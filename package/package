@@ -1,11 +1,10 @@
 #!/bin/bash
 mkdir -p $DESTDIR$PREFIX/bin
-mkdir -p $DESTDIR$PREFIX/lib/kframework
-cp -R k-distribution/target/release/k/* $DESTDIR$PREFIX/lib/kframework
+mkdir -p $DESTDIR$PREFIX/include
+mkdir -p $DESTDIR$PREFIX/lib
+mkdir -p $DESTDIR$PREFIX/share
+cp -R k-distribution/target/release/k/bin/* $DESTDIR$PREFIX/bin
+cp -R k-distribution/target/release/k/include/* $DESTDIR$PREFIX/include
+cp -R k-distribution/target/release/k/lib/* $DESTDIR$PREFIX/lib
+cp -R k-distribution/target/release/k/share/* $DESTDIR$PREFIX/share
 ( cd llvm-backend/target/build && make install )
-for tool in k-bin-to-text kast kbmc kcovr kdep keq kompile kprove krun kserver stop-kserver kore-exec kore-format kore-parser kore-profiler kore-repl llvm-kompile llvm-krun; do
-  path=$DESTDIR$PREFIX/bin/$tool
-  echo "#!/bin/sh" > "$path"
-  echo "$PREFIX/lib/kframework/bin/$tool \"\$@\"" >> "$path"
-  chmod a+x "$path"
-done

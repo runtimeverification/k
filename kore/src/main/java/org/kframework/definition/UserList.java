@@ -23,6 +23,7 @@ public class UserList {
     public KLabel terminatorKLabel = null;
     public KLabel klabel = null;
     public boolean nonEmpty = false;
+    public boolean leftAssoc = false;
     public Production pList = null, pTerminator = null;
     public org.kframework.attributes.Att attrs = null;
 
@@ -54,7 +55,14 @@ public class UserList {
                     ul.attrs = p.att().remove("klabel");
                     // should work without the Att.userList() att, i.e. for any list -- see #1892
                     ul.nonEmpty = ul.attrs.get(Att.USER_LIST()).equals("+");
-                    ul.childSort = ((NonTerminal) p.items().head()).sort();
+                    if (!((NonTerminal)p.items().tail().tail().head()).sort().equals(p.sort())) {
+                        ul.leftAssoc = true;
+                    }
+                    if (ul.leftAssoc) {
+                      ul.childSort = ((NonTerminal) p.items().tail().tail().head()).sort();
+                    } else {
+                      ul.childSort = ((NonTerminal) p.items().head()).sort();
+                    }
                     ul.pList = p;
                 } else if (p.items().size() == 1 && p.items().head() instanceof Terminal) {
                     ul.terminatorKLabel = p.klabel().get();

@@ -18,6 +18,7 @@ import org.kframework.kil.Module;
 import org.kframework.kil.NonTerminal;
 import org.kframework.kil.Production;
 import org.kframework.kil.Terminal;
+import org.kframework.kore.KLabel;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
@@ -44,17 +45,20 @@ public class KILtoKORE extends KILTransformation<Object> {
     private final boolean syntactic;
     private final boolean kore;
     private String moduleName;
+    private final boolean bisonLists;
 
-    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean kore) {
+    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean kore, boolean bisonLists) {
         this.context = context;
         this.syntactic = syntactic;
         this.kore = kore;
+        this.bisonLists = bisonLists;
     }
 
     public KILtoKORE(org.kframework.kil.loader.Context context) {
         this.context = context;
         this.syntactic = false;
         kore = false;
+        bisonLists = false;
     }
 
     public FlatModule toFlatModule(Module m) {
@@ -231,6 +235,9 @@ public class KILtoKORE extends KILTransformation<Object> {
                     }
 
                     org.kframework.attributes.Att attrs = convertAttributes(p);
+                    if (attrs.contains(Att.BRACKET())) {
+                      attrs = attrs.add("bracketLabel", KLabel.class, KLabel(p.getBracketLabel(kore), immutable(p.getParams())));
+                    }
 
                     org.kframework.definition.Production prod;
                     if (p.getKLabel(kore) == null)
@@ -300,9 +307,15 @@ public class KILtoKORE extends KILTransformation<Object> {
         org.kframework.definition.Production prod1, prod3;
 
         // Es ::= E "," Es
-        prod1 = Production(KLabel(p.getKLabel(kore), immutable(p.getParams())), sort,
-                Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)),
-                attrs.add("right"));
+        if (bisonLists) {
+          prod1 = Production(KLabel(p.getKLabel(kore), immutable(p.getParams())), sort,
+                  Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(elementSort)),
+                  attrs.add("left"));
+        } else {
+          prod1 = Production(KLabel(p.getKLabel(kore), immutable(p.getParams())), sort,
+                  Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)),
+                  attrs.add("right"));
+        }
 
 
         // Es ::= ".Es"

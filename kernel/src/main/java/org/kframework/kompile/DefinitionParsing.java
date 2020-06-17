@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections15.ListUtils;
 import org.kframework.Collections;
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
@@ -19,6 +20,7 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kil.Import;
+import org.kframework.kore.AddAtt;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.Sort;
@@ -26,7 +28,7 @@ import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.ParseCache;
 import org.kframework.parser.inner.ParseCache.ParsedSentence;
 import org.kframework.parser.inner.ParseInModule;
-import org.kframework.parser.inner.ParserUtils;
+import org.kframework.parser.ParserUtils;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
@@ -105,13 +107,14 @@ public class DefinitionParsing {
         Definition def = parser.loadDefinition(
                 mainModule,
                 mutable(definition.getParsedDefinition().modules()),
-                "require " + StringUtil.enquoteCString(definitionFile.getPath()),
+                FileUtil.load(definitionFile),
                 Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),
                 ListUtils.union(lookupDirectories,
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
                 kore,
-                options.preprocess);
+                options.preprocess,
+                options.bisonLists);
 
         if (!def.getModule(mainModule).isDefined()) {
           throw KEMException.criticalError("Module " + mainModule + " does not exist.");
@@ -209,7 +212,8 @@ public class DefinitionParsing {
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
                 autoImportDomains,
                 kore,
-                options.preprocess);
+                options.preprocess,
+                options.bisonLists);
         Module m = definition.mainModule();
         return options.coverage ? Definition(Module(m.name(), (Set<Module>)m.imports().$bar(Set(definition.getModule("K-IO").get())), m.localSentences(), m.att()), definition.entryModules(), definition.att()) : definition;
     }
@@ -485,21 +489,18 @@ public class DefinitionParsing {
         Tuple2<Either<java.util.Set<KEMException>, K>, java.util.Set<KEMException>> result;
         if (cache.containsKey(b.contents())) {
             ParsedSentence parse = cache.get(b.contents());
-            Optional<Source> cacheSource = parse.getParse().source();
-            //Cache might contain content from an identical file but another source path.
-            //The content will have wrong Source attribute and must be invalidated.
-            if (cacheSource.isPresent() && cacheSource.get().equals(source)) {
-                cachedBubbles.getAndIncrement();
-                if (kem.options.warnings2errors) {
-                    for (KEMException err : parse.getWarnings().stream().map(e -> (KEMException) e).collect(Collectors.toList())) {
-                        if (kem.options.warnings.includesExceptionType(err.exception.getType())) {
-                            errors.add(KEMException.asError(err));
-                        }
+            cachedBubbles.getAndIncrement();
+            if (kem.options.warnings2errors) {
+                for (KEMException err : parse.getWarnings().stream().map(e -> (KEMException) e).collect(Collectors.toList())) {
+                    if (kem.options.warnings.includesExceptionType(err.exception.getType())) {
+                        errors.add(KEMException.asError(err));
                     }
-                } else
-                    kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
-                return Stream.of(parse.getParse());
+                }
+            } else {
+                kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
             }
+            Att att = parse.getParse().att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class));
+            return Stream.of(new AddAtt(a -> att).apply(parse.getParse()));
         }
         result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, true, b.att().contains("anywhere"));
         parsedBubbles.getAndIncrement();

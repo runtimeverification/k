@@ -346,7 +346,7 @@ public class TypeInferencer implements AutoCloseable {
       return Optional.empty();
     }
     ProductionReference child = (ProductionReference)t;
-    while (child.production().att().contains("bracket")) {
+    while (child.production().att().contains(Att.BRACKET())) {
       if (((TermCons)child).get(0) instanceof Ambiguity) {
         return Optional.empty();
       }
@@ -358,7 +358,7 @@ public class TypeInferencer implements AutoCloseable {
       }
       child = (ProductionReference)((TermCons)child).get(0);
     }
-    while (child.production().att().contains("bracket")) {
+    while (child.production().att().contains(Att.BRACKET())) {
       if (((TermCons)child).get(0) instanceof Ambiguity) {
         return Optional.empty();
       }
@@ -641,7 +641,7 @@ public class TypeInferencer implements AutoCloseable {
     }
 
     boolean isAnonVar(Constant var) {
-      return var.value().equals(ResolveAnonVar.ANON_VAR.name()) || var.value().equals(ResolveAnonVar.FRESH_ANON_VAR.name());
+      return ResolveAnonVar.isAnonVar(KVariable(var.value()));
     }
 
     /**

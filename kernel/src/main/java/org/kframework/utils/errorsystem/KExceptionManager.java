@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @RequestScoped
 public class KExceptionManager {
@@ -57,6 +58,10 @@ public class KExceptionManager {
 
     public void registerCompilerWarning(String message) {
         register(ExceptionType.WARNING, KExceptionGroup.COMPILER, message, null, null, null);
+    }
+
+    public void registerCompilerWarning(Set<KEMException> errors, String message, HasLocation node) {
+        register(errors, ExceptionType.WARNING, KExceptionGroup.COMPILER, message, null, node.location().orElse(null), node.source().orElse(null));
     }
 
     public void registerCompilerWarning(String message, HasLocation node) {
@@ -104,6 +109,17 @@ public class KExceptionManager {
         registerInternal(new KException(type, group, message, source, location, e), true);
     }
 
+    private void register(Set<KEMException> errors, ExceptionType type, KExceptionGroup group, String message,
+                          Throwable e, Location location, Source source) {
+        KException exception = new KException(type, group, message, source, location, e);
+        if (exception.type == ExceptionType.ERROR || options.warnings2errors) {
+            errors.add(new KEMException(exception, ExceptionType.ERROR));
+        } else {
+            registerInternal(exception, false);
+        }
+    }
+
+
     private void registerInternal(KException exception, boolean _throw) {
         if (!options.warnings.includesExceptionType(exception.type))
             return;
@@ -135,7 +151,14 @@ public class KExceptionManager {
     }
 
     public void registerThrown(KEMException e) {
-        exceptions.add(e.exception);
+        KException exception = e.exception;
+        if (!options.warnings.includesExceptionType(exception.type))
+            return;
+        if (options.warnings2errors) {
+            exceptions.add(new KException(ExceptionType.ERROR, exception.exceptionGroup, exception.getMessage(), exception.getSource(), exception.getLocation(), exception.getException()));
+        } else {
+            exceptions.add(exception);
+        }
     }
 
     public List<KException> getExceptions() {

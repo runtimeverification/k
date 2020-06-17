@@ -42,49 +42,49 @@ syntax Int ::= foo4(Bytes) [function, functional]
 
 syntax Int ::= foo5(List) [function, functional]
 rule foo5(.List) => 0
-rule foo5(ListItem(X)) => 0
-rule foo5(ListItem(X) ListItem(Y) ListItem(Z) L) => 0
-rule foo5(ListItem(X) ListItem(0)) => 0
+rule foo5(ListItem(_)) => 0
+rule foo5(ListItem(_) ListItem(_) ListItem(_) _) => 0
+rule foo5(ListItem(_) ListItem(0)) => 0
 
 syntax Int ::= foo6(Map, KItem) [function, functional]
 rule foo6(.Map, _) => 0
-rule foo6(X |-> Y Z::Map, X) => 0
+rule foo6(X |-> _ _::Map, X) => 0
 
 syntax Int ::= foo7(Map) [function, functional]
 rule foo7(.Map) => 0
-rule foo7(X |-> Y) => 0
-rule foo7(X |-> Y A |-> B C |-> D Z::Map) => 0
-rule foo7(X |-> Y 0 |-> B) => 0
+rule foo7(_ |-> _) => 0
+rule foo7(_ |-> _ _ |-> _ _ |-> _ _::Map) => 0
+rule foo7(_ |-> _ 0 |-> _) => 0
 
 syntax Int ::= foo8(Map, KItem) [function, functional]
 rule foo8(.Map, _) => 0
-rule foo8(X |-> Y, X) => 0
-rule foo8(Y |-> Z, X) => 0
-rule foo8(Y |-> Z A |-> B W::Map, X) => 0
+rule foo8(X |-> _, X) => 0
+rule foo8(_ |-> _, _) => 0
+rule foo8(_ |-> _ _ |-> _ _::Map, _) => 0
 
 syntax Int ::= foo9(Map) [function, functional]
-rule foo9(X |-> Y) => 0
-rule foo9(A |-> B C |-> D M::Map) => 0
+rule foo9(_ |-> _) => 0
+rule foo9(_ |-> _ _ |-> _ _::Map) => 0
 
 syntax Int ::= foo6(Set, KItem) [function, functional]
 rule foo6(.Set, _) => 0
-rule foo6(SetItem(X) Z::Set, X) => 0
+rule foo6(SetItem(X) _::Set, X) => 0
 
 syntax Int ::= foo7(Set) [function, functional]
 rule foo7(.Set) => 0
-rule foo7(SetItem(X)) => 0
-rule foo7(SetItem(X) SetItem(A) SetItem(C) Z::Set) => 0
-rule foo7(SetItem(X) SetItem(0)) => 0
+rule foo7(SetItem(_)) => 0
+rule foo7(SetItem(_) SetItem(_) SetItem(_) _::Set) => 0
+rule foo7(SetItem(_) SetItem(0)) => 0
 
 syntax Int ::= foo8(Set, KItem) [function, functional]
 rule foo8(.Set, _) => 0
 rule foo8(SetItem(X), X) => 0
-rule foo8(SetItem(Y), X) => 0
-rule foo8(SetItem(Y) SetItem(A) W::Set, X) => 0
+rule foo8(SetItem(_), _) => 0
+rule foo8(SetItem(_) SetItem(_) _::Set, _) => 0
 
 syntax Int ::= foo9(Set) [function, functional]
-rule foo9(SetItem(X)) => 0
-rule foo9(SetItem(A) SetItem(C) M) => 0
+rule foo9(SetItem(_)) => 0
+rule foo9(SetItem(_) SetItem(_) _) => 0
 
 syntax Int ::= foo10(Float) [function, functional]
 rule foo10(0.0) => 0
@@ -109,5 +109,8 @@ rule foo12(_1) => 0
 rule foo12(_2) => 0
 
 syntax Int ::= foo13(StringBuffer) [function, functional]
+
+syntax Int ::= used() [function]
+rule used() => foo13(.StringBuffer) +Int foo4(.Bytes)
 
 endmodule

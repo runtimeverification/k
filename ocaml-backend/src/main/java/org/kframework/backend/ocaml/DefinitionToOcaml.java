@@ -53,7 +53,7 @@ import org.kframework.kore.VisitK;
 import org.kframework.kore.TransformK;
 import org.kframework.krun.KRun;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.inner.ParserUtils;
+import org.kframework.parser.ParserUtils;
 import org.kframework.parser.outer.Outer;
 import org.kframework.unparser.ToBinary;
 import org.kframework.unparser.ToKast;
@@ -218,7 +218,7 @@ public class DefinitionToOcaml implements Serializable {
         constants = serialized.constants;
         realStepFunctions = serialized.realStepFunctions;
         if (serialized.expandMacros == null) {
-            serialized.expandMacros = ExpandMacros.fromMainModule(def.executionModule(), files, kompileOptions, false);
+            serialized.expandMacros = ExpandMacros.fromMainModule(def.executionModule(), files, kem, kompileOptions, false, false);
         }
         if (serialized.convertDataStructure == null) {
             serialized.convertDataStructure = new ConvertDataStructureToLookup(def.executionModule(), true);
@@ -243,7 +243,7 @@ public class DefinitionToOcaml implements Serializable {
         this.convertDataStructure = new ConvertDataStructureToLookup(def.executionModule(), true);
         ModuleTransformer convertLookups = ModuleTransformer.fromSentenceTransformer(convertDataStructure::convert, "convert data structures to lookups");
         ModuleTransformer liftToKSequence = ModuleTransformer.fromSentenceTransformer(new LiftToKSequence()::lift, "lift K into KSequence");
-        this.expandMacros = ExpandMacros.fromMainModule(def.executionModule(), files, kompileOptions, false);
+        this.expandMacros = ExpandMacros.fromMainModule(def.executionModule(), files, kem, kompileOptions, false, false);
         ModuleTransformer expandMacros = ModuleTransformer.fromSentenceTransformer(this.expandMacros::expand, "expand macro rules");
         ModuleTransformer deconstructInts = ModuleTransformer.fromSentenceTransformer(new DeconstructIntegerAndFloatLiterals()::convert, "remove matches on integer literals in left hand side");
         this.threadCellExists = containsThreadCell(def);
@@ -392,7 +392,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String execute(K k, int depth, String file) {
         StringBuilder sb = new StringBuilder();
-        ocamlProgramHeader(sb, true);
+        ocamlProgramHeader(sb, false);
         ocamlTermInput(new KRun.InitialConfiguration(k), sb); //declares input
         ocamlOpenFile("out", file, sb); //declares out
         runAndPrint(depth, sb); //calls run and prints to out
@@ -401,7 +401,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String match(K k, Rule r, String file) {
         StringBuilder sb = new StringBuilder();
-        ocamlProgramHeader(sb, true);
+        ocamlProgramHeader(sb, false);
         ocamlMatchPattern(r, sb); //declares try_match
         ocamlTermInput(new KRun.InitialConfiguration(k), sb); //declares input
         ocamlOpenFile("subst", file, sb); //declares subst
@@ -428,7 +428,7 @@ public class DefinitionToOcaml implements Serializable {
 
     public String executeAndMatch(K k, int depth, Rule r, String file, String substFile) {
         StringBuilder sb = new StringBuilder();
-        ocamlProgramHeader(sb, true);
+        ocamlProgramHeader(sb, false);
         ocamlMatchPattern(r, sb);  //declares try_match
         ocamlTermInput(new KRun.InitialConfiguration(k), sb);  //declares input
         ocamlOpenFile("out", file, sb); //declares out
@@ -1093,14 +1093,14 @@ public class DefinitionToOcaml implements Serializable {
         File definitionFile = files.resolveWorkingDirectory(options.klabels).getAbsoluteFile();
         List<File> lookupDirectories = kompileOptions.outerParsing.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
         lookupDirectories.add(Kompile.BUILTIN_DIRECTORY);
-        java.util.Set<Module> mods = new ParserUtils(files::resolveWorkingDirectory, kem, globalOptions).loadModules(
+        java.util.Set<Module> mods = new ParserUtils(files, kem, globalOptions, kompileOptions.outerParsing).loadModules(
                 new HashSet<>(),
                 new Context(),
                 "require " + StringUtil.enquoteCString(definitionFile.getPath()),
                 Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),
                 lookupDirectories,
-                new HashSet<>(), false, false);
+                new HashSet<>(), false, false, false);
         mods.stream().forEach(m -> klabels.addAll(mutable(m.definedKLabels())));
     }
 
@@ -1482,7 +1482,7 @@ public class DefinitionToOcaml implements Serializable {
     private int sortRules(Rule r1, Rule r2) {
         return ComparisonChain.start()
                 .compareTrueFirst(r1.att().contains("structural"), r2.att().contains("structural"))
-                .compareFalseFirst(r1.att().contains("owise"), r2.att().contains("owise"))
+                .compareFalseFirst(r1.att().contains(Att.OWISE()), r2.att().contains(Att.OWISE()))
                 .compareFalseFirst(indexesPoorly(r1), indexesPoorly(r2))
                 .result();
     }
@@ -1493,7 +1493,7 @@ public class DefinitionToOcaml implements Serializable {
             K body = r.body();
             K lhs = RewriteToTop.toLeft(body);
             K rhs = RewriteToTop.toRight(body);
-            if (rhs.equals(KSequence(BooleanUtils.FALSE)) && r.att().contains("owise")) {
+            if (rhs.equals(KSequence(BooleanUtils.FALSE)) && r.att().contains(Att.OWISE())) {
                 continue;
             }
             if (!rhs.equals(KSequence(BooleanUtils.TRUE))) {
@@ -1807,7 +1807,7 @@ public class DefinitionToOcaml implements Serializable {
     }
 
     private int sortFunctionRules(Rule a1, Rule a2) {
-        return Boolean.compare(a1.att().contains("owise"), a2.att().contains("owise"));
+        return Boolean.compare(a1.att().contains(Att.OWISE()), a2.att().contains(Att.OWISE()));
     }
 
     private static void encodeStringToIdentifier(StringBuilder sb, KLabel name) {
@@ -1931,7 +1931,7 @@ public class DefinitionToOcaml implements Serializable {
         }
         List<Rule> owiseRules = new ArrayList<>();
         for (Map.Entry<Tuple3<AttCompare, KLabel, AttCompare>, List<Rule>> entry2 : groupByFirstPrefix.entrySet().stream().sorted((e1, e2) -> Integer.compare(e2.getValue().size(), e1.getValue().size())).collect(Collectors.toList())) {
-            if (entry2.getValue().size() != 1 && entry2.getValue().stream().allMatch(r -> indexesPoorly(r) || r.att().contains("owise"))) {
+            if (entry2.getValue().size() != 1 && entry2.getValue().stream().allMatch(r -> indexesPoorly(r) || r.att().contains(Att.OWISE()))) {
               // no rules will actually be part of this lookup key, therefore we should elide the entire match case
               owiseRules.addAll(entry2.getValue());
               continue;
@@ -1971,7 +1971,7 @@ public class DefinitionToOcaml implements Serializable {
                 globalVars.termCache.remove(KToken("dummy", Sort("Dummy")));
                 sb.append(head.prefix);
                 for (Rule r : entry2.getValue()) {
-                    if (indexesPoorly(r) || r.att().contains("owise")) {
+                    if (indexesPoorly(r) || r.att().contains(Att.OWISE())) {
                         owiseRules.add(r);
                     } else {
                         try {
@@ -2057,7 +2057,7 @@ public class DefinitionToOcaml implements Serializable {
 
     private String getRaceRuleType(Rule r) {
         Att att = r.att();
-        if (att.contains("owise")) {
+        if (att.contains(Att.OWISE())) {
             return "RACE.Owise";
         }
         if (att.contains("cool")) {

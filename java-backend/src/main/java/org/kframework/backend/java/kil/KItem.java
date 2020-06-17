@@ -540,7 +540,7 @@ public class KItem extends Term implements KItemRepresentation {
                                 rightHandSide.isCacheable = false;
                             }
 
-                            if (rule.att().contains("owise")) {
+                            if (rule.att().contains(Att.OWISE())) {
                                 if (owiseResult != null) {
                                     throw KEMException.criticalError("Found multiple [owise] rules for the function with KLabel " + kItem.kLabel, rule);
                                 }
@@ -630,7 +630,7 @@ public class KItem extends Term implements KItemRepresentation {
                  * of the left-hand-sides of the other rules (no other rule may apply)
                  */
                 for (Rule rule : rulesForKLabel) {
-                    if (rule.att().contains("owise")) {
+                    if (rule.att().contains(Att.OWISE())) {
                         continue;
                     }
 

@@ -191,7 +191,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   lazy val bracketProductionsFor: Map[Sort, List[Production]] =
     productions
-      .collect({ case p if p.att.contains("bracket") => p })
+      .collect({ case p if p.att.contains(Att.BRACKET) => p })
       .groupBy(_.sort)
       .map { case (s, ps) => (s, ps.toList.sortBy(_.sort)(subsorts.asOrdering)) }
 

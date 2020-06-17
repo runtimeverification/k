@@ -9,6 +9,7 @@ import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
 import org.kframework.compile.checks.CheckAtt;
+import org.kframework.compile.checks.CheckAnonymous;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckFunctions;
 import org.kframework.compile.checks.CheckHOLE;
@@ -28,10 +29,11 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
 import org.kframework.parser.InputModes;
 import org.kframework.parser.KRead;
-import org.kframework.parser.inner.ParserUtils;
+import org.kframework.parser.ParserUtils;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.unparser.ToJson;
 import org.kframework.utils.Stopwatch;
+import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -92,7 +94,7 @@ public class Kompile {
         this.files = files;
         this.kem = kem;
         this.errors = new HashSet<>();
-        this.parser = new ParserUtils(files::resolveWorkingDirectory, kem, kem.options);
+        this.parser = new ParserUtils(files, kem, kem.options, kompileOptions.outerParsing);
         List<File> lookupDirectories = kompileOptions.outerParsing.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
         // these directories should be relative to the current working directory if we refer to them later after the WD has changed.
         kompileOptions.outerParsing.includes = lookupDirectories.stream().map(File::getAbsolutePath).collect(Collectors.toList());
@@ -106,10 +108,6 @@ public class Kompile {
         if (kompileOptions.backend.equals("ocaml")) {
             kem.registerCriticalWarning("The OCaml backend is in the process of being deprecated (final date May 31, 2020). Please switch to the LLVM backend.");
         }
-    }
-
-    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName) {
-        return run(definitionFile, mainModuleName, mainProgramsModuleName, defaultSteps(kompileOptions, kem, files), Collections.emptySet());
     }
 
     /**
@@ -153,8 +151,26 @@ public class Kompile {
 
         CompiledDefinition def = new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(configInfo.getRootCell()).klabel());
 
-        if (kompileOptions.experimental.genBisonParser) {
-            new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, files.resolveKompiled("parser_PGM"));
+        if (kompileOptions.experimental.genBisonParser || kompileOptions.experimental.genGlrBisonParser) {
+            new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, files.resolveKompiled("parser_PGM"), kompileOptions.experimental.genGlrBisonParser);
+            for (Production prod : iterable(kompiledDefinition.mainModule().productions())) {
+                if (prod.att().contains("cell") && prod.att().contains("parser")) {
+                    String att = prod.att().get("parser");
+                    String[][] parts = StringUtil.splitTwoDimensionalAtt(att);
+                    for (String[] part : parts) {
+                        if (part.length != 2) {
+                            throw KEMException.compilerError("Invalid value for parser attribute: " + att, prod);
+                        }
+                        String name = part[0];
+                        String module = part[1];
+                        Option<Module> mod = def.programParsingModuleFor(module, kem);
+                        if (!mod.isDefined()) {
+                            throw KEMException.compilerError("Could not find module referenced by parser attribute: " + module, prod);
+                        }
+                        new KRead(kem, files, InputModes.PROGRAM).createBisonParser(mod.get(), def.configurationVariableDefaultSorts.getOrDefault("$" + name, Sorts.K()), files.resolveKompiled("parser_" + name), kompileOptions.experimental.genGlrBisonParser);
+                    }
+                }
+            }
         }
 
         return def;
@@ -187,7 +203,7 @@ public class Kompile {
         return dt.andThen(d -> Definition(d.mainModule(), immutable(stream(d.entryModules()).filter(mod -> excludedModuleTags.stream().noneMatch(tag -> mod.att().contains(tag))).collect(Collectors.toSet())), d.att()));
     }
 
-    public static Function<Definition, Definition> defaultSteps(KompileOptions kompileOptions, KExceptionManager kem, FileUtil files) {
+    public static Function<Definition, Definition> defaultSteps(KompileOptions kompileOptions, KExceptionManager kem, FileUtil files, boolean isSymbolic) {
         Function1<Definition, Definition> resolveStrict = d -> DefinitionTransformer.from(new ResolveStrict(kompileOptions, d)::resolve, "resolving strict and seqstrict attributes").apply(d);
         DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.experimental.transition), EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION, COOL_RESULT_INJECTION))::resolve, "resolving heat and cool attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
@@ -201,7 +217,7 @@ public class Kompile {
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         Function1<Definition, Definition> expandMacros = d -> {
           ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d, false);
-          return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kompileOptions, false).expand(s), "expand macros").apply(d);
+          return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kem, kompileOptions, false, isSymbolic).expand(s), "expand macros").apply(d);
         };
         GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
         Function1<Definition, Definition> genCoverage = d -> DefinitionTransformer.fromRuleBodyTransformerWithRule((r, body) -> cov.gen(r, body, d.mainModule()), "generate coverage instrumentation").apply(d);
@@ -221,10 +237,10 @@ public class Kompile {
                 .andThen(resolveHeatCoolAttribute)
                 .andThen(resolveSemanticCasts)
                 .andThen(subsortKItem)
-                .andThen(expandMacros)
-                .andThen(guardOrs)
                 .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
+                .andThen(expandMacros)
+                .andThen(guardOrs)
                 .andThen(Kompile::resolveFreshConstants)
                 .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
@@ -297,12 +313,12 @@ public class Kompile {
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckRewrite(errors, m)::check));
 
-        stream(modules).forEach(new CheckImports(mainModule, kem)::check);
-
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(
-                new CheckFunctions(errors, m, excludedModuleTags.contains(Att.CONCRETE()))::check));
+              new CheckFunctions(errors, m, excludedModuleTags.contains(Att.CONCRETE()))::check));
+
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAnonymous(errors, m, kem)::check));
 
         Set<String> moduleNames = new HashSet<>();
         stream(modules).forEach(m -> {
@@ -312,7 +328,7 @@ public class Kompile {
             moduleNames.add(m.name());
         });
 
-        CheckKLabels checkKLabels = new CheckKLabels(errors, kompileOptions.isKore());
+        CheckKLabels checkKLabels = new CheckKLabels(errors, kem, kompileOptions.isKore(), files);
         Set<String> checkedModules = new HashSet<>();
         // only check imported modules because otherwise we might have false positives
         Consumer<Module> checkModuleKLabels = m -> {
@@ -328,6 +344,7 @@ public class Kompile {
         }
         stream(mainModule.importedModules()).forEach(checkModuleKLabels);
         checkModuleKLabels.accept(mainModule);
+        checkKLabels.check();
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckLabels(errors)::check));
 

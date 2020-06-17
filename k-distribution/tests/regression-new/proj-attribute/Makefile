@@ -5,4 +5,4 @@ KOMPILE_BACKEND?=java
 
 TESTDIR=.
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak

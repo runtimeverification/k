@@ -68,6 +68,10 @@ public class KEMException extends RuntimeException {
         return create(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, null, node.location().orElse(null), node.source().orElse(null));
     }
 
+    public static KEMException internalError(String message, Throwable e, HasLocation node) {
+        return create(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, e, node.location().orElse(null), node.source().orElse(null));
+    }
+
     public static KEMException compilerError(String message) {
         return create(ExceptionType.ERROR, KExceptionGroup.COMPILER, message, null, null, null);
     }
@@ -110,6 +114,10 @@ public class KEMException extends RuntimeException {
 
     public static KEMException outerParserError(String message, Throwable e, Source source, Location location) {
         return create(ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, message, e, location, source);
+    }
+
+    public static KEMException outerParserHiddenWarning(String message, Throwable e, Source source, Location location) {
+        return create(ExceptionType.HIDDENWARNING, KExceptionGroup.OUTER_PARSER, message, e, location, source);
     }
 
     public static KEMException asError(KEMException warning) {

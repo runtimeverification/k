@@ -62,16 +62,17 @@ public class KRead {
         }
     }
 
-    public void createBisonParser(Module mod, Sort sort, File outputFile) {
+    public void createBisonParser(Module mod, Sort sort, File outputFile, boolean glr) {
         try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, true)) {
             try (Scanner scanner = parseInModule.getScanner()) {
                 File scannerFile = files.resolveTemp("scanner.l");
+                File scanHdr = files.resolveTemp("scanner.h");
                 File parserFile = files.resolveTemp("parser.y");
                 scanner.writeStandaloneScanner(scannerFile);
-                KSyntax2Bison.writeParser(parseInModule.getParsingModule(), scanner, sort, parserFile);
+                KSyntax2Bison.writeParser(parseInModule.getParsingModule(), scanner, sort, parserFile, glr);
                 int exit = files.getProcessBuilder()
                   .directory(files.resolveTemp("."))
-                  .command("flex", "-w", scannerFile.getAbsolutePath())
+                  .command("flex", "--header-file=" + scanHdr.getAbsolutePath(), "-w", scannerFile.getAbsolutePath())
                   .inheritIO()
                   .start()
                   .waitFor();
@@ -89,11 +90,11 @@ public class KRead {
                 }
                 exit = files.getProcessBuilder()
                   .command("gcc",
-                      files.resolveKBase("include/cparser/main.c").getAbsolutePath(),
+                      files.resolveKInclude("cparser/main.c").getAbsolutePath(),
                       files.resolveTemp("lex.yy.c").getAbsolutePath(),
                       files.resolveTemp("parser.tab.c").getAbsolutePath(),
                       "-iquote", files.resolveTemp(".").getAbsolutePath(),
-                      "-iquote", files.resolveKBase("include/cparser").getAbsolutePath(),
+                      "-iquote", files.resolveKInclude("cparser").getAbsolutePath(),
                       "-o", outputFile.getAbsolutePath())
                   .inheritIO()
                   .start()

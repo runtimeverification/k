@@ -81,7 +81,7 @@ public class ConstructorChecks {
                label.name().equals(KLabels.ML_OR.name()) || label.name().equals(KLabels.ML_AND.name()) || label.name().equals(KLabels.ML_IMPLIES.name()) ||
                label.name().equals(KLabels.ML_EQUALS.name()) || label.name().equals(KLabels.ML_CEIL.name()) || label.name().equals(KLabels.ML_FLOOR.name()) ||
                label.name().equals(KLabels.ML_EXISTS.name()) || label.name().equals(KLabels.ML_FORALL.name()) || label.name().equals(KLabels.CTL_AG.name()) ||
-               label.name().equals(KLabels.RL_wEF.name());
+               label.name().equals(KLabels.RL_wEF.name()) || label.name().equals(KLabels.RL_wAF.name());
     }
 
     private boolean isBuiltinModuloConstructor(KLabel label) {

@@ -4,4 +4,4 @@ KOMPILE_BACKEND=haskell
 TESTDIR=.
 KPROVE_FLAGS=-m A-LEMMAS
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak

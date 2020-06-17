@@ -147,7 +147,7 @@ public class ResolveFun {
     }
 
     private Rule owiseRule(KLabel fun, K k, Sort arg, Att att) {
-        return lambdaRule(fun, KApply(KLabel("#SemanticCastTo" + arg.toString()), KVariable("_Owise")), k, att.add("owise"), x -> BooleanUtils.FALSE);
+        return lambdaRule(fun, KApply(KLabel("#SemanticCastTo" + arg.toString()), KVariable("_Owise")), k, att.add(Att.OWISE()), x -> BooleanUtils.FALSE);
     }
 
     private Rule lambdaRule(KLabel fun, K body, K closure, Att att, UnaryOperator<K> getRHS) {

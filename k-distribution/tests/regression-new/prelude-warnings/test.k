@@ -1,3 +1,8 @@
+require "ffi.k"
+require "json.k"
+require "rat.k"
+require "substitution.k"
+
 module TEST-SYNTAX
 endmodule
 
@@ -10,7 +15,15 @@ module TEST
   imports BYTES
   imports K-IO
   imports DEFAULT-STRATEGY
+  imports MINT
+  imports FFI
+  imports JSON
+  imports RAT
+  imports SUBSTITUTION
   imports TEST-SYNTAX
+
+  syntax MInt{8}
+  rule I:Int => Int2MInt(I)::MInt{8}
 
   configuration <k> $PGM:K </k> <s/>
 endmodule

@@ -1,0 +1,12 @@
+{
+  Result
+#Equals
+  <generatedTop>
+    <k>
+      10
+    </k>
+    <state>
+      x |-> 5
+    </state>
+  </generatedTop>
+}

@@ -366,41 +366,5 @@
 	<prefix.path>/usr/local/opt/llvm/;/usr/local/opt/flex;/usr/local/opt/libffi</prefix.path>
       </properties>
     </profile>
-    <profile>
-      <id>windows64</id>
-      <activation>
-        <os>
-          <family>windows</family>
-          <arch>amd64</arch>
-        </os>
-      </activation>
-      <properties>
-        <native.arch.classifier>64</native.arch.classifier>
-        <native.classifier>windows64</native.classifier>
-        <native.os.classifier>windows</native.os.classifier>
-        <native.exe.type>exe</native.exe.type>
-        <native.exe.extension>.exe</native.exe.extension>
-        <native.script.extension>.bat</native.script.extension>
-        <checkstyle.skip>${skipCheckstyleOnWindows}</checkstyle.skip>
-      </properties>
-    </profile>
-    <profile>
-      <id>windows32</id>
-      <activation>
-        <os>
-          <family>windows</family>
-          <arch>x86</arch>
-        </os>
-      </activation>
-      <properties>
-        <native.arch.classifier>32</native.arch.classifier>
-        <native.classifier>windows32</native.classifier>
-        <native.os.classifier>windows</native.os.classifier>
-        <native.exe.type>exe</native.exe.type>
-        <native.exe.extension>.exe</native.exe.extension>
-        <native.script.extension>.bat</native.script.extension>
-        <checkstyle.skip>${skipCheckstyleOnWindows}</checkstyle.skip>
-      </properties>
-    </profile>
   </profiles>
 </project>

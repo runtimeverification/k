@@ -20,5 +20,5 @@ KRUN_FLAGS=--help
 	${KSERVER} --version | grep -q RV-K
 
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak
 

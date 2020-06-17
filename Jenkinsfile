@@ -79,7 +79,7 @@ pipeline {
                           checkout scm
                           sh '''
                             mv package/debian ./debian
-                            mv debian/control.ubuntu debian/control
+                            mv debian/control.bionic debian/control
                             dpkg-buildpackage
                           '''
                         }
@@ -155,8 +155,66 @@ pipeline {
                 }
               }
             }
+            stage('Build and Package on Ubuntu Focal') {
+              stages {
+                stage('Build on Ubuntu Focal') {
+                  agent {
+                    dockerfile {
+                      filename 'package/debian/Dockerfile'
+                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:focal --build-arg LLVM_VERSION=10'
+                      reuseNode true
+                    }
+                  }
+                  stages {
+                    stage('Build Debian Package') {
+                      steps {
+                        dir("kframework-${env.VERSION}") {
+                          checkout scm
+                          sh '''
+                            mv package/debian ./debian
+                            mv debian/control.focal debian/control
+                            dpkg-buildpackage
+                          '''
+                        }
+                        stash name: 'focal', includes: "kframework_${env.VERSION}_amd64.deb"
+                      }
+                    }
+                  }
+                }
+                stage('Test Debian Package') {
+                  agent {
+                    docker {
+                      image 'ubuntu:focal'
+                      args '-u 0'
+                      reuseNode true
+                    }
+                  }
+                  options { skipDefaultCheckout() }
+                  steps {
+                    unstash 'focal'
+                    sh 'src/main/scripts/test-in-container-debian'
+                  }
+                  post {
+                    always {
+                      sh 'stop-kserver || true'
+                      archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
+                    }
+                  }
+                }
+              }
+              post {
+                failure {
+                  slackSend color: '#cb2431'                                             \
+                          , channel: '#k'                                                \
+                          , message: "Ubuntu Focal Packaging Failed: ${env.BUILD_URL}"
+                }
+              }
+            }
             stage('Build and Package on Debian Buster') {
-              when { branch 'master' }
+              when {
+                branch 'master'
+                beforeAgent true
+              }
               stages {
                 stage('Build on Debian Buster') {
                   agent {
@@ -212,7 +270,10 @@ pipeline {
               }
             }
             stage('Build and Package on Arch Linux') {
-              when { branch 'master' }
+              when {
+                branch 'master'
+                beforeAgent true
+              }
               stages {
                 stage('Build on Arch Linux') {
                   agent {
@@ -271,7 +332,10 @@ pipeline {
               }
             }
             stage('Build Platform Independent K Binary') {
-              when { branch 'master' }
+              when {
+                branch 'master'
+                beforeAgent true
+              }
               agent {
                 dockerfile {
                   additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
@@ -298,7 +362,10 @@ pipeline {
           }
         }
         stage('Build and Package on Mac OS') {
-          when { branch 'master' }
+          when {
+            branch 'master'
+            beforeAgent true
+          }
           stages {
             stage('Build on Mac OS') {
               stages {
@@ -306,15 +373,14 @@ pipeline {
                   agent { label 'anka' }
                   steps {
                     unstash 'src'
+                    dir('kframework') { checkout scm }
                     dir('homebrew-k') {
                       git url: 'git@github.com:kframework/homebrew-k.git'
                       sh '''
                         git config --global user.email 'admin@runtimeverification.com'
                         git config --global user.name  'RV Jenkins'
-                        git remote add k-repo 'https://github.com/kframework/k.git'
-                        git fetch --all
                         # Note: double-backslash in sed-command is for Jenkins benefit.
-                        brew_base_branch=$(git log -n1 --format=%s k-repo/master | sed -n 's!.*\\[brew-staging: \\(.*\\)\\].*!\\1!p')
+                        brew_base_branch=$(cd ../kframework && git log -n1 --format=%s HEAD | sed -n 's!.*\\[brew-staging: \\(.*\\)\\].*!\\1!p')
                         [ "$brew_base_branch" != '' ] || brew_base_branch=master
                         git show-ref --verify refs/remotes/origin/$brew_base_branch
                         git push -d origin brew-release-$PACKAGE || true
@@ -339,11 +405,11 @@ pipeline {
                       sh '${WORKSPACE}/package/macos/brew-install-bottle'
                     }
                     sh '''
-                      cp -R /usr/local/lib/kframework/tutorial ~
+                      cp -R /usr/local/share/kframework/tutorial ~
                       WD=`pwd`
                       cd
                       echo 'Starting kserver...'
-                      /usr/local/lib/kframework/bin/spawn-kserver $WD/kserver.log
+                      spawn-kserver $WD/kserver.log
                       cd tutorial
                       echo 'Testing tutorial in user environment...'
                       make -j`sysctl -n hw.ncpu` ${MAKE_EXTRA_ARGS}
@@ -410,6 +476,7 @@ pipeline {
         unstash 'src'
         unstash 'binary'
         dir('bionic') { unstash 'bionic' }
+        dir('focal')  { unstash 'focal' }
         dir('buster') { unstash 'buster' }
         dir('arch')   { unstash 'arch'   }
         dir('mojave') { unstash 'mojave' }
@@ -420,6 +487,7 @@ pipeline {
             git push release "${K_RELEASE_TAG}"
 
             mv bionic/kframework_${VERSION}_amd64.deb bionic/kframework_${VERSION}_amd64_bionic.deb
+            mv focal/kframework_${VERSION}_amd64.deb focal/kframework_${VERSION}_amd64_focal.deb
             mv buster/kframework_${VERSION}_amd64.deb buster/kframework_${VERSION}_amd64_buster.deb
             LOCAL_BOTTLE_NAME=$(echo mojave/kframework--${VERSION}.mojave.bottle*.tar.gz)
             BOTTLE_NAME=`cd mojave && echo kframework--${VERSION}.mojave.bottle*.tar.gz | sed 's!kframework--!kframework-!'`
@@ -430,6 +498,7 @@ pipeline {
             hub release create                                                                         \
                 --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                              \
                 --attach bionic/kframework_${VERSION}_amd64_bionic.deb'#Ubuntu Bionic (18.04) Package' \
+                --attach focal/kframework_${VERSION}_amd64_focal.deb'#Ubuntu Focal (20.04) Package'    \
                 --attach buster/kframework_${VERSION}_amd64_buster.deb'#Debian Buster (10) Package'    \
                 --attach arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz'#Arch Package'             \
                 --attach mojave/$BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                \
@@ -458,6 +527,12 @@ pipeline {
                           , string(name: 'PR_REVIEWER', value: 'ehildenb')                             \
                           , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/wasm-semantics') \
                           , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                 \
+                          ]
+        build job: 'rv-devops/master', propagate: false, wait: false                                \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                \
+                          , string(name: 'PR_REVIEWER', value: 'dwightguth')                        \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/c-semantics') \
+                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: '.build/k')            \
                           ]
         build job: 'rv-devops/master', propagate: false, wait: false                                               \
             , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                               \
@@ -495,6 +570,13 @@ pipeline {
                           , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/kore')            \
                           , string(name: 'UPDATE_DEPS_RELEASE_FILE', value: 'deps/k_release')           \
                           , string(name: 'UPDATE_DEPS_RELEASE_TAG_SPEC', value: "${env.K_RELEASE_TAG}") \
+                          ]
+        build job: 'rv-devops/master', propagate: false, wait: false                                                 \
+            , parameters: [ booleanParam(name: 'UPDATE_DEPS_RELEASE_TAG', value: true)                               \
+                          , string(name: 'PR_REVIEWER', value: 'ehildenb')                                           \
+                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/blockchain-k-plugin') \
+                          , string(name: 'UPDATE_DEPS_RELEASE_FILE', value: 'deps/k_release')                        \
+                          , string(name: 'UPDATE_DEPS_RELEASE_TAG_SPEC', value: "${env.K_RELEASE_TAG}")              \
                           ]
       }
     }

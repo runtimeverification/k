@@ -2,6 +2,7 @@
 package org.kframework.parser.inner.disambiguation;
 
 import com.google.common.collect.Sets;
+import org.kframework.attributes.Att;
 import org.kframework.POSet;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Tag;
@@ -34,7 +35,7 @@ public class PriorityVisitor extends SetsTransformerWithErrors<KEMException> {
     @Override
     public Either<java.util.Set<KEMException>, Term> apply(TermCons tc) {
         assert tc.production() != null : this.getClass() + ":" + " production not found." + tc;
-        if (!tc.production().isSyntacticSubsort() && !tc.production().att().contains("bracket")) {
+        if (!tc.production().isSyntacticSubsort() && !tc.production().att().contains(Att.BRACKET())) {
             // match only on the outermost elements
             if (tc.production().items().apply(0) instanceof NonTerminal) {
                 Either<java.util.Set<KEMException>, Term> rez =
@@ -76,7 +77,7 @@ public class PriorityVisitor extends SetsTransformerWithErrors<KEMException> {
         }
 
         public Either<java.util.Set<KEMException>, Term> apply(TermCons tc) {
-            if (tc.production().att().contains("bracket")) return Right.apply(tc);
+            if (tc.production().att().contains(Att.BRACKET())) return Right.apply(tc);
             //if (Side.RIGHT  == side && !(tc.production().items().apply(0) instanceof NonTerminal)) return Right.apply(tc);
             //if (Side.LEFT == side && !(tc.production().items().apply(tc.production().items().size() - 1) instanceof NonTerminal)) return Right.apply(tc);
             Tag parentLabel = new Tag(parent.production().klabel().get().name());

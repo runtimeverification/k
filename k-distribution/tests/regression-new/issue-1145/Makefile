@@ -3,4 +3,4 @@ EXT=test
 TESTDIR=.
 KRUN_FLAGS=--output program
 
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak
