@@ -96,7 +96,13 @@ public class CheckAnonymous {
                     if (s instanceof Context && entry.getElement().equals("HOLE")) {
                         continue;
                     }
-                    kem.registerCompilerWarning(errors, "Variable '" + entry.getElement() + "' defined but not used. Prefix variable name with underscore if this is intentional.", loc.get(entry.getElement()));
+                    kem.registerCompilerWarning(errors, "Variable '" + entry.getElement() + "' defined but not used. Prefix variable name with underscore if this is intentional.", 
+                        loc.get(entry.getElement()));
+                }
+            } else if (entry.getCount() > 1) {
+                if ((entry.getElement().startsWith("_") || entry.getElement().startsWith("?_") || entry.getElement().startsWith("!_") || entry.getElement().startsWith("@_")) && !ResolveAnonVar.isAnonVar(KVariable(entry.getElement()))) {
+                    errors.add(KEMException.compilerError("Variable '" + entry.getElement() + "' declared as unused, but it is used. Remove underscore from variable name if this is intentional.",
+                          loc.get(entry.getElement())));
                 }
             }
         }
