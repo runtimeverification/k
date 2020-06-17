@@ -24,9 +24,9 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
     case Ambiguity(items) => KApply(KLabel("amb"), KList(items.asScala.toList map apply asJava), Att.empty)
   }
 
-  def anonVar(sort: Sort): K = {
+  def anonVar(sort: Sort, t: Term): K = {
     val lbl = KLabel("#SemanticCastTo" + sort.toString())
-    if (strict) KApply(lbl, KList(KToken("_", Sorts.KVariable)), Att.empty.add(classOf[Production], Production(lbl, Seq(), sort, Seq(NonTerminal(sort, None))))) else KToken("_", Sorts.KVariable)
+    if (strict) KApply(lbl, KList(KToken("_", Sorts.KVariable, locationToAtt(t.location, t.source))), locationToAtt(t.location, t.source).add(classOf[Production], Production(lbl, Seq(), sort, Seq(NonTerminal(sort, None))))) else KToken("_", Sorts.KVariable, locationToAtt(t.location, t.source))
   }
 
   def termConsToKApply(t: TermCons): K = {
@@ -34,8 +34,8 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
       val realProd = t.production.att.get("recordPrd", classOf[Production])
       val map = new util.ArrayList(t.items).asScala.reverse.zipWithIndex.map { case (item, idx) => (t.production.nonterminal(idx).name.get, apply(item))} toMap
       val realItems = realProd.nonterminals.map {
-        case NonTerminal(sort, None) => anonVar(sort)
-        case NonTerminal(sort, Some(x)) => map.getOrElse(x, anonVar(sort))
+        case NonTerminal(sort, None) => anonVar(sort, t)
+        case NonTerminal(sort, Some(x)) => map.getOrElse(x, anonVar(sort, t))
       }
       KApply(t.production.klabel.get.head, KList(realItems.asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
     } else {
