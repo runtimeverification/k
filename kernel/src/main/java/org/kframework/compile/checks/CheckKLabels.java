@@ -135,7 +135,7 @@ public class CheckKLabels {
                 continue;
             }
             if (canonicalPath == null || !s.get().source().contains(canonicalPath)) {
-                kem.registerCompilerWarning(errors, "Symbol '" + symbol + "' defined but not used.", klabelProds.get(symbol));
+                kem.registerCompilerWarning(errors, "Symbol '" + symbol + "' defined but not used. Add the 'unused' attribute if this is intentional.", klabelProds.get(symbol));
             }
         }
     }
