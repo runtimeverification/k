@@ -104,7 +104,7 @@ public class ResolveAnonVar {
                 if (FRESH_ANON_CONSTANT.equals(k)) {
                     return newDotVariable("!");
                 }
-                if (FRESH_LIST_VAR.equals(k)) {$
+                if (FRESH_LIST_VAR.equals(k)) {
                     return newDotVariable("@");
                 }
                 return super.apply(k);
