@@ -28,6 +28,3 @@ position in [2]
 contain 0, 1, 2, or an even number of components.
 	Source(invalidStrict.k)
 	Location(8,16,8,45)
-[Warning] Compiler: Could not find main syntax module with name
-INVALIDSTRICT-SYNTAX in definition.  Use --syntax-module to specify one. Using
-INVALIDSTRICT as default.
