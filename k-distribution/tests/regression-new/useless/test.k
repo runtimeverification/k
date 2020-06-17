@@ -87,4 +87,7 @@ syntax Int ::= foo13(StringBuffer) [function]
 rule foo13(BAR) => lengthString(StringBuffer2String(BAR))
 rule foo13(BAZ) => lengthString(StringBuffer2String(BAZ))
 
+syntax Int ::= used(Foo) [function]
+rule used(baz()) => 0
+
 endmodule
