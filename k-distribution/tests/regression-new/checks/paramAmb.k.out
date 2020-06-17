@@ -11,5 +11,3 @@
 #KRewrite(#SemanticCastToA(#token("X","#KVariable")),`label(_,_)_PARAMAMB_KItem_N_T`(#SemanticCastToA(#token("X","#KVariable")),`wrap__PARAMAMB_T_M`(#SemanticCastToA(#token("X","#KVariable")))))
 	Source(paramAmb.k)
 	Location(11,8,11,29)
-[Warning] Compiler: Could not find main syntax module with name PARAMAMB-SYNTAX
-in definition.  Use --syntax-module to specify one. Using PARAMAMB as default.

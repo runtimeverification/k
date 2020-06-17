@@ -10,7 +10,7 @@ module VERIFICATION
 endmodule
 
 
-module MAX-BROKEN-SPEC
+module MAX-FAIL-SPEC
   imports VERIFICATION
   imports IMP
 

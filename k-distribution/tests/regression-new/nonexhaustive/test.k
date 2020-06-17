@@ -110,4 +110,7 @@ rule foo12(_2) => 0
 
 syntax Int ::= foo13(StringBuffer) [function, functional]
 
+syntax Int ::= used() [function]
+rule used() => foo13(.StringBuffer) +Int foo4(.Bytes)
+
 endmodule

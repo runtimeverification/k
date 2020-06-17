@@ -7,6 +7,3 @@ KBott ::= "#token" "(" KString "," KString ")" [klabel(#KToken), symbol]
 ::= "bar" "(" ")" [klabel(foo), symbol]
 	Source(invalidSymbol.k)
 	Location(6,16,6,42)
-[Warning] Compiler: Could not find main syntax module with name
-INVALIDSYMBOL-SYNTAX in definition.  Use --syntax-module to specify one. Using
-INVALIDSYMBOL as default.

@@ -5,6 +5,3 @@
 [Error] Compiler: Illegal function symbol on LHS of rule.
 	Source(macroWithFunction.k)
 	Location(13,25,13,35)
-[Warning] Compiler: Could not find main syntax module with name
-MACROWITHFUNCTION-SYNTAX in definition.  Use --syntax-module to specify one.
-Using MACROWITHFUNCTION as default.

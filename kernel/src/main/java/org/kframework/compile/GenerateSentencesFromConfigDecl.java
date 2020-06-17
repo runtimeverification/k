@@ -319,7 +319,7 @@ public class GenerateSentencesFromConfigDecl {
         String sortName = getSortOfCell(cellName);
         Sort sort = Sort(sortName);
 
-        if (cellProperties.contains("maincell")) {
+        if (cellProperties.contains(Att.MAINCELL())) {
             assert isLeaf;
             assert childSorts.size() == 1;
             childSorts = Lists.newArrayList(Sorts.K());
@@ -461,7 +461,7 @@ public class GenerateSentencesFromConfigDecl {
                 throw KEMException.compilerError("Unexpected type for multiplicity * cell: " + cellName
                         + ". Should be one of: Set, Bag, List, Map");
             }
-            SyntaxSort sortDecl = SyntaxSort(Seq(), bagSort, Att().add("hook", type.toUpperCase() + '.' + type));
+            SyntaxSort sortDecl = SyntaxSort(Seq(), bagSort, Att().add("hook", type.toUpperCase() + '.' + type).add("cellCollection"));
             Sentence bagSubsort = Production(Seq(), bagSort, Seq(NonTerminal(sort)));
             Sentence bagElement;
             if (type.equals("Map")) {
@@ -549,7 +549,7 @@ public class GenerateSentencesFromConfigDecl {
     private static Att getCellPropertiesAsAtt(K k, String cellName, K ensures) {
         Att att = Att();
         if (cellName.equals("k")) {
-            att = att.add("maincell");
+            att = att.add(Att.MAINCELL());
         }
         if (ensures != null) {
             att = att.add("topcell");

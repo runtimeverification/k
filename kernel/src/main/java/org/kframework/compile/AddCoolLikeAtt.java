@@ -52,7 +52,7 @@ public class AddCoolLikeAtt {
 
             @Override
             public Boolean apply(KApply k) {
-                if (mod.attributesFor().get(k.klabel()).getOrElse(() -> Att.empty()).contains("maincell")) {
+                if (mod.attributesFor().get(k.klabel()).getOrElse(() -> Att.empty()).contains(Att.MAINCELL())) {
                     if (k.items().get(0) instanceof KSequence) {
                         KSequence seq = (KSequence) k.items().get(0);
                         if (seq.items().size() > 1 && seq.items().get(0) instanceof KVariable) {
