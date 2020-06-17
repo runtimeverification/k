@@ -18,9 +18,10 @@ public class ResolveAnonVar {
     public static KVariable ANON_VAR = KVariable("_");
     public static KVariable FRESH_ANON_VAR = KVariable("?_");
     public static KVariable FRESH_ANON_CONSTANT = KVariable("!_");
+    public static KVariable FRESH_LIST_VAR = KVariable("@_");
 
     public static boolean isAnonVar(KVariable var) {
-        return var.equals(ANON_VAR) || var.equals(FRESH_ANON_VAR) || var.equals(FRESH_ANON_CONSTANT);
+        return var.equals(ANON_VAR) || var.equals(FRESH_ANON_VAR) || var.equals(FRESH_ANON_CONSTANT) || var.equals(FRESH_LIST_VAR);
     }
 
     private Set<KVariable> vars = new HashSet<>();
@@ -102,6 +103,9 @@ public class ResolveAnonVar {
                 }
                 if (FRESH_ANON_CONSTANT.equals(k)) {
                     return newDotVariable("!");
+                }
+                if (FRESH_LIST_VAR.equals(k)) {$
+                    return newDotVariable("@");
                 }
                 return super.apply(k);
             }
