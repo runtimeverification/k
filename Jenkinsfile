@@ -504,6 +504,15 @@ pipeline {
                 --attach mojave/$BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                \
                 --attach k-nightly.tar.gz'#Platform Indepdendent K Binary'                             \
                 --file release.md "${K_RELEASE_TAG}"
+
+            rm -f release.md
+            git checkout -B 'gh-pages'
+            rm -rf $(find . -maxdepth 1 -not -name '*.md' -a -not -name '_config.yml' -a -not -name .git -a -not -path .)
+            git add ./
+            git commit -m 'gh-pages: remove unrelated content'
+            git fetch release gh-pages
+            git merge --strategy ours FETCH_HEAD
+            git push release gh-pages
           '''
         }
         dir('homebrew-k') {
