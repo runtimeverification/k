@@ -509,9 +509,9 @@ pipeline {
             rm -rf $(find . -maxdepth 1 -not -name '*.md' -a -not -name '_config.yml' -a -not -path .)
             git add ./
             git commit -m 'gh-pages: remove unrelated content'
-            git fetch origin gh-pages
+            git fetch release gh-pages
             git merge --strategy ours FETCH_HEAD
-            git push origin gh-pages
+            git push release gh-pages
           '''
         }
         dir('homebrew-k') {
