@@ -506,7 +506,7 @@ pipeline {
                 --file release.md "${K_RELEASE_TAG}"
 
             git checkout -B 'gh-pages'
-            rm -rf CODEOWNERS Dockerfile haskell-backend install-k java-backend Jenkinsfile k-distribution kernel kore ktree llvm-backend ocaml-backend package pom.xml src
+            rm -rf $(find . -maxdepth 1 -not -name '*.md' -a -not -name '_config.yml' -a -not -path .)
             git add ./
             git commit -m 'gh-pages: remove unrelated content'
             git fetch origin gh-pages
