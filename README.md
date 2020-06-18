@@ -1,5 +1,3 @@
-<!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
-
 ---
 permalink: README.html
 ---
