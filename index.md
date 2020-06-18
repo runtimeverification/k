@@ -1,5 +1,6 @@
 K Framework
 ===========
 
--   [Developer README](README.md)
+-   [Release Installation](release.md)
 -   [User Documentation](pending-documentation.md)
+-   [Developer README](README.md)
