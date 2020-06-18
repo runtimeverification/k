@@ -1,6 +1,6 @@
 K Framework
 ===========
 
--   [Release Installation](release.md)
+-   [Release Installation](https://github.com/kframework/k/releases/latest)
 -   [User Documentation](pending-documentation.md)
 -   [Developer README](README.md)
