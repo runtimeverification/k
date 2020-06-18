@@ -3,7 +3,7 @@ package org.kframework.parser
 import java.util
 import java.util.Optional
 
-import org.kframework.attributes.{Att,Location,Source}
+import org.kframework.attributes.{Att,HasLocation,Location,Source}
 import org.kframework.builtin.Sorts
 import org.kframework.definition.{NonTerminal, Production}
 import org.kframework.{kore => k}
@@ -24,7 +24,7 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
     case Ambiguity(items) => KApply(KLabel("amb"), KList(items.asScala.toList map apply asJava), Att.empty)
   }
 
-  def anonVar(sort: Sort, t: Term): K = {
+  def anonVar(sort: Sort, t: HasLocation): K = {
     val lbl = KLabel("#SemanticCastTo" + sort.toString())
     if (strict) KApply(lbl, KList(KToken("_", Sorts.KVariable, locationToAtt(t.location, t.source))), locationToAtt(t.location, t.source).add(classOf[Production], Production(lbl, Seq(), sort, Seq(NonTerminal(sort, None))))) else KToken("_", Sorts.KVariable, locationToAtt(t.location, t.source))
   }
