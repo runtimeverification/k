@@ -185,6 +185,18 @@ have any constructors declared.
 syntax Bytes [hook(BYTES.Bytes), token]
 ```
 
+### `unused` attribute
+
+K will warn you if you declare a symbol that is not used in any of the rules of your
+definition. Sometimes this is intentional, however; in this case, you can suppress the
+warning by adding the `unused` attribute to the production or cell.
+
+```
+syntax Foo ::= foo() [unused]
+
+configuration <foo unused=""> .K </foo>
+```
+
 Evaluation Strategy
 -------------------
 

@@ -1,5 +1,6 @@
 #True
-[Warning] Compiler: Variable 'A' defined but not used.
+[Warning] Compiler: Variable 'A' defined but not used. Prefix variable name
+with underscore if this is intentional.
 	Source(rhs-vars-broken-spec.k)
 	Location(12,20,12,21)
 [Warning] Critical: Found variable A on right hand side of rule, not bound on

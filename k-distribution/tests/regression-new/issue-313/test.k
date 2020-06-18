@@ -5,11 +5,11 @@ imports DOMAINS
 
 configuration
   <k> $PGM:Int </k>
-  <topCell1>
+  <topCell1 unused="">
      <foo> 0 </foo>
   </topCell1>
   <topCell2>
-    <foos> 1 </foos>
+    <foos unused=""> 1 </foos>
   </topCell2>
 
 syntax Int ::= "bar"
