@@ -506,7 +506,7 @@ pipeline {
                 --file release.md "${K_RELEASE_TAG}"
 
             rm -f release.md
-            git checkout -B 'gh-pages'
+            git checkout -B 'gh-pages' release/master
             rm -rf $(find . -maxdepth 1 -not -name '*.md' -a -not -name '_config.yml' -a -not -name .git -a -not -path .)
             git add ./
             git commit -m 'gh-pages: remove unrelated content'
