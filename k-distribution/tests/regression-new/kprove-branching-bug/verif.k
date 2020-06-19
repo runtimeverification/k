@@ -13,6 +13,6 @@ module VERIF
 
     syntax Int ::= foo( Int )       [function, smtlib(foo)]
     rule foo(I) => I %Int 2         [concrete]
-    rule foo(_) <Int 2 => true      [simplification]
+    rule foo(_) <Int 2 => true      [simplification, smt-lemma]
 
 endmodule
