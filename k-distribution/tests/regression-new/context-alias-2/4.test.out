@@ -3,7 +3,7 @@
 #Equals
   <generatedTop>
     <k>
-      baz ( 1 , 2 , 2 )
+      baz ( 1 , 2 , 2 ) ~> .
     </k>
     <state>
       x |-> 2

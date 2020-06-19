@@ -3,7 +3,7 @@
   #Equals
     <generatedTop>
       <k>
-        qux ( 1 , 1 , 2 )
+        qux ( 1 , 1 , 2 ) ~> .
       </k>
       <state>
         x |-> 1
@@ -16,7 +16,7 @@
   #Equals
     <generatedTop>
       <k>
-        qux ( 1 , 1 , 2 )
+        qux ( 1 , 1 , 2 ) ~> .
       </k>
       <state>
         x |-> 2
@@ -29,7 +29,7 @@
   #Equals
     <generatedTop>
       <k>
-        qux ( 1 , 2 , 2 )
+        qux ( 1 , 2 , 2 ) ~> .
       </k>
       <state>
         x |-> 1
@@ -42,7 +42,7 @@
   #Equals
     <generatedTop>
       <k>
-        qux ( 1 , 2 , 2 )
+        qux ( 1 , 2 , 2 ) ~> .
       </k>
       <state>
         x |-> 2
@@ -55,7 +55,7 @@
   #Equals
     <generatedTop>
       <k>
-        r ( x ) ~> #freezerqux(_,_,_)_TEST_Exp_Exp_Exp_Exp1_ ( x = 1 , x = 2 )
+        r ( x ) ~> #freezerqux(_,_,_)_TEST_Exp_Exp_Exp_Exp1_ ( x = 1 ~> . , x = 2 ~> . ) ~> .
       </k>
       <state>
         .Map

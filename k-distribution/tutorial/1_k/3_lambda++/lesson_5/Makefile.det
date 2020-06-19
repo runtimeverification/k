@@ -1,8 +1,8 @@
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 TESTDIR=tests/deterministic
 DEFDIR=det
-include $(MAKEFILE_PATH)/../../1_lambda/lesson_1/Makefile
 KOMPILE_BACKEND=java
+include $(MAKEFILE_PATH)/../../1_lambda/lesson_1/Makefile
 KRUN_FLAGS=--pattern "<k> V:K </k>"
 # Some of these programs yield nondeterminism unless we kompile with the
 # superstrict "strict" option, which is done in Makefile.nondet.  We do not
