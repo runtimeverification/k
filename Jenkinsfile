@@ -530,7 +530,7 @@ pipeline {
               rm -rf $(find . -maxdepth 1 -not -name '*.md' -a -not -name '_config.yml' -a -not -name .git -a -not -path .)
               git add ./
               git commit -m 'gh-pages: remove unrelated content'
-              git merge --strategy ours origin/gh-pages
+              git merge --strategy ours origin/gh-pages --allow-unrelated-histories
               git push origin gh-pages
             '''
           }
