@@ -246,7 +246,7 @@ module SET
   syntax KItem ::= choice(Set)                [function, hook(SET.choice), klabel(Set:choice)]
 
   /*@ Get the union of two sets ($A \cup B$) */
-  syntax Set ::= Set "|Set" Set            [function, functional, hook(SET.union)]
+  syntax Set ::= Set "|Set" Set            [left, function, functional, hook(SET.union)]
   rule S1:Set |Set S2:Set => S1 (S2 -Set S1)
 endmodule
 
