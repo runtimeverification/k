@@ -101,7 +101,7 @@ public class GenerateSentencesFromConfigDecl {
 
                                 boolean isLeafCell = childResult._4();
                                 Tuple4<Set<Sentence>, Sort, K, Boolean> myResult = computeSentencesOfWellFormedCell(isLeafCell, isStream, kore, multiplicity, cfgAtt, m, cellName, cellProperties,
-                                        childResult._2(), childResult._3(), ensures, hasConfigOrRegularVariable(cellContents));
+                                        childResult._2(), childResult._3(), ensures, hasConfigOrRegularVariable(cellContents, m));
                                 return Tuple4.apply((Set<Sentence>)childResult._1().$bar(myResult._1()), Lists.newArrayList(myResult._2()), myResult._3(), false);
                             }
                         }
@@ -134,7 +134,7 @@ public class GenerateSentencesFromConfigDecl {
                         }
                     }
                 }
-                throw KEMException.compilerError("Malformed io cell in configuration declaration.", term);
+                throw KEMException.compilerError("Malformed external cell in configuration declaration.", term);
             } else if (KLabels.CELLS.equals(kapp.klabel())) {
                 //is a cell bag, and thus represents the multiple children of its parent cell
                 if (ensures != null) {
@@ -186,14 +186,21 @@ public class GenerateSentencesFromConfigDecl {
      * Returns true if the specified term has a configuration or regular variable
      * @param contents
      */
-    private static boolean hasConfigOrRegularVariable(K contents) {
-        FindConfigOrRegularVar visitor = new FindConfigOrRegularVar();
+    private static boolean hasConfigOrRegularVariable(K contents, Module m) {
+        FindConfigOrRegularVar visitor = new FindConfigOrRegularVar(m);
         visitor.apply(contents);
         return visitor.hasConfigVar;
     }
 
     private static class FindConfigOrRegularVar extends VisitK {
+
+        private final Module m;
         boolean hasConfigVar;
+
+        public FindConfigOrRegularVar(Module m) {
+            this.m = m;
+        }
+
         @Override
         public void apply(KToken k) {
             if (k.sort().equals(Sorts.KConfigVar())) {
@@ -202,11 +209,31 @@ public class GenerateSentencesFromConfigDecl {
         }
 
         @Override
-        public void apply(KApply k) {
-            if (k.klabel().name().equals("#externalCell")) {
-                hasConfigVar = true;
+        public void apply(KApply kapp) {
+            if (kapp.klabel().name().equals("#externalCell")) {
+                if (kapp.klist().size() == 1) {
+                    K startLabel = kapp.klist().items().get(0);
+                    if (startLabel instanceof KToken) {
+                        KToken label = (KToken) startLabel;
+                        if (label.sort().equals(Sort("#CellName"))) {
+                            String cellName = label.s();
+                            Sort sort = Sort(getSortOfCell(cellName));
+                            Option<Set<Production>> initializerProduction = m.productionsFor().get(KLabel(getInitLabel(sort)));
+                            if (initializerProduction.isDefined()) {
+                                Set<Production> realProds = stream(initializerProduction.get())
+                                        .filter(p -> !p.att().contains(Att.RECORD_PRD(), Production.class))
+                                        .collect(Collections.toSet());
+                                if (realProds.size() == 1) { // should be only a single initializer
+                                    if (realProds.head().items().size() == 4) {
+                                      hasConfigVar = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            super.apply(k);
+            super.apply(kapp);
         }
 
         @Override
@@ -292,7 +319,7 @@ public class GenerateSentencesFromConfigDecl {
         String sortName = getSortOfCell(cellName);
         Sort sort = Sort(sortName);
 
-        if (cellProperties.contains("maincell")) {
+        if (cellProperties.contains(Att.MAINCELL())) {
             assert isLeaf;
             assert childSorts.size() == 1;
             childSorts = Lists.newArrayList(Sorts.K());
@@ -434,7 +461,7 @@ public class GenerateSentencesFromConfigDecl {
                 throw KEMException.compilerError("Unexpected type for multiplicity * cell: " + cellName
                         + ". Should be one of: Set, Bag, List, Map");
             }
-            SyntaxSort sortDecl = SyntaxSort(Seq(), bagSort, Att().add("hook", type.toUpperCase() + '.' + type));
+            SyntaxSort sortDecl = SyntaxSort(Seq(), bagSort, Att().add("hook", type.toUpperCase() + '.' + type).add("cellCollection"));
             Sentence bagSubsort = Production(Seq(), bagSort, Seq(NonTerminal(sort)));
             Sentence bagElement;
             if (type.equals("Map")) {
@@ -522,7 +549,7 @@ public class GenerateSentencesFromConfigDecl {
     private static Att getCellPropertiesAsAtt(K k, String cellName, K ensures) {
         Att att = Att();
         if (cellName.equals("k")) {
-            att = att.add("maincell");
+            att = att.add(Att.MAINCELL());
         }
         if (ensures != null) {
             att = att.add("topcell");

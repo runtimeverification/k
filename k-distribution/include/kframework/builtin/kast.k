@@ -84,8 +84,9 @@ module ML-SYNTAX
   syntax {Sort1, Sort2} Sort2 ::= "#Exists" Sort1 "." Sort2 [klabel(#Exists), symbol, mlOp, mlBinder, mlQuantifier]
                                 | "#Forall" Sort1 "." Sort2 [klabel(#Forall), symbol, mlOp, mlBinder, mlQuantifier]
 
-  syntax {Sort} Sort ::= "#AG" "(" Sort ")" [klabel(#AG), symbol, mlOp, mlQuantifier]
-                       | "#wEF" "(" Sort ")" [klabel(weakExistsFinally), symbol, mlOp, mlQuantifier]
+  syntax {Sort} Sort ::= "#AG" "(" Sort ")" [klabel(#AG), symbol, mlOp]
+                       | "#wEF" "(" Sort ")" [klabel(weakExistsFinally), symbol, mlOp]
+                       | "#wAF" "(" Sort ")" [klabel(weakAlwaysFinally), symbol, mlOp]
 endmodule
 
 module KVARIABLE-SYNTAX
@@ -98,7 +99,7 @@ module KSEQ-SYMBOLIC
   imports ML-SYNTAX
   imports KVARIABLE-SYNTAX
 
-  syntax #KVariable ::= r"(?<![A-Za-z0-9_\\$!\\?@])(\\!|\\?|@)?([A-Z][A-Za-z0-9'_]*|_)"   [token, prec(1)]
+  syntax #KVariable ::= r"(?<![A-Za-z0-9_\\$!\\?@])(\\!|\\?|@)?([A-Z][A-Za-z0-9'_]*|_|_[A-Z][A-Za-z0-9'_]*)"   [token, prec(1)]
                       | #UpperId                                                          [token]
   syntax KConfigVar ::= r"(?<![A-Za-z0-9_\\$!\\?@])(\\$)([A-Z][A-Za-z0-9'_]*)"            [token]
   syntax KBott      ::= #KVariable
@@ -243,6 +244,13 @@ module RECORD-PRODUCTIONS
   // to their nonterminal's names
 endmodule
 
+module KREWRITE
+  syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite), symbol]
+  syntax non-assoc #KRewrite
+  syntax priority #KRewrite > #withConfig
+endmodule
+
+
 module SORT-PREDICATES
   // if this module is imported, the Bool sort will be annotated with
   // syntax Bool ::= isSort(K) [function]
@@ -259,10 +267,7 @@ module K
   imports K-SORT-LATTICE
   imports AUTO-CASTS
   imports AUTO-FOLLOW
-
-  syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite), symbol]
-  syntax non-assoc #KRewrite
-  syntax priority #KRewrite > #withConfig
+  imports KREWRITE
 
   syntax {Sort} Sort ::= Sort "#as" Sort [klabel(#KAs), symbol]
   // functions that preserve sorts and can therefore have inner rewrites
@@ -298,4 +303,5 @@ module K-TERM
   imports K-SORT-LATTICE
   imports AUTO-CASTS
   imports AUTO-FOLLOW
+  imports KREWRITE
 endmodule

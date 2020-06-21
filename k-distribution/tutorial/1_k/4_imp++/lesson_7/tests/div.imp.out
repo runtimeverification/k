@@ -2,7 +2,7 @@
     <threads>
       <thread>
         <k>
-          3 / 0 ~> #freezer_=__IMP-SYNTAX0_ ( y ) ~> #freezer_;_IMP-SYNTAX0_ ( ) ~> .Stmts
+          3 / 0 ~> #freezer_=__IMP-SYNTAX1_ ( y ) ~> #freezer_;_IMP-SYNTAX0_ ( ) ~> .Stmts
         </k>
         <env>
           x |-> 1

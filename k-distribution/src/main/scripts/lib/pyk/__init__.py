@@ -10,21 +10,16 @@ from .kastManip  import *
 from .coverage   import *
 from .definition import *
 
-def _teeProcessStdout(args, tee = True, buffer_size = 80):
-        process = subprocess.Popen(args, stdout = subprocess.PIPE, stderr = subprocess.PIPE, universal_newlines = True)
-        capture = ""
-        s = process.stdout.read(buffer_size)
-        while len(s) > 0:
-            if tee:
-                sys.stdout.write(s)
-                sys.stdout.flush()
-            capture += s
-            s = process.stdout.read(buffer_size)
-        if tee:
-            sys.stderr.write(process.stderr.read())
-            sys.stderr.flush()
-        process.wait()
-        return (process.returncode, capture, process.stderr.read())
+def _teeProcessStdout(args, tee = True, buffer_size = 80, timeout = None):
+    process = subprocess.Popen(args, stdout = subprocess.PIPE, stderr = subprocess.PIPE, universal_newlines = True)
+    try:
+        (stdout_data, stderr_data) = process.communicate(input = None, timeout = timeout)
+    except TimeoutExpired:
+        process.kill()
+        sys.stderr.write("TIMED OUT")
+        sys.stderr.flush()
+        return (-1, "", "")
+    return (process.returncode, stdout_data, stderr_data)
 
 def _runK(command, definition, inputFile, kArgs = [], teeOutput = True, kRelease = None):
     if kRelease is not None:

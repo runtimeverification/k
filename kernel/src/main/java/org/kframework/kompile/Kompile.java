@@ -8,6 +8,7 @@ import org.kframework.attributes.Source;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
+import org.kframework.compile.checks.CheckAnonymous;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckFunctions;
 import org.kframework.compile.checks.CheckHOLE;
@@ -309,12 +310,12 @@ public class Kompile {
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckRewrite(errors, m)::check));
 
-        stream(modules).forEach(new CheckImports(mainModule, kem)::check);
-
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(
-                new CheckFunctions(errors, m, excludedModuleTags.contains(Att.CONCRETE()))::check));
+              new CheckFunctions(errors, m, excludedModuleTags.contains(Att.CONCRETE()))::check));
+
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAnonymous(errors, m, kem)::check));
 
         Set<String> moduleNames = new HashSet<>();
         stream(modules).forEach(m -> {
@@ -324,7 +325,7 @@ public class Kompile {
             moduleNames.add(m.name());
         });
 
-        CheckKLabels checkKLabels = new CheckKLabels(errors, kompileOptions.isKore());
+        CheckKLabels checkKLabels = new CheckKLabels(errors, kem, kompileOptions.isKore(), files);
         Set<String> checkedModules = new HashSet<>();
         // only check imported modules because otherwise we might have false positives
         Consumer<Module> checkModuleKLabels = m -> {
@@ -340,6 +341,7 @@ public class Kompile {
         }
         stream(mainModule.importedModules()).forEach(checkModuleKLabels);
         checkModuleKLabels.accept(mainModule);
+        checkKLabels.check();
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckLabels(errors)::check));
 

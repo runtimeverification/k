@@ -1,0 +1,13 @@
+[Error] Compiler: Had 3 structural errors.
+[Error] Compiler: Variable '?X' defined but not used. Prefix variable name with
+underscore if this is intentional.
+	Source(checkUnusedVar.k)
+	Location(24,18,24,20)
+[Error] Compiler: Variable 'X' defined but not used. Prefix variable name with
+underscore if this is intentional.
+	Source(checkUnusedVar.k)
+	Location(16,12,16,13)
+[Error] Compiler: Variable 'X' defined but not used. Prefix variable name with
+underscore if this is intentional.
+	Source(checkUnusedVar.k)
+	Location(21,12,21,13)

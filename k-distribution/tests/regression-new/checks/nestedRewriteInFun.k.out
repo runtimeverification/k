@@ -11,6 +11,3 @@
 [Error] Compiler: Rewrites are not allowed to be nested.
 	Source(nestedRewriteInFun.k)
 	Location(6,17,6,23)
-[Warning] Compiler: Could not find main syntax module with name
-NESTEDREWRITEINFUN-SYNTAX in definition.  Use --syntax-module to specify one.
-Using NESTEDREWRITEINFUN as default.

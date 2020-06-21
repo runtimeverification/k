@@ -83,28 +83,47 @@ def rewriteWith(rule, pattern):
 def rewriteAnywhereWith(rule, pattern):
     return traverseBottomUp(pattern, lambda p: rewriteWith(rule, p))
 
-def mlPredToBool(k):
-    klabelMap = { "#And"    : "_andBool_"
-                , "#Or"     : "_orBool_"
-                , "#Not"    : "notBool_"
-                , "#Equals" : '_==K_'
-                }
-    return replaceKLabels(k, klabelMap)
+def unsafeMlPredToBool(k):
+    """Attempt to convert an ML Predicate back into a boolean expression.
+
+    This is unsafe in general because not every ML Predicate can be represented correctly as a boolean expression.
+    This function just makes a best-effort to do this.
+    """
+    if k is None:
+        return None
+    mlPredToBoolRules = [ (KApply('#True', [])  , KToken('true', 'Bool'))
+                        , (KApply('#False', []) , KToken('false', 'Bool'))
+                        , (KApply('#And'    , [KVariable('#V1'), KVariable('#V2')]) , KApply('_andBool_' , [KVariable('#V1'), KVariable('#V2')]))
+                        , (KApply('#Or'     , [KVariable('#V1'), KVariable('#V2')]) , KApply('_orBool_'  , [KVariable('#V1'), KVariable('#V2')]))
+                        , (KApply('#Not'    , [KVariable('#V1')])                   , KApply('notBool_'  , [KVariable('#V1')]))
+                        , (KApply('#Equals' , [KVariable('#V1'), KVariable('#V2')]) , KApply('_==K_'     , [KVariable('#V1'), KVariable('#V2')]))
+                        ]
+    newK = k
+    for rule in mlPredToBoolRules:
+        newK = rewriteAnywhereWith(rule, newK)
+    return newK
 
 def simplifyBool(k):
-    simplifyRules = [ (KApply("_==K_", [KVariable("#LHS"), KToken("true", "Bool")]),  KVariable("#LHS"))
-                    , (KApply("_==K_", [KVariable("#LHS"), KToken("false", "Bool")]), KApply("notBool_", [KVariable("#LHS")]))
-                    , (KApply("_andBool_", [KToken("true", "Bool"), KVariable("#REST")]), KVariable("#REST"))
-                    , (KApply("_andBool_", [KVariable("#REST"), KToken("true", "Bool")]), KVariable("#REST"))
-                    , (KApply("_andBool_", [KToken("false", "Bool"), KVariable("#REST")]), KToken("false", "Bool"))
-                    , (KApply("_andBool_", [KVariable("#REST"), KToken("false", "Bool")]), KToken("false", "Bool"))
-                    , (KApply("_orBool_", [KToken("false", "Bool"), KVariable("#REST")]), KVariable("#REST"))
-                    , (KApply("_orBool_", [KVariable("#REST"), KToken("false", "Bool")]), KVariable("#REST"))
-                    , (KApply("_orBool_", [KToken("true", "Bool"), KVariable("#REST")]), KToken("true", "Bool"))
-                    , (KApply("_orBool_", [KVariable("#REST"), KToken("true", "Bool")]), KToken("true", "Bool"))
-                    , (KApply("notBool_", [KToken("false", "Bool")]), KToken("true", "Bool"))
-                    , (KApply("notBool_", [KToken("true", "Bool") ]), KToken("false", "Bool"))
-                    , (KApply("#True", []), KToken("true", "Bool"))
+    if k is None:
+        return None
+    simplifyRules = [ (KApply('_==K_', [KVariable('#LHS'), KToken('true', 'Bool')]), KVariable('#LHS'))
+                    , (KApply('_==K_', [KToken('true', 'Bool'), KVariable('#RHS')]), KVariable('#RHS'))
+                    , (KApply('_==K_', [KVariable('#LHS'), KToken('false', 'Bool')]), KApply('notBool_', [KVariable('#LHS')]))
+                    , (KApply('_==K_', [KToken('false', 'Bool'), KVariable('#RHS')]), KApply('notBool_', [KVariable('#RHS')]))
+                    , (KApply('notBool_', [KToken('false' , 'Bool')]), KToken('true'  , 'Bool'))
+                    , (KApply('notBool_', [KToken('true'  , 'Bool')]), KToken('false' , 'Bool'))
+                    , (KApply('notBool_', [KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')])]), KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')]))
+                    , (KApply('notBool_', [KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')])]), KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')]))
+                    , (KApply('notBool_', [KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')])]), KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')]))
+                    , (KApply('notBool_', [KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')])]), KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')]))
+                    , (KApply('_andBool_', [KToken('true', 'Bool'), KVariable('#REST')]), KVariable('#REST'))
+                    , (KApply('_andBool_', [KVariable('#REST'), KToken('true', 'Bool')]), KVariable('#REST'))
+                    , (KApply('_andBool_', [KToken('false', 'Bool'), KVariable('#REST')]), KToken('false', 'Bool'))
+                    , (KApply('_andBool_', [KVariable('#REST'), KToken('false', 'Bool')]), KToken('false', 'Bool'))
+                    , (KApply('_orBool_', [KToken('false', 'Bool'), KVariable('#REST')]), KVariable('#REST'))
+                    , (KApply('_orBool_', [KVariable('#REST'), KToken('false', 'Bool')]), KVariable('#REST'))
+                    , (KApply('_orBool_', [KToken('true', 'Bool'), KVariable('#REST')]), KToken('true', 'Bool'))
+                    , (KApply('_orBool_', [KVariable('#REST'), KToken('true', 'Bool')]), KToken('true', 'Bool'))
                     ]
     newK = k
     for rule in simplifyRules:
@@ -183,6 +202,8 @@ def pushDownRewrites(kast):
                 if lhs['items'][-1] == rhs['items'][-1]:
                     lowerRewrite = KRewrite(KSequence(lhs['items'][0:-1]), KSequence(rhs['items'][0:-1]))
                     return KSequence([lowerRewrite, lhs['items'][-1]])
+            if isKSequence(lhs) and len(lhs['items']) > 0 and isKVariable(lhs['items'][-1]) and isKVariable(rhs) and lhs['items'][-1] == rhs:
+                return KSequence([KRewrite(KSequence(lhs['items'][0:-1]), KConstant(klabelEmptyK)), rhs])
         return _kast
     return traverseTopDown(kast, _pushDownRewrites)
 
@@ -293,7 +314,12 @@ def minimizeRule(rule):
             ruleRequires = KApply("_andBool_", [ruleRequires, constraint])
 
         ruleBody = substitute(ruleBody, substitutions)
-        ruleRequires = simplifyBool(mlPredToBool(ruleRequires))
+
+        ruleRequires = simplifyBool(unsafeMlPredToBool(ruleRequires))
+        ruleEnsures  = simplifyBool(unsafeMlPredToBool(ruleEnsures))
+
+        ruleRequires = None if ruleRequires == KToken('true', 'Bool') else ruleRequires
+        ruleEnsures  = None if ruleEnsures  == KToken('true', 'Bool') else ruleEnsures
 
     ruleBody = inlineCellMaps(ruleBody)
     ruleBody = removeSemanticCasts(ruleBody)

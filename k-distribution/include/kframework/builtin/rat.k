@@ -24,6 +24,8 @@ module RAT-SYNTAX
 
   syntax Rat ::= minRat(Rat, Rat) [function, functional, klabel(minRat), symbol, smtlib(ratmin), hook(RAT.min)]
                | maxRat(Rat, Rat) [function, functional, klabel(maxRat), symbol, smtlib(ratmax), hook(RAT.max)]
+
+  syntax Float ::= Rat2Float(Rat, precision: Int, exponentBits: Int) [function]
 endmodule
 
 module RAT-COMMON
@@ -130,7 +132,7 @@ module RAT
    * exponentiation
    */
 
-  rule X ^Rat 0 => 1
+  rule _ ^Rat 0 => 1
   rule 0 ^Rat N => 0 requires N =/=Int 0
 
   rule < I , J >Rat ^Rat N => powRat(< I , J >Rat, N) requires N >Int 0
@@ -169,5 +171,9 @@ module RAT
 
   rule maxRat(R, S) => R requires R >=Rat S
   rule maxRat(R, S) => S requires S >=Rat R
+
+  syntax Float ::= #Rat2Float(Int, Int, Int, Int) [function, hook(FLOAT.rat2float)]
+  rule Rat2Float(Num:Int, Prec:Int, Exp:Int) => #Rat2Float(Num, 1, Prec, Exp)
+  rule Rat2Float(< Num, Dem >Rat, Prec, Exp) => #Rat2Float(Num, Dem, Prec, Exp)
 
 endmodule

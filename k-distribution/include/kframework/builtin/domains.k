@@ -474,9 +474,9 @@ module INT-SYMBOLIC [symbolic, kore]
 
   // Bit-shifts
   rule X <<Int 0 => X [simplification]
-  rule 0 <<Int X => 0 [simplification]
+  rule 0 <<Int _ => 0 [simplification]
   rule X >>Int 0 => X [simplification]
-  rule 0 >>Int X => 0 [simplification]
+  rule 0 >>Int _ => 0 [simplification]
 endmodule
 
 module INT-KAST [kast]
@@ -549,7 +549,6 @@ module FLOAT
   syntax Bool ::= signFloat(Float)      [function, functional, hook(FLOAT.sign)]
                 | isNaN(Float)          [function, functional, smt-hook(fp.isNaN), hook(FLOAT.isNaN)]
                 | isInfinite(Float)     [function, functional]
-  syntax MInt ::= significandFloat(Float) [function, hook(FLOAT.significand)]
 
   syntax Float ::= "--Float" Float             [function, functional, smt-hook(fp.neg), hook(FLOAT.neg)]
                  > Float "^Float" Float        [function, left, latex({#1}^{#2}), hook(FLOAT.pow)]
@@ -817,12 +816,12 @@ module BYTES-IN-K
   rule BS [ N <- M ] => substrBytes(BS, 0, N) +Bytes M : substrBytes(BS, N +Int 1, lengthBytes(BS))
 
   syntax Int ::= Bytes "[" Int "]" [function]
-  rule (B : BS) [ 0 ] => B
+  rule (B : _) [ 0 ] => B
   rule (_ : BS) [ I ] => BS [ I -Int 1] requires I >Int 0
 
   syntax Bytes ::= substrBytes(Bytes, Int, Int) [function]
-  rule substrBytes(BS, 0, 0) => nilBytes
-  rule substrBytes(B : BS, N, M) => substrBytes(BS, N -Int 1, M -Int 1) requires N >Int 0
+  rule substrBytes(_, 0, 0) => nilBytes
+  rule substrBytes(_ : BS, N, M) => substrBytes(BS, N -Int 1, M -Int 1) requires N >Int 0
   rule substrBytes(B : BS, 0, M) => B : substrBytes(BS, 0, M -Int 1) requires M >Int 0
 
   syntax Bytes ::= replaceAtBytes(Bytes, Int, Bytes) [function]
@@ -833,8 +832,8 @@ module BYTES-IN-K
   syntax Bytes ::= padRightBytes(Bytes, Int, Int) [function]
                  | padLeftBytes(Bytes, Int, Int) [function]
   rule padRightBytes(BS, LEN, VAL) => reverseBytes(padLeftBytes(reverseBytes(BS), LEN, VAL))
-  rule padLeftBytes(BS, LEN, VAL) => BS requires lengthBytes(BS) >=Int LEN
-  rule padLeftBytes(BS, LEN, VAL) => padLeftBytes(VAL : BS, LEN, VAL) requires lengthBytes(BS) <Int LEN
+  rule padLeftBytes(BS, LEN, _) => BS requires lengthBytes(BS) >=Int LEN andBool 0 <=Int LEN
+  rule padLeftBytes(BS, LEN, VAL) => padLeftBytes(VAL : BS, LEN, VAL) requires lengthBytes(BS) <Int LEN andBool 0 <=Int LEN
 
   syntax Bytes ::= reverseBytes(Bytes) [function, functional]
   syntax Bytes ::= reverseBytes(Bytes, Bytes) [function, klabel(reverseBytesAux)]
@@ -846,7 +845,7 @@ module BYTES-IN-K
   syntax Int ::= lengthBytes(Bytes, Int) [function, klabel(lengthBytesAux), smtlib(lengthBytesAux)]
   rule lengthBytes(BS) => lengthBytes(BS, 0)
   rule lengthBytes(nilBytes, SIZE) => SIZE
-  rule lengthBytes(B : BS, SIZE) => lengthBytes(BS, SIZE +Int 1)
+  rule lengthBytes(_ : BS, SIZE) => lengthBytes(BS, SIZE +Int 1)
 
   syntax Bytes ::= Bytes "+Bytes" Bytes [function, functional, right]
   rule nilBytes +Bytes B2 => B2
@@ -859,10 +858,19 @@ endmodule
 
 module BYTES-KORE [kore]
   imports BYTES-HOOKED
+  imports BYTES-SYMBOLIC-CEIL
 endmodule
 
 module BYTES-SYMBOLIC [symbolic, kast]
   imports BYTES-IN-K
+endmodule
+
+module BYTES-SYMBOLIC-CEIL [symbolic, kore]
+  imports BYTES-HOOKED
+  imports INT
+
+  rule #Ceil(padRightBytes(_, LEN, VAL)) => {(0 <=Int LEN andBool 0 <=Int VAL andBool VAL <Int 256) #Equals true} [anywhere, simplification]
+  rule #Ceil(padLeftBytes(_, LEN, VAL))  => {(0 <=Int LEN andBool 0 <=Int VAL andBool VAL <Int 256) #Equals true} [anywhere, simplification]
 endmodule
 
 module BYTES
