@@ -504,15 +504,6 @@ pipeline {
                 --attach mojave/$BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                \
                 --attach k-nightly.tar.gz'#Platform Indepdendent K Binary'                             \
                 --file release.md "${K_RELEASE_TAG}"
-
-            rm -f release.md
-            git checkout -B 'gh-pages'
-            rm -rf $(find . -maxdepth 1 -not -name '*.md' -a -not -name '_config.yml' -a -not -name .git -a -not -path .)
-            git add ./
-            git commit -m 'gh-pages: remove unrelated content'
-            git fetch release gh-pages
-            git merge --strategy ours FETCH_HEAD
-            git push release gh-pages
           '''
         }
         dir('homebrew-k') {
@@ -523,6 +514,20 @@ pipeline {
               git merge brew-release-$PACKAGE
               git push origin master
               git push origin -d brew-release-$PACKAGE
+            '''
+          }
+        }
+        dir('gh-pages') {
+          sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
+            sh '''
+              git clone 'ssh://github.com/kframework/k.git' --depth 1 --no-single-branch --branch master --branch gh-pages
+              cd k
+              git checkout -B gh-pages origin/master
+              rm -rf $(find . -maxdepth 1 -not -name '*.md' -a -not -name '_config.yml' -a -not -name .git -a -not -path .)
+              git add ./
+              git commit -m 'gh-pages: remove unrelated content'
+              git merge --strategy ours origin/gh-pages --allow-unrelated-histories
+              git push origin gh-pages
             '''
           }
         }
