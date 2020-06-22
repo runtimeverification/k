@@ -4,6 +4,7 @@ package org.kframework.kast;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.kframework.attributes.Source;
+import org.kframework.builtin.Sorts;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
@@ -137,6 +138,10 @@ public class KastFrontEnd extends FrontEnd {
 
               if (options.expandMacros) {
                   parsed = ExpandMacros.forNonSentences(unparsingMod, files.get(), def.kompileOptions, false).expand(parsed);
+              }
+
+              if (sort.equals(Sorts.K())) {
+                  sort = Sorts.KItem();
               }
 
               System.out.print(new String(kprint.get().prettyPrint(def, unparsingMod, parsed, sort), StandardCharsets.UTF_8));

@@ -110,6 +110,9 @@ public class CompiledDefinition implements Serializable {
                                     if (t.sort().equals(Sorts.KConfigVar())) {
                                         Sort sort = Outer.parseSort(k.klabel().name().replace("#SemanticCastTo", ""));
                                         configurationVariableDefaultSorts.put(t.s(), sort);
+                                        if (sort.equals(Sorts.K())) {
+                                          sort = Sorts.KItem();
+                                        }
                                     }
                                 }
                             }
