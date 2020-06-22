@@ -139,7 +139,7 @@ public class KastFrontEnd extends FrontEnd {
                   parsed = ExpandMacros.forNonSentences(unparsingMod, files.get(), def.kompileOptions, false).expand(parsed);
               }
 
-              System.out.print(new String(kprint.get().prettyPrint(def, unparsingMod, parsed), StandardCharsets.UTF_8));
+              System.out.print(new String(kprint.get().prettyPrint(def, unparsingMod, parsed, sort), StandardCharsets.UTF_8));
               System.out.flush();
             }
             sw.printTotal("Total");
