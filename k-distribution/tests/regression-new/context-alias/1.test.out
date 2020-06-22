@@ -1,6 +1,6 @@
 <generatedTop>
   <k>
-    1 + ( 1 + 1 ) ~> #freezer_;_TEST_Stmt_Expr0_ ( )
+    1 + ( 1 + 1 ) ~> #freezer_;_TEST_Stmt_Expr0_ ( ) ~> .
   </k>
   <shouldHeat>
     false
