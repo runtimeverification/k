@@ -1,6 +1,6 @@
 <T>
   <k>
-    undefined ~> #freezer_+__IMP-SYNTAX_AExp_AExp_AExp1_ ( 1 ) ~> #freezer_=_;_IMP-SYNTAX_Stmt_Id_AExp0_ ( s ) ~> q = n / 2 ; ~> r = q + q + 1 ; ~> if ( r <= n ) { n = n + n + n + 1 ; } else { n = q ; } ~> while ( ! n <= 1 ) { s = s + 1 ; q = n / 2 ; r = q + q + 1 ; if ( r <= n ) { n = n + n + n + 1 ; } else { n = q ; } } ~> while ( ! m <= 2 ) { n = m ; m = m + - 1 ; while ( ! n <= 1 ) { s = s + 1 ; q = n / 2 ; r = q + q + 1 ; if ( r <= n ) { n = n + n + n + 1 ; } else { n = q ; } } }
+    undefined ~> #freezer_+__IMP-SYNTAX_AExp_AExp_AExp0_ ( 1 ) ~> #freezer_=_;_IMP-SYNTAX_Stmt_Id_AExp1_ ( s ) ~> q = n / 2 ; ~> r = q + q + 1 ; ~> if ( r <= n ) { n = n + n + n + 1 ; } else { n = q ; } ~> while ( ! n <= 1 ) { s = s + 1 ; q = n / 2 ; r = q + q + 1 ; if ( r <= n ) { n = n + n + n + 1 ; } else { n = q ; } } ~> while ( ! m <= 2 ) { n = m ; m = m + - 1 ; while ( ! n <= 1 ) { s = s + 1 ; q = n / 2 ; r = q + q + 1 ; if ( r <= n ) { n = n + n + n + 1 ; } else { n = q ; } } }
   </k>
   <state>
     m |-> 9

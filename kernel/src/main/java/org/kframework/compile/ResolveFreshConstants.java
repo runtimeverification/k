@@ -146,7 +146,7 @@ public class ResolveFreshConstants {
         }
     }
 
-    private static KVariable FRESH = KVariable("_Fresh", Att.empty().add(Sort.class, Sorts.Int()));
+    private static KVariable FRESH = KVariable("#Fresh", Att.empty().add(Sort.class, Sorts.Int()));
 
     private K transform(K term) {
         return new TransformK() {

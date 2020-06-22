@@ -2,6 +2,7 @@
 package org.kframework.compile.checks;
 
 import com.google.common.collect.ImmutableSet;
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
@@ -18,15 +19,19 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.VisitK;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.file.JarInfo;
+import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.file.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.kframework.kore.KORE.*;
+import static org.kframework.Collections.*;
 
 /**
  * Checks to ensure that KLabels in the definition obey rules relating to their use. First, klabels used in rules must
@@ -37,14 +42,19 @@ import static org.kframework.kore.KORE.*;
 public class CheckKLabels {
     private final Set<KEMException> errors;
     private final boolean kore;
+    private final KExceptionManager kem;
+    private final FileUtil files;
 
-    public CheckKLabels(Set<KEMException> errors, boolean kore) {
+    public CheckKLabels(Set<KEMException> errors, KExceptionManager kem, boolean kore, FileUtil files) {
         this.errors = errors;
         this.kore = kore;
+        this.kem = kem;
+        this.files = files;
     }
 
-    private final Map<KLabel, Module> klabels = new HashMap<>();
+    private final Map<String, Module> klabels = new HashMap<>();
     private final Map<String, Production> klabelProds = new HashMap<>();
+    private final Set<String> usedLabels = new HashSet<>();
 
     public void check(Sentence sentence, Module m) {
         VisitK checkKLabels = new VisitK() {
@@ -63,6 +73,10 @@ public class CheckKLabels {
             private void apply(KLabel klabel, K k) {
                 if (klabel instanceof KVariable)
                     return;
+                Optional<Source> s = k.att().getOptional(Source.class);
+                if (s.isPresent()) {
+                    usedLabels.add(klabel.name());
+                }
                 if (!m.definedKLabels().apply(klabel) && !isInternalKLabel(klabel.name(), m)) {
                     errors.add(KEMException.compilerError("Found klabel " + klabel.name() + " not defined in any production.", k));
                 }
@@ -85,14 +99,43 @@ public class CheckKLabels {
             Production prod = (Production) sentence;
             if (prod.klabel().isDefined()) {
                 KLabel klabel = prod.klabel().get();
-                if (klabels.containsKey(klabel) && !m.equals(klabels.get(klabel)) && !kore) {
-                    errors.add(KEMException.compilerError("KLabel " + klabel.name() + " defined in multiple modules: " + klabels.get(klabel).name() + " and " + m.name() + ".", prod));
+                if (klabels.containsKey(klabel.name()) && !m.equals(klabels.get(klabel.name())) && !kore) {
+                    errors.add(KEMException.compilerError("KLabel " + klabel.name() + " defined in multiple modules: " + klabels.get(klabel.name()).name() + " and " + m.name() + ".", prod));
                 }
                 if (klabelProds.containsKey(klabel.name()) && kore && !internalDuplicates.contains(klabel.name())) {
                     errors.add(KEMException.compilerError("Symbol " + klabel.name() + " is not unique. Previously defined as: " + klabelProds.get(klabel.name()), prod));
                 }
-                klabels.put(klabel, m);
+                klabels.put(klabel.name(), m);
                 klabelProds.put(klabel.name(), prod);
+            }
+        }
+    }
+
+    public void check() {
+        Set<String> definedButNotUsed = new HashSet<>(klabelProds.keySet());
+        definedButNotUsed.removeAll(usedLabels);
+        File includeDir = files.resolveKInclude(".");
+        String canonicalPath;
+        try {
+            canonicalPath = includeDir.getCanonicalPath();
+            if (!canonicalPath.endsWith(File.separator)) {
+              canonicalPath = canonicalPath + File.separator;
+            }
+        } catch (IOException e) {
+            canonicalPath = null;
+        }
+        for (String symbol : definedButNotUsed) {
+            Production prod = klabelProds.get(symbol);
+            Optional<Source> s = prod.source();
+            if (prod.att().contains(Att.MAINCELL()) ||
+                prod.att().contains("unused") ||
+                symbol.equals("<generatedTop>") ||
+                !s.isPresent() ||
+                (prod.att().contains(Att.CELL()) && stream(prod.nonterminals()).filter(nt -> klabels.get(symbol).sortAttributesFor().get(nt.sort().head()).getOrElse(() -> Att.empty()).contains("cellCollection")).findAny().isPresent())) {
+                continue;
+            }
+            if (canonicalPath == null || !s.get().source().contains(canonicalPath)) {
+                kem.registerCompilerWarning(errors, "Symbol '" + symbol + "' defined but not used. Add the 'unused' attribute if this is intentional.", klabelProds.get(symbol));
             }
         }
     }

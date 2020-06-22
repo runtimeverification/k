@@ -99,7 +99,7 @@ module KSEQ-SYMBOLIC
   imports ML-SYNTAX
   imports KVARIABLE-SYNTAX
 
-  syntax #KVariable ::= r"(?<![A-Za-z0-9_\\$!\\?@])(\\!|\\?|@)?([A-Z][A-Za-z0-9'_]*|_)"   [token, prec(1)]
+  syntax #KVariable ::= r"(?<![A-Za-z0-9_\\$!\\?@])(\\!|\\?|@)?([A-Z][A-Za-z0-9'_]*|_|_[A-Z][A-Za-z0-9'_]*)"   [token, prec(1)]
                       | #UpperId                                                          [token]
   syntax KConfigVar ::= r"(?<![A-Za-z0-9_\\$!\\?@])(\\$)([A-Z][A-Za-z0-9'_]*)"            [token]
   syntax KBott      ::= #KVariable

@@ -17,6 +17,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.options.SortedParameterDescriptions;
 
+import com.beust.jcommander.internal.Console;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import com.google.inject.AbstractModule;
@@ -49,17 +50,39 @@ public class JCommanderModule extends AbstractModule  {
         }
     }
 
+    void usage(JCommander jc, StringBuilder sb) {
+        Console defaultConsole = jc.getConsole();
+        jc.setConsole(new Console() {
+            @Override
+            public void print(String msg) {
+                sb.append(msg);
+            }
+
+            @Override
+            public void println(String msg) {
+                sb.append(msg).append('\n');
+            }
+
+            @Override
+            public char[] readPassword(boolean echoInput) {
+                return defaultConsole.readPassword(echoInput);
+            }
+        });
+        jc.usage();
+        jc.setConsole(defaultConsole);
+    }
+
     @Provides @Usage @RequestScoped
     String usage(JCommander jc) {
         StringBuilder sb = new StringBuilder();
-        jc.usage(sb);
+        usage(jc, sb);
         return StringUtil.finesseJCommanderUsage(sb.toString(), jc)[0];
     }
 
     @Provides @ExperimentalUsage @RequestScoped
     String experimentalUsage(JCommander jc) {
         StringBuilder sb = new StringBuilder();
-        jc.usage(sb);
+        usage(jc, sb);
         return StringUtil.finesseJCommanderUsage(sb.toString(), jc)[1];
     }
 }

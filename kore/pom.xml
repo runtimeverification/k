@@ -23,7 +23,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>18.0</version>
+      <version>24.1.1-jre</version>
     </dependency>
     <dependency>
       <groupId>org.pcollections</groupId>
@@ -41,9 +41,9 @@
       <version>3.0.0</version>
     </dependency>
     <dependency>
-      <groupId>org.kframework.dependencies</groupId>
+      <groupId>com.beust</groupId>
       <artifactId>jcommander</artifactId>
-      <version>1.35-custom</version>
+      <version>1.78</version>
     </dependency>
   </dependencies>
 
