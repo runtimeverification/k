@@ -179,7 +179,7 @@ public class KPrint {
                 }
                 ModuleToKORE converter = new ModuleToKORE(module, files, compiledDefinition.topCellInitializer, kompileOptions);
                 result = ExpandMacros.forNonSentences(compiledDefinition.executionModule(), files, kompileOptions, false).expand(result);
-                result = new AddSortInjections(module).addSortInjections(result, s);
+                result = new AddSortInjections(compiledDefinition.executionModule()).addSortInjections(result, s);
                 StringBuilder sb = new StringBuilder();
                 converter.convert(result, sb);
                 return sb.toString().getBytes();
