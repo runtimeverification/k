@@ -22,6 +22,7 @@ term=false
 verbose=false
 literal=false
 outputMode=pretty
+statistics=false
 flags=
 configVars=
 result=1
@@ -309,7 +310,7 @@ do
       ;;
   
       --statistics)
-      flags="$flags --statistics"
+      statistics=true
       ;;
   
       --)
@@ -430,13 +431,27 @@ else
   execute llvm-krun $configVars -d "$kompiledDir" $flags --dry-run -o "$input_file"
 fi
 
+if $statistics; then
+  interpreter_flags=--statistics
+else
+  interpreter_flags=
+fi
+
 if [ -f "$kompiledDir/interpreter" ]; then
   set +e
-  execute $cmdprefix "$kompiledDir/interpreter" "$input_file" "${depth:--1}" "$kore_output"
+  execute $cmdprefix "$kompiledDir/interpreter" "$input_file" "${depth:--1}" "$kore_output" $interpreter_flags
   result=$?
   set -e
 else
   error 'Does not yet support Haskell backend.'
+fi
+
+if $statistics; then
+  steps=$(head -1 "$kore_output")
+  echo "[$steps steps]"
+  kore_output2="$(mktemp tmp.out.XXXXXXXXXX)"
+  tail -1 "$kore_output" > "$kore_output2"
+  mv "$kore_output2" "$kore_output"
 fi
 
 case "$outputMode" in
