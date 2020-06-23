@@ -28,6 +28,7 @@ verbose=false
 literal=false
 outputMode=pretty
 flags=
+configVars=
 
 tempFiles=()
 trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
