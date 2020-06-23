@@ -12,7 +12,8 @@ module VERIF
       requires I <Int 1
     rule <k> step I => ok ...</k>
       requires I ==Int 1
-    rule <k> step I => fail ...</k> [owise]
+    rule <k> step I => fail ...</k>
+      requires notBool (I <Int 1 orBool I ==Int 1)
 
     syntax Int ::= foo( Int )       [function, smtlib(foo)]
     rule foo(I) => I %Int 2         [concrete]
