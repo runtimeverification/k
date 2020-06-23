@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 set -o pipefail
+set -u
 
 export PATH="$(dirname "$0"):$PATH"
 
@@ -21,6 +22,7 @@ filterSubst=true
 outputFile=-
 pattern=
 search=false
+searchType=!
 term=false
 verbose=false
 literal=false
@@ -359,7 +361,7 @@ if [ "$outputFile" = "-" ]; then
 fi
 
 if $term; then
-  if [ -z "$parser_PGM" ]; then
+  if [ -z "${parser_PGM+unset}" ]; then
     execute kast -m "$mainModuleName" "$config_var_PGM" -o kore > "$input_file"
   else
     execute $parser_PGM "$config_var_PGM" > "$input_file"
@@ -371,7 +373,7 @@ else
     tempFile="$(mktemp tmp.in."$name".XXXXXXXXXX)"
     tempFiles+=("$tempFile")
     sortName=`cat "$kompiledDir"/sort_"$name".txt`
-    if [ -z "${!parser_name}" ]; then
+    if [ -z "${!parser_name+unset}" ]; then
       if [ -f "$kompiledDir/parser_$name" ]; then
         parser="$kompiledDir/parser_$name"
       elif [ "$name" = "PGM" ]; then
