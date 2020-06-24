@@ -1,0 +1,1 @@
+../kprove-smt-lemma/test-spec.k
