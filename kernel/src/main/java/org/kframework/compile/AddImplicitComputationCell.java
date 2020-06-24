@@ -12,20 +12,19 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KRewrite;
 
 import java.util.List;
-import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 /**
  *  If a SemanticSentence (Rule or Context) has a body that is not wrapped in any cell,
  *  wrap it in a {@code <k>} cell
  */
-public class AddImplicitComputationCell implements UnaryOperator<Sentence> {
+public class AddImplicitComputationCell {
 
     public static Definition transformDefinition(Definition input) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         return DefinitionTransformer.fromSentenceTransformer(
-                new AddImplicitComputationCell(configInfo, labelInfo),
+                new AddImplicitComputationCell(configInfo, labelInfo)::apply,
                 "concretizing configuration").apply(input);
     }
 
@@ -33,7 +32,7 @@ public class AddImplicitComputationCell implements UnaryOperator<Sentence> {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
         LabelInfo labelInfo = new LabelInfoFromModule(mod);
         return ModuleTransformer.fromSentenceTransformer(
-                new AddImplicitComputationCell(configInfo, labelInfo),
+                new AddImplicitComputationCell(configInfo, labelInfo)::apply,
                 "concretizing configuration").apply(mod);
     }
 
@@ -45,17 +44,17 @@ public class AddImplicitComputationCell implements UnaryOperator<Sentence> {
         this.labelInfo = labelInfo;
     }
 
-    public Sentence apply(Sentence s) {
+    public Sentence apply(Module m, Sentence s) {
         if (skipSentence(s)) {
             return s;
         }
 
         if (s instanceof Rule) {
             Rule rule = (Rule) s;
-            return new Rule(apply(rule.body()), rule.requires(), rule.ensures(), rule.att());
+            return new Rule(apply(rule.body(), m), rule.requires(), rule.ensures(), rule.att());
         } else if (s instanceof Context) {
             Context context = (Context) s;
-            return new Context(apply(context.body()), context.requires(), context.att());
+            return new Context(apply(context.body(), m), context.requires(), context.att());
         } else {
             return s;
         }
@@ -66,8 +65,8 @@ public class AddImplicitComputationCell implements UnaryOperator<Sentence> {
                 || s.att().contains(Att.ANYWHERE()) || s.att().contains(Att.KORE());
     }
 
-    private K apply(K term) {
-        if (labelInfo.isFunction(term)) return term;
+    private K apply(K term, Module m) {
+        if (m.isFunction(term)) return term;
 
         List<K> items = IncompleteCellUtils.flattenCells(term);
         if (items.size() != 1) {
