@@ -3,7 +3,7 @@
 #Equals
   <generatedTop>
     <k>
-      bar ( 5 , 5 , 5 )
+      bar ( 5 , 5 , 5 ) ~> .
     </k>
     <state>
       x |-> 5
