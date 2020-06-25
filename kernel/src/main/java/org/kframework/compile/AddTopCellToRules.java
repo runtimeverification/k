@@ -4,6 +4,7 @@ package org.kframework.compile;
 import org.kframework.attributes.Att;
 import org.kframework.backend.kore.ConstructorChecks;
 import org.kframework.definition.Context;
+import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
@@ -39,8 +40,8 @@ public class AddTopCellToRules {
         this.labelInfo = labelInfo;
     }
 
-    public K addImplicitCells(K term) {
-        if (labelInfo.isFunction(term)) return term;
+    public K addImplicitCells(K term, Module m) {
+        if (m.isFunction(term)) return term;
         return addRootCell(term);
     }
 
@@ -103,29 +104,29 @@ public class AddTopCellToRules {
         return IncompleteCellUtils.make(root, true, term, true);
     }
 
-    public Rule addImplicitCells(Rule rule) {
+    public Rule addImplicitCells(Rule rule, Module m) {
         return new Rule(
-                addImplicitCells(rule.body()),
+                addImplicitCells(rule.body(), m),
                 rule.requires(),
                 rule.ensures(),
                 rule.att());
     }
 
-    public Context addImplicitCells(Context context) {
+    public Context addImplicitCells(Context context, Module m) {
         return new Context(
-                addImplicitCells(context.body()),
+                addImplicitCells(context.body(), m),
                 context.requires(),
                 context.att());
     }
 
-    public Sentence addImplicitCells(Sentence s) {
+    public Sentence addImplicitCells(Sentence s, Module m) {
         if (skipSentence(s)) {
             return s;
         }
         if (s instanceof Rule) {
-            return addImplicitCells((Rule) s);
+            return addImplicitCells((Rule) s, m);
         } else if (s instanceof Context) {
-            return addImplicitCells((Context) s);
+            return addImplicitCells((Context) s, m);
         } else {
             return s;
         }
