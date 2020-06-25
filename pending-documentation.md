@@ -185,7 +185,7 @@ have any constructors declared.
 syntax Bytes [hook(BYTES.Bytes), token]
 ```
 
-#### Converting between `[token]` sorts
+### Converting between `[token]` sorts
 
 You can convert between tokens of one sort via `String`s by defining functions
 implemented by builtin hooks.
@@ -271,6 +271,32 @@ FooToBar(foo)
 
 ```k
 endmodule
+```
+
+### Parsing comments, and the `#Layout` sort
+
+Productions for the `#Layout` sort are used to describe tokens that are
+considered "whitespace". For example, below, we use it to define lines begining
+with `;` (semicolon) as comments.
+
+```k
+module LAYOUT
+  syntax #Layout ::= r"(;[^\\n\\r]*)"    // Semi-colon comments
+                   | r"([\\ \\n\\r\\t])" // Whitespace
+endmodule
+```
+
+Tests:
+
+``` {.semicolon-comments .input}
+foo ; buzz
+; bar
+```
+
+``` {.semicolon-comments .expected}
+<k>
+  foo
+</k>
 ```
 
 ### `unused` attribute
