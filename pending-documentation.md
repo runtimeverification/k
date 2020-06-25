@@ -1435,6 +1435,94 @@ Note that in the case of Set and Map, one guarantee is that K1, K2, K3, and K4
 represent /distinct/ elements. Pattern matching fails if the correct number of
 distinct elements cannot be found.
 
+### Matching on cell fragments
+
+K allows matching fragments of the configuration and using them to construct
+terms and use as function parameters.
+
+```k
+module CELL-FRAGMENTS
+    imports BOOL
+    imports SET
+    imports INT
+```
+
+This configuration contains a `<foo>` cell with multiplicity `*`.
+
+```k
+    syntax KItem ::= "#init"
+    configuration <t>
+                    <k> #init ~> #collectOddFoos ~> $PGM </k>
+                    <foos>
+                      <foo multiplicity="*" type="Set"> 1 </foo>
+                    </foos>
+                  </t>
+```
+
+The `#collectOddFoos` construct grabs the entire content of the `<foos>` cell.
+We may also match on only a portion of its content. Note that the fragment
+must be wrapped in a `<foo>` cell at the call site.
+
+```k
+    syntax KItem ::= "#collectOddFoos"
+    rule <k> #collectOddFoos => collectOddFoos(<foos> FOOS </foos>) ... </k>
+         <foos> FOOS </foos>
+```
+
+The `collectOddFoos` function collects the items it needs
+
+```k
+    syntax Set ::= collectOddFoos(FoosCell) [function]
+    rule collectOddFoos(<foos> <foo> I </foo> REST </foos>)
+      => SetItem(I) collectOddFoos(<foos> REST </foos>)
+      requires I %Int 2 ==Int 1
+    rule collectOddFoos(<foos> <foo> I </foo> REST </foos>)
+      => collectOddFoos(<foos> REST </foos>)
+      requires I %Int 2 ==Int 0
+    rule collectOddFoos(<foos> .Bag </foos>) => .Set
+```
+
+```k
+    rule <t>
+           <k> #init => .K ... </k>
+           <foos> _
+               => <foo> 3 </foo>
+                  <foo> 6 </foo>
+                  <foo> 9 </foo>
+                  <foo> 7 </foo>
+           </foos>
+         </t>
+```
+
+```k
+endmodule
+```
+
+``` {.collect-foos .input}
+1
+```
+
+``` {.collect-foos .expected}
+<t>
+  <k>
+    SetItem ( 3 )
+    SetItem ( 7 )
+    SetItem ( 9 ) ~> 1
+  </k>
+  <foos>
+    <foo>
+      3
+    </foo> <foo>
+      6
+    </foo> <foo>
+      7
+    </foo> <foo>
+      9
+    </foo>
+  </foos>
+</t>
+```
+
 ### `all-path` and `one-path` attributes to distinguish reachability claims
 
 As the Haskell backend can handle both one-path and all-path reachability
