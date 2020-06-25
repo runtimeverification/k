@@ -60,10 +60,7 @@ object KOREToTreeNodes {
       val sort = Sort(t.sort.name, t.sort.params:_*)
       KToken(t.s, sort, t.att)
     case s: KSequence =>
-      if (s.items.size() == 0)
-        KApply(KLabel("#EmptyK"), KList(), s.att)
-      else
-        upList(mod)(s.items.asScala).reduce((k1, k2) => KApply(KLabel("#KSequence"), KList(k1, k2), s.att))
+      upList(mod)(s.items.asScala).foldRight(KApply(KLabel("#EmptyK"), KList(), s.att))((k1, k2) => KApply(KLabel("#KSequence"), KList(k1, k2), s.att))
     case r: KRewrite => KApply(KLabel("#KRewrite"), KList(up(mod)(r.left), up(mod)(r.right)), r.att)
     case t: KApply => KApply(t.klabel, upList(mod)(t.klist.items.asScala), t.att)
   }

@@ -66,8 +66,8 @@ public class ConcretizeCells {
         sortCells = new SortCells(configurationInfo, labelInfo, module);
     }
 
-    public Sentence concretize(Sentence s) {
-        s = addRootCell.addImplicitCells(s);
+    public Sentence concretize(Module m, Sentence s) {
+        s = addRootCell.addImplicitCells(s, m);
         s = addParentCells.concretize(s);
         s = closeCells.close(s);
 

@@ -5,6 +5,3 @@
 [Error] Compiler: Rewrites are not allowed to be nested.
 	Source(nestedRewrite.k)
 	Location(5,12,5,18)
-[Warning] Compiler: Could not find main syntax module with name
-NESTEDREWRITE-SYNTAX in definition.  Use --syntax-module to specify one. Using
-NESTEDREWRITE as default.

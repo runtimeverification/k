@@ -8,7 +8,7 @@ import org.kframework.kore.mini.KRewrite;
 import org.kframework.kore.mini.KVariable;
 
 public class Rules {
-    public static final KRewrite STUCK_RULE = new KRewrite( KApply.of(KLabels.STRATEGY_CELL, KApply.of(KLabels.KSEQ, KApply.of(KLabels.DOTK),  new KVariable("_REST")))
-                                                          , KApply.of(KLabels.STRATEGY_CELL, KApply.of(KLabels.KSEQ, KApply.of(KLabels.STUCK), new KVariable("_REST")))
+    public static final KRewrite STUCK_RULE = new KRewrite( KApply.of(KLabels.STRATEGY_CELL, KApply.of(KLabels.KSEQ, KApply.of(KLabels.DOTK),  new KVariable("#REST")))
+                                                          , KApply.of(KLabels.STRATEGY_CELL, KApply.of(KLabels.KSEQ, KApply.of(KLabels.STUCK), new KVariable("#REST")))
                                                           );
 }
