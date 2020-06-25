@@ -1,4 +1,3 @@
-[Error] Compiler: Had 21 pattern matching errors.
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(20,6,20,17)
@@ -62,3 +61,4 @@
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(88,6,88,58)
+[Error] Compiler: Had 21 pattern matching errors.

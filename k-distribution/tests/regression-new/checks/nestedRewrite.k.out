@@ -1,7 +1,7 @@
-[Error] Compiler: Had 2 structural errors.
 [Error] Compiler: Rewrites are not allowed to be nested.
 	Source(nestedRewrite.k)
 	Location(4,7,4,13)
 [Error] Compiler: Rewrites are not allowed to be nested.
 	Source(nestedRewrite.k)
 	Location(5,12,5,18)
+[Error] Compiler: Had 2 structural errors.
