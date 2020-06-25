@@ -291,7 +291,7 @@ do
       flags="$flags -v"
       ;;
   
-      -save-temps)
+      --save-temps)
       trap - INT TERM EXIT
       flags="$flags -save-temps"
       ;;
