@@ -189,67 +189,23 @@ syntax Bytes [hook(BYTES.Bytes), token]
 
 You can convert between tokens of one sort via `String`s by defining functions
 implemented by builtin hooks.
-
-```k
-module CONVERSIONS
-  imports STRING
-  syntax Foo ::= "foo" [token]
-  syntax Bar ::= "bar" [token]
-```
-
 The hook `STRING.token2string` allows conversion of any token to a string:
 
 ```k
-  syntax String ::= FooToString(Foo)  [function, functional, hook(STRING.token2string)]
+syntax String ::= FooToString(Foo)  [function, functional, hook(STRING.token2string)]
 ```
 
-Executing:
-
-``` {.foo-to-string .input}
-FooToString(foo)
-```
-
-Results in:
-
-``` {.foo-to-string .expected}
-<k>
-  "foo"
-</k>
-```
-
-Similarly, the hook `STRING.string2Token` implements the inverse:
+Similarly, the hook `STRING.string2Token` allows the inverse:
 
 ```k
   syntax Bar ::= StringToBar(String) [function, functional, hook(STRING.string2token)]
 ```
 
-Executing:
-
-``` {.string-to-bar .input}
-StringToBar("bar")
-```
-
-Results in:
-
-``` {.string-to-bar .expected}
-<k>
-  bar
-</k>
-```
-
 WARNING: This sort of conversion does *NOT* do any sort of parsing or validation.
 Thus, we can create arbitary tokens of any sort:
 
-``` {.random-string-to-bar .input}
-StringToBar("The sun rises in the west.")
 ```
-
-Resulting in:
-
-``` {.random-string-to-bar .expected}
-<k>
-  The sun rises in the west.
-</k>
+StringToBar("The sun rises in the west.")
 ```
 
 Composing these two functions lets us convert from `Foo` to `Bar`
@@ -259,20 +215,6 @@ Composing these two functions lets us convert from `Foo` to `Bar`
   rule FooToBar(F) => StringToBar(FooToString(F))
 ```
 
-``` {.foo-to-bar .input}
-FooToBar(foo)
-```
-
-``` {.foo-to-bar .expected}
-<k>
-  foo
-</k>
-```
-
-```k
-endmodule
-```
-
 ### Parsing comments, and the `#Layout` sort
 
 Productions for the `#Layout` sort are used to describe tokens that are
@@ -280,23 +222,8 @@ considered "whitespace". For example, below, we use it to define lines begining
 with `;` (semicolon) as comments.
 
 ```k
-module LAYOUT
-  syntax #Layout ::= r"(;[^\\n\\r]*)"    // Semi-colon comments
-                   | r"([\\ \\n\\r\\t])" // Whitespace
-endmodule
-```
-
-Tests:
-
-``` {.semicolon-comments .input}
-foo ; buzz
-; bar
-```
-
-``` {.semicolon-comments .expected}
-<k>
-  foo
-</k>
+syntax #Layout ::= r"(;[^\\n\\r]*)"    // Semi-colon comments
+                 | r"([\\ \\n\\r\\t])" // Whitespace
 ```
 
 ### `prec` attribute
@@ -306,12 +233,10 @@ allows two types of variables: Names that contain underbars, and names that
 contain sharps/hashes/pound-signs:
 
 ```k
-module TOKENS-AND-PARSING-NAIVE
-  syntax NameWithUnderbar ::= r"[a-zA-Z][A-Za-z0-9_]*"  [token]
-  syntax NameWithSharp    ::= r"[a-zA-Z][A-Za-z0-9_#]*" [token]
-  syntax Pgm ::= underbar(NameWithUnderbar)
-               | sharp(NameWithSharp)
-endmodule
+syntax NameWithUnderbar ::= r"[a-zA-Z][A-Za-z0-9_]*"  [token]
+syntax NameWithSharp    ::= r"[a-zA-Z][A-Za-z0-9_#]*" [token]
+syntax Pgm ::= underbar(NameWithUnderbar)
+             | sharp(NameWithSharp)
 ```
 
 Although, it seems that K has enough information to parse the programs
@@ -339,49 +264,18 @@ have `prec(1)`. That does not leave much room for other priorities. Even if
 precedences, only `prec(0)` and `prec(1)` are available to users. Perhaps we
 should multiply these by 100?
 
-```k
-module TOKENS-AND-PARSING
-  imports BOOL
-```
-
 The `BUILTIN-ID-TOKENS` module defines `#UpperId` and `#LowerId` with attributes `prec(2)`
 
 ```k
-  imports BUILTIN-ID-TOKENS
-```
-
-```k
-  syntax NameWithUnderbar ::= r"[a-zA-Z][A-Za-z0-9_]*" [prec(1), token]
-                            | #UpperId                [token]
-                            | #LowerId                [token]
-
-  syntax NameWithSharp ::= r"[a-zA-Z][A-Za-z0-9_#]*" [prec(1), token]
-                         | #UpperId                 [token]
-                         | #LowerId                 [token]
-
-  syntax Pgm ::= underbar(NameWithUnderbar)
-               | sharp(NameWithSharp)
-endmodule 
-```
-
-``` {.amb-underbar .input}
-underbar(foo)
-```
-
-``` {.amb-underbar .expected}
-<k>
-  underbar ( foo )
-</k>
-```
-
-``` {.amb-sharp .input}
-sharp(foo)
-```
-
-``` {.amb-sharp .expected}
-<k>
-  sharp ( foo )
-</k>
+imports BUILTIN-ID-TOKENS
+syntax NameWithUnderbar ::= r"[a-zA-Z][A-Za-z0-9_]*" [prec(1), token]
+                          | #UpperId                [token]
+                          | #LowerId                [token]
+syntax NameWithSharp ::= r"[a-zA-Z][A-Za-z0-9_#]*" [prec(1), token]
+                       | #UpperId                 [token]
+                       | #LowerId                 [token]
+syntax Pgm ::= underbar(NameWithUnderbar)
+             | sharp(NameWithSharp)
 ```
 
 ### `unused` attribute
@@ -1526,22 +1420,12 @@ K allows matching fragments of the configuration and using them to construct
 terms and use as function parameters.
 
 ```k
-module CELL-FRAGMENTS
-    imports BOOL
-    imports SET
-    imports INT
-```
-
-This configuration contains a `<foo>` cell with multiplicity `*`.
-
-```k
-    syntax KItem ::= "#init"
-    configuration <t>
-                    <k> #init ~> #collectOddFoos ~> $PGM </k>
-                    <foos>
-                      <foo multiplicity="*" type="Set"> 1 </foo>
-                    </foos>
-                  </t>
+configuration <t>
+                <k> #init ~> #collectOddFoos ~> $PGM </k>
+                <foos>
+                  <foo multiplicity="*" type="Set"> 1 </foo>
+                </foos>
+              </t>
 ```
 
 The `#collectOddFoos` construct grabs the entire content of the `<foos>` cell.
@@ -1549,63 +1433,22 @@ We may also match on only a portion of its content. Note that the fragment
 must be wrapped in a `<foo>` cell at the call site.
 
 ```k
-    syntax KItem ::= "#collectOddFoos"
-    rule <k> #collectOddFoos => collectOddFoos(<foos> FOOS </foos>) ... </k>
-         <foos> FOOS </foos>
+syntax KItem ::= "#collectOddFoos"
+rule <k> #collectOddFoos => collectOddFoos(<foos> FOOS </foos>) ... </k>
+     <foos> FOOS </foos>
 ```
 
 The `collectOddFoos` function collects the items it needs
 
 ```k
-    syntax Set ::= collectOddFoos(FoosCell) [function]
-    rule collectOddFoos(<foos> <foo> I </foo> REST </foos>)
-      => SetItem(I) collectOddFoos(<foos> REST </foos>)
-      requires I %Int 2 ==Int 1
-    rule collectOddFoos(<foos> <foo> I </foo> REST </foos>)
-      => collectOddFoos(<foos> REST </foos>)
-      requires I %Int 2 ==Int 0
-    rule collectOddFoos(<foos> .Bag </foos>) => .Set
-```
-
-```k
-    rule <t>
-           <k> #init => .K ... </k>
-           <foos> _
-               => <foo> 3 </foo>
-                  <foo> 6 </foo>
-                  <foo> 9 </foo>
-                  <foo> 7 </foo>
-           </foos>
-         </t>
-```
-
-```k
-endmodule
-```
-
-``` {.collect-foos .input}
-1
-```
-
-``` {.collect-foos .expected}
-<t>
-  <k>
-    SetItem ( 3 )
-    SetItem ( 7 )
-    SetItem ( 9 ) ~> 1
-  </k>
-  <foos>
-    <foo>
-      3
-    </foo> <foo>
-      6
-    </foo> <foo>
-      7
-    </foo> <foo>
-      9
-    </foo>
-  </foos>
-</t>
+syntax Set ::= collectOddFoos(FoosCell) [function]
+rule collectOddFoos(<foos> <foo> I </foo> REST </foos>)
+  => SetItem(I) collectOddFoos(<foos> REST </foos>)
+  requires I %Int 2 ==Int 1
+rule collectOddFoos(<foos> <foo> I </foo> REST </foos>)
+  => collectOddFoos(<foos> REST </foos>)
+  requires I %Int 2 ==Int 0
+rule collectOddFoos(<foos> .Bag </foos>) => .Set
 ```
 
 ### `all-path` and `one-path` attributes to distinguish reachability claims
