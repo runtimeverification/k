@@ -105,7 +105,7 @@ future.
                            also be used without --search to match the output
                            configuration against a pattern and print the
                            substitution. Only supported on Haskell backend.
-      -save-temps          Do not delete temporary files when $KX terminates.
+      --save-temps         Do not delete temporary files when $KX terminates.
       --search             Search for all possible output states after
                            rewriting. Only supported on Haskell backend.
       --search-all         Like --search, but also return interim states
