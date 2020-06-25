@@ -178,7 +178,7 @@ public class KoreBackend extends AbstractBackend {
         };
         ModuleTransformer subsortKItem = ModuleTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         ModuleTransformer addImplicitComputationCell = ModuleTransformer.fromSentenceTransformer(
-                new AddImplicitComputationCell(configInfo, labelInfo),
+                new AddImplicitComputationCell(configInfo, labelInfo)::apply,
                 "concretizing configuration");
         Function1<Module, Module> resolveFreshConstants = d -> ModuleTransformer.from(new ResolveFreshConstants(def, true)::resolve, "resolving !Var variables").apply(d);
         ModuleTransformer concretizeCells = ModuleTransformer.fromSentenceTransformer(

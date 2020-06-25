@@ -113,6 +113,16 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   lazy val productions: Set[Production] = sentences collect { case p: Production => p }
 
+  lazy val functions: Set[KLabel] = productions.filter(_.att.contains(Att.FUNCTION)).map(_.klabel.get.head)
+
+  def isFunction(t: K): Boolean = {
+    t match {
+      case Unapply.KApply(lbl, _) if functions(lbl) => true
+      case Unapply.KRewrite(Unapply.KApply(lbl, _), _) if functions(lbl) => true
+      case _ => false
+    }
+  }
+
   lazy val sortedProductions: Seq[Production] = productions.toSeq.sorted
 
   lazy val localProductions: Set[Production] = localSentences collect { case p: Production => p }
