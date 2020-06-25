@@ -1,1 +1,0 @@
-../kprove-smt-lemma/verif.k
