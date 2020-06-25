@@ -185,6 +185,94 @@ have any constructors declared.
 syntax Bytes [hook(BYTES.Bytes), token]
 ```
 
+#### Converting between `[token]` sorts
+
+You can convert between tokens of one sort via `String`s by defining functions
+implemented by builtin hooks.
+
+```k
+module CONVERSIONS
+  imports STRING
+  syntax Foo ::= "foo" [token]
+  syntax Bar ::= "bar" [token]
+```
+
+The hook `STRING.token2string` allows conversion of any token to a string:
+
+```k
+  syntax String ::= FooToString(Foo)  [function, functional, hook(STRING.token2string)]
+```
+
+Executing:
+
+``` {.foo-to-string .input}
+FooToString(foo)
+```
+
+Results in:
+
+``` {.foo-to-string .expected}
+<k>
+  "foo"
+</k>
+```
+
+Similarly, the hook `STRING.string2Token` implements the inverse:
+
+```k
+  syntax Bar ::= StringToBar(String) [function, functional, hook(STRING.string2token)]
+```
+
+Executing:
+
+``` {.string-to-bar .input}
+StringToBar("bar")
+```
+
+Results in:
+
+``` {.string-to-bar .expected}
+<k>
+  bar
+</k>
+```
+
+WARNING: This sort of conversion does *NOT* do any sort of parsing or validation.
+Thus, we can create arbitary tokens of any sort:
+
+``` {.random-string-to-bar .input}
+StringToBar("The sun rises in the west.")
+```
+
+Resulting in:
+
+``` {.random-string-to-bar .expected}
+<k>
+  The sun rises in the west.
+</k>
+```
+
+Composing these two functions lets us convert from `Foo` to `Bar`
+
+```k
+  syntax Bar ::= FooToBar(Foo) [function]
+  rule FooToBar(F) => StringToBar(FooToString(F))
+```
+
+``` {.foo-to-bar .input}
+FooToBar(foo)
+```
+
+``` {.foo-to-bar .expected}
+<k>
+  foo
+</k>
+```
+
+```k
+endmodule
+```
+
 ### `unused` attribute
 
 K will warn you if you declare a symbol that is not used in any of the rules of your
