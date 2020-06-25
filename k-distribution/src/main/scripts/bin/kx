@@ -8,16 +8,11 @@ export PATH="$(dirname "$0"):$PATH"
 ARGV=()
 bound=
 depth=
-color=false
-if [ -t 1 ]; then
-  color=true
-fi
 params=()
 allPath=true
 dir=.
 cmd=
 cmdprefix=
-io=true
 filterSubst=true
 outputFile=-
 pattern=
@@ -333,8 +328,20 @@ do
   shift
 done
 
-if $search; then
-  io=false
+if [ -z "${io+unset}" ]; then
+  if $search; then
+    io=false
+  else
+    io=true
+  fi
+fi
+
+if [ -z "${color+unset}" ]; then
+  if [[ "$outputFile" == "-" && -t 1 ]]; then
+    color=true
+  else
+    color=false
+  fi
 fi
 
 if [[ "${#ARGV[@]}" -gt 1 ]]; then
