@@ -134,7 +134,7 @@ public class KExceptionManager {
     }
 
     public void print() {
-        Collections.sort(exceptions, 
+        Collections.sort(exceptions,
             Comparator.comparing(KException::getSource, Comparator.nullsLast(Comparator.naturalOrder()))
             .thenComparing(KException::getLocation, Comparator.nullsLast(Comparator.naturalOrder()))
             .thenComparing(e -> e.toString(options.verbose)));
