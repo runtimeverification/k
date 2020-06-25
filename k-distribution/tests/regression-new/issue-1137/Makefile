@@ -3,10 +3,10 @@ EXT=verif
 TESTDIR=.
 KOMPILE_BACKEND=haskell
 KPROVE_FLAGS=-m VERIFICATION
-include ../../../include/ktest.mak
+include ../../../include/kframework/ktest.mak
 
 
-KORE_EXEC=$(abspath $(MAKEFILE_PATH)/../bin/kore-exec)
+KORE_EXEC=$(abspath $(MAKEFILE_PATH)/../../bin/kore-exec)
 test-spec.k: kompile
 	 rm -rf .kprove* .prove
 	 $(KPROVE) $@ $(KPROVE_FLAGS) -d $(DEFDIR) --debug --dry-run --save-proof-definition-to .prove

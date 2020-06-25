@@ -1,5 +1,11 @@
+  #Not ( {
+    X
+  #Equals
+    b
+  } )
+#And
   <k>
-    X:S ~> DotVar1
+    X:S ~> DotVar1 ~> .
   </k>
 #And
   {
