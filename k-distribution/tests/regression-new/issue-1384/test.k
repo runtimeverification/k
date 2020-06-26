@@ -3,7 +3,7 @@ module TEST-SYNTAX
 endmodule
 
 module TEST
-imports DOMAINS 
+imports DOMAINS
 
     syntax EmptyStmt
  // ----------------
@@ -12,8 +12,8 @@ imports DOMAINS
     syntax Defn  ::= "bar" [unused]
  // ----------------------
 
-    syntax Instr ::= EmptyStmt 
-    syntax Defn  ::= EmptyStmt 
+    syntax Instr ::= EmptyStmt
+    syntax Defn  ::= EmptyStmt
     syntax Stmt  ::= Instr | Defn
  // -----------------------------
 
