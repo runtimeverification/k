@@ -3,7 +3,7 @@ permalink: README.html
 copyright: Copyright (c) 2010-2020 K Team. All Rights Reserved.
 ---
 
-[![Join the chat at https://gitter.im/kframework/k](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kframework/k?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[Join the chat at Riot](https://riot.im/app/#/room/#k:matrix.org)
 
 This is a readme file for the developers.
 
