@@ -14,6 +14,7 @@ import org.kframework.utils.inject.RequestScoped;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -133,8 +134,10 @@ public class KExceptionManager {
     }
 
     public void print() {
-        Collections.sort(exceptions, (arg0, arg1) ->
-                arg0.toString(options.verbose).compareTo(arg1.toString(options.verbose)));
+        Collections.sort(exceptions,
+            Comparator.comparing(KException::getSource, Comparator.nullsLast(Comparator.naturalOrder()))
+            .thenComparing(KException::getLocation, Comparator.nullsLast(Comparator.naturalOrder()))
+            .thenComparing(e -> e.toString(options.verbose)));
         KException last = null;
         synchronized (exceptions) {
             for (KException e : exceptions) {
