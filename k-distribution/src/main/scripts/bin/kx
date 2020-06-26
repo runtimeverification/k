@@ -235,9 +235,10 @@ do
         latex) ;;
         kore) ;;
         none) ;;
+
         *)
-          error 'Invalid value for --output. Should be one of "pretty", "program", "kast", "binary", "json", "latex", "kore", or "none".'
-  	;;
+        error 'Invalid value for --output. Should be one of "pretty", "program", "kast", "binary", "json", "latex", "kore", or "none".'
+        ;;
       esac
       outputMode="$2"
       shift
@@ -394,9 +395,9 @@ else
       elif [ "$name" = "PGM" ]; then
         if $hasArgv; then
           parser="kast -o kore"
-	else
+        else
           parser="kast -m $mainModuleName -o kore"
-	fi
+        fi
       else
         parser="kast -m $mainModuleName -o kore"
       fi
@@ -440,17 +441,19 @@ fi
 
 case "$outputMode" in
   pretty)
-    execute kprint "$kompiledDir" "$kore_output" $color > "$outputFile"
-    ;;
+  execute kprint "$kompiledDir" "$kore_output" $color > "$outputFile"
+  ;;
+
   kore)
-    cat "$kore_output" > "$outputFile"
-    echo >> "$outputFile"
-    ;;
-  none)
-    ;;
+  cat "$kore_output" > "$outputFile"
+  echo >> "$outputFile"
+  ;;
+
+  none) ;;
+
   *)
-    execute kast -i kore -o "$outputMode" "$kore_output" > "$outputFile"
-    ;;
+  execute kast -i kore -o "$outputMode" "$kore_output" > "$outputFile"
+  ;;
 esac
 
 exit $result
