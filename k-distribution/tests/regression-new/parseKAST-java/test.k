@@ -2,8 +2,8 @@
 module TEST
   imports K-REFLECTION
 
-syntax K ::= parseKAST(String)
-syntax K ::= "#noparse"
+syntax KItem ::= parseKAST(String)
+syntax KItem ::= "#noparse"
 
 rule parseKAST(S) => #parseKAST(S)
 // messages from different backend can be different so hide it

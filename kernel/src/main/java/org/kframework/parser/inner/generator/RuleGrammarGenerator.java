@@ -368,7 +368,7 @@ public class RuleGrammarGenerator {
             for (Sort srt : iterable(mod.allSorts())) {
                 if (!isParserSort(srt) && !mod.listSorts().contains(srt)) {
                     // K ::= Sort
-                    prods3.add(Production(Seq(), Sorts.K(), Seq(NonTerminal(srt)), Att()));
+                    prods3.add(Production(Seq(), Sorts.KItem(), Seq(NonTerminal(srt)), Att()));
                 }
             }
             // for each triple, generate a new pattern which works better for parsing lists in programs.
