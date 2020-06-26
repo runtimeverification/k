@@ -218,8 +218,9 @@ rule FooToBar(F) => StringToBar(FooToString(F))
 ### Parsing comments, and the `#Layout` sort
 
 Productions for the `#Layout` sort are used to describe tokens that are
-considered "whitespace". For example, below, we use it to define lines begining
-with `;` (semicolon) as comments.
+considered "whitespace". The scanner removes tokens matching these productions
+so they are not even seen by the parser. Below, we use it to define
+lines begining with `;` (semicolon) as comments.
 
 ```k
 syntax #Layout ::= r"(;[^\\n\\r]*)"    // Semi-colon comments
@@ -228,8 +229,8 @@ syntax #Layout ::= r"(;[^\\n\\r]*)"    // Semi-colon comments
 
 ### `prec` attribute
 
-Consider the following naive attempt at creating a language whos syntax
-allows two types of variables: Names that contain underbars, and names that
+Consider the following naive attempt at creating a language what syntax that
+allows two types of variables: names that contain underbars, and names that
 contain sharps/hashes/pound-signs:
 
 ```k
@@ -1421,34 +1422,30 @@ terms and use as function parameters.
 
 ```k
 configuration <t>
-                <k> #init ~> #collectOddFoos ~> $PGM </k>
-                <foos>
-                  <foo multiplicity="*" type="Set"> 1 </foo>
-                </foos>
+                <k> #init ~> #collectOdd ~> $PGM </k>
+                <fs>
+                  <f multiplicity="*" type="Set"> 1 </f>
+                </fs>
               </t>
 ```
 
-The `#collectOddFoos` construct grabs the entire content of the `<foos>` cell.
+The `#collectOdd` construct grabs the entire content of the `<fs>` cell.
 We may also match on only a portion of its content. Note that the fragment
-must be wrapped in a `<foo>` cell at the call site.
+must be wrapped in a `<f>` cell at the call site.
 
 ```k
-syntax KItem ::= "#collectOddFoos"
-rule <k> #collectOddFoos => collectOddFoos(<foos> FOOS </foos>) ... </k>
-     <foos> FOOS </foos>
+syntax KItem ::= "#collectOdd"
+rule <k> #collectOdd => collectOdd(<fs> Fs </fs>) ... </k>
+     <fs> Fs </fs>
 ```
 
-The `collectOddFoos` function collects the items it needs
+The `collectOdd` function collects the items it needs
 
 ```k
-syntax Set ::= collectOddFoos(FoosCell) [function]
-rule collectOddFoos(<foos> <foo> I </foo> REST </foos>)
-  => SetItem(I) collectOddFoos(<foos> REST </foos>)
-  requires I %Int 2 ==Int 1
-rule collectOddFoos(<foos> <foo> I </foo> REST </foos>)
-  => collectOddFoos(<foos> REST </foos>)
-  requires I %Int 2 ==Int 0
-rule collectOddFoos(<foos> .Bag </foos>) => .Set
+syntax Set ::= collectOdd(FsCell) [function]
+rule collectOdd(<fs> <f> I </f> REST </fs>) => SetItem(I) collectOdd(<fs> REST </fs>) requires I %Int 2 ==Int 1
+rule collectOdd(<fs> <f> I </f> REST </fs>) =>            collectOdd(<fs> REST </fs>) requires I %Int 2 ==Int 0
+rule collectOdd(<fs> .Bag </fs>) => .Set
 ```
 
 ### `all-path` and `one-path` attributes to distinguish reachability claims
