@@ -198,7 +198,7 @@ syntax String ::= FooToString(Foo)  [function, functional, hook(STRING.token2str
 Similarly, the hook `STRING.string2Token` allows the inverse:
 
 ```k
-  syntax Bar ::= StringToBar(String) [function, functional, hook(STRING.string2token)]
+syntax Bar ::= StringToBar(String) [function, functional, hook(STRING.string2token)]
 ```
 
 WARNING: This sort of conversion does *NOT* do any sort of parsing or validation.
@@ -211,8 +211,8 @@ StringToBar("The sun rises in the west.")
 Composing these two functions lets us convert from `Foo` to `Bar`
 
 ```k
-  syntax Bar ::= FooToBar(Foo) [function]
-  rule FooToBar(F) => StringToBar(FooToString(F))
+syntax Bar ::= FooToBar(Foo) [function]
+rule FooToBar(F) => StringToBar(FooToString(F))
 ```
 
 ### Parsing comments, and the `#Layout` sort
