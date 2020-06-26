@@ -76,6 +76,7 @@ struct
   let hook_concat c _ _ _ _ = match c with
       [Set (sort,l1,s1)], [Set (_,l2,s2)] when (l1 = l2) -> [Set (sort,l1,(KSet.union s1 s2))]
     | _ -> raise Not_implemented
+  let hook_union c lbl sort x y = hook_concat c lbl sort x y
   let hook_difference c _ _ _ _ = match c with
       [Set (s,l1,k1)], [Set (_,l2,k2)] when (l1 = l2) -> [Set (s,l1,(KSet.diff k1 k2))]
     | _ -> raise Not_implemented
