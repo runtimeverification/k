@@ -88,12 +88,12 @@ public class KException implements Serializable, HasLocation {
 
     @Override
     public Optional<Location> location() {
-        return Optional.of(location);
+        return Optional.ofNullable(location);
     }
 
     @Override
     public Optional<Source> source() {
-        return Optional.of(source);
+        return Optional.ofNullable(source);
     }
 
     public enum KExceptionGroup {
