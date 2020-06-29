@@ -62,7 +62,7 @@ public class CompiledDefinition implements Serializable {
         this.kompileOptions = kompileOptions;
         this.parsedDefinition = parsedDefinition;
         this.kompiledDefinition = kompiledDefinition;
-        initializeConfigurationVariableDefaultSorts();
+        initializeConfigurationVariableDefaultSorts(files);
         this.programStartSymbol = configurationVariableDefaultSorts.getOrDefault("$PGM", Sorts.K());
         this.topCellInitializer = topCellInitializer;
         this.languageParsingModule = kompiledDefinition.getModule("LANGUAGE-PARSING").get();
@@ -91,25 +91,26 @@ public class CompiledDefinition implements Serializable {
         return Rule(IncompleteCellUtils.make(exitProd.klabel().get(), false, KApply(KLabel("#SemanticCastToInt"), KVariable("_")), false), BooleanUtils.TRUE, BooleanUtils.TRUE);
     }
 
-    private void initializeConfigurationVariableDefaultSorts() {
+    private void initializeConfigurationVariableDefaultSorts(FileUtil files) {
         // searching for #SemanticCastTo<Sort>(Map:lookup(_, #token(<VarName>, KConfigVar)))
-        Collections.stream(parsedDefinition.mainModule().rules())
+        Collections.stream(kompiledDefinition.mainModule().rules())
                 .forEach(r -> {
                     new VisitK() {
                         @Override
                         public void apply(KApply k) {
-                            if (k.klabel().name().contains("#SemanticCastTo")
+                            if (k.klabel().name().startsWith("project:")
                                     && k.items().size() == 1 && k.items().get(0) instanceof KApply) {
                                 KApply theMapLookup = (KApply) k.items().get(0);
-                                if (theMapLookup.klabel().name().startsWith("project:")) {
-                                    theMapLookup = (KApply) theMapLookup.items().get(0);
-                                }
                                 if (KLabels.MAP_LOOKUP.equals(theMapLookup.klabel())
                                         && theMapLookup.size() == 2 && theMapLookup.items().get(1) instanceof KToken) {
                                     KToken t = (KToken) theMapLookup.items().get(1);
                                     if (t.sort().equals(Sorts.KConfigVar())) {
-                                        Sort sort = Outer.parseSort(k.klabel().name().replace("#SemanticCastTo", ""));
+                                        Sort sort = Outer.parseSort(k.klabel().name().substring("project:".length()));
                                         configurationVariableDefaultSorts.put(t.s(), sort);
+                                        if (sort.equals(Sorts.K())) {
+                                          sort = Sorts.KItem();
+                                        }
+                                        files.saveToKompiled("sort_" + t.s().substring(1) + ".txt", sort.toString());
                                     }
                                 }
                             }

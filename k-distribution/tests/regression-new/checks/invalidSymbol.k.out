@@ -1,4 +1,3 @@
-[Error] Compiler: Had 2 structural errors.
 [Error] Compiler: Symbol #KToken is not unique. Previously defined as: syntax
 KBott ::= "#token" "(" KString "," KString ")" [klabel(#KToken), symbol]
 	Source(invalidSymbol.k)
@@ -7,3 +6,4 @@ KBott ::= "#token" "(" KString "," KString ")" [klabel(#KToken), symbol]
 ::= "bar" "(" ")" [klabel(foo), symbol]
 	Source(invalidSymbol.k)
 	Location(6,16,6,42)
+[Error] Compiler: Had 2 structural errors.

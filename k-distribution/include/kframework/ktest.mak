@@ -42,6 +42,9 @@ KOMPILE_BACKEND?=llvm
 # check if .k file exists, if not, check if .md file exists
 # if not, default to .k to give error message
 SOURCE_EXT?=$(or $(and $(wildcard $(DEF).k), k), $(or $(and $(wildcard $(DEF).md), md), k))
+ifeq ($(KOMPILE_BACKEND),llvm)
+KRUN=$(abspath $(MAKEFILE_PATH)/../../bin/kx)
+endif
 
 CHECK=| diff -
 REMOVE_PATHS=| sed 's!'`pwd`'/\(\./\)\{0,1\}!!g'
