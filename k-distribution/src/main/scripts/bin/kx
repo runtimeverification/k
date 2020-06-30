@@ -11,20 +11,22 @@ depth=
 params=()
 allPath=true
 dir=.
-cmd=
+cmd=kore-exec
 cmdprefix=
 filterSubst=true
 outputFile=-
 pattern=
 search=false
-searchType=!
+searchType=FINAL
 term=false
 verbose=false
 literal=false
 outputMode=pretty
 statistics=false
+smtPrelude=
 flags=
 configVars=
+dryRun=false
 result=1
 
 tempFiles=()
@@ -117,6 +119,7 @@ future.
                                   initial state in the result
       --search-one-step    Search for all possible states that are the
                            immediate successor of the input.
+      --smt-prelude FILE   Prepend FILE to all smt queries in Haskell backend.
       --statistics         Print number of steps executed. Currently only
                            supported on LLVM backend.
       --term               Use the value that would otherwise be considered the
@@ -192,7 +195,7 @@ do
       --dry-run)
       cmdprefix="echo "
       tempFiles=(${tempFiles[@]/$input_file})
-      outputMode=none
+      dryRun=true
       ;;
   
       --haskell-backend-command)
@@ -263,27 +266,32 @@ do
   
       --search)
       search=true
-      searchType='!'
+      searchType='FINAL'
       ;;
   
       --search-all)
       search=true
-      searchType='*'
+      searchType='STAR'
       ;;
   
       --search-final)
       search=true
-      searchType='!'
+      searchType='FINAL'
       ;;
   
       --search-one-or-more-steps)
       search=true
-      searchType='+'
+      searchType='PLUS'
       ;;
   
       --search-one-step)
       search=true
-      searchType='1'
+      searchType='ONE'
+      ;;
+
+      --smt-prelude)
+      smtPrelude="$2"
+      shift
       ;;
   
       --term)
@@ -431,44 +439,79 @@ else
   execute llvm-krun $configVars -d "$kompiledDir" $flags --dry-run -o "$input_file"
 fi
 
-if $statistics; then
-  interpreter_flags=--statistics
-else
-  interpreter_flags=
-fi
 
 if [ -f "$kompiledDir/interpreter" ]; then
+  if $statistics; then
+    interpreter_flags=--statistics
+  else
+    interpreter_flags=
+  fi
+
   set +e
   execute $cmdprefix "$kompiledDir/interpreter" "$input_file" "${depth:--1}" "$kore_output" $interpreter_flags
   result=$?
   set -e
 else
-  error 'Does not yet support Haskell backend.'
+  # Haskell backend
+  koreExecFlags=
+  if [ -n "$depth" ]; then
+    koreExecFlags="$koreExecFlags --depth $depth"
+  fi
+  if [ -n "$smtPrelude" ]; then
+    koreExecFlags="$koreExecFlags --smt-prelude $smtPrelude"
+  fi
+  if $search || [ -n "$pattern" ]; then
+    patternFile="$(mktemp tmp.pattern.XXXXXXXXXX)"
+    tempFiles+=("$patternFile")
+    if [ -z "$pattern" ]; then
+      echo '\and{SortGeneratedTopCell{}}(VarResult:SortGeneratedTopCell{},\top{SortGeneratedTopCell{}}())' > "$patternFile"
+    else
+      k-compile-search-pattern "$pattern" > "$patternFile"
+    fi
+    if [ -n "$bound" ]; then
+      koreExecFlags="$koreExecFlags --bound $bound"
+    fi
+    set +e
+    execute $cmdprefix "$cmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$input_file" --output "$kore_output" --searchType "$searchType" --search "$patternFile" $koreExecFlags
+    result=$?
+    set -e
+  else
+    set +e
+    execute $cmdprefix "$cmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$input_file" --output "$kore_output" $koreExecFlags
+    result=$?
+    set -e
+  fi
 fi
 
-if $statistics; then
-  steps=$(head -1 "$kore_output")
-  echo "[$steps steps]"
-  kore_output2="$(mktemp tmp.out.XXXXXXXXXX)"
-  tail -1 "$kore_output" > "$kore_output2"
-  mv "$kore_output2" "$kore_output"
+if ! $dryRun; then
+  if [ -f "$kore_output" ]; then
+    if $statistics; then
+      steps=$(head -1 "$kore_output")
+      echo "[$steps steps]"
+      kore_output2="$(mktemp tmp.out.XXXXXXXXXX)"
+      tail -1 "$kore_output" > "$kore_output2"
+      mv "$kore_output2" "$kore_output"
+    fi
+    
+    case "$outputMode" in
+      pretty)
+      execute kprint "$kompiledDir" "$kore_output" $color > "$outputFile"
+      ;;
+
+      kore)
+      cat "$kore_output" > "$outputFile"
+      echo >> "$outputFile"
+      ;;
+
+      none) ;;
+
+      *)
+      execute kast -i kore -o "$outputMode" "$kore_output" > "$outputFile"
+      ;;
+    esac
+  else
+    error "Backend crashed during rewriting with exit code $result"
+  fi
 fi
-
-case "$outputMode" in
-  pretty)
-  execute kprint "$kompiledDir" "$kore_output" $color > "$outputFile"
-  ;;
-
-  kore)
-  cat "$kore_output" > "$outputFile"
-  echo >> "$outputFile"
-  ;;
-
-  none) ;;
-
-  *)
-  execute kast -i kore -o "$outputMode" "$kore_output" > "$outputFile"
-  ;;
-esac
 
 exit $result
