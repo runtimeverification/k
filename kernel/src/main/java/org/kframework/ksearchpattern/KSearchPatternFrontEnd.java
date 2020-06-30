@@ -104,7 +104,7 @@ public class KSearchPatternFrontEnd extends FrontEnd {
           converter.convert(kWithInjections, sb);
           sb.append(", ");
           if (patternCondition.equals(BooleanUtils.TRUE)) {
-            sb.append("\\top{SortGeneratedTopCell{})()");
+            sb.append("\\top{SortGeneratedTopCell{}}()");
           } else {
             sb.append("\\equals{SortBool{},SortGeneratedTopCell{}}(");
             withMacros = macroExpander.expand(patternCondition);
