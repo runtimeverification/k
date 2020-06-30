@@ -144,6 +144,13 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
       .groupBy(_.sort.head)
       .map { case (l, ps) => (l, ps) }
 
+  lazy val productionsForLoc: Map[(Source, Location), Set[Production]] =
+    productions
+      .filter(_.source.isPresent)
+      .filter(_.location.isPresent)
+      .groupBy(p => (p.source.get, p.location.get))
+      .map { case (l, ps) => (l, ps) }
+
   lazy val layouts: Set[String] =
     productionsForSort
       .get(Sorts.Layout.head)
