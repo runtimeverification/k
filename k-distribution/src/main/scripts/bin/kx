@@ -468,11 +468,23 @@ else
     else
       k-compile-search-pattern "$pattern" > "$patternFile"
     fi
+
+    if ! $search; then
+      final_input="$(mktemp tmp.in.XXXXXXXXXX)"
+      tempFiles+=("$final_input")
+      set +e
+      execute $cmdprefix "$cmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$input_file" --output "$final_input" $koreExecFlags
+      set -e
+      depth=0
+    else
+      final_input="$input_file"
+    fi
+
     if [ -n "$bound" ]; then
       koreExecFlags="$koreExecFlags --bound $bound"
     fi
     set +e
-    execute $cmdprefix "$cmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$input_file" --output "$kore_output" --searchType "$searchType" --search "$patternFile" $koreExecFlags
+    execute $cmdprefix "$cmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$final_input" --output "$kore_output" --searchType "$searchType" --search "$patternFile" $koreExecFlags
     result=$?
     set -e
   else
