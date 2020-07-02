@@ -765,7 +765,7 @@ module BYTES-HOOKED
   rule .Bytes => String2Bytes("")
 endmodule
 
-module BYTES-IN-K
+module BYTES-IN-K [symbolic, kast]
   imports INT
   imports K-EQUAL
   imports STRING
@@ -855,10 +855,6 @@ module BYTES-KORE [kore]
   imports BYTES-SYMBOLIC-CEIL
 endmodule
 
-module BYTES-SYMBOLIC [symbolic, kast]
-  imports BYTES-IN-K
-endmodule
-
 module BYTES-SYMBOLIC-CEIL [symbolic, kore]
   imports BYTES-HOOKED
   imports INT
@@ -870,7 +866,7 @@ endmodule
 module BYTES
   imports BYTES-CONCRETE
   imports BYTES-KORE
-  imports BYTES-SYMBOLIC
+  imports BYTES-IN-K
   imports INT
 
   rule Int2Bytes(I::Int, E::Endianness, Unsigned) => Int2Bytes((log2Int(I) +Int 8) /Int 8, I, E)
