@@ -12,8 +12,8 @@ We recommend to either download the K tool from its URL
 in Java, so it is platform-independent) or use the provided online interface
 to execute the tutorial lessons and do the proposed exercises.
 The objective of this tutorial is twofold: to learn K (in folder
-[tutorial/1_k](/tutorial/1_k/)) and to learn how to define languages across
-various paradigms using K (in folder [tutorial/2_languages](/tutorial/2_languages/)).
+[1_k](1_k/)) and to learn how to define languages across
+various paradigms using K (in folder [2_languages](2_languages/)).
 
 It is recommended to study the languages defined in this folder in the
 order indicated by their name, because K features already discussed in
@@ -81,14 +81,14 @@ specific roles can be accessed from <http://kframework.org>.
 ### Usage
 
 Some of the languages defined so far using the K framework can be found in
-the [tutorial/2_languages](/tutorial/2_languages/) directory, and many others
+the [2_languages](2_languages/) directory, and many others
 in the [samples](/samples/) directory.  For example, the directory
 
-    tutorial/2_languages/1_simple/1_untyped
+    2_languages/1_simple/1_untyped
 
 contains the definition of the untyped version of the SIMPLE language, while 
 
-    tutorial/2_languages/1_simple/2_typed/1_static
+    2_languages/1_simple/2_typed/1_static
 
 contains the static semantics, i.e., the type checker.
 
@@ -107,7 +107,7 @@ By default, the tool uses the syntax module of a definition to generate a
 parser for that definition which can be used to parse programs and turn
 them into their corresponding K-AST (KAST) format.  We briefly outline the
 process below, using the untyped SIMPLE language
-([tutorial/2_languages/1_simple/1_untyped](/tutorial/2_languages/1_simple/1_untyped)).
+([2_languages/1_simple/1_untyped](2_languages/1_simple/1_untyped)).
 
 
 #### Parsing Programs
@@ -151,7 +151,7 @@ a program and see its KAST form.  By running
     $ kast tests/diverse/factorial.simple
 
 from the
-[tutorial/2_languages/1_simple/1_untyped](/tutorial/2_languages/1_simple/1_untyped)
+[2_languages/1_simple/1_untyped](2_languages/1_simple/1_untyped)
 directory, you get the internal representation of the factorial program.
 Typically, you should not need to execute the `kast` tool directly, as it will
 be executed by the `krun` tool (below) when necessary.  However, executing it
