@@ -121,22 +121,42 @@ public class KPrint {
     }
 
     public byte[] prettyPrint(Definition def, Module module, K result) {
-        return prettyPrint(def, module, result, options.color(tty.stdout, files.getEnv()));
+        return prettyPrint(def, module, result, Sorts.KItem(), options.color(tty.stdout, files.getEnv()));
+    }
+
+    public byte[] prettyPrint(Definition def, Module module, K result, Sort s) {
+        return prettyPrint(def, module, result, s, options.color(tty.stdout, files.getEnv()));
     }
 
     public byte[] prettyPrint(Definition def, Module module, K orig, ColorSetting colorize) {
-        return prettyPrint(def, module, orig, colorize, options.output);
+        return prettyPrint(def, module, orig, Sorts.KItem(), colorize, options.output);
+    }
+
+    public byte[] prettyPrint(Definition def, Module module, K orig, Sort s, ColorSetting colorize) {
+        return prettyPrint(def, module, orig, s, colorize, options.output);
+    }
+
+    public byte[] prettyPrint(CompiledDefinition def, Module module, K orig, Sort s) {
+        return prettyPrint(def, module, orig, s, options.color(tty.stdout, files.getEnv()), options.output);
     }
 
     public byte[] prettyPrint(CompiledDefinition def, Module module, K orig) {
-        return prettyPrint(def, module, orig, options.color(tty.stdout, files.getEnv()), options.output);
+        return prettyPrint(def, module, orig, Sorts.KItem(), options.color(tty.stdout, files.getEnv()), options.output);
     }
 
     public byte[] prettyPrint(CompiledDefinition def, Module module, K orig, ColorSetting colorize, OutputModes outputMode) {
-        return prettyPrint(def.kompiledDefinition, module, orig, colorize, outputMode);
+        return prettyPrint(def.kompiledDefinition, module, orig, Sorts.KItem(), colorize, outputMode);
+    }
+
+    public byte[] prettyPrint(CompiledDefinition def, Module module, K orig, Sort s, ColorSetting colorize, OutputModes outputMode) {
+        return prettyPrint(def.kompiledDefinition, module, orig, s, colorize, outputMode);
     }
 
     public byte[] prettyPrint(Definition def, Module module, K orig, ColorSetting colorize, OutputModes outputMode) {
+        return prettyPrint(def, module, orig, Sorts.KItem(), colorize, options.output);
+    }
+
+    public byte[] prettyPrint(Definition def, Module module, K orig, Sort s, ColorSetting colorize, OutputModes outputMode) {
         K result = abstractTerm(module, orig);
         switch (outputMode) {
             case KAST:
@@ -158,8 +178,8 @@ public class KPrint {
                     throw KEMException.criticalError("KORE output requires a compiled definition.");
                 }
                 ModuleToKORE converter = new ModuleToKORE(module, files, compiledDefinition.topCellInitializer, kompileOptions);
-                result = ExpandMacros.forNonSentences(module, files, kompileOptions, false).expand(result);
-                result = new AddSortInjections(module).addInjections(result);
+                result = ExpandMacros.forNonSentences(compiledDefinition.executionModule(), files, kompileOptions, false).expand(result);
+                result = new AddSortInjections(compiledDefinition.executionModule()).addSortInjections(result, s);
                 StringBuilder sb = new StringBuilder();
                 converter.convert(result, sb);
                 return sb.toString().getBytes();

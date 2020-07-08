@@ -1,6 +1,6 @@
 <generatedTop>
   <k>
-    start
+    start ~> .
   </k>
   <env>
     1 |-> ListItem ( 2 )

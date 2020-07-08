@@ -403,10 +403,10 @@ module INT-COMMON
                > left:
                  Int "*Int" Int                 [function, functional, klabel(_*Int_), symbol, left, smt-hook(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
                /* FIXME: translate /Int and %Int into smtlib */
-               /* /Int and %Int implement t-division */
+               /* /Int and %Int implement t-division, which rounds towards 0 */
                | Int "/Int" Int                 [function, klabel(_/Int_), symbol, left, smt-hook(div), latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(INT.tdiv)]
                | Int "%Int" Int                 [function, klabel(_%Int_), symbol, left, smt-hook(mod), latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(INT.tmod)]
-               /* divInt and modInt implement e-division */
+               /* divInt and modInt implement e-division according to the Euclidian division theorem, therefore the remainder is always positive */
                | Int "divInt" Int               [function, klabel(_divInt_), symbol, left, smt-hook(div), hook(INT.ediv)]
                | Int "modInt" Int               [function, klabel(_modInt_), symbol, left, smt-hook(mod), hook(INT.emod)]
                > left:
@@ -771,7 +771,7 @@ module BYTES-HOOKED
   rule .Bytes => String2Bytes("")
 endmodule
 
-module BYTES-IN-K
+module BYTES-IN-K [symbolic, kast]
   imports INT
   imports K-EQUAL
   imports STRING
@@ -861,10 +861,6 @@ module BYTES-KORE [kore]
   imports BYTES-SYMBOLIC-CEIL
 endmodule
 
-module BYTES-SYMBOLIC [symbolic, kast]
-  imports BYTES-IN-K
-endmodule
-
 module BYTES-SYMBOLIC-CEIL [symbolic, kore]
   imports BYTES-HOOKED
   imports INT
@@ -876,7 +872,7 @@ endmodule
 module BYTES
   imports BYTES-CONCRETE
   imports BYTES-KORE
-  imports BYTES-SYMBOLIC
+  imports BYTES-IN-K
   imports INT
 
   rule Int2Bytes(I::Int, E::Endianness, Unsigned) => Int2Bytes((log2Int(I) +Int 8) /Int 8, I, E)

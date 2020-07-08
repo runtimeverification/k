@@ -268,7 +268,7 @@ public class GenerateSentencesFromConfigDecl {
             public K apply(KToken k) {
                 if (k.sort().equals(Sorts.KConfigVar())) {
                     if (sort == null || sort.equals(Sorts.K())) {
-                        return KApply(KLabel("Map:lookup"), INIT, k);
+                        return KApply(GenerateSortProjections.getProjectLbl(Sorts.KItem(), m), KApply(KLabel("Map:lookup"), INIT, k));
                     } else {
                         return KApply(GenerateSortProjections.getProjectLbl(sort, m), KApply(KLabel("Map:lookup"), INIT, k));
                     }

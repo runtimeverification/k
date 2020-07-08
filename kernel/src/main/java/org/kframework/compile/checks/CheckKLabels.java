@@ -29,6 +29,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import scala.Tuple2;
 
 import static org.kframework.kore.KORE.*;
 import static org.kframework.Collections.*;
@@ -76,6 +78,14 @@ public class CheckKLabels {
                 Optional<Source> s = k.att().getOptional(Source.class);
                 if (s.isPresent()) {
                     usedLabels.add(klabel.name());
+                    if (m.definedKLabels().apply(klabel)) {
+                        for (Production prod : iterable(m.productionsFor().apply(klabel.head()))) {
+                          if (prod.source().isPresent() && prod.location().isPresent()) {
+                              usedLabels.addAll(stream(m.productionsForLoc().apply(Tuple2.apply(prod.source().get(), prod.location().get())))
+                                  .filter(p -> p.klabel().isDefined()).map(p -> p.klabel().get().name()).collect(Collectors.toSet()));
+                          }
+                        }
+                    }
                 }
                 if (!m.definedKLabels().apply(klabel) && !isInternalKLabel(klabel.name(), m)) {
                     errors.add(KEMException.compilerError("Found klabel " + klabel.name() + " not defined in any production.", k));
