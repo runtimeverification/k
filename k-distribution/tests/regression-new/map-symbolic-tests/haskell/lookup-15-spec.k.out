@@ -1,3 +1,22 @@
-<k>
-  lookupResult ( 1 )
-</k>
+  #Not ( {
+    Y
+  #Equals
+    Z
+  } )
+#And
+  <k>
+    lookupResult ( 1 ~> . ) ~> .
+  </k>
+#And
+  {
+    Z:MyId in_keys ( ( MAP
+    Z:MyId |-> 1 ) [ Y:MyId <- 2 ] )
+  #Equals
+    true
+  }
+#And
+  {
+    Z:MyId in_keys ( MAP )
+  #Equals
+    false
+  }

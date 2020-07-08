@@ -1,3 +1,27 @@
-<k>
-  inkeysResult ( true )
-</k>
+  #Not ( {
+    X
+  #Equals
+    Z
+  } )
+#And
+  <k>
+    inkeysResult ( true ) ~> .
+  </k>
+#And
+  {
+    Y:MyId in_keys ( M )
+  #Equals
+    true
+  }
+#And
+  {
+    Z:MyId in_keys ( M )
+  #Equals
+    false
+  }
+#And
+  {
+    false
+  #Equals
+    X:MyId in_keys ( M )
+  }

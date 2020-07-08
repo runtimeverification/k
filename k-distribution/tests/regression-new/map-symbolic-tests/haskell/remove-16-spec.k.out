@@ -1,3 +1,23 @@
-<k>
-  removeResult ( 3 )
-</k>
+  #Not ( {
+    X
+  #Equals
+    x
+  } )
+#And
+  #Not ( {
+    X
+  #Equals
+    y
+  } )
+#And
+  <k>
+    removeResult ( ( X:MyId |-> 3
+    y |-> 4 ) [ x <- undef ] [ X:MyId ] ~> . ) ~> .
+  </k>
+#And
+  {
+    X:MyId in_keys ( ( X:MyId |-> 3
+    y |-> 4 ) [ x <- undef ] )
+  #Equals
+    true
+  }

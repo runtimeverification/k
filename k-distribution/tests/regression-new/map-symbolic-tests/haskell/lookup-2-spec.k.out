@@ -1,3 +1,9 @@
-<k>
-  lookupResult ( 2 )
-</k>
+  <k>
+    lookupResult ( 2 ~> . ) ~> .
+  </k>
+#And
+  {
+    Z:MyId in_keys ( MAP )
+  #Equals
+    false
+  }

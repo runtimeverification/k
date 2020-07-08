@@ -1,4 +1,10 @@
-<k>
-  assignmentResult ( ( MAP
-  X |-> 1 ) [ Z <- 3 ] )
-</k>
+  <k>
+    assignmentResult ( ( MAP
+    X:MyId |-> 1 ) [ Z:MyId <- 3 ] ) ~> .
+  </k>
+#And
+  {
+    X:MyId in_keys ( MAP )
+  #Equals
+    false
+  }

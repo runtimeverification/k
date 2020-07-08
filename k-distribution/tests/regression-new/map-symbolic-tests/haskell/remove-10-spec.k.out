@@ -1,4 +1,17 @@
-<k>
-  removeResult ( ( MAP
-  Z |-> 1 ) [ Y <- undef ] [ Z ] )
-</k>
+  <k>
+    removeResult ( ( MAP
+    Z:MyId |-> 1 ) [ Y:MyId <- undef ] [ Z:MyId ] ~> . ) ~> .
+  </k>
+#And
+  {
+    Z:MyId in_keys ( ( MAP
+    Z:MyId |-> 1 ) [ Y:MyId <- undef ] )
+  #Equals
+    true
+  }
+#And
+  {
+    Z:MyId in_keys ( MAP )
+  #Equals
+    false
+  }

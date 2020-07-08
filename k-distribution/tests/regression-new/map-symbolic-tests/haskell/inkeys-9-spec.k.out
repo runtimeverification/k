@@ -1,5 +1,29 @@
-<k>
-  inkeysResult ( Y in_keys ( M
-  X |-> 0
-  ( Z |-> 1 ) ) )
-</k>
+  #Not ( {
+    X
+  #Equals
+    Z
+  } )
+#And
+  <k>
+    inkeysResult ( Y:MyId in_keys ( M
+    X:MyId |-> 0
+    ( Z:MyId |-> 1 ) ) ) ~> .
+  </k>
+#And
+  {
+    X:MyId in_keys ( M )
+  #Equals
+    false
+  }
+#And
+  {
+    Z:MyId in_keys ( M )
+  #Equals
+    false
+  }
+#And
+  {
+    false
+  #Equals
+    X:MyId in_keys ( M )
+  }
