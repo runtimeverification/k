@@ -433,7 +433,7 @@ module INT-COMMON
                 | Int "dividesInt" Int    [function]
 endmodule
 
-module INT-SYMBOLIC [symbolic, kore]
+module INT-SYMBOLIC [symbolic]
   imports INT-COMMON
   imports ML-SYNTAX
 
