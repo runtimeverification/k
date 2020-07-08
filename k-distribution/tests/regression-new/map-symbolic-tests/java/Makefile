@@ -1,7 +1,7 @@
 DEF=map-tests
 EXT=mtest
-TESTDIR=.
+TESTDIR=../tests
 KOMPILE_BACKEND=java
 KPROVE_FLAGS=--restore-original-names --no-alpha-renaming --warnings none
 
-include ../../../include/kframework/ktest.mak
+include ../../../../include/kframework/ktest.mak
