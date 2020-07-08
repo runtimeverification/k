@@ -176,8 +176,9 @@ module MAP-KORE-SYMBOLIC [kore,symbolic]
 endmodule
 
 module MAP-SYMBOLIC [symbolic]
-  imports MAP-KORE-SYMBOLIC
   imports K-EQUAL
+  imports MAP
+  imports MAP-KORE-SYMBOLIC
 
   rule .Map [ K1 <- V1 ] => K1 |-> V1
 
