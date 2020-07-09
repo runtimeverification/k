@@ -185,6 +185,95 @@ have any constructors declared.
 syntax Bytes [hook(BYTES.Bytes), token]
 ```
 
+### Converting between `[token]` sorts
+
+You can convert between tokens of one sort via `String`s by defining functions
+implemented by builtin hooks.
+The hook `STRING.token2string` allows conversion of any token to a string:
+
+```k
+syntax String ::= FooToString(Foo)  [function, functional, hook(STRING.token2string)]
+```
+
+Similarly, the hook `STRING.string2Token` allows the inverse:
+
+```k
+syntax Bar ::= StringToBar(String) [function, functional, hook(STRING.string2token)]
+```
+
+WARNING: This sort of conversion does *NOT* do any sort of parsing or validation.
+Thus, we can create arbitary tokens of any sort:
+
+```
+StringToBar("The sun rises in the west.")
+```
+
+Composing these two functions lets us convert from `Foo` to `Bar`
+
+```k
+syntax Bar ::= FooToBar(Foo) [function]
+rule FooToBar(F) => StringToBar(FooToString(F))
+```
+
+### Parsing comments, and the `#Layout` sort
+
+Productions for the `#Layout` sort are used to describe tokens that are
+considered "whitespace". The scanner removes tokens matching these productions
+so they are not even seen by the parser. Below, we use it to define
+lines begining with `;` (semicolon) as comments.
+
+```k
+syntax #Layout ::= r"(;[^\\n\\r]*)"    // Semi-colon comments
+                 | r"([\\ \\n\\r\\t])" // Whitespace
+```
+
+### `prec` attribute
+
+Consider the following naive attempt at creating a language what syntax that
+allows two types of variables: names that contain underbars, and names that
+contain sharps/hashes/pound-signs:
+
+```k
+syntax NameWithUnderbar ::= r"[a-zA-Z][A-Za-z0-9_]*"  [token]
+syntax NameWithSharp    ::= r"[a-zA-Z][A-Za-z0-9_#]*" [token]
+syntax Pgm ::= underbar(NameWithUnderbar)
+             | sharp(NameWithSharp)
+```
+
+Although, it seems that K has enough information to parse the programs
+`underbar(foo)` and `sharp(foo)` with, the lexer does not take into account
+whether a token is being parsed for the `sharp` or for the `underbar`
+production. It chooses an arbitary sort for the token `foo` (perhaps
+`NameWithUnderbar`). Thus, during paring it is unable to construct a valid term
+for one of those programs (`sharp(foo)`) and produces the error message:
+`Inner Parser: Parse error: unexpected token 'foo'.`
+
+Since calculating inclusions and intersections between regular expressions is
+tricky, we must provide this information to K. We do this via the `prec(N)`
+attribute. The lexer will always prefer longer tokens to shorter tokens. However,
+when it has to choose between two different tokens of equal length, token
+productions with higher precedence are tried first.
+
+We also need to make sorts with more specific tokens subsorts of ones with more
+general tokens. We add the token attribute to this production so that all tokens
+of a particular sort are marked with the sort it is parsed as, and not a subsort
+thereof. e.g. we get `underbar(#token("foo", "NameWithUnderbar"))` instead of
+`underbar(#token("foo", "#LowerId"))`
+
+The `BUILTIN-ID-TOKENS` module defines `#UpperId` and `#LowerId` with attributes `prec(2)`.
+
+```k
+imports BUILTIN-ID-TOKENS
+syntax NameWithUnderbar ::= r"[a-zA-Z][A-Za-z0-9_]*" [prec(1), token]
+                          | #UpperId                [token]
+                          | #LowerId                [token]
+syntax NameWithSharp ::= r"[a-zA-Z][A-Za-z0-9_#]*" [prec(1), token]
+                       | #UpperId                 [token]
+                       | #LowerId                 [token]
+syntax Pgm ::= underbar(NameWithUnderbar)
+             | sharp(NameWithSharp)
+```
+
 ### `unused` attribute
 
 K will warn you if you declare a symbol that is not used in any of the rules of your
@@ -1320,6 +1409,39 @@ This will rewrite `I` to `.` if and only if the state cell contains
 Note that in the case of Set and Map, one guarantee is that K1, K2, K3, and K4
 represent /distinct/ elements. Pattern matching fails if the correct number of
 distinct elements cannot be found.
+
+### Matching on cell fragments
+
+K allows matching fragments of the configuration and using them to construct
+terms and use as function parameters.
+
+```k
+configuration <t>
+                <k> #init ~> #collectOdd ~> $PGM </k>
+                <fs>
+                  <f multiplicity="*" type="Set"> 1 </f>
+                </fs>
+              </t>
+```
+
+The `#collectOdd` construct grabs the entire content of the `<fs>` cell.
+We may also match on only a portion of its content. Note that the fragment
+must be wrapped in a `<f>` cell at the call site.
+
+```k
+syntax KItem ::= "#collectOdd"
+rule <k> #collectOdd => collectOdd(<fs> Fs </fs>) ... </k>
+     <fs> Fs </fs>
+```
+
+The `collectOdd` function collects the items it needs
+
+```k
+syntax Set ::= collectOdd(FsCell) [function]
+rule collectOdd(<fs> <f> I </f> REST </fs>) => SetItem(I) collectOdd(<fs> REST </fs>) requires I %Int 2 ==Int 1
+rule collectOdd(<fs> <f> I </f> REST </fs>) =>            collectOdd(<fs> REST </fs>) requires I %Int 2 ==Int 0
+rule collectOdd(<fs> .Bag </fs>) => .Set
+```
 
 ### `all-path` and `one-path` attributes to distinguish reachability claims
 
