@@ -250,7 +250,8 @@ for one of those programs (`sharp(foo)`) and produces the error message:
 
 Since calculating inclusions and intersections between regular expressions is
 tricky, we must provide this information to K. We do this via the `prec(N)`
-attribute that specifies the order in which the lexer tries tokens. Token
+attribute. The lexer will always prefer longer tokens to shorter tokens. However,
+when it has to choose between two different tokens of equal length, token
 productions with higher precedence are tried first.
 
 We also need to make sorts with more specific tokens subsorts of ones with more
