@@ -1,8 +1,8 @@
-module WASM-TEST-SYNTAX 
+module WASM-TEST-SYNTAX
   imports WASM-TEST
 endmodule
 
-module WASM-TEST 
+module WASM-TEST
 endmodule
 
 
