@@ -4,21 +4,32 @@ about: Create a report to help us improve
 title: "[Bug] [kompile|kast|krun|kprove|ksearch] - DESCRIPTION"
 labels: bug
 assignees: ''
-
 ---
 
 **Categorize the bug**
-Fill in the title above (template provided).
+
+Fill in the title (template provided).
+Examples:
+
+[Bug] kompile - crash when compiling with --some-weird-option
+
+[Bug] krun - segfault at runtime when dividing by zero
 
 **Describe the bug**
-A clear and concise description of what the bug is. Example:
+
+A clear and concise description of what the bug is.
+Examples:
 
 Running `kompile` with `--some-weird-option` causes a cryptic error message.
 
 Running `krun` with a definition causes a segfault on LLVM backend.
 
 **Input Files**
-All files needed to produce the bug. Example:
+
+*Minimized* files needed to produce the bug.
+When providing K definitions, a _single_ file should be provided (if possible), and as few modules and sentences as possible.
+When providing programs or proofs, a _single_ program should be provided with a minimized definition which _quickly_ reproduces the issue.
+Examples:
 
 File: `test.k`
 
@@ -36,24 +47,29 @@ for i in [1,2,3]:
    print('hello')
 ```
 
-**To Reproduce**
-Steps to reproduce the behavior (including _code blocks_ with what to run, and _code blocks_ with resulting output). Example:
+**Reproduction Steps**
 
-Kompiling produces the weird error:
+Steps to reproduce the behavior (including _code blocks_ with what to run, and _code blocks_ with resulting output).
+Examples:
+
+Kompiling produces a weird error:
 
 ```
 $ kompile --backend llvm --some-weird-option test.k
-SOME_WEIRD_ERROR_MESSAGE
+SOME WEIRD ERROR MESSAGE
 ```
 
-Running causes a segfault:
+Running on LLVM backend causes a segfault when division by zero:
 
 ```
+$ kompile test.k --backend llvm
+Successful kompilation
 $ krun input.test
 Aborted: some cryptic LLVM backend stuff. Segfault. Panic.
 ```
 
 **Expected behavior**
+
 A clear and concise description of what you expected to happen. Example:
 
 `kompile` should be able to handle `--some-weird-option` without crashing.
