@@ -56,6 +56,12 @@ public class KProveOptions {
     @Parameter(names={"--def-module", "-m"}, description="Name of module containing definition to prove under")
     public String defModule;
 
+    @Parameter(names={"--save-proof-definition-to"}, description="Save the binary version of full definition used " +
+            "for proving this spec. This can be used by other external tools, e.g., kast. The parameter should be " +
+            "the path to a directory not containing other -kompiled directories. A new directory named " +
+            "proof-spec-kompiled will be created in that directory, containing the compiled definition.")
+    public String saveProofDefinitionTo = null;
+
     @Parameter(names="--depth", description="The maximum number of computational steps to prove")
     public Integer depth;
 

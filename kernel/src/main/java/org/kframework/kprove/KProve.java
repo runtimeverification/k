@@ -8,14 +8,20 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.KRun;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
+import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.function.Function;
 
 
@@ -31,18 +37,20 @@ public class KProve {
     private final KPrint kprint;
     private final KProveOptions kproveOptions;
     private final CompiledDefinition compiledDefinition;
+    private final BinaryLoader loader;
     private final ProofDefinitionBuilder proofDefinitionBuilder;
     private final Function<Definition, Rewriter> rewriterGenerator;
 
     @Inject
     public KProve(KExceptionManager kem, FileUtil files, KPrint kprint, KProveOptions kproveOptions,
-                  CompiledDefinition compiledDefinition, ProofDefinitionBuilder proofDefinitionBuilder,
-                  Function<Definition, Rewriter> rewriterGenerator) {
+                  CompiledDefinition compiledDefinition, BinaryLoader loader,
+                  ProofDefinitionBuilder proofDefinitionBuilder, Function<Definition, Rewriter> rewriterGenerator) {
         this.kem = kem;
         this.files = files;
         this.kprint = kprint;
         this.kproveOptions = kproveOptions;
         this.compiledDefinition = compiledDefinition;
+        this.loader = loader;
         this.proofDefinitionBuilder = proofDefinitionBuilder;
         this.rewriterGenerator = rewriterGenerator;
     }
@@ -55,6 +63,11 @@ public class KProve {
 
         Tuple2<Definition, Module> compiled = proofDefinitionBuilder
                 .build(kproveOptions.specFile(files), kproveOptions.defModule, kproveOptions.specModule);
+
+        if (kproveOptions.saveProofDefinitionTo != null) {
+            saveFullDefinition(compiled._1());
+        }
+
         Rewriter rewriter = rewriterGenerator.apply(compiled._1());
         Module specModule = compiled._2();
         Rule boundaryPattern = buildBoundaryPattern(compiledDefinition);
@@ -63,6 +76,22 @@ public class KProve {
         kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), kprint::outputFile,
                 results.k());
         return results.exitCode().orElse(KEMException.TERMINATED_WITH_ERRORS_EXIT_CODE);
+    }
+
+    // Saving combined verification definition to disk to be usable by other tools (e.g., kast)
+    private void saveFullDefinition(Definition fullDefinition) {
+        CompiledDefinition fullCompiledDefinition = new CompiledDefinition(
+                compiledDefinition.kompileOptions,
+                fullDefinition, fullDefinition,
+                files, kem, compiledDefinition.topCellInitializer);
+        Path proveKompiledDir = Paths.get(kproveOptions.saveProofDefinitionTo).resolve("prove-spec-kompiled");
+        try {
+            Files.createDirectories(proveKompiledDir);
+            loader.saveOrDie(proveKompiledDir.resolve("compiled.bin").toFile(), fullCompiledDefinition);
+        } catch (IOException e) {
+            throw KEMException.criticalError(
+                    "Could not create proof output directory " + proveKompiledDir.toAbsolutePath(), e);
+        }
     }
 
     /**

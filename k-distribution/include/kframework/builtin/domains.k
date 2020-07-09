@@ -397,10 +397,10 @@ module INT-COMMON
                > left:
                  Int "*Int" Int                 [function, functional, klabel(_*Int_), symbol, left, smt-hook(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
                /* FIXME: translate /Int and %Int into smtlib */
-               /* /Int and %Int implement t-division */
+               /* /Int and %Int implement t-division, which rounds towards 0 */
                | Int "/Int" Int                 [function, klabel(_/Int_), symbol, left, smt-hook(div), latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(INT.tdiv)]
                | Int "%Int" Int                 [function, klabel(_%Int_), symbol, left, smt-hook(mod), latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(INT.tmod)]
-               /* divInt and modInt implement e-division */
+               /* divInt and modInt implement e-division according to the Euclidian division theorem, therefore the remainder is always positive */
                | Int "divInt" Int               [function, klabel(_divInt_), symbol, left, smt-hook(div), hook(INT.ediv)]
                | Int "modInt" Int               [function, klabel(_modInt_), symbol, left, smt-hook(mod), hook(INT.emod)]
                > left:
@@ -433,7 +433,25 @@ module INT-COMMON
                 | Int "dividesInt" Int    [function]
 endmodule
 
-module INT-SYMBOLIC [symbolic, kore]
+module INT-SYMBOLIC [symbolic]
+  imports INT-COMMON
+  imports INT-SYMBOLIC-KORE
+
+  // Arithmetic Normalization
+  rule I +Int 0 => I [simplification]
+  rule I -Int 0 => I [simplification]
+
+  rule X modInt N => X requires 0 <=Int X andBool X <Int N [simplification]
+  rule X   %Int N => X requires 0 <=Int X andBool X <Int N [simplification]
+
+  // Bit-shifts
+  rule X <<Int 0 => X [simplification]
+  rule 0 <<Int _ => 0 [simplification]
+  rule X >>Int 0 => X [simplification]
+  rule 0 >>Int _ => 0 [simplification]
+endmodule
+
+module INT-SYMBOLIC-KORE [symbolic, kore]
   imports INT-COMMON
   imports ML-SYNTAX
 
@@ -445,9 +463,6 @@ module INT-SYMBOLIC [symbolic, kore]
   rule #Ceil(@I1:Int <<Int  @I2:Int) => {(@I2 >=Int 0)  #Equals true} #And #Ceil(@I1) #And #Ceil(@I2) [anywhere, simplification]
 
   // Arithmetic Normalization
-  rule I +Int 0 => I [simplification]
-  rule I -Int 0 => I [simplification]
-
   rule I +Int B => B +Int I          [concrete(I), symbolic(B), priority(51), simplification]
   rule A -Int I => A +Int (0 -Int I) [concrete(I), symbolic(A), priority(51), simplification]
 
@@ -461,16 +476,8 @@ module INT-SYMBOLIC [symbolic, kore]
   rule I1 -Int (I2 -Int C) => (I1 -Int I2) +Int C [concrete(I1, I2), symbolic(C), simplification]
   rule (C -Int I2) -Int I3 => C -Int (I2 +Int I3) [concrete(I2, I3), symbolic(C), simplification]
 
-  rule X modInt N => X requires 0 <=Int X andBool X <Int N [simplification]
-  rule X   %Int N => X requires 0 <=Int X andBool X <Int N [simplification]
-
   rule I1 &Int (I2 &Int C) => (I1 &Int I2) &Int C [concrete(I1, I2), symbolic(C), simplification]
 
-  // Bit-shifts
-  rule X <<Int 0 => X [simplification]
-  rule 0 <<Int _ => 0 [simplification]
-  rule X >>Int 0 => X [simplification]
-  rule 0 >>Int _ => 0 [simplification]
 endmodule
 
 module INT-KAST [kast]
@@ -765,7 +772,7 @@ module BYTES-HOOKED
   rule .Bytes => String2Bytes("")
 endmodule
 
-module BYTES-IN-K
+module BYTES-IN-K [symbolic, kast]
   imports INT
   imports K-EQUAL
   imports STRING
@@ -855,10 +862,6 @@ module BYTES-KORE [kore]
   imports BYTES-SYMBOLIC-CEIL
 endmodule
 
-module BYTES-SYMBOLIC [symbolic, kast]
-  imports BYTES-IN-K
-endmodule
-
 module BYTES-SYMBOLIC-CEIL [symbolic, kore]
   imports BYTES-HOOKED
   imports INT
@@ -870,7 +873,7 @@ endmodule
 module BYTES
   imports BYTES-CONCRETE
   imports BYTES-KORE
-  imports BYTES-SYMBOLIC
+  imports BYTES-IN-K
   imports INT
 
   rule Int2Bytes(I::Int, E::Endianness, Unsigned) => Int2Bytes((log2Int(I) +Int 8) /Int 8, I, E)

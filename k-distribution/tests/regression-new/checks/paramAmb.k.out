@@ -1,4 +1,3 @@
-[Error] Compiler: Had 1 parsing errors.
 [Error] Inner Parser: Parsing ambiguity.
 1: syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite), symbol]
    
@@ -11,3 +10,4 @@
 #KRewrite(#SemanticCastToA(#token("X","#KVariable")),`label(_,_)_PARAMAMB_KItem_N_T`(#SemanticCastToA(#token("X","#KVariable")),`wrap__PARAMAMB_T_M`(#SemanticCastToA(#token("X","#KVariable")))))
 	Source(paramAmb.k)
 	Location(11,8,11,29)
+[Error] Compiler: Had 1 parsing errors.
