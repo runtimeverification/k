@@ -82,7 +82,7 @@ public class FileUtil {
             try {
                 FileUtils.deleteDirectory(tempDir);
             } catch (IOException e) {
-                kem.registerCriticalWarning("Failed to delete temporary directory", e);
+                kem.registerCriticalWarning(ExceptionType.UNDELETED_TEMP_DIR, "Failed to delete temporary directory", e);
             }
         }
     }

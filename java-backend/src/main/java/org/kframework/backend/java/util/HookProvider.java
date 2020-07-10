@@ -60,7 +60,7 @@ public class HookProvider {
                     }
                 }
             } catch (ClassNotFoundException | SecurityException | IllegalAccessException e) {
-                kem.registerCriticalWarning("missing implementation for hook " + key + ":\n" + hook, e);
+                throw KEMException.internalError("missing implementation for hook " + key + ":\n" + hook, e);
             }
         }
         return result;

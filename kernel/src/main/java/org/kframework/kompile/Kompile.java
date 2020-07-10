@@ -105,7 +105,7 @@ public class Kompile {
         this.sw = sw;
 
         if (kompileOptions.backend.equals("ocaml")) {
-            kem.registerCriticalWarning("The OCaml backend is in the process of being deprecated (final date May 31, 2020). Please switch to the LLVM backend.");
+            kem.registerCriticalWarning(ExceptionType.DEPRECATED_BACKEND, "The OCaml backend is in the process of being deprecated (final date May 31, 2020). Please switch to the LLVM backend.");
         }
     }
 
@@ -352,7 +352,7 @@ public class Kompile {
                 throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
             } else {
                 for (KEMException error : errors) {
-                    kem.registerCriticalWarning(error.exception.getMessage() +
+                    kem.registerCriticalWarning(ExceptionType.FUTURE_ERROR, error.exception.getMessage() +
                             "\nNote: this warning will become an error in subsequent releases.",
                             error.exception);
                 }

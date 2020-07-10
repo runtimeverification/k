@@ -64,7 +64,7 @@ public class SMTOperations {
             }
         } catch (UnsupportedOperationException e) {
             e.printStackTrace();
-            kem.registerCriticalWarning("z3 constraint query: " + e.getMessage(), e);
+            kem.registerCriticalWarning(ExceptionType.PROOF_LINT, "z3 constraint query: " + e.getMessage(), e);
             if (javaExecutionOptions.debugZ3) {
                 log.format("\nZ3 constraint warning: %s\n", e.getMessage());
             }
@@ -111,7 +111,7 @@ public class SMTOperations {
                     }
                     warnMsg += " Search the logs starting with 'Z3 warning' to see the Z3 implication " +
                             "that generated the warning.";
-                    kem.registerInternalWarning(warnMsg, e);
+                    kem.registerInternalWarning(ExceptionType.PROOF_LINT, warnMsg, e);
                 }
                 if (javaExecutionOptions.debugZ3) {
                     log.format("\nZ3 warning. Query not generated: %s\n", e.getMessage());

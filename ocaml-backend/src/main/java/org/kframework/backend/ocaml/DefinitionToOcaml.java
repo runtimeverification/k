@@ -1296,7 +1296,7 @@ public class DefinitionToOcaml implements Serializable {
                         }
                         sb.append("\nwith Not_implemented -> match c with \n");
                     } else if (!hook.equals(".")) {
-                        kem.registerCompilerWarning("missing entry for hook " + hook);
+                        kem.registerCompilerWarning(ExceptionType.MISSING_HOOK, "missing entry for hook " + hook);
                     }
 
                     if (mainModule.attributesFor().apply(functionLabel).contains(Att.PREDICATE(), Sort.class)) {

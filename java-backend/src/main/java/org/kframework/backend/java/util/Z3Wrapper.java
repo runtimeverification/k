@@ -79,7 +79,7 @@ public class Z3Wrapper {
             solver._assert(context.parseSmtlib2(SMT_PRELUDE + query));
             result = solver.check() == Z3Status.UNSAT;
         } catch (Z3Exception e) {
-            kem.registerCriticalWarning(
+            kem.registerCriticalWarning(ExceptionType.PROOF_LINT,
                     "failed to translate smtlib expression:\n" + SMT_PRELUDE + query, e);
         } catch (UnsatisfiedLinkError e) {
             System.err.println(System.getProperty("java.library.path"));

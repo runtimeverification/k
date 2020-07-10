@@ -339,7 +339,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     outputK = new KoreParser(rules.sortAttributesFor())
                             .parseFile(koreOutputFile);
                 } catch (ParseError parseError) {
-                    kem.registerCriticalWarning("Error parsing haskell backend output", parseError);
+                    kem.registerCriticalWarning(ExceptionType.PROOF_LINT, "Error parsing haskell backend output", parseError);
                     outputK = KORE.KApply(KLabels.ML_FALSE);
                 }
                 return new RewriterResult(Optional.empty(), Optional.of(exit), outputK);

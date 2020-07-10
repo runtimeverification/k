@@ -102,12 +102,20 @@ public class KException implements Serializable, HasLocation {
     public enum ExceptionType {
         ERROR, 
         NON_EXHAUSTIVE_MATCH
+        UNDELETED_TEMP_DIR,
+        MISSING_HOOK,
+        MISSING_SYNTAX_MODULE,
+        INVALID_EXIT_CODE,
+        DEPRECATED_BACKEND,
+        INVALID_CONFIG_VAR,
+        FUTURE_ERROR,
+        UNUSED_VAR,
         FIRST_HIDDEN,
         USELESS_RULE,
         UNRESOLVED_FUNCTION_SYMBOL,
-        MISSING_HOOK,
         MALFORMED_MARKDOWN,
-        INVALIDATED_CACHE
+        INVALIDATED_CACHE,
+        UNUSED_SYMBOL
     }
 
     @Override
