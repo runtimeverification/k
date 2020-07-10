@@ -1,4 +1,1 @@
-<k>
-  assignmentResult ( ( MAP [ Y <- 2 ]
-  X |-> 1 ) [ Z <- 3 ] )
-</k>
+#True
