@@ -190,9 +190,7 @@ module MAP-JAVA-SYMBOLIC [kast, symbolic]
   rule ((K1 |-> V1) MAP) [ K2 <- V2 ] => (K1 |-> V1) (MAP [ K2 <- V2 ]) requires K1 =/=K K2
 
   rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP              [ K1 <- V2 ] requires K1  ==K K2
-
-  // potential infinite loop
-  // rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP [ K2 <- V2 ] [ K1 <- V1 ] requires K1 =/=K K2
+//rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP [ K2 <- V2 ] [ K1 <- V1 ] requires K1 =/=K K2 // potential infinite loop even if `K2 in_keys(MAP)`
 
   rule K1 in_keys(M K2 |-> _) => true          requires K1  ==K K2 orBool K1 in_keys(M) [simplification]
   rule K1 in_keys(M K2 |-> _) => K1 in_keys(M) requires K1 =/=K K2 [simplification]
@@ -433,7 +431,25 @@ module INT-COMMON
                 | Int "dividesInt" Int    [function]
 endmodule
 
-module INT-SYMBOLIC [symbolic, kore]
+module INT-SYMBOLIC [symbolic]
+  imports INT-COMMON
+  imports INT-SYMBOLIC-KORE
+
+  // Arithmetic Normalization
+  rule I +Int 0 => I [simplification]
+  rule I -Int 0 => I [simplification]
+
+  rule X modInt N => X requires 0 <=Int X andBool X <Int N [simplification]
+  rule X   %Int N => X requires 0 <=Int X andBool X <Int N [simplification]
+
+  // Bit-shifts
+  rule X <<Int 0 => X [simplification]
+  rule 0 <<Int _ => 0 [simplification]
+  rule X >>Int 0 => X [simplification]
+  rule 0 >>Int _ => 0 [simplification]
+endmodule
+
+module INT-SYMBOLIC-KORE [symbolic, kore]
   imports INT-COMMON
   imports ML-SYNTAX
 
@@ -445,9 +461,6 @@ module INT-SYMBOLIC [symbolic, kore]
   rule #Ceil(@I1:Int <<Int  @I2:Int) => {(@I2 >=Int 0)  #Equals true} #And #Ceil(@I1) #And #Ceil(@I2) [anywhere, simplification]
 
   // Arithmetic Normalization
-  rule I +Int 0 => I [simplification]
-  rule I -Int 0 => I [simplification]
-
   rule I +Int B => B +Int I          [concrete(I), symbolic(B), priority(51), simplification]
   rule A -Int I => A +Int (0 -Int I) [concrete(I), symbolic(A), priority(51), simplification]
 
@@ -461,16 +474,8 @@ module INT-SYMBOLIC [symbolic, kore]
   rule I1 -Int (I2 -Int C) => (I1 -Int I2) +Int C [concrete(I1, I2), symbolic(C), simplification]
   rule (C -Int I2) -Int I3 => C -Int (I2 +Int I3) [concrete(I2, I3), symbolic(C), simplification]
 
-  rule X modInt N => X requires 0 <=Int X andBool X <Int N [simplification]
-  rule X   %Int N => X requires 0 <=Int X andBool X <Int N [simplification]
-
   rule I1 &Int (I2 &Int C) => (I1 &Int I2) &Int C [concrete(I1, I2), symbolic(C), simplification]
 
-  // Bit-shifts
-  rule X <<Int 0 => X [simplification]
-  rule 0 <<Int _ => 0 [simplification]
-  rule X >>Int 0 => X [simplification]
-  rule 0 >>Int _ => 0 [simplification]
 endmodule
 
 module INT-KAST [kast]
