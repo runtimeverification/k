@@ -54,7 +54,7 @@ public class TagSelector {
               tags.add(tag);
           }
     } catch (ParseException e) {
-        throw KEMException.outerParserHiddenWarning("Malformed Markdown code block annotation. Encountered "
+        throw KEMException.outerParserWarning(ExceptionType.MALFORMED_MARKDOWN, "Malformed Markdown code block annotation. Encountered "
               + e.tokenImage[e.currentToken.next.kind]
               + ".\nWas expecting one of: " + Stream.of(e.expectedTokenSequences)
               // using an anonymous class because JavaCC doesn't support Java 8 syntax.

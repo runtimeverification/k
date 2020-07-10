@@ -44,7 +44,7 @@ public final class GlobalOptions {
         /**
          * All warnings and errors except hidden warnings
          */
-        NORMAL(EnumSet.complementOf(EnumSet.of(ExceptionType.HIDDENWARNING))),
+        NORMAL(EnumSet.range(ExceptionType.ERROR, ExceptionType.FIRST_HIDDEN)),
 
         /**
          * No warnings, only errors

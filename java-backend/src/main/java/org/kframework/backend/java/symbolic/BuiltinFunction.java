@@ -67,7 +67,7 @@ public class BuiltinFunction {
 //                }
 
                 if (!hookProvider.containsKey(hookAttribute)) {
-                    kem.registerCriticalHiddenWarning("missing entry for hook " + hookAttribute);
+                    kem.registerCriticalWarning(ExceptionType.MISSING_HOOK, "missing entry for hook " + hookAttribute);
                     continue;
                 }
 

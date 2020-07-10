@@ -23,9 +23,6 @@ public class KException implements Serializable, HasLocation {
         types = new HashMap<KException.ExceptionType, String>();
         types.put(ExceptionType.ERROR, "Error");
         types.put(ExceptionType.WARNING, "Warning");
-        types.put(ExceptionType.HIDDENWARNING, "Warning");
-        types.put(ExceptionType.NON_EXHAUSTIVE_MATCH, "Warning");
-        types.put(ExceptionType.USELESS_RULE, "Warning");
 
         labels = new HashMap<KException.KExceptionGroup, String>();
         labels.put(KExceptionGroup.COMPILER, "Compiler");
@@ -103,7 +100,14 @@ public class KException implements Serializable, HasLocation {
     }
 
     public enum ExceptionType {
-        ERROR, WARNING, HIDDENWARNING, NON_EXHAUSTIVE_MATCH, USELESS_RULE
+        ERROR, 
+        NON_EXHAUSTIVE_MATCH
+        FIRST_HIDDEN,
+        USELESS_RULE,
+        UNRESOLVED_FUNCTION_SYMBOL,
+        MISSING_HOOK,
+        MALFORMED_MARKDOWN,
+        INVALIDATED_CACHE
     }
 
     @Override

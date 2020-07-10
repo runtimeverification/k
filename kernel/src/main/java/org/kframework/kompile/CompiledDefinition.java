@@ -146,16 +146,12 @@ public class CompiledDefinition implements Serializable {
 
         Option<Module> userProgramParsingModule = parsedDefinition.getModule(moduleName + RuleGrammarGenerator.POSTFIX);
         if (userProgramParsingModule.isDefined()) {
-            kem.registerInternalHiddenWarning("Module " + userProgramParsingModule.get().name() + " is user-defined.");
             return userProgramParsingModule;
         } else {
             Option<Module> moduleOption = parsedDefinition.getModule(moduleName);
             Option<Module> programParsingModuleOption = moduleOption.isDefined() ?
                     Option.apply(gen.getProgramsGrammar(moduleOption.get())) :
                     Option.empty();
-            if (programParsingModuleOption.isDefined()) {
-                kem.registerInternalHiddenWarning("Module " + programParsingModuleOption.get().name() + " has been automatically generated.");
-            }
             return programParsingModuleOption;
         }
     }
