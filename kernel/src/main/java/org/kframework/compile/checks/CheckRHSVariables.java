@@ -39,8 +39,7 @@ public class CheckRHSVariables {
     private void check(Rule rule) {
         resetVars();
         Set<String> unboundVariableNames = getUnboundVarNames(rule);
-        boolean isMacro = ExpandMacros.isMacro(rule);
-        boolean errorExistential = !isMacro && this.errorExistential && !(rule.att().contains(Att.LABEL()) && rule.att().get(Att.LABEL()).equals("STDIN-STREAM.stdinUnblock"));
+        boolean errorExistential = this.errorExistential && !(rule.att().contains(Att.LABEL()) && rule.att().get(Att.LABEL()).equals("STDIN-STREAM.stdinUnblock"));
         gatherVars(true, rule.body(), errorExistential);
         gatherVars(false, rule.requires(), errorExistential);
         gatherVars(false, rule.ensures(), errorExistential);
