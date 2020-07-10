@@ -215,7 +215,7 @@ public class DefinitionParsing {
                 options.preprocess,
                 options.bisonLists);
         Module m = definition.mainModule();
-        return options.coverage ? Definition(Module(m.name(), (Set<Module>)m.imports().$bar(Set(definition.getModule("K-IO").get())), m.localSentences(), m.att()), definition.entryModules(), definition.att()) : definition;
+        return options.coverage ? DefinitionTransformer.from(mod -> mod.equals(m) ? Module(m.name(), (Set<Module>)m.imports().$bar(Set(definition.getModule("K-IO").get())), m.localSentences(), m.att()) : mod, "add implicit modules").apply(definition) : definition;
     }
 
     protected Definition resolveConfigBubbles(Definition definition, Module defaultConfiguration, Module mapModule) {
@@ -226,7 +226,7 @@ public class DefinitionParsing {
                 .findFirst().isPresent();
 
         Definition definitionWithConfigBubble = DefinitionTransformer.from(mod -> {
-            if (mod == definition.mainModule()) {
+            if (mod.equals(definition.mainModule())) {
                 java.util.Set<Module> imports = mutable(mod.imports());
                 if (!hasConfigDecl) {
                     imports.add(defaultConfiguration);
