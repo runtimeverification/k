@@ -5,6 +5,6 @@ requires "map-tests.k"
 module INKEYS-4-SPEC
     imports MAP-TESTS
 
-    rule <k> inkeys ( X:MyId in_keys ( M:Map X      |-> 0 ) ) => . </k>
+    rule <k> inkeys ( X:MyId in_keys ( M:Map X      |-> 0 ) ) =>   inkeysResult ( true )                          </k>
 
 endmodule
