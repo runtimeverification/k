@@ -8,11 +8,11 @@ syntax Type ::= t(m1: Int, m2: Int, st: SimpleType)
 
 syntax Type ::= "floatingType" | "intType"
 
-rule floatingType => t(?_, ?_, (float #Or double)) [macro]
+rule floatingType => t(_, _, (float #Or double)) [macro, unboundVariables(_)]
 
 rule floatingType => .K
 
-rule intType => t(?Foo, ?Foo, int) [macro]
+rule intType => t(Foo, Foo, int) [macro, unboundVariables(Foo)]
 
 rule intType => .K
 
