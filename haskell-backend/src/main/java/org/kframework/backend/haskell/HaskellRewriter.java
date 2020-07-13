@@ -313,6 +313,9 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     args.add(smtOptions.smtPrelude);
                 }
                 if (kProveOptions.debugScript != null) {
+                    if (!kProveOptions.debugger) {
+                        throw KEMException.criticalError("Can only use --debug-script with --debugger.");
+                    }
                     args.add("--repl-script");
                     args.add(files.resolveWorkingDirectory(kProveOptions.debugScript).getAbsolutePath());
                 }
