@@ -188,7 +188,7 @@ public class DefinitionParsing {
         Definition trimmed = Definition(parsedDefinition.mainModule(), modules.collect(Collections.toSet()),
                 parsedDefinition.att());
         trimmed = Kompile.excludeModulesByTag(excludedModuleTags).apply(trimmed);
-        Definition afterResolvingConfigBubbles = resolveConfigBubbles(trimmed, parsedDefinition.getModule("DEFAULT-CONFIGURATION").get());
+        Definition afterResolvingConfigBubbles = resolveConfigBubbles(trimmed, parsedDefinition.getModule("DEFAULT-CONFIGURATION").get(), parsedDefinition.getModule("MAP").get());
         RuleGrammarGenerator gen = new RuleGrammarGenerator(afterResolvingConfigBubbles);
         Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles, afterResolvingConfigBubbles.mainModule(), gen);
         saveCachesAndReportParsingErrors();
@@ -218,26 +218,24 @@ public class DefinitionParsing {
         return options.coverage ? DefinitionTransformer.from(mod -> mod.equals(m) ? Module(m.name(), (Set<Module>)m.imports().$bar(Set(definition.getModule("K-IO").get())), m.localSentences(), m.att()) : mod, "add implicit modules").apply(definition) : definition;
     }
 
-    protected Definition resolveConfigBubbles(Definition definition, Module defaultConfiguration) {
+    protected Definition resolveConfigBubbles(Definition definition, Module defaultConfiguration, Module mapModule) {
         boolean hasConfigDecl = stream(definition.mainModule().sentences())
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
                 .filter(b -> b.sentenceType().equals("config"))
                 .findFirst().isPresent();
 
-        Definition definitionWithConfigBubble;
-        if (!hasConfigDecl) {
-            definitionWithConfigBubble = DefinitionTransformer.from(mod -> {
-                if (mod.equals(definition.mainModule())) {
-                    java.util.Set<Module> imports = mutable(mod.imports());
+        Definition definitionWithConfigBubble = DefinitionTransformer.from(mod -> {
+            if (mod.equals(definition.mainModule())) {
+                java.util.Set<Module> imports = mutable(mod.imports());
+                if (!hasConfigDecl) {
                     imports.add(defaultConfiguration);
-                    return Module(mod.name(), (Set<Module>) immutable(imports), mod.localSentences(), mod.att());
                 }
-                return mod;
-            }, "adding default configuration").apply(definition);
-        } else {
-            definitionWithConfigBubble = definition;
-        }
+                imports.add(mapModule);
+                return Module(mod.name(), (Set<Module>) immutable(imports), mod.localSentences(), mod.att());
+            }
+            return mod;
+        }, "adding default configuration").apply(definition);
 
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         caches = loadCaches();
