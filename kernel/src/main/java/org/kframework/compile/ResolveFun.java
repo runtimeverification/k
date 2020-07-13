@@ -164,7 +164,7 @@ public class ResolveFun {
         Set<KEMException> errors = new HashSet<>();
         Set<KVariable> vars = new HashSet<>();
         List<KVariable> result = new ArrayList<>();
-        new GatherVarsVisitor(true, errors, vars).apply(k);
+        new GatherVarsVisitor(true, errors, vars, false).apply(k);
         new ComputeUnboundVariables(true, errors, vars, result::add).apply(k);
         return result;
     }
