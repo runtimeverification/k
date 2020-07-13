@@ -1,0 +1,4 @@
+[Error] Compiler: Found existential variable not supported by concrete backend.
+	Source(errorExistential.k)
+	Location(3,11,3,13)
+[Error] Compiler: Had 1 structural errors.
