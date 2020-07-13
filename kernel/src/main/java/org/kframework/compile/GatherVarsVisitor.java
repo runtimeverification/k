@@ -12,16 +12,23 @@ import java.util.Set;
  */
 public class GatherVarsVisitor extends RewriteAwareVisitor {
     private final Set<KVariable> vars;
+    private final Set<KEMException> errors;
+    private final boolean errorExistential;
 
-    public GatherVarsVisitor(boolean isBody, Set<KEMException> errors, Set<KVariable> vars) {
+    public GatherVarsVisitor(boolean isBody, Set<KEMException> errors, Set<KVariable> vars, boolean errorExistential) {
         super(isBody, errors);
+        this.errors = errors;
         this.vars = vars;
+        this.errorExistential = errorExistential;
     }
 
     @Override
     public void apply(KVariable v) {
         if (isLHS() && !ResolveAnonVar.isAnonVar(v))
             vars.add(v);
+        if (errorExistential && v.name().startsWith("?")) {
+            errors.add(KEMException.compilerError("Found existential variable not supported by concrete backend.", v));
+        }
         super.apply(v);
     }
 
