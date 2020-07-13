@@ -76,4 +76,10 @@ public class KProveOptions {
     @Parameter(names="--concrete-rules", description="List of rule labels to be considered concrete, in addition to " +
             "rules marked with `[concrete]` attribute")
     public List<String> extraConcreteRuleLabels = Collections.emptyList();
+
+    @Parameter(names="--debugger", description="Launch proof in an interactive debugger. Currently only supported by the Haskell backend.")
+    public boolean debugger;
+
+    @Parameter(names="--debug-script", description="Run script passed in specified file when the debugger starts. Used with --debugger.")
+    public String debugScript;
 }
