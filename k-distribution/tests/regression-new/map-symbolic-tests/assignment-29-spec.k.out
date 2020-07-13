@@ -1,1 +1,5 @@
-#True
+<k>
+  assignmentResult ( MAP
+  X |-> BAL_TO
+  Y |-> BAL_FROM -Int 30 )
+</k>

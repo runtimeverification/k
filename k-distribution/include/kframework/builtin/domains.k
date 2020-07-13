@@ -190,7 +190,9 @@ module MAP-JAVA-SYMBOLIC [kast, symbolic]
   rule ((K1 |-> V1) MAP) [ K2 <- V2 ] => (K1 |-> V1) (MAP [ K2 <- V2 ]) requires K1 =/=K K2
 
   rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP              [ K1 <- V2 ] requires K1  ==K K2
-//rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP [ K2 <- V2 ] [ K1 <- V1 ] requires K1 =/=K K2 // potential infinite loop even if `K2 in_keys(MAP)`
+
+  // potential infinite loop
+  // rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP [ K2 <- V2 ] [ K1 <- V1 ] requires K1 =/=K K2
 
   rule K1 in_keys(M K2 |-> _) => true          requires K1  ==K K2 orBool K1 in_keys(M) [simplification]
   rule K1 in_keys(M K2 |-> _) => K1 in_keys(M) requires K1 =/=K K2 [simplification]
@@ -213,7 +215,9 @@ module SET
   /*@ \section{Description} The Set represents a mathematical set (a collection
    of unique items). */
 
-  /*@ Construct a new Set as the union of two different sets ($A \cup B$) */
+  /*@ Construct a new Set as the concatenation (disjoint union) of two different sets
+   *  Concatenating two sets is undefined if their intersection is non-empty, use |Set for normal set union.
+   * */
   syntax Set ::= Set Set                  [left, function, functional, hook(SET.concat), klabel(_Set_), symbol, assoc, comm, unit(.Set), idem, element(SetItem), format(%1%n%2)]
   /*@ Construct an empty Set */
   syntax Set ::= ".Set"                   [function, functional, hook(SET.unit), klabel(.Set), symbol, latex(\dotCt{Set})]
@@ -240,6 +244,10 @@ module SET
 
   /*@ Get an arbitrarily chosen element of the Set */
   syntax KItem ::= choice(Set)                [function, hook(SET.choice), klabel(Set:choice)]
+
+  /*@ Get the union of two sets ($A \cup B$) */
+  syntax Set ::= Set "|Set" Set            [left, function, functional, hook(SET.union)]
+  rule S1:Set |Set S2:Set => S1 (S2 -Set S1)
 endmodule
 
 module LIST

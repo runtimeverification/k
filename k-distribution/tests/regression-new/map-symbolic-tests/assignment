@@ -1,31 +1,31 @@
-rule <k> assignment ( .Map [ x <- 3 ] ) => assignmentResult ( x |-> 3 )  </k>
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult ( ( MAP  X |-> 1 ) [ Y <- 2 ] [ Z <- 3 ] )   </k>
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult ( ( MAP [ Y <- 2 ]  X |-> 1 ) [ Z <- 3 ] )   </k> requires Y =/=K X
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult ( ( MAP [ Y <- 2 ]  X |-> 1 ) [ Z <- 3 ] )   </k> requires Y =/=K X andBool Y in_keys(MAP)
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult ( ( MAP [ Y <- 2 ]  X |-> 1 ) [ Z <- 3 ] )   </k> requires Y =/=K X andBool notBool Y in_keys(MAP) // oracle: ( MAP Y |-> 2 X |-> 1 ) [ Z <- 3 ]
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult ( ( MAP  X |-> 2 ) [ Z <- 3 ]            )   </k> requires Y ==K X
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult (   MAP [ Z <- 3 ]  X |-> 2              )   </k> requires Y ==K X andBool Z in_keys(MAP) // implies Z =/=K X
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult ( ( MAP  X |-> 2 ) [ Z <- 3 ]            )   </k> requires Y ==K X andBool notBool Z in_keys(MAP)
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult (   MAP [ Y <- 2 ] [ Z <- 3 ]  X |-> 1   )   </k> requires Y =/=K X andBool Z =/=K X
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult ( ( MAP [ Y <- 2 ]  X |-> 1 ) [ Z <- 3 ] )   </k> requires Y =/=K X andBool Z =/=K Y
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult (   MAP [ Y <- 2 ] [ Z <- 3 ]  X |-> 1   )   </k> requires Y =/=K X andBool Z =/=K Y andBool notBool Y in_keys(MAP) andBool Z in_keys(MAP) // implies Z =/=K X
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult (   MAP [ Y <- 3 ]  X |-> 1              )   </k> requires Y =/=K X andBool Z  ==K Y andBool Z =/=K X
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult (   MAP [ Y <- 2 ]  X |-> 3              )   </k> requires Y =/=K X andBool Z =/=K Y andBool Z  ==K X
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult (   MAP [ Y <- 2 ] [ Z <- 3 ]  X |-> 1   )   </k> requires Y =/=K X andBool Z =/=K Y andBool Z =/=K X
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult (   MAP [ Y <- 2 ] [ Z <- 3 ]  X |-> 1   )   </k> requires Y =/=K X andBool Z =/=K Y andBool Z =/=K X andBool Y in_keys(MAP) andBool Z in_keys(MAP)
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult (   MAP [ Y <- 2 ] [ Z <- 3 ]  X |-> 1   )   </k> requires Y =/=K X andBool Z =/=K Y andBool Z =/=K X andBool notBool Y in_keys(MAP) andBool notBool Z in_keys(MAP)
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult (   MAP  X |-> 3                         )   </k> requires Y ==K X andBool Z  ==K Y andBool Z  ==K X
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult (  .Map                                  )   </k> requires Y ==K X andBool Z  ==K Y andBool Z  ==K X andBool X in_keys(MAP) // unsatisfiable pre-condition
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult (   MAP  X |-> 3                         )   </k> requires Y ==K X andBool Z  ==K Y andBool Z  ==K X andBool notBool X in_keys(MAP)
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult (   MAP [ Z <- 3 ]  X |-> 2              )   </k> requires Y ==K X andBool Z =/=K Y andBool Z =/=K X
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult ( ( MAP  X |-> 1 ) [ Y <- 2 ] [ Z <- 3 ] )   </k> requires Z  ==K X
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult ( ( MAP  X |-> 1 ) [ Y <- 2 ] [ Z <- 3 ] )   </k> requires Z =/=K X
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult ( ( MAP  X |-> 1 ) [ Y <- 3 ]            )   </k> requires Z  ==K Y
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult ( ( MAP  X |-> 1 ) [ Y <- 2 ] [ Z <- 3 ] )   </k> requires Z =/=K Y
-rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult ( ( MAP  X |-> 1 ) [ Y <- 2 ] [ Z <- 3 ] )   </k> requires Z =/=K Y andBool Z =/=K X
-rule <k> assignment ( (X:MyId |-> 3 1 |-> 4) [ 0 <- 5 ] ) => assignmentResult ( X |-> 3  1 |-> 4   0 |-> 5 ) </k> requires X =/=K 1 // implicit: X =/=K 0 due to sort difference
-rule <k> assignment ( (X:MyId |-> 4        ) [ X <- 3 ] ) => assignmentResult ( X |-> 3                    ) </k>
-rule <k> assignment ( (X:MyId |-> 3 y |-> 4) [ x <- 5 ] ) => assignmentResult ( X |-> 3 [ x <- 5 ] y |-> 4 ) </k> requires X =/=K y
-rule <k> assignment ( (       X:MyId   |-> BAL_TO:Int       Y:MyId   |-> BAL_FROM:Int MAP:Map ) [       Y   <- BAL_FROM -Int 30 ] ) => assignmentResult ( MAP        X   |-> BAL_TO        Y   |-> BAL_FROM -Int 30 ) </k> requires       X   =/=K       Y
-rule <k> assignment ( ( foo ( X:MyId ) |-> BAL_TO:Int foo ( Y:MyId ) |-> BAL_FROM:Int MAP:Map ) [ foo ( Y ) <- BAL_FROM -Int 30 ] ) => assignmentResult ( MAP  foo ( X ) |-> BAL_TO  foo ( Y ) |-> BAL_FROM -Int 30 ) </k> requires       X   =/=K       Y   // implicit: foo ( X ) =/=K foo ( Y )
-rule <k> assignment ( ( foo ( X:MyId ) |-> BAL_TO:Int foo ( Y:MyId ) |-> BAL_FROM:Int MAP:Map ) [ foo ( Y ) <- BAL_FROM -Int 30 ] ) => assignmentResult ( MAP  foo ( X ) |-> BAL_TO  foo ( Y ) |-> BAL_FROM -Int 30 ) </k> requires foo ( X ) =/=K foo ( Y )
+rule <k> assignment ( .Map [ x <- 3 ] ) => . </k>
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k>
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y =/=K X
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y =/=K X andBool Y in_keys(MAP)
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y =/=K X andBool notBool Y in_keys(MAP)
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y ==K X
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y ==K X andBool Z in_keys(MAP)
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y ==K X andBool notBool Z in_keys(MAP)
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y =/=K X andBool Z =/=K X
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y =/=K X andBool Z =/=K Y
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y =/=K X andBool Z =/=K Y andBool notBool Y in_keys(MAP) andBool Z in_keys(MAP)
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y =/=K X andBool Z  ==K Y andBool Z =/=K X
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y =/=K X andBool Z =/=K Y andBool Z  ==K X
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y =/=K X andBool Z =/=K Y andBool Z =/=K X
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y =/=K X andBool Z =/=K Y andBool Z =/=K X andBool Y in_keys(MAP) andBool Z in_keys(MAP)
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y =/=K X andBool Z =/=K Y andBool Z =/=K X andBool notBool Y in_keys(MAP) andBool notBool Z in_keys(MAP)
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y ==K X andBool Z  ==K Y andBool Z  ==K X
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y ==K X andBool Z  ==K Y andBool Z  ==K X andBool X in_keys(MAP)
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y ==K X andBool Z  ==K Y andBool Z  ==K X andBool notBool X in_keys(MAP)
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y ==K X andBool Z =/=K Y andBool Z =/=K X
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Z  ==K X
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Z =/=K X
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Z  ==K Y
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Z =/=K Y
+rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Z =/=K Y andBool Z =/=K X
+rule <k> assignment ( (X:MyId |-> 3 1 |-> 4) [ 0 <- 5 ] ) => . </k> requires X =/=K 1
+rule <k> assignment ( (X:MyId |-> 4) [ X <- 3 ] ) => . </k>
+rule <k> assignment ( (X:MyId |-> 3 y |-> 4) [ x <- 5 ] ) => . </k> requires X =/=K y
+rule <k> assignment ( (       X:MyId   |-> BAL_TO:Int       Y:MyId   |-> BAL_FROM:Int MAP:Map ) [       Y   <- BAL_FROM -Int 30 ] ) => . </k> requires       X   =/=K       Y
+rule <k> assignment ( ( foo ( X:MyId ) |-> BAL_TO:Int foo ( Y:MyId ) |-> BAL_FROM:Int MAP:Map ) [ foo ( Y ) <- BAL_FROM -Int 30 ] ) => . </k> requires       X   =/=K       Y
+rule <k> assignment ( ( foo ( X:MyId ) |-> BAL_TO:Int foo ( Y:MyId ) |-> BAL_FROM:Int MAP:Map ) [ foo ( Y ) <- BAL_FROM -Int 30 ] ) => . </k> requires foo ( X ) =/=K foo ( Y )
