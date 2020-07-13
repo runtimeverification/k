@@ -1,4 +1,1 @@
-<k>
-  lookupResult ( ( MAP
-  Z |-> 1 ) [ Y <- 2 ] [ Z ] )
-</k>
+#True
