@@ -291,7 +291,14 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
 
             private List<String> buildCommonProvingCommand(String defPath, String specPath, String outPath,
                                                            String defModuleName, String specModuleName){
-                String[] koreCommand = haskellKRunOptions.haskellBackendCommand.split("\\s+");
+                String[] koreCommand;
+                if (kProveOptions.debugger && !haskellKRunOptions.haskellBackendCommand.equals("kore-exec")) {
+                    throw KEMException.criticalError("Cannot pass --debugger with --haskell-backend-command.");
+                } else if (kProveOptions.debugger) {
+                    koreCommand = "kore-repl".split("\\s+");
+                } else {
+                    koreCommand = haskellKRunOptions.haskellBackendCommand.split("\\s+");
+                }
 
                 List<String> args = new ArrayList<>();
                 args.addAll(Arrays.asList(koreCommand));
@@ -304,6 +311,13 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 if (smtOptions.smtPrelude != null) {
                     args.add("--smt-prelude");
                     args.add(smtOptions.smtPrelude);
+                }
+                if (kProveOptions.debugScript != null) {
+                    if (!kProveOptions.debugger) {
+                        throw KEMException.criticalError("Can only use --debug-script with --debugger.");
+                    }
+                    args.add("--repl-script");
+                    args.add(files.resolveWorkingDirectory(kProveOptions.debugScript).getAbsolutePath());
                 }
                 return args;
             }
