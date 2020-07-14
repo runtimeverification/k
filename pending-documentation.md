@@ -382,7 +382,7 @@ syntax Exp ::= left:
 
 This indicates that multiplication and division are left-associative, ie, after
 symbols with higher priority are parsed as innermost, symbols are nested with
-the rightmost on top. Addition and subtrasction are right associative, which 
+the rightmost on top. Addition and subtraction are right associative, which 
 is the opposite and indicates that symbols are nested with the leftmost on top.
 Note that this is similar but different from evaluation order, which also
 concerns itself with the ordering of symbols, which is described in the next
