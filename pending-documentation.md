@@ -321,9 +321,9 @@ parse that is chosen. If all the parses were rejected, it is a parse error. If
 multiple parses remain, they might be resolved by further disambiguation such
 as via the `prefer` and `avoid` attributes, but if multiple parses remain after
 disambiguation finishes, this is an ambiguous parse error, indicating there is
-not a unique parse for that  term. In this case, you can get all possible
-parses that were valid by means of the `--gen-glr-parser` command line flag.
-Usually, however, this indicates a problem in your grammar.
+not a unique parse for that term. In the vast majority of cases, this is
+an error and indicates that you ought to either change your grammar or add
+brackets to the term in question. 
 
 Priority is specified in K grammars by means of one of two different
 mechanisms. The first, and simplest, simply replaces the `|` operator in a 
@@ -375,16 +375,18 @@ ambiguities in the above grammar like so:
 syntax Exp ::= left:
                Exp "*" Exp
              | Exp "/" Exp
-             > left:
+             > right:
                Exp "+" Exp
              | Exp "-" Exp
 ```
 
-This indicates that the grammar is left-associative, ie, after symbols with
-higher priority are parsed as innermost, symbols are nested with the rightmost
-on top. Note that this is similar but different from evaluation order, which
-also concerns itself with the ordering of symbols, which is described in the 
-next section.
+This indicates that multiplication and division are left-associative, ie, after
+symbols with higher priority are parsed as innermost, symbols are nested with
+the rightmost on top. Addition and subtrasction are right associative, which 
+is the opposite and indicates that symbols are nested with the leftmost on top.
+Note that this is similar but different from evaluation order, which also
+concerns itself with the ordering of symbols, which is described in the next
+section.
 
 You may note we have not yet introduced the second syntax for priority
 and associativity. In some cases, syntax for a grammar might be spread across
@@ -405,7 +407,7 @@ syntax Exp ::= Exp "*" Exp [mult]
 
 syntax priorities mult div > add sub
 syntax left mult div
-syntax left add sub
+syntax right add sub
 ```
 
 Here we use user-defined attributes to refer to a group of sentences
@@ -420,7 +422,7 @@ syntax Exp ::= Exp "*" Exp [mult]
 
 syntax priorities mult > add
 syntax left mult
-syntax left add
+syntax right add
 ```
 
 Note that there is one other way to describe associativity, but it is
@@ -1413,14 +1415,15 @@ rule foo(0) => 0
 rule foo(_) => 1 [owise]
 ```
 
-Here `foo(0)` is defined explicitly as 0. Any other integer yields the integer
-1. In particular, the second rule above will only be tried after the first
-rule has been shown not to apply.
+Here `foo(0)` is defined explicitly as `0`. Any other integer yields the
+integer `1`. In particular, the second rule above will only be tried after the
+first rule has been shown not to apply.
 
 This is because the first rule has a lower number assigned for its priority
 than the second rule. In practice, each rule in your semantics is implicitly
-or explicitly assigned a numerical priority. Counterintuitively, numbers which
-are lower correspond to **higher** priority, i.e., they will be tried first.
+or explicitly assigned a numerical priority. Rules are tried in increasing
+order of priority, starting at zero and trying each increasing numerical value
+successively.
 
 You can specify the priority of a rule with the `priority` attribute. For
 example, I could equivalently write the second rule above as:
@@ -1429,13 +1432,13 @@ example, I could equivalently write the second rule above as:
 rule foo(_) => 1 [priority(200)]
 ```
 
-The number 200 is not chosen at random. In fact, when you use the `owise`
+The number `200` is not chosen at random. In fact, when you use the `owise`
 attribute, what you are doing is implicitly setting the priority of the rule
-to 200. This has a couple of implications:
+to `200`. This has a couple of implications:
 
 1. Multiple rules with the owise attribute all have the same priority and thus
    can apply in any order.
-2. Rules with priority higher than 200 apply **after** all rules with the 
+2. Rules with priority higher than `200` apply **after** all rules with the 
    `owise` attribute have been tried.
 
 There is one more rule by which priorities are assigned: a rule with no
