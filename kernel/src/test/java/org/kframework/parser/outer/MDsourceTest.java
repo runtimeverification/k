@@ -78,21 +78,24 @@ public class MDsourceTest {
 
     @Test(expected = KEMException.class)
     public void test4() {
-        TagSelector.parseTags("k a", new Source(MDsourceTest.class.toString()));
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        TagSelector.parseTags("k a", new Source(MDsourceTest.class.toString()), kem);
     }
 
     @Test(expected = KEMException.class)
     public void test5() {
-        TagSelector.parseTags("{k a", new Source(MDsourceTest.class.toString()));
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        TagSelector.parseTags("{k a", new Source(MDsourceTest.class.toString()), kem);
     }
 
     @Test
     public void test6() {
-        Assert.assertEquals(2, TagSelector.parseTags("{k a}", new Source(MDsourceTest.class.toString())).size());
-        Assert.assertEquals(2, TagSelector.parseTags("{.k .a}", new Source(MDsourceTest.class.toString())).size());
-        Assert.assertEquals(2, TagSelector.parseTags("{.k a}", new Source(MDsourceTest.class.toString())).size());
-        Assert.assertEquals(1, TagSelector.parseTags("k", new Source(MDsourceTest.class.toString())).size());
-        Assert.assertEquals(0, TagSelector.parseTags("", new Source(MDsourceTest.class.toString())).size());
-        Assert.assertEquals(0, TagSelector.parseTags(" ", new Source(MDsourceTest.class.toString())).size());
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        Assert.assertEquals(2, TagSelector.parseTags("{k a}", new Source(MDsourceTest.class.toString()), kem).size());
+        Assert.assertEquals(2, TagSelector.parseTags("{.k .a}", new Source(MDsourceTest.class.toString()), kem).size());
+        Assert.assertEquals(2, TagSelector.parseTags("{.k a}", new Source(MDsourceTest.class.toString()), kem).size());
+        Assert.assertEquals(1, TagSelector.parseTags("k", new Source(MDsourceTest.class.toString()), kem).size());
+        Assert.assertEquals(0, TagSelector.parseTags("", new Source(MDsourceTest.class.toString()), kem).size());
+        Assert.assertEquals(0, TagSelector.parseTags(" ", new Source(MDsourceTest.class.toString()), kem).size());
     }
 }

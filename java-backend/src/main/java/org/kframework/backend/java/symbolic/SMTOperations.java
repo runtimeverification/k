@@ -8,6 +8,7 @@ import org.kframework.backend.java.util.FormulaContext;
 import org.kframework.backend.java.util.Z3Wrapper;
 import org.kframework.utils.IndentingFormatter;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.SMTSolver;

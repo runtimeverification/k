@@ -57,36 +57,44 @@ public class KExceptionManager {
             registerInternal(e, false);
     }
 
-    public void registerCompilerWarning(String message) {
-        register(ExceptionType.WARNING, KExceptionGroup.COMPILER, message, null, null, null);
+    public void registerCompilerWarning(ExceptionType type, String message) {
+        register(type, KExceptionGroup.COMPILER, message, null, null, null);
     }
 
-    public void registerCompilerWarning(Set<KEMException> errors, String message, HasLocation node) {
-        register(errors, ExceptionType.WARNING, KExceptionGroup.COMPILER, message, null, node.location().orElse(null), node.source().orElse(null));
+    public void registerCompilerWarning(ExceptionType type, Set<KEMException> errors, String message, HasLocation node) {
+        register(errors, type, KExceptionGroup.COMPILER, message, null, node.location().orElse(null), node.source().orElse(null));
     }
 
-    public void registerCompilerWarning(String message, HasLocation node) {
-        register(ExceptionType.WARNING, KExceptionGroup.COMPILER, message, null, node.location().orElse(null), node.source().orElse(null));
+    public void registerCompilerWarning(ExceptionType type, String message, HasLocation node) {
+        register(type, KExceptionGroup.COMPILER, message, null, node.location().orElse(null), node.source().orElse(null));
     }
 
-    public void registerCriticalWarning(String message) {
-        register(ExceptionType.WARNING, KExceptionGroup.CRITICAL, message, null, null, null);
+    public void registerCriticalWarning(ExceptionType type, String message) {
+        register(type, KExceptionGroup.CRITICAL, message, null, null, null);
     }
 
-    public void registerCriticalWarning(String message, Throwable e) {
-        register(ExceptionType.WARNING, KExceptionGroup.CRITICAL, message, e, null, null);
+    public void registerCriticalWarning(ExceptionType type, String message, Throwable e) {
+        register(type, KExceptionGroup.CRITICAL, message, e, null, null);
     }
 
-    public void registerCriticalWarning(String message, HasLocation node) {
-        register(ExceptionType.WARNING, KExceptionGroup.CRITICAL, message, null, node.location().orElse(null), node.source().orElse(null));
+    public void registerCriticalWarning(ExceptionType type, String message, HasLocation node) {
+        register(type, KExceptionGroup.CRITICAL, message, null, node.location().orElse(null), node.source().orElse(null));
     }
 
-    public void registerInternalWarning(String message) {
-        register(ExceptionType.WARNING, KExceptionGroup.INTERNAL, message, null, null, null);
+    public void registerInternalWarning(ExceptionType type, String message) {
+        register(type, KExceptionGroup.INTERNAL, message, null, null, null);
     }
 
-    public void registerInternalWarning(String message, Throwable e) {
-        register(ExceptionType.WARNING, KExceptionGroup.INTERNAL, message, e, null, null);
+    public void registerInternalWarning(ExceptionType type, String message, HasLocation node) {
+        register(type, KExceptionGroup.INTERNAL, message, null, node.location().orElse(null), node.source().orElse(null));
+    }
+
+    public void registerInternalWarning(ExceptionType type, String message, Throwable e) {
+        register(type, KExceptionGroup.INTERNAL, message, e, null, null);
+    }
+
+    public void registerOuterParserWarning(ExceptionType type, String message, Throwable e, Source source, Location location) {
+        register(type, KExceptionGroup.OUTER_PARSER, message, e, location, source);
     }
 
     private void register(ExceptionType type, KExceptionGroup group, String message,

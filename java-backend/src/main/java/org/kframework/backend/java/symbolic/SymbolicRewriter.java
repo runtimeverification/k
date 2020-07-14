@@ -40,6 +40,7 @@ import org.kframework.kprove.KProve;
 import org.kframework.kprove.KProveOptions;
 import org.kframework.rewriter.SearchType;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import javax.annotation.Nullable;

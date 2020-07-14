@@ -60,6 +60,7 @@ import org.kframework.unparser.ToKast;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.algorithms.SCCTarjan;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Function1;

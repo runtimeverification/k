@@ -21,6 +21,7 @@ import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.outer.ExtractFencedKCodeFromMarkdown;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.OuterParsingOptions;

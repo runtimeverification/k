@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.attributes.Location;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.RequestScoped;
 

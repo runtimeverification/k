@@ -19,6 +19,7 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.VisitK;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 

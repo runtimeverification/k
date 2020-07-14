@@ -33,6 +33,7 @@ import org.kframework.rewriter.SearchType;
 import org.kframework.unparser.KPrint;
 import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;

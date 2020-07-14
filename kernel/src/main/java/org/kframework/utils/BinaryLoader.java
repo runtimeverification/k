@@ -4,6 +4,7 @@ package org.kframework.utils;
 import com.google.inject.Inject;
 import jline.internal.Nullable;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.RequestScoped;
 import org.nustaq.serialization.FSTConfiguration;

@@ -71,7 +71,7 @@ public class ExtractFencedKCodeFromMarkdown {
             String cbStr = block.getInfo().toString();
             Set<String> tags = new HashSet<>();
             try {
-                tags = TagSelector.parseTags(blankSb + cbStr, source);
+                tags = TagSelector.parseTags(blankSb + cbStr, source, kem);
             } catch (KEMException e) {
                 kem.registerThrown(e);
             }

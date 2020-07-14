@@ -22,6 +22,7 @@ import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.TTYInfo;

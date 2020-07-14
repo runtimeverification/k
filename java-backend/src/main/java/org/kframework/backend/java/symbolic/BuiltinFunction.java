@@ -9,6 +9,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.kore.KORE;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.lang.invoke.MethodHandle;

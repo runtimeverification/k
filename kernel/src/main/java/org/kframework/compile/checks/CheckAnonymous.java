@@ -15,6 +15,7 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.VisitK;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import static org.kframework.kore.KORE.*;

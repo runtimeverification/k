@@ -13,6 +13,7 @@ import org.kframework.backend.java.z3.Z3Status;
 import org.kframework.builtin.Sorts;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.SMTOptions;
