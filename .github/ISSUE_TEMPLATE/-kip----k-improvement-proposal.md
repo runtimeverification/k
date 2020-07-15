@@ -6,6 +6,11 @@ labels: kip
 assignees: ''
 ---
 
+First fill in the title (template provided).
+Example:
+
+[KIP] - Use `foo` instead of `syntax` for declaring productions
+
 Motivation
 ----------
 
