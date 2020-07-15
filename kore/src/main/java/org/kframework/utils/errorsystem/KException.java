@@ -95,7 +95,7 @@ public class KException implements Serializable, HasLocation {
     }
 
     public enum ExceptionType {
-        ERROR, 
+        ERROR,
         NON_EXHAUSTIVE_MATCH,
         UNDELETED_TEMP_DIR,
         MISSING_HOOK_OCAML,
