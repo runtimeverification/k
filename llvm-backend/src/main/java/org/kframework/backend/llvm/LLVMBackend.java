@@ -49,7 +49,9 @@ public class LLVMBackend extends KoreBackend {
         boolean optimize = kompileOptions.optimize1 || kompileOptions.optimize2 || kompileOptions.optimize3;
         Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), options.heuristic, files.resolveKompiled("dt"), Matching.getThreshold(getThreshold()), !optimize, kompileOptions.global.includesExceptionType(ExceptionType.USELESS_RULE), ex -> {
           kem.addKException(ex);
-          warnings.increment();
+          if (kompileOptions.global.includesExceptionType(ex.getType())) {
+              warnings.increment();
+          }
           return null;
         });
         if (warnings.intValue() > 0 && kem.options.warnings2errors) {
