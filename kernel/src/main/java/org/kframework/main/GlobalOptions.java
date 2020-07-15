@@ -9,6 +9,7 @@ import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DurationConverter;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -123,11 +124,11 @@ public final class GlobalOptions {
     @Parameter(names={"--warnings", "-w"}, converter=WarningsConverter.class, description="Warning level. Values: [all|normal|none]")
     public Warnings warnings = Warnings.NORMAL;
 
-    @Parameter(names="-W", description="Enable specific warning categories. Values: [non-exhaustive-match|undeleted-temp-dir|missing-hook-ocaml|missing-hook-java|missing-syntax-module|invalid-exit-code|deprecated-backend|invalid-config-var|future-error|unused-var|proof-lint|useless-rule|unresolved-function-symbol|malformed-markdown|invalidated-cache|unused-symbol]")
-    public List<ExceptionType> enableWarnings;
+    @Parameter(names="-W", description="Enable specific warning categories. Values: [non-exhaustive-match|undeleted-temp-dir|missing-hook-ocaml|missing-hook-java|missing-syntax-module|invalid-exit-code|deprecated-backend|invalid-config-var|future-error|unused-var|proof-lint|useless-rule|unresolved-function-symbol|malformed-markdown|invalidated-cache|unused-symbol]", converter=ExceptionTypeConverter.class)
+    public List<ExceptionType> enableWarnings = Collections.emptyList();
 
-    @Parameter(names="-Wno", description="Disable specific warning categories.")
-    public List<ExceptionType> disableWarnings;
+    @Parameter(names="-Wno", description="Disable specific warning categories.", converter=ExceptionTypeConverter.class)
+    public List<ExceptionType> disableWarnings = Collections.emptyList();
 
     @Parameter(names={"--warnings-to-errors", "-w2e"}, description="Convert warnings to errors.")
     public boolean warnings2errors = false;
