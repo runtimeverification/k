@@ -101,7 +101,6 @@ public class KException implements Serializable, HasLocation {
         MISSING_HOOK_OCAML,
         MISSING_SYNTAX_MODULE,
         INVALID_EXIT_CODE,
-        DEPRECATED_BACKEND,
         INVALID_CONFIG_VAR,
         FUTURE_ERROR,
         UNUSED_VAR,
