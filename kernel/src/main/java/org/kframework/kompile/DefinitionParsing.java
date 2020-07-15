@@ -490,7 +490,7 @@ public class DefinitionParsing {
             cachedBubbles.getAndIncrement();
             if (kem.options.warnings2errors) {
                 for (KEMException err : parse.getWarnings().stream().map(e -> (KEMException) e).collect(Collectors.toList())) {
-                    if (kem.options.warnings.includesExceptionType(err.exception.getType())) {
+                    if (kem.options.includesExceptionType(err.exception.getType())) {
                         errors.add(KEMException.asError(err));
                     }
                 }
@@ -504,7 +504,7 @@ public class DefinitionParsing {
         parsedBubbles.getAndIncrement();
         if (kem.options.warnings2errors && !result._2().isEmpty()) {
           for (KEMException err : result._2()) {
-            if (kem.options.warnings.includesExceptionType(err.exception.getType())) {
+            if (kem.options.includesExceptionType(err.exception.getType())) {
               errors.add(KEMException.asError(err));
             }
           }

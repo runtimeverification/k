@@ -4,6 +4,7 @@ package org.kframework.utils;
 import com.google.inject.Inject;
 import jline.internal.Nullable;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.RequestScoped;
 import org.nustaq.serialization.FSTConfiguration;
@@ -106,7 +107,7 @@ public class BinaryLoader {
         } catch (FileNotFoundException e) {
             //ignored
         } catch (IOException | ClassNotFoundException e) {
-            kem.registerInternalHiddenWarning("Invalidating serialized cache due to corruption.", e);
+            kem.registerInternalWarning(ExceptionType.INVALIDATED_CACHE, "Invalidating serialized cache due to corruption.", e);
         } catch (InterruptedException e) {
             throw KEMException.criticalError("Interrupted while locking to read " + file.getAbsolutePath(), e);
         }

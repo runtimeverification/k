@@ -12,7 +12,6 @@ import org.kframework.compile.checks.CheckAnonymous;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckFunctions;
 import org.kframework.compile.checks.CheckHOLE;
-import org.kframework.compile.checks.CheckImports;
 import org.kframework.compile.checks.CheckKLabels;
 import org.kframework.compile.checks.CheckLabels;
 import org.kframework.compile.checks.CheckRHSVariables;
@@ -34,6 +33,7 @@ import org.kframework.unparser.ToJson;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -105,7 +105,7 @@ public class Kompile {
         this.sw = sw;
 
         if (kompileOptions.backend.equals("ocaml")) {
-            kem.registerCriticalWarning("The OCaml backend is in the process of being deprecated (final date May 31, 2020). Please switch to the LLVM backend.");
+            kem.registerCriticalWarning(ExceptionType.FUTURE_ERROR, "The OCaml backend is in the process of being deprecated (final date May 31, 2020). Please switch to the LLVM backend.");
         }
     }
 
@@ -352,7 +352,7 @@ public class Kompile {
                 throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
             } else {
                 for (KEMException error : errors) {
-                    kem.registerCriticalWarning(error.exception.getMessage() +
+                    kem.registerCriticalWarning(ExceptionType.FUTURE_ERROR, error.exception.getMessage() +
                             "\nNote: this warning will become an error in subsequent releases.",
                             error.exception);
                 }

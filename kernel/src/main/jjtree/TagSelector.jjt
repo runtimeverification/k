@@ -12,6 +12,8 @@ import java.io.StringReader;
 import java.util.Set;
 import java.util.HashSet;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.attributes.Source;
 import org.kframework.attributes.Location;
 import java.util.function.Function;
@@ -40,7 +42,7 @@ public class TagSelector {
     }
   }
 
-  public static Set<String> parseTags(String input, Source source) {
+  public static Set<String> parseTags(String input, Source source, KExceptionManager kem) {
     TagSelector t = new TagSelector(new StringReader(input));
     Set<String> tags = new HashSet();
     try {
@@ -54,7 +56,7 @@ public class TagSelector {
               tags.add(tag);
           }
     } catch (ParseException e) {
-        throw KEMException.outerParserHiddenWarning("Malformed Markdown code block annotation. Encountered "
+        kem.registerOuterParserWarning(ExceptionType.MALFORMED_MARKDOWN, "Malformed Markdown code block annotation. Encountered "
               + e.tokenImage[e.currentToken.next.kind]
               + ".\nWas expecting one of: " + Stream.of(e.expectedTokenSequences)
               // using an anonymous class because JavaCC doesn't support Java 8 syntax.

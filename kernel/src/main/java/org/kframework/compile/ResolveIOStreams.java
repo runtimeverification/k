@@ -333,7 +333,7 @@ public class ResolveIOStreams {
                         sorts.add(sort);
                     } else {
                         if (k.att().getOption(Location.class).isDefined()) { // warning only for user-provided rules
-                            kem.registerCompilerWarning("Unsupported matching pattern in stdin stream cell." +
+                            throw KEMException.compilerError("Unsupported matching pattern in stdin stream cell." +
                                     "\nThe currently supported pattern is: <in> ListItem(V:Sort) => .List ... </in>", k);
                         }
                     }
