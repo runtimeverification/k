@@ -98,7 +98,7 @@ public class KException implements Serializable, HasLocation {
         ERROR, 
         NON_EXHAUSTIVE_MATCH,
         UNDELETED_TEMP_DIR,
-        MISSING_HOOK,
+        MISSING_HOOK_OCAML,
         MISSING_SYNTAX_MODULE,
         INVALID_EXIT_CODE,
         DEPRECATED_BACKEND,
@@ -107,6 +107,7 @@ public class KException implements Serializable, HasLocation {
         UNUSED_VAR,
         PROOF_LINT,
         FIRST_HIDDEN, // warnings below here are hidden by default
+        MISSING_HOOK_JAVA,
         USELESS_RULE,
         UNRESOLVED_FUNCTION_SYMBOL,
         MALFORMED_MARKDOWN,
