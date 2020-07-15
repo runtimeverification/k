@@ -114,7 +114,7 @@ public class KExceptionManager {
 
 
     private void registerInternal(KException exception, boolean _throw) {
-        if (!options.warnings.includesExceptionType(exception.type))
+        if (!options.includesExceptionType(exception.type))
             return;
         if (_throw && (exception.type == ExceptionType.ERROR || options.warnings2errors)) {
             throw new KEMException(exception, ExceptionType.ERROR);
@@ -147,7 +147,7 @@ public class KExceptionManager {
 
     public void registerThrown(KEMException e) {
         KException exception = e.exception;
-        if (!options.warnings.includesExceptionType(exception.type))
+        if (!options.includesExceptionType(exception.type))
             return;
         if (options.warnings2errors) {
             exceptions.add(new KException(ExceptionType.ERROR, exception.exceptionGroup, exception.getMessage(), exception.getSource(), exception.getLocation(), exception.getException()));

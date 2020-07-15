@@ -370,7 +370,7 @@ public class KItem extends Term implements KItemRepresentation {
                 Term result = kItem.isEvaluable() ? evaluateFunction(kItem, context) : kItem.applyAnywhereRules(context);
                 if (result instanceof KItem && ((KItem) result).isEvaluable() && result.isGround()) {
                     // we do this check because this warning message can be very large and cause OOM
-                    if (options.warnings.includesExceptionType(ExceptionType.UNRESOLVED_FUNCTION_SYMBOL) && stage == Stage.REWRITING) {
+                    if (options.includesExceptionType(ExceptionType.UNRESOLVED_FUNCTION_SYMBOL) && stage == Stage.REWRITING) {
                         StringBuilder sb = new StringBuilder();
                         sb.append("Unable to resolve function symbol:\n\t\t");
                         sb.append(result);
