@@ -29,11 +29,12 @@ configVars=
 dryRun=false
 result=1
 
-tempFiles=()
+tempDir="$(mktemp -d tmp.krun.XXXXXXXXXX)"
+tempFiles=("$tempDir")
 trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
 
 input_file="$(mktemp tmp.in.XXXXXXXXXX)"
-kore_output="$(mktemp tmp.out.XXXXXXXXXX)"
+kore_output="$tempDir/result.kore"
 tempFiles+=("$input_file")
 tempFiles+=("$kore_output")
 
