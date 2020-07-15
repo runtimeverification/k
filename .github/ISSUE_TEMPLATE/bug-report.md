@@ -4,6 +4,7 @@ about: Create a report to help us improve
 title: "[Bug] [kompile|kast|krun|kprove|ksearch] - DESCRIPTION"
 labels: bug
 assignees: ''
+
 ---
 
 **Categorize the bug**
