@@ -45,6 +45,9 @@ SOURCE_EXT?=$(or $(and $(wildcard $(DEF).k), k), $(or $(and $(wildcard $(DEF).md
 ifeq ($(KOMPILE_BACKEND),llvm)
 KRUN=$(abspath $(MAKEFILE_PATH)/../../bin/kx)
 endif
+ifeq ($(KOMPILE_BACKEND),haskell)
+KRUN=$(abspath $(MAKEFILE_PATH)/../../bin/kx)
+endif
 
 CHECK=| diff -
 REMOVE_PATHS=| sed 's!'`pwd`'/\(\./\)\{0,1\}!!g'
