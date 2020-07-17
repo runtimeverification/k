@@ -1,4 +1,4 @@
-requires "rat.k"
+requires "rat.md"
 
 module A
 
