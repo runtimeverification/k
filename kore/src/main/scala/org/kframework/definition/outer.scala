@@ -347,29 +347,9 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     case m: Module => m.name == name && m.sentences == sentences
   }
 
-  def flattened()   : FlatModule                = new FlatModule(name, imports.map(m => m.name), localSentences, att)
+  def flattened()   : FlatModule                = new FlatModule(name, imports.map(m => Import(m.name, Att.empty)), localSentences, att)
   def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ imports.map(m => m.flatModules._2).flatten)
 }
-
-object Import {
-  val syntaxString = "$SYNTAX"
-
-  def isSyntax(name: String): Boolean = name.endsWith(syntaxString)
-
-  def asSyntax(name: String): String =
-    if (isSyntax(name))
-      name
-    else
-      name ++ syntaxString
-
-  def noSyntax(name: String): String =
-    if (isSyntax(name))
-      name.dropRight(syntaxString.length)
-    else
-      name
-}
-
-// hooked but different from core, Import is a sentence here
 
 trait HasAtt {
   val att: Att

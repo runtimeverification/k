@@ -136,7 +136,7 @@ public class ToJson {
         jmod.add("node", JsonParser.KFLATMODULE);
 
         JsonArrayBuilder imports = Json.createArrayBuilder();
-        mod.imports().foreach(i -> imports.add(i));
+        mod.imports().foreach(i -> imports.add(i.name()));
 
         JsonArrayBuilder sentences = Json.createArrayBuilder();
         mod.localSentences().foreach(s -> sentences.add(toJson(s)));
