@@ -1,0 +1,7 @@
+[Error] Compiler: Cell bags are not supported except on the Java backend. If
+you want this feature, file an issue at https://github.com/kframework/k  As a
+workaround, you can add the attribute type="Set" and add a unique identifier to
+each element in the set.
+	Source(test.k)
+	Location(18,17,32,21)
+[Error] Compiler: Had 1 structural errors.
