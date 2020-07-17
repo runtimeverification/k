@@ -24,9 +24,12 @@ public class CheckConfigurationCells {
 
     private final Module module;
 
-    public CheckConfigurationCells(Set<KEMException> errors, Module module) {
+    private final boolean isSymbolicKast;
+
+    public CheckConfigurationCells(Set<KEMException> errors, Module module, boolean isSymbolicKast) {
         this.errors = errors;
         this.module = module;
+        this.isSymbolicKast = isSymbolicKast;
     }
 
     public void check(Sentence s) {
@@ -49,6 +52,13 @@ public class CheckConfigurationCells {
                         }
                         cells.add(sort);
                     }
+                }
+            }
+            if (p.att().getOptional("multiplicity").orElse("").equals("*") && p.att().getOptional("type").orElse("Bag").equals("Bag")) {
+                if (!isSymbolicKast) {
+                    errors.add(KEMException.compilerError("Cell bags are not supported except on the Java backend. If you want "
+                          + "this feature, file an issue at https://github.com/kframework/k  As a workaround, you can add the attribute "
+                          + "type=\"Set\" and add a unique identifier to each element in the set.", p));
                 }
             }
         }
