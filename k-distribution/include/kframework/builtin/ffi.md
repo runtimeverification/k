@@ -91,7 +91,7 @@ type of the function, and returns the return value of the function as a
 `Bytes`.
 
 ```k
-                 | "#ffiCall" "(" Int "," List "," List "," List "," FFIType ")" [function, hook(FFI.call_variadic)]
+  syntax Bytes ::= "#ffiCall" "(" Int "," List "," List "," List "," FFIType ")" [function, hook(FFI.call_variadic)]
 ```
 
 ### Generic
@@ -107,7 +107,7 @@ containing how many of the arguments of the call are fixed or not, and an
 value of the function as a `Bytes`.
 
 ```k
-                 | "#ffiCall" "(" Bool "," Int "," List "," List "," Int "," FFIType ")" [function]
+  syntax Bytes ::= "#ffiCall" "(" Bool "," Int "," List "," List "," Int "," FFIType ")" [function]
 
   rule #ffiCall(false, Addr::Int, Args::List, Types::List, _, Ret::FFIType) => #ffiCall(Addr, Args, Types, Ret)
   rule #ffiCall(true, Addr::Int, Args::List, Types::List, NFixed::Int, Ret::FFIType) => #ffiCall(Addr, Args, range(Types, 0, size(Types) -Int NFixed), range(Types, NFixed, 0), Ret)
@@ -169,7 +169,7 @@ by a previous call to `#alloc`. If `Key` was not used in a previous call to
 `#alloc`, or the memory was already freed, no action is taken. It will generate
 undefined behavior if the `Bytes` term returned by the previous call to
 `#alloc` is still referenced by any other term in the configuration or a
-currently evaluating rule.
+currently evaluating rule. The function returns `.K`.
 
 ```k
   syntax K ::= "#free" "(" KItem ")" [function, hook(FFI.free)]
