@@ -1,4 +1,4 @@
-requires "substitution.k"
+requires "substitution.md"
 
 module TEST-SYNTAX
 endmodule
