@@ -69,14 +69,18 @@ public class KILtoKORE extends KILTransformation<Object> {
                 .filter(j -> !(j instanceof org.kframework.kil.Import))
                 .flatMap(j -> apply(j).stream()).collect(Collectors.toSet());
 
-        Set<String> importedModuleNames = m.getItems().stream()
+        Set<org.kframework.definition.Import> importedModuleNames = m.getItems().stream()
                 .filter(imp -> imp instanceof Import)
-                .map(imp -> ((Import) imp).getName())
+                .map(imp -> apply((Import)imp))
                 .collect(Collectors.toSet());
 
         Att att = convertAttributes(m);
 
         return new FlatModule(moduleName, immutable(importedModuleNames), immutable(items), att);
+    }
+
+    public org.kframework.definition.Import apply(Import imp) {
+        return org.kframework.definition.Import.apply(imp.getName(), convertAttributes(imp));
     }
 
     public org.kframework.definition.Definition apply(Definition d) {
