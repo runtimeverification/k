@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 
 public class InputStreamFile extends File {
 
@@ -19,10 +20,9 @@ public class InputStreamFile extends File {
     }
 
     public long tell() throws IOException {
-        kem.registerInternalWarning("Potentially unsound file system behavior: attempting to tell from "
+        throw KEMException.internalError("Potentially unsound file system behavior: attempting to tell from "
                 + "stdin. If you are interested in this behavior, please "
                 + "file an issue on github.");
-        throw new IOException("ESPIPE");
         // technically the above code is incorrect (it should be what is below); however,
         // we cannot guarantee in a client/server architecture that we have access to
         // the original file descriptors of the client, so we can't actually support this
@@ -38,10 +38,9 @@ public class InputStreamFile extends File {
     }
 
     public void seek(long pos) throws IOException {
-        kem.registerInternalWarning("Potentially unsound file system behavior: attempting to seek from "
+        throw KEMException.internalError("Potentially unsound file system behavior: attempting to seek from "
             + "stdin. If you are interested in this behavior, please "
             + "file an issue on github.");
-        throw new IOException("ESPIPE");
         //see comment on tell
 //        try {
 //            is.getChannel().position(pos);
@@ -57,9 +56,8 @@ public class InputStreamFile extends File {
         //IOException here. An IOException in the api corresponds to a system call failing in a
         //well-defined fashion. Here we throw an error because the behavior
         //is undefined.
-        kem.registerInternalWarning("Unsupported file system behavior: tried to write to stdin."
+        throw KEMException.internalError("Unsupported file system behavior: tried to write to stdin."
                 + " If you are interested in this behavior, please file an issue on github.");
-        throw new UnsupportedOperationException();
     }
 
     public byte getc() throws IOException {
@@ -94,9 +92,8 @@ public class InputStreamFile extends File {
 
     public void write(byte[] b) throws IOException {
         //see comment on putc
-        kem.registerInternalWarning("Unsupported file system behavior: tried to write to stdin."
+        throw KEMException.internalError("Unsupported file system behavior: tried to write to stdin."
                 + " If you are interested in this behavior, please file an issue on github.");
-        throw new UnsupportedOperationException();
     }
 
     void close() throws IOException {

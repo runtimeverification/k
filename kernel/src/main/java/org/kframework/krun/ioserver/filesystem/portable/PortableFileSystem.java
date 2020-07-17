@@ -82,9 +82,8 @@ public class PortableFileSystem implements FileSystem {
                     //man 2 open says you can open a directory in readonly mode with open, but
                     //java has no support for it. So we throw an UnsupportedOperationException
                     //instead of failing with EISDIR
-                    kem.registerInternalWarning("Unsupported file system behavior: tried to open a directory."
-                            + " If you are interested in this behavior, please file an issue on github.");
-                    throw new UnsupportedOperationException();
+                    throw KEMException.internalError("Unsupported file system behavior: tried to open a directory."
+                            + " If you are interested in this behavior, please file an issue on github.", ioe);
                 }
                 throw ioe;
             }

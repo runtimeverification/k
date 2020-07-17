@@ -60,6 +60,7 @@ import org.kframework.unparser.ToKast;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.algorithms.SCCTarjan;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Function1;
@@ -1296,7 +1297,7 @@ public class DefinitionToOcaml implements Serializable {
                         }
                         sb.append("\nwith Not_implemented -> match c with \n");
                     } else if (!hook.equals(".")) {
-                        kem.registerCompilerWarning("missing entry for hook " + hook);
+                        kem.registerCompilerWarning(ExceptionType.MISSING_HOOK_OCAML, "missing entry for hook " + hook);
                     }
 
                     if (mainModule.attributesFor().apply(functionLabel).contains(Att.PREDICATE(), Sort.class)) {

@@ -19,6 +19,7 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.VisitK;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
@@ -145,7 +146,7 @@ public class CheckKLabels {
                 continue;
             }
             if (canonicalPath == null || !s.get().source().contains(canonicalPath)) {
-                kem.registerCompilerWarning(errors, "Symbol '" + symbol + "' defined but not used. Add the 'unused' attribute if this is intentional.", klabelProds.get(symbol));
+                kem.registerCompilerWarning(ExceptionType.UNUSED_SYMBOL, errors, "Symbol '" + symbol + "' defined but not used. Add the 'unused' attribute if this is intentional.", klabelProds.get(symbol));
             }
         }
     }

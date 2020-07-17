@@ -33,7 +33,4 @@ public class LLVMKompileOptions {
 
     @Parameter(names="--no-llvm-kompile", description="Do not invoke llvm-kompile. Useful if you want to do it yourself when building with the LLVM backend.")
     public boolean noLLVMKompile;
-
-    @Parameter(names="-Wuseless", description="Warn about useless top-level rules. This can be quite time-consuming to compute if the semantics is particularly large, so it is disabled by default.")
-    public boolean warnUseless;
 }

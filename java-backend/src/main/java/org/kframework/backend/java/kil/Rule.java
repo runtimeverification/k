@@ -96,14 +96,6 @@ public class Rule extends JavaSymbolicObject<Rule> implements HasAtt {
 
             if (sortPredArg == null) {
                 isSortPredicate = false;
-
-                /*
-                 * YilongL: the right-hand side of the sort predicate rule
-                 * is not necessarily {@code BoolToken#True}? for example:
-                 *     rule isNat(I:Int) => '_>=Int_(I:Int,, Int(#"0"))
-                 */
-                // TODO(YilongL): properly re-implement support for sort predicate rules
-//                GlobalSettings.kem.registerCriticalWarning("Unexpected sort predicate rule: " + this, null, this);
             }
         } else {
             predSort = null;

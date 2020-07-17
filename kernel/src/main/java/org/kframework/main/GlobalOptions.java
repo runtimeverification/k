@@ -3,12 +3,16 @@ package org.kframework.main;
 
 import com.beust.jcommander.Parameter;
 import com.google.inject.Inject;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DurationConverter;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public final class GlobalOptions {
@@ -44,7 +48,7 @@ public final class GlobalOptions {
         /**
          * All warnings and errors except hidden warnings
          */
-        NORMAL(EnumSet.complementOf(EnumSet.of(ExceptionType.HIDDENWARNING))),
+        NORMAL(EnumSet.range(ExceptionType.ERROR, ExceptionType.FIRST_HIDDEN)),
 
         /**
          * No warnings, only errors
@@ -56,9 +60,7 @@ public final class GlobalOptions {
         }
         private Set<ExceptionType> typesIncluded;
 
-        public boolean includesExceptionType(ExceptionType e) {
-            return typesIncluded.contains(e);
-        }
+        public Set<ExceptionType> getTypesIncluded() { return typesIncluded; }
     }
 
     public static class WarningsConverter extends BaseEnumConverter<Warnings> {
@@ -71,6 +73,34 @@ public final class GlobalOptions {
         public Class<Warnings> enumClass() {
             return Warnings.class;
         }
+    }
+
+    public static class ExceptionTypeConverter extends BaseEnumConverter<ExceptionType> {
+
+        public ExceptionTypeConverter(String optionName) {
+            super(optionName);
+        }
+
+        @Override
+        public Class<ExceptionType> enumClass() {
+            return ExceptionType.class;
+        }
+    }
+
+    private Set<ExceptionType> typesIncluded;
+
+    public boolean includesExceptionType(ExceptionType e) {
+        Set<ExceptionType> t = typesIncluded;
+        if (t == null) {
+            t = new HashSet<>(warnings.getTypesIncluded());
+            t.addAll(enableWarnings);
+            t.removeAll(disableWarnings);
+            if (!t.contains(ExceptionType.ERROR)) {
+                throw KEMException.criticalError("Cannot disable errors with -Wno.");
+            }
+            typesIncluded = t;
+        }
+        return t.contains(e);
     }
 
     @Parameter(names={"--help", "-h"}, description="Print this help message", help = true)
@@ -93,6 +123,12 @@ public final class GlobalOptions {
 
     @Parameter(names={"--warnings", "-w"}, converter=WarningsConverter.class, description="Warning level. Values: [all|normal|none]")
     public Warnings warnings = Warnings.NORMAL;
+
+    @Parameter(names="-W", description="Enable specific warning categories. Values: [non-exhaustive-match|undeleted-temp-dir|missing-hook-ocaml|missing-hook-java|missing-syntax-module|invalid-exit-code|deprecated-backend|invalid-config-var|future-error|unused-var|proof-lint|useless-rule|unresolved-function-symbol|malformed-markdown|invalidated-cache|unused-symbol]", converter=ExceptionTypeConverter.class)
+    public List<ExceptionType> enableWarnings = Collections.emptyList();
+
+    @Parameter(names="-Wno", description="Disable specific warning categories.", converter=ExceptionTypeConverter.class)
+    public List<ExceptionType> disableWarnings = Collections.emptyList();
 
     @Parameter(names={"--warnings-to-errors", "-w2e"}, description="Convert warnings to errors.")
     public boolean warnings2errors = false;

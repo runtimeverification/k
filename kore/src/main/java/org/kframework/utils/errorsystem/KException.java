@@ -17,16 +17,8 @@ public class KException implements Serializable, HasLocation {
     private final Throwable exception;
     private StringBuilder trace = new StringBuilder();
 
-    private static final Map<ExceptionType, String> types;
     private static final Map<KExceptionGroup, String> labels;
     static {
-        types = new HashMap<KException.ExceptionType, String>();
-        types.put(ExceptionType.ERROR, "Error");
-        types.put(ExceptionType.WARNING, "Warning");
-        types.put(ExceptionType.HIDDENWARNING, "Warning");
-        types.put(ExceptionType.NON_EXHAUSTIVE_MATCH, "Warning");
-        types.put(ExceptionType.USELESS_RULE, "Warning");
-
         labels = new HashMap<KException.KExceptionGroup, String>();
         labels.put(KExceptionGroup.COMPILER, "Compiler");
         labels.put(KExceptionGroup.OUTER_PARSER, "Outer Parser");
@@ -103,7 +95,23 @@ public class KException implements Serializable, HasLocation {
     }
 
     public enum ExceptionType {
-        ERROR, WARNING, HIDDENWARNING, NON_EXHAUSTIVE_MATCH, USELESS_RULE
+        ERROR,
+        NON_EXHAUSTIVE_MATCH,
+        UNDELETED_TEMP_DIR,
+        MISSING_HOOK_OCAML,
+        MISSING_SYNTAX_MODULE,
+        INVALID_EXIT_CODE,
+        INVALID_CONFIG_VAR,
+        FUTURE_ERROR,
+        UNUSED_VAR,
+        PROOF_LINT,
+        FIRST_HIDDEN, // warnings below here are hidden by default
+        MISSING_HOOK_JAVA,
+        USELESS_RULE,
+        UNRESOLVED_FUNCTION_SYMBOL,
+        MALFORMED_MARKDOWN,
+        INVALIDATED_CACHE,
+        UNUSED_SYMBOL
     }
 
     @Override
@@ -112,7 +120,7 @@ public class KException implements Serializable, HasLocation {
     }
 
     public String toString(boolean verbose) {
-        return "[" + types.get(type) + "] " + labels.get(exceptionGroup) + ": " + message
+        return "[" + (type == ExceptionType.ERROR ? "Error" : "Warning") + "] " + labels.get(exceptionGroup) + ": " + message
                 + (exception == null ? "" : " (" + exception.getClass().getSimpleName() + ": " + exception.getMessage() + ")")
                 + trace.toString() + traceTail()
                 + (source == null ? "" : "\n\t" + source)

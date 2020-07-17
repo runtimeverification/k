@@ -21,6 +21,7 @@ import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.outer.ExtractFencedKCodeFromMarkdown;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.OuterParsingOptions;
@@ -316,7 +317,7 @@ public class ParserUtils {
         opt = modules.stream().filter(m -> m.name().equals(syntaxModuleName)).findFirst();
         Module syntaxModule;
         if (!opt.isPresent()) {
-            kem.registerCompilerWarning("Could not find main syntax module with name " + syntaxModuleName
+            kem.registerCompilerWarning(ExceptionType.MISSING_SYNTAX_MODULE, "Could not find main syntax module with name " + syntaxModuleName
                     + " in definition.  Use --syntax-module to specify one. Using " + mainModuleName + " as default.");
             syntaxModule = mainModule;
         } else {

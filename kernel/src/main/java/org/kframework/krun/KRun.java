@@ -22,6 +22,7 @@ import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.TTYInfo;
@@ -118,7 +119,7 @@ public class KRun {
         }
 
         if (vars.size() != 1) {
-            kem.registerCriticalWarning("Found " + vars.size() + " integer variables in exit code pattern. Returning 111.");
+            kem.registerCriticalWarning(ExceptionType.INVALID_EXIT_CODE, "Found " + vars.size() + " integer variables in exit code pattern. Returning 111.");
             return 111;
         }
         return vars.iterator().next();
@@ -190,7 +191,7 @@ public class KRun {
         for (KToken inputConfigVar : inputConfigVars) {
             if (!defConfigVars.contains(inputConfigVar)) {
                 if (!inputConfigVar.s().equals("$STDIN") && !inputConfigVar.s().equals("$IO")) {
-                    kem.registerCompilerWarning("User specified configuration variable " + inputConfigVar.s() + " which does not exist.");
+                    kem.registerCompilerWarning(ExceptionType.INVALID_CONFIG_VAR, "User specified configuration variable " + inputConfigVar.s() + " which does not exist.");
                 }
             }
         }
