@@ -155,6 +155,13 @@ public class ParserUtils {
 
                 String definitionFileName = ((Require) di).getValue();
 
+                if (definitionFileName.equals("ffi.k")) {
+                    kem.registerCompilerWarning(ExceptionType.FUTURE_ERROR,
+                        "Requiring a K file in the K builtin directory via " +
+                        "a deprecated filename. Please replace \"" + definitionFileName +
+                        "\" with \"" + definitionFileName.substring(0, definitionFileName.length() - 2) + ".md\".", di);
+                }
+
                 ArrayList<File> allLookupDirectoris = new ArrayList<>(lookupDirectories);
                 allLookupDirectoris.add(1, currentDirectory);
 
