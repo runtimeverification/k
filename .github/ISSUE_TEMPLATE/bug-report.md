@@ -13,6 +13,21 @@ Examples:
 
 [Bug] krun - segfault at runtime when dividing by zero
 
+K Version
+---------
+
+Tell us what version of K you are using.
+
+Example:
+
+```
+$ kompile --version
+RV-K version 1.0-SNAPSHOT
+Git revision: 1bd3a49
+Git branch: UNKNOWN
+Build date: Sat Jul 11 01:41:19 UTC 2020
+```
+
 Description
 -----------
 
