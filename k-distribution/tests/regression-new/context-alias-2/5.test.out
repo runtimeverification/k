@@ -1,5 +1,5 @@
   {
-    Result
+    Result:GeneratedTopCell
   #Equals
     <generatedTop>
       <k>
@@ -12,7 +12,7 @@
   }
 #Or
   {
-    Result
+    Result:GeneratedTopCell
   #Equals
     <generatedTop>
       <k>
@@ -25,7 +25,7 @@
   }
 #Or
   {
-    Result
+    Result:GeneratedTopCell
   #Equals
     <generatedTop>
       <k>
@@ -38,7 +38,7 @@
   }
 #Or
   {
-    Result
+    Result:GeneratedTopCell
   #Equals
     <generatedTop>
       <k>
@@ -51,7 +51,7 @@
   }
 #Or
   {
-    Result
+    Result:GeneratedTopCell
   #Equals
     <generatedTop>
       <k>
