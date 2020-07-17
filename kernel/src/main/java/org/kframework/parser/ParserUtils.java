@@ -162,10 +162,10 @@ public class ParserUtils {
                         "\" with \"" + definitionFileName.substring(0, definitionFileName.length() - 2) + ".md\".", di);
                 }
 
-                ArrayList<File> allLookupDirectoris = new ArrayList<>(lookupDirectories);
-                allLookupDirectoris.add(1, currentDirectory);
+                ArrayList<File> allLookupDirectories = new ArrayList<>(lookupDirectories);
+                allLookupDirectories.add(1, currentDirectory); //after builtin directory but before anything else
 
-                Optional<File> definitionFile = allLookupDirectoris.stream()
+                Optional<File> definitionFile = allLookupDirectories.stream()
                         .map(lookupDirectory -> {
                             if (new File(definitionFileName).isAbsolute()) {
                                 return new File(definitionFileName);
@@ -190,7 +190,7 @@ public class ParserUtils {
                 }
                 else
                     throw KEMException.criticalError("Could not find file: " +
-                            definitionFileName + "\nLookup directories:" + allLookupDirectoris, di);
+                            definitionFileName + "\nLookup directories:" + allLookupDirectories, di);
             }
         }
         return results;
