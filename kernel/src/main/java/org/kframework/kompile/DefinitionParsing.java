@@ -110,8 +110,8 @@ public class DefinitionParsing {
                 FileUtil.load(definitionFile),
                 Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),
-                ListUtils.union(lookupDirectories,
-                        Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
+                ListUtils.union(Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
+                  lookupDirectories),
                 kore,
                 options.preprocess,
                 options.bisonLists);

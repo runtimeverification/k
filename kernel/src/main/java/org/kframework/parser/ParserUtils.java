@@ -156,7 +156,7 @@ public class ParserUtils {
                 String definitionFileName = ((Require) di).getValue();
 
                 ArrayList<File> allLookupDirectoris = new ArrayList<>(lookupDirectories);
-                allLookupDirectoris.add(0, currentDirectory);
+                allLookupDirectoris.add(1, currentDirectory);
 
                 Optional<File> definitionFile = allLookupDirectoris.stream()
                         .map(lookupDirectory -> {
