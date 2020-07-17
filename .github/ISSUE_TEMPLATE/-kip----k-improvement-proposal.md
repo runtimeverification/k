@@ -21,14 +21,20 @@ Motivation
 Example K Code
 --------------
 
-Provide a small K-psuedocode example of what you would like to be able to say.
+Provide a small, complete, and self-contained example of what you would like to be able to say in K.
+Try to make it so that your example would `kompile` correctly if this feature were implemented.
 
 Example:
 
 I would like to be able to use `foo` instead of `syntax` for declaring AST nodes:
 
 ```
-foo Bar ::= "newBar" [function]
+module MYMODULE
+  imports BOOL
+
+  foo    Bar ::= "newBar" [function]
+  syntax Bar ::= "anotherBar"
+endmodule
 ```
 
 Documentation
