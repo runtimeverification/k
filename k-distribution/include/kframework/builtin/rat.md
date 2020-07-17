@@ -22,34 +22,21 @@ module RAT-SYNTAX
   syntax Rat ::= Int
 ```
 
-Exponentiation
---------------
+Arithmetic
+----------
 
-You can raise a rational number to any negative or nonnegative integer:
+You can:
+
+* Raise a rational number to any negative or nonnegative integer.
+* Multiply or divide two rational numbers to obtain a product or quotient.
+* Add or subtract two rational numbers to obtain a sum or difference.
 
 ```k
   syntax Rat ::= left:
                  Rat "^Rat" Int [function, functional, klabel(_^Rat_), symbol, left, smtlib(ratpow), hook(RAT.pow)]
-```
-
-Multiplication and Division
----------------------------
-
-You can multiply or divide two rational numbers to obtain a product or
-quotient:
-
-```k
                > left:
                  Rat "*Rat" Rat [function, functional, klabel(_*Rat_), symbol, left, smtlib(ratmul), hook(RAT.mul)]
                | Rat "/Rat" Rat [function,             klabel(_/Rat_), symbol, left, smtlib(ratdiv), hook(RAT.div)]
-```
-
-Addition and Subtraction
-------------------------
-
-You can add or subtract two rational numbers to obtain a sum or difference:
-
-```k
                > left:
                  Rat "+Rat" Rat [function, functional, klabel(_+Rat_), symbol, left, smtlib(ratadd), hook(RAT.add)]
                | Rat "-Rat" Rat [function, functional, klabel(_-Rat_), symbol, left, smtlib(ratsub), hook(RAT.sub)]
