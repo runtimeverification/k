@@ -1,4 +1,4 @@
-require "ffi.k"
+require "ffi.md"
 require "json.k"
 require "rat.k"
 require "substitution.k"

@@ -8,6 +8,7 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Configuration;
 import org.kframework.definition.Definition;
 import org.kframework.definition.FlatModule;
+import org.kframework.definition.Import;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -155,8 +156,8 @@ public class JsonParser {
         String name = data.getString("name");
 
         JsonArray jsonimports = data.getJsonArray("imports");
-        Set<String> imports = new HashSet<>();
-        jsonimports.getValuesAs(JsonString.class).forEach(i -> imports.add(i.getString()));
+        Set<Import> imports = new HashSet<>();
+        jsonimports.getValuesAs(JsonString.class).forEach(i -> imports.add(Import.apply(i.getString(), Att.empty())));
 
         JsonArray sentences = data.getJsonArray("localSentences");
         Set<Sentence> localSentences = new HashSet<>();

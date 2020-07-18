@@ -406,7 +406,7 @@ module INT-COMMON
                /* /Int and %Int implement t-division, which rounds towards 0 */
                | Int "/Int" Int                 [function, klabel(_/Int_), symbol, left, smt-hook(div), latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(INT.tdiv)]
                | Int "%Int" Int                 [function, klabel(_%Int_), symbol, left, smt-hook(mod), latex({#1}\mathrel{\%_{\scriptstyle\it Int}}{#2}), hook(INT.tmod)]
-               /* divInt and modInt implement e-division according to the Euclidian division theorem, therefore the remainder is always positive */
+               /* divInt and modInt implement e-division according to the Euclidean division theorem, therefore the remainder is always positive */
                | Int "divInt" Int               [function, klabel(_divInt_), symbol, left, smt-hook(div), hook(INT.ediv)]
                | Int "modInt" Int               [function, klabel(_modInt_), symbol, left, smt-hook(mod), hook(INT.emod)]
                > left:
