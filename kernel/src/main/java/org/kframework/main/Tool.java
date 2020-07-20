@@ -2,5 +2,5 @@
 package org.kframework.main;
 
 public enum Tool {
-    KOMPILE, KAST, KRUN, KEQ, KPROVE, KBMC, KDOC, KPP, KSERVER, KDEP
+    KOMPILE, KAST, KRUN, KEQ, KPROVE, KBMC, KDOC, KSEARCHPATTERN, KSERVER, KDEP
 }
