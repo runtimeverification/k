@@ -1,4 +1,4 @@
-requires "ffi.k"
+requires "ffi.md"
 
 module TEST-SYNTAX
   imports FFI-SYNTAX
