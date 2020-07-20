@@ -1,0 +1,3 @@
+[Error] Compiler: Could not find module: FOO$SYNTAX
+	Source(missingModule.k)
+	Location(2,3,2,13)
