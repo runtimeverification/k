@@ -104,6 +104,8 @@ public class KExceptionManager {
 
     private void register(Set<KEMException> errors, ExceptionType type, KExceptionGroup group, String message,
                           Throwable e, Location location, Source source) {
+        if (!options.includesExceptionType(type))
+            return;
         KException exception = new KException(type, group, message, source, location, e);
         if (exception.type == ExceptionType.ERROR || options.warnings2errors) {
             errors.add(new KEMException(exception, ExceptionType.ERROR));

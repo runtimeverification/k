@@ -21,6 +21,7 @@ import org.kframework.keq.KEqFrontEnd;
 import org.kframework.kompile.KompileFrontEnd;
 import org.kframework.kprove.KProveFrontEnd;
 import org.kframework.krun.KRunFrontEnd;
+import org.kframework.ksearchpattern.KSearchPatternFrontEnd;
 import org.kframework.kserver.KServerFrontEnd;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -181,6 +182,9 @@ public class Main {
                     break;
                 case "-kdep":
                     modules = KDepFrontEnd.getModules();
+                    break;
+                case "-k-compile-search-pattern":
+                    modules = KSearchPatternFrontEnd.getModules();
                     break;
                 case "-krun":
                     modules.addAll(KRunFrontEnd.getModules());
