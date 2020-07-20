@@ -11,7 +11,7 @@ depth=
 params=()
 allPath=true
 dir=.
-cmd=kore-exec
+haskellCmd=kore-exec
 cmdprefix=
 filterSubst=true
 outputFile=-
@@ -200,7 +200,7 @@ do
       ;;
   
       --haskell-backend-command)
-      cmd="$2"
+      haskellCmd="$2"
       shift
       ;;
   
@@ -475,7 +475,7 @@ else
       final_input="$(mktemp tmp.in.XXXXXXXXXX)"
       tempFiles+=("$final_input")
       set +e
-      execute $cmdprefix "$cmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$input_file" --output "$final_input" $koreExecFlags
+      execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$input_file" --output "$final_input" $koreExecFlags
       set -e
       depthFlags="--depth 0"
     else
@@ -486,12 +486,12 @@ else
       koreExecFlags="$koreExecFlags --bound $bound"
     fi
     set +e
-    execute $cmdprefix "$cmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$final_input" --output "$kore_output" --searchType "$searchType" --search "$patternFile" $koreExecFlags $depthFlags
+    execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$final_input" --output "$kore_output" --searchType "$searchType" --search "$patternFile" $koreExecFlags $depthFlags
     result=$?
     set -e
   else
     set +e
-    execute $cmdprefix "$cmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$input_file" --output "$kore_output" $koreExecFlags $depthFlags
+    execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$input_file" --output "$kore_output" $koreExecFlags $depthFlags
     result=$?
     set -e
   fi
