@@ -8,8 +8,8 @@ Syntax of JSON
 
 K provides builtin support for reading/writing to JSON. While the `JSON-SYNTAX`
 module is not precisely the syntax of JSON (utilizing K's syntax for strings,
-integers, and floating point numbers rather than the syntax used by JSON,
-nevertheless you can convert directly to/from the actual syntax of JSON using
+integers, and floating point numbers rather than the syntax used by JSON),
+you can still convert directly to/from the actual syntax of JSON using
 the `JSON2String` and `String2JSON` hooks.
 
 ```k
