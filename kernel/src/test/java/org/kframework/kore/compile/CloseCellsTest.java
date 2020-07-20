@@ -43,14 +43,14 @@ public class CloseCellsTest {
     public void testSimpleClosure() {
         K term = cell("<k>", false, true, KApply(KLabel("_+_"), KVariable("I"), KVariable("J")));
         K expected = ccell("<k>", KSequence(KApply(KLabel("_+_"), KVariable("I"), KVariable("J")),
-                KVariable("DotVar0")));
+                KVariable("_DotVar0")));
         Assert.assertEquals(expected, new CloseCells(cfgInfo, sortInfo, labelInfo).close(term));
     }
 
     @Test
     public void testCloseMap() {
         K term = cell("<env>", true, false, KApply(KLabel("'_|=>_"), intToToken(1), intToToken(2)));
-        K expected = ccell("<env>", KApply(KLabel("_Map_"), KApply(KLabel("'_|=>_"), intToToken(1), intToToken(2)), KVariable("DotVar0")));
+        K expected = ccell("<env>", KApply(KLabel("_Map_"), KApply(KLabel("'_|=>_"), intToToken(1), intToToken(2)), KVariable("_DotVar0")));
         Assert.assertEquals(expected, new CloseCells(cfgInfo, sortInfo, labelInfo).close(term));
     }
 
@@ -61,9 +61,9 @@ public class CloseCellsTest {
                 cell("<list>", false, true, intToToken(2)),
                 cell("<list>", true, true, intToToken(3)));
         K expected = KApply(KLabels.CELLS,
-                ccell("<list>", KApply(KLabel("_List_"), KVariable("DotVar0"), intToToken(1))),
-                ccell("<list>", KApply(KLabel("_List_"), intToToken(2), KVariable("DotVar1"))),
-                ccell("<list>", KApply(KLabel("_List_"), KVariable("DotVar2"), KApply(KLabel("_List_"), intToToken(3), KVariable("DotVar3")))));
+                ccell("<list>", KApply(KLabel("_List_"), KVariable("_DotVar0"), intToToken(1))),
+                ccell("<list>", KApply(KLabel("_List_"), intToToken(2), KVariable("_DotVar1"))),
+                ccell("<list>", KApply(KLabel("_List_"), KVariable("_DotVar2"), KApply(KLabel("_List_"), intToToken(3), KVariable("_DotVar3")))));
         Assert.assertEquals(expected, new CloseCells(cfgInfo, sortInfo, labelInfo).close(term));
     }
 
@@ -74,9 +74,9 @@ public class CloseCellsTest {
                 cell("<thread>", false, true, cell("<k>", intToToken(2))),
                 cell("<thread>", true, true, cell("<k>", intToToken(2))));
         K expected = KApply(KLabels.CELLS,
-                ccell("<thread>", ccell("<k>", intToToken(1)), KVariable("DotVar0")),
-                ccell("<thread>", ccell("<k>", intToToken(2)), KVariable("DotVar1")),
-                ccell("<thread>", ccell("<k>", intToToken(2)), KVariable("DotVar2")));
+                ccell("<thread>", ccell("<k>", intToToken(1)), KVariable("_DotVar0")),
+                ccell("<thread>", ccell("<k>", intToToken(2)), KVariable("_DotVar1")),
+                ccell("<thread>", ccell("<k>", intToToken(2)), KVariable("_DotVar2")));
         Assert.assertEquals(expected, new CloseCells(cfgInfo, sortInfo, labelInfo).close(term));
     }
 

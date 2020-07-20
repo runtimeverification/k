@@ -1374,7 +1374,7 @@ public class ModuleToKORE {
           if (prod.items().apply(i) instanceof NonTerminal) {
             format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%" + (nt++));
           } else if (prod.items().apply(i) instanceof Terminal) {
-            format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%c" + ((Terminal)prod.items().apply(i)).value().replace("\\", "\\\\").replace("$", "\\$") + "%r");
+            format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%c" + ((Terminal)prod.items().apply(i)).value().replace("\\", "\\\\").replace("$", "\\$").replace("%", "%%") + "%r");
           } else {
             hasFormat = false;
           }
