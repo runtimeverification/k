@@ -1,3 +1,18 @@
+---
+permalink: rat.html
+copyright: Copyright (c) 2019-2020 K Team. All Rights Reserverd.
+---
+
+Rational Numbers in K
+=====================
+
+K provides support for arbitrary-precision rational numbers represented as a 
+quotient between two integers. The sort representing these values is `Rat`.
+`Int` is a subsort of `Rat`, and it is guaranteed that any integer will be
+represented as an `Int` and can be matched as such on the left hand side
+of rules. K also supports the usual arithmetic operators over rational numbers.
+
+```k
 module RAT-SYNTAX
   imports INT-SYNTAX
   imports BOOL
@@ -5,7 +20,18 @@ module RAT-SYNTAX
   syntax Rat
 
   syntax Rat ::= Int
+```
 
+Arithmetic
+----------
+
+You can:
+
+* Raise a rational number to any negative or nonnegative integer.
+* Multiply or divide two rational numbers to obtain a product or quotient.
+* Add or subtract two rational numbers to obtain a sum or difference.
+
+```k
   syntax Rat ::= left:
                  Rat "^Rat" Int [function, functional, klabel(_^Rat_), symbol, left, smtlib(ratpow), hook(RAT.pow)]
                > left:
@@ -14,20 +40,60 @@ module RAT-SYNTAX
                > left:
                  Rat "+Rat" Rat [function, functional, klabel(_+Rat_), symbol, left, smtlib(ratadd), hook(RAT.add)]
                | Rat "-Rat" Rat [function, functional, klabel(_-Rat_), symbol, left, smtlib(ratsub), hook(RAT.sub)]
+```
 
+Comparison
+----------
+
+You can determine whether two rational numbers are equal, unequal, or compare
+one of less than, less than or equalto, greater than, or greater than or equal
+to the other:
+
+```k
   syntax Bool ::= Rat  "==Rat" Rat [function, functional, klabel(_==Rat_),  symbol, smtlib(rateq), hook(RAT.eq)]
                 | Rat "=/=Rat" Rat [function, functional, klabel(_=/=Rat_), symbol, smtlib(ratne), hook(RAT.ne)]
                 | Rat   ">Rat" Rat [function, functional, klabel(_>Rat_),   symbol, smtlib(ratgt), hook(RAT.gt)]
                 | Rat  ">=Rat" Rat [function, functional, klabel(_>=Rat_),  symbol, smtlib(ratge), hook(RAT.ge)]
                 | Rat   "<Rat" Rat [function, functional, klabel(_<Rat_),   symbol, smtlib(ratlt), hook(RAT.lt)]
                 | Rat  "<=Rat" Rat [function, functional, klabel(_<=Rat_),  symbol, smtlib(ratle), hook(RAT.le)]
+```
 
+Min/Max
+-------
+
+You can compute the minimum and maximum of two rational numbers:
+
+```k
   syntax Rat ::= minRat(Rat, Rat) [function, functional, klabel(minRat), symbol, smtlib(ratmin), hook(RAT.min)]
                | maxRat(Rat, Rat) [function, functional, klabel(maxRat), symbol, smtlib(ratmax), hook(RAT.max)]
+```
 
+Conversion to Floating Point
+----------------------------
+
+You can convert a rational number to the nearest floating point number that
+is representable in a `Float` of a specified number of precision and exponent
+bits:
+
+```k
   syntax Float ::= Rat2Float(Rat, precision: Int, exponentBits: Int) [function]
 endmodule
+```
 
+Implementation of Rational Numbers
+----------------------------------
+
+The remainder of this file consists of an implementation in K of the
+operations listed above. Users of the RAT module should not use any of the
+syntax defined in any of these modules.
+
+As a point of reference for users, it is worth noting that rational numbers
+are normalized to a canonical form by this module,. with the canonical form
+bearing the property that it is either an `Int`, or a pair of integers
+`I /Rat J` such that
+`I =/=Int 0 andBool J >=Int 2 andBool gcdInt(I, J) ==Int 1` is always true.
+
+```k
 module RAT-COMMON
   imports RAT-SYNTAX
 
@@ -177,3 +243,4 @@ module RAT
   rule Rat2Float(< Num, Dem >Rat, Prec, Exp) => #Rat2Float(Num, Dem, Prec, Exp)
 
 endmodule
+```

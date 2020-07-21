@@ -1,6 +1,6 @@
 require "ffi.md"
 require "json.md"
-require "rat.k"
+require "rat.md"
 require "substitution.k"
 
 module TEST-SYNTAX
