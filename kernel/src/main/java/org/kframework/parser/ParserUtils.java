@@ -161,6 +161,7 @@ public class ParserUtils {
                         "Requiring a K file in the K builtin directory via " +
                         "a deprecated filename. Please replace \"" + definitionFileName +
                         "\" with \"" + definitionFileName.substring(0, definitionFileName.length() - 2) + ".md\".", di);
+                    definitionFileName = definitionFileName.substring(0, definitionFileName.length() - 2) + ".md";
                 }
 
                 ArrayList<File> allLookupDirectories = new ArrayList<>(lookupDirectories);
