@@ -16,7 +16,7 @@ simpler.
 -   [ffi](ffi.md): FFI interface for calling out to native C code from K.
 -   [json](json.md): JSON datatype and parsers/unparsers for JSON strings.
 -   [rat](rat.md): Rational number representation.
--   [substitution](substitution.k): Hooked implementation of capture-aware
+-   [substitution](substitution.md): Hooked implementation of capture-aware
     sustitution for K definitions.
 -   [unification](unification.k): Hooked implementation of unification
     exposed directly to K definitions.
