@@ -1,5 +1,4 @@
 ---
-permalink: README.html
 copyright: Copyright (c) 2020 K Team. All Rights Reserved.
 ---
 
