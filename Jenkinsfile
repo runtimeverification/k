@@ -520,10 +520,9 @@ pipeline {
         dir('gh-pages') {
           sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
             sh '''
-              git clone 'ssh://github.com/kframework/k.git'
+              git clone 'ssh://github.com/kframework/k.git' --depth 1 --no-single-branch --branch master --branch gh-pages
               cd k
-              hub pr checkout $(echo ${BRANCH_NAME} | cut --delimiter='-' --field=2)
-              git checkout -B gh-pages HEAD
+              git checkout -B gh-pages origin/master
               mv k-distribution/include/kframework/builtin ./
               mv k-distribution/tutorial                   ./
               rm -rf $(find . -maxdepth 1 -not -name '*.md' -a -not -name '_config.yml' -a -not -name .git -a -not -path . -a -not -name builtin -a -not -name tutorial)
