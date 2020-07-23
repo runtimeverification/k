@@ -1,4 +1,7 @@
-<!-- Copyright (c) 2014-2019 K Team. All Rights Reserved. -->
+---
+permalink: README.html
+copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
+---
 
 # K Tutorial
 [*Grigore Rosu*](http://fsl.cs.illinois.edu/grosu) (<grosu@illinois.edu>)
