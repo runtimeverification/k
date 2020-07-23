@@ -1,4 +1,4 @@
-require "substitution.k"
+require "substitution.md"
 
 module TEST
   imports KVAR
