@@ -12,6 +12,7 @@ import org.kframework.compile.checks.CheckAnonymous;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckFunctions;
 import org.kframework.compile.checks.CheckHOLE;
+import org.kframework.compile.checks.CheckK;
 import org.kframework.compile.checks.CheckKLabels;
 import org.kframework.compile.checks.CheckLabels;
 import org.kframework.compile.checks.CheckRHSVariables;
@@ -313,6 +314,8 @@ public class Kompile {
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckRewrite(errors, m)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
+
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckK(errors)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(
               new CheckFunctions(errors, m, isSymbolic)::check));
