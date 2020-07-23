@@ -12,7 +12,10 @@ pipeline {
   stages {
     stage('Init title') {
       when { changeRequest() }
-      steps { script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" } }
+      steps {
+        script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" }
+        milestone()
+      }
     }
     stage('Create source tarball') {
       agent {
@@ -106,51 +109,6 @@ pipeline {
                       sh 'stop-kserver || true'
                       archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
                     }
-                  }
-                }
-              }
-            }
-            stage('DockerHub') {
-              when {
-                branch 'master'
-                beforeAgent true
-              }
-              environment {
-                DOCKERHUB_TOKEN   = credentials('rvdockerhub')
-                BIONIC_COMMIT_TAG = "ubuntu-bionic-${env.SHORT_REV}"
-                BIONIC_BRANCH_TAG = "ubuntu-bionic-${env.BRANCH_NAME}"
-                DOCKERHUB_REPO    = "runtimeverificationinc/kframework-k"
-              }
-              stages {
-                stage('Build Image') {
-                  agent { label 'docker' }
-                  steps {
-                    dir('bionic') { unstash 'bionic' }
-                    sh '''
-                        mv bionic/kframework_${VERSION}_amd64.deb kframework_amd64_bionic.deb
-                        docker login --username "${DOCKERHUB_TOKEN_USR}" --password "${DOCKERHUB_TOKEN_PSW}"
-                        docker image build . --file package/docker/Dockerfile.ubuntu-bionic --tag "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}"
-                        docker image push "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}"
-                        docker tag "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}" "${DOCKERHUB_REPO}:${BIONIC_BRANCH_TAG}"
-                        docker push "${DOCKERHUB_REPO}:${BIONIC_BRANCH_TAG}"
-                    '''
-                  }
-                }
-                stage('Test Image') {
-                  agent {
-                    docker {
-                      image "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}"
-                      args '-u 0'
-                      reuseNode true
-                    }
-                  }
-                  steps {
-                    sh '''
-                      cd ~
-                      echo 'module TEST imports BOOL endmodule' > test.k
-                      kompile test.k --backend llvm
-                      kompile test.k --backend haskell
-                    '''
                   }
                 }
               }
@@ -443,6 +401,52 @@ pipeline {
                       , channel: '#k'                                       \
                       , message: "MacOS Packaging Failed: ${env.BUILD_URL}"
             }
+          }
+        }
+      }
+    }
+    stage('DockerHub') {
+      when {
+        branch 'master'
+        beforeAgent true
+      }
+      environment {
+        DOCKERHUB_TOKEN   = credentials('rvdockerhub')
+        BIONIC_COMMIT_TAG = "ubuntu-bionic-${env.SHORT_REV}"
+        BIONIC_BRANCH_TAG = "ubuntu-bionic-${env.BRANCH_NAME}"
+        DOCKERHUB_REPO    = "runtimeverificationinc/kframework-k"
+      }
+      stages {
+        stage('Build Image') {
+          agent { label 'docker' }
+          steps {
+            milestone()
+            dir('bionic') { unstash 'bionic' }
+            sh '''
+                mv bionic/kframework_${VERSION}_amd64.deb kframework_amd64_bionic.deb
+                docker login --username "${DOCKERHUB_TOKEN_USR}" --password "${DOCKERHUB_TOKEN_PSW}"
+                docker image build . --file package/docker/Dockerfile.ubuntu-bionic --tag "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}"
+                docker image push "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}"
+                docker tag "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}" "${DOCKERHUB_REPO}:${BIONIC_BRANCH_TAG}"
+                docker push "${DOCKERHUB_REPO}:${BIONIC_BRANCH_TAG}"
+            '''
+          }
+        }
+        stage('Test Image') {
+          agent {
+            docker {
+              image "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}"
+              args '-u 0'
+              reuseNode true
+            }
+          }
+          steps {
+            sh '''
+              cd ~
+              echo 'module TEST imports BOOL endmodule' > test.k
+              kompile test.k --backend llvm
+              kompile test.k --backend haskell
+            '''
           }
         }
       }
