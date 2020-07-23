@@ -7,7 +7,9 @@ K Builtins
 
 The K Builtins (also referred to as the K Prelude or the K Standard Library)
 consists of several files which contain definitions that make working with K
-simpler.
+simpler. These files can be found under `include/kframework/builtin` in your K
+installation directory, and can be imported with `requires "FILENAME"` (without
+the path prefix).
 
 -   [domains](domains.k): Basic datatypes which are universally useful.
 -   [kast](kast.k): Representation of K internal data-structures (not to be
