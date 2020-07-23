@@ -1,0 +1,4 @@
+[Error] Compiler: Found #as pattern where the right side is not a variable.
+	Source(invalidAs.k)
+	Location(4,8,4,15)
+[Error] Compiler: Had 1 structural errors.
