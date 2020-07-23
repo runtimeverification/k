@@ -37,9 +37,8 @@ module KVAR-SYNTAX-PROGRAM-PARSING
   imports BUILTIN-ID-TOKENS
 
   syntax KVar ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [prec(1), token]
-
-              | #LowerId                                             [token]
-              | #UpperId                                             [token]
+                | #LowerId                                             [token]
+                | #UpperId                                             [token]
 endmodule
 
 module KVAR-SYNTAX
