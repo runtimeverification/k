@@ -14,7 +14,7 @@ pipeline {
       when { changeRequest() }
       steps {
         script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" }
-        milestone()
+        milestone(1)
       }
     }
     stage('Create source tarball') {
@@ -420,7 +420,7 @@ pipeline {
         stage('Build Image') {
           agent { label 'docker' }
           steps {
-            milestone()
+            milestone(2)
             dir('bionic') { unstash 'bionic' }
             sh '''
                 mv bionic/kframework_${VERSION}_amd64.deb kframework_amd64_bionic.deb
