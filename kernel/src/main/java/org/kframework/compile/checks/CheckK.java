@@ -6,6 +6,7 @@ import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
+import org.kframework.kore.KApply;
 import org.kframework.kore.KAs;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.VisitK;
@@ -27,7 +28,17 @@ public class CheckK {
         new VisitK() {
             @Override
             public void apply(KAs as) {
+                boolean error = false;
                 if (!(as.alias() instanceof KVariable)) {
+                    error = true;
+                    if (as.alias() instanceof KApply) {
+                        KApply app = (KApply)as.alias();
+                        if (app.klabel().name().startsWith("#SemanticCastTo") && app.items().size() == 1 && app.items().get(0) instanceof KVariable) {
+                            error = false;
+                        }
+                    }
+                }
+                if (error) {
                     errors.add(KEMException.compilerError("Found #as pattern where the right side is not a variable.", as));
                 }
                 super.apply(as);
