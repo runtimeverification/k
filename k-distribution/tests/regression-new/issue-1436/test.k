@@ -15,7 +15,7 @@ module TEST
         <log stream="stdout"> .List </log>
 
     syntax Int ::= foo(Int) [function]
- 
+
     rule [[ foo(0) => I ]]
          <bar> I </bar>
 
