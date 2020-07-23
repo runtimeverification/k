@@ -528,9 +528,9 @@ pipeline {
         dir('gh-pages') {
           sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
             sh '''
-              git clone 'ssh://github.com/kframework/k.git' --depth 1 --no-single-branch --branch master --branch gh-pages
+              git clone 'ssh://github.com/kframework/k.git' --depth 1 --no-single-branch --branch ${BRANCH_NAME} --branch gh-pages
               cd k
-              git checkout -B gh-pages origin/master
+              git checkout -B gh-pages origin/${BRANCH_NAME}
               rm -rf $(find . -maxdepth 1 -not -name '*.md' -a -not -name '_config.yml' -a -not -name .git -a -not -path .)
               git add ./
               git commit -m 'gh-pages: remove unrelated content'
