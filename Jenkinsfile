@@ -466,13 +466,13 @@ pipeline {
           reuseNode true
         }
       }
-      post {
-        failure {
-          slackSend color: '#cb2431'                                 \
-                  , channel: '#k'                                    \
-                  , message: "Deploy Phase Failed: ${env.BUILD_URL}"
-        }
-      }
+      //post {
+      //  failure {
+      //    slackSend color: '#cb2431'                                 \
+      //            , channel: '#k'                                    \
+      //            , message: "Deploy Phase Failed: ${env.BUILD_URL}"
+      //  }
+      //}
       environment {
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
