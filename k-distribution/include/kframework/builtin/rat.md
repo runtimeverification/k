@@ -1,5 +1,4 @@
 ---
-permalink: rat.html
 copyright: Copyright (c) 2019-2020 K Team. All Rights Reserverd.
 ---
 
