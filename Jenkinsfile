@@ -528,7 +528,9 @@ pipeline {
               git clone 'ssh://github.com/kframework/k.git' --depth 1 --no-single-branch --branch master --branch gh-pages
               cd k
               git checkout -B gh-pages origin/master
-              rm -rf $(find . -maxdepth 1 -not -name '*.md' -a -not -name '_config.yml' -a -not -name .git -a -not -path .)
+              mv k-distribution/include/kframework/builtin ./
+              mv k-distribution/tutorial                   ./
+              rm -rf $(find . -maxdepth 1 -not -name '*.md' -a -not -name '_config.yml' -a -not -name .git -a -not -path . -a -not -name builtin -a -not -name tutorial)
               git add ./
               git commit -m 'gh-pages: remove unrelated content'
               git merge --strategy ours origin/gh-pages --allow-unrelated-histories
