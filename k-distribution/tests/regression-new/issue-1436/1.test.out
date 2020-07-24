@@ -1,0 +1,13 @@
+<generatedTop>
+  <k>
+    6 ~> .
+  </k>
+  <bar>
+    6
+  </bar>
+  <log>
+    ListItem ( #ostream ( 1 ) )
+    ListItem ( "off" )
+    ListItem ( #buffer ( "0" ~> . ) )
+  </log>
+</generatedTop>
