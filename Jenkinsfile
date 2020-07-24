@@ -366,6 +366,7 @@ pipeline {
             branch 'master'
             beforeAgent true
           }
+          options { timeout(time: 120, unit: 'MINUTES') }
           stages {
             stage('Build on Mac OS') {
               stages {
