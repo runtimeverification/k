@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2014-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
+---
 
 # K Tutorial
 [*Grigore Rosu*](http://fsl.cs.illinois.edu/grosu) (<grosu@illinois.edu>)
@@ -12,8 +14,8 @@ We recommend to either download the K tool from its URL
 in Java, so it is platform-independent) or use the provided online interface
 to execute the tutorial lessons and do the proposed exercises.
 The objective of this tutorial is twofold: to learn K (in folder
-[1_k](1_k/)) and to learn how to define languages across
-various paradigms using K (in folder [2_languages](2_languages/)).
+[1_k](1_k/README.md)) and to learn how to define languages across
+various paradigms using K (in folder [2_languages](2_languages/README.md)).
 
 It is recommended to study the languages defined in this folder in the
 order indicated by their name, because K features already discussed in

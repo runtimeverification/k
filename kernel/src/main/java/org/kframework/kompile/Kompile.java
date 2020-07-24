@@ -66,7 +66,7 @@ import static org.kframework.compile.ResolveHeatCoolAttribute.Mode.*;
  */
 public class Kompile {
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
-    public static final String REQUIRE_PRELUDE_K = "requires \"prelude.k\"\n";
+    public static final String REQUIRE_PRELUDE_K = "requires \"prelude.md\"\n";
 
     public final KompileOptions kompileOptions;
     private final FileUtil files;
