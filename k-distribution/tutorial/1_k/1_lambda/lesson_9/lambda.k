@@ -60,7 +60,7 @@ We need the predefined substitution module, so we require it with the command
 below.  Then we should make sure that we import its module called SUBSTITUTION
 in our LAMBDA module below. */
 
-require "substitution.k"
+require "substitution.md"
 
 module LAMBDA
   imports DOMAINS

@@ -156,22 +156,25 @@ public class ParserUtils {
                 String definitionFileName = ((Require) di).getValue();
 
                 if (definitionFileName.equals("ffi.k") || definitionFileName.equals("json.k") ||
-                    definitionFileName.equals("rat.k")) {
+                    definitionFileName.equals("rat.k") || definitionFileName.equals("substitution.k")) {
                     kem.registerCompilerWarning(ExceptionType.FUTURE_ERROR,
                         "Requiring a K file in the K builtin directory via " +
                         "a deprecated filename. Please replace \"" + definitionFileName +
                         "\" with \"" + definitionFileName.substring(0, definitionFileName.length() - 2) + ".md\".", di);
+                    definitionFileName = definitionFileName.substring(0, definitionFileName.length() - 2) + ".md";
                 }
+
+                String finalDefinitionFile = definitionFileName;
 
                 ArrayList<File> allLookupDirectories = new ArrayList<>(lookupDirectories);
                 allLookupDirectories.add(1, currentDirectory); //after builtin directory but before anything else
 
                 Optional<File> definitionFile = allLookupDirectories.stream()
                         .map(lookupDirectory -> {
-                            if (new File(definitionFileName).isAbsolute()) {
-                                return new File(definitionFileName);
+                            if (new File(finalDefinitionFile).isAbsolute()) {
+                                return new File(finalDefinitionFile);
                             } else {
-                                return new File(lookupDirectory, definitionFileName);
+                                return new File(lookupDirectory, finalDefinitionFile);
                             }
                         })
                         .filter(file -> file.exists()).findFirst();
@@ -191,7 +194,7 @@ public class ParserUtils {
                 }
                 else
                     throw KEMException.criticalError("Could not find file: " +
-                            definitionFileName + "\nLookup directories:" + allLookupDirectories, di);
+                            finalDefinitionFile + "\nLookup directories:" + allLookupDirectories, di);
             }
         }
         return results;
