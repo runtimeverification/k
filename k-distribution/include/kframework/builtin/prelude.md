@@ -1,5 +1,4 @@
 ---
-permalink: prelude.html
 copyright: Copyright (c) 2015-2020 K Team. All Rights Reserved.
 ---
 
