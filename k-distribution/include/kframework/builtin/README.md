@@ -14,7 +14,7 @@ the path prefix).
 -   [domains](domains.k): Basic datatypes which are universally useful.
 -   [kast](kast.k): Representation of K internal data-structures (not to be
     included in normal definitions).
--   [prelude](prelude.k): Legacy file which includes domains.k and kast.k.
+-   [prelude](prelude.md): Automatically included into every K definition.
 -   [ffi](ffi.md): FFI interface for calling out to native C code from K.
 -   [json](json.md): JSON datatype and parsers/unparsers for JSON strings.
 -   [rat](rat.md): Rational number representation.
