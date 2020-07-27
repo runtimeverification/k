@@ -475,13 +475,13 @@ pipeline {
         GIT_SSH_COMMAND       = 'ssh -o StrictHostKeyChecking=accept-new'
       }
       steps {
-        unstash 'src'
-        unstash 'binary'
+        //unstash 'src'
+        //unstash 'binary'
         dir('bionic') { unstash 'bionic' }
-        dir('focal')  { unstash 'focal' }
-        dir('buster') { unstash 'buster' }
-        dir('arch')   { unstash 'arch'   }
-        dir('mojave') { unstash 'mojave' }
+        //dir('focal')  { unstash 'focal' }
+        //dir('buster') { unstash 'buster' }
+        //dir('arch')   { unstash 'arch'   }
+        //dir('mojave') { unstash 'mojave' }
         sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
           sh '''
             git clone 'ssh://github.com/kframework/k.git' k-release
