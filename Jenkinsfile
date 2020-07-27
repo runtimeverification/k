@@ -487,16 +487,23 @@ pipeline {
         dir('mojave') { unstash 'mojave' }
         sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
           sh '''
-            git remote add release 'ssh://github.com/kframework/k.git'
+            git clone 'ssh://github.com/kframework/k.git' k-release
+            cd k-release
+            git fetch --all
+
+            git tag -d "${K_RELEASE_TAG}"         || true
+            git push -d origin "${K_RELEASE_TAG}" || true
+            hub release delete "${K_RELEASE_TAG}" || true
+
             git tag "${K_RELEASE_TAG}" "${SHORT_REV}"
             git push release "${K_RELEASE_TAG}"
 
-            mv bionic/kframework_${VERSION}_amd64.deb bionic/kframework_${VERSION}_amd64_bionic.deb
-            mv focal/kframework_${VERSION}_amd64.deb focal/kframework_${VERSION}_amd64_focal.deb
-            mv buster/kframework_${VERSION}_amd64.deb buster/kframework_${VERSION}_amd64_buster.deb
-            LOCAL_BOTTLE_NAME=$(echo mojave/kframework--${VERSION}.mojave.bottle*.tar.gz)
-            BOTTLE_NAME=`cd mojave && echo kframework--${VERSION}.mojave.bottle*.tar.gz | sed 's!kframework--!kframework-!'`
-            mv $LOCAL_BOTTLE_NAME mojave/$BOTTLE_NAME
+            mv ../bionic/kframework_${VERSION}_amd64.deb bionic/kframework_${VERSION}_amd64_bionic.deb
+            mv ../focal/kframework_${VERSION}_amd64.deb focal/kframework_${VERSION}_amd64_focal.deb
+            mv ../buster/kframework_${VERSION}_amd64.deb buster/kframework_${VERSION}_amd64_buster.deb
+            LOCAL_BOTTLE_NAME=$(echo ../mojave/kframework--${VERSION}.mojave.bottle*.tar.gz)
+            BOTTLE_NAME=$(cd ../mojave && echo kframework--${VERSION}.mojave.bottle*.tar.gz | sed 's!kframework--!kframework-!')
+            mv $LOCAL_BOTTLE_NAME ../mojave/$BOTTLE_NAME
             echo "K Framework Release ${K_RELEASE_TAG}"  > release.md
             echo ''                                     >> release.md
             cat k-distribution/INSTALL.md               >> release.md
