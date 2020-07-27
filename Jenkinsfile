@@ -454,10 +454,6 @@ pipeline {
       }
     }
     stage('Deploy') {
-      when {
-        branch 'master'
-        beforeAgent true
-      }
       agent {
         dockerfile {
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
@@ -479,13 +475,13 @@ pipeline {
         GIT_SSH_COMMAND       = 'ssh -o StrictHostKeyChecking=accept-new'
       }
       steps {
-        unstash 'src'
-        unstash 'binary'
+        //unstash 'src'
+        //unstash 'binary'
         dir('bionic') { unstash 'bionic' }
-        dir('focal')  { unstash 'focal' }
-        dir('buster') { unstash 'buster' }
-        dir('arch')   { unstash 'arch'   }
-        dir('mojave') { unstash 'mojave' }
+        //dir('focal')  { unstash 'focal' }
+        //dir('buster') { unstash 'buster' }
+        //dir('arch')   { unstash 'arch'   }
+        //dir('mojave') { unstash 'mojave' }
         sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
           sh '''
             git clone 'ssh://github.com/kframework/k.git' k-release
@@ -499,56 +495,56 @@ pipeline {
             git tag "${K_RELEASE_TAG}" "${LONG_REV}"
             git push origin "${K_RELEASE_TAG}"
 
-            LOCAL_BOTTLE_NAME=$(find ../mojave -name kframework--${VERSION}.mojave.bottle*.tar.gz)
-            BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#../mojave} | sed 's!kframework--!kframework-!')
+            #LOCAL_BOTTLE_NAME=$(find ../mojave -name kframework--${VERSION}.mojave.bottle*.tar.gz)
+            #BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#../mojave} | sed 's!kframework--!kframework-!')
 
             mv ../bionic/kframework_${VERSION}_amd64.deb             kframework_${VERSION}_amd64_bionic.deb
-            mv ../focal/kframework_${VERSION}_amd64.deb              kframework_${VERSION}_amd64_focal.deb
-            mv ../buster/kframework_${VERSION}_amd64.deb             kframework_${VERSION}_amd64_buster.deb
-            mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz kframework-git-${VERSION}-1-x86_64.pkg.tar.xz
-            mv $LOCAL_BOTTLE_NAME                                    $BOTTLE_NAME
+            #mv ../focal/kframework_${VERSION}_amd64.deb              kframework_${VERSION}_amd64_focal.deb
+            #mv ../buster/kframework_${VERSION}_amd64.deb             kframework_${VERSION}_amd64_buster.deb
+            #mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz kframework-git-${VERSION}-1-x86_64.pkg.tar.xz
+            #mv $LOCAL_BOTTLE_NAME                                    $BOTTLE_NAME
 
             echo "K Framework Release ${K_RELEASE_TAG}"  > release.md
             echo ''                                     >> release.md
             cat k-distribution/INSTALL.md               >> release.md
             hub release create                                                                  \
-                --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                       \
                 --attach kframework_${VERSION}_amd64_bionic.deb'#Ubuntu Bionic (18.04) Package' \
-                --attach kframework_${VERSION}_amd64_focal.deb'#Ubuntu Focal (20.04) Package'   \
-                --attach kframework_${VERSION}_amd64_buster.deb'#Debian Buster (10) Package'    \
-                --attach kframework-git-${VERSION}-1-x86_64.pkg.tar.xz'#Arch Package'           \
-                --attach $BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                \
-                --attach k-nightly.tar.gz'#Platform Indepdendent K Binary'                      \
                 --file release.md "${K_RELEASE_TAG}"
+            #    --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                       \
+            #    --attach kframework_${VERSION}_amd64_focal.deb'#Ubuntu Focal (20.04) Package'   \
+            #    --attach kframework_${VERSION}_amd64_buster.deb'#Debian Buster (10) Package'    \
+            #    --attach kframework-git-${VERSION}-1-x86_64.pkg.tar.xz'#Arch Package'           \
+            #    --attach $BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                \
+            #    --attach k-nightly.tar.gz'#Platform Indepdendent K Binary'                      \
           '''
         }
-        dir('homebrew-k') {
-          git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
-          sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
-            sh '''
-              git checkout master
-              git merge brew-release-$PACKAGE
-              git push origin master
-              git push origin -d brew-release-$PACKAGE
-            '''
-          }
-        }
-        dir('gh-pages') {
-          sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
-            sh '''
-              git clone 'ssh://github.com/kframework/k.git' --depth 1 --no-single-branch --branch master --branch gh-pages
-              cd k
-              git checkout -B gh-pages origin/master
-              mv k-distribution/include/kframework/builtin ./
-              mv k-distribution/tutorial                   ./
-              rm -rf $(find . -maxdepth 1 -not -name '*.md' -a -not -name '_config.yml' -a -not -name .git -a -not -path . -a -not -name builtin -a -not -name tutorial)
-              git add ./
-              git commit -m 'gh-pages: remove unrelated content'
-              git merge --strategy ours origin/gh-pages --allow-unrelated-histories
-              git push origin gh-pages
-            '''
-          }
-        }
+        //dir('homebrew-k') {
+        //  git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
+        //  sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
+        //    sh '''
+        //      git checkout master
+        //      git merge brew-release-$PACKAGE
+        //      git push origin master
+        //      git push origin -d brew-release-$PACKAGE
+        //    '''
+        //  }
+        //}
+        //dir('gh-pages') {
+        //  sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
+        //    sh '''
+        //      git clone 'ssh://github.com/kframework/k.git' --depth 1 --no-single-branch --branch master --branch gh-pages
+        //      cd k
+        //      git checkout -B gh-pages origin/master
+        //      mv k-distribution/include/kframework/builtin ./
+        //      mv k-distribution/tutorial                   ./
+        //      rm -rf $(find . -maxdepth 1 -not -name '*.md' -a -not -name '_config.yml' -a -not -name .git -a -not -path . -a -not -name builtin -a -not -name tutorial)
+        //      git add ./
+        //      git commit -m 'gh-pages: remove unrelated content'
+        //      git merge --strategy ours origin/gh-pages --allow-unrelated-histories
+        //      git push origin gh-pages
+        //    '''
+        //  }
+        //}
       }
     }
     stage('Update Submodules (release)') {
