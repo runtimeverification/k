@@ -6,6 +6,7 @@ pipeline {
     VERSION         = '5.0.0'
     ROOT_URL        = 'https://github.com/kframework/k/releases/download'
     SHORT_REV       = """${sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()}"""
+    LONG_REV        = """${sh(returnStdout: true, script: 'git rev-parse HEAD').trim()}"""
     K_RELEASE_TAG   = "v${env.VERSION}-${env.SHORT_REV}"
     MAKE_EXTRA_ARGS = '' // Example: 'DEBUG=--debug' to see stack traces
   }
@@ -495,7 +496,7 @@ pipeline {
             git push -d origin "${K_RELEASE_TAG}" || true
             hub release delete "${K_RELEASE_TAG}" || true
 
-            git tag "${K_RELEASE_TAG}" "${SHORT_REV}"
+            git tag "${K_RELEASE_TAG}" "${LONG_REV}"
             git push release "${K_RELEASE_TAG}"
 
             mv ../bionic/kframework_${VERSION}_amd64.deb bionic/kframework_${VERSION}_amd64_bionic.deb
