@@ -497,7 +497,7 @@ pipeline {
             hub release delete "${K_RELEASE_TAG}" || true
 
             git tag "${K_RELEASE_TAG}" "${LONG_REV}"
-            git push release "${K_RELEASE_TAG}"
+            git push origin "${K_RELEASE_TAG}"
 
             mv ../bionic/kframework_${VERSION}_amd64.deb bionic/kframework_${VERSION}_amd64_bionic.deb
             mv ../focal/kframework_${VERSION}_amd64.deb focal/kframework_${VERSION}_amd64_focal.deb
