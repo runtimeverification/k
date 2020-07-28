@@ -499,8 +499,8 @@ pipeline {
             git tag "${K_RELEASE_TAG}" "${LONG_REV}"
             git push origin "${K_RELEASE_TAG}"
 
-            LOCAL_BOTTLE_NAME=$(find ../mojave -name kframework--${VERSION}.mojave.bottle*.tar.gz)
-            BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#../mojave} | sed 's!kframework--!kframework-!')
+            LOCAL_BOTTLE_NAME=$(find ../mojave -name "kframework--${VERSION}.mojave.bottle*.tar.gz")
+            BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#../mojave/} | sed 's!kframework--!kframework-!')
 
             mv ../bionic/kframework_${VERSION}_amd64.deb             kframework_${VERSION}_amd64_bionic.deb
             mv ../focal/kframework_${VERSION}_amd64.deb              kframework_${VERSION}_amd64_focal.deb
