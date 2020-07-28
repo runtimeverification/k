@@ -552,7 +552,10 @@ pipeline {
       }
     }
     stage('Update Submodules (release)') {
-      when { branch 'master' }
+      when {
+        branch 'master'
+        beforeAgent true
+      }
       steps {
         build job: 'rv-devops/master', propagate: false, wait: false                                   \
             , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                   \
