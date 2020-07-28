@@ -502,11 +502,13 @@ pipeline {
             LOCAL_BOTTLE_NAME=$(find ../mojave -name "kframework--${VERSION}.mojave.bottle*.tar.gz")
             BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#../mojave/} | sed 's!kframework--!kframework-!')
 
-            mv ../bionic/kframework_${VERSION}_amd64.deb             kframework_${VERSION}_amd64_bionic.deb
-            mv ../focal/kframework_${VERSION}_amd64.deb              kframework_${VERSION}_amd64_focal.deb
-            mv ../buster/kframework_${VERSION}_amd64.deb             kframework_${VERSION}_amd64_buster.deb
-            mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz kframework-git-${VERSION}-1-x86_64.pkg.tar.xz
-            mv $LOCAL_BOTTLE_NAME                                    $BOTTLE_NAME
+            mv ../kframework-${VERSION}-src.tar.gz                      kframework-${VERSION}-src.tar.gz
+            mv ../bionic/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_bionic.deb
+            mv ../focal/kframework_${VERSION}_amd64.deb                 kframework_${VERSION}_amd64_focal.deb
+            mv ../buster/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_buster.deb
+            mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz    kframework-git-${VERSION}-1-x86_64.pkg.tar.xz
+            mv $LOCAL_BOTTLE_NAME                                       $BOTTLE_NAME
+            mv ../k-nightly.tar.gz                                      k-nightly.tar.gz
 
             echo "K Framework Release ${K_RELEASE_TAG}"  > release.md
             echo ''                                     >> release.md
