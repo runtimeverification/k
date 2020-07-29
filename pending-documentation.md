@@ -1123,40 +1123,6 @@ ambiguity during parsing, so care should be taken to ensure that named
 nonterminals are sufficiently unique from one another to prevent such
 ambiguities. Of course, the compiler will generate a warning in this case.
 
-### `concrete` attribute, `#isConcrete` and `#isVariable` function
-
-**NOTE**: The Haskell backend _does not_ and _will not_ support the
-meta-functions `#isConcrete` and `#isVariable`.
-
-Sometimes you only want a given function to simplify if all (or some) of the
-arguments are concrete (non-symbolic). To do so, you can use either the
-`concrete` attribute (if you want it to only apply when all arguments are
-concrete), or the `#isConcrete(_)` side-condition (when you only want it to
-apply if some arguments are concrete). Conversly, the function `#isVariable(_)`
-will only return true when the argument is a variable.
-
-For example, the following will only re-associate terms when all arguments
-are concrete:
-
-```k
-rule X +Int (Y +Int Z) => (X +Int Y) +Int Z [concrete]
-```
-
-And the following rules will only re-associate terms when it will end up
-grouping concrete sub-terms:
-
-```k
-rule X +Int (Y +Int Z) => (X +Int Y) +Int Z
-  requires #isConcrete(X)
-   andBool #isConcrete(Y)
-   andBool #isVariable(Z)
-
-rule X +Int (Y +Int Z) => (X +Int Z) +Int Y
-  requires #isConcrete(X)
-   andBool #isConcrete(Z)
-   andBool #isVariable(Y)
-```
-
 ### `simplification` attribute (Haskell backend)
 
 The simplification attribute identifies axioms that are useful for simplifying
@@ -1196,6 +1162,66 @@ We might add the following simplification lemma:
 Then this simplification rule will only apply if the Haskell backend can prove
 that `notBool N =/=Int 0` is unsatisfiable. This avoids an infinite cycle of
 applying this simplification lemma.
+
+### `concrete` attribute, `#isConcrete` and `#isVariable` function (Java backend)
+
+**NOTE**: The Haskell backend _does not_ and _will not_ support the
+meta-functions `#isConcrete` and `#isVariable`. See below for information about
+the `concrete` and `symbolic` attributes in the Haskell backend.
+
+Sometimes you only want a given function to simplify if all (or some) of the
+arguments are concrete (non-symbolic). To do so, you can use either the
+`concrete` attribute (if you want it to only apply when all arguments are
+concrete), or the `#isConcrete(_)` side-condition (when you only want it to
+apply if some arguments are concrete). Conversly, the function `#isVariable(_)`
+will only return true when the argument is a variable.
+
+For example, the following will only re-associate terms when all arguments
+are concrete:
+
+```k
+rule X +Int (Y +Int Z) => (X +Int Y) +Int Z [concrete]
+```
+
+And the following rules will only re-associate terms when it will end up
+grouping concrete sub-terms:
+
+```k
+rule X +Int (Y +Int Z) => (X +Int Y) +Int Z
+  requires #isConcrete(X)
+   andBool #isConcrete(Y)
+   andBool #isVariable(Z)
+
+rule X +Int (Y +Int Z) => (X +Int Z) +Int Y
+  requires #isConcrete(X)
+   andBool #isConcrete(Z)
+   andBool #isVariable(Y)
+```
+
+### `concrete` and `symbolic` attributes (Haskell backend)
+
+Sometimes you only want a rule to apply if some or all arguments are concrete
+(not symbolic). This is done with the `concrete` attribute. Conversely, the
+`symbolic` attribute will allow a rule to apply only when some arguments are not
+concrete. These attributes should only be given with the `simplification`
+attribute.
+
+For example, the following will only re-associate terms when all arguments
+are concrete:
+
+```k
+rule X +Int (Y +Int Z) => (X +Int Y) +Int Z [simplification, concrete]
+```
+
+These rules will re-associate and commute terms to combine concrete arguments:
+
+```k
+rule (A +Int Y) +Int Z => A +Int (Y +Int Z)
+  [concrete(Y, Z), symbolic(A), simplification]
+
+rule X +Int (B +Int Z) => B +Int (X +Int Z)
+  [concrete(X, Z), symbolic(B), simplification]
+```
 
 ### The `unboundVariables` attribute
 
