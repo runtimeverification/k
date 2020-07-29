@@ -1213,15 +1213,14 @@ are concrete:
 rule X +Int (Y +Int Z) => (X +Int Y) +Int Z [simplification, concrete]
 ```
 
-And the following rules will only re-associate terms when it will end up
-grouping concrete sub-terms:
+These rules will re-associate and commute terms to combine concrete arguments:
 
 ```k
-rule X +Int (Y +Int Z) => (X +Int Y) +Int Z
-  [simplification, concrete(X, Y), symbolic(Z)]
+rule (A +Int Y) +Int Z => A +Int (Y +Int Z)
+  [concrete(Y, Z), symbolic(A), simplification]
 
-rule X +Int (Y +Int Z) => (X +Int Z) +Int Y
-  [simplification, concrete(X, Z), symbolic(Y)]
+rule X +Int (B +Int Z) => B +Int (X +Int Z)
+  [concrete(X, Z), symbolic(B), simplification]
 ```
 
 ### The `unboundVariables` attribute
