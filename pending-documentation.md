@@ -1218,10 +1218,10 @@ grouping concrete sub-terms:
 
 ```k
 rule X +Int (Y +Int Z) => (X +Int Y) +Int Z
-  [simplification, concrete(X), concrete(Y), symbolic(Z)]
+  [simplification, concrete(X, Y), symbolic(Z)]
 
 rule X +Int (Y +Int Z) => (X +Int Z) +Int Y
-  [simplification, concrete(X), symbolic(Y), concrete(Z)]
+  [simplification, concrete(X, Z), symbolic(Y)]
 ```
 
 ### The `unboundVariables` attribute
