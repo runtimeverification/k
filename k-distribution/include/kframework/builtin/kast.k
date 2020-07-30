@@ -65,8 +65,10 @@ endmodule
 module ML-SYNTAX
   imports SORT-K
 
-  syntax {Sort} Sort ::= "#True" [klabel(#Top), symbol, mlUnary]
-                       | "#False" [klabel(#Bottom), symbol, mlUnary]
+  syntax {Sort} Sort ::= "#Top" [klabel(#Top), symbol, mlUnary]
+                       | "#Bottom" [klabel(#Bottom), symbol, mlUnary]
+                       | "#True" [klabel(#Top), symbol, mlUnary, unparseAvoid]
+                       | "#False" [klabel(#Bottom), symbol, mlUnary, unparseAvoid]
                        | "#Not" "(" Sort ")" [klabel(#Not), symbol, mlOp, mlUnary]
 
   syntax {Sort1, Sort2} Sort2 ::= "#Ceil" "(" Sort1 ")" [klabel(#Ceil), symbol, mlOp, mlUnary]
