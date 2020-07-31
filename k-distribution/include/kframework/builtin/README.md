@@ -11,7 +11,7 @@ simpler. These files can be found under `include/kframework/builtin` in your K
 installation directory, and can be imported with `requires "FILENAME"` (without
 the path prefix).
 
--   [domains](domains.k): Basic datatypes which are universally useful.
+-   [domains](domains.md): Basic datatypes which are universally useful.
 -   [kast](kast.k): Representation of K internal data-structures (not to be
     included in normal definitions).
 -   [prelude](prelude.md): Automatically included into every K definition.

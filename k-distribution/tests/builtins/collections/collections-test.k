@@ -1,5 +1,5 @@
 // Copyright (c) 2018-2019 K Team. All Rights Reserved.
-requires "domains.k"
+requires "domains.md"
 
 module COLLECTIONS-TEST-SYNTAX
     imports COLLECTIONS
