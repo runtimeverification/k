@@ -101,6 +101,8 @@ YYSTYPE mergeAmb(YYSTYPE x0, YYSTYPE x1) {
   return result;
 }
 
+char *filename;
+
 void print(node *current) {
   printf("%s", current->symbol);
   if (!current->str) {
@@ -119,6 +121,11 @@ extern node *result;
 int main(int argc, char **argv) {
   yyscan_t scanner;
   yylex_init(&scanner); 
+  if (argc > 2) {
+    filename=argv[2];
+  } else {
+    filename=argv[1];
+  }
   yyset_in(fopen(argv[1], "r"), scanner);
   yyparse(scanner);
   print(result);
