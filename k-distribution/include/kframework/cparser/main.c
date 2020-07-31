@@ -104,6 +104,11 @@ YYSTYPE mergeAmb(YYSTYPE x0, YYSTYPE x1) {
 char *filename;
 
 void print(node *current) {
+  if (current->hasLocation) {
+    printf("Lbl'Hash'location{");
+    printf("%s", current->sort);
+    printf("}(");
+  }
   printf("%s", current->symbol);
   if (!current->str) {
     printf("(");
@@ -113,6 +118,9 @@ void print(node *current) {
       if (i != current->nchildren - 1) printf(",");
     }
     printf(")");
+  }
+  if (current->hasLocation) {
+    printf(", \\dv{SortString{}}(%s), \\dv{SortInt{}}(\"%d\"), \\dv{SortInt{}}(\"%d\"), \\dv{SortInt{}}(\"%d\"), \\dv{SortInt{}}(\"%d\"))", enquote(filename), current->location.first_line, current->location.first_column, current->location.last_line, current->location.last_column);
   }
 }
 
