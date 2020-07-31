@@ -1,4 +1,4 @@
-#True
+#Top
 [Warning] Critical: Found variable _ on right hand side of rule, not bound on
 left hand side. Did you mean "?_"?
 Note: this warning will become an error in subsequent releases.
