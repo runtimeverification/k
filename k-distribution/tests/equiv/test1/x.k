@@ -1,4 +1,4 @@
-require "domains.k"
+require "domains.md"
 
 module X-SYNTAX
 imports DOMAINS-SYNTAX
