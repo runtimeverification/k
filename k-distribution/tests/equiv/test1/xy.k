@@ -1,4 +1,4 @@
-require "domains.k"
+require "domains.md"
 
 // require "./x.k"
 module X-SYNTAX

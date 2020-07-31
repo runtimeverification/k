@@ -1,5 +1,5 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
-require "domains.k"
+require "domains.md"
 
 module ASSOC-TEST
   imports INT

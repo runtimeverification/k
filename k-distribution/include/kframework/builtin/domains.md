@@ -1,6 +1,36 @@
-// Copyright (c) 2015-2019 K Team. All Rights Reserved.
-require "kast.k"
+---
+copyright: Copyright (c) 2015-2020 K Team. All Rights Reserved.
+---
 
+Basic Builtin Types in K
+========================
+
+A major piece of the K prelude consists of a series of modules that contain
+implementations of basic data types and language features in K. You do not need
+to require this file yourself; it is required automatically in every K
+definition unless `--no-prelude` is passed to kompile. K may not work correctly
+if some of these modules do not exist or do not declare certain functions.
+
+```k
+require "kast.k"
+```
+
+Default Modules
+---------------
+
+K declares certain modules that contain most of the builtins you usually want
+when defining a language in K. In particular, this includes integers, booleans,
+strings, identifiers, I/O, lists, maps, and sets. The `DOMAINS-SYNTAX` module
+is designed to be imported by the syntax module of the language and contains
+only the program-level syntax of identifiers, integers, booleans, and strings.
+The `DOMAINS` module contains the rest of the syntax, including builtin
+functions over those and the remaining types.
+
+Note that not all modules are included in DOMAINS. A few less-common modules
+are not, including `ARRAY`, `COLLECTIONS`, `FLOAT`, `STRING-BUFFER`, `BYTES`,
+`K-REFLECTION`, `MINT`, and `STRATEGY`.
+
+```k
 module DOMAINS-SYNTAX
   imports SORT-K
   imports ID-SYNTAX
@@ -21,39 +51,81 @@ module DOMAINS
   imports SET
   imports ID
 endmodule
+```
 
+Arrays
+------
+
+Provided here is an implementation for fixed-sized, contiguous maps from `Int`
+to `KItem`. In some previous versions of K, the `Array` type was a builtin type
+backed by mutable arrays of objects. However, in modern K, the `Array` type is
+implemented by means of the `List` type; users should not access this interface
+directly and should instead make only of the functions listed below. Users of
+this module should import only the `ARRAY` module.
+
+```k
 module ARRAY-SYNTAX
   imports LIST
 
   syntax Array [hook(ARRAY.Array), unit(arrayCtor), element(_[_<-_])]
+```
 
+### Array lookup
+
+You can look up an element in an `Array` by its index in O(log(N)) time. Note
+that the base of the logarithm is a relatively high number and thus the time is
+effectively constant.
+
+```k
   syntax KItem ::= Array "[" Int "]" [function, hook(ARRAY.lookup)]
+```
+
+### Array update
+
+You can create a new `Array` with a new value for a key in O(log(N)) time, or
+effectively constant.
+
+```k
   syntax Array ::= Array "[" key: Int "<-" value: KItem "]" [function, hook(ARRAY.update), klabel(_[_<-_]), symbol]
+```
+
+### Array reset
+
+You can create a new `Array` where a particular key is reset to its default
+value in O(log(N)) time, or effectively constant.
+
+```k
   syntax Array ::= Array "[" Int "<-" "undef" "]" [function, hook(ARRAY.remove)]
-  syntax Array ::= updateArray(Array, Int, List) [function, hook(ARRAY.updateAll)]
-  /*@ Sets a range of indices (given by an index into the array and the number
-   of indices to set) to the same value. */
+```
+
+### Multiple array update
+
+You can create a new `Array` from a `List` `L` of size `N` where the `N`
+elements starting at `index` are replaced with the contents of `L`, in
+O(N*log(K)) time (where K is the size of the array), or effectively linear.
+
+```k
+  syntax Array ::= updateArray(Array, index: Int, List) [function, hook(ARRAY.updateAll)]
+```
+
+### Array fill
+
+You can create a new `Array` where the `length` elements starting at `index`
+are replaced with `value`, in O(length*log(N)) time, or effectively linear.
+
+```k
   syntax Array ::= fillArray(Array, index: Int, length: Int, value: KItem) [function, hook(ARRAY.fill)]
+```
 
+### Array range check
+
+You can test whether an integer is within the bounds of an array in O(1) time.
+
+```k
   syntax Bool ::= Int "in_keys" "(" Array ")" [function, functional, hook(ARRAY.in_keys)]
-endmodule
+```
 
-module ARRAY-CONCRETE [concrete, kast]
-  imports ARRAY-SYNTAX
-  imports LIST
-  imports STRING-SYNTAX
-
-  syntax Array ::= makeEmptyArray(Int) [function, hook(ARRAY.makeEmpty), impure]
-                 | arrayCtor(String, Int, KItem) [function, hook(ARRAY.ctor), symbol]
-                 | makeArray(Int, KItem) [function, hook(ARRAY.make), impure, klabel(makeArrayOcaml)]
-endmodule
-
-module ARRAY-SYMBOLIC [symbolic]
-  imports ARRAY-IN-K
-endmodule
-
-module ARRAY-KORE [kore]
-  imports ARRAY-IN-K
+```k
 endmodule
 
 module ARRAY-IN-K
@@ -61,9 +133,28 @@ module ARRAY-IN-K
   imports LIST
   imports K-EQUAL
   imports INT
+```
 
-  syntax Array ::= makeArray(Int, KItem) [function, hook(ARRAY.make)]
+### Array creation
 
+You can create an array with `length` elements where each element is
+initialized to `value` in O(1) time. Note that the array is stored in a manner
+where only the highest element that is actually modified is given a value
+in its internal representation, which means that subsequent array operations
+may incur a one-time O(N) resizing cost, possibly amortized across multiple
+operations.
+
+```k
+  syntax Array ::= makeArray(length: Int, value: KItem) [function, hook(ARRAY.make)]
+```
+
+### Implementation of Arrays
+
+The remainder of this section consists of an implementation in K of the
+operations listed above. Users of the `ARRAY` module should not make use
+of any of the syntax defined in any of these modules.
+
+```k
   syntax Array ::= arr(List, Int, KItem)
 
   rule makeArray(I::Int, D::KItem) => arr(.List, I, D)
@@ -84,12 +175,41 @@ module ARRAY-IN-K
   rule IDX::Int in_keys(arr(_, I::Int, _)) => IDX >=Int 0 andBool IDX <Int I
 endmodule
 
+module ARRAY-CONCRETE [concrete, kast]
+  imports ARRAY-SYNTAX
+  imports LIST
+  imports STRING-SYNTAX
+
+  syntax Array ::= makeEmptyArray(Int) [function, hook(ARRAY.makeEmpty), impure]
+                 | arrayCtor(String, Int, KItem) [function, hook(ARRAY.ctor), symbol]
+                 | makeArray(Int, KItem) [function, hook(ARRAY.make), impure, klabel(makeArrayOcaml)]
+endmodule
+
+module ARRAY-SYMBOLIC [symbolic]
+  imports ARRAY-IN-K
+endmodule
+
+module ARRAY-KORE [kore]
+  imports ARRAY-IN-K
+endmodule
+
 module ARRAY
   imports ARRAY-CONCRETE
   imports ARRAY-SYMBOLIC
   imports ARRAY-KORE
 endmodule
+```
 
+Maps
+----
+
+Provided here is the syntax of an implementation of immutable, associative,
+commutative maps from `KItem` to `KItem`. This type is hooked to an
+implementation of maps provided by the backend. For more information on
+matching on maps and allowable patterns for doing so, refer to K's
+[user documentation](pending-documentation.md).
+
+```k
 module MAP
   imports BOOL-SYNTAX
   imports INT-SYNTAX
@@ -97,65 +217,191 @@ module MAP
   imports SET
 
   syntax Map [hook(MAP.Map)]
+```
 
-  /*@\section{Description} The Map represents a generalized associative array.
-   Each key can be paired with an arbitrary value, and can be used to reference
-   its associated value. Multiple bindings for the same key are not allowed. */
+### Map concatenation
 
-  /*@ Construct a new Map consisting of key/value pairs of two Maps (the keys of
-   the two Maps are assumed disjoint) */
+The `Map` sort represents a generalized associative array. Each key can be
+paired with an arbitrary value, and can be used to reference its associated
+value. Multiple bindings for the same key are not allowed.
+
+You can construct a new Map consisting of key/value pairs of two Maps. The
+result is `#False` if the maps have keys in common (in particular, this will
+yield an exception during concrete execution). This operation is O(N*log(M))
+where N is the size of the smaller map, when it appears on the right hand side.
+When it appears on the left hand side and all variables are bound, it is
+O(N*log(M)) where M is the size of the map it is matching and N is the number
+of elements being matched. When it appears on the left hand side containing
+variables not bound elsewhere in the term, it is O(N^K) where N is the size of
+the map it is matching and K is the number of unbound keys being matched. In
+other words, one unbound variable is linear, two is quadratic, three is cubic,
+etc.
+
+```k
   syntax Map ::= Map Map                        [left, function, hook(MAP.concat), klabel(_Map_), symbol, assoc, comm, unit(.Map), element(_|->_), index(0), format(%1%n%2)]
-  /*@  Construct an empty Map */
+```
+
+### Map unit
+
+The map with zero elements is represented by `.Map`.
+
+```k
   syntax Map ::= ".Map"                         [function, functional, hook(MAP.unit), klabel(.Map), symbol, latex(\dotCt{Map})]
-               // breaks klabel uniqueness
-               //| "."                            [function, hook(MAP.unit)]
-  /*@ Construct a singleton Map (a Map with only one key/value pair). The key
-   is on the left and the value is on the right */
+```
+
+### Map elements
+
+An element of a `Map` is constructed via the `|->` operator. The key is on the
+left and the value is on the right.
+
+```k
   syntax Map ::= KItem "|->" KItem                      [function, functional, hook(MAP.element), klabel(_|->_), symbol, latex({#1}\mapsto{#2})]
 
   syntax priorities _|->_ > _Map_ .Map
   syntax non-assoc _|->_
+```
 
-  /*@ Retrieve the value associated with the given key */
+### Map lookup
+
+You can look up the value associated with the key of a map in O(log(N)) time.
+Note that the base of the logarithm is a relatively high number and thus the
+time is effectively constant. The value is `#False` if the key is not in the
+map (in particular, this will yield an exception during concrete execution).
+
+```k
   syntax KItem ::= Map "[" KItem "]"                    [function, hook(MAP.lookup), klabel(Map:lookup), symbol]
+```
 
+### Map lookup with default
+
+You can also look up the value associated with the key of a map using a
+total function that assigns a specific default value if the key is not present
+in the map. This operation is also O(log(N)), or effectively constant.
+
+```k
   syntax KItem ::= Map "[" KItem "]" "orDefault" KItem      [function, functional, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault)]
+```
 
-  /*@ Update a Map in form of  of keys and values: */
+### Map update
+
+You can insert a key/value pair into a map in O(log(N)) time, or effectively
+constant.
+
+```k
   syntax Map ::= Map "[" key: KItem "<-" value: KItem "]"           [function, functional, klabel(Map:update), symbol, hook(MAP.update), prefer]
+```
 
-  /*@ Remove key/value pair associated with the key from map? */
+### Map delete
+
+You can remove a key/value pair from a map via its key in O(log(N)) time, or
+effectively constant.
+
+```k
   syntax Map ::= Map "[" KItem "<-" "undef" "]"     [function, functional, hook(MAP.remove), klabel(_[_<-undef]), symbol]
+```
 
-  /*@ Get the difference of two maps interpreted as sets of entries
-   ($M_1 \setminus M2$) */
+### Map difference
+
+You can remove the key/value pairs in a map that are present in another map in
+O(N*log(M)) time (where M is the size of the first map and N is the size of the
+second), or effectively linear. Note that only keys whose value is the same 
+in both maps are removed. To remove all the keys in one map from another map,
+you can say `removeAll(M1, keys(M2))`.
+
+```k
   syntax Map ::= Map "-Map" Map                 [function, functional, hook(MAP.difference), latex({#1}-_{\it Map}{#2})]
+```
 
-  /*@ Update the first map by adding all key/value pairs in the second map. If a
-   key in the first map exists also in the second map, its associated value will
-   be overwritten by the value from the second map. */
+### Multiple map update
+
+You can update a map by adding all the key/value pairs in the second map in
+O(N*log(M)) time (where M is the size of the first map and N is the size of the
+second map), or effectively linear. If any keys are present in both maps, the
+value from the second map overwrites the value in the first. This function is
+total, which is distinct from map concatenation, a partial function only
+defined on maps with disjoint keys.
+
+```k
   syntax Map ::= updateMap(Map, Map)            [function, functional, hook(MAP.updateAll)]
+```
 
-  /*@ Update the Map by removing all key/value pairs with the key in the Set. */
+### Multiple map removal
+
+You can remove a `Set` of keys from a map in O(N*log(M)) time (where M is the
+size of the `Map` and `N` is the size of the `Set`), or effectively linear.
+
+```k
   syntax Map ::= removeAll(Map, Set)            [function, functional, hook(MAP.removeAll)]
+```
 
-  /*@ Get a Set consisting of all keys in the Map:*/
+### Map keys (as `Set`)
+
+You can get a `Set` of all the keys in a Map in O(N) time.
+
+```k
   syntax Set ::= keys(Map)                      [function, functional, hook(MAP.keys)]
+```
+
+### Map keys (as `List`)
+
+You can get a `List` of all the keys in a Map in O(N) time.
+
+```k
   syntax List ::= "keys_list" "(" Map ")"       [function, hook(MAP.keys_list)]
+```
 
+### Map key membership
+
+You can check whether a key is present in a map in O(1) time.
+
+```k
   syntax Bool ::= KItem "in_keys" "(" Map ")"       [function, functional, hook(MAP.in_keys)]
+```
 
-  /*@ Get a List consisting of all values in the Map: */
+### Map values (as `List`)
+
+You can get a `List` of all the values in a map in O(N) time.
+
+```k
   syntax List ::= values(Map)                   [function, hook(MAP.values)]
+```
 
-  /*@ Get the Map size (number of key/value pairs) */
+### Map size
+
+You can get the number of key/value pairs in a map in O(1) time.
+
+```k
   syntax Int ::= size(Map)                      [function, functional, hook(MAP.size), klabel(sizeMap)]
+```
 
-  /*@ Check map inclusion */
+### Map inclusion
+
+You can determine whether a `Map` is a strict subset of another `Map` in O(N)
+time (where N is the size of the first map). Only keys that are bound to the
+same value are considered equal.
+
+```k
   syntax Bool ::= Map "<=Map" Map               [function, functional, hook(MAP.inclusion)]
+```
 
-  /*@ Get an arbitrarily chosen key of the Map  */
+### Map choice
+
+You can get an arbitrarily chosen key of a `Map` in O(1) time. The same key
+will always be returned for the same map, but no guarantee is given that two
+different maps will return the same element, even if they are similar.
+
+```k
   syntax KItem ::= choice(Map)                      [function, hook(MAP.choice), klabel(Map:choice)]
+```
+
+### Implementation of Maps
+
+The remainder of this section contains lemmas used by the Java and Haskell
+backend to simplify expressions of sort `Map`. They do not affect the semantics
+of maps, merely describing additional rules that the backend can use to
+simplify terms.
+
+```k
 endmodule
 
 module MAP-KORE-SYMBOLIC [kore,symbolic]
@@ -205,118 +451,278 @@ module MAP-SYMBOLIC
   imports MAP-JAVA-SYMBOLIC
   imports MAP-KORE-SYMBOLIC
 endmodule
+```
 
+Sets
+----
+
+Provided here is the syntax of an implementation of immutable, associative, 
+commutative sets of `KItem`. This type is hooked to an implementation of sets
+provided by the backend. For more information on matching on sets and allowable
+patterns for doing so, refer to K's
+[user documentation](pending-documentation.md).
+
+```k
 module SET
   imports INT-SYNTAX
   imports BASIC-K
 
   syntax Set [hook(SET.Set)]
+```
 
-  /*@ \section{Description} The Set represents a mathematical set (a collection
-   of unique items). */
+### Set concatenation
 
-  /*@ Construct a new Set as the concatenation (disjoint union) of two different sets
-   *  Concatenating two sets is undefined if their intersection is non-empty, use |Set for normal set union.
-   * */
+The `Set` sort represents a mathematical set (A collection of unique items).
+The sets are nilpotent, i.e., the concatenation of two sets containing elements
+in common is `#False` (note however, this may be silently allowed during
+concrete execution). If you intend to add an element to a set that might
+already be present in the set, use the `|Set` operator instead.
+
+The concatenation operator is O(N*log(M)) where N is the size of the smaller
+set, when it appears on the right hand side. When it appears on the left hand
+side and all variables are bound, it is O(N*log(M)) where M is the size of the
+set it is matching and N is the number of elements being matched. When it
+appears on the left hand side containing variables not bound elsewhere in the
+term, it is O(N^K) where N is the size of the set it is matching and K is the
+number of unbound keys being mached. In other words, one unbound variable is
+linear, two is quadratic, three is cubic, etc.
+
+```k
   syntax Set ::= Set Set                  [left, function, functional, hook(SET.concat), klabel(_Set_), symbol, assoc, comm, unit(.Set), idem, element(SetItem), format(%1%n%2)]
-  /*@ Construct an empty Set */
+```
+
+### Set unit
+
+The set with zero elements is represented by `.Set`.
+
+```k
   syntax Set ::= ".Set"                   [function, functional, hook(SET.unit), klabel(.Set), symbol, latex(\dotCt{Set})]
-               //| "."
-  /*@ Construct a singleton Set (a Set with only one element $\{ a \}$). To add
-   an element $a$ to a set $A$, construct the union of the singleton set
-   $\{ a \}$ and $A$ ($\{ a \} \cup A$). */
+```
+
+### Set elements
+
+An element of a `Set` is constructed via the `SetItem` operator.
+
+```k
   syntax Set ::= SetItem(KItem)               [function, functional, hook(SET.element), klabel(SetItem), symbol]
+```
 
-  /*@ Get the intersection of two sets ($A \cap B$) */
-  syntax Set ::= intersectSet(Set, Set)   [function, functional, hook(SET.intersection)]
+### Set union
 
-  /*@ Get the relative complement of two asets ($A \setminus B$)*/
-  syntax Set ::= Set "-Set" Set           [function, functional, hook(SET.difference), latex({#1}-_{\it Set}{#2}), klabel(Set:difference), symbol]
+You can compute the union of two sets in O(N*log(M)) time (Where N is the size
+of the smaller set). Note that the base of the logarithm is a relatively high
+number and thus the time is effectively linear. The union consists of all the 
+elements present in either set.
 
-  /*@ Check element membership in a set ($a \in A$) */
-  syntax Bool ::= KItem "in" Set              [function, functional, hook(SET.in), klabel(Set:in), symbol]
-
-  /*@ Check set inclusion ($A \subseteq B$) */
-  syntax Bool ::= Set "<=Set" Set         [function, functional, hook(SET.inclusion)]
-
-  /*@ Get the cardinality of a set ($|A|$) */
-  syntax Int ::= size(Set)                [function, functional, hook(SET.size)]
-
-  /*@ Get an arbitrarily chosen element of the Set */
-  syntax KItem ::= choice(Set)                [function, hook(SET.choice), klabel(Set:choice)]
-
-  /*@ Get the union of two sets ($A \cup B$) */
+```k
   syntax Set ::= Set "|Set" Set            [left, function, functional, hook(SET.union)]
   rule S1:Set |Set S2:Set => S1 (S2 -Set S1)
-endmodule
+```
 
+### Set intersection
+
+You can compute the intersection of two sets in O(N*log(M)) time (where N
+is the size of the smaller set), or effectively linear. The intersection
+consists of all the elements present in both sets.
+
+```k
+  syntax Set ::= intersectSet(Set, Set)   [function, functional, hook(SET.intersection)]
+```
+
+### Set complement
+
+You can compute the relative complement of two sets in O(N*log(M)) time (where
+N is the size of the second set), or effectively linear. This is the set of
+elements in the first set that are not present in the second set.
+
+```k
+  syntax Set ::= Set "-Set" Set           [function, functional, hook(SET.difference), latex({#1}-_{\it Set}{#2}), klabel(Set:difference), symbol]
+```
+
+### Set membership
+
+You can compute whether an element is a member of a set in O(1) time.
+
+```k
+  syntax Bool ::= KItem "in" Set              [function, functional, hook(SET.in), klabel(Set:in), symbol]
+```
+
+### Set inclusion
+
+You can determine whether a `Set` is a strict subset of another `Set` in O(N)
+time (where N is the size of the first set).
+
+```k
+  syntax Bool ::= Set "<=Set" Set         [function, functional, hook(SET.inclusion)]
+```
+
+### Set size
+
+You can get the number of elements (the cardinality) of a set in O(1) time.
+
+```k
+  syntax Int ::= size(Set)                [function, functional, hook(SET.size)]
+```
+
+### Set choice
+
+You can get an arbitrarily chosen element of a `Set` in O(1) time. The same
+element will always be returned for the same set, but no guarantee is given
+that two different sets will return the same element, even if they are similar.
+
+```k
+  syntax KItem ::= choice(Set)                [function, hook(SET.choice), klabel(Set:choice)]
+```
+
+```k
+endmodule
+```
+
+Lists
+-----
+
+Provided here is the syntax of an implementation of immutable, associative
+lists of `KItem`. This type is hooked to an implementation of lists provided
+by the backend. For more information on matching on lists and allowable
+patterns for doing so, refer to K's
+[user documentation](pending-documentation).
+
+```k
 module LIST
   imports INT-SYNTAX
   imports BASIC-K
 
   syntax List [hook(LIST.List)]
+```
 
-  /*@ \section{Description} \K lists are ordered collections that may contain
-   duplicate elements. These behave more like lists in functional programming
-   languages than arrays in imperative programming languages; there's no
-   numerical indexing, but instead specific elements are refered to using the
-   Mylist,Mylist construct in combination with the MyListItem construct. It's
-   worth noting that \K lists aren't exactly like lists in functional languages;
-   they're associative, which means that it's easy to access elements at both
-   ends of the lists and concatenate them. For example, L:Mylist,E accesses
-   element E at the end of a list. */
+### List concatenation
 
-  //TODO(AndreiS): move the paragraph below
-  /*@ \section{User-Defined Lists} It is very common in \K to define a shorthand
-   for lists of user-defined sorts. \K 's builtin way of doing this is to use
-   List\{KItem,"Separator"\}, where "Separator" is any valid character or
-   sequence of characters used to separate distinct elements.
-   For example, after defining \\
-   syntax KItem ::= Elt\\
-   a user could then define
-   syntax Elts ::= List\{Elt,","\} \\
-   which would be a comma-separated list whose elements are all of sort Elt. A
-   user could just as well define \\
-   syntax Elts ::= List\{Elt,"and"\} \\
-   which would be a list containing elements of sort Elt that are separated with
-   the word "and". If only one argument is given, the separator is asumed to be
-   commas. So, \\
-   syntax Elts = List\{Elt\} \\
-   would define a comma-separated list containing elements of sort Elt.
-  */
+The `List` sort is an ordered collection that may contain duplicate elements.
+They are backed by relaxed radix balanced trees, which means that they support
+efficiently adding elements to both sides of the list, concatenating two lists,
+indexing, and updating elements.
 
-  /*@ Construct a new List as the concatenation of two Lists. This is similar to
-   the append "@" operation in many functional programming languages. */
+The concatenation operator is O(log(N)) (where N is the size of the longer
+list) when it appears on the right hand side. When it appears on the left hand
+side, it is O(N), where N is the number of elements matched on the front and
+back of the list.
+
+```k
   syntax List ::= List List               [left, function, functional, hook(LIST.concat), klabel(_List_), symbol, smtlib(smt_seq_concat), assoc, unit(.List), element(ListItem), format(%1%n%2)]
-  /*@ Construct an empty List: */
+```
+
+### List unit
+
+The list with zero elements is represented by `.List`.
+
+```k
   syntax List ::= ".List"                 [function, functional, hook(LIST.unit), klabel(.List), symbol, smtlib(smt_seq_nil), latex(\dotCt{List})]
-                //| "."
-  /*@ Construct a singleton List (a list with only  one element) */
+```
+
+### List elements
+
+An element of a `List` is constucted via the `ListItem` operator.
+
+```k
   syntax List ::= ListItem(KItem)             [function, functional, hook(LIST.element), klabel(ListItem), symbol, smtlib(smt_seq_elem)]
+```
 
-  /*@ Get an element form the List by index. Positive indices mean from the
-   beginning (0 is the first element), and negative indices mean from the end
-   (-1 is the last element). */
+### List indexing
+
+You can get an element of a list by its integer offset in O(log(N)) time, or
+effectively constant. Positive indices are 0-indexed from the beginning of the
+list, and negative indices are -1-indexed from the end of the list. In other
+words, 0 is the first element and -1 is the last element.
+
+```k
   syntax KItem ::= List "[" Int "]"           [function, hook(LIST.get), klabel(List:get), symbol]
+```
 
+### List update
+
+You can create a new `List` with a new value at a particular index in
+O(log(N)) time, or effectively constant.
+
+```k
   syntax List ::= List "[" index: Int "<-" value: KItem "]" [function, hook(LIST.update), klabel(List:set)]
+```
 
+### List of identical elements
+
+You can create a list with `length` elements, each containing `value`, in O(N)
+time.
+
+```k
   syntax List ::= makeList(length: Int, value: KItem) [function, hook(LIST.make)]
+```
 
+### Multiple list update
+
+You can create a new `List` which is equal to `dest` except the `N` elements
+starting at `index` are replaced with the contents of `src` in O(N*log(K)) time
+(where K is the size of `dest`), or effectively linear.
+
+```k
   syntax List ::= updateList(dest: List, index: Int, src: List) [function, hook(LIST.updateAll)]
+```
 
+### List fill
+
+You can create a new `List` where the `length` elements starting at `index`
+are replaced with `value`, in O(length*log(N)) time, or effectively linear.
+
+```k
   syntax List ::= fillList(List, index: Int, length: Int, value: KItem) [function, hook(LIST.fill)]
+```
 
-  /*@ Remove elements from the beginning and the end of the List. */
+### List slicing
+
+You can compute a new `List` by removing `fromFront` elements from the front
+of the list and `fromBack` elements from the back of the list in
+O((fromFront+fromBack)*log(N)) time, or effectively linear.
+
+```k
   syntax List ::= range(List, fromFront: Int, fromBack: Int)   [function, hook(LIST.range), klabel(List:range), symbol]
+```
 
-  /*@ Check element membership in the given list */
+### List membership
+
+You can compute whether an element is in a list in O(N) time. For repeated
+comparisons, it is much better to first convert to a set using `List2Set`.
+
+```k
   syntax Bool ::= KItem "in" List             [function, functional, hook(LIST.in), klabel(_inList_)]
+```
 
-  /*@ Get the list length */
+### List size
+
+You can get the number of elements of a list in O(1) time.
+
+```k
   syntax Int ::= size(List)               [function, functional, hook(LIST.size), klabel (sizeList), smtlib(smt_seq_len)]
-endmodule
+```
 
+```k
+endmodule
+```
+
+Collection Conversions
+----------------------
+
+It is possible to convert from a `List` to a `Set` or from a `Set` to a list.
+Converting from a `List` to a `Set` and back will not provide the same list;
+duplicates will have been removed and the list may be reordered. Converting
+from a `Set` to a `List` and back will generate the same set.
+
+Note that because sets are unordered and lists are ordered, converting from a
+Set to a List will generate some arbitrary ordering of elements, which may
+be different from the natural ordering you might assume, or may not. Two
+equal sets are guaranteed to generate the same ordering, but no guarantee is
+otherwise provided about what the ordering will be. In particular, adding an
+element to a set may completely reorder the elements already in the set, when
+it is converted to a list.
+
+```k
 module COLLECTIONS
   imports LIST
   imports SET
@@ -326,7 +732,20 @@ module COLLECTIONS
   syntax Set ::= List2Set(List) [function, functional, hook(SET.list2set)]
 
 endmodule
+```
 
+Booleans
+--------
+
+Provided here is the syntax of an implementation of boolean algebra in K.
+This type is hooked to an implementation of booleans provided by the backend.
+Note that this algebra is different from the builtin truth in matching logic.
+You can, however, convert from the truth of the `Bool` sort to the truth in
+matching logic via the expression `{B #Equals true}`.
+
+The boolean values are `true` and `false`.
+
+```k
 module BOOL-SYNTAX
   syntax Bool [hook(BOOL.Bool)]
   syntax Bool ::= "true"  [token]
@@ -336,6 +755,26 @@ endmodule
 module BOOL
   imports BASIC-K
   imports BOOL-SYNTAX
+```
+
+### Basic boolean arithmetic
+
+You can:
+
+* Negate a boolean value.
+* AND two boolean values.
+* XOR two boolean values.
+* OR two boolean values.
+* IMPLIES two boolean values (i.e., `P impliesBool Q` is the same as
+  `notBool P orBool Q`)
+* Check equality of two boolean values.
+* Check inequality of two boolean values.
+
+Note that only `andThenBool` and `orElseBool` are short-circuiting. `andBool`
+and `orBool` may be short-circuited in concrete backends, but in symbolic 
+ackends, both arguments will be evaluated.
+
+```k
   syntax Bool ::= "notBool" Bool          [function, functional, klabel(notBool_), symbol, smt-hook(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
                 > Bool "andBool" Bool     [function, functional, klabel(_andBool_), symbol, left, smt-hook(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
                 | Bool "andThenBool" Bool [function, functional, klabel(_andThenBool_), symbol, left, smt-hook(and), boolOperation, hook(BOOL.andThen)]
@@ -346,7 +785,14 @@ module BOOL
                 > left:
                   Bool "==Bool" Bool      [function, functional, klabel(_==Bool_), symbol, left, smt-hook(=), hook(BOOL.eq)]
                 | Bool "=/=Bool" Bool     [function, functional, klabel(_=/=Bool_), symbol, left, smt-hook(distinct), hook(BOOL.ne)]
+```
 
+### Implementation of Booleans
+
+The remainder of this section consists of an implementation in K of the
+operations listed above.
+
+```k
   rule notBool true => false
   rule notBool false => true
 
@@ -380,9 +826,24 @@ module BOOL
   rule B:Bool impliesBool false => notBool B
 
   rule B1:Bool =/=Bool B2:Bool => notBool (B1 ==Bool B2)
-
 endmodule
+```
 
+Integers
+--------
+
+Provided here is the syntax of an implementation of arbitrary-precision
+integer arithmetic in K. This type is hooked to an implementation of integers
+provided by the backend. For a fixed-width integer type, see the `MINT` module
+below.
+
+The `UNSIGNED-INT-SYNTAX` module provides a syntax of whole numbers in K.
+This is useful because often programming languages implement the sign of an
+integer as a unary operator rather than part of the lexical syntax of integers.
+However, you can also directly reference integers with a sign using the
+`INT-SYNTAX` module.
+
+```k
 module UNSIGNED-INT-SYNTAX
   syntax Int [hook(INT.Int)]
   syntax Int ::= r"[0-9]+" [prefer, token, prec(2)]
@@ -396,6 +857,33 @@ endmodule
 module INT-COMMON
   imports INT-SYNTAX
   imports BOOL
+```
+
+### Integer arithmetic
+
+You can:
+
+* Compute the bitwise complement `~Int` of an integer value in twos-complement.
+* Compute the exponentiation `^Int` of two integers.
+* Compute the exponentiation of two integers modulo another integer (`^%Int`).
+  `A ^%Int B C` is equal in value to `(A ^Int B) %Int C`, but has a better
+  asymptotic complexity.
+* Compute the product `*Int` of two integers.
+* Compute the quotient `/Int` or modulus `%Int` of two integers using
+  t-division, which rounds towards zero. Division by zero is `#False`.
+* Compute the quotient `divInt` or modulus `modInt` of two integers using
+  Euclidean division, in which the remainder is always non-negative. Division
+  by zero is `#False`.
+* Compute the sum `+Int` or difference `-Int` of two integers.
+* Compute the arithmetic right shift `>>Int` of two integers. Shifting by a
+  negative quantity is `#False`.
+* Compute the left shift of two integers. Shifting by a negative quantity is
+  `#False`.
+* Compute the bitwise and of two integers in twos-complement.
+* Compute the bitwise xor of two integers in twos-complement.
+* Compute the bitwise inclusive-or of two integers in twos-complement.
+
+```k
   syntax Int ::= "~Int" Int                     [function, klabel(~Int_), symbol, functional, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(INT.not), smtlib(notInt)]
                > left:
                  Int "^Int" Int                 [function, klabel(_^Int_), symbol, left, smt-hook(^), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
@@ -421,22 +909,83 @@ module INT-COMMON
                  Int "xorInt" Int               [function, functional, klabel(_xorInt_), symbol, left, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(INT.xor), smtlib(xorInt)]
                > left:
                  Int "|Int" Int                 [function, functional, klabel(_|Int_), symbol, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(INT.or), smtlib(orInt)]
+```
 
+### Integer minimum and maximum
+
+You can compute the minimum and maximum `minInt` and `maxInt` of two integers.
+
+```k
   syntax Int ::= "minInt" "(" Int "," Int ")"   [function, functional, smt-hook((ite (< #1 #2) #1 #2)), hook(INT.min)]
                | "maxInt" "(" Int "," Int ")"   [function, functional, smt-hook((ite (< #1 #2) #2 #1)), hook(INT.max)]
-               | absInt ( Int )                 [function, functional, smt-hook((ite (< #1 0) (- 0 #1) #1)), hook(INT.abs)]
-               | log2Int ( Int )                [function, hook(INT.log2)]
+```
 
+### Absolute value
+
+You can compute the absolute value `absInt` of an integer.
+
+```k
+  syntax Int ::= absInt ( Int )                 [function, functional, smt-hook((ite (< #1 0) (- 0 #1) #1)), hook(INT.abs)]
+```
+
+### Log base 2
+
+You can compute the log base 2, rounded towards zero, of an integer. The log
+base 2 of an integer is equal to the index of the highest bit set in the
+representation of a positive integer. Log base 2 of zero or a negative number
+is `#False`.
+
+```k
+  syntax Int ::= log2Int ( Int )                [function, hook(INT.log2)]
+```
+
+### Bit slicing
+
+You can compute the value of a range of bits in the twos-complement
+representation of an integer, as interpeted either unsigned or signed, of an
+integer. `index` is offset from 0 and `length` is the number of bits, starting
+with `index`, that should be read. The number is assumed to be represented
+in little endian notation with each byte going from least significant to
+most significant. In other words, 0 is the least-significant bit, and each
+successive bit is more significant than the last.
+
+```k
   syntax Int ::= bitRangeInt           ( Int, index: Int, length: Int ) [function, hook(INT.bitRange)]
-  syntax Int ::= signExtendBitRangeInt ( Int, index: Int, length: Int ) [function, hook(INT.signExtendBitRange)]
+               | signExtendBitRangeInt ( Int, index: Int, length: Int ) [function, hook(INT.signExtendBitRange)]
+```
 
+### Integer comparisons
+
+You can compute whether two integers are less than or equal to, less than,
+greater than or equal to, greater than, equal, or unequal to another integer.
+
+```k
   syntax Bool ::= Int "<=Int" Int         [function, functional, klabel(_<=Int_), symbol, left, smt-hook(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
                 | Int "<Int" Int          [function, functional, klabel(_<Int_), symbol, left, smt-hook(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
                 | Int ">=Int" Int         [function, functional, klabel(_>=Int_), symbol, left, smt-hook(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
                 | Int ">Int" Int          [function, functional, klabel(_>Int_), symbol, left, smt-hook(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(INT.gt)]
                 | Int "==Int" Int         [function, functional, klabel(_==Int_), symbol, left, smt-hook(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.eq)]
                 | Int "=/=Int" Int        [function, functional, klabel(_=/=Int_), symbol, left, smt-hook(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.ne)]
-                | Int "dividesInt" Int    [function]
+```
+
+### Divides
+
+You can compute whether one integer evenly divides another. This is the 
+case when the second integer modulo the first integer is equal to zero.
+
+```k
+  syntax Bool ::= Int "dividesInt" Int    [function]
+```
+
+### Implementation of Integers
+
+The remainder of this section consists of an implementation in K of some
+of the operators above, as well as lemmas used  by the Java and Haskell backend
+to simplify expressions of sort `Int`. They do not affect the semantics of
+integers, merely describing additional rules that the backend can use to
+simplify terms.
+
+```k
 endmodule
 
 module INT-SYMBOLIC [symbolic]
@@ -533,10 +1082,43 @@ module INT
   syntax Int ::= randInt(Int) [function, hook(INT.rand)]
   syntax K ::= srandInt(Int) [function, hook(INT.srand)]
 endmodule
+```
 
+IEEE 754 Floating-point Numbers
+-------------------------------
+
+Provided here is the syntax of an implementation of arbitrary-precision
+floating-point arithmetic in K based on a generalization of the IEEE 754
+standard. This type is hooked to an implementation of floats provided by the 
+backend.
+
+The syntax of ordinary floating-point values in K consists of an optional sign
+(+ or -) followed by an optional integer part, followed by a decimal point,
+followed by an optional fractional part. Either the integer part or the 
+fractional part must be specified. The mantissa is followed by an optional
+exponent part, which consists of an `e` or `E`, an optional sign (+ or -), 
+and an integer. The expoennt is followed by an optional suffix, which can be
+either `f`, `F`, `d`, `D`, or `pNxM` where `N` and `M` are positive integers.
+`p` and `x` can be either upper or lowercase.
+
+The value of a floating-point literal is computed as follows: First the
+mantissa is read as a rational number. Then it is multiplied by 10 to the
+power of the exponent, which is interpreted as an integer, and defaults to
+zero if it is not present. Finally, it is rounded to the nearest possible
+value in a floating-point type represented like an IEEE754 floating-point type,
+with the number of bits of precision and exponent specified by the suffix.
+A suffix of `f` or `f` represents the IEEE `binary32` format. A suffix of `d`
+or `D`, or no suffix, represents the IEEE `binary64` format. A suffix of
+`pNxM` (either upper or lowercase) specifies exactly `N` bits of precision and
+`M` bits of exponent. The number of bits of precision is assumed to include
+any optional `1` that precedes the IEEE 754 mantissa. In other words, `p24x8`
+is equal to the IEEE `binary32` format, and `p53x11` is equal to the IEEE
+`binary64` format.
+
+```k
 module FLOAT-SYNTAX
   syntax Float [hook(FLOAT.Float)]
-  syntax Float ::= r"([\\+-]?[0-9]+(\\.[0-9]*)?|\\.[0-9]+)([eE][\\+-]?([0-9]+(\\.[0-9]*)?|\\.[0-9]d+))?([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token, prec(1)]
+  syntax Float ::= r"([\\+-]?[0-9]+(\\.[0-9]*)?|\\.[0-9]+)([eE][\\+-]?[0-9]+)?([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token, prec(1)]
   syntax Float ::= r"[\\+-]?Infinity([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token, prec(3)]
   syntax Float ::= r"NaN([fFdD]|([pP][0-9]+[xX][0-9]+))?" [token, prec(3)]
 endmodule
@@ -545,18 +1127,64 @@ module FLOAT
   imports FLOAT-SYNTAX
   imports BOOL
   imports INT-SYNTAX
+```
 
+### Float precision
 
-// For floating point SMT hooks: http://smtlib.cs.uiowa.edu/theories-FloatingPoint.shtml
+You can retrieve the number of bits of precision in a `Float`.
 
+```k
   syntax Int ::= precisionFloat(Float) [function, functional, hook(FLOAT.precision)]
-               | exponentFloat(Float) [function, functional, hook(FLOAT.exponent)]
-               | exponentBitsFloat(Float) [function, functional, hook(FLOAT.exponentBits)]
+```
 
+### Float exponent bits
+
+You can retrieve the number of bits of exponent range in a `Float`.
+
+```k
+  syntax Int ::= exponentBitsFloat(Float) [function, functional, hook(FLOAT.exponentBits)]
+```
+
+### Float exponent
+
+You can retrieve the value of the exponent bits of a `Float` as an integer.
+
+```k
+  syntax Int ::= exponentFloat(Float) [function, functional, hook(FLOAT.exponent)]
+```
+
+### Float sign
+
+You can retrieve the value of the sign bit of a `Float` as a boolean. True
+means the sign bit is set.
+
+```k
   syntax Bool ::= signFloat(Float)      [function, functional, hook(FLOAT.sign)]
-                | isNaN(Float)          [function, functional, smt-hook(fp.isNaN), hook(FLOAT.isNaN)]
-                | isInfinite(Float)     [function, functional]
+```
 
+### Float special values
+
+You can check whether a `Float` value is infinite or Not-a-Number.
+
+```k
+  syntax Bool ::= isNaN(Float)          [function, functional, smt-hook(fp.isNaN), hook(FLOAT.isNaN)]
+                | isInfinite(Float)     [function, functional]
+```
+
+### Float arithmetic
+
+You can:
+
+* Compute the unary negation `--Float` of a float. `--Float X` is distinct
+  from `0.0 -Float X`. For example, `0.0 -Float 0.0` is positive zero.
+  `--Float 0.0` is negative zero.
+* Compute the exponentation `^Float` of two floats.
+* Compute the product `*Float`, quotient `/Float`, or remainder `%Float` of two
+  floats. The remainder is computed based on rounding the quotient of the two
+  floats to the nearest integer.
+* Compute the sum `+Float` or difference `-Float` of two floats.
+
+```k
   syntax Float ::= "--Float" Float             [function, functional, smt-hook(fp.neg), hook(FLOAT.neg)]
                  > Float "^Float" Float        [function, left, latex({#1}^{#2}), hook(FLOAT.pow)]
                  > left:
@@ -566,7 +1194,40 @@ module FLOAT
                  > left:
                    Float "+Float" Float        [function, left, smt-hook((fp.add roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{+_{\scriptstyle\it Float}}{#2}), hook(FLOAT.add)]
                  | Float "-Float" Float        [function, left, smt-hook((fp.sub roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{-_{\scriptstyle\it Float}}{#2}), hook(FLOAT.sub)]
+```
 
+### Floating-point mathematics
+
+You can:
+
+* Compute the Nth integer root `rootFloat` of a float.
+* Compute the absolute value `absFloat` of a float.
+* Round a floating-point number to a specified precision and exponent
+  range (`roundFloat`). The resulting `Float` will yield the specified values
+  when calling `precisionFloat and `exponentBitsFloat` and when performing
+  further computation.
+* Round a float to the next lowest floating-point value which is an integer
+  (`floorFloat`).
+* Round a float to the next highest floating-point value which is an integer
+  (`ceilFloat`).
+* Compute the natural exponential `expFloat` of a float (i.e. e^x).
+* Compute the natural logarithm `logFloat` of a float.
+* Compute the sine `sinFloat` of a float.
+* Compute the cosine `cosFloat` of a float.
+* Compute the tangent `tanFlooat` of a float.
+* Compute the arcsine `asinFloat` of a float.
+* Compute the arccosine `acosFloat` of a float.
+* Compute the arctangent `atanFloat` of a float.
+* Compute the arctangent `atan2Float` of two floats.
+* Compute the maximum `maxFloat` of two floats.
+* Compute the minimum `minFloat` of two floats.
+* Compute the square root `sqrtFloat` of a float.
+* Compute the largest finite value expressible in a specified precision and
+  exponent range (`maxValueFloat`).
+* Compute the smallest positive finite value expressible in a specified
+  precision and exponent range (`minValueFloat`).
+
+```k
   syntax Float ::= rootFloat(Float, Int)        [function, hook(FLOAT.root)]
                  | absFloat(Float)              [function, functional, smt-hook(fp.abs), hook(FLOAT.abs)]
                  | roundFloat(Float, precision: Int, exponentBits: Int)  [function, hook(FLOAT.round)]
@@ -586,7 +1247,20 @@ module FLOAT
                  | sqrtFloat(Float)             [function]
                  | maxValueFloat(precision: Int, exponentBits: Int)      [function, hook(FLOAT.maxValue)]
                  | minValueFloat(precision: Int, exponentBits: Int)      [function, hook(FLOAT.minValue)]
+```
 
+### Floating-point comparisons
+
+Compute whether a float is less than or equasl to, less than, greater than or
+equal to, greater than, equal, or unequal to another float. Note that
+`X ==Float Y` and `X ==K Y` might yield different values. The latter should be
+used in cases where you want to compare whether two values of sort `Float`
+contain the same term. The former should be used when you want to implement
+the `==` operator of a programming language. In particular, `NaN =/=Float NaN`
+is true, because `NaN` compares unequal to all values, including itself, in
+IEEE 754 arithmetic. `0.0 ==Float -0.0` is also true.
+
+```k
   syntax Bool ::= Float "<=Float" Float       [function, left, smt-hook(fp.leq), latex({#1}\mathrel{\leq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.le)]
                 | Float "<Float" Float        [function, left, smt-hook(fp.lt), latex({#1}\mathrel{<_{\scriptstyle\it Float}}{#2}), hook(FLOAT.lt)]
                 | Float ">=Float" Float       [function, left, smt-hook(fp.geq), latex({#1}\mathrel{\geq_{\scriptstyle\it Float}}{#2}), hook(FLOAT.ge)]
@@ -594,27 +1268,65 @@ module FLOAT
                 | Float "==Float" Float       [function, left, smt-hook(fp.eq), latex({#1}\mathrel{==_{\scriptstyle\it Float}}{#2}), hook(FLOAT.eq), klabel(_==Float_)]
                 | Float "=/=Float" Float      [function, left, smt-hook((not (fp.eq #1 #2))), latex({#1}\mathrel{\neq_{\scriptstyle\it Float}}{#2})]
 
-
   rule F1:Float =/=Float F2:Float => notBool (F1 ==Float F2)
+```
 
+### Conversion between integer and float
+
+You can convert an integer to a floating-point number with the specified
+precision and exponent range. You can also convert a floating-point number
+to the nearest integer. This operation rounds to the nearest integer, but it
+also avoids the double-rounding that is present in `ceilFloat` and `floorFloat`
+if the nearest integer is not representable in the specified floating-point
+type.
+
+```k
   syntax Float ::= Int2Float(Int, precision: Int, exponentBits: Int)    [function, latex({\\it{}Int2Float}), hook(FLOAT.int2float)]
   syntax Int ::= Float2Int(Float)    [function, functional, latex({\\it{}Float2Int}), hook(FLOAT.float2int)]
+```
 
+### Implementation of Floats
+
+The remainder of this section consists of an implementation in K of some of the
+operators above.
+
+```k
   rule sqrtFloat(F:Float) => rootFloat(F, 2)
 
   rule isInfinite(F:Float) => F >Float maxValueFloat(precisionFloat(F), exponentBitsFloat(F)) orBool F <Float --Float maxValueFloat(precisionFloat(F), exponentBitsFloat(F))
 
 endmodule
+```
 
+Strings
+-------
+
+Provided here is the syntax of an implementation of Unicode strings in K. This
+type is hooked to an implementation of strings provided by the backend. The
+implementation is currently incomplete and does not fully support encodings
+and code points beyond the initial 256 code points of the Basic Latin and
+Latin-1 Supplement blocks. In the future, there may be breaking changes to
+the semantics of this module in order to support this functionality.
+
+The syntax of strings in K is delineated by double quotes. Inside the double
+quotes, any character can appear verbatim except double quotes, backslash,
+newline, and carriage return. K also supports the following escape sequences:
+
+* \" - the " character
+* \\ - the \ character
+* \n - newline character
+* \r - carriage return character
+* \t - tab character
+* \f - form feed character
+* \xFF - \x followed by two hexadecimal characters indicates a code point
+  between 0x00 and 0xff
+* \uFFFF - \u followed by four hexadecimal characters indicates a code point
+  between 0x0000 and 0xffff
+* \UFFFFFFFF - \U followed by eight hexadecimal characters indicates a code
+  point between 0x000000 and 0x10ffff
+
+```k
 module STRING-SYNTAX
-  // Double Quoted Strings are of the form:
-  // DoubleQuote StringChar* DoubleQuote
-  // StringChar ::= ~[\"\n\r\\] // anything except for Newline, DoubleQuote and Backslash
-  //              | [\\][nrtf\"\\] // Backslash followed by either 'nrtf', DoubleQuote or Backslash
-  //              | [\\][x] 2*Hex // "\xFF"       Backslash 'x' followed by two   hexadecimal characters
-  //              | [\\][u] 4*Hex // "\uFFFF"     Backslash 'u' followed by four  hexadecimal characters
-  //              | [\\][U] 8*Hex // "\UFFffFFff" Backslash 'U' followed by eight hexadecimal characters
-  //                              // the code must not be in the range [0xdfff, 0xd800] or exceed 0x10ffff
   syntax String [hook(STRING.String)]
   syntax String ::= r"[\\\"](([^\\\"\\n\\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]"      [token]
 endmodule
@@ -624,43 +1336,151 @@ module STRING-COMMON
   imports INT
   imports FLOAT-SYNTAX
   imports K-EQUAL
+```
 
+### String concatenation
+
+You can concatenate two strings in O(N) time. For successive concatenation
+operations, it may be better to use the `STRING-BUFFER` module.
+
+```k
   syntax String ::= String "+String" String    [function, functional, left, latex({#1}+_{\scriptstyle\it String}{#2}), hook(STRING.concat)]
+```
 
-  syntax Bool ::= String "==String" String [function, functional, left, hook(STRING.eq)]
+### String length
 
+You can get the length of a string in O(1) time.
+
+```k
   syntax Int ::= lengthString ( String ) [function, functional, hook(STRING.length)]
+```
+
+### Character and integer conversion
+
+You can convert between a character (as represented by a string containing
+a single code point) and an integer in O(1) time.
+
+```k
   syntax String ::= chrChar ( Int )      [function, hook(STRING.chr)]
   syntax Int ::= ordChar ( String )      [function, hook(STRING.ord)]
+```
 
+### String substring
+
+You can compute a substring of a string in O(N) time (where N is the
+length of the substring). Note that the range generated is 
+`[startIndex..endIndex)`
+
+```k
   syntax String ::= substrString ( String , startIndex: Int , endIndex: Int ) [function, functional, hook(STRING.substr)]
+```
+
+### String search
+
+You can find the first (respectively, last) occurrence of a string, starting
+at a certain `index`, in another string in O(N*M) time.
+
+```k
   syntax Int ::= findString ( haystack: String , needle: String , index: Int )   [function, hook(STRING.find)]
   syntax Int ::= rfindString ( haystack: String , needle: String , index: Int )  [function, hook(STRING.rfind)]
+```
+
+### String character search
+
+You can find the first (respectively, last) occurrence of one of the characters
+of the search string, starting at a certain `index`, in another string in
+O(N*M) time.
+
+```k
   syntax Int ::= findChar ( haystack: String , needles: String , index: Int )     [function, hook(STRING.findChar)]
   syntax Int ::= rfindChar ( haystack: String , needles: String , index: Int )    [function, hook(STRING.rfindChar)]
+```
 
+### String and float conversion
+
+You can convert between a `String` and a `Float`. The String will be
+represented in the syntax of the `Float` sort (see the section on the `FLOAT`
+module above for details of that syntax). Which particular string is returned
+by `Float2String` is determined by the backend, but the same `Float` is
+guaranteed to return the same `String`, and converting that `String` back to a
+`Float` is guaranteed to return the original `Float`.
+
+You can also convert a `Float` to a string in a particular syntax using the
+variant of `Float2String` with a `format`. In this case, the resulting string
+is one which results directly from passing that `format` to `mpfr_printf`. This
+functionality may not be supported on backends that do not use Gnu MPFR to
+implement floating-point numbers.
+
+```k
   syntax String ::= Float2String ( Float )              [function, functional, hook(STRING.float2string)]
   syntax String ::= Float2String ( Float , format: String )     [function, klabel(FloatFormat), hook(STRING.floatFormat)]
   syntax Float  ::= String2Float ( String )             [function, hook(STRING.string2float)]
+```
+
+### String and integer conversions
+
+You can convert between a `String` and an `Int`. The String will be represented
+in the syntax of the `INT` module (i.e., a nonempty sequence of digits
+optionally prefixed by a sign). When converting from an `Int` to a `String`,
+the sign will not be present unless the integer is negative.
+
+You can also convert between a `String` and an `Int` in a particular radix.
+This radix can be anywhere between 2 and 36. For a radix 2 <= N <= 10, the
+digits 0 to N-1 will be used. For a radix 11 <= N <= 36, the digits 0 to 9
+and the first N-10 letters of the Latin alphabet will be used. Both uppercase
+and lowercase letters are supported by `String2Base`. Whether the letters
+returned by `Base2String` are upper or lowercase is determined by the backend,
+but the backend will consistently choose one or the other.
+
+```k
   syntax Int    ::= String2Int   ( String )             [function, hook(STRING.string2int)]
   syntax String ::= Int2String   ( Int )                [function, functional, hook(STRING.int2string)]
   syntax String ::= Base2String  ( Int , base: Int )          [function, hook(STRING.base2string)]
   syntax Int    ::= String2Base  ( String , base: Int )       [function, hook(STRING.string2base)]
+```
 
+### String count and replace
 
+You can replace one, some, or all occurrences of a string within another
+string in O(N*M) time. The `replaceAll`, `replace`, and `replaceFirst` methods
+are identical, except `replaceFirst` replaces exactly one ocurrence of the
+string, the first occurrence. `replace` replaces the first `times` occurrences.
+And `replaceAll` replaces every occurrence.
+
+You can also count the number of times a string occurs within another string
+using `countAllOccurrences`.
+
+```k
   syntax String ::= "replaceAll" "(" haystack: String "," needle: String "," replacement: String ")"      [function, functional, hook(STRING.replaceAll)]
   syntax String ::= "replace" "(" haystack: String "," needle: String "," replacement: String "," times: Int ")" [function, hook(STRING.replace)]
   syntax String ::= "replaceFirst" "(" haystack: String "," needle: String "," replacement: String ")"    [function, functional, hook(STRING.replaceFirst)]
   syntax Int ::= "countAllOccurrences" "(" haystack: String "," needle: String ")"            [function, functional, hook(STRING.countAllOccurrences)]
+```
 
-  syntax Bool ::= String "=/=String" String      [function, functional, left, hook(STRING.ne)]
+### String equality and lexicographic comparison
+
+You can compare whether two strings are equal or unequal, or whether one string
+is less than, less than or equal to, greater than, or greater than or equal to
+another according to the natural lexicographic ordering of strings.
+
+```k
+  syntax Bool ::= String "==String" String [function, functional, left, hook(STRING.eq)]
+                | String "=/=String" String      [function, functional, left, hook(STRING.ne)]
   rule S1:String =/=String S2:String => notBool (S1 ==String S2)
 
   syntax Bool ::= String  "<String" String [function, functional, hook(STRING.lt)]
                 | String "<=String" String [function, functional, hook(STRING.le)]
                 | String  ">String" String [function, functional, hook(STRING.gt)]
                 | String ">=String" String [function, functional, hook(STRING.ge)]
+```
 
+### Implementation of Strings
+
+What follows is a few String hooks which are deprecated and only are supported
+on certain outdated backends of K, as well as an implementation of several
+of the above operations in K.
+
+```k
   syntax String ::= categoryChar(String)       [function, hook(STRING.category)]
                   | directionalityChar(String) [function, hook(STRING.directionality)]
 
@@ -717,7 +1537,27 @@ module STRING
   imports STRING-KAST
   imports STRING-KORE
 endmodule
+```
 
+String Buffers
+--------------
+
+It is a well known fact that repeated string concatenations are quadratic
+in performance whereas use of an efficient mutable representation of arrays
+can yield linear performance. We thus provide such a sort, the `StringBuffer`
+sort. Axiomatically, it is implemented below on symbolic backends using the
+`String` module. However, on concrete backends it provides an efficient
+implementation of string concatenation. There are three operations:
+
+* `.StringBuffer` creates a new `StringBuffer` with current content equal
+  to the empty string.
+* `+String` takes a `StringBuffer` and a `String` and appends the `String` to
+  the end of the `StringBuffer`
+* `StringBuffer2String` converts a `StringBuffer` to a `String`. This operation
+  copies the string so that subsequent modifications to the `StringBuffer`
+  will not change the value of the `String` returned by this function.
+
+```k
 module STRING-BUFFER-IN-K [symbolic]
   imports BASIC-K
   imports STRING
@@ -746,35 +1586,190 @@ module STRING-BUFFER
   imports STRING-BUFFER-HOOKED
   imports STRING-BUFFER-IN-K
 endmodule
+```
 
+Byte Arrays
+-----------
+
+Provided here is the syntax of an implementation of fixed-width arrays of Bytes
+in K. This type is hooked to an implementation of bytes provided by the
+backend. In concrete backends, this representation is mutable and thus multiple
+references can occur to the same `Bytes` object and when one is modified, the
+others are also modified. Care should be taken not to rely on this fact however
+as this is not the case in symbolic backends and thus you will experience
+divergent behavior unless the `Bytes` type is used in a manner that preserves
+consistency.
+
+```k
 module BYTES-HOOKED
   imports STRING-SYNTAX
 
   syntax Bytes [hook(BYTES.Bytes), token]
+```
 
+### Empty byte array
+
+The byte array of length zero is represented by `.Bytes`.
+
+```k
   syntax Bytes ::= ".Bytes" [function, functional, hook(BYTES.empty)]
+```
+
+### Endianness
+
+When converting to/from an integer, byte arrays can be treated as either little
+endian (ie, least significant byte first) or big endian (ie, most significant
+byte first).
+
+```k
   syntax Endianness ::= "LE" [klabel(littleEndianBytes), symbol]
                       | "BE" [klabel(bigEndianBytes), symbol]
+```
+
+### Signedness
+
+When converting to/from an integer, byte arrays can be treated as either signed
+or unsigned.
+
+```k
   syntax Signedness ::= "Signed" [klabel(signedBytes), symbol]
                       | "Unsigned" [klabel(unsignedBytes), symbol]
+```
+
+### Integer and Bytes conversion
+
+You can convert from a `Bytes` to an `Int`. In order to do this, the endianness
+and signedness of the `Bytes` must be provided. The resulting integer is
+created by means of interpreting the `Bytes` as either a twos-complement
+representation, or an unsigned representation, of an integer, in the specified
+byte order.
+
+You can also convert from an `Int` to a `Bytes`. This comes in two variants.
+In the first, the `length` of the resulting `Bytes` in bytes is explicitly
+specified. If the `length` is greater than the highest set bit in the magnitude
+of the integer, the result is padded with 0 bits if the number is positive
+and 1 bits if the number is negative. If the `length` is less than the highest
+bit set in the magnitude of the integer, the most-significant bits of the
+integer will be truncated. The endianness of the resulting `Bytes` object
+is as specified.
+
+In the second variant, both endianness and signedness are specified, and
+the resulting `Bytes` object will be the smallest number of bytes necessary
+for the resulting `Bytes` object to be convertible back to the original integer
+via `Bytes2Int`. In other words, if the highest bit set in the magnitude of the
+integer is N, then the byte array will be at least N+1 bits long, rounded up
+to the nearest byte.
+
+```k
   syntax Int ::= Bytes2Int(Bytes, Endianness, Signedness) [function, functional, hook(BYTES.bytes2int)]
   syntax Bytes ::= Int2Bytes(length: Int, Int, Endianness) [function, functional, hook(BYTES.int2bytes)]
                  | Int2Bytes(Int, Endianness, Signedness) [function, functional, klabel(Int2BytesNoLen)]
+```
+
+### String and Bytes conversion
+
+You can convert between a `Bytes` and a `String` in O(N) time. The resulting
+value is a copy of the original and will not be affected by subsequent
+mutations of the input or output value.
+
+```k
   syntax String ::= Bytes2String(Bytes) [function, functional, hook(BYTES.bytes2string)]
   syntax Bytes ::= String2Bytes(String) [function, functional, hook(BYTES.string2bytes)]
+```
 
+### Bytes update
+
+You can set the value of a particular byte in a `Bytes` object in O(1) time.
+The result is `#False` if `value` is not in the range [0..255] or if `index`
+is not a valid index (ie, less than zero or greater than or equal to the length
+of the `Bytes` term).
+
+```k
   syntax Bytes ::= Bytes "[" index: Int "<-" value: Int "]" [function, hook(BYTES.update)]
+```
+
+### Bytes lookup
+
+You can get the value of a particular byte in a `Bytes` object in O(1) time.
+The result is `#False` if `index` is not a valid index (see above).
+
+```k
   syntax Int ::= Bytes "[" Int "]" [function, hook(BYTES.get)]
+```
+
+### Bytes substring
+
+You can get a new `Bytes` object containing a range of bytes from the input
+`Bytes` in O(N) time (where N is the length of the substring). The range
+of bytes included is `[startIndex..endIndex)`. The resulting `Bytes` is
+a copy and mutations to it do not affect mutations to the original `Bytes`.
+The result is `#False` if `startIndex` or `endIndex` are not valid.
+
+```k
   syntax Bytes ::= substrBytes(Bytes, startIndex: Int, endIndex: Int) [function, hook(BYTES.substr)]
+```
+
+### Multiple bytes update
+
+You can modify a `Bytes` to return a `Bytes` which is equal to `dest` except
+the `N` elements starting at `index` are replaced with the contents of `src` in
+O(N) time. This does not create a new `Bytes` object and will instead modify
+the original on concrete backends. The result is `#False` if `index` + `N`
+is not a valid index.
+
+```k
   syntax Bytes ::= replaceAtBytes(dest: Bytes, index: Int, src: Bytes) [function, hook(BYTES.replaceAt)]
+```
+
+### Bytes padding
+
+You can create a new `Bytes` object which is at least `length` bytes long
+by taking the input sequence and padding it on the right (respectively, on the
+left) with the specified `value`. This does not create a new `Bytes` object
+if the input is already at least `length` bytes long, and will instead
+return the input unchanged. The result is `#False` if `value` is not in the
+range `[0..255]`, or if the length is negative.
+
+```k
   syntax Bytes ::= padRightBytes(Bytes, length: Int, value: Int) [function, hook(BYTES.padRight)]
                  | padLeftBytes(Bytes, length: Int, value: Int) [function, hook(BYTES.padLeft)]
+```
+
+### Bytes reverse
+
+You can reverse a `Bytes` object in O(N) time. This does not create a new
+`Bytes` object and will instead modify the original on concrete backends.
+
+```k
   syntax Bytes ::= reverseBytes(Bytes) [function, functional, hook(BYTES.reverse)]
+```
 
+### Bytes length
+
+You can get the length of a `Bytes` term in O(1) time.
+
+```k
   syntax Int ::= lengthBytes(Bytes) [function, functional, hook(BYTES.length), smtlib(lengthBytes)]
+```
 
+
+### Bytes concatenation
+
+You can create a new `Bytes` object by concatenating two `Bytes` objects
+together in O(N) time.
+
+```k
   syntax Bytes ::= Bytes "+Bytes" Bytes [function, functional, hook(BYTES.concat), right]
+```
 
+### Implementation of Bytes
+
+The remainder of this module consists of an implementation of some of the
+operators listed above in K. This implementation is primarily used by outdated
+backends and should not be viewed as authoritative, nor should the user
+use the `nilBytes` or `:` operators in their definition.
+
+```k
   rule .Bytes => String2Bytes("")
 endmodule
 
@@ -891,7 +1886,25 @@ module BYTES
     requires I <Int -1
   rule Int2Bytes(-1, E::Endianness, Signed) => Int2Bytes(1, -1, E)
 endmodule
+```
 
+Program identifiers
+-------------------
+
+Provided here is an implementation for program identifiers in K. Developers
+of semantics for a particular language may wish to use their own implementation
+instead of the one provided here if their syntax differs from the syntax
+defined below. However, this is provided for convenience for developers who
+do not care about the lexical syntax of identifiers.
+
+Provided are the following pieces of functionality:
+
+* `Id2String` - Convert an `Id` to a `String` containing its name
+* `String2Id` - Convert a `String` to an `Id` with the specified name
+* !X:Id - You can get a fresh identifier distinct from any previous identifier
+  generated by this syntax.
+
+```k
 module ID-SYNTAX-PROGRAM-PARSING
   imports BUILTIN-ID-TOKENS
   syntax Id ::= r"(?<![A-Za-z0-9\\_])[A-Za-z\\_][A-Za-z0-9\\_]*"     [prec(1), token]
@@ -926,7 +1939,21 @@ module ID-SYMBOLIC [symbolic, kast]
   syntax KItem  ::= "#parseIdToken"  "(" String "," String ")"  [function, hook(STRING.parseToken)]
   rule String2Id(S:String) => {#parseIdToken("Id", S)}:>Id
 endmodule
+```
 
+Equality and conditionals
+-------------------------
+
+Provided here are implementations of two important primitives in K:
+
+* `==K` - the equality between two terms. Returns `true` if they are equal
+  and `false` if they are not equal.
+* `#if #then #else #fi` - polymorphic conditional function. If the first
+  argument evaluates to `true`, the second argument is returned. Otherwise,
+  the third argument is returned. Note that this does not short-circuit on
+  symbolic backends.
+
+```k
 module K-EQUAL-SYNTAX
   imports BOOL
   imports BASIC-K
@@ -969,7 +1996,23 @@ module K-EQUAL
   rule #if C:Bool #then _ #else B2::K #fi => B2 requires notBool C
 
 endmodule
+```
 
+Meta operations
+---------------
+
+Provided below are a few miscellaneous, mostly deprecated functions in K.
+It is not recommended to use any of them directly as they are largely
+unsupported in modern K. There are two exceptions:
+
+* `#getenv` - Returns the value of an environment variable
+* `#parseKORE` - Takes a String containing a K intermediate representation of
+  a term such as is returned by `kast -o kore` and converts it to a term.
+  This is NOT type-safe. The responsibility is on the user to ensure that the
+  string they provide is a valid representation of a term of the sort *exactly*
+  equal to the sort where the function appears.
+
+```k
 module K-REFLECTION
   imports BASIC-K
   imports STRING
@@ -1004,11 +2047,39 @@ module K-REFLECTION-SYMBOLIC [symbolic, kast]
   syntax Bool ::= #isConcrete(K) [function, hook(KREFLECTION.isConcrete)]
   syntax Bool ::= #isVariable(K) [function, hook(KREFLECTION.isVariable)]
 endmodule
+```
 
+I/O in K
+--------
+
+Concrete execution in K supports I/O operations. This functionality is not
+supported during symbolic execution, because symbolic execution must exist
+completely free of side-effects, and I/O is an irreducible type of side effect.
+However, it is useful in many cases when defining concrete execution to be able
+to make reference to I/O operations.
+
+The design of these I/O operations is based on the POSIX standard, for the most
+part. For example, the `#read` K function maps to the `read` POSIX function. We
+do not at this time have a higher-level API for I/O, but this may be
+implemented at some point in the future.
+
+I/O operations generally return either their result, or an `IOError` term
+corresponding to the `errno` returned by the underlying system call.
+
+```k
 module K-IO
   imports LIST
   imports STRING
+```
 
+### I/O errors
+
+Aside from EOF, which is returned by `#getc` if the file is at end-of-file, all
+of the below I/O errors correspond to possible values for `errno` after calling
+a library function. If the `errno` returned is not one of the below errnos
+known to K, `#unknownIOError` is returned along with the integer errno value.
+
+```k
   syntax IOError ::= "#EOF" [klabel(#EOF), symbol] | #unknownIOError(errno: Int) [symbol]
                    | "#E2BIG" [klabel(#E2BIG), symbol]
                    | "#EACCES" [klabel(#EACCES), symbol]
@@ -1078,34 +2149,122 @@ module K-IO
                    | "#EHOSTUNREACH" [klabel(#EHOSTUNREACH), symbol]
                    | "#ELOOP" [klabel(#ELOOP), symbol]
                    | "#EOVERFLOW" [klabel(#EOVERFLOW), symbol]
+```
 
+### I/O result sorts
+
+Here we see sorts defined to contain either an `Int` or an `IOError`, or 
+either a `String` or an `IOError`. These sorts are used to implement the
+return sort of functions that may succeed, in which case they return a value,
+or may fail, in which case their return value indicates an error and the
+error indicated is returned via `errno`.
+
+```k
   syntax IOInt ::= Int | IOError
   syntax IOString ::= String | IOError
+```
 
+### Opening a file
+
+You can open a file in K using `#open`. An optional mode indicates the file
+open mode, which can have any value allowed by the `fopen` function in C.
+The returned value is the file descriptor that was opened, or an error.
+
+```k
   syntax IOInt ::= "#open" "(" path: String ")" [function]
                | "#open" "(" path: String "," mode: String ")" [function, hook(IO.open), impure]
-               | "#tell" "(" fd: Int ")" [function, hook(IO.tell), impure]
-               | "#getc" "(" fd: Int ")"             [function, hook(IO.getc), impure]
-               | "#accept" "(" fd: Int ")" [function, hook(IO.accept), impure]
-  syntax IOString ::= "#read" "(" fd: Int "," length: Int ")"    [function, hook(IO.read), impure]
-
-  syntax K ::= "#close" "(" fd: Int ")" [function, hook(IO.close), impure]
-             | "#seek" "(" fd: Int "," index: Int ")" [function, hook(IO.seek), impure]
-             | "#seekEnd" "(" fd: Int "," fromEnd: Int ")" [function, hook(IO.seekEnd), impure]
-             | "#putc" "(" fd: Int "," value: Int ")"      [function, hook(IO.putc), impure]
-             | "#write" "(" fd: Int "," value: String ")" [function, hook(IO.write), impure]
-             | "#lock" "(" fd: Int "," endIndex: Int ")" [function, hook(IO.lock), impure]
-             | "#unlock" "(" fd: Int "," endIndex: Int ")" [function, hook(IO.unlock), impure]
-             | "#shutdownWrite" "(" fd: Int ")" [function, hook(IO.shutdownWrite), impure]
-
-  syntax KItem ::= "#stat" "(" String ")" [function, hook(IO.stat), impure]
-                 | "#lstat" "(" String ")" [function, hook(IO.lstat), impure]
-                 | "#opendir" "(" String ")" [function, hook(IO.opendir), impure]
-
-  syntax Int ::= "#time" "(" ")" [function, hook(IO.time), impure]
 
   rule #open(S:String) => #open(S:String, "r+")
+```
 
+### Get/set position in file
+
+You can get the current offset in a file using `#tell`. You can also seek
+to a particular offset using `#seek` or `#seekEnd`. `#seek` is implemented via
+a call to `lseek` with the `SEEK_SET` whence. `#seekEnd` is implemented via a
+call to `lseek` with the `SEEK_END` whence. You can emulate the `SEEK_CUR`
+whence by means of `#seek(FD, #tell(FD) +Int Offset)`.
+
+```k
+  syntax IOInt ::= "#tell" "(" fd: Int ")" [function, hook(IO.tell), impure]
+  syntax K ::= "#seek" "(" fd: Int "," index: Int ")" [function, hook(IO.seek), impure]
+             | "#seekEnd" "(" fd: Int "," fromEnd: Int ")" [function, hook(IO.seekEnd), impure]
+```
+
+### Read from file
+
+You can read a single character from a file using `#getc`. `#EOF` is returned
+if you are at end-of-fie.
+
+You can also read up to `length` characters in a file using `#read`. The
+resulting read characters are returned, which may be fewer characters than
+requested. A string of zero length being returned indicates end-of-file.
+
+```k
+  syntax IOInt ::= "#getc" "(" fd: Int ")"             [function, hook(IO.getc), impure]
+  syntax IOString ::= "#read" "(" fd: Int "," length: Int ")"    [function, hook(IO.read), impure]
+```
+
+### Write to file
+
+You can write a single character to a file using `#putc`. You can also write 
+a string to a file using `#write`. The returned value on success is `.K`.
+
+```k
+  syntax K ::= "#putc" "(" fd: Int "," value: Int ")"      [function, hook(IO.putc), impure]
+             | "#write" "(" fd: Int "," value: String ")" [function, hook(IO.write), impure]
+```
+
+### Closing a file
+
+You can close a file using `#close`. The returned value on success is `.K`.
+
+```k
+  syntax K ::= "#close" "(" fd: Int ")" [function, hook(IO.close), impure]
+```
+
+### Locking/unlocking a file
+
+You can lock or unlock parts of a file using the `#lock` and `#unlock` 
+functions. The lock starts at the beginning of the file and continues for
+`endIndex` bytes. Note that Unix systems do not actually prevent locked files
+ from being read and modified; you will have to lock both sides of a concurrent
+access to guarantee exclusivity.
+
+```k
+  syntax K ::= "#lock" "(" fd: Int "," endIndex: Int ")" [function, hook(IO.lock), impure]
+             | "#unlock" "(" fd: Int "," endIndex: Int ")" [function, hook(IO.unlock), impure]
+```
+
+### Networking
+
+You can accept a connection on a socket using `#accept`, or shut down the 
+write end of a socket with `#shutdownWrite`. Note that facility is not provided
+for opening, binding, and listening on sockets. These functions are implemented
+in order to support creating stateful request/response servers where the
+request loop is implemented using rewriting in K, but the connection
+initialization is written in native code and linked into the LLVM backend.
+
+```k
+  syntax IOInt ::= "#accept" "(" fd: Int ")" [function, hook(IO.accept), impure]
+  syntax K ::= "#shutdownWrite" "(" fd: Int ")" [function, hook(IO.shutdownWrite), impure]
+```
+
+### Time
+
+You can get the current time in seconds since midnight UTC on January 1, 1970
+using `#time`.
+
+```k
+  syntax Int ::= "#time" "(" ")" [function, hook(IO.time), impure]
+```
+
+### Builtin file descriptors
+
+Provided here are functions that return the file descriptor for standard input,
+standard output, and standard error.
+
+```k
   syntax Int ::= "#stdin"   [function, functional]
                 | "#stdout" [function, functional]
                 | "#stderr" [function, functional]
@@ -1113,23 +2272,65 @@ module K-IO
   rule #stdin => 0
   rule #stdout => 1
   rule #stderr => 2
+```
 
-  syntax Stream ::= #buffer(K)
+### Shell access
 
-// ------------------------------
-// System
+You can execute a command using the shell using the `#system` operator. Care
+must be taken to sanitize inputs to this function or security issues may
+result. Note that K has no facility for reasoning about logic that happens
+outside its process, so any functionality that you wish to be able to formally
+reason about in K should not be implemented via the `#system` operator.
 
-  // executes the given command line with `sh -c cmd:String`
+```k
   syntax KItem ::= #system ( String ) [function, hook(IO.system), impure]
                  | "#systemResult" "(" Int /* exit code */ "," String /* stdout */ "," String /* stderr */ ")" [klabel(#systemResult), symbol]
+```
 
-  syntax K ::= #logToFile(name: String, value: String) [function, functional, hook(IO.log), impure, returnsUnit, symbol]
-  // creates a temporary file in the default system location
+### Temporary files
+
+You can get a temporary file and open it atomically using the `#mkstemp`
+operator. The resulting file will be closed and deleted when K rewriting ends.
+For more info on the argument to `#mkstemp`, see `man mkstemp`.
+
+```k
   syntax IOFile ::= #mkstemp(template: String) [function, hook(IO.mkstemp), impure]
   syntax IOFile ::= IOError
                   | "#tempFile" "(" path: String "," fd: Int ")" [klabel(#tempFile), symbol]
-  // Remove a file or empty directory from the disk. Returns .K on success or an IOError on failure.
+```
+
+### Deleting a file
+
+You can delete a file using its absolute or relative path using the `#remove`
+operator. It returns `.K` on success or an `IOError` on failure.
+
+```k
   syntax K ::= #remove(path: String) [function, functional, hook(IO.remove), impure]
+```
+
+### Logging
+
+You can log information to disk using the `#logToFile` operator. Semantically,
+this operator returns `.K`. However, it has a side effect that is not reasoned
+about which is that `value` will be written to a uniquely-identified file
+containing `name` in its name. The file is only flushed to disk when rewriting
+finishes.
+
+```k
+  syntax K ::= #logToFile(name: String, value: String) [function, functional, hook(IO.log), impure, returnsUnit, symbol]
+```
+
+### Implementation of high-level I/O streams in K
+
+Below is an implementation of the `stream="stdin"` and `stream="stdout"`
+cell attributes in K. You should not refer to these symbols or modules directly
+in your definition. It is provided only so that the K compiler can make use of
+it. For more information on how to use this feature, refer to IMP++ in the K
+tutorial.
+
+```k
+  syntax Stream ::= #buffer(K)
+
 endmodule
 
 // NOTE: DO NOT DIRECTLY IMPORT *-STREAM MODULES
@@ -1303,7 +2504,24 @@ module STDOUT-STREAM
   */
 
 endmodule
+```
 
+Machine Integers
+----------------
+
+Provided here is an implementation of arbitrarily large fixed-precision binary
+integers in K. This type is hooked to an implementation of integers provided
+by the backend, and in particular makes use of native machine integers for
+certain sizes of integer. For arbitrary-precision integers, see the `INT`
+module above.
+
+The syntax of machine integers in K is the same as arbitrary-precision integers
+(i.e., an optional sign followed by a sequence of digits) except that machine
+integers always end in a suffix `pN` where `N` is an integer indicating the
+width in bits of the integer. The `MInt` sort is parametric, and this is
+reflected in the literals. For example, the sort of `0p8` is `MInt{8}`.
+
+```k
 module MINT-SYNTAX
   /*@\section{Description} The MInt implements machine integers of arbitrary
    * bit width represented in 2's complement. */
@@ -1316,26 +2534,43 @@ endmodule
 module MINT
   imports MINT-SYNTAX
   imports INT
+```
 
-  /*@ Function returning the bit width of this machine integer. */
+### Bitwidth of MInt
+
+You can get the number of bits of width in an MInt using `bitwidthMInt`.
+
+```k
   syntax {Width} Int ::= bitwidthMInt(MInt{Width})   [function, functional, hook(MINT.bitwidth)]
+```
 
-  /*@
-   * Functions returning the signed and unsigned interpretations of this
-   * machine integers.
-   *   svalue  returns an integer between -2^(bitwidth - 1) and
-   *           2^(bitwidth - 1) - 1
-   *   uvalue  returns an integer between 0 and 2^bitwidth - 1
-   */
+### Int and MInt conversions
+
+You can convert from an `MInt` to an `Int` using the `MInt2Signed` and 
+`MInt2Unsigned` functions. an `MInt` does not have a sign; its sign is instead
+reflected in how operators interpret its value either as a signed integer or as
+an unsigned integer. Thus, you can interpret a `MInt` as a signed integer witth
+`MInt2Signed`, or as an unsigned integer respectively using `MInt2Unsigned`.
+
+You can also convert from an `Int` to an `MInt` using `Int2MInt`. Care must
+be given to ensure that the sort context where the `Int2MInt` operator appears
+has the correct bitwidth, as this will influence the width of the resulting
+`MInt`.
+
+```k
   syntax {Width} Int ::= MInt2Signed(MInt{Width})     [function, functional, hook(MINT.svalue)]
                        | MInt2Unsigned(MInt{Width})     [function, functional, hook(MINT.uvalue), smt-hook(bv2int)]
 
   syntax {Width} MInt{Width} ::= Int2MInt(Int) [function, functional, hook(MINT.integer), smt-hook(int2bv)]
+```
 
-  /*@
-   * Functions for signed and unsigned minimum and maximum values of a machine
-   * integer on a given bit width.
-   */
+### MInt min and max values
+
+You can get the minimum and maximum values of a signed or unsigned `MInt` 
+with az specified bit width using `sminMInt`, `smaxMInt`, `uminMInt`, and 
+`umaxMInt`.
+
+```k
   syntax Int ::= sminMInt(Int)    [function]
                | smaxMInt(Int)    [function]
                | uminMInt(Int)    [function]
@@ -1344,13 +2579,17 @@ module MINT
   rule smaxMInt(N:Int) => (1 <<Int (N -Int 1)) -Int 1
   rule uminMInt(_:Int) => 0
   rule umaxMInt(N:Int) => (1 <<Int N) -Int 1
+```
 
-  /*@
-   * Functions checking whether a given integer can be represented on as signed
-   * or unsigned on a given bit width without overflow.
-   */
-  syntax Bool ::= soverflowMInt(Int, Int)   [function]
-                | uoverflowMInt(Int, Int)   [function]
+### MInt bounds checking
+
+You can check whether a specified `Int` will be represented in an `MInt`
+with a specified `width` without any loss of precision when interpreted as
+a signed or unsigned integer using `soverflowMInt` and `uoverflowMInt`.
+
+```k
+  syntax Bool ::= soverflowMInt(width: Int, Int)   [function]
+                | uoverflowMInt(width: Int, Int)   [function]
   rule
     soverflowMInt(N:Int, I:Int)
   =>
@@ -1359,58 +2598,64 @@ module MINT
     uoverflowMInt(N:Int, I:Int)
   =>
     I <Int uminMInt(N) orBool I >Int umaxMInt(N)
+```
 
+### MInt arithmetic
+
+You can:
+
+* Compute the bitwise complement `~MInt` of an `MInt`.
+* Compute the unary negation `--MInt` of an `MInt`.
+* Compute the product `*MInt` of two `MInt`s.
+* Compute the quotient `/sMInt` of two `MInt`s interpreted as signed integers.
+* Compute the modulus `%sMInt` of two `MInt`s interpreted as signed integers.
+* Compute the quotient `/uMInt` of two `MInt`s interpreted as unsigned
+  integers.
+* Compute the modulus `%uMInt` of two `MInt`s interpreted as unsigned integers.
+* Compute the sum `+MInt` of two `MInt`s.
+* Compute the difference `-MInt` of two `MInt`s.
+* Compute the left shift `<<MInt` of two `MInt`s. The second `MInt` is always
+  interpreted as positive.
+* Compute the arithmetic right shift `>>aMInt` of two `MInt`s. The second
+  `MInt` is always interpreted as positve.
+* Compute the logical right shift `>>lMInt` of two `MInt`s. The second `MInt`
+  is always interpreted as positive.
+* Compute the bitwise and `&MInt` of two `MInt`s.
+* Compute the bitwise xor `xorMInt` of two `MInt`s.
+* Compute the bitwise inclusive or `|MInt` of two `MInt`s.
+
+```k
   syntax {Width} MInt{Width} ::= "~MInt" MInt{Width} [function, functional, hook(MINT.not), smt-hook(bvnot)]
-
                                | "--MInt" MInt{Width} [function, functional, hook(MINT.neg), smt-hook(bvuminus)]
-  /*@
-   * Multiplication, division and reminder
-   * mul        operation is the same for signed and unsigned integers in twos complement
-   * sdiv/srem  operation interprets operands as signed; undefined if the second
-   *            argument is 0
-   * udiv/urem  operation interprets operands as unsigned; undefined if the
-   *            second argument is 0
-   */
                                > left:
                                  MInt{Width} "*MInt" MInt{Width} [function, functional, hook(MINT.mul), smt-hook(bvmul)]
                                | MInt{Width} "/sMInt" MInt{Width} [function, hook(MINT.sdiv), smt-hook(bvsdiv)]
                                | MInt{Width} "%sMInt" MInt{Width} [function, hook(MINT.srem), smt-hook(bvsrem)]
                                | MInt{Width} "/uMInt" MInt{Width} [function, hook(MINT.udiv), smt-hook(bvudiv)]
                                | MInt{Width} "%uMInt" MInt{Width} [function, hook(MINT.urem), smt-hook(bvurem)]
-
-  /*@
-   * Addition and subtraction
-   * add        operation is the same for signed and unsigned integers in twos complement
-   * sub        operation is the same for signed and unsigned integers in twos complement
-   */
                                > left:
                                  MInt{Width} "+MInt" MInt{Width} [function, functional, hook(MINT.add), smt-hook(bvadd)]
                                | MInt{Width} "-MInt" MInt{Width} [function, functional, hook(MINT.sub), smt-hook(bvsub)]
-
-
-  /*@
-   * Shift operations; the second operand must be non-negative
-   *
-   * shl        operation is the same for arithmetic and logic shift
-   * ashr       arithmetic shift: filling with leftmost bit (sign extension)
-   * lshr       logical shift: filling with zeros
-   */
                                > left:
                                  MInt{Width} "<<MInt" MInt{Width} [function, hook(MINT.shl), smt-hook(bvshl)]
                                | MInt{Width} ">>aMInt" MInt{Width} [function, hook(MINT.ashr), smt-hook(bvashr)]
                                | MInt{Width} ">>lMInt" MInt{Width} [function, hook(MINT.lshr), smt-hook(bvlshr)]
-
-  /*@
-   * Bitwise operations
-   */
                                > left:
                                  MInt{Width} "&MInt" MInt{Width} [function, functional, hook(MINT.and), smt-hook(bvand)]
                                > left:
                                  MInt{Width} "xorMInt" MInt{Width} [function, functional, hook(MINT.xor), smt-hook(bvxor)]
                                > left:
                                  MInt{Width} "|MInt" MInt{Width} [function, functional, hook(MINT.or), smt-hook(bvor)]
+```
 
-  /*@ Comparison operations */
+### MInt comparison
+
+You can compute whether one `MInt` is less than, less than or equal to, greater
+than, or greater than or equal to another `MInt` when interpreted as signed
+or unsigned integers. You can also compute whether one `MInt` is equal to or
+unequal to another `MInt`.
+
+```k
   syntax {Width} Bool ::= MInt{Width} "<sMInt" MInt{Width} [function, functional, hook(MINT.slt), smt-hook(bvslt)]
                         | MInt{Width} "<uMInt" MInt{Width} [function, functional, hook(MINT.ult), smt-hook(bvult)]
                         | MInt{Width} "<=sMInt" MInt{Width} [function, functional, hook(MINT.sle), smt-hook(bvsle)]
@@ -1421,23 +2666,58 @@ module MINT
                         | MInt{Width} ">=uMInt" MInt{Width} [function, functional, hook(MINT.uge), smt-hook(bvuge)]
                         | MInt{Width} "==MInt" MInt{Width} [function, functional, hook(MINT.eq), smt-hook(=)]
                         | MInt{Width} "=/=MInt" MInt{Width} [function, functional, hook(MINT.ne), smt-hook(distinct)]
+```
 
+### MInt min/max
+
+You can compute the signed minimum `sMinMInt`, the signed maximum `sMaxMInt`,
+the unsigned minimum `uMinMInt`, and the unsigned maximum `uMaxMInt` of two
+`MInt`s.
+
+```k
   syntax {Width} MInt{Width} ::= sMaxMInt(MInt{Width}, MInt{Width}) [function, functional, hook(MINT.smax), smt-hook((ite (bvslt #1 #2) #2 #1))]
                                | sMinMInt(MInt{Width}, MInt{Width}) [function, functional, hook(MINT.smin), smt-hook((ite (bvslt #1 #2) #1 #2))]
                                | uMaxMInt(MInt{Width}, MInt{Width}) [function, functional, hook(MINT.umax), smt-hook((ite (bvult #1 #2) #2 #1))]
                                | uMinMInt(MInt{Width}, MInt{Width}) [function, functional, hook(MINT.umin), smt-hook((ite (bvult #1 #2) #1 #2))]
+```
 
-  /*@
-   * Returns a machine integer with either the same low-order bits and a larger width, or a truncated value and a smaller width.
-   * Bits will be truncated starting from the most significant bit.
-   */
+### MInt to MInt conversion
+
+You can convert an `MInt` of one width to another width with `roundMInt`.
+The resulting `MInt` will be truncated starting from the most significant bit
+if the resulting width is smaller than the input. The resulting `MInt` will be
+zero-extended with the same low-order bits if the resulting width is larger
+than the input.
+
+```k
   syntax {Width1, Width2} MInt{Width1} ::= roundMInt(MInt{Width2}) [function, functional, hook(MINT.round)]
-endmodule
+```
 
-module CONFIGURATION-PRIMITIVES
-    syntax K ::= "#RESTORE_CONFIGURATION" "(" K ")"  [klabel(#RESTORE_CONFIGURATION)]
+```k
 endmodule
+```
 
+Strategies
+----------
+
+K supports a built-in strategy language that allows you to control how rules
+apply. In order to enable it, simply import the `STRATEGY` module in your
+definition. This includes the following basic strategy constructs:
+
+* `^ Category:#RuleTag` - This is a strategy that indicates that you should
+  apply a rule with the specified category exactly once. By default, all rules
+  get the `regular` tag. This can be changed on individual rules with the `tag`
+  attribute.
+* `~ Category:#RuleTag` - This is the state the strategy cell will be in
+  after a rule has applied. In other words, all rules that do not mention the
+  strategy cell are automatically instrumented so that they rewrite the current
+  top of the `<s>` cell from `^` to `~`
+* `<s>` - This is the strategy cell and contains the current strategy.
+* `#STUCK()` - By default, a rule is automatically inserted into the definition
+  which adds `#STUCK()` to the top of the `<s>` cell if no other rules apply
+  and if it is not already at the top of the `<s>` cell.
+
+```k
 module STRATEGY
     imports ML-SYNTAX
     imports KVARIABLE-SYNTAX
@@ -1457,7 +2737,16 @@ module RULE-TAG-SYNTAX
 
     syntax #RuleTag ::= #LowerId [token]
 endmodule
+```
 
+This is not a complete strategy language. However, it provides several basics.
+The user can extend this strategy language into a complete strategy language
+in one of three ways. First, they can import the `DEFAULT-STRATEGY` module,
+which provides a very basic strategy that is essentially equivalent to
+execution without a strategy. This can be useful if you wish to wholly
+manipulate the strategy cell yourself within other rules.
+
+```k
 module DEFAULT-STRATEGY-CONCRETE [concrete]
     imports syntax STRATEGY
     imports RULE-TAG-SYNTAX
@@ -1477,7 +2766,15 @@ module DEFAULT-STRATEGY
 
     rule initSCell(_) => <s> ^ regular </s>
 endmodule
+```
 
+The second way you can extend the strategy language is with the
+`STRATEGY-ABSTRACT` module. This provides a slightly more advanced set of
+strategies which you can use to compose the basic strategies in the `STRATEGY`
+module into more complex strategies. Note however that the functionality
+provided is still relatively basic.
+
+```k
 module STRATEGY-ABSTRACT
     imports STRATEGY
 
@@ -1507,3 +2804,10 @@ module STRATEGY-ABSTRACT
  // ------------------------------------------------------
     rule <s> ^ RT:#RuleTag * => ^ RT ~> ^ RT * ~> #catchSTUCK(.Strategy) ... </s>
 endmodule
+```
+
+The third mechanism for extending the strategy language is to define your own
+strategy language. No special facility is required in K in order to compose
+strategies together, so you are free to write whatever rules that manipulate
+the strategy cell you want, and thus whatever more complex strategies you can
+compose from the base builtin strategies.

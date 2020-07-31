@@ -18,7 +18,7 @@ to memory corruption in your interpreter and can cause segmentation faults or
 corrupted term representations that lead to undefined behavior at runtime.
 
 ```k
-require "domains.k"
+require "domains.md"
 
 module FFI-SYNTAX
   imports LIST
