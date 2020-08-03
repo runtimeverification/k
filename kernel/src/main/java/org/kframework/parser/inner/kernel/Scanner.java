@@ -83,9 +83,11 @@ public class Scanner implements AutoCloseable {
         flex.append("%{\n" +
             "#include \"node.h\"\n" +
             "#include \"parser.tab.h\"\n" +
+            "char *filename;\n" +
             "#define YY_USER_ACTION yylloc->first_line = yylloc->last_line = yylineno; \\\n" +
             "    yylloc->first_column = yycolumn; yylloc->last_column = yycolumn + yyleng - 1; \\\n" +
-            "   yycolumn += yyleng;\n" +
+            "   yycolumn += yyleng; \\\n" +
+            "   yylloc->filename = filename;\n" +
             "%}\n\n" +
             "%option reentrant bison-bridge\n" +
             "%option bison-locations\n" +

@@ -125,6 +125,25 @@ public class KSyntax2Bison {
         "char *enquote(char *);\n" +
         "YYSTYPE mergeAmb(YYSTYPE x0, YYSTYPE x1);\n" +
         "node *result;\n" +
+        "# define YYLLOC_DEFAULT(Cur, Rhs, N)                      \\\n" +
+        "do                                                        \\\n" +
+        "  if (N)                                                  \\\n" +
+        "    {                                                     \\\n" +
+        "      (Cur).filename     = YYRHSLOC(Rhs, 1).filename;     \\\n" +
+        "      (Cur).first_line   = YYRHSLOC(Rhs, 1).first_line;   \\\n" +
+        "      (Cur).first_column = YYRHSLOC(Rhs, 1).first_column; \\\n" +
+        "      (Cur).last_line    = YYRHSLOC(Rhs, N).last_line;    \\\n" +
+        "      (Cur).last_column  = YYRHSLOC(Rhs, N).last_column;  \\\n" +
+        "    }                                                     \\\n" +
+        "  else                                                    \\\n" +
+        "    {                                                     \\\n" +
+        "      (Cur).filename     = YYRHSLOC(Rhs, 0).filename;     \\\n" +
+        "      (Cur).first_line   = (Cur).last_line   =            \\\n" +
+        "        YYRHSLOC(Rhs, 0).last_line;                       \\\n" +
+        "      (Cur).first_column = (Cur).last_column =            \\\n" +
+        "        YYRHSLOC(Rhs, 0).last_column;                     \\\n" +
+        "    }                                                     \\\n" +
+        "while (0)\n" +
         "%}\n\n");
     bison.append("%define api.value.type {union value_type}\n");
     bison.append("%define api.pure\n");
