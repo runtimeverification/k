@@ -152,7 +152,7 @@ public class Kompile {
         CompiledDefinition def = new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(configInfo.getRootCell()).klabel());
 
         if (kompileOptions.experimental.genBisonParser || kompileOptions.experimental.genGlrBisonParser) {
-            new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, files.resolveKompiled("parser_PGM"), kompileOptions.experimental.genGlrBisonParser);
+            new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, files.resolveKompiled("parser_PGM"), kompileOptions.experimental.genGlrBisonParser, kompileOptions.experimental.bisonFile);
             for (Production prod : iterable(kompiledDefinition.mainModule().productions())) {
                 if (prod.att().contains("cell") && prod.att().contains("parser")) {
                     String att = prod.att().get("parser");
@@ -167,7 +167,7 @@ public class Kompile {
                         if (!mod.isDefined()) {
                             throw KEMException.compilerError("Could not find module referenced by parser attribute: " + module, prod);
                         }
-                        new KRead(kem, files, InputModes.PROGRAM).createBisonParser(mod.get(), def.configurationVariableDefaultSorts.getOrDefault("$" + name, Sorts.K()), files.resolveKompiled("parser_" + name), kompileOptions.experimental.genGlrBisonParser);
+                        new KRead(kem, files, InputModes.PROGRAM).createBisonParser(mod.get(), def.configurationVariableDefaultSorts.getOrDefault("$" + name, Sorts.K()), files.resolveKompiled("parser_" + name), kompileOptions.experimental.genGlrBisonParser, null);
                     }
                 }
             }

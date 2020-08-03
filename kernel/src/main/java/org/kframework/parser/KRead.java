@@ -21,7 +21,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.Character;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -62,7 +64,7 @@ public class KRead {
         }
     }
 
-    public void createBisonParser(Module mod, Sort sort, File outputFile, boolean glr) {
+    public void createBisonParser(Module mod, Sort sort, File outputFile, boolean glr, String bisonFile) {
         try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, true)) {
             try (Scanner scanner = parseInModule.getScanner()) {
                 File scannerFile = files.resolveTemp("scanner.l");
@@ -88,14 +90,20 @@ public class KRead {
                 if (exit != 0) {
                     throw KEMException.internalError("bison returned nonzero exit code: " + exit + "\n");
                 }
-                exit = files.getProcessBuilder()
-                  .command("gcc",
+                List<String> command = new ArrayList<>();
+                command.addAll(Arrays.asList(
+                      "gcc",
                       files.resolveKInclude("cparser/main.c").getAbsolutePath(),
                       files.resolveTemp("lex.yy.c").getAbsolutePath(),
                       files.resolveTemp("parser.tab.c").getAbsolutePath(),
                       "-iquote", files.resolveTemp(".").getAbsolutePath(),
                       "-iquote", files.resolveKInclude("cparser").getAbsolutePath(),
-                      "-o", outputFile.getAbsolutePath())
+                      "-o", outputFile.getAbsolutePath()));
+                if (bisonFile != null) {
+                    command.add(files.resolveWorkingDirectory(bisonFile).getAbsolutePath());
+                }
+                exit = files.getProcessBuilder()
+                  .command(command.toArray(new String[0]))
                   .inheritIO()
                   .start()
                   .waitFor();
