@@ -273,7 +273,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             int exit;
             if (result instanceof KApply) {
                 KApply kapp = (KApply) result;
-                exit = kapp.klabel().name().equals("#True") ? 0 : 1;
+                exit = kapp.klabel().name().equals(KLabels.ML_TRUE.name()) ? 0 : 1;
             } else {
                 exit = 1;
             }
