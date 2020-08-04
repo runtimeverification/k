@@ -23,4 +23,6 @@ module CONCRETE
   rule baz2(0) => 0 [concrete]
   rule baz2(1) => 1
 
+  syntax Int ::= baz3(Int) [function]
+  rule baz3(X) => 0 [concrete(X)]
 endmodule

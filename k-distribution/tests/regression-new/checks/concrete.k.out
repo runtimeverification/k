@@ -18,4 +18,8 @@ function with one or more non-symbolic rules.
 function with one or more non-concrete rules.
 	Source(concrete.k)
 	Location(23,8,23,20)
-[Error] Compiler: Had 5 structural errors.
+[Error] Compiler: Found concrete attribute without simplification attribute on
+function with one or more non-concrete rules.
+	Source(concrete.k)
+	Location(27,8,27,20)
+[Error] Compiler: Had 6 structural errors.
