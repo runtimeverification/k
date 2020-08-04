@@ -399,7 +399,7 @@ form `var X;` on top of the `k` cell
 left, and is torn, or ruptured, to the right), allocates a fresh
 location `L` in the store which is initialized with a special value
 `⊥` (indeed, the unit `.`, or nothing, is matched anywhere
-in the map---note the tears at both sides---and replaced with the
+in the map ‒note the tears at both sides‒ and replaced with the
 mapping `L ↦ ⊥`), and binds `X` to `L` in the local
 environment shadowing previous declarations of `X`, if any.
 This possible shadowing of `X` requires us to therefore update the
