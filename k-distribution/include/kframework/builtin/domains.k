@@ -519,7 +519,7 @@ module INT
     I1:Int modInt I2:Int
   =>
     ((I1 %Int absInt(I2)) +Int absInt(I2)) %Int absInt(I2)
-  requires I2 =/=Int 0    [concrete]
+  requires I2 =/=Int 0    [concrete, simplification]
 
   rule minInt(I1:Int, I2:Int) => I1 requires I1 <=Int I2
   rule minInt(I1:Int, I2:Int) => I2 requires I1 >=Int I2
