@@ -123,6 +123,10 @@ public class CheckKLabels {
         }
     }
 
+    private boolean hasAttWithNoArg(Att att, String attName) {
+      return att.contains(attName) && att.get(attName).equals("");
+    }
+
     public void check(Module mainMod) {
         Set<String> definedButNotUsed = new HashSet<>(klabelProds.keySet());
         definedButNotUsed.removeAll(usedLabels);
@@ -154,16 +158,16 @@ public class CheckKLabels {
             boolean allConcrete = true;
             boolean allSymbolic = true;
             for (Rule rule : iterable(mainMod.rulesFor().get(function).getOrElse(() -> Collections.<Rule>Set()))) {
-                if ((rule.att().getOptional(Att.CONCRETE()).orElse("foo").equals("") &&
+                if ((hasAttWithNoArg(rule.att(), Att.CONCRETE()) &&
                     rule.att().contains(Att.SYMBOLIC())) ||
-                    (rule.att().getOptional(Att.SYMBOLIC()).orElse("foo").equals("") &&
+                    (hasAttWithNoArg(rule.att(), Att.SYMBOLIC()) &&
                     rule.att().contains(Att.CONCRETE()))) {
                     errors.add(KEMException.compilerError("Rule cannot be both concrete and symbolic in the same variable.", rule));
                 }
-                if (!rule.att().getOptional(Att.CONCRETE()).orElse("foo").equals("")) {
+                if (!hasAttWithNoArg(rule.att(), Att.CONCRETE())) {
                     allConcrete = false;
                 }
-                if (!rule.att().getOptional(Att.SYMBOLIC()).orElse("foo").equals("")) {
+                if (!hasAttWithNoArg(rule.att(), Att.SYMBOLIC())) {
                     allSymbolic = false;
                 }
             }
