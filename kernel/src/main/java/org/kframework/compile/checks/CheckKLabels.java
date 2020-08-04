@@ -2,6 +2,7 @@
 package org.kframework.compile.checks;
 
 import com.google.common.collect.ImmutableSet;
+import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Context;
@@ -122,7 +123,7 @@ public class CheckKLabels {
         }
     }
 
-    public void check() {
+    public void check(Module mainMod) {
         Set<String> definedButNotUsed = new HashSet<>(klabelProds.keySet());
         definedButNotUsed.removeAll(usedLabels);
         File includeDir = files.resolveKInclude(".");
@@ -147,6 +148,32 @@ public class CheckKLabels {
             }
             if (canonicalPath == null || !s.get().source().contains(canonicalPath)) {
                 kem.registerCompilerWarning(ExceptionType.UNUSED_SYMBOL, errors, "Symbol '" + symbol + "' defined but not used. Add the 'unused' attribute if this is intentional.", klabelProds.get(symbol));
+            }
+        }
+        for (KLabel function : iterable(mainMod.functions())) {
+            boolean allConcrete = true;
+            boolean allSymbolic = true;
+            for (Rule rule : iterable(mainMod.rulesFor().get(function).getOrElse(() -> Collections.<Rule>Set()))) {
+                if ((rule.att().getOptional(Att.CONCRETE()).orElse("foo").equals("") &&
+                    rule.att().contains(Att.SYMBOLIC())) ||
+                    (rule.att().getOptional(Att.SYMBOLIC()).orElse("foo").equals("") &&
+                    rule.att().contains(Att.CONCRETE()))) {
+                    errors.add(KEMException.compilerError("Rule cannot be both concrete and symbolic in the same variable.", rule));
+                }
+                if (!rule.att().getOptional(Att.CONCRETE()).orElse("foo").equals("")) {
+                    allConcrete = false;
+                }
+                if (!rule.att().getOptional(Att.SYMBOLIC()).orElse("foo").equals("")) {
+                    allSymbolic = false;
+                }
+            }
+            for (Rule rule : iterable(mainMod.rulesFor().get(function).getOrElse(() -> Collections.<Rule>Set()))) {
+                if (rule.att().contains(Att.CONCRETE()) && !allConcrete && !rule.att().contains(Att.SIMPLIFICATION())) {
+                    errors.add(KEMException.compilerError("Found concrete attribute without simplification attribute on function with one or more non-concrete rules.", rule));
+                }
+                if (rule.att().contains(Att.SYMBOLIC()) && !allSymbolic && !rule.att().contains(Att.SIMPLIFICATION())) {
+                    errors.add(KEMException.compilerError("Found symbolic attribute without simplification attribute on function with one or more non-symbolic rules.", rule));
+                }
             }
         }
     }
