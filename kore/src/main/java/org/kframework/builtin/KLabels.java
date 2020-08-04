@@ -34,8 +34,8 @@ public class KLabels {
     public static final KLabel STRATEGY_CELL = KLabel("<s>");
     public static final KLabel STUCK = KLabel("#STUCK");
 
-    public static final KLabel ML_FALSE = KLabel("#False");
-    public static final KLabel ML_TRUE = KLabel("#True");
+    public static final KLabel ML_FALSE = KLabel("#Bottom");
+    public static final KLabel ML_TRUE = KLabel("#Top");
     public static final KLabel ML_OR = KLabel("#Or");
     public static final KLabel ML_AND = KLabel("#And");
     public static final KLabel ML_NOT = KLabel("#Not");

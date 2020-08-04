@@ -1,4 +1,4 @@
-requires "domains.k"
+requires "domains.md"
 
 module DOMAINS-LEMMAS-NO-SMT
     import INT-SYMBOLIC

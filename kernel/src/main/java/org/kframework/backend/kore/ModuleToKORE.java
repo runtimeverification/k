@@ -1525,9 +1525,9 @@ public class ModuleToKORE {
 
     private static String convertBuiltinLabel(String klabel) {
       switch(klabel) {
-      case "#False":
+      case "#Bottom":
         return "\\bottom";
-      case "#True":
+      case "#Top":
         return "\\top";
       case "#Or":
         return "\\or";
