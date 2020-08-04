@@ -111,11 +111,11 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();
                 String moduleName = mod.name();
 
-                files.saveToTemp("pgm.kore", koreOutput);
-                String pgmPath = files.resolveTemp("pgm.kore").getAbsolutePath();
+                files.saveToTemp("execute-initial.kore", koreOutput);
+                String pgmPath = files.resolveTemp("execute-initial.kore").getAbsolutePath();
                 String[] koreCommand = haskellKRunOptions.haskellBackendCommand.split("\\s+");
                 String koreDirectory = haskellKRunOptions.haskellBackendHome;
-                File koreOutputFile = files.resolveTemp("result.kore");
+                File koreOutputFile = files.resolveTemp("execute-result.kore");
                 List<String> args = new ArrayList<String>();
                 args.addAll(Arrays.asList(koreCommand));
                 args.addAll(Arrays.asList(
@@ -191,13 +191,13 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();
                 String moduleName = mod.name();
 
-                files.saveToTemp("pgm.kore", koreOutput);
-                String pgmPath = files.resolveTemp("pgm.kore").getAbsolutePath();
-                files.saveToTemp("pattern.kore", korePatternOutput);
-                String patternPath = files.resolveTemp("pattern.kore").getAbsolutePath();
+                files.saveToTemp("search-initial.kore", koreOutput);
+                String pgmPath = files.resolveTemp("search-initial.kore").getAbsolutePath();
+                files.saveToTemp("search-pattern.kore", korePatternOutput);
+                String patternPath = files.resolveTemp("search-pattern.kore").getAbsolutePath();
                 String[] koreCommand = haskellKRunOptions.haskellBackendCommand.split("\\s+");
                 String koreDirectory = haskellKRunOptions.haskellBackendHome;
-                File koreOutputFile = files.resolveTemp("result.kore");
+                File koreOutputFile = files.resolveTemp("search-result.kore");
                 List<String> args = new ArrayList<String>();
                 args.addAll(Arrays.asList(koreCommand));
                 args.addAll(Arrays.asList(
