@@ -297,6 +297,15 @@ module K-AMBIGUITIES
 
 endmodule
 
+module K-LOCATIONS
+  imports STRING-SYNTAX
+  imports INT-SYNTAX
+
+  // filename, startLine, startCol, endLine, endCol
+  syntax {Sort} Sort ::= #location(Sort, String, Int, Int, Int, Int) [symbol, format(%3)]
+
+endmodule
+
 // To be used to parse terms in full K
 module K-TERM
   imports KSEQ-SYMBOLIC

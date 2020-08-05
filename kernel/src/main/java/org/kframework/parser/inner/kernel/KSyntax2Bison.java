@@ -125,6 +125,25 @@ public class KSyntax2Bison {
         "char *enquote(char *);\n" +
         "YYSTYPE mergeAmb(YYSTYPE x0, YYSTYPE x1);\n" +
         "node *result;\n" +
+        "# define YYLLOC_DEFAULT(Cur, Rhs, N)                      \\\n" +
+        "do                                                        \\\n" +
+        "  if (N)                                                  \\\n" +
+        "    {                                                     \\\n" +
+        "      (Cur).filename     = YYRHSLOC(Rhs, 1).filename;     \\\n" +
+        "      (Cur).first_line   = YYRHSLOC(Rhs, 1).first_line;   \\\n" +
+        "      (Cur).first_column = YYRHSLOC(Rhs, 1).first_column; \\\n" +
+        "      (Cur).last_line    = YYRHSLOC(Rhs, N).last_line;    \\\n" +
+        "      (Cur).last_column  = YYRHSLOC(Rhs, N).last_column;  \\\n" +
+        "    }                                                     \\\n" +
+        "  else                                                    \\\n" +
+        "    {                                                     \\\n" +
+        "      (Cur).filename     = YYRHSLOC(Rhs, 0).filename;     \\\n" +
+        "      (Cur).first_line   = (Cur).last_line   =            \\\n" +
+        "        YYRHSLOC(Rhs, 0).last_line;                       \\\n" +
+        "      (Cur).first_column = (Cur).last_column =            \\\n" +
+        "        YYRHSLOC(Rhs, 0).last_column;                     \\\n" +
+        "    }                                                     \\\n" +
+        "while (0)\n" +
         "%}\n\n");
     bison.append("%define api.value.type {union value_type}\n");
     bison.append("%define api.pure\n");
@@ -216,6 +235,7 @@ public class KSyntax2Bison {
       i++;
     }
     prod = prod.att().getOptional(Att.ORIGINAL_PRD(), Production.class).orElse(prod);
+    boolean hasLocation = module.sortAttributesFor().get(prod.sort().head()).getOrElse(() -> Att.empty()).contains("locations");
     if (prod.att().contains("token") && !prod.isSubsort()) {
       bison.append("{\n" +
           "  node *n = malloc(sizeof(node));\n" +
@@ -230,6 +250,8 @@ public class KSyntax2Bison {
       }
       bison.append(";\n" +
           "  n->str = true;\n" +
+          "  n->location = @$;\n" +
+          "  n->hasLocation = 0;\n" +
           "  n->nchildren = 0;\n" +
           "  node *n2 = malloc(sizeof(node) + sizeof(node *));\n" +
           "  n2->symbol = \"\\\\dv{");
@@ -239,6 +261,8 @@ public class KSyntax2Bison {
       encodeKore(prod.sort(), bison);
       bison.append("\";\n" +
           "  n2->str = false;\n" +
+          "  n2->location = @$;\n" +
+          "  n2->hasLocation = " + (hasLocation ? "1" : "0") + ";\n" +
           "  n2->nchildren = 1;\n" +
           "  n2->children[0] = n;\n" +
           "  value_type result = {.nterm = n2};\n" +
@@ -256,6 +280,8 @@ public class KSyntax2Bison {
       encodeKore(prod.sort(), bison);
       bison.append("\";\n" +
           "  n->str = false;\n" +
+          "  n->location = @$;\n" +
+          "  n->hasLocation = " + (hasLocation ? "1" : "0") + ";\n" +
           "  n->nchildren = 1;\n" +
           "  n->children[0] = $1.nterm;\n");
       if (prod.att().contains("userListTerminator")) {
@@ -267,6 +293,8 @@ public class KSyntax2Bison {
         encodeKore(nil, bison);
         bison.append("\";\n" +
           "  n2->str = false;\n" +
+          "  n2->location = @$;\n" +
+          "  n2->hasLocation = 0;\n" +
           "  n2->nchildren = 0;\n" +
           "  n2->sort = \"");
         encodeKore(prod.sort(), bison);
@@ -276,6 +304,8 @@ public class KSyntax2Bison {
         encodeKore(cons, bison);
         bison.append("\";\n" +
           "  n3->str = false;\n" +
+          "  n3->location = @$;\n" +
+          "  n3->hasLocation = " + (hasLocation ? "1" : "0") + ";\n" +
           "  n3->nchildren = 2;\n" +
           "  n3->children[0] = n2;\n" +
           "  n3->children[1] = $1.nterm;\n" +
@@ -301,6 +331,8 @@ public class KSyntax2Bison {
       encodeKore(prod.sort(), bison);
       bison.append("\";\n" +
           "  n->str = false;\n" +
+          "  n->location = @$;\n" +
+          "  n->hasLocation = " + (hasLocation ? "1" : "0") + ";\n" +
           "  n->nchildren = 1;\n" +
           "  n->children[0] = $1.nterm->children[0];\n" +
           "  value_type result = {.nterm = n};\n" +
@@ -316,6 +348,8 @@ public class KSyntax2Bison {
       encodeKore(prod.sort(), bison);
       bison.append("\";\n" +
           "  n->str = false;\n" +
+          "  n->location = @$;\n" +
+          "  n->hasLocation = " + (hasLocation ? "1" : "0") + ";\n" +
           "  n->nchildren = ").append(nts.size()).append(";\n");
       for (i = 0; i < nts.size(); i++) {
         bison.append(

@@ -132,7 +132,7 @@ public class KastFrontEnd extends FrontEnd {
             Module parsingMod = maybeMod.get();
 
             if (options.genParser || options.genGlrParser) {
-              kread.createBisonParser(parsingMod, sort, outputFile, options.genGlrParser);
+              kread.createBisonParser(parsingMod, sort, outputFile, options.genGlrParser, options.bisonFile);
             } else {
               K parsed = kread.prettyRead(parsingMod, sort, def, source, FileUtil.read(stringToParse));
 

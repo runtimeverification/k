@@ -103,6 +103,9 @@ public final class KastOptions {
         return files.get().resolveWorkingDirectory(parameters.get(0));
     }
 
+    @Parameter(names="--bison-file", description="C file containing functions to link into bison parser.")
+    public String bisonFile;
+
     @Parameter(names={"--expression", "-e"}, description="An expression to parse passed on the command " +
     "line. It is an error to provide both this option and a file to parse.")
     private String expression;
