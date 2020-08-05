@@ -1113,7 +1113,7 @@ your K definition, and the third type of function is generated automatically
 for each named nonterminal in your definition. Essentially, `isFoo` for some
 sort `Foo` will tell you whether a particular term of sort `K` is a `Foo`,
 `{F}:>Foo` will cast `F` to sort `Foo` if `F` is of sort `Foo` and will be
-undefined (i.e., theoretically defined as `#False`, the bottom symbol in
+undefined (i.e., theoretically defined as `#Bottom`, the bottom symbol in
 matching logic) otherwise. Finally, `bar` will project out the child of a `foo`
 named `bar` in its production declaration.
 

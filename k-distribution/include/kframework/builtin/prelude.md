@@ -17,5 +17,5 @@ your own version of these files with different syntax.
 
 ```k
 require "kast.k"
-require "domains.k"
+require "domains.md"
 ```

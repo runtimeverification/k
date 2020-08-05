@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2019 K Team. All Rights Reserved.
-requires "domains.k"
+requires "domains.md"
 
 module A
     syntax Exp ::= "x" | "y"

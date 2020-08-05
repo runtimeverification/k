@@ -346,7 +346,7 @@ public class Kompile {
         }
         stream(mainModule.importedModules()).forEach(checkModuleKLabels);
         checkModuleKLabels.accept(mainModule);
-        checkKLabels.check();
+        checkKLabels.check(mainModule);
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckLabels(errors)::check));
 

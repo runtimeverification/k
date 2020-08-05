@@ -39,7 +39,7 @@ public class KEq {
         Module spec2 = compiled2._2();
 
         boolean isEquivalent = commonRewriter.equivalence(rewriter1, rewriter2, spec1, spec2);
-        System.out.println(isEquivalent ? "#True" : "#False");
+        System.out.println(isEquivalent ? "#Top" : "#Bottom");
         return isEquivalent ? 0 : 1;
     }
 }

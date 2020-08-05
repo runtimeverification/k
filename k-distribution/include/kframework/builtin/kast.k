@@ -65,8 +65,10 @@ endmodule
 module ML-SYNTAX
   imports SORT-K
 
-  syntax {Sort} Sort ::= "#True" [klabel(#True), symbol, mlUnary]
-                       | "#False" [klabel(#False), symbol, mlUnary]
+  syntax {Sort} Sort ::= "#Top" [klabel(#Top), symbol, mlUnary]
+                       | "#Bottom" [klabel(#Bottom), symbol, mlUnary]
+                       | "#True" [klabel(#Top), symbol, mlUnary, unparseAvoid]
+                       | "#False" [klabel(#Bottom), symbol, mlUnary, unparseAvoid]
                        | "#Not" "(" Sort ")" [klabel(#Not), symbol, mlOp, mlUnary]
 
   syntax {Sort1, Sort2} Sort2 ::= "#Ceil" "(" Sort1 ")" [klabel(#Ceil), symbol, mlOp, mlUnary]
@@ -75,8 +77,8 @@ module ML-SYNTAX
 
   syntax priorities mlUnary > mlEquals > mlAnd
 
-  syntax {Sort} Sort ::= Sort "#And" Sort [klabel(#And), symbol, assoc, left, comm, unit(#True), mlOp, mlAnd, format(%i%1%d%n%2%n%i%3%d)]
-                       > Sort "#Or" Sort [klabel(#Or), symbol, assoc, left, comm, unit(#False), mlOp, format(%i%1%d%n%2%n%i%3%d)]
+  syntax {Sort} Sort ::= Sort "#And" Sort [klabel(#And), symbol, assoc, left, comm, unit(#Top), mlOp, mlAnd, format(%i%1%d%n%2%n%i%3%d)]
+                       > Sort "#Or" Sort [klabel(#Or), symbol, assoc, left, comm, unit(#Bottom), mlOp, format(%i%1%d%n%2%n%i%3%d)]
                        > Sort "#Implies" Sort [klabel(#Implies), symbol, mlOp, mlImplies, format(%i%1%d%n%2%n%i%3%d)]
 
   syntax priorities mlImplies > mlQuantifier
