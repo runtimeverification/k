@@ -31,6 +31,9 @@ import java.util.concurrent.Semaphore;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+import static org.kframework.kore.KORE.*;
+import static org.kframework.Collections.*;
+
 /**
  * Created by dwightguth on 7/21/16.
  */
@@ -83,15 +86,28 @@ public class Scanner implements AutoCloseable {
         flex.append("%{\n" +
             "#include \"node.h\"\n" +
             "#include \"parser.tab.h\"\n" +
+            "char *filename;\n" +
             "#define YY_USER_ACTION yylloc->first_line = yylloc->last_line = yylineno; \\\n" +
             "    yylloc->first_column = yycolumn; yylloc->last_column = yycolumn + yyleng - 1; \\\n" +
-            "   yycolumn += yyleng;\n" +
+            "   yycolumn += yyleng; \\\n" +
+            "   yylloc->filename = filename;\n" +
+            "void line_marker(char *, void *);\n" +
             "%}\n\n" +
             "%option reentrant bison-bridge\n" +
             "%option bison-locations\n" +
             "%option noyywrap\n" +
             "%option yylineno\n" +
             "%%\n\n");
+        if (module.productionsForSort().contains(Sort("#LineMarker").head())) {
+          stream(module.productionsForSort().apply(Sort("#LineMarker").head())).forEach(prod -> {
+            if (prod.items().size() != 1 || !(prod.items().apply(0) instanceof RegexTerminal)) {
+              throw KEMException.compilerError("Productions of sort `#LineMarker` must be exactly one `RegexTerminal`.", prod);
+            }
+            RegexTerminal terminal = (RegexTerminal)prod.items().apply(0);
+            String regex = terminal.regex();
+            flex.append(regex).append(" line_marker(yytext, yyscanner);\n");
+          });
+        }
         appendScanner(flex, this::writeStandaloneAction);
         try {
             FileUtils.write(path, flex);
