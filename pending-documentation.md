@@ -2187,6 +2187,27 @@ some important limitations:
   and use rewriting to resolve the ambiguities using whatever preprocessing
   mechanisms you prefer.
 
+Location Information
+--------------------
+
+K is able to insert file, line, and column metadata into the parse tree on a
+per-sort basis when parsing using a bison-generated parser. To enable this,
+mark the sort with the `locations` attribute.
+
+```
+  syntax Exp [locations]
+  syntax Exp ::= Exp "/" Exp | Int
+```
+
+K implicitly wraps productions of these sorts in a `#location` term (see the
+`K-LOCATIONS` module in `kast.k`). The metadata can thus be accessed with
+ordinary rewrite rules:
+
+```
+  rule #location(_ / 0, File, StartLine, _StartColumn, _EndLine, _EndColumn) =>
+  "Error: Division by zero at " +String File +String ":" Int2String(StartLine) 
+```
+
 Unparsing
 ---------
 

@@ -102,6 +102,11 @@ YYSTYPE mergeAmb(YYSTYPE x0, YYSTYPE x1) {
 }
 
 void print(node *current) {
+  if (current->hasLocation) {
+    printf("Lbl'Hash'location{");
+    printf("%s", current->sort);
+    printf("}(");
+  }
   printf("%s", current->symbol);
   if (!current->str) {
     printf("(");
@@ -112,13 +117,22 @@ void print(node *current) {
     }
     printf(")");
   }
+  if (current->hasLocation) {
+    printf(", \\dv{SortString{}}(%s), \\dv{SortInt{}}(\"%d\"), \\dv{SortInt{}}(\"%d\"), \\dv{SortInt{}}(\"%d\"), \\dv{SortInt{}}(\"%d\"))", enquote(current->location.filename), current->location.first_line, current->location.first_column, current->location.last_line, current->location.last_column);
+  }
 }
 
 extern node *result;
+extern char *filename;
 
 int main(int argc, char **argv) {
   yyscan_t scanner;
   yylex_init(&scanner); 
+  if (argc > 2) {
+    filename=argv[2];
+  } else {
+    filename=argv[1];
+  }
   yyset_in(fopen(argv[1], "r"), scanner);
   yyparse(scanner);
   print(result);

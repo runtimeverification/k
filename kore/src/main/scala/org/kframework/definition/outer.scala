@@ -157,7 +157,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
       .getOrElse(Set[Production]())
       .collect({
           case Production(_, _, _, Seq(RegexTerminal(_, terminalRegex, _)), _) => terminalRegex
-          case p => throw KEMException.compilerError("Productions of sort `Layout` must be exactly one `RegexTerminal`.\nProduction: " + p.toString())
+          case p => throw KEMException.compilerError("Productions of sort `#Layout` must be exactly one `RegexTerminal`.", p)
       })
 
   lazy val layout: String = "(" + layouts.mkString(")|(") + ")"
