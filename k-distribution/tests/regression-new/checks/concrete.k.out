@@ -1,0 +1,25 @@
+[Error] Compiler: Found symbolic attribute without simplification attribute on
+function with one or more non-symbolic rules.
+	Source(concrete.k)
+	Location(6,8,6,21)
+[Error] Compiler: Found concrete attribute without simplification attribute on
+function with one or more non-concrete rules.
+	Source(concrete.k)
+	Location(7,8,7,21)
+[Error] Compiler: Rule cannot be both concrete and symbolic in the same
+variable.
+	Source(concrete.k)
+	Location(10,8,10,19)
+[Error] Compiler: Found symbolic attribute without simplification attribute on
+function with one or more non-symbolic rules.
+	Source(concrete.k)
+	Location(16,8,16,20)
+[Error] Compiler: Found concrete attribute without simplification attribute on
+function with one or more non-concrete rules.
+	Source(concrete.k)
+	Location(23,8,23,20)
+[Error] Compiler: Found concrete attribute without simplification attribute on
+function with one or more non-concrete rules.
+	Source(concrete.k)
+	Location(27,8,27,20)
+[Error] Compiler: Had 6 structural errors.
