@@ -16,6 +16,6 @@ with `kompile -E`, or if you wish to modify the inner syntax of K by providing
 your own version of these files with different syntax.
 
 ```k
-require "kast.k"
+require "kast.md"
 require "domains.md"
 ```

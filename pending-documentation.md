@@ -2200,7 +2200,7 @@ mark the sort with the `locations` attribute.
 ```
 
 K implicitly wraps productions of these sorts in a `#location` term (see the
-`K-LOCATIONS` module in `kast.k`). The metadata can thus be accessed with
+`K-LOCATIONS` module in `kast.md`). The metadata can thus be accessed with
 ordinary rewrite rules:
 
 ```
