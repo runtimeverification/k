@@ -19,6 +19,7 @@ the reader should consult the emvironment-based definition of FUN.
 
 
 ### Syntax
+
 ```k
 require "substitution.md"
 //require "modules/pattern-matching.k"
@@ -26,7 +27,9 @@ require "substitution.md"
 module FUN-UNTYPED-COMMON
   imports DOMAINS-SYNTAX
 ```
+
 ### The Syntactic Constructs
+
 ```k
   syntax Name
   syntax Names ::= List{Name,","}
@@ -115,6 +118,7 @@ module FUN-UNTYPED-COMMON
 ```
 
 ### Additional Priorities
+
 ```k
   syntax priorities @__FUN-UNTYPED-COMMON
                   > ___FUN-UNTYPED-COMMON
@@ -131,7 +135,9 @@ endmodule
 module FUN-UNTYPED-MACROS
   imports FUN-UNTYPED-COMMON
 ```
+
 ### Desugaring macros
+
 ```k
   rule P1 P2 -> E => P1 -> fun P2 -> E                       [macro-rec]
   rule F P = E => F = fun P -> E                             [macro-rec]
