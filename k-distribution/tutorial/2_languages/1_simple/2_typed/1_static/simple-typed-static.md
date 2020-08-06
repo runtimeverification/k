@@ -3,6 +3,7 @@ copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
 ---
 
 SIMPLE — Typed — Static
+=======================
 
 Author: Grigore Roșu (grosu@illinois.edu)  
 Organization: University of Illinois at Urbana-Champaign
@@ -11,6 +12,7 @@ Author: Traian Florin Șerbănuță (traian.serbanuta@unibuc.ro)
 Organization: University of Bucharest
 
 ### Abstract
+
 This is the **K** definition of the static semantics of the typed SIMPLE
 language, or in other words, a type system for the typed SIMPLE
 language in **K**.  We do not re-discuss the various features of the
@@ -45,58 +47,66 @@ Before we give the **K** type system of SIMPLE formally, we discuss,
 informally, the intended typing policy:
 
 * Each program should contain a `main()` function.  Indeed,
-the untyped SIMPLE semantics will get stuck on any program which does
-not have a `main` function.
+  the untyped SIMPLE semantics will get stuck on any program which does
+  not have a `main` function.
+
 * Each primitive value has its own type, which can be `int`
-`bool`, or `string`.  There is also a type `void`
-for nonexistent values, for example for the result of a function meant
-to return no value (but only be used for its side effects, like a
-procedure).
+  `bool`, or `string`.  There is also a type `void`
+  for nonexistent values, for example for the result of a function meant
+  to return no value (but only be used for its side effects, like a
+  procedure).
+
 * The syntax of untyped SIMPLE is extended to allow type
-declarations for all the variables, including array variables.  This is
-done in a C/Java-style.  For example, `int x;` or
-`int x=7, y=x+3;`, or `int[][][] a[10,20];`
-(the latter defines a `10 × 20` matrix of arrays of integers).
-Recall from untyped SIMPLE that, unlike in C/Java, our multi-dimensional
-arrays use comma-separated arguments, although they have the array-of-array
-semantics.
+  declarations for all the variables, including array variables.  This is
+  done in a C/Java-style.  For example, `int x;` or
+  `int x=7, y=x+3;`, or `int[][][] a[10,20];`
+  (the latter defines a `10 × 20` matrix of arrays of integers).
+  Recall from untyped SIMPLE that, unlike in C/Java, our multi-dimensional
+  arrays use comma-separated arguments, although they have the array-of-array
+  semantics.
+
 * Functions are also typed in a C/Java style.  However, since in SIMPLE
-we allow functions to be passed to and returned by other functions, we also
-need function types.  We will use the conventional higher-order arrow-notation
-for function types, but will separate the argument types with commas.  For
-example, a function returning an array of `bool` elements and
-taking as argument an array `x` of two-integer-argument functions
-returning an integer, is declared using a syntax of the form
-`bool[] f(((int,int)->int)[] x) { ... }`
-and has the type `((int,int)->int)[] -> bool[]`.
+  we allow functions to be passed to and returned by other functions, we also
+  need function types.  We will use the conventional higher-order arrow-notation
+  for function types, but will separate the argument types with commas.  For
+  example, a function returning an array of `bool` elements and
+  taking as argument an array `x` of two-integer-argument functions
+  returning an integer, is declared using a syntax of the form
+  `bool[] f(((int,int)->int)[] x) { ... }`
+  and has the type `((int,int)->int)[] -> bool[]`.
+
 * We allow any variable declarations at the top level.  Functions
-can only be declared at the top level.  Each function can only access the
-other functions and variables declared at the top level, or its own locally
-declared variables.  SIMPLE has static scoping.
+  can only be declared at the top level.  Each function can only access the
+  other functions and variables declared at the top level, or its own locally
+  declared variables.  SIMPLE has static scoping.
+
 * The various expression and statement constructs take only elements of
-the expected types.
+  the expected types.
+
 * Increment and assignment can operate both on variables and on array
-elements.  For example, if `f` has type `int->int[][]` and
-function `g` has the type `int->int`, then the
-increment expression `++f(7)[g(2),g(3)]` is valid.
+  elements.  For example, if `f` has type `int->int[][]` and
+  function `g` has the type `int->int`, then the
+  increment expression `++f(7)[g(2),g(3)]` is valid.
+
 * Functions should only return values of their declared result
-type.  To give the programmers more flexibility, we allow functions to
-use `return;` statements to terminate without returning an
-actual value, or to not explicitly use any return statement,
-regardless of their declared return type.  This flexibility can be
-handy when writing programs using certain functions only for their
-side effects.  Nevertheless, as the dynamic semantics shows, a return
-value is automatically generated when an explicit `return`
-statement is not encountered.
+  type.  To give the programmers more flexibility, we allow functions to
+  use `return;` statements to terminate without returning an
+  actual value, or to not explicitly use any return statement,
+  regardless of their declared return type.  This flexibility can be
+  handy when writing programs using certain functions only for their
+  side effects.  Nevertheless, as the dynamic semantics shows, a return
+  value is automatically generated when an explicit `return`
+  statement is not encountered.
+
 * For simplicity, we here limit exceptions to only throw and catch
-integer values.  We let it as an exercise to the reader to extend the
-semantics to allow throwing and catching arbitrary-type exceptions.
-Like in programming languages like Java, one can go even further and
-define a semantics where thrown exceptions are propagated through
-try-catch statements until one of the corresponding type is found.
-We will do this when we define the KOOL language, not here.
-To keep the definition if SIMPLE simple, here we do not attempt to
-reject programs which throw uncaught exceptions.
+  integer values.  We let it as an exercise to the reader to extend the
+  semantics to allow throwing and catching arbitrary-type exceptions.
+  Like in programming languages like Java, one can go even further and
+  define a semantics where thrown exceptions are propagated through
+  try-catch statements until one of the corresponding type is found.
+  We will do this when we define the KOOL language, not here.
+  To keep the definition if SIMPLE simple, here we do not attempt to
+  reject programs which throw uncaught exceptions.
 
 Like in untyped SIMPLE, some constructs can be desugared into a
 smaller set of basic constructs.  In general, it should be clear why a
@@ -107,13 +117,17 @@ its stuck configuration.
 module SIMPLE-TYPED-STATIC-SYNTAX
   imports DOMAINS-SYNTAX
 ```
+
 ### Syntax
+
 The syntax of typed SIMPLE extends that of untyped SIMPLE with support
 for declaring types to variables and functions.
 ```k
   syntax Id ::= "main" [token]
 ```
+
 ### Types
+
 Primitive, array and function types, as well as lists (or tuples) of types.
 The lists of types are useful for function arguments.
 ```k
@@ -124,6 +138,7 @@ The lists of types are useful for function arguments.
 
   syntax Types ::= List{Type,","}
 ```
+
 ### Declarations
 
 Variable and function declarations have the expected syntax.  For variables,
@@ -138,6 +153,7 @@ type, we also introduce a new syntactic category for typed variables,
   syntax Decl ::= Type Exps ";"
                 | Type Id "(" Params ")" Block
 ```
+
 ### Expressions
 
 The syntax of expressions is identical to that in untyped SIMPLE,
@@ -244,6 +260,7 @@ module SIMPLE-TYPED-STATIC
   imports SIMPLE-TYPED-STATIC-SYNTAX
   imports DOMAINS
 ```
+
 ### Static semantics
 
 Here we define the type system of SIMPLE.  Like concrete semantics,
@@ -303,6 +320,7 @@ types are results (same like we did in the IMP++ tutorial).
   syntax KResult ::= Type
                    | Types    //TODO: remove this, eventually
 ```
+
 ### Configuration
 
 The configuration of our type system consists of a `tasks` cell
@@ -329,6 +347,7 @@ subcells.
                   <gtenv color="blue"> .Map </gtenv>
                 </T>
 ```
+
 ### Variable declarations
 
 Variable declarations type as statements, that is, they reduce to the
@@ -362,6 +381,7 @@ variable.
 // but the list completion seems to not work well with that.
   rule T:Type E:Exp[.Types]; => T E;          [structural]
 ```
+
 ### Function declarations
 
 Functions are allowed to be declared only at the top level (the
@@ -388,6 +408,7 @@ entire code of the function body needs to type anyway.
              </task>)
     [structural]
 ```
+
 ### Checking if `main()` exists}
 
 Once the entire program is processed (generating appropriate tasks
@@ -401,6 +422,7 @@ to reject programs without a `main` function).
   rule <task> <k> stmt => main(.Exps); </k> (.Bag => <tenv> .Map </tenv>) </task>
     [structural]
 ```
+
 ### Collecting the terminated tasks
 
 Similarly, once a non-main task (i.e., one which contains a
@@ -415,6 +437,7 @@ when the program correctly type checks.
 ```k
   rule <task>... <k> _:BlockOrStmtType </k> <tenv> _ </tenv> ...</task> => .Bag
 ```
+
 ### Basic values
 
 The first three rewrite rules below reduce the primitive values to
@@ -424,6 +447,7 @@ their types, as we typically do when we define type systems in **K**.
   rule _:Bool => bool
   rule _:String => string
 ```
+
 ### Variable lookup
 
 There are three cases to distinguish for variable lookup: (1) if the
@@ -441,6 +465,7 @@ environment, too.
 
   rule <task> <k> X:Id => T ...</k> </task> <gtenv>... X |-> T ...</gtenv>
 ```
+
 ### Increment
 
 We want the increment operation to apply to any lvalue, including
@@ -457,6 +482,7 @@ rule `++ int => int` below.
   context ++(HOLE => ltype(HOLE))
   rule ++ int => int
 ```
+
 ### Common expression constructs
 
 The rules below are straightforward and self-explanatory:
@@ -478,7 +504,9 @@ The rules below are straightforward and self-explanatory:
   rule bool || bool => bool
   rule ! bool => bool
 ```
+
 ### Array access and size
+
 Array access requires each index to type to an integer, and the
 array type to be at least as deep as the number of indexes:
 ```k
@@ -493,6 +521,7 @@ array type to be at least as deep as the number of indexes:
 ```k
   rule sizeOf(T[]) => int
 ```
+
 ### Input/Output
 
 The read expression construct types to an integer, while print types
@@ -504,6 +533,7 @@ strings.
   rule print(T:Type, Ts => Ts); requires T ==K int orBool T ==K string
   rule print(.Types); => stmt
 ```
+
 ### Assignment
 
 The special context and the rule for assignment below are similar
@@ -514,6 +544,7 @@ becomes the type of the assignment.
   context (HOLE => ltype(HOLE)) = _
   rule T:Type = T => T
 ```
+
 ### Function application and return
 
 Function application requires the type of the function and the
@@ -547,16 +578,22 @@ exceptions can only have integer type.
   rule <task> <k> {S} => block ...</k> <tenv> Rho </tenv> R </task>
        (.Bag => <task> <k> S </k> <tenv> Rho </tenv> R </task>)
 ```
+
 ### Expression statement
+
 ```k
   rule _:Type; => stmt
 ```
+
 ### Conditional and `while` loop
+
 ```k
   rule if (bool) block else block => stmt
   rule while (bool) block => stmt
 ```
+
 ### Exceptions
+
 We currently force the parameters of exceptions to only be integers.
 Moreover, for simplicity, we assume that integer exceptions can be
 thrown from anywhere, including from functions which do not define
@@ -568,7 +605,9 @@ exceptions).
   rule try block catch(int X:Id) {} => {int X;}  [structural]
   rule throw int; => stmt
 ```
+
 ### Concurrency
+
 Nothing special about typing the concurrency constructs, except that
 we do not want the spawned thread to return, so we do not include any
 `return` cell in the new task cell for the thread statement.
@@ -584,6 +623,7 @@ exceptions which are not caught.
 
   rule _:BlockOrStmtType _:BlockOrStmtType => stmt
 ```
+
 ### Auxiliary constructs
 
 The function `mkDecls` turns a list of parameters into a

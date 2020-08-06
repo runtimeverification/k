@@ -3,6 +3,7 @@ copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
 ---
 
 SIMPLE — Typed — Dynamic
+========================
 
 Author: Grigore Roșu (grosu@illinois.edu)  
 Organization: University of Illinois at Urbana-Champaign
@@ -11,6 +12,7 @@ Author: Traian Florin Șerbănuță (traian.serbanuta@unibuc.ro)
 Organization: University of Bucharest
 
 ### Abstract
+
 This is the **K** dynamic semantics of the typed SIMPLE language.
 It is very similar to the semantics of the untyped SIMPLE, the
 difference being that we now dynamically check the typing policy
@@ -27,6 +29,7 @@ module SIMPLE-TYPED-DYNAMIC-SYNTAX
   imports DOMAINS-SYNTAX
 ```
 ### Syntax
+
 The syntax of typed SIMPLE extends that of untyped SIMPLE with support
 for declaring types to variables and functions.
 
@@ -37,7 +40,9 @@ constructs.
 ```k
   syntax Id ::= "main" [token]
 ```
+
 ### Types
+
 ```k
   syntax Type ::= "void" | "int" | "bool" | "string"
                 | Type "[" "]"
@@ -45,7 +50,9 @@ constructs.
                 | "(" Type ")"           [bracket]
   syntax Types ::= List{Type,","}
 ```
+
 ### Declarations
+
 ```k
   syntax Param ::= Type Id
   syntax Params ::= List{Param,","}
@@ -53,7 +60,9 @@ constructs.
   syntax Decl ::= Type Exps ";"
                 | Type Id "(" Params ")" Block
 ```
+
 ### Expressions
+
 ```k
   syntax Exp ::= Int | Bool | String | Id
                | "(" Exp ")"             [bracket]
@@ -91,7 +100,9 @@ Like in the static semantics, there is no need for lists of identifiers
   syntax Val
   syntax Vals ::= List{Val,","}
 ```
+
 ### Statements
+
 ```k
   syntax Block ::= "{" "}"
                 | "{" Stmts "}"
@@ -130,9 +141,11 @@ module SIMPLE-TYPED-DYNAMIC
   imports SIMPLE-TYPED-DYNAMIC-SYNTAX
   imports DOMAINS
 ```
+
 ## Semantics
 
 ### Values and results
+
 These are similar to those of untyped SIMPLE, except that the array
 references and the function abstrations now also hold their types.
 These types are needed in order to easily compute the type of any
@@ -147,7 +160,9 @@ the end of this module).
   syntax KResult ::= Val
                    | Vals  // TODO: should not need this
 ```
+
 ### Configuration
+
 The configuration is almost identical to that of untyped SIMPLE,
 except for a `return` cell inside the `control` cell.
 This `return` cell will hold, like in the static semantics of
@@ -191,9 +206,11 @@ function body encounters an explicit `return` statement.
                   <nextLoc color="gray"> 0 </nextLoc>
                 </T>
 ```
+
 ## Declarations and Initialization
 
 ### Variable Declaration
+
 The `undefined` construct is now parameterized by a type.
 A main difference between untyped SIMPLE and dynamically typed SIMPLE
 is that the latter assigns a type to each of its locations and that
@@ -214,7 +231,9 @@ to a location.
        <store>... .Map => L |-> undefined(T) ...</store>
        <nextLoc> L:Int => L +Int 1 </nextLoc>
 ```
+
 ### Array Declaration
+
 The dynamic semantics of typed array declarations is similar to that
 in untyped SIMPLE, but we have to make sure that we associate the
 right type to the allocated locations.
@@ -248,7 +267,9 @@ adds the length of `Vs` dimensions to the type `T`.
        }
     [structural]
 ```
+
 ### Function declaration
+
 Store all function parameters, as well as the return type, as part
 of the lambda abstraction.  In the spirit of dynamic typing, we will
 make sure that parameters are well typed when the function is invoked.
@@ -258,7 +279,9 @@ make sure that parameters are well typed when the function is invoked.
        <store>... .Map => L |-> lambda(T, Ps, S) ...</store>
        <nextLoc> L => L +Int 1 </nextLoc>
 ```
+
 ### Calling `main()`
+
 When done with the first pass, call `main()`.
 ```k
   syntax KItem ::= "execute"
@@ -266,21 +289,27 @@ When done with the first pass, call `main()`.
        <env> Env </env>
        <genv> .Map => Env </genv>  [structural]
 ```
+
 ### Expressions
 
 ### Variable lookup
+
 ```k
   rule <k> X:Id => V ...</k>
        <env>... X |-> L ...</env>
        <store>... L |-> V:Val ...</store>  [lookup]
 ```
+
 ### Variable/Array increment
+
 ```k
   context ++(HOLE => lvalue(HOLE))
   rule <k> ++loc(L) => I +Int 1 ...</k>
        <store>... L |-> (I:Int => I +Int 1) ...</store>  [increment]
 ```
+
 ### Arithmetic operators
+
 ```k
   rule I1 + I2 => I1 +Int I2
   rule Str1 + Str2 => Str1 +String Str2
@@ -301,6 +330,7 @@ When done with the first pass, call `main()`.
   rule true  || _ => true
   rule false || E => E
 ```
+
 ### Array lookup
 
 Check array bounds, as part of the dynamic typing policy.
@@ -313,10 +343,13 @@ Check array bounds, as part of the dynamic typing policy.
   rule array(_:Type, L:Int, M:Int)[N:Int] => lookup(L +Int N)
     when N >=Int 0 andBool N <Int M  [structural, anywhere]
 ```
+
 ### Size of an array
+
 ```k
   rule sizeOf(array(_,_,N)) => N
 ```
+
 ### Function call
 
 Define function call and return together, to see their relationship.
@@ -352,11 +385,15 @@ completed to return the `nothing` value tagged as expected.
   rule <k> return; => return nothing(T); ...</k> <returnType> T </returnType>
     [structural]
 ```
+
 ### Read
+
 ```k
   rule <k> read() => I ...</k> <input> ListItem(I:Int) => .List ...</input>  [read]
 ```
+
 ### Assignment
+
 The assignment now checks that the type of the assigned location is
 preserved:
 ```k
@@ -365,30 +402,41 @@ preserved:
   rule <k> loc(L) = V:Val => V ...</k> <store>... L |-> (V' => V) ...</store>
     when typeOf(V) ==K typeOf(V')  [assignment]
 ```
+
 ### Statements
 
 ### Blocks
+
 ```k
   rule {} => .  [structural]
   rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>  [structural]
 ```
+
 ### Sequential composition
+
 ```k
   rule S1:Stmts S2:Stmts => S1 ~> S2  [structural]
 ```
+
 ### Expression statements
+
 ```k
   rule _:Val; => .
 ```
+
 ### Conditional
+
 ```k
   rule if ( true) S else _ => S
   rule if (false) _ else S => S
 ```
+
 ### While loop
+
 ```k
   rule while (E) S => if (E) {S while(E)S}  [structural]
 ```
+
 ### Print
 
 We only allow printing integers and strings:
@@ -397,6 +445,7 @@ We only allow printing integers and strings:
     when typeOf(V) ==K int orBool typeOf(V) ==K string  [print]
   rule print(.Vals); => .  [structural]
 ```
+
 ### Exceptions
 
 Exception parameters are now typed, but note that the semantics below
@@ -426,9 +475,11 @@ values, in which case our semantics below works fine:
        </control>
        <env> _ => Env </env>
 ```
+
 ### Threads
 
 ### Thread creation
+
 ```k
    rule <thread>...
           <k> spawn S => !T:Int ...</k>
@@ -440,18 +491,24 @@ values, in which case our semantics below works fine:
                 <id> !T </id>
               ...</thread>)
 ```
+
 ### Thread termination
+
 ```k
    rule (<thread>... <k>.</k> <holds>H</holds> <id>T</id> ...</thread> => .Bag)
         <busy> Busy => Busy -Set keys(H) </busy>
         <terminated>... .Set => SetItem(T) ...</terminated>
 ```
+
 ### Thread joining
+
 ```k
    rule <k> join T:Int; => . ...</k>
         <terminated>... SetItem(T) ...</terminated>
 ```
+
 ### Acquire lock
+
 ```k
    rule <k> acquire V:Val; => . ...</k>
         <holds>... .Map => V |-> 0 ...</holds>
@@ -461,7 +518,9 @@ values, in which case our semantics below works fine:
    rule <k> acquire V; => . ...</k>
         <holds>... V:Val |-> (N:Int => N +Int 1) ...</holds>
 ```
+
 ### Release lock
+
 ```k
    rule <k> release V:Val; => . ...</k>
         <holds>... V |-> (N => N:Int -Int 1) ...</holds>
@@ -470,11 +529,14 @@ values, in which case our semantics below works fine:
    rule <k> release V; => . ...</k> <holds>... V:Val |-> 0 => .Map ...</holds>
         <busy>... SetItem(V) => .Set ...</busy>
 ```
+
 ### Rendezvous synchronization
+
 ```k
    rule <k> rendezvous V:Val; => . ...</k>
         <k> rendezvous V; => . ...</k>  [rendezvous]
 ```
+
 ### Auxiliary declarations and operations
 
 Turns a list of parameters and a list of instance values for them
@@ -492,7 +554,7 @@ Location lookup.
 ```
 Environment recovery.
 ```k
-// TOD: same comment regarding setEnv(...) as for simple untyped
+// TODO: same comment regarding setEnv(...) as for simple untyped
 
   syntax KItem ::= setEnv(Map)
   rule <k> setEnv(Env) => . ...</k>  <env> _ => Env </env>  [structural]
