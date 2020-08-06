@@ -560,7 +560,7 @@ pipeline {
       }
       steps {
         build job: 'rv-devops/master', propagate: false, wait: false                                    \
-            , parameters: [ booleanparam ( name: 'UPDATE_DEPS'         , value: true                  ) \
+            , parameters: [ booleanParam ( name: 'UPDATE_DEPS'         , value: true                  ) \
                           , string       ( name: 'UPDATE_DEPS_REPO'    , value: 'kframework/k'        ) \
                           , string       ( name: 'UPDATE_DEPS_VERSION' , value: "${env.K_RELEASE_TAG}") \
                           ]
