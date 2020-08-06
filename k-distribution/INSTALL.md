@@ -37,7 +37,7 @@ sudo apt install ./kframework_X.Y.Z_amd64_DISTRO.deb
 ### Arch Linux
 
 ```sh
-pacman -U ./kframework-git-X.Y.Z-1-x86_64.pkg.tar.xz
+pacman -U ./kframework-git-X.Y.Z-1-x86_64.pkg.tar.zst
 ```
 
 ### MacOS X Mojave
