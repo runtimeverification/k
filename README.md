@@ -26,7 +26,7 @@ git submodule update --init --recursive
 sudo pacman -S git maven jdk-openjdk cmake boost libyaml jemalloc clang llvm lld zlib gmp mpfr z3 opam curl stack base-devel base python
 export PATH=$PATH:/usr/bin/core_perl
 makepkg
-sudo pacman -U kframework-5.0.0-1-x86_64.pkg.tar.xz
+sudo pacman -U kframework-5.0.0-1-x86_64.pkg.tar.zst
 ```
 
 If you install this list of dependencies, continue directly to the Install section.
