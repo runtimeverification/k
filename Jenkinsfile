@@ -251,7 +251,7 @@ pipeline {
                             mv package/arch/* ./
                             makepkg
                           '''
-                          stash name: 'arch', includes: "kframework-git-${env.VERSION}-1-x86_64.pkg.tar.xz"
+                          stash name: 'arch', includes: "kframework-git-${env.VERSION}-1-x86_64.pkg.tar.zst"
                         }
                       }
                     }
@@ -270,7 +270,7 @@ pipeline {
                     unstash 'arch'
                     sh '''
                       pacman -Syyu --noconfirm
-                      pacman -U --noconfirm kframework-git-${VERSION}-1-x86_64.pkg.tar.xz
+                      pacman -U --noconfirm kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
                       src/main/scripts/test-in-container
                     '''
                   }
@@ -506,7 +506,7 @@ pipeline {
             mv ../bionic/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_bionic.deb
             mv ../focal/kframework_${VERSION}_amd64.deb                 kframework_${VERSION}_amd64_focal.deb
             mv ../buster/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_buster.deb
-            mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.xz    kframework-git-${VERSION}-1-x86_64.pkg.tar.xz
+            mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst   kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
             mv $LOCAL_BOTTLE_NAME                                       $BOTTLE_NAME
             mv ../k-nightly.tar.gz                                      k-nightly.tar.gz
 
@@ -518,7 +518,7 @@ pipeline {
                 --attach kframework_${VERSION}_amd64_bionic.deb'#Ubuntu Bionic (18.04) Package' \
                 --attach kframework_${VERSION}_amd64_focal.deb'#Ubuntu Focal (20.04) Package'   \
                 --attach kframework_${VERSION}_amd64_buster.deb'#Debian Buster (10) Package'    \
-                --attach kframework-git-${VERSION}-1-x86_64.pkg.tar.xz'#Arch Package'           \
+                --attach kframework-git-${VERSION}-1-x86_64.pkg.tar.zst'#Arch Package'          \
                 --attach $BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                \
                 --attach k-nightly.tar.gz'#Platform Indepdendent K Binary'                      \
                 --file release.md "${K_RELEASE_TAG}"
@@ -559,61 +559,10 @@ pipeline {
         beforeAgent true
       }
       steps {
-        build job: 'rv-devops/master', propagate: false, wait: false                                   \
-            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                   \
-                          , string(name: 'PR_REVIEWER', value: 'ehildenb')                             \
-                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/wasm-semantics') \
-                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                 \
-                          ]
-        build job: 'rv-devops/master', propagate: false, wait: false                                \
-            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                \
-                          , string(name: 'PR_REVIEWER', value: 'dwightguth')                        \
-                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/c-semantics') \
-                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: '.build/k')            \
-                          ]
-        build job: 'rv-devops/master', propagate: false, wait: false                                               \
-            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                               \
-                          , string(name: 'PR_REVIEWER', value: 'malturki')                                         \
-                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/beacon-chain-spec') \
-                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                             \
-                          ]
-        build job: 'rv-devops/master', propagate: false, wait: false                                          \
-            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                          \
-                          , string(name: 'PR_REVIEWER', value: 'ehildenb')                                    \
-                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/mkr-mcd-spec') \
-                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                        \
-                          ]
-        build job: 'rv-devops/master', propagate: false, wait: false                                                       \
-            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                                       \
-                          , string(name: 'PR_REVIEWER', value: 'daejunpark')                                               \
-                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/beacon-chain-verification') \
-                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                                     \
-                          ]
-        build job: 'rv-devops/master', propagate: false, wait: false                                                 \
-            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                                 \
-                          , string(name: 'PR_REVIEWER', value: 'sskeirik')                                           \
-                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/michelson-semantics') \
-                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'ext/k')                                \
-                          ]
-        build job: 'rv-devops/master', propagate: false, wait: false                                  \
-            , parameters: [ booleanParam(name: 'UPDATE_DEPS_SUBMODULE', value: true)                  \
-                          , string(name: 'PR_REVIEWER', value: 'ehildenb')                            \
-                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/evm-semantics') \
-                          , string(name: 'UPDATE_DEPS_SUBMODULE_DIR', value: 'deps/k')                \
-                          ]
         build job: 'rv-devops/master', propagate: false, wait: false                                    \
-            , parameters: [ booleanParam(name: 'UPDATE_DEPS_RELEASE_TAG', value: true)                  \
-                          , string(name: 'PR_REVIEWER', value: 'ttuegel')                               \
-                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'kframework/kore')            \
-                          , string(name: 'UPDATE_DEPS_RELEASE_FILE', value: 'deps/k_release')           \
-                          , string(name: 'UPDATE_DEPS_RELEASE_TAG_SPEC', value: "${env.K_RELEASE_TAG}") \
-                          ]
-        build job: 'rv-devops/master', propagate: false, wait: false                                                 \
-            , parameters: [ booleanParam(name: 'UPDATE_DEPS_RELEASE_TAG', value: true)                               \
-                          , string(name: 'PR_REVIEWER', value: 'ehildenb')                                           \
-                          , string(name: 'UPDATE_DEPS_REPOSITORY', value: 'runtimeverification/blockchain-k-plugin') \
-                          , string(name: 'UPDATE_DEPS_RELEASE_FILE', value: 'deps/k_release')                        \
-                          , string(name: 'UPDATE_DEPS_RELEASE_TAG_SPEC', value: "${env.K_RELEASE_TAG}")              \
+            , parameters: [ booleanParam ( name: 'UPDATE_DEPS'         , value: true                  ) \
+                          , string       ( name: 'UPDATE_DEPS_REPO'    , value: 'kframework/k'        ) \
+                          , string       ( name: 'UPDATE_DEPS_VERSION' , value: "${env.K_RELEASE_TAG}") \
                           ]
       }
     }
