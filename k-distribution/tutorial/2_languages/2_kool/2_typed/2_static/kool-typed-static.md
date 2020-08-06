@@ -12,6 +12,7 @@ Organization: University of Bucharest
 
 
 ### Abstract
+
 This is the **K** static semantics of the typed KOOL language.
 It extends the static semantics of typed SIMPLE with static semantics
 for the object-oriented constructs.  Also, the static semantics of
@@ -26,55 +27,56 @@ everything else not mentioned below borrowing its semantics from
 SIMPLE:
 
 * Each class `C` yields a homonymous type, which can be
-explicitly used in programs to type variables and methods, possibly in
-combination with other types.
+  explicitly used in programs to type variables and methods, possibly in
+  combination with other types.
 
 * Since now we have user-defined types, we check that each type
-used in a KOOL program is well-formed, that is, it is constructed only
-from primitive and class types corresponding to declared classes.
+  used in a KOOL program is well-formed, that is, it is constructed only
+  from primitive and class types corresponding to declared classes.
 
 * Class members and their types form a **class type
-environment**.  Each class will have such a type environment.
-Each member in a class is allowed to be declared only once.  Since in
-KOOL we allow methods to be assigned to fields, we make no distinction
-between field and method members; in other words, we reject programs
-declaring both a field and a method with the same name.
+  environment**.  Each class will have such a type environment.
+  Each member in a class is allowed to be declared only once.  Since in
+  KOOL we allow methods to be assigned to fields, we make no distinction
+  between field and method members; in other words, we reject programs
+  declaring both a field and a method with the same name.
 
 * If an identifier is not found in the local type environment, it
-will be searched for in the current class type environment.  If not
-there, then it will be searched for in its superclass' type
-environment.  And so on and so forth.  If not found until the
-`Object` class is reached, a typing error is reported.
+  will be searched for in the current class type environment.  If not
+  there, then it will be searched for in its superclass' type
+  environment.  And so on and so forth.  If not found until the
+  `Object` class is reached, a typing error is reported.
 
 * The assignment allows variables to be assigned values of
-more concrete types.  The result type of the assignment expression
-construct will be the (more abstract) type of the assigned variable,
-and not the (more concrete) type of the expression, like in Java.
+  more concrete types.  The result type of the assignment expression
+  construct will be the (more abstract) type of the assigned variable,
+  and not the (more concrete) type of the expression, like in Java.
 
 * Exceptions are changed (from SIMPLE) to allow throwing and
-catching only objects, like in Java.  Also, unlike in SIMPLE, we do
-not check whether the type of the thrown exception matches the type of
-the caught variable, because exceptions can be caught by other
-`try/catch` blocks, even by ones in other methods.  To avoid
-having to annotate each method with what exceptions it can throw, we
-prefer to not check the type safety of exceptions (although this is an
-excellent homework!).  We only check that the `try` block
-type-checks and that the `catch` block type-checks after we bind
-the caught variable to its claimed type.
+  catching only objects, like in Java.  Also, unlike in SIMPLE, we do
+  not check whether the type of the thrown exception matches the type of
+  the caught variable, because exceptions can be caught by other
+  `try/catch` blocks, even by ones in other methods.  To avoid
+  having to annotate each method with what exceptions it can throw, we
+  prefer to not check the type safety of exceptions (although this is an
+  excellent homework!).  We only check that the `try` block
+  type-checks and that the `catch` block type-checks after we bind
+  the caught variable to its claimed type.
 
 * Class declarations are not allowed to have any cycles in their
-extends relation.  Such cycles would lead to non-termination of
-`new`, as it actually does in the dynamic semantics of KOOL
-where no such circularity checks are performed.
+  extends relation.  Such cycles would lead to non-termination of
+  `new`, as it actually does in the dynamic semantics of KOOL
+  where no such circularity checks are performed.
 
 * Methods overriding other methods should be in the right subtyping
-relationship with the overridden methods: co-variant in the codomain
-and contra-variant in the domain.
+  relationship with the overridden methods: co-variant in the codomain
+  and contra-variant in the domain.
 
 ```k
 module KOOL-TYPED-STATIC-SYNTAX
   imports DOMAINS-SYNTAX
 ```
+
 ### Syntax
 
 The syntax of statically typed KOOL is identical to that of
@@ -88,7 +90,7 @@ the syntax of statically typed SIMPLE.
 **Note**: This paragraph is old, now we can do things better.  We keep
 it here only for historical reasons, to see how much we used to suffer :)
 
-**Annoying **K**-tool technical problem:**
+**Annoying K-tool technical problem:**
 Currently, the **K** tool treats the "non-terminal" productions (i.e.,
 productions consisting of just one non-terminal), also called
 "subsorting" production, differently from the other productions.
@@ -118,7 +120,9 @@ the wrapper in the generated documentation, we associate it an
 ```k
   syntax Id ::= "Object" [token] | "Main" [token]
 ```
+
 ### Types
+
 ```k
   syntax Type ::= "void" | "int" | "bool" | "string"
                 | Id                     [klabel("class"), avoid]  // see next
@@ -129,7 +133,9 @@ the wrapper in the generated documentation, we associate it an
 
   syntax Types ::= List{Type,","}
 ```
+
 ### Declarations
+
 ```k
   syntax Param ::= Type Id
   syntax Params ::= List{Param,","}
@@ -139,7 +145,9 @@ the wrapper in the generated documentation, we associate it an
                 | "class" Id Block
                 | "class" Id "extends" Id Block
 ```
+
 ### Expressions
+
 ```k
   syntax FieldReference ::= Exp "." Id          [strict(1)]
   syntax ArrayReference ::= Exp "[" Exps "]"    [strict]
@@ -184,6 +192,7 @@ the wrapper in the generated documentation, we associate it an
 ```
 
 ### Statements
+
 ```k
   syntax Block ::= "{" "}"
                 | "{" Stmts "}"
@@ -209,6 +218,7 @@ the wrapper in the generated documentation, we associate it an
 ```
 
 ### Desugaring macros
+
 ```k
   rule if (E) S => if (E) S else {}                                     [macro]
   rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
@@ -221,6 +231,7 @@ endmodule
 ```
 
 ### Static semantics
+
 We first discuss the configuration, then give the static semantics
 taken over unchanged from SIMPLE, then discuss the static semantics of
 SIMPLE syntactic constructs that needs to change, and in the end we
@@ -231,6 +242,7 @@ module KOOL-TYPED-STATIC
   imports KOOL-TYPED-STATIC-SYNTAX
   imports DOMAINS
 ```
+
 ### Configuration
 
 The configuration of our type system consists of a `tasks`
@@ -293,6 +305,7 @@ in the class extends relation.
                 </T>
                 <output color="brown" stream="stdout"> .List </output>
 ```
+
 ### Unchanged semantics from statically typed SIMPLE
 
 The syntax and rules below are borrowed unchanged from statically
@@ -381,6 +394,7 @@ typed SIMPLE, so we do not discuss them much here.
 ```
 
 ### Unchanged auxiliary operations from dynamically typed SIMPLE
+
 ```k
   syntax Stmts ::= mkDecls(Params)  [function]
   rule mkDecls(T:Type X:Id, Ps:Params) => T X; mkDecls(Ps)
@@ -413,7 +427,6 @@ typed SIMPLE, so we do not discuss them much here.
 Below we give the new static semantics for language constructs that
 come from SIMPLE, but whose SIMPLE static semantics was too
 restrictive or too permissive and thus had to change.
-
 
 ### Local variable declaration
 
@@ -495,6 +508,7 @@ for example, inside other methods).
 ```
 
 ### Assignment
+
 A more concrete value is allowed to be assigned to a more abstract
 variable.  The operation `checkSubtype` is defined at the end
 of the module and it also works with pairs of lists of types.
@@ -530,6 +544,7 @@ type correctly.
 ```
 
 ### Spawn
+
 The spawned cell needs to also be passed the parent's class.
 ```k
 // explain why
@@ -598,7 +613,9 @@ syntax Type ::= "stmtStop"
   [structural]
 */
 ```
+
 ### Check for unique class names
+
 ```k
   rule (<T>...
           <className> C </className>
@@ -889,6 +906,7 @@ is co-variant in the codomain and contra-variant in the domain).
 ```
 
 ### Generic operations which could be part of the **K** framework
+
 ```k
   syntax KItem ::= stuck(K)  [latex(\framebox{${#1}$})]
 

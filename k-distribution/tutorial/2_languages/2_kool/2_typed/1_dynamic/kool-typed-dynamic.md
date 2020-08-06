@@ -12,6 +12,7 @@ Organization: University of Bucharest
 
 
 ### Abstract
+
 This is the **K** dynamic semantics of the typed KOOL language.  It is
 very similar to the semantics of the untyped KOOL, the difference
 being that we now check the typing policy dynamically.  Since we have
@@ -29,6 +30,7 @@ before proceeding.
 module KOOL-TYPED-DYNAMIC-SYNTAX
   imports DOMAINS-SYNTAX
 ```
+
 ### Syntax
 
 Like for the untyped KOOL language, the syntax of typed KOOL extends
@@ -44,7 +46,9 @@ untyped KOOL.
 ```k
   syntax Id ::= "Object" [token] | "Main" [token]
 ```
+
 ### Types
+
 ```k
   syntax Type ::= "void" | "int" | "bool" | "string"
                 | Id                              // KOOL class
@@ -57,7 +61,9 @@ untyped KOOL.
   syntax Types ::= List{Type,","}
   */
 ```
+
 ### Declarations
+
 ```k
   syntax Param ::= Type Id
   syntax Params ::= List{Param,","}
@@ -67,7 +73,9 @@ untyped KOOL.
                 | "class" Id Block                // KOOL
                 | "class" Id "extends" Id Block   // KOOL
 ```
+
 ### Expressions
+
 ```k
   syntax Exp ::= Int | Bool | String | Id
                | "this"                                 // KOOL
@@ -108,7 +116,9 @@ untyped KOOL.
   syntax Val
   syntax Vals ::= List{Val,","}          [klabel(exps)]
 ```
+
 ### Statements
+
 ```k
   syntax Block ::= "{" "}"
                 | "{" Stmts "}"
@@ -132,7 +142,9 @@ untyped KOOL.
   syntax Stmts ::= Stmt
                  | Stmts Stmts                          [right]
 ```
+
 ### Desugaring macros
+
 ```k
   rule if (E) S => if (E) S else {}                                     [macro]
   rule for(Start Cond; Step) {S::Stmts} => {Start while(Cond){S Step;}} [macro]
@@ -145,6 +157,7 @@ endmodule
 ```
 
 ### Semantics
+
 We first discuss the new configuration, then we include the semantics of
 the constructs borrowed from SIMPLE which stay unchanged, then those
 whose semantics had to change, and finally the semantics of the
@@ -154,7 +167,9 @@ module KOOL-TYPED-DYNAMIC
   imports KOOL-TYPED-DYNAMIC-SYNTAX
   imports DOMAINS
 ```
+
 ### Configuration
+
 The configuration of dynamically typed KOOL is almost identical to
 that of its untyped variant.  The only difference is the cell
 `return`, inside the `control` cell, whose role is to
@@ -211,6 +226,7 @@ the expected type.
                   </classes>
                 </T>
 ```
+
 ### Unchanged semantics from dynamically typed SIMPLE
 
 The semantics below is taken over from dynamically typed SIMPLE
@@ -360,7 +376,9 @@ KOOL).
   rule <k> rendezvous V:Val; => . ...</k>
        <k> rendezvous V; => . ...</k>  [rendezvous]
 ```
+
 ### Unchanged auxiliary operations from dynamically typed SIMPLE
+
 ```k
   syntax Stmts ::= mkDecls(Params,Vals)  [function]
   rule mkDecls((T:Type X:Id, Ps:Params), (V:Val, Vs:Vals))
@@ -804,6 +822,7 @@ Like in untyped KOOL.
 ```
 
 ### `typeOf` for the additional values}
+
 ```k
   rule typeOf(objectClosure(C,_)) => C
   rule typeOf(methodClosure(T:Type,_,_,Ps:Params,_)) => T

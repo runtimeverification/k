@@ -12,6 +12,7 @@ Organization: University of Bucharest
 
 
 ### Abstract
+
 This is the **K** semantic definition of the untyped KOOL language.  KOOL
 is aimed at being a pedagogical and research language that captures
 the essence of the object-oriented programming paradigm.  Its untyped
@@ -24,65 +25,65 @@ the class' _members_.  Specifically, KOOL includes the
 following features:
 
 * Class declarations, where a class may or may not explicitly
-extend another class.  In case a class does not explicitly extend
-another class, then it is assumed that it extends the default top-most
-and empty (i.e., no members) class called `Object`.  Each class
-is required to declare precisely one homonymous method, called its
-_constructor_.  Each valid program should contain one class
-named `Main`, whose constructor, `Main()`, takes no
-arguments.  The execution of a program consists of creating an object
-instance of class `Main` and invoking the constructor
-`Main()` on it, that is, of executing `new Main();`.
+  extend another class.  In case a class does not explicitly extend
+  another class, then it is assumed that it extends the default top-most
+  and empty (i.e., no members) class called `Object`.  Each class
+  is required to declare precisely one homonymous method, called its
+  _constructor_.  Each valid program should contain one class
+  named `Main`, whose constructor, `Main()`, takes no
+  arguments.  The execution of a program consists of creating an object
+  instance of class `Main` and invoking the constructor
+  `Main()` on it, that is, of executing `new Main();`.
 
 * All features of SIMPLE (see `examples/simple/untyped`),
-i.e., multidimensional arrays, function (here called "method")
-abstractions with call-by-value parameter passing style and static
-scoping, blocks with locals, input/output, parametric exceptions, and
-concurrency via dynamic thread creation/termination and synchronization.
-The only change in the syntax of SIMPLE when imported in KOOL is the
-function declaration keyword, `function`, which is changed into
-`method`.  The exact same desugaring macros from SIMPLE are
-also included in KOOL.  We can think of KOOL's classes as embedding
-SIMPLE programs (extended with OO constructs, as discussed next).
+  i.e., multidimensional arrays, function (here called "method")
+  abstractions with call-by-value parameter passing style and static
+  scoping, blocks with locals, input/output, parametric exceptions, and
+  concurrency via dynamic thread creation/termination and synchronization.
+  The only change in the syntax of SIMPLE when imported in KOOL is the
+  function declaration keyword, `function`, which is changed into
+  `method`.  The exact same desugaring macros from SIMPLE are
+  also included in KOOL.  We can think of KOOL's classes as embedding
+  SIMPLE programs (extended with OO constructs, as discussed next).
 
 * Object creation using the `new C(e1,...,en)`
-expression construct.  An object instance of class `C` is first
-created and then the constructor `C(e1,...,en)` is implicitly
-called on that object.  KOOL only allows (and requires) one
-constructor per class.  The class constructor can be called either
-implicitly during a new object creation for the class, or explicitly.
-The superclass constructor is **not** implicitly invoked when a
-class constructor is invoked; if you want to invoke the superclass
-constructor from a subclass constructor then you have to do it
-explicitly.
+  expression construct.  An object instance of class `C` is first
+  created and then the constructor `C(e1,...,en)` is implicitly
+  called on that object.  KOOL only allows (and requires) one
+  constructor per class.  The class constructor can be called either
+  implicitly during a new object creation for the class, or explicitly.
+  The superclass constructor is **not** implicitly invoked when a
+  class constructor is invoked; if you want to invoke the superclass
+  constructor from a subclass constructor then you have to do it
+  explicitly.
 
 * An expression construct `this`, which evaluates to the
-current object.
+  current object.
 
 * An expression construct `super`, which is used (only) in
-combination with member lookup (see next) to refer to a superclass
-field or method.
+  combination with member lookup (see next) to refer to a superclass
+  field or method.
 
 * A member lookup expression construct `e.x`, where `e`
-is an expression (either an expression expected to evaluate to an object
-or the `super` construct) and `x` is a class member name,
-that is, a field or a method name.
+  is an expression (either an expression expected to evaluate to an object
+  or the `super` construct) and `x` is a class member name,
+  that is, a field or a method name.
 
 * Expression constructs `e instanceOf C` and
-`(C) e`, where `e` is an expression expected
-to evaluate to an object and `C` a class name.  The former
-tells whether the class of `e` is a subclass of `C`,
-that is, whether `e` can be used as an instance of `C`,
-and the latter changes the class of `e` to `C`.  These
-operations always succeed: the former returns a Boolean value, while
-the latter changes the current class of `e` to `C`
-regardless of whether it is safe to do so or not.  The typed version
-of KOOL will check the safety of casting by ensuring that the instance
-class of the object is a subclass of `C`.  In untyped KOOL we
-do not want to perform this check because we want to allow the
-programmer maximum of flexibility: if one always accesses only
-available members, then the program can execute successfully despite
-the potentially unsafe cast.
+  `(C) e`, where `e` is an expression expected
+  to evaluate to an object and `C` a class name.  The former
+  tells whether the class of `e` is a subclass of `C`,
+  that is, whether `e` can be used as an instance of `C`,
+  and the latter changes the class of `e` to `C`.  These
+  operations always succeed: the former returns a Boolean value, while
+  the latter changes the current class of `e` to `C`
+  regardless of whether it is safe to do so or not.  The typed version
+  of KOOL will check the safety of casting by ensuring that the instance
+  class of the object is a subclass of `C`.  In untyped KOOL we
+  do not want to perform this check because we want to allow the
+  programmer maximum of flexibility: if one always accesses only
+  available members, then the program can execute successfully despite
+  the potentially unsafe cast.
 
 There are some specific aspects of KOOL that need to be discussed.
 
@@ -142,6 +143,7 @@ those were all borrowed from SIMPLE.
 module KOOL-UNTYPED-SYNTAX
   imports DOMAINS-SYNTAX
 ```
+
 ### Syntax
 
 The syntax of KOOL extends that of SIMPLE with object-oriented
@@ -153,14 +155,14 @@ anymore—needs to initiate dynamic method dispatch).  The additional
 syntax includes:
 
 * First, we need a new dedicated identifier, `Object`, for
-the default top-most class.
+  the default top-most class.
 * Second, we rename the `function` keyword of SIMPLE into `method`.
 * Third, we add syntax for class declarations together with a
-macro making classes which extend nothing to extend `Object`.
+  macro making classes which extend nothing to extend `Object`.
 * Fourth, we change the strictness attribute of application
-into `strict(2)`.
+  into `strict(2)`.
 * Finally, we add syntax and corresponding strictness
-for the KOOL object-oriented constructs.
+  for the KOOL object-oriented constructs.
 
 ```k
   syntax Id ::= "Object" [token] | "Main" [token]
@@ -248,6 +250,7 @@ New desugaring rule
 
 endmodule
 ```
+
 ### Semantics
 
 We first discuss the new configuration of KOOL, which extends that of
@@ -263,6 +266,7 @@ module KOOL-UNTYPED
   imports KOOL-UNTYPED-SYNTAX
   imports DOMAINS
 ```
+
 ### Configuration
 
 KOOL removes one cell and adds two nested cells to the configuration
@@ -274,19 +278,20 @@ global variables in SIMPLE became class fields in KOOL.  Let us now
 discuss the new cells that are added to the configuration of SIMPLE.
 
 * The cell `crntObj` holds data pertaining to the current
-object, that is, the object environment in which the code in cell
-`k` executes: `crntClass` holds the current class (which
-can change as methods of the current object are invoked);
-`envStack` holds the stack of environments as a list,
-each layer corresponding to one class in the objects' instance class
-hierarchy; `location`, which is optional, holds the location in
-the store where the current object is or has to be located (this is
-useful both for method closures and for the semantics of object
-creation).
+  object, that is, the object environment in which the code in cell
+  `k` executes: `crntClass` holds the current class (which
+  can change as methods of the current object are invoked);
+  `envStack` holds the stack of environments as a list,
+  each layer corresponding to one class in the objects' instance class
+  hierarchy; `location`, which is optional, holds the location in
+  the store where the current object is or has to be located (this is
+  useful both for method closures and for the semantics of object
+  creation).
+
 * The cell `classes` holds all the declared classes, each
-class being held in its own `class` cell which contains a name
-(`className`), a parent (`extends`), and the actual
-member declarations (`declarations`).
+  class being held in its own `class` cell which contains a name
+  (`className`), a parent (`extends`), and the actual
+  member declarations (`declarations`).
 
 ```k
   // the syntax declarations below are required because the sorts are
@@ -339,6 +344,7 @@ member declarations (`declarations`).
                   </classes>
                 </T>
 ```
+
 ### Unchanged Semantics from untyped SIMPLE
 
 The semantics below is taken over from SIMPLE unchanged.
@@ -549,7 +555,9 @@ from SIMPLE unchanged.
   rule <k> rendezvous V:Val; => . ...</k>
        <k> rendezvous V; => . ...</k>  [rendezvous]
 ```
+
 ### Unchanged auxiliary operations from untyped SIMPLE
+
 ```k
   syntax Stmts ::= mkDecls(Ids,Vals)  [function]
   rule mkDecls((X:Id, Xs:Ids), (V:Val, Vs:Vals)) => var X=V; mkDecls(Xs,Vs)
@@ -709,6 +717,7 @@ corresponding cells:
                         </classData>)
        ...</classes>  [structural]
 ```
+
 ### Method declaration
 
 Like in SIMPLE, method names are added to the environment and bound
