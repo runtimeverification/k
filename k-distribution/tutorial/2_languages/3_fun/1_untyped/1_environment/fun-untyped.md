@@ -121,6 +121,8 @@ functional or **K** features that have already been explained in there.
 ### Syntax
 
 ```k
+//require "modules/pattern-matching.k"
+
 module FUN-UNTYPED-COMMON
   imports DOMAINS-SYNTAX
 ```
