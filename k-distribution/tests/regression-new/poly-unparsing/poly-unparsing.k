@@ -1,7 +1,5 @@
 // Copyright (c) 2019 K Team. All Rights Reserved.
 
-requires "kast.k"
-
 module POLY-UNPARSING-SYNTAX
   imports ML-SYNTAX
   imports INT
