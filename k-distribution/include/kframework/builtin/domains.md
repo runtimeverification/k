@@ -12,7 +12,7 @@ definition unless `--no-prelude` is passed to kompile. K may not work correctly
 if some of these modules do not exist or do not declare certain functions.
 
 ```k
-require "kast.k"
+require "kast.md"
 ```
 
 Default Modules

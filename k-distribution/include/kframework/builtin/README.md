@@ -12,7 +12,7 @@ installation directory, and can be imported with `requires "FILENAME"` (without
 the path prefix).
 
 -   [domains](domains.md): Basic datatypes which are universally useful.
--   [kast](kast.k): Representation of K internal data-structures (not to be
+-   [kast](kast.md): Representation of K internal data-structures (not to be
     included in normal definitions).
 -   [prelude](prelude.md): Automatically included into every K definition.
 -   [ffi](ffi.md): FFI interface for calling out to native C code from K.

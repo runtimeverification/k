@@ -157,7 +157,7 @@ public class ParserUtils {
 
                 if (definitionFileName.equals("ffi.k") || definitionFileName.equals("json.k") ||
                     definitionFileName.equals("rat.k") || definitionFileName.equals("substitution.k") ||
-                    definitionFileName.equals("domains.k")) {
+                    definitionFileName.equals("domains.k") || definitionFileName.equals("kast.k")) {
                     kem.registerCompilerWarning(ExceptionType.FUTURE_ERROR,
                         "Requiring a K file in the K builtin directory via " +
                         "a deprecated filename. Please replace \"" + definitionFileName +
