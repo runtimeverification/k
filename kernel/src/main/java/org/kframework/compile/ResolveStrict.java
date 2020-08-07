@@ -18,6 +18,7 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
+import org.kframework.parser.outer.Outer;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.Collections;
@@ -130,15 +131,6 @@ public class ResolveStrict {
                 hole = cast(Sorts.KItem(), KVariable("HOLE"));
             }
 
-            // is seqstrict the elements before the argument should be KResult
-            Optional<KApply> sideCondition = Stream.concat(allPositions.stream(), strictnessPositions.subList(0, i).stream()).map(j -> KApply(KLabel("isKResult"), KVariable("K" + (j - 1)))).reduce(BooleanUtils::and);
-            K requires;
-            if (!sideCondition.isPresent() || !sequential) {
-                requires = BooleanUtils.TRUE;
-            } else {
-                requires = sideCondition.get();
-            }
-
             for (ContextAlias alias : aliases) {
                 K body = new TransformK() {
                     @Override
@@ -155,6 +147,18 @@ public class ResolveStrict {
                       return var;
                     }
                 }.apply(alias.body());
+
+                Sort result = Outer.parseSort(alias.att().getOptional("result").orElse("KResult"));
+
+                // is seqstrict the elements before the argument should be KResult
+                Optional<KApply> sideCondition = Stream.concat(allPositions.stream(), strictnessPositions.subList(0, i).stream()).map(j -> KApply(KLabel("is" + result.toString()), KVariable("K" + (j - 1)))).reduce(BooleanUtils::and);
+                K requires;
+                if (!sideCondition.isPresent() || !sequential) {
+                    requires = BooleanUtils.TRUE;
+                } else {
+                    requires = sideCondition.get();
+                }
+
                 Context ctx = Context(body, BooleanUtils.and(requires, alias.requires()), production.att().addAll(alias.att()).remove("label"));
                 sentences.add(ctx);
             }
