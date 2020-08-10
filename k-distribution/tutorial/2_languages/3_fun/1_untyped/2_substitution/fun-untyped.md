@@ -1,27 +1,36 @@
-// Copyright (c) 2013-2019 K Team. All Rights Reserved.
+---
+copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
+---
+
+FUN — Untyped — Substitution
+============================
+
+Author: Grigore Roșu (grosu@illinois.edu)  
+Organization: University of Illinois at Urbana-Champaign
+
+Author: Traian Florin Șerbănuță (traian.serbanuta@unibuc.ro)  
+Organization: University of Bucharest
+
+### Abstract
+
+This is the substitution-based definition of FUN.  For additional
+explanations regarding the semantics of the various FUN constructs,
+the reader should consult the emvironment-based definition of FUN.
+
+
+### Syntax
+
+```k
 require "substitution.md"
 //require "modules/pattern-matching.k"
 
-/*!
-\title{FUN --- Untyped --- Substitution}
-\author{Grigore Ro\c{s}u and Traian Florin \c{S}erb\u{a}nu\c{t}\u{a}
-        (\texttt{\{grosu,tserban2\}@illinois.edu})}
-\organization{University of Illinois at Urbana-Champaign}
-*/
-
-/*@ \section{Abstract}
-This is the substitution-based definition of FUN.  For additional
-explanations regarding the semantics of the various FUN constructs,
-the reader should consult the emvironment-based definition of FUN. */
-
-
-//@ \section{Syntax}
-
 module FUN-UNTYPED-COMMON
   imports DOMAINS-SYNTAX
+```
 
-//@ \subsection{The Syntactic Constructs}
+### The Syntactic Constructs
 
+```k
   syntax Name
   syntax Names ::= List{Name,","}
 
@@ -106,10 +115,11 @@ module FUN-UNTYPED-COMMON
   syntax TypeCase ::= ConstructorName
                     | ConstructorName "(" Types ")"
   syntax TypeCases ::= List{TypeCase,"|"}     [klabel(_|TypeCase_)]
+```
 
+### Additional Priorities
 
-//@ \subsection{Additional Priorities}
-
+```k
   syntax priorities @__FUN-UNTYPED-COMMON
                   > ___FUN-UNTYPED-COMMON
                   > arith
@@ -124,9 +134,11 @@ endmodule
 
 module FUN-UNTYPED-MACROS
   imports FUN-UNTYPED-COMMON
+```
 
-//@ \subsection{Desugaring macros}
+### Desugaring macros
 
+```k
   rule P1 P2 -> E => P1 -> fun P2 -> E                       [macro-rec]
   rule F P = E => F = fun P -> E                             [macro-rec]
 
@@ -145,10 +157,10 @@ module FUN-UNTYPED-MACROS
     => callcc (fun $k -> (fun throw -> E)(fun X -> $k E'))   [macro]
 
   rule datatype T = TCs E => E                               [macro]
-
-/*@ mu needed for letrec, but we put it here so we can also write
-programs with mu in them, which is particularly useful for testing. */
-
+```
+mu needed for letrec, but we put it here so we can also write
+programs with mu in them, which is particularly useful for testing.
+```k
   syntax Exp ::= "mu" Case
 
 endmodule
@@ -164,10 +176,11 @@ module FUN-UNTYPED-SYNTAX
   syntax TypeVar  ::= r"['][a-z][_a-zA-Z0-9]*"     [token]
   syntax TypeName ::= Name                         [token]
 endmodule
+```
 
+### Semantics
 
-//@ \section{Semantics}
-
+```k
 module FUN-UNTYPED
   imports FUN-UNTYPED-COMMON
   imports FUN-UNTYPED-MACROS
@@ -179,9 +192,9 @@ module FUN-UNTYPED
                   <k color="green"> $PGM:Exp </k>
                   <store color="white"> .Map </store>
                 </T>
-
-//@ Both Name and functions are values now:
-
+```
+Both Name and functions are values now:
+```k
   syntax Val ::= Int | Bool | String | Name
   syntax Exp ::= Val
   syntax Exps ::= Vals
@@ -227,26 +240,26 @@ module FUN-UNTYPED
   rule (matchFailure => .) ~> (fun (_->_ | Cs:Cases => Cs)) _
 //  rule (fun P->E | _) V:Val => E[getMatching(P,V)]  when isMatching(P,V)
 //  rule (fun (P->_ | Cs:Cases => Cs)) V:Val  when notBool isMatching(P,V)
-
-/*@ We can reduce multiple bindings to one list binding, and then
+```
+We can reduce multiple bindings to one list binding, and then
 apply the usual desugaring of let into function application.
 It is important that the rule below is a macro, so let is eliminated
-immediately, otherwise it may interfere in ugly ways with substitution. */
-
+immediately, otherwise it may interfere in ugly ways with substitution.
+```k
   rule let Bs in E => ((fun [names(Bs)] -> E) [exps(Bs)])    [macro]
-
-/*@ We only give the semantics of one-binding letrec.
-Multipe bindings are left as an exercise. */
-
+```
+We only give the semantics of one-binding letrec.
+Multipe bindings are left as an exercise.
+```k
   // changed because of parsing error
   //rule mu X:Name -> E => E[(mu X -> E) / X]
   rule mu X:Name -> E => E[X |-> (mu X -> E)]
   rule letrec F:Name = E in E' => let F = (mu F -> E) in E'  [macro]
-
-/*@ We cannot have \texttt{\&} anymore, but we can give direct
-semantics to \texttt{ref}.  We also have to declare \texttt{ref} to
-be a value, so that we will never heat on it. */
-
+```
+We cannot have `&` anymore, but we can give direct
+semantics to `ref`.  We also have to declare `ref` to
+be a value, so that we will never heat on it.
+```k
 //  rule <k> & X => L ...</k>  <env>... X |-> L </env>
   rule isVal(ref) => true
   rule <k> ref V:Val => !L:Int ...</k> <store>... .Map => !L |-> V ...</store>
@@ -258,10 +271,10 @@ be a value, so that we will never heat on it. */
   rule isVal(callcc) => true
   rule <k> (callcc V:Val => V cc(K)) ~> K </k>
   rule <k> cc(K) V:Val ~> _ => V ~> K </k>
+```
 
-
-//@ Auxiliary getters
-
+Auxiliary getters
+```k
   syntax Names ::= names(Bindings)  [function]
   rule names(.Bindings) => .Names
   rule names(X:Name=_ and Bs) => X,names(Bs)
@@ -300,11 +313,12 @@ be a value, so that we will never heat on it. */
   rule mergeMatching(matchResult(_:Map), matchFailure) => matchFailure
   rule mergeMatching(matchFailure, matchResult(_:Map)) => matchFailure
   rule mergeMatching(matchFailure, matchFailure)       => matchFailure
-
-/*@ Besides the generic decomposition rules for patterns and values,
-we also want to allow \texttt{[head|tail]} matching for lists, so we add
-the following custom pattern decomposition rule: */
-
+```
+Besides the generic decomposition rules for patterns and values,
+we also want to allow `[head|tail]` matching for lists, so we add
+the following custom pattern decomposition rule:
+```k
   rule getMatching([H:Exp | T:Exp], [V:Val, Vs:Vals])
     => getMatchingAux((H, T), (V, [Vs]))
 endmodule
+```
