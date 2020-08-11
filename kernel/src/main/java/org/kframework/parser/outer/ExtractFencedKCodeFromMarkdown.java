@@ -70,11 +70,7 @@ public class ExtractFencedKCodeFromMarkdown {
             }
             String cbStr = block.getInfo().toString();
             Set<String> tags = new HashSet<>();
-            try {
-                tags = TagSelector.parseTags(blankSb + cbStr, source);
-            } catch (KEMException e) {
-                kem.registerThrown(e);
-            }
+            tags = TagSelector.parseTags(blankSb + cbStr, source, kem);
             // interested only in code blocks marked as valid by the mdSelector expression
             if (TagSelector.eval(mdSelector, tags)) {
                 // navigate from previous offset to the current one and

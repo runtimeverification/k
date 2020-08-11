@@ -12,6 +12,8 @@ import org.kframework.utils.errorsystem.KEMException
 import scala.annotation.meta.param
 import scala.collection.Set
 
+import java.util.Optional
+
 case class Configuration(body: K, ensures: K, att: Att = Att.empty) extends Sentence with OuterKORE {
   override val isSyntax = true
   override val isNonSyntax = true
@@ -61,7 +63,32 @@ object FlatModule {
   }
 }
 
-case class FlatModule(name: String, imports: Set[String], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
+case class Import(name: String, att: Att = Att.empty) extends HasLocation {
+  override def location(): Optional[Location] = att.getOptional(classOf[Location])
+  override def source(): Optional[Source] = att.getOptional(classOf[Source])
+}
+
+object Import {
+  val syntaxString = "$SYNTAX"
+
+  def isSyntax(name: String): Boolean = name.endsWith(syntaxString)
+
+  def asSyntax(_import: Import): Import =
+    if (isSyntax(_import.name))
+      _import
+    else
+      Import(_import.name ++ syntaxString, _import.att)
+
+  def noSyntax(name: String): String =
+    if (isSyntax(name))
+      name.dropRight(syntaxString.length)
+    else
+      name
+}
+
+
+
+case class FlatModule(name: String, imports: Set[Import], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
   extends OuterKORE with Sorting with Serializable {
 
   def toModule(allModules: Set[FlatModule], koreModules: scala.collection.mutable.Map[String, Module], visitedModules: Seq[FlatModule]): Module = {
@@ -77,8 +104,8 @@ case class FlatModule(name: String, imports: Set[String], localSentences: Set[Se
       throw KEMException.compilerError(msg)
     }
 
-    def resolveImport(importName: String): Module = {
-      var baseName = Import.noSyntax(importName)
+    def resolveImport(_import: Import): Module = {
+      var baseName = Import.noSyntax(_import.name)
       var modOption = allModules.find(m => m.name.equals(baseName))
       if (modOption.nonEmpty) {
         var mod = modOption.get
@@ -86,20 +113,20 @@ case class FlatModule(name: String, imports: Set[String], localSentences: Set[Se
         if (result.isEmpty) {
           result = Some(mod.toModule(allModules, koreModules, this +: visitedModules))
         }
-        if (Import.isSyntax(importName)) {
-          result = Some(koreModules.get(importName).get)
+        if (Import.isSyntax(_import.name)) {
+          result = Some(koreModules.get(_import.name).get)
         }
           result.get
-      } else if (koreModules.contains(importName))
-          koreModules.get(importName).get
+      } else if (koreModules.contains(_import.name))
+          koreModules.get(_import.name).get
         else
-          throw KEMException.compilerError("Could not find module: " + importName)
+          throw KEMException.compilerError("Could not find module: " + _import.name, _import)
     }
 
     var importedSyntaxModules = importedSyntax.map(resolveImport)
     var syntaxItems = items.filter(s => s.isSyntax)
     var att = this.att
-    var newSyntaxModule = new Module(Import.asSyntax(this.name), importedSyntaxModules, syntaxItems, att)
+    var newSyntaxModule = new Module(this.name + Import.syntaxString, importedSyntaxModules, syntaxItems, att)
 
     var importedModules = importedModuleNames.map(resolveImport) ++ Set(newSyntaxModule)
 

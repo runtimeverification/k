@@ -4,7 +4,7 @@ endmodule
 
 module MOD
   imports INT
-  configuration <bar> 0 </bar>
+  configuration <bar unused=""> 0 </bar>
 endmodule
 
 module CHECKUNUSEDVAR
@@ -24,6 +24,8 @@ module CHECKUNUSEDVAR
   rule foo(X) => ?X:Int
     ensures X >Int 0
 
-  configuration <k> $PGM:K </k> <foo multiplicity="?"> <bar/> </foo>
+  rule foo(_X) => 1
+
+  configuration <k> $PGM:K </k> <foo multiplicity="?" unused=""> <bar/> </foo>
 
 endmodule

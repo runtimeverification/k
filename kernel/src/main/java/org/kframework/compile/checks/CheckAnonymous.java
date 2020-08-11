@@ -15,6 +15,7 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.VisitK;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import static org.kframework.kore.KORE.*;
@@ -89,14 +90,20 @@ public class CheckAnonymous {
         }
         for (Multiset.Entry<String> entry : vars.entrySet()) {
             if (entry.getCount() == 1) {
-                if (!(ResolveAnonVar.isAnonVar(KVariable(entry.getElement())))) {
+                if (!(entry.getElement().startsWith("_") || entry.getElement().startsWith("?_") || entry.getElement().startsWith("!_") || entry.getElement().startsWith("@_"))) {
                     if (s instanceof ContextAlias && entry.getElement().equals("HERE")) {
                         continue;
                     }
                     if (s instanceof Context && entry.getElement().equals("HOLE")) {
                         continue;
                     }
-                    kem.registerCompilerWarning(errors, "Variable '" + entry.getElement() + "' defined but not used.", loc.get(entry.getElement()));
+                    kem.registerCompilerWarning(ExceptionType.UNUSED_VAR, errors, "Variable '" + entry.getElement() + "' defined but not used. Prefix variable name with underscore if this is intentional.",
+                        loc.get(entry.getElement()));
+                }
+            } else if (entry.getCount() > 1) {
+                if ((entry.getElement().startsWith("_") || entry.getElement().startsWith("?_") || entry.getElement().startsWith("!_") || entry.getElement().startsWith("@_")) && !ResolveAnonVar.isAnonVar(KVariable(entry.getElement()))) {
+                    errors.add(KEMException.compilerError("Variable '" + entry.getElement() + "' declared as unused, but it is used. Remove underscore from variable name if this is intentional.",
+                          loc.get(entry.getElement())));
                 }
             }
         }

@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
+---
 
 ## Part 2: Defining IMP
 

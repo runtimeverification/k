@@ -57,7 +57,7 @@ public class ResolveFunctionWithConfig {
         topCell = info.getRootCell();
         topCellLabel = info.getCellLabel(topCell);
       }
-      CONFIG_VAR = KVariable("_Configuration", Att().add(Sort.class, topCell).add("withConfig"));
+      CONFIG_VAR = KVariable("#Configuration", Att().add(Sort.class, topCell).add("withConfig"));
     }
 
     private boolean ruleNeedsConfig(Rule r) {
@@ -77,7 +77,7 @@ public class ResolveFunctionWithConfig {
 
             @Override
             public Boolean apply(KVariable k) {
-                return k.name().startsWith("!") || k.name().equals("_Configuration");
+                return k.name().startsWith("!") || k.name().equals("#Configuration");
             }
         };
         if (hasVarNeedsConfig.apply(RewriteToTop.toRight(r.body())) || hasVarNeedsConfig.apply(r.requires()) || hasVarNeedsConfig.apply(r.ensures())) {
@@ -184,7 +184,7 @@ public class ResolveFunctionWithConfig {
 
           @Override
           public Boolean apply(KVariable k) {
-              return k.name().equals("_Configuration");
+              return k.name().equals("#Configuration");
           }
 
           @Override

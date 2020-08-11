@@ -33,6 +33,7 @@ import org.kframework.rewriter.SearchType;
 import org.kframework.unparser.KPrint;
 import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.DefinitionScoped;
@@ -110,11 +111,11 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();
                 String moduleName = mod.name();
 
-                files.saveToTemp("pgm.kore", koreOutput);
-                String pgmPath = files.resolveTemp("pgm.kore").getAbsolutePath();
+                files.saveToTemp("execute-initial.kore", koreOutput);
+                String pgmPath = files.resolveTemp("execute-initial.kore").getAbsolutePath();
                 String[] koreCommand = haskellKRunOptions.haskellBackendCommand.split("\\s+");
                 String koreDirectory = haskellKRunOptions.haskellBackendHome;
-                File koreOutputFile = files.resolveTemp("result.kore");
+                File koreOutputFile = files.resolveTemp("execute-result.kore");
                 List<String> args = new ArrayList<String>();
                 args.addAll(Arrays.asList(koreCommand));
                 args.addAll(Arrays.asList(
@@ -190,13 +191,13 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();
                 String moduleName = mod.name();
 
-                files.saveToTemp("pgm.kore", koreOutput);
-                String pgmPath = files.resolveTemp("pgm.kore").getAbsolutePath();
-                files.saveToTemp("pattern.kore", korePatternOutput);
-                String patternPath = files.resolveTemp("pattern.kore").getAbsolutePath();
+                files.saveToTemp("search-initial.kore", koreOutput);
+                String pgmPath = files.resolveTemp("search-initial.kore").getAbsolutePath();
+                files.saveToTemp("search-pattern.kore", korePatternOutput);
+                String patternPath = files.resolveTemp("search-pattern.kore").getAbsolutePath();
                 String[] koreCommand = haskellKRunOptions.haskellBackendCommand.split("\\s+");
                 String koreDirectory = haskellKRunOptions.haskellBackendHome;
-                File koreOutputFile = files.resolveTemp("result.kore");
+                File koreOutputFile = files.resolveTemp("search-result.kore");
                 List<String> args = new ArrayList<String>();
                 args.addAll(Arrays.asList(koreCommand));
                 args.addAll(Arrays.asList(
@@ -291,7 +292,14 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
 
             private List<String> buildCommonProvingCommand(String defPath, String specPath, String outPath,
                                                            String defModuleName, String specModuleName){
-                String[] koreCommand = haskellKRunOptions.haskellBackendCommand.split("\\s+");
+                String[] koreCommand;
+                if (kProveOptions.debugger && !haskellKRunOptions.haskellBackendCommand.equals("kore-exec")) {
+                    throw KEMException.criticalError("Cannot pass --debugger with --haskell-backend-command.");
+                } else if (kProveOptions.debugger) {
+                    koreCommand = "kore-repl".split("\\s+");
+                } else {
+                    koreCommand = haskellKRunOptions.haskellBackendCommand.split("\\s+");
+                }
 
                 List<String> args = new ArrayList<>();
                 args.addAll(Arrays.asList(koreCommand));
@@ -304,6 +312,13 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 if (smtOptions.smtPrelude != null) {
                     args.add("--smt-prelude");
                     args.add(smtOptions.smtPrelude);
+                }
+                if (kProveOptions.debugScript != null) {
+                    if (!kProveOptions.debugger) {
+                        throw KEMException.criticalError("Can only use --debug-script with --debugger.");
+                    }
+                    args.add("--repl-script");
+                    args.add(files.resolveWorkingDirectory(kProveOptions.debugScript).getAbsolutePath());
                 }
                 return args;
             }
@@ -325,7 +340,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     outputK = new KoreParser(rules.sortAttributesFor())
                             .parseFile(koreOutputFile);
                 } catch (ParseError parseError) {
-                    kem.registerCriticalWarning("Error parsing haskell backend output", parseError);
+                    kem.registerCriticalWarning(ExceptionType.PROOF_LINT, "Error parsing haskell backend output", parseError);
                     outputK = KORE.KApply(KLabels.ML_FALSE);
                 }
                 return new RewriterResult(Optional.empty(), Optional.of(exit), outputK);

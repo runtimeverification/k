@@ -13,7 +13,7 @@ import org.kframework.compile.checks.CheckAnonymous;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckFunctions;
 import org.kframework.compile.checks.CheckHOLE;
-import org.kframework.compile.checks.CheckImports;
+import org.kframework.compile.checks.CheckK;
 import org.kframework.compile.checks.CheckKLabels;
 import org.kframework.compile.checks.CheckLabels;
 import org.kframework.compile.checks.CheckRHSVariables;
@@ -35,6 +35,7 @@ import org.kframework.unparser.ToJson;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -66,7 +67,7 @@ import static org.kframework.compile.ResolveHeatCoolAttribute.Mode.*;
  */
 public class Kompile {
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
-    public static final String REQUIRE_PRELUDE_K = "requires \"prelude.k\"\n";
+    public static final String REQUIRE_PRELUDE_K = "requires \"prelude.md\"\n";
 
     public final KompileOptions kompileOptions;
     private final FileUtil files;
@@ -106,7 +107,7 @@ public class Kompile {
         this.sw = sw;
 
         if (kompileOptions.backend.equals("ocaml")) {
-            kem.registerCriticalWarning("The OCaml backend is in the process of being deprecated (final date May 31, 2020). Please switch to the LLVM backend.");
+            kem.registerCriticalWarning(ExceptionType.FUTURE_ERROR, "The OCaml backend is in the process of being deprecated (final date May 31, 2020). Please switch to the LLVM backend.");
         }
     }
 
@@ -152,7 +153,7 @@ public class Kompile {
         CompiledDefinition def = new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(configInfo.getRootCell()).klabel());
 
         if (kompileOptions.experimental.genBisonParser || kompileOptions.experimental.genGlrBisonParser) {
-            new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, files.resolveKompiled("parser_PGM"), kompileOptions.experimental.genGlrBisonParser);
+            new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, files.resolveKompiled("parser_PGM"), kompileOptions.experimental.genGlrBisonParser, kompileOptions.experimental.bisonFile);
             for (Production prod : iterable(kompiledDefinition.mainModule().productions())) {
                 if (prod.att().contains("cell") && prod.att().contains("parser")) {
                     String att = prod.att().get("parser");
@@ -167,7 +168,7 @@ public class Kompile {
                         if (!mod.isDefined()) {
                             throw KEMException.compilerError("Could not find module referenced by parser attribute: " + module, prod);
                         }
-                        new KRead(kem, files, InputModes.PROGRAM).createBisonParser(mod.get(), def.configurationVariableDefaultSorts.getOrDefault("$" + name, Sorts.K()), files.resolveKompiled("parser_" + name), kompileOptions.experimental.genGlrBisonParser);
+                        new KRead(kem, files, InputModes.PROGRAM).createBisonParser(mod.get(), def.configurationVariableDefaultSorts.getOrDefault("$" + name, Sorts.K()), files.resolveKompiled("parser_" + name), kompileOptions.experimental.genGlrBisonParser, null);
                     }
                 }
             }
@@ -300,12 +301,14 @@ public class Kompile {
     }
 
     public void structuralChecks(scala.collection.Set<Module> modules, Module mainModule, Option<Module> kModule, Set<String> excludedModuleTags, boolean _throw) {
-        CheckRHSVariables checkRHSVariables = new CheckRHSVariables(errors);
+        boolean isSymbolic = excludedModuleTags.contains(Att.CONCRETE());
+        boolean isKast = excludedModuleTags.contains(Att.KORE());
+        CheckRHSVariables checkRHSVariables = new CheckRHSVariables(errors, !isSymbolic);
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAtt(errors, m)::check));
 
-        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckConfigurationCells(errors, m)::check));
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckConfigurationCells(errors, m, isSymbolic && isKast)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckSortTopUniqueness(errors, m)::check));
 
@@ -315,8 +318,10 @@ public class Kompile {
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
 
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckK(errors)::check));
+
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(
-              new CheckFunctions(errors, m, excludedModuleTags.contains(Att.CONCRETE()))::check));
+              new CheckFunctions(errors, m, isSymbolic)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAnonymous(errors, m, kem)::check));
 
@@ -344,7 +349,7 @@ public class Kompile {
         }
         stream(mainModule.importedModules()).forEach(checkModuleKLabels);
         checkModuleKLabels.accept(mainModule);
-        checkKLabels.check();
+        checkKLabels.check(mainModule);
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckLabels(errors)::check));
 
@@ -354,7 +359,7 @@ public class Kompile {
                 throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
             } else {
                 for (KEMException error : errors) {
-                    kem.registerCriticalWarning(error.exception.getMessage() +
+                    kem.registerCriticalWarning(ExceptionType.FUTURE_ERROR, error.exception.getMessage() +
                             "\nNote: this warning will become an error in subsequent releases.",
                             error.exception);
                 }
@@ -398,6 +403,6 @@ public class Kompile {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
-        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule()).concretize(s);
+        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule()).concretize(input.mainModule(), s);
     }
 }

@@ -3,6 +3,7 @@ package org.kframework.compile.checks;
 
 import com.google.common.collect.Sets;
 import org.kframework.attributes.Att;
+import org.kframework.compile.ExpandMacros;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Rule;
@@ -29,35 +30,38 @@ import java.util.Set;
  */
 public class CheckRHSVariables {
     private final Set<KEMException> errors;
+    private final boolean errorExistential;
 
-    public CheckRHSVariables(Set<KEMException> errors) {
+    public CheckRHSVariables(Set<KEMException> errors, boolean errorExistential) {
         this.errors = errors;
+        this.errorExistential = errorExistential;
     }
     private void check(Rule rule) {
         resetVars();
         Set<String> unboundVariableNames = getUnboundVarNames(rule);
-        gatherVars(true, rule.body());
-        gatherVars(false, rule.requires());
-        gatherVars(false, rule.ensures());
-        check(rule.body(), true, unboundVariableNames);
-        check(rule.requires(), false, unboundVariableNames);
-        check(rule.ensures(), false, unboundVariableNames);
+        boolean errorExistential = this.errorExistential && !(rule.att().contains(Att.LABEL()) && rule.att().get(Att.LABEL()).equals("STDIN-STREAM.stdinUnblock"));
+        gatherVars(true, rule.body(), errorExistential);
+        gatherVars(false, rule.requires(), errorExistential);
+        gatherVars(false, rule.ensures(), errorExistential);
+        check(rule.body(), true, false, unboundVariableNames);
+        check(rule.requires(), false, false, unboundVariableNames);
+        check(rule.ensures(), false, false, unboundVariableNames);
     }
 
     private void check(Context context) {
         resetVars();
-        gatherVars(true, context.body());
-        gatherVars(false, context.requires());
-        check(context.body(), true, new HashSet<>());
-        check(context.requires(), false, new HashSet<>());
+        gatherVars(true, context.body(), false);
+        gatherVars(false, context.requires(), false);
+        check(context.body(), true, false, new HashSet<>());
+        check(context.requires(), false, false, new HashSet<>());
     }
 
     private void check(ContextAlias context) {
         resetVars();
-        gatherVars(true, context.body());
-        gatherVars(false, context.requires());
-        check(context.body(), true, new HashSet<>());
-        check(context.requires(), false, new HashSet<>());
+        gatherVars(true, context.body(), false);
+        gatherVars(false, context.requires(), false);
+        check(context.body(), true, true, new HashSet<>());
+        check(context.requires(), false, true, new HashSet<>());
     }
 
     public void check(Sentence s) {
@@ -88,15 +92,16 @@ public class CheckRHSVariables {
         vars.clear();
     }
 
-    void gatherVars(boolean isBody, K term) {
-        new GatherVarsVisitor(isBody, errors, vars).apply(term);
+    void gatherVars(boolean isBody, K term, boolean isMacro) {
+        new GatherVarsVisitor(isBody, errors, vars, isMacro).apply(term);
     }
 
-    private void check(K body, boolean isBody, Set<String> unboundVarNames) {
+    private void check(K body, boolean isBody, boolean isAlias, Set<String> unboundVarNames) {
         Set<KVariable> unbound = new HashSet<>();
         new ComputeUnboundVariables(isBody, errors, vars, unbound::add).apply(body);
         for (KVariable k : unbound) {
             if (unboundVarNames.contains(k.name())) continue;
+            if (isAlias && k.name().equals("HOLE")) continue;
             errors.add(KEMException.compilerError("Found variable " + k.name()
                 + " on right hand side of rule, not bound on left hand side."
                 + " Did you mean \"?" + k.name() + "\"?", k));

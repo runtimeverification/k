@@ -147,7 +147,7 @@ public class ResolveFun {
     }
 
     private Rule owiseRule(KLabel fun, K k, Sort arg, Att att) {
-        return lambdaRule(fun, KApply(KLabel("#SemanticCastTo" + arg.toString()), KVariable("_Owise")), k, att.add(Att.OWISE()), x -> BooleanUtils.FALSE);
+        return lambdaRule(fun, KApply(KLabel("#SemanticCastTo" + arg.toString()), KVariable("#Owise")), k, att.add(Att.OWISE()), x -> BooleanUtils.FALSE);
     }
 
     private Rule lambdaRule(KLabel fun, K body, K closure, Att att, UnaryOperator<K> getRHS) {
@@ -164,7 +164,7 @@ public class ResolveFun {
         Set<KEMException> errors = new HashSet<>();
         Set<KVariable> vars = new HashSet<>();
         List<KVariable> result = new ArrayList<>();
-        new GatherVarsVisitor(true, errors, vars).apply(k);
+        new GatherVarsVisitor(true, errors, vars, false).apply(k);
         new ComputeUnboundVariables(true, errors, vars, result::add).apply(k);
         return result;
     }

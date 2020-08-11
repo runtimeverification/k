@@ -48,7 +48,7 @@ public class OuterParsingOptions implements Serializable {
     @Parameter(names="-I", description="Add a directory to the search path for requires statements.")
     public List<String> includes = new ArrayList<>();
 
-    @Parameter(names="--no-prelude", description="Do not implicitly require prelude.k.")
+    @Parameter(names="--no-prelude", description="Do not implicitly require prelude.md.")
     public boolean noPrelude = false;
 
     @Parameter(names="--md-selector", description="Preprocessor: for .md files, select only the md code blocks that match the selector expression. Ex:'k&(!a|b)'.")

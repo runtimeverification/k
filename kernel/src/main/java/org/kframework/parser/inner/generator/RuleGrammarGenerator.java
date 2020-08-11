@@ -328,16 +328,10 @@ public class RuleGrammarGenerator {
             // remove cells from parsing config cells so they don't conflict with the production in kast.k
             // also add all matching terminals to the #CellName sort
             for (Sentence prod : extensionProds) {
-              if (prod instanceof Production) {
-                for (ProductionItem pi : iterable(((Production)prod).items())) {
-                  if (pi instanceof Terminal) {
-                    Terminal t = (Terminal)pi;
-                    if (t.value().matches("[A-Za-z][A-Za-z0-9\\-]*")) {
-                      prods.add(Production(Seq(), Sorts.CellName(), Seq(t), Att().add("token")));
-                    }
-                  }
-                }
-              }
+                addCellNameProd(prods, prod);
+            }
+            for (Sentence prod : iterable(mod.productions())) {
+                addCellNameProd(prods, prod);
             }
             parseProds = Stream.concat(prods.stream(), stream(mod.sentences()).filter(s -> !s.att().contains("cell"))).collect(Collectors.toSet());
         } else
@@ -374,7 +368,7 @@ public class RuleGrammarGenerator {
             for (Sort srt : iterable(mod.allSorts())) {
                 if (!isParserSort(srt) && !mod.listSorts().contains(srt)) {
                     // K ::= Sort
-                    prods3.add(Production(Seq(), Sorts.K(), Seq(NonTerminal(srt)), Att()));
+                    prods3.add(Production(Seq(), Sorts.KItem(), Seq(NonTerminal(srt)), Att()));
                 }
             }
             // for each triple, generate a new pattern which works better for parsing lists in programs.
@@ -446,6 +440,19 @@ public class RuleGrammarGenerator {
         Module parseM = new Module(mod.name() + "-PARSER", Set(), immutable(parseProds), mod.att());
         parseM.subsorts();
         return Tuple3.apply(extensionM, disambM, parseM);
+    }
+
+    private static void addCellNameProd(Set<Sentence> prods, Sentence prod) {
+        if (prod instanceof Production) {
+          for (ProductionItem pi : iterable(((Production)prod).items())) {
+            if (pi instanceof Terminal) {
+              Terminal t = (Terminal)pi;
+              if (t.value().matches("[A-Za-z][A-Za-z0-9\\-]*")) {
+                prods.add(Production(Seq(), Sorts.CellName(), Seq(t), Att().add("token")));
+              }
+            }
+          }
+        }
     }
 
     private static List<List<Sort>> makeAllSortTuples(int size, Module mod) {

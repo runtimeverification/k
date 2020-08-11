@@ -1,4 +1,4 @@
-[Error] Compiler: Had 15 pattern matching errors.
+[Error] Compiler: Had 11 pattern matching errors.
 [Error] Compiler: Non exhaustive match detected:
 `foo(_)_TEST_Int_Int`(#token("3","Int"))
 [Error] Compiler: Non exhaustive match detected:
@@ -20,15 +20,3 @@
 [Error] Compiler: Non exhaustive match detected:
 `foo3(_)_TEST_Int_String`(#token("\"3\"","String"))
 [Error] Compiler: Non exhaustive match detected: `foo4(_)_TEST_Int_Bytes`(_)
-[Error] Compiler: Potentially useless rule detected.
-	Source(test.k)
-	Location(61,6,61,27)
-[Error] Compiler: Potentially useless rule detected.
-	Source(test.k)
-	Location(81,6,81,30)
-[Error] Compiler: Potentially useless rule detected.
-	Source(test.k)
-	Location(93,6,93,22)
-[Error] Compiler: Potentially useless rule detected.
-	Source(test.k)
-	Location(94,6,94,22)

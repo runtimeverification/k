@@ -1,5 +1,9 @@
-<!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
-[![Join the chat at https://gitter.im/kframework/k](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kframework/k?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+---
+permalink: README.html
+copyright: Copyright (c) 2010-2020 K Team. All Rights Reserved.
+---
+
+[Join the chat at Riot](https://riot.im/app/#/room/#k:matrix.org)
 
 This is a readme file for the developers.
 
@@ -22,7 +26,7 @@ git submodule update --init --recursive
 sudo pacman -S git maven jdk-openjdk cmake boost libyaml jemalloc clang llvm lld zlib gmp mpfr z3 opam curl stack base-devel base python
 export PATH=$PATH:/usr/bin/core_perl
 makepkg
-sudo pacman -U kframework-5.0.0-1-x86_64.pkg.tar.xz
+sudo pacman -U kframework-5.0.0-1-x86_64.pkg.tar.zst
 ```
 
 If you install this list of dependencies, continue directly to the Install section.
@@ -84,9 +88,9 @@ After running `mvn package` for the first time, you should run ``k-distribution/
 
 ## Installing on fresh Windows Subsystem for Linux
 
-1. Install the Ubuntu package from the Windows Store, which as of now is an alias for the Ubuntu LTS 18.04 package. During installation you will be asked to create a new user. 
-2. Download the latest K distribution for Ubuntu Bionic from https://github.com/kframework/k/releases 
-    to a temporary directory, for example `d:\temp` 
+1. Install the Ubuntu package from the Windows Store, which as of now is an alias for the Ubuntu LTS 18.04 package. During installation you will be asked to create a new user.
+2. Download the latest K distribution for Ubuntu Bionic from https://github.com/kframework/k/releases
+    to a temporary directory, for example `d:\temp`
 
 3. Open linux bash. For example by running:
 ```
@@ -96,9 +100,9 @@ ubuntu1804
 4. Run the following commands:
 
     `$ sudo apt-get update`
-    
+
     `$ cd <download dir>`. In our example download dir is `/mnt/d/temp`
-    
+
     `$ sudo apt-get install ./kframework_5.0.0_amd64_bionic.deb`
         This will install ~1.4GB of dependencies and will take some time.
         K will be installed to `/usr`
@@ -106,7 +110,7 @@ ubuntu1804
 5. Copy the tutorial to some work directory, for example `/mnt/d/k-tutorial`. Otherwise, you won't be able to run the
 examples from default installation dir if you are not `root`:
 
-```    
+```
 $ cp -R /usr/share/kframework/tutorial /mnt/d/k-tutorial
 ```
 

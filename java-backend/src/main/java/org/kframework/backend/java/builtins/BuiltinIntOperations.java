@@ -36,7 +36,7 @@ public class BuiltinIntOperations {
     public static IntToken ediv(IntToken term1, IntToken term2, TermContext context) {
         try {
             return IntToken.of((term1.bigIntegerValue().signum() < 0 ?
-                    (term1.bigIntegerValue().add(BigInteger.ONE).subtract(term2.bigIntegerValue())) : term1.bigIntegerValue())
+                    (term1.bigIntegerValue().add(BigInteger.ONE).subtract(term2.bigIntegerValue().abs())) : term1.bigIntegerValue())
                     .divide(term2.bigIntegerValue()));
         } catch (ArithmeticException e) {
             return null;
@@ -45,6 +45,9 @@ public class BuiltinIntOperations {
 
     public static IntToken rem(IntToken term1, IntToken term2, TermContext context) {
         try {
+            BigInteger res = term1.bigIntegerValue().remainder(term2.bigIntegerValue());
+            if (res.compareTo(BigInteger.ZERO) < 0)
+                return IntToken.of(term1.bigIntegerValue().remainder(term2.bigIntegerValue()).add(term2.bigIntegerValue().abs()));
             return IntToken.of(term1.bigIntegerValue().remainder(term2.bigIntegerValue()));
         } catch (ArithmeticException e) {
             return null;

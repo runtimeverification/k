@@ -140,6 +140,9 @@ public class KompileOptions implements Serializable {
         @Parameter(names="--gen-glr-bison-parser", description="Emit GLR bison parser for the PGM configuration variable within the syntax module of your definition into the kompiled definition.")
         public boolean genGlrBisonParser;
 
+        @Parameter(names="--bison-file", description="C file containing functions to link into bison parser.")
+        public String bisonFile;
+
         @Parameter(names="--transition", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of tags designating rules to become transitions.")
         public List<String> transition = Collections.singletonList(DEFAULT_TRANSITION);
 

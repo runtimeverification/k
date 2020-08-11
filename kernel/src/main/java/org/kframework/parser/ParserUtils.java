@@ -21,6 +21,7 @@ import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.outer.ExtractFencedKCodeFromMarkdown;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.OuterParsingOptions;
@@ -154,15 +155,27 @@ public class ParserUtils {
 
                 String definitionFileName = ((Require) di).getValue();
 
-                ArrayList<File> allLookupDirectoris = new ArrayList<>(lookupDirectories);
-                allLookupDirectoris.add(0, currentDirectory);
+                if (definitionFileName.equals("ffi.k") || definitionFileName.equals("json.k") ||
+                    definitionFileName.equals("rat.k") || definitionFileName.equals("substitution.k") ||
+                    definitionFileName.equals("domains.k") || definitionFileName.equals("kast.k")) {
+                    kem.registerCompilerWarning(ExceptionType.FUTURE_ERROR,
+                        "Requiring a K file in the K builtin directory via " +
+                        "a deprecated filename. Please replace \"" + definitionFileName +
+                        "\" with \"" + definitionFileName.substring(0, definitionFileName.length() - 2) + ".md\".", di);
+                    definitionFileName = definitionFileName.substring(0, definitionFileName.length() - 2) + ".md";
+                }
 
-                Optional<File> definitionFile = allLookupDirectoris.stream()
+                String finalDefinitionFile = definitionFileName;
+
+                ArrayList<File> allLookupDirectories = new ArrayList<>(lookupDirectories);
+                allLookupDirectories.add(1, currentDirectory); //after builtin directory but before anything else
+
+                Optional<File> definitionFile = allLookupDirectories.stream()
                         .map(lookupDirectory -> {
-                            if (new File(definitionFileName).isAbsolute()) {
-                                return new File(definitionFileName);
+                            if (new File(finalDefinitionFile).isAbsolute()) {
+                                return new File(finalDefinitionFile);
                             } else {
-                                return new File(lookupDirectory, definitionFileName);
+                                return new File(lookupDirectory, finalDefinitionFile);
                             }
                         })
                         .filter(file -> file.exists()).findFirst();
@@ -182,7 +195,7 @@ public class ParserUtils {
                 }
                 else
                     throw KEMException.criticalError("Could not find file: " +
-                            definitionFileName + "\nLookup directories:" + allLookupDirectoris, di);
+                            finalDefinitionFile + "\nLookup directories:" + allLookupDirectories, di);
             }
         }
         return results;
@@ -316,7 +329,7 @@ public class ParserUtils {
         opt = modules.stream().filter(m -> m.name().equals(syntaxModuleName)).findFirst();
         Module syntaxModule;
         if (!opt.isPresent()) {
-            kem.registerCompilerWarning("Could not find main syntax module with name " + syntaxModuleName
+            kem.registerCompilerWarning(ExceptionType.MISSING_SYNTAX_MODULE, "Could not find main syntax module with name " + syntaxModuleName
                     + " in definition.  Use --syntax-module to specify one. Using " + mainModuleName + " as default.");
             syntaxModule = mainModule;
         } else {

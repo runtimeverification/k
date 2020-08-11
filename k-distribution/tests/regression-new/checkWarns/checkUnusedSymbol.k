@@ -7,4 +7,6 @@ module CHECKUNUSEDSYMBOL
   imports INT
 
   syntax Foo ::= foo(Int)
+
+  syntax Bar ::= bar(Int) [unused]
 endmodule

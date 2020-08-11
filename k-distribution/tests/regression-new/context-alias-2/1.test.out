@@ -1,9 +1,9 @@
 {
-  Result
+  Result:GeneratedTopCell
 #Equals
   <generatedTop>
     <k>
-      10
+      10 ~> .
     </k>
     <state>
       x |-> 5

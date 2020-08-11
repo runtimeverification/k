@@ -45,7 +45,7 @@ public class RuleGrammarTest {
         String definitionText;
         FileUtil files = FileUtil.testFileUtil();
         ParserUtils parser = new ParserUtils(files, new KExceptionManager(new GlobalOptions()));
-        File definitionFile = new File(Kompile.BUILTIN_DIRECTORY.toString() + "/kast.k");
+        File definitionFile = new File(Kompile.BUILTIN_DIRECTORY.toString() + "/prelude.md");
         definitionText = files.loadFromWorkingDirectory(definitionFile.getPath());
 
         Definition baseK =

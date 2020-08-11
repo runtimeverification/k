@@ -9,6 +9,7 @@ import org.kframework.backend.java.kil.TermContext;
 import org.kframework.backend.java.util.ImpureFunctionException;
 import org.kframework.kore.KORE;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.lang.invoke.MethodHandle;
@@ -67,7 +68,7 @@ public class BuiltinFunction {
 //                }
 
                 if (!hookProvider.containsKey(hookAttribute)) {
-                    kem.registerCriticalHiddenWarning("missing entry for hook " + hookAttribute);
+                    kem.registerCriticalWarning(ExceptionType.MISSING_HOOK_JAVA, "missing entry for hook " + hookAttribute);
                     continue;
                 }
 

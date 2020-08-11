@@ -289,10 +289,9 @@ public class Definition extends JavaSymbolicObject {
             macros.add(rule);
         } else if (rule.att().contains(Att.ANYWHERE())) {
             if (!(rule.leftHandSide() instanceof KItem)) {
-                kem.registerCriticalWarning(
+                throw KEMException.compilerError(
                         "The Java backend only supports [anywhere] rule that rewrites KItem; but found:\n\t"
                                 + rule, rule);
-                return;
             }
 
             anywhereRules.put(rule.anywhereKLabel(), rule);

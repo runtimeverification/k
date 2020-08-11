@@ -1440,7 +1440,7 @@ public class ModuleToKORE {
           if (prod.items().apply(i) instanceof NonTerminal) {
             format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%" + (nt++));
           } else if (prod.items().apply(i) instanceof Terminal) {
-            format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%c" + ((Terminal)prod.items().apply(i)).value().replace("\\", "\\\\").replace("$", "\\$") + "%r");
+            format = format.replaceAll("%" + (i+1) + "(?![0-9])", "%c" + ((Terminal)prod.items().apply(i)).value().replace("\\", "\\\\").replace("$", "\\$").replace("%", "%%") + "%r");
           } else {
             hasFormat = false;
           }
@@ -1591,9 +1591,9 @@ public class ModuleToKORE {
 
     private static String convertBuiltinLabel(String klabel) {
       switch(klabel) {
-      case "#False":
+      case "#Bottom":
         return "\\bottom";
-      case "#True":
+      case "#Top":
         return "\\top";
       case "#Or":
         return "\\or";

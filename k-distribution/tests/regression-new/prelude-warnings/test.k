@@ -1,7 +1,7 @@
-require "ffi.k"
-require "json.k"
-require "rat.k"
-require "substitution.k"
+require "ffi.md"
+require "json.md"
+require "rat.md"
+require "substitution.md"
 
 module TEST-SYNTAX
 endmodule

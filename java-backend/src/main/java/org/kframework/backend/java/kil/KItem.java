@@ -370,7 +370,7 @@ public class KItem extends Term implements KItemRepresentation {
                 Term result = kItem.isEvaluable() ? evaluateFunction(kItem, context) : kItem.applyAnywhereRules(context);
                 if (result instanceof KItem && ((KItem) result).isEvaluable() && result.isGround()) {
                     // we do this check because this warning message can be very large and cause OOM
-                    if (options.warnings.includesExceptionType(ExceptionType.HIDDENWARNING) && stage == Stage.REWRITING) {
+                    if (options.includesExceptionType(ExceptionType.UNRESOLVED_FUNCTION_SYMBOL) && stage == Stage.REWRITING) {
                         StringBuilder sb = new StringBuilder();
                         sb.append("Unable to resolve function symbol:\n\t\t");
                         sb.append(result);
@@ -383,7 +383,7 @@ public class KItem extends Term implements KItemRepresentation {
                                 sb.append('\n');
                             }
                         }
-                        kem.registerInternalHiddenWarning(sb.toString(), kItem);
+                        kem.registerInternalWarning(ExceptionType.UNRESOLVED_FUNCTION_SYMBOL, sb.toString(), kItem);
                     }
                     if (RuleAuditing.isAuditBegun()) {
                         System.err.println("Function failed to evaluate: returned " + result);
@@ -461,7 +461,7 @@ public class KItem extends Term implements KItemRepresentation {
                             throw (RuntimeException) t;
                         }
                         if (t instanceof RuntimeException) {
-                            kem.registerInternalWarning("Ignored exception thrown by hook " + kLabelConstant, t);
+                            kem.registerInternalWarning(ExceptionType.PROOF_LINT, "Ignored exception thrown by hook " + kLabelConstant, t);
                         } else {
                             throw new AssertionError("Builtin functions should not throw checked exceptions", t);
                         }
@@ -515,7 +515,7 @@ public class KItem extends Term implements KItemRepresentation {
                                         throw KEMException.criticalError("More than one possible match. " +
                                                 "Function " + kLabelConstant + " might be non-deterministic.");
                                     } else {
-                                        kem.registerInternalWarning("More than one possible match. " +
+                                        kem.registerInternalWarning(ExceptionType.PROOF_LINT, "More than one possible match. " +
                                                 "Behaviors might be lost.");
                                     }
                                 }

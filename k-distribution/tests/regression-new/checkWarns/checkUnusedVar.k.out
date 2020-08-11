@@ -1,16 +1,13 @@
-[Error] Compiler: Had 5 structural errors.
-[Error] Compiler: Symbol '<bar>' defined but not used.
-	Source(checkUnusedVar.k)
-	Location(7,17,7,31)
-[Error] Compiler: Symbol '<foo>' defined but not used.
-	Source(checkUnusedVar.k)
-	Location(27,17,27,69)
-[Error] Compiler: Variable '?X' defined but not used.
-	Source(checkUnusedVar.k)
-	Location(24,18,24,20)
-[Error] Compiler: Variable 'X' defined but not used.
+[Error] Compiler: Variable 'X' defined but not used. Prefix variable name with
+underscore if this is intentional.
 	Source(checkUnusedVar.k)
 	Location(16,12,16,13)
-[Error] Compiler: Variable 'X' defined but not used.
+[Error] Compiler: Variable 'X' defined but not used. Prefix variable name with
+underscore if this is intentional.
 	Source(checkUnusedVar.k)
 	Location(21,12,21,13)
+[Error] Compiler: Variable '?X' defined but not used. Prefix variable name with
+underscore if this is intentional.
+	Source(checkUnusedVar.k)
+	Location(24,18,24,20)
+[Error] Compiler: Had 3 structural errors.

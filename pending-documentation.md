@@ -185,6 +185,287 @@ have any constructors declared.
 syntax Bytes [hook(BYTES.Bytes), token]
 ```
 
+### Converting between `[token]` sorts
+
+You can convert between tokens of one sort via `String`s by defining functions
+implemented by builtin hooks.
+The hook `STRING.token2string` allows conversion of any token to a string:
+
+```k
+syntax String ::= FooToString(Foo)  [function, functional, hook(STRING.token2string)]
+```
+
+Similarly, the hook `STRING.string2Token` allows the inverse:
+
+```k
+syntax Bar ::= StringToBar(String) [function, functional, hook(STRING.string2token)]
+```
+
+WARNING: This sort of conversion does *NOT* do any sort of parsing or validation.
+Thus, we can create arbitary tokens of any sort:
+
+```
+StringToBar("The sun rises in the west.")
+```
+
+Composing these two functions lets us convert from `Foo` to `Bar`
+
+```k
+syntax Bar ::= FooToBar(Foo) [function]
+rule FooToBar(F) => StringToBar(FooToString(F))
+```
+
+### Parsing comments, and the `#Layout` sort
+
+Productions for the `#Layout` sort are used to describe tokens that are
+considered "whitespace". The scanner removes tokens matching these productions
+so they are not even seen by the parser. Below, we use it to define
+lines begining with `;` (semicolon) as comments.
+
+```k
+syntax #Layout ::= r"(;[^\\n\\r]*)"    // Semi-colon comments
+                 | r"([\\ \\n\\r\\t])" // Whitespace
+```
+
+### `prec` attribute
+
+Consider the following naive attempt at creating a language what syntax that
+allows two types of variables: names that contain underbars, and names that
+contain sharps/hashes/pound-signs:
+
+```k
+syntax NameWithUnderbar ::= r"[a-zA-Z][A-Za-z0-9_]*"  [token]
+syntax NameWithSharp    ::= r"[a-zA-Z][A-Za-z0-9_#]*" [token]
+syntax Pgm ::= underbar(NameWithUnderbar)
+             | sharp(NameWithSharp)
+```
+
+Although, it seems that K has enough information to parse the programs
+`underbar(foo)` and `sharp(foo)` with, the lexer does not take into account
+whether a token is being parsed for the `sharp` or for the `underbar`
+production. It chooses an arbitary sort for the token `foo` (perhaps
+`NameWithUnderbar`). Thus, during paring it is unable to construct a valid term
+for one of those programs (`sharp(foo)`) and produces the error message:
+`Inner Parser: Parse error: unexpected token 'foo'.`
+
+Since calculating inclusions and intersections between regular expressions is
+tricky, we must provide this information to K. We do this via the `prec(N)`
+attribute. The lexer will always prefer longer tokens to shorter tokens.
+However, when it has to choose between two different tokens of equal length,
+token productions with higher precedence are tried first.
+
+We also need to make sorts with more specific tokens subsorts of ones with more
+general tokens. We add the token attribute to this production so that all
+tokens of a particular sort are marked with the sort it is parsed as, and not a
+subsort thereof. e.g. we get `underbar(#token("foo", "NameWithUnderbar"))`
+instead of `underbar(#token("foo", "#LowerId"))`
+
+The `BUILTIN-ID-TOKENS` module defines `#UpperId` and `#LowerId` with
+attributes `prec(2)`.
+
+```k
+imports BUILTIN-ID-TOKENS
+syntax NameWithUnderbar ::= r"[a-zA-Z][A-Za-z0-9_]*" [prec(1), token]
+                          | #UpperId                [token]
+                          | #LowerId                [token]
+syntax NameWithSharp ::= r"[a-zA-Z][A-Za-z0-9_#]*" [prec(1), token]
+                       | #UpperId                 [token]
+                       | #LowerId                 [token]
+syntax Pgm ::= underbar(NameWithUnderbar)
+             | sharp(NameWithSharp)
+```
+
+### `unused` attribute
+
+K will warn you if you declare a symbol that is not used in any of the rules of
+your definition. Sometimes this is intentional, however; in this case, you can
+suppress the warning by adding the `unused` attribute to the production or
+cell.
+
+```
+syntax Foo ::= foo() [unused]
+
+configuration <foo unused=""> .K </foo>
+```
+
+### Symbol priority and associativity
+
+Unlike most other parser generators, K combines the task of parsing with AST
+generation. A production declared with the `syntax` keyword in K is both a
+piece of syntax used when parsing, and a symbol that is used when rewriting.
+As a result, it is generally convenient to describe expression grammars using
+priority and associativity declarations rather than explicitly transforming
+your grammar into a series of nonterminals, one for each level of operator
+precedence. Thus, for example, a simple grammar for addition and multiplication
+will look like this:
+
+```k
+syntax Exp ::= Exp "*" Exp
+             | Exp "+" Exp
+```
+
+However, this grammar is ambiguous. The term `x+y*z` might refer to `x+(y*z)`
+or to `(x+y)*z`. In order to differentiate this, we introduce a partial
+ordering between productions known as priority. A symbol "has tighter priority"
+than another symbol if the first symbol can appear under the second, but the
+second cannot appear under the first without a bracket. For example, in 
+traditional arithmetic, multiplication has tighter priority than addition,
+which means that `x+y*z` cannot parse as `(x+y)*z` because the addition
+operator would appear directly beneath the multiplication, which is forbidden
+by the priority filter.
+
+Priority is applied individually to each possible ambiguous parse of a term. It
+then either accepts or rejects that parse. If there is only a single remaining
+parse (after all the other disambiguation steps have happened), this is the
+parse that is chosen. If all the parses were rejected, it is a parse error. If
+multiple parses remain, they might be resolved by further disambiguation such
+as via the `prefer` and `avoid` attributes, but if multiple parses remain after
+disambiguation finishes, this is an ambiguous parse error, indicating there is
+not a unique parse for that term. In the vast majority of cases, this is
+an error and indicates that you ought to either change your grammar or add
+brackets to the term in question. 
+
+Priority is specified in K grammars by means of one of two different
+mechanisms. The first, and simplest, simply replaces the `|` operator in a 
+sequence of K productions with the `>` operator. This operator indicates that
+everything prior to the `>` operator (including transitively) binds tighter
+than what comes after. For example, a more complete grammar for simple
+arithmetic might be:
+
+```k
+syntax Exp ::= Exp "*" Exp
+             | Exp "/" Exp
+             > Exp "+" Exp
+             | Exp "-" Exp
+```
+
+This indicates that multiplication and division bind tigher than addition
+and subtraction, but that there is no relationship in priority between
+multiplication and division.
+
+As you may have noticed, this grammar is also ambiguous. `x*y/z` might refer to
+`x*(y/z)` or to `(x*y)/z`. Indeed, if we removed division and subtraction
+entirely, the grammar would still be ambiguous: `x*y*z` might parse as
+`x*(y*z)`, or as `(x*y)*z`. To resolve this, we introduce another feature:
+associativity. Roughly, asssociativity tells us how symbols are allowed to nest
+within other symbols with the same priority. If a set of symbols is left
+associative, then symbols in that set cannot appear as the rightmost child
+of other symbols in that set. If a set of symbols is right associative, then
+symbols in that set cannot appear as the leftmost child of other symbols in
+that set. Finally, if a set of symbols is non-associative, then symbols
+in that set cannot appear as the rightmost or leftmost child of other symbols
+in that set. For example, in the above example, if addition and subtraction
+are left associative, then `x+y+z` will parse as `(x+y)+`z and `x+y-z` will
+parse as `(x+y)-z` (because the other parse will have been rejected).
+
+You might notice that this seems to apply only to binary infix operators. In
+fact, the real behavior is slightly more complicated. Priority and
+associativity (for technical reasons that go beyond the scope of this document)
+really only apply when the rightmost or leftmost item in a production is a
+nonterminal. If the rightmost nonterminal is followed by a terminal (or
+respectively the leftmost preceded), priority and associativity do not apply.
+Thus we can generalize these concepts to arbitrary context-free grammars.
+
+Associativity is specified in K grammars by means of one of two different
+mechanisms. The first, and simplest, adds the associativity of a priority block
+of symbols prior to that block. For example, we can remove the remaining
+ambiguities in the above grammar like so:
+
+```k
+syntax Exp ::= left:
+               Exp "*" Exp
+             | Exp "/" Exp
+             > right:
+               Exp "+" Exp
+             | Exp "-" Exp
+```
+
+This indicates that multiplication and division are left-associative, ie, after
+symbols with higher priority are parsed as innermost, symbols are nested with
+the rightmost on top. Addition and subtraction are right associative, which 
+is the opposite and indicates that symbols are nested with the leftmost on top.
+Note that this is similar but different from evaluation order, which also
+concerns itself with the ordering of symbols, which is described in the next
+section.
+
+You may note we have not yet introduced the second syntax for priority
+and associativity. In some cases, syntax for a grammar might be spread across
+multiple modules, sometimes for very good reasons with respect to code
+modularity. As a result, it becomes infeasible to declare priority and
+associativity inline within a set of productions, because the productions
+are not contiguous within a single file.
+
+For this purpose, we introduce the equivalent `syntax priorities`,
+`syntax left`, `syntax right`, and `syntax non-assoc` declarations. For
+example, the above grammar can be written equivalently as:
+
+```k
+syntax Exp ::= Exp "*" Exp [mult]
+             | Exp "/" Exp [div]
+             | Exp "+" Exp [add]
+             | Exp "-" Exp [sub]
+
+syntax priorities mult div > add sub
+syntax left mult div
+syntax right add sub
+```
+
+Here we use user-defined attributes to refer to a group of sentences
+collectively. The sets are flattened together. We could equivalently have
+written:
+
+```k
+syntax Exp ::= Exp "*" Exp [mult]
+             | Exp "/" Exp [mult]
+             | Exp "+" Exp [add]
+             | Exp "-" Exp [add]
+
+syntax priorities mult > add
+syntax left mult
+syntax right add
+```
+
+Note that there is one other way to describe associativity, but it is
+prone to a very common mistake. You can apply the attribute `left`, `right`,
+or `non-assoc` directly to a production to indicate that it is, by itself,
+left-, right-, or non-associative. 
+
+However, this often does not mean what users think it means. In particular:
+
+```k
+syntax Exp ::= Exp "+" Exp [left]
+             | Exp "-" Exp [left]
+```
+
+is not equivalent to:
+
+```k
+syntax Exp ::= left:
+               Exp "+" Exp
+             | Exp "-" Exp
+```
+
+Under the first, each production is associative with itself, but not each
+other. Thus, `x+y+z` will parse unambiguously as `(x+y)+z`, but `x+y-z` will
+be ambiguous. However, in the second, `x+y-z` will parse unambiguously as
+`(x+y)-z`.
+
+Think carefully about how you want your grammar to parse. In general, if you're
+not sure, it's probably best to group associativity together into the same
+blocks you use for priority, rather than using `left`, `right`, or `non-assoc`
+attributes on the productions.
+
+### `assoc`, `comm`, `idem`, and `unit` attributes
+
+These attributes are used to indicate whether a collection or a production
+is associative, commutative, idempotent, and/or has a unit.
+In general, you should not need to apply these attributes to productions
+yourself, however, they do have certain special meaning to K. K will generate
+axioms related to each of these concepts into your definition for you
+automatically. It will also automatically sort associative-commutative
+collections, and flatten the indentation of associative collections, when
+unparsing.
+
 Evaluation Strategy
 -------------------
 
@@ -832,7 +1113,7 @@ your K definition, and the third type of function is generated automatically
 for each named nonterminal in your definition. Essentially, `isFoo` for some
 sort `Foo` will tell you whether a particular term of sort `K` is a `Foo`,
 `{F}:>Foo` will cast `F` to sort `Foo` if `F` is of sort `Foo` and will be
-undefined (i.e., theoretically defined as `#False`, the bottom symbol in
+undefined (i.e., theoretically defined as `#Bottom`, the bottom symbol in
 matching logic) otherwise. Finally, `bar` will project out the child of a `foo`
 named `bar` in its production declaration.
 
@@ -841,40 +1122,6 @@ child named `bar` of equal or smaller sort to `Bar`, this will generate an
 ambiguity during parsing, so care should be taken to ensure that named
 nonterminals are sufficiently unique from one another to prevent such
 ambiguities. Of course, the compiler will generate a warning in this case.
-
-### `concrete` attribute, `#isConcrete` and `#isVariable` function
-
-**NOTE**: The Haskell backend _does not_ and _will not_ support the
-meta-functions `#isConcrete` and `#isVariable`.
-
-Sometimes you only want a given function to simplify if all (or some) of the
-arguments are concrete (non-symbolic). To do so, you can use either the
-`concrete` attribute (if you want it to only apply when all arguments are
-concrete), or the `#isConcrete(_)` side-condition (when you only want it to
-apply if some arguments are concrete). Conversly, the function `#isVariable(_)`
-will only return true when the argument is a variable.
-
-For example, the following will only re-associate terms when all arguments
-are concrete:
-
-```k
-rule X +Int (Y +Int Z) => (X +Int Y) +Int Z [concrete]
-```
-
-And the following rules will only re-associate terms when it will end up
-grouping concrete sub-terms:
-
-```k
-rule X +Int (Y +Int Z) => (X +Int Y) +Int Z
-  requires #isConcrete(X)
-   andBool #isConcrete(Y)
-   andBool #isVariable(Z)
-
-rule X +Int (Y +Int Z) => (X +Int Z) +Int Y
-  requires #isConcrete(X)
-   andBool #isConcrete(Z)
-   andBool #isVariable(Y)
-```
 
 ### `simplification` attribute (Haskell backend)
 
@@ -915,6 +1162,66 @@ We might add the following simplification lemma:
 Then this simplification rule will only apply if the Haskell backend can prove
 that `notBool N =/=Int 0` is unsatisfiable. This avoids an infinite cycle of
 applying this simplification lemma.
+
+### `concrete` attribute, `#isConcrete` and `#isVariable` function (Java backend)
+
+**NOTE**: The Haskell backend _does not_ and _will not_ support the
+meta-functions `#isConcrete` and `#isVariable`. See below for information about
+the `concrete` and `symbolic` attributes in the Haskell backend.
+
+Sometimes you only want a given function to simplify if all (or some) of the
+arguments are concrete (non-symbolic). To do so, you can use either the
+`concrete` attribute (if you want it to only apply when all arguments are
+concrete), or the `#isConcrete(_)` side-condition (when you only want it to
+apply if some arguments are concrete). Conversly, the function `#isVariable(_)`
+will only return true when the argument is a variable.
+
+For example, the following will only re-associate terms when all arguments
+are concrete:
+
+```k
+rule X +Int (Y +Int Z) => (X +Int Y) +Int Z [concrete]
+```
+
+And the following rules will only re-associate terms when it will end up
+grouping concrete sub-terms:
+
+```k
+rule X +Int (Y +Int Z) => (X +Int Y) +Int Z
+  requires #isConcrete(X)
+   andBool #isConcrete(Y)
+   andBool #isVariable(Z)
+
+rule X +Int (Y +Int Z) => (X +Int Z) +Int Y
+  requires #isConcrete(X)
+   andBool #isConcrete(Z)
+   andBool #isVariable(Y)
+```
+
+### `concrete` and `symbolic` attributes (Haskell backend)
+
+Sometimes you only want a rule to apply if some or all arguments are concrete
+(not symbolic). This is done with the `concrete` attribute. Conversely, the
+`symbolic` attribute will allow a rule to apply only when some arguments are not
+concrete. These attributes should only be given with the `simplification`
+attribute.
+
+For example, the following will only re-associate terms when all arguments
+are concrete:
+
+```k
+rule X +Int (Y +Int Z) => (X +Int Y) +Int Z [simplification, concrete]
+```
+
+These rules will re-associate and commute terms to combine concrete arguments:
+
+```k
+rule (A +Int Y) +Int Z => A +Int (Y +Int Z)
+  [concrete(Y, Z), symbolic(A), simplification]
+
+rule X +Int (B +Int Z) => B +Int (X +Int Z)
+  [concrete(X, Z), symbolic(B), simplification]
+```
 
 ### The `unboundVariables` attribute
 
@@ -1112,6 +1419,73 @@ Here we know that `foo(I +Int 1)` will return an Int, but the return sort of
 `foo` is `Exp`. So we project the result into the `Int` sort so that it can
 be placed as the child of a `bar`.
 
+### `owise` and `priority` attributes.
+
+Sometimes, it is simply not convenient to explicitly describe every
+single negative case under which a rule should **not** apply. Instead,
+we simply wish to say that a rule should only apply after some other set of
+rules have been tried. K introduces two different attributes that can be
+added to rules which will automatically generate the necessary matching
+conditions in a manner which is performant for concrete execution (indeed,
+it generally outperforms during concrete execution code where the conditions
+are written explicitly).
+
+The first is the `owise` attribute. Very roughly, rules without an attribute
+indicating their priority apply first, followed by rules with the `owise`
+attribute only if all the other rules have been tried and failed. For example,
+consider the following function:
+
+```k
+syntax Int ::= foo(Int) [function]
+rule foo(0) => 0
+rule foo(_) => 1 [owise]
+```
+
+Here `foo(0)` is defined explicitly as `0`. Any other integer yields the
+integer `1`. In particular, the second rule above will only be tried after the
+first rule has been shown not to apply.
+
+This is because the first rule has a lower number assigned for its priority
+than the second rule. In practice, each rule in your semantics is implicitly
+or explicitly assigned a numerical priority. Rules are tried in increasing
+order of priority, starting at zero and trying each increasing numerical value
+successively.
+
+You can specify the priority of a rule with the `priority` attribute. For
+example, I could equivalently write the second rule above as:
+
+```k
+rule foo(_) => 1 [priority(200)]
+```
+
+The number `200` is not chosen at random. In fact, when you use the `owise`
+attribute, what you are doing is implicitly setting the priority of the rule
+to `200`. This has a couple of implications:
+
+1. Multiple rules with the owise attribute all have the same priority and thus
+   can apply in any order.
+2. Rules with priority higher than `200` apply **after** all rules with the 
+   `owise` attribute have been tried.
+
+There is one more rule by which priorities are assigned: a rule with no
+attributes indicating its priority is assigned the priority 50. Thus,
+with each priority explicitly declared, the above example looks like:
+
+```k
+syntax Int ::= foo(Int) [function]
+rule foo(0) => 0 [priority(50)]
+rule foo(_) => 1 [owise]
+```
+
+One final note: the llvm backend reserves priorities between 50 and 150
+inclusive for certain specific purposes. Because of this, explicit
+priorities which are given within this region may not behave precisely as
+described above. This is primarily in order that it be possible where necessary
+to provide guidance to the pattern matching algorithm when it would otherwise
+make bad choices about which rules to try first. You generally should not
+give any rule a priority within this region unless you know exactly what the
+implications are with respect to how the llvm backend orders matches.
+
 Pattern Matching
 ----------------
 
@@ -1308,6 +1682,39 @@ This will rewrite `I` to `.` if and only if the state cell contains
 Note that in the case of Set and Map, one guarantee is that K1, K2, K3, and K4
 represent /distinct/ elements. Pattern matching fails if the correct number of
 distinct elements cannot be found.
+
+### Matching on cell fragments
+
+K allows matching fragments of the configuration and using them to construct
+terms and use as function parameters.
+
+```k
+configuration <t>
+                <k> #init ~> #collectOdd ~> $PGM </k>
+                <fs>
+                  <f multiplicity="*" type="Set"> 1 </f>
+                </fs>
+              </t>
+```
+
+The `#collectOdd` construct grabs the entire content of the `<fs>` cell.
+We may also match on only a portion of its content. Note that the fragment
+must be wrapped in a `<f>` cell at the call site.
+
+```k
+syntax KItem ::= "#collectOdd"
+rule <k> #collectOdd => collectOdd(<fs> Fs </fs>) ... </k>
+     <fs> Fs </fs>
+```
+
+The `collectOdd` function collects the items it needs
+
+```k
+syntax Set ::= collectOdd(FsCell) [function]
+rule collectOdd(<fs> <f> I </f> REST </fs>) => SetItem(I) collectOdd(<fs> REST </fs>) requires I %Int 2 ==Int 1
+rule collectOdd(<fs> <f> I </f> REST </fs>) =>            collectOdd(<fs> REST </fs>) requires I %Int 2 ==Int 0
+rule collectOdd(<fs> .Bag </fs>) => .Set
+```
 
 ### `all-path` and `one-path` attributes to distinguish reachability claims
 
@@ -1779,6 +2186,27 @@ some important limitations:
   the sort of the ambiguity. You can then import the `K-AMBIGUITIES` module
   and use rewriting to resolve the ambiguities using whatever preprocessing
   mechanisms you prefer.
+
+Location Information
+--------------------
+
+K is able to insert file, line, and column metadata into the parse tree on a
+per-sort basis when parsing using a bison-generated parser. To enable this,
+mark the sort with the `locations` attribute.
+
+```
+  syntax Exp [locations]
+  syntax Exp ::= Exp "/" Exp | Int
+```
+
+K implicitly wraps productions of these sorts in a `#location` term (see the
+`K-LOCATIONS` module in `kast.md`). The metadata can thus be accessed with
+ordinary rewrite rules:
+
+```
+  rule #location(_ / 0, File, StartLine, _StartColumn, _EndLine, _EndColumn) =>
+  "Error: Division by zero at " +String File +String ":" Int2String(StartLine) 
+```
 
 Unparsing
 ---------

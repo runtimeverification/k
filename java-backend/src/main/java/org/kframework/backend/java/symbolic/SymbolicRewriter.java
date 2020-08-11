@@ -40,6 +40,7 @@ import org.kframework.kprove.KProve;
 import org.kframework.kprove.KProveOptions;
 import org.kframework.rewriter.SearchType;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import javax.annotation.Nullable;
@@ -744,7 +745,7 @@ public class SymbolicRewriter {
                             System.err.println("\nStep above: " + step + ", evaluation ended with no successors.");
                         }
                         if (step == 1) {
-                            kem.registerCriticalWarning("Evaluation ended on 1st step. " +
+                            kem.registerCriticalWarning(ExceptionType.PROOF_LINT, "Evaluation ended on 1st step. " +
                                     "Possible cause: non-functional term in constraint (path condition).");
                         }
                         /* final term */

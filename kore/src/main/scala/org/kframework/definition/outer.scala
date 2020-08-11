@@ -113,6 +113,16 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   lazy val productions: Set[Production] = sentences collect { case p: Production => p }
 
+  lazy val functions: Set[KLabel] = productions.filter(_.att.contains(Att.FUNCTION)).map(_.klabel.get.head)
+
+  def isFunction(t: K): Boolean = {
+    t match {
+      case Unapply.KApply(lbl, _) if functions(lbl) => true
+      case Unapply.KRewrite(Unapply.KApply(lbl, _), _) if functions(lbl) => true
+      case _ => false
+    }
+  }
+
   lazy val sortedProductions: Seq[Production] = productions.toSeq.sorted
 
   lazy val localProductions: Set[Production] = localSentences collect { case p: Production => p }
@@ -134,13 +144,20 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
       .groupBy(_.sort.head)
       .map { case (l, ps) => (l, ps) }
 
+  lazy val productionsForLoc: Map[(Source, Location), Set[Production]] =
+    productions
+      .filter(_.source.isPresent)
+      .filter(_.location.isPresent)
+      .groupBy(p => (p.source.get, p.location.get))
+      .map { case (l, ps) => (l, ps) }
+
   lazy val layouts: Set[String] =
     productionsForSort
       .get(Sorts.Layout.head)
       .getOrElse(Set[Production]())
       .collect({
           case Production(_, _, _, Seq(RegexTerminal(_, terminalRegex, _)), _) => terminalRegex
-          case p => throw KEMException.compilerError("Productions of sort `Layout` must be exactly one `RegexTerminal`.\nProduction: " + p.toString())
+          case p => throw KEMException.compilerError("Productions of sort `#Layout` must be exactly one `RegexTerminal`.", p)
       })
 
   lazy val layout: String = "(" + layouts.mkString(")|(") + ")"
@@ -330,29 +347,9 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     case m: Module => m.name == name && m.sentences == sentences
   }
 
-  def flattened()   : FlatModule                = new FlatModule(name, imports.map(m => m.name), localSentences, att)
+  def flattened()   : FlatModule                = new FlatModule(name, imports.map(m => Import(m.name, Att.empty)), localSentences, att)
   def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ imports.map(m => m.flatModules._2).flatten)
 }
-
-object Import {
-  val syntaxString = "$SYNTAX"
-
-  def isSyntax(name: String): Boolean = name.endsWith(syntaxString)
-
-  def asSyntax(name: String): String =
-    if (isSyntax(name))
-      name
-    else
-      name ++ syntaxString
-
-  def noSyntax(name: String): String =
-    if (isSyntax(name))
-      name.dropRight(syntaxString.length)
-    else
-      name
-}
-
-// hooked but different from core, Import is a sentence here
 
 trait HasAtt {
   val att: Att
