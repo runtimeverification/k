@@ -1,5 +1,15 @@
 ---
 copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
+title: SIMPLE - Untyped
+author:
+  - given: Grigore
+    family: Roșu
+    email: grosu@illinois.edu
+    organization: University of Illinois at Urbana-Champaign
+  - given: Traian Florin
+    family: Șerbănuță
+    email: traian.serbanuta@unibuc.ro
+    organization: University of Bucharest
 ---
 
 SIMPLE — Untyped
