@@ -19,7 +19,6 @@ RUN    apt-get update        \
         lld-8                \
         llvm-8-tools         \
         maven                \
-        npm                \
         opam                 \
         openjdk-11-jdk       \
         pkg-config           \
