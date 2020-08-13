@@ -2,6 +2,8 @@
 
 ### Do Not Reuse Blindly!
 
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/3_lambda%2b%2b/lesson_4/lambda.k)
+
 [MOVIE [3'37"]](http://youtu.be/OXvtklaSaSQ)
 
 It may be tempting to base your decision to reuse an existing semantics of
@@ -95,3 +97,5 @@ In the next lesson we fix the environment-based semantics of `callcc` by having
 `cc` also wrap an environment, besides a computation.  We will also give a more
 direct semantics to recursion, based on environments instead of fixed-point
 combinators.
+
+Go to [Lesson 5, LAMBDA++: More Semantic Computation Items](../lesson_5/README.md).

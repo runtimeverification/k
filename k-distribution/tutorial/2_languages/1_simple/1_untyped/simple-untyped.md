@@ -2,8 +2,9 @@
 copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
 ---
 
-SIMPLE — Untyped
-================
+# SIMPLE — Untyped
+
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/2_languages/1_simple/1_untyped/simple-untyped.k)
 
 Author: Grigore Roșu (grosu@illinois.edu)  
 Organization: University of Illinois at Urbana-Champaign
@@ -1177,3 +1178,6 @@ IMP++ tutorial for what the transition option means how to use it.
 ```k
 endmodule
 ```
+
+Go to [Lesson 2, SIMPLE typed static](../2_typed/1_static/simple-typed-static.md)
+

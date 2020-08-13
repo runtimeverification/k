@@ -2,6 +2,8 @@
 
 ### Module Importing, Rules, Variables
 
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/1_lambda/lesson_2/lambda.k)
+
 [MOVIE [4'03"]](http://youtu.be/NDXgYfHG6R4)
 
 We here learn how to include a predefined module (SUBSTITUTION), how to
@@ -81,3 +83,5 @@ heating/cooling rules, etc., as discussed in the next lessons.
 
 The next lesson will show how to add LAMBDA the desired evaluation strategies
 using strictness attributes.
+
+Go to [Lesson 3, LAMBDA: Evaluation Strategies using Strictness](../lesson_3/README.md)

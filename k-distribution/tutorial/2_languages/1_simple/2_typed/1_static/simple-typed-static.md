@@ -2,8 +2,9 @@
 copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
 ---
 
-SIMPLE — Typed — Static
-=======================
+# SIMPLE — Typed — Static
+
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/2_languages/1_simple/2_typed/1_static/simple-typed-static.k)
 
 Author: Grigore Roșu (grosu@illinois.edu)  
 Organization: University of Illinois at Urbana-Champaign
@@ -658,3 +659,6 @@ The function `getTypes` is the same as in SIMPLE typed dynamic.
 
 endmodule
 ```
+
+Go to [Lesson 3, SIMPLE typed dynamic](../2_dynamic/simple-typed-dynamic.md)
+

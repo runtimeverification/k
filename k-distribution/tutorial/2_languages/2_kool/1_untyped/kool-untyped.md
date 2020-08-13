@@ -1,8 +1,10 @@
 ---
 copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
 ---
-KOOL — Untyped
-==============
+
+# KOOL — Untyped
+
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/2_languages/2_kool/1_untyped/kool-untyped.k)
 
 Author: Grigore Roșu (grosu@illinois.edu)  
 Organization: University of Illinois at Urbana-Champaign
@@ -1062,3 +1064,6 @@ starting with the most concrete class and going up in the hierarchy.
 
 endmodule
 ```
+
+Go to [Lesson 2, KOOL typed dynamic](../2_typed/1_dynamic/kool-typed-dynamic.md).  
+

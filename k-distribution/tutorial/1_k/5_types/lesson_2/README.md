@@ -2,6 +2,8 @@
 
 ### Substitution-Based Higher-Order Type Systems
 
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/5_types/lesson_2/lambda.k)
+
 [MOVIE [6'52"]](http://youtu.be/7P2QtR9jM2o)
 
 In this lesson you learn how to define a substitution-based type system for
@@ -76,3 +78,6 @@ variable declarations, and then type check them using `krun`.
 
 In the next lesson we will discuss an environment-based type system
 for LAMBDA.
+
+Go to [Lesson 3, Type Systems: Environment-Based Higher-Order Type Systems](../lesson_3/README.md).
+

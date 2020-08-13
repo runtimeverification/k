@@ -2,10 +2,10 @@
 
 ### A Naive Environment-Based Type Inferencer
 
-[MOVIE []]()
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/5_types/lesson_5/lambda.k)
 
 In this lesson you learn how to define a naive environment-based type
-inferencer for a higher-order language.  Specifically, we take the
+inferencer for a higher-order language. Specifically, we take the
 substitution-based type inferencer for LAMBDA defined in Lesson 4 and
 turn it into an environment-based one.
 
@@ -14,7 +14,7 @@ checker for LAMBDA based on the substitution-based one in Lesson 2,
 that the transition from a substitution-based definition to an
 environment-based one was quite systematic and mechanical: each
 substitution occurrence `E[T/X]` is replaced by `E`, but at the same time
-the variable `X` is bound to type `T` in the type environment.  One benefit
+the variable `X` is bound to type `T` in the type environment. One benefit
 of using type environments instead of substitution is that we replace
 a linear complexity operation (the substitution) with a constant
 complexity one (the variable lookup).
@@ -31,8 +31,8 @@ the substitution-based one, except, of course, that the resulting
 configurations will contain a `<tenv/>` cell now.
 
 As sanity check, let us consider two more LAMBDA programs that test
-the static scoping nature of the inferencer.  We do that because
-faulty environment-based definitions often have this problem.  The
+the static scoping nature of the inferencer. We do that because
+faulty environment-based definitions often have this problem. The
 program
 
     let x = 1
@@ -40,7 +40,7 @@ program
        in let x = true
           in f 3
 
-should type to `int`, not to `bool`, and so it does.  Similarly, the
+should type to `int`, not to `bool`, and so it does. Similarly, the
 program
 
     let y = 0
@@ -53,6 +53,8 @@ program
 should also type to `int`, not `bool`, and so it does, too.
 
 The type inferencer defined in this lesson has the same limitations,
-in terms of polymorphism, as the one in Lesson 4.  In the next
+in terms of polymorphism, as the one in Lesson 4. In the next
 lesson we will see how it can be parallelized, and in further lessons
 how to make it polymorphic.
+
+Go to [Lesson 6, Type Systems: Parallel Type Checkers/Inferencers](../lesson_6/README.md).

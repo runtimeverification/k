@@ -2,15 +2,15 @@
 
 ### A Naive Substitution-based Polymorphic Type Inferencer
 
-[MOVIE []]()
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/5_types/lesson_7/lambda.k)
 
 In this lesson you learn how little it takes to turn a naive monomorphic
 type inferencer into a naive polymorphic one, basically only changing
-a few characters.  In terms of the K framework, you will learn that
+a few characters. In terms of the K framework, you will learn that
 you can have complex combinations of substitutions in K, both over
 expressions and over types.
 
-Let us start directly with the change.  All we have to do is to take
+Let us start directly with the change. All we have to do is to take
 the LAMBDA type inferencer in Lesson 4 and only change the macro
 
     rule let X = E in E' => (lambda X . E') E  [macro]
@@ -20,15 +20,15 @@ as follows:
     rule let X = E in E' => E'[E/X]  [macro]
 
 In other words, we are inlining the beta-reduction rule of
-lambda-calculus within the original rule.  In terms of typing,
+lambda-calculus within the original rule. In terms of typing,
 the above forces the type inferencer to type `E` in place for each
-occurrence of `X` in `E'`.  Unlike in the first rule, where `X` had to get
+occurrence of `X` in `E'`. Unlike in the first rule, where `X` had to get
 one type only which satisfied the constrains of all `X`'s occurrences in
 `E'`, we now never associate any type to `X` anymore.
 
-Let us `kompile` and `krun` some examples.  Everything that worked with
+Let us `kompile` and `krun` some examples. Everything that worked with
 the type inferencer in Lesson 4 should still work here, although the
-types of some programs can now be more general.  For example, reconsider
+types of some programs can now be more general. For example, reconsider
 the `nested-lets.lambda` program
 
     let f1 = lambda x . x in
@@ -38,7 +38,7 @@ the `nested-lets.lambda` program
             let f5 = f4 in
               if (f5 true) then f2 else f3
 
-which was previously typed to `bool -> bool`.  With the new rule above,
+which was previously typed to `bool -> bool`. With the new rule above,
 the sequence of lets is iteratively eliminated and we end up with the
 program
 
@@ -89,16 +89,16 @@ substituted for `y` we get a well-typed expression which yields that `x`
 has the type `bool`, so the entire expression types to `bool -> bool`.
 
 The cheap type inferencer that we obtained above therefore works as
-expected.  However, it has two problems which justify a more advanced
-solution.  First, substitution is typically considered an elegant
+expected. However, it has two problems which justify a more advanced
+solution. First, substitution is typically considered an elegant
 mathematical instrument which is not too practical in implementations,
 so an implementation of this type inferencer will likely be based on
-type environments anyway.  Additionally, we mix two kinds of
+type environments anyway. Additionally, we mix two kinds of
 substitutions in this definition, one where we substitute types and
 another where we substitute expressions, which can only make things
-harder to implement efficiently.  Second, our naive substitution of `E`
+harder to implement efficiently. Second, our naive substitution of `E`
 for `X` in `E'` can yield an exponential explosion in size of the original
-program.  Consider, for example, the following classic example which
+program. Consider, for example, the following classic example which
 is known to generate a type whose size is exponential in the size of
 the program (and is thus used as an argument for why let-polymorphic
 type inference is exponential in the worst-case):
@@ -112,15 +112,18 @@ type inference is exponential in the worst-case):
               f04
 
 The particular instance of the pattern above generates a type which
-has 17 type variables!  The desugaring of each `let` doubles the size of
-the program and of its resulting type.  While such programs are little
+has 17 type variables! The desugaring of each `let` doubles the size of
+the program and of its resulting type. While such programs are little
 likely to appear in practice, it is often the case that functions can
 be quite complex and large while their type can be quite simple in the
 end, so we should simply avoid retyping each function each time it is
 used.
 
-This is precisely what we will do next.  Before we present the classic
+This is precisely what we will do next. Before we present the classic
 let-polymorphic type inferencer in Lesson 9, which is based on
 environments, we first quickly discuss in Lesson 8 an intermediate
 step, namely a naive environment-based variant of the inferencer
 defined here.
+
+Go to [Lesson 8, Type Systems: A Naive Environment-based Polymorphic Type Inferencer](../lesson_8/README.md).
+

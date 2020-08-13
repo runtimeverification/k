@@ -2,8 +2,9 @@
 copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
 ---
 
-LOGIK
-=====
+# LOGIK
+
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/2_languages/4_logik/basic/logik.k)
 
 Author: Grigore Roșu (grosu@illinois.edu)  
 Organization: University of Illinois at Urbana-Champaign

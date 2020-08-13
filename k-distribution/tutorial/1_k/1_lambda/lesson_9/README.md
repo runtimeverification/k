@@ -2,6 +2,8 @@
 
 ### A Complete and Documented K Definition
 
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/1_lambda/lesson_9/lambda.k)
+
 [MOVIE [6'07"]](http://youtu.be/-pHgLqNMKac)
 
 In this lesson you will learn how to add formal comments to your K definition,

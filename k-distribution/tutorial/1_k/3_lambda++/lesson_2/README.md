@@ -2,6 +2,8 @@
 
 ### Semantic (Non-Syntactic) Computation Items
 
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/3_lambda%2b%2b/lesson_2/lambda.k)
+
 [MOVIE [8'02"]](http://youtu.be/BYhQQW6swfc)
 
 In this lesson we start another semantic definition of LAMBDA++, which
@@ -174,3 +176,6 @@ program `omega.lambda` should still loop.
 
 Although we completely changed the definitional style of LAMBDA, the semantics
 of the other constructs do not need to change, as seen in the next lesson.
+
+
+Go to [Lesson 3, LAMBDA++: Reusing Existing Semantics](../lesson_3/README.md).

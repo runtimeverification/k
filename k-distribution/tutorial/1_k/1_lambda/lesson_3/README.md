@@ -2,6 +2,8 @@
 
 ### Evaluation Strategies using Strictness
 
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/1_lambda/lesson_3/lambda.k)
+
 [MOVIE [2'20"]](http://youtu.be/aul1x6bd1YM)
 
 Here we learn how to use the K `strict` attribute to define desired evaluation
@@ -38,3 +40,5 @@ lambda-calculus.  While theoretically correct, our definition is not
 easy to use and disseminate.  In the next lessons we will learn how to
 generate formatted documentation for LAMBDA and how to extend LAMBDA
 in order to write human readable and interesting programs.
+
+Go to [Lesson 4, LAMBDA: Generating Documentation; Latex Attributes](../lesson_4/README.md).

@@ -2,12 +2,12 @@
 
 ### A Naive Environment-based Polymorphic Type Inferencer
 
-[MOVIE []]()
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/5_types/lesson_8/lambda.k)
 
 In this short lesson we discuss how to quickly turn a naive
 environment-based monomorphic type inferencer into a naive let-polymorphic
-one.  Like in the previous lesson, we only need to change a few
-characters.  In terms of the K framework, you will learn how to have
+one. Like in the previous lesson, we only need to change a few
+characters. In terms of the K framework, you will learn how to have
 both environments and substitution in the same definition.
 
 Like in the previous lesson, all we have to do is to take the LAMBDA
@@ -27,7 +27,7 @@ substitution module at the top and also import SUBSTITUTION in the
 current module, besides the already existing UNIFICATION.
 
 Everything which worked with the type inferencer in Lesson 7 should
-also work now.  Let us only try the exponential type example,
+also work now. Let us only try the exponential type example,
 
     let f00 = lambda x . lambda y . x in
       let f01 = lambda x . f00 (f00 x) in
@@ -42,10 +42,13 @@ So the only difference between this type inferencer and the one in
 Lesson 7 is that substitution is only used for LAMBDA-to-LAMBDA
 transformations, but not for infusing types within LAMBDA programs.
 Thus, the syntax of LAMBDA programs is preserved intact, which some
-may prefer.  Nevertheless, this type inferencer is still expensive and
+may prefer. Nevertheless, this type inferencer is still expensive and
 wasteful, because the let-bound expression is typed over and over
 again in each place where the let-bound variable occurs.
 
 In the next lesson we will discuss a type inferencer based on the
 classic Damas-Hindley-Milner type system, which maximizes the reuse of
 typing work by means of parametric types.
+
+Go to [Lesson 9, Type Systems: Let-Polymorphic Type Inferencer (Damas-Hindley-Milner)](../lesson_9/README.md).
+

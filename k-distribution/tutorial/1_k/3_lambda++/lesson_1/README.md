@@ -2,6 +2,8 @@
 
 ### Abrupt Changes of Control
 
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/3_lambda%2b%2b/lesson_1/lambda.k)
+
 [MOVIE [6'28"]](http://youtu.be/UZ9iaus024g)
 
 Here we add *call-with-current-continuation* (`callcc`) to the definition of
@@ -116,3 +118,7 @@ in the next lesson we take a fresh look at LAMBDA and define it using
 an environment-based style, which avoids the complexity of substitution
 (e.g., having to deal with variable capture) and is closer in spirit to how
 functional languages are implemented.
+
+
+Go to [Lesson 2, LAMBDA++: Semantic (Non-Syntactic) Computation Items](../lesson_2/README.md).
+

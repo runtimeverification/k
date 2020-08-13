@@ -2,6 +2,8 @@
 
 ### Selective Strictness; Anonymous Variables
 
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/1_lambda/lesson_6/lambda.k)
+
 [MOVIE [2'14"]](http://youtu.be/IreP6DFPWdk)
 
 We here show how to define selective strictness of language constructs,
@@ -45,3 +47,5 @@ division-by-zero.
 In the next lesson we will introduce two new language constructs, called
 `let` and `letrec` and conventionally found in functional programming
 languages, which will allow us to already write interesting LAMBDA programs.
+
+Go to [Lesson 7, LAMBDA: Derived Constructs; Extending Predefined Syntax](../lesson_7/README.md).

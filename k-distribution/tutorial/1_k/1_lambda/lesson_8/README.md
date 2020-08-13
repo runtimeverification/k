@@ -2,6 +2,8 @@
 
 ### Multiple Binding Constructs
 
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/1_lambda/lesson_8/lambda.k)
+
 [MOVIE [2'40"]](http://youtu.be/Ox4uXDpcY64)
 
 Here we learn how multiple language constructs that bind variables can
@@ -59,3 +61,5 @@ We have defined our first programming language in K, which allows us to
 write interesting functional programs.  In the next lesson we will learn how
 to fully document our language definition, in order to disseminate it, to ship
 it to colleagues or friends, to publish it, to teach it, and so on.
+
+Go to [Lesson 9, LAMBDA: A Complete and Commented Definition](../lesson_9/README.md).

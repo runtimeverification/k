@@ -2,6 +2,8 @@
 
 ### Wrapping Up and Documenting LAMBDA++
 
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/3_lambda%2b%2b/lesson_6/lambda.k)
+
 [MOVIE [6'23"]](http://youtu.be/xfvx6Ss5PcA)
 
 In this lesson we wrap up and nicely document LAMBDA++.  In doing so, we also

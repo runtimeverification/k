@@ -2,6 +2,8 @@
 
 ### Generating Documentation; Latex Attributes
 
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/1_lambda/lesson_4/lambda.k)
+
 [MOVIE [3'13"]](http://youtu.be/ULXA4e_6-DY)
 
 In this lesson we learn how to generate formatted documentation from K
@@ -55,3 +57,6 @@ tool provides a few of these (and you can add more).
 
 In the next lesson we show how we can add builtin integers and Booleans to
 LAMBDA, so we can start to evaluate meaningful expressions.
+
+Go to [Lesson 5, LAMBDA: Adding Builtins; Side Conditions](../lesson_5/README.md).
+

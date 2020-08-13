@@ -2,6 +2,8 @@
 
 ### Reusing Existing Semantics
 
+[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/3_lambda%2b%2b/lesson_3/lambda.k)
+
 [MOVIE [3'21"]](http://youtu.be/tW4KRdgBIGo)
 
 In this lesson we will learn that, in some cases, we can reuse existing
@@ -26,3 +28,5 @@ an existing semantics of a language feature?  Well, I'm afraid the answer is:
 we don't.  In the next lesson we will learn how reuse can fail for quite subtle
 reasons, which are impossible to detect statically (and some non-experts may
 fail to even detect them at all).
+
+Go to [Lesson 4, LAMBDA++: Do Not Reuse Blindly!](../lesson_4/README.md).
