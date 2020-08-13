@@ -19,6 +19,7 @@ RUN    apt-get update        \
         lld-8                \
         llvm-8-tools         \
         maven                \
+        npm                \
         opam                 \
         openjdk-11-jdk       \
         pkg-config           \
@@ -26,6 +27,11 @@ RUN    apt-get update        \
         python3-graphviz     \
         z3                   \
         zlib1g-dev
+
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
+RUN    apt-get update               \
+    && apt-get upgrade --yes        \
+    && apt-get install --yes nodejs
 
 RUN curl -sSL https://get.haskellstack.org/ | sh
 
