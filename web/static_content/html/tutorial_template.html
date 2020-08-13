@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {{include/head.html}}
+  </head>
+
+  <body>
+    {{include/header.html}}
+
+    <div class="container-fluid">
+      <div class="row flex-xl-nowrap">
+        {{include/sidebar.html}}
+        <main
+          class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 bd-content"
+          role="main"
+        >
+          <h1 class="title"></h1>
+          <p>Go back to <a href="{{$ROOT}}/tutorials.html">K Tutorial.</a></p>
+          <p>
+            <a
+              href="https://github.com/kframework/k/tree/master/k-distribution/tutorial/1_k/1_lambda/lesson_1"
+              >All files</a
+            >
+            in the K tool distribution that were used in this movie.
+          </p>
+          <p>
+            <a id="try-it-online-link" target="_blank" rel="noopener">
+              <img src="{{$ROOT}}/assets/img/try-it-online.jpg" /> Open Full
+              Tool Page</a
+            >
+          </p>
+          <div class="introduction markdown-preview">
+            {{$MARKDOWN_HTML}}
+          </div>
+        </main>
+      </div>
+    </div>
+    {{include/footer.html}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Typist/1.2/typist.min.js"></script>
+    <script src="{{$ROOT}}/assets/js/index.js"></script>
+    <script>
+      $(function () {
+        // Set header
+        const headerSelector =
+          ".markdown-preview h1, .markdown-preview h2, .markdown-preview h3";
+        if ($(headerSelector).length) {
+          if ($(headerSelector)[0].innerText.match(/^copyright/)) {
+            $(headerSelector)[0].remove();
+          }
+          if ($(headerSelector).length) {
+            const title = $(headerSelector)[0].innerText;
+            $(".title").text(title);
+            $(headerSelector)[0].remove();
+          }
+        }
+
+        const anchorElements = document.querySelectorAll(".markdown-preview a");
+        for (let i = 0; i < anchorElements.length; i++) {
+          if (i > 3) {
+            break;
+          }
+          const anchorElement = anchorElements[i];
+          const href = anchorElement.getAttribute("href");
+          if (href.match(/^https?:\/\/youtu.be\//)) {
+            const match = href.match(/^https?:\/\/youtu.be\/(.+?)$/);
+            if (match && match[1]) {
+              const youtubeId = match[1];
+              const $iframe = $(`<iframe
+  width="560"
+  height="315"
+  src="https://www.youtube.com/embed/${youtubeId}"
+  frameborder="0"
+  allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+  allowfullscreen
+  style="max-width: 100%;"
+></iframe>`);
+              $(".markdown-preview a")[0].replaceWith($iframe[0]);
+            }
+          } else if (anchorElement.innerText.match(/Try it online/i)) {
+            anchorElement.remove();
+            document
+              .getElementById("try-it-online-link")
+              .setAttribute("href", href);
+          }
+        }
+        if (
+          !document.getElementById("try-it-online-link").getAttribute("href")
+        ) {
+          document.getElementById("try-it-online-link").remove();
+        }
+      });
+    </script>
+  </body>
+</html>

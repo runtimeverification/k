@@ -541,11 +541,17 @@ pipeline {
               git clone 'ssh://github.com/kframework/k.git' --depth 1 --no-single-branch --branch master --branch gh-pages
               cd k
               git checkout -B gh-pages origin/master
-              mv k-distribution/include/kframework/builtin ./
-              mv k-distribution/tutorial                   ./
-              rm -rf $(find . -maxdepth 1 -not -name '*.md' -a -not -name '_config.yml' -a -not -name .git -a -not -path . -a -not -name builtin -a -not -name tutorial)
+              cd web
+              npm install
+              npm run build
+              cd -
+              mv web/public_content ./
+              rm -rf $(find . -maxdepth 1 -not -name public_content)
+              cd public_content
+              mv * ../
+              rm -rf public_content
               git add ./
-              git commit -m 'gh-pages: remove unrelated content'
+              git commit -m 'gh-pages: Updated the website'
               git merge --strategy ours origin/gh-pages --allow-unrelated-histories
               git push origin gh-pages
             '''
