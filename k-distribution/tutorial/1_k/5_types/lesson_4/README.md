@@ -2,8 +2,6 @@
 
 ### A Naive Substitution-Based Type Inferencer
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/5_types/lesson_4/lambda.k)
-
 In this lesson you learn how to define a naive substitution-based type
 inferencer for a higher-order language, namely the LAMBDA language
 defined in Part 1 of the tutorial.

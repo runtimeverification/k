@@ -2,8 +2,6 @@
 
 ### Semantic (Non-Syntactic) Computation Items
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/3_lambda%2b%2b/lesson_2/lambda.k)
-
 [MOVIE [8'02"]](http://youtu.be/BYhQQW6swfc)
 
 In this lesson we start another semantic definition of LAMBDA++, which

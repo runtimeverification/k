@@ -103,17 +103,17 @@ Lead by providing a project vision and roadmap.
 - *[K Overview and SIMPLE Case Study](http://fsl.cs.uiuc.edu/index.php/K_Overview_and_SIMPLE_Case_Study)*  
   **Grigore Rosu** and [Traian Florin Serbanuta](./traian_florin_serbanuta.md)  
   ***K'11***, ENTCS 304, pp 3-56. 2014  
-  [PDF](http://fslweb.cs.illinois.edu/FSL/papers/2013/rosu-serbanuta-2013-k/rosu-serbanuta-2013-k-public.pdf), [K](http://kframework.org/), [DOI](http://dx.doi.org/10.1016/j.entcs.2014.05.002), [K'11](http://www.kframework.org/K11/), [BIB](http://fslweb.cs.illinois.edu/FSL/papers/2013/rosu-serbanuta-2013-k/rosu-serbanuta-2013-k-ref.bib)
+  [PDF](http://fslweb.cs.illinois.edu/FSL/papers/2013/rosu-serbanuta-2013-k/rosu-serbanuta-2013-k-public.pdf), [K](http://kframework.org/), [DOI](http://dx.doi.org/10.1016/j.entcs.2014.05.002), K'11, [BIB](http://fslweb.cs.illinois.edu/FSL/papers/2013/rosu-serbanuta-2013-k/rosu-serbanuta-2013-k-ref.bib)
   
 - *[Abstract Semantics for K Module Composition](http://fsl.cs.uiuc.edu/index.php/Abstract_Semantics_for_K_Module_Composition)*  
   [Codruta Girlea](http://fsl.cs.illinois.edu/index.php/Codruta_Girlea?action=render) and **Grigore Rosu**  
   ***K'11***, ENTCS 304, pp 127-149. 2014  
-  [PDF](http://fslweb.cs.illinois.edu/FSL/papers/2013/girlea-rosu-2013-k/girlea-rosu-2013-k-public.pdf), [K](http://kframework.org/), [DOI](http://dx.doi.org/10.1016/j.entcs.2014.05.007), [K'11](http://www.kframework.org/K11/), [BIB](http://fslweb.cs.illinois.edu/FSL/papers/2013/girlea-rosu-2013-k/girlea-rosu-2013-k-ref.bib)
+  [PDF](http://fslweb.cs.illinois.edu/FSL/papers/2013/girlea-rosu-2013-k/girlea-rosu-2013-k-public.pdf), [K](http://kframework.org/), [DOI](http://dx.doi.org/10.1016/j.entcs.2014.05.007), K'11, [BIB](http://fslweb.cs.illinois.edu/FSL/papers/2013/girlea-rosu-2013-k/girlea-rosu-2013-k-ref.bib)
   
 - *[The K Primer (version 3.3)](http://fsl.cs.uiuc.edu/index.php/The_K_Primer_(version_3.3))*  
   [Traian Florin Serbanuta](./traian_florin_serbanuta.md) and [Andrei Arusoaie](./andrei_arusoaie.md) and [David Lazar](https://davidlazar.org/) and [Chucky Ellison](./chucky_ellison.md) and [Dorel Lucanu](./dorel_lucanu.md) and **Grigore Rosu**  
   ***K'11***, ENTCS 304, pp 57-80. 2014  
-  [PDF](http://fslweb.cs.illinois.edu/FSL/papers/2013/k-primer-2013-v32/k-primer-2013-v32-public.pdf), [K](http://kframework.org/), [DOI](http://dx.doi.org/10.1016/j.entcs.2014.05.003), [K'11](http://www.kframework.org/K11/), [BIB](http://fslweb.cs.illinois.edu/FSL/papers/2013/k-primer-2013-v32/k-primer-2013-v32-ref.bib)
+  [PDF](http://fslweb.cs.illinois.edu/FSL/papers/2013/k-primer-2013-v32/k-primer-2013-v32-public.pdf), [K](http://kframework.org/), [DOI](http://dx.doi.org/10.1016/j.entcs.2014.05.003), K'11, [BIB](http://fslweb.cs.illinois.edu/FSL/papers/2013/k-primer-2013-v32/k-primer-2013-v32-ref.bib)
   
 - *[Matching Logic: A Logic for Structural Reasoning](http://fsl.cs.uiuc.edu/index.php/Matching_Logic:_A_Logic_for_Structural_Reasoning)*  
   **Grigore Rosu**  

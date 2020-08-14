@@ -2,8 +2,6 @@
 
 ### Deleting, Saving and Restoring Cell Contents
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/4_imp%2b%2b/lesson_5/imp.k)
-
 [MOVIE [04'30"]](http://youtu.be/Hr1yfcnee_c)
 
 In this lesson we will see how easily we can delete, save and/or restore

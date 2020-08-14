@@ -2,8 +2,6 @@
 
 ### Let-Polymorphic Type Inferencer (Damas-Hindley-Milner)
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/5_types/lesson_9/lambda.k)
-
 In this lesson we discuss a type inferencer based on what we call today
 _the Damas-Hindley-Milner type system_, which is at the core of many
 modern functional programming languages. The first variant of it was

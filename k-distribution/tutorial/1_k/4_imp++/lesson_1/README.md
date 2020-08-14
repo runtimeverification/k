@@ -2,8 +2,6 @@
 
 ### Extending/Changing an Existing Language Syntax
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/4_imp%2b%2b/lesson_1/imp.k)
-
 [MOVIE [07'47"]](http://youtu.be/hWqJ8k9NNp8)
 
 Here we learn how to extend the syntax of an existing language, both with

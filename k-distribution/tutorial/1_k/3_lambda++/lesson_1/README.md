@@ -2,8 +2,6 @@
 
 ### Abrupt Changes of Control
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/3_lambda%2b%2b/lesson_1/lambda.k)
-
 [MOVIE [6'28"]](http://youtu.be/UZ9iaus024g)
 
 Here we add *call-with-current-continuation* (`callcc`) to the definition of

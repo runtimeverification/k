@@ -4,8 +4,6 @@ copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
 
 # KOOL — Typed — Dynamic
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic.k)
-
 Author: Grigore Roșu (grosu@illinois.edu)  
 Organization: University of Illinois at Urbana-Champaign
 

@@ -2,8 +2,6 @@
 
 ### A Naive Environment-Based Type Inferencer
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/5_types/lesson_5/lambda.k)
-
 In this lesson you learn how to define a naive environment-based type
 inferencer for a higher-order language. Specifically, we take the
 substitution-based type inferencer for LAMBDA defined in Lesson 4 and

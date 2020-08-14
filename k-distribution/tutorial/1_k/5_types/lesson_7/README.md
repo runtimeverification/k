@@ -2,8 +2,6 @@
 
 ### A Naive Substitution-based Polymorphic Type Inferencer
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/5_types/lesson_7/lambda.k)
-
 In this lesson you learn how little it takes to turn a naive monomorphic
 type inferencer into a naive polymorphic one, basically only changing
 a few characters. In terms of the K framework, you will learn that

@@ -2,8 +2,6 @@
 
 ### Do Not Reuse Blindly!
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/3_lambda%2b%2b/lesson_4/lambda.k)
-
 [MOVIE [3'37"]](http://youtu.be/OXvtklaSaSQ)
 
 It may be tempting to base your decision to reuse an existing semantics of

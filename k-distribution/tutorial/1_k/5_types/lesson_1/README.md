@@ -2,8 +2,6 @@
 
 ### Imperative, Environment-Based Type Systems
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/5_types/lesson_1/imp.k)
-
 [MOVIE [10'11"]](http://youtu.be/WyUxdo7GhtE)
 
 In this lesson you learn how to define a type system for an imperative

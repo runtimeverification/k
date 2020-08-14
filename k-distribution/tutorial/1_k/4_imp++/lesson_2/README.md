@@ -2,8 +2,6 @@
 
 ### Configuration Refinement; Freshness
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/4_imp%2b%2b/lesson_2/imp.k)
-
 [MOVIE [04'06"]](http://youtu.be/f-qrqs8cMcU)
 
 To prepare for the semantics of threads and local variables, in this lesson we

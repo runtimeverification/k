@@ -2,8 +2,6 @@
 
 ### Derived Constructs, Extending Predefined Syntax
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/1_lambda/lesson_7/lambda.k)
-
 [MOVIE [5'10"]](http://youtu.be/qZWiBaN7zrw)
 
 In this lesson we will learn how to define derived language constructs, that

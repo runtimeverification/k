@@ -2,8 +2,6 @@
 
 ### Module Importing, Rules, Variables
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/1_lambda/lesson_2/lambda.k)
-
 [MOVIE [4'03"]](http://youtu.be/NDXgYfHG6R4)
 
 We here learn how to include a predefined module (SUBSTITUTION), how to

@@ -4,8 +4,6 @@ copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
 
 # FUN — Untyped — Environment
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/2_languages/3_fun/1_untyped/1_environment/fun-untyped.k)
-
 Author: Grigore Roșu (grosu@illinois.edu)  
 Organization: University of Illinois at Urbana-Champaign
 

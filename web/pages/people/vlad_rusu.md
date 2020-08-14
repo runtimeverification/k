@@ -13,4 +13,4 @@
 - *[K Semantics for OCL — a Proposal for a Formal Definition for OCL ](http://fsl.cs.uiuc.edu/index.php/K_Semantics_for_OCL_%E2%80%94_a_Proposal_for_a_Formal_Definition_for_OCL)*  
   [Vlad Rusu](http://fsl.cs.uiuc.edu/index.php/Vlad_Rusu) and [Dorel Lucanu](http://fsl.cs.uiuc.edu/index.php/Dorel_Lucanu)  
   ***K'11*** . 2011. To appear
-  [PDF](https://fmse.info.uaic.ro/publications/getfile/74/pdf/), [Slides (PDF)](http://fmse.info.uaic.ro/fileman/getpubpubfile/52/), [K'11](http://k-framework.org/K11), [BIB](http://fsl.cs.uiuc.edu/pubs/rusu-lucanu-2011-k.bib.txt)
+  [PDF](https://fmse.info.uaic.ro/publications/getfile/74/pdf/), [Slides (PDF)](http://fmse.info.uaic.ro/fileman/getpubpubfile/52/), K'11, [BIB](http://fsl.cs.uiuc.edu/pubs/rusu-lucanu-2011-k.bib.txt)

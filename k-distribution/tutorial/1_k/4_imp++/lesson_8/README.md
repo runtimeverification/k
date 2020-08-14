@@ -2,8 +2,6 @@
 
 ### Wrapping up Larger Languages
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/4_imp%2b%2b/lesson_8/imp.k)
-
 [MOVIE [06'26"]](http://youtu.be/QV1AGagktzk)
 
 In this lesson we wrap up IMP++'s semantics and also generate its poster.

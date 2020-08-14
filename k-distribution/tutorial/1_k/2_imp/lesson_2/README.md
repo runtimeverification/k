@@ -2,8 +2,6 @@
 
 ### Defining a Configuration
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/2_imp/lesson_2/imp.k)
-
 [MOVIE [04'21"]](http://youtu.be/jkwLyGdt70U)
 
 Here we learn how to define a configuration in K. We also learn how to

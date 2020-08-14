@@ -2,8 +2,6 @@
 
 ### Adding Builtins; Side Conditions
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/1_lambda/lesson_5/lambda.k)
-
 [MOVIE [4'52"]](http://youtu.be/T1aI04q3l9U)
 
 We have already added the builtin identifiers (sort `Id`) to LAMBDA expressions,

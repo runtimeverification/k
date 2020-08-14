@@ -17,13 +17,13 @@ Here are the most relevant publications to learn about K and what you can do wit
 - An overview of K and a dynamic and a static K semantics of an imperative language.  
    _[K Overview and SIMPLE Case Study](http://fsl.cs.uiuc.edu/index.php/K_Overview_and_SIMPLE_Case_Study)_ [Grigore Rosu](./people/grigore_rosu.md) and [Traian Florin Serbanuta](./people/traian_florin_serbanuta.md)  
   **_K'11_**, ENTCS 304, pp 3-56. 2014  
-  [PDF](http://fslweb.cs.illinois.edu/FSL/papers/2013/rosu-serbanuta-2013-k/rosu-serbanuta-2013-k-public.pdf), [K](http://kframework.org/), [DOI](http://dx.doi.org/10.1016/j.entcs.2014.05.002), [K'11](http://www.kframework.org/K11/), [BIB](http://fslweb.cs.illinois.edu/FSL/papers/2013/rosu-serbanuta-2013-k/rosu-serbanuta-2013-k-ref.bib)
+  [PDF](http://fslweb.cs.illinois.edu/FSL/papers/2013/rosu-serbanuta-2013-k/rosu-serbanuta-2013-k-public.pdf), [K](http://kframework.org/), [DOI](http://dx.doi.org/10.1016/j.entcs.2014.05.002), K'11, [BIB](http://fslweb.cs.illinois.edu/FSL/papers/2013/rosu-serbanuta-2013-k/rosu-serbanuta-2013-k-ref.bib)
 
 - A brief introduction to the current K tool:  
   _[The K Primer (version 3.3)](<http://fsl.cs.uiuc.edu/index.php/The_K_Primer_(version\*3.3)>)_  
   [Traian Florin Serbanuta](./people/traian_florin_serbanuta.md) and [Andrei Arusoaie](./people/andrei_arusoaie.md) and [David Lazar](https://davidlazar.org/) and [Chucky Ellison](./people/chucky_ellison.md) and [Dorel Lucanu](./people/dorel_lucanu.md) and [Grigore Rosu](./people/grigore_rosu.md)
   _**K'11**_, ENTCS 304, pp 57-80. 2014  
-  [PDF](http://fslweb.cs.illinois.edu/FSL/papers/2013/k-primer-2013-v32/k-primer-2013-v32-public.pdf), [K](http://kframework.org/), [DOI](http://dx.doi.org/10.1016/j.entcs.2014.05.003), [K'11](http://www.kframework.org/K11/), [BIB](http://fslweb.cs.illinois.edu/FSL/papers/2013/k-primer-2013-v32/k-primer-2013-v32-ref.bib)
+  [PDF](http://fslweb.cs.illinois.edu/FSL/papers/2013/k-primer-2013-v32/k-primer-2013-v32-public.pdf), [K](http://kframework.org/), [DOI](http://dx.doi.org/10.1016/j.entcs.2014.05.003), K'11, [BIB](http://fslweb.cs.illinois.edu/FSL/papers/2013/k-primer-2013-v32/k-primer-2013-v32-ref.bib)
 
 - A non-trivial application of K, the most complete formal definition of C to date:  
   _[Defining the Undefinedness of C](http://fsl.cs.uiuc.edu/index.php/Defining_the_Undefinedness_of_C)_  
@@ -145,17 +145,17 @@ Here are all publications about K, in reverse chronological order.
 - _[K Overview and SIMPLE Case Study](http://fsl.cs.uiuc.edu/index.php/K_Overview_and_SIMPLE_Case_Study)_  
   [Grigore Rosu](./people/grigore_rosu.md) and [Traian Florin Serbanuta](./people/traian_florin_serbanuta.md)  
   **_K'11_**, ENTCS 304, pp 3-56. 2014  
-  [PDF](http://fslweb.cs.illinois.edu/FSL/papers/2013/rosu-serbanuta-2013-k/rosu-serbanuta-2013-k-public.pdf), [K](http://kframework.org/), [DOI](http://dx.doi.org/10.1016/j.entcs.2014.05.002), [K'11](http://www.kframework.org/K11/), [BIB](http://fslweb.cs.illinois.edu/FSL/papers/2013/rosu-serbanuta-2013-k/rosu-serbanuta-2013-k-ref.bib)
+  [PDF](http://fslweb.cs.illinois.edu/FSL/papers/2013/rosu-serbanuta-2013-k/rosu-serbanuta-2013-k-public.pdf), [K](http://kframework.org/), [DOI](http://dx.doi.org/10.1016/j.entcs.2014.05.002), K'11, [BIB](http://fslweb.cs.illinois.edu/FSL/papers/2013/rosu-serbanuta-2013-k/rosu-serbanuta-2013-k-ref.bib)
 
 - _[Abstract Semantics for K Module Composition](http://fsl.cs.uiuc.edu/index.php/Abstract_Semantics_for_K_Module_Composition)_  
   [Codruta Girlea](http://fsl.cs.illinois.edu/index.php/Codruta_Girlea?action=render) and [Grigore Rosu](./people/grigore_rosu.md)  
   **_K'11_**, ENTCS 304, pp 127-149. 2014  
-  [PDF](http://fslweb.cs.illinois.edu/FSL/papers/2013/girlea-rosu-2013-k/girlea-rosu-2013-k-public.pdf), [K](http://kframework.org/), [DOI](http://dx.doi.org/10.1016/j.entcs.2014.05.007), [K'11](http://www.kframework.org/K11/), [BIB](http://fslweb.cs.illinois.edu/FSL/papers/2013/girlea-rosu-2013-k/girlea-rosu-2013-k-ref.bib)
+  [PDF](http://fslweb.cs.illinois.edu/FSL/papers/2013/girlea-rosu-2013-k/girlea-rosu-2013-k-public.pdf), [K](http://kframework.org/), [DOI](http://dx.doi.org/10.1016/j.entcs.2014.05.007), K'11, [BIB](http://fslweb.cs.illinois.edu/FSL/papers/2013/girlea-rosu-2013-k/girlea-rosu-2013-k-ref.bib)
 
 - _[The K Primer (version 3.3)](<http://fsl.cs.uiuc.edu/index.php/The_K_Primer_(version*3.3)>)*  
   [Traian Florin Serbanuta](./people/traian_florin_serbanuta.md) and [Andrei Arusoaie](./people/andrei_arusoaie.md) and [David Lazar](https://davidlazar.org/) and [Chucky Ellison](./people/chucky_ellison.md) and [Dorel Lucanu](./people/dorel_lucanu.md) and [Grigore Rosu](./people/grigore_rosu.md)  
   **_K'11_**, ENTCS 304, pp 57-80. 2014  
-  [PDF](http://fslweb.cs.illinois.edu/FSL/papers/2013/k-primer-2013-v32/k-primer-2013-v32-public.pdf), [K](http://kframework.org/), [DOI](http://dx.doi.org/10.1016/j.entcs.2014.05.003), [K'11](http://www.kframework.org/K11/), [BIB](http://fslweb.cs.illinois.edu/FSL/papers/2013/k-primer-2013-v32/k-primer-2013-v32-ref.bib)
+  [PDF](http://fslweb.cs.illinois.edu/FSL/papers/2013/k-primer-2013-v32/k-primer-2013-v32-public.pdf), [K](http://kframework.org/), [DOI](http://dx.doi.org/10.1016/j.entcs.2014.05.003), K'11, [BIB](http://fslweb.cs.illinois.edu/FSL/papers/2013/k-primer-2013-v32/k-primer-2013-v32-ref.bib)
 
 - _[Matching Logic: A Logic for Structural Reasoning](http://fsl.cs.uiuc.edu/index.php/Matching_Logic:_A_Logic_for_Structural_Reasoning)_  
   [Grigore Rosu](./people/grigore_rosu.md)  
@@ -325,12 +325,12 @@ Here are all publications about K, in reverse chronological order.
 - _[Context Transformers in the K Framework](http://fsl.cs.uiuc.edu/index.php/Context_Transformers_in_the_K_Framework)_  
   [Andrei Arusoaie](http://fsl.cs.uiuc.edu/index.php/Andrei_Arusoaie) and [Traian Florin Serbanuta](http://fsl.cs.uiuc.edu/index.php/Traian_Florin_Serbanuta)
   _**K'11**_. 2011. To appear  
-  [PDF](http://fmse.info.uaic.ro/publications/getfile/84/pdf/), [Slides (PDF)](http://fmse.info.uaic.ro/fileman/getpubpubfile/53/), [K'11](http://k-framework.org/K11), [BIB](http://fsl.cs.uiuc.edu/pubs/arusoaie-serbanuta-2011-k.bib.txt)
+  [PDF](http://fmse.info.uaic.ro/publications/getfile/84/pdf/), [Slides (PDF)](http://fmse.info.uaic.ro/fileman/getpubpubfile/53/), K'11, [BIB](http://fsl.cs.uiuc.edu/pubs/arusoaie-serbanuta-2011-k.bib.txt)
 
 - _[K Semantics for OCL — a Proposal for a Formal Definition for OCL](http://fsl.cs.illinois.edu/index.php/K_Semantics_for_OCL_%e2%80%94_a_Proposal_for_a_Formal_Definition_for_OCL)_  
   [Vlad Rusu](http://fsl.cs.uiuc.edu/index.php/Vlad_Rusu) and [Dorel Lucanu](http://fsl.cs.uiuc.edu/index.php/Dorel_Lucanu)  
   **_K'11_**. 2011. To appear  
-  [PDF](https://fmse.info.uaic.ro/publications/getfile/74/pdf/), [Slides (PDF)](http://fmse.info.uaic.ro/fileman/getpubpubfile/52/), [K'11](http://k-framework.org/K11), [BIB](http://fsl.cs.uiuc.edu/pubs/rusu-lucanu-2011-k.bib.txt)
+  [PDF](https://fmse.info.uaic.ro/publications/getfile/74/pdf/), [Slides (PDF)](http://fmse.info.uaic.ro/fileman/getpubpubfile/52/), K'11, [BIB](http://fsl.cs.uiuc.edu/pubs/rusu-lucanu-2011-k.bib.txt)
 
 - _[The Rewriting Logic Semantics Project: A Progress Report](http://fsl.cs.uiuc.edu/index.php/The_Rewriting_Logic_Semantics_Project:_A_Progress_Report)_  
   [Jose Meseguer](http://fsl.cs.uiuc.edu/index.php/Jose_Meseguer) and [Grigore Rosu](http://fsl.cs.uiuc.edu/index.php/Grigore_Rosu)

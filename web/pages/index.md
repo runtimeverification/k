@@ -33,7 +33,7 @@ call/cc.
 
 ## Learn K
 
-- Do the <a style="font-size:24px" href="./tutorials.md">K Tutorial!</a>
+- Do the <a style="font-size:24px" href="./k-distribution/tutorial.md">K Tutorial!</a>
 - Read some papers about K (click on Publications in the left tab).
 
 ## Links

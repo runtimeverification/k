@@ -29,4 +29,4 @@
 - *[Context Transformers in the K Framework](http://fsl.cs.uiuc.edu/index.php/Context_Transformers_in_the_K_Framework)*  
   [Andrei Arusoaie](http://fsl.cs.uiuc.edu/index.php/Andrei_Arusoaie) and [Traian Florin Serbanuta](http://fsl.cs.uiuc.edu/index.php/Traian_Florin_Serbanuta)  
   ***K'11***. 2011. To appear  
-  [PDF](http://fmse.info.uaic.ro/publications/getfile/84/pdf/), [Slides (PDF)](http://fmse.info.uaic.ro/fileman/getpubpubfile/53/), [K'11](http://k-framework.org/K11), [BIB](http://fsl.cs.uiuc.edu/pubs/arusoaie-serbanuta-2011-k.bib.txt)
+  [PDF](http://fmse.info.uaic.ro/publications/getfile/84/pdf/), [Slides (PDF)](http://fmse.info.uaic.ro/fileman/getpubpubfile/53/), K'11, [BIB](http://fsl.cs.uiuc.edu/pubs/arusoaie-serbanuta-2011-k.bib.txt)

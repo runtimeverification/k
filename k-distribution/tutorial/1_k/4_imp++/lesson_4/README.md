@@ -2,8 +2,6 @@
 
 ### Semantic Lists; Input/Output Streaming
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/4_imp%2b%2b/lesson_4/imp.k)
-
 [MOVIE [05'21"]](http://youtu.be/a0qxV1GFR5s)
 
 In this lesson we add semantics to the `read` and `print` IMP++ constructs.

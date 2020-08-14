@@ -2,8 +2,6 @@
 
 ### Parallel Type Checkers/Inferencers
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/5_types/lesson_6/lambda.k)
-
 In this lesson you learn how to define parallel type checkers or
 inferencers. For the sake of a choice, we will parallelize the one in
 the previous lesson, but the ideas are general. We are using the same

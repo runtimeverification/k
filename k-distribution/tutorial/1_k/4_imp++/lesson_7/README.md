@@ -2,8 +2,6 @@
 
 ### Everything Changes: Syntax, Configuration, Semantics
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/4_imp%2b%2b/lesson_7/imp.k)
-
 In this lesson we add thread joining, one of the simplest thread
 synchronization mechanisms. In doing so, we need to add unique ids
 to threads in the configuration, and to modify the syntax to allow `spawn`

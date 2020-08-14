@@ -2,8 +2,6 @@
 
 ### Tagging; Transition Kompilation Option
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/4_imp%2b%2b/lesson_3/imp.k)
-
 [MOVIE [06'56"]](http://youtu.be/uwCUfWt7n-o)
 
 In this lesson we add the semantics of variable increment. In doing so, we

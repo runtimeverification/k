@@ -15,19 +15,16 @@
           role="main"
         >
           <h1 class="title"></h1>
-          <p>Go back to <a href="{{$ROOT}}/tutorials.html">K Tutorial.</a></p>
+          <p>
+            Go back to
+            <a href="{{$ROOT}}/k-distribution/tutorial">K Tutorial.</a>
+          </p>
           <p>
             <a
               href="https://github.com/kframework/k/tree/master/k-distribution/tutorial/1_k/1_lambda/lesson_1"
               >All files</a
             >
             in the K tool distribution that were used in this movie.
-          </p>
-          <p>
-            <a id="try-it-online-link" target="_blank" rel="noopener">
-              <img src="{{$ROOT}}/assets/img/try-it-online.jpg" /> Open Full
-              Tool Page</a
-            >
           </p>
           <div class="introduction markdown-preview">
             {{$MARKDOWN_HTML}}
@@ -76,17 +73,7 @@
 ></iframe>`);
               $(".markdown-preview a")[0].replaceWith($iframe[0]);
             }
-          } else if (anchorElement.innerText.match(/Try it online/i)) {
-            anchorElement.remove();
-            document
-              .getElementById("try-it-online-link")
-              .setAttribute("href", href);
           }
-        }
-        if (
-          !document.getElementById("try-it-online-link").getAttribute("href")
-        ) {
-          document.getElementById("try-it-online-link").remove();
         }
       });
     </script>

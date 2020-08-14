@@ -76,15 +76,15 @@ function generatePagesFromMarkdownFiles(
       if (fs.statSync(path.resolve(dirPath, file)).isDirectory()) {
         helper(path.resolve(dirPath, file));
       } else if (file.endsWith(".md")) {
-        const targetFilePath = path
-          .resolve(
-            path.resolve(
-              outputDirectory,
-              path.relative(sourceDirectory, dirPath)
-            ),
-            file
-          )
-          .replace(/\.md$/, ".html");
+        const targetFilePath = path.resolve(
+          path.resolve(
+            outputDirectory,
+            path.relative(sourceDirectory, dirPath)
+          ),
+          file.match(/^(index|README)\.md$/i)
+            ? "index.html"
+            : `${file.replace(/\.md$/, "")}/index.html`
+        );
         const markdown = fs
           .readFileSync(path.resolve(dirPath, file))
           .toString("utf-8");
@@ -104,7 +104,7 @@ for (file in files) {
   generateOutputWebpage(fs.readFileSync(file).toString("utf-8"), files[file]);
 }
 
-fs.rmdirSync(path.join(__dirname, "./public_content/tutorial"), {
+fs.rmdirSync(path.join(__dirname, "./public_content/k-distribution"), {
   recursive: true,
 });
 const tutorialTemplate = fs
@@ -115,7 +115,7 @@ const pageTemplate = fs
   .toString("utf-8");
 generatePagesFromMarkdownFiles(
   path.resolve(__dirname, "../k-distribution/tutorial/"),
-  path.resolve(__dirname, "./public_content/tutorial/"),
+  path.resolve(__dirname, "./public_content/k-distribution/tutorial/"),
   tutorialTemplate
 );
 generatePagesFromMarkdownFiles(

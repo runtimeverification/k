@@ -2,8 +2,6 @@
 
 ### Environment-Based Higher-Order Type Systems
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/5_types/lesson_3/lambda.k)
-
 In this lesson you learn how to define an environment-based type system for
 a higher-order language, namely the LAMBDA language defined in Part 1 of the
 tutorial.

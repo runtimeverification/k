@@ -2,8 +2,6 @@
 
 ### Generating Documentation; Latex Attributes
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/1_lambda/lesson_4/lambda.k)
-
 [MOVIE [3'13"]](http://youtu.be/ULXA4e_6-DY)
 
 In this lesson we learn how to generate formatted documentation from K

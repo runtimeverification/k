@@ -2,8 +2,6 @@
 
 ### Completing and Documenting IMP
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/2_imp/lesson_5/imp.k)
-
 [MOVIE [03'45"]](http://youtu.be/w2t_Yx2VGVQ)
 
 We here learn no new concepts, but it is a good moment to take a break

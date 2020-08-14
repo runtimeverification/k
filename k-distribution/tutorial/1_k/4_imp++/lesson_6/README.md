@@ -2,8 +2,6 @@
 
 ### Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/4_imp%2b%2b/lesson_6/imp.k)
-
 [MOVIE [11'40"]](http://youtu.be/DpJPP3Qtqno)
 
 In this lesson we add dynamic thread creation and termination to IMP, and

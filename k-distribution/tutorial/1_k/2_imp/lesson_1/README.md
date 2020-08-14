@@ -2,8 +2,6 @@
 
 ### Defining a More Complex Syntax
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/2_imp/lesson_1/imp.k)
-
 [MOVIE [09'15"]](http://youtu.be/F39Ta1stiCM)
 
 Here we learn how to define a more complex language syntax than LAMBDA's,

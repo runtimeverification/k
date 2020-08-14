@@ -2,8 +2,6 @@
 
 ### Syntax Modules and Basic K Commands
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/1_lambda/lesson_1/lambda.k)
-
 [MOVIE [4'07"]](http://youtu.be/y5Tf1EZVj8E)
 
 Here we define our first K module, which contains the initial syntax of the

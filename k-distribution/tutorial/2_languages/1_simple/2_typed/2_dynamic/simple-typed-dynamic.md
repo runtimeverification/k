@@ -4,8 +4,6 @@ copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
 
 # SIMPLE — Typed — Dynamic
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic.k)
-
 Author: Grigore Roșu (grosu@illinois.edu)  
 Organization: University of Illinois at Urbana-Champaign
 

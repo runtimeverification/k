@@ -2,8 +2,6 @@
 
 ### More Semantic Computation Items
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/3_lambda%2b%2b/lesson_5/lambda.k)
-
 [MOVIE [5'19"]](http://youtu.be/dP3FW0kZN6k)
 
 In this lesson we see more examples of semantic (i.e., non-syntactic)

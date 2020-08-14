@@ -2,8 +2,6 @@
 
 ### Selective Strictness; Anonymous Variables
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/1_lambda/lesson_6/lambda.k)
-
 [MOVIE [2'14"]](http://youtu.be/IreP6DFPWdk)
 
 We here show how to define selective strictness of language constructs,

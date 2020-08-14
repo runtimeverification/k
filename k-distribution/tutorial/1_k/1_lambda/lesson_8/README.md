@@ -2,8 +2,6 @@
 
 ### Multiple Binding Constructs
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/1_lambda/lesson_8/lambda.k)
-
 [MOVIE [2'40"]](http://youtu.be/Ox4uXDpcY64)
 
 Here we learn how multiple language constructs that bind variables can

@@ -2,8 +2,6 @@
 
 ### Reusing Existing Semantics
 
-[Try it online](http://kframework.org/tool/run/?autoload=tutorial/1_k/3_lambda%2b%2b/lesson_3/lambda.k)
-
 [MOVIE [3'21"]](http://youtu.be/tW4KRdgBIGo)
 
 In this lesson we will learn that, in some cases, we can reuse existing
