@@ -10,7 +10,7 @@ Organization: University of Illinois at Urbana-Champaign
 Author: Traian Florin Șerbănuță (traian.serbanuta@unibuc.ro)  
 Organization: University of Bucharest
 
-### Abstract
+## Abstract
 
 This is the **K** dynamic semantics of the typed SIMPLE language.
 It is very similar to the semantics of the untyped SIMPLE, the
@@ -27,7 +27,7 @@ in the static semantics of the typed SIMPLE language.
 module SIMPLE-TYPED-DYNAMIC-SYNTAX
   imports DOMAINS-SYNTAX
 ```
-### Syntax
+## Syntax
 
 The syntax of typed SIMPLE extends that of untyped SIMPLE with support
 for declaring types to variables and functions.
@@ -40,7 +40,7 @@ constructs.
   syntax Id ::= "main" [token]
 ```
 
-### Types
+## Types
 
 ```k
   syntax Type ::= "void" | "int" | "bool" | "string"
@@ -50,7 +50,7 @@ constructs.
   syntax Types ::= List{Type,","}
 ```
 
-### Declarations
+## Declarations
 
 ```k
   syntax Param ::= Type Id
@@ -60,7 +60,7 @@ constructs.
                 | Type Id "(" Params ")" Block
 ```
 
-### Expressions
+## Expressions
 
 ```k
   syntax Exp ::= Int | Bool | String | Id
@@ -100,7 +100,7 @@ Like in the static semantics, there is no need for lists of identifiers
   syntax Vals ::= List{Val,","}
 ```
 
-### Statements
+## Statements
 
 ```k
   syntax Block ::= "{" "}"

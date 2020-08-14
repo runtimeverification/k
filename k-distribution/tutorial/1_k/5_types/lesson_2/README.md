@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2014-2019 K Team. All Rights Reserved. -->
 
-### Substitution-Based Higher-Order Type Systems
-
-[MOVIE [6'52"]](http://youtu.be/7P2QtR9jM2o)
+# Substitution-Based Higher-Order Type Systems
 
 In this lesson you learn how to define a substitution-based type system for
 a higher-order language, namely the LAMBDA language defined in Part 1 of the
@@ -78,4 +76,7 @@ In the next lesson we will discuss an environment-based type system
 for LAMBDA.
 
 Go to [Lesson 3, Type Systems: Environment-Based Higher-Order Type Systems](../lesson_3/README.md).
+
+[MOVIE (out of date) [6'52"]](http://youtu.be/7P2QtR9jM2o)
+
 

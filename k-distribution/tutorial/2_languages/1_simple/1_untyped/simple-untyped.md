@@ -11,7 +11,7 @@ Author: Traian Florin Șerbănuță (traian.serbanuta@unibuc.ro)
 Organization: University of Bucharest
 
 
-### Abstract
+## Abstract
 
 This is the **K** semantic definition of the untyped SIMPLE language.
 SIMPLE is intended to be a pedagogical and research language that captures
@@ -72,14 +72,14 @@ module SIMPLE-UNTYPED-SYNTAX
   imports DOMAINS-SYNTAX
 ```
 
-### Syntax
+## Syntax
 
 We start by defining the SIMPLE syntax.  The language constructs discussed
 above have the expected syntax and evaluation strategies.  Recall that in **K**
 we annotate the syntax with appropriate strictness attributes, thus giving
 each language construct the desired evaluation strategy.
 
-### Identifiers
+## Identifiers
 
 Recall from the **K** tutorial that identifiers are builtin and come under the
 syntactic category `Id`.  The special identifier for the function
@@ -97,7 +97,7 @@ concrete identifiers that play a special role in the semantics, like
   syntax Id ::= "main" [token]
 ```
 
-### Declarations
+## Declarations
 
 There are two types of declarations: for variables (including arrays) and
 for functions.  We are going to allow declarations of the form
@@ -109,7 +109,7 @@ productions below are defined shortly.
   syntax Decl ::= "var" Exps ";"
                 | "function" Id "(" Ids ")" Block
 ```
-### Expressions
+## Expressions
 
 The expression constructs below are standard.  Increment (`++`) takes
 an expression rather than a variable because it can also increment an array
@@ -185,7 +185,7 @@ the constructs above).
   syntax Ids ::= Bottoms
 ```
 
-### Statements
+## Statements
 
 Most of the statement constructs are standard for imperative languages.
 We syntactically distinguish between empty and non-empty blocks, because we
@@ -252,7 +252,7 @@ of syntactic mismatch.
 // With that, I could have also eliminated the empty block
 ```
 
-### Desugared Syntax
+## Desugared Syntax
 
 This part desugars some of SIMPLE's language constructs into core ones.
 We only want to give semantics to core constructs, so we get rid of the
@@ -279,7 +279,7 @@ module SIMPLE-UNTYPED
   imports DOMAINS
 ```
 
-### Basic Semantic Infrastructure
+## Basic Semantic Infrastructure
 
 Before one starts adding semantic rules to a **K** definition, one needs to
 define the basic semantic infrastructure consisting of definitions for
@@ -295,7 +295,7 @@ useful for language designers/semanticists to actually think of and design
 their configuration explicitly, so the current implementation of **K** requires
 one to define it.
 
-### Values
+## Values
 
 We here define the values of the language that the various fragments of
 programs evaluate to.  First, integers and Booleans are values.  As discussed,
@@ -326,7 +326,7 @@ with additional values) parser.  If writing the semantics directly on the **K**
 AST, using the associated labels instead of the syntactic constructs, then one
 would not need to include values in expressions.
 
-### Configuration
+## Configuration
 
 The **K** configuration of SIMPLE consists of a top level cell, `T`,
 holding a `threads` cell, a global environment map cell `genv`
@@ -397,12 +397,12 @@ to the **K** tool, as indicated by the `$PGM` variable, followed by the
                 </T>
 ```
 
-### Declarations and Initialization
+## Declarations and Initialization
 
 We start by defining the semantics of declarations (for variables,
 arrays and functions).
 
-### Variable Declaration
+## Variable Declaration
 
 The SIMPLE syntax was desugared above so that each variable is
 declared alone and its initialization is done as a separate statement.
@@ -447,7 +447,7 @@ structure.
        <nextLoc> L => L +Int 1 </nextLoc>
 ```
 
-### Array Declaration
+## Array Declaration
 
 The **K** semantics of the uni-dimensional array declaration is somehow similar
 to the above declaration of ordinary variables.  First, note the
@@ -509,7 +509,7 @@ propagated each time the expression is evaluated in the desugaring code (note
 that both the loop condition and the nested multi-dimensional declaration
 would need to evaluate the expressions given as array dimensions).
 
-### Function declaration
+## Function declaration
 
 Functions are evaluated to λ-abstractions and stored like any other
 values in the store.  A binding is added into the environment for the function
@@ -561,11 +561,11 @@ that the functions "see" each other, allowing for mutual recursion, etc.
        <genv> .Map => Env </genv>  [structural]
 ```
 
-### Expressions
+## Expressions
 
 We next define the **K** semantics of all the expression constructs.
 
-### Variable lookup
+## Variable lookup
 
 When a variable `X` is the first computational task, and `X` is bound to some
 location `L` in the environment, and `L` is mapped to some value `V` in the
@@ -578,7 +578,7 @@ store, then we rewrite `X` into `V`:
 Note that the rule above excludes reading `⊥`, because `⊥` is not
 a value and `V` is checked at runtime to be a value.
 
-### Variable/Array increment
+## Variable/Array increment
 
 This is tricky, because we want to allow both `++x` and `++a[5]`.
 Therefore, we need to extract the lvalue of the expression to increment.
@@ -595,7 +595,7 @@ integers.
        <store>... L |-> (I => I +Int 1) ...</store>  [increment]
 ```
 
-### Arithmetic operators
+## Arithmetic operators
 
 There is nothing special about the following rules.  They rewrite the
 language constructs to their library counterparts when their arguments
@@ -629,7 +629,7 @@ are short-circuited:
   rule false || E => E
 ```
 
-### Array lookup
+## Array lookup
 
 Untyped SIMPLE does not check array bounds (the dynamically typed version of
 it, in `examples/simple/typed/dynamic`, does check for array out of
@@ -652,7 +652,7 @@ and is defined at the end of the file.
     [structural, anywhere]
 ```
 
-### Size of an array
+## Size of an array
 
 The size of the array is stored in the array reference value, and the
 `sizeOf` construct was declared strict, so:
@@ -661,7 +661,7 @@ The size of the array is stored in the array reference value, and the
   rule sizeOf(array(_,N)) => N
 ```
 
-### Function call
+## Function call
 
 Function application was strict in both its arguments, so we can
 assume that both the function and its arguments are evaluated to
@@ -733,7 +733,7 @@ use the returned value in domain computation, like it happens when we
 call a function for its side effects (e.g., with a statement of the
 form `f(x);`), then the program does not get stuck.
 
-### Read
+## Read
 
 The `read()` expression construct simply evaluates to the next
 input value, at the same time discarding the input value from the
@@ -743,7 +743,7 @@ input value, at the same time discarding the input value from the
   rule <k> read() => I ...</k> <input> ListItem(I:Int) => .List ...</input>  [read]
 ```
 
-### Assignment
+## Assignment
 
 In SIMPLE, like in C, assignments are expression constructs and not statement
 constructs.  To make it a statement all one needs to do is to follow it by a
@@ -761,11 +761,11 @@ resulting location:
     [assignment]
 ```
 
-### Statements
+## Statements
 
 We next define the **K** semantics of statements.
 
-### Blocks
+## Blocks
 
 Empty blocks are simply discarded, as shown in the first rule below.
 For non-empty blocks, we schedule the enclosed statement but we have to
@@ -800,7 +800,7 @@ and efficiency (especially since rewrite engines have built-in techniques to
 lazily copy terms, by need, thus not creating unnecessary copies),
 so it is the one that we follow in general.
 
-### Sequential composition
+## Sequential composition
 
 Sequential composition is desugared into **K**'s builtin sequentialization
 operation (recall that, like in C, the semi-colon `;` is not a
@@ -833,7 +833,7 @@ of the semantics: e.g., it tells the parser to parse
 does not tell the rewrite engine to rewrite `(var x; x=0;) x=1;` to
 `var x; (x=0; x=1;)`.
 
-### Expression statements
+## Expression statements
 
 Expression statements are only used for their side effects, so their result
 value is simply discarded.  Common examples of expression statements are ones
@@ -842,7 +842,7 @@ of the form `++x;`, `x=e;`, `e1[e2]=e3;`, etc.
   rule _:Val; => .
 ```
 
-### Conditional
+## Conditional
 
 Since the conditional was declared with the `strict(1)` attribute, we
 can assume that its first argument will eventually be evaluated.  The rules
@@ -853,7 +853,7 @@ proceed (otherwise the rewriting process gets stuck).
   rule if (false) _ else S => S
 ```
 
-### While loop
+## While loop
 
 The simplest way to give the semantics of the while loop is by unrolling.
 Note, however, that its unrolling is only allowed when the while loop reaches
@@ -869,7 +869,7 @@ semantics, which would also involve the `control` cell.
   rule while (E) S => if (E) {S while(E)S}  [structural]
 ```
 
-### Print
+## Print
 
 The `print` statement was strict, so all its arguments are now
 evaluated (recall that `print` is variadic).  We append each of
@@ -881,7 +881,7 @@ its evaluated arguments to the output buffer, and discard the residual
   rule print(.Vals); => .  [structural]
 ```
 
-### Exceptions
+## Exceptions
 
 SIMPLE allows parametric exceptions, in that one can throw and catch a
 particular value.  The statement `try S₁ catch(X) S₂`
@@ -937,13 +937,13 @@ initialization, for binding `X` to `V`; and (2) the block construct for
 preventing `X` from shadowing variables in the original environment upon the
 completion of `S₂`.
 
-### Threads
+## Threads
 
 SIMPLE's threads can be created and terminated dynamically, and can
 synchronize by acquiring and releasing re-entrant locks and by rendezvous.
 We discuss the seven rules giving the semantics of these operations below.
 
-### Thread creation
+## Thread creation
 
 Threads can be created by any other threads using the `spawn S`
 construct.  The spawn expression construct evaluates to the unique identifier
@@ -965,7 +965,7 @@ configuration.  This is part of **K**'s configuration abstraction mechanism.
              ...</thread>)
 ```
 
-### Thread termination
+## Thread termination
 
 Dually to the above, when a thread terminates its assigned computation (the
 contents of its `k` cell) is empty, so the thread can be dissolved.
@@ -986,7 +986,7 @@ threads have terminated.
        <terminated>... .Set => SetItem(T) ...</terminated>
 ```
 
-### Thread joining
+## Thread joining
 
 Thread joining is now straightforward: all we need to do is to check whether
 the identifier of the thread to be joined is in the `terminated` cell.
@@ -997,7 +997,7 @@ continues normally; if not, then the joining thread gets stuck.
        <terminated>... SetItem(T) ...</terminated>
 ```
 
-### Acquire lock
+## Acquire lock
 
 There are two cases to distinguish when a thread attempts to acquire a lock
 (in SIMPLE any value can be used as a lock):  
@@ -1017,7 +1017,7 @@ by the two rules below:
        <holds>... V:Val |-> (N => N +Int 1) ...</holds>
 ```
 
-### Release lock
+## Release lock
 
 Similarly, there are two corresponding cases to distinguish when a thread
 releases a lock:  
@@ -1035,7 +1035,7 @@ so other threads can acquire it if they need to.
        <busy>... SetItem(V) => .Set ...</busy>
 ```
 
-### Rendezvous synchronization
+## Rendezvous synchronization
 
 In addition to synchronization through acquire and release of locks, SIMPLE
 also provides a construct for rendezvous synchronization.  A thread whose next
@@ -1056,12 +1056,12 @@ actual configuration of SIMPLE is to include each `k` cell in a
        <k> rendezvous V; => . ...</k>  [rendezvous]
 ```
 
-### Auxiliary declarations and operations
+## Auxiliary declarations and operations
 
 In this section we define all the auxiliary constructs used in the
 above semantics.
 
-### Making declarations
+## Making declarations
 
 The `mkDecls` auxiliary construct turns a list of identifiers
 and a list of values in a sequence of corresponding variable
@@ -1072,7 +1072,7 @@ declarations.
   rule mkDecls(.Ids,.Vals) => {}
 ```
 
-### Location lookup
+## Location lookup
 
 The operation below is straightforward.  Note that we tag it with the same
 `lookup` tag as the variable lookup rule defined above.  This way,
@@ -1083,7 +1083,7 @@ tag in the transition option of `kompile`.
   rule <k> lookup(L) => V ...</k> <store>... L |-> V:Val ...</store>  [lookup]
 ```
 
-### Environment recovery
+## Environment recovery
 
 We have already discussed the environment recovery auxiliary operation in the
 IMP++ tutorial:
@@ -1115,7 +1115,7 @@ contents of cell `cell` is discarded and gets replaced with `C`.  We
 did not add support for these special computation tasks in our current
 implementation of **K**, so we need to define them as above.
 
-### lvalue and loc
+## lvalue and loc
 
 For convenience in giving the semantics of constructs like the increment and
 the assignment, that we want to operate the same way on variables and on
@@ -1156,7 +1156,7 @@ corresponding store lookup operation.
   rule lvalue(lookup(L:Int) => loc(L))  [structural]
 ```
 
-### Initializing multiple locations
+## Initializing multiple locations
 
 The following operation initializes a sequence of locations with the same
 value:

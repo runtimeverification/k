@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2014-2019 K Team. All Rights Reserved. -->
 
-### Reusing Existing Semantics
-
-[MOVIE [3'21"]](http://youtu.be/tW4KRdgBIGo)
+# Reusing Existing Semantics
 
 In this lesson we will learn that, in some cases, we can reuse existing
 semantics of language features without having to make any change!
@@ -28,3 +26,5 @@ reasons, which are impossible to detect statically (and some non-experts may
 fail to even detect them at all).
 
 Go to [Lesson 4, LAMBDA++: Do Not Reuse Blindly!](../lesson_4/README.md).
+
+[MOVIE (out of date) [3'21"]](http://youtu.be/tW4KRdgBIGo)

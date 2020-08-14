@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2014-2019 K Team. All Rights Reserved. -->
 
-### More Semantic Computation Items
-
-[MOVIE [5'19"]](http://youtu.be/dP3FW0kZN6k)
+# More Semantic Computation Items
 
 In this lesson we see more examples of semantic (i.e., non-syntactic)
 computational items, and how useful they can be.  Specifically, we fix the
@@ -74,3 +72,5 @@ In the next lesson we wrap up the environment definition of LAMBDA++ and
 generate its documentation.
 
 Go to [Lesson 6, LAMBDA++: Wrapping Up and Documenting LAMBDA++](../lesson_6/README.md).
+
+[MOVIE (out of date) [5'19"]](http://youtu.be/dP3FW0kZN6k)

@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
 
-### Configuration Refinement; Freshness
-
-[MOVIE [04'06"]](http://youtu.be/f-qrqs8cMcU)
+# Configuration Refinement; Freshness
 
 To prepare for the semantics of threads and local variables, in this lesson we
 split the state cell into an environment and a store. The environment and
@@ -75,3 +73,5 @@ how that yields non-deterministic behaviors in programs and how to explore
 those behaviors using the K tool.
 
 Go to [Lesson 3, IMP++: Tagging; Superheat/Supercool Kompilation Options](../lesson_3/README.md).
+
+[MOVIE (out of date) [04'06"]](http://youtu.be/f-qrqs8cMcU)

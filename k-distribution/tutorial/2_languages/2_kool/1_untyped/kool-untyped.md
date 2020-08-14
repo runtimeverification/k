@@ -11,7 +11,7 @@ Author: Traian Florin Șerbănuță (traian.serbanuta@unibuc.ro)
 Organization: University of Bucharest
 
 
-### Abstract
+## Abstract
 
 This is the **K** semantic definition of the untyped KOOL language.  KOOL
 is aimed at being a pedagogical and research language that captures
@@ -144,7 +144,7 @@ module KOOL-UNTYPED-SYNTAX
   imports DOMAINS-SYNTAX
 ```
 
-### Syntax
+## Syntax
 
 The syntax of KOOL extends that of SIMPLE with object-oriented
 constructs.  We removed from the **K** annotated syntax of SIMPLE two
@@ -251,7 +251,7 @@ New desugaring rule
 endmodule
 ```
 
-### Semantics
+## Semantics
 
 We first discuss the new configuration of KOOL, which extends that of
 SIMPLE.  Then we include the semantics of the constructs borrowed from
@@ -267,7 +267,7 @@ module KOOL-UNTYPED
   imports DOMAINS
 ```
 
-### Configuration
+## Configuration
 
 KOOL removes one cell and adds two nested cells to the configuration
 of SIMPLE.  The cell which is removed is the one holding the global
@@ -345,7 +345,7 @@ discuss the new cells that are added to the configuration of SIMPLE.
                 </T>
 ```
 
-### Unchanged Semantics from untyped SIMPLE
+## Unchanged Semantics from untyped SIMPLE
 
 The semantics below is taken over from SIMPLE unchanged.
 The semantics of function declaration and invocation, including the
@@ -556,7 +556,7 @@ from SIMPLE unchanged.
        <k> rendezvous V; => . ...</k>  [rendezvous]
 ```
 
-### Unchanged auxiliary operations from untyped SIMPLE
+## Unchanged auxiliary operations from untyped SIMPLE
 
 ```k
   syntax Stmts ::= mkDecls(Ids,Vals)  [function]
@@ -594,14 +594,14 @@ from SIMPLE unchanged.
   rule N...M |-> K => N |-> K (N +Int 1)...M |-> K  when N <=Int M
 ```
 
-### Changes to the existing untyped SIMPLE semantics
+## Changes to the existing untyped SIMPLE semantics
 
 When we extend a language, sometimes we need to do more than just add
 new language constructs and semantics for them.  Sometimes we want to
 also extend the semantics of existing language constructs, in order to
 get more from them.
 
-### Program initialization
+## Program initialization
 
 In SIMPLE, once all the global declarations were processed, the
 function `main()` was invoked.  In KOOL, the global
@@ -627,7 +627,7 @@ execution of all the class' declarations (and also of its
 superclasses').
 
 
-### Object and method closures
+## Object and method closures
 
 Before we can define the semantics of method application (previously
 called function application in SIMPLE), we need to add two more values
@@ -648,7 +648,7 @@ the object environment stack (located in the object stored at the
 location specified as the second argument of `methodClosure`).
 
 
-### Method application
+## Method application
 
 KOOL has a complex mechanism to invoke methods, because it allows both
 dynamic method dispatch and methods as first-class-citizen values (the
@@ -679,7 +679,7 @@ with the unchanged semantics of SIMPLE above.
        </control>
 ```
 
-### Spawn
+## Spawn
 
 We want to extend the semantics of `spawn` to also share the
 current object environment with the child thread, in addition to the
@@ -702,9 +702,9 @@ environment.
              ...</thread>)
 ```
 
-### Semantics of the new KOOL constructs
+## Semantics of the new KOOL constructs
 
-### Class declaration
+## Class declaration
 
 Initially, the classes forming the program are moved into their
 corresponding cells:
@@ -718,7 +718,7 @@ corresponding cells:
        ...</classes>  [structural]
 ```
 
-### Method declaration
+## Method declaration
 
 Like in SIMPLE, method names are added to the environment and bound
 to their code.  However, unlike in SIMPLE where each function was
@@ -743,7 +743,7 @@ understand and reason about if one overuses these features.
        <nextLoc> L => L +Int 1 </nextLoc>
 ```
 
-### New
+## New
 
 The semantics of `new` consists of two actions: memory
 allocation for the new object and execution of the corresponding
@@ -834,7 +834,7 @@ the location is unnecessary and thus we delete it from the
        <store>... .Map => L |-> objectClosure(CC, ES) ...</store>
 ```
 
-### Self reference
+## Self reference
 
 The semantics of `this` is straightforward: evaluate to the
 current object.
@@ -843,7 +843,7 @@ current object.
        <crntObj> <crntClass> CC </crntClass> <envStack> ES </envStack> </crntObj>
 ```
 
-### Object member access
+## Object member access
 
 We can access an object member (field or method) either explicitly,
 using the construct `e.x`, or implicitly, using only the member
@@ -899,7 +899,7 @@ invocations see the entire object, as needed for dynamic method dispatch.
        <envStack> ListItem(envStackFrame(Class':Id,_)) => .List ...</envStack>
     when Class =/=K Class'  [structural]
 ```
-### Method invocation
+## Method invocation
 
 Unlike in SIMPLE, in KOOL application was declared strict only in its
 second argument.  That is because we want to ensure dynamic method
@@ -971,7 +971,7 @@ in which case the semantics of method application given above will
 apply.  Otherwise, the execution will get stuck.
 
 
-### Instance Of
+## Instance Of
 
 It searches the object environment for a layer corresponding to the
 desired class.  It returns `true` iff it can find the class,
@@ -988,7 +988,7 @@ argument does not evaluate to an object.
   rule objectClosure(_, .List) instanceOf _ => false
 ```
 
-### Cast
+## Cast
 
 In untyped KOOL, we prefer to not check the validity of casting.  In
 other words, any cast is allowed on any object, simply changing the
@@ -1001,13 +1001,13 @@ during the current execution is, or happens to be, available.
   rule (C) objectClosure(_ , EnvStack) => objectClosure(C ,EnvStack)
 ```
 
-### KOOL-specific auxiliary declarations and operations
+## KOOL-specific auxiliary declarations and operations
 
 Here we define all the auxiliary constructs used in the above
 KOOL-specific semantics (those used in the SIMPLE fragment
 have already been defined in a corresponding section above).
 
-### Objects as lvalues
+## Objects as lvalues
 
 The current machinery borrowed with the semantics of SIMPLE allows us
 to enrich the set of lvalues, this way allowing new means to assign
@@ -1037,7 +1037,7 @@ member's location based on the current class of the object.
     when Class =/=K Class'  [structural]
 ```
 
-### Lookup member
+## Lookup member
 
 It searches for the given member in the given environment stack,
 starting with the most concrete class and going up in the hierarchy.

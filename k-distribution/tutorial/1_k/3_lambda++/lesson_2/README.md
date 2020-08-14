@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2012-2019 K Team. All Rights Reserved. -->
 
-### Semantic (Non-Syntactic) Computation Items
-
-[MOVIE [8'02"]](http://youtu.be/BYhQQW6swfc)
+# Semantic (Non-Syntactic) Computation Items
 
 In this lesson we start another semantic definition of LAMBDA++, which
 follows a style based on environments instead of substitution.  In terms of
@@ -177,3 +175,5 @@ of the other constructs do not need to change, as seen in the next lesson.
 
 
 Go to [Lesson 3, LAMBDA++: Reusing Existing Semantics](../lesson_3/README.md).
+
+[MOVIE (out of date) [8'02"]](http://youtu.be/BYhQQW6swfc)

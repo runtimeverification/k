@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
 
-### Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2
-
-[MOVIE [11'40"]](http://youtu.be/DpJPP3Qtqno)
+# Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2
 
 In this lesson we add dynamic thread creation and termination to IMP, and
 while doing so we learn how to define and use configurations whose structure
@@ -212,3 +210,5 @@ We currently have no mechanism for thread synchronization. In the next lesson
 we add a `join` statement, which allows a thread to wait until another completes.
 
 Go to [Lesson 7, IMP++: Everything Changes: Syntax, Configuration, Semantics](../lesson_7/README.md).
+
+[MOVIE (out of date) [11'40"]](http://youtu.be/DpJPP3Qtqno)

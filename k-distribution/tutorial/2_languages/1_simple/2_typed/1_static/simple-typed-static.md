@@ -10,7 +10,7 @@ Organization: University of Illinois at Urbana-Champaign
 Author: Traian Florin Șerbănuță (traian.serbanuta@unibuc.ro)  
 Organization: University of Bucharest
 
-### Abstract
+## Abstract
 
 This is the **K** definition of the static semantics of the typed SIMPLE
 language, or in other words, a type system for the typed SIMPLE
@@ -117,7 +117,7 @@ module SIMPLE-TYPED-STATIC-SYNTAX
   imports DOMAINS-SYNTAX
 ```
 
-### Syntax
+## Syntax
 
 The syntax of typed SIMPLE extends that of untyped SIMPLE with support
 for declaring types to variables and functions.
@@ -125,7 +125,7 @@ for declaring types to variables and functions.
   syntax Id ::= "main" [token]
 ```
 
-### Types
+## Types
 
 Primitive, array and function types, as well as lists (or tuples) of types.
 The lists of types are useful for function arguments.
@@ -138,7 +138,7 @@ The lists of types are useful for function arguments.
   syntax Types ::= List{Type,","}
 ```
 
-### Declarations
+## Declarations
 
 Variable and function declarations have the expected syntax.  For variables,
 we basically just replaced the `var` keyword of untyped SIMPLE with a
@@ -153,7 +153,7 @@ type, we also introduce a new syntactic category for typed variables,
                 | Type Id "(" Params ")" Block
 ```
 
-### Expressions
+## Expressions
 
 The syntax of expressions is identical to that in untyped SIMPLE,
 except for the logical conjunction and disjunction which have
@@ -206,7 +206,7 @@ of parameters.
   syntax Exps ::= List{Exp,","}          [strict]
 ```
 
-### Statements
+## Statements
 
 The statements have the same syntax as in untyped SIMPLE, except for
 the exceptions, which now type their parameter.  Note that, unlike in untyped
@@ -241,7 +241,7 @@ they now reduce to the `stmt` type, which is a result.
   syntax Stmts ::= Stmt
                 |  Stmts Stmts                             [seqstrict, right]
 ```
-### Desugaring macros
+## Desugaring macros
 
 We use the same desugaring macros like in untyped SIMPLE, but, of
 course, including the types of the involved variables.
@@ -260,7 +260,7 @@ module SIMPLE-TYPED-STATIC
   imports DOMAINS
 ```
 
-### Static semantics
+## Static semantics
 
 Here we define the type system of SIMPLE.  Like concrete semantics,
 type systems defined in **K** are also executable.  However, **K** type
@@ -286,7 +286,7 @@ namely when all the global variables and functions that it needs have
 already been processed and made available in the global environment by
 the first phase task.
 
-### Extended syntax and results
+## Extended syntax and results
 
 The idea is to start with a configuration holding the program to type
 in one of its cells, then apply rewrite rules on it mixing types and
@@ -320,7 +320,7 @@ types are results (same like we did in the IMP++ tutorial).
                    | Types    //TODO: remove this, eventually
 ```
 
-### Configuration
+## Configuration
 
 The configuration of our type system consists of a `tasks` cell
 holding various typing `task` cells, and a global type environment.
@@ -347,7 +347,7 @@ subcells.
                 </T>
 ```
 
-### Variable declarations
+## Variable declarations
 
 Variable declarations type as statements, that is, they reduce to the
 type `stmt`.  There are only two cases that need to be
@@ -381,7 +381,7 @@ variable.
   rule T:Type E:Exp[.Types]; => T E;          [structural]
 ```
 
-### Function declarations
+## Function declarations
 
 Functions are allowed to be declared only at the top level (the
 `task` cell holds only its `k` subcell).  Each function
@@ -408,7 +408,7 @@ entire code of the function body needs to type anyway.
     [structural]
 ```
 
-### Checking if `main()` exists}
+## Checking if `main()` exists}
 
 Once the entire program is processed (generating appropriate tasks
 to type check its function bodies), we can dissolve the main
@@ -422,7 +422,7 @@ to reject programs without a `main` function).
     [structural]
 ```
 
-### Collecting the terminated tasks
+## Collecting the terminated tasks
 
 Similarly, once a non-main task (i.e., one which contains a
 `tenv` subcells) is completed using the subsequent rules (i.e.,
@@ -437,7 +437,7 @@ when the program correctly type checks.
   rule <task>... <k> _:BlockOrStmtType </k> <tenv> _ </tenv> ...</task> => .Bag
 ```
 
-### Basic values
+## Basic values
 
 The first three rewrite rules below reduce the primitive values to
 their types, as we typically do when we define type systems in **K**.
@@ -447,7 +447,7 @@ their types, as we typically do when we define type systems in **K**.
   rule _:String => string
 ```
 
-### Variable lookup
+## Variable lookup
 
 There are three cases to distinguish for variable lookup: (1) if the
 variable is bound in the local type environment, then look its type up
@@ -465,7 +465,7 @@ environment, too.
   rule <task> <k> X:Id => T ...</k> </task> <gtenv>... X |-> T ...</gtenv>
 ```
 
-### Increment
+## Increment
 
 We want the increment operation to apply to any lvalue, including
 array elements, not only to variables.  For that reason, we define a
@@ -482,7 +482,7 @@ rule `++ int => int` below.
   rule ++ int => int
 ```
 
-### Common expression constructs
+## Common expression constructs
 
 The rules below are straightforward and self-explanatory:
 ```k
@@ -504,7 +504,7 @@ The rules below are straightforward and self-explanatory:
   rule ! bool => bool
 ```
 
-### Array access and size
+## Array access and size
 
 Array access requires each index to type to an integer, and the
 array type to be at least as deep as the number of indexes:
@@ -521,7 +521,7 @@ array type to be at least as deep as the number of indexes:
   rule sizeOf(T[]) => int
 ```
 
-### Input/Output
+## Input/Output
 
 The read expression construct types to an integer, while print types
 to a statement provided that all its arguments type to integers or
@@ -533,7 +533,7 @@ strings.
   rule print(.Types); => stmt
 ```
 
-### Assignment
+## Assignment
 
 The special context and the rule for assignment below are similar
 to those for increment: the LHS of the assignment must be an lvalue
@@ -544,7 +544,7 @@ becomes the type of the assignment.
   rule T:Type = T => T
 ```
 
-### Function application and return
+## Function application and return
 
 Function application requires the type of the function and the
 types of the passed values to be compatible.  Note that a special case
@@ -562,7 +562,7 @@ context, that is, a `return` cell must be available:
   rule <k> return; => stmt ...</k> <returnType> _ </returnType>
 ```
 
-### Blocks
+## Blocks
 
 To avoid having to recover type environments after blocks, we prefer
 to start a new task for block body, making sure that the new task
@@ -578,20 +578,20 @@ exceptions can only have integer type.
        (.Bag => <task> <k> S </k> <tenv> Rho </tenv> R </task>)
 ```
 
-### Expression statement
+## Expression statement
 
 ```k
   rule _:Type; => stmt
 ```
 
-### Conditional and `while` loop
+## Conditional and `while` loop
 
 ```k
   rule if (bool) block else block => stmt
   rule while (bool) block => stmt
 ```
 
-### Exceptions
+## Exceptions
 
 We currently force the parameters of exceptions to only be integers.
 Moreover, for simplicity, we assume that integer exceptions can be
@@ -605,7 +605,7 @@ exceptions).
   rule throw int; => stmt
 ```
 
-### Concurrency
+## Concurrency
 
 Nothing special about typing the concurrency constructs, except that
 we do not want the spawned thread to return, so we do not include any
@@ -623,7 +623,7 @@ exceptions which are not caught.
   rule _:BlockOrStmtType _:BlockOrStmtType => stmt
 ```
 
-### Auxiliary constructs
+## Auxiliary constructs
 
 The function `mkDecls` turns a list of parameters into a
 list of variable declarations.

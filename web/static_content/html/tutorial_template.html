@@ -14,18 +14,6 @@
           class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 bd-content"
           role="main"
         >
-          <h1 class="title"></h1>
-          <p>
-            Go back to
-            <a href="{{$ROOT}}/k-distribution/tutorial">K Tutorial.</a>
-          </p>
-          <p>
-            <a
-              href="https://github.com/kframework/k/tree/master/k-distribution/tutorial/1_k/1_lambda/lesson_1"
-              >All files</a
-            >
-            in the K tool distribution that were used in this movie.
-          </p>
           <div class="introduction markdown-preview">
             {{$MARKDOWN_HTML}}
           </div>
@@ -37,23 +25,10 @@
     <script src="{{$ROOT}}/assets/js/index.js"></script>
     <script>
       $(function () {
-        // Set header
-        const headerSelector =
-          ".markdown-preview h1, .markdown-preview h2, .markdown-preview h3";
-        if ($(headerSelector).length) {
-          if ($(headerSelector)[0].innerText.match(/^copyright/)) {
-            $(headerSelector)[0].remove();
-          }
-          if ($(headerSelector).length) {
-            const title = $(headerSelector)[0].innerText;
-            $(".title").text(title);
-            $(headerSelector)[0].remove();
-          }
-        }
-
+        // Render youtube video
         const anchorElements = document.querySelectorAll(".markdown-preview a");
-        for (let i = 0; i < anchorElements.length; i++) {
-          if (i > 3) {
+        for (let i = anchorElements.length - 1; i >= 0; i--) {
+          if (anchorElements.length - 1 - i > 3) {
             break;
           }
           const anchorElement = anchorElements[i];
@@ -62,16 +37,21 @@
             const match = href.match(/^https?:\/\/youtu.be\/(.+?)$/);
             if (match && match[1]) {
               const youtubeId = match[1];
-              const $iframe = $(`<iframe
-  width="560"
-  height="315"
-  src="https://www.youtube.com/embed/${youtubeId}"
-  frameborder="0"
-  allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-  allowfullscreen
-  style="max-width: 100%;"
-></iframe>`);
-              $(".markdown-preview a")[0].replaceWith($iframe[0]);
+              const $iframe = $(`
+<div style="text-align:center;">
+  <iframe
+    width="560"
+    height="315"
+    src="https://www.youtube.com/embed/${youtubeId}"
+    frameborder="0"
+    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen
+    style="max-width: 100%;"
+  ></iframe>
+  <p>The video is out of date</p>
+</div>
+`);
+              $(anchorElement).replaceWith($iframe[0]);
             }
           }
         }

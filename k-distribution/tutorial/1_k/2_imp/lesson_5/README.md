@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
 
-### Completing and Documenting IMP
-
-[MOVIE [03'45"]](http://youtu.be/w2t_Yx2VGVQ)
+# Completing and Documenting IMP
 
 We here learn no new concepts, but it is a good moment to take a break
 and contemplate what we learned so far.
@@ -19,3 +17,5 @@ post them on the wall, or in poster sessions at conferences.
 This completes our second tutorial. The next tutorials will teach us more
 features of the K framework, such as how to define languages with complex
 control constructs (like `callcc`), languages which are concurrent, and so on.
+
+[MOVIE (out of date) [03'45"]](http://youtu.be/w2t_Yx2VGVQ)

@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2012-2019 K Team. All Rights Reserved. -->
 
-### Module Importing, Rules, Variables
-
-[MOVIE [4'03"]](http://youtu.be/NDXgYfHG6R4)
+# Module Importing, Rules, Variables
 
 We here learn how to include a predefined module (SUBSTITUTION), how to
 use it to define a K rule (the characteristic rule of lambda calculus),
@@ -83,3 +81,5 @@ The next lesson will show how to add LAMBDA the desired evaluation strategies
 using strictness attributes.
 
 Go to [Lesson 3, LAMBDA: Evaluation Strategies using Strictness](../lesson_3/README.md)
+
+[MOVIE (out of date) [4'03"]](http://youtu.be/NDXgYfHG6R4)

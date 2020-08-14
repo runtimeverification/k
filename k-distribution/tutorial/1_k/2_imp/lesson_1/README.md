@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
 
-### Defining a More Complex Syntax
-
-[MOVIE [09'15"]](http://youtu.be/F39Ta1stiCM)
+# Defining a More Complex Syntax
 
 Here we learn how to define a more complex language syntax than LAMBDA's,
 namely the C-like syntax of IMP. Also, we will learn how to define languages
@@ -183,3 +181,5 @@ Until now we have only seen default configurations. In the next lesson we
 will learn how to define a K custom configuration.
 
 Go to [Lesson 2, IMP: Defining a Configuration](../lesson_2/README.md).
+
+[MOVIE (out of date) [09'15"]](http://youtu.be/F39Ta1stiCM)

@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2012-2019 K Team. All Rights Reserved. -->
 
-### Syntax Modules and Basic K Commands
-
-[MOVIE [4'07"]](http://youtu.be/y5Tf1EZVj8E)
+# Syntax Modules and Basic K Commands
 
 Here we define our first K module, which contains the initial syntax of the
 LAMBDA language, and learn how to use the basic K commands.
@@ -111,3 +109,5 @@ rewrite expressions over the defined syntax until they evaluate to a result.
 This way, we obtain our first programming language defined using K.
 
 Go to [Lesson 2, LAMBDA: Module Importing, Rules, Variables](../lesson_2/README.md)
+
+[MOVIE (out of date) [4'07"]](http://youtu.be/y5Tf1EZVj8E)

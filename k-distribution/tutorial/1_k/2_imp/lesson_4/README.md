@@ -1,14 +1,12 @@
 <!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
 
-### Configuration Abstraction, Part 1; Types of Rules
-
-[MOVIE [09'16"]](http://youtu.be/fR2VEfGHtho)
+# Configuration Abstraction, Part 1; Types of Rules
 
 Here we will complete the K definition of IMP and, while doing so, we will
 learn the very first step of what we call _configuration abstraction_, and
 the semantic distinction between structural and computational rules.
 
-#### The IMP Semantic Rules
+## The IMP Semantic Rules
 
 Let us add the remaining rules, in the order in which the language constructs
 were defined in IMP-SYNTAX.
@@ -75,7 +73,7 @@ also been put in a complete `k` cell, but we preferred not to, for simplicity.
 Our IMP semantics is now complete, but there are a few more things that we
 need to understand and do.
 
-#### Configuration Abstraction, Part 1
+## Configuration Abstraction, Part 1
 
 First, let us briefly discuss the very first step of configuration abstraction.
 In K, all semantic rules are in fact rules between configurations. As soon
@@ -105,7 +103,7 @@ If you really want certain rewrites over syntactic terms to apply
 anywhere they match, then you should tag the rule with the attribute
 `anywhere`, which was discussed in Tutorial 1, Lesson 2.5.
 
-#### Structural vs. Computational Rules
+## Structural vs. Computational Rules
 
 The K rules are of two types: structural and computational. Intuitively,
 structural rules rearrange the configuration so that computational rules can
@@ -145,3 +143,5 @@ because it contains two local rewrites.
 In the next lesson we comment the IMP definition and conclude this tutorial.
 
 Go to [Lesson 5, IMP: Completing and Documenting IMP](../lesson_5/README.md).
+
+[MOVIE (out of date) [09'16"]](http://youtu.be/fR2VEfGHtho)

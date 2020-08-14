@@ -1,6 +1,6 @@
 <!-- Copyright (c) 2012-2019 K Team. All Rights Reserved. -->
 
-### A Naive Environment-Based Type Inferencer
+# A Naive Environment-Based Type Inferencer
 
 In this lesson you learn how to define a naive environment-based type
 inferencer for a higher-order language. Specifically, we take the

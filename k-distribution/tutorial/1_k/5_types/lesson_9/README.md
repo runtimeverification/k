@@ -1,6 +1,6 @@
 <!-- Copyright (c) 2014-2019 K Team. All Rights Reserved. -->
 
-### Let-Polymorphic Type Inferencer (Damas-Hindley-Milner)
+# Let-Polymorphic Type Inferencer (Damas-Hindley-Milner)
 
 In this lesson we discuss a type inferencer based on what we call today
 _the Damas-Hindley-Milner type system_, which is at the core of many

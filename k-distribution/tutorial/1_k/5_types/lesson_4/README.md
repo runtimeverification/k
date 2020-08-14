@@ -1,6 +1,6 @@
 <!-- Copyright (c) 2014-2019 K Team. All Rights Reserved. -->
 
-### A Naive Substitution-Based Type Inferencer
+# A Naive Substitution-Based Type Inferencer
 
 In this lesson you learn how to define a naive substitution-based type
 inferencer for a higher-order language, namely the LAMBDA language

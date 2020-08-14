@@ -1,6 +1,6 @@
 <!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
 
-### Everything Changes: Syntax, Configuration, Semantics
+# Everything Changes: Syntax, Configuration, Semantics
 
 In this lesson we add thread joining, one of the simplest thread
 synchronization mechanisms. In doing so, we need to add unique ids

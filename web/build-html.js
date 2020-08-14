@@ -85,9 +85,20 @@ function generatePagesFromMarkdownFiles(
             ? "index.html"
             : `${file.replace(/\.md$/, "")}/index.html`
         );
-        const markdown = fs
+        let markdown = fs
           .readFileSync(path.resolve(dirPath, file))
           .toString("utf-8");
+
+        if (
+          markdown.startsWith("---") &&
+          /* tslint:disable-next-line:no-conditional-assignment */
+          (endFrontMatterOffset = markdown.indexOf("\n---")) > 0
+        ) {
+          markdown = markdown
+            .slice(endFrontMatterOffset + 4)
+            .replace(/^[ \t]*\n/, "");
+        }
+
         const html = md.render(markdown);
 
         generateOutputWebpage(template, targetFilePath, {

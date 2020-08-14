@@ -1,6 +1,6 @@
 <!-- Copyright (c) 2012-2019 K Team. All Rights Reserved. -->
 
-### A Naive Environment-based Polymorphic Type Inferencer
+# A Naive Environment-based Polymorphic Type Inferencer
 
 In this short lesson we discuss how to quickly turn a naive
 environment-based monomorphic type inferencer into a naive let-polymorphic

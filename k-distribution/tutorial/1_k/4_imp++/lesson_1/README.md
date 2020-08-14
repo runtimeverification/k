@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
 
-### Extending/Changing an Existing Language Syntax
-
-[MOVIE [07'47"]](http://youtu.be/hWqJ8k9NNp8)
+# Extending/Changing an Existing Language Syntax
 
 Here we learn how to extend the syntax of an existing language, both with
 new syntactic constructs and with more general uses of existing constructs.
@@ -96,3 +94,5 @@ Specifically, we will split the state cell into an environment cell and a
 store cell, like in LAMBDA++ in Part 3 of the tutorial.
 
 Go to [Lesson 2, IMP++: Configuration Refinement; Freshness](../lesson_2/README.md).
+
+[MOVIE (out of date) [07'47"]](http://youtu.be/hWqJ8k9NNp8)

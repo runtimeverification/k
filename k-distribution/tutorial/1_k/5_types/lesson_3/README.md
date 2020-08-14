@@ -1,6 +1,6 @@
 <!-- Copyright (c) 2012-2019 K Team. All Rights Reserved. -->
 
-### Environment-Based Higher-Order Type Systems
+# Environment-Based Higher-Order Type Systems
 
 In this lesson you learn how to define an environment-based type system for
 a higher-order language, namely the LAMBDA language defined in Part 1 of the

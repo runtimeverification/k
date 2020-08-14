@@ -1,6 +1,6 @@
 <!-- Copyright (c) 2012-2019 K Team. All Rights Reserved. -->
 
-### A Naive Substitution-based Polymorphic Type Inferencer
+# A Naive Substitution-based Polymorphic Type Inferencer
 
 In this lesson you learn how little it takes to turn a naive monomorphic
 type inferencer into a naive polymorphic one, basically only changing

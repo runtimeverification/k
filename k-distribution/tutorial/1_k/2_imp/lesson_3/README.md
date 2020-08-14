@@ -1,15 +1,13 @@
 <!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
 
-### Computations, Results, Strictness; Rules Involving Cells
-
-[MOVIE [10'30"]](http://youtu.be/gYPkhiT2SxA)
+# Computations, Results, Strictness; Rules Involving Cells
 
 In this lesson we will learn about the syntactic category `K` of computations,
 about how strictness attributes are in fact syntactic sugar for rewrite rules
 over computations, and why it is important to tell the tool which
 computations are results. We will also see a K rule that involves cells.
 
-##### K Computations
+## K Computations
 
 Computation structures, or more simply _computations_, extend the abstract
 syntax of your language with a list structure using `~>` (read _followed
@@ -26,7 +24,7 @@ is that the listed tasks are to be processed in order. The initial
 computation typically contains the original program as its sole task, but
 rules can then modify it into task sequences, as seen shortly.
 
-##### Strictness in Theory
+## Strictness in Theory
 
 The strictness attributes, used as annotations to language constructs,
 actually correspond to rules over computations. For example, the
@@ -87,7 +85,7 @@ on rewriting, the fact that they are reversible comes with a serious practical
 problem: they make the K definitions unexecutable, because they lead to
 non-termination.
 
-##### Strictness in Practice; K Results
+## Strictness in Practice; K Results
 
 To break the reversibility of the theoretical heating/cooling rules, and,
 moreover, to efficiently execute K definitions, the current implementation of
@@ -125,7 +123,7 @@ from a theoretical perspective, but, in practice, it is also slower to execute.
 The `kompile` tool strives to give you the best model of the language for the
 task you are interested in.
 
-##### Can't Results be Inferred Automatically?
+## Can't Results be Inferred Automatically?
 
 This is a long story, but the short answer is: _No!_. Maybe in some cases
 it is possible, but we prefer to not attempt it in the K tool. For example,
@@ -144,7 +142,7 @@ theoretical definitions, not meant to be executed, need not worry about
 defining results (that's because in theory semantic rules apply _modulo_ the
 reversible heating/cooling rules, so results are not necessary).
 
-##### A K Rule Involving Cells
+## A K Rule Involving Cells
 
 All our K rules so far in the tutorial were of the form
 
@@ -203,3 +201,5 @@ In the next lesson we define the complete K semantics of IMP and
 run the programs we parsed in the first lesson.
 
 Go to [Lesson 4, IMP: Configuration Abstraction, Part 1; Types of Rules](../lesson_4/README.md).
+
+[MOVIE (out of date) [10'30"]](http://youtu.be/gYPkhiT2SxA)

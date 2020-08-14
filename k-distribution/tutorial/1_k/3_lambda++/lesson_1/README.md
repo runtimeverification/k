@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2012-2019 K Team. All Rights Reserved. -->
 
-### Abrupt Changes of Control
-
-[MOVIE [6'28"]](http://youtu.be/UZ9iaus024g)
+# Abrupt Changes of Control
 
 Here we add *call-with-current-continuation* (`callcc`) to the definition of
 LAMBDA completed in Tutorial 1, and call the resulting language LAMBDA++.
@@ -120,3 +118,4 @@ functional languages are implemented.
 
 Go to [Lesson 2, LAMBDA++: Semantic (Non-Syntactic) Computation Items](../lesson_2/README.md).
 
+[MOVIE (out of date) [6'28"]](http://youtu.be/UZ9iaus024g)

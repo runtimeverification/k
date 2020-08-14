@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
 
-### Defining a Configuration
-
-[MOVIE [04'21"]](http://youtu.be/jkwLyGdt70U)
+# Defining a Configuration
 
 Here we learn how to define a configuration in K. We also learn how to
 initialize and how to display it.
@@ -90,3 +88,4 @@ In the next lesson we will learn how to write rules that involve cells.
 
 Go to [Lesson 3, IMP: Computations, Results, Strictness; Rules Involving Cells](../lesson_3/README.md).
 
+[MOVIE (out of date) [04'21"]](http://youtu.be/jkwLyGdt70U)

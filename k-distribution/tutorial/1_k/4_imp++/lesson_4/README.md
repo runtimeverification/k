@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
 
-### Semantic Lists; Input/Output Streaming
-
-[MOVIE [05'21"]](http://youtu.be/a0qxV1GFR5s)
+# Semantic Lists; Input/Output Streaming
 
 In this lesson we add semantics to the `read` and `print` IMP++ constructs.
 In doing so, we also learn how to use semantic lists and how to connect
@@ -117,3 +115,4 @@ of blocks with local variable declarations.
 
 Go to [Lesson 5, IMP++: Deleting, Saving and Restoring Cell Contents](../lesson_5/README.md).
 
+[MOVIE (out of date) [05'21"]](http://youtu.be/a0qxV1GFR5s)

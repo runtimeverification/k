@@ -1,6 +1,6 @@
 <!-- Copyright (c) 2012-2019 K Team. All Rights Reserved. -->
 
-### Parallel Type Checkers/Inferencers
+# Parallel Type Checkers/Inferencers
 
 In this lesson you learn how to define parallel type checkers or
 inferencers. For the sake of a choice, we will parallelize the one in

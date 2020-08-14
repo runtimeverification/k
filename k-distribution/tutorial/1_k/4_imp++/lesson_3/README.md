@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
 
-### Tagging; Transition Kompilation Option
-
-[MOVIE [06'56"]](http://youtu.be/uwCUfWt7n-o)
+# Tagging; Transition Kompilation Option
 
 In this lesson we add the semantics of variable increment. In doing so, we
 learn how to tag syntactic constructs and rules and then use such tags to
@@ -130,3 +128,4 @@ generate a model of it which behaves like an interactive interpreter!
 
 Go to [Lesson 4, IMP++: Semantic Lists; Input/Output Streaming](../lesson_4/README.md).
 
+[MOVIE (out of date) [06'56"]](http://youtu.be/uwCUfWt7n-o)
