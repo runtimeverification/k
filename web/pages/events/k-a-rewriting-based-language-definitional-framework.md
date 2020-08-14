@@ -3,7 +3,7 @@
 Tutorial at the 33rd ACM SIGPLAN International Conference on Programming Language Design and Implementation (PLDI)
 
 - June 16, 2012 – Beijing (China)
-- Presenter: [Grigore Rosu](../people/grigore_rosu.md) (the main designer of K)
+- Presenter: Grigore Rosu (the main designer of K)
 - Duration: Half a day
 - Expected participants: ~20
 

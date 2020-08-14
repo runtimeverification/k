@@ -6,7 +6,7 @@ Here you will learn how to use the K tool to define languages by means of a seri
 
 Make sure you watch the K overview video before you do the K tutorial:
 
-- [9'59"] [K Overview](./overview.md)
+- [9'59"] [K Overview](../overview.md)
 
 ## Learning K
 

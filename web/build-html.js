@@ -88,7 +88,6 @@ function generatePagesFromMarkdownFiles(
         let markdown = fs
           .readFileSync(path.resolve(dirPath, file))
           .toString("utf-8");
-
         if (
           markdown.startsWith("---") &&
           /* tslint:disable-next-line:no-conditional-assignment */
@@ -98,9 +97,7 @@ function generatePagesFromMarkdownFiles(
             .slice(endFrontMatterOffset + 4)
             .replace(/^[ \t]*\n/, "");
         }
-
         const html = md.render(markdown);
-
         generateOutputWebpage(template, targetFilePath, {
           TITLE: targetFilePath,
           MARKDOWN_HTML: html,
