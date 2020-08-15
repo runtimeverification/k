@@ -20,5 +20,5 @@ the path prefix).
 -   [rat](rat.md): Rational number representation.
 -   [substitution](substitution.md): Hooked implementation of capture-aware
     sustitution for K definitions.
--   [unification](unification.k): Hooked implementation of unification
+-   [unification](unification.md): Hooked implementation of unification
     exposed directly to K definitions.

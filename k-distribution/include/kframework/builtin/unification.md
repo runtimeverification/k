@@ -1,4 +1,8 @@
-// Copyright (c) 2012-2019 K Team. All Rights Reserved.
+---
+copyright: Copyright (c) 2012-2020 K Team. All Rights Reserved.
+---
+
+```k
 require "domains.md"
 module UNIFICATION
   imports SET
@@ -20,3 +24,4 @@ module UNIFICATION
   syntax MetaVariable
 
 endmodule
+```

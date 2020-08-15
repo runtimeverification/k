@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const MarkdownIt = require("markdown-it");
+const glob = require("glob");
 
 const md = new MarkdownIt({
   html: true,
@@ -67,54 +68,64 @@ function generateOutputWebpage(sourceHTML, targetFilePath, variables = {}) {
  * @param {string} template
  */
 function generatePagesFromMarkdownFiles(
+  pattern,
   sourceDirectory,
   outputDirectory,
   template = ""
 ) {
-  const helper = (dirPath) => {
-    for (const file of fs.readdirSync(dirPath)) {
-      if (fs.statSync(path.resolve(dirPath, file)).isDirectory()) {
-        helper(path.resolve(dirPath, file));
-      } else if (file.endsWith(".md")) {
-        const targetFilePath = path.resolve(
-          path.resolve(
-            outputDirectory,
-            path.relative(sourceDirectory, dirPath)
-          ),
-          file.match(/^(index|README)\.md$/i)
-            ? "index.html"
-            : `${file.replace(/\.md$/, "")}/index.html`
-        );
-        let markdown = fs
-          .readFileSync(path.resolve(dirPath, file))
-          .toString("utf-8");
-        if (
-          markdown.startsWith("---") &&
-          /* tslint:disable-next-line:no-conditional-assignment */
-          (endFrontMatterOffset = markdown.indexOf("\n---")) > 0
-        ) {
-          markdown = markdown
-            .slice(endFrontMatterOffset + 4)
-            .replace(/^[ \t]*\n/, "");
-        }
-        const html = md.render(markdown);
-        generateOutputWebpage(template, targetFilePath, {
-          TITLE: targetFilePath,
-          MARKDOWN_HTML: html,
-        });
-      }
+  const files = glob.sync(pattern);
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const targetFilePath = path.resolve(
+      path.resolve(
+        outputDirectory,
+        path.relative(sourceDirectory, path.dirname(file))
+      ),
+      path.basename(file).match(/^(index|README)\.md$/i)
+        ? "index.html"
+        : `${path.basename(file).replace(/\.md$/, "")}/index.html`
+    );
+    let markdown = fs.readFileSync(file).toString("utf-8");
+    if (
+      markdown.startsWith("---") &&
+      /* tslint:disable-next-line:no-conditional-assignment */
+      (endFrontMatterOffset = markdown.indexOf("\n---")) > 0
+    ) {
+      markdown = markdown
+        .slice(endFrontMatterOffset + 4)
+        .replace(/^[ \t]*\n/, "");
     }
-  };
-  helper(sourceDirectory, template);
+    const html = md.render(markdown);
+    generateOutputWebpage(template, targetFilePath, {
+      TITLE: targetFilePath,
+      MARKDOWN_HTML: html,
+    });
+  }
+}
+
+function cleanUpFiles() {
+  fs.rmdirSync(path.join(__dirname, "./public_content/k-distribution"), {
+    recursive: true,
+  });
+
+  const files = glob.sync(
+    path.join(__dirname, "./public_content/") + "/**/*.html"
+  );
+  files.forEach((file) => {
+    fs.unlinkSync(file);
+    const dirPath = path.dirname(file);
+    const filesInside = fs.readdirSync(dirPath);
+    if (!filesInside.length) {
+      fs.rmdirSync(dirPath, { recursive: true });
+    }
+  });
 }
 
 for (file in files) {
   generateOutputWebpage(fs.readFileSync(file).toString("utf-8"), files[file]);
 }
 
-fs.rmdirSync(path.join(__dirname, "./public_content/k-distribution"), {
-  recursive: true,
-});
+cleanUpFiles();
 const tutorialTemplate = fs
   .readFileSync("./static_content/html/tutorial_template.html")
   .toString("utf-8");
@@ -122,12 +133,20 @@ const pageTemplate = fs
   .readFileSync("./static_content/html/page_template.html")
   .toString("utf-8");
 generatePagesFromMarkdownFiles(
-  path.resolve(__dirname, "../k-distribution/tutorial/"),
-  path.resolve(__dirname, "./public_content/k-distribution/tutorial/"),
+  path.resolve(__dirname, "../k-distribution/") + "/**/*.md",
+  path.resolve(__dirname, "../k-distribution/"),
+  path.resolve(__dirname, "./public_content/k-distribution/"),
   tutorialTemplate
 );
 generatePagesFromMarkdownFiles(
+  path.resolve(__dirname, "./pages/") + "/**/*.md",
   path.resolve(__dirname, "./pages/"),
+  path.resolve(__dirname, "./public_content/"),
+  pageTemplate
+);
+generatePagesFromMarkdownFiles(
+  path.resolve(__dirname, "../") + "/pending-documentation.md",
+  path.resolve(__dirname, "../"),
   path.resolve(__dirname, "./public_content/"),
   pageTemplate
 );

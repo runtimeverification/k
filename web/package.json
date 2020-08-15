@@ -17,6 +17,7 @@
   "author": "K | Runtime Verification",
   "license": "UNLICENSED",
   "devDependencies": {
+    "glob": "^7.1.6",
     "http-server": "^0.12.3",
     "parcel": "^1.12.4",
     "sass": "^1.26.9",
