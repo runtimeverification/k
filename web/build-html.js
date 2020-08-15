@@ -2,10 +2,28 @@ const fs = require("fs");
 const path = require("path");
 const MarkdownIt = require("markdown-it");
 const glob = require("glob");
+const hljs = require("highlight.js"); // https://highlightjs.org/
+const k = require("./highlight.js/k");
+hljs.registerLanguage("k", k);
 
 const md = new MarkdownIt({
   html: true,
   linkify: true,
+  highlight: function (str, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return (
+          '<pre class="hljs"><code>' +
+          hljs.highlight(lang, str, true).value +
+          "</code></pre>"
+        );
+      } catch (__) {}
+    }
+
+    return (
+      '<pre class="hljs"><code>' + md.utils.escapeHtml(str) + "</code></pre>"
+    );
+  },
 });
 
 const files = {

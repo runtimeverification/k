@@ -29,7 +29,6 @@
         const href = new URL(anchorElement.href);
         if (href.host === location.host) {
           if (anchorElement.href.endsWith(".md")) {
-            console.log(anchorElement.getAttribute("href"));
             let href = anchorElement.getAttribute("href");
             if (href.startsWith("../") && !href.match(/(index|README)\.md$/)) {
               href = "../" + href;
