@@ -546,9 +546,8 @@ pipeline {
               npm run build
               cd -
               mv web/public_content ./
-              rm -rf $(find . -maxdepth 1 -not -name public_content)
-              cd public_content
-              mv * ../
+              rm -rf $(find . -maxdepth 1 -not -name public_content -a -not -name .git -a -not -path . -a -not -path ..)
+              mv public_content/* ./
               rm -rf public_content
               git add ./
               git commit -m 'gh-pages: Updated the website'
