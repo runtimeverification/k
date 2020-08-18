@@ -24,17 +24,16 @@ call/cc.
 - [Optional] A high-level [interview](http://channel9.msdn.com/posts/ICSE-2011-Grigore-Rosu-The-Art-and-Science-of-Program-Verification) about rewrite-based semantics (Wolfram Schulte interviews Grigore Rosu at [ICSE'11](http://2011.icse-conferences.org/).
 - [FAQ](./faq.md)
 
-## K Tool Download and Online Interface
+## K Tool Download
 
 - The provided [K tool binaries](./downloads.md) are supported on Linux, OS X, and Windows. Other platforms may or may not work correctly. We welcome information about usability of unsupported platforms or bugs in the supported platforms.
 - Try our [Editor Support](./editor_support.md) page for links to K syntax highlighting definitions for various popular editors/IDEs. Please feel free to contribute.
 - The source code (Java) is available on [GitHub](https://github.com/kframework), where you can also [report bugs](http://github.com/kframework/k/issues)</a> (please do so).
-- An experimental [online interface](http://kframework.org/kweb) to the K tool is also available.
 
 ## Learn K
 
 - Do the <a style="font-size:24px" href="./k-distribution/tutorial.md">K Tutorial!</a>
-- Read some papers about K (click on Publications in the left tab).
+- Visit the [Formal Systems Laboratory (FSL)](http://fsl.cs.illinois.edu/index.php/Formal_Systems_Laboratory).  
 
 ## Links
 
@@ -42,5 +41,4 @@ call/cc.
 - [K webpage](http://fmse.info.uaic.ro/projects/K/) at UAIC (Romania).
 - [Matching logic](http://matching-logic.org/) webpage at UIUC (USA).
 - [Online K Discussion Channel](https://riot.im/app/#/room/#k:matrix.org) for K users (Slack & Riot). This is the recommended way to ask questions about K and interact with the K community.
-- [K user list](https://lists.cs.illinois.edu/lists/info/k-user) for general questions to the K user community (use the channel above if you want quick answers) and news on major tool updates.
-- [info@kframework.org](mailto:info@kframework.org): when you cannot get your questions answered using the above channels.
+- [Stackoverflow](https://stackoverflow.com/questions/tagged/kframework) for general questions to the K user community (use the channel above if you want quick answers) and news on major tool updates.
