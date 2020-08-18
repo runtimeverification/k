@@ -23,30 +23,6 @@
       }
     });
 
-    // Sanitize links
-    $("a").each((index, anchorElement) => {
-      try {
-        const href = new URL(anchorElement.href);
-        if (href.host === location.host) {
-          if (anchorElement.href.endsWith(".md")) {
-            let href = anchorElement.getAttribute("href");
-            if (href.startsWith("../") && !href.match(/(index|README)\.md$/)) {
-              href = "../" + href;
-            }
-            anchorElement.setAttribute(
-              "href",
-              href.match(/(index|README)\.md$/)
-                ? href.replace(/(index|README)\.md$/, "")
-                : href.replace(/\.md$/, "/")
-            );
-          }
-        } else {
-          anchorElement.setAttribute("target", "_blank");
-          anchorElement.setAttribute("rel", "noopener");
-        }
-      } catch (error) {}
-    });
-
     // Search box
     $("#search-box").keydown((event) => {
       if (event.which === 13) {

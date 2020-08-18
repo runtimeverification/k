@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const MarkdownIt = require("markdown-it");
 const glob = require("glob");
+const cheerio = require("cheerio");
 const hljs = require("highlight.js"); // https://highlightjs.org/
 const k = require("./highlight.js/k");
 hljs.registerLanguage("k", k);
@@ -114,9 +115,32 @@ function generatePagesFromMarkdownFiles(
         .replace(/^[ \t]*\n/, "");
     }
     const html = md.render(markdown);
+
+    // Format links
+    const $ = cheerio.load(html);
+    $("a").each((index, anchorElement) => {
+      try {
+        let href = $(anchorElement).attr("href");
+        if (href.match(/^(https?|mailto):/)) {
+          $(anchorElement).attr("target", "_blank");
+          $(anchorElement).attr("rel", "noopener");
+        } else if (href.match(/\.md$/)) {
+          if (href.startsWith("../") && !href.match(/(index|README)\.md$/)) {
+            href = "../" + href;
+          }
+          $(anchorElement).attr(
+            "href",
+            href.match(/(index|README)\.md$/)
+              ? href.replace(/(index|README)\.md$/, "")
+              : href.replace(/\.md$/, "/")
+          );
+        }
+      } catch (error) {}
+    });
+
     generateOutputWebpage(template, targetFilePath, {
       TITLE: targetFilePath,
-      MARKDOWN_HTML: html,
+      MARKDOWN_HTML: $.html(),
     });
   }
 }
