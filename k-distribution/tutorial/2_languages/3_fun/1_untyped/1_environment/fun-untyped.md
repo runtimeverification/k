@@ -2,8 +2,7 @@
 copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
 ---
 
-FUN — Untyped — Environment
-===========================
+# FUN — Untyped — Environment
 
 Author: Grigore Roșu (grosu@illinois.edu)  
 Organization: University of Illinois at Urbana-Champaign
@@ -11,7 +10,7 @@ Organization: University of Illinois at Urbana-Champaign
 Author: Traian Florin Șerbănuță (traian.serbanuta@unibuc.ro)  
 Organization: University of Bucharest
 
-### Abstract
+## Abstract
 
 This is the **K** semantic definition of the untyped FUN language.
 FUN is a pedagogical and research language that captures the essence
@@ -118,7 +117,7 @@ LAMBDA++ language in the first part of the K Tutorial.
 To keep the comments below small and focused, we will not re-explain
 functional or **K** features that have already been explained in there.
 
-### Syntax
+## Syntax
 
 ```k
 //require "modules/pattern-matching.k"
@@ -136,7 +135,7 @@ discussed in more depth when we define their semantics in the next
 module.
 
 
-### The Syntactic Constructs
+## The Syntactic Constructs
 
 We start with the syntactic definition of FUN names.
 We have several categories of names: ones to be used for functions and
@@ -356,7 +355,7 @@ a constructor for function types:
   syntax TypeCases ::= List{TypeCase,"|"}     [klabel(_|TypeCase_)]
 ```
 
-### Additional Priorities
+## Additional Priorities
 
 ```k
   syntax priorities @__FUN-UNTYPED-COMMON
@@ -375,7 +374,7 @@ module FUN-UNTYPED-MACROS
   imports FUN-UNTYPED-COMMON
 ```
 
-### Desugaring macros
+## Desugaring macros
 
 We desugar the list non-constructor operations to functions matching
 over list patterns.  In order to do that we need some new variables; for
@@ -427,7 +426,7 @@ module FUN-UNTYPED-SYNTAX
 endmodule
 ```
 
-### Semantics
+## Semantics
 
 The semantics below is environment-based.  A substitution-based
 definition of FUN is also available, but that drops the `&`
@@ -440,7 +439,7 @@ module FUN-UNTYPED
   //imports PATTERN-MATCHING
 ```
 
-### Configuration
+## Configuration
 
 The `k`, `env`, and `store` cells are standard
 (see, for example, the definition of LAMBDA++ or IMP++ in the first
@@ -453,7 +452,7 @@ part of the **K** tutorial).
                 </T>
 ```
 
-### Values and results
+## Values and results
 
 We only define integers, Booleans and strings as values here, but will
 add more values later.
@@ -465,7 +464,7 @@ add more values later.
   syntax KResult ::= Val
 ```
 
-### Lookup
+## Lookup
 
 ```k
   rule <k> X:Name => V ...</k>
@@ -473,7 +472,7 @@ add more values later.
        <store>... L |-> V ...</store>
 ```
 
-### Arithmetic expressions
+## Arithmetic expressions
 
 ```k
   rule I1 * I2 => I1 *Int I2
@@ -496,14 +495,14 @@ add more values later.
   rule false || E => E
 ```
 
-### Conditional
+## Conditional
 
 ```k
   rule if  true then E else _ => E
   rule if false then _ else E => E
 ```
 
-### Lists
+## Lists
 
 We have already declared the syntactic list of expressions strict, so
 we can assume that all the elements that appear in a FUN list are
@@ -522,14 +521,14 @@ a function/closure value that expects the second, list argument):
   rule cons V:Val [Vs:Vals] => [V,Vs]
 ```
 
-### Data Constructors
+## Data Constructors
 
 Constructors take values as arguments and produce other values:
 ```k
   syntax Val ::= ConstructorName
 ```
 
-### Functions and Closures
+## Functions and Closures
 
 Like in the environment-based semantics of LAMBDA++ in the first part
 of the **K** tutorial, functions evaluate to closures.  A closure includes
@@ -575,7 +574,7 @@ to the next one.
 //  rule closure(_, (P->_ | Cs:Cases => Cs)) V:Val  when notBool isMatching(P,V)
 ```
 
-### Let and Letrec
+## Let and Letrec
 
 To highlight the similarities and differences between `let` and
 `letrec`, we prefer to give them direct semantics instead of
@@ -633,7 +632,7 @@ bindings are identifiers, so the semantics will get stuck on programs
 that misuse the `let` and `letrec` binders.
 
 
-### References
+## References
 
 The semantics of references is self-explanatory, except maybe for the
 desugaring rule of `ref`, which is further discussed.  Note
@@ -662,7 +661,7 @@ substitution-based definition of FUN, because there appears to be no way
 to give a substitution-based definition to the `&` construct.
 
 
-### Callcc
+## Callcc
 
 As we know it from the LAMBDA++ tutorial, call-with-current-continuation
 is quite easy to define in **K**.  We first need to define a special
@@ -685,9 +684,9 @@ normally.
   rule <k> cc(Rho,K) V:Val ~> _ => V ~> K </k>  <env> _ => Rho </env>
 ```
 
-### Auxiliary operations
+## Auxiliary operations
 
-### Environment recovery
+## Environment recovery
 
 The environment recovery operation is the same as for the LAMBDA++
 language in the **K** tutorial and many other languages provided with the
@@ -700,7 +699,7 @@ way to achieve the benefits of tail recursion in **K**.
     [structural]
 ```
 
-### `bindTo`, `bind` and `assignTo`
+## `bindTo`, `bind` and `assignTo`
 
 The meaning of these operations has already been explained when we
 discussed the `let` and `letrec` language constructs
@@ -732,7 +731,7 @@ above.
        <store>... .Map => L |-> V ...</store>             [structural]
 ```
 
-### Getters
+## Getters
 
 The following auxiliary operations extract the list of identifiers
 and of expressions in a binding, respectively.
@@ -785,3 +784,5 @@ the following custom pattern decomposition rule:
     => getMatchingAux((H, T), (V, [Vs]))
 endmodule
 ```
+
+Go to [Lesson 2, FUN untyped, Substitution-Based](../2_substitution/fun-untyped.md).

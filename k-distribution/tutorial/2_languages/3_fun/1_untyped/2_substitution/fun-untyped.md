@@ -2,8 +2,7 @@
 copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
 ---
 
-FUN — Untyped — Substitution
-============================
+# FUN — Untyped — Substitution
 
 Author: Grigore Roșu (grosu@illinois.edu)  
 Organization: University of Illinois at Urbana-Champaign
@@ -11,14 +10,14 @@ Organization: University of Illinois at Urbana-Champaign
 Author: Traian Florin Șerbănuță (traian.serbanuta@unibuc.ro)  
 Organization: University of Bucharest
 
-### Abstract
+## Abstract
 
 This is the substitution-based definition of FUN.  For additional
 explanations regarding the semantics of the various FUN constructs,
 the reader should consult the emvironment-based definition of FUN.
 
 
-### Syntax
+## Syntax
 
 ```k
 require "substitution.md"
@@ -28,7 +27,7 @@ module FUN-UNTYPED-COMMON
   imports DOMAINS-SYNTAX
 ```
 
-### The Syntactic Constructs
+## The Syntactic Constructs
 
 ```k
   syntax Name
@@ -117,7 +116,7 @@ module FUN-UNTYPED-COMMON
   syntax TypeCases ::= List{TypeCase,"|"}     [klabel(_|TypeCase_)]
 ```
 
-### Additional Priorities
+## Additional Priorities
 
 ```k
   syntax priorities @__FUN-UNTYPED-COMMON
@@ -136,7 +135,7 @@ module FUN-UNTYPED-MACROS
   imports FUN-UNTYPED-COMMON
 ```
 
-### Desugaring macros
+## Desugaring macros
 
 ```k
   rule P1 P2 -> E => P1 -> fun P2 -> E                       [macro-rec]
@@ -178,7 +177,7 @@ module FUN-UNTYPED-SYNTAX
 endmodule
 ```
 
-### Semantics
+## Semantics
 
 ```k
 module FUN-UNTYPED

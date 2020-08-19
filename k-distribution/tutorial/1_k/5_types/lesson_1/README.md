@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2014-2019 K Team. All Rights Reserved. -->
 
-### Imperative, Environment-Based Type Systems
-
-[MOVIE [10'11"]](http://youtu.be/WyUxdo7GhtE)
+# Imperative, Environment-Based Type Systems
 
 In this lesson you learn how to define a type system for an imperative
 language (the IMP++ language defined in Part 4 of the tutorial), using a style
@@ -137,3 +135,7 @@ is needed anyway, to type empty blocks `{}` (together with the block rule).
 should all type to `stmt`.
 
 In the next lesson we will define a substitution-based type system for LAMBDA.
+
+Go to [Lesson 2, Type Systems: Substitution-Based Higher-Order Type Systems](../lesson_2/README.md).
+
+[MOVIE (out of date) [10'11"]](http://youtu.be/WyUxdo7GhtE)

@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2012-2019 K Team. All Rights Reserved. -->
 
-### Generating Documentation; Latex Attributes
-
-[MOVIE [3'13"]](http://youtu.be/ULXA4e_6-DY)
+# Generating Documentation; Latex Attributes
 
 In this lesson we learn how to generate formatted documentation from K
 language definitions.  We also learn how to use Latex attributes to control
@@ -55,3 +53,7 @@ tool provides a few of these (and you can add more).
 
 In the next lesson we show how we can add builtin integers and Booleans to
 LAMBDA, so we can start to evaluate meaningful expressions.
+
+Go to [Lesson 5, LAMBDA: Adding Builtins; Side Conditions](../lesson_5/README.md).
+
+[MOVIE (out of date) [3'13"]](http://youtu.be/ULXA4e_6-DY)

@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2014-2019 K Team. All Rights Reserved. -->
 
-### Do Not Reuse Blindly!
-
-[MOVIE [3'37"]](http://youtu.be/OXvtklaSaSQ)
+# Do Not Reuse Blindly!
 
 It may be tempting to base your decision to reuse an existing semantics of
 a language feature solely on syntactic considerations; for example, to reuse
@@ -95,3 +93,7 @@ In the next lesson we fix the environment-based semantics of `callcc` by having
 `cc` also wrap an environment, besides a computation.  We will also give a more
 direct semantics to recursion, based on environments instead of fixed-point
 combinators.
+
+Go to [Lesson 5, LAMBDA++: More Semantic Computation Items](../lesson_5/README.md).
+
+[MOVIE (out of date) [3'37"]](http://youtu.be/OXvtklaSaSQ)
