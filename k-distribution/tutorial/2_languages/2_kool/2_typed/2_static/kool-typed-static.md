@@ -1,8 +1,8 @@
 ---
 copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
 ---
-KOOL — Typed — Static
-=====================
+
+# KOOL — Typed — Static
 
 Author: Grigore Roșu (grosu@illinois.edu)  
 Organization: University of Illinois at Urbana-Champaign
@@ -11,7 +11,7 @@ Author: Traian Florin Șerbănuță (traian.serbanuta@unibuc.ro)
 Organization: University of Bucharest
 
 
-### Abstract
+## Abstract
 
 This is the **K** static semantics of the typed KOOL language.
 It extends the static semantics of typed SIMPLE with static semantics
@@ -77,7 +77,7 @@ module KOOL-TYPED-STATIC-SYNTAX
   imports DOMAINS-SYNTAX
 ```
 
-### Syntax
+## Syntax
 
 The syntax of statically typed KOOL is identical to that of
 dynamically typed KOOL, they both taking as input the same programs.
@@ -121,7 +121,7 @@ the wrapper in the generated documentation, we associate it an
   syntax Id ::= "Object" [token] | "Main" [token]
 ```
 
-### Types
+## Types
 
 ```k
   syntax Type ::= "void" | "int" | "bool" | "string"
@@ -134,7 +134,7 @@ the wrapper in the generated documentation, we associate it an
   syntax Types ::= List{Type,","}
 ```
 
-### Declarations
+## Declarations
 
 ```k
   syntax Param ::= Type Id
@@ -146,7 +146,7 @@ the wrapper in the generated documentation, we associate it an
                 | "class" Id "extends" Id Block
 ```
 
-### Expressions
+## Expressions
 
 ```k
   syntax FieldReference ::= Exp "." Id          [strict(1)]
@@ -191,7 +191,7 @@ the wrapper in the generated documentation, we associate it an
   syntax Exps ::= List{Exp,","}          [strict]
 ```
 
-### Statements
+## Statements
 
 ```k
   syntax Block ::= "{" "}"
@@ -217,7 +217,7 @@ the wrapper in the generated documentation, we associate it an
                  | Stmts Stmts                            [seqstrict, right]
 ```
 
-### Desugaring macros
+## Desugaring macros
 
 ```k
   rule if (E) S => if (E) S else {}                                     [macro]
@@ -230,7 +230,7 @@ the wrapper in the generated documentation, we associate it an
 endmodule
 ```
 
-### Static semantics
+## Static semantics
 
 We first discuss the configuration, then give the static semantics
 taken over unchanged from SIMPLE, then discuss the static semantics of
@@ -243,7 +243,7 @@ module KOOL-TYPED-STATIC
   imports DOMAINS
 ```
 
-### Configuration
+## Configuration
 
 The configuration of our type system consists of a `tasks`
 cell with the same meaning like in statically typed SIMPLE, of an
@@ -306,7 +306,7 @@ in the class extends relation.
                 <output color="brown" stream="stdout"> .List </output>
 ```
 
-### Unchanged semantics from statically typed SIMPLE
+## Unchanged semantics from statically typed SIMPLE
 
 The syntax and rules below are borrowed unchanged from statically
 typed SIMPLE, so we do not discuss them much here.
@@ -393,7 +393,7 @@ typed SIMPLE, so we do not discuss them much here.
   rule _:BlockOrStmtType _:BlockOrStmtType => stmt
 ```
 
-### Unchanged auxiliary operations from dynamically typed SIMPLE
+## Unchanged auxiliary operations from dynamically typed SIMPLE
 
 ```k
   syntax Stmts ::= mkDecls(Params)  [function]
@@ -422,13 +422,13 @@ typed SIMPLE, so we do not discuss them much here.
   rule getTypes(.Params) => void, .Types
 ```
 
-### Changes to the existing statically typed SIMPLE semantics
+## Changes to the existing statically typed SIMPLE semantics
 
 Below we give the new static semantics for language constructs that
 come from SIMPLE, but whose SIMPLE static semantics was too
 restrictive or too permissive and thus had to change.
 
-### Local variable declaration
+## Local variable declaration
 
 Since we can define new types in KOOL (corresponding to classes), the
 variable declaration needs to now check that the claimed types exist.
@@ -440,7 +440,7 @@ lists of types as well).
        <tenv> Rho => Rho[X <- T] </tenv>
 ```
 
-### Class member declaration
+## Class member declaration
 
 In class tasks, variable declarations mean class member declarations.
 Since we reduce method declarations to variable declarations (see
@@ -473,7 +473,7 @@ at the end of this module).
     [structural]
 ```
 
-### Method declaration
+## Method declaration
 
 A method declaration requires two conceptual checks to be performed:
 first, that the method's type is consistent with the type of the
@@ -507,7 +507,7 @@ for example, inside other methods).
     [structural]
 ```
 
-### Assignment
+## Assignment
 
 A more concrete value is allowed to be assigned to a more abstract
 variable.  The operation `checkSubtype` is defined at the end
@@ -516,7 +516,7 @@ of the module and it also works with pairs of lists of types.
   rule T:Type = T':Type => checkSubtype(T', T) ~> T
 ```
 
-### Method invocation and return
+## Method invocation and return
 
 Methods can be applied on values of more concrete types than their
 arguments:
@@ -531,7 +531,7 @@ methods:
        <returnType> T':Type </returnType>
 ```
 
-### Exceptions
+## Exceptions
 
 Exceptions can throw and catch values of any types.  Since unlike in Java
 KOOL's methods do not declare the exception types that they can throw,
@@ -543,7 +543,7 @@ type correctly.
   rule throw T:Type ; => stmt
 ```
 
-### Spawn
+## Spawn
 
 The spawned cell needs to also be passed the parent's class.
 ```k
@@ -559,9 +559,9 @@ The spawned cell needs to also be passed the parent's class.
              </task>)
 ```
 
-### Semantics of the new KOOL constructs
+## Semantics of the new KOOL constructs
 
-### Class declaration
+## Class declaration
 
 We process each class in the main task, adding the corresponding data
 into its `class` cell and also adding a class task for it.  We
@@ -614,7 +614,7 @@ syntax Type ::= "stmtStop"
 */
 ```
 
-### Check for unique class names
+## Check for unique class names
 
 ```k
   rule (<T>...
@@ -651,7 +651,7 @@ checks for cycles.
     [inheritance-cycle]
 ```
 
-### New
+## New
 
 To type `new` we only need to check that the class constructor
 can be called with arguments of the given types, so we initiate a call
@@ -664,7 +664,7 @@ also at the end of this module.
   rule new C:Id(Ts:Types) => class(C) . C (Ts) ~> discard ~> class(C)
 ```
 
-### Self reference
+## Self reference
 
 The typing rule for `this` is straightforward: reduce to the
 current class type.
@@ -673,7 +673,7 @@ current class type.
        <inClass> C:Id </inClass>
 ```
 
-### Super
+## Super
 
 Similarly, `super` types to the parent class type.
 Note that for typing concerns, super can be considered as an object
@@ -685,7 +685,7 @@ Note that for typing concerns, super can be considered as an object
         <baseClass> C':Id </baseClass>
 ```
 
-### Object member access
+## Object member access
 
 There are several cases to consider here.  First, if we are in a class
 task, we should lookup the member into the temporary class type
@@ -744,7 +744,7 @@ wait.  Finally, the sixth rule below reports an error when the
     [structural]
 ```
 
-### Instance of and casting
+## Instance of and casting
 
 As it is hard to check statically whether casting is always safe,
 the programmer is simply trusted from a typing perspective.  We only
@@ -778,7 +778,7 @@ of the language need to insert runtime checks for downcasting to be safe.
     // extendsAll is populated); strategies will solve the problem nicely.
 ```
 
-### Cleanup tasks
+## Cleanup tasks
 
 Finally, we need to clean up the terminated tasks.  Each of the three
 types of tasks is handled differently.  The main task is replaced by a
@@ -830,9 +830,9 @@ the `tasks` cell has been removed.
     [structural]
 ```
 
-### KOOL-specific auxiliary declarations and operations
+## KOOL-specific auxiliary declarations and operations
 
-### Subtype checking
+## Subtype checking
 
 The subclass relation introduces a subtyping relation.
 ```k
@@ -858,7 +858,7 @@ The subclass relation introduces a subtyping relation.
   rule checkSubtype(.Types,void) => .  [structural]
 ```
 
-### Checking well-formedness of types
+## Checking well-formedness of types
 
 Since now any _`Id`_ can be used as the type of a class, we need to
 check that the types used in the program actually exists
@@ -879,7 +879,7 @@ check that the types used in the program actually exists
   rule checkType(T:Type[]) => checkType(T)  [structural]
 ```
 
-### Checking correct  overiding of methods
+## Checking correct  overiding of methods
 
 The `checkMethod` operation below searches to see whether
 the current method overrides some other method in some superclass.
@@ -905,7 +905,7 @@ is co-variant in the codomain and contra-variant in the domain).
   rule checkMethod(_:Id,_,Object) => .
 ```
 
-### Generic operations which could be part of the **K** framework
+## Generic operations which could be part of the **K** framework
 
 ```k
   syntax KItem ::= stuck(K)  [latex(\framebox{${#1}$})]

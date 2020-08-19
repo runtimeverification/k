@@ -2,8 +2,7 @@
 copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
 ---
 
-LOGIK
-=====
+# LOGIK
 
 Author: Grigore Roșu (grosu@illinois.edu)  
 Organization: University of Illinois at Urbana-Champaign
@@ -11,7 +10,7 @@ Organization: University of Illinois at Urbana-Champaign
 Author: Traian Florin Șerbănuță (traian.serbanuta@unibuc.ro)  
 Organization: University of Bucharest
 
-### Abstract
+## Abstract
 
 This is the **K** semantic definition of LOGIK, a trivial language
 capturing the essence of the logic programming paradigm.  In this
@@ -182,7 +181,7 @@ module LOGIK-COMMON
   imports DOMAINS-SYNTAX
 ```
 
-### Syntax
+## Syntax
 
 The syntax of LOGIK is straightforward: a program is a sequence of
 Horn clauses followed by a query:
@@ -220,7 +219,7 @@ Unification is at the core of logic programming.  Here we are
 going to use the predefined unification procedure (the same one we
 used in the type inferencers in Tutorial 5).
 
-### Configuration
+## Configuration
 
 The configuration stores each clause in its own cell for easy access,
 and the most general unifier in a cell named `mgu`, same like
@@ -242,7 +241,7 @@ discard the main cell.
                 </T>
                 <solution multiplicity="?"> .K </solution>
 ```
-### Pre- and post-processing
+## Pre- and post-processing
 
 Before we launch the semantics, we first scan the given program and
 place each clause in its own cell, and then place the query in the
@@ -293,7 +292,7 @@ when we search for all solutions, we know that some attempts failed
 //  rule <T>... <mgu> _:MguError </mgu> ...</T> => .
 ```
 
-### Semantics
+## Semantics
 
 Once all the infrastructure is in place, the actual semantics of LOGIK
 is quite simple.  All we have to do is to pick some (fresh instance of

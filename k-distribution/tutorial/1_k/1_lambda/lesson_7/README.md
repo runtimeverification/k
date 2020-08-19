@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2012-2019 K Team. All Rights Reserved. -->
 
-### Derived Constructs, Extending Predefined Syntax
-
-[MOVIE [5'10"]](http://youtu.be/qZWiBaN7zrw)
+# Derived Constructs, Extending Predefined Syntax
 
 In this lesson we will learn how to define derived language constructs, that
 is, ones whose semantics is defined completely in terms of other language
@@ -101,3 +99,7 @@ be written in a functional language:
 
 In the next lesson we will discuss an alternative definition of `letrec`, based
 on another binder, `mu`, specifically designed to define fixed points.
+
+Go to [Lesson 8, LAMBDA: Multiple Binding Constructs](../lesson_8/README.md).
+
+[MOVIE (out of date) [5'10"]](http://youtu.be/qZWiBaN7zrw)

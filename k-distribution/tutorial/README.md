@@ -1,204 +1,112 @@
----
-copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
----
-
 # K Tutorial
-[*Grigore Rosu*](http://fsl.cs.illinois.edu/grosu) (<grosu@illinois.edu>)
 
-In this tutorial you will learn how to use the K tool by means of a series of
-lectures illustrating several simple languages defined using K.  Almost all
-the material is presented in two forms: as ordinary text and as a short
-screencast movie.
-We recommend to either download the K tool from its URL
-(<http://kframework.org>) and install it on your machine (K is implemented
-in Java, so it is platform-independent) or use the provided online interface
-to execute the tutorial lessons and do the proposed exercises.
-The objective of this tutorial is twofold: to learn K (in folder
-[1_k](1_k/README.md)) and to learn how to define languages across
-various paradigms using K (in folder [2_languages](2_languages/README.md)).
+Here you will learn how to use the K tool to define languages by means of a series of screencast movies. It is recommended to do these in the indicated order, because K features already discussed in a previous language definition will likely not be rediscussed in latter definitions. The screencasts follow quite closely the structure of the files under the [tutorial folder](https://github.com/kframework/k/tree/master/k-distribution/tutorial) in the K tool distribution. If you'd rather follow the instructions there and do the tutorial exercises yourself, then go back to http://kframework.org and download the K tool, if you have not done it already. Or, you can first watch the screencasts below and then do the exercises, or do them in parallel.
 
-It is recommended to study the languages defined in this folder in the
-order indicated by their name, because K features already discussed in
-a previous language definition will likely not be rediscussed in
-latter definitions.
+## K Overview
 
-Below we discuss some of the high-level features of the K framework
-and of the current K tool prototype, which you may find useful to know
-about before starting to type and execute the tutorial examples.
+Make sure you watch the K overview video before you do the K tutorial:
 
-Subscribe to the [K user](https://lists.cs.illinois.edu/lists/info/k-user)
-list for technical questions and news on major tool updates.  Ask general,
-non-technical questions at <info@kframework.org>.
+- [9'59"] [K Overview](../overview.md)
 
-## K Framework Overview
+## Learning K
 
-[
-[MOVIE (kframework.org) [9'59"]](http://fsl.cs.uiuc.edu/k-overview/k-overview_player.html)
-|
-[MOVIE (YouTube) [9'59"]](http://youtu.be/eSaIKHQOo4c)
-|
-[SLIDES (PPT)](http://www.kframework.org/images/e/e4/K-Overview.zip)
-|
-[SLIDES (PDF)](http://www.kframework.org/images/e/eb/K-Overview.pdf)
-]
+### [34'46"]   Part 1: Defining LAMBDA
 
-K is an executable semantic framework in which programming languages,
-calculi, as well as type systems or formal analysis tools can be
-defined by making use of configurations, computations and rules:
+Here you will learn how to define a very simple functional language in K and the basics of how to use the K tool. The language is a call-by-value variant of lambda calculus with builtins and mu, and its definition is based on substitution.
 
-- Configurations organize the system/program state in units called
-  cells, which are labeled and can be nested.
-- Computations carry computational meaning as special nested list
-  structures sequentializing computational tasks, such as fragments of
-  program; in particular, computations extend the original language or
-  calculus syntax.
-- K (rewrite) rules generalize conventional rewrite rules by making it
-  explicit which parts of the term they read-only, write-only, or do
-  not care about.  This distinction makes K a suitable framework for
-  defining truly concurrent languages or calculi even in the presence
-  of sharing.
+- [04'07"]   [Lesson 1, LAMBDA: Syntax Modules and Basic K Commands](./1_k/1_lambda/lesson_1/README.md)
+- [04'03"]   [Lesson 2, LAMBDA: Module Importing, Rules, Variables](./1_k/1_lambda/lesson_2/README.md)
+- [02'20"]   [Lesson 3, LAMBDA: Evaluation Strategies using Strictness](./1_k/1_lambda/lesson_3/README.md)
+- [03'13"]   [Lesson 4, LAMBDA: Generating Documentation; Latex Attributes](./1_k/1_lambda/lesson_4/README.md)
+- [04'52"]   [Lesson 5, LAMBDA: Adding Builtins; Side Conditions](./1_k/1_lambda/lesson_5/README.md)
+- [02'14"]   [Lesson 6, LAMBDA: Selective Strictness; Anonymous Variables](./1_k/1_lambda/lesson_6/README.md)
+- [05'10"]   [Lesson 7, LAMBDA: Derived Constructs; Extending Predefined Syntax](./1_k/1_lambda/lesson_7/README.md)
+- [02'40"]   [Lesson 8, LAMBDA: Multiple Binding Constructs](./1_k/1_lambda/lesson_8/README.md) (uncommented)
+- [06'07"]   [Lesson 9, LAMBDA: A Complete and Commented Definition](./1_k/1_lambda/lesson_9/README.md) (commented)
 
-Since computations can be handled like any other terms in a rewriting
-environment, that is, they can be matched, moved from one place to
-another in the original term, modified, or even deleted, K is
-particularly suitable for defining control-intensive language features
-such as abrupt termination, exceptions, call/cc, concurrency, etc.
+###  [37'07"]   Part 2: Defining IMP
+
+Here you will learn how to define a very simple, prototypical textbook C-like imperative language, called IMP, and several new features of the K tool.
+
+- [09'15"]   [Lesson 1, IMP: Defining a More Complex Syntax](./1_k/2_imp/lesson_1/README.md)
+- [04'21"]   [Lesson 2, IMP: Defining a Configuration](./1_k/2_imp/lesson_2/README.md)
+- [10'30"]   [Lesson 3, IMP: Computations, Results, Strictness; Rules Involving Cells](./1_k/2_imp/lesson_3/README.md)
+- [09'16"]   [Lesson 4, IMP: Configuration Abstraction, Part 1; Types of Rules](./1_k/2_imp/lesson_4/README.md)
+- [03'45"]   [Lesson 5, IMP: Completing and Documenting IMP](./1_k/2_imp/lesson_5/README.md)
+
+### [33'10"]   Part 3: Defining LAMBDA++
+
+Here you will learn how to define constructs which abruptly change the execution control, as well as how to define functional languages using environments and closures. LAMBDA++ extends the LAMBDA language above with a callcc construct.
+
+- [06'28"]   [Lesson 1, LAMBDA++: Abrupt Changes of Control](./1_k/3_lambda++/lesson_1/README.md) (substitution-based, uncommented)
+- [08'02"]   [Lesson 2, LAMBDA++: Semantic (Non-Syntactic) Computation Items](./1_k/3_lambda++/lesson_2/README.md)
+- [03'21"]   [Lesson 3, LAMBDA++: Reusing Existing Semantics](./1_k/3_lambda++/lesson_3/README.md)
+- [03'37"]   [Lesson 4, LAMBDA++: Do Not Reuse Blindly!](./1_k/3_lambda++/lesson_4/README.md)
+- [05'19"]   [Lesson 5, LAMBDA++: More Semantic Computation Items](./1_k/3_lambda++/lesson_5/README.md)
+- [06'23"]   [Lesson 6, LAMBDA++: Wrapping Up and Documenting LAMBDA++ (environment-based)](./1_k/3_lambda++/lesson_6/README.md)
 
 
-## The K Tool Prototype
+### [46'46"]   Part 4: Defining IMP++
 
-The K tool prototype, called the "K tool" or the "K prototype" from
-here on, is a prototype implementation of the K Framework written in
-Java and Maude.  The K prototype is implemented by a joint team of
-faculty and students from the University of Illinois at
-Urbana-Champaign, USA (the FSL group, led by professor Grigore Rosu),
-the University Alexandru Ioan Cuza, Iasi, Romania (the FMSE group, led
-by professor Dorel Lucanu), and the University of Bucharest, Romania
-(professor Traian Florin Serbanuta), developers from
-[Runtime Verification, Inc.](https://runtimeverification.com),
-and several individual enthusiasts.
-A current list of the people involved in the project and their
-specific roles can be accessed from <http://kframework.org>.
+Here you will learn how to refine configurations, how to generate fresh elements, how to tag syntactic constructs and rules, how to exhaustively search the space of non-deterministic or concurrent program executions, etc. IMP++ extends the IMP language above with increment, blocks and locals, dynamic threads, input/output, and abrupt termination.
 
-### Usage
+- [07'47"]   [Lesson 1, IMP++: Extending/Changing an Existing Language Syntax](./1_k/4_imp++/lesson_1/README.md)
+- [04'06"]   [Lesson 2, IMP++: Configuration Refinement; Freshness](./1_k/4_imp++/lesson_2/README.md)
+- [06'56"]   [Lesson 3, IMP++: Tagging; Superheat/Supercool Kompilation Options](./1_k/4_imp++/lesson_3/README.md)
+- [05'21"]   [Lesson 4, IMP++: Semantic Lists; Input/Output Streaming](./1_k/4_imp++/lesson_4/README.md)
+- [04'30"]   [Lesson 5, IMP++: Deleting, Saving and Restoring Cell Contents](./1_k/4_imp++/lesson_5/README.md)
+- [11'40"]   [Lesson 6, IMP++: Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2](./1_k/4_imp++/lesson_6/README.md)
+- [??'??"]   [Lesson 7, IMP++: Everything Changes: Syntax, Configuration, Semantics](./1_k/4_imp++/lesson_7/README.md)
+- [06'26"]   [Lesson 8, IMP++: Wrapping up Larger Languages](./1_k/4_imp++/lesson_8/README.md)
 
-Some of the languages defined so far using the K framework can be found in
-the [2_languages](2_languages/) directory, and many others
-in the [samples](/samples/) directory.  For example, the directory
+### [17'03"]   Part 5: Defining Type Systems
 
-    2_languages/1_simple/1_untyped
+Here you will learn how to define various kinds of type systems following various approaches or styles using K.
 
-contains the definition of the untyped version of the SIMPLE language, while 
+- [10'11"]   [Lesson 1, Type Systems: Imperative, Environment-Based Type Systems](./1_k/5_types/lesson_1/README.md) (IMP++ type checker)
+- [06'52"]   [Lesson 2, Type Systems: Substitution-Based Higher-Order Type Systems](./1_k/5_types/lesson_2/README.md) (LAMBDA type checker, substitution, uncommented)
+- [??'??"]   [Lesson 3, Type Systems: Environment-Based Higher-Order Type Systems](./1_k/5_types/lesson_3/README.md) (LAMBDA type checker, environment, uncommented)
+- [??'??"]   [Lesson 4, Type Systems: A Naive Substitution-Based Type Inferencer](./1_k/5_types/lesson_4/README.md) (for LAMBDA, uncommented)
+- [??'??"]   [Lesson 5, Type Systems: A Naive Environment-Based Type Inferencer](./1_k/5_types/lesson_5/README.md) (for LAMBDA, uncommented)
+- [??'??"]   [Lesson 6, Type Systems: Parallel Type Checkers/Inferencers](./1_k/5_types/lesson_6/README.md) (for LAMBDA, uncommented)
+- [??'??"]   [Lesson 7, Type Systems: A Naive Substitution-based Polymorphic Type Inferencer](./1_k/5_types/lesson_7/README.md) (for LAMBDA, uncommented)
+- [??'??"]   [Lesson 8, Type Systems: A Naive Environment-based Polymorphic Type Inferencer](./1_k/5_types/lesson_8/README.md) (for LAMBDA, uncommented)
+- [??'??"]   [Lesson 9, Type Systems: Let-Polymorphic Type Inferencer (Damas-Hindley-Milner)](./1_k/5_types/lesson_9/README.md) (for LAMBDA, uncommented)
 
-    2_languages/1_simple/2_typed/1_static
+### [??'??"]   Part 6: Miscellaneous Other K Features
 
-contains the static semantics, i.e., the type checker.
+Here you will learn a few other K features, and better understand how features that you have already seen work.
 
-We encourage you to contribute with examples to our distribution.
-Please see the README file under [samples](/samples/) for instructions on how
-to do it.
+- [??'??"]   ...
 
+## Learning Language Design and Semantics using K
 
-### How It Works
+### [??'??"]   Part 7: SIMPLE: Designing Imperative Programming Languages
 
-We recommend the papers listed at <http://kframework.org> for a
-deeper understanding of K.  Here we only discuss how our current K
-tool works, reminding important facts about K in general by-need.
+Here you will learn how to design imperative programming languages using K. SIMPLE is an imperative language with functions, threads, pointers, exceptions, multi-dimensional arrays, etc. We first define an untyped version of SIMPLE, then a typed version. For the typed version, we define both a static and a dynamic semantics.
 
-By default, the tool uses the syntax module of a definition to generate a
-parser for that definition which can be used to parse programs and turn
-them into their corresponding K-AST (KAST) format.  We briefly outline the
-process below, using the untyped SIMPLE language
-([2_languages/1_simple/1_untyped](2_languages/1_simple/1_untyped)).
+- [??'??"]   [Lesson 1, SIMPLE untyped](./2_languages/1_simple/1_untyped/simple-untyped.md)
+- [??'??"]   [Lesson 2, SIMPLE typed static](./2_languages/1_simple/2_typed/1_static/simple-typed-static.md)
+- [??'??"]   [Lesson 3, SIMPLE typed dynamic](./2_languages/1_simple/2_typed/2_dynamic/simple-typed-dynamic.md)
 
+###  [??'??"]   Part 8: KOOL: Designing Object-Oriented Programming Languages
 
-#### Parsing Programs
+Here woul will learn how to design object-oriented programming languages using K. KOOL is an object-oriented language that extends SIMPLE with classes and objects. We first define an untyped version of KOOL, then a typed version, with both a dynamic and a static semantics.
 
-You may prefer to first define the syntax and then the semantics.
-That is how most of the languages in this directory are
-defined.  This reduces ambiguities in the parser and therefore might
-be able to parse more programs.  For example, suppose that we want to
-define a language LANGUAGE and that we have already defined its syntax
-in a module LANGUAGE-SYNTAX.  Before even attempting to define the
-semantics, it is a good idea to test the syntax by parsing a large
-variety of programs.
+- [??'??"]   [Lesson 1, KOOL untyped](./2_languages/2_kool/1_untyped/kool-untyped.md)
+- [??'??"]   [Lesson 2, KOOL typed dynamic](./2_languages/2_kool/2_typed/1_dynamic/kool-typed-dynamic.md)
+- [??'??"]   [Lesson 3, KOOL typed static](./2_languages/2_kool/2_typed/2_static/kool-typed-static.md)
 
-In the examples provided with the tool, programs are generally kept in
-a subdirectory in the directory containing the syntax definition.
+### [??'??"]   Part 9: FUN: Designing Functional Programming Languages
+H
+ere woul will learn how to design functional programming languages using K. FUN is a higher-order functional language with general let, letrec, pattern matching, references, lists, callcc, etc. We first define an untyped version of FUN, then a let-polymorphic type inferencer.
 
-As explained in detail in the papers about K, the entire language
-syntax is automatically included as constructors for the builtin sort
-K of computation structures, or simply just computations.  Concrete
-syntax plays no role whatsoever in the mathematical foundations of K.
-That means, in particular, that the distinction between
-concrete/abstract syntax and its representation as computations of
-sort K is irrelevant in the theory of K.  However, it becomes quite
-relevant in implementations of K tools, because we want to use the
-defined language syntax as much as possible in the semantics, which
-means that we need to combine a parser for the defined language with a
-parser for K in order to parse the semantic rules.  It is also possble
-to use an external parser for programs in K; type `krun --help`.
+- [??'??"]   [Lesson 1, FUN untyped, Environment-Based](./2_languages/3_fun/1_untyped/1_environment/fun-untyped.md)
+- [??'??"]   [Lesson 2, FUN untyped, Substitution-Based](./2_languages/3_fun/1_untyped/2_substitution/fun-untyped.md)
+- [??'??"]   Lesson 3, FUN polymorphic type inferencer
 
-In our current implementation of K, the internal representation of the
-syntactic terms follows the simple abstract-syntax-tree (AST) syntax:
+### [??'??"]   Part 10: LOGIK: Designing Logic Programming Languages
 
-    K ::= KLabel "(" KList ")"
+Here you will learn how to design a logic programming language using K.
 
-`KList` is a non-terminal standing for lists of K terms.  This way, from
-an internal representation point of view, a language syntax is nothing but
-a finite set of `KLabel` constants.  The `kast` tool can be used to parse
-a program and see its KAST form.  By running
-
-    $ kompile simple-untyped.k
-    $ kast tests/diverse/factorial.simple
-
-from the
-[2_languages/1_simple/1_untyped](2_languages/1_simple/1_untyped)
-directory, you get the internal representation of the factorial program.
-Typically, you should not need to execute the `kast` tool directly, as it will
-be executed by the `krun` tool (below) when necessary.  However, executing it
-directly can be useful to test and understand your syntax.
-
-Our current implementation allows you to use either concrete syntax or
-abstract syntax (as displayed by the `kast` command above) in your
-semantic rules.  We typically prefer the concrete syntax, but you may
-need to use the abstract syntax instead when your syntax confuses the K parser.
-
-
-#### Running Programs
-
-The `krun` tool can be used to execute programs, or explore their
-behaviors.  What the `krun` tool basically does is:
-1.  put the internal representation of the program in the initial
-    configuration described in the definition;
-2.  call the rewrite engine to execute the program by rewriting the
-    resulting initial configuration; and
-3.  post-process the output of the rewrite engine and display it in
-    a more appealing format.
-
-To run our sample program `factorial`, all we need to do is:
-
-    $ kompile simple-untyped.k
-    $ krun tests/diverse/factorial.simple --output none
-    Input a natural number: 5
-    Factorial of 5 is: 120
-
-The `--output none` option tells `krun` to not display the
-configuration.  Instead, it only displays output produced by the
-program.  Try running it without this option to see the resulting
-configuration.
-
-You can also use the krun command to search for all possible final
-states which could be obtained upon running the program, to model
-check non-deterministic or concurrent programs, and even to
-deductively verify programs.  These are all explained in the various
-lectures in the tutorial.
-
-
-## Reporting Issues/Bugs/Feature requests
-
-Please report issues at <https://github.com/kframework/k/issues>.
-Simply post your test case and briefly explain your problem.  If you
-want to help us the most, please also propose a test case to the
-repository using the style in [tests/issues](/tests/issues/) (do this
-in addition to posting an issue, because you need the issue number).
+- [??'??"]   [Lesson 1, LOGIK](./2_languages/4_logik/basic/logik.md)
