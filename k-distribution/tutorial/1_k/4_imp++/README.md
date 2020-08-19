@@ -1,6 +1,6 @@
 <!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
 
-## Part 4: Defining IMP++
+# Part 4: Defining IMP++
 
 IMP++ extends IMP, which was discussed in Part 2 of this tutorial, with several
 new syntactic constructs.  Also, some existing syntax is generalized, which
