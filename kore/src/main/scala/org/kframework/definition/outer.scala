@@ -379,6 +379,11 @@ case class ContextAlias(body: K, requires: K, att: Att = Att.empty) extends Sent
   override def withAtt(att: Att) = ContextAlias(body, requires, att)
 }
 
+case class Claim(body: K, requires: K, ensures: K, att: Att = Att.empty) extends Sentence with ClaimToString with OuterKORE {
+  override val isSyntax = false
+  override val isNonSyntax = true
+  override def withAtt(att: Att) = Rule(body, requires, ensures, att)
+}
 
 case class Rule(body: K, requires: K, ensures: K, att: Att = Att.empty) extends Sentence with RuleToString with OuterKORE {
   override val isSyntax = false

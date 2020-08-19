@@ -27,6 +27,11 @@ trait RuleToString {
   override def toString = Seq("rule", body, "requires", requires, "ensures", ensures, att).mkString(" ")
 }
 
+trait ClaimToString {
+  self: Claim =>
+  override def toString = Seq("claim", body, "requires", requires, "ensures", ensures, att).mkString(" ")
+}
+
 trait ProductionToString {
   self: Production =>
   override def toString = "syntax " + (if (params.nonEmpty) { "{" + params.mkString(", ") + "} " } else "") + sort + " ::= " + items.mkString(" ") + att.remove(classOf[Source]).remove(classOf[Location]).postfixString

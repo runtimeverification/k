@@ -21,6 +21,9 @@ public class Tag {
     public final static String priority = "priority";
     public final static String attributes = "attributes";
     public final static String rule = "rule";
+    public final static String alias = "alias";
+    public final static String claim = "claim";
+    public final static String context = "context";
     public final static String error = "error";
     public final static String configuration = "config";
     public final static String color = "color";
