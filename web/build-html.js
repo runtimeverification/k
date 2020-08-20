@@ -146,9 +146,15 @@ function generatePagesFromMarkdownFiles(
 }
 
 function cleanUpFiles() {
-  fs.rmdirSync(path.join(__dirname, "./public_content/k-distribution"), {
-    recursive: true,
-  });
+  const kDistributionPath = path.join(
+    __dirname,
+    "./public_content/k-distribution"
+  );
+  if (fs.existsSync(kDistributionPath)) {
+    fs.rmdirSync(kDistributionPath, {
+      recursive: true,
+    });
+  }
 
   const files = glob.sync(
     path.join(__dirname, "./public_content/") + "/**/*.html"
