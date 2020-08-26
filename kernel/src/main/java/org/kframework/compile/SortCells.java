@@ -9,6 +9,7 @@ import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo.Multiplicity;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
@@ -102,6 +103,24 @@ public class SortCells {
         return rule;
     }
 
+    private Claim sortCells(Claim claim) {
+        resetVars();
+        analyzeVars(claim.body());
+        analyzeVars(claim.requires());
+        analyzeVars(claim.ensures());
+        claim = Claim(
+                processVars(claim.body()),
+                processVars(claim.requires()),
+                processVars(claim.ensures()),
+                claim.att());
+        claim = Claim(
+                resolveIncompleteCellFragment(claim.body()),
+                resolveIncompleteCellFragment(claim.requires()),
+                resolveIncompleteCellFragment(claim.ensures()),
+                claim.att());
+        return claim;
+    }
+
     private Context sortCells(Context context) {
         resetVars();
         analyzeVars(context.body());
@@ -115,6 +134,8 @@ public class SortCells {
     public synchronized Sentence sortCells(Sentence s) {
         if (s instanceof Rule) {
             return sortCells((Rule) s);
+        } else if (s instanceof Claim) {
+            return sortCells((Claim) s);
         } else if (s instanceof Context) {
             return sortCells((Context) s);
         } else {

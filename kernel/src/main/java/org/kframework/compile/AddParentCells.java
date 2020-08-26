@@ -7,6 +7,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import org.kframework.builtin.KLabels;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
@@ -315,6 +316,9 @@ public class AddParentCells {
         if (m instanceof Rule) {
             Rule r = (Rule) m;
             return new Rule(concretize(r.body()), r.requires(), r.ensures(), r.att());
+        } else if (m instanceof Claim) {
+            Claim c = (Claim) m;
+            return new Claim(concretize(c.body()), c.requires(), c.ensures(), c.att());
         } else if (m instanceof Context) {
             Context c = (Context) m;
             return new Context(concretize(c.body()), c.requires(), c.att());

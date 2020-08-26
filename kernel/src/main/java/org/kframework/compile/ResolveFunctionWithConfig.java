@@ -5,6 +5,7 @@ import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Definition;
@@ -92,6 +93,14 @@ public class ResolveFunctionWithConfig {
                 transform(rule.requires(), m),
                 transform(rule.ensures(), m),
                 rule.att());
+    }
+
+    private Claim resolve(Claim claim, Module m) {
+        return new Claim(
+                transform(resolve(claim.body(), m), m),
+                transform(claim.requires(), m),
+                transform(claim.ensures(), m),
+                claim.att());
     }
 
     private Context resolve(Context context, Module m) {
@@ -220,6 +229,9 @@ public class ResolveFunctionWithConfig {
       if (s instanceof Rule) {
         Rule r = (Rule)s;
         return Rule(resolveConfigVar(r.body(), r.requires(), r.ensures()), r.requires(), r.ensures(), r.att());
+      } else if (s instanceof Claim) {
+          Claim c = (Claim)s;
+        return Claim(resolveConfigVar(c.body(), c.requires(), c.ensures()), c.requires(), c.ensures(), c.att());
       }
       return s;
     }
@@ -229,6 +241,8 @@ public class ResolveFunctionWithConfig {
             return resolve((Rule) s, m);
         } else if (s instanceof Context) {
             return resolve((Context) s, m);
+        } else if (s instanceof Claim) {
+            return resolve((Claim) s, m);
         } else if (s instanceof ContextAlias) {
             return resolve((ContextAlias) s, m);
         } else if (s instanceof Production) {

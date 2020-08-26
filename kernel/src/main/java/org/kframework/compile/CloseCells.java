@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.LabelInfo;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
@@ -58,6 +59,18 @@ public class CloseCells {
                 rule.att());
     }
 
+    private Claim close(Claim claim) {
+        resetVars();
+        gatherVars(claim.body());
+        gatherVars(claim.requires());
+        gatherVars(claim.ensures());
+        return new Claim(
+                transform(claim.body()),
+                transform(claim.requires()),
+                transform(claim.ensures()),
+                claim.att());
+    }
+
     private Context close(Context context) {
         resetVars();
         gatherVars(context.body());
@@ -71,6 +84,8 @@ public class CloseCells {
     public synchronized Sentence close(Sentence s) {
         if (s instanceof Rule) {
             return close((Rule)s);
+        } else if (s instanceof Claim) {
+            return close((Claim)s);
         } else if (s instanceof Context) {
             return close((Context)s);
         } else {

@@ -216,6 +216,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
 
+  lazy val claims: Set[Claim] = sentences collect { case c: Claim => c }
   lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
   lazy val rulesFor: Map[KLabel, Set[Rule]] = rules.groupBy(r => {
     r.body match {

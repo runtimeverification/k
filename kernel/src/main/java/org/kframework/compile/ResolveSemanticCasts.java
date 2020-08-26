@@ -2,6 +2,7 @@
 package org.kframework.compile;
 
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
@@ -57,6 +58,18 @@ public class ResolveSemanticCasts {
                 addSideCondition(transform(rule.requires()), ExpandMacros.isMacro(rule)),
                 transform(rule.ensures()),
                 rule.att());
+    }
+
+    private Claim resolve(Claim claim) {
+        resetCasts();
+        gatherCasts(claim.body());
+        gatherCasts(claim.requires());
+        gatherCasts(claim.ensures());
+        return new Claim(
+                transform(claim.body()),
+                addSideCondition(transform(claim.requires()), ExpandMacros.isMacro(claim)),
+                transform(claim.ensures()),
+                claim.att());
     }
 
     private Context resolve(Context context) {
@@ -145,6 +158,8 @@ public class ResolveSemanticCasts {
     public synchronized Sentence resolve(Sentence s) {
         if (s instanceof Rule) {
             return resolve((Rule) s);
+        } else if (s instanceof Claim) {
+            return resolve((Claim) s);
         } else if (s instanceof Context) {
             return resolve((Context) s);
         } else {

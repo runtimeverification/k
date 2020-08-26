@@ -9,12 +9,14 @@ import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
 import org.kframework.compile.checks.CheckAnonymous;
+import org.kframework.compile.checks.CheckClaimInDef;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckFunctions;
 import org.kframework.compile.checks.CheckHOLE;
 import org.kframework.compile.checks.CheckK;
 import org.kframework.compile.checks.CheckKLabels;
 import org.kframework.compile.checks.CheckLabels;
+import org.kframework.compile.checks.CheckProverRules;
 import org.kframework.compile.checks.CheckRHSVariables;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
@@ -296,7 +298,18 @@ public class Kompile {
         scala.collection.Set<Module> modules = parsedDef.modules();
         Module mainModule = parsedDef.mainModule();
         Option<Module> kModule = parsedDef.getModule("K");
+        definitionChecks(stream(modules).collect(Collectors.toSet()));
         structuralChecks(modules, mainModule, kModule, excludedModuleTags, true);
+    }
+
+    // checks that are not verified in the prover
+    public void definitionChecks(Set<Module> modules) {
+        modules.forEach(m -> stream(m.localSentences()).forEach(new CheckClaimInDef(errors)::check)); // called in kompile but not kprove
+    }
+
+    // Extra checks just for the prover specification.
+    public void proverChecks(Set<Module> modules) {
+        modules.forEach(m -> stream(m.localSentences()).forEach(new CheckProverRules(errors, kem)::check));
     }
 
     public void structuralChecks(scala.collection.Set<Module> modules, Module mainModule, Option<Module> kModule, Set<String> excludedModuleTags, boolean _throw) {

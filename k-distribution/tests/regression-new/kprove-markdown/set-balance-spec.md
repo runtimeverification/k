@@ -9,7 +9,7 @@ module VERIFICATION
 
     syntax Action ::= totalBalance ( AccountId )
  // --------------------------------------------
-    rule <k> totalBalance(AID) => total_balance(AID) ... </k>
+    claim <k> totalBalance(AID) => total_balance(AID) ... </k>
 endmodule
 
 module SET-BALANCE-SPEC
@@ -19,7 +19,7 @@ module SET-BALANCE-SPEC
 ### `total_balance` tests
 
 ```k
-    rule <k> totalBalance(AID) => 50 </k>
+    claim <k> totalBalance(AID) => 50 </k>
          <account>
            <accountID> AID </accountID>
            <freeBalance> 30 </freeBalance>
@@ -35,7 +35,7 @@ This property shows that `set_balance` will not result in a zero-balance attack.
 **TODO**: Assertions about log events.
 
 ```
-    rule <k> set_balance(Root, WHO, FREE_BALANCE', RESERVED_BALANCE') => . ... </k>
+    claim <k> set_balance(Root, WHO, FREE_BALANCE', RESERVED_BALANCE') => . ... </k>
          <totalIssuance> TOTAL_ISSUANCE => TOTAL_ISSUANCE +Int ( FREE_BALANCE' -Int FREE_BALANCE ) +Int ( RESERVED_BALANCE' -Int RESERVED_BALANCE ) </totalIssuance>
          <existentialDeposit> EXISTENTIAL_DEPOSIT </existentialDeposit>
          <account>
@@ -51,7 +51,7 @@ This property shows that `set_balance` will not result in a zero-balance attack.
 ```
 
 ```k
-    rule <k> set_balance_reserved ( WHO , RESERVED_BALANCE' ) => . ... </k>
+    claim <k> set_balance_reserved ( WHO , RESERVED_BALANCE' ) => . ... </k>
          <existentialDeposit> EXISTENTIAL_DEPOSIT </existentialDeposit>
          <totalIssuance> TOTAL_ISSUANCE +Int ( FREE_BALANCE' -Int FREE_BALANCE ) => TOTAL_ISSUANCE +Int ( FREE_BALANCE' -Int FREE_BALANCE ) +Int ( RESERVED_BALANCE' -Int RESERVED_BALANCE ) </totalIssuance>
          <account>

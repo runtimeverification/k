@@ -3,6 +3,7 @@ package org.kframework.compile;
 
 import org.kframework.attributes.Att;
 import org.kframework.backend.kore.ConstructorChecks;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -112,6 +113,14 @@ public class AddTopCellToRules {
                 rule.att());
     }
 
+    public Claim addImplicitCells(Claim claim, Module m) {
+        return new Claim(
+                addImplicitCells(claim.body(), m),
+                claim.requires(),
+                claim.ensures(),
+                claim.att());
+    }
+
     public Context addImplicitCells(Context context, Module m) {
         return new Context(
                 addImplicitCells(context.body(), m),
@@ -125,6 +134,8 @@ public class AddTopCellToRules {
         }
         if (s instanceof Rule) {
             return addImplicitCells((Rule) s, m);
+        } else if (s instanceof Claim) {
+            return addImplicitCells((Claim) s, m);
         } else if (s instanceof Context) {
             return addImplicitCells((Context) s, m);
         } else {

@@ -4,6 +4,8 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.compile.Backend;
+import org.kframework.compile.checks.CheckClaimInDef;
+import org.kframework.compile.checks.CheckProverRules;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
@@ -16,6 +18,8 @@ import scala.Tuple2;
 import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.kframework.Collections.*;
 
 /**
  * @author Denis Bogdanas
@@ -67,6 +71,7 @@ public class ProofDefinitionBuilder {
         Map<String, Module> modulesMap = modules.stream().collect(Collectors.toMap(Module::name, m -> m));
         Definition parsedDefinition = compiledDefinition.getParsedDefinition();
         Module specModule = getModule(specModuleNameUpdated, modulesMap, parsedDefinition);
+        kompile.proverChecks(modules.stream().filter(m -> !modulesMap.get(defModuleNameUpdated).importedModuleNames().contains(m.name())).collect(Collectors.toSet()));
         kompile.structuralChecks(scala.collection.JavaConverters.asScalaSet(modules),
                 specModule, scala.Option.empty(), backend.excludedModuleTags(), false);
         Module defModule = getModule(defModuleNameUpdated, modulesMap, parsedDefinition);

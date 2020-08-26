@@ -2,6 +2,7 @@
 package org.kframework.compile;
 
 import org.kframework.attributes.Att;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Rule;
@@ -29,6 +30,18 @@ public class ResolveAnonVar {
     void resetVars() {
         vars.clear();
         counter = 0;
+    }
+
+    private Claim resolve(Claim claim) {
+        resetVars();
+        gatherVars(claim.body());
+        gatherVars(claim.requires());
+        gatherVars(claim.ensures());
+        return new Claim(
+                transform(claim.body()),
+                transform(claim.requires()),
+                transform(claim.ensures()),
+                claim.att());
     }
 
     private Rule resolve(Rule rule) {
@@ -72,6 +85,8 @@ public class ResolveAnonVar {
     public synchronized Sentence resolve(Sentence s) {
         if (s instanceof Rule) {
             return resolve((Rule) s);
+        } else if (s instanceof Claim) {
+            return resolve((Claim) s);
         } else if (s instanceof Context) {
             return resolve((Context) s);
         } else if (s instanceof ContextAlias) {
