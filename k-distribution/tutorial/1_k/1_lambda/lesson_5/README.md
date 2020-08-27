@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2012-2019 K Team. All Rights Reserved. -->
 
-### Adding Builtins; Side Conditions
-
-[MOVIE [4'52"]](http://youtu.be/T1aI04q3l9U)
+# Adding Builtins; Side Conditions
 
 We have already added the builtin identifiers (sort `Id`) to LAMBDA expressions,
 but those had no operations on them.  In this lesson we add integers and
@@ -90,3 +88,7 @@ Having builtin arithmetic is useful, but writing programs with just lambda
 and arithmetic constructs is still a pain.  In the next two lessons we will
 add conditional (`if_then_else`) and binding (`let` and `letrec`) constructs,
 which will allow us to write nicer programs.
+
+Go to [Lesson 6, LAMBDA: Selective Strictness; Anonymous Variables](../lesson_6/README.md).
+
+[MOVIE (out of date) [4'52"]](http://youtu.be/T1aI04q3l9U)

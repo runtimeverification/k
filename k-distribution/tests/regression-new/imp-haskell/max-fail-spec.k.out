@@ -1,13 +1,13 @@
   #Not ( {
-      true
+      A
     #Equals
-      A >=Int B
+      B
     }
   #And
     {
       true
     #Equals
-      B ==Int A
+      B >=Int B
     } )
 #And
   <T>

@@ -1,6 +1,6 @@
 <!-- Copyright (c) 2012-2019 K Team. All Rights Reserved. -->
 
-## Part 3: Defining LAMBDA++
+# Part 3: Defining LAMBDA++
 
 Here you will learn how to define language constructs which abruptly change
 the execution control flow, and how to define language semantics following

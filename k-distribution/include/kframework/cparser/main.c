@@ -91,6 +91,8 @@ YYSTYPE mergeAmb(YYSTYPE x0, YYSTYPE x1) {
   strcpy(symbol, prefix);
   strcat(symbol, x0n->sort);
   strcat(symbol, suffix);
+  n->location = x0n->location;
+  n->hasLocation = false;
   n->symbol = symbol;
   n->sort = x0n->sort;
   n->str = false;

@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2012-2019 K Team. All Rights Reserved. -->
 
-### Selective Strictness; Anonymous Variables
-
-[MOVIE [2'14"]](http://youtu.be/IreP6DFPWdk)
+# Selective Strictness; Anonymous Variables
 
 We here show how to define selective strictness of language constructs,
 that is, how to state that certain language constructs are strict only
@@ -45,3 +43,7 @@ division-by-zero.
 In the next lesson we will introduce two new language constructs, called
 `let` and `letrec` and conventionally found in functional programming
 languages, which will allow us to already write interesting LAMBDA programs.
+
+Go to [Lesson 7, LAMBDA: Derived Constructs; Extending Predefined Syntax](../lesson_7/README.md).
+
+[MOVIE (out of date) [2'14"]](http://youtu.be/IreP6DFPWdk)
