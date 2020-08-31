@@ -4,11 +4,13 @@ package org.kframework.compile;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.Sorts;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.FoldK;
 import org.kframework.kore.InjectedKLabel;
@@ -58,23 +60,25 @@ public class AddSortInjections {
     }
 
     public Sentence addInjections(Sentence s) {
-        if (s instanceof Rule) {
-            return addInjections((Rule) s);
+        if (s instanceof RuleOrClaim) {
+            return addInjections((RuleOrClaim) s);
         } else {
             return s;
         }
     }
 
-    public Rule addInjections(Rule rule) {
+    public RuleOrClaim addInjections(RuleOrClaim roc) {
         initSortParams();
-        K body = addTopSortInjections(rule.body());
-        K requires = internalAddSortInjections(rule.requires(), Sorts.Bool());
-        K ensures = internalAddSortInjections(rule.ensures(), Sorts.Bool());
-        Att att = rule.att();
+        K body = addTopSortInjections(roc.body());
+        K requires = internalAddSortInjections(roc.requires(), Sorts.Bool());
+        K ensures = internalAddSortInjections(roc.ensures(), Sorts.Bool());
+        Att att = roc.att();
         if (!sortParams.isEmpty()) {
             att = att.add("sortParams", Set.class, new HashSet<>(sortParams));
         }
-        return new Rule(body, requires, ensures, att);
+        if (roc instanceof Rule)
+            return new Rule(body, requires, ensures, att);
+        return new Claim(body, requires, ensures, att);
     }
 
     public K addInjections(K term) {
