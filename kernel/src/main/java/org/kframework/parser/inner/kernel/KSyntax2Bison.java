@@ -217,6 +217,83 @@ public class KSyntax2Bison {
     sb.append("_");
   }
 
+  private static void appendOverloadCondition(StringBuilder bison, Module module, Production greater, Production lesser, List<Integer> nts) {
+    bison.append("true");
+    for (int i = 0; i < nts.size(); i++) {
+      boolean hasSameSort = lesser.nonterminals().apply(i).sort().equals(greater.nonterminals().apply(i).sort());
+      if (!hasSameSort) {
+        bison.append(" && strncmp($").append(nts.get(i)).append(".nterm->symbol, \"inj{\", 4) == 0 && (false");
+        Sort greaterSort = lesser.nonterminals().apply(i).sort();
+        for (Sort lesserSort : iterable(module.subsorts().elements())) {
+          if (module.subsorts().lessThanEq(lesserSort, greaterSort)) {
+            bison.append(" || strcmp($").append(nts.get(i)).append(".nterm->children[0]->sort, \"");
+            encodeKore(lesserSort, bison);
+            bison.append("\") == 0");
+          }
+        }
+        bison.append(")");
+      }
+    }
+  }
+
+  private static void appendOverloadChecks(StringBuilder bison, Module module, Production greater, List<Integer> nts, boolean hasLocation) {
+    for (Production lesser : iterable(module.overloads().elements())) {
+      if (module.overloads().lessThan(lesser, greater)) {
+        bison.append("  if (");
+        appendOverloadCondition(bison, module, greater, lesser, nts);
+        bison.append(") {\n" +
+            "    n->symbol =\"");
+        encodeKore(lesser.klabel().get(), bison);
+        bison.append("\";\n" +
+            "    n->sort = \"");
+        encodeKore(lesser.sort(), bison);
+        boolean hasLesserLocation = module.sortAttributesFor().get(lesser.sort().head()).getOrElse(() -> Att.empty()).contains("locations");
+        bison.append("\";\n" +
+            "    n->hasLocation = " + (hasLesserLocation ? "1" : "0") + ";\n");
+        for (int i = 0; i < nts.size(); i++) {
+          boolean hasSameSort = lesser.nonterminals().apply(i).sort().equals(greater.nonterminals().apply(i).sort());
+          if (hasSameSort) {
+            bison.append(
+                "    n->children[").append(i).append("] = $").append(nts.get(i)).append(".nterm;\n");
+          } else {
+            bison.append(
+                "    node *origChild = $").append(nts.get(i)).append(".nterm;\n" +
+                "    char *lesserSort = \"");
+            encodeKore(lesser.nonterminals().apply(i).sort(), bison);
+            bison.append("\";\n" +
+                "    if (strcmp(origChild->children[0]->sort, lesserSort) == 0) {\n" +
+                "      n->children[").append(i).append("] = origChild->children[0];\n" +
+                "    } else {\n" +
+                "      node *inj = malloc(sizeof(node) + sizeof(node *));\n" +
+                "      inj->symbol = injSymbol(origChild->children[0]->sort, lesserSort);\n" +
+                "      inj->str = false;\n" +
+                "      inj->location = origChild->location;\n" +
+                "      inj->nchildren = 1;\n" +
+                "      inj->sort = lesserSort;\n" +
+                "      inj->hasLocation = origChild->hasLocation;\n" +
+                "      inj->children[0] = origChild->children[0];\n" +
+                "      n->children[").append(i).append("] = inj;\n" +
+                "    }\n");
+          }
+        }
+        bison.append(
+            "    node *n2 = malloc(sizeof(node) + sizeof(node *));\n" +
+            "    n2->str = false;\n" +
+            "    n2->location = @$;\n" +
+            "    n2->nchildren = 1;\n" +
+            "    n2->sort = \"");
+        encodeKore(greater.sort(), bison);
+        bison.append("\";\n" +
+            "    n2->hasLocation = " + (hasLocation ? "1" : "0") + ";\n" +
+            "    n2->symbol = injSymbol(n->sort, n2->sort);\n" +
+            "    n2->children[0] = n;\n" +
+            "    value_type result = {.nterm = n2};\n" +
+            "    $$ = result;\n" +
+            "  } else");
+      }
+    }
+  }
+
   private static void processProduction(Production prod, Module module, Scanner scanner, StringBuilder bison, boolean glr) {
     int i = 1;
     List<Integer> nts = new ArrayList<>();
@@ -349,23 +426,26 @@ public class KSyntax2Bison {
     } else if (prod.klabel().isDefined()) {
       bison.append("{\n" +
           "  node *n = malloc(sizeof(node) + sizeof(node *)*").append(nts.size()).append(");\n" +
-          "  n->symbol = \"");
-      encodeKore(prod.klabel().get(), bison);
-      bison.append("\";\n" +
-          "  n->sort = \"");
-      encodeKore(prod.sort(), bison);
-      bison.append("\";\n" +
           "  n->str = false;\n" +
           "  n->location = @$;\n" +
-          "  n->hasLocation = " + (hasLocation ? "1" : "0") + ";\n" +
           "  n->nchildren = ").append(nts.size()).append(";\n");
+      appendOverloadChecks(bison, module, prod, nts, hasLocation);
+      bison.append("{\n" +
+          "    n->symbol = \"");
+      encodeKore(prod.klabel().get(), bison);
+      bison.append("\";\n" +
+          "    n->sort = \"");
+      encodeKore(prod.sort(), bison);
+      bison.append("\";\n" +
+          "    n->hasLocation = " + (hasLocation ? "1" : "0") + ";\n");
       for (i = 0; i < nts.size(); i++) {
         bison.append(
-          "  n->children[").append(i).append("] = $").append(nts.get(i)).append(".nterm;\n");
+          "    n->children[").append(i).append("] = $").append(nts.get(i)).append(".nterm;\n");
       }
       bison.append(
-          "  value_type result = {.nterm = n};\n" +
-          "  $$ = result;\n" +
+          "    value_type result = {.nterm = n};\n" +
+          "    $$ = result;\n" +
+          "  }\n" +
           "}\n");
     } else if (prod.att().contains(Att.BRACKET())) {
       bison.append("{\n" +
