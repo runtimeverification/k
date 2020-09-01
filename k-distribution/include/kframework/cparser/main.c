@@ -39,13 +39,6 @@ char *enquote(char *str) {
 }
 
 static bool equalsSymbol(node *x0, node *x1) {
-  if (strncmp(x0->symbol, "inj{", 4) == 0 && strncmp(x1->symbol, "inj{", 4) == 0) {
-    node *c0 = x0->children[0];
-    node *c1 = x1->children[0];
-    if (strcmp(c0->sort, c1->sort) == 0) {
-      return true;
-    }
-  }
   return strcmp(x0->symbol, x1->symbol) == 0;
 }
 
@@ -56,15 +49,6 @@ bool equalsNode(node *x0, node *x1) {
   if (x0->str) {
     return strcmp(x0->symbol, x1->symbol) == 0;
   } else {
-    if (strncmp(x0->symbol, "inj{", 4) == 0 && strncmp(x1->symbol, "inj{", 4) == 0) {
-      node *c0 = x0->children[0];
-      node *c1 = x1->children[0];
-      if (!c0->str && !c1->str && strncmp(c0->symbol, "inj{", 4) == 0 && strncmp(c1->symbol, "inj{", 4) == 0) {
-        if (equalsNode(c0, c1)) {
-          return true;
-        }
-      } 
-    }
     if (!(equalsSymbol(x0, x1) && x0->nchildren == x1->nchildren)) {
       return false;
     }
