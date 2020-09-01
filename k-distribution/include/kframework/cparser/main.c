@@ -61,6 +61,20 @@ bool equalsNode(node *x0, node *x1) {
   }
 }
 
+char *injSymbol(char *lesser, char *greater) {
+  char *prefix = "inj{";
+  char *infix = ", ";
+  char *suffix = "}";
+  size_t len = strlen(prefix) + strlen(suffix) + strlen(lesser) + strlen(greater) + strlen(infix) + 1;
+  char *symbol = malloc(len);
+  strcpy(symbol, prefix);
+  strcat(symbol, lesser);
+  strcat(symbol, infix);
+  strcat(symbol, greater);
+  strcat(symbol, suffix);
+  return symbol;
+}
+
 YYSTYPE mergeAmb(YYSTYPE x0, YYSTYPE x1) {
   if (equalsNode(x0.nterm, x1.nterm)) {
     return x0;

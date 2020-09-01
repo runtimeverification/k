@@ -123,6 +123,7 @@ public class KSyntax2Bison {
         "int yylex(YYSTYPE *, YYLTYPE *, void *);\n" +
         "void yyerror(YYLTYPE *, void *, const char *);\n" +
         "char *enquote(char *);\n" +
+        "char *injSymbol(char *, char *);\n" +
         "YYSTYPE mergeAmb(YYSTYPE x0, YYSTYPE x1);\n" +
         "node *result;\n" +
         "# define YYLLOC_DEFAULT(Cur, Rhs, N)                      \\\n" +
