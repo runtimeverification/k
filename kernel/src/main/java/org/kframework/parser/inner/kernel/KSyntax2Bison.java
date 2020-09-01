@@ -273,19 +273,25 @@ public class KSyntax2Bison {
     } else if (!prod.att().contains("token") && prod.isSubsort() && !prod.att().contains(RuleGrammarGenerator.NOT_INJECTION)) {
       bison.append("{\n" +
           "  node *n = malloc(sizeof(node) + sizeof(node *));\n" +
-          "  n->symbol = \"inj{");
-      encodeKore(prod.getSubsortSort(), bison);
-      bison.append(", ");
-      encodeKore(prod.sort(), bison);
-      bison.append("}\";\n" +
-          "  n->sort = \"");
-      encodeKore(prod.sort(), bison);
-      bison.append("\";\n" +
           "  n->str = false;\n" +
           "  n->location = @$;\n" +
           "  n->hasLocation = " + (hasLocation ? "1" : "0") + ";\n" +
           "  n->nchildren = 1;\n" +
-          "  n->children[0] = $1.nterm;\n");
+          "  n->sort = \"");
+      encodeKore(prod.sort(), bison);
+      bison.append("\";\n" +
+          "  if (!$1.nterm->str && strncmp($1.nterm->symbol, \"inj{\", 4) == 0) {\n" +
+          "    char *childSort = $1.nterm->children[0]->sort;\n" +
+          "    n->symbol = injSymbol(childSort, n->sort);\n" +
+          "    n->children[0] = $1.nterm->children[0];\n" +
+          "  } else {\n" +
+          "    n->symbol = \"inj{");
+      encodeKore(prod.getSubsortSort(), bison);
+      bison.append(", ");
+      encodeKore(prod.sort(), bison);
+      bison.append("}\";\n" +
+          "    n->children[0] = $1.nterm;\n" +
+          "  }\n");
       if (prod.att().contains("userListTerminator")) {
         KLabel nil = KLabel(prod.att().get("userListTerminator"));
         KLabel cons = KLabel(prod.att().get("userList"));
