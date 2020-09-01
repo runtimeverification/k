@@ -118,6 +118,7 @@ public class KSyntax2Bison {
     StringBuilder bison = new StringBuilder();
     bison.append("%{\n" +
         "#include <stdio.h>\n" +
+        "#include <string.h>\n" +
         "#include \"node.h\"\n" +
         "#include \"parser.tab.h\"\n" +
         "int yylex(YYSTYPE *, YYLTYPE *, void *);\n" +
