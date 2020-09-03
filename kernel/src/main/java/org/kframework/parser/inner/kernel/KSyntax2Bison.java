@@ -4,6 +4,7 @@ package org.kframework.parser.inner.kernel;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.kframework.Collections;
+import org.kframework.TopologicalSort;
 import org.kframework.attributes.Att;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.definition.Module;
@@ -237,7 +238,7 @@ public class KSyntax2Bison {
   }
 
   private static void appendOverloadChecks(StringBuilder bison, Module module, Production greater, List<Integer> nts, boolean hasLocation) {
-    for (Production lesser : iterable(module.overloads().elements())) {
+    for (Production lesser : iterable(TopologicalSort.tsort(module.overloads().directRelations()))) {
       if (module.overloads().lessThan(lesser, greater)) {
         bison.append("  if (");
         appendOverloadCondition(bison, module, greater, lesser, nts);
