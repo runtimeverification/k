@@ -1,8 +1,6 @@
 <!-- Copyright (c) 2012-2019 K Team. All Rights Reserved. -->
 
-### Evaluation Strategies using Strictness
-
-[MOVIE [2'20"]](http://youtu.be/aul1x6bd1YM)
+# Evaluation Strategies using Strictness
 
 Here we learn how to use the K `strict` attribute to define desired evaluation
 strategies.  We will also learn how to tell K which terms are already
@@ -38,3 +36,7 @@ lambda-calculus.  While theoretically correct, our definition is not
 easy to use and disseminate.  In the next lessons we will learn how to
 generate formatted documentation for LAMBDA and how to extend LAMBDA
 in order to write human readable and interesting programs.
+
+Go to [Lesson 4, LAMBDA: Generating Documentation; Latex Attributes](../lesson_4/README.md).
+
+[MOVIE (out of date) [2'20"]](http://youtu.be/aul1x6bd1YM)

@@ -22,7 +22,7 @@
   </T>
 #And
   {
-    A <=Int B
-  #Equals
     true
+  #Equals
+    A <=Int B
   }
