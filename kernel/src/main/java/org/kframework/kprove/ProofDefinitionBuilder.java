@@ -71,7 +71,7 @@ public class ProofDefinitionBuilder {
         Map<String, Module> modulesMap = modules.stream().collect(Collectors.toMap(Module::name, m -> m));
         Definition parsedDefinition = compiledDefinition.getParsedDefinition();
         Module specModule = getModule(specModuleNameUpdated, modulesMap, parsedDefinition);
-        kompile.proverChecks(modules.stream().filter(m -> !modulesMap.get(defModuleNameUpdated).importedModuleNames().contains(m.name())).collect(Collectors.toSet()));
+        specModule = kompile.proverChecks(specModule, modulesMap.get(defModuleName));
         kompile.structuralChecks(scala.collection.JavaConverters.asScalaSet(modules),
                 specModule, scala.Option.empty(), backend.excludedModuleTags(), false);
         Module defModule = getModule(defModuleNameUpdated, modulesMap, parsedDefinition);

@@ -36,6 +36,7 @@ import org.kframework.unparser.ToJson;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -310,6 +311,23 @@ public class Kompile {
     // Extra checks just for the prover specification.
     public void proverChecks(Set<Module> modules) {
         modules.forEach(m -> stream(m.localSentences()).forEach(new CheckProverRules(errors, kem)::check));
+    }
+
+    public Module proverChecks(Module specModule, Module mainDefModule) {
+        // TODO: remove once transition to claim rules is done
+        // transform rules into claims if
+        // - they are in the spec modules but not in the definition modules
+        // - they don't contain the `simplification` attribute
+        ModuleTransformer mt = ModuleTransformer.fromSentenceTransformer((m, s) -> {
+            if (mainDefModule.importedModuleNames().contains(m.name()))
+                return s;
+            if (s instanceof Rule && !s.att().contains("simplification")) {
+                kem.registerCompilerWarning(KException.ExceptionType.FUTURE_ERROR, errors, "Deprecated: use claim instead of rule to specify proof objectives.", s);
+                return new Claim(((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att());
+            }
+            return s;
+        }, "rules to claim");
+        return mt.apply(specModule);
     }
 
     public void structuralChecks(scala.collection.Set<Module> modules, Module mainModule, Option<Module> kModule, Set<String> excludedModuleTags, boolean _throw) {
