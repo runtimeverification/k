@@ -550,4 +550,7 @@ trait Builders {
 
   def Alias(str: String, params: Seq[Sort]): Alias
 
+  def LeftAssoc(p: Pattern): Pattern
+
+  def RightAssoc(p: Pattern): Pattern
 }
