@@ -257,22 +257,24 @@ public class KSyntax2Bison {
                 "    n->children[").append(i).append("] = $").append(nts.get(i)).append(".nterm;\n");
           } else {
             bison.append(
-                "    node *origChild = $").append(nts.get(i)).append(".nterm;\n" +
-                "    char *lesserSort = \"");
+                "    {\n" +
+                "      node *origChild = $").append(nts.get(i)).append(".nterm;\n" +
+                "      char *lesserSort = \"");
             encodeKore(lesser.nonterminals().apply(i).sort(), bison);
             bison.append("\";\n" +
-                "    if (strcmp(origChild->children[0]->sort, lesserSort) == 0) {\n" +
-                "      n->children[").append(i).append("] = origChild->children[0];\n" +
-                "    } else {\n" +
-                "      node *inj = malloc(sizeof(node) + sizeof(node *));\n" +
-                "      inj->symbol = injSymbol(origChild->children[0]->sort, lesserSort);\n" +
-                "      inj->str = false;\n" +
-                "      inj->location = origChild->location;\n" +
-                "      inj->nchildren = 1;\n" +
-                "      inj->sort = lesserSort;\n" +
-                "      inj->hasLocation = origChild->hasLocation;\n" +
-                "      inj->children[0] = origChild->children[0];\n" +
-                "      n->children[").append(i).append("] = inj;\n" +
+                "      if (strcmp(origChild->children[0]->sort, lesserSort) == 0) {\n" +
+                "        n->children[").append(i).append("] = origChild->children[0];\n" +
+                "      } else {\n" +
+                "        node *inj = malloc(sizeof(node) + sizeof(node *));\n" +
+                "        inj->symbol = injSymbol(origChild->children[0]->sort, lesserSort);\n" +
+                "        inj->str = false;\n" +
+                "        inj->location = origChild->location;\n" +
+                "        inj->nchildren = 1;\n" +
+                "        inj->sort = lesserSort;\n" +
+                "        inj->hasLocation = origChild->hasLocation;\n" +
+                "        inj->children[0] = origChild->children[0];\n" +
+                "        n->children[").append(i).append("] = inj;\n" +
+                "      }\n" +
                 "    }\n");
           }
         }
