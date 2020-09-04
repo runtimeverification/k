@@ -6,6 +6,7 @@ import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KAs;
 import org.kframework.kore.KRewrite;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.VisitK;
@@ -35,6 +36,7 @@ public class CheckRewrite {
         class Holder {
             boolean hasRewrite = false;
             boolean inRewrite = false;
+            boolean inAs = false;
             boolean inFunctionContext = false;
             boolean inFunctionBody = false;
         }
@@ -49,10 +51,21 @@ public class CheckRewrite {
                 if (h.inFunctionContext) {
                     errors.add(KEMException.compilerError("Rewrites are not allowed in the context of a function rule.", k));
                 }
+                if (h.inAs) {
+                    errors.add(KEMException.compilerError("Rewrites are not allowed inside an #as pattern.", k));
+                }
                 h.hasRewrite = true;
                 h.inRewrite = true;
                 super.apply(k);
                 h.inRewrite = inRewrite;
+            }
+
+            @Override
+            public void apply(KAs k) {
+                boolean inAs = h.inAs;
+                h.inAs = true;
+                super.apply(k);
+                h.inAs = inAs;
             }
 
             @Override
