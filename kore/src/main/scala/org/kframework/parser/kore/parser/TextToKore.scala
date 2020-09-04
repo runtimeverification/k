@@ -500,6 +500,22 @@ class TextToKore(b: Builders = DefaultBuilders) {
             val str = parseString()
             consumeWithLeadingWhitespaces(")")
             b.DomainValue(s, str)
+          case ('l', 'e') => // left-assoc
+            consume("ft-assoc")
+            consumeWithLeadingWhitespaces("{")
+            consumeWithLeadingWhitespaces("}")
+            consumeWithLeadingWhitespaces("(")
+            val p = parsePattern()
+            consumeWithLeadingWhitespaces(")")
+            b.LeftAssoc(p)
+          case ('r', 'i') => // right-assoc
+            consume("ght-assoc")
+            consumeWithLeadingWhitespaces("{")
+            consumeWithLeadingWhitespaces("}")
+            consumeWithLeadingWhitespaces("(")
+            val p = parsePattern()
+            consumeWithLeadingWhitespaces(")")
+            b.RightAssoc(p)
           // case ('s', 'u') => // subset
           //   consume("bset")
           //   consumeWithLeadingWhitespaces("{")
