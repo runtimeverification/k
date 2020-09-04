@@ -9,14 +9,12 @@ import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
 import org.kframework.compile.checks.CheckAnonymous;
-import org.kframework.compile.checks.CheckClaimInDef;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckFunctions;
 import org.kframework.compile.checks.CheckHOLE;
 import org.kframework.compile.checks.CheckK;
 import org.kframework.compile.checks.CheckKLabels;
 import org.kframework.compile.checks.CheckLabels;
-import org.kframework.compile.checks.CheckProverRules;
 import org.kframework.compile.checks.CheckRHSVariables;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
@@ -305,14 +303,14 @@ public class Kompile {
 
     // checks that are not verified in the prover
     public void definitionChecks(Set<Module> modules) {
-        modules.forEach(m -> stream(m.localSentences()).forEach(new CheckClaimInDef(errors)::check)); // called in kompile but not kprove
+        modules.forEach(m -> stream(m.localSentences()).forEach(s -> {
+            // Check that the `claim` keyword is not used in the definition.
+            if (s instanceof Claim)
+                errors.add(KEMException.compilerError("Claims are not allowed in the definition.", s));
+        }));
     }
 
     // Extra checks just for the prover specification.
-    public void proverChecks(Set<Module> modules) {
-        modules.forEach(m -> stream(m.localSentences()).forEach(new CheckProverRules(errors, kem)::check));
-    }
-
     public Module proverChecks(Module specModule, Module mainDefModule) {
         // TODO: remove once transition to claim rules is done
         // transform rules into claims if

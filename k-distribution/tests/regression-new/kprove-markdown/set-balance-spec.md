@@ -9,7 +9,7 @@ module VERIFICATION
 
     syntax Action ::= totalBalance ( AccountId )
  // --------------------------------------------
-    rule <k> totalBalance(AID) => total_balance(AID) ... </k>
+    rule <k> totalBalance(AID) => total_balance(AID) ... </k> [simplification]
 endmodule
 
 module SET-BALANCE-SPEC
