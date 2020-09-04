@@ -108,7 +108,7 @@ module RAT-SYMBOLIC [symbolic, kore]
     #Ceil(@R1:Rat /Rat @R2:Rat)
   =>
     {(@R2 =/=Rat 0) #Equals true} #And #Ceil(@R1) #And #Ceil(@R2)
-  [anywhere]
+  [simplification, anywhere]
 endmodule
 
 module RAT-KORE [kore]
