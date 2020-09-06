@@ -5,6 +5,6 @@ requires "map-tests.k"
 module ASSIGNMENT-10-SPEC
     imports MAP-TESTS
 
-    rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y =/=K X andBool Z =/=K Y
+    rule <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => . </k> requires Y =/=K X andBool Z =/=K Y [simplification]
 
 endmodule

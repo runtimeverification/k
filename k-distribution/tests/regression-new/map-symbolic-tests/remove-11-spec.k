@@ -5,6 +5,6 @@ requires "map-tests.k"
 module REMOVE-11-SPEC
     imports MAP-TESTS
 
-    rule <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k> requires Z =/=K X
+    rule <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k> requires Z =/=K X [simplification]
 
 endmodule

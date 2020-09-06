@@ -5,6 +5,6 @@ requires "map-tests.k"
 module LOOKUP-22-SPEC
     imports MAP-TESTS
 
-    rule <k> lookup ( (X:MyId |-> 3 y |-> 4) [ x <- 5 ] [ X ] ) => . </k> requires X =/=K x
+    rule <k> lookup ( (X:MyId |-> 3 y |-> 4) [ x <- 5 ] [ X ] ) => . </k> requires X =/=K x [simplification]
 
 endmodule

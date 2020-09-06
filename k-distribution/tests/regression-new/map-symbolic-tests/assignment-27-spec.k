@@ -5,6 +5,6 @@ requires "map-tests.k"
 module ASSIGNMENT-27-SPEC
     imports MAP-TESTS
 
-    rule <k> assignment ( (X:MyId |-> 4) [ X <- 3 ] ) => . </k>
+    rule <k> assignment ( (X:MyId |-> 4) [ X <- 3 ] ) => . </k> [simplification]
 
 endmodule
