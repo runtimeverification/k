@@ -1159,7 +1159,7 @@ public class ModuleToKORE {
             for (KVariable ignored : existentials) {
                 sb.append(')');
             }
-            if (isClaim(sentenceType)) {
+            if (rule instanceof Claim) {
                 sb.append(')');
             }
             sb.append(')');
@@ -1194,10 +1194,6 @@ public class ModuleToKORE {
         visitor.apply(rule.ensures());
         visitor.apply(RewriteToTop.toRight(rule.body()));
         return res;
-    }
-
-    private boolean isClaim(SentenceType sentenceType) {
-        return sentenceType == SentenceType.ONE_PATH || sentenceType == SentenceType.ALL_PATH;
     }
 
     private void genAliasForSemanticsRuleLHS(K requires, K left,
