@@ -317,7 +317,7 @@ public class Kompile {
         // - they are in the spec modules but not in the definition modules
         // - they don't contain the `simplification` attribute
         ModuleTransformer mt = ModuleTransformer.fromSentenceTransformer((m, s) -> {
-            if (mainDefModule.importedModuleNames().contains(m.name()))
+            if (m.name().equals(mainDefModule.name()) || mainDefModule.importedModuleNames().contains(m.name()))
                 return s;
             if (s instanceof Rule && !s.att().contains("simplification")) {
                 kem.registerCompilerWarning(KException.ExceptionType.FUTURE_ERROR, errors, "Deprecated: use claim instead of rule to specify proof objectives.", s);

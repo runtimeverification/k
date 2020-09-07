@@ -843,8 +843,6 @@ public class ModuleToKORE {
         consideredAttributes.put(Att.LABEL(), true);
 
         for (Sentence sentence : iterable(spec.sentencesExcept(definition))) {
-            assert sentence instanceof Claim
-                : "Unexpected non-rule claim " + sentence.toString();
             if (sentence instanceof Claim) {
                 convertRule((Claim) sentence, 0, false, topCellSortStr,
                         consideredAttributes, HashMultimap.create(), new HashMap<>(), ArrayListMultimap.create(),
