@@ -6,11 +6,13 @@ import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.checks.CheckFunctions;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.HasAtt;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
@@ -163,6 +165,18 @@ public class ExpandMacros {
         return (Rule)check(result);
     }
 
+    private Claim expand(Claim claim) {
+        resetVars();
+        gatherVars(claim.body());
+        gatherVars(claim.requires());
+        gatherVars(claim.ensures());
+        Claim result = Claim(expand(claim.body()),
+                expand(claim.requires()),
+                expand(claim.ensures()),
+                claim.att());
+        return (Claim)check(result);
+    }
+
     private Context expand(Context context) {
         resetVars();
         gatherVars(context.body());
@@ -283,7 +297,7 @@ public class ExpandMacros {
     }
 
 
-    private Set<Sort> sort(K k, Rule r) {
+    private Set<Sort> sort(K k, RuleOrClaim r) {
         if (k instanceof KVariable) {
             return Collections.singleton(k.att().getOptional(Sort.class).orElse(null));
         } else if (k instanceof KToken) {
@@ -318,7 +332,7 @@ public class ExpandMacros {
         }
     }
 
-    private boolean match(Map<KVariable, K> subst, K pattern, K subject, Rule r) {
+    private boolean match(Map<KVariable, K> subst, K pattern, K subject, RuleOrClaim r) {
         if (pattern instanceof KVariable) {
             if (subst.containsKey(pattern)) {
                 return subst.get(pattern).equals(subject);
@@ -376,6 +390,8 @@ public class ExpandMacros {
     public Sentence expand(Sentence s) {
         if (s instanceof Rule && !isMacro(s)) {
             return transformer.resolve(mod, expand((Rule) s));
+        } else if (s instanceof Claim) {
+            return transformer.resolve(mod, expand((Claim) s));
         } else if (s instanceof Context) {
             return transformer.resolve(mod, expand((Context) s));
         } else {
