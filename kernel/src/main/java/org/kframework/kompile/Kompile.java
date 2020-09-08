@@ -8,6 +8,7 @@ import org.kframework.attributes.Source;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
+import org.kframework.compile.checks.CheckAtt;
 import org.kframework.compile.checks.CheckAnonymous;
 import org.kframework.compile.checks.CheckConfigurationCells;
 import org.kframework.compile.checks.CheckFunctions;
@@ -304,6 +305,8 @@ public class Kompile {
         boolean isKast = excludedModuleTags.contains(Att.KORE());
         CheckRHSVariables checkRHSVariables = new CheckRHSVariables(errors, !isSymbolic);
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
+
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAtt(errors, m)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckConfigurationCells(errors, m, isSymbolic && isKast)::check));
 
