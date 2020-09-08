@@ -181,7 +181,7 @@ public class AddSortInjections {
             Production substituted = substituteProd(prod, expectedSort, (i, fresh) -> sort(kapp.items().get(i), fresh.nonterminals().apply(i).sort()), kapp);
             for (int i = 0; i < kapp.items().size(); i++) {
                 if (kapp.items().size() != substituted.nonterminals().size()) {
-                    throw KEMException.internalError("Invalid sort predicate " + kapp.klabel() +
+                    throw KEMException.compilerError("Invalid sort predicate " + kapp.klabel() +
                         " that depends directly or indirectly on the current configuration. " +
                         "Is it possible to replace the sort predicate with a regular function?", kapp);
                 }
