@@ -249,8 +249,7 @@ public class Definition extends JavaSymbolicObject {
         }
 
         addRule(convertedRule);
-        if (rule instanceof Claim || rule.att().contains(Att.TOP_RULE()) || rule.att().contains(Att.SPECIFICATION())) {
-            specRules.add(convertedRule);
+        if (rule.att().contains(Att.TOP_RULE()) || rule.att().contains(Att.SPECIFICATION())) {
             reverseRuleTable.put(rule.hashCode(), reverseRuleTable.size());
             ruleTable.put(reverseRuleTable.get(rule.hashCode()), convertedRule);
         }
@@ -315,6 +314,9 @@ public class Definition extends JavaSymbolicObject {
             anywhereRules.put(rule.anywhereKLabel(), rule);
         } else {
             rules.add(rule);
+            if (rule.att().contains(Att.SPECIFICATION())) {
+                specRules.add(rule);
+            }
         }
     }
 
