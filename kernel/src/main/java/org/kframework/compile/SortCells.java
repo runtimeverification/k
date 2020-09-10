@@ -722,6 +722,8 @@ public class SortCells {
     public synchronized Sentence preprocess(Sentence s) {
         if (s instanceof Rule) {
             return preprocess((Rule) s);
+        } else if (s instanceof Claim) {
+            return preprocess((Claim) s);
         } else {
             return s;
         }
@@ -733,6 +735,8 @@ public class SortCells {
     public synchronized Sentence postprocess(Sentence s) {
         if (s instanceof Rule) {
             return postprocess((Rule) s);
+        } else if (s instanceof Claim) {
+            return postprocess((Claim) s);
         } else {
             return s;
         }
@@ -752,6 +756,22 @@ public class SortCells {
                 postprocess(rule.requires()),
                 postprocess(rule.ensures()),
                 rule.att());
+    }
+
+    private Claim preprocess(Claim claim) {
+        return Claim(
+                preprocess(claim.body()),
+                preprocess(claim.requires()),
+                preprocess(claim.ensures()),
+                claim.att());
+    }
+
+    private Claim postprocess(Claim claim) {
+        return Claim(
+                postprocess(claim.body()),
+                postprocess(claim.requires()),
+                postprocess(claim.ensures()),
+                claim.att());
     }
 
     /**

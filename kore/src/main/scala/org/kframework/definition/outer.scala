@@ -218,6 +218,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   lazy val claims: Set[Claim] = sentences collect { case c: Claim => c }
   lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
+  lazy val rulesAndClaims: Set[RuleOrClaim] = Set[RuleOrClaim]().++(claims).++(rules)
   lazy val rulesFor: Map[KLabel, Set[Rule]] = rules.groupBy(r => {
     r.body match {
       case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KApply(s, _) :: _) => s
@@ -232,6 +233,8 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   lazy val sortedRules: Seq[Rule] = rules.toSeq.sorted
 
   lazy val localRules: Set[Rule] = localSentences collect { case r: Rule => r }
+  lazy val localClaims: Set[Claim] = localSentences collect { case r: Claim => r }
+  lazy val localRulesAndClaims: Set[RuleOrClaim] = Set[RuleOrClaim]().++(localClaims).++(localRules)
 
   // Check that productions with the same klabel have identical attributes
   //  productionsFor.foreach {

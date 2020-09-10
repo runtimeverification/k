@@ -141,6 +141,7 @@ public class JavaBackend extends AbstractBackend {
                 .andThen(ModuleTransformer.fromRuleBodyTransformer(JavaBackend::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))
                 .andThen(ModuleTransformer.fromRuleBodyTransformer(JavaBackend::convertKSeqToKApply, "kseq to kapply"))
                 .andThen(ModuleTransformer.fromRuleBodyTransformer(NormalizeKSeq.self(), "normalize kseq"))
+                // TODO: remove marking step?
                 .andThen(mod -> JavaBackend.markSpecRules(def, mod))
                 .andThen(ModuleTransformer.fromSentenceTransformer(new AddConfigurationRecoveryFlags()::apply, "add refers_THIS_CONFIGURATION_marker"))
                 //.andThen(ModuleTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
@@ -193,8 +194,8 @@ public class JavaBackend extends AbstractBackend {
      * with a special marker called THE_VARIABLE which the backend uses for special speed optimisations.
      */
     private static Sentence markSingleVariables(Sentence s) {
-        if (s instanceof Rule) {
-            Rule r = (Rule) s;
+        if (s instanceof RuleOrClaim) {
+            RuleOrClaim r = (RuleOrClaim) s;
 
             if (!r.att().contains(Att.TOP_RULE()))
                 return r;
@@ -219,8 +220,10 @@ public class JavaBackend extends AbstractBackend {
                     }
                 }
             };
-
-            return Constructors.Rule(markerAdder.apply(r.body()), markerAdder.apply(r.requires()), markerAdder.apply(r.ensures()), r.att());
+            if (s instanceof Rule)
+                return Constructors.Rule(markerAdder.apply(r.body()), markerAdder.apply(r.requires()), markerAdder.apply(r.ensures()), r.att());
+            else
+                return Constructors.Claim(markerAdder.apply(r.body()), markerAdder.apply(r.requires()), markerAdder.apply(r.ensures()), r.att());
         } else {
             return s;
         }

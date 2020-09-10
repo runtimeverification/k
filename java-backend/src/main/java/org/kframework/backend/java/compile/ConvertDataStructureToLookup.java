@@ -10,6 +10,7 @@ import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.RewriteToTop;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
@@ -105,6 +106,19 @@ public class ConvertDataStructureToLookup {
                 addSideCondition(rule.requires()),
                 rule.ensures(),
                 rule.att());
+    }
+
+    private Claim convert(Claim claim) {
+        reset();
+        gatherVars(claim.body(), vars);
+        gatherVars(claim.requires(), vars);
+        gatherVars(claim.ensures(), vars);
+        K body = transform(claim.body());
+        return Claim(
+                body,
+                addSideCondition(claim.requires()),
+                claim.ensures(),
+                claim.att());
     }
 
     private Context convert(Context context) {
@@ -562,6 +576,8 @@ public class ConvertDataStructureToLookup {
             return s;
         } else if (s instanceof Rule) {
             return convert((Rule) s);
+        } else if (s instanceof Claim) {
+            return convert((Claim) s);
         } else if (s instanceof Context) {
             return convert((Context) s);
         } else {

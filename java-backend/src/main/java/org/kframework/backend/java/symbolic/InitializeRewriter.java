@@ -362,7 +362,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                 converter = new KOREtoBackendKIL(module, definition, rewritingContext, false);
                 termContext = TermContext.builder(rewritingContext).freshCounter(initCounterValue).build();
                 termContext.setKOREtoBackendKILConverter(converter);
-                specRules = definition.addKoreRules(specModule, converter, Att.SPECIFICATION(), this::evaluateRule);
+                specRules = definition.addKoreClaims(specModule, converter, this::evaluateRule);
             }
 
             private org.kframework.backend.java.kil.Rule evaluateRule(org.kframework.backend.java.kil.Rule rule) {

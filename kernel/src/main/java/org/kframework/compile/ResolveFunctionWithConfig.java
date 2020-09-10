@@ -13,6 +13,7 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -61,7 +62,7 @@ public class ResolveFunctionWithConfig {
       CONFIG_VAR = KVariable("#Configuration", Att().add(Sort.class, topCell).add("withConfig"));
     }
 
-    private boolean ruleNeedsConfig(Rule r) {
+    private boolean ruleNeedsConfig(RuleOrClaim r) {
         if (r.body() instanceof KApply && ((KApply)r.body()).klabel().name().equals("#withConfig")) {
             return true;
         }
