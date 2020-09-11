@@ -1,0 +1,4 @@
+[Error] Compiler: Rewrites are not allowed inside an #as pattern.
+	Source(invalidAs2.k)
+	Location(4,9,4,15)
+[Error] Compiler: Had 1 structural errors.
