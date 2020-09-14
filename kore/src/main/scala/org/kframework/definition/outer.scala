@@ -567,7 +567,7 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
 }
 
 object Production {
-  implicit val ord = new Ordering[Production] {
+  implicit val ord: Ordering[Production] = new Ordering[Production] {
     def compare(a: Production, b: Production): Int = {
       Ordering[Option[String]].compare(a.klabel.map(_.name), b.klabel.map(_.name))
     }
