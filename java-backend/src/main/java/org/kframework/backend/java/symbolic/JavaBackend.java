@@ -120,15 +120,15 @@ public class JavaBackend extends AbstractBackend {
         return m -> ModuleTransformer.fromSentenceTransformer(Kompile::removePolyKLabels, "remove poly klabels")
                 .andThen(ModuleTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolve anonymous varaibles"))
                 .andThen(ModuleTransformer.fromSentenceTransformer(s -> new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA)).resolve(s), "resolve semantic casts"))
-                .andThen(AddImplicitComputationCell::transformModule)
-                .andThen(ConcretizeCells::transformModule)
-                .andThen(ModuleTransformer.fromRuleBodyTransformer(RewriteToTop::bubbleRewriteToTopInsideCells, "bubble out rewrites below cells"))
                 //.andThen(ModuleTransformer.fromSentenceTransformer(new NormalizeAssoc(KORE.c()), "normalize assoc"))
                 .andThen(AddBottomSortForListsWithIdenticalLabels.singleton())
                 .andThen(m2 -> {
                   ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(m2, false);
                   return ModuleTransformer.fromSentenceTransformer((mod, s) -> new ExpandMacros(transformer, mod, files, kem, kompileOptions, false, true).expand(s), "expand macros").apply(m2);
                 })
+                .andThen(AddImplicitComputationCell::transformModule)
+                .andThen(ConcretizeCells::transformModule)
+                .andThen(ModuleTransformer.fromRuleBodyTransformer(RewriteToTop::bubbleRewriteToTopInsideCells, "bubble out rewrites below cells"))
                 //.andThen(ModuleTransformer.fromSentenceTransformer(new NormalizeAssoc(KORE.c()), "normalize assoc"))
 
                 //A subset of convertDataStructureToLookup. Does not simplify _Map_ terms.
