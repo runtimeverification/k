@@ -1,30 +1,19 @@
 // Copyright (c) 2016-2019 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
-import com.google.common.collect.ImmutableSet;
 import org.kframework.attributes.Att;
 import org.kframework.compile.RewriteAwareVisitor;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Module;
-import org.kframework.definition.Production;
-import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
-import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
-import org.kframework.kore.Sort;
 import org.kframework.kore.KApply;
-import org.kframework.kore.KLabel;
 import org.kframework.kore.KVariable;
-import org.kframework.kore.VisitK;
-import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
-
-import static org.kframework.kore.KORE.*;
 
 /**
  * Check that functions are not used on LHS in places that should be performing matching.
@@ -41,8 +30,8 @@ public class CheckFunctions {
     }
 
     public void check(Sentence sentence) {
-        if (sentence instanceof Rule) {
-            Rule rl = (Rule) sentence;
+        if (sentence instanceof RuleOrClaim) {
+            RuleOrClaim rl = (RuleOrClaim) sentence;
             check(rl.body());
         } else if (sentence instanceof Context) {
             Context ctx = (Context) sentence;

@@ -3,14 +3,13 @@ package org.kframework.compile.checks;
 
 import com.google.common.collect.Sets;
 import org.kframework.attributes.Att;
-import org.kframework.compile.ExpandMacros;
+import org.kframework.compile.GatherVarsVisitor;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
-import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KVariable;
-import org.kframework.compile.GatherVarsVisitor;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
 
@@ -36,7 +35,7 @@ public class CheckRHSVariables {
         this.errors = errors;
         this.errorExistential = errorExistential;
     }
-    private void check(Rule rule) {
+    private void check(RuleOrClaim rule) {
         resetVars();
         Set<String> unboundVariableNames = getUnboundVarNames(rule);
         boolean errorExistential = this.errorExistential && !(rule.att().contains(Att.LABEL()) && rule.att().get(Att.LABEL()).equals("STDIN-STREAM.stdinUnblock"));
@@ -65,8 +64,8 @@ public class CheckRHSVariables {
     }
 
     public void check(Sentence s) {
-        if (s instanceof Rule) {
-            check((Rule) s);
+        if (s instanceof RuleOrClaim) {
+            check((RuleOrClaim) s);
         } else if (s instanceof Context) {
             check((Context) s);
         } else if (s instanceof ContextAlias) {
@@ -74,7 +73,7 @@ public class CheckRHSVariables {
         }
     }
 
-    private Set<String> getUnboundVarNames(Rule rule) {
+    private Set<String> getUnboundVarNames(RuleOrClaim rule) {
         Option<String> unboundVariablesString = rule.att().getOption(Att.UNBOUND_VARIABLES());
         Set<String> unboundVariableNames = new HashSet<>();
         if (unboundVariablesString.nonEmpty()) {
