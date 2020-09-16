@@ -98,7 +98,7 @@ public class CheckRHSVariables {
 
     private void check(K body, boolean isBody, boolean isAlias, Set<String> unboundVarNames) {
         Set<KVariable> unbound = new HashSet<>();
-        new ComputeUnboundVariables(isBody, errors, vars, unbound::add).apply(body);
+        new ComputeUnboundVariables(isBody, false, errors, vars, unbound::add).apply(body);
         for (KVariable k : unbound) {
             if (unboundVarNames.contains(k.name())) continue;
             if (isAlias && k.name().equals("HOLE")) continue;
