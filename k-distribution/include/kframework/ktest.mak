@@ -50,7 +50,7 @@ KRUN=$(abspath $(MAKEFILE_PATH)/../../bin/kx)
 endif
 
 CHECK=| diff -
-REMOVE_PATHS=| sed 's!'`pwd`'/\(\./\)\{0,1\}!!g'
+REMOVE_PATHS=| sed 's!'`pwd`'/\(\./\)\{0,2\}!!g'
 CONSIDER_ERRORS=2>&1
 
 .PHONY: kompile krun all clean update-results proofs bmc
