@@ -18,7 +18,7 @@ module NESTED-IMPORTS-SPEC [one-path]
   imports IMP
   imports VERIFICATION
 
-  rule
+  claim
     <k>
 if (a <= b)
 { max = b; }

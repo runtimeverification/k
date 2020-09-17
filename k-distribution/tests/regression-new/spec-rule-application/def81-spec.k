@@ -1,7 +1,7 @@
 require "def.k"
 
 /*
-Part 8. Initial simplification must have access to pattern constraint (e.g. spec rule side condition),
+Part 8. Initial simplification must have access to pattern constraint (e.g. spec claim side condition),
             otherwise generated substitutions are sub-optimal.
 ==============
 81.
@@ -14,11 +14,11 @@ Part 8. Initial simplification must have access to pattern constraint (e.g. spec
 module DEF81-SPEC
     imports DEF
 
-    rule <k> start X +Int 1 => end X +Int 1</k>
+    claim <k> start X +Int 1 => end X +Int 1</k>
          <var> binop X (X +Int 1) </var>
        requires X        >=Int 0
 
-    rule <k> mid Y2 -Int 1 => end Y2 -Int 1 </k>
+    claim <k> mid Y2 -Int 1 => end Y2 -Int 1 </k>
          <var> binop (Y1 -Int 1) (incPos(Y1) -Int 1) </var>
       requires Y2 ==Int Y1 +Int 1
       [trusted]
