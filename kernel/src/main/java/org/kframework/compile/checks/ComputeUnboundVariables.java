@@ -25,9 +25,11 @@ public class ComputeUnboundVariables extends RewriteAwareVisitor {
     private final Consumer<KVariable> reporter;
     private Sort context = null;
     private boolean isInKLhs = false;
+    private final boolean lambda;
 
-    public ComputeUnboundVariables(boolean isBody, Set<KEMException> errors, Set<KVariable> vars, Consumer<KVariable> reporter) {
+    public ComputeUnboundVariables(boolean isBody, boolean lambda, Set<KEMException> errors, Set<KVariable> vars, Consumer<KVariable> reporter) {
         super(isBody, errors);
+        this.lambda = lambda;
         this.vars = vars;
         this.reporter = reporter;
     }
@@ -40,7 +42,7 @@ public class ComputeUnboundVariables extends RewriteAwareVisitor {
         if (isRHS() && !isInKLhs) {
             if (!k.name().equals(KLabels.THIS_CONFIGURATION) &&
                     ((k.equals(ResolveAnonVar.ANON_VAR) && !isLHS())
-                            || (!k.equals(ResolveAnonVar.ANON_VAR) && !(k.name().startsWith("?") || k.name().startsWith("!")) && !vars.contains(k)))) {
+                            || (!k.equals(ResolveAnonVar.ANON_VAR) && !(k.name().startsWith("?") || (k.name().startsWith("!") && !lambda)) && !vars.contains(k)))) {
                 reporter.accept(k);
             }
         }
