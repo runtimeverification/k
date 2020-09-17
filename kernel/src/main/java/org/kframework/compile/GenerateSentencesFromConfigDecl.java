@@ -279,6 +279,7 @@ public class GenerateSentencesFromConfigDecl {
     }
 
     private static KVariable INIT = KVariable("Init", Att.empty().add(Sort.class, Sorts.Map()));
+    private static KVariable _INIT = KVariable("_Init", Att.empty().add(Sort.class, Sorts.Map()));
 
     /**
      * Generates the sentences associated with a particular cell.
@@ -367,7 +368,10 @@ public class GenerateSentencesFromConfigDecl {
 
         if (hasConfigurationOrRegularVariable || isStream) {
             initializer = Production(KLabel(initLabel), initSort, Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sorts.Map()), Terminal(")")), Att().add("initializer").add("function").add("noThread"));
-            initializerRule = Rule(KRewrite(KApply(KLabel(initLabel), INIT), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add("initializer"));
+            KVariable initVar = INIT;
+            if (childInitializer instanceof KApply && ((KApply) childInitializer).klabel().equals(KLabels.DotList))
+                initVar = _INIT; // no appearances on RHS so us anonymous variable to avoid warning
+            initializerRule = Rule(KRewrite(KApply(KLabel(initLabel), initVar), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add("initializer"));
         } else {
             initializer = Production(KLabel(initLabel), initSort, Seq(Terminal(initLabel)), Att().add("initializer").add("function").add("noThread"));
             initializerRule = Rule(KRewrite(KApply(KLabel(initLabel)), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add("initializer"));
