@@ -1,11 +1,9 @@
 // Copyright (c) 2018-2019 K Team. All Rights Reserved.
 package org.kframework.compile;
 
-import org.kframework.attributes.Source;
+import org.kframework.attributes.Location;
 import org.kframework.builtin.Sorts;
-import org.kframework.compile.RewriteToTop;
 import org.kframework.definition.Module;
-import org.kframework.definition.Rule;
 import org.kframework.definition.RuleOrClaim;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
@@ -24,7 +22,7 @@ public class GenerateCoverage {
     }
 
     public K gen(RuleOrClaim r, K body, Module mod) {
-        if (!cover || !r.att().getOptional(Source.class).isPresent()) {
+        if (!cover || !r.att().getOptional(Location.class).isPresent()) {
             return body;
         }
         K left = RewriteToTop.toLeft(body);
