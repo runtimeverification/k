@@ -3,6 +3,7 @@ package org.kframework.compile.checks;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Source;
 import org.kframework.compile.ResolveAnonVar;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
@@ -70,9 +71,10 @@ public class CheckAnonymous {
     }
 
     public void check(Sentence s) {
-        if (s.att().getOptional(Att.LABEL()).orElse("").equals("STDIN-STREAM.stdinUnblock")) {
+        if (s.att().getOptional(Att.LABEL()).orElse("").equals("STDIN-STREAM.stdinUnblock"))
             return;
-        }
+        if (s.att().getOptional(Source.class).orElse(Source.apply("")).source().equals("generated"))
+            return;
         resetVars();
         if (s instanceof RuleOrClaim) {
             RuleOrClaim r = (RuleOrClaim) s;
