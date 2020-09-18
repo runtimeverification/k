@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
@@ -67,7 +68,7 @@ public class GenerateSentencesFromConfigDeclTest {
         RuleGrammarGenerator parserGen = new RuleGrammarGenerator(def);
         Module m = RuleGrammarGenerator.getCombinedGrammar(parserGen.getConfigGrammar(m1), true).getExtensionModule();
         Set<Sentence> gen = GenerateSentencesFromConfigDecl.gen(configuration, BooleanUtils.FALSE, Att(), m, false);
-        Att initializerAtts = Att().add("initializer");
+        Att initializerAtts = Att().add("initializer").add(Source.class, Source.apply("generated"));
         Att productionAtts = initializerAtts.add("function").add("noThread");
         Set<Sentence> reference = Set(Production(KLabel("<threads>"), Sort("ThreadsCell"),
                         Seq(Terminal("<threads>"), NonTerminal(Sort("ThreadCellBag")), Terminal("</threads>")),
