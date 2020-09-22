@@ -19,7 +19,7 @@ module SET-BALANCE-SPEC
 ### `total_balance` tests
 
 ```k
-    claim <k> totalBalance(AID) => 50 </k>
+    rule <k> totalBalance(AID) => 50 </k>
          <account>
            <accountID> AID </accountID>
            <freeBalance> 30 </freeBalance>
@@ -35,7 +35,7 @@ This property shows that `set_balance` will not result in a zero-balance attack.
 **TODO**: Assertions about log events.
 
 ```
-    claim <k> set_balance(Root, WHO, FREE_BALANCE', RESERVED_BALANCE') => . ... </k>
+    rule <k> set_balance(Root, WHO, FREE_BALANCE', RESERVED_BALANCE') => . ... </k>
          <totalIssuance> TOTAL_ISSUANCE => TOTAL_ISSUANCE +Int ( FREE_BALANCE' -Int FREE_BALANCE ) +Int ( RESERVED_BALANCE' -Int RESERVED_BALANCE ) </totalIssuance>
          <existentialDeposit> EXISTENTIAL_DEPOSIT </existentialDeposit>
          <account>
@@ -51,7 +51,7 @@ This property shows that `set_balance` will not result in a zero-balance attack.
 ```
 
 ```k
-    claim <k> set_balance_reserved ( WHO , RESERVED_BALANCE' ) => . ... </k>
+    rule <k> set_balance_reserved ( WHO , RESERVED_BALANCE' ) => . ... </k>
          <existentialDeposit> EXISTENTIAL_DEPOSIT </existentialDeposit>
          <totalIssuance> TOTAL_ISSUANCE +Int ( FREE_BALANCE' -Int FREE_BALANCE ) => TOTAL_ISSUANCE +Int ( FREE_BALANCE' -Int FREE_BALANCE ) +Int ( RESERVED_BALANCE' -Int RESERVED_BALANCE ) </totalIssuance>
          <account>

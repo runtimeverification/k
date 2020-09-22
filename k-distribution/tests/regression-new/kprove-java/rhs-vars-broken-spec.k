@@ -7,7 +7,7 @@ endmodule
 module RHS-VARS-BROKEN-SPEC
     imports VERIFICATION
 
-   claim <k> .K => _ </k>
+    rule <k> .K => _ </k>
 
-   claim <k> .K => A </k>
+    rule <k> .K => A </k>
 endmodule
