@@ -42,9 +42,9 @@ claim
       n = n + 1;
     }
   =>
-    _
+    ?_
   </ak>
-  <astate> n |-> N1:Int sum |-> S1:Int _ => _ </astate>
+  <astate> n |-> N1:Int sum |-> S1:Int _ => ?_ </astate>
 </aT>
 <bT>
   <bk>
@@ -52,9 +52,9 @@ claim
       n = n + 1;
     }
   =>
-    _
+    ?_
   </bk>
-  <bstate> n |-> N2:Int sum |-> S2:Int _ => _ </bstate>
+  <bstate> n |-> N2:Int sum |-> S2:Int _ => ?_ </bstate>
 </bT>
 requires N1 ==Int N2
  andBool S1 ==Int S2
@@ -64,11 +64,11 @@ claim
 <s> ^ a ... </s>
 <aT>
   <ak> .K </ak>
-  <astate> n |-> N1:Int _ </astate>
+  <astate> n |-> N1:Int ?_ </astate>
 </aT>
 <bT>
   <bk> .K </bk>
-  <bstate> n |-> N2:Int _ </bstate>
+  <bstate> n |-> N2:Int ?_ </bstate>
 </bT>
 requires N1 ==Int N2
 [trusted]

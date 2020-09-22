@@ -8,8 +8,8 @@ endmodule
 
 module IMAP-SYMBOLIC [symbolic]
     imports IMAP-SYNTAX
-    rule M [ K0 <- V ] [ K ] => V       requires K0  ==Int K
-    rule M [ K0 <- V ] [ K ] => M [ K ] requires K0 =/=Int K
+    rule _M [ K0 <-  V ] [ K ] => V       requires K0  ==Int K
+    rule  M [ K0 <- _V ] [ K ] => M [ K ] requires K0 =/=Int K
 //  rule .IMap [ _ ] => 0
 
 // syntax IntMap
