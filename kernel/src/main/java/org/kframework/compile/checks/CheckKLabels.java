@@ -147,6 +147,7 @@ public class CheckKLabels {
                 prod.att().contains("unused") ||
                 symbol.equals("<generatedTop>") ||
                 !s.isPresent() ||
+                s.get().source().equals("generated") ||
                 (prod.att().contains(Att.CELL()) && stream(prod.nonterminals()).filter(nt -> klabels.get(symbol).sortAttributesFor().get(nt.sort().head()).getOrElse(() -> Att.empty()).contains("cellCollection")).findAny().isPresent())) {
                 continue;
             }
