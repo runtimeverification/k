@@ -25,7 +25,7 @@ must first be installed.
 
 ## The Short Version
 
-On Ubuntu:
+On Ubuntu Linux:
 
 ```
 git submodule update --init --recursive
@@ -33,7 +33,7 @@ sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg
 curl -sSL https://get.haskellstack.org/ | sh
 ```
 
-On Arch (from source):
+On Arch Linux:
 
 ```
 git submodule update --init --recursive
