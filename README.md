@@ -180,29 +180,29 @@ the `kompile` command.  To execute a program you can use `krun`.
 For running either program in the debugger, use the main class `org.kframework.main.Main` with an additional argument `-kompile` or `-krun` added before other command line arguments, and use the classpath from the `k-distribution` module.
 
 # Troubleshooting
-Common error messages:
+Common build-time error messages:
 
--  `Error: JAVA_HOME not found in your environment.
-    Please set the JAVA_HOME variable in your environment to match the
-    location of your Java installation.`
+-   `Error: JAVA_HOME not found in your environment.
+     Please set the JAVA_HOME variable in your environment to match the
+     location of your Java installation.`
     + Make sure `JAVA_HOME` points to the JDK and not the JRE directory.
 
-- `[WARNING] Cannot get the branch information from the git repository:
-   Detecting the current branch failed: 'git' is not recognized as an internal or external command,
-   operable program or batch file.`
-   +  `git` might not be installed on your system. Make sure that you can execute
+-   `[WARNING] Cannot get the branch information from the git repository:
+     Detecting the current branch failed: 'git' is not recognized as an internal or external command,
+     operable program or batch file.`
+    + `git` might not be installed on your system. Make sure that you can execute
       `git` from the command line.
 
-- `1) Error injecting constructor, java.lang.Error: Unresolved compilation problems:
-        The import org.kframework.parser.outer.Outer cannot be resolved
-        Outer cannot be resolved`
-   + You may run into this issue if target/generated-sources/javacc is not added to the
-     build path of your IDE. Generally this is solved by regenerating your project /
-     re-syncing it with the pom.xml.
+-   `1) Error injecting constructor, java.lang.Error: Unresolved compilation problems:
+          The import org.kframework.parser.outer.Outer cannot be resolved
+          Outer cannot be resolved`
+    + You may run into this issue if target/generated-sources/javacc is not added to the
+      build path of your IDE. Generally this is solved by regenerating your project /
+      re-syncing it with the pom.xml.
 
-- `[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.1:compile
-   (default-compile) on project k-core: Fatal error compiling: invalid target release: 1.8 -> [Help 1]`
-   + You either do not have Java 8 installed, or `$JAVA_HOME` does not point to a Java 8 JDK.
+-   `[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.1:compile
+     (default-compile) on project k-core: Fatal error compiling: invalid target release: 1.8 -> [Help 1]`
+    + You either do not have Java 8 installed, or `$JAVA_HOME` does not point to a Java 8 JDK.
 
 If something unexpected happens and the project fails to build, try `mvn clean` and
 rebuild the entire project. Generally speaking, however, the project should build incrementally
