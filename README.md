@@ -204,6 +204,20 @@ Common build-time error messages:
      (default-compile) on project k-core: Fatal error compiling: invalid target release: 1.8 -> [Help 1]`
     + You either do not have Java 8 installed, or `$JAVA_HOME` does not point to a Java 8 JDK.
 
+-   `[ERROR] Failed to execute goal org.apache.maven.plugins:maven-antrun-plugin:1.7:run
+     (build-haskell) on project haskell-backend: An Ant BuildException has occured: exec returned: 1`
+
+    and scrolling up, you see an error message similar to:
+
+    `[exec] Installing GHC ...
+     [exec] ghc-pkg: Couldn't open database $HOME/.stack/programs/x86_64-linux/ghc-tinfo6-8.10.1/lib/ghc-8.10.1/package.conf.d for modification:
+     {handle: $HOME/.stack/programs/x86_64-linux/ghc-tinfo6-8.10.1/lib/ghc-8.10.1/package.conf.d/package.cache.lock}:
+     hLock: invalid argument (Invalid argument)`
+    + If you are using a [WSL version 1 environment](https://docs.microsoft.com/en-us/windows/wsl/compare-versions),
+      then you have encountered a known issue with the latest versions of GHC. In this
+      case, please either build the K Framework in a different environment
+      or else install a [packaged release for your WSL version 1 distribution](https://github.com/kframework/k/releases/).
+
 If something unexpected happens and the project fails to build, try `mvn clean` and
 rebuild the entire project. Generally speaking, however, the project should build incrementally
 without needing to be cleaned first.
