@@ -156,7 +156,16 @@ public class ResolveFun {
         List<K> klist = new ArrayList<>();
         klist.add(RewriteToTop.toLeft(withAnonVars));
         klist.addAll(closure(closure));
-        return Rule(KRewrite(KApply(fun, KList(klist)), getRHS.apply(withAnonVars)),
+        K rewrite = KRewrite(KApply(fun, KList(klist)), getRHS.apply(withAnonVars));
+        K renamed = new TransformK() {
+            public K apply(KVariable k) {
+              if (k.name().startsWith("!")) {
+                return KVariable("#_" + k.name().substring(1), k.att());
+              }
+              return k;
+            }
+        }.apply(rewrite);
+        return Rule(renamed,
                 BooleanUtils.TRUE, BooleanUtils.TRUE, att);
     }
 
@@ -165,7 +174,7 @@ public class ResolveFun {
         Set<KVariable> vars = new HashSet<>();
         List<KVariable> result = new ArrayList<>();
         new GatherVarsVisitor(true, errors, vars, false).apply(k);
-        new ComputeUnboundVariables(true, errors, vars, result::add).apply(k);
+        new ComputeUnboundVariables(true, true, errors, vars, result::add).apply(k);
         return result;
     }
 
