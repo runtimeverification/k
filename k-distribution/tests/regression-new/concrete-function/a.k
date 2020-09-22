@@ -10,7 +10,7 @@ configuration <k> $PGM:Pgm </k>
 syntax Pgm ::= fff(Int)
 rule run(1) => fff(1)
 rule fff(1) => fff(2)
-rule fff(2) => foo(inc(sym(?X:Int)))
+rule fff(2) => foo(inc(sym(?_X:Int)))
 
 rule run(2) => foo(inc(sym(222)))
 
