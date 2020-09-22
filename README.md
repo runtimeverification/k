@@ -7,9 +7,12 @@ copyright: Copyright (c) 2010-2020 K Team. All Rights Reserved.
 
 This is a readme file for the developers.
 
-# Prerequisites
+# Prerequisite Install Guide
 
-In short:
+Before building and installing the K Framework, the following prerequisites
+must first be installed.
+
+## The Short Version
 
 On Ubuntu:
 
@@ -26,9 +29,11 @@ git submodule update --init --recursive
 sudo pacman -S git maven jdk-openjdk cmake boost libyaml jemalloc clang llvm lld zlib gmp mpfr z3 opam curl stack base-devel base python
 ```
 
-If you install this list of dependencies, continue directly to the Install section.
+If you install this list of dependencies, continue directly to the [Build and Install Guide](#build-and-install-guide).
 
-## Java Development Kit (required JDK8 version 8u45 or higher)
+## The Long Version
+
+### Java Development Kit (required JDK8 version 8u45 or higher)
 
 Linux:
 *   Download from package manager (e.g. `sudo apt-get install openjdk-8-jdk`)
@@ -36,7 +41,7 @@ Linux:
 To make sure that everything works you should be able to call `java -version` and
 `javac -version` from a Terminal.
 
-## Apache Maven
+### Apache Maven
 
 Linux:
 *   Download from package manager (e.g. `sudo apt-get install maven`)
@@ -52,12 +57,12 @@ You can test if it works by calling `mvn -version` in a Terminal.
 This will provide the information about the JDK Maven is using, in case
 it is the wrong one.
 
-## Haskell Stack
+### Haskell Stack
 
 To install, go to <https://docs.haskellstack.org/en/stable/README/> and follow the instructions.
 You may need to do `stack upgrade` to ensure the latest version of Haskell Stack.
 
-## Miscellaneous
+### Miscellaneous
 
 Also required:
 
@@ -73,8 +78,9 @@ Also required:
 
 These can all be installed from your package manager.
 
-# Install
-Checkout the directory of this README in your desired location and call `mvn package` from the main
+# Build and Install Guide
+
+Checkout the project source at your desired location and call `mvn package` from the main
 directory to build the distribution. For convenient usage, you can update
 your $PATH with <checkout-dir>k-distribution/target/release/k/bin (strongly recommended, but optional).
 
@@ -140,22 +146,23 @@ eclipse does not support hierarchical projects.
 IntelliJ IDEA comes with built-in maven integration. For more information, refer to
 the [IntelliJ IDEA wiki](http://wiki.jetbrains.net/intellij/Creating_and_importing_Maven_projects)
 
-# Run test suite
+# Running the Test Suite
+
 To completely test the current version of the K framework, run `mvn verify`.
 This normally takes roughly 30 minutes on a fast machine. If you are interested only
 in running the unit tests and checkstyle goals, run `mvn verify -DskipKTest` to
 skip the lengthy `ktest` execution.
 
-# Changing the KORE data structures
+# Changing the KORE Data Structures
 If you need to change the KORE data structures (unless you are a K core developer, you probably do not), see [Guide-for-changing-the-KORE-data-structures](https://github.com/kframework/k/wiki/Guide-for-changing-the-KORE-data-structures).
 
-# Build the final release directory/archives
+# Building the Final Release Directory/Archives
 Call `mvn install` in the base directory. This will attach an artifact to the local
 maven repository containing a zip and tar.gz of the distribution.
 
 The functionality to create a tagged release is currently incomplete.
 
-# Compiling definitions and running programs
+# Compiling Definitions and Running Programs
 Assuming k-distribution/target/release/k/bin is in your path, you can compile definitions using
 the `kompile` command.  To execute a program you can use `krun`.
 
