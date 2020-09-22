@@ -5,7 +5,18 @@ copyright: Copyright (c) 2010-2020 K Team. All Rights Reserved.
 
 [Join the chat at Riot](https://riot.im/app/#/room/#k:matrix.org)
 
-This is a readme file for the developers.
+# Introduction
+
+This is a readme file for _K developers_.
+
+_K-based tool users_ should:
+
+1.  Consult their tool documentation for build/installation instructions.
+2.  If needed, download a [packaged release](https://github.com/kframework/k/releases/)
+    of the K Framework as part of their tool setup process.
+
+The rest of this file assumes you intend to build and install the K Framework
+from source.
 
 # Prerequisite Install Guide
 
