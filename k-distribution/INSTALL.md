@@ -1,12 +1,12 @@
-Installing K Framework Package
-==============================
+Installing the K Framework Package
+==================================
 
 We currently strive to provide packages for the following platforms:
 
 -   Ubuntu Bionic (18.04)
 -   Debian Buster
 -   Arch Linux
--   MacOS X Mojave
+-   MacOS X Mojave/Homewbrew
 -   Docker Images
 -   Platform Independent K Binary
 
@@ -40,14 +40,22 @@ sudo apt install ./kframework_X.Y.Z_amd64_DISTRO.deb
 pacman -U ./kframework-git-X.Y.Z-1-x86_64.pkg.tar.zst
 ```
 
-### MacOS X Mojave
+### MacOS X Mojave/Homebrew
 
-Tap the `kframework/k` bottle then install (with build number `BN`):
+[Homebrew](https://brew.sh/) (or just brew) is a third-party package manager
+for MacOS.
+If you have not installed brew, you must do so before installing the K
+Framework brew package.
+
+With brew installed, do the following to install the K Framework brew package
+(with build number `BN`):
 
 ```sh
-brew tap kframework/k "file:///$(pwd)"
 brew install kframework--X.Y.Z.ID.bottle.BN.tar.gz -v
 ```
+
+Note: the brew package should install on MacOS X Catalina systems even though
+the package was built for Mojave.
 
 ### Docker Images
 
