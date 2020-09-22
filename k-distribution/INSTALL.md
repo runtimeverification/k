@@ -57,6 +57,24 @@ brew install kframework--X.Y.Z.ID.bottle.BN.tar.gz -v
 Note: the brew package should install on MacOS X Catalina systems even though
 the package was built for Mojave.
 
+#### Homebrew Alternate Installation
+
+To directly install the latest K Framework brew package without needing to
+download it separately, do the following:
+
+```sh
+brew install kframework/k/kframework
+```
+
+Or, to streamline future K Framework upgrades, you can `tap` the K Framework
+package repository. This lets future installations/upgrades/etc... use the
+unprefixed package name.
+
+```sh
+brew tap kframework/k
+brew install kframework
+```
+
 ### Docker Images
 
 Docker images with K pre-installed are available at the
