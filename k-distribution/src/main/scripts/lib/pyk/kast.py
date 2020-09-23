@@ -279,7 +279,7 @@ def prettyPrintKast(kast, symbolTable):
     if kast is None or kast == {}:
         return ""
     if isKVariable(kast):
-        return kast["name"]
+        return kast['originalName'] if 'originalName' in kast else kast['name']
     if isKToken(kast):
         return kast["token"]
     if isKApply(kast):
