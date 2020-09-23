@@ -215,8 +215,11 @@ Common build-time error messages:
      hLock: invalid argument (Invalid argument)`
     + If you are using a [WSL version 1 environment](https://docs.microsoft.com/en-us/windows/wsl/compare-versions),
       then you have encountered a known issue with the latest versions of GHC. In this
-      case, please either build the K Framework in a different environment
-      or else install a [packaged release for your WSL version 1 distribution](https://github.com/kframework/k/releases/).
+      case, please either: (a) upgrade to [WSL version 2](https://docs.microsoft.com/en-us/windows/wsl/install-win10),
+      (b) install a [packaged release for your WSL version 1 distribution](https://github.com/kframework/k/releases/),
+      (c) switch to a supported system configuration (e.g. Linux on a virtual machine), or
+      (d) if you do not need the symbolic execution capabilities of the K Framework, disable them
+      at build time (and remove the GHC dependency) by doing: `mvn package -Dhaskell.backend.skip`
 
 If something unexpected happens and the project fails to build, try `mvn clean` and
 rebuild the entire project. Generally speaking, however, the project should build incrementally
