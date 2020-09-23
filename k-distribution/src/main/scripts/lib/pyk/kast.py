@@ -281,30 +281,30 @@ def prettyPrintKast(kast, symbolTable):
     if isKVariable(kast):
         return kast['originalName'] if 'originalName' in kast else kast['name']
     if isKToken(kast):
-        return kast["token"]
+        return kast['token']
     if isKApply(kast):
-        label = kast["label"]
-        args  = kast["args"]
+        label = kast['label']
+        args  = kast['args']
         unparsedArgs = [ prettyPrintKast(arg, symbolTable) for arg in args ]
         if isCellKLabel(label):
-            cellContents = "\n".join(unparsedArgs).rstrip()
-            cellStr   = label + "\n" + indent(cellContents) + "\n</" + label[1:]
+            cellContents = '\n'.join(unparsedArgs).rstrip()
+            cellStr   = label + '\n' + indent(cellContents) + '\n</' + label[1:]
             return cellStr.rstrip()
         unparser = appliedLabelStr(label) if label not in symbolTable else symbolTable[label]
         return unparser(*unparsedArgs)
     if isKAs(kast):
-        patternStr = prettyPrintKast(kast["pattern"], symbolTable)
-        aliasStr   = prettyPrintKast(kast["alias"], symbolTable)
+        patternStr = prettyPrintKast(kast['pattern'], symbolTable)
+        aliasStr   = prettyPrintKast(kast['alias'], symbolTable)
         return patternStr + ' #as ' + aliasStr
     if isKRewrite(kast):
-        lhsStr = prettyPrintKast(kast["lhs"], symbolTable)
-        rhsStr = prettyPrintKast(kast["rhs"], symbolTable)
-        return "( " + lhsStr + " => " + rhsStr + " )"
+        lhsStr = prettyPrintKast(kast['lhs'], symbolTable)
+        rhsStr = prettyPrintKast(kast['rhs'], symbolTable)
+        return '( ' + lhsStr + ' => ' + rhsStr + ' )'
     if isKSequence(kast):
         unparsedItems = [ prettyPrintKast(item, symbolTable) for item in kast['items'] ]
-        unparsedKSequence = "\n~> ".join(unparsedItems)
+        unparsedKSequence = '\n~> '.join(unparsedItems)
         if len(unparsedItems) > 0:
-            unparsedKSequence = "    " + unparsedKSequence
+            unparsedKSequence = '    ' + unparsedKSequence
         else:
             unparsedKSequence = '.'
         return unparsedKSequence
@@ -344,29 +344,29 @@ def prettyPrintKast(kast, symbolTable):
     if isKBubble(kast):
         body = '// KBubble(' + kast['sentenceType'] + ', ' + kast['contents'] + ')'
         attStr    = prettyPrintKast(kast['att'], symbolTable)
-        return body + " " + attStr
+        return body + ' ' + attStr
     if isKRule(kast):
-        body     = "\n     ".join(prettyPrintKast(kast["body"], symbolTable).split("\n"))
-        ruleStr = "rule " + body
-        requiresStr = ""
-        ensuresStr  = ""
+        body     = '\n     '.join(prettyPrintKast(kast['body'], symbolTable).split('\n'))
+        ruleStr = 'rule ' + body
+        requiresStr = ''
+        ensuresStr  = ''
         attsStr     = prettyPrintKast(kast['att'], symbolTable)
-        if kast["requires"] is not None:
-            requiresStr = prettyPrintKast(kast["requires"], symbolTable)
-            requiresStr = "requires " + "\n   ".join(requiresStr.split("\n"))
-        if kast["ensures"] is not None:
-            ensuresStr = prettyPrintKast(kast["ensures"], symbolTable)
-            ensuresStr = "ensures " + "\n  ".join(ensuresStr.split("\n"))
-        return ruleStr + "\n  " + requiresStr + "\n  " + ensuresStr + "\n  " + attsStr
+        if kast['requires'] is not None:
+            requiresStr = prettyPrintKast(kast['requires'], symbolTable)
+            requiresStr = 'requires ' + '\n   '.join(requiresStr.split('\n'))
+        if kast['ensures'] is not None:
+            ensuresStr = prettyPrintKast(kast['ensures'], symbolTable)
+            ensuresStr = 'ensures ' + '\n  '.join(ensuresStr.split('\n'))
+        return ruleStr + '\n  ' + requiresStr + '\n  ' + ensuresStr + '\n  ' + attsStr
     if isKContext(kast):
-        body        = indent(prettyPrintKast(kast["body"], symbolTable))
-        contextStr  = "context alias " + body
-        requiresStr = ""
+        body        = indent(prettyPrintKast(kast['body'], symbolTable))
+        contextStr  = 'context alias ' + body
+        requiresStr = ''
         attsStr     = prettyPrintKast(kast['att'], symbolTable)
         if kast['requires'] is not None:
             requiresStr = prettyPrintKast(kast['requires'], symbolTable)
             requiresStr = 'requires ' + indent(requiresStr)
-        return contextStr + "\n  " + requiresStr + "\n  " + attsStr
+        return contextStr + '\n  ' + requiresStr + '\n  ' + attsStr
     if isKAtt(kast):
         if len(kast['att']) == 0:
             return ''
@@ -375,22 +375,22 @@ def prettyPrintKast(kast, symbolTable):
     if isKSortSynonym(kast):
         return 'sort ' + kast['newSort'] + ' = ' + kast['oldSort'] + ' ' + prettyPrintKast(kast['att'], symbolTable)
     if isKFlatModule(kast):
-        name = kast["name"]
-        imports = "\n".join(['import ' + kimport for kimport in kast["imports"]])
-        localSentences = "\n\n".join([prettyPrintKast(sent, symbolTable) for sent in kast["localSentences"]])
-        contents = imports + "\n\n" + localSentences
-        return "module " + name                    + "\n    " \
-             + "\n    ".join(contents.split("\n")) + "\n" \
-             + "endmodule"
+        name = kast['name']
+        imports = '\n'.join(['import ' + kimport for kimport in kast['imports']])
+        localSentences = '\n\n'.join([prettyPrintKast(sent, symbolTable) for sent in kast['localSentences']])
+        contents = imports + '\n\n' + localSentences
+        return 'module ' + name                    + '\n    ' \
+             + '\n    '.join(contents.split('\n')) + '\n' \
+             + 'endmodule'
     if isKRequire(kast):
-        return "requires \"" + kast["require"] + ".k\""
+        return 'requires \'' + kast['require'] + '.k\''
     if isKDefinition(kast):
-        requires = "" if kast["requires"] is None else "\n".join([prettyPrintKast(require, symbolTable) for require in kast["requires"]])
-        modules  = "\n\n".join([prettyPrintKast(module, symbolTable) for module in kast["modules"]])
-        return requires + "\n\n" + modules
+        requires = '' if kast['requires'] is None else '\n'.join([prettyPrintKast(require, symbolTable) for require in kast['requires']])
+        modules  = '\n\n'.join([prettyPrintKast(module, symbolTable) for module in kast['modules']])
+        return requires + '\n\n' + modules
 
     print()
-    _warning("Error unparsing kast!")
+    _warning('Error unparsing kast!')
     print(kast)
-    _fatal("Error unparsing!")
+    _fatal('Error unparsing!')
 
