@@ -5,13 +5,27 @@ copyright: Copyright (c) 2010-2020 K Team. All Rights Reserved.
 
 [Join the chat at Riot](https://riot.im/app/#/room/#k:matrix.org)
 
-This is a readme file for the developers.
+# Introduction
 
-# Prerequisites
+This is a readme file for _K developers_.
 
-In short:
+_K-based tool users_ should:
 
-On Ubuntu:
+1.  Consult their tool documentation for build/installation instructions.
+2.  If needed, download a [packaged release](https://github.com/kframework/k/releases/)
+    of the K Framework as part of their tool setup process.
+
+The rest of this file assumes you intend to build and install the K Framework
+from source.
+
+# Prerequisite Install Guide
+
+Before building and installing the K Framework, the following prerequisites
+must first be installed.
+
+## The Short Version
+
+On Ubuntu Linux:
 
 ```
 git submodule update --init --recursive
@@ -19,19 +33,18 @@ sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg
 curl -sSL https://get.haskellstack.org/ | sh
 ```
 
-On Arch (from source):
+On Arch Linux:
 
 ```
 git submodule update --init --recursive
 sudo pacman -S git maven jdk-openjdk cmake boost libyaml jemalloc clang llvm lld zlib gmp mpfr z3 opam curl stack base-devel base python
-export PATH=$PATH:/usr/bin/core_perl
-makepkg
-sudo pacman -U kframework-5.0.0-1-x86_64.pkg.tar.zst
 ```
 
-If you install this list of dependencies, continue directly to the Install section.
+If you install this list of dependencies, continue directly to the [Build and Install Guide](#build-and-install-guide).
 
-## Java Development Kit (required JDK8 version 8u45 or higher)
+## The Long Version
+
+### Java Development Kit (required JDK8 version 8u45 or higher)
 
 Linux:
 *   Download from package manager (e.g. `sudo apt-get install openjdk-8-jdk`)
@@ -39,7 +52,7 @@ Linux:
 To make sure that everything works you should be able to call `java -version` and
 `javac -version` from a Terminal.
 
-## Apache Maven
+### Apache Maven
 
 Linux:
 *   Download from package manager (e.g. `sudo apt-get install maven`)
@@ -55,12 +68,12 @@ You can test if it works by calling `mvn -version` in a Terminal.
 This will provide the information about the JDK Maven is using, in case
 it is the wrong one.
 
-## Haskell Stack
+### Haskell Stack
 
 To install, go to <https://docs.haskellstack.org/en/stable/README/> and follow the instructions.
 You may need to do `stack upgrade` to ensure the latest version of Haskell Stack.
 
-## Miscellaneous
+### Miscellaneous
 
 Also required:
 
@@ -76,8 +89,9 @@ Also required:
 
 These can all be installed from your package manager.
 
-# Install
-Checkout the directory of this README in your desired location and call `mvn package` from the main
+# Build and Install Guide
+
+Checkout the project source at your desired location and call `mvn package` from the main
 directory to build the distribution. For convenient usage, you can update
 your $PATH with <checkout-dir>k-distribution/target/release/k/bin (strongly recommended, but optional).
 
@@ -143,51 +157,70 @@ eclipse does not support hierarchical projects.
 IntelliJ IDEA comes with built-in maven integration. For more information, refer to
 the [IntelliJ IDEA wiki](http://wiki.jetbrains.net/intellij/Creating_and_importing_Maven_projects)
 
-# Run test suite
+# Running the Test Suite
+
 To completely test the current version of the K framework, run `mvn verify`.
 This normally takes roughly 30 minutes on a fast machine. If you are interested only
 in running the unit tests and checkstyle goals, run `mvn verify -DskipKTest` to
 skip the lengthy `ktest` execution.
 
-# Changing the KORE data structures
+# Changing the KORE Data Structures
 If you need to change the KORE data structures (unless you are a K core developer, you probably do not), see [Guide-for-changing-the-KORE-data-structures](https://github.com/kframework/k/wiki/Guide-for-changing-the-KORE-data-structures).
 
-# Build the final release directory/archives
+# Building the Final Release Directory/Archives
 Call `mvn install` in the base directory. This will attach an artifact to the local
 maven repository containing a zip and tar.gz of the distribution.
 
 The functionality to create a tagged release is currently incomplete.
 
-# Compiling definitions and running programs
+# Compiling Definitions and Running Programs
 Assuming k-distribution/target/release/k/bin is in your path, you can compile definitions using
 the `kompile` command.  To execute a program you can use `krun`.
 
 For running either program in the debugger, use the main class `org.kframework.main.Main` with an additional argument `-kompile` or `-krun` added before other command line arguments, and use the classpath from the `k-distribution` module.
 
 # Troubleshooting
-Common error messages:
+Common build-time error messages:
 
--  `Error: JAVA_HOME not found in your environment.
-    Please set the JAVA_HOME variable in your environment to match the
-    location of your Java installation.`
+-   `Error: JAVA_HOME not found in your environment.
+     Please set the JAVA_HOME variable in your environment to match the
+     location of your Java installation.`
     + Make sure `JAVA_HOME` points to the JDK and not the JRE directory.
 
-- `[WARNING] Cannot get the branch information from the git repository:
-   Detecting the current branch failed: 'git' is not recognized as an internal or external command,
-   operable program or batch file.`
-   +  `git` might not be installed on your system. Make sure that you can execute
+-   `[WARNING] Cannot get the branch information from the git repository:
+     Detecting the current branch failed: 'git' is not recognized as an internal or external command,
+     operable program or batch file.`
+    + `git` might not be installed on your system. Make sure that you can execute
       `git` from the command line.
 
-- `1) Error injecting constructor, java.lang.Error: Unresolved compilation problems:
-        The import org.kframework.parser.outer.Outer cannot be resolved
-        Outer cannot be resolved`
-   + You may run into this issue if target/generated-sources/javacc is not added to the
-     build path of your IDE. Generally this is solved by regenerating your project /
-     re-syncing it with the pom.xml.
+-   `1) Error injecting constructor, java.lang.Error: Unresolved compilation problems:
+          The import org.kframework.parser.outer.Outer cannot be resolved
+          Outer cannot be resolved`
+    + You may run into this issue if target/generated-sources/javacc is not added to the
+      build path of your IDE. Generally this is solved by regenerating your project /
+      re-syncing it with the pom.xml.
 
-- `[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.1:compile
-   (default-compile) on project k-core: Fatal error compiling: invalid target release: 1.8 -> [Help 1]`
-   + You either do not have Java 8 installed, or `$JAVA_HOME` does not point to a Java 8 JDK.
+-   `[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.1:compile
+     (default-compile) on project k-core: Fatal error compiling: invalid target release: 1.8 -> [Help 1]`
+    + You either do not have Java 8 installed, or `$JAVA_HOME` does not point to a Java 8 JDK.
+
+-   `[ERROR] Failed to execute goal org.apache.maven.plugins:maven-antrun-plugin:1.7:run
+     (build-haskell) on project haskell-backend: An Ant BuildException has occured: exec returned: 1`
+
+    and scrolling up, you see an error message similar to:
+
+    `[exec] Installing GHC ...
+     [exec] ghc-pkg: Couldn't open database $HOME/.stack/programs/x86_64-linux/ghc-tinfo6-8.10.1/lib/ghc-8.10.1/package.conf.d for modification:
+     {handle: $HOME/.stack/programs/x86_64-linux/ghc-tinfo6-8.10.1/lib/ghc-8.10.1/package.conf.d/package.cache.lock}:
+     hLock: invalid argument (Invalid argument)`
+    + If you are using a [WSL version 1 environment](https://docs.microsoft.com/en-us/windows/wsl/compare-versions),
+      then you have encountered a known issue with the latest versions of GHC. In this
+      case, please either:
+      -   upgrade to [WSL version 2](https://docs.microsoft.com/en-us/windows/wsl/install-win10),
+      -   install a [packaged release for your WSL version 1 distribution](https://github.com/kframework/k/releases/),
+      -   switch to a supported system configuration (e.g. Linux on a virtual machine), or
+      -   if you do not need the symbolic execution capabilities of the K Framework, disable them
+          at build time (and remove the GHC dependency) by doing: `mvn package -Dhaskell.backend.skip`.
 
 If something unexpected happens and the project fails to build, try `mvn clean` and
 rebuild the entire project. Generally speaking, however, the project should build incrementally
