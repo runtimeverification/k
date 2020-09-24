@@ -49,6 +49,7 @@ declared in `ffi.h` by libffi.
                   | "#ulong" [klabel(#ulong), symbol]
                   | "#slong" [klabel(#slong), symbol]
                   | "#longdouble" [klabel(#longdouble), symbol]
+                  | "#pointer" [klabel(#pointer), symbol]
                   | "#struct" "(" List ")" [klabel(#struct), symbol]
 endmodule
 
