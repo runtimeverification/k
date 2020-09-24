@@ -1,0 +1,5 @@
+#Top
+[Warning] Compiler: Deprecated: use claim instead of rule to specify proof
+objectives.
+	Source(warnClaim-spec.k)
+	Location(6,10,6,43)
