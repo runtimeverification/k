@@ -83,6 +83,15 @@ def rewriteWith(rule, pattern):
 def rewriteAnywhereWith(rule, pattern):
     return traverseBottomUp(pattern, lambda p: rewriteWith(rule, p))
 
+def replaceWith(rule, pattern):
+    (ruleLHS, ruleRHS) = rule
+    if ruleLHS == pattern:
+        return ruleRHS
+    return pattern
+
+def replaceAnywhereWith(rule, pattern):
+    return traverseBottomUp(pattern, lambda p: replaceWith(rule, p))
+
 def unsafeMlPredToBool(k):
     """Attempt to convert an ML Predicate back into a boolean expression.
 
