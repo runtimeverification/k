@@ -322,7 +322,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
   //         | \ceil { Sort , Sort } ( Pattern )
   //         | \floor { Sort , Sort } ( Pattern )
   //         | \equal  { Sort , Sort } ( Pattern , Pattern )
-  //         | \mem { Sort , Sort } ( Variable , Pattern )
+  //         | \in { Sort , Sort } ( Variable , Pattern )
   //         | StringLiteral
   private def parsePattern(): Pattern = {
     scanner.nextWithSkippingWhitespaces() match {
@@ -500,6 +500,22 @@ class TextToKore(b: Builders = DefaultBuilders) {
             val str = parseString()
             consumeWithLeadingWhitespaces(")")
             b.DomainValue(s, str)
+          case ('l', 'e') => // left-assoc
+            consume("ft-assoc")
+            consumeWithLeadingWhitespaces("{")
+            consumeWithLeadingWhitespaces("}")
+            consumeWithLeadingWhitespaces("(")
+            val p = parsePattern()
+            consumeWithLeadingWhitespaces(")")
+            b.LeftAssoc(p)
+          case ('r', 'i') => // right-assoc
+            consume("ght-assoc")
+            consumeWithLeadingWhitespaces("{")
+            consumeWithLeadingWhitespaces("}")
+            consumeWithLeadingWhitespaces("(")
+            val p = parsePattern()
+            consumeWithLeadingWhitespaces(")")
+            b.RightAssoc(p)
           // case ('s', 'u') => // subset
           //   consume("bset")
           //   consumeWithLeadingWhitespaces("{")
@@ -525,7 +541,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
             val known = Seq(
               "\\top", "\\bottom", "\\and", "\\or", "\\implies",
               "\\iff", "\\exists", "\\forall", "\\ceil", "\\floor",
-              "\\equals", "\\mem")
+              "\\equals", "\\in")
             throw error(known.mkString(","), "'\\" + err1 + err2 + "'")
         }
       case '@' => // set variable

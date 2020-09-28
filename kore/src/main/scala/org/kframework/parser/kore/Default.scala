@@ -169,6 +169,22 @@ object implementation {
     def Symbol(ctr: String, params: Seq[i.Sort]): i.Symbol = d.Symbol(ctr, params)
 
     def Alias(ctr: String, params: Seq[i.Sort]): i.Alias = d.Alias(ctr, params)
+
+    def LeftAssoc(p: i.Pattern): i.Pattern = {
+      p match {
+        case i.Application(head, ps) => {
+          ps.reduceLeft((accum, p) => Application(head, Seq(accum, p)))
+        }
+      }
+    }
+
+    def RightAssoc(p: i.Pattern): i.Pattern = {
+      p match {
+        case i.Application(head, ps) => {
+          ps.reduceRight((p, accum) => Application(head, Seq(p, accum)))
+        }
+      }
+    }
   }
 }
 
