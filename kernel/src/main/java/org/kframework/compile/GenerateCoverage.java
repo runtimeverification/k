@@ -3,9 +3,7 @@ package org.kframework.compile;
 
 import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
-import org.kframework.compile.RewriteToTop;
 import org.kframework.definition.Module;
-import org.kframework.definition.Rule;
 import org.kframework.definition.RuleOrClaim;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;

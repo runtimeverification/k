@@ -5,7 +5,6 @@ import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
-import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Definition;

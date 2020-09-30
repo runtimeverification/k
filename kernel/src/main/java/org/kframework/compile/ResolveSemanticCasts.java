@@ -2,9 +2,7 @@
 package org.kframework.compile;
 
 import org.kframework.builtin.BooleanUtils;
-import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
-import org.kframework.definition.Rule;
 import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;

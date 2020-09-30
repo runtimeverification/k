@@ -3,11 +3,7 @@ package org.kframework.compile;
 
 import com.google.common.collect.Sets;
 import org.kframework.builtin.Sorts;
-import org.kframework.compile.ConfigurationInfo;
-import org.kframework.compile.LabelInfo;
-import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
-import org.kframework.definition.Rule;
 import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.*;

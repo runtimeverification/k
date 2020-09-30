@@ -225,10 +225,7 @@ public class JavaBackend extends AbstractBackend {
                     }
                 }
             };
-            if (s instanceof Rule)
-                return Constructors.Rule(markerAdder.apply(r.body()), markerAdder.apply(r.requires()), markerAdder.apply(r.ensures()), r.att());
-            else
-                return Constructors.Claim(markerAdder.apply(r.body()), markerAdder.apply(r.requires()), markerAdder.apply(r.ensures()), r.att());
+            return ((RuleOrClaim) s).newInstance(markerAdder.apply(r.body()), markerAdder.apply(r.requires()), markerAdder.apply(r.ensures()), r.att());
         } else {
             return s;
         }
