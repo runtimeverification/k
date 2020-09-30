@@ -8,6 +8,7 @@ import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.*;
 import org.kframework.utils.errorsystem.KEMException;
@@ -47,28 +48,16 @@ public class CloseCells {
         return transform(term);
     }
 
-    private Rule close(Rule rule) {
+    private RuleOrClaim close(RuleOrClaim rule) {
         resetVars();
         gatherVars(rule.body());
         gatherVars(rule.requires());
         gatherVars(rule.ensures());
-        return new Rule(
+        return rule.newInstance(
                 transform(rule.body()),
                 transform(rule.requires()),
                 transform(rule.ensures()),
                 rule.att());
-    }
-
-    private Claim close(Claim claim) {
-        resetVars();
-        gatherVars(claim.body());
-        gatherVars(claim.requires());
-        gatherVars(claim.ensures());
-        return new Claim(
-                transform(claim.body()),
-                transform(claim.requires()),
-                transform(claim.ensures()),
-                claim.att());
     }
 
     private Context close(Context context) {
@@ -82,10 +71,8 @@ public class CloseCells {
     }
 
     public synchronized Sentence close(Sentence s) {
-        if (s instanceof Rule) {
-            return close((Rule)s);
-        } else if (s instanceof Claim) {
-            return close((Claim)s);
+        if (s instanceof RuleOrClaim) {
+            return close((RuleOrClaim) s);
         } else if (s instanceof Context) {
             return close((Context)s);
         } else {

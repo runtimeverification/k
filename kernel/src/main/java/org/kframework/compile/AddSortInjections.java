@@ -76,9 +76,7 @@ public class AddSortInjections {
         if (!sortParams.isEmpty()) {
             att = att.add("sortParams", Set.class, new HashSet<>(sortParams));
         }
-        if (roc instanceof Rule)
-            return new Rule(body, requires, ensures, att);
-        return new Claim(body, requires, ensures, att);
+        return roc.newInstance(body, requires, ensures, att);
     }
 
     public K addInjections(K term) {

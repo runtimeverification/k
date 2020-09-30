@@ -6,6 +6,7 @@ import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.*;
 
@@ -32,24 +33,12 @@ public class ResolveAnonVar {
         counter = 0;
     }
 
-    private Claim resolve(Claim claim) {
-        resetVars();
-        gatherVars(claim.body());
-        gatherVars(claim.requires());
-        gatherVars(claim.ensures());
-        return new Claim(
-                transform(claim.body()),
-                transform(claim.requires()),
-                transform(claim.ensures()),
-                claim.att());
-    }
-
-    private Rule resolve(Rule rule) {
+    private RuleOrClaim resolve(RuleOrClaim rule) {
         resetVars();
         gatherVars(rule.body());
         gatherVars(rule.requires());
         gatherVars(rule.ensures());
-        return new Rule(
+        return rule.newInstance(
                 transform(rule.body()),
                 transform(rule.requires()),
                 transform(rule.ensures()),
@@ -83,10 +72,8 @@ public class ResolveAnonVar {
     }
 
     public synchronized Sentence resolve(Sentence s) {
-        if (s instanceof Rule) {
-            return resolve((Rule) s);
-        } else if (s instanceof Claim) {
-            return resolve((Claim) s);
+        if (s instanceof RuleOrClaim) {
+            return resolve((RuleOrClaim) s);
         } else if (s instanceof Context) {
             return resolve((Context) s);
         } else if (s instanceof ContextAlias) {

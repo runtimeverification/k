@@ -153,28 +153,16 @@ public class ExpandMacros {
         return newLabel;
     }
 
-    private Rule expand(Rule rule) {
+    private RuleOrClaim expand(RuleOrClaim rule) {
         resetVars();
         gatherVars(rule.body());
         gatherVars(rule.requires());
         gatherVars(rule.ensures());
-        Rule result = Rule(expand(rule.body()),
+        RuleOrClaim result = rule.newInstance(expand(rule.body()),
                 expand(rule.requires()),
                 expand(rule.ensures()),
                 rule.att());
-        return (Rule)check(result);
-    }
-
-    private Claim expand(Claim claim) {
-        resetVars();
-        gatherVars(claim.body());
-        gatherVars(claim.requires());
-        gatherVars(claim.ensures());
-        Claim result = Claim(expand(claim.body()),
-                expand(claim.requires()),
-                expand(claim.ensures()),
-                claim.att());
-        return (Claim)check(result);
+        return (RuleOrClaim) check(result);
     }
 
     private Context expand(Context context) {

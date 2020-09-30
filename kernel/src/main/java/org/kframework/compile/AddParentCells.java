@@ -10,6 +10,7 @@ import org.kframework.builtin.KLabels;
 import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KAs;
@@ -313,12 +314,9 @@ public class AddParentCells {
     }
 
     public Sentence concretize(Sentence m) {
-        if (m instanceof Rule) {
-            Rule r = (Rule) m;
-            return new Rule(concretize(r.body()), r.requires(), r.ensures(), r.att());
-        } else if (m instanceof Claim) {
-            Claim c = (Claim) m;
-            return new Claim(concretize(c.body()), c.requires(), c.ensures(), c.att());
+        if (m instanceof RuleOrClaim) {
+            RuleOrClaim r = (RuleOrClaim) m;
+            return r.newInstance(concretize(r.body()), r.requires(), r.ensures(), r.att());
         } else if (m instanceof Context) {
             Context c = (Context) m;
             return new Context(concretize(c.body()), c.requires(), c.att());

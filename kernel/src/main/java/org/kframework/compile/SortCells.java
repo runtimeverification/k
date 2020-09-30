@@ -13,6 +13,7 @@ import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -85,40 +86,22 @@ public class SortCells {
 
     }
 
-    private Rule sortCells(Rule rule) {
+    private RuleOrClaim sortCells(RuleOrClaim rule) {
         resetVars();
         analyzeVars(rule.body());
         analyzeVars(rule.requires());
         analyzeVars(rule.ensures());
-        rule = Rule(
+        rule = rule.newInstance(
                 processVars(rule.body()),
                 processVars(rule.requires()),
                 processVars(rule.ensures()),
                 rule.att());
-        rule = Rule(
+        rule = rule.newInstance(
                 resolveIncompleteCellFragment(rule.body()),
                 resolveIncompleteCellFragment(rule.requires()),
                 resolveIncompleteCellFragment(rule.ensures()),
                 rule.att());
         return rule;
-    }
-
-    private Claim sortCells(Claim claim) {
-        resetVars();
-        analyzeVars(claim.body());
-        analyzeVars(claim.requires());
-        analyzeVars(claim.ensures());
-        claim = Claim(
-                processVars(claim.body()),
-                processVars(claim.requires()),
-                processVars(claim.ensures()),
-                claim.att());
-        claim = Claim(
-                resolveIncompleteCellFragment(claim.body()),
-                resolveIncompleteCellFragment(claim.requires()),
-                resolveIncompleteCellFragment(claim.ensures()),
-                claim.att());
-        return claim;
     }
 
     private Context sortCells(Context context) {
@@ -132,10 +115,8 @@ public class SortCells {
     }
 
     public synchronized Sentence sortCells(Sentence s) {
-        if (s instanceof Rule) {
-            return sortCells((Rule) s);
-        } else if (s instanceof Claim) {
-            return sortCells((Claim) s);
+        if (s instanceof RuleOrClaim) {
+            return sortCells((RuleOrClaim) s);
         } else if (s instanceof Context) {
             return sortCells((Context) s);
         } else {
@@ -720,10 +701,8 @@ public class SortCells {
      * Pre-process terms before processVar
      */
     public synchronized Sentence preprocess(Sentence s) {
-        if (s instanceof Rule) {
-            return preprocess((Rule) s);
-        } else if (s instanceof Claim) {
-            return preprocess((Claim) s);
+        if (s instanceof RuleOrClaim) {
+            return preprocess((RuleOrClaim) s);
         } else {
             return s;
         }
@@ -733,45 +712,27 @@ public class SortCells {
      * Post-process terms after processVar
      */
     public synchronized Sentence postprocess(Sentence s) {
-        if (s instanceof Rule) {
-            return postprocess((Rule) s);
-        } else if (s instanceof Claim) {
-            return postprocess((Claim) s);
+        if (s instanceof RuleOrClaim) {
+            return postprocess((RuleOrClaim) s);
         } else {
             return s;
         }
     }
 
-    private Rule preprocess(Rule rule) {
-        return Rule(
+    private RuleOrClaim preprocess(RuleOrClaim rule) {
+        return rule.newInstance(
                 preprocess(rule.body()),
                 preprocess(rule.requires()),
                 preprocess(rule.ensures()),
                 rule.att());
     }
 
-    private Rule postprocess(Rule rule) {
-        return Rule(
+    private RuleOrClaim postprocess(RuleOrClaim rule) {
+        return rule.newInstance(
                 postprocess(rule.body()),
                 postprocess(rule.requires()),
                 postprocess(rule.ensures()),
                 rule.att());
-    }
-
-    private Claim preprocess(Claim claim) {
-        return Claim(
-                preprocess(claim.body()),
-                preprocess(claim.requires()),
-                preprocess(claim.ensures()),
-                claim.att());
-    }
-
-    private Claim postprocess(Claim claim) {
-        return Claim(
-                postprocess(claim.body()),
-                postprocess(claim.requires()),
-                postprocess(claim.ensures()),
-                claim.att());
     }
 
     /**

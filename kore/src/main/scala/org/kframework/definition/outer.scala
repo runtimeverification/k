@@ -389,14 +389,19 @@ abstract class RuleOrClaim extends Sentence {
   def ensures: K
   override val isSyntax = false
   override val isNonSyntax = true
+  def newInstance(body: K, requires: K, ensures: K, att: Att = Att.empty): RuleOrClaim
 }
 
 case class Claim(body: K, requires: K, ensures: K, att: Att = Att.empty) extends RuleOrClaim with ClaimToString with OuterKORE {
   override def withAtt(att: Att): Claim = Claim(body, requires, ensures, att)
+  override def newInstance(body: K, requires: K, ensures: K, att: Att = Att.empty): Claim =
+    Claim(body, requires, ensures, att)
 }
 
 case class Rule(body: K, requires: K, ensures: K, att: Att = Att.empty) extends RuleOrClaim with RuleToString with OuterKORE {
   override def withAtt(att: Att): Rule = Rule(body, requires, ensures, att)
+  override def newInstance(body: K, requires: K, ensures: K, att: Att = Att.empty): Rule =
+    Rule(body, requires, ensures, att)
 }
 
 object Rule {

@@ -8,6 +8,7 @@ import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -105,20 +106,12 @@ public class AddTopCellToRules {
         return IncompleteCellUtils.make(root, true, term, true);
     }
 
-    public Rule addImplicitCells(Rule rule, Module m) {
-        return new Rule(
+    public RuleOrClaim addImplicitCells(RuleOrClaim rule, Module m) {
+        return rule.newInstance(
                 addImplicitCells(rule.body(), m),
                 rule.requires(),
                 rule.ensures(),
                 rule.att());
-    }
-
-    public Claim addImplicitCells(Claim claim, Module m) {
-        return new Claim(
-                addImplicitCells(claim.body(), m),
-                claim.requires(),
-                claim.ensures(),
-                claim.att());
     }
 
     public Context addImplicitCells(Context context, Module m) {
@@ -132,10 +125,8 @@ public class AddTopCellToRules {
         if (skipSentence(s)) {
             return s;
         }
-        if (s instanceof Rule) {
-            return addImplicitCells((Rule) s, m);
-        } else if (s instanceof Claim) {
-            return addImplicitCells((Claim) s, m);
+        if (s instanceof RuleOrClaim) {
+            return addImplicitCells((RuleOrClaim) s, m);
         } else if (s instanceof Context) {
             return addImplicitCells((Context) s, m);
         } else {

@@ -49,12 +49,9 @@ public class AddImplicitComputationCell {
             return s;
         }
 
-        if (s instanceof Rule) {
-            Rule rule = (Rule) s;
-            return new Rule(apply(rule.body(), m), rule.requires(), rule.ensures(), rule.att());
-        } else if (s instanceof Claim) {
-            Claim claim = (Claim) s;
-            return new Claim(apply(claim.body(), m), claim.requires(), claim.ensures(), claim.att());
+        if (s instanceof RuleOrClaim) {
+            RuleOrClaim rule = (RuleOrClaim) s;
+            return rule.newInstance(apply(rule.body(), m), rule.requires(), rule.ensures(), rule.att());
         } else if (s instanceof Context) {
             Context context = (Context) s;
             return new Context(apply(context.body(), m), context.requires(), context.att());

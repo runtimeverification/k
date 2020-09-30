@@ -88,20 +88,12 @@ public class ResolveFunctionWithConfig {
         return false;
     }
 
-    private Rule resolve(Rule rule, Module m) {
-        return new Rule(
+    private RuleOrClaim resolve(RuleOrClaim rule, Module m) {
+        return rule.newInstance(
                 transform(resolve(rule.body(), m), m),
                 transform(rule.requires(), m),
                 transform(rule.ensures(), m),
                 rule.att());
-    }
-
-    private Claim resolve(Claim claim, Module m) {
-        return new Claim(
-                transform(resolve(claim.body(), m), m),
-                transform(claim.requires(), m),
-                transform(claim.ensures(), m),
-                claim.att());
     }
 
     private Context resolve(Context context, Module m) {
@@ -227,23 +219,18 @@ public class ResolveFunctionWithConfig {
     }
 
     public Sentence resolveConfigVar(Sentence s) {
-      if (s instanceof Rule) {
-        Rule r = (Rule)s;
-        return Rule(resolveConfigVar(r.body(), r.requires(), r.ensures()), r.requires(), r.ensures(), r.att());
-      } else if (s instanceof Claim) {
-          Claim c = (Claim)s;
-        return Claim(resolveConfigVar(c.body(), c.requires(), c.ensures()), c.requires(), c.ensures(), c.att());
+      if (s instanceof RuleOrClaim) {
+        RuleOrClaim r = (RuleOrClaim)s;
+        return r.newInstance(resolveConfigVar(r.body(), r.requires(), r.ensures()), r.requires(), r.ensures(), r.att());
       }
       return s;
     }
 
     public Sentence resolve(Module m, Sentence s) {
-        if (s instanceof Rule) {
-            return resolve((Rule) s, m);
+        if (s instanceof RuleOrClaim) {
+            return resolve((RuleOrClaim) s, m);
         } else if (s instanceof Context) {
             return resolve((Context) s, m);
-        } else if (s instanceof Claim) {
-            return resolve((Claim) s, m);
         } else if (s instanceof ContextAlias) {
             return resolve((ContextAlias) s, m);
         } else if (s instanceof Production) {

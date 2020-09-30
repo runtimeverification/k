@@ -14,6 +14,7 @@ import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.Assoc;
 import org.kframework.kore.K;
@@ -95,30 +96,17 @@ public class ConvertDataStructureToLookup {
         }).distinct().collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
     }
 
-    private Rule convert(Rule rule) {
+    private RuleOrClaim convert(RuleOrClaim rule) {
         reset();
         gatherVars(rule.body(), vars);
         gatherVars(rule.requires(), vars);
         gatherVars(rule.ensures(), vars);
         K body = transform(rule.body());
-        return Rule(
+        return rule.newInstance(
                 body,
                 addSideCondition(rule.requires()),
                 rule.ensures(),
                 rule.att());
-    }
-
-    private Claim convert(Claim claim) {
-        reset();
-        gatherVars(claim.body(), vars);
-        gatherVars(claim.requires(), vars);
-        gatherVars(claim.ensures(), vars);
-        K body = transform(claim.body());
-        return Claim(
-                body,
-                addSideCondition(claim.requires()),
-                claim.ensures(),
-                claim.att());
     }
 
     private Context convert(Context context) {
@@ -574,10 +562,8 @@ public class ConvertDataStructureToLookup {
                 || s.att().contains(Att.PATTERN())
                 || s.att().contains(Att.PATTERN_FOLDING())) {
             return s;
-        } else if (s instanceof Rule) {
-            return convert((Rule) s);
-        } else if (s instanceof Claim) {
-            return convert((Claim) s);
+        } else if (s instanceof RuleOrClaim) {
+            return convert((RuleOrClaim) s);
         } else if (s instanceof Context) {
             return convert((Context) s);
         } else {
