@@ -3,7 +3,9 @@ package org.kframework.compile.checks;
 
 import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
+import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
+import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.utils.errorsystem.KEMException;
@@ -25,6 +27,21 @@ public class CheckAtt {
     public void check(Sentence sentence) {
         if (sentence instanceof Rule) {
             check(((Rule) sentence).att(), sentence);
+        } else if (sentence instanceof Production) {
+            check((Production) sentence);
+        }
+    }
+
+    private void check(Production prod) {
+        if (!prod.sort().equals(Sorts.KItem())) {
+            Att sortAtt =  m.sortAttributesFor().getOrElse(prod.sort().head(), () -> Att.empty());
+            if (sortAtt.contains(Att.HOOK()) && !sortAtt.get(Att.HOOK()).equals("ARRAY.Array")) {
+                if (!prod.att().contains(Att.FUNCTION()) && !prod.att().contains("token")) {
+                    if (!(prod.sort().equals(Sorts.K()) && ((prod.klabel().isDefined() && (prod.klabel().get().name().equals("#EmptyK") || prod.klabel().get().name().equals("#KSequence"))) || prod.isSubsort()))) {
+                        errors.add(KEMException.compilerError("Cannot add new constructors to hooked sort " + prod.sort(), prod));
+                    }
+                }
+            }
         }
     }
 
