@@ -29,28 +29,31 @@ to the `#ffiCall` function. These types roughly correspond to the types
 declared in `ffi.h` by libffi.
 
 ```k
-  syntax FFIType ::= "#void" [klabel(#void), symbol]
-                  | "#uint8" [klabel(#uint8), symbol]
-                  | "#sint8" [klabel(#sint8), symbol]
-                  | "#uint16" [klabel(#uint16), symbol]
-                  | "#sint16" [klabel(#sint16), symbol]
-                  | "#uint32" [klabel(#uint32), symbol]
-                  | "#sint32" [klabel(#sint32), symbol]
-                  | "#uint64" [klabel(#uint64), symbol]
-                  | "#sint64" [klabel(#sint64), symbol]
-                  | "#float" [klabel(#float), symbol]
-                  | "#double" [klabel(#double), symbol]
-                  | "#uchar" [klabel(#uchar), symbol]
-                  | "#schar" [klabel(#schar), symbol]
-                  | "#ushort" [klabel(#ushort), symbol]
-                  | "#sshort" [klabel(#sshort), symbol]
-                  | "#uint" [klabel(#uint), symbol]
-                  | "#sint" [klabel(#sint), symbol]
-                  | "#ulong" [klabel(#ulong), symbol]
-                  | "#slong" [klabel(#slong), symbol]
-                  | "#longdouble" [klabel(#longdouble), symbol]
-                  | "#pointer" [klabel(#pointer), symbol]
-                  | "#struct" "(" List ")" [klabel(#struct), symbol]
+  syntax FFIType ::= "#void" [klabel(#ffi_void), symbol]
+                  | "#uint8" [klabel(#ffi_uint8), symbol]
+                  | "#sint8" [klabel(#ffi_sint8), symbol]
+                  | "#uint16" [klabel(#ffi_uint16), symbol]
+                  | "#sint16" [klabel(#ffi_sint16), symbol]
+                  | "#uint32" [klabel(#ffi_uint32), symbol]
+                  | "#sint32" [klabel(#ffi_sint32), symbol]
+                  | "#uint64" [klabel(#ffi_uint64), symbol]
+                  | "#sint64" [klabel(#ffi_sint64), symbol]
+                  | "#float" [klabel(#ffi_float), symbol]
+                  | "#double" [klabel(#ffi_double), symbol]
+                  | "#uchar" [klabel(#ffi_uchar), symbol]
+                  | "#schar" [klabel(#ffi_schar), symbol]
+                  | "#ushort" [klabel(#ffi_ushort), symbol]
+                  | "#sshort" [klabel(#ffi_sshort), symbol]
+                  | "#uint" [klabel(#ffi_uint), symbol]
+                  | "#sint" [klabel(#ffi_sint), symbol]
+                  | "#ulong" [klabel(#ffi_ulong), symbol]
+                  | "#slong" [klabel(#ffi_slong), symbol]
+                  | "#longdouble" [klabel(#ffi_longdouble), symbol]
+                  | "#pointer" [klabel(#ffi_pointer), symbol]
+                  | "#complexfloat" [klabel(#ffi_complexfloat), symbol]
+                  | "#complexdouble" [klabel(#ffi_complexdouble), symbol]
+                  | "#complexlongdouble" [klabel(#ffi_complexlongdouble), symbol]
+                  | "#struct" "(" List ")" [klabel(#ffi_struct), symbol]
 endmodule
 
 module FFI
@@ -173,5 +176,30 @@ currently evaluating rule. The function returns `.K`.
 
 ```k
   syntax K ::= "#free" "(" KItem ")" [function, hook(FFI.free)]
+```
+
+### Reading
+
+`#nativeRead(Addr, Mem)` will read native memory at address `Addr` into `Mem`,
+reading exactly `lengthBytes(Mem)` bytes. This will generate undefined behavior
+if `Addr` does not point to a readable segment of memory at least
+`lengthBytes(Mem)` bytes long.
+
+```k
+  syntax K ::= "#nativeRead" "(" Int "," Bytes ")" [function, hook(FFI.read)]
+```
+
+### Writing
+
+`#nativeWrite(Addr, Mem)` will write the contents of `Mem` to native memory at
+address `Addr`. The memory will be read prior to being written, and a write
+will only happen if the memory has a different value than the current value of
+`Mem`. This will generate undefined behavior if `Addr` does not point to a
+readable segment of memory at least `lengthBytes(Mem)` bytes long, or if the
+memory at address `Addr` has a different value than currently contained in
+`Mem`, and the memory in question is not writeable.
+
+```k
+  syntax K ::= "#nativeWrite" "(" Int "," Bytes ")" [function, hook(FFI.write)]
 endmodule
 ```
