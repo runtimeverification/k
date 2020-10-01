@@ -99,7 +99,8 @@ public class TypeInferencer implements AutoCloseable {
         String[] parts = version.split("\\.");
         int major = Integer.valueOf(parts[0]);
         int minor = Integer.valueOf(parts[1]);
-        if (major < 4 || (major == 4 && minor < 6)) {
+        int patch = Integer.valueOf(parts[2]);
+        if (major < 4 || (major == 4 && minor < 6) || (major == 4 && minor == 8 && patch == 9)) {
           destroyOnReset = true;
         } else {
           destroyOnReset = false;
