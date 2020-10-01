@@ -19,6 +19,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import java.util.EnumSet;
 import java.util.Set;
 
+import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
@@ -71,7 +72,7 @@ public class ResolveHeatCoolAttribute {
         }
         String sort = att.<String>getOptional("result").orElse("KResult");
         KLabel lbl = KLabel("is" + sort);
-        if (!m.productionsFor().contains(lbl)) {
+        if (!m.productionsFor().contains(lbl) && !stream(m.allSorts()).filter(s -> s.toString().equals(sort)).findAny().isPresent()) {
             throw KEMException.compilerError("Definition is missing function " + lbl.name() + " required for strictness. Please either declare sort " + sort + " or declare 'syntax Bool ::= " + lbl.name() + "(K) [symbol, function]'", requires);
         }
         KApply predicate = KApply(lbl, KVariable("HOLE"));
