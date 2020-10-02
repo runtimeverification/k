@@ -5,14 +5,14 @@ module MISSINGKRESULT
   imports SUBSTITUTION
 
   syntax Exp ::= Val
-               | Exp Exp              [strict, left]
+               | Exp Exp
                | "(" Exp ")"          [bracket]
 
   syntax Val ::= Int | Bool
-  syntax Exp ::= Exp "*" Exp          [strict, left]
+  syntax Exp ::= Exp "*" Exp
                | Exp "/" Exp          [strict]
-               > Exp "+" Exp          [strict, left]
-               > Exp "<=" Exp         [strict]
+               > Exp "+" Exp
+               > Exp "<=" Exp
   rule I1 * I2 => I1 *Int I2
   rule I1 / I2 => I1 /Int I2
   rule I1 + I2 => I1 +Int I2
