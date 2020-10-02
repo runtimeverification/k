@@ -148,6 +148,7 @@ public class KExceptionManager {
                 System.err.println(msg);
                 last = e;
             }
+            exceptions.clear();
         }
     }
 
