@@ -21,6 +21,7 @@ import org.kframework.kore.Sort;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -114,7 +115,7 @@ public class KSyntax2Bison {
     return Module(module.name(), module.imports(), immutable(sentences), module.att());
   }
 
-  public static void writeParser(Module module, Scanner scanner, Sort start, File path, boolean glr) {
+  public static void writeParser(Module module, Scanner scanner, Sort start, File path, boolean glr, KExceptionManager kem) {
     module = transformByPriorityAndAssociativity(module);
     StringBuilder bison = new StringBuilder();
     bison.append("%{\n" +
