@@ -187,7 +187,7 @@ struct
       [String sort] -> let res = ff sort config !freshCounter in freshCounter := Z.add !freshCounter Z.one; res
     | _ -> raise Not_implemented
   let hook_getenv c _ _ _ _ = match c with
-      [String key] -> [String (Sys.getenv key)]
+      [String key] -> (try [String (Sys.getenv key)] with Not_found -> [])
     | _ -> raise Not_implemented
   let hook_argv c _ _ _ _ = match c with
       () -> [List (SortList, Lbl_List_,(Array.fold_right (fun arg res -> [String arg] :: res) !CONFIG.sys_argv []))]
