@@ -38,7 +38,9 @@ public class CheckAtt {
             if (sortAtt.contains(Att.HOOK()) && !sortAtt.get(Att.HOOK()).equals("ARRAY.Array")) {
                 if (!prod.att().contains(Att.FUNCTION()) && !prod.att().contains("token")) {
                     if (!(prod.sort().equals(Sorts.K()) && ((prod.klabel().isDefined() && (prod.klabel().get().name().equals("#EmptyK") || prod.klabel().get().name().equals("#KSequence"))) || prod.isSubsort()))) {
-                        errors.add(KEMException.compilerError("Cannot add new constructors to hooked sort " + prod.sort(), prod));
+                        if (!(sortAtt.contains("cellCollection") && prod.isSubsort())) {
+                            errors.add(KEMException.compilerError("Cannot add new constructors to hooked sort " + prod.sort(), prod));
+                        }
                     }
                 }
             }
