@@ -105,6 +105,7 @@ public class KException implements Serializable, HasLocation {
         FUTURE_ERROR,
         UNUSED_VAR,
         PROOF_LINT,
+        NON_LR_GRAMMAR,
         FIRST_HIDDEN, // warnings below here are hidden by default
         MISSING_HOOK_JAVA,
         USELESS_RULE,
