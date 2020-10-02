@@ -9,6 +9,7 @@ import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.GenerateSortPredicateSyntax;
 import org.kframework.compile.GenerateSortProjections;
 import org.kframework.definition.Definition;
+import org.kframework.definition.Import;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.NonTerminal;
@@ -435,9 +436,14 @@ public class RuleGrammarGenerator {
             parseProds.addAll(res);
             disambProds.addAll(res);
         }
-        Module extensionM = new Module(mod.name() + "-EXTENSION", Set(mod), immutable(extensionProds), mod.att());
-        Module disambM = new Module(mod.name() + "-DISAMB", Set(), immutable(disambProds), mod.att());
-        Module parseM = new Module(mod.name() + "-PARSER", Set(), immutable(parseProds), mod.att());
+        Att att = mod.att();
+        List<String> notLrModules = stream(mod.importedModules()).filter(m -> m.att().contains("not-lr1") && !m.name().endsWith(Import.syntaxString())).map(m -> m.name()).collect(Collectors.toList());
+        if (!notLrModules.isEmpty()) {
+          att = att.add("not-lr1", notLrModules.toString());
+        }
+        Module extensionM = new Module(mod.name() + "-EXTENSION", Set(mod), immutable(extensionProds), att);
+        Module disambM = new Module(mod.name() + "-DISAMB", Set(), immutable(disambProds), att);
+        Module parseM = new Module(mod.name() + "-PARSER", Set(), immutable(parseProds), att);
         parseM.subsorts();
         return Tuple3.apply(extensionM, disambM, parseM);
     }
