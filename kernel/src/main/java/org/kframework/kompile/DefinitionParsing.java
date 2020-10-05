@@ -34,8 +34,6 @@ import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.BinaryLoader;
-import org.kframework.utils.StringUtil;
-import org.kframework.utils.Tag;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -49,7 +47,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -66,6 +63,11 @@ import static org.kframework.kore.KORE.*;
  */
 public class DefinitionParsing {
     public static final Sort START_SYMBOL = Sorts.RuleContent();
+    private static final String rule = "rule";
+    private static final String claim = "claim";
+    private static final String configuration = "config";
+    private static final String alias = "alias";
+    private static final String context = "context";
     private final File cacheFile;
     private final boolean autoImportDomains;
     private final boolean kore;
@@ -224,7 +226,7 @@ public class DefinitionParsing {
         boolean hasConfigDecl = stream(definition.mainModule().sentences())
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
-                .filter(b -> b.sentenceType().equals(Tag.configuration))
+                .filter(b -> b.sentenceType().equals(configuration))
                 .findFirst().isPresent();
 
         Definition definitionWithConfigBubble = DefinitionTransformer.from(mod -> {
@@ -282,7 +284,7 @@ public class DefinitionParsing {
         if (stream(inputModule.localSentences())
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
-                .filter(b -> b.sentenceType().equals(Tag.configuration)).count() == 0)
+                .filter(b -> b.sentenceType().equals(configuration)).count() == 0)
             return inputModule;
 
 
@@ -302,7 +304,7 @@ public class DefinitionParsing {
                     .parallel()
                     .filter(s -> s instanceof Bubble)
                     .map(b -> (Bubble) b)
-                    .filter(b -> b.sentenceType().equals(Tag.configuration))
+                    .filter(b -> b.sentenceType().equals(configuration))
                     .flatMap(b -> performParse(cache.getCache(), parser, parser.getScanner(), b))
                     .map(contents -> {
                         KApply configContents = (KApply) contents;
@@ -352,7 +354,7 @@ public class DefinitionParsing {
         if (stream(module.localSentences())
                 .filter(s -> s instanceof Bubble)
                 .map(b -> (Bubble) b)
-                .filter(b -> !b.sentenceType().equals(Tag.configuration)).count() == 0)
+                .filter(b -> !b.sentenceType().equals(configuration)).count() == 0)
             return module;
 
         Module ruleParserModule = gen.getRuleGrammar(module);
@@ -374,7 +376,7 @@ public class DefinitionParsing {
                     .parallel()
                     .filter(s -> s instanceof Bubble)
                     .map(b -> (Bubble) b)
-                    .filter(b -> b.sentenceType().equals(Tag.claim))
+                    .filter(b -> b.sentenceType().equals(claim))
                     .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
                     .map(this::upClaim)
                 .collect(Collections.toSet());
@@ -383,7 +385,7 @@ public class DefinitionParsing {
                     .parallel()
                     .filter(s -> s instanceof Bubble)
                     .map(b -> (Bubble) b)
-                    .filter(b -> b.sentenceType().equals(Tag.rule))
+                    .filter(b -> b.sentenceType().equals(rule))
                     .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
                     .map(this::upRule)
                 .collect(Collections.toSet());
@@ -392,7 +394,7 @@ public class DefinitionParsing {
                     .parallel()
                     .filter(s -> s instanceof Bubble)
                     .map(b -> (Bubble) b)
-                    .filter(b -> b.sentenceType().equals(Tag.context))
+                    .filter(b -> b.sentenceType().equals(context))
                     .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
                     .map(this::upContext)
                 .collect(Collections.toSet());
@@ -401,7 +403,7 @@ public class DefinitionParsing {
                     .parallel()
                     .filter(s -> s instanceof Bubble)
                     .map(b -> (Bubble) b)
-                    .filter(b -> b.sentenceType().equals(Tag.alias))
+                    .filter(b -> b.sentenceType().equals(alias))
                     .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
                     .map(this::upAlias)
                 .collect(Collections.toSet());
@@ -421,7 +423,7 @@ public class DefinitionParsing {
         try (ParseInModule parser = RuleGrammarGenerator
                 .getCombinedGrammar(gen.getRuleGrammar(compiledDef.executionModule()), isStrict, profileRules, files)) {
             java.util.Set<K> res = performParse(new HashMap<>(), parser, parser.getScanner(),
-                    new Bubble(Tag.rule, contents, Att().add("contentStartLine", Integer.class, 1)
+                    new Bubble(rule, contents, Att().add("contentStartLine", Integer.class, 1)
                             .add("contentStartColumn", Integer.class, 1).add(Source.class, source)))
                     .collect(Collectors.toSet());
             if (!errors.isEmpty()) {
