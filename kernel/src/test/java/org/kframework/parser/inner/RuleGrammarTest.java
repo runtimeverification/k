@@ -268,8 +268,9 @@ public class RuleGrammarTest {
     public void test13() {
         String def = "" +
                 "module TEST " +
+                "syntax Bool ::= \"true\" [token] " +
                 "endmodule";
-        parseRule(".::K => .::K requires .::K", def, 0, false);
+        parseRule(".::K => .::K requires true", def, 0, false);
     }
 
     // test automatic follow restriction for terminals

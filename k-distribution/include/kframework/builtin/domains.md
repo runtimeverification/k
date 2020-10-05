@@ -746,8 +746,12 @@ matching logic via the expression `{B #Equals true}`.
 The boolean values are `true` and `false`.
 
 ```k
-module BOOL-SYNTAX
+module SORT-BOOL
   syntax Bool [hook(BOOL.Bool)]
+endmodule
+
+module BOOL-SYNTAX
+  imports SORT-BOOL
   syntax Bool ::= "true"  [token]
   syntax Bool ::= "false" [token]
 endmodule
