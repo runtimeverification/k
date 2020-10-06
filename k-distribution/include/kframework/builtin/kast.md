@@ -34,6 +34,7 @@ imports the syntax of matching logic.
 ```k
 module BASIC-K
   imports ML-SYNTAX
+  imports SORT-BOOL
   syntax KItem [hook(K.KItem)]
   syntax K     ::= KItem
   syntax KConfigVar [token]
@@ -336,11 +337,11 @@ module REQUIRES-ENSURES
   syntax #RuleBody ::= K
 
   syntax #RuleContent ::= #RuleBody                                 [klabel("#ruleNoConditions"), symbol]
-                        | #RuleBody "requires" K                    [klabel("#ruleRequires"), symbol]
-                        | #RuleBody "when" K                        [klabel("#ruleRequires"), symbol]
-                        | #RuleBody "ensures"  K                    [klabel("#ruleEnsures"), symbol]
-                        | #RuleBody "requires" K "ensures" K        [klabel("#ruleRequiresEnsures"), symbol]
-                        | #RuleBody "when" K "ensures" K            [klabel("#ruleRequiresEnsures"), symbol]
+                        | #RuleBody "requires" Bool                 [klabel("#ruleRequires"), symbol]
+                        | #RuleBody "when" Bool                     [klabel("#ruleRequires"), symbol]
+                        | #RuleBody "ensures"  Bool                 [klabel("#ruleEnsures"), symbol]
+                        | #RuleBody "requires" Bool "ensures" Bool  [klabel("#ruleRequiresEnsures"), symbol]
+                        | #RuleBody "when" Bool "ensures" Bool      [klabel("#ruleRequiresEnsures"), symbol]
 endmodule
 ```
 
