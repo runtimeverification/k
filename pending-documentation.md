@@ -2163,6 +2163,9 @@ some important limitations:
   generated will have shift/reduce or reduce/reduce conflicts and the parser
   may behave differently than `kast` would (`kast` is a GLL parser, ie, it
   is based on LL parsers and parses all unambiguous context-free grammars).
+  K provides an attribute, `not-lr1`, which can be applied to modules known to
+  not be LR(1), and will trigger a warning if the user attempts to generate an
+  LR(1) parser which recursively imports that module.
 * If you are using LR(1) based parsing, the `prefer` and `avoid` attributes are
   ignored. It is only possible to implement these attributes by means of
   generalized LL or LR parsing and a postprocessing on the AST to remove the
