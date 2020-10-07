@@ -97,6 +97,10 @@ public class KExceptionManager {
         register(type, KExceptionGroup.OUTER_PARSER, message, e, location, source);
     }
 
+    public void registerInnerParserWarning(ExceptionType type, String message) {
+        register(type, KExceptionGroup.INNER_PARSER, message, null, null, null);
+    }
+
     private void register(ExceptionType type, KExceptionGroup group, String message,
                           Throwable e, Location location, Source source) {
         registerInternal(new KException(type, group, message, source, location, e), true);
@@ -144,6 +148,7 @@ public class KExceptionManager {
                 System.err.println(msg);
                 last = e;
             }
+            exceptions.clear();
         }
     }
 

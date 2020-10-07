@@ -463,7 +463,7 @@ patterns for doing so, refer to K's
 [user documentation](pending-documentation.md).
 
 ```k
-module SET
+module SET [not-lr1]
   imports INT-SYNTAX
   imports BASIC-K
 
@@ -588,7 +588,7 @@ patterns for doing so, refer to K's
 [user documentation](pending-documentation).
 
 ```k
-module LIST
+module LIST [not-lr1]
   imports INT-SYNTAX
   imports BASIC-K
 
@@ -746,13 +746,17 @@ matching logic via the expression `{B #Equals true}`.
 The boolean values are `true` and `false`.
 
 ```k
-module BOOL-SYNTAX
+module SORT-BOOL
   syntax Bool [hook(BOOL.Bool)]
+endmodule
+
+module BOOL-SYNTAX
+  imports SORT-BOOL
   syntax Bool ::= "true"  [token]
   syntax Bool ::= "false" [token]
 endmodule
 
-module BOOL
+module BOOL [not-lr1]
   imports BASIC-K
   imports BOOL-SYNTAX
 ```
