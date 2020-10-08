@@ -21,6 +21,8 @@ import org.kframework.kore.Sort;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -114,7 +116,12 @@ public class KSyntax2Bison {
     return Module(module.name(), module.imports(), immutable(sentences), module.att());
   }
 
-  public static void writeParser(Module module, Scanner scanner, Sort start, File path, boolean glr) {
+  public static void writeParser(Module module, Scanner scanner, Sort start, File path, boolean glr, KExceptionManager kem) {
+    if (!glr && module.att().contains("not-lr1")) {
+        kem.registerInnerParserWarning(ExceptionType.NON_LR_GRAMMAR, "Importing a module that is tagged as not being LR(1) when using Bison's LR(1) parser generator: " + module.att().get("not-lr1"));
+        // print so it appears before we call bison which may not terminate
+        kem.print();
+    }
     module = transformByPriorityAndAssociativity(module);
     StringBuilder bison = new StringBuilder();
     bison.append("%{\n" +

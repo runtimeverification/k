@@ -463,7 +463,7 @@ patterns for doing so, refer to K's
 [user documentation](pending-documentation.md).
 
 ```k
-module SET
+module SET [not-lr1]
   imports INT-SYNTAX
   imports BASIC-K
 
@@ -588,7 +588,7 @@ patterns for doing so, refer to K's
 [user documentation](pending-documentation).
 
 ```k
-module LIST
+module LIST [not-lr1]
   imports INT-SYNTAX
   imports BASIC-K
 
@@ -756,7 +756,7 @@ module BOOL-SYNTAX
   syntax Bool ::= "false" [token]
 endmodule
 
-module BOOL
+module BOOL [not-lr1]
   imports BASIC-K
   imports BOOL-SYNTAX
 ```
