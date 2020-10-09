@@ -3,10 +3,11 @@ package org.kframework.compile.checks;
 
 import org.kframework.attributes.Att;
 import org.kframework.compile.RewriteAwareVisitor;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Module;
-import org.kframework.definition.RuleOrClaim;
+import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -30,8 +31,13 @@ public class CheckFunctions {
     }
 
     public void check(Sentence sentence) {
-        if (sentence instanceof RuleOrClaim) {
-            RuleOrClaim rl = (RuleOrClaim) sentence;
+        if (sentence instanceof Rule) {
+            Rule rl = (Rule) sentence;
+            if (!(isSymbolic && rl.att().contains(Att.SIMPLIFICATION())))
+                // functions are allowed on the LHS of simplification rules on the symbolic engines
+                check(rl.body());
+        } else if (sentence instanceof Claim) {
+            Claim rl = (Claim) sentence;
             check(rl.body());
         } else if (sentence instanceof Context) {
             Context ctx = (Context) sentence;
@@ -58,7 +64,7 @@ public class CheckFunctions {
                 }
                 Att attributes = m.attributesFor().apply(k.klabel());
                 String hook = attributes.getOptional("hook").orElse("");
-                if (!isSymbolic && attributes.contains("function")
+                if (attributes.contains("function")
                     && isLHS()
                     && !atTop
                     && !(hook.equals("SET.element") || hook.equals("SET.concat")
