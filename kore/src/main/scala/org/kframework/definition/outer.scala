@@ -216,7 +216,9 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
 
+  lazy val claims: Set[Claim] = sentences collect { case c: Claim => c }
   lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
+  lazy val rulesAndClaims: Set[RuleOrClaim] = Set[RuleOrClaim]().++(claims).++(rules)
   lazy val rulesFor: Map[KLabel, Set[Rule]] = rules.groupBy(r => {
     r.body match {
       case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KApply(s, _) :: _) => s
@@ -231,6 +233,8 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   lazy val sortedRules: Seq[Rule] = rules.toSeq.sorted
 
   lazy val localRules: Set[Rule] = localSentences collect { case r: Rule => r }
+  lazy val localClaims: Set[Claim] = localSentences collect { case r: Claim => r }
+  lazy val localRulesAndClaims: Set[RuleOrClaim] = Set[RuleOrClaim]().++(localClaims).++(localRules)
 
   // Check that productions with the same klabel have identical attributes
   //  productionsFor.foreach {
@@ -379,11 +383,25 @@ case class ContextAlias(body: K, requires: K, att: Att = Att.empty) extends Sent
   override def withAtt(att: Att) = ContextAlias(body, requires, att)
 }
 
-
-case class Rule(body: K, requires: K, ensures: K, att: Att = Att.empty) extends Sentence with RuleToString with OuterKORE {
+abstract class RuleOrClaim extends Sentence {
+  def body: K
+  def requires: K
+  def ensures: K
   override val isSyntax = false
   override val isNonSyntax = true
-  override def withAtt(att: Att) = Rule(body, requires, ensures, att)
+  def newInstance(body: K, requires: K, ensures: K, att: Att = Att.empty): RuleOrClaim
+}
+
+case class Claim(body: K, requires: K, ensures: K, att: Att = Att.empty) extends RuleOrClaim with ClaimToString with OuterKORE {
+  override def withAtt(att: Att): Claim = Claim(body, requires, ensures, att)
+  override def newInstance(body: K, requires: K, ensures: K, att: Att = Att.empty): Claim =
+    Claim(body, requires, ensures, att)
+}
+
+case class Rule(body: K, requires: K, ensures: K, att: Att = Att.empty) extends RuleOrClaim with RuleToString with OuterKORE {
+  override def withAtt(att: Att): Rule = Rule(body, requires, ensures, att)
+  override def newInstance(body: K, requires: K, ensures: K, att: Att = Att.empty): Rule =
+    Rule(body, requires, ensures, att)
 }
 
 object Rule {
@@ -554,7 +572,7 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
 }
 
 object Production {
-  implicit val ord = new Ordering[Production] {
+  implicit val ord: Ordering[Production] = new Ordering[Production] {
     def compare(a: Production, b: Production): Int = {
       Ordering[Option[String]].compare(a.klabel.map(_.name), b.klabel.map(_.name))
     }

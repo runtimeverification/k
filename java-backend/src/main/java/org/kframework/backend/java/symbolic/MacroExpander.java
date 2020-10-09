@@ -37,33 +37,6 @@ public class MacroExpander extends CopyOnWriteTransformer {
         return term;
     }
 
-    public Definition processDefinition() {
-        Definition definition = context.definition();
-        Definition processedDefinition = new Definition(
-                definition.definitionData(),
-                kem,
-                definition.ruleTable,
-                definition.automatons);
-        processedDefinition.addKLabelCollection(definition.kLabels());
-        for (Rule rule : definition.rules()) {
-            processedDefinition.addRule(processRule(rule));
-        }
-        for (Rule rule : definition.functionRules().values()) {
-            processedDefinition.addRule(processRule(rule));
-        }
-        for (Rule rule : definition.anywhereRules().values()) {
-            processedDefinition.addRule(processRule(rule));
-        }
-        for (Rule rule : definition.patternRules().values()) {
-            processedDefinition.addRule(processRule(rule));
-        }
-        for (Rule rule : definition.patternFoldingRules()) {
-            processedDefinition.addRule(processRule(rule));
-        }
-        processedDefinition.addRuleCollection(definition.macros());
-        return processedDefinition;
-    }
-
     public Rule processRule(Rule rule) {
         Term processedLeftHandSide = processTerm(rule.leftHandSide());
         Term processedRightHandSide = processTerm(rule.rightHandSide());

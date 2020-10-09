@@ -3,9 +3,8 @@ package org.kframework.compile;
 
 import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
-import org.kframework.compile.RewriteToTop;
 import org.kframework.definition.Module;
-import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
 import org.kframework.utils.StringUtil;
@@ -22,7 +21,7 @@ public class GenerateCoverage {
         this.files = files;
     }
 
-    public K gen(Rule r, K body, Module mod) {
+    public K gen(RuleOrClaim r, K body, Module mod) {
         if (!cover || !r.att().getOptional(Source.class).isPresent()) {
             return body;
         }

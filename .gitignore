@@ -3,6 +3,7 @@
 .kast*
 .ktest*
 .kdoc*
+.kprove*
 *-kompiled
 *.pdf
 *.swp

@@ -141,7 +141,8 @@ public class JavaBackend extends AbstractBackend {
                 .andThen(ModuleTransformer.fromRuleBodyTransformer(JavaBackend::ADTKVariableToSortedVariable, "ADT.KVariable to SortedVariable"))
                 .andThen(ModuleTransformer.fromRuleBodyTransformer(JavaBackend::convertKSeqToKApply, "kseq to kapply"))
                 .andThen(ModuleTransformer.fromRuleBodyTransformer(NormalizeKSeq.self(), "normalize kseq"))
-                .andThen(mod -> JavaBackend.markSpecRules(def, mod))
+                // TODO: remove marking step?
+                .andThen(JavaBackend::markSpecRules)
                 .andThen(ModuleTransformer.fromSentenceTransformer(new AddConfigurationRecoveryFlags()::apply, "add refers_THIS_CONFIGURATION_marker"))
                 //.andThen(ModuleTransformer.fromSentenceTransformer(JavaBackend::markSingleVariables, "mark single variables"))
                 //.andThen(ModuleTransformer.from(new AssocCommToAssoc()::apply, "convert AC matching to A matching"))
@@ -164,9 +165,14 @@ public class JavaBackend extends AbstractBackend {
         return s;
     }
 
-    private static Module markSpecRules(Definition d, Module mod) {
-        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(d.mainModule());
-        return ModuleTransformer.fromSentenceTransformer(s -> markRegularRules(d, configInfo, s, Att.SPECIFICATION()), "mark specification rules").apply(mod);
+    private static Module markSpecRules(Module mod) {
+        return ModuleTransformer.fromSentenceTransformer(s -> {
+                    if (s instanceof Claim) {
+                        Claim c = (Claim) s;
+                        return Claim.apply(c.body(), c.requires(), c.ensures(), c.att().add(Att.SPECIFICATION()));
+                    }
+                    return s;
+                }, "mark specification rules").apply(mod);
     }
 
         /**
@@ -193,8 +199,8 @@ public class JavaBackend extends AbstractBackend {
      * with a special marker called THE_VARIABLE which the backend uses for special speed optimisations.
      */
     private static Sentence markSingleVariables(Sentence s) {
-        if (s instanceof Rule) {
-            Rule r = (Rule) s;
+        if (s instanceof RuleOrClaim) {
+            RuleOrClaim r = (RuleOrClaim) s;
 
             if (!r.att().contains(Att.TOP_RULE()))
                 return r;
@@ -219,8 +225,7 @@ public class JavaBackend extends AbstractBackend {
                     }
                 }
             };
-
-            return Constructors.Rule(markerAdder.apply(r.body()), markerAdder.apply(r.requires()), markerAdder.apply(r.ensures()), r.att());
+            return ((RuleOrClaim) s).newInstance(markerAdder.apply(r.body()), markerAdder.apply(r.requires()), markerAdder.apply(r.ensures()), r.att());
         } else {
             return s;
         }
