@@ -29,7 +29,7 @@ rule down(0, M) => M  requires true
    andBool isNat(M)
 
 rule down(K, M) /Int 2 => down(K +Int 1, M)  requires true
-   andBool isNat(K) andBool isNat(M)
+   andBool isNat(K) andBool isNat(M) [simplification]
 
 rule up(H, M) => 1  requires M <=Int 2 ^Int H
    andBool isNat(H) andBool isNat(M)
@@ -61,7 +61,7 @@ rule hash(Branch[K], tn(M, K, up(K, M +Int 1))) => tn(M, K +Int 1, up(K +Int 1, 
       andBool isNat(K) andBool isNat(M)
 //    andBool K <Int TREE_HEIGHT
 //    andBool M <Int 2 ^Int TREE_HEIGHT
-
+ [simplification]
 /*
  * By Lemmas 3 and 8. (\ref{lem:zero}, \ref{lem:contract-invariant})
  */
@@ -71,7 +71,7 @@ rule hash(tn(M, K, up(K, M +Int 1)), Zeros[K])  => tn(M, K +Int 1, up(K +Int 1, 
       andBool isNat(K) andBool isNat(M)
 //    andBool K <Int TREE_HEIGHT
 //    andBool M <Int 2 ^Int TREE_HEIGHT
-
+ [simplification]
 // Proof of Lemma 7 (deposit)
 
 /*
@@ -86,7 +86,7 @@ rule hash(Branch[I], tn(M, I, down(I, M))) => tn(M, I +Int 1, down(I +Int 1, M))
       andBool isNat(I) andBool isNat(M)
 //    andBool I <Int TREE_HEIGHT
 //    andBool M <Int 2 ^Int TREE_HEIGHT
-
+ [simplification]
 /*
  * By Lemma 5. (\ref{lem:two-chains})
  */
@@ -97,7 +97,7 @@ rule isValidBranch(B[I <- tn(M, I, down(I, M))], M) => true
       andBool isNat(I) andBool isNat(M)
 //    andBool I <Int TREE_HEIGHT
 //    andBool M <Int 2 ^Int TREE_HEIGHT
-
+ [simplification]
 rule isValidBranch(B[I <- tn(M, I, down(I, M))], M) => true
      requires isValidBranch(B, M -Int 1)
       andBool (2 ^Int I) *Int down(I, M) ==Int M
@@ -105,7 +105,7 @@ rule isValidBranch(B[I <- tn(M, I, down(I, M))], M) => true
       andBool isNat(I) andBool isNat(M)
 //    andBool I <Int TREE_HEIGHT
 //    andBool M <Int 2 ^Int TREE_HEIGHT
-
+ [simplification]
 //rule down(K, M) => 1
 //     requires M <Int 2 ^Int (K +Int 1)
 //      andBool (2 ^Int K) *Int down(K, M) ==Int M
@@ -120,5 +120,5 @@ rule (2 ^Int (I +Int 1)) *Int down(I +Int 1, M) => M
       andBool isNat(I) andBool isNat(M)
 //    andBool I <Int TREE_HEIGHT
 //    andBool M <Int 2 ^Int TREE_HEIGHT
-
+ [simplification]
 endmodule

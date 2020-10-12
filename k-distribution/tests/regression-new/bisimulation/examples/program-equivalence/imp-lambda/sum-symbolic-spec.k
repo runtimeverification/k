@@ -6,7 +6,7 @@ syntax Bool ::= sim(Int, K) [function, smtlib(sim)]
 
 rule sim(S +Int N1, #addl1(N2) ~> _:Map ~> Ks:K) => true
 requires N1 ==Int N2
- andBool sim(S, Ks)
+ andBool sim(S, Ks) [simplification]
 rule sim(0, .Map) => true
 
 syntax Bool ::= isContinuation(K) [function, smtlib(isContinuation)]
