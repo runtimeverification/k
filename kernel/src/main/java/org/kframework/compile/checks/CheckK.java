@@ -3,7 +3,7 @@ package org.kframework.compile.checks;
 
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
-import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -11,8 +11,6 @@ import org.kframework.kore.KAs;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.VisitK;
 import org.kframework.utils.errorsystem.KEMException;
-
-import static org.kframework.kore.KORE.*;
 
 import java.util.Set;
 
@@ -47,8 +45,8 @@ public class CheckK {
     }
 
     public void check(Sentence s) {
-        if (s instanceof Rule) {
-            Rule r = (Rule)s;
+        if (s instanceof RuleOrClaim) {
+            RuleOrClaim r = (RuleOrClaim)s;
             check(r.body());
             check(r.requires());
             check(r.ensures());

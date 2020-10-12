@@ -57,6 +57,9 @@ object Constructors {
   def ContextAlias(content: K, requires: K) = definition.ContextAlias(content, requires)
   def ContextAlias(content: K, requires: K, att: attributes.Att) = definition.ContextAlias(content, requires, att)
 
+  def Claim(body: K, requires: K, ensures: K, att: attributes.Att) = definition.Claim(body, requires, ensures, att)
+  def Claim(body: K, requires: K, ensures: K) = definition.Claim(body, requires, ensures, Att.empty)
+
   def Rule(body: K, requires: K, ensures: K, att: attributes.Att) = definition.Rule(body, requires, ensures, att)
   def Rule(body: K, requires: K, ensures: K) = definition.Rule(body, requires, ensures, Att.empty)
 

@@ -3,10 +3,8 @@ package org.kframework.compile;
 
 import com.google.common.collect.Sets;
 import org.kframework.builtin.Sorts;
-import org.kframework.compile.ConfigurationInfo;
-import org.kframework.compile.LabelInfo;
 import org.kframework.definition.Context;
-import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.*;
 import org.kframework.utils.errorsystem.KEMException;
@@ -46,12 +44,12 @@ public class CloseCells {
         return transform(term);
     }
 
-    private Rule close(Rule rule) {
+    private RuleOrClaim close(RuleOrClaim rule) {
         resetVars();
         gatherVars(rule.body());
         gatherVars(rule.requires());
         gatherVars(rule.ensures());
-        return new Rule(
+        return rule.newInstance(
                 transform(rule.body()),
                 transform(rule.requires()),
                 transform(rule.ensures()),
@@ -69,8 +67,8 @@ public class CloseCells {
     }
 
     public synchronized Sentence close(Sentence s) {
-        if (s instanceof Rule) {
-            return close((Rule)s);
+        if (s instanceof RuleOrClaim) {
+            return close((RuleOrClaim) s);
         } else if (s instanceof Context) {
             return close((Context)s);
         } else {

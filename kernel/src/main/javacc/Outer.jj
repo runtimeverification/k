@@ -411,6 +411,7 @@ PARSER_END(Outer)
   <RULE: "rule"> : BUBBLE_STATE
 | <CONTEXT: "context"> : CONTEXT_STATE
 | <CONFIGURATION: "configuration"> : BUBBLE_STATE
+| <CLAIM: "claim"> : BUBBLE_STATE
 
 | <SYNTAX: "syntax">
 | <ENDMODULE: "endmodule">
@@ -551,6 +552,7 @@ NonTerminal SortID() : { NonTerminal nonTerminal; }
 | "endmodule"     { matchedToken.kind = ENDMODULE; } : DEFAULT
 
 | "rule"          { matchedToken.kind = RULE;    } : BUBBLE_STATE
+| "claim"         { matchedToken.kind = CLAIM;   } : BUBBLE_STATE
 | "configuration" { matchedToken.kind = CONFIGURATION;  } : BUBBLE_STATE
 | "context"       { matchedToken.kind = CONTEXT; } : CONTEXT_STATE
 
@@ -587,6 +589,7 @@ StringSentence Bubble(String type) :
 | "endmodule"     { matchedToken.kind = ENDMODULE; } : DEFAULT
 
 | "rule"          { matchedToken.kind = RULE;    } : BUBBLE_STATE
+| "claim"         { matchedToken.kind = CLAIM;   } : BUBBLE_STATE
 | "configuration" { matchedToken.kind = CONFIGURATION;  } : BUBBLE_STATE
 | "context"       { matchedToken.kind = CONTEXT; } : CONTEXT_STATE
 
@@ -721,7 +724,7 @@ void Sentence(Module module) :
   Sort param;
   List<Tag> list; }
 {
-  ("rule" | LOOKAHEAD("context" <ALIAS>) "context" <ALIAS> | "configuration" | "context")
+  ("rule" | "claim" | LOOKAHEAD("context" <ALIAS>) "context" <ALIAS> | "configuration" | "context")
   { type = image();
     // Note that we must change the "type"
     if (type.equals("configuration")) { type = "config"; } }

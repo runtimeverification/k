@@ -318,7 +318,7 @@ public class KOREtoBackendKIL {
     /**
      * @param module Required to know if it's a function rule.
      */
-    public Rule convert(@Nullable Module module, org.kframework.definition.Rule rule) {
+    public Rule convert(@Nullable Module module, org.kframework.definition.RuleOrClaim rule) {
         K leftHandSide = RewriteToTop.toLeft(rule.body());
         Att att = rule.att();
 

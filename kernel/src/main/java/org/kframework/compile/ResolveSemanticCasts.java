@@ -3,7 +3,7 @@ package org.kframework.compile;
 
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Context;
-import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -47,12 +47,12 @@ public class ResolveSemanticCasts {
         return transform(k);
     }
 
-    private Rule resolve(Rule rule) {
+    private RuleOrClaim resolve(RuleOrClaim rule) {
         resetCasts();
         gatherCasts(rule.body());
         gatherCasts(rule.requires());
         gatherCasts(rule.ensures());
-        return new Rule(
+        return rule.newInstance(
                 transform(rule.body()),
                 addSideCondition(transform(rule.requires()), ExpandMacros.isMacro(rule)),
                 transform(rule.ensures()),
@@ -143,8 +143,8 @@ public class ResolveSemanticCasts {
     }
 
     public synchronized Sentence resolve(Sentence s) {
-        if (s instanceof Rule) {
-            return resolve((Rule) s);
+        if (s instanceof RuleOrClaim) {
+            return resolve((RuleOrClaim) s);
         } else if (s instanceof Context) {
             return resolve((Context) s);
         } else {
