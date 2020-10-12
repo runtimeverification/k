@@ -841,6 +841,8 @@ public class ModuleToKORE {
         HashMap<String, Boolean> consideredAttributes = new HashMap<>();
         consideredAttributes.put(Att.PRIORITY(), true);
         consideredAttributes.put(Att.LABEL(), true);
+        consideredAttributes.put(Att.SOURCE(), true);
+        consideredAttributes.put(Att.LOCATION(), true);
 
         for (Sentence sentence : iterable(spec.sentencesExcept(definition))) {
             if (sentence instanceof Claim) {
@@ -850,7 +852,7 @@ public class ModuleToKORE {
             }
         }
         sb.append("endmodule ");
-        convert(new HashMap<>(), spec.att(), sb, null, null);
+        convert(consideredAttributes, spec.att(), sb, null, null);
         sb.append("\n");
         return sb.toString();
     }
