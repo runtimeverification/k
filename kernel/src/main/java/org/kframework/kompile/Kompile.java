@@ -320,7 +320,7 @@ public class Kompile {
         ModuleTransformer mt = ModuleTransformer.fromSentenceTransformer((m, s) -> {
             if (m.name().equals(mainDefModule.name()) || mainDefModule.importedModuleNames().contains(m.name()))
                 return s;
-            if (s instanceof Rule && !s.att().contains("simplification")) {
+            if (s instanceof Rule && !s.att().contains(Att.SIMPLIFICATION())) {
                 kem.registerCompilerWarning(KException.ExceptionType.FUTURE_ERROR, errors, "Deprecated: use claim instead of rule to specify proof objectives.", s);
                 return new Claim(((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att());
             }

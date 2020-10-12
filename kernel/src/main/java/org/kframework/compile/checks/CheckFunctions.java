@@ -37,8 +37,7 @@ public class CheckFunctions {
                 // functions are allowed on the LHS of simplification rules on the symbolic engines
                 check(rl.body());
         } else if (sentence instanceof Claim) {
-            Claim rl = (Claim) sentence;
-            check(rl.body());
+            // functions are allowed on LHS of claims
         } else if (sentence instanceof Context) {
             Context ctx = (Context) sentence;
             check(ctx.body());
@@ -67,11 +66,10 @@ public class CheckFunctions {
                 if (attributes.contains("function")
                     && isLHS()
                     && !atTop
-                    && !(hook.equals("SET.element") || hook.equals("SET.concat")
-                      || hook.equals("SET.unit") || hook.equals("LIST.element")
-                      || hook.equals("LIST.concat") || hook.equals("LIST.unit")
-                      || hook.equals("MAP.element") || hook.equals("MAP.concat")
-                      || hook.equals("MAP.unit"))) {
+                    && !(hook.equals("LIST.element") || hook.equals("LIST.concat") || hook.equals("LIST.unit")
+                      || hook.equals("SET.element") || hook.equals("SET.concat") || hook.equals("SET.unit")
+                      || hook.equals("MAP.element") || hook.equals("MAP.concat") || hook.equals("MAP.unit")
+                      || hook.equals("BAG.element") || hook.equals("BAG.concat") || hook.equals("BAG.unit"))) {
                   errors.add(KEMException.compilerError("Illegal function symbol on LHS of rule.", k));
                 }
                 atTop = false;
