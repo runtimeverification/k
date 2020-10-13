@@ -1125,7 +1125,7 @@ ambiguities. Of course, the compiler will generate a warning in this case.
 
 ### `simplification` attribute (Haskell backend)
 
-The simplification attributes identifies rules outside the main semantics that
+The simplification attribute identifies rules outside the main semantics that
 are used to simplify function patterns.
 
 **Conditions**: A simplification rule is applied by _matching_ the function
