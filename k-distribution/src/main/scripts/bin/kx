@@ -520,7 +520,7 @@ if ! $dryRun; then
       none) ;;
 
       *)
-      execute kast -i kore -o "$outputMode" "$kore_output" > "$outputFile"
+      execute kast -d "$(dirname $kompiledDir)" -i kore -o "$outputMode" "$kore_output" > "$outputFile"
       ;;
     esac
   else
