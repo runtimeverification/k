@@ -80,7 +80,7 @@ future.
                            \`-cPGM=foo\`, a temporary file containing the word
                            "foo" is created and cat is called on it to provide
                            the value of \$PGM as a KORE term.
-  
+
   -cNAME=VALUE             Use VALUE as the value for \$NAME. By default,
                            \`kast -m MAINMODULE -o kore\` is used as the
                            parser. This can be overridden with -p.
@@ -145,29 +145,29 @@ do
       bound="$2"
       shift
       ;;
-  
+
       --depth)
       depth="$2"
       shift
       ;;
-  
+
       --color)
       case "$2" in
         on)
         color=true
         ;;
-  
+
         off)
         color=false
         ;;
-  
+
         *)
         error 'Invalid value for --color. Should be "on" or "off".'
         ;;
       esac
       shift
       ;;
-  
+
       -p*=*)
       keyval=${1#-p}
       key=${keyval%%=*}
@@ -175,7 +175,7 @@ do
       var_name="parser_$key"
       printf -v "$var_name" %s "$val"
       ;;
-  
+
       -c*=*)
       keyval=${1#-c}
       key=${keyval%%=*}
@@ -187,49 +187,49 @@ do
       printf %s "$val" > "$tempFile"
       printf -v "$var_name" %s "$tempFile"
       ;;
-  
+
       -d|--directory)
       dir="$2"
       shift
       ;;
-  
+
       --dry-run)
       cmdprefix="echo "
       tempFiles=(${tempFiles[@]/$input_file})
       dryRun=true
       ;;
-  
+
       --haskell-backend-command)
       haskellCmd="$2"
       shift
       ;;
-  
+
       -h|--help)
       print_usage
       exit 0
       ;;
-  
+
       --io)
       case "$2" in
         on)
         io=true
         ;;
-  
+
         off)
         io=false
         ;;
-  
+
         *)
         error 'Invalid value for --io. Should be "on" or "off".'
         ;;
       esac
       shift
       ;;
-  
+
       --no-substitution-filtering)
       filterSubst=false
       ;;
-  
+
       -o|--output)
       case "$2" in
         pretty) ;;
@@ -248,43 +248,43 @@ do
       outputMode="$2"
       shift
       ;;
-  
+
       --output-file)
       outputFile="$2"
       shift
       ;;
-  
+
       --parser)
       var_name="parser_PGM"
       printf -v "$var_name" %s "$2"
       shift
       ;;
-  
+
       --pattern)
       pattern="$2"
       shift
       ;;
-  
+
       --search)
       search=true
       searchType='FINAL'
       ;;
-  
+
       --search-all)
       search=true
       searchType='STAR'
       ;;
-  
+
       --search-final)
       search=true
       searchType='FINAL'
       ;;
-  
+
       --search-one-or-more-steps)
       search=true
       searchType='PLUS'
       ;;
-  
+
       --search-one-step)
       search=true
       searchType='ONE'
@@ -294,43 +294,43 @@ do
       smtPrelude="$2"
       shift
       ;;
-  
+
       --term)
       term=true
-      ;;    
-  
+      ;;
+
       -v|--verbose)
       verbose=true
       flags="$flags -v"
       ;;
-  
+
       --save-temps)
       trap - INT TERM EXIT
       flags="$flags -save-temps"
       ;;
-  
+
       --version)
       kompile --version
       exit 0
       ;;
-  
+
       --debugger)
       cmdprefix="gdb --args "
       ;;
-  
+
       --statistics)
       statistics=true
       ;;
-  
+
       --)
       literal=true
       ;;
-  
+
       -*)
       print_usage
       exit 1
       ;;
-  
+
       *)
       ARGV+=("$1")
       ;;
@@ -506,7 +506,7 @@ if ! $dryRun; then
       tail -1 "$kore_output" > "$kore_output2"
       mv "$kore_output2" "$kore_output"
     fi
-    
+
     case "$outputMode" in
       pretty)
       execute kprint "$kompiledDir" "$kore_output" $color > "$outputFile"
