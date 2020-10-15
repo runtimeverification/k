@@ -264,7 +264,7 @@ on incorrect bindings and that the type system will reject those programs.
 // The "prefer" attribute for letrec currently needed due to tool bug,
 // to make sure that "letrec" is not parsed as "let rec".
   syntax Binding  ::= Exp "=" Exp
-  syntax Bindings ::= List{Binding,"and"}
+  syntax Bindings ::= NeList{Binding,"and"}
 ```
 References are first class values in FUN.  The construct `ref`
 takes an expression, evaluates it, and then it stores the resulting value
@@ -352,7 +352,7 @@ a constructor for function types:
 
   syntax TypeCase ::= ConstructorName
                     | ConstructorName "(" Types ")"
-  syntax TypeCases ::= List{TypeCase,"|"}     [klabel(_|TypeCase_)]
+  syntax TypeCases ::= NeList{TypeCase,"|"}     [klabel(_|TypeCase_)]
 ```
 
 ## Additional Priorities

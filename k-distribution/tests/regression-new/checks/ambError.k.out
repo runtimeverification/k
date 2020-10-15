@@ -1,0 +1,8 @@
+[Error] Inner Parser: Parsing ambiguity.
+1: syntax Exp ::= Exp "r" [klabel(rguard), symbol]
+    rguard(lguard(#token("1","Int")))
+2: syntax Exp ::= "l" Exp [klabel(lguard), symbol]
+    lguard(rguard(#token("1","Int")))
+	Source(ambError.k)
+	Location(20,15,20,20)
+[Error] Compiler: Had 1 parsing errors.
