@@ -1,0 +1,9 @@
+[Error] Compiler: Illegal function symbol on LHS of rule.
+	Source(test.k)
+	Location(5,11,5,20)
+[Error] Compiler: Illegal function symbol on LHS of rule.
+	Source(test.k)
+	Location(5,28,5,37)
+[Error] Compiler: Had 2 structural errors.
+[Warning] Compiler: Could not find main syntax module with name TEST-SYNTAX in
+definition.  Use --syntax-module to specify one. Using TEST as default.
