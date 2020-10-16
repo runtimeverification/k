@@ -70,5 +70,5 @@ module V
 
     syntax Int ::= k(Int) [function, functional, injective, smtlib(k)]
 
-    rule (k(N) +Int 1) -Int 1 => k(N)
+    rule (k(N) +Int 1) -Int 1 => k(N) [simplification]
 endmodule
