@@ -78,8 +78,8 @@ public class PriorityVisitor extends SetsTransformerWithErrors<KEMException> {
 
         public Either<java.util.Set<KEMException>, Term> apply(TermCons tc) {
             if (tc.production().att().contains(Att.BRACKET())) return Right.apply(tc);
-            //if (Side.RIGHT  == side && !(tc.production().items().apply(0) instanceof NonTerminal)) return Right.apply(tc);
-            //if (Side.LEFT == side && !(tc.production().items().apply(tc.production().items().size() - 1) instanceof NonTerminal)) return Right.apply(tc);
+            if (Side.RIGHT  == side && !(tc.production().items().apply(0) instanceof NonTerminal)) return Right.apply(tc);
+            if (Side.LEFT == side && !(tc.production().items().apply(tc.production().items().size() - 1) instanceof NonTerminal)) return Right.apply(tc);
             Tag parentLabel = new Tag(parent.production().klabel().get().name());
             Tag localLabel = new Tag(tc.production().klabel().get().name());
             if (priorities.lessThan(parentLabel, localLabel)) {

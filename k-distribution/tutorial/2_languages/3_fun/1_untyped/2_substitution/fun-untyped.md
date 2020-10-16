@@ -83,7 +83,7 @@ module FUN-UNTYPED-COMMON
   syntax Exp ::= "let" Bindings "in" Exp
                | "letrec" Bindings "in" Exp                 [prefer]
   syntax Binding  ::= Exp "=" Exp
-  syntax Bindings ::= List{Binding,"and"}
+  syntax Bindings ::= NeList{Binding,"and"}
 
   syntax Exp ::= "ref"
                | "&" Name
@@ -113,7 +113,7 @@ module FUN-UNTYPED-COMMON
 
   syntax TypeCase ::= ConstructorName
                     | ConstructorName "(" Types ")"
-  syntax TypeCases ::= List{TypeCase,"|"}     [klabel(_|TypeCase_)]
+  syntax TypeCases ::= NeList{TypeCase,"|"}     [klabel(_|TypeCase_)]
 ```
 
 ## Additional Priorities
