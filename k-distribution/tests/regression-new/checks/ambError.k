@@ -1,4 +1,4 @@
-// issue #1593
+// Issue #1593
 // testing that priority between left guarded and
 // right guarded operators are properly disambiguated
 
