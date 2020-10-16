@@ -86,17 +86,17 @@ rule simS(M, M) => true
 rule simS(M1[K1 <- V1], M2[K2 <- V2]) => true
     requires simS(M1, M2)
      andBool simK(K1, K2)
-     andBool simV(V1, V2)
+     andBool simV(V1, V2) [simplification]
 
 syntax Bool ::= simK(Int, Int) [function, smtlib(simK)]
 rule simK(I1, loc(0, I2)) => true
-    requires I1 ==Int I2
+    requires I1 ==Int I2 [simplification]
 
 syntax Bool ::= simV(Int, Int) [function, smtlib(simV)]
 rule simV(hash(V1), sha256(V2)) => true
-    requires simV(V1, V2)
+    requires simV(V1, V2) [simplification]
 rule simV(M1[K1], M2[K2]) => true
     requires simS(M1, M2)
-     andBool simK(K1, K2)
+     andBool simK(K1, K2) [simplification]
 
 endmodule
