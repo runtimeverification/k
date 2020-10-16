@@ -424,18 +424,18 @@ endmodule
 module MAP-JAVA-SYMBOLIC [kast, symbolic]
   imports MAP
   imports K-EQUAL
-  rule .Map [ K1 <- V1 ] => K1 |-> V1
+  rule .Map [ K1 <- V1 ] => K1 |-> V1 [simplification]
 
-  rule ((K1 |-> V1) MAP) [ K2 ] => V1         requires K1  ==K K2
-  rule ((K1 |-> V1) MAP) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2
+  rule ((K1 |-> V1) MAP) [ K2 ] => V1         requires K1  ==K K2 [simplification]
+  rule ((K1 |-> V1) MAP) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2 [simplification]
 
-  rule (MAP:Map [ K1 <- V1 ]) [ K2 ] => V1         requires K1  ==K K2
-  rule (MAP:Map [ K1 <- V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2
+  rule (MAP:Map [ K1 <- V1 ]) [ K2 ] => V1         requires K1  ==K K2 [simplification]
+  rule (MAP:Map [ K1 <- V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2 [simplification]
 
-  rule ((K1 |-> V1) MAP) [ K2 <- V2 ] => (K1 |-> V2) MAP                requires K1  ==K K2
-  rule ((K1 |-> V1) MAP) [ K2 <- V2 ] => (K1 |-> V1) (MAP [ K2 <- V2 ]) requires K1 =/=K K2
+  rule ((K1 |-> V1) MAP) [ K2 <- V2 ] => (K1 |-> V2) MAP                requires K1  ==K K2 [simplification]
+  rule ((K1 |-> V1) MAP) [ K2 <- V2 ] => (K1 |-> V1) (MAP [ K2 <- V2 ]) requires K1 =/=K K2 [simplification]
 
-  rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP              [ K1 <- V2 ] requires K1  ==K K2
+  rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP              [ K1 <- V2 ] requires K1  ==K K2 [simplification]
 
   // potential infinite loop
   // rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP [ K2 <- V2 ] [ K1 <- V1 ] requires K1 =/=K K2

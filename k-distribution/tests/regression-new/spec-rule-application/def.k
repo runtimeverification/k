@@ -22,11 +22,11 @@ module DEF
     rule incPos(X) => X +Int 1
       requires X >=Int 0
 
-    rule (X +Int A) +Int B => X +Int (A +Int B)
-    rule (X +Int A) -Int B => X +Int (A -Int B)
+    rule (X +Int A) +Int B => X +Int (A +Int B) [simplification]
+    rule (X +Int A) -Int B => X +Int (A -Int B) [simplification]
     rule (X -Int A) +Int B => X +Int (B -Int A)
-      requires B =/=Int 0
-    rule X +Int (A -Int X) => A
+      requires B =/=Int 0 [simplification]
+    rule X +Int (A -Int X) => A [simplification]
     rule X +Int 0 => X
 
 endmodule
