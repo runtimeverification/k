@@ -402,20 +402,20 @@ else
     sortName=`cat "$kompiledDir"/sort_"$name".txt`
     if [ -z "${!parser_name+unset}" ]; then
       if [ -f "$kompiledDir/parser_$name" ]; then
-        parser="$kompiledDir/parser_$name"
+        parser=("$kompiledDir/parser_$name")
       elif [ "$name" = "PGM" ]; then
         if $hasArgv; then
-          parser="kast -d '$dir' -o kore"
+          parser=(kast -d "$dir" -o kore)
         else
-          parser="kast -d '$dir' -m $mainModuleName -o kore"
+          parser=(kast -d "$dir" -m "$mainModuleName" -o kore)
         fi
       else
-        parser="kast -d '$dir' -m $mainModuleName -o kore"
+        parser=(kast -d "$dir" -m "$mainModuleName" -o kore)
       fi
     else
-      parser="${!parser_name}"
+      parser=("${!parser_name}")
     fi
-    execute $parser "${!config_name}" > "$tempFile"
+    execute "${parser[@]}" "${!config_name}" > "$tempFile"
     configVars="$configVars -c $name $tempFile $sortName korefile"
   done
   if [ "$(cat "$kompiledDir"/sort_IO.txt 2>/dev/null)" = "String" ]; then
