@@ -362,6 +362,7 @@ fi
 kompiledDir=
 hasKompiledDir=false
 for file in "$dir"/*-kompiled; do
+  [ ! -d "$file" ] && continue
   kompiledDir=$file
   if $hasKompiledDir; then
     error 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
