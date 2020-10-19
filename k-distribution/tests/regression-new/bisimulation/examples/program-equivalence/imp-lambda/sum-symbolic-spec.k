@@ -4,7 +4,7 @@ imports MAIN
 
 syntax Bool ::= sim(Int, K) [function, smtlib(sim)]
 
-claim sim(S +Int N1, #addl1(N2) ~> _:Map ~> Ks:K) => true
+rule sim(S +Int N1, #addl1(N2) ~> _:Map ~> Ks:K) => true
 requires N1 ==Int N2
  andBool sim(S, Ks) [simplification]
 claim sim(0, .Map) => true

@@ -8,7 +8,7 @@ module IH
     syntax Nat ::= "k" [function]
 
     // induction hypothesis:
-    claim (I:Nat + J:Nat) + k => I:Nat + (J:Nat + k) [simplification]
+    rule (I:Nat + J:Nat) + k => I:Nat + (J:Nat + k) [simplification]
 endmodule
 
 module ASSOC-SPEC
