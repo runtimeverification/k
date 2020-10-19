@@ -9,7 +9,7 @@ module VERIFICATION
 
     syntax Action ::= totalBalance ( AccountId )
  // --------------------------------------------
-    claim <k> totalBalance(AID) => total_balance(AID) ... </k>
+    rule <k> totalBalance(AID) => total_balance(AID) ... </k>
 endmodule
 
 module SET-BALANCE-SPEC
@@ -35,15 +35,15 @@ This property shows that `set_balance` will not result in a zero-balance attack.
 **TODO**: Assertions about log events.
 
 ```
-    claim <k> set_balance(Root, WHO, FREE_BALANCE', RESERVED_BALANCE') => . ... </k>
-          <totalIssuance> TOTAL_ISSUANCE => TOTAL_ISSUANCE +Int ( FREE_BALANCE' -Int FREE_BALANCE ) +Int ( RESERVED_BALANCE' -Int RESERVED_BALANCE ) </totalIssuance>
-          <existentialDeposit> EXISTENTIAL_DEPOSIT </existentialDeposit>
-          <account>
-            <accountID> WHO </accountID>
-            <freeBalance> FREE_BALANCE => FREE_BALANCE' </freeBalance>
-            <reservedBalance> RESERVED_BALANCE => RESERVED_BALANCE' </reservedBalance>
-            ...
-          </account>
+    rule <k> set_balance(Root, WHO, FREE_BALANCE', RESERVED_BALANCE') => . ... </k>
+         <totalIssuance> TOTAL_ISSUANCE => TOTAL_ISSUANCE +Int ( FREE_BALANCE' -Int FREE_BALANCE ) +Int ( RESERVED_BALANCE' -Int RESERVED_BALANCE ) </totalIssuance>
+         <existentialDeposit> EXISTENTIAL_DEPOSIT </existentialDeposit>
+         <account>
+           <accountID> WHO </accountID>
+           <freeBalance> FREE_BALANCE => FREE_BALANCE' </freeBalance>
+           <reservedBalance> RESERVED_BALANCE => RESERVED_BALANCE' </reservedBalance>
+           ...
+         </account>
       requires #inWidth(96, TOTAL_ISSUANCE +Int (FREE_BALANCE' -Int FREE_BALANCE))
        andBool #inWidth(96, TOTAL_ISSUANCE +Int (FREE_BALANCE' -Int FREE_BALANCE) +Int (RESERVED_BALANCE' -Int RESERVED_BALANCE))
        andBool EXISTENTIAL_DEPOSIT <=Int FREE_BALANCE'
