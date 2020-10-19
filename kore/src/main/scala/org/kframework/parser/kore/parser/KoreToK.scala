@@ -158,7 +158,7 @@ class KoreToK (sortAtt : Map[String, String]) {
       throw new TranslationError("Mem patterns currently unsupported")
     case kore.DomainValue(s, str) =>
       val hookAtt = sortAtt.get(apply(s).name).getOrElse("")
-      KORE.KToken(if (hookAtt == "STRING.String") StringUtil.enquoteKString(str) else if (hookAtt == "BYTES.Bytes") "b" + StringUtil.enquoteKString(str) else str, apply(s))
+      KORE.KToken(if (hookAtt == "STRING.String") StringUtil.enquoteKString(str) else str, apply(s))
     case kore.StringLiteral(str) =>
       KORE.KToken(str, Sorts.KString)
   }
