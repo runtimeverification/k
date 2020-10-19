@@ -11,12 +11,12 @@ imports MAIN
 syntax Id ::= "x" [token]
             | "y" [token]
 
-rule
+claim
 <s> ~ a => ^ b ... </s>
 <impk> _:Int </impk>
 [trusted]
 
-rule
+claim
 <s> ~ b => ^ a ... </s>
 <lambdak> _:Int </lambdak>
 [trusted]
@@ -28,7 +28,7 @@ module SIMPLE-SPEC
 imports VERIFICATION
 imports SYNC-POINT-CANDIDATES
 
-rule
+claim
 <k> check => . </k>
 <s> ^ a ... </s>
 <impT>
@@ -45,7 +45,7 @@ requires N1 ==Int N2
  andBool M1 ==Int M2
  andBool Ks1 ==K Ks2
 
-rule
+claim
 <k> check => . </k>
 <s> ^ a ... </s>
 <impT>

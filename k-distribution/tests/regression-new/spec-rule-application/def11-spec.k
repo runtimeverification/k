@@ -5,11 +5,11 @@ require "def.k"
 module DEF11-SPEC
     imports DEF
 
-    rule <k> start X => end X </k>
+    claim <k> start X => end X </k>
          <var> _ </var>
        requires X >=Int 0
 
-    rule <k> mid inc(Y) -Int 1 => end Y </k>
+    claim <k> mid inc(Y) -Int 1 => end Y </k>
          <var> _ </var>
       [trusted]
 

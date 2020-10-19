@@ -3,7 +3,7 @@
 module ABS-SPEC
   imports IMP
 
-rule
+claim
   <threads><thread>...
     <k>
       if (0 <= a) {

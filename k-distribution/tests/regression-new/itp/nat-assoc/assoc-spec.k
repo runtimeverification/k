@@ -8,7 +8,7 @@ module IH
     syntax Nat ::= "k" [function]
 
     // induction hypothesis:
-    rule (I:Nat + J:Nat) + k => I:Nat + (J:Nat + k) [simplification]
+    claim (I:Nat + J:Nat) + k => I:Nat + (J:Nat + k) [simplification]
 endmodule
 
 module ASSOC-SPEC
@@ -18,10 +18,10 @@ module ASSOC-SPEC
     // by induction on k
 
     // base case proof for 0:
-    rule <k> I:Nat + (J:Nat + z) => (I:Nat + J:Nat) + z </k>
+    claim <k> I:Nat + (J:Nat + z) => (I:Nat + J:Nat) + z </k>
 
     // proof of induction step for (s k):
-    rule <k> (I:Nat + J:Nat) + s(k) => I:Nat + (J:Nat + s(k)) </k>
+    claim <k> (I:Nat + J:Nat) + s(k) => I:Nat + (J:Nat + s(k)) </k>
 
     // QED {end of proof for associativity of (_+_)}
 endmodule

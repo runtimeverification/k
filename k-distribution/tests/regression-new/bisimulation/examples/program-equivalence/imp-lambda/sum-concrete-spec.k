@@ -13,12 +13,12 @@ syntax Id ::= "n"   [token]
             | "f"   [token]
             | "x"   [token]
 
-rule
+claim
 <s> ~ a => ^ b ... </s>
 <impk> .K </impk>
 [trusted]
 
-rule
+claim
 <s> ~ b => ^ a ... </s>
 <lambdak> _:Int </lambdak>
 [trusted]
@@ -30,7 +30,7 @@ module SUM-CONCRETE-SPEC
 imports VERIFICATION
 imports SYNC-POINT-CANDIDATES
 
-rule
+claim
 <k> check => . </k>
 <s> ^ a ... </s>
 <impT>
@@ -59,7 +59,7 @@ rule
   <lambdacounter> 1 => _ </lambdacounter>
 </lambdaT>
 
-rule
+claim
 <k> check => . </k>
 <s> ^ a ... </s>
 <impT>
