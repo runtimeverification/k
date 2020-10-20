@@ -66,7 +66,7 @@ def substitute(pattern, substitution):
         return k
     return traverseBottomUp(pattern, replace)
 
-def whereMattchingBottomUp(effect, matchPattern, pattern):
+def whereMatchingBottomUp(effect, matchPattern, pattern):
     def _effect(k):
         matchingSubst = match(matchPattern, k)
         newK = k
@@ -75,7 +75,7 @@ def whereMattchingBottomUp(effect, matchPattern, pattern):
         return newK
     return traverseBottomUp(_effect, pattern)
 
-def whereMattchingTopDown(effect, matchPattern, pattern):
+def whereMatchingTopDown(effect, matchPattern, pattern):
     def _effect(k):
         matchingSubst = match(matchPattern, k)
         newK = k
