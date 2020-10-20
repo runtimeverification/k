@@ -6,7 +6,7 @@ imports LAMBDA
 syntax Id ::= "x" [token]
             | "y" [token]
 
-rule
+claim
 <L2>
      <k> addl(x,y) </k>
      <env> ... x |-> Lx:Int y |-> Ly:Int ... </env>
@@ -14,7 +14,7 @@ rule
 </L2>
 ensures vars(ListItem(N) ListItem(M))
 
-rule
+claim
 <L2>
      <k> I:Int </k>
      <env> _:Map </env>

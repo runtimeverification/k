@@ -2,7 +2,7 @@ module MAIN-SPEC
 
 imports MAIN
 
-rule
+claim
 <k> check => . </k>
 <s> ^ a ... </s>
 <aT>
@@ -14,7 +14,7 @@ rule
   <bm> .IMap => _ </bm>
 </bT>
 
-rule
+claim
 <k> check => . </k>
 <s> ^ a ... </s>
 <aT>
@@ -31,7 +31,7 @@ requires simS(M1,M2)
  andBool I1 ==Int 0
  andBool N1 >=Int 1
 
-rule
+claim
 <k> check => . </k>
 <s> ^ a ... </s>
 <aT>
@@ -48,7 +48,7 @@ requires simS(M1,M2)
  andBool I1 >=Int 1
  andBool N1 >=Int 1
 
-rule
+claim
 <k> check => . </k>
 <s> ^ a ... </s>
 <aT>

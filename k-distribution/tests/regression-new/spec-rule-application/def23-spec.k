@@ -5,11 +5,11 @@ require "def.k"
 module DEF23-SPEC
     imports DEF
 
-    rule <k> start X +Int 1 => end X </k>
+    claim <k> start X +Int 1 => end X </k>
          <var> _ </var>
        requires X >=Int 0
 
-    rule <k> mid Y => end Y -Int 1 </k>
+    claim <k> mid Y => end Y -Int 1 </k>
          <var> _ </var>
       requires Y ==Int incPos(Y) -Int 1
       [trusted]

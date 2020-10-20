@@ -13,11 +13,11 @@ Part 7: Unification (with function evaluation) must be preferred over substituti
 module DEF71-SPEC
     imports DEF
 
-    rule <k> start X1 => end X1 </k>
+    claim <k> start X1 => end X1 </k>
          <var> binop X1 X1 +Int 1 </var>
        requires X1        >=Int 0
 
-    rule <k> mid (Y2 +Int (incPos(Y1) -Int Y1 -Int 1)) => end Y2 </k>
+    claim <k> mid (Y2 +Int (incPos(Y1) -Int Y1 -Int 1)) => end Y2 </k>
          <var> binop Y1 incPos(Y2) </var>
       [trusted]
 

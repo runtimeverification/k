@@ -22,6 +22,11 @@ if isKRule(kast_term):
     defn_name = sys.argv[2][:-5].split("/")[2]
     mod = KFlatModule(defn_name.upper(), ["IMP"], [kast_term])
     kast_term = KDefinition(defn_name, [mod], requires = [KRequire("imp")])
+elif isKClaim(kast_term):
+    kast_term = minimizeRule(kast_term)
+    defn_name = sys.argv[2][:-5].split("/")[2]
+    mod = KFlatModule(defn_name.upper(), ["IMP"], [kast_term])
+    kast_term = KDefinition(defn_name, [mod], requires = [KRequire("imp")])
 elif isKApply(kast_term):
     kast_term = simplifyBool(kast_term)
 

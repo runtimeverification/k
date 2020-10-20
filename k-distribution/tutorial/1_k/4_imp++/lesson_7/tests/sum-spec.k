@@ -2,7 +2,7 @@
 
 module SUM-SPEC
   imports IMP
-rule
+claim
   <threads><thread>...
     <k>
       while (!(n <= 0)) {
@@ -23,7 +23,7 @@ rule
   ...</store>
 requires N >=Int 0
 
-rule
+claim
   <threads><thread>...
     <k>
       int n, sum;
