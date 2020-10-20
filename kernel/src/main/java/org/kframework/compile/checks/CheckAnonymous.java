@@ -7,7 +7,7 @@ import org.kframework.compile.ResolveAnonVar;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Module;
-import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
@@ -18,11 +18,11 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
-import static org.kframework.kore.KORE.*;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import static org.kframework.kore.KORE.*;
 
 public class CheckAnonymous {
 
@@ -74,8 +74,8 @@ public class CheckAnonymous {
             return;
         }
         resetVars();
-        if (s instanceof Rule) {
-            Rule r = (Rule)s;
+        if (s instanceof RuleOrClaim) {
+            RuleOrClaim r = (RuleOrClaim) s;
             gatherVars(r.body());
             gatherVars(r.requires());
             gatherVars(r.ensures());

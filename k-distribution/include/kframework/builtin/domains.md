@@ -424,18 +424,18 @@ endmodule
 module MAP-JAVA-SYMBOLIC [kast, symbolic]
   imports MAP
   imports K-EQUAL
-  rule .Map [ K1 <- V1 ] => K1 |-> V1
+  rule .Map [ K1 <- V1 ] => K1 |-> V1 [simplification]
 
-  rule ((K1 |-> V1) MAP) [ K2 ] => V1         requires K1  ==K K2
-  rule ((K1 |-> V1) MAP) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2
+  rule ((K1 |-> V1) MAP) [ K2 ] => V1         requires K1  ==K K2 [simplification]
+  rule ((K1 |-> V1) MAP) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2 [simplification]
 
-  rule (MAP:Map [ K1 <- V1 ]) [ K2 ] => V1         requires K1  ==K K2
-  rule (MAP:Map [ K1 <- V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2
+  rule (MAP:Map [ K1 <- V1 ]) [ K2 ] => V1         requires K1  ==K K2 [simplification]
+  rule (MAP:Map [ K1 <- V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2 [simplification]
 
-  rule ((K1 |-> V1) MAP) [ K2 <- V2 ] => (K1 |-> V2) MAP                requires K1  ==K K2
-  rule ((K1 |-> V1) MAP) [ K2 <- V2 ] => (K1 |-> V1) (MAP [ K2 <- V2 ]) requires K1 =/=K K2
+  rule ((K1 |-> V1) MAP) [ K2 <- V2 ] => (K1 |-> V2) MAP                requires K1  ==K K2 [simplification]
+  rule ((K1 |-> V1) MAP) [ K2 <- V2 ] => (K1 |-> V1) (MAP [ K2 <- V2 ]) requires K1 =/=K K2 [simplification]
 
-  rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP              [ K1 <- V2 ] requires K1  ==K K2
+  rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP              [ K1 <- V2 ] requires K1  ==K K2 [simplification]
 
   // potential infinite loop
   // rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP [ K2 <- V2 ] [ K1 <- V1 ] requires K1 =/=K K2
@@ -463,7 +463,7 @@ patterns for doing so, refer to K's
 [user documentation](pending-documentation.md).
 
 ```k
-module SET
+module SET [not-lr1]
   imports INT-SYNTAX
   imports BASIC-K
 
@@ -588,7 +588,7 @@ patterns for doing so, refer to K's
 [user documentation](pending-documentation).
 
 ```k
-module LIST
+module LIST [not-lr1]
   imports INT-SYNTAX
   imports BASIC-K
 
@@ -746,13 +746,17 @@ matching logic via the expression `{B #Equals true}`.
 The boolean values are `true` and `false`.
 
 ```k
-module BOOL-SYNTAX
+module SORT-BOOL
   syntax Bool [hook(BOOL.Bool)]
+endmodule
+
+module BOOL-SYNTAX
+  imports SORT-BOOL
   syntax Bool ::= "true"  [token]
   syntax Bool ::= "false" [token]
 endmodule
 
-module BOOL
+module BOOL [not-lr1]
   imports BASIC-K
   imports BOOL-SYNTAX
 ```
@@ -2023,7 +2027,7 @@ module K-REFLECTION
   syntax KItem ::= #fresh(String)   [function, hook(KREFLECTION.fresh), impure]
   syntax KItem ::= getKLabel(K)  [function, hook(KREFLECTION.getKLabel)]
 
-  syntax String ::= #getenv(String) [function, impure, hook(KREFLECTION.getenv)]
+  syntax K ::= #getenv(String) [function, impure, hook(KREFLECTION.getenv)]
 
   // meaningful only for the purposes of compilation to a binary, otherwise
   // undefined

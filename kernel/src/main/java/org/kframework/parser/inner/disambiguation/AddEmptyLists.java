@@ -116,9 +116,7 @@ public class AddEmptyLists extends SetsGeneralTransformer<KEMException, KEMExcep
             if (listSorts.contains(expectedSort) &&
                     !(subsorts.lessThanEq(childSort, expectedSort) && listSorts.contains(childSort))) {
                 final boolean isBracket = child.production().att().contains(Att.BRACKET());
-                if (isBracket
-                        || (child.production().klabel().isDefined()
-                        && child.production().klabel().get().name().equals("#KRewrite"))) {
+                if (isBracket) {
                     newItems.add(child);
                 } else if (childSort.equals(Sorts.K()) || !subsorts.lessThan(childSort, expectedSort)) {
                     newItems.add(child);

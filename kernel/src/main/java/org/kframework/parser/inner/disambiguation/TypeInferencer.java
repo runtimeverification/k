@@ -97,9 +97,12 @@ public class TypeInferencer implements AutoCloseable {
         version = version.substring("(:version \"".length());
         version = version.substring(0, version.indexOf('"'));
         String[] parts = version.split("\\.");
+        // example of version string:
+        // "4.8.8 - build hashcode ad55a1f1c617"
         int major = Integer.valueOf(parts[0]);
         int minor = Integer.valueOf(parts[1]);
-        if (major < 4 || (major == 4 && minor < 6)) {
+        int patch = Integer.valueOf(parts[2].split(" ")[0]);
+        if (major < 4 || (major == 4 && minor < 6) || (major == 4 && minor == 8 && patch == 9)) {
           destroyOnReset = true;
         } else {
           destroyOnReset = false;

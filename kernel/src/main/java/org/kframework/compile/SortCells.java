@@ -5,13 +5,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import org.kframework.attributes.Att;
-import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo.Multiplicity;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
-import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -40,7 +39,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
-import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 /**
@@ -84,17 +82,17 @@ public class SortCells {
 
     }
 
-    private Rule sortCells(Rule rule) {
+    private RuleOrClaim sortCells(RuleOrClaim rule) {
         resetVars();
         analyzeVars(rule.body());
         analyzeVars(rule.requires());
         analyzeVars(rule.ensures());
-        rule = Rule(
+        rule = rule.newInstance(
                 processVars(rule.body()),
                 processVars(rule.requires()),
                 processVars(rule.ensures()),
                 rule.att());
-        rule = Rule(
+        rule = rule.newInstance(
                 resolveIncompleteCellFragment(rule.body()),
                 resolveIncompleteCellFragment(rule.requires()),
                 resolveIncompleteCellFragment(rule.ensures()),
@@ -113,8 +111,8 @@ public class SortCells {
     }
 
     public synchronized Sentence sortCells(Sentence s) {
-        if (s instanceof Rule) {
-            return sortCells((Rule) s);
+        if (s instanceof RuleOrClaim) {
+            return sortCells((RuleOrClaim) s);
         } else if (s instanceof Context) {
             return sortCells((Context) s);
         } else {
@@ -699,8 +697,8 @@ public class SortCells {
      * Pre-process terms before processVar
      */
     public synchronized Sentence preprocess(Sentence s) {
-        if (s instanceof Rule) {
-            return preprocess((Rule) s);
+        if (s instanceof RuleOrClaim) {
+            return preprocess((RuleOrClaim) s);
         } else {
             return s;
         }
@@ -710,23 +708,23 @@ public class SortCells {
      * Post-process terms after processVar
      */
     public synchronized Sentence postprocess(Sentence s) {
-        if (s instanceof Rule) {
-            return postprocess((Rule) s);
+        if (s instanceof RuleOrClaim) {
+            return postprocess((RuleOrClaim) s);
         } else {
             return s;
         }
     }
 
-    private Rule preprocess(Rule rule) {
-        return Rule(
+    private RuleOrClaim preprocess(RuleOrClaim rule) {
+        return rule.newInstance(
                 preprocess(rule.body()),
                 preprocess(rule.requires()),
                 preprocess(rule.ensures()),
                 rule.att());
     }
 
-    private Rule postprocess(Rule rule) {
-        return Rule(
+    private RuleOrClaim postprocess(RuleOrClaim rule) {
+        return rule.newInstance(
                 postprocess(rule.body()),
                 postprocess(rule.requires()),
                 postprocess(rule.ensures()),

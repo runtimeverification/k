@@ -29,7 +29,7 @@ require "chain.k"
 module NTH1-SPEC
     imports V
 
-    rule
+    claim
     <g> nth(1, B1, B2) => B1 <~* B2 </g>
     <p> .Map => ?_ </p>
     <k> apply("nth.e")
@@ -41,7 +41,7 @@ module NTH1-SPEC
      ~> apply("<~*.i")
      => . </k>
 
-    rule
+    claim
     <k> apply("lemma") => . ... </k>
     <g> B1 == B2 and B2 <~ B3 => B1 <~ B3 </g>
         [trusted]

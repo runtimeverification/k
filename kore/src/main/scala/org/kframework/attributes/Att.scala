@@ -103,6 +103,8 @@ object Att {
   val TOP_RULE = "topRule";
   val ORIGINAL_PRD = "originalPrd"
   val RECORD_PRD = "recordPrd"
+  val SOURCE = "org.kframework.attributes.Source"
+  val LOCATION = "org.kframework.attributes.Location"
 
   private val stringClassName = classOf[String].getName
 

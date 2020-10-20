@@ -28,9 +28,9 @@ module ITE-BUG
     rule bool2Word( B:Bool ) => 1 requires B
     rule bool2Word( B:Bool ) => 0 requires notBool B
 
-  rule bool2Word(A)  ==K 0 => notBool(A)
-  rule bool2Word(A)  ==K 1 => A
-  rule bool2Word(A)  =/=K 0 => A
-  rule bool2Word(A)  =/=K 1 => notBool(A)
+  rule bool2Word(A)  ==K 0 => notBool(A)  [simplification]
+  rule bool2Word(A)  ==K 1 => A           [simplification]
+  rule bool2Word(A)  =/=K 0 => A          [simplification]
+  rule bool2Word(A)  =/=K 1 => notBool(A) [simplification]
 
 endmodule

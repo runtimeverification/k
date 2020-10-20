@@ -290,6 +290,8 @@ def onAttributes(kast, effect):
         return KAs(kast['pattern'], kast['alias'], att = effect(kast['att']))
     elif isKRule(kast):
         return KRule(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = effect(kast['att']))
+    elif isKClaim(kast):
+        return KClaim(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = effect(kast['att']))
     elif isKContext(kast):
         return KContext(kast['body'], requires = kast['requires'], att = effect(kast['att']))
     elif isKBubble(kast):
@@ -314,7 +316,7 @@ def onAttributes(kast, effect):
     _fatal('No attributes for: ' + kast['node'] + '.')
 
 def minimizeRule(rule):
-    if not isKRule(rule):
+    if not isKRule(rule) and not isKClaim(rule):
         return rule
 
     ruleBody     = rule["body"]
@@ -355,8 +357,10 @@ def minimizeRule(rule):
 
     if ruleRequires == KToken("true", "Bool"):
         ruleRequires = None
-
-    return KRule(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts)
+    if isKRule(rule):
+        return KRule(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts)
+    else:
+        return KClaim(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts)
 
 def pushDownRewritesRule(rule):
     if not isKRule(rule):

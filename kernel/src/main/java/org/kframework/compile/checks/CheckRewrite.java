@@ -2,7 +2,7 @@
 package org.kframework.compile.checks;
 
 import org.kframework.definition.Module;
-import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -27,8 +27,8 @@ public class CheckRewrite {
     }
 
     public void check(Sentence sentence) {
-        if (sentence instanceof Rule) {
-            check(((Rule) sentence).body());
+        if (sentence instanceof RuleOrClaim) {
+            check(((RuleOrClaim) sentence).body());
         }
     }
 

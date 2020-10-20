@@ -18,11 +18,13 @@ import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.RefreshRules;
 import org.kframework.compile.RewriteToTop;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.Tag;
 import org.kframework.definition.Terminal;
@@ -839,18 +841,18 @@ public class ModuleToKORE {
         HashMap<String, Boolean> consideredAttributes = new HashMap<>();
         consideredAttributes.put(Att.PRIORITY(), true);
         consideredAttributes.put(Att.LABEL(), true);
+        consideredAttributes.put(Att.SOURCE(), true);
+        consideredAttributes.put(Att.LOCATION(), true);
 
         for (Sentence sentence : iterable(spec.sentencesExcept(definition))) {
-            assert sentence instanceof Rule
-                : "Unexpected non-rule claim " + sentence.toString();
-            if (sentence instanceof Rule) {
-                convertRule((Rule) sentence, 0, false, topCellSortStr,
+            if (sentence instanceof Claim) {
+                convertRule((Claim) sentence, 0, false, topCellSortStr,
                         consideredAttributes, HashMultimap.create(), new HashMap<>(), ArrayListMultimap.create(),
                         sentenceType, sb);
             }
         }
         sb.append("endmodule ");
-        convert(new HashMap<>(), spec.att(), sb, null, null);
+        convert(consideredAttributes, spec.att(), sb, null, null);
         sb.append("\n");
         return sb.toString();
     }
@@ -864,7 +866,7 @@ public class ModuleToKORE {
         return Optional.empty();
     }
 
-    private RuleInfo getRuleInfo(Rule rule, boolean heatCoolEq, String topCellSortStr) {
+    private RuleInfo getRuleInfo(RuleOrClaim rule, boolean heatCoolEq, String topCellSortStr) {
         boolean equation = false;
         boolean owise = false;
         boolean kore = rule.att().contains(Att.KORE());
@@ -903,7 +905,7 @@ public class ModuleToKORE {
                 productionSortStr, productionSorts, productionLabel, leftChildren);
     }
 
-    private void convertRule(Rule rule, int ruleIndex, boolean heatCoolEq, String topCellSortStr,
+    private void convertRule(RuleOrClaim rule, int ruleIndex, boolean heatCoolEq, String topCellSortStr,
                              Map<String, Boolean> consideredAttributes, SetMultimap<KLabel, Rule> functionRules,
                              Map<Integer, String> priorityToPreviousGroup,
                              ListMultimap<Integer, String> priorityToAlias,
@@ -1100,7 +1102,7 @@ public class ModuleToKORE {
             }
         } else if (ruleInfo.isKore) {
             assertNoExistentials(rule, existentials);
-            if (isClaim(sentenceType)) {
+            if (rule instanceof Claim) {
                 sb.append("  claim{} ");
             } else {
                 sb.append("  axiom{} ");
@@ -1110,9 +1112,8 @@ public class ModuleToKORE {
             convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
             sb.append("\n\n");
         } else if (!ExpandMacros.isMacro(rule)) {
-            Boolean isRuleClaim = isClaim(sentenceType);
             // generate rule LHS
-            if (!isRuleClaim) {
+            if (!(rule instanceof Claim)) {
                 // LHS for semantics rules
                 String ruleAliasName = String.format("rule%dLHS", ruleIndex);
                 int priority = getPriority(rule.att());
@@ -1160,7 +1161,7 @@ public class ModuleToKORE {
             for (KVariable ignored : existentials) {
                 sb.append(')');
             }
-            if (isClaim(sentenceType)) {
+            if (rule instanceof Claim) {
                 sb.append(')');
             }
             sb.append(')');
@@ -1174,16 +1175,16 @@ public class ModuleToKORE {
         return notMatching.att().contains(Att.OWISE()) || notMatching.att().contains(Att.SIMPLIFICATION());
     }
 
-    private void assertNoExistentials(Rule rule, Set<KVariable> existentials) {
+    private void assertNoExistentials(Sentence sentence, Set<KVariable> existentials) {
         if (!existentials.isEmpty()) {
             throw KEMException.compilerError("Cannot encode equations with existential variables to KORE." +
                     "\n If this is desired, please use #Exists with regular variables." +
                     "\n Offending variables: " + existentials +
-                    "\n context: " + rule);
+                    "\n context: " + sentence);
         }
     }
 
-    private Set<KVariable> getExistentials(Rule rule) {
+    private Set<KVariable> getExistentials(RuleOrClaim rule) {
         Set<KVariable> res = new HashSet<>();
         VisitK visitor = new VisitK() {
             @Override
@@ -1195,10 +1196,6 @@ public class ModuleToKORE {
         visitor.apply(rule.ensures());
         visitor.apply(RewriteToTop.toRight(rule.body()));
         return res;
-    }
-
-    private boolean isClaim(SentenceType sentenceType) {
-        return sentenceType == SentenceType.ONE_PATH || sentenceType == SentenceType.ALL_PATH;
     }
 
     private void genAliasForSemanticsRuleLHS(K requires, K left,

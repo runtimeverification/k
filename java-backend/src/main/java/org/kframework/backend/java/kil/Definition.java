@@ -19,6 +19,7 @@ import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Subsorts;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ExpandMacros;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Module;
 import org.kframework.kil.loader.Context;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
@@ -206,7 +207,7 @@ public class Definition extends JavaSymbolicObject {
     public List<Rule> addKoreRules(Module module, KOREtoBackendKIL converter, @Nullable String filterAttribute,
                                    @Nullable UnaryOperator<Rule> rulePostProcessor) {
         //Add regular rules from all modules
-        List<Rule> result = stream(module.rules())
+        List<Rule> result = stream(module.rulesAndClaims())
                 .filter(rule -> !containsAnyAttribute(rule, automatonAttributes))
                 .filter(rule -> filterAttribute == null || rule.att().contains(filterAttribute))
                 //Ensures that rule order in all collections remains the same across across different executions.
@@ -215,7 +216,23 @@ public class Definition extends JavaSymbolicObject {
                 .collect(Collectors.toList());
 
         //Add automaton from this module only
-        stream(module.localRules())
+        stream(module.localRulesAndClaims())
+                .filter(rule -> containsAnyAttribute(rule, automatonAttributes))
+                .forEach(rule -> addKoreAutomaton(rule, converter, module));
+        return result;
+    }
+
+    public List<Rule> addKoreClaims(Module module, KOREtoBackendKIL converter,
+                                   @Nullable UnaryOperator<Rule> rulePostProcessor) {
+        //Add regular rules from all modules
+        List<Rule> result = stream(module.claims())
+                //Ensures that rule order in all collections remains the same across across different executions.
+                .sorted(Comparator.comparingInt(rule -> rule.body().hashCode()))
+                .map(rule -> addKoreRule(rule, converter, module, rulePostProcessor))
+                .collect(Collectors.toList());
+
+        //Add automaton from this module only
+        stream(module.localRulesAndClaims())
                 .filter(rule -> containsAnyAttribute(rule, automatonAttributes))
                 .forEach(rule -> addKoreAutomaton(rule, converter, module));
         return result;
@@ -224,7 +241,7 @@ public class Definition extends JavaSymbolicObject {
     /**
      * @return the converted rule
      */
-    public Rule addKoreRule(org.kframework.definition.Rule rule, KOREtoBackendKIL converter, Module module,
+    public Rule addKoreRule(org.kframework.definition.RuleOrClaim rule, KOREtoBackendKIL converter, Module module,
                             @Nullable UnaryOperator<Rule> rulePostProcessor) {
         Rule convertedRule = converter.convert(module, rule);
         if (rulePostProcessor != null) {
@@ -242,12 +259,12 @@ public class Definition extends JavaSymbolicObject {
     /**
      * Automaton must be added after regular rules that it includes.
      */
-    public void addKoreAutomaton(org.kframework.definition.Rule rule, KOREtoBackendKIL transformer, Module module) {
+    public void addKoreAutomaton(org.kframework.definition.RuleOrClaim rule, KOREtoBackendKIL transformer, Module module) {
         Rule convertedRule = transformer.convert(module, rule);
         automatons.put(getFirstContainedAttribute(convertedRule, automatonAttributes), convertedRule);
     }
 
-    public boolean containsAnyAttribute(org.kframework.definition.Rule rule, Set<String> attributeNames) {
+    public boolean containsAnyAttribute(org.kframework.definition.RuleOrClaim rule, Set<String> attributeNames) {
         return attributeNames.stream().anyMatch(name -> rule.att().contains(name));
     }
 
@@ -300,12 +317,6 @@ public class Definition extends JavaSymbolicObject {
             if (rule.att().contains(Att.SPECIFICATION())) {
                 specRules.add(rule);
             }
-        }
-    }
-
-    public void addRuleCollection(Collection<Rule> rules) {
-        for (Rule rule : rules) {
-            addRule(rule);
         }
     }
 

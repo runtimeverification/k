@@ -1,9 +1,11 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.unparser;
 
+import jdk.nashorn.internal.parser.JSONParser;
 import org.kframework.attributes.Att;
 import org.kframework.definition.Associativity;
 import org.kframework.definition.Bubble;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.Configuration;
 import org.kframework.definition.Definition;
@@ -14,6 +16,7 @@ import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.SortSynonym;
 import org.kframework.definition.SyntaxAssociativity;
@@ -155,7 +158,7 @@ public class ToJson {
 
     public static JsonStructure toJson(Sentence sen) {
         if (sen instanceof Context)             return toJson((Context) sen);
-        if (sen instanceof Rule)                return toJson((Rule) sen);
+        if (sen instanceof RuleOrClaim)         return toJson((RuleOrClaim) sen);
         if (sen instanceof SyntaxPriority)      return toJson((SyntaxPriority) sen);
         if (sen instanceof SyntaxAssociativity) return toJson((SyntaxAssociativity) sen);
         if (sen instanceof Configuration)       return toJson((Configuration) sen);
@@ -180,10 +183,10 @@ public class ToJson {
         return jcon.build();
     }
 
-    public static JsonStructure toJson(Rule rule) {
+    public static JsonStructure toJson(RuleOrClaim rule) {
         JsonObjectBuilder jrule = Json.createObjectBuilder();
 
-        jrule.add("node", JsonParser.KRULE);
+        jrule.add("node", rule instanceof Rule ? JsonParser.KRULE : JsonParser.KCLAIM);
         jrule.add("body", toJson(rule.body()));
         jrule.add("requires", toJson(rule.requires()));
         jrule.add("ensures", toJson(rule.ensures()));

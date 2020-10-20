@@ -12,6 +12,7 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -60,7 +61,7 @@ public class ResolveFunctionWithConfig {
       CONFIG_VAR = KVariable("#Configuration", Att().add(Sort.class, topCell).add("withConfig"));
     }
 
-    private boolean ruleNeedsConfig(Rule r) {
+    private boolean ruleNeedsConfig(RuleOrClaim r) {
         if (r.body() instanceof KApply && ((KApply)r.body()).klabel().name().equals("#withConfig")) {
             return true;
         }
@@ -86,8 +87,8 @@ public class ResolveFunctionWithConfig {
         return false;
     }
 
-    private Rule resolve(Rule rule, Module m) {
-        return new Rule(
+    private RuleOrClaim resolve(RuleOrClaim rule, Module m) {
+        return rule.newInstance(
                 transform(resolve(rule.body(), m), m),
                 transform(rule.requires(), m),
                 transform(rule.ensures(), m),
@@ -217,16 +218,16 @@ public class ResolveFunctionWithConfig {
     }
 
     public Sentence resolveConfigVar(Sentence s) {
-      if (s instanceof Rule) {
-        Rule r = (Rule)s;
-        return Rule(resolveConfigVar(r.body(), r.requires(), r.ensures()), r.requires(), r.ensures(), r.att());
+      if (s instanceof RuleOrClaim) {
+        RuleOrClaim r = (RuleOrClaim)s;
+        return r.newInstance(resolveConfigVar(r.body(), r.requires(), r.ensures()), r.requires(), r.ensures(), r.att());
       }
       return s;
     }
 
     public Sentence resolve(Module m, Sentence s) {
-        if (s instanceof Rule) {
-            return resolve((Rule) s, m);
+        if (s instanceof RuleOrClaim) {
+            return resolve((RuleOrClaim) s, m);
         } else if (s instanceof Context) {
             return resolve((Context) s, m);
         } else if (s instanceof ContextAlias) {
