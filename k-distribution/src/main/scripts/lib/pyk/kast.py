@@ -89,6 +89,12 @@ def KRule(body, requires = None, ensures = None, att = None):
 def isKRule(k):
     return k["node"] == "KRule"
 
+def KClaim(body, requires = None, ensures = None, att = None):
+    return { "node": "KClaim", "body": body, "requires": requires, "ensures": ensures, "att": att }
+
+def isKClaim(k):
+    return k["node"] == "KClaim"
+
 def KContext(body, requires = None, ensures = None, att = None):
     return { "node": "KContext", "body": body, "requires": requires, "att": att }
 
@@ -188,6 +194,8 @@ def addAttributes(kast, att):
         return KAtt(combineDicts(att, kast['att']))
     if isKRule(kast):
         return KRule(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = addAttributes(kast['att'], att))
+    if isKClaim(kast):
+        return KClaim(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = addAttributes(kast['att'], att))
     if isKProduction(kast):
         return KProduction(kast['productionItems'], kast['sort'], att = addAttributes(kast['att'], att))
     else:
@@ -348,6 +356,19 @@ def prettyPrintKast(kast, symbolTable):
     if isKRule(kast):
         body     = "\n     ".join(prettyPrintKast(kast["body"], symbolTable).split("\n"))
         ruleStr = "rule " + body
+        requiresStr = ""
+        ensuresStr  = ""
+        attsStr     = prettyPrintKast(kast['att'], symbolTable)
+        if kast["requires"] is not None:
+            requiresStr = prettyPrintKast(kast["requires"], symbolTable)
+            requiresStr = "requires " + "\n   ".join(requiresStr.split("\n"))
+        if kast["ensures"] is not None:
+            ensuresStr = prettyPrintKast(kast["ensures"], symbolTable)
+            ensuresStr = "ensures " + "\n  ".join(ensuresStr.split("\n"))
+        return ruleStr + "\n  " + requiresStr + "\n  " + ensuresStr + "\n  " + attsStr
+    if isKClaim(kast):
+        body     = "\n     ".join(prettyPrintKast(kast["body"], symbolTable).split("\n"))
+        ruleStr = "claim " + body
         requiresStr = ""
         ensuresStr  = ""
         attsStr     = prettyPrintKast(kast['att'], symbolTable)

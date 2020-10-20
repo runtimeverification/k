@@ -12,11 +12,11 @@ Part 4. Substitutions of RHS vars must be preferred over LHS vars, for cases var
 module DEF42-SPEC
     imports DEF
 
-    rule <k> start X => end X </k>
+    claim <k> start X => end X </k>
          <var> X -Int 1 </var>
        requires X -Int 1 >=Int 0
 
-    rule <k> mid incPos(Y) => end Y +Int 1 </k>
+    claim <k> mid incPos(Y) => end Y +Int 1 </k>
          <var> Y </var>
       [trusted]
 

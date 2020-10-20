@@ -6,14 +6,14 @@ imports IMP
 syntax Id ::= "x" [token]
             | "y" [token]
 
-rule
+claim
 <L1>
      <k> addi(x,y) </k>
      <state> ... x |-> N:Int y |-> M:Int ... </state>
 </L1>
 ensures vars(ListItem(N) ListItem(M))
 
-rule
+claim
 <L1>
      <k> I:Int </k>
      <state> _:Map </state>

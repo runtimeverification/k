@@ -26,22 +26,22 @@ syntax Id ::= "n"   [token]
             | "f"   [token]
             | "x"   [token]
 
-rule
+claim
 <s> ~ a => ^ b ... </s>
 <impk> while (_) _ </impk>
 [trusted]
 
-rule
+claim
 <s> ~ a => ^ b ... </s>
 <impk> .K </impk>
 [trusted]
 
-rule
+claim
 <s> ~ b => ^ a ... </s>
 <lambdak> f _:Exp ~> Ks:K </lambdak>
 [trusted]
 
-rule
+claim
 <s> ~ b => ^ a ... </s>
 <lambdak> 0 ~> Ks:K </lambdak>
 requires isContinuation(Ks)
@@ -54,7 +54,7 @@ module SUM-SYMBOLIC-SPEC
 imports VERIFICATION
 imports SYNC-POINT-CANDIDATES
 
-rule
+claim
 <k> check => . </k>
 <s> ^ a ... </s>
 <impT>
@@ -84,7 +84,7 @@ rule
 </lambdaT>
 requires N1 ==Int N2
 
-rule
+claim
 <k> check => . </k>
 <s> ^ a ... </s>
 <impT>
@@ -115,7 +115,7 @@ rule
 </lambdaT>
 requires N1 ==Int N2
 
-rule
+claim
 <k> check => . </k>
 <s> ^ a ... </s>
 <impT>
@@ -150,7 +150,7 @@ requires sim(S, Ks)
  andBool N1 ==Int N2 -Int 1
  andBool isContinuation(Ks)
 
-rule
+claim
 <k> check => . </k>
 <s> ^ a ... </s>
 <impT>

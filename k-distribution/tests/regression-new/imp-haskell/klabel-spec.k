@@ -9,5 +9,5 @@ endmodule
 module KLABEL-SPEC
     imports VERIFICATION
 
-    rule <k> .K => .K </k>
+    claim <k> .K => .K </k>
 endmodule

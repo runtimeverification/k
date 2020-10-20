@@ -80,7 +80,7 @@ future.
                            \`-cPGM=foo\`, a temporary file containing the word
                            "foo" is created and cat is called on it to provide
                            the value of \$PGM as a KORE term.
-  
+
   -cNAME=VALUE             Use VALUE as the value for \$NAME. By default,
                            \`kast -m MAINMODULE -o kore\` is used as the
                            parser. This can be overridden with -p.
@@ -145,29 +145,29 @@ do
       bound="$2"
       shift
       ;;
-  
+
       --depth)
       depth="$2"
       shift
       ;;
-  
+
       --color)
       case "$2" in
         on)
         color=true
         ;;
-  
+
         off)
         color=false
         ;;
-  
+
         *)
         error 'Invalid value for --color. Should be "on" or "off".'
         ;;
       esac
       shift
       ;;
-  
+
       -p*=*)
       keyval=${1#-p}
       key=${keyval%%=*}
@@ -175,7 +175,7 @@ do
       var_name="parser_$key"
       printf -v "$var_name" %s "$val"
       ;;
-  
+
       -c*=*)
       keyval=${1#-c}
       key=${keyval%%=*}
@@ -187,49 +187,49 @@ do
       printf %s "$val" > "$tempFile"
       printf -v "$var_name" %s "$tempFile"
       ;;
-  
+
       -d|--directory)
       dir="$2"
       shift
       ;;
-  
+
       --dry-run)
       cmdprefix="echo "
       tempFiles=(${tempFiles[@]/$input_file})
       dryRun=true
       ;;
-  
+
       --haskell-backend-command)
       haskellCmd="$2"
       shift
       ;;
-  
+
       -h|--help)
       print_usage
       exit 0
       ;;
-  
+
       --io)
       case "$2" in
         on)
         io=true
         ;;
-  
+
         off)
         io=false
         ;;
-  
+
         *)
         error 'Invalid value for --io. Should be "on" or "off".'
         ;;
       esac
       shift
       ;;
-  
+
       --no-substitution-filtering)
       filterSubst=false
       ;;
-  
+
       -o|--output)
       case "$2" in
         pretty) ;;
@@ -248,43 +248,43 @@ do
       outputMode="$2"
       shift
       ;;
-  
+
       --output-file)
       outputFile="$2"
       shift
       ;;
-  
+
       --parser)
       var_name="parser_PGM"
       printf -v "$var_name" %s "$2"
       shift
       ;;
-  
+
       --pattern)
       pattern="$2"
       shift
       ;;
-  
+
       --search)
       search=true
       searchType='FINAL'
       ;;
-  
+
       --search-all)
       search=true
       searchType='STAR'
       ;;
-  
+
       --search-final)
       search=true
       searchType='FINAL'
       ;;
-  
+
       --search-one-or-more-steps)
       search=true
       searchType='PLUS'
       ;;
-  
+
       --search-one-step)
       search=true
       searchType='ONE'
@@ -294,43 +294,43 @@ do
       smtPrelude="$2"
       shift
       ;;
-  
+
       --term)
       term=true
-      ;;    
-  
+      ;;
+
       -v|--verbose)
       verbose=true
       flags="$flags -v"
       ;;
-  
+
       --save-temps)
       trap - INT TERM EXIT
       flags="$flags -save-temps"
       ;;
-  
+
       --version)
       kompile --version
       exit 0
       ;;
-  
+
       --debugger)
       cmdprefix="gdb --args "
       ;;
-  
+
       --statistics)
       statistics=true
       ;;
-  
+
       --)
       literal=true
       ;;
-  
+
       -*)
       print_usage
       exit 1
       ;;
-  
+
       *)
       ARGV+=("$1")
       ;;
@@ -362,6 +362,7 @@ fi
 kompiledDir=
 hasKompiledDir=false
 for file in "$dir"/*-kompiled; do
+  [ ! -d "$file" ] && continue
   kompiledDir=$file
   if $hasKompiledDir; then
     error 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
@@ -388,7 +389,7 @@ fi
 
 if $term; then
   if [ -z "${parser_PGM+unset}" ]; then
-    execute kast -m "$mainModuleName" "$config_var_PGM" -o kore > "$input_file"
+    execute kast -d "$dir" -m "$mainModuleName" "$config_var_PGM" -o kore > "$input_file"
   else
     execute $parser_PGM "$config_var_PGM" > "$input_file"
   fi
@@ -401,20 +402,20 @@ else
     sortName=`cat "$kompiledDir"/sort_"$name".txt`
     if [ -z "${!parser_name+unset}" ]; then
       if [ -f "$kompiledDir/parser_$name" ]; then
-        parser="$kompiledDir/parser_$name"
+        parser=("$kompiledDir/parser_$name")
       elif [ "$name" = "PGM" ]; then
         if $hasArgv; then
-          parser="kast -o kore"
+          parser=(kast -d "$dir" -o kore)
         else
-          parser="kast -m $mainModuleName -o kore"
+          parser=(kast -d "$dir" -m "$mainModuleName" -o kore)
         fi
       else
-        parser="kast -m $mainModuleName -o kore"
+        parser=(kast -d "$dir" -m "$mainModuleName" -o kore)
       fi
     else
-      parser="${!parser_name}"
+      parser=("${!parser_name}")
     fi
-    execute $parser "${!config_name}" > "$tempFile"
+    execute "${parser[@]}" "${!config_name}" > "$tempFile"
     configVars="$configVars -c $name $tempFile $sortName korefile"
   done
   if [ "$(cat "$kompiledDir"/sort_IO.txt 2>/dev/null)" = "String" ]; then
@@ -506,7 +507,7 @@ if ! $dryRun; then
       tail -1 "$kore_output" > "$kore_output2"
       mv "$kore_output2" "$kore_output"
     fi
-    
+
     case "$outputMode" in
       pretty)
       execute kprint "$kompiledDir" "$kore_output" $color > "$outputFile"
@@ -520,7 +521,7 @@ if ! $dryRun; then
       none) ;;
 
       *)
-      execute kast -i kore -o "$outputMode" "$kore_output" > "$outputFile"
+      execute kast -d "$dir" -i kore -o "$outputMode" "$kore_output" > "$outputFile"
       ;;
     esac
   else

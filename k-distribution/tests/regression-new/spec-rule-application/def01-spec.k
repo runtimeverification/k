@@ -4,11 +4,11 @@ require "def.k"
 module DEF01-SPEC
     imports DEF
 
-    rule <k> start X => end X +Int 1 </k>
+    claim <k> start X => end X +Int 1 </k>
          <var> _ </var>
        requires X >=Int 0
 
-    rule <k> mid Y => end inc(Y) </k>
+    claim <k> mid Y => end inc(Y) </k>
          <var> _ </var>
       [trusted]
 

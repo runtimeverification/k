@@ -2,22 +2,22 @@ module SYNC-POINT-CANDIDATES
 
 imports MAIN
 
-rule
+claim
 <s> ~ a => ^ b ... </s>
 <ak> while (_) _ </ak>
 [trusted]
 
-rule
+claim
 <s> ~ a => ^ b ... </s>
 <ak> .K </ak>
 [trusted]
 
-rule
+claim
 <s> ~ b => ^ a ... </s>
 <bk> while (_) _ </bk>
 [trusted]
 
-rule
+claim
 <s> ~ b => ^ a ... </s>
 <bk> .K </bk>
 [trusted]
@@ -32,7 +32,7 @@ imports SYNC-POINT-CANDIDATES
 syntax Id ::= "n" [token]
 
 // simple loop
-rule
+claim
 <k> check => . </k>
 <s> ^ a ... </s>
 <aT>
@@ -57,7 +57,7 @@ rule
 </bT>
 requires N1 ==Int N2
 
-rule
+claim
 <k> check => . </k>
 <s> ^ a ... </s>
 <aT>
