@@ -19,13 +19,13 @@ module SET-BALANCE-SPEC
 ### `total_balance` tests
 
 ```k
-    rule <k> totalBalance(AID) => 50 </k>
-         <account>
-           <accountID> AID </accountID>
-           <freeBalance> 30 </freeBalance>
-           <reservedBalance> 20 </reservedBalance>
-           ...
-         </account>
+    claim <k> totalBalance(AID) => 50 </k>
+          <account>
+            <accountID> AID </accountID>
+            <freeBalance> 30 </freeBalance>
+            <reservedBalance> 20 </reservedBalance>
+            ...
+          </account>
 ```
 
 ### No Zero-Balance Accounts Exist
@@ -51,15 +51,15 @@ This property shows that `set_balance` will not result in a zero-balance attack.
 ```
 
 ```k
-    rule <k> set_balance_reserved ( WHO , RESERVED_BALANCE' ) => . ... </k>
-         <existentialDeposit> EXISTENTIAL_DEPOSIT </existentialDeposit>
-         <totalIssuance> TOTAL_ISSUANCE +Int ( FREE_BALANCE' -Int FREE_BALANCE ) => TOTAL_ISSUANCE +Int ( FREE_BALANCE' -Int FREE_BALANCE ) +Int ( RESERVED_BALANCE' -Int RESERVED_BALANCE ) </totalIssuance>
-         <account>
-           <accountID> WHO </accountID>
-           <freeBalance> FREE_BALANCE' </freeBalance>
-           <reservedBalance> RESERVED_BALANCE => RESERVED_BALANCE' </reservedBalance>
-           ...
-         </account>
+    claim <k> set_balance_reserved ( WHO , RESERVED_BALANCE' ) => . ... </k>
+          <existentialDeposit> EXISTENTIAL_DEPOSIT </existentialDeposit>
+          <totalIssuance> TOTAL_ISSUANCE +Int ( FREE_BALANCE' -Int FREE_BALANCE ) => TOTAL_ISSUANCE +Int ( FREE_BALANCE' -Int FREE_BALANCE ) +Int ( RESERVED_BALANCE' -Int RESERVED_BALANCE ) </totalIssuance>
+          <account>
+            <accountID> WHO </accountID>
+            <freeBalance> FREE_BALANCE' </freeBalance>
+            <reservedBalance> RESERVED_BALANCE => RESERVED_BALANCE' </reservedBalance>
+            ...
+          </account>
       requires #inWidth(96, TOTAL_ISSUANCE +Int (FREE_BALANCE' -Int FREE_BALANCE) +Int (RESERVED_BALANCE' -Int RESERVED_BALANCE))
        andBool EXISTENTIAL_DEPOSIT <=Int RESERVED_BALANCE'
 ```

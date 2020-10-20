@@ -6,7 +6,7 @@ imports IMP
 syntax Id ::= "sum" [token]
             | "n" [token]
 
-rule
+claim
   <k>
       sum = sum + n;
       n = n + 1;
@@ -19,7 +19,7 @@ rule
 requires N >=Int 0
 ensures vars(ListItem(S) ListItem(N))
 
-rule
+claim
   <k>
     .K
   </k>

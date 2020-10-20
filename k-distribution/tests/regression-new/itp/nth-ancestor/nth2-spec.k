@@ -29,7 +29,7 @@ require "chain.k"
 module NTH2-SPEC
     imports V
 
-    rule
+    claim
     <g> nth(k(N) +Int 1, B1, B2) => B1 <~* B2 </g>
     <p> .Map => ?_ </p>
     <k> apply("nth.e")
@@ -42,7 +42,7 @@ module NTH2-SPEC
         requires k(N) >Int 0 andBool const(N)
 
     // induction hypothesis
-    rule
+    claim
     <k> apply("ih") => . ... </k>
     <g> nth(k(N), B1, B2) => B1 <~* B2 </g>
         requires k(N) >Int 0 andBool const(N)
@@ -57,7 +57,7 @@ module NTH2-SPEC
         by apply/connect1.
         Qed.
     */
-    rule
+    claim
     <k> apply("lemma") => . ... </k>
     <g> B1 <~* B2 and B2 <~ B3 => B1 <~* B3 </g>
         [trusted]

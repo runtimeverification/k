@@ -4,6 +4,7 @@ package org.kframework.parser.json;
 import org.kframework.attributes.Att;
 import org.kframework.definition.Associativity;
 import org.kframework.definition.Bubble;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.Configuration;
 import org.kframework.definition.Definition;
@@ -82,6 +83,7 @@ public class JsonParser {
                              , KREGEXTERMINAL       = "KRegexTerminal"
                              , KREWRITE             = "KRewrite"
                              , KRULE                = "KRule"
+                             , KCLAIM               = "KClaim"
                              , KSEQUENCE            = "KSequence"
                              , KSORT                = "KSort"
                              , KSORTSYNONYM         = "KSortSynonym"
@@ -186,6 +188,13 @@ public class JsonParser {
                 K ensures  = toK(data.getJsonObject("ensures"));
                 Att att    = toAtt(data.getJsonObject("att"));
                 return new Rule(body, requires, ensures, att);
+            }
+            case KCLAIM: {
+                K body     = toK(data.getJsonObject("body"));
+                K requires = toK(data.getJsonObject("requires"));
+                K ensures  = toK(data.getJsonObject("ensures"));
+                Att att    = toAtt(data.getJsonObject("att"));
+                return new Claim(body, requires, ensures, att);
             }
             case KSYNTAXPRIORITY: {
                 JsonArray priorities = data.getJsonArray("priorities");

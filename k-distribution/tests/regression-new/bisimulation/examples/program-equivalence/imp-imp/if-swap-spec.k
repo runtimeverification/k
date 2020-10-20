@@ -2,12 +2,12 @@ module SYNC-POINT-CANDIDATES
 
 imports MAIN
 
-rule
+claim
 <s> ~ a => ^ b ... </s>
 <ak> .K </ak>
 [trusted]
 
-rule
+claim
 <s> ~ b => ^ a ... </s>
 <bk> .K </bk>
 [trusted]
@@ -22,7 +22,7 @@ imports SYNC-POINT-CANDIDATES
 syntax Id ::= "n" [token]
 
 // swap if-then-else branch
-rule
+claim
 <k> check => . </k>
 <s> ^ a ... </s>
 <aT>
@@ -52,7 +52,7 @@ rule
 </bT>
 requires N1 ==Int N2
 
-rule
+claim
 <k> check => . </k>
 <s> ^ a ... </s>
 <aT>
