@@ -157,7 +157,8 @@ public class KPrint {
     }
 
     public byte[] prettyPrint(Definition def, Module module, K orig, Sort s, ColorSetting colorize, OutputModes outputMode) {
-        K result = abstractTerm(module, orig);
+        Module unparsingModule = new RuleGrammarGenerator(def).getRuleGrammar(module);
+        K result = abstractTerm(unparsingModule, orig);
         switch (outputMode) {
             case KAST:
             case NONE:
@@ -166,7 +167,7 @@ public class KPrint {
             case LATEX:
                 return serialize(result, outputMode);
             case PRETTY:
-                Module prettyUnparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
+                Module prettyUnparsingModule = RuleGrammarGenerator.getCombinedGrammar(unparsingModule, false).getExtensionModule();
                 return (unparseTerm(result, prettyUnparsingModule, colorize) + "\n").getBytes();
             case PROGRAM: {
                 RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
@@ -266,7 +267,7 @@ public class KPrint {
       if (kapp.klabel().head().equals(KLabels.ML_AND)) {
         return filterConjunction(kapp, mod);
       } else if (kapp.klabel().head().equals(KLabels.ML_OR)) {
-        KLabel unit = KLabel(KLabels.ML_FALSE.name(), kapp.klabel().params().apply(0));
+        KLabel unit = KLabels.ML_FALSE;
         List<K> disjuncts = Assoc.flatten(kapp.klabel(), kapp.items(), unit);
         return disjuncts.stream()
                 .map(d -> filterConjunction(d, mod))
@@ -287,7 +288,7 @@ public class KPrint {
       }
       KApply kapp = (KApply)term;
       if (kapp.klabel().head().equals(KLabels.ML_AND)) {
-        KLabel unit = KLabel(KLabels.ML_TRUE.name(), kapp.klabel().params().apply(0));
+        KLabel unit = KLabels.ML_TRUE;
         List<K> conjuncts = Assoc.flatten(kapp.klabel(), kapp.items(), unit);
         return conjuncts.stream()
                 .map(d -> filterEquality(d, multivars(kapp), mod))
@@ -330,19 +331,18 @@ public class KPrint {
     }
 
     private K sortCollections(Module mod, K input) {
-        Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(mod, false).getExtensionModule();
         return new TransformK() {
             @Override
             public K apply(KApply k) {
                 if (k.klabel() instanceof KVariable) {
                     return super.apply(k);
                 }
-                Att att = unparsingModule.attributesFor().apply(KLabel(k.klabel().name()));
+                Att att = mod.attributesFor().apply(KLabel(k.klabel().name()));
                 if (att.contains("comm") && att.contains("assoc") && att.contains("unit")) {
                     List<K> items = new ArrayList<>(Assoc.flatten(k.klabel(), k.klist().items(), KLabel(att.get("unit"))));
                     List<Tuple2<String, K>> printed = new ArrayList<>();
                     for (K item : items) {
-                        String s = unparseInternal(unparsingModule, apply(item), ColorSetting.OFF);
+                        String s = unparseInternal(mod, apply(item), ColorSetting.OFF);
                         printed.add(Tuple2.apply(s, item));
                     }
                     printed.sort(Comparator.comparing(Tuple2::_1, new AlphanumComparator()));
