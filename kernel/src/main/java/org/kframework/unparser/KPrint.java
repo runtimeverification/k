@@ -157,24 +157,30 @@ public class KPrint {
     }
 
     public byte[] prettyPrint(Definition def, Module module, K orig, Sort s, ColorSetting colorize, OutputModes outputMode) {
-        Module unparsingModule = new RuleGrammarGenerator(def).getRuleGrammar(module);
-        K result = abstractTerm(unparsingModule, orig);
+        RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
         switch (outputMode) {
             case KAST:
             case NONE:
             case BINARY:
             case JSON:
-            case LATEX:
+            case LATEX: {
+                Module unparsingModule = gen.getRuleGrammar(module);
+                K result = abstractTerm(unparsingModule, orig);
                 return serialize(result, outputMode);
-            case PRETTY:
-                Module prettyUnparsingModule = RuleGrammarGenerator.getCombinedGrammar(unparsingModule, false).getExtensionModule();
+            }
+            case PRETTY: {
+                Module prettyUnparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(module), false).getExtensionModule();
+                K result = abstractTerm(prettyUnparsingModule, orig);
                 return (unparseTerm(result, prettyUnparsingModule, colorize) + "\n").getBytes();
+            }
             case PROGRAM: {
-                RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
                 Module programUnparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
+                K result = abstractTerm(programUnparsingModule, orig);
                 return (unparseTerm(result, programUnparsingModule, colorize) + "\n").getBytes();
             }
-            case KORE:
+            case KORE: {
+                Module programUnparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
+                K result = abstractTerm(programUnparsingModule, orig);
                 if (compiledDefinition == null) {
                     throw KEMException.criticalError("KORE output requires a compiled definition.");
                 }
@@ -184,6 +190,7 @@ public class KPrint {
                 StringBuilder sb = new StringBuilder();
                 converter.convert(result, sb);
                 return sb.toString().getBytes();
+            }
             default:
                 throw KEMException.criticalError("Unsupported output mode without a CompiledDefinition: " + outputMode);
         }
