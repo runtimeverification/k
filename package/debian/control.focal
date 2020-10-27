@@ -10,7 +10,7 @@ Package: kframework
 Architecture: any
 Section: devel
 Priority: optional
-Depends: default-jre-headless | java8-runtime-headless, flex, bison, gcc, libgmp-dev, libmpfr-dev, z3, libz3-dev, clang-10, lld-10, libyaml-0-2, libjemalloc-dev, opam
+Depends: default-jre-headless | java8-runtime-headless, flex, bison, gcc, libgmp-dev, libmpfr-dev, z3, libz3-dev, clang-10, lld-10, libyaml-0-2, libjemalloc-dev
 Description: K framework toolchain
  Includes K Framework compiler for K language definitions, and K interpreter
  and prover for programs written in languages defined in K.
