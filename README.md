@@ -29,7 +29,7 @@ On Ubuntu Linux:
 
 ```
 git submodule update --init --recursive
-sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven opam python3 cmake gcc clang-8 lld-8 llvm-8-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
+sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 cmake gcc clang-8 lld-8 llvm-8-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
 curl -sSL https://get.haskellstack.org/ | sh
 ```
 
@@ -37,7 +37,7 @@ On Arch Linux:
 
 ```
 git submodule update --init --recursive
-sudo pacman -S git maven jdk-openjdk cmake boost libyaml jemalloc clang llvm lld zlib gmp mpfr z3 opam curl stack base-devel base python
+sudo pacman -S git maven jdk-openjdk cmake boost libyaml jemalloc clang llvm lld zlib gmp mpfr z3 curl stack base-devel base python
 ```
 
 If you install this list of dependencies, continue directly to the [Build and Install Guide](#build-and-install-guide).
@@ -84,8 +84,8 @@ Also required:
 *   [mpfr](http://www.mpfr.org/)
 *   [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
 *   [z3](https://github.com/Z3Prover/z3)
-*   [opam](https://opam.ocaml.org/doc/Install.html)
 *   [python](https://www.python.org)
+*   [opam](https://opam.ocaml.org/doc/Install.html) **OPTIONAL**
 
 These can all be installed from your package manager.
 
@@ -98,7 +98,17 @@ your $PATH with <checkout-dir>k-distribution/target/release/k/bin (strongly reco
 You are also encouraged to set the environment variable `MAVEN_OPTS` to `-XX:+TieredCompilation`,
 which will significantly speed up the incremental build process.
 
-After running `mvn package` for the first time, you should run ``k-distribution/target/release/k/bin/k-configure-opam; eval `opam config env` ``. This performs first-time setup of the OCAML backend.
+**IF** you want to use the OCAML backend (not recommended), you need to run this
+after running `mvn package` for the first time:
+
+```sh
+k-distribution/target/release/k/bin/k-configure-opam
+eval $(opam config env)
+```
+
+This performs first-time setup of the OCAML backend. You may optionally set
+`OPAMROOT` before running this command to specify where the OCAML dependencies
+should be installed to.
 
 ## Installing on fresh Windows Subsystem for Linux
 
