@@ -1,6 +1,8 @@
 #!/bin/sh -ex
 cp -R /usr/share/kframework/tutorial ~
 WD=`pwd`
+k-configure-opam-dev
+eval $(opam config env)
 cd
 echo 'Starting kserver...'
 spawn-kserver $WD/kserver.log
