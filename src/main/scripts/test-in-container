@@ -1,6 +1,9 @@
 #!/bin/sh -ex
-k-configure-opam-dev
+k-configure-opam-dev || true
+opam depext conf-pkg-config.1.1 || true
 eval $(opam config env)
+opam depext conf-pkg-config.1.1 || true
+false
 cp -R /usr/share/kframework/tutorial ~
 WD=`pwd`
 cd
