@@ -1,7 +1,6 @@
 #!/bin/sh -ex
 cp -R /usr/share/kframework/tutorial ~
 WD=`pwd`
-sudo apt-get install --yes opam
 k-configure-opam-dev
 eval $(opam config env)
 cd

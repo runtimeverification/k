@@ -1,4 +1,6 @@
 #!/bin/sh -ex
 apt-get update
-apt-get install -y ./kframework_5.0.0_amd64.deb
+apt-get upgrade --yes
+apt-get install --yes opam
+apt-get install --yes ./kframework_5.0.0_amd64.deb
 "$(dirname "$0")/test-in-container"
