@@ -8,6 +8,7 @@ pipeline {
       steps {
         sh '''
           package/macos/brew-install-deps
+          cd haskell-backend/src/main/native/haskell-backend && stack build --only-snapshot
         '''
       }
     }
