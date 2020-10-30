@@ -169,7 +169,8 @@ public class ToLatex {
                 } else {
                     format = "???";
                 }
-                writeString(out, "\n\\newcommand{" + command + "}[" + arity + "]{" + format + "}               % " + identifier);
+                String newcommand = String.format("%-" + 80 + "s", "\n\\newcommand{" + command + "}[" + arity + "]{" + format + "}");
+                writeString(out, newcommand + " % " + identifier);
             }
         }
     }
