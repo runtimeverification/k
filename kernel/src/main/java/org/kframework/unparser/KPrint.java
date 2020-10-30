@@ -179,14 +179,14 @@ public class KPrint {
                 return (unparseTerm(result, programUnparsingModule, colorize) + "\n").getBytes();
             }
             case KORE: {
-                Module programUnparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
+                Module programUnparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(module), false).getExtensionModule();
                 K result = abstractTerm(programUnparsingModule, orig);
                 if (compiledDefinition == null) {
                     throw KEMException.criticalError("KORE output requires a compiled definition.");
                 }
                 ModuleToKORE converter = new ModuleToKORE(module, files, compiledDefinition.topCellInitializer, kompileOptions);
                 result = ExpandMacros.forNonSentences(compiledDefinition.executionModule(), files, kompileOptions, false).expand(result);
-                result = new AddSortInjections(compiledDefinition.executionModule()).addSortInjections(result, s);
+                result = new AddSortInjections(programUnparsingModule).addSortInjections(result, s);
                 StringBuilder sb = new StringBuilder();
                 converter.convert(result, sb);
                 return sb.toString().getBytes();
@@ -274,7 +274,7 @@ public class KPrint {
       if (kapp.klabel().head().equals(KLabels.ML_AND)) {
         return filterConjunction(kapp, mod);
       } else if (kapp.klabel().head().equals(KLabels.ML_OR)) {
-        KLabel unit = KLabels.ML_FALSE;
+        KLabel unit = KLabel(KLabels.ML_FALSE.name(), kapp.klabel().params().apply(0));
         List<K> disjuncts = Assoc.flatten(kapp.klabel(), kapp.items(), unit);
         return disjuncts.stream()
                 .map(d -> filterConjunction(d, mod))
@@ -295,7 +295,7 @@ public class KPrint {
       }
       KApply kapp = (KApply)term;
       if (kapp.klabel().head().equals(KLabels.ML_AND)) {
-        KLabel unit = KLabels.ML_TRUE;
+        KLabel unit = KLabel(KLabels.ML_TRUE.name(), kapp.klabel().params().apply(0));
         List<K> conjuncts = Assoc.flatten(kapp.klabel(), kapp.items(), unit);
         return conjuncts.stream()
                 .map(d -> filterEquality(d, multivars(kapp), mod))
