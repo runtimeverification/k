@@ -3,7 +3,10 @@ package org.kframework.unparser;
 
 import org.kframework.attributes.Att;
 import org.kframework.definition.Module;
+import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
+import org.kframework.definition.ProductionItem;
+import org.kframework.definition.Terminal;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -160,16 +163,25 @@ public class ToLatex {
     public static void makePrelude(DataOutputStream out, Module mod) throws IOException {
         for (Production p: JavaConverters.setAsJavaSet(mod.productions())) {
             if (! p.isSyntacticSubsort() && ! p.klabelAtt().isEmpty()) {
-                String arity   = Integer.toString(p.arity());
-                String command = latexedKLabel(p.klabelAtt().get());
-                String format;
+                String arity      = Integer.toString(p.arity());
+                String command    = latexedKLabel(p.klabelAtt().get());
+                String format     = "";
                 String identifier = p.klabelAtt().get(); // Include source info?
                 if (p.att().contains("latex")) {
                     format = p.att().get("latex");
                 } else {
-                    format = "???";
+                    int nonTerminal = 1;
+                    for (ProductionItem pItem: JavaConverters.seqAsJavaList(p.items())) {
+                        if (pItem instanceof Terminal) {
+                            format += "\\mathtt{" + ((Terminal) pItem).value() + "}";
+                        }
+                        if (pItem instanceof NonTerminal) {
+                            format += "{#" + Integer.toString(nonTerminal) + "}";
+                            nonTerminal++;
+                        }
+                    }
                 }
-                String newcommand = String.format("%-" + 80 + "s", "\n\\newcommand{" + command + "}[" + arity + "]{" + format + "}");
+                String newcommand = String.format("%-" + 120 + "s", "\n\\newcommand{" + command + "}[" + arity + "]{" + format + "}");
                 writeString(out, newcommand + " % " + identifier);
             }
         }
