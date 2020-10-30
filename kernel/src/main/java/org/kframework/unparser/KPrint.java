@@ -185,8 +185,10 @@ public class KPrint {
                     throw KEMException.criticalError("KORE output requires a compiled definition.");
                 }
                 ModuleToKORE converter = new ModuleToKORE(module, files, compiledDefinition.topCellInitializer, kompileOptions);
-                result = ExpandMacros.forNonSentences(compiledDefinition.executionModule(), files, kompileOptions, false).expand(result);
-                result = new AddSortInjections(programUnparsingModule).addSortInjections(result, s);
+                // require the semantic extension module because sometimes you need cast labels and other labels if you apply macros
+                Module semanticUnparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(compiledDefinition.executionModule()), false).getExtensionModule();
+                result = ExpandMacros.forNonSentences(semanticUnparsingModule, files, kompileOptions, false).expand(result);
+                result = new AddSortInjections(semanticUnparsingModule).addSortInjections(result, s);
                 StringBuilder sb = new StringBuilder();
                 converter.convert(result, sb);
                 return sb.toString().getBytes();
