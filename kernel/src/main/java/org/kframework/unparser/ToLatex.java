@@ -3,6 +3,7 @@ package org.kframework.unparser;
 
 import org.kframework.attributes.Att;
 import org.kframework.definition.Definition;
+import org.kframework.definition.Production;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -22,6 +23,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.regex.Pattern;
+
+import scala.collection.JavaConverters;
 
 /**
  * Writes a KAST term to the LaTeX format.
@@ -155,6 +158,8 @@ public class ToLatex {
     }
 
     public static void makePrelude(DataOutputStream out, Definition def) throws IOException {
-        throw new IOException("Definition to LaTeX unsupported.");
+        for (Production p: JavaConverters.setAsJavaSet(def.mainModule().productions())) {
+            throw new IOException("Definition to LaTeX unsupported.");
+        }
     }
 }
