@@ -1,7 +1,6 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.unparser;
 
-import jdk.nashorn.internal.parser.JSONParser;
 import org.kframework.attributes.Att;
 import org.kframework.definition.Associativity;
 import org.kframework.definition.Bubble;
