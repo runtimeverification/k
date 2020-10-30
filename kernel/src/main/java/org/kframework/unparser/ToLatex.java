@@ -181,7 +181,7 @@ public class ToLatex {
                         }
                     }
                 }
-                String newcommand = String.format("%-" + 120 + "s", "\n\\newcommand{" + command + "}[" + arity + "]{" + format + "}");
+                String newcommand = String.format("%-" + 120 + "s", "\n\\newcommand{\\" + command + "}[" + arity + "]{" + format + "}");
                 writeString(out, newcommand + " % " + identifier);
             }
         }
