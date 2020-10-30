@@ -1,14 +1,12 @@
 // Copyright (c) 2019 K Team. All Rights Reserved.
-
 package org.kframework.builtin;
 
-import org.kframework.kore.K;
-import org.kframework.kore.mini.KApply;
-import org.kframework.kore.mini.KRewrite;
-import org.kframework.kore.mini.KVariable;
+import org.kframework.kore.KRewrite;
+import static org.kframework.kore.KORE.*;
 
 public class Rules {
-    public static final KRewrite STUCK_RULE = new KRewrite( KApply.of(KLabels.STRATEGY_CELL, KApply.of(KLabels.KSEQ, KApply.of(KLabels.DOTK),  new KVariable("#REST")))
-                                                          , KApply.of(KLabels.STRATEGY_CELL, KApply.of(KLabels.KSEQ, KApply.of(KLabels.STUCK), new KVariable("#REST")))
-                                                          );
+    public static final KRewrite STUCK_RULE = KRewrite(
+              KApply(KLabels.STRATEGY_CELL, KList(KApply(KLabels.KSEQ, KList(KApply(KLabels.DOTK, KList(), Att()), KVariable("#REST")), Att())), Att())
+            , KApply(KLabels.STRATEGY_CELL, KList(KApply(KLabels.KSEQ, KList(KApply(KLabels.STUCK, KList(), Att()), KVariable("#REST")), Att())), Att())
+            , Att());
 }
