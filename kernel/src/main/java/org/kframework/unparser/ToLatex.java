@@ -159,7 +159,13 @@ public class ToLatex {
 
     public static void makePrelude(DataOutputStream out, Module mod) throws IOException {
         for (Production p: JavaConverters.setAsJavaSet(mod.productions())) {
-            throw new IOException("Definition to LaTeX unsupported.");
+            if (! p.isSyntacticSubsort()) {
+                if (p.att().contains("latex") && ! p.klabelAtt().isEmpty()) {
+                    writeString(out, "\n\\newcommand{\\" + latexedKLabel(p.klabelAtt().get()) + "}[" + Integer.toString(p.arity()) + "]{" + p.att().get("latex") + "}");
+                } else {
+                    writeString(out, "\n%" + p.toString());
+                }
+            }
         }
     }
 }
