@@ -2,6 +2,7 @@
 package org.kframework.unparser;
 
 import org.kframework.attributes.Att;
+import org.kframework.definition.Definition;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -34,6 +35,16 @@ public class ToLatex {
             return out.toByteArray();
         } catch (IOException e) {
             throw KEMException.criticalError("Could not write K term to LaTeX", e, k);
+        }
+    }
+
+    public static byte[] makePrelude(Definition def) {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            makePrelude(new DataOutputStream(out), def);
+            return out.toByteArray();
+        } catch (IOException e) {
+            throw KEMException.criticalError("Could not write LaTeX prelude for K definition", e);
         }
     }
 
@@ -141,5 +152,9 @@ public class ToLatex {
         } else {
             throw KEMException.criticalError("Unimplemented for LaTeX serialization: ", k);
         }
+    }
+
+    public static void makePrelude(DataOutputStream out, Definition def) throws IOException {
+        throw new IOException("Definition to LaTeX unsupported.");
     }
 }
