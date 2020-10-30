@@ -106,6 +106,9 @@ public final class KastOptions {
     @Parameter(names="--bison-file", description="C file containing functions to link into bison parser.")
     public String bisonFile;
 
+    @Parameter(names="--bison-stack-max-depth", description="Maximum size of bison parsing stack.")
+    public long bisonStackMaxDepth = 10000;
+
     @Parameter(names={"--expression", "-e"}, description="An expression to parse passed on the command " +
     "line. It is an error to provide both this option and a file to parse.")
     private String expression;
