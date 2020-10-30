@@ -70,6 +70,16 @@ public class ToLatex {
         return latexEncoder;
     }
 
+    private static String escapeLatex(String input) {
+        return input.replace("&", "\\&")
+                    .replace("%", "\\%")
+                    .replace("$", "\\$")
+                    .replace("#", "\\#")
+                    .replace("_", "\\_")
+                    .replace("{", "\\{")
+                    .replace("}", "\\}");
+    }
+
     public static final Pattern identChar = Pattern.compile("[A-Za-y]");
     public static String[] asciiReadableEncodingLatex = asciiReadableEncodingLatexCalc();
 
@@ -162,18 +172,18 @@ public class ToLatex {
 
     public static void makePrelude(DataOutputStream out, Module mod) throws IOException {
         for (Production p: JavaConverters.setAsJavaSet(mod.productions())) {
-            if (! p.isSyntacticSubsort() && ! p.klabelAtt().isEmpty()) {
+            if (! p.isSyntacticSubsort() && ! p.klabel().isEmpty() && ! p.att().contains("unparseAvoid")) {
                 String arity      = Integer.toString(p.arity());
-                String command    = latexedKLabel(p.klabelAtt().get());
+                String command    = latexedKLabel(p.klabel().get().name());
                 String format     = "";
-                String identifier = p.klabelAtt().get(); // Include source info?
+                String identifier = p.klabel().get().name(); // Include source info?
                 if (p.att().contains("latex")) {
                     format = p.att().get("latex");
                 } else {
                     int nonTerminal = 1;
                     for (ProductionItem pItem: JavaConverters.seqAsJavaList(p.items())) {
                         if (pItem instanceof Terminal) {
-                            format += "\\mathtt{" + ((Terminal) pItem).value() + "}";
+                            format += "\\mathtt{" + escapeLatex(((Terminal) pItem).value()) + "}";
                         }
                         if (pItem instanceof NonTerminal) {
                             format += "{#" + Integer.toString(nonTerminal) + "}";
