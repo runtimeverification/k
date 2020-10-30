@@ -98,8 +98,13 @@ your $PATH with <checkout-dir>k-distribution/target/release/k/bin (strongly reco
 You are also encouraged to set the environment variable `MAVEN_OPTS` to `-XX:+TieredCompilation`,
 which will significantly speed up the incremental build process.
 
-**IF** you want to use the OCAML backend (not recommended), you need to run this
-after running `mvn package` for the first time:
+**IF** you want to use the OCAML backend (not recommended), you need to install
+the following dependencies:
+
+-   [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
+-   [opam](https://opam.ocaml.org/)
+
+and then after running `mvn package` for the first time, setup OCAML dependencies:
 
 ```sh
 k-distribution/target/release/k/bin/k-configure-opam
