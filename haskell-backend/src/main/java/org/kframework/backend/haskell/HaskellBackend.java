@@ -7,9 +7,13 @@ import org.kframework.backend.kore.KoreBackend;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -31,6 +35,20 @@ public class HaskellBackend extends KoreBackend {
     public void accept(CompiledDefinition def) {
         String kore = getKompiledString(def);
         files.saveToKompiled("definition.kore", kore);
+        ProcessBuilder pb = files.getProcessBuilder();
+        List<String> args = new ArrayList<>();
+        args.add("kore-parser");
+        args.add("--no-print-definition");
+        args.add("definition.kore");
+        try {
+          Process p = pb.command(args).directory(files.resolveKompiled(".")).inheritIO().start();
+          int exit = p.waitFor();
+          if (exit != 0) {
+              throw KEMException.criticalError("Haskell backend reported errors validating compiled definition.\nExamine output to see errors.");
+          }
+        } catch (IOException | InterruptedException e) {
+            throw KEMException.criticalError("Error with I/O while executing kore-parser", e);
+        }
     }
 
     @Override
