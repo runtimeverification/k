@@ -150,7 +150,7 @@ public class Kompile {
             }
         }
 
-        if (kompileOptions.experimental.emitLatex) {
+        if (kompileOptions.experimental.emitLatexPrelude) {
             try {
                 files.saveToKompiled("parsed.tex",   new String(ToLatex.makePrelude(parsedDef),          "UTF-8"));
                 files.saveToKompiled("compiled.tex", new String(ToLatex.makePrelude(kompiledDefinition), "UTF-8"));
