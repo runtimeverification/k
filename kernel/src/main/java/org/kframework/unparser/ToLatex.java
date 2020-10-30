@@ -159,12 +159,17 @@ public class ToLatex {
 
     public static void makePrelude(DataOutputStream out, Module mod) throws IOException {
         for (Production p: JavaConverters.setAsJavaSet(mod.productions())) {
-            if (! p.isSyntacticSubsort()) {
-                if (p.att().contains("latex") && ! p.klabelAtt().isEmpty()) {
-                    writeString(out, "\n\\newcommand{\\" + latexedKLabel(p.klabelAtt().get()) + "}[" + Integer.toString(p.arity()) + "]{" + p.att().get("latex") + "}");
+            if (! p.isSyntacticSubsort() && ! p.klabelAtt().isEmpty()) {
+                String arity   = Integer.toString(p.arity());
+                String command = latexedKLabel(p.klabelAtt().get());
+                String format;
+                String identifier = p.klabelAtt().get(); // Include source info?
+                if (p.att().contains("latex")) {
+                    format = p.att().get("latex");
                 } else {
-                    writeString(out, "\n%" + p.toString());
+                    format = "???";
                 }
+                writeString(out, "\n\\newcommand{" + command + "}[" + arity + "]{" + format + "}               % " + identifier);
             }
         }
     }
