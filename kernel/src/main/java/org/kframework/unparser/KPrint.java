@@ -164,7 +164,7 @@ public class KPrint {
             case BINARY:
             case JSON:
             case LATEX: {
-                Module unparsingModule = gen.getRuleGrammar(module);
+                Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(module), false).getExtensionModule();
                 K result = abstractTerm(unparsingModule, orig);
                 return serialize(result, outputMode);
             }
