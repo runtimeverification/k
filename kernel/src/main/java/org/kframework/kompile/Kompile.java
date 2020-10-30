@@ -152,8 +152,8 @@ public class Kompile {
 
         if (kompileOptions.experimental.emitLatexPrelude) {
             try {
-                files.saveToKompiled("parsed.tex",   new String(ToLatex.makePrelude(parsedDef),          "UTF-8"));
-                files.saveToKompiled("compiled.tex", new String(ToLatex.makePrelude(kompiledDefinition), "UTF-8"));
+                files.saveToKompiled("parsed.tex",   new String(ToLatex.makePrelude(parsedDef.mainModule()),          "UTF-8"));
+                files.saveToKompiled("compiled.tex", new String(ToLatex.makePrelude(kompiledDefinition.mainModule()), "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 throw KEMException.criticalError("Unsupported encoding `UTF-8` when saving LaTeX definition.");
             }

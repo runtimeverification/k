@@ -2,7 +2,7 @@
 package org.kframework.unparser;
 
 import org.kframework.attributes.Att;
-import org.kframework.definition.Definition;
+import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.kore.InjectedKLabel;
 import org.kframework.kore.K;
@@ -41,13 +41,13 @@ public class ToLatex {
         }
     }
 
-    public static byte[] makePrelude(Definition def) {
+    public static byte[] makePrelude(Module mod) {
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            makePrelude(new DataOutputStream(out), def);
+            makePrelude(new DataOutputStream(out), mod);
             return out.toByteArray();
         } catch (IOException e) {
-            throw KEMException.criticalError("Could not write LaTeX prelude for K definition", e);
+            throw KEMException.criticalError("Could not write LaTeX prelude for K module " + mod.name(), e);
         }
     }
 
@@ -157,8 +157,8 @@ public class ToLatex {
         }
     }
 
-    public static void makePrelude(DataOutputStream out, Definition def) throws IOException {
-        for (Production p: JavaConverters.setAsJavaSet(def.mainModule().productions())) {
+    public static void makePrelude(DataOutputStream out, Module mod) throws IOException {
+        for (Production p: JavaConverters.setAsJavaSet(mod.productions())) {
             throw new IOException("Definition to LaTeX unsupported.");
         }
     }
