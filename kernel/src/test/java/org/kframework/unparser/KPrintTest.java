@@ -1,18 +1,14 @@
 // Copyright (c) 2018-2019 K Team. All Rights Reserved.
 package org.kframework.unparser;
 
-import org.junit.Ignore;
 import org.junit.Test;
-
 import org.kframework.attributes.Source;
 import org.kframework.kore.K;
 import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.json.JsonParser;
 import org.kframework.parser.kast.KastParser;
 
-import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,12 +35,10 @@ public class KPrintTest {
     }
 
     private String asKast(K term) {
-        new KPrint();
         return bytes2String(KPrint.serialize(term, OutputModes.KAST));
     }
 
     private K unparseThenParse(K origTerm, OutputModes outputMode) {
-        new KPrint();
         byte[] unparsed = KPrint.serialize(origTerm, outputMode);
         switch (outputMode) {
             case JSON:
