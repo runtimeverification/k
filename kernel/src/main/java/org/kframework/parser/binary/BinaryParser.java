@@ -3,12 +3,7 @@ package org.kframework.parser.binary;
 
 import org.kframework.kore.K;
 import org.kframework.kore.KLabel;
-import org.kframework.kore.mini.InjectedKLabel;
-import org.kframework.kore.mini.KApply;
-import org.kframework.kore.mini.KRewrite;
-import org.kframework.kore.mini.KSequence;
-import org.kframework.kore.mini.KToken;
-import org.kframework.kore.mini.KVariable;
+import org.kframework.kore.KToken;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 
@@ -22,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.kframework.kore.KORE.*;
 /**
  * Parses a KAST binary term into the KORE data structures.
  *
@@ -91,7 +87,7 @@ public class BinaryParser {
                 String s = readString();
                 String sort = readString();
                 Map<String, KToken> sortCache = ktokenCache.computeIfAbsent(sort, sort2 -> new HashMap<>());
-                KToken token = sortCache.computeIfAbsent(s, s2 -> new KToken(s, Outer.parseSort(sort)));
+                KToken token = sortCache.computeIfAbsent(s, s2 -> KToken(s, Outer.parseSort(sort)));
                 stack.push(token);
                 break;
             case KAPPLY:
@@ -104,7 +100,7 @@ public class BinaryParser {
                 for (int i = arity - 1; i >= 0; i--) {
                     items[i] = stack.pop();
                 }
-                stack.push(KApply.of(lbl, items));
+                stack.push(KApply(lbl, items));
                 break;
             case KSEQUENCE:
                 arity = data.getInt();
@@ -115,18 +111,18 @@ public class BinaryParser {
                 for (int i = arity - 1; i >= 0; i--) {
                     items[i] = stack.pop();
                 }
-                stack.push(new KSequence(items));
+                stack.push(KSequence(items));
                 break;
             case KVARIABLE:
-                stack.push(new KVariable(readString()));
+                stack.push(KVariable(readString()));
                 break;
             case KREWRITE:
                 K right = stack.pop();
                 K left = stack.pop();
-                stack.push(new KRewrite(left, right));
+                stack.push(KRewrite(left, right));
                 break;
             case INJECTEDKLABEL:
-                stack.push(new InjectedKLabel(readKLabel()));
+                stack.push(InjectedKLabel(readKLabel()));
                 break;
             case END:
                 break;
@@ -155,7 +151,7 @@ public class BinaryParser {
     private KLabel readKLabel() throws IOException {
         String lbl = readString();
         if (data.get() != 0)
-            return new KVariable(lbl);
+            return KVariable(lbl);
         return klabelCache.computeIfAbsent(lbl, org.kframework.kore.KORE::KLabel);
     }
 

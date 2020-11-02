@@ -4,12 +4,6 @@ package org.kframework.unparser;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.kframework.kore.K;
-import org.kframework.kore.mini.InjectedKLabel;
-import org.kframework.kore.mini.KApply;
-import org.kframework.kore.mini.KRewrite;
-import org.kframework.kore.mini.KSequence;
-import org.kframework.kore.mini.KToken;
-import org.kframework.kore.mini.KVariable;
 import org.kframework.parser.binary.BinaryParser;
 import org.kframework.utils.file.FileUtil;
 
@@ -20,12 +14,12 @@ import static org.kframework.kore.KORE.*;
 
 public class BinaryKASTTest {
 
-    K sharedTerm = KApply.of(KLabel("_|->_"), new KToken("x", Sort("Id")), new KToken("1", Sort("Int")));
-    K sharedTerm2 = new KToken("foo", Sort("Bar"));
+    K sharedTerm = KApply(KLabel("_|->_"), KToken("x", Sort("Id")), KToken("1", Sort("Int")));
+    K sharedTerm2 = KToken("foo", Sort("Bar"));
 
-    K term = KApply.of(KLabel("<T>"), KApply.of(KLabel("<k>"), new KSequence(sharedTerm2,
-                    new KRewrite(new KVariable("Baz"), new KVariable("Baz2")), new InjectedKLabel(KLabel("_+_")), KApply.of(KLabel("foo")))),
-            KApply.of(new KVariable("Lbl"), sharedTerm, sharedTerm, sharedTerm2, sharedTerm));
+    K term = KApply(KLabel("<T>"), KApply(KLabel("<k>"), KSequence(sharedTerm2,
+                    KRewrite(KVariable("Baz"), KVariable("Baz2")), InjectedKLabel(KLabel("_+_")), KApply(KLabel("foo")))),
+            KApply(KVariable("Lbl"), sharedTerm, sharedTerm, sharedTerm2, sharedTerm));
 
     @Test
     public void testWriteThenRead() throws Exception {
@@ -43,12 +37,13 @@ public class BinaryKASTTest {
         krewrite[krewrite.length - 2] = BinaryParser.KREWRITE;
         krewrite[krewrite.length - 1] = BinaryParser.END;
         K result2 = BinaryParser.parse(krewrite);
-        assertEquals(new KRewrite(term, term), result2);
+        assertEquals(KRewrite(term, term), result2);
     }
 
     @Test @Ignore
     public void testLarger() throws Exception {
-        byte[] kast = FileUtil.testFileUtil().loadBytes(new File("/home/dwightguth/c-semantics/tmp-kcc-FzjROvt"));
+        FileUtil.testFileUtil();
+        byte[] kast = FileUtil.loadBytes(new File("/home/dwightguth/c-semantics/tmp-kcc-FzjROvt"));
         K result = BinaryParser.parse(kast);
         System.out.println(ToKast.apply(result));
     }
