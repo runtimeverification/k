@@ -164,10 +164,10 @@ public class CheckKLabels {
                     rule.att().contains(Att.CONCRETE()))) {
                     errors.add(KEMException.compilerError("Rule cannot be both concrete and symbolic in the same variable.", rule));
                 }
-                if (!hasAttWithNoArg(rule.att(), Att.CONCRETE())) {
+                if (!hasAttWithNoArg(rule.att(), Att.CONCRETE()) && !rule.att().contains(Att.SIMPLIFICATION())) {
                     allConcrete = false;
                 }
-                if (!hasAttWithNoArg(rule.att(), Att.SYMBOLIC())) {
+                if (!hasAttWithNoArg(rule.att(), Att.SYMBOLIC()) && !rule.att().contains(Att.SIMPLIFICATION())) {
                     allSymbolic = false;
                 }
             }
