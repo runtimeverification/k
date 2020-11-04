@@ -1,8 +1,4 @@
 #!/bin/bash -ex
 
 brew update
-brew install maven cmake boost libyaml jemalloc llvm gmp mpfr z3 opam pkg-config flex bison
-
-curl -sSL https://get.haskellstack.org/ | sh
-
-k-distribution/src/main/scripts/bin/k-configure-opam-dev
+brew install maven cmake boost libyaml jemalloc llvm@8 gmp mpfr z3 opam pkg-config flex bison haskell-stack
