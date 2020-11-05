@@ -143,6 +143,9 @@ public class KompileOptions implements Serializable {
         @Parameter(names="--bison-file", description="C file containing functions to link into bison parser.")
         public String bisonFile;
 
+        @Parameter(names="--bison-stack-max-depth", description="Maximum size of bison parsing stack (default: 10000).")
+        public long bisonStackMaxDepth = 10000;
+
         @Parameter(names="--transition", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of tags designating rules to become transitions.")
         public List<String> transition = Collections.singletonList(DEFAULT_TRANSITION);
 
