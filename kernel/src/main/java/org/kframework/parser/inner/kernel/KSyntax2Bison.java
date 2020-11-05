@@ -116,7 +116,7 @@ public class KSyntax2Bison {
     return Module(module.name(), module.imports(), immutable(sentences), module.att());
   }
 
-  public static void writeParser(Module module, Scanner scanner, Sort start, File path, boolean glr, KExceptionManager kem) {
+  public static void writeParser(Module module, Scanner scanner, Sort start, File path, boolean glr, long stackDepth, KExceptionManager kem) {
     if (!glr && module.att().contains("not-lr1")) {
         kem.registerInnerParserWarning(ExceptionType.NON_LR_GRAMMAR, "Importing a module that is tagged as not being LR(1) when using Bison's LR(1) parser generator: " + module.att().get("not-lr1"));
         // print so it appears before we call bison which may not terminate
@@ -135,6 +135,7 @@ public class KSyntax2Bison {
         "char *injSymbol(char *, char *);\n" +
         "YYSTYPE mergeAmb(YYSTYPE x0, YYSTYPE x1);\n" +
         "node *result;\n" +
+        "# define YYMAXDEPTH " + stackDepth + "\n" +
         "# define YYLLOC_DEFAULT(Cur, Rhs, N)                      \\\n" +
         "do                                                        \\\n" +
         "  if (N)                                                  \\\n" +
