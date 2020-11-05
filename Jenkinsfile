@@ -379,6 +379,7 @@ pipeline {
                       make -j`sysctl -n hw.ncpu` ${MAKE_EXTRA_ARGS}
                       cd ~
                       echo 'module TEST imports BOOL endmodule' > test.k
+                      kompile test.k --backend ocaml
                       kompile test.k --backend llvm
                       kompile test.k --backend haskell
                     '''
