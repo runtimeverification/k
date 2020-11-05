@@ -1,5 +1,5 @@
 #!/bin/sh -ex
-k-configure-opam
+OPAMROOT=/usr/lib/kframework/opamroot k-configure-opam
 eval $(opam config env)
 cp -R /usr/share/kframework/tutorial ~
 WD=`pwd`
