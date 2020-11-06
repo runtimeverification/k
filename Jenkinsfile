@@ -322,10 +322,10 @@ pipeline {
           }
         }
         stage('Build and Package on Mac OS') {
-          when {
-            branch 'master'
-            beforeAgent true
-          }
+          // when {
+          //   branch 'master'
+          //   beforeAgent true
+          // }
           options { timeout(time: 150, unit: 'MINUTES') }
           stages {
             stage('Build on Mac OS') {
