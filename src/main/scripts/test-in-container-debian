@@ -1,4 +1,5 @@
 #!/bin/sh -ex
+export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get upgrade --yes
 apt-get install --yes opam
