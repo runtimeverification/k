@@ -238,6 +238,11 @@ public class RuleGrammarGenerator {
             }
         }
 
+        /* Instantiate parametric productions
+        *  syntax {S} S ::= S "=>" S - becomes
+        *  syntax Int ::= Int "=>" Int
+        *  syntax Id  ::= Id  "=>" Id - and so on
+        */
         for (Production p : iterable(mod.productions())) {
             prods.addAll(new GenerateSortProjections(mod).gen(p).collect(Collectors.toSet()));
             if (p.params().nonEmpty()) {
@@ -279,7 +284,7 @@ public class RuleGrammarGenerator {
                         }
                     }
                     if (!skip) {
-                        prods.add(Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Att.ORIGINAL_PRD(), Production.class, p)));
+                        prods.add(Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Att.ORIGINAL_PRD(), Production.class, p).add("unparseAvoid")));
                     }
                 }
             }
