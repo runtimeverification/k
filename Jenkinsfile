@@ -546,7 +546,7 @@ pipeline {
               npm run build
               cd -
               mv web/public_content ./
-              rm -rf $(find . -maxdepth 1 -not -name public_content -a -not -name .git -a -not -path . -a -not -path ..)
+              rm -rf $(find . -maxdepth 1 -not -name public_content -a -not -name .git -a -not -path . -a -not -path .. -a -not -name CNAME)
               mv public_content/* ./
               rm -rf public_content
               git add ./

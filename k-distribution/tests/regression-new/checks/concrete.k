@@ -15,9 +15,11 @@ module CONCRETE
   syntax Int ::= bar2(Int) [function]
   rule bar2(0) => 0 [symbolic]
   rule bar2(1) => 1
+  rule bar2(2) => 2 [simplification]
 
   syntax Int ::= baz(Int) [function]
   rule baz(0) => 0 [concrete]
+  rule baz(1) => 1 [simplification]
 
   syntax Int ::= baz2(Int) [function]
   rule baz2(0) => 0 [concrete]

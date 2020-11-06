@@ -1,27 +1,14 @@
 // Copyright (c) 2018-2019 K Team. All Rights Reserved.
 package org.kframework.unparser;
 
-import org.junit.Ignore;
 import org.junit.Test;
-
 import org.kframework.attributes.Source;
 import org.kframework.kore.K;
-import org.kframework.kore.mini.InjectedKLabel;
-import org.kframework.kore.mini.KApply;
-import org.kframework.kore.mini.KRewrite;
-import org.kframework.kore.mini.KSequence;
-import org.kframework.kore.mini.KToken;
-import org.kframework.kore.mini.KVariable;
 import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.json.JsonParser;
 import org.kframework.parser.kast.KastParser;
-import org.kframework.unparser.KPrint;
-import org.kframework.unparser.OutputModes.*;
-import org.kframework.utils.file.FileUtil;
 
-import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +18,7 @@ import static org.kframework.kore.KORE.*;
 public class KPrintTest {
 
     private K cell(String cellName, K cellContent) {
-        return KApply.of(KLabel(cellName), cellContent);
+        return KApply(KLabel(cellName), cellContent);
     }
 
     OutputModes[] outputModes = new OutputModes[] { OutputModes.JSON
@@ -48,11 +35,11 @@ public class KPrintTest {
     }
 
     private String asKast(K term) {
-        return bytes2String(new KPrint().serialize(term, OutputModes.KAST));
+        return bytes2String(KPrint.serialize(term, OutputModes.KAST));
     }
 
     private K unparseThenParse(K origTerm, OutputModes outputMode) {
-        byte[] unparsed = new KPrint().serialize(origTerm, outputMode);
+        byte[] unparsed = KPrint.serialize(origTerm, outputMode);
         switch (outputMode) {
             case JSON:
                 return JsonParser.parse(unparsed);
@@ -61,7 +48,7 @@ public class KPrintTest {
             case KAST:
                return KastParser.parse(bytes2String(unparsed), new Source("KPrintTest"));
             default:
-                return new KToken("###", Sort("UnsupportedOutputMode"));
+                return KToken("###", Sort("UnsupportedOutputMode"));
         }
     }
 
@@ -69,17 +56,17 @@ public class KPrintTest {
     public void testUnparseThenParse() throws Exception {
 
         List<K> terms = new ArrayList<>();
-        terms.add(KApply.of(KLabel("_|->_"), new KToken("x", Sort("Id")), new KToken("1", Sort("Int"))));
-        terms.add( new KToken("foo", Sort("Bar")) );
-        terms.add( KApply.of(KLabel("_+_"), new KVariable("Baz"), new KVariable("Baz2")) );
-        terms.add( cell("<k>", new KSequence( terms.get(1)
-                                            , terms.get(2)
-                                            , new InjectedKLabel(KLabel("_+_"))
-                                            , KApply.of(KLabel("foo"))
-                                            )
+        terms.add(KApply(KLabel("_|->_"), KToken("x", Sort("Id")), KToken("1", Sort("Int"))));
+        terms.add( KToken("foo", Sort("Bar")) );
+        terms.add( KApply(KLabel("_+_"), KVariable("Baz"), KVariable("Baz2")) );
+        terms.add( cell("<k>", KSequence( terms.get(1)
+                                      , terms.get(2)
+                                      , InjectedKLabel(KLabel("_+_"))
+                                      , KApply(KLabel("foo"))
+                                      )
                        )
                  );
-        terms.add( KApply.of(KLabel("<T>"), terms.get(3), KApply.of(new KVariable("Lbl"), terms.get(0), terms.get(0), terms.get(1), terms.get(0))) );
+        terms.add( KApply(KLabel("<T>"), terms.get(3), KApply(KVariable("Lbl"), terms.get(0), terms.get(0), terms.get(1), terms.get(0))) );
 
         for (K term: terms) {
             for (OutputModes outputMode: outputModes) {
