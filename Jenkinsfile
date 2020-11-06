@@ -367,7 +367,7 @@ pipeline {
                     }
                     sh '''
                       brew install opam
-                      OPAMROOT=/usr/local/kframework/opamroot k-configure-opam
+                      k-configure-opam
                       eval $(opam config env)
                       cp -R /usr/local/share/kframework/tutorial ~
                       WD=`pwd`
