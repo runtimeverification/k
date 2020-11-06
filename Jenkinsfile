@@ -170,10 +170,10 @@ pipeline {
               }
             }
             stage('Build and Package on Debian Buster') {
-              // when {
-              //   branch 'master'
-              //   beforeAgent true
-              // }
+              when {
+                branch 'master'
+                beforeAgent true
+              }
               stages {
                 stage('Build on Debian Buster') {
                   agent {
@@ -229,10 +229,10 @@ pipeline {
               }
             }
             stage('Build and Package on Arch Linux') {
-              // when {
-              //   branch 'master'
-              //   beforeAgent true
-              // }
+              when {
+                branch 'master'
+                beforeAgent true
+              }
               stages {
                 stage('Build on Arch Linux') {
                   agent {
@@ -292,10 +292,10 @@ pipeline {
               }
             }
             stage('Build Platform Independent K Binary') {
-              // when {
-              //   branch 'master'
-              //   beforeAgent true
-              // }
+              when {
+                branch 'master'
+                beforeAgent true
+              }
               agent {
                 dockerfile {
                   additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
@@ -322,10 +322,10 @@ pipeline {
           }
         }
         stage('Build and Package on Mac OS') {
-          // when {
-          //   branch 'master'
-          //   beforeAgent true
-          // }
+          when {
+            branch 'master'
+            beforeAgent true
+          }
           options { timeout(time: 150, unit: 'MINUTES') }
           stages {
             stage('Build on Mac OS') {
