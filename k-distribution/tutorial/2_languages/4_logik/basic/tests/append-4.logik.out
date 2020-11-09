@@ -1,18 +1,18 @@
   Solution ==K ( L1:Term |-> cons ( V0 , cons ( V1 , cons ( V2 , cons ( V3 , nil , .Terms ) , .Terms ) , .Terms ) , .Terms ) )
   L2:Term |-> L2
-  ( L3:Term |-> cons ( V0 , cons ( V1 , cons ( V2 , cons ( V3 , cons ( a , L2 , .Terms ) , .Terms ) , .Terms ) , .Terms ) , .Terms ) )
+  L3:Term |-> cons ( V0 , cons ( V1 , cons ( V2 , cons ( V3 , cons ( a , L2 , .Terms ) , .Terms ) , .Terms ) , .Terms ) , .Terms )
 #Or
   Solution ==K ( L1:Term |-> cons ( V0 , cons ( V1 , cons ( V2 , nil , .Terms ) , .Terms ) , .Terms ) )
   L2:Term |-> L2
-  ( L3:Term |-> cons ( V0 , cons ( V1 , cons ( V2 , cons ( a , L2 , .Terms ) , .Terms ) , .Terms ) , .Terms ) )
+  L3:Term |-> cons ( V0 , cons ( V1 , cons ( V2 , cons ( a , L2 , .Terms ) , .Terms ) , .Terms ) , .Terms )
 #Or
   Solution ==K ( L1:Term |-> cons ( V0 , cons ( V1 , nil , .Terms ) , .Terms ) )
   L2:Term |-> L2
-  ( L3:Term |-> cons ( V0 , cons ( V1 , cons ( a , L2 , .Terms ) , .Terms ) , .Terms ) )
+  L3:Term |-> cons ( V0 , cons ( V1 , cons ( a , L2 , .Terms ) , .Terms ) , .Terms )
 #Or
   Solution ==K ( L1:Term |-> cons ( V0 , nil , .Terms ) )
   L2:Term |-> L2
-  ( L3:Term |-> cons ( V0 , cons ( a , L2 , .Terms ) , .Terms ) )
+  L3:Term |-> cons ( V0 , cons ( a , L2 , .Terms ) , .Terms )
 #Or
   Solution ==K ( L1:Term |-> nil )
   L2:Term |-> L2
