@@ -252,7 +252,8 @@ Since calculating inclusions and intersections between regular expressions is
 tricky, we must provide this information to K. We do this via the `prec(N)`
 attribute. The lexer will always prefer longer tokens to shorter tokens.
 However, when it has to choose between two different tokens of equal length,
-token productions with higher precedence are tried first.
+token productions with higher precedence are tried first. Note that the default
+precedence value is zero when the `prec` attribute is not specified.
 
 We also need to make sorts with more specific tokens subsorts of ones with more
 general tokens. We add the token attribute to this production so that all
