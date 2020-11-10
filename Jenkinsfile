@@ -270,6 +270,7 @@ pipeline {
                     unstash 'arch'
                     sh '''
                       pacman -Syyu --noconfirm
+                      pacman -S --noconfirm opam
                       pacman -U --noconfirm kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
                       src/main/scripts/test-in-container
                     '''
@@ -365,6 +366,9 @@ pipeline {
                       sh '${WORKSPACE}/package/macos/brew-install-bottle'
                     }
                     sh '''
+                      brew install opam
+                      k-configure-opam
+                      eval $(opam config env)
                       cp -R /usr/local/share/kframework/tutorial ~
                       WD=`pwd`
                       cd
@@ -375,6 +379,7 @@ pipeline {
                       make -j`sysctl -n hw.ncpu` ${MAKE_EXTRA_ARGS}
                       cd ~
                       echo 'module TEST imports BOOL endmodule' > test.k
+                      kompile test.k --backend ocaml
                       kompile test.k --backend llvm
                       kompile test.k --backend haskell
                     '''

@@ -4,8 +4,8 @@ module IMP-SYNTAX
   imports DOMAINS-SYNTAX
   syntax AExp  ::= Int | Id
                  | "-" Int
-                 | AExp "/" AExp              [left, strict]
-                 > AExp "+" AExp              [left, strict]
+                 | AExp "/" AExp              [left, seqstrict]
+                 > AExp "+" AExp              [left, seqstrict]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
