@@ -159,7 +159,8 @@ of any of the syntax defined in any of these modules.
 
   rule makeArray(I::Int, D::KItem) => arr(.List, I, D)
 
-  rule arr(L::List, _, D::KItem) [ IDX::Int ] => #if IDX >=Int size(L) #then D #else L[IDX] #fi
+  rule arr(L::List, _, _       ) [ IDX::Int ] => L[IDX] requires IDX <Int size(L)
+  rule arr(_      , _, D::KItem) [ _        ] => D      [owise]
 
   syntax List ::= ensureOffsetList(List, Int, KItem) [function]
   rule ensureOffsetList(L::List, IDX::Int, D::KItem) => #if IDX >=Int size(L) #then updateList(makeList(IDX +Int 1, D), 0, L) #else L #fi
