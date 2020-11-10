@@ -1,11 +1,11 @@
   Solution ==K ( L:Term |-> [ 1 , .Vals | [ 2 , .Vals | [ 3 , .Vals | [ V0 , .Vals | [ .Vals ] ] ] ] ] )
-  ( X:Term |-> V0 )
+  X:Term |-> V0
 #Or
   Solution ==K ( L:Term |-> [ 1 , .Vals | [ 2 , .Vals | [ V1 , .Vals | [ 3 , .Vals | [ .Vals ] ] ] ] ] )
-  ( X:Term |-> V1 )
+  X:Term |-> V1
 #Or
   Solution ==K ( L:Term |-> [ 1 , .Vals | [ V2 , .Vals | [ 2 , .Vals | [ 3 , .Vals | [ .Vals ] ] ] ] ] )
-  ( X:Term |-> V2 )
+  X:Term |-> V2
 #Or
   Solution ==K ( L:Term |-> [ V3 , .Vals | [ 1 , .Vals | [ 2 , .Vals | [ 3 , .Vals | [ .Vals ] ] ] ] ] )
   X:Term |-> V3

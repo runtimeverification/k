@@ -1,5 +1,5 @@
   Solution ==K ( L1:Term |-> cons ( a , cons ( b , nil , .Vals ) , .Vals ) )
-  ( L2:Term |-> nil )
+  L2:Term |-> nil
 #Or
   Solution ==K ( L1:Term |-> nil )
   L2:Term |-> cons ( b , cons ( a , nil , .Vals ) , .Vals )

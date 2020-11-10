@@ -1,5 +1,5 @@
   Solution ==K ( L1:Term |-> [ .Vals ] )
-  ( L2:Term |-> [ b , .Vals | [ a , .Vals | [ .Vals ] ] ] )
+  L2:Term |-> [ b , .Vals | [ a , .Vals | [ .Vals ] ] ]
 #Or
   Solution ==K ( L1:Term |-> [ a , .Vals | [ b , .Vals | [ .Vals ] ] ] )
   L2:Term |-> [ .Vals ]
