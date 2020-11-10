@@ -1,0 +1,16 @@
+[Error] Inner Parser: Priority filter exception. Cannot use lguard as a child
+of plus. Consider using parentheses around lguard
+	Source(priorityError.k)
+	Location(19,19,19,22)
+[Error] Inner Parser: Priority filter exception. Cannot use rguard as a child
+of plus. Consider using parentheses around rguard
+	Source(priorityError.k)
+	Location(20,15,20,18)
+[Error] Inner Parser: Parsing ambiguity.
+1: syntax Exp ::= Exp "r" [klabel(rguard), symbol]
+    rguard(lguard(#token("1","Int")))
+2: syntax Exp ::= "l" Exp [klabel(lguard), symbol]
+    lguard(rguard(#token("1","Int")))
+	Source(priorityError.k)
+	Location(21,15,21,20)
+[Error] Compiler: Had 3 parsing errors.
