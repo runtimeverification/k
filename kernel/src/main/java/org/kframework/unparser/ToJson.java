@@ -287,7 +287,7 @@ public class ToJson {
 
         return jsyn.build();
     }
- 
+
     public static JsonStructure toJson(Production pro) {
         JsonObjectBuilder jpro = Json.createObjectBuilder();
 
