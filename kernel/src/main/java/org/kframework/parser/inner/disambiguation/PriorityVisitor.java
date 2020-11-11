@@ -83,18 +83,18 @@ public class PriorityVisitor extends SetsTransformerWithErrors<KEMException> {
             Tag parentLabel = new Tag(parent.production().klabel().get().name());
             Tag localLabel = new Tag(tc.production().klabel().get().name());
             if (priorities.lessThan(parentLabel, localLabel)) {
-                String msg = "Priority filter exception. Cannot use " + localLabel + " as a child of " + parentLabel +
-                        ". Consider using parentheses around " + localLabel;
+                String msg = "Priority filter exception. Cannot use " + localLabel + " as an immediate child of " +
+                        parentLabel + ". Consider using parentheses around " + localLabel;
                 return Left.apply(Sets.newHashSet(KEMException.innerParserError(msg, tc)));
             }
             if (leftAssoc.contains(new Tuple2<>(parentLabel, localLabel)) && Side.RIGHT == side) {
-                String msg = "Associativity filter exception. Cannot use " + localLabel + " as a right child of " + parentLabel +
-                        ". Consider using parentheses around " + localLabel;
+                String msg = "Associativity filter exception. Cannot use " + localLabel + " as an immediate right child of " +
+                        parentLabel + ". Consider using parentheses around " + localLabel;
                 return Left.apply(Sets.newHashSet(KEMException.innerParserError(msg, tc)));
             }
             if (rigthAssoc.contains(new Tuple2<>(parentLabel, localLabel)) && Side.LEFT == side) {
-                String msg = "Associativity filter exception. Cannot use " + localLabel + " as a left child of " + parentLabel +
-                        ". Consider using parentheses around " + localLabel;
+                String msg = "Associativity filter exception. Cannot use " + localLabel + " as an immediate left child of " +
+                        parentLabel + ". Consider using parentheses around " + localLabel;
                 return Left.apply(Sets.newHashSet(KEMException.innerParserError(msg, tc)));
             }
 
