@@ -258,6 +258,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   lazy val sortDeclarations: Set[SyntaxSort] = sentences.collect({ case s: SyntaxSort => s })
   lazy val sortSynonyms: Set[SortSynonym] = sentences.collect({ case s: SortSynonym => s })
+  lazy val lexicalIdentifiers: Set[SyntaxLexical] = sentences.collect({ case s: SyntaxLexical => s })
 
   lazy val sortSynonymMap: Map[Sort, Sort] = sortSynonyms.map(s => (s.newSort, s.oldSort)).toMap
 
