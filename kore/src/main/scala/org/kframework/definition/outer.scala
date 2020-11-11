@@ -258,6 +258,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   lazy val sortDeclarations: Set[SyntaxSort] = sentences.collect({ case s: SyntaxSort => s })
   lazy val sortSynonyms: Set[SortSynonym] = sentences.collect({ case s: SortSynonym => s })
+  lazy val lexicalIdentifiers: Set[SyntaxLexical] = sentences.collect({ case s: SyntaxLexical => s })
 
   lazy val sortSynonymMap: Map[Sort, Sort] = sortSynonyms.map(s => (s.newSort, s.oldSort)).toMap
 
@@ -465,6 +466,13 @@ case class SortSynonym(newSort: Sort, oldSort: Sort, att: Att = Att.empty) exten
   override val isSyntax = true
   override val isNonSyntax = false
   override def withAtt(att: Att) = SortSynonym(newSort, oldSort, att)
+}
+case class SyntaxLexical(name: String, regex: String, att: Att = Att.empty) extends Sentence
+  with SyntaxLexicalToString with OuterKORE {
+
+  override val isSyntax = true
+  override val isNonSyntax = false
+  override def withAtt(att: Att) = SyntaxLexical(name, regex, att)
 }
 
 case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: Att)

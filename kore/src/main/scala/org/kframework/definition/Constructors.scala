@@ -30,6 +30,9 @@ object Constructors {
   def SortSynonym(newSort: Sort, oldSort: Sort) = definition.SortSynonym(newSort, oldSort)
   def SortSynonym(newSort: Sort, oldSort: Sort, att: attributes.Att) = definition.SortSynonym(newSort, oldSort, att)
 
+  def SyntaxLexical(name: String, regex: String) = definition.SyntaxLexical(name, regex)
+  def SyntaxLexical(name: String, regex: String, att: attributes.Att) = definition.SyntaxLexical(name, regex, att)
+
   def Production(params: Seq[Sort], sort: Sort, items: Seq[ProductionItem]) = definition.Production(params, sort, items, Att.empty)
   def Production(params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: attributes.Att) = definition.Production(params, sort, items, att)
   def Production(klabel: KLabel, sort: Sort, items: Seq[ProductionItem]) = definition.Production(klabel, klabel.params, sort, items)
