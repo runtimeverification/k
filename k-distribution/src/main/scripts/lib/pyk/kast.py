@@ -405,8 +405,6 @@ def prettyPrintKast(kast, symbolTable):
             return ''
         attStrs = [ att + '(' + kast['att'][att] + ')' for att in kast['att'].keys() ]
         return '[' + ', '.join(attStrs) + ']'
-    if isKSortSynonym(kast):
-        return 'sort ' + kast['newSort'] + ' = ' + kast['oldSort'] + ' ' + prettyPrintKast(kast['att'], symbolTable)
     if isKFlatModule(kast):
         name = kast["name"]
         imports = "\n".join(['import ' + kimport for kimport in kast["imports"]])

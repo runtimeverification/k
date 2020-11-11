@@ -18,7 +18,7 @@ public class Lexical extends ProductionItem {
     @Override
     public void toString(StringBuilder sb) {
         sb.append("r");
-        sb.append(StringUtil.enquoteCString(lexicalRule));
+        sb.append(StringUtil.enquoteKString(lexicalRule));
     }
 
     @Override
