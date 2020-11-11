@@ -43,7 +43,8 @@ public class CheckAtt {
         if (!prod.sort().equals(Sorts.KItem())) {
             Att sortAtt =  m.sortAttributesFor().getOrElse(prod.sort().head(), () -> Att.empty());
             if (sortAtt.contains(Att.HOOK()) && !sortAtt.get(Att.HOOK()).equals("ARRAY.Array")) {
-                if (!prod.att().contains(Att.FUNCTION()) && !prod.att().contains("token") && !(prod.klabel().isDefined() && macros.contains(prod.klabel().get()))) {
+                if (!prod.att().contains(Att.FUNCTION()) && !prod.att().contains(Att.BRACKET()) && 
+                    !prod.att().contains("token") && !(prod.klabel().isDefined() && macros.contains(prod.klabel().get()))) {
                     if (!(prod.sort().equals(Sorts.K()) && ((prod.klabel().isDefined() && (prod.klabel().get().name().equals("#EmptyK") || prod.klabel().get().name().equals("#KSequence"))) || prod.isSubsort()))) {
                         if (!(sortAtt.contains("cellCollection") && prod.isSubsort())) {
                             errors.add(KEMException.compilerError("Cannot add new constructors to hooked sort " + prod.sort(), prod));
