@@ -252,7 +252,8 @@ Since calculating inclusions and intersections between regular expressions is
 tricky, we must provide this information to K. We do this via the `prec(N)`
 attribute. The lexer will always prefer longer tokens to shorter tokens.
 However, when it has to choose between two different tokens of equal length,
-token productions with higher precedence are tried first.
+token productions with higher precedence are tried first. Note that the default
+precedence value is zero when the `prec` attribute is not specified.
 
 We also need to make sorts with more specific tokens subsorts of ones with more
 general tokens. We add the token attribute to this production so that all
@@ -454,6 +455,37 @@ Think carefully about how you want your grammar to parse. In general, if you're
 not sure, it's probably best to group associativity together into the same
 blocks you use for priority, rather than using `left`, `right`, or `non-assoc`
 attributes on the productions.
+
+### Lexical identifiers
+
+Sometimes it is convenient to be able to give a certain regular expression a
+name and then refer to it in one or more regular expression terminals. This
+can be done with a `syntax lexical` sentence in K:
+
+```k
+syntax lexical Alphanum = r"[0-9a-zA-Z]"
+```
+
+This defines a lexical identifier `Alphanum` which can be expanded in any
+regular expression terminal to the above regular expression. For  example, I
+might choose to then implement the syntax of identifiers as follows:
+
+```k
+syntax Id ::= r"[a-zA-Z]{Alphanum}*" [token]
+```
+
+Here `{Alphanum}` expands to the above regular expression, making the sentence
+equivalent to the following:
+
+```k
+syntax Id ::= r"[a-zA-Z]([0-9a-zA-Z])*" [token]
+```
+
+This feature can be used to more modularly construct the lexical syntax of your
+language. Note that K does not currently check that lexical identifiers used
+in regular expressions have been defined; this will generate an error when
+creating the scanner, however, and the user ought to be able to debug what
+happened.
 
 ### `assoc`, `comm`, `idem`, and `unit` attributes
 
