@@ -466,6 +466,13 @@ case class SortSynonym(newSort: Sort, oldSort: Sort, att: Att = Att.empty) exten
   override val isNonSyntax = false
   override def withAtt(att: Att) = SortSynonym(newSort, oldSort, att)
 }
+case class SyntaxLexical(name: String, regex: String, att: Att = Att.empty) extends Sentence
+  with SyntaxLexicalToString with OuterKORE {
+
+  override val isSyntax = true
+  override val isNonSyntax = false
+  override def withAtt(att: Att) = SyntaxLexical(name, regex, att)
+}
 
 case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, items: Seq[ProductionItem], att: Att)
   extends Sentence with ProductionToString {

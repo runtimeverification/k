@@ -161,6 +161,12 @@ def KSortSynonym(newSort, oldSort, att = None):
 def isKSortSynonym(k):
     return k['node'] == 'KSortSynonym'
 
+def KSyntaxLexical(newSort, oldSort, att = None):
+    return { "node": "KSyntaxLexical", "newSort": newSort, "oldSort": oldSort, "att": att }
+
+def isKSyntaxLexical(k):
+    return k['node'] == 'KSyntaxLexical'
+
 def KFlatModule(name, imports, localSentences, att = None):
     return { "node": "KFlatModule", "name": name, "imports": imports, "localSentences": localSentences, "att": att }
 
@@ -340,6 +346,12 @@ def prettyPrintKast(kast, symbolTable):
         oldSortStr = prettyPrintKast(kast['oldSort'], symbolTable)
         attStr     = prettyPrintKast(kast['att'], symbolTable)
         return 'syntax ' + newSortStr + ' = ' + oldSortStr + ' ' + attStr
+    if isKSyntaxLexical(kast):
+        nameStr = kast['name']
+        regexStr = kast['regex']
+        attStr     = prettyPrintKast(kast['att'], symbolTable)
+        # todo: proper escaping
+        return 'syntax lexical ' + name + ' = r"' + regex + '" ' + attStr
     if isKSyntaxAssociativity(kast):
         assocStr = kast['assoc'].lower()
         tagsStr  = ' '.join(kast['tags'])

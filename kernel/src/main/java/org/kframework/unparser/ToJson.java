@@ -19,6 +19,7 @@ import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.SortSynonym;
 import org.kframework.definition.SyntaxAssociativity;
+import org.kframework.definition.SyntaxLexical;
 import org.kframework.definition.SyntaxPriority;
 import org.kframework.definition.SyntaxSort;
 import org.kframework.definition.Tag;
@@ -164,6 +165,7 @@ public class ToJson {
         if (sen instanceof Bubble)              return toJson((Bubble) sen);
         if (sen instanceof SyntaxSort)          return toJson((SyntaxSort) sen);
         if (sen instanceof SortSynonym)         return toJson((SortSynonym) sen);
+        if (sen instanceof SyntaxLexical)       return toJson((SyntaxLexical) sen);
         if (sen instanceof Production)          return toJson((Production) sen);
 
         JsonObjectBuilder jsen = Json.createObjectBuilder();
@@ -275,6 +277,17 @@ public class ToJson {
         return jsyn.build();
     }
 
+    public static JsonStructure toJson(SyntaxLexical syn) {
+        JsonObjectBuilder jsyn = Json.createObjectBuilder();
+
+        jsyn.add("node", JsonParser.KSYNTAXLEXICAL);
+        jsyn.add("name", syn.name());
+        jsyn.add("regex", syn.regex());
+        jsyn.add("att", toJson(syn.att()));
+
+        return jsyn.build();
+    }
+ 
     public static JsonStructure toJson(Production pro) {
         JsonObjectBuilder jpro = Json.createObjectBuilder();
 
