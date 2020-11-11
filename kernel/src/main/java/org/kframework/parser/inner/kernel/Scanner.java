@@ -10,6 +10,7 @@ import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.RegexTerminal;
+import org.kframework.definition.SyntaxLexical;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
 import org.kframework.parser.inner.ParseInModule;
@@ -96,8 +97,14 @@ public class Scanner implements AutoCloseable {
             "%option reentrant bison-bridge\n" +
             "%option bison-locations\n" +
             "%option noyywrap\n" +
-            "%option yylineno\n" +
-            "%%\n\n");
+            "%option yylineno\n");
+        for (SyntaxLexical ident : iterable(module.lexicalIdentifiers())) {
+          flex.append(ident.name());
+          flex.append(" ");
+          flex.append(ident.regex());
+          flex.append("\n");
+        }
+        flex.append("%%\n\n");
         if (module.productionsForSort().contains(Sort("#LineMarker").head())) {
           stream(module.productionsForSort().apply(Sort("#LineMarker").head())).forEach(prod -> {
             if (prod.items().size() != 1 || !(prod.items().apply(0) instanceof RegexTerminal)) {
@@ -140,8 +147,14 @@ public class Scanner implements AutoCloseable {
                     "   fwrite(yytext, 1, len, stdout);" +
                     " } while (0) \n" +
                     "char *buffer;\n" +
-                    "%}\n\n" +
-                    "%%\n\n");
+                    "%}\n\n");
+            for (SyntaxLexical ident : iterable(module.lexicalIdentifiers())) {
+              flex.append(ident.name());
+              flex.append(" ");
+              flex.append(ident.regex());
+              flex.append("\n");
+            }
+            flex.append("%%\n\n");
             appendScanner(flex, this::writeAction);
             //WIN32 fix for line terminator issue: https://sourceforge.net/p/mingw/mailman/message/11374534/
             flex.append("\n\n%%\n\n" +

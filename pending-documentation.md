@@ -456,6 +456,37 @@ not sure, it's probably best to group associativity together into the same
 blocks you use for priority, rather than using `left`, `right`, or `non-assoc`
 attributes on the productions.
 
+### Lexical identifiers
+
+Sometimes it is convenient to be able to give a certain regular expression a
+name and then refer to it in one or more regular expression terminals. This
+can be done with a `syntax lexical` sentence in K:
+
+```k
+syntax lexical Alphanum = r"[0-9a-zA-Z]"
+```
+
+This defines a lexical identifier `Alphanum` which can be expanded in any
+regular expression terminal to the above regular expression. For  example, I
+might choose to then implement the syntax of identifiers as follows:
+
+```k
+syntax Id ::= r"[a-zA-Z]{Alphanum}*" [token]
+```
+
+Here `{Alphanum}` expands to the above regular expression, making the sentence
+equivalent to the following:
+
+```k
+syntax Id ::= r"[a-zA-Z]([0-9a-zA-Z])*" [token]
+```
+
+This feature can be used to more modularly construct the lexical syntax of your
+language. Note that K does not currently check that lexical identifiers used
+in regular expressions have been defined; this will generate an error when
+creating the scanner, however, and the user ought to be able to debug what
+happened.
+
 ### `assoc`, `comm`, `idem`, and `unit` attributes
 
 These attributes are used to indicate whether a collection or a production

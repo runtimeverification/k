@@ -128,6 +128,11 @@ public class KILtoKORE extends KILTransformation<Object> {
       return new org.kframework.definition.SortSynonym(synonym.newSort, synonym.oldSort, convertAttributes(synonym));
     }
 
+    public org.kframework.definition.Sentence apply(SyntaxLexical lexical) {
+      return new org.kframework.definition.SyntaxLexical(lexical.name, lexical.regex, convertAttributes(lexical));
+    }
+
+
     public org.kframework.definition.Bubble apply(StringSentence sentence) {
         org.kframework.attributes.Att attrs =
             convertAttributes(sentence)

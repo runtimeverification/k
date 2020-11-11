@@ -158,6 +158,7 @@ import org.kframework.kil.NonTerminal;
 import org.kframework.kil.SortSynonym;
 import org.kframework.kil.StringSentence;
 import org.kframework.kil.Syntax;
+import org.kframework.kil.SyntaxLexical;
 import org.kframework.kil.Terminal;
 import org.kframework.kil.UserList;
 import org.kframework.kil.loader.Context;
@@ -419,6 +420,7 @@ PARSER_END(Outer)
 | <PRIORITY: "priority"> : KLABEL_STATE
 | <PRIORITIES: "priorities"> : KLABEL_STATE
 | <NON_ASSOC: "non-assoc"> // : KLABEL_STATE
+| <LEXICAL: "lexical">
 
 | <MODULE: "module"> : MODNAME_STATE
 | <IMPORTS: "imports"> : MODNAME_STATE
@@ -748,6 +750,8 @@ void Sentence(Module module) :
   | ("left" | "right" | "non-assoc") { SwitchTo(KLABEL_STATE); type = image(); }
       list = KLabels()
     { module.appendModuleItem(markLoc(loc, new PriorityExtendedAssoc(type, list))); }
+  | "lexical" (nonTerminal = SortID()) "=" (str = StringRegex())
+    { module.appendModuleItem(markLoc(loc, new SyntaxLexical(nonTerminal.getSort().name(), str))); }
   )
 }
 
