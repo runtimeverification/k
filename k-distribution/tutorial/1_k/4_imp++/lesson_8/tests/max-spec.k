@@ -3,7 +3,7 @@
 module MAX-SPEC
   imports IMP
 
-rule
+claim
   <threads><thread>...
     <k>
       if (b <= a) {

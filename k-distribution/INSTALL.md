@@ -15,6 +15,10 @@ Windows, you are encouraged to install
 [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 and follow the instructions for Ubuntu Bionic.
 
+**NOTE**: The distributed packages do **not** include the OCAML backend
+dependency setup. See the end of this file for instructons on using the OCAML
+backend with the package-installed K.
+
 Download Packages
 -----------------
 
@@ -126,33 +130,36 @@ contributors.
     export PATH=$PATH:/PATH/TO/INSTALL/k/bin
     ```
 
-4.  Install OCaml (Optional):
-
-    **NOTE**: It is *strongly* recommended that you use the LLVM backend
-    instead of the OCaml backend. The OCaml backend is being sunsetted.
-
-    To use the OCAML backend requires an installation of the OCAML package
-    manager OPAM. Instructions on installing OPAM are available here:
-    <https://opam.ocaml.org/doc/Install.html>.
-    You should install on Windows by following the instructions for the Linux
-    distribution you installed for Windows Subsystem for Linux.
-
-    Once opam is installed, you can prepare the installation to run the OCAML
-    backend by running:
-
-    ```
-    k-configure-opam
-    eval $(opam config env)
-    ```
-
-    `k-configure-opam` is in the `k/bin` directory, and the `eval` command sets
-    up your OCaml environment.
-
 4. Test:
 
    Go to one of the examples (say `k/tutorial/2_languages/1_simple/1_untyped/`).
    Assuming `k/bin` is in your `$PATH`, you can compile and test a definition by
    running the `make` command. To execute a program you can use e.g.
-   `krun tests/diverse/factorial.simple`. K supports both the LLVM/OCaml
+   `krun tests/diverse/factorial.simple`. K supports the LLVM/Haskell/Java
    backends for concrete execution and the Haskell/Java backend for symbolic
    execution and program verification (with `kompile --backend [haskell|java]`).
+
+OCAML Backend (Optional)
+------------------------
+
+**NOTE**: It is *strongly* recommended that you use the LLVM backend instead of
+the OCAML backend. The OCAML backend is being sunsetted.
+
+To use the OCAML backend requires an installation of the OCAML package manager
+OPAM. Instructions on installing OPAM are available here:
+<https://opam.ocaml.org/doc/Install.html>.
+You should install on Windows by following the instructions for the Linux
+distribution you installed for Windows Subsystem for Linux.
+
+Once `opam` is installed, you can prepare the installation to run the OCAML
+backend by running (for a user-local install):
+
+```sh
+k-configure-opam
+eval $(opam config env)
+```
+
+`k-configure-opam` is in the `k/bin` directory, and the `eval` command sets up
+your OCAML environment. You can optionally control where the OCAML dependencies
+are installed by setting the `OPAMROOT` environment variable before running the
+above commands with `export OPAMROOT=/path/to/opam/root`.

@@ -89,6 +89,12 @@ def KRule(body, requires = None, ensures = None, att = None):
 def isKRule(k):
     return k["node"] == "KRule"
 
+def KClaim(body, requires = None, ensures = None, att = None):
+    return { "node": "KClaim", "body": body, "requires": requires, "ensures": ensures, "att": att }
+
+def isKClaim(k):
+    return k["node"] == "KClaim"
+
 def KContext(body, requires = None, ensures = None, att = None):
     return { "node": "KContext", "body": body, "requires": requires, "att": att }
 
@@ -155,6 +161,12 @@ def KSortSynonym(newSort, oldSort, att = None):
 def isKSortSynonym(k):
     return k['node'] == 'KSortSynonym'
 
+def KSyntaxLexical(newSort, oldSort, att = None):
+    return { "node": "KSyntaxLexical", "newSort": newSort, "oldSort": oldSort, "att": att }
+
+def isKSyntaxLexical(k):
+    return k['node'] == 'KSyntaxLexical'
+
 def KFlatModule(name, imports, localSentences, att = None):
     return { "node": "KFlatModule", "name": name, "imports": imports, "localSentences": localSentences, "att": att }
 
@@ -188,6 +200,8 @@ def addAttributes(kast, att):
         return KAtt(combineDicts(att, kast['att']))
     if isKRule(kast):
         return KRule(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = addAttributes(kast['att'], att))
+    if isKClaim(kast):
+        return KClaim(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = addAttributes(kast['att'], att))
     if isKProduction(kast):
         return KProduction(kast['productionItems'], kast['sort'], att = addAttributes(kast['att'], att))
     else:
@@ -332,6 +346,12 @@ def prettyPrintKast(kast, symbolTable):
         oldSortStr = prettyPrintKast(kast['oldSort'], symbolTable)
         attStr     = prettyPrintKast(kast['att'], symbolTable)
         return 'syntax ' + newSortStr + ' = ' + oldSortStr + ' ' + attStr
+    if isKSyntaxLexical(kast):
+        nameStr = kast['name']
+        regexStr = kast['regex']
+        attStr     = prettyPrintKast(kast['att'], symbolTable)
+        # todo: proper escaping
+        return 'syntax lexical ' + name + ' = r"' + regex + '" ' + attStr
     if isKSyntaxAssociativity(kast):
         assocStr = kast['assoc'].lower()
         tagsStr  = ' '.join(kast['tags'])
@@ -358,6 +378,19 @@ def prettyPrintKast(kast, symbolTable):
             ensuresStr = prettyPrintKast(kast["ensures"], symbolTable)
             ensuresStr = "ensures " + "\n  ".join(ensuresStr.split("\n"))
         return ruleStr + "\n  " + requiresStr + "\n  " + ensuresStr + "\n  " + attsStr
+    if isKClaim(kast):
+        body     = "\n     ".join(prettyPrintKast(kast["body"], symbolTable).split("\n"))
+        ruleStr = "claim " + body
+        requiresStr = ""
+        ensuresStr  = ""
+        attsStr     = prettyPrintKast(kast['att'], symbolTable)
+        if kast["requires"] is not None:
+            requiresStr = prettyPrintKast(kast["requires"], symbolTable)
+            requiresStr = "requires " + "\n   ".join(requiresStr.split("\n"))
+        if kast["ensures"] is not None:
+            ensuresStr = prettyPrintKast(kast["ensures"], symbolTable)
+            ensuresStr = "ensures " + "\n  ".join(ensuresStr.split("\n"))
+        return ruleStr + "\n  " + requiresStr + "\n  " + ensuresStr + "\n  " + attsStr
     if isKContext(kast):
         body        = indent(prettyPrintKast(kast["body"], symbolTable))
         contextStr  = "context alias " + body
@@ -372,8 +405,6 @@ def prettyPrintKast(kast, symbolTable):
             return ''
         attStrs = [ att + '(' + kast['att'][att] + ')' for att in kast['att'].keys() ]
         return '[' + ', '.join(attStrs) + ']'
-    if isKSortSynonym(kast):
-        return 'sort ' + kast['newSort'] + ' = ' + kast['oldSort'] + ' ' + prettyPrintKast(kast['att'], symbolTable)
     if isKFlatModule(kast):
         name = kast["name"]
         imports = "\n".join(['import ' + kimport for kimport in kast["imports"]])

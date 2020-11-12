@@ -1,8 +1,0 @@
-post_install() {
-	export OPAMROOT=/usr/lib/kframework/opamroot
-	/usr/bin/k-configure-opam
-}
-
-pre_remove() {
-	rm -rf /usr/lib/kframework/opamroot
-}

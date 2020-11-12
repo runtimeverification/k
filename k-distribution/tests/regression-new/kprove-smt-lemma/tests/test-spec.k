@@ -3,5 +3,5 @@
 module TEST-SPEC
     imports VERIF
 
-    rule <k> step foo(_) => ok ...</k>
+    claim <k> step foo(_) => ok ...</k>
 endmodule

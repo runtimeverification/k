@@ -252,7 +252,8 @@ Since calculating inclusions and intersections between regular expressions is
 tricky, we must provide this information to K. We do this via the `prec(N)`
 attribute. The lexer will always prefer longer tokens to shorter tokens.
 However, when it has to choose between two different tokens of equal length,
-token productions with higher precedence are tried first.
+token productions with higher precedence are tried first. Note that the default
+precedence value is zero when the `prec` attribute is not specified.
 
 We also need to make sorts with more specific tokens subsorts of ones with more
 general tokens. We add the token attribute to this production so that all
@@ -454,6 +455,37 @@ Think carefully about how you want your grammar to parse. In general, if you're
 not sure, it's probably best to group associativity together into the same
 blocks you use for priority, rather than using `left`, `right`, or `non-assoc`
 attributes on the productions.
+
+### Lexical identifiers
+
+Sometimes it is convenient to be able to give a certain regular expression a
+name and then refer to it in one or more regular expression terminals. This
+can be done with a `syntax lexical` sentence in K:
+
+```k
+syntax lexical Alphanum = r"[0-9a-zA-Z]"
+```
+
+This defines a lexical identifier `Alphanum` which can be expanded in any
+regular expression terminal to the above regular expression. For  example, I
+might choose to then implement the syntax of identifiers as follows:
+
+```k
+syntax Id ::= r"[a-zA-Z]{Alphanum}*" [token]
+```
+
+Here `{Alphanum}` expands to the above regular expression, making the sentence
+equivalent to the following:
+
+```k
+syntax Id ::= r"[a-zA-Z]([0-9a-zA-Z])*" [token]
+```
+
+This feature can be used to more modularly construct the lexical syntax of your
+language. Note that K does not currently check that lexical identifiers used
+in regular expressions have been defined; this will generate an error when
+creating the scanner, however, and the user ought to be able to debug what
+happened.
 
 ### `assoc`, `comm`, `idem`, and `unit` attributes
 
@@ -1125,18 +1157,29 @@ ambiguities. Of course, the compiler will generate a warning in this case.
 
 ### `simplification` attribute (Haskell backend)
 
-The simplification attribute identifies axioms that are useful for simplifying
-configurations, without being part of the main semantics. When a rule is tagged
-as `simplification`, the Haskell backend will only apply that rule if:
+The simplification attribute identifies rules outside the main semantics that
+are used to simplify function patterns.
 
--   the rule lhs _matches_ the subterm of interest, and
--   the side condition has no remainder given the current top-level predicate
-    (that is, the current top-level predicate _implies_ the side condition of
-    the rule).
+**Conditions**: A simplification rule is applied by _matching_ the function
+arguments, instead of unification as when applying function definition
+rules. This allows function symbols to appear nested as arguments to other
+functions on the left-hand side of a simplification rule, which is forbidden in
+function definition rules. For example, this rule would not be accepted as a
+function definition rule:
 
-Note that the `simplification` attribute can be applied to _any_ rule, not just
-function rules, and that `simplification` rules are tried _before_ rules from
-the semantic definition.
+```
+rule (X +Int Y) +Int Z => X +Int (Y +Int Z) [simplification]
+```
+
+A simplification rule is only applied when the current side condition _implies_
+the `requires` clause of the rule, like function definition rules.
+
+**Order**: Simplification rules are applied after definition rules, if no
+definition rule did apply. The `simplification` attribute accepts an optional
+integer argument which is the rule's _priority_; if the optional argument is not
+specified, it is equivalent to a priority of 50. Simplification rules are
+applied in order of their priority. `simplification` rules may not have the
+`priority` attribute.
 
 For example, for the following definition:
 

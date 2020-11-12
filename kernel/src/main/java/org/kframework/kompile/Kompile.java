@@ -154,7 +154,7 @@ public class Kompile {
         CompiledDefinition def = new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(configInfo.getRootCell()).klabel());
 
         if (kompileOptions.experimental.genBisonParser || kompileOptions.experimental.genGlrBisonParser) {
-            new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, files.resolveKompiled("parser_PGM"), kompileOptions.experimental.genGlrBisonParser, kompileOptions.experimental.bisonFile);
+            new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, files.resolveKompiled("parser_PGM"), kompileOptions.experimental.genGlrBisonParser, kompileOptions.experimental.bisonFile, kompileOptions.experimental.bisonStackMaxDepth);
             for (Production prod : iterable(kompiledDefinition.mainModule().productions())) {
                 if (prod.att().contains("cell") && prod.att().contains("parser")) {
                     String att = prod.att().get("parser");
@@ -169,7 +169,7 @@ public class Kompile {
                         if (!mod.isDefined()) {
                             throw KEMException.compilerError("Could not find module referenced by parser attribute: " + module, prod);
                         }
-                        new KRead(kem, files, InputModes.PROGRAM).createBisonParser(mod.get(), def.configurationVariableDefaultSorts.getOrDefault("$" + name, Sorts.K()), files.resolveKompiled("parser_" + name), kompileOptions.experimental.genGlrBisonParser, null);
+                        new KRead(kem, files, InputModes.PROGRAM).createBisonParser(mod.get(), def.configurationVariableDefaultSorts.getOrDefault("$" + name, Sorts.K()), files.resolveKompiled("parser_" + name), kompileOptions.experimental.genGlrBisonParser, null, kompileOptions.experimental.bisonStackMaxDepth);
                     }
                 }
             }
@@ -320,7 +320,7 @@ public class Kompile {
         ModuleTransformer mt = ModuleTransformer.fromSentenceTransformer((m, s) -> {
             if (m.name().equals(mainDefModule.name()) || mainDefModule.importedModuleNames().contains(m.name()))
                 return s;
-            if (s instanceof Rule && !s.att().contains("simplification")) {
+            if (s instanceof Rule && !s.att().contains(Att.SIMPLIFICATION())) {
                 kem.registerCompilerWarning(KException.ExceptionType.FUTURE_ERROR, errors, "Deprecated: use claim instead of rule to specify proof objectives.", s);
                 return new Claim(((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att());
             }

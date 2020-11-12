@@ -263,6 +263,8 @@ def onAttributes(kast, effect):
         return KAs(kast['pattern'], kast['alias'], att = effect(kast['att']))
     elif isKRule(kast):
         return KRule(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = effect(kast['att']))
+    elif isKClaim(kast):
+        return KClaim(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = effect(kast['att']))
     elif isKContext(kast):
         return KContext(kast['body'], requires = kast['requires'], att = effect(kast['att']))
     elif isKBubble(kast):
@@ -277,6 +279,8 @@ def onAttributes(kast, effect):
         return KSyntaxSort(kast['sort'], att = effect(kast['att']))
     elif isKSortSynonym(kast):
         return KSortSynonym(kast['newSort'], kast['oldSort'], att = effect(kast['att']))
+    elif isKSyntaxLexical(kast):
+        return KSyntaxLexical(kast['name'], kast['regex'], att = effect(kast['att']))
     elif isKFlatModule(kast):
         localSentences = [ onAttributes(sent, effect) for sent in kast['localSentences'] ]
         return KFlatModule(kast['name'], kast['imports'], localSentences, att = effect(kast['att']))
@@ -287,7 +291,7 @@ def onAttributes(kast, effect):
     _fatal('No attributes for: ' + kast['node'] + '.')
 
 def minimizeRule(rule):
-    if not isKRule(rule):
+    if not isKRule(rule) and not isKClaim(rule):
         return rule
 
     ruleBody     = rule["body"]
@@ -328,8 +332,10 @@ def minimizeRule(rule):
 
     if ruleRequires == KToken("true", "Bool"):
         ruleRequires = None
-
-    return KRule(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts)
+    if isKRule(rule):
+        return KRule(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts)
+    else:
+        return KClaim(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts)
 
 def pushDownRewritesRule(rule):
     if not isKRule(rule):

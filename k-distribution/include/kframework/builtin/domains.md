@@ -159,7 +159,8 @@ of any of the syntax defined in any of these modules.
 
   rule makeArray(I::Int, D::KItem) => arr(.List, I, D)
 
-  rule arr(L::List, _, D::KItem) [ IDX::Int ] => #if IDX >=Int size(L) #then D #else L[IDX] #fi
+  rule arr(L::List, _, _       ) [ IDX::Int ] => L[IDX] requires 0 <=Int IDX andBool IDX  <Int size(L)
+  rule arr(_      , _, D::KItem) [ _        ] => D      [owise]
 
   syntax List ::= ensureOffsetList(List, Int, KItem) [function]
   rule ensureOffsetList(L::List, IDX::Int, D::KItem) => #if IDX >=Int size(L) #then updateList(makeList(IDX +Int 1, D), 0, L) #else L #fi
@@ -424,18 +425,18 @@ endmodule
 module MAP-JAVA-SYMBOLIC [kast, symbolic]
   imports MAP
   imports K-EQUAL
-  rule .Map [ K1 <- V1 ] => K1 |-> V1
+  rule .Map [ K1 <- V1 ] => K1 |-> V1 [simplification]
 
-  rule ((K1 |-> V1) MAP) [ K2 ] => V1         requires K1  ==K K2
-  rule ((K1 |-> V1) MAP) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2
+  rule ((K1 |-> V1) MAP) [ K2 ] => V1         requires K1  ==K K2 [simplification]
+  rule ((K1 |-> V1) MAP) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2 [simplification]
 
-  rule (MAP:Map [ K1 <- V1 ]) [ K2 ] => V1         requires K1  ==K K2
-  rule (MAP:Map [ K1 <- V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2
+  rule (MAP:Map [ K1 <- V1 ]) [ K2 ] => V1         requires K1  ==K K2 [simplification]
+  rule (MAP:Map [ K1 <- V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2 [simplification]
 
-  rule ((K1 |-> V1) MAP) [ K2 <- V2 ] => (K1 |-> V2) MAP                requires K1  ==K K2
-  rule ((K1 |-> V1) MAP) [ K2 <- V2 ] => (K1 |-> V1) (MAP [ K2 <- V2 ]) requires K1 =/=K K2
+  rule ((K1 |-> V1) MAP) [ K2 <- V2 ] => (K1 |-> V2) MAP                requires K1  ==K K2 [simplification]
+  rule ((K1 |-> V1) MAP) [ K2 <- V2 ] => (K1 |-> V1) (MAP [ K2 <- V2 ]) requires K1 =/=K K2 [simplification]
 
-  rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP              [ K1 <- V2 ] requires K1  ==K K2
+  rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP              [ K1 <- V2 ] requires K1  ==K K2 [simplification]
 
   // potential infinite loop
   // rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP [ K2 <- V2 ] [ K1 <- V1 ] requires K1 =/=K K2

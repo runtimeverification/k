@@ -4,6 +4,7 @@ package org.kframework.unparser;
 import org.kframework.attributes.Att;
 import org.kframework.definition.Associativity;
 import org.kframework.definition.Bubble;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.Configuration;
 import org.kframework.definition.Definition;
@@ -14,9 +15,11 @@ import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.SortSynonym;
 import org.kframework.definition.SyntaxAssociativity;
+import org.kframework.definition.SyntaxLexical;
 import org.kframework.definition.SyntaxPriority;
 import org.kframework.definition.SyntaxSort;
 import org.kframework.definition.Tag;
@@ -155,13 +158,14 @@ public class ToJson {
 
     public static JsonStructure toJson(Sentence sen) {
         if (sen instanceof Context)             return toJson((Context) sen);
-        if (sen instanceof Rule)                return toJson((Rule) sen);
+        if (sen instanceof RuleOrClaim)         return toJson((RuleOrClaim) sen);
         if (sen instanceof SyntaxPriority)      return toJson((SyntaxPriority) sen);
         if (sen instanceof SyntaxAssociativity) return toJson((SyntaxAssociativity) sen);
         if (sen instanceof Configuration)       return toJson((Configuration) sen);
         if (sen instanceof Bubble)              return toJson((Bubble) sen);
         if (sen instanceof SyntaxSort)          return toJson((SyntaxSort) sen);
         if (sen instanceof SortSynonym)         return toJson((SortSynonym) sen);
+        if (sen instanceof SyntaxLexical)       return toJson((SyntaxLexical) sen);
         if (sen instanceof Production)          return toJson((Production) sen);
 
         JsonObjectBuilder jsen = Json.createObjectBuilder();
@@ -180,10 +184,10 @@ public class ToJson {
         return jcon.build();
     }
 
-    public static JsonStructure toJson(Rule rule) {
+    public static JsonStructure toJson(RuleOrClaim rule) {
         JsonObjectBuilder jrule = Json.createObjectBuilder();
 
-        jrule.add("node", JsonParser.KRULE);
+        jrule.add("node", rule instanceof Rule ? JsonParser.KRULE : JsonParser.KCLAIM);
         jrule.add("body", toJson(rule.body()));
         jrule.add("requires", toJson(rule.requires()));
         jrule.add("ensures", toJson(rule.ensures()));
@@ -268,6 +272,17 @@ public class ToJson {
         jsyn.add("node", JsonParser.KSORTSYNONYM);
         jsyn.add("newSort", toJson(syn.newSort()));
         jsyn.add("oldSort", toJson(syn.oldSort()));
+        jsyn.add("att", toJson(syn.att()));
+
+        return jsyn.build();
+    }
+
+    public static JsonStructure toJson(SyntaxLexical syn) {
+        JsonObjectBuilder jsyn = Json.createObjectBuilder();
+
+        jsyn.add("node", JsonParser.KSYNTAXLEXICAL);
+        jsyn.add("name", syn.name());
+        jsyn.add("regex", syn.regex());
         jsyn.add("att", toJson(syn.att()));
 
         return jsyn.build();

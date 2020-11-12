@@ -14,7 +14,7 @@ module MAX-SPEC [one-path]
   imports VERIFICATION
   imports IMP
 
-  rule
+  claim
     <k>
 if (a <= b)
 { max = b; }

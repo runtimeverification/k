@@ -141,7 +141,17 @@ public class AddSortInjections {
                         if (k.klabel().equals(wrappedLabel)) {
                             if (collectionIsMap(collectionLabel)) {
                                 // Map
-                                return KApply(elementLabel, KList(k.klist().items().get(0), visitChildren(k, actualSort, expectedSort)), Att.empty().add(Sort.class, expectedSort));
+                                K key = k.klist().items().get(0);
+                                Sort adjustedExpectedSort = expectedSort;
+                                if (k.att().contains(Sort.class)) {
+                                    adjustedExpectedSort = k.att().get(Sort.class);
+                                }
+                                Production prod = production(k);
+                                List<K> children = new ArrayList<>();
+                                Production substituted = substituteProd(prod, adjustedExpectedSort, (i, fresh) -> sort(k.items().get(i), fresh.nonterminals().apply(i).sort()), k);
+                                Sort expectedKeySort = substituted.nonterminal(0).sort();
+                                Sort actualKeySort = sort(key, expectedKeySort);
+                                return KApply(elementLabel, KList(visitChildren(key, actualKeySort, expectedKeySort), visitChildren(k, actualSort, expectedSort)), Att.empty().add(Sort.class, expectedSort));
                             } else {
                                 return KApply(elementLabel, KList(visitChildren(k, actualSort, expectedSort)), Att.empty().add(Sort.class, expectedSort));
                             }

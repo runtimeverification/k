@@ -2,7 +2,7 @@
   "format": "KAST",
   "version": 1,
   "term": {
-    "node": "KRule",
+    "node": "KClaim",
     "body": {
       "node": "KRewrite",
       "lhs": {

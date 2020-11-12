@@ -7,11 +7,11 @@ require "def.k"
 module DEF44-SPEC
     imports DEF
 
-    rule <k> start X => end X </k>
+    claim <k> start X => end X </k>
          <var> X </var>
        requires X >=Int 0
 
-    rule <k> mid incPos(Y) -Int 1 => end Y </k>
+    claim <k> mid incPos(Y) -Int 1 => end Y </k>
          <var> Y </var>
       [trusted]
 

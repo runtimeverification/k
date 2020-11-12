@@ -3,7 +3,7 @@
 module MIN-SPEC
   imports IMP
 
-rule
+claim
   <threads><thread>...
     <k>
       if (a <= b) {
