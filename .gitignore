@@ -4,7 +4,6 @@
 .ktest*
 .kdoc*
 .kprove*
-.depend
 *-kompiled
 *.pdf
 *.swp
