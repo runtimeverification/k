@@ -2,7 +2,7 @@
 , flex, gcc, git, gmp, jdk, mpfr, pkgconfig, python3, z3
 }:
 
-let inherit (nix-gitignore) gitignoreFilterRecursiveSource; in
+let inherit (nix-gitignore) gitignoreSourcePure; in
 
 let
   hostInputs = [ flex gcc gmp jdk mpfr pkgconfig python3 z3 ];
@@ -14,7 +14,7 @@ mavenix.buildMaven {
   name = "k-5.0.0";
   infoFile = ./mavenix.lock;
   doCheck = false;
-  src = gitignoreFilterRecursiveSource (_: _: true) [ "nix/" "*.nix" ] ./..;
+  src = gitignoreSourcePure [ "result*" "nix/" "*.nix" ] ./..;
 
   # Add build dependencies
   #
