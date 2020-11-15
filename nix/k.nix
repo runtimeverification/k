@@ -52,6 +52,13 @@ mavenix.buildMaven {
     for prog in $out/bin/*; do
       wrapProgram $prog --prefix PATH : ${hostPATH}
     done
+
+    prelude_kore="$out/include/kframework/kore/prelude.kore"
+    if ! [[ -f "$prelude_kore" ]]
+    then
+        echo 1>&2 "missing output: $prelude_kore"
+        exit 1
+    fi
   '';
 
   # Add extra maven dependencies which might not have been picked up
