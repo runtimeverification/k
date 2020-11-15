@@ -14,7 +14,14 @@ mavenix.buildMaven {
   name = "k-5.0.0";
   infoFile = ./mavenix.lock;
   doCheck = false;
-  src = gitignoreSourcePure [ "result*" "nix/" "*.nix" ] ./..;
+  src =
+    gitignoreSourcePure
+      [
+        ".git/" "result*" "nix/" "*.nix"
+        "haskell-backend/src/main/native/haskell-backend/*"
+        "!haskell-backend/src/main/native/haskell-backend/src"
+      ]
+      ./..;
 
   # Add build dependencies
   #
