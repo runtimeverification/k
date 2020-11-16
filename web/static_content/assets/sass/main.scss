@@ -91,7 +91,7 @@ html body {
   background-color: $white;
 
   @media screen and (prefers-color-scheme: dark) {
-    background-color: $dark-mode-bg;
+    background-color: lighten($color: $dark-mode-bg, $amount: 4%);
     color: $dark-mode-fg;
   }
 }
@@ -872,11 +872,17 @@ video.modal-content {
   }
 }
 
-pre {
+pre[class*="language-"] {
+  background-color: #f7f8fa;
+  font-size: 0.85rem;
+  word-break: normal;
+  white-space: pre-wrap;
   padding: 16px;
   overflow: auto;
-  font-size: 85%;
-  line-height: 1.45;
-  background-color: #f6f8fa;
-  border-radius: 6px;
+}
+
+@media screen and (prefers-color-scheme: dark) {
+  pre[class*="language-"] {
+    background-color: darken($color: $dark-mode-canvas-color, $amount: 5%);
+  }
 }

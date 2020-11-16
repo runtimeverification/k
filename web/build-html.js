@@ -3,29 +3,36 @@ const path = require("path");
 const MarkdownIt = require("markdown-it");
 const glob = require("glob");
 const cheerio = require("cheerio");
-const hljs = require("highlight.js"); // https://highlightjs.org/
-const k = require("./highlight.js/k");
-hljs.registerLanguage("k", k);
+const G = require("glob");
+const url = require("url");
+const Prism = require("prismjs");
+const loadLanguages = require("prismjs/components/");
+loadLanguages();
+const defineK = require("./prismjs/k");
+defineK(Prism);
 
 const md = new MarkdownIt({
   html: true,
   linkify: true,
+  breaks: true,
   highlight: function (str, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return (
-          '<pre class="hljs"><code>' +
-          hljs.highlight(lang, str, true).value +
-          "</code></pre>"
-        );
-      } catch (__) {}
+    lang = lang
+      .trim()
+      .replace(/^{\.(.+?)}?/, (_, $1) => $1)
+      .trim();
+    try {
+      const html = Prism.highlight(str, Prism.languages[lang], lang);
+      return `<pre class="language-${lang}"><code>` + html + "</code></pre>";
+    } catch (error) {
+      return (
+        '<pre class="language-text"><code>' +
+        md.utils.escapeHtml(str) +
+        "</code></pre>"
+      );
     }
-
-    return (
-      '<pre class="hljs"><code>' + md.utils.escapeHtml(str) + "</code></pre>"
-    );
   },
 });
+md.use(require("markdown-it-anchor"));
 
 const files = {
   "./static_content/html/404.html": "404.html",
@@ -81,18 +88,21 @@ function generateOutputWebpage(sourceHTML, targetFilePath, variables = {}) {
 }
 
 /**
- *
+ * @param {string} globPattern
+ * @param {G.IOptions} globOptions
  * @param {string} sourceDirectory
  * @param {string} outputDirectory
  * @param {string} template
  */
-function generatePagesFromMarkdownFiles(
-  pattern,
+function generatePagesFromMarkdownFiles({
+  globPattern,
+  globOptions = {},
+  origin = "",
   sourceDirectory,
   outputDirectory,
-  template = ""
-) {
-  const files = glob.sync(pattern);
+  template = "",
+}) {
+  const files = glob.sync(globPattern, globOptions);
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     const targetFilePath = path.resolve(
@@ -124,16 +134,28 @@ function generatePagesFromMarkdownFiles(
         if (href.match(/^(https?|mailto):/)) {
           $(anchorElement).attr("target", "_blank");
           $(anchorElement).attr("rel", "noopener");
-        } else if (href.match(/\.md$/)) {
-          if (href.startsWith("../") && !href.match(/(index|README)\.md$/)) {
+        } else if (href.match(/\.md(#|$)/)) {
+          // might be ./README.md or ./README.md#tag
+          if (
+            href.startsWith("../") &&
+            !href.match(/(index|README)\.md(#|$)/)
+          ) {
             href = "../" + href;
           }
           $(anchorElement).attr(
             "href",
-            href.match(/(index|README)\.md$/)
-              ? href.replace(/(index|README)\.md$/, "")
-              : href.replace(/\.md$/, "/")
+            href.match(/(index|README)\.md(#|$)/)
+              ? href.replace(/(index|README)\.md/, "")
+              : href.replace(/(?:\/|^)(.+?)\.md/, ($0, name) => {
+                  if (path.basename(file).match(/^(index|README)\.md$/i)) {
+                    return `./${name}/`;
+                  } else {
+                    return `../${name}/`;
+                  }
+                })
           );
+        } else if (!href.endsWith("/")) {
+          $(anchorElement).attr("href", url.resolve(origin, href));
         }
       } catch (error) {}
     });
@@ -180,21 +202,27 @@ const tutorialTemplate = fs
 const pageTemplate = fs
   .readFileSync("./static_content/html/page_template.html")
   .toString("utf-8");
-generatePagesFromMarkdownFiles(
-  path.resolve(__dirname, "../k-distribution/") + "/**/*.md",
-  path.resolve(__dirname, "../k-distribution/"),
-  path.resolve(__dirname, "./public_content/k-distribution/"),
-  tutorialTemplate
-);
-generatePagesFromMarkdownFiles(
-  path.resolve(__dirname, "./pages/") + "/**/*.md",
-  path.resolve(__dirname, "./pages/"),
-  path.resolve(__dirname, "./public_content/"),
-  pageTemplate
-);
-generatePagesFromMarkdownFiles(
-  path.resolve(__dirname, "../") + "/pending-documentation.md",
-  path.resolve(__dirname, "../"),
-  path.resolve(__dirname, "./public_content/"),
-  pageTemplate
-);
+generatePagesFromMarkdownFiles({
+  globPattern: path.resolve(__dirname, "../k-distribution/") + "/**/*.md",
+  globOptions: {},
+  origin: "https://github.com/kframework/k/tree/master/",
+  sourceDirectory: path.resolve(__dirname, "../k-distribution/"),
+  outputDirectory: path.resolve(__dirname, "./public_content/k-distribution/"),
+  template: tutorialTemplate,
+});
+generatePagesFromMarkdownFiles({
+  globPattern: path.resolve(__dirname, "./pages/") + "/**/*.md",
+  globOptions: {},
+  origin: "https://github.com/kframework/k/tree/master/",
+  sourceDirectory: path.resolve(__dirname, "./pages/"),
+  outputDirectory: path.resolve(__dirname, "./public_content/"),
+  template: pageTemplate,
+});
+generatePagesFromMarkdownFiles({
+  globPattern: path.resolve(__dirname, "../") + "/pending-documentation.md",
+  globOptions: {},
+  origin: "https://github.com/kframework/k/tree/master/",
+  sourceDirectory: path.resolve(__dirname, "../"),
+  outputDirectory: path.resolve(__dirname, "./public_content/"),
+  template: pageTemplate,
+});
