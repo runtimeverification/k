@@ -134,25 +134,27 @@ function generatePagesFromMarkdownFiles({
         if (href.match(/^(https?|mailto):/)) {
           $(anchorElement).attr("target", "_blank");
           $(anchorElement).attr("rel", "noopener");
-        } else if (href.match(/\.md(#|$)/)) {
+        } else if (href.match(/\.md(#.+?$|$)/)) {
           // might be ./README.md or ./README.md#tag
-          if (
-            href.startsWith("../") &&
-            !href.match(/(index|README)\.md(#|$)/)
-          ) {
-            href = "../" + href;
-          }
+          let hrefTargetFilePath = path.resolve(
+            href.startsWith("/")
+              ? path.resolve(outputDirectory, "." + path.dirname(href))
+              : path.resolve(
+                  path.dirname(targetFilePath),
+                  path.basename(file).match(/^(index|README)\.md$/i)
+                    ? "./"
+                    : "../",
+                  path.dirname(href)
+                ),
+            path.basename(href).match(/^(README|index)\.md/)
+              ? path.basename(href).replace(/^(README|index)\.md/, `index.html`)
+              : path.basename(href).replace(/\.md/, "/index.html")
+          );
           $(anchorElement).attr(
             "href",
-            href.match(/(index|README)\.md(#|$)/)
-              ? href.replace(/(index|README)\.md/, "")
-              : href.replace(/(?:\/|^)(.+?)\.md/, ($0, name) => {
-                  if (path.basename(file).match(/^(index|README)\.md$/i)) {
-                    return `./${name}/`;
-                  } else {
-                    return `../${name}/`;
-                  }
-                })
+            path
+              .relative(path.dirname(targetFilePath), hrefTargetFilePath)
+              .replace(/(\/|^)index\.html(#|$)/, (_, pre, post) => pre + post)
           );
         } else if (!href.endsWith("/")) {
           $(anchorElement).attr("href", url.resolve(origin, href));
