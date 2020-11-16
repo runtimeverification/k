@@ -413,10 +413,10 @@ pipeline {
       }
     }
     stage('DockerHub') {
- /*     when {
+      when {
         branch 'master'
         beforeAgent true
-      }*/
+      }
       environment {
         DOCKERHUB_TOKEN   = credentials('rvdockerhub')
         BIONIC_COMMIT_TAG = "ubuntu-bionic-${env.SHORT_REV}"
