@@ -66,6 +66,24 @@ def substitute(pattern, substitution):
         return k
     return traverseBottomUp(pattern, replace)
 
+def whereMatchingBottomUp(effect, matchPattern, pattern):
+    def _effect(k):
+        matchingSubst = match(matchPattern, k)
+        newK = k
+        if matchingSubst is not None:
+            newK = effect(matchingSubst)
+        return newK
+    return traverseBottomUp(_effect, pattern)
+
+def whereMatchingTopDown(effect, matchPattern, pattern):
+    def _effect(k):
+        matchingSubst = match(matchPattern, k)
+        newK = k
+        if matchingSubst is not None:
+            newK = effect(matchingSubst)
+        return newK
+    return traverseTopDown(_effect, pattern)
+
 def replaceKLabels(pattern, klabelMap):
     def replace(k):
         if isKApply(k) and k["label"] in klabelMap:
@@ -82,6 +100,15 @@ def rewriteWith(rule, pattern):
 
 def rewriteAnywhereWith(rule, pattern):
     return traverseBottomUp(pattern, lambda p: rewriteWith(rule, p))
+
+def replaceWith(rule, pattern):
+    (ruleLHS, ruleRHS) = rule
+    if ruleLHS == pattern:
+        return ruleRHS
+    return pattern
+
+def replaceAnywhereWith(rule, pattern):
+    return traverseBottomUp(pattern, lambda p: replaceWith(rule, p))
 
 def unsafeMlPredToBool(k):
     """Attempt to convert an ML Predicate back into a boolean expression.
