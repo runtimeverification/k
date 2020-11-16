@@ -19,7 +19,9 @@ mavenix.buildMaven {
       [
         ".git/" "result*" "nix/" "*.nix"
         "haskell-backend/src/main/native/haskell-backend/*"
-        "!haskell-backend/src/main/native/haskell-backend/src"
+        "!haskell-backend/src/main/native/haskell-backend/src"  # need prelude.kore
+        "llvm-backend/src/main/native/llvm-backend/*"
+        "!llvm-backend/src/main/native/llvm-backend/matching"  # need pom.xml
       ]
       ./..;
 
