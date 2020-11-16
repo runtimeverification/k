@@ -14,7 +14,6 @@ defineK(Prism);
 const md = new MarkdownIt({
   html: true,
   linkify: true,
-  breaks: true,
   highlight: function (str, lang) {
     lang = lang
       .trim()
