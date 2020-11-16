@@ -5,13 +5,13 @@ import org.kframework.attributes.Att;
 import org.kframework.definition.Associativity;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Claim;
-import org.kframework.definition.Context;
 import org.kframework.definition.Configuration;
+import org.kframework.definition.Context;
 import org.kframework.definition.Definition;
 import org.kframework.definition.FlatModule;
 import org.kframework.definition.Import;
-import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Module;
+import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
@@ -19,49 +19,37 @@ import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.SortSynonym;
 import org.kframework.definition.SyntaxAssociativity;
+import org.kframework.definition.SyntaxLexical;
 import org.kframework.definition.SyntaxPriority;
 import org.kframework.definition.SyntaxSort;
 import org.kframework.definition.Tag;
 import org.kframework.definition.Terminal;
 import org.kframework.kore.K;
 import org.kframework.kore.KLabel;
-import static org.kframework.kore.KORE.KLabel;
 import org.kframework.kore.KORE;
-import org.kframework.kore.mini.InjectedKLabel;
-import org.kframework.kore.mini.KApply;
-import org.kframework.kore.mini.KRewrite;
-import org.kframework.kore.mini.KSequence;
-import org.kframework.kore.mini.KToken;
-import org.kframework.kore.mini.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import scala.Option;
+import scala.collection.JavaConverters;
 
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
-import javax.json.JsonStructure;
-
-import scala.Option;
-import scala.collection.JavaConverters;
-import scala.collection.Seq;
-import scala.collection.IndexedSeq;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.kframework.Collections.*;
+import static org.kframework.kore.KORE.*;
 
 /**
  * Parses a Json term into the KORE data structures.
@@ -87,6 +75,7 @@ public class JsonParser {
                              , KSEQUENCE            = "KSequence"
                              , KSORT                = "KSort"
                              , KSORTSYNONYM         = "KSortSynonym"
+                             , KSYNTAXLEXICAL       = "KSyntaxLexical"
                              , KSYNTAXASSOCIATIVITY = "KSyntaxAssociativity"
                              , KSYNTAXPRIORITY      = "KSyntaxPriority"
                              , KSYNTAXSORT          = "KSyntaxSort"
@@ -234,6 +223,12 @@ public class JsonParser {
                 Att att   = toAtt(data.getJsonObject("att"));
                 return new SortSynonym(newSort, oldSort, att);
             }
+            case KSYNTAXLEXICAL: {
+                String name = data.getString("name");
+                String regex = data.getString("regex");
+                Att att   = toAtt(data.getJsonObject("att"));
+                return new SyntaxLexical(name, regex, att);
+            }
             case KBUBBLE: {
                 String sentenceType = data.getString("sentenceType");
                 String contents     = data.getString("contents");
@@ -350,29 +345,29 @@ public class JsonParser {
         switch (data.getString("node")) {
 
             case KTOKEN:
-                return new KToken(data.getString("token"), Outer.parseSort(data.getString("sort")));
+                return KToken(data.getString("token"), Outer.parseSort(data.getString("sort")));
 
             case KAPPLY:
                 int arity = data.getInt("arity");
                 K[] args  = toKs(arity, data.getJsonArray("args"));
                 label     = data.getString("label");
                 klabel    = data.getBoolean("variable")
-                          ? new KVariable(label)
+                          ? KVariable(label)
                           : KLabel(label);
-                return KApply.of(klabel, args);
+                return KApply(klabel, args);
 
             case KSEQUENCE:
                 int seqLen = data.getInt("arity");
                 K[] items  = toKs(seqLen, data.getJsonArray("items"));
-                return new KSequence(items);
+                return KSequence(items);
 
             case KVARIABLE:
-                return new KVariable(data.getString("name"));
+                return KVariable(data.getString("name"));
 
             case KREWRITE:
                 K lhs = toK(data.getJsonObject("lhs"));
                 K rhs = toK(data.getJsonObject("rhs"));
-                return new KRewrite(lhs, rhs);
+                return KRewrite(lhs, rhs);
 
             case KAS:
                 K pattern = toK(data.getJsonObject("pattern"));
@@ -382,9 +377,9 @@ public class JsonParser {
             case INJECTEDKLABEL:
                 label  = data.getString("name");
                 klabel = data.getBoolean("variable")
-                       ? new KVariable(label)
+                       ? KVariable(label)
                        : KLabel(label);
-                return new InjectedKLabel(klabel);
+                return InjectedKLabel(klabel);
 
             default:
                 throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));

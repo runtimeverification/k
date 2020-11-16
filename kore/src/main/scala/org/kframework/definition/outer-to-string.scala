@@ -44,7 +44,12 @@ trait SyntaxSortToString {
 
 trait SortSynonymToString {
   self: SortSynonym =>
-  override def toString() = "syntax" + newSort + " = " + oldSort + att.postfixString
+  override def toString() = "syntax " + newSort + " = " + oldSort + att.postfixString
+}
+
+trait SyntaxLexicalToString {
+  self: SyntaxLexical =>
+  override def toString() = "syntax lexical " + name + " = r" + StringUtil.enquoteKString(regex) + att.postfixString
 }
 
 trait TerminalToString {

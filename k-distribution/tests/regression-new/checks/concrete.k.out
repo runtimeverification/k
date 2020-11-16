@@ -17,9 +17,9 @@ function with one or more non-symbolic rules.
 [Error] Compiler: Found concrete attribute without simplification attribute on
 function with one or more non-concrete rules.
 	Source(concrete.k)
-	Location(23,8,23,20)
+	Location(25,8,25,20)
 [Error] Compiler: Found concrete attribute without simplification attribute on
 function with one or more non-concrete rules.
 	Source(concrete.k)
-	Location(27,8,27,20)
+	Location(29,8,29,20)
 [Error] Compiler: Had 6 structural errors.

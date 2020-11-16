@@ -306,6 +306,8 @@ def onAttributes(kast, effect):
         return KSyntaxSort(kast['sort'], att = effect(kast['att']))
     elif isKSortSynonym(kast):
         return KSortSynonym(kast['newSort'], kast['oldSort'], att = effect(kast['att']))
+    elif isKSyntaxLexical(kast):
+        return KSyntaxLexical(kast['name'], kast['regex'], att = effect(kast['att']))
     elif isKFlatModule(kast):
         localSentences = [ onAttributes(sent, effect) for sent in kast['localSentences'] ]
         return KFlatModule(kast['name'], kast['imports'], localSentences, att = effect(kast['att']))
