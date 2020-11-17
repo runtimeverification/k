@@ -85,22 +85,24 @@ Docker images with K pre-installed are available at the
 [runtimeverification/kframework-k Docker Hub repository](https://hub.docker.com/repository/docker/runtimeverificationinc/kframework-k).
 
 Each release at `COMMIT_ID` has an image associated with it at
-`runtimeverificationinc/kframework-k:ubuntu-bionic-COMMIT_ID`.
+`runtimeverificationinc/kframework-k:ubuntu-focal-COMMIT_ID`.
 The latest `master` build Docker image can be accessed with `COMMIT_ID` set to
 `master`.
 
 To run the image directly:
 
 ```sh
-docker run -it runtimeverificationinc/kframework-k:ubuntu-bionic-COMMIT_ID
+docker run -it runtimeverificationinc/kframework-k:ubuntu-focal-COMMIT_ID
 ```
 
 and to make a Docker Image based on it, use the following line in your
 `Dockerfile`:
 
 ```Dockerfile
-FROM runtimeverificationinc/kframework-k:ubuntu-bionic-COMMIT_ID
+FROM runtimeverificationinc/kframework-k:ubuntu-focal-COMMIT_ID
 ```
+
+We also create Ubuntu 18.04 images with the `ubuntu-bionic-COMMIT_ID` tags.
 
 ### Platform Independent K Binary
 
