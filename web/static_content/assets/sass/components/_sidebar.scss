@@ -115,6 +115,13 @@
     color: rgba(0, 0, 0, 0.85);
     text-decoration: none;
   }
+
+  @media screen and (prefers-color-scheme: dark) {
+    color: $dark-mode-fg;
+    &:hover {
+      color: $dark-mode-gray;
+    }
+  }
 }
 
 .bd-toc-item {
