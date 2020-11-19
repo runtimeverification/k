@@ -414,7 +414,7 @@ def prettyPrintKast(kast, symbolTable):
              + '\n    '.join(contents.split('\n')) + '\n' \
              + 'endmodule'
     if isKRequire(kast):
-        return 'requires "' + kast['require'] + '.k"'
+        return 'requires "' + kast['require'] + '"'
     if isKDefinition(kast):
         requires = '' if kast['requires'] is None else '\n'.join([prettyPrintKast(require, symbolTable) for require in kast['requires']])
         modules  = '\n\n'.join([prettyPrintKast(module, symbolTable) for module in kast['modules']])
