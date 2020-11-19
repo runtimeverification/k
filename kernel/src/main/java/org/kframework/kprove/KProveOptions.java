@@ -82,4 +82,7 @@ public class KProveOptions {
 
     @Parameter(names="--debug-script", description="Run script passed in specified file when the debugger starts. Used with --debugger.")
     public String debugScript;
+
+    @Parameter(names="--emit-json", description="Emit JSON serialized def module and spec module.")
+    public boolean emitJson = false;
 }
