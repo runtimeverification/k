@@ -44,11 +44,15 @@ KOMPILE_BACKEND?=llvm
 # check if .k file exists, if not, check if .md file exists
 # if not, default to .k to give error message
 SOURCE_EXT?=$(or $(and $(wildcard $(DEF).k), k), $(or $(and $(wildcard $(DEF).md), md), k))
+
+# Override KRUN with KX for the LLVM and Haskell backends.
+# Use `override` so that we can still pass the paths to krun and kx on the
+# command line.
 ifeq ($(KOMPILE_BACKEND),llvm)
-KRUN=$(KX)
+override KRUN=$(KX)
 endif
 ifeq ($(KOMPILE_BACKEND),haskell)
-KRUN=$(KX)
+override KRUN=$(KX)
 endif
 
 CHECK=| diff -
