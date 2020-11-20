@@ -76,7 +76,7 @@ public class KProve {
 
         if (kproveOptions.emitJson) {
             try {
-                files.saveToKompiled("def-module.json", new String(ToJson.apply(compiled._1()), "UTF-8"));
+                files.saveToKompiled("prove-definition.json", new String(ToJson.apply(compiled._1()), "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 throw KEMException.criticalError("Unsupported encoding `UTF-8` when saving JSON definition.");
             }
