@@ -53,8 +53,7 @@ stdenv.mkDerivation {
   installPhase = ''
     runHook preInstall
 
-    mkdir -p "$out"
-    cp -a -t "$out" .
+    touch "$out"
 
     runHook postInstall
   '';
