@@ -411,7 +411,7 @@ module MAP-KORE-SYMBOLIC [kore,symbolic]
 
    rule #Ceil(@M:Map [@K:KItem]) => {(@K in_keys(@M)) #Equals true} #And #Ceil(@M) #And #Ceil(@K) [anywhere, simplification]
 
-   //// Symbolic update
+   // Symbolic update
    rule (K |-> _ M:Map) [ K <- V ] => (K |-> V M:Map) [simplification]
    rule (M:Map) [ K <- V ] => (K |-> V M:Map) requires notBool (K in_keys(M)) [simplification]
 
