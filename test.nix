@@ -3,10 +3,12 @@ let
   pinned = import sources."nixpkgs" { config = {}; overlays = []; };
 in
 
-{ pkgs ? pinned }:
+{ pkgs ? pinned
+, test ? null
+}:
 
 let
-  inherit (pkgs) stdenv;
+  inherit (pkgs) stdenv lib;
   inherit (pkgs) bison diffutils ncurses gmp mpfr libffi jemalloc;
 
   default = import ./. { inherit pkgs; };
@@ -27,23 +29,26 @@ stdenv.mkDerivation {
     patchShebangs tests/regression-new
   '';
   configurePhase = "true";
-  buildFlags = [
-    "KOMPILE=kompile"
-    "KRUN=krun"
-    "KDEP=kdep"
-    "KPROVE=kprove"
-    "KBMC=kbmc"
-    "KAST=kast"
-    "KPRINT=kprint"
-    "KX=kx"
-  ];
-  buildPhase = ''
-    runHook preBuild
-
-    cd k-distribution/tests/regression-new
-    make $buildFlags -j4
-
-    runHook postBuild
+  buildFlags =
+    [
+      # Find executables on PATH
+      "KOMPILE=kompile"
+      "KRUN=krun"
+      "KDEP=kdep"
+      "KPROVE=kprove"
+      "KBMC=kbmc"
+      "KAST=kast"
+      "KPRINT=kprint"
+      "KX=kx"
+      "KEQ=keq"
+      "KSERVER=kserver"
+      "--output-sync"
+    ]
+    ++ lib.optional (test != null) "-C ${test}"
+    ;
+  enableParallelBuilding = true;
+  preBuild = ''
+    cd tests/regression-new
   '';
   installPhase = ''
     runHook preInstall
