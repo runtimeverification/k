@@ -17,7 +17,7 @@ KEQ=$(abspath $(MAKEFILE_PATH)/../../bin/keq)
 # and kserver
 KSERVER=$(abspath $(MAKEFILE_PATH)/../../bin/kserver)
 # and ksearch
-KSEARCH=$(abspath $(MAKEFILE_PATH)/../../bin/krun) --search-all
+KSEARCH:=$(KRUN) --search-all
 # and kast
 KAST=$(abspath $(MAKEFILE_PATH)/../../bin/kast)
 # and kprint
