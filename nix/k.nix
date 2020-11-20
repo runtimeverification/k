@@ -22,6 +22,7 @@ mavenix.buildMaven {
         "!haskell-backend/src/main/native/haskell-backend/src"  # need prelude.kore
         "llvm-backend/src/main/native/llvm-backend/*"
         "!llvm-backend/src/main/native/llvm-backend/matching"  # need pom.xml
+        "k-distribution/tests/regression-new"
       ]
       ./..;
 
