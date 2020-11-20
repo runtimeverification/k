@@ -6,6 +6,9 @@ KOMPILE_BACKEND=llvm
 export KOMPILE_BACKEND
 KRUN_FLAGS=--parser "cat"
 
-include ../../../include/kframework/ktest.mak
+# Use krun for these tests instead of kx.
+# Setting KOMPILE_BACKEND=llvm above uses the value of KX to run tests, so
+# setting it equal to KRUN causes the actual krun to be used in any case.
+override KX:=$(KRUN)
 
-KRUN=$(abspath $(MAKEFILE_PATH)/../../bin/krun)
+include ../../../include/kframework/ktest.mak
