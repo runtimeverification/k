@@ -23,6 +23,9 @@ stdenv.mkDerivation {
     diffutils ncurses bison clang gmp mpfr libffi jemalloc
     k haskell-backend llvm-backend
   ];
+  postPatch = ''
+    patchShebangs tests/regression-new
+  '';
   configurePhase = "true";
   buildFlags = [
     "KOMPILE=kompile"
