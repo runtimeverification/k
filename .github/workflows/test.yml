@@ -1,0 +1,15 @@
+name: "Test"
+on:
+  pull_request:
+  push:
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2.3.4
+      with:
+        submodules: recursive
+    - uses: cachix/install-nix-action@v12
+    - run: nix-build -A k
+    - run: nix-shell --run "echo OK"
+    - run: nix-build test.nix
