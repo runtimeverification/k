@@ -17,7 +17,7 @@ in
 
 stdenv.mkDerivation {
   name = "k-test";
-  src = k.src;
+  src = ./k-distribution;
   preferLocalBuild = true;
   buildInputs = [
     diffutils ncurses bison clang gmp mpfr libffi jemalloc
