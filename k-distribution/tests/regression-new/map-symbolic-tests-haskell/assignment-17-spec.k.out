@@ -1,1 +1,10 @@
-#Top
+  <k>
+    assignmentResult ( MAP
+    Z:MyId |-> 3 ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    Z:MyId in_keys ( MAP )
+  }

@@ -1,1 +1,3 @@
-#Top
+<k>
+  assignmentResult ( x |-> 3 ) ~> .
+</k>
