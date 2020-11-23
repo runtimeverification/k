@@ -6,4 +6,4 @@ KRUN_FLAGS+=print
 
 include ../../../include/kframework/ktest.mak
 
-override KRUN=./test
+KRUN_OR_KX=./test
