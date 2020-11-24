@@ -2,7 +2,6 @@
 package org.kframework.kprove;
 
 import com.google.inject.Inject;
-import org.kframework.RewriterResult;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
@@ -10,8 +9,10 @@ import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.KRun;
+import org.kframework.RewriterResult;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
+import org.kframework.unparser.ToJson;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -19,6 +20,7 @@ import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -71,6 +73,14 @@ public class KProve {
         Rewriter rewriter = rewriterGenerator.apply(compiled._1());
         Module specModule = compiled._2();
         Rule boundaryPattern = buildBoundaryPattern(compiledDefinition);
+
+        if (kproveOptions.emitJson) {
+            try {
+                files.saveToKompiled("prove-definition.json", new String(ToJson.apply(compiled._1()), "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                throw KEMException.criticalError("Unsupported encoding `UTF-8` when saving JSON definition.");
+            }
+        }
 
         RewriterResult results = rewriter.prove(specModule, boundaryPattern);
         kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), kprint::outputFile,
