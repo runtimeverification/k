@@ -14,9 +14,7 @@
           class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 bd-content"
           role="main"
         >
-          <div class="introduction markdown-preview">
-            {{$MARKDOWN_HTML}}
-          </div>
+          <div class="introduction markdown-preview">{{$MARKDOWN_HTML}}</div>
         </main>
       </div>
     </div>
@@ -56,6 +54,20 @@
           }
         }
       });
+    </script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-9LBGDMRG32"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-9LBGDMRG32");
     </script>
   </body>
 </html>
