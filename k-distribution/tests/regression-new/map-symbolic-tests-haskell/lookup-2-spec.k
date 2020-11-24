@@ -3,10 +3,9 @@
 
 requires "map-tests.k"
 
-module LOOKUP-24-SPEC
+module LOOKUP-2-SPEC
     imports MAP-TESTS
 
-    claim <k> lookup ( (y |-> 4) [ x ] ==K 4 ) => lookupResult ( false ) </k>
-    // TODO: this is trivial
+    claim <k> lookup ( (MAP:Map Y:MyId |-> 1 X:MyId |-> 2) [ Y:MyId ] ) => . </k> requires X =/=K Y
 
 endmodule

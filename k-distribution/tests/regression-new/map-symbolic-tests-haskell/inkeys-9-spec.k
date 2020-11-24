@@ -6,9 +6,6 @@ requires "map-tests.k"
 module INKEYS-9-SPEC
     imports MAP-TESTS
 
-    claim
-        <k> inkeys ( Y:MyId in_keys ( Z:MyId |-> 1 M:Map X:MyId |-> 0 ) )
-            => inkeysResult ( Y in_keys ( M X |-> 0 ( Z |-> 1 ) ) )
-        </k>
+    claim <k> inkeys ( Y:MyId in_keys ( Z:MyId |-> 1 M:Map X:MyId |-> 0 ) ) => . </k> requires notBool Y in_keys(M)
 
 endmodule

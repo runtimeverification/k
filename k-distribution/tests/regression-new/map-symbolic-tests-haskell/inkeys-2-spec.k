@@ -3,9 +3,9 @@
 
 requires "map-tests.k"
 
-module INKEYS-7-SPEC
+module INKEYS-2-SPEC
     imports MAP-TESTS
 
-    claim <k> inkeys ( X:MyId in_keys ( Z:MyId |-> 1 M:Map X      |-> 0 ) ) => . </k>
+    claim <k> inkeys ( Y:MyId in_keys ( M:Map ) ) => . </k> requires Y in_keys(M)
 
 endmodule

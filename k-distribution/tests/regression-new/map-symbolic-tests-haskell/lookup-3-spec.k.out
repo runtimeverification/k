@@ -1,21 +1,21 @@
   #Not ( {
     X
   #Equals
-    Z
+    Y
   } )
 #And
   <k>
-    inkeysResult ( true ) ~> .
+    lookupResult ( 2 ~> . ) ~> .
   </k>
 #And
   {
     false
   #Equals
-    X:MyId in_keys ( M )
+    X:MyId in_keys ( MAP )
   }
 #And
   {
     false
   #Equals
-    Z:MyId in_keys ( M )
+    Y:MyId in_keys ( MAP )
   }
