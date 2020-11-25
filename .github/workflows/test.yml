@@ -13,7 +13,7 @@ jobs:
     - uses: cachix/cachix-action@v8
       with:
         name: runtimeverification
-        skipPush: true
+        signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
     - run: nix-build -A k
     - run: nix-shell --run "echo OK"
     - run: nix-build test.nix
