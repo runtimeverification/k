@@ -5,9 +5,11 @@ claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => remo
 claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => removeResult ( ( MAP X |-> 1 ) [ Y <- undef ] [ Z ] ) </k> requires Y =/=K X
 claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => removeResult ( ( MAP X |-> 1 ) [ Y <- undef ] [ Z ] ) </k> requires Y =/=K X andBool Z =/=K X
 claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => removeResult ( ( MAP X |-> 1 ) [ Y <- undef ] [ Z ] ) </k> requires Y =/=K X andBool Z =/=K Y
+claim <k> remove ( (?MAP:Map ?X:MyId |-> 1) [?Y:MyId <- undef] [ ?Z:MyId ] ) => removeResult ( #Bottom ) </k> requires ?Y =/=K ?X andBool ?Z  ==K ?Y andBool ?Z =/=K ?X
 claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => removeResult ( ( MAP X |-> 1 ) [ Y <- undef ] [ Z ] ) </k> requires Y =/=K X andBool Z =/=K Y andBool Z =/=K X
 claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => removeResult ( ( MAP Z |-> 1 ) [ Y <- undef ] [ Z ] ) </k> requires Z  ==K X
 claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => removeResult ( ( MAP X |-> 1 ) [ Y <- undef ] [ Z ] ) </k> requires Z =/=K X
+claim <k> remove ( (?MAP:Map ?X:MyId |-> 1) [?Y:MyId <- undef] [ ?Z:MyId ] ) => removeResult ( #Bottom ) </k> requires ?Z  ==K ?Y
 claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => removeResult ( ( MAP X |-> 1 ) [ Y <- undef ] [ Z ] ) </k> requires Z =/=K Y
 claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => removeResult ( ( MAP X |-> 1 ) [ Y <- undef ] [ Z ] ) </k> requires Z =/=K Y andBool Z =/=K X
 claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => removeResult ( 1 ) </k> requires Z =/=K Y andBool Z  ==K X andBool Y =/=K X
