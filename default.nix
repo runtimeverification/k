@@ -23,6 +23,7 @@ let
   self = {
     inherit k clang llvm-backend haskell-backend;
     inherit mavenix;
+    inherit (pkgs) mkShell;
   };
 
 in self
