@@ -3,9 +3,9 @@
 
 requires "map-tests.k"
 
-module INKEYS-6-SPEC
+module LOOKUP-21-SPEC
     imports MAP-TESTS
 
-    claim <k> inkeys ( Y:MyId in_keys ( M:Map X:MyId |-> 0 ) ) => . </k> requires notBool Y in_keys(M)
+    claim <k> lookup ( (Y:MyId |-> 1 X:MyId |-> 2 MAP:Map) [ Y:MyId ] ) => lookupResult ( 1 ) </k> requires X =/=K Y
 
 endmodule

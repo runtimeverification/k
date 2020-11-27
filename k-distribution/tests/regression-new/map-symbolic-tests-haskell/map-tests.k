@@ -10,6 +10,7 @@ module MAP-TESTS-SYNTAX
                   | lookup       ( K ) | assignment       ( Map ) | inkeys       ( Bool )
                   | lookupResult ( K ) | assignmentResult ( Map ) | inkeysResult ( Bool )
                   | remove       ( K ) | removeResult       ( K )
+                  | "fail"
 endmodule
 
 module MAP-TESTS

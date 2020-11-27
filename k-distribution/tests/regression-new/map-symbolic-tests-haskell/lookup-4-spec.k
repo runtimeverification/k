@@ -6,6 +6,6 @@ requires "map-tests.k"
 module LOOKUP-4-SPEC
     imports MAP-TESTS
 
-    claim <k> lookup ( (Y:MyId |-> 1 MAP:Map X:MyId |-> 2) [ Y:MyId ] ) => . </k> requires X =/=K Y
+    claim <k> lookup ( (MAP:Map X:MyId |-> 1) [Y:MyId <- 2] [ Z:MyId ] ) => fail </k>
 
 endmodule

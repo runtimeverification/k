@@ -1,7 +1,24 @@
-claim <k> lookup ( (MAP:Map X:MyId |-> 1 Y:MyId |-> 2) [ Y:MyId ] ) => . </k> requires X =/=K Y
-claim <k> lookup ( (MAP:Map Y:MyId |-> 1 X:MyId |-> 2) [ Y:MyId ] ) => . </k> requires X =/=K Y
-claim <k> lookup ( (X:MyId |-> 1 MAP:Map Y:MyId |-> 2) [ Y:MyId ] ) => . </k> requires X =/=K Y
-claim <k> lookup ( (Y:MyId |-> 1 MAP:Map X:MyId |-> 2) [ Y:MyId ] ) => . </k> requires X =/=K Y
-claim <k> lookup ( (X:MyId |-> 1 Y:MyId |-> 2 MAP:Map) [ Y:MyId ] ) => . </k> requires X =/=K Y
-claim <k> lookup ( (Y:MyId |-> 1 X:MyId |-> 2 MAP:Map) [ Y:MyId ] ) => . </k> requires X =/=K Y
-claim <k> lookup ( (y |-> 4) [ x ] ==K 4 ) => . </k>
+claim <k> lookup ( (MAP:Map X:MyId |-> 1) [Y:MyId <- 2] [ Z:MyId ] ) => lookupResult ( MAP ( Y |-> 2 ) [ Z ] ) </k> requires Y ==K X
+claim <k> lookup ( (MAP:Map X:MyId |-> 1) [Y:MyId <- 2] [ Z:MyId ] ) => lookupResult ( 2 ) </k> requires Y ==K X andBool Z  ==K Y andBool Z  ==K X
+claim <k> lookup ( (MAP:Map X:MyId |-> 1) [Y:MyId <- 2] [ Z:MyId ] ) => lookupResult ( MAP [ Z ] ) </k> requires Y ==K X andBool Z =/=K Y andBool Z =/=K X
+claim <k> lookup ( (MAP:Map X:MyId |-> 1) [Y:MyId <- 2] [ Z:MyId ] ) => fail </k>
+claim <k> lookup ( (MAP:Map X:MyId |-> 1) [Y:MyId <- 2] [ Z:MyId ] ) => lookupResult ( MAP [ Y <- 2 ] ( X |-> 1 ) [ Z ] ) </k> requires Y =/=K X
+claim <k> lookup ( (MAP:Map X:MyId |-> 1) [Y:MyId <- 2] [ Z:MyId ] ) => lookupResult ( MAP [ Y <- 2 ] [ Z ] ) </k> requires Y =/=K X andBool Z =/=K X
+claim <k> lookup ( (MAP:Map X:MyId |-> 1) [Y:MyId <- 2] [ Z:MyId ] ) => lookupResult ( MAP [ Y <- 2 ] ( X |-> 1 ) [ Z ] ) </k> requires Y =/=K X andBool Z =/=K Y
+claim <k> lookup ( (MAP:Map X:MyId |-> 1) [Y:MyId <- 2] [ Z:MyId ] ) => lookupResult ( 2 ) </k> requires Y =/=K X andBool Z  ==K Y andBool Z =/=K X
+claim <k> lookup ( (MAP:Map X:MyId |-> 1) [Y:MyId <- 2] [ Z:MyId ] ) => lookupResult ( MAP [ Y <- 2 ] [ Z ] ) </k> requires Y =/=K X andBool Z =/=K Y andBool Z =/=K X
+claim <k> lookup ( (MAP:Map X:MyId |-> 1) [Y:MyId <- 2] [ Z:MyId ] ) => lookupResult ( ( MAP Z |-> 1 ) [ Y <- 2 ] [ Z ] ) </k> requires Z  ==K X
+claim <k> lookup ( (MAP:Map X:MyId |-> 1) [Y:MyId <- 2] [ Z:MyId ] ) => fail </k> requires Z =/=K X
+claim <k> lookup ( (MAP:Map X:MyId |-> 1) [Y:MyId <- 2] [ Z:MyId ] ) => lookupResult ( 2 ) </k> requires Z  ==K Y
+claim <k> lookup ( (MAP:Map X:MyId |-> 1) [Y:MyId <- 2] [ Z:MyId ] ) => lookupResult ( MAP ( X |-> 1 ) [ Z ] ) </k> requires Z =/=K Y
+claim <k> lookup ( (MAP:Map X:MyId |-> 1) [Y:MyId <- 2] [ Z:MyId ] ) => lookupResult ( MAP [ Z ] ) </k> requires Z =/=K Y andBool Z =/=K X
+claim <k> lookup ( (MAP:Map X:MyId |-> 1) [Y:MyId <- 2] [ Z:MyId ] ) => lookupResult ( 1 ) </k> requires Z =/=K Y andBool Z  ==K X andBool Y =/=K X
+claim <k> lookup ( (MAP:Map X:MyId |-> 1 Y:MyId |-> 2) [ Y:MyId ] ) => lookupResult ( 2 ) </k> requires X =/=K Y
+claim <k> lookup ( (MAP:Map Y:MyId |-> 1 X:MyId |-> 2) [ Y:MyId ] ) => lookupResult ( 1 ) </k> requires X =/=K Y
+claim <k> lookup ( (X:MyId |-> 1 MAP:Map Y:MyId |-> 2) [ Y:MyId ] ) => lookupResult ( 2 ) </k> requires X =/=K Y
+claim <k> lookup ( (Y:MyId |-> 1 MAP:Map X:MyId |-> 2) [ Y:MyId ] ) => lookupResult ( 1 ) </k> requires X =/=K Y
+claim <k> lookup ( (X:MyId |-> 1 Y:MyId |-> 2 MAP:Map) [ Y:MyId ] ) => lookupResult ( 2 ) </k> requires X =/=K Y
+claim <k> lookup ( (Y:MyId |-> 1 X:MyId |-> 2 MAP:Map) [ Y:MyId ] ) => lookupResult ( 1 ) </k> requires X =/=K Y
+claim <k> lookup ( (X:MyId |-> 3 y |-> 4) [ x <- 5 ] [ X ] ) => lookupResult ( 3 ) </k> requires X =/=K x
+claim <k> lookup ( (X:MyId |-> 3 y |-> 4) [ x <- 5 ] [ X ] ) => lookupResult ( ( X |-> 3 y |-> 4 ) [ x <- 5 ] [ X ] ) </k> requires X =/=K y
+claim <k> lookup ( (y |-> 4) [ x ] ==K 4 ) => lookupResult ( false ) </k>

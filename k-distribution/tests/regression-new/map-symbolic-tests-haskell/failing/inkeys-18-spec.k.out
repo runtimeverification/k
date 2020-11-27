@@ -1,0 +1,15 @@
+  #Not ( {
+    true
+  #Equals
+    Y:MyId in_keys ( M [ Z:MyId <- 1 ] [ X:MyId <- 0 ] )
+  } )
+#And
+  <k>
+    inkeysResult ( Y:MyId in_keys ( M [ Z:MyId <- 1 ] [ X:MyId <- 0 ] ) ) ~> .
+  </k>
+#And
+  {
+    true
+  #Equals
+    Y:MyId in_keys ( M )
+  }
