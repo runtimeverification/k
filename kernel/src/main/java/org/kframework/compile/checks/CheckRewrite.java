@@ -1,6 +1,7 @@
 // Copyright (c) 2016-2019 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
+import org.kframework.definition.Claim;
 import org.kframework.definition.Module;
 import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
@@ -28,11 +29,11 @@ public class CheckRewrite {
 
     public void check(Sentence sentence) {
         if (sentence instanceof RuleOrClaim) {
-            check(((RuleOrClaim) sentence).body());
+            check(((RuleOrClaim) sentence).body(), sentence instanceof Claim);
         }
     }
 
-    private void check(K body) {
+    private void check(K body, boolean isClaim) {
         class Holder {
             boolean hasRewrite = false;
             boolean inRewrite = false;
@@ -130,7 +131,7 @@ public class CheckRewrite {
                 }
             }
         }.accept(body);
-        if (!h.hasRewrite) {
+        if (!h.hasRewrite && !isClaim) {
             errors.add(KEMException.compilerError("Rules must have at least one rewrite.", body));
         }
     }

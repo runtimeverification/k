@@ -7,8 +7,8 @@ imports SUBSTITUTION
 
 syntax IMap ::= IMap "[" Int "<-" Int "]" [function, klabel(storeI),  smtlib(storeI)]
 syntax Int  ::= IMap "[" Int "]"          [function, klabel(selectI), smtlib(selectI)]
-rule ( M:IMap [ K1 <- V ] ) [ K2 ] => V        requires K1  ==Int K2 [simplification]
-rule ( M:IMap [ K1 <- V ] ) [ K2 ] => M [ K2 ] requires K1 =/=Int K2 [simplification]
+rule ( _M:IMap [ K1 <-  V ] ) [ K2 ] => V        requires K1  ==Int K2 [simplification]
+rule (  M:IMap [ K1 <- _V ] ) [ K2 ] => M [ K2 ] requires K1 =/=Int K2 [simplification]
 
 syntax Bool ::= forall(KVar, Int, Int, Bool) [binder, function, smt-hook((forall ((#1 Int)) (=> (and (>= #1 #2) (< #1 #3)) #4)))]
 rule forall(X, LB, UB, E) => E[LB / X] andBool forall(X, LB +Int 1, UB, E) requires LB  <Int UB
