@@ -579,6 +579,7 @@ pipeline {
               cd web
               npm install
               npm run build
+              npm run build-sitemap
               cd -
               mv web/public_content ./
               rm -rf $(find . -maxdepth 1 -not -name public_content -a -not -name .git -a -not -path . -a -not -path .. -a -not -name CNAME)
