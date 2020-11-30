@@ -210,7 +210,10 @@ pipeline {
                   options { skipDefaultCheckout() }
                   steps {
                     unstash 'buster'
-                    sh 'src/main/scripts/test-in-container-debian'
+                    sh '''
+                      echo "deb http://deb.debian.org/debian buster-backports main" > /etc/apt/sources.list.d/buster-backports.list
+                      src/main/scripts/test-in-container-debian
+                    '''
                   }
                   post {
                     always {
