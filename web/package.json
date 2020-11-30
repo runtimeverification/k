@@ -8,6 +8,7 @@
     "build-css": "parcel build --no-source-maps --no-autoinstall --bundle-node-modules -d ./public_content/assets/css --public-url /assets/css ./static_content/assets/sass/index.scss",
     "build-js": "parcel build --no-source-maps --no-autoinstall --bundle-node-modules -d ./public_content/assets/js --public-url /assets/js ./static_content/assets/js/index.js",
     "build-html": "node build-html.js",
+    "build-sitemap": "node sitemap/build-sitemap.js https://kframework.org/",
     "serve": "http-server public_content"
   },
   "repository": {
@@ -18,11 +19,14 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "cheerio": "^1.0.0-rc.3",
+    "express": "^4.17.1",
+    "get-port": "^5.1.1",
     "glob": "^7.1.6",
     "http-server": "^0.12.3",
     "markdown-it": "^11.0.0",
     "parcel": "^1.12.4",
     "sass": "^1.26.9",
+    "sitemap-generator": "^8.5.1",
     "webfonts-generator": "^0.4.0"
   },
   "dependencies": {
