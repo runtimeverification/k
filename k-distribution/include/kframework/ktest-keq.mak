@@ -10,7 +10,7 @@ BASIC_SMT=$(abspath $(MAKEFILE_PATH)/z3/basic.smt2)
 
 CHECK=| diff -
 
-.PHONY: kompile keq all clean
+.PHONY: kompile keq all clean krun proofs bmc searches strat kast
 
 all: kompile keq
 
