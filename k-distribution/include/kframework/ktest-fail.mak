@@ -13,7 +13,7 @@ KOMPILE_BACKEND?=llvm
 
 CHECK=| diff -
 
-.PHONY: kompile all clean update-results dummy
+.PHONY: kompile all clean update-results dummy krun proofs bmc searches strat kast
 
 # run all tests
 all: kompile
