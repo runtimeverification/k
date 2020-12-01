@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Provides the options needed for tools to perform outer parsing of definitions from source.
  *
- * Used currently by kompile, kdoc, and kdep.
+ * Used currently by kompile, and kdep.
  */
 public class OuterParsingOptions implements Serializable {
 
