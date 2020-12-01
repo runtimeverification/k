@@ -9,8 +9,8 @@ to make them easier to read and print.
 Note that we rearrange a bit the semantics, to group the semantics of old
 IMP's constructs together, and separate it from the new IMP++'s semantics.
 
-Once we are done adding all the comments, we `kompile` with the documentation
-option `--pdf`, and then visualize the generated PDF document.
+Once we are done adding all the comments, we can `krun` with the documentation
+option `--output latex`, and then visualize the generated PDF document.
 
 Everything looks good, except the configuration. We can move the store, in
 and out cells on the next line. The html-ish tag `<br/>` inserts a line break
