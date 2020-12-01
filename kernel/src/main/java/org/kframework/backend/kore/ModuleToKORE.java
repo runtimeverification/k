@@ -217,6 +217,12 @@ public class ModuleToKORE {
             }
         }
 
+        for (Production lesser : iterable(module.overloads().elements())) {
+            for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(() -> Collections.<Production>Set()))) {
+                genOverloadedAxiom(lesser, greater, sb);
+            }
+        }
+
         sb.append("endmodule []\n");
         files.saveToKompiled("syntaxDefinition.kore", sb.toString());
         sb.setLength(length);
