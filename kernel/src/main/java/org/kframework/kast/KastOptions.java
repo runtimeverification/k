@@ -19,6 +19,8 @@ import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
@@ -36,6 +38,9 @@ public final class KastOptions {
             return new StringReader(expression);
         }
         checkSingleFile();
+        if (parameters.get(0).equals("-")) {
+          return new BufferedReader(new InputStreamReader(System.in));
+        }
         return files.get().readFromWorkingDirectory(parameters.get(0));
     }
 
