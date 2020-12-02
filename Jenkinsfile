@@ -115,6 +115,10 @@ pipeline {
               }
             }
             stage('Build and Package on Ubuntu Focal') {
+              when {
+                branch 'master'
+                beforeAgent true
+              }
               stages {
                 stage('Build on Ubuntu Focal') {
                   agent {
@@ -179,7 +183,7 @@ pipeline {
                   agent {
                     dockerfile {
                       filename 'package/debian/Dockerfile'
-                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:buster --build-arg LLVM_VERSION=7'
+                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:buster --build-arg LLVM_VERSION=8'
                       reuseNode true
                     }
                   }
@@ -210,7 +214,10 @@ pipeline {
                   options { skipDefaultCheckout() }
                   steps {
                     unstash 'buster'
-                    sh 'src/main/scripts/test-in-container-debian'
+                    sh '''
+                      echo "deb http://deb.debian.org/debian buster-backports main" > /etc/apt/sources.list.d/buster-backports.list
+                      src/main/scripts/test-in-container-debian
+                    '''
                   }
                   post {
                     always {

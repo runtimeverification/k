@@ -32,10 +32,26 @@ Install Packages
 For version `X.Y.Z`, disto `DISTRO`, and package ID `ID`, the following
 instructions tell you how to install on each system.
 
-### Ubuntu Bionic (18.04)/Debian Buster
+### Ubuntu Bionic (18.04)
 
 ```sh
-sudo apt install ./kframework_X.Y.Z_amd64_DISTRO.deb
+sudo apt install ./kframework_X.Y.Z_amd64_bionic.deb
+```
+
+### Ubuntu Focal (20.04)
+
+```sh
+sudo apt install ./kframework_X.Y.Z_amd64_focal.deb
+```
+
+### Debian Buster
+
+K requires at least LLVM 8, but Debian Buster by default has LLVM 7.
+As a result, you need to enable the Debian Backports apt repository for Debian.
+
+```sh
+echo "deb http://deb.debian.org/debian buster-backports main" > /etc/apt/sources.list.d/buster-backports.list
+sudo apt install ./kframework_X.Y.Z_amd64_buster.deb
 ```
 
 ### Arch Linux

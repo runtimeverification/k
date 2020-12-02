@@ -7,6 +7,7 @@ ARG LLVM_VERSION=8
 ENV TZ America/Chicago
 ENV DEBIAN_FRONTEND=noninteractive
 
+RUN if [ "$BASE_IMAGE" = "debian:buster" ]; then echo "Enabling backports..."; echo "deb http://deb.debian.org/debian buster-backports main" > /etc/apt/sources.list.d/buster-backports.list; fi
 RUN    apt-get update            \
     && apt-get install --yes     \
         bison                    \
