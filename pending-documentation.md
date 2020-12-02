@@ -634,7 +634,7 @@ The user may also write the K cell explicitly in the context declaration
 if they want to match on another cell as well, for example:
 
 ```k
-context <k> foo(HOLE:Bar) ... </kl> <state> .Map </state>
+context <k> foo(HOLE:Bar) ... </k> <state> .Map </state>
 ```
 
 This context will now only heat or cool if the `state` cell is empty.
@@ -652,7 +652,7 @@ This side condition will be appended verbatim to the heating rule that is
 generated, however, it will not affect the cooling rule that is generated:
 
 ```k
-rule <k> foo(HOLE:Bar) => HOLE ~> foo([]) ... </k> requirese baz(HOLE) [heat]
+rule <k> foo(HOLE:Bar) => HOLE ~> foo([]) ... </k> requires baz(HOLE) [heat]
 rule <k> HOLE:Bar ~> foo([]) => foo(HOLE) ... </k> [cool]
 ```
 
@@ -755,8 +755,8 @@ program for the assignment operator. It is equivalent to writing the following
 context declarations:
 
 ```k
-context <k> HOLE:Expr = I:Init => HOLE ~> [] = I ... </k> <evaluate> false </evaluate>
-context <k> HOLE:Expr = I:Init => HOLE ~> [] = I ... </k> <evaluate> true </evaluate> [result(ExecResult)]
+context <k> HOLE:Expr = I:Init ... </k> <evaluate> false </evaluate>
+context <k> HOLE:Expr = I:Init ... </k> <evaluate> true </evaluate> [result(ExecResult)]
 ```
 
 What this is saying is, if the `evaluate` cell is false, evaluate the term
