@@ -429,6 +429,7 @@ module MAP-KORE-SYMBOLIC [kore,symbolic]
    // Symbolic in_keys
    rule K in_keys(M [ K <- undef ]) => false [simplification]
    rule K in_keys(M [ K <- _ ]) => true [simplification]
+   rule K1 in_keys(M [ K2 <- _ ]) => true requires K1 ==K K2 orBool K1 in_keys(M) [simplification]
    rule K1 in_keys(M [ K2 <- _ ]) => K1 in_keys(M) requires K1 =/=K K2 [simplification]
    
 /*
