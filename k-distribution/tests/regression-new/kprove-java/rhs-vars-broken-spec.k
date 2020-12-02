@@ -1,3 +1,5 @@
+// test error messages
+
 requires "demo.k"
 
 module VERIFICATION
@@ -7,7 +9,7 @@ endmodule
 module RHS-VARS-BROKEN-SPEC
     imports VERIFICATION
 
-   claim <k> .K => ?_ </k>
+   claim <k> .K => _ </k>
 
-   claim <k> .K => ?_A </k>
+   claim <k> .K => A </k>
 endmodule
