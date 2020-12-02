@@ -74,4 +74,9 @@
     background-position: 0.4rem 0.6rem;
     background-size: 0.75rem 0.75rem;
   }
+
+  @media screen and (prefers-color-scheme: dark) {
+    color: $dark-mode-fg;
+    background-color: $dark-mode-bg;
+  }
 }

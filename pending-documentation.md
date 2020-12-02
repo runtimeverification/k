@@ -20,7 +20,7 @@ to instead of having to infer it from a comment or from the rule body.
 
 The syntax is:
 
-```
+```k
 name: Sort
 ```
 
@@ -35,7 +35,7 @@ have to manually define the klabels.
 
 For example:
 
-```
+```k
 syntax Foo ::= #Foo( Int, Int ) [klabel(#Foo), symbol]
 ```
 
@@ -73,7 +73,7 @@ enclosed list of parameters prior to the return sort of a production.
 
 Some examples:
 
-```
+```k
 syntax {Sort} Sort ::= "(" Sort ")" [bracket]
 syntax {Sort} KItem ::= Sort
 syntax {Sort} Sort ::= KBott
@@ -283,7 +283,7 @@ your definition. Sometimes this is intentional, however; in this case, you can
 suppress the warning by adding the `unused` attribute to the production or
 cell.
 
-```
+```k
 syntax Foo ::= foo() [unused]
 
 configuration <foo unused=""> .K </foo>
@@ -1048,7 +1048,7 @@ they wish to match on in multiple places.
 
 For example, consider the following semantics:
 
-```
+```k
 syntax KItem ::= "foo" | "foobar"
 syntax KItem ::= bar(KItem) | baz(Int, KItem)
 rule foo => foobar [alias]
@@ -1069,7 +1069,7 @@ can be used to provide this behavior.
 
 For example, consider the following semantics:
 
-```
+```k
 syntax Exp ::= "int" Exps ";" | Exp Exp | Id
 syntax Exps ::= List{Exp,","}
 
@@ -1122,13 +1122,13 @@ proof obligation.
 K automatically generates certain predicate and projection functions from the
 syntax you declare. For example, if you write:
 
-```
+```k
 syntax Foo ::= foo(bar: Bar)
 ```
 
 It will automatically generate the following K code:
 
-```
+```k
 syntax Bool ::= isFoo(K) [function]
 syntax Foo ::= "{" K "}" ":>Foo" [function]
 syntax Bar ::= bar(Foo) [function]
@@ -1167,7 +1167,7 @@ functions on the left-hand side of a simplification rule, which is forbidden in
 function definition rules. For example, this rule would not be accepted as a
 function definition rule:
 
-```
+```k
 rule (X +Int Y) +Int Z => X +Int (Y +Int Z) [simplification]
 ```
 
@@ -1279,13 +1279,13 @@ in regular cases, the `unboundVariables` attributes allows the user to specify
 a comma-separated list of names of variables which can be unbound in the rule.
 
 For example, in the macro declaration
-```
+```k
   rule cppEnumType => bar(_, scopedEnum() #Or unscopedEnum() ) [macro, unboundVariables(_)]
 ```
 the declaration `unboundVariables(_)` allows the rule to pass the unbound
 variable checks, and this in turn allows for `cppEnumType` to be used in
 the LHS of a rule to mean the pattern above:
-```
+```k
   rule inverseConvertType(cppEnumType, foo((cppEnumType #as T::CPPType => underlyingType(T))))
 ```
 
@@ -1311,7 +1311,7 @@ recursive functions, and apply the `memo` attribute to the wrapper.
 uninterpreted functions in the side-condition of any rule. Memoizing such an
 impure function is unsound. To see why, consider the following rules:
 
-```
+```k
 syntax Bool ::= impure( Int ) [function]
 
 syntax Int ::= unsound( Int ) [function, memo]
@@ -1452,7 +1452,7 @@ usefulness of this cast is to cast the return value of a function with a
 greater sort down to a strictly smaller sort that you expect the return value
 of the function to have. For example:
 
-```
+```k
     syntax Exp ::= foo(Exp) [function] | bar(Int) | Int
     rule foo(I:Int) => I
     rule bar(I) => bar({foo(I +Int 1)}:>Int)
@@ -1605,7 +1605,7 @@ of using the `#Or` ML connective on the left hand side of a rule.
 
 For example:
 
-```
+```k
 rule foo #Or bar #Or baz => qux
 ```
 
@@ -1622,7 +1622,7 @@ purpose, we introduce a new syntax for function rules.
 This syntax allows the user to match on *function context* from within a
 function rule:
 
-```
+```k
 syntax Int ::= foo(Int) [function]
 
 rule [[ foo(0) => I ]]
@@ -1639,7 +1639,7 @@ level of a rule body.
 
 Desugared code:
 
-```
+```k
 syntax Int ::= foo(Int, GeneratedTopCell) [function]
 
 rule foo(0, <generatedTop>
@@ -1713,7 +1713,7 @@ and the result is looked up in the collection.
 
 For example:
 
-```
+```k
 syntax Int ::= f(Int) [function]
 rule f(I:Int) => I +Int 1
 rule <k> I:Int => . ... </k> <state> ... SetItem(f(I)) ... </state>
@@ -1897,7 +1897,7 @@ them altogether or to provide ad-hoc implementations for them.
 
 Consider the following definition of a (transition) system:
 
-```
+```k
 module A
   rule foo => true
   rule bar => true
@@ -1906,7 +1906,7 @@ endmodule
 ```
 
 Consider also, the following specification of claims about the definition above:
-```
+```k
 module A-SPEC
   rule [s1]: foo => ?X:Bool
   rule [s2]: foo =>  X:Bool  [unboundVariables(X)]
@@ -1952,7 +1952,7 @@ endmodule
 The random number construct `rand()` is a language construct which could be
 easily conceived to be part of the syntax of a programming language:
 
-```
+```k
 Exp ::= "rand" "(" ")"
 ```
 
@@ -1960,7 +1960,7 @@ The intended semantics of `rand()` is that it can rewrite to any integer in
 a single step. This could be expressed as the following following infinitely
 many rules.
 
-```
+```k
 rule  rand() => 0
 rule  rand() => 1
 rule  rand() => 2
@@ -1987,7 +1987,7 @@ as a precondition to the rule.
 
 1. `randBounded(M,N)` can rewrite to any integer between `M` and `N`
 
-    ```
+    ```k
     syntax Exp ::= randBounded(Int, Int)
     rule randBounded(M, N) => I
       requires M <=Int I andBool I <=Int N
@@ -1997,7 +1997,7 @@ as a precondition to the rule.
 1. `randInList(Is)` takes a list `Is` of items
    and can rewrite in one step to any item in `Is`.
 
-    ```
+    ```k
     syntax Exp ::= randInList (List)
     rule randInList(Is) => I
       requires I inList Is
@@ -2007,7 +2007,7 @@ as a precondition to the rule.
 1. `randNotInList(Is)` takes a list `Is` of items
    and can rewrite in one step to any item _not_ in `Is`.
 
-    ```
+    ```k
     syntax Exp ::= randNotInList (List)
     rule randNotInList(Is) => I
       requires notBool(I inList Is)
@@ -2016,7 +2016,7 @@ as a precondition to the rule.
 
 1. `randPrime()`, can rewrite to any _prime number_.
 
-    ```
+    ```k
     syntax Exp ::= randPrime ()
     rule randPrime() => X:Int
       requires isPrime(X)
@@ -2064,7 +2064,7 @@ such rules accordingly.
 
 We use the following K syntax to define `fresh(Is)`
 
-```
+```k
 syntax Exp ::= fresh (List{Int})
 rule fresh(Is:List{Int}) => ?I:Int
   ensures notBool (?I inList{Int} Is)
@@ -2073,7 +2073,7 @@ rule fresh(Is:List{Int}) => ?I:Int
 A variant of this would be a `choiceInList(Is)` language construct which would
 choose some number from a list:
 
-```
+```k
 syntax Exp ::= choiceInList (List{Int})
 rule choiceInList(Is:List{Int}) => ?I:Int
   ensures ?I inList{Int} Is
@@ -2118,7 +2118,7 @@ W.r.t. the `arb` variants, we can use `?` variables and the `function`
 annotation to signal that we're defining a function and the value of the
 function is fixed, but non-determinate.
 
-```
+```k
 syntax Int ::= arbInList(List{Int}) [function]
 rule arbInList(Is:List{Int}) => ?I:Int
   ensures ?I inList{Int} Is
@@ -2240,7 +2240,7 @@ K is able to insert file, line, and column metadata into the parse tree on a
 per-sort basis when parsing using a bison-generated parser. To enable this,
 mark the sort with the `locations` attribute.
 
-```
+```k
   syntax Exp [locations]
   syntax Exp ::= Exp "/" Exp | Int
 ```
@@ -2249,7 +2249,7 @@ K implicitly wraps productions of these sorts in a `#location` term (see the
 `K-LOCATIONS` module in `kast.md`). The metadata can thus be accessed with
 ordinary rewrite rules:
 
-```
+```k
   rule #location(_ / 0, File, StartLine, _StartColumn, _EndLine, _EndColumn) =>
   "Error: Division by zero at " +String File +String ":" Int2String(StartLine) 
 ```
@@ -2268,7 +2268,7 @@ in order to create a correct string that will be parsed back into the original
 AST. The most common case of this is in expression grammars. For example,
 consider the following grammar:
 
-```
+```k
 syntax Exp ::= Int
              | Exp "*" Exp
              > Exp "+" Exp
@@ -2288,7 +2288,7 @@ You can control how the unparser will insert such brackets by adding a
 production with the `bracket` attribute and the correct sort. For example, if,
 instead of parentheses, you want to use curly braces, you could write:
 
-```
+```k
 syntax Exp ::= "{" Exp "}" [bracket]
 ```
 
@@ -2422,7 +2422,7 @@ tutorial to explain some of the basic commands supported by the LLVM backend.
 Here is a sample K definition we will use to demonstrate debugging
 capabilities:
 
-```
+```k
 module TEST
   imports INT
 

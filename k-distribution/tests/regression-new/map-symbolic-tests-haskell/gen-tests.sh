@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-for test_list in lookup inkeys; do
+for test_list in assignment lookup inkeys remove; do
     i=1
     while read line; do
         spec_file="$test_list-$i-spec.k"
