@@ -1,17 +1,10 @@
   #Not ( {
-      ( MAP
-      X:MyId |-> 1 ) [ Y:MyId <- 2 ] [ Z:MyId ]
-    #Equals
-      MAP
-      ( X:MyId |-> 1 ) [ Z:MyId ]
-    }
-  #And
-    {
-      true
-    #Equals
-      Z:MyId in_keys ( MAP
-      ( X:MyId |-> 1 ) )
-    } )
+    ( MAP
+    X:MyId |-> 1 ) [ Y:MyId <- 2 ] [ Z:MyId ]
+  #Equals
+    MAP
+    ( X:MyId |-> 1 ) [ Z:MyId ]
+  } )
 #And
   #Not ( {
     Y
@@ -33,6 +26,6 @@
   {
     true
   #Equals
-    Z:MyId in_keys ( ( MAP
-    X:MyId |-> 1 ) [ Y:MyId <- 2 ] )
+    Z:MyId in_keys ( MAP
+    ( X:MyId |-> 1 ) )
   }

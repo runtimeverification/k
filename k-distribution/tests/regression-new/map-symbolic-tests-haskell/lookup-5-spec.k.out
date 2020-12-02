@@ -7,12 +7,6 @@
     }
   #And
     {
-      false
-    #Equals
-      X:MyId in_keys ( MAP [ Y:MyId <- 2 ] )
-    }
-  #And
-    {
       true
     #Equals
       Z:MyId in_keys ( MAP [ Y:MyId <- 2 ]

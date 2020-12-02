@@ -8,7 +8,7 @@
     {
       true
     #Equals
-      Z:MyId in_keys ( MAP [ Y:MyId <- 2 ] )
+      Z:MyId in_keys ( MAP )
     } )
 #And
   #Not ( {
@@ -43,6 +43,6 @@
   {
     true
   #Equals
-    Z:MyId in_keys ( ( MAP
-    X:MyId |-> 1 ) [ Y:MyId <- 2 ] )
+    Z:MyId in_keys ( MAP
+    ( X:MyId |-> 1 ) )
   }
