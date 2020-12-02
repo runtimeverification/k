@@ -106,7 +106,7 @@ O(N*log(K)) time (where K is the size of the array), or effectively linear.
 Having `index + N > K` yields an exception.
 
 ```k
-  syntax Array ::= updateArray(Array, index: Int, L) [function, hook(ARRAY.updateAll)]
+  syntax Array ::= updateArray(Array, index: Int, List) [function, hook(ARRAY.updateAll)]
 ```
 
 ### Array fill
@@ -662,8 +662,7 @@ time.
 
 You can create a new `List` which is equal to `dest` except the `N` elements
 starting at `index` are replaced with the contents of `src` in O(N*log(K)) time
-(where K is the size of `dest`and ), or effectively linear.
-Having `index + N > K` yields an exception.
+(where `K` is the size of `dest`and `N` is the size of `src`), or effectively linear. Having `index + N > K` yields an exception.
 
 ```k
   syntax List ::= updateList(dest: List, index: Int, src: List) [function, hook(LIST.updateAll)]
