@@ -1,9 +1,0 @@
-  #Not ( {
-    true
-  #Equals
-    X:MyId in_keys ( M [ Z:MyId <- 1 ] [ X:MyId <- 0 ] )
-  } )
-#And
-  <k>
-    inkeysResult ( X:MyId in_keys ( M [ Z:MyId <- 1 ] [ X:MyId <- 0 ] ) ) ~> .
-  </k>
