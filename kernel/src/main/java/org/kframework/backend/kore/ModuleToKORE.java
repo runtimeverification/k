@@ -1877,6 +1877,8 @@ public class ModuleToKORE {
                 sb.append("}(");
                 if (module.sortAttributesFor().get(k.sort().head()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("").equals("STRING.String")) {
                     sb.append(k.s());
+                } else if (module.sortAttributesFor().get(k.sort().head()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("").equals("BYTES.Bytes")) {
+                    sb.append(k.s().substring(1)); // remove the leading `b`
                 } else {
                     sb.append(StringUtil.enquoteKString(k.s()));
                 }
