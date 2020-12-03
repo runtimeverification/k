@@ -1,8 +1,8 @@
   #Not ( {
-      ( MAP
-      X:MyId |-> 1 ) [ Y:MyId <- 2 ] [ Z:MyId ]
-    #Equals
       MAP [ Y:MyId <- 2 ]
+      ( X:MyId |-> 1 ) [ Z:MyId ]
+    #Equals
+      MAP
       ( X:MyId |-> 1 ) [ Z:MyId ]
     }
   #And
@@ -26,8 +26,8 @@
   } )
 #And
   <k>
-    lookupResult ( ( MAP
-    X:MyId |-> 1 ) [ Y:MyId <- 2 ] [ Z:MyId ] ~> . ) ~> .
+    lookupResult ( MAP
+    ( X:MyId |-> 1 ) [ Z:MyId ] ~> . ) ~> .
   </k>
 #And
   {

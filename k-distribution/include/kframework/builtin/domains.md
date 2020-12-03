@@ -425,6 +425,8 @@ module MAP-KORE-SYMBOLIC [kore,symbolic]
    // Symbolic lookup
    rule (K |-> V _:Map) [ K ] => V [simplification]
    rule (K1 |-> V M:Map) [ K2 ] => M [K2] requires K1 =/=K K2 [simplification]
+   rule (MAP:Map [ K <- V1 ]) [ K ] => V1 [simplification]
+   rule (MAP:Map [ K1 <- V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2 [simplification]
 
    // Symbolic in_keys
    rule K in_keys(M [ K <- undef ]) => false [simplification]
