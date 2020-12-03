@@ -1,13 +1,13 @@
 [Error] Compiler: Found variable _ on right hand side of rule, not bound on
 left hand side. Did you mean "?_"?
 	Source(rhs-vars-broken-spec.k)
-	Location(10,20,10,21)
+	Location(12,20,12,21)
 [Error] Compiler: Found variable A on right hand side of rule, not bound on
 left hand side. Did you mean "?A"?
 	Source(rhs-vars-broken-spec.k)
-	Location(12,20,12,21)
+	Location(14,20,14,21)
 [Warning] Compiler: Variable 'A' defined but not used. Prefix variable name
 with underscore if this is intentional.
 	Source(rhs-vars-broken-spec.k)
-	Location(12,20,12,21)
+	Location(14,20,14,21)
 [Error] Compiler: Had 2 structural errors.
