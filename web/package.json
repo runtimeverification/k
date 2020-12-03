@@ -24,6 +24,7 @@
     "glob": "^7.1.6",
     "http-server": "^0.12.3",
     "markdown-it": "^11.0.0",
+    "markdown-it-anchor": "^6.0.1",
     "parcel": "^1.12.4",
     "sass": "^1.26.9",
     "sitemap-generator": "^8.5.1",
