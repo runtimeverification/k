@@ -34,9 +34,9 @@ claim
       n = n + 1;
     }
   =>
-    _
+    ?_
   </ak>
-  <astate> n |-> N1:Int _ => _ </astate>
+  <astate> n |-> N1:Int _ => ?_ </astate>
 </aT>
 <bT>
   <bk>
@@ -46,9 +46,9 @@ claim
       n = n + 2;
     }
   =>
-    _
+    ?_
   </bk>
-  <bstate> n |-> N2:Int _ => _ </bstate>
+  <bstate> n |-> N2:Int _ => ?_ </bstate>
 </bT>
 requires N1 ==Int N2
 

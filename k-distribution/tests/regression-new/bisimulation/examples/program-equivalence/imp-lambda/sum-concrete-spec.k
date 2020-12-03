@@ -43,20 +43,20 @@ claim
       n = n + -1;
     }
   =>
-    _
+    ?_
   </impk>
-  <impstate> .Map => _ </impstate>
+  <impstate> .Map => ?_ </impstate>
 </impT>
 <lambdaT>
   <lambdak>
     letrec f x = if x <= 0 then 0 else (x + (f (x + -1)))
     in (f 3)
   =>
-    _
+    ?_
   </lambdak>
-  <lambdaenv> .Map => _ </lambdaenv>
-  <lambdastore> .Map => _ </lambdastore>
-  <lambdacounter> 1 => _ </lambdacounter>
+  <lambdaenv> .Map => ?_ </lambdaenv>
+  <lambdastore> .Map => ?_ </lambdastore>
+  <lambdacounter> 1 => ?_ </lambdacounter>
 </lambdaT>
 
 claim

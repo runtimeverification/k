@@ -7,7 +7,7 @@ module A-SPEC
   imports A
 
   claim <k> call(X) => X ... </k>
-        <calldata> _ => _ </calldata>
+        <calldata> _ => ?_ </calldata>
         <flag> 0 => 1 </flag>
 
   claim <k> run => X ... </k>
