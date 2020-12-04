@@ -1,5 +1,1 @@
-<k>
-  assignmentResult ( MAP
-  X:MyId |-> BAL_TO:Int
-  Y:MyId |-> BAL_FROM +Int -30 ) ~> .
-</k>
+#Top

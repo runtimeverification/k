@@ -26,6 +26,6 @@ claim <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) 
 claim <k> assignment ( (X:MyId |-> 3 1 |-> 4) [ 0 <- 5 ] ) => fail </k> requires X =/=K 1
 claim <k> assignment ( (X:MyId |-> 4) [ X <- 3 ] ) => assignmentResult ( X |-> 3 ) </k>
 claim <k> assignment ( (X:MyId |-> 3 y |-> 4) [ x <- 5 ] ) => fail </k> requires X =/=K y
-claim <k> assignment ( (       X:MyId   |-> BAL_TO:Int       Y:MyId   |-> BAL_FROM:Int MAP:Map ) [       Y   <- BAL_FROM -Int 30 ] ) => assignmentResult ( MAP X |-> BAL_TO Y |-> BAL_FROM ) </k> requires       X   =/=K       Y
+claim <k> assignment ( (       X:MyId   |-> BAL_TO:Int       Y:MyId   |-> BAL_FROM:Int MAP:Map ) [       Y   <- BAL_FROM -Int 30 ] ) => assignmentResult ( MAP X |-> BAL_TO Y |-> BAL_FROM -Int 30 ) </k> requires       X   =/=K       Y
 claim <k> assignment ( ( foo ( X:MyId ) |-> BAL_TO:Int foo ( Y:MyId ) |-> BAL_FROM:Int MAP:Map ) [ foo ( Y ) <- BAL_FROM -Int 30 ] ) => assignmentResult ( MAP foo ( X ) |-> BAL_TO foo ( Y ) |-> BAL_FROM -Int 30 ) </k> requires       X   =/=K       Y
 claim <k> assignment ( ( foo ( X:MyId ) |-> BAL_TO:Int foo ( Y:MyId ) |-> BAL_FROM:Int MAP:Map ) [ foo ( Y ) <- BAL_FROM -Int 30 ] ) => assignmentResult ( MAP foo ( X ) |-> BAL_TO foo ( Y ) |-> BAL_FROM -Int 30 ) </k> requires foo ( X ) =/=K foo ( Y )
