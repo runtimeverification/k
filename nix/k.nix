@@ -13,7 +13,6 @@ in
 mavenix.buildMaven {
   name = "k-5.0.0";
   infoFile = ./mavenix.lock;
-  doCheck = false;
   src =
     gitignoreSourcePure
       [
@@ -26,6 +25,8 @@ mavenix.buildMaven {
       ]
       ./..;
 
+  doCheck = true;
+
   # Add build dependencies
   #
   nativeBuildInputs = [ makeWrapper ];
@@ -37,7 +38,6 @@ mavenix.buildMaven {
   # Set build environment variables
   #
   MAVEN_OPTS = [
-    "-DskipTests=true"
     "-DskipKTest=true"
     "-Dllvm.backend.skip=true"
     "-Dhaskell.backend.skip=true"
