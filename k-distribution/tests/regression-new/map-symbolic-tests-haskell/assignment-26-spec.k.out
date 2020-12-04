@@ -1,1 +1,5 @@
-#Top
+<k>
+  assignmentResult ( 0 |-> 5
+  1 |-> 4
+  X:MyId |-> 3 ) ~> .
+</k>

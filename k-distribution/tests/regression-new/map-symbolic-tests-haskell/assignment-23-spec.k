@@ -6,6 +6,6 @@ requires "map-tests.k"
 module ASSIGNMENT-23-SPEC
     imports MAP-TESTS
 
-    claim <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) </k> requires Z =/=K Y andBool Z =/=K X
+    claim <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult ( ( MAP X |-> 1 ) [ Z <- 3 ] ) </k> requires Z  ==K Y
 
 endmodule

@@ -6,6 +6,6 @@ requires "map-tests.k"
 module ASSIGNMENT-28-SPEC
     imports MAP-TESTS
 
-    claim <k> assignment ( ( foo ( X:MyId ) |-> BAL_TO:Int foo ( Y:MyId ) |-> BAL_FROM:Int MAP:Map ) [ foo ( Y ) <- BAL_FROM -Int 30 ] ) => assignmentResult ( ( foo ( X:MyId ) |-> BAL_TO:Int foo ( Y:MyId ) |-> BAL_FROM -Int 30 MAP:Map ) ) </k> requires       X   =/=K       Y
+    claim <k> assignment ( (X:MyId |-> 3 y |-> 4) [ x <- 5 ] ) => fail </k> requires X =/=K y
 
 endmodule
