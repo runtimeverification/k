@@ -5,6 +5,6 @@
   } )
 #And
   <k>
-    assignmentResult ( ( X:MyId |-> 3
-    y |-> 4 ) [ x <- 5 ] ) ~> .
+    assignmentResult ( ( X:MyId |-> 3 ) [ x <- 5 ]
+    y |-> 4 ) ~> .
   </k>
