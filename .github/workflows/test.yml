@@ -3,17 +3,29 @@ on:
   pull_request:
   push:
 jobs:
-  tests:
+  test-nix:
+    name: 'Nix'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2.3.4
+    - name: Check out code
+      uses: actions/checkout@v2.3.4
       with:
         submodules: recursive
-    - uses: cachix/install-nix-action@v12
-    - uses: cachix/cachix-action@v8
+
+    - name: Install Nix
+      uses: cachix/install-nix-action@v12
+
+    - name: Install Cachix
+      uses: cachix/cachix-action@v8
       with:
         name: runtimeverification
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
-    - run: nix-build -A k
-    - run: nix-shell --run "echo OK"
-    - run: nix-build test.nix
+
+    - name: Build
+      run: nix-build -A k
+
+    - name: Check shell
+      run: nix-shell --run "echo OK"
+
+    - name: Run integration tests
+      run: nix-build test.nix
