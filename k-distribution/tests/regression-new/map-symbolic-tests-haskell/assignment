@@ -2,7 +2,7 @@ claim <k> assignment ( .Map [ x <- 3 ] ) => assignmentResult ( x |-> 3 ) </k>
 claim <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => fail </k>
 claim <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => fail </k> requires Y =/=K X
 claim <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => fail </k> requires Y =/=K X andBool Y in_keys(MAP)
-claim <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => fail </k> requires Y =/=K X andBool notBool Y in_keys(MAP)
+claim <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult ( ( X |-> 1  ( Y |-> 2 MAP ) ) [ Z <- 3 ] ) </k> requires Y =/=K X andBool notBool Y in_keys(MAP)
 claim <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult ( ( MAP Y |-> 2 ) [ Z <- 3 ] ) </k> requires Y ==K X
 claim <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult ( ( MAP Y |-> 2 ) [ Z <- 3 ] ) </k> requires Y ==K X andBool Z in_keys(MAP)
 claim <k> assignment ( (MAP:Map X:MyId |-> 1) [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] ) => assignmentResult ( ( MAP Y |-> 2 ) [ Z <- 3 ] ) </k> requires Y ==K X andBool notBool Z in_keys(MAP)
