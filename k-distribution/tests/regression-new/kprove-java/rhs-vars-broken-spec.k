@@ -1,3 +1,5 @@
+// test error messages
+
 requires "demo.k"
 
 module VERIFICATION

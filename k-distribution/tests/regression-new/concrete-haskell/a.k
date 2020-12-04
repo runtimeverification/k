@@ -9,7 +9,7 @@ imports A-SYNTAX
 configuration <k> $PGM:Pgm </k> <counter> 0 </counter>
 
 syntax Int ::= final(Int) [function, functional]
-             | "n" [function, functional]
+             | "n" [function, functional, no-evaluators]
 
 rule <k> run(0) => .K </k> <counter> N:Int => final(N) </counter>
 rule <k> run(N:Int => N -Int 1) ...</k> <counter> M:Int => M +Int 1 </counter>

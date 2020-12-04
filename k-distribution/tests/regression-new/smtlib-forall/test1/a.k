@@ -14,10 +14,10 @@ syntax IntList ::= List{Int,""}
 syntax Bool ::= Int "inI" IntList [function, smtlib(inI)]
 
 syntax KItem ::= foo(IntList)
-rule foo(L) => 0
+rule foo(_L) => 0
 
 syntax KItem ::= bar(IntList, IntList)
-rule bar(L1, L2) => 0
+rule bar(_L1, _L2) => 0
 
 syntax KVar ::= "x" [token]
               | "y" [token]

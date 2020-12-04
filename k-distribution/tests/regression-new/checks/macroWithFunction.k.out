@@ -1,4 +1,5 @@
-[Error] Compiler: Illegal function symbol on LHS of rule.
+[Error] Compiler: Illegal function symbol on LHS of rule. Consider adding
+`simplification` attribute to the rule if this is intended.
 	Source(macroWithFunction.k)
 	Location(13,25,13,35)
 [Error] Compiler: Had 1 structural errors after macro expansion.
