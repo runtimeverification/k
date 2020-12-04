@@ -24,10 +24,12 @@ public class CheckAtt {
     private final Set<KLabel> macros;
     private final Set<KEMException> errors;
     private final Module m;
+    private final boolean isSymbolicKast;
 
-    public CheckAtt(Set<KEMException> errors, Module m) {
+    public CheckAtt(Set<KEMException> errors, Module m, boolean isSymbolicKast) {
         this.errors = errors;
         this.m = m;
+        this.isSymbolicKast = isSymbolicKast;
         this.macros = stream(m.rulesFor()).filter(e -> stream(e._2()).filter(r -> ExpandMacros.isMacro(r)).findAny().isPresent()).map(e -> e._1()).collect(Collectors.toSet());
     }
 
@@ -42,7 +44,7 @@ public class CheckAtt {
     private void check(Production prod) {
         if (!prod.sort().equals(Sorts.KItem())) {
             Att sortAtt =  m.sortAttributesFor().getOrElse(prod.sort().head(), () -> Att.empty());
-            if (sortAtt.contains(Att.HOOK()) && !sortAtt.get(Att.HOOK()).equals("ARRAY.Array")) {
+            if (sortAtt.contains(Att.HOOK()) && !sortAtt.get(Att.HOOK()).equals("ARRAY.Array") && !(sortAtt.get(Att.HOOK()).equals("KVAR.KVar") && isSymbolicKast)) {
                 if (!prod.att().contains(Att.FUNCTION()) && !prod.att().contains(Att.BRACKET()) &&
                     !prod.att().contains("token") && !(prod.klabel().isDefined() && macros.contains(prod.klabel().get()))) {
                     if (!(prod.sort().equals(Sorts.K()) && ((prod.klabel().isDefined() && (prod.klabel().get().name().equals("#EmptyK") || prod.klabel().get().name().equals("#KSequence"))) || prod.isSubsort()))) {
