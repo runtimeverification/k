@@ -1,17 +1,17 @@
-claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => removeResult ( MAP [ Z ] ) </k> requires Y ==K X
-claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => removeResult ( MAP [ Z ] ) </k> requires Y ==K X andBool Z  ==K Y andBool Z  ==K X
-claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => removeResult ( MAP [ Z ] ) </k> requires Y ==K X andBool Z =/=K Y andBool Z =/=K X
-claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => fail </k>
-claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => fail </k> requires Y =/=K X
-claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => fail </k> requires Y =/=K X andBool Z =/=K X
-claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => fail </k> requires Y =/=K X andBool Z =/=K Y
-claim <k> remove ( (?MAP:Map ?X:MyId |-> 1) [?Y:MyId <- undef] [ ?Z:MyId ] ) => removeResult ( #Bottom ) </k> requires ?Y =/=K ?X andBool ?Z  ==K ?Y andBool ?Z =/=K ?X
-claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => fail </k> requires Y =/=K X andBool Z =/=K Y andBool Z =/=K X
-claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => removeResult ( ( MAP Z |-> 1 ) [ Y <- undef ] [ Z ] ) </k> requires Z  ==K X
-claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => fail </k> requires Z =/=K X
-claim <k> remove ( (?MAP:Map ?X:MyId |-> 1) [?Y:MyId <- undef] [ ?Z:MyId ] ) => removeResult ( #Bottom ) </k> requires ?Z  ==K ?Y
-claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => fail </k> requires Z =/=K Y
-claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => fail </k> requires Z =/=K Y andBool Z =/=K X
-claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => removeResult ( 1 ) </k> requires Z =/=K Y andBool Z  ==K X andBool Y =/=K X
-claim <k> remove ( (X:MyId |-> 3 y |-> 4) [ x <- undef ] [ X ] ) => removeResult ( 3 ) </k> requires X =/=K x
-claim <k> remove ( (X:MyId |-> 3 y |-> 4) [ x <- undef ] [ X ] ) => removeResult ( ( X |-> 3 y |-> 4 ) [ x <- undef ] [ X ] ) </k> requires X =/=K y
+claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k> requires Y ==K X
+claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k> requires Y ==K X andBool Z  ==K Y andBool Z  ==K X
+claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k> requires Y ==K X andBool Z =/=K Y andBool Z =/=K X
+claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k>
+claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k> requires Y =/=K X
+claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k> requires Y =/=K X andBool Z =/=K X
+claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k> requires Y =/=K X andBool Z =/=K Y
+claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k> requires Y =/=K X andBool Z  ==K Y andBool Z =/=K X
+claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k> requires Y =/=K X andBool Z =/=K Y andBool Z =/=K X
+claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k> requires Z  ==K X
+claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k> requires Z =/=K X
+claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k> requires Z  ==K Y
+claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k> requires Z =/=K Y
+claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k> requires Z =/=K Y andBool Z =/=K X
+claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k> requires Z =/=K Y andBool Z  ==K X andBool Y =/=K X
+claim <k> remove ( (X:MyId |-> 3 y |-> 4) [ x <- undef ] [ X ] ) => . </k> requires X =/=K x
+claim <k> remove ( (X:MyId |-> 3 y |-> 4) [ x <- undef ] [ X ] ) => . </k> requires X =/=K y

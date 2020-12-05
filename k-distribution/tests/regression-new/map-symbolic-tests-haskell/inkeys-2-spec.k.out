@@ -1,1 +1,9 @@
-#Top
+  <k>
+    inkeysResult ( Y:MyId in_keys ( M ) ) ~> .
+  </k>
+#And
+  {
+    true
+  #Equals
+    Y:MyId in_keys ( M )
+  }

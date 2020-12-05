@@ -6,6 +6,6 @@ requires "map-tests.k"
 module REMOVE-2-SPEC
     imports MAP-TESTS
 
-    claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => removeResult ( MAP [ Z ] ) </k> requires Y ==K X andBool Z  ==K Y andBool Z  ==K X
+    claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k> requires Y ==K X andBool Z  ==K Y andBool Z  ==K X
 
 endmodule

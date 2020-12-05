@@ -1,1 +1,10 @@
-#Top
+  <k>
+    assignmentResult ( ( MAP
+    X:MyId |-> 1 ) [ Z:MyId <- 3 ] ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in_keys ( MAP )
+  }

@@ -4,14 +4,6 @@
     Z
   } )
 #And
-  #Not ( {
-    true
-  #Equals
-    Y:MyId in_keys ( M
-    X:MyId |-> 0
-    ( Z:MyId |-> 1 ) )
-  } )
-#And
   <k>
     inkeysResult ( Y:MyId in_keys ( M
     X:MyId |-> 0

@@ -1,20 +1,4 @@
   #Not ( {
-      ( MAP
-      X:MyId |-> 1
-      Y:MyId |-> 2 ) [ Z:MyId <- 3 ]
-    #Equals
-      MAP [ Z:MyId <- 3 ]
-      X:MyId |-> 1
-      Y:MyId |-> 2
-    }
-  #And
-    {
-      false
-    #Equals
-      X:MyId in_keys ( MAP [ Z:MyId <- 3 ] )
-    } )
-#And
-  #Not ( {
     X
   #Equals
     Y

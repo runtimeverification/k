@@ -1,1 +1,15 @@
-#Top
+  <k>
+    removeResult ( MAP [ Z:MyId ] ~> . ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    Y:MyId in_keys ( MAP )
+  }
+#And
+  {
+    true
+  #Equals
+    Z:MyId in_keys ( MAP )
+  }

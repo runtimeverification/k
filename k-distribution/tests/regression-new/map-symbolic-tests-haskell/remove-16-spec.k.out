@@ -1,1 +1,28 @@
-#Top
+  #Not ( {
+    X
+  #Equals
+    x
+  } )
+#And
+  #Not ( {
+    X
+  #Equals
+    y
+  } )
+#And
+  <k>
+    removeResult ( 3 ~> . ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    y in_keys ( ( X:MyId |-> 3 ) [ x <- undef ] )
+  }
+#And
+  {
+    true
+  #Equals
+    X:MyId in_keys ( ( X:MyId |-> 3 ) [ x <- undef ]
+    ( y |-> 4 ) )
+  }

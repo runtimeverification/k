@@ -6,6 +6,6 @@ requires "map-tests.k"
 module ASSIGNMENT-26-SPEC
     imports MAP-TESTS
 
-    claim <k> assignment ( (X:MyId |-> 3 1 |-> 4) [ 0 <- 5 ] ) => fail </k> requires X =/=K 1
+    claim <k> assignment ( (X:MyId |-> 3 1 |-> 4) [ 0 <- 5 ] ) => . </k> requires X =/=K 1
 
 endmodule
