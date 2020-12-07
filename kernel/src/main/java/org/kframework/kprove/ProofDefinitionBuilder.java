@@ -69,7 +69,7 @@ public class ProofDefinitionBuilder {
         Module specModule = getModule(specModuleNameUpdated, modulesMap, parsedDefinition);
         specModule = kompile.proverChecks(specModule, modulesMap.get(defModuleNameUpdated));
         kompile.structuralChecks(scala.collection.JavaConverters.asScalaSet(modules),
-                specModule, scala.Option.empty(), backend.excludedModuleTags(), false);
+                specModule, scala.Option.empty(), backend.excludedModuleTags());
         Module defModule = getModule(defModuleNameUpdated, modulesMap, parsedDefinition);
         Definition rawExtendedDef = Definition.apply(defModule, parsedDefinition.entryModules(),
                 parsedDefinition.att());
