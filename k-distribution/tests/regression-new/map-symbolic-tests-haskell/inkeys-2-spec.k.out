@@ -1,9 +1,9 @@
   <k>
-    inkeysResult ( Y:MyId in_keys ( M ) ) ~> .
+    inkeysResult ( true ) ~> .
   </k>
 #And
   {
-    true
+    false
   #Equals
-    Y:MyId in_keys ( M )
+    X:MyId in_keys ( M )
   }

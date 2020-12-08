@@ -6,6 +6,6 @@ requires "map-tests.k"
 module INKEYS-13-SPEC
     imports MAP-TESTS
 
-    claim <k> inkeys ( Y:MyId in_keys ( M:Map [ X:MyId <- 0 ] ) ) => . </k>
+    claim <k> inkeys ( Y:MyId in_keys ( M:Map [ X:MyId <- 0 ] ) ) => . </k> requires notBool Y in_keys(M)
 
 endmodule

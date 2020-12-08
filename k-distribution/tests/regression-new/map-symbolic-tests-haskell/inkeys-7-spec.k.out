@@ -1,6 +1,13 @@
+  #Not ( {
+    X
+  #Equals
+    Z
+  } )
+#And
   <k>
     inkeysResult ( Y:MyId in_keys ( M
-    ( X:MyId |-> 0 ) ) ) ~> .
+    X:MyId |-> 0
+    ( Z:MyId |-> 1 ) ) ) ~> .
   </k>
 #And
   {
@@ -12,5 +19,5 @@
   {
     false
   #Equals
-    Y:MyId in_keys ( M )
+    Z:MyId in_keys ( M )
   }

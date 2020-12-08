@@ -8,3 +8,9 @@
   #Equals
     X:MyId in_keys ( M )
   }
+#And
+  {
+    false
+  #Equals
+    Y:MyId in_keys ( M )
+  }

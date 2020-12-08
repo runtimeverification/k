@@ -1,6 +1,11 @@
+  #Not ( {
+    X
+  #Equals
+    Z
+  } )
+#And
   <k>
-    inkeysResult ( Y:MyId in_keys ( M
-    ( X:MyId |-> 0 ) ) ) ~> .
+    inkeysResult ( true ) ~> .
   </k>
 #And
   {
@@ -10,7 +15,7 @@
   }
 #And
   {
-    true
+    false
   #Equals
-    Y:MyId in_keys ( M )
+    Z:MyId in_keys ( M )
   }

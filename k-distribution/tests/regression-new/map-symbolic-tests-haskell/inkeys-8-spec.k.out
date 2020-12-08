@@ -5,7 +5,9 @@
   } )
 #And
   <k>
-    inkeysResult ( true ) ~> .
+    inkeysResult ( Y:MyId in_keys ( M
+    X:MyId |-> 0
+    ( Z:MyId |-> 1 ) ) ) ~> .
   </k>
 #And
   {
@@ -18,4 +20,10 @@
     false
   #Equals
     Z:MyId in_keys ( M )
+  }
+#And
+  {
+    true
+  #Equals
+    Y:MyId in_keys ( M )
   }
