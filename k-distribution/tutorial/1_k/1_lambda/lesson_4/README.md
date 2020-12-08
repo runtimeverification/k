@@ -20,9 +20,6 @@ In our case, we associate the attribute `latex(\lambda{#1}.{#2})` to the
 production declaring the lambda abstraction (recall that in Latex, `#n` refers
 to the n-th argument of the defined new command).
 
-Now, when you call `krun`, you can add the `--output latex` option to get a
-Latex AST of the output term. This option also works for `kast` and `kprove`.
-
 We will later see, in Lesson 9, that we can add arbitrarily complex Latex
 comments and headers to our language definitions, which give us maximum
 flexibility in formatting our language definitions.
