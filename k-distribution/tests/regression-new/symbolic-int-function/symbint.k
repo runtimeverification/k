@@ -10,13 +10,13 @@ module SYMBINT-SYNTAX
   rule symbolicIntNoMemo => ?V:Int
   rule symbolicIntImpure => ?V:Int
 
-  syntax Int ::= init ( Int ) | final ( Int , Int )
+  syntax Exp ::= init ( Int ) | final ( Int , Int )
 endmodule
 
 module SYMBINT
   imports SYMBINT-SYNTAX
 
-  configuration <k> $PGM:Int </k>
+  configuration <k> $PGM:Exp </k>
 
   rule <k> init(0) => final(symbolicIntMemo, symbolicIntMemo)     </k>
   rule <k> init(1) => final(symbolicIntNoMemo, symbolicIntNoMemo) </k>

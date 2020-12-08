@@ -4,7 +4,7 @@ module TEST
 imports DOMAINS
 
 configuration
-  <k> $PGM:Int </k>
+  <k> $PGM:Exp </k>
   <topCell1 unused="">
      <foo> 0 </foo>
   </topCell1>
@@ -12,7 +12,7 @@ configuration
     <foos unused=""> 1 </foos>
   </topCell2>
 
-syntax Int ::= "bar"
+syntax Exp ::= "bar" | Int
 rule <k> bar => 10 </k>
      <topCell2>
        <foo> 0 </foo>

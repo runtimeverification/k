@@ -4,6 +4,6 @@ module COMMON
 imports ID
 imports DOMAINS
 
-syntax Bool ::= vars(List)
+syntax Bool ::= vars(List) [function]
 
 endmodule
