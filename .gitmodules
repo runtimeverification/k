@@ -6,3 +6,6 @@
 	path = haskell-backend/src/main/native/haskell-backend
 	url = https://github.com/kframework/kore
 	ignore = untracked
+[submodule "web/k-web-theme"]
+	path = web/k-web-theme
+	url = https://github.com/runtimeverification/k-web-theme
