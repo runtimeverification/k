@@ -20,11 +20,11 @@ jobs:
         name: runtimeverification
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
 
-    - name: Build
-      run: nix-build -A k
+    - name: 'Build K Framework'
+      run: nix-build -A k -A llvm-backend -A haskell-backend
 
-    - name: Check shell
+    - name: 'Check development environment'
       run: nix-shell --run "echo OK"
 
-    - name: Run integration tests
+    - name: 'Run integration tests'
       run: nix-build test.nix
