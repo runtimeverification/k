@@ -6,25 +6,38 @@ jobs:
     name: 'Nix'
     runs-on: ubuntu-latest
     steps:
-    - name: Check out code
-      uses: actions/checkout@v2.3.4
-      with:
-        submodules: recursive
+      - name: 'Check out code'
+        uses: actions/checkout@v2.3.4
+        with:
+          submodules: recursive
+          # Avoid cloning a detached-HEAD repository on pull_request events.
+          # git-auto-commit-action (below) needs this to find the original
+          # branch where it should push the changes.
+          ref: ${{ github.head_ref }}
 
-    - name: Install Nix
-      uses: cachix/install-nix-action@v12
+      - name: 'Install Nix'
+        uses: cachix/install-nix-action@v12
 
-    - name: Install Cachix
-      uses: cachix/cachix-action@v8
-      with:
-        name: runtimeverification
-        signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+      - name: 'Install Cachix'
+        uses: cachix/cachix-action@v8
+        with:
+          name: runtimeverification
+          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
 
-    - name: 'Build K Framework'
-      run: nix-build -A k -A llvm-backend -A haskell-backend
+      - name: 'Update Maven dependencies'
+        run: ./nix/update-maven.sh
 
-    - name: 'Check development environment'
-      run: nix-shell --run "echo OK"
+      - name: 'Commit changes'
+        uses: stefanzweifel/git-auto-commit-action@v4.7.2
+        with:
+          commit_message: 'Update Maven dependencies'
+          file_pattern: 'nix/'
 
-    - name: 'Run integration tests'
-      run: nix-build test.nix
+      - name: 'Build K Framework'
+        run: nix-build -A k -A llvm-backend -A haskell-backend
+
+      - name: 'Check development environment'
+        run: nix-shell --run "echo OK"
+
+      - name: 'Run integration tests'
+        run: nix-build test.nix
