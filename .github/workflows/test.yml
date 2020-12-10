@@ -34,7 +34,7 @@ jobs:
           file_pattern: 'nix/'
 
       - name: 'Build K Framework'
-        run: nix-build -A k -A llvm-backend -A haskell-backend
+        run: nix-build -A k
 
       - name: 'Check development environment'
         run: nix-shell --run "echo OK"
