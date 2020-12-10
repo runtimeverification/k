@@ -8,9 +8,10 @@ various purposes: to ease understanding the K definition, to publish it,
 to send it to others, etc.
 
 The K tool allows a literate programming style, where the executable
-language definition can be documented by means of annotations.  Some
-back-ends of the K tool, such as those enabled with the `--output latex`
-option.
+language definition can be documented by means of annotations. One such
+annotation is the `latex(_)` annotation, where you can specify how to format
+the given production when producing Latex output via the `--output latex`
+option to `krun`, `kast`, and `kprove`.
 
 There are three types of comments, which we discuss next.
 
