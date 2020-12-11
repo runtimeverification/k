@@ -25,7 +25,8 @@ mavenix.buildMaven {
       ]
       ./..;
 
-  doCheck = true;
+  # Cannot enable unit tests until a bug is fixed upstream (in Mavenix).
+  doCheck = false;
 
   # Add build dependencies
   #
