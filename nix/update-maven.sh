@@ -8,6 +8,6 @@
 # This command will fail, but only after loading the source.
 # mavenix will not do this automatically because we it uses restrict-eval,
 # and we are using filterSource, which is disabled under restrict-eval.
-nix-build --no-out-link -E '(import ./. {}).k.src' || echo "expected error"
+nix-build --no-out-link -E '(import ./. {}).k.src' || echo "^~~~ expected error"
 
 mvnix-update -E '(import ./. {}).k'
