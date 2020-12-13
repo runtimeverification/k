@@ -1,7 +1,7 @@
 [Error] Compiler: Found #as pattern where the right side is not a variable.
 	Source(invalidAs.k)
 	Location(4,9,4,16)
-[Error] Compiler: #as is not allowed in the RHS of a rule
+[Error] Compiler: #as is not allowed in the RHS of a rule.
 	Source(invalidAs.k)
 	Location(5,14,5,21)
 [Error] Compiler: Rewrites are not allowed inside an #as pattern.
