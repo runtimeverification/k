@@ -112,15 +112,10 @@ class KoreToK (sortAtt : Map[String, String]) {
   /** Returns a [[k.K]] from [[kore.Pattern]]. */
   def apply(pat: kore.Pattern): k.K = pat match {
     case kore.Variable(name, sort) =>
-      KORE.KVariable(extractVarName(name), KORE.Att.add(classOf[k.Sort].toString, apply(sort).toString()))
+      KORE.KVariable(extractVarName(name), Att.empty.add(classOf[org.kframework.kore.Sort], apply(sort)))
     case kore.Application(head, args) => head.ctr match {
       case "inj" =>
-        val body = apply(args.head)
-        if (body.isInstanceOf[KVariable]) {
-          KORE.KApply(KORE.KLabel("#SemanticCastTo" + apply(head.params(0)).toString), body)
-        } else {
-          body
-        }
+        apply(args.head)
       case "kseq" =>
         KORE.KSequence(args.map(apply(_)): _*)
       case "dotk" =>
