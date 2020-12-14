@@ -1,0 +1,4 @@
+[Error] Compiler: Configuration variable missing: $Foo. Use -cFoo=<Value> in
+the command line to set.
+[Warning] Compiler: Command line variable A not found in the configuration.
+Ignoring.
