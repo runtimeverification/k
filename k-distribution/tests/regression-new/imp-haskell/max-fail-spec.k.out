@@ -15,9 +15,9 @@
       .
     </k>
     <state>
-      a |-> A:Int
-      b |-> B:Int
-      max |-> B:Int
+      a |-> A
+      b |-> B
+      max |-> B
     </state>
   </T>
 #And
