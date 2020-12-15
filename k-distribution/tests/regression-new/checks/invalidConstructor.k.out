@@ -1,0 +1,7 @@
+[Error] Compiler: Cannot add new constructors to hooked sort K
+	Source(invalidConstructor.k)
+	Location(3,16,3,20)
+[Error] Compiler: Cannot add new constructors to hooked sort Int
+	Source(invalidConstructor.k)
+	Location(4,18,4,22)
+[Error] Compiler: Had 2 structural errors.

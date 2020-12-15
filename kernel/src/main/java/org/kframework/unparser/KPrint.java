@@ -129,7 +129,7 @@ public class KPrint {
     }
 
     public byte[] prettyPrint(Definition def, Module module, K orig, ColorSetting colorize) {
-        return prettyPrint(def, module, orig, Sorts.KItem(), colorize, options.output);
+        return prettyPrint(def, module, orig, Sorts.GeneratedTopCell(), colorize, options.output);
     }
 
     public byte[] prettyPrint(Definition def, Module module, K orig, Sort s, ColorSetting colorize) {

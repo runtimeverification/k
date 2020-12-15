@@ -9,25 +9,25 @@ imports DEPOSIT-SYMBOLIC
 claim <k> deposit(V) => . ... </k>
       <depositCount> M => M +Int 1 </depositCount>
       <treeHeight> TREE_HEIGHT </treeHeight>
-      <branch> Branch1 => Branch2 </branch>
+      <branch> Branch1 => ?Branch2 </branch>
       requires V ==Int tn(M +Int 1, 0, M +Int 1)
        andBool M <Int (2 ^Int TREE_HEIGHT) -Int 1
        andBool isNat(M) andBool isNat(TREE_HEIGHT)
        andBool TREE_HEIGHT >=Int 1
        andBool isValidBranch(Branch1, M)
-      ensures  isValidBranch(Branch2, M +Int 1)
+      ensures  isValidBranch(?Branch2, M +Int 1)
 
 claim <k> depositLoop(I, TREE_HEIGHT -Int 1, down(I, M), tn(M, I, down(I, M))) => . ... </k>
       <depositCount> M </depositCount> // M = m + 1
       <treeHeight> TREE_HEIGHT </treeHeight>
-      <branch> Branch1 => Branch2 </branch>
+      <branch> Branch1 => ?Branch2 </branch>
       requires I <=Int TREE_HEIGHT -Int 1
        andBool (2 ^Int I) *Int down(I, M) ==Int M
        andBool 1 <=Int M andBool M <Int 2 ^Int TREE_HEIGHT
        andBool isNat(I) andBool isNat(M) andBool isNat(TREE_HEIGHT)
        andBool TREE_HEIGHT >=Int 1
        andBool isValidBranch(Branch1, M -Int 1)
-      ensures  isValidBranch(Branch2, M)
+      ensures  isValidBranch(?Branch2, M)
 
 // Lemma 9 (get_deposit_root).
 
