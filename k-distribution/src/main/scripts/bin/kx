@@ -60,6 +60,11 @@ error () {
   exit $result
 }
 
+warning () {
+  printf "%s" "[Warning] Compiler: "
+  echo "$@"
+}
+
 print_usage () {
 cat <<HERE
 Usage: $KX [PROGRAM] [-cNAME=VALUE] [-d DIR]
@@ -403,6 +408,7 @@ if [ "$outputFile" = "-" ]; then
   outputFile=/dev/stdout
 fi
 
+# verify and parse config variables/cmd line parameters
 if $term; then
   if [ -z "${parser_PGM+unset}" ]; then
     execute kast -d "$dir" -m "$mainModuleName" "$config_var_PGM" -o kore > "$input_file"
@@ -410,29 +416,38 @@ if $term; then
     execute $parser_PGM "$config_var_PGM" > "$input_file"
   fi
 else
+  for configVar in `find $kompiledDir -type f -name 'sort_*' | sed 's|.*sort_\(.*\).txt|\1|'`; do
+    if [[ ! "${params[@]}" =~ "$configVar" ]]; then
+      error "Configuration variable missing: \$$configVar. Use -c$configVar=<Value> in the command line to set."
+    fi
+  done
   for name in "${params[@]}"; do
     parser_name="parser_$name"
     config_name="config_var_$name"
     tempFile="$(mktemp tmp.in."$name".XXXXXXXXXX)"
     tempFiles+=("$tempFile")
-    sortName=`cat "$kompiledDir"/sort_"$name".txt`
-    if [ -z "${!parser_name+unset}" ]; then
-      if [ -f "$kompiledDir/parser_$name" ]; then
-        parser=("$kompiledDir/parser_$name")
-      elif [ "$name" = "PGM" ]; then
-        if $hasArgv; then
-          parser=(kast -d "$dir" -o kore)
+    if [ -f $kompiledDir"/sort_"$name".txt" ]; then
+      sortName=`cat "$kompiledDir"/sort_"$name".txt`
+      if [ -z "${!parser_name+unset}" ]; then
+        if [ -f "$kompiledDir/parser_$name" ]; then
+          parser=("$kompiledDir/parser_$name")
+        elif [ "$name" = "PGM" ]; then
+          if $hasArgv; then
+            parser=(kast -d "$dir" -o kore)
+          else
+            parser=(kast -d "$dir" -m "$mainModuleName" -o kore)
+          fi
         else
           parser=(kast -d "$dir" -m "$mainModuleName" -o kore)
         fi
       else
-        parser=(kast -d "$dir" -m "$mainModuleName" -o kore)
+        parser=("${!parser_name}")
       fi
+      execute "${parser[@]}" "${!config_name}" > "$tempFile"
+      configVars="$configVars -c $name $tempFile $sortName korefile"
     else
-      parser=("${!parser_name}")
+      warning "Command line variable $name not found in the configuration. Ignoring."
     fi
-    execute "${parser[@]}" "${!config_name}" > "$tempFile"
-    configVars="$configVars -c $name $tempFile $sortName korefile"
   done
   if [ "$(cat "$kompiledDir"/sort_IO.txt 2>/dev/null)" = "String" ]; then
     if $io; then
