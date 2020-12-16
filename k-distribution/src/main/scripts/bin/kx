@@ -5,6 +5,7 @@ set -u
 
 export PATH="$(dirname "$0"):$PATH"
 
+# initialize flags
 ARGV=()
 bound=
 depth=
@@ -29,6 +30,7 @@ configVars=
 dryRun=false
 result=1
 
+# setup temp files
 tempDir="$(mktemp -d tmp.krun.XXXXXXXXXX)"
 tempFiles=("$tempDir")
 trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
@@ -134,6 +136,7 @@ future.
 HERE
 }
 
+# parse options
 while [[ $# -gt 0 ]]
 do
   arg="$1"
@@ -359,6 +362,7 @@ if [[ "${#ARGV[@]}" -gt 1 ]]; then
   error 'Cannot pass more than one configuration variable as a positional argument.'
 fi
 
+# Compute kompiled directory
 kompiledDir=
 hasKompiledDir=false
 for file in "$dir"/*-kompiled; do
@@ -374,6 +378,7 @@ if ! $hasKompiledDir; then
   error 'Could not find a compiled definition. Use --directory to specify one.'
 fi
 
+# Process configuration variables
 hasArgv=false
 if [[ "${#ARGV[@]}" -gt 0 ]]; then
   config_var_PGM="${ARGV[0]}"
@@ -442,6 +447,7 @@ else
 fi
 
 
+# Invoke backend
 if [ -f "$kompiledDir/interpreter" ]; then
   if $statistics; then
     interpreter_flags=--statistics
@@ -498,6 +504,7 @@ else
   fi
 fi
 
+# Unparsing
 if ! $dryRun; then
   if [ -f "$kore_output" ]; then
     if $statistics; then
