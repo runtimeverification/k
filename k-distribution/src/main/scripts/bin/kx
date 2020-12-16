@@ -36,8 +36,10 @@ tempFiles=("$tempDir")
 trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
 
 input_file="$(mktemp tmp.in.XXXXXXXXXX)"
+expanded_input_file="$(mktemp tmp.in.XXXXXXXXXX)"
 kore_output="$tempDir/result.kore"
 tempFiles+=("$input_file")
+tempFiles+=("$expanded_input_file")
 tempFiles+=("$kore_output")
 
 execute () {
@@ -198,7 +200,7 @@ do
 
       --dry-run)
       cmdprefix="echo "
-      tempFiles=(${tempFiles[@]/$input_file})
+      tempFiles=(${tempFiles[@]/$expanded_input_file})
       dryRun=true
       ;;
 
@@ -446,6 +448,8 @@ else
   execute llvm-krun $configVars -d "$kompiledDir" $flags --dry-run -o "$input_file"
 fi
 
+# Expand macros
+execute kore-expand-macros "$kompiledDir" "$input_file" > "$expanded_input_file"
 
 # Invoke backend
 if [ -f "$kompiledDir/interpreter" ]; then
@@ -456,7 +460,7 @@ if [ -f "$kompiledDir/interpreter" ]; then
   fi
 
   set +e
-  execute $cmdprefix "$kompiledDir/interpreter" "$input_file" "${depth:--1}" "$kore_output" $interpreter_flags
+  execute $cmdprefix "$kompiledDir/interpreter" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags
   result=$?
   set -e
 else
@@ -482,11 +486,11 @@ else
       final_input="$(mktemp tmp.in.XXXXXXXXXX)"
       tempFiles+=("$final_input")
       set +e
-      execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$input_file" --output "$final_input" $koreExecFlags
+      execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$final_input" $koreExecFlags
       set -e
       depthFlags="--depth 0"
     else
-      final_input="$input_file"
+      final_input="$expanded_input_file"
     fi
 
     if [ -n "$bound" ]; then
@@ -498,7 +502,7 @@ else
     set -e
   else
     set +e
-    execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$input_file" --output "$kore_output" $koreExecFlags $depthFlags
+    execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$kore_output" $koreExecFlags $depthFlags
     result=$?
     set -e
   fi
