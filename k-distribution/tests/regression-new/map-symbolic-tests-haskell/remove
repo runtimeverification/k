@@ -15,3 +15,4 @@ claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </
 claim <k> remove ( (MAP:Map X:MyId |-> 1) [Y:MyId <- undef] [ Z:MyId ] ) => . </k> requires Z =/=K Y andBool Z  ==K X andBool Y =/=K X
 claim <k> remove ( (X:MyId |-> 3 y |-> 4) [ x <- undef ] [ X ] ) => . </k> requires X =/=K x
 claim <k> remove ( (X:MyId |-> 3 y |-> 4) [ x <- undef ] [ X ] ) => . </k> requires X =/=K y
+claim <k> remove ( (X:MyId |-> 1 Y:MyId |-> 2) [ X <- undef ] ) => . </k>
