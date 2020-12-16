@@ -271,13 +271,22 @@ public class ModuleToKORE {
         }
 
         sb.append("\n// rules\n");
+        StringBuilder macrosSb = new StringBuilder();
+        macrosSb.append("// macros\n");
         int ruleIndex = 0;
         ListMultimap<Integer, String> priorityToAlias = ArrayListMultimap.create();
         for (Rule rule : sortedRules) {
-            convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, attributes, functionRules,
-                    priorityToPreviousGroup, priorityToAlias, sentenceType, sb);
+            if (ExpandMacros.isMacro(rule)) {
+                convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, attributes, functionRules,
+                        priorityToPreviousGroup, priorityToAlias, sentenceType, macrosSb);
+            } else {
+                convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, attributes, functionRules,
+                        priorityToPreviousGroup, priorityToAlias, sentenceType, sb);
+            }
             ruleIndex++;
         }
+
+        files.saveToKompiled("macros.kore", macrosSb.toString());
 
         sb.append("\n// priority groups\n");
         genPriorityGroups(priorityList, priorityToPreviousGroup, priorityToAlias, topCellSortStr, sb);
@@ -1172,6 +1181,24 @@ public class ModuleToKORE {
             }
             sb.append(')');
             sb.append("\n  ");
+            convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
+            sb.append("\n\n");
+        } else {
+            assertNoExistentials(rule, existentials);
+            sb.append("  axiom{R");
+            Option<Set> sortParams = rule.att().getOption("sortParams", Set.class);
+            if (sortParams.nonEmpty()) {
+                for (Object sortParamName : sortParams.get())
+                    sb.append("," + sortParamName);
+            }
+            sb.append("} ");
+            sb.append("\\equals{");
+            sb.append(ruleInfo.productionSortStr);
+            sb.append(",R} (\n    ");
+            convert(left, sb);
+            sb.append(",\n    ");
+            convert(right, sb);
+            sb.append(")\n  ");
             convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
             sb.append("\n\n");
         }
