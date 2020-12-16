@@ -28,6 +28,7 @@ smtPrelude=
 flags=
 configVars=
 dryRun=false
+expandMacros=true
 result=1
 
 # setup temp files
@@ -103,6 +104,10 @@ future.
                            execution, and disabled when --search is passed.
       --no-substitution-filtering  Don't filter conjuncts with anonymous
                                    variables from substitution output
+      --no-expand-macros   Don't expand macros in initial configuration.
+                           This assumes that the initial configuration contains
+                           no macro terms. Behavior is undefined if this is not
+                           true.
   -o, --output MODE        Select output mode to use when unparsing. Valid
                            values are pretty, program, kast, binary, json,
                            latex, kore, and none.
@@ -233,6 +238,10 @@ do
 
       --no-substitution-filtering)
       filterSubst=false
+      ;;
+
+      --no-expand-macros)
+      expandMacros = false
       ;;
 
       -o|--output)
@@ -449,7 +458,11 @@ else
 fi
 
 # Expand macros
-execute kore-expand-macros "$kompiledDir" "$input_file" > "$expanded_input_file"
+if $expandMacros; then
+  execute kore-expand-macros "$kompiledDir" "$input_file" > "$expanded_input_file"
+else
+  execute cp "$input_file" "$expanded_input_file"
+fi
 
 # Invoke backend
 if [ -f "$kompiledDir/interpreter" ]; then
