@@ -1,14 +1,14 @@
 {
     "mavenix": {
-        "branch": "master",
-        "description": "Deterministic Maven builds using Nix [maintainer=@icetan]",
+        "branch": "sort-locale",
+        "description": "Deterministic Maven builds using Nix?",
         "homepage": "",
-        "owner": "nix-community",
+        "owner": "ttuegel",
         "repo": "mavenix",
-        "rev": "7416dbd2861520d44a4d6ecee9d94f89737412dc",
-        "sha256": "0gkn29q63y2l700vravfl8nqjvd0zx7nvfcb3vj64fal3prh1l7y",
+        "rev": "95b91979926fccd57500bd9d4e33cd49b25035f2",
+        "sha256": "1p8mz6r3f9mf5nyab57nph13s6v0addpr3767njrr74jgcccfrcx",
         "type": "tarball",
-        "url": "https://github.com/nix-community/mavenix/archive/7416dbd2861520d44a4d6ecee9d94f89737412dc.tar.gz",
+        "url": "https://github.com/ttuegel/mavenix/archive/95b91979926fccd57500bd9d4e33cd49b25035f2.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "niv": {
