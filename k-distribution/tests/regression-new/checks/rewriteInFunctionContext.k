@@ -3,7 +3,7 @@ module REWRITEINFUNCTIONCONTEXT
   imports BOOL
   imports MAP
 
-syntax Int ::= foo(Int)
+syntax Int ::= foo(Int) [function]
 
 configuration <k> $PGM:K </k> <bar> 0 </bar>
 

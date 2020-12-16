@@ -115,6 +115,10 @@ pipeline {
               }
             }
             stage('Build and Package on Ubuntu Focal') {
+              when {
+                branch 'master'
+                beforeAgent true
+              }
               stages {
                 stage('Build on Ubuntu Focal') {
                   agent {
@@ -179,7 +183,7 @@ pipeline {
                   agent {
                     dockerfile {
                       filename 'package/debian/Dockerfile'
-                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:buster --build-arg LLVM_VERSION=7'
+                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:buster --build-arg LLVM_VERSION=8'
                       reuseNode true
                     }
                   }
@@ -210,7 +214,10 @@ pipeline {
                   options { skipDefaultCheckout() }
                   steps {
                     unstash 'buster'
-                    sh 'src/main/scripts/test-in-container-debian'
+                    sh '''
+                      echo "deb http://deb.debian.org/debian buster-backports main" > /etc/apt/sources.list.d/buster-backports.list
+                      src/main/scripts/test-in-container-debian
+                    '''
                   }
                   post {
                     always {
@@ -499,13 +506,7 @@ pipeline {
           reuseNode true
         }
       }
-      post {
-        failure {
-          slackSend color: '#cb2431'                                 \
-                  , channel: '#k'                                    \
-                  , message: "Deploy Phase Failed: ${env.BUILD_URL}"
-        }
-      }
+      post { failure { slackSend color: '#cb2431' , channel: '#k' , message: "Deploy Phase Failed: ${env.BUILD_URL}" } }
       environment {
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
@@ -570,6 +571,34 @@ pipeline {
             '''
           }
         }
+      }
+    }
+    stage('Update Dependents') {
+      when {
+        branch 'master'
+        beforeAgent true
+      }
+      steps {
+        build job: 'rv-devops/master', propagate: false, wait: false                                    \
+            , parameters: [ booleanParam ( name: 'UPDATE_DEPS'         , value: true                  ) \
+                          , string       ( name: 'UPDATE_DEPS_REPO'    , value: 'kframework/k'        ) \
+                          , string       ( name: 'UPDATE_DEPS_VERSION' , value: "${env.K_RELEASE_TAG}") \
+                          ]
+      }
+    }
+    stage('GitHub Pages') {
+      when {
+        branch 'master'
+        beforeAgent true
+      }
+      agent {
+        dockerfile {
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+          reuseNode true
+        }
+      }
+      post { failure { slackSend color: '#cb2431' , channel: '#k' , message: "GitHub Pages Deploy Failed: ${env.BUILD_URL}" } }
+      steps {
         dir('gh-pages') {
           sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
             sh '''
@@ -592,19 +621,6 @@ pipeline {
             '''
           }
         }
-      }
-    }
-    stage('Update Submodules (release)') {
-      when {
-        branch 'master'
-        beforeAgent true
-      }
-      steps {
-        build job: 'rv-devops/master', propagate: false, wait: false                                    \
-            , parameters: [ booleanParam ( name: 'UPDATE_DEPS'         , value: true                  ) \
-                          , string       ( name: 'UPDATE_DEPS_REPO'    , value: 'kframework/k'        ) \
-                          , string       ( name: 'UPDATE_DEPS_VERSION' , value: "${env.K_RELEASE_TAG}") \
-                          ]
       }
     }
   }

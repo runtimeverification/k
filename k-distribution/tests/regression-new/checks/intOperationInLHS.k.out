@@ -1,10 +1,13 @@
-[Error] Compiler: Illegal function symbol on LHS of rule.
+[Error] Compiler: Illegal function symbol on LHS of rule. Consider adding
+`simplification` attribute to the rule if this is intended.
 	Source(intOperationInLHS.k)
 	Location(7,10,7,18)
-[Error] Compiler: Illegal function symbol on LHS of rule.
+[Error] Compiler: Illegal function symbol on LHS of rule. Consider adding
+`simplification` attribute to the rule if this is intended.
 	Source(intOperationInLHS.k)
 	Location(17,10,17,16)
-[Error] Compiler: Illegal function symbol on LHS of rule.
+[Error] Compiler: Illegal function symbol on LHS of rule. Consider adding
+`simplification` attribute to the rule if this is intended.
 	Source(intOperationInLHS.k)
 	Location(19,19,19,25)
 [Error] Compiler: Had 3 structural errors.

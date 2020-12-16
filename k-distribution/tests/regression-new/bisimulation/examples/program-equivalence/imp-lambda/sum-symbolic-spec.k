@@ -38,7 +38,7 @@ claim
 
 claim
 <s> ~ b => ^ a ... </s>
-<lambdak> f _:Exp ~> Ks:K </lambdak>
+<lambdak> f _:Exp ~> _Ks:K </lambdak>
 [trusted]
 
 claim
@@ -67,20 +67,20 @@ claim
       n = n + -1;
     }
   =>
-    _
+    ?_
   </impk>
-  <impstate> .Map => _ </impstate>
+  <impstate> .Map => ?_ </impstate>
 </impT>
 <lambdaT>
   <lambdak>
     letrec f x = if x <= 0 then 0 else (x + (f (x + -1)))
     in (f N2:Int)
   =>
-    _
+    ?_
   </lambdak>
-  <lambdaenv> .Map => _ </lambdaenv>
-  <lambdastore> .Map => _ </lambdastore>
-  <lambdacounter> 1 => _ </lambdacounter>
+  <lambdaenv> .Map => ?_ </lambdaenv>
+  <lambdastore> .Map => ?_ </lambdastore>
+  <lambdacounter> 1 => ?_ </lambdacounter>
 </lambdaT>
 requires N1 ==Int N2
 
@@ -94,24 +94,24 @@ claim
       n = n + -1;
     }
   =>
-    _
+    ?_
   </impk>
-  <impstate> sum |-> 0 n |-> N1:Int => _ </impstate>
+  <impstate> sum |-> 0 n |-> N1:Int => ?_ </impstate>
 </impT>
 <lambdaT>
   <lambdak>
     f N2:Int ~> .Map
   =>
-    _
+    ?_
   </lambdak>
-  <lambdaenv> f |-> 2 => _ </lambdaenv>
+  <lambdaenv> f |-> 2 => ?_ </lambdaenv>
   <lambdastore>
     1 |-> muclosure(f |-> 1, lambda x. if x <= 0 then 0 else (x + (f (x + -1))))
     2 |->   closure(f |-> 1,        x, if x <= 0 then 0 else (x + (f (x + -1))))
   =>
-    _
+    ?_
   </lambdastore>
-  <lambdacounter> 3 => _ </lambdacounter>
+  <lambdacounter> 3 => ?_ </lambdacounter>
 </lambdaT>
 requires N1 ==Int N2
 
@@ -125,26 +125,26 @@ claim
       n = n + -1;
     }
   =>
-    _
+    ?_
   </impk>
-  <impstate> sum |-> S:Int n |-> N1:Int => _ </impstate>
+  <impstate> sum |-> S:Int n |-> N1:Int => ?_ </impstate>
 </impT>
 <lambdaT>
   <lambdak>
     f (x + -1) ~> Ks:K
   =>
-    _
+    ?_
   </lambdak>
-  <lambdaenv> f |-> 1 x |-> L:Int => _ </lambdaenv>
+  <lambdaenv> f |-> 1 x |-> L:Int => ?_ </lambdaenv>
   <lambdastore>
     1 |-> muclosure(f |-> 1, lambda x. if x <= 0 then 0 else (x + (f (x + -1))))
     2 |->   closure(f |-> 1,        x, if x <= 0 then 0 else (x + (f (x + -1))))
     L |-> N2:Int
     _:Map
   =>
-    _
+    ?_
   </lambdastore>
-  <lambdacounter> L +Int 1 => _ </lambdacounter>
+  <lambdacounter> L +Int 1 => ?_ </lambdacounter>
 </lambdaT>
 requires sim(S, Ks)
  andBool N1 ==Int N2 -Int 1

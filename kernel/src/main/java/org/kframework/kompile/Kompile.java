@@ -299,7 +299,7 @@ public class Kompile {
         Module mainModule = parsedDef.mainModule();
         Option<Module> kModule = parsedDef.getModule("K");
         definitionChecks(stream(modules).collect(Collectors.toSet()));
-        structuralChecks(modules, mainModule, kModule, excludedModuleTags, true);
+        structuralChecks(modules, mainModule, kModule, excludedModuleTags);
     }
 
     // checks that are not verified in the prover
@@ -313,6 +313,13 @@ public class Kompile {
 
     // Extra checks just for the prover specification.
     public Module proverChecks(Module specModule, Module mainDefModule) {
+        // check rogue syntax in spec module
+        Set<Sentence> toCheck = mutable(specModule.sentences().$minus$minus(mainDefModule.sentences()));
+        for (Sentence s : toCheck)
+            if (s.isSyntax())
+                kem.registerCompilerWarning(ExceptionType.FUTURE_ERROR, errors,
+                        "Found syntax declaration in proof module. This will not be visible from the main module.", s);
+
         // TODO: remove once transition to claim rules is done
         // transform rules into claims if
         // - they are in the spec modules but not in the definition modules
@@ -329,13 +336,13 @@ public class Kompile {
         return mt.apply(specModule);
     }
 
-    public void structuralChecks(scala.collection.Set<Module> modules, Module mainModule, Option<Module> kModule, Set<String> excludedModuleTags, boolean _throw) {
+    public void structuralChecks(scala.collection.Set<Module> modules, Module mainModule, Option<Module> kModule, Set<String> excludedModuleTags) {
         boolean isSymbolic = excludedModuleTags.contains(Att.CONCRETE());
         boolean isKast = excludedModuleTags.contains(Att.KORE());
         CheckRHSVariables checkRHSVariables = new CheckRHSVariables(errors, !isSymbolic);
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
 
-        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAtt(errors, m)::check));
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAtt(errors, mainModule, isSymbolic && isKast)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckConfigurationCells(errors, m, isSymbolic && isKast)::check));
 
@@ -383,16 +390,8 @@ public class Kompile {
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckLabels(errors)::check));
 
         if (!errors.isEmpty()) {
-            if (_throw) {
-                kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
-                throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
-            } else {
-                for (KEMException error : errors) {
-                    kem.registerCriticalWarning(ExceptionType.FUTURE_ERROR, error.exception.getMessage() +
-                            "\nNote: this warning will become an error in subsequent releases.",
-                            error.exception);
-                }
-            }
+            kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
+            throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
         }
     }
 
