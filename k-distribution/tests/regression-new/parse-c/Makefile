@@ -13,4 +13,4 @@ clean:
 	rm -rf test.kore c18-translation-kompiled
 
 
-KRUN=./cparse
+KRUN_OR_KX=./cparse
