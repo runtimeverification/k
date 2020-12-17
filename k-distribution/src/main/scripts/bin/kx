@@ -55,14 +55,12 @@ execute () {
 KX=$(basename "$0")
 
 error () {
-  printf "%s" "[Error] Critical: "
-  echo "$@"
+  printf "[Error] Critical: $@\n" | fold -s 1>&2
   exit $result
 }
 
 warning () {
-  printf "%s" "[Warning] Compiler: "
-  echo "$@"
+  printf "[Warning] Compiler: $@\n" | fold -s 1>&2
 }
 
 print_usage () {
