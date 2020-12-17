@@ -176,7 +176,25 @@ public class KSyntax2Bison {
       }
       bison.append("%token TOK_" + kind + " " + (kind+1) + " " + StringUtil.enquoteCString(val) + "\n");
     }
-    for (Sort sort : iterable(module.allSorts())) {
+
+    //compute sorts reachable from start symbol
+    Map<Sort, List<Production>> prods = stream(module.productions()).collect(Collectors.groupingBy(p -> p.sort()));
+    Set<Sort> reachableSorts = new HashSet<>();
+    Deque<Sort> workList = new ArrayDeque<>();
+    workList.offer(start);
+    do {
+      Sort s = workList.poll();
+      if (reachableSorts.add(s)) {
+        List<Production> prodsForSort = prods.getOrDefault(s, java.util.Collections.<Production>emptyList());
+        for (Production prod : prodsForSort) {
+          for (NonTerminal nt : iterable(prod.nonterminals())) {
+            workList.offer(nt.sort());
+          }
+        }
+      }
+    } while (!workList.isEmpty());
+
+    for (Sort sort : reachableSorts) {
       bison.append("%nterm ");
       encode(sort, bison);
       bison.append("\n");
@@ -187,8 +205,7 @@ public class KSyntax2Bison {
     bison.append("top: ");
     encode(start, bison);
     bison.append(" { result = $1.nterm; } ;\n");
-    Map<Sort, List<Production>> prods = stream(module.productions()).collect(Collectors.groupingBy(p -> p.sort()));
-    for (Sort sort : iterable(module.allSorts())) {
+    for (Sort sort : reachableSorts) {
       encode(sort, bison);
       bison.append(":\n");
       String conn = "";
