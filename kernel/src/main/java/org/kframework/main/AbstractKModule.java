@@ -40,21 +40,6 @@ public abstract class AbstractKModule implements KModule {
         return Collections.emptyMap();
     }
 
-    @Override
-    public List<Module> getKDocModules() {
-        return Collections.<Module>singletonList(new AbstractModule() {
-
-            @Override
-            protected void configure() {
-                MapBinder<String, PosterBackend> mapBinder = MapBinder.newMapBinder(
-                        binder(), String.class, PosterBackend.class);
-                for (Pair<String, Class<? extends PosterBackend>> backend : posterTypes()) {
-                    mapBinder.addBinding(backend.getKey()).to(backend.getValue());
-                }
-            }
-        });
-    }
-
     protected void bindOptions(Supplier<List<Pair<Class<?>, Boolean>>> action, Binder binder) {
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder, Object.class, Options.class);
         Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder, new TypeLiteral<Class<?>>() {}, Options.class);

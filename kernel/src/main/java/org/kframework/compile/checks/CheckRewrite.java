@@ -37,6 +37,7 @@ public class CheckRewrite {
         class Holder {
             boolean hasRewrite = false;
             boolean inRewrite = false;
+            boolean inRewriteRHS = false;
             boolean inAs = false;
             boolean inFunctionContext = false;
             boolean inFunctionBody = false;
@@ -46,6 +47,7 @@ public class CheckRewrite {
             @Override
             public void apply(KRewrite k) {
                 boolean inRewrite = h.inRewrite;
+                boolean inRewriteRHS = h.inRewriteRHS;
                 if (h.inRewrite) {
                     errors.add(KEMException.compilerError("Rewrites are not allowed to be nested.", k));
                 }
@@ -57,13 +59,18 @@ public class CheckRewrite {
                 }
                 h.hasRewrite = true;
                 h.inRewrite = true;
-                super.apply(k);
+                super.apply(k.left());
+                h.inRewriteRHS = true;
+                super.apply(k.right());
+                h.inRewriteRHS = inRewriteRHS;
                 h.inRewrite = inRewrite;
             }
 
             @Override
             public void apply(KAs k) {
                 boolean inAs = h.inAs;
+                if (h.inRewriteRHS)
+                    errors.add(KEMException.compilerError("#as is not allowed in the RHS of a rule.", k));
                 h.inAs = true;
                 super.apply(k);
                 h.inAs = inAs;

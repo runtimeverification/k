@@ -16,7 +16,6 @@ import org.fusesource.jansi.AnsiConsole;
 import org.kframework.kast.KastFrontEnd;
 import org.kframework.kbmc.KBMCFrontEnd;
 import org.kframework.kdep.KDepFrontEnd;
-import org.kframework.kdoc.KDocFrontEnd;
 import org.kframework.keq.KEqFrontEnd;
 import org.kframework.kompile.KompileFrontEnd;
 import org.kframework.kprove.KProveFrontEnd;
@@ -157,15 +156,6 @@ public class Main {
                     modules.addAll(KompileFrontEnd.getModules());
                     for (KModule kModule : kModules) {
                         List<Module> ms = kModule.getKompileModules();
-                        if (ms != null) {
-                            modules.addAll(ms);
-                        }
-                    }
-                    break;
-                case "-kdoc":
-                    modules.addAll(KDocFrontEnd.getModules());
-                    for (KModule kModule : kModules) {
-                        List<Module> ms = kModule.getKDocModules();
                         if (ms != null) {
                             modules.addAll(ms);
                         }
