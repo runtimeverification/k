@@ -10,7 +10,7 @@ include ${K_HOME}/include/kframework/ktest.mak
 
 
 tests/div.imp: kompile
-	cat $@.in 2>/dev/null | $(KRUN) $@ -d $(DEFDIR) --search $(CHECK) $@.out
+	cat $@.in 2>/dev/null | $(KRUN_OR_KX) $@ -d $(DEFDIR) --search $(CHECK) $@.out
 
 tests/spawn.imp: kompile
-	cat $@.in 2>/dev/null | $(KRUN) $@ -d $(DEFDIR) --search --pattern "<output> ListItem(_) ListItem(_) ListItem(#buffer(Out:String)) </output>" $(CHECK) $@.out
+	cat $@.in 2>/dev/null | $(KRUN_OR_KX) $@ -d $(DEFDIR) --search --pattern "<output> ListItem(_) ListItem(_) ListItem(#buffer(Out:String)) </output>" $(CHECK) $@.out

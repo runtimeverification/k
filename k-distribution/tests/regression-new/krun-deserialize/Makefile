@@ -8,4 +8,7 @@ KRUN_FLAGS=--parser "cat"
 
 include ../../../include/kframework/ktest.mak
 
-KRUN=$(abspath $(MAKEFILE_PATH)/../../bin/krun)
+# Use krun for these tests instead of kx.
+# Setting KOMPILE_BACKEND=llvm above uses the value of KX to run tests, so
+# setting it equal to KRUN causes the actual krun to be used in any case.
+KRUN_OR_KX=$(KRUN)

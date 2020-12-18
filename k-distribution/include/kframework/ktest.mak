@@ -17,11 +17,13 @@ KEQ=$(abspath $(MAKEFILE_PATH)/../../bin/keq)
 # and kserver
 KSERVER=$(abspath $(MAKEFILE_PATH)/../../bin/kserver)
 # and ksearch
-KSEARCH=$(abspath $(MAKEFILE_PATH)/../../bin/krun) --search-all
+KSEARCH:=$(KRUN) --search-all
 # and kast
 KAST=$(abspath $(MAKEFILE_PATH)/../../bin/kast)
 # and kprint
 KPRINT=$(abspath $(MAKEFILE_PATH)/../../bin/kprint)
+# and kx
+KX=$(abspath $(MAKEFILE_PATH)/../../bin/kx)
 # path relative to current definition of test programs
 TESTDIR?=tests
 # path to put -kompiled directory in
@@ -42,11 +44,16 @@ KOMPILE_BACKEND?=llvm
 # check if .k file exists, if not, check if .md file exists
 # if not, default to .k to give error message
 SOURCE_EXT?=$(or $(and $(wildcard $(DEF).k), k), $(or $(and $(wildcard $(DEF).md), md), k))
+
+# Override KRUN with KX for the LLVM and Haskell backends.
+# Use `override` so that we can still pass the paths to krun and kx on the
+# command line.
 ifeq ($(KOMPILE_BACKEND),llvm)
-KRUN=$(abspath $(MAKEFILE_PATH)/../../bin/kx)
-endif
-ifeq ($(KOMPILE_BACKEND),haskell)
-KRUN=$(abspath $(MAKEFILE_PATH)/../../bin/kx)
+KRUN_OR_KX=$(KX)
+else ifeq ($(KOMPILE_BACKEND),haskell)
+KRUN_OR_KX=$(KX)
+else
+KRUN_OR_KX=$(KRUN)
 endif
 
 CHECK=| diff -
@@ -85,9 +92,9 @@ update-results: CHECK=>
 # specified in the makefile prior to including ktest.mak.
 %.$(EXT): kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
-	cat $@.in 2>/dev/null | $(KRUN) $@ $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
+	cat $@.in 2>/dev/null | $(KRUN_OR_KX) $@ $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
 else
-	cat $(RESULTDIR)/$(notdir $@).in 2>/dev/null | $(KRUN) $@ $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+	cat $(RESULTDIR)/$(notdir $@).in 2>/dev/null | $(KRUN_OR_KX) $@ $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %-spec.k %-spec.md: kompile
@@ -120,9 +127,9 @@ endif
 
 %.strat: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
-	$(KRUN) $@.input $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) -cSTRATEGY="$(shell cat $@)" $(CHECK) $@.out
+	$(KRUN_OR_KX) $@.input $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) -cSTRATEGY="$(shell cat $@)" $(CHECK) $@.out
 else
-	$(KRUN) $@.input $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) -cSTRATEGY="$(shell cat $@)" $(CHECK) $(RESULT_DIR)/$(notdir $@).out
+	$(KRUN_OR_KX) $@.input $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) -cSTRATEGY="$(shell cat $@)" $(CHECK) $(RESULT_DIR)/$(notdir $@).out
 endif
 
 %.kast: kompile

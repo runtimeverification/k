@@ -9,7 +9,6 @@ import com.google.inject.name.Names;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.kframework.kast.KastOptions;
-import org.kframework.kdoc.KDocOptions;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
@@ -92,7 +91,6 @@ public abstract class BaseTestCase {
         @Override
         protected void configure() {
             bind(RunProcess.class).toInstance(rp);
-            bind(KDocOptions.class).toInstance(new KDocOptions());
             bind(KRunOptions.class).toInstance(new KRunOptions());
             bind(KastOptions.class).toInstance(new KastOptions());
         }

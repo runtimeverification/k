@@ -16,7 +16,7 @@ import java.io.File;
 /**
  * Provides the information needed for tools that parse definitions from source to have acccess to {@link FileUtil}.
  *
- * Used currently by kompile, kdoc, and kdep.
+ * Used currently by kompile, and kdep.
  */
 public class OuterParsingModule extends AbstractModule {
 
