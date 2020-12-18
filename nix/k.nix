@@ -17,7 +17,8 @@ mavenix.buildMaven {
     let
       path = ./..;
       patterns = [
-        "result*" "nix/" "*.nix"
+        "nix/" "*.nix"
+        "!prelude.kore"
         "haskell-backend/src/main/native/haskell-backend/*"
         "!haskell-backend/src/main/native/haskell-backend/src"  # need prelude.kore
         "llvm-backend/src/main/native/llvm-backend/*"
