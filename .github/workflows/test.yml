@@ -2,8 +2,6 @@ name: "Test"
 on:
   pull_request:
 jobs:
-  # Check that the pinned Maven dependencies are up-to-date.
-  # We cannot update them here (in the pull request job).
   check-nix-maven:
     name: 'Nix: Maven'
     runs-on: ubuntu-latest
@@ -25,16 +23,6 @@ jobs:
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
           skipPush: true
 
-      - name: 'Update Maven dependencies'
-        run: ./nix/update-maven.sh
-
-      - name: 'Check for changes'
-        run: |
-          if [ ! $(git status --porcelain | wc -l) -eq 0 ]; then
-            echo "Found dirty files:"
-            git status --porcelain
-            exit 1
-          fi
 
   test-nix:
     name: 'Nix'
@@ -55,6 +43,17 @@ jobs:
         with:
           name: runtimeverification
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+
+      # Check that the pinned Maven dependencies are up-to-date.
+      # We cannot update them in the pull request job.
+      - name: 'Check for changed Maven dependencies'
+        run: |
+          ./nix/update-maven.sh
+          if [ ! $(git status --porcelain | wc -l) -eq 0 ]; then
+            echo "Found dirty files:"
+            git status --porcelain
+            exit 1
+          fi
 
       - name: 'Build K Framework'
         run: nix-build -A k -A llvm-backend -A haskell-backend
