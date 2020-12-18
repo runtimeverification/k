@@ -18,6 +18,30 @@ _K-based tool users_ should:
 The rest of this file assumes you intend to build and install the K Framework
 from source.
 
+# Supported System Configurations
+
+The following system configurations are known to be able to _build and run_ the K Framework.
+System configurations are listed by operating system, cpu architecture, and distribution.
+
+1.  Linux / Windows Subsystem for Linux Version 2 (x86-64)
+    - Ubuntu Bionic Beaver and Focal Fossa
+    - Debian Buster
+    - Arch Linux
+
+2.  macOS (x86-64)
+    - brew - build/run
+
+The following system configurations are known to be able to _run_ the K Framework.
+They _likely cannot build_ the K Framework.
+
+1.  Windows Subsystem for Linux Version 1 (x86-64)
+    - Ubuntu Bionic Beaver and Focal Fossa - build/run
+    - Debian Buster - build/run
+
+Relatively recent Linux x86-64 distributions may be able to _run_ our platform
+independent binary. See our [releases page](https://github.com/kframework/k/releases/)
+for details.
+
 # Prerequisite Install Guide
 
 Before building and installing the K Framework, the following prerequisites
@@ -44,7 +68,42 @@ If you install this list of dependencies, continue directly to the [Build and In
 
 ## The Long Version
 
-### Java Development Kit (required JDK8 version 8u45 or higher)
+The following dependencies are needed either at build time or runtime:
+
+*   [bison](https://www.gnu.org/software/bison/)
+*   [boost](https://www.boost.org/)
+*   [cmake](https://cmake.org/)
+*   [flex](https://github.com/westes/flex)
+*   [gcc](https://gcc.gnu.org/)
+*   [gmp](https://gmplib.org/)
+*   [jdk](https://openjdk.java.net/) (version 8u45 or greater)
+*   [libjemalloc](https://github.com/jemalloc/jemalloc)
+*   [libyaml](https://pyyaml.org/wiki/LibYAML)
+*   [llvm](https://llvm.org/) (on some distributions, the utilities below are also needed and packaged separately)
+    * [clang](http://clang.llvm.org/)
+    * [lld](https://lld.llvm.org/)
+*   [make](https://www.gnu.org/software/make/)
+*   [maven](https://maven.apache.org/)
+*   [mpfr](http://www.mpfr.org/)
+*   [python](https://www.python.org)
+*   [stack](https://docs.haskellstack.org/en/stable/README/)
+*   [zlib](https://www.zlib.net/)
+*   [z3](https://github.com/Z3Prover/z3) (on some distributions libz3 is also needed and packaged separately)
+
+The following dependencies are optional and are only needed when building
+the OCaml backend (**not recommended**):
+
+*   [opam](https://opam.ocaml.org/doc/Install.html)
+*   [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
+
+Typically, these can all be installed from your package manager.
+On some system configurations, special installation steps or post-installation
+configuration steps are required.
+See the notes below.
+
+### Installation Notes
+
+#### Java Development Kit (required JDK8 version 8u45 or higher)
 
 Linux:
 *   Download from package manager (e.g. `sudo apt-get install openjdk-8-jdk`)
@@ -52,12 +111,19 @@ Linux:
 To make sure that everything works you should be able to call `java -version` and
 `javac -version` from a Terminal.
 
-### Apache Maven
+#### LLVM
+
+macOS/brew:
+*   Since LLVM is distributed as a keg-only package, we must explicitly make
+    it available for command line usage. See the results of the
+    `brew info llvm` command for more information on how to do this.
+
+#### Apache Maven
 
 Linux:
 *   Download from package manager (e.g. `sudo apt-get install maven`)
 
-Mac:
+macOS:
 *   Download it from a package manager or from
     http://maven.apache.org/download.cgi and follow the instructions on the webpage.
 
@@ -68,26 +134,10 @@ You can test if it works by calling `mvn -version` in a Terminal.
 This will provide the information about the JDK Maven is using, in case
 it is the wrong one.
 
-### Haskell Stack
+#### Haskell Stack
 
 To install, go to <https://docs.haskellstack.org/en/stable/README/> and follow the instructions.
 You may need to do `stack upgrade` to ensure the latest version of Haskell Stack.
-
-### Miscellaneous
-
-Also required:
-
-*   [gcc](https://gcc.gnu.org/)
-*   [flex](https://github.com/westes/flex)
-*   [make](https://www.gnu.org/software/make/)
-*   [gmp](https://gmplib.org/)
-*   [mpfr](http://www.mpfr.org/)
-*   [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
-*   [z3](https://github.com/Z3Prover/z3)
-*   [python](https://www.python.org)
-*   [opam](https://opam.ocaml.org/doc/Install.html) **OPTIONAL**
-
-These can all be installed from your package manager.
 
 # Build and Install Guide
 
@@ -98,58 +148,58 @@ your $PATH with <checkout-dir>k-distribution/target/release/k/bin (strongly reco
 You are also encouraged to set the environment variable `MAVEN_OPTS` to `-XX:+TieredCompilation`,
 which will significantly speed up the incremental build process.
 
-**IF** you want to use the OCAML backend (not recommended), you need to install
-the following dependencies:
+## Optional OCaml Backend Setup
 
--   [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
--   [opam](https://opam.ocaml.org/)
-
-and then after running `mvn package` for the first time, setup OCAML dependencies:
+**If** you want to use the OCaml backend (not recommended), then after running
+`mvn package` for the first time, setup the OCaml dependencies by running
+the following command:
 
 ```sh
 k-distribution/target/release/k/bin/k-configure-opam
 eval $(opam config env)
 ```
 
-This performs first-time setup of the OCAML backend. You may optionally set
-`OPAMROOT` before running this command to specify where the OCAML dependencies
-should be installed to.
+This performs first-time setup of the OCaml backend. You may optionally set
+`OPAMROOT` before running this command to specify where any OCaml dependencies
+should be installed.
 
 ## Installing on fresh Windows Subsystem for Linux
 
-1. Install the Ubuntu package from the Windows Store, which as of now is an alias for the Ubuntu LTS 18.04 package. During installation you will be asked to create a new user.
-2. Download the latest K distribution for Ubuntu Bionic from https://github.com/kframework/k/releases
+1.  Install the Ubuntu package from the Windows Store, which as of now is an alias for the Ubuntu LTS 18.04 package. During installation you will be asked to create a new user.
+2.  Download the latest K distribution for Ubuntu Bionic from https://github.com/kframework/k/releases
     to a temporary directory, for example `d:\temp`
 
-3. Open linux bash. For example by running:
-```
-ubuntu1804
-```
+3.  Open linux bash. For example by running:
 
-4. Run the following commands:
+    ```
+    ubuntu1804
+    ```
+
+4.  Run the following commands:
 
     `$ sudo apt-get update`
 
     `$ cd <download dir>`. In our example download dir is `/mnt/d/temp`
 
     `$ sudo apt-get install ./kframework_5.0.0_amd64_bionic.deb`
-        This will install ~1.4GB of dependencies and will take some time.
-        K will be installed to `/usr`
+    This will install ~1.4GB of dependencies and will take some time.
+    K will be installed to `/usr`
 
-5. Copy the tutorial to some work directory, for example `/mnt/d/k-tutorial`. Otherwise, you won't be able to run the
-examples from default installation dir if you are not `root`:
+5.  Copy the tutorial to some work directory, for example `/mnt/d/k-tutorial`.
+    Otherwise, you won't be able to run the examples from default installation
+    dir if you are not `root`:
 
-```
-$ cp -R /usr/share/kframework/tutorial /mnt/d/k-tutorial
-```
+    ```
+    $ cp -R /usr/share/kframework/tutorial /mnt/d/k-tutorial
+    ```
 
-6. Now you can try to run some programs:
+6.  Now you can try to run some programs:
 
-```bash
-$ cd /mnt/d/k-tutorial/2_languages/1_simple/1_untyped
-$ make kompile
-$ krun tests/diverse/factorial.simple
-```
+    ```bash
+    $ cd /mnt/d/k-tutorial/2_languages/1_simple/1_untyped
+    $ make kompile
+    $ krun tests/diverse/factorial.simple
+    ```
 
 # Building with Nix
 
