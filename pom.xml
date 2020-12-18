@@ -242,7 +242,7 @@
               <configLocation>src/main/config/checkstyle-copyright.xml</configLocation>
               <failsOnError>true</failsOnError>
               <consoleOutput>true</consoleOutput>
-              <excludes>haskel-backend/src/main/native/**,llvm-backend/src/main/native/**,k-distribution/include/kore/prelude.kore,.idea/**,**/com/davekoelle/**,**/src/main/sdf/syntax/Integration.sdf</excludes>
+              <excludes>haskell-backend/src/main/native/**,llvm-backend/src/main/native/**,k-distribution/include/kore/prelude.kore,.idea/**,**/com/davekoelle/**,**/src/main/sdf/syntax/Integration.sdf</excludes>
             </configuration>
           </execution>
           <execution>

@@ -2,7 +2,6 @@
 .krun*
 .kast*
 .ktest*
-.kdoc*
 .kprove*
 *-kompiled
 *.pdf
@@ -23,3 +22,4 @@ junit-reports
 target/
 kore/doc
 __pycache__
+result*

@@ -68,9 +68,6 @@ maps. `.Map` is the empty map.
 Kompile `imp.k` and run several programs to see how the configuration is
 initialized as desired.
 
-Also, compile with the option `--pdf`, to see how configurations are displayed
-in the documentation: like nested labeled bubbles, where each bubble is a cell.
-
 When configurations get large, and they do when defining large programming
 languages, you may want to color the cells in order to more easily distinguish
 them. This can be easily achieved using the `color` cell attribute, following
@@ -80,9 +77,6 @@ again an XML-ish style:
                     <k color="green"> $PGM:Pgm </k>
                     <state color="red"> .Map </state>
                   </T>
-
-Compile again with the `--pdf` option and take a look at the new configuration.
-The cells should be now colored as indicated.
 
 In the next lesson we will learn how to write rules that involve cells.
 
