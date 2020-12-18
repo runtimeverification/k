@@ -605,6 +605,7 @@ pipeline {
               git clone 'ssh://github.com/kframework/k.git' --depth 1 --no-single-branch --branch master --branch gh-pages
               cd k
               git checkout -B gh-pages origin/master
+              git submodule update --init --recursive -- ./web
               cd web
               npm install
               npm run build
