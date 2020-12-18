@@ -169,14 +169,19 @@ You may need to do `stack upgrade` to ensure the latest version of Haskell Stack
 
 # Build and Install Guide
 
-Checkout the project source at your desired location and call `mvn package` from the main
-directory to build the distribution. For convenient usage, you can update
-your $PATH with <checkout-dir>k-distribution/target/release/k/bin (strongly recommended, but optional).
+## Building with Maven
 
-You are also encouraged to set the environment variable `MAVEN_OPTS` to `-XX:+TieredCompilation`,
-which will significantly speed up the incremental build process.
+Checkout the project source at your desired location and call `mvn package`
+from the main directory to build the distribution. For convenient usage, you
+can update your `$PATH` with
+`<checkout-dir>/k-distribution/target/release/k/bin`
+(strongly recommended, but optional).
 
-## Optional OCaml Backend Setup
+You are also encouraged to set the environment variable `MAVEN_OPTS` to
+`-XX:+TieredCompilation`, which will significantly speed up the incremental
+build process.
+
+### Optional OCaml Backend Setup
 
 **If** you want to use the OCaml backend (not recommended), then after running
 `mvn package` for the first time, setup the OCaml dependencies by running
@@ -191,7 +196,7 @@ This performs first-time setup of the OCaml backend. You may optionally set
 `OPAMROOT` before running this command to specify where any OCaml dependencies
 should be installed.
 
-# Building with Nix
+## Building with Nix
 
 To build the K Framework itself, run:
 
