@@ -39,9 +39,6 @@ jobs:
       - name: 'Check development environment'
         run: nix-shell --run "echo OK"
 
-      - name: 'Run integration tests'
-        run: nix-build test.nix
-
   # Update README.md if this job changes.
   test-nix-install:
     name: 'Nix: Install'
