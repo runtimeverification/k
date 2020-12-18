@@ -2,12 +2,12 @@
   "artifactId": "parent",
   "deps": [
     {
-      "path": "ant-contrib/ant-contrib/1.0b3/ant-contrib-1.0b3.jar",
-      "sha1": "943cd5c8802b2a3a64a010efb86ec19bac142e40"
-    },
-    {
       "path": "ant-contrib/ant-contrib/1.0b3/ant-contrib-1.0b3.pom",
       "sha1": "3a97f431768378a9fdbf082aec8312b99339ae78"
+    },
+    {
+      "path": "ant-contrib/ant-contrib/1.0b3/ant-contrib-1.0b3.jar",
+      "sha1": "943cd5c8802b2a3a64a010efb86ec19bac142e40"
     },
     {
       "path": "antlr/antlr/2.7.2/antlr-2.7.2.jar",
