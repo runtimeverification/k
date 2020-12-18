@@ -20,27 +20,55 @@ from source.
 
 # Supported System Configurations
 
-The following system configurations are known to be able to _build and run_ the K Framework.
-System configurations are listed by operating system, cpu architecture, and distribution.
+We release packages for the following system configurations given in order
+of kernel, CPU architecture, and operating system/package manager.
+These configurations are known to be able to build and run the K Framework:
 
-1.  Linux / Windows Subsystem for Linux Version 2 (x86-64)
-    - Ubuntu Bionic Beaver and Focal Fossa
-    - Debian Buster
-    - Arch Linux
+*   Linux (x86-64) Ubuntu Bionic
+*   Linux (x86-64) Ubuntu Focal Fossa
+*   Linux (x86-64) Arch Linux
+*   Linux (x86-64) Debian Buster
+*   Linux (x86-64) Platform Indepdent Binary (tested on Ubuntu)
+*   macOS (x86-64) Brew
 
-2.  macOS (x86-64)
-    - brew - build/run
+NOTE: users of the platform independent binary must install any needed
+runtime dependencies separately.
 
-The following system configurations are known to be able to _run_ the K Framework.
-They _likely cannot build_ the K Framework.
+The following system configurations have **no direct support** (but see notes
+below about virtual machine/emulation support):
 
-1.  Windows Subsystem for Linux Version 1 (x86-64)
-    - Ubuntu Bionic Beaver and Focal Fossa - build/run
-    - Debian Buster - build/run
+*   Windows (any architecture)
+*   macOS (M1)
 
-Relatively recent Linux x86-64 distributions may be able to _run_ our platform
-independent binary. See our [releases page](https://github.com/kframework/k/releases/)
-for details.
+## Virtualized System Configurations
+
+Even if your system is not supported directly, you may be able to:
+
+1.  Install a free virtual machine/emulation software;
+2.  Install a supported Linux distribution on your virtual machine
+
+Our recommendations for virtual machine software are as follows:
+
+*   Windows 10 (x86-64) users should use
+    [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/)
+    with [version 2](https://docs.microsoft.com/en-us/windows/wsl/compare-versions) **recommended**
+    (version 1 should run the K Framework packages but has known issues when building from source).
+    To install a WSL Linux distribution, follow
+    [these instructions](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+    Then begin the package installation/source build process in the newly created
+    Linux environment.
+
+*   Windows 8 and older (x86-64) users can install
+    [VirtualBox](https://www.virtualbox.org) and then:
+    1.   create a new virtual machine (VM);
+    2.   download a Linux distribution ISO of their choice;
+    3.   install the Linux ISO to the VM created in step (1);
+    4.   begin the package installation/source build process in the newly
+         created VM.
+
+*   macOS (M1) users should use a Linux (x86-64) emulator when they become
+    generally available (if you know of a solution that works now, please let
+    us know so we can update this section).
 
 # Prerequisite Install Guide
 
