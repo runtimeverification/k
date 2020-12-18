@@ -7,7 +7,16 @@ copyright: Copyright (c) 2010-2020 K Team. All Rights Reserved.
 
 # Introduction
 
-This is a readme file for _K developers_.
+The K Framework is a tool for designing and modeling programming languages,
+systems, and more.
+At the core of the K Framework is a language called K.
+The K Framework includes tools for compiling K specifications to build
+interpreters, model checkers, verifiers, associated documentation, and more.
+
+## Preface
+
+This is a readme file for _K developers_. Users should feel comfortable using
+the command line, as we do not provide GUI tools at this time.
 
 _K-based tool users_ should:
 
