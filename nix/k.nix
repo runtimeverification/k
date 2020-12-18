@@ -14,16 +14,27 @@ mavenix.buildMaven {
   name = "k-5.0.0";
   infoFile = ./mavenix.lock;
   src =
-    gitignoreSourcePure
-      [
-        ".git/" "result*" "nix/" "*.nix"
+    let
+      path = ./..;
+      patterns = [
+        "result*" "nix/" "*.nix"
         "haskell-backend/src/main/native/haskell-backend/*"
         "!haskell-backend/src/main/native/haskell-backend/src"  # need prelude.kore
         "llvm-backend/src/main/native/llvm-backend/*"
         "!llvm-backend/src/main/native/llvm-backend/matching"  # need pom.xml
         "k-distribution/tests/regression-new"
-      ]
-      ./..;
+      ];
+      inherit (nix-gitignore) gitignoreFilterPure withGitignoreFile;
+      filter =
+        gitignoreFilterPure
+          (_: _: true)
+          (withGitignoreFile patterns path)
+          path;
+    in
+      builtins.path {
+        inherit path filter;
+        name = "k";
+      };
 
   # Cannot enable unit tests until a bug is fixed upstream (in Mavenix).
   doCheck = false;
