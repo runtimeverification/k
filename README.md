@@ -18,6 +18,19 @@ _K-based tool users_ should:
 The rest of this file assumes you intend to build and install the K Framework
 from source.
 
+## Contents
+
+1.  [Supported System Configurations](#supported-system-configurations)
+2.  [Prerequisite Install Guide](#prerequisite-install-guide)
+3.  [Build and Install Guide](#build-and-install-guide)
+4.  [Quick Start for Ubuntu Bionic/Focal](#quick-start-for-ubuntu-bionicfocal)
+5.  [IDE Setup](#ide-setup)
+6.  [Running the Test Suite](#running-the-test-suite)
+7.  [Changing the KORE Data Structures](#changing-the-kore-data-structures)
+8.  [Building the Final Release Directory/Archives](#building-the-final-release-directoryarchives)
+9.  [Compiling Definitions and Running Programs](#compiling-definitions-and-running-programs)
+10. [Troubleshooting](#troubleshooting)
+
 # Supported System Configurations
 
 We release packages for the following system configurations given in order
