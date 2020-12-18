@@ -44,14 +44,16 @@ jobs:
           name: runtimeverification
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
 
-      - name: 'Update Maven dependencies'
-        run: ./nix/update-maven.sh
-
-      - name: 'Commit changes to Maven dependencies'
-        uses: stefanzweifel/git-auto-commit-action@v4.7.2
-        with:
-          commit_message: 'Update Maven dependencies'
-          file_pattern: 'nix/'
+      # Check that the pinned Maven dependencies are up-to-date.
+      # We cannot update them in the pull request job.
+      - name: 'Check for changed Maven dependencies'
+        run: |
+          ./nix/update-maven.sh
+          if [ ! $(git status --porcelain | wc -l) -eq 0 ]; then
+            echo "Found dirty files:"
+            git status --porcelain
+            exit 1
+          fi
 
       - name: 'Build K Framework'
         run: nix-build -A k -A llvm-backend -A haskell-backend
