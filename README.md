@@ -85,6 +85,7 @@ The following dependencies are needed either at build time or runtime:
 *   [make](https://www.gnu.org/software/make/)
 *   [maven](https://maven.apache.org/)
 *   [mpfr](http://www.mpfr.org/)
+*   [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
 *   [python](https://www.python.org)
 *   [stack](https://docs.haskellstack.org/en/stable/README/)
 *   [zlib](https://www.zlib.net/)
@@ -94,7 +95,6 @@ The following dependencies are optional and are only needed when building
 the OCaml backend (**not recommended**):
 
 *   [opam](https://opam.ocaml.org/doc/Install.html)
-*   [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
 
 Typically, these can all be installed from your package manager.
 On some system configurations, special installation steps or post-installation
