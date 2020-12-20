@@ -32,12 +32,13 @@ expandMacros=true
 result=1
 
 # setup temp files
-tempDir="$(mktemp -d tmp.krun.XXXXXXXXXX)"
+now=`date +"%Y-%m-%d-%H-%M-%S-"$((10#$(date +%N)/1000000))`
+tempDir="$(mktemp -d .krun-${now}-XXXXXXXXXX)"
 tempFiles=("$tempDir")
 trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
 
-input_file="$(mktemp tmp.in.XXXXXXXXXX)"
-expanded_input_file="$(mktemp tmp.in.XXXXXXXXXX)"
+input_file="$(mktemp ${tempDir}/tmp.in.XXXXXXXXXX)"
+expanded_input_file="$(mktemp ${tempDir}/tmp.in.XXXXXXXXXX)"
 kore_output="$tempDir/result.kore"
 tempFiles+=("$input_file")
 tempFiles+=("$expanded_input_file")
@@ -195,7 +196,7 @@ do
       val=${keyval#*=}
       var_name="config_var_$key"
       params+=("$key")
-      tempFile="$(mktemp tmp."$key".pretty.XXXXXXXXXX)"
+      tempFile="$(mktemp ${tempDir}/tmp."$key".pretty.XXXXXXXXXX)"
       tempFiles+=("$tempFile")
       printf %s "$val" > "$tempFile"
       printf -v "$var_name" %s "$tempFile"
@@ -422,7 +423,7 @@ else
   for name in "${params[@]}"; do
     parser_name="parser_$name"
     config_name="config_var_$name"
-    tempFile="$(mktemp tmp.in."$name".XXXXXXXXXX)"
+    tempFile="$(mktemp ${tempDir}/tmp.in."$name".XXXXXXXXXX)"
     tempFiles+=("$tempFile")
     if [ -f $kompiledDir"/sort_"$name".txt" ]; then
       sortName=`cat "$kompiledDir"/sort_"$name".txt`
@@ -442,7 +443,7 @@ else
         parser=("${!parser_name}")
       fi
       execute "${parser[@]}" "${!config_name}" > "$tempFile"
-      configVars="$configVars -c $name $tempFile $sortName korefile"
+      configVars="$configVars -c $name $(basename $tempFile) $sortName korefile"
     else
       warning "Command line variable $name not found in the configuration. Ignoring."
     fi
@@ -462,12 +463,13 @@ else
       unescaped=$(</dev/stdin)
       stdinText=$(awk 'BEGIN {for(n=0;n<256;n++)ord[sprintf("%c",n)]=n} {text = text $0 ORS} END {split(text, chars, ""); for (i=1; i<=length(text); i++) { if (chars[i] == "\"") { printf("%s", "\\\"") } else if (chars[i] == "\\") { printf("%s", "\\\\") } else if (chars[i] == "\n") { printf("%s", "\\n") } else if (chars[i] == "\t") { printf("%s", "\\t") } else if (chars[i] == "\r") { printf("%s", "\\r") } else if (chars[i] == "\f") { printf("%s", "\\f") } else if (ord[chars[i]] >= 32 && ord[chars[i]] < 127) { printf("%s", chars[i]) } else { printf("\\x%02x", ord[chars[i]]) } } }' <<< "$unescaped")
     fi
-    stdinFile="$(mktemp tmp.stdin.XXXXXXXXXX)"
+    stdinFile="$(mktemp ${tempDir}/tmp.stdin.XXXXXXXXXX)"
     tempFiles+=("$stdinFile")
     printf '\dv{SortString{}}(\"%s\")\n' "$stdinText" > "$stdinFile"
     configVars="$configVars -c STDIN $stdinFile String korefile"
   fi
-  execute llvm-krun $configVars -d "$kompiledDir" $flags --dry-run -o "$input_file"
+  # llvm-krun creates temp files in the cwd so execute it in $tempDir instead
+  (cd $tempDir; execute llvm-krun $configVars -d "../$kompiledDir" $flags --dry-run -o "$(basename $input_file)")
 fi
 
 # Expand macros
@@ -500,7 +502,7 @@ else
     koreExecFlags="$koreExecFlags --smt-prelude $smtPrelude"
   fi
   if $search || [ -n "$pattern" ]; then
-    patternFile="$(mktemp tmp.pattern.XXXXXXXXXX)"
+    patternFile="$(mktemp ${tempDir}/tmp.pattern.XXXXXXXXXX)"
     tempFiles+=("$patternFile")
     if [ -z "$pattern" ]; then
       echo '\and{SortGeneratedTopCell{}}(VarResult:SortGeneratedTopCell{},\top{SortGeneratedTopCell{}}())' > "$patternFile"
@@ -509,7 +511,7 @@ else
     fi
 
     if ! $search; then
-      final_input="$(mktemp tmp.in.XXXXXXXXXX)"
+      final_input="$(mktemp ${tempDir}/tmp.in.XXXXXXXXXX)"
       tempFiles+=("$final_input")
       set +e
       execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$final_input" $koreExecFlags
@@ -540,7 +542,7 @@ if ! $dryRun; then
     if $statistics; then
       steps=$(head -1 "$kore_output")
       echo "[$steps steps]"
-      kore_output2="$(mktemp tmp.out.XXXXXXXXXX)"
+      kore_output2="$(mktemp ${tempDir}/tmp.out.XXXXXXXXXX)"
       tail -1 "$kore_output" > "$kore_output2"
       mv "$kore_output2" "$kore_output"
     fi

@@ -47,4 +47,4 @@ update-results: CHECK=>
 update-results: CHECK2=|| true
 
 clean:
-	rm -rf $(DEFDIR)/*-kompiled .depend-tmp .depend
+	rm -rf $(DEFDIR)/*-kompiled .depend-tmp .depend $(DEFDIR)/.krun-*

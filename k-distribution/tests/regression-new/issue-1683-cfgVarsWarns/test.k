@@ -4,5 +4,5 @@
 module TEST
     imports INT
     configuration <k> $PGM:Int </k>
-                  <foo> $Foo </foo>
+                  <foo> $Foo:Int </foo>
 endmodule
