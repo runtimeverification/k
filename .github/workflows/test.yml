@@ -39,9 +39,6 @@ jobs:
       - name: 'Check development environment'
         run: nix-shell --run "echo OK"
 
-      - name: 'Run integration tests'
-        run: nix-build test.nix
-
   # Update README.md if this job changes.
   test-nix-install:
     name: 'Nix: Install'
@@ -52,11 +49,19 @@ jobs:
     timeout-minutes: 10
     runs-on: ${{ matrix.os }}
     steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v2.3.4
+        with:
+          submodules: recursive
+          # Avoid cloning a detached-HEAD repository on pull_request events.
+          # git-auto-commit-action (below) needs this to find the original
+          # branch where it should push the changes.
+          ref: ${{ github.head_ref }}
+
       - name: Test end-to-end installation instructions
         run: |
           bash <(curl -L https://nixos.org/nix/install)
           . $HOME/.nix-profile/etc/profile.d/nix.sh
           nix-env -iA cachix -f https://cachix.org/api/v1/install
           cachix use runtimeverification
-          nix-env -f https://github.com/${{ github.repository }}/archive/${{ github.sha }}.tar.gz \
-            -i -A k -A haskell-backend -A llvm-backend
+          nix-env -f . -i -A k -A haskell-backend
