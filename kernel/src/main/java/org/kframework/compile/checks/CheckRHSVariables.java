@@ -4,6 +4,7 @@ package org.kframework.compile.checks;
 import com.google.common.collect.Sets;
 import org.kframework.attributes.Att;
 import org.kframework.compile.GatherVarsVisitor;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.RuleOrClaim;
@@ -13,7 +14,10 @@ import org.kframework.kore.KVariable;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -40,10 +44,15 @@ public class CheckRHSVariables {
         Set<String> unboundVariableNames = getUnboundVarNames(rule);
         boolean errorExistential = this.errorExistential && !(rule.att().contains(Att.LABEL()) && rule.att().get(Att.LABEL()).equals("STDIN-STREAM.stdinUnblock"));
         gatherVars(true, rule.body(), errorExistential);
-        gatherVars(false, rule.requires(), errorExistential);
         gatherVars(false, rule.ensures(), errorExistential);
-        check(rule.body(), true, false, unboundVariableNames);
-        check(rule.requires(), false, false, unboundVariableNames);
+        if (rule instanceof Claim) {
+            gatherVars(true, rule.requires(), errorExistential);
+            check(Arrays.asList(rule.requires(), rule.body()), true, false, unboundVariableNames);
+        } else {
+            gatherVars(false, rule.requires(), errorExistential);
+            check(rule.body(), true, false, unboundVariableNames);
+            check(rule.requires(), false, false, unboundVariableNames);
+        }
         check(rule.ensures(), false, false, unboundVariableNames);
     }
 
@@ -96,8 +105,13 @@ public class CheckRHSVariables {
     }
 
     private void check(K body, boolean isBody, boolean isAlias, Set<String> unboundVarNames) {
+        check(Collections.singletonList(body), isBody, isAlias, unboundVarNames);
+    }
+
+    private void check(List<K> body, boolean isBody, boolean isAlias, Set<String> unboundVarNames) {
         Set<KVariable> unbound = new HashSet<>();
-        new ComputeUnboundVariables(isBody, false, errors, vars, unbound::add).apply(body);
+        for (K b : body)
+            new ComputeUnboundVariables(isBody, false, errors, vars, unbound::add).apply(b);
         for (KVariable k : unbound) {
             if (unboundVarNames.contains(k.name())) continue;
             if (isAlias && k.name().equals("HOLE")) continue;
@@ -106,5 +120,4 @@ public class CheckRHSVariables {
                 + " Did you mean \"?" + k.name() + "\"?", k));
         }
     }
-
 }
