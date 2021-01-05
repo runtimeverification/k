@@ -1,0 +1,16 @@
+  #Not ( {
+    X
+  #Equals
+    y
+  } )
+#And
+  <k>
+    lookupResult ( ( X:MyId |-> 3 ) [ x <- 5 ] [ X:MyId ] ~> . ) ~> .
+  </k>
+#And
+  {
+    true
+  #Equals
+    X:MyId in_keys ( ( X:MyId |-> 3 ) [ x <- 5 ]
+    ( y |-> 4 ) )
+  }
