@@ -1,0 +1,17 @@
+  <k>
+    lookupResult ( MAP
+    ( Y:MyId |-> 2 ) [ Z:MyId ] ~> . ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    Y:MyId in_keys ( MAP )
+  }
+#And
+  {
+    true
+  #Equals
+    Z:MyId in_keys ( MAP
+    ( Y:MyId |-> 2 ) )
+  }
