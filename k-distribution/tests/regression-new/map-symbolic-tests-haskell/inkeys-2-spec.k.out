@@ -1,9 +1,0 @@
-  <k>
-    inkeysResult ( true ) ~> .
-  </k>
-#And
-  {
-    false
-  #Equals
-    X:MyId in_keys ( M )
-  }
