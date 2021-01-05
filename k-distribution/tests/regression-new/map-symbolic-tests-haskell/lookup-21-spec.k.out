@@ -1,0 +1,21 @@
+  #Not ( {
+    X
+  #Equals
+    Y
+  } )
+#And
+  <k>
+    lookupResult ( 1 ~> . ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in_keys ( MAP )
+  }
+#And
+  {
+    false
+  #Equals
+    Y:MyId in_keys ( MAP )
+  }
