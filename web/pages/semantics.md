@@ -1,38 +1,62 @@
 # Semantics in K
 
-<br>
+## Featured
 
-| Semantics                                                                                           | Start date   | Status   |
-| --------------------------------------------------------------------------------------------------- | ------------ | -------- |
-| [c-semantics](https://github.com/kframework/c-semantics)                                            | Jul 24, 2010 | Active   |
-| [wasm-semantics](https://github.com/kframework/wasm-semantics)                                      | Aug 19, 2015 | Active   |
-| [elrond-semantics](https://github.com/runtimeverification/elrond-semantics)                         | Aug 19, 2015 | Active   |
-| [iele-semantics](https://ielelang.org/)                                                             | Oct 3, 2016  | Active   |
-| [evm-semantics](https://github.com/kframework/evm-semantics)                                        | Oct 3, 2016  | Active   |
-| [ewasm-semantics](https://github.com/kframework/ewasm-semantics)                                    | Jul 10, 2019 | Active   |
-| [michelson-semantics](https://runtimeverification.github.io/michelson-semantics/)                   | Oct 5, 2019  | Active   |
-| [boogie-semantics](https://github.com/kframework/boogie-semantics)                                  | Apr 13, 2020 | Active   |
-| [llvm-semantics](https://github.com/kframework/llvm-semantics)                                      | Dec 26, 2011 | Inactive |
-| [python-semantics](https://github.com/kframework/python-semantics)                                  | Mar 10, 2012 | Inactive |
-| [java-semantics](https://github.com/kframework/java-semantics)                                      | Mar 22, 2012 | Inactive |
-| [ocaml-semantics](https://github.com/kframework/ocaml-semantics)                                    | Aug 7, 2012  | Inactive |
-| [javascript-semantics](https://github.com/kframework/javascript-semantics)                          | Apr 23, 2013 | Inactive |
-| [aadl-semantics](https://github.com/kframework/aadl-semantics)                                      | Oct 2, 2013  | Inactive |
-| [alk-semantics](https://github.com/kframework/alk-semantics)                                        | Oct 7, 2013  | Inactive |
-| [cink-semantics](https://github.com/kframework/cink-semantics)                                      | Oct 9, 2013  | Inactive |
-| [jvm-semantics](https://github.com/kframework/jvm-semantics)                                        | Oct 17, 2013 | Inactive |
-| [modelink-semantics](https://github.com/kframework/modelink-semantics)                              | Dec 10, 2013 | Inactive |
-| [javacard-semantics](https://github.com/kframework/javacard-semantics)                              | Jun 8, 2014  | Inactive |
-| [orc-semantics](https://github.com/kframework/orc-semantics)                                        | May 23, 2016 | Inactive |
-| [haskell-core-semantics](https://github.com/kframework/haskell-core-semantics)                      | Aug 30, 2016 | Inactive |
-| [plutus-core-semantics](https://github.com/kframework/plutus-core-semantics)                        | Oct 3, 2016  | Inactive |
-| [p4-semantics](https://github.com/kframework/p4-semantics)                                          | Nov 8, 2016  | Inactive |
-| [X86-64-semantics](https://github.com/kframework/X86-64-semantics)                                  | Oct 16, 2017 | Inactive |
-| [vyper-semantics](https://github.com/kframework/vyper-semantics)                                    | Oct 25, 2017 | Inactive |
-| [erc20-semantics](https://github.com/runtimeverification/erc20-semantics)                           | Nov 21, 2017 | Inactive |
-| [solidity-semantics](https://github.com/kframework/solidity-semantics)                              | Jun 1, 2018  | Inactive |
-| [eei-semantics](https://github.com/kframework/eei-semantics)                                        | Aug 28, 2018 | Inactive |
-| [erc777-semantics](https://github.com/runtimeverification/erc777-semantics)                         | Aug 11, 2018 | Inactive |
-| [k-in-k](https://github.com/kframework/k-in-k)                                                      | Sep 6, 2018  | Inactive |
-| [yul-semantics](https://github.com/ethereum/yul-semantics)                                          | Aug 23, 2019 | Inactive |
-| [hybrid-programs-semantics](https://github.com/Formal-Systems-Laboratory/hybrid-programs-semantics) | Jan 15, 2020 | Inactive |
+### [C (Jul 2010 - Present)](https://github.com/kframework/c-semantics)
+
+K semantics of the [C programming language](<https://en.wikipedia.org/wiki/C_(programming_language)>). It can help catch the undefined behaviors of C programs.
+
+### [KWasm (Aug 2015 - Present)](https://github.com/kframework/wasm-semantics)
+
+KWasm is the K semantics of [WebAssembly](https://webassembly.github.io/spec/).
+
+### [Elrond (Aug 2015 - Present)](https://github.com/runtimeverification/elrond-semantics)
+
+The semantics of Elrond and Mandos.
+
+### [IELE (Oct 2016 - Present)](https://ielelang.org/)
+
+Provides a model of IELE in K.
+
+### [KEVM (Sep 2017 - Present)](https://jellopaper.org/)
+
+KEVM is the K semantics of the [Ethereum Virtual Machine](https://ethereum.org/en/developers/docs/evm/). It passes all of the Ethereum Test Suite, and is used for verifying EVM programs.
+
+### [KEwasm (Jul 2019 - Present)](https://github.com/kframework/ewasm-semantics)
+
+KEwasm is the K semantics of [Ewasm](https://github.com/ewasm/design).
+
+### [K-Michelson (Oct 2019 - Present)](https://runtimeverification.github.io/michelson-semantics)
+
+K-Michelson is the K semantics of [Michelson blockchain programming language](https://www.michelson.org/).
+
+### [Boogie (Apr 2020 - Present)](https://github.com/kframework/boogie-semantics)
+
+Presents an executable formal semantics for [Boogie](https://github.com/boogie-org/boogie), an intermediate language for verification.
+
+## Archived
+
+- [llvm (2011-2018)](https://github.com/kframework/llvm-semantics)
+- [python (2012-2013)](https://github.com/kframework/python-semantics)
+- [java (2012-2016)](https://github.com/kframework/java-semantics)
+- [ocaml (2012-2013)](https://github.com/kframework/ocaml-semantics)
+- [javascript (2013-2015)](https://github.com/kframework/javascript-semantics)
+- [aadl (2013-2013)](https://github.com/kframework/aadl-semantics)
+- [alk (2013-2014)](https://github.com/kframework/alk-semantics)
+- [cink (2013-2015)](https://github.com/kframework/cink-semantics)
+- [jvm (2013-2014)](https://github.com/kframework/jvm-semantics)
+- [modelink (2013-2013)](https://github.com/kframework/modelink-semantics)
+- [javacard (2014-2014)](https://github.com/kframework/javacard-semantics)
+- [orc (2016-2017)](https://github.com/kframework/orc-semantics)
+- [haskell core (2016-2017)](https://github.com/kframework/haskell-core-semantics)
+- [plutus core (2016-2019)](https://github.com/kframework/plutus-core-semantics)
+- [p4 (2016-2020)](https://github.com/kframework/p4-semantics)
+- [X86-64 (2017-2020)](https://github.com/kframework/X86-64-semantics)
+- [vyper (2017-2018)](https://github.com/kframework/vyper-semantics)
+- [erc20 (2017-2018)](https://github.com/runtimeverification/erc20-semantics)
+- [solidity (2018-2019)](https://github.com/kframework/solidity-semantics)
+- [eei (2018-2019)](https://github.com/kframework/eei-semantics)
+- [erc777 (2018-2018)](https://github.com/runtimeverification/erc777-semantics)
+- [k (2018-2020)](https://github.com/kframework/k-in-k)
+- [yul (2019-2019)](https://github.com/ethereum/yul-semantics)
+- [hybrid programs (2020-2020)](https://github.com/Formal-Systems-Laboratory/hybrid-programs-semantics)
