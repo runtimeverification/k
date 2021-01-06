@@ -76,9 +76,6 @@ it must be a file and the contents of that file is parsed using the parser
 specified with --parser and used as the value of \$PGM (unless --term is
 present; see below).
 
-Currently only the LLVM backend is supported. This will change in the near
-future.
-
       --bound N            Return at most N solutions  with --search
       --depth N            Execute at most N rewrite steps
       --color [on|off]     Enable/disable ANSI color codes. Overrides default,
@@ -146,6 +143,8 @@ future.
                            arguments.
 HERE
 }
+
+ORIG_ARGV=("$@")
 
 # parse options
 while [[ $# -gt 0 ]]
@@ -391,6 +390,11 @@ done
 
 if ! $hasKompiledDir; then
   error 'Could not find a compiled definition. Use --directory to specify one.'
+fi
+
+if [ ! -f "$kompiledDir/definition.kore" ]; then
+  "$(dirname "$0")/krun-legacy" "${ORIG_ARGV[@]}"
+  exit $?
 fi
 
 # Process configuration variables
