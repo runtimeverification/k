@@ -14,10 +14,7 @@ import org.kframework.kore.KVariable;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -47,7 +44,8 @@ public class CheckRHSVariables {
         gatherVars(false, rule.ensures(), errorExistential);
         if (rule instanceof Claim) {
             gatherVars(true, rule.requires(), errorExistential);
-            check(Arrays.asList(rule.requires(), rule.body()), true, false, unboundVariableNames);
+            check(rule.body(), true, false, unboundVariableNames);
+            check(rule.requires(), true, false, unboundVariableNames);
         } else {
             gatherVars(false, rule.requires(), errorExistential);
             check(rule.body(), true, false, unboundVariableNames);
@@ -105,13 +103,8 @@ public class CheckRHSVariables {
     }
 
     private void check(K body, boolean isBody, boolean isAlias, Set<String> unboundVarNames) {
-        check(Collections.singletonList(body), isBody, isAlias, unboundVarNames);
-    }
-
-    private void check(List<K> body, boolean isBody, boolean isAlias, Set<String> unboundVarNames) {
         Set<KVariable> unbound = new HashSet<>();
-        for (K b : body)
-            new ComputeUnboundVariables(isBody, false, errors, vars, unbound::add).apply(b);
+        new ComputeUnboundVariables(isBody, false, errors, vars, unbound::add).apply(body);
         for (KVariable k : unbound) {
             if (unboundVarNames.contains(k.name())) continue;
             if (isAlias && k.name().equals("HOLE")) continue;
