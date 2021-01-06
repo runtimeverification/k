@@ -7,10 +7,10 @@
 | [c-semantics](https://github.com/kframework/c-semantics)                                            | Jul 24, 2010 | Active   |
 | [wasm-semantics](https://github.com/kframework/wasm-semantics)                                      | Aug 19, 2015 | Active   |
 | [elrond-semantics](https://github.com/runtimeverification/elrond-semantics)                         | Aug 19, 2015 | Active   |
-| [iele-semantics](https://github.com/runtimeverification/iele-semantics)                             | Oct 3, 2016  | Active   |
+| [iele-semantics](https://ielelang.org/)                                                             | Oct 3, 2016  | Active   |
 | [evm-semantics](https://github.com/kframework/evm-semantics)                                        | Oct 3, 2016  | Active   |
 | [ewasm-semantics](https://github.com/kframework/ewasm-semantics)                                    | Jul 10, 2019 | Active   |
-| [michelson-semantics](https://github.com/runtimeverification/michelson-semantics)                   | Oct 5, 2019  | Active   |
+| [michelson-semantics](https://runtimeverification.github.io/michelson-semantics/)                   | Oct 5, 2019  | Active   |
 | [boogie-semantics](https://github.com/kframework/boogie-semantics)                                  | Apr 13, 2020 | Active   |
 | [llvm-semantics](https://github.com/kframework/llvm-semantics)                                      | Dec 26, 2011 | Inactive |
 | [python-semantics](https://github.com/kframework/python-semantics)                                  | Mar 10, 2012 | Inactive |
@@ -34,4 +34,5 @@
 | [eei-semantics](https://github.com/kframework/eei-semantics)                                        | Aug 28, 2018 | Inactive |
 | [erc777-semantics](https://github.com/runtimeverification/erc777-semantics)                         | Aug 11, 2018 | Inactive |
 | [k-in-k](https://github.com/kframework/k-in-k)                                                      | Sep 6, 2018  | Inactive |
+| [yul-semantics](https://github.com/ethereum/yul-semantics)                                          | Aug 23, 2019 | Inactive |
 | [hybrid-programs-semantics](https://github.com/Formal-Systems-Laboratory/hybrid-programs-semantics) | Jan 15, 2020 | Inactive |
