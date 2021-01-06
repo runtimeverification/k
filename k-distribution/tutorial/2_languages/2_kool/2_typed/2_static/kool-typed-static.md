@@ -140,7 +140,7 @@ the wrapper in the generated documentation, we associate it an
   syntax Param ::= Type Id
   syntax Params ::= List{Param,","}
 
-  syntax Decl ::= Type Exps ";" [avoid]
+  syntax Stmt ::= Type Exps ";" [avoid]
                 | Type Id "(" Params ")" Block
                 | "class" Id Block
                 | "class" Id "extends" Id Block
@@ -195,14 +195,14 @@ the wrapper in the generated documentation, we associate it an
 
 ```k
   syntax Block ::= "{" "}"
-                | "{" Stmts "}"
+                | "{" Stmt "}"
 
-  syntax Stmt ::= Decl | Block
+  syntax Stmt ::= Block
                 | Exp ";"                                 [strict]
                 | "if" "(" Exp ")" Block "else" Block     [avoid, strict]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block               [strict]
-                | "for" "(" Stmts Exp ";" Exp ")" Block
+                | "for" "(" Stmt Exp ";" Exp ")" Block
                 | "return" Exp ";"                        [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"                [strict]
@@ -213,15 +213,14 @@ the wrapper in the generated documentation, we associate it an
                 | "release" Exp ";"                       [strict]
                 | "rendezvous" Exp ";"                    [strict]
 
-  syntax Stmts ::= Stmt
-                 | Stmts Stmts                            [seqstrict, right]
+  syntax Stmt ::= Stmt Stmt                            [seqstrict, right]
 ```
 
 ## Desugaring macros
 
 ```k
   rule if (E) S => if (E) S else {}                                     [macro]
-  rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
+  rule for(Start Cond; Step) {S:Stmt} => {Start while(Cond){S Step;}}  [macro]
   rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro-rec]
   rule T:Type X:Id = E; => T X; X = E;                                  [macro]
 
@@ -286,7 +285,7 @@ in the class extends relation.
   configuration <T multiplicity="?" color="yellow">
                   <tasks color="orange" multiplicity="?">
                     <task multiplicity="*" color="yellow">
-                      <k color="green"> $PGM:Stmts </k>
+                      <k color="green"> $PGM:Stmt </k>
                       <tenv multiplicity="?" color="cyan"> .Map </tenv>
                       <ctenvT multiplicity="?" color="blue"> .Map </ctenvT>
                       <returnType multiplicity="?" color="black"> void </returnType>
@@ -377,7 +376,7 @@ typed SIMPLE, so we do not discuss them much here.
 
   rule {} => block
 
-  rule <task> <k> {S:Stmts} => block ...</k> <tenv> Rho </tenv> R </task>
+  rule <task> <k> {S:Stmt} => block ...</k> <tenv> Rho </tenv> R </task>
        (.Bag => <task> <k> S </k> <tenv> Rho </tenv> R </task>)
 
   rule _:Type; => stmt
@@ -396,7 +395,7 @@ typed SIMPLE, so we do not discuss them much here.
 ## Unchanged auxiliary operations from dynamically typed SIMPLE
 
 ```k
-  syntax Stmts ::= mkDecls(Params)  [function]
+  syntax Stmt ::= mkDecls(Params)  [function]
   rule mkDecls(T:Type X:Id, Ps:Params) => T X; mkDecls(Ps)
   rule mkDecls(.Params) => {}
 
@@ -578,7 +577,7 @@ instance of this rule).
 // and the class cells; I had to include two separate . rewrites
 
 // TODO: the following fails krun; see #2117
-  rule <task> <k> class C:Id extends C':Id { S:Stmts } => stmt ...</k> </task>
+  rule <task> <k> class C:Id extends C':Id { S:Stmt } => stmt ...</k> </task>
        (.Bag => <classData>...
                <className> C </className>
                <baseClass> C' </baseClass>
@@ -596,7 +595,7 @@ instance of this rule).
 syntax Type ::= "stmtStop"
 
   rule <tasks>...
-       <task> <k> class C:Id extends C':Id { S:Stmts } => stmtStop ...</k> </task>
+       <task> <k> class C:Id extends C':Id { S:Stmt } => stmtStop ...</k> </task>
        (.Bag => <task>
                 <k> checkType(class(C')) ~> S </k>
                 <inClass> C </inClass>

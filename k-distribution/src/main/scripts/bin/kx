@@ -5,6 +5,7 @@ set -u
 
 export PATH="$(dirname "$0"):$PATH"
 
+# initialize flags
 ARGV=()
 bound=
 depth=
@@ -27,15 +28,19 @@ smtPrelude=
 flags=
 configVars=
 dryRun=false
+expandMacros=true
 result=1
 
+# setup temp files
 tempDir="$(mktemp -d tmp.krun.XXXXXXXXXX)"
 tempFiles=("$tempDir")
 trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
 
 input_file="$(mktemp tmp.in.XXXXXXXXXX)"
+expanded_input_file="$(mktemp tmp.in.XXXXXXXXXX)"
 kore_output="$tempDir/result.kore"
 tempFiles+=("$input_file")
+tempFiles+=("$expanded_input_file")
 tempFiles+=("$kore_output")
 
 execute () {
@@ -99,6 +104,10 @@ future.
                            execution, and disabled when --search is passed.
       --no-substitution-filtering  Don't filter conjuncts with anonymous
                                    variables from substitution output
+      --no-expand-macros   Don't expand macros in initial configuration.
+                           This assumes that the initial configuration contains
+                           no macro terms. Behavior is undefined if this is not
+                           true.
   -o, --output MODE        Select output mode to use when unparsing. Valid
                            values are pretty, program, kast, binary, json,
                            latex, kore, and none.
@@ -134,6 +143,7 @@ future.
 HERE
 }
 
+# parse options
 while [[ $# -gt 0 ]]
 do
   arg="$1"
@@ -195,7 +205,7 @@ do
 
       --dry-run)
       cmdprefix="echo "
-      tempFiles=(${tempFiles[@]/$input_file})
+      tempFiles=(${tempFiles[@]/$expanded_input_file})
       dryRun=true
       ;;
 
@@ -228,6 +238,10 @@ do
 
       --no-substitution-filtering)
       filterSubst=false
+      ;;
+
+      --no-expand-macros)
+      expandMacros = false
       ;;
 
       -o|--output)
@@ -359,6 +373,7 @@ if [[ "${#ARGV[@]}" -gt 1 ]]; then
   error 'Cannot pass more than one configuration variable as a positional argument.'
 fi
 
+# Compute kompiled directory
 kompiledDir=
 hasKompiledDir=false
 for file in "$dir"/*-kompiled; do
@@ -374,6 +389,7 @@ if ! $hasKompiledDir; then
   error 'Could not find a compiled definition. Use --directory to specify one.'
 fi
 
+# Process configuration variables
 hasArgv=false
 if [[ "${#ARGV[@]}" -gt 0 ]]; then
   config_var_PGM="${ARGV[0]}"
@@ -441,7 +457,14 @@ else
   execute llvm-krun $configVars -d "$kompiledDir" $flags --dry-run -o "$input_file"
 fi
 
+# Expand macros
+if $expandMacros; then
+  execute kore-expand-macros "$kompiledDir" "$input_file" > "$expanded_input_file"
+else
+  execute cp "$input_file" "$expanded_input_file"
+fi
 
+# Invoke backend
 if [ -f "$kompiledDir/interpreter" ]; then
   if $statistics; then
     interpreter_flags=--statistics
@@ -450,7 +473,7 @@ if [ -f "$kompiledDir/interpreter" ]; then
   fi
 
   set +e
-  execute $cmdprefix "$kompiledDir/interpreter" "$input_file" "${depth:--1}" "$kore_output" $interpreter_flags
+  execute $cmdprefix "$kompiledDir/interpreter" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags
   result=$?
   set -e
 else
@@ -476,11 +499,11 @@ else
       final_input="$(mktemp tmp.in.XXXXXXXXXX)"
       tempFiles+=("$final_input")
       set +e
-      execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$input_file" --output "$final_input" $koreExecFlags
+      execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$final_input" $koreExecFlags
       set -e
       depthFlags="--depth 0"
     else
-      final_input="$input_file"
+      final_input="$expanded_input_file"
     fi
 
     if [ -n "$bound" ]; then
@@ -492,12 +515,13 @@ else
     set -e
   else
     set +e
-    execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$input_file" --output "$kore_output" $koreExecFlags $depthFlags
+    execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$kore_output" $koreExecFlags $depthFlags
     result=$?
     set -e
   fi
 fi
 
+# Unparsing
 if ! $dryRun; then
   if [ -f "$kore_output" ]; then
     if $statistics; then
