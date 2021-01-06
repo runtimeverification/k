@@ -1,38 +1,40 @@
 # Semantics in K
 
+<br>
+
 ## Featured
 
-### [C (Jul 2010 - Present)](https://github.com/kframework/c-semantics)
+* **[C (Jul 2010 - Present)](https://github.com/kframework/c-semantics)**
 
-K semantics of the [C programming language](<https://en.wikipedia.org/wiki/C_(programming_language)>). It can help catch the undefined behaviors of C programs.
+  K semantics of the [C programming language](<https://en.wikipedia.org/wiki/C_(programming_language)>). It can help catch the undefined behaviors of C programs.
 
-### [KWasm (Aug 2015 - Present)](https://github.com/kframework/wasm-semantics)
+* **[KWasm (Aug 2015 - Present)](https://github.com/kframework/wasm-semantics)**
 
-KWasm is the K semantics of [WebAssembly](https://webassembly.github.io/spec/).
+  KWasm is the K semantics of [WebAssembly](https://webassembly.github.io/spec/).
 
-### [Elrond (Aug 2015 - Present)](https://github.com/runtimeverification/elrond-semantics)
+* **[Elrond (Aug 2015 - Present)](https://github.com/runtimeverification/elrond-semantics)**
 
-The semantics of Elrond and Mandos.
+  The semantics of Elrond and Mandos.
 
-### [IELE (Oct 2016 - Present)](https://ielelang.org/)
+* **[IELE (Oct 2016 - Present)](https://ielelang.org/)**
 
-Provides a model of IELE in K.
+  Provides a model of IELE in K.
 
-### [KEVM (Sep 2017 - Present)](https://jellopaper.org/)
+* **[KEVM (Sep 2017 - Present)](https://jellopaper.org/)**
 
-KEVM is the K semantics of the [Ethereum Virtual Machine](https://ethereum.org/en/developers/docs/evm/). It passes all of the Ethereum Test Suite, and is used for verifying EVM programs.
+  KEVM is the K semantics of the [Ethereum Virtual Machine](https://ethereum.org/en/developers/docs/evm/). It passes all of the Ethereum Test Suite, and is used for verifying EVM programs.
 
-### [KEwasm (Jul 2019 - Present)](https://github.com/kframework/ewasm-semantics)
+* **[KEwasm (Jul 2019 - Present)](https://github.com/kframework/ewasm-semantics)**
 
-KEwasm is the K semantics of [Ewasm](https://github.com/ewasm/design).
+  KEwasm is the K semantics of [Ewasm](https://github.com/ewasm/design).
 
-### [K-Michelson (Oct 2019 - Present)](https://runtimeverification.github.io/michelson-semantics)
+* **[K-Michelson (Oct 2019 - Present)](https://runtimeverification.github.io/michelson-semantics)**
 
-K-Michelson is the K semantics of [Michelson blockchain programming language](https://www.michelson.org/).
+  K-Michelson is the K semantics of [Michelson blockchain programming language](https://www.michelson.org/).
 
-### [Boogie (Apr 2020 - Present)](https://github.com/kframework/boogie-semantics)
+* **[Boogie (Apr 2020 - Present)](https://github.com/kframework/boogie-semantics)**
 
-Presents an executable formal semantics for [Boogie](https://github.com/boogie-org/boogie), an intermediate language for verification.
+  Presents an executable formal semantics for [Boogie](https://github.com/boogie-org/boogie), an intermediate language for verification.
 
 ## Archived
 
