@@ -25,6 +25,7 @@ literal=false
 outputMode=pretty
 statistics=false
 smtPrelude=
+smt=
 flags=
 configVars=
 dryRun=false
@@ -120,17 +121,19 @@ present; see below).
       --pattern PAT        Use PAT as the search pattern with --search. Can
                            also be used without --search to match the output
                            configuration against a pattern and print the
-                           substitution. Only supported on Haskell backend.
+                           substitution. Not supported on LLVM backend.
       --save-temps         Do not delete temporary files when $KX terminates.
       --search             Search for all possible output states after
-                           rewriting. Only supported on Haskell backend.
+                           rewriting. Only supported on symbolic backends.
       --search-all         Like --search, but also return interim states
       --search-final       Synonym for --search
       --search-one-or-more-steps  Like --search-all, but do not include the
                                   initial state in the result
       --search-one-step    Search for all possible states that are the
                            immediate successor of the input.
-      --smt-prelude FILE   Prepend FILE to all smt queries in Haskell backend.
+      --smt [none|z3]      Enable/disable SMT solver for symbolic execution.
+      --smt-prelude FILE   Prepend FILE to all SMT queries during symbolic
+                           execution.
       --statistics         Print number of steps executed. Currently only
                            supported on LLVM backend.
       --term               Use the value that would otherwise be considered the
@@ -305,6 +308,19 @@ do
       --search-one-step)
       search=true
       searchType='ONE'
+      ;;
+
+      --smt)
+      case "$2" in
+        none|z3)
+        smt="$2"
+        ;;
+
+        *)
+        error 'Invalid value for --smt. Should be "z3" or "none".'
+        ;;
+      esac
+      shift
       ;;
 
       --smt-prelude)
@@ -507,6 +523,9 @@ else
   fi
   if [ -n "$smtPrelude" ]; then
     koreExecFlags="$koreExecFlags --smt-prelude $smtPrelude"
+  fi
+  if [ -n "$smt" ]; then
+    koreExecFlags="$koreExecFlags --smt $smt"
   fi
   if $search || [ -n "$pattern" ]; then
     patternFile="$(mktemp ${tempDir}/tmp.pattern.XXXXXXXXXX)"
