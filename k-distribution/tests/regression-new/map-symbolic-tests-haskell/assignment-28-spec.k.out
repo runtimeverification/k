@@ -1,0 +1,10 @@
+  #Not ( {
+    X
+  #Equals
+    y
+  } )
+#And
+  <k>
+    assignmentResult ( ( X:MyId |-> 3 ) [ x <- 5 ]
+    y |-> 4 ) ~> .
+  </k>
