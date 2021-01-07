@@ -468,7 +468,7 @@ else
     else
       parser=("${!parser_name}")
     fi
-    execute "${parser[@]}" "${!config_name}" > "$tempFile"
+    execute ${parser[@]} "${!config_name}" > "$tempFile"
     configVars="$configVars -c $name $(basename $tempFile) $sortName korefile"
   done
   if [ "$(cat "$kompiledDir"/sort_IO.txt 2>/dev/null)" = "String" ]; then
