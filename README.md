@@ -7,9 +7,10 @@ copyright: Copyright (c) 2010-2020 K Team. All Rights Reserved.
 
 # Introduction
 
-The K Framework is a tool for designing and modeling programming languages,
-systems, and more.
-At the core of the K Framework is a language called K.
+The K Framework is a tool for designing and modeling programming languages
+and software/hardware systems.
+At the core of the K Framework is a programming, modeling, and specification
+language called K.
 The K Framework includes tools for compiling K specifications to build
 interpreters, model checkers, verifiers, associated documentation, and more.
 
@@ -24,6 +25,10 @@ _K-based tool users_ should:
 2.  If needed, download a [packaged release](https://github.com/kframework/k/releases/)
     of the K Framework as part of their tool setup process.
 
+If you are interested in quickly trying out the K Framework without building
+from source, please see our
+[quick start guide](https://github.com/kframework/k/blob/master/k-distribution/INSTALL.md#quick-start-guide-for-ubuntu-bionicfocal).
+
 The rest of this file assumes you intend to build and install the K Framework
 from source.
 
@@ -32,13 +37,12 @@ from source.
 1.  [Supported System Configurations](#supported-system-configurations)
 2.  [Prerequisite Install Guide](#prerequisite-install-guide)
 3.  [Build and Install Guide](#build-and-install-guide)
-4.  [Quick Start for Ubuntu Bionic/Focal](#quick-start-for-ubuntu-bionicfocal)
-5.  [IDE Setup](#ide-setup)
-6.  [Running the Test Suite](#running-the-test-suite)
-7.  [Changing the KORE Data Structures](#changing-the-kore-data-structures)
-8.  [Building the Final Release Directory/Archives](#building-the-final-release-directoryarchives)
-9.  [Compiling Definitions and Running Programs](#compiling-definitions-and-running-programs)
-10. [Troubleshooting](#troubleshooting)
+4.  [IDE Setup](#ide-setup)
+5.  [Running the Test Suite](#running-the-test-suite)
+6.  [Changing the KORE Data Structures](#changing-the-kore-data-structures)
+7.  [Building the Final Release Directory/Archives](#building-the-final-release-directoryarchives)
+8.  [Compiling Definitions and Running Programs](#compiling-definitions-and-running-programs)
+9.  [Troubleshooting](#troubleshooting)
 
 # Supported System Configurations
 
@@ -46,7 +50,7 @@ We release packages for the following system configurations given in order
 of kernel, CPU architecture, and operating system/package manager.
 These configurations are known to be able to build and run the K Framework:
 
-*   Linux (x86-64) Ubuntu Bionic
+*   Linux (x86-64) Ubuntu Bionic Beaver
 *   Linux (x86-64) Ubuntu Focal Fossa
 *   Linux (x86-64) Arch Linux
 *   Linux (x86-64) Debian Buster
@@ -265,72 +269,6 @@ mkShell {
 ```
 
 If you change any `pom.xml`, you must run `./nix/update-maven.sh`.
-
-# Quick Start for Ubuntu Bionic/Focal
-
-0.  (For WSL/virtual machine users only) be sure your Linux environment is
-    already installed by following
-    [the instructions above](#virtualized-system-configurations) and then
-    start your Linux environment or virtual machine. For WSL users, you can
-    enter the Linux command line environment by opening up `cmd.exe` and
-    typing the following command:
-
-    ```
-    wsl.exe
-    ```
-
-    For VirtualBox or virtual machine software users, you will need to open
-    the VirtualBox or virtual machine application and follow the graphical
-    prompts to start your Linux VM and enter the command line environment.
-
-1.  Download the latest K distribution for Ubuntu Bionic/Focal from
-    https://github.com/kframework/k/releases.
-    To do so, first install `wget`:
-
-    ```bash
-    $ sudo apt-get install wget
-    ```
-
-    Then copy the package link and paste it into the following command by
-    replacing the placeholder `<package-url>` with the real URL:
-
-    ```bash
-    $ wget <package-url>
-    ```
-
-2.  Run the following commands depending on whether you are using Ubuntu
-    Bionic or Ubuntu Focal:
-
-    ```bash
-    $ sudo apt-get update
-    $ sudo apt-get install ./kframework_5.0.0_amd64_bionic.deb
-    ```
-
-    (or)
-
-    ```bash
-    $ sudo apt-get update
-    $ sudo apt-get install ./kframework_5.0.0_amd64_focal.deb
-    ```
-
-    This will install ~1.4GB of dependencies and will take some time.
-    K will be installed to `/usr`.
-
-3.  Copy the K tutorial to some work directory, for example
-    `$HOME/k-tutorial`. This is because only the `root` user can run the
-    examples in the default installation directory.
-
-    ```bash
-    $ cp -R /usr/share/kframework/tutorial $HOME/k-tutorial
-    ```
-
-4.  Now you can try to run some programs:
-
-    ```bash
-    $ cd $HOME/k-tutorial/2_languages/1_simple/1_untyped
-    $ make kompile
-    $ krun tests/diverse/factorial.simple
-    ```
 
 # IDE Setup
 

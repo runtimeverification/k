@@ -181,3 +181,60 @@ eval $(opam config env)
 your OCAML environment. You can optionally control where the OCAML dependencies
 are installed by setting the `OPAMROOT` environment variable before running the
 above commands with `export OPAMROOT=/path/to/opam/root`.
+
+Quick Start Guide for Ubuntu Bionic/Focal
+-----------------------------------------
+
+0.  (For WSL/virtual machine users only) be sure your Linux environment is
+    already installed by following
+    [the instructions above](#virtualized-system-configurations) and then
+    start your Linux environment or virtual machine. For WSL users, you can
+    enter the Linux command line environment by opening up `cmd.exe` and
+    typing the following command:
+
+    ```
+    wsl.exe
+    ```
+
+    For VirtualBox or virtual machine software users, you will need to open
+    the VirtualBox or virtual machine application and follow the graphical
+    prompts to start your Linux VM and enter the command line environment.
+
+1.  Download the latest K distribution for Ubuntu Bionic/Focal from
+    https://github.com/kframework/k/releases.
+
+2.  Go to your downlaod folder and run the following commands depending on
+    whether you are using Ubuntu Bionic or Ubuntu Focal:
+
+    ```bash
+    # for Ubuntu Bionic
+    $ sudo apt-get update
+    $ sudo apt-get install ./kframework_5.0.0_amd64_bionic.deb
+    ```
+
+    (or)
+
+    ```bash
+    # for Ubuntu Focal
+    $ sudo apt-get update
+    $ sudo apt-get install ./kframework_5.0.0_amd64_focal.deb
+    ```
+
+    This will install ~1.4GB of dependencies and will take some time.
+    K will be installed to `/usr`.
+
+3.  Copy the K tutorial to some work directory, for example
+    `$HOME/k-tutorial`. This is because only the `root` user can run the
+    examples in the default installation directory.
+
+    ```bash
+    $ cp -R /usr/share/kframework/tutorial $HOME/k-tutorial
+    ```
+
+4.  Now you can try to run some programs:
+
+    ```bash
+    $ cd $HOME/k-tutorial/2_languages/1_simple/1_untyped
+    $ make kompile
+    $ krun tests/diverse/factorial.simple
+    ```
