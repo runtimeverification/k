@@ -342,7 +342,12 @@ public class KSyntax2Bison {
       i++;
     }
     prod = prod.att().getOptional(Att.ORIGINAL_PRD(), Production.class).orElse(prod);
-    prod = prod.att().getOptional(Att.ORIGINAL_PRD(), Production.class).orElse(prod);
+    if (!prod.att().contains("userListTerminator")) {
+      // further adjustment to get back original production in case of user lists.
+      // don't apply this adjustment to the production that handles the last element of the
+      // list
+      prod = prod.att().getOptional(Att.ORIGINAL_PRD(), Production.class).orElse(prod);
+    }
     boolean hasLocation = module.sortAttributesFor().get(prod.sort().head()).getOrElse(() -> Att.empty()).contains("locations");
     if (prod.att().contains("token") && !prod.isSubsort()) {
       bison.append("{\n" +
