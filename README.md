@@ -27,7 +27,7 @@ _K-based tool users_ should:
 
 If you are interested in quickly trying out the K Framework without building
 from source, please see our
-[quick start guide](https://github.com/kframework/k/blob/master/k-distribution/INSTALL.md#quick-start-guide-for-ubuntu-bionicfocal).
+[quick start guide](k-distribution/INSTALL.md#quick-start-guide-for-ubuntu-bionicfocal).
 
 The rest of this file assumes you intend to build and install the K Framework
 from source.
