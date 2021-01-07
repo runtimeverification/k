@@ -55,7 +55,8 @@ object KOREToTreeNodes {
   }
 
   def up(mod: Module)(t: K): K = t match {
-    case v: KVariable => KToken(v.name, Sorts.KVariable, v.att)
+    case v: KVariable =>
+      KORE.KApply(KORE.KLabel("#SemanticCastTo" + v.att.get(classOf[org.kframework.kore.Sort])), KToken(v.name, Sorts.KVariable, v.att))
     case t: KToken =>
       val sort = Sort(t.sort.name, t.sort.params:_*)
       KToken(t.s, sort, t.att)
