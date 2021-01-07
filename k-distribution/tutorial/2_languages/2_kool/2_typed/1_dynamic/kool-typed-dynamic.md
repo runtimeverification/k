@@ -68,7 +68,7 @@ untyped KOOL.
   syntax Param ::= Type Id
   syntax Params ::= List{Param,","}
 
-  syntax Decl ::= Type Exps ";" [avoid]
+  syntax Stmt ::= Type Exps ";" [avoid]
                 | Type Id "(" Params ")" Block    // stays like in typed SIMPLE
                 | "class" Id Block                // KOOL
                 | "class" Id "extends" Id Block   // KOOL
@@ -121,14 +121,14 @@ untyped KOOL.
 
 ```k
   syntax Block ::= "{" "}"
-                | "{" Stmts "}"
+                | "{" Stmt "}"
 
-  syntax Stmt ::= Decl | Block
+  syntax Stmt ::= Block
                 | Exp ";"                               [strict]
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
-                | "for" "(" Stmts Exp ";" Exp ")" Block
+                | "for" "(" Stmt Exp ";" Exp ")" Block
                 | "print" "(" Exps ")" ";"              [strict]
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
@@ -139,15 +139,14 @@ untyped KOOL.
                 | "release" Exp ";"                     [strict]
                 | "rendezvous" Exp ";"                  [strict]
 
-  syntax Stmts ::= Stmt
-                 | Stmts Stmts                          [right]
+  syntax Stmt ::= Stmt Stmt                          [right]
 ```
 
 ## Desugaring macros
 
 ```k
   rule if (E) S => if (E) S else {}                                     [macro]
-  rule for(Start Cond; Step) {S::Stmts} => {Start while(Cond){S Step;}} [macro]
+  rule for(Start Cond; Step) {S::Stmt} => {Start while(Cond){S Step;}} [macro]
   rule T::Type E1::Exp, E2::Exp, Es::Exps; => T E1; T E2, Es;           [macro-rec]
   rule T::Type X::Id = E; => T X; X = E;                                [macro]
 
@@ -190,7 +189,7 @@ the expected type.
   configuration <T color="red">
                   <threads color="orange">
                     <thread multiplicity="*" type="Set" color="yellow">
-                      <k color="green"> ($PGM:Stmts ~> execute) </k>
+                      <k color="green"> ($PGM:Stmt ~> execute) </k>
                     //<br/> // TODO(KORE): support latex annotations #1799
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
@@ -333,7 +332,7 @@ KOOL).
   rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>  [structural]
 
 
-  rule S1:Stmts S2:Stmts => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
 
 
   rule _:Val; => .
@@ -380,7 +379,7 @@ KOOL).
 ## Unchanged auxiliary operations from dynamically typed SIMPLE
 
 ```k
-  syntax Stmts ::= mkDecls(Params,Vals)  [function]
+  syntax Stmt ::= mkDecls(Params,Vals)  [function]
   rule mkDecls((T:Type X:Id, Ps:Params), (V:Val, Vs:Vals))
     => T X=V; mkDecls(Ps,Vs)
   rule mkDecls(.Params,.Vals) => {}

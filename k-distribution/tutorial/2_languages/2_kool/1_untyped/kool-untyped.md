@@ -167,7 +167,7 @@ syntax includes:
 ```k
   syntax Id ::= "Object" [token] | "Main" [token]
 
-  syntax Decl ::= "var" Exps ";"
+  syntax Stmt ::= "var" Exps ";"
                 | "method" Id "(" Ids ")" Block  // called "function" in SIMPLE
                 | "class" Id Block               // KOOL
                 | "class" Id "extends" Id Block  // KOOL
@@ -214,14 +214,14 @@ syntax includes:
   syntax Vals ::= List{Val,","}          [klabel(exps)]
 
   syntax Block ::= "{" "}"
-                | "{" Stmts "}"
+                | "{" Stmt "}"
 
-  syntax Stmt ::= Decl | Block
+  syntax Stmt ::= Block
                 | Exp ";"                               [strict]
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
-            | "for" "(" Stmts Exp ";" Exp ")" Block
+            | "for" "(" Stmt Exp ";" Exp ")" Block
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [strict]
@@ -232,8 +232,7 @@ syntax includes:
                 | "release" Exp ";"                     [strict]
                 | "rendezvous" Exp ";"                  [strict]
 
-  syntax Stmts ::= Stmt
-                 | Stmts Stmts                          [right]
+  syntax Stmt ::= Stmt Stmt                          [right]
 ```
 
 
@@ -307,7 +306,7 @@ discuss the new cells that are added to the configuration of SIMPLE.
   configuration <T color="red">
                   <threads color="orange">
                     <thread multiplicity="*" type="Set" color="yellow">
-                      <k color="green"> $PGM:Stmts ~> execute </k>
+                      <k color="green"> $PGM:Stmt ~> execute </k>
                     //<br/> // TODO(KORE): support latex annotations #1799
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
@@ -483,7 +482,7 @@ interestingly, the semantics of return stays unchanged.
   rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>  [structural]
 
 
-  rule S1::Stmts S2::Stmts => S1 ~> S2  [structural]
+  rule S1::Stmt S2::Stmt => S1 ~> S2  [structural]
 
   rule _:Val; => .
 
@@ -559,7 +558,7 @@ from SIMPLE unchanged.
 ## Unchanged auxiliary operations from untyped SIMPLE
 
 ```k
-  syntax Stmts ::= mkDecls(Ids,Vals)  [function]
+  syntax Stmt ::= mkDecls(Ids,Vals)  [function]
   rule mkDecls((X:Id, Xs:Ids), (V:Val, Vs:Vals)) => var X=V; mkDecls(Xs,Vs)
   rule mkDecls(.Ids,.Vals) => {}
 
