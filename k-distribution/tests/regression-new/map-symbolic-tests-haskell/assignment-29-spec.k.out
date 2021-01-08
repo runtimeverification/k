@@ -1,0 +1,23 @@
+  #Not ( {
+    X
+  #Equals
+    Y
+  } )
+#And
+  <k>
+    assignmentResult ( MAP
+    X:MyId |-> BAL_TO:Int
+    Y:MyId |-> BAL_FROM +Int -30 ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in_keys ( MAP )
+  }
+#And
+  {
+    false
+  #Equals
+    Y:MyId in_keys ( MAP )
+  }
