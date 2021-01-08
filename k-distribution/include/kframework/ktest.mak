@@ -93,9 +93,9 @@ update-results: CHECK=>
 # specified in the makefile prior to including ktest.mak.
 %.$(EXT): kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
-	cat $@.in 2>/dev/null | $(KRUN_OR_KX) $@ $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
+	if [ -f "$@.in" ]; then cat $@.in; fi | $(KRUN_OR_KX) $@ $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
 else
-	cat $(RESULTDIR)/$(notdir $@).in 2>/dev/null | $(KRUN_OR_KX) $@ $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+	if [ -f "$(RESULTDIR)/$(notdir $@).in" ]; cat $(RESULTDIR)/$(notdir $@).in; fi | $(KRUN_OR_KX) $@ $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %-spec.k %-spec.md: kompile
