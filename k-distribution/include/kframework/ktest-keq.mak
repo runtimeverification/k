@@ -8,6 +8,7 @@ KEQ=$(abspath $(MAKEFILE_PATH)/../../bin/keq)
 
 BASIC_SMT=$(abspath $(MAKEFILE_PATH)/z3/basic.smt2)
 
+SHELL=/bin/bash -o pipefail
 CHECK=| diff -
 
 .PHONY: kompile keq all clean krun proofs bmc searches strat kast

@@ -21,6 +21,8 @@ searches: $(SUBSEARCHES)
 strat: $(SUBSTRAT)
 kast: $(SUBKAST)
 
+SHELL=/bin/bash -o pipefail
+
 $(SUBDIRS):
 	$(MAKE) -C $@
 

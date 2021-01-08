@@ -11,6 +11,7 @@ TESTS?=$(wildcard $(DEFDIR)/*.md) $(wildcard $(DEFDIR)/*.k)
 # default KOMPILE_BACKEND
 KOMPILE_BACKEND?=llvm
 
+SHELL=/bin/bash -o pipefail
 CHECK=| diff -
 
 .PHONY: kompile all clean update-results dummy krun proofs bmc searches strat kast

@@ -56,6 +56,7 @@ else
 KRUN_OR_KX=$(KRUN)
 endif
 
+SHELL=/bin/bash -o pipefail
 CHECK=| diff -
 REMOVE_PATHS=| sed 's!'`pwd`'/\(\./\)\{0,2\}!!g'
 CONSIDER_ERRORS=2>&1
