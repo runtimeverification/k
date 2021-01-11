@@ -416,7 +416,7 @@ if $term; then
   fi
 else
   for configVar in `find $kompiledDir -type f -name 'sort_*' | sed 's|.*sort_\(.*\).txt|\1|'`; do
-    if [[ ! "${params[@]}" =~ "$configVar" ]]; then
+    if [[ $configVar != "IO" && ! "${params[@]}" =~ "$configVar" ]]; then
       error "Configuration variable missing: \$$configVar. Use -c$configVar=<Value> in the command line to set."
     fi
   done
