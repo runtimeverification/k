@@ -1,0 +1,3 @@
+<k>
+  removeResult ( Y:MyId |-> 2 ~> . ) ~> .
+</k>

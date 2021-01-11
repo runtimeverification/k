@@ -4,6 +4,7 @@ package org.kframework.compile.checks;
 import com.google.common.collect.Sets;
 import org.kframework.attributes.Att;
 import org.kframework.compile.GatherVarsVisitor;
+import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.RuleOrClaim;
@@ -40,10 +41,16 @@ public class CheckRHSVariables {
         Set<String> unboundVariableNames = getUnboundVarNames(rule);
         boolean errorExistential = this.errorExistential && !(rule.att().contains(Att.LABEL()) && rule.att().get(Att.LABEL()).equals("STDIN-STREAM.stdinUnblock"));
         gatherVars(true, rule.body(), errorExistential);
-        gatherVars(false, rule.requires(), errorExistential);
         gatherVars(false, rule.ensures(), errorExistential);
-        check(rule.body(), true, false, unboundVariableNames);
-        check(rule.requires(), false, false, unboundVariableNames);
+        if (rule instanceof Claim) {
+            gatherVars(true, rule.requires(), errorExistential);
+            check(rule.body(), true, false, unboundVariableNames);
+            check(rule.requires(), true, false, unboundVariableNames);
+        } else {
+            gatherVars(false, rule.requires(), errorExistential);
+            check(rule.body(), true, false, unboundVariableNames);
+            check(rule.requires(), false, false, unboundVariableNames);
+        }
         check(rule.ensures(), false, false, unboundVariableNames);
     }
 
@@ -106,5 +113,4 @@ public class CheckRHSVariables {
                 + " Did you mean \"?" + k.name() + "\"?", k));
         }
     }
-
 }

@@ -1,0 +1,28 @@
+  #Not ( {
+    X
+  #Equals
+    y
+  } )
+#And
+  <k>
+    removeResult ( ( X:MyId |-> 3 ) [ x <- undef ] [ X:MyId ] ~> . ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    y in_keys ( ( X:MyId |-> 3 ) [ x <- undef ] )
+  }
+#And
+  {
+    true
+  #Equals
+    X:MyId in_keys ( ( X:MyId |-> 3 ) [ x <- undef ]
+    ( y |-> 4 ) )
+  }
+#And
+  {
+    true
+  #Equals
+    X:MyId in_keys ( ( X:MyId |-> 3 ) [ x <- undef ] )
+  }

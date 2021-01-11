@@ -106,7 +106,7 @@ keyword to take a list of expressions.  The non-terminals used in the two
 productions below are defined shortly.
 
 ```k
-  syntax Decl ::= "var" Exps ";"
+  syntax Stmt ::= "var" Exps ";"
                 | "function" Id "(" Ids ")" Block
 ```
 ## Expressions
@@ -206,14 +206,14 @@ arguments.
 
 ```k
   syntax Block ::= "{" "}"
-                | "{" Stmts "}"
+                | "{" Stmt "}"
 
-  syntax Stmt ::= Decl | Block
+  syntax Stmt ::= Block
                 | Exp ";"                               [strict]
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
-                | "for" "(" Stmts Exp ";" Exp ")" Block
+                | "for" "(" Stmt Exp ";" Exp ")" Block
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"              [strict]
@@ -240,8 +240,7 @@ also shown below, in which case the latter would not apply anymore because
 of syntactic mismatch.
 
 ```k
-  syntax Stmts ::= Stmt
-                 | Stmts Stmts                          [right]
+  syntax Stmt ::= Stmt Stmt                          [right]
 
 // I wish I were able to write the following instead, but confuses the parser.
 //
@@ -373,7 +372,7 @@ to the **K** tool, as indicated by the `$PGM` variable, followed by the
   configuration <T color="red">
                   <threads color="orange">
                     <thread multiplicity="*" color="yellow">
-                      <k color="green"> $PGM:Stmts ~> execute </k>
+                      <k color="green"> $PGM:Stmt ~> execute </k>
                     //<br/> // TODO(KORE): support latex annotations #1799
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
@@ -817,7 +816,7 @@ to something).  This means that once `S₁` completes in the rule below, `S₂`
 becomes automatically the next computation item without any additional
 (explicit or implicit) rules.
 ```k
-  rule S1:Stmts S2:Stmts => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
 ```
 
 A subtle aspect of the rule above is that `S₁` is declared to have sort
@@ -908,7 +907,7 @@ is thrown to correctly recover the execution context.  This can be easily
 achieved by pushing/popping the entire current control context onto the
 exception stack.  The three rules below modularly do precisely the above.
 ```k
-  syntax KItem ::= (Id,Stmts,K,Map,ControlCellFragment)
+  syntax KItem ::= (Id,Stmt,K,Map,ControlCellFragment)
 
   syntax KItem ::= "popx"
 
@@ -1067,7 +1066,7 @@ The `mkDecls` auxiliary construct turns a list of identifiers
 and a list of values in a sequence of corresponding variable
 declarations.
 ```k
-  syntax Stmts ::= mkDecls(Ids,Vals)  [function]
+  syntax Stmt ::= mkDecls(Ids,Vals)  [function]
   rule mkDecls((X:Id, Xs:Ids), (V:Val, Vs:Vals)) => var X=V; mkDecls(Xs,Vs)
   rule mkDecls(.Ids,.Vals) => {}
 ```

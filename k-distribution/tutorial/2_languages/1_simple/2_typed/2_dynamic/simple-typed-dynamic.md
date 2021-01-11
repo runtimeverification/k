@@ -56,7 +56,7 @@ constructs.
   syntax Param ::= Type Id
   syntax Params ::= List{Param,","}
 
-  syntax Decl ::= Type Exps ";"
+  syntax Stmt ::= Type Exps ";"
                 | Type Id "(" Params ")" Block
 ```
 
@@ -104,14 +104,14 @@ Like in the static semantics, there is no need for lists of identifiers
 
 ```k
   syntax Block ::= "{" "}"
-                | "{" Stmts "}"
+                | "{" Stmt "}"
 
-  syntax Stmt ::= Decl | Block
+  syntax Stmt ::= Block
                 | Exp ";"                               [strict]
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block
-            | "for" "(" Stmts Exp ";" Exp ")" Block
+            | "for" "(" Stmt Exp ";" Exp ")" Block
                 | "print" "(" Exps ")" ";"              [strict]
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
@@ -122,13 +122,12 @@ Like in the static semantics, there is no need for lists of identifiers
                 | "release" Exp ";"                     [strict]
                 | "rendezvous" Exp ";"                  [strict]
 
-  syntax Stmts ::= Stmt
-                 | Stmts Stmts                          [right]
+  syntax Stmt ::= Stmt Stmt                          [right]
 ```
 The same desugaring macros like in the statically typed SIMPLE.
 ```k
   rule if (E) S => if (E) S else {}                                     [macro]
-  rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
+  rule for(Start Cond; Step) {S:Stmt} => {Start while(Cond){S Step;}}  [macro]
   rule for(Start Cond; Step) {} => {Start while(Cond){Step;}}           [macro]
   rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro-rec]
   rule T:Type X:Id = E; => T X; X = E;                                  [macro]
@@ -153,7 +152,7 @@ the end of this module).
 ```k
   syntax Val ::= Int | Bool | String
                | array(Type,Int,Int)
-               | lambda(Type,Params,Stmts)
+               | lambda(Type,Params,Stmt)
   syntax Exp ::= Val
   syntax Exps ::= Vals
   syntax KResult ::= Val
@@ -182,7 +181,7 @@ function body encounters an explicit `return` statement.
   configuration <T color="red">
                   <threads color="orange">
                     <thread multiplicity="*" color="yellow">
-                      <k color="green"> ($PGM:Stmts ~> execute) </k>
+                      <k color="green"> ($PGM:Stmt ~> execute) </k>
 //                      <br/>
                       <control color="cyan">
                         <fstack color="blue"> .List </fstack>
@@ -414,7 +413,7 @@ preserved:
 ### Sequential composition
 
 ```k
-  rule S1:Stmts S2:Stmts => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
 ```
 
 ### Expression statements
@@ -541,7 +540,7 @@ values, in which case our semantics below works fine:
 Turns a list of parameters and a list of instance values for them
 into a list of variable declarations.
 ```k
-  syntax Stmts ::= mkDecls(Params,Vals)  [function]
+  syntax Stmt ::= mkDecls(Params,Vals)  [function]
   rule mkDecls((T:Type X:Id, Ps:Params), (V:Val, Vs:Vals))
     => T X=V; mkDecls(Ps,Vs)
   rule mkDecls(.Params,.Vals) => {}
