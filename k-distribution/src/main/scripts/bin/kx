@@ -416,7 +416,7 @@ if $term; then
   fi
 else
   for configVar in `find $kompiledDir -type f -name 'sort_*' | sed 's|.*sort_\(.*\).txt|\1|'`; do
-    if [[ $configVar != "IO" && ! "${params[@]}" =~ "$configVar" ]]; then
+    if [[ $configVar != "IO" && $configVar != "STDIN" && ! "${params[@]}" =~ "$configVar" ]]; then
       error "Configuration variable missing: \$$configVar. Use -c$configVar=<Value> in the command line to set."
     fi
   done
@@ -466,7 +466,7 @@ else
     stdinFile="$(mktemp ${tempDir}/tmp.stdin.XXXXXXXXXX)"
     tempFiles+=("$stdinFile")
     printf '\dv{SortString{}}(\"%s\")\n' "$stdinText" > "$stdinFile"
-    configVars="$configVars -c STDIN $stdinFile String korefile"
+    configVars="$configVars -c STDIN $(basename $stdinFile) String korefile"
   fi
   # llvm-krun creates temp files in the cwd so execute it in $tempDir instead
   (cd $tempDir; execute llvm-krun $configVars -d "../$kompiledDir" $flags --dry-run -o "$(basename $input_file)")
