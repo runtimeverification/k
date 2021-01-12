@@ -1,6 +1,6 @@
 ---
 permalink: README.html
-copyright: Copyright (c) 2010-2020 K Team. All Rights Reserved.
+copyright: Copyright (c) 2010-2021 K Team. All Rights Reserved.
 ---
 
 [Join the chat at Riot](https://riot.im/app/#/room/#k:matrix.org)
