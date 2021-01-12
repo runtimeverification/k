@@ -27,15 +27,18 @@ _K-based tool users_ should:
 
 If you are interested in quickly trying out the K Framework without building
 from source, please see our
-[packaged release installation guide](k-distribution/INSTALL.md).
+[packaged release installation guide](https://github.com/kframework/k/blob/master/k-distribution/INSTALL.md).
 
 The rest of this file assumes you intend to build and install the K Framework
 from source.
 
 Note that the K Framework can only be built on (x86-64) Linux-like systems,
-e.g., this also includies macOS/brew (x86-64) and the Windows Subsystem for
-Linux. See the [installation notes](k-distribution/INSTALL.md) for details
-about supported configurations and system setup.
+e.g., this also includies macOS/brew (x86-64) as well as the Windows Subsystem
+for Linux.
+All 32-bit systems are **not supported**.
+See the
+[installation notes](https://github.com/kframework/k/blob/master/k-distribution/INSTALL.md)
+for details about supported configurations and system setup.
 
 ## Contents
 
