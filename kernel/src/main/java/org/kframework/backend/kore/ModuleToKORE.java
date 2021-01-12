@@ -368,6 +368,15 @@ public class ModuleToKORE {
 
     private void translateSymbols(Map<String, Boolean> attributes, SetMultimap<KLabel, Rule> functionRules,
                                   Set<KLabel> impurities, Set<Production> overloads, StringBuilder sb) {
+        HashMap<String, String> KLabelToKORE = new HashMap<String, String>();
+        for (Production prod : iterable(module.sortedProductions())) {
+            if (prod.klabel().isEmpty()) {
+                continue;
+            }
+            StringBuilder koreLbl = new StringBuilder();
+            convert(prod.klabel().get(), prod.params(), koreLbl);
+            KLabelToKORE.put(prod.klabel().get().name(), koreLbl.toString());
+        }
         for (Production prod : iterable(module.sortedProductions())) {
             if (isBuiltinProduction(prod)) {
                 continue;
@@ -378,11 +387,16 @@ public class ModuleToKORE {
             if (impurities.contains(prod.klabel().get())) {
                 impureFunctions.add(prod.klabel().get().name());
             }
-            translateSymbol(attributes, functionRules, impurities, overloads, prod.klabel().get(), prod, sb);
+            translateSymbol(attributes, functionRules, impurities, overloads, prod.klabel().get(), prod, sb, KLabelToKORE);
         }
     }
 
     private void translateSymbol(Map<String, Boolean> attributes, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities, Set<Production> overloads, KLabel label, Production prod, StringBuilder sb) {
+        translateSymbol(attributes, functionRules, impurities, overloads, label, prod, sb, new HashMap<String, String>());
+    }
+
+    private void translateSymbol(Map<String, Boolean> attributes, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities, Set<Production> overloads,
+                                 KLabel label, Production prod, StringBuilder sb, HashMap<String, String> KLabelToKORE) {
         sb.append("  ");
         if (isFunction(prod) && prod.att().contains(Att.HOOK()) && isRealHook(prod.att())) {
             sb.append("hooked-");
@@ -402,7 +416,7 @@ public class ModuleToKORE {
         convert(prod.sort(), prod, sb);
         sb.append(" ");
         Att koreAtt = addKoreAttributes(prod, functionRules, impurities, overloads);
-        convert(attributes, koreAtt, sb, null, null);
+        convert(attributes, koreAtt, sb, null, null, KLabelToKORE);
         sb.append("\n");
     }
 
@@ -1745,6 +1759,10 @@ public class ModuleToKORE {
     }
 
     private void convert(Map<String, Boolean> attributes, Att att, StringBuilder sb, Map<String, KVariable> freeVarsMap, HasLocation location) {
+        convert(attributes, att, sb, freeVarsMap, location, new HashMap<String, String>());
+    }
+
+    private void convert(Map<String, Boolean> attributes, Att att, StringBuilder sb, Map<String, KVariable> freeVarsMap, HasLocation location, HashMap<String, String> KLabelToKORE) {
         sb.append("[");
         String conn = "";
         for (Tuple2<Tuple2<String, String>, ?> attribute : iterable(att.att())) {
@@ -1774,7 +1792,17 @@ public class ModuleToKORE {
                 if (isListOfVarsAttribute(name)) {
                     convertStringVarList(location, freeVarsMap, strVal, sb);
                 } else {
-                    sb.append(StringUtil.enquoteKString(strVal));
+                    switch (name) {
+                        case "unit":
+                        case "element":
+                            String lbl = KLabelToKORE.get(strVal);
+                            if (lbl != null) {
+                                sb.append(StringUtil.enquoteKString(lbl));
+                                break;
+                            }
+                        default:
+                            sb.append(StringUtil.enquoteKString(strVal));
+                    }
                 }
                 sb.append(")");
             } else {
