@@ -109,41 +109,45 @@ See the notes below.
 
 ### Installation Notes
 
-#### Java Development Kit (required JDK8 version 8u45 or higher)
+1.  Java Development Kit (required JDK8 version 8u45 or higher)
 
-Linux:
-*   Download from package manager (e.g. `sudo apt-get install openjdk-8-jdk`)
+    *   Linux: Download from package manager
+        (e.g. `sudo apt-get install openjdk-8-jdk`).
 
-To make sure that everything works you should be able to call `java -version` and
-`javac -version` from a Terminal.
+    *   macOS/brew: Download from package manager
+        (e.g. `brew install java`).
 
-#### LLVM
+    To make sure that everything works you should be able to call
+    `java -version` and `javac -version` from a terminal.
 
-macOS/brew:
-*   Since LLVM is distributed as a keg-only package, we must explicitly make
-    it available for command line usage. See the results of the
-    `brew info llvm` command for more information on how to do this.
+2.  LLVM
 
-#### Apache Maven
+    *   macOS/brew: Since LLVM is distributed as a keg-only package, we must
+        explicitly make it available for command line usage. See the results
+        of the `brew info llvm` command for more information on how to do this.
 
-Linux:
-*   Download from package manager (e.g. `sudo apt-get install maven`)
+3.  Apache Maven
 
-macOS:
-*   Download it from a package manager or from
-    http://maven.apache.org/download.cgi and follow the instructions on the webpage.
+    *   Linux: Download from package manager
+        (e.g. `sudo apt-get install maven`).
 
-Maven usually requires setting an environment variable `JAVA_HOME` pointing
-to the installation directory of the JDK (not to be mistaken with JRE).
+    *   macOS/brew: Download it from a package manager or from
+        http://maven.apache.org/download.cgi and follow the instructions on
+        the webpage.
 
-You can test if it works by calling `mvn -version` in a Terminal.
-This will provide the information about the JDK Maven is using, in case
-it is the wrong one.
+    Maven usually requires setting an environment variable `JAVA_HOME` pointing
+    to the installation directory of the JDK (not to be mistaken with JRE).
 
-#### Haskell Stack
+    You can test if it works by calling `mvn -version` in a terminal.
+    This will provide the information about the JDK Maven is using, in case
+    it is the wrong one.
 
-To install, go to <https://docs.haskellstack.org/en/stable/README/> and follow the instructions.
-You may need to do `stack upgrade` to ensure the latest version of Haskell Stack.
+4.   Haskell Stack
+
+     To install, go to <https://docs.haskellstack.org/en/stable/README/> and
+     follow the instructions.
+     You may need to do `stack upgrade` to ensure the latest version of Haskell
+     Stack.
 
 # Build and Install Guide
 
