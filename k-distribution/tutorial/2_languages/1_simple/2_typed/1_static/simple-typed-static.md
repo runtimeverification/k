@@ -149,7 +149,7 @@ type, we also introduce a new syntactic category for typed variables,
   syntax Param ::= Type Id
   syntax Params ::= List{Param,","}
 
-  syntax Decl ::= Type Exps ";"
+  syntax Stmt ::= Type Exps ";"
                 | Type Id "(" Params ")" Block
 ```
 
@@ -216,14 +216,14 @@ typing perspective, they are all strict: first type their arguments and then
 type the actual construct.
 ```k
   syntax Block ::= "{" "}"
-                | "{" Stmts "}"
+                | "{" Stmt "}"
 
-  syntax Stmt ::= Decl | Block
+  syntax Stmt ::= Block
                 | Exp ";"                                  [strict]
                 | "if" "(" Exp ")" Block "else" Block      [avoid, strict]
                 | "if" "(" Exp ")" Block
                 | "while" "(" Exp ")" Block                [strict]
-                | "for" "(" Stmts Exp ";" Exp ")" Block
+                | "for" "(" Stmt Exp ";" Exp ")" Block
                 | "return" Exp ";"                         [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"                 [strict]
@@ -238,8 +238,7 @@ Note that the sequential composition is now sequentially strict,
 because, unlike in the dynamic semantics where statements dissolved,
 they now reduce to the `stmt` type, which is a result.
 ```k
-  syntax Stmts ::= Stmt
-                |  Stmts Stmts                             [seqstrict, right]
+  syntax Stmt ::= Stmt Stmt                             [seqstrict, right]
 ```
 ## Desugaring macros
 
@@ -247,7 +246,7 @@ We use the same desugaring macros like in untyped SIMPLE, but, of
 course, including the types of the involved variables.
 ```k
   rule if (E) S => if (E) S else {}                                     [macro]
-  rule for(Start Cond; Step) {S:Stmts} => {Start while(Cond){S Step;}}  [macro]
+  rule for(Start Cond; Step) {S:Stmt} => {Start while(Cond){S Step;}}  [macro]
   rule for(Start Cond; Step) {} => {Start while(Cond){Step;}}           [macro]
   rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro-rec]
   rule T:Type X:Id = E; => T X; X = E;                                  [macro]
@@ -337,7 +336,7 @@ subcells.
   configuration <T color="yellow">
                   <tasks color="orange">
                     <task multiplicity="*" color="yellow">
-                      <k color="green"> $PGM:Stmts </k>
+                      <k color="green"> $PGM:Stmt </k>
                       <tenv multiplicity="?" color="cyan"> .Map </tenv>
                       <returnType multiplicity="?" color="black"> void </returnType>
                     </task>
@@ -628,7 +627,7 @@ exceptions which are not caught.
 The function `mkDecls` turns a list of parameters into a
 list of variable declarations.
 ```k
-  syntax Stmts ::= mkDecls(Params)  [function]
+  syntax Stmt ::= mkDecls(Params)  [function]
   rule mkDecls(T:Type X:Id, Ps:Params) => T X; mkDecls(Ps)
   rule mkDecls(.Params) => {}
 ```

@@ -9,11 +9,9 @@ jobs:
       - name: 'Check out code'
         uses: actions/checkout@v2.3.4
         with:
+          # Check out pull request HEAD instead of merge commit.
+          ref: ${{ github.event.pull_request.head.sha }}
           submodules: recursive
-          # Avoid cloning a detached-HEAD repository on pull_request events.
-          # git-auto-commit-action (below) needs this to find the original
-          # branch where it should push the changes.
-          ref: ${{ github.head_ref }}
 
       - name: 'Install Nix'
         uses: cachix/install-nix-action@v12
@@ -24,39 +22,19 @@ jobs:
           name: runtimeverification
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
 
-      - name: 'Update Maven dependencies'
-        run: ./nix/update-maven.sh
-
-      - name: 'Commit changes'
-        uses: stefanzweifel/git-auto-commit-action@v4.7.2
-        with:
-          commit_message: 'Update Maven dependencies'
-          file_pattern: 'nix/'
+      # Check that the pinned Maven dependencies are up-to-date.
+      # We cannot update them in the pull request job.
+      - name: 'Check for changed Maven dependencies'
+        run: |
+          ./nix/update-maven.sh
+          if [ ! $(git status --porcelain | wc -l) -eq 0 ]; then
+            echo "Found dirty files:"
+            git status --porcelain
+            exit 1
+          fi
 
       - name: 'Build K Framework'
         run: nix-build -A k -A llvm-backend -A haskell-backend
 
       - name: 'Check development environment'
         run: nix-shell --run "echo OK"
-
-      - name: 'Run integration tests'
-        run: nix-build test.nix
-
-  # Update README.md if this job changes.
-  test-nix-install:
-    name: 'Nix: Install'
-    needs: test-nix
-    strategy:
-      matrix:
-        os: [ubuntu-20.04, ubuntu-18.04]
-    timeout-minutes: 10
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: Test end-to-end installation instructions
-        run: |
-          bash <(curl -L https://nixos.org/nix/install)
-          . $HOME/.nix-profile/etc/profile.d/nix.sh
-          nix-env -iA cachix -f https://cachix.org/api/v1/install
-          cachix use runtimeverification
-          nix-env -f https://github.com/${{ github.repository }}/archive/${{ github.sha }}.tar.gz \
-            -i -A k -A haskell-backend -A llvm-backend
