@@ -3,7 +3,7 @@ Installing the K Framework Package
 
 We currently strive to provide packages for the following platforms:
 
--   Ubuntu Bionic (18.04)
+-   Ubuntu Bionic Beaver (18.04) and Focal Fossa (20.04)
 -   Debian Buster
 -   Arch Linux
 -   MacOS X Mojave/Homewbrew
@@ -23,7 +23,7 @@ Pre-installation Notes
 
     1.  opening up the command prompt (accessible by searching `cmd` or
         `command prompt` from the start menu);
-    2.  using the `wsl.exe` to access the WSL environment.
+    2.  using the `wsl.exe` command to access the WSL environment.
 
 -   To use K in other non-linux environments (e.g. Windows 8 or earlier),
     you will need to use a virtual machine (VM) software. We assume you have:
@@ -33,14 +33,14 @@ Pre-installation Notes
         virtual machine
 
     Consult your virtual machine software if you need help with the above
-    steps. We recommend the free VirtualBox virutal machine software.
+    steps. We recommend the free VirtualBox virtual machine software.
 
     Before proceeding, follow the virtual machine softare UI to start your
     Linux virtual machine and enter the command line environment.
 
 -   WSL and virtual machine users should be aware that, if you use your web
     browser to download the package, you will need to make it accessible to
-    the command line environment. For this reason, we recommend downloadin the
+    the command line environment. For this reason, we recommend downloading the
     package from the command line directly using a tool like `wget`. For
     example, you could copy the package download URL and then type:
 
@@ -52,7 +52,7 @@ Pre-installation Notes
 
 -   The packages we distribute do **not** include the OCaml backend dependency
     setup. However, we include
-    [instructions below](#installing-the-ocaml-backendoptional) on using the
+    [instructions below](#installing-the-ocaml-backend-optional) on using the
     OCaml backend with the package-installed K.
 
 Downloading Packages
@@ -219,9 +219,9 @@ Testing Packages
 The easiest way to test the K package is to copy a K tutorial language and
 check if you can compile and run an included example.
 
-1.  So, copy the K tutorial to some work directory (e.g. `$HOME/k-tutorial`)
-    from the K distribution root. Using a Linux package, this command typically
-    will be like:
+1.  Start by copying the K tutorial to some work directory
+    (e.g. `$HOME/k-tutorial`) from the K distribution root. Using a Linux
+    package, this command typically will be like:
 
     ```sh
     $ cp -R /usr/share/kframework/tutorial $HOME/k-tutorial
