@@ -4,6 +4,7 @@ import org.kframework.builtin.{KLabels, Sorts}
 import org.kframework.kore.KVariable
 import org.kframework.kore.KORE
 import org.kframework.attributes.Att
+import org.kframework.kore.ADT.KVariable
 import org.kframework.parser.kore
 import org.kframework.utils.StringUtil
 import org.kframework.{kore => k}
@@ -115,7 +116,10 @@ class KoreToK (sortAtt : Map[String, String]) {
       KORE.KVariable(extractVarName(name), Att.empty.add(classOf[org.kframework.kore.Sort], apply(sort)))
     case kore.Application(head, args) => head.ctr match {
       case "inj" =>
-        apply(args.head)
+        apply(args.head) match {
+          case KVariable(name, att) => KORE.KVariable(name, att.add("prettyPrintWithSortAnnotation"))
+          case body => body
+        }
       case "kseq" =>
         KORE.KSequence(args.map(apply(_)): _*)
       case "dotk" =>
