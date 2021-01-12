@@ -27,74 +27,26 @@ _K-based tool users_ should:
 
 If you are interested in quickly trying out the K Framework without building
 from source, please see our
-[quick start guide](k-distribution/INSTALL.md#quick-start-guide-for-ubuntu-bionicfocal).
+[packaged release installation guide](k-distribution/INSTALL.md).
 
 The rest of this file assumes you intend to build and install the K Framework
 from source.
 
+Note that the K Framework can only be built on (x86-64) Linux-like systems,
+e.g., this also includies macOS/brew (x86-64) and the Windows Subsystem for
+Linux. See the [installation notes](k-distribution/INSTALL.md) for details
+about supported configurations and system setup.
+
 ## Contents
 
-1.  [Supported System Configurations](#supported-system-configurations)
-2.  [Prerequisite Install Guide](#prerequisite-install-guide)
-3.  [Build and Install Guide](#build-and-install-guide)
-4.  [IDE Setup](#ide-setup)
-5.  [Running the Test Suite](#running-the-test-suite)
-6.  [Changing the KORE Data Structures](#changing-the-kore-data-structures)
-7.  [Building the Final Release Directory/Archives](#building-the-final-release-directoryarchives)
-8.  [Compiling Definitions and Running Programs](#compiling-definitions-and-running-programs)
-9.  [Troubleshooting](#troubleshooting)
-
-# Supported System Configurations
-
-We release packages for the following system configurations given in order
-of kernel, CPU architecture, and operating system/package manager.
-These configurations are known to be able to build and run the K Framework:
-
-*   Linux (x86-64) Ubuntu Bionic Beaver
-*   Linux (x86-64) Ubuntu Focal Fossa
-*   Linux (x86-64) Arch Linux
-*   Linux (x86-64) Debian Buster
-*   Linux (x86-64) Platform Indepdent Binary (tested on Ubuntu)
-*   macOS (x86-64) Brew
-
-NOTE: users of the platform independent binary must install any needed
-runtime dependencies separately.
-
-The following system configurations have **no direct support** (but see notes
-below about virtual machine/emulation support):
-
-*   Windows (any architecture)
-*   macOS (M1)
-
-## Virtualized System Configurations
-
-Even if your system is not supported directly, you may be able to:
-
-1.  Install a free virtual machine/emulation software;
-2.  Install a supported Linux distribution on your virtual machine
-
-Our recommendations for virtual machine software are as follows:
-
-*   Windows 10 (x86-64) users should use
-    [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/)
-    with [version 2](https://docs.microsoft.com/en-us/windows/wsl/compare-versions) **recommended**
-    (version 1 should run the K Framework packages but has known issues when building from source).
-    To install a WSL Linux distribution, follow
-    [these instructions](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
-    Then begin the package installation/source build process in the newly created
-    Linux environment.
-
-*   Windows 8 and older (x86-64) users can install
-    [VirtualBox](https://www.virtualbox.org) and then:
-    1.   create a new virtual machine (VM);
-    2.   download a Linux distribution ISO of their choice;
-    3.   install the Linux ISO to the VM created in step (1);
-    4.   begin the package installation/source build process in the newly
-         created VM.
-
-*   macOS (M1) users should use a Linux (x86-64) emulator when they become
-    generally available (if you know of a solution that works now, please let
-    us know so we can update this section).
+1.  [Prerequisite Install Guide](#prerequisite-install-guide)
+2.  [Build and Install Guide](#build-and-install-guide)
+3.  [IDE Setup](#ide-setup)
+4.  [Running the Test Suite](#running-the-test-suite)
+5.  [Changing the KORE Data Structures](#changing-the-kore-data-structures)
+6.  [Building the Final Release Directory/Archives](#building-the-final-release-directoryarchives)
+7.  [Compiling Definitions and Running Programs](#compiling-definitions-and-running-programs)
+8.  [Troubleshooting](#troubleshooting)
 
 # Prerequisite Install Guide
 
