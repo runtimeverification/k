@@ -5,4 +5,5 @@ KOMPILE_BACKEND=haskell
 KRUN_FLAGS=--output kore
 
 include ../../../include/kframework/ktest.mak
-KRUN=$(abspath $(MAKEFILE_PATH)/../../bin/krun)
+# force krun instead of kx
+KRUN_OR_KX=$(KRUN)
