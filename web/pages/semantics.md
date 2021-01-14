@@ -4,25 +4,25 @@
 
 ## Featured
 
-* **[C (Jul 2010 - Present)](https://github.com/kframework/c-semantics)**
+* **[C semantics (Jul 2010 - Present)](https://github.com/kframework/c-semantics)**
 
-  K semantics of the [C programming language](<https://en.wikipedia.org/wiki/C_(programming_language)>). It can help catch the undefined behaviors of C programs.
+  The K semantics of the [C programming language](<https://en.wikipedia.org/wiki/C_(programming_language)>) specifies the translation, linking, and execution semantics of the C language according to the official C standard. It has been used to build tools like RV-Match, which detects undefined behaviors in users programs by running their test-suites through the C semantics.
 
 * **[KWasm (Aug 2015 - Present)](https://github.com/kframework/wasm-semantics)**
 
-  KWasm is the K semantics of [WebAssembly](https://webassembly.github.io/spec/).
+  KWasm is the K semantics of [WebAssembly](https://webassembly.github.io/spec/). WebAssembly is a low-level (but simple and streamlined) assembly language that was originally developed to provide a fast execution engine for browser-based tools. More recently, it has been used in several blockchain smart-contract platforms as the underlying language for executing financial agreements. KWasm has been used for measuring coverage of test-suites over Wasm code and verifying programs which are compiled to Wasm.
 
 * **[Elrond (Aug 2015 - Present)](https://github.com/runtimeverification/elrond-semantics)**
 
-  The semantics of Elrond and Mandos.
+  The semantics of [Elrond](https://elrond.com/) is a wrapper around KWasm which extends it with the Elrond blockchain primitives. This extension enables developers targeting the Elrond blockchain to measure coverage of their test-suite directly at the Wasm level.
 
 * **[IELE (Oct 2016 - Present)](https://ielelang.org/)**
 
-  Provides a model of IELE in K.
+  IELE is the underlying VM integrated into the [Cardano](https://cardano.org/) blockchain. IELE is a register-based VM (inspired by LLVM), which attempts to avoid many of the missteps in design present in EVM.
 
 * **[KEVM (Sep 2017 - Present)](https://jellopaper.org/)**
 
-  KEVM is the K semantics of the [Ethereum Virtual Machine](https://ethereum.org/en/developers/docs/evm/). It passes all of the Ethereum Test Suite, and is used for verifying EVM programs.
+  KEVM is the K semantics of the [Ethereum Virtual Machine](https://ethereum.org/en/developers/docs/evm/). It passes all of the Ethereum Test Suite, and is used for verifying EVM programs. Additionally, it has been wrapped up into a full-node client [Firefly](https://fireflyblockchain.org) which can be used for measuring test-coverage and perform other diagnostics on a Ethereum developer's test-suite.
 
 * **[KEwasm (Jul 2019 - Present)](https://github.com/kframework/ewasm-semantics)**
 
@@ -30,11 +30,11 @@
 
 * **[K-Michelson (Oct 2019 - Present)](https://runtimeverification.github.io/michelson-semantics)**
 
-  K-Michelson is the K semantics of [Michelson blockchain programming language](https://www.michelson.org/).
+  K-Michelson is the K semantics of [Michelson blockchain programming language](https://www.michelson.org/), which powers the [Tezos blockchain](https://tezos.com/). KMichelson provides additional testing tools for developers, including a unit-testing framework which is extendable to symbolic property testing.
 
 * **[Boogie (Apr 2020 - Present)](https://github.com/kframework/boogie-semantics)**
 
-  Presents an executable formal semantics for [Boogie](https://github.com/boogie-org/boogie), an intermediate language for verification.
+  Presents an executable formal semantics for [Boogie](https://github.com/boogie-org/boogie), an intermediate language for verification. The K semantics of Boogie provides an independent verification engine for programs compiled to Boogie. This, for example, allows [Dafny](https://www.microsoft.com/en-us/research/project/dafny-a-language-and-program-verifier-for-functional-correctness/) users to either discharge their verification goals using Boogie or using the K semantics of Boogie.
 
 ## Archived
 
