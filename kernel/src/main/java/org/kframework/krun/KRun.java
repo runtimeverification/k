@@ -159,7 +159,11 @@ public class KRun {
             String name = entry.getKey();
             String configVarName = "$" + name;
             if (!expectedConfigVars.contains(KToken(configVarName, Sorts.KConfigVar())) && !name.equals("$STDIN") && !name.equals("$IO")) {
-                kem.registerCompilerWarning(ExceptionType.INVALID_CONFIG_VAR, "Command line variable " + name + " not found in the configuration. Ignoring.");
+                if (name.equals("$PGM")) {
+                    throw KEMException.compilerError("Configuration variable $PGM does not exist. Do not pass a positional argument to krun.");
+                } else {
+                    throw KEMException.compilerError("Configuration variable $" + name + " does not exist. Do not pass -c" + name + " to krun.");
+                }
             } else {
                 String value = entry.getValue().getLeft();
                 String parser = entry.getValue().getRight();
@@ -168,7 +172,7 @@ public class KRun {
                 output.put(KToken(configVarName, Sorts.KConfigVar()), configVar);
             }
         }
-        if (compiledDef.kompiledDefinition.mainModule().allSorts().contains(Sorts.String()))
+        if (compiledDef.kompiledDefinition.mainModule().allSorts().contains(Sorts.String())) {
             if (options.io()) {
                 output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken("\"\"", Sorts.String()));
                 output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"on\"", Sorts.String()));
@@ -177,9 +181,12 @@ public class KRun {
                 output.put(KToken("$STDIN", Sorts.KConfigVar()), KToken(StringUtil.enquoteKString(stdin), Sorts.String()));
                 output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
             }
-        for (KToken defConfigVar : mutable(expectedConfigVars))
-            if (!output.containsKey(defConfigVar))
+        }
+        for (KToken defConfigVar : mutable(expectedConfigVars)) {
+            if (!output.containsKey(defConfigVar)) {
                 throw KEMException.compilerError("Configuration variable missing: " + defConfigVar.s() + ". Use -c" + defConfigVar.s().substring(1) + "=<Value> in the command line to set.");
+            }
+        }
         return plugConfigVars(compiledDef, output);
     }
 
