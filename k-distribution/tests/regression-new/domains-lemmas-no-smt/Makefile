@@ -3,6 +3,6 @@ EXT=dlns
 TESTDIR=.
 KOMPILE_BACKEND=haskell
 KPROVE_FLAGS=--def-module DOMAINS-LEMMAS-NO-SMT --smt none
-KOMPILE_FLAGS=--syntax-module TEST
+KOMPILE_FLAGS=--syntax-module DOMAINS-LEMMAS-NO-SMT
 
 include ../../../include/kframework/ktest.mak

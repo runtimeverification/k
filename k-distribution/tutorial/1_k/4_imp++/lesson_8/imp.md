@@ -441,7 +441,7 @@ count as a computational step.
   but future K should be able to infer that automatically. */
   syntax AExp ::= Printable
 
-  context print(HOLE:AExp, AEs:AExps);
+  context print(HOLE:AExp, _AEs:AExps);
 
   rule <k> print(P:Printable,AEs => AEs); ...</k>
        <output>... .List => ListItem(P) </output>  [print]

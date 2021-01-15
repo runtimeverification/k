@@ -359,7 +359,7 @@ typed SIMPLE, so we do not discuss them much here.
   rule (T[])[int, Ts:Types] => T[Ts]
   rule T:Type[.Types] => T
 
-  rule sizeOf(T[]) => int
+  rule sizeOf(_T[]) => int
 
 
   rule read() => int
@@ -539,7 +539,7 @@ only check that the `try` and the `catch` statements
 type correctly.
 ```k
   rule try block catch(T:Type X:Id) S => {T X; S}  [structural]
-  rule throw T:Type ; => stmt
+  rule throw _T:Type ; => stmt
 ```
 
 ## Spawn
@@ -751,7 +751,7 @@ do some basic upcasting and downcasting checks, to reject casts which
 will absolutely fail.  However, dynamic semantics or implementations
 of the language need to insert runtime checks for downcasting to be safe.
 ```k
-  rule class(C1:Id) instanceOf C2:Id => bool
+  rule class(_C1:Id) instanceOf _C2:Id => bool
   rule (C:Id) class(C) => class(C)
   rule <k> (C2:Id) class(C1:Id) => class(C2) ...</k>
        <className> C1 </className>
@@ -895,7 +895,7 @@ is co-variant in the codomain and contra-variant in the domain).
        <ctenv>... F |-> T':Type ...</ctenv>
     [structural]
 
-  rule <k> checkMethod(F:Id, T:Type, (C:Id => C')) ...</k>
+  rule <k> checkMethod(F:Id, _T:Type, (C:Id => C')) ...</k>
        <className> C </className>
        <baseClass> C':Id </baseClass>
        <ctenv> Rho </ctenv>
