@@ -14,7 +14,7 @@ module TEST
     syntax Foo ::= "symbolicFoo" [function]
                  | "foo" | "bar"
 
-    rule <s> ~ S => . ... </s>
+    rule <s> ~ _S => . ... </s>
     rule symbolicFoo => ?_X:Foo
     rule <k> foo => bar ... </k> [tag(f2b)]
     rule <k> bar => foo ... </k> [tag(b2f)]
