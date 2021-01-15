@@ -472,7 +472,7 @@ else
     configVars="$configVars -c STDIN $(basename $stdinFile) String korefile"
   fi
   # llvm-krun creates temp files in the cwd so execute it in $tempDir instead
-  (cd $tempDir; execute llvm-krun $configVars -d "../$kompiledDir" $flags --dry-run -o "$(basename $input_file)")
+  (cd $tempDir; execute llvm-krun $configVars -d "../$kompiledDir" $flags --dry-run -nm -o "$(basename $input_file)")
 fi
 
 # Expand macros
