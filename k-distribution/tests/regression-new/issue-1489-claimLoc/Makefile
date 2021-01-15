@@ -1,6 +1,7 @@
 DEF=claimLoc
 TESTDIR=.
 KOMPILE_BACKEND=haskell
+KOMPILE_FLAGS=--syntax-module CLAIMLOC
 
 %-spec.k %-spec.md: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))

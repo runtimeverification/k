@@ -11,6 +11,6 @@ module TEST
 
   syntax KItem ::= foo(Foo, Int, Int, Int)
 
-  rule 0 => foo(!I:Foo, !X:Int, !X:Int, !Y:Int)
+  rule 0 => foo(!_I:Foo, !X:Int, !X:Int, !_Y:Int)
 
 endmodule

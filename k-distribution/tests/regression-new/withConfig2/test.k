@@ -6,7 +6,7 @@ module TEST
 
    syntax KItem ::= freshIntx() [function]
 
-   rule freshIntx() => !_I:Int
+   rule freshIntx() => !I:Int
 
    rule 5 => freshIntx()
 

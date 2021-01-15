@@ -15,7 +15,7 @@ module TEST
                  | "foo" | "bar"
 
     rule <s> ~ S => . ... </s>
-    rule symbolicFoo => ?X:Foo
+    rule symbolicFoo => ?_X:Foo
     rule <k> foo => bar ... </k> [tag(f2b)]
     rule <k> bar => foo ... </k> [tag(b2f)]
 endmodule
