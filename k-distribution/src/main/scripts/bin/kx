@@ -5,6 +5,7 @@ set -u
 
 export PATH="$(dirname "$0"):$PATH"
 
+# initialize flags
 ARGV=()
 bound=
 depth=
@@ -27,15 +28,20 @@ smtPrelude=
 flags=
 configVars=
 dryRun=false
+expandMacros=true
 result=1
 
-tempDir="$(mktemp -d tmp.krun.XXXXXXXXXX)"
+# setup temp files
+now=`date +"%Y-%m-%d-%H-%M-%S-"$((10#$(date +%N)/1000000))`
+tempDir="$(mktemp -d .krun-${now}-XXXXXXXXXX)"
 tempFiles=("$tempDir")
 trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
 
-input_file="$(mktemp tmp.in.XXXXXXXXXX)"
+input_file="$(mktemp ${tempDir}/tmp.in.XXXXXXXXXX)"
+expanded_input_file="$(mktemp ${tempDir}/tmp.in.XXXXXXXXXX)"
 kore_output="$tempDir/result.kore"
 tempFiles+=("$input_file")
+tempFiles+=("$expanded_input_file")
 tempFiles+=("$kore_output")
 
 execute () {
@@ -50,9 +56,12 @@ execute () {
 KX=$(basename "$0")
 
 error () {
-  printf "%s" "[Error] Critical: "
-  echo "$@"
+  printf "[Error] Critical: $@\n" | fold -s 1>&2
   exit $result
+}
+
+warning () {
+  printf "[Warning] Compiler: $@\n" | fold -s 1>&2
 }
 
 print_usage () {
@@ -99,6 +108,10 @@ future.
                            execution, and disabled when --search is passed.
       --no-substitution-filtering  Don't filter conjuncts with anonymous
                                    variables from substitution output
+      --no-expand-macros   Don't expand macros in initial configuration.
+                           This assumes that the initial configuration contains
+                           no macro terms. Behavior is undefined if this is not
+                           true.
   -o, --output MODE        Select output mode to use when unparsing. Valid
                            values are pretty, program, kast, binary, json,
                            latex, kore, and none.
@@ -134,6 +147,7 @@ future.
 HERE
 }
 
+# parse options
 while [[ $# -gt 0 ]]
 do
   arg="$1"
@@ -182,7 +196,7 @@ do
       val=${keyval#*=}
       var_name="config_var_$key"
       params+=("$key")
-      tempFile="$(mktemp tmp."$key".pretty.XXXXXXXXXX)"
+      tempFile="$(mktemp ${tempDir}/tmp."$key".pretty.XXXXXXXXXX)"
       tempFiles+=("$tempFile")
       printf %s "$val" > "$tempFile"
       printf -v "$var_name" %s "$tempFile"
@@ -195,7 +209,7 @@ do
 
       --dry-run)
       cmdprefix="echo "
-      tempFiles=(${tempFiles[@]/$input_file})
+      tempFiles=(${tempFiles[@]/$expanded_input_file})
       dryRun=true
       ;;
 
@@ -228,6 +242,10 @@ do
 
       --no-substitution-filtering)
       filterSubst=false
+      ;;
+
+      --no-expand-macros)
+      expandMacros = false
       ;;
 
       -o|--output)
@@ -359,6 +377,7 @@ if [[ "${#ARGV[@]}" -gt 1 ]]; then
   error 'Cannot pass more than one configuration variable as a positional argument.'
 fi
 
+# Compute kompiled directory
 kompiledDir=
 hasKompiledDir=false
 for file in "$dir"/*-kompiled; do
@@ -374,6 +393,7 @@ if ! $hasKompiledDir; then
   error 'Could not find a compiled definition. Use --directory to specify one.'
 fi
 
+# Process configuration variables
 hasArgv=false
 if [[ "${#ARGV[@]}" -gt 0 ]]; then
   config_var_PGM="${ARGV[0]}"
@@ -387,6 +407,7 @@ if [ "$outputFile" = "-" ]; then
   outputFile=/dev/stdout
 fi
 
+# verify and parse config variables/cmd line parameters
 if $term; then
   if [ -z "${parser_PGM+unset}" ]; then
     execute kast -d "$dir" -m "$mainModuleName" "$config_var_PGM" -o kore > "$input_file"
@@ -394,11 +415,23 @@ if $term; then
     execute $parser_PGM "$config_var_PGM" > "$input_file"
   fi
 else
+  for configVar in `ls $kompiledDir/sort_*.txt | sed 's|.*sort_\(.*\).txt|\1|'`; do
+    if [[ $configVar != "IO" && $configVar != "STDIN" && ! "${params[@]}" =~ "$configVar" ]]; then
+      error "Configuration variable missing: \$$configVar. Use -c$configVar=<Value> in the command line to set."
+    fi
+  done
   for name in "${params[@]}"; do
     parser_name="parser_$name"
     config_name="config_var_$name"
-    tempFile="$(mktemp tmp.in."$name".XXXXXXXXXX)"
+    tempFile="$(mktemp ${tempDir}/tmp.in."$name".XXXXXXXXXX)"
     tempFiles+=("$tempFile")
+    if [ ! -f "$kompiledDir"/sort_"$name".txt ]; then
+      if [ "$name" = "PGM" ]; then
+        error "Configuration variable \$PGM does not exist. Do not pass a positional argument to $KX."
+      else
+        error "Configuration variable \$$name does not exist. Do not pass -c$name to $KX."
+      fi
+    fi
     sortName=`cat "$kompiledDir"/sort_"$name".txt`
     if [ -z "${!parser_name+unset}" ]; then
       if [ -f "$kompiledDir/parser_$name" ]; then
@@ -416,7 +449,7 @@ else
       parser=("${!parser_name}")
     fi
     execute "${parser[@]}" "${!config_name}" > "$tempFile"
-    configVars="$configVars -c $name $tempFile $sortName korefile"
+    configVars="$configVars -c $name $(basename $tempFile) $sortName korefile"
   done
   if [ "$(cat "$kompiledDir"/sort_IO.txt 2>/dev/null)" = "String" ]; then
     if $io; then
@@ -433,15 +466,23 @@ else
       unescaped=$(</dev/stdin)
       stdinText=$(awk 'BEGIN {for(n=0;n<256;n++)ord[sprintf("%c",n)]=n} {text = text $0 ORS} END {split(text, chars, ""); for (i=1; i<=length(text); i++) { if (chars[i] == "\"") { printf("%s", "\\\"") } else if (chars[i] == "\\") { printf("%s", "\\\\") } else if (chars[i] == "\n") { printf("%s", "\\n") } else if (chars[i] == "\t") { printf("%s", "\\t") } else if (chars[i] == "\r") { printf("%s", "\\r") } else if (chars[i] == "\f") { printf("%s", "\\f") } else if (ord[chars[i]] >= 32 && ord[chars[i]] < 127) { printf("%s", chars[i]) } else { printf("\\x%02x", ord[chars[i]]) } } }' <<< "$unescaped")
     fi
-    stdinFile="$(mktemp tmp.stdin.XXXXXXXXXX)"
+    stdinFile="$(mktemp ${tempDir}/tmp.stdin.XXXXXXXXXX)"
     tempFiles+=("$stdinFile")
     printf '\dv{SortString{}}(\"%s\")\n' "$stdinText" > "$stdinFile"
-    configVars="$configVars -c STDIN $stdinFile String korefile"
+    configVars="$configVars -c STDIN $(basename $stdinFile) String korefile"
   fi
-  execute llvm-krun $configVars -d "$kompiledDir" $flags --dry-run -o "$input_file"
+  # llvm-krun creates temp files in the cwd so execute it in $tempDir instead
+  (cd $tempDir; execute llvm-krun $configVars -d "../$kompiledDir" $flags --dry-run -o "$(basename $input_file)")
 fi
 
+# Expand macros
+if $expandMacros; then
+  execute kore-expand-macros "$kompiledDir" "$input_file" > "$expanded_input_file"
+else
+  execute cp "$input_file" "$expanded_input_file"
+fi
 
+# Invoke backend
 if [ -f "$kompiledDir/interpreter" ]; then
   if $statistics; then
     interpreter_flags=--statistics
@@ -450,7 +491,7 @@ if [ -f "$kompiledDir/interpreter" ]; then
   fi
 
   set +e
-  execute $cmdprefix "$kompiledDir/interpreter" "$input_file" "${depth:--1}" "$kore_output" $interpreter_flags
+  execute $cmdprefix "$kompiledDir/interpreter" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags
   result=$?
   set -e
 else
@@ -464,7 +505,7 @@ else
     koreExecFlags="$koreExecFlags --smt-prelude $smtPrelude"
   fi
   if $search || [ -n "$pattern" ]; then
-    patternFile="$(mktemp tmp.pattern.XXXXXXXXXX)"
+    patternFile="$(mktemp ${tempDir}/tmp.pattern.XXXXXXXXXX)"
     tempFiles+=("$patternFile")
     if [ -z "$pattern" ]; then
       echo '\and{SortGeneratedTopCell{}}(VarResult:SortGeneratedTopCell{},\top{SortGeneratedTopCell{}}())' > "$patternFile"
@@ -473,14 +514,14 @@ else
     fi
 
     if ! $search; then
-      final_input="$(mktemp tmp.in.XXXXXXXXXX)"
+      final_input="$(mktemp ${tempDir}/tmp.in.XXXXXXXXXX)"
       tempFiles+=("$final_input")
       set +e
-      execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$input_file" --output "$final_input" $koreExecFlags
+      execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$final_input" $koreExecFlags
       set -e
       depthFlags="--depth 0"
     else
-      final_input="$input_file"
+      final_input="$expanded_input_file"
     fi
 
     if [ -n "$bound" ]; then
@@ -492,18 +533,19 @@ else
     set -e
   else
     set +e
-    execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$input_file" --output "$kore_output" $koreExecFlags $depthFlags
+    execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$kore_output" $koreExecFlags $depthFlags
     result=$?
     set -e
   fi
 fi
 
+# Unparsing
 if ! $dryRun; then
   if [ -f "$kore_output" ]; then
     if $statistics; then
       steps=$(head -1 "$kore_output")
       echo "[$steps steps]"
-      kore_output2="$(mktemp tmp.out.XXXXXXXXXX)"
+      kore_output2="$(mktemp ${tempDir}/tmp.out.XXXXXXXXXX)"
       tail -1 "$kore_output" > "$kore_output2"
       mv "$kore_output2" "$kore_output"
     fi

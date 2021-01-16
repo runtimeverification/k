@@ -4,6 +4,7 @@ package org.kframework.compile;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
+import org.kframework.builtin.BooleanUtils;
 import org.kframework.definition.Context;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
@@ -37,6 +38,9 @@ public class MinimizeTermConstruction {
     }
 
     private Rule resolve(Rule rule) {
+        if (rule.att().contains(Att.SIMPLIFICATION())) {
+            return rule;
+        }
         resetVars();
         gatherVars(rule.body());
         gatherVars(rule.requires());
@@ -93,7 +97,7 @@ public class MinimizeTermConstruction {
         new RewriteAwareVisitor(body, new HashSet<>()) {
             @Override
             public void apply(K k) {
-                if (isLHS() && !isRHS() && !(k instanceof KVariable) && !atTop) {
+                if (isLHS() && !isRHS() && !(k instanceof KVariable) && !atTop && !k.equals(BooleanUtils.TRUE)) {
                     cache.put(k, newDotVariable(sorts.sort(k, Sorts.K())));
                 }
                 atTop = false;

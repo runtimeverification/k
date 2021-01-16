@@ -1,0 +1,46 @@
+  #Not ( {
+    X
+  #Equals
+    Y
+  } )
+#And
+  #Not ( {
+    X
+  #Equals
+    Z
+  } )
+#And
+  #Not ( {
+    Y
+  #Equals
+    Z
+  } )
+#And
+  <k>
+    assignmentResult ( MAP [ Y:MyId <- 2 ] [ Z:MyId <- 3 ]
+    X:MyId |-> 1 ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in_keys ( MAP )
+  }
+#And
+  {
+    false
+  #Equals
+    X:MyId in_keys ( MAP [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] )
+  }
+#And
+  {
+    true
+  #Equals
+    Y:MyId in_keys ( MAP )
+  }
+#And
+  {
+    true
+  #Equals
+    Z:MyId in_keys ( MAP )
+  }
