@@ -97,8 +97,9 @@ public class CheckAnonymous {
                     if (s instanceof Context && entry.getElement().equals("HOLE")) {
                         continue;
                     }
-                    kem.registerCompilerWarning(ExceptionType.UNUSED_VAR, errors, "Variable '" + entry.getElement() + "' defined but not used. Prefix variable name with underscore if this is intentional.",
-                        loc.get(entry.getElement()));
+                    if (loc.get(entry.getElement()).location().isPresent()) // ignore generated variables
+                        kem.registerCompilerWarning(ExceptionType.UNUSED_VAR, errors, "Variable '" + entry.getElement() + "' defined but not used. Prefix variable name with underscore if this is intentional.",
+                            loc.get(entry.getElement()));
                 }
             } else if (entry.getCount() > 1) {
                 if ((entry.getElement().startsWith("_") || entry.getElement().startsWith("?_") || entry.getElement().startsWith("!_") || entry.getElement().startsWith("@_")) && !ResolveAnonVar.isAnonVar(KVariable(entry.getElement()))) {
