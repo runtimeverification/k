@@ -1,0 +1,2 @@
+[Error] Critical: Configuration variable missing: $Foo. Use -cFoo=<Value> in 
+the command line to set.

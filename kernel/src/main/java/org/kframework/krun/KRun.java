@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
@@ -152,15 +153,24 @@ public class KRun {
 
     private K parseConfigVars(KRunOptions options, CompiledDefinition compiledDef) {
         HashMap<KToken, K> output = new HashMap<>();
+        scala.collection.Set<KToken> expectedConfigVars = new ConfigurationInfoFromModule(compiledDef.kompiledDefinition.mainModule()).configVars();
         for (Map.Entry<String, Pair<String, String>> entry
                 : options.configurationCreation.configVars(compiledDef.getParsedDefinition().mainModule().name(), files).entrySet()) {
             String name = entry.getKey();
-            String value = entry.getValue().getLeft();
-            String parser = entry.getValue().getRight();
             String configVarName = "$" + name;
-            Sort sort = compiledDef.configurationVariableDefaultSorts.getOrDefault(configVarName, compiledDef.programStartSymbol);
-            K configVar = externalParse(parser, value, sort, Source.apply("<command line: -c" + name + ">"), compiledDef);
-            output.put(KToken(configVarName, Sorts.KConfigVar()), configVar);
+            if (!expectedConfigVars.contains(KToken(configVarName, Sorts.KConfigVar())) && !name.equals("$STDIN") && !name.equals("$IO")) {
+                if (name.equals("$PGM")) {
+                    throw KEMException.compilerError("Configuration variable $PGM does not exist. Do not pass a positional argument to krun.");
+                } else {
+                    throw KEMException.compilerError("Configuration variable $" + name + " does not exist. Do not pass -c" + name + " to krun.");
+                }
+            } else {
+                String value = entry.getValue().getLeft();
+                String parser = entry.getValue().getRight();
+                Sort sort = compiledDef.configurationVariableDefaultSorts.getOrDefault(configVarName, compiledDef.programStartSymbol);
+                K configVar = externalParse(parser, value, sort, Source.apply("<command line: -c" + name + ">"), compiledDef);
+                output.put(KToken(configVarName, Sorts.KConfigVar()), configVar);
+            }
         }
         if (compiledDef.kompiledDefinition.mainModule().allSorts().contains(Sorts.String())) {
             if (options.io()) {
@@ -172,29 +182,12 @@ public class KRun {
                 output.put(KToken("$IO", Sorts.KConfigVar()), KToken("\"off\"", Sorts.String()));
             }
         }
-        if (options.global.debug()) {
-            // on the critical path, so don't perform this check because it's slow unless we're debugging.
-            checkConfigVars(output.keySet(), compiledDef);
+        for (KToken defConfigVar : mutable(expectedConfigVars)) {
+            if (!output.containsKey(defConfigVar)) {
+                throw KEMException.compilerError("Configuration variable missing: " + defConfigVar.s() + ". Use -c" + defConfigVar.s().substring(1) + "=<Value> in the command line to set.");
+            }
         }
         return plugConfigVars(compiledDef, output);
-    }
-
-    private void checkConfigVars(Set<KToken> inputConfigVars, CompiledDefinition compiledDef) {
-        Set<KToken> defConfigVars = mutable(new ConfigurationInfoFromModule(compiledDef.kompiledDefinition.mainModule()).configVars());
-
-        for (KToken defConfigVar : defConfigVars) {
-            if (!inputConfigVars.contains(defConfigVar)) {
-                throw KEMException.compilerError("Configuration variable missing: " + defConfigVar.s());
-            }
-        }
-
-        for (KToken inputConfigVar : inputConfigVars) {
-            if (!defConfigVars.contains(inputConfigVar)) {
-                if (!inputConfigVar.s().equals("$STDIN") && !inputConfigVar.s().equals("$IO")) {
-                    kem.registerCompilerWarning(ExceptionType.INVALID_CONFIG_VAR, "User specified configuration variable " + inputConfigVar.s() + " which does not exist.");
-                }
-            }
-        }
     }
 
     public static String getStdinBuffer(boolean ttyStdin) {
