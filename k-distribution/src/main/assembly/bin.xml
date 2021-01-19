@@ -17,12 +17,18 @@
     </dependencySets>
   <fileSets>
     <fileSet>
+      <directory>${project.basedir}/..</directory>
+      <outputDirectory>/share/kframework</outputDirectory>
+      <includes>
+        <include>README*</include>
+      </includes>
+    </fileSet>
+    <fileSet>
       <directory>${project.basedir}</directory>
       <outputDirectory>/share/kframework</outputDirectory>
       <includes>
         <include>tutorial/**</include>
         <include>INSTALL*</include>
-        <include>README*</include>
       </includes>
       <excludes>
         <exclude>**/.*/**</exclude>

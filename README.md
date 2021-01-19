@@ -1,13 +1,23 @@
 ---
 permalink: README.html
-copyright: Copyright (c) 2010-2020 K Team. All Rights Reserved.
+copyright: Copyright (c) 2010-2021 K Team. All Rights Reserved.
 ---
 
 [Join the chat at Riot](https://riot.im/app/#/room/#k:matrix.org)
 
 # Introduction
 
-This is a readme file for _K developers_.
+The K Framework is a tool for designing and modeling programming languages
+and software/hardware systems.
+At the core of the K Framework is a programming, modeling, and specification
+language called K.
+The K Framework includes tools for compiling K specifications to build
+interpreters, model checkers, verifiers, associated documentation, and more.
+
+## Preface
+
+This is a readme file for _K developers_. Users should feel comfortable using
+the command line, as we do not provide GUI tools at this time.
 
 _K-based tool users_ should:
 
@@ -15,8 +25,31 @@ _K-based tool users_ should:
 2.  If needed, download a [packaged release](https://github.com/kframework/k/releases/)
     of the K Framework as part of their tool setup process.
 
+If you are interested in quickly trying out the K Framework without building
+from source, please see our
+[packaged release installation guide](https://github.com/kframework/k/blob/master/k-distribution/INSTALL.md).
+
 The rest of this file assumes you intend to build and install the K Framework
 from source.
+
+Note that the K Framework can only be built on (x86-64) Linux-like systems,
+e.g., this also includies macOS/brew (x86-64) as well as the Windows Subsystem
+for Linux.
+All 32-bit systems are **not supported**.
+See the
+[installation notes](https://github.com/kframework/k/blob/master/k-distribution/INSTALL.md)
+for details about supported configurations and system setup.
+
+## Contents
+
+1.  [Prerequisite Install Guide](#prerequisite-install-guide)
+2.  [Build and Install Guide](#build-and-install-guide)
+3.  [IDE Setup](#ide-setup)
+4.  [Running the Test Suite](#running-the-test-suite)
+5.  [Changing the KORE Data Structures](#changing-the-kore-data-structures)
+6.  [Building the Final Release Directory/Archives](#building-the-final-release-directoryarchives)
+7.  [Compiling Definitions and Running Programs](#compiling-definitions-and-running-programs)
+8.  [Troubleshooting](#troubleshooting)
 
 # Prerequisite Install Guide
 
@@ -44,114 +77,111 @@ If you install this list of dependencies, continue directly to the [Build and In
 
 ## The Long Version
 
-### Java Development Kit (required JDK8 version 8u45 or higher)
+The following dependencies are needed either at build time or runtime:
 
-Linux:
-*   Download from package manager (e.g. `sudo apt-get install openjdk-8-jdk`)
-
-To make sure that everything works you should be able to call `java -version` and
-`javac -version` from a Terminal.
-
-### Apache Maven
-
-Linux:
-*   Download from package manager (e.g. `sudo apt-get install maven`)
-
-Mac:
-*   Download it from a package manager or from
-    http://maven.apache.org/download.cgi and follow the instructions on the webpage.
-
-Maven usually requires setting an environment variable `JAVA_HOME` pointing
-to the installation directory of the JDK (not to be mistaken with JRE).
-
-You can test if it works by calling `mvn -version` in a Terminal.
-This will provide the information about the JDK Maven is using, in case
-it is the wrong one.
-
-### Haskell Stack
-
-To install, go to <https://docs.haskellstack.org/en/stable/README/> and follow the instructions.
-You may need to do `stack upgrade` to ensure the latest version of Haskell Stack.
-
-### Miscellaneous
-
-Also required:
-
-*   [gcc](https://gcc.gnu.org/)
+*   [bison](https://www.gnu.org/software/bison/)
+*   [boost](https://www.boost.org/)
+*   [cmake](https://cmake.org/)
 *   [flex](https://github.com/westes/flex)
-*   [make](https://www.gnu.org/software/make/)
+*   [gcc](https://gcc.gnu.org/)
 *   [gmp](https://gmplib.org/)
+*   [jdk](https://openjdk.java.net/) (version 8u45 or greater)
+*   [libjemalloc](https://github.com/jemalloc/jemalloc)
+*   [libyaml](https://pyyaml.org/wiki/LibYAML)
+*   [llvm](https://llvm.org/) (on some distributions, the utilities below are also needed and packaged separately)
+    * [clang](http://clang.llvm.org/)
+    * [lld](https://lld.llvm.org/)
+*   [make](https://www.gnu.org/software/make/)
+*   [maven](https://maven.apache.org/)
 *   [mpfr](http://www.mpfr.org/)
 *   [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
-*   [z3](https://github.com/Z3Prover/z3)
 *   [python](https://www.python.org)
-*   [opam](https://opam.ocaml.org/doc/Install.html) **OPTIONAL**
+*   [stack](https://docs.haskellstack.org/en/stable/README/)
+*   [zlib](https://www.zlib.net/)
+*   [z3](https://github.com/Z3Prover/z3) (on some distributions libz3 is also needed and packaged separately)
 
-These can all be installed from your package manager.
+The following dependencies are optional and are only needed when building
+the OCaml backend (**not recommended**):
+
+*   [opam](https://opam.ocaml.org/doc/Install.html)
+
+Typically, these can all be installed from your package manager.
+On some system configurations, special installation steps or post-installation
+configuration steps are required.
+See the notes below.
+
+### Installation Notes
+
+1.  Java Development Kit (required JDK8 version 8u45 or higher)
+
+    *   Linux: Download from package manager
+        (e.g. `sudo apt-get install openjdk-8-jdk`).
+
+    *   macOS/brew: Download from package manager
+        (e.g. `brew install java`).
+
+    To make sure that everything works you should be able to call
+    `java -version` and `javac -version` from a terminal.
+
+2.  LLVM
+
+    *   macOS/brew: Since LLVM is distributed as a keg-only package, we must
+        explicitly make it available for command line usage. See the results
+        of the `brew info llvm` command for more information on how to do this.
+
+3.  Apache Maven
+
+    *   Linux: Download from package manager
+        (e.g. `sudo apt-get install maven`).
+
+    *   macOS/brew: Download it from a package manager or from
+        http://maven.apache.org/download.cgi and follow the instructions on
+        the webpage.
+
+    Maven usually requires setting an environment variable `JAVA_HOME` pointing
+    to the installation directory of the JDK (not to be mistaken with JRE).
+
+    You can test if it works by calling `mvn -version` in a terminal.
+    This will provide the information about the JDK Maven is using, in case
+    it is the wrong one.
+
+4.   Haskell Stack
+
+     To install, go to <https://docs.haskellstack.org/en/stable/README/> and
+     follow the instructions.
+     You may need to do `stack upgrade` to ensure the latest version of Haskell
+     Stack.
 
 # Build and Install Guide
 
-Checkout the project source at your desired location and call `mvn package` from the main
-directory to build the distribution. For convenient usage, you can update
-your $PATH with <checkout-dir>k-distribution/target/release/k/bin (strongly recommended, but optional).
+## Building with Maven
 
-You are also encouraged to set the environment variable `MAVEN_OPTS` to `-XX:+TieredCompilation`,
-which will significantly speed up the incremental build process.
+Checkout the project source at your desired location and call `mvn package`
+from the main directory to build the distribution. For convenient usage, you
+can update your `$PATH` with
+`<checkout-dir>/k-distribution/target/release/k/bin`
+(strongly recommended, but optional).
 
-**IF** you want to use the OCAML backend (not recommended), you need to install
-the following dependencies:
+You are also encouraged to set the environment variable `MAVEN_OPTS` to
+`-XX:+TieredCompilation`, which will significantly speed up the incremental
+build process.
 
--   [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config/)
--   [opam](https://opam.ocaml.org/)
+### Optional OCaml Backend Setup
 
-and then after running `mvn package` for the first time, setup OCAML dependencies:
+**If** you want to use the OCaml backend (not recommended), then after running
+`mvn package` for the first time, setup the OCaml dependencies by running
+the following command:
 
 ```sh
 k-distribution/target/release/k/bin/k-configure-opam
 eval $(opam config env)
 ```
 
-This performs first-time setup of the OCAML backend. You may optionally set
-`OPAMROOT` before running this command to specify where the OCAML dependencies
-should be installed to.
+This performs first-time setup of the OCaml backend. You may optionally set
+`OPAMROOT` before running this command to specify where any OCaml dependencies
+should be installed.
 
-## Installing on fresh Windows Subsystem for Linux
-
-1. Install the Ubuntu package from the Windows Store, which as of now is an alias for the Ubuntu LTS 18.04 package. During installation you will be asked to create a new user.
-2. Download the latest K distribution for Ubuntu Bionic from https://github.com/kframework/k/releases
-    to a temporary directory, for example `d:\temp`
-
-3. Open linux bash. For example by running:
-```
-ubuntu1804
-```
-
-4. Run the following commands:
-
-    `$ sudo apt-get update`
-
-    `$ cd <download dir>`. In our example download dir is `/mnt/d/temp`
-
-    `$ sudo apt-get install ./kframework_5.0.0_amd64_bionic.deb`
-        This will install ~1.4GB of dependencies and will take some time.
-        K will be installed to `/usr`
-
-5. Copy the tutorial to some work directory, for example `/mnt/d/k-tutorial`. Otherwise, you won't be able to run the
-examples from default installation dir if you are not `root`:
-
-```
-$ cp -R /usr/share/kframework/tutorial /mnt/d/k-tutorial
-```
-
-6. Now you can try to run some programs:
-
-```bash
-$ cd /mnt/d/k-tutorial/2_languages/1_simple/1_untyped
-$ make kompile
-$ krun tests/diverse/factorial.simple
-```
-
-# Building with Nix
+## Building with Nix
 
 To build the K Framework itself, run:
 
