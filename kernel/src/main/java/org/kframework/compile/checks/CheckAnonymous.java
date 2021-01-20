@@ -94,7 +94,7 @@ public class CheckAnonymous {
                     if (s instanceof ContextAlias && entry.getElement().equals("HERE")) {
                         continue;
                     }
-                    if (s instanceof Context && entry.getElement().equals("HOLE")) {
+                    if (s instanceof Context || s instanceof ContextAlias && entry.getElement().equals("HOLE")) {
                         continue;
                     }
                     if (loc.get(entry.getElement()).location().isPresent()) // ignore generated variables
