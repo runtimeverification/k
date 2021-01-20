@@ -1199,7 +1199,7 @@ public class ModuleToKORE {
             sb.append(",\n    ");
             convert(right, sb);
             sb.append(")\n  ");
-            convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
+            convert(consideredAttributes, rule.att().add(Att.PRIORITY(), Integer.toString(getPriority(rule.att()))), sb, freeVarsMap, rule);
             sb.append("\n\n");
         }
     }
