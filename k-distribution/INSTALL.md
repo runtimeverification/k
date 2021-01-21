@@ -3,34 +3,74 @@ Installing the K Framework Package
 
 We currently strive to provide packages for the following platforms:
 
--   Ubuntu Bionic (18.04)
+-   Ubuntu Bionic Beaver (18.04) and Focal Fossa (20.04)
 -   Debian Buster
 -   Arch Linux
 -   MacOS X Mojave/Homewbrew
 -   Docker Images
 -   Platform Independent K Binary
 
-**NOTE**: We do not currently support running K on native Windows. To use K on
-Windows, you are encouraged to install
-[Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
-and follow the instructions for Ubuntu Bionic.
+Pre-installation Notes
+----------------------
 
-**NOTE**: The distributed packages do **not** include the OCAML backend
-dependency setup. See the end of this file for instructons on using the OCAML
-backend with the package-installed K.
+-   We **do not** currently support running K natively on Windows. To use K on
+    Windows 10, you are encouraged to install the
+    [Windows Subsystem for Linux (version 2)](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
+    and follow the instructions for installing Ubuntu Bionic.
 
-Download Packages
------------------
+    If you have already installed WSL, before proceeding, you will need to
+    enter the WSL environment. You can do this by:
+
+    1.  opening up the command prompt (accessible by searching `cmd` or
+        `command prompt` from the start menu);
+    2.  using the `wsl.exe` command to access the WSL environment.
+
+-   To use K in other non-linux environments (e.g. Windows 8 or earlier),
+    you will need to use a virtual machine (VM) software. We assume you have:
+
+    1.  Created a virtual machine
+    2.  Installed a Linux distribution (e.g. Ubuntu Bionic Beaver) on your
+        virtual machine
+
+    Consult your virtual machine software if you need help with the above
+    steps. We recommend the free VirtualBox virtual machine software.
+
+    Before proceeding, follow the virtual machine softare UI to start your
+    Linux virtual machine and enter the command line environment.
+
+-   WSL and virtual machine users should be aware that, if you use your web
+    browser to download the package, you will need to make it accessible to
+    the command line environment. For this reason, we recommend downloading the
+    package from the command line directly using a tool like `wget`. For
+    example, you could copy the package download URL and then type:
+
+    ```
+    wget <package-download-url>
+    ```
+
+    where `<package-download-url>` is replaced by the URL you just copied.
+
+-   The packages we distribute do **not** include the OCaml backend dependency
+    setup. However, we include
+    [instructions below](#installing-the-ocaml-backend-optional) on using the
+    OCaml backend with the package-installed K.
+
+Downloading Packages
+--------------------
 
 Download the appropriate package from the GitHub, via the
 [Releases](https://github.com/kframework/k/releases) page.
 Releases are generated as often as possible from `master` build.
 
-Install Packages
-----------------
+Installing Packages
+-------------------
 
 For version `X.Y.Z`, disto `DISTRO`, and package ID `ID`, the following
-instructions tell you how to install on each system.
+instructions tell you how to install on each system. Note that this typically
+requires about ~1.4GB of dependencies and will take some time.
+
+-   On Linux systems, K will typically be installed under `/usr`.
+-   On macOS/brew, K will typically be installed under `/usr/local`.
 
 ### Ubuntu Bionic (18.04)
 
@@ -148,28 +188,19 @@ contributors.
     export PATH=$PATH:/PATH/TO/INSTALL/k/bin
     ```
 
-4. Test:
-
-   Go to one of the examples (say `k/tutorial/2_languages/1_simple/1_untyped/`).
-   Assuming `k/bin` is in your `$PATH`, you can compile and test a definition by
-   running the `make` command. To execute a program you can use e.g.
-   `krun tests/diverse/factorial.simple`. K supports the LLVM/Haskell/Java
-   backends for concrete execution and the Haskell/Java backend for symbolic
-   execution and program verification (with `kompile --backend [haskell|java]`).
-
-OCAML Backend (Optional)
-------------------------
+Installing the OCaml Backend (Optional)
+---------------------------------------
 
 **NOTE**: It is *strongly* recommended that you use the LLVM backend instead of
-the OCAML backend. The OCAML backend is being sunsetted.
+the OCaml backend. The OCaml backend is being sunsetted.
 
-To use the OCAML backend requires an installation of the OCAML package manager
-OPAM. Instructions on installing OPAM are available here:
+To use the OCaml backend requires an installation of the OCaml package manager
+`opam`. Instructions on installing `opam` are available here:
 <https://opam.ocaml.org/doc/Install.html>.
 You should install on Windows by following the instructions for the Linux
 distribution you installed for Windows Subsystem for Linux.
 
-Once `opam` is installed, you can prepare the installation to run the OCAML
+Once `opam` is installed, you can prepare the installation to run the OCaml
 backend by running (for a user-local install):
 
 ```sh
@@ -178,6 +209,40 @@ eval $(opam config env)
 ```
 
 `k-configure-opam` is in the `k/bin` directory, and the `eval` command sets up
-your OCAML environment. You can optionally control where the OCAML dependencies
+your OCaml environment. You can optionally control where the OCaml dependencies
 are installed by setting the `OPAMROOT` environment variable before running the
 above commands with `export OPAMROOT=/path/to/opam/root`.
+
+Testing Packages
+----------------
+
+The easiest way to test the K package is to copy a K tutorial language and
+check if you can compile and run an included example.
+
+1.  Start by copying the K tutorial to some work directory
+    (e.g. `$HOME/k-tutorial`) from the K distribution root. Using a Linux
+    package, this command typically will be like:
+
+    ```sh
+    $ cp -R /usr/share/kframework/tutorial $HOME/k-tutorial
+    ```
+
+    On macOS/brew, this command typically will be like:
+
+    ```sh
+    $ cp -R /usr/local/share/kframework/tutorial $HOME/k-tutorial
+    ```
+
+    Using the platform indenpendent K binary, the command will depend on
+    where you unpacked the K Framework.
+
+    This step is needed because sometimes only the `root` user can run the
+    examples in the default installation directory.
+
+2.  Now you can try to run some programs:
+
+    ```sh
+    $ cd $HOME/k-tutorial/2_languages/1_simple/1_untyped
+    $ make kompile
+    $ krun tests/diverse/factorial.simple
+    ```
