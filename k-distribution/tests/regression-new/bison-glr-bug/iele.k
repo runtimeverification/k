@@ -1,4 +1,4 @@
-module IELE-SYNTAX 
+module IELE-SYNTAX
   imports IELE-COMMON
   syntax IeleNameToken  ::=
     r"(?<![A-Za-z0-9\\_\\.\\-\\$])[a-zA-Z\\.\\_\\$][0-9a-zA-Z\\.\\_\\-\\$]*" [notInRules, prec(3), token]
@@ -62,42 +62,42 @@ module IELE-SYNTAX
     r"\\\"(([^\\\"\\\\])|(\\\\[0-9a-fA-F]{2}))*\\\"" [token]
 endmodule
 
-module IELE-COMMON 
+module IELE-COMMON
   imports DOMAINS-SYNTAX
   imports INT-SYNTAX
-  syntax KResult 
+  syntax KResult
   syntax NumericIeleName  ::=
-    Int 
+    Int
   syntax StringIeleName [token]
   syntax IeleName  ::=
-    NumericIeleName 
+    NumericIeleName
   syntax IeleNameToken [token]
   syntax IeleName  ::=
-    IeleNameToken 
+    IeleNameToken
   syntax IeleName  ::=
     StringIeleName [avoid, function, klabel(StringIeleName), symbol]
   syntax GlobalName  ::=
-    "@" IeleName 
+    "@" IeleName
   syntax LocalName  ::=
-    "%" IeleName 
+    "%" IeleName
   syntax LocalNames  ::=
     List{LocalName,","} [klabel(localNameList)]
   syntax Constant  ::=
-    IntConstant 
-  | GlobalName 
+    IntConstant
+  | GlobalName
   syntax IntConstant  ::=
-    Int 
-  | Bool 
-  | HexConstant 
+    Int
+  | Bool
+  | HexConstant
   syntax HexConstant  ::=
     r"0x[0-9a-fA-F]+" [token]
   syntax LValue  ::=
-    LocalName 
+    LocalName
   syntax LValues  ::=
     NeList{LValue,","} [klabel(lvalueList)]
   syntax Operand  ::=
-    LValue 
-  | Constant 
+    LValue
+  | Constant
   syntax Operands  ::=
     List{Operand,","} [klabel(operandList)]
   syntax NonEmptyOperands  ::=
@@ -105,17 +105,17 @@ module IELE-COMMON
   syntax Ints  ::=
     List{Int,","} [klabel(operandList)]
   syntax Operands  ::=
-    Ints 
+    Ints
   syntax Operands  ::=
-    NonEmptyOperands 
+    NonEmptyOperands
   syntax Ints  ::=
-    NonEmptyInts 
+    NonEmptyInts
   syntax NonEmptyOperands  ::=
-    NonEmptyInts 
+    NonEmptyInts
   syntax NonEmptyInts  ::=
     NeList{Int,","} [klabel(operandList)]
   syntax AssignInst  ::=
-    LValue "=" Operand 
+    LValue "=" Operand
   syntax LoadInst  ::=
     LValue "=" "load" Operand [hybrid, strict(2)]
   syntax LoadInst  ::=
@@ -169,22 +169,22 @@ module IELE-COMMON
   syntax ShiftInst  ::=
     LValue "=" "shift" Operand "," Operand [hybrid, seqstrict(2,3)]
   syntax Predicate  ::=
-    "lt" 
-  | "le" 
-  | "gt" 
-  | "ge" 
-  | "eq" 
-  | "ne" 
+    "lt"
+  | "le"
+  | "gt"
+  | "ge"
+  | "eq"
+  | "ne"
   syntax CmpInst  ::=
     LValue "=" "cmp" Predicate Operand "," Operand [hybrid, seqstrict(3,4)]
   syntax SHA3Inst  ::=
     LValue "=" "sha3" Operand [hybrid, strict(2)]
   syntax JumpInst  ::=
-    "br" IeleName 
+    "br" IeleName
   syntax CondJumpInst  ::=
     "br" Operand "," IeleName [hybrid, strict(1)]
   syntax LocalCallInst  ::=
-    "call" Operand "(" Operands ")" 
+    "call" Operand "(" Operands ")"
   | LValues "=" "call" Operand "(" Operands ")" [hybrid, strict(2,3)]
   syntax AccountCallInst  ::=
     LValues "=" "call" Operand "at" Operand "(" Operands ")" "send" Operand "," "gaslimit" Operand [hybrid, seqstrict(2,3,4,5,6)]
@@ -194,7 +194,7 @@ module IELE-COMMON
     LValue "=" "calladdress" GlobalName "at" Operand [hybrid, strict(3)]
   syntax ReturnInst  ::=
     "ret" NonEmptyOperands [hybrid, strict(1)]
-  | "ret" "void" 
+  | "ret" "void"
   syntax RevertInst  ::=
     "revert" Operand [hybrid, strict(1)]
   syntax LogInst  ::=
@@ -255,48 +255,48 @@ module IELE-COMMON
   syntax IeleNameToken  ::=
     "iele.ecpairing" [token]
   syntax Instruction  ::=
-    AssignInst 
-  | LoadInst 
-  | StoreInst 
-  | SLoadInst 
-  | SStoreInst 
-  | IsZeroInst 
-  | NotInst 
-  | AddInst 
-  | MulInst 
-  | SubInst 
-  | DivInst 
-  | ExpInst 
-  | ModInst 
-  | AddModInst 
-  | MulModInst 
-  | ExpModInst 
-  | ByteInst 
-  | SExtInst 
-  | TwosInst 
-  | BswapInst 
-  | AndInst 
-  | OrInst 
-  | XorInst 
-  | ShiftInst 
-  | CmpInst 
-  | SHA3Inst 
-  | JumpInst 
-  | CondJumpInst 
-  | LocalCallInst 
-  | AccountCallInst 
-  | CallAddressInst 
-  | ReturnInst 
-  | RevertInst 
-  | LogInst 
-  | CreateInst 
-  | SelfdestructInst 
+    AssignInst
+  | LoadInst
+  | StoreInst
+  | SLoadInst
+  | SStoreInst
+  | IsZeroInst
+  | NotInst
+  | AddInst
+  | MulInst
+  | SubInst
+  | DivInst
+  | ExpInst
+  | ModInst
+  | AddModInst
+  | MulModInst
+  | ExpModInst
+  | ByteInst
+  | SExtInst
+  | TwosInst
+  | BswapInst
+  | AndInst
+  | OrInst
+  | XorInst
+  | ShiftInst
+  | CmpInst
+  | SHA3Inst
+  | JumpInst
+  | CondJumpInst
+  | LocalCallInst
+  | AccountCallInst
+  | CallAddressInst
+  | ReturnInst
+  | RevertInst
+  | LogInst
+  | CreateInst
+  | SelfdestructInst
   syntax Instructions  ::=
     List{Instruction,""} [format(%1%2%n%3), klabel(instructionList)]
   syntax TopLevelDefinition  ::=
-    FunctionDefinition 
-  | GlobalDefinition 
-  | ContractDeclaration 
+    FunctionDefinition
+  | GlobalDefinition
+  | ContractDeclaration
   syntax TopLevelDefinitions  ::=
     List{TopLevelDefinition,""} [format(%1%2%n%3), klabel(topLevelDefinitionList)]
   syntax ContractDefinition  ::=
@@ -304,26 +304,26 @@ module IELE-COMMON
   syntax Contract  ::=
     List{ContractDefinition,""} [klabel(contractDefinitionList)]
   syntax ContractDeclaration  ::=
-    "external" "contract" IeleName 
+    "external" "contract" IeleName
   syntax GlobalDefinition  ::=
     GlobalName "=" IntConstant [klabel(globalDefinition)]
   syntax FunctionSignature  ::=
-    GlobalName "(" FunctionParameters ")" 
+    GlobalName "(" FunctionParameters ")"
   syntax FunctionParameters  ::=
-    LocalNames 
+    LocalNames
   syntax FunctionDefinition  ::=
     "define" FunctionSignature "{" Blocks "}" [format(%1 %2 %3%i%n%4%d%n%5%n)]
   | "define" "public" FunctionSignature "{" Blocks "}" [format(%1 %2 %3 %4%i%n%5%d%n%6%n)]
   syntax LabeledBlock  ::=
-    IeleName ":" Instructions 
+    IeleName ":" Instructions
   syntax LabeledBlocks  ::=
     List{LabeledBlock,""} [klabel(labeledBlockList)]
   syntax UnlabeledBlock  ::=
-    Instructions 
+    Instructions
   syntax Blocks [flatPredicate]
   syntax Blocks  ::=
     UnlabeledBlock LabeledBlocks [avoid]
-  | LabeledBlocks 
+  | LabeledBlocks
   syntax IeleNameToken  ::=
     "deposit" [token]
   syntax IeleNameToken  ::=
