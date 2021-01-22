@@ -882,7 +882,7 @@ invocations see the entire object, as needed for dynamic method dispatch.
     => lookupMember(ListItem(envStackFrame(Class,Env)) EStack, X)
     [structural]
   rule objectClosure(Class:Id, (ListItem(envStackFrame(Class':Id,_)) => .List) _)
-       . X:Id
+       . _X:Id
     when Class =/=K Class'  [structural]
 
 /*  rule <k> super . X => lookupMember(EStack, X) ...</k>
@@ -893,7 +893,7 @@ invocations see the entire object, as needed for dynamic method dispatch.
        <crntClass> Class:Id </crntClass>
        <envStack> ListItem(envStackFrame(Class,_)) EStack </envStack>
     [structural]
-  rule <k> super . X ...</k>
+  rule <k> super . _X ...</k>
        <crntClass> Class </crntClass>
        <envStack> ListItem(envStackFrame(Class':Id,_)) => .List ...</envStack>
     when Class =/=K Class'  [structural]
@@ -943,7 +943,7 @@ method call or the array access.
        <crntClass> Class </crntClass>
        <envStack> ListItem(envStackFrame(Class,_)) EStack </envStack>
     [structural]
-  rule <k> (super . X)(_:Exps) ...</k>
+  rule <k> (super . _X)(_:Exps) ...</k>
        <crntClass> Class </crntClass>
        <envStack> ListItem(envStackFrame(Class':Id,_)) => .List ...</envStack>
     when Class =/=K Class'  [structural]
@@ -1032,7 +1032,7 @@ member's location based on the current class of the object.
               => lookupMember(ListItem(envStackFrame(Class,Env)) EStack,
                               X))  [structural]
   rule lvalue(objectClosure(Class, (ListItem(envStackFrame(Class':Id,_)) => .List) _)
-              . X)
+              . _X)
     when Class =/=K Class'  [structural]
 ```
 

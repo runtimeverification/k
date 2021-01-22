@@ -409,7 +409,7 @@ For uniformity, we reduce all types to their general form:
 ```
 The dynamic semantics ignores all the type declarations:
 ```k
-  rule datatype T = TCs E => E                               [macro]
+  rule datatype _T = _TCs E => E                               [macro]
 
 endmodule
 
@@ -517,7 +517,7 @@ value, but we do not need that level of detail here), and also that
 a function/closure value that expects the second, list argument):
 ```k
   rule isVal(cons) => true
-  rule isVal(cons V:Val) => true
+  rule isVal(cons _V:Val) => true
   rule cons V:Val [Vs:Vals] => [V,Vs]
 ```
 
@@ -646,7 +646,7 @@ Once evaluated, its first argument is simply discarded:
   rule <k> & X => L ...</k>  <env>... X |-> L ...</env>
   rule <k> @ L:Int => V:Val ...</k>  <store>... L |-> V ...</store>
   rule <k> L:Int := V:Val => V ...</k>  <store>... L |-> (_=>V) ...</store>
-  rule V:Val; E => E
+  rule _V:Val; E => E
 ```
 The desugaring rule of `ref` (first rule above) works
 because `&` takes a variable and returns its location (like in C).
@@ -720,7 +720,7 @@ above.
 
   rule bind(.Names) => .                  [structural]
   rule <k> bind(X:Name,Xs => Xs) ...</k>
-       <env> Rho => Rho[X <- !L:Int] </env>
+       <env> Rho => Rho[X <- !_L:Int] </env>
     [structural]
 
   syntax KItem ::= assignTo(Names,Exps)  [strict(2)]

@@ -10,7 +10,7 @@ configuration <k> $PGM:Pgm </k>
 syntax Pgm ::= fff(Int)
 rule run(1) => fff(1)
 rule fff(1) => fff(2)
-rule fff(2) => foo(inc(sym(?X:Int))) // terms with variables are not concrete
+rule fff(2) => foo(inc(sym(?_X:Int))) // terms with variables are not concrete
 
 // sym(222) is a functional term, thus not concrete even if no variable appears, for which the inc rule is not applicable,
 // but it will be rewritten to sym2(222), which is a normal (ground) term, and concrete.

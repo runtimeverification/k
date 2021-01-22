@@ -31,8 +31,8 @@ module LAMBDA
                   <tenv color="red"> .Map </tenv>
                 </T>
 
-  rule I:Int => int
-  rule B:Bool => bool
+  rule _I:Int => int
+  rule _B:Bool => bool
   rule <k> X:Id => T ...</k> <tenv>... X |-> T:Type ...</tenv>
   rule (T1:Type -> T2:Type) T1 => T2
   rule int * int => int
@@ -50,5 +50,5 @@ module LAMBDA
 
   rule let X = E in E' => (lambda X . E') E
 
-  rule <k> T:Type ~> (env(TEnv:Map) => .) ...</k> <tenv> _:Map => TEnv </tenv>
+  rule <k> _T:Type ~> (env(TEnv:Map) => .) ...</k> <tenv> _:Map => TEnv </tenv>
 endmodule
