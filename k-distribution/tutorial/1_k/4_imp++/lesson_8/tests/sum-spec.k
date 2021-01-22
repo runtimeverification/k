@@ -3,7 +3,7 @@
 module SUM-INVARIANT
   imports IMP
 
-rule
+claim
   <threads><thread>...
     <k>
       while (!(n <= 0)) {
@@ -29,7 +29,7 @@ endmodule
 module SUM-SPEC
   imports SUM-INVARIANT
 
-rule
+claim
   <threads><thread>...
     <k>
       int n, sum;

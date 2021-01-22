@@ -517,7 +517,7 @@ array type to be at least as deep as the number of indexes:
 ```
 `sizeOf` only needs to check that its argument is an array:
 ```k
-  rule sizeOf(T[]) => int
+  rule sizeOf(_T[]) => int
 ```
 
 ## Input/Output

@@ -4,6 +4,6 @@ module TEST
 
 syntax List ::= foo(List, List) [function]
 
-rule foo(.List, (.List ListItem(I::Int))) => .List
+rule foo(.List, (.List ListItem(_I::Int))) => .List
 
 endmodule

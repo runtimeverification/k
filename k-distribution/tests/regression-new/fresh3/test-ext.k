@@ -22,7 +22,7 @@ module ETHEREUM-SIMULATION
 
     syntax EthereumCommand ::= "load" JSON | "mkTX" Int
  // ---------------------------------------------------
-    rule <k> load "transaction" => mkTX !ID:Int ... </k>
+    rule <k> load "transaction" => mkTX !_ID:Int ... </k>
 endmodule
 
 module TEST-EXT

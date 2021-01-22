@@ -6,8 +6,8 @@ configuration <k> $PGM:K </k>
 
 syntax Foo ::= "foo" | "bar"
 
-rule foo => #if ?B:Bool #then 0 #else 1 #fi ~> 0
+rule foo => #if ?_B:Bool #then 0 #else 1 #fi ~> 0
 
-rule I:Int => bar
+rule _I:Int => bar
 
 endmodule

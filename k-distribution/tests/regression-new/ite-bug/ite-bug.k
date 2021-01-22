@@ -17,12 +17,12 @@ module ITE-BUG
       <k> $PGM:Pgm </k>
       <pc> 0 </pc>
 
-    rule <k> JUMPI DEST I => . ... </k>
+    rule <k> JUMPI _DEST I => . ... </k>
          <pc> PCOUNT => PCOUNT +Int 1 </pc>
       requires I ==Int 0
 
     rule <k> JUMPI DEST I => . ... </k>
-         <pc> PCOUNT => DEST </pc>
+         <pc> _PCOUNT => DEST </pc>
       requires I =/=Int 0
 
     rule bool2Word( B:Bool ) => 1 requires B

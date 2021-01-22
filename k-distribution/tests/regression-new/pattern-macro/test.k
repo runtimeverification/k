@@ -23,9 +23,9 @@ syntax KItem ::= RHold
 syntax KItem ::= Type
 
 syntax Expression ::= arithOp(K, K) | stuff(K) | Int
-rule arithOp(L:K, R:K) => stuff(L) [macro]
-rule arithOp(L:RValue, R::RValue) => .K
-rule arithOp(te(t(0, 0, int), t(0, 0, int)), R::RValue) => .K
+rule arithOp(L:K, _R:K) => stuff(L) [macro]
+rule arithOp(_L:RValue, _R::RValue) => .K
+rule arithOp(te(t(0, 0, int), t(0, 0, int)), _R::RValue) => .K
 
 syntax Expression ::= stuff2(K)
 rule stuff2(_:K) => 0 [macro]
