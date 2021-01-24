@@ -34,20 +34,20 @@ syntax BarInt ::= getBarInt() [function]
 rule getBarInt() => 1
 
 syntax KItem ::= useFooBarInt()
-rule useFooBarInt() => #fun( FOO => getBarInt() )(getFooInt())
+rule useFooBarInt() => #fun( _FOO => getBarInt() )(getFooInt())
 
 // LLVM error
 syntax KItem ::= useNestedBarInt()
 rule useNestedBarInt()
-     => #fun(FOO
-          => #fun( F2 => getBarInt() )(0)
+     => #fun(_FOO
+          => #fun(_F2 => getBarInt() )(0)
         )(0)
 
   syntax KItem ::= nestedFun3Levels()
   rule nestedFun3Levels()
        => #fun(V1
-       => #fun(V2
-       => #fun(V3
+       => #fun(_V2
+       => #fun(_V3
        => requiresConfig()
           )(V1 *Int 0)
           )(0)
@@ -55,7 +55,7 @@ rule useNestedBarInt()
 
   syntax Int ::= requiresConfig() [function]
   rule [[ requiresConfig() => 0 ]]
-    <cell> M </cell>
+    <cell> _M </cell>
 
   syntax IntList ::= List{Int, ""}
 
@@ -63,8 +63,8 @@ rule useNestedBarInt()
   rule callFunIntListAndConfig() => funIntListAndConfig()
 
   syntax Int ::= funIntListAndConfig()     [function]
-  rule [[ funIntListAndConfig() => #fun(V1 => 0)(.IntList) ]]
-    <cell> M </cell>
+  rule [[ funIntListAndConfig() => #fun(_V1 => 0)(.IntList) ]]
+    <cell> _M </cell>
 
   syntax KItem ::= Int
   syntax Int ::= funSortTest(Int) [function]

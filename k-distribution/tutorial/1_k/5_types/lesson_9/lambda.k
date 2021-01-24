@@ -29,8 +29,8 @@ module LAMBDA
   configuration <k color="green"> $PGM:Exp </k>
                 <tenv color="red"> .Map </tenv>
 
-  rule I:Int => int
-  rule B:Bool => bool
+  rule _I:Int => int
+  rule _B:Bool => bool
   rule <k> X:Id => T ...</k>  <tenv>... X |-> T:Type ...</tenv>
   rule T1:Type  * T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type  / T2:Type => T1 = int ~> T2 = int ~> int
@@ -61,5 +61,5 @@ module LAMBDA
   rule T = T => .
 
   syntax KItem ::= setTenv(Map)
-  rule <k> T:Type ~> (setTenv(TEnv) => .) ...</k>  <tenv> _ => TEnv </tenv>
+  rule <k> _T:Type ~> (setTenv(TEnv) => .) ...</k>  <tenv> _ => TEnv </tenv>
 endmodule

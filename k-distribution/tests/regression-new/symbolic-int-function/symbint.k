@@ -6,9 +6,9 @@ module SYMBINT-SYNTAX
   syntax Int ::= "symbolicIntMemo"   [function, memo]
                | "symbolicIntNoMemo" [function]
                | "symbolicIntImpure" [function, impure]
-  rule symbolicIntMemo   => ?V:Int
-  rule symbolicIntNoMemo => ?V:Int
-  rule symbolicIntImpure => ?V:Int
+  rule symbolicIntMemo   => ?_V:Int
+  rule symbolicIntNoMemo => ?_V:Int
+  rule symbolicIntImpure => ?_V:Int
 
   syntax Exp ::= init ( Int ) | final ( Int , Int )
 endmodule

@@ -116,7 +116,7 @@ public class KSyntax2Bison {
     return Module(module.name(), module.imports(), immutable(sentences), module.att());
   }
 
-  public static void writeParser(Module module, Scanner scanner, Sort start, File path, boolean glr, long stackDepth, KExceptionManager kem) {
+  public static void writeParser(Module module, Module disambModule, Scanner scanner, Sort start, File path, boolean glr, long stackDepth, KExceptionManager kem) {
     if (!glr && module.att().contains("not-lr1")) {
         kem.registerInnerParserWarning(ExceptionType.NON_LR_GRAMMAR, "Importing a module that is tagged as not being LR(1) when using Bison's LR(1) parser generator: " + module.att().get("not-lr1"));
         // print so it appears before we call bison which may not terminate
@@ -211,7 +211,7 @@ public class KSyntax2Bison {
       String conn = "";
       for (Production prod : Optional.ofNullable(prods.get(sort)).orElse(java.util.Collections.emptyList())) {
         bison.append("  " + conn);
-        processProduction(prod, module, scanner, bison, glr);
+        processProduction(prod, module, disambModule, scanner, bison, glr);
         conn = "|";
       }
       bison.append(";\n");
@@ -262,9 +262,9 @@ public class KSyntax2Bison {
     }
   }
 
-  private static void appendOverloadChecks(StringBuilder bison, Module module, Production greater, List<Integer> nts, boolean hasLocation) {
-    for (Production lesser : iterable(TopologicalSort.tsort(module.overloads().directRelations()))) {
-      if (module.overloads().lessThan(lesser, greater)) {
+  private static void appendOverloadChecks(StringBuilder bison, Module module, Module disambModule, Production greater, List<Integer> nts, boolean hasLocation) {
+    for (Production lesser : iterable(TopologicalSort.tsort(disambModule.overloads().directRelations()))) {
+      if (disambModule.overloads().lessThan(lesser, greater)) {
         bison.append("  if (");
         appendOverloadCondition(bison, module, greater, lesser, nts);
         bison.append(") {\n" +
@@ -322,7 +322,7 @@ public class KSyntax2Bison {
     }
   }
 
-  private static void processProduction(Production prod, Module module, Scanner scanner, StringBuilder bison, boolean glr) {
+  private static void processProduction(Production prod, Module module, Module disambModule, Scanner scanner, StringBuilder bison, boolean glr) {
     int i = 1;
     List<Integer> nts = new ArrayList<>();
     for (ProductionItem item : iterable(prod.items())) {
@@ -342,6 +342,12 @@ public class KSyntax2Bison {
       i++;
     }
     prod = prod.att().getOptional(Att.ORIGINAL_PRD(), Production.class).orElse(prod);
+    if (!prod.att().contains("userListTerminator")) {
+      // further adjustment to get back original production in case of user lists.
+      // don't apply this adjustment to the production that handles the last element of the
+      // list
+      prod = prod.att().getOptional(Att.ORIGINAL_PRD(), Production.class).orElse(prod);
+    }
     boolean hasLocation = module.sortAttributesFor().get(prod.sort().head()).getOrElse(() -> Att.empty()).contains("locations");
     if (prod.att().contains("token") && !prod.isSubsort()) {
       bison.append("{\n" +
@@ -457,7 +463,7 @@ public class KSyntax2Bison {
           "  n->str = false;\n" +
           "  n->location = @$;\n" +
           "  n->nchildren = ").append(nts.size()).append(";\n");
-      appendOverloadChecks(bison, module, prod, nts, hasLocation);
+      appendOverloadChecks(bison, module, disambModule, prod, nts, hasLocation);
       bison.append("{\n" +
           "    n->symbol = \"");
       encodeKore(prod.klabel().get(), bison);

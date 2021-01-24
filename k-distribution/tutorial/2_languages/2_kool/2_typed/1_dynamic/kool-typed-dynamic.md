@@ -690,8 +690,8 @@ Like in untyped KOOL.
     => lookupMember(ListItem(envStackFrame(Class,Env)) EStack, X)
     [structural]
   rule objectClosure(Class:Id,
-                     (ListItem(envStackFrame(Class':Id,_)) => .List) EStack)
-       . X:Id
+                     (ListItem(envStackFrame(Class':Id,_)) => .List) _EStack)
+       . _X:Id
     requires Class =/=K Class' [structural]
 
 /*  rule <k> super . X => lookupMember(<envStack>EStack</envStack>, X) ...</k>
@@ -702,9 +702,9 @@ Like in untyped KOOL.
        <crntClass> Class:Id </crntClass>
        <envStack> ListItem(envStackFrame(Class,_)) EStack </envStack>
     [structural]
-  rule <k> super . X ...</k>
+  rule <k> super . _X ...</k>
        <crntClass> Class:Id </crntClass>
-       <envStack> (ListItem(envStackFrame(Class':Id,_)) => .List) EStack </envStack>
+       <envStack> (ListItem(envStackFrame(Class':Id,_)) => .List) _EStack </envStack>
     requires Class =/=K Class' [structural]
 ```
 
@@ -735,9 +735,9 @@ The method lookup is the same as in untyped KOOL.
        <crntClass> Class:Id </crntClass>
        <envStack> ListItem(envStackFrame(Class,_)) EStack </envStack>
     [structural]
-  rule <k> (super . X)(_:Exps)...</k>
+  rule <k> (super . _X)(_:Exps)...</k>
        <crntClass> Class:Id </crntClass>
-       <envStack> (ListItem(envStackFrame(Class':Id,_)) => .List) EStack </envStack>
+       <envStack> (ListItem(envStackFrame(Class':Id,_)) => .List) _EStack </envStack>
     requires Class =/=K Class' [structural]
 
   // TODO(KORE): fix getKLabel #1801
@@ -799,8 +799,8 @@ Like in untyped KOOL.
               => lookupMember(ListItem(envStackFrame(C,Env)) EStack,
                               X))  [structural]
   rule lvalue(objectClosure(C,
-                            (ListItem(envStackFrame(C',_)) => .List) EStack)
-              . X)
+                            (ListItem(envStackFrame(C',_)) => .List) _EStack)
+              . _X)
     requires C =/=K C' [structural]
 ```
 
@@ -825,7 +825,7 @@ Like in untyped KOOL.
 
 ```k
   rule typeOf(objectClosure(C,_)) => C
-  rule typeOf(methodClosure(T:Type,_,_,Ps:Params,_)) => T
+  rule typeOf(methodClosure(T:Type,_,_,_Ps:Params,_)) => T
 ```
 
 ## Subtype checking
@@ -864,7 +864,7 @@ the subtype relation above.
   rule unsafeCast(objectClosure(_,EStack), C:Id)
     => objectClosure(C,EStack)
 
-  rule unsafeCast(methodClosure(T',C,OL,Ps,S), T) => methodClosure(T,C,OL,Ps,S)
+  rule unsafeCast(methodClosure(_T',C,OL,Ps,S), T) => methodClosure(T,C,OL,Ps,S)
 
   rule unsafeCast(V:Val, T:Type) => V  requires typeOf(V) ==K T
 ```

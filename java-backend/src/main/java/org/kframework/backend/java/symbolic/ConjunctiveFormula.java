@@ -586,8 +586,10 @@ public class ConjunctiveFormula extends Term implements CollectionInternalRepres
                     Sets.union(oldEquality.leftHandSide().variableSet(),
                             oldEquality.rightHandSide().variableSet()))
                                                              : substitution;
-            global.log().format("Unification failure: %s\nOld Equality: %s\nRelevant substitution: %s\n",
-                    equality, oldEquality, debugSubstitution);
+            if (global.javaExecutionOptions.debugFormulas) {
+                global.log().format("Unification failure: %s\nOld Equality: %s\nRelevant substitution: %s\n",
+                        equality, oldEquality, debugSubstitution);
+            }
         }
     }
 

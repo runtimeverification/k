@@ -30,8 +30,8 @@ module LAMBDA
                   </task>
                 </tasks>
 
-  rule I:Int => int
-  rule B:Bool => bool
+  rule _I:Int => int
+  rule _B:Bool => bool
   rule <k> X:Id => T ...</k>  <tenv>... X |-> T ...</tenv>
 
   rule <k> E1 * E2 => int ...</k> <tenv> Rho </tenv>
