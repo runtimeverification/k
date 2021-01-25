@@ -53,14 +53,14 @@ in our LAMBDA module below.
 ```k
 require "substitution.md"
 
-module LAMBDA
-  imports DOMAINS
-  imports SUBSTITUTION
+module LAMBDA-SYNTAX
+  imports DOMAINS-SYNTAX
+  imports KVAR-SYNTAX
 ```
-### Basic Call-by-value λ-Calculus
+### Basic Call-by-value λ-Calculus Syntax
 
-We first define a conventional call-by-value λ-calculus, making sure
-we declare the lambda abstraction construct to be a binder, the
+We first define the syntax of conventional call-by-value λ-calculus, making
+sure we declare the lambda abstraction construct to be a binder, the
 lambda application to be strict, and the parentheses used for grouping as
 a bracket.
 
@@ -82,15 +82,9 @@ The initial syntax of our λ-calculus:
   syntax Exp ::= Val
                | Exp Exp              [left, strict]
                | "(" Exp ")"          [bracket]
-  syntax KResult ::= Val
-```
-### β-reduction
-
-```k
-  rule (lambda X:KVar . E:Exp) V:Val => E[V / X]
 ```
 
-### Integer and Boolean Builtins
+### Integer and Boolean Builtins Syntax
 The LAMBDA arithmetic and Boolean expression constructs are simply rewritten
 to their builtin counterparts once their arguments are evaluated.
 The annotated operators in the right-hand side of the rules below are
@@ -102,23 +96,18 @@ attributes declared as annotations to their syntax declarations (below).
 
 ```k
   syntax Val ::= Int | Bool
-  syntax Exp ::= Exp "*" Exp          [strict, left]
+  syntax Exp ::= "-" Int
+               > Exp "*" Exp          [strict, left]
                | Exp "/" Exp          [strict]
                > Exp "+" Exp          [strict, left]
                > Exp "<=" Exp         [strict]
-  rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2  requires I2 =/=Int 0
-  rule I1 + I2 => I1 +Int I2
-  rule I1 <= I2 => I1 <=Int I2
 ```
 
-### Conditional
+### Conditional Syntax
 Note that the `if` construct is strict only in its first argument.
 
 ```k
   syntax Exp ::= "if" Exp "then" Exp "else" Exp    [strict(1)]
-  rule if true  then E else _ => E
-  rule if false then _ else E => E
 ```
 
 ### Let Binder
@@ -138,6 +127,45 @@ and faster to execute.
   syntax Exp ::= "letrec" KVar KVar "=" Exp "in" Exp
                | "mu" KVar "." Exp                  [binder, latex(\mu{#1}.{#2})]
   rule letrec F:KVar X:KVar = E in E' => let F = mu F . lambda X . E in E' [macro]
+endmodule
+```
+
+### LAMBDA module
+
+```k
+module LAMBDA
+  imports LAMBDA-SYNTAX
+  imports SUBSTITUTION
+
+  syntax KResult ::= Val
+```
+
+### β-reduction
+
+```k
+  rule (lambda X:KVar . E:Exp) V:Val => E[V / X]
+```
+
+### Integer Builtins
+
+```k
+  rule - I => 0 -Int I
+  rule I1 * I2 => I1 *Int I2
+  rule I1 / I2 => I1 /Int I2  requires I2 =/=Int 0
+  rule I1 + I2 => I1 +Int I2
+  rule I1 <= I2 => I1 <=Int I2
+```
+
+### Conditional
+
+```k
+  rule if true  then E else _ => E
+  rule if false then _ else E => E
+```
+
+### Mu
+
+```k
   rule mu X . E => E[(mu X . E) / X]
 endmodule
 ```

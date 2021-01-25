@@ -1,7 +1,7 @@
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 DEF=lambda
 EXT=lambda
-KOMPILE_FLAGS=--syntax-module LAMBDA
+KOMPILE_FLAGS=--gen-bison-parser
 
 %/arithmetic-div-zero.lambda:
 	true
