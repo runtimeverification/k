@@ -1797,7 +1797,8 @@ public class ModuleToKORE {
                         case "element":
                             String lbl = KLabelToKORE.get(strVal);
                             if (lbl != null) {
-                                sb.append(StringUtil.enquoteKString(lbl));
+                                sb.append(lbl);
+                                sb.append("()");
                                 break;
                             }
                         default:
