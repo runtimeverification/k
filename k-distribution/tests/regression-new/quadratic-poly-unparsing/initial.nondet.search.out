@@ -1,5 +1,5 @@
   {
-    Result
+    Result:GeneratedTopCell
   #Equals
     <k>
       final1 ~> .
@@ -7,7 +7,7 @@
   }
 #Or
   {
-    Result
+    Result:GeneratedTopCell
   #Equals
     <k>
       final2 ~> .
@@ -15,7 +15,7 @@
   }
 #Or
   {
-    Result
+    Result:GeneratedTopCell
   #Equals
     <k>
       initial ~> .
@@ -23,7 +23,7 @@
   }
 #Or
   {
-    Result
+    Result:GeneratedTopCell
   #Equals
     <k>
       next1 ~> .
@@ -31,7 +31,7 @@
   }
 #Or
   {
-    Result
+    Result:GeneratedTopCell
   #Equals
     <k>
       next2 ~> .

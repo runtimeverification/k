@@ -43,6 +43,7 @@ We move all the LAMBDA++ syntax here.
                | Exp Exp              [strict, left]
                | "(" Exp ")"          [bracket]
 // Arithmetic
+               > "-" Int
                | Exp "*" Exp          [strict, left]
                | Exp "/" Exp          [strict]
                > Exp "+" Exp          [strict, left]
@@ -142,6 +143,7 @@ the back-end do whatever it wants, you should add a side condition to the
 division rule.
 
 ```k
+  rule - I => 0 -Int I
   rule I1 * I2 => I1 *Int I2
   rule I1 / I2 => I1 /Int I2
   rule I1 + I2 => I1 +Int I2
