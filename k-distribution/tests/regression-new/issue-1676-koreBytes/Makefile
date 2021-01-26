@@ -6,4 +6,4 @@ KRUN_FLAGS=--output kore
 KOMPILE_FLAGS=--syntax-module TEST
 
 include ../../../include/kframework/ktest.mak
-KRUN_OR_KX=$(KRUN)
+KRUN_OR_LEGACY=$(KRUN_LEGACY)

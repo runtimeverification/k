@@ -39,7 +39,7 @@ stdenv.mkDerivation {
       "KBMC=kbmc"
       "KAST=kast"
       "KPRINT=kprint"
-      "KX=kx"
+      "KRUN_LEGACY=krun-legacy"
       "KEQ=keq"
       "KSERVER=kserver"
       "--output-sync"
