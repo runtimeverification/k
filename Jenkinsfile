@@ -61,10 +61,10 @@ pipeline {
                         sh '''
                           echo 'Setting up environment...'
                           eval `opam config env`
+                          export K_OPTS='-Xmx8G'
                           echo 'Building K...'
                           mvn --batch-mode verify -U
                           echo 'Starting kserver...'
-                          export K_OPTS='-Xmx8G'
                           k-distribution/target/release/k/bin/spawn-kserver kserver.log
                           cd k-exercises/tutorial
                           make -j`nproc` ${MAKE_EXTRA_ARGS}
