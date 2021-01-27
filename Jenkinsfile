@@ -61,7 +61,7 @@ pipeline {
                         sh '''
                           echo 'Setting up environment...'
                           eval `opam config env`
-                          export K_OPTS='-Xmx12G'
+                          export K_OPTS='-Xmx8G'
                           echo 'Building K...'
                           mvn --batch-mode verify -U
                           echo 'Starting kserver...'
