@@ -1,1 +1,16 @@
-Lbl'-LT-'generatedTop'-GT-'{}(Lbl'-LT-'k'-GT-'{}(kseq{}(inj{SortInt{}, SortKItem{}}(Var'Apos'QuesUnds'Apos'0:SortInt{}),dotk{}())),Lbl'-LT-'generatedCounter'-GT-'{}(\dv{SortInt{}}("0")))
+/* Fl Fn D Sfc */
+Lbl'-LT-'generatedTop'-GT-'{}(
+    /* Fl Fn D Sfc */
+    Lbl'-LT-'k'-GT-'{}(
+        /* Fl Fn D Sfc */
+        kseq{}(
+            /* Fl Fn D Sfc */
+            /* Inj: */ inj{SortInt{}, SortKItem{}}(
+                /* Fl Fn D Sfa */ Var'QuesUnds'0:SortInt{}
+            ),
+            /* Fl Fn D Sfa Cl */ dotk{}()
+        )
+    ),
+    /* Fl Fn D Sfa Cl */
+    Lbl'-LT-'generatedCounter'-GT-'{}(/* Fl Fn D Sfa Cl */ \dv{SortInt{}}("0"))
+)
