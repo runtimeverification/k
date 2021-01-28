@@ -8,7 +8,7 @@ KOMPILE_BACKEND?=java
 KRUN_FLAGS=--output none --smt none
 
 %/threads/threads_05.simple: kompile
-	cat tests/threads_05.simple.in 2>/dev/null | $(KRUN_OR_KX) $@ -d $(DEFDIR) --search --bound 5 $(CHECK) tests/threads_05.simple.out
+	cat tests/threads_05.simple.in 2>/dev/null | $(KRUN_OR_LEGACY) $@ -d $(DEFDIR) --search --bound 5 $(CHECK) tests/threads_05.simple.out
 
 %/exceptions/exceptions_07.simple \
 %/threads/threads_01.simple \
@@ -17,7 +17,7 @@ KRUN_FLAGS=--output none --smt none
 %/threads/threads_06.simple \
 %/threads/threads_09.simple \
 %/diverse/div-nondet.simple: kompile
-	cat tests/$(notdir $@).in 2>/dev/null | $(KRUN_OR_KX) $@ -d $(DEFDIR) --search --pattern '<output> ListItem(#ostream(1)) ListItem("off") ListItem(#buffer(S:String)) </output>' $(CHECK) tests/$(notdir $@).out
+	cat tests/$(notdir $@).in 2>/dev/null | $(KRUN_OR_LEGACY) $@ -d $(DEFDIR) --search --pattern '<output> ListItem(#ostream(1)) ListItem("off") ListItem(#buffer(S:String)) </output>' $(CHECK) tests/$(notdir $@).out
 
 %/diverse/dekker.simple \
 %/threads/threads_03.simple \

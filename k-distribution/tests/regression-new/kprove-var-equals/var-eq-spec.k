@@ -8,8 +8,8 @@ requires "var-eq.k"
 module VAR-EQ-SPEC
   imports VAR-EQ
 
-  claim <k> VAR:ATerm => a3 ...</k> [trusted]
-  claim <k> VAR:BTerm => b3 ...</k> [trusted]
+  claim <k> _VAR:ATerm => a3 ...</k> [trusted]
+  claim <k> _VAR:BTerm => b3 ...</k> [trusted]
 
   claim <k> a1 => a3 ...</k>
   claim <k> b1 => b3 ...</k>

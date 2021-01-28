@@ -2,6 +2,7 @@ DEF=test
 EXT=test
 TESTDIR=.
 KRUN_FLAGS=--help
+KOMPILE_FLAGS=--syntax-module TEST
 
 1.test:
 	${KAST} --help | grep -q -- "--version"

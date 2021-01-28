@@ -28,8 +28,8 @@ module LAMBDA
 
   configuration <k color="green"> $PGM:Exp </k>
 
-  rule I:Int => int
-  rule B:Bool => bool
+  rule _I:Int => int
+  rule _B:Bool => bool
   rule T1:Type  * T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type  / T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type  + T2:Type => T1 = int ~> T2 = int ~> int

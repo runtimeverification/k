@@ -142,6 +142,7 @@ public class ModuleToKORE {
         attributes.put("nat", true);
         attributes.put("terminals", true);
         attributes.put("colors", true);
+        attributes.put(Att.PRIORITY(), true);
         Set<Integer> priorities = new HashSet<>();
         collectTokenSortsAndAttributes(tokenSorts, attributes, priorities, heatCoolEq, topCellSortStr);
         Map<Integer, String> priorityToPreviousGroup = new HashMap<>();
@@ -1200,7 +1201,7 @@ public class ModuleToKORE {
             sb.append(",\n    ");
             convert(right, sb);
             sb.append(")\n  ");
-            convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
+            convert(consideredAttributes, rule.att().add(Att.PRIORITY(), Integer.toString(getPriority(rule.att()))), sb, freeVarsMap, rule);
             sb.append("\n\n");
         }
     }

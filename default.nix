@@ -18,12 +18,12 @@ let
       };
     in import src { inherit pkgs; };
 
-  k = callPackage ./nix/k.nix {
-    inherit mavenix;
-  };
-
   llvm-backend-project = import ./llvm-backend/src/main/native/llvm-backend { inherit pkgs; };
   inherit (llvm-backend-project) clang llvm-backend;
+
+  k = callPackage ./nix/k.nix {
+    inherit llvm-backend mavenix;
+  };
 
   haskell-backend-project = import ./haskell-backend/src/main/native/haskell-backend {
     src = ttuegel.cleanGitSubtree {
