@@ -155,7 +155,7 @@ module FUN-UNTYPED-MACROS
   rule try E catch(X) E'
     => callcc (fun $k -> (fun throw -> E)(fun X -> $k E'))   [macro]
 
-  rule datatype T = TCs E => E                               [macro]
+  rule datatype _T = _TCs E => E                               [macro]
 ```
 mu needed for letrec, but we put it here so we can also write
 programs with mu in them, which is particularly useful for testing.
@@ -224,7 +224,7 @@ Both Name and functions are values now:
   rule if false then _ else E => E
 
   rule isVal(cons) => true
-  rule isVal(cons V:Val) => true
+  rule isVal(cons _V:Val) => true
   rule cons V:Val [Vs:Vals] => [V,Vs]
 
   syntax Val ::= ConstructorName
@@ -264,7 +264,7 @@ be a value, so that we will never heat on it.
   rule <k> ref V:Val => !L:Int ...</k> <store>... .Map => !L |-> V ...</store>
   rule <k> @ L:Int => V:Val ...</k>  <store>... L |-> V ...</store>
   rule <k> L:Int := V:Val => V ...</k>  <store>... L |-> (_=>V) ...</store>
-  rule V:Val; E => E
+  rule _V:Val; E => E
 
   syntax Val ::= cc(K)
   rule isVal(callcc) => true

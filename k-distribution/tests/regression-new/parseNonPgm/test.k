@@ -26,7 +26,7 @@ module TEST
 
   syntax KResult ::= Int
 
-  rule <k> I:Int ; => . ...</k> <mode> noprint </mode>
+  rule <k> _I:Int ; => . ...</k> <mode> noprint </mode>
   rule <k> I:Int ; => #write(1, Int2String(I)) ...</k> <mode> print </mode>
 
   rule I + I2 => I +Int I2

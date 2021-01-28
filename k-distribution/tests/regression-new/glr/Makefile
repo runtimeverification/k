@@ -14,4 +14,4 @@ clean:
 	rm -rf test.kore test-kompiled
 
 
-KRUN_OR_KX=./parse
+KRUN_OR_LEGACY=./parse

@@ -8,6 +8,6 @@ endmodule
 module TEST
   imports TEST-SYNTAX
 
-  rule I:Int => .AList
+  rule _I:Int => .AList
   configuration <k> $PGM:Int </k>
 endmodule

@@ -37,8 +37,8 @@ module LAMBDA
   configuration <k color="green"> $PGM:Exp </k>
                 <tenv color="red"> .Map </tenv>
 
-  rule I:Int => int
-  rule B:Bool => bool
+  rule _I:Int => int
+  rule _B:Bool => bool
   rule <k> X:KVar => T ...</k>  <tenv>... X |-> T:Type ...</tenv>
   rule int * int => int
   rule int / int => int

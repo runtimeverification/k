@@ -100,7 +100,7 @@ rule <k> depositLoop(I, N, Size, Value) => . ... </k>
      requires I <Int N
       andBool Size %Int 2 ==Int 1
 
-rule <k> depositLoop(I, N, Size, Value) => . ... </k>
+rule <k> depositLoop(I, N, _Size, Value) => . ... </k>
      <branch> B => B[I <- Value] </branch>
      requires I >=Int N
 //     orBool Size %Int 2 ==Int 1

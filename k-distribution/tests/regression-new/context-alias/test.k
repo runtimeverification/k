@@ -32,7 +32,7 @@ rule <k> evalAndStop() => 0 ...</k> <shouldHeat> _ => false </shouldHeat>
 
 rule S::Stmt S2::Stmt => S ~> S2
 
-rule I:Int ; => .K
+rule _I:Int ; => .K
 
 rule <k> X:Id = I:Int => I ...</k> <state> Rho => Rho [ X <- I ] </state>
 rule <k> X:Id := I:Int => I ...</k> <state> Rho => Rho [ X <- I ] </state>
