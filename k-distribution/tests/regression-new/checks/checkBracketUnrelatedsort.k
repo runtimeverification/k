@@ -1,5 +1,6 @@
 module CHECKBRACKET-SYNTAX
-  syntax Exp ::= "(" Exp Exp ")" [bracket]
+  syntax A
+  syntax Exp ::= "(" A ")" [bracket]
 endmodule
 
 module CHECKBRACKET
