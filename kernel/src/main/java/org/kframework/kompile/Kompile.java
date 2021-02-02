@@ -4,6 +4,7 @@ package org.kframework.kompile;
 import com.google.inject.Inject;
 import org.kframework.Strategy;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
@@ -40,11 +41,14 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
+
+import scala.collection.JavaConverters;
 import scala.Function1;
 import scala.Option;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -134,11 +138,13 @@ public class Kompile {
 
         files.saveToKompiled("parsed.txt", parsedDef.toString());
         checkDefinition(parsedDef, excludedModuleTags);
+        sw.printIntermediate("Run definition checks");
 
         Definition kompiledDefinition = pipeline.apply(parsedDef);
-
         files.saveToKompiled("compiled.txt", kompiledDefinition.toString());
         sw.printIntermediate("Apply compile pipeline");
+
+        files.saveToKompiled("allRules.txt", ruleSourceMap(kompiledDefinition));
 
         if (kompileOptions.experimental.emitJson) {
             try {
@@ -176,6 +182,27 @@ public class Kompile {
         }
 
         return def;
+    }
+
+    private static String ruleSourceMap(Definition def) {
+        List<String> ruleLocs = new ArrayList<String>();
+        for (Sentence s: JavaConverters.setAsJavaSet(def.mainModule().sentences())) {
+            if (s instanceof RuleOrClaim) {
+                Optional<Source>   optFile = s.att().getOptional(Source.class);
+                Optional<Location> optLine = s.att().getOptional(Location.class);
+                Optional<Location> optCol  = s.att().getOptional(Location.class);
+                Optional<String>   optId   = s.att().getOptional("UNIQUE_ID");
+                if (optFile.isPresent() && optLine.isPresent() && optCol.isPresent() && optId.isPresent()) {
+                    String file = optFile.get().source();
+                    int line    = optLine.get().startLine();
+                    int col     = optCol.get().startColumn();
+                    String loc  = file + ":" + line + ":" + col;
+                    String id   = optId.get();
+                    ruleLocs.add(id + " " + loc);
+                }
+            }
+        }
+        return String.join("\n", ruleLocs);
     }
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, Set<String> excludedModuleTags) {
