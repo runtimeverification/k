@@ -1,6 +1,7 @@
 // Copyright (c) 2019 K Team. All Rights Reserved.
 package org.kframework.backend.kore
 
+import org.kframework.compile.Backend;
 import org.kframework.kompile.Kompile
 import org.kframework.kompile.KompileOptions
 import org.kframework.main.GlobalOptions
@@ -40,7 +41,7 @@ class KoreTest {
     val backend = new KoreBackend(options, files, kem)
     files.saveToDefinitionDirectory("test.k", k)
     val defn = compiler.run(files.resolveDefinitionDirectory("test.k"), "TEST", "TEST", backend.steps, backend.excludedModuleTags)
-    backend.accept(defn)
+    backend.accept(new Backend.Holder(defn))
     new TextToKore().parse(files.resolveDefinitionDirectory("test.kore"))
   }
 
