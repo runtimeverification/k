@@ -56,6 +56,10 @@ public class ProofDefinitionBuilder {
      * @param specModuleName Module containing specifications to prove
      */
     public Tuple2<Definition, Module> build(File specFile, String defModuleName, String specModuleName) {
+        return build(specFile, defModuleName, specModuleName, true);
+    }
+
+    public Tuple2<Definition, Module> build(File specFile, String defModuleName, String specModuleName, boolean updateCaches) {
         String defModuleNameUpdated =
                 defModuleName == null ? compiledDefinition.kompiledDefinition.mainModule().name() : defModuleName;
         String specModuleNameUpdated =
@@ -63,7 +67,7 @@ public class ProofDefinitionBuilder {
         File absSpecFile = files.resolveWorkingDirectory(specFile).getAbsoluteFile();
 
         Set<Module> modules = kompile.parseModules(compiledDefinition, defModuleNameUpdated, specModuleNameUpdated, absSpecFile,
-                backend.excludedModuleTags());
+                backend.excludedModuleTags(), updateCaches);
         Map<String, Module> modulesMap = modules.stream().collect(Collectors.toMap(Module::name, m -> m));
         Definition parsedDefinition = compiledDefinition.getParsedDefinition();
         Module specModule = getModule(specModuleNameUpdated, modulesMap, parsedDefinition);

@@ -91,8 +91,15 @@ public class KompileOptions implements Serializable {
 
     @Parameter(names="-E", description="Perform outer parsing and then stop and pretty print the definition to standard output. Useful for converting a K definition into a completely self-contained file when reporting a bug.")
     public boolean preprocess;
+
     @Parameter(names="--bison-lists", description="Make List and NeList left associative. This is useful for creating Bison parsers that use bounded stack space.")
     public boolean bisonLists;
+
+    @Parameter(names="--read-only-parse-cache", description="Treat the parse cache as read-only (for global installs of semantics).")
+    private boolean noUpdateParseCache = false;
+    public boolean updateParseCache() {
+        return ! noUpdateParseCache;
+    }
 
     @ParametersDelegate
     public Experimental experimental = new Experimental();
