@@ -16,7 +16,15 @@ import java.util.function.Function;
  */
 public interface Backend {
 
-    void accept(CompiledDefinition def);
+    public class Holder {
+        public CompiledDefinition def;
+
+        public Holder(CompiledDefinition def) {
+            this.def = def;
+        }
+    };
+
+    void accept(Holder def);
 
     Function<Definition, Definition> steps();
 

@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.kframework.backend.llvm.matching.Matching;
 import org.kframework.backend.kore.KoreBackend;
+import org.kframework.compile.Backend;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -41,8 +42,9 @@ public class LLVMBackend extends KoreBackend {
 
 
     @Override
-    public void accept(CompiledDefinition def) {
-        String kore = getKompiledString(def);
+    public void accept(Backend.Holder h) {
+        String kore = getKompiledString(h.def);
+        h.def = null;
         files.saveToKompiled("definition.kore", kore);
         FileUtils.deleteQuietly(files.resolveKompiled("dt"));
         MutableInt warnings = new MutableInt();

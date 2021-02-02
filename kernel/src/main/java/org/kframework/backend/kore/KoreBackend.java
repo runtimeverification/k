@@ -9,6 +9,7 @@ import org.kframework.compile.AbstractBackend;
 import org.kframework.compile.AddCoolLikeAtt;
 import org.kframework.compile.AddImplicitComputationCell;
 import org.kframework.compile.AddSortInjections;
+import org.kframework.compile.Backend;
 import org.kframework.compile.ConcretizeCells;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.ExpandMacros;
@@ -77,7 +78,8 @@ public class KoreBackend extends AbstractBackend {
     }
 
     @Override
-    public void accept(CompiledDefinition def) {
+    public void accept(Backend.Holder h) {
+        CompiledDefinition def = h.def;
         String kore = getKompiledString(def);
         File defFile = kompileOptions.outerParsing.mainDefinitionFile(files);
         String name = defFile.getName();

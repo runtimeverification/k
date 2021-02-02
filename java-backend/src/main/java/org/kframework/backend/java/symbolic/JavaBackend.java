@@ -69,7 +69,7 @@ public class JavaBackend extends AbstractBackend {
     }
 
     @Override
-    public void accept(CompiledDefinition def) {
+    public void accept(Backend.Holder h) {
     }
 
     @Inject
