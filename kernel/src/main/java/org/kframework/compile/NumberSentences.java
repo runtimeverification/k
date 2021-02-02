@@ -6,16 +6,6 @@ import org.bouncycastle.util.encoders.Hex;
 import org.kframework.attributes.Att;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.RuleOrClaim;
-import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.file.JarInfo;
-
-import java.util.Optional;
-
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 
 public class NumberSentences {
 
