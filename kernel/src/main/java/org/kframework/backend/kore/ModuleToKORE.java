@@ -383,7 +383,8 @@ public class ModuleToKORE {
         }
     }
 
-    private void translateSymbol(Map<String, Boolean> attributes, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities, Set<Production> overloads, KLabel label, Production prod, StringBuilder sb) {
+    private void translateSymbol(Map<String, Boolean> attributes, SetMultimap<KLabel, Rule> functionRules, Set<KLabel> impurities, Set<Production> overloads,
+                                 KLabel label, Production prod, StringBuilder sb) {
         sb.append("  ");
         if (isFunction(prod) && prod.att().contains(Att.HOOK()) && isRealHook(prod.att())) {
             sb.append("hooked-");
@@ -1775,7 +1776,16 @@ public class ModuleToKORE {
                 if (isListOfVarsAttribute(name)) {
                     convertStringVarList(location, freeVarsMap, strVal, sb);
                 } else {
-                    sb.append(StringUtil.enquoteKString(strVal));
+                    switch (name) {
+                        case "unit":
+                        case "element":
+                            Production prod = production(KApply(KLabel(strVal)));
+                            convert(prod.klabel().get(), prod.params(), sb);
+                            sb.append("()");
+                            break;
+                        default:
+                            sb.append(StringUtil.enquoteKString(strVal));
+                    }
                 }
                 sb.append(")");
             } else {
