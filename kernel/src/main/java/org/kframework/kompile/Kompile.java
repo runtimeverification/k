@@ -191,7 +191,7 @@ public class Kompile {
                 Optional<Source>   optFile = s.att().getOptional(Source.class);
                 Optional<Location> optLine = s.att().getOptional(Location.class);
                 Optional<Location> optCol  = s.att().getOptional(Location.class);
-                Optional<String>   optId   = s.att().getOptional(Att.UNIQUE_ID);
+                Optional<String>   optId   = s.att().getOptional(Att.UNIQUE_ID());
                 if (optFile.isPresent() && optLine.isPresent() && optCol.isPresent() && optId.isPresent()) {
                     String file = optFile.get().source();
                     int line    = optLine.get().startLine();

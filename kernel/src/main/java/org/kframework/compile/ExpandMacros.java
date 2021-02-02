@@ -225,8 +225,8 @@ public class ExpandMacros {
                         final Map<KVariable, K> subst = new HashMap<>();
                         if (match(subst, left, applied, r) && (r.att().contains(Att.MACRO_REC()) || r.att().contains(Att.ALIAS_REC()) || !appliedRules.contains(r))) {
                             if (cover) {
-                                if (!r.att().contains(Att.UNIQUE_ID)) System.out.println(r.toString());
-                                coverage.println(r.att().get(Att.UNIQUE_ID));
+                                if (!r.att().contains(Att.UNIQUE_ID())) System.out.println(r.toString());
+                                coverage.println(r.att().get(Att.UNIQUE_ID()));
                             }
                             Set<Rule> oldAppliedRules = appliedRules;
                             appliedRules = new HashSet<>(appliedRules);

@@ -1,6 +1,7 @@
 // Copyright (c) 2018-2019 K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
@@ -27,7 +28,7 @@ public class GenerateCoverage {
         }
         K left = RewriteToTop.toLeft(body);
         K right = RewriteToTop.toRight(body);
-        String id = r.att().get(Att.UNIQUE_ID);
+        String id = r.att().get(Att.UNIQUE_ID());
 
         if (ExpandMacros.isMacro(r)) {
             //handled by macro expander
