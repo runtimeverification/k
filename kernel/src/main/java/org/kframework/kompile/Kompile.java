@@ -453,8 +453,8 @@ public class Kompile {
         return parseModules(definition, mainModule, entryPointModule, definitionFile, excludeModules, true);
     }
 
-    public Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, Set<String> excludeModules, boolean updateCaches) {
-        Set<Module> modules = definitionParsing.parseModules(definition, mainModule, entryPointModule, definitionFile, excludeModules, updateCaches);
+    public Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, Set<String> excludeModules, boolean readOnlyCache) {
+        Set<Module> modules = definitionParsing.parseModules(definition, mainModule, entryPointModule, definitionFile, excludeModules, readOnlyCache);
         int totalBubbles = definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get();
         sw.printIntermediate("Parse spec modules [" + definitionParsing.parsedBubbles.get() + "/" + totalBubbles + " rules]");
         return modules;

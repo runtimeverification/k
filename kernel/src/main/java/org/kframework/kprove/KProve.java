@@ -64,7 +64,7 @@ public class KProve {
         }
 
         Tuple2<Definition, Module> compiled = proofDefinitionBuilder
-                .build(kproveOptions.specFile(files), kproveOptions.defModule, kproveOptions.specModule, compiledDefinition.kompileOptions.updateParseCache());
+                .build(kproveOptions.specFile(files), kproveOptions.defModule, kproveOptions.specModule, compiledDefinition.kompileOptions.readOnlyKompiledDirectory);
 
         if (kproveOptions.saveProofDefinitionTo != null) {
             saveFullDefinition(compiled._1());

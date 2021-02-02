@@ -95,11 +95,8 @@ public class KompileOptions implements Serializable {
     @Parameter(names="--bison-lists", description="Make List and NeList left associative. This is useful for creating Bison parsers that use bounded stack space.")
     public boolean bisonLists;
 
-    @Parameter(names="--read-only-parse-cache", description="Treat the parse cache as read-only (for global installs of semantics).")
-    private boolean noUpdateParseCache = false;
-    public boolean updateParseCache() {
-        return ! noUpdateParseCache;
-    }
+    @Parameter(names="--read-only-kompiled-directory", description="Files in the generated kompiled directory should be read-only to other frontend tools.")
+    public boolean readOnlyKompiledDirectory = false;
 
     @ParametersDelegate
     public Experimental experimental = new Experimental();
