@@ -14,7 +14,7 @@ public class NumberSentences {
             return s;
         }
         String id = ruleHash(s.withAtt(Att.empty()));
-        return s.withAtt(s.att().add("UNIQUE_ID", id));
+        return s.withAtt(s.att().add(Att.UNIQUE_ID, id));
     }
 
     private static String ruleHash(Sentence s) {

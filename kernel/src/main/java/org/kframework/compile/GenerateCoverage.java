@@ -27,7 +27,7 @@ public class GenerateCoverage {
         }
         K left = RewriteToTop.toLeft(body);
         K right = RewriteToTop.toRight(body);
-        String id = r.att().get("UNIQUE_ID");
+        String id = r.att().get(Att.UNIQUE_ID);
 
         if (ExpandMacros.isMacro(r)) {
             //handled by macro expander
