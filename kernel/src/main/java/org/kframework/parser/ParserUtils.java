@@ -62,43 +62,6 @@ public class ParserUtils {
         mdExtractor = new ExtractFencedKCodeFromMarkdown(this.kem, outerParsingOptions.mdSelector);
     }
 
-    public static K parseWithFile(String theTextToParse,
-                                  String mainModule,
-                                  Sort startSymbol,
-                                  File definitionFile) {
-        String definitionText;
-        try {
-            definitionText = FileUtils.readFileToString(definitionFile);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return parseWithString(theTextToParse, mainModule, startSymbol, Source.apply(definitionFile.getAbsolutePath()), definitionText);
-    }
-
-    public static K parseWithString(String theTextToParse,
-                                    String mainModule,
-                                    Sort startSymbol,
-                                    Source source,
-                                    String definitionText) {
-        Module kastModule = parseMainModuleOuterSyntax(definitionText, source, mainModule);
-        return parseWithModule(theTextToParse, startSymbol, source, kastModule);
-    }
-
-    public static K parseWithModule(String theTextToParse,
-                                    Sort startSymbol,
-                                    Source source,
-                                    org.kframework.definition.Module kastModule) {
-        ParseInModule parser = new ParseInModule(kastModule);
-        return parseWithModule(theTextToParse, startSymbol, source, parser);
-    }
-
-    public static K parseWithModule(String theTextToParse,
-                                    Sort startSymbol,
-                                    Source source,
-                                    ParseInModule kastModule) {
-        return kastModule.parseString(theTextToParse, startSymbol, source)._1().right().get();
-    }
-
     /**
      * Takes a definition in e-kore textual format and a main module name, and returns the KORE
      * representation of that module. Current implementation uses JavaCC and goes through KIL.
