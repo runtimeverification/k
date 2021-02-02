@@ -206,15 +206,18 @@ public class KSyntax2Bison {
     encode(start, bison);
     bison.append(" { result = $1.nterm; } ;\n");
     for (Sort sort : reachableSorts) {
-      encode(sort, bison);
-      bison.append(":\n");
-      String conn = "";
-      for (Production prod : Optional.ofNullable(prods.get(sort)).orElse(java.util.Collections.emptyList())) {
-        bison.append("  " + conn);
-        processProduction(prod, module, disambModule, scanner, bison, glr);
-        conn = "|";
+      List<Production> prodsForSort = Optional.ofNullable(prods.get(sort)).orElse(java.util.Collections.emptyList());
+      if (!prodsForSort.isEmpty()) {
+        encode(sort, bison);
+        bison.append(":\n");
+        String conn = "";
+        for (Production prod : prodsForSort) {
+          bison.append("  " + conn);
+          processProduction(prod, module, disambModule, scanner, bison, glr);
+          conn = "|";
+        }
+        bison.append(";\n");
       }
-      bison.append(";\n");
     }
     bison.append("\n%%\n");
     bison.append("\n" +
