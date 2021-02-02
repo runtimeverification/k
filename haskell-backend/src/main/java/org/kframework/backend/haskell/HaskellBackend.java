@@ -4,6 +4,7 @@ package org.kframework.backend.haskell;
 import com.google.inject.Inject;
 import org.kframework.attributes.Att;
 import org.kframework.backend.kore.KoreBackend;
+import org.kframework.compile.Backend;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -32,8 +33,9 @@ public class HaskellBackend extends KoreBackend {
 
 
     @Override
-    public void accept(CompiledDefinition def) {
-        String kore = getKompiledString(def);
+    public void accept(Backend.Holder h) {
+        String kore = getKompiledString(h.def);
+        h.def = null;
         files.saveToKompiled("definition.kore", kore);
         ProcessBuilder pb = files.getProcessBuilder();
         List<String> args = new ArrayList<>();

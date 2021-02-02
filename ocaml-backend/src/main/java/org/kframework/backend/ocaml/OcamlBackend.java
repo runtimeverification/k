@@ -4,6 +4,7 @@ package org.kframework.backend.ocaml;
 import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.kframework.compile.AbstractBackend;
+import org.kframework.compile.Backend;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
@@ -48,7 +49,8 @@ public class OcamlBackend extends AbstractBackend {
     }
 
     @Override
-    public void accept(CompiledDefinition compiledDefinition) {
+    public void accept(Backend.Holder h) {
+        CompiledDefinition compiledDefinition = h.def;
         DefinitionToOcaml def = new DefinitionToOcaml(kem, files, globalOptions, kompileOptions, options);
         def.initialize(compiledDefinition);
         String ocaml = def.constants();
