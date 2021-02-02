@@ -223,8 +223,7 @@ public class Kompile {
         };
         GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
         Function1<Definition, Definition> genCoverage = d -> DefinitionTransformer.fromRuleBodyTransformerWithRule((r, body) -> cov.gen(r, body, d.mainModule()), "generate coverage instrumentation").apply(d);
-        NumberSentences numSents = new NumberSentences(files);
-        DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(numSents::number, "number sentences uniquely");
+        DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
         Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, false)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
 
@@ -235,7 +234,6 @@ public class Kompile {
                 .andThen(resolveAnonVars)
                 .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
                 .andThen(numberSentences)
-                .andThen(d -> { numSents.close(); return d; })
                 .andThen(resolveHeatCoolAttribute)
                 .andThen(resolveSemanticCasts)
                 .andThen(subsortKItem)
