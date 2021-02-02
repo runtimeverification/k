@@ -535,28 +535,30 @@ pipeline {
             git tag "${K_RELEASE_TAG}" "${LONG_REV}"
             git push origin "${K_RELEASE_TAG}"
 
-            LOCAL_BOTTLE_NAME=$(find ../mojave -name "kframework--${VERSION}.mojave.bottle*.tar.gz")
-            BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#../mojave/} | sed 's!kframework--!kframework-!')
+            COMMIT_DATE=$(date '+%Y%m%d%H%M' --date=$(git show --no-patch --format='%ci' ${K_RELEASE_TAG}))
 
-            mv ../kframework-${VERSION}-src.tar.gz                      kframework-${VERSION}-src.tar.gz
-            mv ../bionic/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_bionic.deb
-            mv ../focal/kframework_${VERSION}_amd64.deb                 kframework_${VERSION}_amd64_focal.deb
-            mv ../buster/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_buster.deb
-            mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst   kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
+            LOCAL_BOTTLE_NAME=$(find ../mojave -name "kframework--${VERSION}.mojave.bottle*.tar.gz")
+            BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#../mojave/} | sed 's!kframework--!kframework-!' | sed 's!mojave\.!mojave.'${COMMIT_DATE}'.!')
+
+            mv ../kframework-${VERSION}-src.tar.gz                      kframework-${VERSION}-src_${COMMIT_DATE}.tar.gz
+            mv ../bionic/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_bionic_${COMMIT_DATE}.deb
+            mv ../focal/kframework_${VERSION}_amd64.deb                 kframework_${VERSION}_amd64_focal_${COMMIT_DATE}.deb
+            mv ../buster/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_buster_${COMMIT_DATE}.deb
+            mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst   kframework-git-${VERSION}-1-x86_64_${COMMIT_DATE}.pkg.tar.zst
             mv $LOCAL_BOTTLE_NAME                                       $BOTTLE_NAME
-            mv ../k-nightly.tar.gz                                      k-nightly.tar.gz
+            mv ../k-nightly.tar.gz                                      k-nightly_${COMMIT_DATE}.tar.gz
 
             echo "K Framework Release ${K_RELEASE_TAG}"  > release.md
             echo ''                                     >> release.md
             cat k-distribution/INSTALL.md               >> release.md
-            hub release create                                                                  \
-                --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                       \
-                --attach kframework_${VERSION}_amd64_bionic.deb'#Ubuntu Bionic (18.04) Package' \
-                --attach kframework_${VERSION}_amd64_focal.deb'#Ubuntu Focal (20.04) Package'   \
-                --attach kframework_${VERSION}_amd64_buster.deb'#Debian Buster (10) Package'    \
-                --attach kframework-git-${VERSION}-1-x86_64.pkg.tar.zst'#Arch Package'          \
-                --attach $BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                \
-                --attach k-nightly.tar.gz'#Platform Indepdendent K Binary'                      \
+            hub release create                                                                                 \
+                --attach kframework-${VERSION}-src_${COMMIT_DATE}.tar.gz'#Source tar.gz'                       \
+                --attach kframework_${VERSION}_amd64_bionic_${COMMIT_DATE}.deb'#Ubuntu Bionic (18.04) Package' \
+                --attach kframework_${VERSION}_amd64_focal_${COMMIT_DATE}.deb'#Ubuntu Focal (20.04) Package'   \
+                --attach kframework_${VERSION}_amd64_buster_${COMMIT_DATE}.deb'#Debian Buster (10) Package'    \
+                --attach kframework-git-${VERSION}-1-x86_64_${COMMIT_DATE}.pkg.tar.zst'#Arch Package'          \
+                --attach $BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                               \
+                --attach k-nightly_${COMMIT_DATE}.tar.gz'#Platform Indepdendent K Binary'                      \
                 --file release.md "${K_RELEASE_TAG}"
           '''
         }
