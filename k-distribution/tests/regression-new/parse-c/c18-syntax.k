@@ -191,7 +191,7 @@ module C18-COMMON
                       | DirectDeclarator
 
   syntax DirectDeclarator ::= Identifier
-                            | "(" Declarator ")" [bracket]
+                            | "(" Declarator ")"
                             | DirectDeclarator "[" TypeQualifiers Exp "]"
                             | DirectDeclarator "[" TypeQualifiers "]"
                             | DirectDeclarator "[" Exp "]"
@@ -238,7 +238,7 @@ module C18-COMMON
                               | DirectAbstractDeclarator
                               | Pointer DirectAbstractDeclarator
 
-  syntax DirectAbstractDeclarator ::= "(" AbstractDeclarator ")" [bracket]
+  syntax DirectAbstractDeclarator ::= "(" AbstractDeclarator ")"
                                     | "[" "]"
                                     | "[" TypeQualifiers "]"
                                     | "[" TypeQualifiers Exp "]"

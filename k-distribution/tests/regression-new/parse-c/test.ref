@@ -3,8 +3,8 @@
 amb ( .DeclSpecifiers  typedef  int  AA ; , .DeclSpecifiers  typedef  int .InitDecls , AA ; )
 .DeclSpecifiers  int main ( ) {
   .BlockItems
-  amb ( .DeclSpecifiers  T .InitDecls , x ; , T ( x ) ; )
-  amb ( .DeclSpecifiers  S .InitDecls , x ; , S ( x ) ; )
+  amb ( .DeclSpecifiers  T .InitDecls , ( x ) ; , T ( x ) ; )
+  amb ( .DeclSpecifiers  S .InitDecls , ( x ) ; , S ( x ) ; )
   amb ( T * y ; , .DeclSpecifiers  T .InitDecls , * y ; )
   .DeclSpecifiers  int .InitDecls , U , z ;
   amb ( U * z ; , .DeclSpecifiers  U .InitDecls , * z ; )
