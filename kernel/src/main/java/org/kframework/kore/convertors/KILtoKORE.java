@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
+import org.kframework.compile.checks.CheckBracket;
 import org.kframework.compile.checks.CheckListDecl;
 import org.kframework.definition.Associativity;
 import org.kframework.definition.FlatModule;
@@ -63,6 +64,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public FlatModule toFlatModule(Module m) {
         CheckListDecl.check(m);
+        CheckBracket.check(m);
         moduleName = m.getName();
 
         Set<org.kframework.definition.Sentence> items = m.getItems().stream()
