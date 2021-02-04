@@ -247,7 +247,7 @@ do
       ;;
 
       --no-expand-macros)
-      expandMacros = false
+      expandMacros=false
       ;;
 
       -o|--output)
