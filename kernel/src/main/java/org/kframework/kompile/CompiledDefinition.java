@@ -92,6 +92,9 @@ public class CompiledDefinition implements Serializable {
     }
 
     private void initializeConfigurationVariableDefaultSorts(FileUtil files) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("#!/usr/bin/env bash\n\n");
+        sb.append("declare -A configVarsMap\n");
         // searching for #SemanticCastTo<Sort>(Map:lookup(_, #token(<VarName>, KConfigVar)))
         Collections.stream(kompiledDefinition.mainModule().rules())
                 .forEach(r -> {
@@ -110,7 +113,8 @@ public class CompiledDefinition implements Serializable {
                                         if (sort.equals(Sorts.K())) {
                                           sort = Sorts.KItem();
                                         }
-                                        files.saveToKompiled("sort_" + t.s().substring(1) + ".txt", sort.toString());
+                                        String str = "configVarsMap[" + t.s().substring(1) + "]=" + sort.toString() + "\n";
+                                        sb.append(str);
                                     }
                                 }
                             }
@@ -118,6 +122,7 @@ public class CompiledDefinition implements Serializable {
                         }
                     }.apply(r.body());
                 });
+        files.saveToKompiled("configVarsMap.sh", sb.toString());
     }
 
     /**
