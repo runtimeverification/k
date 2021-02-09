@@ -6,10 +6,6 @@ in
 { pkgs ? pinned }:
 
 let
-  inherit (pkgs) callPackage;
-
-  mavenix = import sources."mavenix" { inherit pkgs; };
-
   ttuegel =
     let
       src = builtins.fetchGit {
@@ -17,8 +13,21 @@ let
         rev = "66bb0ab890ff4d828a2dcfc7d5968465d0c7084f";
       };
     in import src { inherit pkgs; };
+in
 
-  llvm-backend-project = import ./llvm-backend/src/main/native/llvm-backend { inherit pkgs; };
+let
+  inherit (pkgs) callPackage;
+
+  mavenix = import sources."mavenix" { inherit pkgs; };
+
+  llvm-backend-project = import ./llvm-backend/src/main/native/llvm-backend {
+    inherit pkgs;
+    src = ttuegel.cleanGitSubtree {
+      name = "llvm-backend";
+      src = ./.;
+      subDir = "llvm-backend/src/main/native/llvm-backend";
+    };
+  };
   inherit (llvm-backend-project) clang llvm-backend;
 
   k = callPackage ./nix/k.nix {
