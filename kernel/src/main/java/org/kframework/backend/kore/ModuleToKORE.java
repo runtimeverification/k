@@ -633,6 +633,8 @@ public class ModuleToKORE {
     private void genNoConfusionAxioms(Production prod, Set<Tuple2<Production, Production>> noConfusion,
                                       SetMultimap<KLabel, Rule> functionRulesMap, Set<KLabel> impurities,
                                       StringBuilder sb) {
+        if (prod.isSortVariable(prod.sort()))
+            return;
         // c(x1,x2,...) /\ c(y1,y2,...) -> c(x1/\y2,x2/\y2,...)
         if (prod.arity() > 0) {
             sb.append("  axiom");

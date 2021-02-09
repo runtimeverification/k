@@ -141,6 +141,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   lazy val productionsForSort: Map[SortHead, Set[Production]] =
     productions
+      .filter(prd => !prd.isSortVariable(prd.sort))
       .groupBy(_.sort.head)
       .map { case (l, ps) => (l, ps) }
 
