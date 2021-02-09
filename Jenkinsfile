@@ -376,12 +376,12 @@ pipeline {
                       brew install opam
                       k-configure-opam
                       eval $(opam config env)
-                      cp -R /usr/local/share/kframework/tutorial ~
+                      cp -R /usr/local/share/kframework/pl-tutorial ~
                       WD=`pwd`
                       cd
                       echo 'Starting kserver...'
                       spawn-kserver $WD/kserver.log
-                      cd tutorial
+                      cd pl-tutorial
                       echo 'Testing tutorial in user environment...'
                       make -j`sysctl -n hw.ncpu` ${MAKE_EXTRA_ARGS}
                       cd ~
