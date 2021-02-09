@@ -154,7 +154,9 @@ public class Kompile {
         CompiledDefinition def = new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(configInfo.getRootCell()).klabel());
 
         if (kompileOptions.experimental.genBisonParser || kompileOptions.experimental.genGlrBisonParser) {
-            new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, files.resolveKompiled("parser_PGM"), kompileOptions.experimental.genGlrBisonParser, kompileOptions.experimental.bisonFile, kompileOptions.experimental.bisonStackMaxDepth);
+            if (def.configurationVariableDefaultSorts.containsKey("$PGM")) {
+                new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, files.resolveKompiled("parser_PGM"), kompileOptions.experimental.genGlrBisonParser, kompileOptions.experimental.bisonFile, kompileOptions.experimental.bisonStackMaxDepth);
+            }
             for (Production prod : iterable(kompiledDefinition.mainModule().productions())) {
                 if (prod.att().contains("cell") && prod.att().contains("parser")) {
                     String att = prod.att().get("parser");
