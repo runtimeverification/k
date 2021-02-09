@@ -82,7 +82,7 @@ Currently all the K collections are "untyped", that is, over the sort `K`.
 In the future we want to have parametric collections.  Make sure the tutorial
 is systematically changed when this happens.
 
-See issue #2023 and modify tutorial/1_k/2_imp/lesson_4 accordingly, if needed.
+See issue #2023 and modify pl-tutorial/1_k/2_imp/lesson_4 accordingly, if needed.
 
 All definitions, and corresponding READMEs, should be changed to take advantage
 of modules and module operations.  Ideally, we'd like to have no code repetition
