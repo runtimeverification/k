@@ -535,7 +535,7 @@ pipeline {
             git tag "${K_RELEASE_TAG}" "${LONG_REV}"
             git push origin "${K_RELEASE_TAG}"
 
-            COMMIT_DATE=$(date '+%Y%m%d%H%M' --date=$(git show --no-patch --format='%ci' ${K_RELEASE_TAG}))
+            COMMIT_DATE=$(date '+%Y%m%d%H%M' --date="$(git show --no-patch --format='%ci' ${K_RELEASE_TAG})")
 
             LOCAL_BOTTLE_NAME=$(find ../mojave -name "kframework--${VERSION}.mojave.bottle*.tar.gz")
             BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#../mojave/} | sed 's!kframework--!kframework-!' | sed 's!mojave!mojave.'${COMMIT_DATE}'!')
