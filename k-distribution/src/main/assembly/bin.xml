@@ -27,7 +27,7 @@
       <directory>${project.basedir}</directory>
       <outputDirectory>/share/kframework</outputDirectory>
       <includes>
-        <include>tutorial/**</include>
+        <include>pl-tutorial/**</include>
         <include>INSTALL*</include>
       </includes>
       <excludes>
