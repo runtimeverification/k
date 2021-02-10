@@ -534,7 +534,7 @@ else
     if [ -z "$pattern" ]; then
       echo '\and{SortGeneratedTopCell{}}(VarResult:SortGeneratedTopCell{},\top{SortGeneratedTopCell{}}())' > "$patternFile"
     else
-      k-compile-search-pattern "$pattern" > "$patternFile"
+      k-compile-search-pattern --directory "$dir" "$pattern" > "$patternFile"
     fi
 
     if ! $search; then
