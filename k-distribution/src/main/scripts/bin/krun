@@ -430,7 +430,7 @@ fi
 # verify and parse config variables/cmd line parameters
 if $term; then
   if [ -z "${parser_PGM+unset}" ]; then
-    execute kast -d "$dir" -m "$mainModuleName" "$config_var_PGM" -o kore > "$input_file"
+    execute kast --directory "$dir" -m "$mainModuleName" "$config_var_PGM" -o kore > "$input_file"
   else
     execute $parser_PGM "$config_var_PGM" > "$input_file"
   fi
@@ -458,12 +458,12 @@ else
         parser=("$kompiledDir/parser_$name")
       elif [ "$name" = "PGM" ]; then
         if $hasArgv; then
-          parser=(kast -d "$dir" -o kore)
+          parser=(kast --directory "$dir" -o kore)
         else
-          parser=(kast -d "$dir" -m "$mainModuleName" -o kore)
+          parser=(kast --directory "$dir" -m "$mainModuleName" -o kore)
         fi
       else
-        parser=(kast -s "$sortName" -d "$dir" -m "$mainModuleName" -o kore)
+        parser=(kast -s "$sortName" --directory "$dir" -m "$mainModuleName" -o kore)
       fi
     else
       parser=("${!parser_name}")
@@ -493,7 +493,7 @@ else
   fi
   abs_kompiled_dir=`echo "$(cd "$(dirname "$kompiledDir")"; pwd -P)/$(basename "$kompiledDir")"`
   # llvm-krun creates temp files in the cwd so execute it in $tempDir instead
-  (cd $tempDir; execute llvm-krun $configVars -d "$abs_kompiled_dir" $flags --dry-run -nm -o "$(basename $input_file)")
+  (cd $tempDir; execute llvm-krun $configVars --directory "$abs_kompiled_dir" $flags --dry-run -nm -o "$(basename $input_file)")
 fi
 
 # Expand macros
@@ -587,7 +587,7 @@ if ! $dryRun; then
       none) ;;
 
       *)
-      execute kast -d "$dir" -i kore -o "$outputMode" "$kore_output" > "$outputFile"
+      execute kast --directory "$dir" -i kore -o "$outputMode" "$kore_output" > "$outputFile"
       ;;
     esac
   else
