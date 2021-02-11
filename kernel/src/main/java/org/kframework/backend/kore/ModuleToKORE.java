@@ -47,7 +47,6 @@ import org.kframework.unparser.Formatter;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
-import scala.Int;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
@@ -664,6 +663,7 @@ public class ModuleToKORE {
             }
             sb.append(")) [constructor{}()] // no confusion same constructor\n");
         }
+        Production prodRen = prod.renameParams("", "P1");
         for (Production prod2 : iterable(module.productionsForSort().apply(prod.sort().head()).toSeq().sorted(Production.ord()))) {
             // !(cx(x1,x2,...) /\ cy(y1,y2,...))
             if (prod2.klabel().isEmpty() || noConfusion.contains(Tuple2.apply(prod, prod2)) || prod.equals(prod2)
@@ -673,14 +673,16 @@ public class ModuleToKORE {
             }
             noConfusion.add(Tuple2.apply(prod, prod2));
             noConfusion.add(Tuple2.apply(prod2, prod));
+
+            prod2 = prod2.renameParams("", "P2");
             sb.append("  axiom");
-            convertParams(prod.klabel(), false, sb);
-            sb.append("\\not{");
-            convert(prod.sort(), prod, sb);
+            convertParams(Arrays.asList(prodRen.klabel(), prod2.klabel()), false, sb);
+            sb.append(" \\not{");
+            convert(prodRen.sort(), prodRen, sb);
             sb.append("} (\\and{");
-            convert(prod.sort(), prod, sb);
+            convert(prodRen.sort(), prodRen, sb);
             sb.append("} (");
-            applyPattern(prod, "X", sb);
+            applyPattern(prodRen, "X", sb);
             sb.append(", ");
             applyPattern(prod2, "Y", sb);
             sb.append(")) [constructor{}()] // no confusion different constructors\n");
@@ -701,8 +703,10 @@ public class ModuleToKORE {
     }
 
     private void genNoJunkAxiom(Sort sort, StringBuilder sb) {
-        sb.append("  axiom{} ");
+        StringBuilder sb2 = new StringBuilder();
+        sb.append("  axiom");
         boolean hasToken = false;
+        List<Option<KLabel>> paramProds = new ArrayList<>();
         int numTerms = 0;
         for (Production prod : iterable(mutable(module.productionsForSort()).getOrDefault(sort.head(), Set()).toSeq().sorted(Production.ord()))) {
             if (isFunction(prod) || prod.isSubsort() || isBuiltinProduction(prod)) {
@@ -711,36 +715,40 @@ public class ModuleToKORE {
             if (prod.klabel().isEmpty() && !((prod.att().contains("token") && !hasToken) || prod.isSubsort())) {
                 continue;
             }
+            prod = prod.renameParams("P" + numTerms, "");
+            paramProds.add(prod.klabel());
             numTerms++;
-            sb.append("\\or{");
-            convert(sort, sb);
-            sb.append("} (");
+            sb2.append("\\or{");
+            convert(sort, sb2);
+            sb2.append("} (");
             if (prod.att().contains("token") && !hasToken) {
-                convertTokenProd(sort, sb);
+                convertTokenProd(sort, sb2);
                 hasToken = true;
             } else if (prod.klabel().isDefined()) {
                 for (int i = 0; i < prod.arity(); i++) {
-                    sb.append("\\exists{");
-                    convert(sort, sb);
-                    sb.append("} (X").append(i).append(":");
-                    convert(prod.nonterminal(i).sort(), prod, sb);
-                    sb.append(", ");
+                    sb2.append("\\exists{");
+                    convert(sort, sb2);
+                    sb2.append("} (X").append(i).append(":");
+                    convert(prod.nonterminal(i).sort(), prod, sb2);
+                    sb2.append(", ");
                 }
-                convert(prod.klabel().get(), prod, sb);
-                sb.append("(");
+                convert(prod.klabel().get(), prod, sb2);
+                sb2.append("(");
                 String conn = "";
                 for (int i = 0; i < prod.arity(); i++) {
-                    sb.append(conn).append("X").append(i).append(":");
-                    convert(prod.nonterminal(i).sort(), prod, sb);
+                    sb2.append(conn).append("X").append(i).append(":");
+                    convert(prod.nonterminal(i).sort(), prod, sb2);
                     conn = ", ";
                 }
-                sb.append(")");
+                sb2.append(")");
                 for (int i = 0; i < prod.arity(); i++) {
-                    sb.append(")");
+                    sb2.append(")");
                 }
             }
-            sb.append(", ");
+            sb2.append(", ");
         }
+        convertParams(paramProds, false, sb);
+        sb.append(sb2);
         for (Sort s : iterable(module.sortedAllSorts())) {
             if (module.subsorts().lessThan(s, sort) && !sort.equals(Sorts.K())) {
                 numTerms++;
@@ -1387,16 +1395,27 @@ public class ModuleToKORE {
     }
 
     private void convertParams(Option<KLabel> maybeKLabel, boolean hasR, StringBuilder sb) {
+        convertParams(java.util.Collections.singletonList(maybeKLabel), hasR, sb);
+    }
+
+    private void convertParams(List<Option<KLabel>> maybeKLabel, boolean hasR, StringBuilder sb) {
         sb.append("{");
+        List<KLabel> kls = new ArrayList<>();
+        for (Option<KLabel> mkl : maybeKLabel) {
+            if (mkl.isDefined()) {
+                kls.add(mkl.get());
+            }
+        }
         String conn = "";
         if (hasR) {
             sb.append("R");
-            if (maybeKLabel.isDefined()) {
+            if (!kls.isEmpty()) {
                 conn = ", ";
             }
         }
-        if (maybeKLabel.isDefined()) {
-            for (Sort param : iterable(maybeKLabel.get().params())) {
+        if (!kls.isEmpty()) {
+            // combine the parametric sorts from all the parameters, they should be unique
+            for (Sort param : kls.stream().flatMap(x -> mutable(x.params()).stream()).collect(Collectors.toList())) {
                 sb.append(conn);
                 convert(param, Seq(param), sb);
                 conn = ", ";

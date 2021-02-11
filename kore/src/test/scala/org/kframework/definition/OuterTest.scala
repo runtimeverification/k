@@ -55,4 +55,25 @@ class OuterTest {
     val prod2 = Production(Some(KLabel("foo")), Seq(), Sort("Foo"), Seq(), Att.add("klabel", "bar"))
     Assert.assertNotEquals(prod1, prod2)
   }
+
+  @Test def renameParamsTest: Unit = {
+    val prod1 = Production(Some(KLabel("foo")), Seq(Sort("S")), Sort("Foo"), Seq(NonTerminal(Sort("S"), None)), Att.add("klabel", "foo"))
+    val prod2 = Production(Some(KLabel("foo")), Seq(Sort("PrefixSSuffix")), Sort("Foo"), Seq(NonTerminal(Sort("PrefixSSuffix"), None)), Att.add("klabel", "foo"))
+    val prod3 = prod1.renameParams("Prefix", "Suffix")
+    Assert.assertEquals(prod2, prod3)
+  }
+
+  @Test def renameParamsTest2: Unit = {
+    val prod1 = Production(None, Seq(), Sort("Foo"), Seq(NonTerminal(Sort("S"), None)), Att)
+    val prod2 = Production(None, Seq(), Sort("Foo"), Seq(NonTerminal(Sort("S"), None)), Att)
+    val prod3 = prod1.renameParams("Prefix", "Suffix")
+    Assert.assertEquals(prod2, prod3)
+  }
+
+  @Test def renameParamsTest3: Unit = {
+    val prod1 = Production(Some(KLabel("foo")), Seq(Sort("S")), Sort("S"), Seq(NonTerminal(Sort("S"), None)), Att.add("klabel", "foo"))
+    val prod2 = Production(Some(KLabel("foo")), Seq(Sort("PrefixSSuffix")), Sort("PrefixSSuffix"), Seq(NonTerminal(Sort("PrefixSSuffix"), None)), Att.add("klabel", "foo"))
+    val prod3 = prod1.renameParams("Prefix", "Suffix")
+    Assert.assertEquals(prod2, prod3)
+  }
 }

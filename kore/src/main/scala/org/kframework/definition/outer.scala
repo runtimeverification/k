@@ -514,6 +514,21 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
     }), att)
   }
 
+  def renameParams(prefix:String, suffix:String): Production = {
+    if (klabel.isDefined && params.nonEmpty)
+      Production(
+        ADT.KLabel(klabel.get.name, params.map(p => Sort(prefix + p.name + suffix)):_*),
+        params.map(p => Sort(prefix + p.name + suffix)),
+        if (isSortVariable(sort)) Sort(prefix + sort.name + suffix) else sort,
+        items.map({
+            case nt@NonTerminal(sort, name) => if (isSortVariable(sort)) NonTerminal(Sort(prefix + sort.name + suffix), name) else nt
+            case i => i
+          }),
+        att)
+      else
+        this
+  }
+
   def isSortVariable(s: Sort): Boolean = {
     params.contains(s)
   }
