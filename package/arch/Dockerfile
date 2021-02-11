@@ -4,7 +4,6 @@ RUN    pacman -Sy   --noconfirm archlinux-keyring \
     && rm -r /etc/pacman.d/gnupg                  \
     && pacman-key --init                          \
     && pacman-key --populate archlinux            \
-    && mkdir /var/lib/pacman                      \
     && pacman -Syyu --noconfirm                   \
     && pacman -S    --noconfirm                   \
                        base                       \
