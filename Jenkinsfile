@@ -44,6 +44,10 @@ pipeline {
         stage('Build and Package K on Linux') {
           stages {
             stage('Build and Package on Ubuntu Bionic') {
+              when {
+                branch 'master'
+                beforeAgent true
+              }
               stages {
                 stage('Build on Ubuntu Bionic') {
                   agent {
@@ -236,10 +240,10 @@ pipeline {
               }
             }
             stage('Build and Package on Arch Linux') {
-              when {
-                branch 'master'
-                beforeAgent true
-              }
+              // when {
+              //   branch 'master'
+              //   beforeAgent true
+              // }
               stages {
                 stage('Build on Arch Linux') {
                   agent {
