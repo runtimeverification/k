@@ -1,6 +1,6 @@
 FROM archlinux/base
 
-RUN    pacman -S    --noconfirm archlinux-keyring \
+RUN    pacman -Sy   --noconfirm archlinux-keyring \
     && pacman -Syyu --noconfirm                   \
     && pacman -S    --noconfirm                   \
                        base                       \
