@@ -212,6 +212,13 @@ do
       --dry-run)
       cmdprefix="echo "
       tempFiles=(${tempFiles[@]/$expanded_input_file})
+      # slash removes prefixes so build a new array with the files to keep
+      newArray=()
+      for value in "${tempFiles[@]}"; do
+          $value != $tempDir && newArray+=($value)
+      done
+      tempFiles="${newArray[@]}"
+      unset newArray
       dryRun=true
       ;;
 
@@ -247,7 +254,7 @@ do
       ;;
 
       --no-expand-macros)
-      expandMacros = false
+      expandMacros=false
       ;;
 
       -o|--output)
@@ -463,7 +470,7 @@ else
           parser=(kast -d "$dir" -m "$mainModuleName" -o kore)
         fi
       else
-        parser=(kast -d "$dir" -m "$mainModuleName" -o kore)
+        parser=(kast -s "$sortName" -d "$dir" -m "$mainModuleName" -o kore)
       fi
     else
       parser=("${!parser_name}")

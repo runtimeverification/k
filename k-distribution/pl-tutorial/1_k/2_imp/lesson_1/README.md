@@ -162,7 +162,7 @@ Before we move to the K semantics of IMP, we would like to make some
 clarifications regarding the K builtin parser, `kast`. Although it is quite
 powerful, you should not expect magic from it! While the K parser can parse
 many non-trivial languages (see, for example, the KOOL language in
-[tutorial/2_languages](/tutorial/2_languages)) in the K distribution), it was
+[pl-tutorial/2_languages](/pl-tutorial/2_languages)) in the K distribution), it was
 never meant to be a substitute for real parsers. We often call the syntax
 defined in K _the syntax of the semantics_, to highlight the fact that its
 role is to serve as a convenient notation when writing the semantics, not
