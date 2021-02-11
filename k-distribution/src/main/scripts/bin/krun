@@ -212,6 +212,13 @@ do
       --dry-run)
       cmdprefix="echo "
       tempFiles=(${tempFiles[@]/$expanded_input_file})
+      # slash removes prefixes so build a new array with the files to keep
+      newArray=()
+      for value in "${tempFiles[@]}"; do
+          $value != $tempDir && newArray+=($value)
+      done
+      tempFiles="${newArray[@]}"
+      unset newArray
       dryRun=true
       ;;
 
