@@ -126,6 +126,8 @@ public class Kompile {
      * @return
      */
     public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Function<Definition, Definition> pipeline, Set<String> excludedModuleTags) {
+        files.resolveKompiled(".").mkdirs();
+
         if (kompileOptions.profileRules) {
             for (File f : files.resolveKompiled(".").listFiles()) {
                 if (f.getName().matches("timing[0-9]+\\.log")) {
