@@ -1,30 +1,31 @@
 FROM archlinux/base
 
-RUN    pacman -Syyu --noconfirm \
-    && pacman -S --noconfirm    \
-                    base        \
-                    base-devel  \
-                    boost       \
-                    clang       \
-                    cmake       \
-                    curl        \
-                    git         \
-                    gmp         \
-                    hub         \
-                    jdk-openjdk \
-                    jemalloc    \
-                    libyaml     \
-                    lld         \
-                    llvm        \
-                    maven       \
-                    mpfr        \
-                    opam        \
-                    openssh     \
-                    python      \
-                    python-pip  \
-                    stack       \
-                    z3          \
-                    zlib
+RUN    pacman -S    --noconfirm archlinux-keyring \
+    && pacman -Syyu --noconfirm                   \
+    && pacman -S    --noconfirm                   \
+                       base                       \
+                       base-devel                 \
+                       boost                      \
+                       clang                      \
+                       cmake                      \
+                       curl                       \
+                       git                        \
+                       gmp                        \
+                       hub                        \
+                       jdk-openjdk                \
+                       jemalloc                   \
+                       libyaml                    \
+                       lld                        \
+                       llvm                       \
+                       maven                      \
+                       mpfr                       \
+                       opam                       \
+                       openssh                    \
+                       python                     \
+                       python-pip                 \
+                       stack                      \
+                       z3                         \
+                       zlib
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
