@@ -1,8 +1,8 @@
-[Error] Compiler: Illegal function symbol (_+Int_) on LHS of rule. Consider
+[Error] Compiler: Illegal function symbol _+Int_ on LHS of rule. Consider
 adding `simplification` attribute to the rule if this is intended.
 	Source(test.k)
 	Location(5,11,5,20)
-[Error] Compiler: Illegal function symbol (_-Int_) on LHS of rule. Consider
+[Error] Compiler: Illegal function symbol _-Int_ on LHS of rule. Consider
 adding `simplification` attribute to the rule if this is intended.
 	Source(test.k)
 	Location(5,28,5,37)

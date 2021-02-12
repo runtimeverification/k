@@ -70,7 +70,7 @@ public class CheckFunctions {
                       || hook.equals("SET.element") || hook.equals("SET.concat") || hook.equals("SET.unit")
                       || hook.equals("MAP.element") || hook.equals("MAP.concat") || hook.equals("MAP.unit")
                       || hook.equals("BAG.element") || hook.equals("BAG.concat") || hook.equals("BAG.unit"))) {
-                  errors.add(KEMException.compilerError("Illegal function symbol (" + k.klabel().name() + ") on LHS of rule." +
+                  errors.add(KEMException.compilerError("Illegal function symbol " + k.klabel().name() + " on LHS of rule." +
                           " Consider adding `simplification` attribute to the rule if this is intended.", k));
                 }
                 atTop = false;
