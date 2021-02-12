@@ -460,7 +460,7 @@ else
         error "Configuration variable \$$name does not exist. Do not pass -c$name to $KX."
       fi
     fi
-    indirectName="declaredConfigVar_${name}"
+    indirectName="declaredConfigVar_$name"
     sortName=${!indirectName}
     if [ -z "${!parser_name+unset}" ]; then
       if [ -f "$kompiledDir/parser_$name" ]; then
