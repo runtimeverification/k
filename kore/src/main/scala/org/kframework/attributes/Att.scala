@@ -99,12 +99,13 @@ object Att {
   val SYNTAX_MODULE = "syntaxModule"
   val SPECIFICATION = "specification"
   val REFERS_THIS_CONFIGURATION = "refers_THIS_CONFIGURATION";
-  val REFERS_RESTORE_CONFIGURATION = "refers_RESTORE_CONFIGURATION";
-  val TOP_RULE = "topRule";
+  val REFERS_RESTORE_CONFIGURATION = "refers_RESTORE_CONFIGURATION"
+  val TOP_RULE = "topRule"
   val ORIGINAL_PRD = "originalPrd"
   val RECORD_PRD = "recordPrd"
   val SOURCE = "org.kframework.attributes.Source"
   val LOCATION = "org.kframework.attributes.Location"
+  val UNIQUE_ID = "UNIQUE_ID"
 
   private val stringClassName = classOf[String].getName
 
