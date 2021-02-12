@@ -56,7 +56,7 @@ public class ProofDefinitionBuilder {
      * @param specModuleName Module containing specifications to prove
      */
     public Tuple2<Definition, Module> build(File specFile, String defModuleName, String specModuleName) {
-        return build(specFile, defModuleName, specModuleName, true);
+        return build(specFile, defModuleName, specModuleName, false);
     }
 
     public Tuple2<Definition, Module> build(File specFile, String defModuleName, String specModuleName, boolean readOnlyCache) {
