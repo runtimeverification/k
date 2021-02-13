@@ -15,9 +15,14 @@ import java.util.Set;
 
 import static org.kframework.kore.KORE.*;
 
+/**
+ * Keep #Or patterns from appearing on the RHS of a rewrite after having split
+ * the configuration for a rule where the #Or was above a rewrite
+ */
 public class GuardOrPatterns {
 
-    private Set<KVariable> vars = new HashSet<>();
+    private final Set<KVariable> vars = new HashSet<>();
+    private final Set<K> lhsOrs = new HashSet<>();
     private final boolean kore;
 
     public GuardOrPatterns(boolean kore) {
@@ -26,6 +31,7 @@ public class GuardOrPatterns {
 
     void resetVars() {
         vars.clear();
+        lhsOrs.clear();
     }
 
     private Rule resolve(Module m, Rule rule) {
@@ -74,13 +80,29 @@ public class GuardOrPatterns {
                 super.apply(v);
             }
         }.apply(term);
+
+        new VisitK() {
+            @Override
+            public void apply(KRewrite v) {
+                super.apply(v.left());
+            }
+
+            @Override
+            public void apply(KApply k) {
+                if (k.klabel().head().equals(KLabels.ML_OR)) {
+                    lhsOrs.add(k);
+                }
+                super.apply(k);
+            }
+        }.apply(term);
     }
 
     K transform(K term, Module m) {
         return new TransformK() {
             @Override
             public K apply(KApply k) {
-              if (k.klabel().head().equals(KLabels.ML_OR)) {
+              // keep #Or patterns which appear only on the RHS of a rewrite
+              if (k.klabel().head().equals(KLabels.ML_OR) && lhsOrs.contains(k)) {
                 if (kore) {
                   AddSortInjections inj = new AddSortInjections(m);
                   return KAs(k, newDotVariable(inj.sort(k, null)));
