@@ -13,6 +13,7 @@ pipeline {
     stage('Build Anka VM') {
       options { timeout(time: 150, unit: 'MINUTES') }
       agent { label 'anka-k-master' }
+      environment { STACK_ROOT = '/opt/stack' }
       steps {
         sh '''
           package/macos/brew-install-deps

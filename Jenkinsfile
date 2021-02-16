@@ -339,6 +339,7 @@ pipeline {
               stages {
                 stage('Build Homebrew Bottle') {
                   agent { label 'anka' }
+                  environment { STACK_ROOT = '/opt/stack' }
                   steps {
                     unstash 'src'
                     dir('kframework') { checkout scm }
