@@ -104,7 +104,7 @@ public class Kompile {
                 ? files.resolveWorkingDirectory(kompileOptions.experimental.cacheFile) : files.resolveKompiled("cache.bin");
         this.definitionParsing = new DefinitionParsing(
                 lookupDirectories, kompileOptions, kem, files,
-                parser, cacheParses, cacheFile);
+                parser, cacheParses, cacheFile, sw);
         this.sw = sw;
 
         if (kompileOptions.backend.equals("ocaml")) {
@@ -130,10 +130,12 @@ public class Kompile {
             }
         }
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, excludedModuleTags);
-        sw.printIntermediate("Parse definition [" + definitionParsing.parsedBubbles.get() + "/" + (definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get()) + " rules]");
+        sw.printIntermediate("Parse rules [" + definitionParsing.parsedBubbles.get() + "/" + (definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get()) + " rules]");
 
         files.saveToKompiled("parsed.txt", parsedDef.toString());
         checkDefinition(parsedDef, excludedModuleTags);
+
+        sw.printIntermediate("Validate definition");
 
         Definition kompiledDefinition = pipeline.apply(parsedDef);
 
