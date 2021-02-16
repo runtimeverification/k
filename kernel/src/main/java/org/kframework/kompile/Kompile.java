@@ -140,8 +140,6 @@ public class Kompile {
 
         files.saveToKompiled("parsed.txt", parsedDef.toString());
         checkDefinition(parsedDef, excludedModuleTags);
-        sw.printIntermediate("Run definition checks");
-
         sw.printIntermediate("Validate definition");
 
         Definition kompiledDefinition = pipeline.apply(parsedDef);
