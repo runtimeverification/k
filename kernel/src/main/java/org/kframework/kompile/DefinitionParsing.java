@@ -112,7 +112,7 @@ public class DefinitionParsing {
         this.sw = sw;
     }
 
-    public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, java.util.Set<String> excludeModules) {
+    public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, java.util.Set<String> excludeModules, boolean readOnlyCache) {
         Definition def = parser.loadDefinition(
                 mainModule,
                 mutable(definition.getParsedDefinition().modules()),
@@ -155,7 +155,9 @@ public class DefinitionParsing {
         }
 
         def = resolveNonConfigBubbles(def, def.getModule(entryPointModule).get(), gen);
-        saveCachesAndReportParsingErrors();
+        if (! readOnlyCache) {
+            saveCachesAndReportParsingErrors();
+        }
         return mutable(def.entryModules());
     }
 

@@ -5,7 +5,6 @@ We currently strive to provide packages for the following platforms:
 
 -   Ubuntu Bionic Beaver (18.04) and Focal Fossa (20.04)
 -   Debian Buster
--   Arch Linux
 -   MacOS X Mojave/Homewbrew
 -   Docker Images
 -   Platform Independent K Binary
@@ -92,12 +91,6 @@ As a result, you need to enable the Debian Backports apt repository for Debian.
 ```sh
 echo "deb http://deb.debian.org/debian buster-backports main" > /etc/apt/sources.list.d/buster-backports.list
 sudo apt install ./kframework_X.Y.Z_amd64_buster.deb
-```
-
-### Arch Linux
-
-```sh
-pacman -U ./kframework-git-X.Y.Z-1-x86_64.pkg.tar.zst
 ```
 
 ### MacOS X Mojave/Homebrew
@@ -220,17 +213,17 @@ The easiest way to test the K package is to copy a K tutorial language and
 check if you can compile and run an included example.
 
 1.  Start by copying the K tutorial to some work directory
-    (e.g. `$HOME/k-tutorial`) from the K distribution root. Using a Linux
+    (e.g. `$HOME/pl-tutorial`) from the K distribution root. Using a Linux
     package, this command typically will be like:
 
     ```sh
-    $ cp -R /usr/share/kframework/tutorial $HOME/k-tutorial
+    $ cp -R /usr/share/kframework/pl-tutorial $HOME/pl-tutorial
     ```
 
     On macOS/brew, this command typically will be like:
 
     ```sh
-    $ cp -R /usr/local/share/kframework/tutorial $HOME/k-tutorial
+    $ cp -R /usr/local/share/kframework/pl-tutorial $HOME/pl-tutorial
     ```
 
     Using the platform indenpendent K binary, the command will depend on
@@ -242,7 +235,7 @@ check if you can compile and run an included example.
 2.  Now you can try to run some programs:
 
     ```sh
-    $ cd $HOME/k-tutorial/2_languages/1_simple/1_untyped
+    $ cd $HOME/pl-tutorial/2_languages/1_simple/1_untyped
     $ make kompile
     $ krun tests/diverse/factorial.simple
     ```

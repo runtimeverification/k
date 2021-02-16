@@ -235,69 +235,69 @@ pipeline {
                 }
               }
             }
-            stage('Build and Package on Arch Linux') {
-              when {
-                branch 'master'
-                beforeAgent true
-              }
-              stages {
-                stage('Build on Arch Linux') {
-                  agent {
-                    dockerfile {
-                      filename 'package/arch/Dockerfile'
-                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
-                      reuseNode true
-                    }
-                  }
-                  stages {
-                    stage('Build Pacman Package') {
-                      steps {
-                        dir("kframework-arch-${env.VERSION}") {
-                          checkout scm
-                          sh '''
-                            mv package/arch/* ./
-                            makepkg
-                          '''
-                          stash name: 'arch', includes: "kframework-git-${env.VERSION}-1-x86_64.pkg.tar.zst"
-                        }
-                      }
-                    }
-                  }
-                }
-                stage('Test Arch Package') {
-                  agent {
-                    docker {
-                      image 'archlinux/base'
-                      args '-u 0'
-                      reuseNode true
-                    }
-                  }
-                  options { skipDefaultCheckout() }
-                  steps {
-                    unstash 'arch'
-                    sh '''
-                      pacman -Syyu --noconfirm
-                      pacman -S --noconfirm opam
-                      pacman -U --noconfirm kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
-                      src/main/scripts/test-in-container
-                    '''
-                  }
-                  post {
-                    always {
-                      sh 'stop-kserver || true'
-                      archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-                    }
-                  }
-                }
-              }
-              post {
-                failure {
-                  slackSend color: '#cb2431'                                         \
-                          , channel: '#k'                                            \
-                          , message: "Arch Linux Packaging Failed: ${env.BUILD_URL}"
-                }
-              }
-            }
+            // stage('Build and Package on Arch Linux') {
+            //   when {
+            //     branch 'master'
+            //     beforeAgent true
+            //   }
+            //   stages {
+            //     stage('Build on Arch Linux') {
+            //       agent {
+            //         dockerfile {
+            //           filename 'package/arch/Dockerfile'
+            //           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+            //           reuseNode true
+            //         }
+            //       }
+            //       stages {
+            //         stage('Build Pacman Package') {
+            //           steps {
+            //             dir("kframework-arch-${env.VERSION}") {
+            //               checkout scm
+            //               sh '''
+            //                 mv package/arch/* ./
+            //                 makepkg
+            //               '''
+            //               stash name: 'arch', includes: "kframework-git-${env.VERSION}-1-x86_64.pkg.tar.zst"
+            //             }
+            //           }
+            //         }
+            //       }
+            //     }
+            //     stage('Test Arch Package') {
+            //       agent {
+            //         docker {
+            //           image 'archlinux/base'
+            //           args '-u 0'
+            //           reuseNode true
+            //         }
+            //       }
+            //       options { skipDefaultCheckout() }
+            //       steps {
+            //         unstash 'arch'
+            //         sh '''
+            //           pacman -Syyu --noconfirm
+            //           pacman -S --noconfirm opam
+            //           pacman -U --noconfirm kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
+            //           src/main/scripts/test-in-container
+            //         '''
+            //       }
+            //       post {
+            //         always {
+            //           sh 'stop-kserver || true'
+            //           archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
+            //         }
+            //       }
+            //     }
+            //   }
+            //   post {
+            //     failure {
+            //       slackSend color: '#cb2431'                                         \
+            //               , channel: '#k'                                            \
+            //               , message: "Arch Linux Packaging Failed: ${env.BUILD_URL}"
+            //     }
+            //   }
+            // }
             stage('Build Platform Independent K Binary') {
               when {
                 branch 'master'
@@ -339,6 +339,7 @@ pipeline {
               stages {
                 stage('Build Homebrew Bottle') {
                   agent { label 'anka' }
+                  environment { STACK_ROOT = '/opt/stack' }
                   steps {
                     unstash 'src'
                     dir('kframework') { checkout scm }
@@ -376,12 +377,12 @@ pipeline {
                       brew install opam
                       k-configure-opam
                       eval $(opam config env)
-                      cp -R /usr/local/share/kframework/tutorial ~
+                      cp -R /usr/local/share/kframework/pl-tutorial ~
                       WD=`pwd`
                       cd
                       echo 'Starting kserver...'
                       spawn-kserver $WD/kserver.log
-                      cd tutorial
+                      cd pl-tutorial
                       echo 'Testing tutorial in user environment...'
                       make -j`sysctl -n hw.ncpu` ${MAKE_EXTRA_ARGS}
                       cd ~
@@ -520,7 +521,7 @@ pipeline {
         dir('bionic') { unstash 'bionic' }
         dir('focal')  { unstash 'focal' }
         dir('buster') { unstash 'buster' }
-        dir('arch')   { unstash 'arch'   }
+        // dir('arch')   { unstash 'arch'   }
         dir('mojave') { unstash 'mojave' }
         sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
           sh '''
@@ -544,7 +545,7 @@ pipeline {
             mv ../bionic/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_bionic_${COMMIT_DATE}.deb
             mv ../focal/kframework_${VERSION}_amd64.deb                 kframework_${VERSION}_amd64_focal_${COMMIT_DATE}.deb
             mv ../buster/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_buster_${COMMIT_DATE}.deb
-            mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst   kframework-git-${VERSION}-1-x86_64_${COMMIT_DATE}.pkg.tar.zst
+            // mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst   kframework-git-${VERSION}-1-x86_64_${COMMIT_DATE}.pkg.tar.zst
             mv $LOCAL_BOTTLE_NAME                                       $BOTTLE_NAME
             mv ../k-nightly.tar.gz                                      k-nightly_${COMMIT_DATE}.tar.gz
 
@@ -556,10 +557,10 @@ pipeline {
                 --attach kframework_${VERSION}_amd64_bionic_${COMMIT_DATE}.deb'#Ubuntu Bionic (18.04) Package' \
                 --attach kframework_${VERSION}_amd64_focal_${COMMIT_DATE}.deb'#Ubuntu Focal (20.04) Package'   \
                 --attach kframework_${VERSION}_amd64_buster_${COMMIT_DATE}.deb'#Debian Buster (10) Package'    \
-                --attach kframework-git-${VERSION}-1-x86_64_${COMMIT_DATE}.pkg.tar.zst'#Arch Package'          \
                 --attach $BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                               \
                 --attach k-nightly_${COMMIT_DATE}.tar.gz'#Platform Indepdendent K Binary'                      \
                 --file release.md "${K_RELEASE_TAG}"
+                // --attach kframework-git-${VERSION}-1-x86_64_${COMMIT_DATE}.pkg.tar.zst'#Arch Package'          \
           '''
         }
         dir('homebrew-k') {
