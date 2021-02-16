@@ -10,6 +10,7 @@
 .metadata
 .recommenders
 .cache
+.vscode
 .idea
 *.iml
 .project
