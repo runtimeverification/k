@@ -4,6 +4,7 @@ package org.kframework.kompile;
 import com.google.inject.Inject;
 import org.kframework.Strategy;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
@@ -40,11 +41,14 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
+
+import scala.collection.JavaConverters;
 import scala.Function1;
 import scala.Option;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -104,7 +108,7 @@ public class Kompile {
                 ? files.resolveWorkingDirectory(kompileOptions.experimental.cacheFile) : files.resolveKompiled("cache.bin");
         this.definitionParsing = new DefinitionParsing(
                 lookupDirectories, kompileOptions, kem, files,
-                parser, cacheParses, cacheFile);
+                parser, cacheParses, cacheFile, sw);
         this.sw = sw;
 
         if (kompileOptions.backend.equals("ocaml")) {
@@ -122,6 +126,8 @@ public class Kompile {
      * @return
      */
     public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Function<Definition, Definition> pipeline, Set<String> excludedModuleTags) {
+        files.resolveKompiled(".").mkdirs();
+
         if (kompileOptions.profileRules) {
             for (File f : files.resolveKompiled(".").listFiles()) {
                 if (f.getName().matches("timing[0-9]+\\.log")) {
@@ -130,15 +136,17 @@ public class Kompile {
             }
         }
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, excludedModuleTags);
-        sw.printIntermediate("Parse definition [" + definitionParsing.parsedBubbles.get() + "/" + (definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get()) + " rules]");
+        sw.printIntermediate("Parse rules [" + definitionParsing.parsedBubbles.get() + "/" + (definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get()) + " rules]");
 
         files.saveToKompiled("parsed.txt", parsedDef.toString());
         checkDefinition(parsedDef, excludedModuleTags);
+        sw.printIntermediate("Validate definition");
 
         Definition kompiledDefinition = pipeline.apply(parsedDef);
-
         files.saveToKompiled("compiled.txt", kompiledDefinition.toString());
         sw.printIntermediate("Apply compile pipeline");
+
+        files.saveToKompiled("allRules.txt", ruleSourceMap(kompiledDefinition));
 
         if (kompileOptions.experimental.emitJson) {
             try {
@@ -178,6 +186,27 @@ public class Kompile {
         }
 
         return def;
+    }
+
+    private static String ruleSourceMap(Definition def) {
+        List<String> ruleLocs = new ArrayList<String>();
+        for (Sentence s: JavaConverters.setAsJavaSet(def.mainModule().sentences())) {
+            if (s instanceof RuleOrClaim) {
+                Optional<Source>   optFile = s.att().getOptional(Source.class);
+                Optional<Location> optLine = s.att().getOptional(Location.class);
+                Optional<Location> optCol  = s.att().getOptional(Location.class);
+                Optional<String>   optId   = s.att().getOptional(Att.UNIQUE_ID());
+                if (optFile.isPresent() && optLine.isPresent() && optCol.isPresent() && optId.isPresent()) {
+                    String file = optFile.get().source();
+                    int line    = optLine.get().startLine();
+                    int col     = optCol.get().startColumn();
+                    String loc  = file + ":" + line + ":" + col;
+                    String id   = optId.get();
+                    ruleLocs.add(id + " " + loc);
+                }
+            }
+        }
+        return String.join("\n", ruleLocs);
     }
 
     public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, Set<String> excludedModuleTags) {
@@ -225,8 +254,7 @@ public class Kompile {
         };
         GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
         Function1<Definition, Definition> genCoverage = d -> DefinitionTransformer.fromRuleBodyTransformerWithRule((r, body) -> cov.gen(r, body, d.mainModule()), "generate coverage instrumentation").apply(d);
-        NumberSentences numSents = new NumberSentences(files);
-        DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(numSents::number, "number sentences uniquely");
+        DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
         Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, false)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
 
@@ -237,7 +265,6 @@ public class Kompile {
                 .andThen(resolveAnonVars)
                 .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
                 .andThen(numberSentences)
-                .andThen(d -> { numSents.close(); return d; })
                 .andThen(resolveHeatCoolAttribute)
                 .andThen(resolveSemanticCasts)
                 .andThen(subsortKItem)
@@ -423,7 +450,11 @@ public class Kompile {
     }
 
     public Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, Set<String> excludeModules) {
-        Set<Module> modules = definitionParsing.parseModules(definition, mainModule, entryPointModule, definitionFile, excludeModules);
+        return parseModules(definition, mainModule, entryPointModule, definitionFile, excludeModules, true);
+    }
+
+    public Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, Set<String> excludeModules, boolean readOnlyCache) {
+        Set<Module> modules = definitionParsing.parseModules(definition, mainModule, entryPointModule, definitionFile, excludeModules, readOnlyCache);
         int totalBubbles = definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get();
         sw.printIntermediate("Parse spec modules [" + definitionParsing.parsedBubbles.get() + "/" + totalBubbles + " rules]");
         return modules;

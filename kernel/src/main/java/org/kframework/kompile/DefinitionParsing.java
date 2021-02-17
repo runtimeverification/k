@@ -35,6 +35,7 @@ import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.BinaryLoader;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -79,6 +80,7 @@ public class DefinitionParsing {
     private final ParserUtils parser;
     private final boolean cacheParses;
     private final BinaryLoader loader;
+    private final Stopwatch sw;
 
     public final AtomicInteger parsedBubbles = new AtomicInteger(0);
     public final AtomicInteger cachedBubbles = new AtomicInteger(0);
@@ -93,7 +95,8 @@ public class DefinitionParsing {
             FileUtil files,
             ParserUtils parser,
             boolean cacheParses,
-            File cacheFile) {
+            File cacheFile,
+            Stopwatch sw) {
         this.lookupDirectories = lookupDirectories;
         this.options = options;
         this.kem = kem;
@@ -106,9 +109,10 @@ public class DefinitionParsing {
         this.loader = new BinaryLoader(this.kem);
         this.isStrict = options.strict();
         this.profileRules = options.profileRules;
+        this.sw = sw;
     }
 
-    public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, java.util.Set<String> excludeModules) {
+    public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, java.util.Set<String> excludeModules, boolean readOnlyCache) {
         Definition def = parser.loadDefinition(
                 mainModule,
                 mutable(definition.getParsedDefinition().modules()),
@@ -151,7 +155,9 @@ public class DefinitionParsing {
         }
 
         def = resolveNonConfigBubbles(def, def.getModule(entryPointModule).get(), gen);
-        saveCachesAndReportParsingErrors();
+        if (! readOnlyCache) {
+            saveCachesAndReportParsingErrors();
+        }
         return mutable(def.entryModules());
     }
 
@@ -193,7 +199,11 @@ public class DefinitionParsing {
         Definition trimmed = Definition(parsedDefinition.mainModule(), modules.collect(Collections.toSet()),
                 parsedDefinition.att());
         trimmed = Kompile.excludeModulesByTag(excludedModuleTags).apply(trimmed);
+        sw.printIntermediate("Outer parsing [" + trimmed.entryModules().size() + " modules]");
         Definition afterResolvingConfigBubbles = resolveConfigBubbles(trimmed, parsedDefinition.getModule("DEFAULT-CONFIGURATION").get(), parsedDefinition.getModule("MAP").get());
+        sw.printIntermediate("Parse configurations [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " declarations]");
+        parsedBubbles.set(0);
+        cachedBubbles.set(0);
         RuleGrammarGenerator gen = new RuleGrammarGenerator(afterResolvingConfigBubbles);
         Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles, afterResolvingConfigBubbles.mainModule(), gen);
         saveCachesAndReportParsingErrors();
