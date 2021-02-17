@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.util.function.Function;
 
 import org.kframework.kil.ASTNode;
+import org.kframework.utils.errorsystem.KEMException;
 
 public class KILTransformation<R> implements Function<ASTNode, R> {
 
@@ -30,7 +31,7 @@ public class KILTransformation<R> implements Function<ASTNode, R> {
                     + " is missing a definition for visit(" + t.getClass() + ")"
                     + ". Encounteed when visiting " + makeErrorMessage(t), e);
         // DISABLE EXCEPTION CHECKSTYLE
-        } catch (VisitingException e) {
+        } catch (VisitingException | KEMException e) {
             throw e;
         } catch (Throwable e) {
             throw new VisitingException(makeErrorMessage(t), e);
