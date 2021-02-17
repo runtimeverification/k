@@ -1,1 +1,207 @@
 # Lesson 1.2: Basics of Functional K
+
+The purpose of this lesson is to explain the basics of **productions** and
+**rules** in K. These are two types of K **sentences**. A K file consists of
+one or more **requires** or **modules** in K. Each module consists of one or
+more **imports** or sentences. For more information on requires, modules, and
+sentences, refer to [Lesson 4](../04_modules/README.md). However, for the time
+being, just think of a module as a container for sentences, and don't worry
+about requires or imports just yet.
+
+## Our first K program
+
+To start with, input the following program into your editor:
+
+```k
+module LESSON-02-A
+
+  syntax Color ::= Yellow() | Blue()
+  syntax Fruit ::= Banana() | Blueberry()
+  syntax Color ::= colorOf(Fruit) [function]
+
+  rule colorOf(Banana()) => Yellow()
+  rule colorOf(Blueberry()) => Blue()
+
+endmodule
+```
+
+Save this file as `lesson-02-a.k` and then run:
+
+```
+kompile lesson-02-a.k
+```
+
+`kompile` is K's compiler. By default, it takes a program or specification
+written in K and compiles it into an interpreter for that input. Right now
+we are compiling a single file. A set of K files that are compiled together
+are called a **K definition**. We will cover multiple file K definitions later
+on. `kompile` will output a directory containing everything needed to execute
+programs using or perform proofs about that definition. In this case, the 
+directory `kompile` will create by default will be in the current directory
+and will be called `lesson-02-a-kompiled`.
+
+Now, save the following input file in your editor:
+
+```
+colorOf(Banana())
+```
+
+You can call it whatever file name you want, but for example purposes we will
+call this file `banana.color`. Save it in the same directory that also contains
+the `lesson-02-a-kompiled` directory.
+
+We can now evaluate this K term by running:
+
+```
+krun banana.color
+```
+
+From that directory. `krun` will invoke K's interpreter by interpreting a
+program according to the definition that was compiled in that directory.
+
+You will get the following output:
+
+```
+<k>
+  Yellow ( ) ~> .
+</k>
+```
+
+For now, don't worry about the `<k>`, `</k>`, or ` ~> .` portions of this
+output file. Instead, let's look at what this definition and program did.
+
+## Productions, Constructors, and Functions
+
+The first thing to realize is that this K definition contains 5 productions.
+Productions are introduced with the **syntax** keyword, followed by a **sort**,
+followed by the operator `::=`, followed by one or more **constructors**,
+**functions**, **tokens**, **brackets**, **lists**, **macros**, **aliases**, 
+or **anywhere productions**, separated by the `|` operator. Each of these
+individually is a single production, and the `|` symbol simply groups together
+productions that have the same sort. For example, we could equally have written
+an identical K definition like so:
+
+```k
+module LESSON-02-B
+
+  syntax Color ::= Yellow()
+  syntax Color ::= Blue()
+  syntax Fruit ::= Banana()
+  syntax Fruit ::= Blueberry()
+  syntax Color ::= colorOf(Fruit) [function]
+
+  rule colorOf(Banana()) => Yellow()
+  rule colorOf(Blueberry()) => Blue()
+
+endmodule
+```
+
+Or even:
+
+```k
+module LESSON-02-C
+
+  syntax Color ::= Yellow()
+                 | Blue()
+                 | colorOf(Fruit) [function]
+  syntax Fruit ::= Banana()
+                 | Blueberry()
+
+  rule colorOf(Banana()) => Yellow()
+  rule colorOf(Blueberry()) => Blue()
+
+endmodule
+```
+
+Each of these types of productions named above has the same underlying syntax,
+but context and **attributes** are used to distinguish between the different
+types. Tokens, brackets, lists, macros, aliases, and anywhere productions will
+be covered in a later lesson, but this lesson does introduce us to constructors
+and functions. `Yellow()`, `Blue()`, `Banana()`, and `Blueberry()` are
+constructors. You can think of a constructor like a constructor for an
+algebraic data type, if you're familiar with a functional language. The data
+type itself is the sort that appears on the left of the `::=` operator. Sorts
+in K consist of uppercase identifiers.
+
+Constructors can have arguments, but these constructors do not have any
+arguments. We will cover the syntax of productions in detail in the next
+lesson, but for now, you can write a production with no arguments as an
+uppercase or lowercase identifier followed by the `()` operator. You can write
+a production with arguments by putting the sorts of the arguments in a
+comma-separated list inside the parentheses.
+
+A function is distinguished from a constructor by the presence of the
+**function** attribute. Attributes appear in a comma separated list between
+square brackets after any sentence, including both productions and rules.
+Various attributes with built-in meanings exist in K and will be discussed
+throughout the tutorial, but the user can also give any sentence a user-defined
+attribute using the same syntax by simply using an identifier for the attribute
+which is not reserved by K.
+
+## Rules, Matching, and Variables
+
+Functions in K are given definitions using rules. A rule begins with the `rule`
+keyword and contains at least one **rewrite operator**. The rewrite operator
+is represented by the syntax `=>`. The rewrite operator is one of the built-in
+productions in K, and we will discuss in more detail how it can be used in
+future lessons, but for now, you can think of a rule as consisting of a 
+**left-hand side** and a **right-hand side**, separated by the rewrite
+operator. On the left-hand side is the name of the function and zero or more
+**patterns**. On the right-hand side is another pattern. The meaning of the
+rule is relatively simple, having defined these components. If the function
+is called with arguments that **match** the patterns on the left-hand side,
+then the return value of the function is the pattern on the right-hand side.
+
+For example, in the above example, if the argument of the `colorOf` function
+is `Banana()`, then the return value of the function is `Yellow()`.
+
+So far we have introduced that a constructor is a type of pattern in K. We
+will introduce more complex patterns in later lessons, but there is one other
+type of basic pattern: the **variable**. A variable, syntactically, consists
+of an uppercase identifier. However, unlike a constructor, a variable will
+match **any** pattern with one exception: Two variables with the same name
+must match the same pattern.
+
+Here is a more complex example:
+
+```k
+module LESSON-02-D
+
+  syntax Container ::= Jar(Fruit)
+  syntax Fruit ::= Apple() | Pear()
+
+  syntax Fruit ::= contentsOfJar(Container) [function]
+
+  rule contentsOfJar(Jar(F)) => F
+
+endmodule
+```
+
+In this example, `F` is a variable. It will match both `Apple()` and `Pear()`.
+The return value of the function is created by **substituting** the matched
+values of all of the variables into the variables on the right-hand side of
+the rule.
+
+To demonstrate, compile this definition and execute the following program with
+krun:
+
+```
+contentsOfJar(Jar(Apple()))
+```
+
+You will see when you run it that the program returns `Apple()`, because that
+is the pattern that was matched to `F`.
+
+## Exercises
+
+1. Extend the definition in lesson-02-a.k with the addition of blackberries
+   and kiwis. For simplicity, blackberries are black and kiwis are green. Then
+   compile your definition and test that your additional fruits are correctly
+   handled by the `colorOf` function.
+2. Create a new definition which defines an outfit as a hat, shirt, pants, and
+   shoes. Define a new sort, `Boolean`, with two constructors, true and false.
+   Each of hat, shirt, pants, and shoes will have a single argument, which is
+   a color, either black or white. Then define an `outfitMatching` function
+   that will return true if all the pieces of the outfit are the same color.
+   You do not need to define the case that returns false. Write some tests
+   that your function behaves the way you expect.
