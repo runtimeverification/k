@@ -545,7 +545,7 @@ pipeline {
             mv ../bionic/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_bionic_${COMMIT_DATE}.deb
             mv ../focal/kframework_${VERSION}_amd64.deb                 kframework_${VERSION}_amd64_focal_${COMMIT_DATE}.deb
             mv ../buster/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_buster_${COMMIT_DATE}.deb
-            // mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst   kframework-git-${VERSION}-1-x86_64_${COMMIT_DATE}.pkg.tar.zst
+            # mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst   kframework-git-${VERSION}-1-x86_64_${COMMIT_DATE}.pkg.tar.zst
             mv $LOCAL_BOTTLE_NAME                                       $BOTTLE_NAME
             mv ../k-nightly.tar.gz                                      k-nightly_${COMMIT_DATE}.tar.gz
 
@@ -560,7 +560,7 @@ pipeline {
                 --attach $BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                               \
                 --attach k-nightly_${COMMIT_DATE}.tar.gz'#Platform Indepdendent K Binary'                      \
                 --file release.md "${K_RELEASE_TAG}"
-                // --attach kframework-git-${VERSION}-1-x86_64_${COMMIT_DATE}.pkg.tar.zst'#Arch Package'          \
+                # --attach kframework-git-${VERSION}-1-x86_64_${COMMIT_DATE}.pkg.tar.zst'#Arch Package'          \
           '''
         }
         dir('homebrew-k') {
