@@ -1,3 +1,6 @@
-KOMPILE_BACKEND?=haskell
+DEF=test
+EXT=test
+TESTDIR=.
+KOMPILE_BACKEND=haskell
 
-include ../../../include/kframework/ktest-fail.mak
+include ../../../include/kframework/ktest.mak
