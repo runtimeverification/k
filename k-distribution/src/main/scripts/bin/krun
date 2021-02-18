@@ -212,6 +212,13 @@ do
       --dry-run)
       cmdprefix="echo "
       tempFiles=(${tempFiles[@]/$expanded_input_file})
+      # slash removes prefixes so build a new array with the files to keep
+      newArray=()
+      for value in "${tempFiles[@]}"; do
+          $value != $tempDir && newArray+=($value)
+      done
+      tempFiles="${newArray[@]}"
+      unset newArray
       dryRun=true
       ;;
 
@@ -428,14 +435,15 @@ if [ "$outputFile" = "-" ]; then
 fi
 
 # verify and parse config variables/cmd line parameters
+source "$kompiledDir/configVars.sh"
 if $term; then
   if [ -z "${parser_PGM+unset}" ]; then
-    execute kast -d "$dir" -m "$mainModuleName" "$config_var_PGM" -o kore > "$input_file"
+    execute kast --directory "$dir" -m "$mainModuleName" "$config_var_PGM" -o kore > "$input_file"
   else
     execute $parser_PGM "$config_var_PGM" > "$input_file"
   fi
 else
-  for configVar in `ls $kompiledDir/sort_*.txt | sed 's|.*sort_\(.*\).txt|\1|'`; do
+  for configVar in "${declaredConfigVars[@]}"; do
     if [[ $configVar != "IO" && $configVar != "STDIN" && ! "${params[@]}" =~ "$configVar" ]]; then
       error "Configuration variable missing: \$$configVar. Use -c$configVar=<Value> in the command line to set."
     fi
@@ -445,25 +453,26 @@ else
     config_name="config_var_$name"
     tempFile="$(mktemp ${tempDir}/tmp.in."$name".XXXXXXXXXX)"
     tempFiles+=("$tempFile")
-    if [ ! -f "$kompiledDir"/sort_"$name".txt ]; then
+    if [[ ! "${declaredConfigVars[@]}" =~ "$name" ]]; then
       if [ "$name" = "PGM" ]; then
         error "Configuration variable \$PGM does not exist. Do not pass a positional argument to $KX."
       else
         error "Configuration variable \$$name does not exist. Do not pass -c$name to $KX."
       fi
     fi
-    sortName=`cat "$kompiledDir"/sort_"$name".txt`
+    indirectName="declaredConfigVar_$name"
+    sortName=${!indirectName}
     if [ -z "${!parser_name+unset}" ]; then
       if [ -f "$kompiledDir/parser_$name" ]; then
         parser=("$kompiledDir/parser_$name")
       elif [ "$name" = "PGM" ]; then
         if $hasArgv; then
-          parser=(kast -d "$dir" -o kore)
+          parser=(kast --directory "$dir" -o kore)
         else
-          parser=(kast -d "$dir" -m "$mainModuleName" -o kore)
+          parser=(kast --directory "$dir" -m "$mainModuleName" -o kore)
         fi
       else
-        parser=(kast -s "$sortName" -d "$dir" -m "$mainModuleName" -o kore)
+        parser=(kast -s "$sortName" --directory "$dir" -m "$mainModuleName" -o kore)
       fi
     else
       parser=("${!parser_name}")
@@ -471,7 +480,7 @@ else
     execute ${parser[@]} "${!config_name}" > "$tempFile"
     configVars="$configVars -c $name $(basename $tempFile) $sortName korefile"
   done
-  if [ "$(cat "$kompiledDir"/sort_IO.txt 2>/dev/null)" = "String" ]; then
+  if [[ ${declaredConfigVar_IO+unset} && "${declaredConfigVar_IO}" = "String" ]]; then
     if $io; then
       ioText=on
     else
@@ -479,7 +488,7 @@ else
     fi
     configVars="$configVars -c IO \dv{SortString{}}(\"$ioText\") String kore"
   fi
-  if [ "$(cat "$kompiledDir"/sort_STDIN.txt 2>/dev/null)" = "String" ]; then
+  if [[ ${declaredConfigVar_STDIN+unset} && "${declaredConfigVar_STDIN}" = "String" ]]; then
     if $io; then
       stdinText=
     else
@@ -493,7 +502,7 @@ else
   fi
   abs_kompiled_dir=`echo "$(cd "$(dirname "$kompiledDir")"; pwd -P)/$(basename "$kompiledDir")"`
   # llvm-krun creates temp files in the cwd so execute it in $tempDir instead
-  (cd $tempDir; execute llvm-krun $configVars -d "$abs_kompiled_dir" $flags --dry-run -nm -o "$(basename $input_file)")
+  (cd $tempDir; execute llvm-krun $configVars --directory "$abs_kompiled_dir" $flags --dry-run -nm -o "$(basename $input_file)")
 fi
 
 # Expand macros
@@ -534,7 +543,7 @@ else
     if [ -z "$pattern" ]; then
       echo '\and{SortGeneratedTopCell{}}(VarResult:SortGeneratedTopCell{},\top{SortGeneratedTopCell{}}())' > "$patternFile"
     else
-      k-compile-search-pattern "$pattern" > "$patternFile"
+      k-compile-search-pattern --directory "$dir" "$pattern" > "$patternFile"
     fi
 
     if ! $search; then
@@ -587,7 +596,7 @@ if ! $dryRun; then
       none) ;;
 
       *)
-      execute kast -d "$dir" -i kore -o "$outputMode" "$kore_output" > "$outputFile"
+      execute kast --directory "$dir" -i kore -o "$outputMode" "$kore_output" > "$outputFile"
       ;;
     esac
   else
