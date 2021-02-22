@@ -539,7 +539,7 @@ pipeline {
             COMMIT_DATE=$(date '+%Y%m%d%H%M' --date="$(git show --no-patch --format='%ci' ${K_RELEASE_TAG})")
 
             LOCAL_BOTTLE_NAME=$(find ../mojave -name "kframework--${VERSION}.mojave.bottle*.tar.gz")
-            BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#../mojave/} | sed 's!kframework--!kframework-!' | sed 's!mojave!mojave.'${COMMIT_DATE}'!')
+            BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#../mojave/} | sed 's!kframework--!kframework-!')
 
             mv ../kframework-${VERSION}-src.tar.gz                      kframework-${VERSION}-src_${COMMIT_DATE}.tar.gz
             mv ../bionic/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_bionic_${COMMIT_DATE}.deb
