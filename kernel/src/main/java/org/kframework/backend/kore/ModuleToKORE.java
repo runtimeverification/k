@@ -124,7 +124,8 @@ public class ModuleToKORE {
         StringBuilder semantics = new StringBuilder();
         StringBuilder syntax    = new StringBuilder();
         StringBuilder macros    = new StringBuilder();
-        convert(heatCoolEq, common, semantics, syntax, macros);
+        String prelude = files.loadFromKIncludeDir("kore/prelude.kore");
+        convert(heatCoolEq, prelude, common, semantics, syntax, macros);
         int length = common.length();
         common.append(syntax);
         files.saveToKompiled("syntaxDefinition.kore", common.toString());
@@ -134,11 +135,10 @@ public class ModuleToKORE {
         return common.toString();
     }
 
-    public void convert(boolean heatCoolEq, StringBuilder common, StringBuilder semantics, StringBuilder syntax, StringBuilder macros) {
+    public void convert(boolean heatCoolEq, String prelude, StringBuilder common, StringBuilder semantics, StringBuilder syntax, StringBuilder macros) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(module);
         Sort topCellSort = configInfo.getRootCell();
         String topCellSortStr = getSortStr(topCellSort);
-        String prelude = files.loadFromKIncludeDir("kore/prelude.kore");
         common.append("[topCellInitializer{}(");
         convert(topCellInitializer, common);
         common.append("())]\n\n");
