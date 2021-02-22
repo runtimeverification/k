@@ -191,10 +191,14 @@ public class DefinitionParsing {
             modules = Stream.concat(modules, Stream.of(syntaxModule.get()));
             modules = Stream.concat(modules, stream(syntaxModule.get().importedModules()));
         }
-        Option<Module> claimsModule = parsedDefinition.getModule(claimsModuleName);
-        if (claimsModule.isDefined()) {
-            modules = Stream.concat(modules, Stream.of(claimsModule.get()));
-            modules = Stream.concat(modules, stream(claimsModule.get().importedModules()));
+        if (claimsModuleName != null) {
+            Option<Module> claimsModule = parsedDefinition.getModule(claimsModuleName);
+            if (claimsModule.isDefined()) {
+                modules = Stream.concat(modules, Stream.of(claimsModule.get()));
+                modules = Stream.concat(modules, stream(claimsModule.get().importedModules()));
+            } else {
+                throw KEMException.criticalError("Module " + claimsModuleName + " does not exist.");
+            }
         }
         modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("K-REFLECTION").get()));
         modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("STDIN-STREAM").get()));
