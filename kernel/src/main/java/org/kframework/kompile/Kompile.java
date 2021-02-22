@@ -125,7 +125,7 @@ public class Kompile {
      * @param programStartSymbol
      * @return
      */
-    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Function<Definition, Definition> pipeline, Set<String> excludedModuleTags) {
+    public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, String claimsModuleName, Function<Definition, Definition> pipeline, Set<String> excludedModuleTags) {
         files.resolveKompiled(".").mkdirs();
 
         if (kompileOptions.profileRules) {
@@ -135,7 +135,7 @@ public class Kompile {
                 }
             }
         }
-        Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, excludedModuleTags);
+        Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, claimsModuleName, excludedModuleTags);
         sw.printIntermediate("Parse rules [" + definitionParsing.parsedBubbles.get() + "/" + (definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get()) + " rules]");
 
         files.saveToKompiled("parsed.txt", parsedDef.toString());
@@ -209,8 +209,8 @@ public class Kompile {
         return String.join("\n", ruleLocs);
     }
 
-    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, Set<String> excludedModuleTags) {
-        return definitionParsing.parseDefinitionAndResolveBubbles(definitionFile, mainModuleName, mainProgramsModule, excludedModuleTags);
+    public Definition parseDefinition(File definitionFile, String mainModuleName, String mainProgramsModule, String claimsModuleName, Set<String> excludedModuleTags) {
+        return definitionParsing.parseDefinitionAndResolveBubbles(definitionFile, mainModuleName, mainProgramsModule, claimsModuleName, excludedModuleTags);
     }
 
     private static Module filterStreamModules(Module input) {
@@ -327,17 +327,7 @@ public class Kompile {
         scala.collection.Set<Module> modules = parsedDef.modules();
         Module mainModule = parsedDef.mainModule();
         Option<Module> kModule = parsedDef.getModule("K");
-        definitionChecks(stream(modules).collect(Collectors.toSet()));
         structuralChecks(modules, mainModule, kModule, excludedModuleTags);
-    }
-
-    // checks that are not verified in the prover
-    public void definitionChecks(Set<Module> modules) {
-        modules.forEach(m -> stream(m.localSentences()).forEach(s -> {
-            // Check that the `claim` keyword is not used in the definition.
-            if (s instanceof Claim)
-                errors.add(KEMException.compilerError("Claims are not allowed in the definition.", s));
-        }));
     }
 
     // Extra checks just for the prover specification.

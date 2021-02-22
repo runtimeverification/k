@@ -4,13 +4,13 @@ package org.kframework.compile;
 import org.bouncycastle.jcajce.provider.digest.SHA3;
 import org.bouncycastle.util.encoders.Hex;
 import org.kframework.attributes.Att;
+import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.definition.RuleOrClaim;
 
 public class NumberSentences {
 
     public static Sentence number(Sentence s) {
-        if (!(s instanceof RuleOrClaim)) {
+        if (!(s instanceof Rule)) {
             return s;
         }
         String id = ruleHash(s.withAtt(Att.empty()));

@@ -67,7 +67,13 @@ public class KompileFrontEnd extends FrontEnd {
 
         Kompile kompile = new Kompile(options, files.get(), kem, sw, !options.profileRules);
         Backend backend = koreBackend.get();
-        CompiledDefinition def = kompile.run(options.outerParsing.mainDefinitionFile(files.get()), options.mainModule(files.get()), options.syntaxModule(files.get()), backend.steps(), backend.excludedModuleTags());
+        CompiledDefinition def = kompile.run(
+                options.outerParsing.mainDefinitionFile(files.get()),
+                options.mainModule(files.get()),
+                options.syntaxModule(files.get()),
+                options.claimsModule,
+                backend.steps(),
+                backend.excludedModuleTags());
         kompile = null;
         files.get().saveToKompiled("mainModule.txt", def.executionModule().name());
         sw.printIntermediate("Kompile to kore");

@@ -61,6 +61,9 @@ public class KompileOptions implements Serializable {
         return syntaxModule;
     }
 
+    @Parameter(names="--claims-module", description="Specify an extra module for claims. This information is used by 'kprove'.")
+    public String claimsModule;
+
     @Parameter(names="--non-strict", description="Do not add runtime sort checks for every variable's inferred sort. Only has an effect with `--backend ocaml`.")
     private boolean nonStrict;
 

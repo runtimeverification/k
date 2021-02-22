@@ -40,7 +40,7 @@ class KoreTest {
     val compiler = new Kompile(options, files, kem, false)
     val backend = new KoreBackend(options, files, kem)
     files.saveToDefinitionDirectory("test.k", k)
-    val defn = compiler.run(files.resolveDefinitionDirectory("test.k"), "TEST", "TEST", backend.steps, backend.excludedModuleTags)
+    val defn = compiler.run(files.resolveDefinitionDirectory("test.k"), "TEST", "TEST", "TEST", backend.steps, backend.excludedModuleTags)
     backend.accept(new Backend.Holder(defn))
     new TextToKore().parse(files.resolveDefinitionDirectory("test.kore"))
   }

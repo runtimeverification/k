@@ -182,7 +182,7 @@ public class DefinitionParsing {
         }
     }
 
-    public Definition parseDefinitionAndResolveBubbles(File definitionFile, String mainModuleName, String mainProgramsModule, java.util.Set<String> excludedModuleTags) {
+    public Definition parseDefinitionAndResolveBubbles(File definitionFile, String mainModuleName, String mainProgramsModule, String claimsModuleName, java.util.Set<String> excludedModuleTags) {
         Definition parsedDefinition = parseDefinition(definitionFile, mainModuleName, mainProgramsModule);
         Stream<Module> modules = Stream.of(parsedDefinition.mainModule());
         modules = Stream.concat(modules, stream(parsedDefinition.mainModule().importedModules()));
@@ -190,6 +190,11 @@ public class DefinitionParsing {
         if (syntaxModule.isDefined()) {
             modules = Stream.concat(modules, Stream.of(syntaxModule.get()));
             modules = Stream.concat(modules, stream(syntaxModule.get().importedModules()));
+        }
+        Option<Module> claimsModule = parsedDefinition.getModule(claimsModuleName);
+        if (claimsModule.isDefined()) {
+            modules = Stream.concat(modules, Stream.of(claimsModule.get()));
+            modules = Stream.concat(modules, stream(claimsModule.get().importedModules()));
         }
         modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("K-REFLECTION").get()));
         modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("STDIN-STREAM").get()));
