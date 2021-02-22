@@ -126,11 +126,13 @@ public class ModuleToKORE {
         StringBuilder macros    = new StringBuilder();
         String prelude = files.loadFromKIncludeDir("kore/prelude.kore");
         convert(heatCoolEq, prelude, common, semantics, syntax, macros);
-        int length = common.length();
-        common.append(syntax);
-        files.saveToKompiled("syntaxDefinition.kore", common.toString());
-        files.saveToKompiled("macros.kore", macros.toString());
-        common.setLength(length);
+        if (! options.readOnlyKompiledDirectory) {
+            int length = common.length();
+            common.append(syntax);
+            files.saveToKompiled("syntaxDefinition.kore", common.toString());
+            files.saveToKompiled("macros.kore", macros.toString());
+            common.setLength(length);
+        }
         common.append(semantics);
         return common.toString();
     }
