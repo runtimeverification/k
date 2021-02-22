@@ -120,38 +120,33 @@ public class ModuleToKORE {
     private static final boolean METAVAR = false;
 
     public String convert(boolean heatCoolEq, StringBuilder sb) {
-        StringBuilder common    = new StringBuilder();
         StringBuilder semantics = new StringBuilder();
         StringBuilder syntax    = new StringBuilder();
         StringBuilder macros    = new StringBuilder();
         String prelude = files.loadFromKIncludeDir("kore/prelude.kore");
-        convert(heatCoolEq, prelude, common, semantics, syntax, macros);
+        convert(heatCoolEq, prelude, semantics, syntax, macros);
         if (! options.readOnlyKompiledDirectory) {
-            int length = common.length();
-            common.append(syntax);
-            files.saveToKompiled("syntaxDefinition.kore", common.toString());
+            files.saveToKompiled("syntaxDefinition.kore", syntax.toString());
             files.saveToKompiled("macros.kore", macros.toString());
-            common.setLength(length);
         }
-        common.append(semantics);
-        return common.toString();
+        return semantics.toString();
     }
 
-    public void convert(boolean heatCoolEq, String prelude, StringBuilder common, StringBuilder semantics, StringBuilder syntax, StringBuilder macros) {
+    public void convert(boolean heatCoolEq, String prelude, StringBuilder semantics, StringBuilder syntax, StringBuilder macros) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(module);
         Sort topCellSort = configInfo.getRootCell();
         String topCellSortStr = getSortStr(topCellSort);
-        common.append("[topCellInitializer{}(");
-        convert(topCellInitializer, common);
-        common.append("())]\n\n");
-        common.append(prelude);
-        common.append("\n");
+        semantics.append("[topCellInitializer{}(");
+        convert(topCellInitializer, semantics);
+        semantics.append("())]\n\n");
+        semantics.append(prelude);
+        semantics.append("\n");
 
         SentenceType sentenceType = getSentenceType(module.att()).orElse(SentenceType.REWRITE_RULE);
-        common.append("module ");
-        convert(module.name(), common);
-        common.append("\n\n// imports\n");
-        common.append("  import K []\n\n// sorts\n");
+        semantics.append("module ");
+        convert(module.name(), semantics);
+        semantics.append("\n\n// imports\n");
+        semantics.append("  import K []\n\n// sorts\n");
 
         Set<SortHead> tokenSorts = new HashSet<>();
         // Map attribute name to whether the attribute has a value
@@ -183,7 +178,7 @@ public class ModuleToKORE {
         if (attributes.containsKey("token")) {
             attributes.put(HAS_DOMAIN_VALUES, false);
         }
-        translateSorts(tokenSorts, attributes, collectionSorts, common);
+        translateSorts(tokenSorts, attributes, collectionSorts, semantics);
 
         List<Rule> sortedRules = new ArrayList<>(JavaConverters.seqAsJavaList(module.sortedRules()));
         if (options.backend.equals("haskell")) {
@@ -209,16 +204,17 @@ public class ModuleToKORE {
         Set<KLabel> impurities = functionRules.keySet().stream().filter(lbl -> module.attributesFor().get(lbl).getOrElse(() -> Att()).contains(Att.IMPURE())).collect(Collectors.toSet());
         impurities.addAll(deps.ancestors(impurities));
 
-        common.append("\n// symbols\n");
+        semantics.append("\n// symbols\n");
         Set<Production> overloads = new HashSet<>();
         for (Production lesser : iterable(module.overloads().elements())) {
             for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(Collections::<Production>Set))) {
                 overloads.add(greater);
             }
         }
-        translateSymbols(attributes, functionRules, impurities, overloads, common);
+        translateSymbols(attributes, functionRules, impurities, overloads, semantics);
 
         // print syntax definition
+        syntax.append(semantics);
         for (Tuple2<Sort, scala.collection.immutable.List<Production>> sort : iterable(module.bracketProductionsFor())) {
             for (Production prod : iterable(sort._2())) {
                 translateSymbol(attributes, functionRules, impurities, overloads, prod.att().get("bracketLabel", KLabel.class), prod, syntax);
@@ -240,9 +236,9 @@ public class ModuleToKORE {
             }
         }
 
-        common.append("endmodule []\n");
+        syntax.append("endmodule []\n");
 
-        common.append("\n// generated axioms\n");
+        semantics.append("\n// generated axioms\n");
         Set<Tuple2<Production, Production>> noConfusion = new HashSet<>();
         for (Production prod : iterable(module.sortedProductions())) {
             if (isBuiltinProduction(prod)) {
@@ -285,7 +281,7 @@ public class ModuleToKORE {
             }
         }
 
-        common.append("\n// rules\n");
+        semantics.append("\n// rules\n");
 
         macros.append("// macros\n");
         int ruleIndex = 0;
@@ -301,11 +297,11 @@ public class ModuleToKORE {
             ruleIndex++;
         }
 
-        common.append("\n// priority groups\n");
+        semantics.append("\n// priority groups\n");
         genPriorityGroups(priorityList, priorityToPreviousGroup, priorityToAlias, topCellSortStr, semantics);
-        common.append("endmodule ");
+        semantics.append("endmodule ");
         convert(attributes, module.att(), semantics, null, null);
-        common.append("\n");
+        semantics.append("\n");
     }
 
     private void collectTokenSortsAndAttributes(Set<SortHead> tokenSorts, Map<String, Boolean> attributes,
