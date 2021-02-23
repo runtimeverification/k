@@ -3,7 +3,6 @@ package org.kframework.backend.kore;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
-import org.kframework.Strategy;
 import org.kframework.attributes.Att;
 import org.kframework.compile.AbstractBackend;
 import org.kframework.compile.AddCoolLikeAtt;
@@ -13,8 +12,8 @@ import org.kframework.compile.Backend;
 import org.kframework.compile.ConcretizeCells;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.ExpandMacros;
-import org.kframework.compile.GeneratedTopFormat;
 import org.kframework.compile.GenerateCoverage;
+import org.kframework.compile.GeneratedTopFormat;
 import org.kframework.compile.GenerateSortPredicateRules;
 import org.kframework.compile.GenerateSortPredicateSyntax;
 import org.kframework.compile.GenerateSortProjections;
@@ -39,6 +38,7 @@ import org.kframework.definition.ModuleTransformer;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.Strategy;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
@@ -89,14 +89,25 @@ public class KoreBackend extends AbstractBackend {
 
     protected String getKompiledString(CompiledDefinition def) {
         Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule());
-        ModuleToKORE converter = new ModuleToKORE(mainModule, files, def.topCellInitializer, def.kompileOptions);
+        ModuleToKORE converter = new ModuleToKORE(mainModule, def.topCellInitializer, def.kompileOptions);
         return getKompiledString(converter, files, heatCoolEquations);
     }
 
     public static String getKompiledString(ModuleToKORE converter, FileUtil files, boolean heatCoolEquations) {
         StringBuilder sb = new StringBuilder();
-        String kompiledString = converter.convert(heatCoolEquations, sb);
+        String kompiledString = getKompiledStringAndWriteSyntaxMacros(converter, files, heatCoolEquations, sb);
         return kompiledString;
+    }
+
+    public static String getKompiledStringAndWriteSyntaxMacros(ModuleToKORE converter, FileUtil files, boolean heatCoolEq, StringBuilder sb) {
+        StringBuilder semantics = new StringBuilder();
+        StringBuilder syntax    = new StringBuilder();
+        StringBuilder macros    = new StringBuilder();
+        String prelude = files.loadFromKIncludeDir("kore/prelude.kore");
+        converter.convert(heatCoolEq, prelude, semantics, syntax, macros);
+        files.saveToKompiled("syntaxDefinition.kore", syntax.toString());
+        files.saveToKompiled("macros.kore", macros.toString());
+        return semantics.toString();
     }
 
     public static Module getKompiledModule(Module mainModule) {

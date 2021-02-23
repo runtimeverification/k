@@ -46,7 +46,6 @@ import org.kframework.kore.VisitK;
 import org.kframework.unparser.Formatter;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.file.FileUtil;
 import scala.Int;
 import scala.Option;
 import scala.Tuple2;
@@ -105,30 +104,17 @@ public class ModuleToKORE {
     public static final String ALL_PATH_OP = KLabels.RL_wAF.name();
     public static final String HAS_DOMAIN_VALUES = "hasDomainValues";
     private final Module module;
-    private final FileUtil files;
     private final Set<String> impureFunctions = new HashSet<>();
     private final KLabel topCellInitializer;
     private final Set<String> mlBinders = new HashSet<>();
     private final KompileOptions options;
 
-    public ModuleToKORE(Module module, FileUtil files, KLabel topCellInitializer, KompileOptions options) {
+    public ModuleToKORE(Module module, KLabel topCellInitializer, KompileOptions options) {
         this.module = module;
-        this.files = files;
         this.topCellInitializer = topCellInitializer;
         this.options = options;
     }
     private static final boolean METAVAR = false;
-
-    public String convert(boolean heatCoolEq, StringBuilder sb) {
-        StringBuilder semantics = new StringBuilder();
-        StringBuilder syntax    = new StringBuilder();
-        StringBuilder macros    = new StringBuilder();
-        String prelude = files.loadFromKIncludeDir("kore/prelude.kore");
-        convert(heatCoolEq, prelude, semantics, syntax, macros);
-        files.saveToKompiled("syntaxDefinition.kore", syntax.toString());
-        files.saveToKompiled("macros.kore", macros.toString());
-        return semantics.toString();
-    }
 
     public void convert(boolean heatCoolEq, String prelude, StringBuilder semantics, StringBuilder syntax, StringBuilder macros) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(module);
