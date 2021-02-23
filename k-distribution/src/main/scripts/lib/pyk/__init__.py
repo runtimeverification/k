@@ -36,6 +36,9 @@ def kast(definition, inputFile, kastArgs = [], teeOutput = True, kRelease = None
 def krun(definition, inputFile, krunArgs = [], teeOutput = True, kRelease = None):
     return _runK('krun', definition, inputFile, kArgs = krunArgs, teeOutput = teeOutput, kRelease = kRelease)
 
+def krunLegacy(definition, inputFile, krunArgs = [], teeOutput = True, kRelease = None):
+    return _runK('krun-legacy', definition, inputFile, kArgs = krunArgs, teeOutput = teeOutput, kRelease = kRelease)
+
 def kprove(definition, inputFile, kproveArgs = [], teeOutput = True, kRelease = None):
     return _runK('kprove', definition, inputFile, kArgs = kproveArgs, teeOutput = teeOutput, kRelease = kRelease)
 
@@ -49,7 +52,7 @@ def krunJSON(definition, inputJSON, krunArgs = [], teeOutput = True, kRelease = 
     with tempfile.NamedTemporaryFile(mode = 'w', delete = not keepTemp) as tempf:
         tempf.write(json.dumps(inputJSON))
         tempf.flush()
-        (rC, out, err) = krun(definition, tempf.name, krunArgs = krunArgs + ['--output', 'json', '--parser', 'cat'], teeOutput = teeOutput, kRelease = kRelease)
+        (rC, out, err) = krunLegacy(definition, tempf.name, krunArgs = krunArgs + ['--output', 'json', '--parser', 'cat'], teeOutput = teeOutput, kRelease = kRelease)
         out = None if out == '' else json.loads(out)['term']
         return (rC, out, err)
 
