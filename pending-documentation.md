@@ -367,6 +367,18 @@ nonterminal. If the rightmost nonterminal is followed by a terminal (or
 respectively the leftmost preceded), priority and associativity do not apply.
 Thus we can generalize these concepts to arbitrary context-free grammars.
 
+Note that in some cases, this is not the behavior you want. You may actually
+want to reject parses even though the leftmost and rightmost item in a
+production are terminals. You can accomplish this by means of the
+`applyPriority` attribute. When placed on a production, it tells the parser
+which nonterminals of a production the priority filter ought to reject children
+under, overriding the default behavior. For example, I might have a production
+like `syntax Exp ::= foo(Exp, Exp) [applyPriority(1)]`. This tells the parser
+to reject terms with looser priority binding under the first `Exp`, but not
+the second. By default, with this production, neither position would apply
+to the priority filter, because the first and last items of the production
+are both terminals.
+
 Associativity is specified in K grammars by means of one of two different
 mechanisms. The first, and simplest, adds the associativity of a priority block
 of symbols prior to that block. For example, we can remove the remaining
