@@ -183,7 +183,13 @@ public class KILtoKORE extends KILTransformation<Object> {
             java.util.Set<Production> productions = context.tags.get(l.name());
             if (productions.isEmpty())
                 throw KEMException.outerParserError("Could not find any productions for tag: " + l.name(), loc.getSource(), loc.getLocation());
-            return productions.stream().map(p -> Tag(p.getKLabel(kore)));
+            return productions.stream().map(p -> {
+              String label = p.getKLabel(kore);
+              if (label == null && p.getAttributes().contains(Att.BRACKET())) {
+                label = p.getBracketLabel(kore);
+              }
+              return Tag(label);
+            });
         }).collect(Collectors.toSet()));
     }
 

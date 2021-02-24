@@ -79,8 +79,8 @@ public class PriorityVisitor extends SetsTransformerWithErrors<KEMException> {
         public Either<java.util.Set<KEMException>, Term> apply(TermCons tc) {
             //if (Side.RIGHT  == side && !(tc.production().items().apply(0) instanceof NonTerminal)) return Right.apply(tc);
             //if (Side.LEFT == side && !(tc.production().items().apply(tc.production().items().size() - 1) instanceof NonTerminal)) return Right.apply(tc);
-            Tag parentLabel = new Tag(parent.production().klabel().get().name());
-            Tag localLabel = new Tag(tc.production().klabel().get().name());
+            Tag parentLabel = new Tag(parent.production().parseLabel().name());
+            Tag localLabel = new Tag(tc.production().parseLabel().name());
             if (priorities.lessThan(parentLabel, localLabel)) {
                 String msg = "Priority filter exception. Cannot use " + localLabel + " as an immediate child of " +
                         parentLabel + ". Consider using parentheses around " + localLabel;
