@@ -3,7 +3,6 @@ package org.kframework.backend.kore;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
-import org.kframework.Strategy;
 import org.kframework.attributes.Att;
 import org.kframework.compile.AbstractBackend;
 import org.kframework.compile.AddCoolLikeAtt;
@@ -13,8 +12,8 @@ import org.kframework.compile.Backend;
 import org.kframework.compile.ConcretizeCells;
 import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.ExpandMacros;
-import org.kframework.compile.GeneratedTopFormat;
 import org.kframework.compile.GenerateCoverage;
+import org.kframework.compile.GeneratedTopFormat;
 import org.kframework.compile.GenerateSortPredicateRules;
 import org.kframework.compile.GenerateSortPredicateSyntax;
 import org.kframework.compile.GenerateSortProjections;
@@ -39,6 +38,8 @@ import org.kframework.definition.ModuleTransformer;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.main.Tool;
+import org.kframework.Strategy;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
@@ -60,21 +61,24 @@ public class KoreBackend extends AbstractBackend {
     private final KExceptionManager kem;
     private final EnumSet<ResolveHeatCoolAttribute.Mode> heatCoolConditions;
     private final boolean heatCoolEquations;
+    private final Tool tool;
 
     @Inject
     public KoreBackend(
             KompileOptions kompileOptions,
             FileUtil files,
-            KExceptionManager kem) {
-        this(kompileOptions, files, kem, kompileOptions.optimize2 || kompileOptions.optimize3 ? EnumSet.of(HEAT_RESULT) : EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION), false);
+            KExceptionManager kem,
+            Tool tool) {
+        this(kompileOptions, files, kem, kompileOptions.optimize2 || kompileOptions.optimize3 ? EnumSet.of(HEAT_RESULT) : EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION), false, tool);
     }
 
-    public KoreBackend(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, EnumSet<ResolveHeatCoolAttribute.Mode> heatCoolConditions, boolean heatCoolEquations) {
+    public KoreBackend(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, EnumSet<ResolveHeatCoolAttribute.Mode> heatCoolConditions, boolean heatCoolEquations, Tool tool) {
         this.kompileOptions = kompileOptions;
         this.files = files;
         this.kem = kem;
         this.heatCoolConditions = heatCoolConditions;
         this.heatCoolEquations = heatCoolEquations;
+        this.tool = tool;
     }
 
     @Override
@@ -89,14 +93,27 @@ public class KoreBackend extends AbstractBackend {
 
     protected String getKompiledString(CompiledDefinition def) {
         Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule());
-        ModuleToKORE converter = new ModuleToKORE(mainModule, files, def.topCellInitializer, def.kompileOptions);
-        return getKompiledString(converter, files, heatCoolEquations);
+        ModuleToKORE converter = new ModuleToKORE(mainModule, def.topCellInitializer, def.kompileOptions);
+        return getKompiledString(converter, files, heatCoolEquations, tool);
     }
 
-    public static String getKompiledString(ModuleToKORE converter, FileUtil files, boolean heatCoolEquations) {
+    public static String getKompiledString(ModuleToKORE converter, FileUtil files, boolean heatCoolEquations, Tool t) {
         StringBuilder sb = new StringBuilder();
-        String kompiledString = converter.convert(heatCoolEquations, sb);
+        String kompiledString = getKompiledStringAndWriteSyntaxMacros(converter, files, heatCoolEquations, sb, t);
         return kompiledString;
+    }
+
+    public static String getKompiledStringAndWriteSyntaxMacros(ModuleToKORE converter, FileUtil files, boolean heatCoolEq, StringBuilder sb, Tool t) {
+        StringBuilder semantics = new StringBuilder();
+        StringBuilder syntax    = new StringBuilder();
+        StringBuilder macros    = new StringBuilder();
+        String prelude = files.loadFromKIncludeDir("kore/prelude.kore");
+        converter.convert(heatCoolEq, prelude, semantics, syntax, macros);
+        if (t == Tool.KOMPILE) {
+            files.saveToKompiled("syntaxDefinition.kore", syntax.toString());
+            files.saveToKompiled("macros.kore", macros.toString());
+        }
+        return semantics.toString();
     }
 
     public static Module getKompiledModule(Module mainModule) {
