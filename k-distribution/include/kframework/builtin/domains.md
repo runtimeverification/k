@@ -1396,8 +1396,14 @@ a single code point) and an integer in O(1) time.
 ### String substring
 
 You can compute a substring of a string in O(N) time (where N is the
-length of the substring). Note that the range generated is 
-`[startIndex..endIndex)`
+length of the substring). There are two important facts to note:
+
+1.  the range generated includes the character at `startIndex` but excludes the
+    character at `endIndex`, i.e., the range is `[startIndex..endIndex)`.
+2.  when using the LLVM backend, if the substring indices are invalid (i.e.,
+    if either `startIndex` or `endIndex` is negative or greater than the string
+    length or if `endIndex < startIndex`), then this function may throw an
+    exception and cause the interpreter to terminate unexpectedly.
 
 ```k
   syntax String ::= substrString ( String , startIndex: Int , endIndex: Int ) [function, functional, hook(STRING.substr)]
