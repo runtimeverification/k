@@ -37,12 +37,14 @@ public class PriorityVisitor extends SetsTransformerWithErrors<KEMException> {
         assert tc.production() != null : this.getClass() + ":" + " production not found." + tc;
         if (!tc.production().isSyntacticSubsort()) {
             // match only on the outermost elements
+            boolean applied = false;
             if (tc.production().items().apply(0) instanceof NonTerminal) {
                 Either<java.util.Set<KEMException>, Term> rez =
                         new PriorityVisitor2(tc, PriorityVisitor2.Side.LEFT, priorities, leftAssoc, rightAssoc).apply(tc.get(0));
                 if (rez.isLeft())
                     return rez;
                 tc = tc.with(0, rez.right().get());
+                applied = true;
             }
             if (tc.production().items().apply(tc.production().items().size() - 1) instanceof NonTerminal) {
                 int last = tc.items().size() - 1;
@@ -51,6 +53,14 @@ public class PriorityVisitor extends SetsTransformerWithErrors<KEMException> {
                 if (rez.isLeft())
                     return rez;
                 tc = tc.with(last, rez.right().get());
+                applied = true;
+            }
+            if (tc.production().att().contains(Att.BRACKET()) && !applied) {
+                Either<java.util.Set<KEMException>, Term> rez =
+                        new PriorityVisitor2(tc, PriorityVisitor2.Side.MIDDLE, priorities, leftAssoc, rightAssoc).apply(tc.get(0));
+                if (rez.isLeft())
+                    return rez;
+                tc = tc.with(0, rez.right().get());
             }
         }
         return super.apply(tc);
@@ -61,7 +71,7 @@ public class PriorityVisitor extends SetsTransformerWithErrors<KEMException> {
          * Specifies whether the current node is the left most or the right most child of the parent.
          * This is useful because associativity can be checked at the same time with priorities.
          */
-        public static enum Side {LEFT, RIGHT}
+        public static enum Side {LEFT, RIGHT, MIDDLE}
         private final TermCons parent;
         private final Side side;
         private final POSet<Tag> priorities;
