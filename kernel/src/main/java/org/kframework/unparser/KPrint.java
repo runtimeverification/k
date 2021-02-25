@@ -177,7 +177,7 @@ public class KPrint {
                 if (compiledDefinition == null) {
                     throw KEMException.criticalError("KORE output requires a compiled definition.");
                 }
-                ModuleToKORE converter = new ModuleToKORE(module, files, compiledDefinition.topCellInitializer, kompileOptions);
+                ModuleToKORE converter = new ModuleToKORE(module, compiledDefinition.topCellInitializer, kompileOptions);
                 result = ExpandMacros.forNonSentences(compiledDefinition.executionModule(), files, kompileOptions, false).expand(result);
                 result = new AddSortInjections(compiledDefinition.executionModule()).addSortInjections(result, s);
                 StringBuilder sb = new StringBuilder();
