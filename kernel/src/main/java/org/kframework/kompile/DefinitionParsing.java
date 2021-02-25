@@ -541,7 +541,7 @@ public class DefinitionParsing {
             Att att = parse.getParse().att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class));
             return Stream.of(new AddAtt(a -> att).apply(parse.getParse()));
         }
-        result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, true, b.att().contains("anywhere") || ExpandMacros.isMacro(b));
+        result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, true, b.att().contains(Att.ANYWHERE()) || b.att().contains(Att.SIMPLIFICATION()) || ExpandMacros.isMacro(b));
         parsedBubbles.getAndIncrement();
         if (kem.options.warnings2errors && !result._2().isEmpty()) {
           for (KEMException err : result._2()) {
