@@ -79,7 +79,7 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
             public RewriterResult execute(K k, Optional<Integer> depth) {
                 Module mod = def.executionModule();
                 ExpandMacros macroExpander = ExpandMacros.forNonSentences(mod, files, kompileOptions, false);
-                ModuleToKORE converter = new ModuleToKORE(mod, files, def.topCellInitializer, kompileOptions);
+                ModuleToKORE converter = new ModuleToKORE(mod, def.topCellInitializer, kompileOptions);
                 K withMacros = macroExpander.expand(k);
                 K kWithInjections = new AddSortInjections(mod).addInjections(withMacros);
                 StringBuilder sb = new StringBuilder();

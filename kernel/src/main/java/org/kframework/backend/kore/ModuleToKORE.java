@@ -46,7 +46,6 @@ import org.kframework.kore.VisitK;
 import org.kframework.unparser.Formatter;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.file.FileUtil;
 import scala.Int;
 import scala.Option;
 import scala.Tuple2;
@@ -105,36 +104,33 @@ public class ModuleToKORE {
     public static final String ALL_PATH_OP = KLabels.RL_wAF.name();
     public static final String HAS_DOMAIN_VALUES = "hasDomainValues";
     private final Module module;
-    private final FileUtil files;
     private final Set<String> impureFunctions = new HashSet<>();
     private final KLabel topCellInitializer;
     private final Set<String> mlBinders = new HashSet<>();
     private final KompileOptions options;
 
-    public ModuleToKORE(Module module, FileUtil files, KLabel topCellInitializer, KompileOptions options) {
+    public ModuleToKORE(Module module, KLabel topCellInitializer, KompileOptions options) {
         this.module = module;
-        this.files = files;
         this.topCellInitializer = topCellInitializer;
         this.options = options;
     }
     private static final boolean METAVAR = false;
 
-    public String convert(boolean heatCoolEq, StringBuilder sb) {
+    public void convert(boolean heatCoolEq, String prelude, StringBuilder semantics, StringBuilder syntax, StringBuilder macros) {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(module);
         Sort topCellSort = configInfo.getRootCell();
         String topCellSortStr = getSortStr(topCellSort);
-        String prelude = files.loadFromKIncludeDir("kore/prelude.kore");
-        sb.append("[topCellInitializer{}(");
-        convert(topCellInitializer, sb);
-        sb.append("())]\n\n");
-        sb.append(prelude);
-        sb.append("\n");
+        semantics.append("[topCellInitializer{}(");
+        convert(topCellInitializer, semantics);
+        semantics.append("())]\n\n");
+        semantics.append(prelude);
+        semantics.append("\n");
 
         SentenceType sentenceType = getSentenceType(module.att()).orElse(SentenceType.REWRITE_RULE);
-        sb.append("module ");
-        convert(module.name(), sb);
-        sb.append("\n\n// imports\n");
-        sb.append("  import K []\n\n// sorts\n");
+        semantics.append("module ");
+        convert(module.name(), semantics);
+        semantics.append("\n\n// imports\n");
+        semantics.append("  import K []\n\n// sorts\n");
 
         Set<SortHead> tokenSorts = new HashSet<>();
         // Map attribute name to whether the attribute has a value
@@ -166,7 +162,7 @@ public class ModuleToKORE {
         if (attributes.containsKey("token")) {
             attributes.put(HAS_DOMAIN_VALUES, false);
         }
-        translateSorts(tokenSorts, attributes, collectionSorts, sb);
+        translateSorts(tokenSorts, attributes, collectionSorts, semantics);
 
         List<Rule> sortedRules = new ArrayList<>(JavaConverters.seqAsJavaList(module.sortedRules()));
         if (options.backend.equals("haskell")) {
@@ -192,20 +188,20 @@ public class ModuleToKORE {
         Set<KLabel> impurities = functionRules.keySet().stream().filter(lbl -> module.attributesFor().get(lbl).getOrElse(() -> Att()).contains(Att.IMPURE())).collect(Collectors.toSet());
         impurities.addAll(deps.ancestors(impurities));
 
-        sb.append("\n// symbols\n");
+        semantics.append("\n// symbols\n");
         Set<Production> overloads = new HashSet<>();
         for (Production lesser : iterable(module.overloads().elements())) {
             for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(Collections::<Production>Set))) {
                 overloads.add(greater);
             }
         }
-        translateSymbols(attributes, functionRules, impurities, overloads, sb);
+        translateSymbols(attributes, functionRules, impurities, overloads, semantics);
 
         // print syntax definition
-        int length = sb.length();
+        syntax.append(semantics);
         for (Tuple2<Sort, scala.collection.immutable.List<Production>> sort : iterable(module.bracketProductionsFor())) {
             for (Production prod : iterable(sort._2())) {
-                translateSymbol(attributes, functionRules, impurities, overloads, prod.att().get("bracketLabel", KLabel.class), prod, sb);
+                translateSymbol(attributes, functionRules, impurities, overloads, prod.att().get("bracketLabel", KLabel.class), prod, syntax);
             }
         }
         for (Production prod : iterable(module.sortedProductions())) {
@@ -213,88 +209,83 @@ public class ModuleToKORE {
                 continue;
             }
             if (prod.isSubsort() && !prod.sort().equals(Sorts.K())) {
-                genSubsortAxiom(prod, sb);
+                genSubsortAxiom(prod, syntax);
                 continue;
             }
         }
 
         for (Production lesser : iterable(module.overloads().elements())) {
             for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(() -> Collections.<Production>Set()))) {
-                genOverloadedAxiom(lesser, greater, sb);
+                genOverloadedAxiom(lesser, greater, syntax);
             }
         }
 
-        sb.append("endmodule []\n");
-        files.saveToKompiled("syntaxDefinition.kore", sb.toString());
-        sb.setLength(length);
+        syntax.append("endmodule []\n");
 
-        sb.append("\n// generated axioms\n");
+        semantics.append("\n// generated axioms\n");
         Set<Tuple2<Production, Production>> noConfusion = new HashSet<>();
         for (Production prod : iterable(module.sortedProductions())) {
             if (isBuiltinProduction(prod)) {
                 continue;
             }
             if (prod.isSubsort() && !prod.sort().equals(Sorts.K())) {
-                genSubsortAxiom(prod, sb);
+                genSubsortAxiom(prod, semantics);
                 continue;
             }
             if (prod.klabel().isEmpty()) {
                 continue;
             }
             if (prod.att().contains(Att.ASSOC())) {
-                genAssocAxiom(prod, sb);
+                genAssocAxiom(prod, semantics);
             }
             if (prod.att().contains(Att.COMM())) {
-                genCommAxiom(prod, sb);
+                genCommAxiom(prod, semantics);
             }
             if (prod.att().contains(Att.IDEM())) {
-                genIdemAxiom(prod, sb);
+                genIdemAxiom(prod, semantics);
             }
             if (isFunction(prod) && prod.att().contains(Att.UNIT())) {
-                genUnitAxiom(prod, sb);
+                genUnitAxiom(prod, semantics);
             }
             if (isFunctional(prod, functionRules, impurities)) {
-                genFunctionalAxiom(prod, sb);
+                genFunctionalAxiom(prod, semantics);
             }
             if (isConstructor(prod, functionRules, impurities)) {
-                genNoConfusionAxioms(prod, noConfusion, functionRules, impurities, sb);
+                genNoConfusionAxioms(prod, noConfusion, functionRules, impurities, semantics);
             }
         }
 
         for (Sort sort : iterable(module.sortedAllSorts())) {
-            genNoJunkAxiom(sort, sb);
+            genNoJunkAxiom(sort, semantics);
         }
 
         for (Production lesser : iterable(module.overloads().elements())) {
             for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(() -> Collections.<Production>Set()))) {
-                genOverloadedAxiom(lesser, greater, sb);
+                genOverloadedAxiom(lesser, greater, semantics);
             }
         }
 
-        sb.append("\n// rules\n");
-        StringBuilder macrosSb = new StringBuilder();
-        macrosSb.append("// macros\n");
+        semantics.append("\n// rules\n");
+
+        macros.append("// macros\n");
         int ruleIndex = 0;
         ListMultimap<Integer, String> priorityToAlias = ArrayListMultimap.create();
         for (Rule rule : sortedRules) {
             if (ExpandMacros.isMacro(rule)) {
                 convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, attributes, functionRules,
-                        priorityToPreviousGroup, priorityToAlias, sentenceType, macrosSb);
+                        priorityToPreviousGroup, priorityToAlias, sentenceType, macros);
             } else {
                 convertRule(rule, ruleIndex, heatCoolEq, topCellSortStr, attributes, functionRules,
-                        priorityToPreviousGroup, priorityToAlias, sentenceType, sb);
+                        priorityToPreviousGroup, priorityToAlias, sentenceType, semantics);
             }
             ruleIndex++;
         }
 
-        files.saveToKompiled("macros.kore", macrosSb.toString());
-
-        sb.append("\n// priority groups\n");
-        genPriorityGroups(priorityList, priorityToPreviousGroup, priorityToAlias, topCellSortStr, sb);
-        sb.append("endmodule ");
-        convert(attributes, module.att(), sb, null, null);
-        sb.append("\n");
-        return sb.toString();
+        semantics.append("\n// priority groups\n");
+        genPriorityGroups(priorityList, priorityToPreviousGroup, priorityToAlias, topCellSortStr, semantics);
+        semantics.append("endmodule ");
+        convert(attributes, module.att(), semantics, null, null);
+        semantics.append("\n");
     }
 
     private void collectTokenSortsAndAttributes(Set<SortHead> tokenSorts, Map<String, Boolean> attributes,

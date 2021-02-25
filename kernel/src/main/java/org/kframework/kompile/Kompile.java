@@ -450,7 +450,7 @@ public class Kompile {
     }
 
     public Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, Set<String> excludeModules) {
-        return parseModules(definition, mainModule, entryPointModule, definitionFile, excludeModules, true);
+        return parseModules(definition, mainModule, entryPointModule, definitionFile, excludeModules, false);
     }
 
     public Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, Set<String> excludeModules, boolean readOnlyCache) {
