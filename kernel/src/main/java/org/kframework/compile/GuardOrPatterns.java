@@ -98,7 +98,7 @@ public class GuardOrPatterns {
 
             @Override
             public K apply(KRewrite k) {
-              return KRewrite(k.left(), apply(k.right()), k.att());
+              return k;
             }
         }.apply(term);
     }
