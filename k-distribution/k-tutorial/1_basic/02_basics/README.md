@@ -205,3 +205,8 @@ is the pattern that was matched to `F`.
    that will return true if all the pieces of the outfit are the same color.
    You do not need to define the case that returns false. Write some tests
    that your function behaves the way you expect.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.3: BNF Syntax and Parser Generation](../03_parsing/README.md).
