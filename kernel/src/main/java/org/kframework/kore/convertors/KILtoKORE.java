@@ -204,8 +204,9 @@ public class KILtoKORE extends KILTransformation<Object> {
             return res;
         }
 
-        Function<PriorityBlock, scala.collection.Set<Tag>> applyToTags = (PriorityBlock b) -> immutable(b
-                .getProductions().stream().filter(p -> p.getKLabel(kore) != null).map(p -> Tag(p.getKLabel(kore)))
+        Function<PriorityBlock, scala.collection.Set<Tag>> applyToTags = (PriorityBlock b) -> immutable(Stream.concat(b
+                .getProductions().stream().filter(p -> p.getKLabel(kore) != null).map(p -> Tag(p.getKLabel(kore))),
+                b.getProductions().stream().filter(p -> p.containsAttribute(Att.BRACKET())).map(p -> Tag(p.getBracketLabel(kore))))
                 .collect(Collectors.toSet()));
 
         if (s.getPriorityBlocks().size() > 1) {
