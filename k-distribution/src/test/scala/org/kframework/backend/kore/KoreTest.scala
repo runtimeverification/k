@@ -5,6 +5,7 @@ import org.kframework.compile.Backend;
 import org.kframework.kompile.Kompile
 import org.kframework.kompile.KompileOptions
 import org.kframework.main.GlobalOptions
+import org.kframework.main.Tool
 import org.kframework.utils.errorsystem.KExceptionManager
 import org.kframework.utils.file.FileUtil
 import org.kframework.utils.options.OuterParsingOptions
@@ -38,7 +39,7 @@ class KoreTest {
 
   def kompile(k: String): Definition = {
     val compiler = new Kompile(options, files, kem, false)
-    val backend = new KoreBackend(options, files, kem)
+    val backend = new KoreBackend(options, files, kem, Tool.KOMPILE)
     files.saveToDefinitionDirectory("test.k", k)
     val defn = compiler.run(files.resolveDefinitionDirectory("test.k"), "TEST", "TEST", backend.steps, backend.excludedModuleTags)
     backend.accept(new Backend.Holder(defn))

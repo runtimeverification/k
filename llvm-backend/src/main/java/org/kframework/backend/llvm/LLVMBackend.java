@@ -9,6 +9,7 @@ import org.kframework.backend.kore.KoreBackend;
 import org.kframework.compile.Backend;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -27,17 +28,20 @@ public class LLVMBackend extends KoreBackend {
     private final LLVMKompileOptions options;
     private final KExceptionManager kem;
     private final KompileOptions kompileOptions;
+    private final Tool tool;
 
     @Inject
     public LLVMBackend(
             KompileOptions kompileOptions,
             FileUtil files,
             KExceptionManager kem,
-            LLVMKompileOptions options) {
-        super(kompileOptions, files, kem);
+            LLVMKompileOptions options,
+            Tool tool) {
+        super(kompileOptions, files, kem, tool);
         this.options = options;
         this.kompileOptions = kompileOptions;
         this.kem = kem;
+        this.tool = tool;
     }
 
 
