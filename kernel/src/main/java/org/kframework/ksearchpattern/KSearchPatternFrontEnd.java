@@ -95,7 +95,7 @@ public class KSearchPatternFrontEnd extends FrontEnd {
           K patternTerm = RewriteToTop.toLeft(pattern.body());
           K patternCondition = pattern.requires();
           org.kframework.definition.Module mod = compiledDef.executionModule();
-          ModuleToKORE converter = new ModuleToKORE(mod, files, compiledDef.topCellInitializer, kompileOptions);
+          ModuleToKORE converter = new ModuleToKORE(mod, compiledDef.topCellInitializer, kompileOptions);
           StringBuilder sb = new StringBuilder();
           ExpandMacros macroExpander = ExpandMacros.forNonSentences(mod, files, kompileOptions, false);
           K withMacros = macroExpander.expand(patternTerm);
