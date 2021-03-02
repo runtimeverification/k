@@ -116,7 +116,7 @@ pipeline {
             }
             stage('Build and Package on Ubuntu Focal') {
               when {
-                branch 'master'
+                branch 'release'
                 beforeAgent true
               }
               stages {
@@ -175,7 +175,7 @@ pipeline {
             }
             stage('Build and Package on Debian Buster') {
               when {
-                branch 'master'
+                branch 'release'
                 beforeAgent true
               }
               stages {
@@ -237,7 +237,7 @@ pipeline {
             }
             // stage('Build and Package on Arch Linux') {
             //   when {
-            //     branch 'master'
+            //     branch 'release'
             //     beforeAgent true
             //   }
             //   stages {
@@ -300,7 +300,7 @@ pipeline {
             // }
             stage('Build Platform Independent K Binary') {
               when {
-                branch 'master'
+                branch 'release'
                 beforeAgent true
               }
               agent {
@@ -330,7 +330,7 @@ pipeline {
         }
         stage('Build and Package on Mac OS') {
           when {
-            branch 'master'
+            branch 'release'
             beforeAgent true
           }
           options { timeout(time: 150, unit: 'MINUTES') }
@@ -422,7 +422,7 @@ pipeline {
     }
     stage('DockerHub') {
       when {
-        branch 'master'
+        branch 'release'
         beforeAgent true
       }
       environment {
@@ -498,7 +498,7 @@ pipeline {
     }
     stage('Deploy') {
       when {
-        branch 'master'
+        branch 'release'
         beforeAgent true
       }
       agent {
@@ -578,7 +578,7 @@ pipeline {
     }
     stage('Update Dependents') {
       when {
-        branch 'master'
+        branch 'release'
         beforeAgent true
       }
       steps {
@@ -591,7 +591,7 @@ pipeline {
     }
     stage('GitHub Pages') {
       when {
-        branch 'master'
+        branch 'release'
         beforeAgent true
       }
       agent {
