@@ -1405,8 +1405,9 @@ length of the substring). Note that the range generated is
 
 ### String search
 
-You can find the first (respectively, last) occurrence of a string, starting
+You can find the first (respectively, last) occurrence of a substring, starting
 at a certain `index`, in another string in O(N*M) time.
+Returns `-1` if the substring is not found.
 
 ```k
   syntax Int ::= findString ( haystack: String , needle: String , index: Int )   [function, hook(STRING.find)]
