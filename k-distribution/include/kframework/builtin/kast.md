@@ -101,7 +101,7 @@ module KSEQ
              | ".::K"    [klabel(#EmptyK), symbol, unparseAvoid]
   syntax K ::= K "~>" K  [klabel(#KSequence), left, assoc, unit(#EmptyK), symbol]
   syntax left #KSequence
-  syntax {Sort} Sort     ::= "(" Sort ")"    [bracket]
+  syntax {Sort} Sort     ::= "(" Sort ")"    [bracket, defaultBracket, applyPriority(1)]
 endmodule
 ```
 

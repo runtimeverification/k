@@ -4,6 +4,7 @@ package org.kframework.kil.loader;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import com.google.inject.Inject;
+import org.kframework.attributes.Att;
 import org.kframework.kil.Production;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.KRunOptions;
@@ -33,6 +34,8 @@ public class Context implements Serializable {
     public void addProduction(Production p, boolean kore) {
         if (p.getKLabel(false) != null) {
             tags.put(p.getKLabel(false), p);
+        } else if (p.getAttributes().contains(Att.BRACKET())) {
+            tags.put(p.getBracketLabel(false), p);
         }
         for (Tuple2<String, String> a : iterable(p.getAttributes().att().keys())) {
             tags.put(a._1, p);
