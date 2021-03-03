@@ -142,10 +142,11 @@ productions in K, and we will discuss in more detail how it can be used in
 future lessons, but for now, you can think of a rule as consisting of a 
 **left-hand side** and a **right-hand side**, separated by the rewrite
 operator. On the left-hand side is the name of the function and zero or more
-**patterns**. On the right-hand side is another pattern. The meaning of the
-rule is relatively simple, having defined these components. If the function
-is called with arguments that **match** the patterns on the left-hand side,
-then the return value of the function is the pattern on the right-hand side.
+**patterns** corresponding to the parameters of the function. On the right-hand
+side is another pattern. The meaning of the rule is relatively simple, having
+defined these components. If the function is called with arguments that
+**match** the patterns on the left-hand side, then the return value of the
+function is the pattern on the right-hand side.
 
 For example, in the above example, if the argument of the `colorOf` function
 is `Banana()`, then the return value of the function is `Yellow()`.
