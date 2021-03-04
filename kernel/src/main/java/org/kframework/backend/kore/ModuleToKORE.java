@@ -604,7 +604,7 @@ public class ModuleToKORE {
                         )
                         , BooleanUtils.TRUE
                         , BooleanUtils.TRUE
-                        , Att.empty().add("anywhere").add("simplification")
+                        , Att.empty().add(Att.SIMPLIFICATION())
                 );
         rules.add(ceilMapRule);
     }
@@ -899,7 +899,7 @@ public class ModuleToKORE {
                     .map(i -> (NonTerminal) i)
                     .map(NonTerminal::sort).collect(Collectors.toList());
             productionLabel = production.klabel().get();
-            if (isFunction(production) || rule.att().contains(Att.ANYWHERE()) && !kore) {
+            if (isFunction(production) || rule.att().contains(Att.SIMPLIFICATION()) || rule.att().contains(Att.ANYWHERE()) && !kore) {
                 leftChildren = ((KApply) leftPattern).items();
                 equation = true;
             } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {
