@@ -6,16 +6,16 @@ module IMP-SYNTAX
                  | "++" Id
                  | "read" "(" ")"
                  | "-" Int
+                 | "(" AExp ")"               [bracket]
                  > AExp "/" AExp              [left, strict, division]
                  > AExp "+" AExp              [left, strict]
                  > "spawn" Block
                  > Id "=" AExp                [strict(2)]
-                 | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
                  | "!" BExp                   [strict]
-                 > BExp "&&" BExp             [left, strict(1)]
                  | "(" BExp ")"               [bracket]
+                 > BExp "&&" BExp             [left, strict(1)]
   syntax Block ::= "{" Stmts "}"
   syntax Stmt  ::= Block
                  | AExp ";"                   [strict]

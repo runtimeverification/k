@@ -128,8 +128,8 @@ the wrapper in the generated documentation, we associate it an
                 | Id                     [klabel("class"), avoid]  // see next
                 | class(Id)         // explicit KOOL class type
                 | Type "[" "]"
-                > Types "->" Type
                 | "(" Type ")"           [bracket]
+                > Types "->" Type
 
   syntax Types ::= List{Type,","}
 ```

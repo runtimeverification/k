@@ -5,6 +5,7 @@ We currently strive to provide packages for the following platforms:
 
 -   Ubuntu Bionic Beaver (18.04) and Focal Fossa (20.04)
 -   Debian Buster
+-   Arch Linux
 -   MacOS X Mojave/Homewbrew
 -   Docker Images
 -   Platform Independent K Binary
@@ -91,6 +92,12 @@ As a result, you need to enable the Debian Backports apt repository for Debian.
 ```sh
 echo "deb http://deb.debian.org/debian buster-backports main" > /etc/apt/sources.list.d/buster-backports.list
 sudo apt install ./kframework_X.Y.Z_amd64_buster.deb
+```
+
+### Arch Linux
+
+```sh
+pacman -U ./kframework-git-X.Y.Z-1-x86_64.pkg.tar.zst
 ```
 
 ### MacOS X Mojave/Homebrew

@@ -53,8 +53,8 @@ untyped KOOL.
   syntax Type ::= "void" | "int" | "bool" | "string"
                 | Id                              // KOOL class
                 | Type "[" "]"
-                > Types "->" Type
                 | "(" Type ")"           [bracket]
+                > Types "->" Type
   // TODO(KORE): drop klabel once issues #1913 are fixed
   syntax Types ::= List{Type,","}   [klabel(_,_::Types)]
   /*
