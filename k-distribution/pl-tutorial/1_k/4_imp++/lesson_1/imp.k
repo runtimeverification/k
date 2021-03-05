@@ -7,14 +7,14 @@ module IMP-SYNTAX
                  | "read" "(" ")"
                  // remove division tag when we have proper search strategies
                  | "-" Int
+                 | "(" AExp ")"               [bracket]
                  > AExp "/" AExp              [left, strict, division]
                  > AExp "+" AExp              [left, strict]
-                 | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
                  | "!" BExp                   [strict]
-                 > BExp "&&" BExp             [left, strict(1)]
                  | "(" BExp ")"               [bracket]
+                 > BExp "&&" BExp             [left, strict(1)]
   syntax Block ::= "{" "}"
                  | "{" Stmt "}"
   syntax Stmt  ::= Block

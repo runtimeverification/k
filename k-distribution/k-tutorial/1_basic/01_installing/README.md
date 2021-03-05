@@ -56,5 +56,7 @@ If you have problems installing K, we encourage you to reach out to us. If you
 follow the above install instructions and run into a problem, you can
 [Create a bug report on GitHub](https://github.com/kframework/k/issues/new?assignees=&labels=bug&template=bug-report.md&title=%5BBug%5D+%5Bkompile%7Ckast%7Ckrun%7Ckprove%7Cksearch%5D+-+DESCRIPTION)
 
+## Next lesson
+
 Once you have set up K on your system to your satisfaction, you can continue to
 [Lesson 1.2: Basics of Functional K](../02_basics/README.md).

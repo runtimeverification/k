@@ -132,8 +132,8 @@ The lists of types are useful for function arguments.
 ```k
   syntax Type ::= "void" | "int" | "bool" | "string"
                 | Type "[" "]"
-                > Types "->" Type
                 | "(" Type ")"             [bracket]
+                > Types "->" Type
 
   syntax Types ::= List{Type,","}
 ```
