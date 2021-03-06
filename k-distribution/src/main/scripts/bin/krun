@@ -3,7 +3,7 @@ set -e
 set -o pipefail
 set -u
 
-export PATH="$(dirname "$0"):$PATH"
+export PATH="$(cd "$(dirname "$0")"; pwd):$PATH"
 
 # initialize flags
 ARGV=()
