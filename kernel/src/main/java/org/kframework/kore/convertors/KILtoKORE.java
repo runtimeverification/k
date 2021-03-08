@@ -183,7 +183,13 @@ public class KILtoKORE extends KILTransformation<Object> {
             java.util.Set<Production> productions = context.tags.get(l.name());
             if (productions.isEmpty())
                 throw KEMException.outerParserError("Could not find any productions for tag: " + l.name(), loc.getSource(), loc.getLocation());
-            return productions.stream().map(p -> Tag(p.getKLabel(kore)));
+            return productions.stream().map(p -> {
+              String label = p.getKLabel(kore);
+              if (label == null && p.getAttributes().contains(Att.BRACKET())) {
+                label = p.getBracketLabel(kore);
+              }
+              return Tag(label);
+            });
         }).collect(Collectors.toSet()));
     }
 
@@ -198,8 +204,9 @@ public class KILtoKORE extends KILTransformation<Object> {
             return res;
         }
 
-        Function<PriorityBlock, scala.collection.Set<Tag>> applyToTags = (PriorityBlock b) -> immutable(b
-                .getProductions().stream().filter(p -> p.getKLabel(kore) != null).map(p -> Tag(p.getKLabel(kore)))
+        Function<PriorityBlock, scala.collection.Set<Tag>> applyToTags = (PriorityBlock b) -> immutable(Stream.concat(b
+                .getProductions().stream().filter(p -> p.getKLabel(kore) != null).map(p -> Tag(p.getKLabel(kore))),
+                b.getProductions().stream().filter(p -> p.containsAttribute(Att.BRACKET())).map(p -> Tag(p.getBracketLabel(kore))))
                 .collect(Collectors.toSet()));
 
         if (s.getPriorityBlocks().size() > 1) {

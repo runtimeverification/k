@@ -3,7 +3,7 @@ set -e
 set -o pipefail
 set -u
 
-export PATH="$(dirname "$0"):$PATH"
+export PATH="$(cd "$(dirname "$0")"; pwd):$PATH"
 
 # initialize flags
 ARGV=()
@@ -215,7 +215,9 @@ do
       # slash removes prefixes so build a new array with the files to keep
       newArray=()
       for value in "${tempFiles[@]}"; do
-          $value != $tempDir && newArray+=($value)
+          if [ $value != $tempDir ]; then 
+            newArray+=($value)
+          fi
       done
       tempFiles="${newArray[@]}"
       unset newArray
