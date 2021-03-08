@@ -6,13 +6,13 @@ module IMP-SYNTAX
   syntax AExp  ::= Int | Id
                  | "-" Int                    [format(%1%2)]
                  | AExp "/" AExp              [left, strict, color(pink)]
-                 > AExp "+" AExp              [left, strict, color(pink)]
                  | "(" AExp ")"               [bracket]
+                 > AExp "+" AExp              [left, strict, color(pink)]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2}), color(pink)]
                  | "!" BExp                   [strict, color(pink)]
-                 > BExp "&&" BExp             [left, strict(1), color(pink)]
                  | "(" BExp ")"               [bracket]
+                 > BExp "&&" BExp             [left, strict(1), color(pink)]
   syntax Block ::= "{" "}"
                  | "{" Stmt "}"               [format(%1%i%n%2%d%n%3)]
   syntax Stmt  ::= Block

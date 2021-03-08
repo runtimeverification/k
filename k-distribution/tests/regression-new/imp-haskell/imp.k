@@ -5,13 +5,13 @@ module IMP-SYNTAX
   syntax AExp  ::= Int | Id
                  | "-" Int
                  | AExp "/" AExp              [left, seqstrict]
-                 > AExp "+" AExp              [left, seqstrict]
                  | "(" AExp ")"               [bracket]
+                 > AExp "+" AExp              [left, seqstrict]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
                  | "!" BExp                   [strict]
-                 > BExp "&&" BExp             [left, strict(1)]
                  | "(" BExp ")"               [bracket]
+                 > BExp "&&" BExp             [left, strict(1)]
   syntax Block ::= "{" "}"
                  | "{" Stmt "}"
   syntax Stmt  ::= Block
