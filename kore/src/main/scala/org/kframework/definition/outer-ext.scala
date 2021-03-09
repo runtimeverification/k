@@ -3,7 +3,6 @@
 package org.kframework.definition
 
 import javax.annotation.Nonnull
-
 import org.kframework.kore._
 import org.kframework.attributes._
 import org.kframework.kore.{KORE => con}
@@ -11,8 +10,8 @@ import org.kframework.utils.errorsystem.KEMException
 
 import scala.annotation.meta.param
 import scala.collection.Set
-
 import java.util.Optional
+import scala.collection.concurrent.TrieMap
 
 case class Configuration(body: K, ensures: K, att: Att = Att.empty) extends Sentence with OuterKORE {
   override val isSyntax = true
@@ -86,7 +85,42 @@ object Import {
       name
 }
 
+object FlatModuleConvert {
+  def toModule(allModules:Set[FlatModule]):Set[Module] = {
+    val memoization:TrieMap[String, Module] = collection.concurrent.TrieMap[String, Module]()
+    allModules.map(m => toModuleRec(m))
+    def toModuleRec(m:FlatModule):Module = {
+      memoization.getOrElseUpdate(m.name, {
+        new Module(
+          m.name,
+          m.imports.map(i => toModuleRec(allModules.find(f => f.name.equals(i.name)).getOrElse(throw KEMException.compilerError("Could not find module: " + i.name, i)))),
+          m.localSentences,
+          m.att
+        )
+      })
+    }
+    memoization.values.toSet
+  }
 
+  def splitSyntax(allModules: Set[FlatModule]):Set[FlatModule] = {
+    allModules.flatMap(m => {
+      Set(
+        new FlatModule(
+          m.name,
+          m.imports + Import.asSyntax(new Import(m.name)),
+          m.localSentences.filter(s => s.isNonSyntax),
+          m.att
+        ),
+        new FlatModule(
+          m.name + Import.syntaxString,
+          m.imports.map(i => Import.asSyntax(i)),
+          m.localSentences.filter(s => s.isSyntax),
+          m.att
+        )
+      )
+    })
+  }
+}
 
 case class FlatModule(name: String, imports: Set[Import], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
   extends OuterKORE with Sorting with Serializable {

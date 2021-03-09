@@ -47,6 +47,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     private final boolean kore;
     private String moduleName;
     private final boolean bisonLists;
+    private final Map<String, FlatModule> memoization = new HashMap<>();
 
     public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean kore, boolean bisonLists) {
         this.context = context;
@@ -63,6 +64,8 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public FlatModule toFlatModule(Module m) {
+        if (memoization.containsKey(m.getName()))
+            return memoization.get(m.getName());
         CheckListDecl.check(m);
         CheckBracket.check(m);
         moduleName = m.getName();
@@ -78,7 +81,9 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         Att att = convertAttributes(m);
 
-        return new FlatModule(moduleName, immutable(importedModuleNames), immutable(items), att);
+        FlatModule fm = new FlatModule(moduleName, immutable(importedModuleNames), immutable(items), att);
+        memoization.put(m.getName(), fm);
+        return fm;
     }
 
     public org.kframework.definition.Import apply(Import imp) {
