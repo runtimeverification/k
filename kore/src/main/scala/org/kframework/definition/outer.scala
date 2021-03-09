@@ -40,6 +40,7 @@ case class Definition(
                        entryModules: Set[Module],
                        att: Att)
   extends DefinitionToString with OuterKORE {
+  assert(modules.map(x => x.name).size == entryModules.flatMap(x => x.importedModulesIds).size, "Duplicate module names found in definition constructor.")
 
   private def allModules(m: Module): Set[Module] = m.importedModules + m
 
@@ -92,7 +93,10 @@ object Module {
 
 case class Module(val name: String, val imports: Set[Module], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
   extends ModuleToString with OuterKORE with Sorting with Serializable {
-
+  assert(importedModulesIds.size == importedModuleNames.size, "Module imports duplicate modules.")
+  lazy val importedModulesIds: Map[Integer, Module] = imports.map(x => (Int.box(System.identityHashCode(x)), x)).toMap ++ (imports flatMap {
+    _.importedModulesIds
+  })
   assert(att != null)
 
   private lazy val importedSentences = imports flatMap {_.sentences}
