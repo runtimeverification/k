@@ -128,12 +128,24 @@ extern char *filename;
 int main(int argc, char **argv) {
   yyscan_t scanner;
   yylex_init(&scanner); 
-  if (argc > 2) {
+  if (argc < 2 || argc > 3) {
+    fprintf(stderr, "usage: %s <file> [<filename>]\n", argv[0]);
+    exit(1);
+  }
+  if (argc == 3) {
     filename=argv[2];
   } else {
     filename=argv[1];
   }
-  yyset_in(fopen(argv[1], "r"), scanner);
+  FILE *f = fopen(argv[1], "r");
+  if (!f) {
+    int len = strlen(argv[0]) + strlen(argv[1]) + 19;
+    char *buf = malloc(len);
+    snprintf(buf, len, "%s: cannot access '%s'", argv[0], argv[1]);
+    perror(buf);
+    exit(1);
+  }
+  yyset_in(f, scanner);
   yyparse(scanner);
   print(result);
   printf("\n");
