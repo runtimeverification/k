@@ -52,7 +52,7 @@ public class CheckFunctions {
             boolean atTop = true;
             @Override
             public void apply(KApply k) {
-                if (k.klabel().name().equals("#withConfig") || k.klabel().name().startsWith("#SemanticCastTo")) {
+                if (k.klabel().name().equals("#withConfig")) {
                   super.apply(k);
                   return;
                 }
