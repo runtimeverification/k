@@ -72,6 +72,7 @@ public class KompileFrontEnd extends FrontEnd {
         files.get().saveToKompiled("mainModule.txt", def.executionModule().name());
         sw.printIntermediate("Kompile to kore");
         loader.saveOrDie(files.get().resolveKompiled("compiled.bin"), def);
+        files.get().saveToKompiled("backend.txt", options.backend); // used by the krun script
         sw.printIntermediate("Save to disk");
         Backend.Holder h = new Backend.Holder(def);
         def = null;
