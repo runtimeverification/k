@@ -24,13 +24,6 @@
   {
     true
   #Equals
-    Z:MyId in_keys ( ( MAP
-    X:MyId |-> 1 ) [ Y:MyId <- undef ] )
-  }
-#And
-  {
-    true
-  #Equals
     Z:MyId in_keys ( MAP [ Y:MyId <- undef ]
     ( X:MyId |-> 1 ) )
   }
