@@ -158,7 +158,7 @@ public class TypeInferencer implements AutoCloseable {
     Map<SortHead, Integer> ordinals = new HashMap<>();
     int i = 0;
 
-    for (Sort s : iterable(TopologicalSort.tsort(relations.directRelations()))) {
+    for (Sort s : iterable(relations.sortedElements())) {
       if (!isRealSort(s.head())) {
         continue;
       }
