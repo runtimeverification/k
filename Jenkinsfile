@@ -339,7 +339,10 @@ pipeline {
               stages {
                 stage('Build Homebrew Bottle') {
                   agent { label 'anka' }
-                  environment { STACK_ROOT = '/opt/stack' }
+                  environment {
+                    HOMEBREW_NO_ENV_FILTERING = '1'
+                    STACK_ROOT = '/opt/stack'
+                  }
                   steps {
                     unstash 'src'
                     dir('kframework') { checkout scm }
@@ -456,7 +459,7 @@ pipeline {
                 docker tag "${DOCKERHUB_REPO}:${FOCAL_COMMIT_TAG}" "${DOCKERHUB_REPO}:${FOCAL_BRANCH_TAG}"
                 docker push "${DOCKERHUB_REPO}:${FOCAL_BRANCH_TAG}"
             '''
- 
+
           }
         }
         stage('Test Bionic Image') {
