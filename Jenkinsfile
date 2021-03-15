@@ -336,6 +336,7 @@ pipeline {
                 stage('Build Homebrew Bottle') {
                   agent { label 'anka' }
                   environment {
+                    // TODO (ttuegel): Use brew --env=std instead.
                     HOMEBREW_NO_ENV_FILTERING = '1'
                     STACK_ROOT = '/opt/stack'
                   }
@@ -345,7 +346,9 @@ pipeline {
                     dir('homebrew-k') {
                       git url: 'git@github.com:kframework/homebrew-k.git'
                       sh '''
-                        stat /var/cache
+                        mkdir -p /opt/stack
+                        stat /opt/stack
+
                         git config --global user.email 'admin@runtimeverification.com'
                         git config --global user.name  'RV Jenkins'
                         # Note: double-backslash in sed-command is for Jenkins benefit.
