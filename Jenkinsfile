@@ -45,7 +45,10 @@ pipeline {
           stages {
             stage('Build and Package on Ubuntu Bionic') {
               when {
-                not { branch 'master' }
+                anyOf {
+                  branch 'release'
+                  changeRequest()
+                }
                 beforeAgent true
               }
               stages {
@@ -460,7 +463,6 @@ pipeline {
                 docker tag "${DOCKERHUB_REPO}:${FOCAL_COMMIT_TAG}" "${DOCKERHUB_REPO}:${FOCAL_BRANCH_TAG}"
                 docker push "${DOCKERHUB_REPO}:${FOCAL_BRANCH_TAG}"
             '''
- 
           }
         }
         stage('Test Bionic Image') {
