@@ -44,6 +44,10 @@ pipeline {
         stage('Build and Package K on Linux') {
           stages {
             stage('Build and Package on Ubuntu Bionic') {
+              when {
+                not { branch 'master' }
+                beforeAgent true
+              }
               stages {
                 stage('Build on Ubuntu Bionic') {
                   agent {
@@ -625,6 +629,32 @@ pipeline {
             '''
           }
         }
+      }
+    }
+    stage('Trigger Release') {
+      when {
+        branch 'master'
+        beforeAgent true
+      }
+      agent {
+        dockerfile {
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+          reuseNode true
+        }
+      }
+      options { skipDefaultCheckout() }
+      post { failure { slackSend color: '#cb2431' , channel: '#k' , message: "Failed to trigger Release: ${env.BUILD_URL}" } }
+      steps {
+        sh '''
+          git clone 'https://github.com/kframework/k' k-release
+          cd k-release
+          git checkout -B release origin/release
+          git merge origin/master
+          ./package/version.sh
+          git add -u
+          git commit -m "Set Version: $(cat package/version)"
+          git push origin release
+        '''
       }
     }
   }
