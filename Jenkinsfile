@@ -338,7 +338,7 @@ pipeline {
                   environment {
                     // TODO (ttuegel): Use brew --env=std instead.
                     HOMEBREW_NO_ENV_FILTERING = '1'
-                    STACK_ROOT = "${env.WORKSPACE}/.stack"
+                    STACK_ROOT = "${env.HOME}/.stack"
                   }
                   steps {
                     unstash 'src'
