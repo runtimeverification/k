@@ -41,14 +41,15 @@ version_bump() {
 }
 
 version_fill() {
-    local major minor patch version
+    local major minor patch commit version
     major="$(cat $major_version_file)"
     minor="$(cat $minor_version_file)"
-    [[ -f "$patch_version_file"  ]] || echo 0                  > "$patch_version_file"
-    [[ -f "$commit_version_file" ]] || git rev-parse --short=7 > "$commit_version_file"
+    [[ -f "$patch_version_file"  ]] || echo 0 > "$patch_version_file"
+    git rev-parse --short=7 HEAD > "$commit_version_file"
     patch="$(cat $patch_version_file)"
+    commit="$(cat $commit_version_file)"
     version="$major.$minor.$patch"
-    notif "Version: $version"
+    notif "Version: $version - $commit"
     echo "$version" > "$version_file"
 }
 
