@@ -7,7 +7,7 @@ pipeline {
     ROOT_URL        = 'https://github.com/kframework/k/releases/download'
     SHORT_REV       = """${sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()}"""
     LONG_REV        = """${sh(returnStdout: true, script: 'git rev-parse HEAD').trim()}"""
-    K_RELEASE_TAG   = """${sh(returnStdout: true, script: 'echo $(cat package/version)-$(cat package/version.commit)').trim()}"""
+    K_RELEASE_TAG   = """${sh(returnStdout: true, script: 'cat package/version.release-tag').trim()}"""
     MAKE_EXTRA_ARGS = '' // Example: 'DEBUG=--debug' to see stack traces
   }
   stages {
@@ -650,9 +650,11 @@ pipeline {
         sh '''
           git clone 'https://github.com/kframework/k' k-release
           cd k-release
+          git fetch --all
           git checkout -B release origin/release
           git merge origin/master
-          ./package/version.sh
+          ./package/version.sh bump
+          ./package/version.sh sub
           git add -u
           git commit -m "Set Version: $(cat package/version)"
           git push origin release
