@@ -269,7 +269,7 @@ public class DefinitionParsing {
         return result;
     }
 
-    Map<String, ParseCache> caches;
+    public Map<String, ParseCache> caches;
     private java.util.Set<KEMException> errors;
     RuleGrammarGenerator gen;
 

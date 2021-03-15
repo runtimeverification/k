@@ -9,6 +9,7 @@ import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Option;
 import scala.Tuple2;
@@ -34,7 +35,7 @@ public class ProofDefinitionBuilder {
 
     private final CompiledDefinition compiledDefinition;
     private final Backend backend;
-    private final Kompile kompile;
+    public final Kompile kompile;
     private final FileUtil files;
     @Inject(optional = true)
     @Named("extraConcreteRuleLabels")
@@ -55,11 +56,11 @@ public class ProofDefinitionBuilder {
      *                       modules required by proofs, usually abstractions for symbolic execution and lemmas.
      * @param specModuleName Module containing specifications to prove
      */
-    public Tuple2<Definition, Module> build(File specFile, String defModuleName, String specModuleName) {
+    public Tuple2<CompiledDefinition, Module> build(File specFile, String defModuleName, String specModuleName) {
         return build(specFile, defModuleName, specModuleName, false);
     }
 
-    public Tuple2<Definition, Module> build(File specFile, String defModuleName, String specModuleName, boolean readOnlyCache) {
+    public Tuple2<CompiledDefinition, Module> build(File specFile, String defModuleName, String specModuleName, boolean readOnlyCache) {
         String defModuleNameUpdated =
                 defModuleName == null ? compiledDefinition.kompiledDefinition.mainModule().name() : defModuleName;
         String specModuleNameUpdated =
@@ -81,8 +82,8 @@ public class ProofDefinitionBuilder {
         compiledExtendedDef = backend.proofDefinitionNonCachedSteps(extraConcreteRuleLabels).apply(compiledExtendedDef);
 
         specModule = backend.specificationSteps(compiledDefinition.kompiledDefinition).apply(specModule);
-
-        return Tuple2.apply(compiledExtendedDef, specModule);
+        CompiledDefinition cd = new CompiledDefinition(compiledDefinition.kompileOptions, parsedDefinition, compiledExtendedDef, files, new KExceptionManager(compiledDefinition.kompileOptions.global), compiledDefinition.topCellInitializer);
+        return Tuple2.apply(cd, specModule);
     }
 
     private static Module getModule(String defModule, Map<String, Module> modules, Definition parsedDefinition) {

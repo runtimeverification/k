@@ -28,14 +28,14 @@ public class KEq {
                    FileUtil files) {
         Rewriter commonRewriter = commonGen.apply(commonDef.kompiledDefinition);
 
-        Tuple2<Definition, Module> compiled1 = pdb1.build(
+        Tuple2<CompiledDefinition, Module> compiled1 = pdb1.build(
                 files.resolveWorkingDirectory(keqOptions.spec1), keqOptions.defModule1, keqOptions.specModule1);
-        Rewriter rewriter1 = gen1.apply(compiled1._1());
+        Rewriter rewriter1 = gen1.apply(compiled1._1().kompiledDefinition);
         Module spec1 = compiled1._2();
 
-        Tuple2<Definition, Module> compiled2 = pdb2.build(
+        Tuple2<CompiledDefinition, Module> compiled2 = pdb2.build(
                 files.resolveWorkingDirectory(keqOptions.spec2), keqOptions.defModule2, keqOptions.specModule2);
-        Rewriter rewriter2 = gen2.apply(compiled2._1());
+        Rewriter rewriter2 = gen2.apply(compiled2._1().kompiledDefinition);
         Module spec2 = compiled2._2();
 
         boolean isEquivalent = commonRewriter.equivalence(rewriter1, rewriter2, spec1, spec2);

@@ -63,45 +63,38 @@ public class KProve {
                     kproveOptions.specFile(files).getAbsolutePath());
         }
 
-        Tuple2<Definition, Module> compiled = proofDefinitionBuilder
+        Tuple2<CompiledDefinition, Module> compiled = proofDefinitionBuilder
                 .build(kproveOptions.specFile(files), kproveOptions.defModule, kproveOptions.specModule, compiledDefinition.kompileOptions.readOnlyKompiledDirectory);
 
+        // Saving combined verification definition to disk to be usable by other tools or future kprove runs
         if (kproveOptions.saveProofDefinitionTo != null) {
-            saveFullDefinition(compiled._1());
+            Path proveKompiledDir = Paths.get(kproveOptions.saveProofDefinitionTo).resolve("prove-spec-kompiled");
+            try {
+                Files.createDirectories(proveKompiledDir);
+                loader.saveOrDie(proveKompiledDir.resolve("compiled.bin").toFile(), compiled._1());
+                loader.saveOrDie(proveKompiledDir.resolve("cache.bin").toFile(), proofDefinitionBuilder.kompile.definitionParsing.caches);
+            } catch (IOException e) {
+                throw KEMException.criticalError(
+                        "Could not create proof output directory " + proveKompiledDir.toAbsolutePath(), e);
+            }
         }
 
-        Rewriter rewriter = rewriterGenerator.apply(compiled._1());
+        Rewriter rewriter = rewriterGenerator.apply(compiled._1().kompiledDefinition);
         Module specModule = compiled._2();
         Rule boundaryPattern = buildBoundaryPattern(compiledDefinition);
 
         if (kproveOptions.emitJson) {
             try {
-                files.saveToKompiled("prove-definition.json", new String(ToJson.apply(compiled._1()), "UTF-8"));
+                files.saveToKompiled("prove-definition.json", new String(ToJson.apply(compiled._1().kompiledDefinition), "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 throw KEMException.criticalError("Unsupported encoding `UTF-8` when saving JSON definition.");
             }
         }
 
         RewriterResult results = rewriter.prove(specModule, boundaryPattern);
-        kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), kprint::outputFile,
+        kprint.prettyPrint(compiled._1().kompiledDefinition, compiled._1().kompiledDefinition.getModule("LANGUAGE-PARSING").get(), kprint::outputFile,
                 results.k());
         return results.exitCode().orElse(KEMException.TERMINATED_WITH_ERRORS_EXIT_CODE);
-    }
-
-    // Saving combined verification definition to disk to be usable by other tools (e.g., kast)
-    private void saveFullDefinition(Definition fullDefinition) {
-        CompiledDefinition fullCompiledDefinition = new CompiledDefinition(
-                compiledDefinition.kompileOptions,
-                fullDefinition, fullDefinition,
-                files, kem, compiledDefinition.topCellInitializer);
-        Path proveKompiledDir = Paths.get(kproveOptions.saveProofDefinitionTo).resolve("prove-spec-kompiled");
-        try {
-            Files.createDirectories(proveKompiledDir);
-            loader.saveOrDie(proveKompiledDir.resolve("compiled.bin").toFile(), fullCompiledDefinition);
-        } catch (IOException e) {
-            throw KEMException.criticalError(
-                    "Could not create proof output directory " + proveKompiledDir.toAbsolutePath(), e);
-        }
     }
 
     /**

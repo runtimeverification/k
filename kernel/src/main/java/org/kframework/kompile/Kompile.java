@@ -79,7 +79,7 @@ public class Kompile {
     private final KExceptionManager kem;
     private final ParserUtils parser;
     private final Stopwatch sw;
-    private final DefinitionParsing definitionParsing;
+    public final DefinitionParsing definitionParsing;
     java.util.Set<KEMException> errors;
 
     public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, boolean cacheParses) {

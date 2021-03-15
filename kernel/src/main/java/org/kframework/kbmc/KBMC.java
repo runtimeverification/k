@@ -4,6 +4,7 @@ package org.kframework.kbmc;
 import org.kframework.RewriterResult;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
+import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kprove.ProofDefinitionBuilder;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
@@ -37,13 +38,13 @@ public class KBMC {
                     options.specFile(files).getAbsolutePath());
         }
 
-        Tuple2<Definition, Module> compiled = proofDefinitionBuilder
+        Tuple2<CompiledDefinition, Module> compiled = proofDefinitionBuilder
                 .build(options.specFile(files), options.defModule, options.specModule);
-        Rewriter rewriter = rewriterGenerator.apply(compiled._1());
+        Rewriter rewriter = rewriterGenerator.apply(compiled._1().kompiledDefinition);
         Module specModule = compiled._2();
 
         RewriterResult results = rewriter.bmc(specModule);
-        kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), kprint::outputFile,
+        kprint.prettyPrint(compiled._1().kompiledDefinition, compiled._1().kompiledDefinition.getModule("LANGUAGE-PARSING").get(), kprint::outputFile,
                 results.k());
         return results.exitCode().orElse(KEMException.TERMINATED_WITH_ERRORS_EXIT_CODE);
     }
