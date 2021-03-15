@@ -347,6 +347,8 @@ pipeline {
                       sh '''
                         cd haskell-backend/src/main/native/haskell-backend/
                         stack build --only-snapshot
+                        chmod go+rwx "$STACK_ROOT"
+                        chmod -R go+rw "$STACK_ROOT"
                       '''
                     }
                     dir('homebrew-k') {
