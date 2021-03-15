@@ -573,7 +573,7 @@ elif [ "$backendName" = "haskell" ] ; then
     set -e
   fi
 else
-  error "Backend $backendName not supportd. Use krun-legacy."
+  error "Backend $backendName not supported. Use krun-legacy."
 fi
 
 # Unparsing
