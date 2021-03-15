@@ -3,10 +3,10 @@ pipeline {
   options { ansiColor('xterm') }
   environment {
     PACKAGE         = 'kframework'
-    VERSION         = '5.0.0'
     ROOT_URL        = 'https://github.com/kframework/k/releases/download'
     SHORT_REV       = """${sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()}"""
     LONG_REV        = """${sh(returnStdout: true, script: 'git rev-parse HEAD').trim()}"""
+    VERSION         = """${sh(returnStdout: true, script: 'cat package/version').trim()}"""
     K_RELEASE_TAG   = """${sh(returnStdout: true, script: 'cat package/version.release-tag').trim()}"""
     MAKE_EXTRA_ARGS = '' // Example: 'DEBUG=--debug' to see stack traces
   }
