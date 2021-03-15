@@ -12,6 +12,7 @@ fatal() { echo "[FATAL] $@" ; exit 1 ; }
 major_version_file="package/version.major"
 minor_version_file="package/version.minor"
 patch_version_file="package/version.patch"
+commit_version_file="package/version.commit"
 version_file="package/version"
 
 version_bump() {
@@ -43,7 +44,8 @@ version_fill() {
     local major minor patch version
     major="$(cat $major_version_file)"
     minor="$(cat $minor_version_file)"
-    [[ -f "$patch_version_file" ]] || echo 0 > "$patch_version_file"
+    [[ -f "$patch_version_file"  ]] || echo 0                  > "$patch_version_file"
+    [[ -f "$commit_version_file" ]] || git rev-parse --short=7 > "$commit_version_file"
     patch="$(cat $patch_version_file)"
     version="$major.$minor.$patch"
     notif "Version: $version"
