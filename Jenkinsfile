@@ -7,7 +7,7 @@ pipeline {
     ROOT_URL        = 'https://github.com/kframework/k/releases/download'
     SHORT_REV       = """${sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()}"""
     LONG_REV        = """${sh(returnStdout: true, script: 'git rev-parse HEAD').trim()}"""
-    K_RELEASE_TAG   = "v${env.VERSION}-${env.SHORT_REV}"
+    K_RELEASE_TAG   = """${sh(returnStdout: true, script: 'echo $(cat package/version)-$(cat package/version.commit)').trim()}"""
     MAKE_EXTRA_ARGS = '' // Example: 'DEBUG=--debug' to see stack traces
   }
   stages {
