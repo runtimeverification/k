@@ -342,7 +342,13 @@ pipeline {
                   }
                   steps {
                     unstash 'src'
-                    dir('kframework') { checkout scm }
+                    dir('kframework') {
+                      checkout scm
+                      sh '''
+                        cd haskell-backend/src/main/native/haskell-backend/
+                        stack build --only-snapshot
+                      '''
+                    }
                     dir('homebrew-k') {
                       git url: 'git@github.com:kframework/homebrew-k.git'
                       sh '''
