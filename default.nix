@@ -31,7 +31,7 @@ let
   inherit (llvm-backend-project) clang llvm-backend;
 
   k = callPackage ./nix/k.nix {
-    inherit llvm-backend mavenix;
+    inherit haskell-backend llvm-backend mavenix;
   };
 
   haskell-backend-project = import ./haskell-backend/src/main/native/haskell-backend {
