@@ -7,7 +7,7 @@ pipeline {
     SHORT_REV       = """${sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()}"""
     LONG_REV        = """${sh(returnStdout: true, script: 'git rev-parse HEAD').trim()}"""
     VERSION         = """${sh(returnStdout: true, script: 'cat package/version').trim()}"""
-    K_RELEASE_TAG   = """${sh(returnStdout: true, script: 'cat package/version.release-tag').trim()}"""
+    K_RELEASE_TAG   = "v${env.VERSION}"
     MAKE_EXTRA_ARGS = '' // Example: 'DEBUG=--debug' to see stack traces
   }
   stages {
@@ -535,37 +535,38 @@ pipeline {
             cd k-release
             git fetch --all
 
+            release_commit="$(git merge-base $LONG_REV origin/master)"
+            git checkout $release_commit
+
             git tag -d "${K_RELEASE_TAG}"         || true
             git push -d origin "${K_RELEASE_TAG}" || true
             hub release delete "${K_RELEASE_TAG}" || true
 
-            git tag "${K_RELEASE_TAG}" "${LONG_REV}"
+            git tag "${K_RELEASE_TAG}" "${release_commit}"
             git push origin "${K_RELEASE_TAG}"
-
-            COMMIT_DATE=$(date '+%Y%m%d%H%M' --date="$(git show --no-patch --format='%ci' ${K_RELEASE_TAG})")
 
             LOCAL_BOTTLE_NAME=$(find ../mojave -name "kframework--${VERSION}.mojave.bottle*.tar.gz")
             BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#../mojave/} | sed 's!kframework--!kframework-!')
 
-            mv ../kframework-${VERSION}-src.tar.gz                      kframework-${VERSION}-src_${COMMIT_DATE}.tar.gz
-            mv ../bionic/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_bionic_${COMMIT_DATE}.deb
-            mv ../focal/kframework_${VERSION}_amd64.deb                 kframework_${VERSION}_amd64_focal_${COMMIT_DATE}.deb
-            mv ../buster/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_buster_${COMMIT_DATE}.deb
-            mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst   kframework-git-${VERSION}-1-x86_64_${COMMIT_DATE}.pkg.tar.zst
+            mv ../kframework-${VERSION}-src.tar.gz                      kframework-${VERSION}-src.tar.gz
+            mv ../bionic/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_bionic.deb
+            mv ../focal/kframework_${VERSION}_amd64.deb                 kframework_${VERSION}_amd64_focal.deb
+            mv ../buster/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_buster.deb
+            mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst   kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
             mv $LOCAL_BOTTLE_NAME                                       $BOTTLE_NAME
-            mv ../k-nightly.tar.gz                                      k-nightly_${COMMIT_DATE}.tar.gz
+            mv ../k-nightly.tar.gz                                      k-nightly_${VERSION}.tar.gz
 
-            echo "K Framework Release ${K_RELEASE_TAG}"  > release.md
-            echo ''                                     >> release.md
-            cat k-distribution/INSTALL.md               >> release.md
-            hub release create                                                                                 \
-                --attach kframework-${VERSION}-src_${COMMIT_DATE}.tar.gz'#Source tar.gz'                       \
-                --attach kframework_${VERSION}_amd64_bionic_${COMMIT_DATE}.deb'#Ubuntu Bionic (18.04) Package' \
-                --attach kframework_${VERSION}_amd64_focal_${COMMIT_DATE}.deb'#Ubuntu Focal (20.04) Package'   \
-                --attach kframework_${VERSION}_amd64_buster_${COMMIT_DATE}.deb'#Debian Buster (10) Package'    \
-                --attach kframework-git-${VERSION}-1-x86_64_${COMMIT_DATE}.pkg.tar.zst'#Arch Package'          \
-                --attach $BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                               \
-                --attach k-nightly_${COMMIT_DATE}.tar.gz'#Platform Indepdendent K Binary'                      \
+            echo "K Framework Release ${VERSION}"  > release.md
+            echo ''                               >> release.md
+            cat k-distribution/INSTALL.md         >> release.md
+            hub release create                                                                  \
+                --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                       \
+                --attach kframework_${VERSION}_amd64_bionic.deb'#Ubuntu Bionic (18.04) Package' \
+                --attach kframework_${VERSION}_amd64_focal.deb'#Ubuntu Focal (20.04) Package'   \
+                --attach kframework_${VERSION}_amd64_buster.deb'#Debian Buster (10) Package'    \
+                --attach kframework-git-${VERSION}-1-x86_64.pkg.tar.zst'#Arch Package'          \
+                --attach $BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                \
+                --attach k-nightly_${VERSION}.tar.gz'#Platform Indepdendent K Binary'           \
                 --file release.md "${K_RELEASE_TAG}"
           '''
         }
