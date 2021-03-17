@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -xeuo pipefail
 
 UPSTREAM="${UPSTREAM:-origin}"
 MASTER="${MASTER:-master}"
@@ -15,10 +15,12 @@ patch_version_file="package/version.patch"
 commit_version_file="package/version.commit"
 version_file="package/version"
 release_tag_file="package/version.release-tag"
+version_date_file="package/version.date"
 
 version_bump() {
     local master_commit master_major master_minor master_patch master_commit
     local release_commit release_patch release_minor release_major
+    local release_tag version_date
 
     master_commit="$(git rev-parse --short=7 ${UPSTREAM}/${MASTER})"
     release_commit="$(git rev-parse --short=7 ${UPSTREAM}/${RELEASE})"
@@ -50,6 +52,9 @@ version_bump() {
 
     release_tag="${version}-${commit}"
     echo "$release_tag" > $release_tag_file
+
+    version_date="$(date)"
+    echo "$version_date" > $version_date_file
 
     notif "Version: ${release_tag}"
 }
