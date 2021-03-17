@@ -1,6 +1,8 @@
 // Copyright (c) 2014-2019 K Team. All Rights Reserved.
 package org.kframework.utils.file;
 
+import org.apache.commons.io.FileUtils;
+
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
@@ -71,23 +73,17 @@ public class JarInfo {
     }
 
     public void printVersionMessage() {
+        String kBase = getKBase();
         try {
-            URL url = JarInfo.class.getResource("versionMarker");
-            URLConnection conn = url.openConnection();
-            if (!(conn instanceof JarURLConnection)) {
-                System.out.println("K framework internal build");
-                return;
-            }
-            Manifest mf = ((JarURLConnection)conn).getManifest();
-            String revision = mf.getMainAttributes().getValue("Implementation-Revision");
-            String branch = mf.getMainAttributes().getValue("Implementation-Branch");
-            Date date = new Date(Long.parseLong(mf.getMainAttributes().getValue("Implementation-Date")));
-            System.out.println("RV-K version " + JarInfo.class.getPackage().getImplementationVersion());
-            System.out.println("Git revision: " + revision);
-            System.out.println("Git branch: " + branch);
-            System.out.println("Build date: " + date.toString());
+            String version       = FileUtils.readFileToString(new File(kBase + "/lib/version")).trim();
+            String versionCommit = FileUtils.readFileToString(new File(kBase + "/lib/version.commit")).trim();
+            String versionDate   = FileUtils.readFileToString(new File(kBase + "/lib/version.date")).trim();
+
+            System.out.println("K version:    " + version);
+            System.out.println("Git revision: " + versionCommit);
+            System.out.println("Build date:   " + versionDate);
         } catch (IOException e) {
-            throw KEMException.internalError("Could not load version info. Check your build system?");
+            throw KEMException.internalError("Could not load version info.");
         }
     }
 }
