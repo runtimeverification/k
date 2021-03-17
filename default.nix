@@ -11,6 +11,7 @@ let
       src = builtins.fetchGit {
         url = "https://github.com/ttuegel/nix-lib";
         rev = "66bb0ab890ff4d828a2dcfc7d5968465d0c7084f";
+        ref = "main";
       };
     in import src { inherit pkgs; };
 in
