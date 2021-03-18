@@ -4,6 +4,12 @@
     x
   } )
 #And
+  #Not ( {
+    X
+  #Equals
+    y
+  } )
+#And
   <k>
     lookupResult ( 3 ~> . ) ~> .
   </k>

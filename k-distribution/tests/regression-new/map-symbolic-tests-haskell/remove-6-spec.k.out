@@ -21,6 +21,12 @@
   }
 #And
   {
+    false
+  #Equals
+    X:MyId in_keys ( MAP [ Y:MyId <- undef ] )
+  }
+#And
+  {
     true
   #Equals
     Z:MyId in_keys ( MAP [ Y:MyId <- undef ]
