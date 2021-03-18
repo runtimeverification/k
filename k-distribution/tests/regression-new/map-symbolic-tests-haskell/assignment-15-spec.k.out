@@ -28,6 +28,12 @@
   }
 #And
   {
+    false
+  #Equals
+    X:MyId in_keys ( MAP [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] )
+  }
+#And
+  {
     true
   #Equals
     Y:MyId in_keys ( MAP )

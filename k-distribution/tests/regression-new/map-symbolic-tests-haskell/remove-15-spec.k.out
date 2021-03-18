@@ -19,3 +19,10 @@
   #Equals
     Z:MyId in_keys ( MAP [ Y:MyId <- undef ] )
   }
+#And
+  {
+    true
+  #Equals
+    Z:MyId in_keys ( ( MAP
+    Z:MyId |-> 1 ) [ Y:MyId <- undef ] )
+  }

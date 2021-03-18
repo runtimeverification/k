@@ -13,3 +13,10 @@
   #Equals
     Z:MyId in_keys ( MAP )
   }
+#And
+  {
+    true
+  #Equals
+    Z:MyId in_keys ( ( MAP
+    Z:MyId |-> 1 ) [ Y:MyId <- 2 ] )
+  }

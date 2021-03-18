@@ -20,3 +20,9 @@
   #Equals
     X:MyId in_keys ( MAP )
   }
+#And
+  {
+    false
+  #Equals
+    X:MyId in_keys ( MAP [ Y:MyId <- 2 ] [ Z:MyId <- 3 ] )
+  }

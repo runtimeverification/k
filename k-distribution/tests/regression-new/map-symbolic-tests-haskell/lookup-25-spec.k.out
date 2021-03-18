@@ -1,9 +1,3 @@
-  #Not ( {
-    X
-  #Equals
-    Y
-  } )
-#And
-  <k>
-    lookupResult ( 1 ~> . ) ~> .
-  </k>
+<k>
+  lookupResult ( 1 ~> . ) ~> .
+</k>
