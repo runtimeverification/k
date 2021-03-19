@@ -2,16 +2,4 @@
 function rules.
 	Source(checkFuncRuleAtt.k)
 	Location(7,10,7,20)
-[Error] Compiler: Attributes macro|macro-rec|alias|alias-rec are not allowed on
-function rules.
-	Source(checkFuncRuleAtt.k)
-	Location(8,10,8,20)
-[Error] Compiler: Attributes macro|macro-rec|alias|alias-rec are not allowed on
-function rules.
-	Source(checkFuncRuleAtt.k)
-	Location(9,10,9,20)
-[Error] Compiler: Attributes macro|macro-rec|alias|alias-rec are not allowed on
-function rules.
-	Source(checkFuncRuleAtt.k)
-	Location(10,10,10,20)
-[Error] Compiler: Had 4 structural errors.
+[Error] Compiler: Had 1 structural errors.

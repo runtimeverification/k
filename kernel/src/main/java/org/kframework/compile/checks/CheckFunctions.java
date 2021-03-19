@@ -90,7 +90,7 @@ public class CheckFunctions {
         new RewriteAwareVisitor(true, errors) {
             @Override
             public void apply(KApply k) {
-                if (isRHS() || k.klabel() instanceof KVariable || CheckKLabels.isInternalKLabel(k.klabel().name(), m) || !m.attributesFor().contains(k.klabel())) {
+                if (isRHS() || k.klabel() instanceof KVariable || !m.attributesFor().contains(k.klabel())) {
                     return;
                 }
                 if (k.klabel().name().equals("#withConfig")) {
