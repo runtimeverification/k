@@ -1,5 +1,6 @@
 { lib, mavenix, nix-gitignore, runCommand, makeWrapper
-, flex, gcc, git, gmp, jdk, llvm-backend, mpfr, pkgconfig, python3, z3
+, flex, gcc, git, gmp, jdk, mpfr, pkgconfig, python3, z3
+, haskell-backend, llvm-backend
 }:
 
 let inherit (nix-gitignore) gitignoreSourcePure; in
@@ -85,7 +86,10 @@ let
 in
 
 let
-  hostInputs = [ flex gcc gmp jdk llvm-backend mpfr pkgconfig python3 z3 ];
+  hostInputs = [
+    flex gcc gmp jdk mpfr pkgconfig python3 z3
+    haskell-backend llvm-backend
+  ];
   # PATH used at runtime
   hostPATH = lib.makeBinPath hostInputs;
 in
@@ -111,4 +115,3 @@ runCommand unwrapped.name
       ln -s $unwrapped/$each $out/$each
     done
   ''
-  
