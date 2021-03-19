@@ -8,6 +8,7 @@ import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -33,6 +34,7 @@ public class CheckFunctions {
     public void check(Sentence sentence) {
         if (sentence instanceof Rule) {
             Rule rl = (Rule) sentence;
+            checkFuncAtt(rl);
             if (!(isSymbolic && rl.att().contains(Att.SIMPLIFICATION())))
                 // functions are allowed on the LHS of simplification rules on the symbolic engines
                 check(rl.body());
@@ -82,5 +84,27 @@ public class CheckFunctions {
                 super.apply(k);
             }
         }.apply(body);
+    }
+
+    public void checkFuncAtt(RuleOrClaim r) {
+        new RewriteAwareVisitor(true, errors) {
+            @Override
+            public void apply(KApply k) {
+                if (isRHS() || k.klabel() instanceof KVariable || CheckKLabels.isInternalKLabel(k.klabel().name(), m) || !m.attributesFor().contains(k.klabel())) {
+                    return;
+                }
+                if (k.klabel().name().equals("#withConfig")) {
+                    super.apply(k);
+                    return;
+                }
+                Att attributes = m.attributesFor().apply(k.klabel());
+                if (attributes.contains("function") && (r.att().contains("macro")
+                                                     || r.att().contains("macro-rec")
+                                                     || r.att().contains("alias")
+                                                     || r.att().contains("alias-rec"))) {
+                    errors.add(KEMException.compilerError("Attributes macro|macro-rec|alias|alias-rec are not allowed on function rules.", r));
+                }
+            }
+        }.apply(r.body());
     }
 }
