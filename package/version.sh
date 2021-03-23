@@ -12,13 +12,11 @@ fatal() { echo "[FATAL] $@" ; exit 1 ; }
 major_version_file="package/version.major"
 minor_version_file="package/version.minor"
 patch_version_file="package/version.patch"
-commit_version_file="package/version.commit"
 version_file="package/version"
-release_tag_file="package/version.release-tag"
 version_date_file="package/version.date"
 
 version_bump() {
-    local master_commit master_major master_minor master_patch master_commit
+    local master_commit master_major master_minor master_patch
     local release_commit release_patch release_minor release_major
     local release_tag version_date
 
@@ -41,17 +39,12 @@ version_bump() {
     else
         echo $(($release_patch + 1)) > $patch_version_file
     fi
-    echo "$master_commit" > $commit_version_file
 
     major="$(cat $major_version_file)"
     minor="$(cat $minor_version_file)"
     patch="$(cat $patch_version_file)"
-    commit="$(cat $commit_version_file)"
     version="${major}.${minor}.${patch}"
     echo "$version" > $version_file
-
-    release_tag="${version}-${commit}"
-    echo "$release_tag" > $release_tag_file
 
     version_date="$(date)"
     echo "$version_date" > $version_date_file

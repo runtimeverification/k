@@ -75,12 +75,10 @@ public class JarInfo {
     public void printVersionMessage() {
         String kBase = getKBase();
         try {
-            String version       = FileUtils.readFileToString(new File(kBase + "/lib/version")).trim();
-            String versionCommit = FileUtils.readFileToString(new File(kBase + "/lib/version.commit")).trim();
-            String versionDate   = FileUtils.readFileToString(new File(kBase + "/lib/version.date")).trim();
+            String version     = FileUtils.readFileToString(new File(kBase + "/lib/version")).trim();
+            String versionDate = FileUtils.readFileToString(new File(kBase + "/lib/version.date")).trim();
 
             System.out.println("K version:    " + version);
-            System.out.println("Git revision: " + versionCommit);
             System.out.println("Build date:   " + versionDate);
         } catch (IOException e) {
             throw KEMException.internalError("Could not load version info.");

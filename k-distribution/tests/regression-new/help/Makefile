@@ -19,13 +19,6 @@ KOMPILE_FLAGS=--syntax-module TEST
 	${KPROVE}  --version | grep -q $(shell cat ../../../../package/version)
 	${KRUN}    --version | grep -q $(shell cat ../../../../package/version)
 	${KSERVER} --version | grep -q $(shell cat ../../../../package/version)
-	${KAST}    --version | grep -q $(shell cat ../../../../package/version.commit)
-	${KDEP}    --version | grep -q $(shell cat ../../../../package/version.commit)
-	${KEQ}     --version | grep -q $(shell cat ../../../../package/version.commit)
-	${KOMPILE} --version | grep -q $(shell cat ../../../../package/version.commit)
-	${KPROVE}  --version | grep -q $(shell cat ../../../../package/version.commit)
-	${KRUN}    --version | grep -q $(shell cat ../../../../package/version.commit)
-	${KSERVER} --version | grep -q $(shell cat ../../../../package/version.commit)
 
 
 include ../../../include/kframework/ktest.mak
