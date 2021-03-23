@@ -60,6 +60,14 @@ def krunJSON(definition, inputJSON, kastArgs = [], krunArgs = [], teeOutput = Tr
             out = None if out == '' else json.loads(out)['term']
             return (rC, out, err)
 
+def krunJSONLegacy(definition, inputJSON, krunArgs = [], teeOutput = True, kRelease = None, keepTemp = False):
+    with tempfile.NamedTemporaryFile(mode = 'w', delete = not keepTemp) as tempf:
+        tempf.write(json.dumps(inputJSON))
+        tempf.flush()
+        (rC, out, err) = krunLegacy(definition, tempf.name, krunArgs = krunArgs + ['--output', 'json', '--parser', 'cat'], teeOutput = teeOutput, kRelease = kRelease)
+        out = None if out == '' else json.loads(out)['term']
+        return (rC, out, err)
+
 def kproveJSON(definition, inputJSON, symbolTable, kproveArgs = [], teeOutput = True, kRelease = None, keepTemp = False):
     if not isKDefinition(inputJSON):
         sys.stderr.write(inputJSON)
