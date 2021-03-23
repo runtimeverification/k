@@ -1,5 +1,5 @@
 { lib, mavenix, nix-gitignore, runCommand, makeWrapper
-, flex, gcc, git, gmp, jdk, mpfr, pkgconfig, python3, z3
+, flex, gcc, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3
 , haskell-backend, llvm-backend
 }:
 
@@ -87,7 +87,7 @@ in
 
 let
   hostInputs = [
-    flex gcc gmp jdk mpfr pkgconfig python3 z3
+    flex gcc gmp jdk mpfr ncurses pkgconfig python3 z3
     haskell-backend llvm-backend
   ];
   # PATH used at runtime

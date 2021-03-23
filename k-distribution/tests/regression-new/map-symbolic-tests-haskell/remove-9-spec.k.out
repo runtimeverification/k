@@ -27,10 +27,9 @@
   }
 #And
   {
-    true
+    false
   #Equals
-    Z:MyId in_keys ( ( MAP
-    X:MyId |-> 1 ) [ Y:MyId <- undef ] )
+    X:MyId in_keys ( MAP [ Y:MyId <- undef ] )
   }
 #And
   {
