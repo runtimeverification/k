@@ -79,11 +79,10 @@ production accepts any valid term of that sort at that position.
 
 This is why, when we wrote the program `colorOf(Banana())`, `krun` was able to
 execute that program: because it represented a term of sort `Color` that was
-parsed and interpreted by K's interpreter. Seen this way, you can see how that
-string represents a sentence in the formal language defined by the above
-grammar. K then parses it automatically into an AST of that term, and then,
-since the symbol `colorOf` is a function, it evaluates that function using
-the rules that define it.
+parsed and interpreted by K's interpreter. In other words, `krun` parses and
+interprets terms according to the grammar defined by the developer. It is
+automatically converted into an AST of that term, and then the `colorOf`
+function is evaluated using the function rules provided in the definition.
 
 Bringing us back to the file `lesson-03-a.k`, we can see that this grammar
 has given a simple BNF grammar for expressions over booleans. We have defined
@@ -128,7 +127,7 @@ inj{SortBoolean{}, SortKItem{}}(
 Don't worry about what exactly this means yet, just understand that it
 represents the AST of the program that you just parsed. You ought to be able
 to recognize the basic shape of it by seeing the words `true`, `false`, and
-`And` in there. This is `KORE`, the intermediate representation of K, and we
+`And` in there. This is **Kore**, the intermediate representation of K, and we
 will cover it in detail later.
 
 ## Disambiguation
@@ -154,14 +153,13 @@ When you try and parse this program, you ought to see the following error:
         Location(1,1,1,23)
 ```
 
-Essentially what this error is saying is, `kast` was unable to parse this
-program because it is ambiguous. K's just-in-time parser is what is technically
-known as a GLL parser, which in practice means it handles the full generality
-of context-free grammars, including those grammars which are ambiguous. An
-ambiguous grammar is one where one or more sentences in the grammar might be
-able to be parsed into more than one distinct AST. In this example, it can't
-decide whether it should be parsed as `(true && false) || false` or as
-`true && (false || false)`. As a result, it reports the error to the user.
+This error is saying that `kast` was unable to parse this program because it is
+ambiguous. K's just-in-time parser is a GLL parser, which means it can handle
+the full generality of context-free grammars, including those grammars which
+are ambiguous. An ambiguous grammar is one where the same string can be parsed
+as multiple distinct ASTs. In this example, it can't decide whether it should
+be parsed as `(true && false) || false` or as `true && (false || false)`. As a
+result, it reports the error to the user.
 
 ## Brackets
 
@@ -214,7 +212,7 @@ true && (false || false)
 ```
 
 If you parse these programs with `kast`, you will once again get a single
-unique AST with no error. If you look, you may spot that the bracket itself
+unique AST with no error. If you look, you might notice that the bracket itself
 does not appear in the AST. In fact, this is a property unique to brackets:
 productions with the bracket attribute are not represented in the parsed AST
 of a term, and the child of the bracket is folded immediately into the parent
@@ -226,10 +224,11 @@ a single non-terminal of the same sort as the production itself.
 Of course, in practice, very few formal languages outside the domain of
 natural language processing are ambiguous. The main reason for this is that
 parsing unambiguous languages is asymptotically faster than parsing ambiguous
-languages. Programming language designers instead prefer to use a notion of
-operator precedence and associativity to make expression grammars unambiguous
-by automatically choosing certain parses over other parses in cases where the
-grammar would otherwise be ambiguous.
+languages. Programming language designers instead usually use the notions of
+operator precedence and associativity to make expression grammars unambiguous.
+These mechanisms work by instructing the parser to reject certain ASTs in favor
+of others in case of ambiguities; often it is possible to remove *all*
+ambiguities in a grammar with these techniques.
 
 While it is sometimes possible to explicitly rewrite the grammar to remove
 these parses, because K's grammar specification and AST generation are
@@ -238,7 +237,7 @@ approach of explicitly expressing the relative precedence of different
 operators in different situations in order to resolve the ambiguity.
 
 For example, in C, `&&` binds tighter in precedence than `||`, meaning that
-the expression `true && false || false` would be parsed as
+the expression `true && false || false` has only one valid AST:
 `(true && false) || false`.
 
 Consider, then, the third iteration on the grammar of this definition
@@ -272,25 +271,23 @@ The meaning of these priority groups becomes apparent when parsing programs:
 A symbol with a **lesser priority**, (i.e., one that **binds looser**), cannot
 appear as the **direct child** of a symbol with a **greater priority** (i.e.,
 one that **binds tighter**. In this case, the `>` operator can be seen as a
-**less-than** operator describing a transitive partial ordering on the 
+**greater-than** operator describing a transitive partial ordering on the 
 productions in the production block, expressing their relative priority.
 
 To see this more concretely, let's look again at the program
 `true && false || false`. As noted before, previously this program was
-ambiguous because it was ambiguous whether the `&&` was a child of the `||`
-or vice versa. However, because of the rule that a symbol with lesser priority
-cannot appear as the direct child of a symbol with greater priority, and
-because we can see from the above grammar that `&&` has a greater priority than
-`||`, we **reject** the parse where `||` is under the `&&` operator. As a
-result, we are left with the unambiguous parse `(true && false) || false`.
-Similarly, `true || false && false` parses unambiguously as
-`true || (false && false)`. Conversely, if the user explicitly wants the other
-parse, they can express this parse using brackets. In other words, they can
-explicitly write the program `true && (false || false)`. This still parses
-successfully because the `||` operator is no longer the **direct** child of the
-`&&` operator, but is instead the direct child of the `()` operator, and the
-`&&` operator is an **indirect** parent. Indirect parents are completely
-ignored when disambiguating; only the direct parent/child relation matters.
+ambiguous because the parser could either choose that `&&` was the child of `||`
+or vice versa. However, because a symbol with lesser priority (i.e., `||`)
+cannot appear as the direct child of a symbol with greater priority
+(i.e., `&&`), the parser will **reject** the parse where `||` is under the
+`&&` operator. As a result, we are left with the unambiguous parse
+`(true && false) || false`. Similarly, `true || false && false` parses
+unambiguously as `true || (false && false)`. Conversely, if the user explicitly
+wants the other parse, they can express this using brackets by explicitly
+writing `true && (false || false)`. This still parses successfully because the
+`||` operator is no longer the **direct** child of the `&&` operator, but is 
+instead the direct child of the `()` operator, and the `&&` operator is an
+**indirect** parent, which is not subject to the priority restriction.
 
 Astute readers, however, will already have noticed what seems to be a
 contradiction: we have defined `()` as also having greater priority than `||`.
@@ -308,7 +305,7 @@ parent's production. For example, in the production `Bool "&&" Bool`, the
 first `Bool` non-terminal is not preceded by any terminals, and the last `Bool`
 non-terminal is not followed by any terminals. As a result of this, we apply
 the priority rule to both children of `&&`. However, in the `()` operator, 
-the sole non-terminal is both preceded by and followed by a terminal. As a
+the sole non-terminal is both preceded by and followed by terminals. As a
 result, the priority rule is not applied when `()` is the parent. Because of
 this, the program we mentioned above successfully parses.
 
@@ -324,15 +321,17 @@ true && false && false
 
 Priority blocks will not help us here: the problem comes between two parses
 where both possible parses have a direct parent and child which is within a
-single priority block.
+single priority block (in this case, `&&` is in the same block as itself).
 
-This is where the notion of associativity comes into play. Essentially,
-associativity applies the following additional rule to parses: a
-left-associative symbol cannot appear as a direct rightmost child of a symbol
-with equal priority; a right-associative symbol cannot appear as a direct
-leftmost child of a symbol with equal priority; and a non-associative symbol
-cannot appear as a direct leftmost **or** rightmost child of a symbol with
-equal priority.
+This is where the notion of associativity comes into play. Associativity
+applies the following additional rules to parses:
+
+* a left-associative symbol cannot appear as a direct rightmost child of a
+symbol with equal priority;
+* a right-associative symbol cannot appear as a direct leftmost child of a
+symbol with equal priority; and
+* a non-associative symbol cannot appear as a direct leftmost **or** rightmost
+child of a symbol with equal priority.
 
 In C, binary operators are all left-associative, meaning that the expression 
 `true && false && false` parses unambiguously as `(true && false) && false`,
@@ -396,7 +395,7 @@ As a result of this, K provides a second way of declaring priority and
 associativity relations.
 
 Consider the following grammar, which we will name `lesson-03-h.k` and which
-will express the exact same grammar relation as `lesson-03-f.k`
+will express the exact same grammar as `lesson-03-f.k`
 
 ```k
 module LESSON-03-H
@@ -446,14 +445,14 @@ module LESSON-03-I
   syntax Exp ::= "true" | "false"
   syntax Stmt ::= "if" "(" Exp ")" Stmt
                 | "if" "(" Exp ")" Stmt "else" Stmt
-                | ";"
+                | "{" "}"
 endmodule
 ```
 
 We can write the following program (`dangling-else.if`):
 
 ```
-if (true) if (false) ; else ;
+if (true) if (false) {} else {}
 ```
 
 This is ambiguous because it is unclear whether the `else` clause is part of
@@ -479,7 +478,7 @@ when we parse this program, we see the following ambiguity as an error message:
 ```
 
 Roughly, we see that the ambiguity is between an `if` with an `else` or an `if`
-without an `else`. Siknce we want to pick the first parse, we can tell K to
+without an `else`. Since we want to pick the first parse, we can tell K to
 "avoid" the second parse with the `avoid` attribute. Consider the following
 modified definition (`lesson-03-j.k`):
 
@@ -520,29 +519,41 @@ a production consists of a regular expression followed by the `token`
 attribute, and the resulting AST consists of a typed string containing the
 value recognized by the regular expression.
 
-For example, we might define the integer token in C with the following
+For example, the builtin integers in K are defined using the following
 production:
 
 ```k
-syntax IntConstant ::= r"(([1-9][0-9]*)|(0[0-7]*)|(0[xX][0-9a-fA-F]+))(([uU][lL]?)|([uU]((ll)|(LL)))|([lL][uU]?)|(((ll)|(LL))[uU]?))?" [token]
+syntax Int ::= r"[\\+-]?[0-9]+" [token]
 ```
 
-As you can see, the main difference with this production is the `r` preceding
-the terminal and the `token` attribute. The `r` indicates that what follows
-is a regular expression. It is also possible to define tokens that do not
-use regular expressions. This can be useful when you wish to declare particular
-identifiers for use in your semantics later. For example:
+Here we can see that we have defined that an integer is an optional sign
+followed by a nonzero sequence of digits. The `r` preceding the terminal
+indicates that what appears inside the double quotes is a regular expression,
+and the `token` attribute indicates that terms which parse as this production
+should be converted into a token by the parser.
+
+It is also possible to define tokens that do not use regular expressions. This
+can be useful when you wish to declare particular identifiers for use in your
+semantics later. For example:
 
 ```k
 syntax Id ::= "main" [token]
 ```
 
 Here we declare that `main` is a token of sort `Id`. Instead of being parsed
-as a symbol, it gets parsed as a token instead, generating a typed string
-in the AST. This is useful because the parser generally does not treat the
-`main` function in C specially; only the semantics treats it specially.
+as a symbol, it gets parsed as a token, generating a typed string in the AST.
+This is useful in a semantics of C because the parser generally does not treat
+the `main` function in C specially; only the semantics treats it specially
 
-As you may have noted above, however, long and complex regular expressions
+Of course, each language may have different lexical syntax, some of which may
+be more complex. For example, if we wish to define the syntax of integers in C,
+we could use the following production:
+
+```k
+syntax IntConstant ::= r"(([1-9][0-9]*)|(0[0-7]*)|(0[xX][0-9a-fA-F]+))(([uU][lL]?)|([uU]((ll)|(LL)))|([lL][uU]?)|(((ll)|(LL))[uU]?))?" [token]
+```
+
+As you may have noted above, long and complex regular expressions
 can be hard to read. They also suffer from the problem that unlike a grammar,
 they are not particularly modular.
 
@@ -588,12 +599,12 @@ a grammar instead.
 
 ## Ahead-of-time parser generation
 
-Finally, so far we have been entirely focused on K's support for just-in-time
-parsing, where the parser is generated on the fly prior to being used.
-This benefits from being faster to generate the parser, but it suffers in
-performance if you have to repeatedly parse strings with the same parser.
-For this reason, it is generally encouraged that when parsing programs,
-you use K's ahead-of-time parser generation instead. K makes use of
+So far we have been entirely focused on K's support for just-in-timeparsing,
+where the parser is generated on the fly prior to being used. This benefits
+from being faster to generate the parser, but it suffers in performance if you
+have to repeatedly parse strings with the same parser. For this reason, it is
+generally encouraged that when parsing programs, you use K's ahead-of-time
+parser generation. K makes use of
 [GNU Bison](https://www.gnu.org/software/bison/) to generate parsers.
 
 By default, you can enable ahead-of-time parsing via the `--gen-bison-parser`
