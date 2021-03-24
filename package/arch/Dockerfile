@@ -41,8 +41,6 @@ ADD k-distribution/src/main/scripts/lib/opam                                    
 RUN    cd /home/user                        \
     && ./.tmp-opam/bin/k-configure-opam-dev
 
-ENV LC_ALL = C.UTF-8
-ENV LANG   = C.UTF-8
 ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml        /home/user/.tmp-haskell/
 ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/package.yaml /home/user/.tmp-haskell/kore/
 RUN    cd /home/user/.tmp-haskell \
