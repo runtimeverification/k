@@ -513,9 +513,9 @@ if $expandMacros; then
 else
   execute cp "$input_file" "$expanded_input_file"
 fi
-
+backendName=$(cat "$kompiledDir"/backend.txt)
 # Invoke backend
-if [ -f "$kompiledDir/interpreter" ]; then
+if [ "$backendName" = "llvm" ]; then
   if $statistics; then
     interpreter_flags=--statistics
   else
@@ -526,7 +526,7 @@ if [ -f "$kompiledDir/interpreter" ]; then
   execute $cmdprefix "$kompiledDir/interpreter" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags
   result=$?
   set -e
-else
+elif [ "$backendName" = "haskell" ] ; then
   # Haskell backend
   koreExecFlags=
   depthFlags=
@@ -572,6 +572,8 @@ else
     result=$?
     set -e
   fi
+else
+  error "Backend $backendName not supported. Use krun-legacy."
 fi
 
 # Unparsing

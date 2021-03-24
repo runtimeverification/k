@@ -48,7 +48,19 @@ def kastJSON(definition, inputJSON, kastArgs = [], teeOutput = True, kRelease = 
         tempf.flush()
         return kast(definition, tempf.name, kastArgs = kastArgs, teeOutput = teeOutput, kRelease = kRelease)
 
-def krunJSON(definition, inputJSON, krunArgs = [], teeOutput = True, kRelease = None, keepTemp = False):
+def krunJSON(definition, inputJSON, kastArgs = [], krunArgs = [], teeOutput = True, kRelease = None, keepTemp = False):
+    with tempfile.NamedTemporaryFile(mode = 'w', delete = not keepTemp) as tempJSON:
+        tempJSON.write(json.dumps(inputJSON))
+        tempJSON.flush()
+        (rC, kore, err) = kast(definition, tempJSON.name, kastArgs = ['--output', 'kore', '--input', 'json'] + kastArgs, teeOutput = teeOutput, kRelease = kRelease)
+        with tempfile.NamedTemporaryFile(mode = 'w', delete = not keepTemp) as tempKore:
+            tempKore.write(kore)
+            tempKore.flush()
+            (rC, out, err) = krun(definition, tempKore.name, krunArgs = krunArgs + ['--output', 'json', '--parser', 'cat'], teeOutput = teeOutput, kRelease = kRelease)
+            out = None if out == '' else json.loads(out)['term']
+            return (rC, out, err)
+
+def krunJSONLegacy(definition, inputJSON, krunArgs = [], teeOutput = True, kRelease = None, keepTemp = False):
     with tempfile.NamedTemporaryFile(mode = 'w', delete = not keepTemp) as tempf:
         tempf.write(json.dumps(inputJSON))
         tempf.flush()

@@ -33,7 +33,7 @@ KOMPILED_DIR=$(DEFDIR)/$(notdir $(DEF))-kompiled
 # path relative to current definition of output/input files
 RESULTDIR?=$(TESTDIR)
 # all tests in test directory with matching file extension
-TESTS?=$(wildcard $(TESTDIR)/*.$(EXT))
+TESTS?=$(wildcard $(TESTDIR)/krun.nopgm) $(wildcard $(TESTDIR)/*.$(EXT))
 PROOF_TESTS?=$(wildcard $(TESTDIR)/*-spec.k) $(wildcard $(TESTDIR)/*-spec.md)
 BMC_TESTS?=$(wildcard $(TESTDIR)/*-spec-bmc.k) $(wildcard $(TESTDIR)/*-spec-bmc.md)
 SEARCH_TESTS?=$(wildcard $(TESTDIR)/*.$(EXT).search)
@@ -86,6 +86,13 @@ ifeq ($(TESTDIR),$(RESULTDIR))
 	cat $@.in 2>/dev/null | $(KRUN_OR_LEGACY) $@ $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
 else
 	cat $(RESULTDIR)/$(notdir $@).in 2>/dev/null | $(KRUN_OR_LEGACY) $@ $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+endif
+
+krun.nopgm: kompile
+ifeq ($(TESTDIR),$(RESULTDIR))
+	cat $@.in 2>/dev/null | $(KRUN_OR_LEGACY) $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
+else
+	cat $(RESULTDIR)/$(notdir $@).in 2>/dev/null | $(KRUN_OR_LEGACY) $(KRUN_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %-spec.k %-spec.md: kompile
