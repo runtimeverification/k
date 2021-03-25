@@ -14,9 +14,3 @@
   #Equals
     Z:MyId in_keys ( MAP )
   }
-#And
-  {
-    false
-  #Equals
-    Z:MyId in_keys ( MAP [ Y:MyId <- 2 ] )
-  }
