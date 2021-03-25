@@ -1,6 +1,6 @@
 <!-- Copyright (c) 2013-2019 K Team. All Rights Reserved. -->
 
-Mofify IMP so that the K *followed by* arrow, `~>`, does not explicitly
+Modify IMP so that the K *followed by* arrow, `~>`, does not explicitly
 occur in the definition (it currently occurs in the semantics of
 sequential composition).
 
