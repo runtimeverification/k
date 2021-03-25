@@ -1,0 +1,21 @@
+[Error] Compiler: Attributes macro|macro-rec|alias|alias-rec are not allowed on
+function rules.
+	Source(checkFuncRuleAtt.k)
+	Location(10,10,10,18)
+[Error] Compiler: Attributes macro|macro-rec|alias|alias-rec are not allowed on
+function rules.
+	Source(checkFuncRuleAtt.k)
+	Location(11,10,11,18)
+[Error] Compiler: Attributes macro|macro-rec|alias|alias-rec are not allowed on
+function rules.
+	Source(checkFuncRuleAtt.k)
+	Location(12,10,12,18)
+[Error] Compiler: Attributes macro|macro-rec|alias|alias-rec are not allowed on
+function rules.
+	Source(checkFuncRuleAtt.k)
+	Location(13,10,13,18)
+[Error] Compiler: Attributes macro|macro-rec|alias|alias-rec are not allowed on
+function rules.
+	Source(checkFuncRuleAtt.k)
+	Location(16,10,17,26)
+[Error] Compiler: Had 5 structural errors.
