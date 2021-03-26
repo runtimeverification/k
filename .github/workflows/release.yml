@@ -1,0 +1,22 @@
+name: "Release"
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  nix-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2.3.4
+        with:
+          submodules: recursive
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v12
+
+      - name: Upload release.nix
+        uses: ttuegel/upload-release.nix@v1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
