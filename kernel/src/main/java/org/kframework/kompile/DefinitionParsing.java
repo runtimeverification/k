@@ -277,16 +277,6 @@ public class DefinitionParsing {
         return errors;
     }
 
-    public Definition resolveNonConfigBubbles(Definition defWithConfig, Module mainModule, RuleGrammarGenerator gen) {
-        Module ruleParserModule = gen.getRuleGrammar(mainModule);
-        ParseCache cache = loadCache(ruleParserModule);
-        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
-            parser.getScanner();
-            Map<String, Module> parsed = defWithConfig.parMap(m -> this.resolveNonConfigBubbles(m, parser.getScanner(), gen));
-            return DefinitionTransformer.from(m -> Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()), "parsing rules").apply(defWithConfig);
-        }
-    }
-
     private Definition resolveConfigBubbles(Definition def, RuleGrammarGenerator gen) {
       return DefinitionTransformer.from(m -> resolveConfigBubbles(def, m, gen), "parsing configs").apply(def);
     }
@@ -361,71 +351,135 @@ public class DefinitionParsing {
 
     }
 
-    private Module resolveNonConfigBubbles(Module module, Scanner scanner, RuleGrammarGenerator gen) {
-        if (stream(module.localSentences())
-                .filter(s -> s instanceof Bubble)
-                .map(b -> (Bubble) b)
-                .filter(b -> !b.sentenceType().equals(configuration)).count() == 0)
-            return module;
-
-        Module ruleParserModule = gen.getRuleGrammar(module);
-
-        ParseCache cache = loadCache(ruleParserModule);
-        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
-            if (stream(module.localSentences()).filter(s -> s instanceof Bubble).filter(s -> !cache.getCache().containsKey(((Bubble)s).contents())).findAny().isPresent()) {
-                parser.initialize();
-            }
-
-            // this scanner is not good for this module, so we must generate a new scanner.
-            boolean needNewScanner = !scanner.getModule().importedModuleNames().contains(module.name());
-            if (needNewScanner && kem.options.verbose) {
-              System.out.println("New scanner: " + module.name());
-            }
-            final Scanner realScanner = needNewScanner ? parser.getScanner() : scanner;
-
-            Set<Sentence> claimSet = stream(module.localSentences())
-                    .parallel()
-                    .filter(s -> s instanceof Bubble)
-                    .map(b -> (Bubble) b)
-                    .filter(b -> b.sentenceType().equals(claim))
-                    .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
-                    .map(this::upClaim)
-                .collect(Collections.toSet());
-
-            Set<Sentence> ruleSet = stream(module.localSentences())
-                    .parallel()
-                    .filter(s -> s instanceof Bubble)
-                    .map(b -> (Bubble) b)
-                    .filter(b -> b.sentenceType().equals(rule))
-                    .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
-                    .map(this::upRule)
-                .collect(Collections.toSet());
-
-            Set<Sentence> contextSet = stream(module.localSentences())
-                    .parallel()
-                    .filter(s -> s instanceof Bubble)
-                    .map(b -> (Bubble) b)
-                    .filter(b -> b.sentenceType().equals(context))
-                    .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
-                    .map(this::upContext)
-                .collect(Collections.toSet());
-
-            Set<Sentence> aliasSet = stream(module.localSentences())
-                    .parallel()
-                    .filter(s -> s instanceof Bubble)
-                    .map(b -> (Bubble) b)
-                    .filter(b -> b.sentenceType().equals(alias))
-                    .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
-                    .map(this::upAlias)
-                .collect(Collections.toSet());
-
-            if (needNewScanner) {
-                realScanner.close();//required for Windows.
-            }
-
-            return Module(module.name(), module.imports(),
-                    stream((Set<Sentence>) module.localSentences().$bar(ruleSet).$bar(claimSet).$bar(contextSet).$bar(aliasSet)).filter(b -> !(b instanceof Bubble)).collect(Collections.toSet()), module.att());
+    // Find the entry modules (not included in any other module)
+    private static java.util.Set<Module> getBotModules(Set<Module> allModules) {
+        java.util.Set<Module> included = new HashSet<>();
+        for (Module m : mutable(allModules)) {
+            included.addAll(mutable(m.importedModules()));
         }
+        java.util.Set<Module> rez = mutable(allModules);
+        rez.removeAll(included);
+        return rez;
+    }
+
+    public Definition resolveNonConfigBubbles(Definition defWithConfig, Module mainModule, RuleGrammarGenerator gen) {
+        // prepare parsers and their caches for all modules that have bubbles
+        RuleGrammarGenerator gen2 = new RuleGrammarGenerator(defWithConfig);
+        Map<String, ParseInModule> parsers = new HashMap<>();
+        for (Module m : mutable(defWithConfig.modules())) {
+            if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble && !((Bubble) s).sentenceType().equals(configuration))) {
+                ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen2.getRuleGrammar(m), isStrict, profileRules, files);
+                parsers.put(m.name(), pim);
+            }
+        }
+        // load cached bubbles
+        Definition defWithCaches = DefinitionTransformer.from(m -> {
+            if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble && !((Bubble) s).sentenceType().equals(configuration))) {
+                ParseCache cache = loadCache(parsers.get(m.name()).seedModule());
+                java.util.Set<Sentence> replacedBubbles = new HashSet<>();
+                java.util.Set<Sentence> cachedParses = new HashSet<>();
+                for (Sentence s : mutable(m.localSentences())) {
+                    if (!(s instanceof Bubble) || ((Bubble) s).sentenceType().equals(configuration))
+                        continue;
+                    Bubble b = ((Bubble) s);
+                    if (cache.getCache().containsKey(b.contents())) {
+                        replacedBubbles.add(b);
+                        ParsedSentence parsed = cache.getCache().get(b.contents());
+                        cachedBubbles.getAndIncrement();
+                        if (kem.options.warnings2errors) {
+                            for (KEMException err : parsed.getWarnings().stream().map(e -> (KEMException) e).collect(Collectors.toList())) {
+                                if (kem.options.includesExceptionType(err.exception.getType())) {
+                                    errors.add(KEMException.asError(err));
+                                }
+                            }
+                        } else {
+                            kem.addAllKException(parsed.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
+                        }
+                        // TODO: update error location
+                        Att att = parsed.getParse().att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class));
+                        cachedParses.add(upSentence(new AddAtt(a -> att).apply(parsed.getParse()), b.sentenceType()));
+                        // TODO: check to see if we don't parse the same rules twice because of module duplication!!!!!!!!!!!!!!!!!
+                    }
+                }
+                if (!replacedBubbles.isEmpty()) {
+                    // make a new module with replaced bubbles
+                    return Module(m.name(),
+                            m.imports(),
+                            stream((Set<Sentence>) m.localSentences().$minus$minus(immutable(replacedBubbles)).
+                                                                      $bar(immutable(cachedParses))).collect(Collections.toSet()),
+                            m.att());
+                }
+            }
+            return m;
+        }, "").apply(defWithConfig);
+        // prepare scanners for remaining bubbles
+        // scanners can be reused so find the bottom modules which include all other modules
+        java.util.Set<Module> botMods = getBotModules(defWithCaches.modules()).stream().filter(m -> m.sentences().filter(s -> s instanceof Bubble).size() != 0).collect(Collectors.toSet());
+        java.util.Map<String, ParseInModule> donorScanners = new HashMap<>();
+        for (Module m : mutable(defWithCaches.modules())) {
+            if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble && !((Bubble) s).sentenceType().equals(configuration))) {
+                Module scannerModule = botMods.stream().filter(bm -> m.equals(bm) || bm.importedModuleNames().contains(m.name())).findFirst()
+                        .orElseThrow(() -> new AssertionError("Expected at least one bottom module to have a suitable scanner: " + m.name()));
+                donorScanners.put(m.name(), parsers.get(scannerModule.name()));
+            }
+        }
+        // create scanners
+        new HashSet<>(donorScanners.values()).parallelStream().map(ParseInModule::getScanner).collect(Collectors.toSet());
+
+        // do parsing on remaining bubbles
+        Map<String, java.util.Set<Sentence>> parsedSentences = new HashMap<>();
+        stream(defWithCaches.modules())
+                .parallel()
+                .map(m -> {
+                    if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble && !((Bubble) s).sentenceType().equals(configuration)))
+                        return m;
+                    ParseInModule pim = parsers.get(m.name());
+                    pim.setScanner(donorScanners.get(m.name()).getScanner());
+                    pim.initialize();
+                    ParseCache cache = loadCache(pim.seedModule());
+                    java.util.Set<Sentence> sentences = stream(m.localSentences()).filter(s -> s instanceof Bubble && !((Bubble) s).sentenceType().equals(configuration))
+                            .map(s -> (Bubble) s)
+                            .parallel()
+                            .flatMap(b -> {
+                                Tuple2<Either<java.util.Set<KEMException>, K>, java.util.Set<KEMException>> result;
+                                int startLine = b.att().get("contentStartLine", Integer.class);
+                                int startColumn = b.att().get("contentStartColumn", Integer.class);
+                                Source source = b.att().get(Source.class);
+                                result = pim.parseString(b.contents(), START_SYMBOL, pim.getScanner(), source, startLine, startColumn, true, b.att().contains(Att.ANYWHERE()) || b.att().contains(Att.SIMPLIFICATION()) || ExpandMacros.isMacro(b));
+                                parsedBubbles.getAndIncrement();
+                                if (kem.options.warnings2errors && !result._2().isEmpty()) {
+                                    for (KEMException err : result._2()) {
+                                        if (kem.options.includesExceptionType(err.exception.getType())) {
+                                            errors.add(KEMException.asError(err));
+                                        }
+                                    }
+                                } else {
+                                    kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
+                                }
+                                if (result._1().isRight()) {
+                                    KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, isStrict).down(result._1().right().get());
+                                    k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class)));
+                                    cache.getCache().put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
+                                    return Stream.of(upSentence(k, b.sentenceType()));
+                                } else {
+                                    errors.addAll(result._1().left().get());
+                                    return Stream.empty();
+                                }
+                            }).collect(Collectors.toSet());
+                    synchronized (parsedSentences) {
+                        parsedSentences.put(m.name(), sentences);
+                    }
+                    return m;
+                }).collect(Collectors.toSet());
+
+        // replace bubbles with parsed sentences
+        return DefinitionTransformer.from(m -> {
+            if (parsedSentences.get(m.name()) == null || parsedSentences.get(m.name()).isEmpty())
+                return m;
+            java.util.Set<Sentence> noBubbles = stream(m.localSentences()).filter(s -> !(s instanceof Bubble)).collect(Collectors.toSet());
+            noBubbles.addAll(parsedSentences.get(m.name())); // doing it with java because scala filter gives a NoSuchMethodError when using $plus$plus
+            return Module(m.name(), m.imports(), immutable(noBubbles), m.att());
+        }, "parsing rules").apply(defWithConfig);
     }
 
     public Rule parseRule(CompiledDefinition compiledDef, String contents, Source source) {
@@ -442,6 +496,16 @@ public class DefinitionParsing {
             }
             return upRule(res.iterator().next());
         }
+    }
+
+    private Sentence upSentence(K contens, String sentenceType) {
+        switch (sentenceType) {
+        case claim:    return upClaim(contens);
+        case rule:     return upRule(contens);
+        case context:  return upContext(contens);
+        case alias:    return upAlias(contens);
+        }
+        throw new AssertionError("Unexpected sentence type: " + sentenceType);
     }
 
     private Claim upClaim(K contents) {
