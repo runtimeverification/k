@@ -13,8 +13,10 @@ import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.SyntaxLexical;
 import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
+import org.kframework.main.GlobalOptions;
 import org.kframework.parser.inner.ParseInModule;
 import org.kframework.utils.OS;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Tuple2;
@@ -43,8 +45,16 @@ public class Scanner implements AutoCloseable {
     private final Map<TerminalLike, Tuple2<Integer, Integer>> tokens;
     private final File scanner;
     private final Module module;
+    private GlobalOptions go = new GlobalOptions();
 
     private static final String EXE_EXTENSION = OS.current().equals(OS.WINDOWS) ? ".exe" : "";
+
+    public Scanner(ParseInModule module, GlobalOptions go) {
+        this.go = go;
+        this.tokens  = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
+        this.module  = module.seedModule();
+        this.scanner = getScanner();
+    }
 
     public Scanner(ParseInModule module) {
         this.tokens  = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
@@ -124,6 +134,7 @@ public class Scanner implements AutoCloseable {
     }
 
     public File getScanner() {
+        Stopwatch sw = new Stopwatch(go);
         File scanner;
         // tokenization
         try {
@@ -216,6 +227,7 @@ public class Scanner implements AutoCloseable {
         } catch (IOException | InterruptedException e) {
             throw KEMException.internalError("Failed to write file for scanner", e);
         }
+        sw.printIntermediate("New scanner:" + module.name());
         return scanner;
     }
 

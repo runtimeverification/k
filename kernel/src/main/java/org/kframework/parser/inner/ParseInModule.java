@@ -7,6 +7,7 @@ import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
+import org.kframework.main.GlobalOptions;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.disambiguation.*;
@@ -77,7 +78,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         this.files = files;
         if (profileRules) {
             try {
-                timing = new BufferedWriter(new FileWriter(files.resolveKompiled("timing" + Thread.currentThread().getId() + ".log"), true));
+                timing = new BufferedWriter(new FileWriter(files.resolveTemp("timing" + Thread.currentThread().getId() + ".log"), true));
             } catch (IOException e) {
                 throw KEMException.internalError("Failed to open timing.log", e);
             }
@@ -171,6 +172,13 @@ public class ParseInModule implements Serializable, AutoCloseable {
     private Scanner scanner;
     private ThreadLocal<TypeInferencer> inferencer = new ThreadLocal<>();
     private Queue<TypeInferencer> inferencers = new ConcurrentLinkedQueue<>();
+
+    public Scanner getScanner(GlobalOptions go) {
+        if (scanner == null) {
+            scanner = new Scanner(this, go);
+        }
+        return scanner;
+    }
 
     public Scanner getScanner() {
         if (scanner == null) {

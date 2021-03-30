@@ -154,7 +154,7 @@ public class DefinitionParsing {
             throw new AssertionError("should not reach this statement");
         }
 
-        def = resolveNonConfigBubbles(def, def.getModule(entryPointModule).get(), gen);
+        def = resolveNonConfigBubbles(def);
         if (! readOnlyCache) {
             saveCachesAndReportParsingErrors();
         }
@@ -204,8 +204,7 @@ public class DefinitionParsing {
         sw.printIntermediate("Parse configurations [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " declarations]");
         parsedBubbles.set(0);
         cachedBubbles.set(0);
-        RuleGrammarGenerator gen = new RuleGrammarGenerator(afterResolvingConfigBubbles);
-        Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles, afterResolvingConfigBubbles.mainModule(), gen);
+        Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles);
         saveCachesAndReportParsingErrors();
         return afterResolvingAllOtherBubbles;
     }
@@ -300,7 +299,7 @@ public class DefinitionParsing {
         Set<Sentence> configDeclProductions;
         ParseCache cache = loadCache(gen.getConfigGrammar(module));
         try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
-             parser.getScanner();
+             parser.getScanner(options.global);
              configDeclProductions = stream(module.localSentences())
                     .parallel()
                     .filter(s -> s instanceof Bubble)
@@ -362,7 +361,7 @@ public class DefinitionParsing {
         return rez;
     }
 
-    public Definition resolveNonConfigBubbles(Definition defWithConfig, Module mainModule, RuleGrammarGenerator gen) {
+    public Definition resolveNonConfigBubbles(Definition defWithConfig) {
         // prepare parsers and their caches for all modules that have bubbles
         RuleGrammarGenerator gen2 = new RuleGrammarGenerator(defWithConfig);
         Map<String, ParseInModule> parsers = new HashMap<>();
@@ -424,7 +423,7 @@ public class DefinitionParsing {
             }
         }
         // create scanners
-        new HashSet<>(donorScanners.values()).parallelStream().map(ParseInModule::getScanner).collect(Collectors.toSet());
+        new HashSet<>(donorScanners.values()).parallelStream().map(x -> x.getScanner(options.global)).collect(Collectors.toSet());
 
         // do parsing on remaining bubbles
         Map<String, java.util.Set<Sentence>> parsedSentences = new HashMap<>();
