@@ -14,6 +14,16 @@ minor_version_file="package/version.minor"
 patch_version_file="package/version.patch"
 version_file="package/version"
 
+version_set_major_minor_patch() {
+    local version_commit
+
+    version_commit="$1" ; shift
+
+    version_major="$(git show $version_commit:$version_file | cut --delimiter '.' --field 1)"
+    version_minor="$(git show $version_commit:$version_file | cut --delimiter '.' --field 2)"
+    version_patch="$(git show $version_commit:$version_file | cut --delimiter '.' --field 3)"
+}
+
 version_bump() {
     local master_commit master_major master_minor master_patch
     local release_commit release_patch release_minor release_major
@@ -21,26 +31,31 @@ version_bump() {
     master_commit="$(git rev-parse --short=7 ${UPSTREAM}/${MASTER})"
     release_commit="$(git rev-parse --short=7 ${UPSTREAM}/${RELEASE})"
 
-    master_major="$(git show $master_commit:$major_version_file)"
-    master_minor="$(git show $master_commit:$minor_version_file)"
-    master_patch="$(git show $master_commit:$patch_version_file)"
+    version_set_major_minor_patch "$master_commit"
+    master_major="$version_major"
+    master_minor="$version_minor"
+    master_patch="$version_patch"
 
-    release_major="$(git show $release_commit:$major_version_file)"
-    release_minor="$(git show $release_commit:$minor_version_file)"
-    release_patch="$(git show $release_commit:$patch_version_file)"
+    version_set_major_minor_patch "$release_commit"
+    release_major="$version_major"
+    release_minor="$version_minor"
+    release_patch="$version_patch"
 
+    echo $master_major $master_minor $master_patch
+    echo $release_major $release_minor $release_patch
+
+    major="$release_major"
+    minor="$release_minor"
+    patch="$release_patch"
     if [[ "$master_major" -gt "$release_major" ]]; then
-        echo 0 > $minor_version_file
-        echo 0 > $patch_version_file
+        minor='0'
+        patch='0'
     elif [[ "$master_minor" -gt "$release_minor" ]]; then
-        echo 0 > $patch_version_file
+        patch='0'
     else
-        echo $(($release_patch + 1)) > $patch_version_file
+        patch=$(($patch + 1))
     fi
 
-    major="$(cat $major_version_file)"
-    minor="$(cat $minor_version_file)"
-    patch="$(cat $patch_version_file)"
     version="${major}.${minor}.${patch}"
     echo "$version" > $version_file
 
