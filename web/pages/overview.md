@@ -11,6 +11,6 @@
 
 Go to [Youtube mirror](http://youtu.be/eSaIKHQOo4c), if the above does not work.
 
-Go back to http://k-framework.com for further links, the K tool and contact information.
+Go back to https://kframework.org for further links, the K tool and contact information.
 
 The slides presented above: [PPTX](http://www.kframework.org/images/e/e4/K-Overview.zip) | [PDF](http://www.kframework.org/images/e/eb/K-Overview.pdf)

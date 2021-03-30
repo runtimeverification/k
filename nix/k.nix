@@ -1,25 +1,26 @@
-{ lib, mavenix, nix-gitignore, runCommand, makeWrapper
+{ lib, mavenix, cleanGit, cleanSourceWith, runCommand, makeWrapper
 , flex, gcc, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3
 , haskell-backend, llvm-backend
 }:
-
-let inherit (nix-gitignore) gitignoreSourcePure; in
 
 let
   unwrapped = mavenix.buildMaven {
     name = "k-5.0.0";
     infoFile = ./mavenix.lock;
     src =
-      gitignoreSourcePure
-        [
-          ".git/" "result*" "nix/" "*.nix"
-          "haskell-backend/src/main/native/haskell-backend/*"
-          "!haskell-backend/src/main/native/haskell-backend/src"  # need prelude.kore
-          "llvm-backend/src/main/native/llvm-backend/*"
-          "!llvm-backend/src/main/native/llvm-backend/matching"  # need pom.xml
-          "k-distribution/tests/regression-new"
-        ]
-        ./..;
+      cleanSourceWith {
+        name = "k";
+        src = cleanGit { src = ./..; name = "k"; };
+        ignore =
+          [
+            "result*" "nix/" "*.nix"
+            "haskell-backend/src/main/native/haskell-backend/*"
+            "!haskell-backend/src/main/native/haskell-backend/src"  # need prelude.kore
+            "llvm-backend/src/main/native/llvm-backend/*"
+            "!llvm-backend/src/main/native/llvm-backend/matching"  # need pom.xml
+            "k-distribution/tests/regression-new"
+          ];
+      };
 
     # Cannot enable unit tests until a bug is fixed upstream (in Mavenix).
     doCheck = false;

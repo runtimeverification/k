@@ -23,6 +23,7 @@ jobs:
         uses: cachix/cachix-action@v8
         with:
           name: runtimeverification
+          extraPullNames: kore
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
 
       # Check that the pinned Maven dependencies are up-to-date.
