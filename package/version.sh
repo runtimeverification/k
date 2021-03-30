@@ -41,16 +41,16 @@ version_bump() {
     release_minor="$version_minor"
     release_patch="$version_patch"
 
-    echo $master_major $master_minor $master_patch
-    echo $release_major $release_minor $release_patch
-
     major="$release_major"
     minor="$release_minor"
     patch="$release_patch"
     if [[ "$master_major" -gt "$release_major" ]]; then
+        major="$master_major"
         minor='0'
         patch='0'
     elif [[ "$master_minor" -gt "$release_minor" ]]; then
+        major="$master_major"
+        minor="$master_minor"
         patch='0'
     else
         patch=$(($patch + 1))
