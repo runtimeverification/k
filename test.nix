@@ -15,11 +15,18 @@ let
   inherit (default) k haskell-backend llvm-backend;
   inherit (default) clang;
 
+  ttuegel = import sources."ttuegel" { inherit pkgs ; };
+  inherit (ttuegel) cleanGitSubtree;
+
 in
 
 stdenv.mkDerivation {
   name = "k-test";
-  src = ./k-distribution;
+  src = cleanGitSubtree {
+    name = "k-distribution";
+    src = ./.;
+    subDir = "k-distribution";
+  };
   preferLocalBuild = true;
   buildInputs = [
     diffutils ncurses bison clang gmp mpfr libffi jemalloc
