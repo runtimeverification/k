@@ -9,9 +9,6 @@ RELEASE="${RELEASE:-release}"
 notif() { echo "== $@" >&2 ; }
 fatal() { echo "[FATAL] $@" ; exit 1 ; }
 
-major_version_file="package/version.major"
-minor_version_file="package/version.minor"
-patch_version_file="package/version.patch"
 version_file="package/version"
 
 version_set_major_minor_patch() {
