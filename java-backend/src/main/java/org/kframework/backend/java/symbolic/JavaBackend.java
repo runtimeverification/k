@@ -92,6 +92,7 @@ public class JavaBackend extends AbstractBackend {
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::convertListItemToNonFunction, "remove function attribute from ListItem production"))
                 .andThen(DefinitionTransformer.fromSentenceTransformer(new NormalizeAssoc(KORE.c()), "normalize assoc"))
                 .andThen(DefinitionTransformer.from(AddBottomSortForListsWithIdenticalLabels.singleton(), "add bottom sorts for lists"))
+                .andThen(DefinitionTransformer.from(new GenerateSortProjections()::gen, "adding sort projections"))
                 .andThen(d2 -> {
                   ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d2, false);
                   return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kem, kompileOptions, false, true).expand(s), "expand macros").apply(d2);
@@ -122,6 +123,7 @@ public class JavaBackend extends AbstractBackend {
                 .andThen(ModuleTransformer.fromSentenceTransformer(s -> new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA)).resolve(s), "resolve semantic casts"))
                 //.andThen(ModuleTransformer.fromSentenceTransformer(new NormalizeAssoc(KORE.c()), "normalize assoc"))
                 .andThen(AddBottomSortForListsWithIdenticalLabels.singleton())
+                .andThen(ModuleTransformer.from(new GenerateSortProjections()::gen, "adding sort projections"))
                 .andThen(m2 -> {
                   ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(m2, false);
                   return ModuleTransformer.fromSentenceTransformer((mod, s) -> new ExpandMacros(transformer, mod, files, kem, kompileOptions, false, true).expand(s), "expand macros").apply(m2);

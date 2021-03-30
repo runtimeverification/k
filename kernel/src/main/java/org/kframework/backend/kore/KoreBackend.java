@@ -201,9 +201,11 @@ public class KoreBackend extends AbstractBackend {
         ModuleTransformer concretizeCells = ModuleTransformer.fromSentenceTransformer(
                 new ConcretizeCells(configInfo, labelInfo, sortInfo, mod)::concretize,
                 "concretizing configuration");
+        ModuleTransformer generateSortProjections = ModuleTransformer.from(new GenerateSortProjections()::gen, "adding sort projections");
 
         return m -> resolveAnonVars
                 .andThen(resolveSemanticCasts)
+                .andThen(generateSortProjections)
                 .andThen(expandMacros)
                 .andThen(addImplicitComputationCell)
                 .andThen(resolveFreshConstants)
