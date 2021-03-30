@@ -353,11 +353,11 @@ public class DefinitionParsing {
 
     public Definition resolveNonConfigBubbles(Definition defWithConfig) {
         // prepare parsers and their caches for all modules that have bubbles
-        RuleGrammarGenerator gen2 = new RuleGrammarGenerator(defWithConfig);
+        RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithConfig);
         Map<String, ParseInModule> parsers = new HashMap<>();
         for (Module m : mutable(defWithConfig.modules())) {
             if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble && !((Bubble) s).sentenceType().equals(configuration))) {
-                ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen2.getRuleGrammar(m), isStrict, profileRules, files);
+                ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(m), isStrict, profileRules, files);
                 parsers.put(m.name(), pim);
             }
         }
@@ -404,6 +404,10 @@ public class DefinitionParsing {
         // prepare scanners for remaining bubbles
         // scanners can be reused so find the bottom modules which include all other modules
         java.util.Set<Module> botMods = getBotModules(defWithCaches.modules()).stream().filter(m -> m.sentences().filter(s -> s instanceof Bubble).size() != 0).collect(Collectors.toSet());
+        for (Module m : botMods) {
+            ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(m), isStrict, profileRules, files);
+            parsers.put(m.name(), pim);
+        }
         java.util.Map<String, ParseInModule> donorScanners = new HashMap<>();
         for (Module m : mutable(defWithCaches.modules())) {
             if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble && !((Bubble) s).sentenceType().equals(configuration))) {

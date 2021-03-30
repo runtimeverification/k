@@ -68,7 +68,11 @@ public class ProofDefinitionBuilder {
 
         Set<Module> modules = kompile.parseModules(compiledDefinition, defModuleNameUpdated, specModuleNameUpdated, absSpecFile,
                 backend.excludedModuleTags(), readOnlyCache);
-        Map<String, Module> modulesMap = modules.stream().collect(Collectors.toMap(Module::name, m -> m));
+        // avoid the module duplication bug #1838
+        //Map<String, Module> modulesMap = modules.stream().collect(Collectors.toMap(Module::name, m -> m));
+        Map<String, List<Module>> group = modules.stream().collect(Collectors.groupingBy(Module::name));
+        Map<String, Module> modulesMap = group.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, x -> x.getValue().get(0)));
+
         Definition parsedDefinition = compiledDefinition.getParsedDefinition();
         Module specModule = getModule(specModuleNameUpdated, modulesMap, parsedDefinition);
         specModule = kompile.proverChecks(specModule, modulesMap.get(defModuleNameUpdated));
