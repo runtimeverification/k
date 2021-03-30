@@ -13,12 +13,10 @@ major_version_file="package/version.major"
 minor_version_file="package/version.minor"
 patch_version_file="package/version.patch"
 version_file="package/version"
-version_date_file="package/version.date"
 
 version_bump() {
     local master_commit master_major master_minor master_patch
     local release_commit release_patch release_minor release_major
-    local release_tag version_date
 
     master_commit="$(git rev-parse --short=7 ${UPSTREAM}/${MASTER})"
     release_commit="$(git rev-parse --short=7 ${UPSTREAM}/${RELEASE})"
@@ -46,10 +44,7 @@ version_bump() {
     version="${major}.${minor}.${patch}"
     echo "$version" > $version_file
 
-    version_date="$(date)"
-    echo "$version_date" > $version_date_file
-
-    notif "Version: ${release_tag}"
+    notif "Version: ${version}"
 }
 
 version_sub() {

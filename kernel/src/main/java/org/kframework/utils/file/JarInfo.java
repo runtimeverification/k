@@ -74,9 +74,13 @@ public class JarInfo {
 
     public void printVersionMessage() {
         String kBase = getKBase();
+        URL    url   = JarInfo.class.getResource("versionMarker");
         try {
+            URLConnection conn = url.openConnection();
+            Manifest      mf   = ((JarURLConnection)conn).getManifest();
+
             String version     = FileUtils.readFileToString(new File(kBase + "/lib/version")).trim();
-            String versionDate = FileUtils.readFileToString(new File(kBase + "/lib/version.date")).trim();
+            String versionDate = new Date(Long.parseLong(mf.getMainAttributes().getValue("Implementation-Date"))).toString();
 
             System.out.println("K version:    " + version);
             System.out.println("Build date:   " + versionDate);

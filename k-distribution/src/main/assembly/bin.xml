@@ -72,7 +72,6 @@
       <outputDirectory>/lib</outputDirectory>
       <includes>
         <include>version</include>
-        <include>version.date</include>
       </includes>
     </fileSet>
     <fileSet>
