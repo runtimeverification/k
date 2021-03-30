@@ -1,6 +1,8 @@
 // Copyright (c) 2014-2019 K Team. All Rights Reserved.
 package org.kframework.utils.file;
 
+import org.apache.commons.io.FileUtils;
+
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
@@ -71,23 +73,19 @@ public class JarInfo {
     }
 
     public void printVersionMessage() {
+        String kBase = getKBase();
+        URL    url   = JarInfo.class.getResource("versionMarker");
         try {
-            URL url = JarInfo.class.getResource("versionMarker");
             URLConnection conn = url.openConnection();
-            if (!(conn instanceof JarURLConnection)) {
-                System.out.println("K framework internal build");
-                return;
-            }
-            Manifest mf = ((JarURLConnection)conn).getManifest();
-            String revision = mf.getMainAttributes().getValue("Implementation-Revision");
-            String branch = mf.getMainAttributes().getValue("Implementation-Branch");
-            Date date = new Date(Long.parseLong(mf.getMainAttributes().getValue("Implementation-Date")));
-            System.out.println("RV-K version " + JarInfo.class.getPackage().getImplementationVersion());
-            System.out.println("Git revision: " + revision);
-            System.out.println("Git branch: " + branch);
-            System.out.println("Build date: " + date.toString());
+            Manifest      mf   = ((JarURLConnection)conn).getManifest();
+
+            String version     = FileUtils.readFileToString(new File(kBase + "/lib/version")).trim();
+            String versionDate = new Date(Long.parseLong(mf.getMainAttributes().getValue("Implementation-Date"))).toString();
+
+            System.out.println("K version:    " + version);
+            System.out.println("Build date:   " + versionDate);
         } catch (IOException e) {
-            throw KEMException.internalError("Could not load version info. Check your build system?");
+            throw KEMException.internalError("Could not load version info.");
         }
     }
 }

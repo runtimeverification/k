@@ -68,6 +68,13 @@
       <outputDirectory>/lib/kframework</outputDirectory>
     </fileSet>
     <fileSet>
+      <directory>${project.parent.basedir}/package</directory>
+      <outputDirectory>/lib</outputDirectory>
+      <includes>
+        <include>version</include>
+      </includes>
+    </fileSet>
+    <fileSet>
       <directory>${project.basedir}/../llvm-backend/target/build/install/bin</directory>
       <outputDirectory>/bin</outputDirectory>
       <fileMode>775</fileMode>
