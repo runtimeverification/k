@@ -334,7 +334,7 @@ public class DefinitionParsing {
                 throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
             }
             return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
-                    (Set<Sentence>) module.localSentences().$bar(configDeclSyntax),
+                    (Set<Sentence>) module.localSentences().$bar(configDeclSyntax).filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))),
                     module.att());
         } else {
             Module mapModule;
@@ -344,7 +344,7 @@ public class DefinitionParsing {
                 throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
             }
             return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
-                    (Set<Sentence>) module.localSentences().$bar(configDeclRules),
+                    (Set<Sentence>) module.localSentences().$bar(configDeclRules).filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))),
                     module.att());
         }
 
@@ -366,19 +366,19 @@ public class DefinitionParsing {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithConfig);
         Map<String, ParseInModule> parsers = new HashMap<>();
         for (Module m : mutable(defWithConfig.modules())) {
-            if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble && !((Bubble) s).sentenceType().equals(configuration))) {
+            if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble)) {
                 ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(m), isStrict, profileRules, files);
                 parsers.put(m.name(), pim);
             }
         }
         // load cached bubbles
         Definition defWithCaches = DefinitionTransformer.from(m -> {
-            if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble && !((Bubble) s).sentenceType().equals(configuration))) {
+            if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble)) {
                 ParseCache cache = loadCache(parsers.get(m.name()).seedModule());
                 java.util.Set<Sentence> replacedBubbles = new HashSet<>();
                 java.util.Set<Sentence> cachedParses = new HashSet<>();
                 for (Sentence s : mutable(m.localSentences())) {
-                    if (!(s instanceof Bubble) || ((Bubble) s).sentenceType().equals(configuration))
+                    if (!(s instanceof Bubble))
                         continue;
                     Bubble b = ((Bubble) s);
                     if (cache.getCache().containsKey(b.contents())) {
@@ -420,7 +420,7 @@ public class DefinitionParsing {
         }
         java.util.Map<String, ParseInModule> donorScanners = new HashMap<>();
         for (Module m : mutable(defWithCaches.modules())) {
-            if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble && !((Bubble) s).sentenceType().equals(configuration))) {
+            if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble)) {
                 Module scannerModule = botMods.stream().filter(bm -> m.equals(bm) || bm.importedModuleNames().contains(m.name())).findFirst()
                         .orElseThrow(() -> new AssertionError("Expected at least one bottom module to have a suitable scanner: " + m.name()));
                 donorScanners.put(m.name(), parsers.get(scannerModule.name()));
@@ -434,13 +434,13 @@ public class DefinitionParsing {
         stream(defWithCaches.modules())
                 .parallel()
                 .map(m -> {
-                    if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble && !((Bubble) s).sentenceType().equals(configuration)))
+                    if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble))
                         return m;
                     ParseInModule pim = parsers.get(m.name());
                     pim.setScanner(donorScanners.get(m.name()).getScanner());
                     pim.initialize();
                     ParseCache cache = loadCache(pim.seedModule());
-                    java.util.Set<Sentence> sentences = stream(m.localSentences()).filter(s -> s instanceof Bubble && !((Bubble) s).sentenceType().equals(configuration))
+                    java.util.Set<Sentence> sentences = stream(m.localSentences()).filter(s -> s instanceof Bubble)
                             .map(s -> (Bubble) s)
                             .parallel()
                             .flatMap(b -> {
