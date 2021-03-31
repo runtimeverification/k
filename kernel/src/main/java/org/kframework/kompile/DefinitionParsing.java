@@ -373,41 +373,41 @@ public class DefinitionParsing {
         }
         // load cached bubbles
         Definition defWithCaches = DefinitionTransformer.from(m -> {
-            if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble)) {
-                ParseCache cache = loadCache(parsers.get(m.name()).seedModule());
-                java.util.Set<Sentence> replacedBubbles = new HashSet<>();
-                java.util.Set<Sentence> cachedParses = new HashSet<>();
-                for (Sentence s : mutable(m.localSentences())) {
-                    if (!(s instanceof Bubble))
-                        continue;
-                    Bubble b = ((Bubble) s);
-                    if (cache.getCache().containsKey(b.contents())) {
-                        replacedBubbles.add(b);
-                        ParsedSentence parsed = cache.getCache().get(b.contents());
-                        cachedBubbles.getAndIncrement();
-                        if (kem.options.warnings2errors) {
-                            for (KEMException err : parsed.getWarnings().stream().map(e -> (KEMException) e).collect(Collectors.toList())) {
-                                if (kem.options.includesExceptionType(err.exception.getType())) {
-                                    errors.add(KEMException.asError(err));
-                                }
+            if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble))
+                return m;
+            ParseCache cache = loadCache(parsers.get(m.name()).seedModule());
+            java.util.Set<Sentence> replacedBubbles = new HashSet<>();
+            java.util.Set<Sentence> cachedParses = new HashSet<>();
+            for (Sentence s : mutable(m.localSentences())) {
+                if (!(s instanceof Bubble))
+                    continue;
+                Bubble b = ((Bubble) s);
+                if (cache.getCache().containsKey(b.contents())) {
+                    replacedBubbles.add(b);
+                    ParsedSentence parsed = cache.getCache().get(b.contents());
+                    cachedBubbles.getAndIncrement();
+                    if (kem.options.warnings2errors) {
+                        for (KEMException err : parsed.getWarnings().stream().map(e -> (KEMException) e).collect(Collectors.toList())) {
+                            if (kem.options.includesExceptionType(err.exception.getType())) {
+                                errors.add(KEMException.asError(err));
                             }
-                        } else {
-                            kem.addAllKException(parsed.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
                         }
-                        // TODO: update error location
-                        Att att = parsed.getParse().att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class));
-                        cachedParses.add(upSentence(new AddAtt(a -> att).apply(parsed.getParse()), b.sentenceType()));
-                        // TODO: check to see if we don't parse the same rules twice because of module duplication!!!!!!!!!!!!!!!!!
+                    } else {
+                        kem.addAllKException(parsed.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
                     }
+                    // TODO: update error location
+                    Att att = parsed.getParse().att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class));
+                    cachedParses.add(upSentence(new AddAtt(a -> att).apply(parsed.getParse()), b.sentenceType()));
+                    // TODO: check to see if we don't parse the same rules twice because of module duplication!!!!!!!!!!!!!!!!!
                 }
-                if (!replacedBubbles.isEmpty()) {
-                    // make a new module with replaced bubbles
-                    return Module(m.name(),
-                            m.imports(),
-                            stream((Set<Sentence>) m.localSentences().$minus$minus(immutable(replacedBubbles)).
-                                                                      $bar(immutable(cachedParses))).collect(Collections.toSet()),
-                            m.att());
-                }
+            }
+            if (!replacedBubbles.isEmpty()) {
+                // make a new module with replaced bubbles
+                return Module(m.name(),
+                        m.imports(),
+                        stream((Set<Sentence>) m.localSentences().$minus$minus(immutable(replacedBubbles)).
+                                                                  $bar(immutable(cachedParses))).collect(Collections.toSet()),
+                        m.att());
             }
             return m;
         }, "").apply(defWithConfig);
@@ -482,7 +482,7 @@ public class DefinitionParsing {
             java.util.Set<Sentence> noBubbles = stream(m.localSentences()).filter(s -> !(s instanceof Bubble)).collect(Collectors.toSet());
             noBubbles.addAll(parsedSentences.get(m.name())); // doing it with java because scala filter gives a NoSuchMethodError when using $plus$plus
             return Module(m.name(), m.imports(), immutable(noBubbles), m.att());
-        }, "parsing rules").apply(defWithConfig);
+        }, "parsing rules").apply(defWithCaches);
     }
 
     public Rule parseRule(CompiledDefinition compiledDef, String contents, Source source) {
