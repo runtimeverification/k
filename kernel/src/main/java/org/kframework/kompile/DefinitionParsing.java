@@ -14,7 +14,6 @@ import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.GenerateSentencesFromConfigDecl;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Claim;
-import org.kframework.definition.Configuration;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Definition;
