@@ -94,9 +94,7 @@ def translateCoverage(src_all_rules, dst_all_rules, dst_definition, src_rules_li
             _fatal('COULD NOT FIND RULE LOCATION IN dst_rule_map: ' + src_rule_loc)
         dst_rule = dst_rule_map[src_rule_loc]
 
-        if dst_rule not in dst_non_function_rules:
-            _notif('Skipping non-semantic rule: ' + dst_rule)
-        else:
+        if dst_rule in dst_non_function_rules:
             dst_rule_list.append(dst_rule)
 
     return dst_rule_list

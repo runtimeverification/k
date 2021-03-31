@@ -8,6 +8,7 @@ import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
+import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -33,17 +34,25 @@ public class CheckFunctions {
     public void check(Sentence sentence) {
         if (sentence instanceof Rule) {
             Rule rl = (Rule) sentence;
+            checkFuncAtt(rl);
             if (!(isSymbolic && rl.att().contains(Att.SIMPLIFICATION())))
                 // functions are allowed on the LHS of simplification rules on the symbolic engines
                 check(rl.body());
         } else if (sentence instanceof Claim) {
             // functions are allowed on LHS of claims
+            Claim c = (Claim) sentence;
+            if (c.att().contains("macro") || c.att().contains("macro-rec") || c.att().contains("alias") || c.att().contains("alias-rec"))
+                errors.add(KEMException.compilerError("Attributes macro|macro-rec|alias|alias-rec are not allowed on claims.", c));
         } else if (sentence instanceof Context) {
             Context ctx = (Context) sentence;
             check(ctx.body());
+            if (ctx.att().contains("macro") || ctx.att().contains("macro-rec") || ctx.att().contains("alias") || ctx.att().contains("alias-rec"))
+                errors.add(KEMException.compilerError("Attributes macro|macro-rec|alias|alias-rec are not allowed on contexts.", ctx));
         } else if (sentence instanceof ContextAlias) {
             ContextAlias ctx = (ContextAlias) sentence;
             check(ctx.body());
+            if (ctx.att().contains("macro") || ctx.att().contains("macro-rec") || ctx.att().contains("alias") || ctx.att().contains("alias-rec"))
+                errors.add(KEMException.compilerError("Attributes macro|macro-rec|alias|alias-rec are not allowed on contexts.", ctx));
         }
     }
 
@@ -82,5 +91,27 @@ public class CheckFunctions {
                 super.apply(k);
             }
         }.apply(body);
+    }
+
+    public void checkFuncAtt(Rule r) {
+        new RewriteAwareVisitor(true, errors) {
+            @Override
+            public void apply(KApply k) {
+                if (k.klabel().name().equals("#withConfig")) {
+                    super.apply(k);
+                    return;
+                }
+                if ((isRHS() && !isLHS()) || k.klabel() instanceof KVariable || !m.attributesFor().contains(k.klabel())) {
+                    return;
+                }
+                Att attributes = m.attributesFor().apply(k.klabel());
+                if (attributes.contains("function") && (r.att().contains("macro")
+                                                     || r.att().contains("macro-rec")
+                                                     || r.att().contains("alias")
+                                                     || r.att().contains("alias-rec"))) {
+                    errors.add(KEMException.compilerError("Attributes macro|macro-rec|alias|alias-rec are not allowed on function rules.", r));
+                }
+            }
+        }.apply(r.body());
     }
 }

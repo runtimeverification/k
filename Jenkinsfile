@@ -3,11 +3,11 @@ pipeline {
   options { ansiColor('xterm') }
   environment {
     PACKAGE         = 'kframework'
-    VERSION         = '5.0.0'
     ROOT_URL        = 'https://github.com/kframework/k/releases/download'
     SHORT_REV       = """${sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()}"""
     LONG_REV        = """${sh(returnStdout: true, script: 'git rev-parse HEAD').trim()}"""
-    K_RELEASE_TAG   = "v${env.VERSION}-${env.SHORT_REV}"
+    VERSION         = """${sh(returnStdout: true, script: 'cat package/version').trim()}"""
+    K_RELEASE_TAG   = "v${env.VERSION}"
     MAKE_EXTRA_ARGS = '' // Example: 'DEBUG=--debug' to see stack traces
   }
   stages {
@@ -44,6 +44,13 @@ pipeline {
         stage('Build and Package K on Linux') {
           stages {
             stage('Build and Package on Ubuntu Bionic') {
+              when {
+                anyOf {
+                  branch 'release'
+                  changeRequest()
+                }
+                beforeAgent true
+              }
               stages {
                 stage('Build on Ubuntu Bionic') {
                   agent {
@@ -116,7 +123,7 @@ pipeline {
             }
             stage('Build and Package on Ubuntu Focal') {
               when {
-                branch 'master'
+                branch 'release'
                 beforeAgent true
               }
               stages {
@@ -175,7 +182,7 @@ pipeline {
             }
             stage('Build and Package on Debian Buster') {
               when {
-                branch 'master'
+                branch 'release'
                 beforeAgent true
               }
               stages {
@@ -237,7 +244,7 @@ pipeline {
             }
             stage('Build and Package on Arch Linux') {
               when {
-                branch 'master'
+                branch 'release'
                 beforeAgent true
               }
               stages {
@@ -300,7 +307,7 @@ pipeline {
             }
             stage('Build Platform Independent K Binary') {
               when {
-                branch 'master'
+                branch 'release'
                 beforeAgent true
               }
               agent {
@@ -330,7 +337,7 @@ pipeline {
         }
         stage('Build and Package on Mac OS') {
           when {
-            branch 'master'
+            branch 'release'
             beforeAgent true
           }
           options { timeout(time: 150, unit: 'MINUTES') }
@@ -422,16 +429,16 @@ pipeline {
     }
     stage('DockerHub') {
       when {
-        branch 'master'
+        branch 'release'
         beforeAgent true
       }
       environment {
-        DOCKERHUB_TOKEN   = credentials('rvdockerhub')
-        BIONIC_COMMIT_TAG = "ubuntu-bionic-${env.SHORT_REV}"
-        BIONIC_BRANCH_TAG = "ubuntu-bionic-${env.BRANCH_NAME}"
-        FOCAL_COMMIT_TAG = "ubuntu-focal-${env.SHORT_REV}"
-        FOCAL_BRANCH_TAG = "ubuntu-focal-${env.BRANCH_NAME}"
-        DOCKERHUB_REPO    = "runtimeverificationinc/kframework-k"
+        DOCKERHUB_TOKEN    = credentials('rvdockerhub')
+        BIONIC_VERSION_TAG = "ubuntu-bionic-${env.VERSION}"
+        BIONIC_BRANCH_TAG  = "ubuntu-bionic-${env.BRANCH_NAME}"
+        FOCAL_VERSION_TAG  = "ubuntu-focal-${env.VERSION}"
+        FOCAL_BRANCH_TAG   = "ubuntu-focal-${env.BRANCH_NAME}"
+        DOCKERHUB_REPO     = "runtimeverificationinc/kframework-k"
       }
       stages {
         stage('Build Image') {
@@ -442,27 +449,26 @@ pipeline {
             sh '''
                 mv bionic/kframework_${VERSION}_amd64.deb kframework_amd64_bionic.deb
                 docker login --username "${DOCKERHUB_TOKEN_USR}" --password "${DOCKERHUB_TOKEN_PSW}"
-                docker image build . --file package/docker/Dockerfile.ubuntu-bionic --tag "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}"
-                docker image push "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}"
-                docker tag "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}" "${DOCKERHUB_REPO}:${BIONIC_BRANCH_TAG}"
+                docker image build . --file package/docker/Dockerfile.ubuntu-bionic --tag "${DOCKERHUB_REPO}:${BIONIC_VERSION_TAG}"
+                docker image push "${DOCKERHUB_REPO}:${BIONIC_VERSION_TAG}"
+                docker tag "${DOCKERHUB_REPO}:${BIONIC_VERSION_TAG}" "${DOCKERHUB_REPO}:${BIONIC_BRANCH_TAG}"
                 docker push "${DOCKERHUB_REPO}:${BIONIC_BRANCH_TAG}"
             '''
             dir('focal') { unstash 'focal' }
             sh '''
                 mv focal/kframework_${VERSION}_amd64.deb kframework_amd64_focal.deb
                 docker login --username "${DOCKERHUB_TOKEN_USR}" --password "${DOCKERHUB_TOKEN_PSW}"
-                docker image build . --file package/docker/Dockerfile.ubuntu-focal --tag "${DOCKERHUB_REPO}:${FOCAL_COMMIT_TAG}"
-                docker image push "${DOCKERHUB_REPO}:${FOCAL_COMMIT_TAG}"
-                docker tag "${DOCKERHUB_REPO}:${FOCAL_COMMIT_TAG}" "${DOCKERHUB_REPO}:${FOCAL_BRANCH_TAG}"
+                docker image build . --file package/docker/Dockerfile.ubuntu-focal --tag "${DOCKERHUB_REPO}:${FOCAL_VERSION_TAG}"
+                docker image push "${DOCKERHUB_REPO}:${FOCAL_VERSION_TAG}"
+                docker tag "${DOCKERHUB_REPO}:${FOCAL_VERSION_TAG}" "${DOCKERHUB_REPO}:${FOCAL_BRANCH_TAG}"
                 docker push "${DOCKERHUB_REPO}:${FOCAL_BRANCH_TAG}"
             '''
- 
           }
         }
         stage('Test Bionic Image') {
           agent {
             docker {
-              image "${DOCKERHUB_REPO}:${BIONIC_COMMIT_TAG}"
+              image "${DOCKERHUB_REPO}:${BIONIC_VERSION_TAG}"
               args '-u 0'
               reuseNode true
             }
@@ -479,7 +485,7 @@ pipeline {
         stage('Test Focal Image') {
           agent {
             docker {
-              image "${DOCKERHUB_REPO}:${FOCAL_COMMIT_TAG}"
+              image "${DOCKERHUB_REPO}:${FOCAL_VERSION_TAG}"
               args '-u 0'
               reuseNode true
             }
@@ -498,7 +504,7 @@ pipeline {
     }
     stage('Deploy') {
       when {
-        branch 'master'
+        branch 'release'
         beforeAgent true
       }
       agent {
@@ -529,37 +535,38 @@ pipeline {
             cd k-release
             git fetch --all
 
+            release_commit="$(git merge-base $LONG_REV origin/master)"
+            git checkout $release_commit
+
             git tag -d "${K_RELEASE_TAG}"         || true
             git push -d origin "${K_RELEASE_TAG}" || true
             hub release delete "${K_RELEASE_TAG}" || true
 
-            git tag "${K_RELEASE_TAG}" "${LONG_REV}"
+            git tag "${K_RELEASE_TAG}" "${release_commit}"
             git push origin "${K_RELEASE_TAG}"
-
-            COMMIT_DATE=$(date '+%Y%m%d%H%M' --date="$(git show --no-patch --format='%ci' ${K_RELEASE_TAG})")
 
             LOCAL_BOTTLE_NAME=$(find ../mojave -name "kframework--${VERSION}.mojave.bottle*.tar.gz")
             BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#../mojave/} | sed 's!kframework--!kframework-!')
 
-            mv ../kframework-${VERSION}-src.tar.gz                      kframework-${VERSION}-src_${COMMIT_DATE}.tar.gz
-            mv ../bionic/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_bionic_${COMMIT_DATE}.deb
-            mv ../focal/kframework_${VERSION}_amd64.deb                 kframework_${VERSION}_amd64_focal_${COMMIT_DATE}.deb
-            mv ../buster/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_buster_${COMMIT_DATE}.deb
-            mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst   kframework-git-${VERSION}-1-x86_64_${COMMIT_DATE}.pkg.tar.zst
+            mv ../kframework-${VERSION}-src.tar.gz                      kframework-${VERSION}-src.tar.gz
+            mv ../bionic/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_bionic.deb
+            mv ../focal/kframework_${VERSION}_amd64.deb                 kframework_${VERSION}_amd64_focal.deb
+            mv ../buster/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_buster.deb
+            mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst   kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
             mv $LOCAL_BOTTLE_NAME                                       $BOTTLE_NAME
-            mv ../k-nightly.tar.gz                                      k-nightly_${COMMIT_DATE}.tar.gz
+            mv ../k-nightly.tar.gz                                      k-nightly_${VERSION}.tar.gz
 
-            echo "K Framework Release ${K_RELEASE_TAG}"  > release.md
-            echo ''                                     >> release.md
-            cat k-distribution/INSTALL.md               >> release.md
-            hub release create                                                                                 \
-                --attach kframework-${VERSION}-src_${COMMIT_DATE}.tar.gz'#Source tar.gz'                       \
-                --attach kframework_${VERSION}_amd64_bionic_${COMMIT_DATE}.deb'#Ubuntu Bionic (18.04) Package' \
-                --attach kframework_${VERSION}_amd64_focal_${COMMIT_DATE}.deb'#Ubuntu Focal (20.04) Package'   \
-                --attach kframework_${VERSION}_amd64_buster_${COMMIT_DATE}.deb'#Debian Buster (10) Package'    \
-                --attach kframework-git-${VERSION}-1-x86_64_${COMMIT_DATE}.pkg.tar.zst'#Arch Package'          \
-                --attach $BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                               \
-                --attach k-nightly_${COMMIT_DATE}.tar.gz'#Platform Indepdendent K Binary'                      \
+            echo "K Framework Release ${VERSION}"  > release.md
+            echo ''                               >> release.md
+            cat k-distribution/INSTALL.md         >> release.md
+            hub release create                                                                  \
+                --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                       \
+                --attach kframework_${VERSION}_amd64_bionic.deb'#Ubuntu Bionic (18.04) Package' \
+                --attach kframework_${VERSION}_amd64_focal.deb'#Ubuntu Focal (20.04) Package'   \
+                --attach kframework_${VERSION}_amd64_buster.deb'#Debian Buster (10) Package'    \
+                --attach kframework-git-${VERSION}-1-x86_64.pkg.tar.zst'#Arch Package'          \
+                --attach $BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                \
+                --attach k-nightly_${VERSION}.tar.gz'#Platform Indepdendent K Binary'           \
                 --file release.md "${K_RELEASE_TAG}"
           '''
         }
@@ -578,7 +585,7 @@ pipeline {
     }
     stage('Update Dependents') {
       when {
-        branch 'master'
+        branch 'release'
         beforeAgent true
       }
       steps {
@@ -591,7 +598,7 @@ pipeline {
     }
     stage('GitHub Pages') {
       when {
-        branch 'master'
+        branch 'release'
         beforeAgent true
       }
       agent {
@@ -625,6 +632,34 @@ pipeline {
             '''
           }
         }
+      }
+    }
+    stage('Trigger Release') {
+      when {
+        branch 'master'
+        beforeAgent true
+      }
+      agent {
+        dockerfile {
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+          reuseNode true
+        }
+      }
+      options { skipDefaultCheckout() }
+      post { failure { slackSend color: '#cb2431' , channel: '#k' , message: "Failed to trigger Release: ${env.BUILD_URL}" } }
+      steps {
+        sh '''
+          git clone 'https://github.com/kframework/k' k-release
+          cd k-release
+          git fetch --all
+          git checkout -B release origin/release
+          git merge origin/master
+          ./package/version.sh bump
+          ./package/version.sh sub
+          git add -u
+          git commit -m "Set Version: $(cat package/version)"
+          git push origin release
+        '''
       }
     }
   }
