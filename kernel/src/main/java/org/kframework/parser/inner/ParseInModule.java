@@ -78,7 +78,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         this.files = files;
         if (profileRules) {
             try {
-                timing = new BufferedWriter(new FileWriter(files.resolveTemp("timing" + Thread.currentThread().getId() + ".log"), true));
+                timing = new BufferedWriter(new FileWriter(files.resolveKompiled("timing" + Thread.currentThread().getId() + ".log"), true));
             } catch (IOException e) {
                 throw KEMException.internalError("Failed to open timing.log", e);
             }
