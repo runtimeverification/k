@@ -307,18 +307,18 @@ public class DefinitionParsing {
                     .map(b -> (Bubble) b)
                     .filter(b -> b.sentenceType().equals(configuration))
                     .flatMap(b -> performParse(cache.getCache(), parser, parser.getScanner(), b))
-                     .map(contents -> {
-                         KApply configContents = (KApply) contents;
-                         List<K> items = configContents.klist().items();
-                         switch (configContents.klabel().name()) {
-                         case "#ruleNoConditions":
-                             return Configuration(items.get(0), BooleanUtils.TRUE, configContents.att());
-                         case "#ruleEnsures":
-                             return Configuration(items.get(0), items.get(1), configContents.att());
-                         default:
-                             throw KEMException.compilerError("Illegal configuration with requires clause detected.", configContents);
-                         }
-                     })
+                    .map(contents -> {
+                        KApply configContents = (KApply) contents;
+                        List<K> items = configContents.klist().items();
+                        switch (configContents.klabel().name()) {
+                        case "#ruleNoConditions":
+                            return Configuration(items.get(0), BooleanUtils.TRUE, configContents.att());
+                        case "#ruleEnsures":
+                            return Configuration(items.get(0), items.get(1), configContents.att());
+                        default:
+                            throw KEMException.compilerError("Illegal configuration with requires clause detected.", configContents);
+                        }
+                    })
                     .flatMap(
                             configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule(), kore)))
                     .collect(Collections.toSet());
