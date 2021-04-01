@@ -362,20 +362,12 @@ public class DefinitionParsing {
     }
 
     public Definition resolveNonConfigBubbles(Definition defWithConfig) {
-        // prepare parsers and their caches for all modules that have bubbles
         RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithConfig);
-        Map<String, ParseInModule> parsers = new HashMap<>();
-        for (Module m : mutable(defWithConfig.modules())) {
-            if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble)) {
-                ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(m), isStrict, profileRules, files);
-                parsers.put(m.name(), pim);
-            }
-        }
         // load cached bubbles
         Definition defWithCaches = DefinitionTransformer.from(m -> {
             if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble))
                 return m;
-            ParseCache cache = loadCache(parsers.get(m.name()).seedModule());
+            ParseCache cache = loadCache(gen.getRuleGrammar(m));
             java.util.Set<Sentence> replacedBubbles = new HashSet<>();
             java.util.Set<Sentence> cachedParses = new HashSet<>();
             for (Sentence s : mutable(m.localSentences())) {
@@ -395,7 +387,7 @@ public class DefinitionParsing {
                     } else {
                         kem.addAllKException(parsed.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
                     }
-                    // TODO: update error location
+                    // TODO: update error location #1873
                     Att att = parsed.getParse().att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class));
                     cachedParses.add(upSentence(new AddAtt(a -> att).apply(parsed.getParse()), b.sentenceType()));
                     // TODO: check to see if we don't parse the same rules twice because of module duplication!!!!!!!!!!!!!!!!!
@@ -414,16 +406,18 @@ public class DefinitionParsing {
         // prepare scanners for remaining bubbles
         // scanners can be reused so find the bottom modules which include all other modules
         java.util.Set<Module> botMods = getBotModules(defWithCaches.modules()).stream().filter(m -> m.sentences().filter(s -> s instanceof Bubble).size() != 0).collect(Collectors.toSet());
+        Map<String, ParseInModule> botParsers = new HashMap<>();
         for (Module m : botMods) {
             ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(m), isStrict, profileRules, files);
-            parsers.put(m.name(), pim);
+            botParsers.put(m.name(), pim);
         }
+        // map the module name to the scanner that it should use when parsing
         java.util.Map<String, ParseInModule> donorScanners = new HashMap<>();
         for (Module m : mutable(defWithCaches.modules())) {
             if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble)) {
                 Module scannerModule = botMods.stream().filter(bm -> m.equals(bm) || bm.importedModuleNames().contains(m.name())).findFirst()
                         .orElseThrow(() -> new AssertionError("Expected at least one bottom module to have a suitable scanner: " + m.name()));
-                donorScanners.put(m.name(), parsers.get(scannerModule.name()));
+                donorScanners.put(m.name(), botParsers.get(scannerModule.name()));
             }
         }
         // create scanners
@@ -436,7 +430,7 @@ public class DefinitionParsing {
                 .map(m -> {
                     if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble))
                         return m;
-                    ParseInModule pim = parsers.get(m.name());
+                    ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(m), isStrict, profileRules, files);
                     pim.setScanner(donorScanners.get(m.name()).getScanner());
                     pim.initialize();
                     ParseCache cache = loadCache(pim.seedModule());
