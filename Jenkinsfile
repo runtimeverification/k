@@ -19,6 +19,13 @@ pipeline {
       }
     }
     stage('Create source tarball') {
+      when {
+        anyOf {
+          branch 'release'
+          changeRequest()
+        }
+        beforeAgent true
+      }
       agent {
         dockerfile {
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
