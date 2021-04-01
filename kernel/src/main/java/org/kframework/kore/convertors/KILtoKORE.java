@@ -98,6 +98,8 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         HashMap<String, org.kframework.definition.Module> koreModules = new HashMap<>();
 
+        apply(mainModule, kilModules, koreModules);
+
         // Set<org.kframework.definition.Module> modules = kilModules.map(i ->
         // apply((Module) i))
         // .collect(Collectors.toSet());
