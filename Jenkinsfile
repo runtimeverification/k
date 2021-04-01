@@ -19,6 +19,13 @@ pipeline {
       }
     }
     stage('Create source tarball') {
+      when {
+        anyOf {
+          branch 'release'
+          changeRequest()
+        }
+        beforeAgent true
+      }
       agent {
         dockerfile {
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
@@ -648,18 +655,20 @@ pipeline {
       options { skipDefaultCheckout() }
       post { failure { slackSend color: '#cb2431' , channel: '#k' , message: "Failed to trigger Release: ${env.BUILD_URL}" } }
       steps {
-        sh '''
-          git clone 'https://github.com/kframework/k' k-release
-          cd k-release
-          git fetch --all
-          git checkout -B release origin/release
-          git merge origin/master
-          ./package/version.sh bump
-          ./package/version.sh sub
-          git add -u
-          git commit -m "Set Version: $(cat package/version)"
-          git push origin release
-        '''
+        sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
+          sh '''
+            git clone 'ssh://github.com/kframework/k' k-release
+            cd k-release
+            git fetch --all
+            git checkout -B release origin/release
+            git merge origin/master
+            ./package/version.sh bump
+            ./package/version.sh sub
+            git add -u
+            git commit -m "Set Version: $(cat package/version)"
+            git push origin release
+          '''
+        }
       }
     }
   }
