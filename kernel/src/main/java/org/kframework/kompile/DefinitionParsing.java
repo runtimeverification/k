@@ -26,11 +26,11 @@ import org.kframework.kore.AddAtt;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.Sort;
+import org.kframework.parser.ParserUtils;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.ParseCache;
 import org.kframework.parser.inner.ParseCache.ParsedSentence;
 import org.kframework.parser.inner.ParseInModule;
-import org.kframework.parser.ParserUtils;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
@@ -54,7 +54,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
-import static org.kframework.definition.Constructors.Module;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
@@ -406,24 +405,25 @@ public class DefinitionParsing {
         // prepare scanners for remaining bubbles
         // scanners can be reused so find the bottom modules which include all other modules
         java.util.Set<Module> botMods = getBotModules(defWithCaches.modules()).stream().filter(m -> m.sentences().filter(s -> s instanceof Bubble).size() != 0).collect(Collectors.toSet());
-        Map<String, ParseInModule> botParsers = new HashMap<>();
-        for (Module m : botMods) {
-            ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(m), isStrict, profileRules, files);
-            botParsers.put(m.name(), pim);
-        }
+
         // map the module name to the scanner that it should use when parsing
-        java.util.Map<String, ParseInModule> donorScanners = new HashMap<>();
+        java.util.Map<String, Module> donorModule = new HashMap<>();
         for (Module m : mutable(defWithCaches.modules())) {
             if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble)) {
                 Module scannerModule = botMods.stream().filter(bm -> m.equals(bm) || bm.importedModuleNames().contains(m.name())).findFirst()
                         .orElseThrow(() -> new AssertionError("Expected at least one bottom module to have a suitable scanner: " + m.name()));
-                donorScanners.put(m.name(), botParsers.get(scannerModule.name()));
+                donorModule.put(m.name(), scannerModule);
             }
         }
         // create scanners
-        new HashSet<>(donorScanners.values()).parallelStream().map(x -> x.getScanner(options.global)).collect(Collectors.toSet());
+        Map<Module, ParseInModule> donorScanners = new HashSet<>(donorModule.values()).parallelStream().map(x -> {
+            ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(x), isStrict, profileRules, files);
+            pim.getScanner(options.global);
+            return new Tuple2<>(x, pim);
+        }).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
 
-        // do parsing on remaining bubbles
+        // do parsing on remaining bubbles and collect everything in `parsedSentences`
+        // this way we can easily parallelize the steps and we don't have to deal with the complex structure of modules
         Map<String, java.util.Set<Sentence>> parsedSentences = new HashMap<>();
         stream(defWithCaches.modules())
                 .parallel()
@@ -431,7 +431,7 @@ public class DefinitionParsing {
                     if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble))
                         return m;
                     ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(m), isStrict, profileRules, files);
-                    pim.setScanner(donorScanners.get(m.name()).getScanner());
+                    pim.setScanner(donorScanners.get(donorModule.get(m.name())).getScanner());
                     pim.initialize();
                     ParseCache cache = loadCache(pim.seedModule());
                     java.util.Set<Sentence> sentences = stream(m.localSentences()).filter(s -> s instanceof Bubble)
