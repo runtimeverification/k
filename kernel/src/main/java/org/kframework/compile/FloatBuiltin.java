@@ -119,6 +119,10 @@ public class FloatBuiltin {
         return exponent;
     }
 
+    public BinaryMathContext getMathContext() {
+      return new BinaryMathContext(precision(), exponent());
+    }
+
     public int precision() {
         return value.precision();
     }
