@@ -27,7 +27,9 @@ import org.kframework.utils.options.OuterParsingOptions;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -220,8 +222,10 @@ public class ParserUtils {
         previousModules.stream().map(m -> koreModules.put(m.name(), m)).collect(Collectors.toList()); // populate koreModules with previousModules
         HashSet<org.kframework.kil.Module> kilModulesSet = new HashSet<>(kilModules);
 
-        Set<FlatModule> flatModules = kilModulesSet.stream().map(kilToKore::toFlatModule).collect(Collectors.toSet());
-        flatModules.stream().map(m -> m.toModule(immutable(flatModules), koreModules, Seq())).collect(Collectors.toSet()); // accumulate in koreModules the new modules
+        java.util.List<FlatModule> flatModules = kilModulesSet.stream().map(kilToKore::toFlatModule).sorted(Comparator.comparing(FlatModule::name)).collect(Collectors.toList());
+
+        // accumulate in koreModules the new modules. Use an ordered set in order to stabilize the error message for circular imports
+        flatModules.stream().map(m -> m.toModule(immutable(new LinkedHashSet<>(flatModules)), koreModules, Seq())).collect(Collectors.toSet());
         Set<Module> finalModules = mutable(koreModules.values().toSet());
 
         Set<Module> result = new HashSet<>();
