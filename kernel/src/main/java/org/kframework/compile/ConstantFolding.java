@@ -261,7 +261,7 @@ public class ConstantFolding {
   private String STRING_floatFormat(FloatBuiltin f, String format) {
     return FloatBuiltin.printKFloat(f.bigFloatValue(), () -> f.bigFloatValue().toString(format));
   }
-  
+
   private FloatBuiltin STRING_string2float(String s) {
     try {
       return FloatBuiltin.of(s);
@@ -292,7 +292,7 @@ public class ConstantFolding {
       throw KEMException.compilerError("Argument to hook STRING.string2base invalid. Expected a valid integer in base " + base.intValue() + ".", e, loc);
     }
   }
-  
+
   private String STRING_base2string(BigInteger i, BigInteger base) {
     if (base.compareTo(BigInteger.valueOf(2)) < 0 || base.compareTo(BigInteger.valueOf(36)) > 0) {
       throw KEMException.compilerError("Argument to hook STRING.string2base out of range. Expected a number between 2 and 36.", loc);
