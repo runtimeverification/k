@@ -369,10 +369,10 @@ pipeline {
                         git push -d origin brew-release-$PACKAGE || true
                         git checkout -b brew-release-$PACKAGE "origin/$brew_base_branch"
                         git merge origin/master
-                        ${WORKSPACE}/package/macos/brew-update-to-local
-                        git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 1"
-                        ${WORKSPACE}/package/macos/brew-build-and-update-to-local-bottle ${SHORT_REV}
-                        git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 2"
+                        ${WORKSPACE}/package/macos/brew-update-to-local ${PACKAGE} ${VERSION}
+                        git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${SHORT_REV}: part 1"
+                        ${WORKSPACE}/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL} ${SHORT_REV}
+                        git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${SHORT_REV}: part 2"
                         git push origin brew-release-$PACKAGE
                       '''
                       stash name: 'mojave', includes: "kframework--${env.VERSION}.mojave.bottle*.tar.gz"
@@ -385,7 +385,7 @@ pipeline {
                     dir('homebrew-k') {
                       git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
                       unstash 'mojave'
-                      sh '${WORKSPACE}/package/macos/brew-install-bottle'
+                      sh '${WORKSPACE}/package/macos/brew-install-bottle ${PACKAGE} ${VERSION}'
                     }
                     sh '''
                       brew install opam
@@ -407,8 +407,8 @@ pipeline {
                     '''
                     dir('homebrew-k') {
                       sh '''
-                        ${WORKSPACE}/package/macos/brew-update-to-final ${SHORT_REV}
-                        git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 3"
+                        ${WORKSPACE}/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL} ${SHORT_REV}
+                        git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${SHORT_REV}: part 3"
                         git push origin brew-release-$PACKAGE
                       '''
                     }

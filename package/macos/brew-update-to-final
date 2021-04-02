@@ -1,5 +1,7 @@
 #!/bin/sh -exu
-REV=$1
-sed -i "" -e 's!^  url ".*"$!  url "'$ROOT_URL/v$VERSION-$REV/$PACKAGE-$VERSION-src'.tar.gz"!' \
-    Formula/$PACKAGE.rb
-cat Formula/$PACKAGE.rb
+package="$1"  ; shift
+version="$1"  ; shift
+root_url="$1" ; shift
+rev="$1"      ; shift
+sed -i "" -e 's!^  url ".*"$!  url "'$root_url/v$version-$rev/$package-$version-src'.tar.gz"!' Formula/$package.rb
+cat Formula/$package.rb
