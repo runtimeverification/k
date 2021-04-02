@@ -42,6 +42,7 @@ import org.kframework.utils.file.FileUtil;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.Set;
+import scala.collection.mutable.LinkedHashSet;
 import scala.util.Either;
 
 import java.io.File;
@@ -405,12 +406,19 @@ public class DefinitionParsing {
         // prepare scanners for remaining bubbles
         // scanners can be reused so find the bottom modules which include all other modules
         java.util.Set<Module> botMods = getBotModules(defWithCaches.modules()).stream().filter(m -> m.sentences().filter(s -> s instanceof Bubble).size() != 0).collect(Collectors.toSet());
+        // prefer modules that import the main module. This way we avoid using the main syntax module which could contain problematic syntax for rule parsing
+        java.util.Set<Module> orderedBotMods = new java.util.LinkedHashSet<>();
+        for (Module m : botMods) {
+            if (m.name().equals(defWithCaches.mainModule().name()) || m.importedModuleNames().contains(defWithCaches.mainModule().name()))
+                orderedBotMods.add(m);
+        }
+        orderedBotMods.addAll(botMods);
 
         // map the module name to the scanner that it should use when parsing
         java.util.Map<String, Module> donorModule = new HashMap<>();
         for (Module m : mutable(defWithCaches.modules())) {
             if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble)) {
-                Module scannerModule = botMods.stream().filter(bm -> m.equals(bm) || bm.importedModuleNames().contains(m.name())).findFirst()
+                Module scannerModule = orderedBotMods.stream().filter(bm -> m.equals(bm) || bm.importedModuleNames().contains(m.name())).findFirst()
                         .orElseThrow(() -> new AssertionError("Expected at least one bottom module to have a suitable scanner: " + m.name()));
                 donorModule.put(m.name(), scannerModule);
             }
