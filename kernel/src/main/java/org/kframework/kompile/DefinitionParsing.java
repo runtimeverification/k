@@ -379,13 +379,13 @@ public class DefinitionParsing {
                     ParsedSentence parsed = cache.getCache().get(b.contents());
                     cachedBubbles.getAndIncrement();
                     if (kem.options.warnings2errors) {
-                        for (KEMException err : parsed.getWarnings().stream().map(e -> (KEMException) e).collect(Collectors.toList())) {
+                        for (KEMException err : parsed.getWarnings()) {
                             if (kem.options.includesExceptionType(err.exception.getType())) {
                                 errors.add(KEMException.asError(err));
                             }
                         }
                     } else {
-                        kem.addAllKException(parsed.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
+                        kem.addAllKException(parsed.getWarnings().stream().map(KEMException::getKException).collect(Collectors.toList()));
                     }
                     // TODO: update error location #1873
                     Att att = parsed.getParse().att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class));
