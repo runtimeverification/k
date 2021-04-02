@@ -28,7 +28,7 @@ import static org.kframework.definition.Constructors.*;
 
 public class ConstantFolding {
 
-  private final List<String> hookNamespaces = Arrays.asList(Hooks.BOOL, Hooks.FLOAT, Hooks.INT, Hooks.MINT, Hooks.STRING);
+  private final List<String> hookNamespaces = Arrays.asList(Hooks.BOOL, Hooks.FLOAT, Hooks.INT, Hooks.STRING);
 
   private K loc;
 
@@ -71,16 +71,6 @@ public class ConstantFolding {
     }.apply(body);
   }
 
-  private static class MIntBuiltin {
-    public BigInteger i;
-    public long precision;
-
-    public MIntBuiltin(BigInteger i, long precision) {
-      this.i = i;
-      this.precision = precision;
-    }
-  }
-
   private Class<?> classOf(String hook) {
     switch(hook) {
       case "BOOL.Bool":
@@ -89,8 +79,6 @@ public class ConstantFolding {
         return FloatBuiltin.class;
       case "INT.Int":
         return BigInteger.class;
-      case "MINT.MInt":
-        return MIntBuiltin.class;
       case "STRING.String":
         return String.class;
       default:
@@ -106,10 +94,6 @@ public class ConstantFolding {
         return FloatBuiltin.of(token);
       case "INT.Int":
         return new BigInteger(token);
-      case "MINT.MInt":
-        int idx = token.indexOf('p');
-        if (idx == -1) idx = token.indexOf('P');
-        return new MIntBuiltin(new BigInteger(token.substring(0, idx)), Long.valueOf(token.substring(idx+1)));
       case "STRING.String":
         return StringUtil.unquoteKString(token);
       default:
@@ -123,8 +107,6 @@ public class ConstantFolding {
     } else if (result instanceof FloatBuiltin) {
       return KToken(((FloatBuiltin)result).value(), sort);
     } else if (result instanceof BigInteger) {
-      return KToken(result.toString(), sort);
-    } else if (result instanceof MIntBuiltin) {
       return KToken(result.toString(), sort);
     } else if (result instanceof String) {
       return KToken(StringUtil.enquoteKString((String)result), sort);
