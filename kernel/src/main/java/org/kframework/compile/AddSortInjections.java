@@ -303,10 +303,16 @@ public class AddSortInjections {
                         .collect(Collectors.toSet());
     }
 
+    /**
+     * Compute the sort of a term in a context where there is no expected sort, i.e., at the top of a rule body.
+     */
     public Sort topSort(K term) {
       return sort(term, freshSortParam());
     }
 
+    /**
+     * Compute the sort of a term with a particular expected sort.
+     */
     public Sort sort(K term, Sort expectedSort) {
         if (term instanceof KApply) {
             KApply kapp = (KApply)term;
