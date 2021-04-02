@@ -39,13 +39,9 @@ public class GenerateCoverage {
 
         Sort s = inj.topSort(body);
 
-        K k = KSequence(KApply(KLabel("#logToFile"),
+        K k = KApply(KLabel("sideEffect:" + s.toString()), KApply(KLabel("#logToFile"),
             KToken(StringUtil.enquoteKString(files.resolveKompiled("coverage.txt").getAbsolutePath()), Sorts.String()),
             KToken(StringUtil.enquoteKString(id + '\n'), Sorts.String())), right);
-
-        if (!s.equals(Sorts.K())) {
-            k = KApply(KLabel("project:" + s.toString()), k);
-        }
 
         return KRewrite(left, k);
     }
