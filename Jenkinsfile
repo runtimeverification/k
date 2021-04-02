@@ -371,7 +371,7 @@ pipeline {
                         git merge origin/master
                         ${WORKSPACE}/package/macos/brew-update-to-local ${PACKAGE} ${VERSION}
                         git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${SHORT_REV}: part 1"
-                        ${WORKSPACE}/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL} ${SHORT_REV}
+                        ${WORKSPACE}/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL}
                         git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${SHORT_REV}: part 2"
                         git push origin brew-release-$PACKAGE
                       '''
@@ -407,7 +407,7 @@ pipeline {
                     '''
                     dir('homebrew-k') {
                       sh '''
-                        ${WORKSPACE}/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL} ${SHORT_REV}
+                        ${WORKSPACE}/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL}
                         git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${SHORT_REV}: part 3"
                         git push origin brew-release-$PACKAGE
                       '''
