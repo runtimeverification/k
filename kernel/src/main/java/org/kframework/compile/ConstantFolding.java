@@ -83,7 +83,7 @@ public class ConstantFolding {
       case "STRING.String":
         return String.class;
       default:
-        throw KEMException.internalError("Invalid constant-folding sort");
+        return String.class;
     }
   }
 
@@ -98,7 +98,7 @@ public class ConstantFolding {
       case "STRING.String":
         return StringUtil.unquoteKString(token);
       default:
-        throw KEMException.internalError("Invalid constant-folding sort");
+        return token;
     }
   }
 
@@ -112,7 +112,7 @@ public class ConstantFolding {
     } else if (result instanceof String) {
       return KToken(StringUtil.enquoteKString((String)result), sort);
     } else {
-      throw KEMException.internalError("Invalid constant-folding sort");
+      return KToken(result.toString(), sort);
     }
   }
 
@@ -123,7 +123,7 @@ public class ConstantFolding {
     for (K arg : args) {
       KToken tok = (KToken)arg;
       Sort sort = tok.sort();
-      String argHook = module.sortAttributesFor().apply(sort.head()).get(Att.HOOK());
+      String argHook = module.sortAttributesFor().apply(sort.head()).getOptional(Att.HOOK()).orElse("");
       paramTypes.add(classOf(argHook));
       unwrappedArgs.add(unwrap(tok.s(), argHook));
     }
@@ -336,6 +336,14 @@ public class ConstantFolding {
 
   private boolean STRING_ge(String a, String b) {
     return a.compareTo(b) >= 0;
+  }
+
+  private String STRING_token2string(String token) {
+    return token;
+  }
+
+  private String STRING_string2token(String str) {
+    return str;
   }
 
   private BigInteger INT_not(BigInteger a) {
