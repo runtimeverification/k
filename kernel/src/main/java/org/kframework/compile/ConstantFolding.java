@@ -14,10 +14,13 @@ import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.StringUtil;
+import org.kframework.mpfr.BigFloat;
+import org.kframework.mpfr.BinaryMathContext;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -499,4 +502,199 @@ public class ConstantFolding {
     return !a.equals(b);
   }
 
+  private BigInteger FLOAT_precision(FloatBuiltin f) {
+    return BigInteger.valueOf(f.precision());
+  }
+
+  private BigInteger FLOAT_exponentBits(FloatBuiltin f) {
+    return BigInteger.valueOf(f.exponent());
+  }
+
+  private BigInteger FLOAT_exponent(FloatBuiltin f) {
+    BinaryMathContext mc = f.getMathContext();
+    return BigInteger.valueOf(f.bigFloatValue().exponent(mc.minExponent, mc.maxExponent));
+  }
+
+  private boolean FLOAT_sign(FloatBuiltin f) {
+    return f.bigFloatValue().sign();
+  }
+
+  private boolean FLOAT_isNaN(FloatBuiltin f) {
+    return f.bigFloatValue().isNaN();
+  }
+
+  private FloatBuiltin FLOAT_neg(FloatBuiltin f) {
+    return FloatBuiltin.of(f.bigFloatValue().negate(f.getMathContext()), f.exponent());
+  }
+
+  private void throwIfNotMatched(FloatBuiltin a, FloatBuiltin b, String hook) {
+    if (!a.getMathContext().equals(b.getMathContext())) {
+      throw KEMException.compilerError("Arguments to hook " + hook + " do not match in exponent bits and precision.", loc);
+    }
+  }
+
+  private FloatBuiltin FLOAT_pow(FloatBuiltin a, FloatBuiltin b) {
+    throwIfNotMatched(a, b, "FLOAT.pow");
+    return FloatBuiltin.of(a.bigFloatValue().pow(b.bigFloatValue(), a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_mul(FloatBuiltin a, FloatBuiltin b) {
+    throwIfNotMatched(a, b, "FLOAT.mul");
+    return FloatBuiltin.of(a.bigFloatValue().multiply(b.bigFloatValue(), a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_div(FloatBuiltin a, FloatBuiltin b) {
+    throwIfNotMatched(a, b, "FLOAT.div");
+    return FloatBuiltin.of(a.bigFloatValue().divide(b.bigFloatValue(), a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_rem(FloatBuiltin a, FloatBuiltin b) {
+    throwIfNotMatched(a, b, "FLOAT.rem");
+    return FloatBuiltin.of(a.bigFloatValue().remainder(b.bigFloatValue(), a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_add(FloatBuiltin a, FloatBuiltin b) {
+    throwIfNotMatched(a, b, "FLOAT.add");
+    return FloatBuiltin.of(a.bigFloatValue().add(b.bigFloatValue(), a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_sub(FloatBuiltin a, FloatBuiltin b) {
+    throwIfNotMatched(a, b, "FLOAT.sub");
+    return FloatBuiltin.of(a.bigFloatValue().subtract(b.bigFloatValue(), a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_root(FloatBuiltin a, BigInteger b) {
+    throwIfNotInt(b, "FLOAT.root");
+    return FloatBuiltin.of(a.bigFloatValue().root(b.intValue(), a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_abs(FloatBuiltin a) {
+    return FloatBuiltin.of(a.bigFloatValue().abs(a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_round(FloatBuiltin a, BigInteger prec, BigInteger exp) {
+    throwIfNotUnsignedInt(prec, "FLOAT.round");
+    throwIfNotUnsignedInt(exp, "FLOAT.round");
+    if (prec.intValue() < 2 || exp.intValue() < 2) {
+      throw KEMException.compilerError("Arguments to hook FLOAT.round are too small. Precision and exponent bits must both be at least 2.", loc);
+    }
+    return FloatBuiltin.of(a.bigFloatValue().round(new BinaryMathContext(prec.intValue(), exp.intValue())), exp.intValue());
+  }
+
+  private FloatBuiltin FLOAT_floor(FloatBuiltin a) {
+    return FloatBuiltin.of(a.bigFloatValue().rint(a.getMathContext().withRoundingMode(RoundingMode.FLOOR)), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_ceil(FloatBuiltin a) {
+    return FloatBuiltin.of(a.bigFloatValue().rint(a.getMathContext().withRoundingMode(RoundingMode.CEILING)), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_exp(FloatBuiltin a) {
+    return FloatBuiltin.of(a.bigFloatValue().exp(a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_log(FloatBuiltin a) {
+    return FloatBuiltin.of(a.bigFloatValue().log(a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_sin(FloatBuiltin a) {
+    return FloatBuiltin.of(a.bigFloatValue().sin(a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_cos(FloatBuiltin a) {
+    return FloatBuiltin.of(a.bigFloatValue().cos(a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_tan(FloatBuiltin a) {
+    return FloatBuiltin.of(a.bigFloatValue().tan(a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_asin(FloatBuiltin a) {
+    return FloatBuiltin.of(a.bigFloatValue().asin(a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_acos(FloatBuiltin a) {
+    return FloatBuiltin.of(a.bigFloatValue().acos(a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_atan(FloatBuiltin a) {
+    return FloatBuiltin.of(a.bigFloatValue().atan(a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_atan2(FloatBuiltin a, FloatBuiltin b) {
+    throwIfNotMatched(a, b, "FLOAT.atan2");
+    return FloatBuiltin.of(BigFloat.atan2(a.bigFloatValue(), b.bigFloatValue(), a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_max(FloatBuiltin a, FloatBuiltin b) {
+    throwIfNotMatched(a, b, "FLOAT.max");
+    return FloatBuiltin.of(BigFloat.max(a.bigFloatValue(), b.bigFloatValue(), a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_min(FloatBuiltin a, FloatBuiltin b) {
+    throwIfNotMatched(a, b, "FLOAT.min");
+    return FloatBuiltin.of(BigFloat.min(a.bigFloatValue(), b.bigFloatValue(), a.getMathContext()), a.exponent());
+  }
+
+  private FloatBuiltin FLOAT_maxValue(BigInteger prec, BigInteger exp) {
+    throwIfNotUnsignedInt(prec, "FLOAT.maxValue");
+    throwIfNotUnsignedInt(exp, "FLOAT.maxValue");
+    if (prec.intValue() < 2 || exp.intValue() < 2) {
+      throw KEMException.compilerError("Arguments to hook FLOAT.maxValue are too small. Precision and exponent bits must both be at least 2.", loc);
+    }
+    BinaryMathContext mc = new BinaryMathContext(prec.intValue(), exp.intValue());
+    return FloatBuiltin.of(BigFloat.maxValue(mc.precision, mc.maxExponent), exp.intValue());
+  }
+
+  private FloatBuiltin FLOAT_minValue(BigInteger prec, BigInteger exp) {
+    throwIfNotUnsignedInt(prec, "FLOAT.minValue");
+    throwIfNotUnsignedInt(exp, "FLOAT.minValue");
+    if (prec.intValue() < 2 || exp.intValue() < 2) {
+      throw KEMException.compilerError("Arguments to hook FLOAT.minValue are too small. Precision and exponent bits must both be at least 2.", loc);
+    }
+    BinaryMathContext mc = new BinaryMathContext(prec.intValue(), exp.intValue());
+    return FloatBuiltin.of(BigFloat.minValue(mc.precision, mc.minExponent), exp.intValue());
+  }
+
+  private boolean FLOAT_lt(FloatBuiltin a, FloatBuiltin b) {
+    return a.bigFloatValue().lessThan(b.bigFloatValue());
+  }
+
+  private boolean FLOAT_le(FloatBuiltin a, FloatBuiltin b) {
+    return a.bigFloatValue().lessThanOrEqualTo(b.bigFloatValue());
+  }
+
+  private boolean FLOAT_gt(FloatBuiltin a, FloatBuiltin b) {
+    return a.bigFloatValue().greaterThan(b.bigFloatValue());
+  }
+
+  private boolean FLOAT_ge(FloatBuiltin a, FloatBuiltin b) {
+    return a.bigFloatValue().greaterThanOrEqualTo(b.bigFloatValue());
+  }
+
+  private boolean FLOAT_eq(FloatBuiltin a, FloatBuiltin b) {
+    return a.bigFloatValue().equalTo(b.bigFloatValue());
+  }
+
+  private boolean FLOAT_ne(FloatBuiltin a, FloatBuiltin b) {
+    return !a.bigFloatValue().equalTo(b.bigFloatValue());
+  }
+
+  private FloatBuiltin FLOAT_int2float(BigInteger a, BigInteger prec, BigInteger exp) {
+    throwIfNotUnsignedInt(prec, "FLOAT.int2float");
+    throwIfNotUnsignedInt(exp, "FLOAT.int2float");
+    if (prec.intValue() < 2 || exp.intValue() < 2) {
+      throw KEMException.compilerError("Arguments to hook FLOAT.int2float are too small. Precision and exponent bits must both be at least 2.", loc);
+    }
+    BinaryMathContext mc = new BinaryMathContext(prec.intValue(), exp.intValue());
+    return FloatBuiltin.of(new BigFloat(a, mc), exp.intValue());
+  }
+
+  private BigInteger FLOAT_float2int(FloatBuiltin a) {
+    try {
+      return a.bigFloatValue().rint(a.getMathContext().withRoundingMode(RoundingMode.DOWN)).toBigIntegerExact();
+    } catch (ArithmeticException e) {
+      throw KEMException.compilerError("Argument to hook FLOAT.float2int cannot be rounded to an integer.", e, loc);
+    }
+  }
 }
