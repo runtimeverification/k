@@ -36,6 +36,7 @@ result=1
 now=`date +"%Y-%m-%d-%H-%M-%S"`
 tempDir="$(mktemp -d .krun-${now}-XXXXXXXXXX)"
 tempFiles=("$tempDir")
+dryRunFiles=$tempFiles
 trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
 
 input_file="$(mktemp ${tempDir}/tmp.in.XXXXXXXXXX)"
@@ -211,16 +212,6 @@ do
 
       --dry-run)
       cmdprefix="echo "
-      tempFiles=(${tempFiles[@]/$expanded_input_file})
-      # slash removes prefixes so build a new array with the files to keep
-      newArray=()
-      for value in "${tempFiles[@]}"; do
-          if [ $value != $tempDir ]; then 
-            newArray+=($value)
-          fi
-      done
-      tempFiles="${newArray[@]}"
-      unset newArray
       dryRun=true
       ;;
 
@@ -522,6 +513,7 @@ if [ "$backendName" = "llvm" ]; then
     interpreter_flags=
   fi
 
+  dryRunFiles+=($expanded_input_file)
   set +e
   execute $cmdprefix "$kompiledDir/interpreter" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags
   result=$?
@@ -562,11 +554,14 @@ elif [ "$backendName" = "haskell" ] ; then
     if [ -n "$bound" ]; then
       koreExecFlags="$koreExecFlags --bound $bound"
     fi
+    dryRunFiles+=($final_input)
+    dryRunFiles+=($patternFile)
     set +e
     execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$final_input" --output "$kore_output" --searchType "$searchType" --search "$patternFile" $koreExecFlags $depthFlags
     result=$?
     set -e
   else
+    dryRunFiles+=($expanded_input_file)
     set +e
     execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$kore_output" $koreExecFlags $depthFlags
     result=$?
@@ -606,6 +601,17 @@ if ! $dryRun; then
   else
     error "Backend crashed during rewriting with exit code $result"
   fi
+else
+  # kepp files used by dry-run
+  newArray=()
+  for value in "${tempFiles[@]}"; do
+      if [[ ! ${dryRunFiles[@]} =~ ${value} ]]; then 
+        newArray+=($value)
+      fi
+  done
+  tempFiles=()
+  tempFiles=${newArray[@]}
+  unset newArray
 fi
 
 exit $result
