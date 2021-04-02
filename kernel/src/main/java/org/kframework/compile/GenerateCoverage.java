@@ -37,7 +37,7 @@ public class GenerateCoverage {
 
         AddSortInjections inj = new AddSortInjections(mod);
 
-        Sort s = inj.sort(right, Sorts.K());
+        Sort s = inj.topSort(body);
 
         K k = KSequence(KApply(KLabel("#logToFile"),
             KToken(StringUtil.enquoteKString(files.resolveKompiled("coverage.txt").getAbsolutePath()), Sorts.String()),

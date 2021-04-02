@@ -112,7 +112,7 @@ public class AddSortInjections {
         }.apply(body)) {
             body = KRewrite(RewriteToTop.toLeft(body), RewriteToTop.toRight(body));
         }
-        Sort sort = sort(body, freshSortParam());
+        Sort sort = topSort(body);
         return internalAddSortInjections(body, sort);
     }
 
@@ -301,6 +301,10 @@ public class AddSortInjections {
                         .filter(t -> t._1().sort().equals(param))
                         .map(t -> t._2())
                         .collect(Collectors.toSet());
+    }
+
+    public Sort topSort(K term) {
+      return sort(term, freshSortParam());
     }
 
     public Sort sort(K term, Sort expectedSort) {
