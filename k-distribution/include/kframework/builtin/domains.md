@@ -1112,8 +1112,8 @@ module INT
   syntax Int ::= freshInt(Int)    [freshGenerator, function, functional]
   rule freshInt(I:Int) => I
 
-  syntax Int ::= randInt(Int) [function, hook(INT.rand)]
-  syntax K ::= srandInt(Int) [function, hook(INT.srand)]
+  syntax Int ::= randInt(Int) [function, hook(INT.rand), impure]
+  syntax K ::= srandInt(Int) [function, hook(INT.srand), impure]
 endmodule
 ```
 
