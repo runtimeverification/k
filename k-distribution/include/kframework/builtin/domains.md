@@ -419,15 +419,15 @@ module MAP-KORE-SYMBOLIC [kore,symbolic]
   rule #Ceil(@M:Map [@K:KItem]) => {(@K in_keys(@M)) #Equals true} #And #Ceil(@M) #And #Ceil(@K) [anywhere, simplification]
 
   // Symbolic update
-  rule (K |-> _ M:Map) [ K <- V ] => (K |-> V M) [simplification]
+  rule (K |-> _ M:Map) [ K <- V ] => (K |-> V M) ensures notBool (K in_keys(M)) [simplification]
   rule M:Map [ K <- V ] => (K |-> V M) requires notBool (K in_keys(M)) [simplification]
   rule M:Map [ K <- _ ] [ K <- V ] => M [ K <- V ] [simplification]
-  rule (K1 |-> V1 M:Map) [ K2 <- V2 ] => (K1 |-> V1 (M [ K2 <- V2 ])) requires K1 =/=K K2 [simplification]
+  rule (K1 |-> V1 M:Map) [ K2 <- V2 ] => (K1 |-> V1 (M [ K2 <- V2 ])) requires K1 =/=K K2 ensures notBool (K1 in_keys(M)) [simplification]
 
   // Symbolic remove
   rule (K |-> _ M:Map) [ K <- undef ] => M ensures notBool (K in_keys(M)) [simplification]
   rule M:Map [ K <- undef ] => M requires notBool (K in_keys(M)) [simplification]
-  rule (K1 |-> V1 M:Map) [ K2 <- undef ] => (K1 |-> V1 (M [ K2 <- undef ])) requires K1 =/=K K2 [simplification]
+  rule (K1 |-> V1 M:Map) [ K2 <- undef ] => (K1 |-> V1 (M [ K2 <- undef ])) requires K1 =/=K K2 ensures notBool (K1 in_keys(M)) [simplification]
 
   // Symbolic lookup
   rule (K  |->  V M:Map) [ K ]  => V ensures notBool (K in_keys(M)) [simplification]
