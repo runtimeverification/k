@@ -3,6 +3,7 @@ package org.kframework.backend.haskell;
 
 import com.google.inject.Inject;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Source;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.builtin.KLabels;
@@ -285,9 +286,8 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             }
 
             private String saveKoreSpecToTemp(ModuleToKORE converter, Module rules) {
-                StringBuilder sb = new StringBuilder();
                 String koreOutput = converter.convertSpecificationModule(module, rules,
-                        haskellKRunOptions.defaultClaimType, sb);
+                        haskellKRunOptions.defaultClaimType, Source.apply(kProveOptions.specFile(files).getAbsolutePath()));
                 files.saveToTemp("spec.kore", koreOutput);
                 String specPath = files.resolveTemp("spec.kore").getAbsolutePath();
                 return specPath;

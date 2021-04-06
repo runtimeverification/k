@@ -8,6 +8,7 @@ import com.google.common.collect.SetMultimap;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
+import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Hooks;
 import org.kframework.builtin.KLabels;
@@ -122,7 +123,15 @@ public class ModuleToKORE {
         String topCellSortStr = getSortStr(topCellSort);
         semantics.append("[topCellInitializer{}(");
         convert(topCellInitializer, semantics);
-        semantics.append("())]\n\n");
+        semantics.append("()), ");
+        StringBuilder sb = new StringBuilder();
+        HashMap<String, Boolean> considerSource = new HashMap<>();
+        considerSource.put(Att.SOURCE(), true);
+        // insert the location of the main module so the backend can provide better error location
+        convert(considerSource, Att.empty().add(Source.class, module.att().get(Source.class)), sb, null, null);
+        semantics.append(sb.subSequence(1, sb.length() - 1));
+        semantics.append("]\n\n");
+
         semantics.append(prelude);
         semantics.append("\n");
 
@@ -832,13 +841,16 @@ public class ModuleToKORE {
         return prod.klabel().nonEmpty() && ConstructorChecks.isBuiltinLabel(prod.klabel().get());
     }
 
-    public String convertSpecificationModule(Module definition, Module spec, SentenceType defaultSentenceType, StringBuilder sb) {
+    public String convertSpecificationModule(Module definition, Module spec, SentenceType defaultSentenceType, Source mainFile) {
         SentenceType sentenceType = getSentenceType(spec.att()).orElse(defaultSentenceType);
-        sb.setLength(0); // reset string writer
+        StringBuilder sb = new StringBuilder();
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(definition);
         Sort topCellSort = configInfo.getRootCell();
         String topCellSortStr = getSortStr(topCellSort);
-        sb.append("[]\n");
+        HashMap<String, Boolean> considerSource = new HashMap<>();
+        considerSource.put(Att.SOURCE(), true);
+        convert(considerSource, Att.empty().add(Source.class, mainFile), sb, null, null);
+        sb.append("\n");
         sb.append("module ");
         convert(spec.name(), sb);
         sb.append("\n\n// imports\n");
