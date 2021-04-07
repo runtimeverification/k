@@ -6,20 +6,10 @@ in
 { pkgs ? pinned }:
 
 let
-  ttuegel =
-    let
-      src = builtins.fetchGit {
-        url = "https://github.com/ttuegel/nix-lib";
-        rev = "66bb0ab890ff4d828a2dcfc7d5968465d0c7084f";
-        ref = "main";
-      };
-    in import src { inherit pkgs; };
-in
-
-let
   inherit (pkgs) callPackage;
 
   mavenix = import sources."mavenix" { inherit pkgs; };
+  ttuegel = import sources."ttuegel" { inherit pkgs; };
 
   llvm-backend-project = import ./llvm-backend/src/main/native/llvm-backend {
     inherit pkgs;
@@ -32,7 +22,8 @@ let
   inherit (llvm-backend-project) clang llvm-backend;
 
   k = callPackage ./nix/k.nix {
-    inherit llvm-backend mavenix;
+    inherit haskell-backend llvm-backend mavenix;
+    inherit (ttuegel) cleanGit cleanSourceWith;
   };
 
   haskell-backend-project = import ./haskell-backend/src/main/native/haskell-backend {

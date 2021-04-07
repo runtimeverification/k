@@ -182,13 +182,6 @@
       <type>exe</type>
     </dependency>
 
-    <!--Custom serializer-->
-    <!--<dependency>
-      <groupId>com.esotericsoftware</groupId>
-      <artifactId>kryo</artifactId>
-      <version>5.0.0-RC4</version> - Crashes when serializing Att.
-      <version>4.0.2</version> - Doesn't work out of the box. Serialized classes need default constructor.
-    </dependency>-->
     <dependency>
       <groupId>de.ruedigermoeller</groupId>
       <artifactId>fst</artifactId>

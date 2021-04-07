@@ -425,13 +425,13 @@ module MAP-KORE-SYMBOLIC [kore,symbolic]
   rule (K1 |-> V1 M:Map) [ K2 <- V2 ] => (K1 |-> V1 (M [ K2 <- V2 ])) requires K1 =/=K K2 [simplification]
 
   // Symbolic remove
-  rule (K |-> _ M:Map) [ K <- undef ] => M [simplification]
+  rule (K |-> _ M:Map) [ K <- undef ] => M ensures notBool (K in_keys(M)) [simplification]
   rule M:Map [ K <- undef ] => M requires notBool (K in_keys(M)) [simplification]
   rule (K1 |-> V1 M:Map) [ K2 <- undef ] => (K1 |-> V1 (M [ K2 <- undef ])) requires K1 =/=K K2 [simplification]
 
   // Symbolic lookup
-  rule (K  |->  V _:Map) [ K ]  => V [simplification]
-  rule (K1 |-> _V M:Map) [ K2 ] => M [K2] requires K1 =/=K K2 [simplification]
+  rule (K  |->  V M:Map) [ K ]  => V ensures notBool (K in_keys(M)) [simplification]
+  rule (K1 |-> _V M:Map) [ K2 ] => M [K2] requires K1 =/=K K2 ensures notBool (K1 in_keys(M)) [simplification]
   rule (_MAP:Map [ K  <-  V1 ]) [ K ]  => V1 [simplification]
   rule ( MAP:Map [ K1 <- _V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2 [simplification]
 
