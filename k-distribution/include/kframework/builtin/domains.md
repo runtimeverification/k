@@ -1439,7 +1439,7 @@ O(N*M) time.
 
 ```k
   syntax String ::= Bool2String(Bool) [function, functional]
-  rule Bool2String(true) => "true"
+  rule Bool2String(true)  => "true"
   rule Bool2String(false) => "false"
 ```
 
