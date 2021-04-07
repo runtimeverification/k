@@ -104,6 +104,9 @@ case class FlatModule(name: String, imports: Set[Import], localSentences: Set[Se
       throw KEMException.compilerError(msg)
     }
 
+    if (koreModules.contains(mainModName))
+      return koreModules(mainModName)
+
     def resolveImport(_import: Import): Module = {
       var baseName = Import.noSyntax(_import.name)
       var modOption = allModules.find(m => m.name.equals(baseName))
