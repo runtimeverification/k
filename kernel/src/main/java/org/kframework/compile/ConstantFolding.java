@@ -145,51 +145,51 @@ public class ConstantFolding {
     }
   }
 
-  private boolean BOOL_not(boolean a) {
+  boolean BOOL_not(boolean a) {
     return ! a;
   }
 
-  private boolean BOOL_and(boolean a, boolean b) {
+  boolean BOOL_and(boolean a, boolean b) {
     return a && b;
   }
 
-  private boolean BOOL_andThen(boolean a, boolean b) {
+  boolean BOOL_andThen(boolean a, boolean b) {
     return a && b;
   }
 
-  private boolean BOOL_xor(boolean a, boolean b) {
+  boolean BOOL_xor(boolean a, boolean b) {
     return (a && !b) || (b && !a);
   }
 
-  private boolean BOOL_or(boolean a, boolean b) {
+  boolean BOOL_or(boolean a, boolean b) {
     return a || b;
   }
 
-  private boolean BOOL_orElse(boolean a, boolean b) {
+  boolean BOOL_orElse(boolean a, boolean b) {
     return a || b;
   }
 
-  private boolean BOOL_implies(boolean a, boolean b) {
+  boolean BOOL_implies(boolean a, boolean b) {
     return ! a || b;
   }
 
-  private boolean BOOL_eq(boolean a, boolean b) {
+  boolean BOOL_eq(boolean a, boolean b) {
     return a == b;
   }
 
-  private boolean BOOL_ne(boolean a, boolean b) {
+  boolean BOOL_ne(boolean a, boolean b) {
     return a != b;
   }
 
-  private String STRING_concat(String a, String b) {
+  String STRING_concat(String a, String b) {
     return a + b;
   }
 
-  private BigInteger STRING_length(String a) {
+  BigInteger STRING_length(String a) {
     return BigInteger.valueOf(a.length());
   }
 
-  private String STRING_chr(BigInteger a) {
+  String STRING_chr(BigInteger a) {
     if (a.compareTo(BigInteger.ZERO) < 0 || a.compareTo(BigInteger.valueOf(0x10ffff)) > 0) {
       throw KEMException.compilerError("Argument to hook STRING.chr out of range. Expected a number between 0 and 1114111.", loc);
     }
@@ -197,7 +197,7 @@ public class ConstantFolding {
     return new String(codePoint, 0, 1);
   }
 
-  private BigInteger STRING_ord(String a) {
+  BigInteger STRING_ord(String a) {
     if (a.codePointCount(0, a.length()) > 1) {
       throw KEMException.compilerError("Argument to hook STRING.ord out of range. Expected a single character.");
     }
@@ -216,7 +216,7 @@ public class ConstantFolding {
     }
   }
 
-  private String STRING_substr(String s, BigInteger start, BigInteger end) {
+  String STRING_substr(String s, BigInteger start, BigInteger end) {
     throwIfNotInt(start, "STRING.substr");
     throwIfNotInt(end, "STRING.substr");
     try {
@@ -226,43 +226,43 @@ public class ConstantFolding {
     }
   }
 
-  private BigInteger STRING_find(String haystack, String needle, BigInteger idx) {
+  BigInteger STRING_find(String haystack, String needle, BigInteger idx) {
     throwIfNotInt(idx, "STRING.find");
     int offset = haystack.offsetByCodePoints(0, idx.intValue());
     int foundOffset = haystack.indexOf(needle, offset);
     return BigInteger.valueOf((foundOffset == -1 ? -1 : haystack.codePointCount(0, foundOffset)));
   }
 
-  private BigInteger STRING_rfind(String haystack, String needle, BigInteger idx) {
+  BigInteger STRING_rfind(String haystack, String needle, BigInteger idx) {
     throwIfNotInt(idx, "STRING.rfind");
     int offset = haystack.offsetByCodePoints(0, idx.intValue());
     int foundOffset = haystack.lastIndexOf(needle, offset);
     return BigInteger.valueOf((foundOffset == -1 ? -1 : haystack.codePointCount(0, foundOffset)));
   }
 
-  private BigInteger STRING_findChar(String haystack, String needles, BigInteger idx) {
+  BigInteger STRING_findChar(String haystack, String needles, BigInteger idx) {
     throwIfNotInt(idx, "STRING.findChar");
     int offset = haystack.offsetByCodePoints(0, idx.intValue());
     int foundOffset = StringUtil.indexOfAny(haystack, needles, offset);
     return BigInteger.valueOf((foundOffset == -1 ? -1 : haystack.codePointCount(0, foundOffset)));
   }
 
-  private BigInteger STRING_rfindChar(String haystack, String needles, BigInteger idx) {
+  BigInteger STRING_rfindChar(String haystack, String needles, BigInteger idx) {
     throwIfNotInt(idx, "STRING.findChar");
     int offset = haystack.offsetByCodePoints(0, idx.intValue());
     int foundOffset = StringUtil.lastIndexOfAny(haystack, needles, offset);
     return BigInteger.valueOf((foundOffset == -1 ? -1 : haystack.codePointCount(0, foundOffset)));
   }
 
-  private String STRING_float2string(FloatBuiltin f) {
+  String STRING_float2string(FloatBuiltin f) {
     return FloatBuiltin.printKFloat(f.bigFloatValue(), f.bigFloatValue()::toString);
   }
 
-  private String STRING_floatFormat(FloatBuiltin f, String format) {
+  String STRING_floatFormat(FloatBuiltin f, String format) {
     return FloatBuiltin.printKFloat(f.bigFloatValue(), () -> f.bigFloatValue().toString(format));
   }
 
-  private FloatBuiltin STRING_string2float(String s) {
+  FloatBuiltin STRING_string2float(String s) {
     try {
       return FloatBuiltin.of(s);
     } catch (NumberFormatException e) {
@@ -270,7 +270,7 @@ public class ConstantFolding {
     }
   }
 
-  private BigInteger STRING_string2int(String s) {
+  BigInteger STRING_string2int(String s) {
     try {
       return new BigInteger(s, 10);
     } catch (NumberFormatException e) {
@@ -278,11 +278,11 @@ public class ConstantFolding {
     }
   }
 
-  private String STRING_int2string(BigInteger i) {
+  String STRING_int2string(BigInteger i) {
     return i.toString();
   }
 
-  private BigInteger STRING_string2base(String s, BigInteger base) {
+  BigInteger STRING_string2base(String s, BigInteger base) {
     if (base.compareTo(BigInteger.valueOf(2)) < 0 || base.compareTo(BigInteger.valueOf(36)) > 0) {
       throw KEMException.compilerError("Argument to hook STRING.string2base out of range. Expected a number between 2 and 36.", loc);
     }
@@ -293,72 +293,72 @@ public class ConstantFolding {
     }
   }
 
-  private String STRING_base2string(BigInteger i, BigInteger base) {
+  String STRING_base2string(BigInteger i, BigInteger base) {
     if (base.compareTo(BigInteger.valueOf(2)) < 0 || base.compareTo(BigInteger.valueOf(36)) > 0) {
       throw KEMException.compilerError("Argument to hook STRING.string2base out of range. Expected a number between 2 and 36.", loc);
     }
     return i.toString(base.intValue());
   }
 
-  private String STRING_replaceAll(String haystack, String needle, String replacement) {
+  String STRING_replaceAll(String haystack, String needle, String replacement) {
     return StringUtils.replace(haystack, needle, replacement);
   }
 
-  private String STRING_replace(String haystack, String needle, String replacement, BigInteger times) {
+  String STRING_replace(String haystack, String needle, String replacement, BigInteger times) {
     throwIfNotInt(times, "STRING.replace");
     return StringUtils.replace(haystack, needle, replacement, times.intValue());
   }
 
-  private String STRING_replaceFirst(String haystack, String needle, String replacement) {
+  String STRING_replaceFirst(String haystack, String needle, String replacement) {
     return StringUtils.replaceOnce(haystack, needle, replacement);
   }
 
-  private BigInteger STRING_countAllOccurrences(String haystack, String needle) {
+  BigInteger STRING_countAllOccurrences(String haystack, String needle) {
     return BigInteger.valueOf(StringUtils.countMatches(haystack, needle));
   }
 
-  private boolean STRING_eq(String a, String b) {
+  boolean STRING_eq(String a, String b) {
     return a.equals(b);
   }
 
-  private boolean STRING_ne(String a, String b) {
+  boolean STRING_ne(String a, String b) {
     return !a.equals(b);
   }
 
-  private boolean STRING_lt(String a, String b) {
+  boolean STRING_lt(String a, String b) {
     return a.compareTo(b) < 0;
   }
 
-  private boolean STRING_gt(String a, String b) {
+  boolean STRING_gt(String a, String b) {
     return a.compareTo(b) > 0;
   }
 
-  private boolean STRING_le(String a, String b) {
+  boolean STRING_le(String a, String b) {
     return a.compareTo(b) <= 0;
   }
 
-  private boolean STRING_ge(String a, String b) {
+  boolean STRING_ge(String a, String b) {
     return a.compareTo(b) >= 0;
   }
 
-  private String STRING_token2string(String token) {
+  String STRING_token2string(String token) {
     return token;
   }
 
-  private String STRING_string2token(String str) {
+  String STRING_string2token(String str) {
     return str;
   }
 
-  private BigInteger INT_not(BigInteger a) {
+  BigInteger INT_not(BigInteger a) {
     return a.not();
   }
 
-  private BigInteger INT_pow(BigInteger a, BigInteger b) {
+  BigInteger INT_pow(BigInteger a, BigInteger b) {
     throwIfNotUnsignedInt(b, "INT.pow");
     return a.pow(b.intValue());
   }
 
-  private BigInteger INT_powmod(BigInteger a, BigInteger b, BigInteger c) {
+  BigInteger INT_powmod(BigInteger a, BigInteger b, BigInteger c) {
     try {
       return a.modPow(b, c);
     } catch(ArithmeticException e) {
@@ -366,75 +366,75 @@ public class ConstantFolding {
     }
   }
 
-  private BigInteger INT_mul(BigInteger a, BigInteger b) {
+  BigInteger INT_mul(BigInteger a, BigInteger b) {
     return a.multiply(b);
   }
 
-  private BigInteger INT_tdiv(BigInteger a, BigInteger b) {
+  BigInteger INT_tdiv(BigInteger a, BigInteger b) {
     if (b.compareTo(BigInteger.ZERO) == 0) {
       throw KEMException.compilerError("Division by zero.", loc);
     }
     return a.divide(b);
   }
 
-  private BigInteger INT_tmod(BigInteger a, BigInteger b) {
+  BigInteger INT_tmod(BigInteger a, BigInteger b) {
     if (b.compareTo(BigInteger.ZERO) == 0) {
       throw KEMException.compilerError("Modulus by zero.", loc);
     }
     return a.remainder(b);
   }
 
-  private BigInteger INT_ediv(BigInteger a, BigInteger b) {
+  BigInteger INT_ediv(BigInteger a, BigInteger b) {
     return a.subtract(a.mod(b)).divide(b);
   }
 
-  private BigInteger INT_emod(BigInteger a, BigInteger b) {
+  BigInteger INT_emod(BigInteger a, BigInteger b) {
     return a.mod(b);
   }
 
-  private BigInteger INT_add(BigInteger a, BigInteger b) {
+  BigInteger INT_add(BigInteger a, BigInteger b) {
     return a.add(b);
   }
 
-  private BigInteger INT_sub(BigInteger a, BigInteger b) {
+  BigInteger INT_sub(BigInteger a, BigInteger b) {
     return a.subtract(b);
   }
 
-  private BigInteger INT_shr(BigInteger a, BigInteger b) {
+  BigInteger INT_shr(BigInteger a, BigInteger b) {
     throwIfNotUnsignedInt(b, "INT.shr");
     return a.shiftRight(b.intValue());
   }
 
-  private BigInteger INT_shl(BigInteger a, BigInteger b) {
+  BigInteger INT_shl(BigInteger a, BigInteger b) {
     throwIfNotUnsignedInt(b, "INT.shl");
     return a.shiftLeft(b.intValue());
   }
 
-  private BigInteger INT_and(BigInteger a, BigInteger b) {
+  BigInteger INT_and(BigInteger a, BigInteger b) {
     return a.and(b);
   }
 
-  private BigInteger INT_xor(BigInteger a, BigInteger b) {
+  BigInteger INT_xor(BigInteger a, BigInteger b) {
     return a.xor(b);
   }
 
-  private BigInteger INT_or(BigInteger a, BigInteger b) {
+  BigInteger INT_or(BigInteger a, BigInteger b) {
     return a.or(b);
   }
 
-  private BigInteger INT_min(BigInteger a, BigInteger b) {
+  BigInteger INT_min(BigInteger a, BigInteger b) {
     return a.min(b);
   }
 
-  private BigInteger INT_max(BigInteger a, BigInteger b) {
+  BigInteger INT_max(BigInteger a, BigInteger b) {
     return a.max(b);
   }
 
-  private BigInteger INT_abs(BigInteger a) {
+  BigInteger INT_abs(BigInteger a) {
     return a.abs();
   }
 
-  private BigInteger INT_log2(BigInteger a) {
+  BigInteger INT_log2(BigInteger a) {
     if (a.compareTo(BigInteger.ZERO) <= 0) {
       throw KEMException.compilerError("Argument to hook INT.log2 out of range. Expected a positive integer.", loc);
     }
@@ -446,7 +446,7 @@ public class ConstantFolding {
     return BigInteger.valueOf(log2);
   }
 
-  private BigInteger INT_bitRange(BigInteger i, BigInteger index, BigInteger length) {
+  BigInteger INT_bitRange(BigInteger i, BigInteger index, BigInteger length) {
     throwIfNotUnsignedInt(index, "INT.bitRange");
     throwIfNotUnsignedInt(length, "INT.bitRange");
     byte[] twosComplement = i.toByteArray();
@@ -460,7 +460,7 @@ public class ConstantFolding {
     return i;
   }
 
-  private BigInteger INT_signExtendBitRange(BigInteger i, BigInteger index, BigInteger length) {
+  BigInteger INT_signExtendBitRange(BigInteger i, BigInteger index, BigInteger length) {
     throwIfNotUnsignedInt(index, "INT.signExtendBitRange");
     throwIfNotUnsignedInt(length, "INT.signExtendBitRange");
     if (length.intValue() == 0) {
@@ -478,52 +478,52 @@ public class ConstantFolding {
     }
   }
 
-  private boolean INT_lt(BigInteger a, BigInteger b) {
+  boolean INT_lt(BigInteger a, BigInteger b) {
     return a.compareTo(b) < 0;
   }
 
-  private boolean INT_gt(BigInteger a, BigInteger b) {
+  boolean INT_gt(BigInteger a, BigInteger b) {
     return a.compareTo(b) > 0;
   }
 
-  private boolean INT_le(BigInteger a, BigInteger b) {
+  boolean INT_le(BigInteger a, BigInteger b) {
     return a.compareTo(b) <= 0;
   }
 
-  private boolean INT_ge(BigInteger a, BigInteger b) {
+  boolean INT_ge(BigInteger a, BigInteger b) {
     return a.compareTo(b) >= 0;
   }
 
-  private boolean INT_eq(BigInteger a, BigInteger b) {
+  boolean INT_eq(BigInteger a, BigInteger b) {
     return a.equals(b);
   }
 
-  private boolean INT_ne(BigInteger a, BigInteger b) {
+  boolean INT_ne(BigInteger a, BigInteger b) {
     return !a.equals(b);
   }
 
-  private BigInteger FLOAT_precision(FloatBuiltin f) {
+  BigInteger FLOAT_precision(FloatBuiltin f) {
     return BigInteger.valueOf(f.precision());
   }
 
-  private BigInteger FLOAT_exponentBits(FloatBuiltin f) {
+  BigInteger FLOAT_exponentBits(FloatBuiltin f) {
     return BigInteger.valueOf(f.exponent());
   }
 
-  private BigInteger FLOAT_exponent(FloatBuiltin f) {
+  BigInteger FLOAT_exponent(FloatBuiltin f) {
     BinaryMathContext mc = f.getMathContext();
     return BigInteger.valueOf(f.bigFloatValue().exponent(mc.minExponent, mc.maxExponent));
   }
 
-  private boolean FLOAT_sign(FloatBuiltin f) {
+  boolean FLOAT_sign(FloatBuiltin f) {
     return f.bigFloatValue().sign();
   }
 
-  private boolean FLOAT_isNaN(FloatBuiltin f) {
+  boolean FLOAT_isNaN(FloatBuiltin f) {
     return f.bigFloatValue().isNaN();
   }
 
-  private FloatBuiltin FLOAT_neg(FloatBuiltin f) {
+  FloatBuiltin FLOAT_neg(FloatBuiltin f) {
     return FloatBuiltin.of(f.bigFloatValue().negate(f.getMathContext()), f.exponent());
   }
 
@@ -533,46 +533,46 @@ public class ConstantFolding {
     }
   }
 
-  private FloatBuiltin FLOAT_pow(FloatBuiltin a, FloatBuiltin b) {
+  FloatBuiltin FLOAT_pow(FloatBuiltin a, FloatBuiltin b) {
     throwIfNotMatched(a, b, "FLOAT.pow");
     return FloatBuiltin.of(a.bigFloatValue().pow(b.bigFloatValue(), a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_mul(FloatBuiltin a, FloatBuiltin b) {
+  FloatBuiltin FLOAT_mul(FloatBuiltin a, FloatBuiltin b) {
     throwIfNotMatched(a, b, "FLOAT.mul");
     return FloatBuiltin.of(a.bigFloatValue().multiply(b.bigFloatValue(), a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_div(FloatBuiltin a, FloatBuiltin b) {
+  FloatBuiltin FLOAT_div(FloatBuiltin a, FloatBuiltin b) {
     throwIfNotMatched(a, b, "FLOAT.div");
     return FloatBuiltin.of(a.bigFloatValue().divide(b.bigFloatValue(), a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_rem(FloatBuiltin a, FloatBuiltin b) {
+  FloatBuiltin FLOAT_rem(FloatBuiltin a, FloatBuiltin b) {
     throwIfNotMatched(a, b, "FLOAT.rem");
     return FloatBuiltin.of(a.bigFloatValue().remainder(b.bigFloatValue(), a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_add(FloatBuiltin a, FloatBuiltin b) {
+  FloatBuiltin FLOAT_add(FloatBuiltin a, FloatBuiltin b) {
     throwIfNotMatched(a, b, "FLOAT.add");
     return FloatBuiltin.of(a.bigFloatValue().add(b.bigFloatValue(), a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_sub(FloatBuiltin a, FloatBuiltin b) {
+  FloatBuiltin FLOAT_sub(FloatBuiltin a, FloatBuiltin b) {
     throwIfNotMatched(a, b, "FLOAT.sub");
     return FloatBuiltin.of(a.bigFloatValue().subtract(b.bigFloatValue(), a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_root(FloatBuiltin a, BigInteger b) {
+  FloatBuiltin FLOAT_root(FloatBuiltin a, BigInteger b) {
     throwIfNotInt(b, "FLOAT.root");
     return FloatBuiltin.of(a.bigFloatValue().root(b.intValue(), a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_abs(FloatBuiltin a) {
+  FloatBuiltin FLOAT_abs(FloatBuiltin a) {
     return FloatBuiltin.of(a.bigFloatValue().abs(a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_round(FloatBuiltin a, BigInteger prec, BigInteger exp) {
+  FloatBuiltin FLOAT_round(FloatBuiltin a, BigInteger prec, BigInteger exp) {
     throwIfNotUnsignedInt(prec, "FLOAT.round");
     throwIfNotUnsignedInt(exp, "FLOAT.round");
     if (prec.intValue() < 2 || exp.intValue() < 2) {
@@ -581,62 +581,62 @@ public class ConstantFolding {
     return FloatBuiltin.of(a.bigFloatValue().round(new BinaryMathContext(prec.intValue(), exp.intValue())), exp.intValue());
   }
 
-  private FloatBuiltin FLOAT_floor(FloatBuiltin a) {
+  FloatBuiltin FLOAT_floor(FloatBuiltin a) {
     return FloatBuiltin.of(a.bigFloatValue().rint(a.getMathContext().withRoundingMode(RoundingMode.FLOOR)), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_ceil(FloatBuiltin a) {
+  FloatBuiltin FLOAT_ceil(FloatBuiltin a) {
     return FloatBuiltin.of(a.bigFloatValue().rint(a.getMathContext().withRoundingMode(RoundingMode.CEILING)), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_exp(FloatBuiltin a) {
+  FloatBuiltin FLOAT_exp(FloatBuiltin a) {
     return FloatBuiltin.of(a.bigFloatValue().exp(a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_log(FloatBuiltin a) {
+  FloatBuiltin FLOAT_log(FloatBuiltin a) {
     return FloatBuiltin.of(a.bigFloatValue().log(a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_sin(FloatBuiltin a) {
+  FloatBuiltin FLOAT_sin(FloatBuiltin a) {
     return FloatBuiltin.of(a.bigFloatValue().sin(a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_cos(FloatBuiltin a) {
+  FloatBuiltin FLOAT_cos(FloatBuiltin a) {
     return FloatBuiltin.of(a.bigFloatValue().cos(a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_tan(FloatBuiltin a) {
+  FloatBuiltin FLOAT_tan(FloatBuiltin a) {
     return FloatBuiltin.of(a.bigFloatValue().tan(a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_asin(FloatBuiltin a) {
+  FloatBuiltin FLOAT_asin(FloatBuiltin a) {
     return FloatBuiltin.of(a.bigFloatValue().asin(a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_acos(FloatBuiltin a) {
+  FloatBuiltin FLOAT_acos(FloatBuiltin a) {
     return FloatBuiltin.of(a.bigFloatValue().acos(a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_atan(FloatBuiltin a) {
+  FloatBuiltin FLOAT_atan(FloatBuiltin a) {
     return FloatBuiltin.of(a.bigFloatValue().atan(a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_atan2(FloatBuiltin a, FloatBuiltin b) {
+  FloatBuiltin FLOAT_atan2(FloatBuiltin a, FloatBuiltin b) {
     throwIfNotMatched(a, b, "FLOAT.atan2");
     return FloatBuiltin.of(BigFloat.atan2(a.bigFloatValue(), b.bigFloatValue(), a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_max(FloatBuiltin a, FloatBuiltin b) {
+  FloatBuiltin FLOAT_max(FloatBuiltin a, FloatBuiltin b) {
     throwIfNotMatched(a, b, "FLOAT.max");
     return FloatBuiltin.of(BigFloat.max(a.bigFloatValue(), b.bigFloatValue(), a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_min(FloatBuiltin a, FloatBuiltin b) {
+  FloatBuiltin FLOAT_min(FloatBuiltin a, FloatBuiltin b) {
     throwIfNotMatched(a, b, "FLOAT.min");
     return FloatBuiltin.of(BigFloat.min(a.bigFloatValue(), b.bigFloatValue(), a.getMathContext()), a.exponent());
   }
 
-  private FloatBuiltin FLOAT_maxValue(BigInteger prec, BigInteger exp) {
+  FloatBuiltin FLOAT_maxValue(BigInteger prec, BigInteger exp) {
     throwIfNotUnsignedInt(prec, "FLOAT.maxValue");
     throwIfNotUnsignedInt(exp, "FLOAT.maxValue");
     if (prec.intValue() < 2 || exp.intValue() < 2) {
@@ -646,7 +646,7 @@ public class ConstantFolding {
     return FloatBuiltin.of(BigFloat.maxValue(mc.precision, mc.maxExponent), exp.intValue());
   }
 
-  private FloatBuiltin FLOAT_minValue(BigInteger prec, BigInteger exp) {
+  FloatBuiltin FLOAT_minValue(BigInteger prec, BigInteger exp) {
     throwIfNotUnsignedInt(prec, "FLOAT.minValue");
     throwIfNotUnsignedInt(exp, "FLOAT.minValue");
     if (prec.intValue() < 2 || exp.intValue() < 2) {
@@ -656,31 +656,31 @@ public class ConstantFolding {
     return FloatBuiltin.of(BigFloat.minValue(mc.precision, mc.minExponent), exp.intValue());
   }
 
-  private boolean FLOAT_lt(FloatBuiltin a, FloatBuiltin b) {
+  boolean FLOAT_lt(FloatBuiltin a, FloatBuiltin b) {
     return a.bigFloatValue().lessThan(b.bigFloatValue());
   }
 
-  private boolean FLOAT_le(FloatBuiltin a, FloatBuiltin b) {
+  boolean FLOAT_le(FloatBuiltin a, FloatBuiltin b) {
     return a.bigFloatValue().lessThanOrEqualTo(b.bigFloatValue());
   }
 
-  private boolean FLOAT_gt(FloatBuiltin a, FloatBuiltin b) {
+  boolean FLOAT_gt(FloatBuiltin a, FloatBuiltin b) {
     return a.bigFloatValue().greaterThan(b.bigFloatValue());
   }
 
-  private boolean FLOAT_ge(FloatBuiltin a, FloatBuiltin b) {
+  boolean FLOAT_ge(FloatBuiltin a, FloatBuiltin b) {
     return a.bigFloatValue().greaterThanOrEqualTo(b.bigFloatValue());
   }
 
-  private boolean FLOAT_eq(FloatBuiltin a, FloatBuiltin b) {
+  boolean FLOAT_eq(FloatBuiltin a, FloatBuiltin b) {
     return a.bigFloatValue().equalTo(b.bigFloatValue());
   }
 
-  private boolean FLOAT_ne(FloatBuiltin a, FloatBuiltin b) {
+  boolean FLOAT_ne(FloatBuiltin a, FloatBuiltin b) {
     return !a.bigFloatValue().equalTo(b.bigFloatValue());
   }
 
-  private FloatBuiltin FLOAT_int2float(BigInteger a, BigInteger prec, BigInteger exp) {
+  FloatBuiltin FLOAT_int2float(BigInteger a, BigInteger prec, BigInteger exp) {
     throwIfNotUnsignedInt(prec, "FLOAT.int2float");
     throwIfNotUnsignedInt(exp, "FLOAT.int2float");
     if (prec.intValue() < 2 || exp.intValue() < 2) {
@@ -690,7 +690,7 @@ public class ConstantFolding {
     return FloatBuiltin.of(new BigFloat(a, mc), exp.intValue());
   }
 
-  private BigInteger FLOAT_float2int(FloatBuiltin a) {
+  BigInteger FLOAT_float2int(FloatBuiltin a) {
     try {
       return a.bigFloatValue().rint(a.getMathContext().withRoundingMode(RoundingMode.DOWN)).toBigIntegerExact();
     } catch (ArithmeticException e) {
