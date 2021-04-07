@@ -1435,6 +1435,20 @@ O(N*M) time.
   syntax Int ::= rfindChar ( haystack: String , needles: String , index: Int )    [function, hook(STRING.rfindChar)]
 ```
 
+### String and Bool conversion
+
+```k
+  syntax String ::= Bool2String(Bool) [function, functional]
+  rule Bool2String(true) => "true"
+  rule Bool2String(false) => "false"
+```
+
+```k
+  syntax Bool ::= String2Bool(String) [function]
+  rule String2Bool("true")  => true
+  rule String2Bool("false") => false
+```
+
 ### String and float conversion
 
 You can convert between a `String` and a `Float`. The String will be
