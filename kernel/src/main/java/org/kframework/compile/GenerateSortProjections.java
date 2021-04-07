@@ -29,11 +29,15 @@ import static org.kframework.kore.KORE.*;
 public class GenerateSortProjections {
 
     private Module mod;
+    private final boolean cover;
 
-    public GenerateSortProjections() {}
+    public GenerateSortProjections(boolean cover) {
+        this.cover = cover;
+    }
 
     public GenerateSortProjections(Module mod) {
       this.mod = mod;
+      this.cover = false;
     }
 
     public Module gen(Module mod) {
@@ -63,7 +67,15 @@ public class GenerateSortProjections {
         if (mod.definedKLabels().contains(lbl)) {
             return Stream.empty();
         }
-        return stream(Set(Production(lbl, sort, Seq(Terminal(lbl.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")), Att().add("function").add("projection")), r));
+        Production prod = Production(lbl, sort, Seq(Terminal(lbl.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")), Att().add("function").add("projection"));
+        if (cover) {
+            KLabel sideEffectLbl = KLabel("sideEffect:" + sort.toString());
+            Production sideEffect = Production(sideEffectLbl, sort, Seq(Terminal(sideEffectLbl.name()), Terminal("("), NonTerminal(Sorts.K()), Terminal(","), NonTerminal(sort), Terminal(")")), Att().add("function"));
+            Rule sideEffectR = Rule(KRewrite(KApply(sideEffectLbl, KVariable("K2", Att.empty().add(Sort.class, Sorts.K())), var), var), BooleanUtils.TRUE, BooleanUtils.TRUE);
+            return stream(Set(prod, r, sideEffect, sideEffectR));
+        } else {
+            return stream(Set(prod, r));
+        }
     }
 
     public Stream<? extends Sentence> gen(Production prod) {
