@@ -419,18 +419,22 @@ module MAP-KORE-SYMBOLIC [kore,symbolic]
   rule #Ceil(@M:Map [@K:KItem]) => {(@K in_keys(@M)) #Equals true} #And #Ceil(@M) #And #Ceil(@K) [anywhere, simplification]
 
   // Symbolic update
-  // The ensures clause in the followig rule is redundant. K also appears in the rhs, preserving the case when it's #Bottom 
-  rule (K |-> _ M:Map) [ K <- V ] => (K |-> V M) ensures notBool (K in_keys(M)) [simplification]
+
+  // Adding the definedness condition `notBool (K in_keys(M))` in the ensures clause of the followig rule would be redundant
+  // because K also appears in the rhs, preserving the case when it's #Bottom.
+  rule (K |-> _ M:Map) [ K <- V ] => (K |-> V M) [simplification]
   rule M:Map [ K <- V ] => (K |-> V M) requires notBool (K in_keys(M)) [simplification]
   rule M:Map [ K <- _ ] [ K <- V ] => M [ K <- V ] [simplification]
-  // The ensures clause in the followig rule is redundant. K1 also appears in the rhs, preserving the case when it's #Bottom 
-  rule (K1 |-> V1 M:Map) [ K2 <- V2 ] => (K1 |-> V1 (M [ K2 <- V2 ])) requires K1 =/=K K2 ensures notBool (K1 in_keys(M)) [simplification]
+  // Adding the definedness condition `notBool (K1 in_keys(M))` in the ensures clause of the followig rule would be redundant
+  // because K1 also appears in the rhs, preserving the case when it's #Bottom.
+  rule (K1 |-> V1 M:Map) [ K2 <- V2 ] => (K1 |-> V1 (M [ K2 <- V2 ])) requires K1 =/=K K2 [simplification]
 
   // Symbolic remove
   rule (K |-> _ M:Map) [ K <- undef ] => M ensures notBool (K in_keys(M)) [simplification]
   rule M:Map [ K <- undef ] => M requires notBool (K in_keys(M)) [simplification]
-  // The ensures clause in the followig rule is redundant. K also appears in the rhs, preserving the case when it's #Bottom 
-  rule (K1 |-> V1 M:Map) [ K2 <- undef ] => (K1 |-> V1 (M [ K2 <- undef ])) requires K1 =/=K K2 ensures notBool (K1 in_keys(M)) [simplification]
+  // Adding the definedness condition `notBool (K1 in_keys(M))` in the ensures clause of the followig rule would be redundant
+  // because K1 also appears in the rhs, preserving the case when it's #Bottom.
+  rule (K1 |-> V1 M:Map) [ K2 <- undef ] => (K1 |-> V1 (M [ K2 <- undef ])) requires K1 =/=K K2 [simplification]
 
   // Symbolic lookup
   rule (K  |->  V M:Map) [ K ]  => V ensures notBool (K in_keys(M)) [simplification]
