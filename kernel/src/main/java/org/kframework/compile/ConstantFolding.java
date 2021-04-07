@@ -31,7 +31,7 @@ import static org.kframework.definition.Constructors.*;
 
 public class ConstantFolding {
 
-  private final List<String> hookNamespaces = Arrays.asList(Hooks.BOOL, Hooks.FLOAT, Hooks.INT, Hooks.STRING);
+  private static final List<String> hookNamespaces = Arrays.asList(Hooks.BOOL, Hooks.FLOAT, Hooks.INT, Hooks.STRING);
 
   private K loc;
 
