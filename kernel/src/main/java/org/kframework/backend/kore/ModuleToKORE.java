@@ -841,15 +841,15 @@ public class ModuleToKORE {
         return prod.klabel().nonEmpty() && ConstructorChecks.isBuiltinLabel(prod.klabel().get());
     }
 
-    public String convertSpecificationModule(Module definition, Module spec, SentenceType defaultSentenceType, Source mainFile) {
+    public String convertSpecificationModule(Module definition, Module spec, SentenceType defaultSentenceType, StringBuilder sb) {
         SentenceType sentenceType = getSentenceType(spec.att()).orElse(defaultSentenceType);
-        StringBuilder sb = new StringBuilder();
+        sb.setLength(0); // reset string writer
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(definition);
         Sort topCellSort = configInfo.getRootCell();
         String topCellSortStr = getSortStr(topCellSort);
         HashMap<String, Boolean> considerSource = new HashMap<>();
         considerSource.put(Att.SOURCE(), true);
-        convert(considerSource, Att.empty().add(Source.class, mainFile), sb, null, null);
+        convert(considerSource, Att.empty().add(Source.class, spec.att().get(Source.class)), sb, null, null);
         sb.append("\n");
         sb.append("module ");
         convert(spec.name(), sb);
