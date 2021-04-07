@@ -92,7 +92,6 @@ case class FlatModule(name: String, imports: Set[Import], localSentences: Set[Se
   extends OuterKORE with Sorting with Serializable {
 
   def toModule(allModules: Set[FlatModule], koreModules: scala.collection.mutable.Map[String, Module], visitedModules: Seq[FlatModule]): Module = {
-    var mainModName = this.name
     var items = this.localSentences
     var importedModuleNames = this.imports
     var importedSyntax = importedModuleNames.map(m => Import.asSyntax(m))
@@ -104,8 +103,8 @@ case class FlatModule(name: String, imports: Set[Import], localSentences: Set[Se
       throw KEMException.compilerError(msg)
     }
 
-    if (koreModules.contains(mainModName))
-      return koreModules(mainModName)
+    if (koreModules.contains(this.name))
+      return koreModules(this.name)
 
     def resolveImport(_import: Import): Module = {
       var baseName = Import.noSyntax(_import.name)
