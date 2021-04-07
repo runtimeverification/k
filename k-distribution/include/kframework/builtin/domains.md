@@ -1813,6 +1813,8 @@ together in O(N) time.
 
 ```k
   syntax Bytes ::= Bytes "+Bytes" Bytes [function, functional, hook(BYTES.concat), right]
+
+endmodule
 ```
 
 ### Implementation of Bytes
@@ -1823,9 +1825,6 @@ backends and should not be viewed as authoritative, nor should the user
 use the `nilBytes` or `:` operators in their definition.
 
 ```k
-  rule .Bytes => String2Bytes("")
-endmodule
-
 module BYTES-IN-K [symbolic, kast]
   imports INT
   imports K-EQUAL
