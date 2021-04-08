@@ -221,8 +221,8 @@ public class ConstantFolding {
   }
 
   String STRING_substr(String s, BigInteger start, BigInteger end) {
-    throwIfNotInt(start, "STRING.substr");
-    throwIfNotInt(end, "STRING.substr");
+    throwIfNotUnsignedInt(start, "STRING.substr");
+    throwIfNotUnsignedInt(end, "STRING.substr");
     try {
       return s.substring(s.offsetByCodePoints(0, start.intValue()), s.offsetByCodePoints(0, end.intValue()));
     } catch (IndexOutOfBoundsException e) {
@@ -309,7 +309,7 @@ public class ConstantFolding {
   }
 
   String STRING_replace(String haystack, String needle, String replacement, BigInteger times) {
-    throwIfNotInt(times, "STRING.replace");
+    throwIfNotUnsignedInt(times, "STRING.replace");
     return StringUtils.replace(haystack, needle, replacement, times.intValue());
   }
 
