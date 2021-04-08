@@ -190,7 +190,7 @@ public class ConstantFolding {
   }
 
   BigInteger STRING_length(String a) {
-    return BigInteger.valueOf(a.length());
+    return BigInteger.valueOf(a.codePointCount(0, a.length()));
   }
 
   String STRING_chr(BigInteger a) {
