@@ -275,7 +275,7 @@ public class ConstantFolding {
   }
 
   String STRING_float2string(FloatBuiltin f) {
-    return FloatBuiltin.printKFloat(f.bigFloatValue(), f.bigFloatValue()::toString);
+    return f.value();
   }
 
   String STRING_floatFormat(FloatBuiltin f, String format) {
