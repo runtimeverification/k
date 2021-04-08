@@ -35,6 +35,10 @@ public class ConstantFolding {
 
   private K loc;
 
+  void setLoc(K loc) {
+    this.loc = loc;
+  }
+
   public Sentence fold(Module module, Sentence sentence) {
     if (sentence instanceof Rule) {
       Rule r = (Rule)sentence;
