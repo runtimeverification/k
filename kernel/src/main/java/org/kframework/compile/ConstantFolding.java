@@ -202,7 +202,7 @@ public class ConstantFolding {
   }
 
   BigInteger STRING_ord(String a) {
-    if (a.codePointCount(0, a.length()) > 1) {
+    if (a.codePointCount(0, a.length()) != 1) {
       throw KEMException.compilerError("Argument to hook STRING.ord out of range. Expected a single character.");
     }
     return BigInteger.valueOf(a.codePointAt(0));
