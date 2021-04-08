@@ -283,7 +283,7 @@ public class ConstantFoldingTest {
     assertEquals(BigInteger.valueOf(1), cf.STRING_string2int("1"));
     assertEquals(BigInteger.valueOf(1), cf.STRING_string2int("+1"));
     assertEquals(BigInteger.valueOf(-1), cf.STRING_string2int("-1"));
-    assertEquals(new BigInteger("100000000000000000000"), cf.STRING_string2int("100000000000000000000")); 
+    assertEquals(new BigInteger("100000000000000000000"), cf.STRING_string2int("100000000000000000000"));
   }
 
   @Test(expected=KEMException.class)
@@ -645,7 +645,7 @@ public class ConstantFoldingTest {
   @Test(expected=KEMException.class)
   public void testIntLog2Error2() {
     cf.INT_log2(BigInteger.valueOf(-1));
-  } 
+  }
 
   @Test
   public void testBitRange() {
