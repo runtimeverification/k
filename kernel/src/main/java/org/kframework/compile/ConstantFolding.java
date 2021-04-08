@@ -405,11 +405,21 @@ public class ConstantFolding {
   }
 
   BigInteger INT_ediv(BigInteger a, BigInteger b) {
-    return a.subtract(a.mod(b)).divide(b);
+    if (b.compareTo(BigInteger.ZERO) == 0) {
+      throw KEMException.compilerError("Division by zero.", loc);
+    }
+    return a.subtract(INT_emod(a, b)).divide(b);
   }
 
   BigInteger INT_emod(BigInteger a, BigInteger b) {
-    return a.mod(b);
+    if (b.compareTo(BigInteger.ZERO) == 0) {
+      throw KEMException.compilerError("Division by zero.", loc);
+    }
+    BigInteger rem = a.remainder(b);
+    if (rem.compareTo(BigInteger.ZERO) < 0) {
+      return rem.add(b.abs());
+    }
+    return rem;
   }
 
   BigInteger INT_add(BigInteger a, BigInteger b) {
