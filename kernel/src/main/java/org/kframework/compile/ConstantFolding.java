@@ -231,31 +231,47 @@ public class ConstantFolding {
   }
 
   BigInteger STRING_find(String haystack, String needle, BigInteger idx) {
-    throwIfNotInt(idx, "STRING.find");
-    int offset = haystack.offsetByCodePoints(0, idx.intValue());
-    int foundOffset = haystack.indexOf(needle, offset);
-    return BigInteger.valueOf((foundOffset == -1 ? -1 : haystack.codePointCount(0, foundOffset)));
+    throwIfNotUnsignedInt(idx, "STRING.find");
+    try {
+      int offset = haystack.offsetByCodePoints(0, idx.intValue());
+     int foundOffset = haystack.indexOf(needle, offset);
+      return BigInteger.valueOf((foundOffset == -1 ? -1 : haystack.codePointCount(0, foundOffset)));
+    } catch(IndexOutOfBoundsException e) {
+      throw KEMException.compilerError("Argument to hook STRING.find out of range. Expected an index >= 0 and <= the length of the string to search.", e, loc);
+    }
   }
 
   BigInteger STRING_rfind(String haystack, String needle, BigInteger idx) {
-    throwIfNotInt(idx, "STRING.rfind");
-    int offset = haystack.offsetByCodePoints(0, idx.intValue());
-    int foundOffset = haystack.lastIndexOf(needle, offset);
-    return BigInteger.valueOf((foundOffset == -1 ? -1 : haystack.codePointCount(0, foundOffset)));
+    throwIfNotUnsignedInt(idx, "STRING.rfind");
+    try {
+      int offset = haystack.offsetByCodePoints(0, idx.intValue());
+      int foundOffset = haystack.lastIndexOf(needle, offset);
+      return BigInteger.valueOf((foundOffset == -1 ? -1 : haystack.codePointCount(0, foundOffset)));
+    } catch(IndexOutOfBoundsException e) {
+      throw KEMException.compilerError("Argument to hook STRING.rfind out of range. Expected an index >= 0 and <= the length of the string to search.", e, loc);
+    }
   }
 
   BigInteger STRING_findChar(String haystack, String needles, BigInteger idx) {
-    throwIfNotInt(idx, "STRING.findChar");
-    int offset = haystack.offsetByCodePoints(0, idx.intValue());
-    int foundOffset = StringUtil.indexOfAny(haystack, needles, offset);
-    return BigInteger.valueOf((foundOffset == -1 ? -1 : haystack.codePointCount(0, foundOffset)));
+    throwIfNotUnsignedInt(idx, "STRING.findChar");
+    try {
+      int offset = haystack.offsetByCodePoints(0, idx.intValue());
+      int foundOffset = StringUtil.indexOfAny(haystack, needles, offset);
+      return BigInteger.valueOf((foundOffset == -1 ? -1 : haystack.codePointCount(0, foundOffset)));
+    } catch(IndexOutOfBoundsException e) {
+      throw KEMException.compilerError("Argument to hook STRING.findChar out of range. Expected an index >= 0 and <= the length of the string to search.", e, loc);
+    }
   }
 
   BigInteger STRING_rfindChar(String haystack, String needles, BigInteger idx) {
-    throwIfNotInt(idx, "STRING.findChar");
-    int offset = haystack.offsetByCodePoints(0, idx.intValue());
-    int foundOffset = StringUtil.lastIndexOfAny(haystack, needles, offset);
-    return BigInteger.valueOf((foundOffset == -1 ? -1 : haystack.codePointCount(0, foundOffset)));
+    throwIfNotUnsignedInt(idx, "STRING.rfindChar");
+    try {
+      int offset = haystack.offsetByCodePoints(0, idx.intValue());
+      int foundOffset = StringUtil.lastIndexOfAny(haystack, needles, offset);
+      return BigInteger.valueOf((foundOffset == -1 ? -1 : haystack.codePointCount(0, foundOffset)));
+    } catch(IndexOutOfBoundsException e) {
+      throw KEMException.compilerError("Argument to hook STRING.rfindChar out of range. Expected an index >= 0 and <= the length of the string to search.", e, loc);
+    }
   }
 
   String STRING_float2string(FloatBuiltin f) {
