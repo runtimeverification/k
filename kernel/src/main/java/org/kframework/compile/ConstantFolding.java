@@ -479,15 +479,7 @@ public class ConstantFolding {
   BigInteger INT_bitRange(BigInteger i, BigInteger index, BigInteger length) {
     throwIfNotUnsignedInt(index, "INT.bitRange");
     throwIfNotUnsignedInt(length, "INT.bitRange");
-    byte[] twosComplement = i.toByteArray();
-    BigInteger positive = new BigInteger(1, twosComplement);
-    for (int j = 0; j < index.intValue(); j++) {
-      i = i.clearBit(j);
-    }
-    for (int j = index.intValue() + length.intValue(); j < twosComplement.length * 8; j++) {
-      i = i.clearBit(j);
-    }
-    return i;
+    return i.and(BigInteger.ONE.shiftLeft(length.intValue()).subtract(BigInteger.ONE).shiftLeft(index.intValue())).shiftRight(index.intValue());
   }
 
   BigInteger INT_signExtendBitRange(BigInteger i, BigInteger index, BigInteger length) {
