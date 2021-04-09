@@ -112,6 +112,14 @@ public class FloatBuiltin {
         return value;
     }
 
+    public float floatValue() {
+        return value.floatValue();
+    }
+
+    public double doubleValue() {
+        return value.doubleValue();
+    }
+
     /**
      * Returns a {@link BinaryMathContext} representing the context to perform arithmetic under.
      */
