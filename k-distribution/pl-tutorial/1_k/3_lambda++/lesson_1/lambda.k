@@ -35,7 +35,6 @@ endmodule
 module LAMBDA
   imports LAMBDA-SYNTAX
   imports SUBSTITUTION
-  imports DEFAULT-CONFIGURATION
 
   syntax KResult ::= Val
 

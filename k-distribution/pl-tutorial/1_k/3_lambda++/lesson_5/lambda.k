@@ -10,8 +10,8 @@ module LAMBDA-CONFIG
                 </T>
 endmodule
 
-module LAMBDA
-  imports LAMBDA-CONFIG
+module LAMBDA-SEMANTICS
+  imports syntax LAMBDA-CONFIG
   syntax Exp ::= Id
                | "lambda" Id "." Exp  [latex(\lambda{#1}.{#2})]
                | Exp Exp              [strict, left]
@@ -66,4 +66,9 @@ module LAMBDA
   syntax Val ::= cc(Map,K)
   rule <k> (callcc V:Val => V cc(Rho,K)) ~> K </k> <env> Rho </env>
   rule <k> cc(Rho,K) V:Val ~> _ =>  V ~> K </k> <env> _ => Rho </env>
+endmodule
+
+module LAMBDA
+  imports LAMBDA-SEMANTICS
+  imports LAMBDA-CONFIG
 endmodule
