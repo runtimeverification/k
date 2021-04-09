@@ -4,6 +4,7 @@ package org.kframework.parser;
 import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
+import org.kframework.definition.FlatModule;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
 import org.kframework.kil.Definition;
@@ -11,13 +12,10 @@ import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Require;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.Kompile;
-import org.kframework.kore.K;
-import org.kframework.kore.Sort;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.inner.ApplySynonyms;
 import org.kframework.parser.inner.CollectProductionsVisitor;
-import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.outer.ExtractFencedKCodeFromMarkdown;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
@@ -29,14 +27,14 @@ import org.kframework.utils.options.OuterParsingOptions;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
@@ -220,11 +218,16 @@ public class ParserUtils {
 
         KILtoKORE kilToKore = new KILtoKORE(context, false, kore, leftAssoc);
 
-        HashMap<String, Module> koreModules = new HashMap<>();
-        koreModules.putAll(previousModules.stream().collect(Collectors.toMap(Module::name, m -> m)));
+        scala.collection.mutable.Map<String, Module> koreModules = new scala.collection.mutable.HashMap<>();
+        previousModules.stream().map(m -> koreModules.put(m.name(), m)).collect(Collectors.toList()); // populate koreModules with previousModules
         HashSet<org.kframework.kil.Module> kilModulesSet = new HashSet<>(kilModules);
 
-        Set<Module> finalModules = kilModules.stream().map(m -> kilToKore.apply(m, kilModulesSet, koreModules)).flatMap(m -> Stream.concat(Stream.of(m), Stream.of(koreModules.get(m.name() + "$SYNTAX")))).collect(Collectors.toSet());
+        java.util.List<FlatModule> flatModules = kilModulesSet.stream().map(kilToKore::toFlatModule).sorted(Comparator.comparing(FlatModule::name)).collect(Collectors.toList());
+
+        // accumulate in koreModules the new modules. Use an ordered set to stabilize the error message for circular imports
+        flatModules.stream().map(m -> m.toModule(immutable(new LinkedHashSet<>(flatModules)), koreModules, Seq())).collect(Collectors.toSet());
+        Set<Module> finalModules = mutable(koreModules.values().toSet());
+
         Set<Module> result = new HashSet<>();
         ModuleTransformer applySynonyms = ModuleTransformer.fromSentenceTransformer(new ApplySynonyms()::apply, "Apply sort synonyms");
         for (Module mod : finalModules) {
