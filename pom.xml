@@ -329,7 +329,7 @@
         <native.exe.type>uexe</native.exe.type>
         <native.exe.extension />
         <native.script.extension />
-        <make.args> --output-sync </make.args>
+        <make.args>--output-sync</make.args>
       </properties>
     </profile>
     <profile>
@@ -348,7 +348,7 @@
         <native.exe.type>uexe</native.exe.type>
         <native.exe.extension />
         <native.script.extension />
-        <make.args> --output-sync </make.args>
+        <make.args>--output-sync</make.args>
       </properties>
     </profile>
     <profile>
