@@ -2800,19 +2800,19 @@ manipulate the strategy cell yourself within other rules.
 
 ```k
 module DEFAULT-STRATEGY-CONCRETE [concrete]
-    imports syntax STRATEGY
+    imports STRATEGY
     imports RULE-TAG-SYNTAX
     rule ~ regular => ^ regular [anywhere]
 endmodule
 
 module DEFAULT-STRATEGY-SYMBOLIC [symbolic]
-    imports syntax STRATEGY
+    imports STRATEGY
     imports RULE-TAG-SYNTAX
     rule <s> ~ regular => ^ regular ... </s>
 endmodule
 
 module DEFAULT-STRATEGY
-    imports syntax STRATEGY
+    imports STRATEGY
     imports DEFAULT-STRATEGY-CONCRETE
     imports DEFAULT-STRATEGY-SYMBOLIC
 
