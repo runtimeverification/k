@@ -122,7 +122,7 @@
               <target>
                 <exec dir="${ktestDir}" executable="make" failonerror="true">
                   <arg value="-j12" />
-                  <arg value="--output-sync" />
+                  <arg value="${make.args}" />
                 </exec>
               </target>
               <skip>${skipKTest}</skip>
