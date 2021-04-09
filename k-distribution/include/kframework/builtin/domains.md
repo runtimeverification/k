@@ -2816,7 +2816,7 @@ module DEFAULT-STRATEGY
     imports DEFAULT-STRATEGY-CONCRETE
     imports DEFAULT-STRATEGY-SYMBOLIC
 
-    rule initSCell(_) => <s> ^ regular </s>
+    rule initSCell(_) => <s> ^ regular </s> [priority(25)]
 endmodule
 ```
 
