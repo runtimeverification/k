@@ -714,7 +714,7 @@ public class ConstantFolding {
 
   BigInteger FLOAT_float2int(FloatBuiltin a) {
     try {
-      return a.bigFloatValue().rint(a.getMathContext().withRoundingMode(RoundingMode.DOWN)).toBigIntegerExact();
+      return a.bigFloatValue().rint(a.getMathContext()).toBigIntegerExact();
     } catch (ArithmeticException e) {
       throw KEMException.compilerError("Argument to hook FLOAT.float2int cannot be rounded to an integer.", e, loc);
     }
