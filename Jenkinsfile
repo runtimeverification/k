@@ -81,7 +81,7 @@ pipeline {
                           echo 'Starting kserver...'
                           k-distribution/target/release/k/bin/spawn-kserver kserver.log
                           cd k-exercises/tutorial
-                          make -j`nproc` ${MAKE_EXTRA_ARGS}
+                          make -j`nproc` --output-sync ${MAKE_EXTRA_ARGS}
                         '''
                       }
                       post {
