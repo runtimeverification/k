@@ -1442,6 +1442,20 @@ O(N*M) time.
   syntax Int ::= rfindChar ( haystack: String , needles: String , index: Int )    [function, hook(STRING.rfindChar)]
 ```
 
+### String and Bool conversion
+
+```k
+  syntax String ::= Bool2String(Bool) [function, functional]
+  rule Bool2String(true)  => "true"
+  rule Bool2String(false) => "false"
+```
+
+```k
+  syntax Bool ::= String2Bool(String) [function]
+  rule String2Bool("true")  => true
+  rule String2Bool("false") => false
+```
+
 ### String and float conversion
 
 You can convert between a `String` and a `Float`. The String will be
@@ -1806,6 +1820,8 @@ together in O(N) time.
 
 ```k
   syntax Bytes ::= Bytes "+Bytes" Bytes [function, functional, hook(BYTES.concat), right]
+
+endmodule
 ```
 
 ### Implementation of Bytes
@@ -1816,9 +1832,6 @@ backends and should not be viewed as authoritative, nor should the user
 use the `nilBytes` or `:` operators in their definition.
 
 ```k
-  rule .Bytes => String2Bytes("")
-endmodule
-
 module BYTES-IN-K [symbolic, kast]
   imports INT
   imports K-EQUAL
@@ -2794,23 +2807,23 @@ manipulate the strategy cell yourself within other rules.
 
 ```k
 module DEFAULT-STRATEGY-CONCRETE [concrete]
-    imports syntax STRATEGY
+    imports STRATEGY
     imports RULE-TAG-SYNTAX
     rule ~ regular => ^ regular [anywhere]
 endmodule
 
 module DEFAULT-STRATEGY-SYMBOLIC [symbolic]
-    imports syntax STRATEGY
+    imports STRATEGY
     imports RULE-TAG-SYNTAX
     rule <s> ~ regular => ^ regular ... </s>
 endmodule
 
 module DEFAULT-STRATEGY
-    imports syntax STRATEGY
+    imports STRATEGY
     imports DEFAULT-STRATEGY-CONCRETE
     imports DEFAULT-STRATEGY-SYMBOLIC
 
-    rule initSCell(_) => <s> ^ regular </s>
+    rule initSCell(_) => <s> ^ regular </s> [priority(25)]
 endmodule
 ```
 
