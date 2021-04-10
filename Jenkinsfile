@@ -19,6 +19,13 @@ pipeline {
       }
     }
     stage('Create source tarball') {
+      when {
+        anyOf {
+          branch 'release'
+          changeRequest()
+        }
+        beforeAgent true
+      }
       agent {
         dockerfile {
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
@@ -74,7 +81,7 @@ pipeline {
                           echo 'Starting kserver...'
                           k-distribution/target/release/k/bin/spawn-kserver kserver.log
                           cd k-exercises/tutorial
-                          make -j`nproc` ${MAKE_EXTRA_ARGS}
+                          make -j`nproc` --output-sync ${MAKE_EXTRA_ARGS}
                         '''
                       }
                       post {
@@ -362,10 +369,10 @@ pipeline {
                         git push -d origin brew-release-$PACKAGE || true
                         git checkout -b brew-release-$PACKAGE "origin/$brew_base_branch"
                         git merge origin/master
-                        ${WORKSPACE}/package/macos/brew-update-to-local
-                        git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 1"
-                        ${WORKSPACE}/package/macos/brew-build-and-update-to-local-bottle ${SHORT_REV}
-                        git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 2"
+                        ${WORKSPACE}/package/macos/brew-update-to-local ${PACKAGE} ${VERSION}
+                        git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${SHORT_REV}: part 1"
+                        ${WORKSPACE}/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL}
+                        git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${SHORT_REV}: part 2"
                         git push origin brew-release-$PACKAGE
                       '''
                       stash name: 'mojave', includes: "kframework--${env.VERSION}.mojave.bottle*.tar.gz"
@@ -378,7 +385,7 @@ pipeline {
                     dir('homebrew-k') {
                       git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
                       unstash 'mojave'
-                      sh '${WORKSPACE}/package/macos/brew-install-bottle'
+                      sh '${WORKSPACE}/package/macos/brew-install-bottle ${PACKAGE} ${VERSION}'
                     }
                     sh '''
                       brew install opam
@@ -400,8 +407,8 @@ pipeline {
                     '''
                     dir('homebrew-k') {
                       sh '''
-                        ${WORKSPACE}/package/macos/brew-update-to-final ${SHORT_REV}
-                        git commit Formula/$PACKAGE.rb -m "Update $PACKAGE to ${SHORT_REV}: part 3"
+                        ${WORKSPACE}/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL}
+                        git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${SHORT_REV}: part 3"
                         git push origin brew-release-$PACKAGE
                       '''
                     }
@@ -648,18 +655,20 @@ pipeline {
       options { skipDefaultCheckout() }
       post { failure { slackSend color: '#cb2431' , channel: '#k' , message: "Failed to trigger Release: ${env.BUILD_URL}" } }
       steps {
-        sh '''
-          git clone 'https://github.com/kframework/k' k-release
-          cd k-release
-          git fetch --all
-          git checkout -B release origin/release
-          git merge origin/master
-          ./package/version.sh bump
-          ./package/version.sh sub
-          git add -u
-          git commit -m "Set Version: $(cat package/version)"
-          git push origin release
-        '''
+        sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
+          sh '''
+            git clone 'ssh://github.com/kframework/k' k-release
+            cd k-release
+            git fetch --all
+            git checkout -B release origin/release
+            git merge origin/master
+            ./package/version.sh bump
+            ./package/version.sh sub
+            git add -u
+            git commit -m "Set Version: $(cat package/version)"
+            git push origin release
+          '''
+        }
       }
     }
   }

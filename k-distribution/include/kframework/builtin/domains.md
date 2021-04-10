@@ -419,14 +419,21 @@ module MAP-KORE-SYMBOLIC [kore,symbolic]
   rule #Ceil(@M:Map [@K:KItem]) => {(@K in_keys(@M)) #Equals true} #And #Ceil(@M) #And #Ceil(@K) [anywhere, simplification]
 
   // Symbolic update
+
+  // Adding the definedness condition `notBool (K in_keys(M))` in the ensures clause of the following rule would be redundant
+  // because K also appears in the rhs, preserving the case when it's #Bottom.
   rule (K |-> _ M:Map) [ K <- V ] => (K |-> V M) [simplification]
   rule M:Map [ K <- V ] => (K |-> V M) requires notBool (K in_keys(M)) [simplification]
   rule M:Map [ K <- _ ] [ K <- V ] => M [ K <- V ] [simplification]
+  // Adding the definedness condition `notBool (K1 in_keys(M))` in the ensures clause of the following rule would be redundant
+  // because K1 also appears in the rhs, preserving the case when it's #Bottom.
   rule (K1 |-> V1 M:Map) [ K2 <- V2 ] => (K1 |-> V1 (M [ K2 <- V2 ])) requires K1 =/=K K2 [simplification]
 
   // Symbolic remove
   rule (K |-> _ M:Map) [ K <- undef ] => M ensures notBool (K in_keys(M)) [simplification]
   rule M:Map [ K <- undef ] => M requires notBool (K in_keys(M)) [simplification]
+  // Adding the definedness condition `notBool (K1 in_keys(M))` in the ensures clause of the following rule would be redundant
+  // because K1 also appears in the rhs, preserving the case when it's #Bottom.
   rule (K1 |-> V1 M:Map) [ K2 <- undef ] => (K1 |-> V1 (M [ K2 <- undef ])) requires K1 =/=K K2 [simplification]
 
   // Symbolic lookup
@@ -1435,6 +1442,20 @@ O(N*M) time.
   syntax Int ::= rfindChar ( haystack: String , needles: String , index: Int )    [function, hook(STRING.rfindChar)]
 ```
 
+### String and Bool conversion
+
+```k
+  syntax String ::= Bool2String(Bool) [function, functional]
+  rule Bool2String(true)  => "true"
+  rule Bool2String(false) => "false"
+```
+
+```k
+  syntax Bool ::= String2Bool(String) [function]
+  rule String2Bool("true")  => true
+  rule String2Bool("false") => false
+```
+
 ### String and float conversion
 
 You can convert between a `String` and a `Float`. The String will be
@@ -1799,6 +1820,8 @@ together in O(N) time.
 
 ```k
   syntax Bytes ::= Bytes "+Bytes" Bytes [function, functional, hook(BYTES.concat), right]
+
+endmodule
 ```
 
 ### Implementation of Bytes
@@ -1809,9 +1832,6 @@ backends and should not be viewed as authoritative, nor should the user
 use the `nilBytes` or `:` operators in their definition.
 
 ```k
-  rule .Bytes => String2Bytes("")
-endmodule
-
 module BYTES-IN-K [symbolic, kast]
   imports INT
   imports K-EQUAL
@@ -2787,23 +2807,23 @@ manipulate the strategy cell yourself within other rules.
 
 ```k
 module DEFAULT-STRATEGY-CONCRETE [concrete]
-    imports syntax STRATEGY
+    imports STRATEGY
     imports RULE-TAG-SYNTAX
     rule ~ regular => ^ regular [anywhere]
 endmodule
 
 module DEFAULT-STRATEGY-SYMBOLIC [symbolic]
-    imports syntax STRATEGY
+    imports STRATEGY
     imports RULE-TAG-SYNTAX
     rule <s> ~ regular => ^ regular ... </s>
 endmodule
 
 module DEFAULT-STRATEGY
-    imports syntax STRATEGY
+    imports STRATEGY
     imports DEFAULT-STRATEGY-CONCRETE
     imports DEFAULT-STRATEGY-SYMBOLIC
 
-    rule initSCell(_) => <s> ^ regular </s>
+    rule initSCell(_) => <s> ^ regular </s> [priority(25)]
 endmodule
 ```
 
