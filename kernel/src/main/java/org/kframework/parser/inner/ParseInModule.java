@@ -179,11 +179,16 @@ public class ParseInModule implements Serializable, AutoCloseable {
         }
         return scanner;
     }
+
     public Scanner getScanner() {
         if (scanner == null) {
             scanner = new Scanner(this);
         }
         return scanner;
+    }
+
+    public void setScanner(Scanner scanner) {
+        this.scanner = scanner;
     }
 
     public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>

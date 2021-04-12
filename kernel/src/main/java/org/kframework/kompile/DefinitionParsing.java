@@ -154,7 +154,7 @@ public class DefinitionParsing {
             throw new AssertionError("should not reach this statement");
         }
 
-        def = resolveNonConfigBubbles(def, def.getModule(entryPointModule).get(), gen);
+        def = resolveNonConfigBubbles(def, def.getModule(entryPointModule).get());
         if (! readOnlyCache) {
             saveCachesAndReportParsingErrors();
         }
@@ -205,7 +205,7 @@ public class DefinitionParsing {
         parsedBubbles.set(0);
         cachedBubbles.set(0);
         RuleGrammarGenerator gen = new RuleGrammarGenerator(afterResolvingConfigBubbles);
-        Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles, afterResolvingConfigBubbles.mainModule(), gen);
+        Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles, afterResolvingConfigBubbles.mainModule());
         saveCachesAndReportParsingErrors();
         return afterResolvingAllOtherBubbles;
     }
@@ -277,18 +277,8 @@ public class DefinitionParsing {
         return errors;
     }
 
-    public Definition resolveNonConfigBubbles(Definition defWithConfig, Module mainModule, RuleGrammarGenerator gen) {
-        Module ruleParserModule = gen.getRuleGrammar(mainModule);
-        ParseCache cache = loadCache(ruleParserModule);
-        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
-            parser.getScanner(options.global);
-            Map<String, Module> parsed = defWithConfig.parMap(m -> this.resolveNonConfigBubbles(m, parser.getScanner(options.global), gen));
-            return DefinitionTransformer.from(m -> Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()), "parsing rules").apply(defWithConfig);
-        }
-    }
-
     private Definition resolveConfigBubbles(Definition def, RuleGrammarGenerator gen) {
-      return DefinitionTransformer.from(m -> resolveConfigBubbles(def, m, gen), "parsing configs").apply(def);
+        return DefinitionTransformer.from(m -> resolveConfigBubbles(def, m, gen), "parsing configs").apply(def);
     }
 
     private Module resolveConfigBubbles(Definition def, Module inputModule, RuleGrammarGenerator gen) {
@@ -363,39 +353,142 @@ public class DefinitionParsing {
 
     }
 
-    private Module resolveNonConfigBubbles(Module module, Scanner scanner, RuleGrammarGenerator gen) {
-        if (stream(module.localSentences())
-                .filter(s -> s instanceof Bubble)
-                .map(b -> (Bubble) b)
-                .filter(b -> !b.sentenceType().equals(configuration)).count() == 0)
-            return module;
-
-        Module ruleParserModule = gen.getRuleGrammar(module);
-
-        ParseCache cache = loadCache(ruleParserModule);
-        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
-            if (stream(module.localSentences()).filter(s -> s instanceof Bubble).filter(s -> !cache.getCache().containsKey(((Bubble)s).contents())).findAny().isPresent()) {
-                parser.initialize();
-            }
-
-            // this scanner is not good for this module, so we must generate a new scanner.
-            boolean needNewScanner = !scanner.getModule().importedModuleNames().contains(module.name());
-            final Scanner realScanner = needNewScanner ? parser.getScanner(options.global) : scanner;
-
-            Set<Sentence> parsedSentences = stream(module.localSentences())
-                    .parallel()
-                    .filter(s -> s instanceof Bubble)
-                    .map(b -> (Bubble) b)
-                    .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b).map(p -> upSentence(p, b.sentenceType())))
-                    .collect(Collections.toSet());
-
-            if (needNewScanner) {
-                realScanner.close();//required for Windows.
-            }
-
-            return Module(module.name(), module.imports(),
-                    stream((Set<Sentence>) module.localSentences().$bar(parsedSentences)).filter(b -> !(b instanceof Bubble)).collect(Collections.toSet()), module.att());
+    // Find the entry modules (not included in any other module)
+    private static java.util.Set<Module> getBotModules(Set<Module> allModules) {
+        java.util.Set<Module> included = new HashSet<>();
+        for (Module m : mutable(allModules)) {
+            included.addAll(mutable(m.importedModules()));
         }
+        java.util.Set<Module> rez = mutable(allModules);
+        rez.removeAll(included);
+        return rez;
+    }
+
+    public Definition resolveNonConfigBubbles(Definition defWithConfig, Module mainModule) {
+        RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithConfig);
+        // load cached bubbles
+        Definition defWithCaches = DefinitionTransformer.from(m -> {
+            if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble))
+                return m;
+            ParseCache cache = loadCache(gen.getRuleGrammar(m));
+            java.util.Set<Sentence> replacedBubbles = new HashSet<>();
+            java.util.Set<Sentence> cachedParses = new HashSet<>();
+            for (Sentence s : mutable(m.localSentences())) {
+                if (!(s instanceof Bubble))
+                    continue;
+                Bubble b = ((Bubble) s);
+                if (cache.getCache().containsKey(b.contents())) {
+                    replacedBubbles.add(b);
+                    ParsedSentence parsed = cache.getCache().get(b.contents());
+                    cachedBubbles.getAndIncrement();
+                    if (kem.options.warnings2errors) {
+                        for (KEMException err : parsed.getWarnings()) {
+                            if (kem.options.includesExceptionType(err.exception.getType())) {
+                                errors.add(KEMException.asError(err));
+                            }
+                        }
+                    } else {
+                        kem.addAllKException(parsed.getWarnings().stream().map(KEMException::getKException).collect(Collectors.toList()));
+                    }
+                    // TODO: update error location #1873
+                    Att att = parsed.getParse().att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class));
+                    cachedParses.add(upSentence(new AddAtt(a -> att).apply(parsed.getParse()), b.sentenceType()));
+                    // TODO: check to see if we don't parse the same rules twice because of module duplication!!!!!!!!!!!!!!!!!
+                }
+            }
+            if (!replacedBubbles.isEmpty()) {
+                // make a new module with replaced bubbles
+                return Module(m.name(),
+                        m.imports(),
+                        stream((Set<Sentence>) m.localSentences().$minus$minus(immutable(replacedBubbles)).
+                                $bar(immutable(cachedParses))).collect(Collections.toSet()),
+                        m.att());
+            }
+            return m;
+        }, "").apply(defWithConfig);
+
+        // prepare scanners for remaining bubbles
+        // scanners can be reused so find the bottom modules which include all other modules
+        java.util.Set<Module> botMods = getBotModules(defWithCaches.modules()).stream().filter(m -> m.sentences().filter(s -> s instanceof Bubble).size() != 0).collect(Collectors.toSet());
+        // prefer modules that import the main module. This way we avoid using the main syntax module which could contain problematic syntax for rule parsing
+        java.util.Set<Module> orderedBotMods = new java.util.LinkedHashSet<>();
+        for (Module m : botMods) {
+            if (m.name().equals(defWithCaches.mainModule().name()) || m.importedModuleNames().contains(defWithCaches.mainModule().name()))
+                orderedBotMods.add(m);
+        }
+        orderedBotMods.addAll(botMods);
+
+        // map the module name to the scanner that it should use when parsing
+        java.util.Map<String, Module> donorModule = new HashMap<>();
+        for (Module m : mutable(defWithCaches.modules())) {
+            if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble)) {
+                Module scannerModule = orderedBotMods.stream().filter(bm -> m.equals(bm) || bm.importedModuleNames().contains(m.name())).findFirst()
+                        .orElseThrow(() -> new AssertionError("Expected at least one bottom module to have a suitable scanner: " + m.name()));
+                donorModule.put(m.name(), scannerModule);
+            }
+        }
+        // create scanners
+        Map<Module, ParseInModule> donorScanners = new HashSet<>(donorModule.values()).parallelStream().map(x -> {
+            ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(x), isStrict, profileRules, files);
+            pim.getScanner(options.global);
+            return new Tuple2<>(x, pim);
+        }).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
+
+        // do parsing on remaining bubbles and collect everything in `parsedSentences`
+        // this way we can easily parallelize the steps and we don't have to deal with the complex structure of modules
+        Map<String, java.util.Set<Sentence>> parsedSentences = stream(defWithCaches.modules())
+                .parallel()
+                .flatMap(m -> {
+                    if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble))
+                        return Stream.of();
+                    ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(m), isStrict, profileRules, files);
+                    pim.setScanner(donorScanners.get(donorModule.get(m.name())).getScanner());
+                    pim.initialize();
+                    ParseCache cache = loadCache(pim.seedModule());
+                    java.util.Set<Sentence> sentences = stream(m.localSentences())
+                            .filter(s -> s instanceof Bubble)
+                            .map(s -> (Bubble) s)
+                            .parallel()
+                            .flatMap(b -> {
+                                Tuple2<Either<java.util.Set<KEMException>, K>, java.util.Set<KEMException>> result;
+                                int startLine = b.att().get("contentStartLine", Integer.class);
+                                int startColumn = b.att().get("contentStartColumn", Integer.class);
+                                Source source = b.att().get(Source.class);
+                                result = pim.parseString(b.contents(), START_SYMBOL, pim.getScanner(), source, startLine, startColumn, true, b.att().contains(Att.ANYWHERE()) || b.att().contains(Att.SIMPLIFICATION()) || ExpandMacros.isMacro(b));
+                                parsedBubbles.getAndIncrement();
+                                if (kem.options.warnings2errors && !result._2().isEmpty()) {
+                                    for (KEMException err : result._2()) {
+                                        if (kem.options.includesExceptionType(err.exception.getType())) {
+                                            errors.add(KEMException.asError(err));
+                                        }
+                                    }
+                                } else {
+                                    kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
+                                }
+                                if (result._1().isRight()) {
+                                    KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, isStrict).down(result._1().right().get());
+                                    k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class)));
+                                    cache.getCache().put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
+                                    return Stream.of(upSentence(k, b.sentenceType()));
+                                } else {
+                                    errors.addAll(result._1().left().get());
+                                    return Stream.empty();
+                                }
+                            }).collect(Collectors.toSet());
+                    return Stream.of(new Tuple2<>(m.name(), sentences));
+                }).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
+
+        for (ParseInModule pim : donorScanners.values())
+            pim.getScanner().close();
+
+        // replace bubbles with parsed sentences
+        return DefinitionTransformer.from(m -> {
+            if (parsedSentences.get(m.name()) == null || parsedSentences.get(m.name()).isEmpty())
+                return m;
+            java.util.Set<Sentence> noBubbles = stream(m.localSentences()).filter(s -> !(s instanceof Bubble)).collect(Collectors.toSet());
+            noBubbles.addAll(parsedSentences.get(m.name())); // doing it with java because scala filter gives a NoSuchMethodError when using $plus$plus
+            return Module(m.name(), m.imports(), immutable(noBubbles), m.att());
+        }, "parsing rules").apply(defWithCaches);
     }
 
     public Rule parseRule(CompiledDefinition compiledDef, String contents, Source source) {
