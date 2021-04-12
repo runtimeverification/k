@@ -154,7 +154,7 @@ public class DefinitionParsing {
             throw new AssertionError("should not reach this statement");
         }
 
-        def = resolveNonConfigBubbles(def, def.getModule(entryPointModule).get());
+        def = resolveNonConfigBubbles(def);
         if (! readOnlyCache) {
             saveCachesAndReportParsingErrors();
         }
@@ -205,7 +205,7 @@ public class DefinitionParsing {
         parsedBubbles.set(0);
         cachedBubbles.set(0);
         RuleGrammarGenerator gen = new RuleGrammarGenerator(afterResolvingConfigBubbles);
-        Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles, afterResolvingConfigBubbles.mainModule());
+        Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles);
         saveCachesAndReportParsingErrors();
         return afterResolvingAllOtherBubbles;
     }
@@ -364,7 +364,7 @@ public class DefinitionParsing {
         return rez;
     }
 
-    public Definition resolveNonConfigBubbles(Definition defWithConfig, Module mainModule) {
+    public Definition resolveNonConfigBubbles(Definition defWithConfig) {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithConfig);
         // load cached bubbles
         Definition defWithCaches = DefinitionTransformer.from(m -> {
