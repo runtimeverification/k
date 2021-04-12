@@ -345,7 +345,8 @@ public class DefinitionParsing {
                 throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
             }
             return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
-                    (Set<Sentence>) module.localSentences().$bar(configDeclSyntax),
+                    (Set<Sentence>) module.localSentences().$bar(configDeclSyntax)
+                            .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))),
                     module.att());
         } else {
             Module mapModule;
@@ -355,7 +356,8 @@ public class DefinitionParsing {
                 throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
             }
             return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
-                    (Set<Sentence>) module.localSentences().$bar(configDeclRules),
+                    (Set<Sentence>) module.localSentences().$bar(configDeclRules)
+                            .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))),
                     module.att());
         }
 
@@ -380,48 +382,19 @@ public class DefinitionParsing {
             boolean needNewScanner = !scanner.getModule().importedModuleNames().contains(module.name());
             final Scanner realScanner = needNewScanner ? parser.getScanner(options.global) : scanner;
 
-            Set<Sentence> claimSet = stream(module.localSentences())
+            Set<Sentence> parsedSentences = stream(module.localSentences())
                     .parallel()
                     .filter(s -> s instanceof Bubble)
                     .map(b -> (Bubble) b)
-                    .filter(b -> b.sentenceType().equals(claim))
-                    .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
-                    .map(this::upClaim)
-                .collect(Collections.toSet());
-
-            Set<Sentence> ruleSet = stream(module.localSentences())
-                    .parallel()
-                    .filter(s -> s instanceof Bubble)
-                    .map(b -> (Bubble) b)
-                    .filter(b -> b.sentenceType().equals(rule))
-                    .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
-                    .map(this::upRule)
-                .collect(Collections.toSet());
-
-            Set<Sentence> contextSet = stream(module.localSentences())
-                    .parallel()
-                    .filter(s -> s instanceof Bubble)
-                    .map(b -> (Bubble) b)
-                    .filter(b -> b.sentenceType().equals(context))
-                    .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
-                    .map(this::upContext)
-                .collect(Collections.toSet());
-
-            Set<Sentence> aliasSet = stream(module.localSentences())
-                    .parallel()
-                    .filter(s -> s instanceof Bubble)
-                    .map(b -> (Bubble) b)
-                    .filter(b -> b.sentenceType().equals(alias))
-                    .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b))
-                    .map(this::upAlias)
-                .collect(Collections.toSet());
+                    .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b).map(p -> upSentence(p, b.sentenceType())))
+                    .collect(Collections.toSet());
 
             if (needNewScanner) {
                 realScanner.close();//required for Windows.
             }
 
             return Module(module.name(), module.imports(),
-                    stream((Set<Sentence>) module.localSentences().$bar(ruleSet).$bar(claimSet).$bar(contextSet).$bar(aliasSet)).filter(b -> !(b instanceof Bubble)).collect(Collections.toSet()), module.att());
+                    stream((Set<Sentence>) module.localSentences().$bar(parsedSentences)).filter(b -> !(b instanceof Bubble)).collect(Collections.toSet()), module.att());
         }
     }
 
@@ -439,6 +412,16 @@ public class DefinitionParsing {
             }
             return upRule(res.iterator().next());
         }
+    }
+
+    private Sentence upSentence(K contens, String sentenceType) {
+        switch (sentenceType) {
+        case claim:         return upClaim(contens);
+        case rule:          return upRule(contens);
+        case context:       return upContext(contens);
+        case alias:         return upAlias(contens);
+        }
+        throw new AssertionError("Unexpected sentence type: " + sentenceType);
     }
 
     private Claim upClaim(K contents) {
