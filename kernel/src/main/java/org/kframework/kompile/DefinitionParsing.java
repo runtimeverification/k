@@ -441,41 +441,42 @@ public class DefinitionParsing {
                 .flatMap(m -> {
                     if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble))
                         return Stream.of();
-                    ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(m), isStrict, profileRules, files);
-                    pim.setScanner(donorScanners.get(donorModule.get(m.name())).getScanner());
-                    pim.initialize();
-                    ParseCache cache = loadCache(pim.seedModule());
-                    java.util.Set<Sentence> sentences = stream(m.localSentences())
-                            .filter(s -> s instanceof Bubble)
-                            .map(s -> (Bubble) s)
-                            .parallel()
-                            .flatMap(b -> {
-                                Tuple2<Either<java.util.Set<KEMException>, K>, java.util.Set<KEMException>> result;
-                                int startLine = b.att().get("contentStartLine", Integer.class);
-                                int startColumn = b.att().get("contentStartColumn", Integer.class);
-                                Source source = b.att().get(Source.class);
-                                result = pim.parseString(b.contents(), START_SYMBOL, pim.getScanner(), source, startLine, startColumn, true, b.att().contains(Att.ANYWHERE()) || b.att().contains(Att.SIMPLIFICATION()) || ExpandMacros.isMacro(b));
-                                parsedBubbles.getAndIncrement();
-                                if (kem.options.warnings2errors && !result._2().isEmpty()) {
-                                    for (KEMException err : result._2()) {
-                                        if (kem.options.includesExceptionType(err.exception.getType())) {
-                                            errors.add(KEMException.asError(err));
+                    try (ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(m), isStrict, profileRules, files)) {
+                        pim.setScanner(donorScanners.get(donorModule.get(m.name())).getScanner());
+                        pim.initialize();
+                        ParseCache cache = loadCache(pim.seedModule());
+                        java.util.Set<Sentence> sentences = stream(m.localSentences())
+                                .filter(s -> s instanceof Bubble)
+                                .map(s -> (Bubble) s)
+                                .parallel()
+                                .flatMap(b -> {
+                                    Tuple2<Either<java.util.Set<KEMException>, K>, java.util.Set<KEMException>> result;
+                                    int startLine = b.att().get("contentStartLine", Integer.class);
+                                    int startColumn = b.att().get("contentStartColumn", Integer.class);
+                                    Source source = b.att().get(Source.class);
+                                    result = pim.parseString(b.contents(), START_SYMBOL, pim.getScanner(), source, startLine, startColumn, true, b.att().contains(Att.ANYWHERE()) || b.att().contains(Att.SIMPLIFICATION()) || ExpandMacros.isMacro(b));
+                                    parsedBubbles.getAndIncrement();
+                                    if (kem.options.warnings2errors && !result._2().isEmpty()) {
+                                        for (KEMException err : result._2()) {
+                                            if (kem.options.includesExceptionType(err.exception.getType())) {
+                                                errors.add(KEMException.asError(err));
+                                            }
                                         }
+                                    } else {
+                                        kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
                                     }
-                                } else {
-                                    kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
-                                }
-                                if (result._1().isRight()) {
-                                    KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, isStrict).down(result._1().right().get());
-                                    k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class)));
-                                    cache.getCache().put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
-                                    return Stream.of(upSentence(k, b.sentenceType()));
-                                } else {
-                                    errors.addAll(result._1().left().get());
-                                    return Stream.empty();
-                                }
-                            }).collect(Collectors.toSet());
-                    return Stream.of(new Tuple2<>(m.name(), sentences));
+                                    if (result._1().isRight()) {
+                                        KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, isStrict).down(result._1().right().get());
+                                        k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class)));
+                                        cache.getCache().put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
+                                        return Stream.of(upSentence(k, b.sentenceType()));
+                                    } else {
+                                        errors.addAll(result._1().left().get());
+                                        return Stream.empty();
+                                    }
+                                }).collect(Collectors.toSet());
+                        return Stream.of(new Tuple2<>(m.name(), sentences));
+                    }
                 }).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
 
         for (ParseInModule pim : donorScanners.values())
