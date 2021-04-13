@@ -353,8 +353,8 @@ public class DefinitionParsing {
 
     }
 
-    // Find the entry modules (not included in any other module)
-    private static java.util.Set<Module> getBotModules(Set<Module> allModules) {
+    // Find the top modules (not included in any other module)
+    private static java.util.Set<Module> getTopModules(Set<Module> allModules) {
         java.util.Set<Module> included = new HashSet<>();
         for (Module m : mutable(allModules)) {
             included.addAll(mutable(m.importedModules()));
@@ -408,27 +408,27 @@ public class DefinitionParsing {
         }, "").apply(defWithConfig);
 
         // prepare scanners for remaining bubbles
-        // scanners can be reused so find the bottom modules which include all other modules
-        java.util.Set<Module> botMods = getBotModules(defWithCaches.modules()).stream().filter(m -> m.sentences().filter(s -> s instanceof Bubble).size() != 0).collect(Collectors.toSet());
+        // scanners can be reused so find the top modules which include all other modules
+        java.util.Set<Module> topMods = getTopModules(defWithCaches.modules()).stream().filter(m -> m.sentences().filter(s -> s instanceof Bubble).size() != 0).collect(Collectors.toSet());
         // prefer modules that import the main module. This way we avoid using the main syntax module which could contain problematic syntax for rule parsing
-        java.util.Set<Module> orderedBotMods = new java.util.LinkedHashSet<>();
-        for (Module m : botMods) {
+        java.util.Set<Module> orderedTopMods = new java.util.LinkedHashSet<>();
+        for (Module m : topMods) {
             if (m.name().equals(defWithCaches.mainModule().name()) || m.importedModuleNames().contains(defWithCaches.mainModule().name()))
-                orderedBotMods.add(m);
+                orderedTopMods.add(m);
         }
-        orderedBotMods.addAll(botMods);
+        orderedTopMods.addAll(topMods);
 
         // map the module name to the scanner that it should use when parsing
         java.util.Map<String, Module> donorModule = new HashMap<>();
         for (Module m : mutable(defWithCaches.modules())) {
             if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble)) {
-                Module scannerModule = orderedBotMods.stream().filter(bm -> m.equals(bm) || bm.importedModuleNames().contains(m.name())).findFirst()
+                Module scannerModule = orderedTopMods.stream().filter(bm -> m.equals(bm) || bm.importedModuleNames().contains(m.name())).findFirst()
                         .orElseThrow(() -> new AssertionError("Expected at least one bottom module to have a suitable scanner: " + m.name()));
                 donorModule.put(m.name(), scannerModule);
             }
         }
         // create scanners
-        Map<Module, ParseInModule> donorScanners = new HashSet<>(donorModule.values()).parallelStream().map(x -> {
+        Map<Module, ParseInModule> donorParseInModules = new HashSet<>(donorModule.values()).parallelStream().map(x -> {
             ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(x), isStrict, profileRules, files);
             pim.getScanner(options.global);
             return new Tuple2<>(x, pim);
@@ -442,7 +442,7 @@ public class DefinitionParsing {
                     if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble))
                         return Stream.of();
                     try (ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(m), isStrict, profileRules, files)) {
-                        pim.setScanner(donorScanners.get(donorModule.get(m.name())).getScanner());
+                        pim.setScanner(donorParseInModules.get(donorModule.get(m.name())).getScanner());
                         pim.initialize();
                         ParseCache cache = loadCache(pim.seedModule());
                         java.util.Set<Sentence> sentences = stream(m.localSentences())
@@ -479,7 +479,7 @@ public class DefinitionParsing {
                     }
                 }).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
 
-        for (ParseInModule pim : donorScanners.values())
+        for (ParseInModule pim : donorParseInModules.values())
             pim.getScanner().close();
 
         // replace bubbles with parsed sentences
