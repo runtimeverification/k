@@ -22,7 +22,7 @@ let
   inherit (llvm-backend-project) clang llvm-backend;
 
   k = callPackage ./nix/k.nix {
-    inherit haskell-backend llvm-backend mavenix;
+    inherit haskell-backend llvm-backend mavenix prelude-kore;
     inherit (ttuegel) cleanGit cleanSourceWith;
   };
 
@@ -33,6 +33,7 @@ let
     };
   };
   haskell-backend = haskell-backend-project.kore;
+  inherit (haskell-backend-project) prelude-kore;
 
   self = {
     inherit k clang llvm-backend haskell-backend;
