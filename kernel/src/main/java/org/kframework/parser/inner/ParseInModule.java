@@ -7,6 +7,7 @@ import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
+import org.kframework.main.GlobalOptions;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.disambiguation.*;
@@ -172,6 +173,12 @@ public class ParseInModule implements Serializable, AutoCloseable {
     private ThreadLocal<TypeInferencer> inferencer = new ThreadLocal<>();
     private Queue<TypeInferencer> inferencers = new ConcurrentLinkedQueue<>();
 
+    public Scanner getScanner(GlobalOptions go) {
+        if (scanner == null) {
+            scanner = new Scanner(this, go);
+        }
+        return scanner;
+    }
     public Scanner getScanner() {
         if (scanner == null) {
             scanner = new Scanner(this);

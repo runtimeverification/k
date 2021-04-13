@@ -11,7 +11,7 @@ test.kore: forwarder.iele kompile
 include ../../../include/kframework/ktest.mak
 
 clean:
-	rm -rf test.kore test-kompiled .depend-tmp .depend .krun-*
+	rm -rf test.kore $(KOMPILED_DIR) .depend-tmp .depend .kompile-* .krun-* .kprove-* kore-exec.tar.gz
 
 
 KRUN_OR_KX=./parse
