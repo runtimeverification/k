@@ -1,30 +1,31 @@
 FROM archlinux/base
 
-RUN    pacman -Syyu --noconfirm \
-    && pacman -S --noconfirm    \
-                    base        \
-                    base-devel  \
-                    boost       \
-                    clang       \
-                    cmake       \
-                    curl        \
-                    git         \
-                    gmp         \
-                    hub         \
-                    jdk-openjdk \
-                    jemalloc    \
-                    libyaml     \
-                    lld         \
-                    llvm        \
-                    maven       \
-                    mpfr        \
-                    opam        \
-                    openssh     \
-                    python      \
-                    python-pip  \
-                    stack       \
-                    z3          \
-                    zlib
+RUN    pacman -Sy   --noconfirm archlinux-keyring \
+    && pacman -Syyu --noconfirm                   \
+    && pacman -S    --noconfirm                   \
+                       base                       \
+                       base-devel                 \
+                       boost                      \
+                       clang                      \
+                       cmake                      \
+                       curl                       \
+                       git                        \
+                       gmp                        \
+                       hub                        \
+                       jdk-openjdk                \
+                       jemalloc                   \
+                       libyaml                    \
+                       lld                        \
+                       llvm                       \
+                       maven                      \
+                       mpfr                       \
+                       opam                       \
+                       openssh                    \
+                       python                     \
+                       python-pip                 \
+                       stack                      \
+                       z3                         \
+                       zlib
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
@@ -40,7 +41,6 @@ ADD k-distribution/src/main/scripts/lib/opam                                    
 RUN    cd /home/user                        \
     && ./.tmp-opam/bin/k-configure-opam-dev
 
-ENV LC_ALL=C.UTF-8
 ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml        /home/user/.tmp-haskell/
 ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/package.yaml /home/user/.tmp-haskell/kore/
 RUN    cd /home/user/.tmp-haskell \

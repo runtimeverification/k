@@ -3,7 +3,7 @@ set -e
 set -o pipefail
 set -u
 
-export PATH="$(dirname "$0"):$PATH"
+export PATH="$(cd "$(dirname "$0")"; pwd):$PATH"
 
 # initialize flags
 ARGV=()
@@ -215,7 +215,9 @@ do
       # slash removes prefixes so build a new array with the files to keep
       newArray=()
       for value in "${tempFiles[@]}"; do
-          $value != $tempDir && newArray+=($value)
+          if [ $value != $tempDir ]; then 
+            newArray+=($value)
+          fi
       done
       tempFiles="${newArray[@]}"
       unset newArray
@@ -511,9 +513,9 @@ if $expandMacros; then
 else
   execute cp "$input_file" "$expanded_input_file"
 fi
-
+backendName=$(cat "$kompiledDir"/backend.txt)
 # Invoke backend
-if [ -f "$kompiledDir/interpreter" ]; then
+if [ "$backendName" = "llvm" ]; then
   if $statistics; then
     interpreter_flags=--statistics
   else
@@ -524,7 +526,7 @@ if [ -f "$kompiledDir/interpreter" ]; then
   execute $cmdprefix "$kompiledDir/interpreter" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags
   result=$?
   set -e
-else
+elif [ "$backendName" = "haskell" ] ; then
   # Haskell backend
   koreExecFlags=
   depthFlags=
@@ -570,6 +572,8 @@ else
     result=$?
     set -e
   fi
+else
+  error "Backend $backendName not supported. Use krun-legacy."
 fi
 
 # Unparsing

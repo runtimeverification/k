@@ -266,7 +266,7 @@ public class KSyntax2Bison {
   }
 
   private static void appendOverloadChecks(StringBuilder bison, Module module, Module disambModule, Production greater, List<Integer> nts, boolean hasLocation) {
-    for (Production lesser : iterable(TopologicalSort.tsort(disambModule.overloads().directRelations()))) {
+    for (Production lesser : iterable(disambModule.overloads().sortedElements())) {
       if (disambModule.overloads().lessThan(lesser, greater)) {
         bison.append("  if (");
         appendOverloadCondition(bison, module, greater, lesser, nts);

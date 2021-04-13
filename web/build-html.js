@@ -17,6 +17,8 @@ generatePagesFromMarkdownFiles({
   sourceDirectory: path.resolve(__dirname, "../k-distribution/"),
   outputDirectory: path.resolve(__dirname, "./public_content/k-distribution/"),
   websiteDirectory: path.resolve(__dirname, "./public_content/"),
+  websiteOrigin: "https://kframework.org",
+  includeFileBasePath: path.resolve(__dirname, "./static_content/html/"),
   template: tutorialTemplate,
 });
 generatePagesFromMarkdownFiles({
@@ -26,6 +28,8 @@ generatePagesFromMarkdownFiles({
   sourceDirectory: path.resolve(__dirname, "./pages/"),
   outputDirectory: path.resolve(__dirname, "./public_content/"),
   websiteDirectory: path.resolve(__dirname, "./public_content/"),
+  websiteOrigin: "https://kframework.org",
+  includeFileBasePath: path.resolve(__dirname, "./static_content/html/"),
   template: pageTemplate,
 });
 generatePagesFromMarkdownFiles({
@@ -35,5 +39,7 @@ generatePagesFromMarkdownFiles({
   sourceDirectory: path.resolve(__dirname, "../"),
   outputDirectory: path.resolve(__dirname, "./public_content/"),
   websiteDirectory: path.resolve(__dirname, "./public_content/"),
+  websiteOrigin: "https://kframework.org",
+  includeFileBasePath: path.resolve(__dirname, "./static_content/html/"),
   template: pageTemplate,
 });

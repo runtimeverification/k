@@ -17,6 +17,8 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
 
   lazy val elements: Set[T] = directRelations.flatMap(a => Set(a._1, a._2))
 
+  lazy val sortedElements: scala.collection.immutable.List[T] = TopologicalSort.tsort(directRelations).toList
+
   /**
    * Internal private method. Computes the transitive closer of the initial relations.
    * It also checks for cycles during construction and throws an exception if it finds any.

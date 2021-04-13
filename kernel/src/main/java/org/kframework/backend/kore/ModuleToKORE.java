@@ -8,6 +8,7 @@ import com.google.common.collect.SetMultimap;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
+import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Hooks;
 import org.kframework.builtin.KLabels;
@@ -122,7 +123,15 @@ public class ModuleToKORE {
         String topCellSortStr = getSortStr(topCellSort);
         semantics.append("[topCellInitializer{}(");
         convert(topCellInitializer, semantics);
-        semantics.append("())]\n\n");
+        semantics.append("()), ");
+        StringBuilder sb = new StringBuilder();
+        HashMap<String, Boolean> considerSource = new HashMap<>();
+        considerSource.put(Att.SOURCE(), true);
+        // insert the location of the main module so the backend can provide better error location
+        convert(considerSource, Att.empty().add(Source.class, module.att().get(Source.class)), sb, null, null);
+        semantics.append(sb.subSequence(1, sb.length() - 1));
+        semantics.append("]\n\n");
+
         semantics.append(prelude);
         semantics.append("\n");
 
@@ -604,7 +613,7 @@ public class ModuleToKORE {
                         )
                         , BooleanUtils.TRUE
                         , BooleanUtils.TRUE
-                        , Att.empty().add("anywhere").add("simplification")
+                        , Att.empty().add(Att.SIMPLIFICATION())
                 );
         rules.add(ceilMapRule);
     }
@@ -838,7 +847,10 @@ public class ModuleToKORE {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(definition);
         Sort topCellSort = configInfo.getRootCell();
         String topCellSortStr = getSortStr(topCellSort);
-        sb.append("[]\n");
+        HashMap<String, Boolean> considerSource = new HashMap<>();
+        considerSource.put(Att.SOURCE(), true);
+        convert(considerSource, Att.empty().add(Source.class, spec.att().get(Source.class)), sb, null, null);
+        sb.append("\n");
         sb.append("module ");
         convert(spec.name(), sb);
         sb.append("\n\n// imports\n");
@@ -899,7 +911,7 @@ public class ModuleToKORE {
                     .map(i -> (NonTerminal) i)
                     .map(NonTerminal::sort).collect(Collectors.toList());
             productionLabel = production.klabel().get();
-            if (isFunction(production) || rule.att().contains(Att.ANYWHERE()) && !kore) {
+            if (isFunction(production) || rule.att().contains(Att.SIMPLIFICATION()) || rule.att().contains(Att.ANYWHERE()) && !kore) {
                 leftChildren = ((KApply) leftPattern).items();
                 equation = true;
             } else if ((rule.att().contains("heat") || rule.att().contains("cool")) && heatCoolEq) {

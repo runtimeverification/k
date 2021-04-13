@@ -479,6 +479,7 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
   extends Sentence with ProductionToString {
 
   lazy val klabelAtt: Option[String] = att.getOption("klabel").orElse(klabel.map(_.name))
+  lazy val parseLabel: KLabel = klabel.getOrElse(att.get("bracketLabel", classOf[KLabel]))
 
   override def equals(that: Any) = that match {
     case p@Production(`klabel`, `params`, `sort`, `items`, _) => ( this.klabelAtt == p.klabelAtt

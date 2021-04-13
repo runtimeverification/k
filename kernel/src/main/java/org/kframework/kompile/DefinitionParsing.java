@@ -281,8 +281,8 @@ public class DefinitionParsing {
         Module ruleParserModule = gen.getRuleGrammar(mainModule);
         ParseCache cache = loadCache(ruleParserModule);
         try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
-            parser.getScanner();
-            Map<String, Module> parsed = defWithConfig.parMap(m -> this.resolveNonConfigBubbles(m, parser.getScanner(), gen));
+            parser.getScanner(options.global);
+            Map<String, Module> parsed = defWithConfig.parMap(m -> this.resolveNonConfigBubbles(m, parser.getScanner(options.global), gen));
             return DefinitionTransformer.from(m -> Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()), "parsing rules").apply(defWithConfig);
         }
     }
@@ -310,13 +310,13 @@ public class DefinitionParsing {
         Set<Sentence> configDeclProductions;
         ParseCache cache = loadCache(gen.getConfigGrammar(module));
         try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
-             parser.getScanner();
+             parser.getScanner(options.global);
              configDeclProductions = stream(module.localSentences())
                     .parallel()
                     .filter(s -> s instanceof Bubble)
                     .map(b -> (Bubble) b)
                     .filter(b -> b.sentenceType().equals(configuration))
-                    .flatMap(b -> performParse(cache.getCache(), parser, parser.getScanner(), b))
+                    .flatMap(b -> performParse(cache.getCache(), parser, parser.getScanner(options.global), b))
                     .map(contents -> {
                         KApply configContents = (KApply) contents;
                         List<K> items = configContents.klist().items();
@@ -378,10 +378,7 @@ public class DefinitionParsing {
 
             // this scanner is not good for this module, so we must generate a new scanner.
             boolean needNewScanner = !scanner.getModule().importedModuleNames().contains(module.name());
-            if (needNewScanner && kem.options.verbose) {
-              System.out.println("New scanner: " + module.name());
-            }
-            final Scanner realScanner = needNewScanner ? parser.getScanner() : scanner;
+            final Scanner realScanner = needNewScanner ? parser.getScanner(options.global) : scanner;
 
             Set<Sentence> claimSet = stream(module.localSentences())
                     .parallel()
@@ -433,7 +430,7 @@ public class DefinitionParsing {
         gen = new RuleGrammarGenerator(compiledDef.kompiledDefinition);
         try (ParseInModule parser = RuleGrammarGenerator
                 .getCombinedGrammar(gen.getRuleGrammar(compiledDef.executionModule()), isStrict, profileRules, files)) {
-            java.util.Set<K> res = performParse(new HashMap<>(), parser, parser.getScanner(),
+            java.util.Set<K> res = performParse(new HashMap<>(), parser, parser.getScanner(options.global),
                     new Bubble(rule, contents, Att().add("contentStartLine", Integer.class, 1)
                             .add("contentStartColumn", Integer.class, 1).add(Source.class, source)))
                     .collect(Collectors.toSet());
@@ -541,7 +538,7 @@ public class DefinitionParsing {
             Att att = parse.getParse().att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class));
             return Stream.of(new AddAtt(a -> att).apply(parse.getParse()));
         }
-        result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, true, b.att().contains("anywhere") || ExpandMacros.isMacro(b));
+        result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, true, b.att().contains(Att.ANYWHERE()) || b.att().contains(Att.SIMPLIFICATION()) || ExpandMacros.isMacro(b));
         parsedBubbles.getAndIncrement();
         if (kem.options.warnings2errors && !result._2().isEmpty()) {
           for (KEMException err : result._2()) {
