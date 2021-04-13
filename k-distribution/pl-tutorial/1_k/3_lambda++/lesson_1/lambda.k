@@ -32,10 +32,9 @@ module LAMBDA-SYNTAX
   syntax Val ::= cc(K)
 endmodule
 
-module LAMBDA-SEMANTICS
+module LAMBDA
   imports LAMBDA-SYNTAX
   imports SUBSTITUTION
-  imports syntax DEFAULT-CONFIGURATION
 
   syntax KResult ::= Val
 
@@ -54,9 +53,4 @@ module LAMBDA-SEMANTICS
 
   rule <k> (callcc V:Val => V cc(K)) ~> K </k>
   rule <k> cc(K) V ~> _ =>  V ~> K </k>
-endmodule
-
-module LAMBDA
-  imports LAMBDA-SEMANTICS
-  imports DEFAULT-CONFIGURATION
 endmodule
