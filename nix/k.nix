@@ -1,6 +1,6 @@
 { lib, mavenix, cleanGit, cleanSourceWith, runCommand, makeWrapper
 , flex, gcc, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3
-, haskell-backend, llvm-backend
+, haskell-backend, prelude-kore, llvm-backend
 }:
 
 let
@@ -15,7 +15,6 @@ let
           [
             "result*" "nix/" "*.nix"
             "haskell-backend/src/main/native/haskell-backend/*"
-            "!haskell-backend/src/main/native/haskell-backend/src"  # need prelude.kore
             "llvm-backend/src/main/native/llvm-backend/*"
             "!llvm-backend/src/main/native/llvm-backend/matching"  # need pom.xml
             "k-distribution/tests/regression-new"
@@ -56,11 +55,8 @@ let
       rm -fr "$out/lib/opam"
 
       prelude_kore="$out/include/kframework/kore/prelude.kore"
-      if ! [[ -f "$prelude_kore" ]]
-      then
-          echo 1>&2 "missing output: $prelude_kore"
-          exit 1
-      fi
+      mkdir -p "$(dirname "$prelude_kore")"
+      ln -s "${prelude-kore}" "$prelude_kore"
     '';
 
     # Add extra maven dependencies which might not have been picked up
