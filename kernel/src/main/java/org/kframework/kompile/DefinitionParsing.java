@@ -411,19 +411,19 @@ public class DefinitionParsing {
         // scanners can be reused so find the top modules which include all other modules
         java.util.Set<Module> topMods = getTopModules(defWithCaches.modules()).stream().filter(m -> m.sentences().filter(s -> s instanceof Bubble).size() != 0).collect(Collectors.toSet());
         // prefer modules that import the main module. This way we avoid using the main syntax module which could contain problematic syntax for rule parsing
-        java.util.Set<Module> orderedBotMods = new java.util.LinkedHashSet<>();
+        java.util.Set<Module> orderedTopMods = new java.util.LinkedHashSet<>();
         for (Module m : topMods) {
             if (m.name().equals(defWithCaches.mainModule().name()) || m.importedModuleNames().contains(defWithCaches.mainModule().name()))
-                orderedBotMods.add(m);
+                orderedTopMods.add(m);
         }
-        orderedBotMods.addAll(topMods);
+        orderedTopMods.addAll(topMods);
 
         // map the module name to the scanner that it should use when parsing
         java.util.Map<String, Module> donorModule = new HashMap<>();
         for (Module m : mutable(defWithCaches.modules())) {
             if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble)) {
-                Module scannerModule = orderedBotMods.stream().filter(bm -> m.equals(bm) || bm.importedModuleNames().contains(m.name())).findFirst()
-                        .orElseThrow(() -> new AssertionError("Expected at least one bottom module to have a suitable scanner: " + m.name()));
+                Module scannerModule = orderedTopMods.stream().filter(bm -> m.equals(bm) || bm.importedModuleNames().contains(m.name())).findFirst()
+                        .orElseThrow(() -> new AssertionError("Expected at least one top module to have a suitable scanner: " + m.name()));
                 donorModule.put(m.name(), scannerModule);
             }
         }
@@ -508,12 +508,12 @@ public class DefinitionParsing {
         }
     }
 
-    private Sentence upSentence(K contens, String sentenceType) {
+    private Sentence upSentence(K contents, String sentenceType) {
         switch (sentenceType) {
-        case claim:         return upClaim(contens);
-        case rule:          return upRule(contens);
-        case context:       return upContext(contens);
-        case alias:         return upAlias(contens);
+        case claim:         return upClaim(contents);
+        case rule:          return upRule(contents);
+        case context:       return upContext(contents);
+        case alias:         return upAlias(contents);
         }
         throw new AssertionError("Unexpected sentence type: " + sentenceType);
     }
