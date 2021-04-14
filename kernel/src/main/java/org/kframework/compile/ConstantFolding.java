@@ -194,6 +194,7 @@ public class ConstantFolding {
   }
 
   String STRING_chr(BigInteger a) {
+    // unicode code points range from 0x0 to 0x10ffff
     if (a.compareTo(BigInteger.ZERO) < 0 || a.compareTo(BigInteger.valueOf(0x10ffff)) > 0) {
       throw KEMException.compilerError("Argument to hook STRING.chr out of range. Expected a number between 0 and 1114111.", loc);
     }
