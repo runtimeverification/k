@@ -527,7 +527,7 @@ if [ "$backendName" = "llvm" ]; then
     interpreter_flags=
   fi
 
-  keepTempsIfDryRun $tempDir $expanded_input_file $kore_output
+  keepTempsIfDryRun "$tempDir" "$expanded_input_file" "$kore_output"
   set +e
   execute $cmdprefix "$kompiledDir/interpreter" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags
   result=$?
@@ -557,7 +557,7 @@ elif [ "$backendName" = "haskell" ] ; then
     if ! $search; then
       final_input="$(mktemp ${tempDir}/tmp.in.XXXXXXXXXX)"
       tempFiles+=("$final_input")
-      keepTempsIfDryRun $tempDir $final_input $expanded_input_file $kore_output
+      keepTempsIfDryRun "$tempDir" "$final_input" "$expanded_input_file" "$kore_output"
       set +e
       execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$final_input" $koreExecFlags
       set -e
@@ -569,13 +569,13 @@ elif [ "$backendName" = "haskell" ] ; then
     if [ -n "$bound" ]; then
       koreExecFlags="$koreExecFlags --bound $bound"
     fi
-    keepTempsIfDryRun $tempDir $final_input $patternFile $kore_output
+    keepTempsIfDryRun "$tempDir" "$final_input" "$patternFile" "$kore_output"
     set +e
     execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$final_input" --output "$kore_output" --searchType "$searchType" --search "$patternFile" $koreExecFlags $depthFlags
     result=$?
     set -e
   else
-    keepTempsIfDryRun $tempDir $expanded_input_file $kore_output
+    keepTempsIfDryRun "$tempDir" "$expanded_input_file" "$kore_output"
     set +e
     execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$kore_output" $koreExecFlags $depthFlags
     result=$?
