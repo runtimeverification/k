@@ -50,7 +50,7 @@ keepTempsIfDryRun () {
   if $dryRun; then
     local newArray=()
     for value in "${tempFiles[@]}"; do
-        if [[ ! $@ =~ ${value} ]]; then
+        if [[ ! "$@" =~ ${value} ]]; then
           newArray+=($value)
         fi
     done
