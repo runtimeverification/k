@@ -19,7 +19,7 @@ public class Stopwatch {
 
     @Inject
     public Stopwatch(GlobalOptions options) {
-        this.options = options;
+        this.options = options != null ? options : new GlobalOptions();
         start = System.currentTimeMillis();
         lastIntermediate = start;
     }
