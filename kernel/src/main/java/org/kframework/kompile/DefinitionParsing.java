@@ -4,6 +4,7 @@ package org.kframework.kompile;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections15.ListUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
@@ -202,7 +203,8 @@ public class DefinitionParsing {
         sw.printIntermediate("Parse configurations [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " declarations]");
         parsedBubbles.set(0);
         cachedBubbles.set(0);
-        Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles);
+        Definition afterCaches = resolveCachedBubbles(afterResolvingConfigBubbles);
+        Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterCaches);
         saveCachesAndReportParsingErrors();
         return afterResolvingAllOtherBubbles;
     }
@@ -297,6 +299,7 @@ public class DefinitionParsing {
                     .filter(b -> b.sentenceType().equals(configuration))
                     .flatMap(b -> performParse(cache.getCache(), parser, parser.getScanner(options.global), b))
                     .map(contents -> {
+                        // TODO: put this in upSentence
                         KApply configContents = (KApply) contents;
                         List<K> items = configContents.klist().items();
                         switch (configContents.klabel().name()) {
@@ -462,6 +465,50 @@ public class DefinitionParsing {
             caches.put(parser.name(), cachedParser);
         }
         return cachedParser;
+    }
+
+    private Definition resolveCachedBubbles(Definition def) {
+        RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
+        return DefinitionTransformer.from(m -> {
+            if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble))
+                return m;
+            ParseCache cache = loadCache(gen.getRuleGrammar(m));
+
+            Map<Bubble, Sentence> fromCache = stream(m.localSentences())
+                    .filter(s -> s instanceof Bubble)
+                    .map(b -> (Bubble) b)
+                    .flatMap(b -> {
+                        int startLine = b.att().get("contentStartLine", Integer.class);
+                        int startColumn = b.att().get("contentStartColumn", Integer.class);
+                        // TODO: update error location #1873
+                        Tuple2<Either<java.util.Set<KEMException>, K>, java.util.Set<KEMException>> result;
+                        if (cache.getCache().containsKey(b.contents())) {
+                            ParsedSentence parse = cache.getCache().get(b.contents());
+                            cachedBubbles.getAndIncrement();
+                            if (kem.options.warnings2errors) {
+                                for (KEMException err : parse.getWarnings()) {
+                                    if (kem.options.includesExceptionType(err.exception.getType())) {
+                                        errors.add(KEMException.asError(err));
+                                    }
+                                }
+                            } else {
+                                kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
+                            }
+                            Att att = parse.getParse().att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class));
+                            return Stream.of(Pair.of(b, upSentence(new AddAtt(a -> att).apply(parse.getParse()), b.sentenceType())));
+                        }
+                        return Stream.of();
+                    }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+            if (!fromCache.isEmpty())
+                return Module(m.name(),
+                        m.imports(),
+                        m.localSentences()
+                                .$bar(immutable(Sets.newHashSet(fromCache.values())))
+                                .filter(s -> s instanceof Bubble && !fromCache.containsKey(s))
+                                .seq(),
+                        m.att());
+            return m;
+        }, "load cached bubbles").apply(def);
     }
 
     private boolean equalsSyntax(Module _this, Module that) {
