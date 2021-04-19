@@ -14,6 +14,7 @@ import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.GenerateSentencesFromConfigDecl;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Claim;
+import org.kframework.definition.Configuration;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Definition;
@@ -304,18 +305,7 @@ public class DefinitionParsing {
                     .map(b -> (Bubble) b)
                     .filter(b -> b.sentenceType().equals(configuration))
                     .flatMap(b -> performParse(cache.getCache(), parser, parser.getScanner(options.global), b))
-                    .map(contents -> {
-                        KApply configContents = (KApply) contents;
-                        List<K> items = configContents.klist().items();
-                        switch (configContents.klabel().name()) {
-                        case "#ruleNoConditions":
-                            return Configuration(items.get(0), BooleanUtils.TRUE, configContents.att());
-                        case "#ruleEnsures":
-                            return Configuration(items.get(0), items.get(1), configContents.att());
-                        default:
-                            throw KEMException.compilerError("Illegal configuration with requires clause detected.", configContents);
-                        }
-                    })
+                    .map(this::upConfiguration)
                     .flatMap(
                             configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule(), kore)))
                     .collect(Collections.toSet());
@@ -393,6 +383,7 @@ public class DefinitionParsing {
         case rule:          return upRule(contents);
         case context:       return upContext(contents);
         case alias:         return upAlias(contents);
+        case configuration: return upConfiguration(contents);
         }
         throw new AssertionError("Unexpected sentence type: " + sentenceType);
     }
@@ -454,6 +445,19 @@ public class DefinitionParsing {
             return ContextAlias(items.get(0), items.get(1), ruleContents.att());
         default:
             throw KEMException.criticalError("Illegal context alias with ensures clause detected.", contents);
+        }
+    }
+
+    private Configuration upConfiguration(K contents) {
+        KApply configContents = (KApply) contents;
+        List<K> items = configContents.klist().items();
+        switch (configContents.klabel().name()) {
+        case "#ruleNoConditions":
+            return Configuration(items.get(0), BooleanUtils.TRUE, configContents.att());
+        case "#ruleEnsures":
+            return Configuration(items.get(0), items.get(1), configContents.att());
+        default:
+            throw KEMException.compilerError("Illegal configuration with requires clause detected.", configContents);
         }
     }
 
