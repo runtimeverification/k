@@ -46,15 +46,16 @@ object FlatModule {
     def toModuleRec(m:FlatModule, visitedModules: Seq[FlatModule]):Module = {
       if (visitedModules.contains(m)) {
         var msg = "Found circularity in module imports: "
-        visitedModules.foreach(m => msg += m.name + " < ")
-        msg += visitedModules.head.name
+        visitedModules.reverse.foreach(m => msg += m.name + " < ")
+        msg += visitedModules.reverse.head.name
         throw KEMException.compilerError(msg)
       }
       memoization.getOrElseUpdate(m.name, {
         new Module(
           m.name,
           m.imports.map(i => memoization.getOrElse(i.name,
-            toModuleRec(allModules.find(f => f.name.equals(i.name)).getOrElse(throw KEMException.compilerError("Could not find module: " + i.name, i)), visitedModules :+ m))),
+            toModuleRec(allModules.find(f => f.name.equals(i.name))
+              .getOrElse(throw KEMException.compilerError("Could not find module: " + i.name, i)), visitedModules :+ m))),
           m.localSentences,
           m.att
         )
