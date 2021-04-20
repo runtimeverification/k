@@ -25,7 +25,7 @@ outputMode=pretty
 statistics=false
 smtPrelude=
 smt=
-flags=
+llvm_krun_flags=
 configVars=
 dryRun=false
 expandMacros=true
@@ -341,12 +341,12 @@ do
 
       -v|--verbose)
       verbose=true
-      flags="$flags -v"
+      llvm_krun_flags="$llvm_krun_flags -v"
       ;;
 
       --save-temps)
       trap - INT TERM EXIT
-      flags="$flags -save-temps"
+      llvm_krun_flags="$llvm_krun_flags -save-temps"
       ;;
 
       --version)
@@ -502,7 +502,7 @@ else
   fi
   abs_kompiled_dir=`echo "$(cd "$(dirname "$kompiledDir")"; pwd -P)/$(basename "$kompiledDir")"`
   # llvm-krun creates temp files in the cwd so execute it in $tempDir instead
-  (cd $tempDir; execute llvm-krun $configVars --directory "$abs_kompiled_dir" $flags --dry-run -nm -o "$(basename $input_file)")
+  (cd $tempDir; execute llvm-krun $configVars --directory "$abs_kompiled_dir" $llvm_krun_flags --dry-run -nm -o "$(basename $input_file)")
 fi
 
 # Expand macros
