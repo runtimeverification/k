@@ -38,6 +38,12 @@
   The K semantics of the [C programming language](<https://en.wikipedia.org/wiki/C_(programming_language)>) specifies the translation, linking, and execution semantics of the C language according to the official C standard.
   It has been used to build tools like RV-Match, which detects undefined behaviors in users programs by running their test-suites through the C semantics.
 
+- **[P4 (Nov 2016 - Present)](https://github.com/kframework/p4-semantics)**
+
+  A complete formal semantics of the [P4 language](https://p4.org/), version 1.0.4.
+  P4 is a software-defined-networking language, targeted at providing a hardware agnostic way to specify network behavior.
+  The K P4 semantics provides a way to model-check these P4 specifications, looking for bad networking states.
+
 ## Archived
 
 - [llvm (2011-2018)](https://github.com/kframework/llvm-semantics)
@@ -54,7 +60,6 @@
 - [orc (2016-2017)](https://github.com/kframework/orc-semantics)
 - [haskell core (2016-2017)](https://github.com/kframework/haskell-core-semantics)
 - [plutus core (2016-2019)](https://github.com/kframework/plutus-core-semantics)
-- [p4 (2016-2020)](https://github.com/kframework/p4-semantics)
 - [X86-64 (2017-2020)](https://github.com/kframework/X86-64-semantics)
 - [vyper (2017-2018)](https://github.com/kframework/vyper-semantics)
 - [erc20 (2017-2018)](https://github.com/runtimeverification/erc20-semantics)
