@@ -28,12 +28,6 @@
   K-Michelson is the K semantics of [Michelson blockchain programming language](https://www.michelson.org/), which powers the [Tezos blockchain](https://tezos.com/).
   KMichelson provides additional testing tools for developers, including a unit-testing framework which is extendable to symbolic property testing.
 
-- **[Boogie (Apr 2020 - Present)](https://github.com/kframework/boogie-semantics)**
-
-  Presents an executable formal semantics for [Boogie](https://github.com/boogie-org/boogie), an intermediate language for verification.
-  The K semantics of Boogie provides an independent verification engine for programs compiled to Boogie.
-  This, for example, allows [Dafny](https://www.microsoft.com/en-us/research/project/dafny-a-language-and-program-verifier-for-functional-correctness/) users to either discharge their verification goals using Boogie or using the K semantics of Boogie.
-
 - **[Elrond (July 2020 - Present)](https://github.com/runtimeverification/elrond-semantics)**
 
   The semantics of [Elrond](https://elrond.com/) is a wrapper around KWasm which extends it with the Elrond blockchain primitives.
@@ -71,3 +65,4 @@
 - [yul (2019-2019)](https://github.com/ethereum/yul-semantics)
 - [KEwasm (2019-2020)](https://github.com/kframework/ewasm-semantics)
 - [hybrid programs (2020-2020)](https://github.com/Formal-Systems-Laboratory/hybrid-programs-semantics)
+- [Boogie (2020)](https://github.com/kframework/boogie-semantics)
