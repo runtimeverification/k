@@ -217,16 +217,9 @@ public class ParserUtils {
         }
 
         KILtoKORE kilToKore = new KILtoKORE(context, false, kore, leftAssoc);
-
-        scala.collection.mutable.Map<String, Module> koreModules = new scala.collection.mutable.HashMap<>();
-        previousModules.stream().map(m -> koreModules.put(m.name(), m)).collect(Collectors.toList()); // populate koreModules with previousModules
-        HashSet<org.kframework.kil.Module> kilModulesSet = new HashSet<>(kilModules);
-
-        java.util.List<FlatModule> flatModules = kilModulesSet.stream().map(kilToKore::toFlatModule).sorted(Comparator.comparing(FlatModule::name)).collect(Collectors.toList());
-
-        // accumulate in koreModules the new modules. Use an ordered set to stabilize the error message for circular imports
-        flatModules.stream().map(m -> m.toModule(immutable(new LinkedHashSet<>(flatModules)), koreModules, Seq())).collect(Collectors.toSet());
-        Set<Module> finalModules = mutable(koreModules.values().toSet());
+        // Order modules by name to stabilize the error message for circular imports
+        java.util.List<FlatModule> flatModules = kilModules.stream().map(kilToKore::toFlatModule).sorted(Comparator.comparing(FlatModule::name)).collect(Collectors.toList());
+        Set<Module> finalModules = mutable(FlatModule.toModule(immutable(new LinkedHashSet<>(flatModules)), immutable(previousModules)));
 
         Set<Module> result = new HashSet<>();
         ModuleTransformer applySynonyms = ModuleTransformer.fromSentenceTransformer(new ApplySynonyms()::apply, "Apply sort synonyms");

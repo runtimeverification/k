@@ -6,6 +6,7 @@ import org.kframework.definition.Associativity;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Claim;
 import org.kframework.definition.Configuration;
+import org.kframework.definition.Constructors;
 import org.kframework.definition.Context;
 import org.kframework.definition.Definition;
 import org.kframework.definition.FlatModule;
@@ -124,16 +125,16 @@ public class JsonParser {
 
         String mainModuleName = data.getString("mainModule");
         JsonArray mods = data.getJsonArray("modules");
-        Set<FlatModule> entryModules = new HashSet<>();
+        Set<FlatModule> flatModules = new HashSet<>();
         for (JsonObject m: mods.getValuesAs(JsonObject.class)) {
-            entryModules.add(toFlatModule(m));
+            flatModules.add(toFlatModule(m));
         }
 
-        Map<String,Module> koreModules = new HashMap<>();
-        FlatModule mainFlatMod = entryModules.stream().filter(mod -> mod.name().equals(mainModuleName)).findFirst().get();
-        Module mainMod = mainFlatMod.toModule(immutable(entryModules), JavaConverters.mapAsScalaMapConverter(koreModules).asScala(), Seq());
-
-        return new Definition(mainMod, immutable(new HashSet<>(koreModules.values())), toAtt(data.getJsonObject("att")));
+        scala.collection.Set<Module> koreModules = FlatModule.toModule(immutable(flatModules), Set());
+        return Constructors.Definition(
+                koreModules.find(x -> x.name().equals(mainModuleName))
+                        .getOrElse(() -> { throw new AssertionError("Could not find main module name: " + mainModuleName); }),
+                koreModules, toAtt(data.getJsonObject("att")));
     }
 
 /////////////////////////
