@@ -14,7 +14,6 @@ allPath=true
 dir=.
 haskellCmd=kore-exec
 cmdprefix=
-filterSubst=true
 outputFile=-
 pattern=
 search=false
@@ -119,8 +118,6 @@ present; see below).
                            stdin/stdout via cells with "stream" attribute.
                            Defaults to enabled when performing concrete
                            execution, and disabled when --search is passed.
-      --no-substitution-filtering  Don't filter conjuncts with anonymous
-                                   variables from substitution output
       --no-expand-macros   Don't expand macros in initial configuration.
                            This assumes that the initial configuration contains
                            no macro terms. Behavior is undefined if this is not
@@ -254,10 +251,6 @@ do
         ;;
       esac
       shift
-      ;;
-
-      --no-substitution-filtering)
-      filterSubst=false
       ;;
 
       --no-expand-macros)
