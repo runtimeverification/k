@@ -144,10 +144,4 @@ public final class KastOptions {
             return InputModes.class;
         }
     }
-
-    @ParametersDelegate
-    public Experimental experimental = new Experimental();
-
-    public static final class Experimental {
-    }
 }
