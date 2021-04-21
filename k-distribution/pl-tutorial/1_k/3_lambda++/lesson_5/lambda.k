@@ -1,17 +1,14 @@
 // Copyright (c) 2012-2019 K Team. All Rights Reserved.
 
-module LAMBDA-CONFIG
+module LAMBDA
   imports DOMAINS
-  syntax Exp
+
   configuration <T>
                   <k> $PGM:Exp </k>
                   <env> .Map </env>
                   <store> .Map </store>
                 </T>
-endmodule
 
-module LAMBDA-SEMANTICS
-  imports syntax LAMBDA-CONFIG
   syntax Exp ::= Id
                | "lambda" Id "." Exp  [latex(\lambda{#1}.{#2})]
                | Exp Exp              [strict, left]
@@ -66,9 +63,4 @@ module LAMBDA-SEMANTICS
   syntax Val ::= cc(Map,K)
   rule <k> (callcc V:Val => V cc(Rho,K)) ~> K </k> <env> Rho </env>
   rule <k> cc(Rho,K) V:Val ~> _ =>  V ~> K </k> <env> _ => Rho </env>
-endmodule
-
-module LAMBDA
-  imports LAMBDA-SEMANTICS
-  imports LAMBDA-CONFIG
 endmodule
