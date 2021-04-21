@@ -1,1 +1,1 @@
-[Error] Compiler: Found circularity in module imports: D < C < B < A < E < D
+[Error] Compiler: Found circularity in module imports: E < D < C < B < A < E

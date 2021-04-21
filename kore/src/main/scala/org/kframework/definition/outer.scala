@@ -340,6 +340,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
         throw KEMException.compilerError("Could not find sorts: " + res.asJava, p)
     case _ =>
   }
+  checkSorts()
 
   lazy val recordProjections = productions.flatMap(p => p.nonterminals.filter(_.name.isDefined).map(nt => "project:" ++ p.klabel.get.name ++ ":" ++ nt.name.get))
   lazy val semanticCasts = allSorts.map("#SemanticCastTo" + _)

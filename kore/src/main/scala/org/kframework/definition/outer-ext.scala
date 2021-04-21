@@ -39,7 +39,7 @@ object FlatModule {
     new FlatModule(name, Set(), unresolvedLocalSentences, Att.empty)
   }
 
-  def toModule(allModules:Set[FlatModule], previousModules:Set[Module]):Set[Module] = {
+  def toModule(allModules:Seq[FlatModule], previousModules:Set[Module]):Set[Module] = {
     val memoization:TrieMap[String, Module] = collection.concurrent.TrieMap[String, Module]()
     previousModules.map(m => memoization.put(m.name, m))
     allModules.map(m => toModuleRec(m, Seq()))

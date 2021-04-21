@@ -125,7 +125,7 @@ public class JsonParser {
 
         String mainModuleName = data.getString("mainModule");
         JsonArray mods = data.getJsonArray("modules");
-        Set<FlatModule> flatModules = new HashSet<>();
+        List<FlatModule> flatModules = new ArrayList<>();
         for (JsonObject m: mods.getValuesAs(JsonObject.class)) {
             flatModules.add(toFlatModule(m));
         }

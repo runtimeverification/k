@@ -24,6 +24,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import scala.collection.Seq;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -84,7 +85,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         Set<Module> kilModules = d.getItems().stream().filter(i -> i instanceof Module)
                 .map(mod -> (Module) mod).collect(Collectors.toSet());
 
-        Set<FlatModule> flatModules = kilModules.stream().map(this::toFlatModule).collect(Collectors.toSet());
+        List<FlatModule> flatModules = kilModules.stream().map(this::toFlatModule).sorted(Comparator.comparing(FlatModule::name)).collect(Collectors.toList());
         scala.collection.Set<org.kframework.definition.Module> koreModules = FlatModule.toModule(immutable(flatModules), Set());
 
         return Definition(

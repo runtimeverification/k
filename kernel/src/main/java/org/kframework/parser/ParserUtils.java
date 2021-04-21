@@ -219,7 +219,7 @@ public class ParserUtils {
         KILtoKORE kilToKore = new KILtoKORE(context, false, kore, leftAssoc);
         // Order modules by name to stabilize the error message for circular imports
         java.util.List<FlatModule> flatModules = kilModules.stream().map(kilToKore::toFlatModule).sorted(Comparator.comparing(FlatModule::name)).collect(Collectors.toList());
-        Set<Module> finalModules = mutable(FlatModule.toModule(immutable(new LinkedHashSet<>(flatModules)), immutable(previousModules)));
+        Set<Module> finalModules = mutable(FlatModule.toModule(immutable(flatModules), immutable(previousModules)));
 
         Set<Module> result = new HashSet<>();
         ModuleTransformer applySynonyms = ModuleTransformer.fromSentenceTransformer(new ApplySynonyms()::apply, "Apply sort synonyms");
