@@ -47,7 +47,7 @@ SOURCE_EXT?=$(or $(and $(wildcard $(DEF).k), k), $(or $(and $(wildcard $(DEF).md
 
 KRUN_OR_LEGACY=$(KRUN)
 
-CHECK=| diff -
+CHECK?=| diff -
 REMOVE_PATHS=| sed 's!'`pwd`'/\(\./\)\{0,2\}!!g'
 CONSIDER_ERRORS=2>&1
 
