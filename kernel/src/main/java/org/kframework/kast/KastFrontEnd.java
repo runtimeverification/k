@@ -142,7 +142,7 @@ public class KastFrontEnd extends FrontEnd {
                   sort = Sorts.KItem();
               }
 
-              kprint.get().prettyPrint(def, unparsingMod, s -> kprint.get().outputFile(s), parsed, sort);
+              kprint.get().prettyPrint(def.kompiledDefinition, unparsingMod, s -> kprint.get().outputFile(s), parsed, sort);
             }
             sw.printTotal("Total");
             return 0;

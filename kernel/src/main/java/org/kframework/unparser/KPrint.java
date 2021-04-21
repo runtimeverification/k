@@ -112,52 +112,12 @@ public class KPrint {
         }
     }
 
-    public void prettyPrint(Definition def, Module module, Consumer<byte[]> print, K result, ColorSetting colorize) {
-        print.accept(prettyPrint(def, module, result, colorize));
-    }
-
     public void prettyPrint(Definition def, Module module, Consumer<byte[]> print, K result) {
-        print.accept(prettyPrint(def, module, result, options.color(tty.stdout, files.getEnv())));
+        prettyPrint(def, module, print, result, Sorts.GeneratedTopCell());
     }
 
-    public void prettyPrint(CompiledDefinition def, Module module, Consumer<byte[]> print, K result, Sort s) {
-        print.accept(prettyPrint(def.kompiledDefinition, module, result, s));
-    }
-
-    public byte[] prettyPrint(Definition def, Module module, K result) {
-        return prettyPrint(def, module, result, Sorts.KItem(), options.color(tty.stdout, files.getEnv()));
-    }
-
-    public byte[] prettyPrint(Definition def, Module module, K result, Sort s) {
-        return prettyPrint(def, module, result, s, options.color(tty.stdout, files.getEnv()));
-    }
-
-    public byte[] prettyPrint(Definition def, Module module, K orig, ColorSetting colorize) {
-        return prettyPrint(def, module, orig, Sorts.GeneratedTopCell(), colorize, options.output);
-    }
-
-    public byte[] prettyPrint(Definition def, Module module, K orig, Sort s, ColorSetting colorize) {
-        return prettyPrint(def, module, orig, s, colorize, options.output);
-    }
-
-    public byte[] prettyPrint(CompiledDefinition def, Module module, K orig, Sort s) {
-        return prettyPrint(def, module, orig, s, options.color(tty.stdout, files.getEnv()), options.output);
-    }
-
-    public byte[] prettyPrint(CompiledDefinition def, Module module, K orig) {
-        return prettyPrint(def, module, orig, Sorts.KItem(), options.color(tty.stdout, files.getEnv()), options.output);
-    }
-
-    public byte[] prettyPrint(CompiledDefinition def, Module module, K orig, ColorSetting colorize, OutputModes outputMode) {
-        return prettyPrint(def.kompiledDefinition, module, orig, Sorts.KItem(), colorize, outputMode);
-    }
-
-    public byte[] prettyPrint(CompiledDefinition def, Module module, K orig, Sort s, ColorSetting colorize, OutputModes outputMode) {
-        return prettyPrint(def.kompiledDefinition, module, orig, s, colorize, outputMode);
-    }
-
-    public byte[] prettyPrint(Definition def, Module module, K orig, ColorSetting colorize, OutputModes outputMode) {
-        return prettyPrint(def, module, orig, Sorts.KItem(), colorize, options.output);
+    public void prettyPrint(Definition def, Module module, Consumer<byte[]> print, K result, Sort s) {
+        print.accept(prettyPrint(def, module, result, s, options.color(tty.stdout, files.getEnv()), options.output));
     }
 
     public byte[] prettyPrint(Definition def, Module module, K orig, Sort s, ColorSetting colorize, OutputModes outputMode) {
