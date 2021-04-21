@@ -39,6 +39,7 @@ BMC_TESTS?=$(wildcard $(TESTDIR)/*-spec-bmc.k) $(wildcard $(TESTDIR)/*-spec-bmc.
 SEARCH_TESTS?=$(wildcard $(TESTDIR)/*.$(EXT).search)
 STRAT_TESTS?=$(wildcard $(TESTDIR)/*.strat)
 KAST_TESTS?=$(wildcard $(TESTDIR)/*.kast)
+KAST_BISON_TESTS?=$(wildcard $(TESTDIR)/*.kast-bison)
 # default KOMPILE_BACKEND
 KOMPILE_BACKEND?=llvm
 # check if .k file exists, if not, check if .md file exists
@@ -54,7 +55,7 @@ CONSIDER_ERRORS=2>&1
 .PHONY: kompile krun all clean update-results proofs bmc
 
 # run all tests
-all: kompile krun proofs bmc searches strat kast
+all: kompile krun proofs bmc searches strat kast kast-bison
 
 # run only kompile
 kompile: $(KOMPILED_DIR)/timestamp
@@ -73,6 +74,8 @@ searches: $(SEARCH_TESTS)
 strat: $(STRAT_TESTS)
 
 kast: $(KAST_TESTS)
+
+kast-bison: $(KAST_BISON_TESTS)
 
 # run all tests and regenerate output files
 update-results: all
@@ -135,6 +138,14 @@ ifeq ($(TESTDIR),$(RESULTDIR))
 	$(KAST) $@ $(KAST_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
 else
 	$(KAST) $@ $(KAST_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+endif
+
+%.kast-bison: kompile
+	$(KAST) $(KAST_FLAGS) $(DEBUG) -d $(DEFDIR) bison_parser
+ifeq ($(TESTDIR),$(RESULTDIR))
+	./bison_parser $@ $(CHECK) $@.out
+else
+	./bison_parser $@ $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 clean:
