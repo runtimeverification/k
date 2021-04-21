@@ -19,13 +19,13 @@ pipeline {
       }
     }
     stage('Create source tarball') {
-      //when {
-      //  anyOf {
-      //    branch 'release'
-      //    changeRequest()
-      //  }
-      //  beforeAgent true
-      //}
+      when {
+        anyOf {
+          branch 'release'
+          changeRequest()
+        }
+        beforeAgent true
+      }
       agent {
         dockerfile {
           additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
@@ -51,13 +51,13 @@ pipeline {
         stage('Build and Package K on Linux') {
           stages {
             stage('Build and Package on Ubuntu Bionic') {
-              //when {
-              //  anyOf {
-              //    branch 'release'
-              //    changeRequest()
-              //  }
-              //  beforeAgent true
-              //}
+              when {
+                anyOf {
+                  branch 'release'
+                  changeRequest()
+                }
+                beforeAgent true
+              }
               stages {
                 stage('Build on Ubuntu Bionic') {
                   agent {
@@ -129,10 +129,10 @@ pipeline {
               }
             }
             stage('Build and Package on Ubuntu Focal') {
-              //when {
-              //  branch 'release'
-              //  beforeAgent true
-              //}
+              when {
+                branch 'release'
+                beforeAgent true
+              }
               stages {
                 stage('Build on Ubuntu Focal') {
                   agent {
@@ -188,10 +188,10 @@ pipeline {
               }
             }
             stage('Build and Package on Debian Buster') {
-              //when {
-              //  branch 'release'
-              //  beforeAgent true
-              //}
+              when {
+                branch 'release'
+                beforeAgent true
+              }
               stages {
                 stage('Build on Debian Buster') {
                   agent {
@@ -250,10 +250,10 @@ pipeline {
               }
             }
             stage('Build and Package on Arch Linux') {
-              //when {
-              //  branch 'release'
-              //  beforeAgent true
-              //}
+              when {
+                branch 'release'
+                beforeAgent true
+              }
               stages {
                 stage('Build on Arch Linux') {
                   agent {
@@ -313,10 +313,10 @@ pipeline {
               }
             }
             stage('Build Platform Independent K Binary') {
-              //when {
-              //  branch 'release'
-              //  beforeAgent true
-              //}
+              when {
+                branch 'release'
+                beforeAgent true
+              }
               agent {
                 dockerfile {
                   additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
