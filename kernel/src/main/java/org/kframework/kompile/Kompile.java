@@ -104,8 +104,8 @@ public class Kompile {
         List<File> lookupDirectories = kompileOptions.outerParsing.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
         // these directories should be relative to the current working directory if we refer to them later after the WD has changed.
         kompileOptions.outerParsing.includes = lookupDirectories.stream().map(File::getAbsolutePath).collect(Collectors.toList());
-        File cacheFile = kompileOptions.experimental.cacheFile != null
-                ? files.resolveWorkingDirectory(kompileOptions.experimental.cacheFile) : files.resolveKompiled("cache.bin");
+        File cacheFile = kompileOptions.cacheFile != null
+                ? files.resolveWorkingDirectory(kompileOptions.cacheFile) : files.resolveKompiled("cache.bin");
         this.definitionParsing = new DefinitionParsing(
                 lookupDirectories, kompileOptions, kem, files,
                 parser, cacheParses, cacheFile, sw);
@@ -148,7 +148,7 @@ public class Kompile {
 
         files.saveToKompiled("allRules.txt", ruleSourceMap(kompiledDefinition));
 
-        if (kompileOptions.experimental.emitJson) {
+        if (kompileOptions.emitJson) {
             try {
                 files.saveToKompiled("parsed.json",   new String(ToJson.apply(parsedDef),          "UTF-8"));
                 files.saveToKompiled("compiled.json", new String(ToJson.apply(kompiledDefinition), "UTF-8"));
@@ -161,9 +161,9 @@ public class Kompile {
 
         CompiledDefinition def = new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(configInfo.getRootCell()).klabel());
 
-        if (kompileOptions.experimental.genBisonParser || kompileOptions.experimental.genGlrBisonParser) {
+        if (kompileOptions.genBisonParser || kompileOptions.genGlrBisonParser) {
             if (def.configurationVariableDefaultSorts.containsKey("$PGM")) {
-                new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, files.resolveKompiled("parser_PGM"), kompileOptions.experimental.genGlrBisonParser, kompileOptions.experimental.bisonFile, kompileOptions.experimental.bisonStackMaxDepth);
+                new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, files.resolveKompiled("parser_PGM"), kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth);
             }
             for (Production prod : iterable(kompiledDefinition.mainModule().productions())) {
                 if (prod.att().contains("cell") && prod.att().contains("parser")) {
@@ -179,7 +179,7 @@ public class Kompile {
                         if (!mod.isDefined()) {
                             throw KEMException.compilerError("Could not find module referenced by parser attribute: " + module, prod);
                         }
-                        new KRead(kem, files, InputModes.PROGRAM).createBisonParser(mod.get(), def.configurationVariableDefaultSorts.getOrDefault("$" + name, Sorts.K()), files.resolveKompiled("parser_" + name), kompileOptions.experimental.genGlrBisonParser, null, kompileOptions.experimental.bisonStackMaxDepth);
+                        new KRead(kem, files, InputModes.PROGRAM).createBisonParser(mod.get(), def.configurationVariableDefaultSorts.getOrDefault("$" + name, Sorts.K()), files.resolveKompiled("parser_" + name), kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth);
                     }
                 }
             }
@@ -238,7 +238,7 @@ public class Kompile {
 
     public static Function<Definition, Definition> defaultSteps(KompileOptions kompileOptions, KExceptionManager kem, FileUtil files, boolean isSymbolic) {
         Function1<Definition, Definition> resolveStrict = d -> DefinitionTransformer.from(new ResolveStrict(kompileOptions, d)::resolve, "resolving strict and seqstrict attributes").apply(d);
-        DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.experimental.transition), EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION, COOL_RESULT_INJECTION))::resolve, "resolving heat and cool attributes");
+        DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.transition), EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION, COOL_RESULT_INJECTION))::resolve, "resolving heat and cool attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
         DefinitionTransformer guardOrs = DefinitionTransformer.fromSentenceTransformer(new GuardOrPatterns(false)::resolve, "resolving or patterns");
         DefinitionTransformer resolveSemanticCasts =
@@ -276,7 +276,7 @@ public class Kompile {
                 .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
                 .andThen(AddImplicitComputationCell::transformDefinition)
-                .andThen(d -> new Strategy(kompileOptions.experimental.heatCoolStrategies).addStrategyCellToRulesTransformer(d).apply(d))
+                .andThen(d -> new Strategy(kompileOptions.heatCoolStrategies).addStrategyCellToRulesTransformer(d).apply(d))
                 .andThen(ConcretizeCells::transformDefinition)
                 .andThen(genCoverage)
                 .andThen(Kompile::addSemanticsModule)
