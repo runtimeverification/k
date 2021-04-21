@@ -137,7 +137,7 @@ public class OcamlRewriter implements Function<Definition, Rewriter> {
     private RewriterResult parseOcamlRewriterOutput(byte[] output) {
         String s = new String(output);
         int steps = Integer.parseInt(s.substring(0, s.indexOf('\n')));
-        if (options.experimental.statistics) {
+        if (options.statistics) {
             System.err.println("[" + steps + " steps]");
         }
         return new RewriterResult(Optional.of(steps), Optional.empty(), BinaryParser.parse(Arrays.copyOfRange(output, s.indexOf('\n') + 1, output.length)));
@@ -312,7 +312,7 @@ public class OcamlRewriter implements Function<Definition, Rewriter> {
         args.addAll(Arrays.asList(objectFiles));
         args.addAll(Arrays.asList("-lmpfr","-lgmp","-lffi","-lm","-ldl"));
         args.add("-Wl,--no-as-needed");
-        args.addAll(options.experimental.nativeLibraries);
+        args.addAll(options.nativeLibraries);
         pb.command(args);
         if (options.global.verbose) {
             System.err.println("+ " + StringUtils.join(args, " "));
@@ -335,7 +335,7 @@ public class OcamlRewriter implements Function<Definition, Rewriter> {
         args.addAll(0, converter.options.packages.stream().flatMap(p -> Stream.of("-package", p)).collect(Collectors.toList()));
         // -cclib -foo is used to pass -foo to gcc which is called to do linking. -cclib -Wl,-foo is used to pass
         // -foo to ld which is called by gcc.
-        args.addAll(options.experimental.nativeLibraries.stream().flatMap(lib -> Stream.of("-cclib", lib)).collect(Collectors.toList()));
+        args.addAll(options.nativeLibraries.stream().flatMap(lib -> Stream.of("-cclib", lib)).collect(Collectors.toList()));
         args.addAll(Arrays.asList(objectFiles));
         String ocamlfind = OcamlBackend.getOcamlFind(files);
         if (converter.kompileOptions.optimize2 || converter.kompileOptions.optimize3) {
