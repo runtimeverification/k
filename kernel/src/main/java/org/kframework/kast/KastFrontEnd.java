@@ -89,11 +89,9 @@ public class KastFrontEnd extends FrontEnd {
         scope.enter(kompiledDir.get());
         try {
             Reader stringToParse = null;
-            File outputFile = null;
+            File outputFile = files.get().resolveWorkingDirectory(options.print.outputFile);
             if (!(options.genParser || options.genGlrParser)) {
               stringToParse = options.stringToParse();
-            } else {
-              outputFile = options.outputFile();
             }
             Source source = options.source();
 
@@ -144,8 +142,7 @@ public class KastFrontEnd extends FrontEnd {
                   sort = Sorts.KItem();
               }
 
-              System.out.print(new String(kprint.get().prettyPrint(def, unparsingMod, parsed, sort), StandardCharsets.UTF_8));
-              System.out.flush();
+              kprint.get().prettyPrint(def, unparsingMod, s -> kprint.get().outputFile(s), parsed, sort);
             }
             sw.printTotal("Total");
             return 0;

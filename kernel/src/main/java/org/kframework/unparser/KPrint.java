@@ -120,6 +120,10 @@ public class KPrint {
         print.accept(prettyPrint(def, module, result, options.color(tty.stdout, files.getEnv())));
     }
 
+    public void prettyPrint(CompiledDefinition def, Module module, Consumer<byte[]> print, K result, Sort s) {
+        print.accept(prettyPrint(def.kompiledDefinition, module, result, s));
+    }
+
     public byte[] prettyPrint(Definition def, Module module, K result) {
         return prettyPrint(def, module, result, Sorts.KItem(), options.color(tty.stdout, files.getEnv()));
     }
