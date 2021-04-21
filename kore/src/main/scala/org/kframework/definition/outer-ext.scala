@@ -5,7 +5,6 @@ package org.kframework.definition
 import javax.annotation.Nonnull
 import org.kframework.kore._
 import org.kframework.attributes._
-import org.kframework.kore.{KORE => con}
 import org.kframework.utils.errorsystem.KEMException
 
 import scala.annotation.meta.param
@@ -51,7 +50,7 @@ object FlatModule {
         throw KEMException.compilerError(msg)
       }
       memoization.getOrElseUpdate(m.name, {
-        new Module(
+        val newM = new Module(
           m.name,
           m.imports.map(i => memoization.getOrElse(i.name,
             toModuleRec(allModules.find(f => f.name.equals(i.name))
@@ -59,6 +58,8 @@ object FlatModule {
           m.localSentences,
           m.att
         )
+        newM.checkSorts()
+        newM
       })
     }
     memoization.values.toSet
