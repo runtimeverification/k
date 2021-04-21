@@ -33,14 +33,6 @@ public class KompileFrontEndTest extends IOTestCase {
         assertEquals("foo", stdout.toString());
     }
 
-
-    @Test
-    public void testExperimentalHelp() throws IOException {
-        options.global.helpExperimental = true;
-        new KompileFrontEnd(options, "", "foo", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files)).main();
-        assertEquals("foo", stdout.toString());
-    }
-
     @Test
     public void testVersion() {
         options.global.version = true;

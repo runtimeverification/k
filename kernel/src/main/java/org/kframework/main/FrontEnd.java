@@ -43,9 +43,6 @@ public abstract class FrontEnd {
             if (globalOptions.help) {
                 System.out.print(usage);
                 retval = 0;
-            } else if (globalOptions.helpExperimental) {
-                System.out.print(experimentalUsage);
-                retval = 0;
             } else if (globalOptions.version) {
                 jarInfo.printVersionMessage();
                 retval = 0;
