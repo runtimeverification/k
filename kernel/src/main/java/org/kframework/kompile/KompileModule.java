@@ -34,8 +34,6 @@ public class KompileModule extends AbstractModule {
 
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder(), Object.class, Options.class);
         optionsBinder.addBinding().to(KompileOptions.class);
-        Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
-        experimentalOptionsBinder.addBinding().toInstance(SMTOptions.class);
     }
 
     @Provides

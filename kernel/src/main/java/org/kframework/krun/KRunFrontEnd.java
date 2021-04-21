@@ -55,7 +55,6 @@ public class KRunFrontEnd extends FrontEnd {
     KRunFrontEnd(
             GlobalOptions options,
             @Usage String usage,
-            @ExperimentalUsage String experimentalUsage,
             JarInfo jarInfo,
             DefinitionScope scope,
             @KompiledDir Provider<File> kompiledDir,
@@ -67,7 +66,7 @@ public class KRunFrontEnd extends FrontEnd {
             Provider<Function<Definition, Rewriter>> initializeRewriter,
             Provider<ExecutionMode> executionMode,
             TTYInfo tty) {
-        super(kem, options, usage, experimentalUsage, jarInfo, files);
+        super(kem, options, usage, jarInfo, files);
         this.scope = scope;
         this.kompiledDir = kompiledDir;
         this.kem = kem;

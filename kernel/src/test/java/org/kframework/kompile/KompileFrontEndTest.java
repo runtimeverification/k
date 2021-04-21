@@ -29,14 +29,14 @@ public class KompileFrontEndTest extends IOTestCase {
     @Test
     public void testHelp() throws IOException {
         options.global.help = true;
-        new KompileFrontEnd(options, "foo", "", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files)).main();
+        new KompileFrontEnd(options, "foo", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files)).main();
         assertEquals("foo", stdout.toString());
     }
 
     @Test
     public void testVersion() {
         options.global.version = true;
-        new KompileFrontEnd(options, "", "foo", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files)).main();
+        new KompileFrontEnd(options, "", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files)).main();
         verify(jarInfo).printVersionMessage();
     }
 }

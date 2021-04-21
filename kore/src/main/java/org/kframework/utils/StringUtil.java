@@ -433,38 +433,23 @@ public class StringUtil {
      * Finesse the JCommander usage output to make it more readable to the user.
      *
      * This function does two things. First, it reworks the indentation to fix a
-     * bug where different commands are indented differently. Second, it
-     * separates out experimental and non-experimental options in order to print
-     * their usage separately.
+     * bug where different commands are indented differently.
      * @param string The unfiltered output from JCommander's usage
-     * @return An array of strings. If the command has experimental options, they
-     * are in the second string, and the main options are in the first string.
-     * Otherwise, there will only be one string outputted.
+     * @return An array of strings. There will only be one string outputted.
      */
     public static String[] finesseJCommanderUsage(String string, JCommander jc) {
         //for some reason the usage pattern indents commands inconsistently, so we need to adjust it
         string = string.replaceAll("        ", "    ");
         String lastLine = "";
         StringBuilder mainOptions = new StringBuilder();
-        StringBuilder experimentalOptions = new StringBuilder();
-        experimentalOptions.append("  Experimental Options:\n");
-        boolean inExperimentalOptions = false;
         for (String line : string.split("\n")) {
             if (line.startsWith("    --")) {
-                if (lastLine.compareTo(line) > 0) {
-                    inExperimentalOptions = true;
-                }
                 lastLine = line;
             }
-            if (inExperimentalOptions) {
-                experimentalOptions.append(line);
-                experimentalOptions.append("\n");
-            } else {
-                mainOptions.append(line);
-                mainOptions.append("\n");
-            }
+            mainOptions.append(line);
+            mainOptions.append("\n");
         }
-        return new String[] {mainOptions.toString(), experimentalOptions.toString()};
+        return new String[] {mainOptions.toString()};
     }
 
     /**

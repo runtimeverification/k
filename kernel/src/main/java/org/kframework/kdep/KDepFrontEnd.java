@@ -58,11 +58,10 @@ public class KDepFrontEnd extends FrontEnd {
             KExceptionManager kem,
             GlobalOptions globalOptions,
             @Usage String usage,
-            @ExperimentalUsage String experimentalUsage,
             Stopwatch sw,
             JarInfo jarInfo,
             Provider<FileUtil> files) {
-        super(kem, globalOptions, usage, experimentalUsage, jarInfo, files);
+        super(kem, globalOptions, usage, jarInfo, files);
         this.options = options;
         this.globalOptions = globalOptions;
         this.kem = kem;
