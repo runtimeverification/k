@@ -29,27 +29,56 @@ This syntax can be used anywhere in a K definition that expects a non-terminal.
 ### `klabel(_)` and `symbol` attributes
 
 By default K generates for each syntax definition a long and obfuscated klabel
-string, which serves as internal identifier and also is used in kast format of
-that syntax. If we need to reference a certain syntax production externally, we
-have to manually define the klabels.
+string, which serves as a unique internal identifier and also is used in kast
+format of that syntax. If we need to reference a certain syntax production
+externally, we have to manually define the klabels using the `klabel` attribute.
+One example of where you would want to do this is to be able to refer to a given
+symbol via the `syntax priorities` attribute, or to enable overloading of a
+given symbol.
+
+If you only provide the `klabel` attribute, you can use the provided `klabel` to
+refer to that symbol anywhere in the frontend K code. However, the internal
+identifier seen by the backend for that symbol will still be the long obfuscated
+generated string. Sometimes you want control over the internal identfier used as
+well, in which case you use the `symbol` attribute. This tells the frontend to
+use whatever the declared `klabel` is directly as the internal identfier.
 
 For example:
 
 ```k
-syntax Foo ::= #Foo( Int, Int ) [klabel(#Foo), symbol]
+module MYMODULE
+    syntax FooBarBaz ::= #Foo( Int, Int ) [klabel(#Foo), symbol] // symbol1
+                       | #Bar( Int, Int ) [klabel(#Bar)]         // symbol2
+                       | #Baz( Int, Int )                        // symbol3
+endmodule
 ```
 
-Now a kast term for `Foo` will look like `#Foo(1,  1)`.
-Without `symbol`, the klabel defined for this syntax will still be a long
-obfuscated string. `[symbol]` also ensures that this attribute is unique to
-the definition. Uniqueness is not enforced by default for backwards
-compatibility. In some circumstances in Java and Ocaml backend we need multiple
-syntax definition with the same klabel. Otherwise it is recommended to use
-`klabel` and `symbol` together. One application is loading a config through
-JSON backend.
+Here, we have that:
 
-KLabels are also used when terms are logged in Java Backend, when using
-logging/debugging options, or in error messages.
+-   In frontend K, you can refer to "symbol1" as `#Foo` (from `klabel(#Foo)`),
+    and the backend will see `'Hash'Foo` as the symbol name.
+-   In frontend K, you can refer to "symbol2" as `Bar` (from `klabel(#Bar)`),
+    and the backend will see
+    `'Hash'Bar'LParUndsCommUndsRParUnds'MYMODULE'Unds'FooBarBaz'Unds'Int'Unds'Int`
+    as the symbol name.
+-   In frontend K, you can refer to "symbol3" as
+    `#Baz(_,_)_MYMODULE_FooBarBaz_Int_Int` (from auto-generated klabel), and
+    the backend will see
+    `'Hash'Baz'LParUndsCommUndsRParUnds'MYMODULE'Unds'FooBarBaz'Unds'Int'Unds'Int`
+    as the symbol name.
+
+The `symbol` provided *must* be unique to this definition, unless you are
+intentionally to identify two pieces of concrete syntax as producing the same
+symbol. Uniqueness is not enforced by default for backwards compatibility.
+
+In general, it's recommended to use `symbol` attribute whenever you use `klabel`
+unless you explicitely have a reason not to (sometimes this messes with
+deprecated backends). It can be very helpful use the `symbol` attribute, as many
+debugging messages are printed in Kast format, which will be more readable with
+the `symbol` names you explicitely declare. In addition, if you are
+programatically manipulating definitions via the JSON Kast format, building
+terms using the user-provided pretty `symbol, klabel(...)` is easier and less
+error-prone when the auto-generation process for klabels changes.
 
 ### Parametric productions and `bracket` attributes
 
