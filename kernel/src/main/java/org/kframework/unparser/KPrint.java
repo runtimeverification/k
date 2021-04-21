@@ -120,6 +120,10 @@ public class KPrint {
         print.accept(prettyPrint(def, module, result, s, options.color(tty.stdout, files.getEnv()), options.output));
     }
 
+    public byte[] prettyPrint(Definition def, Module module, K result) {
+        return prettyPrint(def, module, result, Sorts.GeneratedTopCell(), options.color(tty.stdout, files.getEnv()), options.output);
+    }
+
     public byte[] prettyPrint(Definition def, Module module, K orig, Sort s, ColorSetting colorize, OutputModes outputMode) {
         K result = abstractTerm(module, orig);
         switch (outputMode) {
