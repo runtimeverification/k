@@ -66,7 +66,7 @@ public class PrintOptions {
     }
 
     @Parameter(names="--output-file", description="Store output in the file instead of displaying it.")
-    public String outputFile = "/dev/stdout";
+    public String outputFile;
 
     @Parameter(names={"--output", "-o"}, converter=OutputModeConverter.class,
             description="How to display krun results. <mode> is either [pretty|program|kast|binary|json|latex|kore|none].")
