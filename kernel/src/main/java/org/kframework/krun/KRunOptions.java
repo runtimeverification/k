@@ -142,11 +142,10 @@ public final class KRunOptions {
         if (io != null && io == true && search()) {
             throw KEMException.criticalError("You cannot specify both --io on and --search");
         }
-        if (io != null && io == true && experimental.ltlmc()) {
+        if (io != null && io == true && this.ltlmc()) {
             throw KEMException.criticalError("You cannot specify both --io on and --ltlmc");
         }
-        if (search()
-                || experimental.ltlmc()) {
+        if (search() || this.ltlmc()) {
             return false;
         }
         if (io == null) {
@@ -217,36 +216,30 @@ public final class KRunOptions {
     @Parameter(names="--depth", description="The maximum number of computational steps to execute or search the definition for.")
     public Integer depth;
 
-    @ParametersDelegate
-    public Experimental experimental = new Experimental();
+    @Parameter(names="--statistics", description="Print rewrite engine statistics.", arity=1,
+            converter=OnOffConverter.class)
+    public boolean statistics = false;
 
-    public final class Experimental {
+    @Parameter(names="--debugger", description="Run an execution in debug mode.")
+    public boolean debugger = false;
 
-        @Parameter(names="--statistics", description="Print rewrite engine statistics.", arity=1,
-                converter=OnOffConverter.class)
-        public boolean statistics = false;
+    @Parameter(names="--ltlmc", description="Specify the formula for model checking at the commandline.")
+    public String ltlmc;
 
-        @Parameter(names="--debugger", description="Run an execution in debug mode.")
-        public boolean debugger = false;
+    @Parameter(names="--ltlmc-file", description="Specify the formula for model checking through a file.")
+    public String ltlmcFile;
 
-        @Parameter(names="--ltlmc", description="Specify the formula for model checking at the commandline.")
-        public String ltlmc;
-
-        @Parameter(names="--ltlmc-file", description="Specify the formula for model checking through a file.")
-        public String ltlmcFile;
-
-        public boolean ltlmc() {
-            return ltlmc != null || ltlmcFile != null;
-        }
-
-        @ParametersDelegate
-        public SMTOptions smt = new SMTOptions();
-
-        @Parameter(names="--native-libraries", description="Flags to pass to linker. Useful in defining rewriter plugins.",
-                listConverter=StringListConverter.class)
-        public List<String> nativeLibraries = Collections.emptyList();
-
-        @Parameter(names="--profile", description="Run krun multiple times to gather better performance metrics.")
-        public int profile = 1;
+    public boolean ltlmc() {
+        return ltlmc != null || ltlmcFile != null;
     }
+
+    @ParametersDelegate
+    public SMTOptions smt = new SMTOptions();
+
+    @Parameter(names="--native-libraries", description="Flags to pass to linker. Useful in defining rewriter plugins.",
+            listConverter=StringListConverter.class)
+    public List<String> nativeLibraries = Collections.emptyList();
+
+    @Parameter(names="--profile", description="Run krun multiple times to gather better performance metrics.")
+    public int profile = 1;
 }

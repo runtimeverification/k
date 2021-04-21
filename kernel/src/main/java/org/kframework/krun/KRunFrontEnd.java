@@ -86,7 +86,7 @@ public class KRunFrontEnd extends FrontEnd {
     public int run() {
         scope.enter(kompiledDir.get());
         try {
-            for (int i = 0; i < krunOptions.experimental.profile - 1; i++) {
+            for (int i = 0; i < krunOptions.profile - 1; i++) {
                 new KRun(kem, files.get(), tty, kprint.get()).run(compiledDef.get(),
                         krunOptions,
                         initializeRewriter.get(),
