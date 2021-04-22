@@ -67,12 +67,9 @@ Here, we have that:
     `'Hash'Baz'LParUndsCommUndsRParUnds'MYMODULE'Unds'FooBarBaz'Unds'Int'Unds'Int`
     as the symbol name.
 
-The `symbol` provided *must* be unique to this definition, unless you are
-intentionally to identify two pieces of concrete syntax as producing the same
-symbol (in which case you use `overload` as well). This is enforced by K.
-
+The `symbol` provided *must* be unique to this definition. This is enforced by K.
 In general, it's recommended to use `symbol` attribute whenever you use `klabel`
-unless you explicitely have a reason not to (eg. you want to `overload` symbols,
+unless you explicitely have a reason not to (eg. you want to *overload* symbols,
 or you're using a deprecated backend). It can be very helpful use the `symbol`
 attribute for debugging, as many debugging messages are printed in Kast format
 which will be more readable with the `symbol` names you explicitely declare.
