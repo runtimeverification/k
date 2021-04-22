@@ -661,8 +661,14 @@ pipeline {
             cd k-release
             git fetch --all
             git checkout -B release origin/release
-            git merge origin/master
-            ./package/version.sh bump
+            old_master="$(git merge-base origin/master origin/release)"
+            new_master="$(git rev-parse origin/master)"
+            if git diff --exit-code ${old_master} ${new_master} -- package/version; then
+                git merge origin/master
+                ./package/version.sh bump
+            else
+                git merge origin/master --strategy=theirs
+            fi
             ./package/version.sh sub
             git add -u
             git commit -m "Set Version: $(cat package/version)"
