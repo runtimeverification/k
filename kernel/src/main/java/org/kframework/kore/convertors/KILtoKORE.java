@@ -86,7 +86,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                 .map(mod -> (Module) mod).collect(Collectors.toSet());
 
         List<FlatModule> flatModules = kilModules.stream().map(this::toFlatModule).sorted(Comparator.comparing(FlatModule::name)).collect(Collectors.toList());
-        scala.collection.Set<org.kframework.definition.Module> koreModules = FlatModule.toModule(immutable(flatModules), Set());
+        scala.collection.Set<org.kframework.definition.Module> koreModules = FlatModule.toModules(immutable(flatModules), Set());
 
         return Definition(
                 koreModules.find(x -> x.name().equals(d.getMainModule()))

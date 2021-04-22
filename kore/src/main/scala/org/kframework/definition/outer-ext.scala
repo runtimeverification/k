@@ -8,9 +8,8 @@ import org.kframework.attributes._
 import org.kframework.utils.errorsystem.KEMException
 
 import scala.annotation.meta.param
-import scala.collection.Set
+import scala.collection.{Set, mutable}
 import java.util.Optional
-import scala.collection.concurrent.TrieMap
 
 case class Configuration(body: K, ensures: K, att: Att = Att.empty) extends Sentence with OuterKORE {
   override val isSyntax = true
@@ -38,15 +37,20 @@ object FlatModule {
     new FlatModule(name, Set(), unresolvedLocalSentences, Att.empty)
   }
 
-  def toModule(allModules:Seq[FlatModule], previousModules:Set[Module]):Set[Module] = {
-    val memoization:TrieMap[String, Module] = collection.concurrent.TrieMap[String, Module]()
+  /**
+   * Gets a list of {@link FlatModule} and returns a set of {@link Module}.
+   * @param allModules List of FlatModules to be transformed. The order matters when reporting circular imports.
+   * @param previousModules A set of Modules already built. New modules will be added to this set.
+   * @return The set of Modules, directly connected and maximally shared.
+   */
+  def toModules(allModules:Seq[FlatModule], previousModules:Set[Module]):Set[Module] = {
+    val memoization:mutable.HashMap[String, Module] = collection.mutable.HashMap[String, Module]()
     previousModules.map(m => memoization.put(m.name, m))
-    allModules.map(m => toModuleRec(m, Seq()))
     def toModuleRec(m:FlatModule, visitedModules: Seq[FlatModule]):Module = {
       if (visitedModules.contains(m)) {
         var msg = "Found circularity in module imports: "
         visitedModules.reverse.foreach(m => msg += m.name + " < ")
-        msg += visitedModules.reverse.head.name
+        msg += visitedModules.last.name
         throw KEMException.compilerError(msg)
       }
       memoization.getOrElseUpdate(m.name, {
@@ -62,6 +66,7 @@ object FlatModule {
         newM
       })
     }
+    allModules.map(m => toModuleRec(m, Seq()))
     memoization.values.toSet
   }
 }

@@ -43,10 +43,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static org.kframework.Collections.*;
@@ -130,7 +128,7 @@ public class JsonParser {
             flatModules.add(toFlatModule(m));
         }
 
-        scala.collection.Set<Module> koreModules = FlatModule.toModule(immutable(flatModules), Set());
+        scala.collection.Set<Module> koreModules = FlatModule.toModules(immutable(flatModules), Set());
         return Constructors.Definition(
                 koreModules.find(x -> x.name().equals(mainModuleName))
                         .getOrElse(() -> { throw new AssertionError("Could not find main module name: " + mainModuleName); }),
