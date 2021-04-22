@@ -99,6 +99,7 @@ The following dependencies are needed either at build time or runtime:
 *   [stack](https://docs.haskellstack.org/en/stable/README/)
 *   [zlib](https://www.zlib.net/)
 *   [z3](https://github.com/Z3Prover/z3) (on some distributions libz3 is also needed and packaged separately)
+    Note that you need at least version 4.6 of Z3, and we recommend at least version 4.8.
 
 The following dependencies are optional and are only needed when building
 the OCaml backend (**not recommended**):
