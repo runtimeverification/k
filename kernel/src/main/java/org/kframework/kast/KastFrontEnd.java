@@ -88,17 +88,7 @@ public class KastFrontEnd extends FrontEnd {
     public int run() {
         scope.enter(kompiledDir.get());
         try {
-            Reader stringToParse = null;
-            File outputFile = null;
-            if (!(options.genParser || options.genGlrParser)) {
-              stringToParse = options.stringToParse();
-            } else {
-              outputFile = options.outputFile();
-            }
-            Source source = options.source();
-
             CompiledDefinition def = compiledDef.get();
-            KRead kread = new KRead(kem, files.get(), options.input);
 
             org.kframework.kore.Sort sort = options.sort;
             if (sort == null) {
@@ -108,6 +98,7 @@ public class KastFrontEnd extends FrontEnd {
                     sort = def.programStartSymbol;
                 }
             }
+
             Module unparsingMod;
             if (options.module == null) {
                 options.module = def.mainSyntaxModuleName();
@@ -125,28 +116,32 @@ public class KastFrontEnd extends FrontEnd {
                 }
                 unparsingMod = maybeUnparsingMod.get();
             }
+
             Option<Module> maybeMod = def.programParsingModuleFor(options.module, kem);
             if (maybeMod.isEmpty()) {
                 throw KEMException.innerParserError("Module " + options.module + " not found. Specify a module with -m.");
             }
             Module parsingMod = maybeMod.get();
 
+            KRead kread = new KRead(kem, files.get(), options.input);
             if (options.genParser || options.genGlrParser) {
-              kread.createBisonParser(parsingMod, sort, outputFile, options.genGlrParser, options.bisonFile, options.bisonStackMaxDepth);
+                kread.createBisonParser(parsingMod, sort, options.bisonOutputFile(), options.genGlrParser, options.bisonFile, options.bisonStackMaxDepth);
             } else {
-              K parsed = kread.prettyRead(parsingMod, sort, def, source, FileUtil.read(stringToParse));
+                Reader stringToParse = options.stringToParse();
+                Source source = options.source();
+                K parsed = kread.prettyRead(parsingMod, sort, def, source, FileUtil.read(stringToParse));
 
-              if (options.expandMacros) {
-                  parsed = ExpandMacros.forNonSentences(unparsingMod, files.get(), def.kompileOptions, false).expand(parsed);
-              }
+                if (options.expandMacros) {
+                    parsed = ExpandMacros.forNonSentences(unparsingMod, files.get(), def.kompileOptions, false).expand(parsed);
+                }
 
-              if (sort.equals(Sorts.K())) {
-                  sort = Sorts.KItem();
-              }
+                if (sort.equals(Sorts.K())) {
+                    sort = Sorts.KItem();
+                }
 
-              System.out.print(new String(kprint.get().prettyPrint(def, unparsingMod, parsed, sort), StandardCharsets.UTF_8));
-              System.out.flush();
+                kprint.get().prettyPrint(def.kompiledDefinition, unparsingMod, s -> kprint.get().outputFile(s), parsed, sort);
             }
+
             sw.printTotal("Total");
             return 0;
         } finally {
