@@ -90,7 +90,7 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         return Definition(
                 koreModules.find(x -> x.name().equals(d.getMainModule()))
-                        .getOrElse(() -> { throw new AssertionError("Could not find main module name: " + d.getMainModule()); }),
+                        .getOrElse(() -> { throw new AssertionError("Could not find main module name: " + d.getMainModule() + " when loading from front-end classes."); }),
                 koreModules, Att());
     }
 

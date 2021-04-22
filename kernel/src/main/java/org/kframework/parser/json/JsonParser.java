@@ -131,7 +131,7 @@ public class JsonParser {
         scala.collection.Set<Module> koreModules = FlatModule.toModules(immutable(flatModules), Set());
         return Constructors.Definition(
                 koreModules.find(x -> x.name().equals(mainModuleName))
-                        .getOrElse(() -> { throw new AssertionError("Could not find main module name: " + mainModuleName); }),
+                        .getOrElse(() -> { throw new AssertionError("Could not find main module name " + mainModuleName + " when loading from JSON."); }),
                 koreModules, toAtt(data.getJsonObject("att")));
     }
 
