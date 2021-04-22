@@ -69,16 +69,17 @@ Here, we have that:
 
 The `symbol` provided *must* be unique to this definition, unless you are
 intentionally to identify two pieces of concrete syntax as producing the same
-symbol. Uniqueness is not enforced by default for backwards compatibility.
+symbol (in which case you use `overload` as well). This is enforced by K.
 
 In general, it's recommended to use `symbol` attribute whenever you use `klabel`
-unless you explicitely have a reason not to (sometimes this messes with
-deprecated backends). It can be very helpful use the `symbol` attribute, as many
-debugging messages are printed in Kast format, which will be more readable with
-the `symbol` names you explicitely declare. In addition, if you are
-programatically manipulating definitions via the JSON Kast format, building
-terms using the user-provided pretty `symbol, klabel(...)` is easier and less
-error-prone when the auto-generation process for klabels changes.
+unless you explicitely have a reason not to (eg. you want to `overload` symbols,
+or you're using a deprecated backend). It can be very helpful use the `symbol`
+attribute for debugging, as many debugging messages are printed in Kast format
+which will be more readable with the `symbol` names you explicitely declare.
+In addition, if you are programatically manipulating definitions via the JSON
+Kast format, building terms using the user-provided pretty
+`symbol, klabel(...)` is easier and less error-prone when the auto-generation
+process for klabels changes.
 
 ### Parametric productions and `bracket` attributes
 
