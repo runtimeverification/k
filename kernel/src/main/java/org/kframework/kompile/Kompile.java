@@ -276,7 +276,7 @@ public class Kompile {
                 .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
                 .andThen(AddImplicitComputationCell::transformDefinition)
-                .andThen(d -> new Strategy(kompileOptions.heatCoolStrategies).addStrategyCellToRulesTransformer(d).apply(d))
+                .andThen(d -> new Strategy().addStrategyCellToRulesTransformer(d).apply(d))
                 .andThen(ConcretizeCells::transformDefinition)
                 .andThen(genCoverage)
                 .andThen(Kompile::addSemanticsModule)

@@ -102,9 +102,6 @@ public class KompileOptions implements Serializable {
         return backend.equals("kore") || backend.equals("haskell") || backend.equals("llvm");
     }
 
-    @Parameter(names="--heat-cool-by-strategies", description="Control heating and cooling using strategies.")
-    public boolean heatCoolStrategies = false;
-
     @ParametersDelegate
     public SMTOptions smt = new SMTOptions();
 

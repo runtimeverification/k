@@ -167,7 +167,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
                 .andThen(subsortKItem)
-                .andThen(d -> new Strategy(kompileOptions.heatCoolStrategies).addStrategyCellToRulesTransformer(d).apply(d))
+                .andThen(d -> new Strategy().addStrategyCellToRulesTransformer(d).apply(d))
                 .andThen(d -> Strategy.addStrategyRuleToMainModule(def.mainModule().name()).apply(d))
                 .andThen(ConcretizeCells::transformDefinition)
                 .andThen(genCoverage)
