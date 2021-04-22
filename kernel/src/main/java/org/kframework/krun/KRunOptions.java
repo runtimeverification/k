@@ -142,10 +142,7 @@ public final class KRunOptions {
         if (io != null && io == true && search()) {
             throw KEMException.criticalError("You cannot specify both --io on and --search");
         }
-        if (io != null && io == true && this.ltlmc()) {
-            throw KEMException.criticalError("You cannot specify both --io on and --ltlmc");
-        }
-        if (search() || this.ltlmc()) {
+        if (search()) {
             return false;
         }
         if (io == null) {
@@ -222,16 +219,6 @@ public final class KRunOptions {
 
     @Parameter(names="--debugger", description="Run an execution in debug mode.")
     public boolean debugger = false;
-
-    @Parameter(names="--ltlmc", description="Specify the formula for model checking at the commandline.")
-    public String ltlmc;
-
-    @Parameter(names="--ltlmc-file", description="Specify the formula for model checking through a file.")
-    public String ltlmcFile;
-
-    public boolean ltlmc() {
-        return ltlmc != null || ltlmcFile != null;
-    }
 
     @ParametersDelegate
     public SMTOptions smt = new SMTOptions();
