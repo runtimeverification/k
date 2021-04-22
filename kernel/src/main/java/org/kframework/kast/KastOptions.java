@@ -44,15 +44,6 @@ public final class KastOptions {
         return files.get().readFromWorkingDirectory(parameters.get(0));
     }
 
-    public File fileToParse() {
-        checkFileExprExclusion();
-        if (expression != null) {
-            throw KEMException.criticalError("expression input not implemented for --k2kore");
-        }
-        checkSingleFile();
-        return files.get().resolveWorkingDirectory(parameters.get(0));
-    }
-
     private void checkFileExprExclusion() {
         if (parameters != null && parameters.size() > 0 && expression != null) {
             throw KEMException.criticalError("It is an error to provide both a file and an expression to parse.");
