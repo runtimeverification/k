@@ -664,14 +664,14 @@ pipeline {
             old_master="$(git merge-base origin/master origin/release)"
             new_master="$(git rev-parse origin/master)"
             if git diff --exit-code ${old_master} ${new_master} -- package/version; then
-                git merge origin/master
+                git merge --no-edit origin/master
                 ./package/version.sh bump
             else
-                git merge origin/master --strategy-option=theirs
+                git merge --no-edit --strategy-option=theirs origin/master
             fi
             ./package/version.sh sub
-            git add -u
-            git commit -m "Set Version: $(cat package/version)"
+            git add --update
+            git commit --no-edit --allow-empty --message "Set Version: $(cat package/version)"
             git push origin release
           '''
         }
