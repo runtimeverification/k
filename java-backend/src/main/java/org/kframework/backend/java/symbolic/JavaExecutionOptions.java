@@ -17,10 +17,6 @@ public final class JavaExecutionOptions {
         + "execution in the java backend if function definitions are not deterministic.")
     public boolean deterministicFunctions = false;
 
-    @Parameter(names="--symbolic-execution", description="Use unification rather than "
-        + "pattern matching to drive rewriting in the Java backend.")
-    public boolean symbolicExecution = false;
-
     @Parameter(names="--audit-file", description="Enforce that the rule applied at the step specified by "
             + "--apply-step is a rule at the specified file and line, or fail with an error explaining why "
             + "the rule did not apply.")
