@@ -667,7 +667,7 @@ pipeline {
                 git merge origin/master
                 ./package/version.sh bump
             else
-                git merge origin/master --strategy=theirs
+                git merge origin/master --strategy-option=theirs
             fi
             ./package/version.sh sub
             git add -u
