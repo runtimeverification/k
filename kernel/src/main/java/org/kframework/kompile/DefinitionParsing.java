@@ -313,32 +313,16 @@ public class DefinitionParsing {
                     .collect(Collections.toSet());
         }
 
-        Set<Sentence> configDeclSyntax = stream(configDeclProductions).filter(Sentence::isSyntax).collect(Collections.toSet());
-        Set<Sentence> configDeclRules = stream(configDeclProductions).filter(Sentence::isNonSyntax).collect(Collections.toSet());
-
-        if (module.name().endsWith(Import.IMPORTS_SYNTAX_SUFFIX)) {
-            Module mapModule;
-            if (def.getModule("MAP$SYNTAX").isDefined()) {
-                mapModule = def.getModule("MAP$SYNTAX").get();
-            } else {
-                throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
-            }
-            return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
-                    (Set<Sentence>) module.localSentences().$bar(configDeclSyntax)
-                            .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))),
-                    module.att());
+        Module mapModule;
+        if (def.getModule("MAP").isDefined()) {
+            mapModule = def.getModule("MAP").get();
         } else {
-            Module mapModule;
-            if (def.getModule("MAP").isDefined()) {
-                mapModule = def.getModule("MAP").get();
-            } else {
-                throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
-            }
-            return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
-                    (Set<Sentence>) module.localSentences().$bar(configDeclRules)
-                            .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))),
-                    module.att());
+            throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
         }
+        return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
+                (Set<Sentence>) module.localSentences().$bar(configDeclProductions)
+                        .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))),
+                module.att());
     }
 
     public Definition resolveNonConfigBubbles(Definition defWithConfig) {

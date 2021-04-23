@@ -6,6 +6,7 @@ import org.kframework.definition.Associativity;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Claim;
 import org.kframework.definition.Configuration;
+import org.kframework.definition.Constructors;
 import org.kframework.definition.Context;
 import org.kframework.definition.Definition;
 import org.kframework.definition.FlatModule;
@@ -42,10 +43,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static org.kframework.Collections.*;
@@ -124,16 +123,16 @@ public class JsonParser {
 
         String mainModuleName = data.getString("mainModule");
         JsonArray mods = data.getJsonArray("modules");
-        Set<FlatModule> entryModules = new HashSet<>();
+        List<FlatModule> flatModules = new ArrayList<>();
         for (JsonObject m: mods.getValuesAs(JsonObject.class)) {
-            entryModules.add(toFlatModule(m));
+            flatModules.add(toFlatModule(m));
         }
 
-        Map<String,Module> koreModules = new HashMap<>();
-        FlatModule mainFlatMod = entryModules.stream().filter(mod -> mod.name().equals(mainModuleName)).findFirst().get();
-        Module mainMod = mainFlatMod.toModule(immutable(entryModules), JavaConverters.mapAsScalaMapConverter(koreModules).asScala(), Seq());
-
-        return new Definition(mainMod, immutable(new HashSet<>(koreModules.values())), toAtt(data.getJsonObject("att")));
+        scala.collection.Set<Module> koreModules = FlatModule.toModules(immutable(flatModules), Set());
+        return Constructors.Definition(
+                koreModules.find(x -> x.name().equals(mainModuleName))
+                        .getOrElse(() -> { throw new AssertionError("Could not find main module name " + mainModuleName + " when loading from JSON."); }),
+                koreModules, toAtt(data.getJsonObject("att")));
     }
 
 /////////////////////////
