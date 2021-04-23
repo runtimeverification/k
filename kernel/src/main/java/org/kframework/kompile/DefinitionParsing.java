@@ -306,8 +306,7 @@ public class DefinitionParsing {
                     .filter(b -> b.sentenceType().equals(configuration))
                     .flatMap(b -> performParse(cache.getCache(), parser, parser.getScanner(options.global), b))
                     .map(this::upConfiguration)
-                    .flatMap(
-                            configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule(), kore)))
+                    .flatMap(configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule(), kore)))
                     .collect(Collections.toSet());
         }
 
