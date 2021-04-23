@@ -74,6 +74,6 @@ public class JCommanderModule extends AbstractModule  {
     String usage(JCommander jc) {
         StringBuilder sb = new StringBuilder();
         usage(jc, sb);
-        return StringUtil.finesseJCommanderUsage(sb.toString(), jc)[0];
+        return sb.toString().replaceAll("        ", "    ");
     }
 }

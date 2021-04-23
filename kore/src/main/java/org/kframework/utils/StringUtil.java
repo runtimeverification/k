@@ -430,29 +430,6 @@ public class StringUtil {
     }
 
     /**
-     * Finesse the JCommander usage output to make it more readable to the user.
-     *
-     * This function does two things. First, it reworks the indentation to fix a
-     * bug where different commands are indented differently.
-     * @param string The unfiltered output from JCommander's usage
-     * @return An array of strings. There will only be one string outputted.
-     */
-    public static String[] finesseJCommanderUsage(String string, JCommander jc) {
-        //for some reason the usage pattern indents commands inconsistently, so we need to adjust it
-        string = string.replaceAll("        ", "    ");
-        String lastLine = "";
-        StringBuilder mainOptions = new StringBuilder();
-        for (String line : string.split("\n")) {
-            if (line.startsWith("    --")) {
-                lastLine = line;
-            }
-            mainOptions.append(line);
-            mainOptions.append("\n");
-        }
-        return new String[] {mainOptions.toString()};
-    }
-
-    /**
      * Takes a textual representation of a KLabel using backticks to delimit
      * and returns the string representation of the KLabel that it corresponds to
      *
