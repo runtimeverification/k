@@ -300,17 +300,12 @@ public class DefinitionParsing {
                     .filter(b -> b.sentenceType().equals(configuration))
                     .flatMap(b -> performParse(cache.getCache(), parser, parser.getScanner(options.global), b))
                     .map(this::upConfiguration)
-                    .flatMap(
-                            configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule(), kore)))
+                    .flatMap(configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule(), kore)))
                     .collect(Collections.toSet());
         }
 
-        Module mapModule;
-        if (def.getModule("MAP").isDefined()) {
-            mapModule = def.getModule("MAP").get();
-        } else {
-            throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
-        }
+        Module mapModule = def.getModule("MAP").getOrElse(() -> {
+            throw KEMException.compilerError("Module MAP must be visible at the configuration declaration, in module " + module.name()); });
         return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
                 (Set<Sentence>) module.localSentences().$bar(configDeclProductions)
                         .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))),
