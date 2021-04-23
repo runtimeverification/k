@@ -54,14 +54,13 @@ object FlatModule {
         throw KEMException.compilerError(msg)
       }
       memoization.getOrElseUpdate(m.name, {
-        val newM = new Module(
-          m.name,
-          m.imports.map(i => memoization.getOrElse(i.name,
-            toModuleRec(allModules.find(f => f.name.equals(i.name))
-              .getOrElse(throw KEMException.compilerError("Could not find module: " + i.name, i)), visitedModules :+ m))),
-          m.localSentences,
-          m.att
-        )
+        // transform all imports into Module
+        val newImports = m.imports.map(i => memoization.getOrElse(i.name
+          // if can't find the Module in memoization, build a new one
+          , toModuleRec(allModules.find(f => f.name.equals(i.name))
+              .getOrElse(throw KEMException.compilerError("Could not find module: " + i.name, i))
+            , visitedModules :+ m)))
+        val newM = new Module(m.name, newImports, m.localSentences, m.att)
         newM.checkSorts()
         newM
       })
