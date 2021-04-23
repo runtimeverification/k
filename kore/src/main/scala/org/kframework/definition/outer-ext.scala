@@ -8,7 +8,8 @@ import org.kframework.attributes._
 import org.kframework.utils.errorsystem.KEMException
 
 import scala.annotation.meta.param
-import scala.collection.{Set, mutable}
+import scala.collection.Set
+import scala.collection.mutable
 import java.util.Optional
 
 case class Configuration(body: K, ensures: K, att: Att = Att.empty) extends Sentence with OuterKORE {
