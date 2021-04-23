@@ -74,6 +74,7 @@ public class JCommanderModule extends AbstractModule  {
     String usage(JCommander jc) {
         StringBuilder sb = new StringBuilder();
         usage(jc, sb);
+        //for some reason the usage pattern indents commands inconsistently, so we need to adjust it
         return sb.toString().replaceAll("        ", "    ");
     }
 }
