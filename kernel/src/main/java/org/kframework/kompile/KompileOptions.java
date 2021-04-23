@@ -107,30 +107,11 @@ public class KompileOptions implements Serializable {
 
     public static final class Experimental implements Serializable {
 
-        // Experimental options
-        @Parameter(names="--step", description="Name of the compilation phase after which the compilation process should stop.")
-        public String step;
-
-        @Parameter(names="--add-top-cell", description="Add a top cell to configuration and all rules.")
-        public boolean addTopCell = false;
-
         @Parameter(names="--heat-cool-by-strategies", description="Control heating and cooling using strategies.")
         public boolean heatCoolStrategies = false;
 
-        @Parameter(names="--k-cells", description="Cells which contain komputations.")
-        public List<String> kCells = Arrays.asList("k");
-
         @ParametersDelegate
         public SMTOptions smt = new SMTOptions();
-
-        @Parameter(names="--documentation", listConverter=StringListConverter.class, description="<string> is a comma-separated list of tags designating rules to be included in the file generated with --backend=doc")
-        public List<String> documentation = Collections.singletonList("documentation");
-
-        @Parameter(names="--legacy-kast", description="Compile with settings based on the old KAST structure")
-        public boolean legacyKast = false;
-
-        @Parameter(names="--kore-prove", description="Compile with the KORE pipeline for proving.")
-        public boolean koreProve = false;
 
         @Parameter(names="--cache-file", description="Location of parse cache file. Default is $KOMPILED_DIR/cache.bin.")
         public String cacheFile;
