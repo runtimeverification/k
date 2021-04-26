@@ -119,10 +119,11 @@ public class StringUtil {
         if (str.equals("") || search.equals("")) {
             return -1;
         }
-        for (int i = str.length(), strCodepoint; i > 0; i -= Character.charCount(strCodepoint)) {
-            strCodepoint = str.codePointBefore(i);
-            for (int j = search.length(), searchCodepoint; j > 0; j -= Character.charCount(searchCodepoint)) {
-                searchCodepoint = search.codePointBefore(j);
+        int start = str.offsetByCodePoints(0, offset);
+        for (int i = start, strCodepoint; i >= 0; i -= Character.charCount(strCodepoint)) {
+            strCodepoint = str.codePointAt(i);
+            for (int j = search.length() - 1, searchCodepoint; j >= 0; j -= Character.charCount(searchCodepoint)) {
+                searchCodepoint = search.codePointAt(j);
                 if (strCodepoint == searchCodepoint) {
                     return i;
                 }
@@ -135,7 +136,8 @@ public class StringUtil {
         if (str.equals("") || search.equals("")) {
             return -1;
         }
-        for (int i = 0, strCodepoint; i < str.length(); i += Character.charCount(strCodepoint)) {
+        int start = str.offsetByCodePoints(0, offset);
+        for (int i = start, strCodepoint; i < str.length(); i += Character.charCount(strCodepoint)) {
             strCodepoint = str.codePointAt(i);
             for (int j = 0, searchCodepoint; j < search.length(); j += Character.charCount(searchCodepoint)) {
                 searchCodepoint = search.codePointAt(j);
