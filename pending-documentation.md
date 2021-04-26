@@ -29,27 +29,54 @@ This syntax can be used anywhere in a K definition that expects a non-terminal.
 ### `klabel(_)` and `symbol` attributes
 
 By default K generates for each syntax definition a long and obfuscated klabel
-string, which serves as internal identifier and also is used in kast format of
-that syntax. If we need to reference a certain syntax production externally, we
-have to manually define the klabels.
+string, which serves as a unique internal identifier and also is used in kast
+format of that syntax. If we need to reference a certain syntax production
+externally, we have to manually define the klabels using the `klabel` attribute.
+One example of where you would want to do this is to be able to refer to a given
+symbol via the `syntax priorities` attribute, or to enable overloading of a
+given symbol.
+
+If you only provide the `klabel` attribute, you can use the provided `klabel` to
+refer to that symbol anywhere in the frontend K code. However, the internal
+identifier seen by the backend for that symbol will still be the long obfuscated
+generated string. Sometimes you want control over the internal identfier used as
+well, in which case you use the `symbol` attribute. This tells the frontend to
+use whatever the declared `klabel` is directly as the internal identfier.
 
 For example:
 
 ```k
-syntax Foo ::= #Foo( Int, Int ) [klabel(#Foo), symbol]
+module MYMODULE
+    syntax FooBarBaz ::= #Foo( Int, Int ) [klabel(#Foo), symbol] // symbol1
+                       | #Bar( Int, Int ) [klabel(#Bar)]         // symbol2
+                       | #Baz( Int, Int )                        // symbol3
+endmodule
 ```
 
-Now a kast term for `Foo` will look like `#Foo(1,  1)`.
-Without `symbol`, the klabel defined for this syntax will still be a long
-obfuscated string. `[symbol]` also ensures that this attribute is unique to
-the definition. Uniqueness is not enforced by default for backwards
-compatibility. In some circumstances in Java and Ocaml backend we need multiple
-syntax definition with the same klabel. Otherwise it is recommended to use
-`klabel` and `symbol` together. One application is loading a config through
-JSON backend.
+Here, we have that:
 
-KLabels are also used when terms are logged in Java Backend, when using
-logging/debugging options, or in error messages.
+-   In frontend K, you can refer to "symbol1" as `#Foo` (from `klabel(#Foo)`),
+    and the backend will see `'Hash'Foo` as the symbol name.
+-   In frontend K, you can refer to "symbol2" as `Bar` (from `klabel(#Bar)`),
+    and the backend will see
+    `'Hash'Bar'LParUndsCommUndsRParUnds'MYMODULE'Unds'FooBarBaz'Unds'Int'Unds'Int`
+    as the symbol name.
+-   In frontend K, you can refer to "symbol3" as
+    `#Baz(_,_)_MYMODULE_FooBarBaz_Int_Int` (from auto-generated klabel), and
+    the backend will see
+    `'Hash'Baz'LParUndsCommUndsRParUnds'MYMODULE'Unds'FooBarBaz'Unds'Int'Unds'Int`
+    as the symbol name.
+
+The `symbol` provided *must* be unique to this definition. This is enforced by K.
+In general, it's recommended to use `symbol` attribute whenever you use `klabel`
+unless you explicitely have a reason not to (eg. you want to *overload* symbols,
+or you're using a deprecated backend). It can be very helpful use the `symbol`
+attribute for debugging, as many debugging messages are printed in Kast format
+which will be more readable with the `symbol` names you explicitely declare.
+In addition, if you are programatically manipulating definitions via the JSON
+Kast format, building terms using the user-provided pretty
+`symbol, klabel(...)` is easier and less error-prone when the auto-generation
+process for klabels changes.
 
 ### Parametric productions and `bracket` attributes
 
@@ -309,7 +336,7 @@ However, this grammar is ambiguous. The term `x+y*z` might refer to `x+(y*z)`
 or to `(x+y)*z`. In order to differentiate this, we introduce a partial
 ordering between productions known as priority. A symbol "has tighter priority"
 than another symbol if the first symbol can appear under the second, but the
-second cannot appear under the first without a bracket. For example, in 
+second cannot appear under the first without a bracket. For example, in
 traditional arithmetic, multiplication has tighter priority than addition,
 which means that `x+y*z` cannot parse as `(x+y)*z` because the addition
 operator would appear directly beneath the multiplication, which is forbidden
@@ -324,10 +351,10 @@ as via the `prefer` and `avoid` attributes, but if multiple parses remain after
 disambiguation finishes, this is an ambiguous parse error, indicating there is
 not a unique parse for that term. In the vast majority of cases, this is
 an error and indicates that you ought to either change your grammar or add
-brackets to the term in question. 
+brackets to the term in question.
 
 Priority is specified in K grammars by means of one of two different
-mechanisms. The first, and simplest, simply replaces the `|` operator in a 
+mechanisms. The first, and simplest, simply replaces the `|` operator in a
 sequence of K productions with the `>` operator. This operator indicates that
 everything prior to the `>` operator (including transitively) binds tighter
 than what comes after. For example, a more complete grammar for simple
@@ -395,7 +422,7 @@ syntax Exp ::= left:
 
 This indicates that multiplication and division are left-associative, ie, after
 symbols with higher priority are parsed as innermost, symbols are nested with
-the rightmost on top. Addition and subtraction are right associative, which 
+the rightmost on top. Addition and subtraction are right associative, which
 is the opposite and indicates that symbols are nested with the leftmost on top.
 Note that this is similar but different from evaluation order, which also
 concerns itself with the ordering of symbols, which is described in the next
@@ -441,7 +468,7 @@ syntax right add
 Note that there is one other way to describe associativity, but it is
 prone to a very common mistake. You can apply the attribute `left`, `right`,
 or `non-assoc` directly to a production to indicate that it is, by itself,
-left-, right-, or non-associative. 
+left-, right-, or non-associative.
 
 However, this often does not mean what users think it means. In particular:
 
@@ -1218,6 +1245,22 @@ Then this simplification rule will only apply if the Haskell backend can prove
 that `notBool N =/=Int 0` is unsatisfiable. This avoids an infinite cycle of
 applying this simplification lemma.
 
+**NOTE**: The frontend and Haskell backend **do not check** that supplied
+simplification rules are sound, this is the developer's responsibility. In
+particular, rules with the simplification attribute must preserve definedness;
+that is, if the left-hand side refers to any partial function then:
+
+-   the right-hand side must be `#Bottom` when the left-hand side is `#Bottom`, or
+-   the rule must have an `ensures` clause that is `false` when the left-hand
+    side is `#Bottom`, or
+-   the rule must have a `requires` clause that is `false` when the left-hand
+    side is `#Bottom`.
+
+These conditions are in order of decreasing preference: the best option is to
+preserve `#Bottom` on the right-hand side, the next best option is to have an
+`ensures` clause, and the least-preferred option is to have a `requires` clause.
+The most preferred option is to write total functions and avoid the entire issue.
+
 ### `concrete` attribute, `#isConcrete` and `#isVariable` function (Java backend)
 
 **NOTE**: The Haskell backend _does not_ and _will not_ support the
@@ -1519,7 +1562,7 @@ to `200`. This has a couple of implications:
 
 1. Multiple rules with the owise attribute all have the same priority and thus
    can apply in any order.
-2. Rules with priority higher than `200` apply **after** all rules with the 
+2. Rules with priority higher than `200` apply **after** all rules with the
    `owise` attribute have been tried.
 
 There is one more rule by which priorities are assigned: a rule with no
@@ -2230,7 +2273,7 @@ some important limitations:
   is quite primitive, and in the worst case it can use exponential space and
   time to parse a program, which generally leads the generated parser to report
   "memory exhausted", indicating that the parse could not be completed within
-  the stack space allocated by Bison. It's best to ensure that the grammar is 
+  the stack space allocated by Bison. It's best to ensure that the grammar is
   as close to LR(1) as possible and only utilizes conflicts where absolutely
   necessary. One tool that can be used to facilitate this is to pass
   `--bison-lists` to kompile. This will disable support for the `List{Sort}`
@@ -2238,7 +2281,7 @@ some important limitations:
   resulting productions generated for `NeList{Sort}` will be LR(1) and use bounded
   stack space.
 * If the grammar you are parsing is context-sensitive (for example, because
-  it requires a symbol table to parse), one thing you can do to make this 
+  it requires a symbol table to parse), one thing you can do to make this
   language parse in K is to implement the language as an ambiguous grammar.
   Bison's GLR parser will generate an `amb` production that is parametric in
   the sort of the ambiguity. You can then import the `K-AMBIGUITIES` module
@@ -2263,7 +2306,7 @@ ordinary rewrite rules:
 
 ```k
   rule #location(_ / 0, File, StartLine, _StartColumn, _EndLine, _EndColumn) =>
-  "Error: Division by zero at " +String File +String ":" Int2String(StartLine) 
+  "Error: Division by zero at " +String File +String ":" Int2String(StartLine)
 ```
 
 Unparsing
@@ -2292,7 +2335,7 @@ result, when writing a program, if we want to write an expression that first
 applies addition, then multiplication, we must use brackets: `(1 + 2) * 3`.
 Similarly, if we have such an AST, we must **insert** brackets into the AST
 in order to faithfully unparse the term in a manner that will be parsed back
-into the same ast, because if we do not, we end up unparsing the term as 
+into the same ast, because if we do not, we end up unparsing the term as
 `1 + 2 * 3`, which will be parsed back as `1 + (2 * 3)` because of the priority
 declaration in the grammar.
 
@@ -2366,12 +2409,12 @@ list of escape sequences recognized by the formatter:
 
 | Escape Sequence | Meaning                                                   |
 | --------------- | --------------------------------------------------------- |
-| n               | Insert '\n' followed by the current indentation level     | 
+| n               | Insert '\n' followed by the current indentation level     |
 | i               | Increase the current indentation level by 1               |
 | d               | Decrease the current indentation level by 1               |
 | c               | Move to the next color in the list of colors for this
                     production                                                |
-| r               | Reset color to the default foreground color for the 
+| r               | Reset color to the default foreground color for the
                     terminal                                                  |
 | an integer      | Print a terminal or nonterminal from the production.
                     The integer is treated as a 1-based index into the

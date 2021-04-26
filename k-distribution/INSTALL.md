@@ -175,6 +175,8 @@ contributors.
     sudo apt-get install build-essential m4 openjdk-8-jre libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev unzip python3
     ```
 
+    Note that you need at least version 4.6 of Z3, and we recommend at least version 4.8.
+
 2.  Unpack the binary (will place in subdirectory `k`), move to preferred install location:
 
     ```sh
