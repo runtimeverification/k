@@ -11,7 +11,6 @@ import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.Backend;
 import org.kframework.compile.ConcretizeCells;
 import org.kframework.compile.ConfigurationInfoFromModule;
-import org.kframework.compile.ConstantFolding;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.GenerateCoverage;
 import org.kframework.compile.GeneratedTopFormat;
@@ -142,7 +141,6 @@ public class KoreBackend extends AbstractBackend {
           ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d, true);
           return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kem, kompileOptions, false, excludedModuleTags().contains(Att.CONCRETE())).expand(s), "expand macros").apply(d);
         };
-        DefinitionTransformer constantFolding = DefinitionTransformer.fromSentenceTransformer(new ConstantFolding()::fold, "constant expression folding");
         Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(d, true).resolve(m)), "resolving !Var variables").apply(d);
         GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
         Function1<Definition, Definition> genCoverage = d -> DefinitionTransformer.fromRuleBodyTransformerWithRule((r, body) -> cov.gen(r, body, d.mainModule()), "generate coverage instrumentation").apply(d);
@@ -162,7 +160,6 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(subsortKItem)
                 .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
-                .andThen(constantFolding)
                 .andThen(expandMacros)
                 .andThen(guardOrs)
                 .andThen(AddImplicitComputationCell::transformDefinition)
