@@ -66,19 +66,19 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
    * Returns true if x < y
    */
   def lessThan(x: T, y: T): Boolean = <(x, y)
-  def lessThanEq(x: T, y: T): Boolean = <(x, y) | x == y
+  def lessThanEq(x: T, y: T): Boolean = x == y || <(x, y)
   def directlyLessThan(x: T, y: T): Boolean = directRelationsMap.get(x).exists(_.contains(y))
   /**
    * Returns true if y < x
    */
   def greaterThan(x: T, y: T): Boolean = >(x, y)
-  def greaterThanEq(x: T, y: T): Boolean = >(x, y) | x == y
+  def greaterThanEq(x: T, y: T): Boolean = x == y || >(x, y)
   def directlyGreaterThan(x: T, y: T): Boolean = directRelationsMap.get(y).exists(_.contains(x))
   /**
    * Returns true if y < x or y < x
    */
   def inSomeRelation(x: T, y: T) = this.~(x, y)
-  def inSomeRelationEq(x: T, y: T) = this.~(x, y) | x == y
+  def inSomeRelationEq(x: T, y: T) = x == y || this.~(x, y)
 
   /**
    * Returns an Optional of the least upper bound if it exists, or an empty Optional otherwise.
