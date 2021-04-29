@@ -1,4 +1,4 @@
-FROM archlinux/base
+FROM archlinux:base
 
 RUN    pacman -Sy   --noconfirm archlinux-keyring \
     && pacman -Syyu --noconfirm                   \
