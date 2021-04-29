@@ -281,7 +281,7 @@ pipeline {
                 stage('Test Arch Package') {
                   agent {
                     docker {
-                      image 'archlinux/base'
+                      image 'archlinux:base'
                       args '-u 0'
                       reuseNode true
                     }
