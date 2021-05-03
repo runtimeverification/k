@@ -286,8 +286,8 @@ In both cases, no action is taken if the parse is not ambiguous.
 
 ## Exercises
 
-1. Modify your solution from lesson 3 so that unary negation should bind
-tighter than multiplication and division, which should bind tighter than
+1. Modify your solution from lesson 3, problem 1 so that unary negation should
+bind tighter than multiplication and division, which should bind tighter than
 addition and subtraction, and each binary operator should be left associative.
 Write these priority and associativity declarations both inline and explicitly.
 
