@@ -26,10 +26,10 @@ the expression `true && false || false` has only one valid AST:
 `(true && false) || false`.
 
 Consider, then, the third iteration on the grammar of this definition
-(`lesson-03-e.k`):
+(`lesson-04-a.k`):
 
 ```k
-module LESSON-03-E
+module LESSON-04-A
 
   syntax Boolean ::= "true" | "false"
                    | "(" Boolean ")" [bracket]
@@ -123,10 +123,10 @@ In C, binary operators are all left-associative, meaning that the expression
 because `&&` cannot appear as the rightmost child of itself.
 
 Consider, then, the fourth iteration on the grammar of this definition
-(`lesson-03-f.k`):
+(`lesson-04-b.k`):
 
 ```k
-module LESSON-03-F
+module LESSON-04-B
 
   syntax Boolean ::= "true" | "false"
                    | "(" Boolean ")" [bracket]
@@ -145,10 +145,10 @@ either `left:` for left associativity, `right:` for right associativity, or
 apply associativity to has only a single production, but we could equally well
 write a priority block with multiple productions and an associativity.
 
-For example, consider the following, different grammar (`lesson-03-g.k`):
+For example, consider the following, different grammar (`lesson-04-c.k`):
 
 ```k
-module LESSON-03-G
+module LESSON-04-C
 
   syntax Boolean ::= "true" | "false"
                    | "(" Boolean ")" [bracket]
@@ -179,11 +179,11 @@ multiple modules.
 As a result of this, K provides a second way of declaring priority and
 associativity relations.
 
-Consider the following grammar, which we will name `lesson-03-h.k` and which
-will express the exact same grammar as `lesson-03-f.k`
+Consider the following grammar, which we will name `lesson-04-D.k` and which
+will express the exact same grammar as `lesson-04-b.k`
 
 ```k
-module LESSON-03-H
+module LESSON-04-D
 
   syntax Boolean ::= "true" [literal] | "false" [literal]
   syntax Boolean ::= "(" Boolean ")" [atom, bracket]
@@ -222,10 +222,10 @@ two ambiguous parses directly while still not rejecting any parses if the term
 parsed is unambiguous. A good example of this is the famous "dangling else"
 problem in imperative C-like languages.
 
-Consider the following definition (`lesson-03-i.k`):
+Consider the following definition (`lesson-04-E.k`):
 
 ```k
-module LESSON-03-I
+module LESSON-04-E
 
   syntax Exp ::= "true" | "false"
   syntax Stmt ::= "if" "(" Exp ")" Stmt
@@ -254,10 +254,10 @@ when we parse this program, we see the following ambiguity as an error message:
 [Error] Inner Parser: Parsing ambiguity.
 1: syntax Stmt ::= "if" "(" Exp ")" Stmt
 
-`if(_)__LESSON-03-I_Stmt_Exp_Stmt`(`true_LESSON-03-I_Exp`(.KList),`if(_)_else__LESSON-03-I_Stmt_Exp_Stmt_Stmt`(`false_LESSON-03-I_Exp`(.KList),`;_LESSON-03-I_Stmt`(.KList),`;_LESSON-03-I_Stmt`(.KList)))
+`if(_)__LESSON-04-E_Stmt_Exp_Stmt`(`true_LESSON-04-E_Exp`(.KList),`if(_)_else__LESSON-04-E_Stmt_Exp_Stmt_Stmt`(`false_LESSON-04-E_Exp`(.KList),`;_LESSON-04-E_Stmt`(.KList),`;_LESSON-04-E_Stmt`(.KList)))
 2: syntax Stmt ::= "if" "(" Exp ")" Stmt "else" Stmt
 
-`if(_)_else__LESSON-03-I_Stmt_Exp_Stmt_Stmt`(`true_LESSON-03-I_Exp`(.KList),`if(_)__LESSON-03-I_Stmt_Exp_Stmt`(`false_LESSON-03-I_Exp`(.KList),`;_LESSON-03-I_Stmt`(.KList)),`;_LESSON-03-I_Stmt`(.KList))
+`if(_)_else__LESSON-04-E_Stmt_Exp_Stmt_Stmt`(`true_LESSON-04-E_Exp`(.KList),`if(_)__LESSON-04-E_Stmt_Exp_Stmt`(`false_LESSON-04-E_Exp`(.KList),`;_LESSON-04-E_Stmt`(.KList)),`;_LESSON-04-E_Stmt`(.KList))
         Source(./dangling-else.if)
         Location(1,1,1,30)
 ```
@@ -265,10 +265,10 @@ when we parse this program, we see the following ambiguity as an error message:
 Roughly, we see that the ambiguity is between an `if` with an `else` or an `if`
 without an `else`. Since we want to pick the first parse, we can tell K to
 "avoid" the second parse with the `avoid` attribute. Consider the following
-modified definition (`lesson-03-j.k`):
+modified definition (`lesson-04-f.k`):
 
 ```k
-module LESSON-03-I
+module LESSON-04-F
 
   syntax Exp ::= "true" | "false"
   syntax Stmt ::= "if" "(" Exp ")" Stmt
