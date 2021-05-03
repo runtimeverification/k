@@ -10,12 +10,6 @@ public class OcamlKRunOptions {
     @Parameter(names="--ocaml-compile", description="Compile program to run into OCAML binary.")
     public boolean ocamlCompile;
 
-    @Parameter(names="--mini-krun", description="Use minimalist krun pipeline for faster performance.")
-    public boolean miniKRun;
-
-    @Parameter(names="--interpret", description="Use even more minimal interpreter pipeline for faster performance.")
-    public boolean interpret;
-
     @Parameter(names="--native-compiler", description="Command to use to perform native linking.")
     public String nativeCompiler;
 

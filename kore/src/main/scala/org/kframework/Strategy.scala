@@ -19,7 +19,7 @@ object Strategy {
   def addStrategyRuleToMainModule(mainModuleName: String) = {
     DefinitionTransformer(
       module =>
-        if (module.name != mainModuleName || !module.importedModuleNames.contains("STRATEGY$SYNTAX")) {
+        if (module.name != mainModuleName || !module.importedModuleNames.contains("STRATEGY")) {
           module
         } else {
           Module(module.name, module.imports, module.localSentences + Rule(
@@ -71,7 +71,7 @@ class Strategy(heatCool: Boolean) {
 
           import rich._
           
-          if (!defn.mainModule.importedModuleNames.contains("STRATEGY$SYNTAX") || r.att.contains(Att.ANYWHERE) || r.att.contains(Att.MACRO) || r.att.contains(Att.ALIAS) || r.att.contains(Att.MACRO_REC) || r.att.contains(Att.ALIAS_REC)) {
+          if (!defn.mainModule.importedModuleNames.contains("STRATEGY") || r.att.contains(Att.ANYWHERE) || r.att.contains(Att.MACRO) || r.att.contains(Att.ALIAS) || r.att.contains(Att.MACRO_REC) || r.att.contains(Att.ALIAS_REC)) {
             r
           } else
             r match {

@@ -41,12 +41,6 @@ RUN    groupadd -g $GROUP_ID user                     \
 
 USER user:user
 
-RUN mkdir -p /home/user/.ssh
-ADD --chown=user:user package/ssh/config /home/user/.ssh/
-RUN    chmod go-rwx -R /home/user/.ssh                                \
-    && git config --global user.email "admin@runtimeverification.com" \
-    && git config --global user.name  "RV Jenkins"
-
 RUN curl -L https://github.com/github/hub/releases/download/v2.14.0/hub-linux-amd64-2.14.0.tgz -o /home/user/hub.tgz
 RUN cd /home/user && tar xzf hub.tgz
 
@@ -60,7 +54,7 @@ RUN    cd /home/user                        \
 
 ENV LC_ALL=C.UTF-8
 ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml        /home/user/.tmp-haskell/
-ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/package.yaml /home/user/.tmp-haskell/kore/
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/kore.cabal /home/user/.tmp-haskell/kore/
 RUN    cd /home/user/.tmp-haskell  \
     && stack build --only-snapshot
 
@@ -76,3 +70,13 @@ ADD k-distribution/pom.xml                                     /home/user/.tmp-m
 ADD kore/pom.xml                                               /home/user/.tmp-maven/kore/
 RUN    cd /home/user/.tmp-maven               \
     && mvn --batch-mode dependency:go-offline
+
+RUN    git config --global user.email 'admin@runtimeverification.com' \
+    && git config --global user.name  'RV Jenkins'                    \
+    && mkdir -p ~/.ssh                                                \
+    && echo 'host github.com'                       > ~/.ssh/config   \
+    && echo '    hostname github.com'              >> ~/.ssh/config   \
+    && echo '    user git'                         >> ~/.ssh/config   \
+    && echo '    identityagent SSH_AUTH_SOCK'      >> ~/.ssh/config   \
+    && echo '    stricthostkeychecking accept-new' >> ~/.ssh/config   \
+    && chmod go-rwx -R ~/.ssh

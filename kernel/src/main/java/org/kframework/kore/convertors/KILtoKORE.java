@@ -21,16 +21,12 @@ import org.kframework.kil.Production;
 import org.kframework.kil.Terminal;
 import org.kframework.kore.KLabel;
 import org.kframework.utils.errorsystem.KEMException;
-import scala.Tuple2;
-import scala.collection.JavaConverters;
 import scala.collection.Seq;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -86,35 +82,16 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.definition.Definition apply(Definition d) {
-//        Set<org.kframework.definition.Require> requires = d.getItems().stream()
-//                .filter(i -> i instanceof Require).map(i -> apply((Require) i))
-//                .collect(Collectors.toSet());
-
         Set<Module> kilModules = d.getItems().stream().filter(i -> i instanceof Module)
                 .map(mod -> (Module) mod).collect(Collectors.toSet());
 
-        Module mainModule = kilModules.stream()
-                .filter(mod -> mod.getName().equals(d.getMainModule())).findFirst().get();
-
-        HashMap<String, org.kframework.definition.Module> koreModules = new HashMap<>();
-
-        apply(mainModule, kilModules, koreModules);
-
-        // Set<org.kframework.definition.Module> modules = kilModules.map(i ->
-        // apply((Module) i))
-        // .collect(Collectors.toSet());
+        List<FlatModule> flatModules = kilModules.stream().map(this::toFlatModule).sorted(Comparator.comparing(FlatModule::name)).collect(Collectors.toList());
+        scala.collection.Set<org.kframework.definition.Module> koreModules = FlatModule.toModules(immutable(flatModules), Set());
 
         return Definition(
-                koreModules.get(mainModule.getName()),
-                immutable(new HashSet<>(koreModules.values())), Att());
-    }
-
-    public org.kframework.definition.Module apply(Module mainModule, Set<Module> allKilModules,
-                                                  Map<String, org.kframework.definition.Module> koreModules) {
-        FlatModule mainFlatModule = toFlatModule(mainModule);
-        Set<FlatModule> flatModules = allKilModules.stream().map(m -> toFlatModule(m)).collect(Collectors.toSet());
-        org.kframework.definition.Module result = mainFlatModule.toModule(immutable(flatModules), JavaConverters.mapAsScalaMapConverter(koreModules).asScala(), Seq());
-        return result;
+                koreModules.find(x -> x.name().equals(d.getMainModule()))
+                        .getOrElse(() -> { throw new AssertionError("Could not find main module name: " + d.getMainModule() + " when loading from front-end classes."); }),
+                koreModules, Att());
     }
 
     @SuppressWarnings("unchecked")

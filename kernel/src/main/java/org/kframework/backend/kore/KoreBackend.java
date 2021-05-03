@@ -134,7 +134,7 @@ public class KoreBackend extends AbstractBackend {
         DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun(true)::resolve, "resolving #fun");
         Function1<Definition, Definition> resolveFunctionWithConfig = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, true)::resolve, "resolving functions with config context").apply(d);
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
-        DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections()::gen, "adding sort projections");
+        DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections(kompileOptions.coverage)::gen, "adding sort projections");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         Function1<Definition, Definition> addCoolLikeAtt = d -> DefinitionTransformer.fromSentenceTransformer(new AddCoolLikeAtt(d.mainModule())::add, "add cool-like attribute").apply(d);
         Function1<Definition, Definition> expandMacros = d -> {
@@ -201,9 +201,11 @@ public class KoreBackend extends AbstractBackend {
         ModuleTransformer concretizeCells = ModuleTransformer.fromSentenceTransformer(
                 new ConcretizeCells(configInfo, labelInfo, sortInfo, mod)::concretize,
                 "concretizing configuration");
+        ModuleTransformer generateSortProjections = ModuleTransformer.from(new GenerateSortProjections(false)::gen, "adding sort projections");
 
         return m -> resolveAnonVars
                 .andThen(resolveSemanticCasts)
+                .andThen(generateSortProjections)
                 .andThen(expandMacros)
                 .andThen(addImplicitComputationCell)
                 .andThen(resolveFreshConstants)

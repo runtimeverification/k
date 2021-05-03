@@ -5,7 +5,7 @@ module DEPOSIT-SYMBOLIC
 imports DEPOSIT
 
 syntax Bool ::= isNat(Int) [function]
-rule isNat(I) => I >=Int 0 [macro]
+rule isNat(I) => I >=Int 0
 
 syntax Int ::= tn(Int, Int, Int) /* tn(m,l,i) := T_m(l,i)  */ [function, smtlib(tn)]
              | up(Int, Int)      /* up(k,x)   := \up^k x   */ [function, smtlib(up)]

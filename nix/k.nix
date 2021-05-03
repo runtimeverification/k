@@ -1,25 +1,25 @@
-{ lib, mavenix, nix-gitignore, runCommand, makeWrapper
-, flex, gcc, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3
-, haskell-backend, llvm-backend
+{ lib, mavenix, cleanGit, cleanSourceWith, runCommand, makeWrapper
+, bison, flex, gcc, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3
+, haskell-backend, prelude-kore, llvm-backend
 }:
-
-let inherit (nix-gitignore) gitignoreSourcePure; in
 
 let
   unwrapped = mavenix.buildMaven {
-    name = "k-5.0.0";
+    name = "k-5.1.0";
     infoFile = ./mavenix.lock;
     src =
-      gitignoreSourcePure
-        [
-          ".git/" "result*" "nix/" "*.nix"
-          "haskell-backend/src/main/native/haskell-backend/*"
-          "!haskell-backend/src/main/native/haskell-backend/src"  # need prelude.kore
-          "llvm-backend/src/main/native/llvm-backend/*"
-          "!llvm-backend/src/main/native/llvm-backend/matching"  # need pom.xml
-          "k-distribution/tests/regression-new"
-        ]
-        ./..;
+      cleanSourceWith {
+        name = "k";
+        src = cleanGit { src = ./..; name = "k"; };
+        ignore =
+          [
+            "result*" "nix/" "*.nix"
+            "haskell-backend/src/main/native/haskell-backend/*"
+            "llvm-backend/src/main/native/llvm-backend/*"
+            "!llvm-backend/src/main/native/llvm-backend/matching"  # need pom.xml
+            "k-distribution/tests/regression-new"
+          ];
+      };
 
     # Cannot enable unit tests until a bug is fixed upstream (in Mavenix).
     doCheck = false;
@@ -55,11 +55,8 @@ let
       rm -fr "$out/lib/opam"
 
       prelude_kore="$out/include/kframework/kore/prelude.kore"
-      if ! [[ -f "$prelude_kore" ]]
-      then
-          echo 1>&2 "missing output: $prelude_kore"
-          exit 1
-      fi
+      mkdir -p "$(dirname "$prelude_kore")"
+      ln -s "${prelude-kore}" "$prelude_kore"
     '';
 
     # Add extra maven dependencies which might not have been picked up
@@ -87,7 +84,7 @@ in
 
 let
   hostInputs = [
-    flex gcc gmp jdk mpfr ncurses pkgconfig python3 z3
+    bison flex gcc gmp jdk mpfr ncurses pkgconfig python3 z3
     haskell-backend llvm-backend
   ];
   # PATH used at runtime

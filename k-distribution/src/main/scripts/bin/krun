@@ -14,7 +14,6 @@ allPath=true
 dir=.
 haskellCmd=kore-exec
 cmdprefix=
-filterSubst=true
 outputFile=-
 pattern=
 search=false
@@ -26,7 +25,7 @@ outputMode=pretty
 statistics=false
 smtPrelude=
 smt=
-flags=
+llvm_krun_flags=
 configVars=
 dryRun=false
 expandMacros=true
@@ -44,6 +43,21 @@ kore_output="$tempDir/result.kore"
 tempFiles+=("$input_file")
 tempFiles+=("$expanded_input_file")
 tempFiles+=("$kore_output")
+
+keepTempsIfDryRun () {
+  # kepp files used by dry-run
+  if $dryRun; then
+    local newArray=()
+    for value in "${tempFiles[@]}"; do
+        if [[ ! "$@" =~ ${value} ]]; then
+          newArray+=($value)
+        fi
+    done
+    tempFiles=()
+    tempFiles=${newArray[@]}
+    unset newArray
+  fi
+}
 
 execute () {
   (
@@ -104,8 +118,6 @@ present; see below).
                            stdin/stdout via cells with "stream" attribute.
                            Defaults to enabled when performing concrete
                            execution, and disabled when --search is passed.
-      --no-substitution-filtering  Don't filter conjuncts with anonymous
-                                   variables from substitution output
       --no-expand-macros   Don't expand macros in initial configuration.
                            This assumes that the initial configuration contains
                            no macro terms. Behavior is undefined if this is not
@@ -211,16 +223,6 @@ do
 
       --dry-run)
       cmdprefix="echo "
-      tempFiles=(${tempFiles[@]/$expanded_input_file})
-      # slash removes prefixes so build a new array with the files to keep
-      newArray=()
-      for value in "${tempFiles[@]}"; do
-          if [ $value != $tempDir ]; then 
-            newArray+=($value)
-          fi
-      done
-      tempFiles="${newArray[@]}"
-      unset newArray
       dryRun=true
       ;;
 
@@ -249,10 +251,6 @@ do
         ;;
       esac
       shift
-      ;;
-
-      --no-substitution-filtering)
-      filterSubst=false
       ;;
 
       --no-expand-macros)
@@ -343,12 +341,12 @@ do
 
       -v|--verbose)
       verbose=true
-      flags="$flags -v"
+      llvm_krun_flags="$llvm_krun_flags -v"
       ;;
 
       --save-temps)
       trap - INT TERM EXIT
-      flags="$flags -save-temps"
+      llvm_krun_flags="$llvm_krun_flags -save-temps"
       ;;
 
       --version)
@@ -504,7 +502,7 @@ else
   fi
   abs_kompiled_dir=`echo "$(cd "$(dirname "$kompiledDir")"; pwd -P)/$(basename "$kompiledDir")"`
   # llvm-krun creates temp files in the cwd so execute it in $tempDir instead
-  (cd $tempDir; execute llvm-krun $configVars --directory "$abs_kompiled_dir" $flags --dry-run -nm -o "$(basename $input_file)")
+  (cd $tempDir; execute llvm-krun $configVars --directory "$abs_kompiled_dir" $llvm_krun_flags --dry-run -nm -o "$(basename $input_file)")
 fi
 
 # Expand macros
@@ -522,6 +520,7 @@ if [ "$backendName" = "llvm" ]; then
     interpreter_flags=
   fi
 
+  keepTempsIfDryRun "$tempDir" "$expanded_input_file" "$kore_output"
   set +e
   execute $cmdprefix "$kompiledDir/interpreter" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags
   result=$?
@@ -551,6 +550,7 @@ elif [ "$backendName" = "haskell" ] ; then
     if ! $search; then
       final_input="$(mktemp ${tempDir}/tmp.in.XXXXXXXXXX)"
       tempFiles+=("$final_input")
+      keepTempsIfDryRun "$tempDir" "$final_input" "$expanded_input_file" "$kore_output"
       set +e
       execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$final_input" $koreExecFlags
       set -e
@@ -562,11 +562,13 @@ elif [ "$backendName" = "haskell" ] ; then
     if [ -n "$bound" ]; then
       koreExecFlags="$koreExecFlags --bound $bound"
     fi
+    keepTempsIfDryRun "$tempDir" "$final_input" "$patternFile" "$kore_output"
     set +e
     execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$final_input" --output "$kore_output" --searchType "$searchType" --search "$patternFile" $koreExecFlags $depthFlags
     result=$?
     set -e
   else
+    keepTempsIfDryRun "$tempDir" "$expanded_input_file" "$kore_output"
     set +e
     execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$kore_output" $koreExecFlags $depthFlags
     result=$?

@@ -34,5 +34,17 @@
         "type": "tarball",
         "url": "https://github.com/nixos/nixpkgs/archive/16b3b1eef03e6fb8211b095079aba5059f26081e.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "ttuegel": {
+        "branch": "main",
+        "description": "A library of useful Nix functions",
+        "homepage": null,
+        "owner": "ttuegel",
+        "repo": "nix-lib",
+        "rev": "66bb0ab890ff4d828a2dcfc7d5968465d0c7084f",
+        "sha256": "03828qxfxc1xv44jj6y2ar5h58lcppg0admn0smqzm3s1gk6rbnc",
+        "type": "tarball",
+        "url": "https://github.com/ttuegel/nix-lib/archive/66bb0ab890ff4d828a2dcfc7d5968465d0c7084f.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }
