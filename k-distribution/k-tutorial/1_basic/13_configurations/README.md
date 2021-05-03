@@ -1,1 +1,1 @@
-# Lesson 1.12: Configuration Declarations and Cell Nesting
+# Lesson 1.13: Configuration Declarations and Cell Nesting

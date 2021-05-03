@@ -1,1 +1,1 @@
-# Lesson 1.5: Integers and Booleans
+# Lesson 1.6: Integers and Booleans

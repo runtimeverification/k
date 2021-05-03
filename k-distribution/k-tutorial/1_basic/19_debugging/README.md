@@ -1,1 +1,1 @@
-# Lesson 1.18: Debugging with GDB
+# Lesson 1.19: Debugging with GDB

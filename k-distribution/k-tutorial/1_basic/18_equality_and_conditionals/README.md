@@ -1,1 +1,1 @@
-# Lesson 1.17: Term Equality and the Ternary Operator
+# Lesson 1.18: Term Equality and the Ternary Operator

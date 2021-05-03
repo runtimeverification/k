@@ -1,1 +1,1 @@
-# Lesson 1.7: Literate Programming with Markdown
+# Lesson 1.8: Literate Programming with Markdown
