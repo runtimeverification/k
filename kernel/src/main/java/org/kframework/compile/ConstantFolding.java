@@ -59,12 +59,16 @@ public class ConstantFolding {
           String hook = att.get(Att.HOOK());
           if (hookNamespaces.stream().anyMatch(ns -> hook.startsWith(ns + "."))) {
             List<K> args = new ArrayList<>();
+            boolean fold = true;
             for (K arg : k.items()) {
               K expanded = apply(arg);
               if (!(expanded instanceof KToken)) {
-                return super.apply(k);
+                fold = false;
               }
               args.add(expanded);
+            }
+            if (!fold) {
+              return KApply(k.klabel(), KList(args));
             }
             try {
               loc = k;
