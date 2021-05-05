@@ -343,7 +343,6 @@ public class DefinitionParsing {
 
     public Definition resolveNonConfigBubbles(Definition def) {
         Definition defWithCaches = resolveCachedRuleBubbles(def);
-
         // prepare scanners for remaining bubbles
         // scanners can be reused so find the top modules which include all other modules
         java.util.Set<Module> topMods = getTopModules(defWithCaches.modules()).stream().filter(m -> m.sentences().filter(s -> s instanceof Bubble).size() != 0).collect(Collectors.toSet());
@@ -366,10 +365,10 @@ public class DefinitionParsing {
         }
         RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithCaches);
         // create scanners
-        Map<Module, ParseInModule> donorParseInModules = new HashSet<>(donorModule.values()).parallelStream().map(x -> {
-            ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(x), isStrict, profileRules, files);
+        Map<Module, ParseInModule> donorParseInModules = new HashSet<>(donorModule.values()).parallelStream().map(m -> {
+            ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(m), isStrict, profileRules, files);
             pim.getScanner(options.global);
-            return new Tuple2<>(x, pim);
+            return new Tuple2<>(m, pim);
         }).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
 
         // do parsing on remaining bubbles and collect everything in `parsedSentences`
@@ -388,13 +387,14 @@ public class DefinitionParsing {
                                 .map(s -> (Bubble) s)
                                 .parallel()
                                 .flatMap(b -> {
-                                            Tuple2<Either<java.util.Set<KEMException>, K>, java.util.Set<KEMException>> result;
-                                            int startLine = b.att().get("contentStartLine", Integer.class);
-                                            int startColumn = b.att().get("contentStartColumn", Integer.class);
-                                            Source source = b.att().get(Source.class);
-                                            result = pim.parseString(b.contents(), START_SYMBOL, pim.getScanner(), source, startLine, startColumn, true, b.att().contains(Att.ANYWHERE()) || b.att().contains(Att.SIMPLIFICATION()) || ExpandMacros.isMacro(b));
-                                            parsedBubbles.getAndIncrement();
-                                            registerWarnings(result._2());
+                                    int startLine = b.att().get("contentStartLine", Integer.class);
+                                    int startColumn = b.att().get("contentStartColumn", Integer.class);
+                                    Source source = b.att().get(Source.class);
+                                    boolean isAnywhere = b.att().contains(Att.ANYWHERE()) || b.att().contains(Att.SIMPLIFICATION()) || ExpandMacros.isMacro(b);
+                                    Tuple2<Either<java.util.Set<KEMException>, K>, java.util.Set<KEMException>> result =
+                                            pim.parseString(b.contents(), START_SYMBOL, pim.getScanner(), source, startLine, startColumn, true, isAnywhere);
+                                    parsedBubbles.getAndIncrement();
+                                    registerWarnings(result._2());
                                     if (result._1().isRight()) {
                                         KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, isStrict).down(result._1().right().get());
                                         k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class)));
