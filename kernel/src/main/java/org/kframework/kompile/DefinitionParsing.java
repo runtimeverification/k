@@ -242,7 +242,7 @@ public class DefinitionParsing {
                     imports.add(defaultConfiguration);
                 }
                 imports.add(mapModule);
-                return Module(mod.name(), (Set<Module>) immutable(imports), mod.localSentences(), mod.att());
+                return Module(mod.name(), immutable(imports), mod.localSentences(), mod.att());
             }
             return mod;
         }, "adding default configuration").apply(definition);
@@ -252,7 +252,8 @@ public class DefinitionParsing {
 
         Definition result;
         try {
-            result = resolveConfigBubbles(definitionWithConfigBubble);
+            Definition defWithCaches = resolveBubbles(definitionWithConfigBubble, false);
+            result = resolveConfigBubbles(defWithCaches);
         } catch (KEMException e) {
             errors.add(e);
             throwExceptionIfThereAreErrors();
@@ -270,53 +271,37 @@ public class DefinitionParsing {
     }
 
     private Definition resolveConfigBubbles(Definition def) {
-        RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
-        return DefinitionTransformer.from(inputModule -> {
-            if (stream(inputModule.localSentences())
-                  .noneMatch(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration)))
-              return inputModule;
+        return DefinitionTransformer.from(m -> {
+            if (stream(m.localSentences()).noneMatch(s -> s instanceof Configuration))
+              return m;
 
-            Set<Sentence> importedConfigurationSortsSubsortedToCell = stream(inputModule.productions())
-                  .filter(p -> p.att().contains("cell"))
-                  .map(p -> Production(Seq(), Sorts.Cell(), Seq(NonTerminal(p.sort())))).collect(Collections.toSet());
-
-            Module module = Module(inputModule.name(), inputModule.imports(),
-                  inputModule.localSentences().$bar(importedConfigurationSortsSubsortedToCell).seq(), inputModule.att());
-
-            Set<Sentence> configDeclProductions;
-            ParseCache cache = loadCache(gen.getConfigGrammar(module));
-            try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
-                parser.getScanner(options.global);
-                configDeclProductions = stream(module.localSentences())
-                      .parallel()
-                      .filter(s -> s instanceof Bubble)
-                      .map(b -> (Bubble) b)
-                      .filter(b -> b.sentenceType().equals(configuration))
-                      .flatMap(b -> performParse(cache.getCache(), parser, parser.getScanner(options.global), b))
-                      .map(this::upConfiguration)
+            RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
+            ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(m), isStrict, profileRules, files);
+            Set<Sentence> configDeclProductions = stream(m.localSentences())
+                      .filter(s -> s instanceof Configuration)
+                      .map(b -> (Configuration) b)
                       .flatMap(configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule(), kore)))
                       .collect(Collections.toSet());
-            }
 
             Module mapModule = def.getModule("MAP").getOrElse(() -> {
-                throw KEMException.compilerError("Module MAP must be visible at the configuration declaration, in module " + module.name());
+                throw KEMException.compilerError("Module MAP must be visible at the configuration declaration, in module " + m.name());
             });
-            Set<Sentence> stc = module.localSentences()
+            Set<Sentence> stc = m.localSentences()
                     .$bar(configDeclProductions)
                     .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))).seq();
-            return Module(module.name(), module.imports().$bar(Set(mapModule)).seq(), stc, module.att());
+            return Module(m.name(), m.imports().$bar(Set(mapModule)).seq(), stc, m.att());
         }, "parsing configs").apply(def);
     }
 
-    private Definition resolveCachedRuleBubbles(Definition def) {
+    private Definition resolveCachedBubbles(Definition def, boolean isRule) {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
         return DefinitionTransformer.from(m -> {
-            if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble))
+            if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble && (isRule || ((Bubble) s).sentenceType().equals(configuration))))
                 return m;
-            ParseCache cache = loadCache(gen.getRuleGrammar(m));
+            ParseCache cache = isRule ? loadCache(gen.getRuleGrammar(m)) : loadCache(gen.getConfigGrammar(m));
 
             Map<Bubble, Sentence> fromCache = stream(m.localSentences())
-                    .filter(s -> s instanceof Bubble)
+                    .filter(s -> s instanceof Bubble && (isRule || ((Bubble) s).sentenceType().equals(configuration)))
                     .map(b -> (Bubble) b)
                     .flatMap(b -> {
                         if (cache.getCache().containsKey(b.contents())) {
@@ -340,10 +325,15 @@ public class DefinitionParsing {
     }
 
     public Definition resolveNonConfigBubbles(Definition def) {
-        Definition defWithCaches = resolveCachedRuleBubbles(def);
+        return resolveBubbles(def, true);
+    }
+
+    private Definition resolveBubbles(Definition def, boolean isRule) {
+        Definition defWithCaches = resolveCachedBubbles(def, isRule);
         // prepare scanners for remaining bubbles
         // scanners can be reused so find the top modules which include all other modules
-        java.util.Set<Module> topMods = getTopModules(defWithCaches.modules()).stream().filter(m -> m.sentences().filter(s -> s instanceof Bubble).size() != 0).collect(Collectors.toSet());
+        java.util.Set<Module> topMods = getTopModules(defWithCaches.modules()).stream()
+                .filter(m -> m.sentences().filter(s -> s instanceof Bubble && (isRule || ((Bubble) s).sentenceType().equals(configuration))).size() != 0).collect(Collectors.toSet());
         // prefer modules that import the main module. This way we avoid using the main syntax module which could contain problematic syntax for rule parsing
         java.util.Set<Module> orderedTopMods = new java.util.LinkedHashSet<>();
         for (Module m : topMods) {
@@ -355,7 +345,7 @@ public class DefinitionParsing {
         // map the module name to the scanner that it should use when parsing
         java.util.Map<String, Module> donorModule = new HashMap<>();
         for (Module m : mutable(defWithCaches.modules())) {
-            if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble)) {
+            if (stream(m.localSentences()).anyMatch(s -> s instanceof Bubble && (isRule || ((Bubble) s).sentenceType().equals(configuration)))) {
                 Module scannerModule = orderedTopMods.stream().filter(bm -> m.equals(bm) || bm.importedModuleNames().contains(m.name())).findFirst()
                         .orElseThrow(() -> new AssertionError("Expected at least one top module to have a suitable scanner: " + m.name()));
                 donorModule.put(m.name(), scannerModule);
@@ -364,7 +354,7 @@ public class DefinitionParsing {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithCaches);
         // create scanners
         Map<Module, ParseInModule> donorParseInModules = new HashSet<>(donorModule.values()).parallelStream().map(m -> {
-            ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(m), isStrict, profileRules, files);
+            ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(isRule ? gen.getRuleGrammar(m) : gen.getConfigGrammar(m), isStrict, profileRules, files);
             pim.getScanner(options.global);
             return new Tuple2<>(m, pim);
         }).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
@@ -374,14 +364,14 @@ public class DefinitionParsing {
         Map<String, java.util.Set<Sentence>> parsedSentences = stream(defWithCaches.modules())
                 .parallel()
                 .flatMap(m -> {
-                    if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble))
+                    if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble && (isRule || ((Bubble) s).sentenceType().equals(configuration))))
                         return Stream.of();
-                    try (ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(m), isStrict, profileRules, files)) {
+                    try (ParseInModule pim = RuleGrammarGenerator.getCombinedGrammar(isRule ? gen.getRuleGrammar(m) : gen.getConfigGrammar(m), isStrict, profileRules, files)) {
                         pim.setScanner(donorParseInModules.get(donorModule.get(m.name())).getScanner());
                         pim.initialize();
                         ParseCache cache = loadCache(pim.seedModule());
                         java.util.Set<Sentence> sentences = stream(m.localSentences())
-                                .filter(s -> s instanceof Bubble)
+                                .filter(s -> s instanceof Bubble && (isRule || ((Bubble) s).sentenceType().equals(configuration)))
                                 .map(s -> (Bubble) s)
                                 .parallel()
                                 .flatMap(b -> {
@@ -416,7 +406,7 @@ public class DefinitionParsing {
                 return m;
             Set<Sentence> noBubbles = m.localSentences()
                     .$bar(immutable(parsedSentences.get(m.name())))
-                    .filter(s -> !(s instanceof Bubble)).seq();
+                    .filter(s -> !(s instanceof Bubble && (isRule || ((Bubble) s).sentenceType().equals(configuration)))).seq();
             return Module(m.name(), m.imports(), noBubbles, m.att());
         }, "parsing rules").apply(defWithCaches);
     }
@@ -466,6 +456,7 @@ public class DefinitionParsing {
         case rule:          return upRule(contents);
         case context:       return upContext(contents);
         case alias:         return upAlias(contents);
+        case configuration: return upConfiguration(contents);
         }
         throw new AssertionError("Unexpected sentence type: " + sentenceType);
     }
