@@ -253,7 +253,26 @@ public class DefinitionParsing {
         Definition result;
         try {
             Definition defWithCaches = resolveBubbles(definitionWithConfigBubble, false);
-            result = resolveConfigBubbles(defWithCaches);
+            result = DefinitionTransformer.from(m -> {
+                if (stream(m.localSentences()).noneMatch(s -> s instanceof Configuration))
+                    return m;
+
+                RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithCaches);
+                ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(m), isStrict, profileRules, files);
+                Set<Sentence> configDeclProductions = stream(m.localSentences())
+                        .filter(s -> s instanceof Configuration)
+                        .map(b -> (Configuration) b)
+                        .flatMap(configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule(), kore)))
+                        .collect(Collections.toSet());
+
+                Module mapModule2 = defWithCaches.getModule("MAP").getOrElse(() -> {
+                    throw KEMException.compilerError("Module MAP must be visible at the configuration declaration, in module " + m.name());
+                });
+                Set<Sentence> stc = m.localSentences()
+                        .$bar(configDeclProductions)
+                        .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))).seq();
+                return Module(m.name(), m.imports().$bar(Set(mapModule2)).seq(), stc, m.att());
+            }, "parsing configs").apply(defWithCaches);
         } catch (KEMException e) {
             errors.add(e);
             throwExceptionIfThereAreErrors();
@@ -293,6 +312,10 @@ public class DefinitionParsing {
         }, "parsing configs").apply(def);
     }
 
+    public Definition resolveNonConfigBubbles(Definition def) {
+        return resolveBubbles(def, true);
+    }
+
     private Definition resolveCachedBubbles(Definition def, boolean isRule) {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
         return DefinitionTransformer.from(m -> {
@@ -322,10 +345,6 @@ public class DefinitionParsing {
             }
             return m;
         }, "load cached bubbles").apply(def);
-    }
-
-    public Definition resolveNonConfigBubbles(Definition def) {
-        return resolveBubbles(def, true);
     }
 
     private Definition resolveBubbles(Definition def, boolean isRule) {
