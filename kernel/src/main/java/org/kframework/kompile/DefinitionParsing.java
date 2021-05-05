@@ -393,25 +393,8 @@ public class DefinitionParsing {
                                 .filter(s -> s instanceof Bubble && (isRule || ((Bubble) s).sentenceType().equals(configuration)))
                                 .map(s -> (Bubble) s)
                                 .parallel()
-                                .flatMap(b -> {
-                                    int startLine = b.att().get("contentStartLine", Integer.class);
-                                    int startColumn = b.att().get("contentStartColumn", Integer.class);
-                                    Source source = b.att().get(Source.class);
-                                    boolean isAnywhere = b.att().contains(Att.ANYWHERE()) || b.att().contains(Att.SIMPLIFICATION()) || ExpandMacros.isMacro(b);
-                                    Tuple2<Either<java.util.Set<KEMException>, K>, java.util.Set<KEMException>> result =
-                                            pim.parseString(b.contents(), START_SYMBOL, pim.getScanner(), source, startLine, startColumn, true, isAnywhere);
-                                    parsedBubbles.getAndIncrement();
-                                    registerWarnings(result._2());
-                                    if (result._1().isRight()) {
-                                        KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, isStrict).down(result._1().right().get());
-                                        k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class)));
-                                        cache.getCache().put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
-                                        return Stream.of(upSentence(k, b.sentenceType()));
-                                    } else {
-                                        errors.addAll(result._1().left().get());
-                                        return Stream.empty();
-                                    }
-                                }).collect(Collectors.toSet());
+                                .flatMap(b -> parseBubble(pim, cache, b))
+                                .collect(Collectors.toSet());
                         return Stream.of(new Tuple2<>(m.name(), sentences));
                     }
                 }).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
@@ -428,6 +411,26 @@ public class DefinitionParsing {
                     .filter(s -> !(s instanceof Bubble && (isRule || ((Bubble) s).sentenceType().equals(configuration)))).seq();
             return Module(m.name(), m.imports(), noBubbles, m.att());
         }, "parsing rules").apply(defWithCaches);
+    }
+
+    private Stream<Sentence> parseBubble(ParseInModule pim, ParseCache cache, Bubble b) {
+        int startLine = b.att().get("contentStartLine", Integer.class);
+        int startColumn = b.att().get("contentStartColumn", Integer.class);
+        Source source = b.att().get(Source.class);
+        boolean isAnywhere = b.att().contains(Att.ANYWHERE()) || b.att().contains(Att.SIMPLIFICATION()) || ExpandMacros.isMacro(b);
+        Tuple2<Either<java.util.Set<KEMException>, K>, java.util.Set<KEMException>> result =
+                pim.parseString(b.contents(), START_SYMBOL, pim.getScanner(), source, startLine, startColumn, true, isAnywhere);
+        parsedBubbles.getAndIncrement();
+        registerWarnings(result._2());
+        if (result._1().isRight()) {
+            KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, isStrict).down(result._1().right().get());
+            k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class)));
+            cache.getCache().put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
+            return Stream.of(upSentence(k, b.sentenceType()));
+        } else {
+            errors.addAll(result._1().left().get());
+            return Stream.empty();
+        }
     }
 
     // Find the top modules (not included in any other module)
