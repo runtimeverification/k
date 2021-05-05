@@ -270,44 +270,42 @@ public class DefinitionParsing {
     }
 
     private Definition resolveConfigBubbles(Definition def) {
-      RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
-      return DefinitionTransformer.from(m -> resolveConfigBubbles(def, m, gen), "parsing configs").apply(def);
-    }
+        RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
+        return DefinitionTransformer.from(inputModule -> {
+            if (stream(inputModule.localSentences())
+                  .noneMatch(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration)))
+              return inputModule;
 
-    private Module resolveConfigBubbles(Definition def, Module inputModule, RuleGrammarGenerator gen) {
-        if (stream(inputModule.localSentences())
-                .noneMatch(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration)))
-            return inputModule;
+            Set<Sentence> importedConfigurationSortsSubsortedToCell = stream(inputModule.productions())
+                  .filter(p -> p.att().contains("cell"))
+                  .map(p -> Production(Seq(), Sorts.Cell(), Seq(NonTerminal(p.sort())))).collect(Collections.toSet());
 
-        Set<Sentence> importedConfigurationSortsSubsortedToCell = stream(inputModule.productions())
-                .filter(p -> p.att().contains("cell"))
-                .map(p -> Production(Seq(), Sorts.Cell(), Seq(NonTerminal(p.sort())))).collect(Collections.toSet());
+            Module module = Module(inputModule.name(), inputModule.imports(),
+                  inputModule.localSentences().$bar(importedConfigurationSortsSubsortedToCell).seq(), inputModule.att());
 
-        Module module = Module(inputModule.name(), (Set<Module>) inputModule.imports(),
-                (Set<Sentence>) inputModule.localSentences().$bar(importedConfigurationSortsSubsortedToCell),
-                inputModule.att());
+            Set<Sentence> configDeclProductions;
+            ParseCache cache = loadCache(gen.getConfigGrammar(module));
+            try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
+                parser.getScanner(options.global);
+                configDeclProductions = stream(module.localSentences())
+                      .parallel()
+                      .filter(s -> s instanceof Bubble)
+                      .map(b -> (Bubble) b)
+                      .filter(b -> b.sentenceType().equals(configuration))
+                      .flatMap(b -> performParse(cache.getCache(), parser, parser.getScanner(options.global), b))
+                      .map(this::upConfiguration)
+                      .flatMap(configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule(), kore)))
+                      .collect(Collections.toSet());
+            }
 
-        Set<Sentence> configDeclProductions;
-        ParseCache cache = loadCache(gen.getConfigGrammar(module));
-        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
-             parser.getScanner(options.global);
-             configDeclProductions = stream(module.localSentences())
-                    .parallel()
-                    .filter(s -> s instanceof Bubble)
-                    .map(b -> (Bubble) b)
-                    .filter(b -> b.sentenceType().equals(configuration))
-                    .flatMap(b -> performParse(cache.getCache(), parser, parser.getScanner(options.global), b))
-                    .map(this::upConfiguration)
-                    .flatMap(configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule(), kore)))
-                    .collect(Collections.toSet());
-        }
-
-        Module mapModule = def.getModule("MAP").getOrElse(() -> {
-            throw KEMException.compilerError("Module MAP must be visible at the configuration declaration, in module " + module.name()); });
-        return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
-                (Set<Sentence>) module.localSentences().$bar(configDeclProductions)
-                        .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))),
-                module.att());
+            Module mapModule = def.getModule("MAP").getOrElse(() -> {
+                throw KEMException.compilerError("Module MAP must be visible at the configuration declaration, in module " + module.name());
+            });
+            Set<Sentence> stc = module.localSentences()
+                    .$bar(configDeclProductions)
+                    .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))).seq();
+            return Module(module.name(), module.imports().$bar(Set(mapModule)).seq(), stc, module.att());
+        }, "parsing configs").apply(def);
     }
 
     private Definition resolveCachedRuleBubbles(Definition def) {
