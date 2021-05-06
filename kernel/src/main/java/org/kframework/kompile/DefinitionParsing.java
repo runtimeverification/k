@@ -4,6 +4,7 @@ package org.kframework.kompile;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections15.ListUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
@@ -315,12 +316,13 @@ public class DefinitionParsing {
     }
 
     private Definition resolveNonConfigBubbles(Definition defWithConfig) {
-        RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithConfig);
-        Module ruleParserModule = gen.getRuleGrammar(defWithConfig.mainModule());
+        Definition defWithCaches = resolveCachedBubbles(defWithConfig, true);
+        RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithCaches);
+        Module ruleParserModule = gen.getRuleGrammar(defWithCaches.mainModule());
         ParseCache cache = loadCache(ruleParserModule);
         try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
             parser.getScanner(options.global);
-            Map<String, Module> parsed = defWithConfig.parMap(m -> this.resolveNonConfigBubbles(m, parser.getScanner(options.global), gen));
+            Map<String, Module> parsed = defWithCaches.parMap(m -> this.resolveNonConfigBubbles(m, parser.getScanner(options.global), gen));
             return DefinitionTransformer.from(m -> Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()), "parsing rules").apply(defWithConfig);
         }
     }
@@ -356,6 +358,43 @@ public class DefinitionParsing {
             return Module(module.name(), module.imports(),
                     stream((Set<Sentence>) module.localSentences().$bar(parsedSet)).filter(b -> !(b instanceof Bubble)).collect(Collections.toSet()), module.att());
         }
+    }
+
+    /**
+     * Replace all the targeted Bubbles from the definition if they can be found in caches.
+     * @param def    The Definition with Bubbles.
+     * @param isRule true if it should target non config Bubbles, false if it should parse only config bubbles
+     * @return A new Definition object with Bubbles replaced by the appropriate Sentence type.
+     */
+    private Definition resolveCachedBubbles(Definition def, boolean isRule) {
+        RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
+        return DefinitionTransformer.from(m -> {
+            if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble && (isRule || ((Bubble) s).sentenceType().equals(configuration))))
+                return m;
+            ParseCache cache = isRule ? loadCache(gen.getRuleGrammar(m)) : loadCache(gen.getConfigGrammar(m));
+
+            Map<Bubble, Sentence> fromCache = stream(m.localSentences())
+                    .filter(s -> s instanceof Bubble && (isRule || ((Bubble) s).sentenceType().equals(configuration)))
+                    .map(b -> (Bubble) b)
+                    .flatMap(b -> {
+                        if (cache.getCache().containsKey(b.contents())) {
+                            ParsedSentence parse = cache.getCache().get(b.contents());
+                            cachedBubbles.getAndIncrement();
+                            registerWarnings(parse.getWarnings());
+                            Att att = parse.getParse().att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class));
+                            return Stream.of(Pair.of(b, upSentence(new AddAtt(a -> att).apply(parse.getParse()), b.sentenceType())));
+                        }
+                        return Stream.of();
+                    }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+
+            if (!fromCache.isEmpty()) {
+                Set<Sentence> stc = m.localSentences()
+                        .$bar(immutable(Sets.newHashSet(fromCache.values())))
+                        .filter(s -> !(s instanceof Bubble && fromCache.containsKey(s))).seq();
+                return Module(m.name(), m.imports(), stc, m.att());
+            }
+            return m;
+        }, "load cached bubbles").apply(def);
     }
 
     private void registerWarnings(java.util.Set<KEMException> warnings) {
