@@ -432,7 +432,7 @@ public class DefinitionParsing {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(compiledDef.kompiledDefinition);
         try (ParseInModule parser = RuleGrammarGenerator
                 .getCombinedGrammar(gen.getRuleGrammar(compiledDef.executionModule()), isStrict, profileRules, files)) {
-            java.util.Set<K> res = performParse(new HashMap<>(), parser, parser.getScanner(options.global),
+            java.util.Set<K> res = parseBubble(parser, new HashMap<>(),
                     new Bubble(rule, contents, Att().add("contentStartLine", Integer.class, 1)
                             .add("contentStartColumn", Integer.class, 1).add(Source.class, source)))
                     .collect(Collectors.toSet());
@@ -545,18 +545,17 @@ public class DefinitionParsing {
     }
 
     private Stream<? extends K> performParse(Map<String, ParsedSentence> cache, ParseInModule parser, Scanner scanner, Bubble b) {
+        parser.setScanner(scanner);
+        return parseBubble(parser, cache, b);
+    }
+
+    private Stream<? extends K> parseBubble(ParseInModule pim, Map<String, ParsedSentence> cache, Bubble b) {
         int startLine = b.att().get("contentStartLine", Integer.class);
         int startColumn = b.att().get("contentStartColumn", Integer.class);
         Source source = b.att().get(Source.class);
-        Tuple2<Either<java.util.Set<KEMException>, K>, java.util.Set<KEMException>> result;
-        if (cache.containsKey(b.contents())) {
-            ParsedSentence parse = cache.get(b.contents());
-            cachedBubbles.getAndIncrement();
-            registerWarnings(parse.getWarnings());
-            Att att = parse.getParse().att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class));
-            return Stream.of(new AddAtt(a -> att).apply(parse.getParse()));
-        }
-        result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, true, b.att().contains(Att.ANYWHERE()) || b.att().contains(Att.SIMPLIFICATION()) || ExpandMacros.isMacro(b));
+        boolean isAnywhere = b.att().contains(Att.ANYWHERE()) || b.att().contains(Att.SIMPLIFICATION()) || ExpandMacros.isMacro(b);
+        Tuple2<Either<java.util.Set<KEMException>, K>, java.util.Set<KEMException>> result =
+                pim.parseString(b.contents(), START_SYMBOL, pim.getScanner(), source, startLine, startColumn, true, isAnywhere);
         parsedBubbles.getAndIncrement();
         registerWarnings(result._2());
         if (result._1().isRight()) {
