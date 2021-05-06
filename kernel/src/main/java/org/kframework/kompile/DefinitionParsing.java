@@ -279,40 +279,63 @@ public class DefinitionParsing {
     }
 
     private Definition resolveConfigBubbles(Definition def) {
+        Definition defWithCaches = resolveCachedBubbles(def, false);
         RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
-        return DefinitionTransformer.from(inputModule -> {
-            if (stream(inputModule.localSentences())
-                  .noneMatch(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration)))
-              return inputModule;
 
-            Set<Sentence> importedConfigurationSortsSubsortedToCell = stream(inputModule.productions())
+        Definition defWithParsedConfigs = DefinitionTransformer.from(m -> {
+            if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration)))
+                return m;
+            Module ruleParserModule = gen.getConfigGrammar(m);
+
+            ParseCache cache = loadCache(ruleParserModule);
+            try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
+                if (stream(m.localSentences()).filter(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))
+                        .anyMatch(s -> !cache.getCache().containsKey(((Bubble)s).contents()))) {
+                    parser.initialize();
+                    parser.getScanner(options.global);
+                }
+
+                Set<Sentence> parsedSet = stream(m.localSentences())
+                        .parallel()
+                        .filter(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))
+                        .map(b -> (Bubble) b)
+                        .flatMap(b -> performParse(cache.getCache(), parser, parser.getScanner(options.global), b)
+                                .map(p -> upSentence(p, b.sentenceType())))
+                        .collect(Collections.toSet());
+
+                return Module(m.name(), m.imports(),
+                        stream((Set<Sentence>) m.localSentences().$bar(parsedSet)).filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))).collect(Collections.toSet()), m.att());
+            }
+        }, "parse config bubbles").apply(defWithCaches);
+
+        return DefinitionTransformer.from(m -> {
+            if (stream(m.localSentences()).noneMatch(s -> s instanceof Configuration))
+              return m;
+
+            Set<Sentence> importedConfigurationSortsSubsortedToCell = stream(m.productions())
                   .filter(p -> p.att().contains("cell"))
-                  .map(p -> Production(Seq(), Sorts.Cell(), Seq(NonTerminal(p.sort())))).collect(Collections.toSet());
+                  .map(p -> Production(Seq(), Sorts.Cell(), Seq(NonTerminal(p.sort())))).collect(toSet());
 
-            Module module = Module(inputModule.name(), inputModule.imports(),
-                  (Set<Sentence>) inputModule.localSentences().$bar(importedConfigurationSortsSubsortedToCell),
-                  inputModule.att());
+            Module module = Module(m.name(), m.imports(),
+                  (Set<Sentence>) m.localSentences().$bar(importedConfigurationSortsSubsortedToCell),
+                  m.att());
 
             Set<Sentence> configDeclProductions;
             ParseCache cache = loadCache(gen.getConfigGrammar(module));
-            try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
-                parser.getScanner(options.global);
+            ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files);
                 configDeclProductions = stream(module.localSentences())
                       .parallel()
-                      .filter(s -> s instanceof Bubble)
-                      .map(b -> (Bubble) b)
-                      .filter(b -> b.sentenceType().equals(configuration))
-                      .flatMap(b -> performParse(cache.getCache(), parser, parser.getScanner(options.global), b))
-                      .map(this::upConfiguration)
+                      .filter(s -> s instanceof Configuration)
+                      .map(b -> (Configuration) b)
                       .flatMap(configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule(), kore)))
-                      .collect(Collections.toSet());
-            }
+                      .collect(toSet());
 
-            return Module(module.name(), module.imports(),
-                  (Set<Sentence>) module.localSentences().$bar(configDeclProductions)
-                          .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))),
-                  module.att());
-        }, "parsing configs").apply(def);
+            Set<Sentence> stc = m.localSentences()
+                    .$bar(configDeclProductions)
+                    .filter(s -> !(s instanceof Configuration))
+                    .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))).seq();
+            return Module(m.name(), m.imports(), stc, m.att());
+        }, "parsing configs").apply(defWithParsedConfigs);
     }
 
     private Definition resolveNonConfigBubbles(Definition defWithConfig) {
