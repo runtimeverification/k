@@ -3,7 +3,12 @@ let
   pinned = import sources."nixpkgs" { config = {}; overlays = []; };
 in
 
-{ pkgs ? pinned }:
+{ pkgs ? pinned
+
+# Build an optimized release package.
+# Currently requires dependents to use LTO. Use sparingly.
+, release ? false
+}:
 
 let
   inherit (pkgs) callPackage;
@@ -13,6 +18,8 @@ let
 
   llvm-backend-project = import ./llvm-backend/src/main/native/llvm-backend {
     inherit pkgs;
+    # Wait until https://github.com/kframework/llvm-backend/pull/407 gets merged
+    # inherit release;
     src = ttuegel.cleanGitSubtree {
       name = "llvm-backend";
       src = ./.;
@@ -24,6 +31,7 @@ let
   k = callPackage ./nix/k.nix {
     inherit haskell-backend llvm-backend mavenix prelude-kore;
     inherit (ttuegel) cleanGit cleanSourceWith;
+    inherit release;
   };
 
   haskell-backend-project = import ./haskell-backend/src/main/native/haskell-backend {

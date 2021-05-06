@@ -1,6 +1,8 @@
 { lib, mavenix, cleanGit, cleanSourceWith, runCommand, makeWrapper
 , bison, flex, gcc, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3
 , haskell-backend, prelude-kore, llvm-backend
+# Options:
+, release # optimized release build, currently: LTO
 }:
 
 let
@@ -37,7 +39,9 @@ let
       "-Dllvm.backend.skip=true"
       "-Dhaskell.backend.skip=true"
     ];
-
+    
+    cmakeBuildType = if release then "Release" else "FastBuild";
+    
     # Attributes are passed to the underlying `stdenv.mkDerivation`, so build
     #   hooks can be set here also.
     #
