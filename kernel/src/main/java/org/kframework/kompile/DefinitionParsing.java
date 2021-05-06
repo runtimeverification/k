@@ -60,9 +60,9 @@ import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 /**
- * A bundle of code doing various aspects of definition parsing.
- * TODO: In major need of refactoring.
- * @cos refactored this code out of Kompile but none (or close to none) of it was originally written by him.
+ * Code for doing inner parsing.
+ * - parse configurations and generate syntax for parsing rule cells
+ * - parse non config sentences (rule, context, alias, claim)
  */
 public class DefinitionParsing {
     public static final Sort START_SYMBOL = Sorts.RuleContent();
@@ -269,6 +269,11 @@ public class DefinitionParsing {
         return errors;
     }
 
+    /**
+     * Resolve the Configuration Bubbles from a definition. First by looking for caches, then by parsing remaining configs.
+     * @param def The Definition with Bubbles.
+     * @return A new Definition object with Bubbles replaced by the appropriate Sentence type.
+     */
     private Definition resolveConfigBubbles(Definition def) {
         Definition defWithConfig = resolveBubbles(def, false);
         return DefinitionTransformer.from(m -> {
@@ -294,10 +299,21 @@ public class DefinitionParsing {
         }, "parsing configs").apply(defWithConfig);
     }
 
-    public Definition resolveNonConfigBubbles(Definition def) {
+    /**
+     * Resolve the non config Bubbles from a definition. First by looking for caches, then by parsing remaining configs.
+     * @param def The Definition with Bubbles.
+     * @return A new Definition object with Bubbles replaced by the appropriate Sentence type.
+     */
+    private Definition resolveNonConfigBubbles(Definition def) {
         return resolveBubbles(def, true);
     }
 
+    /**
+     * Replace all the targeted Bubbles from the definition if they can be found in caches.
+     * @param def    The Definition with Bubbles.
+     * @param isRule true if it should target non config Bubbles, false if it should parse only config bubbles
+     * @return A new Definition object with Bubbles replaced by the appropriate Sentence type.
+     */
     private Definition resolveCachedBubbles(Definition def, boolean isRule) {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
         return DefinitionTransformer.from(m -> {
@@ -329,6 +345,15 @@ public class DefinitionParsing {
         }, "load cached bubbles").apply(def);
     }
 
+    /**
+     * Parse Bubbles that are found in the Definition.
+     * This optimizes the number of scanners generated. Before it starts parsing, it looks for modules that contain
+     * Bubbles that might need parsing and creates a list of scanners and modules that are needed.
+     * The expensive steps (scanner generation, parser initialization and parsing) are done in parallel.
+     * @param def    The Definition with Bubbles.
+     * @param isRule true if it should target non config Bubbles, false if it should parse only config bubbles
+     * @return A new Definition object with Bubbles replaced by the appropriate Sentence type.
+     */
     private Definition resolveBubbles(Definition def, boolean isRule) {
         Definition defWithCaches = resolveCachedBubbles(def, isRule);
         // prepare scanners for remaining bubbles
