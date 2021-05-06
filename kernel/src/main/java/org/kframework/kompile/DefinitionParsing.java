@@ -252,28 +252,7 @@ public class DefinitionParsing {
 
         Definition result;
         try {
-            Definition defWithCaches = resolveBubbles(definitionWithConfigBubble, false);
-            result = DefinitionTransformer.from(m -> {
-                if (stream(m.localSentences()).noneMatch(s -> s instanceof Configuration))
-                    return m;
-
-                RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithCaches);
-                ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(m), isStrict, profileRules, files);
-                Set<Sentence> configDeclProductions = stream(m.localSentences())
-                        .filter(s -> s instanceof Configuration)
-                        .map(b -> (Configuration) b)
-                        .flatMap(configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule(), kore)))
-                        .collect(Collections.toSet());
-
-                Module mapModule2 = defWithCaches.getModule("MAP").getOrElse(() -> {
-                    throw KEMException.compilerError("Module MAP must be visible at the configuration declaration, in module " + m.name());
-                });
-                Set<Sentence> stc = m.localSentences()
-                        .$bar(configDeclProductions)
-                        .filter(s -> !(s instanceof Configuration))
-                        .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))).seq();
-                return Module(m.name(), m.imports().$bar(Set(mapModule2)).seq(), stc, m.att());
-            }, "parsing configs").apply(defWithCaches);
+            result = resolveConfigBubbles(definitionWithConfigBubble);
         } catch (KEMException e) {
             errors.add(e);
             throwExceptionIfThereAreErrors();
@@ -291,8 +270,9 @@ public class DefinitionParsing {
     }
 
     private Definition resolveConfigBubbles(Definition def) {
+        Definition defWithConfig = resolveBubbles(def, false);
         return DefinitionTransformer.from(m -> {
-            if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration)))
+            if (stream(m.localSentences()).noneMatch(s -> s instanceof Configuration))
               return m;
 
             RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
@@ -311,7 +291,7 @@ public class DefinitionParsing {
                     .filter(s -> !(s instanceof Configuration))
                     .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))).seq();
             return Module(m.name(), m.imports().$bar(Set(mapModule)).seq(), stc, m.att());
-        }, "parsing configs").apply(def);
+        }, "parsing configs").apply(defWithConfig);
     }
 
     public Definition resolveNonConfigBubbles(Definition def) {
