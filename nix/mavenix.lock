@@ -2146,10 +2146,6 @@
       "sha1": "1ef24807b2eaf9d51b5587710878146d630cc855"
     },
     {
-      "path": "commons-io/commons-io/2.4/commons-io-2.4.jar",
-      "sha1": "b1b6ea3b7e4aa4f492509a4952029cd8e48019ad"
-    },
-    {
       "path": "commons-io/commons-io/2.4/commons-io-2.4.pom",
       "sha1": "9ece23effe8bce3904f3797a76b1ba6ab681e1b9"
     },
@@ -2164,6 +2160,14 @@
     {
       "path": "commons-io/commons-io/2.6/commons-io-2.6.pom",
       "sha1": "5060835593e5b6ed18c82fc2e782f0a3c30a00b1"
+    },
+    {
+      "path": "commons-io/commons-io/2.7/commons-io-2.7.jar",
+      "sha1": "3f2bd4ba11c4162733c13cc90ca7c7ea09967102"
+    },
+    {
+      "path": "commons-io/commons-io/2.7/commons-io-2.7.pom",
+      "sha1": "60fb89f2e5c6da8e16bdc716dea69a23e9a5c9bf"
     },
     {
       "path": "commons-lang/commons-lang/2.1/commons-lang-2.1.jar",
@@ -2924,6 +2928,10 @@
     {
       "path": "org/apache/commons/commons-parent/5/commons-parent-5.pom",
       "sha1": "a0a168281558e7ae972f113fa128bc46b4973edd"
+    },
+    {
+      "path": "org/apache/commons/commons-parent/50/commons-parent-50.pom",
+      "sha1": "b47c55b7ee647e1c78546791e7f4fe59b842c320"
     },
     {
       "path": "org/apache/commons/commons-parent/7/commons-parent-7.pom",
