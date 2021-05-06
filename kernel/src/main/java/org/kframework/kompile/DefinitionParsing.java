@@ -360,6 +360,18 @@ public class DefinitionParsing {
         }
     }
 
+    private void registerWarnings(java.util.Set<KEMException> warnings) {
+        if (kem.options.warnings2errors) {
+            for (KEMException err : warnings) {
+                if (kem.options.includesExceptionType(err.exception.getType())) {
+                    errors.add(KEMException.asError(err));
+                }
+            }
+        } else {
+            kem.addAllKException(warnings.stream().map(KEMException::getKException).collect(Collectors.toList()));
+        }
+    }
+
     public Rule parseRule(CompiledDefinition compiledDef, String contents, Source source) {
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         RuleGrammarGenerator gen = new RuleGrammarGenerator(compiledDef.kompiledDefinition);
@@ -485,29 +497,13 @@ public class DefinitionParsing {
         if (cache.containsKey(b.contents())) {
             ParsedSentence parse = cache.get(b.contents());
             cachedBubbles.getAndIncrement();
-            if (kem.options.warnings2errors) {
-                for (KEMException err : parse.getWarnings().stream().map(e -> (KEMException) e).collect(Collectors.toList())) {
-                    if (kem.options.includesExceptionType(err.exception.getType())) {
-                        errors.add(KEMException.asError(err));
-                    }
-                }
-            } else {
-                kem.addAllKException(parse.getWarnings().stream().map(e -> e.getKException()).collect(Collectors.toList()));
-            }
+            registerWarnings(parse.getWarnings());
             Att att = parse.getParse().att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class));
             return Stream.of(new AddAtt(a -> att).apply(parse.getParse()));
         }
         result = parser.parseString(b.contents(), START_SYMBOL, scanner, source, startLine, startColumn, true, b.att().contains(Att.ANYWHERE()) || b.att().contains(Att.SIMPLIFICATION()) || ExpandMacros.isMacro(b));
         parsedBubbles.getAndIncrement();
-        if (kem.options.warnings2errors && !result._2().isEmpty()) {
-          for (KEMException err : result._2()) {
-            if (kem.options.includesExceptionType(err.exception.getType())) {
-              errors.add(KEMException.asError(err));
-            }
-          }
-        } else {
-          kem.addAllKException(result._2().stream().map(e -> e.getKException()).collect(Collectors.toList()));
-        }
+        registerWarnings(result._2());
         if (result._1().isRight()) {
             KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, isStrict).down(result._1().right().get());
             k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class)));
