@@ -270,6 +270,7 @@ public class DefinitionParsing {
                 });
                 Set<Sentence> stc = m.localSentences()
                         .$bar(configDeclProductions)
+                        .filter(s -> !(s instanceof Configuration))
                         .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))).seq();
                 return Module(m.name(), m.imports().$bar(Set(mapModule2)).seq(), stc, m.att());
             }, "parsing configs").apply(defWithCaches);
@@ -291,7 +292,7 @@ public class DefinitionParsing {
 
     private Definition resolveConfigBubbles(Definition def) {
         return DefinitionTransformer.from(m -> {
-            if (stream(m.localSentences()).noneMatch(s -> s instanceof Configuration))
+            if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration)))
               return m;
 
             RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
@@ -307,6 +308,7 @@ public class DefinitionParsing {
             });
             Set<Sentence> stc = m.localSentences()
                     .$bar(configDeclProductions)
+                    .filter(s -> !(s instanceof Configuration))
                     .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))).seq();
             return Module(m.name(), m.imports().$bar(Set(mapModule)).seq(), stc, m.att());
         }, "parsing configs").apply(def);
