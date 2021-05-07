@@ -31,7 +31,6 @@ let
   k = callPackage ./nix/k.nix {
     inherit haskell-backend llvm-backend mavenix prelude-kore;
     inherit (ttuegel) cleanGit cleanSourceWith;
-    inherit release;
   };
 
   haskell-backend-project = import ./haskell-backend/src/main/native/haskell-backend {
