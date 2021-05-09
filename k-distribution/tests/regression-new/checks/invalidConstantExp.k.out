@@ -1,0 +1,6 @@
+[Error] Compiler: Division by zero.
+  while executing phase "constant expression folding" on sentence at
+	Source(invalidConstantExp.k)
+	Location(4,8,4,21)
+	Source(invalidConstantExp.k)
+	Location(4,13,4,21)
