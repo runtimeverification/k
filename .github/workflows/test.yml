@@ -29,5 +29,9 @@ jobs:
       - name: 'Build K Framework'
         run: nix-build -A k -A llvm-backend -A haskell-backend
 
+      - name: 'Build K Framework with LTO'
+        run: nix-build -A k -A llvm-backend -A haskell-backend --arg release true
+        if: ${{ !startsWith(matrix.os, 'macos') }}
+
       - name: 'Check development environment'
         run: nix-shell --run "echo OK"
