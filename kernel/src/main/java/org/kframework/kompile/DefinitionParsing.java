@@ -322,12 +322,12 @@ public class DefinitionParsing {
 
             Set<Sentence> configDeclProductions;
             ParseCache cache = loadCache(gen.getConfigGrammar(module));
-            ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files);
+            Module extMod = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files).getExtensionModule();
                 configDeclProductions = stream(module.localSentences())
                       .parallel()
                       .filter(s -> s instanceof Configuration)
                       .map(b -> (Configuration) b)
-                      .flatMap(configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), parser.getExtensionModule(), kore)))
+                      .flatMap(configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), extMod, kore)))
                       .collect(toSet());
 
             Set<Sentence> stc = m.localSentences()
