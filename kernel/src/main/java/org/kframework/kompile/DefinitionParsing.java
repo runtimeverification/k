@@ -23,7 +23,6 @@ import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Import;
 import org.kframework.kore.AddAtt;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -34,7 +33,6 @@ import org.kframework.parser.inner.ParseCache.ParsedSentence;
 import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.ParserUtils;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
-import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
@@ -205,7 +203,9 @@ public class DefinitionParsing {
         parsedBubbles.set(0);
         cachedBubbles.set(0);
         Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles);
+        sw.printIntermediate("Parse rules [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " rules]");
         saveCachesAndReportParsingErrors();
+        sw.printIntermediate("Save caches and report parsing errors");
         return afterResolvingAllOtherBubbles;
     }
 
