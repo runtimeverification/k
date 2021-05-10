@@ -112,11 +112,23 @@ public class FloatBuiltin {
         return value;
     }
 
+    public float floatValue() {
+        return value.floatValue();
+    }
+
+    public double doubleValue() {
+        return value.doubleValue();
+    }
+
     /**
      * Returns a {@link BinaryMathContext} representing the context to perform arithmetic under.
      */
     public int exponent() {
         return exponent;
+    }
+
+    public BinaryMathContext getMathContext() {
+      return new BinaryMathContext(precision(), exponent());
     }
 
     public int precision() {
@@ -156,5 +168,33 @@ public class FloatBuiltin {
 
     public static String printKFloatSuffix(BigFloat value, int exponent) {
         return "p" + value.precision() + "x" + exponent;
+    }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode() * 31 + exponent;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null) {
+            return false;
+        }
+        if (!object.getClass().equals(FloatBuiltin.class)) {
+            return false;
+        }
+        FloatBuiltin other = (FloatBuiltin)object;
+        if (!value.equals(other.value)) {
+            return false;
+        }
+        if (exponent != other.exponent) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return value();
     }
 }
