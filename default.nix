@@ -18,8 +18,7 @@ let
 
   llvm-backend-project = import ./llvm-backend/src/main/native/llvm-backend {
     inherit pkgs;
-    # Wait until https://github.com/kframework/llvm-backend/pull/407 gets merged
-    # inherit release;
+    inherit release;
     src = ttuegel.cleanGitSubtree {
       name = "llvm-backend";
       src = ./.;
