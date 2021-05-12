@@ -348,10 +348,6 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   override lazy val hashCode: Int = name.hashCode
 
-  override def equals(that: Any) = that match {
-    case m: Module => m.name == name && m.sentences == sentences && m.imports.map(x => x.name) == imports.map(x => x.name)
-  }
-
   def flattened()   : FlatModule                = new FlatModule(name, imports.map(m => Import(m.name, Att.empty)), localSentences, att)
   def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ imports.map(m => m.flatModules._2).flatten)
 }
