@@ -2,7 +2,7 @@
 
 The purpose of this lesson is to teach how to use K's builtin features for
 disambiguation to transform an ambiguous grammar into an unambiguous one that
-expresses the intended the intended ASTs.
+expresses the intended ASTs.
 
 ## Priority blocks
 
@@ -186,11 +186,11 @@ will express the exact same grammar as `lesson-04-b.k`
 module LESSON-04-D
 
   syntax Boolean ::= "true" [literal] | "false" [literal]
-  syntax Boolean ::= "(" Boolean ")" [atom, bracket]
-  syntax Boolean ::= "!" Boolean [not, function]
-  syntax Boolean ::= Boolean "&&" Boolean [and, function]
-  syntax Boolean ::= Boolean "^" Boolean [xor, function]
-  syntax Boolean ::= Boolean "|" Boolean [or, function]
+                   | "(" Boolean ")" [atom, bracket]
+                   | "!" Boolean [not, function]
+                   | Boolean "&&" Boolean [and, function]
+                   | Boolean "^" Boolean [xor, function]
+                   | Boolean "|" Boolean [or, function]
 
   syntax priorities literal atom > not > and > xor > or
   syntax left and
