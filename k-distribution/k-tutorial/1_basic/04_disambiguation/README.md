@@ -300,7 +300,7 @@ In both cases, no action is taken if the parse is not ambiguous.
 
 1. Parse the program `if (true) if (false) {} else {}` using `lesson-04-f.k`
 and confirm that else clause is part of the innermost `if` statement. Then
-modify the definition so that you will get the opposite parse.
+modify the definition so that you will get the alternative parse.
 
 2. Modify your solution from lesson 3, problem 1 so that unary negation should
 bind tighter than multiplication and division, which should bind tighter than
