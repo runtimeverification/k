@@ -37,7 +37,6 @@ let
       "-Dllvm.backend.skip=true"
       "-Dhaskell.backend.skip=true"
     ];
-
     # Attributes are passed to the underlying `stdenv.mkDerivation`, so build
     #   hooks can be set here also.
     #
