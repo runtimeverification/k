@@ -98,7 +98,7 @@ this, the program we mentioned above successfully parses.
 
 Parse the program `true && false || false` yourself, and confirm that the AST
 places `||` as the top level symbol. Then modify the definition so that you
-will get the opposite parse.
+will get the alternative parse.
 
 ## Associativity
 
@@ -178,7 +178,7 @@ to think about what the differences are in practice.
 
 Parse the program `true && false && false` yourself, and confirm that the AST
 places the rightmost `&&` at the top of the expression. Then modify the 
-definition to generate the opposite parse.
+definition to generate the alternative parse.
 
 ## Explicit priority and associativity declarations
 

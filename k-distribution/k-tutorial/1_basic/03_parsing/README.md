@@ -148,7 +148,7 @@ output. We will talk more about this in later lessons.
 
 ### Exercise
 
-Parse the expression `false || true` with `--output kastr`. See if you can
+Parse the expression `false || true` with `--output kast`. See if you can
 predict approximately what the corresponding output would be with
 `--output kore`, then run the command yourself and compare it to your
 prediction.
