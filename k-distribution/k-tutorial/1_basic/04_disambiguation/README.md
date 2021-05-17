@@ -310,3 +310,8 @@ Write these priority and associativity declarations both inline and explicitly.
 3. Write a simple grammar containing at least one ambiguity that cannot be
 resolved via priority or associativity, and then use the `prefer` attribute to
 resolve that ambiguity.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.5: Modules, Imports, and Requires](../05_modules/README.md).

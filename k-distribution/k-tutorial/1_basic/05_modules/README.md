@@ -1,4 +1,4 @@
-# Lesson 1.5: Modules and Imports
+# Lesson 1.5: Modules, Imports, and Requires
 
 The purpose of this lesson is to explain how K definitions can be broken into
 separate modules and files and how these distinct components combine into a
