@@ -38,7 +38,7 @@ endmodule
 A module with some attributes:
 
 ```k
-module LESSON-05-B [attr]
+module LESSON-05-B [attr1, attr2, attr3(value)]
 
 endmodule
 ```
@@ -63,7 +63,7 @@ others.
 An import in K appears at the top of a module, prior to any sentences. It can
 be specified with the `imports` keyword, followed by a module name.
 
-For example, here is a simple definition with two modules:
+For example, here is a simple definition with two modules (`lesson-05-d.k`):
 
 ```k
 module LESSON-05-D-1
@@ -88,12 +88,19 @@ and simply including its sentences in another module directly, but we will
 cover these differences later. Essentially, you can think of modules as
 a way of conceptually grouping sentences in a larger K definition.
 
+### Exercise
+
+Modify `lesson-05-d.k` to include four modules: one containing the syntax, two
+with one rule each that imports the first module, and one module containing
+no sentences that imports the second and third module. 
+
 ## Parsing in the presence of multiple modules
 
 As you may have noticed, each module in a definition can express a distinct set
 of syntax. When parsing the sentences in a module, we use the syntax
 **of that module**, enriched with the basic syntax of K, in order to parse
-rules in that module. For example, the following definition is a parser error:
+rules in that module. For example, the following definition is a parser error
+(`lesson-05-e.k`):
 
 ```k
 module LESSON-05-E-1
@@ -152,7 +159,8 @@ files together, and uses them collectively as the set of modules to which
 Putting it all together, here is one possible way in which we could break the
 definition `lesson-02-c.k` from Lesson 2 into multiple files and modules:
 
-colors.k
+`colors.k`:
+
 ```k
 module COLORS
   syntax Color ::= Yellow()
@@ -160,7 +168,8 @@ module COLORS
 endmodule
 ```
 
-fruits.k
+`fruits.k`:
+
 ```k
 module FRUITS
   syntax Fruit ::= Banana()
@@ -168,7 +177,8 @@ module FRUITS
 endmodule
 ```
 
-colorOf.k
+`colorOf.k`:
+
 ```k
 requires "fruits.k"
 requires "colors.k"
@@ -191,18 +201,24 @@ endmodule
 You would then compile this definition with `kompile colorOf.k` and use it the
 same way as the original, single-module definition.
 
+### Exercise
+
+Modify the name of the `COLOROF` module, and then recompile the definition.
+Try to understand why you now get a compiler error. Then, resolve this compiler
+error by passing the `--main-module` and `--syntax-module` flags to kompile.
+
 ## Include path
 
 One note can be made about how paths are resolved in `requires` statements.
 
 By default, the path you specify is allowed to be an absolute or a relative
-path. If the path is absolute, that exact file is imported. If the path is
-relative, a matching file is looked for within all of the `include directories`
-specified to the compiler. By default, the include directories include the
-current working directory, followed by the `include/kframework/builtin`
-directory within your installation of K. You can also pass one or more
-directories to `kompile` via the `-I` command line flag, in which case these
-directories are prepended on the beginning of the list.
+path. If the path is absolute, that exact file is imported. If the path ias
+relative, a matching file is looked for within all of the 
+**include directories** specified to the compiler. By default, the include
+directories include the current working directory, followed by the
+`include/kframework/builtin` directory within your installation of K. You can
+also pass one or more directories to `kompile` via the `-I` command line flag,
+in which case these directories are prepended on the beginning of the list.
 
 ## Exercises
 
@@ -215,3 +231,7 @@ the same set of expressions as before.
 
 2. Modify `lesson-02-d.k` from Lesson 2 so that the rules and syntax are in
 separate modules in separate files.
+
+3. Place the file containing the syntax from Problem 2 in another directory,
+then recompile the definition. Observe why a compilation error occurs. Then
+fix the compiler error by passing `-I` to kompile.
