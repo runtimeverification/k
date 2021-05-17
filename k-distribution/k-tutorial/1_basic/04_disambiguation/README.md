@@ -94,6 +94,12 @@ the sole non-terminal is both preceded by and followed by terminals. As a
 result, the priority rule is not applied when `()` is the parent. Because of
 this, the program we mentioned above successfully parses.
 
+### Exercise
+
+Parse the program `true && false || false` yourself, and confirm that the AST
+places `||` as the top level symbol. Then modify the definition so that you
+will get the opposite parse.
+
 ## Associativity
 
 Even having broken the expression grammar into priority blocks, the resulting
@@ -167,6 +173,12 @@ This means that none of `&&`, `^`, and `||` can appear as the right child of
 any of `&&`, `^`, or `||`. As a result of this, this grammar is also not
 ambiguous. However, it expresses a different grammar, and you are encouraged
 to think about what the differences are in practice.
+
+### Exercise
+
+Parse the program `true && false && false` yourself, and confirm that the AST
+places the rightmost `&&` at the top of the expression. Then modify the 
+definition to generate the opposite parse.
 
 ## Explicit priority and associativity declarations
 
@@ -273,7 +285,7 @@ module LESSON-04-F
   syntax Exp ::= "true" | "false"
   syntax Stmt ::= "if" "(" Exp ")" Stmt
                 | "if" "(" Exp ")" Stmt "else" Stmt [avoid]
-                | ";"
+                | "{" "}"
 endmodule
 ```
 
@@ -286,11 +298,15 @@ In both cases, no action is taken if the parse is not ambiguous.
 
 ## Exercises
 
-1. Modify your solution from lesson 3, problem 1 so that unary negation should
+1. Parse the program `if (true) if (false) {} else {}` using `lesson-04-f.k`
+and confirm that else clause is part of the innermost `if` statement. Then
+modify the definition so that you will get the opposite parse.
+
+2. Modify your solution from lesson 3, problem 1 so that unary negation should
 bind tighter than multiplication and division, which should bind tighter than
 addition and subtraction, and each binary operator should be left associative.
 Write these priority and associativity declarations both inline and explicitly.
 
-2. Write a simple grammar containing at least one ambiguity that cannot be
+3. Write a simple grammar containing at least one ambiguity that cannot be
 resolved via priority or associativity, and then use the `prefer` attribute to
 resolve that ambiguity.
