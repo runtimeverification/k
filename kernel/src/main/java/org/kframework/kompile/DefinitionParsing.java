@@ -296,7 +296,7 @@ public class DefinitionParsing {
                         .parallel()
                         .filter(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))
                         .map(b -> (Bubble) b)
-                        .flatMap(b -> performParse(cache.getCache(), parser, parser.getScanner(options.global), b)
+                        .flatMap(b -> parseBubble(parser, cache.getCache(), b)
                                 .map(p -> upSentence(p, b.sentenceType())))
                         .collect(Collections.toSet());
 
@@ -352,27 +352,27 @@ public class DefinitionParsing {
             return module;
 
         Module ruleParserModule = gen.getRuleGrammar(module);
+        // this scanner is not good for this module, so we must generate a new scanner.
+        boolean needNewScanner = !scanner.getModule().importedModuleNames().contains(module.name());
 
         ParseCache cache = loadCache(ruleParserModule);
         try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
-            if (stream(module.localSentences()).filter(s -> s instanceof Bubble).anyMatch(s -> !cache.getCache().containsKey(((Bubble)s).contents()))) {
-                parser.initialize();
-            }
-
-            // this scanner is not good for this module, so we must generate a new scanner.
-            boolean needNewScanner = !scanner.getModule().importedModuleNames().contains(module.name());
-            final Scanner realScanner = needNewScanner ? parser.getScanner(options.global) : scanner;
+            if (needNewScanner)
+                parser.getScanner(options.global);
+            else
+                parser.setScanner(scanner);
+            parser.initialize();
 
             Set<Sentence> parsedSet = stream(module.localSentences())
                     .parallel()
                     .filter(s -> s instanceof Bubble)
                     .map(b -> (Bubble) b)
-                    .flatMap(b -> performParse(cache.getCache(), parser, realScanner, b)
+                    .flatMap(b -> parseBubble(parser, cache.getCache(), b)
                             .map(p -> upSentence(p, b.sentenceType())))
                     .collect(Collections.toSet());
 
             if (needNewScanner) {
-                realScanner.close();//required for Windows.
+                parser.getScanner().close();//required for Windows.
             }
 
             return Module(module.name(), module.imports(),
@@ -544,11 +544,6 @@ public class DefinitionParsing {
         if (!_this.leftAssoc().equals(that.leftAssoc())) return false;
         if (!_this.rightAssoc().equals(that.rightAssoc())) return false;
         return _this.sortDeclarations().equals(that.sortDeclarations());
-    }
-
-    private Stream<? extends K> performParse(Map<String, ParsedSentence> cache, ParseInModule parser, Scanner scanner, Bubble b) {
-        parser.setScanner(scanner);
-        return parseBubble(parser, cache, b);
     }
 
     private Stream<? extends K> parseBubble(ParseInModule pim, Map<String, ParsedSentence> cache, Bubble b) {
