@@ -8,7 +8,6 @@ We currently strive to provide packages for the following platforms:
 -   Arch Linux
 -   MacOS X Mojave/Homewbrew
 -   Docker Images
--   Platform Independent K Binary
 
 Pre-installation Notes
 ----------------------
@@ -160,36 +159,6 @@ FROM runtimeverificationinc/kframework-k:ubuntu-focal-COMMIT_ID
 
 We also create Ubuntu 18.04 images with the `ubuntu-bionic-COMMIT_ID` tags.
 
-### Platform Independent K Binary
-
-The platform independent K binary is a best-attempt at making a portable
-distribution of K. When possible, prefer the platform specific packages.
-We have only tested this on Ubuntu, although it may work on other distributions.
-Appropriate installation instructions and bug reports are welcome from
-contributors.
-
-1.  Install Prerequisites:
-
-    ```sh
-    sudo apt-get update
-    sudo apt-get install build-essential m4 openjdk-8-jre libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev unzip python3
-    ```
-
-    Note that you need at least version 4.6 of Z3, and we recommend at least version 4.8.
-
-2.  Unpack the binary (will place in subdirectory `k`), move to preferred install location:
-
-    ```sh
-    tar -xvf kframework-X.Y.Z-ID-x86_64.pkg.tar.gz
-    mv k /PATH/TO/INSTALL/k
-    ```
-
-3.  Update your `PATH` (using the `k` directory extracted to above):
-
-    ```sh
-    export PATH=$PATH:/PATH/TO/INSTALL/k/bin
-    ```
-
 Installing the OCaml Backend (Optional)
 ---------------------------------------
 
@@ -234,9 +203,6 @@ check if you can compile and run an included example.
     ```sh
     $ cp -R /usr/local/share/kframework/pl-tutorial $HOME/pl-tutorial
     ```
-
-    Using the platform indenpendent K binary, the command will depend on
-    where you unpacked the K Framework.
 
     This step is needed because sometimes only the `root` user can run the
     examples in the default installation directory.
