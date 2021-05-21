@@ -198,6 +198,7 @@ public class DefinitionParsing {
         Definition trimmed = Definition(parsedDefinition.mainModule(), modules.collect(Collections.toSet()),
                 parsedDefinition.att());
         trimmed = Kompile.excludeModulesByTag(excludedModuleTags).apply(trimmed);
+        trimmed = Kompile.excludeSentencesByBackend(excludedModuleTags.contains(Att.CONCRETE())).apply(trimmed);
         sw.printIntermediate("Outer parsing [" + trimmed.entryModules().size() + " modules]");
         Definition afterResolvingConfigBubbles = resolveConfigBubbles(trimmed, parsedDefinition.getModule("DEFAULT-CONFIGURATION").get());
         sw.printIntermediate("Parse configurations [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " declarations]");
