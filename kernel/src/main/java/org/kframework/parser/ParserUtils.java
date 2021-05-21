@@ -141,10 +141,7 @@ public class ParserUtils {
                         .filter(file -> file.exists()).findFirst();
 
                 if (definitionFile.isPresent()) {
-                    File canonical = definitionFile.get().getAbsoluteFile();
-                    try {
-                        canonical = canonical.getCanonicalFile();
-                    } catch (IOException e) {}
+                    File canonical = definitionFile.get().toPath().toAbsolutePath().normalize().toFile();
                     if (!requiredFiles.contains(canonical)) {
                         requiredFiles.add(canonical);
                         results.addAll(slurp(loadDefinitionText(canonical),
@@ -152,10 +149,10 @@ public class ParserUtils {
                                 canonical.getParentFile(),
                                 lookupDirectories, requiredFiles));
                     }
-                }
-                else
+                } else {
                     throw KEMException.criticalError("Could not find file: " +
                             finalDefinitionFile + "\nLookup directories:" + allLookupDirectories, di);
+                }
             }
         }
         return results;
@@ -257,7 +254,7 @@ public class ParserUtils {
             boolean preprocess,
             boolean leftAssoc) {
         return loadDefinition(mainModuleName, syntaxModuleName, definitionText,
-                Source.apply(source.getAbsolutePath()),
+                Source.apply(source.toPath().toAbsolutePath().normalize().toString()),
                 currentDirectory, lookupDirectories, autoImportDomains, kore, preprocess, leftAssoc);
     }
 
