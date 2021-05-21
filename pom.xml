@@ -142,7 +142,13 @@
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
-	  <version>2.17</version>
+          <version>2.17</version>
+          <configuration>
+            <environmentVariables>
+              <!-- forcing en_US locale because of decimal separator in tests -->
+              <LC_NUMERIC>en_US.UTF-8</LC_NUMERIC>
+            </environmentVariables>
+          </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
