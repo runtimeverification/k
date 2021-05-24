@@ -236,16 +236,6 @@ public class Kompile {
         return dt.andThen(d -> Definition(d.mainModule(), immutable(stream(d.entryModules()).filter(mod -> excludedModuleTags.stream().noneMatch(tag -> mod.att().contains(tag))).collect(Collectors.toSet())), d.att()));
     }
 
-    public static Function1<Definition, Definition> excludeSentencesByBackend(boolean isSymbolic) {
-        DefinitionTransformer dt = DefinitionTransformer.from(m -> {
-            scala.collection.Set<Sentence> snt = m.localSentences().filter(s -> !(!isSymbolic && s.att().contains(Att.SIMPLIFICATION()))).toSet();
-            if (snt.size() != m.localSentences().size())
-                return Module(m.name(), m.imports(), snt, m.att());
-            return m;
-        }, "exclude backend specific rules");
-        return dt.andThen(dt);
-    }
-
     public static Function<Definition, Definition> defaultSteps(KompileOptions kompileOptions, KExceptionManager kem, FileUtil files, boolean isSymbolic) {
         Function1<Definition, Definition> resolveStrict = d -> DefinitionTransformer.from(new ResolveStrict(kompileOptions, d)::resolve, "resolving strict and seqstrict attributes").apply(d);
         DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.experimental.transition), EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION, COOL_RESULT_INJECTION))::resolve, "resolving heat and cool attributes");
