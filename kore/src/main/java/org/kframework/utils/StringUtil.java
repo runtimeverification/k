@@ -411,14 +411,18 @@ public class StringUtil {
             return str;
         }
 
+        // keep indentation of long lines (like term ambiguities)
+        int firstChar = 0;
+        while (str.charAt(firstChar) == ' ')
+            firstChar++;
         // scan from `col` to left
-        for (int i = col - 1; i > 0; i--) {
+        for (int i = col - 1; i > firstChar; i--) {
             if (str.charAt(i) == ' ') {
                 return str.substring(0, i) + "\n" + splitLine(str.substring(i + 1), col);
             }
         }
 
-        // we reached to beginning of the string and it contains no whitespaces before the `col`
+        // we reached the beginning of the string and it contains no whitespaces before the `col`
         // but it's longer than `col` so we should replace first space after rightmost column
         // with a newline to make it shorter
         for (int i = col; i < str.length(); i++) {
