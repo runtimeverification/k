@@ -35,8 +35,8 @@ public class CheckFunctions {
         if (sentence instanceof Rule) {
             Rule rl = (Rule) sentence;
             checkFuncAtt(rl);
-            if (!(isSymbolic && rl.att().contains(Att.SIMPLIFICATION())))
-                // functions are allowed on the LHS of simplification rules on the symbolic engines
+            if (!rl.att().contains(Att.SIMPLIFICATION()))
+                // functions are allowed on the LHS of simplification rules
                 check(rl.body());
         } else if (sentence instanceof Claim) {
             // functions are allowed on LHS of claims
