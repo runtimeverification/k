@@ -6,14 +6,14 @@ complete K definition.
 
 ## K's outer syntax
 
-Recall from Lesson 3 that K's grammar is broken into two components: the 
-**outer syntax** of K and the **inner syntax** of K. Outer syntax, as
-previously mentioned, consists of **requires**, **modules**, **imports**, and
-**sentences**. K's semantics is expressed by the set of sentences contained
-in the definition. The scope of what is considered contained in that definition
-is determined both by the **main semantics module** of a K definition, as
-well as the requires and imports present in the file that contains that
-module.
+Recall from [Lesson 3](../03_parsing/README.md) that K's grammar is broken into
+two components: the **outer syntax** of K and the **inner syntax** of K. Outer
+syntax, as previously mentioned, consists of **requires**, **modules**,
+**imports**, and **sentences**. A K semantics is expressed by the set of
+sentences contained in the definition. The scope of what is considered
+contained in that definition is determined both by the
+**main semantics module** of a K definition, as well as the requires and
+imports present in the file that contains that module.
 
 ## Basic module syntax
 
@@ -130,7 +130,7 @@ module, as well as all the modules it imports recursively, are used to
 determine the rules that can be applied at runtime in order to execute a
 program. For example, in the above example, if the main semantics module is
 module `LESSON-05-D-1`, then `not` is an uninterpreted function and the rules
-in module `LESSON-05-D-2` are ignored.
+in module `LESSON-05-D-2` are not included.
 
 While you can specify the entry point modules explicitly by passing the
 `--main-module` and `--syntax-module` flags to `kompile`, by default, if you
@@ -142,17 +142,21 @@ main syntax module will be `FOO-SYNTAX`.
 So far, while we have discussed ways to break definitions into multiple
 conceptual components, this is of limited usefulness because we are still
 forced to put all the modules in the definition into a single file. This is
-obviously not desirable. As a result, K provides a second mechanism for
-combining files in a K definition, namely, the **requires** directive.
+obviously not desirable. As a result, K provides a mechanism for combining
+files in a K definition, namely, the **requires** directive.
 
-A `requires` statement appears at the top of a K file, prior to any module
-declarations. It consists of the keyword `requires` followed by a double-quoted
-string. That string contains a filename. When you run `kompile` on a file,
-it will look at all of the `requires` statements in that file, look up those
-files on disk, parse them, and then recursively process all the requires
-statements in those files. It then combines all the modules in all of those
-files together, and uses them collectively as the set of modules to which
-`imports` statements can refer.
+In K, the `requires` keyword has two meanings. The first, the requires
+statement, appears at the top of a K file, prior to any module declarations. It
+consists of the keyword `requires` followed by a double-quoted string. The
+second meaning of the `requires` keyword will be covered in a later lesson,
+but it is distinguished because the second case occurs only inside modules.
+
+The string passed to the requires statement contains a filename. When you run
+`kompile` on a file, it will look at all of the `requires` statements in that
+file, look up those files on disk, parse them, and then recursively process all
+the requires statements in those files. It then combines all the modules in all
+of those files together, and uses them collectively as the set of modules to
+which `imports` statements can refer.
 
 ## Putting it all together
 
@@ -212,7 +216,7 @@ error by passing the `--main-module` and `--syntax-module` flags to kompile.
 One note can be made about how paths are resolved in `requires` statements.
 
 By default, the path you specify is allowed to be an absolute or a relative
-path. If the path is absolute, that exact file is imported. If the path ias
+path. If the path is absolute, that exact file is imported. If the path is
 relative, a matching file is looked for within all of the 
 **include directories** specified to the compiler. By default, the include
 directories include the current working directory, followed by the
