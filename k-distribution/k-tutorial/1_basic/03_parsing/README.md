@@ -394,4 +394,4 @@ express each individual intended meaning using brackets.
 ## Next lesson
 
 Once you have completed the above exercises, you can continue to
-[Lesson 1.4: Disambiguating Parses](../04_parsing/README.md).
+[Lesson 1.4: Disambiguating Parses](../04_disambiguation/README.md).
