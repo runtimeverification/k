@@ -45,6 +45,7 @@ KOMPILE_BACKEND?=llvm
 # check if .k file exists, if not, check if .md file exists
 # if not, default to .k to give error message
 SOURCE_EXT?=$(or $(and $(wildcard $(DEF).k), k), $(or $(and $(wildcard $(DEF).md), md), k))
+KOMPILE_FLAGS+=--no-exc-wrap
 
 KRUN_OR_LEGACY=$(KRUN)
 

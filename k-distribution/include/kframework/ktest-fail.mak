@@ -10,6 +10,7 @@ DEFDIR?=.
 TESTS?=$(wildcard $(DEFDIR)/*.md) $(wildcard $(DEFDIR)/*.k)
 # default KOMPILE_BACKEND
 KOMPILE_BACKEND?=llvm
+KOMPILE_FLAGS+=--no-exc-wrap
 
 CHECK=| diff -
 

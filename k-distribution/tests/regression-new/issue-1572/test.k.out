@@ -1,2 +1,1 @@
-[Error] Inner Parser: Importing a module that is tagged as not being LR(1) when
-using Bison's LR(1) parser generator: [BOOL]
+[Error] Inner Parser: Importing a module that is tagged as not being LR(1) when using Bison's LR(1) parser generator: [BOOL]
