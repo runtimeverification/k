@@ -26,6 +26,8 @@ import org.kframework.utils.options.OuterParsingOptions;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -143,8 +145,10 @@ public class ParserUtils {
                 if (definitionFile.isPresent()) {
                     File canonical = definitionFile.get().getAbsoluteFile();
                     try {
-                        canonical = canonical.getCanonicalFile();
-                    } catch (IOException e) {}
+                        canonical = definitionFile.get().toPath().toRealPath(LinkOption.NOFOLLOW_LINKS).toFile();
+                    } catch (IOException e) {
+                        // if it fails, just keep the original option
+                    }
                     if (!requiredFiles.contains(canonical)) {
                         requiredFiles.add(canonical);
                         results.addAll(slurp(loadDefinitionText(canonical),
@@ -152,10 +156,10 @@ public class ParserUtils {
                                 canonical.getParentFile(),
                                 lookupDirectories, requiredFiles));
                     }
-                }
-                else
+                } else {
                     throw KEMException.criticalError("Could not find file: " +
                             finalDefinitionFile + "\nLookup directories:" + allLookupDirectories, di);
+                }
             }
         }
         return results;
@@ -256,8 +260,14 @@ public class ParserUtils {
             boolean kore,
             boolean preprocess,
             boolean leftAssoc) {
+        String strSource = source.getAbsolutePath();
+        try {
+            strSource = source.toPath().toRealPath(LinkOption.NOFOLLOW_LINKS).toString();
+        } catch (IOException e) {
+            // if it fails, just keep the original option
+        }
         return loadDefinition(mainModuleName, syntaxModuleName, definitionText,
-                Source.apply(source.getAbsolutePath()),
+                Source.apply(strSource),
                 currentDirectory, lookupDirectories, autoImportDomains, kore, preprocess, leftAssoc);
     }
 
