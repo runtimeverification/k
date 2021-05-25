@@ -8,7 +8,6 @@ import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
-import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -23,20 +22,18 @@ import java.util.Set;
 public class CheckFunctions {
     private final Set<KEMException> errors;
     private final Module m;
-    private final boolean isSymbolic;
 
-    public CheckFunctions(Set<KEMException> errors, Module m, boolean isSymbolic) {
+    public CheckFunctions(Set<KEMException> errors, Module m) {
         this.errors = errors;
         this.m = m;
-        this.isSymbolic = isSymbolic;
     }
 
     public void check(Sentence sentence) {
         if (sentence instanceof Rule) {
             Rule rl = (Rule) sentence;
             checkFuncAtt(rl);
-            if (!(isSymbolic && rl.att().contains(Att.SIMPLIFICATION())))
-                // functions are allowed on the LHS of simplification rules on the symbolic engines
+            if (!rl.att().contains(Att.SIMPLIFICATION()))
+                // functions are allowed on the LHS of simplification rules
                 check(rl.body());
         } else if (sentence instanceof Claim) {
             // functions are allowed on LHS of claims

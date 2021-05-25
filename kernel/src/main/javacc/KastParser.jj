@@ -50,7 +50,7 @@ public class KastParser {
                         }
                       }).collect(Collectors.toList()).toString(), e, source,
                     new Location(e.currentToken.next.beginLine, e.currentToken.next.beginColumn, e.currentToken.next.endLine, e.currentToken.next.endColumn));
-        } catch (TokenMgrError e) {
+        } catch (TokenMgrException e) {
             throw KEMException.innerParserError(e.getMessage(), e, source, null);
         }
 	}
