@@ -92,7 +92,8 @@ a way of conceptually grouping sentences in a larger K definition.
 
 Modify `lesson-05-d.k` to include four modules: one containing the syntax, two
 with one rule each that imports the first module, and one module containing
-no sentences that imports the second and third module. 
+no sentences that imports the second and third module. Check to make sure the
+definition still compiles and that you can still evaluate the `not` function.
 
 ## Parsing in the presence of multiple modules
 
@@ -129,8 +130,9 @@ you use to parse programs that you execute with `krun`. The main semantics
 module, as well as all the modules it imports recursively, are used to
 determine the rules that can be applied at runtime in order to execute a
 program. For example, in the above example, if the main semantics module is
-module `LESSON-05-D-1`, then `not` is an uninterpreted function and the rules
-in module `LESSON-05-D-2` are not included.
+module `LESSON-05-D-1`, then `not` is an uninterpreted function (i.e., has no
+rules associated with it), and the rules in module `LESSON-05-D-2` are not
+included.
 
 While you can specify the entry point modules explicitly by passing the
 `--main-module` and `--syntax-module` flags to `kompile`, by default, if you
