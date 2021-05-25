@@ -95,7 +95,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
         this.kem = kem;
         this.smtOptions = smtOptions;
         this.hookProvider = HookProvider.get(kem);
-        this.transitions = kompileOptions.experimental.transition;
+        this.transitions = kompileOptions.transition;
         this.krunOptions = krunOptions;
         this.kproveOptions = kproveOptions;
         this.kompileOptions = kompileOptions;

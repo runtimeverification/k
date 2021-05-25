@@ -28,8 +28,6 @@ public class KBMCModule extends AbstractModule {
 
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder(), Object.class, Options.class);
         optionsBinder.addBinding().to(KBMCOptions.class);
-        Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
-
     }
 
     @Provides @RequestScoped

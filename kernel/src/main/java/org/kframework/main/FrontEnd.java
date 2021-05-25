@@ -18,7 +18,7 @@ public abstract class FrontEnd {
 
     private final KExceptionManager kem;
     private final GlobalOptions globalOptions;
-    private final String usage, experimentalUsage;
+    private final String usage;
     private final JarInfo jarInfo;
     private final Provider<FileUtil> files;
 
@@ -26,13 +26,11 @@ public abstract class FrontEnd {
             KExceptionManager kem,
             GlobalOptions globalOptions,
             String usage,
-            String experimentalUsage,
             JarInfo jarInfo,
             Provider<FileUtil> files) {
         this.kem = kem;
         this.globalOptions = globalOptions;
         this.usage = usage;
-        this.experimentalUsage = experimentalUsage;
         this.jarInfo = jarInfo;
         this.files = files;
     }
@@ -42,9 +40,6 @@ public abstract class FrontEnd {
         try {
             if (globalOptions.help) {
                 System.out.print(usage);
-                retval = 0;
-            } else if (globalOptions.helpExperimental) {
-                System.out.print(experimentalUsage);
                 retval = 0;
             } else if (globalOptions.version) {
                 jarInfo.printVersionMessage();

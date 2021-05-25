@@ -89,7 +89,7 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
                 String pgmPath = files.resolveTemp("pgm.kore").getAbsolutePath();
                 File koreOutputFile = files.resolveTemp("result.kore");
                 List<String> args = new ArrayList<String>();
-                if (krunOptions.experimental.debugger) {
+                if (krunOptions.debugger) {
                   if (OS.current() == OS.OSX) {
                     args.add("lldb");
                     args.add("--");
@@ -102,7 +102,7 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
                 args.add(pgmPath);
                 args.add(Integer.toString(depth.orElse(-1)));
                 args.add(koreOutputFile.getAbsolutePath());
-                if (krunOptions.experimental.statistics) {
+                if (krunOptions.statistics) {
                   args.add("--statistics");
                 }
                 String[] command = new String[args.size()];
@@ -117,7 +117,7 @@ public class LLVMRewriter implements Function<Definition, Rewriter> {
                       throw KEMException.criticalError("LLVM Backend crashed during rewriting.");
                     }
                     int line = 0;
-                    if (krunOptions.experimental.statistics) {
+                    if (krunOptions.statistics) {
                       line = 1;
                       BufferedReader br = new BufferedReader(new FileReader(koreOutputFile));
                       long steps = Long.parseLong(br.readLine());

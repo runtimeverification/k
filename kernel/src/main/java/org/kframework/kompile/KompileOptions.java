@@ -98,42 +98,33 @@ public class KompileOptions implements Serializable {
     @Parameter(names="--read-only-kompiled-directory", description="Files in the generated kompiled directory should be read-only to other frontend tools.")
     public boolean readOnlyKompiledDirectory = false;
 
-    @ParametersDelegate
-    public Experimental experimental = new Experimental();
-
     public boolean isKore() {
         return backend.equals("kore") || backend.equals("haskell") || backend.equals("llvm");
     }
 
-    public static final class Experimental implements Serializable {
+    @ParametersDelegate
+    public SMTOptions smt = new SMTOptions();
 
-        @Parameter(names="--heat-cool-by-strategies", description="Control heating and cooling using strategies.")
-        public boolean heatCoolStrategies = false;
+    @Parameter(names="--cache-file", description="Location of parse cache file. Default is $KOMPILED_DIR/cache.bin.")
+    public String cacheFile;
 
-        @ParametersDelegate
-        public SMTOptions smt = new SMTOptions();
+    @Parameter(names="--emit-json", description="Emit JSON serialized version of parsed and kompiled definitions.")
+    public boolean emitJson = false;
 
-        @Parameter(names="--cache-file", description="Location of parse cache file. Default is $KOMPILED_DIR/cache.bin.")
-        public String cacheFile;
+    @Parameter(names="--gen-bison-parser", description="Emit bison parser for the PGM configuration variable within the syntax module of your definition into the kompiled definition.")
+    public boolean genBisonParser;
 
-        @Parameter(names="--emit-json", description="Emit JSON serialized version of parsed and kompiled definitions.")
-        public boolean emitJson = false;
+    @Parameter(names="--gen-glr-bison-parser", description="Emit GLR bison parser for the PGM configuration variable within the syntax module of your definition into the kompiled definition.")
+    public boolean genGlrBisonParser;
 
-        @Parameter(names="--gen-bison-parser", description="Emit bison parser for the PGM configuration variable within the syntax module of your definition into the kompiled definition.")
-        public boolean genBisonParser;
+    @Parameter(names="--bison-file", description="C file containing functions to link into bison parser.")
+    public String bisonFile;
 
-        @Parameter(names="--gen-glr-bison-parser", description="Emit GLR bison parser for the PGM configuration variable within the syntax module of your definition into the kompiled definition.")
-        public boolean genGlrBisonParser;
+    @Parameter(names="--bison-stack-max-depth", description="Maximum size of bison parsing stack (default: 10000).")
+    public long bisonStackMaxDepth = 10000;
 
-        @Parameter(names="--bison-file", description="C file containing functions to link into bison parser.")
-        public String bisonFile;
+    @Parameter(names="--transition", listConverter=StringListConverter.class, description="[DEPRECATED: java backend only] <string> is a whitespace-separated list of tags designating rules to become transitions.")
+    public List<String> transition = Collections.singletonList(DEFAULT_TRANSITION);
 
-        @Parameter(names="--bison-stack-max-depth", description="Maximum size of bison parsing stack (default: 10000).")
-        public long bisonStackMaxDepth = 10000;
-
-        @Parameter(names="--transition", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of tags designating rules to become transitions.")
-        public List<String> transition = Collections.singletonList(DEFAULT_TRANSITION);
-
-        public static final String DEFAULT_TRANSITION = "transition";
-    }
+    public static final String DEFAULT_TRANSITION = "transition";
 }
