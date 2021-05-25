@@ -26,10 +26,11 @@ import org.kframework.utils.options.OuterParsingOptions;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -144,8 +145,10 @@ public class ParserUtils {
                 if (definitionFile.isPresent()) {
                     File canonical = definitionFile.get().getAbsoluteFile();
                     try {
-                        canonical = canonical.getCanonicalFile();
-                    } catch (IOException e) {}
+                        canonical = definitionFile.get().toPath().toRealPath(LinkOption.NOFOLLOW_LINKS).toFile();
+                    } catch (IOException e) {
+                        // if it fails, just keep the original option
+                    }
                     if (!requiredFiles.contains(canonical)) {
                         requiredFiles.add(canonical);
                         results.addAll(slurp(loadDefinitionText(canonical),
@@ -153,10 +156,10 @@ public class ParserUtils {
                                 canonical.getParentFile(),
                                 lookupDirectories, requiredFiles));
                     }
-                }
-                else
+                } else {
                     throw KEMException.criticalError("Could not find file: " +
                             finalDefinitionFile + "\nLookup directories:" + allLookupDirectories, di);
+                }
             }
         }
         return results;
@@ -217,16 +220,9 @@ public class ParserUtils {
         }
 
         KILtoKORE kilToKore = new KILtoKORE(context, false, kore, leftAssoc);
-
-        scala.collection.mutable.Map<String, Module> koreModules = new scala.collection.mutable.HashMap<>();
-        previousModules.stream().map(m -> koreModules.put(m.name(), m)).collect(Collectors.toList()); // populate koreModules with previousModules
-        HashSet<org.kframework.kil.Module> kilModulesSet = new HashSet<>(kilModules);
-
-        java.util.List<FlatModule> flatModules = kilModulesSet.stream().map(kilToKore::toFlatModule).sorted(Comparator.comparing(FlatModule::name)).collect(Collectors.toList());
-
-        // accumulate in koreModules the new modules. Use an ordered set to stabilize the error message for circular imports
-        flatModules.stream().map(m -> m.toModule(immutable(new LinkedHashSet<>(flatModules)), koreModules, Seq())).collect(Collectors.toSet());
-        Set<Module> finalModules = mutable(koreModules.values().toSet());
+        // Order modules by name to stabilize the error message for circular imports
+        java.util.List<FlatModule> flatModules = kilModules.stream().map(kilToKore::toFlatModule).sorted(Comparator.comparing(FlatModule::name)).collect(Collectors.toList());
+        Set<Module> finalModules = mutable(FlatModule.toModules(immutable(flatModules), immutable(previousModules)));
 
         Set<Module> result = new HashSet<>();
         ModuleTransformer applySynonyms = ModuleTransformer.fromSentenceTransformer(new ApplySynonyms()::apply, "Apply sort synonyms");
@@ -264,8 +260,14 @@ public class ParserUtils {
             boolean kore,
             boolean preprocess,
             boolean leftAssoc) {
+        String strSource = source.getAbsolutePath();
+        try {
+            strSource = source.toPath().toRealPath(LinkOption.NOFOLLOW_LINKS).toString();
+        } catch (IOException e) {
+            // if it fails, just keep the original option
+        }
         return loadDefinition(mainModuleName, syntaxModuleName, definitionText,
-                Source.apply(source.getAbsolutePath()),
+                Source.apply(strSource),
                 currentDirectory, lookupDirectories, autoImportDomains, kore, preprocess, leftAssoc);
     }
 

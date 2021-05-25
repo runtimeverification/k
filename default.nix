@@ -3,7 +3,12 @@ let
   pinned = import sources."nixpkgs" { config = {}; overlays = []; };
 in
 
-{ pkgs ? pinned }:
+{ pkgs ? pinned
+
+# Build an optimized release package.
+# Currently requires dependents to use LTO. Use sparingly.
+, release ? false
+}:
 
 let
   inherit (pkgs) callPackage;
@@ -13,6 +18,7 @@ let
 
   llvm-backend-project = import ./llvm-backend/src/main/native/llvm-backend {
     inherit pkgs;
+    inherit release;
     src = ttuegel.cleanGitSubtree {
       name = "llvm-backend";
       src = ./.;

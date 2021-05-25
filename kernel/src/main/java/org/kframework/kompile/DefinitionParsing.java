@@ -192,13 +192,14 @@ public class DefinitionParsing {
         modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("K-REFLECTION").get()));
         modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("STDIN-STREAM").get()));
         modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("STDOUT-STREAM").get()));
+        modules = Stream.concat(modules, Stream.of(parsedDefinition.getModule("MAP").get()));
         modules = Stream.concat(modules,
                 stream(parsedDefinition.entryModules()).filter(m -> stream(m.sentences()).noneMatch(s -> s instanceof Bubble)));
         Definition trimmed = Definition(parsedDefinition.mainModule(), modules.collect(Collections.toSet()),
                 parsedDefinition.att());
         trimmed = Kompile.excludeModulesByTag(excludedModuleTags).apply(trimmed);
         sw.printIntermediate("Outer parsing [" + trimmed.entryModules().size() + " modules]");
-        Definition afterResolvingConfigBubbles = resolveConfigBubbles(trimmed, parsedDefinition.getModule("DEFAULT-CONFIGURATION").get(), parsedDefinition.getModule("MAP").get());
+        Definition afterResolvingConfigBubbles = resolveConfigBubbles(trimmed, parsedDefinition.getModule("DEFAULT-CONFIGURATION").get());
         sw.printIntermediate("Parse configurations [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " declarations]");
         parsedBubbles.set(0);
         cachedBubbles.set(0);
@@ -230,28 +231,35 @@ public class DefinitionParsing {
         return options.coverage ? DefinitionTransformer.from(mod -> mod.equals(m) ? Module(m.name(), (Set<Module>)m.imports().$bar(Set(definition.getModule("K-IO").get())), m.localSentences(), m.att()) : mod, "add implicit modules").apply(definition) : definition;
     }
 
-    protected Definition resolveConfigBubbles(Definition definition, Module defaultConfiguration, Module mapModule) {
-        boolean hasConfigDecl = stream(definition.mainModule().sentences())
-                .anyMatch(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration));
-
+    protected Definition resolveConfigBubbles(Definition definition, Module defaultConfiguration) {
         Definition definitionWithConfigBubble = DefinitionTransformer.from(mod -> {
-            if (mod.equals(definition.mainModule())) {
-                java.util.Set<Module> imports = mutable(mod.imports());
+            if (mod.name().equals(definition.mainModule().name())) {
+                boolean hasConfigDecl = stream(mod.sentences())
+                        .anyMatch(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration));
                 if (!hasConfigDecl) {
-                    imports.add(defaultConfiguration);
+                    return Module(mod.name(), mod.imports().$bar(Set(defaultConfiguration)).seq(), mod.localSentences(), mod.att());
                 }
-                imports.add(mapModule);
-                return Module(mod.name(), (Set<Module>) immutable(imports), mod.localSentences(), mod.att());
             }
             return mod;
         }, "adding default configuration").apply(definition);
+
+        Module mapModule = definitionWithConfigBubble.getModule("MAP")
+                .getOrElse(() -> { throw KEMException.compilerError("Module MAP must be visible at the configuration declaration"); });
+        Definition definitionWithMapForConfig = DefinitionTransformer.from(mod -> {
+            boolean hasConfigDecl = stream(mod.localSentences())
+                    .anyMatch(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration));
+            if (hasConfigDecl) {
+                return Module(mod.name(), mod.imports().$bar(Set(mapModule)).seq(), mod.localSentences(), mod.att());
+            }
+            return mod;
+        }, "adding MAP to modules with configs").apply(definitionWithConfigBubble);
 
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         caches = loadCaches();
 
         Definition result;
         try {
-            result = resolveConfigBubbles(definitionWithConfigBubble);
+            result = resolveConfigBubbles(definitionWithMapForConfig);
         } catch (KEMException e) {
             errors.add(e);
             throwExceptionIfThereAreErrors();
@@ -313,32 +321,10 @@ public class DefinitionParsing {
                     .collect(Collections.toSet());
         }
 
-        Set<Sentence> configDeclSyntax = stream(configDeclProductions).filter(Sentence::isSyntax).collect(Collections.toSet());
-        Set<Sentence> configDeclRules = stream(configDeclProductions).filter(Sentence::isNonSyntax).collect(Collections.toSet());
-
-        if (module.name().endsWith(Import.IMPORTS_SYNTAX_SUFFIX)) {
-            Module mapModule;
-            if (def.getModule("MAP$SYNTAX").isDefined()) {
-                mapModule = def.getModule("MAP$SYNTAX").get();
-            } else {
-                throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
-            }
-            return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
-                    (Set<Sentence>) module.localSentences().$bar(configDeclSyntax)
-                            .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))),
-                    module.att());
-        } else {
-            Module mapModule;
-            if (def.getModule("MAP").isDefined()) {
-                mapModule = def.getModule("MAP").get();
-            } else {
-                throw KEMException.compilerError("Module Map must be visible at the configuration declaration, in module " + module.name());
-            }
-            return Module(module.name(), (Set<Module>) module.imports().$bar(Set(mapModule)),
-                    (Set<Sentence>) module.localSentences().$bar(configDeclRules)
-                            .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))),
-                    module.att());
-        }
+        return Module(module.name(), module.imports(),
+                (Set<Sentence>) module.localSentences().$bar(configDeclProductions)
+                        .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))),
+                module.att());
     }
 
     public Definition resolveNonConfigBubbles(Definition defWithConfig) {

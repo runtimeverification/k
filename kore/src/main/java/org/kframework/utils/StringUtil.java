@@ -119,10 +119,11 @@ public class StringUtil {
         if (str.equals("") || search.equals("")) {
             return -1;
         }
-        for (int i = str.length(), strCodepoint; i > 0; i -= Character.charCount(strCodepoint)) {
-            strCodepoint = str.codePointBefore(i);
-            for (int j = search.length(), searchCodepoint; j > 0; j -= Character.charCount(searchCodepoint)) {
-                searchCodepoint = search.codePointBefore(j);
+        int start = str.offsetByCodePoints(0, offset);
+        for (int i = start, strCodepoint; i >= 0; i -= Character.charCount(strCodepoint)) {
+            strCodepoint = str.codePointAt(i);
+            for (int j = search.length() - 1, searchCodepoint; j >= 0; j -= Character.charCount(searchCodepoint)) {
+                searchCodepoint = search.codePointAt(j);
                 if (strCodepoint == searchCodepoint) {
                     return i;
                 }
@@ -135,7 +136,8 @@ public class StringUtil {
         if (str.equals("") || search.equals("")) {
             return -1;
         }
-        for (int i = 0, strCodepoint; i < str.length(); i += Character.charCount(strCodepoint)) {
+        int start = str.offsetByCodePoints(0, offset);
+        for (int i = start, strCodepoint; i < str.length(); i += Character.charCount(strCodepoint)) {
             strCodepoint = str.codePointAt(i);
             for (int j = 0, searchCodepoint; j < search.length(); j += Character.charCount(searchCodepoint)) {
                 searchCodepoint = search.codePointAt(j);
@@ -409,14 +411,18 @@ public class StringUtil {
             return str;
         }
 
+        // keep indentation of long lines (like term ambiguities)
+        int firstChar = 0;
+        while (str.charAt(firstChar) == ' ')
+            firstChar++;
         // scan from `col` to left
-        for (int i = col - 1; i > 0; i--) {
+        for (int i = col - 1; i > firstChar; i--) {
             if (str.charAt(i) == ' ') {
                 return str.substring(0, i) + "\n" + splitLine(str.substring(i + 1), col);
             }
         }
 
-        // we reached to beginning of the string and it contains no whitespaces before the `col`
+        // we reached the beginning of the string and it contains no whitespaces before the `col`
         // but it's longer than `col` so we should replace first space after rightmost column
         // with a newline to make it shorter
         for (int i = col; i < str.length(); i++) {

@@ -210,10 +210,7 @@ public class ResolveIOStreams {
                 } else if (rule.att().contains("projection")) {
                     sentences.add(rule);
                 }
-            }
-        }
-        for (Sentence s : mutable(getStreamSyntaxModule(streamName).localSentences())) {
-            if (s instanceof Production) {
+            } else if (s instanceof Production) {
                 Production production = (Production) s;
                 if (production.sort().toString().equals("Stream") || production.att().contains("projection")) {
                     sentences.add(production);
@@ -226,17 +223,6 @@ public class ResolveIOStreams {
     private Module getStreamModule(String streamName) {
         // TODO(Daejun): fix hard-coded stream module naming convention
         String moduleName = streamName.toUpperCase() + "-STREAM";
-        Option<Module> module = definition.getModule(moduleName);
-        if (module.isDefined()) {
-            return module.get();
-        } else {
-            throw KEMException.compilerError("no such module: " + moduleName);
-        }
-    }
-
-    private Module getStreamSyntaxModule(String streamName) {
-        // TODO(Daejun): fix hard-coded stream module naming convention
-        String moduleName = streamName.toUpperCase() + "-STREAM$SYNTAX";
         Option<Module> module = definition.getModule(moduleName);
         if (module.isDefined()) {
             return module.get();

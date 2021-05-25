@@ -281,7 +281,7 @@ pipeline {
                 stage('Test Arch Package') {
                   agent {
                     docker {
-                      image 'archlinux/base'
+                      image 'archlinux:base'
                       args '-u 0'
                       reuseNode true
                     }
@@ -309,34 +309,6 @@ pipeline {
                   slackSend color: '#cb2431'                                         \
                           , channel: '#k'                                            \
                           , message: "Arch Linux Packaging Failed: ${env.BUILD_URL}"
-                }
-              }
-            }
-            stage('Build Platform Independent K Binary') {
-              when {
-                branch 'release'
-                beforeAgent true
-              }
-              agent {
-                dockerfile {
-                  additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
-                  reuseNode true
-                }
-              }
-              steps {
-                sh '''
-                  eval `opam config env`
-                  mvn --batch-mode clean
-                  mvn --batch-mode install -DskipKTest -Dcheckstyle.skip
-                  mv k-distribution/target/k-nightly.tar.gz ./
-                '''
-                stash name: 'binary', includes: 'k-nightly.tar.gz'
-              }
-              post {
-                failure {
-                  slackSend color: '#cb2431'                                                  \
-                          , channel: '#k'                                                     \
-                          , message: "Platform Independent K Binary Failed: ${env.BUILD_URL}"
                 }
               }
             }
@@ -530,7 +502,6 @@ pipeline {
       }
       steps {
         unstash 'src'
-        unstash 'binary'
         dir('bionic') { unstash 'bionic' }
         dir('focal')  { unstash 'focal' }
         dir('buster') { unstash 'buster' }
@@ -561,7 +532,6 @@ pipeline {
             mv ../buster/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_buster.deb
             mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst   kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
             mv $LOCAL_BOTTLE_NAME                                       $BOTTLE_NAME
-            mv ../k-nightly.tar.gz                                      k-nightly_${VERSION}.tar.gz
 
             echo "K Framework Release ${VERSION}"  > release.md
             echo ''                               >> release.md
@@ -573,7 +543,6 @@ pipeline {
                 --attach kframework_${VERSION}_amd64_buster.deb'#Debian Buster (10) Package'    \
                 --attach kframework-git-${VERSION}-1-x86_64.pkg.tar.zst'#Arch Package'          \
                 --attach $BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                \
-                --attach k-nightly_${VERSION}.tar.gz'#Platform Indepdendent K Binary'           \
                 --file release.md "${K_RELEASE_TAG}"
           '''
         }

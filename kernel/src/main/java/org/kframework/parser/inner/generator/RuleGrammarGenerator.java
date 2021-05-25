@@ -147,19 +147,11 @@ public class RuleGrammarGenerator {
         } else {
             Module newMod = ModuleTransformer.from(oldMod -> {
                 Set<Module> imports = stream(oldMod.imports()).map(_import -> {
-                    if (_import.name().endsWith("$SYNTAX")) {
-                        Option<Module> programParsing = baseK.getModule(_import.name().substring(0, _import.name().length()-"$SYNTAX".length()) + "-PROGRAM-PARSING$SYNTAX");
-                        if (programParsing.isDefined()) {
-                            return programParsing.get();
-                        }
-                        return _import;
-                    } else {
-                        Option<Module> programParsing = baseK.getModule(_import.name() + "-PROGRAM-PARSING");
-                        if (programParsing.isDefined()) {
-                            return programParsing.get();
-                        }
-                        return _import;
+                    Option<Module> programParsing = baseK.getModule(_import.name() + "-PROGRAM-PARSING");
+                    if (programParsing.isDefined()) {
+                        return programParsing.get();
                     }
+                    return _import;
                 }).collect(Collectors.toSet());
                 return Module.apply(oldMod.name(), immutable(imports), oldMod.localSentences(), oldMod.att());
             }, "apply program parsing modules").apply(mod);
@@ -437,7 +429,7 @@ public class RuleGrammarGenerator {
             disambProds.addAll(res);
         }
         Att att = mod.att();
-        List<String> notLrModules = stream(mod.importedModules()).filter(m -> m.att().contains("not-lr1") && !m.name().endsWith(Import.syntaxString())).map(m -> m.name()).collect(Collectors.toList());
+        List<String> notLrModules = stream(mod.importedModules()).filter(m -> m.att().contains("not-lr1")).map(Module::name).collect(Collectors.toList());
         if (!notLrModules.isEmpty()) {
           att = att.add("not-lr1", notLrModules.toString());
         }

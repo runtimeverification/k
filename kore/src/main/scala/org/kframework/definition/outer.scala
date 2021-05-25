@@ -68,12 +68,12 @@ trait Sorting {
     POSet(subsortRelations)
   }
 
-  def computeOverloadPOSet(subsorts: POSet[Sort], prods: Set[Production]) = {
+  def computeOverloadPOSet(subsorts: POSet[Sort], prods: Set[Production]): POSet[Production] = {
     def isLessThan(p1: Production, p2: Production): Boolean = {
         p1.klabel.isDefined &&
         p1.klabelAtt == p2.klabelAtt &&
-        subsorts.lessThanEq(p1.sort, p2.sort) &&
         p1.nonterminals.size == p2.nonterminals.size &&
+        subsorts.lessThanEq(p1.sort, p2.sort) &&
         p1.nonterminals.zip(p2.nonterminals).forall(pair => subsorts.lessThanEq(pair._1.sort, pair._2.sort)) &&
         (p1.sort != p2.sort || p1.nonterminals.map(_.sort) != p2.nonterminals.map(_.sort)) &&
         p1 != p2
@@ -347,10 +347,6 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   lazy val sortPredicates = allSorts.map("is" + _)
 
   override lazy val hashCode: Int = name.hashCode
-
-  override def equals(that: Any) = that match {
-    case m: Module => m.name == name && m.sentences == sentences
-  }
 
   def flattened()   : FlatModule                = new FlatModule(name, imports.map(m => Import(m.name, Att.empty)), localSentences, att)
   def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ imports.map(m => m.flatModules._2).flatten)

@@ -169,8 +169,8 @@ of any of the syntax defined in any of these modules.
   rule arr(_      , _, D::KItem) [ _        ] => D      [owise]
 
   syntax List ::= ensureOffsetList(List, Int, KItem) [function]
-  rule ensureOffsetList(L::List, IDX::Int, D::KItem) => updateList(makeList(IDX +Int 1, D), 0, L) requires         IDX >=Int size(L)
-  rule ensureOffsetList(L::List, IDX::Int, _::KItem) => L                                         requires notBool IDX >=Int size(L)
+  rule ensureOffsetList(L::List, IDX::Int, D::KItem) => L makeList(IDX +Int 1 -Int size(L), D) requires         IDX >=Int size(L)
+  rule ensureOffsetList(L::List, IDX::Int, _::KItem) => L                                      requires notBool IDX >=Int size(L)
 
   rule arr(L::List, I::Int, D::KItem) [ IDX::Int <- VAL::KItem ] => arr(ensureOffsetList(L, IDX, D) [ IDX <- VAL ], I, D)
 
@@ -1119,8 +1119,8 @@ module INT
   syntax Int ::= freshInt(Int)    [freshGenerator, function, functional]
   rule freshInt(I:Int) => I
 
-  syntax Int ::= randInt(Int) [function, hook(INT.rand)]
-  syntax K ::= srandInt(Int) [function, hook(INT.srand)]
+  syntax Int ::= randInt(Int) [function, hook(INT.rand), impure]
+  syntax K ::= srandInt(Int) [function, hook(INT.srand), impure]
 endmodule
 ```
 
