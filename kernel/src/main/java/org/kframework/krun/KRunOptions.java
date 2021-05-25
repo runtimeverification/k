@@ -223,7 +223,7 @@ public final class KRunOptions {
     @ParametersDelegate
     public SMTOptions smt = new SMTOptions();
 
-    @Parameter(names="--native-libraries", description="Flags to pass to linker. Useful in defining rewriter plugins.",
+    @Parameter(names="--native-libraries", description="[DEPRECATED: ocaml backend only] Flags to pass to linker. Useful in defining rewriter plugins.",
             listConverter=StringListConverter.class)
     public List<String> nativeLibraries = Collections.emptyList();
 
