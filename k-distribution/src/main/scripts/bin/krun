@@ -70,13 +70,15 @@ execute () {
 
 KX=$(basename "$0")
 
+FoldLines="fold -s"
+
 error () {
-  printf "[Error] Critical: $@\n" | fold -s 1>&2
+  printf "[Error] Critical: $@\n" | $FoldLines 1>&2
   exit $result
 }
 
 warning () {
-  printf "[Warning] Compiler: $@\n" | fold -s 1>&2
+  printf "[Warning] Compiler: $@\n" $FoldLines 1>&2
 }
 
 print_usage () {
@@ -118,6 +120,8 @@ present; see below).
                            stdin/stdout via cells with "stream" attribute.
                            Defaults to enabled when performing concrete
                            execution, and disabled when --search is passed.
+      --no-exc-wrap        Do not wrap exception messages to 80 chars. Keep
+                           long lines.
       --no-expand-macros   Don't expand macros in initial configuration.
                            This assumes that the initial configuration contains
                            no macro terms. Behavior is undefined if this is not
@@ -251,6 +255,10 @@ do
         ;;
       esac
       shift
+      ;;
+
+      --no-exc-wrap)
+      FoldLines=tee
       ;;
 
       --no-expand-macros)
@@ -521,10 +529,23 @@ if [ "$backendName" = "llvm" ]; then
   fi
 
   keepTempsIfDryRun "$tempDir" "$expanded_input_file" "$kore_output"
-  set +e
-  execute $cmdprefix "$kompiledDir/interpreter" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags
-  result=$?
-  set -e
+  if $search; then
+    if [ -n "$pattern" ]; then
+      error "Backend llvm does not support search patterns yet."
+    fi
+    if [[ $searchType != "FINAL" ]]; then
+      error "Backend llvm does not support --search-all, --search-one-or-more-steps, or --search-one-step yet"
+    fi
+    set +e
+    execute $cmdprefix "$kompiledDir/search" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags
+    result=$?
+    set -e
+  else
+    set +e
+    execute $cmdprefix "$kompiledDir/interpreter" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags
+    result=$?
+    set -e
+  fi
 elif [ "$backendName" = "haskell" ] ; then
   # Haskell backend
   koreExecFlags=
