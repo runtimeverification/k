@@ -70,15 +70,15 @@ execute () {
 
 KX=$(basename "$0")
 
-FoldLines="fold -s"
+fold_lines="fold -s"
 
 error () {
-  printf "[Error] Critical: $@\n" | $FoldLines 1>&2
+  printf "[Error] Critical: $@\n" | $fold_lines 1>&2
   exit $result
 }
 
 warning () {
-  printf "[Warning] Compiler: $@\n" $FoldLines 1>&2
+  printf "[Warning] Compiler: $@\n" $fold_lines 1>&2
 }
 
 print_usage () {
@@ -258,7 +258,7 @@ do
       ;;
 
       --no-exc-wrap)
-      FoldLines=tee
+      fold_lines=tee
       ;;
 
       --no-expand-macros)
