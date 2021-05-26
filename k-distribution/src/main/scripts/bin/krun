@@ -78,7 +78,7 @@ error () {
 }
 
 warning () {
-  printf "[Warning] Compiler: $@\n" $fold_lines 1>&2
+  printf "[Warning] Compiler: $@\n" | $fold_lines 1>&2
 }
 
 print_usage () {
