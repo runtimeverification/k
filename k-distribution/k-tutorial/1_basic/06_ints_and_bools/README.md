@@ -57,7 +57,7 @@ module LESSON-06-B
 endmodule
 ```
 
-In the above example, Boolean inclusive or is performed via the `orBool`
+In the above example, Boolean **inclusive or** is performed via the `orBool`
 function, which is defined in the `BOOL` module. As a matter of convention,
 many functions over builtin sorts in K are suffixed with the name of the
 primary sort over which those functions are defined. This happens so that the
@@ -70,7 +70,9 @@ language in K.
 Write a function `isBlueAndNotYellow` which computes the appropriate Boolean
 expression. If you are unsure what the appropriate syntax is to use, you
 can refer to the `BOOL` module in
-[domains.md](../../../include/kframework/builtin/domains.md).
+[domains.md](../../../include/kframework/builtin/domains.md). Add a term of
+sort `Fruit` for which `isBlue` and `isYellow` both return true, and test that
+the `isBlueAndNotYellow` function behaves as expected on all three `Fruit`s.
 
 ### Syntax Modules
 
