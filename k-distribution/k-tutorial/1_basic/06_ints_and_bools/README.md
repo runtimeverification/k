@@ -53,7 +53,7 @@ module LESSON-06-B
   rule isYellow(Banana()) => true
   rule isYellow(Blueberry()) => false
 
-  rule isBlueOrYellow(F:Fruit) => isBlue(F) orBool isYellow(F)
+  rule isBlueOrYellow(F) => isBlue(F) orBool isYellow(F)
 endmodule
 ```
 
@@ -120,7 +120,7 @@ endmodule
 ```
 
 Note the encapsulation of syntax: the `LESSON-06-C-SYNTAX` module contains
-exactly the syntax of our boolean expressions, and no more, whereas any other
+exactly the syntax of our Boolean expressions, and no more, whereas any other
 syntax needed to implement those functaions is in the `LESSON-06-C` module
 instead.
 
@@ -166,10 +166,15 @@ lesson 3, problem 2. Check to make sure each computes the value you expected.
 2. Combine the Boolean expression calculator from this lesson with your
 solution to problem 1, and then extend the combined calculator with the `<`,
 `<=`, `>`, `>=`, `==`, and `!=` expressions. Write some Boolean expressions
-that combine integer and boolean operations, and test to ensure that these
+that combine integer and Boolean operations, and test to ensure that these
 expressions return the expected truth value.
 
 3. Compute the following expressions using your solution from problem 2:
 `7 / 3`, `7 / -3`, `-7 / 3`, `-7 / -3`. Then replace the `/Int` function in
 your definition with `divInt` instead, and observe how the value of the above
 expressions changes. Why does this occur?
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.7: Side Conditions and Rule Priority](../07_side_conditions/README.md).
