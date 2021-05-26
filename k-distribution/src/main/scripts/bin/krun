@@ -258,7 +258,7 @@ do
       ;;
 
       --no-exc-wrap)
-      fold_lines=tee
+      fold_lines="cat -"
       ;;
 
       --no-expand-macros)
