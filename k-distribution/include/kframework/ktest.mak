@@ -47,6 +47,7 @@ KOMPILE_BACKEND?=llvm
 SOURCE_EXT?=$(or $(and $(wildcard $(DEF).k), k), $(or $(and $(wildcard $(DEF).md), md), k))
 KOMPILE_FLAGS+=--no-exc-wrap
 KPROVE_FLAGS+=--no-exc-wrap
+KRUN_FLAGS+=--no-exc-wrap
 
 KRUN_OR_LEGACY=$(KRUN)
 
