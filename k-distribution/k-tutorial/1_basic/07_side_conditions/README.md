@@ -81,7 +81,7 @@ module LESSON-07-B
 
   syntax Bool ::= isPositive(Int) [function]
 
-  rule isPositive(I) => true  requires I >Int 0	
+  rule isPositive(I) => true  requires I >Int 0
   rule isPositive(_) => false [owise] 
 endmodule
 ```
@@ -89,7 +89,8 @@ endmodule
 Note that we have introduced a new piece of syntax here: `_`. This is actually
 just a variable. However, as a special case, when a variable is named `_`, it
 does not bind a value that can be used on the right hand side of the rule, or
-in a side condition.
+in a side condition. Effectively, `_` is a placeholder variable that means "I
+don't care about this term."
 
 This rule is saying, "if the first rule does not apply, then the result of the
 function is false." Note, however, that `owise` can be used in more complicated
@@ -162,7 +163,9 @@ explicit priority.
 ## Exercises
 
 1. Write a function `isEven` that returns whether an integer is an even number.
-Use only two rules and one side condition.
+Use only two rules and one side condition. Refer back to
+[domains.md](../../../include/kframework/builtin/domains.md) for the relevant
+integer operations.
 
 2. Modify the calculator application from lesson 6, problem 2, so that division
 by zero will no longer make `krun` crash with a "Divison by zero" exception.
