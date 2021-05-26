@@ -173,3 +173,8 @@ expressions return the expected truth value.
 `7 / 3`, `7 / -3`, `-7 / 3`, `-7 / -3`. Then replace the `/Int` function in
 your definition with `divInt` instead, and observe how the value of the above
 expressions changes. Why does this occur?
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.7: Side Conditions and Rule Priority](../07_side_conditions/README.md).
