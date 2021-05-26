@@ -53,7 +53,7 @@ module LESSON-06-B
   rule isYellow(Banana()) => true
   rule isYellow(Blueberry()) => false
 
-  rule isBlueOrYellow(F:Fruit) => isBlue(F) orBool isYellow(F)
+  rule isBlueOrYellow(F) => isBlue(F) orBool isYellow(F)
 endmodule
 ```
 
