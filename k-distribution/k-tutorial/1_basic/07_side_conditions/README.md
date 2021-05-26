@@ -81,8 +81,7 @@ module LESSON-07-B
 
   syntax Bool ::= isPositive(Int) [function]
 
-  rule isPositive(I) => true
-    requires I >Int 0	
+  rule isPositive(I) => true  requires I >Int 0	
   rule isPositive(_) => false [owise] 
 endmodule
 ```
