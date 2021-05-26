@@ -59,13 +59,12 @@ public class KSearchPatternFrontEnd extends FrontEnd {
             Provider<KompileOptions> kompileOptions,
             GlobalOptions globalOptions,
             @Usage String usage,
-            @ExperimentalUsage String experimentalUsage,
             JarInfo jarInfo,
             Provider<FileUtil> files,
             @KompiledDir Provider<File> kompiledDir,
             Provider<CompiledDefinition> compiledDef,
             DefinitionScope scope) {
-        super(kem, globalOptions, usage, experimentalUsage, jarInfo, files);
+        super(kem, globalOptions, usage, jarInfo, files);
         this.options = options;
         this.kompileOptions = kompileOptions;
         this.globalOptions = globalOptions;

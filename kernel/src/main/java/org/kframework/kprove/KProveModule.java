@@ -30,8 +30,6 @@ public class KProveModule extends AbstractModule {
 
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder(), Object.class, Options.class);
         optionsBinder.addBinding().to(KProveOptions.class);
-        Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
-
     }
 
     @Provides @RequestScoped

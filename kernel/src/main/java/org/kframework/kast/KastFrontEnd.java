@@ -58,7 +58,6 @@ public class KastFrontEnd extends FrontEnd {
     KastFrontEnd(
             KastOptions options,
             @Usage String usage,
-            @ExperimentalUsage String experimentalUsage,
             Stopwatch sw,
             KExceptionManager kem,
             JarInfo jarInfo,
@@ -68,7 +67,7 @@ public class KastFrontEnd extends FrontEnd {
             Provider<CompiledDefinition> compiledDef,
             Provider<KPrint> kprint,
             DefinitionScope scope) {
-        super(kem, options.global, usage, experimentalUsage, jarInfo, files);
+        super(kem, options.global, usage, jarInfo, files);
         this.options = options;
         this.sw = sw;
         this.kem = kem;

@@ -68,9 +68,6 @@ public class JavaBackendKModule extends AbstractKModule {
                 MapBinder<String, Integer> checkPointBinder = MapBinder.newMapBinder(
                         binder(), String.class, Integer.class, Names.named("checkpointIntervalMap"));
                 checkPointBinder.addBinding("java").toInstance(50); //TODO(dwightguth): finesse this number
-
-                Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
-                experimentalOptionsBinder.addBinding().toInstance(JavaExecutionOptions.class);
             }
         });
         return mods;
@@ -86,9 +83,6 @@ public class JavaBackendKModule extends AbstractKModule {
 
                 installJavaBackend(binder());
                 installJavaRewriter(binder());
-
-                Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
-                experimentalOptionsBinder.addBinding().toInstance(JavaExecutionOptions.class);
             }
         });
         return mods;

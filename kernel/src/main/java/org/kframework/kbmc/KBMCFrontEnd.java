@@ -39,14 +39,13 @@ public class KBMCFrontEnd extends FrontEnd {
     public KBMCFrontEnd(
             GlobalOptions options,
             @JCommanderModule.Usage String usage,
-            @JCommanderModule.ExperimentalUsage String experimentalUsage,
             JarInfo jarInfo,
             DefinitionScope scope,
             @KompiledDir Provider<File> kompiledDir,
             KExceptionManager kem,
             Provider<FileUtil> files,
             Provider<KBMC> kbmc) {
-        super(kem, options, usage, experimentalUsage, jarInfo, files);
+        super(kem, options, usage, jarInfo, files);
         this.scope = scope;
         this.kompiledDir = kompiledDir;
         this.kbmc = kbmc;

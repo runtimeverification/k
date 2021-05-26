@@ -521,7 +521,7 @@ public class SymbolicRewriter {
         if (depth == 0) {
             addSearchResult(searchResults, initCnstrTerm, pattern, bound, context);
             stopwatch.stop();
-            if (context.global().krunOptions.experimental.statistics)
+            if (context.global().krunOptions.statistics)
                 System.err.println("[" + visited.size() + "states, " + 0 + "steps, " + stopwatch + "]");
             return disjunctResults(searchResults);
         }
@@ -539,7 +539,7 @@ public class SymbolicRewriter {
         if (searchType == SearchType.STAR) {
             if (addSearchResult(searchResults, initCnstrTerm, pattern, bound, context)) {
                 stopwatch.stop();
-                if (context.global().krunOptions.experimental.statistics)
+                if (context.global().krunOptions.statistics)
                     System.err.println("[" + visited.size() + "states, " + 0 + "steps, " + stopwatch + "]");
                 return disjunctResults(searchResults);
             }
@@ -593,7 +593,7 @@ public class SymbolicRewriter {
         }
 
         stopwatch.stop();
-        if (context.global().krunOptions.experimental.statistics) {
+        if (context.global().krunOptions.statistics) {
             System.err.println("[" + visited.size() + "states, " + step + "steps, " + stopwatch + "]");
         }
         return disjunctResults(searchResults);

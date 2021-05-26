@@ -31,8 +31,6 @@ public class KastModule extends AbstractModule {
 
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder(), Object.class, Options.class);
         optionsBinder.addBinding().to(KastOptions.class);
-        Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
-        experimentalOptionsBinder.addBinding().toInstance(KastOptions.Experimental.class);
     }
 
     @Provides @RequestScoped

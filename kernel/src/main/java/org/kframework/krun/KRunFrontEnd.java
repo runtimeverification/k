@@ -55,7 +55,6 @@ public class KRunFrontEnd extends FrontEnd {
     KRunFrontEnd(
             GlobalOptions options,
             @Usage String usage,
-            @ExperimentalUsage String experimentalUsage,
             JarInfo jarInfo,
             DefinitionScope scope,
             @KompiledDir Provider<File> kompiledDir,
@@ -67,7 +66,7 @@ public class KRunFrontEnd extends FrontEnd {
             Provider<Function<Definition, Rewriter>> initializeRewriter,
             Provider<ExecutionMode> executionMode,
             TTYInfo tty) {
-        super(kem, options, usage, experimentalUsage, jarInfo, files);
+        super(kem, options, usage, jarInfo, files);
         this.scope = scope;
         this.kompiledDir = kompiledDir;
         this.kem = kem;
@@ -86,7 +85,7 @@ public class KRunFrontEnd extends FrontEnd {
     public int run() {
         scope.enter(kompiledDir.get());
         try {
-            for (int i = 0; i < krunOptions.experimental.profile - 1; i++) {
+            for (int i = 0; i < krunOptions.profile - 1; i++) {
                 new KRun(kem, files.get(), tty, kprint.get()).run(compiledDef.get(),
                         krunOptions,
                         initializeRewriter.get(),
