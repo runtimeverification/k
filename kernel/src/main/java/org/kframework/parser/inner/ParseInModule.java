@@ -61,18 +61,23 @@ public class ParseInModule implements Serializable, AutoCloseable {
     private final boolean profileRules;
     private final FileUtil files;
     public ParseInModule(Module seedModule) {
-        this(seedModule, seedModule, seedModule, seedModule, true, false, null);
+        this(seedModule, seedModule, seedModule, seedModule, null, true, false, null);
     }
 
     public ParseInModule(Module seedModule, boolean strict, boolean profileRules, FileUtil files) {
-        this(seedModule, null, null, null, strict, profileRules, files);
+        this(seedModule, null, null, null, null, strict, profileRules, files);
     }
 
-    public ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule, boolean strict, boolean profileRules, FileUtil files) {
+    public ParseInModule(Module seedModule, Scanner scanner, boolean strict, boolean profileRules, FileUtil files) {
+        this(seedModule, null, null, null, scanner, strict, profileRules, files);
+    }
+
+    public ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule, Scanner scanner, boolean strict, boolean profileRules, FileUtil files) {
         this.seedModule = seedModule;
         this.extensionModule = extensionModule;
         this.disambModule = disambModule;
         this.parsingModule = parsingModule;
+        this.scanner = scanner;
         this.strict = strict;
         this.profileRules = profileRules;
         this.files = files;
@@ -184,10 +189,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
             scanner = new Scanner(this);
         }
         return scanner;
-    }
-
-    public void setScanner(Scanner scanner) {
-        this.scanner = scanner;
     }
 
     public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>

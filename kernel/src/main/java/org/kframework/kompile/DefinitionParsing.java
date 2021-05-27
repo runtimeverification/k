@@ -356,11 +356,11 @@ public class DefinitionParsing {
         boolean needNewScanner = !scanner.getModule().importedModuleNames().contains(module.name());
 
         ParseCache cache = loadCache(ruleParserModule);
-        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
+        try (ParseInModule parser = needNewScanner ?
+                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files) :
+                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), scanner, isStrict, profileRules, files)) {
             if (needNewScanner)
                 parser.getScanner(options.global);
-            else
-                parser.setScanner(scanner);
             parser.initialize();
 
             Set<Sentence> parsedSet = stream(module.localSentences())
