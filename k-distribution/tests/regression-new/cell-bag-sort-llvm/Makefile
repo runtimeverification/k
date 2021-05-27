@@ -1,3 +1,3 @@
-KOMPILE_FLAGS+=-w none
+KOMPILE_FLAGS=-w none
 
 include ../../../include/kframework/ktest-fail.mak
