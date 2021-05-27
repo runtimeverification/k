@@ -241,3 +241,8 @@ separate modules in separate files.
 3. Place the file containing the syntax from Problem 2 in another directory,
 then recompile the definition. Observe why a compilation error occurs. Then
 fix the compiler error by passing `-I` to kompile.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.6: Integers and Booleans](../06_ints_and_bools/README.md).

@@ -22,7 +22,7 @@ is then used to perform parsing.
 ## Basic BNF productions
 
 To illustrate how this works, we will consider a simple K definition which
-defines a relatively basic calculator capable of evaluating boolean expressions
+defines a relatively basic calculator capable of evaluating Boolean expressions
 containing and, or, not, and xor.
 
 Input the following program into your editor as file `lesson-03-a.k`:
@@ -85,9 +85,9 @@ automatically converted into an AST of that term, and then the `colorOf`
 function is evaluated using the function rules provided in the definition.
 
 Bringing us back to the file `lesson-03-a.k`, we can see that this grammar
-has given a simple BNF grammar for expressions over booleans. We have defined
-constructors corresponding to the boolean values true and false, and functions
-corresponding to the boolean operators for and, or, not, and xor. We have also
+has given a simple BNF grammar for expressions over Booleans. We have defined
+constructors corresponding to the Boolean values true and false, and functions
+corresponding to the Boolean operators for and, or, not, and xor. We have also
 given a syntax for each of these functions based on their syntax in the `C`
 programming language. As such, we can now write programs in the simple language
 we have defined.
