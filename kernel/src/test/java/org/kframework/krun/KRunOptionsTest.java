@@ -12,7 +12,7 @@ public class KRunOptionsTest {
     public void testOn() {
         KRunOptions options = new KRunOptions();
         new JCommander(options, "--statistics", "on", "--io", "on");
-        assertTrue(options.experimental.statistics);
+        assertTrue(options.statistics);
         assertTrue(options.io());
     }
 
@@ -20,7 +20,7 @@ public class KRunOptionsTest {
     public void testOff() {
         KRunOptions options = new KRunOptions();
         new JCommander(options, "--statistics", "off", "--io", "off");
-        assertFalse(options.experimental.statistics);
+        assertFalse(options.statistics);
         assertFalse(options.io());
     }
 

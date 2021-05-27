@@ -133,6 +133,11 @@ square brackets after any sentence, including both productions and rules.
 Various attributes with built-in meanings exist in K and will be discussed
 throughout the tutorial.
 
+### Exercise
+
+Use `krun` to compute the return value of the `colorOf` function on a
+`Blueberry()`.
+
 ## Rules, Matching, and Variables
 
 Functions in K are given definitions using rules. A rule begins with the `rule`

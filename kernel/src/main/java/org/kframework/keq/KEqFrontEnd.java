@@ -44,7 +44,6 @@ public class KEqFrontEnd extends FrontEnd {
     public KEqFrontEnd(
             GlobalOptions globalOptions,
             @JCommanderModule.Usage String usage,
-            @JCommanderModule.ExperimentalUsage String experimentalUsage,
             JarInfo jarInfo,
             DefinitionScope scope,
             @Main(KompiledDir.class) Provider<File> kompiledDir,
@@ -59,7 +58,7 @@ public class KEqFrontEnd extends FrontEnd {
             @Spec1 Provider<ProofDefinitionBuilder> pdb1Provider,
             @Spec2 Provider<ProofDefinitionBuilder> pdb2Provider,
             Provider<KEq> keq) {
-        super(kem, globalOptions, usage, experimentalUsage, jarInfo, files);
+        super(kem, globalOptions, usage, jarInfo, files);
         this.scope = scope;
         this.kompiledDir = kompiledDir;
         this.kompiledDir1 = kompiledDir1;

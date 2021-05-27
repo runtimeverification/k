@@ -66,29 +66,27 @@ public class ExpandMacros {
     private final PrintWriter coverage;
     private final FileChannel channel;
     private final boolean reverse;
-    private final boolean isSymbolic;
     private final ResolveFunctionWithConfig transformer;
     private final KompileOptions kompileOptions;
     private final KExceptionManager kem;
 
-    public static ExpandMacros fromMainModule(Module mod, FileUtil files, KExceptionManager kem, KompileOptions kompileOptions, boolean reverse, boolean isSymbolic) {
-        return new ExpandMacros(mod, files, kem, kompileOptions, reverse, true, isSymbolic);
+    public static ExpandMacros fromMainModule(Module mod, FileUtil files, KExceptionManager kem, KompileOptions kompileOptions, boolean reverse) {
+        return new ExpandMacros(mod, files, kem, kompileOptions, reverse, true);
     }
 
     public static ExpandMacros forNonSentences(Module mod, FileUtil files, KompileOptions kompileOptions, boolean reverse) {
-        return new ExpandMacros(mod, files, null, kompileOptions, reverse, false, true);
+        return new ExpandMacros(mod, files, null, kompileOptions, reverse, false);
     }
 
-    private ExpandMacros(Module mod, FileUtil files, KExceptionManager kem, KompileOptions kompileOptions, boolean reverse, boolean sentences, boolean isSymbolic) {
-        this(sentences ? new ResolveFunctionWithConfig(mod, kompileOptions.isKore()) : null, mod, files, kem, kompileOptions, reverse, isSymbolic);
+    private ExpandMacros(Module mod, FileUtil files, KExceptionManager kem, KompileOptions kompileOptions, boolean reverse, boolean sentences) {
+        this(sentences ? new ResolveFunctionWithConfig(mod, kompileOptions.isKore()) : null, mod, files, kem, kompileOptions, reverse);
     }
 
-    public ExpandMacros(ResolveFunctionWithConfig transformer, Module mod, FileUtil files, KExceptionManager kem, KompileOptions kompileOptions, boolean reverse, boolean isSymbolic) {
+    public ExpandMacros(ResolveFunctionWithConfig transformer, Module mod, FileUtil files, KExceptionManager kem, KompileOptions kompileOptions, boolean reverse) {
         this.mod = mod;
         this.reverse = reverse;
         this.cover = kompileOptions.coverage;
         this.kompileOptions = kompileOptions;
-        this.isSymbolic = isSymbolic;
         this.kem = kem;
         files.resolveKompiled(".").mkdirs();
         List<Rule> allMacros = stream(mod.rules()).filter(r -> isMacro(r.att(), reverse)).sorted(Comparator.comparingInt(r -> ModuleToKORE.getPriority(r.att()))).collect(Collectors.toList());
@@ -178,7 +176,7 @@ public class ExpandMacros {
 
     private Sentence check(Sentence s) {
         Set<KEMException> errors = new HashSet<>();
-        new CheckFunctions(errors, mod, isSymbolic).check(s);
+        new CheckFunctions(errors, mod).check(s);
         if (!errors.isEmpty()) {
           kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
           throw KEMException.compilerError("Had " + errors.size() + " structural errors after macro expansion.");

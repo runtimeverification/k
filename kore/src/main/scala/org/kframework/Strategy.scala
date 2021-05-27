@@ -53,7 +53,7 @@ class ContainsSCell extends ExistsK {
   }
 }
 
-class Strategy(heatCool: Boolean) {
+class Strategy() {
   import Strategy._
 
   def addStrategyCellToRulesTransformer(defn: Definition) =
@@ -90,10 +90,6 @@ class Strategy(heatCool: Boolean) {
                     val strategy =
                       if (r.att.contains(Att.TAG)) {
                         makeRewrite(r.att.get(Att.TAG))
-                      } else if (heatCool && r.att.contains(Att.HEAT)) {
-                        makeRewrite("heat")
-                      } else if (heatCool && r.att.contains(Att.COOL)) {
-                        makeRewrite("cool")
                       } else {
                         makeRewrite("regular")
                       }

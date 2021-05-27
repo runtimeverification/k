@@ -142,11 +142,7 @@ public final class KRunOptions {
         if (io != null && io == true && search()) {
             throw KEMException.criticalError("You cannot specify both --io on and --search");
         }
-        if (io != null && io == true && experimental.ltlmc()) {
-            throw KEMException.criticalError("You cannot specify both --io on and --ltlmc");
-        }
-        if (search()
-                || experimental.ltlmc()) {
+        if (search()) {
             return false;
         }
         if (io == null) {
@@ -217,36 +213,20 @@ public final class KRunOptions {
     @Parameter(names="--depth", description="The maximum number of computational steps to execute or search the definition for.")
     public Integer depth;
 
+    @Parameter(names="--statistics", description="Print rewrite engine statistics.", arity=1,
+            converter=OnOffConverter.class)
+    public boolean statistics = false;
+
+    @Parameter(names="--debugger", description="Run an execution in debug mode.")
+    public boolean debugger = false;
+
     @ParametersDelegate
-    public Experimental experimental = new Experimental();
+    public SMTOptions smt = new SMTOptions();
 
-    public final class Experimental {
+    @Parameter(names="--native-libraries", description="[DEPRECATED: ocaml backend only] Flags to pass to linker. Useful in defining rewriter plugins.",
+            listConverter=StringListConverter.class)
+    public List<String> nativeLibraries = Collections.emptyList();
 
-        @Parameter(names="--statistics", description="Print rewrite engine statistics.", arity=1,
-                converter=OnOffConverter.class)
-        public boolean statistics = false;
-
-        @Parameter(names="--debugger", description="Run an execution in debug mode.")
-        public boolean debugger = false;
-
-        @Parameter(names="--ltlmc", description="Specify the formula for model checking at the commandline.")
-        public String ltlmc;
-
-        @Parameter(names="--ltlmc-file", description="Specify the formula for model checking through a file.")
-        public String ltlmcFile;
-
-        public boolean ltlmc() {
-            return ltlmc != null || ltlmcFile != null;
-        }
-
-        @ParametersDelegate
-        public SMTOptions smt = new SMTOptions();
-
-        @Parameter(names="--native-libraries", description="Flags to pass to linker. Useful in defining rewriter plugins.",
-                listConverter=StringListConverter.class)
-        public List<String> nativeLibraries = Collections.emptyList();
-
-        @Parameter(names="--profile", description="Run krun multiple times to gather better performance metrics.")
-        public int profile = 1;
-    }
+    @Parameter(names="--profile", description="Run krun multiple times to gather better performance metrics.")
+    public int profile = 1;
 }

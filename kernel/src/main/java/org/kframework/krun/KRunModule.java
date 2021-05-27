@@ -43,16 +43,13 @@ public class KRunModule extends AbstractModule {
 
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder(), Object.class, Options.class);
         optionsBinder.addBinding().to(KRunOptions.class);
-        Multibinder<Class<?>> experimentalOptionsBinder = Multibinder.newSetBinder(binder(), new TypeLiteral<Class<?>>() {}, Options.class);
-        experimentalOptionsBinder.addBinding().toInstance(KRunOptions.Experimental.class);
-        experimentalOptionsBinder.addBinding().toInstance(SMTOptions.class);
 
         ThrowingProviderBinder throwingBinder = ThrowingProviderBinder.create(binder());
     }
 
     @Provides
     SMTOptions smtOptions(KRunOptions options) {
-        return options.experimental.smt;
+        return options.smt;
     }
 
     @Provides

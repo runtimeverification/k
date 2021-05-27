@@ -302,7 +302,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         }
 
         for (Sort sort : Sets.difference(sorts, Sets.union(SMTLIB_BUILTIN_SORTS, definition.smtPreludeSorts()))) {
-            if (sort.equals(Sort.MAP) && krunOptions.experimental.smt.mapAsIntArray) {
+            if (sort.equals(Sort.MAP) && krunOptions.smt.mapAsIntArray) {
                 sb.append("(define-sort Map () (Array Int Int))");
             } else {
                 sb.append("(declare-sort ");
@@ -410,7 +410,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         s = renameSort(s);
         if (s == Sort.BIT_VECTOR) {
             return "(_ BitVec " + BitVector.getBitwidthOrDie(att) + ")";
-        } else if (s == Sort.FLOAT && !krunOptions.experimental.smt.floatsAsPO) {
+        } else if (s == Sort.FLOAT && !krunOptions.smt.floatsAsPO) {
             Pair<Integer, Integer> pair = FloatToken.getExponentAndSignificandOrDie(att);
             return "(_ FP " + pair.getLeft() + " " + pair.getRight() + ")";
         } else {
@@ -551,10 +551,10 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
         KList kList = (KList) kItem.kList();
 
         String label = kLabel.smtlib();
-        if (kLabel.label().equals("Map:lookup") && krunOptions.experimental.smt.mapAsIntArray) {
+        if (kLabel.label().equals("Map:lookup") && krunOptions.smt.mapAsIntArray) {
             label = "select";
         }
-        if (kLabel.label().equals("_[_<-_]") && krunOptions.experimental.smt.mapAsIntArray) {
+        if (kLabel.label().equals("_[_<-_]") && krunOptions.smt.mapAsIntArray) {
             label = "store";
         }
         if (label == null) {
@@ -562,7 +562,7 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
                     new SMTTranslationFailure("missing SMTLib translation for " + kLabel)));
         }
 
-        if (krunOptions.experimental.smt.floatsAsPO) {
+        if (krunOptions.smt.floatsAsPO) {
             switch (kLabel.label()) {
                 case "_<Float_":
                     label = "float_lt";
@@ -654,11 +654,11 @@ public class    KILtoSMTLib extends CopyOnWriteTransformer {
 
     @Override
     public SMTLibTerm transform(FloatToken floatToken) {
-        if (krunOptions.experimental.smt.floatsAsPO
+        if (krunOptions.smt.floatsAsPO
                 && (floatToken.bigFloatValue().isPositiveZero() || floatToken.bigFloatValue().isNegativeZero())) {
             return new SMTLibTerm("float_zero");
         }
-        assert !krunOptions.experimental.smt.floatsAsPO;
+        assert !krunOptions.smt.floatsAsPO;
 
         StringBuilder sb = new StringBuilder();
         new Formatter(sb).format(
