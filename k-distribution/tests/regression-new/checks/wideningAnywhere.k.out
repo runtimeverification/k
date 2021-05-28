@@ -1,5 +1,4 @@
-[Error] Inner Parser: Unexpected sort KItem for term parsed as production
-syntax KItem ::= "bar". Expected: Foo
+[Error] Inner Parser: Unexpected sort KItem for term parsed as production syntax KItem ::= "bar". Expected: Foo
 	Source(wideningAnywhere.k)
 	Location(6,13,6,16)
 [Error] Compiler: Had 1 parsing errors.
