@@ -282,29 +282,40 @@ public class DefinitionParsing {
         Definition defWithCaches = resolveCachedBubbles(def, false);
         RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
 
+        // parse config bubbles in parallel
+        Map<String, java.util.Set<Sentence>> parsed = stream(defWithCaches.modules())
+                .filter(m -> stream(m.localSentences()).anyMatch(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration)))
+                .parallel()
+                .flatMap(m -> {
+                    Module configParserModule = gen.getConfigGrammar(m);
+                    ParseCache cache = loadCache(configParserModule);
+                    try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
+                        // each parser gets its own scanner because config labels can conflict with user tokens
+                        parser.getScanner(options.global);
+                        parser.initialize();
+
+                        java.util.Set<Sentence> parsedSet = stream(m.localSentences())
+                                .filter(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))
+                                .map(b -> (Bubble) b)
+                                .parallel()
+                                .flatMap(b -> parseBubble(parser, cache.getCache(), b)
+                                        .map(p -> upSentence(p, b.sentenceType())))
+                                .collect(Collectors.toSet());
+                        return Stream.of(new Tuple2<>(m.name(), parsedSet));
+                    }
+                }).collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
+
         Definition defWithParsedConfigs = DefinitionTransformer.from(m -> {
             if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration)))
                 return m;
-            Module ruleParserModule = gen.getConfigGrammar(m);
+            Set<Sentence> configs = stream((Set<Sentence>) m.localSentences()
+                    .$bar(immutable(parsed.get(m.name()))))
+                    .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration)))
+                    .collect(toSet());
+            return Module(m.name(), m.imports(), configs, m.att());
+        }, "replace config bubbles").apply(defWithCaches);
 
-            ParseCache cache = loadCache(ruleParserModule);
-            try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
-                parser.initialize();
-                parser.getScanner(options.global);
-
-                Set<Sentence> parsedSet = stream(m.localSentences())
-                        .parallel()
-                        .filter(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))
-                        .map(b -> (Bubble) b)
-                        .flatMap(b -> parseBubble(parser, cache.getCache(), b)
-                                .map(p -> upSentence(p, b.sentenceType())))
-                        .collect(Collections.toSet());
-
-                return Module(m.name(), m.imports(),
-                        stream((Set<Sentence>) m.localSentences().$bar(parsedSet)).filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))).collect(Collections.toSet()), m.att());
-            }
-        }, "parse config bubbles").apply(defWithCaches);
-
+        // replace config bubbles with the generated syntax and rules
         return DefinitionTransformer.from(m -> {
             if (stream(m.localSentences()).noneMatch(s -> s instanceof Configuration))
               return m;
@@ -317,11 +328,9 @@ public class DefinitionParsing {
                   (Set<Sentence>) m.localSentences().$bar(importedConfigurationSortsSubsortedToCell),
                   m.att());
 
-            Set<Sentence> configDeclProductions;
             ParseCache cache = loadCache(gen.getConfigGrammar(module));
             Module extMod = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files).getExtensionModule();
-                configDeclProductions = stream(module.localSentences())
-                      .parallel()
+            Set<Sentence> configDeclProductions = stream(module.localSentences())
                       .filter(s -> s instanceof Configuration)
                       .map(b -> (Configuration) b)
                       .flatMap(configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), extMod, kore)))
@@ -329,10 +338,9 @@ public class DefinitionParsing {
 
             Set<Sentence> stc = m.localSentences()
                     .$bar(configDeclProductions)
-                    .filter(s -> !(s instanceof Configuration))
-                    .filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))).seq();
+                    .filter(s -> !(s instanceof Configuration)).seq();
             return Module(m.name(), m.imports(), stc, m.att());
-        }, "parsing configs").apply(defWithParsedConfigs);
+        }, "expand configs").apply(defWithParsedConfigs);
     }
 
     private Definition resolveNonConfigBubbles(Definition defWithConfig) {
