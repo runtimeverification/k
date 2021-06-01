@@ -41,7 +41,7 @@ programs or perform proofs using that definition. In this case, the directory
 `kompile` will create by default will be in the current directory and will be
 called `lesson-02-a-kompiled`.
 
-Now, save the following input file in your editor as `banana.color` in the
+Now, save the following input file in your editor as `banana.color` in the same
 directory as `lesson-02-a.k`:
 
 ```
