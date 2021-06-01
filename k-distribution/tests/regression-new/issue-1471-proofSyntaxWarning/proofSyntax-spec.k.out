@@ -2,11 +2,9 @@ kore-exec: [] Warning (WarnTrivialClaim):
     Claim proven during initialization: proofSyntax-spec.k:24:9-24:30
     The left-hand side of the claim may be undefined.
 #Top
-[Warning] Compiler: Found syntax declaration in proof module. This will not be
-visible from the main module.
+[Warning] Compiler: Found syntax declaration in proof module. This will not be visible from the main module.
 	Source(proofSyntax-spec.k)
 	Location(16,16,16,18)
-[Warning] Compiler: Found syntax declaration in proof module. This will not be
-visible from the main module.
+[Warning] Compiler: Found syntax declaration in proof module. This will not be visible from the main module.
 	Source(proofSyntax-spec.k)
 	Location(22,16,22,18)
