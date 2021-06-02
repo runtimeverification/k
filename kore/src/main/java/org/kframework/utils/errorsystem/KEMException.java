@@ -120,12 +120,21 @@ public class KEMException extends RuntimeException {
         return new KEMException(warning.exception, ExceptionType.ERROR);
     }
 
+    public KEMException withLocation(Location loc, Source source) {
+        return create(this.exception.getType(),
+                exception.getExceptionGroup(),
+                exception.getMessage(),
+                exception.getException(),
+                loc,
+                source);
+    }
+
     @Override
     public String getMessage() {
         return exception.toString();
     }
 
-    public static KEMException create(ExceptionType type, KExceptionGroup group, String message,
+    private static KEMException create(ExceptionType type, KExceptionGroup group, String message,
                                        Throwable e, Location location, Source source) {
         return new KEMException(new KException(type, group, message, source, location, e));
     }

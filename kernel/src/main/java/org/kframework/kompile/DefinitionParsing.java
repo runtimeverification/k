@@ -21,6 +21,7 @@ import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
+import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.AddAttRec;
@@ -398,6 +399,10 @@ public class DefinitionParsing {
                     .flatMap(b -> {
                         if (cache.getCache().containsKey(b.contents())) {
                             ParsedSentence parse = updateLocation(cache.getCache().get(b.contents()), b);
+                            Att termAtt = parse.getParse().att().remove(Source.class).remove(Location.class).remove(Production.class);
+                            Att bubbleAtt = b.att().remove(Source.class).remove(Location.class).remove("contentStartLine", Integer.class).remove("contentStartColumn", Integer.class);
+                            if (!termAtt.equals(bubbleAtt)) // invalidate cache if attributes changed
+                                return Stream.of();
                             cachedBubbles.getAndIncrement();
                             registerWarnings(parse.getWarnings());
                             return Stream.of(Pair.of(b, upSentence(parse.getParse(), b.sentenceType())));
@@ -429,14 +434,8 @@ public class DefinitionParsing {
                 return a.remove(Source.class).remove(Location.class).add(Location.class, newLoc)
                         .add(Source.class, b.source().orElseThrow(() -> new AssertionError("Expecting bubble to have source location!")));
             }).apply(parse.getParse());
-            java.util.Set<KEMException> warnings = parse.getWarnings().stream().map(ex ->
-                    KEMException.create(
-                        ex.exception.getType(),
-                        ex.exception.getExceptionGroup(),
-                        ex.exception.getMessage(),
-                        ex.exception.getException(),
-                        updateLocation(oldStartLine, lineOffset, columnOffset, ex.exception.getLocation()),
-                        b.source().orElseThrow(() -> new AssertionError("Expecting bubble to have source location!"))))
+            java.util.Set<KEMException> warnings = parse.getWarnings().stream().map(ex -> ex.withLocation(ex.exception.getLocation(),
+                            b.source().orElseThrow(() -> new AssertionError("Expecting bubble to have source location!"))))
                     .collect(Collectors.toSet());
             return new ParsedSentence(k, warnings);
         }
