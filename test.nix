@@ -35,10 +35,6 @@ stdenv.mkDerivation {
   postPatch = ''
     patchShebangs tests/regression-new
   '';
-  configurePhase = ''
-    export KSERVER_SOCKET=$NIX_BUILD_TOP/kserver-socket
-    KSERVER_LOG=$NIX_BUILD_TOP/kserver.log
-  '';
   buildFlags =
     [
       # Find executables on PATH
@@ -59,13 +55,7 @@ stdenv.mkDerivation {
     ;
   enableParallelBuilding = true;
   preBuild = ''
-    spawn-kserver $KSERVER_LOG
     cd tests/regression-new
-  '';
-  postBuild = ''
-    stop-kserver
-    sleep 4
-    cat $KSERVER_LOG
   '';
   installPhase = ''
     runHook preInstall
