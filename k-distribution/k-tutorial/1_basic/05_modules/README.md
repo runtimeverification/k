@@ -103,7 +103,7 @@ of syntax. When parsing the sentences in a module, we use the syntax
 rules in that module. For example, the following definition is a parser error
 (`lesson-05-e.k`):
 
-```k
+```{.k .error}
 module LESSON-05-E-1
   rule not true => false
   rule not false => true
@@ -185,7 +185,7 @@ endmodule
 
 `colorOf.k`:
 
-```k
+```{.k .exclude}
 requires "fruits.k"
 requires "colors.k"
 
