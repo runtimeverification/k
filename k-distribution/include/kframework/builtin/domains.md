@@ -1590,6 +1590,9 @@ module STRING-KORE [kore]
 
   rule S1:String ==K S2:String => S1 ==String S2
 
+  syntax String ::= decodeBytes ( encoding: String , contents: Bytes ) [function, hook(BYTES.decodeBytes)]
+  syntax Bytes ::= encodeBytes ( encoding: String , contents: String ) [function, hook(BYTES.encodeBytes)]
+
 endmodule
 
 module STRING
