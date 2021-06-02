@@ -52,6 +52,7 @@ stdenv.mkDerivation {
       "KRUN_LEGACY=krun-legacy"
       "KEQ=keq"
       "KSERVER=kserver"
+      "PACKAGE_VERSION=${lib.fileContents ./package/version}"
       "--output-sync"
     ]
     ++ lib.optional (test != null) "-C ${test}"
