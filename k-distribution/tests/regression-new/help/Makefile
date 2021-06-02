@@ -3,6 +3,7 @@ EXT=test
 TESTDIR=.
 KRUN_FLAGS=--help
 KOMPILE_FLAGS=--syntax-module TEST
+PACKAGE_VERSION ?= $(shell cat ../../../../package/version)
 
 1.test:
 	${KAST}    --help    | grep -q -- "--version"
@@ -12,13 +13,13 @@ KOMPILE_FLAGS=--syntax-module TEST
 	${KPROVE}  --help    | grep -q -- "--version"
 	${KRUN}    --help    | grep -q -- "--version"
 	${KSERVER} --help    | grep -q -- "--version"
-	${KAST}    --version | grep -q $(shell cat ../../../../package/version)
-	${KDEP}    --version | grep -q $(shell cat ../../../../package/version)
-	${KEQ}     --version | grep -q $(shell cat ../../../../package/version)
-	${KOMPILE} --version | grep -q $(shell cat ../../../../package/version)
-	${KPROVE}  --version | grep -q $(shell cat ../../../../package/version)
-	${KRUN}    --version | grep -q $(shell cat ../../../../package/version)
-	${KSERVER} --version | grep -q $(shell cat ../../../../package/version)
+	${KAST}    --version | grep -q $(PACKAGE_VERSION)
+	${KDEP}    --version | grep -q $(PACKAGE_VERSION)
+	${KEQ}     --version | grep -q $(PACKAGE_VERSION)
+	${KOMPILE} --version | grep -q $(PACKAGE_VERSION)
+	${KPROVE}  --version | grep -q $(PACKAGE_VERSION)
+	${KRUN}    --version | grep -q $(PACKAGE_VERSION)
+	${KSERVER} --version | grep -q $(PACKAGE_VERSION)
 
 
 include ../../../include/kframework/ktest.mak
