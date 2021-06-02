@@ -21,18 +21,18 @@ import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
+import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
-import org.kframework.kil.Import;
-import org.kframework.kore.AddAtt;
+import org.kframework.kore.AddAttRec;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.Sort;
+import org.kframework.parser.ParserUtils;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.ParseCache;
 import org.kframework.parser.inner.ParseCache.ParsedSentence;
 import org.kframework.parser.inner.ParseInModule;
-import org.kframework.parser.ParserUtils;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
@@ -404,11 +404,14 @@ public class DefinitionParsing {
                     .map(b -> (Bubble) b)
                     .flatMap(b -> {
                         if (cache.getCache().containsKey(b.contents())) {
-                            ParsedSentence parse = cache.getCache().get(b.contents());
+                            ParsedSentence parse = updateLocation(cache.getCache().get(b.contents()), b);
+                            Att termAtt = parse.getParse().att().remove(Source.class).remove(Location.class).remove(Production.class);
+                            Att bubbleAtt = b.att().remove(Source.class).remove(Location.class).remove("contentStartLine", Integer.class).remove("contentStartColumn", Integer.class);
+                            if (!termAtt.equals(bubbleAtt)) // invalidate cache if attributes changed
+                                return Stream.of();
                             cachedBubbles.getAndIncrement();
                             registerWarnings(parse.getWarnings());
-                            Att att = parse.getParse().att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class));
-                            return Stream.of(Pair.of(b, upSentence(new AddAtt(a -> att).apply(parse.getParse()), b.sentenceType())));
+                            return Stream.of(Pair.of(b, upSentence(parse.getParse(), b.sentenceType())));
                         }
                         return Stream.of();
                     }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
@@ -421,6 +424,38 @@ public class DefinitionParsing {
             }
             return m;
         }, "load cached bubbles").apply(def);
+    }
+
+    private ParsedSentence updateLocation(ParsedSentence parse, Bubble b) {
+        int newStartLine = b.att().get("contentStartLine", Integer.class);
+        int newStartColumn = b.att().get("contentStartColumn", Integer.class);
+        int oldStartLine = parse.getParse().att().get(Location.class).startLine();
+        int oldStartColumn = parse.getParse().att().get(Location.class).startColumn();
+        if (oldStartLine != newStartLine || oldStartColumn != newStartColumn || !parse.getParse().source().equals(b.source())) {
+            int lineOffset = newStartLine - oldStartLine;
+            int columnOffset = newStartColumn - oldStartColumn;
+            K k = new AddAttRec(a -> {
+                Location loc = a.get(Location.class);
+                Location newLoc = updateLocation(oldStartLine, lineOffset, columnOffset, loc);
+                return a.remove(Source.class).remove(Location.class).add(Location.class, newLoc)
+                        .add(Source.class, b.source().orElseThrow(() -> new AssertionError("Expecting bubble to have source location!")));
+            }).apply(parse.getParse());
+            java.util.Set<KEMException> warnings = parse.getWarnings().stream().map(ex -> ex.withLocation(ex.exception.getLocation(),
+                            b.source().orElseThrow(() -> new AssertionError("Expecting bubble to have source location!"))))
+                    .collect(Collectors.toSet());
+            return new ParsedSentence(k, warnings);
+        }
+        return parse;
+    }
+
+    private static Location updateLocation(int oldStartLine, int lineOffset, int columnOffset, Location loc) {
+        return Location.apply(
+                loc.startLine() + lineOffset,
+                // only the first line can have column offset, otherwise it will trigger a cache miss
+                oldStartLine == loc.startLine() ? loc.startColumn() + columnOffset : loc.startColumn(),
+                loc.endLine() + lineOffset,
+                oldStartLine == loc.endLine() ? loc.endColumn() + columnOffset : loc.endColumn()
+        );
     }
 
     private void registerWarnings(java.util.Set<KEMException> warnings) {
@@ -563,7 +598,8 @@ public class DefinitionParsing {
         registerWarnings(result._2());
         if (result._1().isRight()) {
             KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, isStrict).down(result._1().right().get());
-            k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine").remove("contentStartColumn").remove(Source.class).remove(Location.class)));
+            k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine", Integer.class)
+                    .remove("contentStartColumn", Integer.class).remove(Source.class).remove(Location.class)));
             cache.put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
             return Stream.of(k);
         } else {

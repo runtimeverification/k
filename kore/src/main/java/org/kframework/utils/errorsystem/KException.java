@@ -179,4 +179,8 @@ public class KException implements Serializable, HasLocation {
     public Location getLocation() {
         return location;
     }
+
+    public KExceptionGroup getExceptionGroup() {
+        return exceptionGroup;
+    }
 }
