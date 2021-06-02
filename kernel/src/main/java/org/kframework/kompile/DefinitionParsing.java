@@ -283,6 +283,10 @@ public class DefinitionParsing {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
 
         // parse config bubbles in parallel
+        // step 1 - use scala parallel streams to generate parsers
+        // step 2 - use java parallel streams to parse sentences
+        // this avoids creation of extra (costly) threads at the cost
+        // of a small thread contention between the two thread pools
         Map<String, Module> parsed = defWithCaches.parMap(m -> {
             if (stream(m.localSentences()).noneMatch(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration)))
                 return m;
