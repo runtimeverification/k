@@ -502,9 +502,9 @@ in your code (e.g. `syntax #Layout`).
 
 ```k
 module DEFAULT-LAYOUT
-    syntax #Layout ::= r"(\\/\\*([^\\*]|(\\*+([^\\*\\/])))*\\*+\\/)"
-                     | r"(\\/\\/[^\\n\\r]*)"
-                     | r"([\\ \\n\\r\\t])"
+    syntax #Layout ::= r"(\\/\\*([^\\*]|(\\*+([^\\*\\/])))*\\*+\\/)" // C-style multi-line comments
+                     | r"(\\/\\/[^\\n\\r]*)"                         // C-style single-line comments
+                     | r"([\\ \\n\\r\\t])"                           // Whitespace
 endmodule
 ```
 

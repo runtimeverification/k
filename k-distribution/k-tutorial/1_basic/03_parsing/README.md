@@ -293,7 +293,7 @@ syntax Id ::= "main" [token]
 Here we declare that `main` is a token of sort `Id`. Instead of being parsed
 as a symbol, it gets parsed as a token, generating a typed string in the AST.
 This is useful in a semantics of C because the parser generally does not treat
-the `main` function in C specially; only the semantics treats it specially
+the `main` function in C specially; only the semantics treats it specially.
 
 Of course, each language may have different lexical syntax, some of which may
 be more complex. For example, if we wish to define the syntax of integers in C,

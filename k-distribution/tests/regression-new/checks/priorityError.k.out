@@ -1,9 +1,7 @@
-[Error] Inner Parser: Priority filter exception. Cannot use lguard as an
-immediate child of plus. Consider using parentheses around lguard
+[Error] Inner Parser: Priority filter exception. Cannot use lguard as an immediate child of plus. Consider using parentheses around lguard
 	Source(priorityError.k)
 	Location(19,19,19,22)
-[Error] Inner Parser: Priority filter exception. Cannot use rguard as an
-immediate child of plus. Consider using parentheses around rguard
+[Error] Inner Parser: Priority filter exception. Cannot use rguard as an immediate child of plus. Consider using parentheses around rguard
 	Source(priorityError.k)
 	Location(20,15,20,18)
 [Error] Inner Parser: Parsing ambiguity.

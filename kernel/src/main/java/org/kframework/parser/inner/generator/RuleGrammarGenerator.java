@@ -22,6 +22,7 @@ import org.kframework.definition.Terminal;
 import org.kframework.definition.UserList;
 import org.kframework.kore.Sort;
 import org.kframework.parser.inner.ParseInModule;
+import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import scala.collection.Seq;
@@ -191,6 +192,10 @@ public class RuleGrammarGenerator {
      */
     public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, FileUtil files) {
         return new ParseInModule(mod, strict, timing, files);
+    }
+
+    public static ParseInModule getCombinedGrammar(Module mod, Scanner scanner, boolean strict, boolean timing, FileUtil files) {
+        return new ParseInModule(mod, scanner, strict, timing, files);
     }
 
     public static Tuple3<Module, Module, Module> getCombinedGrammarImpl(Module mod) {
