@@ -171,3 +171,8 @@ integer operations.
 by zero will no longer make `krun` crash with a "Divison by zero" exception.
 Instead, the `/` function should not match any of its rules if the denominator
 is zero.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.8: Literate Programming with Markdown](../08_literate_programming/README.md).
