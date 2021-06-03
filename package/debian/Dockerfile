@@ -29,6 +29,7 @@ RUN    apt-get update            \
         maven                    \
         opam                     \
         openjdk-11-jdk           \
+        parallel                 \
         pkg-config               \
         python3                  \
         python3-graphviz         \

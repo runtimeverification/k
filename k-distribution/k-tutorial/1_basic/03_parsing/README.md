@@ -272,7 +272,7 @@ value recognized by the regular expression.
 For example, the builtin integers in K are defined using the following
 production:
 
-```k
+```{.k .exclude}
 syntax Int ::= r"[\\+-]?[0-9]+" [token]
 ```
 
@@ -286,7 +286,7 @@ It is also possible to define tokens that do not use regular expressions. This
 can be useful when you wish to declare particular identifiers for use in your
 semantics later. For example:
 
-```k
+```{.k .exclude}
 syntax Id ::= "main" [token]
 ```
 
@@ -299,7 +299,7 @@ Of course, each language may have different lexical syntax, some of which may
 be more complex. For example, if we wish to define the syntax of integers in C,
 we could use the following production:
 
-```k
+```{.k .exclude}
 syntax IntConstant ::= r"(([1-9][0-9]*)|(0[0-7]*)|(0[xX][0-9a-fA-F]+))(([uU][lL]?)|([uU]((ll)|(LL)))|([lL][uU]?)|(((ll)|(LL))[uU]?))?" [token]
 ```
 
@@ -313,7 +313,7 @@ giving them a name, and then referring to them in productions.
 Consider the following (equivalent) way to define the lexical syntax of
 integers in C:
 
-```k
+```{.k .exclude}
 syntax IntConstant ::= r"({DecConstant}|{OctConstant}|{HexConstant})({IntSuffix}?)" [token]
 syntax lexical DecConstant = r"{NonzeroDigit}({Digit}*)"
 syntax lexical OctConstant = r"0({OctDigit}*)"
