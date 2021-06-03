@@ -21,17 +21,21 @@ module LESSON-07-A
   imports BOOL
   imports INT
 
-  syntax Grade ::= A() | B() | C() | D() | F()
+  syntax Grade ::= "letter-A" 
+                 | "letter-B"
+                 | "letter-C"
+                 | "letter-D"
+                 | "letter-F"
                  | gradeFromPercentile(Int) [function]
 
-  rule gradeFromPercentile(I) => A() requires I >=Int 90
+  rule gradeFromPercentile(I) => letter-A requires I >=Int 90
 endmodule
 ```
 
 In this case, the `gradeFromPercentile` function takes a single integer
-argument. The function evaluates to `A()` if the argument passed is greater
-than 90. Note that the side condition is allowed to refer to variables that
-appear on the left-hand-side of the rule. In the same manner as variables
+argument. The function evaluates to `letter-A` if the argument passed is
+greater than 90. Note that the side condition is allowed to refer to variables
+that appear on the left-hand-side of the rule. In the same manner as variables
 appearing on the right-hand-side, variables that appear in the side condition
 evaluate to the value that was matched on the left hand side. Then the
 functions in the side condition are evaluated, which returns a term of sort
@@ -41,8 +45,8 @@ left-hand-side of the rule match the term being evaluated.
 
 ### Exercise
 
-Write a rule that evaluates `gradeFromPercentile` to `B()` if the argument to
-the function is in the range [80,90). Test that the function correctly
+Write a rule that evaluates `gradeFromPercentile` to `letter-B` if the argument
+to the function is in the range [80,90). Test that the function correctly
 evaluates various numbers between 80 and 100.
 
 ## `owise` Rules
@@ -69,9 +73,9 @@ rules, and will only be tried to be applied after all the other,
 higher-priority rules have been tried and they have failed.
 
 For example, in the above exercise, we had to add a side condition containing
-two boolean comparisons to the rule we wrote to handle `B()` grades. However,
-in practice this meant that we compare the percentile to 90 twice. We can more
-efficiently and more idiomatically write the `B()` case for the
+two boolean comparisons to the rule we wrote to handle `letter-B` grades.
+However, in practice this meant that we compare the percentile to 90 twice. We
+can more efficiently and more idiomatically write the `letter-B` case for the
 `gradeFromPercentile` rule using the `owise` attribute (`lesson-07-b.k`):
 
 ```k
@@ -79,11 +83,15 @@ module LESSON-07-B
   imports BOOL
   imports INT
 
-  syntax Grade ::= A() | B() | C() | D() | F()
+  syntax Grade ::= "letter-A" 
+                 | "letter-B"
+                 | "letter-C"
+                 | "letter-D"
+                 | "letter-F"
                  | gradeFromPercentile(Int) [function]
 
-  rule gradeFromPercentile(I) => A() requires I >=Int 90
-  rule gradeFromPercentile(I) => B() requires I >=Int 80 [owise]
+  rule gradeFromPercentile(I) => letter-A requires I >=Int 90
+  rule gradeFromPercentile(I) => letter-B requires I >=Int 80 [owise]
 endmodule
 ```
 
@@ -127,11 +135,15 @@ module LESSON-07-C
   imports BOOL
   imports INT
 
-  syntax Grade ::= A() | B() | C() | D() | F()
+  syntax Grade ::= "letter-A" 
+                 | "letter-B"
+                 | "letter-C"
+                 | "letter-D"
+                 | "letter-F"
                  | gradeFromPercentile(Int) [function]
 
-  rule gradeFromPercentile(I) => A() requires I >=Int 90 [priority(50)]
-  rule gradeFromPercentile(I) => B() requires I >=Int 80 [priority(200)]
+  rule gradeFromPercentile(I) => letter-A requires I >=Int 90 [priority(50)]
+  rule gradeFromPercentile(I) => letter-B requires I >=Int 80 [priority(200)]
 endmodule
 ```
 
@@ -144,14 +156,18 @@ module LESSON-07-D
   imports BOOL
   imports INT
 
-  syntax Grade ::= A() | B() | C() | D() | F()
+  syntax Grade ::= "letter-A" 
+                 | "letter-B"
+                 | "letter-C"
+                 | "letter-D"
+                 | "letter-F"
                  | gradeFromPercentile(Int) [function]
 
-  rule gradeFromPercentile(I) => A() requires I >=Int 90 [priority(50)]
-  rule gradeFromPercentile(I) => B() requires I >=Int 80 [priority(51)]
-  rule gradeFromPercentile(I) => C() requires I >=Int 70 [priority(52)]
-  rule gradeFromPercentile(I) => D() requires I >=Int 60 [priority(53)]
-  rule gradeFromPercentile(_) => F()                     [priority(54)]
+  rule gradeFromPercentile(I) => letter-A requires I >=Int 90 [priority(50)]
+  rule gradeFromPercentile(I) => letter-B requires I >=Int 80 [priority(51)]
+  rule gradeFromPercentile(I) => letter-C requires I >=Int 70 [priority(52)]
+  rule gradeFromPercentile(I) => letter-D requires I >=Int 60 [priority(53)]
+  rule gradeFromPercentile(_) => letter-F                     [priority(54)]
 endmodule
 ```
 
