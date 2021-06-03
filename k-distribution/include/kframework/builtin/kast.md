@@ -134,7 +134,7 @@ The correspondance between K symbols and KORE symbols is as follows:
 * `#wAF` - `weakAlwaysFinally`
 
 ```k
-module ML-SYNTAX
+module ML-SYNTAX [not-lr1]
   imports SORT-K
 
   syntax {Sort} Sort ::= "#Top" [klabel(#Top), symbol, mlUnary]
