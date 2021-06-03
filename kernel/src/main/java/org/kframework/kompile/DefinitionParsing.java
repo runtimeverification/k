@@ -364,7 +364,7 @@ public class DefinitionParsing {
         ParseCache cache = loadCache(ruleParserModule);
         try (ParseInModule parser = needNewScanner ?
                 RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files) :
-                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), scanner, isStrict, profileRules, files)) {
+                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), scanner, isStrict, profileRules, false, files)) {
             if (needNewScanner)
                 parser.getScanner(options.global);
             parser.initialize();
