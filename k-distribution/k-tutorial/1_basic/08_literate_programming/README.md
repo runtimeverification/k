@@ -156,3 +156,8 @@ compiler in order to make it compile.
 3. Modify your calculator application from lesson 7, problem 2, to be written
 in a literate style. Consider what text might be appropriate to turn the
 resulting markdown file into documentation for your calculator.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.9: Unparsing and the format and color attributes](../09_unparsing/README.md).
