@@ -1,1 +1,1 @@
-[Error] Inner Parser: Importing a module that is tagged as not being LR(1) when using Bison's parser generator: [ML-SYNTAX] Module will not be included in Bison grammar.
+[Error] Inner Parser: Skipping modules [ML-SYNTAX] tagged as not-lr1 which are not supported by Bison.
