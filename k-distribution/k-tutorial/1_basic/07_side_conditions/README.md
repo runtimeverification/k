@@ -87,11 +87,11 @@ module LESSON-07-B
 endmodule
 ```
 
-This rule is saying, "if the first rule does not apply, then the grade is a B
-if the percentile is greater than or equal to 80." Note here that we use both
+This rule is saying, "if all the other rules do not apply, then the grade is a
+B if the percentile is greater than or equal to 80." Note here that we use both
 a side condition and an `owise` attribute on the same rule. This is not
 required (as we will see later), but it is allowed. What this means is that the
-side condition is only tried if the previous rules did not apply **and** the 
+side condition is only tried if the other rules did not apply **and** the 
 left-hand-side of the rule matched. You can even use more complex matching on
 the left-hand-side than simply a variable. More generally, you can also have
 multiple higher-priority rules, or multiple `owise` rules. What this means in
