@@ -6,7 +6,7 @@ complete K definition.
 
 ## K's outer syntax
 
-Recall from [Lesson 3](../03_parsing/README.md) that K's grammar is broken into
+Recall from [Lesson 1.3](../03_parsing/README.md) that K's grammar is broken into
 two components: the **outer syntax** of K and the **inner syntax** of K. Outer
 syntax, as previously mentioned, consists of **requires**, **modules**,
 **imports**, and **sentences**. A K semantics is expressed by the set of
@@ -163,7 +163,8 @@ which `imports` statements can refer.
 ## Putting it all together
 
 Putting it all together, here is one possible way in which we could break the
-definition `lesson-02-c.k` from Lesson 2 into multiple files and modules:
+definition `lesson-02-c.k` from [Lesson 1.2](../02_basics/README.md) into
+multiple files and modules:
 
 `colors.k`:
 
@@ -228,17 +229,17 @@ in which case these directories are prepended on the beginning of the list.
 
 ## Exercises
 
-1. Take the solution to Lesson 4, Problem 1 which included the explicit
+1. Take the solution to lesson 1.4, problem 1 which included the explicit
 priority and associativity declarations, and modify the definition so that
 the syntax of integers and brackets is in one module, the syntax of addition,
 subtraction, and unary negation is in another module, and the syntax of
 multiplication and division is in a third module. Make sure you can still parse
 the same set of expressions as before.
 
-2. Modify `lesson-02-d.k` from Lesson 2 so that the rules and syntax are in
+2. Modify `lesson-02-d.k` from lesson 1.2 so that the rules and syntax are in
 separate modules in separate files.
 
-3. Place the file containing the syntax from Problem 2 in another directory,
+3. Place the file containing the syntax from problem 2 in another directory,
 then recompile the definition. Observe why a compilation error occurs. Then
 fix the compiler error by passing `-I` to kompile.
 

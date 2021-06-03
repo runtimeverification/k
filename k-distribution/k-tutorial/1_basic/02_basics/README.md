@@ -4,7 +4,7 @@ The purpose of this lesson is to explain the basics of **productions** and
 **rules** in K. These are two types of K **sentences**. A K file consists of
 one or more **requires** or **modules** in K. Each module consists of one or
 more **imports** or sentences. For more information on requires, modules, and
-sentences, refer to [Lesson 4](../04_modules/README.md). However, for the time
+sentences, refer to [Lesson 1.4](../04_modules/README.md). However, for the time
 being, just think of a module as a container for sentences, and don't worry
 about requires or imports just yet.
 
