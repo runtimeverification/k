@@ -1,4 +1,4 @@
-{ lib, mavenix, cleanGit, cleanSourceWith, runCommand, makeWrapper
+{ stdenv, lib, mavenix, cleanGit, cleanSourceWith, runCommand, makeWrapper
 , bison, flex, gcc, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3
 , haskell-backend, prelude-kore, llvm-backend
 }:
@@ -56,6 +56,15 @@ let
       prelude_kore="$out/include/kframework/kore/prelude.kore"
       mkdir -p "$(dirname "$prelude_kore")"
       ln -s "${prelude-kore}" "$prelude_kore"
+    '';
+
+    preFixup = lib.optionalString (!stdenv.isDarwin) ''
+      patchelf --set-interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" "$out/bin/ng"
+    '';
+
+    doInstallCheck = true;
+    installCheckPhase = ''
+      $out/bin/ng --help
     '';
 
     # Add extra maven dependencies which might not have been picked up
