@@ -121,7 +121,7 @@ endmodule
 
 Note the encapsulation of syntax: the `LESSON-06-C-SYNTAX` module contains
 exactly the syntax of our Boolean expressions, and no more, whereas any other
-syntax needed to implement those functaions is in the `LESSON-06-C` module
+syntax needed to implement those functions is in the `LESSON-06-C` module
 instead.
 
 #### Exercise

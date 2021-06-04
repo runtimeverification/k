@@ -27,7 +27,7 @@ underscores, separated by a hyphen. Here are some valid module names: `FOO`,
 `-FOO`, `BAR-`, `FOO--BAR`. Stylistically, modules names are usually all
 uppercase with hyphens separating words, but this is not strictly enforced.
 
-Some examples modules include an empty module:
+Some example modules include an empty module:
 
 ```k
 module LESSON-05-A
