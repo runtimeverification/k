@@ -7,7 +7,7 @@ import javax.annotation.Nonnull
 
 import dk.brics.automaton.{BasicAutomata, RegExp, RunAutomaton, SpecialOperations}
 import org.kframework.POSet
-import org.kframework.attributes.{Att, HasLocation, Location, Source}
+import org.kframework.attributes.{Att, AttValue, HasLocation, Location, Source}
 import org.kframework.definition.Constructors._
 import org.kframework.kore.Unapply.{KApply, KLabel}
 import org.kframework.kore
@@ -39,7 +39,7 @@ case class Definition(
                        mainModule: Module,
                        entryModules: Set[Module],
                        att: Att)
-  extends DefinitionToString with OuterKORE {
+  extends DefinitionToString with OuterKORE with AttValue {
 
   private def allModules(m: Module): Set[Module] = m.importedModules + m
 
@@ -91,7 +91,7 @@ object Module {
 }
 
 case class Module(val name: String, val imports: Set[Module], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
-  extends ModuleToString with OuterKORE with Sorting with Serializable {
+  extends ModuleToString with OuterKORE with Sorting with Serializable with AttValue {
 
   assert(att != null)
 
@@ -356,7 +356,7 @@ trait HasAtt {
   val att: Att
 }
 
-trait Sentence extends HasLocation with HasAtt {
+trait Sentence extends HasLocation with HasAtt with AttValue {
   // marker
   val isSyntax: Boolean
   val isNonSyntax: Boolean
