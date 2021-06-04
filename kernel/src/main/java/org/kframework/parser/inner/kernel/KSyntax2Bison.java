@@ -117,10 +117,8 @@ public class KSyntax2Bison {
   }
 
   public static void writeParser(Module module, Module disambModule, Scanner scanner, Sort start, File path, boolean glr, long stackDepth, KExceptionManager kem) {
-    if (!glr && module.att().contains("not-lr1")) {
-        kem.registerInnerParserWarning(ExceptionType.NON_LR_GRAMMAR, "Importing a module that is tagged as not being LR(1) when using Bison's LR(1) parser generator: " + module.att().get("not-lr1"));
-        // print so it appears before we call bison which may not terminate
-        kem.print();
+    if (module.att().contains("not-lr1")) {
+        kem.registerInnerParserWarning(ExceptionType.NON_LR_GRAMMAR, "Skipping modules " + module.att().get("not-lr1") + " tagged as not-lr1 which are not supported by Bison.");
     }
     module = transformByPriorityAndAssociativity(module);
     StringBuilder bison = new StringBuilder();
