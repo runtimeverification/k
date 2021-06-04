@@ -30,6 +30,7 @@ case class Att(att: Map[(String, String), Any]) extends AttributesToString {
 
   def add(key: String): Att = add(key, "")
   def add(key: String, value: String): Att = add(key, Att.stringClassName, value)
+  def add(key: String, value: Int): Att = add(key, Att.intClassName, value)
   def add[T](key: Class[T], value: T): Att = add(key.getName, key.getName, value)
   def add[T](key: String, cls: Class[T], value: T): Att = add(key, cls.getName, value)
   private def add[T](key: String, clsStr: String, value: T): Att = Att(att + ((key, clsStr) -> value))
@@ -108,6 +109,7 @@ object Att {
   val UNIQUE_ID = "UNIQUE_ID"
 
   private val stringClassName = classOf[String].getName
+  private val intClassName = classOf[java.lang.Integer].getName
 
   def from(thatAtt: java.util.Map[String, String]): Att =
     Att(immutable(thatAtt).map { case (k, v) => ((k, Att.stringClassName), v) }.toMap)
