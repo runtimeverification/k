@@ -9,7 +9,7 @@ trait AttValue
 /**
  * 2nd value in key is always a class name. For a key of type (s1, s2), value must be of type class.forName(s2).
  */
-case class Att(att: Map[(String, String), Any]) extends AttributesToString {
+case class Att private (att: Map[(String, String), Any]) extends AttributesToString {
 
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Att.this)
 
@@ -33,9 +33,11 @@ case class Att(att: Map[(String, String), Any]) extends AttributesToString {
   def add(key: String): Att = add(key, "")
   def add(key: String, value: String): Att = add(key, Att.stringClassName, value)
   def add(key: String, value: Int): Att = add(key, Att.intClassName, value)
-  def add[T](key: Class[T], value: T): Att = add(key.getName, key.getName, value)
-  def add[T](key: String, cls: Class[T], value: T): Att = add(key, cls.getName, value)
-  private def add[T](key: String, clsStr: String, value: T): Att = Att(att + ((key, clsStr) -> value))
+  def add[T <: AttValue](key: Class[T], value: T): Att = add(key.getName, key.getName, value)
+  def add[T <: AttValue](key: String, cls: Class[T], value: T): Att = add(key, cls.getName, value)
+  private def add[T <: AttValue](key: String, clsStr: String, value: T): Att = Att(att + ((key, clsStr) -> value))
+  private def add(key: String, clsStr: String, value: String): Att = Att(att + ((key, clsStr) -> value))
+  private def add(key: String, clsStr: String, value: Int): Att = Att(att + ((key, clsStr) -> value))
   def addAll(thatAtt: Att) = Att(att ++ thatAtt.att)
 
   def remove(key: String): Att = remove(key, Att.stringClassName)
