@@ -10,9 +10,13 @@ trait AttValue
 /**
  * 2nd value in key is always a class name. For a key of type (s1, s2), value must be of type class.forName(s2).
  */
-case class Att private (att: Map[(String, String), Any]) extends AttributesToString {
+class Att private (val att: Map[(String, String), Any]) extends AttributesToString with Serializable {
 
-  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Att.this)
+  override lazy val hashCode: Int = att.hashCode()
+  override def equals(that: Any) = that match {
+    case a: Att => a.att == att
+    case _ => false
+  }
 
   def contains(cls: Class[_]): Boolean = att.contains((cls.getName, cls.getName))
   def contains(key: String): Boolean = att.contains((key, Att.stringClassName))
@@ -118,6 +122,10 @@ object Att {
 
   def from(thatAtt: java.util.Map[String, String]): Att =
     Att(immutable(thatAtt).map { case (k, v) => ((k, Att.stringClassName), v) }.toMap)
+
+  private def apply(thatAtt: Map[(String, String), Any]) = {
+    new Att(thatAtt)
+  }
 
   def mergeAttributes(p: Set[Att]) = {
     val union = p.flatMap(_.att)
