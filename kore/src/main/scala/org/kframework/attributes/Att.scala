@@ -4,6 +4,8 @@ import java.util.Optional
 
 import org.kframework.Collections._
 
+trait AttValue
+
 /**
  * 2nd value in key is always a class name. For a key of type (s1, s2), value must be of type class.forName(s2).
  */
