@@ -269,9 +269,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   @transient lazy val sortAttributesFor: Map[SortHead, Att] = sortDeclarationsFor mapValues {mergeAttributes(_)}
 
   private def mergeAttributes[T <: Sentence](p: Set[T]) = {
-    val union = p.flatMap(_.att.att)
-    val attMap = union.groupBy({ case ((name, _), _) => name})
-    Att(union.filter { key => attMap(key._1._1).size == 1 }.toMap)
+    Att.mergeAttributes(p.map(_.att))
   }
 
   lazy val definedSorts: Set[SortHead] = (productions filter {p => !p.isSortVariable(p.sort)} map {_.sort.head}) ++ (sortDeclarations filter { s => s.params.isEmpty } map {_.sort.head}) ++ definedInstantiations.values.flatten.flatMap(_.params).filter(_.isNat).map(_.head)

@@ -3,6 +3,7 @@ package org.kframework.attributes
 import java.util.Optional
 
 import org.kframework.Collections._
+import scala.collection.Set
 
 trait AttValue
 
@@ -117,6 +118,13 @@ object Att {
 
   def from(thatAtt: java.util.Map[String, String]): Att =
     Att(immutable(thatAtt).map { case (k, v) => ((k, Att.stringClassName), v) }.toMap)
+
+  def mergeAttributes(p: Set[Att]) = {
+    val union = p.flatMap(_.att)
+    val attMap = union.groupBy({ case ((name, _), _) => name})
+    Att(union.filter { key => attMap(key._1._1).size == 1 }.toMap)
+  }
+
 }
 
 trait AttributesToString {
