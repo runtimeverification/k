@@ -178,7 +178,15 @@ public class RuleGrammarGenerator {
 
     /* use this overload if you don't need to profile rule parse times. */
     public static ParseInModule getCombinedGrammar(Module mod, boolean strict) {
-      return getCombinedGrammar(mod, strict, false, null);
+      return getCombinedGrammar(mod, strict, false, false, null);
+    }
+
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, boolean isBison) {
+      return getCombinedGrammar(mod, strict, timing, isBison, null);
+    }
+
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, FileUtil files) {
+      return getCombinedGrammar(mod, strict, timing, false, files);
     }
 
     /**
@@ -190,18 +198,27 @@ public class RuleGrammarGenerator {
      * @param mod module for which to create the parser.
      * @return parser which applies disambiguation filters by default.
      */
-    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, FileUtil files) {
-        return new ParseInModule(mod, strict, timing, files);
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, boolean isBison, FileUtil files) {
+        return new ParseInModule(mod, strict, timing, isBison, files);
     }
 
-    public static ParseInModule getCombinedGrammar(Module mod, Scanner scanner, boolean strict, boolean timing, FileUtil files) {
-        return new ParseInModule(mod, scanner, strict, timing, files);
+    public static ParseInModule getCombinedGrammar(Module mod, Scanner scanner, boolean strict, boolean timing, boolean isBison, FileUtil files) {
+        return new ParseInModule(mod, scanner, strict, timing, isBison, files);
     }
 
-    public static Tuple3<Module, Module, Module> getCombinedGrammarImpl(Module mod) {
+    public static Tuple3<Module, Module, Module> getCombinedGrammarImpl(Module mod, boolean isBison) {
         Set<Sentence> prods = new HashSet<>();
         Set<Sentence> extensionProds = new HashSet<>();
         Set<Sentence> disambProds;
+
+        if (isBison) {
+          mod = ModuleTransformer.from(m -> {
+            if (m.att().contains("not-lr1")) {
+              return Module(m.name(), m.imports(), Set(), m.att());
+            }
+            return m;
+          }, "strip not-lr1 modules from bison grammar").apply(mod);
+        }
 
         if (mod.importedModuleNames().contains(AUTO_CASTS)) { // create the diamond
             Set<Sentence> temp;

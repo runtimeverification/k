@@ -35,7 +35,6 @@ stdenv.mkDerivation {
   postPatch = ''
     patchShebangs tests/regression-new
   '';
-  configurePhase = "true";
   buildFlags =
     [
       # Find executables on PATH
