@@ -205,7 +205,7 @@ codes, followed by their meaning:
 
 | Format Code | Meaning                                                       |
 | ----------- | ------------------------------------------------------------- |
-| n           | Insert '\nm' followed by the current indentation level        |
+| n           | Insert '\n' followed by the current indentation level        |
 | i           | Increase the current indentation level by 1                   |
 | d           | Decrease the current indentation level by 1                   |
 | c           | Move to the next color in the list of colors for this
