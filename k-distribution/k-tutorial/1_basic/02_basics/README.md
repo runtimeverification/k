@@ -66,7 +66,17 @@ You will get the following output:
 ```
 
 For now, don't worry about the `<k>`, `</k>`, or ` ~> .` portions of this
-output file. Instead, let's look at what this definition and program did.
+output file.
+
+You can also execute small programs directly by specifying them on the command
+line instead of putting them in a file. For example, the same program above
+could also have been executed by running the following command:
+
+```
+krun -cPGM='colorOf(Banana())'
+```
+
+Now, let's look at what this definition and program did.
 
 ## Productions, Constructors, and Functions
 
