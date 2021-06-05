@@ -2452,7 +2452,7 @@ by one element, and terminals and `%r` reset the current color to the default
 foreground color of the terminal afterwards.
 
 There are two ways you can construct a list of colors associated with a
-production:P
+production:
 
 * The `color` attribute creates the entire list all with the same color, as
 specified by the value of the attribute. When combined with the default format
