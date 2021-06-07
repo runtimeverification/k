@@ -115,8 +115,8 @@ public class KILtoKORE extends KILTransformation<Object> {
     public org.kframework.definition.Bubble apply(StringSentence sentence) {
         org.kframework.attributes.Att attrs =
             convertAttributes(sentence)
-            .add("contentStartLine", Integer.class, sentence.getContentStartLine())
-            .add("contentStartColumn", Integer.class, sentence.getContentStartColumn());
+            .add("contentStartLine", sentence.getContentStartLine())
+            .add("contentStartColumn", sentence.getContentStartColumn());
 
         String label = sentence.getLabel();
         if (!label.isEmpty()) {
