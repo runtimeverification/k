@@ -21,29 +21,33 @@ module LESSON-07-A
   imports BOOL
   imports INT
 
-  syntax Bool ::= isPositive(Int) [function]
+  syntax Grade ::= "letter-A" 
+                 | "letter-B"
+                 | "letter-C"
+                 | "letter-D"
+                 | "letter-F"
+                 | gradeFromPercentile(Int) [function]
 
-  rule isPositive(I) => true
-    requires I >Int 0
+  rule gradeFromPercentile(I) => letter-A requires I >=Int 90
 endmodule
 ```
 
-In this case, the `isPositive` function takes a single integer argument. The
-function evaluates to true if the argument passed is greater than zero. Note
-that the side condition is allowed to refer to variables that appear on the
-left-hand-side of the rule. In the same manner as variables appearing on the
-right-hand-side, variables that appear in the side condition evaluate to the
-value that was matched on the left hand side. Then the functions in the
-side condition are evaluated, which returns a term of sort `Bool`. If the term
-is equal to `true`, then the rule applies. Bear in mind that the side condition
-is only evaluated at all if the patterns on the left-hand-side of the rule
-match the term being evaluated.
+In this case, the `gradeFromPercentile` function takes a single integer
+argument. The function evaluates to `letter-A` if the argument passed is
+greater than 90. Note that the side condition is allowed to refer to variables
+that appear on the left-hand-side of the rule. In the same manner as variables
+appearing on the right-hand-side, variables that appear in the side condition
+evaluate to the value that was matched on the left hand side. Then the
+functions in the side condition are evaluated, which returns a term of sort
+`Bool`. If the term is equal to `true`, then the rule applies. Bear in mind
+that the side condition is only evaluated at all if the patterns on the
+left-hand-side of the rule match the term being evaluated.
 
 ### Exercise
 
-Write a rule that evaluates `isPositive` to `false` if the argument to the
-function is zero or negative. Test that the function correctly evaluates 
-various positive, zero, and negative integers.
+Write a rule that evaluates `gradeFromPercentile` to `letter-B` if the argument
+to the function is in the range [80,90). Test that the function correctly
+evaluates various numbers between 80 and 100.
 
 ## `owise` Rules
 
@@ -68,42 +72,46 @@ What this means, in practice, is that this rule has lower priority than other
 rules, and will only be tried to be applied after all the other,
 higher-priority rules have been tried and they have failed.
 
-For example, in the above exercise, we had to add a side condition to the rule
-we wrote to handle `isPositive` for negative numbers. However, in practice this
-meant that the integer comparison operation happened twice. We can more
-efficiently and more idiomatically write the negative case for the `isPositive`
-rule using the `owise` attribute (`lesson-07-b.k`):
+For example, in the above exercise, we had to add a side condition containing
+two boolean comparisons to the rule we wrote to handle `letter-B` grades.
+However, in practice this meant that we compare the percentile to 90 twice. We
+can more efficiently and more idiomatically write the `letter-B` case for the
+`gradeFromPercentile` rule using the `owise` attribute (`lesson-07-b.k`):
 
 ```k
 module LESSON-07-B
   imports BOOL
   imports INT
 
-  syntax Bool ::= isPositive(Int) [function]
+  syntax Grade ::= "letter-A" 
+                 | "letter-B"
+                 | "letter-C"
+                 | "letter-D"
+                 | "letter-F"
+                 | gradeFromPercentile(Int) [function]
 
-  rule isPositive(I) => true  requires I >Int 0
-  rule isPositive(_) => false [owise] 
+  rule gradeFromPercentile(I) => letter-A requires I >=Int 90
+  rule gradeFromPercentile(I) => letter-B requires I >=Int 80 [owise]
 endmodule
 ```
 
-Note that we have introduced a new piece of syntax here: `_`. This is actually
-just a variable. However, as a special case, when a variable is named `_`, it
-does not bind a value that can be used on the right hand side of the rule, or
-in a side condition. Effectively, `_` is a placeholder variable that means "I
-don't care about this term."
-
-This rule is saying, "if the first rule does not apply, then the result of the
-function is false." Note, however, that `owise` can be used in more complicated
-ways. For example, you can perform additional matching in an `owise` rule. You
-can also have multiple higher-priority rules, or multiple `owise` rules. What
-this means in practice is that all of the non-`owise` rules are tried first, in
-any order, followed by all the `owise` rules, in any order.
+This rule is saying, "if all the other rules do not apply, then the grade is a
+B if the percentile is greater than or equal to 80." Note here that we use both
+a side condition and an `owise` attribute on the same rule. This is not
+required (as we will see later), but it is allowed. What this means is that the
+side condition is only tried if the other rules did not apply **and** the 
+left-hand-side of the rule matched. You can even use more complex matching on
+the left-hand-side than simply a variable. More generally, you can also have
+multiple higher-priority rules, or multiple `owise` rules. What this means in
+practice is that all of the non-`owise` rules are tried first, in any order,
+followed by all the `owise` rules, in any order.
 
 ### Exercise
 
-Reverse the rules defining `isPositive` so that the case for zero and negative
-numbers is tried first, and the positive case is handled via an `owise` rule.
-Test that the output of the function is the same either way.
+Write another implementation of `gradeFromPercentile` which handles only the
+cases for `D` and `F`, and uses the `owise` attribute to avoid redundant
+boolean comparisons. Test that various percentiles in the range [0, 70) are
+evaluated correctly.
 
 ## Rule Priority
 
@@ -119,41 +127,60 @@ cause `owise` rules to be tried after regular rules.
 
 However, it is also possible to directly assign a numerical priority to a rule
 via the `priority` attribute. For example, here is an alternative way
-we could express the `isPositive` function (`lesson-07-c.k`):
+we could express the same two rules in the `gradeFromPercentile` function
+(`lesson-07-c.k`):
 
 ```k
 module LESSON-07-C
   imports BOOL
   imports INT
 
-  syntax Bool ::= isPositive(Int) [function]
+  syntax Grade ::= "letter-A" 
+                 | "letter-B"
+                 | "letter-C"
+                 | "letter-D"
+                 | "letter-F"
+                 | gradeFromPercentile(Int) [function]
 
-  rule isPositive(I) => true
-    requires I >Int 0 [priority(50)]
-  rule isPositive(_) => false [priority(200)] 
+  rule gradeFromPercentile(I) => letter-A requires I >=Int 90 [priority(50)]
+  rule gradeFromPercentile(I) => letter-B requires I >=Int 80 [priority(200)]
 endmodule
 ```
 
 We can, of course, assign a priority equal to any non-negative integer. For
-example, here is a more complex example (`lesson-07-d.k`):
+example, here is a more complex example that handles the remaining grades 
+(`lesson-07-d.k`):
 
 ```k
 module LESSON-07-D
-  imports INT
   imports BOOL
+  imports INT
 
-  syntax Int ::= foo(Int) [function]
+  syntax Grade ::= "letter-A" 
+                 | "letter-B"
+                 | "letter-C"
+                 | "letter-D"
+                 | "letter-F"
+                 | gradeFromPercentile(Int) [function]
 
-  rule foo(I) => 0 requires I <=Int 1 [priority(50)]
-  rule foo(I) => 1 requires I <=Int 10 [priority(51)]
-  rule foo(I) => 2 requires I <=Int 100 [priority(52)]
-  rule foo(_) => 3 [priority(53)]
+  rule gradeFromPercentile(I) => letter-A requires I >=Int 90 [priority(50)]
+  rule gradeFromPercentile(I) => letter-B requires I >=Int 80 [priority(51)]
+  rule gradeFromPercentile(I) => letter-C requires I >=Int 70 [priority(52)]
+  rule gradeFromPercentile(I) => letter-D requires I >=Int 60 [priority(53)]
+  rule gradeFromPercentile(_) => letter-F                     [priority(54)]
 endmodule
 ```
 
-Here we have explicitly expressed the order in which the rules of this
-function are tried. Since rules are tried in increasing numerical priority,
-we first try the rule with priority 50, then 51, then 53, and finally 53.
+Note that we have introduced a new piece of syntax here: `_`. This is actually
+just a variable. However, as a special case, when a variable is named `_`, it
+does not bind a value that can be used on the right hand side of the rule, or
+in a side condition. Effectively, `_` is a placeholder variable that means "I
+don't care about this term."
+
+In this example, we have explicitly expressed the order in which the rules of
+this function are tried. Since rules are tried in increasing numerical
+priority, we first try the rule with priority 50, then 51, then 52, 53, and
+finally 54.
 
 As a final note, remember that if you assign a rule a priority higher than 200,
 it will be tried **after** a rule with the `owise` attribute, and if you assign
@@ -163,7 +190,8 @@ explicit priority.
 ## Exercises
 
 1. Write a function `isEven` that returns whether an integer is an even number.
-Use only two rules and one side condition. Refer back to
+Use two rules and one side condition. The right hand side of the rules should
+be boolean literals. Refer back to
 [domains.md](../../../include/kframework/builtin/domains.md) for the relevant
 integer operations.
 
@@ -171,3 +199,8 @@ integer operations.
 by zero will no longer make `krun` crash with a "Divison by zero" exception.
 Instead, the `/` function should not match any of its rules if the denominator
 is zero.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.8: Literate Programming with Markdown](../08_literate_programming/README.md).

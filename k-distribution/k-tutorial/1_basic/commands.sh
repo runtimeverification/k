@@ -5,7 +5,7 @@ kompile 02_basics/README.md --md-selector "k & ! exclude" --main-module LESSON-0
 kompile 03_parsing/README.md --md-selector "k & ! exclude" --main-module LESSON-03-A -d build/03a
 kompile 03_parsing/README.md --md-selector "k & ! exclude" --main-module LESSON-03-B -d build/03b
 kompile 03_parsing/README.md --md-selector "k & ! exclude" --main-module LESSON-03-C -d build/03c
-kompile 03_parsing/README.md --md-selector "k & ! exclude" --main-module LESSON-03-D -d build/03d
+kompile 03_parsing/README.md --md-selector "k & ! exclude" --main-module LESSON-03-D -d build/03d --gen-bison-parser
 kompile 04_disambiguation/README.md --md-selector "k & ! exclude" --main-module LESSON-04-A -d build/04a
 kompile 04_disambiguation/README.md --md-selector "k & ! exclude" --main-module LESSON-04-B -d build/04b
 kompile 04_disambiguation/README.md --md-selector "k & ! exclude" --main-module LESSON-04-C -d build/04c
@@ -24,3 +24,6 @@ kompile 07_side_conditions/README.md --md-selector "k & ! exclude" --main-module
 kompile 07_side_conditions/README.md --md-selector "k & ! exclude" --main-module LESSON-07-C -d build/07c
 kompile 07_side_conditions/README.md --md-selector "k & ! exclude" --main-module LESSON-07-D -d build/07d
 kompile 08_literate_programming/README.md --md-selector "k & ! exclude" --main-module LESSON-08 -d build/08
+kompile 09_unparsing/README.md --md-selector "k & ! exclude" --main-module LESSON-09-A -d build/09a
+kompile 09_unparsing/README.md --md-selector "k & ! exclude" --main-module LESSON-09-B -d build/09b
+kompile 09_unparsing/README.md --md-selector "k & ! exclude" --main-module LESSON-09-C -d build/09c
