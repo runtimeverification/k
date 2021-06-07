@@ -1661,10 +1661,31 @@ divergent behavior unless the `Bytes` type is used in a manner that preserves
 consistency.
 
 ```k
-module BYTES-HOOKED
+module BYTES-SYNTAX
   imports STRING-SYNTAX
 
   syntax Bytes [hook(BYTES.Bytes), token]
+endmodule
+```
+
+```k
+module BYTES-STRING-ENCODE [kore, symbolic]
+  imports BYTES-SYNTAX
+```
+### Encoding/decoding between Bytes and String
+
+You can encode/decode between Bytes and String using`UTF-8`, `UTF-16LE`, `UTF-16BE`, `UTF-32LE`, and `UTF-32BE`
+
+```k
+    syntax String ::= decodeBytes ( encoding: String , contents: Bytes ) [function, hook(BYTES.decodeBytes)]
+    syntax Bytes ::= encodeBytes ( encoding: String , contents: String ) [function, hook(BYTES.encodeBytes)]
+endmodule
+```
+
+```k
+module BYTES-HOOKED
+  imports STRING-SYNTAX
+  imports BYTES-SYNTAX
 ```
 
 ### Empty byte array
@@ -1737,14 +1758,6 @@ mutations of the input or output value.
   syntax Bytes ::= String2Bytes(String) [function, functional, hook(BYTES.string2bytes)]
 ```
 
-### Encoding/decoding between Bytes and String
-
-You can encode/decode between Bytes and String using`UTF-8`, `UTF-16LE`, `UTF-16BE`, `UTF-32LE`, and `UTF-32BE`
-
-```k
-  syntax String ::= decodeBytes ( encoding: String , contents: Bytes ) [function, hook(BYTES.decodeBytes)]
-  syntax Bytes ::= encodeBytes ( encoding: String , contents: String ) [function, hook(BYTES.encodeBytes)]
-```
 ### Bytes update
 
 You can set the value of a particular byte in a `Bytes` object in O(1) time.
