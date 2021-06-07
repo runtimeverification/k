@@ -250,6 +250,9 @@ public class ParseInModule implements Serializable, AutoCloseable {
             Either<Set<KEMException>, Term> rez = new TreeCleanerVisitor().apply(parsed);
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
+            rez = new CollapseRecordProdsVisitor().apply(rez.right().get());
+            if (rez.isLeft())
+                return new Tuple2<>(rez, warn);
             rez = new CorrectRewritePriorityVisitor().apply(rez.right().get());
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);

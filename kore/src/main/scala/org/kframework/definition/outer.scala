@@ -475,7 +475,7 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
   lazy val klabelAtt: Option[String] = att.getOption("klabel").orElse(klabel.map(_.name))
   lazy val parseLabel: KLabel = klabel.getOrElse(att.get("bracketLabel", classOf[KLabel]))
 
-  override def equals(that: Any) = that match {
+  override def equals(that: Any): Boolean = that match {
     case p@Production(`klabel`, `params`, `sort`, `items`, _) => ( this.klabelAtt == p.klabelAtt
                                                       && this.att.getOption("function") == p.att.getOption("function")
                                                       && this.att.getOption("symbol") == p.att.getOption("symbol")
@@ -551,23 +551,33 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
 
   lazy val isPrefixProduction: Boolean = computePrefixProduction
 
-  private def makeRecordProduction(terminals: Seq[NonTerminal]): Production = {
-    val prefix = items.takeWhile(_.isInstanceOf[Terminal]) :+ Terminal("...")
-    val suffix = items.last
-    val newAtt = att.add("recordPrd", classOf[Production], this).add("unparseAvoid")
-    if (terminals.isEmpty)
-      Production(klabel, params, sort, prefix :+ suffix, newAtt)
-    else {
-      val middle = terminals.tail.foldLeft(Seq(Terminal(terminals.head.name.get), Terminal(":"), terminals.head)){ (l, nt) => l ++ Seq(Terminal(","), Terminal(nt.name.get), Terminal(":"), nt) }
-      Production(klabel, params, sort, prefix ++ middle :+ suffix, newAtt)
-    }
-  }
-
+  /**
+   * Generate lists to parse record productions efficiently
+   * syntax S       ::= prefix(... Uid)   [main]
+   * syntax Uid     ::= ""                [empty]
+   * syntax Uid     ::= UidNe             [subsort]
+   * syntax UidNe   ::= UidNe "," UidItem [repeat]
+   * syntax UidNe   ::= UidItem           [subsort2]
+   * syntax UidItem ::= "name" ":" Sort   [item]
+   */
   lazy val recordProductions: Set[Production] = {
     assert(isPrefixProduction)
-    val namedNts = items.filter(_.isInstanceOf[NonTerminal]).map(_.asInstanceOf[NonTerminal]).filter(_.name.isDefined).toSeq
-    val powerSet = 0 to namedNts.size flatMap namedNts.combinations
-    powerSet.map(makeRecordProduction).toSet
+    val namedNts = items.filter(_.isInstanceOf[NonTerminal]).map(_.asInstanceOf[NonTerminal]).filter(_.name.isDefined)
+    val prefix = items.takeWhile(_.isInstanceOf[Terminal]) :+ Terminal("...")
+    val suffix = items.last
+    val newAtt = Att.empty.add("recordPrd", classOf[Production], this)
+    if (namedNts.isEmpty) // if it doesn't contain named NTs, don't generate the extra list productions
+      Set(Production(klabel, params, sort, prefix :+ suffix, newAtt.add("recordPrd-zero")))
+    else {
+      val baseName = items.head.asInstanceOf[Terminal].value + "-" + Production.getNextUid
+      val prd = Production(klabel, params, sort, prefix :+ NonTerminal(Sort(baseName), None) :+ suffix, newAtt.add("recordPrd-main"))
+      val empty = Production(klabel, Seq(), Sort(baseName), Seq(Terminal("")), newAtt.add("recordPrd-empty"))
+      val subsort = Production(None, Seq(), Sort(baseName), Seq(NonTerminal(Sort(baseName + "Ne"), None)), newAtt.add("recordPrd-subsort"))
+      val repeat = Production(klabel, Seq(), Sort(baseName + "Ne"), Seq(NonTerminal(Sort(baseName + "Ne"), None), Terminal(","), NonTerminal(Sort(baseName + "Item"), None)), newAtt.add("recordPrd-repeat"))
+      val subsort2 = Production(None, Seq(), Sort(baseName + "Ne"), Seq(NonTerminal(Sort(baseName + "Item"), None)), newAtt.add("recordPrd-subsort"))
+      val namedItems: Set[Production] = namedNts.map(nt => Production(klabel, Seq(), Sort(baseName + "Item"), Seq(Terminal(nt.name.get), Terminal(":"), NonTerminal(nt.sort, None)), newAtt.add("recordPrd-item", nt.name.get))).toSet
+      namedItems + prd + empty + subsort + repeat + subsort2
+    }
   }
   override val isSyntax = true
   override val isNonSyntax = false
@@ -593,6 +603,8 @@ object Production {
   }
 
   val kLabelAttribute = "klabel"
+  private var uid = 1
+  def getNextUid:Int = { uid = uid + 1; uid}
 }
 
 // hooked but problematic, see kast-core.k

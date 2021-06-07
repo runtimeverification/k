@@ -237,14 +237,6 @@ public class RuleGrammarGenerator {
             }
         }
 
-        if (mod.importedModuleNames().contains(RECORD_PRODS)) {
-            for (Production p : iterable(mod.productions())) {
-                if (p.isPrefixProduction()) {
-                    prods.addAll(mutable(p.recordProductions()));
-                }
-            }
-        }
-
         if (mod.importedModuleNames().contains(SORT_PREDICATES)) {
             for (Sort s : iterable(mod.allSorts())) {
                 prods.addAll(new GenerateSortPredicateSyntax().gen(mod, s));
@@ -374,6 +366,14 @@ public class RuleGrammarGenerator {
                 }
                 return s;
             }).collect(Collectors.toSet());
+        }
+
+        if (mod.importedModuleNames().contains(RECORD_PRODS)) {
+            for (Production p : iterable(mod.productions())) {
+                if (p.isPrefixProduction()) {
+                    parseProds.addAll(mutable(p.recordProductions()));
+                }
+            }
         }
 
         disambProds = parseProds.stream().collect(Collectors.toSet());
