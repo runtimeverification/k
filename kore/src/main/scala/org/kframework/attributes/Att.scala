@@ -3,13 +3,28 @@ package org.kframework.attributes
 import java.util.Optional
 
 import org.kframework.Collections._
+import scala.collection.Set
+
+/**
+ * Marker class for objects that can be stored as the value of an attribute.
+ *
+ * So far this trait implements no methods, but in the future it may
+ * include some methods relating to serialization/deserialization that
+ * all inheritors must implement. It may depend on what serialization library
+ * we choose to use going forward.
+ */
+trait AttValue
 
 /**
  * 2nd value in key is always a class name. For a key of type (s1, s2), value must be of type class.forName(s2).
  */
-case class Att(att: Map[(String, String), Any]) extends AttributesToString {
+class Att private (val att: Map[(String, String), Any]) extends AttributesToString with Serializable {
 
-  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Att.this)
+  override lazy val hashCode: Int = att.hashCode()
+  override def equals(that: Any) = that match {
+    case a: Att => a.att == att
+    case _ => false
+  }
 
   def contains(cls: Class[_]): Boolean = att.contains((cls.getName, cls.getName))
   def contains(key: String): Boolean = att.contains((key, Att.stringClassName))
@@ -30,9 +45,12 @@ case class Att(att: Map[(String, String), Any]) extends AttributesToString {
 
   def add(key: String): Att = add(key, "")
   def add(key: String, value: String): Att = add(key, Att.stringClassName, value)
-  def add[T](key: Class[T], value: T): Att = add(key.getName, key.getName, value)
-  def add[T](key: String, cls: Class[T], value: T): Att = add(key, cls.getName, value)
-  private def add[T](key: String, clsStr: String, value: T): Att = Att(att + ((key, clsStr) -> value))
+  def add(key: String, value: Int): Att = add(key, Att.intClassName, value)
+  def add[T <: AttValue](key: Class[T], value: T): Att = add(key.getName, key.getName, value)
+  def add[T <: AttValue](key: String, cls: Class[T], value: T): Att = add(key, cls.getName, value)
+  private def add[T <: AttValue](key: String, clsStr: String, value: T): Att = Att(att + ((key, clsStr) -> value))
+  private def add(key: String, clsStr: String, value: String): Att = Att(att + ((key, clsStr) -> value))
+  private def add(key: String, clsStr: String, value: Int): Att = Att(att + ((key, clsStr) -> value))
   def addAll(thatAtt: Att) = Att(att ++ thatAtt.att)
 
   def remove(key: String): Att = remove(key, Att.stringClassName)
@@ -108,9 +126,21 @@ object Att {
   val UNIQUE_ID = "UNIQUE_ID"
 
   private val stringClassName = classOf[String].getName
+  private val intClassName = classOf[java.lang.Integer].getName
 
   def from(thatAtt: java.util.Map[String, String]): Att =
     Att(immutable(thatAtt).map { case (k, v) => ((k, Att.stringClassName), v) }.toMap)
+
+  private def apply(thatAtt: Map[(String, String), Any]) = {
+    new Att(thatAtt)
+  }
+
+  def mergeAttributes(p: Set[Att]) = {
+    val union = p.flatMap(_.att)
+    val attMap = union.groupBy({ case ((name, _), _) => name})
+    Att(union.filter { key => attMap(key._1._1).size == 1 }.toMap)
+  }
+
 }
 
 trait AttributesToString {

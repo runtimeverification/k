@@ -476,8 +476,8 @@ public class DefinitionParsing {
         try (ParseInModule parser = RuleGrammarGenerator
                 .getCombinedGrammar(gen.getRuleGrammar(compiledDef.executionModule()), isStrict, profileRules, files)) {
             java.util.Set<K> res = parseBubble(parser, new HashMap<>(),
-                    new Bubble(rule, contents, Att().add("contentStartLine", Integer.class, 1)
-                            .add("contentStartColumn", Integer.class, 1).add(Source.class, source)))
+                    new Bubble(rule, contents, Att().add("contentStartLine", 1)
+                            .add("contentStartColumn", 1).add(Source.class, source)))
                     .collect(Collectors.toSet());
             if (!errors.isEmpty()) {
                 throw errors.iterator().next();
