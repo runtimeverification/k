@@ -5,6 +5,14 @@ import java.util.Optional
 import org.kframework.Collections._
 import scala.collection.Set
 
+/**
+ * Marker class for objects that can be stored as the value of an attribute.
+ *
+ * So far this trait implements no methods, but in the future it may
+ * include some methods relating to serialization/deserialization that
+ * all inheritors must implement. It may depend on what serialization library
+ * we choose to use going forward.
+ */
 trait AttValue
 
 /**
