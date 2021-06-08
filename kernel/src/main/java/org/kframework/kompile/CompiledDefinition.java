@@ -150,14 +150,14 @@ public class CompiledDefinition implements Serializable {
      * It automatically generates this module unless the user has already defined a module postfixed with
      * {@link RuleGrammarGenerator#POSTFIX}. In latter case, it uses the user-defined module.
      */
-    public Option<Module> programParsingModuleFor(String moduleName, KExceptionManager kem) {
-        RuleGrammarGenerator gen = new RuleGrammarGenerator(parsedDefinition);
+    public static Option<Module> programParsingModuleFor(Definition kompiledDefinition, String moduleName, KExceptionManager kem) {
+        RuleGrammarGenerator gen = new RuleGrammarGenerator(kompiledDefinition);
 
-        Option<Module> userProgramParsingModule = parsedDefinition.getModule(moduleName + RuleGrammarGenerator.POSTFIX);
+        Option<Module> userProgramParsingModule = kompiledDefinition.getModule(moduleName + RuleGrammarGenerator.POSTFIX);
         if (userProgramParsingModule.isDefined()) {
             return userProgramParsingModule;
         } else {
-            Option<Module> moduleOption = parsedDefinition.getModule(moduleName);
+            Option<Module> moduleOption = kompiledDefinition.getModule(moduleName);
             Option<Module> programParsingModuleOption = moduleOption.isDefined() ?
                     Option.apply(gen.getProgramsGrammar(moduleOption.get())) :
                     Option.empty();
@@ -173,14 +173,14 @@ public class CompiledDefinition implements Serializable {
      * @return the parsed term.
      */
 
-    public K parseSingleTerm(Module module, Sort programStartSymbol, KExceptionManager kem, String s, Source source) {
-        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, kompileOptions.strict())) {
+    public static K parseSingleTerm(Module module, Sort programStartSymbol, KExceptionManager kem, String s, Source source) {
+        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, true)) {
             Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> res = parseInModule.parseString(s, programStartSymbol, source);
             kem.addAllKException(res._2().stream().map(e -> e.getKException()).collect(Collectors.toSet()));
             if (res._1().isLeft()) {
                 throw res._1().left().get().iterator().next();
             }
-            return new TreeNodesToKORE(Outer::parseSort, kompileOptions.strict()).down(res._1().right().get());
+            return new TreeNodesToKORE(Outer::parseSort, true).down(res._1().right().get());
         }
     }
 

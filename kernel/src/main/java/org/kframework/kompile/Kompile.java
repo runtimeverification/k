@@ -163,7 +163,7 @@ public class Kompile {
 
         if (kompileOptions.genBisonParser || kompileOptions.genGlrBisonParser) {
             if (def.configurationVariableDefaultSorts.containsKey("$PGM")) {
-                new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, files.resolveKompiled("parser_PGM"), kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth);
+                new KRead(kem, files, InputModes.PROGRAM).createBisonParser(CompiledDefinition.programParsingModuleFor(def.kompiledDefinition, def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, files.resolveKompiled("parser_PGM"), kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth);
             }
             for (Production prod : iterable(kompiledDefinition.mainModule().productions())) {
                 if (prod.att().contains("cell") && prod.att().contains("parser")) {
@@ -175,7 +175,7 @@ public class Kompile {
                         }
                         String name = part[0];
                         String module = part[1];
-                        Option<Module> mod = def.programParsingModuleFor(module, kem);
+                        Option<Module> mod = CompiledDefinition.programParsingModuleFor(def.kompiledDefinition, module, kem);
                         if (!mod.isDefined()) {
                             throw KEMException.compilerError("Could not find module referenced by parser attribute: " + module, prod);
                         }

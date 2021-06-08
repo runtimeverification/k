@@ -126,9 +126,6 @@ public final class KastOptions {
     @Parameter(names={"--module", "-m"}, description="Parse text in the specified module. Defaults to the syntax module of the definition.")
     public String module;
 
-    @Parameter(names="--expand-macros", description="Also expand macros in the parsed string.")
-    public boolean expandMacros = false;
-
     @Parameter(names={"--input", "-i"}, converter=InputModeConverter.class,
             description="How to read kast input in. <mode> is either [program|binary|kast|json|kore].")
     public InputModes input = InputModes.PROGRAM;

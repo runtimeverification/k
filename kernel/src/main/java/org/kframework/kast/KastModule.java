@@ -1,7 +1,9 @@
 // Copyright (c) 2014-2019 K Team. All Rights Reserved.
 package org.kframework.kast;
 
+import org.kframework.definition.Definition;
 import org.kframework.kil.loader.Context;
+import org.kframework.kompile.CompiledDefinition;
 import org.kframework.krun.KRunOptions;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
@@ -17,6 +19,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
+
+import static org.kframework.definition.Constructors.*;
 
 public class KastModule extends AbstractModule {
 
@@ -46,5 +50,10 @@ public class KastModule extends AbstractModule {
     @Provides
     DefinitionLoadingOptions defLoadingOptions(KastOptions options) {
         return options.definitionLoading;
+    }
+
+    @Provides
+    Definition def(CompiledDefinition d) {
+      return Definition(d.kompiledDefinition.mainModule(), d.kompiledDefinition.modules(), d.kompiledDefinition.att().add("startSymbol", d.programStartSymbol.toString()));
     }
 }
