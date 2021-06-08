@@ -63,11 +63,12 @@ public class CollapseRecordProdsVisitor extends SetsTransformerWithErrors<KEMExc
                 if (nt.name().isDefined() && children.containsKey(nt.name().get()))
                     collapsedItems = collapsedItems.plus(children.get(nt.name().get()));
                 else {
-                    Production anonVarPrd = Production.apply(Seq(), Sorts.KVariable(), Seq(Terminal.apply("_")), Att.empty());
-                    collapsedItems = collapsedItems.plus(Constant.apply("_", anonVarPrd, tc.location(), tc.source()));
+                    Production anonVarPrd = Production.apply(Seq(), Sorts.KVariable(), Seq(Terminal.apply("_[A-Z][A-Za-z0-9'_]*")), Att.empty());
+                    // The name is required so disambiguation doesn't collapse the variables into the same term.
+                    collapsedItems = collapsedItems.plus(Constant.apply("_" + nt.name().get(), anonVarPrd, tc.location(), tc.source()));
                 }
             }
-            TermCons collapsed = TermCons.apply(collapsedItems, origPrd);
+            TermCons collapsed = TermCons.apply(collapsedItems, origPrd, tc.location(), tc.source());
             return super.apply(collapsed);
         }
         return super.apply(tc);

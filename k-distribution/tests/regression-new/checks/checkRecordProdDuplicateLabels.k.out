@@ -1,0 +1,4 @@
+[Error] Inner Parser: Duplicate record production key: p1
+	Source(checkRecordProdDuplicateLabels.k)
+	Location(41,7,41,41)
+[Error] Compiler: Had 1 parsing errors.
