@@ -14,7 +14,7 @@ import scala.collection.JavaConverters._
  * https://github.com/kframework/k/wiki/KORE-data-structures-guide
  */
 
-trait K extends Serializable with HasLocation {
+trait K extends Serializable with HasLocation with AttValue {
   def att: Att
   override def toString = ToKast.apply(this)
 
@@ -62,7 +62,7 @@ object K {
 
 trait KItem extends K
 
-trait KLabel {
+trait KLabel extends AttValue {
   def name: String
   def params: Seq[Sort]
   override def equals(other: Any) = other match {
@@ -93,7 +93,7 @@ trait KToken extends KItem {
   def computeHashCode = sort.hashCode() * 13 + s.hashCode
 }
 
-trait Sort extends Ordered[Sort] {
+trait Sort extends Ordered[Sort] with AttValue {
   def name: String
   def params: Seq[Sort]
   override def equals(other: Any) = other match {
@@ -159,7 +159,7 @@ trait KCollection {
   def computeHashCode = items.hashCode
 }
 
-trait KList extends KCollection {
+trait KList extends KCollection with AttValue {
 }
 
 trait KApply extends KItem with KCollection {

@@ -951,7 +951,8 @@ public class ModuleToKORE {
         if (ruleInfo.isEquation) {
             assertNoExistentials(rule, existentials);
             sb.append("  axiom{R");
-            Option<Set> sortParams = rule.att().getOption("sortParams", Set.class);
+            Option<Sort> sortParamsWrapper = rule.att().getOption("sortParams", Sort.class);
+            Option<Set<String>> sortParams = sortParamsWrapper.map(s -> stream(s.params()).map(sort -> sort.name()).collect(Collectors.toSet()));
             if (sortParams.nonEmpty()) {
                 for (Object sortParamName : sortParams.get())
                     sb.append("," + sortParamName);
@@ -1191,7 +1192,8 @@ public class ModuleToKORE {
         } else {
             assertNoExistentials(rule, existentials);
             sb.append("  axiom{R");
-            Option<Set> sortParams = rule.att().getOption("sortParams", Set.class);
+            Option<Sort> sortParamsWrapper = rule.att().getOption("sortParams", Sort.class);
+            Option<Set<String>> sortParams = sortParamsWrapper.map(s -> stream(s.params()).map(sort -> sort.name()).collect(Collectors.toSet()));
             if (sortParams.nonEmpty()) {
                 for (Object sortParamName : sortParams.get())
                     sb.append("," + sortParamName);
