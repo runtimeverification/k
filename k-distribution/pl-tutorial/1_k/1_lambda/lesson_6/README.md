@@ -46,4 +46,4 @@ languages, which will allow us to already write interesting LAMBDA programs.
 
 Go to [Lesson 7, LAMBDA: Derived Constructs; Extending Predefined Syntax](../lesson_7/README.md).
 
-[MOVIE (out of date) [2'14"]](http://youtu.be/IreP6DFPWdk)
+[MOVIE (out of date) [2'14"]](https://youtu.be/IreP6DFPWdk)

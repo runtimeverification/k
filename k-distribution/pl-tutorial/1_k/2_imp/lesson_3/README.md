@@ -202,4 +202,4 @@ run the programs we parsed in the first lesson.
 
 Go to [Lesson 4, IMP: Configuration Abstraction, Part 1; Types of Rules](../lesson_4/README.md).
 
-[MOVIE (out of date) [10'30"]](http://youtu.be/gYPkhiT2SxA)
+[MOVIE (out of date) [10'30"]](https://youtu.be/gYPkhiT2SxA)
