@@ -8,7 +8,7 @@ import org.kframework.kore.KORE.Sort
 import org.kframework.kore.KORE.KLabel
 
 class OuterTest {
-  @Test def isPrefixTest: Unit = {
+  @Test def isPrefixTest(): Unit = {
     val sort = Sort("foo")
     val nt = NonTerminal(sort, None)
     val prod1 = Production(Seq(), sort, Seq(Terminal("foo"), Terminal("("), nt, Terminal(")")), Att)
@@ -33,24 +33,37 @@ class OuterTest {
     Assert.assertTrue(prod10.isPrefixProduction)
   }
 
-  @Test def recordProductions: Unit = {
+  @Test def recordProductions1(): Unit = {
     val sort1 = Sort("foo1")
     val sort2 = Sort("foo2")
     val nt1 = NonTerminal(sort1, Some("bar"))
     val nt2 = NonTerminal(sort2, Some("baz"))
     val prod = Production(Seq(), sort1, Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")), Att)
-    val newAtt = Att.add("recordPrd", classOf[Production], prod).add("unparseAvoid")
     val records = prod.recordProductions
-    Assert.assertEquals(4, records.size)
-    Assert.assertEquals(Set(
-      Production(Seq(), sort1, Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal(")")), newAtt),
-      Production(Seq(), sort1, Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal("baz"), Terminal(":"), nt2, Terminal(")")), newAtt),
-      Production(Seq(), sort1, Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal("bar"), Terminal(":"), nt1, Terminal(")")), newAtt),
-      Production(Seq(), sort1, Seq(Terminal("foo"), Terminal("("), Terminal("..."), Terminal("bar"), Terminal(":"), nt1, Terminal(","), Terminal("baz"), Terminal(":"), nt2,Terminal(")")), newAtt)
-    ), records)
+    Assert.assertEquals(7, records.size)
   }
 
-  @Test def klabelAttEquality: Unit = {
+  @Test def recordProductions2(): Unit = {
+    val sort1 = Sort("foo1")
+    val sort2 = Sort("foo2")
+    val nt1 = NonTerminal(sort1, None)
+    val nt2 = NonTerminal(sort2, Some("baz"))
+    val prod = Production(Seq(), sort1, Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")), Att)
+    val records = prod.recordProductions
+    Assert.assertEquals(6, records.size)
+  }
+
+  @Test def recordProductions3(): Unit = {
+    val sort1 = Sort("foo1")
+    val sort2 = Sort("foo2")
+    val nt1 = NonTerminal(sort1, None)
+    val nt2 = NonTerminal(sort2, None)
+    val prod = Production(Seq(), sort1, Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")), Att)
+    val records = prod.recordProductions
+    Assert.assertEquals(1, records.size)
+  }
+
+  @Test def klabelAttEquality(): Unit = {
     val prod1 = Production(Some(KLabel("foo")), Seq(), Sort("Foo"), Seq(), Att.add("klabel", "foo"))
     val prod2 = Production(Some(KLabel("foo")), Seq(), Sort("Foo"), Seq(), Att.add("klabel", "bar"))
     Assert.assertNotEquals(prod1, prod2)
