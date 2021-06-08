@@ -34,9 +34,8 @@ supported:
 Please note that as of the current moment, K's unicode support is not fully
 complete, so you may run into errors using code points greater than 0xff.
 
-### Exercise
-
-Write a string literal containing the following block of text:
+As an example, you can construct a string literal containing the following
+block of text:
 
 ```
 This is an example block of text.
@@ -45,7 +44,11 @@ Here is a quotation: "Hello world."
 ÁÉÍÓÚ
 ```
 
-Use the `\t` and `\x` character escapes when doing so.
+Like so:
+
+```
+"This is an example block of text.\nHere is a quotation: \"Hello world.\"\n\tThis line is indented.\n\xc1\xc9\xcd\xd3\xda\n"
+```
 
 ## Basic String Functions
 
