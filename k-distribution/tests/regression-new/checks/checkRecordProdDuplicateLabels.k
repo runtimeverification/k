@@ -39,4 +39,6 @@ syntax StateCell ::= invariantStateFull(
       variables:Map,
       performedActions:List) // 30 params
  rule invariantStateFull(... p1:X, p1:Y) => 1
+ rule invariantStateFull(... numUsers:_X, stack:_Y, quorum:_Z, variables:_P) => 1
+ rule invariantStateFull(... numUsers:_X) ~> invariantStateFull(...) => 1
 endmodule

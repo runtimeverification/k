@@ -47,13 +47,13 @@ public class CollapseRecordProdsVisitor extends SetsTransformerWithErrors<KEMExc
                         children.put(key, iterator.get(0));
                     iterator = null;
                 } else if (iterator.production().att().contains("recordPrd-repeat")) {
-                    TermCons item = (TermCons) iterator.get(0);
+                    TermCons item = (TermCons) iterator.get(1);
                     String key = item.production().att().get("recordPrd-item");
                     if (children.containsKey(key))
                         return Left.apply(Sets.newHashSet(KEMException.innerParserError("Duplicate record production key: " + key, tc)));
                     else
                         children.put(key, item.get(0));
-                    iterator = (TermCons) iterator.get(1);
+                    iterator = (TermCons) iterator.get(0);
                 } else
                     iterator = null;
             }
@@ -65,7 +65,7 @@ public class CollapseRecordProdsVisitor extends SetsTransformerWithErrors<KEMExc
                 else {
                     Production anonVarPrd = Production.apply(Seq(), Sorts.KVariable(), Seq(Terminal.apply("_[A-Z][A-Za-z0-9'_]*")), Att.empty());
                     // The name is required so disambiguation doesn't collapse the variables into the same term.
-                    collapsedItems = collapsedItems.plus(Constant.apply("_" + nt.name().getOrElse(() -> "Gen" + uid++), anonVarPrd, tc.location(), tc.source()));
+                    collapsedItems = collapsedItems.plus(Constant.apply("_" + nt.name().getOrElse(() -> "Gen") + uid++, anonVarPrd, tc.location(), tc.source()));
                 }
             }
             TermCons collapsed = TermCons.apply(collapsedItems, origPrd, tc.location(), tc.source());
