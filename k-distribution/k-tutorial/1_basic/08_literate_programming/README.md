@@ -149,11 +149,11 @@ endmodule
 that you get a parser error if you try to evaluate the `foo` function with the
 resulting definition.
 
-2. Compile [Lesson 3](../03_parsing/README.md) as a K definition. Identify
+2. Compile [Lesson 1.3](../03_parsing/README.md) as a K definition. Identify
 why it fails to compile. Then pass an appropriate `--md-selector` to the
 compiler in order to make it compile.
 
-3. Modify your calculator application from lesson 7, problem 2, to be written
+3. Modify your calculator application from lesson 1.7, problem 2, to be written
 in a literate style. Consider what text might be appropriate to turn the
 resulting markdown file into documentation for your calculator.
 

@@ -302,7 +302,7 @@ In both cases, no action is taken if the parse is not ambiguous.
 and confirm that else clause is part of the innermost `if` statement. Then
 modify the definition so that you will get the alternative parse.
 
-2. Modify your solution from lesson 3, problem 2 so that unary negation should
+2. Modify your solution from lesson 1.3, problem 2 so that unary negation should
 bind tighter than multiplication and division, which should bind tighter than
 addition and subtraction, and each binary operator should be left associative.
 Write these priority and associativity declarations both inline and explicitly.
