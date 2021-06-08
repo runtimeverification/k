@@ -1,1 +1,1 @@
-# Lesson 1.12: Basics of K Rewriting
+# Lesson 1.13: Basics of K Rewriting
