@@ -1,6 +1,7 @@
 // Copyright (c) 2018-2019 K Team. All Rights Reserved.
 package org.kframework.compile;
 
+import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.Sorts;
@@ -71,7 +72,7 @@ public class AddSortInjections {
         K ensures = internalAddSortInjections(roc.ensures(), Sorts.Bool());
         Att att = roc.att();
         if (!sortParams.isEmpty()) {
-            att = att.add("sortParams", Set.class, new HashSet<>(sortParams));
+            att = att.add("sortParams", Sort.class, Sort("", sortParams.stream().map(s -> Sort(s)).collect(Collections.toList())));
         }
         return roc.newInstance(body, requires, ensures, att);
     }
