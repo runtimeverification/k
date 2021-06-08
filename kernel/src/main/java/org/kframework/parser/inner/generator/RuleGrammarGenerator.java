@@ -9,7 +9,6 @@ import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.GenerateSortPredicateSyntax;
 import org.kframework.compile.GenerateSortProjections;
 import org.kframework.definition.Definition;
-import org.kframework.definition.Import;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.NonTerminal;
@@ -292,6 +291,17 @@ public class RuleGrammarGenerator {
         }
         extensionProds.addAll(prods);
 
+        Set<Sentence> recordProds = new HashSet<>();
+        if (mod.importedModuleNames().contains(RECORD_PRODS)) {
+            // these should be visible only in the parsing module
+            // but are required by config cell names
+            for (Production p : iterable(mod.productions())) {
+                if (p.isPrefixProduction()) {
+                    recordProds.addAll(mutable(p.recordProductions()));
+                }
+            }
+        }
+
         boolean addRuleCells;
         if (mod.importedModuleNames().contains(RULE_CELLS)) { // prepare cell productions for rule parsing
             // make sure a configuration actually exists, otherwise ConfigurationInfoFromModule explodes.
@@ -337,6 +347,9 @@ public class RuleGrammarGenerator {
             for (Sentence prod : extensionProds) {
                 addCellNameProd(prods, prod);
             }
+            for (Sentence prod : recordProds) {
+                addCellNameProd(prods, prod);
+            }
             for (Sentence prod : iterable(mod.productions())) {
                 addCellNameProd(prods, prod);
             }
@@ -366,14 +379,6 @@ public class RuleGrammarGenerator {
                 }
                 return s;
             }).collect(Collectors.toSet());
-        }
-
-        if (mod.importedModuleNames().contains(RECORD_PRODS)) {
-            for (Production p : iterable(mod.productions())) {
-                if (p.isPrefixProduction()) {
-                    parseProds.addAll(mutable(p.recordProductions()));
-                }
-            }
         }
 
         disambProds = parseProds.stream().collect(Collectors.toSet());
@@ -450,6 +455,8 @@ public class RuleGrammarGenerator {
             parseProds.addAll(res);
             disambProds.addAll(res);
         }
+
+        parseProds.addAll(recordProds);
         Att att = mod.att();
         List<String> notLrModules = stream(mod.importedModules()).filter(m -> m.att().contains("not-lr1")).map(Module::name).collect(Collectors.toList());
         if (!notLrModules.isEmpty()) {

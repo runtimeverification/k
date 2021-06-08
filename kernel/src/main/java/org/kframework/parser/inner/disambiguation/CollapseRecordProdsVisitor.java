@@ -35,7 +35,7 @@ public class CollapseRecordProdsVisitor extends SetsTransformerWithErrors<KEMExc
             TermCons iterator = tc;
 
             // find all named items
-            while (iterator != null && iterator.production().att().contains("recordPrd")) {
+            while (iterator != null && iterator.production().att().contains("recordPrd", Production.class)) {
                 if (iterator.production().att().contains("recordPrd-main"))
                     iterator = (TermCons) iterator.get(0);
                 else if (iterator.production().att().contains("recordPrd-item")) {
