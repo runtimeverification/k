@@ -570,13 +570,13 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
       Set(Production(klabel, params, sort, prefix :+ suffix, newAtt.add("recordPrd-zero")))
     else {
       val baseName = items.head.asInstanceOf[Terminal].value + "-" + Production.getNextUid
-      val prd = Production(klabel, params, sort, prefix :+ NonTerminal(Sort(baseName), None) :+ suffix, newAtt.add("recordPrd-main"))
+      val main = Production(klabel, params, sort, prefix :+ NonTerminal(Sort(baseName), None) :+ suffix, newAtt.add("recordPrd-main"))
       val empty = Production(klabel, Seq(), Sort(baseName), Seq(Terminal("")), newAtt.add("recordPrd-empty"))
       val subsort = Production(None, Seq(), Sort(baseName), Seq(NonTerminal(Sort(baseName + "Ne"), None)), newAtt.add("recordPrd-subsort"))
       val repeat = Production(klabel, Seq(), Sort(baseName + "Ne"), Seq(NonTerminal(Sort(baseName + "Ne"), None), Terminal(","), NonTerminal(Sort(baseName + "Item"), None)), newAtt.add("recordPrd-repeat"))
       val subsort2 = Production(None, Seq(), Sort(baseName + "Ne"), Seq(NonTerminal(Sort(baseName + "Item"), None)), newAtt.add("recordPrd-subsort"))
       val namedItems: Set[Production] = namedNts.map(nt => Production(klabel, Seq(), Sort(baseName + "Item"), Seq(Terminal(nt.name.get), Terminal(":"), NonTerminal(nt.sort, None)), newAtt.add("recordPrd-item", nt.name.get))).toSet
-      namedItems + prd + empty + subsort + repeat + subsort2
+      namedItems + main + empty + subsort + repeat + subsort2
     }
   }
   override val isSyntax = true
