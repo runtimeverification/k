@@ -108,7 +108,7 @@ with the `k` selector. However, this is merely a specific instance of a general
 principle, namely, that K allows you to control which selectors get included
 in your K definition. This is done by means of the `--md-selector` flag to
 `kompile`. This flag accepts a **Markdown selector expression**, which you
-can essentially think of as a kind of boolean algebra over Markdown selectors.
+can essentially think of as a kind of Boolean algebra over Markdown selectors.
 Each selector becomes an atom, and you can combine these atoms via the `&`, 
 `|`, `!`, and `()` operators.
 
