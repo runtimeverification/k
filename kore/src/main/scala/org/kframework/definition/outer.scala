@@ -568,7 +568,11 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
     val newAtt = Att.empty.add(Att.RECORD_PRD, classOf[Production], this)
     if (namedNts.isEmpty) // if it doesn't contain named NTs, don't generate the extra list productions
       Set(Production(klabel, params, sort, prefix :+ suffix, newAtt.add("recordPrd-zero")))
-    else {
+    else if(namedNts.size == 1) {
+      val main = Production(klabel, params, sort, prefix :+ suffix, newAtt.add("recordPrd-zero"))
+      val one = Production(klabel, params, sort, prefix :+ Terminal(namedNts.head.name.get) :+ Terminal(":") :+ namedNts.head :+ suffix, newAtt.add("recordPrd-one", namedNts.head.name.get))
+      Set(main, one)
+    } else {
       val baseName = items.head.asInstanceOf[Terminal].value + "-" + Production.getNextUid
       val main = Production(klabel, params, sort, prefix :+ NonTerminal(Sort(baseName), None) :+ suffix, newAtt.add("recordPrd-main"))
       val empty = Production(klabel, Seq(), Sort(baseName), Seq(Terminal("")), newAtt.add("recordPrd-empty"))

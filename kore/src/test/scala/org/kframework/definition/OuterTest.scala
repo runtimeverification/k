@@ -50,7 +50,7 @@ class OuterTest {
     val nt2 = NonTerminal(sort2, Some("baz"))
     val prod = Production(Seq(), sort1, Seq(Terminal("foo"), Terminal("("), nt1, Terminal(","), nt2, Terminal(")")), Att)
     val records = prod.recordProductions
-    Assert.assertEquals(6, records.size)
+    Assert.assertEquals(2, records.size)
   }
 
   @Test def recordProductions3(): Unit = {

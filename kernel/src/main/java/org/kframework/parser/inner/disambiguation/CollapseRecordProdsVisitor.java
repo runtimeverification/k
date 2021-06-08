@@ -39,7 +39,11 @@ public class CollapseRecordProdsVisitor extends SetsTransformerWithErrors<KEMExc
             while (iterator != null && iterator.production().att().contains(Att.RECORD_PRD(), Production.class)) {
                 if (iterator.production().att().contains("recordPrd-main"))
                     iterator = (TermCons) iterator.get(0);
-                else if (iterator.production().att().contains("recordPrd-item")) {
+                else if (iterator.production().att().contains("recordPrd-one")) {
+                    String key = iterator.production().att().get("recordPrd-one");
+                    children.put(key, iterator.get(0));
+                    iterator = null;
+                } else if (iterator.production().att().contains("recordPrd-item")) {
                     String key = iterator.production().att().get("recordPrd-item");
                     if (children.containsKey(key))
                         return Left.apply(Sets.newHashSet(KEMException.innerParserError("Duplicate record production key: " + key, tc)));
