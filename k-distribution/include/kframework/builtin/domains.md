@@ -1674,7 +1674,7 @@ module BYTES-STRING-ENCODE [kore, symbolic]
 ```
 ### Encoding/decoding between Bytes and String
 
-You can encode/decode between Bytes and String using`UTF-8`, `UTF-16LE`, `UTF-16BE`, `UTF-32LE`, and `UTF-32BE`
+You can encode/decode between Bytes and String using `UTF-8`, `UTF-16LE`, `UTF-16BE`, `UTF-32LE`, and `UTF-32BE`
 
 ```k
     syntax String ::= decodeBytes ( encoding: String , contents: Bytes ) [function, hook(BYTES.decodeBytes)]
@@ -1686,6 +1686,7 @@ endmodule
 module BYTES-HOOKED
   imports STRING-SYNTAX
   imports BYTES-SYNTAX
+  imports BYTES-STRING-ENCODE
 ```
 
 ### Empty byte array
