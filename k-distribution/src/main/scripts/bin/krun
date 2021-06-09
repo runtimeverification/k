@@ -30,6 +30,7 @@ configVars=
 dryRun=false
 expandMacros=true
 result=1
+filterSubst=true
 
 # setup temp files
 now=`date +"%Y-%m-%d-%H-%M-%S"`
@@ -126,6 +127,8 @@ present; see below).
                            This assumes that the initial configuration contains
                            no macro terms. Behavior is undefined if this is not
                            true.
+      --no-substitution-filtering  Don't filter conjuncts with anonymous
+                                   variables from substitution output
   -o, --output MODE        Select output mode to use when unparsing. Valid
                            values are pretty, program, kast, binary, json,
                            latex, kore, and none.
@@ -259,6 +262,10 @@ do
 
       --no-exc-wrap)
       fold_lines="cat -"
+      ;;
+
+      --no-substitution-filtering)
+      filterSubst=false
       ;;
 
       --no-expand-macros)
@@ -612,7 +619,7 @@ if ! $dryRun; then
 
     case "$outputMode" in
       pretty)
-      execute kprint "$kompiledDir" "$kore_output" $color > "$outputFile"
+      execute kprint "$kompiledDir" "$kore_output" $color $filterSubst > "$outputFile"
       ;;
 
       kore)
