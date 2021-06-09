@@ -195,7 +195,7 @@ be boolean literals. Refer back to
 [domains.md](../../../include/kframework/builtin/domains.md) for the relevant
 integer operations.
 
-2. Modify the calculator application from lesson 6, problem 2, so that division
+2. Modify the calculator application from lesson 1.6, problem 2, so that division
 by zero will no longer make `krun` crash with a "Divison by zero" exception.
 Instead, the `/` function should not match any of its rules if the denominator
 is zero.
