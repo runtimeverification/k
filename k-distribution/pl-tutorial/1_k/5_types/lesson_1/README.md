@@ -138,4 +138,4 @@ In the next lesson we will define a substitution-based type system for LAMBDA.
 
 Go to [Lesson 2, Type Systems: Substitution-Based Higher-Order Type Systems](../lesson_2/README.md).
 
-[MOVIE (out of date) [10'11"]](http://youtu.be/WyUxdo7GhtE)
+[MOVIE (out of date) [10'11"]](https://youtu.be/WyUxdo7GhtE)

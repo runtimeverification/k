@@ -96,4 +96,4 @@ combinators.
 
 Go to [Lesson 5, LAMBDA++: More Semantic Computation Items](../lesson_5/README.md).
 
-[MOVIE (out of date) [3'37"]](http://youtu.be/OXvtklaSaSQ)
+[MOVIE (out of date) [3'37"]](https://youtu.be/OXvtklaSaSQ)

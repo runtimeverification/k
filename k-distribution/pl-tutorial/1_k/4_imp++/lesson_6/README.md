@@ -211,4 +211,4 @@ we add a `join` statement, which allows a thread to wait until another completes
 
 Go to [Lesson 7, IMP++: Everything Changes: Syntax, Configuration, Semantics](../lesson_7/README.md).
 
-[MOVIE (out of date) [11'40"]](http://youtu.be/DpJPP3Qtqno)
+[MOVIE (out of date) [11'40"]](https://youtu.be/DpJPP3Qtqno)

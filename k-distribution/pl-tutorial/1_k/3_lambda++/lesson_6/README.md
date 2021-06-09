@@ -11,4 +11,4 @@ Part 3 of the tutorial is now complete.  Part 4 will teach you more features
 of the K framework, in particular how to exhaustively explore the behaviors
 of non-deterministic or concurrent programs.
 
-[MOVIE (out of date) [6'23"]](http://youtu.be/xfvx6Ss5PcA)
+[MOVIE (out of date) [6'23"]](https://youtu.be/xfvx6Ss5PcA)

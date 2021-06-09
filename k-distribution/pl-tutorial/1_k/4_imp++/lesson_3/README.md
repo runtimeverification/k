@@ -128,4 +128,4 @@ generate a model of it which behaves like an interactive interpreter!
 
 Go to [Lesson 4, IMP++: Semantic Lists; Input/Output Streaming](../lesson_4/README.md).
 
-[MOVIE (out of date) [06'56"]](http://youtu.be/uwCUfWt7n-o)
+[MOVIE (out of date) [06'56"]](https://youtu.be/uwCUfWt7n-o)

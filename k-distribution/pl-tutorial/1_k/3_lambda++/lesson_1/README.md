@@ -118,4 +118,4 @@ functional languages are implemented.
 
 Go to [Lesson 2, LAMBDA++: Semantic (Non-Syntactic) Computation Items](../lesson_2/README.md).
 
-[MOVIE (out of date) [6'28"]](http://youtu.be/UZ9iaus024g)
+[MOVIE (out of date) [6'28"]](https://youtu.be/UZ9iaus024g)

@@ -10,13 +10,13 @@ Let us continue our `lambda.k` definition started in the previous lesson.
 
 The `requires` keyword takes a `.k` file containing language features that
 are needed for the current definition, which can be found in the
-[k/include](/include/) folder.  Thus, the command
+[k-distribution/include/kframework/builtin](../../../../include/kframework/builtin/README.md) folder.  Thus, the command
 
     require "substitution.k"
 
 says that the subsequent definition of LAMBDA needs the generic substitution,
 which is predefined in file `substitution.k` under the folder
-[k/include](/include/).  Note that substitution can be defined itself in K,
+[k-distribution/include/kframework/builtin](../../../../include/kframework/builtin/README.md).  Note that substitution can be defined itself in K,
 although it uses advanced features that we have not discussed yet in this
 tutorial, so it may not be easy to understand now.
 
@@ -82,4 +82,4 @@ using strictness attributes.
 
 Go to [Lesson 3, LAMBDA: Evaluation Strategies using Strictness](../lesson_3/README.md)
 
-[MOVIE (out of date) [4'03"]](http://youtu.be/NDXgYfHG6R4)
+[MOVIE (out of date) [4'03"]](https://youtu.be/NDXgYfHG6R4)

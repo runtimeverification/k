@@ -68,7 +68,7 @@ Before we modify the rules, let us first define our machinery for
 adding and solving constraints. First, we require and import the
 unification procedure. We do not discuss unification here, but if you
 are interested you can consult the `unification.k` files under
-[k/include/modules](/include/modules), which contains our current generic
+[k-distribution/include/kframework/builtin](../../../../include/kframework/builtin/README.md), which contains our current generic
 definition of unification, which is written also in K. The generic unification
 provides a sort, `Mgu`, for _most-general-unifier_, an operation
 `updateMgu(Mgu,T1,T2)` which updates `Mgu` with additional constraints
