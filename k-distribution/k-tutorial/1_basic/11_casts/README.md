@@ -62,22 +62,22 @@ module LESSON-11-B
   imports BOOL
 
   syntax Term ::= Exp | Stmt
-  syntax Bool ::= isExp(Term) [function]
+  syntax Bool ::= isExpression(Term) [function]
 
-  rule isExp(E:Exp) => true
-  rule isExp(_) => false [owise]
+  rule isExpression(E:Exp) => true
+  rule isExpression(_) => false [owise]
 endmodule
 ```
 
 Here we have defined a very simple function that decides whether a term is
 an expression or a statement. It does this by casting the variable inside the
-`isExp` rule to sort `Exp`. As a result, that variable will only match terms
-of sort `Exp`. Thus, `isExp(1)` will return true, as will `isExp(1 + 2)`, but
-`isExp({})` will return false.
+`isExpression` rule to sort `Exp`. As a result, that variable will only match terms
+of sort `Exp`. Thus, `isExpression(1)` will return true, as will `isExpression(1 + 2)`, but
+`isExpression({})` will return false.
 
 #### Exercise
 
-Verify this fact for yourself by running `isExp` on the above examples. Then
+Verify this fact for yourself by running `isExpression` on the above examples. Then
 write an `isStmt` function, and test that it works as expected.
 
 ### Strict casts
