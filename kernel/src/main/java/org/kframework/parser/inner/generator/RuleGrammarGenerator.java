@@ -18,6 +18,7 @@ import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.SortSynonym;
 import org.kframework.definition.Terminal;
+import org.kframework.definition.UidProvider;
 import org.kframework.definition.UserList;
 import org.kframework.kore.Sort;
 import org.kframework.parser.inner.ParseInModule;
@@ -295,9 +296,10 @@ public class RuleGrammarGenerator {
         if (mod.importedModuleNames().contains(RECORD_PRODS)) {
             // these should be visible only in the parsing module
             // but are required by config cell names
+            UidProvider uid = new UidProvider(mod.name());
             for (Production p : iterable(mod.productions())) {
                 if (p.isPrefixProduction()) {
-                    recordProds.addAll(mutable(p.recordProductions()));
+                    recordProds.addAll(mutable(p.recordProductions(uid)));
                 }
             }
         }

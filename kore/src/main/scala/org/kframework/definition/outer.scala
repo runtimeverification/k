@@ -560,7 +560,7 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
    * syntax UidNe   ::= UidItem           [subsort2]
    * syntax UidItem ::= "name" ":" Sort   [item]
    */
-  lazy val recordProductions: Set[Production] = {
+  def recordProductions(uid:UidProvider): Set[Production] = {
     assert(isPrefixProduction)
     val namedNts = items.filter(_.isInstanceOf[NonTerminal]).map(_.asInstanceOf[NonTerminal]).filter(_.name.isDefined)
     val prefix = items.takeWhile(_.isInstanceOf[Terminal]) :+ Terminal("...")
@@ -573,7 +573,7 @@ case class Production(klabel: Option[KLabel], params: Seq[Sort], sort: Sort, ite
       val one = Production(klabel, params, sort, prefix :+ Terminal(namedNts.head.name.get) :+ Terminal(":") :+ namedNts.head :+ suffix, newAtt.add("recordPrd-one", namedNts.head.name.get))
       Set(main, one)
     } else {
-      val baseName = items.head.asInstanceOf[Terminal].value + "-" + Production.getNextUid
+      val baseName = items.head.asInstanceOf[Terminal].value + "-" + uid
       val main = Production(klabel, params, sort, prefix :+ NonTerminal(Sort(baseName), None) :+ suffix, newAtt.add("recordPrd-main"))
       val empty = Production(klabel, Seq(), Sort(baseName), Seq(Terminal("")), newAtt.add("recordPrd-empty"))
       val subsort = Production(None, Seq(), Sort(baseName), Seq(NonTerminal(Sort(baseName + "Ne"), None)), newAtt.add("recordPrd-subsort"))
@@ -607,8 +607,12 @@ object Production {
   }
 
   val kLabelAttribute = "klabel"
-  private var uid = 1
-  def getNextUid:Int = { uid = uid + 1; uid}
+}
+
+// a way to deterministically generate unique IDs dependent on module name
+case class UidProvider(modName:String) {
+  private var uid = 0
+  override def toString:String = { uid = uid + 1; modName + "+" + uid}
 }
 
 // hooked but problematic, see kast-core.k
