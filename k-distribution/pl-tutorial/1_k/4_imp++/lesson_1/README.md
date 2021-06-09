@@ -95,4 +95,4 @@ store cell, like in LAMBDA++ in Part 3 of the tutorial.
 
 Go to [Lesson 2, IMP++: Configuration Refinement; Freshness](../lesson_2/README.md).
 
-[MOVIE (out of date) [07'47"]](http://youtu.be/hWqJ8k9NNp8)
+[MOVIE (out of date) [07'47"]](https://youtu.be/hWqJ8k9NNp8)

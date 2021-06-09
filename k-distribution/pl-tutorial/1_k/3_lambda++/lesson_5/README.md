@@ -73,4 +73,4 @@ generate its documentation.
 
 Go to [Lesson 6, LAMBDA++: Wrapping Up and Documenting LAMBDA++](../lesson_6/README.md).
 
-[MOVIE (out of date) [5'19"]](http://youtu.be/dP3FW0kZN6k)
+[MOVIE (out of date) [5'19"]](https://youtu.be/dP3FW0kZN6k)

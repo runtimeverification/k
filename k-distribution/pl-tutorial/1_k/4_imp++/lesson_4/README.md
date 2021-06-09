@@ -115,4 +115,4 @@ of blocks with local variable declarations.
 
 Go to [Lesson 5, IMP++: Deleting, Saving and Restoring Cell Contents](../lesson_5/README.md).
 
-[MOVIE (out of date) [05'21"]](http://youtu.be/a0qxV1GFR5s)
+[MOVIE (out of date) [05'21"]](https://youtu.be/a0qxV1GFR5s)

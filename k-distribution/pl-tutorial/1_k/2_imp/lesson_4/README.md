@@ -144,4 +144,4 @@ In the next lesson we comment the IMP definition and conclude this tutorial.
 
 Go to [Lesson 5, IMP: Completing and Documenting IMP](../lesson_5/README.md).
 
-[MOVIE (out of date) [09'16"]](http://youtu.be/fR2VEfGHtho)
+[MOVIE (out of date) [09'16"]](https://youtu.be/fR2VEfGHtho)

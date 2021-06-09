@@ -58,4 +58,4 @@ dynamically creates a concurrent shared-memory thread executing statement `S`.
 
 Go to [Lesson 6, IMP++: Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2](../lesson_6/README.md).
 
-[MOVIE (out of date) [04'30"]](http://youtu.be/Hr1yfcnee_c)
+[MOVIE (out of date) [04'30"]](https://youtu.be/Hr1yfcnee_c)

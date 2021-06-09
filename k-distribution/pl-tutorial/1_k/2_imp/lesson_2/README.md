@@ -82,4 +82,4 @@ In the next lesson we will learn how to write rules that involve cells.
 
 Go to [Lesson 3, IMP: Computations, Results, Strictness; Rules Involving Cells](../lesson_3/README.md).
 
-[MOVIE (out of date) [04'21"]](http://youtu.be/jkwLyGdt70U)
+[MOVIE (out of date) [04'21"]](https://youtu.be/jkwLyGdt70U)

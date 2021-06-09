@@ -52,4 +52,4 @@ Tutorial 1 is now complete.  The next tutorial will take us through the
 definition of a simple imperative language and will expose us to more
 feature of the K framework and the K tool.
 
-[MOVIE (out of date) [6'07"]](http://youtu.be/-pHgLqNMKac)
+[MOVIE (out of date) [6'07"]](https://youtu.be/-pHgLqNMKac)

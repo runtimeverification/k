@@ -77,6 +77,6 @@ for LAMBDA.
 
 Go to [Lesson 3, Type Systems: Environment-Based Higher-Order Type Systems](../lesson_3/README.md).
 
-[MOVIE (out of date) [6'52"]](http://youtu.be/7P2QtR9jM2o)
+[MOVIE (out of date) [6'52"]](https://youtu.be/7P2QtR9jM2o)
 
 

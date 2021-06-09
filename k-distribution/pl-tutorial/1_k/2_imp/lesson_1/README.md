@@ -167,8 +167,7 @@ never meant to be a substitute for real parsers. We often call the syntax
 defined in K _the syntax of the semantics_, to highlight the fact that its
 role is to serve as a convenient notation when writing the semantics, not
 necessarily as a means to define concrete syntax of arbitrarily complex
-programming languages. See the KERNELC language in [samples](/samples/)
-for an example on how to connect an external parser for concrete syntax to
+programming languages. See the KERNELC language for an example on how to connect an external parser for concrete syntax to
 the K tool.
 
 The above being said, we strongly encourage you to strive to make the
@@ -182,4 +181,4 @@ will learn how to define a K custom configuration.
 
 Go to [Lesson 2, IMP: Defining a Configuration](../lesson_2/README.md).
 
-[MOVIE (out of date) [09'15"]](http://youtu.be/F39Ta1stiCM)
+[MOVIE (out of date) [09'15"]](https://youtu.be/F39Ta1stiCM)
