@@ -31,13 +31,12 @@ call/cc.
 ## Learn K
 
 - Do the <a style="font-size:24px" href="./k-distribution/pl-tutorial.md">K Tutorial!</a>
-- Read some papers about K on the [Formal Systems Laboratory (FSL)](http://fsl.cs.illinois.edu/index.php/FSL_Publications).  
+- Read some papers about K on the [Formal Systems Laboratory (FSL)](https://fsl.cs.illinois.edu/publications/).  
 - <a href="./pending-documentation/">User documentation</a>
 - <a href="./k-distribution/include/kframework/builtin/">Builtins</a>
 
 ## Links
 
-- [K and matching logic webpage](http://fsl.cs.uiuc.edu/index.php/K_and_Matching_Logic) at UIUC (USA).
 - [K webpage](http://fmse.info.uaic.ro/projects/K/) at UAIC (Romania).
 - [Matching logic](http://matching-logic.org/) webpage at UIUC (USA).
 - [Online K Discussion Channel](https://riot.im/app/#/room/#k:matrix.org) for K users (Slack & Riot). This is the recommended way to ask questions about K and interact with the K community.

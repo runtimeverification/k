@@ -102,4 +102,4 @@ on another binder, `mu`, specifically designed to define fixed points.
 
 Go to [Lesson 8, LAMBDA: Multiple Binding Constructs](../lesson_8/README.md).
 
-[MOVIE (out of date) [5'10"]](http://youtu.be/qZWiBaN7zrw)
+[MOVIE (out of date) [5'10"]](https://youtu.be/qZWiBaN7zrw)

@@ -156,12 +156,12 @@ programming languages.
 
 ## Exercises
 
-1. Extend your solution from lesson 4, problem 2 to implement the rules
+1. Extend your solution from lesson 1.4, problem 2 to implement the rules
 that define the behavior of addition, subtraction, multiplication, and
 division. Do not worry about the case when the user tries to divide by zero
 at this time. Use `/Int` to implement division. Test your new calculator
 implementation by executing the arithmetic expressions you wrote as part of
-lesson 3, problem 2. Check to make sure each computes the value you expected.
+lesson 1.3, problem 2. Check to make sure each computes the value you expected.
 
 2. Combine the Boolean expression calculator from this lesson with your
 solution to problem 1, and then extend the combined calculator with the `<`,

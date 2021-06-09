@@ -1661,10 +1661,32 @@ divergent behavior unless the `Bytes` type is used in a manner that preserves
 consistency.
 
 ```k
-module BYTES-HOOKED
+module BYTES-SYNTAX
   imports STRING-SYNTAX
 
   syntax Bytes [hook(BYTES.Bytes), token]
+endmodule
+```
+
+```k
+module BYTES-STRING-ENCODE [kore, symbolic]
+  imports BYTES-SYNTAX
+```
+### Encoding/decoding between Bytes and String
+
+You can encode/decode between Bytes and String using `UTF-8`, `UTF-16LE`, `UTF-16BE`, `UTF-32LE`, and `UTF-32BE`
+
+```k
+    syntax String ::= decodeBytes ( encoding: String , contents: Bytes ) [function, hook(BYTES.decodeBytes)]
+    syntax Bytes ::= encodeBytes ( encoding: String , contents: String ) [function, hook(BYTES.encodeBytes)]
+endmodule
+```
+
+```k
+module BYTES-HOOKED
+  imports STRING-SYNTAX
+  imports BYTES-SYNTAX
+  imports BYTES-STRING-ENCODE
 ```
 
 ### Empty byte array

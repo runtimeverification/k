@@ -74,4 +74,4 @@ those behaviors using the K tool.
 
 Go to [Lesson 3, IMP++: Tagging; Superheat/Supercool Kompilation Options](../lesson_3/README.md).
 
-[MOVIE (out of date) [04'06"]](http://youtu.be/f-qrqs8cMcU)
+[MOVIE (out of date) [04'06"]](https://youtu.be/f-qrqs8cMcU)
