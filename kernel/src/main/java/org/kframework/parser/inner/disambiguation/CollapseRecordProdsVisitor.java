@@ -8,6 +8,7 @@ import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.Terminal;
 import org.kframework.parser.Constant;
+import org.kframework.parser.SafeTransformer;
 import org.kframework.parser.SetsTransformerWithErrors;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
@@ -18,6 +19,7 @@ import scala.util.Either;
 import scala.util.Left;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,6 +30,13 @@ import static org.kframework.Collections.*;
  * Expecting the exact pattern of productions described in Production.recordProductions()
  */
 public class CollapseRecordProdsVisitor extends SetsTransformerWithErrors<KEMException> {
+    CollectVariableNames varNamesVis;
+    // require the term before starting the visitor to make sure we generate unique variable names
+    public CollapseRecordProdsVisitor(Term t) {
+        varNamesVis = new CollectVariableNames();
+        varNamesVis.apply(t);
+    }
+
     @Override
     public Either<Set<KEMException>, Term> apply(TermCons tc) {
         if (tc.production().att().contains(Att.RECORD_PRD(), Production.class)) {
@@ -69,7 +78,9 @@ public class CollapseRecordProdsVisitor extends SetsTransformerWithErrors<KEMExc
                 else {
                     Production anonVarPrd = Production.apply(Seq(), Sorts.KVariable(), Seq(Terminal.apply("_[A-Z][A-Za-z0-9'_]*")), Att.empty());
                     // The name is required so disambiguation doesn't collapse the variables into the same term.
-                    collapsedItems = collapsedItems.plus(Constant.apply("_" + nt.name().getOrElse(() -> "Gen") + uid++, anonVarPrd, tc.location(), tc.source()));
+                    String varName;
+                    do { varName = "_" + nt.name().getOrElse(() -> "Gen") + uid++; } while (varNamesVis.varNames.contains(varName));
+                    collapsedItems = collapsedItems.plus(Constant.apply(varName, anonVarPrd, tc.location(), tc.source()));
                 }
             }
             TermCons collapsed = TermCons.apply(collapsedItems, origPrd, tc.location(), tc.source());
@@ -79,4 +90,14 @@ public class CollapseRecordProdsVisitor extends SetsTransformerWithErrors<KEMExc
     }
 
     private int uid = 0;
+
+    private static class CollectVariableNames extends SafeTransformer {
+        public Set<String> varNames = new HashSet<>();
+        @Override
+        public Term apply(Constant c) {
+            if (c.production().sort().equals(Sorts.KVariable()))
+                varNames.add(c.value());
+            return super.apply(c);
+        }
+    }
 }
