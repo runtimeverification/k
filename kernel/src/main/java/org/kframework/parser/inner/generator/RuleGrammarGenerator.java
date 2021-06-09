@@ -9,7 +9,6 @@ import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.GenerateSortPredicateSyntax;
 import org.kframework.compile.GenerateSortProjections;
 import org.kframework.definition.Definition;
-import org.kframework.definition.Import;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.NonTerminal;
@@ -19,6 +18,7 @@ import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Sentence;
 import org.kframework.definition.SortSynonym;
 import org.kframework.definition.Terminal;
+import org.kframework.definition.UidProvider;
 import org.kframework.definition.UserList;
 import org.kframework.kore.Sort;
 import org.kframework.parser.inner.ParseInModule;
@@ -237,14 +237,6 @@ public class RuleGrammarGenerator {
             }
         }
 
-        if (mod.importedModuleNames().contains(RECORD_PRODS)) {
-            for (Production p : iterable(mod.productions())) {
-                if (p.isPrefixProduction()) {
-                    prods.addAll(mutable(p.recordProductions()));
-                }
-            }
-        }
-
         if (mod.importedModuleNames().contains(SORT_PREDICATES)) {
             for (Sort s : iterable(mod.allSorts())) {
                 prods.addAll(new GenerateSortPredicateSyntax().gen(mod, s));
@@ -300,6 +292,18 @@ public class RuleGrammarGenerator {
         }
         extensionProds.addAll(prods);
 
+        Set<Sentence> recordProds = new HashSet<>();
+        if (mod.importedModuleNames().contains(RECORD_PRODS)) {
+            // these should be visible only in the parsing module
+            // but are required by config cell names
+            UidProvider uid = new UidProvider(mod.name());
+            for (Production p : iterable(mod.productions())) {
+                if (p.isPrefixProduction()) {
+                    recordProds.addAll(mutable(p.recordProductions(uid)));
+                }
+            }
+        }
+
         boolean addRuleCells;
         if (mod.importedModuleNames().contains(RULE_CELLS)) { // prepare cell productions for rule parsing
             // make sure a configuration actually exists, otherwise ConfigurationInfoFromModule explodes.
@@ -343,6 +347,9 @@ public class RuleGrammarGenerator {
             // remove cells from parsing config cells so they don't conflict with the production in kast.k
             // also add all matching terminals to the #CellName sort
             for (Sentence prod : extensionProds) {
+                addCellNameProd(prods, prod);
+            }
+            for (Sentence prod : recordProds) {
                 addCellNameProd(prods, prod);
             }
             for (Sentence prod : iterable(mod.productions())) {
@@ -450,6 +457,8 @@ public class RuleGrammarGenerator {
             parseProds.addAll(res);
             disambProds.addAll(res);
         }
+
+        parseProds.addAll(recordProds);
         Att att = mod.att();
         List<String> notLrModules = stream(mod.importedModules()).filter(m -> m.att().contains("not-lr1")).map(Module::name).collect(Collectors.toList());
         if (!notLrModules.isEmpty()) {
