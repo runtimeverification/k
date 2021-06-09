@@ -192,3 +192,8 @@ operator which concatenates them.
 express the integer and Boolean expressions that it supports, in the same style
 as `LESSON-11-D`. Then write an `eval` function that evaluates all terms of
 sort `Exp` to either a `Bool` or an `Int`.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.12: Syntactic Lists](../12_syntactic_lists/README.md).
