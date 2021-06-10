@@ -90,8 +90,8 @@ example, consider the following definition:
 module LESSON-11-C
   imports INT
 
-  syntax Exp ::= Int | Exp "+" Exp
-  syntax Exp2 ::= Exp | Exp2 "+" Exp2
+  syntax Exp ::= Int | Exp "+" Exp [exp]
+  syntax Exp2 ::= Exp | Exp2 "+" Exp2 [exp2]
 endmodule
 ```
 
@@ -99,8 +99,7 @@ This grammar is a little ambiguous and contrived, but it serves to demonstrate
 how a semantic cast might be insufficient to disambiguate a term. If I were 
 to write the term `(I1:Int + I2:Int):Exp2`, the term would be ambiguous,
 because the cast is not sufficiently strict to determine whether you mean
-the derivation `Exp2 -> Exp -> Exp "+" Exp` or the derivation
-`Exp2 -> Exp2 "+" Exp2`.
+to derive the "+" production tagged `exp`, or the one tagged `exp2`.
 
 In this situation, there is a solution: the **strict cast**. For every sort
 `S` in your grammar, K also defines the following production:
@@ -120,6 +119,13 @@ As a result, if we were to write in the above grammar the term
 `(I1:Int + I2:Int)::Exp2`, then we would know that the first derivation above
 should be chosen, whereas if we want the second derivation, we could write
 `(I1:Int + I2:Int)::Exp`.
+
+#### Exercise
+
+Write a function `eval` which takes a term of sort `Exp2` and returns an `Int`.
+The function should be capable of evaluating any term of sort `Exp2` to the
+integer value which it expresses. You will need to write strict casts in order
+to disambiguate these rules.
 
 ### Projection casts
 
@@ -183,6 +189,6 @@ the projection cast will fail.
 operator which concatenates them.
 
 2. Modify your solution from lesson 1.9, problem 2 by using an `Exp` sort to
-express the integer and boolean expressions that it supports, in the same style
+express the integer and Boolean expressions that it supports, in the same style
 as `LESSON-11-D`. Then write an `eval` function that evaluates all terms of
 sort `Exp` to either a `Bool` or an `Int`.
