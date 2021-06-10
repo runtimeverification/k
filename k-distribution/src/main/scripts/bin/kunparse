@@ -35,12 +35,8 @@ KUNPARSE=$(basename "$0")
 fold_lines="fold -s"
 
 error () {
-  printf "[Error] Critical: $@\n" | $fold_lines 1>&2
+  printf "[Error] Unparser: $@\n" | $fold_lines 1>&2
   exit $result
-}
-
-warning () {
-  printf "[Warning] Compiler: $@\n" | $fold_lines 1>&2
 }
 
 print_usage () {
@@ -189,6 +185,7 @@ if [ -z "${color+unset}" ]; then
 fi
 
 if [[ "${#ARGV[@]}" -ne 1 ]]; then
+  print_usage
   error 'Must pass exactly one KORE file as a positional argument.'
 fi
 
