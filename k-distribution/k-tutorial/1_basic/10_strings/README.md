@@ -107,3 +107,8 @@ composed of the first word of each sentence, followed by a period. Do not
 worry about capitalization or periods within the sentence which do not end the
 sentence (e.g. "Dr."). For more information about the functions over strings
 required to implement such a function, refer to `domains.md`.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.11: Casting Terms](../10_casts/README.md).
