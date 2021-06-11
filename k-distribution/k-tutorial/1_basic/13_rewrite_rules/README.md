@@ -275,3 +275,8 @@ heating and cooling rules much more compactly.
 ## Exercises
 
 1. Modify `LESSON-13-C` to add rules to evaluate integer subtraction.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.14: Defining Evaluation Order](../14_evaluation_order/README.md).
