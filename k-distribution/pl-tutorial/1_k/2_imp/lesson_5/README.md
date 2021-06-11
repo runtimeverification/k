@@ -18,4 +18,4 @@ This completes our second tutorial. The next tutorials will teach us more
 features of the K framework, such as how to define languages with complex
 control constructs (like `callcc`), languages which are concurrent, and so on.
 
-[MOVIE (out of date) [03'45"]](http://youtu.be/w2t_Yx2VGVQ)
+[MOVIE (out of date) [03'45"]](https://youtu.be/w2t_Yx2VGVQ)

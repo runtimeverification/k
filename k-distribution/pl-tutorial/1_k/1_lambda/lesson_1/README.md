@@ -110,4 +110,4 @@ This way, we obtain our first programming language defined using K.
 
 Go to [Lesson 2, LAMBDA: Module Importing, Rules, Variables](../lesson_2/README.md)
 
-[MOVIE (out of date) [4'07"]](http://youtu.be/y5Tf1EZVj8E)
+[MOVIE (out of date) [4'07"]](https://youtu.be/y5Tf1EZVj8E)

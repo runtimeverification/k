@@ -60,4 +60,4 @@ it to colleagues or friends, to publish it, to teach it, and so on.
 
 Go to [Lesson 9, LAMBDA: A Complete and Commented Definition](../lesson_9/README.md).
 
-[MOVIE (out of date) [2'40"]](http://youtu.be/Ox4uXDpcY64)
+[MOVIE (out of date) [2'40"]](https://youtu.be/Ox4uXDpcY64)

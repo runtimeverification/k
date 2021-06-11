@@ -27,3 +27,8 @@ kompile 08_literate_programming/README.md --md-selector "k & ! exclude" --main-m
 kompile 09_unparsing/README.md --md-selector "k & ! exclude" --main-module LESSON-09-A -d build/09a
 kompile 09_unparsing/README.md --md-selector "k & ! exclude" --main-module LESSON-09-B -d build/09b
 kompile 09_unparsing/README.md --md-selector "k & ! exclude" --main-module LESSON-09-C -d build/09c
+kompile 10_strings/README.md --md-selector "k & ! exclude" --main-module LESSON-10 -d build/10
+kompile 11_casts/README.md --md-selector "k & ! exclude" --main-module LESSON-11-A -d build/11a
+kompile 11_casts/README.md --md-selector "k & ! exclude" --main-module LESSON-11-B -d build/11b
+kompile 11_casts/README.md --md-selector "k & ! exclude" --main-module LESSON-11-C -d build/11c
+kompile 11_casts/README.md --md-selector "k & ! exclude" --main-module LESSON-11-D -d build/11d

@@ -73,7 +73,7 @@ rules, and will only be tried to be applied after all the other,
 higher-priority rules have been tried and they have failed.
 
 For example, in the above exercise, we had to add a side condition containing
-two boolean comparisons to the rule we wrote to handle `letter-B` grades.
+two Boolean comparisons to the rule we wrote to handle `letter-B` grades.
 However, in practice this meant that we compare the percentile to 90 twice. We
 can more efficiently and more idiomatically write the `letter-B` case for the
 `gradeFromPercentile` rule using the `owise` attribute (`lesson-07-b.k`):
@@ -110,7 +110,7 @@ followed by all the `owise` rules, in any order.
 
 Write another implementation of `gradeFromPercentile` which handles only the
 cases for `D` and `F`, and uses the `owise` attribute to avoid redundant
-boolean comparisons. Test that various percentiles in the range [0, 70) are
+Boolean comparisons. Test that various percentiles in the range [0, 70) are
 evaluated correctly.
 
 ## Rule Priority
@@ -191,11 +191,11 @@ explicit priority.
 
 1. Write a function `isEven` that returns whether an integer is an even number.
 Use two rules and one side condition. The right hand side of the rules should
-be boolean literals. Refer back to
+be Boolean literals. Refer back to
 [domains.md](../../../include/kframework/builtin/domains.md) for the relevant
 integer operations.
 
-2. Modify the calculator application from lesson 6, problem 2, so that division
+2. Modify the calculator application from lesson 1.6, problem 2, so that division
 by zero will no longer make `krun` crash with a "Divison by zero" exception.
 Instead, the `/` function should not match any of its rules if the denominator
 is zero.
