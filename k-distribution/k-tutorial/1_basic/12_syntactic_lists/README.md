@@ -61,7 +61,8 @@ the following additional module (`lesson-12-c.k`):
 
 ```k
 module LESSON-12-C
-  imports LESSON-12-B
+  imports LESSON-12-A
+  imports INT
 
   syntax Int ::= sum(Ints) [function]
   rule sum(I:Int) => I
