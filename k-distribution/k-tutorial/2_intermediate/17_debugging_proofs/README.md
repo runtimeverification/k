@@ -1,1 +1,1 @@
-# Lesson 2.16: Debugging Proofs using the Haskell Backend REPL
+# Lesson 2.17: Debugging Proofs using the Haskell Backend REPL

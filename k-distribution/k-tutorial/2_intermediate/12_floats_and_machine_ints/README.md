@@ -1,1 +1,1 @@
-# Lesson 2.11: IEEE 754 Floating Point and Fixed Width Integers
+# Lesson 2.12: IEEE 754 Floating Point and Fixed Width Integers
