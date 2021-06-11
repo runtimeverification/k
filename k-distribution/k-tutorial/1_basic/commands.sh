@@ -39,3 +39,6 @@ kompile 12_syntactic_lists/README.md --md-selector "k & ! exclude" --main-module
 kompile 12_syntactic_lists/README.md --md-selector "k & ! exclude" --main-module LESSON-12-E -d build/12e
 kompile 12_syntactic_lists/README.md --md-selector "k & ! exclude" --main-module LESSON-12-F -d build/12f
 kompile 12_syntactic_lists/README.md --md-selector "k & ! exclude" --main-module LESSON-12-G -d build/12g
+kompile 13_rewrite_rules/README.md --md-selector "k & ! exclude" --main-module LESSON-13-A -d build/13a
+kompile 13_rewrite_rules/README.md --md-selector "k & ! exclude" --main-module LESSON-13-B -d build/13b
+kompile 13_rewrite_rules/README.md --md-selector "k & ! exclude" --main-module LESSON-13-C -d build/13c
