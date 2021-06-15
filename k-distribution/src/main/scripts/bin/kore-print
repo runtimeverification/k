@@ -187,6 +187,7 @@ if [[ "${#ARGV[@]}" -ne 1 ]]; then
   print_usage
   error 'Must pass exactly one KORE file as a positional argument.'
 fi
+input_file="${ARGV[0]}"
 
 # Compute kompiled directory
 kompiledDir=
@@ -210,12 +211,10 @@ if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then
   exit $?
 fi
 
-if [[ "${ARGV[0]}" == "-" ]]; then
-  inputCfg=/dev/stdin
-elif [ -r "${ARGV[0]}" ]; then
-  inputCfg="${ARGV[0]}"
-else
-  error "Could not open file: ${ARGV[0]}"
+if [[ "$input_file" == "-" ]]; then
+  input_file=/dev/stdin
+elif [ ! -r "$input_file" ]; then
+  error "Could not open file: $input_file"
 fi
 
 if [ "$outputFile" = "-" ]; then
@@ -224,7 +223,7 @@ fi
 
 case "$outputMode" in
   pretty)
-  execute kprint "$kompiledDir" "$inputCfg" $color $filterSubst > "$outputFile"
+  execute kprint "$kompiledDir" "$input_file" $color $filterSubst > "$outputFile"
   ;;
 
   kore)
