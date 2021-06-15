@@ -42,7 +42,7 @@ error () {
 print_usage () {
 cat <<HERE
 Usage: $KPARSE_AOT <OUTPUT_FILE> [-d DIR] [-m MODULE] [-s SORT]
-Generate an ahead-of-time parser from a K definitino.
+Generate an ahead-of-time parser from a K definition.
 
 Mandatory arguments to long options are mandatory for short options too.
 
