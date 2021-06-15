@@ -206,6 +206,7 @@ public class DefinitionParsing {
         parsedBubbles.set(0);
         cachedBubbles.set(0);
         Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles);
+        sw.printIntermediate("Parse rules [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " rules]");
         saveCachesAndReportParsingErrors();
         return afterResolvingAllOtherBubbles;
     }
