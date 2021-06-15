@@ -30,7 +30,7 @@ execute () {
   )
 }
 
-KPARSE_AOT=$(basename "$0")
+KPARSE_GEN=$(basename "$0")
 
 fold_lines="fold -s"
 
@@ -41,13 +41,13 @@ error () {
 
 print_usage () {
 cat <<HERE
-Usage: $KPARSE_AOT <OUTPUT_FILE> [-d DIR] [-m MODULE] [-s SORT]
+Usage: $KPARSE_GEN <OUTPUT_FILE> [-d DIR] [-m MODULE] [-s SORT]
 Generate an ahead-of-time parser from a K definition.
 
 Mandatory arguments to long options are mandatory for short options too.
 
-$KPARSE_AOT expects exactly 1 positional argument. It must be a valid path
-where an executable file can be written. By default, $KPARSE_AOT will
+$KPARSE_GEN expects exactly 1 positional argument. It must be a valid path
+where an executable file can be written. By default, $KPARSE_GEN will
 generate an LR(1) parser for the \$PGM configuration variable, but this can be
 customized; see below. If no \$PGM configuration variable exists, it will
 generate a parser for the KItem sort in the main syntax module.
