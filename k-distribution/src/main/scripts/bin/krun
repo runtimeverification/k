@@ -452,7 +452,7 @@ fi
 source "$kompiledDir/configVars.sh"
 if $term; then
   if [ -z "${parser_PGM+unset}" ]; then
-    execute kast --directory "$dir" -m "$mainModuleName" "$config_var_PGM" -o kore > "$input_file"
+    execute kast --directory "$dir" --module "$mainModuleName" "$config_var_PGM" --output kore > "$input_file"
   else
     execute $parser_PGM "$config_var_PGM" > "$input_file"
   fi
@@ -481,12 +481,12 @@ else
         parser=("$kompiledDir/parser_$name")
       elif [ "$name" = "PGM" ]; then
         if $hasArgv; then
-          parser=(kast --directory "$dir" -o kore)
+          parser=(kast --directory "$dir" --output kore)
         else
-          parser=(kast --directory "$dir" -m "$mainModuleName" -o kore)
+          parser=(kast --directory "$dir" --module "$mainModuleName" --output kore)
         fi
       else
-        parser=(kast -s "$sortName" --directory "$dir" -m "$mainModuleName" -o kore)
+        parser=(kast --sort "$sortName" --directory "$dir" --module "$mainModuleName" --output kore)
       fi
     else
       parser=("${!parser_name}")
@@ -629,7 +629,7 @@ if ! $dryRun; then
       none) ;;
 
       *)
-      execute kast --directory "$dir" -i kore -o "$outputMode" "$kore_output" > "$outputFile"
+      execute kast --directory "$dir" --input kore --output "$outputMode" "$kore_output" > "$outputFile"
       ;;
     esac
   else
