@@ -7,13 +7,14 @@ export PATH="$(cd "$(dirname "$0")"; pwd):$PATH"
 
 # initialize flags
 ARGV=()
+bisonFiles=()
 dir=.
+fold_lines="fold -s"
+glr=--gen-parser
 literal=false
 result=1
-verbose=false
-bisonFiles=()
 stackDepth=10000
-glr=--gen-parser
+verbose=false
 
 # setup temp files
 now=`date +"%Y-%m-%d-%H-%M-%S"`
@@ -31,8 +32,6 @@ execute () {
 }
 
 KPARSE_GEN=$(basename "$0")
-
-fold_lines="fold -s"
 
 error () {
   printf "[Error] Inner Parser: $@\n" | $fold_lines 1>&2
