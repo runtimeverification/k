@@ -17,7 +17,7 @@ verbose=false
 
 # setup temp files
 now=`date +"%Y-%m-%d-%H-%M-%S"`
-tempDir="$(mktemp -d .kunparse-${now}-XXXXXXXXXX)"
+tempDir="$(mktemp -d .kore-print-${now}-XXXXXXXXXX)"
 tempFiles=("$tempDir")
 trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
 
