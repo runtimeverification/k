@@ -206,7 +206,7 @@ fi
 
 
 if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then
-  execute "$(dirname "$0")/kast" -i kore "${ORIG_ARGV[@]}"
+  execute "$(dirname "$0")/kast" --input kore "${ORIG_ARGV[@]}"
   exit $?
 fi
 
@@ -235,7 +235,7 @@ case "$outputMode" in
   none) ;;
 
   *)
-  execute "$(dirname "$0")/kast" -i kore "${ORIG_ARGV[@]}"
+  execute "$(dirname "$0")/kast" --input kore "${ORIG_ARGV[@]}"
   ;;
 esac
  
