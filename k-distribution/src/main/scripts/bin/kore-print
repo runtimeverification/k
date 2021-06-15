@@ -30,7 +30,7 @@ execute () {
   )
 }
 
-KUNPARSE=$(basename "$0")
+KORE_PRINT=$(basename "$0")
 
 fold_lines="fold -s"
 
@@ -41,13 +41,13 @@ error () {
 
 print_usage () {
 cat <<HERE
-Usage: $KUNPARSE <INPUT.kore> [-d DIR] [-o OUTPUT]
+Usage: $KORE_PRINT <INPUT.kore> [-d DIR] [-o OUTPUT]
 Convert a KORE term into another format.
 
 Mandatory arguments to long options are mandatory for short options too.
 
-$KUNPARSE expects exactly 1 positional argument. It must be a file and the
-contents of that file must contain a KORE pattern. By default, $KUNPARSE will
+$KORE_PRINT expects exactly 1 positional argument. It must be a file and the
+contents of that file must contain a KORE pattern. By default, $KORE_PRINT will
 pretty print that term, but some customization is possible; see below.
 
       --color [on|off]     Enable/disable ANSI color codes. Overrides default,
@@ -64,9 +64,9 @@ pretty print that term, but some customization is possible; see below.
                            values are pretty, program, kast, binary, json,
                            latex, kore, and none.
       --output-file FILE   Print converted term to FILE
-      --save-temps         Do not delete temporary files when $KUNPARSE
+      --save-temps         Do not delete temporary files when $KORE_PRINT
                            terminates.
-  -v, --verbose            Print significant commands executed by $KUNPARSE.
+  -v, --verbose            Print significant commands executed by $KORE_PRINT.
       --version            Print version of K
       --                   Interpret all arguments following as positional
                            arguments.
