@@ -65,7 +65,7 @@ of any sort can be injected as an element of a term of sort `K`, also called
 a **K sequence**.
 
 By default, when you `krun` a program, the AST of the program is inserted as
- the sole element of a K sequence into the `<k>` cell. This explains why we
+the sole element of a K sequence into the `<k>` cell. This explains why we
 saw the output we did in Lesson 1.2.
 
 With these preliminaries in mind, we can now explain how top-level rewrite
@@ -90,11 +90,12 @@ can be made.
 
 ### Exercise
 
-Pass a program containing no functions to `krun`. Observe the output and try
-to understand why you get the output you do. Then write two rules that rewrite
-that program to another. Run `krun --search` on that program and observe both
-results. Then add a third rule that rewrites one of those results again. 
-Test that that rule applies as well.
+Pass a program containing no functions to `krun`. You can use a term of sort
+`Exp` from `LESSON-11-D`. Observe the output and try to understand why you get
+the output you do. Then write two rules that rewrite that program to another.
+Run `krun --search` on that program and observe both results. Then add a third
+rule that rewrites one of those results again. Test that that rule applies as
+well.
 
 ## Using top-level rules to evaluate expressions
 
@@ -154,9 +155,9 @@ module LESSON-13-B
   rule <k> E1:Val && E2:Exp ~> K:K </k> => <k> E2 ~> freezer3(E1) ~> K </k> [priority(51)]
   rule <k> E1:Exp && E2:Exp ~> K:K </k> => <k> E1 ~> freezer4(E2) ~> K </k> [priority(52)]
 
-  rule <k> E1:Val ~> freezer1(E2) ~> K:K </k> => <k> E2 + E1 ~> K </k>
+  rule <k> E2:Val ~> freezer1(E1) ~> K:K </k> => <k> E1 + E2 ~> K </k>
   rule <k> E1:Val ~> freezer2(E2) ~> K:K </k> => <k> E1 + E2 ~> K </k>
-  rule <k> E1:Val ~> freezer3(E2) ~> K:K </k> => <k> E2 && E1 ~> K </k>
+  rule <k> E2:Val ~> freezer3(E1) ~> K:K </k> => <k> E1 && E2 ~> K </k>
   rule <k> E1:Val ~> freezer4(E2) ~> K:K </k> => <k> E1 && E2 ~> K </k>
 endmodule
 ```
@@ -168,7 +169,7 @@ matches a K cell in which the first element of the K sequence is an `Exp` whose
 arguments are values, and rewrites the first element of the sequence to the
 result of that expression. The second also matches a K cell with an `Exp` in
 the first element of its K sequence, but it matches when one or both arguments
- of the `Exp` are not values, and replace the first element of the K sequence
+of the `Exp` are not values, and replace the first element of the K sequence
 with two new elements: one being an argument to evaluate, and the other being
 a special constructor called a **freezer**. Finally, the third matches a K
 sequence where a `Val` is first, and a freezer is second, and replaces them
@@ -212,10 +213,10 @@ We can equivalently write it like following:
 
 When you put a rewrite inside a term like this, in essence, you are telling
 the rule to only rewrite **part** of the left-hand-side to the right-hand-side.
-In practice, this is implemented by lifting rewrite operator to the top of
+In practice, this is implemented by lifting the rewrite operator to the top of
 the rule by means of duplicating the surrounding context.
 
-There is a second way that the above rule can be simplified, however. K
+There is a way that the above rule can be simplified further, however. K
 provides a special syntax for each cell containing a term of sort K, indicating
 that we want to match only on some prefix of the K sequence. For example, the
 above rule can be simplified further like so:
@@ -261,9 +262,9 @@ module LESSON-13-C
   rule <k> E1:Val && E2:Exp => E2 ~> freezer3(E1) ...</k> [priority(51)]
   rule <k> E1:Exp && E2:Exp => E1 ~> freezer4(E2) ...</k> [priority(52)]
 
-  rule <k> E1:Val ~> freezer1(E2) => E2 + E1 ...</k>
+  rule <k> E2:Val ~> freezer1(E1) => E1 + E2 ...</k>
   rule <k> E1:Val ~> freezer2(E2) => E1 + E2 ...</k>
-  rule <k> E1:Val ~> freezer3(E2) => E2 && E1 ...</k>
+  rule <k> E2:Val ~> freezer3(E1) => E1 && E2 ...</k>
   rule <k> E1:Val ~> freezer4(E2) => E1 && E2 ...</k>
 endmodule
 ```

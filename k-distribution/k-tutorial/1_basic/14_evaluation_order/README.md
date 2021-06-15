@@ -215,12 +215,12 @@ the rule generated for the `2` will include `isKResult(E1)` where `E1` is the
 first child of the production.
 
 As you can see if you work through the process, the above code will ultimately
-generate the same contexts present in `LESSON-14-B`. Finally, note that there
-are a few minor syntactic conveniences provided by the `seqstrict` attribute.
+generate the same contexts present in `LESSON-14-B`.
 
-First, if you want your `context alias` sentence to look exactly like
-`<k> HERE ...</k>`, you can omit both the `context alias` sentence from the
-definition, and the name from the `seqstrict` attribute.
+Finally, note that there are a few minor syntactic conveniences provided by the
+`seqstrict` attribute. First, if you want your `context alias` sentence to look
+exactly like `<k> HERE ...</k>`, you can omit both the `context alias` sentence
+from the definition, and the name from the `seqstrict` attribute.
 
 Second, if the numbered list of offsets contains every nonterminal in the
 production, it can be omitted from the attribute value.
