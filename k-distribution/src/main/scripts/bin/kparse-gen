@@ -190,4 +190,4 @@ if [ -z "${sort+unset}" ]; then
   fi
 fi
 
-execute kast ${bisonFiles[@]} --bison-stack-max-depth "$stackDepth" -d "$dir" $glr -m "$module" -s "$sort" "${ARGV[0]}"
+execute kast ${bisonFiles[@]} --bison-stack-max-depth "$stackDepth" --directory "$dir" $glr --module "$module" --sort "$sort" "${ARGV[0]}"
