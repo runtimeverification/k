@@ -136,7 +136,6 @@ public class Kompile {
             }
         }
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, excludedModuleTags);
-        sw.printIntermediate("Parse rules [" + definitionParsing.parsedBubbles.get() + "/" + (definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get()) + " rules]");
 
         files.saveToKompiled("parsed.txt", parsedDef.toString());
         checkDefinition(parsedDef, excludedModuleTags);
