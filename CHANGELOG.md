@@ -11,7 +11,7 @@ Feature Additions
 
 -   The LLVM backend now supports the non-deterministic `search` feature.
     This must be enabled at `kompile` time with `--enable-search --backend llvm`
-    and use of the `--pattern` option is not supported.
+    and only supports the `--search|--search-final` options.
 
 Commits: #1896 - 42dbd6af22, #1946 - 2403a5c09a, #1958 - c4c5582232,
          #1978 - 3eebe42d24
