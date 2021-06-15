@@ -6,12 +6,12 @@ K Framework 5.2.0
 Feature Additions
 -----------------
 
--   `kompile` will now attempt to compute constant expressions which appear
+-   `kompile` will now attempt to simplify constant expressions which appear
     in the RHS of rules.
 
 -   The LLVM backend now supports the non-deterministic `search` feature.
     This must be enabled at `kompile` time with `--enable-search --backend llvm`
-    and only the `krun --search-final` option is supported.
+    and use of the `--pattern` option is not supported.
 
 Commits: #1896 - 42dbd6af22, #1946 - 2403a5c09a, #1958 - c4c5582232,
          #1978 - 3eebe42d24
@@ -57,7 +57,6 @@ Documentation
 
 -   Many broken links on the website are fixed.
 
-
 Commits: #1929 - cf8d4265a8, #1930 - 35a7b6d37d, #1995 - 1c46185602,
          #1997 - 561e0f6e8c, #2023 - 61eec9a398, #2018 - c017a74a88,
          #2011 - 2f589a36ba, #2005 - ef39d1f0fb, #1994 - 58ea05e4ee,
@@ -69,10 +68,28 @@ Parsing Performance
 -------------------
 
 -   Definition parsing performance is significantly improved by being smarter
-    with the existing cache-setup, and optimizing some specific code hotspots.
+    with the existing caches and optimizing some specific code hotspots.
 
 Commits: #2012 - c747292f23, #2001 - 787add05a4, #1996 - e655bcc108,
          #1962 - b9581a3bd4, #1944 - 9f8a111e34
+
+Misc
+----
+
+-   Modules marked as `not-lr1` are automatically excluded from the generated
+    Bison parser, instead of causing an error.
+
+-   `krun` respects the `--no-exc-wrap` option now.
+
+-   Formatting of several error messages is improved, especially indentation.
+
+-   File symlink handling in `requires` statements is improved.
+
+-   `kast` tool no longer silently ignores the `--output-file` parameter.
+
+Commits: #2010 - ff680bd9d8, #1999 - c294c372b9, #1987 - 7a482220be,
+         #1991 - f244e528a1, #1984 - 04cf28cea4, #1981 - d939ea3a4e,
+         #1982 - f4526b0322, #1931 - 31a97a54b8
 
 Packaging/Deployment
 --------------------
@@ -92,23 +109,6 @@ Commits: #1935 - 4c363a4ceb, #2004 - 800cd8cf2c, #1884 - 312e54d183,
          #1964 - cf17ed5497, #1960 - 2225e0ef3a, #1948 - cb7dadd046,
          #1975 - 506d2019e1, #1951 - 04c747e243, #2014 - 0ebf654633,
          #2014 - bae0b77226
-
-Misc
-----
-
--   Modules marked as `not-lr1` are automatically excluded from the generated
-    Bison parser, instead of causing an error.
-
--   `krun` respects the `--no-exc-wrap` option now, and indentiation of various
-    error messages is improved.
-
--   File symlink handling in `requires` statements is improved.
-
--   `kast` tool no longer silently ignores the `--output-file` parameter.
-
-Commits: #2010 - ff680bd9d8, #1999 - c294c372b9, #1987 - 7a482220be,
-         #1991 - f244e528a1, #1984 - 04cf28cea4, #1981 - d939ea3a4e,
-         #1982 - f4526b0322, #1931 - 31a97a54b8
 
 Dependency Updates
 ------------------
