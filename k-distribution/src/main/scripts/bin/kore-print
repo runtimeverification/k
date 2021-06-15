@@ -9,6 +9,7 @@ export PATH="$(cd "$(dirname "$0")"; pwd):$PATH"
 ARGV=()
 dir=.
 filterSubst=true
+fold_lines="fold -s"
 literal=false
 outputFile=-
 outputMode=pretty
@@ -31,8 +32,6 @@ execute () {
 }
 
 KORE_PRINT=$(basename "$0")
-
-fold_lines="fold -s"
 
 error () {
   printf "[Error] Unparser: $@\n" | $fold_lines 1>&2

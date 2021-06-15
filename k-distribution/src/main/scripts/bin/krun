@@ -31,6 +31,7 @@ dryRun=false
 expandMacros=true
 result=1
 filterSubst=true
+fold_lines="fold -s"
 
 # setup temp files
 now=`date +"%Y-%m-%d-%H-%M-%S"`
@@ -70,8 +71,6 @@ execute () {
 }
 
 KRUN=$(basename "$0")
-
-fold_lines="fold -s"
 
 error () {
   printf "[Error] Critical: $@\n" | $fold_lines 1>&2
