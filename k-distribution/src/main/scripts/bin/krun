@@ -69,7 +69,7 @@ execute () {
   )
 }
 
-KX=$(basename "$0")
+KRUN=$(basename "$0")
 
 fold_lines="fold -s"
 
@@ -84,12 +84,12 @@ warning () {
 
 print_usage () {
 cat <<HERE
-Usage: $KX [PROGRAM] [-cNAME=VALUE] [-d DIR]
+Usage: $KRUN [PROGRAM] [-cNAME=VALUE] [-d DIR]
 Execute a program using a K semantics that was built with kompile.
 
 Mandatory arguments to long options are mandatory for short options too.
 
-$KX expects 0 or 1 positional arguments. If a positional argument is present,
+$KRUN expects 0 or 1 positional arguments. If a positional argument is present,
 it must be a file and the contents of that file is parsed using the parser
 specified with --parser and used as the value of \$PGM (unless --term is
 present; see below).
@@ -134,14 +134,14 @@ present; see below).
                            latex, kore, and none.
       --output-file FILE   Print final configuration to FILE
       --parser VALUE       Use VALUE as parser to parse \$PGM. For example,
-                           if the user says "$KX --parser cat foo.kore", then
+                           if the user says "$KRUN --parser cat foo.kore", then
                            \`cat foo.kore\` is invoked and the result on stdout
                            is used as the value of \$PGM as a KORE term.
       --pattern PAT        Use PAT as the search pattern with --search. Can
                            also be used without --search to match the output
                            configuration against a pattern and print the
                            substitution. Not supported on LLVM backend.
-      --save-temps         Do not delete temporary files when $KX terminates.
+      --save-temps         Do not delete temporary files when $KRUN terminates.
       --search             Search for all possible output states after
                            rewriting. Only supported on symbolic backends.
       --search-all         Like --search, but also return interim states
@@ -159,7 +159,7 @@ present; see below).
                            value for \$PGM as the entire input configuration.
                            i.e., skip composing configuration from
                            configuration variables.
-  -v, --verbose            Print significant commands executed by $KX.
+  -v, --verbose            Print significant commands executed by $KRUN.
       --version            Print version of K
       --                   Interpret all arguments following as positional
                            arguments.
@@ -470,9 +470,9 @@ else
     tempFiles+=("$tempFile")
     if [[ ! "${declaredConfigVars[@]}" =~ "$name" ]]; then
       if [ "$name" = "PGM" ]; then
-        error "Configuration variable \$PGM does not exist. Do not pass a positional argument to $KX."
+        error "Configuration variable \$PGM does not exist. Do not pass a positional argument to $KRUN."
       else
-        error "Configuration variable \$$name does not exist. Do not pass -c$name to $KX."
+        error "Configuration variable \$$name does not exist. Do not pass -c$name to $KRUN."
       fi
     fi
     indirectName="declaredConfigVar_$name"
