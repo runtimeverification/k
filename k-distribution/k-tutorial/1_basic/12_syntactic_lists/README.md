@@ -181,3 +181,8 @@ error.
 
 2. Write a modified `sum` function with the `List` construct that can also sum
 up an empty list of arguments. In such a case, the sum ought to be 0.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.13: Basics of K Rewriting](../13_rewrite_rules/README.md).
