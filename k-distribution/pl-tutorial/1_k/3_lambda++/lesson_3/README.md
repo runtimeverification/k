@@ -27,4 +27,4 @@ fail to even detect them at all).
 
 Go to [Lesson 4, LAMBDA++: Do Not Reuse Blindly!](../lesson_4/README.md).
 
-[MOVIE (out of date) [3'21"]](http://youtu.be/tW4KRdgBIGo)
+[MOVIE (out of date) [3'21"]](https://youtu.be/tW4KRdgBIGo)

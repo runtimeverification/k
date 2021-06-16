@@ -106,9 +106,6 @@ public final class GlobalOptions {
     @Parameter(names={"--help", "-h"}, description="Print this help message", help = true)
     public boolean help = false;
 
-    @Parameter(names={"--help-experimental", "-X"}, description="Print help on non-standard options.", help=true)
-    public boolean helpExperimental = false;
-
     @Parameter(names="--version", description="Print version information")
     public boolean version = false;
 

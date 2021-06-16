@@ -53,7 +53,7 @@ public class LLVMBackend extends KoreBackend {
         FileUtils.deleteQuietly(files.resolveKompiled("dt"));
         MutableInt warnings = new MutableInt();
         boolean optimize = kompileOptions.optimize1 || kompileOptions.optimize2 || kompileOptions.optimize3;
-        Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), options.heuristic, files.resolveKompiled("dt"), Matching.getThreshold(getThreshold()), !optimize, kompileOptions.global.includesExceptionType(ExceptionType.USELESS_RULE), ex -> {
+        Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), options.heuristic, files.resolveKompiled("dt"), Matching.getThreshold(getThreshold()), !optimize, kompileOptions.global.includesExceptionType(ExceptionType.USELESS_RULE), options.enableSearch, ex -> {
           kem.addKException(ex);
           if (kompileOptions.global.includesExceptionType(ex.getType())) {
               warnings.increment();
@@ -66,14 +66,21 @@ public class LLVMBackend extends KoreBackend {
         if (options.noLLVMKompile) {
             return;
         }
+        llvmKompile("main", "interpreter");
+        if (options.enableSearch) {
+          llvmKompile("search", "search");
+        }
+    }
+
+    private void llvmKompile(String type, String executable) {
         ProcessBuilder pb = files.getProcessBuilder();
         List<String> args = new ArrayList<>();
         args.add("llvm-kompile");
         args.add("definition.kore");
         args.add("dt");
-        args.add("main");
+        args.add(type);
         args.add("-o");
-        args.add("interpreter");
+        args.add(executable);
         if (kompileOptions.optimize1) args.add("-O1");
         if (kompileOptions.optimize2) args.add("-O2");
         if (kompileOptions.optimize3) args.add("-O2"); // clang -O3 does not make the llvm backend any faster

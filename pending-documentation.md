@@ -1149,8 +1149,8 @@ simplified similarly to a `function`.
 These attributes guide the prover when it tries to apply rules to discharge a
 proof obligation.
 
--   `smt-lemma` can be applied to a rule _without_ side-conditions to encode
-    that rule as an equality when sending queries to Z3.
+-   `smt-lemma` can be applied to a rule to encode it as an equality when
+    sending queries to Z3.
 -   `lemma` distinguishes normal rules from lemma rules in the semantics, but
     has no affect.
 -   `trusted` instructs the prover that it should not attempt proving a given
@@ -2452,7 +2452,7 @@ by one element, and terminals and `%r` reset the current color to the default
 foreground color of the terminal afterwards.
 
 There are two ways you can construct a list of colors associated with a
-production:P
+production:
 
 * The `color` attribute creates the entire list all with the same color, as
 specified by the value of the attribute. When combined with the default format

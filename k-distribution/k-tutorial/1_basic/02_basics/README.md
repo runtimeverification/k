@@ -4,7 +4,7 @@ The purpose of this lesson is to explain the basics of **productions** and
 **rules** in K. These are two types of K **sentences**. A K file consists of
 one or more **requires** or **modules** in K. Each module consists of one or
 more **imports** or sentences. For more information on requires, modules, and
-sentences, refer to [Lesson 4](../04_modules/README.md). However, for the time
+sentences, refer to [Lesson 1.4](../04_modules/README.md). However, for the time
 being, just think of a module as a container for sentences, and don't worry
 about requires or imports just yet.
 
@@ -41,7 +41,7 @@ programs or perform proofs using that definition. In this case, the directory
 `kompile` will create by default will be in the current directory and will be
 called `lesson-02-a-kompiled`.
 
-Now, save the following input file in your editor as `banana.color` in the
+Now, save the following input file in your editor as `banana.color` in the same
 directory as `lesson-02-a.k`:
 
 ```
@@ -66,7 +66,17 @@ You will get the following output:
 ```
 
 For now, don't worry about the `<k>`, `</k>`, or ` ~> .` portions of this
-output file. Instead, let's look at what this definition and program did.
+output file.
+
+You can also execute small programs directly by specifying them on the command
+line instead of putting them in a file. For example, the same program above
+could also have been executed by running the following command:
+
+```
+krun -cPGM='colorOf(Banana())'
+```
+
+Now, let's look at what this definition and program did.
 
 ## Productions, Constructors, and Functions
 

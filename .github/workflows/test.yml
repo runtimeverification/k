@@ -35,3 +35,6 @@ jobs:
 
       - name: 'Check development environment'
         run: nix-shell --run "echo OK"
+
+      - name: 'Run selected integration tests'
+        run: nix-build test.nix --argstr test help

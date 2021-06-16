@@ -14,7 +14,7 @@ K/Maude syntax highlighter for Atom based on the BBEdit grammar described below
 
 K/Maude syntax highlighter for TextWrangler/BBEdit
 
-- Source: http://github.com/kframework/k-editor-support/tree/master/BBEdit
+- Source: https://github.com/kframework/k-editor-support/tree/master/BBEdit
 
 ## Emacs
 
@@ -36,20 +36,20 @@ K syntax highlighter for Notepad++
 
 ## Pygments
 
-Support for http://pygments.org/ Pygments
+Support for https://pygments.org/ Pygments
 
-- Source: http://github.com/kframework/k-editor-support/tree/master/pygments
+- Source: https://github.com/kframework/k-editor-support/tree/master/pygments
 - Note: the lexer is far from being complete.
 
 ## Vim
 
 K/Maude syntax highlighter for vim
 
-- Source: http://github.com/kframework/k-editor-support/tree/master/vim
+- Source: https://github.com/kframework/k-editor-support/tree/master/vim
 
 ## Visual Studio Code
 
 K extension for Visual Studio Code
 
 - Extension page on Visual Studio Marketplace: https://marketplace.visualstudio.com/items?itemName=clv.kframework
-- Source code: http://github.com/LucianCumpata/K-VSCode
+- Source code: https://github.com/LucianCumpata/K-VSCode

@@ -499,7 +499,7 @@ patterns for doing so, refer to K's
 [user documentation](pending-documentation.md).
 
 ```k
-module SET [not-lr1]
+module SET
   imports INT-SYNTAX
   imports BASIC-K
 
@@ -624,7 +624,7 @@ patterns for doing so, refer to K's
 [user documentation](pending-documentation).
 
 ```k
-module LIST [not-lr1]
+module LIST
   imports INT-SYNTAX
   imports BASIC-K
 
@@ -792,7 +792,7 @@ module BOOL-SYNTAX
   syntax Bool ::= "false" [token]
 endmodule
 
-module BOOL [not-lr1]
+module BOOL
   imports BASIC-K
   imports BOOL-SYNTAX
 ```
@@ -1661,10 +1661,32 @@ divergent behavior unless the `Bytes` type is used in a manner that preserves
 consistency.
 
 ```k
-module BYTES-HOOKED
+module BYTES-SYNTAX
   imports STRING-SYNTAX
 
   syntax Bytes [hook(BYTES.Bytes), token]
+endmodule
+```
+
+```k
+module BYTES-STRING-ENCODE [kore, symbolic]
+  imports BYTES-SYNTAX
+```
+### Encoding/decoding between Bytes and String
+
+You can encode/decode between Bytes and String using `UTF-8`, `UTF-16LE`, `UTF-16BE`, `UTF-32LE`, and `UTF-32BE`
+
+```k
+    syntax String ::= decodeBytes ( encoding: String , contents: Bytes ) [function, hook(BYTES.decodeBytes)]
+    syntax Bytes ::= encodeBytes ( encoding: String , contents: String ) [function, hook(BYTES.encodeBytes)]
+endmodule
+```
+
+```k
+module BYTES-HOOKED
+  imports STRING-SYNTAX
+  imports BYTES-SYNTAX
+  imports BYTES-STRING-ENCODE
 ```
 
 ### Empty byte array

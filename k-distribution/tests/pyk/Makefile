@@ -89,4 +89,4 @@ $(sum_to_n_coverage): $(llvm_imp_kompiled) kpyk-tests/sum-to-n.imp
 	mv $(llvm_dir)/imp-kompiled/*_coverage.txt $@
 
 test-kpyk-coverage-log: $(sum_to_n_coverage)
-	$(KPYK) $(llvm_dir)/imp-kompiled coverage $(sum_to_n_coverage)
+	$(KPYK) $(llvm_dir)/imp-kompiled coverage $(sum_to_n_coverage) > /dev/null

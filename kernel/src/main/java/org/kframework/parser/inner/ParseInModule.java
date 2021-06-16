@@ -59,22 +59,29 @@ public class ParseInModule implements Serializable, AutoCloseable {
     private volatile Grammar grammar = null;
     private final boolean strict;
     private final boolean profileRules;
+    private final boolean isBison;
     private final FileUtil files;
     public ParseInModule(Module seedModule) {
-        this(seedModule, seedModule, seedModule, seedModule, true, false, null);
+        this(seedModule, seedModule, seedModule, seedModule, null, true, false, false, null);
     }
 
-    public ParseInModule(Module seedModule, boolean strict, boolean profileRules, FileUtil files) {
-        this(seedModule, null, null, null, strict, profileRules, files);
+    public ParseInModule(Module seedModule, boolean strict, boolean profileRules, boolean isBison, FileUtil files) {
+        this(seedModule, null, null, null, null, strict, profileRules, isBison, files);
     }
 
-    public ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule, boolean strict, boolean profileRules, FileUtil files) {
+    public ParseInModule(Module seedModule, Scanner scanner, boolean strict, boolean profileRules, boolean isBison, FileUtil files) {
+        this(seedModule, null, null, null, scanner, strict, profileRules, isBison, files);
+    }
+
+    public ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule, Scanner scanner, boolean strict, boolean profileRules, boolean isBison, FileUtil files) {
         this.seedModule = seedModule;
         this.extensionModule = extensionModule;
         this.disambModule = disambModule;
         this.parsingModule = parsingModule;
+        this.scanner = scanner;
         this.strict = strict;
         this.profileRules = profileRules;
+        this.isBison = isBison;
         this.files = files;
         if (profileRules) {
             try {
@@ -102,7 +109,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
     public Module getExtensionModule() {
         Module extM = extensionModule;
         if (extM == null) {
-            Tuple3<Module, Module, Module> mods = RuleGrammarGenerator.getCombinedGrammarImpl(seedModule);
+            Tuple3<Module, Module, Module> mods = RuleGrammarGenerator.getCombinedGrammarImpl(seedModule, isBison);
             extM = mods._1();
             disambModule = mods._2();
             parsingModule = mods._3();
@@ -114,7 +121,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
     public Module getParsingModule() {
         Module parseM = parsingModule;
         if (parseM == null) {
-            Tuple3<Module, Module, Module> mods = RuleGrammarGenerator.getCombinedGrammarImpl(seedModule);
+            Tuple3<Module, Module, Module> mods = RuleGrammarGenerator.getCombinedGrammarImpl(seedModule, isBison);
             extensionModule = mods._1();
             disambModule = mods._2();
             parseM = mods._3();
@@ -126,7 +133,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
     public Module getDisambiguationModule() {
         Module disambM = disambModule;
         if (disambM == null) {
-            Tuple3<Module, Module, Module> mods = RuleGrammarGenerator.getCombinedGrammarImpl(seedModule);
+            Tuple3<Module, Module, Module> mods = RuleGrammarGenerator.getCombinedGrammarImpl(seedModule, isBison);
             extensionModule = mods._1();
             disambM = mods._2();
             parsingModule = mods._3();
@@ -241,6 +248,9 @@ public class ParseInModule implements Serializable, AutoCloseable {
             }
 
             Either<Set<KEMException>, Term> rez = new TreeCleanerVisitor().apply(parsed);
+            if (rez.isLeft())
+                return new Tuple2<>(rez, warn);
+            rez = new CollapseRecordProdsVisitor(rez.right().get()).apply(rez.right().get());
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
             rez = new CorrectRewritePriorityVisitor().apply(rez.right().get());

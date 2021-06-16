@@ -49,10 +49,9 @@ public class KServerFrontEnd extends FrontEnd {
             KExceptionManager kem,
             KServerOptions options,
             @Usage String usage,
-            @ExperimentalUsage String experimentalUsage,
             JarInfo jarInfo,
             Provider<FileUtil> files) {
-        super(kem, options.global, usage, experimentalUsage, jarInfo, files);
+        super(kem, options.global, usage, jarInfo, files);
         this.options = options;
     }
 

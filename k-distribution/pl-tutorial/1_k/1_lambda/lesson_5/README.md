@@ -91,4 +91,4 @@ which will allow us to write nicer programs.
 
 Go to [Lesson 6, LAMBDA: Selective Strictness; Anonymous Variables](../lesson_6/README.md).
 
-[MOVIE (out of date) [4'52"]](http://youtu.be/T1aI04q3l9U)
+[MOVIE (out of date) [4'52"]](https://youtu.be/T1aI04q3l9U)

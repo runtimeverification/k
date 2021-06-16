@@ -33,4 +33,7 @@ public class LLVMKompileOptions {
 
     @Parameter(names="--no-llvm-kompile", description="Do not invoke llvm-kompile. Useful if you want to do it yourself when building with the LLVM backend.")
     public boolean noLLVMKompile;
+
+    @Parameter(names="--enable-search", description="By default, to reduce compilation time, `krun --search` is disabled on the LLVM backend. Pass this flag to enable it.")
+    public boolean enableSearch;
 }

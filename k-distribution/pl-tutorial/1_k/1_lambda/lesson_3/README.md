@@ -39,4 +39,4 @@ in order to write human readable and interesting programs.
 
 Go to [Lesson 4, LAMBDA: Generating Documentation; Latex Attributes](../lesson_4/README.md).
 
-[MOVIE (out of date) [2'20"]](http://youtu.be/aul1x6bd1YM)
+[MOVIE (out of date) [2'20"]](https://youtu.be/aul1x6bd1YM)
