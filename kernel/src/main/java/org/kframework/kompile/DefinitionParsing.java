@@ -114,10 +114,10 @@ public class DefinitionParsing {
         this.sw = sw;
     }
 
-    public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, java.util.Set<String> excludeModules, boolean readOnlyCache) {
+    public java.util.Set<Module> parseModules(java.util.Set<Module> previousModules, String mainModule, String entryPointModule, File definitionFile, java.util.Set<String> excludeModules, boolean readOnlyCache) {
         Definition def = parser.loadDefinition(
                 mainModule,
-                mutable(definition.getParsedDefinition().modules()),
+                previousModules,
                 FileUtil.load(definitionFile),
                 Source.apply(definitionFile.getAbsolutePath()),
                 definitionFile.getParentFile(),

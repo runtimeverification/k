@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
+
 /**
  * @author Denis Bogdanas
  * Created on 07-Nov-19.
@@ -67,14 +68,13 @@ public class ProofDefinitionBuilder {
                 specModuleName == null ? FilenameUtils.getBaseName(specFile.getName()).toUpperCase() : specModuleName;
         File absSpecFile = files.resolveWorkingDirectory(specFile).getAbsoluteFile();
 
-        Set<Module> modules = kompile.parseModules(compiledDefinition, defModuleNameUpdated, specModuleNameUpdated, absSpecFile,
-                backend.excludedModuleTags(), readOnlyCache);
+        Set<Module> modules = kompile.parseModules(mutable(compiledDefinition.getParsedDefinition().modules()),
+                defModuleNameUpdated,specModuleNameUpdated,absSpecFile,backend.excludedModuleTags(), readOnlyCache);
         Map<String, Module> modulesMap = modules.stream().collect(Collectors.toMap(Module::name, m -> m));
         Definition parsedDefinition = compiledDefinition.getParsedDefinition();
         Module specModule = getModule(specModuleNameUpdated, modulesMap, parsedDefinition);
         specModule = kompile.proverChecks(specModule, modulesMap.get(defModuleNameUpdated));
-        kompile.structuralChecks(scala.collection.JavaConverters.asScalaSet(modules),
-                specModule, scala.Option.empty(), backend.excludedModuleTags());
+        kompile.structuralChecks(immutable(modules),specModule, scala.Option.empty(), backend.excludedModuleTags());
         Module defModule = getModule(defModuleNameUpdated, modulesMap, parsedDefinition);
         Definition rawExtendedDef = Definition.apply(defModule, immutable(modules), parsedDefinition.att());
         Definition compiledExtendedDef = compileDefinition(backend, rawExtendedDef); //also resolves imports
