@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -471,12 +472,13 @@ public class RuleGrammarGenerator {
         return Tuple3.apply(extensionM, disambM, parseM);
     }
 
+    private static final Pattern alphaNum = Pattern.compile("[A-Za-z][A-Za-z0-9\\-]*");
     private static void addCellNameProd(Set<Sentence> prods, Sentence prod) {
         if (prod instanceof Production) {
           for (ProductionItem pi : iterable(((Production)prod).items())) {
             if (pi instanceof Terminal) {
               Terminal t = (Terminal)pi;
-              if (t.value().matches("[A-Za-z][A-Za-z0-9\\-]*")) {
+              if (alphaNum.matcher(t.value()).matches()) {
                 prods.add(Production(Seq(), Sorts.CellName(), Seq(t), Att().add("token")));
               }
             }
