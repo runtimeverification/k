@@ -18,7 +18,7 @@
     true
   #Equals
     Z:MyId in_keys ( MAP
-    ( Y:MyId |-> 2 ) )
+    ( Y:MyId |-> 1 ) )
   }
 #And
   {
