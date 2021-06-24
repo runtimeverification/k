@@ -137,6 +137,10 @@ public class DefinitionParsing {
         modules = Stream.concat(modules, stream(def.getModule(mainModule).get().importedModules()));
         modules = Stream.concat(modules, Stream.of(def.getModule(entryPointModule).get()));
         modules = Stream.concat(modules, stream(def.getModule(entryPointModule).get().importedModules()));
+        modules = Stream.concat(modules, Stream.of(def.getModule("K-REFLECTION").get()));
+        modules = Stream.concat(modules, Stream.of(def.getModule("STDIN-STREAM").get()));
+        modules = Stream.concat(modules, Stream.of(def.getModule("STDOUT-STREAM").get()));
+        modules = Stream.concat(modules, Stream.of(def.getModule("MAP").get()));
         // include modules from kast.md. We can easily find them because they will have no non-Syntax sentences
         modules = Stream.concat(modules, stream(def.entryModules()).filter(m -> stream(m.sentences())
                 .noneMatch(s -> s instanceof Bubble
