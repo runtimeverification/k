@@ -76,7 +76,12 @@ public class ProofDefinitionBuilder {
         specModule = kompile.proverChecks(specModule, modulesMap.get(defModuleNameUpdated));
         kompile.structuralChecks(immutable(modules),specModule, scala.Option.empty(), backend.excludedModuleTags());
         Module defModule = getModule(defModuleNameUpdated, modulesMap, parsedDefinition);
-        Definition rawExtendedDef = Definition.apply(defModule, immutable(modules), parsedDefinition.att());
+        final Module specModuleFinal = specModule;
+        Set<Module> modules3 = modules.stream().filter(m ->
+                !(m.name().equals(specModuleFinal.name())
+                        || (specModuleFinal.importedModuleNames().contains(m.name())
+                        && !defModule.importedModuleNames().contains(m.name())))).collect(Collectors.toSet());
+        Definition rawExtendedDef = Definition.apply(defModule, immutable(modules3), parsedDefinition.att());
         Definition compiledExtendedDef = compileDefinition(backend, rawExtendedDef); //also resolves imports
         compiledExtendedDef = backend.proofDefinitionNonCachedSteps(extraConcreteRuleLabels).apply(compiledExtendedDef);
 
