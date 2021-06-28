@@ -1,14 +1,14 @@
 # Lesson 1.15: Configuration Declarations and Cell Nesting
 
 The purpose of this lesson is to explain how to store additional information
-about the state of your interpreter by declaring additional cells using the
+about the state of your interpreter by declaring **cells** using the
 `configuration` sentence, as well as how to add additional inputs to your
 definition.
 
 ## Cells and Configuration Declarations
 
 We have already covered the absolute basics of cells in K by looking at the
-`<k>` cell. As explained in [Lesson 1.13](../13_rewrite_ruels/README.md), the
+`<k>` cell. As explained in [Lesson 1.13](../13_rewrite_rules/README.md), the
 `<k>` cell is available without being explicitly declared. It turns out this is
 because, if the user does not explicitly specify a `configuration` sentence
 anywhere in the main module of their definition, the `configuration` sentence
@@ -22,21 +22,20 @@ automatically. Here is what that sentence looks like:
 
 This configuration declaration declares a single cell, the `<k>` cell. It also
 declares that at the start of rewriting, the contents of that cell should be
-initialized with the value of the `$PGM` **configuration variable**. A
-configuration variable is like an input to `krun`. It is a term that is
-supplied to krun in the form of an AST that was parsed from the grammar of
-a particular module. By default, the `$PGM` configuration variable uses the 
-module of the main syntax module of the definition. The cast on the
-configuration variable also specifies the sort that is used as the entry point
-to the parser, in this case the `K` sort.
+initialized with the value of the `$PGM` **configuration variable**.
+Configuration variables function as inputs to `krun`. These terms are supplied
+to `krun` in the form of ASTs parsed using a particular module. By default, the
+`$PGM` configuration variable uses the main syntax module of the definition.
+The cast on the configuration variable also specifies the sort that is used as
+the entry point to the parser, in this case the `K` sort.
 
 Note that we did not explicitly specify the `$PGM` configuration variable when
-we invoke `krun` on a file. This is because `krun` specifically handles a file
-passed as a positional argument as a file containing the term that should be
-passed as the `$PGM` configuration variable, as a special naming convention.
-We did, however, specify the `PGM` name explicitly when we called `krun` with
-the `-cPGM` command line argument. This is the other, explicit, way of
-specifying an input to krun.
+we invoked `krun` on a file. This is because `krun` handles the `$PGM` variable
+specially, and allows you to pass the term for that variable in the contents of
+a file passed as a positional argument to `krun`. We did, however, specify the
+`PGM` name explicitly when we called `krun` with the `-cPGM` command line
+argument in [Lesson 1.2](../02_basics/README.md). This is the other, explicit,
+way of specifying an input to krun.
 
 This explains the most basic use of configuration declarations in K. We can,
 however, declare multiple cells and multiple configuration variables. We can
