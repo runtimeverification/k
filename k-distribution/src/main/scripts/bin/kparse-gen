@@ -32,6 +32,7 @@ execute () {
 }
 
 KPARSE_GEN=$(basename "$0")
+KAST_UTIL="$(dirname "$0")/kast"
 
 error () {
   printf "[Error] Inner Parser: $@\n" | $fold_lines 1>&2
@@ -191,4 +192,4 @@ if [ -z "${sort+unset}" ]; then
   fi
 fi
 
-execute kast ${bisonFiles[@]} --bison-stack-max-depth "$stackDepth" --directory "$dir" $glr --module "$module" --sort "$sort" "$output_file"
+execute "$KAST_UTIL" ${bisonFiles[@]} --bison-stack-max-depth "$stackDepth" --directory "$dir" $glr --module "$module" --sort "$sort" "$output_file"
