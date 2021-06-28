@@ -206,6 +206,7 @@ public class DefinitionParsing {
         parsedBubbles.set(0);
         cachedBubbles.set(0);
         Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles);
+        sw.printIntermediate("Parse rules [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " rules]");
         saveCachesAndReportParsingErrors();
         return afterResolvingAllOtherBubbles;
     }
@@ -326,8 +327,7 @@ public class DefinitionParsing {
                   (Set<Sentence>) m.localSentences().$bar(importedConfigurationSortsSubsortedToCell),
                   m.att());
 
-            ParseCache cache = loadCache(gen.getConfigGrammar(module));
-            Module extMod = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files).getExtensionModule();
+            Module extMod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(module), isStrict, profileRules, files).getExtensionModule();
             Set<Sentence> configDeclProductions = stream(module.localSentences())
                       .filter(s -> s instanceof Configuration)
                       .map(b -> (Configuration) b)

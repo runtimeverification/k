@@ -28,8 +28,10 @@ import org.kframework.utils.Stopwatch;
 import scala.Option;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -125,6 +127,9 @@ public class KastFrontEnd extends FrontEnd {
             KRead kread = new KRead(kem, files.get(), options.input);
             if (options.genParser || options.genGlrParser) {
                 kread.createBisonParser(parsingMod, sort, options.bisonOutputFile(), options.genGlrParser, options.bisonFile, options.bisonStackMaxDepth);
+                try {
+                  Files.copy(options.bisonOutputFile().toPath(), files.get().resolveKompiled("parser_" + sort.name() + "_" + options.module).toPath());
+                } catch (IOException e) {}
             } else {
                 Reader stringToParse = options.stringToParse();
                 Source source = options.source();
