@@ -32,6 +32,7 @@ execute () {
 }
 
 KORE_PRINT=$(basename "$0")
+KAST_UTIL="$(dirname "$0")/kast"
 
 error () {
   printf "[Error] Unparser: $@\n" | $fold_lines 1>&2
@@ -207,7 +208,7 @@ fi
 
 
 if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then
-  execute "$(dirname "$0")/kast" --input kore "${ORIG_ARGV[@]}"
+  execute "$KAST_UTIL" --input kore "${ORIG_ARGV[@]}"
   exit $?
 fi
 
@@ -234,7 +235,7 @@ case "$outputMode" in
   none) ;;
 
   *)
-  execute "$(dirname "$0")/kast" --input kore "${ORIG_ARGV[@]}"
+  execute "$KAST_UTIL" --input kore "${ORIG_ARGV[@]}"
   ;;
 esac
  
