@@ -3,6 +3,6 @@ module RECORDONRHS
 
 syntax Foo ::= foo(Int)
 
-rule 0 => foo(...)
+rule _Gen0 => foo(...)
 
 endmodule

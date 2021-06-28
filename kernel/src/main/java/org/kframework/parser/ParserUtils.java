@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -88,6 +89,11 @@ public class ParserUtils {
             File currentDirectory,
             List<File> lookupDirectories,
             Set<File> requiredFiles) {
+        try {
+            source = Source.apply(Paths.get(source.source()).toRealPath(LinkOption.NOFOLLOW_LINKS).toString());
+        } catch (IOException e) {
+            // if it fails, just keep the original option
+        }
         if (source.source().endsWith(".md")) {
             definitionText = mdExtractor.extract(definitionText, source);
             if (options.debug()) { // save .k files in temp directory

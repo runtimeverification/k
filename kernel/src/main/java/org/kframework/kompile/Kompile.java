@@ -47,7 +47,9 @@ import scala.Function1;
 import scala.Option;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -136,7 +138,6 @@ public class Kompile {
             }
         }
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, excludedModuleTags);
-        sw.printIntermediate("Parse rules [" + definitionParsing.parsedBubbles.get() + "/" + (definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get()) + " rules]");
 
         files.saveToKompiled("parsed.txt", parsedDef.toString());
         checkDefinition(parsedDef, excludedModuleTags);
@@ -163,7 +164,15 @@ public class Kompile {
 
         if (kompileOptions.genBisonParser || kompileOptions.genGlrBisonParser) {
             if (def.configurationVariableDefaultSorts.containsKey("$PGM")) {
-                new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, files.resolveKompiled("parser_PGM"), kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth);
+                String filename = "parser_" + def.programStartSymbol.name() + "_" + def.mainSyntaxModuleName();
+                File outputFile = files.resolveKompiled(filename);
+                File linkFile = files.resolveKompiled("parser_PGM");
+                new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, outputFile, kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth);
+                try {
+                    Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
+                } catch (IOException e) {
+                    throw KEMException.internalError("Cannot write to kompiled directory.", e);
+                }
             }
             for (Production prod : iterable(kompiledDefinition.mainModule().productions())) {
                 if (prod.att().contains("cell") && prod.att().contains("parser")) {
@@ -179,7 +188,16 @@ public class Kompile {
                         if (!mod.isDefined()) {
                             throw KEMException.compilerError("Could not find module referenced by parser attribute: " + module, prod);
                         }
-                        new KRead(kem, files, InputModes.PROGRAM).createBisonParser(mod.get(), def.configurationVariableDefaultSorts.getOrDefault("$" + name, Sorts.K()), files.resolveKompiled("parser_" + name), kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth);
+                        Sort sort = def.configurationVariableDefaultSorts.getOrDefault("$" + name, Sorts.K());
+                        String filename = "parser_" + sort.name() + "_" + module;
+                        File outputFile = files.resolveKompiled(filename);
+                        File linkFile = files.resolveKompiled("parser_" + name);
+                        new KRead(kem, files, InputModes.PROGRAM).createBisonParser(mod.get(), sort, outputFile, kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth);
+                        try {
+                            Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
+                        } catch (IOException e) {
+                            throw KEMException.internalError("Cannot write to kompiled directory.", e);
+                        }
                     }
                 }
             }

@@ -28,3 +28,21 @@ kompile 09_unparsing/README.md --md-selector "k & ! exclude" --main-module LESSO
 kompile 09_unparsing/README.md --md-selector "k & ! exclude" --main-module LESSON-09-B -d build/09b
 kompile 09_unparsing/README.md --md-selector "k & ! exclude" --main-module LESSON-09-C -d build/09c
 kompile 10_strings/README.md --md-selector "k & ! exclude" --main-module LESSON-10 -d build/10
+kompile 11_casts/README.md --md-selector "k & ! exclude" --main-module LESSON-11-A -d build/11a
+kompile 11_casts/README.md --md-selector "k & ! exclude" --main-module LESSON-11-B -d build/11b
+kompile 11_casts/README.md --md-selector "k & ! exclude" --main-module LESSON-11-C -d build/11c
+kompile 11_casts/README.md --md-selector "k & ! exclude" --main-module LESSON-11-D -d build/11d
+kompile 12_syntactic_lists/README.md --md-selector "k & ! exclude" --main-module LESSON-12-A -d build/12a
+kompile 12_syntactic_lists/README.md --md-selector "k & ! exclude" --main-module LESSON-12-B -d build/12b
+kompile 12_syntactic_lists/README.md --md-selector "k & ! exclude" --main-module LESSON-12-C -d build/12c
+kompile 12_syntactic_lists/README.md --md-selector "k & ! exclude" --main-module LESSON-12-D -d build/12d
+kompile 12_syntactic_lists/README.md --md-selector "k & ! exclude" --main-module LESSON-12-E -d build/12e
+kompile 12_syntactic_lists/README.md --md-selector "k & ! exclude" --main-module LESSON-12-F -d build/12f
+kompile 12_syntactic_lists/README.md --md-selector "k & ! exclude" --main-module LESSON-12-G -d build/12g
+kompile 13_rewrite_rules/README.md --md-selector "k & ! exclude" --main-module LESSON-13-A -d build/13a
+kompile 13_rewrite_rules/README.md --md-selector "k & ! exclude" --main-module LESSON-13-B -d build/13b
+kompile 13_rewrite_rules/README.md --md-selector "k & ! exclude" --main-module LESSON-13-C -d build/13c
+kompile 14_evaluation_order/README.md --md-selector "k & ! exclude & ! alias" --main-module LESSON-14-A -d build/14a
+kompile 14_evaluation_order/README.md --md-selector "k & ! exclude & ! alias" --main-module LESSON-14-B -d build/14b
+kompile 14_evaluation_order/README.md --md-selector "k & ! exclude" --main-module LESSON-14-C -d build/14c
+kompile 14_evaluation_order/README.md --md-selector "k & ! exclude & ! alias" --main-module LESSON-14-D -d build/14d
