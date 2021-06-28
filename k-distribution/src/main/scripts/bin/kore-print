@@ -227,7 +227,7 @@ case "$outputMode" in
   ;;
 
   kore)
-  cat "$inputCfg" > "$outputFile"
+  cat "$input_file" > "$outputFile"
   echo >> "$outputFile"
   ;;
 
