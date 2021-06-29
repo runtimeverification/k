@@ -176,4 +176,4 @@ of the other constructs do not need to change, as seen in the next lesson.
 
 Go to [Lesson 3, LAMBDA++: Reusing Existing Semantics](../lesson_3/README.md).
 
-[MOVIE (out of date) [8'02"]](http://youtu.be/BYhQQW6swfc)
+[MOVIE (out of date) [8'02"]](https://youtu.be/BYhQQW6swfc)

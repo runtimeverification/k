@@ -287,7 +287,12 @@ specifying that you want all the colors in the list to be the same color.
 `(`, `)`, `{`, and `}` a third color.
 
 2. Use the `format`, `color`, and `colors` attributes to tell the unparser to
-style the expression grammar from lesson 8, problem 3 according to your own
+style the expression grammar from lesson 1.8, problem 3 according to your own
 personal preferences for syntax highlighting and code formatting. You can
 view the result of the unparser on a function term without evaluating that
 function by means of the command `kast --output pretty <file>`.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.10: Strings](../10_strings/README.md).

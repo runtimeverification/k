@@ -34,4 +34,4 @@ LAMBDA, so we can start to evaluate meaningful expressions.
 
 Go to [Lesson 5, LAMBDA: Adding Builtins; Side Conditions](../lesson_5/README.md).
 
-[MOVIE (out of date) [3'13"]](http://youtu.be/ULXA4e_6-DY)
+[MOVIE (out of date) [3'13"]](https://youtu.be/ULXA4e_6-DY)

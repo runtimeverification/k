@@ -30,23 +30,13 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
   }
 
   def termConsToKApply(t: TermCons): K = {
-    if (t.production.att.contains("recordPrd", classOf[Production])) {
-      val realProd = t.production.att.get("recordPrd", classOf[Production])
-      val map = new util.ArrayList(t.items).asScala.reverse.zipWithIndex.map { case (item, idx) => (t.production.nonterminal(idx).name.get, apply(item))} toMap
-      val realItems = realProd.nonterminals.map {
-        case NonTerminal(sort, None) => anonVar(sort, t)
-        case NonTerminal(sort, Some(x)) => map.getOrElse(x, anonVar(sort, t))
-      }
-      KApply(t.production.klabel.get.head, KList(realItems.asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
-    } else {
-      val realProd = if (t.production.att.contains("originalPrd", classOf[Production])) t.production.att.get("originalPrd", classOf[Production]) else t.production
-      if (t.production.att.contains(Att.BRACKET))
-        return apply(t.items.get(0))
-      if (t.production.klabel.isEmpty)
-        throw KEMException.internalError("Missing klabel in production: " + t.production, t)
-      val klabel = if (t.production.klabel.get.name == "#OuterCast") KLabel("project:" ++ t.production.sort.toString) else t.production.klabel.get
-      KApply(klabel.head, KList(new util.ArrayList(t.items).asScala.reverse map apply asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
-    }
+    val realProd = if (t.production.att.contains("originalPrd", classOf[Production])) t.production.att.get("originalPrd", classOf[Production]) else t.production
+    if (t.production.att.contains(Att.BRACKET))
+      return apply(t.items.get(0))
+    if (t.production.klabel.isEmpty)
+      throw KEMException.internalError("Missing klabel in production: " + t.production, t)
+    val klabel = if (t.production.klabel.get.name == "#OuterCast") KLabel("project:" ++ t.production.sort.toString) else t.production.klabel.get
+    KApply(klabel.head, KList(new util.ArrayList(t.items).asScala.reverse map apply asJava), locationToAtt(t.location, t.source).add(classOf[Production], realProd))
   }
 
   def down(t: K): K = t match {
