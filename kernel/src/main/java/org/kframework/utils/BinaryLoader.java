@@ -7,60 +7,25 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.RequestScoped;
-import org.nustaq.serialization.FSTConfiguration;
-import org.nustaq.serialization.FSTObjectInput;
-import org.nustaq.serialization.FSTObjectOutput;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.channels.OverlappingFileLockException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @RequestScoped
 public class BinaryLoader {
-
-    static {
-        disableAccessWarnings();
-    }
-
-    /**
-     * Disables JVM warnings "WARNING: An illegal reflective access operation has occurred" produced by FST.
-     * <p>
-     * source: https://stackoverflow.com/a/53517025/4182868
-     */
-    @SuppressWarnings("unchecked")
-    public static void disableAccessWarnings() {
-        try {
-            Class unsafeClass = Class.forName("sun.misc.Unsafe");
-            Field field = unsafeClass.getDeclaredField("theUnsafe");
-            field.setAccessible(true);
-            Object unsafe = field.get(null);
-
-            Method putObjectVolatile =
-                    unsafeClass.getDeclaredMethod("putObjectVolatile", Object.class, long.class, Object.class);
-            Method staticFieldOffset = unsafeClass.getDeclaredMethod("staticFieldOffset", Field.class);
-
-            Class loggerClass = Class.forName("jdk.internal.module.IllegalAccessLogger");
-            Field loggerField = loggerClass.getDeclaredField("logger");
-            Long offset = (Long) staticFieldOffset.invoke(unsafe, loggerField);
-            putObjectVolatile.invoke(unsafe, loggerClass, offset, null);
-            // DISABLE EXCEPTION CHECKSTYLE
-        } catch (Exception ignored) {
-            // ENABLE EXCEPTION CHECKSTYLE
-            //Exception here caused by reflexion will just re-enable the warning.
-        }
-    }
-
-    //Fixes a concurrency issue in FST 2.57
-    //https://github.com/RuedigerMoeller/fast-serialization/issues/235
-    static ThreadLocal<FSTConfiguration> conf = ThreadLocal.withInitial(FSTConfiguration::createDefaultConfiguration);
 
     private static ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -87,7 +52,7 @@ public class BinaryLoader {
 
     public <T> T loadOrDie(Class<T> cls, File file) {
         try {
-            return cls.cast(loadSynchronized(file));
+            return loadSynchronized(file, cls);
         } catch (ClassNotFoundException e) {
             throw new AssertionError("Something wrong with deserialization", e);
         } catch (ObjectStreamException e) {
@@ -103,7 +68,7 @@ public class BinaryLoader {
     @Nullable
     public <T> T loadCache(Class<T> cls, File file) {
         try {
-            return cls.cast(loadSynchronized(file));
+            return loadSynchronized(file, cls);
         } catch (FileNotFoundException e) {
             //ignored
         } catch (IOException | ClassNotFoundException e) {
@@ -118,7 +83,7 @@ public class BinaryLoader {
      * Locks the file before writing, so that it cannot be read by another instance of K. If the file is currently in
      * use, this method will block until lock can be acquired.
      */
-    public void saveSynchronized(File file, Object o) throws IOException, InterruptedException {
+    private void saveSynchronized(File file, Object o) throws IOException, InterruptedException {
         //To protect from concurrent access from another thread, in kserver mode
         lock.writeLock().lockInterruptibly();
         //JDK API limitation: there's no API to atomically open a file for writing and lock it.
@@ -129,7 +94,7 @@ public class BinaryLoader {
             //To protect from concurrent access to same file from another process, in standalone mode
             lockStream.getChannel().lock(); //Lock is released automatically when lockStream is closed.
             //already buffered
-            try (FSTObjectOutput serializer = new FSTObjectOutput(new FileOutputStream(file), conf.get())) {
+            try (ObjectOutputStream serializer = new ObjectOutputStream(new FileOutputStream(file))) {
                 serializer.writeObject(o);
             }
         } finally {
@@ -137,7 +102,7 @@ public class BinaryLoader {
         }
     }
 
-    public Object loadSynchronized(File file) throws IOException, ClassNotFoundException, InterruptedException {
+    private <T> T loadSynchronized(File file, Class<T> cls) throws IOException, ClassNotFoundException, InterruptedException {
         //To protect from concurrent access from another thread
         lock.readLock().lockInterruptibly();
         //There's no issue if input stream is opened before lock is acquired
@@ -149,13 +114,9 @@ public class BinaryLoader {
             } catch (OverlappingFileLockException e) {
                 //We are in Nailgun mode. File lock is not needed.
             }
-            try (FSTObjectInput deserializer = new FSTObjectInput(in, conf.get())) { //already buffered
+            try (ObjectInputStream deserializer = new ObjectInputStream(in)) { //already buffered
                 Object obj = deserializer.readObject();
-                return obj;
-            } finally {
-                // Former FST bug workaround: FSTObjectInput.close() doesn't close underlying FileInputStream.
-                // This may cause OverlappingFileLockException in saveSynchronized(), in Nailgun mode.
-                in.close();
+                return cls.cast(obj);
             }
         } finally {
             lock.readLock().unlock();
