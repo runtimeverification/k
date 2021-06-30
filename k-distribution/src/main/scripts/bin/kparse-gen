@@ -56,19 +56,19 @@ generate a parser for the KItem sort in the main syntax module.
                            parser
       --bison-stack-max-depth  Maximum size of bison stack. Default: 10000
   -d, --directory DIR      Look for a kompiled directory ending in "-kompiled"
-                           under the directory DIR.
-  -g, --glr                Generate a GLR parser instead of an LR(1) parser.
+                           under the directory DIR
+  -g, --glr                Generate a GLR parser instead of an LR(1) parser
   -h, --help               Display this help and exit
   -m, --module MODULE      Module to use to generate grammar
       --no-exc-wrap        Do not wrap exception messages to 80 chars. Keep
-                           long lines.
+                           long lines
       --save-temps         Do not delete temporary files when $KUNPARSE
-                           terminates.
+                           terminates
   -s, --sort               Sort to use as start symbol of parser
-  -v, --verbose            Print significant commands executed by $KUNPARSE.
+  -v, --verbose            Print significant commands executed by $KUNPARSE
       --version            Print version of K
       --                   Interpret all arguments following as positional
-                           arguments.
+                           arguments
 HERE
 }
 
@@ -153,7 +153,7 @@ done
 
 if [[ "${#ARGV[@]}" -ne 1 ]]; then
   print_usage
-  error 'Must pass exactly one KORE file as a positional argument.'
+  error 'Must pass exactly one writeable file path as a positional argument.'
 fi
 output_file="${ARGV[0]}"
 
