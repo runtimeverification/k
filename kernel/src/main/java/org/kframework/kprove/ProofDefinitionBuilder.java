@@ -68,6 +68,8 @@ public class ProofDefinitionBuilder {
                 specModuleName == null ? FilenameUtils.getBaseName(specFile.getName()).toUpperCase() : specModuleName;
         File absSpecFile = files.resolveWorkingDirectory(specFile).getAbsoluteFile();
 
+        cache.put(compiledDefinition.getParsedDefinition(), compiledDefinition.kompiledDefinition);
+
         Set<Module> modules = kompile.parseModules(mutable(compiledDefinition.getParsedDefinition().modules()),
                 defModuleNameUpdated,specModuleNameUpdated,absSpecFile,backend.excludedModuleTags(), readOnlyCache);
         Map<String, Module> modulesMap = modules.stream().collect(Collectors.toMap(Module::name, m -> m));
@@ -77,8 +79,10 @@ public class ProofDefinitionBuilder {
         kompile.structuralChecks(immutable(modules),specModule, scala.Option.empty(), backend.excludedModuleTags());
         Module defModule = getModule(defModuleNameUpdated, modulesMap, parsedDefinition);
         final Module specModuleFinal = specModule;
+        // clear the definition of the spec module (try to see if it matches any saved kompiled definition)
         Set<Module> modules3 = modules.stream().filter(m ->
-                !(m.name().equals(specModuleFinal.name())
+                m.name().equals(defModuleNameUpdated)
+                || !(m.name().equals(specModuleFinal.name())
                         || (specModuleFinal.importedModuleNames().contains(m.name())
                         && !defModule.importedModuleNames().contains(m.name())))).collect(Collectors.toSet());
         Definition rawExtendedDef = Definition.apply(defModule, immutable(modules3), parsedDefinition.att());
