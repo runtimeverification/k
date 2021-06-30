@@ -169,6 +169,7 @@ public class Kompile {
                 File linkFile = files.resolveKompiled("parser_PGM");
                 new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, outputFile, kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth);
                 try {
+                    linkFile.delete();
                     Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
                 } catch (IOException e) {
                     throw KEMException.internalError("Cannot write to kompiled directory.", e);
@@ -194,6 +195,7 @@ public class Kompile {
                         File linkFile = files.resolveKompiled("parser_" + name);
                         new KRead(kem, files, InputModes.PROGRAM).createBisonParser(mod.get(), sort, outputFile, kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth);
                         try {
+                            linkFile.delete();
                             Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
                         } catch (IOException e) {
                             throw KEMException.internalError("Cannot write to kompiled directory.", e);

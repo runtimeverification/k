@@ -40,9 +40,7 @@ else
     if [ $ARCH -eq 64 ]; then
       TIERED=-XX:+TieredCompilation
     fi
-    # FST serializer v2.56 works properly only with ParallelGC. And ParallelGC should be faster for K anyway.
-    # https://github.com/RuedigerMoeller/fast-serialization/issues/274
-    export K_OPTS="-Xms64m -Xmx4096m -Xss32m -XX:+UseParallelGC $TIERED $K_OPTS"
+    export K_OPTS="-Xms64m -Xmx4096m -Xss32m $TIERED $K_OPTS"
     JAVA="java -Dfile.encoding=UTF-8 -Djava.awt.headless=true $K_OPTS -ea -cp \"$(dirname "$BASH_SOURCE")/java/*\""
   fi
 fi
