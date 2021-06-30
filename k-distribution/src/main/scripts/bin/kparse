@@ -46,28 +46,29 @@ Generate an on-the-fly parser from a K definition and use it to parse a term.
 Mandatory arguments to long options are mandatory for short options too.
 
 $KPARSE expects exactly 1 positional argument. It must be either a readable
-file, or '-'. By default, this file will be parsed using the main syntax
-module of the K definition and the sort of the \$PGM configuration variable.
-The resulting AST, in KORE format, will be output on stdout. This can be
-customized; see below. If no \$PGM configuration variable exists, the default
-sort will be the KItem sort.
+file, or '-' (for stdin). By default, this file will be parsed using the main
+syntax module of the K definition and the sort of the \$PGM configuration
+variable. The resulting AST, in KORE format, will be output on stdout. The
+sort, module, and input format used for parsing can be customized; see below.
+If no \$PGM configuration variable exists, the default sort will be the KItem
+sort.
 
   -d, --directory DIR      Look for a kompiled directory ending in "-kompiled"
-                           under the directory DIR.
+                           under the directory DIR
   -h, --help               Display this help and exit
   -i, --input MODE         Select input mode to use when parsing. Valid values
-                           are program, kast, binary, json, and kore. 
+                           are program, kast, binary, json, and kore.
   -m, --module MODULE      Module to use to generate grammar
       --no-exc-wrap        Do not wrap exception messages to 80 chars. Keep
-                           long lines.
+                           long lines
       --output-file FILE   Print resulting AST to FILE
       --save-temps         Do not delete temporary files when $KPARSE
-                           terminates.
+                           terminates
   -s, --sort               Sort to use as start symbol of parser
-  -v, --verbose            Print significant commands executed by $KPARSE.
+  -v, --verbose            Print significant commands executed by $KPARSE
       --version            Print version of K
       --                   Interpret all arguments following as positional
-                           arguments.
+                           arguments
 HERE
 }
 
