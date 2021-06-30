@@ -52,24 +52,24 @@ pretty print that term, but some customization is possible; see below.
 
       --color [on|off]     Enable/disable ANSI color codes. Overrides default,
                            which is determined based on whether stdout is a
-                           terminal.
+                           terminal
   -d, --directory DIR      Look for a kompiled directory ending in "-kompiled"
-                           under the directory DIR.
+                           under the directory DIR
   -h, --help               Display this help and exit
       --no-exc-wrap        Do not wrap exception messages to 80 chars. Keep
-                           long lines.
+                           long lines
       --no-substitution-filtering  Don't filter conjuncts with anonymous
                                    variables from substitution output
   -o, --output MODE        Select output mode to use when unparsing. Valid
                            values are pretty, program, kast, binary, json,
-                           latex, kore, and none.
+                           latex, kore, and none
       --output-file FILE   Print converted term to FILE
       --save-temps         Do not delete temporary files when $KORE_PRINT
-                           terminates.
-  -v, --verbose            Print significant commands executed by $KORE_PRINT.
+                           terminates
+  -v, --verbose            Print significant commands executed by $KORE_PRINT
       --version            Print version of K
       --                   Interpret all arguments following as positional
-                           arguments.
+                           arguments
 HERE
 }
 
