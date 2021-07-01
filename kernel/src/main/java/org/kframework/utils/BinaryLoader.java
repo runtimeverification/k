@@ -18,6 +18,9 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.channels.OverlappingFileLockException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,8 +29,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @RequestScoped
 public class BinaryLoader {
-
-    private static ReadWriteLock lock = new ReentrantReadWriteLock();
 
     private final KExceptionManager kem;
 
@@ -84,42 +85,18 @@ public class BinaryLoader {
      * use, this method will block until lock can be acquired.
      */
     private void saveSynchronized(File file, Object o) throws IOException, InterruptedException {
-        //To protect from concurrent access from another thread, in kserver mode
-        lock.writeLock().lockInterruptibly();
-        //JDK API limitation: there's no API to atomically open a file for writing and lock it.
-        //Consequently, if another process reads a file between the moments this thread opens a stream and acquires a
-        // lock, it will see an empty file.
-        // To prevent this we acquire file lock before opening the stream, using another stream.
-        try (FileOutputStream lockStream = new FileOutputStream(file, true)) {
-            //To protect from concurrent access to same file from another process, in standalone mode
-            lockStream.getChannel().lock(); //Lock is released automatically when lockStream is closed.
-            //already buffered
-            try (ObjectOutputStream serializer = new ObjectOutputStream(new FileOutputStream(file))) {
-                serializer.writeObject(o);
-            }
-        } finally {
-            lock.writeLock().unlock();
+        // we want to atomically update the file in case two kprove threads are writing to the same cache at the same time.
+        Path tempFile = Files.createTempFile(file.getCanonicalFile().getParentFile().toPath(), "tmp", ".bin");
+        try (ObjectOutputStream serializer = new ObjectOutputStream(new FileOutputStream(tempFile.toFile()))) {
+            serializer.writeObject(o);
         }
+        Files.move(tempFile, file.toPath(), StandardCopyOption.ATOMIC_MOVE);
     }
 
     private <T> T loadSynchronized(File file, Class<T> cls) throws IOException, ClassNotFoundException, InterruptedException {
-        //To protect from concurrent access from another thread
-        lock.readLock().lockInterruptibly();
-        //There's no issue if input stream is opened before lock is acquired
-        try (FileInputStream in = new FileInputStream(file)) {
-            //To protect from concurrent access to same file from another process
-            //Lock is released automatically when stream is closed.
-            try {
-                in.getChannel().lock(0L, Long.MAX_VALUE, true);
-            } catch (OverlappingFileLockException e) {
-                //We are in Nailgun mode. File lock is not needed.
-            }
-            try (ObjectInputStream deserializer = new ObjectInputStream(in)) { //already buffered
-                Object obj = deserializer.readObject();
-                return cls.cast(obj);
-            }
-        } finally {
-            lock.readLock().unlock();
+        try (ObjectInputStream deserializer = new ObjectInputStream(new FileInputStream(file))) { //already buffered
+            Object obj = deserializer.readObject();
+            return cls.cast(obj);
         }
     }
 }
