@@ -43,17 +43,15 @@ public class BinaryLoader {
             throw KEMException.criticalError("Could not create directory " + dir);
         }
         try {
-            saveSynchronized(file, o);
+            saveImpl(file, o);
         } catch (IOException e) {
             throw KEMException.criticalError("Could not write to " + file.getAbsolutePath(), e);
-        } catch (InterruptedException e) {
-            throw KEMException.criticalError("Interrupted while locking to write " + file, e);
         }
     }
 
     public <T> T loadOrDie(Class<T> cls, File file) {
         try {
-            return loadSynchronized(file, cls);
+            return loadImpl(file, cls);
         } catch (ClassNotFoundException e) {
             throw new AssertionError("Something wrong with deserialization", e);
         } catch (ObjectStreamException e) {
@@ -61,21 +59,17 @@ public class BinaryLoader {
                     + "the latest version of the K tool. Please re-run kompile and try again.", e);
         } catch (IOException e) {
             throw KEMException.criticalError("Could not read from " + file.getAbsolutePath(), e);
-        } catch (InterruptedException e) {
-            throw KEMException.criticalError("Interrupted while locking to read " + file.getAbsolutePath(), e);
         }
     }
 
     @Nullable
     public <T> T loadCache(Class<T> cls, File file) {
         try {
-            return loadSynchronized(file, cls);
+            return loadImpl(file, cls);
         } catch (FileNotFoundException e) {
             //ignored
         } catch (IOException | ClassNotFoundException e) {
             kem.registerInternalWarning(ExceptionType.INVALIDATED_CACHE, "Invalidating serialized cache due to corruption.", e);
-        } catch (InterruptedException e) {
-            throw KEMException.criticalError("Interrupted while locking to read " + file.getAbsolutePath(), e);
         }
         return null;
     }
@@ -84,7 +78,7 @@ public class BinaryLoader {
      * Locks the file before writing, so that it cannot be read by another instance of K. If the file is currently in
      * use, this method will block until lock can be acquired.
      */
-    private void saveSynchronized(File file, Object o) throws IOException, InterruptedException {
+    private void saveImpl(File file, Object o) throws IOException {
         // we want to atomically update the file in case two kprove threads are writing to the same cache at the same time.
         Path tempFile = Files.createTempFile(file.getCanonicalFile().getParentFile().toPath(), "tmp", ".bin");
         try (ObjectOutputStream serializer = new ObjectOutputStream(new FileOutputStream(tempFile.toFile()))) {
@@ -93,7 +87,7 @@ public class BinaryLoader {
         Files.move(tempFile, file.toPath(), StandardCopyOption.ATOMIC_MOVE);
     }
 
-    private <T> T loadSynchronized(File file, Class<T> cls) throws IOException, ClassNotFoundException, InterruptedException {
+    private <T> T loadImpl(File file, Class<T> cls) throws IOException, ClassNotFoundException {
         try (ObjectInputStream deserializer = new ObjectInputStream(new FileInputStream(file))) { //already buffered
             Object obj = deserializer.readObject();
             return cls.cast(obj);
