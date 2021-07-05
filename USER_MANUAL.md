@@ -1,5 +1,5 @@
-K Manual
-========
+K User Manual
+=============
 
 **Under Construction**
 
