@@ -101,7 +101,7 @@ do
         kore) ;;
 
         *)
-	error 'Invalid value for --input. Should be one of "program", "kast", "binary", "json", or "kore".'
+        error 'Invalid value for --input. Should be one of "program", "kast", "binary", "json", or "kore".'
         ;;
       esac
       inputMode="$2"
