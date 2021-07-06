@@ -7,7 +7,7 @@ KRUN=$(abspath $(MAKEFILE_PATH)/../../bin/krun)
 # and kdep
 KDEP=$(abspath $(MAKEFILE_PATH)/../../bin/kdep)
 # and kprove
-KPROVE=$(abspath $(MAKEFILE_PATH)/../../bin/kprove)
+KPROVE=$(abspath $(MAKEFILE_PATH)/../../bin/kprovex)
 # and kbmc
 KBMC=$(abspath $(MAKEFILE_PATH)/../../bin/kbmc)
 # and kast
