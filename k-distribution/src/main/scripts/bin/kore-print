@@ -83,7 +83,7 @@ do
     ARGV+=("$1")
   else
     case "$arg" in
-       --color)
+      --color)
       case "$2" in
         on)
         color=true
@@ -206,7 +206,6 @@ if ! $hasKompiledDir; then
   error 'Could not find a compiled definition. Use --directory to specify one.'
 fi
 
-
 if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then
   execute "$KAST_UTIL" --input kore "${ORIG_ARGV[@]}"
   exit $?
@@ -232,7 +231,8 @@ case "$outputMode" in
   echo >> "$outputFile"
   ;;
 
-  none) ;;
+  none)
+  ;;
 
   *)
   execute "$KAST_UTIL" --input kore "${ORIG_ARGV[@]}"
