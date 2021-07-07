@@ -8,6 +8,8 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.inject.RequestScoped;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -81,14 +83,14 @@ public class BinaryLoader {
     private void saveImpl(File file, Object o) throws IOException {
         // we want to atomically update the file in case two kprove threads are writing to the same cache at the same time.
         Path tempFile = Files.createTempFile(file.getCanonicalFile().getParentFile().toPath(), "tmp", ".bin");
-        try (ObjectOutputStream serializer = new ObjectOutputStream(new FileOutputStream(tempFile.toFile()))) {
+        try (ObjectOutputStream serializer = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(tempFile.toFile())))) {
             serializer.writeObject(o);
         }
         Files.move(tempFile, file.toPath(), StandardCopyOption.ATOMIC_MOVE);
     }
 
     private <T> T loadImpl(File file, Class<T> cls) throws IOException, ClassNotFoundException {
-        try (ObjectInputStream deserializer = new ObjectInputStream(new FileInputStream(file))) { //already buffered
+        try (ObjectInputStream deserializer = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)))) { //already buffered
             Object obj = deserializer.readObject();
             return cls.cast(obj);
         }
