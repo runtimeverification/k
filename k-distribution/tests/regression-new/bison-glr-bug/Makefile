@@ -1,7 +1,6 @@
 DEF=iele
 EXT=
 TESTDIR=.
-KOMPILE_FLAGS+=--gen-glr-bison-parser
 
 test: test.kore
 	cat test.kore | diff - test.ref

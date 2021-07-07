@@ -1,7 +1,7 @@
 DEF=c18-translation
 EXT=kc
 TESTDIR=.
-KOMPILE_FLAGS+=--bison-lists --gen-glr-bison-parser
+KOMPILE_FLAGS+=--bison-lists
 test: test.kore
 	$(KPRINT) c18-translation-kompiled test.kore | diff - test.ref
 
