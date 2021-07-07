@@ -111,11 +111,11 @@ public class KompileOptions implements Serializable {
     @Parameter(names="--emit-json", description="Emit JSON serialized version of parsed and kompiled definitions.")
     public boolean emitJson = false;
 
-    @Parameter(names="--gen-bison-parser", description="Emit bison parser for the PGM configuration variable within the syntax module of your definition into the kompiled definition.")
-    public boolean genBisonParser;
+    @Parameter(names="--lr1-parser", description="Emit LR(1) bison parser for the PGM configuration variable within the syntax module of your definition into the kompiled definition.")
+    public boolean lr1Parser;
 
-    @Parameter(names="--gen-glr-bison-parser", description="Emit GLR bison parser for the PGM configuration variable within the syntax module of your definition into the kompiled definition.")
-    public boolean genGlrBisonParser;
+    @Parameter(names="--jit-parser", description="Do not emit a GLR bison parser for the PGM configuration variable. Instead, use K's just-in-time parsing capabilities.")
+    public boolean jitParser;
 
     @Parameter(names="--bison-file", description="C file containing functions to link into bison parser.")
     public String bisonFile;

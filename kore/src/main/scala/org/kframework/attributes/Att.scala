@@ -73,6 +73,7 @@ object Att {
   val PROJ = "proj"
   val UNIT = "unit"
   val PREDICATE = "predicate"
+  val KAST = "kast"
   val KORE = "kore"
   val ANYWHERE = "anywhere"
   val PATTERN = "pattern"
