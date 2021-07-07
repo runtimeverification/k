@@ -6,6 +6,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.kframework.Collections;
 import org.kframework.TopologicalSort;
 import org.kframework.attributes.Att;
+import org.kframework.builtin.Sorts;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
@@ -387,60 +388,79 @@ public class KSyntax2Bison {
           "  node *n = malloc(sizeof(node) + sizeof(node *));\n" +
           "  n->str = false;\n" +
           "  n->location = @$;\n" +
-          "  n->hasLocation = " + (hasLocation ? "1" : "0") + ";\n" +
-          "  n->nchildren = 1;\n" +
-          "  n->sort = \"");
-      encodeKore(prod.sort(), bison);
-      bison.append("\";\n" +
-          "  if (!$1.nterm->str && strncmp($1.nterm->symbol, \"inj{\", 4) == 0) {\n" +
-          "    char *childSort = $1.nterm->children[0]->sort;\n" +
-          "    n->symbol = injSymbol(childSort, n->sort);\n" +
-          "    n->children[0] = $1.nterm->children[0];\n" +
-          "  } else {\n" +
-          "    n->symbol = \"inj{");
-      encodeKore(prod.getSubsortSort(), bison);
-      bison.append(", ");
-      encodeKore(prod.sort(), bison);
-      bison.append("}\";\n" +
-          "    n->children[0] = $1.nterm;\n" +
-          "  }\n");
-      if (prod.att().contains("userListTerminator")) {
-        KLabel nil = KLabel(prod.att().get("userListTerminator"));
-        KLabel cons = KLabel(prod.att().get("userList"));
-        bison.append(
-          "  node *n2 = malloc(sizeof(node));\n" +
-          "  n2->symbol = \"");
-        encodeKore(nil, bison);
-        bison.append("\";\n" +
-          "  n2->str = false;\n" +
-          "  n2->location = @$;\n" +
-          "  n2->hasLocation = 0;\n" +
-          "  n2->nchildren = 0;\n" +
-          "  n2->sort = \"");
+          "  n->hasLocation = " + (hasLocation ? "1" : "0") + ";\n");
+      if (prod.sort().equals(Sorts.K()) && prod.getSubsortSort().equals(Sorts.KItem())) {
+        bison.append("  n->nchildren = 2;\n" +
+            "  n->sort = \"");
         encodeKore(prod.sort(), bison);
         bison.append("\";\n" +
-          "  node *n3 = malloc(sizeof(node) + 2*sizeof(node *));\n" +
-          "  n3->symbol = \"");
-        encodeKore(cons, bison);
-        bison.append("\";\n" +
-          "  n3->str = false;\n" +
-          "  n3->location = @$;\n" +
-          "  n3->hasLocation = " + (hasLocation ? "1" : "0") + ";\n" +
-          "  n3->nchildren = 2;\n" +
-          "  n3->children[0] = n2;\n" +
-          "  n3->children[1] = $1.nterm;\n" +
-          "  n3->sort = \"");
-        encodeKore(prod.getSubsortSort(), bison);
-        bison.append("\";\n" +
-          "  value_type result = {.nterm = n3};\n" +
-          "  $$ = result;\n" +
-          "}\n");
+            "  n->symbol = \"kseq{}\";\n" +
+            "  n->children[0] = $1.nterm;\n" +
+            "  node *n2 = malloc(sizeof(node));\n" +
+            "  n2->symbol = \"dotk{}\";\n" +
+            "  n2->str = false;\n" +
+            "  n2->location = @$;\n" +
+            "  n2->hasLocation = false;\n" +
+            "  n2->nchildren = 0;\n" +
+            "  n2->sort = \"SortK{}\";\n" +
+            "  n->children[1] = n2;\n" +
+            "  value_type result = {.nterm = n};\n" +
+            "  $$ = result;\n" +
+            "}\n");
       } else {
-        bison.append("  value_type result = {.nterm = n};\n" +
-          "  $$ = result;\n" +
-          "}\n");
+        bison.append("  n->nchildren = 1;\n" +
+            "  n->sort = \"");
+        encodeKore(prod.sort(), bison);
+        bison.append("\";\n" +
+            "  if (!$1.nterm->str && strncmp($1.nterm->symbol, \"inj{\", 4) == 0) {\n" +
+            "    char *childSort = $1.nterm->children[0]->sort;\n" +
+            "    n->symbol = injSymbol(childSort, n->sort);\n" +
+            "    n->children[0] = $1.nterm->children[0];\n" +
+            "  } else {\n" +
+            "    n->symbol = \"inj{");
+        encodeKore(prod.getSubsortSort(), bison);
+        bison.append(", ");
+        encodeKore(prod.sort(), bison);
+        bison.append("}\";\n" +
+            "    n->children[0] = $1.nterm;\n" +
+            "  }\n");
+        if (prod.att().contains("userListTerminator")) {
+          KLabel nil = KLabel(prod.att().get("userListTerminator"));
+          KLabel cons = KLabel(prod.att().get("userList"));
+          bison.append(
+            "  node *n2 = malloc(sizeof(node));\n" +
+            "  n2->symbol = \"");
+          encodeKore(nil, bison);
+          bison.append("\";\n" +
+            "  n2->str = false;\n" +
+            "  n2->location = @$;\n" +
+            "  n2->hasLocation = 0;\n" +
+            "  n2->nchildren = 0;\n" +
+            "  n2->sort = \"");
+          encodeKore(prod.sort(), bison);
+          bison.append("\";\n" +
+            "  node *n3 = malloc(sizeof(node) + 2*sizeof(node *));\n" +
+            "  n3->symbol = \"");
+          encodeKore(cons, bison);
+          bison.append("\";\n" +
+            "  n3->str = false;\n" +
+            "  n3->location = @$;\n" +
+            "  n3->hasLocation = " + (hasLocation ? "1" : "0") + ";\n" +
+            "  n3->nchildren = 2;\n" +
+            "  n3->children[0] = n2;\n" +
+            "  n3->children[1] = $1.nterm;\n" +
+            "  n3->sort = \"");
+          encodeKore(prod.getSubsortSort(), bison);
+          bison.append("\";\n" +
+            "  value_type result = {.nterm = n3};\n" +
+            "  $$ = result;\n" +
+            "}\n");
+        } else {
+          bison.append("  value_type result = {.nterm = n};\n" +
+            "  $$ = result;\n" +
+            "}\n");
+        }
       }
-
     } else if (prod.att().contains("token") && prod.isSubsort()) {
       bison.append("{\n" +
           "  node *n = malloc(sizeof(node) + sizeof(node *));\n" +
