@@ -14,6 +14,7 @@ import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.json.JsonParser;
 import org.kframework.parser.kast.KastParser;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
@@ -64,8 +65,14 @@ public class KRead {
         }
     }
 
+    private static final String ERROR_FILE = "bison-error.txt";
+
     public void createBisonParser(Module mod, Sort sort, File outputFile, boolean glr, String bisonFile, long stackDepth) {
         try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, true, false, true)) {
+            if (!parseInModule.getParsingModule().productionsForSort().contains(sort.head())) {
+                kem.registerInnerParserWarning(ExceptionType.EMPTY_PARSER, "Trying to generate parser for sort " + sort + " in module " + mod.name() + " which has no terms; skipping.");
+                return;
+            }
             try (Scanner scanner = parseInModule.getScanner(kem.options)) {
                 File scannerFile = files.resolveTemp("scanner.l");
                 File scanHdr = files.resolveTemp("scanner.h");
@@ -85,10 +92,18 @@ public class KRead {
                   .directory(files.resolveTemp("."))
                   .command("bison", "-d", "-Wno-other", "-Wno-conflicts-sr", "-Wno-conflicts-rr", parserFile.getAbsolutePath())
                   .inheritIO()
+                  .redirectError(files.resolveTemp(ERROR_FILE))
                   .start()
                   .waitFor();
                 if (exit != 0) {
-                    throw KEMException.internalError("bison returned nonzero exit code: " + exit + "\n");
+                    String error = files.loadFromTemp(ERROR_FILE);
+                    if (error.contains("start symbol top does not derive any sentence")) {
+                      kem.registerInnerParserWarning(ExceptionType.EMPTY_PARSER, "Trying to generate parser for sort " + sort + " in module " + mod.name() + " which has no terms; skipping.");
+                      return;
+                    } else {
+                      System.err.println(error);
+                      throw KEMException.internalError("bison returned nonzero exit code: " + exit + "\n");
+                    }
                 }
                 List<String> command = new ArrayList<>();
                 command.addAll(Arrays.asList(
