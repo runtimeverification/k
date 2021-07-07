@@ -30,6 +30,8 @@ configVars=
 dryRun=false
 expandMacros=true
 result=1
+filterSubst=true
+fold_lines="fold -s"
 
 # setup temp files
 now=`date +"%Y-%m-%d-%H-%M-%S"`
@@ -68,9 +70,7 @@ execute () {
   )
 }
 
-KX=$(basename "$0")
-
-fold_lines="fold -s"
+KRUN=$(basename "$0")
 
 error () {
   printf "[Error] Critical: $@\n" | $fold_lines 1>&2
@@ -83,12 +83,12 @@ warning () {
 
 print_usage () {
 cat <<HERE
-Usage: $KX [PROGRAM] [-cNAME=VALUE] [-d DIR]
+Usage: $KRUN [PROGRAM] [-cNAME=VALUE] [-d DIR]
 Execute a program using a K semantics that was built with kompile.
 
 Mandatory arguments to long options are mandatory for short options too.
 
-$KX expects 0 or 1 positional arguments. If a positional argument is present,
+$KRUN expects 0 or 1 positional arguments. If a positional argument is present,
 it must be a file and the contents of that file is parsed using the parser
 specified with --parser and used as the value of \$PGM (unless --term is
 present; see below).
@@ -126,19 +126,21 @@ present; see below).
                            This assumes that the initial configuration contains
                            no macro terms. Behavior is undefined if this is not
                            true.
+      --no-substitution-filtering  Don't filter conjuncts with anonymous
+                                   variables from substitution output
   -o, --output MODE        Select output mode to use when unparsing. Valid
                            values are pretty, program, kast, binary, json,
                            latex, kore, and none.
       --output-file FILE   Print final configuration to FILE
       --parser VALUE       Use VALUE as parser to parse \$PGM. For example,
-                           if the user says "$KX --parser cat foo.kore", then
+                           if the user says "$KRUN --parser cat foo.kore", then
                            \`cat foo.kore\` is invoked and the result on stdout
                            is used as the value of \$PGM as a KORE term.
       --pattern PAT        Use PAT as the search pattern with --search. Can
                            also be used without --search to match the output
                            configuration against a pattern and print the
                            substitution. Not supported on LLVM backend.
-      --save-temps         Do not delete temporary files when $KX terminates.
+      --save-temps         Do not delete temporary files when $KRUN terminates.
       --search             Search for all possible output states after
                            rewriting. Only supported on symbolic backends.
       --search-all         Like --search, but also return interim states
@@ -156,7 +158,7 @@ present; see below).
                            value for \$PGM as the entire input configuration.
                            i.e., skip composing configuration from
                            configuration variables.
-  -v, --verbose            Print significant commands executed by $KX.
+  -v, --verbose            Print significant commands executed by $KRUN.
       --version            Print version of K
       --                   Interpret all arguments following as positional
                            arguments.
@@ -259,6 +261,10 @@ do
 
       --no-exc-wrap)
       fold_lines="cat -"
+      ;;
+
+      --no-substitution-filtering)
+      filterSubst=false
       ;;
 
       --no-expand-macros)
@@ -446,7 +452,7 @@ fi
 source "$kompiledDir/configVars.sh"
 if $term; then
   if [ -z "${parser_PGM+unset}" ]; then
-    execute kast --directory "$dir" -m "$mainModuleName" "$config_var_PGM" -o kore > "$input_file"
+    execute kast --directory "$dir" --module "$mainModuleName" "$config_var_PGM" --output kore > "$input_file"
   else
     execute $parser_PGM "$config_var_PGM" > "$input_file"
   fi
@@ -463,9 +469,9 @@ else
     tempFiles+=("$tempFile")
     if [[ ! "${declaredConfigVars[@]}" =~ "$name" ]]; then
       if [ "$name" = "PGM" ]; then
-        error "Configuration variable \$PGM does not exist. Do not pass a positional argument to $KX."
+        error "Configuration variable \$PGM does not exist. Do not pass a positional argument to $KRUN."
       else
-        error "Configuration variable \$$name does not exist. Do not pass -c$name to $KX."
+        error "Configuration variable \$$name does not exist. Do not pass -c$name to $KRUN."
       fi
     fi
     indirectName="declaredConfigVar_$name"
@@ -475,12 +481,12 @@ else
         parser=("$kompiledDir/parser_$name")
       elif [ "$name" = "PGM" ]; then
         if $hasArgv; then
-          parser=(kast --directory "$dir" -o kore)
+          parser=(kast --directory "$dir" --output kore)
         else
-          parser=(kast --directory "$dir" -m "$mainModuleName" -o kore)
+          parser=(kast --directory "$dir" --module "$mainModuleName" --output kore)
         fi
       else
-        parser=(kast -s "$sortName" --directory "$dir" -m "$mainModuleName" -o kore)
+        parser=(kast --sort "$sortName" --directory "$dir" --module "$mainModuleName" --output kore)
       fi
     else
       parser=("${!parser_name}")
@@ -612,7 +618,7 @@ if ! $dryRun; then
 
     case "$outputMode" in
       pretty)
-      execute kprint "$kompiledDir" "$kore_output" $color > "$outputFile"
+      execute kprint "$kompiledDir" "$kore_output" $color $filterSubst > "$outputFile"
       ;;
 
       kore)
@@ -623,7 +629,7 @@ if ! $dryRun; then
       none) ;;
 
       *)
-      execute kast --directory "$dir" -i kore -o "$outputMode" "$kore_output" > "$outputFile"
+      execute kast --directory "$dir" --input kore --output "$outputMode" "$kore_output" > "$outputFile"
       ;;
     esac
   else
