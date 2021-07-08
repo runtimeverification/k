@@ -32,7 +32,7 @@ call/cc.
 
 - Do the <a style="font-size:24px" href="./k-distribution/pl-tutorial.md">K Tutorial!</a>
 - Read some papers about K on the [Formal Systems Laboratory (FSL)](https://fsl.cs.illinois.edu/publications/).  
-- <a href="./pending-documentation/">User documentation</a>
+- <a href="./USER_MANUAL/">User documentation</a>
 - <a href="./k-distribution/include/kframework/builtin/">Builtins</a>
 
 ## Links
