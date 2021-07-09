@@ -31,11 +31,11 @@ the entry point to the parser, in this case the `K` sort.
 
 Note that we did not explicitly specify the `$PGM` configuration variable when
 we invoked `krun` on a file. This is because `krun` handles the `$PGM` variable
-specially, and allows you to pass the term for that variable in the contents of
-a file passed as a positional argument to `krun`. We did, however, specify the
-`PGM` name explicitly when we called `krun` with the `-cPGM` command line
-argument in [Lesson 1.2](../02_basics/README.md). This is the other, explicit,
-way of specifying an input to krun.
+specially, and allows you to pass the term for that variable via a file passed
+as a positional argument to `krun`. We did, however, specify the `PGM` name
+explicitly when we called `krun` with the `-cPGM` command line argument in
+[Lesson 1.2](../02_basics/README.md). This is the other, explicit, way of
+specifying an input to krun.
 
 This explains the most basic use of configuration declarations in K. We can,
 however, declare multiple cells and multiple configuration variables. We can
@@ -94,13 +94,13 @@ module LESSON-15-B
 endmodule
 ```
 
-This definition takes two integers and populates the `<k>` cell with a Boolean
-indicating whether the first integer is greater than the second. Notice that
-we have specified no `$PGM` configuration variable here. As a result, we cannot
-invoke `krun` via the syntax `krun $file`. Instead, we must explicitly pass
-values for each configuration variable via the `-cFIRST` and `-cSECOND` command
-line flags. For example, if we invoke `krun -cFIRST=0 -cSECOND=1`, we will get 
-the value `false` in the K cell.
+This definition takes two integers as command-line arguments and populates the
+`<k>` cell with a Boolean indicating whether the first integer is greater than
+the second. Notice that we have specified no `$PGM` configuration variable
+here. As a result, we cannot invoke `krun` via the syntax `krun $file`.
+Instead, we must explicitly pass values for each configuration variable via the
+`-cFIRST` and `-cSECOND` command line flags. For example, if we invoke
+`krun -cFIRST=0 -cSECOND=1`, we will get the value `false` in the K cell.
 
 You can also specify both a `$PGM` configuration variable and other
 configuration variables in a single configuration declaration, in which case
@@ -112,9 +112,9 @@ to be explicitly initialized with `-c`.
 
 Modify your solution to Lesson 1.14, Problem 2 to add a new cell with a
 configuration variable of sort `Bool`. This variable should determine whether
-the `/` operator uses `/Int` or `divInt`. Test that by specifying different
-values for this variable, you can change the behavior of rounding on division
-of negative numbers.
+the `/` operator is evaluated using `/Int` or `divInt`. Test that by specifying
+different values for this variable, you can change the behavior of rounding on
+division of negative numbers.
 
 ## Cell Nesting
 
@@ -174,11 +174,10 @@ In other words, K will complete cells to the top of the configuration by
 inserting parent cells where appropriate based on the declared structure of
 the configuration. This is useful because as a definition evolves, the
 configuration may change, but you don't want to have to modify every single
-rule every time it does. Thus, K follows the principle that you should only
-mention the cells in a rule that the rule actually needs to know about in
-order to accomplish its specific goal. By following this best practice, you
-can significantly increase the modularity of the definition and make it easier
-to maintain and modify.
+rule each time. Thus, K follows the principle that you should only mention the
+cells in a rule that are actually needed in order to accomplish its specific
+goal. By following this best practice, you can significantly increase the
+modularity of the definition and make it easier to maintain and modify.
 
 ### Exercise
 
@@ -209,18 +208,18 @@ might instead write that cell. For example, consider the following rule:
 ```
 
 Here we have introduced two new concepts. The first is the variable of sort
-`StateCell`, which matches the `<state>` part of the configuration. The second
-is that we have introduced the concept of `...` once again. When a cell contains
-other cells, it is also possible to specify `...` on either the left, right
-or both sides of the cell term. Each of these three syntaxes are equivalent
-in this case. When they appear on the left-hand-side of a rule, they indicate
-that we don't care what value any cells not explicitly named might have. For
-example, I might write `<state>... <first> 0 </first> ...</state>` on the 
-left-hand-side of a rule in order to indicate that we want to match the rule
-when the `<first>` cell contains a zero, regardless of what the `<second>` cell
-contains. If we had not included this ellipsis, it would have been a syntax
-error, because K would have expected you to provide a value for each of the
-child cells.
+`StateCell`, which matches the entire `<state>` part of the configuration. The
+second is that we have introduced the concept of `...` once again. When a cell
+contains other cells, it is also possible to specify `...` on either the left,
+right or both sides of the cell term. Each of these three syntaxes are
+equivalent in this case. When they appear on the left-hand-side of a rule, they
+indicate that we don't care what value any cells not explicitly named might
+have. For example, I might write `<state>... <first> 0 </first> ...</state>` on
+the left-hand-side of a rule in order to indicate that we want to match the
+rule when the `<first>` cell contains a zero, regardless of what the `<second>`
+cell contains. If we had not included this ellipsis, it would have been a
+syntax error, because K would have expected you to provide a value for each of
+the child cells.
 
 However, if, as in the example above, the `...` appeared on the right-hand-side
 of a rule, this instead indicates that the cells not explicitly mentioned under
