@@ -295,3 +295,8 @@ many are there total, and why?
 2. Modify your solution from lesson 1.11 problem 2 to remove the `eval`
 function and instead evaluate expressions from left to right using the
 `seqstrict` attribute.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.15: Configuration Declarations and Cell Nesting](../15_configurations/README.md).
