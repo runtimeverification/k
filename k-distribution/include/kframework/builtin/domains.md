@@ -215,7 +215,7 @@ Provided here is the syntax of an implementation of immutable, associative,
 commutative maps from `KItem` to `KItem`. This type is hooked to an
 implementation of maps provided by the backend. For more information on
 matching on maps and allowable patterns for doing so, refer to K's
-[user documentation](pending-documentation.md).
+[user documentation](USER_MANUAL.md).
 
 ```k
 module MAP
@@ -496,7 +496,7 @@ Provided here is the syntax of an implementation of immutable, associative,
 commutative sets of `KItem`. This type is hooked to an implementation of sets
 provided by the backend. For more information on matching on sets and allowable
 patterns for doing so, refer to K's
-[user documentation](pending-documentation.md).
+[user documentation](USER_MANUAL.md).
 
 ```k
 module SET
@@ -621,7 +621,7 @@ Provided here is the syntax of an implementation of immutable, associative
 lists of `KItem`. This type is hooked to an implementation of lists provided
 by the backend. For more information on matching on lists and allowable
 patterns for doing so, refer to K's
-[user documentation](pending-documentation).
+[user documentation](USER_MANUAL.md).
 
 ```k
 module LIST

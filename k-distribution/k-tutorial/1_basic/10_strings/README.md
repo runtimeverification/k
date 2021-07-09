@@ -111,4 +111,4 @@ required to implement such a function, refer to `domains.md`.
 ## Next lesson
 
 Once you have completed the above exercises, you can continue to
-[Lesson 1.11: Casting Terms](../10_casts/README.md).
+[Lesson 1.11: Casting Terms](../11_casts/README.md).

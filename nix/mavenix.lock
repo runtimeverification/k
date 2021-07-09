@@ -1170,14 +1170,6 @@
       "sha1": "3457ebb3180f4f2f599242e70697c80135c58dcf"
     },
     {
-      "path": "com/fasterxml/jackson/core/jackson-core/2.8.8/jackson-core-2.8.8.jar",
-      "sha1": "d478fb6de45a7c3d2cad07c8ad70c7f0a797a020"
-    },
-    {
-      "path": "com/fasterxml/jackson/core/jackson-core/2.8.8/jackson-core-2.8.8.pom",
-      "sha1": "39fc72c2d4b4370bda4767d66dfe5ce82cffdb79"
-    },
-    {
       "path": "com/fasterxml/jackson/core/jackson-databind/2.6.6/jackson-databind-2.6.6.pom",
       "sha1": "32698733d34d0c3bf27904a1549c9dd2a9555dbe"
     },
@@ -1210,20 +1202,12 @@
       "sha1": "b232d48541db046aa1245c27bfa7398ea737d2ad"
     },
     {
-      "path": "com/fasterxml/jackson/jackson-parent/2.8/jackson-parent-2.8.pom",
-      "sha1": "d020f5b079a7c1608b08f4f9bd76f73cb9b3a1be"
-    },
-    {
       "path": "com/fasterxml/oss-parent/23/oss-parent-23.pom",
       "sha1": "8ee7f1755fea4b333428aac06fca31330404357f"
     },
     {
       "path": "com/fasterxml/oss-parent/24/oss-parent-24.pom",
       "sha1": "f4fbf349d22ab6a355ebecdb8a2886dd790b4877"
-    },
-    {
-      "path": "com/fasterxml/oss-parent/27/oss-parent-27.pom",
-      "sha1": "77c5efd41e5c52f4f68c36eeb7fe3ccdf0119e53"
     },
     {
       "path": "com/github/platform-team/aws-maven/6.0.0/aws-maven-6.0.0.jar",
@@ -2320,14 +2304,6 @@
     {
       "path": "de/rototor/pdfbox/graphics2d/0.24/graphics2d-0.24.pom",
       "sha1": "331d47196489033aa021cf4ecc37a17fc6005777"
-    },
-    {
-      "path": "de/ruedigermoeller/fst/2.56/fst-2.56.jar",
-      "sha1": "6711f096910c4dfe388936b13def643d458a51e3"
-    },
-    {
-      "path": "de/ruedigermoeller/fst/2.56/fst-2.56.pom",
-      "sha1": "0578b28c0fdfe9e611345524bf4dbf55b2957722"
     },
     {
       "path": "dk/brics/automaton/automaton/1.11-8/automaton-1.11-8.jar",
@@ -6942,14 +6918,6 @@
       "sha1": "a2a52b5dc6183010d4e3d12a520ced355607ce32"
     },
     {
-      "path": "org/javassist/javassist/3.21.0-GA/javassist-3.21.0-GA.jar",
-      "sha1": "598244f595db5c5fb713731eddbb1c91a58d959b"
-    },
-    {
-      "path": "org/javassist/javassist/3.21.0-GA/javassist-3.21.0-GA.pom",
-      "sha1": "5cfdd0a984c30f194ddad04bc658f8b909e1dbf3"
-    },
-    {
       "path": "org/jdom/jdom/1.1/jdom-1.1.jar",
       "sha1": "1d04c0f321ea337f3661cf7ede8f4c6f653a8fdd"
     },
@@ -7106,10 +7074,6 @@
       "sha1": "156a12a0fcf8ed856bdc60ce10550ea46fba8eaa"
     },
     {
-      "path": "org/objenesis/objenesis-parent/2.5.1/objenesis-parent-2.5.1.pom",
-      "sha1": "b198b6c36d1213398a3d4a7d1ea6519f99e11be9"
-    },
-    {
       "path": "org/objenesis/objenesis-parent/2.6/objenesis-parent-2.6.pom",
       "sha1": "cfc0966402e8174fbacd5c5dd355b5815364a4fe"
     },
@@ -7128,14 +7092,6 @@
     {
       "path": "org/objenesis/objenesis/2.1/objenesis-2.1.pom",
       "sha1": "362dfc522ff5a1401838f136cb7a7ec99033fc33"
-    },
-    {
-      "path": "org/objenesis/objenesis/2.5.1/objenesis-2.5.1.jar",
-      "sha1": "272bab9a4e5994757044d1fc43ce480c8cb907a4"
-    },
-    {
-      "path": "org/objenesis/objenesis/2.5.1/objenesis-2.5.1.pom",
-      "sha1": "66bf4b0f67bd43953bf906e0f4001d82593f5e41"
     },
     {
       "path": "org/objenesis/objenesis/2.6/objenesis-2.6.jar",
