@@ -69,6 +69,7 @@ public class KompileFrontEnd extends FrontEnd {
         CompiledDefinition def = kompile.run(options.outerParsing.mainDefinitionFile(files.get()), options.mainModule(files.get()), options.syntaxModule(files.get()), backend.steps(), backend.excludedModuleTags());
         kompile = null;
         files.get().saveToKompiled("mainModule.txt", def.executionModule().name());
+        files.get().saveToKompiled("mainSyntaxModule.txt", def.mainSyntaxModuleName());
         sw.printIntermediate("Kompile to kore");
         loader.saveOrDie(files.get().resolveKompiled("compiled.bin"), def);
         files.get().saveToKompiled("backend.txt", options.backend); // used by the krun script
