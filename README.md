@@ -66,6 +66,8 @@ sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg
 curl -sSL https://get.haskellstack.org/ | sh
 ```
 
+Note: we require version 8 or greater for clang, lld, and llvm-tools.
+
 On Arch Linux:
 
 ```
@@ -88,7 +90,7 @@ The following dependencies are needed either at build time or runtime:
 *   [jdk](https://openjdk.java.net/) (version 8u45 or greater)
 *   [libjemalloc](https://github.com/jemalloc/jemalloc)
 *   [libyaml](https://pyyaml.org/wiki/LibYAML)
-*   [llvm](https://llvm.org/) (on some distributions, the utilities below are also needed and packaged separately)
+*   [llvm](https://llvm.org/) (We require version 8 or greater for clang, lld, and llvm-tools. On some distributions, the utilities below are also needed and packaged separately.)
     * [clang](http://clang.llvm.org/)
     * [lld](https://lld.llvm.org/)
 *   [make](https://www.gnu.org/software/make/)

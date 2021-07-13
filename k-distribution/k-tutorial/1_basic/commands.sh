@@ -46,3 +46,6 @@ kompile 14_evaluation_order/README.md --md-selector "k & ! exclude & ! alias" --
 kompile 14_evaluation_order/README.md --md-selector "k & ! exclude & ! alias" --main-module LESSON-14-B -d build/14b
 kompile 14_evaluation_order/README.md --md-selector "k & ! exclude" --main-module LESSON-14-C -d build/14c
 kompile 14_evaluation_order/README.md --md-selector "k & ! exclude & ! alias" --main-module LESSON-14-D -d build/14d
+kompile 15_configurations/README.md --md-selector "k & ! exclude" --main-module LESSON-15-A -d build/15a
+kompile 15_configurations/README.md --md-selector "k & ! exclude" --main-module LESSON-15-B -d build/15b
+kompile 15_configurations/README.md --md-selector "k & ! exclude" --main-module LESSON-15-C -d build/15c
