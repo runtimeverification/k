@@ -56,7 +56,8 @@ KPROVE_OR_X=$(KPROVE)
 CHECK?=| diff -
 REMOVE_PATHS=| sed 's!'`pwd`'/\(\./\)\{0,2\}!!g'
 CONSIDER_ERRORS=2>&1
-CONSIDER_PROVER_ERRORS=
+# null by default, add CONSIDER_PROVER_ERRORS=2>&1 to the local Makefile to test kprove output
+#CONSIDER_PROVER_ERRORS=
 
 .PHONY: kompile krun all clean update-results proofs bmc
 
