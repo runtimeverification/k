@@ -297,7 +297,7 @@ public class Kompile {
                 .andThen(generateSortProjections)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(d -> new Strategy().addStrategyCellToRulesTransformer(d).apply(d))
-                .andThen(ConcretizeCells::transformDefinition)
+                .andThen(d -> ConcretizeCells.transformDefinition(d, false))
                 .andThen(genCoverage)
                 .andThen(Kompile::addSemanticsModule)
                 .andThen(resolveConfigVar)
@@ -484,6 +484,6 @@ public class Kompile {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
-        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule()).concretize(input.mainModule(), s);
+        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule(), kompileOptions.isKore()).concretize(input.mainModule(), s);
     }
 }

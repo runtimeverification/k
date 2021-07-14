@@ -171,7 +171,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(subsortKItem)
                 .andThen(d -> new Strategy().addStrategyCellToRulesTransformer(d).apply(d))
                 .andThen(d -> Strategy.addStrategyRuleToMainModule(def.mainModule().name()).apply(d))
-                .andThen(ConcretizeCells::transformDefinition)
+                .andThen(d -> ConcretizeCells.transformDefinition(d, true))
                 .andThen(genCoverage)
                 .andThen(Kompile::addSemanticsModule)
                 .andThen(resolveConfigVar)
@@ -201,7 +201,7 @@ public class KoreBackend extends AbstractBackend {
                 "concretizing configuration");
         Function1<Module, Module> resolveFreshConstants = d -> ModuleTransformer.from(new ResolveFreshConstants(def, true)::resolve, "resolving !Var variables").apply(d);
         ModuleTransformer concretizeCells = ModuleTransformer.fromSentenceTransformer(
-                new ConcretizeCells(configInfo, labelInfo, sortInfo, mod)::concretize,
+                new ConcretizeCells(configInfo, labelInfo, sortInfo, mod, true)::concretize,
                 "concretizing configuration");
         ModuleTransformer generateSortProjections = ModuleTransformer.from(new GenerateSortProjections(false)::gen, "adding sort projections");
 
