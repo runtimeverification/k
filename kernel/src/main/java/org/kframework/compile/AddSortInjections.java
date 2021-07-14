@@ -329,6 +329,9 @@ public class AddSortInjections {
             if (kapp.klabel().name().equals("#fun3")) {
                 return sort(kapp.items().get(1), expectedSort);
             }
+            if (kapp.klabel().name().equals("#let")) {
+                return sort(kapp.items().get(2), expectedSort);
+            }
             if (kapp.klabel().name().equals("_:=K_")) {
                 return Sorts.Bool();
             }
