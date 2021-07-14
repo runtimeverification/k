@@ -69,18 +69,6 @@ public class RewriteAwareVisitor extends VisitK {
                 isRHS = wasRHS;
                 isLHS = wasLHS;
                 apply(k.items().get(1));
-            } else if (k.klabel().name().equals("#fun3")) {
-                isRHS = false;
-                isLHS = true;
-                apply(k.items().get(0));
-                isRHS = true;
-                isLHS = false;
-                apply(k.items().get(1));
-                // in well formed programs this should always reset to true and false, but we want to make sure we don't
-                // create spurious reports if this constraint was violated by the user.
-                isRHS = wasRHS;
-                isLHS = wasLHS;
-                apply(k.items().get(2));
             } else {
                 isRHS = false;
                 isLHS = true;
