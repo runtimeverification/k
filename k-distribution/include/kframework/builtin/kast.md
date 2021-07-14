@@ -460,6 +460,8 @@ module K
   // functions that do not preserve sort and therefore cannot have inner rewrites
   syntax {Sort1, Sort2} Sort1 ::= "#fun" "(" Sort2 "=>" Sort1 ")" "(" Sort2 ")" [klabel(#fun3), symbol]
 
+  syntax {Sort1, Sort2} Sort1 ::= "#let" Sort2 "=" Sort2 "#in" Sort1 [klabel(#let), symbol]
+
   /*@ Set membership over terms. In addition to equality over
       concrete patterns, K also supports computing equality
       between a concrete pattern and a symbolic pattern.
