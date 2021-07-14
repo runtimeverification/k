@@ -160,7 +160,14 @@ public class Kompile {
 
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(kompiledDefinition.mainModule());
 
-        CompiledDefinition def = new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(configInfo.getRootCell()).klabel());
+        boolean isKast = excludedModuleTags.contains(Att.KORE());
+        Sort rootCell;
+        if (isKast) {
+          rootCell = configInfo.getRootCell();
+        } else {
+          rootCell = Sorts.GeneratedTopCell();
+        }
+        CompiledDefinition def = new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(rootCell).klabel());
 
         if (kompileOptions.genBisonParser || kompileOptions.genGlrBisonParser) {
             if (def.configurationVariableDefaultSorts.containsKey("$PGM")) {
