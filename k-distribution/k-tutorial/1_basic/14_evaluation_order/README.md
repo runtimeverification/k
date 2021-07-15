@@ -71,7 +71,7 @@ of the heating rules, where the `Val` sort was previously used.
 
 Second, we have removed the rule priorities on the heating rules and the use of
 the `Val` sort on the cooling rules, and replaced them with the `heat` and
-`cool` attributes. These attribute instruct the compiler that these rules are
+`cool` attributes. These attributes instruct the compiler that these rules are
 heating and cooling rules, and thus should implicitly apply only when certain
 terms on the LHS either are or are not a `KResult` (i.e., `isKResult` returns
 `true` versus `false`).
@@ -261,7 +261,7 @@ subtraction.
 
 ## Nondeterministic evaluation order with the `strict` attribute
 
-Thus far, we have focused entirely on determinstic evaluation order. However,
+Thus far, we have focused entirely on deterministic evaluation order. However,
 not all languages are deterministic in the order they evaluate expressions.
 For example, in C, the expression `a() + b() + c()` is guaranteed to parse
 to `(a() + b()) + c()`, but it is not guaranteed that `a` will be called before
