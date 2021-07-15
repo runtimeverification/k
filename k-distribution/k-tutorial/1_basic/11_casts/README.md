@@ -23,7 +23,7 @@ differences, in turn.
 ### Semantic casts
 
 The most basic, and most common, type of cast in K is called the
-**semantic cast**. For every sort `S` declared in a module, K provies the
+**semantic cast**. For every sort `S` declared in a module, K provides the
 following (implicit) production for use in sentences:
 
 ```
