@@ -64,10 +64,6 @@ public class KProveOptions {
             "on every step. In most specifications boundary is marked by \"k\".")
     public List<String> boundaryCells = Collections.emptyList();
 
-    @Parameter(names="--concrete-rules", description="List of rule labels to be considered concrete, in addition to " +
-            "rules marked with `[concrete]` attribute")
-    public List<String> extraConcreteRuleLabels = Collections.emptyList();
-
     @Parameter(names="--debugger", description="Launch proof in an interactive debugger. Currently only supported by the Haskell backend.")
     public boolean debugger;
 

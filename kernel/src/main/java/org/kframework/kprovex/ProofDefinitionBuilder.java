@@ -27,9 +27,6 @@ public class ProofDefinitionBuilder {
     private final Backend backend;
     private final Kompile kompile;
     private final FileUtil files;
-    @Inject(optional = true)
-    @Named("extraConcreteRuleLabels")
-    private List<String> extraConcreteRuleLabels = null;
 
     @Inject
     public ProofDefinitionBuilder(CompiledDefinition compiledDefinition, Backend backend, Kompile kompile,
@@ -59,8 +56,7 @@ public class ProofDefinitionBuilder {
         kompile.structuralChecks(immutable(modules), specModule, Option.empty(), backend.excludedModuleTags());
         specModule = backend.specificationSteps(compiledDefinition.kompiledDefinition).apply(specModule);
 
-        Definition compiledExtendedDef = backend.proofDefinitionNonCachedSteps(extraConcreteRuleLabels).apply(compiledDefinition.kompiledDefinition);
-        return Tuple2.apply(compiledExtendedDef, specModule);
+        return Tuple2.apply(compiledDefinition.kompiledDefinition, specModule);
     }
 
     private static Module getModule(String defModule, Map<String, Module> modules, Definition parsedDefinition) {
