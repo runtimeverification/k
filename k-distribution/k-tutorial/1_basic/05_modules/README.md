@@ -234,7 +234,8 @@ priority and associativity declarations, and modify the definition so that
 the syntax of integers and brackets is in one module, the syntax of addition,
 subtraction, and unary negation is in another module, and the syntax of
 multiplication and division is in a third module. Make sure you can still parse
-the same set of expressions as before.
+the same set of expressions as before. Place priority declarations in the main
+module.
 
 2. Modify `lesson-02-d.k` from lesson 1.2 so that the rules and syntax are in
 separate modules in separate files.

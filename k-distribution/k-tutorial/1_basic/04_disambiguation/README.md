@@ -96,7 +96,7 @@ this, the program we mentioned above successfully parses.
 
 ### Exercise
 
-Parse the program `true && false || false` yourself, and confirm that the AST
+Parse the program `true && false || false` using kast, and confirm that the AST
 places `||` as the top level symbol. Then modify the definition so that you
 will get the alternative parse.
 
