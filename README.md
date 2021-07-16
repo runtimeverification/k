@@ -186,7 +186,10 @@ should be installed.
 
 ## Building with Nix
 
-By default, Nix will build the project and its transitive dependencies from source, which can take up to an hour. We recommend setting up the binary cache at [kore.cachix.org] to speed up the build process significantly.
+By default, Nix will build the project and its transitive dependencies from
+source, which can take up to an hour. We recommend setting up
+[the binary cache](https://app.cachix.org/cache/kore) to speed up the build
+process significantly.
 
 To build the K Framework itself, run:
 
