@@ -184,7 +184,7 @@ public class CheckKLabels {
 
     private static final ImmutableSet<String> internalDuplicates = ImmutableSet.of("#EmptyKList", "#EmptyK", "#ruleRequires", "#ruleRequiresEnsures", "#Top", "#Bottom");
 
-    private static final ImmutableSet<String> internalNames = ImmutableSet.of("#cells", "#dots", "#noDots", "#Or", "#fun2", "#fun3", "#withConfig", "<generatedTop>", "#SemanticCastToBag", "_:=K_", "_:/=K_");
+    private static final ImmutableSet<String> internalNames = ImmutableSet.of("#cells", "#dots", "#noDots", "#Or", "#fun2", "#fun3", "#let", "#withConfig", "<generatedTop>", "#SemanticCastToBag", "_:=K_", "_:/=K_");
 
     public static boolean isInternalKLabel(String name, Module m) {
         return m.semanticCasts().apply(name) || internalNames.contains(name)|| m.recordProjections().apply(name) || m.sortPredicates().apply(name) || m.sortProjections().apply(name);
