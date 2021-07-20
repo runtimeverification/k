@@ -204,7 +204,7 @@ Provided for reference is a table with a complete list of all valid format
 codes, followed by their meaning:
 
 <table>
-<tr><th> Format Code </th><th> Meaning                                          </th></tr>
+<tr><th> Format Code </th><th> Meaning                                          </th></tr>
 <tr><td> n           </td><td> Insert '\n' followed by the current indentation
                                level                                            </td></tr>
 <tr><td> i           </td><td> Increase the current indentation level by 1      </td></tr>
@@ -213,7 +213,7 @@ codes, followed by their meaning:
                                this production (see next section)               </td></tr>
 <tr><td> r           </td><td> Reset color to the default foreground color for
                                the terminal (see next section)                  </td></tr>
-<tr><td> an integer  </td><td> Print a terminal or non-terminal from the
+<tr><td> an integer  </td><td> Print a terminal or non-terminal from the
                                production. The integer is treated as a 1-based
                                index into the terminals and non-terminals of
                                the production.
@@ -234,7 +234,7 @@ codes, followed by their meaning:
                                current color and indentation level to the color
                                and indentation level following unparsing that
                                term.                                            </td></tr>
-<tr><td> other char  </td><td> Print that character verbatim                    </td></tr>
+<tr><td> other char  </td><td> Print that character verbatim                    </td></tr>
 </table>
 
 ### Exercise
