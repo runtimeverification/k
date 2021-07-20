@@ -15,7 +15,7 @@ of the expression is a value.
 
 However, K has built-in support for deciding when to heat and when to cool.
 This support comes in the form of the rule attributes `heat` and `cool` as
-well as the builtin function `isKResult`.
+well as the specially named function `isKResult`.
 
 Consider the following definition, which is equivalent to `LESSON-13-C`
 (`lesson-14-a.k`):
