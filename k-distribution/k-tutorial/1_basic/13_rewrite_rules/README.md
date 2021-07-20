@@ -23,7 +23,7 @@ even the most frequently used. K also has a concept of a
 **top-level rewrite rule**. The simplest way to ensure that a rule is treated
 as a top-level rule is for the left-hand side of the rule to mention one or
 more **cells**. We will cover how cells work and are declared in more detail
-in a later lesson, but for now, you should be aware that when we ran `krun`
+in a later lesson, but for now, what you should know is that when we ran `krun`
 in our very first example in Lesson 1.2 and got the following output:
 
 ```
