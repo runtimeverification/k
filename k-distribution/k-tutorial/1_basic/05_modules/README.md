@@ -225,7 +225,7 @@ relative, a matching file is looked for within all of the
 directories include the current working directory, followed by the
 `include/kframework/builtin` directory within your installation of K. You can
 also pass one or more directories to `kompile` via the `-I` command line flag,
-in which case these directories are prepended on the beginning of the list.
+in which case these directories are prepended to the beginning of the list.
 
 ## Exercises
 

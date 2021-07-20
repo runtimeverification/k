@@ -24,6 +24,7 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.definition.SyntaxSort;
 import org.kframework.kore.AddAttRec;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -316,7 +317,8 @@ public class DefinitionParsing {
 
         // replace config bubbles with the generated syntax and rules
         return DefinitionTransformer.from(m -> {
-            if (stream(m.localSentences()).noneMatch(s -> s instanceof Configuration))
+            if (stream(m.localSentences()).noneMatch(s -> s instanceof Configuration
+                    || (s instanceof SyntaxSort && s.att().contains("temporary-cell-sort-decl"))))
               return m;
 
             Set<Sentence> importedConfigurationSortsSubsortedToCell = stream(m.productions())
@@ -336,8 +338,11 @@ public class DefinitionParsing {
 
             Set<Sentence> stc = m.localSentences()
                     .$bar(configDeclProductions)
-                    .filter(s -> !(s instanceof Configuration)).seq();
-            return Module(m.name(), m.imports(), stc, m.att());
+                    .filter(s -> !(s instanceof Configuration))
+                    .filter(s -> !(s instanceof SyntaxSort && s.att().contains("temporary-cell-sort-decl"))).seq();
+            Module newM = Module(m.name(), m.imports(), stc, m.att());
+            newM.checkSorts(); // ensure all the Cell sorts are defined
+            return newM;
         }, "expand configs").apply(defWithParsedConfigs);
     }
 

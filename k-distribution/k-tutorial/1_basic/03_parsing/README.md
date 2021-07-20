@@ -42,7 +42,7 @@ endmodule
 You will notice that the productions in this file look a little different than
 the ones from the previous lesson. In point of fact, K has two different
 mechanisms for defining productions. We have previously been focused
-exclusively on the first mechinism, where the `::=` symbol is followed by an
+exclusively on the first mechanism, where the `::=` symbol is followed by an
 alphanumeric identifier followed by a comma-separated list of sorts in
 parentheses. However, this is merely a special case of a more generic mechanism
 for defining the syntax of productions using a variant of

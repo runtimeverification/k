@@ -527,6 +527,7 @@ public class GenerateSentencesFromConfigDecl {
             sentences.add(getExitCode);
             KVariable var = KVariable("Exit", Att.empty().add(Sort.class, Sorts.Int()));
             Rule getExitCodeRule = Rule(KRewrite(KApply(getExitCodeLabel, IncompleteCellUtils.make(KLabels.GENERATED_TOP_CELL, true, IncompleteCellUtils.make(KLabel(klabel), false, var, false), true)), var), BooleanUtils.TRUE, BooleanUtils.TRUE);
+            sentences.add(SyntaxSort.apply(Seq(), Sorts.GeneratedTopCell(), Att.empty()));
             sentences.add(getExitCodeRule);
         }
         return Tuple4.apply(immutable(sentences),cellsSort,rhs, false);

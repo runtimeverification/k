@@ -798,10 +798,10 @@ public class TypeInferencer implements AutoCloseable {
       case "timeout":
         return Status.UNKNOWN;
       default:
-        throw KEMException.internalError("Unexpected result from z3: " + result);
+        throw KEMException.internalError("Unexpected result from z3: " + result, currentTerm);
       }
     } catch (IOException e) {
-      throw KEMException.internalError("Could not read from z3 process", e);
+      throw KEMException.internalError("Could not read from z3 process", e, currentTerm);
     }
   }
 
@@ -888,9 +888,9 @@ public class TypeInferencer implements AutoCloseable {
       }
       return new SmtSortParser(new StringReader(result)).Sort();
     } catch (IOException e) {
-      throw KEMException.internalError("Could not read from z3 process", e);
+      throw KEMException.internalError("Could not read from z3 process", e, currentTerm);
     } catch (ParseException e) {
-      throw KEMException.internalError("Failed to parse z3 sort", e);
+      throw KEMException.internalError("Failed to parse z3 sort", e, currentTerm);
     }
   }
 
