@@ -212,16 +212,16 @@ Here we have introduced two new concepts. The first is the variable of sort
 second is that we have introduced the concept of `...` once again. When a cell
 contains other cells, it is also possible to specify `...` on either the left,
 right or both sides of the cell term. Each of these three syntaxes are
-equivalent in this case. When they appear on the left-hand-side of a rule, they
+equivalent in this case. When they appear on the left-hand side of a rule, they
 indicate that we don't care what value any cells not explicitly named might
 have. For example, I might write `<state>... <first> 0 </first> ...</state>` on
-the left-hand-side of a rule in order to indicate that we want to match the
+the left-hand side of a rule in order to indicate that we want to match the
 rule when the `<first>` cell contains a zero, regardless of what the `<second>`
 cell contains. If we had not included this ellipsis, it would have been a
 syntax error, because K would have expected you to provide a value for each of
 the child cells.
 
-However, if, as in the example above, the `...` appeared on the right-hand-side
+However, if, as in the example above, the `...` appeared on the right-hand side
 of a rule, this instead indicates that the cells not explicitly mentioned under
 the cell should be initialized with their default value from the configuration
 declaration. In other words, that rule will set the value of `<first>` and
@@ -239,5 +239,5 @@ Boolean cell you created is initialized to false. Then add a production
 `syntax Stmt ::= Bool ";" Exp`, and a rule that uses this `Stmt` to set the
 value of the Boolean flag. Then add another production
 `syntax Stmt ::= "reset" ";" Exp` which sets the value of the Boolean flag back
-to its default value via a `...` on the right-hand-side. You will need to add
+to its default value via a `...` on the right-hand side. You will need to add
 an additional cell around the Boolean cell to make this work.
