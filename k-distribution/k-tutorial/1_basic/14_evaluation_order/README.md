@@ -222,7 +222,7 @@ Finally, note that there are a few minor syntactic conveniences provided by the
 exactly like `<k> HERE ...</k>`, you can omit both the `context alias` sentence
 from the definition, and the name from the `seqstrict` attribute.
 
-Second, if the numbered list of offsets contains every nonterminal in the
+Second, if the numbered list of offsets contains every non-terminal in the
 production, it can be omitted from the attribute value.
 
 Thus, we can finally produce the idiomatic K definition for this example
