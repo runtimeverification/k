@@ -82,9 +82,9 @@ becomes the **final configuration** and is output by `krun`.
 
 If more than one top-level rule applies, by default, `K` will pick just one
 of those rules, apply it, and continue rewriting. However, it is
-**nondeterministic** which rule applies. In theory, it could be any of them.
+**non-deterministic** which rule applies. In theory, it could be any of them.
 By passing the `--search` flag to `krun`, you are able to tell `krun` to 
-explore all possible nondeterministic choices, and generate a complete list of
+explore all possible non-deterministic choices, and generate a complete list of
 all possible final configurations reachable by each nondeterminstic choice that
 can be made.
 

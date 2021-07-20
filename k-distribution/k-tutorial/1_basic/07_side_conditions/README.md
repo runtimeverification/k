@@ -58,7 +58,7 @@ immediately clear why this choice was made, given that a function is not
 considered well-defined if multiple rules for evaluating it are capable of
 evaluating the same arguments to different results. However, in future lessons
 we will discuss other types of rules in K, some of which can be
-**nondeterministic**. What this means is that if more than one rule is capable
+**non-deterministic**. What this means is that if more than one rule is capable
 of matching, then K will explore both possible rules in parallel, and consider
 each of their respective results when executing your program. Don't worry too
 much about this right now, but just understand that because of the potential

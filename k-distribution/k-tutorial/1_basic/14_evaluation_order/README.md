@@ -265,9 +265,9 @@ Thus far, we have focused entirely on deterministic evaluation order. However,
 not all languages are deterministic in the order they evaluate expressions.
 For example, in C, the expression `a() + b() + c()` is guaranteed to parse
 to `(a() + b()) + c()`, but it is not guaranteed that `a` will be called before
-`b` before `c`. In fact, this evaluation order is nondeterministic.
+`b` before `c`. In fact, this evaluation order is non-deterministic.
 
-We can express nondeterministic evaluation orders with the `strict` attribute.
+We can express non-deterministic evaluation orders with the `strict` attribute.
 Its behavior is identical to the `seqstrict` attribute, except that step 3 in
 the above list (with the side condition automatically added) does not take
 place. In other words, if I wrote `syntax Exp ::= Exp "+" Exp [strict]` instead
