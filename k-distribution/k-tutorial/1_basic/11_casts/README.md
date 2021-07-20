@@ -132,15 +132,16 @@ casts to disambiguate their right-hand side.
 
 ### Projection casts
 
-Sometimes, when dealing with grammars containing subsorts, it can be desirable
-to reason with the subsort production itself, which **injects** one sort into
-another. Remember from above that such a production looks like
-`syntax S ::= S2`. This type of production, called a **subsort production**,
-can be thought of as a type of inheritance involving constructors. If we have
-the above production in our grammar, we say that `S2` is a subsort of `S`,
-or that any `S2` is also an `S`. K implicitly maintains a symbol at runtime
-which keeps track of where such subsortings occur; this symbol is called
-an **injection**.
+Thus far we have focused entirely on casts which exist solely to inform the 
+compiler about the sort of terms. However, sometimes when dealing with grammars
+containing subsorts, it can be desirable to reason with the subsort production
+itself, which **injects** one sort into another. Remember from above that such
+a production looks like `syntax S ::= S2`. This type of production, called a
+**subsort production**, can be thought of as a type of inheritance involving
+constructors. If we have the above production in our grammar, we say that `S2`
+is a subsort of `S`, or that any `S2` is also an `S`. K implicitly maintains a
+symbol at runtime which keeps track of where such subsortings occur; this
+symbol is called an **injection**.
 
 Sometimes, when one sort is a subsort of another, it can be the case that
 a function returns one sort, but you actually want to cast the result of 
@@ -160,7 +161,9 @@ For each pair of sorts `S` and `S2`, K provides the following production:
 What this means is that you take any term of sort `S2` and **cast** it to sort
 `S`. If the term of sort S2 consists of an injection containing a term of sort
 `S`, then this will return that term. Otherwise, an error occurs and rewriting
-fails, returning the projection function which failed to apply.
+fails, returning the projection function which failed to apply. The sort is
+not actually checked at compilation time; rather, it a runtime check is
+inserted into the code that runs when the rule applies.
 
 For example, here is an example that makes use of projection casts:
 
