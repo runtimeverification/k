@@ -55,7 +55,7 @@ public class CheckAtt {
                 }
             }
         }
-        if (prod.att().contains("binder")) {
+        if (prod.att().contains("binder") && !isSymbolicKast) {
             if (!prod.att().get("binder").equals("")) {
                 errors.add(KEMException.compilerError("Attribute value for 'binder' attribute is not supported.", prod));
             }
