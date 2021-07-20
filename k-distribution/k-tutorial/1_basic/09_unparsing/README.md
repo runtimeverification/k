@@ -286,6 +286,29 @@ how the formatter interacts with the list of colors specified by the `colors`
 attribute. You can essentially think of the `color` attribute as a way of
 specifying that you want all the colors in the list to be the same color.
 
+For example, here is a variant of LESSON-09-A which colors the various boolean
+operators:
+
+```k
+module LESSON-09-D
+  imports BOOL
+
+  syntax Exp ::= "(" Exp ")" [bracket]
+               | Bool
+               > "!" Exp [color(yellow)]
+               > left:
+                 Exp "&&" Exp [color(red)]
+               | Exp "^" Exp [color(blue)]
+               | Exp "||" Exp [color(green)]
+
+  syntax Exp ::= id(Exp) [function]
+  rule id(E) => E
+endmodule
+```
+
+For a complete list of allowed colors, see 
+[here](https://github.com/kframework/llvm-backend/blob/master/lib/ast/AST.cpp#L381).
+
 ## Exercises
 
 1. Use the color attribute on `LESSON-09-C` to color the keywords `true` and
