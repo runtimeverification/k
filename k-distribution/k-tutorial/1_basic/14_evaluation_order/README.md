@@ -270,9 +270,9 @@ to `(a() + b()) + c()`, but it is not guaranteed that `a` will be called before
 We can express non-deterministic evaluation orders with the `strict` attribute.
 Its behavior is identical to the `seqstrict` attribute, except that step 3 in
 the above list (with the side condition automatically added) does not take
-place. In other words, if I wrote `syntax Exp ::= Exp "+" Exp [strict]` instead
-of `syntax Exp ::= Exp "+" Exp [seqstrict]`, it would generate the following
-two contexts instead of the ones found in `LESSON-14-B`:
+place. In other words, if we wrote `syntax Exp ::= Exp "+" Exp [strict]`
+instead of `syntax Exp ::= Exp "+" Exp [seqstrict]`, it would generate the
+following two contexts instead of the ones found in `LESSON-14-B`:
 
 ```
   context <k> _:Exp + HOLE:Exp ...</k>

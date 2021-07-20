@@ -40,7 +40,7 @@ defined a sort `Exp`, the actual production for that sort would be:
 At runtime, this expression will not actually exist; it is merely an annotation
 to the compiler describing the sort of the term inside the cast. It is telling
 the compiler that the term inside the cast must be of sort `Exp`. For example,
-if I had the following grammar:
+if we had the following grammar:
 
 ```k
 module LESSON-11-A
@@ -96,7 +96,7 @@ endmodule
 ```
 
 This grammar is a little ambiguous and contrived, but it serves to demonstrate
-how a semantic cast might be insufficient to disambiguate a term. If I were 
+how a semantic cast might be insufficient to disambiguate a term. If we were 
 to write the term `(I1:Int + I2:Int):Exp2`, the term would be ambiguous,
 because the cast is not sufficiently strict to determine whether you mean
 to derive the "+" production tagged `exp`, or the one tagged `exp2`.

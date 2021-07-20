@@ -196,7 +196,7 @@ unique sort is assigned for that cell with a single constructor (the cell
 itself). The sort name is taken by removing all special characters,
 capitalizing the first letter and each letter after a hyphen, and adding the
 word `Cell` at the end. For example, in the above example, the cell sorts are
-`TCell`, `KCell`, `StateCell`, `FirstCell`, and `SecondCell`. If I had declared
+`TCell`, `KCell`, `StateCell`, `FirstCell`, and `SecondCell`. If we had declared
 a cell as `<first-number>`, then the cell sort name would be `FirstNumberCell`.
 
 You can explicitly reference a variable of one of these sorts anywhere you
@@ -214,7 +214,7 @@ contains other cells, it is also possible to specify `...` on either the left,
 right or both sides of the cell term. Each of these three syntaxes are
 equivalent in this case. When they appear on the left-hand side of a rule, they
 indicate that we don't care what value any cells not explicitly named might
-have. For example, I might write `<state>... <first> 0 </first> ...</state>` on
+have. For example, we might write `<state>... <first> 0 </first> ...</state>` on
 the left-hand side of a rule in order to indicate that we want to match the
 rule when the `<first>` cell contains a zero, regardless of what the `<second>`
 cell contains. If we had not included this ellipsis, it would have been a
