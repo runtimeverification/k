@@ -55,6 +55,16 @@ public class CheckAtt {
                 }
             }
         }
+        if (prod.att().contains("binder") && !isSymbolicKast) {
+            if (!prod.att().get("binder").equals("")) {
+                errors.add(KEMException.compilerError("Attribute value for 'binder' attribute is not supported.", prod));
+            }
+            if (prod.nonterminals().size() < 2) {
+                errors.add(KEMException.compilerError("Binder productions must have at least two nonterminals.", prod));
+            } else if (!m.sortAttributesFor().get(prod.nonterminals().apply(0).sort().head()).getOrElse(() -> Att.empty()).getOptional(Att.HOOK()).orElse("").equals("KVAR.KVar")) {
+                errors.add(KEMException.compilerError("First child of binder must have a sort with the 'KVAR.KVar' hook attribute.", prod));
+            }
+        }
     }
 
     private void check(Att att, HasLocation loc) {
