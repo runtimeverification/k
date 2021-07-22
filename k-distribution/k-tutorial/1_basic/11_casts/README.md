@@ -126,8 +126,8 @@ Write a function `eval` which takes a term of sort `Exp2` and returns an `Int`.
 The function should be capable of evaluating any term of sort `Exp2` to the
 integer value which it expresses. You will need to write strict casts in order
 to disambiguate these rules. You will not be able to directly write terms of
-sort Exp2 directly in a program, so you will have to create new function
-symbols that rewrite constant symbols to terms of sort Exp2 and use strict
+sort `Exp2` directly in a program, so you will have to create new function
+symbols that rewrite constant symbols to terms of sort `Exp2` and use strict
 casts to disambiguate their right-hand side.
 
 ### Projection casts
