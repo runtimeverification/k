@@ -99,7 +99,7 @@ public class CheckRewrite {
                         h.inFunctionContext = wasInFunctionContext;
                         h.inFunctionBody = wasInFunctionBody;
                         apply(k.items().get(1));
-                    } else {
+                    } else if (k.klabel().name().equals("#fun3")) {
                         boolean wasInRewrite = h.inRewrite;
                         boolean hadRewrite = h.hasRewrite;
                         boolean wasInFunctionContext = h.inFunctionContext;
@@ -117,6 +117,24 @@ public class CheckRewrite {
                         h.inFunctionContext = wasInFunctionContext;
                         h.inFunctionBody = wasInFunctionBody;
                         apply(k.items().get(2));
+                    } else {
+                        boolean wasInRewrite = h.inRewrite;
+                        boolean hadRewrite = h.hasRewrite;
+                        boolean wasInFunctionContext = h.inFunctionContext;
+                        boolean wasInFunctionBody = h.inFunctionBody;
+                        h.inRewrite = true;
+                        h.hasRewrite = true;
+                        h.inFunctionContext = false;
+                        h.inFunctionBody = false;
+                        apply(k.items().get(0));
+                        apply(k.items().get(2));
+                        // in well formed programs this should always reset to true and true, but we want to make sure we
+                        // don't create spurious reports if this constraint was violated by the user.
+                        h.inRewrite = wasInRewrite;
+                        h.hasRewrite = hadRewrite;
+                        h.inFunctionContext = wasInFunctionContext;
+                        h.inFunctionBody = wasInFunctionBody;
+                        apply(k.items().get(1));
                     }
                 } else if (!(k.klabel() instanceof KVariable) && k.klabel().name().equals("#withConfig")) {
                     boolean inFunctionContext = h.inFunctionContext;

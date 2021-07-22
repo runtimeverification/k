@@ -23,7 +23,7 @@ differences, in turn.
 ### Semantic casts
 
 The most basic, and most common, type of cast in K is called the
-**semantic cast**. For every sort `S` declared in a module, K provies the
+**semantic cast**. For every sort `S` declared in a module, K provides the
 following (implicit) production for use in sentences:
 
 ```
@@ -78,7 +78,7 @@ of sort `Exp`. Thus, `isExpression(1)` will return true, as will `isExpression(1
 #### Exercise
 
 Verify this fact for yourself by running `isExpression` on the above examples. Then
-write an `isStmt` function, and test that it works as expected.
+write an `isStatement` function, and test that it works as expected.
 
 ### Strict casts
 

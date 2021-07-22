@@ -48,7 +48,7 @@ As a syntactic convenience, K allows you to treat `~>` like it is an
 associative list (i.e., as if it were defined as `syntax K ::= K "~>" K`), but
 when a definition is compiled, it will automatically transform the rules you
 write so that they treat the `K` sort as a cons-list. Another syntactic
-convenience is that, for disamiguation purposes, you can write `.K` anywhere
+convenience is that, for disambiguation purposes, you can write `.K` anywhere
 you would otherwise write `.` and the meaning is identical.
 
 Now, you may notice that the above grammar mentions the sort `KItem`. This is

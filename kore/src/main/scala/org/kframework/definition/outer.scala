@@ -331,7 +331,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   def checkSorts () = sentences foreach {
     case p@Production(_, params, _, items, _) =>
       val res = items collect 
-      { case nt: NonTerminal if !p.isSortVariable(nt.sort) && !definedSorts.contains(nt.sort.head) && !usedCellSorts.contains(nt.sort) && !sortSynonymMap.contains(nt.sort) => nt 
+      { case nt: NonTerminal if !p.isSortVariable(nt.sort) && !definedSorts.contains(nt.sort.head) && !sortSynonymMap.contains(nt.sort) => nt
         case nt: NonTerminal if nt.sort.params.nonEmpty && (nt.sort.params.toSet & params.toSet).isEmpty && !definedInstantiations.getOrElse(nt.sort.head, Set()).contains(nt.sort) => nt
       }
       if (res.nonEmpty)

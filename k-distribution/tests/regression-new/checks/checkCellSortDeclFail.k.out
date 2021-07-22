@@ -1,0 +1,4 @@
+[Error] Compiler: Could not find sorts: [MisTypedCell]
+	Source(checkCellSortDeclFail.k)
+	Location(12,16,12,27)
+[Error] Compiler: Had 1 parsing errors.

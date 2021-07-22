@@ -84,8 +84,8 @@ The return value is the length of the string in **code points**.
 ### Substring computation
 
 The function to compute the substring of a string is `substrString`. It
-takes two string indices, startin from 0, and returns the substring within the
-range [start..end). It is only defined if `end => start`, `start >= 0`, and
+takes two string indices, starting from 0, and returns the substring within the
+range [start..end). It is only defined if `end >= start`, `start >= 0`, and
 `end <= length of string`. Here, for example, we return the first 5 characters
 of a string:
 

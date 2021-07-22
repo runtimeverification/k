@@ -274,7 +274,7 @@ list of colors associated with each production, and then the format attribute
 is used to control how those colors are used to unparse the term. At its most
 basic level, you can set the `color` attribute to color all the terminals in
 the production a certain color, or you can use the `colors` attribute to
-specify a comma separated list of colors for each non-terminal in the
+specify a comma-separated list of colors for each non-terminal in the
 production. At a more advanced level, the `%c` and `%r` format codes control
 how the formatter interacts with the list of colors specified by the `colors`
 attribute. You can essentially think of the `color` attribute as a way of
