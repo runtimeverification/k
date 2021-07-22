@@ -78,7 +78,7 @@ of sort `Exp`. Thus, `isExpression(1)` will return true, as will `isExpression(1
 #### Exercise
 
 Verify this fact for yourself by running `isExpression` on the above examples. Then
-write an `isStmt` function, and test that it works as expected.
+write an `isStatement` function, and test that it works as expected.
 
 ### Strict casts
 
