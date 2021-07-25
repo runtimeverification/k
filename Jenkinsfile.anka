@@ -9,7 +9,7 @@
 pipeline {
   agent { label 'docker' }
   options { ansiColor('xterm') }
-  triggers { cron('H/5 0-7 * * 0') }
+  triggers { cron('@weekly') }
   stages {
     stage('Build Anka VM') {
       options { timeout(time: 150, unit: 'MINUTES') }
