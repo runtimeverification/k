@@ -227,7 +227,7 @@ public class Outer {
                   sb.deleteCharAt(sb.length() - 1);
                   return sb.toString();
                 }
-              }).collect(Collectors.toList()).toString(), e, source,
+              }).collect(Collectors.toList()).toString(),  source,
             new Location(e.currentToken.next.beginLine, e.currentToken.next.beginColumn, e.currentToken.next.endLine, e.currentToken.next.endColumn));
     } catch (TokenMgrException e) {
       // TODO: report location
