@@ -217,6 +217,8 @@ public class RuleGrammarGenerator {
         Set<Sentence> extensionProds = new HashSet<>();
         Set<Sentence> disambProds;
 
+        Module origMod = mod;
+
         if (isBison) {
           mod = ModuleTransformer.from(m -> {
             if (m.att().contains("not-lr1")) {
@@ -470,7 +472,7 @@ public class RuleGrammarGenerator {
         if (!notLrModules.isEmpty()) {
           att = att.add("not-lr1", notLrModules.toString());
         }
-        Module extensionM = new Module(mod.name() + "-EXTENSION", Set(mod), Set(), immutable(extensionProds), att);
+        Module extensionM = new Module(mod.name() + "-EXTENSION", Set(origMod), Set(), immutable(extensionProds), att);
         Module disambM = new Module(mod.name() + "-DISAMB", Set(), Set(), immutable(disambProds), att);
         Module parseM = new Module(mod.name() + "-PARSER", Set(), Set(), immutable(parseProds), att);
         parseM.subsorts();
