@@ -2,6 +2,7 @@
 package org.kframework.parser.inner.generator;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
+import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
@@ -218,6 +219,13 @@ public class RuleGrammarGenerator {
         Set<Sentence> disambProds;
 
         Module origMod = mod;
+
+        UnaryOperator<Module> f = m -> Module(m.name(), m.publicImports(), Set(), m.publicSentences(), m.att());
+        mod = Module(mod.name(),
+            stream(mod.publicImports()).map(f).collect(Collections.toSet()),
+            stream(mod.privateImports()).map(f).collect(Collections.toSet()),
+            mod.localSentences(),
+            mod.att());
 
         if (isBison) {
           mod = ModuleTransformer.from(m -> {
