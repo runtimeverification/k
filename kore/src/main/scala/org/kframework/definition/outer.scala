@@ -90,10 +90,12 @@ object Module {
   }
 }
 
-case class Module(val name: String, val imports: Set[Module], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
+case class Module(val name: String, val publicImports: Set[Module], val privateImports: Set[Module], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
   extends ModuleToString with OuterKORE with Sorting with Serializable with AttValue {
 
   assert(att != null)
+
+  lazy val imports: Set[Module] = publicImports | privateImports
 
   private lazy val importedSentences = imports flatMap {_.sentences}
 
