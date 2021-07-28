@@ -106,9 +106,6 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     _.importedModules
   })
 
-  def addImport(m : Module) : Module = new Module(name, imports + m, localSentences, att)
-  def wrappingModule(newName : String) : Module = new Module(newName, Set(this), Set(), Att.empty)
-
   lazy val importedModuleNames: Set[String] = importedModules.map(_.name)
 
   lazy val productions: Set[Production] = sentences collect { case p: Production => p }
