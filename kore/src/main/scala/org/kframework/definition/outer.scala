@@ -86,7 +86,7 @@ trait Sorting {
 
 object Module {
   def apply(name: String, unresolvedLocalSentences: Set[Sentence]): Module = {
-    new Module(name, Set(), unresolvedLocalSentences, Att.empty)
+    new Module(name, Set(), Set(), unresolvedLocalSentences, Att.empty)
   }
 }
 

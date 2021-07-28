@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -115,6 +116,7 @@ public class RuleGrammarGenerator {
         Module newM = new Module( mod.name() + "-" + RULE_CELLS
                                 , Set(mod, baseK.getModule(K).get(), baseK.getModule(RULE_CELLS).get(), baseK.getModule(DEFAULT_LAYOUT).get())
                                 , Set()
+                                , Set()
                                 , Att()
                                 );
         return newM;
@@ -130,6 +132,7 @@ public class RuleGrammarGenerator {
         // import CONFIG-CELLS in order to parse cells specific to configurations
         Module newM = new Module( mod.name() + "-" + CONFIG_CELLS
                                 , Set(mod, baseK.getModule(K).get(), baseK.getModule(CONFIG_CELLS).get(), baseK.getModule(DEFAULT_LAYOUT).get())
+                                , Set()
                                 , Set()
                                 , Att()
                                 );
@@ -148,14 +151,16 @@ public class RuleGrammarGenerator {
             return mod;
         } else {
             Module newMod = ModuleTransformer.from(oldMod -> {
-                Set<Module> imports = stream(oldMod.imports()).map(_import -> {
+                UnaryOperator<Module> f = _import -> {
                     Option<Module> programParsing = baseK.getModule(_import.name() + "-PROGRAM-PARSING");
                     if (programParsing.isDefined()) {
                         return programParsing.get();
                     }
                     return _import;
-                }).collect(Collectors.toSet());
-                return Module.apply(oldMod.name(), immutable(imports), oldMod.localSentences(), oldMod.att());
+                };
+                Set<Module> publicImports = stream(oldMod.publicImports()).map(f).collect(Collectors.toSet());
+                Set<Module> privateImports = stream(oldMod.privateImports()).map(f).collect(Collectors.toSet());
+                return Module.apply(oldMod.name(), immutable(publicImports), immutable(privateImports), oldMod.localSentences(), oldMod.att());
             }, "apply program parsing modules").apply(mod);
 
             Set<Module> modules = new HashSet<Module>();
@@ -169,7 +174,7 @@ public class RuleGrammarGenerator {
                 modules.add(baseK.getModule(DEFAULT_LAYOUT).get());
             }
 
-            return Module.apply(mod.name() + "-PROGRAM-GRAMMAR", immutable(modules), Set(), Att());
+            return Module.apply(mod.name() + "-PROGRAM-GRAMMAR", immutable(modules), Set(), Set(), Att());
         }
     }
 
@@ -215,7 +220,7 @@ public class RuleGrammarGenerator {
         if (isBison) {
           mod = ModuleTransformer.from(m -> {
             if (m.att().contains("not-lr1")) {
-              return Module(m.name(), m.imports(), Set(), m.att());
+              return Module(m.name(), m.publicImports(), m.privateImports(), Set(), m.att());
             }
             return m;
           }, "strip not-lr1 modules from bison grammar").apply(mod);
@@ -465,9 +470,9 @@ public class RuleGrammarGenerator {
         if (!notLrModules.isEmpty()) {
           att = att.add("not-lr1", notLrModules.toString());
         }
-        Module extensionM = new Module(mod.name() + "-EXTENSION", Set(mod), immutable(extensionProds), att);
-        Module disambM = new Module(mod.name() + "-DISAMB", Set(), immutable(disambProds), att);
-        Module parseM = new Module(mod.name() + "-PARSER", Set(), immutable(parseProds), att);
+        Module extensionM = new Module(mod.name() + "-EXTENSION", Set(mod), Set(), immutable(extensionProds), att);
+        Module disambM = new Module(mod.name() + "-DISAMB", Set(), Set(), immutable(disambProds), att);
+        Module parseM = new Module(mod.name() + "-PARSER", Set(), Set(), immutable(parseProds), att);
         parseM.subsorts();
         return Tuple3.apply(extensionM, disambM, parseM);
     }
