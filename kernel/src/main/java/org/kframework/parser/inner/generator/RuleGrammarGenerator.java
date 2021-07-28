@@ -227,10 +227,10 @@ public class RuleGrammarGenerator {
         Module origMod = mod;
 
         if (!forGlobalScanner) {
-          UnaryOperator<Module> f = m -> Module(m.name(), m.publicImports(), Set(), m.publicSentences(), m.att());
+          ModuleTransformer f = ModuleTransformer.from(m -> Module(m.name(), m.publicImports(), Set(), m.publicSentences(), m.att()), "compute module signature");
           mod = Module(mod.name(),
-              stream(mod.publicImports()).map(f).collect(Collections.toSet()),
-              stream(mod.privateImports()).map(f).collect(Collections.toSet()),
+              stream(mod.publicImports()).map(m -> f.apply(m)).collect(Collections.toSet()),
+              stream(mod.privateImports()).map(m -> f.apply(m)).collect(Collections.toSet()),
               mod.localSentences(),
               mod.att());
         }
