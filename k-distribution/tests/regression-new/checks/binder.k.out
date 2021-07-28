@@ -1,0 +1,10 @@
+[Error] Compiler: Binder productions must have at least two nonterminals.
+	Source(binder.k)
+	Location(6,20,6,33)
+[Error] Compiler: Attribute value for 'binder' attribute is not supported.
+	Source(binder.k)
+	Location(8,20,8,52)
+[Error] Compiler: First child of binder must have a sort with the 'KVAR.KVar' hook attribute.
+	Source(binder.k)
+	Location(10,20,10,45)
+[Error] Compiler: Had 3 structural errors.

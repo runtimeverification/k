@@ -228,7 +228,7 @@ public class Outer {
                   return sb.toString();
                 }
               }).collect(Collectors.toList()).toString(), e, source,
-            new Location(e.currentToken.next.beginLine, e.currentToken.next.beginColumn, e.currentToken.next.endLine, e.currentToken.next.endColumn));
+            new Location(e.currentToken.next.beginLine, e.currentToken.next.beginColumn, e.currentToken.next.endLine, e.currentToken.next.endColumn), false);
     } catch (TokenMgrException e) {
       // TODO: report location
       throw KEMException.outerParserError(e.getMessage(), e, source, null);
