@@ -115,10 +115,10 @@ public class RuleGrammarGenerator {
     public Module getRuleGrammar(Module mod) {
         // import RULE-CELLS in order to parse cells specific to rules
         Module newM = new Module( mod.name() + "-" + RULE_CELLS
-                                , Set(mod, baseK.getModule(K).get(), baseK.getModule(RULE_CELLS).get(), baseK.getModule(DEFAULT_LAYOUT).get())
-                                , Set()
-                                , Set()
-                                , Att()
+                                , (scala.collection.Set<Module>) mod.publicImports().$bar(Set(baseK.getModule(K).get(), baseK.getModule(RULE_CELLS).get(), baseK.getModule(DEFAULT_LAYOUT).get()))
+                                , mod.privateImports()
+                                , mod.localSentences()
+                                , mod.att()
                                 );
         return newM;
     }
@@ -132,10 +132,10 @@ public class RuleGrammarGenerator {
     public Module getConfigGrammar(Module mod) {
         // import CONFIG-CELLS in order to parse cells specific to configurations
         Module newM = new Module( mod.name() + "-" + CONFIG_CELLS
-                                , Set(mod, baseK.getModule(K).get(), baseK.getModule(CONFIG_CELLS).get(), baseK.getModule(DEFAULT_LAYOUT).get())
-                                , Set()
-                                , Set()
-                                , Att()
+                                , (scala.collection.Set<Module>) mod.publicImports().$bar(Set(baseK.getModule(K).get(), baseK.getModule(CONFIG_CELLS).get(), baseK.getModule(DEFAULT_LAYOUT).get()))
+                                , mod.privateImports()
+                                , mod.localSentences()
+                                , mod.att()
                                 );
         return newM;
     }
@@ -165,7 +165,9 @@ public class RuleGrammarGenerator {
             }, "apply program parsing modules").apply(mod);
 
             Set<Module> modules = new HashSet<Module>();
-            modules.add(newMod);
+            for (Module m : iterable(newMod.publicImports())) {
+              modules.add(m);
+            }
 
             // import PROGRAM-LISTS so user lists are modified to parse programs
             modules.add(baseK.getModule(PROGRAM_LISTS).get());
@@ -175,7 +177,7 @@ public class RuleGrammarGenerator {
                 modules.add(baseK.getModule(DEFAULT_LAYOUT).get());
             }
 
-            return Module.apply(mod.name() + "-PROGRAM-GRAMMAR", immutable(modules), Set(), Set(), Att());
+            return Module.apply(mod.name() + "-PROGRAM-GRAMMAR", immutable(modules), newMod.privateImports(), newMod.localSentences(), newMod.att());
         }
     }
 
