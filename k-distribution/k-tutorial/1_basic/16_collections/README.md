@@ -82,9 +82,11 @@ endmodule
 
 There are several new features in this definition. First, note we import
 the module `ID-SYNTAX`. This module is defined in `domains.md` and provides a
-basic syntax for identifiers. This syntax is only imported when parsing
-programs, not when parsing rules. Later in this lesson we will see how to
-reference specific concrete identifiers in a rule.
+basic syntax for identifiers. We are using the `Id` sort provided by this
+module in this definition to implement the names of program variables. This
+syntax is only imported when parsing programs, not when parsing rules. Later in
+this lesson we will see how to reference specific concrete identifiers in a
+rule.
 
 Second, we introduce a single new function over the `Map` sort. This function,
 which is represented by the symbol
@@ -126,11 +128,11 @@ help make the output more readable.
 ### Exercise
 
 Create a sort `Stmt` that is a subsort of `Decl`. Create a production of sort
-`Stmt` for variable assignment. Feel free to use the syntax
-`syntax Stmt ::= Id "=" Exp ";"`. Write a rule that implements variable
-assignment using a map update function. Then write the same rule using a
-map pattern. Test your implementations with some programs to ensure they behave
-as expected.
+`Stmt` for variable assignment in addition to the variable declaration
+production. Feel free to use the syntax `syntax Stmt ::= Id "=" Exp ";"`. Write
+a rule that implements variable assignment using a map update function. Then
+write the same rule using a map pattern. Test your implementations with some
+programs to ensure they behave as expected.
 
 ## Semantic Lists
 
@@ -259,10 +261,12 @@ Note that we have successfully put on the `<k>` cell the value returned by the
 Add a term of sort `Id` to the `stackFrame` operator to keep track of the
 name of the function in that stack frame. Then write a function
 `syntax String ::= printStackTrace(List)` that takes the contents of the
-`<fstack>` cell and pretty prints the current stack trace. Test this function
-by creating a new expression that returns the current stack trace as a string.
-Make sure to update `isKResult` and the `Exp` sort as appropriate to allow
-strings as values.
+`<fstack>` cell and pretty prints the current stack trace. You can concatenate
+strings with `+String` in the `STRING` module in `domains.md`, and you can
+convert an `Id` to a `String` with the `Id2String` function in the `ID` module.
+Test this function by creating a new expression that returns the current stack
+trace as a string. Make sure to update `isKResult` and the `Exp` sort as
+appropriate to allow strings as values.
 
 ## Sets
 
