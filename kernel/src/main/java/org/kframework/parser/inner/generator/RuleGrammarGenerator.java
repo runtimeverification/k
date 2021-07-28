@@ -185,15 +185,19 @@ public class RuleGrammarGenerator {
 
     /* use this overload if you don't need to profile rule parse times. */
     public static ParseInModule getCombinedGrammar(Module mod, boolean strict) {
-      return getCombinedGrammar(mod, strict, false, false, null);
+      return getCombinedGrammar(mod, strict, false, false, false, null);
     }
 
     public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, boolean isBison) {
-      return getCombinedGrammar(mod, strict, timing, isBison, null);
+      return getCombinedGrammar(mod, strict, timing, isBison, false, null);
     }
 
     public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, FileUtil files) {
-      return getCombinedGrammar(mod, strict, timing, false, files);
+      return getCombinedGrammar(mod, strict, timing, false, false, files);
+    }
+
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, FileUtil files, boolean forGlobalScanner) {
+      return getCombinedGrammar(mod, strict, timing, false, forGlobalScanner, files);
     }
 
     /**
@@ -205,27 +209,29 @@ public class RuleGrammarGenerator {
      * @param mod module for which to create the parser.
      * @return parser which applies disambiguation filters by default.
      */
-    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, boolean isBison, FileUtil files) {
-        return new ParseInModule(mod, strict, timing, isBison, files);
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, boolean isBison, boolean forGlobalScanner, FileUtil files) {
+        return new ParseInModule(mod, strict, timing, isBison, forGlobalScanner, files);
     }
 
     public static ParseInModule getCombinedGrammar(Module mod, Scanner scanner, boolean strict, boolean timing, boolean isBison, FileUtil files) {
-        return new ParseInModule(mod, scanner, strict, timing, isBison, files);
+        return new ParseInModule(mod, scanner, strict, timing, isBison, false, files);
     }
 
-    public static Tuple3<Module, Module, Module> getCombinedGrammarImpl(Module mod, boolean isBison) {
+    public static Tuple3<Module, Module, Module> getCombinedGrammarImpl(Module mod, boolean isBison, boolean forGlobalScanner) {
         Set<Sentence> prods = new HashSet<>();
         Set<Sentence> extensionProds = new HashSet<>();
         Set<Sentence> disambProds;
 
         Module origMod = mod;
 
-        UnaryOperator<Module> f = m -> Module(m.name(), m.publicImports(), Set(), m.publicSentences(), m.att());
-        mod = Module(mod.name(),
-            stream(mod.publicImports()).map(f).collect(Collections.toSet()),
-            stream(mod.privateImports()).map(f).collect(Collections.toSet()),
-            mod.localSentences(),
-            mod.att());
+        if (!forGlobalScanner) {
+          UnaryOperator<Module> f = m -> Module(m.name(), m.publicImports(), Set(), m.publicSentences(), m.att());
+          mod = Module(mod.name(),
+              stream(mod.publicImports()).map(f).collect(Collections.toSet()),
+              stream(mod.privateImports()).map(f).collect(Collections.toSet()),
+              mod.localSentences(),
+              mod.att());
+        }
 
         if (isBison) {
           mod = ModuleTransformer.from(m -> {
