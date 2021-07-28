@@ -14,7 +14,7 @@ of rules. K also supports the usual arithmetic operators over rational numbers.
 ```k
 module RAT-SYNTAX
   imports INT-SYNTAX
-  imports BOOL
+  imports private BOOL
 
   syntax Rat
 
@@ -101,8 +101,9 @@ module RAT-COMMON
 endmodule
 
 module RAT-SYMBOLIC [symbolic, kore]
-  imports RAT-COMMON
+  imports private RAT-COMMON
   imports ML-SYNTAX
+  imports private BOOL
 
   rule
     #Ceil(@R1:Rat /Rat @R2:Rat)
@@ -112,8 +113,8 @@ module RAT-SYMBOLIC [symbolic, kore]
 endmodule
 
 module RAT-KORE [kore]
-  imports RAT-COMMON
-  imports K-EQUAL
+  imports private RAT-COMMON
+  imports private K-EQUAL
 
   /*
    * equalities
@@ -127,8 +128,9 @@ module RAT-KORE [kore]
 endmodule
 
 module RAT-KAST [kast]
-  imports RAT-COMMON
-  imports INT
+  imports private RAT-COMMON
+  imports private INT
+  imports private BOOL
 
   /*
    * equalities for non-kore backends such as the java backend
@@ -142,12 +144,14 @@ module RAT-KAST [kast]
   rule R =/=Rat S => notBool (R ==Rat S)
 endmodule
 
-module RAT
-  imports RAT-COMMON
+module RAT [private]
+  imports private RAT-COMMON
   imports RAT-SYMBOLIC
   imports RAT-KORE
   imports RAT-KAST
-  imports INT
+  imports RAT-SYNTAX
+  imports private INT
+  imports private BOOL
 
   /*
    * arithmetic
@@ -187,7 +191,7 @@ module RAT
   rule makeRat(I, J, D) => makeRat(0 -Int I, 0 -Int J, D) requires J <Int 0
 
   // gcdInt(a,b) computes the gcd of |a| and |b|, which is positive.
-  syntax Int ::= gcdInt(Int, Int) [function]
+  syntax Int ::= gcdInt(Int, Int) [function, public]
 
   rule gcdInt(A, 0) => A        requires A >Int 0
   rule gcdInt(A, 0) => 0 -Int A requires A <Int 0
