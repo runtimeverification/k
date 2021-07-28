@@ -1,5 +1,4 @@
 DEF=../concrete-function/a
-DEFDIR=../concrete-function
 TESTDIR=.
 EXT=a
 KOMPILE_BACKEND=java
