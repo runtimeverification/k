@@ -112,6 +112,14 @@ case class Module(val name: String, val publicImports: Set[Module], val privateI
 
   lazy val productions: Set[Production] = sentences collect { case p: Production => p }
 
+  lazy val publicSentences: Set[Sentence] = {
+    if (att.contains(Att.PRIVATE)) {
+      localSentences.filter(_.att.contains(Att.PUBLIC))
+    } else {
+      localSentences.filter(!_.att.contains(Att.PRIVATE))
+    }
+  }
+
   lazy val functions: Set[KLabel] = productions.filter(_.att.contains(Att.FUNCTION)).map(_.klabel.get.head)
 
   def isFunction(t: K): Boolean = {
