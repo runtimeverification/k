@@ -1,0 +1,28 @@
+[Error] Inner Parser: Parse error: unexpected token 'foo'.
+	Source(signature.k)
+	Location(24,8,24,11)
+[Error] Inner Parser: Parse error: unexpected token 'fu'.
+	Source(signature.k)
+	Location(26,8,26,10)
+[Error] Inner Parser: Parse error: unexpected token 'baz'.
+	Source(signature.k)
+	Location(28,8,28,11)
+[Error] Inner Parser: Parse error: unexpected token 'foo'.
+	Source(signature.k)
+	Location(36,8,36,11)
+[Error] Inner Parser: Parse error: unexpected token 'bam'.
+	Source(signature.k)
+	Location(37,8,37,11)
+[Error] Inner Parser: Parse error: unexpected token 'fu'.
+	Source(signature.k)
+	Location(38,8,38,10)
+[Error] Inner Parser: Parse error: unexpected token 'bar'.
+	Source(signature.k)
+	Location(39,8,39,11)
+[Error] Inner Parser: Parse error: unexpected token 'baz'.
+	Source(signature.k)
+	Location(40,8,40,11)
+[Error] Inner Parser: Parse error: unexpected token 'b'.
+	Source(signature.k)
+	Location(42,8,42,9)
+[Error] Compiler: Had 9 parsing errors.
