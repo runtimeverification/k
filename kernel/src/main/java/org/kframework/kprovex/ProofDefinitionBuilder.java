@@ -23,7 +23,7 @@ public class ProofDefinitionBuilder {
 
     private final CompiledDefinition compiledDefinition;
     private final Backend backend;
-    private final Kompile kompile;
+    public final Kompile kompile;
     private final FileUtil files;
 
     @Inject
@@ -46,7 +46,7 @@ public class ProofDefinitionBuilder {
         File absSpecFile = files.resolveWorkingDirectory(specFile).getAbsoluteFile();
 
         Set<Module> modules = kompile.parseModules(compiledDefinition, defModuleNameUpdated, specModuleNameUpdated, absSpecFile,
-                backend.excludedModuleTags(), readOnlyCache);
+                backend.excludedModuleTags(), true);
         Map<String, Module> modulesMap = modules.stream().collect(Collectors.toMap(Module::name, m -> m));
         Definition parsedDefinition = compiledDefinition.getParsedDefinition();
         Module specModule = getModule(specModuleNameUpdated, modulesMap, parsedDefinition);
