@@ -8,20 +8,26 @@ import org.kframework.attributes.Source;
 public class Import extends ModuleItem {
 
     String name;
+    boolean isPublic;
 
-    public Import(String importName) {
+    public Import(String importName, boolean isPublic) {
         super();
         name = importName;
+        this.isPublic = isPublic;
     }
 
-    public Import(String importName, Location loc, Source source) {
+    public Import(String importName, boolean isPublic, Location loc, Source source) {
         super(loc, source);
         this.name = importName;
+        this.isPublic = isPublic;
     }
 
     @Override
     public void toString(StringBuilder sb) {
         sb.append("  imports ");
+        if (!isPublic) {
+          sb.append("private ");
+        }
         sb.append(name);
     }
 
@@ -31,5 +37,13 @@ public class Import extends ModuleItem {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isPublic() {
+      return isPublic;
+    }
+
+    public void setPublic(boolean isPublic) {
+      this.isPublic = isPublic;
     }
 }
