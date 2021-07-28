@@ -345,7 +345,7 @@ case class Module(val name: String, val publicImports: Set[Module], val privateI
 
   override lazy val hashCode: Int = name.hashCode
 
-  def flattened()   : FlatModule                = new FlatModule(name, imports.map(m => Import(m.name, Att.empty)), localSentences, att)
+  def flattened()   : FlatModule                = new FlatModule(name, imports.map(m => Import(m.name, publicImports.contains(m), Att.empty)), localSentences, att)
   def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ imports.map(m => m.flatModules._2).flatten)
 }
 
