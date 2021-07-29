@@ -86,7 +86,7 @@ For example, consider the following module:
 
 ```k
 module LESSON-17-B
-  imports INT-SYNTAX
+  imports INT
   imports ID-SYNTAX
 
   syntax Stmt ::= Id "=" Exp ";" [strict(2)]
@@ -109,9 +109,9 @@ module LESSON-17-B
 
   rule <k> X:Id => I:Int ...</k>
        <state>... X |-> I ...</state>
-  rule <k> X:Id = I:Int => . ...</k>
+  rule <k> X:Id = I:Int ; => . ...</k>
        <state> STATE => STATE [ X <- I ] </state>
-  rule <k> S:Stmt Ss:Stmts => S => Ss ...</k>
+  rule <k> S:Stmt Ss:Stmts => S ~> Ss ...</k>
   rule <k> I1:Int + I2:Int => I1 +Int I2 ...</k>
 
   rule <thread>...
@@ -131,6 +131,10 @@ module LESSON-17-B
          <id> ID </id>
          <k> return I:Int ; ...</k>
        </thread> => .Bag)
+
+  syntax Bool ::= isKResult(K) [function, symbol]
+  rule isKResult(_:Int) => true
+  rule isKResult(_) => false [owise]
 endmodule
 ```
 
