@@ -13,7 +13,7 @@ module A [private]
   rule bam() => .K
   rule fu() => .K
   rule bar => .K
-  rule baz => .K  
+  rule baz => .K
 endmodule
 
 module B
