@@ -5,6 +5,7 @@ endmodule
 
 module PROOFSYNTAX
   imports PROOFSYNTAX-SYNTAX
+  imports BOOL
 
   syntax S::= "c" | "d"
 

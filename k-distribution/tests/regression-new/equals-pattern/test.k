@@ -3,6 +3,8 @@
 module TEST-SYNTAX
   imports INT
   imports K-EQUAL
+  imports BOOL
+  imports BASIC-K
 
 syntax KItem ::= foo(Int) | bar(Int) | baz(KItem) | stuff(K)
 
