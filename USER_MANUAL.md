@@ -954,6 +954,11 @@ preserve `#Bottom` on the right-hand side, the next best option is to have an
 `ensures` clause, and the least-preferred option is to have a `requires` clause.
 The most preferred option is to write total functions and avoid the entire issue.
 
+**NOTE**: The Haskell backend does not attempt to prove claims which right-hand
+side is `#Bottom`. The reason for this is that the general case is undecidable,
+and the backend might enter an infinite loop. Therefore, the backend emits a
+warning if it encounters such a claim.
+
 ### `concrete` attribute, `#isConcrete` and `#isVariable` function (Java backend)
 
 **NOTE**: The Haskell backend _does not_ and _will not_ support the
