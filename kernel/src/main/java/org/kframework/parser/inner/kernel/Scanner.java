@@ -227,7 +227,7 @@ public class Scanner implements AutoCloseable {
         } catch (IOException | InterruptedException e) {
             throw KEMException.internalError("Failed to write file for scanner", e);
         }
-        sw.printIntermediate("New scanner: " + module.name());
+        sw.printIntermediate("  New scanner: " + module.name());
         return scanner;
     }
 
