@@ -1,8 +1,6 @@
-DEF=a
-EXT=a
-KOMPILE_BACKEND=java
+DEF=errorClaim
 TESTDIR=.
-KOMPILE_FLAGS=--concrete-rules "A.f1"
+KOMPILE_BACKEND=java
 
 include ../../../include/kframework/ktest.mak
 
