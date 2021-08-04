@@ -87,7 +87,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         this.files = files;
         if (profileRules) {
             try {
-                timing = new BufferedWriter(new FileWriter(files.resolveKompiled("timing" + Thread.currentThread().getId() + ".log"), true));
+                timing = new BufferedWriter(new FileWriter(files.resolveTemp("timing" + Thread.currentThread().getId() + ".log"), true));
             } catch (IOException e) {
                 throw KEMException.internalError("Failed to open timing.log", e);
             }
@@ -228,11 +228,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
             parseStringTerm(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
         scanner = getGrammar(scanner);
 
-        long start = 0;
-        if (profileRules) {
-            start = System.nanoTime();
-        }
-
+        long start = System.currentTimeMillis(), endParse = 0, startTypeInf = 0, endTypeInf = 0;
         try {
             Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol.toString());
             Set<KEMException> warn = Sets.newHashSet();
@@ -248,6 +244,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
             } catch (KEMException e) {
                 return Tuple2.apply(Left.apply(Collections.singleton(e)), Collections.emptySet());
             }
+            endParse = System.currentTimeMillis();
 
             Either<Set<KEMException>, Term> rez = new TreeCleanerVisitor().apply(parsed);
             if (rez.isLeft())
@@ -273,6 +270,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
             Term rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez.right().get());
             rez3 = new PushTopAmbiguityUp().apply(rez3);
 
+            startTypeInf = System.currentTimeMillis();
             TypeInferencer currentInferencer = inferencer.get();
             if (currentInferencer == null) {
                 currentInferencer = new TypeInferencer(disambModule);
@@ -281,6 +279,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
             }
 
             rez = new TypeInferenceVisitor(currentInferencer, startSymbol, strict && inferSortChecks, true, isAnywhere).apply(rez3);
+            endTypeInf = System.currentTimeMillis();
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
 
@@ -300,18 +299,14 @@ public class ParseInModule implements Serializable, AutoCloseable {
             return new Tuple2<>(Right.apply(rez3), warn);
         } finally {
             if (profileRules) {
-                long stop = System.nanoTime();
+                long stop = System.currentTimeMillis();
                 try {
                     Writer t = timing;
                     synchronized(t) {
-                        t.write(source.toString());
-                        t.write(':');
-                        t.write(Integer.toString(startLine));
-                        t.write(':');
-                        t.write(Integer.toString(startColumn));
-                        t.write(' ');
-                        t.write(Double.toString((stop - start) / 1000000000.0));
-                        t.write('\n');
+                        long totalTime = stop - start;
+                        long parseTime = endParse - start;
+                        long tiTime = endTypeInf - startTypeInf;
+                        t.write(String.format("%5d %s:%d   parse:%4d typeInf:%4d\n", totalTime, source.source(), startLine, parseTime, tiTime));
                     }
                 } catch (IOException e) {
                   throw KEMException.internalError("Could not write to timing.log", e);
