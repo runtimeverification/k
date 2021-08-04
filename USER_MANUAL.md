@@ -1,12 +1,81 @@
 K User Manual
 =============
 
-**Under Construction**
+**NOTE:** The K User Manual is still **under construction**; some features of K
+may have partial or missing documentation.
 
-This document contains documentation that has been written up to some extent
-but still needs to be ultimately included in the K manual which has not been
-written yet. New features of K that affect the surface language should be added
-to this document.
+Introduction
+------------
+
+### Why K?
+
+The K Framework is a programming language and system design toolkit made for
+practioners and researchers alike.
+
+**K For Practioners:**
+*K is a framework for deriving programming languages tools from their semantic
+specifications.*
+
+Typically, programming language tools are developed as follows: for each
+language *L*, a separate team develops tool *T* (e.g. a compiler, interpreter,
+parser, symbolic execution engine, etc). Thus, for *N* different languages and
+*M* different tools, we have *N x M* different teams and implementations.
+
+K approaches the problem differently, by imagining how each of the *M*
+different tools could be derived generically from a common specification. In
+other words, for any language *L*, a language-generic tool is a function *T(L)*
+which gives us tool *T* for *L*. The end result is that we need only *N + M*
+different implementations: one for each language and each tool.
+
+**K For Researchers:**
+*K is a configuration- and rewrite-based executable semantic framework.*
+
+In more detail, K specifications are:
+
+1.   **Executable:** compile into runnable and testable programs;
+2.   **Semantic:** correspond to a logical theory with a sound and relatively
+     complete proof system;
+3.   **Configuration-based:** organize system states into compositional,
+     hierarchical, labelled units called cells;
+4.   **Rewrite-based:** define system transitions using rewrite rules.
+
+K specifications are compiled into particular *matching logic* theories, giving
+them a simple and expressive semantics. K semantic rules are implicitly defined
+over the entire configuration structure, but omit unused cells, enabling a
+highly modular definitional style. Furthermore, K has been used to develop
+programming languages, type systems, and formal analysis tools.
+
+### K Framework Overview
+
+As mentioned in the _Why K?_ section above, the K Framework is designed as a
+collection of language-generic command-line interface (CLI) tools which revolve
+around K specifications. These tools cover a broad range of uses, but typically
+fall into one of the following categories:
+
+1.  Transforming K Specs (e.g. compilation, visual presentation)
+2.  Running K Specs (e.g. concrete and symbolic execution)
+3.  Analyzing K Specs (e.g. theorem proving, bounded model checking)
+
+Different tools in the K Framework have different levels of maturity.
+The most well-supported and broadly tools are the following:
+
+-   `komile` - the K compiler driver
+-   `krun` - the K interpreter and symbolic execution engine driver
+-   `kprove` - the K theorem prover
+-   `kast` - the stanadlone K parser and abstract syntax tree (AST)
+    transformation tool
+
+### Manual Objectives
+
+This user manual is designed to be a tool reference. In particular, it is not
+desgined to be a tutorial on how to write K specifications or to teach the
+logical foundations of K. New K users should consult our dedicated
+[K tutorial](https://kframework.org/k-distribution/k-tutorial/).
+Researchers seeking to learn more about the logic underlying K are encouraged
+to peruse the
+[growing literature on K and matching logic](https://fsl.cs.illinois.edu/projects/pl/index.html).
+We will consider the manual complete when it provides a complete description of
+all well-supported K tools and features.
 
 Syntax Declaration
 ------------------
