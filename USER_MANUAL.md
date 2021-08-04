@@ -57,7 +57,7 @@ fall into one of the following categories:
 3.  Analyzing K Specs (e.g. theorem proving, bounded model checking)
 
 Different tools in the K Framework have different levels of maturity.
-The most well-supported and broadly tools are the following:
+The most well-supported and broadly used tools are the following:
 
 -   `komile` - the K compiler driver
 -   `krun` - the K interpreter and symbolic execution engine driver
