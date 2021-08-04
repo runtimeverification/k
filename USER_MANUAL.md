@@ -56,10 +56,9 @@ fall into one of the following categories:
 2.  Running K Specs (e.g. concrete and symbolic execution)
 3.  Analyzing K Specs (e.g. theorem proving, bounded model checking)
 
-Different tools in the K Framework have different levels of maturity.
-The most well-supported and broadly used tools are the following:
+The main *user-facing* K tools include:
 
--   `komile` - the K compiler driver
+-   `kompile` - the K compiler driver
 -   `krun` - the K interpreter and symbolic execution engine driver
 -   `kprove` - the K theorem prover
 -   `kast` - the stanadlone K parser and abstract syntax tree (AST)
@@ -70,7 +69,8 @@ The most well-supported and broadly used tools are the following:
 This user manual is designed to be a tool reference. In particular, it is not
 desgined to be a tutorial on how to write K specifications or to teach the
 logical foundations of K. New K users should consult our dedicated
-[K tutorial](https://kframework.org/k-distribution/k-tutorial/).
+[K tutorial](https://kframework.org/k-distribution/k-tutorial/),
+or the more language-design oriented [PL tutorial](https://kframework.org/k-distribution/pl-tutorial/).
 Researchers seeking to learn more about the logic underlying K are encouraged
 to peruse the
 [growing literature on K and matching logic](https://fsl.cs.illinois.edu/projects/pl/index.html).
