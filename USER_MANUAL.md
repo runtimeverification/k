@@ -75,7 +75,7 @@ Researchers seeking to learn more about the logic underlying K are encouraged
 to peruse the
 [growing literature on K and matching logic](https://fsl.cs.illinois.edu/projects/pl/index.html).
 We will consider the manual complete when it provides a complete description of
-all well-supported K tools and features.
+all user-facing K tools and features.
 
 Syntax Declaration
 ------------------
