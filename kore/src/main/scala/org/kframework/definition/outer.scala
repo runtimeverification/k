@@ -120,6 +120,11 @@ case class Module(val name: String, val publicImports: Set[Module], val privateI
     }
   }
 
+  lazy val signature: Module = {
+    val f = ModuleTransformer.from(m => Module(m.name, m.publicImports, Set(), m.publicSentences, m.att), "compute module signature")
+    Module(name, publicImports.map(f), privateImports.map(f), localSentences, att)
+  }
+
   lazy val functions: Set[KLabel] = productions.filter(_.att.contains(Att.FUNCTION)).map(_.klabel.get.head)
 
   def isFunction(t: K): Boolean = {

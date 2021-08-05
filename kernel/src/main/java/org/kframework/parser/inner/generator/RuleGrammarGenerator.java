@@ -227,12 +227,7 @@ public class RuleGrammarGenerator {
         Module origMod = mod;
 
         if (!forGlobalScanner) {
-          ModuleTransformer f = ModuleTransformer.from(m -> Module(m.name(), m.publicImports(), Set(), m.publicSentences(), m.att()), "compute module signature");
-          mod = Module(mod.name(),
-              stream(mod.publicImports()).map(m -> f.apply(m)).collect(Collections.toSet()),
-              stream(mod.privateImports()).map(m -> f.apply(m)).collect(Collections.toSet()),
-              mod.localSentences(),
-              mod.att());
+          mod = mod.signature();
         }
 
         if (isBison) {

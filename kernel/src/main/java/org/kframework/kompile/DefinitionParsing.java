@@ -577,7 +577,7 @@ public class DefinitionParsing {
 
     private ParseCache loadCache(Module parser) {
         ParseCache cachedParser = caches.get(parser.name());
-        if (cachedParser == null || !equalsSyntax(cachedParser.getModule(), parser) || cachedParser.isStrict() != isStrict) {
+        if (cachedParser == null || !equalsSyntax(cachedParser.getModule().signature(), parser.signature()) || cachedParser.isStrict() != isStrict) {
             cachedParser = new ParseCache(parser, isStrict, java.util.Collections.synchronizedMap(new HashMap<>()));
             caches.put(parser.name(), cachedParser);
         }
