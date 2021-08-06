@@ -113,9 +113,13 @@ public class RuleGrammarGenerator {
      * @return a new module which imports the original user module and a set of marker modules.
      */
     public Module getRuleGrammar(Module mod) {
+        return getGrammar(mod, RULE_CELLS);
+    }
+
+    private Module getGrammar(Module mod, String name) {
         // import RULE-CELLS in order to parse cells specific to rules
-        Module newM = new Module( mod.name() + "-" + RULE_CELLS
-                                , (scala.collection.Set<Module>) mod.publicImports().$bar(Set(baseK.getModule(K).get(), baseK.getModule(RULE_CELLS).get(), baseK.getModule(DEFAULT_LAYOUT).get()))
+        Module newM = new Module( mod.name() + "-" + name
+                                , (scala.collection.Set<Module>) mod.publicImports().$bar(Set(baseK.getModule(K).get(), baseK.getModule(name).get(), baseK.getModule(DEFAULT_LAYOUT).get()))
                                 , mod.privateImports()
                                 , mod.localSentences()
                                 , mod.att()
@@ -130,14 +134,7 @@ public class RuleGrammarGenerator {
      * @return a new module which imports the original user module and a set of marker modules.
      */
     public Module getConfigGrammar(Module mod) {
-        // import CONFIG-CELLS in order to parse cells specific to configurations
-        Module newM = new Module( mod.name() + "-" + CONFIG_CELLS
-                                , (scala.collection.Set<Module>) mod.publicImports().$bar(Set(baseK.getModule(K).get(), baseK.getModule(CONFIG_CELLS).get(), baseK.getModule(DEFAULT_LAYOUT).get()))
-                                , mod.privateImports()
-                                , mod.localSentences()
-                                , mod.att()
-                                );
-        return newM;
+        return getGrammar(mod, CONFIG_CELLS);
     }
 
     /**
