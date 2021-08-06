@@ -136,7 +136,7 @@ You can test whether an integer is within the bounds of an array in O(1) time.
 endmodule
 
 module ARRAY-IN-K [private]
-  imports ARRAY-SYNTAX
+  imports public ARRAY-SYNTAX
   imports private LIST
   imports private K-EQUAL
   imports private INT
@@ -2032,7 +2032,7 @@ module ID
 endmodule
 
 module ID-SYMBOLIC [symbolic, kast, private]
-  imports ID-COMMON
+  imports public ID-COMMON
   imports private STRING
 
   syntax KItem  ::= "#parseIdToken"  "(" String "," String ")"  [function, hook(STRING.parseToken)]

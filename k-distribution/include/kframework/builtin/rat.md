@@ -146,10 +146,10 @@ endmodule
 
 module RAT [private]
   imports private RAT-COMMON
-  imports RAT-SYMBOLIC
-  imports RAT-KORE
-  imports RAT-KAST
-  imports RAT-SYNTAX
+  imports public RAT-SYMBOLIC
+  imports public RAT-KORE
+  imports public RAT-KAST
+  imports public RAT-SYNTAX
   imports private INT
   imports private BOOL
 
