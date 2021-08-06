@@ -3009,6 +3009,154 @@ Using `rbreak <regex>` you can set breakpoints on multiple functions.
 send `-ccopt -g` to kompile in order to generate debug info symbols.
 
 
+Attributes Reference
+--------------------
+
+### Attribute Syntax Overview
+
+In K, many different syntactic categories accept _attributes_, an optional
+trailing list of keywords or user-defined identifiers. Attribute lists have two
+different syntaxes, depending on where they occur. Each attribute also has a
+type which describes where it may occur.
+
+The first syntax is a square-bracketed (`[]`) list of words. This syntax is
+available for following attribute types:
+
+1.  `module` attributes - may appear immediately after the `module` keyword
+2.  `sort` attributes - may appear immediately after a sort declaration
+3.  `production` attributes - may appear immediately after a BNF production
+    alternative
+4.  `rule` attributes - may appear immediately after a rule
+5.  `context` attributes - may appear immediately after a context or context
+    alias
+6.  `context alias` attributes - may appear immediately after a context alias
+7.  `claim` attributes - may appear immediately after a claim
+
+The second syntax is the XML attribute syntax, i.e., a space delemited list of
+key-and-quoted-value pairs appearing inside the start tag of an XML element:
+`<element key1="value" key2="value2" ... > </element>`. This syntax is
+available for the following attribute types:
+
+1.  `cell` attributes - may appear inside of the cell start tag in
+    configuration declarations
+
+Note that, currently, *unknown* attributes are *ignored*. Essentially, this
+means that there is no such thing as an *invalid* attribute. When we talk about
+the *type* of an attribute, we mean a syntactic category to which an attribute
+can be attached where the attribute has some semantic effect.
+
+### Attribute Index
+
+We now provide an index of available attributes organized alphabetically with a
+brief description of each. Note that the same attribute may appear in the index
+multiple times to indicate its effect in different contexts or with/without
+arguments. A legend describing how to interpret the index follows.
+
+| Name                  | Type  | Backend | Effect                                                                               |
+| --------------------- | ----- | ------- | ------------------------------------------------------------------------------------ |
+| `alias-rec`           | rule  | all     | This attribute describes an `alias` that may be applied recursively                  |
+| `alias`               | rule  | all     | This production is a `macro` that also is applied during unparsing                   |
+| `all-path`            | claim | haskell | `kprove` must check that this claim holds on all execution paths                     |
+| `anywhere`            | rule  | all     | This rule may be applied anywhere, i.e., it is not lifted over the configuration     |
+| `applyPriority(_)`    | prod  | all     | The parser must reject this production if named arguments are lower priority         |
+| `avoid`               | prod  | all     | In case of same-priority parse ties, this production has lower precendence           |
+| `binder`              | prod  | all     | This production is a binder; substitution will respect its bound variables           |
+| `bracket`             | prod  | all     | This production is a bracket; it only exists for grouping at parse-time              |
+| `color(_)`            | prod  | all     | All terminals in this production are printed with the given color                    |
+| `colors(_)`           | prod  | all     | All terminals in this production are printed with the given color list               |
+| `concrete`            | rule  | haskell | This attribute is equivalent to `concrete(_)` with all variables listed              |
+| `concrete(_)`         | rule  | haskell | This `simplification` rule only applies when the listed variables are concrete       |
+| `context(_)`          | alias | all     | The bound context's `HOLE` will be cooled into the given symbol                      |
+| `cool`                | rule  | all     | This rule is a cooling rule                                                          |
+| `exit = ""`           | cell  | all     | The `Int` value contained in this cell will be used as `krun`'s exit code            |
+| `format`              | prod  | all     | The unparser will print this production according to the given string                |
+| `freshGenerator`      | prod  | all     | This production of the form `X ::= F(Int)` will be used generate fresh `X` values    |
+| `functional`          | rule  | all     | This production is interpreted as a total function                                   |
+| `function`            | rule  | all     | This production is interpreted as a partial function                                 |
+| `heat`                | rule  | all     | This rule is a heating rule                                                          |
+| `hook(_)`             | prod  | all     | This function produnction is implemented by the named K runtime internal function    |
+| `hybrid(_)`           | prod  | all     | For each given sort `s`, this production inhabits `s` if its strict arguments do     |
+| `hybrid`              | prod  | all     | This attribute is equivalent to `hybrid(KResult)`                                    |
+| `klabel(_)`           | all   | all     | This object's internal name is equal to the given identifier                         |
+| `latex(_)`            | prod  | all     | This production's latex encoding is the given term; `#N` refers to argument `N`      |
+| `left`                | prod  | all     | Nested copies of this production associate to the left                               |
+| `lemma`               | rule  | all     | This attribute has no effect; it is a comment about the rule's purpose               |
+| `locations`           | sort  | all     | This attribute tells the parser to wrap terms in the given sort with location info   |
+| `macro-rec`           | rule  | all     | This attribute describes a `macro` that may be applied recursively                   |
+| `macro`               | rule  | all     | This rule is only applied statically immediately after program parsing               |
+| `memo`                | rule  | haskell | Tells the backend to memoize all applications of this rule                           |
+| `multiplicity = "_"`  | cell  | all     | Valid configurations may only contain the given number of copies of this cell        |
+| `non-assoc`           | prod  | all     | Nested copies of this production do not associate to the right or left               |
+| `one-path`            | claim | all     | `kprove` must check that this claim holds on at least one execution path             |
+| `owise`               | rule  | all     | This attribute is equivalent to `priority(200)`                                      |
+| `prec(_)`             | token | all     | This token has the given precedence; higher numbers mean higher precendence          |
+| `prefer`              | prod  | all     | In case of same-priority parse ties, this production has higher precendence          |
+| `priority(_)`         | rule  | all     | This rule will be executed with the given priority; lower numbers are tried first    |
+| `private`             | mod   | all     | All productions in this module are `private` by default                              |
+| `private`             | prod  | all     | This production is *not* accessible to other modules via import                      |
+| `public`              | mod   | all     | All productions in this module are `public` by default                               |
+| `public`              | prod  | all     | This production is accessible to other modules via import                            |
+| `result(_)`           | ctxt  | all     | This context uses the given sort used for heating/cooling tests                      |
+| `result(_)`           | rule  | all     | This rule uses the given sort used for heating/cooling tests                         |
+| `right`               | prod  | all     | Nested copies of this production associate to the right                              |
+| `seqstrict(_)`        | prod  | all     | The named arguments in this propduction evaluate strictly in declaration order       |
+| `seqstrict`           | prod  | all     | This attribute is like `seqstrict(_)` applied to all arguments                       |
+| `simplification`      | rule  | haskell | This attribute is equivalent to `simplification(50)`                                 |
+| `simplification(_)`   | rule  | haskell | This rule is a simplification with the given priority; lower numbers are tried first |
+| `smt-hook(_)`         | prod  | haskell | This production's SMT encoding is the given term; `#N` refers to argument `N`        |
+| `smt-lemma`           | rule  | all     | This rule's encoding is passed to the SMT solver when checking side-conditions       |
+| `smtlib(_)`           | prod  | haskell | This produnction's SMT encoding is an uninterpreted function with the given name     |
+| `strict`              | prod  | all     | This attribute is like `strict(_)` applied to all arguments                          |
+| `strict(_)`           | prod  | all     | This named arguments in this production evaluate strictly in any order               |
+| `symbolic`            | rule  | haskell | This attribute is equivalent to `symbolic(_)` but with all variables listed          |
+| `symbolic(_)`         | rule  | haskell | This `simplification` rule only applies when the listed variables are symbolic       |
+| `symbol`              | prod  | all     | The compiler will disable module and arity name-mangling for this production         |
+| `token`               | prod  | all     | This production will not be parsed inside of rule bodies                             |
+| `token`               | sort  | all     | This sort is inhabited by only tokens or domain values                               |
+| `trusted`             | claim | haskell | `kprove` will assume this claim and use it when proving other claims                 |
+| `type = "_"`          | cell  | all     | `kompile` will check that this cell structure conforms to given type                 |
+| `unboundVariables(_)` | rule  | all     | `kompile` will skip checking if any given variable is unbound on this rule's RHS     |
+| `unused`              | prod  | all     | `kompile` will warn if this production is used in any rule or context body           |
+
+### Internal Attribute Index
+
+Some attributes should not generally appear in user code, except in some
+unusual or complex examples. Such attributes are typically generated by the
+compiler and used internally. We list these attributes below as a reference for
+interested readers:
+
+| Name       | Type | Backend | Effect                                                                        |
+| ---------- | ---- | ------- | ----------------------------------------------------------------------------- |
+| `assoc`    | prod | all     | This production is semantically associative                                   |
+| `comm`     | prod | all     | This production is semantically commutative                                   |
+| `idem`     | prod | all     | This production is semantically idempotent                                    |
+| `unit`     | prod | all     | This production has a semantic identity                                       |
+| `userList` | prod | all     | This production describes a list defined via a `List` or `NeList` constructor |
+
+### Index Legend
+
+-   `Name` - the attribute's name (optionally followed by an underscore `_` to indicate the attribute takes arguments)
+-   `Type` - the syntactic categories where this attribute is *not* ignored;
+    the possible values are the types mentioned above or shorthands:
+
+    1.  `all` - short for any type except `cell`
+    2.  `mod` - short for `module`
+    3.  `sort`
+    4.  `prod` - short for `production`
+    5.  `rule`
+    6.  `ctxt` - short for `context` or `context alias`
+    7.  `claim`
+    8.  `cell`
+
+-   `Backend` - the backends that do *not* ignore this attribute; possible values:
+
+    1.  `all` - all backends
+    2.  `llvm` - the LLVM backend
+    3.  `haskell` - the Haskell backend
+
+-   `Effect` - the attribute's effect (when it applies)
+
+
 Pending Documentation
 ---------------------
 
