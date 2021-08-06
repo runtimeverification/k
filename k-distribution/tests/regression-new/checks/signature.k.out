@@ -25,4 +25,7 @@
 [Error] Inner Parser: Parse error: unexpected token 'b'.
 	Source(signature.k)
 	Location(42,8,42,9)
-[Error] Compiler: Had 9 parsing errors.
+[Error] Inner Parser: Parse error: unexpected token 'a'.
+	Source(signature.k)
+	Location(54,8,54,9)
+[Error] Compiler: Had 10 parsing errors.

@@ -42,6 +42,19 @@ module C
   rule b() => .K
 endmodule
 
-module SIGNATURE
+module D [private]
   imports C
+  imports public A
+
+endmodule
+
+module E
+  imports D
+
+  rule a() => .K
+  rule bam() => .K
+endmodule
+
+module SIGNATURE
+  imports E
 endmodule
