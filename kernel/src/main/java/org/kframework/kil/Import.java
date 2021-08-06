@@ -27,6 +27,8 @@ public class Import extends ModuleItem {
         sb.append("  imports ");
         if (!isPublic) {
           sb.append("private ");
+        } else {
+          sb.append("public ");
         }
         sb.append(name);
     }
