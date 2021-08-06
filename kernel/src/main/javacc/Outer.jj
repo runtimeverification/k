@@ -531,6 +531,7 @@ NonTerminal SortID() : { NonTerminal nonTerminal; }
 <MODNAME_STATE> TOKEN:
 {
   <IMPORTSPRIVATE: "private"> : MODNAME_STATE
+| <IMPORTSPUBLIC: "public"> : MODNAME_STATE
 | <MODNAME: ("#")?(["a"-"z", "0"-"9", "A"-"Z", "_"])+
              ("-" (["a"-"z", "0"-"9", "A"-"Z", "_"])+)*> : DEFAULT
 }
@@ -706,9 +707,9 @@ void Module(List<DefinitionItem> items) : { Location loc = startLoc(); }
 }
 
 /** Parses an Import and adds it to module */
-void Import(Module module): { Location loc = startLoc(); boolean isPublic = true; }
+void Import(Module module): { Location loc = startLoc(); boolean isPublic = module.getAttribute("private") == null; }
 {
-  ("imports" | "import") (<IMPORTSPRIVATE> { isPublic = false; } )? <MODNAME>
+  ("imports" | "import") ((<IMPORTSPRIVATE> { isPublic = false; }) | (<IMPORTSPUBLIC> { isPublic = true; }) )? <MODNAME>
   { module.appendModuleItem(markLoc(loc, new Import(image(), isPublic))); }
 }
 
