@@ -16,16 +16,20 @@ practioners and researchers alike.
 *K is a framework for deriving programming languages tools from their semantic
 specifications.*
 
-Typically, programming language tools are developed as follows: for each
-language *L*, a separate team develops tool *T* (e.g. a compiler, interpreter,
-parser, symbolic execution engine, etc). Thus, for *N* different languages and
-*M* different tools, we have *N x M* different teams and implementations.
+Typically, programming language tool development follows a similar pattern.
+After a new programming language is designed, separate teams will develop
+separate language tools (e.g. a compiler, interpreter, parser, symbolic
+execution engine, etc). Code reuse is uncommon. The end result is that for each
+new language, the same basic tools and patterns are re-implemented again and
+again.
 
-K approaches the problem differently, by imagining how each of the *M*
-different tools could be derived generically from a common specification. In
-other words, for any language *L*, a language-generic tool is a function *T(L)*
-which gives us tool *T* for *L*. The end result is that we need only *N + M*
-different implementations: one for each language and each tool.
+K approaches the problem differently, by imagining how different tools could be
+derived generically from a common specification. In other words, for any
+language, a language-generic tool is a function that takes a language spec as
+input and produces a tool as output. The end result is that the exercise of
+designing new languages and their associated tooling is now reduced to
+developing a single language specfication from which we derive our tooling *for
+free*.
 
 **K For Researchers:**
 *K is a configuration- and rewrite-based executable semantic framework.*
@@ -59,7 +63,7 @@ typically fall into one of the following categories:
 The main *user-facing* K tools include:
 
 -   `kompile` - the K compiler driver
--   `kast` - the stanadlone K parser and abstract syntax tree (AST)
+-   `kparse` - the stanadlone K parser and abstract syntax tree (AST)
     transformation tool
 -   `krun` - the K interpreter and symbolic execution engine driver
 -   `kprove` - the K theorem prover
@@ -103,7 +107,7 @@ more *files*. In this scheme, files may *require* other files and modules may
 *import* other modules, giving rise to a hierarchy of files and modules. We
 give an intuitive sketch of the two levels of grouping in the diagram below:
 
-```k
+```
    example.k file
   +=======================+
   | requires ".." --------|--> File_1
@@ -184,7 +188,7 @@ can be understood as a blackbox with the following inputs and outputs:
 |             +-------------------------------------------+  |
 |             |                                              |
 |             |       +---------+                            |
-|  K Term ----+-------|  kast   |--> K Term                  |
+|  K Term ----+-------| kparse  |--> K Term                  |
 |             |       +---------+                            |
 |             |                                              |
 |             |       +---------+                            |
@@ -204,7 +208,7 @@ where:
 -   programs are denoted by boxes with single-lined borders
 -   inputs and outputs are denoted by words attached to lines
 -   K terms typically correspond to *programs* defined in a particular
-    language's syntax (which are either parsed using `kast` or executed using
+    language's syntax (which are either parsed using `kparse` or executed using
     `krun`)
 -   K claims are a notation for describing *how* certain K programs *should*
     execute (which are checked by our theorem prover `kprove`)
@@ -224,7 +228,7 @@ the K execution process into the following stages:
 2.  the input string is lexed into a token stream
 3.  the token stream is parsed into K terms/claims
 4.  the K term/claims are transformed according the K tool being used (e.g.
-    `kast`, `krun`, or `kprove`)
+    `kparse`, `krun`, or `kprove`)
 5.  the K term/claims are unparsed into a string form and printed
 
 Note that all of the above steps performed in K execution process are fully
