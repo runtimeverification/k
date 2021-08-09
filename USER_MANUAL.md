@@ -172,6 +172,25 @@ notation. Note that this is not a full definition; we focus instead on the
 overall structure of the specification. Syntactic categories which are not
 defined are denoted by sort names surrounded by curly braces (`{}`).
 
+Due to the highly generic nature of user-defined K syntax, the parsing process
+of K roughly proceeds in three stages, corresponding to the three kinds of
+declarations shown above.
+
+1.  In the first stage, system primitive declarations are gathered and a parser
+    is constructed.
+2.  In the second stage, the system primitive parser is used to parse
+    configuration declarations; in our BNF grammar below, we use `{TermBubble}`
+    to describe things which can be parsed using the primitive syntax.
+3.  Finally, a third stage parser is constructed containing both primitive and
+    configuration syntax is constructed which is used to parse contexts,
+    context aliases, and rules. In our BNF grammar below, we use the words
+    `{Bubble}` and `{BubbleWithRewrites}` to describe parsers which contain the
+    combined primitive and configuration syntax. The `{BubbleWithRewrites}`
+    category additional adds the rewrite arrow syntax (`=>`) needed for parsing
+    `rule`s and `context`s.
+
+We now present our high-level BNF syntax:
+
 ```
   File         ::= RequiresList ModuleList
 
@@ -239,16 +258,18 @@ We can further drill down by sentence type.
                       | StartCellDecl InnerCellDecl EndCellDecl
   ConfigImport      ::= "<" {CellId} "/>"
   StartCellDecl     ::= "<" {CellId} CellAttributeList ">"
-  InnerCellDecl     ::= {Bubble} | NeCellDeclList
+  InnerCellDecl     ::= {TermBubble} | NeCellDeclList
   EndCellDecl       ::= "</" {CellId} ">"
   CellAttributeList ::= "" | CellAttribute CellAttributeList
   CellAttribute     ::= {Id} "=" {String}
 
-  RuleDeclaration ::= "rule" OptName {BubbleWithRewrites} AttributeSet
-  OptName         ::= "" | Name
-  Name            ::= "[" {Id} "]" ":"
+  RuleDeclaration   ::= "rule" OptName {BubbleWithRewrites} RequiresCondition EnsuresCondition AttributeSet
+  OptName           ::= "" | Name
+  Name              ::= "[" {Id} "]" ":"
+  RequiresCondition ::= "" | "requires" {Bubble}
+  EnsuresCondition  ::= "" | "ensures" {Bubble}
 
-  ContextDeclaration      ::= "context" {BubbleWithRewrites} AttributeSet
+  ContextDeclaration      ::= "context" {BubbleWithRewrites} RequiresCondition AttributeSet
   ContextAliasDeclaration ::= "context" "alias" Name {Bubble} AttributeSet
 ```
 
