@@ -8,6 +8,57 @@ but still needs to be ultimately included in the K manual which has not been
 written yet. New features of K that affect the surface language should be added
 to this document.
 
+Module Declaration
+------------------
+
+K modules are declared at the top level of a K file. They begin with the
+`module` keyword and are followed by a **module ID** and an optional set of
+attributes. They continue with zero or more imports and zero or more sentences
+until the `endmodule` keyword is reached.
+
+A module ID consists of an optional `#` at the beginning, followed by one or
+more components separated by hyphens. Each component can contain letters,
+numbers, or underscores.
+
+After the module ID, attributes can be specified in square brackets. See below
+for an (incomplete) list of allowed module attributes.
+
+Following the attributes, a module can contain zero or more **imports**. An
+import consists of the `import` or `imports` keywords followed by a module ID.
+An import tells the compiler that this module should contain all the sentences
+(recursively) contained by the module being imported.
+
+Imports can be **public** or **private**. By default, they are public, which
+means that all the imported syntax can be used by any module that imports the
+module doing the import. However, you can explicitly override the visibility
+of the import with the `public` or `private` keyword immediately prior to the
+module name. A module imported privately does not export its syntax to modules
+that import the module doing the import.
+
+Following imports, a module can contain zero or more sentences. A sentence can
+be a syntax declaration, a rule, a configuration declaration, a context, a
+claim, or a context alias. Details on each of these can be found in subsequent
+sections.
+
+### `private` attribute
+
+If the module is given the `private` attribute, all of its imports and syntax
+are private by default. Individual pieces of syntax can be made public with
+the `public` attribute, and individual imports can be made public with the
+`public` keyword. See relevant sections on syntax and modules for more details
+on what it means for syntax and imports to be public or private.
+
+### `symbolic` and `concrete` attribute
+
+These attributes may be placed on modules to indicate that they should only
+be used by the Haskell and LLVM backends respectively. If the definition is
+compiled on the opposite backend, they are implicitly removed from the
+definition prior to parsing anywhere they are imported. This can be useful when
+used in limited capacity in order to provide alternate semantics for certain
+features on different backends. It should be used sparingly as it makes it more
+difficult to trust the correctness of your semantics, even in the presence of
+testing.
+
 Syntax Declaration
 ------------------
 
@@ -536,6 +587,24 @@ axioms related to each of these concepts into your definition for you
 automatically. It will also automatically sort associative-commutative
 collections, and flatten the indentation of associative collections, when
 unparsing.
+
+### `public` and `private` attribute
+
+K allows users to declare certain pieces of syntax as either public or private.
+All syntax is public by default. Public syntax can be used from any module that
+imports that piece of syntax. A piece of syntax can be declared private with
+the `private` attribute. This means that that syntax can only be used in the
+module in which it is declared; it is not visible from modules that import
+that module.
+
+You can also change the default visibility of a module with the `private`
+attribute, when it is placed directly on a module. A module with the `private`
+attribute has all syntax `private` by default; this can be overridden on
+specific sentences with the `public` attribute.
+
+Note that the `private` module attribute also changes the default visiblity
+of imports; please refer to the appropriate section elsewhere in the manual
+for more details.
 
 
 Configuration Declaration
