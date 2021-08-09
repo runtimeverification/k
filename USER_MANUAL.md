@@ -146,6 +146,7 @@ specifications:
 1.  sentences that define our *system's primitives*, including:
 
     -   **sort declarations:** define new categories of primitive datatypes
+    -   **sort synonym declaration:** defines a copy of an existing sort with a new name
     -   **Backus-Naur Form (BNF) grammar declarations:** define the
         operators that inhabit our primitive datatypes
     -   **lexical syntax declarations:** define lexemes/tokens for the
@@ -171,120 +172,173 @@ specifications:
 
 ### K Syntax Overview
 
-Here we provide an overview of the top-level K syntax using a K-style BNF
-notation. Note that this is not a full definition; we focus instead on the
-overall structure of the specification. Syntactic categories which are not
-defined are denoted by names surrounded by curly braces (`{}`). In particular,
-we omit the syntax of strings (`{String}`) and all types of identifiers, e.g.,
-`{ModuleId}`, `{Id}`, `{SortId}`, `{CellId}`, etc. We also omit the syntax of
-attributes (`{Attribute}`), a highly flexible mechanism for modifying the
-interpretation of modules and various kinds of sentences.
-
+Here we provide a high-level overview of K syntax using a K-style BNF notation.
 Due to the highly generic nature of user-defined K syntax, the parsing process
-of K specifications roughly proceeds in three stages, corresponding to the
-three kinds of declarations shown above.
+of K specifications roughly proceeds in two stages:
 
-1.  In the first stage, system primitive declarations are gathered and a parser
-    is constructed.
-2.  In the second stage, the system primitive parser is used to parse
-    configuration declarations; in our BNF grammar below, we use `{TermBubble}`
-    to describe things which can be parsed using the primitive syntax.
-3.  Finally, a third stage parser is constructed containing both primitive and
-    configuration syntax is constructed which is used to parse contexts,
-    context aliases, and rules. In our BNF grammar below, we use the words
-    `{Bubble}` and `{BubbleWithRewrites}` to describe parsers which contain the
-    combined primitive and configuration syntax. The `{BubbleWithRewrites}`
-    category additional adds the rewrite arrow syntax (`=>`) needed for parsing
-    `rule`s and `context`s.
+1.  *Outer parsing* happens first and parses K's *outer syntax* (or
+    *non-user-defined* syntax). In this phase, any user-defined syntax is
+    encapsulated in a special sort called `Bubble`.
 
-**Note:** _the parsers listed above are all used internally by the K compiler
-`kompile`. As part of compilation, `kompile` will generate a separate
-language-specific parser that can only parse programs in the specified language
-syntax. The language-specific parser is the one invoked when using `krun`._
+2.  *Inner parsing* happens second and handles parsing all user-defined syntax.
+    In this phase, `Bubble`s are parsed using the accessible `syntax`
+    declarations collected during phase (1) from the current `module` and the
+    modules that it recurisvely imports.
 
-We now present our high-level BNF syntax:
+    Note that inner parsing itself is split into two subphases:
 
-```
-  File         ::= RequiresList ModuleList
+    1.  In the first subphase, `configuration` declaration `Bubble`s are
+        resolved. After this subphase completes, the `configuration` syntax is
+        known.
+    2.  In the second subphase, `context alias`, `context`, and `rule`
+        `Bubble`s are resolved. After this subphase, all of the rules are
+        known.
 
-  RequiresList ::= "" | Requires RequiresList
-  Requires     ::= RequireCmd {String}
-  RequireCmd   ::= "requires" | "require"
+#### Outer Syntax
 
-  Module       ::= "module" {ModuleId} AttributeSet ImportList SentenceList "endmodule"
-
-  AttributeSet ::= "" | "[" Attributes "]"
-  Attributes   ::= Attributes "," {Attribute}
-
-  ImportList   ::= "" | Import ImportList
-  Import       ::= ImportCmd {ModuleId}
-  ImportCmd    ::= "imports" | "import"
-
-  SentenceList ::= "" | Sentence SentenceList
-  Sentence     ::= SortDeclaration
-                 | GrammarDeclaration
-                 | LexicalDeclaration
-                 | AssociativityDeclaration
-                 | PriorityDeclaration
-                 | ConfigDeclaration
-                 | RuleDeclaration
-                 | ContextDeclaration
-                 | ContextAliasDeclaration
-```
-
-We can further drill down by sentence type.
+We now present the K high-level outer syntax in a K module `OUTER-SYNTAX`. The
+first part of the module defines the structure of files and modules. Note that
+all user-defined syntax is implicitly subsorted into the top-level sort of K
+called `K`.
 
 ```
-  SortDeclaration    ::= "syntax" {SortId} AttributeSet
+module OUTER-SYNTAX
 
-  GrammarDeclaration ::= "syntax" {SortId} "::=" AlternativeList
-  AlternativeList    ::= Production
-                       | Production "|" AlternativeList
+  syntax File         ::= RequiresList ModuleList
 
-  Production         ::= ProductionSyntax AttributeSet
-  ProductionSyntax   ::= FunctionSyntax
-                       | GenericSyntax
+  syntax RequiresList ::= "" | Requires RequiresList
+  syntax Requires     ::= RequireCmd {String}
+  syntax RequireCmd   ::= "requires" | "require"
 
-  FunctionNotation   ::= {Id} "(" ParameterList ")"
-  ParameterList      ::= "" | NeParameterList
-  NeParameterList    ::= Parameter | Parameter "," NeParameterList
-  Parameter          ::= OptParamName {SortId}
-  OptParamName       ::= "" | {Id} ":"
+  syntax Module       ::= "module" {ModuleId} AttributeSet ImportList SentenceList "endmodule"
 
-  GenericNotation    ::= StringOrSortIdList
-  StringOrSortIdList ::= StringOrSortId | StringOrSortId StringOrSortIdList
-  StringOrSortIdList ::= {String} | {SortId}
+  syntax AttributeSet ::= "" | "[" Attributes "]"
+  syntax Attributes   ::= {Attribute} | {Attribute} "," Attributes
 
-  LexicalDeclaration ::= "syntax" "lexical" {Id} "=" {String}
+  syntax ImportList   ::= "" | Import ImportList
+  syntax Import       ::= ImportCmd {ModuleId}
+  syntax ImportCmd    ::= "imports" | "import"
 
-  AssociativityDeclaration ::= "syntax" Associativity NeIdList
-  NeIdList                 ::= {Id} | {Id} NeIdList
-  Associativity            ::= "left" | "right" | "non-assoc"
-
-  PriorityDeclaration ::= "syntax" "priorities" PriorityList
-  PriorityList        ::= NeIdList ">" PriorityList
-                        | NeIdList ">" NeIdList
-
-  ConfigDeclaration ::= "configuration" NeCellDeclList
-  NeCellDeclList    ::= CellDecl | CellDecl NeCellDeclList
-  CellDecl          ::= ConfigImport
-                      | StartCellDecl InnerCellDecl EndCellDecl
-  ConfigImport      ::= "<" {CellId} "/>"
-  StartCellDecl     ::= "<" {CellId} CellAttributeList ">"
-  InnerCellDecl     ::= {TermBubble} | NeCellDeclList
-  EndCellDecl       ::= "</" {CellId} ">"
-  CellAttributeList ::= "" | CellAttribute CellAttributeList
-  CellAttribute     ::= {Id} "=" {String}
-
-  RuleDeclaration   ::= "rule" OptName {BubbleWithRewrites} RequiresCondition EnsuresCondition AttributeSet
-  OptName           ::= "" | Name
-  Name              ::= "[" {Id} "]" ":"
-  RequiresCondition ::= "" | "requires" {Bubble}
-  EnsuresCondition  ::= "" | "ensures" {Bubble}
-
-  ContextDeclaration      ::= "context" {BubbleWithRewrites} RequiresCondition AttributeSet
-  ContextAliasDeclaration ::= "context" "alias" Name {Bubble} AttributeSet
+  syntax SentenceList ::= "" | Sentence SentenceList
+  syntax Sentence
 ```
+
+This second part of the module defines the first several types of `syntax`
+sentences.
+
+```
+  syntax Sentence ::= SortDeclaration
+                    | SortSynonymDeclaration
+                    | LexicalDeclaration
+                    | AssociativityDeclaration
+                    | PriorityDeclaration
+
+  syntax SortDeclaration          ::= "syntax" {SortId} AttributeSet
+
+  syntax SortSynonymDeclaration   ::= "syntax" {SortId} "=" {SortId} AttributeSet
+
+  syntax LexicalDeclaration       ::= "syntax" "lexical" {Id} "=" StringOrRegex AttributeSet
+
+  syntax AssociativityDeclaration ::= "syntax" Associativity NeIdList
+  syntax NeIdList                 ::= {Id} | {Id} NeIdList
+
+  syntax PriorityDeclaration      ::= "syntax" PriorityKeyword PriorityList
+  syntax PriorityKeyword          ::= "priorities" | "priority"
+  syntax PriorityList             ::= NeIdList ">" NeIdList
+                                    | NeIdList ">" PriorityList
+```
+
+This third part of the module defines grammar declarations. Note that these
+declarations are more complex than typical BNF grammar productions, because, in
+addition to defining a set of alternative productions, information about
+production priority and associativity can be optionally specified (for parse
+disambiguation purposes). Also, grammar declarations may be parameterized over
+a set of sorts so that they are generated for each available sort parameter.
+
+Finally, note that there are two usable production
+syntaxes: a shorthand syntax for function-like operations and a generic syntax.
+
+```
+  syntax Sentence ::= GrammarDeclaration
+
+  syntax GrammarDeclaration ::= "syntax" OptSortParams {SortId} "::=" PriorityBlockList
+  syntax OptSortParams      ::= "" | SortParams
+  syntax SortParams         ::= Id | Id "," SortParams
+  syntax PriorityBlockList  ::= PriorityBlock
+                              | PriorityBlock ">" PriorityBlockList
+  syntax PriorityBlock      ::= OptAssociativity AlternativeList
+  syntax OptAssociativity   ::= "" | Associativity ":"
+  syntax Associativity      ::= "left" | "right" | "non-assoc"
+  syntax AlternativeList    ::= Production
+                              | Production "|" AlternativeList
+  syntax Production         ::= ProductionSyntax AttributeSet
+  syntax ProductionSyntax   ::= FunctionSyntax
+                              | GenericSyntax
+
+  syntax FunctionSyntax     ::= {Id} "(" ParameterList ")"
+  syntax ParameterList      ::= "" | NeParameterList
+  syntax NeParameterList    ::= Parameter | Parameter "," NeParameterList
+  syntax Parameter          ::= OptParamName {SortId}
+  syntax OptParamName       ::= "" | {Id} ":"
+
+  syntax GenericSyntax      ::= ProductionItems
+  syntax ProductionItems    ::= ProductionItem | ProductionItem ProductionItem
+  syntax ProductionItem     ::= StringOrRegex | {SortId}
+  syntax StringOrRegex      ::= {String} | {Regex}
+```
+
+This fourth part of the module defines the kinds of sentences all depend on
+user-defined syntax. Thus, they parse over bubbles. Note that the actual
+definition of `Bubble` differs slightly from the one shown here, but the
+possible parses are the same except that the keywords `endmodule`, `syntax`,
+`configuration`, `context` and `rule` cannot be used directly due to
+their special nature in guiding the parser.
+
+```
+  syntax Sentence ::= ConfigDeclaration
+                    | RuleDeclaration
+                    | ContextDeclaration
+                    | ContextAliasDeclaration
+
+  syntax ConfigDeclaration ::= "configuration" OptName Bubble AttributeSet
+  syntax OptName           ::= "" | Name
+  syntax Name              ::= "[" {Id} "]" ":"
+
+  syntax ContextDeclaration ::= "context" OptName Bubble AttributeSet
+
+  syntax ContextAliasDeclaration ::= "context" "alias" OptName Bubble AttributeSet
+
+  syntax RuleDeclaration ::= "rule" OptName Bubble AttributeSet
+endmodule
+```
+
+##### Inner Syntax
+
+Recall that inner parsing occurs in two subphases. We describe each of them in
+more detail below.
+
+1.  In the first subphase, all `configuration` `Bubble`s are resolved in the
+    built-in sort `Bag` using all the user-defined syntax, the set of builtin
+    syntax, and the configuration declaration syntax defined in module
+    `CONFIG-CELLS` in `kast.md`. The result of this phase is that all of the
+    cells declared in `configuration` declarations are transformed into
+    standard `syntax` declarations of the form:
+
+    ```
+    syntax Cell ::= "<" CellId ">" K "</" CellId ">"
+    ```
+
+    That is, after this phase completes, there is nothing special or built-in
+    about the cell syntax.
+
+2.  In the second subphase, all `context`, `context alias`, and `rule`
+    `Bubble`s are resolved in the built-in sort `#RuleContent` using the
+    user-defined syntax, the set of builtin syntax, all `configuration`
+    syntax derived from the previous subphase, and all of the syntax
+    defined in the `K` module in `kast.md`.
+
+For complete details on the syntax available during inner parsing, see
+`kast.md`.
 
 ### K Process Overview
 
