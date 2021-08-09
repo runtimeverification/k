@@ -170,11 +170,15 @@ specifications:
 Here we provide an overview of the top-level K syntax using a K-style BNF
 notation. Note that this is not a full definition; we focus instead on the
 overall structure of the specification. Syntactic categories which are not
-defined are denoted by sort names surrounded by curly braces (`{}`).
+defined are denoted by names surrounded by curly braces (`{}`). In particular,
+we omit the syntax of strings (`{String}`) and all types of identifiers, e.g.,
+`{ModuleId}`, `{Id}`, `{SortId}`, `{CellId}`, etc. We also omit the syntax of
+attributes (`{Attribute}`), a highly flexible mechanism for modifying the
+interpretation of modules and various kinds of sentences.
 
 Due to the highly generic nature of user-defined K syntax, the parsing process
-of K roughly proceeds in three stages, corresponding to the three kinds of
-declarations shown above.
+of K specifications roughly proceeds in three stages, corresponding to the
+three kinds of declarations shown above.
 
 1.  In the first stage, system primitive declarations are gathered and a parser
     is constructed.
@@ -188,6 +192,11 @@ declarations shown above.
     combined primitive and configuration syntax. The `{BubbleWithRewrites}`
     category additional adds the rewrite arrow syntax (`=>`) needed for parsing
     `rule`s and `context`s.
+
+**Note:** _the parsers listed above are all used internally by the K compiler
+`kompile`. As part of compilation, `kompile` will generate a separate
+language-specific parser that can only parse programs in the specified language
+syntax. The language-specific parser is the one invoked when using `krun`._
 
 We now present our high-level BNF syntax:
 
