@@ -311,6 +311,11 @@ where:
 -   process outlines are denoted by boxes with double-lined borders
 -   programs are denoted by boxes with single-lined borders
 -   inputs and outputs are denoted by words attached to lines
+-   K terms typically correspond to *programs* defined in a particular
+    language's syntax (which are either parsed using `kast` or executed using
+    `krun`)
+-   K claims are a notation for describing *how* certain K programs *should*
+    execute (which are checked by our theorem prover `kprove`)
 
 **K Compilation Process:**
 Let us start with a description of the compilation process. According to the
