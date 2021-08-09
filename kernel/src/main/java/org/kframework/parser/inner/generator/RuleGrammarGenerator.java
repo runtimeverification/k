@@ -195,6 +195,14 @@ public class RuleGrammarGenerator {
       return getCombinedGrammar(mod, strict, timing, false, false, files);
     }
 
+    // the forGlobalScanner flag tells the ParseInModule class not to exclude
+    // private syntax from the grammar generated for the module. It should
+    // not be used when actually peforming parsing as this will lead to
+    // incorrect grammars. However, it is used in one place in the code:
+    // during rule parsing, we generate a single scanner to scan all the
+    // modules. This must include the private syntax of those modules,
+    // otherwise we would not be able to use it to scan the modules in which
+    //  that private syntax is visible.
     public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, FileUtil files, boolean forGlobalScanner) {
       return getCombinedGrammar(mod, strict, timing, false, forGlobalScanner, files);
     }
