@@ -275,8 +275,8 @@ We can further drill down by sentence type.
 
 ### K Process Overview
 
-Each K tool can be understood as a blackbox with the following inputs and
-outputs:
+We now examine how the K tools are generally used. At a high-level, each K tool
+can be understood as a blackbox with the following inputs and outputs:
 
 ```
  K Compilation Process
