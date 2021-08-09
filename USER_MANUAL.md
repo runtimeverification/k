@@ -49,7 +49,22 @@ programming languages, type systems, and formal analysis tools.
 
 As mentioned in the _Why K?_ section above, the K Framework is designed as a
 collection of language-generic command-line interface (CLI) tools which revolve
-around K specifications. This user manual is designed to be a tool reference.
+around K specifications. These tools cover a broad range of uses, but they
+typically fall into one of the following categories:
+
+1.  Transforming K Specs (e.g. compilation)
+2.  Running K Specs (e.g. concrete and symbolic execution)
+3.  Analyzing K Specs (e.g. theorem proving)
+
+The main *user-facing* K tools include:
+
+-   `kompile` - the K compiler driver
+-   `kast` - the stanadlone K parser and abstract syntax tree (AST)
+    transformation tool
+-   `krun` - the K interpreter and symbolic execution engine driver
+-   `kprove` - the K theorem prover
+
+This user manual is designed to be a tool reference.
 In particular, it is not desgined to be a tutorial on how to write K
 specifications or to teach the logical foundations of K. New K users should
 consult our dedicated
@@ -65,112 +80,28 @@ all user-facing K tools and features.
 Introduction to K
 -----------------
 
-The K Framework is a collection of tools cover a broad range of uses, but
-they typically fall into one of the following categories:
-
-1.  Transforming K Specs (e.g. compilation)
-2.  Running K Specs (e.g. concrete and symbolic execution)
-3.  Analyzing K Specs (e.g. theorem proving, bounded model checking)
-
-The main *user-facing* K tools include:
-
--   `kompile` - the K compiler driver
--   `kast` - the stanadlone K parser and abstract syntax tree (AST)
-    transformation tool
--   `krun` - the K interpreter and symbolic execution engine driver
--   `kprove` - the K theorem prover
-
-We divide this section into two parts: an introduction to the K process
-lifecycle and an overview of the K specification language.
-
-### K Process Overview
-
-Each K tool can be understood as a blackbox with the following inputs and
-outputs:
-
-```
- K Compilation Process
-+============================================================+
-|                     +---------+                            |
-|  K Specification ---| kompile |--> Kore Specification --+  |
-|                     +---------+                         |  |
-+=========================================================|==+
-                                                          |
- K Execution Process                                      |
-+=========================================================|==+
-|                                                         |  |
-|             +-------------------------------------------+  |
-|             |                                              |
-|             |       +---------+                            |
-|  K Term ----+-------|  kast   |--> K Term                  |
-|             |       +---------+                            |
-|             |                                              |
-|             |       +---------+                            |
-|  K Term ----+-------|  krun   |--> K Term                  |
-|             |       +---------+                            |
-|             |                                              |
-|             |       +---------+                            |
-|  K Claims --+-------| kprove  |--> K Claims                |
-|                     +---------+                            |
-|                                                            |
-+============================================================+
-```
-
-where:
-
--   process outlines are denoted by boxes with double-lined borders
--   programs are denoted by boxes with single-lined borders
--   inputs and outputs are denoted by words attached to lines
-
-**K Compilation Process:**
-Let us start with a description of the compilation process. According to the
-above diagram, the compiler driver is called `kompile`. For our purposes, it is
-enough to view the K compilation process as a black box that transforms a K
-specification into a Kore specification file.
-
-**K Execution Process:**
-We now turn our attention to the K execution process. Abstractly, we can divide
-the K execution process into the following stages:
-
-1.  the kore specification is loaded (which defines a lexer, parser, and
-    unparser among other things)
-2.  the input string is lexed into a token stream
-3.  the token stream is parsed into K terms/claims
-4.  the K term/claims are transformed according the K tool being used (e.g.
-    `kast`, `krun`, or `kprove`)
-5.  the K term/claims are unparsed into a string form and printed
-
-### K Language Overview
-
 Since K specifications are the primary input into the entire system, let us
-take a moment to describe them.
+take a moment to describe them. At the highest level, K specifications describe
+a programming language or system using three different pieces:
 
-#### Key Concepts
+1.  the *system primitives*, the base datatypes used during system operation,
+    e.g., numbers, lists, maps, etc;
+2.  the *system state*, a tuple or record over system primitives which gives a
+    complete snapshot of the system at any given moment;
+3.  the *system behavior*, a set of rules which defines possible system
+    evolutions.
 
-Given the number of different tools that we want to derive, K specifications
-need to contain an encoding of several key concepts (notice how they correspond
-to the various K execution stages):
+K specifications are then defined by a collection of *sentences* which
+correspond to the three concepts above:
 
-1.  a *term language* - defines a set of nested tree-like structures
-2.  a *lexer*  - converts a string into a token stream
-3.  a *parser* - converts a token stream into a term
-4.  a term *pretty printer* - a program which unparses terms into their string
-    form
-5.  a set of *rewrite rules* - each rule transforms a term into a possibly
-    different term
+1.  `syntax` declarations encode the *system primitives*;
+2.  `configuration` declarations encode the *system state*;
+3.  `context` and `rule` declarations encode the *system behavior*.
 
-Clearly, there are entire languages devoted to encoding these different
-concepts individually, e.g., `flex` for lexers, `bison` for parsers, etc. What
-K offers is a _consistent_ language to package the above concepts in a way that
-we believe is convenient and practical for a wide range of uses.
-
-#### Specification Organization
-
-At a high-level, K specifications are defined by a collection of *sentences*,
-organized into one or *modules* which are stored in one or more *files*. In
-this scheme, files may *require* other files and modules may *import* other
-modules, giving rise to a hierarchy of files and modules. We give an intuitive
-sketch of the two levels of grouping in the diagram below:
+K sentences are then organized into one or *modules* which are stored in one or
+more *files*. In this scheme, files may *require* other files and modules may
+*import* other modules, giving rise to a hierarchy of files and modules. We
+give an intuitive sketch of the two levels of grouping in the diagram below:
 
 ```k
    example.k file
@@ -196,31 +127,43 @@ sketch of the two levels of grouping in the diagram below:
 
 where:
 
--   files and modules are denoted by double-bordered and single-borded boxes respectively;
--   file or module identifiers are denoted by `..`, and;
--   potential repititions are denoted by `...`.
+-   files and modules are denoted by double-bordered and single-borded boxes
+    respectively;
+-   file or module identifiers are denoted by double dots (`..`);
+-   potential repititions are denoted by triple dots (`...`).
 
 In the end, we require that the file and module hierarchies both form a
 directed acyclic graph (DAG). This is, no file may recursively require itself,
 and likewise, no module may recursively import itself.
 
-Looking inside a module, we see that, abstractly speaking, we have two kinds of
-sentences:
+We now zoom in further to discuss the various kinds of sentences contained in K
+specifications:
 
-1.  sentences that define our system's state or data; these include:
+1.  sentences that define our *system's primitives*, including:
 
-    -   sort declarations
-    -   Backus-Naur Form (BNF) productions
-    -   lexical syntax declarations
-    -   syntax associativity declarations
-    -   syntax priority declarations
-    -   configuration declarations
+    -   **sort declarations:** define new categories of primitive datatypes
+    -   **Backus-Naur Form (BNF) grammar declarations:** define the
+        operators that inhabit our primitive datatypes
+    -   **lexical syntax declarations:** define lexemes/tokens for the
+        lexer/tokenizer
+    -   **syntax associativity declarations:** specify the
+        associativity/grouping of our declared operators
+    -   **syntax priority declarations:** specify the priority of
+        potential ambiguous operators
 
-2.  sentences that define our system's behavior; these include:
+2.  sentences that define our *system's state*, including:
 
-    -   context declarations
-    -   context alias declarations
-    -   rule declarations
+    -   **configuration declarations:** define labelled, hierarchical records
+        using an nested XML-like syntax
+
+3.  sentences that define our *system's behavior*, including:
+
+    -   **context declarations:** describe how primitives and configurations
+        can simplify
+    -   **context alias declarations:** define templates that can generate new
+        contexts
+    -   **rule declarations:** define how the system transitions from one state
+        to the next
 
 ### K Syntax Overview
 
@@ -308,6 +251,70 @@ We can further drill down by sentence type.
   ContextDeclaration      ::= "context" {BubbleWithRewrites} AttributeSet
   ContextAliasDeclaration ::= "context" "alias" Name {Bubble} AttributeSet
 ```
+
+### K Process Overview
+
+Each K tool can be understood as a blackbox with the following inputs and
+outputs:
+
+```
+ K Compilation Process
++============================================================+
+|                     +---------+                            |
+|  K Specification ---| kompile |--> Kore Specification --+  |
+|                     +---------+                         |  |
++=========================================================|==+
+                                                          |
+ K Execution Process                                      |
++=========================================================|==+
+|                                                         |  |
+|             +-------------------------------------------+  |
+|             |                                              |
+|             |       +---------+                            |
+|  K Term ----+-------|  kast   |--> K Term                  |
+|             |       +---------+                            |
+|             |                                              |
+|             |       +---------+                            |
+|  K Term ----+-------|  krun   |--> K Term                  |
+|             |       +---------+                            |
+|             |                                              |
+|             |       +---------+                            |
+|  K Claims --+-------| kprove  |--> K Claims                |
+|                     +---------+                            |
+|                                                            |
++============================================================+
+```
+
+where:
+
+-   process outlines are denoted by boxes with double-lined borders
+-   programs are denoted by boxes with single-lined borders
+-   inputs and outputs are denoted by words attached to lines
+
+**K Compilation Process:**
+Let us start with a description of the compilation process. According to the
+above diagram, the compiler driver is called `kompile`. For our purposes, it is
+enough to view the K compilation process as a black box that transforms a K
+specification into a Kore specification file.
+
+**K Execution Process:**
+We now turn our attention to the K execution process. Abstractly, we can divide
+the K execution process into the following stages:
+
+1.  the kore specification is loaded (which defines a lexer, parser, and
+    unparser among other things)
+2.  the input string is lexed into a token stream
+3.  the token stream is parsed into K terms/claims
+4.  the K term/claims are transformed according the K tool being used (e.g.
+    `kast`, `krun`, or `kprove`)
+5.  the K term/claims are unparsed into a string form and printed
+
+Note that all of the above steps performed in K execution process are fully
+prescribed by the input K specification. Of course, there are entire languages
+devoted to encoding these various stages proces individually, e.g., `flex` for
+lexers, `bison` for parsers, etc. What K offers is a _consistent_ language to
+package the above concepts in a way that we believe is convenient and practical
+for a wide range of uses.
 
 Syntax Declaration
 ------------------
