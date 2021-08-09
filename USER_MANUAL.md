@@ -45,37 +45,269 @@ over the entire configuration structure, but omit unused cells, enabling a
 highly modular definitional style. Furthermore, K has been used to develop
 programming languages, type systems, and formal analysis tools.
 
-### K Framework Overview
+### Manual Objectives
 
 As mentioned in the _Why K?_ section above, the K Framework is designed as a
 collection of language-generic command-line interface (CLI) tools which revolve
-around K specifications. These tools cover a broad range of uses, but typically
-fall into one of the following categories:
+around K specifications. This user manual is designed to be a tool reference.
+In particular, it is not desgined to be a tutorial on how to write K
+specifications or to teach the logical foundations of K. New K users should
+consult our dedicated
+[K tutorial](https://kframework.org/k-distribution/k-tutorial/),
+or the more language-design oriented
+[PL tutorial](https://kframework.org/k-distribution/pl-tutorial/).
+Researchers seeking to learn more about the logic underlying K are encouraged
+to peruse the
+[growing literature on K and matching logic](https://fsl.cs.illinois.edu/projects/pl/index.html).
+We will consider the manual complete when it provides a complete description of
+all user-facing K tools and features.
 
-1.  Transforming K Specs (e.g. compilation, visual presentation)
+Introduction to K
+-----------------
+
+The K Framework is a collection of tools cover a broad range of uses, but
+they typically fall into one of the following categories:
+
+1.  Transforming K Specs (e.g. compilation)
 2.  Running K Specs (e.g. concrete and symbolic execution)
 3.  Analyzing K Specs (e.g. theorem proving, bounded model checking)
 
 The main *user-facing* K tools include:
 
 -   `kompile` - the K compiler driver
--   `krun` - the K interpreter and symbolic execution engine driver
--   `kprove` - the K theorem prover
 -   `kast` - the stanadlone K parser and abstract syntax tree (AST)
     transformation tool
+-   `krun` - the K interpreter and symbolic execution engine driver
+-   `kprove` - the K theorem prover
 
-### Manual Objectives
+We divide this section into two parts: an introduction to the K process
+lifecycle and an overview of the K specification language.
 
-This user manual is designed to be a tool reference. In particular, it is not
-desgined to be a tutorial on how to write K specifications or to teach the
-logical foundations of K. New K users should consult our dedicated
-[K tutorial](https://kframework.org/k-distribution/k-tutorial/),
-or the more language-design oriented [PL tutorial](https://kframework.org/k-distribution/pl-tutorial/).
-Researchers seeking to learn more about the logic underlying K are encouraged
-to peruse the
-[growing literature on K and matching logic](https://fsl.cs.illinois.edu/projects/pl/index.html).
-We will consider the manual complete when it provides a complete description of
-all user-facing K tools and features.
+### K Process Overview
+
+Each K tool can be understood as a blackbox with the following inputs and
+outputs:
+
+```
+ K Compilation Process
++============================================================+
+|                     +---------+                            |
+|  K Specification ---| kompile |--> Kore Specification --+  |
+|                     +---------+                         |  |
++=========================================================|==+
+                                                          |
+ K Execution Process                                      |
++=========================================================|==+
+|                                                         |  |
+|             +-------------------------------------------+  |
+|             |                                              |
+|             |       +---------+                            |
+|  K Term ----+-------|  kast   |--> K Term                  |
+|             |       +---------+                            |
+|             |                                              |
+|             |       +---------+                            |
+|  K Term ----+-------|  krun   |--> K Term                  |
+|             |       +---------+                            |
+|             |                                              |
+|             |       +---------+                            |
+|  K Claims --+-------| kprove  |--> K Claims                |
+|                     +---------+                            |
+|                                                            |
++============================================================+
+```
+
+where:
+
+-   process outlines are denoted by boxes with double-lined borders
+-   programs are denoted by boxes with single-lined borders
+-   inputs and outputs are denoted by words attached to lines
+
+**K Compilation Process:**
+Let us start with a description of the compilation process. According to the
+above diagram, the compiler driver is called `kompile`. For our purposes, it is
+enough to view the K compilation process as a black box that transforms a K
+specification into a Kore specification file.
+
+**K Execution Process:**
+We now turn our attention to the K execution process. Abstractly, we can divide
+the K execution process into the following stages:
+
+1.  the kore specification is loaded (which defines a lexer, parser, and
+    unparser among other things)
+2.  the input string is lexed into a token stream
+3.  the token stream is parsed into K terms/claims
+4.  the K term/claims are transformed according the K tool being used (e.g.
+    `kast`, `krun`, or `kprove`)
+5.  the K term/claims are unparsed into a string form and printed
+
+### K Language Overview
+
+Since K specifications are the primary input into the entire system, let us
+take a moment to describe them.
+
+#### Key Concepts
+
+Given the number of different tools that we want to derive, K specifications
+need to contain an encoding of several key concepts (notice how they correspond
+to the various K execution stages):
+
+1.  a *term language* - defines a set of nested tree-like structures
+2.  a *lexer*  - converts a string into a token stream
+3.  a *parser* - converts a token stream into a term
+4.  a term *pretty printer* - a program which unparses terms into their string
+    form
+5.  a set of *rewrite rules* - each rule transforms a term into a possibly
+    different term
+
+Clearly, there are entire languages devoted to encoding these different
+concepts individually, e.g., `flex` for lexers, `bison` for parsers, etc. What
+K offers is a _consistent_ language to package the above concepts in a way that
+we believe is convenient and practical for a wide range of uses.
+
+#### Specification Organization
+
+At a high-level, K specifications are defined by a collection of *sentences*,
+organized into one or *modules* which are stored in one or more *files*. In
+this scheme, files may *require* other files and modules may *import* other
+modules, giving rise to a hierarchy of files and modules. We give an intuitive
+sketch of the two levels of grouping in the diagram below:
+
+```k
+   example.k file
+  +=======================+
+  | requires ".." --------|--> File_1
+  | ...                   |
+  | requires ".." --------|--> File_N
+  |                       |
+  |  +-----------------+  |
+  |  | module ..       |  |
+  |  |   imports .. ---|--|--> Module_1
+  |  |   ...           |  |
+  |  |   imports .. ---|--|--> Module_M
+  |  |                 |  |
+  |  |   sentence_1    |  |
+  |  |   ...           |  |
+  |  |   sentence_K    |  |
+  |  | endmodule       |  |
+  |  +-----------------+  |
+  |                       |
+  +=======================+
+```
+
+where:
+
+-   files and modules are denoted by double-bordered and single-borded boxes respectively;
+-   file or module identifiers are denoted by `..`, and;
+-   potential repititions are denoted by `...`.
+
+In the end, we require that the file and module hierarchies both form a
+directed acyclic graph (DAG). This is, no file may recursively require itself,
+and likewise, no module may recursively import itself.
+
+Looking inside a module, we see that, abstractly speaking, we have two kinds of
+sentences:
+
+1.  sentences that define our system's state or data; these include:
+
+    -   sort declarations
+    -   Backus-Naur Form (BNF) productions
+    -   lexical syntax declarations
+    -   syntax associativity declarations
+    -   syntax priority declarations
+    -   configuration declarations
+
+2.  sentences that define our system's behavior; these include:
+
+    -   context declarations
+    -   context alias declarations
+    -   rule declarations
+
+### K Syntax Overview
+
+Here we provide an overview of the top-level K syntax using a K-style BNF
+notation. Note that this is not a full definition; we focus instead on the
+overall structure of the specification. Syntactic categories which are not
+defined are denoted by sort names surrounded by curly braces (`{}`).
+
+```
+  File         ::= RequiresList ModuleList
+
+  RequiresList ::= "" | Requires RequiresList
+  Requires     ::= RequireCmd {String}
+  RequireCmd   ::= "requires" | "require"
+
+  Module       ::= "module" {ModuleId} AttributeSet ImportList SentenceList "endmodule"
+
+  AttributeSet ::= "" | "[" Attributes "]"
+  Attributes   ::= Attributes "," {Attribute}
+
+  ImportList   ::= "" | Import ImportList
+  Import       ::= ImportCmd {ModuleId}
+  ImportCmd    ::= "imports" | "import"
+
+  SentenceList ::= "" | Sentence SentenceList
+  Sentence     ::= SortDeclaration
+                 | GrammarDeclaration
+                 | LexicalDeclaration
+                 | AssociativityDeclaration
+                 | PriorityDeclaration
+                 | ConfigDeclaration
+                 | RuleDeclaration
+                 | ContextDeclaration
+                 | ContextAliasDeclaration
+```
+
+We can further drill down by sentence type.
+
+```
+  SortDeclaration    ::= "syntax" {SortId} AttributeSet
+
+  GrammarDeclaration ::= "syntax" {SortId} "::=" AlternativeList
+  AlternativeList    ::= Production
+                       | Production "|" AlternativeList
+
+  Production         ::= ProductionSyntax AttributeSet
+  ProductionSyntax   ::= FunctionSyntax
+                       | GenericSyntax
+
+  FunctionNotation   ::= {Id} "(" ParameterList ")"
+  ParameterList      ::= "" | NeParameterList
+  NeParameterList    ::= Parameter | Parameter "," NeParameterList
+  Parameter          ::= OptParamName {SortId}
+  OptParamName       ::= "" | {Id} ":"
+
+  GenericNotation    ::= StringOrSortIdList
+  StringOrSortIdList ::= StringOrSortId | StringOrSortId StringOrSortIdList
+  StringOrSortIdList ::= {String} | {SortId}
+
+  LexicalDeclaration ::= "syntax" "lexical" {Id} "=" {String}
+
+  AssociativityDeclaration ::= "syntax" Associativity NeIdList
+  NeIdList                 ::= {Id} | {Id} NeIdList
+  Associativity            ::= "left" | "right" | "non-assoc"
+
+  PriorityDeclaration ::= "syntax" "priorities" PriorityList
+  PriorityList        ::= NeIdList ">" PriorityList
+                        | NeIdList ">" NeIdList
+
+  ConfigDeclaration ::= "configuration" NeCellDeclList
+  NeCellDeclList    ::= CellDecl | CellDecl NeCellDeclList
+  CellDecl          ::= ConfigImport
+                      | StartCellDecl InnerCellDecl EndCellDecl
+  ConfigImport      ::= "<" {CellId} "/>"
+  StartCellDecl     ::= "<" {CellId} CellAttributeList ">"
+  InnerCellDecl     ::= {Bubble} | NeCellDeclList
+  EndCellDecl       ::= "</" {CellId} ">"
+  CellAttributeList ::= "" | CellAttribute CellAttributeList
+  CellAttribute     ::= {Id} "=" {String}
+
+  RuleDeclaration ::= "rule" OptName {BubbleWithRewrites} AttributeSet
+  OptName         ::= "" | Name
+  Name            ::= "[" {Id} "]" ":"
+
+  ContextDeclaration      ::= "context" {BubbleWithRewrites} AttributeSet
+  ContextAliasDeclaration ::= "context" "alias" Name {Bubble} AttributeSet
+```
 
 Syntax Declaration
 ------------------
