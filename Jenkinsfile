@@ -293,7 +293,7 @@ pipeline {
                     unstash 'arch'
                     sh '''
                       pacman -Syyu --noconfirm
-                      pacman -S --noconfirm opam
+                      pacman -S --noconfirm opam pkgconf
                       pacman -U --noconfirm kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
                       src/main/scripts/test-in-container
                     '''
