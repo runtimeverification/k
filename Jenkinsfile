@@ -293,7 +293,7 @@ pipeline {
                     unstash 'arch'
                     sh '''
                       pacman -Syyu --noconfirm
-                      pacman -S --noconfirm opam
+                      pacman -S --noconfirm opam pkgconf
                       pacman -U --noconfirm kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
                       src/main/scripts/test-in-container
                     '''
@@ -349,7 +349,7 @@ pipeline {
                         git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${SHORT_REV}: part 2"
                         git push origin brew-release-$PACKAGE
                       '''
-                      stash name: 'mojave', includes: "kframework--${env.VERSION}.mojave.bottle*.tar.gz"
+                      stash name: 'big_sur', includes: "kframework--${env.VERSION}.big_sur.bottle*.tar.gz"
                     }
                   }
                 }
@@ -358,7 +358,7 @@ pipeline {
                   steps {
                     dir('homebrew-k') {
                       git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
-                      unstash 'mojave'
+                      unstash 'big_sur'
                       sh '${WORKSPACE}/package/macos/brew-install-bottle ${PACKAGE} ${VERSION}'
                     }
                     sh '''
@@ -502,7 +502,7 @@ pipeline {
         dir('focal')  { unstash 'focal' }
         dir('buster') { unstash 'buster' }
         dir('arch')   { unstash 'arch'   }
-        dir('mojave') { unstash 'mojave' }
+        dir('big_sur') { unstash 'big_sur' }
         sshagent(['rv-jenkins-github']) {
           sh '''
             git clone 'ssh://github.com/kframework/k.git' k-release
@@ -519,8 +519,8 @@ pipeline {
             git tag "${K_RELEASE_TAG}" "${release_commit}"
             git push origin "${K_RELEASE_TAG}"
 
-            LOCAL_BOTTLE_NAME=$(find ../mojave -name "kframework--${VERSION}.mojave.bottle*.tar.gz")
-            BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#../mojave/} | sed 's!kframework--!kframework-!')
+            LOCAL_BOTTLE_NAME=$(find ../big_sur -name "kframework--${VERSION}.big_sur.bottle*.tar.gz")
+            BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#../big_sur/} | sed 's!kframework--!kframework-!')
 
             mv ../kframework-${VERSION}-src.tar.gz                      kframework-${VERSION}-src.tar.gz
             mv ../bionic/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_bionic.deb
