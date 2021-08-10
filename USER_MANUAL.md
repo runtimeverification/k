@@ -606,6 +606,27 @@ Note that the `private` module attribute also changes the default visiblity
 of imports; please refer to the appropriate section elsewhere in the manual
 for more details.
 
+Here is an example usage:
+
+```k
+module WIDGET-SYNTAX
+
+  syntax Widget ::= foo()
+  syntax WidgetHelper ::= bar() [private] // this production is not visible
+                                          // outside this module
+endmodule
+
+module WIDGET [private]
+  imports WIDGET-SYNTAX
+
+  syntax Widget ::= fooImpl() // this production is not visible outside this
+                              // module
+
+  // this production is visible outside this module
+  syntax KItem ::= adjustWidget(Widget) [function, public] 
+endmodule
+```
+
 
 Configuration Declaration
 -------------------------
