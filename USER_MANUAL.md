@@ -23,12 +23,11 @@ execution engine, etc). Code reuse is uncommon. The end result is that for each
 new language, the same basic tools and patterns are re-implemented again and
 again.
 
-K approaches the problem differently, by imagining how different tools could be
-derived generically from a common specification. In other words, for any
-language, a language-generic tool is a function that takes a language spec as
-input and produces a tool as output. The end result is that the exercise of
+K approaches the problem differently -- it generates each of these tools from a single language specification.
+The work of programming language design and tool implementation are made separate concerns.
+The end result is that the exercise of
 designing new languages and their associated tooling is now reduced to
-developing a single language specfication from which we derive our tooling *for
+developing a single language specification from which we derive our tooling *for
 free*.
 
 **K For Researchers:**
@@ -205,7 +204,7 @@ can be understood as a blackbox with the following inputs and outputs:
 where:
 
 -   process outlines are denoted by boxes with double-lined borders
--   programs are denoted by boxes with single-lined borders
+-   executables are denoted by boxes with single-lined borders
 -   inputs and outputs are denoted by words attached to lines
 -   K terms typically correspond to *programs* defined in a particular
     language's syntax (which are either parsed using `kparse` or executed using
