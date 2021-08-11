@@ -133,7 +133,7 @@ public class KSyntax2GrammarStatesFilter {
                 if (prdItem instanceof org.kframework.definition.NonTerminal) {
                     org.kframework.definition.NonTerminal srt = (org.kframework.definition.NonTerminal) prdItem;
                     Grammar.NonTerminalState nts = grammar.new NonTerminalState(sort + " ::= " + srt.sort(), nt,
-                            grammar.get(srt.sort().toString()));
+                            Optional.ofNullable(grammar.get(srt.sort().toString())).orElse(grammar.nullNT()));
                     previous.next.add(nts);
                     previous = nts;
                 } else if (prdItem instanceof TerminalLike) {

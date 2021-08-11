@@ -90,7 +90,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.definition.Import apply(Import imp) {
-        return org.kframework.definition.Import.apply(imp.getName(), convertAttributes(imp));
+        return org.kframework.definition.Import.apply(imp.getName(), imp.isPublic(), convertAttributes(imp));
     }
 
     public org.kframework.definition.Definition apply(Definition d) {
