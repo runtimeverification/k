@@ -62,6 +62,8 @@ import scala.collection.JavaConverters;
 import scala.collection.Seq;
 import scala.collection.Set;
 
+import static org.kframework.Collections.*;
+
 /**
  * Writes a KAST term to the KAST Json format.
  */
@@ -139,7 +141,12 @@ public class ToJson {
         jmod.add("node", JsonParser.KFLATMODULE);
 
         JsonArrayBuilder imports = Json.createArrayBuilder();
-        mod.imports().foreach(i -> imports.add(i.name()));
+        stream(mod.imports()).forEach(i -> {
+          JsonObjectBuilder jimp = Json.createObjectBuilder();
+          jmod.add("name", i.name());
+          jmod.add("isPublic", i.isPublic());
+          imports.add(jimp.build());
+        });
 
         JsonArrayBuilder sentences = Json.createArrayBuilder();
         mod.localSentences().foreach(s -> sentences.add(toJson(s)));
