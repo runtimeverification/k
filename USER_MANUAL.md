@@ -170,8 +170,18 @@ specifications:
 
 ### K Process Overview
 
-We now examine how the K tools are generally used. At a high-level, each K tool
-can be understood as a blackbox with the following inputs and outputs:
+We now examine how the K tools are generally used. The main input to all of the
+K tools is a K specification. For effieciency reasons, this specification is
+first compiled into an intermediate representation called Kore. Once we have
+obtained this intermediate representation, we can use it to do:
+
+1.  parsing/pretty-printing, i.e., converting a K term, whose syntax is defined
+    by a K specification, into a alternate representation
+2.  concrete and abstract execution of a K specification
+3.  theorem proving, i.e., verifying whether a set of claims about a K
+    specification hold
+
+We represent the overall process using the graphic below:
 
 ```
  K Compilation Process
@@ -216,7 +226,8 @@ where:
 Let us start with a description of the compilation process. According to the
 above diagram, the compiler driver is called `kompile`. For our purposes, it is
 enough to view the K compilation process as a black box that transforms a K
-specification into a Kore specification file.
+specification into a lower-level Kore specification that encodes the same
+information, but that is easier to work with programmatically.
 
 **K Execution Process:**
 We now turn our attention to the K execution process. Abstractly, we can divide
