@@ -54,3 +54,4 @@ kompile 16_collections/README.md --md-selector "k & ! exclude" --main-module LES
 kompile 16_collections/README.md --md-selector "k & ! exclude" --main-module LESSON-16-C -d build/16c
 kompile 17_cell_multiplicity/README.md --md-selector "k & ! exclude" --main-module LESSON-17-A -d build/17a
 kompile 17_cell_multiplicity/README.md --md-selector "k & ! exclude" --main-module LESSON-17-B -d build/17b
+kompile 18_equality_and_conditionals/README.md --md-selector "k & ! exclude" --main-module LESSON-18 -d build/18
