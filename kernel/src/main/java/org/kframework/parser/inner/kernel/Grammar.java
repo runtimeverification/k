@@ -58,6 +58,14 @@ public class Grammar implements Serializable {
     /** The set of "root" NonTerminals */
     private BiMap<String, NonTerminal> startNonTerminals = HashBiMap.create();
 
+    public NonTerminal nullNT() {
+      return get("_Null");
+    }
+
+    public Grammar() {
+      add(new NonTerminal("_Null"));
+    }
+
     public boolean add(NonTerminal newNT) {
         if (startNonTerminals.containsKey(newNT.name)) {
             return false;

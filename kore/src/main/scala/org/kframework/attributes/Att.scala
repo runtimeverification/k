@@ -125,6 +125,8 @@ object Att {
   val SOURCE = "org.kframework.attributes.Source"
   val LOCATION = "org.kframework.attributes.Location"
   val UNIQUE_ID = "UNIQUE_ID"
+  val PUBLIC = "public"
+  val PRIVATE = "private"
 
   private val stringClassName = classOf[String].getName
   private val intClassName = classOf[java.lang.Integer].getName

@@ -275,7 +275,7 @@ public class ResolveFreshConstants {
         if (sentences.equals(m.localSentences())) {
             return m;
         }
-        return Module(m.name(), kore ? m.imports() : add(def.getModule("K-REFLECTION").get(), m.imports()), sentences, m.att());
+        return Module(m.name(), kore ? m.publicImports() : add(def.getModule("K-REFLECTION").get(), m.publicImports()), m.privateImports(), sentences, m.att());
     }
 }
 
