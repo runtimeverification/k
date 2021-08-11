@@ -346,3 +346,8 @@ sure to consider the interactions between components, such as saving and
 restoring the environment of variables at each call site. Don't worry about
 local function definitions or global variables for now. Make sure to test the
 resulting interpreter.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.17: Cell Multiplicity and Cell Collections](../17_cell_multiplicity/README.md).

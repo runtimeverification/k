@@ -25,6 +25,7 @@ import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.StringUtil;
 import scala.Option;
 import scala.Tuple2;
 import scala.util.Either;
@@ -125,7 +126,23 @@ public class CompiledDefinition implements Serializable {
                     }.apply(r.body());
                 });
         sb.append(arr);
-        sb.append(")");
+        sb.append(")\n");
+
+        for (Production prod : iterable(kompiledDefinition.mainModule().productions())) {
+            if (prod.att().contains("cell") && prod.att().contains("parser")) {
+                String att = prod.att().get("parser");
+                String[][] parts = StringUtil.splitTwoDimensionalAtt(att);
+                for (String[] part : parts) {
+                    if (part.length != 2) {
+                        throw KEMException.compilerError("Invalid value for parser attribute: " + att, prod);
+                    }
+                    String name = part[0];
+                    String module = part[1];
+                    sb.append("declaredConfigVarModule_" + name + "='" + module + "'\n");
+                }
+            }
+        }
+
         files.saveToKompiled("configVars.sh", sb.toString());
     }
 

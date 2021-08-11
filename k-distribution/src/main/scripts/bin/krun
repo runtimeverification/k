@@ -478,7 +478,9 @@ else
       fi
     fi
     indirectName="declaredConfigVar_$name"
+    indirectModuleName="declaredConfigVarModule_$name"
     sortName=${!indirectName}
+    moduleName=${!indirectModuleName:-unset}
     if [ -z "${!parser_name+unset}" ]; then
       if [ "$name" = "PGM" ]; then
         if $hasArgv; then
@@ -486,8 +488,10 @@ else
         else
           parser=(kparse --directory "$dir" --module "$mainModuleName")
         fi
-      else
+      elif [ -z "${!indirectModuleName+unset}" ]; then
         parser=(kparse --sort "$sortName" --directory "$dir" --module "$mainModuleName")
+      else
+        parser=(kparse --sort "$sortName" --directory "$dir" --module "$moduleName")
       fi
     else
       parser=("${!parser_name}")
