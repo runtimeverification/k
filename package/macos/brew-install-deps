@@ -1,4 +1,4 @@
 #!/bin/bash -ex
 
 brew update
-brew install maven cmake boost libyaml jemalloc llvm@8 gmp mpfr z3 pkg-config flex bison haskell-stack
+brew install maven cmake boost libyaml jemalloc llvm@12 gmp mpfr z3 pkg-config flex bison haskell-stack

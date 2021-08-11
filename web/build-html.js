@@ -33,7 +33,7 @@ generatePagesFromMarkdownFiles({
   template: pageTemplate,
 });
 generatePagesFromMarkdownFiles({
-  globPattern: path.resolve(__dirname, "../") + "/pending-documentation.md",
+  globPattern: path.resolve(__dirname, "../") + "/USER_MANUAL.md",
   globOptions: {},
   origin: "https://github.com/kframework/k/tree/master/",
   sourceDirectory: path.resolve(__dirname, "../"),

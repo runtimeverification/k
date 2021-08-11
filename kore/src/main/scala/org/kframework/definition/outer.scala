@@ -86,14 +86,16 @@ trait Sorting {
 
 object Module {
   def apply(name: String, unresolvedLocalSentences: Set[Sentence]): Module = {
-    new Module(name, Set(), unresolvedLocalSentences, Att.empty)
+    new Module(name, Set(), Set(), unresolvedLocalSentences, Att.empty)
   }
 }
 
-case class Module(val name: String, val imports: Set[Module], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
+case class Module(val name: String, val publicImports: Set[Module], val privateImports: Set[Module], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
   extends ModuleToString with OuterKORE with Sorting with Serializable with AttValue {
 
   assert(att != null)
+
+  lazy val imports: Set[Module] = publicImports | privateImports
 
   private lazy val importedSentences = imports flatMap {_.sentences}
 
@@ -106,12 +108,22 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
     _.importedModules
   })
 
-  def addImport(m : Module) : Module = new Module(name, imports + m, localSentences, att)
-  def wrappingModule(newName : String) : Module = new Module(newName, Set(this), Set(), Att.empty)
-
   lazy val importedModuleNames: Set[String] = importedModules.map(_.name)
 
   lazy val productions: Set[Production] = sentences collect { case p: Production => p }
+
+  lazy val publicSentences: Set[Sentence] = {
+    if (att.contains(Att.PRIVATE)) {
+      localSentences.filter(_.att.contains(Att.PUBLIC))
+    } else {
+      localSentences.filter(!_.att.contains(Att.PRIVATE))
+    }
+  }
+
+  lazy val signature: Module = {
+    val f = ModuleTransformer.from(m => Module(m.name, m.publicImports, Set(), m.publicSentences, m.att), "compute module signature")
+    Module(name, publicImports.map(f), privateImports.map(f), localSentences, att)
+  }
 
   lazy val functions: Set[KLabel] = productions.filter(_.att.contains(Att.FUNCTION)).map(_.klabel.get.head)
 
@@ -331,7 +343,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   def checkSorts () = sentences foreach {
     case p@Production(_, params, _, items, _) =>
       val res = items collect 
-      { case nt: NonTerminal if !p.isSortVariable(nt.sort) && !definedSorts.contains(nt.sort.head) && !usedCellSorts.contains(nt.sort) && !sortSynonymMap.contains(nt.sort) => nt 
+      { case nt: NonTerminal if !p.isSortVariable(nt.sort) && !definedSorts.contains(nt.sort.head) && !sortSynonymMap.contains(nt.sort) => nt
         case nt: NonTerminal if nt.sort.params.nonEmpty && (nt.sort.params.toSet & params.toSet).isEmpty && !definedInstantiations.getOrElse(nt.sort.head, Set()).contains(nt.sort) => nt
       }
       if (res.nonEmpty)
@@ -346,7 +358,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   override lazy val hashCode: Int = name.hashCode
 
-  def flattened()   : FlatModule                = new FlatModule(name, imports.map(m => Import(m.name, Att.empty)), localSentences, att)
+  def flattened()   : FlatModule                = new FlatModule(name, imports.map(m => Import(m.name, publicImports.contains(m), Att.empty)), localSentences, att)
   def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ imports.map(m => m.flatModules._2).flatten)
 }
 

@@ -54,7 +54,7 @@ public class RewriteAwareVisitor extends VisitK {
 
     @Override
     public void apply(KApply k) {
-        if (!(k.klabel() instanceof KVariable) && k.klabel().name().equals("#fun2") || k.klabel().name().equals("#fun3")) {
+        if (!(k.klabel() instanceof KVariable) && k.klabel().name().equals("#fun2") || k.klabel().name().equals("#fun3") || k.klabel().name().equals("#let")) {
             boolean wasRHS = isRHS;
             boolean wasLHS = isLHS;
             if (!isRHS || isLHS) {

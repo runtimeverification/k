@@ -92,12 +92,15 @@ public class ResolveFun {
             @Override
             public K apply(KApply k) {
                 KLabel lbl = k.klabel();
-                if (!(lbl instanceof KVariable) && lbl.name().equals("#fun2") || lbl.name().equals("#fun3") || lbl.equals(KLabels.IN_K) || lbl.equals(KLabels.NOT_IN_K)) {
+                if (!(lbl instanceof KVariable) && lbl.name().equals("#fun2") || lbl.name().equals("#fun3") || lbl.name().equals("#let") || lbl.equals(KLabels.IN_K) || lbl.equals(KLabels.NOT_IN_K)) {
                     String nameHint1 = "", nameHint2 = "";
                     K arg, body;
                     if (lbl.name().equals("#fun3")) {
                         body = KRewrite(k.items().get(0), k.items().get(1));
                         arg = k.items().get(2);
+                    } else if (lbl.name().equals("#let")) {
+                        body = KRewrite(k.items().get(0), k.items().get(2));
+                        arg = k.items().get(1);
                     } else {
                         body = k.items().get(0);
                         arg = k.items().get(1);
@@ -116,7 +119,7 @@ public class ResolveFun {
                     Sort lhsSort = sort(RewriteToTop.toLeft(body));
                     Sort argSort = sort(arg);
                     Sort lubSort = AddSortInjections.lubSort(lhsSort, argSort, null, body, module);
-                    if (lbl.name().equals("#fun3") || lbl.name().equals("#fun2")) {
+                    if (lbl.name().equals("#fun3") || lbl.name().equals("#fun2") || lbl.name().equals("#let")) {
                         funProds.add(funProd(fun, body, lubSort));
                         funRules.add(funRule(fun, body, k.att()));
                     } else {
@@ -256,6 +259,6 @@ public class ResolveFun {
         Set<Sentence> newSentences = stream(m.localSentences()).map(this::resolve).collect(Collectors.toSet());
         newSentences.addAll(funProds);
         newSentences.addAll(funRules);
-        return Module(m.name(), m.imports(), immutable(newSentences), m.att());
+        return Module(m.name(), m.publicImports(), m.privateImports(), immutable(newSentences), m.att());
     }
 }

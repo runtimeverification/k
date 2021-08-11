@@ -30,7 +30,7 @@ configVars=
 dryRun=false
 expandMacros=true
 result=1
-filterSubst=true
+filterSubst=
 fold_lines="fold -s"
 
 # setup temp files
@@ -105,7 +105,7 @@ present; see below).
                            the value of \$PGM as a KORE term.
 
   -cNAME=VALUE             Use VALUE as the value for \$NAME. By default,
-                           \`kast -m MAINMODULE -o kore\` is used as the
+                           \`kparse -m MAINMODULE\` is used as the
                            parser. This can be overridden with -p.
       --debugger           Launch the backend in a debugging console.
                            Currently only supported on LLVM backend.
@@ -186,6 +186,7 @@ do
       ;;
 
       --color)
+      colorOpt="$2"
       case "$2" in
         on)
         color=true
@@ -264,7 +265,7 @@ do
       ;;
 
       --no-substitution-filtering)
-      filterSubst=false
+      filterSubst=--no-substitution-filtering
       ;;
 
       --no-expand-macros)
@@ -404,8 +405,10 @@ fi
 if [ -z "${color+unset}" ]; then
   if [[ "$outputFile" == "-" && -t 1 ]]; then
     color=true
+    colorOpt=on
   else
     color=false
+    colorOpt=off
   fi
 fi
 
@@ -452,7 +455,7 @@ fi
 source "$kompiledDir/configVars.sh"
 if $term; then
   if [ -z "${parser_PGM+unset}" ]; then
-    execute kast --directory "$dir" --module "$mainModuleName" "$config_var_PGM" --output kore > "$input_file"
+    execute kparse --directory "$dir" --module "$mainModuleName" "$config_var_PGM" > "$input_file"
   else
     execute $parser_PGM "$config_var_PGM" > "$input_file"
   fi
@@ -475,18 +478,20 @@ else
       fi
     fi
     indirectName="declaredConfigVar_$name"
+    indirectModuleName="declaredConfigVarModule_$name"
     sortName=${!indirectName}
+    moduleName=${!indirectModuleName:-unset}
     if [ -z "${!parser_name+unset}" ]; then
-      if [ -f "$kompiledDir/parser_$name" ]; then
-        parser=("$kompiledDir/parser_$name")
-      elif [ "$name" = "PGM" ]; then
+      if [ "$name" = "PGM" ]; then
         if $hasArgv; then
-          parser=(kast --directory "$dir" --output kore)
+          parser=(kparse --directory "$dir")
         else
-          parser=(kast --directory "$dir" --module "$mainModuleName" --output kore)
+          parser=(kparse --directory "$dir" --module "$mainModuleName")
         fi
+      elif [ -z "${!indirectModuleName+unset}" ]; then
+        parser=(kparse --sort "$sortName" --directory "$dir" --module "$mainModuleName")
       else
-        parser=(kast --sort "$sortName" --directory "$dir" --module "$mainModuleName" --output kore)
+        parser=(kparse --sort "$sortName" --directory "$dir" --module "$moduleName")
       fi
     else
       parser=("${!parser_name}")
@@ -616,22 +621,7 @@ if ! $dryRun; then
       mv "$kore_output2" "$kore_output"
     fi
 
-    case "$outputMode" in
-      pretty)
-      execute kprint "$kompiledDir" "$kore_output" $color $filterSubst > "$outputFile"
-      ;;
-
-      kore)
-      cat "$kore_output" > "$outputFile"
-      echo >> "$outputFile"
-      ;;
-
-      none) ;;
-
-      *)
-      execute kast --directory "$dir" --input kore --output "$outputMode" "$kore_output" > "$outputFile"
-      ;;
-    esac
+    execute kore-print --directory "$dir" --output "$outputMode" "$kore_output" --color "$colorOpt" $filterSubst > "$outputFile"
   else
     error "Backend crashed during rewriting with exit code $result"
   fi

@@ -147,7 +147,7 @@ public class JsonParser {
 
         JsonArray jsonimports = data.getJsonArray("imports");
         Set<Import> imports = new HashSet<>();
-        jsonimports.getValuesAs(JsonString.class).forEach(i -> imports.add(Import.apply(i.getString(), Att.empty())));
+        jsonimports.getValuesAs(JsonObject.class).forEach(i -> imports.add(Import.apply(i.getString("name"), i.getBoolean("public"), Att.empty())));
 
         JsonArray sentences = data.getJsonArray("localSentences");
         Set<Sentence> localSentences = new HashSet<>();

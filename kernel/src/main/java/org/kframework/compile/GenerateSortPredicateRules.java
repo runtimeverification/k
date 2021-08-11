@@ -53,7 +53,7 @@ public class GenerateSortPredicateRules {
     public Module gen(Module mod) {
         this.mod = mod;
         predicateRules = stream(mod.rules()).filter(this::isPredicate).collect(Collectors.toSet());
-        return Module(mod.name(), mod.imports(), (Set<Sentence>) mod.localSentences().$bar(stream(mod.allSorts())
+        return Module(mod.name(), mod.publicImports(), mod.privateImports(), (Set<Sentence>) mod.localSentences().$bar(stream(mod.allSorts())
                 .flatMap(this::gen).collect(Collections.toSet())), mod.att());
     }
 

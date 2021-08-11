@@ -16,7 +16,7 @@ import scala.collection.Set
 class AssocCommToAssoc extends Function[Module, Module] {
 
   override def apply(m: Module) = {
-    Module(m.name, m.imports, m.localSentences flatMap {apply(_)(m)}, m.att)
+    Module(m.name, m.publicImports, m.privateImports, m.localSentences flatMap {apply(_)(m)}, m.att)
   }
 
   private def apply(s: Sentence)(implicit m: Module): List[Sentence] = s match {
