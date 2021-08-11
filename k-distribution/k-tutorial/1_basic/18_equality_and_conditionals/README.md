@@ -26,10 +26,10 @@ the `owise` attribute). However, sometimes it is useful to explicitly write
 a conditional expression directly in the right-hand side of a rule. For this
 purpose, K defines one more operator in the `K-EQUAL` module, which corresponds
 to the usual ternary operator in many languages. Here is an example of its 
-usage (`lesson-18-a.k`):
+usage (`lesson-18.k`):
 
 ```k
-module LESSON-18-A
+module LESSON-18
   imports INT
   imports BOOL
 
