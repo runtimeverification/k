@@ -203,6 +203,20 @@ called `K`.
 
 ```
 module OUTER-SYNTAX
+  syntax String       ::= 
+
+  syntax lexical LowerId ::= r"#?[a-z][a-z,A-Z,0-9]*"
+  syntax lexical UpperId ::= r"#?[A-Z][a-z,A-Z,0-9]*"
+  syntax lexical LCurly  ::= r"\\{"
+  syntax lexical RCurly  ::= r"\\}"
+
+  syntax ModuleId  ::= r"#?[a-z,A-Z,0-9,_]+(-[a-z,A-Z,0-9,_]+)*"
+
+  syntax ParamSort ::= r"{UpperId}{LCurly}{UpperId}(,{Upper"
+  syntax Nat          ::= r"[0-9]+"
+  syntax SortId       ::= Nat | UpperId SortParams
+  syntax SortParams   ::= Id | Id "," SortParams
+  syntax ParamId      ::= LowerId | UpperId 
 
   syntax File         ::= RequiresList ModuleList
 
@@ -263,7 +277,6 @@ syntaxes: a shorthand syntax for function-like operations and a generic syntax.
 
   syntax GrammarDeclaration ::= "syntax" OptSortParams {SortId} "::=" PriorityBlockList
   syntax OptSortParams      ::= "" | SortParams
-  syntax SortParams         ::= Id | Id "," SortParams
   syntax PriorityBlockList  ::= PriorityBlock
                               | PriorityBlock ">" PriorityBlockList
   syntax PriorityBlock      ::= OptAssociativity AlternativeList
@@ -275,7 +288,8 @@ syntaxes: a shorthand syntax for function-like operations and a generic syntax.
   syntax ProductionSyntax   ::= FunctionSyntax
                               | GenericSyntax
 
-  syntax FunctionSyntax     ::= {Id} "(" ParameterList ")"
+  syntax FunctionSyntax     ::= OptFuncName "(" ParameterList ")"
+  syntax OptFunctName       ::= "" | Id
   syntax ParameterList      ::= "" | NeParameterList
   syntax NeParameterList    ::= Parameter | Parameter "," NeParameterList
   syntax Parameter          ::= OptParamName {SortId}
