@@ -15,8 +15,8 @@ whether two terms in K are equal. The operator for this is found in
 module. The operator is `==K` and takes two terms of sort `K` and returns a
 `Bool`. It returns true if they are equal. This includes equality over builtin
 types such as `Map` and `Set` where equality is not purely structural in
-nature. However, it does not include any notion of semantic equality in
-user-defined. The inverse symbol for inequality is `=/=K`.
+nature. However, it does not include any notion of semantic equality over
+user-defined syntax. The inverse symbol for inequality is `=/=K`.
 
 ## Ternary Operator
 
