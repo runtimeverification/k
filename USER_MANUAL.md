@@ -3060,7 +3060,7 @@ arguments. A legend describing how to interpret the index follows.
 | `anywhere`            | rule  | all     | [`anywhere` rules](#anywhere-rules)                                                                                                             |
 | `applyPriority(_)`    | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
 | `avoid`               | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
-| `binder`              | prod  | all     | N/A                                                                                                                                             |
+| `binder`              | prod  | all     | No reference yet.                                                                                                                               |
 | `bracket`             | prod  | all     | [Parametric productions and `bracket` attributes](#parametric-productions-and-bracket-attributes)                                               |
 | `color(_)`            | prod  | all     | [`color` and `colors` attributes](#color-and-colors-attributes)                                                                                 |
 | `colors(_)`           | prod  | all     | [`color` and `colors` attributes](#color-and-colors-attributes)                                                                                 |
@@ -3071,14 +3071,14 @@ arguments. A legend describing how to interpret the index follows.
 | `cool`                | rule  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
 | `exit = ""`           | cell  | all     | [`exit` attribute](#exit-attribute)                                                                                                             |
 | `format`              | prod  | all     | [`format` attribute](#format-attribute)                                                                                                         |
-| `freshGenerator`      | prod  | all     | [`freshGenerator` attribute](#freshgenerator-attribute)                                                                                        |
+| `freshGenerator`      | prod  | all     | [`freshGenerator` attribute](#freshgenerator-attribute)                                                                                         |
 | `functional`          | rule  | all     | [`function` and `functional` attributes](#function-and-functional-attributes)                                                                   |
 | `function`            | rule  | all     | [`function` and `functional` attributes](#function-and-functional-attributes)                                                                   |
 | `heat`                | rule  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
 | `hook(_)`             | prod  | all     | No reference yet                                                                                                                                |
 | `hybrid(_)`           | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
 | `hybrid`              | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
-| `klabel(_)`           | all   | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                            |
+| `klabel(_)`           | all   | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
 | `latex(_)`            | prod  | all     | No reference yet                                                                                                                                |
 | `left`                | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
 | `lemma`               | rule  | all     | [`smt-lemma`, `lemma`, and `trusted` attributes](#smt-lemma-lemma-and-trusted-attributes)                                                       |
@@ -3095,7 +3095,7 @@ arguments. A legend describing how to interpret the index follows.
 | `priority(_)`         | rule  | all     | [`owise` and `priority` attributes](#owise-and-priority-attributes)                                                                             |
 | `private`             | mod   | all     | [`private` attribute](#private-attribute)                                                                                                       |
 | `private`             | prod  | all     | [`public` and `private` attribute](#public-and-private-attribute)                                                                               |
-| `public`              | mod   | all     | No reference yet.                                                                               |
+| `public`              | mod   | all     | No reference yet.                                                                                                                               |
 | `public`              | prod  | all     | [`public` and `private` attribute](#public-and-private-attribute)                                                                               |
 | `result(_)`           | ctxt  | all     | [`result` attribute](#result-attribute)                                                                                                         |
 | `result(_)`           | rule  | all     | [`result` attribute](#result-attribute)                                                                                                         |
@@ -3112,7 +3112,7 @@ arguments. A legend describing how to interpret the index follows.
 | `symbolic`            | mod   | haskell | [`symbolic` and `concrete` attribute](#symbolic-and-concrete-attribute)                                                                         |
 | `symbolic`            | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
 | `symbolic(_)`         | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
-| `symbol`              | prod  | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                            |
+| `symbol`              | prod  | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
 | `token`               | prod  | all     | [`token` attribute](#token-attribute)                                                                                                           |
 | `token`               | sort  | all     | [`token` attribute](#token-attribute)                                                                                                           |
 | `trusted`             | claim | haskell | [`smt-lemma`, `lemma`, and `trusted` attributes](#smt-lemma-lemma-and-trusted-attributes)                                                       |
