@@ -5854,12 +5854,12 @@
       "sha1": "57e0b6a607859774b2cdd680c6f2aab147b83a4f"
     },
     {
-      "path": "org/bouncycastle/bcprov-jdk15on/1.57/bcprov-jdk15on-1.57.jar",
-      "sha1": "f66a135611d42c992e5745788c3f94eb06464537"
+      "path": "org/bouncycastle/bcprov-jdk15on/1.67/bcprov-jdk15on-1.67.jar",
+      "sha1": "8c0998045da87dbc2f1d4b6480458ed811ca7b82"
     },
     {
-      "path": "org/bouncycastle/bcprov-jdk15on/1.57/bcprov-jdk15on-1.57.pom",
-      "sha1": "d2e8496f537f071bbc0e502ff4c729dbf136b89d"
+      "path": "org/bouncycastle/bcprov-jdk15on/1.67/bcprov-jdk15on-1.67.pom",
+      "sha1": "c622f23fc3d1acf7c0cf66755ad7455781c4d489"
     },
     {
       "path": "org/checkerframework/checker-qual/2.11.1/checker-qual-2.11.1.jar",
