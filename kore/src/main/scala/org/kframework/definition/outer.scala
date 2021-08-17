@@ -86,16 +86,18 @@ trait Sorting {
 
 object Module {
   def apply(name: String, unresolvedLocalSentences: Set[Sentence]): Module = {
-    new Module(name, Set(), Set(), unresolvedLocalSentences, Att.empty)
+    new Module(name, Set(), unresolvedLocalSentences, Att.empty)
   }
 }
 
-case class Module(val name: String, val publicImports: Set[Module], val privateImports: Set[Module], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
+case class Import(val module: Module, val isPublic: Boolean)
+
+case class Module(val name: String, val imports: Set[Import], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
   extends ModuleToString with OuterKORE with Sorting with Serializable with AttValue {
 
   assert(att != null)
 
-  lazy val fullImports: Set[Module] = publicImports | privateImports
+  lazy val fullImports: Set[Module] = imports.map(_.module)
 
   private lazy val importedSentences = fullImports flatMap {_.sentences}
 
@@ -121,8 +123,8 @@ case class Module(val name: String, val publicImports: Set[Module], val privateI
   }
 
   lazy val signature: Module = {
-    val f = ModuleTransformer.from(m => Module(m.name, m.publicImports, Set(), m.publicSentences, m.att), "compute module signature")
-    Module(name, publicImports.map(f), privateImports.map(f), localSentences, att)
+    val f = ModuleTransformer.from(m => Module(m.name, m.imports.filter(_.isPublic), m.publicSentences, m.att), "compute module signature")
+    Module(name, imports.map(i => Import(f(i.module), i.isPublic)), localSentences, att)
   }
 
   lazy val functions: Set[KLabel] = productions.filter(_.att.contains(Att.FUNCTION)).map(_.klabel.get.head)
@@ -358,7 +360,7 @@ case class Module(val name: String, val publicImports: Set[Module], val privateI
 
   override lazy val hashCode: Int = name.hashCode
 
-  def flattened()   : FlatModule                = new FlatModule(name, fullImports.map(m => FlatImport(m.name, publicImports.contains(m), Att.empty)), localSentences, att)
+  def flattened()   : FlatModule                = new FlatModule(name, imports.map(i => FlatImport(i.module.name, i.isPublic, Att.empty)), localSentences, att)
   def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ fullImports.map(m => m.flatModules._2).flatten)
 }
 

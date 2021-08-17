@@ -56,14 +56,13 @@ object FlatModule {
       }
       memoization.getOrElseUpdate(m.name, {
         // transform all imports into Module
-        val f = (i: FlatImport) => memoization.getOrElse(i.name
+        val f = (i: FlatImport) => Import(memoization.getOrElse(i.name
           // if can't find the Module in memoization, build a new one
           , toModuleRec(allModules.find(f => f.name.equals(i.name))
               .getOrElse(throw KEMException.compilerError("Could not find module: " + i.name, i))
-            , visitedModules :+ m))
-        val newPublicImports = m.imports.filter(_.isPublic).map(f)
-        val newPrivateImports = m.imports.filter(!_.isPublic).map(f)
-        val newM = new Module(m.name, newPublicImports, newPrivateImports, m.localSentences, m.att)
+            , visitedModules :+ m)), i.isPublic)
+        val newImports = m.imports.map(f)
+        val newM = new Module(m.name, newImports, m.localSentences, m.att)
         newM.checkSorts()
         newM
       })

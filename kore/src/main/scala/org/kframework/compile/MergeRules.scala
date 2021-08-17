@@ -35,7 +35,7 @@ class MergeRules(val automatonAttribute: String, filterAttribute: String) extend
     if (rulesToMerge.nonEmpty) {
       val newBody = pushDisjunction(rulesToMerge map { r => (convertKRewriteToKApply(r.body), KApply(isRulePredicate,KToken(r.hashCode.toString, Sorts.K, Att.empty))) })(m)
       val automatonRule = Rule(newBody, TrueToken, TrueToken, Att.empty.add(automatonAttribute))
-      Module(m.name, m.publicImports, m.privateImports, m.localSentences + automatonRule, m.att)
+      Module(m.name, m.imports, m.localSentences + automatonRule, m.att)
     } else {
       m
     }
