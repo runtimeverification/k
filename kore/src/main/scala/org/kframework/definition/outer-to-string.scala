@@ -7,7 +7,7 @@ import collection._
 trait ModuleToString {
   self: Module =>
   override def toString = "module " + name + att.postfixString + "\n" +
-    prettyPrintSet(imports map {"imports " + _.name}) +
+    prettyPrintSet(fullImports map {"imports " + _.name}) +
     prettyPrintSet(localSentences) +
     "endmodule"
 

@@ -95,16 +95,16 @@ case class Module(val name: String, val publicImports: Set[Module], val privateI
 
   assert(att != null)
 
-  lazy val imports: Set[Module] = publicImports | privateImports
+  lazy val fullImports: Set[Module] = publicImports | privateImports
 
-  private lazy val importedSentences = imports flatMap {_.sentences}
+  private lazy val importedSentences = fullImports flatMap {_.sentences}
 
   lazy val sentences: Set[Sentence] = localSentences | importedSentences
 
   lazy val labeled: Map[String, Set[Sentence]] = sentences.filter(_.label.isPresent).groupBy(_.label.get)
 
   /** All the imported modules, calculated recursively. */
-  lazy val importedModules: Set[Module] = imports | (imports flatMap {
+  lazy val importedModules: Set[Module] = fullImports | (fullImports flatMap {
     _.importedModules
   })
 
@@ -342,7 +342,7 @@ case class Module(val name: String, val publicImports: Set[Module], val privateI
   // check that non-terminals have a defined sort
   def checkSorts () = sentences foreach {
     case p@Production(_, params, _, items, _) =>
-      val res = items collect 
+      val res = items collect
       { case nt: NonTerminal if !p.isSortVariable(nt.sort) && !definedSorts.contains(nt.sort.head) && !sortSynonymMap.contains(nt.sort) => nt
         case nt: NonTerminal if nt.sort.params.nonEmpty && (nt.sort.params.toSet & params.toSet).isEmpty && !definedInstantiations.getOrElse(nt.sort.head, Set()).contains(nt.sort) => nt
       }
@@ -358,8 +358,8 @@ case class Module(val name: String, val publicImports: Set[Module], val privateI
 
   override lazy val hashCode: Int = name.hashCode
 
-  def flattened()   : FlatModule                = new FlatModule(name, imports.map(m => FlatImport(m.name, publicImports.contains(m), Att.empty)), localSentences, att)
-  def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ imports.map(m => m.flatModules._2).flatten)
+  def flattened()   : FlatModule                = new FlatModule(name, fullImports.map(m => FlatImport(m.name, publicImports.contains(m), Att.empty)), localSentences, att)
+  def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ fullImports.map(m => m.flatModules._2).flatten)
 }
 
 trait HasAtt {
