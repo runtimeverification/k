@@ -1,12 +1,252 @@
 K User Manual
 =============
 
-**Under Construction**
+**NOTE:** The K User Manual is still **under construction**; some features of K
+may have partial or missing documentation.
 
-This document contains documentation that has been written up to some extent
-but still needs to be ultimately included in the K manual which has not been
-written yet. New features of K that affect the surface language should be added
-to this document.
+Introduction
+------------
+
+### Why K?
+
+The K Framework is a programming language and system design toolkit made for
+practioners and researchers alike.
+
+**K For Practioners:**
+*K is a framework for deriving programming languages tools from their semantic
+specifications.*
+
+Typically, programming language tool development follows a similar pattern.
+After a new programming language is designed, separate teams will develop
+separate language tools (e.g. a compiler, interpreter, parser, symbolic
+execution engine, etc). Code reuse is uncommon. The end result is that for each
+new language, the same basic tools and patterns are re-implemented again and
+again.
+
+K approaches the problem differently -- it generates each of these tools from a single language specification.
+The work of programming language design and tool implementation are made separate concerns.
+The end result is that the exercise of
+designing new languages and their associated tooling is now reduced to
+developing a single language specification from which we derive our tooling *for
+free*.
+
+**K For Researchers:**
+*K is a configuration- and rewrite-based executable semantic framework.*
+
+In more detail, K specifications are:
+
+1.   **Executable:** compile into runnable and testable programs;
+2.   **Semantic:** correspond to a logical theory with a sound and relatively
+     complete proof system;
+3.   **Configuration-based:** organize system states into compositional,
+     hierarchical, labelled units called cells;
+4.   **Rewrite-based:** define system transitions using rewrite rules.
+
+K specifications are compiled into particular *matching logic* theories, giving
+them a simple and expressive semantics. K semantic rules are implicitly defined
+over the entire configuration structure, but omit unused cells, enabling a
+highly modular definitional style. Furthermore, K has been used to develop
+programming languages, type systems, and formal analysis tools.
+
+### Manual Objectives
+
+As mentioned in the _Why K?_ section above, the K Framework is designed as a
+collection of language-generic command-line interface (CLI) tools which revolve
+around K specifications. These tools cover a broad range of uses, but they
+typically fall into one of the following categories:
+
+1.  Transforming K Specs (e.g. compilation)
+2.  Running K Specs (e.g. concrete and symbolic execution)
+3.  Analyzing K Specs (e.g. theorem proving)
+
+The main *user-facing* K tools include:
+
+-   `kompile` - the K compiler driver
+-   `kparse` - the stanadlone K parser and abstract syntax tree (AST)
+    transformation tool
+-   `krun` - the K interpreter and symbolic execution engine driver
+-   `kprove` - the K theorem prover
+
+This user manual is designed to be a tool reference.
+In particular, it is not desgined to be a tutorial on how to write K
+specifications or to teach the logical foundations of K. New K users should
+consult our dedicated
+[K tutorial](https://kframework.org/k-distribution/k-tutorial/),
+or the more language-design oriented
+[PL tutorial](https://kframework.org/k-distribution/pl-tutorial/).
+Researchers seeking to learn more about the logic underlying K are encouraged
+to peruse the
+[growing literature on K and matching logic](https://fsl.cs.illinois.edu/projects/pl/index.html).
+We will consider the manual complete when it provides a complete description of
+all user-facing K tools and features.
+
+Introduction to K
+-----------------
+
+Since K specifications are the primary input into the entire system, let us
+take a moment to describe them. At the highest level, K specifications describe
+a programming language or system using three different pieces:
+
+1.  the *system primitives*, the base datatypes used during system operation,
+    e.g., numbers, lists, maps, etc;
+2.  the *system state*, a tuple or record over system primitives which gives a
+    complete snapshot of the system at any given moment;
+3.  the *system behavior*, a set of rules which defines possible system
+    evolutions.
+
+K specifications are then defined by a collection of *sentences* which
+correspond to the three concepts above:
+
+1.  `syntax` declarations encode the *system primitives*;
+2.  `configuration` declarations encode the *system state*;
+3.  `context` and `rule` declarations encode the *system behavior*.
+
+K sentences are then organized into one or *modules* which are stored in one or
+more *files*. In this scheme, files may *require* other files and modules may
+*import* other modules, giving rise to a hierarchy of files and modules. We
+give an intuitive sketch of the two levels of grouping in the diagram below:
+
+```
+   example.k file
+  +=======================+
+  | requires ".." --------|--> File_1
+  | ...                   |
+  | requires ".." --------|--> File_N
+  |                       |
+  |  +-----------------+  |
+  |  | module ..       |  |
+  |  |   imports .. ---|--|--> Module_1
+  |  |   ...           |  |
+  |  |   imports .. ---|--|--> Module_M
+  |  |                 |  |
+  |  |   sentence_1    |  |
+  |  |   ...           |  |
+  |  |   sentence_K    |  |
+  |  | endmodule       |  |
+  |  +-----------------+  |
+  |                       |
+  +=======================+
+```
+
+where:
+
+-   files and modules are denoted by double-bordered and single-borded boxes
+    respectively;
+-   file or module identifiers are denoted by double dots (`..`);
+-   potential repititions are denoted by triple dots (`...`).
+
+In the end, we require that the file and module hierarchies both form a
+directed acyclic graph (DAG). This is, no file may recursively require itself,
+and likewise, no module may recursively import itself.
+
+We now zoom in further to discuss the various kinds of sentences contained in K
+specifications:
+
+1.  sentences that define our *system's primitives*, including:
+
+    -   **sort declarations:** define new categories of primitive datatypes
+    -   **Backus-Naur Form (BNF) grammar declarations:** define the
+        operators that inhabit our primitive datatypes
+    -   **lexical syntax declarations:** define lexemes/tokens for the
+        lexer/tokenizer
+    -   **syntax associativity declarations:** specify the
+        associativity/grouping of our declared operators
+    -   **syntax priority declarations:** specify the priority of
+        potential ambiguous operators
+
+2.  sentences that define our *system's state*, including:
+
+    -   **configuration declarations:** define labelled, hierarchical records
+        using an nested XML-like syntax
+
+3.  sentences that define our *system's behavior*, including:
+
+    -   **context declarations:** describe how primitives and configurations
+        can simplify
+    -   **context alias declarations:** define templates that can generate new
+        contexts
+    -   **rule declarations:** define how the system transitions from one state
+        to the next
+
+### K Process Overview
+
+We now examine how the K tools are generally used. The main input to all of the
+K tools is a K specification. For effieciency reasons, this specification is
+first compiled into an intermediate representation called Kore. Once we have
+obtained this intermediate representation, we can use it to do:
+
+1.  parsing/pretty-printing, i.e., converting a K term, whose syntax is defined
+    by a K specification, into a alternate representation
+2.  concrete and abstract execution of a K specification
+3.  theorem proving, i.e., verifying whether a set of claims about a K
+    specification hold
+
+We represent the overall process using the graphic below:
+
+```
+ K Compilation Process
++============================================================+
+|                     +---------+                            |
+|  K Specification ---| kompile |--> Kore Specification --+  |
+|                     +---------+                         |  |
++=========================================================|==+
+                                                          |
+ K Execution Process                                      |
++=========================================================|==+
+|                                                         |  |
+|             +-------------------------------------------+  |
+|             |                                              |
+|             |       +---------+                            |
+|  K Term ----+-------| kparse  |--> K Term                  |
+|             |       +---------+                            |
+|             |                                              |
+|             |       +---------+                            |
+|  K Term ----+-------|  krun   |--> K Term                  |
+|             |       +---------+                            |
+|             |                                              |
+|             |       +---------+                            |
+|  K Claims --+-------| kprove  |--> K Claims                |
+|                     +---------+                            |
+|                                                            |
++============================================================+
+```
+
+where:
+
+-   process outlines are denoted by boxes with double-lined borders
+-   executables are denoted by boxes with single-lined borders
+-   inputs and outputs are denoted by words attached to lines
+-   K terms typically correspond to *programs* defined in a particular
+    language's syntax (which are either parsed using `kparse` or executed using
+    `krun`)
+-   K claims are a notation for describing *how* certain K programs *should*
+    execute (which are checked by our theorem prover `kprove`)
+
+**K Compilation Process:**
+Let us start with a description of the compilation process. According to the
+above diagram, the compiler driver is called `kompile`. For our purposes, it is
+enough to view the K compilation process as a black box that transforms a K
+specification into a lower-level Kore specification that encodes the same
+information, but that is easier to work with programmatically.
+
+**K Execution Process:**
+We now turn our attention to the K execution process. Abstractly, we can divide
+the K execution process into the following stages:
+
+1.  the kore specification is loaded (which defines a lexer, parser, and
+    unparser among other things)
+2.  the input string is lexed into a token stream
+3.  the token stream is parsed into K terms/claims
+4.  the K term/claims are transformed according the K tool being used (e.g.
+    `kparse`, `krun`, or `kprove`)
+5.  the K term/claims are unparsed into a string form and printed
+
+Note that all of the above steps performed in K execution process are fully
+prescribed by the input K specification. Of course, there are entire languages
+devoted to encoding these various stages proces individually, e.g., `flex` for
+lexers, `bison` for parsers, etc. What K offers is a _consistent_ language to
+package the above concepts in a way that we believe is convenient and practical
+for a wide range of uses.
 
 Module Declaration
 ------------------

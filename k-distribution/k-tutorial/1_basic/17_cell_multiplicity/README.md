@@ -161,3 +161,8 @@ still being a collection under the hood.
 1. Modify the solution from Lesson 1.16, Problem 1 so that the cell you use to
 keep track of functions in a `Map` is now a cell collection. Run some programs
 and compare how they get unparsed before and after this change.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.18: Term Equality and the Ternary Operator](../18_equality_and_conditionals/README.md).
