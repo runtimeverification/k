@@ -10,6 +10,7 @@ import org.kframework.utils.file.KompiledDir;
 import org.kframework.utils.file.TempDir;
 import org.kframework.utils.file.WorkingDir;
 import org.kframework.utils.options.OuterParsingOptions;
+import org.kframework.utils.options.OutputDirectoryOptions;
 
 import java.io.File;
 
@@ -27,14 +28,14 @@ public class OuterParsingModule extends AbstractModule {
 
     @Provides
     @DefinitionDir
-    File definitionDir(@WorkingDir File workingDir, OuterParsingOptions options) {
-        if (options.directory == null) {
+    File definitionDir(@WorkingDir File workingDir, OuterParsingOptions options, OutputDirectoryOptions output) {
+        if (output.directory == null) {
             // bootstrap the part of FileUtil we need
             return options.mainDefinitionFile(new FileUtil(null, null, workingDir, null, null, null)).getParentFile();
         }
-        File f = new File(options.directory);
+        File f = new File(output.directory);
         if (f.isAbsolute()) return f;
-        return new File(workingDir, options.directory);
+        return new File(workingDir, output.directory);
     }
 
     @Provides @KompiledDir
