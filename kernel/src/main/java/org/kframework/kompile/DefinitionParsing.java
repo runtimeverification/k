@@ -81,7 +81,6 @@ public class DefinitionParsing {
     private final KompileOptions options;
 
     private final KExceptionManager kem;
-    private final FileUtil files;
     private final ParserUtils parser;
     private final boolean cacheParses;
     private final BinaryLoader loader;
@@ -97,7 +96,6 @@ public class DefinitionParsing {
             List<File> lookupDirectories,
             KompileOptions options,
             KExceptionManager kem,
-            FileUtil files,
             ParserUtils parser,
             boolean cacheParses,
             File cacheFile,
@@ -105,7 +103,6 @@ public class DefinitionParsing {
         this.lookupDirectories = lookupDirectories;
         this.options = options;
         this.kem = kem;
-        this.files = files;
         this.parser = parser;
         this.cacheParses = cacheParses;
         this.cacheFile = cacheFile;
@@ -113,7 +110,7 @@ public class DefinitionParsing {
         this.kore = options.isKore();
         this.loader = new BinaryLoader(this.kem);
         this.isStrict = options.strict();
-        this.timing = options.profileRules ? new TimingCollector() : null;
+        this.timing = options.profileRules != null ? new TimingCollector() : null;
         this.sw = sw;
     }
 
@@ -159,9 +156,8 @@ public class DefinitionParsing {
         }
 
         def = resolveNonConfigBubbles(def);
-        if (options.profileRules) {
-            files.saveToTemp("timings.log", timing.getOrderedMessages());
-        }
+        if (options.profileRules != null)
+            FileUtil.save(new File(options.profileRules), timing.getOrderedMessages());
         if (! readOnlyCache) {
             saveCachesAndReportParsingErrors();
         }
@@ -214,9 +210,8 @@ public class DefinitionParsing {
         cachedBubbles.set(0);
         Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles);
         sw.printIntermediate("Parse rules [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " rules]");
-        if (options.profileRules) {
-            files.saveToTemp("timings.log", timing.getOrderedMessages());
-        }
+        if (options.profileRules != null)
+            FileUtil.save(new File(options.profileRules), timing.getOrderedMessages());
         saveCachesAndReportParsingErrors();
         return afterResolvingAllOtherBubbles;
     }

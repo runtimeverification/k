@@ -110,7 +110,7 @@ public class Kompile {
         File cacheFile = kompileOptions.cacheFile != null
                 ? files.resolveWorkingDirectory(kompileOptions.cacheFile) : files.resolveKompiled("cache.bin");
         this.definitionParsing = new DefinitionParsing(
-                lookupDirectories, kompileOptions, kem, files,
+                lookupDirectories, kompileOptions, kem,
                 parser, cacheParses, cacheFile, sw);
         this.sw = sw;
 
