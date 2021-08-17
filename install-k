@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-K_VERSION=5.1.139
+K_VERSION=5.1.140
 
 if [ `id -u` -ne 0 ]; then
   echo "$0: error: This script must be run as root."
