@@ -21,8 +21,8 @@ object Constructors {
   def Definition(mainModule: Module, modules: Set[Module], att: Att) =
     definition.Definition(mainModule, modules, att)
 
-  def Import(module: Module, isPublic: Boolean) =
-    definition.Import(module, isPublic)
+  def Import(module: Module, isPublic: Boolean, tag: Option[Tag]) =
+    definition.Import(module, isPublic, tag)
 
   def Module(name: String, imports: Set[Import], sentences: Set[Sentence], att: attributes.Att) =
     definition.Module(name, imports, sentences, att)

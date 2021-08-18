@@ -90,7 +90,7 @@ object Module {
   }
 }
 
-case class Import(val module: Module, val isPublic: Boolean)
+case class Import(val module: Module, val isPublic: Boolean, val tag: Option[Tag])
   extends ImportToString with OuterKORE with Serializable
 
 case class Module(val name: String, val imports: Set[Import], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
