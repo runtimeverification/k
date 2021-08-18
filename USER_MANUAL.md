@@ -3009,6 +3009,156 @@ Using `rbreak <regex>` you can set breakpoints on multiple functions.
 send `-ccopt -g` to kompile in order to generate debug info symbols.
 
 
+Attributes Reference
+--------------------
+
+### Attribute Syntax Overview
+
+In K, many different syntactic categories accept _attributes_, an optional
+trailing list of keywords or user-defined identifiers. Attribute lists have two
+different syntaxes, depending on where they occur. Each attribute also has a
+type which describes where it may occur.
+
+The first syntax is a square-bracketed (`[]`) list of words. This syntax is
+available for following attribute types:
+
+1.  `module` attributes - may appear immediately after the `module` keyword
+2.  `sort` attributes - may appear immediately after a sort declaration
+3.  `production` attributes - may appear immediately after a BNF production
+    alternative
+4.  `rule` attributes - may appear immediately after a rule
+5.  `context` attributes - may appear immediately after a context or context
+    alias
+6.  `context alias` attributes - may appear immediately after a context alias
+7.  `claim` attributes - may appear immediately after a claim
+
+The second syntax is the XML attribute syntax, i.e., a space delemited list of
+key-and-quoted-value pairs appearing inside the start tag of an XML element:
+`<element key1="value" key2="value2" ... > </element>`. This syntax is
+available for the following attribute types:
+
+1.  `cell` attributes - may appear inside of the cell start tag in
+    configuration declarations
+
+Note that, currently, *unknown* attributes are *ignored*. Essentially, this
+means that there is no such thing as an *invalid* attribute. When we talk about
+the *type* of an attribute, we mean a syntactic category to which an attribute
+can be attached where the attribute has some semantic effect.
+
+### Attribute Index
+
+We now provide an index of available attributes organized alphabetically with a
+brief description of each. Note that the same attribute may appear in the index
+multiple times to indicate its effect in different contexts or with/without
+arguments. A legend describing how to interpret the index follows.
+
+| Name                  | Type  | Backend | Reference                                                                                                                                       |
+| --------------------- | ----- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `alias-rec`           | rule  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `alias`               | rule  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `all-path`            | claim | haskell | [`all-path` and `one-path` attributes to distinguish reachability claims](#all-path-and-one-path-attributes-to-distinguish-reachability-claims) |
+| `anywhere`            | rule  | all     | [`anywhere` rules](#anywhere-rules)                                                                                                             |
+| `applyPriority(_)`    | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `avoid`               | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `binder`              | prod  | all     | No reference yet.                                                                                                                               |
+| `bracket`             | prod  | all     | [Parametric productions and `bracket` attributes](#parametric-productions-and-bracket-attributes)                                               |
+| `color(_)`            | prod  | all     | [`color` and `colors` attributes](#color-and-colors-attributes)                                                                                 |
+| `colors(_)`           | prod  | all     | [`color` and `colors` attributes](#color-and-colors-attributes)                                                                                 |
+| `concrete`            | mod   | llvm    | [`symbolic` and `concrete` attribute](#symbolic-and-concrete-attribute)                                                                         |
+| `concrete(_)`         | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
+| `concrete`            | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
+| `context(_)`          | alias | all     | [Context aliases](#context-aliases)                                                                                                             |
+| `cool`                | rule  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
+| `exit = ""`           | cell  | all     | [`exit` attribute](#exit-attribute)                                                                                                             |
+| `format`              | prod  | all     | [`format` attribute](#format-attribute)                                                                                                         |
+| `freshGenerator`      | prod  | all     | [`freshGenerator` attribute](#freshgenerator-attribute)                                                                                         |
+| `functional`          | rule  | all     | [`function` and `functional` attributes](#function-and-functional-attributes)                                                                   |
+| `function`            | rule  | all     | [`function` and `functional` attributes](#function-and-functional-attributes)                                                                   |
+| `heat`                | rule  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
+| `hook(_)`             | prod  | all     | No reference yet                                                                                                                                |
+| `hybrid(_)`           | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
+| `hybrid`              | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
+| `klabel(_)`           | all   | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
+| `latex(_)`            | prod  | all     | No reference yet                                                                                                                                |
+| `left`                | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `lemma`               | rule  | all     | [`smt-lemma`, `lemma`, and `trusted` attributes](#smt-lemma-lemma-and-trusted-attributes)                                                       |
+| `locations`           | sort  | all     | [Location Information](#location-information)                                                                                                   |
+| `macro-rec`           | rule  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `macro`               | rule  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `memo`                | rule  | haskell | [The `memo` attribute](#the-memo-attribute)                                                                                                     |
+| `multiplicity = "_"`  | cell  | all     | [Collection Cells: `multiplicity` and `type` attributes](#collection-cells-multiplicity-and-type-attributes)                                    |
+| `non-assoc`           | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `one-path`            | claim | all     | [`all-path` and `one-path` attributes to distinguish reachability claims](#all-path-and-one-path-attributes-to-distinguish-reachability-claims) |
+| `owise`               | rule  | all     | [`owise` and `priority` attributes](#owise-and-priority-attributes)                                                                             |
+| `prec(_)`             | token | all     | [`prec` attribute](#prec-attribute)                                                                                                             |
+| `prefer`              | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `priority(_)`         | rule  | all     | [`owise` and `priority` attributes](#owise-and-priority-attributes)                                                                             |
+| `private`             | mod   | all     | [`private` attribute](#private-attribute)                                                                                                       |
+| `private`             | prod  | all     | [`public` and `private` attribute](#public-and-private-attribute)                                                                               |
+| `public`              | mod   | all     | No reference yet.                                                                                                                               |
+| `public`              | prod  | all     | [`public` and `private` attribute](#public-and-private-attribute)                                                                               |
+| `result(_)`           | ctxt  | all     | [`result` attribute](#result-attribute)                                                                                                         |
+| `result(_)`           | rule  | all     | [`result` attribute](#result-attribute)                                                                                                         |
+| `right`               | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `seqstrict(_)`        | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
+| `seqstrict`           | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
+| `simplification`      | rule  | haskell | [`simplification` attribute (Haskell backend)](#simplification-attribute-haskell-backend)                                                       |
+| `simplification(_)`   | rule  | haskell | [`simplification` attribute (Haskell backend)](#simplification-attribute-haskell-backend)                                                       |
+| `smt-hook(_)`         | prod  | haskell | [SMT Translation](#smt-translation)                                                                                                             |
+| `smt-lemma`           | rule  | all     | [`smt-lemma`, `lemma`, and `trusted` attributes](#smt-lemma-lemma-and-trusted-attributes)                                                       |
+| `smtlib(_)`           | prod  | haskell | [SMT Translation](#smt-translation)                                                                                                             |
+| `strict`              | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
+| `strict(_)`           | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
+| `symbolic`            | mod   | haskell | [`symbolic` and `concrete` attribute](#symbolic-and-concrete-attribute)                                                                         |
+| `symbolic`            | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
+| `symbolic(_)`         | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
+| `symbol`              | prod  | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
+| `token`               | prod  | all     | [`token` attribute](#token-attribute)                                                                                                           |
+| `token`               | sort  | all     | [`token` attribute](#token-attribute)                                                                                                           |
+| `trusted`             | claim | haskell | [`smt-lemma`, `lemma`, and `trusted` attributes](#smt-lemma-lemma-and-trusted-attributes)                                                       |
+| `type = "_"`          | cell  | all     | [Collection Cells: `multiplicity` and `type` attributes](#collection-cells-multiplicity-and-type-attributes)                                    |
+| `unboundVariables(_)` | rule  | all     | [The `unboundVariables` attribute](#the-unboundvariables-attribute)                                                                             |
+| `unused`              | prod  | all     | [`unused` attribute](#unused-attribute)                                                                                                         |
+
+### Internal Attribute Index
+
+Some attributes should not generally appear in user code, except in some
+unusual or complex examples. Such attributes are typically generated by the
+compiler and used internally. We list these attributes below as a reference for
+interested readers:
+
+| Name       | Type | Backend | Reference                                                                             |
+| ---------- | ---- | ------- | ------------------------------------------------------------------------------------- |
+| `assoc`    | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
+| `comm`     | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
+| `idem`     | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
+| `unit`     | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
+| `userList` | prod | all     | No reference yet                                                                      |
+
+### Index Legend
+
+-   `Name` - the attribute's name (optionally followed by an underscore `_` to indicate the attribute takes arguments)
+-   `Type` - the syntactic categories where this attribute is *not* ignored;
+    the possible values are the types mentioned above or shorthands:
+
+    1.  `all` - short for any type except `cell`
+    2.  `mod` - short for `module`
+    3.  `sort`
+    4.  `prod` - short for `production`
+    5.  `rule`
+    6.  `ctxt` - short for `context` or `context alias`
+    7.  `claim`
+    8.  `cell`
+
+-   `Backend` - the backends that do *not* ignore this attribute; possible values:
+
+    1.  `all` - all backends
+    2.  `llvm` - the LLVM backend
+    3.  `haskell` - the Haskell backend
+
+-   `Effect` - the attribute's effect (when it applies)
+
+
 Pending Documentation
 ---------------------
 
