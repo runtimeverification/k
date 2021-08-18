@@ -19,7 +19,7 @@ trait ModuleToString {
 
 trait ImportToString {
   self: Import =>
-  override def toString = "imports " + (if (isPublic) "public " else "private ") + module.name
+  override def toString = "imports " + (if (isPublic) "public " else "private ") + module.name + (if (tag.isDefined) { "." + tag.get.name } else "")
 }
 
 trait DefinitionToString {
