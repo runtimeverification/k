@@ -45,9 +45,11 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.kframework.Collections.*;
+import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
 /**
@@ -147,7 +149,7 @@ public class JsonParser {
 
         JsonArray jsonimports = data.getJsonArray("imports");
         Set<FlatImport> imports = new HashSet<>();
-        jsonimports.getValuesAs(JsonObject.class).forEach(i -> imports.add(FlatImport.apply(i.getString("name"), i.getBoolean("public"), Att.empty())));
+        jsonimports.getValuesAs(JsonObject.class).forEach(i -> imports.add(FlatImport.apply(i.getString("name"), i.getBoolean("public"), immutable(Optional.ofNullable(i.getString("tag")).map(s -> Tag(s))), Att.empty())));
 
         JsonArray sentences = data.getJsonArray("localSentences");
         Set<Sentence> localSentences = new HashSet<>();
