@@ -322,6 +322,7 @@ command `k match MODULE.label subject` for a particular top-level rule label.
 For example, with the `baz` rule above, we get the following output:
 
 ```
+(gdb) k match LESSON-19-D.baz subject
 Subject:
 baz2 ( )
 does not match pattern:
