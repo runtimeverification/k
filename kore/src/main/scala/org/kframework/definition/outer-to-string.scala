@@ -7,7 +7,7 @@ import collection._
 trait ModuleToString {
   self: Module =>
   override def toString = "module " + name + att.postfixString + "\n" +
-    prettyPrintSet(fullImports map {"imports " + _.name}) +
+    prettyPrintSet(imports) +
     prettyPrintSet(localSentences) +
     "endmodule"
 
@@ -15,6 +15,11 @@ trait ModuleToString {
     s.toList.map(_.toString).sorted.reverse.map("  " + _).mkString("\n") +
       (if (s.size > 0) "\n" else "")
   }
+}
+
+trait ImportToString {
+  self: Import =>
+  override def toString = "imports " + (if (isPublic) "public " else "private ") + module.name
 }
 
 trait DefinitionToString {

@@ -91,6 +91,7 @@ object Module {
 }
 
 case class Import(val module: Module, val isPublic: Boolean)
+  extends ImportToString with OuterKORE with Serializable
 
 case class Module(val name: String, val imports: Set[Import], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
   extends ModuleToString with OuterKORE with Sorting with Serializable with AttValue {
