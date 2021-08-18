@@ -23,7 +23,7 @@ case $ID in
 	debian)
 		case $VERSION_ID in
 			10)
-				CODENAME=buster
+				CODENAME=bullseye
 				;;
 			*)
 				echo "Unsupported Debian version, try building from source."
