@@ -3,6 +3,7 @@
 module ITE-BUG-SYNTAX
     imports INT
     imports K-EQUAL
+    imports BOOL
 
     syntax Pgm ::= Instr
     syntax Instr ::= "JUMPI" Int Int

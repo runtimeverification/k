@@ -5,6 +5,7 @@ endmodule
 module CHECKMINTLITERAL
   imports CHECKMINTLITERAL-SYNTAX
   imports MINT
+  imports INT
 
   syntax MInt{6}
   syntax KItem ::= foo(MInt{6})

@@ -170,6 +170,7 @@ For example, here is an example that makes use of projection casts:
 ```k
 module LESSON-11-D
   imports INT
+  imports BOOL
 
   syntax Exp ::= Int | Bool | Exp "+" Exp | Exp "&&" Exp
 

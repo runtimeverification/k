@@ -29,6 +29,7 @@ endmodule
 module A
 
 imports A-CONFIG
+imports BOOL
 
 /*
   i = 0
