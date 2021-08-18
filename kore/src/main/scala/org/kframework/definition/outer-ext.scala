@@ -24,7 +24,7 @@ case class Bubble(sentenceType: String, contents: String, att: Att = Att.empty) 
   override def withAtt(att: Att) = Bubble(sentenceType, contents, att)
 }
 
-case class FlatImport(name: String, isPublic: Boolean, att: Att = Att.empty) extends HasLocation {
+case class FlatImport(name: String, isPublic: Boolean, tag: Option[Tag], att: Att = Att.empty) extends HasLocation {
   override def location(): Optional[Location] = att.getOptional(classOf[Location])
   override def source(): Optional[Source] = att.getOptional(classOf[Source])
 }
