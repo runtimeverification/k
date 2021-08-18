@@ -316,8 +316,9 @@ such cases are not always obvious. You might look at a rule and not immediately
 spot why it didn't apply on a particular term. For this reason, it can be
 useful to get the debugger to provide a log about how it tried to match that
 term. You can do this with the `k match` command. If you are stopped after
-having run `k start` or `k step`, you can obtain this log by running the
-command `k match MODULE.label subject` for a particular top-level rule label.
+having run `k start` or `k step`, you can obtain this log for any rule after
+any step by running the command `k match MODULE.label subject` for a particular
+top-level rule label.
 
 For example, with the `baz` rule above, we get the following output:
 
