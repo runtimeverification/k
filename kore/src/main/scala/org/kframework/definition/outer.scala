@@ -125,7 +125,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
   lazy val signature: Module = {
     val f = ModuleTransformer.from(m => Module(m.name, m.imports.filter(_.isPublic), m.publicSentences, m.att), "compute module signature")
-    Module(name, imports.map(i => Import(f(i.module), i.isPublic)), localSentences, att)
+    Module(name, imports.map(i => Import(f(i.module), i.isPublic, i.tag)), localSentences, att)
   }
 
   lazy val functions: Set[KLabel] = productions.filter(_.att.contains(Att.FUNCTION)).map(_.klabel.get.head)
@@ -361,7 +361,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
   override lazy val hashCode: Int = name.hashCode
 
-  def flattened()   : FlatModule                = new FlatModule(name, imports.map(i => FlatImport(i.module.name, i.isPublic, Att.empty)), localSentences, att)
+  def flattened()   : FlatModule                = new FlatModule(name, imports.map(i => FlatImport(i.module.name, i.isPublic, i.tag, Att.empty)), localSentences, att)
   def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ fullImports.map(m => m.flatModules._2).flatten)
 }
 

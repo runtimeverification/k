@@ -60,7 +60,7 @@ object FlatModule {
           // if can't find the Module in memoization, build a new one
           , toModuleRec(allModules.find(f => f.name.equals(i.name))
               .getOrElse(throw KEMException.compilerError("Could not find module: " + i.name, i))
-            , visitedModules :+ m)), i.isPublic)
+            , visitedModules :+ m)), i.isPublic, i.tag)
         val newImports = m.imports.map(f)
         val newM = new Module(m.name, newImports, m.localSentences, m.att)
         newM.checkSorts()
