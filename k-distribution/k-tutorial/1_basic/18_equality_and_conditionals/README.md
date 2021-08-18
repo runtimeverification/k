@@ -32,6 +32,7 @@ usage (`lesson-18.k`):
 module LESSON-18
   imports INT
   imports BOOL
+  imports K-EQUAL
 
   syntax Exp ::= Int | Bool | "if" "(" Exp ")" Exp "else" Exp [strict(1)]
 

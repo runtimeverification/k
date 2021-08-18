@@ -87,6 +87,7 @@ For example, consider the following module:
 ```k
 module LESSON-17-B
   imports INT
+  imports BOOL
   imports ID-SYNTAX
 
   syntax Stmt ::= Id "=" Exp ";" [strict(2)]

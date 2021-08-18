@@ -11,6 +11,7 @@ module STRATEGIES
     imports STRATEGY
     imports STRATEGY-ABSTRACT
     imports RULE-TAG-SYNTAX
+    imports LIST
 
     configuration
       <wrapper>
