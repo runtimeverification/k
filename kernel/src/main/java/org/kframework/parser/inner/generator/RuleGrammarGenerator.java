@@ -10,6 +10,7 @@ import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.GenerateSortPredicateSyntax;
 import org.kframework.compile.GenerateSortProjections;
 import org.kframework.definition.Definition;
+import org.kframework.definition.Import;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.NonTerminal;
@@ -119,8 +120,7 @@ public class RuleGrammarGenerator {
     private Module getGrammar(Module mod, String name) {
         // import RULE-CELLS in order to parse cells specific to rules
         Module newM = new Module( mod.name() + "-" + name
-                                , (scala.collection.Set<Module>) mod.publicImports().$bar(Set(baseK.getModule(K).get(), baseK.getModule(name).get(), baseK.getModule(DEFAULT_LAYOUT).get()))
-                                , mod.privateImports()
+                                , (scala.collection.Set<Import>) mod.imports().$bar(Set(Import(baseK.getModule(K).get(), true), Import(baseK.getModule(name).get(), true), Import(baseK.getModule(DEFAULT_LAYOUT).get(), true)))
                                 , mod.localSentences()
                                 , mod.att()
                                 );
@@ -149,32 +149,31 @@ public class RuleGrammarGenerator {
             return mod;
         } else {
             Module newMod = ModuleTransformer.from(oldMod -> {
-                UnaryOperator<Module> f = _import -> {
-                    Option<Module> programParsing = baseK.getModule(_import.name() + "-PROGRAM-PARSING");
+                UnaryOperator<Import> f = _import -> {
+                    Option<Module> programParsing = baseK.getModule(_import.module().name() + "-PROGRAM-PARSING");
                     if (programParsing.isDefined()) {
-                        return programParsing.get();
+                        return Import(programParsing.get(), _import.isPublic());
                     }
                     return _import;
                 };
-                Set<Module> publicImports = stream(oldMod.publicImports()).map(f).collect(Collectors.toSet());
-                Set<Module> privateImports = stream(oldMod.privateImports()).map(f).collect(Collectors.toSet());
-                return Module.apply(oldMod.name(), immutable(publicImports), immutable(privateImports), oldMod.localSentences(), oldMod.att());
+                Set<Import> imports = stream(oldMod.imports()).map(f).collect(Collectors.toSet());
+                return Module.apply(oldMod.name(), immutable(imports), oldMod.localSentences(), oldMod.att());
             }, "apply program parsing modules").apply(mod);
 
-            Set<Module> modules = new HashSet<Module>();
-            for (Module m : iterable(newMod.publicImports())) {
+            Set<Import> modules = new HashSet<Import>();
+            for (Import m : iterable(newMod.imports())) {
               modules.add(m);
             }
 
             // import PROGRAM-LISTS so user lists are modified to parse programs
-            modules.add(baseK.getModule(PROGRAM_LISTS).get());
+            modules.add(Import(baseK.getModule(PROGRAM_LISTS).get(), true));
 
             // check if `#Layout` has been declared, import `DEFAULT-LAYOUT` if not
             if (! mod.allSorts().contains(Sorts.Layout())) {
-                modules.add(baseK.getModule(DEFAULT_LAYOUT).get());
+                modules.add(Import(baseK.getModule(DEFAULT_LAYOUT).get(), true));
             }
 
-            return Module.apply(mod.name() + "-PROGRAM-GRAMMAR", immutable(modules), newMod.privateImports(), newMod.localSentences(), newMod.att());
+            return Module.apply(mod.name() + "-PROGRAM-GRAMMAR", immutable(modules), newMod.localSentences(), newMod.att());
         }
     }
 
@@ -238,7 +237,7 @@ public class RuleGrammarGenerator {
         if (isBison) {
           mod = ModuleTransformer.from(m -> {
             if (m.att().contains("not-lr1")) {
-              return Module(m.name(), m.publicImports(), m.privateImports(), Set(), m.att());
+              return Module(m.name(), m.imports(), Set(), m.att());
             }
             return m;
           }, "strip not-lr1 modules from bison grammar").apply(mod);
@@ -488,9 +487,9 @@ public class RuleGrammarGenerator {
         if (!notLrModules.isEmpty()) {
           att = att.add("not-lr1", notLrModules.toString());
         }
-        Module extensionM = new Module(mod.name() + "-EXTENSION", Set(origMod), Set(), immutable(extensionProds), att);
-        Module disambM = new Module(mod.name() + "-DISAMB", Set(), Set(), immutable(disambProds), att);
-        Module parseM = new Module(mod.name() + "-PARSER", Set(), Set(), immutable(parseProds), att);
+        Module extensionM = new Module(mod.name() + "-EXTENSION", Set(Import(origMod, true)), immutable(extensionProds), att);
+        Module disambM = new Module(mod.name() + "-DISAMB", Set(), immutable(disambProds), att);
+        Module parseM = new Module(mod.name() + "-PARSER", Set(), immutable(parseProds), att);
         parseM.subsorts();
         return Tuple3.apply(extensionM, disambM, parseM);
     }

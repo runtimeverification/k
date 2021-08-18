@@ -97,7 +97,7 @@ public class KSyntax2Bison {
         sentences.add(s);
       }
     }
-    module = Module(module.name(), module.publicImports(), module.privateImports(), immutable(sentences), module.att());
+    module = Module(module.name(), module.imports(), immutable(sentences), module.att());
     Deque<Tuple2<Sort, Set<Tag>>> worklist = new ArrayDeque<>(nts);
     worklist.addAll(nts);
     while (!worklist.isEmpty()) {
@@ -113,7 +113,7 @@ public class KSyntax2Bison {
         }
       }
     }
-    return Module(module.name(), module.publicImports(), module.privateImports(), immutable(sentences), module.att());
+    return Module(module.name(), module.imports(), immutable(sentences), module.att());
   }
 
   public static void writeParser(Module module, Module disambModule, Scanner scanner, Sort start, File path, boolean glr, long stackDepth, KExceptionManager kem) {

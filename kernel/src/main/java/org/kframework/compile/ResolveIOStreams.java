@@ -5,6 +5,7 @@ import org.kframework.attributes.Location;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Definition;
+import org.kframework.definition.Import;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
@@ -81,10 +82,10 @@ public class ResolveIOStreams {
                     sentences.addAll(getStreamModuleSentences(p));
                 }
             }
-            return Module(m.name(), (Set<Module>)m.publicImports().
-                            $bar(Set(definition.getModule("K-IO").get())).
-                            $bar(Set(definition.getModule("K-REFLECTION").get())),
-                    m.privateImports(), immutable(sentences), m.att());
+            return Module(m.name(), (Set<Import>)m.imports().
+                            $bar(Set(Import(definition.getModule("K-IO").get(), true))).
+                            $bar(Set(Import(definition.getModule("K-REFLECTION").get(), true))),
+                    immutable(sentences), m.att());
         }
     }
 

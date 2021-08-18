@@ -252,6 +252,6 @@ public class ResolveStrict {
                 .filter(s -> s instanceof Production)
                 .map(s -> (Production) s)
                 .filter(p -> p.att().contains("strict") || p.att().contains("seqstrict")).collect(Collectors.toSet()));
-        return Module(input.name(), input.publicImports(), input.privateImports(), (scala.collection.Set<Sentence>) stream(input.localSentences()).filter(s -> !(s instanceof ContextAlias)).collect(Collections.toSet()).$bar(immutable(contextsToAdd)), input.att());
+        return Module(input.name(), input.imports(), (scala.collection.Set<Sentence>) stream(input.localSentences()).filter(s -> !(s instanceof ContextAlias)).collect(Collections.toSet()).$bar(immutable(contextsToAdd)), input.att());
     }
 }

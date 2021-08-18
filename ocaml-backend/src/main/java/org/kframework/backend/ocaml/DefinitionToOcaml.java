@@ -265,7 +265,7 @@ public class DefinitionToOcaml implements Serializable {
         Function1<Module, Module> pipeline = removePolyKLabels
                 .andThen(preprocessKLabelPredicates)
                 .andThen(splitThreadCell)
-                .andThen(mod -> Module(mod.name(), mod.publicImports(), mod.privateImports(),
+                .andThen(mod -> Module(mod.name(), mod.imports(),
                         Stream.concat(stream(mod.localSentences()),
                                 Stream.<Sentence>of(thread, bottom, threadLocal)).collect(org.kframework.Collections.toSet()), mod.att()))
                 .andThen(convertLookups)
