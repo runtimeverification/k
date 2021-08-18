@@ -362,7 +362,7 @@ pipeline {
                       sh '${WORKSPACE}/package/macos/brew-install-bottle ${PACKAGE} ${VERSION}'
                     }
                     sh '''
-                      brew install opam
+                      brew install opam pkg-config
                       k-configure-opam
                       eval $(opam config env)
                       cp -R /usr/local/share/kframework/pl-tutorial ~

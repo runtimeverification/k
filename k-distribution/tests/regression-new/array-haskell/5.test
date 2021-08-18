@@ -1,1 +1,1 @@
-arr ( ListItem( 1 ), 0, 0 ) [ -1 ]
+makeArray(1, 0) [0 <- 1] [ -1 ]

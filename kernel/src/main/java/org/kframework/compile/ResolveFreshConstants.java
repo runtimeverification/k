@@ -7,6 +7,7 @@ import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Context;
 import org.kframework.definition.Definition;
+import org.kframework.definition.Import;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
@@ -275,7 +276,7 @@ public class ResolveFreshConstants {
         if (sentences.equals(m.localSentences())) {
             return m;
         }
-        return Module(m.name(), kore ? m.publicImports() : add(def.getModule("K-REFLECTION").get(), m.publicImports()), m.privateImports(), sentences, m.att());
+        return Module(m.name(), kore ? m.imports() : (Set<Import>) m.imports().$bar(Set(Import(def.getModule("K-REFLECTION").get(), true))), sentences, m.att());
     }
 }
 

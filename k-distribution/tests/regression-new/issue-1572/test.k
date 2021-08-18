@@ -1,5 +1,5 @@
 module TEST-SYNTAX
-  imports BOOL
+  imports ML-SYNTAX
 
 endmodule
 

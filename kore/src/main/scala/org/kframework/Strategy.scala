@@ -22,7 +22,7 @@ object Strategy {
         if (module.name != mainModuleName || !module.importedModuleNames.contains("STRATEGY")) {
           module
         } else {
-          Module(module.name, module.publicImports, module.privateImports, module.localSentences + Rule(
+          Module(module.name, module.imports, module.localSentences + Rule(
             KORE.KApply(KLabels.STRATEGY_CELL,
               KORE.KApply(KLabels.NO_DOTS),
               KORE.KRewrite(

@@ -259,6 +259,6 @@ public class ResolveFun {
         Set<Sentence> newSentences = stream(m.localSentences()).map(this::resolve).collect(Collectors.toSet());
         newSentences.addAll(funProds);
         newSentences.addAll(funRules);
-        return Module(m.name(), m.publicImports(), m.privateImports(), immutable(newSentences), m.att());
+        return Module(m.name(), m.imports(), immutable(newSentences), m.att());
     }
 }

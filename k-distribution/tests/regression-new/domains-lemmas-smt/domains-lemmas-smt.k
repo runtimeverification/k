@@ -1,7 +1,8 @@
 requires "domains.md"
 
 module DOMAINS-LEMMAS-SMT
-    import INT-SYMBOLIC
+    imports INT-SYMBOLIC
+    imports BOOL
 
     configuration <k> $PGM:Pgm </k>
 
