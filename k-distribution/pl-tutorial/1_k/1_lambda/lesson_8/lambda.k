@@ -32,6 +32,7 @@ endmodule
 module LAMBDA
   imports LAMBDA-SYNTAX
   imports SUBSTITUTION
+  imports DOMAINS
 
   syntax KResult ::= Val
 

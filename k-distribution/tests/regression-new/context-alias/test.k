@@ -2,6 +2,7 @@ module TEST
   imports INT
   imports ID
   imports MAP
+  imports BOOL
 
 configuration <k> $PGM:Stmt </k> <shouldHeat> false </shouldHeat> <state> .Map </state> <stuff> false </stuff>
 

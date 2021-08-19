@@ -1,5 +1,6 @@
 module INVALIDSORTPREDICATE
   imports INT
+  imports BOOL
 
   syntax Exp
 

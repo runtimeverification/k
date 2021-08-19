@@ -5,6 +5,7 @@ requires "domains.md"
 module A
 
   imports INT
+  imports BOOL
   imports K-REFLECTION
 
   configuration <T>

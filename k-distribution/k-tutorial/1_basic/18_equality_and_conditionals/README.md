@@ -32,6 +32,7 @@ usage (`lesson-18.k`):
 module LESSON-18
   imports INT
   imports BOOL
+  imports K-EQUAL
 
   syntax Exp ::= Int | Bool | "if" "(" Exp ")" Exp "else" Exp [strict(1)]
 
@@ -68,3 +69,8 @@ unequal.
 2. Modify your solution to Lesson 1.16, Problem 1 and introduce an `if`
 `Stmt` to the syntax of the language, then implement it using the `#if` symbol.
 Make sure to write tests for the resulting interpreter.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.19: Debugging with GDB](../19_debugging/README.md).

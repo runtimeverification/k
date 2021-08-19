@@ -243,7 +243,7 @@ public class Kompile {
 
     private static Module filterStreamModules(Module input) {
         if (input.name().equals("STDIN-STREAM") || input.name().equals("STDOUT-STREAM")) {
-            return Module(input.name(), Set(), Set(), Set(), input.att());
+            return Module(input.name(), Set(), Set(), input.att());
         }
         return input;
     }
@@ -255,10 +255,9 @@ public class Kompile {
     }
 
     private static Module excludeModulesByTag(Set<String> excludedModuleTags, Module mod) {
-        Predicate<Module> f = _import -> excludedModuleTags.stream().noneMatch(tag -> _import.att().contains(tag));
-        Set<Module> newPublicImports = stream(mod.publicImports()).filter(f).collect(Collectors.toSet());
-        Set<Module> newPrivateImports = stream(mod.privateImports()).filter(f).collect(Collectors.toSet());
-        return Module(mod.name(), immutable(newPublicImports), immutable(newPrivateImports), mod.localSentences(), mod.att());
+        Predicate<Import> f = _import -> excludedModuleTags.stream().noneMatch(tag -> _import.module().att().contains(tag));
+        Set<Import> newImports = stream(mod.imports()).filter(f).collect(Collectors.toSet());
+        return Module(mod.name(), immutable(newImports), mod.localSentences(), mod.att());
     }
 
     public static Function1<Definition, Definition> excludeModulesByTag(Set<String> excludedModuleTags) {
@@ -343,7 +342,7 @@ public class Kompile {
         if (prods.isEmpty()) {
             return module;
         } else {
-            return Module(module.name(), module.publicImports(), module.privateImports(), Stream.concat(stream(module.localSentences()), prods.stream())
+            return Module(module.name(), module.imports(), Stream.concat(stream(module.localSentences()), prods.stream())
                     .collect(org.kframework.Collections.toSet()), module.att());
         }
     }
@@ -481,10 +480,10 @@ public class Kompile {
         java.util.Set<Module> allModules = mutable(d.modules());
 
         Module languageParsingModule = Constructors.Module("LANGUAGE-PARSING",
-                Set(d.mainModule(),
-                        d.getModule(d.att().get(Att.SYNTAX_MODULE())).get(),
-                        d.getModule("K-TERM").get(),
-                        d.getModule(RuleGrammarGenerator.ID_PROGRAM_PARSING).get()), Set(), Set(), Att());
+                Set(Import(d.mainModule(), true),
+                        Import(d.getModule(d.att().get(Att.SYNTAX_MODULE())).get(), true),
+                        Import(d.getModule("K-TERM").get(), true),
+                        Import(d.getModule(RuleGrammarGenerator.ID_PROGRAM_PARSING).get(), true)), Set(), Att());
         allModules.add(languageParsingModule);
         return Constructors.Definition(d.mainModule(), immutable(allModules), d.att());
     }
