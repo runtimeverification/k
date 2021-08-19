@@ -3,6 +3,7 @@ package org.kframework.backend.kore;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
+import org.kframework.attributes.Att;
 import org.kframework.compile.AbstractBackend;
 import org.kframework.compile.AddCoolLikeAtt;
 import org.kframework.compile.AddImplicitComputationCell;
@@ -35,6 +36,7 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
+import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
@@ -148,6 +150,9 @@ public class KoreBackend extends AbstractBackend {
         DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
         Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, true)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
+        Function1<Definition, Definition> markExtraConcreteRules = d -> DefinitionTransformer.fromSentenceTransformer((m, s) ->
+                s instanceof Rule && kompileOptions.extraConcreteRuleLabels.contains(s.att().getOption(Att.LABEL()).getOrElse(() -> null)) ?
+                        Rule.apply(((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att().add(Att.CONCRETE())) : s, "mark extra concrete rules").apply(d);
 
         return def -> resolveIO
                 .andThen(resolveFun)
@@ -176,6 +181,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(Kompile::addSemanticsModule)
                 .andThen(resolveConfigVar)
                 .andThen(addCoolLikeAtt)
+                .andThen(markExtraConcreteRules)
                 .apply(def);
     }
 
