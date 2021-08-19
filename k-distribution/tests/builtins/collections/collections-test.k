@@ -3,6 +3,7 @@ requires "domains.md"
 
 module COLLECTIONS-TEST-SYNTAX
     imports COLLECTIONS
+    imports INT
 
     syntax Program ::= Set | List
  // -----------------------------

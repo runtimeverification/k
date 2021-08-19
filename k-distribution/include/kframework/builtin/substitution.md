@@ -46,14 +46,17 @@ endmodule
 
 module KVAR-COMMON
   imports KVAR-SYNTAX
-  imports STRING
+  imports private STRING
 
   syntax KVar ::= String2KVar (String) [function, functional, hook(STRING.string2token)]
-  syntax KVar ::= freshKVar(Int)    [freshGenerator, function, functional]
+  syntax KVar ::= freshKVar(Int)    [freshGenerator, function, functional, private]
+
+  rule freshKVar(I:Int) => String2KVar("_" +String Int2String(I))
 endmodule
 
 module KVAR-SYMBOLIC [symbolic, kast]
   imports KVAR-COMMON
+  imports private STRING
 
   syntax KItem  ::= "#parseToken"  "(" String "," String ")"  [function, klabel(#parseKVar), hook(STRING.parseToken)]
   rule String2KVar(S:String) => {#parseToken("KVar", S)}:>KVar
@@ -62,8 +65,6 @@ endmodule
 module KVAR
   imports KVAR-COMMON
   imports KVAR-SYMBOLIC
-
-  rule freshKVar(I:Int) => String2KVar("_" +String Int2String(I))
 endmodule
 ```
 
@@ -97,7 +98,7 @@ for example due to `krun --depth`.
 
 ```k
 module SUBSTITUTION
-  imports MAP
+  imports private MAP
   imports KVAR
 
   syntax {Sort} Sort ::= Sort "[" KItem "/" KItem "]"  [function, hook(SUBSTITUTION.substOne), impure]

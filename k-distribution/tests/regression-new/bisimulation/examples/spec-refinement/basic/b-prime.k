@@ -31,6 +31,7 @@ endmodule
 module B
 
 imports B-CONFIG
+imports BOOL
 
 /*
   i = 0

@@ -58,7 +58,7 @@ public class ResolveContexts {
         if (!rulesToAdd.isEmpty()) {
             rulesToAdd.add(SyntaxSort(Seq(), Sorts.K()));
         }
-        return Module(input.name(), input.publicImports(), input.privateImports(), (scala.collection.Set<Sentence>) stream(input.localSentences()).filter(s -> !(s instanceof Context)).collect(Collections.toSet()).$bar(immutable(rulesToAdd)), input.att());
+        return Module(input.name(), input.imports(), (scala.collection.Set<Sentence>) stream(input.localSentences()).filter(s -> !(s instanceof Context)).collect(Collections.toSet()).$bar(immutable(rulesToAdd)), input.att());
     }
 
     private Set<KLabel> klabels;

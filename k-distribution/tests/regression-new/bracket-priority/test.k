@@ -1,5 +1,6 @@
 module TEST
   imports ID
+  imports INT
 
 syntax Exp ::= "(" Name ExpList ")"
 syntax Exp ::= Int
