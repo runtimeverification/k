@@ -14,9 +14,4 @@ syntax Pgm ::= List{Cmd,""}
 
 syntax Rat ::= "(" Rat ")" [bracket]
 
-syntax Rat ::= "<" Int "," Int ">"
-
-// to distinghish constructor terms from unevaluated function terms
-rule < A , B >Rat ; => < A , B > ; [anywhere]
-
 endmodule

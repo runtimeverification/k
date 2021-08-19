@@ -24,6 +24,7 @@ module DEPOSIT
 imports DEPOSIT-SYNTAX
 imports INT
 imports IMAP
+imports BOOL
 
 /*
  * zerohashes: int[TREE_HEIGHT] = \{0\} # zero array

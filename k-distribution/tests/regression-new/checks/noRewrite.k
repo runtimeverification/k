@@ -1,4 +1,5 @@
 module NOREWRITE
+  imports INT
 
 rule 0
 

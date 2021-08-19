@@ -189,17 +189,17 @@ pipeline {
                 }
               }
             }
-            stage('Build and Package on Debian Buster') {
+            stage('Build and Package on Debian Bullseye') {
               when {
                 branch 'release'
                 beforeAgent true
               }
               stages {
-                stage('Build on Debian Buster') {
+                stage('Build on Debian Bullseye') {
                   agent {
                     dockerfile {
                       filename 'package/debian/Dockerfile'
-                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:buster --build-arg LLVM_VERSION=8'
+                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:bullseye --build-arg LLVM_VERSION=11'
                       reuseNode true
                     }
                   }
@@ -214,7 +214,7 @@ pipeline {
                             dpkg-buildpackage
                           '''
                         }
-                        stash name: 'buster', includes: "kframework_${env.VERSION}_amd64.deb"
+                        stash name: 'bullseye', includes: "kframework_${env.VERSION}_amd64.deb"
                       }
                     }
                   }
@@ -222,16 +222,16 @@ pipeline {
                 stage('Test Debian Package') {
                   agent {
                     docker {
-                      image 'debian:buster'
+                      image 'debian:bullseye'
                       args '-u 0'
                       reuseNode true
                     }
                   }
                   options { skipDefaultCheckout() }
                   steps {
-                    unstash 'buster'
+                    unstash 'bullseye'
                     sh '''
-                      echo "deb http://deb.debian.org/debian buster-backports main" > /etc/apt/sources.list.d/buster-backports.list
+                      # echo "deb http://deb.debian.org/debian bullseye-backports main" > /etc/apt/sources.list.d/bullseye-backports.list
                       src/main/scripts/test-in-container-debian
                     '''
                   }
@@ -247,7 +247,7 @@ pipeline {
                 failure {
                   slackSend color: '#cb2431'                                             \
                           , channel: '#k'                                                \
-                          , message: "Debian Buster Packaging Failed: ${env.BUILD_URL}"
+                          , message: "Debian Bullseye Packaging Failed: ${env.BUILD_URL}"
                 }
               }
             }
@@ -362,7 +362,7 @@ pipeline {
                       sh '${WORKSPACE}/package/macos/brew-install-bottle ${PACKAGE} ${VERSION}'
                     }
                     sh '''
-                      brew install opam
+                      brew install opam pkg-config
                       k-configure-opam
                       eval $(opam config env)
                       cp -R /usr/local/share/kframework/pl-tutorial ~
@@ -500,7 +500,7 @@ pipeline {
         unstash 'src'
         dir('bionic') { unstash 'bionic' }
         dir('focal')  { unstash 'focal' }
-        dir('buster') { unstash 'buster' }
+        dir('bullseye') { unstash 'bullseye' }
         dir('arch')   { unstash 'arch'   }
         dir('big_sur') { unstash 'big_sur' }
         sshagent(['rv-jenkins-github']) {
@@ -525,7 +525,7 @@ pipeline {
             mv ../kframework-${VERSION}-src.tar.gz                      kframework-${VERSION}-src.tar.gz
             mv ../bionic/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_bionic.deb
             mv ../focal/kframework_${VERSION}_amd64.deb                 kframework_${VERSION}_amd64_focal.deb
-            mv ../buster/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_buster.deb
+            mv ../bullseye/kframework_${VERSION}_amd64.deb              kframework_${VERSION}_amd64_bullseye.deb
             mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst   kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
             mv $LOCAL_BOTTLE_NAME                                       $BOTTLE_NAME
 
@@ -536,7 +536,7 @@ pipeline {
                 --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                       \
                 --attach kframework_${VERSION}_amd64_bionic.deb'#Ubuntu Bionic (18.04) Package' \
                 --attach kframework_${VERSION}_amd64_focal.deb'#Ubuntu Focal (20.04) Package'   \
-                --attach kframework_${VERSION}_amd64_buster.deb'#Debian Buster (10) Package'    \
+                --attach kframework_${VERSION}_amd64_bullseye.deb'#Debian Bullseye (11) Package'    \
                 --attach kframework-git-${VERSION}-1-x86_64.pkg.tar.zst'#Arch Package'          \
                 --attach $BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                \
                 --file release.md "${K_RELEASE_TAG}"

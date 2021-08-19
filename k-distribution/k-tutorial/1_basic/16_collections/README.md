@@ -192,6 +192,7 @@ endmodule
 module LESSON-16-B
   imports LESSON-16-B-SYNTAX
   imports BOOL
+  imports LIST
 
   configuration <T>
                   <k> $PGM:Pgm ~> main () </k>
@@ -305,6 +306,7 @@ endmodule
 module LESSON-16-C
   imports LESSON-16-C-SYNTAX
   imports BOOL
+  imports SET
 
   configuration <T>
                   <k> $PGM:Pgm </k>

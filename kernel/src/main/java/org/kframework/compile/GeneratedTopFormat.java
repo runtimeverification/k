@@ -51,7 +51,7 @@ public class GeneratedTopFormat {
 
     public static Module resolve(Module m) {
         Set<Sentence> newSentences = JavaConverters.asScalaSet(stream(m.localSentences()).map(s -> s instanceof Production ? resolve((Production) s) : s).collect(Collectors.toSet()));
-        return Module(m.name(), m.publicImports(), m.privateImports(), newSentences, m.att());
+        return Module(m.name(), m.imports(), newSentences, m.att());
     }
 
 }

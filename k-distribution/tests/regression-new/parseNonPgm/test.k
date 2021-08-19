@@ -21,6 +21,7 @@ module TEST
   imports MODE
   imports INT
   imports K-IO
+  imports STRING
 
   configuration <k> $PGM:Pgm </k> <mode parser="MODE, MODE"> $MODE:Mode </mode>
 
