@@ -39,6 +39,7 @@ public class KRunExecutionMode implements ExecutionMode {
 
     @Override
     public Tuple2<K, Integer> execute(KRun.InitialConfiguration config, Function<Definition, Rewriter> rewriterGenerator, CompiledDefinition compiledDefinition) {
+        compiledDefinition.kompileOptions.global = kRunOptions.global;
         Rewriter rewriter = rewriterGenerator.apply(compiledDefinition.kompiledDefinition);
         K k = config.theConfig;
         Rule pattern = null, parsedPattern = null;
