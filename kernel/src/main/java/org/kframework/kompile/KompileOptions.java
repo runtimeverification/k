@@ -4,26 +4,26 @@ package org.kframework.kompile;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import org.apache.commons.io.FilenameUtils;
-
 import org.kframework.backend.Backends;
 import org.kframework.main.GlobalOptions;
-import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
-import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.StringListConverter;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 @RequestScoped
 public class KompileOptions implements Serializable {
 
+    public KompileOptions updateGlobalOptions(GlobalOptions global) {
+        this.global = global;
+        return this;
+    }
 
     /**
      * WARNING: this field will be non-null in kompile tool, but null when KompileOption is deserialized,
@@ -73,9 +73,6 @@ public class KompileOptions implements Serializable {
 
     @Parameter(names="--coverage", description="Generate coverage data when executing semantics.")
     public boolean coverage;
-
-    @Parameter(names="--profile-rule-parsing", description="Generate time in seconds to parse each rule in the semantics.")
-    public String profileRules;
 
     @Parameter(names="--hook-namespaces", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of namespaces to include in the hooks defined in the definition")
     public List<String> hookNamespaces = Collections.emptyList();

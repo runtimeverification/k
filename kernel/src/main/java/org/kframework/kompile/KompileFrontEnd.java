@@ -14,7 +14,6 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.JCommanderModule;
-import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 
 import java.util.ArrayList;
@@ -64,7 +63,7 @@ public class KompileFrontEnd extends FrontEnd {
                     options.outerParsing.mainDefinitionFile(files.get()).getAbsolutePath());
         }
 
-        Kompile kompile = new Kompile(options, files.get(), kem, sw, options.profileRules != null);
+        Kompile kompile = new Kompile(options, files.get(), kem, sw);
         Backend backend = koreBackend.get();
         CompiledDefinition def = kompile.run(options.outerParsing.mainDefinitionFile(files.get()), options.mainModule(files.get()), options.syntaxModule(files.get()), backend.steps(), backend.excludedModuleTags());
         kompile = null;

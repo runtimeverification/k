@@ -18,6 +18,7 @@ import org.kframework.parser.inner.ApplySynonyms;
 import org.kframework.parser.inner.CollectProductionsVisitor;
 import org.kframework.parser.outer.ExtractFencedKCodeFromMarkdown;
 import org.kframework.parser.outer.Outer;
+import org.kframework.utils.TimingCollector;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -50,16 +51,22 @@ public class ParserUtils {
     private final GlobalOptions options;
     private final FileUtil files;
     private final ExtractFencedKCodeFromMarkdown mdExtractor;
+    private final TimingCollector timing;
 
     public ParserUtils(FileUtil files, KExceptionManager kem) {
         this(files, kem, new GlobalOptions(), new OuterParsingOptions());
     }
 
     public ParserUtils(FileUtil files, KExceptionManager kem, GlobalOptions options, OuterParsingOptions outerParsingOptions) {
+        this(files, kem, options, outerParsingOptions, null);
+    }
+
+    public ParserUtils(FileUtil files, KExceptionManager kem, GlobalOptions options, OuterParsingOptions outerParsingOptions, TimingCollector timing) {
         this.kem = kem;
         this.options = options;
         this.files = files;
         mdExtractor = new ExtractFencedKCodeFromMarkdown(this.kem, outerParsingOptions.mdSelector);
+        this.timing = timing;
     }
 
     /**

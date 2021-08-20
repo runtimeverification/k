@@ -130,6 +130,9 @@ public final class GlobalOptions {
     @Parameter(names={"--warnings-to-errors", "-w2e"}, description="Convert warnings to errors.")
     public boolean warnings2errors = false;
 
+    @Parameter(names="--profile-rule-parsing", description="Generate time in seconds to parse each rule in the semantics.")
+    public String profileRules;
+
     @Parameter(names = {"--shutdown-wait-time"}, converter = DurationConverter.class,
             description = "If option is set, a shutdown hook will be registered " +
                     "that, once invoked, interrupts the main thread and waits its termination. " +

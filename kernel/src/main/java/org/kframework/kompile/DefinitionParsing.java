@@ -82,7 +82,6 @@ public class DefinitionParsing {
 
     private final KExceptionManager kem;
     private final ParserUtils parser;
-    private final boolean cacheParses;
     private final BinaryLoader loader;
     private final Stopwatch sw;
 
@@ -97,20 +96,18 @@ public class DefinitionParsing {
             KompileOptions options,
             KExceptionManager kem,
             ParserUtils parser,
-            boolean cacheParses,
             File cacheFile,
             Stopwatch sw) {
         this.lookupDirectories = lookupDirectories;
         this.options = options;
         this.kem = kem;
         this.parser = parser;
-        this.cacheParses = cacheParses;
         this.cacheFile = cacheFile;
         this.autoImportDomains = !options.outerParsing.noPrelude;
         this.kore = options.isKore();
         this.loader = new BinaryLoader(this.kem);
         this.isStrict = options.strict();
-        this.timing = options.profileRules != null ? new TimingCollector() : null;
+        this.timing = options.global.profileRules != null ? new TimingCollector() : null;
         this.sw = sw;
     }
 
@@ -156,8 +153,8 @@ public class DefinitionParsing {
         }
 
         def = resolveNonConfigBubbles(def);
-        if (options.profileRules != null)
-            FileUtil.save(new File(options.profileRules), timing.getOrderedMessages());
+        if (options.global.profileRules != null)
+            FileUtil.save(new File(options.global.profileRules), timing.getOrderedMessages());
         if (! readOnlyCache) {
             saveCachesAndReportParsingErrors();
         }
@@ -167,7 +164,7 @@ public class DefinitionParsing {
     public Map<String, ParseCache> loadCaches() {
         Map<String, ParseCache> result;
         //noinspection unchecked
-        result = cacheParses ? loader.loadCache(Map.class, cacheFile) : null;
+        result = timing == null ? loader.loadCache(Map.class, cacheFile) : null;
         if (result == null) {
             result = new HashMap<>();
         }
@@ -180,7 +177,7 @@ public class DefinitionParsing {
     }
 
     private void saveCaches() {
-        if (cacheParses) {
+        if (timing == null) {
             loader.saveOrDie(cacheFile, caches);
         }
     }
@@ -210,8 +207,8 @@ public class DefinitionParsing {
         cachedBubbles.set(0);
         Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles);
         sw.printIntermediate("Parse rules [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " rules]");
-        if (options.profileRules != null)
-            FileUtil.save(new File(options.profileRules), timing.getOrderedMessages());
+        if (options.global.profileRules != null)
+            FileUtil.save(new File(options.global.profileRules), timing.getOrderedMessages());
         saveCachesAndReportParsingErrors();
         return afterResolvingAllOtherBubbles;
     }

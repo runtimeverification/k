@@ -28,6 +28,7 @@ import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
+import org.kframework.main.GlobalOptions;
 import org.kframework.parser.InputModes;
 import org.kframework.parser.KRead;
 import org.kframework.parser.ParserUtils;
@@ -85,20 +86,17 @@ public class Kompile {
     private final DefinitionParsing definitionParsing;
     java.util.Set<KEMException> errors;
 
-    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, boolean cacheParses) {
-        this(kompileOptions, files, kem, new Stopwatch(kompileOptions.global), cacheParses);
-    }
-
     public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem) {
-        this(kompileOptions, files, kem, true);
+        this(kompileOptions, files, kem, new Stopwatch(kompileOptions.global));
     }
 
+    // called by KProve or other tools which will override GlobalOptions
     @Inject
-    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
-        this(kompileOptions, files, kem, sw, true);
+    public Kompile(KompileOptions kompileOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
+        this(kompileOptions.updateGlobalOptions(globalOptions), files, kem, sw);
     }
 
-    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
+    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
         this.kompileOptions = kompileOptions;
         this.files = files;
         this.kem = kem;
@@ -111,7 +109,7 @@ public class Kompile {
                 ? files.resolveWorkingDirectory(kompileOptions.cacheFile) : files.resolveKompiled("cache.bin");
         this.definitionParsing = new DefinitionParsing(
                 lookupDirectories, kompileOptions, kem,
-                parser, cacheParses, cacheFile, sw);
+                parser, cacheFile, sw);
         this.sw = sw;
 
         if (kompileOptions.backend.equals("ocaml")) {

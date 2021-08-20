@@ -56,7 +56,6 @@ public class KProve {
             throw KEMException.criticalError("Definition file doesn't exist: " +
                     kproveOptions.specFile(files).getAbsolutePath());
         }
-        proofDefinitionBuilder.kompile.kompileOptions.global = kproveOptions.global;
 
         Tuple2<Definition, Module> compiled = proofDefinitionBuilder
                 .build(kproveOptions.specFile(files), kproveOptions.specModule, compiledDefinition.kompileOptions.readOnlyKompiledDirectory);
