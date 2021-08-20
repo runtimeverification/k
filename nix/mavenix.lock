@@ -1338,8 +1338,8 @@
       "sha1": "a4686474dcba0d75d89e3d4f9665634832e49b6f"
     },
     {
-      "path": "com/google/guava/guava-parent/29.0-jre/guava-parent-29.0-jre.pom",
-      "sha1": "bd26677407fe1a325335f7c0b96ed42417198250"
+      "path": "com/google/guava/guava-parent/30.0-jre/guava-parent-30.0-jre.pom",
+      "sha1": "967743c6cda3e5267084455bca3c7ab08df3f453"
     },
     {
       "path": "com/google/guava/guava/16.0.1/guava-16.0.1.pom",
@@ -1354,12 +1354,12 @@
       "sha1": "db536f4a1c26739eb6ee1cfb707ec3fbe8325c86"
     },
     {
-      "path": "com/google/guava/guava/29.0-jre/guava-29.0-jre.jar",
-      "sha1": "801142b4c3d0f0770dd29abea50906cacfddd447"
+      "path": "com/google/guava/guava/30.0-jre/guava-30.0-jre.jar",
+      "sha1": "8ddbc8769f73309fe09b54c5951163f10b0d89fa"
     },
     {
-      "path": "com/google/guava/guava/29.0-jre/guava-29.0-jre.pom",
-      "sha1": "e40cdee0d70244df1e963daac53a16241aea4585"
+      "path": "com/google/guava/guava/30.0-jre/guava-30.0-jre.pom",
+      "sha1": "d7239fe628e6e3fbb6734acbc07195435fdac305"
     },
     {
       "path": "com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar",
@@ -5862,20 +5862,20 @@
       "sha1": "c622f23fc3d1acf7c0cf66755ad7455781c4d489"
     },
     {
-      "path": "org/checkerframework/checker-qual/2.11.1/checker-qual-2.11.1.jar",
-      "sha1": "8c43bf8f99b841d23aadda6044329dad9b63c185"
-    },
-    {
-      "path": "org/checkerframework/checker-qual/2.11.1/checker-qual-2.11.1.pom",
-      "sha1": "ebc1b44da8503640e2ed42627b299272c8c72824"
-    },
-    {
       "path": "org/checkerframework/checker-qual/2.5.2/checker-qual-2.5.2.jar",
       "sha1": "cea74543d5904a30861a61b4643a5f2bb372efc4"
     },
     {
       "path": "org/checkerframework/checker-qual/2.5.2/checker-qual-2.5.2.pom",
       "sha1": "7cee753353b0fc94e0300ad3dbf155069260c4d7"
+    },
+    {
+      "path": "org/checkerframework/checker-qual/3.5.0/checker-qual-3.5.0.jar",
+      "sha1": "2f50520c8abea66fbd8d26e481d3aef5c673b510"
+    },
+    {
+      "path": "org/checkerframework/checker-qual/3.5.0/checker-qual-3.5.0.pom",
+      "sha1": "408a4451ff5bdef60400a49657867db100ea0f83"
     },
     {
       "path": "org/codehaus/codehaus-parent/4/codehaus-parent-4.pom",
