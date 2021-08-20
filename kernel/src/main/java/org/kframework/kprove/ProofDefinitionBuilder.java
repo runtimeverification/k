@@ -34,7 +34,7 @@ public class ProofDefinitionBuilder {
 
     private final CompiledDefinition compiledDefinition;
     private final Backend backend;
-    public final Kompile kompile;
+    private final Kompile kompile;
     private final FileUtil files;
     @Inject(optional = true)
     @Named("extraConcreteRuleLabels")
