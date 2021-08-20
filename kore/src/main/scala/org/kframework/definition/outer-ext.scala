@@ -8,7 +8,6 @@ import org.kframework.attributes._
 import org.kframework.utils.errorsystem.KEMException
 
 import scala.annotation.meta.param
-import scala.collection.Set
 import scala.collection.mutable
 import java.util.Optional
 

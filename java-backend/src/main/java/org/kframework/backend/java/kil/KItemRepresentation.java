@@ -8,6 +8,7 @@ import org.kframework.kore.KList;
 
 import java.util.List;
 import java.util.stream.Stream;
+import scala.collection.immutable.Seq;
 
 public interface KItemRepresentation extends KoreRepresentation, KApply, HasGlobalContext {
     default Term kLabel() {
@@ -24,6 +25,10 @@ public interface KItemRepresentation extends KoreRepresentation, KApply, HasGlob
 
     default List<K> items() {
         return klist().items();
+    }
+
+    default Seq<K> scalaItems() {
+        return klist().scalaItems();
     }
 
     default int size() {

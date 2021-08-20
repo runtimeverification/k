@@ -66,7 +66,7 @@ public class ComputeTransitiveFunctionDependencies {
             }
         }
 
-        for (Tuple2<KLabel, scala.collection.Set<Rule>> entry : iterable(module.rulesFor())) {
+        for (Tuple2<KLabel, scala.collection.immutable.Set<Rule>> entry : iterable(module.rulesFor())) {
             for (Rule rule : iterable(entry._2())) {
                 if (module.attributesFor().getOrElse(entry._1(), () -> Att.empty()).contains(Att.FUNCTION())) {
                     GetPredecessors visitor = new GetPredecessors(entry._1());

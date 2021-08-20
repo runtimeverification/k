@@ -17,6 +17,8 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.kframework.Collections.*;
+
 /**
  * @author Denis Bogdanas
  * Created on 07-Nov-19.
@@ -72,7 +74,7 @@ public class ProofDefinitionBuilder {
         Definition parsedDefinition = compiledDefinition.getParsedDefinition();
         Module specModule = getModule(specModuleNameUpdated, modulesMap, parsedDefinition);
         specModule = kompile.proverChecks(specModule, modulesMap.get(defModuleNameUpdated));
-        kompile.structuralChecks(scala.collection.JavaConverters.asScalaSet(modules),
+        kompile.structuralChecks(immutable(modules),
                 specModule, scala.Option.empty(), backend.excludedModuleTags());
         Module defModule = getModule(defModuleNameUpdated, modulesMap, parsedDefinition);
         Definition rawExtendedDef = Definition.apply(defModule, parsedDefinition.entryModules(),

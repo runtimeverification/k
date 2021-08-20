@@ -2,7 +2,7 @@
 package org.kframework.kore;
 
 import org.kframework.Collections;
-import scala.collection.Set;
+import scala.collection.immutable.Set;
 
 /**
  * Finds all patterns described by the visitor

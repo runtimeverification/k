@@ -45,7 +45,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Option;
 import scala.Tuple2;
-import scala.collection.Set;
+import scala.collection.immutable.Set;
 import scala.util.Either;
 
 import java.io.File;
@@ -242,7 +242,7 @@ public class DefinitionParsing {
                 boolean hasConfigDecl = stream(mod.sentences())
                         .anyMatch(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration));
                 if (!hasConfigDecl) {
-                    return Module(mod.name(), mod.imports().$bar(Set(Import(defaultConfiguration, true))).seq(), mod.localSentences(), mod.att());
+                    return Module(mod.name(), (Set<Import>) mod.imports().$bar(Set(Import(defaultConfiguration, true))), mod.localSentences(), mod.att());
                 }
             }
             return mod;
@@ -254,7 +254,7 @@ public class DefinitionParsing {
             boolean hasConfigDecl = stream(mod.localSentences())
                     .anyMatch(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration));
             if (hasConfigDecl) {
-                return Module(mod.name(), mod.imports().$bar(Set(Import(mapModule, true))).seq(), mod.localSentences(), mod.att());
+                return Module(mod.name(), (Set<Import>) mod.imports().$bar(Set(Import(mapModule, true))), mod.localSentences(), mod.att());
             }
             return mod;
         }, "adding MAP to modules with configs").apply(definitionWithConfigBubble);
@@ -307,7 +307,7 @@ public class DefinitionParsing {
                         .flatMap(b -> parseBubble(parser, cache.getCache(), b)
                                 .map(p -> upSentence(p, b.sentenceType())))
                         .collect(Collectors.toSet());
-                Set<Sentence> allSent = m.localSentences().$bar(immutable(parsedSet)).filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))).seq();
+                Set<Sentence> allSent = (Set<Sentence>)m.localSentences().$bar(immutable(parsedSet)).filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration)));
                 return Module(m.name(), m.imports(), allSent, m.att());
             }
         });
@@ -337,10 +337,10 @@ public class DefinitionParsing {
                       .flatMap(configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), extMod, kore)))
                       .collect(toSet());
 
-            Set<Sentence> stc = m.localSentences()
+            Set<Sentence> stc = (Set<Sentence>) m.localSentences()
                     .$bar(configDeclProductions)
                     .filter(s -> !(s instanceof Configuration))
-                    .filter(s -> !(s instanceof SyntaxSort && s.att().contains("temporary-cell-sort-decl"))).seq();
+                    .filter(s -> !(s instanceof SyntaxSort && ((Sentence)s).att().contains("temporary-cell-sort-decl")));
             Module newM = Module(m.name(), m.imports(), stc, m.att());
             newM.checkSorts(); // ensure all the Cell sorts are defined
             return newM;
@@ -423,9 +423,9 @@ public class DefinitionParsing {
                     }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
 
             if (!fromCache.isEmpty()) {
-                Set<Sentence> stc = m.localSentences()
+                Set<Sentence> stc = (Set<Sentence>) m.localSentences()
                         .$bar(immutable(Sets.newHashSet(fromCache.values())))
-                        .filter(s -> !(s instanceof Bubble && fromCache.containsKey(s))).seq();
+                        .filter(s -> !(s instanceof Bubble && fromCache.containsKey(s)));
                 return Module(m.name(), m.imports(), stc, m.att());
             }
             return m;

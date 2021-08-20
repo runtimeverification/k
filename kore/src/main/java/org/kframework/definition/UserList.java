@@ -27,7 +27,7 @@ public class UserList {
     public Production pList = null, pTerminator = null;
     public org.kframework.attributes.Att attrs = null;
 
-    public static scala.collection.Set<UserList> apply(scala.collection.Set<Sentence> sentences) {
+    public static scala.collection.Set<UserList> apply(scala.collection.immutable.Set<Sentence> sentences) {
         return Collections.immutable(getLists(Collections.mutable(sentences))).toSet();
     }
 
@@ -55,11 +55,11 @@ public class UserList {
                     ul.attrs = p.att().remove("klabel");
                     // should work without the Att.userList() att, i.e. for any list -- see #1892
                     ul.nonEmpty = ul.attrs.get(Att.USER_LIST()).equals("+");
-                    if (!((NonTerminal)p.items().tail().tail().head()).sort().equals(p.sort())) {
+                    if (!((NonTerminal)p.items().apply(2)).sort().equals(p.sort())) {
                         ul.leftAssoc = true;
                     }
                     if (ul.leftAssoc) {
-                      ul.childSort = ((NonTerminal) p.items().tail().tail().head()).sort();
+                      ul.childSort = ((NonTerminal) p.items().apply(2)).sort();
                     } else {
                       ul.childSort = ((NonTerminal) p.items().head()).sort();
                     }

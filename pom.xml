@@ -76,7 +76,7 @@
     <base>master</base>
     <skipCheckstyleOnWindows>true</skipCheckstyleOnWindows>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <scala.version>2.12.4</scala.version>
+    <scala.version>2.13.5</scala.version>
     <project.build.type>FastBuild</project.build.type>
   </properties>
 
@@ -87,9 +87,14 @@
       <version>${scala.version}</version>
     </dependency>
     <dependency>
-        <groupId>org.scala-lang</groupId>
-        <artifactId>scala-reflect</artifactId>
-        <version>${scala.version}</version>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-reflect</artifactId>
+      <version>${scala.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scala-lang.modules</groupId>
+      <artifactId>scala-parallel-collections_2.13</artifactId>
+      <version>1.0.3</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

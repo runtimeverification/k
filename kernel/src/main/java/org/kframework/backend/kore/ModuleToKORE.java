@@ -50,8 +50,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import scala.Int;
 import scala.Option;
 import scala.Tuple2;
-import scala.collection.JavaConverters;
-import scala.collection.Seq;
+import scala.collection.immutable.Seq;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -172,7 +171,7 @@ public class ModuleToKORE {
         }
         translateSorts(tokenSorts, attributes, collectionSorts, semantics);
 
-        List<Rule> sortedRules = new ArrayList<>(JavaConverters.seqAsJavaList(module.sortedRules()));
+        List<Rule> sortedRules = mutable(module.sortedRules());
         if (options.backend.equals("haskell")) {
             module.sortedProductions().toStream().filter(this::isGeneratedInKeysOp).foreach(
                     prod -> {
@@ -553,7 +552,7 @@ public class ModuleToKORE {
 
     private void genMapCeilAxioms(Production prod, Collection<Rule> rules) {
         Sort mapSort = prod.nonterminal(1).sort();
-        scala.collection.Set<Production> mapProds = module.productionsForSort().apply(mapSort.head());
+        scala.collection.immutable.Set<Production> mapProds = module.productionsForSort().apply(mapSort.head());
         Production concatProd = mapProds.find(p -> hasHookValue(p.att(), "MAP.concat")).get();
         Production elementProd = mapProds.find(p -> hasHookValue(p.att(), "MAP.element")).get();
         Seq<NonTerminal> nonterminals = elementProd.nonterminals();
@@ -583,7 +582,7 @@ public class ModuleToKORE {
                 setArgsCeil = KApply(andLabel, setArgsCeil, KApply(ceil, setVar));
             }
         }
-        Seq<K> setArgsSeq = JavaConverters.iterableAsScalaIterable(setArgs).toSeq();
+        Seq<K> setArgsSeq = immutable(setArgs);
 
         KLabel equalsLabel = KLabel(KLabels.ML_EQUALS.name(), Sorts.Bool(), sortParam);
         Rule ceilMapRule =
@@ -1510,7 +1509,7 @@ public class ModuleToKORE {
           att = att.add("terminals", sb.toString());
           if (prod.klabel().isDefined()) {
               List<K> lessThanK = new ArrayList<>();
-              Option<scala.collection.Set<Tag>> lessThan = module.priorities().relations().get(Tag(prod.klabel().get().name()));
+              Option<scala.collection.immutable.Set<Tag>> lessThan = module.priorities().relations().get(Tag(prod.klabel().get().name()));
               if (lessThan.isDefined()) {
                   for (Tag t : iterable(lessThan.get())) {
                     if (ConstructorChecks.isBuiltinLabel(KLabel(t.name()))) {
@@ -1533,7 +1532,7 @@ public class ModuleToKORE {
         return att.remove(Att.ORIGINAL_PRD(), Production.class);
     }
 
-    private KList getAssoc(scala.collection.Set<Tuple2<Tag, Tag>> assoc, KLabel klabel) {
+    private KList getAssoc(scala.collection.immutable.Set<Tuple2<Tag, Tag>> assoc, KLabel klabel) {
       return KList(stream(assoc).filter(t -> t._1().name().equals(klabel.name())).map(t -> KApply(KLabel(t._2().name()))).collect(Collectors.toList()));
     }
 
@@ -1618,7 +1617,7 @@ public class ModuleToKORE {
         KLabel klabel = term.klabel();
         if (klabel.name().equals(KLabels.INJ))
             return instantiatePolySorts ? INJ_PROD.substitute(term.klabel().params()) : INJ_PROD;
-        Option<scala.collection.Set<Production>> prods = module.productionsFor().get(klabel.head());
+        Option<scala.collection.immutable.Set<Production>> prods = module.productionsFor().get(klabel.head());
         assert(prods.nonEmpty());
         assert(prods.get().size() == 1);
         return instantiatePolySorts ? prods.get().head().substitute(term.klabel().params()) : prods.get().head();

@@ -21,7 +21,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
 import scala.Tuple2;
 import scala.Tuple4;
-import scala.collection.Set;
+import scala.collection.immutable.Set;
 
 import java.util.ArrayList;
 import java.util.HashSet;

@@ -7,7 +7,7 @@ import org.kframework.kore.SortedADT.SortedKVariable
 import org.kframework.kore.KORE.{KApply, KRewrite}
 import org.kframework.kore._
 
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.Set
 
 /**

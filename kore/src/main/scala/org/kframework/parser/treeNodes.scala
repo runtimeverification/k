@@ -8,10 +8,10 @@ import org.kframework.kore.KORE.Sort
 import java.util._
 import java.lang.Iterable
 import org.pcollections.{ConsPStack, PStack}
-import collection.JavaConverters._
 import org.kframework.utils.StringUtil
 
 import scala.collection.mutable;
+import scala.jdk.CollectionConverters._
 
 trait Term extends HasLocation {
   var location: Optional[Location] = Optional.empty()
@@ -21,7 +21,7 @@ trait Term extends HasLocation {
 trait ProductionReference extends Term {
   val production: Production
   var id: Optional[Integer] = Optional.empty()
-  def setId(id: Optional[Integer]) {
+  def setId(id: Optional[Integer]): Unit = {
     this.id = id
   }
 }
@@ -111,7 +111,7 @@ object KList {
 }
 
 object Ambiguity {
-  @annotation.varargs def apply(items: Term*): Ambiguity = Ambiguity(items.to[mutable.Set].asJava)
+  @annotation.varargs def apply(items: Term*): Ambiguity = Ambiguity(items.toSet.asJava)
   def apply(items: Set[Term], location: Optional[Location], source: Optional[Source]):Ambiguity = {
     val res = Ambiguity(items)
     res.location = location

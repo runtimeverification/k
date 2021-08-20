@@ -10,7 +10,6 @@ import org.kframework.utils.StringUtil
 import org.kframework.{kore => k}
 
 import scala.collection.Map
-import scala.collection.JavaConverters._
 
 /** Translation error exception. */
 case class TranslationError(msg: String) extends RuntimeException(msg)

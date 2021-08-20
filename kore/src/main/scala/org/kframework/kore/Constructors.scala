@@ -2,7 +2,7 @@ package org.kframework.kore
 
 import org.kframework.attributes._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait Constructors {
   def KLabel(name: String, params: Sort*): KLabel

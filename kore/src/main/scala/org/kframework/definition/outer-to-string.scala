@@ -2,7 +2,6 @@ package org.kframework.definition
 
 import org.kframework.attributes.{Location,Source}
 import org.kframework.utils.StringUtil
-import collection._
 
 trait ModuleToString {
   self: Module =>

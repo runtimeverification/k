@@ -22,7 +22,7 @@ import org.kframework.kil.Production;
 import org.kframework.kil.Terminal;
 import org.kframework.kore.KLabel;
 import org.kframework.utils.errorsystem.KEMException;
-import scala.collection.Seq;
+import scala.collection.immutable.Seq;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -98,7 +98,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                 .map(mod -> (Module) mod).collect(Collectors.toSet());
 
         List<FlatModule> flatModules = kilModules.stream().map(this::toFlatModule).sorted(Comparator.comparing(FlatModule::name)).collect(Collectors.toList());
-        scala.collection.Set<org.kframework.definition.Module> koreModules = FlatModule.toModules(immutable(flatModules), Set());
+        scala.collection.immutable.Set<org.kframework.definition.Module> koreModules = FlatModule.toModules(immutable(flatModules), Set());
 
         return Definition(
                 koreModules.find(x -> x.name().equals(d.getMainModule()))
@@ -139,7 +139,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.definition.SyntaxAssociativity apply(PriorityExtendedAssoc ii) {
-        scala.collection.Set<Tag> tags = toTags(ii.getTags(), ii);
+        scala.collection.immutable.Set<Tag> tags = toTags(ii.getTags(), ii);
         String assocOrig = ii.getAssoc();
         Associativity assoc = applyAssoc(assocOrig);
         return SyntaxAssociativity(assoc, tags);
@@ -160,14 +160,14 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public Set<org.kframework.definition.Sentence> apply(PriorityExtended pe) {
-        Seq<scala.collection.Set<Tag>> seqOfSetOfTags = immutable(pe.getPriorityBlocks()
+        Seq<scala.collection.immutable.Set<Tag>> seqOfSetOfTags = immutable(pe.getPriorityBlocks()
                 .stream().map(block -> toTags(block.getProductions(), pe))
                 .collect(Collectors.toList()));
 
         return Sets.newHashSet(SyntaxPriority(seqOfSetOfTags));
     }
 
-    public scala.collection.Set<Tag> toTags(List<Tag> labels, ASTNode loc) {
+    public scala.collection.immutable.Set<Tag> toTags(List<Tag> labels, ASTNode loc) {
         return immutable(labels.stream().flatMap(l -> {
             java.util.Set<Production> productions = context.tags.get(l.name());
             if (productions.isEmpty())
@@ -193,7 +193,7 @@ public class KILtoKORE extends KILTransformation<Object> {
             return res;
         }
 
-        Function<PriorityBlock, scala.collection.Set<Tag>> applyToTags = (PriorityBlock b) -> immutable(Stream.concat(b
+        Function<PriorityBlock, scala.collection.immutable.Set<Tag>> applyToTags = (PriorityBlock b) -> immutable(Stream.concat(b
                 .getProductions().stream().filter(p -> p.getKLabel(kore) != null).map(p -> Tag(p.getKLabel(kore))),
                 b.getProductions().stream().filter(p -> p.containsAttribute(Att.BRACKET())).map(p -> Tag(p.getBracketLabel(kore))))
                 .collect(Collectors.toSet()));

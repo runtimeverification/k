@@ -17,9 +17,8 @@ import org.kframework.utils.errorsystem.KEMException
 import org.kframework.builtin.Sorts
 
 import scala.annotation.meta.param
-import scala.collection.JavaConverters._
-import collection._
-import scala.collection.Set
+import scala.jdk.CollectionConverters._
+import scala.collection.parallel.CollectionConverters._
 
 trait OuterKORE
 
@@ -226,7 +225,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
       .groupBy(_.sort)
       .map { case (s, ps) => (s, ps.toList.sortBy(_.sort)(subsorts.asOrdering)) }
 
-  @transient lazy val sortFor: Map[KLabel, Sort] = productionsFor mapValues {_.head.sort}
+  @transient lazy val sortFor: Map[KLabel, Sort] = productionsFor.view mapValues {_.head.sort} toMap
 
   def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
 
@@ -257,10 +256,10 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
   //        throw DivergingAttributesForTheSameKLabel(ps)
   //  }
 
-  @transient lazy val attributesFor: Map[KLabel, Att] = productionsFor mapValues {mergeAttributes(_)}
+  @transient lazy val attributesFor: Map[KLabel, Att] = productionsFor.view mapValues {mergeAttributes(_)} toMap
 
   @transient lazy val signatureFor: Map[KLabel, Set[(Seq[Sort], Sort)]] =
-    productionsFor mapValues {
+    productionsFor.view mapValues {
       ps: Set[Production] =>
         ps.filter { p: Production => p.params.isEmpty }
         .map {
@@ -268,7 +267,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
             val params: Seq[Sort] = p.items collect { case NonTerminal(sort, _) => sort }
             (params, p.sort)
         }
-    }
+    } toMap
 
   lazy val sortDeclarations: Set[SyntaxSort] = sentences.collect({ case s: SyntaxSort => s })
   lazy val sortSynonyms: Set[SortSynonym] = sentences.collect({ case s: SortSynonym => s })
@@ -280,7 +279,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     sortDeclarations
       .groupBy(_.sort.head)
 
-  @transient lazy val sortAttributesFor: Map[SortHead, Att] = sortDeclarationsFor mapValues {mergeAttributes(_)}
+  @transient lazy val sortAttributesFor: Map[SortHead, Att] = sortDeclarationsFor.view mapValues {mergeAttributes(_)} toMap
 
   private def mergeAttributes[T <: Sentence](p: Set[T]) = {
     Att.mergeAttributes(p.map(_.att))
@@ -331,15 +330,15 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
   }
 
   @transient lazy val freshFunctionFor: Map[Sort, KLabel] =
-    productions.groupBy(_.sort).mapValues(_.filter(_.att.contains("freshGenerator")))
-      .filter(_._2.nonEmpty).mapValues(_.map(p => p.klabel.get)).mapValues { set => {
+    productions.groupBy(_.sort).view.mapValues(_.filter(_.att.contains("freshGenerator")))
+      .filter(_._2.nonEmpty).view.mapValues(_.map(p => p.klabel.get)).view.mapValues { set => {
       if (set.size > 1)
         throw KEMException.compilerError("Found more than one fresh generator for sort " + sortFor(set.head)
           + ". Found: " + set)
       else
         set.head
     }
-    }
+    } toMap
 
   // check that non-terminals have a defined sort
   def checkSorts () = sentences foreach {
@@ -360,8 +359,8 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
   override lazy val hashCode: Int = name.hashCode
 
-  def flattened()   : FlatModule                = new FlatModule(name, imports.map(i => FlatImport(i.module.name, i.isPublic, Att.empty)), localSentences, att)
-  def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ fullImports.map(m => m.flatModules._2).flatten)
+  def flattened   : FlatModule                = new FlatModule(name, imports.map(i => FlatImport(i.module.name, i.isPublic, Att.empty)), localSentences, att)
+  def flatModules : (String, Set[FlatModule]) = (name, Set(flattened) ++ fullImports.map(m => m.flatModules._2).flatten)
 }
 
 trait HasAtt {

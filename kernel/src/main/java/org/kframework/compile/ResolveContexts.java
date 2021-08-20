@@ -58,7 +58,7 @@ public class ResolveContexts {
         if (!rulesToAdd.isEmpty()) {
             rulesToAdd.add(SyntaxSort(Seq(), Sorts.K()));
         }
-        return Module(input.name(), input.imports(), (scala.collection.Set<Sentence>) stream(input.localSentences()).filter(s -> !(s instanceof Context)).collect(Collections.toSet()).$bar(immutable(rulesToAdd)), input.att());
+        return Module(input.name(), input.imports(), (scala.collection.immutable.Set<Sentence>) stream(input.localSentences()).filter(s -> !(s instanceof Context)).collect(Collections.toSet()).$bar(immutable(rulesToAdd)), input.att());
     }
 
     private Set<KLabel> klabels;
@@ -242,7 +242,7 @@ public class ResolveContexts {
 
         int cntHoles = new FindK() {
             @Override
-            public scala.collection.Set<K> apply(KVariable k) {
+            public scala.collection.immutable.Set<K> apply(KVariable k) {
                 if (k.name().equals("HOLE")) {
                     return org.kframework.Collections.Set(k);
                 } else {
@@ -256,7 +256,7 @@ public class ResolveContexts {
 
         int cntRewrites = new FindK() {
             @Override
-            public scala.collection.Set<K> apply(KRewrite k) {
+            public scala.collection.immutable.Set<K> apply(KRewrite k) {
                 return this.merge(org.kframework.Collections.Set(k), super.apply(k));
             }
         }.apply(body).size();

@@ -34,7 +34,7 @@ class NormalizeAssoc(c: Constructors) extends ((Module, Sentence )=> Sentence) {
           KApply(opKLabel, KList(flattenChildren map apply: _*), kApply.att)
         }
       } else {
-        KApply(kApply.klabel, KList(immutable(kApply.klist.items) map apply: _*), kApply.att)
+        KApply(kApply.klabel, KList(kApply.klist.scalaItems map apply: _*), kApply.att)
       }
     case kRewrite: KRewrite => KRewrite(apply(kRewrite.left), kRewrite.right, kRewrite.att)
     case _ => k

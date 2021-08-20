@@ -1,7 +1,7 @@
 package org.kframework.kore
 
 import org.kframework.kore
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
  * Scala deconstructors for inner KORE objects.
@@ -48,8 +48,6 @@ object Unapply {
   }
 
   object KList {
-
-    import scala.collection.JavaConverters._
 
     def unapplySeq(klist: KList): Option[Seq[kore.K]] = Some(klist.items.asScala.toSeq)
   }

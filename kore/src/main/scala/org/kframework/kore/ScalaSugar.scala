@@ -4,7 +4,7 @@ import org.kframework.attributes.Att
 import org.kframework.builtin.{KLabels, Sorts}
 import org.kframework.kore
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait ScalaSugared {
   val c: Constructors

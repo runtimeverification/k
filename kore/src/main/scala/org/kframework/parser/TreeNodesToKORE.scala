@@ -12,7 +12,7 @@ import org.kframework.kore.{KORE, _}
 import org.kframework.utils.errorsystem.KEMException
 import org.pcollections.PStack
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], strict: Boolean) {
 

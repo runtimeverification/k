@@ -27,7 +27,7 @@ import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
-import scala.collection.Set;
+import scala.collection.immutable.Set;
 import scala.Option;
 
 import java.util.ArrayList;

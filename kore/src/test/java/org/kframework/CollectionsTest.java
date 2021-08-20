@@ -5,6 +5,7 @@ package org.kframework;
 import org.junit.Test;
 import scala.collection.Set;
 import scala.collection.immutable.List;
+import scala.collection.immutable.Seq;
 
 import java.util.stream.Stream;
 
@@ -25,7 +26,7 @@ public class CollectionsTest {
         Stream<String> l = s.map(x -> x.toString());
 
         // and back to an immutable List
-        List<String> collectedList = l.collect(toList());
+        Seq<String> collectedList = l.collect(toList());
 
         // which has the expected value
         assertEquals(List("1", "2", "3"), collectedList);

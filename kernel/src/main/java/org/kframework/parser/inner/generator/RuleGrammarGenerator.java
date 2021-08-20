@@ -27,7 +27,7 @@ import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
-import scala.collection.Seq;
+import scala.collection.immutable.Seq;
 import scala.Option;
 import scala.Tuple3;
 
@@ -120,7 +120,7 @@ public class RuleGrammarGenerator {
     private Module getGrammar(Module mod, String name) {
         // import RULE-CELLS in order to parse cells specific to rules
         Module newM = new Module( mod.name() + "-" + name
-                                , (scala.collection.Set<Import>) mod.imports().$bar(Set(Import(baseK.getModule(K).get(), true), Import(baseK.getModule(name).get(), true), Import(baseK.getModule(DEFAULT_LAYOUT).get(), true)))
+                                , (scala.collection.immutable.Set<Import>) mod.imports().$bar(Set(Import(baseK.getModule(K).get(), true), Import(baseK.getModule(name).get(), true), Import(baseK.getModule(DEFAULT_LAYOUT).get(), true)))
                                 , mod.localSentences()
                                 , mod.att()
                                 );
@@ -349,7 +349,7 @@ public class RuleGrammarGenerator {
                     assert p.items().last() instanceof Terminal || p.items().last() instanceof RegexTerminal;
                     final ProductionItem body;
                     if (cfgInfo.isLeafCell(p.sort())) {
-                        body = p.items().tail().head();
+                        body = p.items().apply(1);
                     } else {
                         body = NonTerminal(Sorts.Bag());
                     }

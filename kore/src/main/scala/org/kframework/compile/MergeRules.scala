@@ -7,9 +7,8 @@ import org.kframework.kore._
 import org.kframework.kore.KORE.{KApply, KLabel, KToken, Sort}
 import org.kframework.kore.{K, KApply, KLabel, KVariable, Unapply, Assoc}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.Iterable
-import collection._
 
 /**
   * Compiler pass for merging the rules as expected by FastRuleMatcher

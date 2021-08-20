@@ -8,13 +8,13 @@ import org.kframework.Collections;
 import org.kframework.backend.java.kil.Sort;
 import org.kframework.definition.Module;
 import org.kframework.utils.errorsystem.KEMException;
-import scala.collection.JavaConversions;
 
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.kframework.Collections.*;
 
 /**
  * Subsort relation.
@@ -34,7 +34,7 @@ public class Subsorts implements Serializable {
     private final Table<Sort, Sort, Boolean> subsort;
 
     public Subsorts(Module module) {
-        sorts = JavaConversions.asJavaCollection(module.allSorts()).stream()
+        sorts = mutable(module.allSorts()).stream()
                 .map(Sort::of)
                 .collect(Collectors.toSet());
 

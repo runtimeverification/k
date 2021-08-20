@@ -153,7 +153,7 @@ public class KRun {
 
     private K parseConfigVars(KRunOptions options, CompiledDefinition compiledDef) {
         HashMap<KToken, K> output = new HashMap<>();
-        scala.collection.Set<KToken> expectedConfigVars = new ConfigurationInfoFromModule(compiledDef.kompiledDefinition.mainModule()).configVars();
+        scala.collection.immutable.Set<KToken> expectedConfigVars = new ConfigurationInfoFromModule(compiledDef.kompiledDefinition.mainModule()).configVars();
         for (Map.Entry<String, Pair<String, String>> entry
                 : options.configurationCreation.configVars(compiledDef.getParsedDefinition().mainModule().name(), files).entrySet()) {
             String name = entry.getKey();

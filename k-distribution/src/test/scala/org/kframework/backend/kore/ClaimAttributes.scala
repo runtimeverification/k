@@ -8,7 +8,7 @@ import org.kframework.parser.kore._
 
 class ClaimAttributes extends KoreTest {
 
-  @Test def test() {
+  @Test def test(): Unit = {
     val definition = this.kompile("module TEST [all-path] configuration <k> $PGM:K </k> syntax Exp ::= \"a\" | \"b\" " +
       "rule a => b [one-path] " +
       "rule a => b [all-path] " +

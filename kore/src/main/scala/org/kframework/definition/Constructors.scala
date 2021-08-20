@@ -7,7 +7,6 @@ import java.util.Optional
 import org.kframework.attributes.Att
 import org.kframework.{attributes, definition}
 import org.kframework.kore._
-import collection._
 
 /**
  *

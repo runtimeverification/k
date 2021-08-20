@@ -38,7 +38,7 @@ public class CorrectRewritePriorityVisitor extends SetsTransformerWithErrors<KEM
     @Override
     public Either<java.util.Set<KEMException>, Term> apply(Ambiguity amb) {
         // if the ambiguity has rewrites at the top, prefer them, and eliminate the rest
-        scala.collection.Set<Term> rewrites = amb.items().stream().filter(o ->
+        scala.collection.immutable.Set<Term> rewrites = amb.items().stream().filter(o ->
                 o instanceof TermCons &&
                         ((TermCons) o).production().klabel().isDefined() &&
                         ((TermCons) o).production().klabel().get().name().equals("#KRewrite")).collect(Collections.toSet());

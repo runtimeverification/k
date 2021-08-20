@@ -9,16 +9,16 @@ import org.kframework.utils.errorsystem.KEMException;
 object RewriteToTop {
   def toLeft(rewrite: K): K = rewrite match {
     case t: KRewrite => t.left
-    case t: KApply => compactInjections(KApply(t.klabel, immutable(t.klist.items) map toLeft, t.att))
-    case t: KSequence => KSequence(mutable(immutable(t.items) map toLeft toList), t.att)
+    case t: KApply => compactInjections(KApply(t.klabel, t.klist.scalaItems map toLeft, t.att))
+    case t: KSequence => KSequence(mutable(t.scalaItems map toLeft toList), t.att)
     case t: KAs => KAs(toLeft(t.pattern), t.alias, t.att)
     case other => other
   }
 
   def toRight(rewrite: K): K = rewrite match {
     case t: KRewrite => toRight(t.right) // recurse here because of KAs
-    case t: KApply => compactInjections(KApply(t.klabel, immutable(t.klist.items) map toRight, t.att))
-    case t: KSequence => KSequence(mutable(immutable(t.items) map toRight toList), t.att)
+    case t: KApply => compactInjections(KApply(t.klabel, t.klist.scalaItems map toRight, t.att))
+    case t: KSequence => KSequence(mutable(t.scalaItems map toRight toList), t.att)
     case t: KAs => t.alias
     case other => other
   }
@@ -27,16 +27,16 @@ object RewriteToTop {
   def bubbleRewriteToTopInsideCells(k: K): K = k match {
     case kapp: KApply =>
       if (isCell(kapp) && nonCell(kapp.items.get(0)))
-        KApply(kapp.klabel, immutable(kapp.klist.items) map makeRewriteIfNeeded, kapp.att)
+        KApply(kapp.klabel, kapp.klist.scalaItems map makeRewriteIfNeeded, kapp.att)
       else
-        KApply(kapp.klabel, immutable(kapp.klist.items) map bubbleRewriteToTopInsideCells, kapp.att)
+        KApply(kapp.klabel, kapp.klist.scalaItems map bubbleRewriteToTopInsideCells, kapp.att)
     case _ => k
   }
 
 
   def nonCell(k: K): Boolean = k match {
     case kapp: KApply => if (!isCell(kapp)) {
-      immutable(kapp.klist.items) map nonCell forall { b => b }
+      kapp.klist.scalaItems map nonCell forall { b => b }
     } else {
       false
     }
@@ -46,8 +46,8 @@ object RewriteToTop {
 
   def hasRewrite(k: K): Boolean = k match {
     case t: KRewrite => true
-    case t: KApply => immutable(t.klist.items).foldLeft(false)((b,k) => b || hasRewrite(k))
-    case t: KSequence => immutable(t.items).foldLeft(false)((b,k) => b || hasRewrite(k))
+    case t: KApply => t.klist.scalaItems.foldLeft(false)((b,k) => b || hasRewrite(k))
+    case t: KSequence => t.scalaItems.foldLeft(false)((b,k) => b || hasRewrite(k))
     case other => false
   }
 
@@ -59,7 +59,7 @@ object RewriteToTop {
 
   private def compactInjections(k: K): K = k match {
     case kapp: KApply =>
-      val args: Seq[K] = immutable(kapp.klist.items)
+      val args: Seq[K] = kapp.klist.scalaItems
       if (isInjection(kapp) && args.length == 1 && isInjection(args.head)) {
         val kappInner: KApply = args.head.asInstanceOf[KApply]
         val sortsOuter: List[Sort] = kapp.klabel.params.toList

@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import scala.collection.immutable.List;
+import scala.collection.immutable.Seq;
 
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
@@ -156,7 +156,7 @@ public class ResolveFunctionWithConfig {
           } else {
             secondChild = IncompleteCellUtils.make(topCellLabel, true, cell, true);
           }
-          List<K> items = Stream.concat(funKApp.items().stream(), Stream.of(KAs(secondChild, CONFIG_VAR, Att().add("withConfig")))).collect(Collections.toList());
+          Seq<K> items = Stream.concat(funKApp.items().stream(), Stream.of(KAs(secondChild, CONFIG_VAR, Att().add("withConfig")))).collect(Collections.toList());
           K result = KApply(funKApp.klabel(), KList(items), funKApp.att());
           if (rhs == null) {
             return result;
@@ -170,7 +170,7 @@ public class ResolveFunctionWithConfig {
 
     private Production resolve(Production prod) {
         if (prod.klabel().isDefined() && withConfigFunctions.contains(prod.klabel().get())) {
-            List<ProductionItem> pis = Stream.concat(stream(prod.items()), Stream.of(NonTerminal(topCell))).collect(Collections.toList());
+            Seq<ProductionItem> pis = Stream.concat(stream(prod.items()), Stream.of(NonTerminal(topCell))).collect(Collections.toList());
             return Production(prod.klabel(), prod.params(), prod.sort(), pis, prod.att());
         }
         return prod;

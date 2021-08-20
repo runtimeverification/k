@@ -22,8 +22,7 @@ import org.kframework.kore.TransformK;
 import org.kframework.kore.VisitK;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Tuple2;
-import scala.collection.JavaConversions;
-import scala.collection.Seq;
+import scala.collection.immutable.Seq;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -874,13 +873,13 @@ public class SortCells {
     // if multiple signiture exist, then return arbitrary one of them that is not K
     private Sort nthArgSort(KLabel klabel, int n) {
         java.util.Set<Tuple2<Seq<Sort>,Sort>> sigs =
-                mutable(JavaConversions.mapAsJavaMap(module.signatureFor()).get(klabel));
+                mutable(mutable(module.signatureFor()).get(klabel));
         if (sigs == null) {
             throw new IllegalArgumentException("Not found signature for label: " + klabel);
         }
         Sort sort = null;
         for (Tuple2<Seq<Sort>,Sort> sig : sigs) {
-            List<Sort> sorts = JavaConversions.seqAsJavaList(sig._1());
+            List<Sort> sorts = mutable(sig._1());
             if (n >= sorts.size()) continue;
             sort = sorts.get(n);
             if (!sort.equals(Sorts.K())) {

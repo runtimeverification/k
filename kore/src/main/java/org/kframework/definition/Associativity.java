@@ -2,5 +2,5 @@
 package org.kframework.definition;
 
 public enum Associativity {
-  Left, Right, NonAssoc, Unspecified
+  Left, Right, NonAssoc
 }

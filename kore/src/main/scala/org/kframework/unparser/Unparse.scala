@@ -6,14 +6,12 @@ import org.kframework.kore.Unapply._
 import org.kframework.kore.{KLabel, InjectedKLabel, K, KApply}
 import org.kframework.utils.StringUtil
 
-import scala.collection.JavaConverters._
-
 /**
  * Print terms according to the official KAST syntax.
  */
 object ToKast {
   def apply(k: K): String = {
-    val b = StringBuilder.newBuilder
+    val b = new StringBuilder()
     unparse(s => b ++= s, false, 0, k)
     b.toString()
   }
@@ -31,9 +29,9 @@ object ToKast {
         && l.name != "#token" && l.name != "#klabel") {
       name = l.name
     } else if (inParen) {
-      name = " `"+ escapeBackTicksAndSlashes(l.name) +'`'
+      name = " `"+ escapeBackTicksAndSlashes(l.name) +"`"
     } else {
-      name = '`' + escapeBackTicksAndSlashes(l.name) + '`'
+      name = "`" + escapeBackTicksAndSlashes(l.name) + "`"
     }
     if (l.params.isEmpty) {
       name

@@ -93,7 +93,7 @@ public class ResolveStrict {
         String[] strictAttrs = attribute.split(",");
         for (String strictAttr : strictAttrs) {
             String label = strictAttr.trim();
-            Option<scala.collection.Set<Sentence>> ss = d.mainModule().labeled().get(label);
+            Option<scala.collection.immutable.Set<Sentence>> ss = d.mainModule().labeled().get(label);
             if (ss.isDefined()) {
                 for (Sentence s : iterable(ss.get())) {
                     if (s instanceof ContextAlias) {
@@ -252,6 +252,6 @@ public class ResolveStrict {
                 .filter(s -> s instanceof Production)
                 .map(s -> (Production) s)
                 .filter(p -> p.att().contains("strict") || p.att().contains("seqstrict")).collect(Collectors.toSet()));
-        return Module(input.name(), input.imports(), (scala.collection.Set<Sentence>) stream(input.localSentences()).filter(s -> !(s instanceof ContextAlias)).collect(Collections.toSet()).$bar(immutable(contextsToAdd)), input.att());
+        return Module(input.name(), input.imports(), (scala.collection.immutable.Set<Sentence>) stream(input.localSentences()).filter(s -> !(s instanceof ContextAlias)).collect(Collections.toSet()).$bar(immutable(contextsToAdd)), input.att());
     }
 }

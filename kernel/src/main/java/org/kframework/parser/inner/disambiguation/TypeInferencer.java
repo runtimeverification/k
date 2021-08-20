@@ -22,8 +22,8 @@ import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
 
-import scala.collection.Seq;
-import scala.collection.Set;
+import scala.collection.immutable.Seq;
+import scala.collection.immutable.Set;
 import scala.Tuple2;
 
 import java.io.BufferedReader;

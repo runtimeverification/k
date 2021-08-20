@@ -8,8 +8,7 @@ import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.Sentence;
-import scala.collection.Set;
-import scala.collection.JavaConverters;
+import scala.collection.immutable.Set;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,7 @@ public class GeneratedTopFormat {
         if (prod.klabel().isDefined() && prod.klabel().get().equals(KLabels.GENERATED_TOP_CELL)) {
             List<Integer> cellPositions = new ArrayList<Integer>();
             int i = 1;
-            for (ProductionItem p: JavaConverters.seqAsJavaList(prod.items())) {
+            for (ProductionItem p: mutable(prod.items())) {
                 if (p instanceof NonTerminal) {
                     NonTerminal nt = (NonTerminal) p;
                     if (! nt.sort().equals(Sorts.GeneratedCounterCell())) {
@@ -50,7 +49,7 @@ public class GeneratedTopFormat {
     }
 
     public static Module resolve(Module m) {
-        Set<Sentence> newSentences = JavaConverters.asScalaSet(stream(m.localSentences()).map(s -> s instanceof Production ? resolve((Production) s) : s).collect(Collectors.toSet()));
+        Set<Sentence> newSentences = immutable(stream(m.localSentences()).map(s -> s instanceof Production ? resolve((Production) s) : s).collect(Collectors.toSet()));
         return Module(m.name(), m.imports(), newSentences, m.att());
     }
 

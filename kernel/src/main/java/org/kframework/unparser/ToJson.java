@@ -58,7 +58,6 @@ import javax.json.JsonStructure;
 import scala.Enumeration;
 import scala.Option;
 import scala.Tuple2;
-import scala.collection.JavaConverters;
 import scala.collection.Seq;
 import scala.collection.Set;
 
@@ -102,7 +101,7 @@ public class ToJson {
         JsonObjectBuilder jdef = Json.createObjectBuilder();
 
         JsonArrayBuilder mods = Json.createArrayBuilder();
-        for (Module m : JavaConverters.setAsJavaSet(def.modules())) {
+        for (Module m : mutable(def.modules())) {
             mods.add(toJson(m));
         }
 
@@ -119,7 +118,7 @@ public class ToJson {
         jatt.add("node", JsonParser.KATT);
 
         JsonObjectBuilder jattKeys = Json.createObjectBuilder();
-        for (Tuple2<String,String> key: JavaConverters.seqAsJavaList(att.att().keys().toSeq())) {
+        for (Tuple2<String,String> key: mutable(att.att().keys().toSeq())) {
             jattKeys.add(key._1(), att.att().get(key).get().toString());
         }
         jatt.add("att", jattKeys.build());
@@ -209,7 +208,7 @@ public class ToJson {
         jsyn.add("node", JsonParser.KSYNTAXPRIORITY);
 
         JsonArrayBuilder priArray = Json.createArrayBuilder();
-        for (Set<Tag> pri : JavaConverters.seqAsJavaList(syn.priorities())) {
+        for (Set<Tag> pri : mutable(syn.priorities())) {
             JsonArrayBuilder tagArray = Json.createArrayBuilder();
             pri.foreach(t -> tagArray.add(t.name()));
             priArray.add(tagArray);
@@ -265,7 +264,7 @@ public class ToJson {
         jsyn.add("sort", toJson(syn.sort()));
 
         JsonArrayBuilder params = Json.createArrayBuilder();
-        JavaConverters.seqAsJavaList(syn.params()).forEach(p -> params.add(toJson(p)));
+        mutable(syn.params()).forEach(p -> params.add(toJson(p)));
         jsyn.add("params", params.build());
 
         jsyn.add("att", toJson(syn.att()));
@@ -306,11 +305,11 @@ public class ToJson {
         }
 
         JsonArrayBuilder productionItems = Json.createArrayBuilder();
-        JavaConverters.seqAsJavaList(pro.items()).forEach(p -> productionItems.add(toJson(p)));
+        mutable(pro.items()).forEach(p -> productionItems.add(toJson(p)));
         jpro.add("productionItems", productionItems.build());
 
         JsonArrayBuilder params = Json.createArrayBuilder();
-        JavaConverters.seqAsJavaList(pro.params()).forEach(p -> params.add(toJson(p)));
+        mutable(pro.params()).forEach(p -> params.add(toJson(p)));
         jpro.add("params", params.build());
 
         jpro.add("sort", toJson(pro.sort()));

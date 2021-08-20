@@ -6,8 +6,6 @@ import org.kframework.attributes._
 import org.kframework.unparser.ToKast
 import org.kframework.utils.errorsystem.KEMException
 
-import scala.collection.JavaConverters._
-
 /**
  * This file contains all inner KORE interfaces.
  * The the wiki for documentation:
@@ -34,8 +32,8 @@ object K {
       import scala.math.Ordering.Implicits._
       (a, b) match {
         case (c: KToken, d: KToken) => Ordering.Tuple2(Ordering[String], Ordering[Sort]).compare((c.s, c.sort), (d.s, d.sort))
-        case (c: KApply, d: KApply) => Ordering.Tuple2(KLabelOrdering, seqDerivedOrdering[Seq, K](this)).compare((c.klabel, c.klist.items.asScala), (d.klabel, d.klist.items.asScala))
-        case (c: KSequence, d: KSequence) => seqDerivedOrdering(this).compare(c.items.asScala, d.items.asScala)
+        case (c: KApply, d: KApply) => Ordering.Tuple2(KLabelOrdering, seqOrdering[Seq, K](this)).compare((c.klabel, c.klist.scalaItems), (d.klabel, d.klist.scalaItems))
+        case (c: KSequence, d: KSequence) => seqOrdering(this).compare(c.scalaItems, d.scalaItems)
         case (c: KVariable, d: KVariable) => Ordering[String].compare(c.name, d.name)
         case (c: KAs, d: KAs) => Ordering.Tuple2(this, this).compare((c.pattern, c.alias), (d.pattern, d.alias))
         case (c: KRewrite, d: KRewrite) => Ordering.Tuple2(this, this).compare((c.left, c.right), (d.left, d.right))
@@ -79,7 +77,7 @@ trait KLabel extends AttValue {
 object KLabelOrdering extends Ordering[KLabel] {
   def compare(a: KLabel, b: KLabel): Int = {
     import scala.math.Ordering.Implicits._
-    Ordering.Tuple2(Ordering[String], seqDerivedOrdering[Seq, Sort](Ordering[Sort])).compare((a.name, a.params), (b.name, b.params))
+    Ordering.Tuple2(Ordering[String], seqOrdering[Seq, Sort](Ordering[Sort])).compare((a.name, a.params), (b.name, b.params))
   }
 }
 
@@ -104,7 +102,7 @@ trait Sort extends Ordered[Sort] with AttValue {
     
   def compare(that: Sort): Int = {
     import scala.math.Ordering.Implicits._
-    Ordering.Tuple2(Ordering[String], seqDerivedOrdering[Seq, Sort](Ordering.ordered(identity))).compare((this.name, this.params), (this.name, this.params))
+    Ordering.Tuple2(Ordering[String], seqOrdering[Seq, Sort](Ordering.ordered(identity))).compare((this.name, this.params), (this.name, this.params))
   }
 
   def head: SortHead = ADT.SortHead(name, params.size)
@@ -145,6 +143,7 @@ trait SortHead extends Ordered[SortHead] {
 
 trait KCollection {
   def items: java.util.List[K]
+  def scalaItems: Seq[K]
   def size: Int
   def asIterable: java.lang.Iterable[_ <: K]
   def stream: java.util.stream.Stream[K] = items.stream()

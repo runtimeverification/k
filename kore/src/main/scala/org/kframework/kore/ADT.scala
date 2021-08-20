@@ -5,7 +5,7 @@ import org.kframework.kore
 import org.kframework.kore.KORE.Sort
 import org.kframework.attributes._
 
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /**
  * Abstract Data Types: basic implementations for the inner KORE interfaces.
@@ -28,12 +28,14 @@ object ADT {
 
   case class KApply[KK <: K](klabel: kore.KLabel, klist: kore.KList, att: Att = Att.empty) extends kore.KApply {
     def items = klist.items
+    def scalaItems = klist.scalaItems
     def size = klist.size
     def asIterable = klist.asIterable
   }
 
   class KSequence private(val elements: List[K], val att: Att = Att.empty) extends kore.KSequence {
     val items: java.util.List[K] = elements.asJava
+    def scalaItems: List[K] = elements
     val size: Int = elements.size
     val asIterable: java.lang.Iterable[K] = new org.kframework.List(elements)
     lazy val kApply: kore.KApply = items.asScala reduceRightOption { (a, b) => KLabels.KSEQ.apply(a, b) } getOrElse { KLabels.DOTK.apply() } match {
@@ -89,6 +91,7 @@ object ADT {
 
   case class KList(elements: List[K]) extends kore.KList {
     lazy val items: java.util.List[K] = elements.asJava
+    def scalaItems = elements
     def iterator: Iterator[K] = elements.iterator
     lazy val size = elements.size
     lazy val asIterable = new org.kframework.List(elements)

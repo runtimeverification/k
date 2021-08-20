@@ -8,7 +8,7 @@ import org.junit.Assert._
 
 class NoAppendIT extends KoreTest {
 
-  @Test def test() {
+  @Test def test(): Unit = {
     val axioms = this.axioms("module TEST imports K-EQUAL imports DEFAULT-STRATEGY configuration <k> $PGM:K </k> <s/> endmodule")
     for (axiom <- axioms) {
       val rewrite = getRewrite(axiom)

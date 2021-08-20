@@ -42,7 +42,6 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 
-import scala.collection.JavaConverters;
 import scala.Function1;
 import scala.Option;
 
@@ -218,7 +217,7 @@ public class Kompile {
 
     private static String ruleSourceMap(Definition def) {
         List<String> ruleLocs = new ArrayList<String>();
-        for (Sentence s: JavaConverters.setAsJavaSet(def.mainModule().sentences())) {
+        for (Sentence s: mutable(def.mainModule().sentences())) {
             if (s instanceof RuleOrClaim) {
                 Optional<Source>   optFile = s.att().getOptional(Source.class);
                 Optional<Location> optLine = s.att().getOptional(Location.class);

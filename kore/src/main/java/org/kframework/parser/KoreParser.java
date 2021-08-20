@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
 
@@ -25,7 +26,7 @@ public class KoreParser {
 
     public KoreParser(Map<SortHead, Att> sortAttMap) {
         textToKore = new TextToKore();
-        koreToK = new org.kframework.parser.kore.parser.KoreToK(stream(sortAttMap).map(t -> Tuple2.apply(t._1().name(), t._2().getOptional("hook").orElse(""))).collect(Collections.toMap()));
+        koreToK = new org.kframework.parser.kore.parser.KoreToK(stream(sortAttMap).map(t -> Tuple2.apply(t._1().name(), t._2().getOptional("hook").orElse(""))).collect(Collectors.collectingAndThen(Collectors.toMap(t -> t._1(), t -> t._2()), org.kframework.Collections::immutable)));
     }
 
     public K parseString(String koreString) {

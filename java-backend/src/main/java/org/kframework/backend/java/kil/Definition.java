@@ -25,8 +25,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
-import scala.collection.JavaConversions;
-import scala.collection.JavaConverters;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -118,8 +116,8 @@ public class Definition extends JavaSymbolicObject {
         Module moduleWithPolyProds = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
 
         ImmutableSetMultimap.Builder<String, SortSignature> signaturesBuilder = ImmutableSetMultimap.builder();
-        JavaConversions.mapAsJavaMap(moduleWithPolyProds.signatureFor()).entrySet().stream().forEach(e -> {
-            JavaConversions.setAsJavaSet(e.getValue()).stream().forEach(p -> {
+        mutable(moduleWithPolyProds.signatureFor()).entrySet().stream().forEach(e -> {
+            mutable(e.getValue()).stream().forEach(p -> {
                 ImmutableList.Builder<Sort> sortsBuilder = ImmutableList.builder();
                 stream(p._1()).map(s -> Sort.of(s)).forEach(sortsBuilder::add);
                 signaturesBuilder.put(
@@ -129,7 +127,7 @@ public class Definition extends JavaSymbolicObject {
         });
 
         ImmutableMap.Builder<String, Att> attributesBuilder = ImmutableMap.builder();
-        JavaConversions.mapAsJavaMap(module.attributesFor()).entrySet().stream().forEach(e -> {
+        mutable(module.attributesFor()).entrySet().stream().forEach(e -> {
             attributesBuilder.put(e.getKey().name(), e.getValue());
         });
 
@@ -138,7 +136,7 @@ public class Definition extends JavaSymbolicObject {
                 getDataStructureSorts(module),
                 signaturesBuilder.build(),
                 attributesBuilder.build(),
-                JavaConverters.mapAsJavaMapConverter(module.freshFunctionFor()).asJava().entrySet().stream().collect(Collectors.toMap(
+                mutable(module.freshFunctionFor()).entrySet().stream().collect(Collectors.toMap(
                         e -> Sort.of(e.getKey()),
                         e -> e.getValue())),
                 Collections.emptyMap(),

@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 K Team. All Rights Reserved.
+// Copyright (c) 2017-2019 K Team. All Rights Reserved.
 package org.kframework.parser.json;
 
 import org.kframework.attributes.Att;
@@ -32,7 +32,6 @@ import org.kframework.kore.Sort;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
-import scala.collection.JavaConverters;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -128,7 +127,7 @@ public class JsonParser {
             flatModules.add(toFlatModule(m));
         }
 
-        scala.collection.Set<Module> koreModules = FlatModule.toModules(immutable(flatModules), Set());
+        scala.collection.immutable.Set<Module> koreModules = FlatModule.toModules(immutable(flatModules), Set());
         return Constructors.Definition(
                 koreModules.find(x -> x.name().equals(mainModuleName))
                         .getOrElse(() -> { throw new AssertionError("Could not find main module name " + mainModuleName + " when loading from JSON."); }),
@@ -187,17 +186,23 @@ public class JsonParser {
             case KSYNTAXPRIORITY: {
                 JsonArray priorities = data.getJsonArray("priorities");
                 Att att = toAtt(data.getJsonObject("att"));
-                List<scala.collection.Set<Tag>> syntaxPriorities = new ArrayList<>();
+                List<scala.collection.immutable.Set<Tag>> syntaxPriorities = new ArrayList<>();
                 priorities.getValuesAs(JsonArray.class).forEach(tags -> syntaxPriorities.add(toTags(tags)));
-                return new SyntaxPriority(JavaConverters.iterableAsScalaIterableConverter(syntaxPriorities).asScala().toSeq(), att);
+                return new SyntaxPriority(immutable(syntaxPriorities), att);
             }
             case KSYNTAXASSOCIATIVITY: {
                 String assocString = data.getString("assoc");
-                Associativity assoc = assocString == "Left"     ? Associativity.Left
-                                              : assocString == "Right"    ? Associativity.Right
-                                              : assocString == "NonAssoc" ? Associativity.NonAssoc
-                                              : Associativity.Unspecified;
-                scala.collection.Set<Tag> tags = toTags(data.getJsonArray("tags"));
+                Associativity assoc;
+                if (assocString.equals("Left")) {
+                  assoc = Associativity.Left;
+                } else if (assocString.equals("Right")) {
+                  assoc = Associativity.Right;
+                } else if (assocString.equals("NonAssoc")) {
+                  assoc = Associativity.NonAssoc;
+                } else {
+                  throw KEMException.internalError("Invalid JSON");
+                }
+                scala.collection.immutable.Set<Tag> tags = toTags(data.getJsonArray("tags"));
                 Att att = toAtt(data.getJsonObject("att"));
                 return new SyntaxAssociativity(assoc, tags, att);
             }
@@ -214,7 +219,7 @@ public class JsonParser {
                 for (JsonObject s : data.getJsonArray("params").getValuesAs(JsonObject.class)) {
                     params.add(toSort(s));
                 }
-                return new SyntaxSort(JavaConverters.asScalaIteratorConverter(params.iterator()).asScala().toSeq(), sort, att);
+                return new SyntaxSort(immutable(params), sort, att);
             }
             case KSORTSYNONYM: {
                 Sort newSort = toSort(data.getJsonObject("newSort"));
@@ -247,17 +252,17 @@ public class JsonParser {
                 for (JsonObject s : data.getJsonArray("params").getValuesAs(JsonObject.class)) {
                     params.add(toSort(s));
                 }
-                return new Production(klabel, JavaConverters.asScalaIteratorConverter(params.iterator()).asScala().toSeq(), sort, JavaConverters.asScalaIteratorConverter(pItems.iterator()).asScala().toSeq(), att);
+                return new Production(klabel, immutable(params), sort, immutable(pItems), att);
             }
             default:
                 throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
         }
     }
 
-    private static scala.collection.Set<Tag> toTags(JsonArray data) {
+    private static scala.collection.immutable.Set<Tag> toTags(JsonArray data) {
         Set<Tag> tags = new HashSet<>();
         data.getValuesAs(JsonString.class).forEach(s -> tags.add(new Tag(s.getString())));
-        return JavaConverters.asScalaSet(tags);
+        return immutable(tags);
     }
 
     private static Sort toSort(JsonObject data) {

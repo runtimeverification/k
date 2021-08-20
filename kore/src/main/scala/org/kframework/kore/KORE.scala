@@ -1,11 +1,10 @@
 package org.kframework.kore
 
-import org.kframework.{CombinerFromBuilder, Collector, attributes}
+import org.kframework.attributes
 import org.kframework.attributes.Att
 
 import scala.collection.mutable.ListBuffer
-import collection.JavaConverters._
-import collection._
+import scala.jdk.CollectionConverters._
 
 /**
  *
@@ -39,12 +38,6 @@ object KORE extends Constructors with ScalaSugared {
 
   def InjectedKLabel(label: KLabel): InjectedKLabel = InjectedKLabel(label, Att)
 
-  //  def toKList: Collector[K, KList] =
-  //    Collector(() => new CombinerFromBuilder(KList.newBuilder()))
-
-  //  def toKSequence: Collector[K, KSequence] =
-  //    Collector(() => new CombinerFromBuilder(KSequence.newBuilder()))
-
   @annotation.varargs override def KLabel(name: String, params: Sort*): KLabel = ADT.KLabel(name, params:_*)
 
   override def KApply(klabel: KLabel, klist: KList, att: Att): KApply = ADT.KApply(klabel, klist, att)
@@ -61,7 +54,7 @@ object KORE extends Constructors with ScalaSugared {
     ADT.Sort(name.name)
   }
 
-  def Sort(name: String, params: java.util.List[Sort]): Sort = ADT.Sort(name, params.asScala:_*)
+  def Sort(name: String, params: java.util.List[Sort]): Sort = ADT.Sort(name, params.asScala.toSeq:_*)
 
   def SortHead(name: String, params: Int): SortHead = ADT.SortHead(name, params)
 

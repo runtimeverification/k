@@ -2,7 +2,6 @@ package org.kframework.kore
 
 import org.kframework.attributes.Att
 import org.kframework.definition.Module
-import collection.JavaConverters._
 
 case class Rich(theModule: Module) {
 

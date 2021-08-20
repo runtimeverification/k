@@ -5,7 +5,8 @@ import java.util
 import org.kframework.POSet
 import org.kframework.kore.KORE.{KApply, KLabel}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
+import scala.collection.MapView
 import org.kframework.compile.ConfigurationInfo.Multiplicity
 import org.kframework.definition.{Module, NonTerminal, Production, Rule}
 import org.kframework.kore._
@@ -14,7 +15,6 @@ import org.kframework.utils.errorsystem.KEMException
 
 import org.kframework.builtin.Sorts
 
-import collection._
 
 object ConfigurationInfoFromModule
 
@@ -42,8 +42,8 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
   private val cellBagProductions: Map[Sort,Production] = buildCellProductionMap(cellBagProductionsSet)
 
   private val cellBagSubsorts: Map[Sort, Set[Sort]] = cellBagProductions.values.map(p => (p.sort, getCellSortsOfCellBag(p.sort))).toMap
-  private val cellLabels: Map[Sort, KLabel] = cellProductions.mapValues(_.klabel.get)
-  private val cellLabelsToSorts: Map[KLabel, Sort] = cellLabels.map(_.swap)
+  private val cellLabels: MapView[Sort, KLabel] = cellProductions.view.mapValues(_.klabel.get)
+  private val cellLabelsToSorts: Map[KLabel, Sort] = cellLabels.map(_.swap).toMap
 
   private val cellFragmentLabel: Map[Sort,KLabel] =
     m.productions.filter(_.att.contains("cellFragment", classOf[Sort]))

@@ -17,7 +17,7 @@ object NormalizeKSeq extends (K => K) {
   def apply(k: K): K = {
     k match {
       case app: KApply =>
-        val convertedK: K = KApply(app.klabel, immutable(app.klist.items) map apply, app.att)
+        val convertedK: K = KApply(app.klabel, app.klist.scalaItems map apply, app.att)
         if (app.klabel == kseq) normalize(convertedK) else convertedK
       case rw: KRewrite => KRewrite(apply(rw.left), apply(rw.right), rw.att)
       case other => other

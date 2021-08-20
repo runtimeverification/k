@@ -29,7 +29,7 @@ public class GenerateSortPredicateSyntax {
         if (!res.isEmpty()) {
             res.add(SyntaxSort(Seq(), Sorts.K()));
         }
-        return Module(mod.name(), mod.imports(), (scala.collection.Set<Sentence>) mod.localSentences().$bar(immutable(res)), mod.att());
+        return Module(mod.name(), mod.imports(), (scala.collection.immutable.Set<Sentence>) mod.localSentences().$bar(immutable(res)), mod.att());
     }
 
     public Set<Sentence> gen(Module mod, Sort sort) {

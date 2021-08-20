@@ -15,7 +15,7 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
-import scala.collection.Set;
+import scala.collection.immutable.Set;
 
 import java.util.ArrayList;
 import java.util.HashSet;

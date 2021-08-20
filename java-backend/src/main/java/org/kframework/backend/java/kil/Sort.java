@@ -8,7 +8,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import org.kframework.kore.KORE;
-import scala.collection.Seq;
+import scala.collection.immutable.Seq;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

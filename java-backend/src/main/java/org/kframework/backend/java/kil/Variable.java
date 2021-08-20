@@ -8,7 +8,7 @@ import org.kframework.attributes.Att;
 import org.kframework.backend.java.symbolic.Transformer;
 import org.kframework.backend.java.symbolic.Visitor;
 import org.kframework.backend.java.util.Constants;
-import scala.collection.Seq;
+import scala.collection.immutable.Seq;
 
 import java.util.Map;
 import java.util.Set;

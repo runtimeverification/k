@@ -41,7 +41,6 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.SMTOptions;
 import scala.Function1;
 import scala.Tuple2;
-import scala.collection.JavaConversions;
 
 import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
@@ -54,6 +53,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.kframework.kore.KORE.*;
+import static org.kframework.Collections.*;
 
 /**
  * Created by dwightguth on 5/6/15.
@@ -467,7 +467,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             Definition definition = new Definition(module, kem);
             global.setDefinition(definition);
 
-            JavaConversions.setAsJavaSet(module.attributesFor().keySet()).stream()
+            mutable(module.attributesFor().keySet()).stream()
                     .map(l -> KLabelConstant.of(l, definition))
                     //sorting to eliminate non-determinism in logs
                     .sorted(Comparator.comparing(KLabelConstant::label))

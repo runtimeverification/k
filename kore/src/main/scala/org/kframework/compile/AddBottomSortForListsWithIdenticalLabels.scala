@@ -4,7 +4,6 @@ import org.kframework.attributes.Att
 import org.kframework.definition._
 import org.kframework.kore.KORE.Sort
 
-import collection._
 import scala.collection.immutable.Iterable
 
 object AddBottomSortForListsWithIdenticalLabels extends Function[Module, Module] {

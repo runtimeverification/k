@@ -38,7 +38,7 @@ public class CorrectKSeqPriorityVisitor extends SetsTransformerWithErrors<KEMExc
     @Override
     public Either<java.util.Set<KEMException>, Term> apply(Ambiguity amb) {
         // if the ambiguity has KSeq at the top, prefer them, and eliminate the rest
-        scala.collection.Set<Term> rewrites = amb.items().stream().filter(o ->
+        scala.collection.immutable.Set<Term> rewrites = amb.items().stream().filter(o ->
                 o instanceof TermCons &&
                         ((TermCons) o).production().klabel().isDefined() &&
                         ((TermCons) o).production().klabel().get().name().equals("#KSequence")).collect(Collections.toSet());

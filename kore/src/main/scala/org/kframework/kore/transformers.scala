@@ -2,8 +2,7 @@
 
 package org.kframework.kore
 
-import collection._
-import JavaConverters._
+import scala.jdk.CollectionConverters._
 
 trait KTransformer[T] extends ((K) => T) with java.util.function.Function[K, T] {
 
@@ -72,7 +71,7 @@ class KVisitor extends java.util.function.Consumer[K] {
 
   def accept(k: K) = apply(k)
 
-  def apply(k: K) {
+  def apply(k: K): Unit = {
     k match {
       case k: KApply => apply(k: KApply)
       case k: KRewrite => apply(k)

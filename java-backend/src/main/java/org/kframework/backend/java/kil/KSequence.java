@@ -11,6 +11,9 @@ import org.kframework.kore.K;
 import java.util.Collections;
 import java.util.List;
 
+import scala.collection.immutable.Seq;
+
+import static org.kframework.Collections.*;
 
 /**
  * Represents a list of KItem, or {@link KItem} in the Java backend. Or in the
@@ -94,6 +97,11 @@ public class KSequence extends KCollection implements org.kframework.kore.KSeque
         } else {
             return super.items();
         }
+    }
+
+    @Override
+    public Seq<K> scalaItems() {
+        return immutable(items());
     }
 
     @Override

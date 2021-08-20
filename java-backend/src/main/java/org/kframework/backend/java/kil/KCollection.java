@@ -11,7 +11,9 @@ import org.kframework.backend.java.util.Constants;
 
 import com.google.common.base.Joiner;
 import org.kframework.kore.K;
+import scala.collection.immutable.Seq;
 
+import static org.kframework.Collections.*;
 
 /**
  * Represents either a {@link KList} or a {@link KSequence}.
@@ -173,6 +175,11 @@ public abstract class KCollection extends Collection implements Iterable<Term>, 
     @Override
     public List<K> items() {
         return (List<K>) (Object) getContents();
+    }
+
+    @Override
+    public Seq<K> scalaItems() {
+        return immutable(items());
     }
 
     @Override

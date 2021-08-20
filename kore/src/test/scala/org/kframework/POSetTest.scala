@@ -12,7 +12,7 @@ class POSetTest {
 
   val b1 = Bar(1); val b2 = Bar(2); val b3 = Bar(3); val b4 = Bar(4); val b5 = Bar(5)
 
-  @Test def transitiveness() {
+  @Test def transitiveness(): Unit = {
     implicit val p = POSet(b1 -> b2, b2 -> b3, b4 -> b5)
 
     assertTrue(b1 < b3)
@@ -23,21 +23,21 @@ class POSetTest {
   }
 
   @Test(expected = classOf[KEMException])
-  def circularityTestFail() {
+  def circularityTestFail(): Unit = {
     POSet(b1 -> b2, b2 -> b1)
   }
 
   @Test(expected = classOf[KEMException])
-  def circularityTestFailId() {
+  def circularityTestFailId(): Unit = {
     POSet(b1 -> b1)
   }
 
   @Test(expected = classOf[KEMException])
-  def circularityTestFailThree() {
+  def circularityTestFailThree(): Unit = {
     POSet(b1 -> b2, b2 -> b3, b3 -> b2)
   }
 
-  @Test def lub() {
+  @Test def lub(): Unit = {
     assertEquals(Some(b2), POSet(b1 -> b2).lub)
     assertEquals(Some(b3), POSet(b1 -> b3, b2 -> b3).lub)
     assertEquals(Some(b4), POSet(b1 -> b3, b2 -> b3, b3 -> b4).lub)

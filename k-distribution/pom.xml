@@ -82,7 +82,6 @@
         </executions>
         <configuration>
           <args>
-            <arg>-Xexperimental</arg>
             <arg>-feature</arg>
             <arg>-deprecation</arg>
             <arg>-language:implicitConversions</arg>

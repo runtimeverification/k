@@ -285,7 +285,7 @@ public class SymbolicRewriter {
     private Term restoreConfigurationIfNecessary(ConstrainedTerm subject, Rule rule, Term theNew) {
         if (rule.att().contains(Att.REFERS_RESTORE_CONFIGURATION())) {
             K strategyCell = new FindK() {
-                public scala.collection.Set<K> apply(KApply k) {
+                public scala.collection.immutable.Set<K> apply(KApply k) {
                     if (k.klabel().name().equals(Strategy.strategyCellName()))
                         return org.kframework.Collections.Set(k);
                     else
@@ -294,7 +294,7 @@ public class SymbolicRewriter {
             }.apply(theNew).head();
 
             K theRestoredBody = new FindK() {
-                public scala.collection.Set<K> apply(KApply k) {
+                public scala.collection.immutable.Set<K> apply(KApply k) {
                     if (k.klabel().name().equals("#RESTORE_CONFIGURATION"))
                         return org.kframework.Collections.Set(k.klist().items().get(0));
                     else

@@ -5,7 +5,6 @@ import org.kframework.utils.errorsystem.KEMException
 
 import java.util
 import java.util.Optional
-import collection._
 
 /**
  * A partially ordered set based on an initial set of direct relations.
@@ -13,7 +12,7 @@ import collection._
 class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
 
   // convert the input set of relations to Map form for performance
-  private val directRelationsMap: Map[T, Set[T]] = directRelations groupBy { _._1 } mapValues { _ map { _._2 } toSet } map identity
+  private val directRelationsMap: Map[T, Set[T]] = (directRelations groupBy { _._1 }).view mapValues { _ map { _._2 } toSet } toMap
 
   lazy val elements: Set[T] = directRelations.flatMap(a => Set(a._1, a._2))
 
@@ -44,7 +43,7 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
    * @param current element
    * @param path so far
    */
-  private def constructAndThrowCycleException(start: T, current: T, path: Seq[T]) {
+  private def constructAndThrowCycleException(start: T, current: T, path: Seq[T]): Unit = {
     val currentPath = path :+ current
     val succs = directRelationsMap.getOrElse(current, Set())
     if (succs.contains(start)) {
@@ -117,8 +116,8 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
     sorts.filter(s1 => !sorts.exists(s2 => lessThan(s1,s2))).toSet
 
   def maximal(sorts : util.Collection[T]) : util.Set[T] = {
-    import scala.collection.JavaConversions._
-    maximal(sorts : Iterable[T])
+    import scala.jdk.CollectionConverters._
+    maximal(sorts.asScala).asJava
   }
 
   /**
@@ -129,12 +128,12 @@ class POSet[T](val directRelations: Set[(T, T)]) extends Serializable {
     sorts.filter(s1 => !sorts.exists(s2 => >(s1,s2))).toSet
 
   def minimal(sorts : util.Collection[T]) : util.Set[T] = {
-    import scala.collection.JavaConversions._
-    minimal(sorts : Iterable[T])
+    import scala.jdk.CollectionConverters._
+    minimal(sorts.asScala).asJava
   }
 
   override def toString() = {
-    "POSet(" + (relations flatMap { case (from, tos) => tos map { case to => from + "<" + to } }).mkString(",") + ")"
+    "POSet(" + (relations flatMap { case (from, tos) => tos map { case to => from.toString + "<" + to.toString } }).mkString(",") + ")"
   }
 
   override def hashCode = relations.hashCode()

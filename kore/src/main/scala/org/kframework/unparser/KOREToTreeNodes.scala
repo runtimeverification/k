@@ -11,8 +11,7 @@ import org.kframework.parser.{KList => _, _}
 import org.kframework.utils.StringUtil
 import org.pcollections.ConsPStack
 
-import collection._
-import JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object KOREToTreeNodes {
 
@@ -28,7 +27,7 @@ object KOREToTreeNodes {
   def apply(t: K, mod: Module, fromKore: Boolean): Term = t match {
     case t: KToken => Constant(t.s, mod.tokenProductionFor(t.sort), t.att.getOptional(classOf[Location]), t.att.getOptional(classOf[Source]))
     case a: KApply =>
-      val scalaChildren = a.klist.items.asScala map { i: K => apply(i, mod, fromKore).asInstanceOf[Term] }
+      val scalaChildren = a.klist.scalaItems map { i: K => apply(i, mod, fromKore).asInstanceOf[Term] }
       val children = ConsPStack.from(scalaChildren.reverse asJava)
       val loc = t.att.getOptional(classOf[Location])
       val source = t.att.getOptional(classOf[Source])
@@ -64,9 +63,9 @@ object KOREToTreeNodes {
       val sort = Sort(t.sort.name, t.sort.params:_*)
       KToken(t.s, sort, t.att)
     case s: KSequence =>
-      upList(mod)(s.items.asScala).foldRight(KApply(KLabel("#EmptyK"), KList(), s.att))((k1, k2) => KApply(KLabel("#KSequence"), KList(k1, k2), s.att))
+      upList(mod)(s.scalaItems).foldRight(KApply(KLabel("#EmptyK"), KList(), s.att))((k1, k2) => KApply(KLabel("#KSequence"), KList(k1, k2), s.att))
     case r: KRewrite => KApply(KLabel("#KRewrite"), KList(up(mod)(r.left), up(mod)(r.right)), r.att)
-    case t: KApply => KApply(t.klabel, upList(mod)(t.klist.items.asScala), t.att)
+    case t: KApply => KApply(t.klabel, upList(mod)(t.klist.scalaItems), t.att)
   }
 
   def upList(mod: Module)(items: Seq[K]): Seq[K] = {
