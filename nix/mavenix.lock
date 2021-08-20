@@ -1434,6 +1434,10 @@
       "sha1": "47e0dd93285dcc6b33181713bc7e8aed66742964"
     },
     {
+      "path": "com/googlecode/juniversalchardet/juniversalchardet/1.0.3/juniversalchardet-1.0.3.pom",
+      "sha1": "be6da8320adedafc712d645ddaaad00357b55408"
+    },
+    {
       "path": "com/helger/maven/ph-javacc-maven-plugin/4.1.4/ph-javacc-maven-plugin-4.1.4.jar",
       "sha1": "c4434297659c27e788ee9d352188862734278fe5"
     },
@@ -1576,10 +1580,6 @@
     {
       "path": "com/puppycrawl/tools/checkstyle/8.19/checkstyle-8.19.pom",
       "sha1": "db7bb76bc0aefa23d21d36949cec9ab8e0d14e1d"
-    },
-    {
-      "path": "com/runtimeverification/k/parent/1.0-SNAPSHOT/parent-1.0-20200713.173706-176.pom",
-      "sha1": "54a2ded5657583ddf53845ed8347386b704d4348"
     },
     {
       "path": "com/thoughtworks/qdox/qdox/1.12/qdox-1.12.jar",
@@ -2478,10 +2478,6 @@
       "sha1": "21663b93af1247eab73abb3a1c999e9b4b4c4430"
     },
     {
-      "path": "jline/jline/2.14.5/jline-2.14.5.pom",
-      "sha1": "9eb9ceeea01a5668165055f317af43db1a834c4f"
-    },
-    {
       "path": "joda-time/joda-time/2.8.1/joda-time-2.8.1.jar",
       "sha1": "f5bfc718c95a7b1d3c371bb02a188a4df18361a9"
     },
@@ -2624,6 +2620,14 @@
     {
       "path": "net/java/dev/jna/jna/4.5.1/jna-4.5.1.pom",
       "sha1": "30f4caff4cda589a081bedc5c7c72d2ffbee6273"
+    },
+    {
+      "path": "net/java/dev/jna/jna/5.3.1/jna-5.3.1.jar",
+      "sha1": "6eb9d07456c56b9c2560722e90382252f0f98405"
+    },
+    {
+      "path": "net/java/dev/jna/jna/5.3.1/jna-5.3.1.pom",
+      "sha1": "1639fbc106fb148481148978c45531e49e79c745"
     },
     {
       "path": "net/java/jvnet-parent/3/jvnet-parent-3.pom",
@@ -5774,6 +5778,26 @@
       "sha1": "fc5c25638339e5197c22c70d9bf08efd2ece0928"
     },
     {
+      "path": "org/apache/sshd/sshd-common/2.1.0/sshd-common-2.1.0.pom",
+      "sha1": "e9a3fc83c513175bcaa2c959bc86b6016e0a1fab"
+    },
+    {
+      "path": "org/apache/sshd/sshd-core/2.1.0/sshd-core-2.1.0.pom",
+      "sha1": "899d4daf011070a85ca24331146a19a63d6074e6"
+    },
+    {
+      "path": "org/apache/sshd/sshd-scp/2.1.0/sshd-scp-2.1.0.pom",
+      "sha1": "1d73472baaa55e68f24e500e0fa2a7a3b819980b"
+    },
+    {
+      "path": "org/apache/sshd/sshd-sftp/2.1.0/sshd-sftp-2.1.0.pom",
+      "sha1": "39773899699005cc6334ec397f6d29281fe76c50"
+    },
+    {
+      "path": "org/apache/sshd/sshd/2.1.0/sshd-2.1.0.pom",
+      "sha1": "907e16f55698951a6bfab35e3ceed6d77640bd44"
+    },
+    {
       "path": "org/apache/struts/struts-core/1.3.8/struts-core-1.3.8.jar",
       "sha1": "66178d4a9279ebb1cd1eb79c10dc204b4199f061"
     },
@@ -6846,6 +6870,10 @@
       "sha1": "ad0238e7718c2f5f50e3e1bf93ed14c3a3d15675"
     },
     {
+      "path": "org/fusesource/fusesource-pom/1.12/fusesource-pom-1.12.pom",
+      "sha1": "778b55850b2bb4ebf48c02bc57a9afb1eec8f52e"
+    },
+    {
       "path": "org/fusesource/fusesource-pom/1.8/fusesource-pom-1.8.pom",
       "sha1": "d4f1b288004e1a8c8bc9f61f5f151d1ef0d4211a"
     },
@@ -6872,6 +6900,10 @@
     {
       "path": "org/fusesource/jansi/jansi/1.11/jansi-1.11.pom",
       "sha1": "af75ce5357c0cab4dc273738073fcfb39a10fdfe"
+    },
+    {
+      "path": "org/fusesource/jansi/jansi/2.1.0/jansi-2.1.0.pom",
+      "sha1": "ca03fdce484ffe07ca8608ffc314fe0a2f7a36a8"
     },
     {
       "path": "org/glassfish/javax.json/1.0.4/javax.json-1.0.4.jar",
@@ -6932,6 +6964,18 @@
     {
       "path": "org/jetbrains/annotations/15.0/annotations-15.0.pom",
       "sha1": "061c533b685552908a13ff6af0f6deb0d531b312"
+    },
+    {
+      "path": "org/jline/jline-parent/3.19.0/jline-parent-3.19.0.pom",
+      "sha1": "f4a06cc11e50bd9e069558d19e9715d039d64451"
+    },
+    {
+      "path": "org/jline/jline/3.19.0/jline-3.19.0.jar",
+      "sha1": "27edf6497c4fac20b63ca4cd8788581ca86cb83e"
+    },
+    {
+      "path": "org/jline/jline/3.19.0/jline-3.19.0.pom",
+      "sha1": "d0d05f6e7acdf88e2e117585416195258c11a65a"
     },
     {
       "path": "org/jsoup/jsoup/1.11.3/jsoup-1.11.3.jar",
@@ -7210,12 +7254,12 @@
       "sha1": "5ada4f90b1651ae7b89766df379740215570fec7"
     },
     {
-      "path": "org/scala-lang/modules/scala-xml_2.12/1.0.6/scala-xml_2.12-1.0.6.jar",
-      "sha1": "e22de3366a698a9f744106fb6dda4335838cf6a7"
+      "path": "org/scala-lang/modules/scala-parallel-collections_2.13/1.0.3/scala-parallel-collections_2.13-1.0.3.jar",
+      "sha1": "f0f414d81a7c2e1900cd72fb74ee07622e6432f6"
     },
     {
-      "path": "org/scala-lang/modules/scala-xml_2.12/1.0.6/scala-xml_2.12-1.0.6.pom",
-      "sha1": "be1e909cee8fcaa2aba20438ffb7e2f7462e3e7d"
+      "path": "org/scala-lang/modules/scala-parallel-collections_2.13/1.0.3/scala-parallel-collections_2.13-1.0.3.pom",
+      "sha1": "2500c173a1e34366cfe8731daafd49d689618d58"
     },
     {
       "path": "org/scala-lang/scala-compiler/2.10.5/scala-compiler-2.10.5.jar",
@@ -7226,12 +7270,12 @@
       "sha1": "c3e0b6cf2f45a5a7cb052ef9e00f8fdac55e71b7"
     },
     {
-      "path": "org/scala-lang/scala-compiler/2.12.4/scala-compiler-2.12.4.jar",
-      "sha1": "c69c0ee397050d7fa30cfe490471388d30c03bd0"
+      "path": "org/scala-lang/scala-compiler/2.13.5/scala-compiler-2.13.5.jar",
+      "sha1": "89f92380397757b03411693c2a3391e84b79e478"
     },
     {
-      "path": "org/scala-lang/scala-compiler/2.12.4/scala-compiler-2.12.4.pom",
-      "sha1": "b1584d2334a379f4d670d4bf479028dda04446b7"
+      "path": "org/scala-lang/scala-compiler/2.13.5/scala-compiler-2.13.5.pom",
+      "sha1": "c1f9c5f4af2564c74318d0aa4aebaf30f857330b"
     },
     {
       "path": "org/scala-lang/scala-library/2.10.5/scala-library-2.10.5.jar",
@@ -7242,20 +7286,12 @@
       "sha1": "4e8b721680f2defb491fe90447302658d464d5c0"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.0/scala-library-2.12.0.jar",
-      "sha1": "270fc1cda47bc255f3cd03152ec8c2ed7d224e2b"
+      "path": "org/scala-lang/scala-library/2.13.5/scala-library-2.13.5.jar",
+      "sha1": "d0df6e78b6ccb0102cb0395bfa8cb806e9e81b61"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.0/scala-library-2.12.0.pom",
-      "sha1": "ec47a11a9a60cd7c33d3fb68d6e5bb81a92b973e"
-    },
-    {
-      "path": "org/scala-lang/scala-library/2.12.4/scala-library-2.12.4.jar",
-      "sha1": "7663f74ef944453c86cc7e6597ed33e9281f6412"
-    },
-    {
-      "path": "org/scala-lang/scala-library/2.12.4/scala-library-2.12.4.pom",
-      "sha1": "661d2aad643bbbe5b530b917dcbf5ae4750e01e5"
+      "path": "org/scala-lang/scala-library/2.13.5/scala-library-2.13.5.pom",
+      "sha1": "2841921de68092d0a139f22b47423d803b6e0378"
     },
     {
       "path": "org/scala-lang/scala-reflect/2.10.5/scala-reflect-2.10.5.jar",
@@ -7266,12 +7302,12 @@
       "sha1": "30f1f646114a79eeefb254ead190f045c4605649"
     },
     {
-      "path": "org/scala-lang/scala-reflect/2.12.4/scala-reflect-2.12.4.jar",
-      "sha1": "2df9e6015b97e35464edddd20eec392bb54fab11"
+      "path": "org/scala-lang/scala-reflect/2.13.5/scala-reflect-2.13.5.jar",
+      "sha1": "08dee4d8c5374920f2db2f5f55d9dd6ecd4194cc"
     },
     {
-      "path": "org/scala-lang/scala-reflect/2.12.4/scala-reflect-2.12.4.pom",
-      "sha1": "2fa11f84ca26c8a29add2bec72f4137d0cf254a2"
+      "path": "org/scala-lang/scala-reflect/2.13.5/scala-reflect-2.13.5.pom",
+      "sha1": "dc324bdc6c42ec3ab44331820da910a1ff4ca9f0"
     },
     {
       "path": "org/slf4j/jcl-over-slf4j/1.5.6/jcl-over-slf4j-1.5.6.jar",
@@ -7308,6 +7344,10 @@
     {
       "path": "org/slf4j/slf4j-api/1.5.6/slf4j-api-1.5.6.pom",
       "sha1": "b79729ffc12292c0ec755db12360486066f6fd34"
+    },
+    {
+      "path": "org/slf4j/slf4j-api/1.7.21/slf4j-api-1.7.21.pom",
+      "sha1": "da1347f4af6398d8c9cece95ca215baf8570449b"
     },
     {
       "path": "org/slf4j/slf4j-api/1.7.25/slf4j-api-1.7.25.jar",
@@ -7360,6 +7400,10 @@
     {
       "path": "org/slf4j/slf4j-parent/1.5.6/slf4j-parent-1.5.6.pom",
       "sha1": "7e94cd535680417391d54c1b1a14bcf9ed29a400"
+    },
+    {
+      "path": "org/slf4j/slf4j-parent/1.7.21/slf4j-parent-1.7.21.pom",
+      "sha1": "974e5bae7c87ae28134204511dcba6f327de9d5c"
     },
     {
       "path": "org/slf4j/slf4j-parent/1.7.25/slf4j-parent-1.7.25.pom",
@@ -7654,6 +7698,10 @@
       "sha1": "7f500699ef371383492a4d6ee799b1a77ffd82cc"
     },
     {
+      "path": "org/springframework/spring-framework-bom/5.0.8.RELEASE/spring-framework-bom-5.0.8.RELEASE.pom",
+      "sha1": "ff907a9872f3996de48c2c6288c6f11cb6edc111"
+    },
+    {
       "path": "org/tmatesoft/sqljet/sqljet/1.0.4/sqljet-1.0.4.jar",
       "sha1": "e887bd8e02033afec7e2c618e44387d84116fd5c"
     },
@@ -7800,10 +7848,6 @@
   ],
   "groupId": "com.runtimeverification.k",
   "metas": [
-    {
-      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>com.runtimeverification.k</groupId>\n  <artifactId>parent</artifactId>\n  <version>1.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20200713.173706</timestamp>\n      <buildNumber>176</buildNumber>\n    </snapshot>\n    <lastUpdated>20200713173706</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0-20200713.173706-176</value>\n        <updated>20200713173706</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
-      "path": "com/runtimeverification/k/parent/1.0-SNAPSHOT"
-    },
     {
       "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-all</artifactId>\n  <version>0.9.2-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20180116.225224</timestamp>\n      <buildNumber>2</buildNumber>\n    </snapshot>\n    <lastUpdated>20180116225224</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>0.9.2-20180116.225224-2</value>\n        <updated>20180116225224</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
       "path": "org/kframework/dependencies/nailgun-all/0.9.2-SNAPSHOT"
