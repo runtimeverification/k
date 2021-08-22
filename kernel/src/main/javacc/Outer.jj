@@ -238,7 +238,7 @@ public class Outer {
   public static Sort parseSort(String string) {
     Outer parser = new Outer(new StringReader(string));
     try {
-      return parser.SimpleSort();
+      return parser.SimpleSortParam();
     } catch (ParseException e) {
       throw KEMException.compilerError("Could not parse " + string + " as a sort.", e);
     } catch (TokenMgrException e) {
@@ -495,20 +495,38 @@ String StringRegex() : {}
   }
 }
 
+/** Sort names may not be numbers, but sort parameter names may be numbers */
 Sort SimpleSort() : { String str; Sort sort; List<Sort> params = new ArrayList<Sort>(); }
 {
   UpperId() { str = image(); }
   (
-    "{" sort = SimpleSort() { params.add(sort); }
-    ("," sort = SimpleSort() { params.add(sort); })*
+    "{" sort = SimpleSortParam() { params.add(sort); }
+    ("," sort = SimpleSortParam() { params.add(sort); })*
+    "}"
+  )?
+  { return Sort(str, params); }
+}
+
+Sort SimpleSortParam() : { String str; Sort sort; List<Sort> params = new ArrayList<Sort>(); }
+{
+  UpperId() { str = image(); }
+  (
+    "{" sort = SimpleSortParam() { params.add(sort); }
+    ("," sort = SimpleSortParam() { params.add(sort); })*
     "}"
   )?
   { return Sort(str, params); }
 | <NAT> { str = image(); return Sort(str, params); }
 }
 
-/** Parses and returns a NonTerminal but not a List or NeList */
-NonTerminal SimpleSortID() : { Location loc = startLoc(); Sort sort; Optional<String> name = Optional.empty(); }
+/** Non-parameterized sort names are not followed by curly braces */
+Sort NonParamSimpleSort() : {}
+{
+  UpperId() { return Sort(image(), new ArrayList<Sort>()); }
+}
+
+/** Parses and returns a NonTerminal that is a sort ID optionally with a name (but is not a List or NeList) */
+NonTerminal SortID() : { Location loc = startLoc(); Sort sort; Optional<String> name = Optional.empty(); }
 {
   (LOOKAHEAD((<UPPER_ID> | <LOWER_ID>) ":")
   (<UPPER_ID> | <LOWER_ID>) { name = Optional.of(image()); } ":")?
@@ -516,10 +534,10 @@ NonTerminal SimpleSortID() : { Location loc = startLoc(); Sort sort; Optional<St
   { return markLoc(loc, new NonTerminal(sort, name)); }
 }
 
-/** Parses and returns a NonTerminal */
-NonTerminal SortID() : { NonTerminal nonTerminal; }
+/** Parses and returns a NonTerminal that is a sort ID without a name (but is not a List or NeList) */
+NonTerminal SimpleSortID() : { Location loc = startLoc(); Sort sort; }
 {
-  nonTerminal = SimpleSortID() { return nonTerminal; }
+  sort = SimpleSort() { return markLoc(loc, new NonTerminal(sort, Optional.empty())); }
 }
 
 ///////
@@ -730,12 +748,12 @@ void Sentence(Module module) :
   ss = Bubble(type) { module.appendModuleItem(markLoc(loc, ss)); }
 
 | "syntax" 
-  ( { List<Sort> params = new ArrayList<Sort>(); } ( "{" param = SimpleSort() { params.add(param); } ( "," param = SimpleSort() { params.add(param); })* "}" )? nonTerminal = SortID() {ModuleItem syn = new Syntax(nonTerminal, params); }
+  ( { List<Sort> params = new ArrayList<Sort>(); } ( "{" param = NonParamSimpleSort() { params.add(param); } ( "," param = NonParamSimpleSort() { params.add(param); })* "}" )? nonTerminal = SimpleSortID() {ModuleItem syn = new Syntax(nonTerminal, params); }
     ( "::=" { List<PriorityBlock> pblocks = new ArrayList<PriorityBlock>(); }
       PriorityBlock(pblocks) (">" PriorityBlock(pblocks))*
       { ((Syntax)syn).setPriorityBlocks(pblocks); }
     | Attributes(syn)
-    | "=" (oldSort = SortID()) { syn = new SortSynonym(nonTerminal, oldSort); }
+    | "=" (oldSort = SimpleSortID()) { syn = new SortSynonym(nonTerminal, oldSort); }
       (Attributes(syn))?)?
     { module.appendModuleItem(markLoc(loc, syn)); }
   | ("priority" | "priorities")
@@ -747,7 +765,7 @@ void Sentence(Module module) :
   | ("left" | "right" | "non-assoc") { SwitchTo(KLABEL_STATE); type = image(); }
       list = KLabels()
     { module.appendModuleItem(markLoc(loc, new PriorityExtendedAssoc(type, list))); }
-  | "lexical" (nonTerminal = SortID()) "=" (str = StringRegex())
+  | "lexical" (nonTerminal = SimpleSortID()) "=" (str = StringRegex())
     { module.appendModuleItem(markLoc(loc, new SyntaxLexical(nonTerminal.getSort().name(), str))); }
   )
 }
