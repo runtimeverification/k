@@ -1,0 +1,4 @@
+[Error] Inner Parser: Parse error: unexpected token ')'.
+	Source(partialImport.k)
+	Location(5,12,5,13)
+[Error] Compiler: Had 1 parsing errors.
