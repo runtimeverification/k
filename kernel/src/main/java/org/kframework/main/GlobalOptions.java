@@ -130,7 +130,7 @@ public final class GlobalOptions {
     @Parameter(names={"--warnings-to-errors", "-w2e"}, description="Convert warnings to errors.")
     public boolean warnings2errors = false;
 
-    @Parameter(names="--profile-rule-parsing", description="Generate time in seconds to parse each rule in the semantics.")
+    @Parameter(names="--profile-rule-parsing", description="Store in the given file the time in milliseconds to parse each rule in the semantics.")
     public String profileRules;
 
     @Parameter(names = {"--shutdown-wait-time"}, converter = DurationConverter.class,
