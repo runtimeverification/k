@@ -280,7 +280,7 @@ syntax being imported. If an import's module name is followed by a `.`
 character followed by an attribute name or klabel, then only sentences that
 have that attribute name or productions that have that klabel attribute will
 be imported by that declaration. For example, if I say `imports FOO.bar`, then
-only productiosn whose klabel attribute is `bar` or whose attribute list
+only productions whose klabel attribute is `bar` or whose attribute list
 contains the `bar` attribute will be visible to the importing module. Note that
 all rules, constructors, and sorts declared in that module will still exist
 in the final interpreter.
