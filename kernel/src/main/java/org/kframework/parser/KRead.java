@@ -65,7 +65,7 @@ public class KRead {
     }
 
     public void createBisonParser(Module mod, Sort sort, File outputFile, boolean glr, String bisonFile, long stackDepth) {
-        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, true, false, true)) {
+        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, true, null, true, false)) {
             try (Scanner scanner = parseInModule.getScanner(kem.options)) {
                 File scannerFile = files.resolveTemp("scanner.l");
                 File scanHdr = files.resolveTemp("scanner.h");

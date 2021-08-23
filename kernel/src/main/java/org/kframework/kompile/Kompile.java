@@ -130,14 +130,6 @@ public class Kompile {
      */
     public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Function<Definition, Definition> pipeline, Set<String> excludedModuleTags) {
         files.resolveKompiled(".").mkdirs();
-
-        if (kompileOptions.profileRules) {
-            for (File f : files.resolveKompiled(".").listFiles()) {
-                if (f.getName().matches("timing[0-9]+\\.log")) {
-                    f.delete();
-                }
-            }
-        }
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, excludedModuleTags);
 
         files.saveToKompiled("parsed.txt", parsedDef.toString());

@@ -25,6 +25,7 @@ import org.kframework.definition.UserList;
 import org.kframework.kore.Sort;
 import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.inner.kernel.Scanner;
+import org.kframework.utils.TimingCollector;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import scala.collection.Seq;
@@ -183,27 +184,23 @@ public class RuleGrammarGenerator {
 
     /* use this overload if you don't need to profile rule parse times. */
     public static ParseInModule getCombinedGrammar(Module mod, boolean strict) {
-      return getCombinedGrammar(mod, strict, false, false, false, null);
+      return getCombinedGrammar(mod, strict, null, false, false);
     }
 
-    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, boolean isBison) {
-      return getCombinedGrammar(mod, strict, timing, isBison, false, null);
-    }
-
-    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, FileUtil files) {
-      return getCombinedGrammar(mod, strict, timing, false, false, files);
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, TimingCollector timing) {
+      return getCombinedGrammar(mod, strict, timing, false, false);
     }
 
     // the forGlobalScanner flag tells the ParseInModule class not to exclude
     // private syntax from the grammar generated for the module. It should
-    // not be used when actually peforming parsing as this will lead to
+    // not be used when actually performing parsing as this will lead to
     // incorrect grammars. However, it is used in one place in the code:
     // during rule parsing, we generate a single scanner to scan all the
     // modules. This must include the private syntax of those modules,
     // otherwise we would not be able to use it to scan the modules in which
-    //  that private syntax is visible.
-    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, FileUtil files, boolean forGlobalScanner) {
-      return getCombinedGrammar(mod, strict, timing, false, forGlobalScanner, files);
+    // that private syntax is visible.
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, TimingCollector timing, boolean forGlobalScanner) {
+      return getCombinedGrammar(mod, strict, timing, false, forGlobalScanner);
     }
 
     /**
@@ -215,12 +212,12 @@ public class RuleGrammarGenerator {
      * @param mod module for which to create the parser.
      * @return parser which applies disambiguation filters by default.
      */
-    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, boolean isBison, boolean forGlobalScanner, FileUtil files) {
-        return new ParseInModule(mod, strict, timing, isBison, forGlobalScanner, files);
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, TimingCollector timing, boolean isBison, boolean forGlobalScanner) {
+        return new ParseInModule(mod, strict, timing, isBison, forGlobalScanner);
     }
 
-    public static ParseInModule getCombinedGrammar(Module mod, Scanner scanner, boolean strict, boolean timing, boolean isBison, FileUtil files) {
-        return new ParseInModule(mod, scanner, strict, timing, isBison, false, files);
+    public static ParseInModule getCombinedGrammar(Module mod, Scanner scanner, boolean strict, TimingCollector timing, boolean isBison) {
+        return new ParseInModule(mod, scanner, strict, timing, isBison, false);
     }
 
     public static Tuple3<Module, Module, Module> getCombinedGrammarImpl(Module mod, boolean isBison, boolean forGlobalScanner) {
