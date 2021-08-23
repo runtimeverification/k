@@ -21,14 +21,10 @@ object Collections {
   def immutable[K, V](s: java.util.Map[K, V]): Map[K, V] = s.asScala.toMap
   def immutable[T](s: Array[T]): Seq[T] = s.toIndexedSeq
 
-  def mutable[T](s: scala.List[T]): java.util.List[T] = s.asJava
-  def mutable[T](s: Seq[T]): java.util.List[T] = s.asJava
-  def mutable[K, V](s: Map[K, V]): java.util.Map[K, V] = s.asJava
-  def mutable[T](s: Set[T]): java.util.Set[T] = {
-    val x = new util.HashSet[T]()
-    x.addAll(s.asJava)
-    x
-  }
+  def mutable[T](s: scala.List[T]): java.util.List[T] = new util.ArrayList[T](s.asJava)
+  def mutable[T](s: Seq[T]): java.util.List[T] = new util.ArrayList[T](s.asJava)
+  def mutable[K, V](s: Map[K, V]): java.util.Map[K, V] = new util.HashMap(s.asJava)
+  def mutable[T](s: Set[T]): java.util.Set[T] = new util.HashSet[T](s.asJava)
 
   def iterable[T](c: Iterable[T]): java.lang.Iterable[T] = c.asJava
   def stream[T](c: Iterable[T]): java.util.stream.Stream[T] = StreamSupport.stream(c.asJava.spliterator(), false);
