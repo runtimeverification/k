@@ -4,7 +4,7 @@ Installing the K Framework Package
 We currently strive to provide packages for the following platforms:
 
 -   Ubuntu Bionic Beaver (18.04) and Focal Fossa (20.04)
--   Debian Buster
+-   Debian Bullseye
 -   Arch Linux
 -   MacOS X Mojave/Homewbrew
 -   Docker Images
@@ -83,14 +83,10 @@ sudo apt install ./kframework_X.Y.Z_amd64_bionic.deb
 sudo apt install ./kframework_X.Y.Z_amd64_focal.deb
 ```
 
-### Debian Buster
-
-K requires at least LLVM 8, but Debian Buster by default has LLVM 7.
-As a result, you need to enable the Debian Backports apt repository for Debian.
+### Debian Bullseye
 
 ```sh
-echo "deb http://deb.debian.org/debian buster-backports main" > /etc/apt/sources.list.d/buster-backports.list
-sudo apt install ./kframework_X.Y.Z_amd64_buster.deb
+sudo apt install ./kframework_X.Y.Z_amd64_bullseye.deb
 ```
 
 ### Arch Linux
