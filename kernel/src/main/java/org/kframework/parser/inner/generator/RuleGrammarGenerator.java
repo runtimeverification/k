@@ -152,7 +152,7 @@ public class RuleGrammarGenerator {
                 UnaryOperator<Import> f = _import -> {
                     Option<Module> programParsing = baseK.getModule(_import.module().name() + "-PROGRAM-PARSING");
                     if (programParsing.isDefined()) {
-                        return Import(programParsing.get(), _import.isPublic());
+                        return Import(programParsing.get(), _import.isPublic(), _import.tag());
                     }
                     return _import;
                 };
