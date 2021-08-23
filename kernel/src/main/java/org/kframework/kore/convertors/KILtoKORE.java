@@ -92,8 +92,8 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     public org.kframework.definition.FlatImport apply(Import imp) {
         return org.kframework.definition.FlatImport.apply(
-            imp.getName(), 
-            imp.isPublic(), 
+            imp.getName(),
+            imp.isPublic(),
             imp.getTag() == null ? immutable(Optional.empty()) : immutable(Optional.of(Tag(imp.getTag()))),
             convertAttributes(imp));
     }
