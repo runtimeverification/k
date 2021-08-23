@@ -165,7 +165,7 @@ public class Kompile {
                 String filename = "parser_" + def.programStartSymbol.name() + "_" + def.mainSyntaxModuleName();
                 File outputFile = files.resolveKompiled(filename);
                 File linkFile = files.resolveKompiled("parser_PGM");
-                new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, outputFile, kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth);
+                new KRead(kem, files, InputModes.PROGRAM, kompileOptions.global).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, outputFile, kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth);
                 try {
                     linkFile.delete();
                     Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
@@ -191,7 +191,7 @@ public class Kompile {
                         String filename = "parser_" + sort.name() + "_" + module;
                         File outputFile = files.resolveKompiled(filename);
                         File linkFile = files.resolveKompiled("parser_" + name);
-                        new KRead(kem, files, InputModes.PROGRAM).createBisonParser(mod.get(), sort, outputFile, kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth);
+                        new KRead(kem, files, InputModes.PROGRAM, kompileOptions.global).createBisonParser(mod.get(), sort, outputFile, kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth);
                         try {
                             linkFile.delete();
                             Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
