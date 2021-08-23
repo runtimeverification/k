@@ -33,7 +33,7 @@ object AddBottomSortForListsWithIdenticalLabels extends Function[Module, Module]
     val theAdditionalSubsortingProductions = theAdditionalSubsortingProductionsSets.flatten
 
     if (theAdditionalSubsortingProductions.nonEmpty)
-      Module(m.name, m.publicImports, m.privateImports, m.localSentences ++ theAdditionalSubsortingProductions, m.att)
+      Module(m.name, m.imports, m.localSentences ++ theAdditionalSubsortingProductions, m.att)
     else
       m
   }

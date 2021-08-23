@@ -30,7 +30,7 @@ object ModuleTransformer {
       }
       //TODO(compare attributes)
       if (newSentences != m.localSentences)
-        Module(m.name, m.publicImports, m.privateImports, newSentences, m.att)
+        Module(m.name, m.imports, newSentences, m.att)
       else
         m
     }, name)
@@ -72,10 +72,9 @@ class ModuleTransformer(f: Module => Module, name: String) extends (Module => Mo
 
   override def apply(input: Module): Module = {
     memoization.getOrElseUpdate(input, {
-      var newPublicImports = input.publicImports map this
-      var newPrivateImports = input.privateImports map this
-      if (newPublicImports != input.publicImports || newPrivateImports != input.privateImports)
-        f(Module(input.name, newPublicImports, newPrivateImports, input.localSentences, input.att))
+      var newImports = input.imports map (i => Import(this(i.module), i.isPublic))
+      if (newImports != input.imports)
+        f(Module(input.name, newImports, input.localSentences, input.att))
       else
         f(input)
     })

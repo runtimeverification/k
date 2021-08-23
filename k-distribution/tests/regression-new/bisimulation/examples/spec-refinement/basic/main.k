@@ -19,6 +19,7 @@ imports STRING
 imports STRATEGY
 imports RULE-TAG-SYNTAX
 imports K-REFLECTION
+imports K-EQUAL
 
 configuration <c>
   <k> $PGM:Pgm </k>

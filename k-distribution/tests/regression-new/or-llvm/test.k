@@ -4,6 +4,7 @@ module TEST
   imports INT
   imports BOOL
   imports ML-SYNTAX
+  imports BASIC-K
 
   configuration <k> $PGM:K </k> <c> 0 </c>
 

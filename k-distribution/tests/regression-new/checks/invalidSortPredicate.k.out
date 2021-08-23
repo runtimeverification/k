@@ -1,6 +1,6 @@
 [Error] Compiler: Invalid sort predicate isExp that depends directly or indirectly on the current configuration. Is it possible to replace the sort predicate with a regular function?
   while executing phase "Add sort injections" on sentence at
 	Source(invalidSortPredicate.k)
-	Location(6,8,6,53)
+	Location(7,8,7,53)
 	Source(invalidSortPredicate.k)
-	Location(6,8,6,16)
+	Location(7,8,7,16)
