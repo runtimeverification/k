@@ -1,0 +1,9 @@
+contentsOfJar(
+  Jar(
+    contentsOfJar(
+      Jar(
+        Apple()
+      )
+    )
+  )
+)
