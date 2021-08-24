@@ -4,9 +4,11 @@ package org.kframework.parser.inner.kernel;
 import org.apache.commons.codec.binary.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.kframework.POSet;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Production;
+import org.kframework.kore.Sort;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.KList;
 import org.kframework.parser.Term;
@@ -403,8 +405,9 @@ public class Parser {
         Map<NonTerminalCall.Key, NonTerminalCall> ntCalls = new HashMap<>();
         Map<StateCall.Key, StateCall> stateCalls = new HashMap<>();
         Map<StateReturn.Key, StateReturn> stateReturns = new HashMap<>();
+        final POSet<Sort> syntacticSubsorts;
 
-        public ParseState(String input, Scanner scanner, Source source, int startLine, int startColumn) {
+        public ParseState(String input, Scanner scanner, Source source, int startLine, int startColumn, POSet<Sort> syntacticSubsorts) {
             /**
              * Create arrays corresponding to the index in the input CharSequence and the line and
              * column in the text. Tab counts as one.
@@ -414,6 +417,7 @@ public class Parser {
              * http://www.unicode.org/reports/tr18/#Line_Boundaries
              */
             this.originalInput = input;
+            this.syntacticSubsorts = syntacticSubsorts;
             this.source = source;
             byte[] utf8 = StringUtils.getBytesUtf8(input);
             lines = new int[utf8.length+1];
@@ -549,12 +553,12 @@ public class Parser {
 
     private final ParseState s;
 
-    public Parser(String input, Scanner scanner) {
-        s = new ParseState(input, scanner, Source.apply("<unknown>"), 1, 1);
+    public Parser(String input, Scanner scanner, POSet<Sort> syntacticSubsorts) {
+        s = new ParseState(input, scanner, Source.apply("<unknown>"), 1, 1, syntacticSubsorts);
     }
 
-    public Parser(String input, Scanner scanner, Source source, int startLine, int startColumn) {
-        s = new ParseState(input, scanner, source, startLine, startColumn);
+    public Parser(String input, Scanner scanner, Source source, int startLine, int startColumn, POSet<Sort> syntacticSubsorts) {
+        s = new ParseState(input, scanner, source, startLine, startColumn, syntacticSubsorts);
     }
 
     /**

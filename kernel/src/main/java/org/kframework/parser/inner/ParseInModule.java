@@ -243,7 +243,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
 
             Term parsed;
             try {
-                Parser parser = new Parser(input, scanner, source, startLine, startColumn);
+                Parser parser = new Parser(input, scanner, source, startLine, startColumn, getParsingModule().syntacticSubsorts());
                 parsed = parser.parse(startSymbolNT, 0);
             } catch (KEMException e) {
                 return Tuple2.apply(Left.apply(Collections.singleton(e)), Collections.emptySet());
