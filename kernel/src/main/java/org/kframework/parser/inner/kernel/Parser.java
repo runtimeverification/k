@@ -8,6 +8,7 @@ import org.kframework.POSet;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Production;
+import org.kframework.definition.ProductionItem;
 import org.kframework.definition.TerminalLike;
 import org.kframework.kore.Sort;
 import org.kframework.parser.Ambiguity;
@@ -30,6 +31,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import static org.kframework.definition.Constructors.*;
 
 /**
  * This is the main code for running the parser.
@@ -625,24 +629,34 @@ public class Parser {
                 current = Math.max(current, key.stateBegin);
         }
         current = Math.max(current, s.maxPosition);
-        Set<Pair<Production, RegExState>> tokens = new HashSet<>();
-        for (StateCall.Key key : s.stateCalls.keySet()) {
-            if (key.state instanceof RegExState && key.stateBegin == s.maxPosition) {
-                tokens.add(new ImmutablePair<>(
-                    null, ((RegExState) key.state)));
+        Set<ProductionItem> expected = new HashSet<>();
+        Set<Sort> expectedSorts = new HashSet<>();
+        for (StateCall.Key key : s.failedStates) {
+            if (key.stateBegin == current) {
+                if (key.state instanceof NonTerminalState) {
+                    NonTerminalState state = (NonTerminalState)key.state;
+                    expectedSorts.add(state.child.sort);
+                } else if (key.state instanceof RegExState) {
+                    RegExState state = (RegExState)key.state;
+                    expected.add(s.resolve(state.kind));
+                } else {
+                    assert false;
+                }
             }
         }
+        expectedSorts = s.syntacticSubsorts.maximal(expectedSorts);
+        expected.addAll(expectedSorts.stream().map(s -> NonTerminal(s)).collect(Collectors.toSet()));
         if (s.input.length == 0) {
             return new ParseError(s.source, current, s.lines[0], s.columns[0],
-                    s.lines[0], s.columns[0] + 1, tokens);
+                    s.lines[0], s.columns[0] + 1, expected);
         }
         if (current == s.input.length) {
             Scanner.Token t = s.input[current - 1];
             return new ParseError(s.source, current, s.lines[t.endLoc], s.columns[t.endLoc],
-                    s.lines[t.endLoc], s.columns[t.endLoc] + 1, tokens);
+                    s.lines[t.endLoc], s.columns[t.endLoc] + 1, expected);
         } else {
             return new ParseError(s.source, current, s.lines[s.input[current].startLoc], s.columns[s.input[current].startLoc],
-                    s.lines[s.input[current].endLoc], s.columns[s.input[current].endLoc], tokens);
+                    s.lines[s.input[current].endLoc], s.columns[s.input[current].endLoc], expected);
         }
     }
 
@@ -657,18 +671,18 @@ public class Parser {
         public final int startLine;
         public final int endColumn;
         public final int endLine;
-        /// Pairs of Sorts and RegEx patterns that the parsed expected to occur next
-        public final Set<Pair<Production, RegExState>> tokens;
+        /// BNF production items that are expected to occur next
+        private final Set<ProductionItem> expected;
 
-        public ParseError(Source source, int position, int startLine, int startColumn, int endLine, int endColumn, Set<Pair<Production, RegExState>> tokens) {
+        public ParseError(Source source, int position, int startLine, int startColumn, int endLine, int endColumn, Set<ProductionItem> expected) {
             this.startColumn = startColumn;
             this.endColumn = endColumn;
             this.startLine = startLine;
             this.endLine = endLine;
-            assert tokens != null;
+            assert expected != null;
             this.source = source;
             this.position = position;
-            this.tokens = tokens;
+            this.expected = expected;
         }
     }
 
