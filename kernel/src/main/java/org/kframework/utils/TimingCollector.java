@@ -6,13 +6,13 @@ import scala.Tuple2;
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Deque;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @ThreadSafe
 public class TimingCollector {
-    final Deque<Tuple2<String, String>> messages = new ConcurrentLinkedDeque<>();
+    final Queue<Tuple2<String, String>> messages = new ConcurrentLinkedQueue<>();
 
     public void addMessage(String msg, String comparablePart) {
         messages.add(new Tuple2<>(msg, comparablePart));
