@@ -8,6 +8,7 @@ import org.kframework.POSet;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Production;
+import org.kframework.definition.TerminalLike;
 import org.kframework.kore.Sort;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.KList;
@@ -392,6 +393,7 @@ public class Parser {
     private static class ParseState {
         // the input string which needs parsing
         final Scanner.Token[] input;
+        private final Scanner scanner;
         final String originalInput;
         // a priority queue containing the return states to be processed
         final StateReturnWorkList stateReturnWorkList = new StateReturnWorkList();
@@ -417,6 +419,7 @@ public class Parser {
              * http://www.unicode.org/reports/tr18/#Line_Boundaries
              */
             this.originalInput = input;
+            this.scanner = scanner;
             this.syntacticSubsorts = syntacticSubsorts;
             this.source = source;
             byte[] utf8 = StringUtils.getBytesUtf8(input);
@@ -458,6 +461,10 @@ public class Parser {
             lines[utf8.length] = l;
             columns[utf8.length] = c;
             this.input = scanner.tokenize(input, source, lines, columns);
+        }
+
+        public TerminalLike resolve(int kind) {
+          return scanner.getTokenByKind(kind);
         }
     }
 
