@@ -612,6 +612,7 @@ public class Parser {
             if (perror.position != 0) {
                 msg = msg + " following token '" + s.input[perror.position - 1].value + "'";
             }
+            msg = msg + ". Expected one of: " + perror.getExpected(s.scanner.getGlobalOptions().verbose) + ".";
             Location loc = new Location(perror.startLine, perror.startColumn,
                     perror.endLine, perror.endColumn);
             Source source = perror.source;
