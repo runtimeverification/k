@@ -132,7 +132,7 @@ public class ECDSARecover implements Serializable {
      * as the pubKeyHash/address.
      */
     public byte[] getPubKey() {
-        return pub.getEncoded();
+        return pub.getEncoded(false);
     }
 
     public String toString() {

@@ -1,1 +1,1 @@
-arr ( .List , 10 , 0 ) [0]
+makeArray(10, 0) [0]

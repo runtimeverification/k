@@ -24,12 +24,12 @@ case class Bubble(sentenceType: String, contents: String, att: Att = Att.empty) 
   override def withAtt(att: Att) = Bubble(sentenceType, contents, att)
 }
 
-case class Import(name: String, att: Att = Att.empty) extends HasLocation {
+case class FlatImport(name: String, isPublic: Boolean, tag: Option[Tag], att: Att = Att.empty) extends HasLocation {
   override def location(): Optional[Location] = att.getOptional(classOf[Location])
   override def source(): Optional[Source] = att.getOptional(classOf[Source])
 }
 
-case class FlatModule(name: String, imports: Set[Import], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
+case class FlatModule(name: String, imports: Set[FlatImport], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
   extends OuterKORE with Sorting with Serializable {
 }
 
@@ -56,11 +56,12 @@ object FlatModule {
       }
       memoization.getOrElseUpdate(m.name, {
         // transform all imports into Module
-        val newImports = m.imports.map(i => memoization.getOrElse(i.name
+        val f = (i: FlatImport) => Import(memoization.getOrElse(i.name
           // if can't find the Module in memoization, build a new one
           , toModuleRec(allModules.find(f => f.name.equals(i.name))
               .getOrElse(throw KEMException.compilerError("Could not find module: " + i.name, i))
-            , visitedModules :+ m)))
+            , visitedModules :+ m)), i.isPublic, i.tag)
+        val newImports = m.imports.map(f)
         val newM = new Module(m.name, newImports, m.localSentences, m.att)
         newM.checkSorts()
         newM

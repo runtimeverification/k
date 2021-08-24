@@ -1,6 +1,7 @@
 module TEST
   imports INT
   imports MAP
+  imports LIST
 
   syntax KItem ::= "start"
   configuration <k> start </k>

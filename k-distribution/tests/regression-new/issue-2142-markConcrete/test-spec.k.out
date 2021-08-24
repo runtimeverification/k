@@ -1,0 +1,9 @@
+  #Not ( {
+    0
+  #Equals
+    keccak ( _0 )
+  } )
+#And
+  <k>
+    doneLemma ( keccak ( _0 ) ) ~> _DotVar1 ~> .
+  </k>

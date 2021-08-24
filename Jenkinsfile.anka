@@ -1,6 +1,6 @@
 // The way this Jenkinsfile should be configured is:
-// 1. Create a Pipeline job on Jenkins that checks out this repo and uses this
-//    Jenkinsfile. It should run once a week on weekends.
+// 1. Create a MultiBranch Pipeline job on Jenkins that checks out this repo
+//    and uses this Jenkinsfile.
 // 2. Create an Anka VM template in the Jenkins Anka Cloud Config that uses
 //    the below agent label and refers to the base image in the registry.
 // 3. Enable cache builder on that VM template and make it generate a new VM
@@ -9,6 +9,7 @@
 pipeline {
   agent { label 'docker' }
   options { ansiColor('xterm') }
+  triggers { cron('H/5 0-7 * * 0') }
   stages {
     stage('Build Anka VM') {
       options { timeout(time: 150, unit: 'MINUTES') }
@@ -16,7 +17,7 @@ pipeline {
       steps {
         sh '''
           package/macos/brew-install-deps
-          brew install opam
+          brew install opam pkg-config
         '''
       }
     }

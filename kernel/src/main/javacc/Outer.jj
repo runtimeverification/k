@@ -228,7 +228,7 @@ public class Outer {
                   return sb.toString();
                 }
               }).collect(Collectors.toList()).toString(), e, source,
-            new Location(e.currentToken.next.beginLine, e.currentToken.next.beginColumn, e.currentToken.next.endLine, e.currentToken.next.endColumn));
+            new Location(e.currentToken.next.beginLine, e.currentToken.next.beginColumn, e.currentToken.next.endLine, e.currentToken.next.endColumn), false);
     } catch (TokenMgrException e) {
       // TODO: report location
       throw KEMException.outerParserError(e.getMessage(), e, source, null);
@@ -425,6 +425,7 @@ PARSER_END(Outer)
 | <MODULE: "module"> : MODNAME_STATE
 | <IMPORTS: "imports"> : MODNAME_STATE
 | <IMPORTS2: "import"> : MODNAME_STATE
+| <IMPORT_DOT: "."> : KLABEL_STATE
 
 | <STRING: "\"" (~["\"", "\\", "\n"] |
                  "\\\"" | "\\n" | "\\r" | "\\t" | "\\\\")* "\"">
@@ -530,7 +531,9 @@ NonTerminal SortID() : { NonTerminal nonTerminal; }
 <MODNAME_STATE> SKIP: { " " | "\t" | "\r" | "\n" }
 <MODNAME_STATE> TOKEN:
 {
-  <MODNAME: ("#")?(["a"-"z", "0"-"9", "A"-"Z", "_"])+
+  <IMPORTSPRIVATE: "private"> : MODNAME_STATE
+| <IMPORTSPUBLIC: "public"> : MODNAME_STATE
+| <MODNAME: ("#")?(["a"-"z", "0"-"9", "A"-"Z", "_"])+
              ("-" (["a"-"z", "0"-"9", "A"-"Z", "_"])+)*> : DEFAULT
 }
 
@@ -705,10 +708,11 @@ void Module(List<DefinitionItem> items) : { Location loc = startLoc(); }
 }
 
 /** Parses an Import and adds it to module */
-void Import(Module module): { Location loc = startLoc(); boolean isSyntax = false; }
+void Import(Module module): { Location loc = startLoc(); boolean isPublic = module.getAttribute("private") == null; String tag = null; String modname; }
 {
-  ("imports" | "import") <MODNAME>
-  { module.appendModuleItem(markLoc(loc, new Import(image()))); }
+  ("imports" | "import") ((<IMPORTSPRIVATE> { isPublic = false; }) | (<IMPORTSPUBLIC> { isPublic = true; }) )? <MODNAME> { modname = image(); }
+  ("." <KLABEL> { tag = image(); } )?
+  { module.appendModuleItem(markLoc(loc, new Import(modname, isPublic, tag))); }
 }
 
 /** Parses a Sentence and adds it to 'module' */

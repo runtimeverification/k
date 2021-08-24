@@ -63,6 +63,7 @@ module IMP
   imports INT
   imports BOOL
   imports MAP
+  imports SET
 /*@ \section{Semantics}
 This module defines the semantics of IMP\@.
 Before you start adding semantic rules to a \K definition, you need to

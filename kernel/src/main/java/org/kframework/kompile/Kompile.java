@@ -59,6 +59,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -160,7 +161,14 @@ public class Kompile {
 
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(kompiledDefinition.mainModule());
 
-        CompiledDefinition def = new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(configInfo.getRootCell()).klabel());
+        boolean isKast = excludedModuleTags.contains(Att.KORE());
+        Sort rootCell;
+        if (isKast) {
+          rootCell = configInfo.getRootCell();
+        } else {
+          rootCell = Sorts.GeneratedTopCell();
+        }
+        CompiledDefinition def = new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(rootCell).klabel());
 
         if (kompileOptions.genBisonParser || kompileOptions.genGlrBisonParser) {
             if (def.configurationVariableDefaultSorts.containsKey("$PGM")) {
@@ -247,7 +255,8 @@ public class Kompile {
     }
 
     private static Module excludeModulesByTag(Set<String> excludedModuleTags, Module mod) {
-        Set<Module> newImports = stream(mod.imports()).filter(_import -> excludedModuleTags.stream().noneMatch(tag -> _import.att().contains(tag))).collect(Collectors.toSet());
+        Predicate<Import> f = _import -> excludedModuleTags.stream().noneMatch(tag -> _import.module().att().contains(tag));
+        Set<Import> newImports = stream(mod.imports()).filter(f).collect(Collectors.toSet());
         return Module(mod.name(), immutable(newImports), mod.localSentences(), mod.att());
     }
 
@@ -277,6 +286,9 @@ public class Kompile {
         DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
         Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, false)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
+        Function1<Definition, Definition> markExtraConcreteRules = d -> DefinitionTransformer.fromSentenceTransformer((m, s) ->
+                    s instanceof Rule && kompileOptions.extraConcreteRuleLabels.contains(s.att().getOption(Att.LABEL()).getOrElse(() -> null)) ?
+                            Rule.apply(((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att().add(Att.CONCRETE())) : s, "mark extra concrete rules").apply(d);
 
         return def -> resolveIO
                 .andThen(resolveFun)
@@ -297,10 +309,11 @@ public class Kompile {
                 .andThen(generateSortProjections)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(d -> new Strategy().addStrategyCellToRulesTransformer(d).apply(d))
-                .andThen(ConcretizeCells::transformDefinition)
+                .andThen(d -> ConcretizeCells.transformDefinition(d, false))
                 .andThen(genCoverage)
                 .andThen(Kompile::addSemanticsModule)
                 .andThen(resolveConfigVar)
+                .andThen(markExtraConcreteRules)
                 .apply(def);
     }
 
@@ -385,6 +398,25 @@ public class Kompile {
         return mt.apply(specModule);
     }
 
+    // Extra checks just for the prover specification.
+    public void proverChecksX(Module specModule, Module mainDefModule) {
+        // check rogue syntax in spec module
+        Set<Sentence> toCheck = mutable(specModule.sentences().$minus$minus(mainDefModule.sentences()));
+        for (Sentence s : toCheck)
+            if (s.isSyntax() && (!s.att().contains(Att.TOKEN()) || !mainDefModule.allSorts().contains(((Production) s).sort())))
+                errors.add(KEMException.compilerError("Found syntax declaration in proof module. Only tokens for existing sorts are allowed.", s));
+
+        ModuleTransformer mt = ModuleTransformer.fromSentenceTransformer((m, s) -> {
+            if (m.name().equals(mainDefModule.name()) || mainDefModule.importedModuleNames().contains(m.name()))
+                return s;
+            if (!(s instanceof Claim || s.isSyntax())) {
+                errors.add(KEMException.compilerError("Use claim instead of rule to specify proof objectives.", s));
+            }
+            return s;
+        }, "rules in spec module");
+        mt.apply(specModule);
+    }
+
     public void structuralChecks(scala.collection.Set<Module> modules, Module mainModule, Option<Module> kModule, Set<String> excludedModuleTags) {
         boolean isSymbolic = excludedModuleTags.contains(Att.CONCRETE());
         boolean isKast = excludedModuleTags.contains(Att.KORE());
@@ -448,16 +480,16 @@ public class Kompile {
         java.util.Set<Module> allModules = mutable(d.modules());
 
         Module languageParsingModule = Constructors.Module("LANGUAGE-PARSING",
-                Set(d.mainModule(),
-                        d.getModule(d.att().get(Att.SYNTAX_MODULE())).get(),
-                        d.getModule("K-TERM").get(),
-                        d.getModule(RuleGrammarGenerator.ID_PROGRAM_PARSING).get()), Set(), Att());
+                Set(Import(d.mainModule(), true),
+                        Import(d.getModule(d.att().get(Att.SYNTAX_MODULE())).get(), true),
+                        Import(d.getModule("K-TERM").get(), true),
+                        Import(d.getModule(RuleGrammarGenerator.ID_PROGRAM_PARSING).get(), true)), Set(), Att());
         allModules.add(languageParsingModule);
         return Constructors.Definition(d.mainModule(), immutable(allModules), d.att());
     }
 
     public static Definition resolveFreshConstants(Definition input) {
-        return DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(input, false).resolve(m)), "resolving !Var variables")
+        return DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(input, false, null).resolve(m)), "resolving !Var variables")
                 .apply(input);
     }
 
@@ -484,6 +516,6 @@ public class Kompile {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
-        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule()).concretize(input.mainModule(), s);
+        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule(), kompileOptions.isKore()).concretize(input.mainModule(), s);
     }
 }
