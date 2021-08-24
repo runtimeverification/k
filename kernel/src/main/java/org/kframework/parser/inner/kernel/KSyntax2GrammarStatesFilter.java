@@ -45,7 +45,7 @@ public class KSyntax2GrammarStatesFilter {
         Set<Sort> sorts = Stream.concat(stream(module.allSorts()), stream(module.usedCellSorts())).collect(Collectors.toSet());
         // create a NonTerminal for every declared sort
         for (Sort sort : sorts) {
-            grammar.add(grammar.new NonTerminal(sort.toString()));
+            grammar.add(grammar.new NonTerminal(sort.toString(), sort));
         }
 
         stream(module.productions()).filter(p -> p.params().isEmpty()).collect(Collectors.groupingBy(p -> p.sort())).entrySet().stream().sorted(Comparator.comparing(e2 -> e2.getKey().toString())).forEach(e -> processProductions(e.getKey(), e.getValue(), grammar, scanner));
@@ -133,7 +133,7 @@ public class KSyntax2GrammarStatesFilter {
                 if (prdItem instanceof org.kframework.definition.NonTerminal) {
                     org.kframework.definition.NonTerminal srt = (org.kframework.definition.NonTerminal) prdItem;
                     Grammar.NonTerminalState nts = grammar.new NonTerminalState(sort + " ::= " + srt.sort(), nt,
-                            Optional.ofNullable(grammar.get(srt.sort().toString())).orElse(grammar.nullNT()));
+                            Optional.ofNullable(grammar.get(srt.sort().toString())).orElse(grammar.nullNT(srt.sort())));
                     previous.next.add(nts);
                     previous = nts;
                 } else if (prdItem instanceof TerminalLike) {

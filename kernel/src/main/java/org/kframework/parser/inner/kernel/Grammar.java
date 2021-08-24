@@ -5,6 +5,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
+import org.kframework.kore.Sort;
 import org.kframework.utils.algorithms.SCCTarjan;
 
 import java.io.Serializable;
@@ -58,12 +59,14 @@ public class Grammar implements Serializable {
     /** The set of "root" NonTerminals */
     private BiMap<String, NonTerminal> startNonTerminals = HashBiMap.create();
 
-    public NonTerminal nullNT() {
-      return get("_Null");
-    }
-
-    public Grammar() {
-      add(new NonTerminal("_Null"));
+    public NonTerminal nullNT(Sort sort) {
+      String name = "_Null" + sort.toString();
+      NonTerminal nt = get(name);
+      if (nt == null) {
+        nt = new NonTerminal(name, sort);
+        add(nt);
+      }
+      return nt;
     }
 
     public boolean add(NonTerminal newNT) {
@@ -196,6 +199,7 @@ public class Grammar implements Serializable {
      */
     public class NonTerminal implements Serializable {
         public final String name;
+        public final Sort sort;
         private final int hashCode;
         public final int unique;
         /**
@@ -213,10 +217,11 @@ public class Grammar implements Serializable {
         private boolean[] firstSet;
         private boolean nullable;
 
-        public NonTerminal(String name) {
+        public NonTerminal(String name, Sort sort) {
             unique = ntCounter++;
             assert name != null && !name.equals("") : "NonTerminal name cannot be null or empty.";
             this.name = name;
+            this.sort = sort;
             hashCode = name.hashCode();
             this.entryState = new EntryState(name + "-entry", this);
             this.exitState = new ExitState(name + "-exit", this);
