@@ -598,8 +598,11 @@ public class Parser {
             ParseError perror = getErrors();
 
             String msg = s.input.length == perror.position ?
-                    "Parse error: unexpected end of file." :
-                    "Parse error: unexpected token '" + s.input[perror.position].value + "'.";
+                    "Parse error: unexpected end of file" :
+                    "Parse error: unexpected token '" + s.input[perror.position].value + "'";
+            if (perror.position != 0) {
+                msg = msg + " following token '" + s.input[perror.position - 1].value + "'";
+            }
             Location loc = new Location(perror.startLine, perror.startColumn,
                     perror.endLine, perror.endColumn);
             Source source = perror.source;
