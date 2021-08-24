@@ -10,6 +10,7 @@ import org.kframework.attributes.Source;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.TerminalLike;
+import org.kframework.definition.RegexTerminal;
 import org.kframework.kore.Sort;
 import org.kframework.parser.Ambiguity;
 import org.kframework.parser.KList;
@@ -26,8 +27,12 @@ import org.kframework.parser.inner.kernel.Grammar.State;
 import org.kframework.utils.errorsystem.KEMException;
 import org.pcollections.ConsPStack;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -683,6 +688,29 @@ public class Parser {
             this.source = source;
             this.position = position;
             this.expected = expected;
+        }
+
+        public String getExpected(boolean verbose) {
+          int maxItems = 5;
+          if (verbose) {
+            maxItems = Integer.MAX_VALUE;
+          }
+          int actualItems = Integer.min(maxItems, expected.size());
+          List<ProductionItem> l = new ArrayList<>(expected);
+          Collections.sort(l, 
+              Comparator.comparing(p -> p instanceof TerminalLike)
+              .thenComparing(Comparator.comparing(p -> p instanceof RegexTerminal))
+              .thenComparing(Comparator.comparing(p -> p.toString())));
+          StringBuilder sb = new StringBuilder();
+          String conn = "";
+          for (int i = 0; i < actualItems; i++) {
+            sb.append(conn).append(l.get(i).toString());
+            conn = ", ";
+          }
+          if (actualItems < expected.size()) {
+            sb.append(", etc");
+          }
+          return sb.toString();
         }
     }
 
