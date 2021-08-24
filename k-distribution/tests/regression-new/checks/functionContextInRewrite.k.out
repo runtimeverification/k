@@ -1,4 +1,4 @@
-[Error] Inner Parser: Parse error: unexpected token '['.
+[Error] Inner Parser: Parse error: unexpected token '[' following token '('. Expected one of: K, "...".
 	Source(functionContextInRewrite.k)
 	Location(8,12,8,13)
 [Error] Compiler: Had 1 parsing errors.

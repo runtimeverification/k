@@ -1,31 +1,31 @@
-[Error] Inner Parser: Parse error: unexpected token 'foo'.
+[Error] Inner Parser: Parse error: unexpected token 'foo'. Expected one of: #RuleBody.
 	Source(signature.k)
 	Location(24,8,24,11)
-[Error] Inner Parser: Parse error: unexpected token 'fu'.
+[Error] Inner Parser: Parse error: unexpected token 'fu'. Expected one of: #RuleBody.
 	Source(signature.k)
 	Location(26,8,26,10)
-[Error] Inner Parser: Parse error: unexpected token 'baz'.
+[Error] Inner Parser: Parse error: unexpected token 'baz'. Expected one of: #RuleBody.
 	Source(signature.k)
 	Location(28,8,28,11)
-[Error] Inner Parser: Parse error: unexpected token 'foo'.
+[Error] Inner Parser: Parse error: unexpected token 'foo'. Expected one of: #RuleBody.
 	Source(signature.k)
 	Location(36,8,36,11)
-[Error] Inner Parser: Parse error: unexpected token 'bam'.
+[Error] Inner Parser: Parse error: unexpected token 'bam'. Expected one of: #RuleBody.
 	Source(signature.k)
 	Location(37,8,37,11)
-[Error] Inner Parser: Parse error: unexpected token 'fu'.
+[Error] Inner Parser: Parse error: unexpected token 'fu'. Expected one of: #RuleBody.
 	Source(signature.k)
 	Location(38,8,38,10)
-[Error] Inner Parser: Parse error: unexpected token 'bar'.
+[Error] Inner Parser: Parse error: unexpected token 'bar'. Expected one of: #RuleBody.
 	Source(signature.k)
 	Location(39,8,39,11)
-[Error] Inner Parser: Parse error: unexpected token 'baz'.
+[Error] Inner Parser: Parse error: unexpected token 'baz'. Expected one of: #RuleBody.
 	Source(signature.k)
 	Location(40,8,40,11)
-[Error] Inner Parser: Parse error: unexpected token 'b'.
+[Error] Inner Parser: Parse error: unexpected token 'b'. Expected one of: #RuleBody.
 	Source(signature.k)
 	Location(42,8,42,9)
-[Error] Inner Parser: Parse error: unexpected token 'a'.
+[Error] Inner Parser: Parse error: unexpected token 'a'. Expected one of: #RuleBody.
 	Source(signature.k)
 	Location(54,8,54,9)
 [Error] Compiler: Had 10 parsing errors.

@@ -1,7 +1,7 @@
-[Error] Inner Parser: Parse error: unexpected token '['.
+[Error] Inner Parser: Parse error: unexpected token '[' following token '['. Expected one of: K.
 	Source(nestedFunctionContext.k)
 	Location(14,8,14,9)
-[Error] Inner Parser: Parse error: unexpected token '<baz>'.
+[Error] Inner Parser: Parse error: unexpected token '<baz>' following token '1'. Expected one of: "#And", "#Implies", "#Or", "#as", "%Int", etc.
 	Source(nestedFunctionContext.k)
 	Location(19,6,19,11)
 [Error] Compiler: Had 2 parsing errors.
