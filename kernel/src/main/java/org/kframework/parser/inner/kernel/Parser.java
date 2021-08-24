@@ -407,6 +407,7 @@ public class Parser {
         Map<NonTerminalCall.Key, NonTerminalCall> ntCalls = new HashMap<>();
         Map<StateCall.Key, StateCall> stateCalls = new HashMap<>();
         Map<StateReturn.Key, StateReturn> stateReturns = new HashMap<>();
+        private final Set<StateCall.Key> failedStates = new HashSet<>();
         final POSet<Sort> syntacticSubsorts;
 
         public ParseState(String input, Scanner scanner, Source source, int startLine, int startColumn, POSet<Sort> syntacticSubsorts) {
@@ -748,6 +749,8 @@ public class Parser {
                 s.stateReturnWorkList.enqueue(
                     s.stateReturns.computeIfAbsent(
                             new StateReturn.Key(stateCall, stateCall.key.stateBegin + 1), StateReturn.Key::create));
+            } else {
+              s.failedStates.add(stateCall.key);
             }
         // not instanceof SimpleState
         } else if (nextState instanceof NonTerminalState) {
@@ -769,6 +772,7 @@ public class Parser {
                 }
             } else {
                 // we don't create an entry in the map for this statecall, so we need to track its location another way.
+                s.failedStates.add(stateCall.key);
                 s.maxPosition = Math.max(s.maxPosition, stateCall.key.stateBegin);
             }
         } else { throw unknownStateType(); }
