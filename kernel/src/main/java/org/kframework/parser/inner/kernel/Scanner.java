@@ -133,6 +133,10 @@ public class Scanner implements AutoCloseable {
         }
     }
 
+    public GlobalOptions getGlobalOptions() {
+        return go;
+    }
+
     public File getScanner() {
         Stopwatch sw = new Stopwatch(go);
         File scanner;
