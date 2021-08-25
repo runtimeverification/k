@@ -5,24 +5,24 @@
           .
         </k>
         <env>
+          t2 |-> 3
           t1 |-> 1
           x |-> 0
-          t2 |-> 3
         </env>
         <id>
-          4
+          0
         </id>
       </thread> <thread>
         <k>
           .
         </k>
         <env>
+          t2 |-> 3
           t1 |-> 1
           x |-> 0
-          t2 |-> 3
         </env>
         <id>
-          0
+          4
         </id>
       </thread> <thread>
         <k>
@@ -38,9 +38,9 @@
       </thread>
     </threads>
     <store>
-      3 |-> 4
-      0 |-> 11
       1 |-> 2
+      0 |-> 11
+      3 |-> 4
     </store>
     <input>
       ListItem ( #buffer ( "" ~> . ) )
@@ -61,24 +61,24 @@
           .
         </k>
         <env>
+          t2 |-> 3
           t1 |-> 1
           x |-> 0
-          t2 |-> 3
         </env>
         <id>
-          4
+          0
         </id>
       </thread> <thread>
         <k>
           .
         </k>
         <env>
+          t2 |-> 3
           t1 |-> 1
           x |-> 0
-          t2 |-> 3
         </env>
         <id>
-          0
+          4
         </id>
       </thread> <thread>
         <k>
@@ -94,9 +94,9 @@
       </thread>
     </threads>
     <store>
-      3 |-> 4
-      0 |-> 16
       1 |-> 2
+      0 |-> 16
+      3 |-> 4
     </store>
     <input>
       ListItem ( #buffer ( "" ~> . ) )
@@ -117,24 +117,24 @@
           .
         </k>
         <env>
+          t2 |-> 3
           t1 |-> 1
           x |-> 0
-          t2 |-> 3
         </env>
         <id>
-          4
+          0
         </id>
       </thread> <thread>
         <k>
           .
         </k>
         <env>
+          t2 |-> 3
           t1 |-> 1
           x |-> 0
-          t2 |-> 3
         </env>
         <id>
-          0
+          4
         </id>
       </thread> <thread>
         <k>
@@ -150,9 +150,9 @@
       </thread>
     </threads>
     <store>
-      3 |-> 4
-      0 |-> 21
       1 |-> 2
+      0 |-> 21
+      3 |-> 4
     </store>
     <input>
       ListItem ( #buffer ( "" ~> . ) )
@@ -173,24 +173,24 @@
           .
         </k>
         <env>
+          t2 |-> 3
           t1 |-> 1
           x |-> 0
-          t2 |-> 3
         </env>
         <id>
-          4
+          0
         </id>
       </thread> <thread>
         <k>
           .
         </k>
         <env>
+          t2 |-> 3
           t1 |-> 1
           x |-> 0
-          t2 |-> 3
         </env>
         <id>
-          0
+          4
         </id>
       </thread> <thread>
         <k>
@@ -206,9 +206,9 @@
       </thread>
     </threads>
     <store>
-      3 |-> 4
-      0 |-> 33
       1 |-> 2
+      0 |-> 33
+      3 |-> 4
     </store>
     <input>
       ListItem ( #buffer ( "" ~> . ) )
