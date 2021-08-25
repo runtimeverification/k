@@ -331,6 +331,7 @@ user-defined types are quoted identifiers.
 ```k
   syntax TypeVar
   syntax TypeVars ::= List{TypeVar,","}
+  syntax TypeVars ::= Bottoms
 ```
 Types can be basic types, function types, or user-defined
 parametric types.  In the dynamic semantics we are going to simply ignore
