@@ -48,12 +48,13 @@ import java.util.Optional;
 
 import javax.json.Json;
 import javax.json.stream.JsonGenerator;
-import javax.json.JsonWriterFactory;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import javax.json.JsonWriter;
 import javax.json.JsonStructure;
+import javax.json.JsonValue;
+import javax.json.JsonWriter;
+import javax.json.JsonWriterFactory;
 
 import scala.Enumeration;
 import scala.Option;
@@ -143,8 +144,14 @@ public class ToJson {
         JsonArrayBuilder imports = Json.createArrayBuilder();
         stream(mod.imports()).forEach(i -> {
           JsonObjectBuilder jimp = Json.createObjectBuilder();
-          jmod.add("name", i.name());
-          jmod.add("isPublic", i.isPublic());
+          jimp.add("name", i.name());
+          jimp.add("isPublic", i.isPublic());
+          Optional<String> tag = mutable(i.tag()).map(t -> t.name());
+          if (tag.isPresent()) {
+            jimp.add("tag", tag.get());
+          } else {
+            jimp.add("tag", JsonValue.NULL);
+          }
           imports.add(jimp.build());
         });
 

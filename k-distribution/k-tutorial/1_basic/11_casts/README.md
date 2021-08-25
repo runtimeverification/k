@@ -64,7 +64,7 @@ module LESSON-11-B
   syntax Term ::= Exp | Stmt
   syntax Bool ::= isExpression(Term) [function]
 
-  rule isExpression(E:Exp) => true
+  rule isExpression(_E:Exp) => true
   rule isExpression(_) => false [owise]
 endmodule
 ```
