@@ -1,7 +1,7 @@
 DEF=deposit-symbolic
 EXT=deposit
 TESTDIR=.
-KOMPILE_BACKEND=java
+KOMPILE_BACKEND=haskell
 KOMPILE_FLAGS=--syntax-module DEPOSIT-SYMBOLIC
 KPROVE_FLAGS=--smt-prelude imap.smt2
 
