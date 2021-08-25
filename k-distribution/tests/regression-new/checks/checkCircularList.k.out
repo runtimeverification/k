@@ -1,2 +1,2 @@
 [Error] Compiler: Had 1 parsing errors.
-[Error] Compiler: Illegal circular relation: Exp < ExpList < Exp
+[Error] Compiler: Illegal circular relation: ExpList < Exp < ExpList
