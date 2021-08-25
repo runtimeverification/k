@@ -1,0 +1,10 @@
+[Error] Inner Parser: Parse error: unexpected token '=>'.
+	Source(parseErrorExpected.k)
+	Location(4,6,4,8)
+[Error] Inner Parser: Parse error: unexpected end of file following token 'true'.
+	Source(parseErrorExpected.k)
+	Location(5,15,5,16)
+[Error] Inner Parser: Parse error: unexpected token '</k>' following token 'true'.
+	Source(parseErrorExpected.k)
+	Location(6,20,6,24)
+[Error] Compiler: Had 3 parsing errors.
