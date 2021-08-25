@@ -698,7 +698,7 @@ public class Parser {
           }
           int actualItems = Integer.min(maxItems, expected.size());
           List<ProductionItem> l = new ArrayList<>(expected);
-          Collections.sort(l, 
+          Collections.sort(l,
               Comparator.comparing(p -> p instanceof TerminalLike)
               .thenComparing(Comparator.comparing(p -> p instanceof RegexTerminal))
               .thenComparing(Comparator.comparing(p -> p.toString())));
