@@ -7,6 +7,7 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import scala.Option;
@@ -23,16 +24,18 @@ public class ProofDefinitionBuilder {
 
     private final CompiledDefinition compiledDefinition;
     private final Backend backend;
-    public final Kompile kompile;
+    private final Kompile kompile;
     private final FileUtil files;
+    private final Stopwatch sw;
 
     @Inject
     public ProofDefinitionBuilder(CompiledDefinition compiledDefinition, Backend backend, Kompile kompile,
-                                  FileUtil files) {
+                                  FileUtil files, Stopwatch sw) {
         this.compiledDefinition = compiledDefinition;
         this.backend = backend;
         this.kompile = kompile;
         this.files = files;
+        this.sw = sw;
     }
 
     /**
@@ -53,7 +56,7 @@ public class ProofDefinitionBuilder {
         kompile.proverChecksX(specModule, modulesMap.get(defModuleNameUpdated));
         kompile.structuralChecks(immutable(modules), specModule, Option.empty(), backend.excludedModuleTags());
         specModule = backend.specificationSteps(compiledDefinition.kompiledDefinition).apply(specModule);
-
+        sw.printIntermediate("Apply prover steps");
         return Tuple2.apply(compiledDefinition.kompiledDefinition, specModule);
     }
 

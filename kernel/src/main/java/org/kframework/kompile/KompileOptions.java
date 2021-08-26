@@ -4,20 +4,16 @@ package org.kframework.kompile;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import org.apache.commons.io.FilenameUtils;
-
 import org.kframework.backend.Backends;
 import org.kframework.main.GlobalOptions;
-import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
-import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.StringListConverter;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,6 +27,16 @@ public class KompileOptions implements Serializable {
      */
     @ParametersDelegate
     public transient GlobalOptions global = new GlobalOptions();
+
+    /**
+     * Update the GlobalOptions field from this class.
+     * Used in KProve and other tools that need to rebuild the kompile
+     * infrastructure but with updated `-v` or `--debug` options.
+     */
+    public KompileOptions updateGlobalOptions(GlobalOptions global) {
+        this.global = global;
+        return this;
+    }
 
     @ParametersDelegate
     public OuterParsingOptions outerParsing = new OuterParsingOptions();
