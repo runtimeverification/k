@@ -108,8 +108,9 @@ followed by all the `owise` rules, in any order.
 
 ### Exercise
 
-Write another implementation of `gradeFromPercentile` which handles only the
-cases for `D` and `F`, and uses the `owise` attribute to avoid redundant
+The grades `D` and `F` correspond to the percentile ranges [60, 70) and [0, 60)
+respectively. Write another implementation of `gradeFromPercentile` which
+handles only these cases, and uses the `owise` attribute to avoid redundant
 Boolean comparisons. Test that various percentiles in the range [0, 70) are
 evaluated correctly.
 
