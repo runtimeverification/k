@@ -1,7 +1,7 @@
-[Error] Inner Parser: Parse error: unexpected token ')'.
+[Error] Inner Parser: Parse error: unexpected token ')' following token '('.
 	Source(partialImport.k)
 	Location(6,12,6,13)
-[Error] Inner Parser: Parse error: unexpected token ')'.
+[Error] Inner Parser: Parse error: unexpected token ')' following token '('.
 	Source(partialImport.k)
 	Location(8,12,8,13)
 [Error] Compiler: Had 2 parsing errors.
