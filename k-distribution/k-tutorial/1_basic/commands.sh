@@ -15,7 +15,7 @@ kompile 04_disambiguation/README.md --md-selector "k & ! exclude" --main-module 
 kompile 05_modules/README.md --md-selector "k & ! exclude" --main-module LESSON-05-A --syntax-module LESSON-05-A -d build/05a
 kompile 05_modules/README.md --md-selector "k & ! exclude" --main-module LESSON-05-B --syntax-module LESSON-05-B -d build/05b
 kompile 05_modules/README.md --md-selector "k & ! exclude" --main-module LESSON-05-C --syntax-module LESSON-05-C -d build/05c
-kompile 05_modules/README.md --md-selector "k & ! exclude" --main-module LESSON-05-D-2 --syntax-module LESSON-05-D-2 -d build/05d
+kompile 05_modules/README.md --md-selector "k & ! exclude" --main-module LESSON-05-D --syntax-module LESSON-05-D -d build/05d
 kompile 06_ints_and_bools/README.md --md-selector "k & ! exclude" --main-module LESSON-06-A --syntax-module LESSON-06-A  -d build/06a
 kompile 06_ints_and_bools/README.md --md-selector "k & ! exclude" --main-module LESSON-06-B --syntax-module LESSON-06-B  -d build/06b
 kompile 06_ints_and_bools/README.md --md-selector "k & ! exclude" --main-module LESSON-06-C -d build/06c
@@ -59,3 +59,4 @@ kompile 19_debugging/README.md --md-selector "k & ! exclude" --main-module LESSO
 kompile 19_debugging/README.md --md-selector "k & ! exclude" --main-module LESSON-19-B --syntax-module LESSON-19-B -d build/19b
 kompile 19_debugging/README.md --md-selector "k & ! exclude" --main-module LESSON-19-C --syntax-module LESSON-19-C -d build/19c
 kompile 19_debugging/README.md --md-selector "k & ! exclude" --main-module LESSON-19-D --syntax-module LESSON-19-D -d build/19d
+kompile 20_backends/README.md --md-selector "k & ! exclude" --main-module LESSON-20 --syntax-module LESSON-20 -d build/20
