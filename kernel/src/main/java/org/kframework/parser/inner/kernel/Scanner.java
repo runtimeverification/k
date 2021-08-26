@@ -102,6 +102,10 @@ public class Scanner implements AutoCloseable {
             "    yylloc->first_column = yycolumn; yylloc->last_column = yycolumn + yyleng - 1; \\\n" +
             "   yycolumn += yyleng; \\\n" +
             "   yylloc->filename = filename;\n" +
+            "#define ECHO do {\\\n" +
+            "  fprintf (stderr, \"%d:%d:%d:%d:syntax error: unexpected %s\\n\", yylloc->first_line, yylloc->first_column, yylloc->last_line, yylloc->last_column, yytext);\\\n" +
+            "  exit(1);\\\n" +
+            "} while (0)\n" +
             "void line_marker(char *, void *);\n" +
             "%}\n\n" +
             "%option reentrant bison-bridge\n" +
