@@ -319,7 +319,7 @@ For a complete list of allowed colors, see
 style the expression grammar from lesson 1.8, problem 3 according to your own
 personal preferences for syntax highlighting and code formatting. You can
 view the result of the unparser on a function term without evaluating that
-function by means of the command `kast --output pretty <file>`.
+function by means of the command `kparse <file> | kore-print -`.
 
 ## Next lesson
 
