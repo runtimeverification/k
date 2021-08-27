@@ -17,6 +17,8 @@ import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.inject.OuterParsingModule;
+import org.kframework.utils.options.OuterParsingOptions;
 import scala.Tuple2;
 
 import java.io.UnsupportedEncodingException;

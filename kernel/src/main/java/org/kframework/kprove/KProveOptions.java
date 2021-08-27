@@ -11,6 +11,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BackendOptions;
 import org.kframework.utils.options.DefinitionLoadingOptions;
+import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
 
 import java.io.File;
@@ -26,19 +27,13 @@ public class KProveOptions {
     @ParametersDelegate
     public DefinitionLoadingOptions definitionLoading = new DefinitionLoadingOptions();
 
-    @Parameter(description="<file>")
-    private List<String> parameters;
+    @ParametersDelegate
+    public OuterParsingOptions outerParsing = new OuterParsingOptions();
 
     private File specFile;
 
     public synchronized File specFile(FileUtil files) {
-        if (specFile == null) {
-            if (parameters == null || parameters.size() == 0) {
-                throw KEMException.criticalError("You have to provide exactly one main file in order to do outer parsing.");
-            }
-            specFile = files.resolveWorkingDirectory(parameters.get(0));
-        }
-        return specFile;
+        return outerParsing.mainDefinitionFile(files);
     }
 
     @ParametersDelegate

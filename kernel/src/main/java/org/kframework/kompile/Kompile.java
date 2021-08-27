@@ -42,6 +42,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 
+import org.kframework.utils.options.OuterParsingOptions;
 import scala.collection.JavaConverters;
 import scala.Function1;
 import scala.Option;
@@ -86,7 +87,7 @@ public class Kompile {
     java.util.Set<KEMException> errors;
 
     public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, boolean cacheParses) {
-        this(kompileOptions, files, kem, new Stopwatch(kompileOptions.global), cacheParses);
+        this(kompileOptions, null, files, kem, new Stopwatch(kompileOptions.global), cacheParses);
     }
 
     public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem) {
@@ -94,12 +95,19 @@ public class Kompile {
     }
 
     @Inject
-    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
-        this(kompileOptions, files, kem, sw, true);
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsing, FileUtil files, KExceptionManager kem, Stopwatch sw) {
+        this(kompileOptions, outerParsing, files, kem, sw, true);
     }
 
     public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
+        this(kompileOptions, null, files, kem, sw, cacheParses);
+    }
+
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsing, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
         this.kompileOptions = kompileOptions;
+        if (outerParsing != null) {
+            kompileOptions.outerParsing = outerParsing;
+        }
         this.files = files;
         this.kem = kem;
         this.errors = new HashSet<>();

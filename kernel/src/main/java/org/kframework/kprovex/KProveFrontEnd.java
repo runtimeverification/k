@@ -15,6 +15,7 @@ import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.DefinitionLoadingModule;
 import org.kframework.utils.inject.DefinitionScope;
 import org.kframework.utils.inject.JCommanderModule;
+import org.kframework.utils.options.OuterParsingOptions;
 
 import java.io.File;
 import java.util.List;
