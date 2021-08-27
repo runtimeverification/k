@@ -1,0 +1,11 @@
+y = spawn {
+  z = 2 ;
+  return z ;
+} ;
+
+x = spawn {
+  z = 6 ; 
+  return z + 8 ;
+} ;
+
+return join x ; + join y ; ;
