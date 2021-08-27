@@ -1,0 +1,19 @@
+fun f() {
+  return 5 ;
+}
+
+fun g() {
+  return -f() * 5 ;
+}
+
+fun h() {
+  int a = g() ;
+  int b = g() ;
+  int c = a - 1 ;
+  b = f() * 2 ;
+  return b ;
+}
+
+fun main() {
+  return h() + 10 ;
+}
