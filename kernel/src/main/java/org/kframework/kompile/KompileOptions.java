@@ -28,16 +28,6 @@ public class KompileOptions implements Serializable {
     @ParametersDelegate
     public transient GlobalOptions global = new GlobalOptions();
 
-    /**
-     * Update the GlobalOptions field from this class.
-     * Used in KProve and other tools that need to rebuild the kompile
-     * infrastructure but with updated `-v` or `--debug` options.
-     */
-    public KompileOptions updateGlobalOptions(GlobalOptions global) {
-        this.global = global;
-        return this;
-    }
-
     @ParametersDelegate
     public OuterParsingOptions outerParsing = new OuterParsingOptions();
 
