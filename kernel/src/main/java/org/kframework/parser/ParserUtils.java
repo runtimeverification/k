@@ -1,8 +1,11 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.parser;
 
+import com.google.common.collect.Streams;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.tuple.Triple;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.definition.FlatModule;
 import org.kframework.definition.Module;
@@ -27,7 +30,6 @@ import org.kframework.utils.options.OuterParsingOptions;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.LinkOption;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -199,8 +201,13 @@ public class ParserUtils {
 
         new CollectProductionsVisitor(kore, context).visit(def);
 
-        Map<String, List<org.kframework.kil.Module>> groupedModules = kilModules.stream()
-          .collect(Collectors.groupingBy(org.kframework.kil.Module::getName));
+        // Triple of moduleName, Source, Location
+        Map<String, List<Triple<String, Source, Location>>> groupedModules =
+                Streams.concat(
+                        previousModules.stream().map(m -> Triple.of(m.name(), m.att().get(Att.SOURCE(), Source.class),
+                                m.att().get(Att.LOCATION(), Location.class))),
+                        kilModules.stream().map(m -> Triple.of(m.getName(), m.getSource(), m.getLocation())))
+                .collect(Collectors.groupingBy(Triple::getLeft));
 
         List<String> duplicateModules = groupedModules
           .entrySet().stream()
@@ -210,9 +217,10 @@ public class ParserUtils {
 
         int errors = 0;
         for (String moduleName : duplicateModules) {
-          org.kframework.kil.Module firstMod = groupedModules.get(moduleName).get(0);
-          org.kframework.kil.Module secondMod = groupedModules.get(moduleName).get(1);
-          KEMException ex = KEMException.outerParserError("Module " + moduleName + " previously declared at " + firstMod.getSource() + " and " + firstMod.getLocation(), secondMod.getSource(), secondMod.getLocation());
+          Triple<String, Source, Location> firstMod = groupedModules.get(moduleName).get(0);
+          Triple<String, Source, Location> secondMod = groupedModules.get(moduleName).get(1);
+          KEMException ex = KEMException.outerParserError("Module " + moduleName + " previously declared at "
+                  + firstMod.getMiddle() + " and " + firstMod.getRight(), secondMod.getMiddle(), secondMod.getRight());
           errors++;
           kem.addKException(ex.getKException());
         }
