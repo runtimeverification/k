@@ -34,6 +34,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -207,6 +208,8 @@ public class ParserUtils {
                         previousModules.stream().map(m -> Triple.of(m.name(), m.att().get(Att.SOURCE(), Source.class),
                                 m.att().get(Att.LOCATION(), Location.class))),
                         kilModules.stream().map(m -> Triple.of(m.getName(), m.getSource(), m.getLocation())))
+                // make sure we have unique modules (double requires), and preserve order
+                .collect(Collectors.toCollection(LinkedHashSet::new)).stream()
                 .collect(Collectors.groupingBy(Triple::getLeft));
 
         List<String> duplicateModules = groupedModules
