@@ -146,7 +146,10 @@ int main(int argc, char **argv) {
     exit(1);
   }
   yyset_in(f, scanner);
-  yyparse(scanner);
+  int status = yyparse(scanner);
+  if (status) {
+    exit(status);
+  }
   print(result);
   printf("\n");
   yylex_destroy(scanner);
