@@ -33,7 +33,7 @@ module ARITH
   imports MAP
 
   configuration <T>
-                  <k> $PGM:Pgm ~> main () </k>
+                  <k color="red"> $PGM:Pgm ~> main () </k>
                   <state>
                     <functions> .Map </functions>
                     <fstack> .List </fstack>
