@@ -36,7 +36,7 @@ $(llvm_imp_kompiled): $(llvm_imp) $(KOMPILE)
 	$(KOMPILE) --directory $(llvm_dir) --backend llvm -I $(llvm_dir) $< --emit-json --coverage
 
 $(haskell_imp_kompiled): $(haskell_imp) $(KOMPILE)
-	$(KOMPILE) --directory $(haskell_dir) --backend haskell -I $(haskell_dir) $< --emit-json
+	$(KOMPILE) --directory $(haskell_dir) --backend haskell $< --emit-json
 
 update-results:
 kompile: $(llvm_imp_kompiled) $(haskell_imp_kompiled)
@@ -75,7 +75,7 @@ $(defn_tests)/kast-tests/%.out: $(defn_tests)/kast-tests/%.gen $(llvm_imp_kompil
 	$(KAST) --directory $(llvm_dir) --output pretty --sort $(basename $(basename $*)) -m IMP $< > $@
 
 $(defn_tests)/proof-tests/%-spec.json.prove: $(defn_tests)/proof-tests/%-spec.k $(haskell_imp_kompiled)
-	$(KPROVE) --directory $(haskell_dir) $< -m IMP
+	$(KPROVE) --directory $(haskell_dir) $< -m IMP -I $(haskell_dir)
 
 ## kpyk runner tests
 
