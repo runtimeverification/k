@@ -1,0 +1,12 @@
+fun f() {
+  return 5 ;
+}
+
+fun main() {
+  int a = 1 ;
+  int b = f() ;
+  if ( a ) {
+    b = 2 ;
+  }
+  return b ;
+}
