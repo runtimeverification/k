@@ -15,14 +15,16 @@ module IMP-SYNTAX
                   | AExp "<=" AExp [seqstrict]
                   > BExp "&&" BExp [strict(1)]
 
-  syntax Block  ::= "{" "}"
+  syntax EmptyBlock ::= "{" "}"
+
+  syntax Block  ::= EmptyBlock
                   | "{" Stmt "}"
 
   syntax Stmt   ::= Block
                   | Id "=" AExp ";" [strict(2)]
                   | "if" "(" BExp ")" Block "else" Block [strict(1)]
                   | "while" "(" BExp ")" Block
-                  > Stmt Stmt       [left]
+                  > Stmt Stmt       [seqstrict]
 
   syntax Pgm    ::= "int" Ids ";" Stmt
 endmodule
@@ -31,7 +33,7 @@ module IMP
   imports IMP-SYNTAX
   imports DOMAINS
 
-  syntax KResult ::= Int | Bool
+  syntax KResult ::= Int | Bool | EmptyBlock
 
   configuration
     <T color="yellow">
@@ -55,7 +57,7 @@ module IMP
 
   // Stmt
   
-  rule  <k> X:Id = I:Int ; => . ...</k>
+  rule  <k> X:Id = I:Int ; => { } ...</k>
         <state> S => S[X <- I] </state>
         requires X in_keys(S)
 
@@ -65,11 +67,10 @@ module IMP
   rule  <k> while (C) B => if (C) { B while (C) B } else { } ...</k>
         [structural]
 
-  rule  <k> S:Stmt S':Stmt => S ~> S' ...</k>
+  rule  <k> { } S':Stmt => S' ...</k>
 
   // Block
 
-  rule  <k> {   } => . ...</k> [structural]
   rule  <k> { S } => S ...</k> [structural]
 
   // Pgm

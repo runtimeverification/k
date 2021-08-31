@@ -21,7 +21,7 @@ module IMP-SYNTAX
   syntax Stmt   ::= Block
                   | Id "=" AExp ";" [strict(2)]
                   | "if" "(" BExp ")" Block "else" Block [strict(1)]
-                  | "while" "(" BExp ")" Block [strict(1)]
+                  | "while" "(" BExp ")" Block
                   > Stmt Stmt       [left]
 
   syntax Pgm    ::= "int" Ids ";" Stmt
@@ -33,12 +33,52 @@ module IMP
 
   syntax KResult ::= Int | Bool
 
+  syntax KItem  ::= "undefined"
+
   configuration
     <T color="yellow">
       <k color="green"> $PGM:Pgm </k>
       <state color="red"> .Map </state>
     </T>
 
+  // Exp
+
   rule  <k> X:Id => I ...</k>
         <state>... X |-> I ...</state>
+
+  rule  - I => 0 -Int I
+  rule I1 / I2 => I1 /Int I2
+  rule I1 + I2 => I1 +Int I2
+
+  rule ! B => notBool B
+  rule I1 <= I2 => I1 <=Int I2
+  rule true && B2 => B2
+  rule false && _ => false
+
+  // Stmt
+  
+  rule  <k> X:Id = I:Int ; => . ...</k>
+        <state> S => S[X <- I] </state>
+        requires X in_keys(S)
+
+  rule  <k> if ( true  ) B else _ => B ...</k>
+  rule  <k> if ( false ) _ else B => B ...</k>
+
+  rule  <k> while (C) B => if (C) { B while (C) B } else { } ...</k>
+        [structural]
+
+  rule  <k> S:Stmt S':Stmt => S ~> S' ...</k>
+
+  // Block
+
+  rule  <k> {   } => . ...</k> [structural]
+  rule  <k> { S } => S ...</k> [structural]
+
+  // Pgm
+
+  rule  <k> int (X, Xs => Xs) ; _  ...</k>
+        <state> S => S[X <- undefined] </state>
+        requires notBool X in_keys(S)
+
+  rule  <k> int .Ids ; S => S ...</k>
 endmodule
