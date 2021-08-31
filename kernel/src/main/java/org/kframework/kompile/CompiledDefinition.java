@@ -76,7 +76,7 @@ public class CompiledDefinition implements Serializable {
         if (exitCodeRule == null) {
             this.exitCodePattern = null;
         } else {
-            this.exitCodePattern = new Kompile(kompileOptions, files, kem).compileRule(kompiledDefinition, exitCodeRule);
+            this.exitCodePattern = new Kompile(kompileOptions, kompileOptions.outerParsing, files, kem).compileRule(kompiledDefinition, exitCodeRule);
         }
     }
 
@@ -206,11 +206,11 @@ public class CompiledDefinition implements Serializable {
     }
 
     public Rule compilePatternIfAbsent(FileUtil files, KExceptionManager kem, String pattern, Source source) {
-        return cachedcompiledPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, files, kem).parseAndCompileRule(this, p, source,
+        return cachedcompiledPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, kompileOptions.outerParsing, files, kem).parseAndCompileRule(this, p, source,
                 Optional.of(parsePatternIfAbsent(files, kem, pattern, source))));
     }
 
     public Rule parsePatternIfAbsent(FileUtil files, KExceptionManager kem, String pattern, Source source) {
-        return cachedParsedPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, files, kem).parseRule(this, p, source));
+        return cachedParsedPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, kompileOptions.outerParsing, files, kem).parseRule(this, p, source));
     }
 }

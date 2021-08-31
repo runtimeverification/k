@@ -43,6 +43,7 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.options.OuterParsingOptions;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.Set;
@@ -95,6 +96,7 @@ public class DefinitionParsing {
     public DefinitionParsing(
             List<File> lookupDirectories,
             KompileOptions options,
+            OuterParsingOptions outerParsingOptions,
             KExceptionManager kem,
             FileUtil files,
             ParserUtils parser,
@@ -108,7 +110,7 @@ public class DefinitionParsing {
         this.parser = parser;
         this.cacheParses = cacheParses;
         this.cacheFile = cacheFile;
-        this.autoImportDomains = !options.outerParsing.noPrelude;
+        this.autoImportDomains = !outerParsingOptions.noPrelude;
         this.kore = options.isKore();
         this.loader = new BinaryLoader(this.kem);
         this.isStrict = options.strict();

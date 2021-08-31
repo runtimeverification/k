@@ -84,46 +84,36 @@ public class Kompile {
     private final ParserUtils parser;
     private final Stopwatch sw;
     private final DefinitionParsing definitionParsing;
+    private final OuterParsingOptions outerParsingOptions;
     java.util.Set<KEMException> errors;
 
-    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, boolean cacheParses) {
-        this(kompileOptions, null, files, kem, new Stopwatch(kompileOptions.global), cacheParses);
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, FileUtil files, KExceptionManager kem, boolean cacheParses) {
+        this(kompileOptions, outerParsingOptions, files, kem, new Stopwatch(kompileOptions.global), cacheParses);
     }
 
-    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem) {
-        this(kompileOptions, files, kem, true);
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, FileUtil files, KExceptionManager kem) {
+        this(kompileOptions, outerParsingOptions, files, kem, true);
     }
 
     @Inject
-    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsing, FileUtil files, KExceptionManager kem, Stopwatch sw) {
-        this(kompileOptions, outerParsing, files, kem, sw, true);
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
+        this(kompileOptions, outerParsingOptions, files, kem, sw, true);
     }
 
-    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
-        this(kompileOptions, null, files, kem, sw, cacheParses);
-    }
-
-    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsing, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
+        this.outerParsingOptions = outerParsingOptions;
         this.kompileOptions = kompileOptions;
-
-        /**
-         * Invoking the kompile command will inject outerParsing into kompileOptions.outerParsing and leave the outerParsing parameter as null.
-         * Skip this assignment to prevent kompileOptions.outerParsing from being clobbered for the kompile utility.
-         */
-        if (outerParsing != null) {
-            kompileOptions.outerParsing = outerParsing;
-        }
         this.files = files;
         this.kem = kem;
         this.errors = new HashSet<>();
-        this.parser = new ParserUtils(files, kem, kem.options, kompileOptions.outerParsing);
-        List<File> lookupDirectories = kompileOptions.outerParsing.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
+        this.parser = new ParserUtils(files, kem, kem.options, outerParsingOptions);
+        List<File> lookupDirectories = this.outerParsingOptions.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
         // these directories should be relative to the current working directory if we refer to them later after the WD has changed.
-        kompileOptions.outerParsing.includes = lookupDirectories.stream().map(File::getAbsolutePath).collect(Collectors.toList());
+        this.outerParsingOptions.includes = lookupDirectories.stream().map(File::getAbsolutePath).collect(Collectors.toList());
         File cacheFile = kompileOptions.cacheFile != null
                 ? files.resolveWorkingDirectory(kompileOptions.cacheFile) : files.resolveKompiled("cache.bin");
         this.definitionParsing = new DefinitionParsing(
-                lookupDirectories, kompileOptions, kem, files,
+                lookupDirectories, kompileOptions, outerParsingOptions, kem, files,
                 parser, cacheParses, cacheFile, sw);
         this.sw = sw;
 
