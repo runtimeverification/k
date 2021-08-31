@@ -192,6 +192,7 @@ endmodule
 module LESSON-16-B
   imports LESSON-16-B-SYNTAX
   imports BOOL
+  imports LIST
 
   configuration <T>
                   <k> $PGM:Pgm ~> main () </k>
@@ -305,6 +306,7 @@ endmodule
 module LESSON-16-C
   imports LESSON-16-C-SYNTAX
   imports BOOL
+  imports SET
 
   configuration <T>
                   <k> $PGM:Pgm </k>
@@ -346,3 +348,8 @@ sure to consider the interactions between components, such as saving and
 restoring the environment of variables at each call site. Don't worry about
 local function definitions or global variables for now. Make sure to test the
 resulting interpreter.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.17: Cell Multiplicity and Cell Collections](../17_cell_multiplicity/README.md).

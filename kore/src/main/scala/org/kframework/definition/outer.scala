@@ -90,28 +90,52 @@ object Module {
   }
 }
 
-case class Module(val name: String, val imports: Set[Module], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
+case class Import(val module: Module, val isPublic: Boolean, val tag: Option[Tag])
+  extends ImportToString with OuterKORE with Serializable
+
+case class Module(val name: String, val imports: Set[Import], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
   extends ModuleToString with OuterKORE with Sorting with Serializable with AttValue {
 
   assert(att != null)
 
-  private lazy val importedSentences = imports flatMap {_.sentences}
+  lazy val fullImports: Set[Module] = imports.map(_.module)
+
+  private lazy val importedSentences = fullImports flatMap {_.sentences}
 
   lazy val sentences: Set[Sentence] = localSentences | importedSentences
 
   lazy val labeled: Map[String, Set[Sentence]] = sentences.filter(_.label.isPresent).groupBy(_.label.get)
 
   /** All the imported modules, calculated recursively. */
-  lazy val importedModules: Set[Module] = imports | (imports flatMap {
+  lazy val importedModules: Set[Module] = fullImports | (fullImports flatMap {
     _.importedModules
   })
-
-  def addImport(m : Module) : Module = new Module(name, imports + m, localSentences, att)
-  def wrappingModule(newName : String) : Module = new Module(newName, Set(this), Set(), Att.empty)
 
   lazy val importedModuleNames: Set[String] = importedModules.map(_.name)
 
   lazy val productions: Set[Production] = sentences collect { case p: Production => p }
+
+  private lazy val allPublicSentences: Set[Sentence] = {
+    if (att.contains(Att.PRIVATE)) {
+      localSentences.filter(_.att.contains(Att.PUBLIC))
+    } else {
+      localSentences.filter(!_.att.contains(Att.PRIVATE))
+    }
+  }
+
+  def publicSentences(tags: Set[Tag]) = {
+    var sentences = allPublicSentences
+    for (tag <- tags) {
+      sentences = sentences.filter(s => s.att.contains(tag.name) || 
+        (s.isInstanceOf[Production] && s.asInstanceOf[Production].klabelAtt.contains(tag.name)))
+    }
+    sentences
+  }
+
+  lazy val signature: Module = {
+    def f(m: Module, tags: Set[Tag]): Module = Module(m.name, m.imports.filter(_.isPublic).map(i => Import(f(i.module, tags | (if (i.tag.isDefined) Set(i.tag.get) else Set())), i.isPublic, i.tag)), m.publicSentences(tags), m.att)
+    Module(name, imports.map(i => Import(f(i.module, if (i.tag.isDefined) Set(i.tag.get) else Set()), i.isPublic, i.tag)), localSentences, att)
+  }
 
   lazy val functions: Set[KLabel] = productions.filter(_.att.contains(Att.FUNCTION)).map(_.klabel.get.head)
 
@@ -330,7 +354,7 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
   // check that non-terminals have a defined sort
   def checkSorts () = sentences foreach {
     case p@Production(_, params, _, items, _) =>
-      val res = items collect 
+      val res = items collect
       { case nt: NonTerminal if !p.isSortVariable(nt.sort) && !definedSorts.contains(nt.sort.head) && !sortSynonymMap.contains(nt.sort) => nt
         case nt: NonTerminal if nt.sort.params.nonEmpty && (nt.sort.params.toSet & params.toSet).isEmpty && !definedInstantiations.getOrElse(nt.sort.head, Set()).contains(nt.sort) => nt
       }
@@ -346,8 +370,8 @@ case class Module(val name: String, val imports: Set[Module], localSentences: Se
 
   override lazy val hashCode: Int = name.hashCode
 
-  def flattened()   : FlatModule                = new FlatModule(name, imports.map(m => Import(m.name, Att.empty)), localSentences, att)
-  def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ imports.map(m => m.flatModules._2).flatten)
+  def flattened()   : FlatModule                = new FlatModule(name, imports.map(i => FlatImport(i.module.name, i.isPublic, i.tag, Att.empty)), localSentences, att)
+  def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ fullImports.map(m => m.flatModules._2).flatten)
 }
 
 trait HasAtt {

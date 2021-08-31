@@ -59,6 +59,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -254,7 +255,8 @@ public class Kompile {
     }
 
     private static Module excludeModulesByTag(Set<String> excludedModuleTags, Module mod) {
-        Set<Module> newImports = stream(mod.imports()).filter(_import -> excludedModuleTags.stream().noneMatch(tag -> _import.att().contains(tag))).collect(Collectors.toSet());
+        Predicate<Import> f = _import -> excludedModuleTags.stream().noneMatch(tag -> _import.module().att().contains(tag));
+        Set<Import> newImports = stream(mod.imports()).filter(f).collect(Collectors.toSet());
         return Module(mod.name(), immutable(newImports), mod.localSentences(), mod.att());
     }
 
@@ -478,10 +480,10 @@ public class Kompile {
         java.util.Set<Module> allModules = mutable(d.modules());
 
         Module languageParsingModule = Constructors.Module("LANGUAGE-PARSING",
-                Set(d.mainModule(),
-                        d.getModule(d.att().get(Att.SYNTAX_MODULE())).get(),
-                        d.getModule("K-TERM").get(),
-                        d.getModule(RuleGrammarGenerator.ID_PROGRAM_PARSING).get()), Set(), Att());
+                Set(Import(d.mainModule(), true),
+                        Import(d.getModule(d.att().get(Att.SYNTAX_MODULE())).get(), true),
+                        Import(d.getModule("K-TERM").get(), true),
+                        Import(d.getModule(RuleGrammarGenerator.ID_PROGRAM_PARSING).get(), true)), Set(), Att());
         allModules.add(languageParsingModule);
         return Constructors.Definition(d.mainModule(), immutable(allModules), d.att());
     }

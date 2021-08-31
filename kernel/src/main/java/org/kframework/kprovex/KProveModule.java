@@ -3,8 +3,8 @@ package org.kframework.kprovex;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.multibindings.Multibinder;
-import com.google.inject.name.Named;
 import org.kframework.kompile.BackendModule;
+import org.kframework.kprove.KProveOptions;
 import org.kframework.krun.RewriterModule;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
@@ -15,8 +15,6 @@ import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BackendOptions;
 import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.SMTOptions;
-
-import java.util.List;
 
 public class KProveModule extends AbstractModule {
     @Override

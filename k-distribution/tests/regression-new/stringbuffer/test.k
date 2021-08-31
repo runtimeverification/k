@@ -1,5 +1,6 @@
 module TEST
   imports STRING-BUFFER
+  imports INT
 
   rule 0 => foo(.StringBuffer, 0)
 

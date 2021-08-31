@@ -6,7 +6,7 @@ a semantics of programs in a programming language in K.
 
 ## Recap: Function rules in K
 
-Recall from [Leson 1.2](../02_basics/README.md) that we have, thus far,
+Recall from [Lesson 1.2](../02_basics/README.md) that we have, thus far,
 introduced two types of productions in K: **constructors** and **functions**.
 A function is identified by the **function** attribute placed on the
 production. As you may recall, when we write a rule with a function on the

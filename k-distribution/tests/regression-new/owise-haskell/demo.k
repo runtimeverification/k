@@ -1,4 +1,5 @@
 module DEMO
+  imports BOOL
 
   syntax S ::= "a" | f(S)
   syntax Bool ::= S "lt" S [function]

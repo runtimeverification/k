@@ -31,6 +31,7 @@ module IMP
   imports INT
   imports BOOL
   imports MAP
+  imports SET
 
   syntax KResult ::= Int | Bool
 
