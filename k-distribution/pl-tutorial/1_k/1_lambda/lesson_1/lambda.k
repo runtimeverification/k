@@ -1,13 +1,10 @@
-// Copyright (c) 2012-2019 K Team. All Rights Reserved.
-
 module LAMBDA-SYNTAX
-  imports DOMAINS-SYNTAX
+  imports ID-SYNTAX
 
-  syntax Val ::= Id
-               | "lambda" Id "." Exp
-  syntax Exp ::= Val
-               | Exp Exp      [left]
-               | "(" Exp ")"  [bracket]
+  syntax Exp  ::= Id
+                | "lambda" Id "." Exp
+                | Exp Exp [left]
+                | "(" Exp ")" [bracket]
 endmodule
 
 module LAMBDA

@@ -1,16 +1,14 @@
-// Copyright (c) 2012-2019 K Team. All Rights Reserved.
-
-require "substitution.md"
+requires "substitution.md"
 
 module LAMBDA-SYNTAX
-  imports DOMAINS-SYNTAX
   imports KVAR-SYNTAX
 
-  syntax Val ::= KVar
-               | "lambda" KVar "." Exp  [binder]
-  syntax Exp ::= Val
-               | Exp Exp              [strict, left]
-               | "(" Exp ")"          [bracket]
+  syntax Val  ::= KVar
+                | "lambda" KVar "." Exp [binder]
+
+  syntax Exp  ::= Val
+                | Exp Exp [left, strict]
+                | "(" Exp ")" [bracket]
 endmodule
 
 module LAMBDA
