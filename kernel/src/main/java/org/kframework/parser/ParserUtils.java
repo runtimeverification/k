@@ -3,7 +3,6 @@ package org.kframework.parser;
 
 import com.google.common.collect.Streams;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.tuple.Triple;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
@@ -26,6 +25,7 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.OuterParsingOptions;
+import scala.Tuple3;
 
 import java.io.File;
 import java.io.IOException;
@@ -202,15 +202,15 @@ public class ParserUtils {
 
         new CollectProductionsVisitor(kore, context).visit(def);
 
-        // Triple of moduleName, Source, Location
-        Map<String, List<Triple<String, Source, Location>>> groupedModules =
+        // Tuple3 of moduleName, Source, Location
+        Map<String, List<Tuple3<String, Source, Location>>> groupedModules =
                 Streams.concat(
-                        previousModules.stream().map(m -> Triple.of(m.name(), m.att().get(Att.SOURCE(), Source.class),
+                        previousModules.stream().map(m -> Tuple3.apply(m.name(), m.att().get(Att.SOURCE(), Source.class),
                                 m.att().get(Att.LOCATION(), Location.class))),
-                        kilModules.stream().map(m -> Triple.of(m.getName(), m.getSource(), m.getLocation())))
+                        kilModules.stream().map(m -> Tuple3.apply(m.getName(), m.getSource(), m.getLocation())))
                 // make sure we have unique modules (double requires), and preserve order
                 .collect(Collectors.toCollection(LinkedHashSet::new)).stream()
-                .collect(Collectors.groupingBy(Triple::getLeft));
+                .collect(Collectors.groupingBy(Tuple3::_1));
 
         List<String> duplicateModules = groupedModules
           .entrySet().stream()
@@ -220,10 +220,10 @@ public class ParserUtils {
 
         int errors = 0;
         for (String moduleName : duplicateModules) {
-          Triple<String, Source, Location> firstMod = groupedModules.get(moduleName).get(0);
-          Triple<String, Source, Location> secondMod = groupedModules.get(moduleName).get(1);
+          Tuple3<String, Source, Location> firstMod = groupedModules.get(moduleName).get(0);
+          Tuple3<String, Source, Location> secondMod = groupedModules.get(moduleName).get(1);
           KEMException ex = KEMException.outerParserError("Module " + moduleName + " previously declared at "
-                  + firstMod.getMiddle() + " and " + firstMod.getRight(), secondMod.getMiddle(), secondMod.getRight());
+                  + firstMod._2() + " and " + firstMod._3(), secondMod._2(), secondMod._3());
           errors++;
           kem.addKException(ex.getKException());
         }
