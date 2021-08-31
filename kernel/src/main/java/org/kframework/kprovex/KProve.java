@@ -8,6 +8,7 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
+import org.kframework.kprove.KProveOptions;
 import org.kframework.krun.KRun;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
@@ -46,6 +47,18 @@ public class KProve {
         this.loader = loader;
         this.proofDefinitionBuilder = proofDefinitionBuilder;
         this.rewriterGenerator = rewriterGenerator;
+        // validate kprovex options. There are too many dependencies to have duplicate options files
+        // so use the same class, but throw an error if used by accident. It would have been silent anyway.
+        // TODO: remove once transition to kprovex is finished
+        if (kproveOptions.defModule != null) {
+            throw KEMException.criticalError("Option `--def-module` no longer supported in the kprovex tool.");
+        }
+        if (kproveOptions.saveProofDefinitionTo != null) {
+            throw KEMException.criticalError("Option `--save-proof-definition-to` no longer supported in the kprovex tool.");
+        }
+        if (!kproveOptions.extraConcreteRuleLabels.isEmpty()) {
+            throw KEMException.criticalError("Option `--concrete-rules` no longer supported in the kprovex tool.");
+        }
     }
 
     public int run() {

@@ -71,7 +71,7 @@ module LESSON-05-D-1
   syntax Boolean ::= "not" Boolean [function]
 endmodule
 
-module LESSON-05-D-2
+module LESSON-05-D
   imports LESSON-05-D-1
 
   rule not true => false
@@ -79,21 +79,21 @@ module LESSON-05-D-2
 endmodule
 ```
 
-If we assume that module `LESSON-05-D-2` is the main semantics module of the
-definition, then this K definition is equivalent to the definition expressed
-by the single module `LESSON-05-C`. Essentially, by importing a module, we
-include all of the sentences in the module being imported into the module that
-we import from. There are a few minor differences between importing a module
-and simply including its sentences in another module directly, but we will
-cover these differences later. Essentially, you can think of modules as
-a way of conceptually grouping sentences in a larger K definition.
+This K definition is equivalent to the definition expressed by the single module
+`LESSON-05-C`. Essentially, by importing a module, we include all of the
+sentences in the module being imported into the module that we import from.
+There are a few minor differences between importing a module and simply
+including its sentences in another module directly, but we will cover these
+differences later. Essentially, you can think of modules as a way of
+conceptually grouping sentences in a larger K definition.
 
 ### Exercise
 
 Modify `lesson-05-d.k` to include four modules: one containing the syntax, two
-with one rule each that imports the first module, and one module containing
-no sentences that imports the second and third module. Check to make sure the
-definition still compiles and that you can still evaluate the `not` function.
+with one rule each that imports the first module, and a final module
+`LESSON-05-D` containing no sentences that imports the second and third module.
+Check to make sure the definition still compiles and that you can still evaluate
+the `not` function.
 
 ## Parsing in the presence of multiple modules
 

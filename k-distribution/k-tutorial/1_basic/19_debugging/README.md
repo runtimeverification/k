@@ -359,3 +359,8 @@ Finally, step through the program until the addition symbol is at the top
 of the K cell, and then use the `k match` command to report the reason why
 the subtraction rule does not apply. You may need to modify the definition
 to insert some rule labels.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.20: K Backends and the Haskell Backend](../20_backends/README.md).
