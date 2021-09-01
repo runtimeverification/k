@@ -158,8 +158,9 @@ public class DefinitionParsing {
 
         def = resolveNonConfigBubbles(def);
         if (! readOnlyCache) {
-            saveCachesAndReportParsingErrors();
+            saveCaches();
         }
+        throwExceptionIfThereAreErrors();
         return mutable(def.entryModules());
     }
 

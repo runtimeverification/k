@@ -1,0 +1,4 @@
+[Error] Inner Parser: Parse error: unexpected token '...' following token 'asdf'.
+	Source(test-spec.k)
+	Location(8,20,8,23)
+[Error] Compiler: Had 1 parsing errors.
