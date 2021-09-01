@@ -1,61 +1,80 @@
-// Copyright (c) 2012-2019 K Team. All Rights Reserved.
+requires "substitution.md"
+
+module LAMBDA-SYNTAX
+  imports ID-SYNTAX
+  imports DOMAINS-SYNTAX
+
+  syntax Val  ::= Int | Bool
+
+  syntax Exp  ::= Id
+                | Val
+                | "lambda" Id "." Exp
+                | "-" Int
+                | Exp Exp [left, strict]
+                | "(" Exp ")" [bracket]
+
+  syntax Exp  ::= Exp "*"  Exp [strict, left]
+                | Exp "/"  Exp [strict, left]
+                > Exp "+"  Exp [strict, left]
+                > Exp "<=" Exp [strict]
+
+  syntax Exp  ::= "if" Exp "then" Exp "else" Exp [strict(1)]
+
+  syntax Exp  ::= "let" Id "=" Exp "in" Exp
+                | "mu" Id "." Exp
+                | "letrec" Id Id "=" Exp "in" Exp
+
+  syntax Exp  ::= "callcc" Exp [strict]
+endmodule
 
 module LAMBDA
+  imports LAMBDA-SYNTAX
   imports DOMAINS
-  syntax Exp ::= Id
-               | "lambda" Id "." Exp  [latex(\lambda{#1}.{#2})]
-               | Exp Exp              [strict, left]
-               | "(" Exp ")"          [bracket]
 
-  configuration <T>
-                  <k> $PGM:Exp </k>
-                  <env> .Map </env>
-                  <store> .Map </store>
-                </T>
-
-  syntax Val ::= closure(Map,Id,Exp)
-  syntax Exp ::= Val
   syntax KResult ::= Val
 
-  rule <k> lambda X:Id . E => closure(Rho,X,E) ...</k>
-       <env> Rho </env>
-    [structural]
-  rule <k> closure(Rho,X,E) V:Val => E ~> Rho' ...</k>
-       <env> Rho' => Rho[X <- !N] </env>
-       <store>... .Map => (!N:Int |-> V) ...</store>
-  rule <k> X => V ...</k>
-       <env>... X |-> N ...</env>
-       <store>... N |-> V ...</store>
-  rule <k> _:Val ~> (Rho => .) ...</k> <env> _ => Rho </env>
-    [structural]
+  configuration
+    <T>
+      <k> $PGM:Exp </k>
+      <env> .Map </env>
+      <store> .Map </store>
+    </T>
 
-  syntax Val ::= Int | Bool
-  syntax Exp ::= Exp "*" Exp          [strict, left]
-               | Exp "/" Exp          [strict]
-               > Exp "+" Exp          [strict, left]
-               > Exp "<=" Exp         [strict]
-  rule I1 * I2 => I1 *Int I2
-  rule I1 / I2 => I1 /Int I2
-  rule I1 + I2 => I1 +Int I2
-  rule I1 <= I2 => I1 <=Int I2
+  syntax Val    ::= closure(Map, Id, Exp)
+                  | cc(K)
 
-  syntax Exp ::= "if" Exp "then" Exp "else" Exp  [strict(1)]
-  rule if true  then E else _ => E
-  rule if false then _ else E => E
+  rule  <k> lambda X:Id . E:Exp => closure(Rho, X, E) ...</k>
+        <env> Rho </env>
 
-  syntax Exp ::= "let" Id "=" Exp "in" Exp
-  rule let X = E in E':Exp => (lambda X . E') E                        [macro]
+  rule  <k> closure(Rho, X, E) V:Val => E ~> Rho' ...</k>
+        <env> Rho' => Rho[X <- !N] </env>
+        <store>... .Map => (!N:Int |-> V) ...</store>
 
-  syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
-  syntax Id ::= "$x" | "$y"
-  rule letrec F:Id X:Id = E in E'
-    => let F =
-         (lambda $x . ((lambda F . lambda X . E) (lambda $y . ($x $x $y))))
-         (lambda $x . ((lambda F . lambda X . E) (lambda $y . ($x $x $y))))
-       in E'                                                           [macro]
+  rule  <k> X:Id => V ...</k>
+        <env>... X |-> N ...</env>
+        <store>... N |-> V ...</store>
 
-  syntax Exp ::= "callcc" Exp  [strict]
-  syntax Val ::= cc(K)
-  rule <k> (callcc V:Val => V cc(K)) ~> K </k>
-  rule <k> cc(K) V ~> _ =>  V ~> K </k>
+  rule  <k> _:Val ~> (Rho => .) ... </k>
+        <env> _ => Rho </env>
+
+  rule  <k> - I:Int          => 0   -Int I ...</k>
+  rule  <k> I1:Int *  I2:Int => I1  *Int I2 ...</k>
+  rule  <k> I1:Int /  I2:Int => I1  /Int I2 ...</k>
+  rule  <k> I1:Int +  I2:Int => I1  +Int I2 ...</k>
+
+  rule  <k> I1:Int <= I2:Int => I1 <=Int I2 ...</k>
+
+  rule  <k> if true  then E else _ => E ...</k>
+  rule  <k> if false then _ else E => E ...</k>
+
+  rule  <k> let V = E1 in E2 => (lambda V . E2) E1 ...</k>
+
+  rule  <k> letrec F:Id X = E in E' => let F = mu F . lambda X . E in E' ...</k>
+
+  rule  <k> mu X . E => E ...</k>
+        <env> Rho => Rho[X <- !N] </env>
+        <store>... .Map => (!N:Int |-> mu X . E) ...</store>
+
+  rule  <k> (callcc V:Val => V cc(K)) ~> K </k>
+  rule  <k> cc(K) V ~> _ => V ~> K </k>
 endmodule
