@@ -1,75 +1,95 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
-
 module IMP-SYNTAX
   imports DOMAINS-SYNTAX
-  syntax AExp  ::= Int | String | Id
-                 | "++" Id
-                 | "read" "(" ")"
-                 | "-" Int
-                 | "(" AExp ")"               [bracket]
-                 > AExp "/" AExp              [left, strict, division]
-                 > AExp "+" AExp              [left, strict]
-  syntax BExp  ::= Bool
-                 | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
-                 | "!" BExp                   [strict]
-                 | "(" BExp ")"               [bracket]
-                 > BExp "&&" BExp             [left, strict(1)]
-  syntax Block ::= "{" "}"
-                 | "{" Stmt "}"
-  syntax Stmt  ::= Block
-                 | Id "=" AExp ";"            [strict(2)]
-                 | "if" "(" BExp ")"
-                   Block "else" Block         [strict(1)]
-                 | "while" "(" BExp ")" Block
-                 | "int" Ids ";"
-                 | "print" "(" AExps ")" ";"
-                 | "halt" ";"
-                 > "spawn" Stmt
-                 > Stmt Stmt                  [left]
 
-  syntax Ids   ::= List{Id,","}
-  syntax AExps ::= List{AExp,","}
-  syntax AExps ::= Ids
+  syntax Ids    ::= List{Id, ","}
+
+  syntax AExp   ::= Int | Id | String
+                  | "-" Int
+                  | "++" Id
+                  | read()
+                  | "(" AExp ")" [bracket]
+                  > AExp "/" AExp [strict, left, division]
+                  > AExp "+" AExp [strict, left]
+
+  syntax AExps  ::= List{AExp, ","}
+                  | Ids
+
+  syntax BExp   ::= Bool
+                  | "!" BExp [strict]
+                  | "(" BExp ")" [bracket]
+                  | AExp "<=" AExp [seqstrict]
+                  > BExp "&&" BExp [strict(1)]
+
+  syntax Block  ::= "{" "}"
+                  | "{" Stmt "}"
+
+  syntax Stmt   ::= Block
+                  | "halt" ";"
+                  | "int" Ids ";"
+                  | Id "=" AExp ";" [strict(2)]
+                  | "if" "(" BExp ")" Block "else" Block [strict(1)]
+                  | "while" "(" BExp ")" Block
+                  | "print" "(" AExps ")" ";"
+                  > "spawn" Stmt
+                  > Stmt Stmt       [left]
 endmodule
-
 
 module IMP
   imports IMP-SYNTAX
   imports DOMAINS
+
   syntax KResult ::= Int | Bool
 
-  configuration <T color="yellow">
-                  <k color="green"> $PGM:Stmt </k>
-                  <env color="LightSkyBlue"> .Map </env>
-                  <store color="red"> .Map </store>
-                </T>
+  configuration
+    <T color="yellow">
+      <k color="green"> $PGM:Stmt </k>
+      <env color="LightSkyBlue"> .Map </env>
+      <store color="red"> .Map </store>
+    </T>
 
-// AExp
-  rule <k> X:Id => I ...</k>
-       <env>... X |-> N ...</env>
-       <store>... N |-> I ...</store>
-  rule I1 / I2 => I1 /Int I2  when I2 =/=Int 0
+  // Exp
+
+  rule  <k> X:Id => I ...</k>
+        <env>... X |-> N ...</env>
+        <store>... N |-> I ...</store>
+
+  rule  - I => 0 -Int I
+  rule I1 / I2 => I1 /Int I2
   rule I1 + I2 => I1 +Int I2
-  rule - I => 0 -Int I
-// BExp
-  rule I1 <= I2 => I1 <=Int I2
-  rule ! T => notBool T
-  rule true && B => B
-  rule false && _ => false
-// Block
-  rule {} => .   [structural]
-  rule {S} => S  [structural]
-// Stmt
-  rule <k> X = I:Int; => . ...</k>
-       <env>... X |-> N ...</env>
-       <store>... N |-> (_ => I) ...</store>
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
-  rule if (true)  S else _ => S
-  rule if (false) _ else S => S
-  rule while (B) S => if (B) {S while (B) S} else {}  [structural]
 
-  rule <k> int (X,Xs => Xs); ...</k>
-       <env> Rho => Rho[X <- !N:Int] </env>
-       <store>... .Map => !N |-> 0 ...</store>
-  rule int .Ids; => .  [structural]
+  /* rule  <k> ++ X:Id => X = X + 1 ; ~> X ...</k> */
+
+  rule ! B => notBool B
+  rule I1 <= I2 => I1 <=Int I2
+  rule true && B2 => B2
+  rule false && _ => false
+
+  // Stmt
+  
+  rule  <k> X:Id = I:Int ; => . ...</k>
+        <env>... X |-> N ...</env>
+        <store> S => S [N <- I] </store>
+        requires N in_keys(S)
+
+  rule  <k> if ( true  ) B else _ => B ...</k>
+  rule  <k> if ( false ) _ else B => B ...</k>
+
+  rule  <k> while (C) B => if (C) { B while (C) B } else { } ...</k>
+        [structural]
+
+  rule  <k> S:Stmt S':Stmt => S ~> S' ...</k>
+
+  // Block
+
+  rule  <k> {   } => . ...</k> [structural]
+  rule  <k> { S } => S ...</k> [structural]
+
+  // Pgm
+
+  rule  <k> int (X, Xs => Xs) ;  ...</k>
+        <env> Rho => Rho [X <- !N:Int] </env>
+        <store>... .Map => !N |-> 0 ...</store>
+        requires notBool X in_keys(Rho)
+
+  rule  <k> int .Ids ; => . ...</k>
 endmodule

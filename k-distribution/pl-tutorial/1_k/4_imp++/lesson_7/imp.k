@@ -1,113 +1,151 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
-
 module IMP-SYNTAX
   imports DOMAINS-SYNTAX
-  syntax AExp  ::= Int | String | Id
-                 | "++" Id
-                 | "read" "(" ")"
-                 | "-" Int
-                 | "(" AExp ")"               [bracket]
-                 > AExp "/" AExp              [left, strict, division]
-                 > AExp "+" AExp              [left, strict]
-                 > "spawn" Block
-                 > Id "=" AExp                [strict(2)]
-  syntax BExp  ::= Bool
-                 | AExp "<=" AExp             [seqstrict, latex({#1}\leq{#2})]
-                 | "!" BExp                   [strict]
-                 | "(" BExp ")"               [bracket]
-                 > BExp "&&" BExp             [left, strict(1)]
-  syntax Block ::= "{" Stmts "}"
-  syntax Stmt  ::= Block
-                 | AExp ";"                   [strict]
-                 | "if" "(" BExp ")"
-                   Block "else" Block         [strict(1)]
-                 | "while" "(" BExp ")" Block
-                 | "int" Ids ";"
-                 | "print" "(" AExps ")" ";"
-                 | "halt" ";"
-                 > "join" AExp ";"            [strict]
 
-  syntax Ids   ::= List{Id,","}
-  syntax AExps ::= List{AExp,","}
-  syntax Stmts ::= List{Stmt,""}
-  syntax AExps ::= Ids
+  syntax Ids    ::= List{Id, ","}
+
+  syntax AExp   ::= Int | Id | String
+                  | "-" Int
+                  | "++" Id
+                  | "read" "(" ")"
+                  | "(" AExp ")" [bracket]
+                  > AExp "/" AExp [strict, left, division]
+                  > AExp "+" AExp [strict, left]
+                  > "spawn" Block
+                  > Id "=" AExp [strict(2)]
+
+  syntax AExps  ::= List{AExp, ","}
+                  | Ids
+
+  syntax BExp   ::= Bool
+                  | "!" BExp [strict]
+                  | "(" BExp ")" [bracket]
+                  | AExp "<=" AExp [seqstrict]
+                  > BExp "&&" BExp [strict(1)]
+
+  syntax Block  ::= "{" Stmts "}"
+
+  syntax Stmt   ::= Block
+                  | AExp ";" [strict]
+                  | "halt" ";"
+                  | "int" Ids ";"
+                  | "if" "(" BExp ")" Block "else" Block [strict(1)]
+                  | "while" "(" BExp ")" Block
+                  | "print" "(" AExps ")" ";"
+                  | "join" AExp ";" [strict]
+
+  syntax Stmts  ::= List{Stmt, ""}
 endmodule
-
 
 module IMP
   imports IMP-SYNTAX
   imports DOMAINS
+
   syntax KResult ::= Int | Bool | String
 
-  configuration <T color="yellow">
-                  <threads color="orange">
-                    <thread multiplicity="*" color="blue">
-                      <k color="green"> $PGM:Stmts </k>
-                      <env color="LightSkyBlue"> .Map </env>
-                      <id color="black"> 0 </id>
-                    </thread>
-                  </threads>
-                  <store color="red"> .Map </store>
-                  <input color="magenta" stream="stdin"> .List </input>
-                  <output color="Orchid" stream="stdout"> .List </output>
-                </T>
+  configuration
+    <T color="yellow">
+      <threads color="orange">
+        <thread multiplicity="*" color="blue" type="Map">
+          <id color="Salmon"> 0 </id>
+          <k color="green"> $PGM:Stmts </k>
+          <env color="LightSkyBlue"> .Map </env>
+        </thread>
+      </threads>
+      <store color="red"> .Map </store>
+      <input color="magenta" stream="stdin"> .List </input>
+      <output color="Orchid" stream="stdout"> .List </output>
+      <done color="brown"> .Set </done>
+    </T>
 
-// AExp
-  rule <k> X:Id => I ...</k>
-       <env>... X |-> N ...</env>
-       <store>... N |-> I ...</store>  [lookup]
-  rule <k> ++X => I +Int 1 ...</k>
-       <env>... X |-> N ...</env>
-       <store>... N |-> (I => I +Int 1) ...</store>  [increment]
-  rule <k> read() => I ...</k>
-       <input> ListItem(I:Int) => .List ...</input>  [read]
-  rule I1 / I2 => I1 /Int I2  requires I2 =/=Int 0
+  // Exp
+
+  rule  <k> X:Id => I ...</k>
+        <env>... X |-> N ...</env>
+        <store>... N |-> I ...</store>
+        [lookup]
+
+  rule  - I => 0 -Int I
+  rule I1 / I2 => I1 /Int I2 requires I2 =/=Int 0
   rule I1 + I2 => I1 +Int I2
-  rule - I => 0 -Int I
-  rule Str1 + Str2 => Str1 +String Str2
-// BExp
+  rule S1 + S2 => S1 +String S2
+
+  rule  <k> _:Int ; => . ...</k>
+
+  rule  <k> ++ X => I +Int 1 ...</k>
+        <env>... X |-> N ...</env>
+        <store>... N |-> (I => I +Int 1) ...</store>
+        [increment]
+
+  rule ! B => notBool B
   rule I1 <= I2 => I1 <=Int I2
-  rule ! T => notBool T
-  rule true && B => B
+  rule true && B2 => B2
   rule false && _ => false
-// Block
-  rule <k> {Ss} => Ss ~> Rho ...</k> <env> Rho </env>  [structural]
-  rule <k> Rho => . ...</k> <env> _ => Rho </env>    [structural]
-// Stmt
-  rule _:Int; => .
-  rule <k> X = I:Int => I ...</k>
-       <env>... X |-> N ...</env>
-       <store>... N |-> (_ => I) ...</store>  [assignment]
-  rule if (true)  S else _ => S
-  rule if (false) _ else S => S
-  rule while (B) S => if (B) {S while (B) S} else {.Stmts}  [structural]
 
-  rule <k> int (X,Xs => Xs); ...</k>
-       <env> Rho => Rho[X <- !N:Int] </env>
-       <store>... .Map => !N |-> 0 ...</store>
-  rule int .Ids; => .  [structural]
+  // Stmt
+  
+  rule  <k> X:Id = I:Int => I ...</k>
+        <env>... X |-> N ...</env>
+        <store>... N |-> (_ => I) ...</store>
+        [assignment]
 
-  syntax Printable ::= Int | String
-/* currently it is necessary to subsort Printable to AExp,
-  but future K should be able to infer that automatically. */
-  syntax AExp ::= Printable
-  context print(HOLE:AExp, _AEs:AExps);
-  rule <k> print(P:Printable,AEs => AEs); ...</k>
-       <output>... .List => ListItem(P) </output>  [print]
-  rule print(.AExps); => .  [structural]
+  rule  <k> read() => I ...</k>
+        <input> ListItem(I:Int) => .List ...</input>
+        [read]
 
-  rule <k> halt; ~> _ => . </k>
+  context print(HOLE:AExp, _);
 
-  rule <k> spawn S => !T:Int ...</k> <env> Rho </env>
-       (.Bag => <thread>... <k> S </k> <env> Rho </env> <id> !T </id> ...</thread>)
-  rule <k> join(T:Int); => . ...</k>
-       <thread>... <k> . </k> <id> T </id> ...</thread>
+  syntax Printable  ::= Int | String
+  syntax AExp       ::= Printable
 
-// Stmts
-  rule .Stmts => .                 [structural]
-  rule S:Stmt Ss:Stmts => S ~> Ss  [structural]
+  rule  <k> print(P:Printable, AEs => AEs) ; ...</k>
+        <output>... .List => ListItem(P) </output>
+        [print]
 
-// verification ids
-  syntax Id ::= "n"     [token]
-              | "sum"   [token]
+  rule  <k> print(.AExps) ; => . ...</k>
+
+  rule  <k> if ( true  ) B else _ => B ...</k>
+  rule  <k> if ( false ) _ else B => B ...</k>
+
+  rule  <k> while (C) B => if (C) { B while (C) B } else { .Stmts } ...</k>
+        [structural]
+
+  rule  <k> spawn S => !I ...</k>
+        <env> Rho </env>
+        (.Bag =>
+          <thread> 
+            ...
+            <id> !I:Int </id>
+            <k> S </k>
+            <env> Rho </env>
+            ...
+          </thread>)
+
+  rule  (<thread>... <id> I </id> <k> . </k> ...</thread> => .Bag) 
+        <done>... .Set => SetItem(I) ...</done> [structural]
+
+  rule  <k> join I:Int ; => . ...</k>
+        <done>... SetItem(I) ...</done>
+
+  rule  <k> halt ; ~> _ => . </k>
+
+  rule  <k> S:Stmt S':Stmt => S ~> S' ...</k>
+
+  // Block
+
+  rule  <k> .Stmts => .       ...</k> [structural]
+  rule  <k> S:Stmt Ss:Stmts => S ~> Ss ...</k> [structural]
+
+  rule  <k> { S } => S ~> Rho ...</k>
+        <env> Rho </env> [structural]
+
+  rule  <k> Rho => . ...</k>
+        <env> _ => Rho </env> [structural]
+
+  // Pgm
+
+  rule  <k> int (X, Xs => Xs) ;  ...</k>
+        <env> Rho => Rho [X <- !N:Int] </env>
+        <store>... .Map => !N |-> 0 ...</store>
+
+  rule  <k> int .Ids ; => . ...</k>
 endmodule
