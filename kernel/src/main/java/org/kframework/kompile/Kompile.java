@@ -501,10 +501,6 @@ public class Kompile {
                 .apply(parsedRule);
     }
 
-    public Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, Set<String> excludeModules) {
-        return parseModules(definition, mainModule, entryPointModule, definitionFile, excludeModules, false);
-    }
-
     public Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, Set<String> excludeModules, boolean readOnlyCache) {
         Set<Module> modules = definitionParsing.parseModules(definition, mainModule, entryPointModule, definitionFile, excludeModules, readOnlyCache);
         int totalBubbles = definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get();
