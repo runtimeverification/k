@@ -1,8 +1,10 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.parser;
 
+import com.google.common.collect.Streams;
 import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.definition.FlatModule;
 import org.kframework.definition.Module;
@@ -23,15 +25,16 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.OuterParsingOptions;
+import scala.Tuple3;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.LinkOption;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -199,8 +202,15 @@ public class ParserUtils {
 
         new CollectProductionsVisitor(kore, context).visit(def);
 
-        Map<String, List<org.kframework.kil.Module>> groupedModules = kilModules.stream()
-          .collect(Collectors.groupingBy(org.kframework.kil.Module::getName));
+        // Tuple3 of moduleName, Source, Location
+        Map<String, List<Tuple3<String, Source, Location>>> groupedModules =
+                Streams.concat(
+                        previousModules.stream().map(m -> Tuple3.apply(m.name(), m.att().get(Att.SOURCE(), Source.class),
+                                m.att().get(Att.LOCATION(), Location.class))),
+                        kilModules.stream().map(m -> Tuple3.apply(m.getName(), m.getSource(), m.getLocation())))
+                // make sure we have unique modules (double requires), and preserve order
+                .collect(Collectors.toCollection(LinkedHashSet::new)).stream()
+                .collect(Collectors.groupingBy(Tuple3::_1));
 
         List<String> duplicateModules = groupedModules
           .entrySet().stream()
@@ -210,9 +220,10 @@ public class ParserUtils {
 
         int errors = 0;
         for (String moduleName : duplicateModules) {
-          org.kframework.kil.Module firstMod = groupedModules.get(moduleName).get(0);
-          org.kframework.kil.Module secondMod = groupedModules.get(moduleName).get(1);
-          KEMException ex = KEMException.outerParserError("Module " + moduleName + " previously declared at " + firstMod.getSource() + " and " + firstMod.getLocation(), secondMod.getSource(), secondMod.getLocation());
+          Tuple3<String, Source, Location> firstMod = groupedModules.get(moduleName).get(0);
+          Tuple3<String, Source, Location> secondMod = groupedModules.get(moduleName).get(1);
+          KEMException ex = KEMException.outerParserError("Module " + moduleName + " previously declared at "
+                  + firstMod._2() + " and " + firstMod._3(), secondMod._2(), secondMod._3());
           errors++;
           kem.addKException(ex.getKException());
         }
