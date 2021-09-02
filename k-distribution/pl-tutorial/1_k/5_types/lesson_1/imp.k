@@ -8,9 +8,9 @@ module IMP-SYNTAX
                   | "++" Id
                   | "read" "(" ")"
                   | "(" AExp ")" [bracket]
-                  > AExp "/" AExp [strict, left, division]
+                  > AExp "/" AExp [strict, left]
                   > AExp "+" AExp [strict, left]
-                  > "spawn" Block
+                  > "spawn" Block [strict]
                   > Id "=" AExp [strict(2)]
 
   syntax AExps  ::= List{AExp, ","}
@@ -19,8 +19,8 @@ module IMP-SYNTAX
   syntax BExp   ::= Bool
                   | "!" BExp [strict]
                   | "(" BExp ")" [bracket]
-                  | AExp "<=" AExp [seqstrict]
-                  > BExp "&&" BExp [strict(1)]
+                  | AExp "<=" AExp [strict]
+                  > BExp "&&" BExp [left, strict]
 
   syntax Block  ::= "{" Stmts "}"
 
@@ -28,12 +28,12 @@ module IMP-SYNTAX
                   | AExp ";" [strict]
                   | "halt" ";"
                   | "int" Ids ";"
-                  | "if" "(" BExp ")" Block "else" Block [strict(1)]
-                  | "while" "(" BExp ")" Block
+                  | "if" "(" BExp ")" Block "else" Block [strict]
+                  | "while" "(" BExp ")" Block [strict]
                   | "print" "(" AExps ")" ";"
                   | "join" AExp ";" [strict]
 
-  syntax Stmts  ::= List{Stmt, ""}
+  syntax Stmts  ::= List{Stmt, ""} [strict(1)]
 endmodule
 
 module IMP
@@ -44,114 +44,80 @@ module IMP
   syntax PrintableType  ::= "int" | "string"
   syntax Type ::= PrintableType | "bool" | BlockOrStmtType
 
-  syntax KResult ::= Type
+  syntax KResult  ::= Type
 
-  /* syntax KResult ::= Int | Bool | String */
+  syntax AExp     ::= Type
+  syntax BExp     ::= Type
 
-  /* configuration */
-  /*   <T color="yellow"> */
-  /*     <threads color="orange"> */
-  /*       <thread multiplicity="*" color="blue" type="Map"> */
-  /*         <id color="Salmon"> 0 </id> */
-  /*         <k color="green"> $PGM:Stmts </k> */
-  /*         <env color="LightSkyBlue"> .Map </env> */
-  /*       </thread> */
-  /*     </threads> */
-  /*     <store color="red"> .Map </store> */
-  /*     <input color="magenta" stream="stdin"> .List </input> */
-  /*     <output color="Orchid" stream="stdout"> .List </output> */
-  /*     <done color="brown"> .Set </done> */
-  /*   </T> */
+  configuration
+    <T color="yellow">
+      <k color="green"> $PGM:Stmts </k>
+      <tenv color="LightSkyBlue"> .Map </tenv>
+    </T>
 
   /* // Exp */
 
-  /* rule  <k> X:Id => I ...</k> */
-  /*       <env>... X |-> N ...</env> */
-  /*       <store>... N |-> I ...</store> */
-  /*       [lookup] */
+  rule _:Int => int
+  rule _:String => string
 
-  /* rule  - I => 0 -Int I */
-  /* rule I1 / I2 => I1 /Int I2 requires I2 =/=Int 0 */
-  /* rule I1 + I2 => I1 +Int I2 */
-  /* rule S1 + S2 => S1 +String S2 */
+  rule  <k> X:Id => T ...</k>
+        <tenv>... X |-> T ...</tenv>
 
-  /* rule  <k> _:Int ; => . ...</k> */
+  rule  - _ => int
+  rule int / int => int
+  rule int + int => int
+  rule string + string => string
 
-  /* rule  <k> ++ X => I +Int 1 ...</k> */
-  /*       <env>... X |-> N ...</env> */
-  /*       <store>... N |-> (I => I +Int 1) ...</store> */
-  /*       [increment] */
+  rule  <k> int ; => stmt ...</k>
 
-  /* rule ! B => notBool B */
-  /* rule I1 <= I2 => I1 <=Int I2 */
-  /* rule true && B2 => B2 */
-  /* rule false && _ => false */
+  rule  <k> ++ X => int ...</k>
+        <tenv>... X |-> int ...</tenv>
+
+  rule _:Bool => bool
+  rule ! _ => bool
+  rule int <= int => bool
+  rule bool && bool => bool
 
   /* // Stmt */
   
-  /* rule  <k> X:Id = I:Int => I ...</k> */
-  /*       <env>... X |-> N ...</env> */
-  /*       <store>... N |-> (_ => I) ...</store> */
-  /*       [assignment] */
+  rule  <k> X:Id = T => T ...</k>
+        <tenv>... X |-> T ...</tenv>
 
-  /* rule  <k> read() => I ...</k> */
-  /*       <input> ListItem(I:Int) => .List ...</input> */
-  /*       [read] */
+  rule  <k> read() => int ...</k>
 
-  /* context print(HOLE:AExp, _); */
+  context print(HOLE:AExp, _);
 
-  /* syntax Printable  ::= Int | String */
-  /* syntax AExp       ::= Printable */
+  rule  <k> print(_:PrintableType, AEs => AEs) ; ...</k>
+  rule  <k> print(.AExps) ; => stmt ...</k>
 
-  /* rule  <k> print(P:Printable, AEs => AEs) ; ...</k> */
-  /*       <output>... .List => ListItem(P) </output> */
-  /*       [print] */
+  rule  <k> if ( bool ) block else block => stmt ...</k>
 
-  /* rule  <k> print(.AExps) ; => . ...</k> */
+  rule  <k> while ( bool ) block => stmt ...</k>
 
-  /* rule  <k> if ( true  ) B else _ => B ...</k> */
-  /* rule  <k> if ( false ) _ else B => B ...</k> */
+  rule  <k> spawn block => int ...</k>
 
-  /* rule  <k> while (C) B => if (C) { B while (C) B } else { .Stmts } ...</k> */
-  /*       [structural] */
+  rule  <k> join int ; => stmt ...</k>
 
-  /* rule  <k> spawn S => !I ...</k> */
-  /*       <env> Rho </env> */
-  /*       (.Bag => */
-  /*         <thread> */ 
-  /*           ... */
-  /*           <id> !I:Int </id> */
-  /*           <k> S </k> */
-  /*           <env> Rho </env> */
-  /*           ... */
-  /*         </thread>) */
-
-  /* rule  (<thread>... <id> I </id> <k> . </k> ...</thread> => .Bag) */ 
-  /*       <done>... .Set => SetItem(I) ...</done> [structural] */
-
-  /* rule  <k> join I:Int ; => . ...</k> */
-  /*       <done>... SetItem(I) ...</done> */
-
-  /* rule  <k> halt ; ~> _ => . </k> */
-
-  /* rule  <k> S:Stmt S':Stmt => S ~> S' ...</k> */
+  rule  <k> halt ; => stmt ...</k>
 
   /* // Block */
 
-  /* rule  <k> .Stmts => .       ...</k> [structural] */
-  /* rule  <k> S:Stmt Ss:Stmts => S ~> Ss ...</k> [structural] */
+  syntax Block  ::= Type
 
-  /* rule  <k> { S } => S ~> Rho ...</k> */
-  /*       <env> Rho </env> [structural] */
+  rule  <k> .Stmts => stmt:KItem       ...</k> [structural]
+  rule  <k> _:BlockOrStmtType Ss => Ss ...</k>
 
-  /* rule  <k> Rho => . ...</k> */
-  /*       <env> _ => Rho </env> [structural] */
+  rule  <k> { S } => S ~> Rho ...</k>
+        <tenv> Rho </tenv> [structural]
+
+  rule  <k> _:BlockOrStmtType ~> Rho => block ...</k>
+        <tenv> _ => Rho </tenv> [structural]
 
   /* // Pgm */
 
-  /* rule  <k> int (X, Xs => Xs) ;  ...</k> */
-  /*       <env> Rho => Rho [X <- !N:Int] </env> */
-  /*       <store>... .Map => !N |-> 0 ...</store> */
+  rule  <k> int (X:Id, Xs:Ids => Xs) ;  ...</k>
+        <tenv> M => M[X <- int]  </tenv>
 
-  /* rule  <k> int .Ids ; => . ...</k> */
+  rule  <k> int .Ids ; => stmt ...</k>
+
 endmodule
