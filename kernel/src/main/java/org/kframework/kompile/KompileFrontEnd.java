@@ -16,6 +16,7 @@ import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
+import org.kframework.utils.options.OuterParsingOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ public class KompileFrontEnd extends FrontEnd {
 
 
     private final KompileOptions options;
+    private final OuterParsingOptions outerOptions;
     private final Provider<Backend> koreBackend;
     private final Stopwatch sw;
     private final KExceptionManager kem;
@@ -41,6 +43,7 @@ public class KompileFrontEnd extends FrontEnd {
     @Inject
     KompileFrontEnd(
             KompileOptions options,
+            OuterParsingOptions outerOptions,
             @Usage String usage,
             Provider<Backend> koreBackend,
             Stopwatch sw,
@@ -50,6 +53,7 @@ public class KompileFrontEnd extends FrontEnd {
             Provider<FileUtil> files) {
         super(kem, options.global, usage, jarInfo, files);
         this.options = options;
+        this.outerOptions = outerOptions;
         this.koreBackend = koreBackend;
         this.sw = sw;
         this.kem = kem;
@@ -59,14 +63,14 @@ public class KompileFrontEnd extends FrontEnd {
 
     @Override
     public int run() {
-        if (!options.outerParsing.mainDefinitionFile(files.get()).exists()) {
+        if (!outerOptions.mainDefinitionFile(files.get()).exists()) {
             throw KEMException.criticalError("Definition file doesn't exist: " +
-                    options.outerParsing.mainDefinitionFile(files.get()).getAbsolutePath());
+                    outerOptions.mainDefinitionFile(files.get()).getAbsolutePath());
         }
 
-        Kompile kompile = new Kompile(options, options.outerParsing, files.get(), kem, sw, !options.profileRules);
+        Kompile kompile = new Kompile(options, outerOptions, files.get(), kem, sw, !options.profileRules);
         Backend backend = koreBackend.get();
-        CompiledDefinition def = kompile.run(options.outerParsing.mainDefinitionFile(files.get()), options.mainModule(files.get()), options.syntaxModule(files.get()), backend.steps(), backend.excludedModuleTags());
+        CompiledDefinition def = kompile.run(outerOptions.mainDefinitionFile(files.get()), options.mainModule(files.get()), options.syntaxModule(files.get()), backend.steps(), backend.excludedModuleTags());
         kompile = null;
         files.get().saveToKompiled("mainModule.txt", def.executionModule().name());
         files.get().saveToKompiled("mainSyntaxModule.txt", def.mainSyntaxModuleName());
