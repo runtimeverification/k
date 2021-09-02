@@ -1,51 +1,64 @@
-// Copyright (c) 2012-2019 K Team. All Rights Reserved.
+requires "substitution.md"
 
-require "substitution.md"
+module LAMBDA-SYNTAX
+  imports KVAR-SYNTAX
+  imports DOMAINS-SYNTAX
+
+  syntax Type ::= "int"
+                | "bool"
+                | Type "->" Type
+                | "(" Type ")" [bracket]
+
+  syntax Exp  ::= KVar
+                | "lambda" KVar ":" Type "." Exp [binder]
+                | Exp Exp [strict, left]
+                | "(" Exp ")" [bracket]
+
+  syntax Exp  ::= Int | Bool
+                | "-" Int
+                > Exp "*"  Exp [strict, left]
+                | Exp "/"  Exp [strict, left]
+                > Exp "+"  Exp [strict, left]
+                > Exp "<=" Exp [strict]
+
+  syntax Exp  ::= "if" Exp "then" Exp "else" Exp [strict]
+
+  syntax Exp  ::= "let" KVar ":" Type "=" Exp "in" Exp
+                | "mu"  KVar ":" Type "." Exp [binder]
+                | "letrec" KVar ":" Type KVar ":" Type "=" Exp "in" Exp
+endmodule
 
 module LAMBDA
-  imports DOMAINS
+  imports LAMBDA-SYNTAX
   imports SUBSTITUTION
+  imports DOMAINS
 
-  syntax Type ::= "int" | "bool"
-                | Type "->" Type
-                | "(" Type ")"                 [bracket]
+  syntax Exp      ::= Type
+                    | Exp "->" Exp [strict]
 
-  syntax Exp ::= KVar
-               | "lambda" KVar ":" Type "." Exp  [binder]
-               | Exp Exp                       [strict, left]
-               | "(" Exp ")"                   [bracket]
-
-  syntax Exp ::= Type
-
-  syntax KResult ::= Type
-
-  syntax Exp ::= Exp "->" Exp                  [strict]
-
-  rule lambda X : T . E => T -> (E[T/X])
-  rule (T1 -> T2) T1 => T2
-
-  syntax Exp ::= Int | Bool
-               | Exp "*" Exp          [strict, left]
-               | Exp "/" Exp          [strict]
-               > Exp "+" Exp          [strict, left]
-               > Exp "<=" Exp         [strict]
+  rule lambda X : T . E => T -> (E[T / X])
+  rule (T -> T') T => T'
 
   rule _:Int => int
   rule _:Bool => bool
-  rule int * int => int
-  rule int / int => int
-  rule int + int => int
+
+  rule - _ => int
+  rule int *  int => int
+  rule int /  int => int
+  rule int +  int => int
   rule int <= int => bool
 
-  syntax Exp ::= "if" Exp "then" Exp "else" Exp                       [strict]
   rule if bool then T:Type else T => T
 
-  syntax Exp ::= "let" KVar ":" Type "=" Exp "in" Exp
-  rule let X : T = E in E' => (lambda X : T . E') E                   [macro]
+  rule let V : T = E1 in E2 => (lambda V : T . E2) E1 [macro]
 
-  syntax Exp ::= "letrec" KVar ":" Type KVar ":" Type "=" Exp "in" Exp
-               | "mu" KVar ":" Type "." Exp                             [binder]
-  rule letrec F : T1  X : T2 = E in E'
-    => let F : T1 = mu F : T1 . lambda X : T2 . E in E'               [macro]
-  rule mu X : T . E => (T -> T) (E[T/X])
+  rule letrec F : T X : T' = E in E' =>
+    let F : T = mu F : T . lambda X : T' . E in E' [macro]
+
+  rule mu X : T . E => (T -> T):Type (E [T / X])
+
+  syntax Bool ::= isKResult(K) [symbol, function]
+  rule isKResult(_:Type) => true
+  rule isKResult((_ -> _)::Exp) => true
+  rule isKResult(_) => false [owise]
 endmodule
