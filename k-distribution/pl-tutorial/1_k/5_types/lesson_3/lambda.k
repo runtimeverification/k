@@ -1,58 +1,71 @@
-// Copyright (c) 2012-2019 K Team. All Rights Reserved.
+module LAMBDA-SYNTAX
+  imports DOMAINS-SYNTAX
+
+  syntax Type ::= "int"
+                | "bool"
+                | Type "->" Type
+                | "(" Type ")" [bracket]
+
+  syntax Exp  ::= Id
+                | "lambda" Id ":" Type "." Exp
+                | Exp Exp [strict, left]
+                | "(" Exp ")" [bracket]
+
+  syntax Exp  ::= Int | Bool
+                | "-" Int
+                > Exp "*"  Exp [strict, left]
+                | Exp "/"  Exp [strict, left]
+                > Exp "+"  Exp [strict, left]
+                > Exp "<=" Exp [strict]
+
+  syntax Exp  ::= "if" Exp "then" Exp "else" Exp [strict]
+
+  syntax Exp  ::= "let" Id ":" Type "=" Exp "in" Exp
+                | "mu"  Id ":" Type "." Exp
+                | "letrec" Id ":" Type Id ":" Type "=" Exp "in" Exp
+endmodule
 
 module LAMBDA
+  imports LAMBDA-SYNTAX
   imports DOMAINS
-  syntax Type ::= "int" | "bool"
-                | Type "->" Type
-                | "(" Type ")"                 [bracket]
 
-  syntax Exp ::= Id
-               | "lambda" Id ":" Type "." Exp
-               | Exp Exp                       [strict, left]
-               | "(" Exp ")"                   [bracket]
+  configuration
+    <T>
+      <k> $PGM:Exp </k>
+      <tenv> .Map </tenv>
+    </T>
 
-  syntax Exp ::= Type
+  syntax KResult  ::= Type
 
-  syntax KResult ::= Type
+  syntax Exp      ::= Type
+                    | Exp "->" Exp [strict]
 
-  configuration <T color="yellow">
-                  <k color="green"> $PGM:Exp </k>
-                  <tenv color="blue"> .Map </tenv>
-                </T>
+  rule  <k> lambda X : T . E => (T -> E) ~> Rho ...</k>
+        <tenv> Rho => Rho [X <- T] </tenv>
 
-  syntax Exp ::= Exp "->" Exp                  [strict]
-  rule <k> lambda X : T . E => (T -> E) ~> Rho ...</k>
-       <tenv> Rho => Rho[X <- T] </tenv>
+  rule (T -> T') T => T'
 
-  rule <k> X:Id => T ...</k> <tenv>... X |-> T ...</tenv>
-  rule (T1 -> T2) T1 => T2
-
-  syntax Exp ::= Int | Bool
-               | Exp "*" Exp          [strict, left]
-               | Exp "/" Exp          [strict]
-               > Exp "+" Exp          [strict, left]
-               > Exp "<=" Exp         [strict]
+  rule  <k> X:Id => T ...</k>
+        <tenv>... X |-> T ...</tenv>
 
   rule _:Int => int
   rule _:Bool => bool
-  rule int * int => int
-  rule int / int => int
-  rule int + int => int
+
+  rule - _ => int
+  rule int *  int => int
+  rule int /  int => int
+  rule int +  int => int
   rule int <= int => bool
 
-  syntax Exp ::= "if" Exp "then" Exp "else" Exp                       [strict]
   rule if bool then T:Type else T => T
 
-  syntax Exp ::= "let" Id ":" Type "=" Exp "in" Exp
-  rule let X : T = E in E' => (lambda X : T . E') E                   [macro]
+  rule let V : T = E1 in E2 => (lambda V : T . E2) E1 [macro]
 
-  syntax Exp ::= "letrec" Id ":" Type Id ":" Type "=" Exp "in" Exp
-               | "mu" Id ":" Type "." Exp
-  rule letrec F : T1  X : T2 = E in E'
-    => let F : T1 = mu F : T1 . lambda X : T2 . E in E'               [macro]
-  rule <k> mu X : T . E => (T -> T) E ~> Rho ...</k>
-       <tenv> Rho => Rho[X <- T] </tenv>
+  /* rule letrec F : T X : T' = E in E' => */
+  /*   let F : T = mu F : T . lambda X : T' . E in E' [macro] */
 
-// Auxiliary type environment recovery
-  rule <k> _:Type ~> (Rho => .) ...</k> <tenv> _ => Rho </tenv>
+  /* rule mu X : T . E => (T -> T):Type (E [T / X]) */
+
+  rule  <k> _ ~> (Rho => .) ...</k>
+        <tenv> _ => Rho </tenv>
 endmodule
