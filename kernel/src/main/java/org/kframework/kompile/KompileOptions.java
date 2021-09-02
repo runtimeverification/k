@@ -26,7 +26,14 @@ public class KompileOptions implements Serializable {
      * as part of CompiledDefinition, in any other tool. usability depends on context.
      */
     @ParametersDelegate
-    public transient GlobalOptions global = new GlobalOptions();
+    private final transient GlobalOptions global = new GlobalOptions();
+
+    /**
+     * Use only in the Guice Provider method, so it can be replaced by GlobalOptions from other tools.
+     */
+    GlobalOptions getGlobalOptions_UseOnlyInGuiceProvider() {
+        return global;
+    }
 
     @ParametersDelegate
     public OuterParsingOptions outerParsing = new OuterParsingOptions();

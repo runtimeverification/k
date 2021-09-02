@@ -79,7 +79,7 @@ public class Kompile {
     public static final String REQUIRE_PRELUDE_K = "requires \"prelude.md\"\n";
 
     private final KompileOptions kompileOptions;
-    private GlobalOptions globalOptions;
+    private final GlobalOptions globalOptions;
     private final FileUtil files;
     private final KExceptionManager kem;
     private final ParserUtils parser;
@@ -87,23 +87,18 @@ public class Kompile {
     private final DefinitionParsing definitionParsing;
     java.util.Set<KEMException> errors;
 
-    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, boolean cacheParses) {
-        this(kompileOptions, files, kem, new Stopwatch(kompileOptions.global), cacheParses);
-    }
-
-    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem) {
-        this(kompileOptions, files, kem, true);
+    public Kompile(KompileOptions kompileOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem) {
+        this(kompileOptions, globalOptions, files, kem, new Stopwatch(globalOptions), true);
     }
 
     @Inject
     public Kompile(KompileOptions kompileOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
-        this(kompileOptions, files, kem, sw, true);
-        this.globalOptions = globalOptions;
+        this(kompileOptions, globalOptions, files, kem, sw, true);
     }
 
-    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
+    public Kompile(KompileOptions kompileOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
         this.kompileOptions = kompileOptions;
-        this.globalOptions = kompileOptions.global;
+        this.globalOptions = globalOptions;
         this.files = files;
         this.kem = kem;
         this.errors = new HashSet<>();
@@ -114,7 +109,7 @@ public class Kompile {
         File cacheFile = kompileOptions.cacheFile != null
                 ? files.resolveWorkingDirectory(kompileOptions.cacheFile) : files.resolveKompiled("cache.bin");
         this.definitionParsing = new DefinitionParsing(
-                lookupDirectories, kompileOptions, kem, files,
+                lookupDirectories, kompileOptions, globalOptions, kem, files,
                 parser, cacheParses, cacheFile, sw);
         this.sw = sw;
 
@@ -172,7 +167,7 @@ public class Kompile {
         } else {
           rootCell = Sorts.GeneratedTopCell();
         }
-        CompiledDefinition def = new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(rootCell).klabel());
+        CompiledDefinition def = new CompiledDefinition(kompileOptions, globalOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(rootCell).klabel());
 
         if (kompileOptions.genBisonParser || kompileOptions.genGlrBisonParser) {
             if (def.configurationVariableDefaultSorts.containsKey("$PGM")) {

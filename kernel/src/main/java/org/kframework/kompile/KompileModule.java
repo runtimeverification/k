@@ -40,7 +40,7 @@ public class KompileModule extends AbstractModule {
 
     @Provides @RequestScoped
     GlobalOptions globalOptions(KompileOptions options) {
-        return options.global;
+        return options.getGlobalOptions_UseOnlyInGuiceProvider();
     }
 
     @Provides
