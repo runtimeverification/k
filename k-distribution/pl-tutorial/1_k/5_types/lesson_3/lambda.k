@@ -66,6 +66,6 @@ module LAMBDA
 
   /* rule mu X : T . E => (T -> T):Type (E [T / X]) */
 
-  rule  <k> _ ~> (Rho => .) ...</k>
+  rule  <k> _:Type ~> (Rho => .) ...</k>
         <tenv> _ => Rho </tenv>
 endmodule
