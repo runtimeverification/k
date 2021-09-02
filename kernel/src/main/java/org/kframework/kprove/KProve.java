@@ -91,7 +91,7 @@ public class KProve {
     // Saving combined verification definition to disk to be usable by other tools (e.g., kast)
     private void saveFullDefinition(Definition fullDefinition) {
         CompiledDefinition fullCompiledDefinition = new CompiledDefinition(
-                compiledDefinition.kompileOptions,
+                compiledDefinition.kompileOptions, compiledDefinition.outerParsingOptions,
                 fullDefinition, fullDefinition,
                 files, kem, compiledDefinition.topCellInitializer);
         Path proveKompiledDir = Paths.get(kproveOptions.saveProofDefinitionTo).resolve("prove-spec-kompiled");

@@ -171,7 +171,7 @@ public class Kompile {
         } else {
           rootCell = Sorts.GeneratedTopCell();
         }
-        CompiledDefinition def = new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(rootCell).klabel());
+        CompiledDefinition def = new CompiledDefinition(kompileOptions, kompileOptions.outerParsing, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(rootCell).klabel());
 
         if (kompileOptions.genBisonParser || kompileOptions.genGlrBisonParser) {
             if (def.configurationVariableDefaultSorts.containsKey("$PGM")) {
