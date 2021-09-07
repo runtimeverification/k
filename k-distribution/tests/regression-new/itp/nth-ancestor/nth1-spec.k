@@ -23,8 +23,6 @@
     by apply/connect1.
 */
 
-require "chain.k"
-
 // base case
 module NTH1-SPEC
     imports V
