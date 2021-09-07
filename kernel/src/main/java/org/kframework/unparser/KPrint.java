@@ -73,12 +73,6 @@ public class KPrint {
                 new PrintOptions(), null, new KompileOptions());
     }
 
-    public KPrint(CompiledDefinition compiledDefinition) {
-        this(new KExceptionManager(compiledDefinition.kompileOptions.global), FileUtil.testFileUtil(),
-                new TTYInfo(false, false, false), new PrintOptions(), compiledDefinition,
-                compiledDefinition.kompileOptions);
-    }
-
     @Inject
     public KPrint(KExceptionManager kem, FileUtil files, TTYInfo tty, PrintOptions options,
                   CompiledDefinition compiledDefinition, KompileOptions kompileOptions) {

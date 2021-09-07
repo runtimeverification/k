@@ -3,6 +3,7 @@ package org.kframework.kompile;
 
 import com.google.inject.util.Providers;
 import org.junit.Test;
+import org.kframework.main.GlobalOptions;
 import org.kframework.utils.IOTestCase;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
@@ -25,18 +26,19 @@ public class KompileFrontEndTest extends IOTestCase {
     FileUtil files;
 
     KompileOptions options = new KompileOptions();
+    GlobalOptions globalOptions = new GlobalOptions();
 
     @Test
     public void testHelp() throws IOException {
-        options.global.help = true;
-        new KompileFrontEnd(options, "foo", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files)).main();
+        globalOptions.help = true;
+        new KompileFrontEnd(options, globalOptions,"foo", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files)).main();
         assertEquals("foo", stdout.toString());
     }
 
     @Test
     public void testVersion() {
-        options.global.version = true;
-        new KompileFrontEnd(options, "", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files)).main();
+        globalOptions.version = true;
+        new KompileFrontEnd(options, globalOptions, "", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files)).main();
         verify(jarInfo).printVersionMessage();
     }
 }
