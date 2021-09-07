@@ -209,6 +209,8 @@
           </execution>
         </executions>
         <configuration>
+          <useNativeGit>true</useNativeGit>
+          <failOnNoGitDirectory>false</failOnNoGitDirectory>
           <includeOnlyProperties>
             <includeOnlyProperty>^git.commit.id.describe$</includeOnlyProperty>
           </includeOnlyProperties>
