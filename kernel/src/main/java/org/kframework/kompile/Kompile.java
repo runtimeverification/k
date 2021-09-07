@@ -267,7 +267,7 @@ public class Kompile {
 
     public static Function<Definition, Definition> defaultSteps(KompileOptions kompileOptions, KExceptionManager kem, FileUtil files) {
         Function1<Definition, Definition> resolveStrict = d -> DefinitionTransformer.from(new ResolveStrict(kompileOptions, d)::resolve, "resolving strict and seqstrict attributes").apply(d);
-        DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.transition), EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION, COOL_RESULT_INJECTION))::resolve, "resolving heat and cool attributes");
+        DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION, COOL_RESULT_INJECTION))::resolve, "resolving heat and cool attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
         DefinitionTransformer guardOrs = DefinitionTransformer.fromSentenceTransformer(new GuardOrPatterns(false)::resolve, "resolving or patterns");
         DefinitionTransformer resolveSemanticCasts =

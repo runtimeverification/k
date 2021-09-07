@@ -127,11 +127,6 @@ public class KompileOptions implements Serializable {
     @Parameter(names="--bison-stack-max-depth", description="Maximum size of bison parsing stack (default: 10000).")
     public long bisonStackMaxDepth = 10000;
 
-    @Parameter(names="--transition", listConverter=StringListConverter.class, description="[DEPRECATED: java backend only] <string> is a whitespace-separated list of tags designating rules to become transitions.")
-    public List<String> transition = Collections.singletonList(DEFAULT_TRANSITION);
-
-    public static final String DEFAULT_TRANSITION = "transition";
-
     @Parameter(names="--top-cell", description="Choose the top configuration cell when more than one is provided. Does nothing if only one top cell exists.")
     public String topCell;
 }

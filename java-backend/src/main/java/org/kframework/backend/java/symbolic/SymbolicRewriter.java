@@ -72,11 +72,10 @@ public class SymbolicRewriter {
     private final FastRuleMatcher theFastMatcher;
     private final Definition definition;
 
-    public SymbolicRewriter(GlobalContext global, List<String> transitions,
-                            KOREtoBackendKIL constructor) {
+    public SymbolicRewriter(GlobalContext global, KOREtoBackendKIL constructor) {
         this.constructor = constructor;
         this.definition = global.getDefinition();
-        this.transitions = transitions;
+        this.transitions = Collections.singletonList("transition");
         this.theFastMatcher = new FastRuleMatcher(global);
         this.transition = true;
         this.global = global;

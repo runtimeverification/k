@@ -65,7 +65,6 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
     private final KExceptionManager kem;
     private final SMTOptions smtOptions;
     private final Map<String, MethodHandle> hookProvider;
-    private final List<String> transitions;
     private final KRunOptions krunOptions;
     private final KProveOptions kproveOptions;
     private final FileUtil files;
@@ -95,7 +94,6 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
         this.kem = kem;
         this.smtOptions = smtOptions;
         this.hookProvider = HookProvider.get(kem);
-        this.transitions = kompileOptions.transition;
         this.krunOptions = krunOptions;
         this.kproveOptions = kproveOptions;
         this.kompileOptions = kompileOptions;
@@ -169,7 +167,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             Term backendKil = converter.convert(macroExpander.expand(resolveCasts.resolve(k))).evaluate(termContext);
             rewritingContext.stateLog.log(StateLog.LogEvent.EXECINIT, backendKil, KApply(KLabels.ML_TRUE));
             rewritingContext.setExecutionPhase(true);
-            SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
+            SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, converter);
             if (javaExecutionOptions.skipInvokingBackend) {
                 System.err.println("Skipping invoking the backend!");
                 return new RewriterResult(Optional.empty(), Optional.of(0), KORE.KApply(KLabels.ML_TRUE));
@@ -196,7 +194,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             Term javaTerm = converter.convert(macroExpander.expand(resolveCasts.resolve(initialConfiguration))).evaluate(termContext);
             rewritingContext.stateLog.log(StateLog.LogEvent.SEARCHINIT, javaTerm, KApply(KLabels.ML_TRUE));
             org.kframework.backend.java.kil.Rule javaPattern = convertToJavaPattern(converter, pattern);
-            SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
+            SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, converter);
             if (javaExecutionOptions.skipInvokingBackend) {
                 System.err.println("Skipping invoking the backend!");
                 return KORE.KApply(KLabels.ML_TRUE);
@@ -228,7 +226,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                     .map(org.kframework.backend.java.kil.Rule::renameVariables)
                     .collect(Collectors.toList());
 
-            SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, transitions, converter);
+            SymbolicRewriter rewriter = new SymbolicRewriter(rewritingContext, converter);
 
             if (javaExecutionOptions.skipInvokingBackend) {
                 System.err.println("Skipping invoking the backend!");
@@ -349,10 +347,6 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
             return ((BuiltinList) ((KList) ((KItem) e.equalities().get(0).leftHandSide()).kList()).getContents().get(0)).children;
         }
 
-        private List<String> getTransitions() {
-            return transitions;
-        }
-
         private class ProcessProofRules {
             private final KOREtoBackendKIL converter;
             private final TermContext termContext;
@@ -437,7 +431,7 @@ public class InitializeRewriter implements Function<org.kframework.definition.De
                     .collect(Collectors.toList());
 
             //// prove spec rules
-            rewriter = new SymbolicRewriter(glue.rewritingContext, glue.getTransitions(), processProofRules.converter);
+            rewriter = new SymbolicRewriter(glue.rewritingContext, processProofRules.converter);
 
             startSyncNodes = new ArrayList<>();
             targetSyncNodes = new ArrayList<>();

@@ -16,6 +16,7 @@ import org.kframework.kore.TransformK;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -32,8 +33,8 @@ public class ResolveHeatCoolAttribute {
         HEAT_RESULT, COOL_RESULT_CONDITION, COOL_RESULT_INJECTION
     }
 
-    public ResolveHeatCoolAttribute(Set<String> transitions, EnumSet<Mode> modes) {
-        this.transitions = transitions;
+    public ResolveHeatCoolAttribute(EnumSet<Mode> modes) {
+        this.transitions = Collections.singleton("transition");
         this.modes = modes;
     }
 

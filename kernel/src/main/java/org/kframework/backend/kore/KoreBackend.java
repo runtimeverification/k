@@ -50,7 +50,6 @@ import scala.Function1;
 import java.io.File;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -128,7 +127,7 @@ public class KoreBackend extends AbstractBackend {
     @Override
     public Function<Definition, Definition> steps() {
         Function1<Definition, Definition> resolveStrict = d -> DefinitionTransformer.from(new ResolveStrict(kompileOptions, d)::resolve, "resolving strict and seqstrict attributes").apply(d);
-        DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.transition), heatCoolConditions)::resolve, "resolving heat and cool attributes");
+        DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(heatCoolConditions)::resolve, "resolving heat and cool attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
         DefinitionTransformer guardOrs = DefinitionTransformer.fromSentenceTransformer(new GuardOrPatterns(true)::resolve, "resolving or patterns");
         DefinitionTransformer resolveSemanticCasts =
