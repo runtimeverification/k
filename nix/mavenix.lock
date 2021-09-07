@@ -1434,6 +1434,14 @@
       "sha1": "47e0dd93285dcc6b33181713bc7e8aed66742964"
     },
     {
+      "path": "com/googlecode/javaewah/JavaEWAH/1.1.7/JavaEWAH-1.1.7.jar",
+      "sha1": "570dde3cd706ae10c62fe19b150928cfdb415e87"
+    },
+    {
+      "path": "com/googlecode/javaewah/JavaEWAH/1.1.7/JavaEWAH-1.1.7.pom",
+      "sha1": "eebcc67a5569c2efd68b56ded57a2678c421a3b6"
+    },
+    {
       "path": "com/helger/maven/ph-javacc-maven-plugin/4.1.4/ph-javacc-maven-plugin-4.1.4.jar",
       "sha1": "c4434297659c27e788ee9d352188862734278fe5"
     },
@@ -1524,6 +1532,22 @@
     {
       "path": "com/jcraft/jsch/0.1.38/jsch-0.1.38.pom",
       "sha1": "90ff09ba4668324b217d11d51b8f7704aeef7f93"
+    },
+    {
+      "path": "com/jcraft/jsch/0.1.55/jsch-0.1.55.jar",
+      "sha1": "bbd40e5aa7aa3cfad5db34965456cee738a42a50"
+    },
+    {
+      "path": "com/jcraft/jsch/0.1.55/jsch-0.1.55.pom",
+      "sha1": "4960f6d19a24a432ed88262d2ef704fd37dbedd7"
+    },
+    {
+      "path": "com/jcraft/jzlib/1.1.1/jzlib-1.1.1.jar",
+      "sha1": "a1551373315ffc2f96130a0e5704f74e151777ba"
+    },
+    {
+      "path": "com/jcraft/jzlib/1.1.1/jzlib-1.1.1.pom",
+      "sha1": "d990b68017884e9615990c39ef81cf2b5884d464"
     },
     {
       "path": "com/mks/api/mksapi-jar/4.10.9049/mksapi-jar-4.10.9049.jar",
@@ -2418,6 +2442,14 @@
       "sha1": "b8e00a8a0deb0ebef447570e37ff8146ccd92cbe"
     },
     {
+      "path": "javax/json/javax.json-api/1.1.4/javax.json-api-1.1.4.jar",
+      "sha1": "c8efa3cfaeee2b05c2dfd54cba21548a081b1746"
+    },
+    {
+      "path": "javax/json/javax.json-api/1.1.4/javax.json-api-1.1.4.pom",
+      "sha1": "805c8b05dd5cf5780bcb2d6d23c6c5346da09186"
+    },
+    {
       "path": "javax/servlet/servlet-api/2.3/servlet-api-2.3.pom",
       "sha1": "5a7b9bcc0517b8fc785f306518b66616d9339548"
     },
@@ -2480,6 +2512,14 @@
     {
       "path": "jline/jline/2.14.5/jline-2.14.5.pom",
       "sha1": "9eb9ceeea01a5668165055f317af43db1a834c4f"
+    },
+    {
+      "path": "joda-time/joda-time/2.10.10/joda-time-2.10.10.jar",
+      "sha1": "29e8126e31f41e5c12b9fe3a7eb02e704c47d70b"
+    },
+    {
+      "path": "joda-time/joda-time/2.10.10/joda-time-2.10.10.pom",
+      "sha1": "d6b3422231b9c976bc409b906f114fa0697b280c"
     },
     {
       "path": "joda-time/joda-time/2.8.1/joda-time-2.8.1.jar",
@@ -2630,6 +2670,10 @@
       "sha1": "f8f3be3e980551a39b5679411e171aeb6931aaec"
     },
     {
+      "path": "net/java/jvnet-parent/5/jvnet-parent-5.pom",
+      "sha1": "5343c954d21549d039feebe5fadef023cdfc1388"
+    },
+    {
       "path": "net/sf/jung/jung-api/2.0.1/jung-api-2.0.1.jar",
       "sha1": "843d5ccb44dd310ed0e36cb9b776baa0391515a2"
     },
@@ -2664,6 +2708,14 @@
     {
       "path": "net/sourceforge/collections/collections-generic/4.01/collections-generic-4.01.pom",
       "sha1": "abbc30cb102336779372ab1b84d3b56b7be0b34f"
+    },
+    {
+      "path": "nu/studer/java-ordered-properties/1.0.4/java-ordered-properties-1.0.4.jar",
+      "sha1": "d7343483a491e2534a99170777e14accbafddbe2"
+    },
+    {
+      "path": "nu/studer/java-ordered-properties/1.0.4/java-ordered-properties-1.0.4.pom",
+      "sha1": "df83748f62713a842bde62f72008d1f73d4726ae"
     },
     {
       "path": "org/antlr/antlr-master/3.1.3/antlr-master-3.1.3.pom",
@@ -6842,6 +6894,26 @@
       "sha1": "17d9344459471ef3d2792e7452ead549809eccc5"
     },
     {
+      "path": "org/eclipse/jgit/org.eclipse.jgit-parent/5.12.0.202106070339-r/org.eclipse.jgit-parent-5.12.0.202106070339-r.pom",
+      "sha1": "cee7af91b52265c085bcafd7882b7e8bfc2620f3"
+    },
+    {
+      "path": "org/eclipse/jgit/org.eclipse.jgit.ssh.jsch/5.12.0.202106070339-r/org.eclipse.jgit.ssh.jsch-5.12.0.202106070339-r.jar",
+      "sha1": "af53654d7f4372b4e45fed6ccc4fe2333532d110"
+    },
+    {
+      "path": "org/eclipse/jgit/org.eclipse.jgit.ssh.jsch/5.12.0.202106070339-r/org.eclipse.jgit.ssh.jsch-5.12.0.202106070339-r.pom",
+      "sha1": "f7dc8a83de1b7adc5a00294023d4a2f388f68b73"
+    },
+    {
+      "path": "org/eclipse/jgit/org.eclipse.jgit/5.12.0.202106070339-r/org.eclipse.jgit-5.12.0.202106070339-r.jar",
+      "sha1": "b7792da62103c956d3e58e29fb2e6e5c5f0e1317"
+    },
+    {
+      "path": "org/eclipse/jgit/org.eclipse.jgit/5.12.0.202106070339-r/org.eclipse.jgit-5.12.0.202106070339-r.pom",
+      "sha1": "39896be49d1eda5abcf2a3e476de49be66086585"
+    },
+    {
       "path": "org/fusesource/fusesource-pom/1.10/fusesource-pom-1.10.pom",
       "sha1": "ad0238e7718c2f5f50e3e1bf93ed14c3a3d15675"
     },
@@ -6882,8 +6954,20 @@
       "sha1": "d2e9a3dae7592cc57e1272dde8c7802da2dc9452"
     },
     {
+      "path": "org/glassfish/javax.json/1.1.4/javax.json-1.1.4.jar",
+      "sha1": "943f240a509d3c70b448a55c6735591ecbd37c88"
+    },
+    {
+      "path": "org/glassfish/javax.json/1.1.4/javax.json-1.1.4.pom",
+      "sha1": "8bf098ded08602a59a3eeaca27563e37127ced0d"
+    },
+    {
       "path": "org/glassfish/json/1.0.4/json-1.0.4.pom",
       "sha1": "eb133db30d301d71aa4710950f1f1e17d391f4d5"
+    },
+    {
+      "path": "org/glassfish/json/1.1.4/json-1.1.4.pom",
+      "sha1": "b935431de5a4ab939c11430d15391fd19d7b1b7c"
     },
     {
       "path": "org/hamcrest/hamcrest-core/1.1/hamcrest-core-1.1.jar",
@@ -7494,6 +7578,10 @@
       "sha1": "3ae20880ad3d5da6b1caec19e3de7e70dd2dd762"
     },
     {
+      "path": "org/sonatype/oss/oss-parent/6/oss-parent-6.pom",
+      "sha1": "765c355ec09ad070065d9d12a9245bba5c689d96"
+    },
+    {
       "path": "org/sonatype/oss/oss-parent/7/oss-parent-7.pom",
       "sha1": "46b8a785b60a2767095b8611613b58577e96d4c9"
     },
@@ -7708,6 +7796,26 @@
     {
       "path": "oro/oro/2.0.8/oro-2.0.8.pom",
       "sha1": "6d10956ccdb32138560928ba9501648e430c34bb"
+    },
+    {
+      "path": "pl/project13/maven/git-commit-id-plugin-core/4.0.5/git-commit-id-plugin-core-4.0.5.jar",
+      "sha1": "e978b30c70318b44819e0b984c3b6702259ba6b6"
+    },
+    {
+      "path": "pl/project13/maven/git-commit-id-plugin-core/4.0.5/git-commit-id-plugin-core-4.0.5.pom",
+      "sha1": "7d2b8ff5c4f54e7aa59ee2caabeafaa5d139596f"
+    },
+    {
+      "path": "pl/project13/maven/git-commit-id-plugin-parent/4.0.5/git-commit-id-plugin-parent-4.0.5.pom",
+      "sha1": "0c21c957af2a775521a63d201cb170fcd22dde1f"
+    },
+    {
+      "path": "pl/project13/maven/git-commit-id-plugin/4.0.5/git-commit-id-plugin-4.0.5.jar",
+      "sha1": "492a7d84f37a1aa197628bc56d1a2e29fc1eda79"
+    },
+    {
+      "path": "pl/project13/maven/git-commit-id-plugin/4.0.5/git-commit-id-plugin-4.0.5.pom",
+      "sha1": "c7aa3808d0bc1ac66bc04f85af0368bd4edae1e8"
     },
     {
       "path": "plexus/plexus-containers/1.0.2/plexus-containers-1.0.2.pom",
