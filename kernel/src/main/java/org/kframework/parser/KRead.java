@@ -6,6 +6,7 @@ import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
+import org.kframework.main.GlobalOptions;
 import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
@@ -13,6 +14,7 @@ import org.kframework.parser.inner.kernel.KSyntax2Bison;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.json.JsonParser;
 import org.kframework.parser.kast.KastParser;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -34,15 +36,18 @@ public class KRead {
     private final KExceptionManager kem;
     private final FileUtil files;
     private final InputModes input;
+    private final GlobalOptions globalOptions;
 
     public KRead(
             KExceptionManager kem,
             FileUtil files,
-            InputModes input
+            InputModes input,
+            GlobalOptions globalOptions
     ) {
         this.kem = kem;
         this.files = files;
         this.input = input;
+        this.globalOptions = globalOptions;
     }
 
     public K prettyRead(Module mod, Sort sort, CompiledDefinition def, Source source, String stringToParse) {
@@ -65,6 +70,7 @@ public class KRead {
     }
 
     public void createBisonParser(Module mod, Sort sort, File outputFile, boolean glr, String bisonFile, long stackDepth) {
+        Stopwatch sw = new Stopwatch(globalOptions);
         try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, true, false, true)) {
             try (Scanner scanner = parseInModule.getScanner(kem.options)) {
                 File scannerFile = files.resolveTemp("scanner.l");
@@ -114,6 +120,7 @@ public class KRead {
               throw KEMException.internalError("Failed to execute process.", e);
             }
         }
+        sw.printIntermediate("  New Bison parser: " + mod.name());
     }
 
     public K deserialize(String stringToParse, Source source) {

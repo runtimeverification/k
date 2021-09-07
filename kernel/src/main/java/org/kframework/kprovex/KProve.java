@@ -14,6 +14,7 @@ import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
 import org.kframework.unparser.ToJson;
 import org.kframework.utils.BinaryLoader;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -34,11 +35,12 @@ public class KProve {
     private final BinaryLoader loader;
     private final ProofDefinitionBuilder proofDefinitionBuilder;
     private final Function<Definition, Rewriter> rewriterGenerator;
+    private final Stopwatch sw;
 
     @Inject
     public KProve(KExceptionManager kem, FileUtil files, KPrint kprint, KProveOptions kproveOptions,
                   CompiledDefinition compiledDefinition, BinaryLoader loader,
-                  ProofDefinitionBuilder proofDefinitionBuilder, Function<Definition, Rewriter> rewriterGenerator) {
+                  ProofDefinitionBuilder proofDefinitionBuilder, Function<Definition, Rewriter> rewriterGenerator, Stopwatch sw) {
         this.kem = kem;
         this.files = files;
         this.kprint = kprint;
@@ -47,6 +49,7 @@ public class KProve {
         this.loader = loader;
         this.proofDefinitionBuilder = proofDefinitionBuilder;
         this.rewriterGenerator = rewriterGenerator;
+        this.sw = sw;
         // validate kprovex options. There are too many dependencies to have duplicate options files
         // so use the same class, but throw an error if used by accident. It would have been silent anyway.
         // TODO: remove once transition to kprovex is finished
@@ -83,8 +86,10 @@ public class KProve {
         }
 
         RewriterResult results = rewriter.prove(specModule, boundaryPattern, true);
+        sw.printIntermediate("Backend");
         kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), kprint::outputFile,
                 results.k());
+        sw.printTotal("Total");
         return results.exitCode().orElse(KEMException.TERMINATED_WITH_ERRORS_EXIT_CODE);
     }
 

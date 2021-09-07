@@ -18,6 +18,7 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KToken;
 import org.kframework.kore.Sort;
 import org.kframework.kore.VisitK;
+import org.kframework.main.GlobalOptions;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
@@ -48,6 +49,7 @@ import static org.kframework.kore.KORE.*;
 
 public class CompiledDefinition implements Serializable {
     public final KompileOptions kompileOptions;
+    private  transient final GlobalOptions globalOptions;
     private final Definition parsedDefinition;
     public final Definition kompiledDefinition;
     public final Sort programStartSymbol;
@@ -59,8 +61,9 @@ public class CompiledDefinition implements Serializable {
     private Map<String, Rule> cachedParsedPatterns = new ConcurrentHashMap<>();
 
 
-    public CompiledDefinition(KompileOptions kompileOptions, Definition parsedDefinition, Definition kompiledDefinition, FileUtil files, KExceptionManager kem, KLabel topCellInitializer) {
+    public CompiledDefinition(KompileOptions kompileOptions, GlobalOptions globalOptions, Definition parsedDefinition, Definition kompiledDefinition, FileUtil files, KExceptionManager kem, KLabel topCellInitializer) {
         this.kompileOptions = kompileOptions;
+        this.globalOptions = globalOptions;
         this.parsedDefinition = parsedDefinition;
         this.kompiledDefinition = kompiledDefinition;
         initializeConfigurationVariableDefaultSorts(files);
@@ -76,7 +79,7 @@ public class CompiledDefinition implements Serializable {
         if (exitCodeRule == null) {
             this.exitCodePattern = null;
         } else {
-            this.exitCodePattern = new Kompile(kompileOptions, files, kem).compileRule(kompiledDefinition, exitCodeRule);
+            this.exitCodePattern = new Kompile(kompileOptions, globalOptions, files, kem).compileRule(kompiledDefinition, exitCodeRule);
         }
     }
 
@@ -206,11 +209,11 @@ public class CompiledDefinition implements Serializable {
     }
 
     public Rule compilePatternIfAbsent(FileUtil files, KExceptionManager kem, String pattern, Source source) {
-        return cachedcompiledPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, files, kem).parseAndCompileRule(this, p, source,
+        return cachedcompiledPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, globalOptions, files, kem).parseAndCompileRule(this, p, source,
                 Optional.of(parsePatternIfAbsent(files, kem, pattern, source))));
     }
 
     public Rule parsePatternIfAbsent(FileUtil files, KExceptionManager kem, String pattern, Source source) {
-        return cachedParsedPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, files, kem).parseRule(this, p, source));
+        return cachedParsedPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, globalOptions, files, kem).parseRule(this, p, source));
     }
 }

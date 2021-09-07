@@ -125,7 +125,7 @@ public class KastFrontEnd extends FrontEnd {
             }
             Module parsingMod = maybeMod.get();
 
-            KRead kread = new KRead(kem, files.get(), options.input);
+            KRead kread = new KRead(kem, files.get(), options.input, options.global);
             if (options.genParser || options.genGlrParser) {
                 kread.createBisonParser(parsingMod, sort, options.bisonOutputFile(), options.genGlrParser, options.bisonFile, options.bisonStackMaxDepth);
                 try {
