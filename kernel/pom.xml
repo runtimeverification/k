@@ -241,7 +241,10 @@
             <configuration>
               <exportAntProperties>true</exportAntProperties>
               <target>
-                <exec executable="git" outputproperty="git.describe.out" failifexecutionfails="false">
+                <exec executable="git"
+                      outputproperty="git.describe.out"
+                      errorproperty="git.describe.err"
+                      failifexecutionfails="false">
                   <arg value="describe" />
                   <arg value="--tags" />
                   <arg value="--dirty" />
