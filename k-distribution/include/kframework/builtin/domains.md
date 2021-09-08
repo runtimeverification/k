@@ -2484,18 +2484,6 @@ module STDIN-STREAM
        andBool lengthString(S) >Int 1 // [stdin]
        [stream]
 
-  rule [stdinParseArbitrarySort]:
-       <stdin>
-       (ListItem(#parseInput(Sort:String, Delimiters:String))
-       => ListItem(#parseKAST(substrString(S, 0, findChar(S, Delimiters, 0)))))
-       ListItem(#buffer(S:String => substrString(S,findChar(S, Delimiters, 0) +Int 1, lengthString(S))))
-       _:List
-       </stdin>
-    requires findChar(S, Delimiters, 0) =/=Int -1
-       andBool Sort ==String "K"
-       andBool lengthString(S) >Int 1 // [stdin]
-       [stream]
-
   rule [stdinTrim]:
        <stdin>
        ListItem(#parseInput(Sort:String, Delimiters:String))
