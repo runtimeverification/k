@@ -79,8 +79,14 @@ public class JarInfo {
             URLConnection conn = url.openConnection();
             Manifest      mf   = ((JarURLConnection)conn).getManifest();
 
-            String version     = FileUtils.readFileToString(new File(kBase + "/lib/version")).trim();
             String versionDate = new Date(Long.parseLong(mf.getMainAttributes().getValue("Implementation-Date"))).toString();
+
+            // Use the output of 'git describe' if we're building K from a Git repository, or fall back to
+            // the release version if we're not (e.g. from a release tarball).
+            String version = mf.getMainAttributes().getValue("Implementation-Git-Describe");
+            if (version.isEmpty()) {
+                version = FileUtils.readFileToString(new File(kBase + "/lib/version")).trim();
+            }
 
             System.out.println("K version:    " + version);
             System.out.println("Build date:   " + versionDate);
