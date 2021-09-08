@@ -81,9 +81,14 @@ public class JarInfo {
 
             String version     = FileUtils.readFileToString(new File(kBase + "/lib/version")).trim();
             String versionDate = new Date(Long.parseLong(mf.getMainAttributes().getValue("Implementation-Date"))).toString();
+            String gitRevision = mf.getMainAttributes().getValue("Implementation-Git-Describe");
 
             System.out.println("K version:    " + version);
             System.out.println("Build date:   " + versionDate);
+
+            if(!gitRevision.isEmpty()) {
+                System.out.println("Git revision: " + gitRevision);
+            }
         } catch (IOException e) {
             throw KEMException.internalError("Could not load version info.");
         }

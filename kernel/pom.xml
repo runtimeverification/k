@@ -232,6 +232,30 @@
         </configuration>
       </plugin>
       <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <id>get-git-revision</id>
+            <phase>compile</phase>
+            <configuration>
+              <exportAntProperties>true</exportAntProperties>
+              <target>
+                <exec executable="git" outputproperty="git.describe.out" failifexecutionfails="false">
+                  <arg value="describe" />
+                  <arg value="--tags" />
+                  <arg value="--dirty" />
+                  <arg value="--long" />
+                </exec>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <version>2.5</version>
         <configuration>
@@ -241,6 +265,7 @@
               <Implementation-Branch>${scmBranch}</Implementation-Branch>
               <Implementation-Date>${timestamp}</Implementation-Date>
               <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Git-Describe>${git.describe.out}</Implementation-Git-Describe>
             </manifestEntries>
           </archive>
         </configuration>
