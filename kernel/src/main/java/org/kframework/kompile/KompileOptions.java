@@ -37,10 +37,10 @@ public class KompileOptions implements Serializable {
     }
 
     @ParametersDelegate
-    public OuterParsingOptions outerParsing = new OuterParsingOptions();
+    public transient OuterParsingOptions outerParsing = new OuterParsingOptions();
 
     @ParametersDelegate
-    public transient OutputDirectoryOptions outputDirectory = new OutputDirectoryOptions();
+    public OutputDirectoryOptions outputDirectory = new OutputDirectoryOptions();
 
     // Common options
     @Parameter(names="--backend", description="Choose a backend. <backend> is one of [llvm|haskell|kore|java|ocaml]. Each creates the kompiled K definition.")
