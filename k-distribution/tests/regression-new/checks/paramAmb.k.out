@@ -1,10 +1,10 @@
 [Error] Inner Parser: Parsing ambiguity.
 1: syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite), symbol]
-    #KRewrite(#SemanticCastToB(#token("X","#KVariable")),`label(_,_)_PARAMAMB_KItem_N_T`(#SemanticCastToB(#token("X","#KVariable")),`wrap__PARAMAMB_T_M`(#SemanticCastToB(#token("X","#KVariable")))))
-2: syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite), symbol]
     #KRewrite(#SemanticCastToX(#token("X","#KVariable")),`label(_,_)_PARAMAMB_KItem_N_T`(#SemanticCastToX(#token("X","#KVariable")),`wrap__PARAMAMB_T_X`(#SemanticCastToX(#token("X","#KVariable")))))
-3: syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite), symbol]
+2: syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite), symbol]
     #KRewrite(#SemanticCastToA(#token("X","#KVariable")),`label(_,_)_PARAMAMB_KItem_N_T`(#SemanticCastToA(#token("X","#KVariable")),`wrap__PARAMAMB_T_M`(#SemanticCastToA(#token("X","#KVariable")))))
+3: syntax {Sort} Sort ::= Sort "=>" Sort [klabel(#KRewrite), symbol]
+    #KRewrite(#SemanticCastToB(#token("X","#KVariable")),`label(_,_)_PARAMAMB_KItem_N_T`(#SemanticCastToB(#token("X","#KVariable")),`wrap__PARAMAMB_T_M`(#SemanticCastToB(#token("X","#KVariable")))))
 	Source(paramAmb.k)
 	Location(11,8,11,29)
 [Error] Compiler: Had 1 parsing errors.
