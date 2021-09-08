@@ -33,7 +33,7 @@ public class KProveModule extends AbstractModule {
 
     @Provides @RequestScoped
     GlobalOptions globalOptions(KProveOptions options) {
-        return options.global;
+        return options.getGlobalOptions_useOnlyInGuiceProvider();
     }
 
     @Provides @RequestScoped

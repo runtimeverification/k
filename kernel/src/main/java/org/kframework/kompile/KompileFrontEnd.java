@@ -6,6 +6,7 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import org.kframework.compile.Backend;
 import org.kframework.main.FrontEnd;
+import org.kframework.main.GlobalOptions;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
@@ -44,6 +45,7 @@ public class KompileFrontEnd extends FrontEnd {
     KompileFrontEnd(
             KompileOptions options,
             OuterParsingOptions outerOptions,
+            GlobalOptions globalOptions,
             @Usage String usage,
             Provider<Backend> koreBackend,
             Stopwatch sw,
@@ -51,7 +53,7 @@ public class KompileFrontEnd extends FrontEnd {
             BinaryLoader loader,
             JarInfo jarInfo,
             Provider<FileUtil> files) {
-        super(kem, options.global, usage, jarInfo, files);
+        super(kem, globalOptions, usage, jarInfo, files);
         this.options = options;
         this.outerOptions = outerOptions;
         this.koreBackend = koreBackend;
@@ -68,7 +70,7 @@ public class KompileFrontEnd extends FrontEnd {
                     outerOptions.mainDefinitionFile(files.get()).getAbsolutePath());
         }
 
-        Kompile kompile = new Kompile(options, outerOptions, files.get(), kem, sw, !options.profileRules);
+        Kompile kompile = new Kompile(options, outerOptions, globalOptions, files.get(), kem, sw, !options.profileRules);
         Backend backend = koreBackend.get();
         CompiledDefinition def = kompile.run(outerOptions.mainDefinitionFile(files.get()), options.mainModule(files.get()), options.syntaxModule(files.get()), backend.steps(), backend.excludedModuleTags());
         kompile = null;

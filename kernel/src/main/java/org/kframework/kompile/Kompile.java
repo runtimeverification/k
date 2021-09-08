@@ -28,6 +28,7 @@ import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
+import org.kframework.main.GlobalOptions;
 import org.kframework.parser.InputModes;
 import org.kframework.parser.KRead;
 import org.kframework.parser.ParserUtils;
@@ -78,7 +79,8 @@ public class Kompile {
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
     public static final String REQUIRE_PRELUDE_K = "requires \"prelude.md\"\n";
 
-    public final KompileOptions kompileOptions;
+    private final KompileOptions kompileOptions;
+    private final GlobalOptions globalOptions;
     private final FileUtil files;
     private final KExceptionManager kem;
     private final ParserUtils parser;
@@ -87,22 +89,23 @@ public class Kompile {
     private final OuterParsingOptions outerParsingOptions;
     java.util.Set<KEMException> errors;
 
-    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, FileUtil files, KExceptionManager kem, boolean cacheParses) {
-        this(kompileOptions, outerParsingOptions, files, kem, new Stopwatch(kompileOptions.global), cacheParses);
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, boolean cacheParses) {
+        this(kompileOptions, outerParsingOptions, globalOptions, files, kem, new Stopwatch(globalOptions), cacheParses);
     }
 
-    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, FileUtil files, KExceptionManager kem) {
-        this(kompileOptions, outerParsingOptions, files, kem, true);
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem) {
+        this(kompileOptions, outerParsingOptions, globalOptions, files, kem, true);
     }
 
     @Inject
-    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
-        this(kompileOptions, outerParsingOptions, files, kem, sw, true);
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
+        this(kompileOptions, outerParsingOptions, globalOptions, files, kem, sw, true);
     }
 
-    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
         this.outerParsingOptions = outerParsingOptions;
         this.kompileOptions = kompileOptions;
+        this.globalOptions = globalOptions;
         this.files = files;
         this.kem = kem;
         this.errors = new HashSet<>();
@@ -113,7 +116,7 @@ public class Kompile {
         File cacheFile = kompileOptions.cacheFile != null
                 ? files.resolveWorkingDirectory(kompileOptions.cacheFile) : files.resolveKompiled("cache.bin");
         this.definitionParsing = new DefinitionParsing(
-                lookupDirectories, kompileOptions, outerParsingOptions, kem, files,
+                lookupDirectories, kompileOptions, outerParsingOptions, globalOptions, kem, files,
                 parser, cacheParses, cacheFile, sw);
         this.sw = sw;
 
@@ -171,14 +174,14 @@ public class Kompile {
         } else {
           rootCell = Sorts.GeneratedTopCell();
         }
-        CompiledDefinition def = new CompiledDefinition(kompileOptions, kompileOptions.outerParsing, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(rootCell).klabel());
+        CompiledDefinition def = new CompiledDefinition(kompileOptions, kompileOptions.outerParsing, globalOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(rootCell).klabel());
 
         if (kompileOptions.genBisonParser || kompileOptions.genGlrBisonParser) {
             if (def.configurationVariableDefaultSorts.containsKey("$PGM")) {
                 String filename = "parser_" + def.programStartSymbol.name() + "_" + def.mainSyntaxModuleName();
                 File outputFile = files.resolveKompiled(filename);
                 File linkFile = files.resolveKompiled("parser_PGM");
-                new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, outputFile, kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth);
+                new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, outputFile, kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth);
                 try {
                     linkFile.delete();
                     Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
@@ -204,7 +207,7 @@ public class Kompile {
                         String filename = "parser_" + sort.name() + "_" + module;
                         File outputFile = files.resolveKompiled(filename);
                         File linkFile = files.resolveKompiled("parser_" + name);
-                        new KRead(kem, files, InputModes.PROGRAM).createBisonParser(mod.get(), sort, outputFile, kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth);
+                        new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(mod.get(), sort, outputFile, kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth);
                         try {
                             linkFile.delete();
                             Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));

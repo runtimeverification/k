@@ -1,7 +1,7 @@
 // Copyright (c) 2019 K Team. All Rights Reserved.
 package org.kframework.backend.kore
 
-import org.kframework.compile.Backend;
+import org.kframework.compile.Backend
 import org.kframework.kompile.Kompile
 import org.kframework.kompile.KompileOptions
 import org.kframework.main.GlobalOptions
@@ -12,6 +12,7 @@ import org.kframework.utils.options.OuterParsingOptions
 import org.kframework.parser.kore._
 import org.kframework.parser.kore.implementation.{DefaultBuilders => B}
 import org.kframework.parser.kore.parser.TextToKore
+import org.kframework.utils.Stopwatch
 
 import java.io.File
 import java.nio.file.Files
@@ -38,7 +39,8 @@ class KoreTest {
   }
 
   def kompile(k: String): Definition = {
-    val compiler = new Kompile(options, new OuterParsingOptions(), files, kem, false)
+    val go = new GlobalOptions();
+    val compiler = new Kompile(options, new OuterParsingOptions(), go, files, kem, new Stopwatch(go), false)
     val backend = new KoreBackend(options, files, kem, Tool.KOMPILE)
     files.saveToDefinitionDirectory("test.k", k)
     val defn = compiler.run(files.resolveDefinitionDirectory("test.k"), "TEST", "TEST", backend.steps, backend.excludedModuleTags)

@@ -22,7 +22,14 @@ import java.util.List;
 public class KProveOptions {
 
     @ParametersDelegate
-    public transient GlobalOptions global = new GlobalOptions();
+    private final transient GlobalOptions global = new GlobalOptions();
+
+    /**
+     * Use only in the Guice Provider method, so it can replace the GlobalOptions from kompile.
+     */
+    public GlobalOptions getGlobalOptions_useOnlyInGuiceProvider() {
+        return global;
+    }
 
     @ParametersDelegate
     public DefinitionLoadingOptions definitionLoading = new DefinitionLoadingOptions();

@@ -30,6 +30,7 @@ import org.kframework.kore.AddAttRec;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.Sort;
+import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ParserUtils;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.ParseCache;
@@ -79,6 +80,7 @@ public class DefinitionParsing {
     private final boolean autoImportDomains;
     private final boolean kore;
     private final KompileOptions options;
+    private final GlobalOptions globalOptions;
 
     private final KExceptionManager kem;
     private final FileUtil files;
@@ -97,6 +99,7 @@ public class DefinitionParsing {
             List<File> lookupDirectories,
             KompileOptions options,
             OuterParsingOptions outerParsingOptions,
+            GlobalOptions globalOptions,
             KExceptionManager kem,
             FileUtil files,
             ParserUtils parser,
@@ -105,6 +108,7 @@ public class DefinitionParsing {
             Stopwatch sw) {
         this.lookupDirectories = lookupDirectories;
         this.options = options;
+        this.globalOptions = globalOptions;
         this.kem = kem;
         this.files = files;
         this.parser = parser;
@@ -146,6 +150,7 @@ public class DefinitionParsing {
         def = Definition(def.mainModule(), modules.collect(Collections.toSet()), def.att());
 
         def = Kompile.excludeModulesByTag(excludeModules).apply(def);
+        sw.printIntermediate("Outer parsing [" + def.modules().size() + " modules]");
 
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         caches = loadCaches();
@@ -205,7 +210,7 @@ public class DefinitionParsing {
         Definition trimmed = Definition(parsedDefinition.mainModule(), modules.collect(Collections.toSet()),
                 parsedDefinition.att());
         trimmed = Kompile.excludeModulesByTag(excludedModuleTags).apply(trimmed);
-        sw.printIntermediate("Outer parsing [" + trimmed.entryModules().size() + " modules]");
+        sw.printIntermediate("Outer parsing [" + trimmed.modules().size() + " modules]");
         Definition afterResolvingConfigBubbles = resolveConfigBubbles(trimmed, parsedDefinition.getModule("DEFAULT-CONFIGURATION").get());
         sw.printIntermediate("Parse configurations [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " declarations]");
         parsedBubbles.set(0);
@@ -300,7 +305,7 @@ public class DefinitionParsing {
             ParseCache cache = loadCache(configParserModule);
             try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
                 // each parser gets its own scanner because config labels can conflict with user tokens
-                parser.getScanner(options.global);
+                parser.getScanner(globalOptions);
                 parser.initialize();
 
                 java.util.Set<Sentence> parsedSet = stream(m.localSentences())
@@ -356,8 +361,8 @@ public class DefinitionParsing {
         Module ruleParserModule = gen.getRuleGrammar(defWithCaches.mainModule());
         ParseCache cache = loadCache(ruleParserModule);
         try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files, true)) {
-            parser.getScanner(options.global);
-            Map<String, Module> parsed = defWithCaches.parMap(m -> this.resolveNonConfigBubbles(m, parser.getScanner(options.global), gen));
+            parser.getScanner(globalOptions);
+            Map<String, Module> parsed = defWithCaches.parMap(m -> this.resolveNonConfigBubbles(m, parser.getScanner(globalOptions), gen));
             return DefinitionTransformer.from(m -> Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()), "parsing rules").apply(defWithConfig);
         }
     }
@@ -375,7 +380,7 @@ public class DefinitionParsing {
                 RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files) :
                 RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), scanner, isStrict, profileRules, false, files)) {
             if (needNewScanner)
-                parser.getScanner(options.global);
+                parser.getScanner(globalOptions);
             parser.initialize();
 
             Set<Sentence> parsedSet = stream(module.localSentences())

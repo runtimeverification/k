@@ -4,21 +4,17 @@ package org.kframework.kompile;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import org.apache.commons.io.FilenameUtils;
-
 import org.kframework.backend.Backends;
 import org.kframework.main.GlobalOptions;
-import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.OutputDirectoryOptions;
 import org.kframework.utils.options.SMTOptions;
-import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.StringListConverter;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,7 +27,14 @@ public class KompileOptions implements Serializable {
      * as part of CompiledDefinition, in any other tool. usability depends on context.
      */
     @ParametersDelegate
-    public transient GlobalOptions global = new GlobalOptions();
+    private final transient GlobalOptions global = new GlobalOptions();
+
+    /**
+     * Use only in the Guice Provider method, so it can be replaced by GlobalOptions from other tools.
+     */
+    GlobalOptions getGlobalOptions_UseOnlyInGuiceProvider() {
+        return global;
+    }
 
     @ParametersDelegate
     public OuterParsingOptions outerParsing = new OuterParsingOptions();
