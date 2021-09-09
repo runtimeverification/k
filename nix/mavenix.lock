@@ -1578,10 +1578,6 @@
       "sha1": "db7bb76bc0aefa23d21d36949cec9ab8e0d14e1d"
     },
     {
-      "path": "com/runtimeverification/k/parent/1.0-SNAPSHOT/parent-1.0-20200713.173706-176.pom",
-      "sha1": "54a2ded5657583ddf53845ed8347386b704d4348"
-    },
-    {
       "path": "com/thoughtworks/qdox/qdox/1.12/qdox-1.12.jar",
       "sha1": "466993f8362511ecc42e6508d3db1880bfcd5c56"
     },
@@ -7800,10 +7796,6 @@
   ],
   "groupId": "com.runtimeverification.k",
   "metas": [
-    {
-      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>com.runtimeverification.k</groupId>\n  <artifactId>parent</artifactId>\n  <version>1.0-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20200713.173706</timestamp>\n      <buildNumber>176</buildNumber>\n    </snapshot>\n    <lastUpdated>20200713173706</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>1.0-20200713.173706-176</value>\n        <updated>20200713173706</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
-      "path": "com/runtimeverification/k/parent/1.0-SNAPSHOT"
-    },
     {
       "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-all</artifactId>\n  <version>0.9.2-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20180116.225224</timestamp>\n      <buildNumber>2</buildNumber>\n    </snapshot>\n    <lastUpdated>20180116225224</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>0.9.2-20180116.225224-2</value>\n        <updated>20180116225224</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
       "path": "org/kframework/dependencies/nailgun-all/0.9.2-SNAPSHOT"
