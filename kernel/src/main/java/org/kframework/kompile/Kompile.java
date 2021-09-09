@@ -43,6 +43,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 
+import org.kframework.utils.options.OuterParsingOptions;
 import scala.collection.JavaConverters;
 import scala.Function1;
 import scala.Option;
@@ -85,31 +86,37 @@ public class Kompile {
     private final ParserUtils parser;
     private final Stopwatch sw;
     private final DefinitionParsing definitionParsing;
+    private final OuterParsingOptions outerParsingOptions;
     java.util.Set<KEMException> errors;
 
-    public Kompile(KompileOptions kompileOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem) {
-        this(kompileOptions, globalOptions, files, kem, new Stopwatch(globalOptions), true);
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, boolean cacheParses) {
+        this(kompileOptions, outerParsingOptions, globalOptions, files, kem, new Stopwatch(globalOptions), cacheParses);
+    }
+
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem) {
+        this(kompileOptions, outerParsingOptions, globalOptions, files, kem, true);
     }
 
     @Inject
-    public Kompile(KompileOptions kompileOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
-        this(kompileOptions, globalOptions, files, kem, sw, true);
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
+        this(kompileOptions, outerParsingOptions, globalOptions, files, kem, sw, true);
     }
 
-    public Kompile(KompileOptions kompileOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
+        this.outerParsingOptions = outerParsingOptions;
         this.kompileOptions = kompileOptions;
         this.globalOptions = globalOptions;
         this.files = files;
         this.kem = kem;
         this.errors = new HashSet<>();
-        this.parser = new ParserUtils(files, kem, kem.options, kompileOptions.outerParsing);
-        List<File> lookupDirectories = kompileOptions.outerParsing.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
+        this.parser = new ParserUtils(files, kem, kem.options, outerParsingOptions);
+        List<File> lookupDirectories = this.outerParsingOptions.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
         // these directories should be relative to the current working directory if we refer to them later after the WD has changed.
-        kompileOptions.outerParsing.includes = lookupDirectories.stream().map(File::getAbsolutePath).collect(Collectors.toList());
+        this.outerParsingOptions.includes = lookupDirectories.stream().map(File::getAbsolutePath).collect(Collectors.toList());
         File cacheFile = kompileOptions.cacheFile != null
                 ? files.resolveWorkingDirectory(kompileOptions.cacheFile) : files.resolveKompiled("cache.bin");
         this.definitionParsing = new DefinitionParsing(
-                lookupDirectories, kompileOptions, globalOptions, kem, files,
+                lookupDirectories, kompileOptions, outerParsingOptions, globalOptions, kem, files,
                 parser, cacheParses, cacheFile, sw);
         this.sw = sw;
 
@@ -167,7 +174,7 @@ public class Kompile {
         } else {
           rootCell = Sorts.GeneratedTopCell();
         }
-        CompiledDefinition def = new CompiledDefinition(kompileOptions, globalOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(rootCell).klabel());
+        CompiledDefinition def = new CompiledDefinition(kompileOptions, kompileOptions.outerParsing, globalOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(rootCell).klabel());
 
         if (kompileOptions.genBisonParser || kompileOptions.genGlrBisonParser) {
             if (def.configurationVariableDefaultSorts.containsKey("$PGM")) {

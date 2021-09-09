@@ -11,9 +11,11 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.unparser.PrintOptions;
 import org.kframework.utils.inject.Options;
+import org.kframework.utils.inject.OuterParsingModule;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BackendOptions;
 import org.kframework.utils.options.DefinitionLoadingOptions;
+import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
 
 public class KProveModule extends AbstractModule {
@@ -33,6 +35,9 @@ public class KProveModule extends AbstractModule {
     GlobalOptions globalOptions(KProveOptions options) {
         return options.getGlobalOptions_useOnlyInGuiceProvider();
     }
+
+    @Provides @RequestScoped
+    OuterParsingOptions outerParsingOptions(KProveOptions options) { return options.outerParsing; }
 
     @Provides @RequestScoped
     PrintOptions printOptions(KProveOptions options) {
