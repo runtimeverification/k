@@ -2482,6 +2482,10 @@
       "sha1": "9eb9ceeea01a5668165055f317af43db1a834c4f"
     },
     {
+      "path": "jline/jline/2.14.6/jline-2.14.6.pom",
+      "sha1": "378c8caace8e1e65314477420d9734373cf29531"
+    },
+    {
       "path": "joda-time/joda-time/2.8.1/joda-time-2.8.1.jar",
       "sha1": "f5bfc718c95a7b1d3c371bb02a188a4df18361a9"
     },
@@ -6846,6 +6850,10 @@
       "sha1": "ad0238e7718c2f5f50e3e1bf93ed14c3a3d15675"
     },
     {
+      "path": "org/fusesource/fusesource-pom/1.11/fusesource-pom-1.11.pom",
+      "sha1": "f5547b0657be718d1ec0d2816cbcd5c398d6fccb"
+    },
+    {
       "path": "org/fusesource/fusesource-pom/1.8/fusesource-pom-1.8.pom",
       "sha1": "d4f1b288004e1a8c8bc9f61f5f151d1ef0d4211a"
     },
@@ -6866,12 +6874,20 @@
       "sha1": "c1fb6dcfa9faf3eafaf00bd66cbea2dbbc8c11d0"
     },
     {
+      "path": "org/fusesource/jansi/jansi-project/1.12/jansi-project-1.12.pom",
+      "sha1": "deaf98271d58b21e78bc4a20d425447fcc03b781"
+    },
+    {
       "path": "org/fusesource/jansi/jansi/1.11/jansi-1.11.jar",
       "sha1": "655c643309c2f45a56a747fda70e3fadf57e9f11"
     },
     {
       "path": "org/fusesource/jansi/jansi/1.11/jansi-1.11.pom",
       "sha1": "af75ce5357c0cab4dc273738073fcfb39a10fdfe"
+    },
+    {
+      "path": "org/fusesource/jansi/jansi/1.12/jansi-1.12.pom",
+      "sha1": "5cc7bd0ed4d411d362a05c3645a87ea76a3f2533"
     },
     {
       "path": "org/glassfish/javax.json/1.0.4/javax.json-1.0.4.jar",
@@ -7226,6 +7242,14 @@
       "sha1": "c3e0b6cf2f45a5a7cb052ef9e00f8fdac55e71b7"
     },
     {
+      "path": "org/scala-lang/scala-compiler/2.12.14/scala-compiler-2.12.14.jar",
+      "sha1": "3b7df7263c4302955a7cfe37d4af6cef5d4551bb"
+    },
+    {
+      "path": "org/scala-lang/scala-compiler/2.12.14/scala-compiler-2.12.14.pom",
+      "sha1": "c54913f97735e7460eb53a34e301259c1a26c9d6"
+    },
+    {
       "path": "org/scala-lang/scala-compiler/2.12.4/scala-compiler-2.12.4.jar",
       "sha1": "c69c0ee397050d7fa30cfe490471388d30c03bd0"
     },
@@ -7250,6 +7274,14 @@
       "sha1": "ec47a11a9a60cd7c33d3fb68d6e5bb81a92b973e"
     },
     {
+      "path": "org/scala-lang/scala-library/2.12.14/scala-library-2.12.14.jar",
+      "sha1": "1c65e76e15684d378fa2deb4ebe536a68e10c9bf"
+    },
+    {
+      "path": "org/scala-lang/scala-library/2.12.14/scala-library-2.12.14.pom",
+      "sha1": "1b1783cf18f4dc11a625701bdf185cb93b6f5de3"
+    },
+    {
       "path": "org/scala-lang/scala-library/2.12.4/scala-library-2.12.4.jar",
       "sha1": "7663f74ef944453c86cc7e6597ed33e9281f6412"
     },
@@ -7264,6 +7296,14 @@
     {
       "path": "org/scala-lang/scala-reflect/2.10.5/scala-reflect-2.10.5.pom",
       "sha1": "30f1f646114a79eeefb254ead190f045c4605649"
+    },
+    {
+      "path": "org/scala-lang/scala-reflect/2.12.14/scala-reflect-2.12.14.jar",
+      "sha1": "7116526cd205bb709241b29426ff98291f7facd0"
+    },
+    {
+      "path": "org/scala-lang/scala-reflect/2.12.14/scala-reflect-2.12.14.pom",
+      "sha1": "a3316246e57553ae82e0817379535eb049c42215"
     },
     {
       "path": "org/scala-lang/scala-reflect/2.12.4/scala-reflect-2.12.4.jar",
