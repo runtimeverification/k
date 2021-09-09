@@ -2474,10 +2474,6 @@
       "sha1": "21663b93af1247eab73abb3a1c999e9b4b4c4430"
     },
     {
-      "path": "jline/jline/2.14.5/jline-2.14.5.pom",
-      "sha1": "9eb9ceeea01a5668165055f317af43db1a834c4f"
-    },
-    {
       "path": "jline/jline/2.14.6/jline-2.14.6.pom",
       "sha1": "378c8caace8e1e65314477420d9734373cf29531"
     },
@@ -7246,14 +7242,6 @@
       "sha1": "c54913f97735e7460eb53a34e301259c1a26c9d6"
     },
     {
-      "path": "org/scala-lang/scala-compiler/2.12.4/scala-compiler-2.12.4.jar",
-      "sha1": "c69c0ee397050d7fa30cfe490471388d30c03bd0"
-    },
-    {
-      "path": "org/scala-lang/scala-compiler/2.12.4/scala-compiler-2.12.4.pom",
-      "sha1": "b1584d2334a379f4d670d4bf479028dda04446b7"
-    },
-    {
       "path": "org/scala-lang/scala-library/2.10.5/scala-library-2.10.5.jar",
       "sha1": "57ac67a6cf6fd591e235c62f8893438e8d10431d"
     },
@@ -7278,14 +7266,6 @@
       "sha1": "1b1783cf18f4dc11a625701bdf185cb93b6f5de3"
     },
     {
-      "path": "org/scala-lang/scala-library/2.12.4/scala-library-2.12.4.jar",
-      "sha1": "7663f74ef944453c86cc7e6597ed33e9281f6412"
-    },
-    {
-      "path": "org/scala-lang/scala-library/2.12.4/scala-library-2.12.4.pom",
-      "sha1": "661d2aad643bbbe5b530b917dcbf5ae4750e01e5"
-    },
-    {
       "path": "org/scala-lang/scala-reflect/2.10.5/scala-reflect-2.10.5.jar",
       "sha1": "7392facb48876c67a89fcb086112b195f5f6bbc3"
     },
@@ -7300,14 +7280,6 @@
     {
       "path": "org/scala-lang/scala-reflect/2.12.14/scala-reflect-2.12.14.pom",
       "sha1": "a3316246e57553ae82e0817379535eb049c42215"
-    },
-    {
-      "path": "org/scala-lang/scala-reflect/2.12.4/scala-reflect-2.12.4.jar",
-      "sha1": "2df9e6015b97e35464edddd20eec392bb54fab11"
-    },
-    {
-      "path": "org/scala-lang/scala-reflect/2.12.4/scala-reflect-2.12.4.pom",
-      "sha1": "2fa11f84ca26c8a29add2bec72f4137d0cf254a2"
     },
     {
       "path": "org/slf4j/jcl-over-slf4j/1.5.6/jcl-over-slf4j-1.5.6.jar",
