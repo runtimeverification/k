@@ -51,4 +51,7 @@ public class OuterParsingOptions implements Serializable {
 
     @Parameter(names="--md-selector", description="Preprocessor: for .md files, select only the md code blocks that match the selector expression. Ex:'k&(!a|b)'.")
     public String mdSelector = "k";
+
+    @Parameter(names="--profile-rule-parsing", description="Generate time in seconds to parse each rule in the semantics. Found in -kompiled directory under timing.log.")
+    public boolean profileRules;
 }

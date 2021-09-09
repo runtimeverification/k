@@ -118,7 +118,7 @@ public class DefinitionParsing {
         this.kore = options.isKore();
         this.loader = new BinaryLoader(this.kem);
         this.isStrict = options.strict();
-        this.profileRules = options.profileRules;
+        this.profileRules = outerParsingOptions.profileRules;
         this.sw = sw;
     }
 
