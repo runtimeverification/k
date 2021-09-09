@@ -10,6 +10,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BackendOptions;
 import org.kframework.utils.options.DefinitionLoadingOptions;
+import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
 
 import java.io.File;
@@ -19,6 +20,9 @@ public class KBMCOptions {
 
     @ParametersDelegate
     public transient GlobalOptions global = new GlobalOptions();
+
+    @ParametersDelegate
+    public transient OuterParsingOptions outer = new OuterParsingOptions();
 
     @ParametersDelegate
     public DefinitionLoadingOptions definitionLoading = new DefinitionLoadingOptions();

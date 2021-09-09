@@ -286,9 +286,9 @@ public class DefinitionToOcaml implements Serializable {
                 throw KEMException.criticalError("Must have only one klabel with the \"thread\" attribute. Found: " + threadKLabels);
             }
             Rule matchThreadSet = Rule(IncompleteCellUtils.make(threadKLabels.iterator().next(), false, KVariable("Threads"), false), BooleanUtils.TRUE, BooleanUtils.TRUE);
-            this.matchThreadSet = convert(new Kompile(kompileOptions, globalOptions, files, kem).compileRule(def.kompiledDefinition, matchThreadSet));
+            this.matchThreadSet = convert(new Kompile(kompileOptions, kompileOptions.outerParsing, globalOptions, files, kem).compileRule(def.kompiledDefinition, matchThreadSet));
             Rule rewriteThreadSet = Rule(IncompleteCellUtils.make(threadKLabels.iterator().next(), false, KRewrite(KVariable("Threads"), KVariable("NewThreads")), false), BooleanUtils.TRUE, BooleanUtils.TRUE);
-            this.rewriteThreadSet = convert(new Kompile(kompileOptions, globalOptions, files, kem).compileRule(def.kompiledDefinition, rewriteThreadSet));
+            this.rewriteThreadSet = convert(new Kompile(kompileOptions, kompileOptions.outerParsing, globalOptions, files, kem).compileRule(def.kompiledDefinition, rewriteThreadSet));
             this.rewriteThreadSet = Rule(new TransformK() { public K apply(KVariable var) { return KVariable(var.name(), var.att().remove(Sort.class)); } }.apply(this.rewriteThreadSet.body()),
                     this.rewriteThreadSet.requires(), this.rewriteThreadSet.ensures());
         }
@@ -296,8 +296,8 @@ public class DefinitionToOcaml implements Serializable {
         if (mainModule.definedKLabels().contains(stratCell)) {
             Rule makeStuck = Rule(IncompleteCellUtils.make(stratCell, false, KRewrite(KSequence(), KApply(KLabel("#STUCK"))), true), BooleanUtils.TRUE, BooleanUtils.TRUE);
             Rule makeUnstuck = Rule(IncompleteCellUtils.make(stratCell, false, KRewrite(KApply(KLabel("#STUCK")), KSequence()), true), BooleanUtils.TRUE, BooleanUtils.TRUE);
-            this.makeStuck = convert(new Kompile(kompileOptions, globalOptions, files, kem).compileRule(def.kompiledDefinition, makeStuck));
-            this.makeUnstuck = convert(new Kompile(kompileOptions, globalOptions, files, kem).compileRule(def.kompiledDefinition, makeUnstuck));
+            this.makeStuck = convert(new Kompile(kompileOptions, kompileOptions.outerParsing, globalOptions, files, kem).compileRule(def.kompiledDefinition, makeStuck));
+            this.makeUnstuck = convert(new Kompile(kompileOptions, kompileOptions.outerParsing, globalOptions, files, kem).compileRule(def.kompiledDefinition, makeUnstuck));
         } else {
             this.makeStuck = null;
             this.makeUnstuck = null;
