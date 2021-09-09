@@ -10,6 +10,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.OuterParsingOptions;
+import org.kframework.utils.options.OutputDirectoryOptions;
 import org.kframework.utils.options.SMTOptions;
 import org.kframework.utils.options.StringListConverter;
 
@@ -36,7 +37,10 @@ public class KompileOptions implements Serializable {
     }
 
     @ParametersDelegate
-    public OuterParsingOptions outerParsing = new OuterParsingOptions();
+    public transient OuterParsingOptions outerParsing = new OuterParsingOptions();
+
+    @ParametersDelegate
+    public OutputDirectoryOptions outputDirectory = new OutputDirectoryOptions();
 
     // Common options
     @Parameter(names="--backend", description="Choose a backend. <backend> is one of [llvm|haskell|kore|java|ocaml]. Each creates the kompiled K definition.")
