@@ -40,7 +40,7 @@ class KoreTest {
 
   def kompile(k: String): Definition = {
     val go = new GlobalOptions();
-    val compiler = new Kompile(options, go, files, kem, new Stopwatch(go), false)
+    val compiler = new Kompile(options, new OuterParsingOptions(), go, files, kem, new Stopwatch(go), false)
     val backend = new KoreBackend(options, files, kem, Tool.KOMPILE)
     files.saveToDefinitionDirectory("test.k", k)
     val defn = compiler.run(files.resolveDefinitionDirectory("test.k"), "TEST", "TEST", backend.steps, backend.excludedModuleTags)
