@@ -14,4 +14,4 @@ all: $(TESTS)
 dummy:
 
 %.k %.md: dummy
-	$(KDEP) $(OPTS) $@ $(CHECK) $@.out
+	$(KDEP) $(OPTS) $@ | sed 's!'`pwd`'/\(\./\)\{0,2\}!!g' $(CHECK) $@.out
