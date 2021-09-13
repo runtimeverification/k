@@ -19,8 +19,8 @@ functions.
 
 ## Unification
 
-Previusly, we have introduced the concept that K rewrite rules operate by means
-of pattern matching: the current configuration being rewritten is pattern
+Previously, we have introduced the concept that K rewrite rules operate by 
+means of pattern matching: the current configuration being rewritten is pattern
 matched against the left-hand side of the rewrite rule, and the substitution
 is used in order to construct a new term from the right-hand side. In symbolic
 execution, we use
@@ -60,10 +60,10 @@ that such variables begin with the `?` prefix. For example, here is a rule
 that rewrites a constructor `foo` to a symbolic integer:
 
 ```
-rule foo => ?X:Int
+rule <k> foo => ?X:Int ...</k>
 ```
 
-When this rule applies, a variable is introduced to the configuration, which
+When this rule applies, a fresh variable is introduced to the configuration, which
 then is unified against the rules that might apply in order to symbolically
 execute that configuration.
 
@@ -145,7 +145,7 @@ configurations and constraints, as opposed to over the `Bool` sort.
 
 Notice that the configuration listed above is a disjunction of conjunctions.
 This is the most common form of output that can be produced by the Haskell
-Backend. In this case, each conjunction consists of a configuration and a pair
+Backend. In this case, each conjunction consists of a configuration and a set
 of constraints. What this conjunction describes, essentially, is a
 configuration and a set of information that was derived to be true while
 rewriting that configuration.
