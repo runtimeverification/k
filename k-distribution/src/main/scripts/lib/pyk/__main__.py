@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     elif args['command'] == 'minimize':
         json_definition = readKastTerm(kompiled_dir + '/compiled.json')
-        symbolTable = buildSymbolTable(json_definition)
+        symbolTable = buildSymbolTable(json_definition, opinionated = True)
         json_term = json.loads(args['json-term'].read())
         minimizedTerm = minimizeTerm(json_term['term'])
         args['output'].write(prettyPrintKast(minimizedTerm, symbolTable))
