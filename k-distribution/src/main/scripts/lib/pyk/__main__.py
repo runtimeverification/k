@@ -38,6 +38,10 @@ coverageArgs = pykCommandParsers.add_parser('coverage', help = 'Convert coverage
 coverageArgs.add_argument('coverage-file', type = argparse.FileType('r'), help = 'Coverage file to build log for.')
 coverageArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
 
+minimizeArgs = pykCommandParsers.add_parser('minimize', help = 'Output the minimized K term.')
+minimizeArgs.add_argument('json-term', type = argparse.FileType('r'), help = 'JSON representation of term to minimize.')
+minimizeArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
+
 def definitionDir(kompiledDir):
     return path.dirname(path.abspath(kompiledDir))
 
@@ -75,6 +79,14 @@ if __name__ == '__main__':
             args['output'].write('Rule: ' + rid.strip())
             args['output'].write('\nUnparsed:\n')
             args['output'].write(prettyPrintKast(rule, symbolTable))
+
+    elif args['command'] == 'minimize':
+        json_definition = removeSourceMap(readKastTerm(kompiled_dir + '/compiled.json'))
+        symbolTable = buildSymbolTable(json_definition)
+        symbolTable [ '...' ] = lambda l: l + ' ...'
+        json_term = json.loads(args['json-term'].read())
+        minimizedTerm = minimizeTerm(json_term['term'])
+        args['output'].write(prettyPrintKast(minimizedTerm, symbolTable))
 
     args['output'].flush()
 
