@@ -17,7 +17,7 @@ pipeline {
       steps {
         sh '''
           package/macos/brew-install-deps
-          brew install opam
+          brew install opam pkg-config
         '''
       }
     }

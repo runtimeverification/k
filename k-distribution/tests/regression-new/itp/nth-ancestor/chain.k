@@ -13,6 +13,8 @@ module CHAIN
 
     imports PROOF-SCRIPT
     imports CHAIN-SYNTAX
+    imports INT
+    imports BOOL
 
     /*
         (* abstract representation of a block tree *)

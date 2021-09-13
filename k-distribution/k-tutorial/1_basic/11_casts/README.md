@@ -64,7 +64,7 @@ module LESSON-11-B
   syntax Term ::= Exp | Stmt
   syntax Bool ::= isExpression(Term) [function]
 
-  rule isExpression(E:Exp) => true
+  rule isExpression(_E:Exp) => true
   rule isExpression(_) => false [owise]
 endmodule
 ```
@@ -170,6 +170,7 @@ For example, here is an example that makes use of projection casts:
 ```k
 module LESSON-11-D
   imports INT
+  imports BOOL
 
   syntax Exp ::= Int | Bool | Exp "+" Exp | Exp "&&" Exp
 

@@ -9,6 +9,7 @@ endmodule
 
 module FLOAT-MUL
     imports FLOAT-MUL-SYNTAX
+    imports INT
 
     configuration <k> $PGM:Pgm </k>
 

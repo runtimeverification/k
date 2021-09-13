@@ -4,6 +4,7 @@ module PROOF-SCRIPT
 
     imports STRING
     imports MAP
+    imports K-EQUAL
 
     configuration <T>
       <k> $PGM:Script </k>

@@ -22,7 +22,7 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk15on</artifactId>
-      <version>1.57</version>
+      <version>1.67</version>
     </dependency>
     <dependency>
       <groupId>com.google.inject</groupId>
@@ -232,6 +232,33 @@
         </configuration>
       </plugin>
       <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <id>get-git-revision</id>
+            <phase>compile</phase>
+            <configuration>
+              <exportAntProperties>true</exportAntProperties>
+              <target>
+                <exec executable="git"
+                      outputproperty="git.describe.out"
+                      errorproperty="git.describe.err"
+                      failifexecutionfails="false">
+                  <arg value="describe" />
+                  <arg value="--tags" />
+                  <arg value="--dirty" />
+                  <arg value="--long" />
+                </exec>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <version>2.5</version>
         <configuration>
@@ -241,6 +268,7 @@
               <Implementation-Branch>${scmBranch}</Implementation-Branch>
               <Implementation-Date>${timestamp}</Implementation-Date>
               <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Git-Describe>${git.describe.out}</Implementation-Git-Describe>
             </manifestEntries>
           </archive>
         </configuration>

@@ -20,6 +20,7 @@ import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
 import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
+import org.kframework.definition.Import;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
 import org.kframework.definition.Rule;
@@ -29,6 +30,7 @@ import org.kframework.kore.AddAttRec;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.Sort;
+import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ParserUtils;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.ParseCache;
@@ -42,6 +44,7 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.options.OuterParsingOptions;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.Set;
@@ -77,6 +80,7 @@ public class DefinitionParsing {
     private final boolean autoImportDomains;
     private final boolean kore;
     private final KompileOptions options;
+    private final GlobalOptions globalOptions;
 
     private final KExceptionManager kem;
     private final FileUtil files;
@@ -94,6 +98,8 @@ public class DefinitionParsing {
     public DefinitionParsing(
             List<File> lookupDirectories,
             KompileOptions options,
+            OuterParsingOptions outerParsingOptions,
+            GlobalOptions globalOptions,
             KExceptionManager kem,
             FileUtil files,
             ParserUtils parser,
@@ -102,12 +108,13 @@ public class DefinitionParsing {
             Stopwatch sw) {
         this.lookupDirectories = lookupDirectories;
         this.options = options;
+        this.globalOptions = globalOptions;
         this.kem = kem;
         this.files = files;
         this.parser = parser;
         this.cacheParses = cacheParses;
         this.cacheFile = cacheFile;
-        this.autoImportDomains = !options.outerParsing.noPrelude;
+        this.autoImportDomains = !outerParsingOptions.noPrelude;
         this.kore = options.isKore();
         this.loader = new BinaryLoader(this.kem);
         this.isStrict = options.strict();
@@ -143,6 +150,7 @@ public class DefinitionParsing {
         def = Definition(def.mainModule(), modules.collect(Collections.toSet()), def.att());
 
         def = Kompile.excludeModulesByTag(excludeModules).apply(def);
+        sw.printIntermediate("Outer parsing [" + def.modules().size() + " modules]");
 
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         caches = loadCaches();
@@ -157,8 +165,9 @@ public class DefinitionParsing {
 
         def = resolveNonConfigBubbles(def);
         if (! readOnlyCache) {
-            saveCachesAndReportParsingErrors();
+            saveCaches();
         }
+        throwExceptionIfThereAreErrors();
         return mutable(def.entryModules());
     }
 
@@ -201,7 +210,7 @@ public class DefinitionParsing {
         Definition trimmed = Definition(parsedDefinition.mainModule(), modules.collect(Collections.toSet()),
                 parsedDefinition.att());
         trimmed = Kompile.excludeModulesByTag(excludedModuleTags).apply(trimmed);
-        sw.printIntermediate("Outer parsing [" + trimmed.entryModules().size() + " modules]");
+        sw.printIntermediate("Outer parsing [" + trimmed.modules().size() + " modules]");
         Definition afterResolvingConfigBubbles = resolveConfigBubbles(trimmed, parsedDefinition.getModule("DEFAULT-CONFIGURATION").get());
         sw.printIntermediate("Parse configurations [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " declarations]");
         parsedBubbles.set(0);
@@ -232,7 +241,7 @@ public class DefinitionParsing {
                 options.preprocess,
                 options.bisonLists);
         Module m = definition.mainModule();
-        return options.coverage ? DefinitionTransformer.from(mod -> mod.equals(m) ? Module(m.name(), (Set<Module>)m.publicImports().$bar(Set(definition.getModule("K-IO").get())), m.privateImports(), m.localSentences(), m.att()) : mod, "add implicit modules").apply(definition) : definition;
+        return options.coverage ? DefinitionTransformer.from(mod -> mod.equals(m) ? Module(m.name(), (Set<Import>)m.imports().$bar(Set(Import(definition.getModule("K-IO").get(), true))), m.localSentences(), m.att()) : mod, "add implicit modules").apply(definition) : definition;
     }
 
     protected Definition resolveConfigBubbles(Definition definition, Module defaultConfiguration) {
@@ -241,7 +250,7 @@ public class DefinitionParsing {
                 boolean hasConfigDecl = stream(mod.sentences())
                         .anyMatch(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration));
                 if (!hasConfigDecl) {
-                    return Module(mod.name(), mod.publicImports().$bar(Set(defaultConfiguration)).seq(), mod.privateImports(), mod.localSentences(), mod.att());
+                    return Module(mod.name(), mod.imports().$bar(Set(Import(defaultConfiguration, true))).seq(), mod.localSentences(), mod.att());
                 }
             }
             return mod;
@@ -253,7 +262,7 @@ public class DefinitionParsing {
             boolean hasConfigDecl = stream(mod.localSentences())
                     .anyMatch(s -> s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration));
             if (hasConfigDecl) {
-                return Module(mod.name(), mod.publicImports().$bar(Set(mapModule)).seq(), mod.privateImports(), mod.localSentences(), mod.att());
+                return Module(mod.name(), mod.imports().$bar(Set(Import(mapModule, true))).seq(), mod.localSentences(), mod.att());
             }
             return mod;
         }, "adding MAP to modules with configs").apply(definitionWithConfigBubble);
@@ -296,7 +305,7 @@ public class DefinitionParsing {
             ParseCache cache = loadCache(configParserModule);
             try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
                 // each parser gets its own scanner because config labels can conflict with user tokens
-                parser.getScanner(options.global);
+                parser.getScanner(globalOptions);
                 parser.initialize();
 
                 java.util.Set<Sentence> parsedSet = stream(m.localSentences())
@@ -307,12 +316,12 @@ public class DefinitionParsing {
                                 .map(p -> upSentence(p, b.sentenceType())))
                         .collect(Collectors.toSet());
                 Set<Sentence> allSent = m.localSentences().$bar(immutable(parsedSet)).filter(s -> !(s instanceof Bubble && ((Bubble) s).sentenceType().equals(configuration))).seq();
-                return Module(m.name(), m.publicImports(), m.privateImports(), allSent, m.att());
+                return Module(m.name(), m.imports(), allSent, m.att());
             }
         });
 
         Definition defWithParsedConfigs = DefinitionTransformer.from(m ->
-                Module(m.name(), m.publicImports(), m.privateImports(), parsed.get(m.name()).localSentences(), m.att()),
+                Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()),
                 "replace configs").apply(defWithCaches);
 
         // replace config bubbles with the generated syntax and rules
@@ -325,7 +334,7 @@ public class DefinitionParsing {
                   .filter(p -> p.att().contains("cell"))
                   .map(p -> Production(Seq(), Sorts.Cell(), Seq(NonTerminal(p.sort())))).collect(toSet());
 
-            Module module = Module(m.name(), m.publicImports(), m.privateImports(),
+            Module module = Module(m.name(), m.imports(),
                   (Set<Sentence>) m.localSentences().$bar(importedConfigurationSortsSubsortedToCell),
                   m.att());
 
@@ -340,7 +349,7 @@ public class DefinitionParsing {
                     .$bar(configDeclProductions)
                     .filter(s -> !(s instanceof Configuration))
                     .filter(s -> !(s instanceof SyntaxSort && s.att().contains("temporary-cell-sort-decl"))).seq();
-            Module newM = Module(m.name(), m.publicImports(), m.privateImports(), stc, m.att());
+            Module newM = Module(m.name(), m.imports(), stc, m.att());
             newM.checkSorts(); // ensure all the Cell sorts are defined
             return newM;
         }, "expand configs").apply(defWithParsedConfigs);
@@ -352,9 +361,9 @@ public class DefinitionParsing {
         Module ruleParserModule = gen.getRuleGrammar(defWithCaches.mainModule());
         ParseCache cache = loadCache(ruleParserModule);
         try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files, true)) {
-            parser.getScanner(options.global);
-            Map<String, Module> parsed = defWithCaches.parMap(m -> this.resolveNonConfigBubbles(m, parser.getScanner(options.global), gen));
-            return DefinitionTransformer.from(m -> Module(m.name(), m.publicImports(), m.privateImports(), parsed.get(m.name()).localSentences(), m.att()), "parsing rules").apply(defWithConfig);
+            parser.getScanner(globalOptions);
+            Map<String, Module> parsed = defWithCaches.parMap(m -> this.resolveNonConfigBubbles(m, parser.getScanner(globalOptions), gen));
+            return DefinitionTransformer.from(m -> Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()), "parsing rules").apply(defWithConfig);
         }
     }
 
@@ -371,7 +380,7 @@ public class DefinitionParsing {
                 RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files) :
                 RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), scanner, isStrict, profileRules, false, files)) {
             if (needNewScanner)
-                parser.getScanner(options.global);
+                parser.getScanner(globalOptions);
             parser.initialize();
 
             Set<Sentence> parsedSet = stream(module.localSentences())
@@ -386,7 +395,7 @@ public class DefinitionParsing {
                 parser.getScanner().close();//required for Windows.
             }
 
-            return Module(module.name(), module.publicImports(), module.privateImports(),
+            return Module(module.name(), module.imports(),
                     stream((Set<Sentence>) module.localSentences().$bar(parsedSet)).filter(b -> !(b instanceof Bubble)).collect(Collections.toSet()), module.att());
         }
     }
@@ -425,7 +434,7 @@ public class DefinitionParsing {
                 Set<Sentence> stc = m.localSentences()
                         .$bar(immutable(Sets.newHashSet(fromCache.values())))
                         .filter(s -> !(s instanceof Bubble && fromCache.containsKey(s))).seq();
-                return Module(m.name(), m.publicImports(), m.privateImports(), stc, m.att());
+                return Module(m.name(), m.imports(), stc, m.att());
             }
             return m;
         }, "load cached bubbles").apply(def);

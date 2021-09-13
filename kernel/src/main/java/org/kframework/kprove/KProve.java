@@ -10,10 +10,12 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.krun.KRun;
 import org.kframework.RewriterResult;
+import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
 import org.kframework.unparser.ToJson;
 import org.kframework.utils.BinaryLoader;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -38,23 +40,27 @@ public class KProve {
     private final FileUtil files;
     private final KPrint kprint;
     private final KProveOptions kproveOptions;
+    private final GlobalOptions globalOptions;
     private final CompiledDefinition compiledDefinition;
     private final BinaryLoader loader;
     private final ProofDefinitionBuilder proofDefinitionBuilder;
     private final Function<Definition, Rewriter> rewriterGenerator;
+    private final Stopwatch sw;
 
     @Inject
     public KProve(KExceptionManager kem, FileUtil files, KPrint kprint, KProveOptions kproveOptions,
-                  CompiledDefinition compiledDefinition, BinaryLoader loader,
-                  ProofDefinitionBuilder proofDefinitionBuilder, Function<Definition, Rewriter> rewriterGenerator) {
+                  GlobalOptions globalOptions, CompiledDefinition compiledDefinition, BinaryLoader loader,
+                  ProofDefinitionBuilder proofDefinitionBuilder, Function<Definition, Rewriter> rewriterGenerator, Stopwatch sw) {
         this.kem = kem;
         this.files = files;
         this.kprint = kprint;
         this.kproveOptions = kproveOptions;
+        this.globalOptions = globalOptions;
         this.compiledDefinition = compiledDefinition;
         this.loader = loader;
         this.proofDefinitionBuilder = proofDefinitionBuilder;
         this.rewriterGenerator = rewriterGenerator;
+        this.sw = sw;
     }
 
     public int run() {
@@ -83,15 +89,18 @@ public class KProve {
         }
 
         RewriterResult results = rewriter.prove(specModule, boundaryPattern, false);
+        sw.printIntermediate("Backend");
         kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), kprint::outputFile,
                 results.k());
+        sw.printTotal("Total");
         return results.exitCode().orElse(KEMException.TERMINATED_WITH_ERRORS_EXIT_CODE);
     }
 
     // Saving combined verification definition to disk to be usable by other tools (e.g., kast)
     private void saveFullDefinition(Definition fullDefinition) {
         CompiledDefinition fullCompiledDefinition = new CompiledDefinition(
-                compiledDefinition.kompileOptions,
+                compiledDefinition.kompileOptions, kproveOptions.outerParsing,
+                globalOptions,
                 fullDefinition, fullDefinition,
                 files, kem, compiledDefinition.topCellInitializer);
         Path proveKompiledDir = Paths.get(kproveOptions.saveProofDefinitionTo).resolve("prove-spec-kompiled");

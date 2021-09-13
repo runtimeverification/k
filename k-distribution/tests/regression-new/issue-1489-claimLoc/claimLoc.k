@@ -1,6 +1,7 @@
 // Copyright (c) 2020 K Team. All Rights Reserved.
 
 module CLAIMLOC
+  imports BOOL
   syntax S ::= "a" | "b" | "c" | "d"
 
   rule a => b [label(A2B)]
