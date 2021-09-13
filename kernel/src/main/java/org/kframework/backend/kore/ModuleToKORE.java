@@ -1052,9 +1052,9 @@ public class ModuleToKORE {
                     conn = ",";
                 }
                 sb.append(")");
-		sb.append(",\n     \\and{");
-		sb.append(ruleInfo.productionSortStr);
-		sb.append("} (\n       ");
+                sb.append(",\n     \\and{");
+                sb.append(ruleInfo.productionSortStr);
+                sb.append("} (\n       ");
                 convert(right, sb);
                 sb.append(",\n        ");
                 convertSideCondition(ensures, ruleInfo.productionSortStr, sb);
@@ -1068,9 +1068,9 @@ public class ModuleToKORE {
                 sb.append(ruleInfo.productionSortStr);
                 sb.append(",R} (\n      ");
                 convert(left, sb);
-		sb.append(",\n     \\and{");
-		sb.append(ruleInfo.productionSortStr);
-		sb.append("} (\n       ");
+                sb.append(",\n     \\and{");
+                sb.append(ruleInfo.productionSortStr);
+                sb.append("} (\n       ");
 		convert(right, sb);
                 sb.append(",\n        ");
                 convertSideCondition(ensures, ruleInfo.productionSortStr, sb);
@@ -1115,9 +1115,9 @@ public class ModuleToKORE {
                     conn = ",";
                 }
                 sb.append(")");
-		sb.append(",\n     \\and{");
-		sb.append(ruleInfo.productionSortStr);
-		sb.append("} (\n       ");
+                sb.append(",\n     \\and{");
+                sb.append(ruleInfo.productionSortStr);
+                sb.append("} (\n       ");
                 convert(right, sb);
                 sb.append(",\n        ");
                 convertSideCondition(ensures, ruleInfo.productionSortStr, sb);
