@@ -1071,7 +1071,7 @@ public class ModuleToKORE {
                 sb.append(",\n     \\and{");
                 sb.append(ruleInfo.productionSortStr);
                 sb.append("} (\n       ");
-		convert(right, sb);
+                convert(right, sb);
                 sb.append(",\n        ");
                 convertSideCondition(ensures, ruleInfo.productionSortStr, sb);
                 sb.append(")))\n  ");
