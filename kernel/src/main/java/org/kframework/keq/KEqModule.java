@@ -30,6 +30,7 @@ import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.inject.Spec1;
 import org.kframework.utils.inject.Spec2;
 import org.kframework.utils.options.DefinitionLoadingOptions;
+import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
 
 import java.util.List;
@@ -73,6 +74,9 @@ public class KEqModule extends AbstractModule {
     GlobalOptions globalOptions(KEqOptions options) {
         return options.global;
     }
+
+    @Provides @RequestScoped
+    OuterParsingOptions outerParsingOptions(KEqOptions options) { return options.outer; }
 
     @Provides
     SMTOptions smtOptions(KEqOptions options) { return options.smt; }

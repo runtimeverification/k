@@ -27,6 +27,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.options.OuterParsingOptions;
 import scala.Option;
 import scala.Tuple2;
 import scala.util.Either;
@@ -49,6 +50,7 @@ import static org.kframework.kore.KORE.*;
 
 public class CompiledDefinition implements Serializable {
     public final KompileOptions kompileOptions;
+    public final OuterParsingOptions outerParsingOptions;
     private  transient final GlobalOptions globalOptions;
     private final Definition parsedDefinition;
     public final Definition kompiledDefinition;
@@ -61,8 +63,9 @@ public class CompiledDefinition implements Serializable {
     private Map<String, Rule> cachedParsedPatterns = new ConcurrentHashMap<>();
 
 
-    public CompiledDefinition(KompileOptions kompileOptions, GlobalOptions globalOptions, Definition parsedDefinition, Definition kompiledDefinition, FileUtil files, KExceptionManager kem, KLabel topCellInitializer) {
+    public CompiledDefinition(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, GlobalOptions globalOptions, Definition parsedDefinition, Definition kompiledDefinition, FileUtil files, KExceptionManager kem, KLabel topCellInitializer) {
         this.kompileOptions = kompileOptions;
+        this.outerParsingOptions = outerParsingOptions;
         this.globalOptions = globalOptions;
         this.parsedDefinition = parsedDefinition;
         this.kompiledDefinition = kompiledDefinition;
@@ -79,7 +82,7 @@ public class CompiledDefinition implements Serializable {
         if (exitCodeRule == null) {
             this.exitCodePattern = null;
         } else {
-            this.exitCodePattern = new Kompile(kompileOptions, globalOptions, files, kem).compileRule(kompiledDefinition, exitCodeRule);
+            this.exitCodePattern = new Kompile(kompileOptions, outerParsingOptions, globalOptions, files, kem).compileRule(kompiledDefinition, exitCodeRule);
         }
     }
 
@@ -209,11 +212,11 @@ public class CompiledDefinition implements Serializable {
     }
 
     public Rule compilePatternIfAbsent(FileUtil files, KExceptionManager kem, String pattern, Source source) {
-        return cachedcompiledPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, globalOptions, files, kem).parseAndCompileRule(this, p, source,
+        return cachedcompiledPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, outerParsingOptions, globalOptions, files, kem).parseAndCompileRule(this, p, source,
                 Optional.of(parsePatternIfAbsent(files, kem, pattern, source))));
     }
 
     public Rule parsePatternIfAbsent(FileUtil files, KExceptionManager kem, String pattern, Source source) {
-        return cachedParsedPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, globalOptions, files, kem).parseRule(this, p, source));
+        return cachedParsedPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, outerParsingOptions, globalOptions, files, kem).parseRule(this, p, source));
     }
 }

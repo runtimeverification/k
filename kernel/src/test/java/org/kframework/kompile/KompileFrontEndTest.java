@@ -7,6 +7,7 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.utils.IOTestCase;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
+import org.kframework.utils.options.OuterParsingOptions;
 import org.mockito.Mock;
 
 import java.io.IOException;
@@ -26,19 +27,20 @@ public class KompileFrontEndTest extends IOTestCase {
     FileUtil files;
 
     KompileOptions options = new KompileOptions();
+    OuterParsingOptions outerOptions = new OuterParsingOptions();
     GlobalOptions globalOptions = new GlobalOptions();
 
     @Test
     public void testHelp() throws IOException {
         globalOptions.help = true;
-        new KompileFrontEnd(options, globalOptions,"foo", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files)).main();
+        new KompileFrontEnd(options, outerOptions, globalOptions, "foo", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files)).main();
         assertEquals("foo", stdout.toString());
     }
 
     @Test
     public void testVersion() {
         globalOptions.version = true;
-        new KompileFrontEnd(options, globalOptions, "", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files)).main();
+        new KompileFrontEnd(options, outerOptions, globalOptions, "", Providers.of(koreBackend), sw, kem, loader, jarInfo, Providers.of(files)).main();
         verify(jarInfo).printVersionMessage();
     }
 }
