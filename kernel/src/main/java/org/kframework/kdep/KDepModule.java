@@ -41,5 +41,5 @@ public class KDepModule extends AbstractModule {
     OuterParsingOptions outerParsingOptions(KDepOptions options) { return options.outerParsing; }
 
     @Provides
-    OutputDirectoryOptions outputDirectoryOptions(KompileOptions options) { return options.outputDirectory; }
+    OutputDirectoryOptions outputDirectoryOptions(KDepOptions options) { return options.outputDirectory; }
 }
