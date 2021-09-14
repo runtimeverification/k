@@ -14,4 +14,7 @@ all: $(TESTS)
 dummy:
 
 %.k %.md: dummy
-	$(KDEP) $(OPTS) $@ | sed 's!'`pwd`'/\(\./\)\{0,2\}!!g' $(CHECK) $@.out
+	$(KDEP) $(KDEP_FLAGS) $@ | sed 's!'`pwd`'/\(\./\)\{0,2\}!!g' $(CHECK) $@.out
+
+clean:
+	rm -rf $(KOMPILED_DIR) .depend-tmp .depend .kompile-* .krun-* .kprove-* .kbmc-* kore-exec.tar.gz
