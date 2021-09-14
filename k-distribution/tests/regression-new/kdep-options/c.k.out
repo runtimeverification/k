@@ -1,4 +1,4 @@
-OutputDirectoryTest/c-kompiled/timestamp : \
+
     IncludeDirTest/d.k \
     c.k \
-
+OutputDirectoryTest/c-kompiled/timestamp : \
