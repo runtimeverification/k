@@ -79,7 +79,7 @@ constraint that the symbolic integer that was introduced must be less than
 five, by means of the following rule:
 
 ```
-rule foo => ?X:Int ensures ?X <Int 5
+rule <k> foo => ?X:Int ...</k> ensures ?X <Int 5
 ```
 
 ## Putting it all together
