@@ -1,6 +1,6 @@
-
-    IncludeDirTest/d.k \
-    a.k \
-    b.k \
-    c.k \
 OutputDirectoryTest/a-kompiled/timestamp : \
+    IncludeDirTest/d.k \
+    c.k \
+    b.k \
+    a.k \
+
