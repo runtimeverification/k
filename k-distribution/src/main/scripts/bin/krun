@@ -437,12 +437,6 @@ if [ ! -f "$kompiledDir/definition.kore" ]; then
   exit $?
 fi
 
-if $search; then
-  if [ ! -f "$kompiledDir/search" ] || [ ! -x "$kompiledDir/search" ]; then
-    error 'You must pass --enable-search to kompile to be able to use krun --search'
-  fi
-fi
-
 # Process configuration variables
 hasArgv=false
 if [[ "${#ARGV[@]}" -gt 0 ]]; then
@@ -547,6 +541,9 @@ if [ "$backendName" = "llvm" ]; then
 
   keepTempsIfDryRun "$tempDir" "$expanded_input_file" "$kore_output"
   if $search; then
+    if [ ! -f "$kompiledDir/search" ] || [ ! -x "$kompiledDir/search" ]; then
+      error 'You must pass --enable-search to kompile to be able to use krun --search with the LLVM backend'
+    fi
     if [ -n "$pattern" ]; then
       error "Backend llvm does not support search patterns yet."
     fi
