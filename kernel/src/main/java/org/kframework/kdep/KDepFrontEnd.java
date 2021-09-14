@@ -23,6 +23,7 @@ import org.kframework.utils.options.OuterParsingOptions;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -104,7 +105,13 @@ public class KDepFrontEnd extends FrontEnd {
                 requiredFiles));;
         Set<File> allFiles = modules.stream().map(m -> new File(m.getSource().source())).collect(Collectors.toSet());
         System.out.println(files.get().resolveWorkingDirectory(".").toURI().relativize(files.get().resolveKompiled("timestamp").toURI()).getPath() + " : \\");
-        for (File file : allFiles) {
+
+        List<File> sortedFiles = new ArrayList<File>(allFiles);
+        Collections.sort(sortedFiles, (File a, File b) -> {
+          return a.getAbsolutePath().compareTo(b.getAbsolutePath());
+        });
+
+        for (File file : sortedFiles) {
             System.out.println("    " + file.getAbsolutePath() + " \\");
         }
         System.out.println();
