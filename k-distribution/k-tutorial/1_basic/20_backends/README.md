@@ -76,6 +76,11 @@ of understanding.
 
 ## Exercises
 
-Compile your solution to Lesson 1.18, Problem 2 with the Haskell Backend
+1. Compile your solution to Lesson 1.18, Problem 2 with the Haskell Backend
 and execute some programs. Compare the resulting configurations with the
 output of the same program on the LLVM Backend.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.21: Unification and Symbolic Execution](../21_symbolic_execution/README.md).
