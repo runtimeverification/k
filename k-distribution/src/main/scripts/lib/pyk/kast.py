@@ -248,8 +248,8 @@ def underbarUnparsing(symbol):
         return " ".join(result)
     return _underbarUnparsing
 
-def indent(input):
-    return "\n".join(["  " + l for l in input.split("\n")])
+def indent(input, size = 2):
+    return '\n'.join([(' ' * size) + l for l in input.split('\n')])
 
 def newLines(input):
     return '\n'.join(input)
@@ -284,6 +284,7 @@ def buildSymbolTable(definition, opinionated = False):
 
     if opinionated:
         symbolTable [ '#And' ] = lambda c1, c2: c1 + '\n#And ' + c2
+        symbolTable [ '#Or'  ] = lambda c1, c2: indent(c1, size = 4) + '\n#Or '  + indent(c2, size = 4)
 
     return symbolTable
 
