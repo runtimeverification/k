@@ -6,7 +6,10 @@ KOMPILE = $(K_BIN)/kompile
 KAST    = $(K_BIN)/kast
 KRUN    = $(K_BIN)/krun
 KPROVE  = $(K_BIN)/kprove
+KPROVEX = $(K_BIN)/kprovex
 KPYK    = $(K_BIN)/kpyk
+
+CHECK = git diff --no-index -R
 
 PYTHONPATH := $(K_LIB)
 export PYTHONPATH
@@ -36,7 +39,7 @@ $(llvm_imp_kompiled): $(llvm_imp) $(KOMPILE)
 	$(KOMPILE) --directory $(llvm_dir) --backend llvm -I $(llvm_dir) $< --emit-json --coverage
 
 $(haskell_imp_kompiled): $(haskell_imp) $(KOMPILE)
-	$(KOMPILE) --directory $(haskell_dir) --backend haskell -I $(haskell_dir) $< --emit-json
+	$(KOMPILE) --directory $(haskell_dir) --backend haskell $< --emit-json
 
 update-results:
 kompile: $(llvm_imp_kompiled) $(haskell_imp_kompiled)
@@ -75,13 +78,13 @@ $(defn_tests)/kast-tests/%.out: $(defn_tests)/kast-tests/%.gen $(llvm_imp_kompil
 	$(KAST) --directory $(llvm_dir) --output pretty --sort $(basename $(basename $*)) -m IMP $< > $@
 
 $(defn_tests)/proof-tests/%-spec.json.prove: $(defn_tests)/proof-tests/%-spec.k $(haskell_imp_kompiled)
-	$(KPROVE) --directory $(haskell_dir) $< -m IMP
+	$(KPROVE) --directory $(haskell_dir) $< -m IMP -I $(haskell_dir)
 
 ## kpyk runner tests
 
 sum_to_n_coverage := kpyk-tests/sum-to-n.imp.coverage
 
-test-kpyk: test-kpyk-coverage-log
+test-kpyk: test-kpyk-coverage-log test-kpyk-minimize-term
 
 $(sum_to_n_coverage): $(llvm_imp_kompiled) kpyk-tests/sum-to-n.imp
 	rm -rf $(llvm_dir)/imp-kompiled/*_coverage.txt
@@ -90,3 +93,10 @@ $(sum_to_n_coverage): $(llvm_imp_kompiled) kpyk-tests/sum-to-n.imp
 
 test-kpyk-coverage-log: $(sum_to_n_coverage)
 	$(KPYK) $(llvm_dir)/imp-kompiled coverage $(sum_to_n_coverage) > /dev/null
+
+test-kpyk-minimize-term: kpyk-tests/minimize/test.k
+	$(KOMPILE) kpyk-tests/minimize/test.k --directory kpyk-tests/minimize --backend haskell --emit-json \
+	    --main-module TEST
+	$(KPROVEX) kpyk-tests/minimize/test.k --directory kpyk-tests/minimize --output json --spec-module TEST-SPEC > kpyk-tests/minimize/test.json || true
+	$(KPYK) kpyk-tests/minimize/test-kompiled minimize kpyk-tests/minimize/test.json > kpyk-tests/minimize/test.k.out
+	$(CHECK) kpyk-tests/minimize/test.k.out kpyk-tests/minimize/test.k.expected

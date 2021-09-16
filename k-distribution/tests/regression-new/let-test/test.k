@@ -1,5 +1,7 @@
 module TEST
   imports INT
+  imports K-EQUAL
+  imports BOOL
 
   syntax Exp ::= foo(Exp) | Int
 

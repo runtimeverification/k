@@ -254,7 +254,7 @@ def indent(input):
 def newLines(input):
     return '\n'.join(input)
 
-def buildSymbolTable(definition):
+def buildSymbolTable(definition, opinionated = False):
     """Build the unparsing symbol table given a JSON encoded definition.
 
     -   Input: JSON encoded K definition.
@@ -281,6 +281,9 @@ def buildSymbolTable(definition):
                     label = sent['att']['att']['klabel']
                 unparser = _unparserFromProductionItems(sent['productionItems'])
                 symbolTable[label] = unparser
+
+    if opinionated:
+        symbolTable [ '#And' ] = lambda c1, c2: c1 + '\n#And ' + c2
 
     return symbolTable
 

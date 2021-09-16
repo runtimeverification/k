@@ -2,6 +2,7 @@
 package org.kframework.parser.inner.generator;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
+import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
@@ -9,6 +10,7 @@ import org.kframework.compile.ConfigurationInfoFromModule;
 import org.kframework.compile.GenerateSortPredicateSyntax;
 import org.kframework.compile.GenerateSortProjections;
 import org.kframework.definition.Definition;
+import org.kframework.definition.Import;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.NonTerminal;
@@ -33,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -111,11 +114,15 @@ public class RuleGrammarGenerator {
      * @return a new module which imports the original user module and a set of marker modules.
      */
     public Module getRuleGrammar(Module mod) {
+        return getGrammar(mod, RULE_CELLS);
+    }
+
+    private Module getGrammar(Module mod, String name) {
         // import RULE-CELLS in order to parse cells specific to rules
-        Module newM = new Module( mod.name() + "-" + RULE_CELLS
-                                , Set(mod, baseK.getModule(K).get(), baseK.getModule(RULE_CELLS).get(), baseK.getModule(DEFAULT_LAYOUT).get())
-                                , Set()
-                                , Att()
+        Module newM = new Module( mod.name() + "-" + name
+                                , (scala.collection.Set<Import>) mod.imports().$bar(Set(Import(baseK.getModule(K).get(), true), Import(baseK.getModule(name).get(), true), Import(baseK.getModule(DEFAULT_LAYOUT).get(), true)))
+                                , mod.localSentences()
+                                , mod.att()
                                 );
         return newM;
     }
@@ -127,13 +134,7 @@ public class RuleGrammarGenerator {
      * @return a new module which imports the original user module and a set of marker modules.
      */
     public Module getConfigGrammar(Module mod) {
-        // import CONFIG-CELLS in order to parse cells specific to configurations
-        Module newM = new Module( mod.name() + "-" + CONFIG_CELLS
-                                , Set(mod, baseK.getModule(K).get(), baseK.getModule(CONFIG_CELLS).get(), baseK.getModule(DEFAULT_LAYOUT).get())
-                                , Set()
-                                , Att()
-                                );
-        return newM;
+        return getGrammar(mod, CONFIG_CELLS);
     }
 
     /**
@@ -148,28 +149,31 @@ public class RuleGrammarGenerator {
             return mod;
         } else {
             Module newMod = ModuleTransformer.from(oldMod -> {
-                Set<Module> imports = stream(oldMod.imports()).map(_import -> {
-                    Option<Module> programParsing = baseK.getModule(_import.name() + "-PROGRAM-PARSING");
+                UnaryOperator<Import> f = _import -> {
+                    Option<Module> programParsing = baseK.getModule(_import.module().name() + "-PROGRAM-PARSING");
                     if (programParsing.isDefined()) {
-                        return programParsing.get();
+                        return Import(programParsing.get(), _import.isPublic(), _import.tag());
                     }
                     return _import;
-                }).collect(Collectors.toSet());
+                };
+                Set<Import> imports = stream(oldMod.imports()).map(f).collect(Collectors.toSet());
                 return Module.apply(oldMod.name(), immutable(imports), oldMod.localSentences(), oldMod.att());
             }, "apply program parsing modules").apply(mod);
 
-            Set<Module> modules = new HashSet<Module>();
-            modules.add(newMod);
+            Set<Import> modules = new HashSet<Import>();
+            for (Import m : iterable(newMod.imports())) {
+              modules.add(m);
+            }
 
             // import PROGRAM-LISTS so user lists are modified to parse programs
-            modules.add(baseK.getModule(PROGRAM_LISTS).get());
+            modules.add(Import(baseK.getModule(PROGRAM_LISTS).get(), true));
 
             // check if `#Layout` has been declared, import `DEFAULT-LAYOUT` if not
             if (! mod.allSorts().contains(Sorts.Layout())) {
-                modules.add(baseK.getModule(DEFAULT_LAYOUT).get());
+                modules.add(Import(baseK.getModule(DEFAULT_LAYOUT).get(), true));
             }
 
-            return Module.apply(mod.name() + "-PROGRAM-GRAMMAR", immutable(modules), Set(), Att());
+            return Module.apply(mod.name() + "-PROGRAM-GRAMMAR", immutable(modules), newMod.localSentences(), newMod.att());
         }
     }
 
@@ -179,15 +183,27 @@ public class RuleGrammarGenerator {
 
     /* use this overload if you don't need to profile rule parse times. */
     public static ParseInModule getCombinedGrammar(Module mod, boolean strict) {
-      return getCombinedGrammar(mod, strict, false, false, null);
+      return getCombinedGrammar(mod, strict, false, false, false, null);
     }
 
     public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, boolean isBison) {
-      return getCombinedGrammar(mod, strict, timing, isBison, null);
+      return getCombinedGrammar(mod, strict, timing, isBison, false, null);
     }
 
     public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, FileUtil files) {
-      return getCombinedGrammar(mod, strict, timing, false, files);
+      return getCombinedGrammar(mod, strict, timing, false, false, files);
+    }
+
+    // the forGlobalScanner flag tells the ParseInModule class not to exclude
+    // private syntax from the grammar generated for the module. It should
+    // not be used when actually performing parsing as this will lead to
+    // incorrect grammars. However, it is used in one place in the code:
+    // during rule parsing, we generate a single scanner to scan all the
+    // modules. This must include the private syntax of those modules,
+    // otherwise we would not be able to use it to scan the modules in which
+    //  that private syntax is visible.
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, FileUtil files, boolean forGlobalScanner) {
+      return getCombinedGrammar(mod, strict, timing, false, forGlobalScanner, files);
     }
 
     /**
@@ -199,18 +215,24 @@ public class RuleGrammarGenerator {
      * @param mod module for which to create the parser.
      * @return parser which applies disambiguation filters by default.
      */
-    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, boolean isBison, FileUtil files) {
-        return new ParseInModule(mod, strict, timing, isBison, files);
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, boolean isBison, boolean forGlobalScanner, FileUtil files) {
+        return new ParseInModule(mod, strict, timing, isBison, forGlobalScanner, files);
     }
 
     public static ParseInModule getCombinedGrammar(Module mod, Scanner scanner, boolean strict, boolean timing, boolean isBison, FileUtil files) {
-        return new ParseInModule(mod, scanner, strict, timing, isBison, files);
+        return new ParseInModule(mod, scanner, strict, timing, isBison, false, files);
     }
 
-    public static Tuple3<Module, Module, Module> getCombinedGrammarImpl(Module mod, boolean isBison) {
+    public static Tuple3<Module, Module, Module> getCombinedGrammarImpl(Module mod, boolean isBison, boolean forGlobalScanner) {
         Set<Sentence> prods = new HashSet<>();
         Set<Sentence> extensionProds = new HashSet<>();
         Set<Sentence> disambProds;
+
+        Module origMod = mod;
+
+        if (!forGlobalScanner) {
+          mod = mod.signature();
+        }
 
         if (isBison) {
           mod = ModuleTransformer.from(m -> {
@@ -465,7 +487,7 @@ public class RuleGrammarGenerator {
         if (!notLrModules.isEmpty()) {
           att = att.add("not-lr1", notLrModules.toString());
         }
-        Module extensionM = new Module(mod.name() + "-EXTENSION", Set(mod), immutable(extensionProds), att);
+        Module extensionM = new Module(mod.name() + "-EXTENSION", Set(Import(origMod, true)), immutable(extensionProds), att);
         Module disambM = new Module(mod.name() + "-DISAMB", Set(), immutable(disambProds), att);
         Module parseM = new Module(mod.name() + "-PARSER", Set(), immutable(parseProds), att);
         parseM.subsorts();

@@ -1,7 +1,7 @@
 Balances Module Specifications
 ==============================
 
-```k
+```keep
 requires "set-balance.md"
 
 module VERIFICATION
@@ -16,9 +16,13 @@ module SET-BALANCE-SPEC
     imports VERIFICATION
 ```
 
+```k
+ignore thie code block!
+```
+
 ### `total_balance` tests
 
-```k
+```keep
     claim <k> totalBalance(AID) => 50 </k>
           <account>
             <accountID> AID </accountID>
@@ -34,7 +38,7 @@ This property shows that `set_balance` will not result in a zero-balance attack.
 **TODO**: Generalize to any EntryAction.
 **TODO**: Assertions about log events.
 
-```
+```discard
     rule <k> set_balance(Root, WHO, FREE_BALANCE', RESERVED_BALANCE') => . ... </k>
          <totalIssuance> TOTAL_ISSUANCE => TOTAL_ISSUANCE +Int ( FREE_BALANCE' -Int FREE_BALANCE ) +Int ( RESERVED_BALANCE' -Int RESERVED_BALANCE ) </totalIssuance>
          <existentialDeposit> EXISTENTIAL_DEPOSIT </existentialDeposit>
@@ -50,7 +54,7 @@ This property shows that `set_balance` will not result in a zero-balance attack.
        andBool EXISTENTIAL_DEPOSIT <=Int RESERVED_BALANCE'
 ```
 
-```k
+```keep
     claim <k> set_balance_reserved ( WHO , RESERVED_BALANCE' ) => . ... </k>
           <existentialDeposit> EXISTENTIAL_DEPOSIT </existentialDeposit>
           <totalIssuance> TOTAL_ISSUANCE +Int ( FREE_BALANCE' -Int FREE_BALANCE ) => TOTAL_ISSUANCE +Int ( FREE_BALANCE' -Int FREE_BALANCE ) +Int ( RESERVED_BALANCE' -Int RESERVED_BALANCE ) </totalIssuance>
@@ -64,6 +68,6 @@ This property shows that `set_balance` will not result in a zero-balance attack.
        andBool EXISTENTIAL_DEPOSIT <=Int RESERVED_BALANCE'
 ```
 
-```k
+```keep
 endmodule
 ```

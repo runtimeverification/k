@@ -33,6 +33,8 @@ module IMP
   imports BOOL
   imports INT
   imports MAP
+  imports SET
+  imports BASIC-K
 
   syntax KResult ::= Int | Bool
   syntax KItem   ::= Pgm

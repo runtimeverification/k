@@ -4,6 +4,8 @@ TESTDIR=.
 KRUN_FLAGS=--help
 KOMPILE_FLAGS=--syntax-module TEST
 PACKAGE_VERSION ?= $(shell cat ../../../../package/version)
+GIT_REVISION=$(shell git describe --tags --long)
+VERSION_REGEX="$(PACKAGE_VERSION)\|$(GIT_REVISION)"
 
 1.test:
 	${KAST}    --help    | grep -q -- "--version"
@@ -13,13 +15,13 @@ PACKAGE_VERSION ?= $(shell cat ../../../../package/version)
 	${KPROVE}  --help    | grep -q -- "--version"
 	${KRUN}    --help    | grep -q -- "--version"
 	${KSERVER} --help    | grep -q -- "--version"
-	${KAST}    --version | grep -q $(PACKAGE_VERSION)
-	${KDEP}    --version | grep -q $(PACKAGE_VERSION)
-	${KEQ}     --version | grep -q $(PACKAGE_VERSION)
-	${KOMPILE} --version | grep -q $(PACKAGE_VERSION)
-	${KPROVE}  --version | grep -q $(PACKAGE_VERSION)
-	${KRUN}    --version | grep -q $(PACKAGE_VERSION)
-	${KSERVER} --version | grep -q $(PACKAGE_VERSION)
+	${KAST}    --version | grep -q $(VERSION_REGEX)
+	${KDEP}    --version | grep -q $(VERSION_REGEX)
+	${KEQ}     --version | grep -q $(VERSION_REGEX)
+	${KOMPILE} --version | grep -q $(VERSION_REGEX)
+	${KPROVE}  --version | grep -q $(VERSION_REGEX)
+	${KRUN}    --version | grep -q $(VERSION_REGEX)
+	${KSERVER} --version | grep -q $(VERSION_REGEX)
 
 
 include ../../../include/kframework/ktest.mak

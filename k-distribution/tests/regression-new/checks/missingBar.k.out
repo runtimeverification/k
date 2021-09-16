@@ -1,0 +1,4 @@
+[Error] Outer Parser: Encountered <LOWER_ID>.
+Was expecting one of: ["rule", "context", "configuration", "claim", "syntax", "endmodule", "[", ">", "|"]
+	Source(missingBar.k)
+	Location(4,18,4,20)

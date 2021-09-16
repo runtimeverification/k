@@ -5,6 +5,7 @@ endmodule
 module TEST
   imports TEST-SYNTAX
   imports INT
+  imports BOOL
 
   configuration <k> split($PGM:Int) </k>
   syntax Int ::= split(Int)  [function, functional]

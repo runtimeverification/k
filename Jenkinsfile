@@ -189,17 +189,17 @@ pipeline {
                 }
               }
             }
-            stage('Build and Package on Debian Buster') {
+            stage('Build and Package on Debian Bullseye') {
               when {
                 branch 'release'
                 beforeAgent true
               }
               stages {
-                stage('Build on Debian Buster') {
+                stage('Build on Debian Bullseye') {
                   agent {
                     dockerfile {
                       filename 'package/debian/Dockerfile'
-                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:buster --build-arg LLVM_VERSION=8'
+                      additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:bullseye --build-arg LLVM_VERSION=11'
                       reuseNode true
                     }
                   }
@@ -214,7 +214,7 @@ pipeline {
                             dpkg-buildpackage
                           '''
                         }
-                        stash name: 'buster', includes: "kframework_${env.VERSION}_amd64.deb"
+                        stash name: 'bullseye', includes: "kframework_${env.VERSION}_amd64.deb"
                       }
                     }
                   }
@@ -222,16 +222,16 @@ pipeline {
                 stage('Test Debian Package') {
                   agent {
                     docker {
-                      image 'debian:buster'
+                      image 'debian:bullseye'
                       args '-u 0'
                       reuseNode true
                     }
                   }
                   options { skipDefaultCheckout() }
                   steps {
-                    unstash 'buster'
+                    unstash 'bullseye'
                     sh '''
-                      echo "deb http://deb.debian.org/debian buster-backports main" > /etc/apt/sources.list.d/buster-backports.list
+                      # echo "deb http://deb.debian.org/debian bullseye-backports main" > /etc/apt/sources.list.d/bullseye-backports.list
                       src/main/scripts/test-in-container-debian
                     '''
                   }
@@ -247,7 +247,7 @@ pipeline {
                 failure {
                   slackSend color: '#cb2431'                                             \
                           , channel: '#k'                                                \
-                          , message: "Debian Buster Packaging Failed: ${env.BUILD_URL}"
+                          , message: "Debian Bullseye Packaging Failed: ${env.BUILD_URL}"
                 }
               }
             }
@@ -293,7 +293,7 @@ pipeline {
                     unstash 'arch'
                     sh '''
                       pacman -Syyu --noconfirm
-                      pacman -S --noconfirm opam
+                      pacman -S --noconfirm opam pkgconf
                       pacman -U --noconfirm kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
                       src/main/scripts/test-in-container
                     '''
@@ -349,7 +349,7 @@ pipeline {
                         git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${SHORT_REV}: part 2"
                         git push origin brew-release-$PACKAGE
                       '''
-                      stash name: 'mojave', includes: "kframework--${env.VERSION}.mojave.bottle*.tar.gz"
+                      stash name: 'big_sur', includes: "kframework--${env.VERSION}.big_sur.bottle*.tar.gz"
                     }
                   }
                 }
@@ -358,11 +358,11 @@ pipeline {
                   steps {
                     dir('homebrew-k') {
                       git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
-                      unstash 'mojave'
+                      unstash 'big_sur'
                       sh '${WORKSPACE}/package/macos/brew-install-bottle ${PACKAGE} ${VERSION}'
                     }
                     sh '''
-                      brew install opam
+                      brew install opam pkg-config
                       k-configure-opam
                       eval $(opam config env)
                       cp -R /usr/local/share/kframework/pl-tutorial ~
@@ -495,21 +495,15 @@ pipeline {
         }
       }
       post { failure { slackSend color: '#cb2431' , channel: '#k' , message: "Deploy Phase Failed: ${env.BUILD_URL}" } }
-      environment {
-        AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
-        AWS_REGION            = 'us-east-2'
-        GITHUB_TOKEN          = credentials('rv-jenkins')
-        GIT_SSH_COMMAND       = 'ssh -o StrictHostKeyChecking=accept-new'
-      }
+      environment { GITHUB_TOKEN = credentials('rv-jenkins-access-token') }
       steps {
         unstash 'src'
         dir('bionic') { unstash 'bionic' }
         dir('focal')  { unstash 'focal' }
-        dir('buster') { unstash 'buster' }
+        dir('bullseye') { unstash 'bullseye' }
         dir('arch')   { unstash 'arch'   }
-        dir('mojave') { unstash 'mojave' }
-        sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
+        dir('big_sur') { unstash 'big_sur' }
+        sshagent(['rv-jenkins-github']) {
           sh '''
             git clone 'ssh://github.com/kframework/k.git' k-release
             cd k-release
@@ -525,13 +519,13 @@ pipeline {
             git tag "${K_RELEASE_TAG}" "${release_commit}"
             git push origin "${K_RELEASE_TAG}"
 
-            LOCAL_BOTTLE_NAME=$(find ../mojave -name "kframework--${VERSION}.mojave.bottle*.tar.gz")
-            BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#../mojave/} | sed 's!kframework--!kframework-!')
+            LOCAL_BOTTLE_NAME=$(find ../big_sur -name "kframework--${VERSION}.big_sur.bottle*.tar.gz")
+            BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#../big_sur/} | sed 's!kframework--!kframework-!')
 
             mv ../kframework-${VERSION}-src.tar.gz                      kframework-${VERSION}-src.tar.gz
             mv ../bionic/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_bionic.deb
             mv ../focal/kframework_${VERSION}_amd64.deb                 kframework_${VERSION}_amd64_focal.deb
-            mv ../buster/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_buster.deb
+            mv ../bullseye/kframework_${VERSION}_amd64.deb              kframework_${VERSION}_amd64_bullseye.deb
             mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst   kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
             mv $LOCAL_BOTTLE_NAME                                       $BOTTLE_NAME
 
@@ -542,7 +536,7 @@ pipeline {
                 --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                       \
                 --attach kframework_${VERSION}_amd64_bionic.deb'#Ubuntu Bionic (18.04) Package' \
                 --attach kframework_${VERSION}_amd64_focal.deb'#Ubuntu Focal (20.04) Package'   \
-                --attach kframework_${VERSION}_amd64_buster.deb'#Debian Buster (10) Package'    \
+                --attach kframework_${VERSION}_amd64_bullseye.deb'#Debian Bullseye (11) Package'    \
                 --attach kframework-git-${VERSION}-1-x86_64.pkg.tar.zst'#Arch Package'          \
                 --attach $BOTTLE_NAME'#Mac OS X Homebrew Bottle'                                \
                 --file release.md "${K_RELEASE_TAG}"
@@ -550,7 +544,7 @@ pipeline {
         }
         dir('homebrew-k') {
           git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
-          sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
+          sshagent(['rv-jenkins-github']) {
             sh '''
               git checkout master
               git merge brew-release-$PACKAGE
@@ -567,7 +561,7 @@ pipeline {
         beforeAgent true
       }
       steps {
-        build job: 'rv-devops/master', propagate: false, wait: false                                    \
+        build job: 'DevOps/master', propagate: false, wait: false                                       \
             , parameters: [ booleanParam ( name: 'UPDATE_DEPS'         , value: true                  ) \
                           , string       ( name: 'UPDATE_DEPS_REPO'    , value: 'kframework/k'        ) \
                           , string       ( name: 'UPDATE_DEPS_VERSION' , value: "${env.K_RELEASE_TAG}") \
@@ -588,7 +582,7 @@ pipeline {
       post { failure { slackSend color: '#cb2431' , channel: '#k' , message: "GitHub Pages Deploy Failed: ${env.BUILD_URL}" } }
       steps {
         dir('gh-pages') {
-          sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
+          sshagent(['rv-jenkins-github']) {
             sh '''
               git clone 'ssh://github.com/kframework/k.git' --depth 1 --no-single-branch --branch master --branch gh-pages
               cd k
@@ -626,7 +620,7 @@ pipeline {
       options { skipDefaultCheckout() }
       post { failure { slackSend color: '#cb2431' , channel: '#k' , message: "Failed to trigger Release: ${env.BUILD_URL}" } }
       steps {
-        sshagent(['2b3d8d6b-0855-4b59-864a-6b3ddf9c9d1a']) {
+        sshagent(['rv-jenkins-github']) {
           sh '''
             git clone 'ssh://github.com/kframework/k' k-release
             cd k-release

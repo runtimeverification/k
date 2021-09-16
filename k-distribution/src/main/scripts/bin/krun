@@ -478,7 +478,9 @@ else
       fi
     fi
     indirectName="declaredConfigVar_$name"
+    indirectModuleName="declaredConfigVarModule_$name"
     sortName=${!indirectName}
+    moduleName=${!indirectModuleName:-unset}
     if [ -z "${!parser_name+unset}" ]; then
       if [ "$name" = "PGM" ]; then
         if $hasArgv; then
@@ -486,8 +488,10 @@ else
         else
           parser=(kparse --directory "$dir" --module "$mainModuleName")
         fi
-      else
+      elif [ -z "${!indirectModuleName+unset}" ]; then
         parser=(kparse --sort "$sortName" --directory "$dir" --module "$mainModuleName")
+      else
+        parser=(kparse --sort "$sortName" --directory "$dir" --module "$moduleName")
       fi
     else
       parser=("${!parser_name}")
@@ -537,6 +541,9 @@ if [ "$backendName" = "llvm" ]; then
 
   keepTempsIfDryRun "$tempDir" "$expanded_input_file" "$kore_output"
   if $search; then
+    if [ ! -f "$kompiledDir/search" ] || [ ! -x "$kompiledDir/search" ]; then
+      error 'You must pass --enable-search to kompile to be able to use krun --search with the LLVM backend'
+    fi
     if [ -n "$pattern" ]; then
       error "Backend llvm does not support search patterns yet."
     fi

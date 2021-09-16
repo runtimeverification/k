@@ -1,12 +1,313 @@
 K User Manual
 =============
 
-**Under Construction**
+**NOTE:** The K User Manual is still **under construction**; some features of K
+may have partial or missing documentation.
 
-This document contains documentation that has been written up to some extent
-but still needs to be ultimately included in the K manual which has not been
-written yet. New features of K that affect the surface language should be added
-to this document.
+Introduction
+------------
+
+### Why K?
+
+The K Framework is a programming language and system design toolkit made for
+practioners and researchers alike.
+
+**K For Practioners:**
+*K is a framework for deriving programming languages tools from their semantic
+specifications.*
+
+Typically, programming language tool development follows a similar pattern.
+After a new programming language is designed, separate teams will develop
+separate language tools (e.g. a compiler, interpreter, parser, symbolic
+execution engine, etc). Code reuse is uncommon. The end result is that for each
+new language, the same basic tools and patterns are re-implemented again and
+again.
+
+K approaches the problem differently -- it generates each of these tools from a single language specification.
+The work of programming language design and tool implementation are made separate concerns.
+The end result is that the exercise of
+designing new languages and their associated tooling is now reduced to
+developing a single language specification from which we derive our tooling *for
+free*.
+
+**K For Researchers:**
+*K is a configuration- and rewrite-based executable semantic framework.*
+
+In more detail, K specifications are:
+
+1.   **Executable:** compile into runnable and testable programs;
+2.   **Semantic:** correspond to a logical theory with a sound and relatively
+     complete proof system;
+3.   **Configuration-based:** organize system states into compositional,
+     hierarchical, labelled units called cells;
+4.   **Rewrite-based:** define system transitions using rewrite rules.
+
+K specifications are compiled into particular *matching logic* theories, giving
+them a simple and expressive semantics. K semantic rules are implicitly defined
+over the entire configuration structure, but omit unused cells, enabling a
+highly modular definitional style. Furthermore, K has been used to develop
+programming languages, type systems, and formal analysis tools.
+
+### Manual Objectives
+
+As mentioned in the _Why K?_ section above, the K Framework is designed as a
+collection of language-generic command-line interface (CLI) tools which revolve
+around K specifications. These tools cover a broad range of uses, but they
+typically fall into one of the following categories:
+
+1.  Transforming K Specs (e.g. compilation)
+2.  Running K Specs (e.g. concrete and symbolic execution)
+3.  Analyzing K Specs (e.g. theorem proving)
+
+The main *user-facing* K tools include:
+
+-   `kompile` - the K compiler driver
+-   `kparse` - the stanadlone K parser and abstract syntax tree (AST)
+    transformation tool
+-   `krun` - the K interpreter and symbolic execution engine driver
+-   `kprove` - the K theorem prover
+
+This user manual is designed to be a tool reference.
+In particular, it is not desgined to be a tutorial on how to write K
+specifications or to teach the logical foundations of K. New K users should
+consult our dedicated
+[K tutorial](https://kframework.org/k-distribution/k-tutorial/),
+or the more language-design oriented
+[PL tutorial](https://kframework.org/k-distribution/pl-tutorial/).
+Researchers seeking to learn more about the logic underlying K are encouraged
+to peruse the
+[growing literature on K and matching logic](https://fsl.cs.illinois.edu/projects/pl/index.html).
+We will consider the manual complete when it provides a complete description of
+all user-facing K tools and features.
+
+Introduction to K
+-----------------
+
+Since K specifications are the primary input into the entire system, let us
+take a moment to describe them. At the highest level, K specifications describe
+a programming language or system using three different pieces:
+
+1.  the *system primitives*, the base datatypes used during system operation,
+    e.g., numbers, lists, maps, etc;
+2.  the *system state*, a tuple or record over system primitives which gives a
+    complete snapshot of the system at any given moment;
+3.  the *system behavior*, a set of rules which defines possible system
+    evolutions.
+
+K specifications are then defined by a collection of *sentences* which
+correspond to the three concepts above:
+
+1.  `syntax` declarations encode the *system primitives*;
+2.  `configuration` declarations encode the *system state*;
+3.  `context` and `rule` declarations encode the *system behavior*.
+
+K sentences are then organized into one or *modules* which are stored in one or
+more *files*. In this scheme, files may *require* other files and modules may
+*import* other modules, giving rise to a hierarchy of files and modules. We
+give an intuitive sketch of the two levels of grouping in the diagram below:
+
+```
+   example.k file
+  +=======================+
+  | requires ".." --------|--> File_1
+  | ...                   |
+  | requires ".." --------|--> File_N
+  |                       |
+  |  +-----------------+  |
+  |  | module ..       |  |
+  |  |   imports .. ---|--|--> Module_1
+  |  |   ...           |  |
+  |  |   imports .. ---|--|--> Module_M
+  |  |                 |  |
+  |  |   sentence_1    |  |
+  |  |   ...           |  |
+  |  |   sentence_K    |  |
+  |  | endmodule       |  |
+  |  +-----------------+  |
+  |                       |
+  +=======================+
+```
+
+where:
+
+-   files and modules are denoted by double-bordered and single-borded boxes
+    respectively;
+-   file or module identifiers are denoted by double dots (`..`);
+-   potential repititions are denoted by triple dots (`...`).
+
+In the end, we require that the file and module hierarchies both form a
+directed acyclic graph (DAG). This is, no file may recursively require itself,
+and likewise, no module may recursively import itself.
+
+We now zoom in further to discuss the various kinds of sentences contained in K
+specifications:
+
+1.  sentences that define our *system's primitives*, including:
+
+    -   **sort declarations:** define new categories of primitive datatypes
+    -   **Backus-Naur Form (BNF) grammar declarations:** define the
+        operators that inhabit our primitive datatypes
+    -   **lexical syntax declarations:** define lexemes/tokens for the
+        lexer/tokenizer
+    -   **syntax associativity declarations:** specify the
+        associativity/grouping of our declared operators
+    -   **syntax priority declarations:** specify the priority of
+        potential ambiguous operators
+
+2.  sentences that define our *system's state*, including:
+
+    -   **configuration declarations:** define labelled, hierarchical records
+        using an nested XML-like syntax
+
+3.  sentences that define our *system's behavior*, including:
+
+    -   **context declarations:** describe how primitives and configurations
+        can simplify
+    -   **context alias declarations:** define templates that can generate new
+        contexts
+    -   **rule declarations:** define how the system transitions from one state
+        to the next
+
+### K Process Overview
+
+We now examine how the K tools are generally used. The main input to all of the
+K tools is a K specification. For effieciency reasons, this specification is
+first compiled into an intermediate representation called Kore. Once we have
+obtained this intermediate representation, we can use it to do:
+
+1.  parsing/pretty-printing, i.e., converting a K term, whose syntax is defined
+    by a K specification, into a alternate representation
+2.  concrete and abstract execution of a K specification
+3.  theorem proving, i.e., verifying whether a set of claims about a K
+    specification hold
+
+We represent the overall process using the graphic below:
+
+```
+ K Compilation Process
++============================================================+
+|                     +---------+                            |
+|  K Specification ---| kompile |--> Kore Specification --+  |
+|                     +---------+                         |  |
++=========================================================|==+
+                                                          |
+ K Execution Process                                      |
++=========================================================|==+
+|                                                         |  |
+|             +-------------------------------------------+  |
+|             |                                              |
+|             |       +---------+                            |
+|  K Term ----+-------| kparse  |--> K Term                  |
+|             |       +---------+                            |
+|             |                                              |
+|             |       +---------+                            |
+|  K Term ----+-------|  krun   |--> K Term                  |
+|             |       +---------+                            |
+|             |                                              |
+|             |       +---------+                            |
+|  K Claims --+-------| kprove  |--> K Claims                |
+|                     +---------+                            |
+|                                                            |
++============================================================+
+```
+
+where:
+
+-   process outlines are denoted by boxes with double-lined borders
+-   executables are denoted by boxes with single-lined borders
+-   inputs and outputs are denoted by words attached to lines
+-   K terms typically correspond to *programs* defined in a particular
+    language's syntax (which are either parsed using `kparse` or executed using
+    `krun`)
+-   K claims are a notation for describing *how* certain K programs *should*
+    execute (which are checked by our theorem prover `kprove`)
+
+**K Compilation Process:**
+Let us start with a description of the compilation process. According to the
+above diagram, the compiler driver is called `kompile`. For our purposes, it is
+enough to view the K compilation process as a black box that transforms a K
+specification into a lower-level Kore specification that encodes the same
+information, but that is easier to work with programmatically.
+
+**K Execution Process:**
+We now turn our attention to the K execution process. Abstractly, we can divide
+the K execution process into the following stages:
+
+1.  the kore specification is loaded (which defines a lexer, parser, and
+    unparser among other things)
+2.  the input string is lexed into a token stream
+3.  the token stream is parsed into K terms/claims
+4.  the K term/claims are transformed according the K tool being used (e.g.
+    `kparse`, `krun`, or `kprove`)
+5.  the K term/claims are unparsed into a string form and printed
+
+Note that all of the above steps performed in K execution process are fully
+prescribed by the input K specification. Of course, there are entire languages
+devoted to encoding these various stages proces individually, e.g., `flex` for
+lexers, `bison` for parsers, etc. What K offers is a _consistent_ language to
+package the above concepts in a way that we believe is convenient and practical
+for a wide range of uses.
+
+Module Declaration
+------------------
+
+K modules are declared at the top level of a K file. They begin with the
+`module` keyword and are followed by a **module ID** and an optional set of
+attributes. They continue with zero or more imports and zero or more sentences
+until the `endmodule` keyword is reached.
+
+A module ID consists of an optional `#` at the beginning, followed by one or
+more components separated by hyphens. Each component can contain letters,
+numbers, or underscores.
+
+After the module ID, attributes can be specified in square brackets. See below
+for an (incomplete) list of allowed module attributes.
+
+Following the attributes, a module can contain zero or more **imports**. An
+import consists of the `import` or `imports` keywords followed by a module ID.
+An import tells the compiler that this module should contain all the sentences
+(recursively) contained by the module being imported.
+
+Imports can be **public** or **private**. By default, they are public, which
+means that all the imported syntax can be used by any module that imports the
+module doing the import. However, you can explicitly override the visibility
+of the import with the `public` or `private` keyword immediately prior to the
+module name. A module imported privately does not export its syntax to modules
+that import the module doing the import.
+
+An import statement can also choose to explicitly hide some or all of the
+syntax being imported. If an import's module name is followed by a `.`
+character followed by an attribute name or klabel, then only sentences that
+have that attribute name or productions that have that klabel attribute will
+be imported by that declaration. For example, if I say `imports FOO.bar`, then
+only productions whose klabel attribute is `bar` or whose attribute list
+contains the `bar` attribute will be visible to the importing module. Note that
+all rules, constructors, and sorts declared in that module will still exist
+in the final interpreter.
+
+Following imports, a module can contain zero or more sentences. A sentence can
+be a syntax declaration, a rule, a configuration declaration, a context, a
+claim, or a context alias. Details on each of these can be found in subsequent
+sections.
+
+### `private` attribute
+
+If the module is given the `private` attribute, all of its imports and syntax
+are private by default. Individual pieces of syntax can be made public with
+the `public` attribute, and individual imports can be made public with the
+`public` keyword. See relevant sections on syntax and modules for more details
+on what it means for syntax and imports to be public or private.
+
+### `symbolic` and `concrete` attribute
+
+These attributes may be placed on modules to indicate that they should only
+be used by the Haskell and LLVM backends respectively. If the definition is
+compiled on the opposite backend, they are implicitly removed from the
+definition prior to parsing anywhere they are imported. This can be useful when
+used in limited capacity in order to provide alternate semantics for certain
+features on different backends. It should be used sparingly as it makes it more
+difficult to trust the correctness of your semantics, even in the presence of
+testing.
 
 Syntax Declaration
 ------------------
@@ -537,6 +838,45 @@ automatically. It will also automatically sort associative-commutative
 collections, and flatten the indentation of associative collections, when
 unparsing.
 
+### `public` and `private` attribute
+
+K allows users to declare certain pieces of syntax as either public or private.
+All syntax is public by default. Public syntax can be used from any module that
+imports that piece of syntax. A piece of syntax can be declared private with
+the `private` attribute. This means that that syntax can only be used in the
+module in which it is declared; it is not visible from modules that import
+that module.
+
+You can also change the default visibility of a module with the `private`
+attribute, when it is placed directly on a module. A module with the `private`
+attribute has all syntax `private` by default; this can be overridden on
+specific sentences with the `public` attribute.
+
+Note that the `private` module attribute also changes the default visiblity
+of imports; please refer to the appropriate section elsewhere in the manual
+for more details.
+
+Here is an example usage:
+
+```k
+module WIDGET-SYNTAX
+
+  syntax Widget ::= foo()
+  syntax WidgetHelper ::= bar() [private] // this production is not visible
+                                          // outside this module
+endmodule
+
+module WIDGET [private]
+  imports WIDGET-SYNTAX
+
+  syntax Widget ::= fooImpl() // this production is not visible outside this
+                              // module
+
+  // this production is visible outside this module
+  syntax KItem ::= adjustWidget(Widget) [function, public] 
+endmodule
+```
+
 
 Configuration Declaration
 -------------------------
@@ -953,6 +1293,11 @@ These conditions are in order of decreasing preference: the best option is to
 preserve `#Bottom` on the right-hand side, the next best option is to have an
 `ensures` clause, and the least-preferred option is to have a `requires` clause.
 The most preferred option is to write total functions and avoid the entire issue.
+
+**NOTE**: The Haskell backend does not attempt to prove claims which right-hand
+side is `#Bottom`. The reason for this is that the general case is undecidable,
+and the backend might enter an infinite loop. Therefore, the backend emits a
+warning if it encounters such a claim.
 
 ### `concrete` attribute, `#isConcrete` and `#isVariable` function (Java backend)
 
@@ -2677,6 +3022,156 @@ Using `rbreak <regex>` you can set breakpoints on multiple functions.
 -   `<optimized out>` try kompiling without `-O1`, `-O2`, or `-O3`.
 -   `(gdb) break definition.kore:break -> No source file named definition.kore.`
 send `-ccopt -g` to kompile in order to generate debug info symbols.
+
+
+Attributes Reference
+--------------------
+
+### Attribute Syntax Overview
+
+In K, many different syntactic categories accept _attributes_, an optional
+trailing list of keywords or user-defined identifiers. Attribute lists have two
+different syntaxes, depending on where they occur. Each attribute also has a
+type which describes where it may occur.
+
+The first syntax is a square-bracketed (`[]`) list of words. This syntax is
+available for following attribute types:
+
+1.  `module` attributes - may appear immediately after the `module` keyword
+2.  `sort` attributes - may appear immediately after a sort declaration
+3.  `production` attributes - may appear immediately after a BNF production
+    alternative
+4.  `rule` attributes - may appear immediately after a rule
+5.  `context` attributes - may appear immediately after a context or context
+    alias
+6.  `context alias` attributes - may appear immediately after a context alias
+7.  `claim` attributes - may appear immediately after a claim
+
+The second syntax is the XML attribute syntax, i.e., a space delemited list of
+key-and-quoted-value pairs appearing inside the start tag of an XML element:
+`<element key1="value" key2="value2" ... > </element>`. This syntax is
+available for the following attribute types:
+
+1.  `cell` attributes - may appear inside of the cell start tag in
+    configuration declarations
+
+Note that, currently, *unknown* attributes are *ignored*. Essentially, this
+means that there is no such thing as an *invalid* attribute. When we talk about
+the *type* of an attribute, we mean a syntactic category to which an attribute
+can be attached where the attribute has some semantic effect.
+
+### Attribute Index
+
+We now provide an index of available attributes organized alphabetically with a
+brief description of each. Note that the same attribute may appear in the index
+multiple times to indicate its effect in different contexts or with/without
+arguments. A legend describing how to interpret the index follows.
+
+| Name                  | Type  | Backend | Reference                                                                                                                                       |
+| --------------------- | ----- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `alias-rec`           | rule  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `alias`               | rule  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `all-path`            | claim | haskell | [`all-path` and `one-path` attributes to distinguish reachability claims](#all-path-and-one-path-attributes-to-distinguish-reachability-claims) |
+| `anywhere`            | rule  | all     | [`anywhere` rules](#anywhere-rules)                                                                                                             |
+| `applyPriority(_)`    | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `avoid`               | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `binder`              | prod  | all     | No reference yet.                                                                                                                               |
+| `bracket`             | prod  | all     | [Parametric productions and `bracket` attributes](#parametric-productions-and-bracket-attributes)                                               |
+| `color(_)`            | prod  | all     | [`color` and `colors` attributes](#color-and-colors-attributes)                                                                                 |
+| `colors(_)`           | prod  | all     | [`color` and `colors` attributes](#color-and-colors-attributes)                                                                                 |
+| `concrete`            | mod   | llvm    | [`symbolic` and `concrete` attribute](#symbolic-and-concrete-attribute)                                                                         |
+| `concrete(_)`         | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
+| `concrete`            | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
+| `context(_)`          | alias | all     | [Context aliases](#context-aliases)                                                                                                             |
+| `cool`                | rule  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
+| `exit = ""`           | cell  | all     | [`exit` attribute](#exit-attribute)                                                                                                             |
+| `format`              | prod  | all     | [`format` attribute](#format-attribute)                                                                                                         |
+| `freshGenerator`      | prod  | all     | [`freshGenerator` attribute](#freshgenerator-attribute)                                                                                         |
+| `functional`          | rule  | all     | [`function` and `functional` attributes](#function-and-functional-attributes)                                                                   |
+| `function`            | rule  | all     | [`function` and `functional` attributes](#function-and-functional-attributes)                                                                   |
+| `heat`                | rule  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
+| `hook(_)`             | prod  | all     | No reference yet                                                                                                                                |
+| `hybrid(_)`           | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
+| `hybrid`              | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
+| `klabel(_)`           | all   | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
+| `latex(_)`            | prod  | all     | No reference yet                                                                                                                                |
+| `left`                | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `lemma`               | rule  | all     | [`smt-lemma`, `lemma`, and `trusted` attributes](#smt-lemma-lemma-and-trusted-attributes)                                                       |
+| `locations`           | sort  | all     | [Location Information](#location-information)                                                                                                   |
+| `macro-rec`           | rule  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `macro`               | rule  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `memo`                | rule  | haskell | [The `memo` attribute](#the-memo-attribute)                                                                                                     |
+| `multiplicity = "_"`  | cell  | all     | [Collection Cells: `multiplicity` and `type` attributes](#collection-cells-multiplicity-and-type-attributes)                                    |
+| `non-assoc`           | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `one-path`            | claim | all     | [`all-path` and `one-path` attributes to distinguish reachability claims](#all-path-and-one-path-attributes-to-distinguish-reachability-claims) |
+| `owise`               | rule  | all     | [`owise` and `priority` attributes](#owise-and-priority-attributes)                                                                             |
+| `prec(_)`             | token | all     | [`prec` attribute](#prec-attribute)                                                                                                             |
+| `prefer`              | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `priority(_)`         | rule  | all     | [`owise` and `priority` attributes](#owise-and-priority-attributes)                                                                             |
+| `private`             | mod   | all     | [`private` attribute](#private-attribute)                                                                                                       |
+| `private`             | prod  | all     | [`public` and `private` attribute](#public-and-private-attribute)                                                                               |
+| `public`              | mod   | all     | No reference yet.                                                                                                                               |
+| `public`              | prod  | all     | [`public` and `private` attribute](#public-and-private-attribute)                                                                               |
+| `result(_)`           | ctxt  | all     | [`result` attribute](#result-attribute)                                                                                                         |
+| `result(_)`           | rule  | all     | [`result` attribute](#result-attribute)                                                                                                         |
+| `right`               | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
+| `seqstrict(_)`        | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
+| `seqstrict`           | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
+| `simplification`      | rule  | haskell | [`simplification` attribute (Haskell backend)](#simplification-attribute-haskell-backend)                                                       |
+| `simplification(_)`   | rule  | haskell | [`simplification` attribute (Haskell backend)](#simplification-attribute-haskell-backend)                                                       |
+| `smt-hook(_)`         | prod  | haskell | [SMT Translation](#smt-translation)                                                                                                             |
+| `smt-lemma`           | rule  | all     | [`smt-lemma`, `lemma`, and `trusted` attributes](#smt-lemma-lemma-and-trusted-attributes)                                                       |
+| `smtlib(_)`           | prod  | haskell | [SMT Translation](#smt-translation)                                                                                                             |
+| `strict`              | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
+| `strict(_)`           | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
+| `symbolic`            | mod   | haskell | [`symbolic` and `concrete` attribute](#symbolic-and-concrete-attribute)                                                                         |
+| `symbolic`            | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
+| `symbolic(_)`         | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
+| `symbol`              | prod  | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
+| `token`               | prod  | all     | [`token` attribute](#token-attribute)                                                                                                           |
+| `token`               | sort  | all     | [`token` attribute](#token-attribute)                                                                                                           |
+| `trusted`             | claim | haskell | [`smt-lemma`, `lemma`, and `trusted` attributes](#smt-lemma-lemma-and-trusted-attributes)                                                       |
+| `type = "_"`          | cell  | all     | [Collection Cells: `multiplicity` and `type` attributes](#collection-cells-multiplicity-and-type-attributes)                                    |
+| `unboundVariables(_)` | rule  | all     | [The `unboundVariables` attribute](#the-unboundvariables-attribute)                                                                             |
+| `unused`              | prod  | all     | [`unused` attribute](#unused-attribute)                                                                                                         |
+
+### Internal Attribute Index
+
+Some attributes should not generally appear in user code, except in some
+unusual or complex examples. Such attributes are typically generated by the
+compiler and used internally. We list these attributes below as a reference for
+interested readers:
+
+| Name       | Type | Backend | Reference                                                                             |
+| ---------- | ---- | ------- | ------------------------------------------------------------------------------------- |
+| `assoc`    | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
+| `comm`     | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
+| `idem`     | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
+| `unit`     | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
+| `userList` | prod | all     | No reference yet                                                                      |
+
+### Index Legend
+
+-   `Name` - the attribute's name (optionally followed by an underscore `_` to indicate the attribute takes arguments)
+-   `Type` - the syntactic categories where this attribute is *not* ignored;
+    the possible values are the types mentioned above or shorthands:
+
+    1.  `all` - short for any type except `cell`
+    2.  `mod` - short for `module`
+    3.  `sort`
+    4.  `prod` - short for `production`
+    5.  `rule`
+    6.  `ctxt` - short for `context` or `context alias`
+    7.  `claim`
+    8.  `cell`
+
+-   `Backend` - the backends that do *not* ignore this attribute; possible values:
+
+    1.  `all` - all backends
+    2.  `llvm` - the LLVM backend
+    3.  `haskell` - the Haskell backend
+
+-   `Effect` - the attribute's effect (when it applies)
 
 
 Pending Documentation
