@@ -266,7 +266,6 @@ def uselessVarsToDots(kast, requires = None, ensures = None):
     -   Input: kast term, and a requires clause and ensures clause.
     -   Output: kast term with the useless vars structurally abstracted.
     """
-
     numOccurances = {}
     def _getNumOccurances(_kast):
         if isKVariable(_kast):
@@ -294,6 +293,18 @@ def uselessVarsToDots(kast, requires = None, ensures = None):
         return _kast
 
     return traverseBottomUp(kast, _collapseUselessVars)
+
+def labelsToDots(kast, cell_list):
+    """Abstract specific labels for printing.
+
+    -   Input: kast term, and list of labels to abstract.
+    -   Output: kast term with those labels abstracted.
+    """
+    def _labelstoDots(k):
+        if isKApply(k) and isCellKLabel(k['label']) and k['label'] in cell_list:
+            return ktokenDots
+        return k
+    return traverseBottomUp(kast, _labelstoDots)
 
 def onAttributes(kast, effect):
     if isKAs(kast):
@@ -327,7 +338,7 @@ def onAttributes(kast, effect):
         return KDefinition(kast['mainModule'], modules, requires = requires, att = effect(kast['att']))
     _fatal('No attributes for: ' + kast['node'] + '.')
 
-def minimizeTerm(term, requires = None, ensures = None):
+def minimizeTerm(term, requires = None, ensures = None, abstractLabels = []):
     """Minimize a K term for pretty-printing.
 
     -   Input: kast term, and optionally requires and ensures clauses with constraints.
@@ -339,6 +350,7 @@ def minimizeTerm(term, requires = None, ensures = None):
     term = inlineCellMaps(term)
     term = removeSemanticCasts(term)
     term = uselessVarsToDots(term, requires = requires, ensures = ensures)
+    term = labelsToDots(term, abstractLabels)
     term = collapseDots(term)
     return term
 

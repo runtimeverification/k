@@ -41,6 +41,7 @@ coverageArgs.add_argument('-o', '--output', type = argparse.FileType('w'), defau
 minimizeArgs = pykCommandParsers.add_parser('minimize', help = 'Output the minimized K term.')
 minimizeArgs.add_argument('json-term', type = argparse.FileType('r'), help = 'JSON representation of term to minimize.')
 minimizeArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
+minimizeArgs.add_argument('--omit-labels', default = '', nargs = '?')
 
 def definitionDir(kompiledDir):
     return path.dirname(path.abspath(kompiledDir))
@@ -83,9 +84,12 @@ if __name__ == '__main__':
     elif args['command'] == 'minimize':
         json_definition = readKastTerm(kompiled_dir + '/compiled.json')
         symbolTable = buildSymbolTable(json_definition, opinionated = True)
-        json_term = json.loads(args['json-term'].read())
-        minimizedTerm = minimizeTerm(json_term['term'])
-        args['output'].write(prettyPrintKast(minimizedTerm, symbolTable))
+        json_term = json.loads(args['json-term'].read())['term']
+        minimized_disjuncts = [minimizeTerm(t, abstractLabels = [] if args['omit_labels'] is None else args['omit_labels'].split(',')) for t in flattenLabel('#Or', json_term)]
+        new_disjunct = minimized_disjuncts[0]
+        for d in minimized_disjuncts[1:]:
+            new_disjunct = KApply('#Or', [new_disjunct, d])
+        args['output'].write(prettyPrintKast(new_disjunct, symbolTable))
 
     args['output'].flush()
 
