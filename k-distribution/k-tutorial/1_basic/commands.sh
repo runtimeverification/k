@@ -59,4 +59,5 @@ kompile 19_debugging/README.md --md-selector "k & ! exclude" --main-module LESSO
 kompile 19_debugging/README.md --md-selector "k & ! exclude" --main-module LESSON-19-B --syntax-module LESSON-19-B -d build/19b
 kompile 19_debugging/README.md --md-selector "k & ! exclude" --main-module LESSON-19-C --syntax-module LESSON-19-C -d build/19c
 kompile 19_debugging/README.md --md-selector "k & ! exclude" --main-module LESSON-19-D --syntax-module LESSON-19-D -d build/19d
-kompile 20_backends/README.md --md-selector "k & ! exclude" --main-module LESSON-20 --syntax-module LESSON-20 -d build/20
+kompile 20_backends/README.md --backend haskell --md-selector "k & ! exclude" --main-module LESSON-20 --syntax-module LESSON-20 -d build/20
+kompile 21_symbolic_execution/README.md --backend haskell --md-selector "k & ! exclude" --main-module LESSON-21 --syntax-module LESSON-21 -d build/21
