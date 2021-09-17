@@ -284,7 +284,7 @@ def buildSymbolTable(definition, opinionated = False):
 
     if opinionated:
         symbolTable [ '#And' ] = lambda c1, c2: c1 + '\n#And ' + c2
-        symbolTable [ '#Or'  ] = lambda c1, c2: indent(c1, size = 4) + '\n#Or '  + indent(c2, size = 4)
+        symbolTable [ '#Or'  ] = lambda c1, c2: c1 + '\n#Or\n'  + indent(c2, size = 4)
 
     return symbolTable
 
