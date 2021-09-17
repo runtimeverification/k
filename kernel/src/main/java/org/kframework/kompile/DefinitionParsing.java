@@ -645,15 +645,11 @@ public class DefinitionParsing {
             try {
                 List<Tuple2<String, String>> msgs = new ArrayList<>();
                 for (File f : files.resolveTemp(".").listFiles()) {
-                    if (f.getName().matches("timing[0-9]+\\.log")) {
+                    if (f.getName().matches("timing.+\\.log")) {
                         BufferedReader br = new BufferedReader(new FileReader(f));
-                        while (true) {
-                            String path = br.readLine();
-                            if (path == null)
-                                break;
-                            String msg = br.readLine();
-                            msgs.add(Tuple2.apply(path, msg));
-                        }
+                        String path = br.readLine();
+                        String msg = br.readLine();
+                        msgs.add(Tuple2.apply(path, msg));
                     }
                 }
                 msgs.sort(Comparator.comparing(Tuple2::_1));
