@@ -100,7 +100,7 @@ public class KProve {
     private void saveFullDefinition(Definition fullDefinition) {
         CompiledDefinition fullCompiledDefinition = new CompiledDefinition(
                 compiledDefinition.kompileOptions, kproveOptions.outerParsing,
-                globalOptions,
+                kproveOptions.innerParsing, globalOptions,
                 fullDefinition, fullDefinition,
                 files, kem, compiledDefinition.topCellInitializer);
         Path proveKompiledDir = Paths.get(kproveOptions.saveProofDefinitionTo).resolve("prove-spec-kompiled");

@@ -44,6 +44,7 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.options.InnerParsingOptions;
 import org.kframework.utils.options.OuterParsingOptions;
 import scala.Option;
 import scala.Tuple2;
@@ -100,11 +101,13 @@ public class DefinitionParsing {
     private final boolean isStrict;
     private final boolean profileRules;
     private final List<File> lookupDirectories;
+    private final InnerParsingOptions innerParsingOptions;
 
     public DefinitionParsing(
             List<File> lookupDirectories,
             KompileOptions options,
             OuterParsingOptions outerParsingOptions,
+            InnerParsingOptions innerParsingOptions,
             GlobalOptions globalOptions,
             KExceptionManager kem,
             FileUtil files,
@@ -116,6 +119,7 @@ public class DefinitionParsing {
         this.options = options;
         this.globalOptions = globalOptions;
         this.outerParsingOptions = outerParsingOptions;
+        this.innerParsingOptions = innerParsingOptions;
         this.kem = kem;
         this.files = files;
         this.parser = parser;
@@ -125,7 +129,7 @@ public class DefinitionParsing {
         this.kore = options.isKore();
         this.loader = new BinaryLoader(this.kem);
         this.isStrict = options.strict();
-        this.profileRules = outerParsingOptions.profileRules != null;
+        this.profileRules = innerParsingOptions.profileRules != null;
         this.sw = sw;
     }
 
@@ -641,7 +645,7 @@ public class DefinitionParsing {
     // 2. the printable part which contains the timing information
     // The comparable part is used to sort each entry to provide a stable output.
     private void saveTimings() {
-        if (outerParsingOptions.profileRules != null) {
+        if (innerParsingOptions.profileRules != null) {
             try {
                 List<Tuple2<String, String>> msgs = new ArrayList<>();
                 for (File f : files.resolveTemp(".").listFiles()) {
@@ -653,7 +657,7 @@ public class DefinitionParsing {
                     }
                 }
                 msgs.sort(Comparator.comparing(Tuple2::_1));
-                FileUtil.save(new File(outerParsingOptions.profileRules),
+                FileUtil.save(new File(innerParsingOptions.profileRules),
                         msgs.stream().map(Tuple2::_2).collect(Collectors.joining("\n")));
             } catch (IOException e) {
                 throw KEMException.internalError("Failed to open timing.log", e);

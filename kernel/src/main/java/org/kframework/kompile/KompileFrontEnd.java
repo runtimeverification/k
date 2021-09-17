@@ -17,6 +17,7 @@ import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
+import org.kframework.utils.options.InnerParsingOptions;
 import org.kframework.utils.options.OuterParsingOptions;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ public class KompileFrontEnd extends FrontEnd {
 
     private final KompileOptions options;
     private final OuterParsingOptions outerOptions;
+    private final InnerParsingOptions innerOptions;
     private final Provider<Backend> koreBackend;
     private final Stopwatch sw;
     private final KExceptionManager kem;
@@ -45,6 +47,7 @@ public class KompileFrontEnd extends FrontEnd {
     KompileFrontEnd(
             KompileOptions options,
             OuterParsingOptions outerOptions,
+            InnerParsingOptions innerOptions,
             GlobalOptions globalOptions,
             @Usage String usage,
             Provider<Backend> koreBackend,
@@ -56,6 +59,7 @@ public class KompileFrontEnd extends FrontEnd {
         super(kem, globalOptions, usage, jarInfo, files);
         this.options = options;
         this.outerOptions = outerOptions;
+        this.innerOptions = innerOptions;
         this.koreBackend = koreBackend;
         this.sw = sw;
         this.kem = kem;
@@ -70,7 +74,7 @@ public class KompileFrontEnd extends FrontEnd {
                     outerOptions.mainDefinitionFile(files.get()).getAbsolutePath());
         }
 
-        Kompile kompile = new Kompile(options, outerOptions, globalOptions, files.get(), kem, sw, outerOptions.profileRules == null);
+        Kompile kompile = new Kompile(options, outerOptions, innerOptions, globalOptions, files.get(), kem, sw, innerOptions.profileRules == null);
         Backend backend = koreBackend.get();
         CompiledDefinition def = kompile.run(outerOptions.mainDefinitionFile(files.get()), options.mainModule(files.get()), options.syntaxModule(files.get()), backend.steps(), backend.excludedModuleTags());
         kompile = null;
