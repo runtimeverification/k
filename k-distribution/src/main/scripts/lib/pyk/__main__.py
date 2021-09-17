@@ -85,10 +85,14 @@ if __name__ == '__main__':
         json_definition = readKastTerm(kompiled_dir + '/compiled.json')
         symbolTable = buildSymbolTable(json_definition, opinionated = True)
         json_term = json.loads(args['json-term'].read())['term']
-        minimized_disjuncts = [minimizeTerm(t, abstractLabels = [] if args['omit_labels'] is None else args['omit_labels'].split(',')) for t in flattenLabel('#Or', json_term)]
-        new_disjunct = minimized_disjuncts[0]
-        for d in minimized_disjuncts[1:]:
-            new_disjunct = KApply('#Or', [new_disjunct, d])
+        abstractLabels = [] if args['omit_labels'] is None else args['omit_labels'].split(',')
+        minimized_disjuncts = []
+        for d in flattenLabel('#Or', json_term):
+            dMinimized = minimizeTerm(d, abstractLabels = abstractLabels)
+            (dConfig, dConstraint) = splitConfigAndConstraints(dMinimized)
+            minimized_disjuncts.append(KApply('#And', [dConfig, dConstraint]))
+        sorted_disjunct = buildAssoc(KConstant('#Bottom'), '#Or', minimized_disjuncts)
+        new_disjunct = propogateUpConstraints(sorted_disjunct)
         args['output'].write(prettyPrintKast(new_disjunct, symbolTable))
 
     args['output'].flush()

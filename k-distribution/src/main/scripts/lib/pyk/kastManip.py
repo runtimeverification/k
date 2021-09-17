@@ -6,6 +6,18 @@ import subprocess
 from .kast import *
 from .kast import _notif, _warning, _fatal
 
+def buildAssoc(base, join, l):
+    """Build an associative binary operator term given the join and unit ops.
+
+    -   Input: unit, join, and list of elements to join.
+    -   Output: cons-list style construction of the joined term.
+    """
+    if len(l) == 0:
+        return base
+    if len(l) == 1:
+        return l[0]
+    return KApply(join, [l[0], buildAssoc(base, join, l[1:])])
+
 def match(pattern, kast):
     subst = {}
     if isKVariable(pattern):
@@ -170,6 +182,63 @@ def flattenLabel(label, kast):
         constraints = [ flattenLabel(label, arg) for arg in kast["args"] ]
         return [ c for cs in constraints for c in cs ]
     return [kast]
+
+def splitConfigAndConstraints(kast):
+    """Split the configuration/term from the constraints.
+
+    -   Input: kast conjunct representing a constrained term.
+    -   Output: tuple of term and constraint.
+    """
+    conjuncts = flattenLabel('#And', kast)
+    term = None
+    constraints = []
+    for c in conjuncts:
+        if isKApply(c) and c['label'] == '<generatedTop>':
+            term = c
+        else:
+            constraints.append(c)
+    constraint = buildAssoc(KConstant('#Top'), '#And', constraints)
+    return (term, constraint)
+
+def findCommonItems(l1, l2):
+    common = []
+    for i in l1:
+        if i in l2:
+            common.append(i)
+    newL1 = []
+    newL2 = []
+    for i in l1:
+        if not i in common:
+            newL1.append(i)
+    for i in l2:
+        if not i in common:
+            newL2.append(i)
+    return (common, newL1, newL2)
+
+def propogateUpConstraints(k):
+    """Try to propogate common constraints up disjuncts.
+
+    -   Input: kast disjunct of constrained terms (conjuncts).
+    -   Output: kast where common constraints in the disjunct have been propogated up.
+    """
+    def _propogateUpConstraints(_k):
+        pattern = KApply('#Or', [KApply('#And', [KVariable('G1'), KVariable('C1')]), KApply('#And', [KVariable('G2'), KVariable('C2')])])
+        pmatch = match(pattern, _k)
+        if pmatch is None:
+            return _k
+        (common1, l1, r1) = findCommonItems(flattenLabel('#And', pmatch['C1']), flattenLabel('#And', pmatch['C2']))
+        (common2, r2, l2) = findCommonItems(r1, l1)
+        common = common1 + common2
+        if len(common) == 0:
+            return _k
+        g1 = pmatch['G1']
+        if len(l2) > 0:
+            g1 = buildAssoc(KConstant('#Top'), '#And', [g1] + l2)
+        g2 = pmatch['G2']
+        if len(r2) > 0:
+            g2 = buildAssoc(KConstant('#Top'), '#And', [g2] + r2)
+        return KApply('#And', [KApply('#Or', [g1, g2]), buildAssoc(KConstant('#Top'), '#And', common)])
+    return traverseBottomUp(k, _propogateUpConstraints)
 
 def splitConfigFrom(configuration):
     """Split the substitution from a given configuration.
