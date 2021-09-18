@@ -363,14 +363,14 @@ def uselessVarsToDots(kast, requires = None, ensures = None):
 
     return traverseBottomUp(kast, _collapseUselessVars)
 
-def labelsToDots(kast, cell_list):
+def labelsToDots(kast, labels):
     """Abstract specific labels for printing.
 
     -   Input: kast term, and list of labels to abstract.
     -   Output: kast term with those labels abstracted.
     """
     def _labelstoDots(k):
-        if isKApply(k) and isCellKLabel(k['label']) and k['label'] in cell_list:
+        if isKApply(k) and isCellKLabel(k['label']) and k['label'] in labels:
             return ktokenDots
         return k
     return traverseBottomUp(kast, _labelstoDots)
