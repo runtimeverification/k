@@ -930,7 +930,7 @@ You can:
 ```k
   syntax Int ::= "~Int" Int                     [function, klabel(~Int_), symbol, functional, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(INT.not), smtlib(notInt)]
                > left:
-                 Int "^Int" Int                 [function, klabel(_^Int_), symbol, left, smt-hook(^), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
+                 Int "^Int" Int                 [function, klabel(_^Int_), symbol, left, smt-hook((to_int (^ #1 #2))), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
                | Int "^%Int" Int Int            [function, klabel(_^%Int__), symbol, left, smt-hook((mod (^ #1 #2) #3)), hook(INT.powmod)]
                > left:
                  Int "*Int" Int                 [function, functional, klabel(_*Int_), symbol, left, smt-hook(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
@@ -1054,6 +1054,8 @@ module INT-SYMBOLIC [symbolic]
 
   rule X modInt N => X requires 0 <=Int X andBool X <Int N [simplification]
   rule X   %Int N => X requires 0 <=Int X andBool X <Int N [simplification]
+
+  rule X ^Int N => 0 requires N <Int 0 [simplification]
 
   // Bit-shifts
   rule X <<Int 0 => X [simplification]
