@@ -930,7 +930,7 @@ You can:
 ```k
   syntax Int ::= "~Int" Int                     [function, klabel(~Int_), symbol, functional, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(INT.not), smtlib(notInt)]
                > left:
-                 Int "^Int" Int                 [function, klabel(_^Int_), symbol, left, smt-hook((to_int (^ #1 #2))), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
+                 Int "^Int" Int                 [function, klabel(_^Int_), symbol, left, smt-hook((ite (< #2 0) 0 (to_int (^ #1 #2)))), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
                | Int "^%Int" Int Int            [function, klabel(_^%Int__), symbol, left, smt-hook((mod (^ #1 #2) #3)), hook(INT.powmod)]
                > left:
                  Int "*Int" Int                 [function, functional, klabel(_*Int_), symbol, left, smt-hook(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
