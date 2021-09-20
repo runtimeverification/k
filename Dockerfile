@@ -3,7 +3,7 @@ FROM ubuntu:bionic
 RUN    apt-get update        \
     && apt-get install --yes \
         bison                \
-        clang-8              \
+        clang-10             \
         cmake                \
         curl                 \
         debhelper            \
@@ -16,8 +16,8 @@ RUN    apt-get update        \
         libmpfr-dev          \
         libyaml-dev          \
         libz3-dev            \
-        lld-8                \
-        llvm-8-tools         \
+        lld-10               \
+        llvm-10-tools        \
         maven                \
         opam                 \
         openjdk-11-jdk       \
