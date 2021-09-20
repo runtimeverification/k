@@ -7,10 +7,9 @@
         <env>
           t1 |-> 1
           x |-> 0
-          t2 |-> 3
         </env>
         <id>
-          4
+          2
         </id>
       </thread> <thread>
         <k>
@@ -31,16 +30,17 @@
         <env>
           t1 |-> 1
           x |-> 0
+          t2 |-> 3
         </env>
         <id>
-          2
+          4
         </id>
       </thread>
     </threads>
     <store>
       3 |-> 4
-      0 |-> 11
       1 |-> 2
+      0 |-> 11
     </store>
     <input>
       ListItem ( #buffer ( "" ~> . ) )
@@ -63,10 +63,9 @@
         <env>
           t1 |-> 1
           x |-> 0
-          t2 |-> 3
         </env>
         <id>
-          4
+          2
         </id>
       </thread> <thread>
         <k>
@@ -87,16 +86,17 @@
         <env>
           t1 |-> 1
           x |-> 0
+          t2 |-> 3
         </env>
         <id>
-          2
+          4
         </id>
       </thread>
     </threads>
     <store>
       3 |-> 4
-      0 |-> 16
       1 |-> 2
+      0 |-> 16
     </store>
     <input>
       ListItem ( #buffer ( "" ~> . ) )
@@ -119,10 +119,9 @@
         <env>
           t1 |-> 1
           x |-> 0
-          t2 |-> 3
         </env>
         <id>
-          4
+          2
         </id>
       </thread> <thread>
         <k>
@@ -143,16 +142,17 @@
         <env>
           t1 |-> 1
           x |-> 0
+          t2 |-> 3
         </env>
         <id>
-          2
+          4
         </id>
       </thread>
     </threads>
     <store>
       3 |-> 4
-      0 |-> 21
       1 |-> 2
+      0 |-> 21
     </store>
     <input>
       ListItem ( #buffer ( "" ~> . ) )
@@ -175,10 +175,9 @@
         <env>
           t1 |-> 1
           x |-> 0
-          t2 |-> 3
         </env>
         <id>
-          4
+          2
         </id>
       </thread> <thread>
         <k>
@@ -199,16 +198,17 @@
         <env>
           t1 |-> 1
           x |-> 0
+          t2 |-> 3
         </env>
         <id>
-          2
+          4
         </id>
       </thread>
     </threads>
     <store>
       3 |-> 4
-      0 |-> 33
       1 |-> 2
+      0 |-> 33
     </store>
     <input>
       ListItem ( #buffer ( "" ~> . ) )
