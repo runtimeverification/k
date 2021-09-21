@@ -2102,7 +2102,7 @@ Meta operations
 
 Provided below are a few miscellaneous, mostly deprecated functions in K.
 It is not recommended to use any of them directly as they are largely
-unsupported in modern K. There are two exceptions:
+unsupported in modern K. There are three exceptions:
 
 * `#getenv` - Returns the value of an environment variable
 * `#parseKORE` - Takes a String containing a K intermediate representation of
@@ -2110,6 +2110,8 @@ unsupported in modern K. There are two exceptions:
   This is NOT type-safe. The responsibility is on the user to ensure that the
   string they provide is a valid representation of a term of the sort *exactly*
   equal to the sort where the function appears.
+* `#kompiledDirectory` - Returns the path to the current compiled K definition
+  directory.
 
 ```k
 module K-REFLECTION
@@ -2123,6 +2125,8 @@ module K-REFLECTION
   syntax KItem ::= getKLabel(K)  [function, hook(KREFLECTION.getKLabel)]
 
   syntax K ::= #getenv(String) [function, impure, hook(KREFLECTION.getenv)]
+
+  syntax String ::= #kompiledDirectory() [function, hook(KREFLECTION.kompiledDir)]
 
   // meaningful only for the purposes of compilation to a binary, otherwise
   // undefined
