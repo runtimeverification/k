@@ -364,12 +364,13 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
   }
 
   def checkTokenSorts () = {
-    val localTokens = localProductions
-      .collect({ case p if p.att.contains("token") => p })
+    val localTokens = productions
+      .filter(p => p.att.contains("token"))
       .groupBy(_.sort)
-      .map { case (s, ps) => (s, ps) }
     // Token sorts should only contain productions with function or token labels. Any other label is incorrect.
-    val nontokens = productions.filter(p => !p.att.contains("function") && !p.att.contains("token"))
+    val excluded = Set("KLabel", "KBott")
+    val nontokens = localProductions.filter(p => !p.att.contains("function") && !p.att.contains("token") && !p.sort.name.startsWith("#") &&
+    !excluded.contains(p.sort.name))
     val conflicts = nontokens.filter(p => localTokens.contains(p.sort))
     conflicts foreach {
       case p: Production => throw KEMException.compilerError(
