@@ -41,7 +41,7 @@ public class KompileOptions implements Serializable {
     public transient OuterParsingOptions outerParsing = new OuterParsingOptions();
 
     @ParametersDelegate
-    public InnerParsingOptions innerParsing = new InnerParsingOptions();
+    public transient InnerParsingOptions innerParsing = new InnerParsingOptions();
 
     @ParametersDelegate
     public OutputDirectoryOptions outputDirectory = new OutputDirectoryOptions();

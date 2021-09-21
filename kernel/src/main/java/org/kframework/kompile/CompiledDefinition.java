@@ -51,9 +51,9 @@ import static org.kframework.kore.KORE.*;
 
 public class CompiledDefinition implements Serializable {
     public final KompileOptions kompileOptions;
-    private transient final OuterParsingOptions outerParsingOptions;
+    private final OuterParsingOptions outerParsingOptions;
     private transient final GlobalOptions globalOptions;
-    private transient final InnerParsingOptions innerParsingOptions;
+    private final InnerParsingOptions innerParsingOptions;
     private final Definition parsedDefinition;
     public final Definition kompiledDefinition;
     public final Sort programStartSymbol;

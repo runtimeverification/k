@@ -7,6 +7,7 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.unparser.PrintOptions;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.DefinitionLoadingOptions;
+import org.kframework.utils.options.InnerParsingOptions;
 import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
 
@@ -17,6 +18,9 @@ public final class KEqOptions {
 
     @ParametersDelegate
     public transient OuterParsingOptions outer = new OuterParsingOptions();
+
+    @ParametersDelegate
+    public transient InnerParsingOptions inner = new InnerParsingOptions();
 
     @ParametersDelegate
     public DefinitionLoadingOptions definitionLoading = new DefinitionLoadingOptions();
