@@ -363,6 +363,21 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     case _ =>
   }
 
+  def checkTokenSorts () = {
+    val localTokens = localProductions
+      .collect({ case p if p.att.contains("token") => p })
+      .groupBy(_.sort)
+      .map { case (s, ps) => (s, ps) }
+    // Token sorts should only contain productions with function or token labels. Any other label is incorrect.
+    val nontokens = productions.filter(p => !p.att.contains("function") && !p.att.contains("token"))
+    val conflicts = nontokens.filter(p => localTokens.contains(p.sort))
+    conflicts foreach {
+      case p: Production => throw KEMException.compilerError(
+        "Sort "+ p.sort.name + " was declared as a token. Productions of this sort can only contain [function] or [token] labels.", p)
+      case _ =>
+    }
+  }
+
   lazy val recordProjections = productions.flatMap(p => p.nonterminals.filter(_.name.isDefined).map(nt => "project:" ++ p.klabel.get.name ++ ":" ++ nt.name.get))
   lazy val semanticCasts = allSorts.map("#SemanticCastTo" + _)
   lazy val sortProjections = allSorts.map("project:" + _)
