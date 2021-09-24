@@ -2,6 +2,7 @@
 package org.kframework.parser.inner;
 
 import com.google.common.collect.Sets;
+import org.apache.commons.io.FileUtils;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
@@ -26,10 +27,12 @@ import scala.util.Left;
 import scala.util.Right;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Queue;
 import java.util.Set;
@@ -85,13 +88,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
         this.isBison = isBison;
         this.forGlobalScanner = forGlobalScanner;
         this.files = files;
-        if (profileRules) {
-            try {
-                timing = new BufferedWriter(new FileWriter(files.resolveKompiled("timing" + Thread.currentThread().getId() + ".log"), true));
-            } catch (IOException e) {
-                throw KEMException.internalError("Failed to open timing.log", e);
-            }
-        }
     }
 
     /**
@@ -208,8 +204,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
         return new Tuple2<>(parseInfo, result._2());
     }
 
-    private Writer timing;
-
     /**
      * Parse the given input. This function is private because the final disambiguation
      * in {@link AmbFilter} eliminates ambiguities that will be equivalent only after
@@ -228,10 +222,8 @@ public class ParseInModule implements Serializable, AutoCloseable {
             parseStringTerm(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
         scanner = getGrammar(scanner);
 
-        long start = 0;
-        if (profileRules) {
-            start = System.nanoTime();
-        }
+        long start, endParse = 0, startTypeInf = 0, endTypeInf = 0;
+        start = profileRules ? System.currentTimeMillis() : 0;
 
         try {
             Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol.toString());
@@ -248,6 +240,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
             } catch (KEMException e) {
                 return Tuple2.apply(Left.apply(Collections.singleton(e)), Collections.emptySet());
             }
+            endParse = profileRules ? System.currentTimeMillis() : 0;
 
             Either<Set<KEMException>, Term> rez = new TreeCleanerVisitor().apply(parsed);
             if (rez.isLeft())
@@ -272,6 +265,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
                 return new Tuple2<>(rez, warn);
             Term rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez.right().get());
             rez3 = new PushTopAmbiguityUp().apply(rez3);
+            startTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
             TypeInferencer currentInferencer = inferencer.get();
             if (currentInferencer == null) {
@@ -279,6 +273,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
                 inferencer.set(currentInferencer);
                 inferencers.add(currentInferencer);
             }
+            endTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
             rez = new TypeInferenceVisitor(currentInferencer, startSymbol, strict && inferSortChecks, true, isAnywhere).apply(rez3);
             if (rez.isLeft())
@@ -300,19 +295,14 @@ public class ParseInModule implements Serializable, AutoCloseable {
             return new Tuple2<>(Right.apply(rez3), warn);
         } finally {
             if (profileRules) {
-                long stop = System.nanoTime();
                 try {
-                    Writer t = timing;
-                    synchronized(t) {
-                        t.write(source.toString());
-                        t.write(':');
-                        t.write(Integer.toString(startLine));
-                        t.write(':');
-                        t.write(Integer.toString(startColumn));
-                        t.write(' ');
-                        t.write(Double.toString((stop - start) / 1000000000.0));
-                        t.write('\n');
-                    }
+                    long stop = System.currentTimeMillis();
+                    long totalTime = stop - start;
+                    long parseTime = endParse - start;
+                    long tiTime = endTypeInf - startTypeInf;
+                    File f = File.createTempFile("timing", ".log", files.resolveTemp(""));
+                    FileUtils.writeStringToFile(f, String.format("%s:%d\n%5d %s:%d   parse:%4d typeInf:%4d",
+                            source.source(), startLine, totalTime, source.source(), startLine, parseTime, tiTime), StandardCharsets.UTF_8);
                 } catch (IOException e) {
                   throw KEMException.internalError("Could not write to timing.log", e);
                 }
@@ -328,16 +318,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
             inferencer.close();
         }
         inferencers.clear();
-        Writer t = timing;
-        if (t != null) {
-            synchronized(t) {
-                try {
-                    t.close();
-                } catch (IOException e) {
-                    throw KEMException.internalError("Could not close timing.log", e);
-                }
-            }
-        }
     }
 
     public static Term disambiguateForUnparse(Module mod, Term ambiguity) {

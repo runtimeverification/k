@@ -1259,12 +1259,14 @@ You can:
 * Compute the absolute value `absFloat` of a float.
 * Round a floating-point number to a specified precision and exponent
   range (`roundFloat`). The resulting `Float` will yield the specified values
-  when calling `precisionFloat and `exponentBitsFloat` and when performing
+  when calling `precisionFloat` and `exponentBitsFloat` and when performing
   further computation.
 * Round a float to the next lowest floating-point value which is an integer
   (`floorFloat`).
 * Round a float to the next highest floating-point value which is an integer
   (`ceilFloat`).
+* Round a float to the next closest floating-point value which is an integer, in
+  the direction of zero (`truncFloat`).
 * Compute the natural exponential `expFloat` of a float (i.e. e^x).
 * Compute the natural logarithm `logFloat` of a float.
 * Compute the sine `sinFloat` of a float.
@@ -1288,6 +1290,7 @@ You can:
                  | roundFloat(Float, precision: Int, exponentBits: Int)  [function, hook(FLOAT.round)]
                  | floorFloat(Float)            [function, functional, hook(FLOAT.floor)]
                  | ceilFloat(Float)             [function, functional, hook(FLOAT.ceil)]
+                 | truncFloat(Float)            [function, functional, hook(FLOAT.trunc)]
                  | expFloat(Float)              [function, functional, hook(FLOAT.exp)]
                  | logFloat(Float)              [function, hook(FLOAT.log)]
                  | sinFloat(Float)              [function, functional, hook(FLOAT.sin)]
