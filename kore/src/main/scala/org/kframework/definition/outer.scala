@@ -376,6 +376,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
 trait HasAtt {
   val att: Att
+  def isMacro: Boolean = att.contains(Att.MACRO) || att.contains(Att.MACRO_REC) || att.contains(Att.ALIAS) || att.contains(Att.ALIAS_REC)
 }
 
 trait Sentence extends HasLocation with HasAtt with AttValue {
