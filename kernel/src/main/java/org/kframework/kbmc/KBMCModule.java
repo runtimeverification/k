@@ -15,6 +15,7 @@ import org.kframework.utils.inject.Options;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BackendOptions;
 import org.kframework.utils.options.DefinitionLoadingOptions;
+import org.kframework.utils.options.InnerParsingOptions;
 import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
 
@@ -36,6 +37,9 @@ public class KBMCModule extends AbstractModule {
 
     @Provides @RequestScoped
     OuterParsingOptions outerParsingOptions(KBMCOptions options) { return options.outer; }
+
+    @Provides @RequestScoped
+    InnerParsingOptions innerParsingOptions(KBMCOptions options) { return options.inner; }
 
     @Provides @RequestScoped
     PrintOptions printOptions(KBMCOptions options) {
