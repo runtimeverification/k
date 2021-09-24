@@ -9,6 +9,7 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
+import org.kframework.utils.options.InnerParsingOptions;
 import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.OutputDirectoryOptions;
 import org.kframework.utils.options.SMTOptions;
@@ -38,6 +39,9 @@ public class KompileOptions implements Serializable {
 
     @ParametersDelegate
     public transient OuterParsingOptions outerParsing = new OuterParsingOptions();
+
+    @ParametersDelegate
+    public transient InnerParsingOptions innerParsing = new InnerParsingOptions();
 
     @ParametersDelegate
     public OutputDirectoryOptions outputDirectory = new OutputDirectoryOptions();
@@ -80,9 +84,6 @@ public class KompileOptions implements Serializable {
 
     @Parameter(names="--coverage", description="Generate coverage data when executing semantics.")
     public boolean coverage;
-
-    @Parameter(names="--profile-rule-parsing", description="Generate time in seconds to parse each rule in the semantics. Found in -kompiled directory under timing.log.")
-    public boolean profileRules;
 
     @Parameter(names="--hook-namespaces", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of namespaces to include in the hooks defined in the definition")
     public List<String> hookNamespaces = Collections.emptyList();

@@ -43,6 +43,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 
+import org.kframework.utils.options.InnerParsingOptions;
 import org.kframework.utils.options.OuterParsingOptions;
 import scala.collection.JavaConverters;
 import scala.Function1;
@@ -87,23 +88,25 @@ public class Kompile {
     private final Stopwatch sw;
     private final DefinitionParsing definitionParsing;
     private final OuterParsingOptions outerParsingOptions;
+    private final InnerParsingOptions innerParsingOptions;
     java.util.Set<KEMException> errors;
 
-    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, boolean cacheParses) {
-        this(kompileOptions, outerParsingOptions, globalOptions, files, kem, new Stopwatch(globalOptions), cacheParses);
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, InnerParsingOptions innerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, boolean cacheParses) {
+        this(kompileOptions, outerParsingOptions, innerParsingOptions, globalOptions, files, kem, new Stopwatch(globalOptions), cacheParses);
     }
 
-    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem) {
-        this(kompileOptions, outerParsingOptions, globalOptions, files, kem, true);
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, InnerParsingOptions innerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem) {
+        this(kompileOptions, outerParsingOptions, innerParsingOptions, globalOptions, files, kem, true);
     }
 
     @Inject
-    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
-        this(kompileOptions, outerParsingOptions, globalOptions, files, kem, sw, true);
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, InnerParsingOptions innerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
+        this(kompileOptions, outerParsingOptions, innerParsingOptions, globalOptions, files, kem, sw, true);
     }
 
-    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, InnerParsingOptions innerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
         this.outerParsingOptions = outerParsingOptions;
+        this.innerParsingOptions = innerParsingOptions;
         this.kompileOptions = kompileOptions;
         this.globalOptions = globalOptions;
         this.files = files;
@@ -116,7 +119,7 @@ public class Kompile {
         File cacheFile = kompileOptions.cacheFile != null
                 ? files.resolveWorkingDirectory(kompileOptions.cacheFile) : files.resolveKompiled("cache.bin");
         this.definitionParsing = new DefinitionParsing(
-                lookupDirectories, kompileOptions, outerParsingOptions, globalOptions, kem, files,
+                lookupDirectories, kompileOptions, outerParsingOptions, innerParsingOptions, globalOptions, kem, files,
                 parser, cacheParses, cacheFile, sw);
         this.sw = sw;
 
@@ -137,13 +140,6 @@ public class Kompile {
     public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Function<Definition, Definition> pipeline, Set<String> excludedModuleTags) {
         files.resolveKompiled(".").mkdirs();
 
-        if (kompileOptions.profileRules) {
-            for (File f : files.resolveKompiled(".").listFiles()) {
-                if (f.getName().matches("timing[0-9]+\\.log")) {
-                    f.delete();
-                }
-            }
-        }
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, excludedModuleTags);
 
         files.saveToKompiled("parsed.txt", parsedDef.toString());
@@ -174,7 +170,7 @@ public class Kompile {
         } else {
           rootCell = Sorts.GeneratedTopCell();
         }
-        CompiledDefinition def = new CompiledDefinition(kompileOptions, kompileOptions.outerParsing, globalOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(rootCell).klabel());
+        CompiledDefinition def = new CompiledDefinition(kompileOptions, kompileOptions.outerParsing, kompileOptions.innerParsing, globalOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(rootCell).klabel());
 
         if (kompileOptions.genBisonParser || kompileOptions.genGlrBisonParser) {
             if (def.configurationVariableDefaultSorts.containsKey("$PGM")) {
