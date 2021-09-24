@@ -11,6 +11,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BackendOptions;
 import org.kframework.utils.options.DefinitionLoadingOptions;
+import org.kframework.utils.options.InnerParsingOptions;
 import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
 
@@ -36,6 +37,9 @@ public class KProveOptions {
 
     @ParametersDelegate
     public OuterParsingOptions outerParsing = new OuterParsingOptions();
+
+    @ParametersDelegate
+    public InnerParsingOptions innerParsing = new InnerParsingOptions();
 
     private File specFile;
 

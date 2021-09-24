@@ -15,6 +15,7 @@ import org.kframework.utils.inject.OuterParsingModule;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BackendOptions;
 import org.kframework.utils.options.DefinitionLoadingOptions;
+import org.kframework.utils.options.InnerParsingOptions;
 import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
 
@@ -38,6 +39,9 @@ public class KProveModule extends AbstractModule {
 
     @Provides @RequestScoped
     OuterParsingOptions outerParsingOptions(KProveOptions options) { return options.outerParsing; }
+
+    @Provides @RequestScoped
+    InnerParsingOptions InnerParsingOptions(KProveOptions options) { return options.innerParsing; }
 
     @Provides @RequestScoped
     PrintOptions printOptions(KProveOptions options) {
