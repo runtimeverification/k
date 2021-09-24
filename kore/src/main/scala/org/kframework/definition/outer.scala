@@ -238,20 +238,22 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
   @transient lazy val sortFor: Map[KLabel, Sort] = productionsFor mapValues {_.head.sort}
 
-  def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
+  def isSort(klabel: KLabel, s: Sort): Boolean = subsorts.<(sortFor(klabel), s)
 
   lazy val claims: Set[Claim] = sentences collect { case c: Claim => c }
   lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
   lazy val rulesAndClaims: Set[RuleOrClaim] = Set[RuleOrClaim]().++(claims).++(rules)
-  lazy val rulesFor: Map[KLabel, Set[Rule]] = rules.groupBy(r => {
-    r.body match {
-      case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KApply(s, _) :: _) => s
-      case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KRewrite(Unapply.KApply(s, _), _) :: _) => s
-      case Unapply.KApply(s, _) => s
-      case Unapply.KRewrite(Unapply.KApply(s, _), _) => s
-      case _ => KORE.KLabel("")
-    }
-  })
+  lazy val rulesFor: Map[KLabel, Set[Rule]] = rules.groupBy(r => matchKLabel(r))
+  lazy val macroKLables: Set[KLabel] = rules.filter(r => r.isMacro).map(r => matchKLabel(r))
+
+  private def matchKLabel(r: Rule) = r.body match {
+    case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KApply(s, _) :: _) => s
+    case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KRewrite(Unapply.KApply(s, _), _) :: _) => s
+    case Unapply.KApply(s, _) => s
+    case Unapply.KRewrite(Unapply.KApply(s, _), _) => s
+    case _ => KORE.KLabel("")
+  }
+
   lazy val contexts: Set[Context] = sentences collect { case r: Context => r }
 
   lazy val sortedRules: Seq[Rule] = rules.toSeq.sorted
