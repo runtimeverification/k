@@ -90,8 +90,7 @@ object Module {
   }
 }
 
-case class Import(val module: Module, val isPublic: Boolean, val tag: Option[Tag])
-  extends ImportToString with OuterKORE with Serializable
+case class Import(val module: Module, val isPublic: Boolean)
 
 case class Module(val name: String, val imports: Set[Import], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
   extends ModuleToString with OuterKORE with Sorting with Serializable with AttValue {
@@ -115,7 +114,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
   lazy val productions: Set[Production] = sentences collect { case p: Production => p }
 
-  private lazy val allPublicSentences: Set[Sentence] = {
+  lazy val publicSentences: Set[Sentence] = {
     if (att.contains(Att.PRIVATE)) {
       localSentences.filter(_.att.contains(Att.PUBLIC))
     } else {
@@ -123,18 +122,9 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     }
   }
 
-  def publicSentences(tags: Set[Tag]) = {
-    var sentences = allPublicSentences
-    for (tag <- tags) {
-      sentences = sentences.filter(s => s.att.contains(tag.name) || 
-        (s.isInstanceOf[Production] && s.asInstanceOf[Production].klabelAtt.contains(tag.name)))
-    }
-    sentences
-  }
-
   lazy val signature: Module = {
-    def f(m: Module, tags: Set[Tag]): Module = Module(m.name, m.imports.filter(_.isPublic).map(i => Import(f(i.module, tags | (if (i.tag.isDefined) Set(i.tag.get) else Set())), i.isPublic, i.tag)), m.publicSentences(tags), m.att)
-    Module(name, imports.map(i => Import(f(i.module, if (i.tag.isDefined) Set(i.tag.get) else Set()), i.isPublic, i.tag)), localSentences, att)
+    val f = ModuleTransformer.from(m => Module(m.name, m.imports.filter(_.isPublic), m.publicSentences, m.att), "compute module signature")
+    Module(name, imports.map(i => Import(f(i.module), i.isPublic)), localSentences, att)
   }
 
   lazy val functions: Set[KLabel] = productions.filter(_.att.contains(Att.FUNCTION)).map(_.klabel.get.head)
@@ -370,7 +360,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
   override lazy val hashCode: Int = name.hashCode
 
-  def flattened()   : FlatModule                = new FlatModule(name, imports.map(i => FlatImport(i.module.name, i.isPublic, i.tag, Att.empty)), localSentences, att)
+  def flattened()   : FlatModule                = new FlatModule(name, imports.map(i => FlatImport(i.module.name, i.isPublic, Att.empty)), localSentences, att)
   def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ fullImports.map(m => m.flatModules._2).flatten)
 }
 

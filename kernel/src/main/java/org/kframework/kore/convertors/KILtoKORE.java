@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -91,11 +90,7 @@ public class KILtoKORE extends KILTransformation<Object> {
     }
 
     public org.kframework.definition.FlatImport apply(Import imp) {
-        return org.kframework.definition.FlatImport.apply(
-            imp.getName(),
-            imp.isPublic(),
-            imp.getTag() == null ? immutable(Optional.empty()) : immutable(Optional.of(Tag(imp.getTag()))),
-            convertAttributes(imp));
+        return org.kframework.definition.FlatImport.apply(imp.getName(), imp.isPublic(), convertAttributes(imp));
     }
 
     public org.kframework.definition.Definition apply(Definition d) {
