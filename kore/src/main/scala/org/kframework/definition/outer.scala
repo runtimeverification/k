@@ -244,7 +244,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
   lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
   lazy val rulesAndClaims: Set[RuleOrClaim] = Set[RuleOrClaim]().++(claims).++(rules)
   lazy val rulesFor: Map[KLabel, Set[Rule]] = rules.groupBy(r => matchKLabel(r))
-  lazy val macroKLables: Set[KLabel] = rules.filter(r => r.isMacro).map(r => matchKLabel(r))
+  lazy val macroKLabels: Set[KLabel] = rules.filter(r => r.isMacro).map(r => matchKLabel(r))
 
   private def matchKLabel(r: Rule) = r.body match {
     case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KApply(s, _) :: _) => s
