@@ -11,24 +11,27 @@ import java.util.Set;
 public class CheckTokens {
     private final Set<KEMException> errors;
     private final Module m;
-    private static final ImmutableSet<String> ignoredSortNames = ImmutableSet.of("Bag", "IOFile", "IOInt", "IOString", "K", "KBott", "KItem", "KLabel", "KList", "Sort");
+    private static final ImmutableSet<String> ignoredSortNames = ImmutableSet.of("KBott", "KLabel");
+    private static final ImmutableSet<String> allowedLabels = ImmutableSet.of("function", "token", "bracket");
 
     public CheckTokens(Set<KEMException> errors, Module m) {
         this.errors = errors;
         this.m = m;
     }
+    public void check(Sentence sentence) {
+        if (sentence instanceof Production) {
+            check((Production) sentence);
+        }
+        return;
+    }
 
     // This check ensures that sorts containing token declarations only contain syntax declarations that are also tokens (or macros).
-    public void check(Sentence sentence) {
-        if (!(sentence instanceof Production)) {
-            return;
-        }
-
-        Production p = (Production) sentence;
-        // ignoredSortNames include special sorts defined in domains.md or kast.md that are special variables that
-        // contain subsorts and tokens. The codebase relies on the definitions kast.md and domains.md to be unmodified
+    public void check(Production p) {
+        // ignoredSortNames contains special sorts defined in domains.md or kast.md that are special variables that
+        // contain subsorts and tokens. The codebase relies on the definitions in these files to be unmodified
         // so ignore these names.
-        if (p.att().contains("function") || p.att().contains("token") || p.sort().name().startsWith("#")
+        if (p.sort().name().startsWith("#")
+                || allowedLabels.stream().anyMatch(l -> p.att().contains(l))
                 || ignoredSortNames.contains(p.sort().name())) {
             return;
         }
@@ -38,6 +41,7 @@ public class CheckTokens {
             return;
         }
 
-        errors.add(KEMException.compilerError("Sort " + p.sort().name() + " was declared as a token. Productions of this sort can only contain [function] or [token] labels.", p));
+        errors.add(KEMException.compilerError(
+                "Sort " + p.sort().name() + " was declared as a token. Productions of this sort can only contain [function] or [token] labels.", p));
     }
 }
