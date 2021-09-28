@@ -310,7 +310,7 @@ def inlineCellMaps(kast):
     -   Output: kast term with cell maps inlined.
     """
     def _inlineCellMaps(_kast):
-        if isKApply(_kast) and _kast["label"] == "_|->_":
+        if isKApply(_kast) and _kast["label"].endswith('CellMapItem'):
             mapKey = _kast["args"][0]
             if isKApply(mapKey) and isCellKLabel(mapKey["label"]):
                 return _kast["args"][1]
