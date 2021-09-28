@@ -370,7 +370,7 @@ public class ExpandMacros {
     }
 
     public static boolean isMacro(HasAtt s) {
-      return s.att().contains(Att.MACRO()) || s.att().contains(Att.MACRO_REC()) || s.att().contains(Att.ALIAS_REC()) || s.att().contains(Att.ALIAS());
+        return s.isMacro();
     }
 
     public Sentence expand(Sentence s) {
@@ -384,5 +384,4 @@ public class ExpandMacros {
             return s;
         }
     }
-
 }

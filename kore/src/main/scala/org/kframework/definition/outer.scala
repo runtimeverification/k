@@ -90,8 +90,7 @@ object Module {
   }
 }
 
-case class Import(val module: Module, val isPublic: Boolean, val tag: Option[Tag])
-  extends ImportToString with OuterKORE with Serializable
+case class Import(val module: Module, val isPublic: Boolean)
 
 case class Module(val name: String, val imports: Set[Import], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
   extends ModuleToString with OuterKORE with Sorting with Serializable with AttValue {
@@ -115,7 +114,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
   lazy val productions: Set[Production] = sentences collect { case p: Production => p }
 
-  private lazy val allPublicSentences: Set[Sentence] = {
+  lazy val publicSentences: Set[Sentence] = {
     if (att.contains(Att.PRIVATE)) {
       localSentences.filter(_.att.contains(Att.PUBLIC))
     } else {
@@ -123,18 +122,9 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     }
   }
 
-  def publicSentences(tags: Set[Tag]) = {
-    var sentences = allPublicSentences
-    for (tag <- tags) {
-      sentences = sentences.filter(s => s.att.contains(tag.name) || 
-        (s.isInstanceOf[Production] && s.asInstanceOf[Production].klabelAtt.contains(tag.name)))
-    }
-    sentences
-  }
-
   lazy val signature: Module = {
-    def f(m: Module, tags: Set[Tag]): Module = Module(m.name, m.imports.filter(_.isPublic).map(i => Import(f(i.module, tags | (if (i.tag.isDefined) Set(i.tag.get) else Set())), i.isPublic, i.tag)), m.publicSentences(tags), m.att)
-    Module(name, imports.map(i => Import(f(i.module, if (i.tag.isDefined) Set(i.tag.get) else Set()), i.isPublic, i.tag)), localSentences, att)
+    val f = ModuleTransformer.from(m => Module(m.name, m.imports.filter(_.isPublic), m.publicSentences, m.att), "compute module signature")
+    Module(name, imports.map(i => Import(f(i.module), i.isPublic)), localSentences, att)
   }
 
   lazy val functions: Set[KLabel] = productions.filter(_.att.contains(Att.FUNCTION)).map(_.klabel.get.head)
@@ -238,20 +228,22 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
   @transient lazy val sortFor: Map[KLabel, Sort] = productionsFor mapValues {_.head.sort}
 
-  def isSort(klabel: KLabel, s: Sort) = subsorts.<(sortFor(klabel), s)
+  def isSort(klabel: KLabel, s: Sort): Boolean = subsorts.<(sortFor(klabel), s)
 
   lazy val claims: Set[Claim] = sentences collect { case c: Claim => c }
   lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
   lazy val rulesAndClaims: Set[RuleOrClaim] = Set[RuleOrClaim]().++(claims).++(rules)
-  lazy val rulesFor: Map[KLabel, Set[Rule]] = rules.groupBy(r => {
-    r.body match {
-      case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KApply(s, _) :: _) => s
-      case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KRewrite(Unapply.KApply(s, _), _) :: _) => s
-      case Unapply.KApply(s, _) => s
-      case Unapply.KRewrite(Unapply.KApply(s, _), _) => s
-      case _ => KORE.KLabel("")
-    }
-  })
+  lazy val rulesFor: Map[KLabel, Set[Rule]] = rules.groupBy(r => matchKLabel(r))
+  lazy val macroKLabels: Set[KLabel] = rules.filter(r => r.isMacro).map(r => matchKLabel(r))
+
+  private def matchKLabel(r: Rule) = r.body match {
+    case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KApply(s, _) :: _) => s
+    case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KRewrite(Unapply.KApply(s, _), _) :: _) => s
+    case Unapply.KApply(s, _) => s
+    case Unapply.KRewrite(Unapply.KApply(s, _), _) => s
+    case _ => KORE.KLabel("")
+  }
+
   lazy val contexts: Set[Context] = sentences collect { case r: Context => r }
 
   lazy val sortedRules: Seq[Rule] = rules.toSeq.sorted
@@ -370,12 +362,13 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
   override lazy val hashCode: Int = name.hashCode
 
-  def flattened()   : FlatModule                = new FlatModule(name, imports.map(i => FlatImport(i.module.name, i.isPublic, i.tag, Att.empty)), localSentences, att)
+  def flattened()   : FlatModule                = new FlatModule(name, imports.map(i => FlatImport(i.module.name, i.isPublic, Att.empty)), localSentences, att)
   def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ fullImports.map(m => m.flatModules._2).flatten)
 }
 
 trait HasAtt {
   val att: Att
+  def isMacro: Boolean = att.contains(Att.MACRO) || att.contains(Att.MACRO_REC) || att.contains(Att.ALIAS) || att.contains(Att.ALIAS_REC)
 }
 
 trait Sentence extends HasLocation with HasAtt with AttValue {
