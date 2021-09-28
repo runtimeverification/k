@@ -253,7 +253,7 @@ adds the length of `Vs` dimensions to the type `T`.
 ```k
 // TODO: Check the desugaring below to be consistent with the one for untyped simple
 
-  syntax Id ::= "$1" | "$2"
+  syntax Id ::= "$1" [token] | "$2" [token]
   rule T:Type X:Id[N1:Int, N2:Int, Vs:Vals];
     => T[]<Vs> X[N1];
        {

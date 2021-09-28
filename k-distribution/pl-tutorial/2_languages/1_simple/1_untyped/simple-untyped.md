@@ -487,7 +487,7 @@ To this aim, we introduce two special unique variable identifiers,
 through and initializes each element of the first dimension with an array
 of the remaining dimensions, declared as variable `$2`:
 ```k
-  syntax Id ::= "$1" | "$2"
+  syntax Id ::= "$1" [token] | "$2" [token]
   rule var X:Id[N1:Int, N2:Int, Vs:Vals];
     => var X[N1];
        {
