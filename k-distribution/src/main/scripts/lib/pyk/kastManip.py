@@ -19,6 +19,11 @@ def buildAssoc(base, join, l):
     return KApply(join, [l[0], buildAssoc(base, join, l[1:])])
 
 def match(pattern, kast):
+    """Perform syntactic pattern matching and return the substitution.
+
+    -   Input: a pattern and a kast term.
+    -   Output: substitution instantiating the pattern to the kast term.
+    """
     subst = {}
     if isKVariable(pattern):
         return { pattern["name"] : kast }
@@ -72,6 +77,11 @@ def collectFreeVars(kast):
     return freeVars
 
 def substitute(pattern, substitution):
+    """Apply a substitution to a pattern.
+
+    -   Input: a pattern with free variables and a substitution.
+    -   Output: the pattern with the substitution applied.
+    """
     def replace(k):
         if isKVariable(k) and k["name"] in substitution:
             return substitution[k["name"]]
