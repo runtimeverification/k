@@ -5,7 +5,7 @@
 
 let
   unwrapped = mavenix.buildMaven {
-    name = "k-5.1.202";
+    name = "k-5.1.203";
     infoFile = ./mavenix.lock;
     src =
       cleanSourceWith {
