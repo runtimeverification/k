@@ -49,9 +49,9 @@ minimizeArgs.add_argument('--omit-labels', default = '', nargs = '?')
 def definitionDir(kompiledDir):
     return path.dirname(path.abspath(kompiledDir))
 
-if __name__ == '__main__':
+def main(commandLineArgs, extraMain = None):
     returncode = 0
-    args = vars(pykArgs.parse_args())
+    args = vars(commandLineArgs.parse_args())
     kompiled_dir = args['kompiled-dir']
 
     if args['command'] in [ 'parse' , 'run' , 'prove' ]:
@@ -98,7 +98,13 @@ if __name__ == '__main__':
         new_disjunct = propogateUpConstraints(sorted_disjunct)
         args['output'].write(prettyPrintKast(new_disjunct, symbolTable))
 
+    elif extraMain is not None:
+        extraMain(args, kompiled_dir)
+
     args['output'].flush()
 
     if returncode != 0:
         _fatal('Non-zero exit code (' + str(returncode) + '): ' + str(kCommand), code = returncode)
+
+if __name__ == '__main__':
+    main(pykArgs)
