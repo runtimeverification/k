@@ -438,7 +438,7 @@ public class Kompile {
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
 
-        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckTokens(errors, m)::check));
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckTokens(errors, m, isSymbolic && isKast)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckK(errors)::check));
 
