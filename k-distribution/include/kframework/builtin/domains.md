@@ -2105,7 +2105,7 @@ Meta operations
 
 Provided below are a few miscellaneous, mostly deprecated functions in K.
 It is not recommended to use any of them directly as they are largely
-unsupported in modern K. There are three exceptions:
+unsupported in modern K. There are a few exceptions:
 
 * `#getenv` - Returns the value of an environment variable
 * `#parseKORE` - Takes a String containing a K intermediate representation of
