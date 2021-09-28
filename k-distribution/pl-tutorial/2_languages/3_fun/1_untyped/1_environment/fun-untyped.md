@@ -382,7 +382,7 @@ those, we follow the same convention like in the **K** tutorial, where we
 added them as new identifier constructs starting with the character `$`,
 so we can easily recognize them when we debug or trace the semantics.
 ```k
-  syntax Name ::= "$h" | "$t"
+  syntax Name ::= "$h" [token] | "$t" [token]
   rule head => fun [$h|$t] -> $h                             [macro]
   rule tail => fun [$h|$t] -> $t                             [macro]
   rule null? => fun [.Exps] -> true | [$h|$t] -> false       [macro]
@@ -398,7 +398,7 @@ Uncurrying of multiple arguments in functions and binders:
 ```
 We desugar the `try-catch` construct into callcc:
 ```k
-  syntax Name ::= "$k" | "$v"
+  syntax Name ::= "$k" [token] | "$v" [token]
   rule try E catch(X) E'
     => callcc (fun $k -> (fun throw -> E)(fun X -> $k E'))   [macro]
 ```
@@ -641,7 +641,7 @@ Sequential composition, which is needed only to accumulate the
 side effects due to assignments, was strict in the first argument.
 Once evaluated, its first argument is simply discarded:
 ```k
-  syntax Name ::= "$x"
+  syntax Name ::= "$x" [token]
   rule ref => fun $x -> & $x                                 [macro]
   rule <k> & X => L ...</k>  <env>... X |-> L ...</env>
   rule <k> @ L:Int => V:Val ...</k>  <store>... L |-> V ...</store>
