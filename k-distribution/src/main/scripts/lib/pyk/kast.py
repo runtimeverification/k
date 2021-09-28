@@ -375,11 +375,13 @@ def prettyPrintKast(kast, symbolTable):
         requiresStr = ''
         ensuresStr  = ''
         attsStr     = prettyPrintKast(kast['att'], symbolTable)
+        reqEnsSymbolTable = { k: symbolTable[k] for k in symbolTable }
+        reqEnsSymbolTable [ '_andBool_' ] = lambda b1, b2: b1 + '\nandBool ' + b2
         if kast['requires'] is not None:
-            requiresStr = prettyPrintKast(kast['requires'], symbolTable)
+            requiresStr = prettyPrintKast(kast['requires'], reqEnsSymbolTable)
             requiresStr = 'requires ' + '\n   '.join(requiresStr.split('\n'))
         if kast['ensures'] is not None:
-            ensuresStr = prettyPrintKast(kast['ensures'], symbolTable)
+            ensuresStr = prettyPrintKast(kast['ensures'], reqEnsSymbolTable)
             ensuresStr = 'ensures ' + '\n  '.join(ensuresStr.split('\n'))
         return ruleStr + '\n  ' + requiresStr + '\n  ' + ensuresStr + '\n  ' + attsStr
     if isKClaim(kast):
@@ -388,11 +390,13 @@ def prettyPrintKast(kast, symbolTable):
         requiresStr = ''
         ensuresStr  = ''
         attsStr     = prettyPrintKast(kast['att'], symbolTable)
+        reqEnsSymbolTable = { k: symbolTable[k] for k in symbolTable }
+        reqEnsSymbolTable [ '_andBool_' ] = lambda b1, b2: b1 + '\nandBool ' + b2
         if kast['requires'] is not None:
-            requiresStr = prettyPrintKast(kast['requires'], symbolTable)
+            requiresStr = prettyPrintKast(kast['requires'], reqEnsSymbolTable)
             requiresStr = 'requires ' + '\n   '.join(requiresStr.split('\n'))
         if kast['ensures'] is not None:
-            ensuresStr = prettyPrintKast(kast['ensures'], symbolTable)
+            ensuresStr = prettyPrintKast(kast['ensures'], reqEnsSymbolTable)
             ensuresStr = 'ensures ' + '\n  '.join(ensuresStr.split('\n'))
         return ruleStr + '\n  ' + requiresStr + '\n  ' + ensuresStr + '\n  ' + attsStr
     if isKContext(kast):
