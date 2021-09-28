@@ -34,7 +34,7 @@ public class CheckTokens {
         }
 
         if (!m.tokenProductionsFor().contains(p.sort()) // We only care about sorts that have been declared as tokens.
-                || p.klabel().isDefined() && m.macroKLables().contains(p.klabel().get())) {
+                || p.klabel().isDefined() && m.macroKLabels().contains(p.klabel().get())) {
             return;
         }
 
