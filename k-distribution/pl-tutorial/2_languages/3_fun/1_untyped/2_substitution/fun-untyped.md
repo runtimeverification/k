@@ -146,12 +146,12 @@ module FUN-UNTYPED-MACROS
 //  rule 'TypeName(Tn:TypeName) => (.TypeVars) Tn              [macro]
   rule `Type-TypeName`(T:Type, Tn:TypeName) => (T) Tn          [macro]
 
-  syntax Name ::= "$h" [token] | "$t" [token]
+  syntax Name ::= "$h" | "$t"
   rule head => fun [$h|$t] -> $h                             [macro]
   rule tail => fun [$h|$t] -> $t                             [macro]
   rule null? => fun [.Exps] -> true | [$h|$t] -> false       [macro]
 
-  syntax Name ::= "$k" [token] | "$v" [token]
+  syntax Name ::= "$k" | "$v"
   rule try E catch(X) E'
     => callcc (fun $k -> (fun throw -> E)(fun X -> $k E'))   [macro]
 
