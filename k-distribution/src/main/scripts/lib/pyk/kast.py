@@ -319,10 +319,12 @@ def prettyPrintKast(kast, symbolTable):
         rhsStr = prettyPrintKast(kast['rhs'], symbolTable)
         return '( ' + lhsStr + ' => ' + rhsStr + ' )'
     if isKSequence(kast):
-        unparsedItems = [ prettyPrintKast(item, symbolTable) for item in kast['items'] ]
+        unparsedItems = [ prettyPrintKast(item, symbolTable) for item in kast['items'][0:-1] ]
         unparsedKSequence = '\n~> '.join(unparsedItems)
-        if len(unparsedItems) > 0:
-            unparsedKSequence = '    ' + unparsedKSequence
+        if len(kast['items']) > 0 and kast['items'][-1] == ktokenDots:
+            unparsedKSequence = unparsedKSequence + '\n' + prettyPrintKast(ktokenDots, symbolTable)
+        elif len(kast['items']) > 0:
+            unparsedKSequence = unparsedKSequence + '\n~> ' + prettyPrintKast(kast['items'][-1], symbolTable)
         else:
             unparsedKSequence = '.'
         return unparsedKSequence
