@@ -21,7 +21,7 @@ public class CheckTokens {
         this.isSymbolicKast = isSymbolicKast;
     }
     public void check(Sentence sentence) {
-        if (sentence instanceof Production && !isSymbolicKast) {
+        if (!isSymbolicKast && (sentence instanceof Production)) {
             check((Production) sentence);
         }
         return;
