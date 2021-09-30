@@ -114,6 +114,11 @@ def replaceKLabels(pattern, klabelMap):
     return traverseBottomUp(pattern, replace)
 
 def rewriteWith(rule, pattern):
+    """Rewrite a given pattern at the top with the supplied rule.
+
+    -   Input: A rule to rewrite with and a pattern to rewrite.
+    -   Output: The pattern with the rewrite applied once at the top.
+    """
     (ruleLHS, ruleRHS) = rule
     matchingSubst = match(ruleLHS, pattern)
     if matchingSubst is not None:
@@ -121,6 +126,11 @@ def rewriteWith(rule, pattern):
     return pattern
 
 def rewriteAnywhereWith(rule, pattern):
+    """Attempt rewriting once at every position in an AST bottom-up.
+
+    -   Input: A rule to rewrite with, and a pattern to rewrite.
+    -   Output: The pattern with rewrites applied at every node once starting from the bottom.
+    """
     return traverseBottomUp(pattern, lambda p: rewriteWith(rule, p))
 
 def replaceWith(rule, pattern):
