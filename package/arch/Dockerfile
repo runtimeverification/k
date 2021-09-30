@@ -14,6 +14,7 @@ RUN    pacman -Sy   --noconfirm archlinux-keyring \
                        hub                        \
                        jdk-openjdk                \
                        jemalloc                   \
+                       libunwind                  \
                        libyaml                    \
                        lld                        \
                        llvm                       \
