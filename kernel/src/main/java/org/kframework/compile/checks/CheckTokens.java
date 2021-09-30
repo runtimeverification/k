@@ -11,17 +11,16 @@ import java.util.Set;
 public class CheckTokens {
     private final Set<KEMException> errors;
     private final Module m;
-    private final boolean isSymbolicKast;
     private static final ImmutableSet<String> ignoredSortNames = ImmutableSet.of("KBott", "KLabel");
     private static final ImmutableSet<String> allowedLabels = ImmutableSet.of("function", "token", "bracket");
 
-    public CheckTokens(Set<KEMException> errors, Module m, boolean isSymbolicKast) {
+    public CheckTokens(Set<KEMException> errors, Module m) {
         this.errors = errors;
         this.m = m;
-        this.isSymbolicKast = isSymbolicKast;
     }
+
     public void check(Sentence sentence) {
-        if (!isSymbolicKast && (sentence instanceof Production)) {
+        if (sentence instanceof Production) {
             check((Production) sentence);
         }
         return;
