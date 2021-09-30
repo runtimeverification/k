@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 
 import argparse
-import sys
 import tempfile
 import os.path as path
 
 from .         import *
 from .graphviz import *
-
-sys.setrecursionlimit(1500000)
 
 pykArgs = argparse.ArgumentParser()
 pykArgs.add_argument('kompiled-dir', type = str, help = 'Kompiled directory for definition.')
