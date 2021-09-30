@@ -93,7 +93,10 @@ def main(commandLineArgs, extraMain = None):
         for d in flattenLabel('#Or', json_term):
             dMinimized = minimizeTerm(d, abstractLabels = abstractLabels)
             (dConfig, dConstraint) = splitConfigAndConstraints(dMinimized)
-            minimized_disjuncts.append(KApply('#And', [dConfig, dConstraint]))
+            if dConstraint != KConstant('#Top'):
+                minimized_disjuncts.append(KApply('#And', [dConfig, dConstraint]))
+            else:
+                minimized_disjuncts.append(dConfig)
         sorted_disjunct = buildAssoc(KConstant('#Bottom'), '#Or', minimized_disjuncts)
         new_disjunct = propogateUpConstraints(sorted_disjunct)
         args['output'].write(prettyPrintKast(new_disjunct, symbolTable))
