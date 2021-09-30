@@ -14,6 +14,7 @@ RUN    apt-get update        \
         libgmp-dev           \
         libjemalloc-dev      \
         libmpfr-dev          \
+        libunwind-dev        \
         libyaml-dev          \
         libz3-dev            \
         lld-10               \

@@ -62,7 +62,7 @@ On Ubuntu Linux:
 
 ```
 git submodule update --init --recursive
-sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 cmake gcc clang-10 lld-10 llvm-10-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
+sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 cmake gcc clang-10 lld-10 llvm-10-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev libunwind-dev
 curl -sSL https://get.haskellstack.org/ | sh
 ```
 
@@ -72,7 +72,7 @@ On Arch Linux:
 
 ```
 git submodule update --init --recursive
-sudo pacman -S git maven jdk-openjdk cmake boost libyaml jemalloc clang llvm lld zlib gmp mpfr z3 curl stack base-devel base python
+sudo pacman -S git maven jdk-openjdk cmake boost libyaml jemalloc libunwind clang llvm lld zlib gmp mpfr z3 curl stack base-devel base python
 ```
 
 If you install this list of dependencies, continue directly to the [Build and Install Guide](#build-and-install-guide).
@@ -89,6 +89,7 @@ The following dependencies are needed either at build time or runtime:
 *   [gmp](https://gmplib.org/)
 *   [jdk](https://openjdk.java.net/) (version 8u45 or greater)
 *   [libjemalloc](https://github.com/jemalloc/jemalloc)
+*   [libunwind](https://www.nongnu.org/libunwind/)
 *   [libyaml](https://pyyaml.org/wiki/LibYAML)
 *   [llvm](https://llvm.org/) (We require version 10 or greater for clang, lld, and llvm-tools. On some distributions, the utilities below are also needed and packaged separately.)
     * [clang](http://clang.llvm.org/)
