@@ -438,7 +438,7 @@ public class Kompile {
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
 
-        if (!(isSymbolic && isKast)) {
+        if (!(isSymbolic && isKast)) { // if it's not the java backend
             stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckTokens(errors, m)::check));
         }
 
