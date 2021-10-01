@@ -64,9 +64,6 @@ public final class JavaExecutionOptions {
             "with other backends. Recommended to enable for Java backend.")
     public boolean formatFailures = false;
 
-    @Parameter(names="--branching-allowed", arity=1, description="Number of branching events allowed before a forcible stop.")
-    public int branchingAllowed = Integer.MAX_VALUE;
-
     @Parameter(names="--log", description="Log every step.")
     public boolean log = false;
 

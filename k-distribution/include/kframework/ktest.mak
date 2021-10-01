@@ -162,4 +162,6 @@ clean:
 	@$(KDEP) $(DEF).$(SOURCE_EXT) > .depend-tmp
 	@mv .depend-tmp .depend
 
+ifneq ($(MAKECMDGOALS),clean)
 -include .depend
+endif

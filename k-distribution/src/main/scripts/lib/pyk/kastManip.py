@@ -235,6 +235,11 @@ def pushDownRewrites(kast):
     return traverseTopDown(kast, _pushDownRewrites)
 
 def inlineCellMaps(kast):
+    """Ensure that cell map collections are printed nicely, not as Maps."
+
+    -   Input: kast term.
+    -   Output: kast term with cell maps inlined.
+    """
     def _inlineCellMaps(_kast):
         if isKApply(_kast) and _kast["label"] == "_|->_":
             mapKey = _kast["args"][0]
@@ -256,6 +261,11 @@ def removeSemanticCasts(kast):
     return traverseBottomUp(kast, _removeSemanticCasts)
 
 def uselessVarsToDots(kast, requires = None, ensures = None):
+    """Structurally abstract away useless variables.
+
+    -   Input: kast term, and a requires clause and ensures clause.
+    -   Output: kast term with the useless vars structurally abstracted.
+    """
 
     numOccurances = {}
     def _getNumOccurances(_kast):
@@ -317,7 +327,30 @@ def onAttributes(kast, effect):
         return KDefinition(kast['mainModule'], modules, requires = requires, att = effect(kast['att']))
     _fatal('No attributes for: ' + kast['node'] + '.')
 
+def minimizeTerm(term, requires = None, ensures = None):
+    """Minimize a K term for pretty-printing.
+
+    -   Input: kast term, and optionally requires and ensures clauses with constraints.
+    -   Output: kast term minimized.
+        -   Variables only used once will be removed.
+        -   Unused cells will be abstracted.
+        -   Attempt to remove useless conditions.
+    """
+    term = inlineCellMaps(term)
+    term = removeSemanticCasts(term)
+    term = uselessVarsToDots(term, requires = requires, ensures = ensures)
+    term = collapseDots(term)
+    return term
+
 def minimizeRule(rule):
+    """Minimize a K rule or claim for pretty-printing.
+
+    -   Input: kast representing a K rule or claim.
+    -   Output: kast with the rule or claim minimized:
+        -   Variables only used once will be removed.
+        -   Unused cells will be abstracted.
+        -   Attempt to remove useless side-conditions.
+    """
     if not isKRule(rule) and not isKClaim(rule):
         return rule
 
@@ -352,10 +385,7 @@ def minimizeRule(rule):
         ruleRequires = None if ruleRequires == KToken('true', 'Bool') else ruleRequires
         ruleEnsures  = None if ruleEnsures  == KToken('true', 'Bool') else ruleEnsures
 
-    ruleBody = inlineCellMaps(ruleBody)
-    ruleBody = removeSemanticCasts(ruleBody)
-    ruleBody = uselessVarsToDots(ruleBody, requires = ruleRequires, ensures = ruleEnsures)
-    ruleBody = collapseDots(ruleBody)
+    ruleBody = minimizeTerm(ruleBody, requires = ruleRequires, ensures = ruleEnsures)
 
     if ruleRequires == KToken("true", "Bool"):
         ruleRequires = None

@@ -11,6 +11,7 @@ import org.kframework.main.Tool;
 import org.kframework.utils.inject.Options;
 import org.kframework.utils.inject.OuterParsingModule;
 import org.kframework.utils.inject.RequestScoped;
+import org.kframework.utils.options.InnerParsingOptions;
 import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.OutputDirectoryOptions;
 import org.kframework.utils.options.SMTOptions;
@@ -46,6 +47,9 @@ public class KompileModule extends AbstractModule {
 
     @Provides
     OuterParsingOptions outerParsingOptions(KompileOptions options) { return options.outerParsing; }
+
+    @Provides
+    InnerParsingOptions innerParsingOptions(KompileOptions options) { return options.innerParsing; }
 
     @Provides
     OutputDirectoryOptions outputDirectoryOptions(KompileOptions options) { return options.outputDirectory; }

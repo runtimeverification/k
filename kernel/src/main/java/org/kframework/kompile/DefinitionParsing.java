@@ -44,13 +44,19 @@ import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.options.InnerParsingOptions;
 import org.kframework.utils.options.OuterParsingOptions;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.Set;
 import scala.util.Either;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -81,6 +87,7 @@ public class DefinitionParsing {
     private final boolean kore;
     private final KompileOptions options;
     private final GlobalOptions globalOptions;
+    private final OuterParsingOptions outerParsingOptions;
 
     private final KExceptionManager kem;
     private final FileUtil files;
@@ -94,11 +101,13 @@ public class DefinitionParsing {
     private final boolean isStrict;
     private final boolean profileRules;
     private final List<File> lookupDirectories;
+    private final InnerParsingOptions innerParsingOptions;
 
     public DefinitionParsing(
             List<File> lookupDirectories,
             KompileOptions options,
             OuterParsingOptions outerParsingOptions,
+            InnerParsingOptions innerParsingOptions,
             GlobalOptions globalOptions,
             KExceptionManager kem,
             FileUtil files,
@@ -109,6 +118,8 @@ public class DefinitionParsing {
         this.lookupDirectories = lookupDirectories;
         this.options = options;
         this.globalOptions = globalOptions;
+        this.outerParsingOptions = outerParsingOptions;
+        this.innerParsingOptions = innerParsingOptions;
         this.kem = kem;
         this.files = files;
         this.parser = parser;
@@ -118,7 +129,7 @@ public class DefinitionParsing {
         this.kore = options.isKore();
         this.loader = new BinaryLoader(this.kem);
         this.isStrict = options.strict();
-        this.profileRules = options.profileRules;
+        this.profileRules = innerParsingOptions.profileRules != null;
         this.sw = sw;
     }
 
@@ -141,6 +152,8 @@ public class DefinitionParsing {
         if (!def.getModule(entryPointModule).isDefined()) {
           throw KEMException.criticalError("Module " + entryPointModule + " does not exist.");
         }
+        if (profileRules) // create the temp dir ahead of parsing to avoid a race condition
+            files.resolveTemp(".");
         Stream<Module> modules = Stream.of(def.getModule(mainModule).get());
         modules = Stream.concat(modules, stream(def.getModule(mainModule).get().importedModules()));
         modules = Stream.concat(modules, Stream.of(def.getModule(entryPointModule).get()));
@@ -164,6 +177,7 @@ public class DefinitionParsing {
         }
 
         def = resolveNonConfigBubbles(def);
+        saveTimings();
         if (! readOnlyCache) {
             saveCaches();
         }
@@ -211,12 +225,15 @@ public class DefinitionParsing {
                 parsedDefinition.att());
         trimmed = Kompile.excludeModulesByTag(excludedModuleTags).apply(trimmed);
         sw.printIntermediate("Outer parsing [" + trimmed.modules().size() + " modules]");
+        if (profileRules) // create the temp dir ahead of parsing to avoid a race condition
+            files.resolveTemp(".");
         Definition afterResolvingConfigBubbles = resolveConfigBubbles(trimmed, parsedDefinition.getModule("DEFAULT-CONFIGURATION").get());
         sw.printIntermediate("Parse configurations [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " declarations]");
         parsedBubbles.set(0);
         cachedBubbles.set(0);
         Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles);
         sw.printIntermediate("Parse rules [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " rules]");
+        saveTimings();
         saveCachesAndReportParsingErrors();
         return afterResolvingAllOtherBubbles;
     }
@@ -619,6 +636,32 @@ public class DefinitionParsing {
         } else {
             errors.addAll(result._1().left().get());
             return Stream.empty();
+        }
+    }
+
+    // Save all the timing information collected during parsing in a single file specified at command line.
+    // Timing information is expected to have two parts:
+    // 1. the comparable part - path:lineNumber
+    // 2. the printable part which contains the timing information
+    // The comparable part is used to sort each entry to provide a stable output.
+    private void saveTimings() {
+        if (innerParsingOptions.profileRules != null) {
+            try {
+                List<Tuple2<String, String>> msgs = new ArrayList<>();
+                for (File f : files.resolveTemp(".").listFiles()) {
+                    if (f.getName().matches("timing.+\\.log")) {
+                        BufferedReader br = new BufferedReader(new FileReader(f));
+                        String path = br.readLine();
+                        String msg = br.readLine();
+                        msgs.add(Tuple2.apply(path, msg));
+                    }
+                }
+                msgs.sort(Comparator.comparing(Tuple2::_1));
+                FileUtil.save(new File(innerParsingOptions.profileRules),
+                        msgs.stream().map(Tuple2::_2).collect(Collectors.joining("\n")));
+            } catch (IOException e) {
+                throw KEMException.internalError("Failed to open timing.log", e);
+            }
         }
     }
 }
