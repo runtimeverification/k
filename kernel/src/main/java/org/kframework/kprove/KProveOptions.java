@@ -56,6 +56,9 @@ public class KProveOptions {
     @ParametersDelegate
     public PrintOptions print = new PrintOptions();
 
+    @Parameter(names="--branching-allowed", arity = 1, description="Number of branching events allowed before a forcible stop.")
+    public int branchingAllowed = Integer.MAX_VALUE;
+
     @Parameter(names={"--spec-module", "-sm"}, description="Name of module containing specification to prove")
     public String specModule;
 
