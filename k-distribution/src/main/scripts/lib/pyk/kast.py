@@ -36,16 +36,16 @@ def combineDicts(*dicts):
     return combineDicts(newDict, *restDicts)
 
 def KApply(label, args):
-    return { "node": "KApply", "label": label, "variable": False, "arity": len(args), "args": args }
+    return { 'node': 'KApply', 'label': label, 'variable': False, 'arity': len(args), 'args': args }
 
 def isKApply(k):
-    return k["node"] == "KApply"
+    return k['node'] == 'KApply'
 
 def KAs(pattern, alias, att = None):
-    return { "node": "KAs", "pattern": pattern, "alias": alias, "att": att }
+    return { 'node': 'KAs', 'pattern': pattern, 'alias': alias, 'att': att }
 
 def isKAs(k):
-    return k["node"] == "KAs"
+    return k['node'] == 'KAs'
 
 def KConstant(label):
     return KApply(label, [])
@@ -54,139 +54,139 @@ def isKConstant(k):
     return isKApply(k) and len(k['args']) == 0
 
 def KSequence(items):
-    return { "node": "KSequence", "arity": len(items), "items": items }
+    return { 'node': 'KSequence', 'arity': len(items), 'items': items }
 
 def isKSequence(k):
-    return k["node"] == "KSequence"
+    return k['node'] == 'KSequence'
 
 def KVariable(name):
-    return { "node" : "KVariable", "name": name, "originalName": name }
+    return { 'node' : 'KVariable', 'name': name, 'originalName': name }
 
 def isKVariable(k):
-    return k["node"] == "KVariable"
+    return k['node'] == 'KVariable'
 
 def KToken(token, sort):
-    return { "node" : "KToken", "sort": sort, "token": token}
+    return { 'node' : 'KToken', 'sort': sort, 'token': token}
 
 def isKToken(k):
-    return k["node"] == "KToken"
+    return k['node'] == 'KToken'
 
 def KRewrite(lhs, rhs):
-    return { "node": "KRewrite", "lhs": lhs, "rhs": rhs }
+    return { 'node': 'KRewrite', 'lhs': lhs, 'rhs': rhs }
 
 def isKRewrite(k):
-    return k["node"] == "KRewrite"
+    return k['node'] == 'KRewrite'
 
 def KAtt(atts = {}):
-    return {"node": "KAtt", "att": atts}
+    return {'node': 'KAtt', 'att': atts}
 
 def isKAtt(k):
-    return k["node"] == "KAtt"
+    return k['node'] == 'KAtt'
 
 def KRule(body, requires = None, ensures = None, att = None):
-    return { "node": "KRule", "body": body, "requires": requires, "ensures": ensures, "att": att }
+    return { 'node': 'KRule', 'body': body, 'requires': requires, 'ensures': ensures, 'att': att }
 
 def isKRule(k):
-    return k["node"] == "KRule"
+    return k['node'] == 'KRule'
 
 def KClaim(body, requires = None, ensures = None, att = None):
-    return { "node": "KClaim", "body": body, "requires": requires, "ensures": ensures, "att": att }
+    return { 'node': 'KClaim', 'body': body, 'requires': requires, 'ensures': ensures, 'att': att }
 
 def isKClaim(k):
-    return k["node"] == "KClaim"
+    return k['node'] == 'KClaim'
 
 def KContext(body, requires = None, ensures = None, att = None):
-    return { "node": "KContext", "body": body, "requires": requires, "att": att }
+    return { 'node': 'KContext', 'body': body, 'requires': requires, 'att': att }
 
 def isKContext(k):
-    return k["node"] == "KContext"
+    return k['node'] == 'KContext'
 
 def KBubble(sentenceType, contents, att = None):
-    return { "node": "KBubble", "sentenceType": sentenceType, "contents": contents, "att": att }
+    return { 'node': 'KBubble', 'sentenceType': sentenceType, 'contents': contents, 'att': att }
 
 def isKBubble(k):
     return k['node'] == 'KBubble'
 
 def KProduction(productionItems, sort, att = None):
-    return { "node": "KProduction", "productionItems": productionItems, "sort": sort, "att": att }
+    return { 'node': 'KProduction', 'productionItems': productionItems, 'sort': sort, 'att': att }
 
 def isKProduction(k):
     return k['node'] == 'KProduction'
 
 def KNonTerminal(sort):
-    return { "node": "KNonTerminal", "sort": sort }
+    return { 'node': 'KNonTerminal', 'sort': sort }
 
 def isKNonTerminal(k):
     return k['node'] == 'KNonTerminal'
 
 def KTerminal(value):
-    return { "node": "KTerminal", "value": value}
+    return { 'node': 'KTerminal', 'value': value}
 
 def isKTerminal(k):
     return k['node'] == 'KTerminal'
 
 def KRegexTerminal(regex, precedeRegex = None, followRegex = None):
-    return { "node": "KRegexTerminal", "regex": regex, "precedeRegex": precedeRegex, "followRegex": followRegex }
+    return { 'node': 'KRegexTerminal', 'regex': regex, 'precedeRegex': precedeRegex, 'followRegex': followRegex }
 
 def isKRegexTerminal(k):
     return k['node'] == 'KRegexTerminal'
 
 def KSort(name):
-    return { "node": "KSort", "name": name }
+    return { 'node': 'KSort', 'name': name }
 
 def isKSort(k):
     return k['node'] == 'KSort'
 
 def KSyntaxAssociativity(assoc, tags = [], att = None):
-    return { "node": "KSyntaxAssociativity", "assoc": assoc, "tags": tags, "att": att }
+    return { 'node': 'KSyntaxAssociativity', 'assoc': assoc, 'tags': tags, 'att': att }
 
 def isKSyntaxAssociativity(k):
     return k['node'] == 'KSyntaxAssociativity'
 
 def KSyntaxPriority(priorities = [], att = None):
-    return { "node": "KSyntaxPriority", "priorities": priorities, "att": att }
+    return { 'node': 'KSyntaxPriority', 'priorities': priorities, 'att': att }
 
 def isKSyntaxPriority(k):
     return k['node'] == 'KSyntaxPriority'
 
 def KSyntaxSort(sort, att = None):
-    return { "node": "KSyntaxSort", "sort": sort, "att": att }
+    return { 'node': 'KSyntaxSort', 'sort': sort, 'att': att }
 
 def isKSyntaxSort(k):
     return k['node'] == 'KSyntaxSort'
 
 def KSortSynonym(newSort, oldSort, att = None):
-    return { "node": "KSortSynonym", "newSort": newSort, "oldSort": oldSort, "att": att }
+    return { 'node': 'KSortSynonym', 'newSort': newSort, 'oldSort': oldSort, 'att': att }
 
 def isKSortSynonym(k):
     return k['node'] == 'KSortSynonym'
 
 def KSyntaxLexical(newSort, oldSort, att = None):
-    return { "node": "KSyntaxLexical", "newSort": newSort, "oldSort": oldSort, "att": att }
+    return { 'node': 'KSyntaxLexical', 'newSort': newSort, 'oldSort': oldSort, 'att': att }
 
 def isKSyntaxLexical(k):
     return k['node'] == 'KSyntaxLexical'
 
 def KFlatModule(name, imports, localSentences, att = None):
-    return { "node": "KFlatModule", "name": name, "imports": imports, "localSentences": localSentences, "att": att }
+    return { 'node': 'KFlatModule', 'name': name, 'imports': imports, 'localSentences': localSentences, 'att': att }
 
 def isKFlatModule(k):
-    return k["node"] == "KFlatModule"
+    return k['node'] == 'KFlatModule'
 
 def KRequire(krequire):
-    return { "node": "KRequire", "require": krequire }
+    return { 'node': 'KRequire', 'require': krequire }
 
 def isKRequire(k):
-    return k["node"] == "KRequire"
+    return k['node'] == 'KRequire'
 
 def KDefinition(mainModule, modules, requires = None, att = None):
-    return { "node": "KDefinition", "mainModule": mainModule, "modules": modules, "requires": requires, "att": att }
+    return { 'node': 'KDefinition', 'mainModule': mainModule, 'modules': modules, 'requires': requires, 'att': att }
 
 def isKDefinition(k):
-    return k["node"] == "KDefinition"
+    return k['node'] == 'KDefinition'
 
 def isCellKLabel(label):
-    return len(label) > 1 and label[0] == "<" and label[-1] == ">"
+    return len(label) > 1 and label[0] == '<' and label[-1] == '>'
 
 def getAttribute(k, key):
     if 'att' in k.keys() and isKAtt(k['att']):
@@ -210,19 +210,19 @@ def addAttributes(kast, att):
         sys.stderr.flush()
         sys.exit(1)
 
-klabelCells   = "#KCells"
-klabelEmptyK  = "#EmptyK"
+klabelCells   = '#KCells'
+klabelEmptyK  = '#EmptyK'
 
-ktokenDots = KToken("...", "K")
+ktokenDots = KToken('...', 'K')
 
 def paren(printer):
-    return (lambda *args: "( " + printer(*args) + " )")
+    return (lambda *args: '( ' + printer(*args) + ' )')
 
 def binOpStr(symbol):
-    return (lambda a1, a2: a1 + " " + symbol + " " + a2)
+    return (lambda a1, a2: a1 + ' ' + symbol + ' ' + a2)
 
 def appliedLabelStr(symbol):
-    return (lambda *args: symbol + " ( " + " , ".join(args) + " )")
+    return (lambda *args: symbol + ' ( ' + ' , '.join(args) + ' )')
 
 def constLabel(symbol):
     return (lambda: symbol)
@@ -234,18 +234,18 @@ def assocWithUnit(assocJoin, unit):
     return _assocWithUnit
 
 def underbarUnparsing(symbol):
-    splitSymbol = symbol.split("_")
-    numArgs = len([symb for symb in splitSymbol if symb == ""])
+    splitSymbol = symbol.split('_')
+    numArgs = len([symb for symb in splitSymbol if symb == ''])
     def _underbarUnparsing(*args):
         result = []
         i = 0
         for symb in splitSymbol:
-            if symb != "":
+            if symb != '':
                 result.append(symb)
             if i < len(args):
                 result.append(args[i])
                 i += 1
-        return " ".join(result)
+        return ' '.join(result)
     return _underbarUnparsing
 
 def indent(input, size = 2):
@@ -264,7 +264,7 @@ def buildSymbolTable(definition, opinionated = False):
         _fatal('Must supply a KDefinition!')
 
     def _unparserFromProductionItems(prodItems):
-        unparseString = ""
+        unparseString = ''
         for prodItem in prodItems:
             if isKTerminal(prodItem):
                 unparseString += prodItem['value']
