@@ -4,4 +4,7 @@
 [Error] Compiler: Cannot add new constructors to hooked sort Int
 	Source(invalidConstructor.k)
 	Location(4,18,4,22)
-[Error] Compiler: Had 2 structural errors.
+[Error] Compiler: Sort Int was declared as a token. Productions of this sort can only contain [function] or [token] labels.
+	Source(invalidConstructor.k)
+	Location(4,18,4,22)
+[Error] Compiler: Had 3 structural errors.

@@ -21,6 +21,7 @@ import org.kframework.compile.checks.CheckRHSVariables;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
 import org.kframework.compile.checks.CheckStreams;
+import org.kframework.compile.checks.CheckTokens;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -436,6 +437,10 @@ public class Kompile {
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckRewrite(errors, m)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
+
+        if (!(isSymbolic && isKast)) { // if it's not the java backend
+            stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckTokens(errors, m)::check));
+        }
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckK(errors)::check));
 
