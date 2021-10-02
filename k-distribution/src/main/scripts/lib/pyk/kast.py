@@ -83,14 +83,14 @@ def KAtt(atts = {}):
 def isKAtt(k):
     return k['node'] == 'KAtt'
 
-def KRule(body, requires = None, ensures = None, att = None):
-    return { 'node': 'KRule', 'body': body, 'requires': requires, 'ensures': ensures, 'att': att }
+def KRule(body, requires = None, ensures = None, att = None, label = None):
+    return { 'node': 'KRule', 'body': body, 'requires': requires, 'ensures': ensures, 'att': att , 'label': label }
 
 def isKRule(k):
     return k['node'] == 'KRule'
 
-def KClaim(body, requires = None, ensures = None, att = None):
-    return { 'node': 'KClaim', 'body': body, 'requires': requires, 'ensures': ensures, 'att': att }
+def KClaim(body, requires = None, ensures = None, att = None, label = None):
+    return { 'node': 'KClaim', 'body': body, 'requires': requires, 'ensures': ensures, 'att': att , 'label': label }
 
 def isKClaim(k):
     return k['node'] == 'KClaim'
@@ -375,24 +375,10 @@ def prettyPrintKast(kast, symbolTable, debug = False):
         body = '// KBubble(' + kast['sentenceType'] + ', ' + kast['contents'] + ')'
         attStr    = prettyPrintKast(kast['att'], symbolTable, debug = debug)
         return body + ' ' + attStr
-    if isKRule(kast):
-        body     = '\n     '.join(prettyPrintKast(kast['body'], symbolTable, debug = debug).split('\n'))
-        ruleStr = 'rule ' + body
-        requiresStr = ''
-        ensuresStr  = ''
-        attsStr     = prettyPrintKast(kast['att'], symbolTable, debug = debug)
-        reqEnsSymbolTable = { k: symbolTable[k] for k in symbolTable }
-        reqEnsSymbolTable [ '_andBool_' ] = lambda b1, b2: b1 + '\nandBool ' + b2
-        if kast['requires'] is not None:
-            requiresStr = prettyPrintKast(kast['requires'], reqEnsSymbolTable, debug = debug)
-            requiresStr = 'requires ' + '\n   '.join(requiresStr.split('\n'))
-        if kast['ensures'] is not None:
-            ensuresStr = prettyPrintKast(kast['ensures'], reqEnsSymbolTable, debug = debug)
-            ensuresStr = 'ensures ' + '\n  '.join(ensuresStr.split('\n'))
-        return ruleStr + '\n  ' + requiresStr + '\n  ' + ensuresStr + '\n  ' + attsStr
-    if isKClaim(kast):
-        body     = '\n     '.join(prettyPrintKast(kast['body'], symbolTable, debug = debug).split('\n'))
-        ruleStr = 'claim ' + body
+    if isKRule(kast) or isKClaim(kast):
+        body        = '\n     '.join(prettyPrintKast(kast['body'], symbolTable, debug = debug).split('\n'))
+        ruleStr     = 'rule' if isKRule(kast) else 'claim'
+        ruleStr     = ruleStr + ' ' + ('' if kast['label'] is None else '[' + kast['label'] + ']: ') + body
         requiresStr = ''
         ensuresStr  = ''
         attsStr     = prettyPrintKast(kast['att'], symbolTable, debug = debug)
