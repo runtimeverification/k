@@ -213,7 +213,7 @@ def splitConfigAndConstraints(kast):
     term = None
     constraints = []
     for c in conjuncts:
-        if isKApply(c) and c['label'] == '<generatedTop>':
+        if isKApply(c) and isCellKLabel(c['label']):
             term = c
         else:
             constraints.append(c)
