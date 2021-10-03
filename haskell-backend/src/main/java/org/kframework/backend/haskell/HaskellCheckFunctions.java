@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 K Team. All Rights Reserved.
+// Copyright (c) 2018-2021 K Team. All Rights Reserved.
 package org.kframework.backend.haskell;
 
 import com.google.inject.Inject;
@@ -51,7 +51,7 @@ public class HaskellBackend extends KoreBackend {
               throw KEMException.criticalError("Haskell backend reported errors validating compiled definition.\nExamine output to see errors.");
           }
         } catch (IOException | InterruptedException e) {
-            throw KEMException.criticalError("Error with I/O while executing kore-parser", e);
+            throw KEMException.criticalError("Error with I/O while executing kore-check-functions", e);
         }
     }
 
