@@ -199,9 +199,9 @@ def addAttributes(kast, att):
     if isKAtt(kast):
         return KAtt(combineDicts(att, kast['att']))
     if isKRule(kast):
-        return KRule(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = addAttributes(kast['att'], att))
+        return KRule(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = addAttributes(kast['att'], att), label = kast['label'])
     if isKClaim(kast):
-        return KClaim(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = addAttributes(kast['att'], att))
+        return KClaim(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = addAttributes(kast['att'], att), label = kast['label'])
     if isKProduction(kast):
         return KProduction(kast['productionItems'], kast['sort'], att = addAttributes(kast['att'], att))
     else:
@@ -380,8 +380,10 @@ def prettyPrintKast(kast, symbolTable, debug = False):
         return body + ' ' + attStr
     if isKRule(kast) or isKClaim(kast):
         body        = '\n     '.join(prettyPrintKast(kast['body'], symbolTable, debug = debug).split('\n'))
-        ruleStr     = 'rule' if isKRule(kast) else 'claim'
-        ruleStr     = ruleStr + ' ' + ('' if kast['label'] is None else '[' + kast['label'] + ']: ') + body
+        ruleStr     = 'rule ' if isKRule(kast) else 'claim '
+        if 'label' in kast and kast['label'] is not None:
+            ruleStr = ruleStr + '[' + kast['label'] + ']:'
+        ruleStr     = ruleStr + ' ' + body
         requiresStr = ''
         ensuresStr  = ''
         attsStr     = prettyPrintKast(kast['att'], symbolTable, debug = debug)

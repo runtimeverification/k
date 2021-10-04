@@ -410,9 +410,9 @@ def onAttributes(kast, effect):
     if isKAs(kast):
         return KAs(kast['pattern'], kast['alias'], att = effect(kast['att']))
     elif isKRule(kast):
-        return KRule(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = effect(kast['att']))
+        return KRule(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = effect(kast['att']), label = kast['label'])
     elif isKClaim(kast):
-        return KClaim(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = effect(kast['att']))
+        return KClaim(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = effect(kast['att']), label = kast['label'])
     elif isKContext(kast):
         return KContext(kast['body'], requires = kast['requires'], att = effect(kast['att']))
     elif isKBubble(kast):
@@ -466,28 +466,29 @@ def minimizeRule(rule):
     if not isKRule(rule) and not isKClaim(rule):
         return rule
 
-    ruleBody     = rule["body"]
-    ruleRequires = rule["requires"]
-    ruleEnsures  = rule["ensures"]
-    ruleAtts     = rule["att"]
+    ruleBody     = rule['body']
+    ruleRequires = rule['requires']
+    ruleEnsures  = rule['ensures']
+    ruleAtts     = rule['att']
+    ruleLabel    = rule['label']
 
     if ruleRequires is not None:
-        constraints = flattenLabel("_andBool_", ruleRequires)
-        ruleRequires = KToken("true", "Bool")
+        constraints = flattenLabel('_andBool_', ruleRequires)
+        ruleRequires = KToken('true', 'Bool')
         substitutions = {}
         for constraint in constraints:
-            if isKApply(constraint) and constraint["label"] == "_==K_":
-                lhs = constraint["args"][0]
-                rhs = constraint["args"][1]
+            if isKApply(constraint) and constraint['label'] == '_==K_':
+                lhs = constraint['args'][0]
+                rhs = constraint['args'][1]
                 if isKVariable(lhs):
-                    substitutions[lhs["name"]] = rhs
+                    substitutions[lhs['name']] = rhs
                     continue
-                if isKApply(lhs) and lhs["label"] == "Map:lookup":
-                    mapName  = lhs["args"][0]["name"]
-                    mapEntry = KApply("_|->_", [lhs["args"][1], rhs])
-                    substitutions[mapName] = KApply("_Map_", [mapEntry, KVariable(mapName + "_REST")])
+                if isKApply(lhs) and lhs['label'] == 'Map:lookup':
+                    mapName  = lhs['args'][0]['name']
+                    mapEntry = KApply('_|->_', [lhs['args'][1], rhs])
+                    substitutions[mapName] = KApply('_Map_', [mapEntry, KVariable(mapName + '_REST')])
                     continue
-            ruleRequires = KApply("_andBool_", [ruleRequires, constraint])
+            ruleRequires = KApply('_andBool_', [ruleRequires, constraint])
 
         ruleBody = substitute(ruleBody, substitutions)
 
@@ -499,19 +500,12 @@ def minimizeRule(rule):
 
     ruleBody = minimizeTerm(ruleBody, requires = ruleRequires, ensures = ruleEnsures)
 
-    if ruleRequires == KToken("true", "Bool"):
+    if ruleRequires == KToken('true', 'Bool'):
         ruleRequires = None
     if isKRule(rule):
-        return KRule(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts)
+        return KRule(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts, label = ruleLabel)
     else:
-        return KClaim(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts)
-
-def pushDownRewritesRule(rule):
-    if not isKRule(rule):
-        return rule
-
-    newRuleBody = pushDownRewrites(rule['body'])
-    return KRule(newRuleBody, requires = rule['requires'], ensures = rule['ensures'], att = rule['att'])
+        return KClaim(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts, label = ruleLabel)
 
 def removeSourceMap(k):
     """Remove source map information from a given definition.
