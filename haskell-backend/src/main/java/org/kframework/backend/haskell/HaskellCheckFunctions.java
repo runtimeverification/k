@@ -22,10 +22,10 @@ import java.util.HashSet;
 
 import static org.kframework.compile.ResolveHeatCoolAttribute.Mode.*;
 
-public class HaskellBackend extends KoreBackend {
+public class HaskellCheckFunctions extends KoreBackend {
 
     @Inject
-    public HaskellBackend(
+    public HaskellCheckFunctions(
             KompileOptions kompileOptions,
             FileUtil files,
             KExceptionManager kem,
