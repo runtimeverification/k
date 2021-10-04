@@ -370,6 +370,10 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                     args.addAll(Arrays.asList(
                         "--depth", kProveOptions.depth.toString()));
                 }
+                if (kProveOptions.branchingAllowed != Integer.MAX_VALUE) {
+                    args.add("--breadth");
+                    args.add(String.valueOf(kProveOptions.branchingAllowed));
+                }
                 String[] koreCommand = args.toArray(new String[args.size()]);
                 if (backendOptions.dryRun) {
                     globalOptions.debugWarnings = true; // sets this so the kprove directory is not removed.
