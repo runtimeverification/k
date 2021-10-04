@@ -318,8 +318,9 @@ def pushDownRewrites(kast):
             rhs = _kast["rhs"]
             if lhs == rhs:
                 return lhs
-            if  isKApply(lhs) and isKApply(rhs) and lhs["label"] == rhs["label"] and isCellKLabel(lhs["label"]) \
-            and len(lhs["args"]) == len(rhs["args"]):
+            if isKVariable(lhs) and isKVariable(rhs) and lhs['name'] == rhs['name']:
+                return lhs
+            if  isKApply(lhs) and isKApply(rhs) and lhs["label"] == rhs["label"] and isCellKLabel(lhs["label"]) and len(lhs["args"]) == len(rhs["args"]):
                     newArgs = [ KRewrite(lArg, rArg) for (lArg, rArg) in zip(lhs["args"], rhs["args"]) ]
                     return KApply(lhs["label"], newArgs)
             if isKSequence(lhs) and isKSequence(rhs) and len(lhs['items']) > 0 and len(rhs['items']) > 0:
