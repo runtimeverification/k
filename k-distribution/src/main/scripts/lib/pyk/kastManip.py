@@ -6,17 +6,28 @@ import subprocess
 from .kast import *
 from .kast import _notif, _warning, _fatal
 
-def buildAssoc(base, join, l):
+def buildAssoc(unit, join, ls):
     """Build an associative binary operator term given the join and unit ops.
 
     -   Input: unit, join, and list of elements to join.
     -   Output: cons-list style construction of the joined term.
     """
-    if len(l) == 0:
-        return base
-    if len(l) == 1:
-        return l[0]
-    return KApply(join, [l[0], buildAssoc(base, join, l[1:])])
+    ls = list(filter(lambda l: l != unit, ls))
+    if len(ls) == 0:
+        return unit
+    if len(ls) == 1:
+        return ls[0]
+    return KApply(join, [ls[0], buildAssoc(unit, join, ls[1:])])
+
+def buildCons(unit, cons, ls):
+    """Build a cons operator term given the cons and unit ops.
+
+    -   Input: unit, cons, and list of elements to join.
+    -   Output: cons-list style construction of the joined term.
+    """
+    if len(ls) == 0:
+        return unit
+    return KApply(cons, [ls[0], buildCons(unit, cons, ls[1:])])
 
 def match(pattern, kast):
     """Perform syntactic pattern matching and return the substitution.
