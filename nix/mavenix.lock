@@ -2426,6 +2426,18 @@
       "sha1": "a159fa05cce714c83deff647655dd53db064b21c"
     },
     {
+      "path": "javax/xml/bind/jaxb-api-parent/2.3.0/jaxb-api-parent-2.3.0.pom",
+      "sha1": "813cc0def6b156ec1808f4695a74cf6777030012"
+    },
+    {
+      "path": "javax/xml/bind/jaxb-api/2.3.0/jaxb-api-2.3.0.jar",
+      "sha1": "99f802e0cb3e953ba3d6e698795c4aeb98d37c48"
+    },
+    {
+      "path": "javax/xml/bind/jaxb-api/2.3.0/jaxb-api-2.3.0.pom",
+      "sha1": "61dab99f547e2110e42e35f659d9ba27bd00108c"
+    },
+    {
       "path": "jaxen/jaxen/1.1-beta-8/jaxen-1.1-beta-8.jar",
       "sha1": "b0bbd0cc28b4ec88b58d304896f7be7598e1c909"
     },
@@ -2624,6 +2636,10 @@
     {
       "path": "net/java/jvnet-parent/3/jvnet-parent-3.pom",
       "sha1": "f8f3be3e980551a39b5679411e171aeb6931aaec"
+    },
+    {
+      "path": "net/java/jvnet-parent/5/jvnet-parent-5.pom",
+      "sha1": "5343c954d21549d039feebe5fadef023cdfc1388"
     },
     {
       "path": "net/sf/jung/jung-api/2.0.1/jung-api-2.0.1.jar",
