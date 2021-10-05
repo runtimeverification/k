@@ -439,6 +439,18 @@ def onAttributes(kast, effect):
         return KDefinition(kast['mainModule'], modules, requires = requires, att = effect(kast['att']))
     _fatal('No attributes for: ' + kast['node'] + '.')
 
+def dedupeClauses(terms):
+    """Return a list of terms in the same order with duplicates removed.
+
+    -   Input: a list.
+    -   Output: a list with duplicates removed.
+    """
+    newTerms = []
+    for t in terms:
+        if t not in newTerms:
+            newTerms.append(t)
+    return newTerms
+
 def minimizeTerm(term, requires = None, ensures = None, abstractLabels = []):
     """Minimize a K term for pretty-printing.
 
@@ -493,8 +505,12 @@ def minimizeRule(rule):
 
         ruleBody = substitute(ruleBody, substitutions)
 
-        ruleRequires = simplifyBool(unsafeMlPredToBool(ruleRequires))
-        ruleEnsures  = simplifyBool(unsafeMlPredToBool(ruleEnsures))
+        if ruleRequires is not None:
+            ruleRequires = buildAssoc(KConstant('#Top'), '#And', dedupeClauses(flattenLabel('#And', ruleRequires)))
+            ruleRequires = simplifyBool(unsafeMlPredToBool(ruleRequires))
+        if ruleEnsures is not None:
+            ruleEnsures = buildAssoc(KConstant('#Top'), '#And', dedupeClauses(flattenLabel('#And', ruleEnsures)))
+            ruleEnsures = simplifyBool(unsafeMlPredToBool(ruleEnsures))
 
         ruleRequires = None if ruleRequires == KToken('true', 'Bool') else ruleRequires
         ruleEnsures  = None if ruleEnsures  == KToken('true', 'Bool') else ruleEnsures
