@@ -326,14 +326,15 @@ def prettyPrintKast(kast, symbolTable, debug = False):
         rhsStr = prettyPrintKast(kast['rhs'], symbolTable, debug = debug)
         return '( ' + lhsStr + ' => ' + rhsStr + ' )'
     if isKSequence(kast):
-        unparsedItems = [ prettyPrintKast(item, symbolTable, debug = debug) for item in kast['items'][0:-1] ]
-        unparsedKSequence = '\n~> '.join(unparsedItems)
-        if len(kast['items']) > 0 and kast['items'][-1] == ktokenDots:
+        if len(kast['items']) == 0:
+            return prettyPrintKast(KConstant(klabelEmptyK), symbolTable, debug = debug)
+        if len(kast['items']) == 1:
+            return prettyPrintKast(kast['items'][0], symbolTable, debug = debug)
+        unparsedKSequence = '\n~> '.join([ prettyPrintKast(item, symbolTable, debug = debug) for item in kast['items'][0:-1] ])
+        if kast['items'][-1] == ktokenDots:
             unparsedKSequence = unparsedKSequence + '\n' + prettyPrintKast(ktokenDots, symbolTable, debug = debug)
-        elif len(kast['items']) > 0:
-            unparsedKSequence = unparsedKSequence + '\n~> ' + prettyPrintKast(kast['items'][-1], symbolTable, debug = debug)
         else:
-            unparsedKSequence = '.'
+            unparsedKSequence = unparsedKSequence + '\n~> ' + prettyPrintKast(kast['items'][-1], symbolTable, debug = debug)
         return unparsedKSequence
     if isKSort(kast):
         return kast['name']
