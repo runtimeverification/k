@@ -1,4 +1,4 @@
-[Error] Compiler: Invalid smt-lemma term detected. All terms in smt-lemma rules require smt-hook or smtlib labels
+[Error] Compiler: Invalid term in smt-lemma detected. All terms in smt-lemma rules require smt-hook or smtlib labels
 	Source(smtLemmaCheck.k)
 	Location(12,8,12,12)
 [Error] Compiler: Had 1 structural errors after macro expansion.
