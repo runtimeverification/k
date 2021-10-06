@@ -59,8 +59,8 @@ def KSequence(items):
 def isKSequence(k):
     return k['node'] == 'KSequence'
 
-def KVariable(name, sort = None):
-    return { 'node' : 'KVariable', 'name': name, 'originalName': name, 'sort': sort }
+def KVariable(name):
+    return { 'node' : 'KVariable', 'name': name, 'originalName': name }
 
 def isKVariable(k):
     return k['node'] == 'KVariable'
@@ -301,10 +301,7 @@ def prettyPrintKast(kast, symbolTable, debug = False):
     if kast is None or kast == {}:
         return ""
     if isKVariable(kast):
-        varStr = kast['originalName'] if 'originalName' in kast else kast['name']
-        if 'sort' in kast and kast['sort'] is not None:
-            varStr = varStr + ':' + kast['sort']
-        return varStr
+        return kast['originalName'] if 'originalName' in kast else kast['name']
     if isKToken(kast):
         return kast['token']
     if isKApply(kast):
