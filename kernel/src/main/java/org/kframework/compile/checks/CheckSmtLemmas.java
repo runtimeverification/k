@@ -27,9 +27,6 @@ public class CheckSmtLemmas {
     }
 
     private void check(Rule rule){
-        if (!(rule.body() instanceof KRewrite)) {
-            return;
-        }
         new VisitK() {
             @Override
             public void apply(KApply k) {
