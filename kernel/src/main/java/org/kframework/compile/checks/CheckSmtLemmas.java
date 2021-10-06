@@ -1,5 +1,6 @@
 package org.kframework.compile.checks;
 
+import org.kframework.attributes.Att;
 import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
@@ -20,7 +21,7 @@ public class CheckSmtLemmas {
     }
 
     public void check(Sentence sentence) {
-        if ((sentence instanceof Rule) && sentence.att().contains("smt-lemma")) {
+        if ((sentence instanceof Rule) && sentence.att().contains(Att.SMT_LEMMA())) {
             check((Rule) sentence);
         }
     }
@@ -31,17 +32,13 @@ public class CheckSmtLemmas {
         }
         new VisitK() {
             @Override
-            public void apply(KRewrite k) {
-                super.apply(k.left());
-                super.apply(k.right());
-            }
-
-            @Override
             public void apply(KApply k) {
-                if (!k.att().toString().matches(".*smtlib.*|.*smt-hook.*")) {
+                if (m.productionsFor().isDefinedAt(k.klabel()) && !m.productionsFor().get(k.klabel()).get()
+                        .exists(p -> p.att().contains(Att.SMT_HOOK()) || p.att().contains(Att.SMTLIB()))) {
                     errors.add(KEMException.compilerError(
                             "Invalid smt-lemma term detected. All terms in smt-lemma rules require smt-hook or smtlib labels", k));
                 }
+
                 k.klist().items().stream().forEach(ki -> super.apply(ki));
             }
         }.accept(rule.body());
