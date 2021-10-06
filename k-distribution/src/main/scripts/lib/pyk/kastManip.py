@@ -296,10 +296,15 @@ def splitConfigFrom(configuration):
     return (symbolic_config, initial_substitution)
 
 def collapseDots(kast):
+    """Given a configuration with structural frames `...`, minimize the structural frames needed.
+
+    -   Input: a configuration, potentially with structural frames.
+    -   Output: the same configuration, with the amount of structural framing minimized.
+    """
     def _collapseDots(_kast):
         if isKApply(_kast):
-            label = _kast["label"]
-            args  = _kast["args"]
+            label = _kast['label']
+            args  = _kast['args']
             if isCellKLabel(label) and len(args) == 1 and args[0] == ktokenDots:
                 return ktokenDots
             newArgs = [ arg for arg in args if arg != ktokenDots ]
@@ -309,7 +314,7 @@ def collapseDots(kast):
                 newArgs.append(ktokenDots)
             return KApply(label, newArgs)
         elif isKRewrite(_kast):
-            if _kast["lhs"] == ktokenDots:
+            if _kast['lhs'] == ktokenDots:
                 return ktokenDots
         return _kast
     return traverseBottomUp(kast, _collapseDots)
@@ -400,14 +405,14 @@ def uselessVarsToDots(kast, keepVars = None):
     numOccurances = countVarOccurances(kast, numOccurances = initList)
 
     def _collapseUselessVars(_kast):
-        if isKApply(_kast) and isCellKLabel(_kast["label"]):
+        if isKApply(_kast) and isCellKLabel(_kast['label']):
             newArgs = []
-            for arg in _kast["args"]:
-                if isKVariable(arg) and numOccurances[arg["name"]] == 1:
+            for arg in _kast['args']:
+                if isKVariable(arg) and numOccurances[arg['name']] == 1:
                     newArgs.append(ktokenDots)
                 else:
                     newArgs.append(arg)
-            return KApply(_kast["label"], newArgs)
+            return KApply(_kast['label'], newArgs)
         return _kast
 
     return traverseBottomUp(kast, _collapseUselessVars)
