@@ -63,7 +63,7 @@ def match(pattern, kast):
 
 def onChildren(kast, effect):
     if isKApply(kast):
-        return KApply(kast["label"], [ effect(arg) for arg in kast['args'] ])
+        return KApply(kast['label'], [ effect(arg) for arg in kast['args'] ])
     elif isKRewrite(kast):
         return KRewrite(effect(kast['lhs']), effect(kast['rhs']))
     elif isKSequence(kast):
@@ -78,14 +78,6 @@ def traverseTopDown(kast, effect):
 
 def collectBottomUp(kast, callback):
     callback(onChildren(kast, lambda _kast: collectBottomUp(_kast, callback)))
-
-def collectFreeVars(kast):
-    freeVars = set([])
-    def addFreeVar(k):
-        if isKVariable(k):
-            freeVars.add(k["name"])
-    collectBottomUp(kast, addFreeVar)
-    return freeVars
 
 def substitute(pattern, substitution):
     """Apply a substitution to a pattern.
@@ -107,15 +99,6 @@ def whereMatchingBottomUp(effect, matchPattern, pattern):
             newK = effect(matchingSubst)
         return newK
     return traverseBottomUp(_effect, pattern)
-
-def whereMatchingTopDown(effect, matchPattern, pattern):
-    def _effect(k):
-        matchingSubst = match(matchPattern, k)
-        newK = k
-        if matchingSubst is not None:
-            newK = effect(matchingSubst)
-        return newK
-    return traverseTopDown(_effect, pattern)
 
 def replaceKLabels(pattern, klabelMap):
     def replace(k):
@@ -207,6 +190,26 @@ def getOccurances(kast, pattern):
             occurances.append(k)
     collectBottomUp(kast, addOccurance)
     return occurances
+
+def countVarOccurances(kast, numOccurances = None):
+    """Count the number of occurances of each variable in a proof.
+
+    -   Input: Kast term.
+    -   Output: Map of variable names to their number of occurances.
+    """
+    numOccurances = {} if numOccurances is None else numOccurances
+    def _getNumOccurances(_kast):
+        if isKVariable(_kast):
+            vName = _kast["name"]
+            if vName in numOccurances:
+                numOccurances[vName] += 1
+            else:
+                numOccurances[vName] = 1
+    collectBottomUp(kast, _getNumOccurances)
+    return numOccurances
+
+def collectFreeVars(kast):
+    return list(countVarOccurances(kast).keys())
 
 def flattenLabel(label, kast):
     if isKApply(kast) and kast["label"] == label:
@@ -312,17 +315,22 @@ def collapseDots(kast):
     return traverseBottomUp(kast, _collapseDots)
 
 def pushDownRewrites(kast):
+    """Traverse a term and push rewrites down as far as possible.
+
+    -   Input: Kast term potentially with rewrites.
+    -   Output: Kast term with rewrites localized (or removed) as much as possible.
+    """
     def _pushDownRewrites(_kast):
         if isKRewrite(_kast):
-            lhs = _kast["lhs"]
-            rhs = _kast["rhs"]
+            lhs = _kast['lhs']
+            rhs = _kast['rhs']
             if lhs == rhs:
                 return lhs
             if isKVariable(lhs) and isKVariable(rhs) and lhs['name'] == rhs['name']:
                 return lhs
-            if  isKApply(lhs) and isKApply(rhs) and lhs["label"] == rhs["label"] and isCellKLabel(lhs["label"]) and len(lhs["args"]) == len(rhs["args"]):
-                    newArgs = [ KRewrite(lArg, rArg) for (lArg, rArg) in zip(lhs["args"], rhs["args"]) ]
-                    return KApply(lhs["label"], newArgs)
+            if  isKApply(lhs) and isKApply(rhs) and lhs['label'] == rhs['label'] and len(lhs['args']) == len(rhs['args']):
+                    newArgs = [ KRewrite(lArg, rArg) for (lArg, rArg) in zip(lhs['args'], rhs['args']) ]
+                    return KApply(lhs['label'], newArgs)
             if isKSequence(lhs) and isKSequence(rhs) and len(lhs['items']) > 0 and len(rhs['items']) > 0:
                 if lhs['items'][0] == rhs['items'][0]:
                     lowerRewrite = KRewrite(KSequence(lhs['items'][1:]), KSequence(rhs['items'][1:]))
@@ -361,26 +369,35 @@ def removeSemanticCasts(kast):
         return _kast
     return traverseBottomUp(kast, _removeSemanticCasts)
 
-def uselessVarsToDots(kast, requires = None, ensures = None):
+def markUselessVars(kast):
+    """Given a kast term as input with variables, return one where the useless vars are appropriately marked.
+
+    -   Input: A Kast term.
+    -   Output: Kast term with variables appropriately named.
+    """
+    occurances = countVarOccurances(kast)
+    subst = {}
+    for v in occurances:
+        if v.startswith('_') and occurances[v] > 1:
+            subst[v] = KVariable(v[1:])
+        elif (not v.startswith('_')) and occurances[v] == 1:
+            subst[v] = KVariable('_' + v)
+    return substitute(kast, subst)
+
+def uselessVarsToDots(kast, keepVars = None):
     """Structurally abstract away useless variables.
 
     -   Input: kast term, and a requires clause and ensures clause.
     -   Output: kast term with the useless vars structurally abstracted.
     """
-    numOccurances = {}
-    def _getNumOccurances(_kast):
-        if isKVariable(_kast):
-            vName = _kast["name"]
-            if vName in numOccurances:
-                numOccurances[vName] += 1
+    initList = {}
+    if keepVars is not None:
+        for v in keepVars:
+            if v not in initList:
+                initList[v] = 1
             else:
-                numOccurances[vName] = 1
-
-    collectBottomUp(kast, _getNumOccurances)
-    if requires is not None:
-        collectBottomUp(requires, _getNumOccurances)
-    if ensures is not None:
-        collectBottomUp(ensures, _getNumOccurances)
+                initList[v] += 1
+    numOccurances = countVarOccurances(kast, numOccurances = initList)
 
     def _collapseUselessVars(_kast):
         if isKApply(_kast) and isCellKLabel(_kast["label"]):
@@ -451,7 +468,7 @@ def dedupeClauses(terms):
             newTerms.append(t)
     return newTerms
 
-def minimizeTerm(term, requires = None, ensures = None, abstractLabels = []):
+def minimizeTerm(term, keepVars = None, abstractLabels = []):
     """Minimize a K term for pretty-printing.
 
     -   Input: kast term, and optionally requires and ensures clauses with constraints.
@@ -462,12 +479,12 @@ def minimizeTerm(term, requires = None, ensures = None, abstractLabels = []):
     """
     term = inlineCellMaps(term)
     term = removeSemanticCasts(term)
-    term = uselessVarsToDots(term, requires = requires, ensures = ensures)
+    term = uselessVarsToDots(term, keepVars = keepVars)
     term = labelsToDots(term, abstractLabels)
     term = collapseDots(term)
     return term
 
-def minimizeRule(rule):
+def minimizeRule(rule, keepVars = []):
     """Minimize a K rule or claim for pretty-printing.
 
     -   Input: kast representing a K rule or claim.
@@ -476,7 +493,7 @@ def minimizeRule(rule):
         -   Unused cells will be abstracted.
         -   Attempt to remove useless side-conditions.
     """
-    if not isKRule(rule) and not isKClaim(rule):
+    if not (isKRule(rule) or isKClaim(rule)):
         return rule
 
     ruleBody     = rule['body']
@@ -486,36 +503,22 @@ def minimizeRule(rule):
     ruleLabel    = rule['label']
 
     if ruleRequires is not None:
-        constraints = flattenLabel('_andBool_', ruleRequires)
-        ruleRequires = KToken('true', 'Bool')
-        substitutions = {}
-        for constraint in constraints:
-            if isKApply(constraint) and constraint['label'] == '_==K_':
-                lhs = constraint['args'][0]
-                rhs = constraint['args'][1]
-                if isKVariable(lhs):
-                    substitutions[lhs['name']] = rhs
-                    continue
-                if isKApply(lhs) and lhs['label'] == 'Map:lookup':
-                    mapName  = lhs['args'][0]['name']
-                    mapEntry = KApply('_|->_', [lhs['args'][1], rhs])
-                    substitutions[mapName] = KApply('_Map_', [mapEntry, KVariable(mapName + '_REST')])
-                    continue
-            ruleRequires = KApply('_andBool_', [ruleRequires, constraint])
+        ruleRequires = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupeClauses(flattenLabel('_andBool_', ruleRequires)))
+        ruleRequires = simplifyBool(ruleRequires)
 
-        ruleBody = substitute(ruleBody, substitutions)
+    if ruleEnsures is not None:
+        ruleEnsures = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupeClauses(flattenLabel('_andBool_', ruleEnsures)))
+        ruleEnsures = simplifyBool(ruleEnsures)
 
-        if ruleRequires is not None:
-            ruleRequires = buildAssoc(KConstant('#Top'), '#And', dedupeClauses(flattenLabel('#And', ruleRequires)))
-            ruleRequires = simplifyBool(unsafeMlPredToBool(ruleRequires))
-        if ruleEnsures is not None:
-            ruleEnsures = buildAssoc(KConstant('#Top'), '#And', dedupeClauses(flattenLabel('#And', ruleEnsures)))
-            ruleEnsures = simplifyBool(unsafeMlPredToBool(ruleEnsures))
+    ruleRequires = None if ruleRequires == KToken('true', 'Bool') else ruleRequires
+    ruleEnsures  = None if ruleEnsures  == KToken('true', 'Bool') else ruleEnsures
 
-        ruleRequires = None if ruleRequires == KToken('true', 'Bool') else ruleRequires
-        ruleEnsures  = None if ruleEnsures  == KToken('true', 'Bool') else ruleEnsures
-
-    ruleBody = minimizeTerm(ruleBody, requires = ruleRequires, ensures = ruleEnsures)
+    constrainedVars = [] if keepVars is None else keepVars
+    if ruleRequires is not None:
+        constrainedVars = constrainedVars + collectFreeVars(ruleRequires)
+    if ruleEnsures is not None:
+        constrainedVars = constrainedVars + collectFreeVars(ruleEnsures)
+    ruleBody = minimizeTerm(ruleBody, keepVars = constrainedVars)
 
     if ruleRequires == KToken('true', 'Bool'):
         ruleRequires = None
