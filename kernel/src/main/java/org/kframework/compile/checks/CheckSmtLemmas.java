@@ -33,7 +33,7 @@ public class CheckSmtLemmas {
                 if (m.productionsFor().isDefinedAt(k.klabel()) && !m.productionsFor().get(k.klabel()).get()
                         .exists(p -> p.att().contains(Att.SMT_HOOK()) || p.att().contains(Att.SMTLIB()))) {
                     errors.add(KEMException.compilerError(
-                            "Invalid smt-lemma term detected. All terms in smt-lemma rules require smt-hook or smtlib labels", k));
+                            "Invalid term in smt-lemma detected. All terms in smt-lemma rules require smt-hook or smtlib labels", k));
                 }
 
                 k.klist().items().stream().forEach(ki -> super.apply(ki));
