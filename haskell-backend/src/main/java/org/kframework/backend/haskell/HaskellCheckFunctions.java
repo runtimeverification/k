@@ -37,8 +37,7 @@ public class HaskellCheckFunctions extends KoreBackend {
     @Override
     public void accept(Backend.Holder h) {
         String kore = getKompiledString(h.def);
-	Module mod = h.def.mainModule();
-	String moduleName = mod.name();
+	String moduleName = h.def.mainSyntaxModuleName();
         h.def = null;
         files.saveToKompiled("definition.kore", kore);
         ProcessBuilder pb = files.getProcessBuilder();
