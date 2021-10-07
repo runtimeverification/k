@@ -17,6 +17,8 @@ def buildAssoc(unit, join, ls):
         return unit
     if len(ls) == 1:
         return ls[0]
+    if ls[0] == unit:
+        return buildAssoc(unit, join, ls[1:])
     return KApply(join, [ls[0], buildAssoc(unit, join, ls[1:])])
 
 def buildCons(unit, cons, ls):
