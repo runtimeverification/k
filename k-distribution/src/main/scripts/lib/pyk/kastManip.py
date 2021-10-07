@@ -443,8 +443,6 @@ def uselessVarsToDots(kast, keepVars = None):
                 else:
                     newArgs.append(arg)
             return KApply(_kast['label'], newArgs)
-        if isKSequence(_kast) and len(_kast['items']) > 0 and isKVariable(_kast['items'][-1]) and _kast['items'][-1]['name'].startswith('_'):
-            return KSequence(_kast['items'][0:-1] + [ktokenDots])
         return _kast
 
     return traverseBottomUp(kast, _collapseUselessVars)
