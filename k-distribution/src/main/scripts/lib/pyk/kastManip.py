@@ -217,6 +217,36 @@ def flattenLabel(label, kast):
         return [ c for cs in constraints for c in cs ]
     return [kast]
 
+def onCells(cellHandler, constrainedTerm):
+    """Given an effect and a constrained term, return the effect applied to the cells in the term.
+
+    -   Input: Effect that takes as input a cell name and the contents of the cell, and a constrained term.
+    -   Output: Constrained term with the effect applied to each cell.
+    """
+    (config, constraint) = splitConfigAndConstraints(constrainedTerm)
+    constraints          = flattenLabel('#And', constraint)
+    (emptyConfig, subst) = splitConfigFrom(config)
+    for k in subst:
+        newCell = cellHandler(k, subst[k])
+        if newCell is not None:
+            (term, constraint) = newCell
+            subst[k] = term
+            if not constraint in constraints:
+                constraints.append(constraint)
+    return buildAssoc(KConstant('#Top'), '#And', [substitute(emptyConfig, subst)] + constraints)
+
+def onCell(cellVariable, effect, constrainedTerm):
+    """Given a cell variable name, an effect, and a constrained term, return the affect applied to that cell in the term.
+
+    -   Input: Cell variable name, cell effect, constrained term.
+    -   Output: The constrained term with the effect applied to the specified cell.
+    """
+    def _cellHandler(cellName, cellValue):
+        if cellName == cellVariable:
+            return effect(cellValue)
+        return None
+    onCells(_cellHandler, constrainedTerm)
+
 def splitConfigAndConstraints(kast):
     """Split the configuration/term from the constraints.
 
