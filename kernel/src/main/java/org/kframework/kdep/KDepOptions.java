@@ -26,5 +26,5 @@ public class KDepOptions {
     public OutputDirectoryOptions outputDirectory = new OutputDirectoryOptions();
 
     @Parameter(names="--remake-depend", description="Generate an additional rule to remake the dependency file.")
-    public String alsoDependName;
+    public boolean alsoRemakeDepend = false;
 }

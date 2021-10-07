@@ -119,8 +119,9 @@ public class KDepFrontEnd extends FrontEnd {
         }
         System.out.println();
 
-        if (this.kdepOptions.alsoDependName != null) {
-            System.out.println(this.kdepOptions.alsoDependName + " : " + " \\");
+        if (this.kdepOptions.alsoRemakeDepend) {
+            System.out.println("DEPEND_FILE=$(lastword $(MAKEFILE_LIST))");
+            System.out.println("$(DEPEND_FILE) : " + " \\");
             System.out.println("    $(wildcard \\");
 
             for (File file : sortedFiles) {
