@@ -21,7 +21,7 @@ import static org.kframework.Collections.*;
  * Created by dwightguth on 1/25/16.
  */
 public class CheckAtt {
-    private final Set<KLabel> macros;
+    private final scala.collection.Set<KLabel> macros;
     private final Set<KEMException> errors;
     private final Module m;
     private final boolean isSymbolicKast;
@@ -30,7 +30,7 @@ public class CheckAtt {
         this.errors = errors;
         this.m = m;
         this.isSymbolicKast = isSymbolicKast;
-        this.macros = stream(m.rulesFor()).filter(e -> stream(e._2()).filter(r -> ExpandMacros.isMacro(r)).findAny().isPresent()).map(e -> e._1()).collect(Collectors.toSet());
+        this.macros = m.macroKLabels();
     }
 
     public void check(Sentence sentence) {
