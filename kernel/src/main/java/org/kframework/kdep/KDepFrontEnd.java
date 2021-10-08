@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
  */
 public class KDepFrontEnd extends FrontEnd {
 
+    private final KDepOptions kdepOptions;
     private final OuterParsingOptions options;
     private final KExceptionManager kem;
     private final Stopwatch sw;
@@ -55,6 +56,7 @@ public class KDepFrontEnd extends FrontEnd {
 
     @Inject
     public KDepFrontEnd(
+            KDepOptions kdepOptions,
             OuterParsingOptions options,
             KExceptionManager kem,
             GlobalOptions globalOptions,
@@ -63,6 +65,7 @@ public class KDepFrontEnd extends FrontEnd {
             JarInfo jarInfo,
             Provider<FileUtil> files) {
         super(kem, globalOptions, usage, jarInfo, files);
+        this.kdepOptions = kdepOptions;
         this.options = options;
         this.globalOptions = globalOptions;
         this.kem = kem;
@@ -115,6 +118,18 @@ public class KDepFrontEnd extends FrontEnd {
             System.out.println("    " + file.getAbsolutePath() + " \\");
         }
         System.out.println();
+
+        if (this.kdepOptions.alsoRemakeDepend) {
+            System.out.println("DEPEND_FILE=$(lastword $(MAKEFILE_LIST))");
+            System.out.println("$(DEPEND_FILE) : " + " \\");
+            System.out.println("    $(wildcard \\");
+
+            for (File file : sortedFiles) {
+                System.out.println("        " + file.getAbsolutePath() + " \\");
+            }
+
+            System.out.println("    )");
+        }
         return 0;
     }
 }
