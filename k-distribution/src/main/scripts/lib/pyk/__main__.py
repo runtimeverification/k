@@ -85,18 +85,21 @@ def main(commandLineArgs, extraMain = None):
         json_definition = readKastTerm(kompiled_dir + '/compiled.json')
         symbolTable = buildSymbolTable(json_definition, opinionated = True)
         json_term = json.loads(args['json-term'].read())['term']
-        abstractLabels = [] if args['omit_labels'] is None else args['omit_labels'].split(',')
-        minimized_disjuncts = []
-        for d in flattenLabel('#Or', json_term):
-            dMinimized = minimizeTerm(d, abstractLabels = abstractLabels)
-            (dConfig, dConstraint) = splitConfigAndConstraints(dMinimized)
-            if dConstraint != KConstant('#Top'):
-                minimized_disjuncts.append(KApply('#And', [dConfig, dConstraint]))
-            else:
-                minimized_disjuncts.append(dConfig)
-        sorted_disjunct = buildAssoc(KConstant('#Bottom'), '#Or', minimized_disjuncts)
-        new_disjunct = propogateUpConstraints(sorted_disjunct)
-        args['output'].write(prettyPrintKast(new_disjunct, symbolTable))
+        if json_term == KConstant('#Top'):
+            args['output'].write(prettyPrintKast(json_term, symbolTable))
+        else:
+            abstractLabels = [] if args['omit_labels'] is None else args['omit_labels'].split(',')
+            minimized_disjuncts = []
+            for d in flattenLabel('#Or', json_term):
+                dMinimized = minimizeTerm(d, abstractLabels = abstractLabels)
+                (dConfig, dConstraint) = splitConfigAndConstraints(dMinimized)
+                if dConstraint != KConstant('#Top'):
+                    minimized_disjuncts.append(KApply('#And', [dConfig, dConstraint]))
+                else:
+                    minimized_disjuncts.append(dConfig)
+            sorted_disjunct = buildAssoc(KConstant('#Bottom'), '#Or', minimized_disjuncts)
+            new_disjunct = propogateUpConstraints(sorted_disjunct)
+            args['output'].write(prettyPrintKast(new_disjunct, symbolTable))
 
     elif extraMain is not None:
         extraMain(args, kompiled_dir)
