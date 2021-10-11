@@ -256,13 +256,13 @@ def findCommonItems(l1, l2):
             newL2.append(i)
     return (common, newL1, newL2)
 
-def propogateUpConstraints(k):
-    """Try to propogate common constraints up disjuncts.
+def propagateUpConstraints(k):
+    """Try to propagate common constraints up disjuncts.
 
     -   Input: kast disjunct of constrained terms (conjuncts).
-    -   Output: kast where common constraints in the disjunct have been propogated up.
+    -   Output: kast where common constraints in the disjunct have been propagated up.
     """
-    def _propogateUpConstraints(_k):
+    def _propagateUpConstraints(_k):
         pattern = KApply('#Or', [KApply('#And', [KVariable('G1'), KVariable('C1')]), KApply('#And', [KVariable('G2'), KVariable('C2')])])
         pmatch = match(pattern, _k)
         if pmatch is None:
@@ -279,7 +279,7 @@ def propogateUpConstraints(k):
         if len(r2) > 0:
             g2 = buildAssoc(KConstant('#Top'), '#And', [g2] + r2)
         return KApply('#And', [KApply('#Or', [g1, g2]), buildAssoc(KConstant('#Top'), '#And', common)])
-    return traverseBottomUp(k, _propogateUpConstraints)
+    return traverseBottomUp(k, _propagateUpConstraints)
 
 def splitConfigFrom(configuration):
     """Split the substitution from a given configuration.

@@ -98,7 +98,7 @@ def main(commandLineArgs, extraMain = None):
                 else:
                     minimized_disjuncts.append(dConfig)
             sorted_disjunct = buildAssoc(KConstant('#Bottom'), '#Or', minimized_disjuncts)
-            new_disjunct = propogateUpConstraints(sorted_disjunct)
+            new_disjunct = propagateUpConstraints(sorted_disjunct)
             args['output'].write(prettyPrintKast(new_disjunct, symbolTable))
 
     elif extraMain is not None:
