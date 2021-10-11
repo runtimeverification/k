@@ -194,11 +194,11 @@ def getAttribute(k, key):
     -   Input: Kast with a KAtt, and attribute name.
     -   Output: Attribute value if present, otherwise None.
     """
-    if 'att' in k and isKAtt(k['att']):
+    if 'att' in k and k['att'] is not None and isKAtt(k['att']):
         katts = k['att']['att']
         if key in katts.keys():
             return katts[key]
-        return None
+    return None
 
 def addAttributes(kast, att):
     """Returns the input Kast with the given attributes added.
