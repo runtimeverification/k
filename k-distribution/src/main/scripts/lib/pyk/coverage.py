@@ -28,10 +28,10 @@ def getRuleById(definition, rule_id):
     _fatal('Could not find rule with ID: ' + rule_id)
 
 def stripCoverageLogger(rule):
-    ruleBody     = rule["body"]
-    ruleRequires = rule["requires"]
-    ruleEnsures  = rule["ensures"]
-    ruleAtts     = rule["att"]
+    ruleBody     = rule['body']
+    ruleRequires = rule['requires']
+    ruleEnsures  = rule['ensures']
+    ruleAtts     = rule['att']
 
     if isKRewrite(ruleBody):
         ruleLHS = ruleBody['lhs']
