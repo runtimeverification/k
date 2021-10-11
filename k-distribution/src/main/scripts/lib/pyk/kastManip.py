@@ -341,8 +341,8 @@ def pushDownRewrites(kast):
             if isKVariable(lhs) and isKVariable(rhs) and lhs['name'] == rhs['name']:
                 return lhs
             if  isKApply(lhs) and isKApply(rhs) and lhs['label'] == rhs['label'] and len(lhs['args']) == len(rhs['args']):
-                    newArgs = [ KRewrite(lArg, rArg) for (lArg, rArg) in zip(lhs['args'], rhs['args']) ]
-                    return KApply(lhs['label'], newArgs)
+                newArgs = [ KRewrite(lArg, rArg) for (lArg, rArg) in zip(lhs['args'], rhs['args']) ]
+                return KApply(lhs['label'], newArgs)
             if isKSequence(lhs) and isKSequence(rhs) and len(lhs['items']) > 0 and len(rhs['items']) > 0:
                 if lhs['items'][0] == rhs['items'][0]:
                     lowerRewrite = KRewrite(KSequence(lhs['items'][1:]), KSequence(rhs['items'][1:]))
