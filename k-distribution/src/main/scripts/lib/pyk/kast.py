@@ -391,7 +391,7 @@ def prettyPrintKast(kast, symbolTable, debug = False):
         body        = '\n     '.join(prettyPrintKast(kast['body'], symbolTable, debug = debug).split('\n'))
         ruleStr     = 'rule ' if isKRule(kast) else 'claim '
         if getAttribute(kast, 'label') is not None:
-            ruleStr = ruleStr + '[' + kast['label'] + ']:'
+            ruleStr = ruleStr + '[' + getAttribute(kast, 'label') + ']:'
         ruleStr     = ruleStr + ' ' + body
         requiresStr = ''
         ensuresStr  = ''
