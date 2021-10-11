@@ -14,7 +14,7 @@ def _teeProcessStdout(args, tee = True, buffer_size = 80, timeout = None):
     process = subprocess.Popen(args, stdout = subprocess.PIPE, stderr = subprocess.PIPE, universal_newlines = True)
     try:
         (stdout_data, stderr_data) = process.communicate(input = None, timeout = timeout)
-    except TimeoutExpired:
+    except subprocess.TimeoutExpired:
         process.kill()
         sys.stderr.write("TIMED OUT")
         sys.stderr.flush()
