@@ -201,6 +201,11 @@ def getAttribute(k, key):
         return None
 
 def addAttributes(kast, att):
+    """Returns the input Kast with the given attributes added.
+
+    -   Input: Kast term, and attribute dictionary.
+    -   Output: Same Kast term, with the attributes overwritten/added.
+    """
     if isKAtt(kast):
         return KAtt(combineDicts(att, kast['att']))
     if isKRule(kast):
