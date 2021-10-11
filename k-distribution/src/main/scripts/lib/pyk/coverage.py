@@ -32,7 +32,6 @@ def stripCoverageLogger(rule):
     ruleRequires = rule['requires']
     ruleEnsures  = rule['ensures']
     ruleAtts     = rule['att']
-    ruleLabel    = rule['label']
 
     if isKRewrite(ruleBody):
         ruleLHS = ruleBody['lhs']
@@ -41,7 +40,7 @@ def stripCoverageLogger(rule):
             ruleRHSseq = ruleRHS['args'][0]
             if isKSequence(ruleRHSseq) and len(ruleRHSseq['items']) == 2:
                 ruleBody = KRewrite(ruleLHS, ruleRHSseq['items'][1])
-    return KRule(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts, label = ruleLabel)
+    return KRule(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts)
 
 def translateCoverage(src_all_rules, dst_all_rules, dst_definition, src_rules_list):
     """Translate the coverage data from one kompiled definition to another.

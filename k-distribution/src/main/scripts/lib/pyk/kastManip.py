@@ -440,9 +440,9 @@ def onAttributes(kast, effect):
     if isKAs(kast):
         return KAs(kast['pattern'], kast['alias'], att = effect(kast['att']))
     elif isKRule(kast):
-        return KRule(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = effect(kast['att']), label = kast['label'])
+        return KRule(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = effect(kast['att']))
     elif isKClaim(kast):
-        return KClaim(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = effect(kast['att']), label = kast['label'])
+        return KClaim(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = effect(kast['att']))
     elif isKContext(kast):
         return KContext(kast['body'], requires = kast['requires'], att = effect(kast['att']))
     elif isKBubble(kast):
@@ -512,7 +512,6 @@ def minimizeRule(rule, keepVars = []):
     ruleRequires = rule['requires']
     ruleEnsures  = rule['ensures']
     ruleAtts     = rule['att']
-    ruleLabel    = rule['label']
 
     if ruleRequires is not None:
         ruleRequires = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupeClauses(flattenLabel('_andBool_', ruleRequires)))
@@ -535,9 +534,9 @@ def minimizeRule(rule, keepVars = []):
     if ruleRequires == KToken('true', 'Bool'):
         ruleRequires = None
     if isKRule(rule):
-        return KRule(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts, label = ruleLabel)
+        return KRule(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts)
     else:
-        return KClaim(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts, label = ruleLabel)
+        return KClaim(ruleBody, requires = ruleRequires, ensures = ruleEnsures, att = ruleAtts)
 
 def removeSourceMap(k):
     """Remove source map information from a given definition.

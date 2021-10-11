@@ -83,14 +83,14 @@ def KAtt(atts = {}):
 def isKAtt(k):
     return k['node'] == 'KAtt'
 
-def KRule(body, requires = None, ensures = None, att = None, label = None):
-    return { 'node': 'KRule', 'body': body, 'requires': requires, 'ensures': ensures, 'att': att , 'label': label }
+def KRule(body, requires = None, ensures = None, att = None):
+    return { 'node': 'KRule', 'body': body, 'requires': requires, 'ensures': ensures, 'att': att }
 
 def isKRule(k):
     return k['node'] == 'KRule'
 
-def KClaim(body, requires = None, ensures = None, att = None, label = None):
-    return { 'node': 'KClaim', 'body': body, 'requires': requires, 'ensures': ensures, 'att': att , 'label': label }
+def KClaim(body, requires = None, ensures = None, att = None):
+    return { 'node': 'KClaim', 'body': body, 'requires': requires, 'ensures': ensures, 'att': att }
 
 def isKClaim(k):
     return k['node'] == 'KClaim'
@@ -189,7 +189,12 @@ def isCellKLabel(label):
     return len(label) > 1 and label[0] == '<' and label[-1] == '>'
 
 def getAttribute(k, key):
-    if 'att' in k.keys() and isKAtt(k['att']):
+    """Returns the value of the attribute if present, None otherwise.
+
+    -   Input: Kast with a KAtt, and attribute name.
+    -   Output: Attribute value if present, otherwise None.
+    """
+    if 'att' in k and isKAtt(k['att']):
         katts = k['att']['att']
         if key in katts.keys():
             return katts[key]
@@ -199,9 +204,9 @@ def addAttributes(kast, att):
     if isKAtt(kast):
         return KAtt(combineDicts(att, kast['att']))
     if isKRule(kast):
-        return KRule(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = addAttributes(kast['att'], att), label = kast['label'])
+        return KRule(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = addAttributes(kast['att'], att))
     if isKClaim(kast):
-        return KClaim(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = addAttributes(kast['att'], att), label = kast['label'])
+        return KClaim(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = addAttributes(kast['att'], att))
     if isKProduction(kast):
         return KProduction(kast['productionItems'], kast['sort'], att = addAttributes(kast['att'], att))
     else:
@@ -379,7 +384,7 @@ def prettyPrintKast(kast, symbolTable, debug = False):
     if isKRule(kast) or isKClaim(kast):
         body        = '\n     '.join(prettyPrintKast(kast['body'], symbolTable, debug = debug).split('\n'))
         ruleStr     = 'rule ' if isKRule(kast) else 'claim '
-        if 'label' in kast and kast['label'] is not None:
+        if getAttribute(kast, 'label') is not None:
             ruleStr = ruleStr + '[' + kast['label'] + ']:'
         ruleStr     = ruleStr + ' ' + body
         requiresStr = ''
