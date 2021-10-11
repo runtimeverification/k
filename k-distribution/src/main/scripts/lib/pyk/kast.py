@@ -208,12 +208,13 @@ def addAttributes(kast, att):
     """
     if isKAtt(kast):
         return KAtt(combineDicts(att, kast['att']))
+    newAtt = KAtt(att) if not ('att' in kast and kast['att'] is not None and isKAtt(kast['att'])) else addAttributes(kast['att'], att)
     if isKRule(kast):
-        return KRule(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = addAttributes(kast['att'], att))
+        return KRule(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = newAtt)
     if isKClaim(kast):
-        return KClaim(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = addAttributes(kast['att'], att))
+        return KClaim(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = newAtt)
     if isKProduction(kast):
-        return KProduction(kast['productionItems'], kast['sort'], att = addAttributes(kast['att'], att))
+        return KProduction(kast['productionItems'], kast['sort'], att = newAtt)
     else:
         _notif('Do not know how to add attributes to KAST!')
         sys.stderr.write(str(kast))
