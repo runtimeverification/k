@@ -202,7 +202,7 @@ def countVarOccurances(kast, numOccurances = None):
     numOccurances = {} if numOccurances is None else numOccurances
     def _getNumOccurances(_kast):
         if isKVariable(_kast):
-            vName = _kast["name"]
+            vName = _kast['name']
             if vName in numOccurances:
                 numOccurances[vName] += 1
             else:
