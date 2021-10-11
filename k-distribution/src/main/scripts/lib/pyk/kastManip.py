@@ -242,18 +242,6 @@ def onCells(cellHandler, constrainedTerm):
                 constraints.append(constraint)
     return buildAssoc(KConstant('#Top'), '#And', [substitute(emptyConfig, subst)] + constraints)
 
-def onCell(cellVariable, effect, constrainedTerm):
-    """Given a cell variable name, an effect, and a constrained term, return the affect applied to that cell in the term.
-
-    -   Input: Cell variable name, cell effect, constrained term.
-    -   Output: The constrained term with the effect applied to the specified cell.
-    """
-    def _cellHandler(cellName, cellValue):
-        if cellName == cellVariable:
-            return effect(cellValue)
-        return None
-    onCells(_cellHandler, constrainedTerm)
-
 def splitConfigAndConstraints(kast):
     """Split the configuration/term from the constraints.
 
