@@ -222,12 +222,17 @@ Framework, you can add a `shell.nix` based on this template:
 
 ```.nix
 # shell.nix
+{ pkgs ? import <nixpkgs> {} }:
+
+with pkgs;
 let
   kframework = import ./path/to/k {};
   inherit (kframework) mkShell;
 in
 mkShell {
   buildInputs = [
+    bison boost cmake flex gcc glibc gmp gnumake jdk8 jemalloc libyaml libffi llvm maven mpfr opam pkg-config python stack zlib z3
+
     kframework.k
     clang kframework.llvm-backend
     kframework.haskell-backend
