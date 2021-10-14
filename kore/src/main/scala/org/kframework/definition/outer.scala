@@ -234,14 +234,26 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
   lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
   lazy val rulesAndClaims: Set[RuleOrClaim] = Set[RuleOrClaim]().++(claims).++(rules)
   lazy val rulesFor: Map[KLabel, Set[Rule]] = rules.groupBy(r => matchKLabel(r))
-  lazy val macroKLabels: Set[KLabel] = rules.filter(r => r.isMacro).map(r => matchKLabel(r))
+  lazy val macroKLabels: Set[KLabel] = macroKLabelsFromRules++macroKLabelsFromProductions
+  lazy val macroKLabelsFromRules: Set[KLabel] = rules.filter(r => r.isMacro).map(r => matchKLabel(r))
+  lazy val macroKLabelsFromProductions: Set[KLabel] = productions.filter(p => p.isMacro).map(p => matchKLabel(p))
 
-  private def matchKLabel(r: Rule) = r.body match {
+  def matchKLabel(r: Rule) = r.body match {
     case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KApply(s, _) :: _) => s
     case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KRewrite(Unapply.KApply(s, _), _) :: _) => s
     case Unapply.KApply(s, _) => s
     case Unapply.KRewrite(Unapply.KApply(s, _), _) => s
     case _ => KORE.KLabel("")
+  }
+
+  private def matchKLabel(p: Production) = p.klabel match {
+    case Some(klabel) => klabel
+    case _ => KORE.KLabel("")
+  }
+
+  def ruleLhsHasMacroKLabel(r: Rule) = r.body match {
+    case Unapply.KRewrite(Unapply.KApply(l @ Unapply.KLabel(_), _), _) => macroKLabelsFromProductions.contains(l)
+    case _ => false
   }
 
   lazy val contexts: Set[Context] = sentences collect { case r: Context => r }
