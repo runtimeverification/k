@@ -25,7 +25,7 @@ syntax KItem ::= Type
 
 syntax Expression ::= arithOp(K, K) [macro]
                     | stuff(K)
-		    | Int
+                    | Int
 
 rule arithOp(L:K, _R:K) => stuff(L)
 
