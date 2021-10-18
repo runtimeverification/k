@@ -238,7 +238,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
   lazy val macroKLabelsFromRules: Set[KLabel] = rules.filter(r => r.isMacro).map(r => matchKLabel(r))
   lazy val macroKLabelsFromProductions: Set[KLabel] = productions.filter(p => p.isMacro).map(p => matchKLabel(p))
 
-  def matchKLabel(r: Rule) = r.body match {
+  def matchKLabel(r: Rule): KLabel = r.body match {
     case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KApply(s, _) :: _) => s
     case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KRewrite(Unapply.KApply(s, _), _) :: _) => s
     case Unapply.KApply(s, _) => s
@@ -251,7 +251,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     case _ => KORE.KLabel("")
   }
 
-  def ruleLhsHasMacroKLabel(r: Rule) = r.body match {
+  def ruleLhsHasMacroKLabel(r: Rule): Boolean = r.body match {
     case Unapply.KRewrite(Unapply.KApply(l @ Unapply.KLabel(_), _), _) => macroKLabelsFromProductions.contains(l)
     case _ => false
   }
