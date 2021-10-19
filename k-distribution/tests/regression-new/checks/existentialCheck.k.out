@@ -1,0 +1,10 @@
+[Error] Compiler: Claims are not allowed in the definition.
+	Source(existentialCheck.k)
+	Location(3,11,3,31)
+[Error] Compiler: Existential variable ?X found in LHS. Existential variables are only allowed in the RHS.
+	Source(existentialCheck.k)
+	Location(3,15,3,17)
+[Error] Compiler: Found existential variable not supported by concrete backend.
+	Source(existentialCheck.k)
+	Location(3,15,3,17)
+[Error] Compiler: Had 3 structural errors.
