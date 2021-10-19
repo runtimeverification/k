@@ -123,6 +123,8 @@ public class JavaBackend extends AbstractBackend {
                 //.andThen(ModuleTransformer.fromSentenceTransformer(new NormalizeAssoc(KORE.c()), "normalize assoc"))
                 .andThen(AddBottomSortForListsWithIdenticalLabels.singleton())
                 .andThen(ModuleTransformer.from(new GenerateSortProjections(false)::gen, "adding sort projections"))
+                .andThen(m2 -> ModuleTransformer.fromSentenceTransformer((mod, s) -> new PropagateMacro(mod).propagate(s),
+                        "propagate macro labels from production to rules").apply(m2))
                 .andThen(m2 -> {
                   ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(m2, false);
                   return ModuleTransformer.fromSentenceTransformer((mod, s) -> new ExpandMacros(transformer, mod, files, kem, kompileOptions, false).expand(s), "expand macros").apply(m2);
