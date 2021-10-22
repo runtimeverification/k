@@ -2107,7 +2107,7 @@ Meta operations
 
 Provided below are a few miscellaneous, mostly deprecated functions in K.
 It is not recommended to use any of them directly as they are largely
-unsupported in modern K. There are three exceptions:
+unsupported in modern K. There are a few exceptions:
 
 * `#getenv` - Returns the value of an environment variable
 * `#parseKORE` - Takes a String containing a K intermediate representation of
@@ -2117,6 +2117,7 @@ unsupported in modern K. There are three exceptions:
   equal to the sort where the function appears.
 * `#kompiledDirectory` - Returns the path to the current compiled K definition
   directory.
+* `#unparseKORE` = Takes a K term and converts it to a string.
 
 ```k
 module K-REFLECTION
@@ -2139,6 +2140,7 @@ module K-REFLECTION
 
   // Takes as input a string and returns a K term
   syntax {Sort} Sort ::= #parseKORE(String) [function, hook(KREFLECTION.parseKORE)]
+  syntax {Sort} String ::= #unparseKORE(Sort) [function, hook(KREFLECTION.printKORE)]
   syntax {Sort} Sort ::= #parseKAST(String) [function, hook(KREFLECTION.parseKAST)]
   syntax IOError ::= "#noParse" "(" String ")" [klabel(#noParse), symbol]
 

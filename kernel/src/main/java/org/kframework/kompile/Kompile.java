@@ -21,6 +21,7 @@ import org.kframework.compile.checks.CheckRHSVariables;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
 import org.kframework.compile.checks.CheckStreams;
+import org.kframework.compile.checks.CheckTokens;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -279,6 +280,8 @@ public class Kompile {
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
         DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections(kompileOptions.coverage)::gen, "adding sort projections");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
+        Function1<Definition, Definition> propagateMacroToRules =
+                d -> DefinitionTransformer.fromSentenceTransformer((m, s) -> new PropagateMacro(m).propagate(s), "propagate macro labels from production to rules").apply(d);
         Function1<Definition, Definition> expandMacros = d -> {
           ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d, false);
           return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kem, kompileOptions, false).expand(s), "expand macros").apply(d);
@@ -304,6 +307,7 @@ public class Kompile {
                 .andThen(subsortKItem)
                 .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
+                .andThen(propagateMacroToRules)
                 .andThen(expandMacros)
                 .andThen(guardOrs)
                 .andThen(Kompile::resolveFreshConstants)
@@ -425,7 +429,7 @@ public class Kompile {
         CheckRHSVariables checkRHSVariables = new CheckRHSVariables(errors, !isSymbolic);
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
 
-        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAtt(errors, mainModule, isSymbolic && isKast)::check));
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAtt(errors, kem, mainModule, isSymbolic && isKast)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckConfigurationCells(errors, m, isSymbolic && isKast)::check));
 
@@ -436,6 +440,10 @@ public class Kompile {
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckRewrite(errors, m)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
+
+        if (!(isSymbolic && isKast)) { // if it's not the java backend
+            stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckTokens(errors, m)::check));
+        }
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckK(errors)::check));
 

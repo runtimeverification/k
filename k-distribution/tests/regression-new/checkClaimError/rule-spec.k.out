@@ -1,3 +1,6 @@
+[Warning] Compiler: The attribute [macro] has been deprecated on rules. Use this label on syntax declarations instead.
+	Source(errorClaim.k)
+	Location(7,10,7,18)
 [Error] Compiler: Use claim instead of rule to specify proof objectives.
 	Source(rule-spec.k)
 	Location(6,10,6,43)

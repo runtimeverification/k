@@ -1,0 +1,10 @@
+OutputDirectoryTest/a-kompiled/timestamp : \
+    a.k \
+    b.k \
+
+DEPEND_FILE=$(lastword $(MAKEFILE_LIST))
+$(DEPEND_FILE) :  \
+    $(wildcard \
+        a.k \
+        b.k \
+    )

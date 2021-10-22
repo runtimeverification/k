@@ -41,13 +41,14 @@ coverageArgs.add_argument('-o', '--output', type = argparse.FileType('w'), defau
 minimizeArgs = pykCommandParsers.add_parser('minimize', help = 'Output the minimized K term.')
 minimizeArgs.add_argument('json-term', type = argparse.FileType('r'), help = 'JSON representation of term to minimize.')
 minimizeArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
+minimizeArgs.add_argument('--omit-labels', default = '', nargs = '?')
 
 def definitionDir(kompiledDir):
     return path.dirname(path.abspath(kompiledDir))
 
-if __name__ == '__main__':
+def main(commandLineArgs, extraMain = None):
     returncode = 0
-    args = vars(pykArgs.parse_args())
+    args = vars(commandLineArgs.parse_args())
     kompiled_dir = args['kompiled-dir']
 
     if args['command'] in [ 'parse' , 'run' , 'prove' ]:
@@ -83,11 +84,30 @@ if __name__ == '__main__':
     elif args['command'] == 'minimize':
         json_definition = readKastTerm(kompiled_dir + '/compiled.json')
         symbolTable = buildSymbolTable(json_definition, opinionated = True)
-        json_term = json.loads(args['json-term'].read())
-        minimizedTerm = minimizeTerm(json_term['term'])
-        args['output'].write(prettyPrintKast(minimizedTerm, symbolTable))
+        json_term = json.loads(args['json-term'].read())['term']
+        if json_term == KConstant('#Top'):
+            args['output'].write(prettyPrintKast(json_term, symbolTable))
+        else:
+            abstractLabels = [] if args['omit_labels'] is None else args['omit_labels'].split(',')
+            minimized_disjuncts = []
+            for d in flattenLabel('#Or', json_term):
+                dMinimized = minimizeTerm(d, abstractLabels = abstractLabels)
+                (dConfig, dConstraint) = splitConfigAndConstraints(dMinimized)
+                if dConstraint != KConstant('#Top'):
+                    minimized_disjuncts.append(KApply('#And', [dConfig, dConstraint]))
+                else:
+                    minimized_disjuncts.append(dConfig)
+            sorted_disjunct = buildAssoc(KConstant('#Bottom'), '#Or', minimized_disjuncts)
+            new_disjunct = propagateUpConstraints(sorted_disjunct)
+            args['output'].write(prettyPrintKast(new_disjunct, symbolTable))
+
+    elif extraMain is not None:
+        extraMain(args, kompiled_dir)
 
     args['output'].flush()
 
     if returncode != 0:
         _fatal('Non-zero exit code (' + str(returncode) + '): ' + str(kCommand), code = returncode)
+
+if __name__ == '__main__':
+    main(pykArgs)

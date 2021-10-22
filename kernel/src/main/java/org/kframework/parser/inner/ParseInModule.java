@@ -273,11 +273,11 @@ public class ParseInModule implements Serializable, AutoCloseable {
                 inferencer.set(currentInferencer);
                 inferencers.add(currentInferencer);
             }
-            endTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
             rez = new TypeInferenceVisitor(currentInferencer, startSymbol, strict && inferSortChecks, true, isAnywhere).apply(rez3);
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
+            endTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
             rez = new ResolveOverloadedTerminators(disambModule.overloads()).apply(rez.right().get());
             if (rez.isLeft())
