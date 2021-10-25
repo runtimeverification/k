@@ -71,11 +71,14 @@
             <configuration>
               <skip>${haskell.backend.skip}</skip>
               <target>
+                <property name="stackBuildOpts" value="" />
+
                 <mkdir dir="${project.build.directory}/stack-install" />
                 <exec executable="stack" dir="${project.basedir}/src/main/native/haskell-backend" failonerror="true">
                   <arg value="install" />
                   <arg value="--local-bin-path=${project.build.directory}/stack-install" />
                   <arg value="--flag=kore:${haskell.backend.flags.release}" />
+                  <arg line="${stackBuildOpts}" />
                 </exec>
               </target>
             </configuration>
