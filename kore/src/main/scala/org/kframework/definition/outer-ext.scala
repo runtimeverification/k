@@ -24,7 +24,7 @@ case class Bubble(sentenceType: String, contents: String, att: Att = Att.empty) 
   override def withAtt(att: Att) = Bubble(sentenceType, contents, att)
 }
 
-case class FlatImport(name: String, isPublic: Boolean, tag: Option[Tag], att: Att = Att.empty) extends HasLocation {
+case class FlatImport(name: String, isPublic: Boolean, att: Att = Att.empty) extends HasLocation {
   override def location(): Optional[Location] = att.getOptional(classOf[Location])
   override def source(): Optional[Source] = att.getOptional(classOf[Source])
 }
@@ -60,7 +60,7 @@ object FlatModule {
           // if can't find the Module in memoization, build a new one
           , toModuleRec(allModules.find(f => f.name.equals(i.name))
               .getOrElse(throw KEMException.compilerError("Could not find module: " + i.name, i))
-            , visitedModules :+ m)), i.isPublic, i.tag)
+            , visitedModules :+ m)), i.isPublic)
         val newImports = m.imports.map(f)
         val newM = new Module(m.name, newImports, m.localSentences, m.att)
         newM.checkSorts()

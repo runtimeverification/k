@@ -23,6 +23,7 @@ import org.kframework.compile.LabelInfo;
 import org.kframework.compile.LabelInfoFromModule;
 import org.kframework.compile.MinimizeTermConstruction;
 import org.kframework.compile.NumberSentences;
+import org.kframework.compile.PropagateMacro;
 import org.kframework.compile.ResolveAnonVar;
 import org.kframework.compile.ResolveContexts;
 import org.kframework.compile.ResolveFreshConstants;
@@ -139,6 +140,8 @@ public class KoreBackend extends AbstractBackend {
         DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections(kompileOptions.coverage)::gen, "adding sort projections");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         Function1<Definition, Definition> addCoolLikeAtt = d -> DefinitionTransformer.fromSentenceTransformer(new AddCoolLikeAtt(d.mainModule())::add, "add cool-like attribute").apply(d);
+        Function1<Definition, Definition> propagateMacroToRules =
+                d -> DefinitionTransformer.fromSentenceTransformer((m, s) -> new PropagateMacro(m).propagate(s), "propagate macro labels from production to rules").apply(d);
         Function1<Definition, Definition> expandMacros = d -> {
           ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d, true);
           return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kem, kompileOptions, false).expand(s), "expand macros").apply(d);
@@ -167,6 +170,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
                 .andThen(constantFolding)
+                .andThen(propagateMacroToRules)
                 .andThen(expandMacros)
                 .andThen(guardOrs)
                 .andThen(AddImplicitComputationCell::transformDefinition)
@@ -197,6 +201,8 @@ public class KoreBackend extends AbstractBackend {
         ModuleTransformer resolveSemanticCasts = ModuleTransformer.fromSentenceTransformer(
                 new ResolveSemanticCasts(true)::resolve,
                 "resolving semantic casts");
+        Function1<Module, Module> propagateMacroToRules =
+                m -> ModuleTransformer.fromSentenceTransformer((m2, s) -> new PropagateMacro(m2).propagate(s), "propagate macro labels from production to rules").apply(m);
         Function1<Module, Module> expandMacros = m -> {
           ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(m, true);
           return ModuleTransformer.fromSentenceTransformer((m2, s) -> new ExpandMacros(transformer, m2, files, kem, kompileOptions, false).expand(s), "expand macros").apply(m);
@@ -214,6 +220,7 @@ public class KoreBackend extends AbstractBackend {
         return m -> resolveAnonVars
                 .andThen(resolveSemanticCasts)
                 .andThen(generateSortProjections)
+                .andThen(propagateMacroToRules)
                 .andThen(expandMacros)
                 .andThen(addImplicitComputationCell)
                 .andThen(resolveFreshConstants)

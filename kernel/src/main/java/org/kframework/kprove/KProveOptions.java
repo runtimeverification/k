@@ -11,6 +11,7 @@ import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BackendOptions;
 import org.kframework.utils.options.DefinitionLoadingOptions;
+import org.kframework.utils.options.InnerParsingOptions;
 import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
 
@@ -37,6 +38,9 @@ public class KProveOptions {
     @ParametersDelegate
     public OuterParsingOptions outerParsing = new OuterParsingOptions();
 
+    @ParametersDelegate
+    public InnerParsingOptions innerParsing = new InnerParsingOptions();
+
     private File specFile;
 
     public synchronized File specFile(FileUtil files) {
@@ -51,6 +55,9 @@ public class KProveOptions {
 
     @ParametersDelegate
     public PrintOptions print = new PrintOptions();
+
+    @Parameter(names="--branching-allowed", arity = 1, description="Number of branching events allowed before a forcible stop.")
+    public int branchingAllowed = Integer.MAX_VALUE;
 
     @Parameter(names={"--spec-module", "-sm"}, description="Name of module containing specification to prove")
     public String specModule;
