@@ -6862,6 +6862,10 @@
       "sha1": "f5547b0657be718d1ec0d2816cbcd5c398d6fccb"
     },
     {
+      "path": "org/fusesource/fusesource-pom/1.12/fusesource-pom-1.12.pom",
+      "sha1": "778b55850b2bb4ebf48c02bc57a9afb1eec8f52e"
+    },
+    {
       "path": "org/fusesource/fusesource-pom/1.8/fusesource-pom-1.8.pom",
       "sha1": "d4f1b288004e1a8c8bc9f61f5f151d1ef0d4211a"
     },
@@ -6886,16 +6890,20 @@
       "sha1": "deaf98271d58b21e78bc4a20d425447fcc03b781"
     },
     {
-      "path": "org/fusesource/jansi/jansi/1.11/jansi-1.11.jar",
-      "sha1": "655c643309c2f45a56a747fda70e3fadf57e9f11"
-    },
-    {
       "path": "org/fusesource/jansi/jansi/1.11/jansi-1.11.pom",
       "sha1": "af75ce5357c0cab4dc273738073fcfb39a10fdfe"
     },
     {
       "path": "org/fusesource/jansi/jansi/1.12/jansi-1.12.pom",
       "sha1": "5cc7bd0ed4d411d362a05c3645a87ea76a3f2533"
+    },
+    {
+      "path": "org/fusesource/jansi/jansi/2.4.0/jansi-2.4.0.jar",
+      "sha1": "321c614f85f1dea6bb08c1817c60d53b7f3552fd"
+    },
+    {
+      "path": "org/fusesource/jansi/jansi/2.4.0/jansi-2.4.0.pom",
+      "sha1": "8a24a317c524469da0de8024d764605790db8409"
     },
     {
       "path": "org/glassfish/javax.json/1.0.4/javax.json-1.0.4.jar",
