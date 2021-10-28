@@ -6,6 +6,7 @@ import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.checks.CheckFunctions;
+import org.kframework.compile.checks.CheckSmtLemmas;
 import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.HasAtt;
@@ -177,6 +178,7 @@ public class ExpandMacros {
     private Sentence check(Sentence s) {
         Set<KEMException> errors = new HashSet<>();
         new CheckFunctions(errors, mod).check(s);
+        new CheckSmtLemmas(errors, mod).check(s);
         if (!errors.isEmpty()) {
           kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
           throw KEMException.compilerError("Had " + errors.size() + " structural errors after macro expansion.");
@@ -370,7 +372,7 @@ public class ExpandMacros {
     }
 
     public static boolean isMacro(HasAtt s) {
-      return s.att().contains(Att.MACRO()) || s.att().contains(Att.MACRO_REC()) || s.att().contains(Att.ALIAS_REC()) || s.att().contains(Att.ALIAS());
+        return s.isMacro();
     }
 
     public Sentence expand(Sentence s) {
@@ -384,5 +386,4 @@ public class ExpandMacros {
             return s;
         }
     }
-
 }

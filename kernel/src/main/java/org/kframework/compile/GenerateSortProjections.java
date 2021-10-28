@@ -79,7 +79,7 @@ public class GenerateSortProjections {
     }
 
     public Stream<? extends Sentence> gen(Production prod) {
-      if (prod.att().contains(Att.FUNCTION())) {
+      if (prod.att().contains(Att.FUNCTION()) || (prod.klabel().isDefined() && mod.macroKLabels().contains(prod.klabel().get()))) {
         return Stream.empty();
       }
       java.util.Set<Sentence> sentences = new HashSet<>();
@@ -107,6 +107,4 @@ public class GenerateSortProjections {
       }
       return sentences.stream();
     }
-
-
 }
