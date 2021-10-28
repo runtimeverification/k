@@ -156,7 +156,7 @@ else
 endif
 
 clean:
-	rm -rf $(KOMPILED_DIR) .depend-tmp .depend .kompile-* .krun-* .kprove-* .kbmc-* kore-exec.tar.gz
+	rm -rf $(KOMPILED_DIR) .depend-tmp .depend .kompile-* .krun-* .kprove-* .kbmc-* kore-exec.tar.gz kore-check-functions.tar.gz
 
 .depend:
 	@$(KDEP) $(DEF).$(SOURCE_EXT) > .depend-tmp
