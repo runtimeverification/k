@@ -108,26 +108,6 @@
       <artifactId>mpfr_java</artifactId>
       <version>1.2</version>
     </dependency>
-
-    <dependency>
-      <groupId>org.kframework.mpfr_java</groupId>
-      <artifactId>mpfr_java</artifactId>
-      <version>1.2</version>
-      <classifier>linux64</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.mpfr_java</groupId>
-      <artifactId>mpfr_java</artifactId>
-      <version>1.2</version>
-      <classifier>osx</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.kframework.mpfr_java</groupId>
-      <artifactId>mpfr_java</artifactId>
-      <version>1.2</version>
-      <classifier>osx-arm</classifier>
-    </dependency>
-
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
