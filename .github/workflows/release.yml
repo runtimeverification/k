@@ -40,7 +40,7 @@ jobs:
 
       - name: Check out homebrew repo master branch
         uses: actions/checkout@v2.3.4
-        if: ${{ steps.checkout.outcome == failure }}
+        if: ${{ steps.checkout.outcome == 'failure' }}
         with:
           repository: kframework/homebrew-k
           path: homebrew-k
