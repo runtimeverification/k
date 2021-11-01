@@ -428,7 +428,7 @@ pipeline {
             echo "K Framework Release ${VERSION}"  > release.md
             echo ''                               >> release.md
             cat k-distribution/INSTALL.md         >> release.md
-            hub release create --draft                                                          \
+            hub release create --prerelease                                                     \
                 --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                       \
                 --attach kframework_${VERSION}_amd64_bionic.deb'#Ubuntu Bionic (18.04) Package' \
                 --attach kframework_${VERSION}_amd64_focal.deb'#Ubuntu Focal (20.04) Package'   \

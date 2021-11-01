@@ -2,7 +2,7 @@ name: "Release"
 on:
   release:
     types:
-      - created
+      - prereleased
 
 jobs:
   nix-release:
@@ -138,4 +138,4 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const { owner, repo } = context.repo
-            await github.repos.updateRelease({ owner, repo, release_id: ${{ steps.release.outputs.release_id }}, draft: false })
+            await github.repos.updateRelease({ owner, repo, release_id: ${{ steps.release.outputs.release_id }}, prerelease: false })
