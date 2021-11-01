@@ -132,7 +132,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     sentences
   }
 
-  lazy val signature: Module = {
+  def signature: Module = {
     def f(m: Module, tags: Set[Tag]): Module = Module(m.name, m.imports.filter(_.isPublic).map(i => Import(f(i.module, tags | (if (i.tag.isDefined) Set(i.tag.get) else Set())), i.isPublic, i.tag)), m.publicSentences(tags), m.att)
     Module(name, imports.map(i => Import(f(i.module, if (i.tag.isDefined) Set(i.tag.get) else Set()), i.isPublic, i.tag)), localSentences, att)
   }
