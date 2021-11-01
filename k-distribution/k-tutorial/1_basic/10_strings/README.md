@@ -102,8 +102,9 @@ substrString(S, 3, lengthString(S))
 sentences, each ending in a period), and constructs a new (nonsense) sentence
 composed of the first word of each sentence, followed by a period. Do not
 worry about capitalization or periods within the sentence which do not end the
-sentence (e.g. "Dr."). For more information about the functions over strings
-required to implement such a function, refer to `domains.md`.
+sentence (e.g. "Dr."). You can assume that all whitespace within the paragraph
+are spaces. For more information about the functions over strings required to
+implement such a function, refer to `domains.md`.
 
 ## Next lesson
 

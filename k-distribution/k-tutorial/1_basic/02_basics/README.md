@@ -173,7 +173,7 @@ of an uppercase identifier. However, unlike a constructor, a variable will
 match **any** pattern with one exception: Two variables with the same name
 must match the same pattern.
 
-Here is a more complex example:
+Here is a more complex example (`lesson-02-d.k`):
 
 ```k
 module LESSON-02-D
