@@ -6862,6 +6862,10 @@
       "sha1": "f5547b0657be718d1ec0d2816cbcd5c398d6fccb"
     },
     {
+      "path": "org/fusesource/fusesource-pom/1.12/fusesource-pom-1.12.pom",
+      "sha1": "778b55850b2bb4ebf48c02bc57a9afb1eec8f52e"
+    },
+    {
       "path": "org/fusesource/fusesource-pom/1.8/fusesource-pom-1.8.pom",
       "sha1": "d4f1b288004e1a8c8bc9f61f5f151d1ef0d4211a"
     },
@@ -6870,12 +6874,24 @@
       "sha1": "93faf3c8d4abe722978ac34c95b7b27abce53505"
     },
     {
+      "path": "org/fusesource/hawtjni/hawtjni-project/1.18/hawtjni-project-1.18.pom",
+      "sha1": "f52ccd437991b8c04c2c0101c37ea4134b3aad74"
+    },
+    {
       "path": "org/fusesource/hawtjni/hawtjni-runtime/1.10/hawtjni-runtime-1.10.jar",
       "sha1": "3142d79489369a058889796a65e615eb9d20ba5b"
     },
     {
       "path": "org/fusesource/hawtjni/hawtjni-runtime/1.10/hawtjni-runtime-1.10.pom",
       "sha1": "76095710434bbf83b57a6bd5ec8cd9e900283b44"
+    },
+    {
+      "path": "org/fusesource/hawtjni/hawtjni-runtime/1.18/hawtjni-runtime-1.18.jar",
+      "sha1": "f1a69a4e05337df874739adea6b65935cae195ae"
+    },
+    {
+      "path": "org/fusesource/hawtjni/hawtjni-runtime/1.18/hawtjni-runtime-1.18.pom",
+      "sha1": "7e400881574d027102e47dc2462d36fd153a2770"
     },
     {
       "path": "org/fusesource/jansi/jansi-project/1.11/jansi-project-1.11.pom",
@@ -7024,6 +7040,26 @@
     {
       "path": "org/kframework/mpfr_java/mpfr_java/1.0.1/mpfr_java-1.0.1.pom",
       "sha1": "4de2d567cb59bdf86b26d9c4723db7033a6de7d8"
+    },
+    {
+      "path": "org/kframework/mpfr_java/mpfr_java/1.2/mpfr_java-1.2-linux64.jar",
+      "sha1": "f81a9fba413318be7a2997b9b605784a948be065"
+    },
+    {
+      "path": "org/kframework/mpfr_java/mpfr_java/1.2/mpfr_java-1.2-osx-arm.jar",
+      "sha1": "36817ef1378dbb3b1bfcb82daf7a191219964d63"
+    },
+    {
+      "path": "org/kframework/mpfr_java/mpfr_java/1.2/mpfr_java-1.2-osx.jar",
+      "sha1": "b1998d734e2ee88e2e99717aa1c1aa596d4a18cd"
+    },
+    {
+      "path": "org/kframework/mpfr_java/mpfr_java/1.2/mpfr_java-1.2.jar",
+      "sha1": "77eadc5127adf6144cbb52fdb383c3dc9c02838d"
+    },
+    {
+      "path": "org/kframework/mpfr_java/mpfr_java/1.2/mpfr_java-1.2.pom",
+      "sha1": "5dd43a87e562c333d89d692e7438d34640d2e2d8"
     },
     {
       "path": "org/mockito/mockito-core/1.9.5/mockito-core-1.9.5.jar",
