@@ -22,3 +22,122 @@ jobs:
         uses: ttuegel/upload-release.nix@v1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+  macos-build:
+    runs-on: macos-11
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2.3.4
+        with:
+          submodules: recursive
+          path: kframework
+
+      - name: Check out matching homebrew repo branch
+        uses: actions/checkout@v2.3.4
+        id: checkout
+        with:
+          repository: kframework/homebrew-k
+          path: homebrew-k
+          ref: staging
+        continue-on-error: true
+
+      - name: Check out homebrew repo master branch
+        uses: actions/checkout@v2.3.4
+        if: ${{ steps.checkout.outcome == failure }}
+        with:
+          repository: kframework/homebrew-k
+          path: homebrew-k
+
+      - name: Build brew bottle
+        id: build
+        run: |
+          PACKAGE=kframework
+          VERSION=$(cat kframework/package/version)
+          ROOT_URL='https://github.com/kframework/k/releases/download'
+          cd homebrew-k
+          ../kframework/package/macos/brew-update-to-local ${PACKAGE} ${VERSION}
+          ../kframework/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL}
+          LOCAL_BOTTLE_NAME=$(find . -name "kframework--${VERSION}.big_sur.bottle*.tar.gz")
+          echo "::set-output name=path::$LOCAL_BOTTLE_NAME"
+
+      - name: Upload bottle
+        uses: actions/upload-artifact@v2
+        with:
+          name: homebrew
+          path: homebrew-k
+    outputs:
+      bottle_path: ${{ steps.build.outputs.path }}
+
+  macos-test:
+    runs-on: macos-11
+    needs: macos-build
+    steps:
+      - name: Download bottle
+        uses: actions/download-artifact@v2
+        with:
+          name: homebrew
+
+      - name: Test brew bottle
+        id: test
+        run: |
+          brew install -f homebrew-k/${{ needs.macos-build.bottle_path }}
+          brew install opam pkg-config
+          k-configure-opam
+          eval $(opam config env)
+          cp -R /usr/local/share/kframework/pl-tutorial ~
+          WD=`pwd`
+          cd
+          echo 'Starting kserver...'
+          spawn-kserver $WD/kserver.log
+          cd pl-tutorial
+          echo 'Testing tutorial in user environment...'
+          make -j`sysctl -n hw.ncpu` ${MAKE_EXTRA_ARGS}
+          cd ~
+          echo 'module TEST imports BOOL endmodule' > test.k
+          kompile test.k --backend ocaml
+          kompile test.k --backend llvm
+          kompile test.k --backend haskell
+
+      - name: Get upload_url
+        run: |
+          echo "::set-output name=release_id::$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)"
+          echo "::set-output name=upload_url::https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)/assets{?name,label}"  
+        id: release
+
+      - name: Upload bottle to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          asset_content_type: "application/gzip"
+          asset_name: "Mac OS X Homebrew Bottle"
+          asset_path: ${{ steps.build.outputs.path }}
+          upload_url: ${{ steps.release.outputs.upload_url }}
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4.7.2
+        with:
+          repository: homebrew-k
+          commit_message: 'Update brew package version'
+          file_pattern: 'Formula/kframework.rb'
+          branch: master
+
+      - name: Delete Release
+        if: failure()
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const { owner, repo } = context.repo
+            await github.repos.deleteRelease({ owner, repo, release_id: ${{ steps.release.outputs.release_id }} })
+
+  macos-release:
+    runs-on: ubuntu-latest
+    needs: [nix-release, macos-test]
+    steps:
+      - name: Publish release
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const { owner, repo } = context.repo
+            await github.repos.updateRelease({ owner, repo, release_id: ${{ steps.release.outputs.release_id }}, draft: false })
