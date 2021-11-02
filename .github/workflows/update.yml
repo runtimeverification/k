@@ -18,7 +18,7 @@ jobs:
           submodules: recursive
 
       - name: 'Install Nix'
-        uses: cachix/install-nix-action@v12
+        uses: cachix/install-nix-action@v14.1
 
       - name: 'Install Cachix'
         uses: cachix/cachix-action@v10
