@@ -31,7 +31,7 @@ git clone https://github.com/kframework/k --recursive
 ```
 
 Instructions on how to build K from source can be found
-[here](../../../../README.md).
+[here](https://github.com/kframework/k/blob/master/README.md).
 
 ## Configuring your editor
 
