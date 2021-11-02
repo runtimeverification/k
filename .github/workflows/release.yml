@@ -69,7 +69,7 @@ jobs:
           PACKAGE=kframework
           VERSION=$(cat kframework/package/version)
           ROOT_URL='https://github.com/kframework/k/releases/download'
-          export STACK_ROOT=~/.stack
+          export HOMEBREW_STACK_ROOT=~/.stack
           wget "$ROOT_URL/v${VERSION}/kframework-${VERSION}-src.tar.gz"
           cd homebrew-k
           ../kframework/package/macos/brew-update-to-local ${PACKAGE} ${VERSION}
