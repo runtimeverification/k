@@ -55,21 +55,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Cache stack
-        uses: actions/cache@v2
-        with:
-          path: .stack
-          key: ${{ runner.os }}-stack-${{ hashFiles('**/stack.yaml') }}-
-          restore-keys: |
-            ${{ runner.os }}-stack-
-
       - name: Build brew bottle
         id: build
         run: |
           PACKAGE=kframework
           VERSION=$(cat kframework/package/version)
           ROOT_URL='https://github.com/kframework/k/releases/download'
-          export HOMEBREW_STACK_ROOT=$(pwd)/.stack
           wget "$ROOT_URL/v${VERSION}/kframework-${VERSION}-src.tar.gz"
           cd homebrew-k
           ../kframework/package/macos/brew-update-to-local ${PACKAGE} ${VERSION}
