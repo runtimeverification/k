@@ -175,12 +175,12 @@ multiple variables of sort `List` are not allowed, it is an error to write
 `<cell>... Pattern ...</cell>`.
 
 Here is an example of a simple definition that implements a very basic
-function-call semantics using a `List` as a function stack (`lesson-16-a.k`):
+function-call semantics using a `List` as a function stack (`lesson-16-b.k`):
 
 ```k
 module LESSON-16-B-SYNTAX
   imports INT-SYNTAX
-  import ID-SYNTAX
+  imports ID-SYNTAX
 
   syntax Exp ::= Id "(" ")" | Int
   syntax Stmt ::= "return" Exp ";" [strict]
@@ -233,8 +233,8 @@ process all the declarations in the program, then we call the `main` function.
 Consider the following program (`foo.func`):
 
 ```
-int foo() { return 5; }
-int main() { return foo(); }
+fun foo() { return 5; }
+fun main() { return foo(); }
 ```
 
 When we `krun` this program, we should get the following output:
@@ -275,7 +275,7 @@ The final primary data structure sort in K is a set, i.e., an idempotent
 unordered collection where elements are deduplicated. The sort provided by K
 for this purpose is the `Set` sort and it is provided in `domains.md` in the
 `SET` module. Like maps and lists, this type is not (currently) polymorphic.
-Like `Map` and `List`, all `Sert` terms are sets of terms of the `KItem` sort.
+Like `Map` and `List`, all `Set` terms are sets of terms of the `KItem` sort.
 
 A `Set` pattern has the exact same restrictions as a `Map` pattern, except that
 its elements are treated like keys, and there are no values. It has the same
