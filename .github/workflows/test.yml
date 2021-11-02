@@ -17,10 +17,10 @@ jobs:
           submodules: recursive
 
       - name: 'Install Nix'
-        uses: cachix/install-nix-action@v13
+        uses: cachix/install-nix-action@v12
 
       - name: 'Install Cachix'
-        uses: cachix/cachix-action@v10
+        uses: cachix/cachix-action@v8
         with:
           name: runtimeverification
           extraPullNames: kore
