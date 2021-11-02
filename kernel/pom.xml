@@ -106,19 +106,19 @@
     <dependency>
       <groupId>org.kframework.mpfr_java</groupId>
       <artifactId>mpfr_java</artifactId>
-      <version>0.2</version>
+      <version>1.4</version>
     </dependency>
 
     <dependency>
       <groupId>org.kframework.mpfr_java</groupId>
       <artifactId>mpfr_java</artifactId>
-      <version>0.2</version>
+      <version>1.4</version>
       <classifier>osx</classifier>
     </dependency>
     <dependency>
       <groupId>org.kframework.mpfr_java</groupId>
       <artifactId>mpfr_java</artifactId>
-      <version>0.2</version>
+      <version>1.4</version>
       <classifier>linux64</classifier>
     </dependency>
 
