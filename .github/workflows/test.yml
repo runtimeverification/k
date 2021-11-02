@@ -18,6 +18,8 @@ jobs:
 
       - name: 'Install Nix'
         uses: cachix/install-nix-action@v14.1
+        with:
+          install_url: "https://releases.nixos.org/nix/nix-2.3.16/install"
 
       - name: 'Install Cachix'
         uses: cachix/cachix-action@v10
@@ -37,4 +39,4 @@ jobs:
         run: nix-shell --run "echo OK"
 
       - name: 'Run selected integration tests'
-        run: GC_DONT_GC=1 nix-build test.nix --argstr test help
+        run: nix-build test.nix --argstr test help

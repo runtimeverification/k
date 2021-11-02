@@ -15,6 +15,8 @@ jobs:
 
       - name: Install Nix
         uses: cachix/install-nix-action@v14.1
+        with:
+          install_url: "https://releases.nixos.org/nix/nix-2.3.16/install"
 
       - name: Upload release.nix
         uses: ttuegel/upload-release.nix@v1.0
