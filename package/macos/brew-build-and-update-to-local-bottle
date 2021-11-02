@@ -2,7 +2,9 @@
 package="$1"  ; shift
 version="$1"  ; shift
 root_url="$1" ; shift
-brew install Formula/$package.rb --build-bottle -v
-brew bottle --json Formula/$package.rb --root-url="$root_url/v$version/"
+brew tap kframework/k "file://$(pwd)"
+brew install $package --build-bottle -v
+brew bottle --json $package --root-url="$root_url/v$version/"
 cat *.bottle.json
 brew bottle --merge --write --no-commit *.bottle.json
+cp $(brew formula $package) Formula/$package.rb
