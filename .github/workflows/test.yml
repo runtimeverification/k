@@ -37,4 +37,4 @@ jobs:
         run: nix-shell --run "echo OK"
 
       - name: 'Run selected integration tests'
-        run: nix-build test.nix --argstr test help
+        run: GC_DONT_GC=1 nix-build test.nix --argstr test help
