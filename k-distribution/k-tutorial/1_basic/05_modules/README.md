@@ -229,7 +229,7 @@ in which case these directories are prepended to the beginning of the list.
 
 ## Exercises
 
-1. Take the solution to lesson 1.4, problem 1 which included the explicit
+1. Take the solution to lesson 1.4, problem 2 which included the explicit
 priority and associativity declarations, and modify the definition so that
 the syntax of integers and brackets is in one module, the syntax of addition,
 subtraction, and unary negation is in another module, and the syntax of

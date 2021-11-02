@@ -45,7 +45,13 @@ and, or, and not over these values. For example (`lesson-06-b.k`):"
 
 ```k
 module LESSON-06-B
-  imports LESSON-06-A
+  imports BOOL
+
+  syntax Fruit ::= Blueberry() | Banana()
+  syntax Bool ::= isBlue(Fruit) [function]
+
+  rule isBlue(Blueberry()) => true
+  rule isBlue(Banana()) => false
 
   syntax Bool ::= isYellow(Fruit) [function]
                 | isBlueOrYellow(Fruit) [function]
