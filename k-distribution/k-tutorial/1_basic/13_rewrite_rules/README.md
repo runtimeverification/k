@@ -1,6 +1,6 @@
 # Lesson 1.13: Basics of K Rewriting
 
-The purpose of this lesson is to explain how rewrite rules which are not the
+The purpose of this lesson is to explain how rewrite rules that are not the
 definition of a function behave, and how, using these rules, you can construct
 a semantics of programs in a programming language in K.
 

@@ -73,7 +73,7 @@ command.
 ## Cell collections
 
 The second type of cell multiplicity we will discuss is `*`. Simlar to a
-regular expression languiage, this attribute tells the compiler that this cell
+regular expression language, this attribute tells the compiler that this cell
 can appear 0 or more times in the configuration. In other words, it is a
 **cell collection**. All cell collections are required to have the `type`
 attribute set to either `Set` or `Map`. A `Set` cell collection is represented
