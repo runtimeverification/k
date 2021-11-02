@@ -64,7 +64,9 @@ jobs:
           wget "$ROOT_URL/v${VERSION}/kframework-${VERSION}-src.tar.gz"
           cd homebrew-k
           ../kframework/package/macos/brew-update-to-local ${PACKAGE} ${VERSION}
+          git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${VERSION}: part 1"
           ../kframework/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL}
+          git reset HEAD^
           LOCAL_BOTTLE_NAME=$(find . -name "kframework--${VERSION}.big_sur.bottle*.tar.gz")
           echo "::set-output name=path::$LOCAL_BOTTLE_NAME"
 
