@@ -98,7 +98,7 @@ jobs:
       - name: Test brew bottle
         id: test
         run: |
-          brew install -f homebrew-k/${{ needs.macos-build.bottle_path }}
+          brew install -f homebrew-k/${{ needs.macos-build.outputs.bottle_path }}
           brew install opam pkg-config
           k-configure-opam
           eval $(opam config env)
