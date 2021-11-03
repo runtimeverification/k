@@ -67,7 +67,7 @@ jobs:
           git commit Formula/$PACKAGE.rb -m "Update ${PACKAGE} to ${VERSION}: part 1"
           ../kframework/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL}
           git reset HEAD^
-          LOCAL_BOTTLE_NAME=$(find . -name "kframework--${VERSION}.big_sur.bottle*.tar.gz")
+          LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.big_sur.bottle*.tar.gz"))
           echo "::set-output name=path::$LOCAL_BOTTLE_NAME"
 
       - name: Upload bottle
@@ -87,6 +87,7 @@ jobs:
 
     outputs:
       bottle_path: ${{ steps.build.outputs.path }}
+      release_id: ${{ steps.release.outputs.release_id }}
 
   macos-test:
     runs-on: macos-11
@@ -100,11 +101,14 @@ jobs:
       - name: Test brew bottle
         id: test
         run: |
-          brew install -f homebrew-k/${{ needs.macos-build.outputs.bottle_path }}
+          cd homebrew-k
+          brew tap kframework/k "file:///$(pwd)"
+          brew install ${{ needs.macos-build.outputs.bottle_path }} -v
           brew install opam pkg-config
           k-configure-opam
           eval $(opam config env)
           cp -R /usr/local/share/kframework/pl-tutorial ~
+          cd ..
           WD=`pwd`
           cd
           echo 'Starting kserver...'
@@ -117,12 +121,6 @@ jobs:
           kompile test.k --backend ocaml
           kompile test.k --backend llvm
           kompile test.k --backend haskell
-
-      - name: Get upload_url
-        run: |
-          echo "::set-output name=release_id::$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)"
-          echo "::set-output name=upload_url::https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)/assets{?name,label}"  
-        id: release
 
       - name: Upload bottle to release
         uses: actions/upload-release-asset@v1
@@ -149,7 +147,7 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const { owner, repo } = context.repo
-            await github.repos.deleteRelease({ owner, repo, release_id: ${{ steps.release.outputs.release_id }} })
+            await github.repos.deleteRelease({ owner, repo, release_id: ${{ needs.macos-build.outputs.release_id }} })
 
   macos-release:
     runs-on: ubuntu-latest
@@ -161,4 +159,4 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const { owner, repo } = context.repo
-            await github.repos.updateRelease({ owner, repo, release_id: ${{ steps.release.outputs.release_id }}, prerelease: false })
+            await github.repos.updateRelease({ owner, repo, release_id: ${{ needs.macos-build.outputs.release_id }}, prerelease: false })
