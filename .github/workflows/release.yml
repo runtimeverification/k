@@ -99,6 +99,7 @@ jobs:
       - name: Test brew bottle
         id: test
         run: |
+          ls -R
           cd homebrew-k
           brew tap kframework/k "file:///$(pwd)"
           brew install ${{ needs.macos-build.outputs.bottle_path }} -v
