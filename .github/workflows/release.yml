@@ -55,6 +55,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      - name: Get upload_url
+        run: |
+          echo "::set-output name=release_id::$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)"
+          echo "::set-output name=upload_url::https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)/assets{?name,label}"
+        id: release
+
       - name: Build brew bottle
         id: build
         run: |
@@ -88,6 +94,7 @@ jobs:
     outputs:
       bottle_path: ${{ steps.build.outputs.path }}
       release_id: ${{ steps.release.outputs.release_id }}
+      upload_url: ${{ steps.release.outputs.upload_url }}
 
   macos-test:
     runs-on: macos-11
@@ -127,8 +134,8 @@ jobs:
         with:
           asset_content_type: "application/gzip"
           asset_name: "Mac OS X Homebrew Bottle"
-          asset_path: ${{ steps.build.outputs.path }}
-          upload_url: ${{ steps.release.outputs.upload_url }}
+          asset_path: ${{ needs.macos-build.outputs.bottle_path }}
+          upload_url: ${{ needs.macos-build.outputs.upload_url }}
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4.7.2
