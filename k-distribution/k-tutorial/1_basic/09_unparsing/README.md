@@ -23,7 +23,7 @@ constructing a sound algorithm that takes a grammar and an AST and emits text
 that could be parsed via that grammar to the original AST is an
 **NP-hard problem**. As a result, in the interests of avoiding exponential time
 algorithms when users rarely care about unparsing being completely sound, we
-take certain shortcuts that provide a linear-time algorithm that /approximates/
+take certain shortcuts that provide a linear-time algorithm that _approximates_
 a sound solution to the problem while sacrificing the notion that the result
 can be parsed into the exact original term in all cases.
 
@@ -127,7 +127,7 @@ endmodule
 ```
 
 This is a statement grammar, simplified to the point of meaninglessness, but
-still useful as an objecte lesson in unparsing. Consider the following program
+still useful as an object lesson in unparsing. Consider the following program
 in this grammar (`if.stmt`):
 
 ```
@@ -280,9 +280,9 @@ list of colors associated with each production, and then the format attribute
 is used to control how those colors are used to unparse the term. At its most
 basic level, you can set the `color` attribute to color all the terminals in
 the production a certain color, or you can use the `colors` attribute to
-specify a comma-separated list of colors for each non-terminal in the
-production. At a more advanced level, the `%c` and `%r` format codes control
-how the formatter interacts with the list of colors specified by the `colors`
+specify a comma-separated list of colors for each terminal in the production.
+At a more advanced level, the `%c` and `%r` format codes control how the
+formatter interacts with the list of colors specified by the `colors`
 attribute. You can essentially think of the `color` attribute as a way of
 specifying that you want all the colors in the list to be the same color.
 
