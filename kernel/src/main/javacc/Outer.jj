@@ -425,6 +425,7 @@ PARSER_END(Outer)
 | <MODULE: "module"> : MODNAME_STATE
 | <IMPORTS: "imports"> : MODNAME_STATE
 | <IMPORTS2: "import"> : MODNAME_STATE
+| <IMPORT_DOT: "."> : KLABEL_STATE
 
 | <STRING: "\"" (~["\"", "\\", "\n"] |
                  "\\\"" | "\\n" | "\\r" | "\\t" | "\\\\")* "\"">
@@ -707,10 +708,11 @@ void Module(List<DefinitionItem> items) : { Location loc = startLoc(); }
 }
 
 /** Parses an Import and adds it to module */
-void Import(Module module): { Location loc = startLoc(); boolean isPublic = module.getAttribute("private") == null; }
+void Import(Module module): { Location loc = startLoc(); boolean isPublic = module.getAttribute("private") == null; String tag = null; String modname; }
 {
-  ("imports" | "import") ((<IMPORTSPRIVATE> { isPublic = false; }) | (<IMPORTSPUBLIC> { isPublic = true; }) )? <MODNAME>
-  { module.appendModuleItem(markLoc(loc, new Import(image(), isPublic))); }
+  ("imports" | "import") ((<IMPORTSPRIVATE> { isPublic = false; }) | (<IMPORTSPUBLIC> { isPublic = true; }) )? <MODNAME> { modname = image(); }
+  ("." <KLABEL> { tag = image(); } )?
+  { module.appendModuleItem(markLoc(loc, new Import(modname, isPublic, tag))); }
 }
 
 /** Parses a Sentence and adds it to 'module' */
