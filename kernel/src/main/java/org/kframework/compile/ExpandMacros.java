@@ -197,7 +197,7 @@ public class ExpandMacros {
                     }
                     k.klist().items().stream().forEach(i -> super.apply(i));
                 }
-            }.accept(((Rule) s).body());
+            }.accept(((RuleOrClaim) s).body());
         }
 
         if (!errors.isEmpty()) {
