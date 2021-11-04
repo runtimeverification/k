@@ -90,7 +90,8 @@ object Module {
   }
 }
 
-case class Import(val module: Module, val isPublic: Boolean)
+case class Import(val module: Module, val isPublic: Boolean, val tag: Option[Tag])
+  extends ImportToString with OuterKORE with Serializable
 
 case class Module(val name: String, val imports: Set[Import], localSentences: Set[Sentence], @(Nonnull@param) val att: Att = Att.empty)
   extends ModuleToString with OuterKORE with Sorting with Serializable with AttValue {
@@ -114,7 +115,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
   lazy val productions: Set[Production] = sentences collect { case p: Production => p }
 
-  lazy val publicSentences: Set[Sentence] = {
+  private lazy val allPublicSentences: Set[Sentence] = {
     if (att.contains(Att.PRIVATE)) {
       localSentences.filter(_.att.contains(Att.PUBLIC))
     } else {
@@ -122,9 +123,29 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     }
   }
 
-  lazy val signature: Module = {
-    val f = ModuleTransformer.from(m => Module(m.name, m.imports.filter(_.isPublic), m.publicSentences, m.att), "compute module signature")
-    Module(name, imports.map(i => Import(f(i.module), i.isPublic)), localSentences, att)
+  def publicSentences(tags: Set[Tag]) = {
+    var sentences = allPublicSentences
+    for (tag <- tags) {
+      sentences = sentences.filter(s => s.att.contains(tag.name) || 
+        (s.isInstanceOf[Production] && s.asInstanceOf[Production].klabelAtt.contains(tag.name)))
+    }
+    sentences
+  }
+
+  def signature: Module = {
+    def f(m: Module, tags: Set[Tag]): Module = 
+      Module(
+        m.name, 
+        m.imports.filter(_.isPublic).map(i => 
+          Import(f(i.module, tags | (if (i.tag.isDefined) Set(i.tag.get) else Set())), i.isPublic, i.tag)), 
+        m.publicSentences(tags), 
+        m.att)
+    Module(
+      name, 
+      imports.map(i => 
+        Import(f(i.module, if (i.tag.isDefined) Set(i.tag.get) else Set()), i.isPublic, i.tag)), 
+      localSentences, 
+      att)
   }
 
   lazy val functions: Set[KLabel] = productions.filter(_.att.contains(Att.FUNCTION)).map(_.klabel.get.head)
@@ -234,14 +255,26 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
   lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
   lazy val rulesAndClaims: Set[RuleOrClaim] = Set[RuleOrClaim]().++(claims).++(rules)
   lazy val rulesFor: Map[KLabel, Set[Rule]] = rules.groupBy(r => matchKLabel(r))
-  lazy val macroKLabels: Set[KLabel] = rules.filter(r => r.isMacro).map(r => matchKLabel(r))
+  lazy val macroKLabels: Set[KLabel] = macroKLabelsFromRules++macroKLabelsFromProductions
+  lazy val macroKLabelsFromRules: Set[KLabel] = rules.filter(r => r.isMacro).map(r => matchKLabel(r))
+  lazy val macroKLabelsFromProductions: Set[KLabel] = productions.filter(p => p.isMacro).map(p => matchKLabel(p))
 
-  private def matchKLabel(r: Rule) = r.body match {
+  def matchKLabel(r: Rule): KLabel = r.body match {
     case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KApply(s, _) :: _) => s
     case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KRewrite(Unapply.KApply(s, _), _) :: _) => s
     case Unapply.KApply(s, _) => s
     case Unapply.KRewrite(Unapply.KApply(s, _), _) => s
     case _ => KORE.KLabel("")
+  }
+
+  private def matchKLabel(p: Production) = p.klabel match {
+    case Some(klabel) => klabel
+    case _ => KORE.KLabel("")
+  }
+
+  def ruleLhsHasMacroKLabel(r: Rule): Boolean = r.body match {
+    case Unapply.KRewrite(Unapply.KApply(l @ Unapply.KLabel(_), _), _) => macroKLabelsFromProductions.contains(l)
+    case _ => false
   }
 
   lazy val contexts: Set[Context] = sentences collect { case r: Context => r }
@@ -362,7 +395,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
   override lazy val hashCode: Int = name.hashCode
 
-  def flattened()   : FlatModule                = new FlatModule(name, imports.map(i => FlatImport(i.module.name, i.isPublic, Att.empty)), localSentences, att)
+  def flattened()   : FlatModule                = new FlatModule(name, imports.map(i => FlatImport(i.module.name, i.isPublic, i.tag, Att.empty)), localSentences, att)
   def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ fullImports.map(m => m.flatModules._2).flatten)
 }
 

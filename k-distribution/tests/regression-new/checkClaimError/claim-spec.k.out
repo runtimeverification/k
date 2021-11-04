@@ -1,1 +1,4 @@
 #Top
+[Warning] Compiler: The attribute [macro] has been deprecated on rules. Use this label on syntax declarations instead.
+	Source(errorClaim.k)
+	Location(7,10,7,18)

@@ -318,6 +318,7 @@
       </plugin>
     </plugins>
   </build>
+
   <profiles>
     <profile>
       <id>linux64</id>
@@ -328,6 +329,7 @@
           <arch>amd64</arch>
         </os>
       </activation>
+
       <properties>
         <native.arch.classifier>64</native.arch.classifier>
         <native.classifier>linux64</native.classifier>
@@ -338,25 +340,7 @@
         <make.args>--output-sync</make.args>
       </properties>
     </profile>
-    <profile>
-      <id>linux32</id>
-      <activation>
-        <os>
-          <family>Unix</family>
-          <name>!mac os x</name>
-          <arch>i386</arch>
-        </os>
-      </activation>
-      <properties>
-        <native.arch.classifier>32</native.arch.classifier>
-        <native.classifier>linux32</native.classifier>
-        <native.os.classifier>linux</native.os.classifier>
-        <native.exe.type>uexe</native.exe.type>
-        <native.exe.extension />
-        <native.script.extension />
-        <make.args>--output-sync</make.args>
-      </properties>
-    </profile>
+
     <profile>
       <id>osx</id>
       <activation>
@@ -364,6 +348,7 @@
           <family>mac</family>
         </os>
       </activation>
+
       <properties>
         <native.arch.classifier>64</native.arch.classifier>
         <native.classifier>osx</native.classifier>

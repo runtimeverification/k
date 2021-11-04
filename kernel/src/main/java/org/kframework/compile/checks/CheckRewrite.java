@@ -77,6 +77,14 @@ public class CheckRewrite {
             }
 
             @Override
+            public void apply(KVariable k) {
+                if (!h.inRewriteRHS && k.name().startsWith("?")) {
+                    errors.add(KEMException.compilerError(
+                            "Existential variable " + k.name() + " found in LHS. Existential variables are only allowed in the RHS.", k));
+                }
+            }
+
+            @Override
             public void apply(KApply k) {
                 if (!(k.klabel() instanceof KVariable) && k.klabel().name().equals("#fun2") || k.klabel().name().equals("#fun3")) {
                     if (k.klabel().name().equals("#fun2")) {
