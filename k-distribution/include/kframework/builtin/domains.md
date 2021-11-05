@@ -1059,13 +1059,13 @@ module INT-SYMBOLIC [symbolic]
   rule X modInt N => X requires 0 <=Int X andBool X <Int N [simplification]
   rule X   %Int N => X requires 0 <=Int X andBool X <Int N [simplification]
 
-  rule  1 ^Int _ =>  1                           [simplification]
-  rule -1 ^Int N =>  1 requires N %Int 2 ==Int 0 [simplification]
-  rule -1 ^Int N => -1 requires N %Int 2 ==Int 1 [simplification]
-  rule  0 ^Int N =>  0 requires N >Int 0         [simplification]
-  rule  X ^Int N =>  0 requires absInt(X) >Int 0
-                        andBool N <Int 0         [simplification]
-  rule  X ^Int 0 =>  1 requires X =/=Int 0       [simplification]
+  rule  1 ^Int _ =>  1                            [simplification]
+  rule -1 ^Int N =>  1 requires N %Int 2 ==Int  0 [simplification]
+  rule -1 ^Int N => -1 requires N %Int 2 =/=Int 0 [simplification]
+  rule  0 ^Int N =>  0 requires N >Int 0          [simplification]
+  rule  X ^Int N =>  0 requires absInt(X) >Int 1
+                        andBool N <Int 0          [simplification]
+  rule  X ^Int 0 =>  1 requires X =/=Int 0        [simplification]
 
   // Bit-shifts
   rule X <<Int 0 => X [simplification]
