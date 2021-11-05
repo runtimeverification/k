@@ -1,76 +1,85 @@
 K Framework 5.2.0
 =================
 
-**TODO**: Current as of 30d285a8442b622796f8e2e212f92d4bec23029d
+**TODO**: Current as of 361eb5fe325b31d3bef049bda1c4e32a11d50ae5
 
-Feature Additions
------------------
+Features
+-------
 
--   `kompile` will now attempt to simplify constant expressions which appear
-    in the RHS of rules.
+- `kompile` will now attempt to simplify constant expressions which appear
+  in the RHS of rules.
 
--   The LLVM backend now supports the non-deterministic `search` feature.
-    This must be enabled at `kompile` time with `--enable-search --backend llvm`
-    and only supports the `--search|--search-final` options.
+- The LLVM backend now supports the non-deterministic `search` feature.
+  This must be enabled at `kompile` time with `--enable-search --backend llvm`
+  and only supports the `--search|--search-final` options.
 
-Feature Removals
-----------------
+- The sentence type `imports syntax` has been removed. It was only used in one
+  place in the tutorial, which was easy to resolve. This allows simplifying
+  several code-paths in `kompile`.
 
--   The sentence type `imports syntax` has been removed. It was only used in one
-    place in the tutorial, which was easy to resolve. This allows simplifying
-    several code-paths in `kompile`.
+- All modules which contain `configuration` declarations will automatically
+  import the `MAP` module now, instead of only the main module.
 
-Kore Encoding and Builtins
---------------------------
+- The new Haskell backend hooks for `encodeBytes` and `decodeBytes` are
+  exposed in `domains.md`.
 
--   The K formula calculating Array extension has been optimized in
-    `domains.md`.
+- Added support for module signatures supporting public/private syntax and imports.
 
--   All modules which contain `configuration` declarations will automatically
-    import the `MAP` module now, instead of only the main module.
+- `macro` is now expected to be added to the syntax declaration instead of rules.
 
--   The LLVM backend now also sees `simplification` rules, and is responsible
-    for ignoring them.
+- Rework timing info for `--profile-rule-parsing`. It now takes a file and
+  includes separate data fields for parsing and type inference.
 
--   The new Haskell backend hooks for `encodeBytes` and `decodeBytes` are
-    are exposed in `domains.md`.
+- Added `kprovex`. A lightweight version of `kprove` which restricts the spec files
+  to claims and token syntax. This avoids several bugs in the old code path and
+  slightly improves the front end overhead. To convert the old tests, you need to
+  kompile ahead of time the definition with the simplification rules and extra
+  helper syntax needed for the proofs.
 
 Documentation
 -------------
 
--   The option `--help-experimental` or `-X` is removed from all tools, and
-    all the `--help` option lists are flattened.
+- Relicence as BSD 3-Clause
 
--   Documentation for `symbol`, `klabel`, `simplification`, and `smt-lemma`
-    attributes is updated in `pending-documentation.md`. Documentation for
-    the `#Layout` sort is updated in `kast.md`.
+- Lessons Basic 2-21 of the new K tutorial have been written.
 
--   Lessons 2-12 of the new K tutorial have been written.
+- The option `--help-experimental` or `-X` is removed from all tools, and 
+  all the `--help` option lists are flattened.
 
-Parsing Performance
--------------------
+- Rename `pending-documentation.md` into `USER_MANUAL.md`
 
--   Definition parsing performance is significantly improved by being smarter
-    with the existing caches and optimizing some specific code hotspots.
+Misc/Bug Fixes
+--------------
 
-Misc
-----
-
--   Modules marked as `not-lr1` are automatically excluded from the generated
+- Modules marked as `not-lr1` are automatically excluded from the generated
     Bison parser, instead of causing an error.
 
--   `krun` respects the `--no-exc-wrap` option now.
+- `krun` respects the `--no-exc-wrap` option now.
 
--   Formatting of several error messages is improved, especially indentation.
+- Formatting of several error messages is improved, especially indentation.
 
--   File symlink handling in `requires` statements is improved.
+- File symlink handling in `requires` statements is improved.
 
--   `kast` tool no longer silently ignores the `--output-file` parameter.
+- `kast` tool no longer silently ignores the `--output-file` parameter.
+
+- Verbose mode offers more information about timings and scanners being created.
+
+- Added `-I`, `--md-selector` and `--no-prelude` to kprove, kprovex and kbmc
+
+Performance Improvements
+------------------------
+
+- Definition parsing performance is significantly improved by being smarter
+  with the existing caches and optimizing some specific code hotspots.
+
+- Improve type inference time for anonymous variables.
+
+- Parse Record Productions in linear time.
+
+- The K formula calculating Array extension has been optimized in `domains.md`.
 
 Packaging/Deployment
 --------------------
-
--   The automatic deployment release trigger is fixed.
 
 -   The Nix packages are built with LTO turned on. Bison is included
     in the Nix package dependencies. `kserver` now works on Nix.
@@ -85,11 +94,11 @@ Packaging/Deployment
 Dependency Updates
 ------------------
 
--   Haskell backend is updated to version 67d4d2369.
+-   Haskell backend is updated to version d4239d97f5b53188460e7399b683111b5687661c.
 
--   LLVM backend is updated to version 789d437.
+-   LLVM backend is updated to version 23c2adcd21a1486442062ecc4ae051548215bcc3.
 
--   K Web Theme is updated to version 4d2c931.
+-   K Web Theme is updated to version b458d1461c31760024ea06e0e50f25806ace5e2c.
 
 -   JavaCC is updated to version 4.1.4.
 
