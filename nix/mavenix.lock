@@ -6998,26 +6998,6 @@
       "sha1": "e0b9da6ab81c1ba9a08f4898ec0a944c275e2ed6"
     },
     {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.2/mpfr_java-1.2-linux64.jar",
-      "sha1": "f81a9fba413318be7a2997b9b605784a948be065"
-    },
-    {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.2/mpfr_java-1.2-osx-arm.jar",
-      "sha1": "36817ef1378dbb3b1bfcb82daf7a191219964d63"
-    },
-    {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.2/mpfr_java-1.2-osx.jar",
-      "sha1": "b1998d734e2ee88e2e99717aa1c1aa596d4a18cd"
-    },
-    {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.2/mpfr_java-1.2.jar",
-      "sha1": "77eadc5127adf6144cbb52fdb383c3dc9c02838d"
-    },
-    {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.2/mpfr_java-1.2.pom",
-      "sha1": "5dd43a87e562c333d89d692e7438d34640d2e2d8"
-    },
-    {
       "path": "org/kframework/mpfr_java/mpfr_java/1.4/mpfr_java-1.4-linux64.jar",
       "sha1": "78c13578c9052e9f9dcb6723a267fb183e5ebdac"
     },
