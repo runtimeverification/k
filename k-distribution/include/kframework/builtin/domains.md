@@ -909,6 +909,10 @@ You can:
 
 * Compute the bitwise complement `~Int` of an integer value in twos-complement.
 * Compute the exponentiation `^Int` of two integers.
+  * As implemented above, the frontend will only send integer exponentiation to
+    Z3 if both the base and exponent are positive integers. This prevents the K
+    frontend from running afoul of the potentially undefined or inconsistent Z3
+    behaviour in cases where `#1` or `#2` are non-positive.
 * Compute the exponentiation of two integers modulo another integer (`^%Int`).
   `A ^%Int B C` is equal in value to `(A ^Int B) %Int C`, but has a better
   asymptotic complexity.
@@ -1055,7 +1059,13 @@ module INT-SYMBOLIC [symbolic]
   rule X modInt N => X requires 0 <=Int X andBool X <Int N [simplification]
   rule X   %Int N => X requires 0 <=Int X andBool X <Int N [simplification]
 
-  rule _ ^Int N => 0 requires N <Int 0 [simplification]
+  rule  1 ^Int _ =>  1                           [simplification]
+  rule -1 ^Int N =>  1 requires N %Int 2 ==Int 0 [simplification]
+  rule -1 ^Int N => -1 requires N %Int 2 ==Int 1 [simplification]
+  rule  0 ^Int N =>  0 requires N >Int 0         [simplification]
+  rule  X ^Int N =>  0 requires absInt(X) >Int 0
+                        andBool N <Int 0         [simplification]
+  rule  X ^Int 0 =>  1 requires X =/=Int 0       [simplification]
 
   // Bit-shifts
   rule X <<Int 0 => X [simplification]
