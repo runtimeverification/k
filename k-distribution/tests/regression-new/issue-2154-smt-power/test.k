@@ -13,5 +13,5 @@ module TEST
        andBool 0 <Int M andBool 0 <Int M'
        andBool N <=Int M andBool N' <=Int M'
       [simplification, smt-lemma]
-                     
+
 endmodule
