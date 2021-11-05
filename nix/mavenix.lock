@@ -6846,10 +6846,6 @@
       "sha1": "17d9344459471ef3d2792e7452ead549809eccc5"
     },
     {
-      "path": "org/fusesource/fusesource-pom/1.10/fusesource-pom-1.10.pom",
-      "sha1": "ad0238e7718c2f5f50e3e1bf93ed14c3a3d15675"
-    },
-    {
       "path": "org/fusesource/fusesource-pom/1.11/fusesource-pom-1.11.pom",
       "sha1": "f5547b0657be718d1ec0d2816cbcd5c398d6fccb"
     },
@@ -6858,16 +6854,16 @@
       "sha1": "778b55850b2bb4ebf48c02bc57a9afb1eec8f52e"
     },
     {
-      "path": "org/fusesource/hawtjni/hawtjni-project/1.10/hawtjni-project-1.10.pom",
-      "sha1": "93faf3c8d4abe722978ac34c95b7b27abce53505"
+      "path": "org/fusesource/hawtjni/hawtjni-project/1.18/hawtjni-project-1.18.pom",
+      "sha1": "f52ccd437991b8c04c2c0101c37ea4134b3aad74"
     },
     {
-      "path": "org/fusesource/hawtjni/hawtjni-runtime/1.10/hawtjni-runtime-1.10.jar",
-      "sha1": "3142d79489369a058889796a65e615eb9d20ba5b"
+      "path": "org/fusesource/hawtjni/hawtjni-runtime/1.18/hawtjni-runtime-1.18.jar",
+      "sha1": "f1a69a4e05337df874739adea6b65935cae195ae"
     },
     {
-      "path": "org/fusesource/hawtjni/hawtjni-runtime/1.10/hawtjni-runtime-1.10.pom",
-      "sha1": "76095710434bbf83b57a6bd5ec8cd9e900283b44"
+      "path": "org/fusesource/hawtjni/hawtjni-runtime/1.18/hawtjni-runtime-1.18.pom",
+      "sha1": "7e400881574d027102e47dc2462d36fd153a2770"
     },
     {
       "path": "org/fusesource/jansi/jansi-project/1.12/jansi-project-1.12.pom",
@@ -6998,32 +6994,20 @@
       "sha1": "e0b9da6ab81c1ba9a08f4898ec0a944c275e2ed6"
     },
     {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.0.1/mpfr_java-1.0.1-linux32.jar",
-      "sha1": "8b08caf73df4aa5489ba23725bdb74ed5378d0d7"
+      "path": "org/kframework/mpfr_java/mpfr_java/1.4/mpfr_java-1.4-linux64.jar",
+      "sha1": "78c13578c9052e9f9dcb6723a267fb183e5ebdac"
     },
     {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.0.1/mpfr_java-1.0.1-linux64.jar",
-      "sha1": "4e0140ec3961442fbdd2fecd7c8d2608c0d142e4"
+      "path": "org/kframework/mpfr_java/mpfr_java/1.4/mpfr_java-1.4-osx.jar",
+      "sha1": "e9b757d86b6777dafc45d5fda43151483ed553d3"
     },
     {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.0.1/mpfr_java-1.0.1-osx.jar",
-      "sha1": "56597fb5adf813c122b618221a682c612d4669d4"
+      "path": "org/kframework/mpfr_java/mpfr_java/1.4/mpfr_java-1.4.jar",
+      "sha1": "326d809a7d7ebd9b648e10ab2e3ec17fa8bab20d"
     },
     {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.0.1/mpfr_java-1.0.1-windows32.jar",
-      "sha1": "8e1c247076e5ad41af6fb04a1017c8cfa8a4e3b7"
-    },
-    {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.0.1/mpfr_java-1.0.1-windows64.jar",
-      "sha1": "fa041868aca85b706788ed9b8a15324bcbb3a4e3"
-    },
-    {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.0.1/mpfr_java-1.0.1.jar",
-      "sha1": "11c5a8ece113121145afb5168b1b9f09ad2ec560"
-    },
-    {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.0.1/mpfr_java-1.0.1.pom",
-      "sha1": "4de2d567cb59bdf86b26d9c4723db7033a6de7d8"
+      "path": "org/kframework/mpfr_java/mpfr_java/1.4/mpfr_java-1.4.pom",
+      "sha1": "0be0710dd4702726211e61ce6dd3b56acc2d052f"
     },
     {
       "path": "org/mockito/mockito-core/1.9.5/mockito-core-1.9.5.jar",
