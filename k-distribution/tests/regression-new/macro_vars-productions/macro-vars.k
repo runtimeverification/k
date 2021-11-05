@@ -12,4 +12,7 @@ module MACRO-VARS
   syntax CPPType ::= underlyingType(CPPType) [function]
   syntax CPPType ::= "cppEnumType" [macro]
   rule cppEnumType => bar(_, scopedEnum() #Or unscopedEnum() ) [unboundVariables(_)]
+  syntax Int ::= A ( Int ) [macro]
+  rule A ( N ) => N +Int 1
+  rule A ( N ) => N [simplification]
 endmodule
