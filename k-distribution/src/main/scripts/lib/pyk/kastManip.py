@@ -39,12 +39,14 @@ def match(pattern, kast):
     """
     subst = {}
     if isKVariable(pattern):
-        return { pattern["name"] : kast }
+        if isKVariable(kast) and pattern['name'] == kast['name']:
+            return {}
+        return { pattern['name'] : kast }
     if isKToken(pattern) and isKToken(kast):
-        return {} if pattern["token"] == kast["token"] else None
+        return {} if pattern['token'] == kast['token'] else None
     if  isKApply(pattern) and isKApply(kast) \
-    and pattern["label"] == kast["label"] and len(pattern["args"]) == len(kast["args"]):
-        for (patternArg, kastArg) in zip(pattern["args"], kast["args"]):
+    and pattern['label'] == kast['label'] and len(pattern['args']) == len(kast['args']):
+        for (patternArg, kastArg) in zip(pattern['args'], kast['args']):
             argSubst = match(patternArg, kastArg)
             subst = combineDicts(subst, argSubst)
             if subst is None:
