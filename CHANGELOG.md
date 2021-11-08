@@ -15,9 +15,8 @@ Features
 - `kompile` will now attempt to simplify constant expressions which appear
   in the RHS of rules.
 
-- The LLVM backend now supports the non-deterministic `search` feature.
-  This must be enabled at `kompile` time with `--enable-search --backend llvm`
-  and only supports the `--search|--search-final` options.
+- `krun` now supports `--search` and `--search-final`. This works with the LLVM
+  backend and must be enabled at `kompile` time with `--enable-search --backend llvm`.
 
 - The sentence type `imports syntax` has been removed. It was only used in one
   place in the tutorial, which was easy to resolve. This allows several code-paths
