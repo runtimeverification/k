@@ -74,7 +74,9 @@ jobs:
           ../kframework/package/macos/brew-build-and-update-to-local-bottle ${PACKAGE} ${VERSION} ${ROOT_URL}
           git reset HEAD^
           LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.big_sur.bottle*.tar.gz"))
+          BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#./} | sed 's!kframework--!kframework-!')
           echo "::set-output name=path::$LOCAL_BOTTLE_NAME"
+          echo "::set-output name=path_remote::$BOTTLE_NAME"
 
       - name: Upload bottle
         uses: actions/upload-artifact@v2
@@ -93,6 +95,7 @@ jobs:
 
     outputs:
       bottle_path: ${{ steps.build.outputs.path }}
+      bottle_path_remote: ${{ steps.build.outputs.path_remote }}
       release_id: ${{ steps.release.outputs.release_id }}
       upload_url: ${{ steps.release.outputs.upload_url }}
 
@@ -133,7 +136,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           asset_content_type: "application/gzip"
-          asset_name: "Mac OS X Homebrew Bottle"
+          asset_name: ${{ needs.macos-build.outputs.bottle_path_remote }}
           asset_path: ${{ needs.macos-build.outputs.bottle_path }}
           upload_url: ${{ needs.macos-build.outputs.upload_url }}
 
