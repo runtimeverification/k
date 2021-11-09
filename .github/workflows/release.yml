@@ -137,13 +137,13 @@ jobs:
           asset_path: ${{ needs.macos-build.outputs.bottle_path }}
           upload_url: ${{ needs.macos-build.outputs.upload_url }}
 
-      - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v4.7.2
-        with:
-          repository: homebrew-k
-          commit_message: 'Update brew package version'
-          file_pattern: 'Formula/kframework.rb'
-          branch: master
+          #      - name: Commit changes
+          #        uses: stefanzweifel/git-auto-commit-action@v4.7.2
+          #        with:
+          #          repository: homebrew-k
+          #          commit_message: 'Update brew package version'
+          #          file_pattern: 'Formula/kframework.rb'
+          #          branch: master
 
       - name: Delete Release
         if: failure()
@@ -154,14 +154,14 @@ jobs:
             const { owner, repo } = context.repo
             await github.repos.deleteRelease({ owner, repo, release_id: ${{ needs.macos-build.outputs.release_id }} })
 
-  macos-release:
-    runs-on: ubuntu-latest
-    needs: [nix-release, macos-test]
-    steps:
-      - name: Publish release
-        uses: actions/github-script@v4
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            const { owner, repo } = context.repo
-            await github.repos.updateRelease({ owner, repo, release_id: ${{ needs.macos-build.outputs.release_id }}, prerelease: false })
+            #  macos-release:
+            #    runs-on: ubuntu-latest
+            #    needs: [nix-release, macos-test]
+            #    steps:
+            #      - name: Publish release
+            #        uses: actions/github-script@v4
+            #        with:
+            #          github-token: ${{secrets.GITHUB_TOKEN}}
+            #          script: |
+            #            const { owner, repo } = context.repo
+            #            await github.repos.updateRelease({ owner, repo, release_id: ${{ needs.macos-build.outputs.release_id }}, prerelease: false })
