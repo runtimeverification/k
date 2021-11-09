@@ -60,7 +60,7 @@ must first be installed.
 
 On Ubuntu Linux:
 
-```
+```shell
 git submodule update --init --recursive
 sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 cmake gcc clang-10 lld-10 llvm-10-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
 curl -sSL https://get.haskellstack.org/ | sh
@@ -70,12 +70,18 @@ Note: we require version 10 or greater for clang, lld, and llvm-tools.
 
 On Arch Linux:
 
-```
+```shell
 git submodule update --init --recursive
 sudo pacman -S git maven jdk-openjdk cmake boost libyaml jemalloc clang llvm lld zlib gmp mpfr z3 curl stack base-devel base python
 ```
 
 If you install this list of dependencies, continue directly to the [Build and Install Guide](#build-and-install-guide).
+
+On macOS using [Homebrew](https://brew.sh/):
+```shell
+git submodule update --init --recursive
+brew install bison boost cmake flex gcc gmp openjdk jemalloc libyaml llvm make maven mpfr pkg-config python stack zlib z3
+```
 
 ## The Long Version
 
@@ -132,7 +138,14 @@ See the notes below.
         explicitly make it available for command line usage. See the results
         of the `brew info llvm` command for more information on how to do this.
 
-3.  Apache Maven
+3.  Flex / Bison
+
+    *   macOS/brew: The versions of these packages supplied by the OS are too
+        old, and are not compatible with the K build. You must ensure that the
+        Homebrew-installed versions are first on your `PATH` when building K
+        (i.e. `which flex` is **not** `/usr/bin/flex`).
+
+4.  Apache Maven
 
     *   Linux: Download from package manager
         (e.g. `sudo apt-get install maven`).
@@ -148,7 +161,7 @@ See the notes below.
     This will provide the information about the JDK Maven is using, in case
     it is the wrong one.
 
-4.   Haskell Stack
+5.   Haskell Stack
 
      To install, go to <https://docs.haskellstack.org/en/stable/README/> and
      follow the instructions.
@@ -168,6 +181,23 @@ can update your `$PATH` with
 You are also encouraged to set the environment variable `MAVEN_OPTS` to
 `-XX:+TieredCompilation`, which will significantly speed up the incremental
 build process.
+
+### Apple Silicon Support
+
+K currently offers partial support for Apple Silicon; the toolchain has been
+tested and works on ARM macOS, but is not yet part of our CI/CI pipeline. To
+build K on an Apple Silicon machine, ensure the following steps are followed in
+addition to the usual Maven build setup:
+* Ensure that Homebrew-installed versions of `llvm-config`, `flex` and `bison`
+  are on your `PATH` ahead of any macOS-supplied versions.
+* Pass `-Dstack.extra-opts='--compiler ghc-8.10.7 --system-ghc'` as an
+  additional argument to `mvn package` when building the toolchain.
+  * This is a workaround for `stack` and `ghc` not yet properly supporting ARM
+    macOS; the underlying problem is likely to be fixed at some point in the
+    future.
+  * See [the documentation](https://github.com/kframework/kore#apple-silicon)
+    and [associated PR](https://github.com/kframework/kore/pull/2893) for more
+    details.
 
 ### Optional OCaml Backend Setup
 
