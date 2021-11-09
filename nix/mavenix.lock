@@ -2478,14 +2478,6 @@
       "sha1": "419d0d7f80d7d00f8155bd45de15e7cf5d889f0a"
     },
     {
-      "path": "jline/jline/2.13/jline-2.13.jar",
-      "sha1": "2d9530d0a25daffaffda7c35037b046b627bb171"
-    },
-    {
-      "path": "jline/jline/2.13/jline-2.13.pom",
-      "sha1": "21663b93af1247eab73abb3a1c999e9b4b4c4430"
-    },
-    {
       "path": "jline/jline/2.14.6/jline-2.14.6.pom",
       "sha1": "378c8caace8e1e65314477420d9734373cf29531"
     },
@@ -6862,10 +6854,6 @@
       "sha1": "778b55850b2bb4ebf48c02bc57a9afb1eec8f52e"
     },
     {
-      "path": "org/fusesource/fusesource-pom/1.8/fusesource-pom-1.8.pom",
-      "sha1": "d4f1b288004e1a8c8bc9f61f5f151d1ef0d4211a"
-    },
-    {
       "path": "org/fusesource/hawtjni/hawtjni-project/1.18/hawtjni-project-1.18.pom",
       "sha1": "f52ccd437991b8c04c2c0101c37ea4134b3aad74"
     },
@@ -6878,24 +6866,20 @@
       "sha1": "7e400881574d027102e47dc2462d36fd153a2770"
     },
     {
-      "path": "org/fusesource/jansi/jansi-project/1.11/jansi-project-1.11.pom",
-      "sha1": "c1fb6dcfa9faf3eafaf00bd66cbea2dbbc8c11d0"
-    },
-    {
       "path": "org/fusesource/jansi/jansi-project/1.12/jansi-project-1.12.pom",
       "sha1": "deaf98271d58b21e78bc4a20d425447fcc03b781"
     },
     {
-      "path": "org/fusesource/jansi/jansi/1.11/jansi-1.11.jar",
-      "sha1": "655c643309c2f45a56a747fda70e3fadf57e9f11"
-    },
-    {
-      "path": "org/fusesource/jansi/jansi/1.11/jansi-1.11.pom",
-      "sha1": "af75ce5357c0cab4dc273738073fcfb39a10fdfe"
-    },
-    {
       "path": "org/fusesource/jansi/jansi/1.12/jansi-1.12.pom",
       "sha1": "5cc7bd0ed4d411d362a05c3645a87ea76a3f2533"
+    },
+    {
+      "path": "org/fusesource/jansi/jansi/2.4.0/jansi-2.4.0.jar",
+      "sha1": "321c614f85f1dea6bb08c1817c60d53b7f3552fd"
+    },
+    {
+      "path": "org/fusesource/jansi/jansi/2.4.0/jansi-2.4.0.pom",
+      "sha1": "8a24a317c524469da0de8024d764605790db8409"
     },
     {
       "path": "org/glassfish/javax.json/1.0.4/javax.json-1.0.4.jar",
@@ -6956,6 +6940,18 @@
     {
       "path": "org/jetbrains/annotations/15.0/annotations-15.0.pom",
       "sha1": "061c533b685552908a13ff6af0f6deb0d531b312"
+    },
+    {
+      "path": "org/jline/jline-parent/3.21.0/jline-parent-3.21.0.pom",
+      "sha1": "bcc18b1f077a1bb4368cbe83951a0d8fddddf7a2"
+    },
+    {
+      "path": "org/jline/jline/3.21.0/jline-3.21.0.jar",
+      "sha1": "2bf6f2311356f309fda0412e9389d2499346b5a1"
+    },
+    {
+      "path": "org/jline/jline/3.21.0/jline-3.21.0.pom",
+      "sha1": "bd03ef78247c946d6762aa7c72a7e4f1a2c13ce3"
     },
     {
       "path": "org/jsoup/jsoup/1.11.3/jsoup-1.11.3.jar",
