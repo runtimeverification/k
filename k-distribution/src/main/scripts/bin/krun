@@ -50,13 +50,13 @@ keepTempsIfDryRun () {
   # kepp files used by dry-run
   if $dryRun; then
     local newArray=()
-    for value in "${tempFiles[@]}"; do
+    for value in ${tempFiles[@]+"${tempFiles[@]}"}; do
         if [[ ! "$@" =~ ${value} ]]; then
           newArray+=($value)
         fi
     done
     tempFiles=()
-    tempFiles=${newArray[@]}
+    tempFiles=${newArray[@]+"${newArray[@]}"}
     unset newArray
   fi
 }
@@ -433,13 +433,13 @@ if ! $hasKompiledDir; then
 fi
 
 if [ ! -f "$kompiledDir/definition.kore" ]; then
-  "$(dirname "$0")/krun-legacy" "${ORIG_ARGV[@]}"
+  "$(dirname "$0")/krun-legacy" ${ORIG_ARGV[@]+"${ORIG_ARGV[@]}"}
   exit $?
 fi
 
 # Process configuration variables
 hasArgv=false
-if [[ "${#ARGV[@]}" -gt 0 ]]; then
+if [[ ${#ARGV[@]+"${#ARGV[@]}"} -gt 0 ]]; then
   config_var_PGM="${ARGV[0]}"
   hasArgv=true
   params+=("PGM")
@@ -461,11 +461,11 @@ if $term; then
   fi
 else
   for configVar in ${declaredConfigVars[@]+"${declaredConfigVars[@]}"}; do
-    if [[ $configVar != "IO" && $configVar != "STDIN" && ! "${params[@]}" =~ "$configVar" ]]; then
+    if [[ $configVar != "IO" && $configVar != "STDIN" && ! ${params[@]+"${params[@]}"} =~ "$configVar" ]]; then
       error "Configuration variable missing: \$$configVar. Use -c$configVar=<Value> in the command line to set."
     fi
   done
-  for name in "${params[@]}"; do
+  for name in ${params[@]+"${params[@]}"}; do
     parser_name="parser_$name"
     config_name="config_var_$name"
     tempFile="$(mktemp ${tempDir}/tmp.in."$name".XXXXXXXXXX)"
@@ -496,7 +496,7 @@ else
     else
       parser=("${!parser_name}")
     fi
-    execute ${parser[@]} "${!config_name}" > "$tempFile"
+    execute ${parser[@]+"${parser[@]}"} "${!config_name}" > "$tempFile"
     configVars="$configVars -c $name $(basename $tempFile) $sortName korefile"
   done
   if [[ ${declaredConfigVar_IO+unset} && "${declaredConfigVar_IO}" = "String" ]]; then
