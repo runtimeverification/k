@@ -439,7 +439,7 @@ fi
 
 # Process configuration variables
 hasArgv=false
-if [[ ${#ARGV[@]+"${#ARGV[@]}"} -gt 0 ]]; then
+if [[ "${#ARGV[@]}" -gt 0 ]]; then
   config_var_PGM="${ARGV[0]}"
   hasArgv=true
   params+=("PGM")
