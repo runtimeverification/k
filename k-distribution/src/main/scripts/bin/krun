@@ -460,7 +460,7 @@ if $term; then
     execute $parser_PGM "$config_var_PGM" > "$input_file"
   fi
 else
-  for configVar in "${declaredConfigVars[@]}"; do
+  for configVar in ${declaredConfigVars[@]+"${declaredConfigVars[@]}"}; do
     if [[ $configVar != "IO" && $configVar != "STDIN" && ! "${params[@]}" =~ "$configVar" ]]; then
       error "Configuration variable missing: \$$configVar. Use -c$configVar=<Value> in the command line to set."
     fi
@@ -470,7 +470,7 @@ else
     config_name="config_var_$name"
     tempFile="$(mktemp ${tempDir}/tmp.in."$name".XXXXXXXXXX)"
     tempFiles+=("$tempFile")
-    if [[ ! "${declaredConfigVars[@]}" =~ "$name" ]]; then
+    if [[ ! ${declaredConfigVars[@]+"${declaredConfigVars[@]}"} =~ "$name" ]]; then
       if [ "$name" = "PGM" ]; then
         error "Configuration variable \$PGM does not exist. Do not pass a positional argument to $KRUN."
       else
