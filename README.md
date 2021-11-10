@@ -80,15 +80,13 @@ If you install this list of dependencies, continue directly to the [Build and In
 On macOS using [Homebrew](https://brew.sh/):
 ```shell
 git submodule update --init --recursive
-brew install bash bison boost cmake flex gcc gmp openjdk jemalloc libyaml llvm make maven mpfr pkg-config python stack zlib z3
+brew install bison boost cmake flex gcc gmp openjdk jemalloc libyaml llvm make maven mpfr pkg-config python stack zlib z3
 ```
 
 ## The Long Version
 
 The following dependencies are needed either at build time or runtime:
 
-*   [bash](https://www.gnu.org/software/bash/) (K requires Bash version 4.4 or
-  newer.)
 *   [bison](https://www.gnu.org/software/bison/)
 *   [boost](https://www.boost.org/)
 *   [cmake](https://cmake.org/)
