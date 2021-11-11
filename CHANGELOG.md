@@ -1,8 +1,6 @@
 K Framework 5.2.0
 =================
 
-**TODO**: Current as of 07918e142f8d5af3e041ffa48eecad089da7e291
-
 Features
 --------
 
@@ -92,9 +90,9 @@ Packaging/Deployment
 Dependency Updates
 ------------------
 
-- Haskell backend is updated to version [2f5f5e3](https://github.com/kframework/kore/commit/2f5f5e3a137d1334c24c401bdbbb0eb97a2f0208).
+- Haskell backend is updated to version [82b8a19](https://github.com/kframework/kore/commit/82b8a19bfc3fb7d9f3ca3f3e715ec7ae08b70a99).
   
-- LLVM backend is updated to version [b536e97](https://github.com/kframework/llvm-backend/commit/b536e9730b9721c635eb7516041e488cacf66624).
+- LLVM backend is updated to version [572cf69](https://github.com/kframework/llvm-backend/commit/572cf698be6baef5cdd01aa9239e32e9be89ec6a).
 
 - K Web Theme is updated to version [b458d14](https://github.com/runtimeverification/k-web-theme/commit/b458d1461c31760024ea06e0e50f25806ace5e2c).
 
