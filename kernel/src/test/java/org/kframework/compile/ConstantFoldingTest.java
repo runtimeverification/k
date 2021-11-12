@@ -813,10 +813,14 @@ public class ConstantFoldingTest {
   private double[] refs = new double[] {0.0, -0.0, 1.0/0.0, -1.0/0.0, 1.0, -1.0, 3.0, 0.5, 0.0/0.0};
 
   private void testUnaryOp(Function<FloatBuiltin, FloatBuiltin> op, Function<Double, Double> refOp) {
+    testUnaryOp(op, refOp, Double.MIN_VALUE);
+  }
+
+  private void testUnaryOp(Function<FloatBuiltin, FloatBuiltin> op, Function<Double, Double> refOp, Double epsilon) {
     for (int i = 0; i < refs.length; i++) {
       FloatBuiltin result = op.apply(_double(refs[i]));
       double ref = refOp.apply(refs[i]);
-      assertEquals(ref, result.doubleValue(), Double.MIN_VALUE);
+      assertEquals(ref, result.doubleValue(), epsilon);
     }
   }
 
@@ -900,12 +904,12 @@ public class ConstantFoldingTest {
 
   @Test
   public void testExp() {
-    testUnaryOp(cf::FLOAT_exp, Math::exp);
+    testUnaryOp(cf::FLOAT_exp, Math::exp, 1e-15);
   }
 
   @Test
   public void testLog() {
-    testUnaryOp(cf::FLOAT_log, Math::log);
+    testUnaryOp(cf::FLOAT_log, Math::log, 1e-15);
   }
 
   @Test
