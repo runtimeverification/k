@@ -437,17 +437,6 @@ pipeline {
                 --file release.md "${K_RELEASE_TAG}"
           '''
         }
-        dir('homebrew-k') {
-          git url: 'git@github.com:kframework/homebrew-k.git', branch: 'brew-release-kframework'
-          sshagent(['rv-jenkins-github']) {
-            sh '''
-              git checkout master
-              git merge brew-release-$PACKAGE
-              git push origin master
-              git push origin -d brew-release-$PACKAGE
-            '''
-          }
-        }
       }
     }
     stage('Update Dependents') {
