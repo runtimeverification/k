@@ -182,6 +182,30 @@ You are also encouraged to set the environment variable `MAVEN_OPTS` to
 `-XX:+TieredCompilation`, which will significantly speed up the incremental
 build process.
 
+### Apple Silicon Support
+
+K currently offers partial support for Apple Silicon; the toolchain has been
+tested and works on ARM macOS, but is not yet part of our CI/CI pipeline. To
+build K on an Apple Silicon machine, ensure the following steps are followed in
+addition to the usual Maven build setup:
+* Ensure that Homebrew-installed versions of `llvm-config`, `flex` and `bison`
+  are on your `PATH` ahead of any macOS-supplied versions.
+  * [`direnv`](https://direnv.net/) offers a convenient way to automate this. To
+    do so:
+    ```shell
+    brew install direnv
+    cp macos-envrc .envrc
+    direnv allow
+    ```
+* Pass `-Dstack.extra-opts='--compiler ghc-8.10.7 --system-ghc'` as an
+  additional argument to `mvn package` when building the toolchain.
+  * This is a workaround for `stack` and `ghc` not yet properly supporting ARM
+    macOS; the underlying problem is likely to be fixed at some point in the
+    future.
+  * See [the documentation](https://github.com/kframework/kore#apple-silicon)
+    and [associated PR](https://github.com/kframework/kore/pull/2893) for more
+    details.
+
 ### Optional OCaml Backend Setup
 
 **If** you want to use the OCaml backend (not recommended), then after running

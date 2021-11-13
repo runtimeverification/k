@@ -2,7 +2,7 @@
 package org.kframework.utils;
 
 import com.google.inject.Inject;
-import jline.internal.Nullable;
+import javax.annotation.Nullable;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
