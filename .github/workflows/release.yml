@@ -143,7 +143,6 @@ jobs:
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4.7.2
         with:
-          repository: homebrew-k
           commit_message: 'Update brew package version'
           file_pattern: 'Formula/kframework.rb'
           branch: master
