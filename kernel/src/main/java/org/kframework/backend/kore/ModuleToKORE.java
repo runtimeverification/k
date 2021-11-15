@@ -114,6 +114,11 @@ public class ModuleToKORE {
         this.module = module;
         this.topCellInitializer = topCellInitializer;
         this.options = options;
+        for (Production prod : iterable(module.sortedProductions())) {
+            if (prod.att().contains("mlBinder")) {
+                mlBinders.add(prod.klabel().get().name());
+            }
+        }
     }
     private static final boolean METAVAR = false;
 
@@ -309,9 +314,6 @@ public class ModuleToKORE {
             Att att = prod.att();
             if (att.contains("token")) {
                 tokenSorts.add(prod.sort().head());
-            }
-            if (att.contains("mlBinder")) {
-                mlBinders.add(prod.klabel().get().name());
             }
             collectAttributes(attributes, att);
         }
