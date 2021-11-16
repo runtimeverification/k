@@ -158,9 +158,11 @@ jobs:
           asset_path: homebrew-k-old/${{ needs.macos-build.outputs.bottle_path }}
           upload_url: ${{ needs.macos-build.outputs.upload_url }}
 
-      - name: Apply changes to GitHub repo
+      - name: Prepare repo for commit
         run: |
           cp homebrew-k-old/Formula/kframework.rb homebrew-k/Formula/kframework.rb
+          cd homebrew-k
+          git config --unset-all http.https://github.com/.extraheader
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4.7.2
