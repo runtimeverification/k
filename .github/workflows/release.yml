@@ -103,14 +103,32 @@ jobs:
     runs-on: macos-11
     needs: macos-build
     steps:
+      - name: Check out matching homebrew repo branch
+        uses: actions/checkout@v2.3.4
+        id: checkout
+        with:
+          repository: kframework/homebrew-k
+          path: homebrew-k
+          ref: staging
+        continue-on-error: true
+
+      - name: Check out homebrew repo master branch
+        uses: actions/checkout@v2.3.4
+        if: ${{ steps.checkout.outcome == 'failure' }}
+        with:
+          repository: kframework/homebrew-k
+          path: homebrew-k
+
       - name: Download bottle
         uses: actions/download-artifact@v2
         with:
           name: homebrew
+          path: homebrew-k-old
 
       - name: Test brew bottle
         id: test
         run: |
+          cd homebrew-k-old
           brew tap kframework/k "file:///$(pwd)"
           brew install ${{ needs.macos-build.outputs.bottle_path }} -v
           brew install opam pkg-config
@@ -137,12 +155,17 @@ jobs:
         with:
           asset_content_type: "application/gzip"
           asset_name: ${{ needs.macos-build.outputs.bottle_path_remote }}
-          asset_path: ${{ needs.macos-build.outputs.bottle_path }}
+          asset_path: homebrew-k-old/${{ needs.macos-build.outputs.bottle_path }}
           upload_url: ${{ needs.macos-build.outputs.upload_url }}
+
+      - name: Apply changes to GitHub repo
+        run: |
+          cp homebrew-k-old/Formula/kframework.rb homebrew-k/Formula/kframework.rb
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4.7.2
         with:
+          repository: homebrew-k
           commit_message: 'Update brew package version'
           file_pattern: 'Formula/kframework.rb'
           branch: master
