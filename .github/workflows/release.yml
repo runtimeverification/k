@@ -158,19 +158,18 @@ jobs:
           asset_path: homebrew-k-old/${{ needs.macos-build.outputs.bottle_path }}
           upload_url: ${{ needs.macos-build.outputs.upload_url }}
 
-      - name: Prepare repo for commit
+      - name: Add ssh key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.HOMEBREW_SSH_KEY }}
+          known_hosts: ${{ secrets.KNOLWN_HOSTS_GITHUB_COM }}
+
+      - name: Commit changes
         run: |
           cp homebrew-k-old/Formula/kframework.rb homebrew-k/Formula/kframework.rb
           cd homebrew-k
-          git config --unset-all http.https://github.com/.extraheader
-
-      - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v4.7.2
-        with:
-          repository: homebrew-k
-          commit_message: 'Update brew package version'
-          file_pattern: 'Formula/kframework.rb'
-          branch: master
+          git commit -m 'Update brew package version' Formula/kframework.rb
+          git push origin master
 
       - name: Delete Release
         if: failure()
