@@ -14,7 +14,6 @@ import org.kframework.builtin.Hooks;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.AddSortInjections;
-import org.kframework.compile.ComputeTransitiveFunctionDependencies;
 import org.kframework.compile.ExpandMacros;
 import org.kframework.compile.RefreshRules;
 import org.kframework.compile.RewriteToTop;
@@ -60,9 +59,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.*;
@@ -103,7 +102,6 @@ public class ModuleToKORE {
     public static final String ALL_PATH_OP = KLabels.RL_wAF.name();
     public static final String HAS_DOMAIN_VALUES = "hasDomainValues";
     private final Module module;
-    private final Set<String> impureFunctions = new HashSet<>();
     private final KLabel topCellInitializer;
     private final Set<String> mlBinders = new HashSet<>();
     private final KompileOptions options;
@@ -195,9 +193,6 @@ public class ModuleToKORE {
                 }
             }
         }
-        ComputeTransitiveFunctionDependencies deps = new ComputeTransitiveFunctionDependencies(module);
-        Set<KLabel> impurities = functionRules.keySet().stream().filter(lbl -> module.attributesFor().get(lbl).getOrElse(() -> Att()).contains(Att.IMPURE())).collect(Collectors.toSet());
-        impurities.addAll(deps.ancestors(impurities));
 
         semantics.append("\n// symbols\n");
         Set<Production> overloads = new HashSet<>();
@@ -206,7 +201,7 @@ public class ModuleToKORE {
                 overloads.add(greater);
             }
         }
-        translateSymbols(attributes, functionRules, impurities, overloads, semantics);
+        translateSymbols(attributes, functionRules, overloads, semantics);
 
         // print syntax definition
         syntax.append(semantics);
@@ -262,7 +257,7 @@ public class ModuleToKORE {
                 genFunctionalAxiom(prod, semantics);
             }
             if (isConstructor(prod, functionRules)) {
-                genNoConfusionAxioms(prod, noConfusion, functionRules, impurities, semantics);
+                genNoConfusionAxioms(prod, noConfusion, functionRules, semantics);
             }
         }
 
@@ -367,16 +362,13 @@ public class ModuleToKORE {
     }
 
     private void translateSymbols(Map<String, Boolean> attributes, SetMultimap<KLabel, Rule> functionRules,
-                                  Set<KLabel> impurities, Set<Production> overloads, StringBuilder sb) {
+                                  Set<Production> overloads, StringBuilder sb) {
         for (Production prod : iterable(module.sortedProductions())) {
             if (isBuiltinProduction(prod)) {
                 continue;
             }
             if (prod.klabel().isEmpty()) {
                 continue;
-            }
-            if (impurities.contains(prod.klabel().get())) {
-                impureFunctions.add(prod.klabel().get().name());
             }
             translateSymbol(attributes, functionRules, overloads, prod.klabel().get(), prod, sb);
         }
@@ -630,8 +622,7 @@ public class ModuleToKORE {
     }
 
     private void genNoConfusionAxioms(Production prod, Set<Tuple2<Production, Production>> noConfusion,
-                                      SetMultimap<KLabel, Rule> functionRulesMap, Set<KLabel> impurities,
-                                      StringBuilder sb) {
+                                      SetMultimap<KLabel, Rule> functionRulesMap, StringBuilder sb) {
         // c(x1,x2,...) /\ c(y1,y2,...) -> c(x1/\y2,x2/\y2,...)
         if (prod.arity() > 0) {
             sb.append("  axiom");
@@ -1885,9 +1876,6 @@ public class ModuleToKORE {
         new VisitK() {
             @Override
             public void apply(KApply k) {
-                if (impureFunctions.contains(k.klabel().name())) {
-                    throw KEMException.internalError("Cannot yet translate impure function to kore: " + k.klabel().name(), k);
-                }
                 KLabel label = computePolyKLabel(k);
                 String conn = "";
                 if (mlBinders.contains(k.klabel().name()) && k.items().get(0).att().contains("anonymous")){
