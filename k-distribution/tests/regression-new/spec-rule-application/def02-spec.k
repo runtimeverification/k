@@ -10,7 +10,7 @@ module DEF02-SPEC
 
     claim <k> mid Y => end ?Z </k>
          <var> _ </var>
-      requires ?Z ==Int incPos(Y)
+      requires Z ==Int incPos(Y)
       [trusted]
 
 endmodule
