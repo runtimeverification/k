@@ -275,6 +275,16 @@ of the import with the `public` or `private` keyword immediately prior to the
 module name. A module imported privately does not export its syntax to modules
 that import the module doing the import.
 
+An import statement can also choose to explicitly hide some or all of the
+syntax being imported. If an import's module name is followed by a `.`
+character followed by an attribute name or klabel, then only sentences that
+have that attribute name or productions that have that klabel attribute will
+be imported by that declaration. For example, if I say `imports FOO.bar`, then
+only productions whose klabel attribute is `bar` or whose attribute list
+contains the `bar` attribute will be visible to the importing module. Note that
+all rules, constructors, and sorts declared in that module will still exist
+in the final interpreter.
+
 Following imports, a module can contain zero or more sentences. A sentence can
 be a syntax declaration, a rule, a configuration declaration, a context, a
 claim, or a context alias. Details on each of these can be found in subsequent
@@ -2753,28 +2763,24 @@ list of escape sequences recognized by the formatter:
 | n               | Insert '\n' followed by the current indentation level     |
 | i               | Increase the current indentation level by 1               |
 | d               | Decrease the current indentation level by 1               |
-| c               | Move to the next color in the list of colors for this
-                    production                                                |
-| r               | Reset color to the default foreground color for the
-                    terminal                                                  |
-| an integer      | Print a terminal or nonterminal from the production.
-                    The integer is treated as a 1-based index into the
-                    terminals and nonterminals of the production.
-
-                    If the offset refers to a terminal, move to the next color
-                    in the list of colors for this production, print the value
-                    of that terminal, then reset the color to the default
-                    foreground color for the terminal.
-
-                    If the offset refers to a regular expression terminal, it
-                    is an error.
-
-                    If the offset refers to a nonterminal, print the unparsed
-                    representation of the corresponding child of the current
-                    term.                                                     |
+| c               | Move to the next color in the list of colors for this production |
+| r               | Reset color to the default foreground color for the terminal (See below for more information on how colors work) |
+| an integer      | Print a terminal or nonterminal from the production (See below for more information) |
 | any other char  | Print that character verbatim                             |
 
-For more information on how colors work, see below.
+#### Using the integer escape sequence
+
+In the integer escape sequence `%a`, the integer `a` is treated as a 1-based
+index into the terminals and nonterminals of the production.
+
+- If the offset refers to a terminal, move to the next color in the list of
+  colors for this production, print the value of that terminal, then reset the
+  color to the default foreground color for the terminal.
+
+- If the offset refers to a regular expression terminal, it is an error.
+
+- If the offset refers to a nonterminal, print the unparsed representation of
+  the corresponding child of the current term.
 
 #### `color` and `colors` attributes
 

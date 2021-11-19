@@ -191,7 +191,7 @@ multiple modules.
 As a result of this, K provides a second way of declaring priority and
 associativity relations.
 
-Consider the following grammar, which we will name `lesson-04-D.k` and which
+Consider the following grammar, which we will name `lesson-04-d.k` and which
 will express the exact same grammar as `lesson-04-b.k`
 
 ```k

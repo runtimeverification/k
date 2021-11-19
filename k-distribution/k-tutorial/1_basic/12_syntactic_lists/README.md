@@ -158,8 +158,8 @@ For this reason, we introduce the additional `NeList{}` construct. The syntax
 is identical to `List{}`, except with `NeList` instead of `List` before the
 curly braces. When parsing rules, it behaves identically to the `List{}`
 construct. However, when parsing inputs to `krun`, the above grammar, if we
-replaced `Ids` with an `NeList{}`, would become equivalent to the following
-(`lesson-12-g.k`):
+replaced `syntax Ids ::= List{Id,","}` with `syntax Ids ::= NeList{Id,","}`,
+would become equivalent to the following (`lesson-12-g.k`):
 
 ```k
 module LESSON-12-G
