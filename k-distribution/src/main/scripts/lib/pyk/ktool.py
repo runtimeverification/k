@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+
+import os
+import subprocess
+
+from .kastManip import *
+
+class KPrint:
+    def __init__(self, kompiledDirectory):
+        self.kompiledDirectory = kompiledDirectory
+        self.definition        = readKastTerm(self.kompiledDirectory + '/compiled.json')
+        self.symbolTable       = buildSymbolTable(self.definition, opinionated = True)
+
+    def prettyPrint(self, kast):
+        return prettyPrintKast(kast, self.symbolTable)
+
+    def prettyPrintConstraint(self, constraint):
+        return self.prettyPrint(simplifyBool(unsafeMlPredToBool(constraint)))
+
+class KProve(KPrint):
+    def __init__(self, kompiledDirectory, mainFileName, useDirectory = None):
+        super(KProve, self).__init__(kompiledDirectory)
+        self.directory      = '/'.join(self.kompiledDirectory.split('/')[0:-1])
+        self.useDirectory   = self.directory + '/kprove' if useDirectory is None else useDirectory
+        if not os.path.exists(self.useDirectory):
+            os.makedirs(self.useDirectory)
+        self.mainFileName   = mainFileName
+        self.prover         = [ 'kprove' ]
+        self.proverArgs     = [ ]
+        with open(self.kompiledDirectory + '/backend.txt', 'r') as ba:
+            self.backend    = ba.read()
+        with open(self.kompiledDirectory + '/mainModule.txt', 'r') as mm:
+            self.mainModule = mm.read()
+
+    def prove(self, specFile, specModuleName, args = [], haskellArgs = [], logAxiomsFile = None):
+        logFile = specFile + '.debug-log' if logAxiomsFile is None else logAxiomsFile
+        if os.path.exists(logFile):
+            os.remove(logFile)
+        haskellLogArgs = [ '--log' , logFile , '--log-format'  , 'oneline' , '--log-entries' , 'DebugTransition' ]
+        command  = [ c for c in self.prover ]
+        command += [ specFile ]
+        command += [ '--backend' , self.backend , '--directory' , self.directory , '-I' , self.directory , '--spec-module' , specModuleName , '--output' , 'json' ]
+        command += [ c for c in self.proverArgs ]
+        command += args
+        commandEnv                   = os.environ.copy()
+        commandEnv['KORE_EXEC_OPTS'] = ' '.join(haskellArgs + haskellLogArgs)
+        notif(' '.join(command))
+        process          = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.PIPE, universal_newlines = True, env = commandEnv)
+        (stdout, stderr) = process.communicate(input = None)
+        try:
+            finalState = json.loads(stdout)['term']
+        except:
+            sys.stderr.write(stdout + '\n')
+            sys.stderr.write(stderr + '\n')
+            fatal('Exiting...', exitCode = process.returncode)
+        if finalState == KConstant('#Top') and len(getAppliedAxiomList(logFile)) == 0:
+            fatal('Proof took zero steps, likely the LHS is invalid: ' + specFile)
+        return finalState
+
+    def writeClaimDefinition(self, claim, claimId):
+        tmpClaim      = self.useDirectory + '/' + claimId.lower() + '-spec.k'
+        tmpModuleName = claimId.upper() + '-SPEC'
+        with open(tmpClaim, 'w') as tc:
+            claimModule     = KFlatModule(tmpModuleName, [self.mainModule], [claim])
+            claimDefinition = KDefinition(tmpModuleName, [claimModule], requires = [KRequire(self.mainFileName)])
+            tc.write(genFileTimestamp() + '\n')
+            tc.write(self.prettyPrint(claimDefinition) + '\n\n')
+            tc.flush()
+        notif('Wrote claim file: ' + tmpClaim)
+
+    def proveClaim(self, claim, claimId, args = [], haskellArgs = [], logAxiomsFile = None):
+        self.writeClaimDefinition(claim, claimId)
+        return self.prove(self.useDirectory + '/' + claimId.lower() + '-spec.k', claimId.upper() + '-SPEC', args = args, haskellArgs = haskellArgs, logAxiomsFile = logAxiomsFile)
