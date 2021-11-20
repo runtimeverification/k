@@ -5,7 +5,6 @@ import subprocess
 
 from .kast      import *
 from .kastManip import *
-from .kast      import _notif, _warning, _fatal
 
 def ruleHasId(sentence, ruleIds):
     if isKRule(sentence):

@@ -4,7 +4,6 @@ import sys
 import subprocess
 
 from .kast import *
-from .kast import _notif, _warning, _fatal
 
 def buildAssoc(unit, join, ls):
     """Build an associative binary operator term given the join and unit ops.
@@ -39,14 +38,12 @@ def match(pattern, kast):
     """
     subst = {}
     if isKVariable(pattern):
-        if isKVariable(kast) and pattern['name'] == kast['name']:
-            return {}
-        return { pattern['name'] : kast }
+        return { pattern["name"] : kast }
     if isKToken(pattern) and isKToken(kast):
-        return {} if pattern['token'] == kast['token'] else None
+        return {} if pattern["token"] == kast["token"] else None
     if  isKApply(pattern) and isKApply(kast) \
-    and pattern['label'] == kast['label'] and len(pattern['args']) == len(kast['args']):
-        for (patternArg, kastArg) in zip(pattern['args'], kast['args']):
+    and pattern["label"] == kast["label"] and len(pattern["args"]) == len(kast["args"]):
+        for (patternArg, kastArg) in zip(pattern["args"], kast["args"]):
             argSubst = match(patternArg, kastArg)
             subst = combineDicts(subst, argSubst)
             if subst is None:
@@ -468,7 +465,7 @@ def onAttributes(kast, effect):
         modules = [ onAttributes(mod, effect) for mod in kast['modules'] ]
         requires = None if 'requires' not in kast else kast['requires']
         return KDefinition(kast['mainModule'], modules, requires = requires, att = effect(kast['att']))
-    _fatal('No attributes for: ' + kast['node'] + '.')
+    fatal('No attributes for: ' + kast['node'] + '.')
 
 def dedupeClauses(terms):
     """Return a list of terms in the same order with duplicates removed.
@@ -562,14 +559,14 @@ def readKastTerm(termPath):
 
 def writeKDefinition(fileName, kDef, symbolTable):
     if not isKDefinition(kDef):
-        _notif("Not a K Definition!")
+        notif("Not a K Definition!")
         print(kDef)
         sys.exit(1)
     specText = prettyPrintKast(kDef, symbolTable)
     with open(fileName, "w") as sfile:
         sfile.write(specText)
-        _notif("Wrote spec file: " + fileName)
+        notif("Wrote spec file: " + fileName)
         print(specText)
         sys.stdout.flush()
         return
-    _fatal("Could not write spec file: " + fileName)
+    fatal("Could not write spec file: " + fileName)

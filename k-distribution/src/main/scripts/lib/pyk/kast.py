@@ -3,18 +3,7 @@
 import sys
 import json
 
-def _notif(msg):
-    sys.stderr.write('\n')
-    sys.stderr.write(msg + '\n')
-    sys.stderr.write(''.join(['=' for c in msg]) + '\n')
-    sys.stderr.flush()
-
-def _warning(msg):
-    _notif('[WARNING] ' + msg)
-
-def _fatal(msg, code = 1):
-    _notif('[FATAL] ' + msg)
-    sys.exit(code)
+from .util import *
 
 def combineDicts(*dicts):
     if len(dicts) == 0:
@@ -216,7 +205,7 @@ def addAttributes(kast, att):
     if isKProduction(kast):
         return KProduction(kast['productionItems'], kast['sort'], att = newAtt)
     else:
-        _notif('Do not know how to add attributes to KAST!')
+        notif('Do not know how to add attributes to KAST!')
         sys.stderr.write(str(kast))
         sys.stderr.flush()
         sys.exit(1)
@@ -272,7 +261,7 @@ def buildSymbolTable(definition, opinionated = False):
     -   Return: Python dictionary mapping klabels to automatically generated unparsers.
     """
     if not isKDefinition(definition):
-        _fatal('Must supply a KDefinition!')
+        fatal('Must supply a KDefinition!')
 
     def _unparserFromProductionItems(prodItems):
         unparseString = ''
@@ -435,7 +424,7 @@ def prettyPrintKast(kast, symbolTable, debug = False):
         return requires + '\n\n' + modules
 
     print()
-    _warning('Error unparsing kast!')
+    warning('Error unparsing kast!')
     print(kast)
-    _fatal('Error unparsing!')
+    fatal('Error unparsing!')
 

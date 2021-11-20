@@ -5,7 +5,8 @@ import subprocess
 import sys
 import tempfile
 
-from .kast       import _notif, _warning, _fatal
+from .util       import *
+from .kast       import *
 from .kastManip  import *
 from .coverage   import *
 from .definition import *
@@ -16,9 +17,9 @@ def _teeProcessStdout(args, tee = True, buffer_size = 80, timeout = None):
         (stdout_data, stderr_data) = process.communicate(input = None, timeout = timeout)
     except subprocess.TimeoutExpired:
         process.kill()
-        sys.stderr.write("TIMED OUT")
+        sys.stderr.write('TIMED OUT')
         sys.stderr.flush()
-        return (-1, "", "")
+        return (-1, '', '')
     return (process.returncode, stdout_data, stderr_data)
 
 def _runK(command, definition, inputFile, kArgs = [], teeOutput = True, kRelease = None):
@@ -27,7 +28,7 @@ def _runK(command, definition, inputFile, kArgs = [], teeOutput = True, kRelease
     elif 'K_RELEASE' in os.environ:
         command = os.environ['K_RELEASE'] + '/bin/' + command
     kCommand = [ command , '--directory' , definition , inputFile ] + kArgs
-    _notif('Running: ' + ' '.join(kCommand))
+    notif('Running: ' + ' '.join(kCommand))
     return _teeProcessStdout(kCommand, tee = teeOutput)
 
 def kast(definition, inputFile, kastArgs = [], teeOutput = True, kRelease = None):
@@ -71,7 +72,7 @@ def krunJSONLegacy(definition, inputJSON, krunArgs = [], teeOutput = True, kRele
 def kproveJSON(definition, inputJSON, symbolTable, kproveArgs = [], teeOutput = True, kRelease = None, keepTemp = False):
     if not isKDefinition(inputJSON):
         sys.stderr.write(inputJSON)
-        _fatal("Not a K Definition!")
+        fatal('Not a K Definition!')
     with tempfile.NamedTemporaryFile(mode = 'w', delete = not keepTemp) as tempf:
         tempf.write(prettyPrintKast(inputJSON, symbolTable))
         tempf.flush()
