@@ -7,6 +7,7 @@ on:
 jobs:
   nix-release:
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Check out code
         uses: actions/checkout@v2.3.4
@@ -24,6 +25,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
   macos-build:
     runs-on: macos-11
+    environment: production
     steps:
       - name: Check out code
         uses: actions/checkout@v2.3.4
@@ -101,16 +103,35 @@ jobs:
 
   macos-test:
     runs-on: macos-11
+    environment: production
     needs: macos-build
     steps:
+      - name: Check out matching homebrew repo branch
+        uses: actions/checkout@v2.3.4
+        id: checkout
+        with:
+          repository: kframework/homebrew-k
+          path: homebrew-k
+          ref: staging
+        continue-on-error: true
+
+      - name: Check out homebrew repo master branch
+        uses: actions/checkout@v2.3.4
+        if: ${{ steps.checkout.outcome == 'failure' }}
+        with:
+          repository: kframework/homebrew-k
+          path: homebrew-k
+
       - name: Download bottle
         uses: actions/download-artifact@v2
         with:
           name: homebrew
+          path: homebrew-k-old
 
       - name: Test brew bottle
         id: test
         run: |
+          cd homebrew-k-old
           brew tap kframework/k "file:///$(pwd)"
           brew install ${{ needs.macos-build.outputs.bottle_path }} -v
           brew install opam pkg-config
@@ -137,16 +158,21 @@ jobs:
         with:
           asset_content_type: "application/gzip"
           asset_name: ${{ needs.macos-build.outputs.bottle_path_remote }}
-          asset_path: ${{ needs.macos-build.outputs.bottle_path }}
+          asset_path: homebrew-k-old/${{ needs.macos-build.outputs.bottle_path }}
           upload_url: ${{ needs.macos-build.outputs.upload_url }}
 
-      - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v4.7.2
+      - name: Add ssh key
+        uses: shimataro/ssh-key-action@v2
         with:
-          repository: homebrew-k
-          commit_message: 'Update brew package version'
-          file_pattern: 'Formula/kframework.rb'
-          branch: master
+          key: ${{ secrets.HOMEBREW_SSH_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS_GITHUB_COM }}
+
+      - name: Commit changes
+        run: |
+          cp homebrew-k-old/Formula/kframework.rb homebrew-k/Formula/kframework.rb
+          cd homebrew-k
+          git commit -m 'Update brew package version' Formula/kframework.rb
+          git push origin master
 
       - name: Delete Release
         if: failure()
@@ -159,6 +185,7 @@ jobs:
 
   macos-release:
     runs-on: ubuntu-latest
+    environment: production
     needs: [nix-release, macos-test]
     steps:
       - name: Publish release
