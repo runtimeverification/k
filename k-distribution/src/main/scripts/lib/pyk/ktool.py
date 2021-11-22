@@ -14,9 +14,6 @@ class KPrint:
     def prettyPrint(self, kast):
         return prettyPrintKast(kast, self.symbolTable)
 
-    def prettyPrintConstraint(self, constraint):
-        return self.prettyPrint(simplifyBool(unsafeMlPredToBool(constraint)))
-
 class KProve(KPrint):
     def __init__(self, kompiledDirectory, mainFileName, useDirectory = None):
         super(KProve, self).__init__(kompiledDirectory)
@@ -57,9 +54,13 @@ class KProve(KPrint):
             fatal('Proof took zero steps, likely the LHS is invalid: ' + specFile)
         return finalState
 
-    def writeClaimDefinition(self, claim, claimId):
-        tmpClaim      = self.useDirectory + '/' + claimId.lower() + '-spec.k'
-        tmpModuleName = claimId.upper() + '-SPEC'
+    def writeClaimDefinition(self, claim, claimId, rule = False):
+        tmpClaim      = self.useDirectory + '/' + claimId.lower()
+        tmpModuleName = claimId.upper()
+        if not rule:
+            tmpClaim      += '-spec'
+            tmpModuleName += '-SPEC'
+        tmpClaim += '.k'
         with open(tmpClaim, 'w') as tc:
             claimModule     = KFlatModule(tmpModuleName, [self.mainModule], [claim])
             claimDefinition = KDefinition(tmpModuleName, [claimModule], requires = [KRequire(self.mainFileName)])
@@ -68,6 +69,8 @@ class KProve(KPrint):
             tc.flush()
         notif('Wrote claim file: ' + tmpClaim)
 
-    def proveClaim(self, claim, claimId, args = [], haskellArgs = [], logAxiomsFile = None):
+    def proveClaim(self, claim, claimId, args = [], haskellArgs = [], logAxiomsFile = None, dryRun = False):
         self.writeClaimDefinition(claim, claimId)
-        return self.prove(self.useDirectory + '/' + claimId.lower() + '-spec.k', claimId.upper() + '-SPEC', args = args, haskellArgs = haskellArgs, logAxiomsFile = logAxiomsFile)
+        if not dryRun:
+            return self.prove(self.useDirectory + '/' + claimId.lower() + '-spec.k', claimId.upper() + '-SPEC', args = args, haskellArgs = haskellArgs, logAxiomsFile = logAxiomsFile)
+        return KConstant('#Top')
