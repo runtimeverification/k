@@ -36,4 +36,10 @@ public class LLVMKompileOptions {
 
     @Parameter(names="--enable-search", description="By default, to reduce compilation time, `krun --search` is disabled on the LLVM backend. Pass this flag to enable it.")
     public boolean enableSearch;
+
+    @Parameter(names="--llvm-kompile-library", description="Passes `library` instead of `main` to llvm-kompile.")
+    public boolean enableLibrary;
+
+    @Parameter(names={ "--output", "-o" }, description="Use with `--llvm-kompile-library`. Sets the output filename.")
+    public String output = "interpreter";
 }

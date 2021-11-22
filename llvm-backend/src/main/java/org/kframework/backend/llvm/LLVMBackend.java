@@ -78,9 +78,13 @@ public class LLVMBackend extends KoreBackend {
         if (options.noLLVMKompile) {
             return;
         }
-        llvmKompile("main", "interpreter");
+        if (options.enableLibrary) {
+            llvmKompile("library", options.output);
+        } else {
+            llvmKompile("main", "interpreter");
+        }
         if (options.enableSearch) {
-          llvmKompile("search", "search");
+            llvmKompile("search", "search");
         }
     }
 
