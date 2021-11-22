@@ -8,7 +8,7 @@ module DEF02-SPEC
          <var> _ </var>
        requires X >=Int 0
 
-    claim <k> mid Y => end ?Z </k>
+    claim <k> mid Y => end Z </k>
          <var> _ </var>
       requires Z ==Int incPos(Y)
       [trusted]
