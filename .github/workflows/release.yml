@@ -7,6 +7,7 @@ on:
 jobs:
   nix-release:
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Check out code
         uses: actions/checkout@v2.3.4
@@ -24,6 +25,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
   macos-build:
     runs-on: macos-11
+    environment: production
     steps:
       - name: Check out code
         uses: actions/checkout@v2.3.4
@@ -101,6 +103,7 @@ jobs:
 
   macos-test:
     runs-on: macos-11
+    environment: production
     needs: macos-build
     steps:
       - name: Check out matching homebrew repo branch
@@ -182,6 +185,7 @@ jobs:
 
   macos-release:
     runs-on: ubuntu-latest
+    environment: production
     needs: [nix-release, macos-test]
     steps:
       - name: Publish release
