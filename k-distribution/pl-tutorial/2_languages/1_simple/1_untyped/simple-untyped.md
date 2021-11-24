@@ -4,10 +4,10 @@ copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
 
 # SIMPLE — Untyped
 
-Author: Grigore Roșu (grosu@illinois.edu)  
+Author: Grigore Roșu (grosu@illinois.edu)
 Organization: University of Illinois at Urbana-Champaign
 
-Author: Traian Florin Șerbănuță (traian.serbanuta@unibuc.ro)  
+Author: Traian Florin Șerbănuță (traian.serbanuta@unibuc.ro)
 Organization: University of Bucharest
 
 
@@ -106,7 +106,9 @@ keyword to take a list of expressions.  The non-terminals used in the two
 productions below are defined shortly.
 
 ```k
-  syntax Stmt ::= "var" Exps ";"
+
+  syntax Stmt ::= "var" Exp ";"
+                | "var" Exps ";" [macro-rec, avoid]
                 | "function" Id "(" Ids ")" Block
 ```
 ## Expressions
@@ -175,13 +177,13 @@ whenever requested (e.g., when they appear as strict arguments of
 the constructs above).
 
 ```k
-  syntax Ids  ::= List{Id,","}
-  syntax Exps ::= List{Exp,","}          [strict]  // automatically hybrid now
-  syntax Exps ::= Ids
+  syntax Ids  ::= List{Id,","}           [klabel(exps), prefer]
+  syntax Exps ::= List{Exp,","}          [klabel(exps), strict]  // automatically hybrid now
+  syntax Exps ::= Ids                    [prefer]
   syntax Val
-  syntax Vals ::= List{Val,","}
+  syntax Vals ::= List{Val,","}          [klabel(exps)]
   syntax Bottom
-  syntax Bottoms ::= List{Bottom,","}
+  syntax Bottoms ::= List{Bottom,","}    [klabel(exps)]
   syntax Ids ::= Bottoms
 ```
 
@@ -211,11 +213,11 @@ arguments.
   syntax Stmt ::= Block
                 | Exp ";"                               [strict]
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
-                | "if" "(" Exp ")" Block
+                | "if" "(" Exp ")" Block                [macro]
                 | "while" "(" Exp ")" Block
-                | "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmt Exp ";" Exp ")" Block  [macro]
                 | "return" Exp ";"                      [strict]
-                | "return" ";"
+                | "return" ";"                          [macro]
                 | "print" "(" Exps ")" ";"              [strict]
 // NOTE: print strict allows non-deterministic evaluation of its arguments
 // Either keep like this but document, or otherwise make Exps seqstrict.
@@ -258,11 +260,13 @@ We only want to give semantics to core constructs, so we get rid of the
 derived ones before we start the semantics.  All desugaring macros below are
 straightforward.
 ```k
-  rule if (E) S => if (E) S else {}                                 [macro]
-  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
-  rule for(Start Cond; Step) {} => {Start while (Cond) {Step;}}     [macro]
-  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;          [macro-rec]
-  rule var X:Id = E; => var X; X = E;                               [macro]
+  rule if (E) S => if (E) S else {}
+  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}
+  rule for(Start Cond; Step) {} => {Start while (Cond) {Step;}}
+  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;
+  rule var E:Exp, .Exps; => var E;
+
+  rule var X:Id = E; => var X; X = E;  [macro]
 ```
 
 For the semantics, we can therefore assume from now on that each
@@ -371,7 +375,7 @@ to the **K** tool, as indicated by the `$PGM` variable, followed by the
 
   configuration <T color="red">
                   <threads color="orange">
-                    <thread multiplicity="*" color="yellow">
+                    <thread multiplicity="*" color="yellow" type="Set">
                       <k color="green"> $PGM:Stmt ~> execute </k>
                     //<br/> // TODO(KORE): support latex annotations #1799
                       <control color="cyan">
@@ -390,8 +394,27 @@ to the **K** tool, as indicated by the `$PGM` variable, followed by the
                   <busy color="cyan"> .Set </busy>
                   <terminated color="red"> .Set </terminated>
                 //<br/> // TODO(KORE): support latex annotations #1799
+```
+
+This is a section for running programs in search mode. Due to some limitations, reads and writes via
+file descriptors are not available in this mode. So input and output are simulated via ordinary Lists.
+
+```{.k .noio}
+                  <input color="magenta"> $INPUT:List </input>
+                  <output color="brown"> .List </output>
+```
+
+This section contains piece of configuration for programs doing real reads and writes over
+stdin/stdout file descriptors.
+
+```{.k .io}
                   <input color="magenta" stream="stdin"> .List </input>
                   <output color="brown" stream="stdout"> .List </output>
+```
+
+During kompilation one of these two modes is selected according to test needs.
+
+```k
                   <nextLoc color="gray"> 0 </nextLoc>
                 </T>
 ```
@@ -487,16 +510,16 @@ To this aim, we introduce two special unique variable identifiers,
 through and initializes each element of the first dimension with an array
 of the remaining dimensions, declared as variable `$2`:
 ```k
-  syntax Id ::= "$1" | "$2"
-  rule var X:Id[N1:Int, N2:Int, Vs:Vals];
+  syntax Id ::= "$1" [token] | "$2" [token]
+  rule var X:Id[(N1:Int, N2:Int, Vs:Vals):Vals];
     => var X[N1];
        {
          for(var $1 = 0; $1 <= N1 - 1; ++$1) {
-           var $2[N2, Vs];
+           var $2[(N2, Vs):Vals];
            X[$1] = $2;
          }
        }
-    [structural]
+    
 ```
 Ideally, one would like to perform syntactic desugarings like the one
 above before the actual semantics.  Unfortunately, that was not possible in
@@ -557,7 +580,7 @@ that the functions "see" each other, allowing for mutual recursion, etc.
   syntax KItem ::= "execute"
   rule <k> execute => main(.Exps); </k>
        <env> Env </env>
-       <genv> .Map => Env </genv>  [structural]
+       <genv> .Map => Env </genv>  
 ```
 
 ## Expressions
@@ -644,11 +667,11 @@ and is defined at the end of the file.
 // at the top of the computation or inside the lvalue wrapper. So it
 // may not be worth, or we may need to come up with a special notation
 // allowing us to enumerate contexts for [anywhere] rules.
-  rule V:Val[N1:Int, N2:Int, Vs:Vals] => V[N1][N2, Vs]
-    [structural, anywhere]
+  rule V:Val[(N1:Int, N2:Int, Vs:Vals):Vals] => V[N1][(N2, Vs):Vals]
+    [anywhere]
 
   rule array(L,_)[N:Int] => lookup(L +Int N)
-    [structural, anywhere]
+    [anywhere]
 ```
 
 ## Size of an array
@@ -713,7 +736,7 @@ nulary `return;` statements.
        <env> _ => Env </env>
 
   syntax Val ::= "nothing"
-  rule return; => return nothing;   [macro]
+  rule return; => return nothing;
 ```
 Like for division-by-zero, it is left unspecified what happens
 when the `nothing` value is used in domain calculations.  For
@@ -739,7 +762,9 @@ input value, at the same time discarding the input value from the
 `in` cell.
 
 ```k
-  rule <k> read() => I ...</k> <input> ListItem(I:Int) => .List ...</input>  [read]
+  rule <k> read() => I ...</k>
+       <input> ListItem(I:Int) => .List ...</input>
+       [read]
 ```
 
 ## Assignment
@@ -776,8 +801,8 @@ for variable declarations, as we did above.  One can make the two rules below
 computational if one wants them to count as computational steps.
 
 ```k
-  rule {} => .  [structural]
-  rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>  [structural]
+  rule {} => .  
+  rule <k> { S } => S ~> setEnv(Env) ...</k>  <env> Env </env>  
 ```
 The basic definition of environment recovery is straightforward and
 given in the section on auxiliary constructs at the end of the file.
@@ -816,7 +841,7 @@ to something).  This means that once `S₁` completes in the rule below, `S₂`
 becomes automatically the next computation item without any additional
 (explicit or implicit) rules.
 ```k
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule S1:Stmt S2:Stmt => S1 ~> S2  
 ```
 
 A subtle aspect of the rule above is that `S₁` is declared to have sort
@@ -865,7 +890,7 @@ below works because our while loops in SIMPLE are indeed very basic.  If we
 allowed break/continue of loops then we would need a completely different
 semantics, which would also involve the `control` cell.
 ```k
-  rule while (E) S => if (E) {S while(E)S}  [structural]
+  rule while (E) S => if (E) {S while(E)S}  
 ```
 
 ## Print
@@ -875,9 +900,12 @@ evaluated (recall that `print` is variadic).  We append each of
 its evaluated arguments to the output buffer, and discard the residual
 `print` statement with an empty list of arguments.
 ```k
-  rule <k> print(V:Val, Es => Es); ...</k> <output>... .List => ListItem(V) </output>
-    [print]
-  rule print(.Vals); => .  [structural]
+
+  rule <k> print(V:Val, Es => Es); ...</k>
+       <output>... .List => ListItem(V) </output>
+       [print]
+
+  rule print(.Vals); => .  
 ```
 
 ## Exceptions
@@ -1090,7 +1118,7 @@ IMP++ tutorial:
 // TODO: eliminate the env wrapper, like we did in IMP++
 
   syntax KItem ::= setEnv(Map)
-  rule <k> setEnv(Env) => . ...</k> <env> _ => Env </env>  [structural]
+  rule <k> setEnv(Env) => . ...</k> <env> _ => Env </env>  
 ```
 While theoretically sufficient, the basic definition for environment
 recovery alone is suboptimal.  Consider a loop `while (E)S`,
@@ -1105,7 +1133,7 @@ recovery tasks, we only need to keep the last one.  The elegant rule below
 does precisely that, thus avoiding the unnecessary computation explosion
 problem:
 ```k
-  rule (setEnv(_) => .) ~> setEnv(_)  [structural]
+  rule (setEnv(_) => .) ~> setEnv(_)  
 ```
 In fact, the above follows a common convention in **K** for recovery
 operations of cell contents: the meaning of a computation task of the form
@@ -1142,7 +1170,7 @@ corresponding store lookup operation.
 // Local variable
 
   rule <k> lvalue(X:Id => loc(L)) ...</k> <env>... X |-> L:Int ...</env>
-    [structural]
+    
 
 // Array element: evaluate the array and its index;
 // then the array lookup rule above applies.
@@ -1152,7 +1180,7 @@ corresponding store lookup operation.
 
 // Finally, return the address of the desired object member
 
-  rule lvalue(lookup(L:Int) => loc(L))  [structural]
+  rule lvalue(lookup(L:Int) => loc(L))
 ```
 
 ## Initializing multiple locations

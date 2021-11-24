@@ -1,7 +1,98 @@
-  S ==K "x = 5\n"
+  <T>
+    <threads>
+      .ThreadCellSet
+    </threads>
+    <genv>
+      main |-> 0
+    </genv>
+    <store>
+      0 |-> lambda ( .Bottoms , { var x ; print ( "x = " , .Bottoms ) ; x = read ( ) ; ( var t1 ; t1 = spawn { x = x / 2 ; } ; ) ( var t2 ; t2 = spawn { x = x + 10 ; } ; ) join t1 ; join t2 ; print ( x , "\n" , .Bottoms ) ; } )
+      1 |-> 0
+      2 |-> 0
+      3 |-> 1
+    </store>
+    <busy>
+      .Set
+    </busy>
+    <terminated>
+      SetItem ( 0 )
+      SetItem ( 1 )
+    </terminated>
+    <input>
+      .List
+    </input>
+    <output>
+      ListItem ( "x = " )
+      ListItem ( 0 )
+      ListItem ( "\n" )
+    </output>
+    <nextLoc>
+      4
+    </nextLoc>
+  </T>
 #Or
-  S ==K "x = 10\n"
+  <T>
+    <threads>
+      .ThreadCellSet
+    </threads>
+    <genv>
+      main |-> 0
+    </genv>
+    <store>
+      0 |-> lambda ( .Bottoms , { var x ; print ( "x = " , .Bottoms ) ; x = read ( ) ; ( var t1 ; t1 = spawn { x = x / 2 ; } ; ) ( var t2 ; t2 = spawn { x = x + 10 ; } ; ) join t1 ; join t2 ; print ( x , "\n" , .Bottoms ) ; } )
+      1 |-> 5
+      2 |-> 0
+      3 |-> 1
+    </store>
+    <busy>
+      .Set
+    </busy>
+    <terminated>
+      SetItem ( 0 )
+      SetItem ( 1 )
+    </terminated>
+    <input>
+      .List
+    </input>
+    <output>
+      ListItem ( "x = " )
+      ListItem ( 5 )
+      ListItem ( "\n" )
+    </output>
+    <nextLoc>
+      4
+    </nextLoc>
+  </T>
 #Or
-  S ==K "x = 15\n"
-#Or
-  S ==K "x = 20\n"
+  <T>
+    <threads>
+      .ThreadCellSet
+    </threads>
+    <genv>
+      main |-> 0
+    </genv>
+    <store>
+      0 |-> lambda ( .Bottoms , { var x ; print ( "x = " , .Bottoms ) ; x = read ( ) ; ( var t1 ; t1 = spawn { x = x / 2 ; } ; ) ( var t2 ; t2 = spawn { x = x + 10 ; } ; ) join t1 ; join t2 ; print ( x , "\n" , .Bottoms ) ; } )
+      1 |-> 10
+      2 |-> 0
+      3 |-> 1
+    </store>
+    <busy>
+      .Set
+    </busy>
+    <terminated>
+      SetItem ( 0 )
+      SetItem ( 1 )
+    </terminated>
+    <input>
+      .List
+    </input>
+    <output>
+      ListItem ( "x = " )
+      ListItem ( 10 )
+      ListItem ( "\n" )
+    </output>
+    <nextLoc>
+      4
+    </nextLoc>
+  </T>

@@ -1,3 +1,57 @@
-  S ==K "5\n"
+  <T>
+    <threads>
+      .ThreadCellSet
+    </threads>
+    <genv>
+      main |-> 0
+    </genv>
+    <store>
+      0 |-> lambda ( .Bottoms , { ( var x ; x = 5 ; ) spawn { x = 7 ; } ; print ( x , "\n" , .Bottoms ) ; } )
+      1 |-> 7
+    </store>
+    <busy>
+      .Set
+    </busy>
+    <terminated>
+      SetItem ( 0 )
+    </terminated>
+    <input>
+      ListItem ( 0 )
+    </input>
+    <output>
+      ListItem ( 5 )
+      ListItem ( "\n" )
+    </output>
+    <nextLoc>
+      2
+    </nextLoc>
+  </T>
 #Or
-  S ==K "7\n"
+  <T>
+    <threads>
+      .ThreadCellSet
+    </threads>
+    <genv>
+      main |-> 0
+    </genv>
+    <store>
+      0 |-> lambda ( .Bottoms , { ( var x ; x = 5 ; ) spawn { x = 7 ; } ; print ( x , "\n" , .Bottoms ) ; } )
+      1 |-> 7
+    </store>
+    <busy>
+      .Set
+    </busy>
+    <terminated>
+      SetItem ( 0 )
+    </terminated>
+    <input>
+      ListItem ( 0 )
+    </input>
+    <output>
+      ListItem ( 7 )
+      ListItem ( "\n" )
+    </output>
+    <nextLoc>
+      2
+    </nextLoc>
+  </T>

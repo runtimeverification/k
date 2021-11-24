@@ -4,11 +4,11 @@
 function main() {
   spawn {
     var x = 2;
-    print(x," ");
+//    print(x," ");
   };
   spawn {
     var x = 3;
-    print(x," ");
+//    print(x," ");
   };
 }
 

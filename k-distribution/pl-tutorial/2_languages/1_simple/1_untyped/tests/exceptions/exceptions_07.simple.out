@@ -1,3 +1,65 @@
-  S ==K "2 5\n"
+  <T>
+    <threads>
+      .ThreadCellSet
+    </threads>
+    <genv>
+      main |-> 0
+    </genv>
+    <store>
+      0 |-> lambda ( .Bottoms , { var e ; try { ( var x ; x = 2 ; ) print ( x , " " , .Bottoms ) ; throw ++ x + x ; } catch ( e ) { print ( e , "\n" , .Bottoms ) ; } } )
+      1 |-> undefined
+      2 |-> 3
+      3 |-> 5
+    </store>
+    <busy>
+      .Set
+    </busy>
+    <terminated>
+      SetItem ( 0 )
+    </terminated>
+    <input>
+      ListItem ( 0 )
+    </input>
+    <output>
+      ListItem ( 2 )
+      ListItem ( " " )
+      ListItem ( 5 )
+      ListItem ( "\n" )
+    </output>
+    <nextLoc>
+      4
+    </nextLoc>
+  </T>
 #Or
-  S ==K "2 6\n"
+  <T>
+    <threads>
+      .ThreadCellSet
+    </threads>
+    <genv>
+      main |-> 0
+    </genv>
+    <store>
+      0 |-> lambda ( .Bottoms , { var e ; try { ( var x ; x = 2 ; ) print ( x , " " , .Bottoms ) ; throw ++ x + x ; } catch ( e ) { print ( e , "\n" , .Bottoms ) ; } } )
+      1 |-> undefined
+      2 |-> 3
+      3 |-> 6
+    </store>
+    <busy>
+      .Set
+    </busy>
+    <terminated>
+      SetItem ( 0 )
+    </terminated>
+    <input>
+      ListItem ( 0 )
+    </input>
+    <output>
+      ListItem ( 2 )
+      ListItem ( " " )
+      ListItem ( 6 )
+      ListItem ( "\n" )
+    </output>
+    <nextLoc>
+      4
+    </nextLoc>
+  </T>

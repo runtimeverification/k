@@ -1,6 +1,35 @@
-  Result ==K <T>
+  <T>
     <threads>
-      .ThreadCellBag
+      <thread>
+        <k>
+          0 ; ~> while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Bottoms ) ; ~> setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> return nothing ; ~> .
+        </k>
+        <control>
+          <fstack>
+            ListItem ( ( main |-> 2
+            x |-> 0
+            y |-> 1 , #freezer_;_SIMPLE-UNTYPED-SYNTAX_Stmt_Exp0_ ( ) ~> . , <control>-fragment noFstackCell <xstack>
+              .List
+            </xstack> </control>-fragment ) )
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread>
     </threads>
     <genv>
       main |-> 2
@@ -17,26 +46,75 @@
     </busy>
     <terminated>
       SetItem ( 0 )
-      SetItem ( 1 )
     </terminated>
     <input>
-      ListItem ( #buffer ( "\n" ) )
-      ListItem ( "off" )
-      ListItem ( #istream ( 0 ) )
+      ListItem ( 0 )
     </input>
     <output>
-      ListItem ( #ostream ( 1 ) )
-      ListItem ( "off" )
-      ListItem ( #buffer ( "0\n" ) )
+      .List
     </output>
     <nextLoc>
       3
     </nextLoc>
   </T>
 #Or
-  Result ==K <T>
+  <T>
     <threads>
-      .ThreadCellBag
+      <thread>
+        <k>
+          0 ~> #freezer_;_SIMPLE-UNTYPED-SYNTAX_Stmt_Exp0_ ( ) ~> setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> .
+        </k>
+        <control>
+          <fstack>
+            .List
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread> <thread>
+        <k>
+          1 <= x ~> #freezerif(_)_else__SIMPLE-UNTYPED-SYNTAX_Stmt_Exp_Block_Block0_ ( { { y = y + 1 ; } while ( 1 <= x ) { y = y + 1 ; } } ~> . , { } ~> . ) ~> print ( y , "\n" , .Bottoms ) ; ~> setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> return nothing ; ~> .
+        </k>
+        <control>
+          <fstack>
+            ListItem ( ( main |-> 2
+            x |-> 0
+            y |-> 1 , #freezer_;_SIMPLE-UNTYPED-SYNTAX_Stmt_Exp0_ ( ) ~> . , <control>-fragment noFstackCell <xstack>
+              .List
+            </xstack> </control>-fragment ) )
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread>
     </threads>
     <genv>
       main |-> 2
@@ -45,34 +123,166 @@
     </genv>
     <store>
       0 |-> 0
-      1 |-> 1
+      1 |-> 0
       2 |-> lambda ( .Bottoms , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Bottoms ) ; } )
     </store>
     <busy>
       .Set
     </busy>
     <terminated>
-      SetItem ( 0 )
-      SetItem ( 1 )
+      .Set
     </terminated>
     <input>
-      ListItem ( #buffer ( "\n" ) )
-      ListItem ( "off" )
-      ListItem ( #istream ( 0 ) )
+      ListItem ( 0 )
     </input>
     <output>
-      ListItem ( #ostream ( 1 ) )
-      ListItem ( "off" )
-      ListItem ( #buffer ( "1\n" ) )
+      .List
     </output>
     <nextLoc>
       3
     </nextLoc>
   </T>
 #Or
-  Result ==K <T>
+  <T>
     <threads>
-      .ThreadCellBag
+      <thread>
+        <k>
+          1 ~> #freezer_<=__SIMPLE-UNTYPED-SYNTAX_Exp_Exp_Exp1_ ( 1 ~> . ) ~> #freezerif(_)_else__SIMPLE-UNTYPED-SYNTAX_Stmt_Exp_Block_Block0_ ( { { y = y + 1 ; } while ( 1 <= x ) { y = y + 1 ; } } ~> . , { } ~> . ) ~> print ( y , "\n" , .Bottoms ) ; ~> setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> return nothing ; ~> .
+        </k>
+        <control>
+          <fstack>
+            ListItem ( ( main |-> 2
+            x |-> 0
+            y |-> 1 , #freezer_;_SIMPLE-UNTYPED-SYNTAX_Stmt_Exp0_ ( ) ~> . , <control>-fragment noFstackCell <xstack>
+              .List
+            </xstack> </control>-fragment ) )
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread> <thread>
+        <k>
+          lvalue ( loc ( 0 ) ~> . ) ~> #freezer_=__SIMPLE-UNTYPED-SYNTAX_Exp_Exp_Exp0_ ( 0 ~> . ) ~> #freezer_;_SIMPLE-UNTYPED-SYNTAX_Stmt_Exp0_ ( ) ~> setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> .
+        </k>
+        <control>
+          <fstack>
+            .List
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread>
+    </threads>
+    <genv>
+      main |-> 2
+      x |-> 0
+      y |-> 1
+    </genv>
+    <store>
+      0 |-> 1
+      1 |-> 0
+      2 |-> lambda ( .Bottoms , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Bottoms ) ; } )
+    </store>
+    <busy>
+      .Set
+    </busy>
+    <terminated>
+      .Set
+    </terminated>
+    <input>
+      ListItem ( 0 )
+    </input>
+    <output>
+      .List
+    </output>
+    <nextLoc>
+      3
+    </nextLoc>
+  </T>
+#Or
+  <T>
+    <threads>
+      <thread>
+        <k>
+          .
+        </k>
+        <control>
+          <fstack>
+            .List
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread> <thread>
+        <k>
+          while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Bottoms ) ; ~> setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> return nothing ; ~> .
+        </k>
+        <control>
+          <fstack>
+            ListItem ( ( main |-> 2
+            x |-> 0
+            y |-> 1 , #freezer_;_SIMPLE-UNTYPED-SYNTAX_Stmt_Exp0_ ( ) ~> . , <control>-fragment noFstackCell <xstack>
+              .List
+            </xstack> </control>-fragment ) )
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread>
     </threads>
     <genv>
       main |-> 2
@@ -81,34 +291,83 @@
     </genv>
     <store>
       0 |-> 0
-      1 |-> 2
+      1 |-> 0
       2 |-> lambda ( .Bottoms , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Bottoms ) ; } )
     </store>
     <busy>
       .Set
     </busy>
     <terminated>
-      SetItem ( 0 )
-      SetItem ( 1 )
+      .Set
     </terminated>
     <input>
-      ListItem ( #buffer ( "\n" ) )
-      ListItem ( "off" )
-      ListItem ( #istream ( 0 ) )
+      ListItem ( 0 )
     </input>
     <output>
-      ListItem ( #ostream ( 1 ) )
-      ListItem ( "off" )
-      ListItem ( #buffer ( "2\n" ) )
+      .List
     </output>
     <nextLoc>
       3
     </nextLoc>
   </T>
 #Or
-  Result ==K <T>
+  <T>
     <threads>
-      .ThreadCellBag
+      <thread>
+        <k>
+          0 ; ~> setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> .
+        </k>
+        <control>
+          <fstack>
+            .List
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread> <thread>
+        <k>
+          if ( 1 <= x ) { { y = y + 1 ; } while ( 1 <= x ) { y = y + 1 ; } } else { } ~> print ( y , "\n" , .Bottoms ) ; ~> setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> return nothing ; ~> .
+        </k>
+        <control>
+          <fstack>
+            ListItem ( ( main |-> 2
+            x |-> 0
+            y |-> 1 , #freezer_;_SIMPLE-UNTYPED-SYNTAX_Stmt_Exp0_ ( ) ~> . , <control>-fragment noFstackCell <xstack>
+              .List
+            </xstack> </control>-fragment ) )
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread>
     </threads>
     <genv>
       main |-> 2
@@ -117,34 +376,338 @@
     </genv>
     <store>
       0 |-> 0
-      1 |-> 3
+      1 |-> 0
       2 |-> lambda ( .Bottoms , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Bottoms ) ; } )
     </store>
     <busy>
       .Set
     </busy>
     <terminated>
-      SetItem ( 0 )
-      SetItem ( 1 )
+      .Set
     </terminated>
     <input>
-      ListItem ( #buffer ( "\n" ) )
-      ListItem ( "off" )
-      ListItem ( #istream ( 0 ) )
+      ListItem ( 0 )
     </input>
     <output>
-      ListItem ( #ostream ( 1 ) )
-      ListItem ( "off" )
-      ListItem ( #buffer ( "3\n" ) )
+      .List
     </output>
     <nextLoc>
       3
     </nextLoc>
   </T>
 #Or
-  Result ==K <T>
+  <T>
     <threads>
-      .ThreadCellBag
+      <thread>
+        <k>
+          if ( true ) { { y = y + 1 ; } while ( 1 <= x ) { y = y + 1 ; } } else { } ~> print ( y , "\n" , .Bottoms ) ; ~> setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> return nothing ; ~> .
+        </k>
+        <control>
+          <fstack>
+            ListItem ( ( main |-> 2
+            x |-> 0
+            y |-> 1 , #freezer_;_SIMPLE-UNTYPED-SYNTAX_Stmt_Exp0_ ( ) ~> . , <control>-fragment noFstackCell <xstack>
+              .List
+            </xstack> </control>-fragment ) )
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread> <thread>
+        <k>
+          x = 0 ; ~> setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> .
+        </k>
+        <control>
+          <fstack>
+            .List
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread>
+    </threads>
+    <genv>
+      main |-> 2
+      x |-> 0
+      y |-> 1
+    </genv>
+    <store>
+      0 |-> 1
+      1 |-> 0
+      2 |-> lambda ( .Bottoms , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Bottoms ) ; } )
+    </store>
+    <busy>
+      .Set
+    </busy>
+    <terminated>
+      .Set
+    </terminated>
+    <input>
+      ListItem ( 0 )
+    </input>
+    <output>
+      .List
+    </output>
+    <nextLoc>
+      3
+    </nextLoc>
+  </T>
+#Or
+  <T>
+    <threads>
+      <thread>
+        <k>
+          loc ( 0 ) = 0 ~> #freezer_;_SIMPLE-UNTYPED-SYNTAX_Stmt_Exp0_ ( ) ~> setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> .
+        </k>
+        <control>
+          <fstack>
+            .List
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread> <thread>
+        <k>
+          x ~> #freezer_<=__SIMPLE-UNTYPED-SYNTAX_Exp_Exp_Exp1_ ( 1 ~> . ) ~> #freezerif(_)_else__SIMPLE-UNTYPED-SYNTAX_Stmt_Exp_Block_Block0_ ( { { y = y + 1 ; } while ( 1 <= x ) { y = y + 1 ; } } ~> . , { } ~> . ) ~> print ( y , "\n" , .Bottoms ) ; ~> setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> return nothing ; ~> .
+        </k>
+        <control>
+          <fstack>
+            ListItem ( ( main |-> 2
+            x |-> 0
+            y |-> 1 , #freezer_;_SIMPLE-UNTYPED-SYNTAX_Stmt_Exp0_ ( ) ~> . , <control>-fragment noFstackCell <xstack>
+              .List
+            </xstack> </control>-fragment ) )
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread>
+    </threads>
+    <genv>
+      main |-> 2
+      x |-> 0
+      y |-> 1
+    </genv>
+    <store>
+      0 |-> 1
+      1 |-> 0
+      2 |-> lambda ( .Bottoms , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Bottoms ) ; } )
+    </store>
+    <busy>
+      .Set
+    </busy>
+    <terminated>
+      .Set
+    </terminated>
+    <input>
+      ListItem ( 0 )
+    </input>
+    <output>
+      .List
+    </output>
+    <nextLoc>
+      3
+    </nextLoc>
+  </T>
+#Or
+  <T>
+    <threads>
+      <thread>
+        <k>
+          1 <= 1 ~> #freezerif(_)_else__SIMPLE-UNTYPED-SYNTAX_Stmt_Exp_Block_Block0_ ( { { y = y + 1 ; } while ( 1 <= x ) { y = y + 1 ; } } ~> . , { } ~> . ) ~> print ( y , "\n" , .Bottoms ) ; ~> setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> return nothing ; ~> .
+        </k>
+        <control>
+          <fstack>
+            ListItem ( ( main |-> 2
+            x |-> 0
+            y |-> 1 , #freezer_;_SIMPLE-UNTYPED-SYNTAX_Stmt_Exp0_ ( ) ~> . , <control>-fragment noFstackCell <xstack>
+              .List
+            </xstack> </control>-fragment ) )
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread> <thread>
+        <k>
+          lvalue ( x ~> . ) ~> #freezer_=__SIMPLE-UNTYPED-SYNTAX_Exp_Exp_Exp0_ ( 0 ~> . ) ~> #freezer_;_SIMPLE-UNTYPED-SYNTAX_Stmt_Exp0_ ( ) ~> setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> .
+        </k>
+        <control>
+          <fstack>
+            .List
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread>
+    </threads>
+    <genv>
+      main |-> 2
+      x |-> 0
+      y |-> 1
+    </genv>
+    <store>
+      0 |-> 1
+      1 |-> 0
+      2 |-> lambda ( .Bottoms , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Bottoms ) ; } )
+    </store>
+    <busy>
+      .Set
+    </busy>
+    <terminated>
+      .Set
+    </terminated>
+    <input>
+      ListItem ( 0 )
+    </input>
+    <output>
+      .List
+    </output>
+    <nextLoc>
+      3
+    </nextLoc>
+  </T>
+#Or
+  <T>
+    <threads>
+      <thread>
+        <k>
+          setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> .
+        </k>
+        <control>
+          <fstack>
+            .List
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread> <thread>
+        <k>
+          while ( 1 <= x ) { y = y + 1 ; } ~> print ( y , "\n" , .Bottoms ) ; ~> setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> return nothing ; ~> .
+        </k>
+        <control>
+          <fstack>
+            ListItem ( ( main |-> 2
+            x |-> 0
+            y |-> 1 , #freezer_;_SIMPLE-UNTYPED-SYNTAX_Stmt_Exp0_ ( ) ~> . , <control>-fragment noFstackCell <xstack>
+              .List
+            </xstack> </control>-fragment ) )
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread>
     </threads>
     <genv>
       main |-> 2
@@ -153,25 +716,188 @@
     </genv>
     <store>
       0 |-> 0
-      1 |-> 4
+      1 |-> 0
       2 |-> lambda ( .Bottoms , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Bottoms ) ; } )
     </store>
     <busy>
       .Set
     </busy>
     <terminated>
-      SetItem ( 0 )
-      SetItem ( 1 )
+      .Set
     </terminated>
     <input>
-      ListItem ( #buffer ( "\n" ) )
-      ListItem ( "off" )
-      ListItem ( #istream ( 0 ) )
+      ListItem ( 0 )
     </input>
     <output>
-      ListItem ( #ostream ( 1 ) )
-      ListItem ( "off" )
-      ListItem ( #buffer ( "4\n" ) )
+      .List
+    </output>
+    <nextLoc>
+      3
+    </nextLoc>
+  </T>
+#Or
+  <T>
+    <threads>
+      <thread>
+        <k>
+          true ~> #freezerif(_)_else__SIMPLE-UNTYPED-SYNTAX_Stmt_Exp_Block_Block0_ ( { { y = y + 1 ; } while ( 1 <= x ) { y = y + 1 ; } } ~> . , { } ~> . ) ~> print ( y , "\n" , .Bottoms ) ; ~> setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> return nothing ; ~> .
+        </k>
+        <control>
+          <fstack>
+            ListItem ( ( main |-> 2
+            x |-> 0
+            y |-> 1 , #freezer_;_SIMPLE-UNTYPED-SYNTAX_Stmt_Exp0_ ( ) ~> . , <control>-fragment noFstackCell <xstack>
+              .List
+            </xstack> </control>-fragment ) )
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread> <thread>
+        <k>
+          x = 0 ~> #freezer_;_SIMPLE-UNTYPED-SYNTAX_Stmt_Exp0_ ( ) ~> setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> .
+        </k>
+        <control>
+          <fstack>
+            .List
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread>
+    </threads>
+    <genv>
+      main |-> 2
+      x |-> 0
+      y |-> 1
+    </genv>
+    <store>
+      0 |-> 1
+      1 |-> 0
+      2 |-> lambda ( .Bottoms , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Bottoms ) ; } )
+    </store>
+    <busy>
+      .Set
+    </busy>
+    <terminated>
+      .Set
+    </terminated>
+    <input>
+      ListItem ( 0 )
+    </input>
+    <output>
+      .List
+    </output>
+    <nextLoc>
+      3
+    </nextLoc>
+  </T>
+#Or
+  <T>
+    <threads>
+      <thread>
+        <k>
+          { x = 0 ; } ~> .
+        </k>
+        <control>
+          <fstack>
+            .List
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread> <thread>
+        <k>
+          { { y = y + 1 ; } while ( 1 <= x ) { y = y + 1 ; } } ~> print ( y , "\n" , .Bottoms ) ; ~> setEnv ( main |-> 2
+          x |-> 0
+          y |-> 1 ) ~> return nothing ; ~> .
+        </k>
+        <control>
+          <fstack>
+            ListItem ( ( main |-> 2
+            x |-> 0
+            y |-> 1 , #freezer_;_SIMPLE-UNTYPED-SYNTAX_Stmt_Exp0_ ( ) ~> . , <control>-fragment noFstackCell <xstack>
+              .List
+            </xstack> </control>-fragment ) )
+          </fstack>
+          <xstack>
+            .List
+          </xstack>
+        </control>
+        <env>
+          main |-> 2
+          x |-> 0
+          y |-> 1
+        </env>
+        <holds>
+          .Map
+        </holds>
+        <id>
+          0
+        </id>
+      </thread>
+    </threads>
+    <genv>
+      main |-> 2
+      x |-> 0
+      y |-> 1
+    </genv>
+    <store>
+      0 |-> 1
+      1 |-> 0
+      2 |-> lambda ( .Bottoms , { x = 1 ; y = 0 ; spawn { x = 0 ; } ; while ( 1 <= x ) { y = y + 1 ; } print ( y , "\n" , .Bottoms ) ; } )
+    </store>
+    <busy>
+      .Set
+    </busy>
+    <terminated>
+      .Set
+    </terminated>
+    <input>
+      ListItem ( 0 )
+    </input>
+    <output>
+      .List
     </output>
     <nextLoc>
       3
