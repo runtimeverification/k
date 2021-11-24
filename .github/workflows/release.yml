@@ -113,6 +113,7 @@ jobs:
           repository: kframework/homebrew-k
           path: homebrew-k
           ref: staging
+          persist-credentials: false
         continue-on-error: true
 
       - name: Check out homebrew repo master branch
@@ -121,6 +122,7 @@ jobs:
         with:
           repository: kframework/homebrew-k
           path: homebrew-k
+          persist-credentials: false
 
       - name: Download bottle
         uses: actions/download-artifact@v2
@@ -172,6 +174,7 @@ jobs:
           cp homebrew-k-old/Formula/kframework.rb homebrew-k/Formula/kframework.rb
           cd homebrew-k
           git commit -m 'Update brew package version' Formula/kframework.rb
+          git remote set-url origin git@github.com:kframework/homebrew-k.git
           git push origin master
 
       - name: Delete Release
