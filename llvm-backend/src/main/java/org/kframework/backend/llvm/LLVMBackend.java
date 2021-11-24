@@ -78,11 +78,27 @@ public class LLVMBackend extends KoreBackend {
         if (options.noLLVMKompile) {
             return;
         }
-        if (options.enableLibrary) {
-            llvmKompile("library", options.output);
-        } else {
-            llvmKompile("main", "interpreter");
+        if (options.enableSearch && options.llvmKompileOutput != null) {
+            throw KEMException.criticalError("Can't use --llvm-kompile-output with --enable-search.");
         }
+        String llvmType;
+        switch (options.llvmKompileType) {
+            case "main":
+            case "search":
+            case "library":
+            case "static":
+                llvmType = options.llvmKompileType;
+                break;
+            default:
+                throw KEMException.criticalError("Non-valid argument for --llvm-kompile-type: " + options.llvmKompileType + ". Expected [main|search|library|static]");
+        }
+
+        String llvmOutput = "interpreter";
+        if (options.llvmKompileOutput != null) {
+            llvmOutput = options.llvmKompileOutput;
+        }
+        llvmKompile(llvmType, llvmOutput);
+
         if (options.enableSearch) {
             llvmKompile("search", "search");
         }

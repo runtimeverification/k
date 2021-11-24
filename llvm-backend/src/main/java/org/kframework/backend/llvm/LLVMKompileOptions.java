@@ -37,9 +37,9 @@ public class LLVMKompileOptions {
     @Parameter(names="--enable-search", description="By default, to reduce compilation time, `krun --search` is disabled on the LLVM backend. Pass this flag to enable it.")
     public boolean enableSearch;
 
-    @Parameter(names="--llvm-kompile-library", description="Passes `library` instead of `main` to llvm-kompile.")
-    public boolean enableLibrary;
+    @Parameter(names="--llvm-kompile-type", description="Specifies the llvm backend's output type. Valid choices are main (build an interpreter), search (same as main, but the interpreter does search instead of single-path execution), library (same as main, but a main method isn't linked in. The user is expected to link their own), and static (same as library, but no '-l' flags are passed during linking. Used for making a portable object file).")
+    public String llvmKompileType = "main";
 
-    @Parameter(names={ "--output", "-o" }, description="Use with `--llvm-kompile-library`. Sets the output filename.")
-    public String output = "interpreter";
+    @Parameter(names="--llvm-kompile-output", description="Name the output binary from the llvm backend.")
+    public String llvmKompileOutput = null;
 }
