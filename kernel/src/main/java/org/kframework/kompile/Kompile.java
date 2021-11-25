@@ -416,7 +416,8 @@ public class Kompile {
             if (m.name().equals(mainDefModule.name()) || mainDefModule.importedModuleNames().contains(m.name()))
                 return s;
             if (!(s instanceof Claim || s.isSyntax())) {
-                errors.add(KEMException.compilerError("Use claim instead of rule to specify proof objectives.", s));
+                if (s instanceof Rule && !s.att().contains(Att.SIMPLIFICATION()))
+                    errors.add(KEMException.compilerError("Use claim instead of rule to specify proof objectives.", s));
             }
             return s;
         }, "rules in spec module");
