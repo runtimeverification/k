@@ -78,7 +78,9 @@ of understanding.
 
 1. Compile your solution to Lesson 1.18, Problem 2 with the Haskell Backend
 and execute some programs. Compare the resulting configurations with the
-output of the same program on the LLVM Backend.
+output of the same program on the LLVM Backend. Note that if you are getting
+different behaviors on the Haskell backend, you might have some luck debugging
+by passing `--search` to `krun` when using the LLVM backend.
 
 ## Next lesson
 
