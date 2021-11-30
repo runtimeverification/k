@@ -1,0 +1,7 @@
+[Error] Compiler: Invalid format attribute: unfinished escape sequence.
+	Source(invalidFormat.k)
+	Location(3,18,3,34)
+[Error] Compiler: Invalid colors attribute: expected 2 colors, found 1 colors instead.
+	Source(invalidFormat.k)
+	Location(5,18,5,50)
+[Error] Compiler: Had 2 structural errors.
