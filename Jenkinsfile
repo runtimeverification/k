@@ -409,7 +409,7 @@ pipeline {
             cd k-release
             git fetch --all
 
-            release_commit="$(git merge-base $LONG_REV origin/master)"
+            release_commit="$LONG_REV"
             git checkout $release_commit
 
             git tag -d "${K_RELEASE_TAG}"         || true
