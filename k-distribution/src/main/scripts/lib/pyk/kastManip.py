@@ -262,22 +262,19 @@ def propagateUpConstraints(k):
     -   Output: kast where common constraints in the disjunct have been propagated up.
     """
     def _propagateUpConstraints(_k):
-        pattern = KApply('#Or', [KApply('#And', [KVariable('G1'), KVariable('C1')]), KApply('#And', [KVariable('G2'), KVariable('C2')])])
-        pmatch = match(pattern, _k)
-        if pmatch is None:
+        if not (isKApply(_k) and _k['label'] == '#Or'):
             return _k
-        (common1, l1, r1) = findCommonItems(flattenLabel('#And', pmatch['C1']), flattenLabel('#And', pmatch['C2']))
+        conjuncts1        = flattenLabel('#And', _k['args'][0])
+        conjuncts2        = flattenLabel('#And', _k['args'][1])
+        (common1, l1, r1) = findCommonItems(conjuncts1, conjuncts2)
         (common2, r2, l2) = findCommonItems(r1, l1)
         common = common1 + common2
         if len(common) == 0:
             return _k
-        g1 = pmatch['G1']
-        if len(l2) > 0:
-            g1 = buildAssoc(KConstant('#Top'), '#And', [g1] + l2)
-        g2 = pmatch['G2']
-        if len(r2) > 0:
-            g2 = buildAssoc(KConstant('#Top'), '#And', [g2] + r2)
-        return KApply('#And', [KApply('#Or', [g1, g2]), buildAssoc(KConstant('#Top'), '#And', common)])
+        conjunct1 = buildAssoc(KConstant('#Top'), '#And', l2)
+        conjunct2 = buildAssoc(KConstant('#Top'), '#And', r2)
+        disjunct  = KApply('#Or', [conjunct1, conjunct2])
+        return buildAssoc(KConstant('#Top'), '#And', [disjunct] + common)
     return traverseBottomUp(k, _propagateUpConstraints)
 
 def splitConfigFrom(configuration):
