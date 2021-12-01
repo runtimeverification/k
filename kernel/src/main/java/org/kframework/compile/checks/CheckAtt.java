@@ -67,6 +67,53 @@ public class CheckAtt {
                 errors.add(KEMException.compilerError("First child of binder must have a sort with the 'KVAR.KVar' hook attribute.", prod));
             }
         }
+        boolean hasColors = false;
+        int ncolors = 0;
+        if (prod.att().contains("colors")) {
+          hasColors = true;
+          ncolors = prod.att().get("colors").split(",").length;
+        }
+        int nterminals = prod.items().size() - prod.nonterminals().size();
+        int nescapes = 0;
+        if (prod.att().contains("format")) {
+            String format = prod.att().get("format");
+            for (int i = 0; i < format.length(); i++) {
+                char c = format.charAt(i);
+                if (c == '%') {
+                    if (i == format.length() - 1) {
+                        errors.add(KEMException.compilerError("Invalid format attribute: unfinished escape sequence.", prod));
+                        break;
+                    }
+                    char c2 = format.charAt(i + 1);
+                    i++;
+                    switch(c2) {
+                      case 'n':
+                      case 'i':
+                      case 'd':
+                      case 'r':
+                        break;
+                      case 'c':
+                        nescapes++;
+                        break;
+                      case '0':
+                      case '1':
+                      case '2':
+                      case '3':
+                      case '4':
+                      case '5':
+                      case '6':
+                      case '7':
+                      case '8':
+                      case '9':
+                        for (; i < format.length() && format.charAt(i) >= '0' && format.charAt(i) <= '9'; i++) {}
+                        break;
+                    }
+                }
+            }
+        }
+        if (hasColors && nescapes + nterminals != ncolors) {
+            errors.add(KEMException.compilerError("Invalid colors attribute: expected " + (nescapes + nterminals) + " colors, found " + ncolors + " colors instead.", prod));
+        }
     }
 
     private void check(Rule rule) {
