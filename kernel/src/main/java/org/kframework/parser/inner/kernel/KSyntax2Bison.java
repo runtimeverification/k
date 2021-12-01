@@ -435,7 +435,7 @@ public class KSyntax2Bison {
           "  n3->children[0] = n2;\n" +
           "  n3->children[1] = $1.nterm;\n" +
           "  n3->sort = \"");
-        encodeKore(prod.getSubsortSort(), bison);
+        encodeKore(prod.sort(), bison);
         bison.append("\";\n" +
           "  value_type result = {.nterm = n3};\n" +
           "  $$ = result;\n" +
