@@ -69,9 +69,11 @@ def main(commandLineArgs, extraMain = None):
             (returncode, stdout, stderr) = krun(definition_dir, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
             args['output'].write(stdout)
         elif args['command'] == 'prove':
-            kprover = KProve(kompiled_dir, args['main-file'])
-            (returncode, stdout, stderr) = kprover.prove(args['spec-file'], args['spec-module'], args = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
-            args['output'].write(stdout)
+            kprover    = KProve(kompiled_dir, args['main-file'])
+            finalState = kprover.prove(args['spec-file'], args['spec-module'], args = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
+            args['output'].write(kprover.prettyPrint(finalState))
+            if finalState != KConstant('#Top'):
+                fatal('Proof failed!')
 
     elif args['command'] == 'graph-imports':
         returncode = 0 if graphvizImports(kompiled_dir + '/parsed') and graphvizImports(kompiled_dir + '/compiled') else 1
