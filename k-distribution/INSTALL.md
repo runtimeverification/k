@@ -116,8 +116,9 @@ With brew installed, do the following to install the K Framework brew package
 brew install kframework--X.Y.Z.ID.bottle.BN.tar.gz -v
 ```
 
-Note: the brew package should install on MacOS X Catalina systems even though
-the package was built for Mojave.
+Note: we do not yet have a MacOS Monterey bottle. The existing brew package
+also does not work on M1 Silicon Macs. If you have either of these systems,
+you should build from source for the time being.
 
 #### Homebrew Alternate Installation
 
