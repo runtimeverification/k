@@ -77,6 +77,7 @@ jobs:
           git reset HEAD^
           LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.big_sur.bottle*.tar.gz"))
           BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#./} | sed 's!kframework--!kframework-!')
+          ../kframework/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL}
           echo "::set-output name=path::$LOCAL_BOTTLE_NAME"
           echo "::set-output name=path_remote::$BOTTLE_NAME"
 
@@ -113,6 +114,7 @@ jobs:
           repository: kframework/homebrew-k
           path: homebrew-k
           ref: staging
+          persist-credentials: false
         continue-on-error: true
 
       - name: Check out homebrew repo master branch
@@ -121,6 +123,7 @@ jobs:
         with:
           repository: kframework/homebrew-k
           path: homebrew-k
+          persist-credentials: false
 
       - name: Download bottle
         uses: actions/download-artifact@v2
@@ -172,6 +175,7 @@ jobs:
           cp homebrew-k-old/Formula/kframework.rb homebrew-k/Formula/kframework.rb
           cd homebrew-k
           git commit -m 'Update brew package version' Formula/kframework.rb
+          git remote set-url origin git@github.com:kframework/homebrew-k.git
           git push origin master
 
       - name: Delete Release
@@ -186,7 +190,7 @@ jobs:
   macos-release:
     runs-on: ubuntu-latest
     environment: production
-    needs: [nix-release, macos-test]
+    needs: [nix-release, macos-build, macos-test]
     steps:
       - name: Publish release
         uses: actions/github-script@v4

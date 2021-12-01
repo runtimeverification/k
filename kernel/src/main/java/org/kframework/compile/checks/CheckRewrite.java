@@ -29,11 +29,11 @@ public class CheckRewrite {
 
     public void check(Sentence sentence) {
         if (sentence instanceof RuleOrClaim) {
-            check(((RuleOrClaim) sentence).body(), sentence instanceof Claim);
+            check((RuleOrClaim) sentence, sentence instanceof Claim);
         }
     }
 
-    private void check(K body, boolean isClaim) {
+    private void check(RuleOrClaim sentence, boolean isClaim) {
         class Holder {
             boolean hasRewrite = false;
             boolean inRewrite = false;
@@ -43,7 +43,7 @@ public class CheckRewrite {
             boolean inFunctionBody = false;
         }
         Holder h = new Holder();
-        new VisitK() {
+        VisitK visitor = new VisitK() {
             @Override
             public void apply(KRewrite k) {
                 boolean inRewrite = h.inRewrite;
@@ -163,9 +163,11 @@ public class CheckRewrite {
                     super.apply(k);
                 }
             }
-        }.accept(body);
+        };
+        visitor.accept(sentence.requires());
+        visitor.accept(sentence.body());
         if (!h.hasRewrite && !isClaim) {
-            errors.add(KEMException.compilerError("Rules must have at least one rewrite.", body));
+            errors.add(KEMException.compilerError("Rules must have at least one rewrite.", sentence.body()));
         }
     }
 }
