@@ -3,6 +3,7 @@
 import argparse
 import tempfile
 import os.path as path
+import sys
 
 from .         import *
 from .graphviz import *
@@ -26,7 +27,10 @@ krunArgs.add_argument('-f', '--from', default = 'pretty', choices = ['pretty', '
 krunArgs.add_argument('-t', '--to',   default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
 krunArgs.add_argument('kArgs', nargs='*', help = 'Arguments to pass through to K invocation.')
 
-kproveArgs = pykCommandParsers.add_parser('prove', help = 'Prove an input specification.')
+kproveArgs = pykCommandParsers.add_parser('prove', help = 'Prove an input specification (using kprovex).')
+kproveArgs.add_argument('main-file', type = str, help = 'Main file used for kompilation.')
+kproveArgs.add_argument('spec-file', type = str, help = 'File with the specification module.')
+kproveArgs.add_argument('spec-module', type = str, help = 'Module with claims to be proven.')
 kproveArgs.add_argument('-i', '--input',  type = argparse.FileType('r'), default = '-')
 kproveArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
 kproveArgs.add_argument('-t', '--to',   default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
@@ -65,7 +69,8 @@ def main(commandLineArgs, extraMain = None):
             (returncode, stdout, stderr) = krun(definition_dir, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
             args['output'].write(stdout)
         elif args['command'] == 'prove':
-            (returncode, stdout, stderr) = kprove(definition_dir, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
+            kprover = KProve(kompiled_dir, args['main-file'])
+            (returncode, stdout, stderr) = kprover.prove(args['spec-file'], args['spec-module'], args = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
             args['output'].write(stdout)
 
     elif args['command'] == 'graph-imports':
@@ -110,4 +115,5 @@ def main(commandLineArgs, extraMain = None):
         _fatal('Non-zero exit code (' + str(returncode) + '): ' + str(kCommand), code = returncode)
 
 if __name__ == '__main__':
+    sys.setrecursionlimit(15000000)
     main(pykArgs)

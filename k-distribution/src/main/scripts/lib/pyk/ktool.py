@@ -22,7 +22,7 @@ class KProve(KPrint):
         if not os.path.exists(self.useDirectory):
             os.makedirs(self.useDirectory)
         self.mainFileName   = mainFileName
-        self.prover         = [ 'kprove' ]
+        self.prover         = [ 'kprovex' ]
         self.proverArgs     = [ ]
         with open(self.kompiledDirectory + '/backend.txt', 'r') as ba:
             self.backend    = ba.read()
