@@ -210,6 +210,17 @@ def addAttributes(kast, att):
         sys.stderr.flush()
         sys.exit(1)
 
+def flattenLabel(label, kast):
+    """Given a tree of a label, return all the leaves.
+
+    -   Input: label of tree, and kast term.
+    -   Output: list of leaves of tree (singleton list for no occurance of label at top).
+    """
+    if isKApply(kast) and kast['label'] == label:
+        items = [ flattenLabel(label, arg) for arg in kast['args'] ]
+        return [ c for cs in items for c in cs ]
+    return [kast]
+
 klabelCells   = '#KCells'
 klabelEmptyK  = '#EmptyK'
 
@@ -385,14 +396,12 @@ def prettyPrintKast(kast, symbolTable, debug = False):
         requiresStr = ''
         ensuresStr  = ''
         attsStr     = prettyPrintKast(kast['att'], symbolTable, debug = debug)
-        reqEnsSymbolTable = { k: symbolTable[k] for k in symbolTable }
-        reqEnsSymbolTable [ '_andBool_' ] = lambda b1, b2: b1 + '\nandBool ' + b2
         if kast['requires'] is not None:
-            requiresStr = prettyPrintKast(kast['requires'], reqEnsSymbolTable, debug = debug)
-            requiresStr = 'requires ' + '\n   '.join(requiresStr.split('\n'))
+            reqLines    = [ prettyPrintKast(req, symbolTable, debug = debug) for req in flattenLabel('_andBool_', kast['requires']) ]
+            requiresStr = 'requires ' + '\n   andBool '.join(reqLines)
         if kast['ensures'] is not None:
-            ensuresStr = prettyPrintKast(kast['ensures'], reqEnsSymbolTable, debug = debug)
-            ensuresStr = 'ensures ' + '\n  '.join(ensuresStr.split('\n'))
+            ensLines   = [ prettyPrintKast(ens, symbolTable, debug = debug) for ens in flattenLabel('_andBool_', kast['ensures']) ]
+            ensuresStr = 'ensures ' + '\n   andBool '.join(ensLines)
         return ruleStr + '\n  ' + requiresStr + '\n  ' + ensuresStr + '\n  ' + attsStr
     if isKContext(kast):
         body        = indent(prettyPrintKast(kast['body'], symbolTable, debug = debug))

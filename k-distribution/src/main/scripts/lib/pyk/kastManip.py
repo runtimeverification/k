@@ -212,17 +212,6 @@ def countVarOccurances(kast, numOccurances = None):
 def collectFreeVars(kast):
     return list(countVarOccurances(kast).keys())
 
-def flattenLabel(label, kast):
-    """Given a binary tree of a label, return all the leaves.
-
-    -   Input: label of binary tree, and kast term.
-    -   Output: list of leaves of binary tree (singleton list for no occurance of label at top).
-    """
-    if isKApply(kast) and kast['label'] == label:
-        items = [ flattenLabel(label, arg) for arg in kast['args'] ]
-        return [ c for cs in items for c in cs ]
-    return [kast]
-
 def splitConfigAndConstraints(kast):
     """Split the configuration/term from the constraints.
 
