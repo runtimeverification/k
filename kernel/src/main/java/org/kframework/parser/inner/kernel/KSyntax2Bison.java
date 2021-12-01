@@ -220,7 +220,7 @@ public class KSyntax2Bison {
     bison.append("\n%%\n");
     bison.append("\n" +
         "void yyerror (YYLTYPE *loc, void *scanner, const char *s) {\n" +
-        "    fprintf (stderr, \"%d:%d:%d:%d:%s\\n\", loc->first_line, loc->first_column, loc->last_line, loc->last_column, s);\n" +
+        "    fprintf (stderr, \"%s:%d:%d:%d:%d:%s\\n\", loc->filename, loc->first_line, loc->first_column, loc->last_line, loc->last_column, s);\n" +
         "}\n");
     try {
       FileUtils.write(path, bison);
