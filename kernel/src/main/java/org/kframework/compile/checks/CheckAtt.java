@@ -126,7 +126,7 @@ public class CheckAtt {
                 }
             }
         } else if (!prod.att().contains("token") && !prod.sort().equals(Sorts.Layout()) && !prod.sort().equals(Sorts.LineMarker())) {
-            for (ProductionItem pi : iterable(prod.items())) {  
+            for (ProductionItem pi : iterable(prod.items())) {
                 if (pi instanceof RegexTerminal) {
                     if (prod.items().size() == 1)  {
                         errors.add(KEMException.compilerError(
