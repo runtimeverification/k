@@ -840,10 +840,8 @@ operations listed above.
   rule notBool true => false
   rule notBool false => true
 
-  rule true andBool B:Bool => B:Bool
-  rule B:Bool andBool true => B:Bool
-  rule false andBool _:Bool => false
-  rule _:Bool andBool false => false
+  rule true andBool true => true
+  rule _:Bool andBool _:Bool => false [owise]
 
   rule true andThenBool K::Bool => K
   rule K::Bool andThenBool true => K
