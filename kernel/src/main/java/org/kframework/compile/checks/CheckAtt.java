@@ -6,6 +6,8 @@ import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
+import org.kframework.definition.ProductionItem;
+import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.KLabel;
@@ -15,6 +17,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.Set;
 
+import static org.kframework.Collections.*;
 
 /**
  * Created by dwightguth on 1/25/16.
@@ -105,8 +108,32 @@ public class CheckAtt {
                       case '7':
                       case '8':
                       case '9':
-                        for (; i < format.length() && format.charAt(i) >= '0' && format.charAt(i) <= '9'; i++) {}
+                        StringBuilder sb = new StringBuilder();
+                        for (; i < format.length() && format.charAt(i) >= '0' && format.charAt(i) <= '9'; i++) {
+                            sb.append(format.charAt(i));
+                        }
+                        int idx = Integer.parseInt(sb.toString());
+                        if (idx == 0 || idx > prod.items().size()) {
+                            errors.add(KEMException.compilerError("Invalid format escape sequence '%" + sb.toString() + "'. Expected a number between 1 and " + prod.items().size(), prod));
+                        } else {
+                            ProductionItem pi = prod.items().apply(idx-1);
+                            if (pi instanceof RegexTerminal) {
+                                errors.add(KEMException.compilerError("Invalid format escape sequence referring to regular expression terminal '" + pi + "'.", prod));
+                            }
+                        }
                         break;
+                    }
+                }
+            }
+        } else if (!prod.att().contains("token") && !prod.sort().equals(Sorts.Layout()) && !prod.sort().equals(Sorts.LineMarker())) {
+            for (ProductionItem pi : iterable(prod.items())) {  
+                if (pi instanceof RegexTerminal) {
+                    if (prod.items().size() == 1)  {
+                        errors.add(KEMException.compilerError(
+                              "Expected format attribute on production with regular expression terminal. Did you forget the 'token' attribute?", prod));
+                    } else {
+                        errors.add(KEMException.compilerError(
+                              "Expected format attribute on production with regular expression terminal.", prod));
                     }
                 }
             }
