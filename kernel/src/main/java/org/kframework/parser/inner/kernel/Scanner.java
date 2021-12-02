@@ -119,8 +119,8 @@ public class Scanner implements AutoCloseable {
           flex.append("\n");
         }
         flex.append("%%\n\n");
-        if (module.productionsForSort().contains(Sort("#LineMarker").head())) {
-          stream(module.productionsForSort().apply(Sort("#LineMarker").head())).forEach(prod -> {
+        if (module.productionsForSort().contains(Sorts.LineMarker().head())) {
+          stream(module.productionsForSort().apply(Sorts.LineMarker().head())).forEach(prod -> {
             if (prod.items().size() != 1 || !(prod.items().apply(0) instanceof RegexTerminal)) {
               throw KEMException.compilerError("Productions of sort `#LineMarker` must be exactly one `RegexTerminal`.", prod);
             }
