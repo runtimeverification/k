@@ -1,30 +1,30 @@
 # path to the current makefile
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+# path to binary directory of this distribution
+K_BIN=$(abspath $(MAKEFILE_PATH)/../../bin)
 # path to the kompile binary of this distribuition
-KOMPILE=$(abspath $(MAKEFILE_PATH)/../../bin/kompile)
+KOMPILE=${K_BIN}/kompile
 # ditto for krun
-KRUN=$(abspath $(MAKEFILE_PATH)/../../bin/krun)
+KRUN=${K_BIN}/krun
 # and kdep
-KDEP=$(abspath $(MAKEFILE_PATH)/../../bin/kdep)
+KDEP=${K_BIN}/kdep
 # and kprove
-KPROVE=$(abspath $(MAKEFILE_PATH)/../../bin/kprove)
-KPROVEX=$(abspath $(MAKEFILE_PATH)/../../bin/kprovex)
+KPROVE=${K_BIN}/kprove
+KPROVEX=${K_BIN}/kprovex
 # and kbmc
-KBMC=$(abspath $(MAKEFILE_PATH)/../../bin/kbmc)
+KBMC=${K_BIN}/kbmc
 # and kast
-KAST=$(abspath $(MAKEFILE_PATH)/../../bin/kast)
+KAST=${K_BIN}/kast
 # and keq
-KEQ=$(abspath $(MAKEFILE_PATH)/../../bin/keq)
+KEQ=${K_BIN}/keq
 # and kserver
-KSERVER=$(abspath $(MAKEFILE_PATH)/../../bin/kserver)
+KSERVER=${K_BIN}/kserver
 # and ksearch
 KSEARCH:=$(KRUN) --search-all
-# and kast
-KAST=$(abspath $(MAKEFILE_PATH)/../../bin/kast)
 # and kprint
-KPRINT=$(abspath $(MAKEFILE_PATH)/../../bin/kprint)
+KPRINT=${K_BIN}/kprint
 # and krun-legacy
-KRUN_LEGACY=$(abspath $(MAKEFILE_PATH)/../../bin/krun-legacy)
+KRUN_LEGACY=${K_BIN}/krun-legacy
 # path relative to current definition of test programs
 TESTDIR?=tests
 # path to put -kompiled directory in
