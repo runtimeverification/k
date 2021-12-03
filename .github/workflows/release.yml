@@ -80,6 +80,7 @@ jobs:
           ../kframework/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL}
           echo "::set-output name=path::$LOCAL_BOTTLE_NAME"
           echo "::set-output name=path_remote::$BOTTLE_NAME"
+          echo "::set-output name=version::$VERSION"
 
       - name: Upload bottle
         uses: actions/upload-artifact@v2
@@ -101,6 +102,7 @@ jobs:
       bottle_path_remote: ${{ steps.build.outputs.path_remote }}
       release_id: ${{ steps.release.outputs.release_id }}
       upload_url: ${{ steps.release.outputs.upload_url }}
+      version: ${{ steps.build.outputs.version }}
 
   macos-test:
     runs-on: macos-11
@@ -199,3 +201,13 @@ jobs:
           script: |
             const { owner, repo } = context.repo
             await github.repos.updateRelease({ owner, repo, release_id: ${{ needs.macos-build.outputs.release_id }}, prerelease: false })
+      - name: Update dependents
+        env:
+          JENKINS_TOKEN: ${{ secrets.JENKINS_TOKEN }}
+          VERSION: ${{ needs.macos-build.outputs.version }}
+        run: |
+          curl 'https://office.runtimeverification.com/jenkins/job/DevOps/job/master/buildWithParameters' \
+              --data token=$JENKINS_DEVOPS_TOKEN \
+              --data UPDATE_DEPS=true \
+              --data UPDATE_DEPS_REPO=kframework/k \
+              --data UPDATE_DEPS_VERSION=v$VERSION

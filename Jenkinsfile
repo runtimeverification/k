@@ -439,19 +439,6 @@ pipeline {
         }
       }
     }
-    stage('Update Dependents') {
-      when {
-        branch 'release'
-        beforeAgent true
-      }
-      steps {
-        build job: 'DevOps/master', propagate: false, wait: false                                       \
-            , parameters: [ booleanParam ( name: 'UPDATE_DEPS'         , value: true                  ) \
-                          , string       ( name: 'UPDATE_DEPS_REPO'    , value: 'kframework/k'        ) \
-                          , string       ( name: 'UPDATE_DEPS_VERSION' , value: "${env.K_RELEASE_TAG}") \
-                          ]
-      }
-    }
     stage('GitHub Pages') {
       when {
         branch 'release'
