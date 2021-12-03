@@ -16,7 +16,7 @@ module C-LEXICAL
   syntax Constant ::= IntConstant | Float
   syntax StringLiteral ::= String
 
-  syntax IntConstant ::= r"(([1-9][0-9]*)|(0[0-7]*)|(0[xX][0-9a-fA-F]+))(([uU][lL]?)|([uU]((ll)|(LL)))|([lL][uU]?)|(((ll)|(LL))[uU]?))?"
+  syntax IntConstant ::= r"(([1-9][0-9]*)|(0[0-7]*)|(0[xX][0-9a-fA-F]+))(([uU][lL]?)|([uU]((ll)|(LL)))|([lL][uU]?)|(((ll)|(LL))[uU]?))?" [token]
   syntax Char ::= r"[LuU]?'(([^'\\n\\\\])|(\\\\['\\\"?\\\\abfnrtv])|(\\\\[0-7]{3})|(\\\\x[0-9a-fA-F]+)|(\\\\u[0-9a-fA-F]{4})|(\\\\U[0-9a-fA-F]{8}))+'" [token]
 
 endmodule
