@@ -2659,6 +2659,22 @@ ordinary rewrite rules:
   "Error: Division by zero at " +String File +String ":" Int2String(StartLine)
 ```
 
+Sometimes it is desirable to allow code to be written in a file which
+overwrites the current location information provided by the parser. This can be
+done via a combination of the `#LineMarker` sort and the `--bison-file` flag to
+the parser generator. If you declare a production of sort `#LineMarker` which
+contains a regular expression terminal, this will be treated as a
+**line marker** by the bison parser. The user will then be expected to provide
+an implementation of the parser for the line marker in C. The function expected
+by the parser has the signature `void line_marker(char *, yyscan_t)`, where
+`yyscan_t` is a
+[reentrant flex scanner](https://westes.github.io/flex/manual/Reentrant.html).
+The string value of the line marker token as specified by your regular
+expression can be found in the first parameter of the function, and you can
+set the line number used by the scanner using `yyset_lineno(int, yyscan_t)`. If
+you declare the variable `extern char *filename`, you can also set the current
+file name by writing a malloc'd, zero-terminated string to that variable.
+
 
 Unparsing
 ---------
