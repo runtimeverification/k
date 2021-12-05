@@ -419,7 +419,7 @@ def prettyPrintKast(kast, symbolTable, debug = False):
         return '[' + ', '.join(attStrs) + ']'
     if isKFlatModule(kast):
         name = kast['name']
-        imports = '\n'.join(['import ' + kimport for kimport in kast['imports']])
+        imports = '\n'.join(['imports ' + kimport for kimport in kast['imports']])
         localSentences = '\n\n'.join([prettyPrintKast(sent, symbolTable, debug = debug) for sent in kast['localSentences']])
         contents = imports + '\n\n' + localSentences
         return 'module ' + name                    + '\n    ' \
