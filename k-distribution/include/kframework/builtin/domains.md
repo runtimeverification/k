@@ -848,24 +848,20 @@ operations listed above.
   rule false andThenBool _ => false
   rule _ andThenBool false => false
 
-  rule false xorBool B:Bool => B:Bool
-  rule B:Bool xorBool false => B:Bool
-  rule B:Bool xorBool B:Bool => false
+  rule false xorBool true => true
+  rule true xorBool false => true
+  rule _:Bool xorBool _:Bool => false [owise]
 
-  rule true orBool _:Bool => true
-  rule _:Bool orBool true => true
-  rule false orBool B:Bool => B
-  rule B:Bool orBool false => B
+  rule false orBool false => false
+  rule _:Bool orBool _:Bool => true [owise]
 
   rule true orElseBool _ => true
   rule _ orElseBool true => true
   rule false orElseBool K::Bool => K
   rule K::Bool orElseBool false => K
 
-  rule true impliesBool B:Bool => B
-  rule false impliesBool _:Bool => true
-  rule _:Bool impliesBool true => true
-  rule B:Bool impliesBool false => notBool B
+  rule true impliesBool false => false
+  rule _:Bool impliesBool _:Bool => true [owise]
 
   rule B1:Bool =/=Bool B2:Bool => notBool (B1 ==Bool B2)
 endmodule
