@@ -14,13 +14,13 @@ class KPrint:
         self.definition        = readKastTerm(self.kompiledDirectory + '/compiled.json')
         self.symbolTable       = buildSymbolTable(self.definition, opinionated = True)
 
-    def prettyPrint(self, kast):
+    def prettyPrint(self, kast, debug = False):
         """Given a KAST term, pretty-print it using the current definition.
 
         -   Input: KAST term in JSON.
         -   Output: Best-effort pretty-printed representation of the KAST term.
         """
-        return prettyPrintKast(kast, self.symbolTable)
+        return prettyPrintKast(kast, self.symbolTable, debug = debug)
 
 class KProve(KPrint):
     """Given a kompiled directory and a main file name, build a prover for it.
