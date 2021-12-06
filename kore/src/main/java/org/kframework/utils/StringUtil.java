@@ -541,7 +541,7 @@ public class StringUtil {
             "Hash",// 23
             "Dolr",// 24
             "Perc",// 25
-            "And",// 26
+            "And-",// 26
             "Apos",// 27
             "LPar",// 28
             "RPar",// 29
@@ -563,11 +563,11 @@ public class StringUtil {
             "9",// 39
             "Coln",// 3a
             "SCln",// 3b
-            "LT",// 3c
+            "-LT-",// 3c
             "Eqls",// 3d
-            "GT",// 3e
+            "-GT-",// 3e
             "Ques",// 3f
-            "AT",// 40
+            "-AT-",// 40
             "A",// 41
             "B",// 42
             "C",// 43
@@ -597,7 +597,7 @@ public class StringUtil {
             "LSqB",// 5b
             "Bash",// 5c
             "RSqB",// 5d
-            "Xor",// 5e
+            "Xor-",// 5e
             "Unds",// 5f
             "BQuo",// 60
             "a",// 61
@@ -635,7 +635,8 @@ public class StringUtil {
     private static final Map<String, Character> asciiReadableEncodingDefaultMap = new HashMap<>();
     static {
         for (int i = 0; i < asciiReadableEncodingDefault.length; i++)
-            asciiReadableEncodingDefaultMap.put(asciiReadableEncodingDefault[i], (char) i);
+            if (asciiReadableEncodingDefault[i] != null && asciiReadableEncodingDefault[i].length() > 1)
+                asciiReadableEncodingDefaultMap.put(asciiReadableEncodingDefault[i], (char) i);
     }
 
     public static void encodeStringToAlphanumeric(StringBuilder sb, String name, String[] asciiReadableEncodingTable, Pattern identChar, String escapeChar) {
@@ -673,13 +674,13 @@ public class StringUtil {
             if (quotedState) {
                 if (encoded.charAt(i) == '\'') {
                     quotedState = false;
-                    resultedEncoding.append(asciiReadableEncodingDefaultMap.get(tempSb.toString()));
-                } else
-                    tempSb.append(encoded.charAt(i));
+                } else {
+                    resultedEncoding.append(asciiReadableEncodingDefaultMap.get(encoded.substring(i, i + 4)));
+                    i += 3;
+                }
             } else {
                 if (encoded.charAt(i) == '\'') {
                     quotedState = true;
-                    tempSb = new StringBuilder();
                 } else
                     resultedEncoding.append(encoded.charAt(i));
             }
