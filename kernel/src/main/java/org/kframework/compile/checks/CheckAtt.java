@@ -6,6 +6,8 @@ import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
+import org.kframework.definition.ProductionItem;
+import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.KLabel;
@@ -15,6 +17,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.util.Set;
 
+import static org.kframework.Collections.*;
 
 /**
  * Created by dwightguth on 1/25/16.
@@ -66,6 +69,77 @@ public class CheckAtt {
             } else if (!m.sortAttributesFor().get(prod.nonterminals().apply(0).sort().head()).getOrElse(() -> Att.empty()).getOptional(Att.HOOK()).orElse("").equals("KVAR.KVar")) {
                 errors.add(KEMException.compilerError("First child of binder must have a sort with the 'KVAR.KVar' hook attribute.", prod));
             }
+        }
+        boolean hasColors = false;
+        int ncolors = 0;
+        if (prod.att().contains("colors")) {
+          hasColors = true;
+          ncolors = prod.att().get("colors").split(",").length;
+        }
+        int nterminals = prod.items().size() - prod.nonterminals().size();
+        int nescapes = 0;
+        if (prod.att().contains("format")) {
+            String format = prod.att().get("format");
+            for (int i = 0; i < format.length(); i++) {
+                char c = format.charAt(i);
+                if (c == '%') {
+                    if (i == format.length() - 1) {
+                        errors.add(KEMException.compilerError("Invalid format attribute: unfinished escape sequence.", prod));
+                        break;
+                    }
+                    char c2 = format.charAt(i + 1);
+                    i++;
+                    switch(c2) {
+                      case 'n':
+                      case 'i':
+                      case 'd':
+                      case 'r':
+                        break;
+                      case 'c':
+                        nescapes++;
+                        break;
+                      case '0':
+                      case '1':
+                      case '2':
+                      case '3':
+                      case '4':
+                      case '5':
+                      case '6':
+                      case '7':
+                      case '8':
+                      case '9':
+                        StringBuilder sb = new StringBuilder();
+                        for (; i < format.length() && format.charAt(i) >= '0' && format.charAt(i) <= '9'; i++) {
+                            sb.append(format.charAt(i));
+                        }
+                        int idx = Integer.parseInt(sb.toString());
+                        if (idx == 0 || idx > prod.items().size()) {
+                            errors.add(KEMException.compilerError("Invalid format escape sequence '%" + sb.toString() + "'. Expected a number between 1 and " + prod.items().size(), prod));
+                        } else {
+                            ProductionItem pi = prod.items().apply(idx-1);
+                            if (pi instanceof RegexTerminal) {
+                                errors.add(KEMException.compilerError("Invalid format escape sequence referring to regular expression terminal '" + pi + "'.", prod));
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        } else if (!prod.att().contains("token") && !prod.sort().equals(Sorts.Layout()) && !prod.sort().equals(Sorts.LineMarker())) {
+            for (ProductionItem pi : iterable(prod.items())) {
+                if (pi instanceof RegexTerminal) {
+                    if (prod.items().size() == 1)  {
+                        errors.add(KEMException.compilerError(
+                              "Expected format attribute on production with regular expression terminal. Did you forget the 'token' attribute?", prod));
+                    } else {
+                        errors.add(KEMException.compilerError(
+                              "Expected format attribute on production with regular expression terminal.", prod));
+                    }
+                }
+            }
+        }
+        if (hasColors && nescapes + nterminals != ncolors) {
+            errors.add(KEMException.compilerError("Invalid colors attribute: expected " + (nescapes + nterminals) + " colors, found " + ncolors + " colors instead.", prod));
         }
     }
 

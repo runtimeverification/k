@@ -8,7 +8,7 @@ module TEST-SYNTAX
                  | "testFunction1" "(" Int ")" ";"
                  > Stmt Stmt       [left, format(%1%n%2)]
 
-  syntax Pgm ::= Stmt           [format(%1 %2%3%n%4), colors(yellow,pink)]
+  syntax Pgm ::= Stmt
 endmodule
 
 module TEST
