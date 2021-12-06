@@ -409,7 +409,7 @@ pipeline {
             cd k-release
             git fetch --all
 
-            release_commit="$(git merge-base $LONG_REV origin/master)"
+            release_commit="$LONG_REV"
             git checkout $release_commit
 
             git tag -d "${K_RELEASE_TAG}"         || true
@@ -437,19 +437,6 @@ pipeline {
                 --file release.md "${K_RELEASE_TAG}"
           '''
         }
-      }
-    }
-    stage('Update Dependents') {
-      when {
-        branch 'release'
-        beforeAgent true
-      }
-      steps {
-        build job: 'DevOps/master', propagate: false, wait: false                                       \
-            , parameters: [ booleanParam ( name: 'UPDATE_DEPS'         , value: true                  ) \
-                          , string       ( name: 'UPDATE_DEPS_REPO'    , value: 'kframework/k'        ) \
-                          , string       ( name: 'UPDATE_DEPS_VERSION' , value: "${env.K_RELEASE_TAG}") \
-                          ]
       }
     }
     stage('GitHub Pages') {

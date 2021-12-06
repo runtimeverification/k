@@ -32,6 +32,11 @@ public class StringUtilTest {
     }
 
     @Test
+    public void decodeKoreString() {
+        Assert.assertEquals(StringUtil.decodeKoreString("'Unds'V'Unds'9"), "_V_9");
+    }
+
+    @Test
     public void testBijection() {
         char[] all = new char[256];
         for (int i = 0; i < 256; i++)
