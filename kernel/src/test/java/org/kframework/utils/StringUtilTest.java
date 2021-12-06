@@ -34,6 +34,7 @@ public class StringUtilTest {
     @Test
     public void decodeKoreString() {
         Assert.assertEquals(StringUtil.decodeKoreString("'Unds'V'Unds'9"), "_V_9");
+        Assert.assertEquals(StringUtil.decodeKoreString("'QuesUnds'0"), "?_0");
     }
 
     @Test
