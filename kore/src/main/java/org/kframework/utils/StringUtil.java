@@ -669,7 +669,6 @@ public class StringUtil {
     public static String decodeKoreString(String encoded) {
         boolean quotedState = false;
         StringBuilder resultedEncoding = new StringBuilder();
-        StringBuilder tempSb = new StringBuilder();
         for (int i = 0; i < encoded.length(); i++) {
             if (quotedState) {
                 if (encoded.charAt(i) == '\'') {
