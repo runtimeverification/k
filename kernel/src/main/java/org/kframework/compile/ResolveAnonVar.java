@@ -24,6 +24,14 @@ public class ResolveAnonVar {
         return var.equals(ANON_VAR) || var.equals(FRESH_ANON_VAR) || var.equals(FRESH_ANON_CONSTANT) || var.equals(FRESH_LIST_VAR);
     }
 
+    public static boolean isAnonVarOrNamedAnonVar(KVariable var) {
+        return var.name().startsWith(ANON_VAR.name())
+                || var.name().startsWith(FRESH_ANON_VAR.name())
+                || var.name().startsWith(FRESH_ANON_CONSTANT.name())
+                || var.name().startsWith(FRESH_LIST_VAR.name());
+    }
+
+
     private Set<KVariable> vars = new HashSet<>();
 
     void resetVars() {
