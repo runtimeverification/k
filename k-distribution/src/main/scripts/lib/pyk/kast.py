@@ -299,6 +299,29 @@ def buildSymbolTable(definition, opinionated = False):
 
     return symbolTable
 
+def prettyPrintKastBool(kast, symbolTable, debug = False):
+    """Print out KAST requires/ensures clause.
+
+    -   Input: KAST Bool for requires/ensures clause.
+    -   Output: Best-effort string representation of KAST term.
+    """
+    if debug:
+        sys.stderr.write(str(kast))
+        sys.stderr.write('\n')
+        sys.stderr.flush()
+    if isKApply(kast) and kast['label'] in ['_andBool_', '_orBool_']:
+        clauses    = [ prettyPrintKastBool(c, symbolTable, debug = debug) for c in flattenLabel(kast['label'], kast) ]
+        head       = kast['label'].replace('_', ' ')
+        if head == ' orBool ':
+            head = '  orBool '
+        separator  = ' ' * (len(head) - 7)
+        spacer     = ' ' * len(head)
+        joinSep    = lambda s: ('\n' + separator).join(s.split('\n'))
+        clauses    = ['( ' + joinSep(clauses[0])] + [ head + '( ' + joinSep(c) for c in clauses[1:] ] + [spacer + (')' * len(clauses))]
+        return '\n'.join(clauses)
+    else:
+        return prettyPrintKast(kast, symbolTable, debug = debug)
+
 def prettyPrintKast(kast, symbolTable, debug = False):
     """Print out KAST terms/outer syntax.
 
@@ -397,11 +420,9 @@ def prettyPrintKast(kast, symbolTable, debug = False):
         ensuresStr  = ''
         attsStr     = prettyPrintKast(kast['att'], symbolTable, debug = debug)
         if kast['requires'] is not None:
-            reqLines    = [ prettyPrintKast(req, symbolTable, debug = debug) for req in flattenLabel('_andBool_', kast['requires']) ]
-            requiresStr = 'requires ' + '\n   andBool '.join(reqLines)
+            requiresStr = 'requires ' + '\n  '.join(prettyPrintKastBool(kast['requires'], symbolTable, debug = debug).split('\n'))
         if kast['ensures'] is not None:
-            ensLines   = [ prettyPrintKast(ens, symbolTable, debug = debug) for ens in flattenLabel('_andBool_', kast['ensures']) ]
-            ensuresStr = 'ensures ' + '\n   andBool '.join(ensLines)
+            ensuresStr = 'ensures ' + '\n '.join(prettyPrintKastBool(kast['ensures'], symbolTable, debug = debug).split('\n'))
         return ruleStr + '\n  ' + requiresStr + '\n  ' + ensuresStr + '\n  ' + attsStr
     if isKContext(kast):
         body        = indent(prettyPrintKast(kast['body'], symbolTable, debug = debug))
