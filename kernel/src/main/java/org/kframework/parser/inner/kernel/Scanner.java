@@ -64,6 +64,13 @@ public class Scanner implements AutoCloseable {
         this.scanner = getScanner();
     }
 
+    public Scanner(ParseInModule module, GlobalOptions go, File scanner) {
+        this.go = go;
+        this.tokens  = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
+        this.module  = module.seedModule();
+        this.scanner = scanner;
+    }
+
     public void serialize(File output) {
         try {
             Files.copy(scanner.toPath(), output.toPath(), StandardCopyOption.REPLACE_EXISTING);

@@ -505,7 +505,8 @@ public class DefinitionParsing {
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         RuleGrammarGenerator gen = new RuleGrammarGenerator(compiledDef.kompiledDefinition);
         try (ParseInModule parser = RuleGrammarGenerator
-                .getCombinedGrammar(gen.getRuleGrammar(compiledDef.executionModule()), isStrict, profileRules, files)) {
+                .getCombinedGrammar(gen.getRuleGrammar(compiledDef.getParsedDefinition().mainModule()), isStrict, profileRules, false, true, files)) {
+            parser.setScanner(new Scanner(parser, globalOptions, files.resolveKompiled("scanner")));
             java.util.Set<K> res = parseBubble(parser, new HashMap<>(),
                     new Bubble(rule, contents, Att().add("contentStartLine", 1)
                             .add("contentStartColumn", 1).add(Source.class, source)))
