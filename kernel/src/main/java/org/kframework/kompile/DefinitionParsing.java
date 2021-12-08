@@ -378,7 +378,7 @@ public class DefinitionParsing {
         Module ruleParserModule = gen.getRuleGrammar(defWithCaches.mainModule());
         ParseCache cache = loadCache(ruleParserModule);
         try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files, true)) {
-            parser.getScanner(globalOptions);
+            parser.getScanner(globalOptions).serialize(files.resolveKompiled("scanner"));
             Map<String, Module> parsed = defWithCaches.parMap(m -> this.resolveNonConfigBubbles(m, parser.getScanner(globalOptions), gen));
             return DefinitionTransformer.from(m -> Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()), "parsing rules").apply(defWithConfig);
         }
