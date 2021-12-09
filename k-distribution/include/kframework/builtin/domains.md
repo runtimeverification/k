@@ -842,11 +842,9 @@ operations listed above.
 
   rule true andBool true => true
   rule _:Bool andBool _:Bool => false [owise]
-
-  rule true andThenBool K::Bool => K
-  rule K::Bool andThenBool true => K
-  rule false andThenBool _ => false
-  rule _ andThenBool false => false
+  
+  rule true andThenBool true => false
+  rule _::Bool andThenBool _::Bool => false [owise]
 
   rule false xorBool true => true
   rule true xorBool false => true
@@ -855,10 +853,8 @@ operations listed above.
   rule false orBool false => false
   rule _:Bool orBool _:Bool => true [owise]
 
-  rule true orElseBool _ => true
-  rule _ orElseBool true => true
-  rule false orElseBool K::Bool => K
-  rule K::Bool orElseBool false => K
+  rule false orElseBool false => false
+  rule _::Bool orElseBool _::Bool => true [owise]
 
   rule true impliesBool false => false
   rule _:Bool impliesBool _:Bool => true [owise]
