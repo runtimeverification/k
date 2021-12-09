@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from   datetime import datetime
+import hashlib
 import sys
 import time
 
@@ -36,3 +37,8 @@ def getAppliedAxiomList(debugLogFile):
                     axioms.append(next_axioms)
                     next_axioms = []
     return axioms
+
+def strHash(k):
+    hash = hashlib.sha256()
+    hash.update(str(k).encode('utf-8'))
+    return str(hash.hexdigest())
