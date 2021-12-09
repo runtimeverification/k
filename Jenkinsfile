@@ -63,7 +63,7 @@ pipeline {
             }
           }
           stages {
-            stage('Checkout code') { steps { dir('k-exercises') { git url: 'git@github.com:kframework/k-exercises.git' } } }
+            stage('Checkout code') { steps { dir('k-exercises') { git url: 'git@github.com:kframework/k-exercises.git', credentialsId: 'rv-jenkins-access-token' } } }
             stage('Build and Test K') {
               options { timeout(time: 45, unit: 'MINUTES') }
               steps {
