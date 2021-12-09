@@ -5,7 +5,6 @@ package org.kframework
 import java.util
 
 import collection.JavaConverters._
-import java.util.Optional
 import java.util.stream.StreamSupport
 import scala.collection.mutable.Builder
 import scala.collection.mutable.ListBuffer
@@ -22,7 +21,6 @@ object Collections {
   def immutable[T](s: java.util.List[T]): Seq[T] = s.asScala
   def immutable[K, V](s: java.util.Map[K, V]): Map[K, V] = s.asScala
   def immutable[T](s: Array[T]): Seq[T] = s
-  def immutable[T](s: java.util.Optional[T]): Option[T] = if (s.isPresent) Some(s.get) else None
 
   def mutable[T](s: scala.List[T]): java.util.List[T] = s.asJava
   def mutable[T](s: Seq[T]): java.util.List[T] = s.asJava
@@ -32,7 +30,6 @@ object Collections {
     x.addAll(s.asJava)
     x
   }
-  def mutable[T](s: Option[T]): java.util.Optional[T] = if (s.isDefined) Optional.of(s.get) else Optional.empty[T]
 
   def iterable[T](c: Iterable[T]): java.lang.Iterable[T] = c.asJava
   def stream[T](c: Iterable[T]): java.util.stream.Stream[T] = StreamSupport.stream(c.asJava.spliterator(), false);
