@@ -9,20 +9,17 @@ public class Import extends ModuleItem {
 
     String name;
     boolean isPublic;
-    String tag;
 
-    public Import(String importName, boolean isPublic, String tag) {
+    public Import(String importName, boolean isPublic) {
         super();
         name = importName;
         this.isPublic = isPublic;
-        this.tag = tag;
     }
 
-    public Import(String importName, boolean isPublic, String tag, Location loc, Source source) {
+    public Import(String importName, boolean isPublic, Location loc, Source source) {
         super(loc, source);
         this.name = importName;
         this.isPublic = isPublic;
-        this.tag = tag;
     }
 
     @Override
@@ -34,9 +31,6 @@ public class Import extends ModuleItem {
           sb.append("public ");
         }
         sb.append(name);
-        if (tag != null) {
-          sb.append(".").append(tag);
-        }
     }
 
     public String getName() {
@@ -48,18 +42,10 @@ public class Import extends ModuleItem {
     }
 
     public boolean isPublic() {
-        return isPublic;
+      return isPublic;
     }
 
     public void setPublic(boolean isPublic) {
-        this.isPublic = isPublic;
-    }
-
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag() {
-        this.tag = tag;
+      this.isPublic = isPublic;
     }
 }

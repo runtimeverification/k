@@ -275,16 +275,6 @@ of the import with the `public` or `private` keyword immediately prior to the
 module name. A module imported privately does not export its syntax to modules
 that import the module doing the import.
 
-An import statement can also choose to explicitly hide some or all of the
-syntax being imported. If an import's module name is followed by a `.`
-character followed by an attribute name or klabel, then only sentences that
-have that attribute name or productions that have that klabel attribute will
-be imported by that declaration. For example, if I say `imports FOO.bar`, then
-only productions whose klabel attribute is `bar` or whose attribute list
-contains the `bar` attribute will be visible to the importing module. Note that
-all rules, constructors, and sorts declared in that module will still exist
-in the final interpreter.
-
 Following imports, a module can contain zero or more sentences. A sentence can
 be a syntax declaration, a rule, a configuration declaration, a context, a
 claim, or a context alias. Details on each of these can be found in subsequent
