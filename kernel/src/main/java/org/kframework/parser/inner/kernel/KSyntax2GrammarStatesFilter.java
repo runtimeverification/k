@@ -63,11 +63,16 @@ public class KSyntax2GrammarStatesFilter {
                 if (pi instanceof TerminalLike) {
                     TerminalLike lx = (TerminalLike) pi;
                     if (tokens.containsKey(lx)) {
+                        int prec;
                         if (p.att().contains("prec")) {
-                            int prec = Integer.valueOf(p.att().<String>getOptional("prec").get());
-                            if (prec != tokens.get(lx)) {
-                                throw KEMException.compilerError("Inconsistent token precedence detected.", p);
-                            }
+                            prec = Integer.valueOf(p.att().<String>getOptional("prec").get());
+                        } else if (lx instanceof Terminal) {
+                            prec = Integer.MAX_VALUE;
+                        } else {
+                            prec = 0;
+                        }
+                        if (prec != tokens.get(lx)) {
+                            throw KEMException.compilerError("Inconsistent token precedence detected.", p);
                         }
                     } else if (lx instanceof Terminal && terminals.contains(((Terminal) lx).value())) {
                         tokens.put(lx, Integer.MAX_VALUE);
