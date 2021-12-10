@@ -137,6 +137,12 @@ def KSyntaxLexical(newSort, oldSort, att = None):
 def isKSyntaxLexical(k):
     return k['node'] == 'KSyntaxLexical'
 
+def KImport(name, public = True):
+    return { 'node': 'KImport', 'name': name, 'isPublic': public }
+
+def isKImport(k):
+    return k['node'] == 'KImport'
+
 def KFlatModule(name, imports, localSentences, att = None):
     return { 'node': 'KFlatModule', 'name': name, 'imports': imports, 'localSentences': localSentences, 'att': att }
 
@@ -423,13 +429,15 @@ def prettyPrintKast(kast, symbolTable, debug = False):
             return ''
         attStrs = [ att + '(' + kast['att'][att] + ')' for att in kast['att'].keys() ]
         return '[' + ', '.join(attStrs) + ']'
+    if isKImport(kast):
+        return ' '.join(['imports', ('public' if kast['imports']['isPublic'] else 'private'), kast['name']])
     if isKFlatModule(kast):
         name = kast['name']
-        imports = '\n'.join(['imports ' + kimport for kimport in kast['imports']])
+        imports = '\n'.join([prettyPrintKast(kimport, symbolTable, debug = debug) for kimport in kast['imports']])
         localSentences = '\n\n'.join([prettyPrintKast(sent, symbolTable, debug = debug) for sent in kast['localSentences']])
         contents = imports + '\n\n' + localSentences
         return 'module ' + name                    + '\n    ' \
-             + '\n    '.join(contents.split('\n')) + '\n' \
+             + '\n    '.join(contents.split('\n')) + '\n'     \
              + 'endmodule'
     if isKRequire(kast):
         return 'requires "' + kast['require'] + '"'
