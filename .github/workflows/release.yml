@@ -203,7 +203,7 @@ jobs:
             await github.repos.updateRelease({ owner, repo, release_id: ${{ needs.macos-build.outputs.release_id }}, prerelease: false })
       - name: Update dependents
         env:
-          JENKINS_TOKEN: ${{ secrets.JENKINS_TOKEN }}
+          JENKINS_DEVOPS_TOKEN: ${{ secrets.JENKINS_DEVOPS_TOKEN }}
           VERSION: ${{ needs.macos-build.outputs.version }}
         run: |
           curl 'https://office.runtimeverification.com/jenkins/job/DevOps/job/master/buildWithParameters' \
