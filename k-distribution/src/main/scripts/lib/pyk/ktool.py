@@ -71,26 +71,6 @@ class KProve(KPrint):
             fatal('Proof took zero steps, likely the LHS is invalid: ' + specFile)
         return finalState
 
-    def _writeClaimDefinition(self, claim, claimId, rule = False):
-        """Given a K claim, write the definition file needed for the prover to it.
-
-        -   Input: KAST representation of a claim to prove, and an identifier for said claim.
-        -   Output: Write to filesystem the specification with the claim.
-        """
-        tmpClaim      = self.useDirectory + '/' + claimId.lower()
-        tmpModuleName = claimId.upper()
-        if not rule:
-            tmpClaim      += '-spec'
-            tmpModuleName += '-SPEC'
-        tmpClaim += '.k'
-        with open(tmpClaim, 'w') as tc:
-            claimModule     = KFlatModule(tmpModuleName, [self.mainModule], [claim])
-            claimDefinition = KDefinition(tmpModuleName, [claimModule], requires = [KRequire(self.mainFileName)])
-            tc.write(genFileTimestamp() + '\n')
-            tc.write(self.prettyPrint(claimDefinition) + '\n\n')
-            tc.flush()
-        notif('Wrote claim file: ' + tmpClaim)
-
     def proveClaim(self, claim, claimId, args = [], haskellArgs = [], logAxiomsFile = None):
         """Given a K claim, write the definition needed for the prover, and attempt to prove it.
 
@@ -115,3 +95,23 @@ class KProve(KPrint):
                 break
         nextStates = flattenLabel('#Or', nextState)
         return (depth, nextStates)
+
+    def _writeClaimDefinition(self, claim, claimId, rule = False):
+        """Given a K claim, write the definition file needed for the prover to it.
+
+        -   Input: KAST representation of a claim to prove, and an identifier for said claim.
+        -   Output: Write to filesystem the specification with the claim.
+        """
+        tmpClaim      = self.useDirectory + '/' + claimId.lower()
+        tmpModuleName = claimId.upper()
+        if not rule:
+            tmpClaim      += '-spec'
+            tmpModuleName += '-SPEC'
+        tmpClaim += '.k'
+        with open(tmpClaim, 'w') as tc:
+            claimModule     = KFlatModule(tmpModuleName, [self.mainModule], [claim])
+            claimDefinition = KDefinition(tmpModuleName, [claimModule], requires = [KRequire(self.mainFileName)])
+            tc.write(genFileTimestamp() + '\n')
+            tc.write(self.prettyPrint(claimDefinition) + '\n\n')
+            tc.flush()
+        notif('Wrote claim file: ' + tmpClaim)
