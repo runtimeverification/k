@@ -102,14 +102,14 @@ class KProve(Kompiled):
             return self.prove(self.useDirectory + '/' + claimId.lower() + '-spec.k', claimId.upper() + '-SPEC', args = args, haskellArgs = haskellArgs, logAxiomsFile = logAxiomsFile)
         return KConstant('#Top')
 
-    def proveClaimNoBranching(self, claim, claimId, arsg = [], haskellArgs = [], logAxiomsFile = None, maxDepth = 1000):
+    def proveClaimNoBranching(self, claim, claimId, args = [], haskellArgs = [], logAxiomsFile = None, maxDepth = 1000):
         """Given a K claim, attempt to prove it, but do not allow the prover to branch.
 
         -   Input: KAST representation of a claim to prove, and identifier for said claim.
         -   Output: KAST representation of final state of prover.
         """
         logFileName = logAxiomsFile if logAxiomsFile is not None else self.useDirectory + '/' + claimId.lower() + '-debug.log'
-        nextState   = self.proveClaim(claim, claimId, args = ['--branching-allowed', '1', '--depth', str(maxDepth)], logAxiomsFile = logFileName)
+        nextState   = self.proveClaim(claim, claimId, args = (args + ['--branching-allowed', '1', '--depth', str(maxDepth)]), haskellArgs = haskellArgs, logAxiomsFile = logFileName)
         depth       = 0
         for axioms in getAppliedAxiomList(logFileName):
             depth += 1
