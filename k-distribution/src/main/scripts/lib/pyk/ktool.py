@@ -5,7 +5,7 @@ import subprocess
 
 from .kastManip import *
 
-class Kompiled:
+class KPrint:
     """Given a kompiled directory, build an unparser for it.
     """
 
@@ -23,7 +23,7 @@ class Kompiled:
         """
         return prettyPrintKast(kast, self.symbolTable, debug = debug)
 
-class KProve(Kompiled):
+class KProve(KPrint):
     """Given a kompiled directory and a main file name, build a prover for it.
     """
 
