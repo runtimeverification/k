@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
 import argparse
+from   graphviz import Digraph
 import tempfile
 import os.path as path
 import sys
 
-from .         import *
-from .graphviz import *
+from .      import *
+from .ktool import KPrint, KProve
 
 pykArgs = argparse.ArgumentParser()
 pykArgs.add_argument('kompiled-dir', type = str, help = 'Kompiled directory for definition.')
@@ -84,9 +85,8 @@ def main(commandLineArgs, extraMain = None):
             modName = module['name']
             importGraph.node(modName)
             for moduleImport in module['imports']:
-                importGraph.edge(modName, moduleImport)
+                importGraph.edge(modName, moduleImport['name'])
         importGraph.render(graphFile)
-        notif('Wrote graph files: ' + graphFile + '.')
 
     elif args['command'] == 'coverage':
         json_definition = removeSourceMap(readKastTerm(kompiled_dir + '/compiled.json'))
@@ -120,8 +120,6 @@ def main(commandLineArgs, extraMain = None):
 
     elif extraMain is not None:
         extraMain(args, kompiled_dir)
-
-    args['output'].flush()
 
     if returncode != 0:
         _fatal('Non-zero exit code (' + str(returncode) + '): ' + str(kCommand), code = returncode)

@@ -14,9 +14,9 @@ CHECK = git diff --no-index -R
 PYTHONPATH := $(K_LIB)
 export PYTHONPATH
 
-.PHONY: all clean pyk                                 \
-        test test-defn test-defn-kast test-defn-prove \
-        test-kpyk test-kpyk-coverage-log
+.PHONY: all clean pyk                                                               \
+        test test-defn test-defn-kast test-defn-prove                               \
+        test-kpyk test-kpyk-coverage-log test-kpyk-graphviz test-kpyk-minimize-term
 
 all: test
 
@@ -84,7 +84,11 @@ $(defn_tests)/proof-tests/%-spec.json.prove: $(defn_tests)/proof-tests/%-spec.k 
 
 sum_to_n_coverage := kpyk-tests/sum-to-n.imp.coverage
 
-test-kpyk: test-kpyk-coverage-log test-kpyk-minimize-term
+test-kpyk: test-kpyk-graphviz test-kpyk-coverage-log test-kpyk-minimize-term
+
+test-kpyk-graphviz: $(llvm_imp_kompiled)
+	$(KPYK) $(dir $<) graph-imports
+	$(CHECK) $(dir $<)/import-graph imp-import-graph.expected
 
 $(sum_to_n_coverage): $(llvm_imp_kompiled) kpyk-tests/sum-to-n.imp
 	rm -rf $(llvm_dir)/imp-kompiled/*_coverage.txt
