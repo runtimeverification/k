@@ -143,8 +143,8 @@ public class ToJson {
         JsonArrayBuilder imports = Json.createArrayBuilder();
         stream(mod.imports()).forEach(i -> {
           JsonObjectBuilder jimp = Json.createObjectBuilder();
-          jmod.add("name", i.name());
-          jmod.add("isPublic", i.isPublic());
+          jimp.add("name", i.name());
+          jimp.add("isPublic", i.isPublic());
           imports.add(jimp.build());
         });
 
