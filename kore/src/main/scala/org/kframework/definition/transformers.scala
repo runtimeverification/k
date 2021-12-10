@@ -72,7 +72,7 @@ class ModuleTransformer(f: Module => Module, name: String) extends (Module => Mo
 
   override def apply(input: Module): Module = {
     memoization.getOrElseUpdate(input, {
-      var newImports = input.imports map (i => Import(this(i.module), i.isPublic, i.tag))
+      var newImports = input.imports map (i => Import(this(i.module), i.isPublic))
       if (newImports != input.imports)
         f(Module(input.name, newImports, input.localSentences, input.att))
       else

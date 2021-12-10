@@ -374,9 +374,9 @@ module AUTO-CASTS
   // if this module is imported, the parser automatically
   // generates, for all sorts, productions of the form:
   // Sort  ::= Sort ":Sort"  // semantic cast - force the inner term to be `Sort` or a subsort
-  // Sort  ::= Sort "::Sort" // syntactic cast - force the inner term to be exactly `Sort`. Useful for disambiguation
-  // KBott ::= "{" Sort "}" "<:Sort" // bypass the type checker. Allows for a term of `Sort` to be placed in any context
-  // Sort  ::= "{" K "}"    ":>Sort" // bypass the type checker. Allows any term to be placed in a context that expects `Sort`
+  // Sort  ::= Sort "::Sort" // strict cast - force the inner term to be exactly `Sort`. Useful for disambiguation
+  // Sort ::= "{" Sort "}" "<:Sort" // synonym for strict cast
+  // Sort  ::= "{" K "}"    ":>Sort" // projection cast. Allows any term to be placed in a context that expects `Sort`
   // this is part of the mechanism that allows concrete user syntax in K
 endmodule
 

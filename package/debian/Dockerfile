@@ -31,6 +31,7 @@ RUN    apt-get update            \
         openjdk-11-jdk           \
         parallel                 \
         pkg-config               \
+        python                   \
         python3                  \
         python3-graphviz         \
         zlib1g-dev

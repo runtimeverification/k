@@ -653,7 +653,7 @@ public class TypeInferencer implements AutoCloseable {
     }
 
     boolean isAnonVar(Constant var) {
-      return ResolveAnonVar.isAnonVar(KVariable(var.value()));
+      return ResolveAnonVar.isAnonVarOrNamedAnonVar(KVariable(var.value()));
     }
 
     /**
