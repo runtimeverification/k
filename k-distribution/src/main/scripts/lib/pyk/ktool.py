@@ -71,7 +71,7 @@ class KProve(KPrint):
             fatal('Proof took zero steps, likely the LHS is invalid: ' + specFile)
         return finalState
 
-    def writeClaimDefinition(self, claim, claimId, rule = False):
+    def _writeClaimDefinition(self, claim, claimId, rule = False):
         """Given a K claim, write the definition file needed for the prover to it.
 
         -   Input: KAST representation of a claim to prove, and an identifier for said claim.
@@ -91,16 +91,14 @@ class KProve(KPrint):
             tc.flush()
         notif('Wrote claim file: ' + tmpClaim)
 
-    def proveClaim(self, claim, claimId, args = [], haskellArgs = [], logAxiomsFile = None, dryRun = False):
+    def proveClaim(self, claim, claimId, args = [], haskellArgs = [], logAxiomsFile = None):
         """Given a K claim, write the definition needed for the prover, and attempt to prove it.
 
         -   Input: KAST representation of a claim to prove, and an identifer for said claim.
         -   Output: KAST representation of final state the prover supplies for it.
         """
-        self.writeClaimDefinition(claim, claimId)
-        if not dryRun:
-            return self.prove(self.useDirectory + '/' + claimId.lower() + '-spec.k', claimId.upper() + '-SPEC', args = args, haskellArgs = haskellArgs, logAxiomsFile = logAxiomsFile)
-        return KConstant('#Top')
+        self._writeClaimDefinition(claim, claimId)
+        return self.prove(self.useDirectory + '/' + claimId.lower() + '-spec.k', claimId.upper() + '-SPEC', args = args, haskellArgs = haskellArgs, logAxiomsFile = logAxiomsFile)
 
     def proveClaimNoBranching(self, claim, claimId, args = [], haskellArgs = [], logAxiomsFile = None, maxDepth = 1000):
         """Given a K claim, attempt to prove it, but do not allow the prover to branch.
