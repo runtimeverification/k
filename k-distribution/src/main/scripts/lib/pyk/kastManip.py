@@ -512,21 +512,3 @@ def removeSourceMap(k):
                     newAtts[attKey] = atts[attKey]
             return KAtt(atts = newAtts)
     return onAttributes(k, _removeSourceMap)
-
-def readKastTerm(termPath):
-    with open(termPath, "r") as termFile:
-        return json.loads(termFile.read())['term']
-
-def writeKDefinition(fileName, kDef, symbolTable):
-    if not isKDefinition(kDef):
-        notif("Not a K Definition!")
-        print(kDef)
-        sys.exit(1)
-    specText = prettyPrintKast(kDef, symbolTable)
-    with open(fileName, "w") as sfile:
-        sfile.write(specText)
-        notif("Wrote spec file: " + fileName)
-        print(specText)
-        sys.stdout.flush()
-        return
-    fatal("Could not write spec file: " + fileName)
