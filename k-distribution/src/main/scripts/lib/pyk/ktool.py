@@ -109,7 +109,7 @@ class KProve(Kompiled):
         -   Output: KAST representation of final state of prover.
         """
         logFileName = logAxiomsFile if logAxiomsFile is not None else self.useDirectory + '/' + claimId.lower() + '-debug.log'
-        nextState   = self.proveClaim(claim, claimId, args = ['--branching-allowed', '1', '--depth', str(maxDepth)], logAxiomsFile = logAxiomsFile)
+        nextState   = self.proveClaim(claim, claimId, args = ['--branching-allowed', '1', '--depth', str(maxDepth)], logAxiomsFile = logFileName)
         depth       = 0
         for axioms in getAppliedAxiomList(logFileName):
             depth += 1
