@@ -76,7 +76,17 @@ def main(commandLineArgs, extraMain = None):
                 fatal('Proof failed!')
 
     elif args['command'] == 'graph-imports':
-        returncode = 0 if graphvizImports(kompiled_dir + '/parsed') and graphvizImports(kompiled_dir + '/compiled') else 1
+        kprinter    = KPrint(kompiled_dir)
+        kDefn       = kprinter.definition
+        importGraph = Digraph()
+        graphFile   = kompiled_dir + '/import-graph'
+        for module in kDefn['modules']:
+            modName = module['name']
+            importGraph.node(modName)
+            for moduleImport in module['imports']:
+                importGraph.edge(modName, moduleImport)
+        importGraph.render(graphFile)
+        notif('Wrote graph files: ' + graphFile + '.')
 
     elif args['command'] == 'coverage':
         json_definition = removeSourceMap(readKastTerm(kompiled_dir + '/compiled.json'))
