@@ -230,21 +230,6 @@ def splitConfigAndConstraints(kast):
     constraint = buildAssoc(KConstant('#Top'), '#And', constraints)
     return (term, constraint)
 
-def findCommonItems(l1, l2):
-    common = []
-    for i in l1:
-        if i in l2:
-            common.append(i)
-    newL1 = []
-    newL2 = []
-    for i in l1:
-        if not i in common:
-            newL1.append(i)
-    for i in l2:
-        if not i in common:
-            newL2.append(i)
-    return (common, newL1, newL2)
-
 def propagateUpConstraints(k):
     """Try to propagate common constraints up disjuncts.
 
@@ -454,18 +439,6 @@ def onAttributes(kast, effect):
         return KDefinition(kast['mainModule'], modules, requires = requires, att = effect(kast['att']))
     fatal('No attributes for: ' + kast['node'] + '.')
 
-def dedupeClauses(terms):
-    """Return a list of terms in the same order with duplicates removed.
-
-    -   Input: a list.
-    -   Output: a list with duplicates removed.
-    """
-    newTerms = []
-    for t in terms:
-        if t not in newTerms:
-            newTerms.append(t)
-    return newTerms
-
 def minimizeTerm(term, keepVars = None, abstractLabels = []):
     """Minimize a K term for pretty-printing.
 
@@ -500,11 +473,11 @@ def minimizeRule(rule, keepVars = []):
     ruleAtts     = rule['att']
 
     if ruleRequires is not None:
-        ruleRequires = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupeClauses(flattenLabel('_andBool_', ruleRequires)))
+        ruleRequires = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupe(flattenLabel('_andBool_', ruleRequires)))
         ruleRequires = simplifyBool(ruleRequires)
 
     if ruleEnsures is not None:
-        ruleEnsures = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupeClauses(flattenLabel('_andBool_', ruleEnsures)))
+        ruleEnsures = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupe(flattenLabel('_andBool_', ruleEnsures)))
         ruleEnsures = simplifyBool(ruleEnsures)
 
     ruleRequires = None if ruleRequires == KToken('true', 'Bool') else ruleRequires
