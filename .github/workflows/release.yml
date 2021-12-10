@@ -206,7 +206,8 @@ jobs:
           JENKINS_DEVOPS_TOKEN: ${{ secrets.JENKINS_DEVOPS_TOKEN }}
           VERSION: ${{ needs.macos-build.outputs.version }}
         run: |
-          curl 'https://office.runtimeverification.com/jenkins/job/DevOps/job/master/buildWithParameters' \
+          curl --fail 'https://office.runtimeverification.com/jenkins/buildByToken/buildWithParameters' \
+              --data job=Devops/master \
               --data token=$JENKINS_DEVOPS_TOKEN \
               --data UPDATE_DEPS=true \
               --data UPDATE_DEPS_REPO=kframework/k \
