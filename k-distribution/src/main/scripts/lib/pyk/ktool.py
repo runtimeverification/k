@@ -47,7 +47,7 @@ class KProve(KPrint):
         -   Input: Specification file name, specification module name, optionall arguments, haskell backend arguments, and file to log axioms to.
         -   Output: KAST represenation of output of prover, or crashed process.
         """
-        logFile = specFile + '.debug-log' if logAxiomsFile is None else logAxiomsFile
+        logFile = specFile.with_suffix('.debug-log') if logAxiomsFile is None else logAxiomsFile
         if os.path.exists(logFile):
             os.remove(logFile)
         haskellLogArgs = [ '--log' , logFile , '--log-format'  , 'oneline' , '--log-entries' , 'DebugTransition' ]
@@ -86,7 +86,7 @@ class KProve(KPrint):
         -   Input: KAST representation of a claim to prove, and identifier for said claim.
         -   Output: KAST representation of final state of prover.
         """
-        logFileName = logAxiomsFile if logAxiomsFile is not None else self.useDirectory + '/' + claimId.lower() + '-debug.log'
+        logFileName = logAxiomsFile if logAxiomsFile is not None else (self.useDirectory / claimId.lower()).with_suffix('.debug.log')
         nextState   = self.proveClaim(claim, claimId, args = (args + ['--branching-allowed', '1', '--depth', str(maxDepth)]), haskellArgs = haskellArgs, logAxiomsFile = logFileName)
         depth       = 0
         for axioms in getAppliedAxiomList(logFileName):
