@@ -32,9 +32,8 @@ kproveArgs = pykCommandParsers.add_parser('prove', help = 'Prove an input specif
 kproveArgs.add_argument('main-file', type = str, help = 'Main file used for kompilation.')
 kproveArgs.add_argument('spec-file', type = str, help = 'File with the specification module.')
 kproveArgs.add_argument('spec-module', type = str, help = 'Module with claims to be proven.')
-kproveArgs.add_argument('-i', '--input',  type = argparse.FileType('r'), default = '-')
-kproveArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
-kproveArgs.add_argument('-t', '--to',   default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
+kproveArgs.add_argument('--output-file', type = argparse.FileType('w'), default = '-')
+kproveArgs.add_argument('--output', default = 'pretty', choices = ['pretty', 'json'])
 kproveArgs.add_argument('kArgs', nargs='*', help = 'Arguments to pass through to K invocation.')
 
 graphImportsArgs = pykCommandParsers.add_parser('graph-imports', help = 'Graph the imports of a given definition.')
@@ -56,7 +55,7 @@ def main(commandLineArgs, extraMain = None):
     args = vars(commandLineArgs.parse_args())
     kompiled_dir = args['kompiled-dir']
 
-    if args['command'] in [ 'parse' , 'run' , 'prove' ]:
+    if args['command'] in [ 'parse' , 'run' ]:
         inputFile = args['input'].name
         if inputFile == '<stdin>':
             with tempfile.NamedTemporaryFile(mode = 'w') as tempf:
@@ -69,12 +68,16 @@ def main(commandLineArgs, extraMain = None):
         elif args['command'] == 'run':
             (returncode, stdout, stderr) = krun(definition_dir, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
             args['output'].write(stdout)
-        elif args['command'] == 'prove':
-            kprover    = KProve(kompiled_dir, args['main-file'])
-            finalState = kprover.prove(args['spec-file'], args['spec-module'], args = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
-            args['output'].write(kprover.prettyPrint(finalState))
-            if finalState != KConstant('#Top'):
-                fatal('Proof failed!')
+
+    elif args['command'] == 'prove':
+        kprover    = KProve(kompiled_dir, args['main-file'])
+        finalState = kprover.prove(args['spec-file'], args['spec-module'], args = args['kArgs'])
+        if args['output'] == 'pretty':
+            args['output_file'].write(kprover.prettyPrint(finalState))
+        else:
+            args['output_file'].write(json.dumps({ 'format': 'KAST', 'version': 1, 'term': finalState }))
+        if finalState != KConstant('#Top'):
+            fatal('Proof failed!')
 
     elif args['command'] == 'graph-imports':
         kprinter    = KPrint(kompiled_dir)

@@ -9,6 +9,8 @@ KPROVE  = $(K_BIN)/kprove
 KPROVEX = $(K_BIN)/kprovex
 KPYK    = $(K_BIN)/kpyk
 
+export PATH := $(K_BIN):$(PATH)
+
 CHECK = git diff --no-index -R
 
 PYTHONPATH := $(K_LIB)
@@ -101,6 +103,6 @@ test-kpyk-coverage-log: $(sum_to_n_coverage)
 test-kpyk-minimize-term: kpyk-tests/minimize/test.k
 	$(KOMPILE) kpyk-tests/minimize/test.k --directory kpyk-tests/minimize --backend haskell --emit-json \
 	    --main-module TEST
-	$(KPROVEX) kpyk-tests/minimize/test.k --directory kpyk-tests/minimize --output json --spec-module TEST-SPEC > kpyk-tests/minimize/test.json || true
+	$(KPYK) kpyk-tests/minimize/test-kompiled prove    kpyk-tests/minimize/test.k kpyk-tests/minimize/test.k TEST-SPEC --output json > kpyk-tests/minimize/test.json || true
 	$(KPYK) kpyk-tests/minimize/test-kompiled minimize kpyk-tests/minimize/test.json > kpyk-tests/minimize/test.k.out
 	$(CHECK) kpyk-tests/minimize/test.k.out kpyk-tests/minimize/test.k.expected
