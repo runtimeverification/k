@@ -30,4 +30,4 @@ elif isKClaim(kast_term):
 elif isKApply(kast_term):
     kast_term = simplifyBool(kast_term)
 
-print(prettyPrintKast(kast_term, IMP_symbols, debug = True))
+print(prettyPrintKast(kast_term, IMP_symbols))

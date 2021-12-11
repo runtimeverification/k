@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+from   pathlib    import Path
 import subprocess
 
 from .kastManip import *
@@ -10,8 +11,8 @@ class KPrint:
     """
 
     def __init__(self, kompiledDirectory):
-        self.kompiledDirectory = kompiledDirectory
-        self.definition        = readKastTerm(self.kompiledDirectory + '/compiled.json')
+        self.kompiledDirectory = Path(kompiledDirectory)
+        self.definition        = readKastTerm(self.kompiledDirectory / 'compiled.json')
         self.symbolTable       = buildSymbolTable(self.definition, opinionated = True)
         self.definitionHash    = strHash(self.definition)
 
@@ -29,16 +30,15 @@ class KProve(KPrint):
 
     def __init__(self, kompiledDirectory, mainFileName, useDirectory = None):
         super(KProve, self).__init__(kompiledDirectory)
-        self.directory      = '/'.join(self.kompiledDirectory.split('/')[0:-1])
-        self.useDirectory   = self.directory + '/kprove' if useDirectory is None else useDirectory
-        if not os.path.exists(self.useDirectory):
-            os.makedirs(self.useDirectory)
+        self.directory      = Path(self.kompiledDirectory).parent
+        self.useDirectory   = (self.directory / 'kprove') if useDirectory is None else Path(useDirectory)
+        self.useDirectory.mkdir(parents = True, exist_ok = True)
         self.mainFileName   = mainFileName
         self.prover         = [ 'kprovex' ]
         self.proverArgs     = [ ]
-        with open(self.kompiledDirectory + '/backend.txt', 'r') as ba:
+        with open(self.kompiledDirectory / 'backend.txt', 'r') as ba:
             self.backend    = ba.read()
-        with open(self.kompiledDirectory + '/mainModule.txt', 'r') as mm:
+        with open(self.kompiledDirectory / 'mainModule.txt', 'r') as mm:
             self.mainModule = mm.read()
 
     def prove(self, specFile, specModuleName, args = [], haskellArgs = [], logAxiomsFile = None):
@@ -53,7 +53,7 @@ class KProve(KPrint):
         haskellLogArgs = [ '--log' , logFile , '--log-format'  , 'oneline' , '--log-entries' , 'DebugTransition' ]
         command  = [ c for c in self.prover ]
         command += [ specFile ]
-        command += [ '--backend' , self.backend , '--directory' , self.directory , '-I' , self.directory , '--spec-module' , specModuleName , '--output' , 'json' ]
+        command += [ '--backend' , self.backend , '--directory' , str(self.directory) , '-I' , str(self.directory) , '--spec-module' , specModuleName , '--output' , 'json' ]
         command += [ c for c in self.proverArgs ]
         command += args
         commandEnv                   = os.environ.copy()
@@ -78,7 +78,7 @@ class KProve(KPrint):
         -   Output: KAST representation of final state the prover supplies for it.
         """
         self._writeClaimDefinition(claim, claimId)
-        return self.prove(self.useDirectory + '/' + claimId.lower() + '-spec.k', claimId.upper() + '-SPEC', args = args, haskellArgs = haskellArgs, logAxiomsFile = logAxiomsFile)
+        return self.prove(self.useDirectory / (claimId.lower() + '-spec.k'), claimId.upper() + '-SPEC', args = args, haskellArgs = haskellArgs, logAxiomsFile = logAxiomsFile)
 
     def proveClaimNoBranching(self, claim, claimId, args = [], haskellArgs = [], logAxiomsFile = None, maxDepth = 1000):
         """Given a K claim, attempt to prove it, but do not allow the prover to branch.
@@ -102,7 +102,7 @@ class KProve(KPrint):
         -   Input: KAST representation of a claim to prove, and an identifier for said claim.
         -   Output: Write to filesystem the specification with the claim.
         """
-        tmpClaim      = self.useDirectory + '/' + claimId.lower()
+        tmpClaim      = self.useDirectory / claimId.lower()
         tmpModuleName = claimId.upper()
         if not rule:
             tmpClaim      += '-spec'
