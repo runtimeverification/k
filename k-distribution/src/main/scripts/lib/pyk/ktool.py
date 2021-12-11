@@ -88,7 +88,7 @@ class KProve(KPrint):
         logFileName = logAxiomsFile if logAxiomsFile is not None else (self.useDirectory / claimId.lower()).with_suffix('.debug.log')
         nextState   = self.proveClaim(claim, claimId, args = (args + ['--branching-allowed', '1', '--depth', str(maxDepth)]), haskellArgs = haskellArgs, logAxiomsFile = logFileName)
         depth       = 0
-        for axioms in getAppliedAxiomList(logFileName):
+        for axioms in getAppliedAxiomList(str(logFileName)):
             depth += 1
             if len(axioms) > 1:
                 break
@@ -101,16 +101,13 @@ class KProve(KPrint):
         -   Input: KAST representation of a claim to prove, and an identifier for said claim.
         -   Output: Write to filesystem the specification with the claim.
         """
-        tmpClaim      = self.useDirectory / claimId.lower()
-        tmpModuleName = claimId.upper()
-        if not rule:
-            tmpClaim      += '-spec'
-            tmpModuleName += '-SPEC'
-        tmpClaim += '.k'
+        tmpClaim      = self.useDirectory / (claimId.lower() if rule else (claimId.lower() + '-spec'))
+        tmpModuleName = claimId.upper() if rule else (claimId.upper() + '-SPEC')
+        tmpClaim      = tmpClaim.with_suffix('.k')
         with open(tmpClaim, 'w') as tc:
-            claimModule     = KFlatModule(tmpModuleName, [self.mainModule], [claim])
+            claimModule     = KFlatModule(tmpModuleName, [KImport(self.mainModule, True)], [claim])
             claimDefinition = KDefinition(tmpModuleName, [claimModule], requires = [KRequire(self.mainFileName)])
             tc.write(genFileTimestamp() + '\n')
             tc.write(self.prettyPrint(claimDefinition) + '\n\n')
             tc.flush()
-        notif('Wrote claim file: ' + tmpClaim)
+        notif('Wrote claim file: ' + str(tmpClaim) + '.')
