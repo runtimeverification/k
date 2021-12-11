@@ -430,7 +430,7 @@ def prettyPrintKast(kast, symbolTable, debug = False):
         attStrs = [ att + '(' + kast['att'][att] + ')' for att in kast['att'].keys() ]
         return '[' + ', '.join(attStrs) + ']'
     if isKImport(kast):
-        return ' '.join(['imports', ('public' if kast['imports']['isPublic'] else 'private'), kast['name']])
+        return ' '.join(['imports', ('public' if kast['isPublic'] else 'private'), kast['name']])
     if isKFlatModule(kast):
         name = kast['name']
         imports = '\n'.join([prettyPrintKast(kimport, symbolTable, debug = debug) for kimport in kast['imports']])
