@@ -198,10 +198,10 @@ def addAttributes(kast, att):
         sys.exit(1)
 
 def flattenLabel(label, kast):
-    """Given a tree of a label, return all the leaves.
+    """Given a cons list, return a flat Python list of the elements.
 
-    -   Input: label of tree, and kast term.
-    -   Output: list of leaves of tree (singleton list for no occurance of label at top).
+    -   Input: Cons operation to flatten.
+    -   Output: Items of cons list.
     """
     if isKApply(kast) and kast['label'] == label:
         items = [ flattenLabel(label, arg) for arg in kast['args'] ]
