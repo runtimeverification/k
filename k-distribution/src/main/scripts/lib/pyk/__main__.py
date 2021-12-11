@@ -14,26 +14,18 @@ pykArgs.add_argument('kompiled-dir', type = str, help = 'Kompiled directory for 
 
 pykCommandParsers = pykArgs.add_subparsers(dest = 'command')
 
-kastArgs = pykCommandParsers.add_parser('parse', help = 'Parse an input program.')
-kastArgs.add_argument('-i', '--input',  type = argparse.FileType('r'), default = '-')
-kastArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
-kastArgs.add_argument('-f', '--from', default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
-kastArgs.add_argument('-t', '--to',   default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
-kastArgs.add_argument('kArgs', nargs='*', help = 'Arguments to pass through to K invocation.')
-
-krunArgs = pykCommandParsers.add_parser('run', help = 'Run an input program.')
-krunArgs.add_argument('-i', '--input',  type = argparse.FileType('r'), default = '-')
-krunArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
-krunArgs.add_argument('-f', '--from', default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
-krunArgs.add_argument('-t', '--to',   default = 'pretty', choices = ['pretty', 'json', 'kast', 'binary', 'kore'])
-krunArgs.add_argument('kArgs', nargs='*', help = 'Arguments to pass through to K invocation.')
+kprintArgs = pykCommandParsers.add_parser('print', help = 'Pretty print a term.')
+kprintArgs.add_argument('term', type = argparse.FileType('r'), help = 'Input term (in JSON).')
+kprintArgs.add_argument('--minimize', default = True, action = 'store_true', help = 'Minimize the JSON configuration before printing.')
+kprintArgs.add_argument('--no-minimize', dest = 'minimize', action = 'store_false', help = 'Do not minimize the JSON configuration before printing.')
+kprintArgs.add_argument('--omit-labels', default = '', nargs = '?', help = 'List of labels to omit from output.')
+kprintArgs.add_argument('--output-file', type = argparse.FileType('w'), default = '-')
 
 kproveArgs = pykCommandParsers.add_parser('prove', help = 'Prove an input specification (using kprovex).')
 kproveArgs.add_argument('main-file', type = str, help = 'Main file used for kompilation.')
 kproveArgs.add_argument('spec-file', type = str, help = 'File with the specification module.')
 kproveArgs.add_argument('spec-module', type = str, help = 'Module with claims to be proven.')
 kproveArgs.add_argument('--output-file', type = argparse.FileType('w'), default = '-')
-kproveArgs.add_argument('--output', default = 'pretty', choices = ['pretty', 'json'])
 kproveArgs.add_argument('kArgs', nargs='*', help = 'Arguments to pass through to K invocation.')
 
 graphImportsArgs = pykCommandParsers.add_parser('graph-imports', help = 'Graph the imports of a given definition.')
@@ -41,11 +33,6 @@ graphImportsArgs = pykCommandParsers.add_parser('graph-imports', help = 'Graph t
 coverageArgs = pykCommandParsers.add_parser('coverage', help = 'Convert coverage file to human readable log.')
 coverageArgs.add_argument('coverage-file', type = argparse.FileType('r'), help = 'Coverage file to build log for.')
 coverageArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
-
-minimizeArgs = pykCommandParsers.add_parser('minimize', help = 'Output the minimized K term.')
-minimizeArgs.add_argument('json-term', type = argparse.FileType('r'), help = 'JSON representation of term to minimize.')
-minimizeArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
-minimizeArgs.add_argument('--omit-labels', default = '', nargs = '?')
 
 def definitionDir(kompiledDir):
     return path.dirname(path.abspath(kompiledDir))
@@ -55,29 +42,33 @@ def main(commandLineArgs, extraMain = None):
     args = vars(commandLineArgs.parse_args())
     kompiled_dir = args['kompiled-dir']
 
-    if args['command'] in [ 'parse' , 'run' ]:
-        inputFile = args['input'].name
-        if inputFile == '<stdin>':
-            with tempfile.NamedTemporaryFile(mode = 'w') as tempf:
-                tempf.write(args['input'].read())
-                inputFile = tempf.name
-        definition_dir = definitionDir(kompiled_dir)
-        if args['command'] == 'parse':
-            (returncode, stdout, stderr) = kast(definition_dir, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
-            args['output'].write(stdout)
-        elif args['command'] == 'run':
-            (returncode, stdout, stderr) = krun(definition_dir, inputFile, kArgs = ['--input', args['from'], '--output', args['to']] + args['kArgs'])
-            args['output'].write(stdout)
+    if args['command'] == 'print':
+        printer = KPrint(kompiled_dir)
+        term    = json.loads(args['term'].read())
+        if 'term' in term:
+            term = term['term']
+        if term == KConstant('#Top'):
+            args['output_file'].write(printer.prettyPrint(term))
+        else:
+            if args['minimize']:
+                abstractLabels     = [] if args['omit_labels'] is None else args['omit_labels'].split(',')
+                minimizedDisjuncts = []
+                for d in flattenLabel('#Or', term):
+                    dMinimized = minimizeTerm(d, abstractLabels = abstractLabels)
+                    (dConfig, dConstraint) = splitConfigAndConstraints(dMinimized)
+                    if dConstraint != KConstant('#Top'):
+                        minimizedDisjuncts.append(KApply('#And', [dConfig, dConstraint]))
+                    else:
+                        minimizedDisjuncts.append(dConfig)
+                term = propagateUpConstraints(buildAssoc(KConstant('#Bottom'), '#Or', minimizedDisjuncts))
+            args['output_file'].write(printer.prettyPrint(term))
 
     elif args['command'] == 'prove':
         kprover    = KProve(kompiled_dir, args['main-file'])
         finalState = kprover.prove(args['spec-file'], args['spec-module'], args = args['kArgs'])
-        if args['output'] == 'pretty':
-            args['output_file'].write(kprover.prettyPrint(finalState))
-        else:
-            args['output_file'].write(json.dumps({ 'format': 'KAST', 'version': 1, 'term': finalState }))
+        args['output_file'].write(json.dumps(finalState))
         if finalState != KConstant('#Top'):
-            fatal('Proof failed!')
+            warning('Proof failed!')
 
     elif args['command'] == 'graph-imports':
         kprinter    = KPrint(kompiled_dir)
@@ -100,26 +91,6 @@ def main(commandLineArgs, extraMain = None):
             args['output'].write('Rule: ' + rid.strip())
             args['output'].write('\nUnparsed:\n')
             args['output'].write(prettyPrintKast(rule, symbolTable))
-
-    elif args['command'] == 'minimize':
-        json_definition = readKastTerm(kompiled_dir + '/compiled.json')
-        symbolTable = buildSymbolTable(json_definition, opinionated = True)
-        json_term = json.loads(args['json-term'].read())['term']
-        if json_term == KConstant('#Top'):
-            args['output'].write(prettyPrintKast(json_term, symbolTable))
-        else:
-            abstractLabels = [] if args['omit_labels'] is None else args['omit_labels'].split(',')
-            minimized_disjuncts = []
-            for d in flattenLabel('#Or', json_term):
-                dMinimized = minimizeTerm(d, abstractLabels = abstractLabels)
-                (dConfig, dConstraint) = splitConfigAndConstraints(dMinimized)
-                if dConstraint != KConstant('#Top'):
-                    minimized_disjuncts.append(KApply('#And', [dConfig, dConstraint]))
-                else:
-                    minimized_disjuncts.append(dConfig)
-            sorted_disjunct = buildAssoc(KConstant('#Bottom'), '#Or', minimized_disjuncts)
-            new_disjunct = propagateUpConstraints(sorted_disjunct)
-            args['output'].write(prettyPrintKast(new_disjunct, symbolTable))
 
     elif extraMain is not None:
         extraMain(args, kompiled_dir)
