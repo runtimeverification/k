@@ -40,7 +40,7 @@ def definitionDir(kompiledDir):
 def main(commandLineArgs, extraMain = None):
     returncode = 0
     args = vars(commandLineArgs.parse_args())
-    kompiled_dir = args['kompiled-dir']
+    kompiled_dir = Path(args['kompiled-dir'])
 
     if args['command'] == 'print':
         printer = KPrint(kompiled_dir)
@@ -65,7 +65,7 @@ def main(commandLineArgs, extraMain = None):
 
     elif args['command'] == 'prove':
         kprover    = KProve(kompiled_dir, args['main-file'])
-        finalState = kprover.prove(args['spec-file'], args['spec-module'], args = args['kArgs'])
+        finalState = kprover.prove(Path(args['spec-file']), args['spec-module'], args = args['kArgs'])
         args['output_file'].write(json.dumps(finalState))
         if finalState != KConstant('#Top'):
             warning('Proof failed!')
@@ -74,16 +74,17 @@ def main(commandLineArgs, extraMain = None):
         kprinter    = KPrint(kompiled_dir)
         kDefn       = kprinter.definition
         importGraph = Digraph()
-        graphFile   = kompiled_dir + '/import-graph'
+        graphFile   = kompiled_dir / 'import-graph'
         for module in kDefn['modules']:
             modName = module['name']
             importGraph.node(modName)
             for moduleImport in module['imports']:
                 importGraph.edge(modName, moduleImport['name'])
         importGraph.render(graphFile)
+        notif('Wrote file: ' + str(graphFile))
 
     elif args['command'] == 'coverage':
-        json_definition = removeSourceMap(readKastTerm(kompiled_dir + '/compiled.json'))
+        json_definition = removeSourceMap(readKastTerm(kompiled_dir / 'compiled.json'))
         symbolTable = buildSymbolTable(json_definition)
         for rid in args['coverage-file']:
             rule = minimizeRule(stripCoverageLogger(getRuleById(json_definition, rid.strip())))
