@@ -8,7 +8,7 @@ module VERIFICATION
   rule (X +Int Y) +Int Z => Y +Int (X +Int Z) [simplification, concrete(X), symbolic(Y), concrete(Z)]
   rule X +Int (Y +Int Z) => Z +Int (X +Int Y) [simplification, concrete(X, Y), symbolic(Z)]
   rule X +Int (Y +Int Z) => Y +Int (X +Int Z) [simplification, concrete(X), symbolic(Y), concrete(Z)]
-  rule final(n +Int _M:Int) => 0 [simplification, concrete(_M)]
+  rule final(n +Int M:Int) => 0 requires M >=Int 0 [simplification, concrete(M)]
 endmodule
 
 module A1-SPEC

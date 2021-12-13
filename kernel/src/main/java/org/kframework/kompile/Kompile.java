@@ -417,7 +417,7 @@ public class Kompile {
                 return s;
             if (!(s instanceof Claim || s.isSyntax())) {
                 if (s instanceof Rule && !s.att().contains(Att.SIMPLIFICATION()))
-                    errors.add(KEMException.compilerError("Use claim instead of rule to specify proof objectives.", s));
+                    errors.add(KEMException.compilerError("Only claims and simplification rules are allowed in proof modules.", s));
             }
             return s;
         }, "rules in spec module");
