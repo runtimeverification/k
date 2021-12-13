@@ -100,5 +100,8 @@ def main(commandLineArgs, extraMain = None):
         _fatal('Non-zero exit code (' + str(returncode) + '): ' + str(kCommand), code = returncode)
 
 if __name__ == '__main__':
-    sys.setrecursionlimit(15000000)
+    # KAST terms can end up nested quite deeply, because of the various assoc operators (eg. _Map_, _Set_, ...).
+    # Most pyk operations are defined recursively, meaning you get a callstack the same depth as the term.
+    # This change makes it so that in most cases, by default, pyk doesn't run out of stack space.
+    sys.setrecursionlimit(10 ** 7)
     main(pykArgs)
