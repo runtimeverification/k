@@ -48,7 +48,8 @@ class KProve(KPrint):
         -   Output: KAST represenation of output of prover, or crashed process.
         """
         logFile = specFile.with_suffix('.debug-log') if logAxiomsFile is None else logAxiomsFile
-        logFile.unlink(missing_ok = True)
+        if logFile.exists():
+            logFile.unlink()
         haskellLogArgs = [ '--log' , str(logFile) , '--log-format'  , 'oneline' , '--log-entries' , 'DebugTransition' ]
         command  = [ c for c in self.prover ]
         command += [ str(specFile) ]
