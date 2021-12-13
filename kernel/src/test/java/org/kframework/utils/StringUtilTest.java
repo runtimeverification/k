@@ -3,6 +3,9 @@ package org.kframework.utils;
 
 import junit.framework.Assert;
 import org.junit.Test;
+import org.kframework.backend.kore.ModuleToKORE;
+
+import java.util.regex.Pattern;
 
 public class StringUtilTest {
 
@@ -33,7 +36,15 @@ public class StringUtilTest {
 
     @Test
     public void decodeKoreString() {
-        Assert.assertEquals(StringUtil.decodeKoreString("'Unds'V'Unds'9"), "_V_9");
+        Assert.assertEquals("_V_9", StringUtil.decodeKoreString("'Unds'V'Unds'9"));
+        Assert.assertEquals("?_0", StringUtil.decodeKoreString("'QuesUnds'0"));
+        Pattern identChar = Pattern.compile("[A-Za-z0-9\\-]");
+        StringBuilder buffer = new StringBuilder();
+        StringUtil.encodeStringToAlphanumeric(buffer, "?_0", ModuleToKORE.asciiReadableEncodingKore, identChar, "'");
+        Assert.assertEquals("'QuesUnds'0", buffer.toString());
+        buffer.setLength(0);
+        StringUtil.encodeStringToAlphanumeric(buffer, "_V_9", ModuleToKORE.asciiReadableEncodingKore, identChar, "'");
+        Assert.assertEquals("'Unds'V'Unds'9", buffer.toString());
     }
 
     @Test
