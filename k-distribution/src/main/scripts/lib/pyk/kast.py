@@ -286,6 +286,10 @@ def buildSymbolTable(definition, opinionated = False):
 
     return symbolTable
 
+def readKastTerm(termPath):
+    with open(termPath, 'r') as termFile:
+        return json.loads(termFile.read())['term']
+
 def prettyPrintKastBool(kast, symbolTable, debug = False):
     """Print out KAST requires/ensures clause.
 
@@ -308,10 +312,6 @@ def prettyPrintKastBool(kast, symbolTable, debug = False):
         return '\n'.join(clauses)
     else:
         return prettyPrintKast(kast, symbolTable, debug = debug)
-
-def readKastTerm(termPath):
-    with open(termPath, 'r') as termFile:
-        return json.loads(termFile.read())['term']
 
 def prettyPrintKast(kast, symbolTable, debug = False):
     """Print out KAST terms/outer syntax.
