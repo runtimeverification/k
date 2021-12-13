@@ -16,7 +16,7 @@ CHECK = git diff --no-index -R
 PYTHONPATH := $(K_LIB)
 export PYTHONPATH
 
-.PHONY: all clean pyk                                                               \
+.PHONY: all clean update-results pyk                                                \
         test test-defn test-defn-kast test-defn-prove                               \
         test-kpyk test-kpyk-coverage-log test-kpyk-graphviz test-kpyk-minimize-term
 
@@ -43,7 +43,8 @@ $(llvm_imp_kompiled): $(llvm_imp) $(KOMPILE)
 $(haskell_imp_kompiled): $(haskell_imp) $(KOMPILE)
 	$(KOMPILE) --directory $(haskell_dir) --backend haskell $< --emit-json
 
-update-results:
+update-results: CHECK=cp
+update-results: test
 kompile: $(llvm_imp_kompiled) $(haskell_imp_kompiled)
 
 # Tests
