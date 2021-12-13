@@ -90,7 +90,7 @@ test-kpyk: test-kpyk-graphviz test-kpyk-coverage-log test-kpyk-minimize-term
 
 test-kpyk-graphviz: $(llvm_imp_kompiled)
 	$(KPYK) $(dir $<) graph-imports
-	cat $(dir $<)import-graph | sed 's/^[[:space:]]*//' | tr -d '" ->' | sort > import-graph.sorted
+	cat $(dir $<)import-graph | tr -cd '[:alnum:]\n' | grep . | tr '[:lower:]' '[:upper:]' | sort > import-graph.sorted
 	$(CHECK) import-graph.sorted imp-import-graph.expected
 
 $(sum_to_n_coverage): $(llvm_imp_kompiled) kpyk-tests/sum-to-n.imp
