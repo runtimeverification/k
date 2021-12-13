@@ -635,9 +635,15 @@ public class StringUtil {
     private static final Map<String, Character> asciiReadableEncodingDefaultMap = new HashMap<>();
     static {
         for (int i = 0; i < asciiReadableEncodingDefault.length; i++)
-            asciiReadableEncodingDefaultMap.put(asciiReadableEncodingDefault[i], (char) i);
+            if (asciiReadableEncodingDefault[i] != null && asciiReadableEncodingDefault[i].length() > 1)
+                asciiReadableEncodingDefaultMap.put(asciiReadableEncodingDefault[i], (char) i);
     }
 
+    /**
+     * Encode special characters depending on context.
+     * @param asciiReadableEncodingTable Override the default `asciiReadableEncodingDefault` depending on language requirements
+     * @param identChar which characters to replace
+     */
     public static void encodeStringToAlphanumeric(StringBuilder sb, String name, String[] asciiReadableEncodingTable, Pattern identChar, String escapeChar) {
         boolean inIdent = true;
         for (int i = 0; i < name.length(); i++) {
@@ -668,18 +674,17 @@ public class StringUtil {
     public static String decodeKoreString(String encoded) {
         boolean quotedState = false;
         StringBuilder resultedEncoding = new StringBuilder();
-        StringBuilder tempSb = new StringBuilder();
         for (int i = 0; i < encoded.length(); i++) {
             if (quotedState) {
                 if (encoded.charAt(i) == '\'') {
                     quotedState = false;
-                    resultedEncoding.append(asciiReadableEncodingDefaultMap.get(tempSb.toString()));
-                } else
-                    tempSb.append(encoded.charAt(i));
+                } else {
+                    resultedEncoding.append(asciiReadableEncodingDefaultMap.get(encoded.substring(i, i + 4)));
+                    i += 3;
+                }
             } else {
                 if (encoded.charAt(i) == '\'') {
                     quotedState = true;
-                    tempSb = new StringBuilder();
                 } else
                     resultedEncoding.append(encoded.charAt(i));
             }
