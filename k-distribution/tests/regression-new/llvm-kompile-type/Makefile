@@ -6,3 +6,5 @@ all:
 	$(MAKE) -C ../imp-llvm clean
 	$(MAKE) -C ../imp-llvm
 	$(MAKE) -C ../imp-llvm clean
+
+clean:
