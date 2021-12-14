@@ -112,6 +112,7 @@ public class CheckAtt {
                         for (; i < format.length() && format.charAt(i) >= '0' && format.charAt(i) <= '9'; i++) {
                             sb.append(format.charAt(i));
                         }
+                        i--;
                         int idx = Integer.parseInt(sb.toString());
                         if (idx == 0 || idx > prod.items().size()) {
                             errors.add(KEMException.compilerError("Invalid format escape sequence '%" + sb.toString() + "'. Expected a number between 1 and " + prod.items().size(), prod));
