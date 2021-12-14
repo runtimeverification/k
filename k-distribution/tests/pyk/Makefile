@@ -9,14 +9,16 @@ KPROVE  = $(K_BIN)/kprove
 KPROVEX = $(K_BIN)/kprovex
 KPYK    = $(K_BIN)/kpyk
 
+export PATH := $(K_BIN):$(PATH)
+
 CHECK = git diff --no-index -R
 
 PYTHONPATH := $(K_LIB)
 export PYTHONPATH
 
-.PHONY: all clean pyk                                 \
-        test test-defn test-defn-kast test-defn-prove \
-        test-kpyk test-kpyk-coverage-log
+.PHONY: all clean update-results pyk                                                \
+        test test-defn test-defn-kast test-defn-prove                               \
+        test-kpyk test-kpyk-coverage-log test-kpyk-graphviz test-kpyk-minimize-term
 
 all: test
 
@@ -41,7 +43,8 @@ $(llvm_imp_kompiled): $(llvm_imp) $(KOMPILE)
 $(haskell_imp_kompiled): $(haskell_imp) $(KOMPILE)
 	$(KOMPILE) --directory $(haskell_dir) --backend haskell $< --emit-json
 
-update-results:
+update-results: CHECK=cp
+update-results: test
 kompile: $(llvm_imp_kompiled) $(haskell_imp_kompiled)
 
 # Tests
@@ -84,7 +87,12 @@ $(defn_tests)/proof-tests/%-spec.json.prove: $(defn_tests)/proof-tests/%-spec.k 
 
 sum_to_n_coverage := kpyk-tests/sum-to-n.imp.coverage
 
-test-kpyk: test-kpyk-coverage-log test-kpyk-minimize-term
+test-kpyk: test-kpyk-graphviz test-kpyk-coverage-log test-kpyk-minimize-term
+
+test-kpyk-graphviz: $(llvm_imp_kompiled)
+	$(KPYK) $(dir $<) graph-imports
+	cat $(dir $<)import-graph | tr -cd '[:alnum:]\n' | grep . | tr '[:lower:]' '[:upper:]' | sort > import-graph.sorted
+	$(CHECK) import-graph.sorted imp-import-graph.expected
 
 $(sum_to_n_coverage): $(llvm_imp_kompiled) kpyk-tests/sum-to-n.imp
 	rm -rf $(llvm_dir)/imp-kompiled/*_coverage.txt
@@ -97,6 +105,6 @@ test-kpyk-coverage-log: $(sum_to_n_coverage)
 test-kpyk-minimize-term: kpyk-tests/minimize/test.k
 	$(KOMPILE) kpyk-tests/minimize/test.k --directory kpyk-tests/minimize --backend haskell --emit-json \
 	    --main-module TEST
-	$(KPROVEX) kpyk-tests/minimize/test.k --directory kpyk-tests/minimize --output json --spec-module TEST-SPEC > kpyk-tests/minimize/test.json || true
-	$(KPYK) kpyk-tests/minimize/test-kompiled minimize kpyk-tests/minimize/test.json > kpyk-tests/minimize/test.k.out
+	$(KPYK) kpyk-tests/minimize/test-kompiled prove kpyk-tests/minimize/test.k kpyk-tests/minimize/test.k TEST-SPEC \
+	    | $(KPYK) kpyk-tests/minimize/test-kompiled print /dev/stdin > kpyk-tests/minimize/test.k.out
 	$(CHECK) kpyk-tests/minimize/test.k.out kpyk-tests/minimize/test.k.expected
