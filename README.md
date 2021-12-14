@@ -62,7 +62,7 @@ On Ubuntu Linux:
 
 ```shell
 git submodule update --init --recursive
-sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 cmake gcc clang-10 lld-10 llvm-10-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
+sudo apt-get install build-essential m4 openjdk-11-jdk libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 cmake gcc clang-10 lld-10 llvm-10-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
 curl -sSL https://get.haskellstack.org/ | sh
 ```
 
@@ -93,7 +93,7 @@ The following dependencies are needed either at build time or runtime:
 *   [flex](https://github.com/westes/flex)
 *   [gcc](https://gcc.gnu.org/)
 *   [gmp](https://gmplib.org/)
-*   [jdk](https://openjdk.java.net/) (version 8u45 or greater)
+*   [jdk](https://openjdk.java.net/) (version 11 or greater)
 *   [libjemalloc](https://github.com/jemalloc/jemalloc)
 *   [libyaml](https://pyyaml.org/wiki/LibYAML)
 *   [llvm](https://llvm.org/) (We require version 10 or greater for clang, lld, and llvm-tools. On some distributions, the utilities below are also needed and packaged separately.)
@@ -124,10 +124,10 @@ See the notes below.
 
 ### Installation Notes
 
-1.  Java Development Kit (required JDK8 version 8u45 or higher)
+1.  Java Development Kit (required JDK11 or higher)
 
     *   Linux: Download from package manager
-        (e.g. `sudo apt-get install openjdk-8-jdk`).
+        (e.g. `sudo apt-get install openjdk-11-jdk`).
 
     *   macOS/brew: Download from package manager
         (e.g. `brew install java`).
@@ -342,8 +342,8 @@ Common build-time error messages:
       re-syncing it with the pom.xml.
 
 -   `[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.1:compile
-     (default-compile) on project k-core: Fatal error compiling: invalid target release: 1.8 -> [Help 1]`
-    + You either do not have Java 8 installed, or `$JAVA_HOME` does not point to a Java 8 JDK.
+     (default-compile) on project k-core: Fatal error compiling: invalid target release: 11 -> [Help 1]`
+    + You either do not have Java 11 installed, or `$JAVA_HOME` does not point to a Java 11 JDK.
 
 -   `[ERROR] Failed to execute goal org.apache.maven.plugins:maven-antrun-plugin:1.7:run
      (build-haskell) on project haskell-backend: An Ant BuildException has occured: exec returned: 1`
