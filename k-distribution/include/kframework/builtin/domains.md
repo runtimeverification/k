@@ -1433,7 +1433,7 @@ length of the substring). There are two important facts to note:
     character at `endIndex`, i.e., the range is `[startIndex..endIndex)`.
 2.  this function is only defined on valid indices (i.e., it is defined when
     `startIndex < endIndex` and `endIndex` is less than or equal to the string
-    legnth).
+    length).
 
 ```k
   syntax String ::= substrString ( String , startIndex: Int , endIndex: Int ) [function, functional, hook(STRING.substr)]
