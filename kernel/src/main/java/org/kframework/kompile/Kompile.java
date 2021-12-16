@@ -354,7 +354,7 @@ public class Kompile {
     }
 
     public Rule parseAndCompileRule(CompiledDefinition compiledDef, String contents, Source source, Optional<Rule> parsedRule) {
-        Rule parsed = parsedRule.orElse(parseRule(compiledDef, contents, source));
+        Rule parsed = parsedRule.orElseGet(() -> parseRule(compiledDef, contents, source));
         return compileRule(compiledDef.kompiledDefinition, parsed);
     }
 

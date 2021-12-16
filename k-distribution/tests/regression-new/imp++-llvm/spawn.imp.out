@@ -1,223 +1,239 @@
-  <T>
-    <threads>
-      <thread>
-        <k>
-          .
-        </k>
-        <env>
-          t1 |-> 1
-          t2 |-> 3
-          x |-> 0
-        </env>
-        <id>
-          0
-        </id>
-      </thread> <thread>
-        <k>
-          .
-        </k>
-        <env>
-          t1 |-> 1
-          t2 |-> 3
-          x |-> 0
-        </env>
-        <id>
-          4
-        </id>
-      </thread> <thread>
-        <k>
-          .
-        </k>
-        <env>
-          t1 |-> 1
-          x |-> 0
-        </env>
-        <id>
-          2
-        </id>
-      </thread>
-    </threads>
-    <store>
-      0 |-> 11
-      1 |-> 2
-      3 |-> 4
-    </store>
-    <input>
-      ListItem ( #buffer ( "" ~> . ) )
-      ListItem ( "off" )
-      ListItem ( #istream ( 0 ) )
-    </input>
-    <output>
-      ListItem ( #ostream ( 1 ) )
-      ListItem ( "off" )
-      ListItem ( #buffer ( "x = 11\n" ~> . ) )
-    </output>
-  </T>
+  {
+    Result:GeneratedTopCell
+  #Equals
+    <T>
+      <threads>
+        <thread>
+          <k>
+            .
+          </k>
+          <env>
+            t1 |-> 1
+            t2 |-> 3
+            x |-> 0
+          </env>
+          <id>
+            0
+          </id>
+        </thread> <thread>
+          <k>
+            .
+          </k>
+          <env>
+            t1 |-> 1
+            t2 |-> 3
+            x |-> 0
+          </env>
+          <id>
+            4
+          </id>
+        </thread> <thread>
+          <k>
+            .
+          </k>
+          <env>
+            t1 |-> 1
+            x |-> 0
+          </env>
+          <id>
+            2
+          </id>
+        </thread>
+      </threads>
+      <store>
+        0 |-> 11
+        1 |-> 2
+        3 |-> 4
+      </store>
+      <input>
+        ListItem ( #buffer ( "" ~> . ) )
+        ListItem ( "off" )
+        ListItem ( #istream ( 0 ) )
+      </input>
+      <output>
+        ListItem ( #ostream ( 1 ) )
+        ListItem ( "off" )
+        ListItem ( #buffer ( "x = 11\n" ~> . ) )
+      </output>
+    </T>
+  }
 #Or
-  <T>
-    <threads>
-      <thread>
-        <k>
-          .
-        </k>
-        <env>
-          t1 |-> 1
-          t2 |-> 3
-          x |-> 0
-        </env>
-        <id>
-          0
-        </id>
-      </thread> <thread>
-        <k>
-          .
-        </k>
-        <env>
-          t1 |-> 1
-          t2 |-> 3
-          x |-> 0
-        </env>
-        <id>
-          4
-        </id>
-      </thread> <thread>
-        <k>
-          .
-        </k>
-        <env>
-          t1 |-> 1
-          x |-> 0
-        </env>
-        <id>
-          2
-        </id>
-      </thread>
-    </threads>
-    <store>
-      0 |-> 16
-      1 |-> 2
-      3 |-> 4
-    </store>
-    <input>
-      ListItem ( #buffer ( "" ~> . ) )
-      ListItem ( "off" )
-      ListItem ( #istream ( 0 ) )
-    </input>
-    <output>
-      ListItem ( #ostream ( 1 ) )
-      ListItem ( "off" )
-      ListItem ( #buffer ( "x = 16\n" ~> . ) )
-    </output>
-  </T>
+  {
+    Result:GeneratedTopCell
+  #Equals
+    <T>
+      <threads>
+        <thread>
+          <k>
+            .
+          </k>
+          <env>
+            t1 |-> 1
+            t2 |-> 3
+            x |-> 0
+          </env>
+          <id>
+            0
+          </id>
+        </thread> <thread>
+          <k>
+            .
+          </k>
+          <env>
+            t1 |-> 1
+            t2 |-> 3
+            x |-> 0
+          </env>
+          <id>
+            4
+          </id>
+        </thread> <thread>
+          <k>
+            .
+          </k>
+          <env>
+            t1 |-> 1
+            x |-> 0
+          </env>
+          <id>
+            2
+          </id>
+        </thread>
+      </threads>
+      <store>
+        0 |-> 16
+        1 |-> 2
+        3 |-> 4
+      </store>
+      <input>
+        ListItem ( #buffer ( "" ~> . ) )
+        ListItem ( "off" )
+        ListItem ( #istream ( 0 ) )
+      </input>
+      <output>
+        ListItem ( #ostream ( 1 ) )
+        ListItem ( "off" )
+        ListItem ( #buffer ( "x = 16\n" ~> . ) )
+      </output>
+    </T>
+  }
 #Or
-  <T>
-    <threads>
-      <thread>
-        <k>
-          .
-        </k>
-        <env>
-          t1 |-> 1
-          t2 |-> 3
-          x |-> 0
-        </env>
-        <id>
-          0
-        </id>
-      </thread> <thread>
-        <k>
-          .
-        </k>
-        <env>
-          t1 |-> 1
-          t2 |-> 3
-          x |-> 0
-        </env>
-        <id>
-          4
-        </id>
-      </thread> <thread>
-        <k>
-          .
-        </k>
-        <env>
-          t1 |-> 1
-          x |-> 0
-        </env>
-        <id>
-          2
-        </id>
-      </thread>
-    </threads>
-    <store>
-      0 |-> 21
-      1 |-> 2
-      3 |-> 4
-    </store>
-    <input>
-      ListItem ( #buffer ( "" ~> . ) )
-      ListItem ( "off" )
-      ListItem ( #istream ( 0 ) )
-    </input>
-    <output>
-      ListItem ( #ostream ( 1 ) )
-      ListItem ( "off" )
-      ListItem ( #buffer ( "x = 21\n" ~> . ) )
-    </output>
-  </T>
+  {
+    Result:GeneratedTopCell
+  #Equals
+    <T>
+      <threads>
+        <thread>
+          <k>
+            .
+          </k>
+          <env>
+            t1 |-> 1
+            t2 |-> 3
+            x |-> 0
+          </env>
+          <id>
+            0
+          </id>
+        </thread> <thread>
+          <k>
+            .
+          </k>
+          <env>
+            t1 |-> 1
+            t2 |-> 3
+            x |-> 0
+          </env>
+          <id>
+            4
+          </id>
+        </thread> <thread>
+          <k>
+            .
+          </k>
+          <env>
+            t1 |-> 1
+            x |-> 0
+          </env>
+          <id>
+            2
+          </id>
+        </thread>
+      </threads>
+      <store>
+        0 |-> 21
+        1 |-> 2
+        3 |-> 4
+      </store>
+      <input>
+        ListItem ( #buffer ( "" ~> . ) )
+        ListItem ( "off" )
+        ListItem ( #istream ( 0 ) )
+      </input>
+      <output>
+        ListItem ( #ostream ( 1 ) )
+        ListItem ( "off" )
+        ListItem ( #buffer ( "x = 21\n" ~> . ) )
+      </output>
+    </T>
+  }
 #Or
-  <T>
-    <threads>
-      <thread>
-        <k>
-          .
-        </k>
-        <env>
-          t1 |-> 1
-          t2 |-> 3
-          x |-> 0
-        </env>
-        <id>
-          0
-        </id>
-      </thread> <thread>
-        <k>
-          .
-        </k>
-        <env>
-          t1 |-> 1
-          t2 |-> 3
-          x |-> 0
-        </env>
-        <id>
-          4
-        </id>
-      </thread> <thread>
-        <k>
-          .
-        </k>
-        <env>
-          t1 |-> 1
-          x |-> 0
-        </env>
-        <id>
-          2
-        </id>
-      </thread>
-    </threads>
-    <store>
-      0 |-> 33
-      1 |-> 2
-      3 |-> 4
-    </store>
-    <input>
-      ListItem ( #buffer ( "" ~> . ) )
-      ListItem ( "off" )
-      ListItem ( #istream ( 0 ) )
-    </input>
-    <output>
-      ListItem ( #ostream ( 1 ) )
-      ListItem ( "off" )
-      ListItem ( #buffer ( "x = 33\n" ~> . ) )
-    </output>
-  </T>
+  {
+    Result:GeneratedTopCell
+  #Equals
+    <T>
+      <threads>
+        <thread>
+          <k>
+            .
+          </k>
+          <env>
+            t1 |-> 1
+            t2 |-> 3
+            x |-> 0
+          </env>
+          <id>
+            0
+          </id>
+        </thread> <thread>
+          <k>
+            .
+          </k>
+          <env>
+            t1 |-> 1
+            t2 |-> 3
+            x |-> 0
+          </env>
+          <id>
+            4
+          </id>
+        </thread> <thread>
+          <k>
+            .
+          </k>
+          <env>
+            t1 |-> 1
+            x |-> 0
+          </env>
+          <id>
+            2
+          </id>
+        </thread>
+      </threads>
+      <store>
+        0 |-> 33
+        1 |-> 2
+        3 |-> 4
+      </store>
+      <input>
+        ListItem ( #buffer ( "" ~> . ) )
+        ListItem ( "off" )
+        ListItem ( #istream ( 0 ) )
+      </input>
+      <output>
+        ListItem ( #ostream ( 1 ) )
+        ListItem ( "off" )
+        ListItem ( #buffer ( "x = 33\n" ~> . ) )
+      </output>
+    </T>
+  }
