@@ -1,2 +1,6 @@
-V ==K closure ( $exit |-> 1
-x |-> 3 , y , x y )
+{
+  V:K
+#Equals
+  closure ( $exit |-> 0
+  x |-> 2 , y , x y ) ~> .
+}

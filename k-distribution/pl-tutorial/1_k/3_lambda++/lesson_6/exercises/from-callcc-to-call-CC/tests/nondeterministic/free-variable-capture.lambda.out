@@ -1,11 +1,23 @@
-  V ==K ( a ~> #freezer___CALLCC0_ ( ( lambda x . lambda y . x ) y z ) ~> .Map )
+  {
+    V:K
+  #Equals
+    a ~> #freezer___CALLCC_Exp_Exp_Exp0_ ( ( lambda x . lambda y . x ) y z ~> . ) ~> .Map ~> .
+  }
 #Or
-  V ==K ( a ~> #freezer___CALLCC0_ ( closure ( $exit |-> 1 , x , lambda y . x ) y z ) ~> .Map )
+  {
+    V:K
+  #Equals
+    y ~> #freezer___CALLCC_Exp_Exp_Exp1_ ( closure ( $exit |-> 0 , x , lambda y . x ) ~> . ) ~> #freezer___CALLCC_Exp_Exp_Exp0_ ( z ~> . ) ~> #freezer___CALLCC_Exp_Exp_Exp1_ ( a ~> . ) ~> .Map ~> .
+  }
 #Or
-  V ==K ( y ~> #freezer___CALLCC1_ ( closure ( $exit |-> 1 , x , lambda y . x ) ) ~> #freezer___CALLCC0_ ( z ) ~> #freezer___CALLCC1_ ( a ) ~> .Map )
+  {
+    V:K
+  #Equals
+    y ~> #freezer___CALLCC_Exp_Exp_Exp1_ ( lambda x . lambda y . x ~> . ) ~> #freezer___CALLCC_Exp_Exp_Exp0_ ( z ~> . ) ~> #freezer___CALLCC_Exp_Exp_Exp1_ ( a ~> . ) ~> .Map ~> .
+  }
 #Or
-  V ==K ( y ~> #freezer___CALLCC1_ ( lambda x . lambda y . x ) ~> #freezer___CALLCC0_ ( z ) ~> #freezer___CALLCC1_ ( a ) ~> .Map )
-#Or
-  V ==K ( z ~> #freezer___CALLCC1_ ( ( lambda x . lambda y . x ) y ) ~> #freezer___CALLCC1_ ( a ) ~> .Map )
-#Or
-  V ==K ( z ~> #freezer___CALLCC1_ ( closure ( $exit |-> 1 , x , lambda y . x ) y ) ~> #freezer___CALLCC1_ ( a ) ~> .Map )
+  {
+    V:K
+  #Equals
+    z ~> #freezer___CALLCC_Exp_Exp_Exp1_ ( ( lambda x . lambda y . x ) y ~> . ) ~> #freezer___CALLCC_Exp_Exp_Exp1_ ( a ~> . ) ~> .Map ~> .
+  }

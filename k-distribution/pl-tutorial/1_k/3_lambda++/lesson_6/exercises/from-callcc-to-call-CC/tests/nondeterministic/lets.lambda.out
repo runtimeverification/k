@@ -1,1 +1,5 @@
-V ==K true
+{
+  V:K
+#Equals
+  true ~> .
+}
