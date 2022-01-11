@@ -3,6 +3,7 @@
 package org.kframework.definition
 
 import java.util.Optional
+import java.lang.Comparable
 import javax.annotation.Nonnull
 
 import dk.brics.automaton.{BasicAutomata, RegExp, RunAutomaton, SpecialOperations}
@@ -650,7 +651,7 @@ sealed trait ProductionItem extends OuterKORE
 
 // marker
 
-sealed trait TerminalLike extends ProductionItem {
+sealed trait TerminalLike extends ProductionItem with Comparable[TerminalLike] {
 }
 
 case class NonTerminal(sort: Sort, name: Option[String]) extends ProductionItem
@@ -665,8 +666,22 @@ case class RegexTerminal(precedeRegex: String, regex: String, followRegex: Strin
     SpecialOperations.reverse(unreversed)
     new RunAutomaton(unreversed, false)
   }
+
+  def compareTo(t: TerminalLike): Int = {
+    if (t.isInstanceOf[Terminal]) {
+      return 1;
+    }
+    return regex.compareTo(t.asInstanceOf[RegexTerminal].regex)
+  }
 }
 
 case class Terminal(value: String) extends TerminalLike // hooked
   with TerminalToString {
+
+  def compareTo(t: TerminalLike): Int = {
+    if (t.isInstanceOf[RegexTerminal]) {
+      return -1;
+    }
+    return value.compareTo(t.asInstanceOf[Terminal].value)
+  }
 }

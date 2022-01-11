@@ -57,7 +57,7 @@ module IELE-SYNTAX
   syntax IeleNameToken  ::=
     Keyword [token]
   syntax NumericIeleName  ::=
-    r"[0-9]+" [token]
+    r"[0-9]+" [token, prec(2)]
   syntax StringIeleName  ::=
     r"\\\"(([^\\\"\\\\])|(\\\\[0-9a-fA-F]{2}))*\\\"" [token]
 endmodule
