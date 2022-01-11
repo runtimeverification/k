@@ -135,6 +135,12 @@ jobs:
 
       - name: Test brew bottle
         id: test
+        env:
+          # github actions sets the JAVA_HOME variable to Java 8 explicitly for
+          # some reason. There doesn't seem to be a way to tell it to unset the
+          # variable, so instead we just have to tell it to use Java 11
+          # explicitly intead.
+          JAVA_HOME: ${{ env.JAVA_HOME_11_X64 }}
         run: |
           cd homebrew-k-old
           brew tap kframework/k "file:///$(pwd)"
