@@ -1,0 +1,7 @@
+[Error] Compiler: Simplification rules need to be function/functional like.
+	Source(a2-spec.k)
+	Location(7,8,7,55)
+[Error] Compiler: Simplification rules need to be function/functional like.
+	Source(a2-spec.k)
+	Location(8,8,8,25)
+[Error] Compiler: Had 2 structural errors.

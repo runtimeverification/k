@@ -10,6 +10,7 @@ module TEST
 
   syntax Int ::= final(Int) [function, functional]
                | "n" [function, functional, no-evaluators]
+  syntax S ::= "notAFunction" | Int
 
   rule <k> run(0) => .K </k> <counter> N:Int => final(N) </counter>
   rule <k> run(N:Int => N -Int 1) ...</k> <counter> M:Int => M +Int 1 </counter>
