@@ -1433,7 +1433,7 @@ length of the substring). There are two important facts to note:
     character at `endIndex`, i.e., the range is `[startIndex..endIndex)`.
 2.  this function is only defined on valid indices (i.e., it is defined when
     `startIndex < endIndex` and `endIndex` is less than or equal to the string
-    legnth).
+    length).
 
 ```k
   syntax String ::= substrString ( String , startIndex: Int , endIndex: Int ) [function, functional, hook(STRING.substr)]
@@ -2439,6 +2439,9 @@ tutorial.
 
 ```k
   syntax Stream ::= #buffer(K)
+                  | #istream(Int)
+                  | #parseInput(String, String)
+                  | #ostream(Int)
 
 endmodule
 
@@ -2454,9 +2457,6 @@ module STDIN-STREAM
   imports LIST
   imports INT
   imports BOOL
-
-  syntax Stream ::= #istream(Int)
-  syntax Stream ::= #parseInput(String, String)
 
   configuration <stdin> ListItem(#buffer($STDIN:String)) ListItem($IO:String) ListItem(#istream(#stdin)) </stdin>
 
@@ -2551,8 +2551,6 @@ module STDOUT-STREAM
   imports K-IO
   imports LIST
   imports STRING
-
-  syntax Stream ::= #ostream(Int)
 
   configuration <stdout> ListItem(#ostream(#stdout)) ListItem($IO:String) ListItem(#buffer("")) </stdout>
 //configuration <stderr> ListItem(#ostream(#stderr)) ListItem($IO:String) ListItem(#buffer("")) </stderr>

@@ -1,3 +1,11 @@
-  V ==K 3
+  {
+    V:K
+  #Equals
+    3 ~> .
+  }
 #Or
-  V ==K 4
+  {
+    V:K
+  #Equals
+    4 ~> .
+  }

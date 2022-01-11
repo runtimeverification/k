@@ -1,0 +1,3 @@
+[Error] Compiler: Inconsistent token precedence detected.
+	Source(invalidPrec.k)
+	Location(3,17,3,33)

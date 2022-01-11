@@ -540,20 +540,33 @@ if [ "$backendName" = "llvm" ]; then
   fi
 
   keepTempsIfDryRun "$tempDir" "$expanded_input_file" "$kore_output"
-  if $search; then
+  if $search || [ -n "$pattern" ]; then
     if [ ! -f "$kompiledDir/search" ] || [ ! -x "$kompiledDir/search" ]; then
       error 'You must pass --enable-search to kompile to be able to use krun --search with the LLVM backend'
     fi
-    if [ -n "$pattern" ]; then
-      error "Backend llvm does not support search patterns yet."
+    patternFile="$(mktemp ${tempDir}/tmp.pattern.XXXXXXXXXX)"
+    tempFiles+=("$patternFile")
+    if [ -z "$pattern" ]; then
+      echo '\and{SortGeneratedTopCell{}}(VarResult:SortGeneratedTopCell{},\top{SortGeneratedTopCell{}}())' > "$patternFile"
+    else
+      execute k-compile-search-pattern --directory "$dir" "$pattern" > "$patternFile"
     fi
+
     if [[ $searchType != "FINAL" ]]; then
       error "Backend llvm does not support --search-all, --search-one-or-more-steps, or --search-one-step yet"
     fi
+    disjunctFile="$(mktemp ${tempDir}/tmp.disjunction.XXXXXXXXXX)"
+    tempFiles+=("$disjunctFile")
+    if $search; then
+      llvmCommand="$kompiledDir/search"
+    else
+      llvmCommand="$kompiledDir/interpreter"
+    fi
     set +e
-    execute $cmdprefix "$kompiledDir/search" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags
+    execute $cmdprefix "$llvmCommand" "$expanded_input_file" "${depth:--1}" "$disjunctFile" $interpreter_flags
     result=$?
     set -e
+    execute kore-match-disjunction "$kompiledDir/definition.kore" --module "$mainModuleName" --disjunction "$disjunctFile" --match "$patternFile" --output "$kore_output"
   else
     set +e
     execute $cmdprefix "$kompiledDir/interpreter" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags
