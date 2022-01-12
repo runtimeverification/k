@@ -2,3 +2,6 @@ MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 TESTDIR=tests/nondeterministic
 DEFDIR=nondet
 include $(MAKEFILE_PATH)/../lesson_2/Makefile
+
+%/arithmetic-div-zero.lambda:
+	true
