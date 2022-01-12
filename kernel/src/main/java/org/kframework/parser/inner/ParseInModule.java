@@ -190,9 +190,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
         }
         return scanner;
     }
-    public void setScanner(Scanner s) {
-        scanner = s;
-    }
 
     public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
         parseString(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
