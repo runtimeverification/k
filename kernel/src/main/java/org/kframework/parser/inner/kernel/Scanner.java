@@ -25,8 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -62,21 +60,6 @@ public class Scanner implements AutoCloseable {
         this.tokens  = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
         this.module  = module.seedModule();
         this.scanner = getScanner();
-    }
-
-    public Scanner(ParseInModule module, GlobalOptions go, File scanner) {
-        this.go = go;
-        this.tokens  = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
-        this.module  = module.seedModule();
-        this.scanner = scanner;
-    }
-
-    public void serialize(File output) {
-        try {
-            Files.copy(scanner.toPath(), output.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw KEMException.criticalError("Could not write to " + output, e);
-        }
     }
 
     public Module getModule() {
