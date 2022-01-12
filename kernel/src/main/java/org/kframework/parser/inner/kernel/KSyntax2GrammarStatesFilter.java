@@ -21,13 +21,11 @@ import scala.Tuple2;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -56,30 +54,29 @@ public class KSyntax2GrammarStatesFilter {
     }
 
     public static Map<TerminalLike, Tuple2<Integer, Integer>> getTokens(Module module) {
-        Map<TerminalLike, Integer> tokens = new TreeMap<>();
-        Set<String> terminals = new HashSet<>();
+        Map<TerminalLike, Tuple2<Integer, Integer>> tokens = new HashMap<>();
+        Map<String, Integer> terminals = new HashMap<>();
+        int idx = 0;
         for (Production p : iterable(module.productions())) {
             for (ProductionItem pi : iterable(p.items())) {
                 if (pi instanceof TerminalLike) {
                     TerminalLike lx = (TerminalLike) pi;
+                    int current;
                     if (tokens.containsKey(lx)) {
-                        int prec;
                         if (p.att().contains("prec")) {
-                            prec = Integer.valueOf(p.att().<String>getOptional("prec").get());
-                        } else if (lx instanceof Terminal) {
-                            prec = Integer.MAX_VALUE;
-                        } else {
-                            prec = 0;
+                            int prec = Integer.valueOf(p.att().<String>getOptional("prec").get());
+                            if (prec != tokens.get(lx)._2()) {
+                                throw KEMException.compilerError("Inconsistent token precedence detected.", p);
+                            }
                         }
-                        if (prec != tokens.get(lx)) {
-                            throw KEMException.compilerError("Inconsistent token precedence detected.", p);
-                        }
-                    } else if (lx instanceof Terminal && terminals.contains(((Terminal) lx).value())) {
-                        tokens.put(lx, Integer.MAX_VALUE);
+                    } else if (lx instanceof Terminal && terminals.containsKey(((Terminal) lx).value())) {
+                        current = terminals.get(((Terminal) lx).value());
+                        tokens.put(lx, Tuple2.apply(current, Integer.MAX_VALUE));
                     } else {
+                        current = idx++;
                         if (lx instanceof Terminal) {
-                            terminals.add(((Terminal) lx).value());
-                            tokens.put(lx, Integer.MAX_VALUE);
+                            terminals.put(((Terminal) lx).value(), current);
+                            tokens.put(lx, Tuple2.apply(current, Integer.MAX_VALUE));
                         } else {
                             int prec;
                             if (p.att().contains("prec")) {
@@ -87,20 +84,13 @@ public class KSyntax2GrammarStatesFilter {
                             } else {
                                 prec = 0;
                             }
-                            tokens.put(lx, prec);
+                            tokens.put(lx, Tuple2.apply(current, prec));
                         }
                     }
                 }
             }
         }
-
-        Map<TerminalLike, Tuple2<Integer, Integer>> finalTokens = new HashMap<>();
-        int idx = 0;
-        for (TerminalLike t : tokens.keySet()) {
-            finalTokens.put(t, Tuple2.apply(idx++, tokens.get(t)));
-        }
-
-        return finalTokens;
+        return tokens;
     }
 
     static public <E> String mkString(Iterable<E> list, Function<E,String> stringify, String delimiter) {
