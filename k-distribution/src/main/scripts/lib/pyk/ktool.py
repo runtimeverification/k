@@ -41,7 +41,7 @@ class KProve(KPrint):
         with open(self.kompiledDirectory / 'mainModule.txt', 'r') as mm:
             self.mainModule = mm.read()
 
-    def prove(self, specFile, specModuleName, args = [], haskellArgs = [], logAxiomsFile = None):
+    def prove(self, specFile, specModuleName, args = [], haskellArgs = [], logAxiomsFile = None, allowZeroStep = False):
         """Given the specification to prove and arguments for the prover, attempt to prove it.
 
         -   Input: Specification file name, specification module name, optionall arguments, haskell backend arguments, and file to log axioms to.
@@ -67,27 +67,27 @@ class KProve(KPrint):
             sys.stderr.write(stdout + '\n')
             sys.stderr.write(stderr + '\n')
             fatal('Exiting...', exitCode = process.returncode)
-        if finalState == KConstant('#Top') and len(getAppliedAxiomList(logFile)) == 0:
+        if finalState == KConstant('#Top') and len(getAppliedAxiomList(logFile)) == 0 and not allowZeroStep:
             fatal('Proof took zero steps, likely the LHS is invalid: ' + str(specFile))
         return finalState
 
-    def proveClaim(self, claim, claimId, args = [], haskellArgs = [], logAxiomsFile = None):
+    def proveClaim(self, claim, claimId, args = [], haskellArgs = [], logAxiomsFile = None, allowZeroStep = False):
         """Given a K claim, write the definition needed for the prover, and attempt to prove it.
 
         -   Input: KAST representation of a claim to prove, and an identifer for said claim.
         -   Output: KAST representation of final state the prover supplies for it.
         """
         self._writeClaimDefinition(claim, claimId)
-        return self.prove(self.useDirectory / (claimId.lower() + '-spec.k'), claimId.upper() + '-SPEC', args = args, haskellArgs = haskellArgs, logAxiomsFile = logAxiomsFile)
+        return self.prove(self.useDirectory / (claimId.lower() + '-spec.k'), claimId.upper() + '-SPEC', args = args, haskellArgs = haskellArgs, logAxiomsFile = logAxiomsFile, allowZeroStep = allowZeroStep)
 
-    def proveClaimNoBranching(self, claim, claimId, args = [], haskellArgs = [], logAxiomsFile = None, maxDepth = 1000):
+    def proveClaimNoBranching(self, claim, claimId, args = [], haskellArgs = [], logAxiomsFile = None, maxDepth = 1000, allowZeroStep = False):
         """Given a K claim, attempt to prove it, but do not allow the prover to branch.
 
         -   Input: KAST representation of a claim to prove, and identifier for said claim.
         -   Output: KAST representation of final state of prover.
         """
         logFileName = logAxiomsFile if logAxiomsFile is not None else (self.useDirectory / claimId.lower()).with_suffix('.debug.log')
-        nextState   = self.proveClaim(claim, claimId, args = (args + ['--branching-allowed', '1', '--depth', str(maxDepth)]), haskellArgs = haskellArgs, logAxiomsFile = logFileName)
+        nextState   = self.proveClaim(claim, claimId, args = (args + ['--branching-allowed', '1', '--depth', str(maxDepth)]), haskellArgs = haskellArgs, logAxiomsFile = logFileName, allowZeroStep = allowZeroStep)
         depth       = 0
         for axioms in getAppliedAxiomList(str(logFileName)):
             depth += 1
