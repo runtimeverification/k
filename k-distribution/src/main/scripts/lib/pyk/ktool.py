@@ -68,7 +68,7 @@ class KProve(KPrint):
             sys.stderr.write(stderr + '\n')
             fatal('Exiting...', exitCode = process.returncode)
         if finalState == KConstant('#Top') and len(getAppliedAxiomList(logFile)) == 0:
-            fatal('Proof took zero steps, likely the LHS is invalid: ' + specFile)
+            fatal('Proof took zero steps, likely the LHS is invalid: ' + str(specFile))
         return finalState
 
     def proveClaim(self, claim, claimId, args = [], haskellArgs = [], logAxiomsFile = None):
