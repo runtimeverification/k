@@ -1683,7 +1683,8 @@ consistency.
 module BYTES-SYNTAX
   imports private STRING-SYNTAX
 
-  syntax Bytes [hook(BYTES.Bytes), token]
+  syntax Bytes [hook(BYTES.Bytes)]
+  syntax Bytes ::= r"b[\\\"](([^\\\"\\n\\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]"      [token]
 endmodule
 ```
 
@@ -2439,9 +2440,6 @@ tutorial.
 
 ```k
   syntax Stream ::= #buffer(K)
-                  | #istream(Int)
-                  | #parseInput(String, String)
-                  | #ostream(Int)
 
 endmodule
 
@@ -2457,6 +2455,9 @@ module STDIN-STREAM
   imports LIST
   imports INT
   imports BOOL
+
+  syntax Stream ::= #istream(Int)
+  syntax Stream ::= #parseInput(String, String)
 
   configuration <stdin> ListItem(#buffer($STDIN:String)) ListItem($IO:String) ListItem(#istream(#stdin)) </stdin>
 
@@ -2551,6 +2552,8 @@ module STDOUT-STREAM
   imports K-IO
   imports LIST
   imports STRING
+
+  syntax Stream ::= #ostream(Int)
 
   configuration <stdout> ListItem(#ostream(#stdout)) ListItem($IO:String) ListItem(#buffer("")) </stdout>
 //configuration <stderr> ListItem(#ostream(#stderr)) ListItem($IO:String) ListItem(#buffer("")) </stderr>
