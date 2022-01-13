@@ -1683,7 +1683,8 @@ consistency.
 module BYTES-SYNTAX
   imports private STRING-SYNTAX
 
-  syntax Bytes [hook(BYTES.Bytes), token]
+  syntax Bytes [hook(BYTES.Bytes)]
+  syntax Bytes ::= r"b[\\\"](([^\\\"\\n\\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]"      [token]
 endmodule
 ```
 
