@@ -416,7 +416,14 @@ public class Kompile {
             if (m.name().equals(mainDefModule.name()) || mainDefModule.importedModuleNames().contains(m.name()))
                 return s;
             if (!(s instanceof Claim || s.isSyntax())) {
-                errors.add(KEMException.compilerError("Use claim instead of rule to specify proof objectives.", s));
+                if (s instanceof Rule && !s.att().contains(Att.SIMPLIFICATION()))
+                    errors.add(KEMException.compilerError("Only claims and simplification rules are allowed in proof modules.", s));
+            }
+            if (s instanceof Rule && s.att().contains(Att.SIMPLIFICATION())) {
+                // TODO: it should be function like rule
+                KLabel kl = m.matchKLabel((Rule) s);
+                if (!m.functions().contains(kl))
+                    errors.add(KEMException.compilerError("Simplification rules need to be function/functional like.", s));
             }
             return s;
         }, "rules in spec module");

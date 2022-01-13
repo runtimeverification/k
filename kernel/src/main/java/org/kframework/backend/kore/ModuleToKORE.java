@@ -854,8 +854,8 @@ public class ModuleToKORE {
         consideredAttributes.put(Att.LOCATION(), true);
 
         for (Sentence sentence : iterable(spec.sentencesExcept(definition))) {
-            if (sentence instanceof Claim) {
-                convertRule((Claim) sentence, 0, false, topCellSortStr,
+            if (sentence instanceof Claim || (sentence instanceof Rule && sentence.att().contains(Att.SIMPLIFICATION()))) {
+                convertRule((RuleOrClaim) sentence, 0, false, topCellSortStr,
                         consideredAttributes, HashMultimap.create(), new HashMap<>(), ArrayListMultimap.create(),
                         sentenceType, sb);
             }
