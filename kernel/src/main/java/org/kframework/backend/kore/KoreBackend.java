@@ -7,6 +7,7 @@ import org.kframework.attributes.Att;
 import org.kframework.compile.AbstractBackend;
 import org.kframework.compile.AddCoolLikeAtt;
 import org.kframework.compile.AddImplicitComputationCell;
+import org.kframework.compile.AddNonExecutableSideCondition;
 import org.kframework.compile.AddSortInjections;
 import org.kframework.compile.Backend;
 import org.kframework.compile.ConcretizeCells;
@@ -156,6 +157,11 @@ public class KoreBackend extends AbstractBackend {
         Function1<Definition, Definition> markExtraConcreteRules = d -> DefinitionTransformer.fromSentenceTransformer((m, s) ->
                 s instanceof Rule && kompileOptions.extraConcreteRuleLabels.contains(s.att().getOption(Att.LABEL()).getOrElse(() -> null)) ?
                         Rule.apply(((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att().add(Att.CONCRETE())) : s, "mark extra concrete rules").apply(d);
+        Function1<Definition, Definition> addNonExecutableDefaultSideCondition =
+                d -> DefinitionTransformer.fromSentenceTransformer(
+                        (m, s) -> AddNonExecutableSideCondition.add(s),
+                        "add trivial side condition to non-executable rules")
+                        .apply(d);
 
         return def -> resolveIO
                 .andThen(resolveFun)
@@ -186,6 +192,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(resolveConfigVar)
                 .andThen(addCoolLikeAtt)
                 .andThen(markExtraConcreteRules)
+                .andThen(addNonExecutableDefaultSideCondition)
                 .apply(def);
     }
 
