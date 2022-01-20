@@ -1207,7 +1207,9 @@ public class ModuleToKORE {
     }
 
     private boolean ignoreOwise(Rule notMatching) {
-        return notMatching.att().contains(Att.OWISE()) || notMatching.att().contains(Att.SIMPLIFICATION());
+        return notMatching.att().contains(Att.OWISE())
+                || notMatching.att().contains(Att.SIMPLIFICATION())
+                || notMatching.att().contains(Att.NON_EXECUTABLE());
     }
 
     private void assertNoExistentials(Sentence sentence, Set<KVariable> existentials) {
