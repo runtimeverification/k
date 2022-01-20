@@ -70,6 +70,7 @@ public class CheckAtt {
                 errors.add(KEMException.compilerError("First child of binder must have a sort with the 'KVAR.KVar' hook attribute.", prod));
             }
         }
+
         boolean hasColors = false;
         int ncolors = 0;
         if (prod.att().contains("colors")) {
@@ -148,6 +149,20 @@ public class CheckAtt {
         if (rule.isMacro()) {
             kem.registerCompilerWarning(ExceptionType.RULE_HAS_MACRO_ATT, errors,
                     "The attribute [" + rule.att().getMacro().get() + "] has been deprecated on rules. Use this label on syntax declarations instead.", rule);
+        }
+
+        checkNonExecutable(rule);
+    }
+
+    private void checkNonExecutable(Rule rule) {
+        boolean isFunction = rule.att().contains(Att.FUNCTION());
+        boolean isNonExecutable = rule.att().contains(Att.NON_EXECUTABLE());
+
+        if(isNonExecutable && !isFunction) {
+            errors.add(
+                    KEMException.compilerError(
+                            "non-executable attribute is only supported on function rules.",
+                            rule));
         }
     }
 
