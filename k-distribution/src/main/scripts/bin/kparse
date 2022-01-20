@@ -21,14 +21,7 @@ tempDir="$(mktemp -d .kparse-${now}-XXXXXXXXXX)"
 tempFiles=("$tempDir")
 trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
 
-execute () {
-  (
-  if $verbose; then
-    set -x
-  fi
-  "$@"
-  )
-}
+source "$(dirname "$0")/../lib/kframework/k.sh"
 
 KPARSE=$(basename "$0")
 KAST_UTIL="$(dirname "$0")/kast"
@@ -215,14 +208,14 @@ case "$inputMode" in
   program)
   bisonParser="${kompiledDir}/parser_${sort}_${module}" 
   if [ -x "$bisonParser" ]; then
-    execute "$bisonParser" "$input_file" > "$outputFile"
+    output "$outputFile" execute "$bisonParser" "$input_file"
   else
     execute "$KAST_UTIL" --output kore "${ORIG_ARGV[@]}"
   fi
   ;;
 
   kore)
-  cat "$input_file" > "$outputFile"
+  output "$outputFile" cat "$input_file"
   ;;
 
   *)
