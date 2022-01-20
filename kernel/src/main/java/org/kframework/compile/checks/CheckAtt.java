@@ -1,6 +1,7 @@
 // Copyright (c) 2016-2019 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
+import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.Sorts;
@@ -155,8 +156,10 @@ public class CheckAtt {
     }
 
     private void checkNonExecutable(Rule rule) {
-        boolean isFunction = rule.att().contains(Att.FUNCTION());
         boolean isNonExecutable = rule.att().contains(Att.NON_EXECUTABLE());
+        boolean isFunction = m.attributesFor()
+                                .getOrElse(m.matchKLabel(rule), Att::empty)
+                                .contains(Att.FUNCTION());
 
         if(isNonExecutable && !isFunction) {
             errors.add(
