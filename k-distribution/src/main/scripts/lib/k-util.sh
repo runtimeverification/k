@@ -22,9 +22,6 @@ error () {
   exit ${result}
 }
 
-warning () {
-  printf "[Warning] Compiler: $@\n" | ${fold_lines} 1>&2
-}
 
 k_util_usage() {
     cat <<HERE
