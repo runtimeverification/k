@@ -11,14 +11,17 @@
 #
 # source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
+# initialize flags
+fold_lines='fold -s'
 verbose=false
+
+# initialize state
 result=0
-fold_lines="fold -s"
 
 error () {
   local result
   result="$1" ; shift
-  printf "[Error] Critical: $@\n" | ${fold_lines} 1>&2
+  printf "[Error] Critical: $*\n" | ${fold_lines} 1>&2
   exit ${result}
 }
 
@@ -41,7 +44,7 @@ do
   else
     case "${arg}" in
       --no-exc-wrap)
-      fold_lines="cat -"
+      fold_lines='cat -'
       ;;
 
       --verbose)
