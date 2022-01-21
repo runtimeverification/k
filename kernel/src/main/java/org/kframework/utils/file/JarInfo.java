@@ -88,6 +88,15 @@ public class JarInfo {
                 version = FileUtils.readFileToString(new File(kBase + "/lib/version")).trim();
             }
 
+            // Note that if we're using git describe, the output will look
+            // something like v5.2.61~1^2 because of the master / release branch
+            // structure. Rather than deal with this in Maven, we cut the suffix
+            // off here.
+            int suffixStart = version.indexOf('~');
+            if (suffixStart != -1) {
+              version = version.substring(0, suffixStart);
+            }
+
             System.out.println("K version:    " + version);
             System.out.println("Build date:   " + versionDate);
         } catch (IOException e) {
