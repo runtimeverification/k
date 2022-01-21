@@ -15,6 +15,8 @@ KPROVEX=${K_BIN}/kprovex
 KBMC=${K_BIN}/kbmc
 # and kast
 KAST=${K_BIN}/kast
+# and kparse
+KPARSE=${K_BIN}/kparse
 # and keq
 KEQ=${K_BIN}/keq
 # and kserver
@@ -40,6 +42,7 @@ BMC_TESTS?=$(wildcard $(TESTDIR)/*-spec-bmc.k) $(wildcard $(TESTDIR)/*-spec-bmc.
 SEARCH_TESTS?=$(wildcard $(TESTDIR)/*.$(EXT).search)
 STRAT_TESTS?=$(wildcard $(TESTDIR)/*.strat)
 KAST_TESTS?=$(wildcard $(TESTDIR)/*.kast)
+KPARSE_TESTS?=$(wildcard $(TESTDIR)/*.kparse)
 KAST_BISON_TESTS?=$(wildcard $(TESTDIR)/*.kast-bison)
 # default KOMPILE_BACKEND
 KOMPILE_BACKEND?=llvm
@@ -62,7 +65,7 @@ CONSIDER_ERRORS=2>&1
 .PHONY: kompile krun all clean update-results proofs bmc
 
 # run all tests
-all: kompile krun proofs bmc searches strat kast kast-bison
+all: kompile krun proofs bmc searches strat kast kast-bison kparse
 
 # run only kompile
 kompile: $(KOMPILED_DIR)/timestamp
@@ -81,6 +84,8 @@ searches: $(SEARCH_TESTS)
 strat: $(STRAT_TESTS)
 
 kast: $(KAST_TESTS)
+
+kparse: $(KPARSE_TESTS)
 
 kast-bison: $(KAST_BISON_TESTS)
 
@@ -145,6 +150,13 @@ ifeq ($(TESTDIR),$(RESULTDIR))
 	$(KAST) $@ $(KAST_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
 else
 	$(KAST) $@ $(KAST_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+endif
+
+%.kparse: kompile
+ifeq ($(TESTDIR),$(RESULTDIR))
+	$(KPARSE) $@ $(KPARSE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
+else
+	$(KPARSE) $@ $(KPARSE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %.kast-bison: kompile

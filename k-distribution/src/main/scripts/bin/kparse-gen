@@ -22,14 +22,7 @@ tempDir="$(mktemp -d .kparse-gen-${now}-XXXXXXXXXX)"
 tempFiles=("$tempDir")
 trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
 
-execute () {
-  (
-  if $verbose; then
-    set -x
-  fi
-  "$@"
-  )
-}
+source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 KPARSE_GEN=$(basename "$0")
 KAST_UTIL="$(dirname "$0")/kast"
