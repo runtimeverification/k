@@ -51,10 +51,9 @@ profile_line () {
 
 k_util_usage() {
     cat <<HERE
-  --no-exc-wrap            Do not wrap exception messages to 80 chars. Keep
-                           long lines.
-  --profile                Print coarse process timing information
-  -v, --verbose            Print significant sub-commands executed
+  --no-exc-wrap     Do not wrap messages to 80 chars (keep long lines).
+  --profile         Print coarse process timing information
+  -v, --verbose     Print significant sub-commands executed
 HERE
 }
 
