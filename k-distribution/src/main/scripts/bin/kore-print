@@ -14,7 +14,6 @@ literal=false
 outputFile=-
 outputMode=pretty
 result=1
-verbose=false
 
 # setup temp files
 now=`date +"%Y-%m-%d-%H-%M-%S"`
@@ -43,6 +42,12 @@ $KORE_PRINT expects exactly 1 positional argument. It must be a file and the
 contents of that file must contain a KORE pattern. By default, $KORE_PRINT will
 pretty print that term, but some customization is possible; see below.
 
+General arguments:
+
+$(k_util_usage)
+
+$KORE_PRINT arguments:
+
       --color [on|off]     Enable/disable ANSI color codes. Overrides default,
                            which is determined based on whether stdout is a
                            terminal
@@ -59,7 +64,6 @@ pretty print that term, but some customization is possible; see below.
       --output-file FILE   Print converted term to FILE
       --save-temps         Do not delete temporary files when $KORE_PRINT
                            terminates
-  -v, --verbose            Print significant commands executed by $KORE_PRINT
       --version            Print version of K
       --                   Interpret all arguments following as positional
                            arguments
@@ -133,10 +137,6 @@ do
       --output-file)
       outputFile="$2"
       shift
-      ;;
-
-      -v|--verbose)
-      verbose=true
       ;;
 
       --save-temps)

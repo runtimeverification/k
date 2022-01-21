@@ -19,7 +19,6 @@ pattern=
 search=false
 searchType=FINAL
 term=false
-verbose=false
 literal=false
 outputMode=pretty
 statistics=false
@@ -34,7 +33,7 @@ filterSubst=
 fold_lines="fold -s"
 
 # setup temp files
-now=`date +"%Y-%m-%d-%H-%M-%S"`
+now="$(date +"%Y-%m-%d-%H-%M-%S")"
 tempDir="$(mktemp -d .krun-${now}-XXXXXXXXXX)"
 tempFiles=("$tempDir")
 trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
@@ -62,6 +61,9 @@ keepTempsIfDryRun () {
 }
 
 source "$(dirname "$0")/../lib/kframework/k-util.sh"
+if ${verbose}; then
+  llvm_krun_flags="${llvm_krun_flags} -v"
+fi
 
 KRUN=$(basename "$0")
 
@@ -85,6 +87,12 @@ $KRUN expects 0 or 1 positional arguments. If a positional argument is present,
 it must be a file and the contents of that file is parsed using the parser
 specified with --parser and used as the value of \$PGM (unless --term is
 present; see below).
+
+General options:
+
+$(k_util_usage)
+
+$KRUN options:
 
       --bound N            Return at most N solutions  with --search
       --depth N            Execute at most N rewrite steps
@@ -151,7 +159,6 @@ present; see below).
                            value for \$PGM as the entire input configuration.
                            i.e., skip composing configuration from
                            configuration variables.
-  -v, --verbose            Print significant commands executed by $KRUN.
       --version            Print version of K
       --                   Interpret all arguments following as positional
                            arguments.
@@ -345,11 +352,6 @@ do
 
       --term)
       term=true
-      ;;
-
-      -v|--verbose)
-      verbose=true
-      llvm_krun_flags="$llvm_krun_flags -v"
       ;;
 
       --save-temps)

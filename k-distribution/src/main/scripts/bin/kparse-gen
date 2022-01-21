@@ -14,7 +14,6 @@ glr=--gen-parser
 literal=false
 result=1
 stackDepth=10000
-verbose=false
 
 # setup temp files
 now=`date +"%Y-%m-%d-%H-%M-%S"`
@@ -45,6 +44,12 @@ generate an LR(1) parser for the \$PGM configuration variable, but this can be
 customized; see below. If no \$PGM configuration variable exists, it will
 generate a parser for the KItem sort in the main syntax module.
 
+General options:
+
+$(k_util_usage)
+
+$KPARSE_GEN options:
+
       --bison-file FILE    C file that should be linked into the generated
                            parser
       --bison-stack-max-depth  Maximum size of bison stack. Default: 10000
@@ -58,7 +63,6 @@ generate a parser for the KItem sort in the main syntax module.
       --save-temps         Do not delete temporary files when $KPARSE_GEN
                            terminates
   -s, --sort               Sort to use as start symbol of parser
-  -v, --verbose            Print significant commands executed by $KPARSE_GEN
       --version            Print version of K
       --                   Interpret all arguments following as positional
                            arguments
@@ -107,10 +111,6 @@ do
 
       --no-exc-wrap)
       fold_lines="cat -"
-      ;;
-
-      -v|--verbose)
-      verbose=true
       ;;
 
       -s|--sort)

@@ -13,7 +13,6 @@ inputMode=program
 literal=false
 outputFile=-
 result=1
-verbose=false
 
 # setup temp files
 now=`date +"%Y-%m-%d-%H-%M-%S"`
@@ -46,6 +45,12 @@ sort, module, and input format used for parsing can be customized; see below.
 If no \$PGM configuration variable exists, the default sort will be the KItem
 sort.
 
+General options:
+
+$(k_util_usage)
+
+$KPARSE options:
+
   -d, --directory DIR      Look for a kompiled directory ending in "-kompiled"
                            under the directory DIR
   -h, --help               Display this help and exit
@@ -58,7 +63,6 @@ sort.
       --save-temps         Do not delete temporary files when $KPARSE
                            terminates
   -s, --sort               Sort to use as start symbol of parser
-  -v, --verbose            Print significant commands executed by $KPARSE
       --version            Print version of K
       --                   Interpret all arguments following as positional
                            arguments
@@ -113,10 +117,6 @@ do
       --output-file)
       outputFile="$2"
       shift
-      ;;
-
-      -v|--verbose)
-      verbose=true
       ;;
 
       -s|--sort)
