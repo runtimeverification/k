@@ -12,6 +12,18 @@
 # source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 verbose=false
+result=0
+
+error () {
+  local result
+  result="$1" ; shift
+  printf "[Error] Critical: $@\n" | $fold_lines 1>&2
+  exit ${result}
+}
+
+warning () {
+  printf "[Warning] Compiler: $@\n" | $fold_lines 1>&2
+}
 
 k_util_usage() {
     cat <<HERE

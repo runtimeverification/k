@@ -13,7 +13,6 @@ fold_lines="fold -s"
 literal=false
 outputFile=-
 outputMode=pretty
-result=1
 
 # setup temp files
 now=`date +"%Y-%m-%d-%H-%M-%S"`
@@ -25,11 +24,6 @@ source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 KORE_PRINT=$(basename "$0")
 KAST_UTIL="$(dirname "$0")/kast"
-
-error () {
-  printf "[Error] Unparser: $@\n" | $fold_lines 1>&2
-  exit $result
-}
 
 print_usage () {
 cat <<HERE
@@ -91,7 +85,7 @@ do
         ;;
 
         *)
-        error 'Invalid value for --color. Should be "on" or "off".'
+        error 1 'Invalid value for --color. Should be "on" or "off".'
         ;;
       esac
       shift
@@ -127,7 +121,7 @@ do
         none) ;;
 
         *)
-        error 'Invalid value for --output. Should be one of "pretty", "program", "kast", "binary", "json", "latex", "kore", or "none".'
+        error 1 'Invalid value for --output. Should be one of "pretty", "program", "kast", "binary", "json", "latex", "kore", or "none".'
         ;;
       esac
       outputMode="$2"
@@ -179,7 +173,7 @@ fi
 
 if [[ "${#ARGV[@]}" -ne 1 ]]; then
   print_usage
-  error 'Must pass exactly one KORE file as a positional argument.'
+  error 1 'Must pass exactly one KORE file as a positional argument.'
 fi
 input_file="${ARGV[0]}"
 
@@ -190,13 +184,13 @@ for file in "$dir"/*-kompiled; do
   [ ! -d "$file" ] && continue
   kompiledDir=$file
   if $hasKompiledDir; then
-    error 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
+    error 1 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
   fi
   hasKompiledDir=true
 done
 
 if ! $hasKompiledDir; then
-  error 'Could not find a compiled definition. Use --directory to specify one.'
+  error 1 'Could not find a compiled definition. Use --directory to specify one.'
 fi
 
 if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then
@@ -207,7 +201,7 @@ fi
 if [[ "$input_file" == "-" ]]; then
   input_file=/dev/stdin
 elif [ ! -r "$input_file" ]; then
-  error "Could not open file: $input_file"
+  error 1 "Could not open file: $input_file"
 fi
 
 if [ "$outputFile" = "-" ]; then

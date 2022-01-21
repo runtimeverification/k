@@ -12,7 +12,6 @@ dir=.
 fold_lines="fold -s"
 glr=--gen-parser
 literal=false
-result=1
 stackDepth=10000
 
 # setup temp files
@@ -25,11 +24,6 @@ source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 KPARSE_GEN=$(basename "$0")
 KAST_UTIL="$(dirname "$0")/kast"
-
-error () {
-  printf "[Error] Inner Parser: $@\n" | $fold_lines 1>&2
-  exit $result
-}
 
 print_usage () {
 cat <<HERE
@@ -146,7 +140,7 @@ done
 
 if [[ "${#ARGV[@]}" -ne 1 ]]; then
   print_usage
-  error 'Must pass exactly one writeable file path as a positional argument.'
+  error 1 'Must pass exactly one writeable file path as a positional argument.'
 fi
 output_file="${ARGV[0]}"
 
@@ -157,17 +151,17 @@ for file in "$dir"/*-kompiled; do
   [ ! -d "$file" ] && continue
   kompiledDir=$file
   if $hasKompiledDir; then
-    error 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
+    error 1 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
   fi
   hasKompiledDir=true
 done
 
 if ! $hasKompiledDir; then
-  error 'Could not find a compiled definition. Use --directory to specify one.'
+  error 1 'Could not find a compiled definition. Use --directory to specify one.'
 fi
 
 if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then
-  error 'Bison is not supported on Java or Ocaml backends.'
+  error 1 'Bison is not supported on Java or Ocaml backends.'
   exit 1
 fi
 

@@ -12,7 +12,6 @@ fold_lines="fold -s"
 inputMode=program
 literal=false
 outputFile=-
-result=1
 
 # setup temp files
 now=`date +"%Y-%m-%d-%H-%M-%S"`
@@ -24,11 +23,6 @@ source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 KPARSE=$(basename "$0")
 KAST_UTIL="$(dirname "$0")/kast"
-
-error () {
-  printf "[Error] Inner Parser: $@\n" | $fold_lines 1>&2
-  exit $result
-}
 
 print_usage () {
 cat <<HERE
@@ -98,7 +92,7 @@ do
         kore) ;;
 
         *)
-        error 'Invalid value for --input. Should be one of "program", "kast", "binary", "json", or "kore".'
+        error 1 'Invalid value for --input. Should be one of "program", "kast", "binary", "json", or "kore".'
         ;;
       esac
       inputMode="$2"
@@ -156,7 +150,7 @@ done
 
 if [[ "${#ARGV[@]}" -ne 1 ]]; then
   print_usage
-  error 'Must pass exactly one file as a positional argument.'
+  error 1 'Must pass exactly one file as a positional argument.'
 fi
 input_file="${ARGV[0]}"
 
@@ -167,13 +161,13 @@ for file in "$dir"/*-kompiled; do
   [ ! -d "$file" ] && continue
   kompiledDir=$file
   if $hasKompiledDir; then
-    error 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
+    error 1 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
   fi
   hasKompiledDir=true
 done
 
 if ! $hasKompiledDir; then
-  error 'Could not find a compiled definition. Use --directory to specify one.'
+  error 1 'Could not find a compiled definition. Use --directory to specify one.'
 fi
 
 if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then
@@ -184,7 +178,7 @@ fi
 if [[ "$input_file" == "-" ]]; then
   input_file=/dev/stdin
 elif [ ! -r "$input_file" ]; then
-  error "Could not open file: $input_file"
+  error 1 "Could not open file: $input_file"
 fi
 
 if [ "$outputFile" = "-" ]; then
