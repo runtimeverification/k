@@ -176,7 +176,7 @@ public class DefinitionParsing {
             throw new AssertionError("should not reach this statement");
         }
 
-        def = resolveNonConfigBubbles(def);
+        def = resolveNonConfigBubbles(def, false);
         saveTimings();
         if (! readOnlyCache) {
             saveCaches();
@@ -231,7 +231,7 @@ public class DefinitionParsing {
         sw.printIntermediate("Parse configurations [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " declarations]");
         parsedBubbles.set(0);
         cachedBubbles.set(0);
-        Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles);
+        Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles, true);
         sw.printIntermediate("Parse rules [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " rules]");
         saveTimings();
         saveCachesAndReportParsingErrors();
@@ -372,13 +372,16 @@ public class DefinitionParsing {
         }, "expand configs").apply(defWithParsedConfigs);
     }
 
-    private Definition resolveNonConfigBubbles(Definition defWithConfig) {
+    private Definition resolveNonConfigBubbles(Definition defWithConfig, boolean serializeScanner) {
         Definition defWithCaches = resolveCachedBubbles(defWithConfig, true);
         RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithCaches);
         Module ruleParserModule = gen.getRuleGrammar(defWithCaches.mainModule());
         ParseCache cache = loadCache(ruleParserModule);
         try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files, true)) {
-            parser.getScanner(globalOptions).serialize(files.resolveKompiled("scanner"));
+            Scanner scanner = parser.getScanner(globalOptions);
+            if (serializeScanner) {
+                scanner.serialize(files.resolveKompiled("scanner"));
+            }
             Map<String, Module> parsed = defWithCaches.parMap(m -> this.resolveNonConfigBubbles(m, parser.getScanner(globalOptions), gen));
             return DefinitionTransformer.from(m -> Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()), "parsing rules").apply(defWithConfig);
         }
