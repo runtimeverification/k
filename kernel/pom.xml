@@ -223,23 +223,10 @@
             <configuration>
               <exportAntProperties>true</exportAntProperties>
               <target>
-                <exec executable="git"
-                      outputproperty="git.mergebase.out"
-                      errorproperty="git.mergebase.err"
-                      failifexecutionfails="false">
-                  <arg value="merge-base" />
-                  <arg value="HEAD" />
-                  <arg value="master" />
-                </exec>
-
-                <exec executable="git"
+                <exec executable="../scripts/get-version-string.sh"
                       outputproperty="git.describe.out"
                       errorproperty="git.describe.err"
                       failifexecutionfails="false">
-                  <arg value="describe" />
-                  <arg value="--always" />
-                  <arg value="--contains" />
-                  <arg value="${git.mergebase.out}" />
                 </exec>
               </target>
             </configuration>
