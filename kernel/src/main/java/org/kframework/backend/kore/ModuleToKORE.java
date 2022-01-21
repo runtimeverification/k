@@ -952,7 +952,7 @@ public class ModuleToKORE {
                         .stream().map(KVariable::name).collect(Collectors.toSet());
                 sb.append("\\implies{R} (\n    \\and{R} (\n      \\not{R} (\n        ");
                 for (Rule notMatching : RefreshRules.refresh(functionRules.get(ruleInfo.productionLabel), varNames)) {
-                    if (ignoreOwise(notMatching)) {
+                    if (ignoreSideConditionsForOwise(notMatching)) {
                         continue;
                     }
                     sb.append("\\or{R} (\n");
@@ -1001,7 +1001,7 @@ public class ModuleToKORE {
                 sb.append("\\bottom{R}()");
                 sb.append("\n        ");
                 for (Rule notMatching : functionRules.get(ruleInfo.productionLabel)) {
-                    if (ignoreOwise(notMatching)) {
+                    if (ignoreSideConditionsForOwise(notMatching)) {
                         continue;
                     }
                     sb.append(")");
@@ -1206,7 +1206,7 @@ public class ModuleToKORE {
         }
     }
 
-    private boolean ignoreOwise(Rule notMatching) {
+    private boolean ignoreSideConditionsForOwise(Rule notMatching) {
         return notMatching.att().contains(Att.OWISE())
                 || notMatching.att().contains(Att.SIMPLIFICATION())
                 || notMatching.att().contains(Att.NON_EXECUTABLE());
