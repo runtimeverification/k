@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-kparse "$@"
-kparse "$@"
+"$(dirname "$0")/../../../bin/kparse" "$@"
+"$(dirname "$0")/../../../bin/kparse" "$@"
