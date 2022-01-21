@@ -61,7 +61,7 @@ keepTempsIfDryRun () {
   fi
 }
 
-source "$(dirname "$0")/../lib/kframework/k.sh"
+source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 KRUN=$(basename "$0")
 

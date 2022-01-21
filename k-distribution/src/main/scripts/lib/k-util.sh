@@ -9,7 +9,7 @@
 # You can use this script by adding the following line (minus the comment) to
 # your script:
 #
-# source "$(dirname "$0")/../lib/kframework/k.sh"
+# source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 execute () {
   (
