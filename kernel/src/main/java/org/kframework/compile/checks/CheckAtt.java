@@ -1,7 +1,6 @@
 // Copyright (c) 2016-2019 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
-import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
 import org.kframework.builtin.Sorts;
@@ -71,7 +70,6 @@ public class CheckAtt {
                 errors.add(KEMException.compilerError("First child of binder must have a sort with the 'KVAR.KVar' hook attribute.", prod));
             }
         }
-
         boolean hasColors = false;
         int ncolors = 0;
         if (prod.att().contains("colors")) {
