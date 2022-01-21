@@ -11,11 +11,20 @@
 #
 # source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
+time_millis () {
+  # Using this solution to support MacOS
+  # https://superuser.com/questions/599072/how-to-get-bash-execution-time-in-milliseconds-under-mac-os-x
+  # TODO: Is it worth the extra dependency on perl? Should we find a different way.
+  perl -MTime::HiRes -e 'printf("%.0f\n",Time::HiRes::time()*1000)'
+}
+
 # initialize flags
 fold_lines='fold -s'
+profile=false
 verbose=false
 
 # initialize state
+old_millis="$(time_millis)"
 result=0
 
 error () {
@@ -25,11 +34,26 @@ error () {
   exit ${result}
 }
 
+time_diff () {
+  local time1 time2
+  time2="$1" ; shift
+  time1="$1" ; shift
+  echo "$((${time2} - ${time1}))"
+}
+
+profile_line () {
+  local new_millis diff_millis
+  new_millis="$(time_millis)"
+  diff_millis="$((${new_millis} - ${old_millis}))"
+  old_millis="${new_millis}"
+  printf "[Timing ${diff_millis} ms] $*\n" | ${fold_lines} 1>&2
+}
 
 k_util_usage() {
     cat <<HERE
   --no-exc-wrap            Do not wrap exception messages to 80 chars. Keep
                            long lines.
+  --profile                Print coarse process timing information
   -v, --verbose            Print significant sub-commands executed
 HERE
 }
@@ -45,6 +69,10 @@ do
     case "${arg}" in
       --no-exc-wrap)
       fold_lines='cat -'
+      ;;
+
+      --profile)
+      profile=true
       ;;
 
       --verbose)
@@ -70,7 +98,13 @@ execute () {
   if ${verbose}; then
     set -x
   fi
+  if ${profile}; then
+    profile_line "Starting: $*"
+  fi
   "$@"
+  if ${profile}; then
+    profile_line "Finished: $*"
+  fi
   )
 }
 
