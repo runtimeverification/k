@@ -8,7 +8,6 @@ export PATH="$(cd "$(dirname "$0")"; pwd):$PATH"
 # initialize flags
 ARGV=()
 dir=.
-fold_lines="fold -s"
 inputMode=program
 literal=false
 outputFile=-
@@ -51,8 +50,6 @@ $KPARSE options:
   -i, --input MODE         Select input mode to use when parsing. Valid values
                            are program, kast, binary, json, and kore.
   -m, --module MODULE      Module to use to generate grammar
-      --no-exc-wrap        Do not wrap exception messages to 80 chars. Keep
-                           long lines
       --output-file FILE   Print resulting AST to FILE
       --save-temps         Do not delete temporary files when $KPARSE
                            terminates
@@ -102,10 +99,6 @@ do
       -m|--module)
       module="$2"
       shift
-      ;;
-
-      --no-exc-wrap)
-      fold_lines="cat -"
       ;;
 
       --output-file)

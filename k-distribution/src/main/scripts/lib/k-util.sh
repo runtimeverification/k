@@ -13,20 +13,23 @@
 
 verbose=false
 result=0
+fold_lines="fold -s"
 
 error () {
   local result
   result="$1" ; shift
-  printf "[Error] Critical: $@\n" | $fold_lines 1>&2
+  printf "[Error] Critical: $@\n" | ${fold_lines} 1>&2
   exit ${result}
 }
 
 warning () {
-  printf "[Warning] Compiler: $@\n" | $fold_lines 1>&2
+  printf "[Warning] Compiler: $@\n" | ${fold_lines} 1>&2
 }
 
 k_util_usage() {
     cat <<HERE
+  --no-exc-wrap            Do not wrap exception messages to 80 chars. Keep
+                           long lines.
   -v, --verbose            Print significant sub-commands executed
 HERE
 }
@@ -40,6 +43,10 @@ do
     args+=("${arg}")
   else
     case "${arg}" in
+      --no-exc-wrap)
+      fold_lines="cat -"
+      ;;
+
       --verbose)
       verbose=true
       ;;
@@ -60,7 +67,7 @@ fi
 
 execute () {
   (
-  if $verbose; then
+  if ${verbose}; then
     set -x
   fi
   "$@"

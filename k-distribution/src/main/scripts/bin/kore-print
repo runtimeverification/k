@@ -9,7 +9,6 @@ export PATH="$(cd "$(dirname "$0")"; pwd):$PATH"
 ARGV=()
 dir=.
 filterSubst=true
-fold_lines="fold -s"
 literal=false
 outputFile=-
 outputMode=pretty
@@ -48,8 +47,6 @@ $KORE_PRINT arguments:
   -d, --directory DIR      Look for a kompiled directory ending in "-kompiled"
                            under the directory DIR
   -h, --help               Display this help and exit
-      --no-exc-wrap        Do not wrap exception messages to 80 chars. Keep
-                           long lines
       --no-substitution-filtering  Don't filter conjuncts with anonymous
                                    variables from substitution output
   -o, --output MODE        Select output mode to use when unparsing. Valid
@@ -99,10 +96,6 @@ do
       -h|--help)
       print_usage
       exit 0
-      ;;
-
-      --no-exc-wrap)
-      fold_lines="cat -"
       ;;
 
       --no-substitution-filtering)
