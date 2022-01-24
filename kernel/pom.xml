@@ -223,14 +223,10 @@
             <configuration>
               <exportAntProperties>true</exportAntProperties>
               <target>
-                <exec executable="git"
+                <exec executable="../scripts/get-version-string.sh"
                       outputproperty="git.describe.out"
                       errorproperty="git.describe.err"
                       failifexecutionfails="false">
-                  <arg value="describe" />
-                  <arg value="--tags" />
-                  <arg value="--dirty" />
-                  <arg value="--long" />
                 </exec>
               </target>
             </configuration>
