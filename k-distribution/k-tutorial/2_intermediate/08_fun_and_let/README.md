@@ -1,4 +1,4 @@
-# Lesson 2.9: `#as` Patterns
+# Lesson 2.8: `#fun` and `#let`
 
 ## Return to Top
 
