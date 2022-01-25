@@ -542,7 +542,7 @@ if [ "$backendName" = "llvm" ]; then
     if [ -z "$pattern" ]; then
       echo '\and{SortGeneratedTopCell{}}(VarResult:SortGeneratedTopCell{},\top{SortGeneratedTopCell{}}())' > "$patternFile"
     else
-      k-compile-search-pattern --directory "$dir" "$pattern" > "$patternFile"
+      execute k-compile-search-pattern --directory "$dir" "$pattern" > "$patternFile"
     fi
 
     if [[ $searchType != "FINAL" ]]; then
