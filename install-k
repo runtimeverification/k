@@ -39,6 +39,6 @@ esac
 
 apt-get update
 apt-get install -y curl
-curl -L https://github.com/kframework/k/releases/download/$TAG/kframework_${K_VERSION}_amd64_$CODENAME.deb -o kframework_${K_VERSION}_amd64.deb
+curl -L https://github.com/runtimeverification/k/releases/download/$TAG/kframework_${K_VERSION}_amd64_$CODENAME.deb -o kframework_${K_VERSION}_amd64.deb
 apt-get install -y ./kframework_${K_VERSION}_amd64.deb
 rm -f kframework_${K_VERSION}_amd64.deb
