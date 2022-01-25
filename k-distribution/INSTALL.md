@@ -65,7 +65,7 @@ Downloading Packages
 --------------------
 
 Download the appropriate package from the GitHub, via the
-[Releases](https://github.com/kframework/k/releases) page.
+[Releases](https://github.com/runtimeverification/k/releases) page.
 Releases are generated as often as possible from `master` build.
 
 Installing Packages
