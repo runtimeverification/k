@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kframework/k.git"
+    "url": "git+https://github.com/runtimeverification/k.git"
   },
   "author": "K | Runtime Verification",
   "license": "UNLICENSED",
@@ -21,7 +21,7 @@
     "k-web-theme": "file:k-web-theme"
   },
   "bugs": {
-    "url": "https://github.com/kframework/k/issues"
+    "url": "https://github.com/runtimeverification/k/issues"
   },
-  "homepage": "https://github.com/kframework/k#readme"
+  "homepage": "https://github.com/runtimeverification/k#readme"
 }
