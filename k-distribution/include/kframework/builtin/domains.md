@@ -185,16 +185,6 @@ of any of the syntax defined in any of these modules.
   rule IDX::Int in_keys(arr(_, I::Int, _)) => IDX >=Int 0 andBool IDX <Int I
 endmodule
 
-module ARRAY-CONCRETE [concrete, kast]
-  imports ARRAY-SYNTAX
-  imports LIST
-  imports STRING-SYNTAX
-
-  syntax Array ::= makeEmptyArray(Int) [function, hook(ARRAY.makeEmpty), impure]
-                 | arrayCtor(String, Int, KItem) [function, hook(ARRAY.ctor), symbol]
-                 | makeArray(Int, KItem) [function, hook(ARRAY.make), impure, klabel(makeArrayOcaml)]
-endmodule
-
 module ARRAY-SYMBOLIC [symbolic]
   imports ARRAY-IN-K
 endmodule
@@ -204,7 +194,6 @@ module ARRAY-KORE [kore]
 endmodule
 
 module ARRAY
-  imports ARRAY-CONCRETE
   imports ARRAY-SYMBOLIC
   imports ARRAY-KORE
 endmodule
