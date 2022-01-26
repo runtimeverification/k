@@ -29,8 +29,9 @@ error () {
 k_util_usage() {
     cat <<HERE
   --no-exc-wrap     Do not wrap messages to 80 chars (keep long lines).
-  --profile         Print coarse process timing information
-  -v, --verbose     Print significant sub-commands executed
+  --profile         Print coarse process timing information. Format printed:
+                    exit-code wall-time user-time system-time command args*
+  -v, --verbose     Print significant sub-commands executed.
 HERE
 }
 
