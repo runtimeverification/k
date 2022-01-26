@@ -1,0 +1,4 @@
+[Error] Compiler: non-executable attribute is only supported on function rules.
+	Source(test.k)
+	Location(16,8,16,27)
+[Error] Compiler: Had 1 structural errors.

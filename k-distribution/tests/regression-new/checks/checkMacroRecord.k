@@ -1,4 +1,4 @@
-// https://github.com/kframework/k/issues/2217
+// https://github.com/runtimeverification/k/issues/2217
 // do not generate sort projections for macro symbols
 module CHECKMACRORECORD
     imports INT

@@ -108,6 +108,7 @@ object Att {
   val SMTLIB = "smtlib"
   val SMT_LEMMA = "smt-lemma"
   val SMT_PRELUDE = "smt-prelude"
+  val NON_EXECUTABLE = "non-executable"
   val ONE_PATH = "one-path"
   val ALL_PATH = "all-path"
   val CELL = "cell"
