@@ -401,13 +401,13 @@ for file in "$dir"/*-kompiled; do
   [ ! -d "$file" ] && continue
   kompiledDir=$file
   if $hasKompiledDir; then
-    error 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
+    error 1 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
   fi
   hasKompiledDir=true
 done
 
 if ! $hasKompiledDir; then
-  error 'Could not find a compiled definition. Use --directory to specify one.'
+  error 1 'Could not find a compiled definition. Use --directory to specify one.'
 fi
 
 if [ ! -f "$kompiledDir/definition.kore" ]; then
@@ -440,7 +440,7 @@ if $term; then
 else
   for configVar in ${declaredConfigVars[@]+"${declaredConfigVars[@]}"}; do
     if [[ $configVar != "IO" && $configVar != "STDIN" && ! ${params[@]+"${params[@]}"} =~ "$configVar" ]]; then
-      error "Configuration variable missing: \$$configVar. Use -c$configVar=<Value> in the command line to set."
+      error 1 "Configuration variable missing: \$$configVar. Use -c$configVar=<Value> in the command line to set."
     fi
   done
   for name in ${params[@]+"${params[@]}"}; do
@@ -450,9 +450,9 @@ else
     tempFiles+=("$tempFile")
     if [[ ! ${declaredConfigVars[@]+"${declaredConfigVars[@]}"} =~ "$name" ]]; then
       if [ "$name" = "PGM" ]; then
-        error "Configuration variable \$PGM does not exist. Do not pass a positional argument to $KRUN."
+        error 1 "Configuration variable \$PGM does not exist. Do not pass a positional argument to $KRUN."
       else
-        error "Configuration variable \$$name does not exist. Do not pass -c$name to $KRUN."
+        error 1 "Configuration variable \$$name does not exist. Do not pass -c$name to $KRUN."
       fi
     fi
     indirectName="declaredConfigVar_$name"
@@ -520,7 +520,7 @@ if [ "$backendName" = "llvm" ]; then
   keepTempsIfDryRun "$tempDir" "$expanded_input_file" "$kore_output"
   if $search || [ -n "$pattern" ]; then
     if [ ! -f "$kompiledDir/search" ] || [ ! -x "$kompiledDir/search" ]; then
-      error 'You must pass --enable-search to kompile to be able to use krun --search with the LLVM backend'
+      error 1 'You must pass --enable-search to kompile to be able to use krun --search with the LLVM backend'
     fi
     patternFile="$(mktemp ${tempDir}/tmp.pattern.XXXXXXXXXX)"
     tempFiles+=("$patternFile")
@@ -531,7 +531,7 @@ if [ "$backendName" = "llvm" ]; then
     fi
 
     if [[ $searchType != "FINAL" ]]; then
-      error "Backend llvm does not support --search-all, --search-one-or-more-steps, or --search-one-step yet"
+      error 1 'Backend llvm does not support --search-all, --search-one-or-more-steps, or --search-one-step yet.'
     fi
     disjunctFile="$(mktemp ${tempDir}/tmp.disjunction.XXXXXXXXXX)"
     tempFiles+=("$disjunctFile")
@@ -601,7 +601,7 @@ elif [ "$backendName" = "haskell" ] ; then
     set -e
   fi
 else
-  error "Backend $backendName not supported. Use krun-legacy."
+  error 1 "Backend $backendName not supported. Use krun-legacy."
 fi
 
 # Unparsing
