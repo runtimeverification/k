@@ -149,6 +149,22 @@ public class CheckAtt {
             kem.registerCompilerWarning(ExceptionType.RULE_HAS_MACRO_ATT, errors,
                     "The attribute [" + rule.att().getMacro().get() + "] has been deprecated on rules. Use this label on syntax declarations instead.", rule);
         }
+
+        checkNonExecutable(rule);
+    }
+
+    private void checkNonExecutable(Rule rule) {
+        boolean isNonExecutable = rule.att().contains(Att.NON_EXECUTABLE());
+        boolean isFunction = m.attributesFor()
+                                .getOrElse(m.matchKLabel(rule), Att::empty)
+                                .contains(Att.FUNCTION());
+
+        if(isNonExecutable && !isFunction) {
+            errors.add(
+                    KEMException.compilerError(
+                            "non-executable attribute is only supported on function rules.",
+                            rule));
+        }
     }
 
     private void check(Att att, HasLocation loc) {
