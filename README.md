@@ -112,11 +112,6 @@ The following dependencies are needed either at build time or runtime:
     manager does not supply it. Other versions are known to have bugs and
     performance regressions likely to cause issues in the K test suite.
 
-The following dependencies are optional and are only needed when building
-the OCaml backend (**not recommended**):
-
-*   [opam](https://opam.ocaml.org/doc/Install.html)
-
 Typically, these can all be installed from your package manager.
 On some system configurations, special installation steps or post-installation
 configuration steps are required.
@@ -208,21 +203,6 @@ addition to the usual Maven build setup:
   * See [the documentation](https://github.com/kframework/kore#apple-silicon)
     and [associated PR](https://github.com/kframework/kore/pull/2893) for more
     details.
-
-### Optional OCaml Backend Setup
-
-**If** you want to use the OCaml backend (not recommended), then after running
-`mvn package` for the first time, setup the OCaml dependencies by running
-the following command:
-
-```sh
-k-distribution/target/release/k/bin/k-configure-opam
-eval $(opam config env)
-```
-
-This performs first-time setup of the OCaml backend. You may optionally set
-`OPAMROOT` before running this command to specify where any OCaml dependencies
-should be installed.
 
 ## Building with Nix
 

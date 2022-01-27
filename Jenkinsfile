@@ -69,7 +69,6 @@ pipeline {
               steps {
                 sh '''
                   echo 'Setting up environment...'
-                  eval `opam config env`
                   export K_OPTS='-Xmx12G'
                   echo 'Building K...'
                   mvn --batch-mode verify -U
@@ -288,7 +287,6 @@ pipeline {
             unstash 'arch'
             sh '''
               pacman -Syyu --noconfirm
-              pacman -S --noconfirm opam pkgconf
               pacman -U --noconfirm kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
               src/main/scripts/test-in-container
             '''

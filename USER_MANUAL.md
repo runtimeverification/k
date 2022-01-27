@@ -1377,8 +1377,8 @@ the LHS of a rule to mean the pattern above:
 The `memo` attribute is a hint from the user to the backend to memoize a
 function. Not all backends support memoization, but when the attribute is used
 and the definition is compiled for a `memo`-supporting backend, then calls to
-the function may be cached. At the time of writing, the Haskell and OCaml
-backends support memoization.
+the function may be cached. At the time of writing, only the Haskell
+backend supports memoization.
 
 #### Limitations of memoization with the Haskell backend
 
@@ -1509,10 +1509,9 @@ K also introduces the strict cast:
     syntax S ::= S "::S"
 ```
 
-The meaning at runtime is exactly the same as the semantic cast (except in the
-ocaml backend, where it will match a term of any sort at runtime); however,
-it restricts the sort of the term inside the cast to **exactly** `Sort`. That
-is to say, if you use it on something that is a strictly smaller sort, it will
+The meaning at runtime is exactly the same as the semantic cast; however, it
+restricts the sort of the term inside the cast to **exactly** `Sort`. That is
+to say, if you use it on something that is a strictly smaller sort, it will
 generate a type error. This is useful in certain circumstances to help
 disambiguate terms, when a semantic cast would not have resolved the ambiguity.
 As such, it is primarily used to solve ambiguities rather than to guide

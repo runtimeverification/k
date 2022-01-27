@@ -7857,13 +7857,6 @@
       "version": "1.0-SNAPSHOT"
     },
     {
-      "artifactId": "ocaml-backend",
-      "groupId": "com.runtimeverification.k",
-      "name": "ocaml-backend-1.0-SNAPSHOT",
-      "path": "./ocaml-backend",
-      "version": "1.0-SNAPSHOT"
-    },
-    {
       "artifactId": "java-backend",
       "groupId": "com.runtimeverification.k",
       "name": "java-backend-1.0-SNAPSHOT",
