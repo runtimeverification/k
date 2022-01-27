@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -60,6 +62,21 @@ public class Scanner implements AutoCloseable {
         this.tokens  = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
         this.module  = module.seedModule();
         this.scanner = getScanner();
+    }
+
+    public Scanner(ParseInModule module, GlobalOptions go, File scanner) {
+        this.go = go;
+        this.tokens  = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
+        this.module  = module.seedModule();
+        this.scanner = scanner;
+    }
+
+    public void serialize(File output) {
+        try {
+            Files.copy(scanner.toPath(), output.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw KEMException.criticalError("Could not write to " + output, e);
+        }
     }
 
     public Module getModule() {
@@ -119,8 +136,8 @@ public class Scanner implements AutoCloseable {
           flex.append("\n");
         }
         flex.append("%%\n\n");
-        if (module.productionsForSort().contains(Sort("#LineMarker").head())) {
-          stream(module.productionsForSort().apply(Sort("#LineMarker").head())).forEach(prod -> {
+        if (module.productionsForSort().contains(Sorts.LineMarker().head())) {
+          stream(module.productionsForSort().apply(Sorts.LineMarker().head())).forEach(prod -> {
             if (prod.items().size() != 1 || !(prod.items().apply(0) instanceof RegexTerminal)) {
               throw KEMException.compilerError("Productions of sort `#LineMarker` must be exactly one `RegexTerminal`.", prod);
             }

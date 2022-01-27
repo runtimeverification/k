@@ -152,7 +152,7 @@ public class RuleGrammarGenerator {
                 UnaryOperator<Import> f = _import -> {
                     Option<Module> programParsing = baseK.getModule(_import.module().name() + "-PROGRAM-PARSING");
                     if (programParsing.isDefined()) {
-                        return Import(programParsing.get(), _import.isPublic(), _import.tag());
+                        return Import(programParsing.get(), _import.isPublic());
                     }
                     return _import;
                 };
@@ -535,7 +535,7 @@ public class RuleGrammarGenerator {
         Att attrs1 = Att().add(Sort.class, castSort);
         prods.add(Production(KLabel("#SyntacticCast"), castSort, Seq(NonTerminal(labelSort), Terminal("::" + castSort.toString())), attrs1.add("format", "%1%2")));
         prods.add(Production(KLabel("#SemanticCastTo" + labelSort.toString()), labelSort, Seq(NonTerminal(labelSort), Terminal(":"  + castSort.toString())), attrs1.add("format", "%1%2")));
-        prods.add(Production(KLabel("#InnerCast"), outerSort, Seq(Terminal("{"), NonTerminal(labelSort), Terminal("}"), Terminal("<:" + castSort.toString())), attrs1.add("format", "%1 %2 %3%4")));
+        prods.add(Production(KLabel("#InnerCast"), castSort, Seq(Terminal("{"), NonTerminal(labelSort), Terminal("}"), Terminal("<:" + castSort.toString())), attrs1.add("format", "%1 %2 %3%4")));
         prods.add(Production(KLabel("#OuterCast"), labelSort, Seq(Terminal("{"), NonTerminal(innerSort), Terminal("}"), Terminal(":>" + castSort.toString())), attrs1.add("format", "%1 %2 %3%4")));
         return prods;
     }

@@ -7,6 +7,7 @@ import org.kframework.kore.KORE.Sort
 
 object Sorts {
   val Layout = Sort("#Layout")
+  val LineMarker = Sort("#LineMarker")
 
   val RuleTag = Sort("#RuleTag")
 

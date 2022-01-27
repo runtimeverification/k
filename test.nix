@@ -48,6 +48,9 @@ stdenv.mkDerivation {
       "KRUN_LEGACY=krun-legacy"
       "KEQ=keq"
       "KSERVER=kserver"
+      "KPARSE=kparse"
+      "KPARSE_GEN=kparse-gen"
+      "KORE_PRINT=kore-print"
       "PACKAGE_VERSION=${lib.fileContents ./package/version}"
       "--output-sync"
     ]

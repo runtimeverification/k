@@ -11,7 +11,7 @@ import scala.collection.JavaConverters._
 /**
  * This file contains all inner KORE interfaces.
  * The the wiki for documentation:
- * https://github.com/kframework/k/wiki/KORE-data-structures-guide
+ * https://github.com/runtimeverification/k/wiki/KORE-data-structures-guide
  */
 
 trait K extends Serializable with HasLocation with AttValue {

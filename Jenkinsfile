@@ -3,7 +3,7 @@ pipeline {
   options { ansiColor('xterm') }
   environment {
     PACKAGE         = 'kframework'
-    ROOT_URL        = 'https://github.com/kframework/k/releases/download'
+    ROOT_URL        = 'https://github.com/runtimeverification/k/releases/download'
     SHORT_REV       = """${sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()}"""
     LONG_REV        = """${sh(returnStdout: true, script: 'git rev-parse HEAD').trim()}"""
     VERSION         = """${sh(returnStdout: true, script: 'cat package/version').trim()}"""
@@ -63,7 +63,7 @@ pipeline {
             }
           }
           stages {
-            stage('Checkout code') { steps { dir('k-exercises') { git url: 'git@github.com:kframework/k-exercises.git' } } }
+            stage('Checkout code') { steps { dir('k-exercises') { git url: 'git@github.com:kframework/k-exercises.git', credentialsId: 'rv-jenkins-access-token' } } }
             stage('Build and Test K') {
               options { timeout(time: 45, unit: 'MINUTES') }
               steps {
@@ -405,11 +405,11 @@ pipeline {
         dir('arch')   { unstash 'arch'   }
         sshagent(['rv-jenkins-github']) {
           sh '''
-            git clone 'ssh://github.com/kframework/k.git' k-release
+            git clone 'ssh://github.com/runtimeverification/k.git' k-release
             cd k-release
             git fetch --all
 
-            release_commit="$(git merge-base $LONG_REV origin/master)"
+            release_commit="$LONG_REV"
             git checkout $release_commit
 
             git tag -d "${K_RELEASE_TAG}"         || true
@@ -439,19 +439,6 @@ pipeline {
         }
       }
     }
-    stage('Update Dependents') {
-      when {
-        branch 'release'
-        beforeAgent true
-      }
-      steps {
-        build job: 'DevOps/master', propagate: false, wait: false                                       \
-            , parameters: [ booleanParam ( name: 'UPDATE_DEPS'         , value: true                  ) \
-                          , string       ( name: 'UPDATE_DEPS_REPO'    , value: 'kframework/k'        ) \
-                          , string       ( name: 'UPDATE_DEPS_VERSION' , value: "${env.K_RELEASE_TAG}") \
-                          ]
-      }
-    }
     stage('GitHub Pages') {
       when {
         branch 'release'
@@ -468,7 +455,7 @@ pipeline {
         dir('gh-pages') {
           sshagent(['rv-jenkins-github']) {
             sh '''
-              git clone 'ssh://github.com/kframework/k.git' --depth 1 --no-single-branch --branch master --branch gh-pages
+              git clone 'ssh://github.com/runtimeverification/k.git' --depth 1 --no-single-branch --branch master --branch gh-pages
               cd k
               git checkout -B gh-pages origin/master
               git submodule update --init --recursive -- ./web
@@ -506,7 +493,7 @@ pipeline {
       steps {
         sshagent(['rv-jenkins-github']) {
           sh '''
-            git clone 'ssh://github.com/kframework/k' k-release
+            git clone 'ssh://github.com/runtimeverification/k' k-release
             cd k-release
             git fetch --all
             git checkout -B release origin/release

@@ -22,14 +22,7 @@ tempDir="$(mktemp -d .kparse-gen-${now}-XXXXXXXXXX)"
 tempFiles=("$tempDir")
 trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
 
-execute () {
-  (
-  if $verbose; then
-    set -x
-  fi
-  "$@"
-  )
-}
+source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 KPARSE_GEN=$(basename "$0")
 KAST_UTIL="$(dirname "$0")/kast"
@@ -62,10 +55,10 @@ generate a parser for the KItem sort in the main syntax module.
   -m, --module MODULE      Module to use to generate grammar
       --no-exc-wrap        Do not wrap exception messages to 80 chars. Keep
                            long lines
-      --save-temps         Do not delete temporary files when $KUNPARSE
+      --save-temps         Do not delete temporary files when $KPARSE_GEN
                            terminates
   -s, --sort               Sort to use as start symbol of parser
-  -v, --verbose            Print significant commands executed by $KUNPARSE
+  -v, --verbose            Print significant commands executed by $KPARSE_GEN
       --version            Print version of K
       --                   Interpret all arguments following as positional
                            arguments
