@@ -61,14 +61,7 @@ keepTempsIfDryRun () {
   fi
 }
 
-execute () {
-  (
-  if $verbose; then
-    set -x
-  fi
-  "$@"
-  )
-}
+source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 KRUN=$(basename "$0")
 
@@ -549,7 +542,7 @@ if [ "$backendName" = "llvm" ]; then
     if [ -z "$pattern" ]; then
       echo '\and{SortGeneratedTopCell{}}(VarResult:SortGeneratedTopCell{},\top{SortGeneratedTopCell{}}())' > "$patternFile"
     else
-      k-compile-search-pattern --directory "$dir" "$pattern" > "$patternFile"
+      execute k-compile-search-pattern --directory "$dir" "$pattern" > "$patternFile"
     fi
 
     if [[ $searchType != "FINAL" ]]; then
@@ -637,7 +630,7 @@ if ! $dryRun; then
       mv "$kore_output2" "$kore_output"
     fi
 
-    execute kore-print --directory "$dir" --output "$outputMode" "$kore_output" --color "$colorOpt" $filterSubst > "$outputFile"
+    output "$outputFile" execute kore-print --directory "$dir" --output "$outputMode" "$kore_output" --color "$colorOpt" $filterSubst
   else
     error "Backend crashed during rewriting with exit code $result"
   fi

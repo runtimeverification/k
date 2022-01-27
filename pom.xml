@@ -21,7 +21,7 @@
   </modules>
 
   <scm>
-    <connection>scm:git:https://github.com/kframework/k.git</connection>
+    <connection>scm:git:https://github.com/runtimeverification/k.git</connection>
     <tag>HEAD</tag>
   </scm>
 
