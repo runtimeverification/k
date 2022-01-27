@@ -257,6 +257,9 @@ public class ParseInModule implements Serializable, AutoCloseable {
             rez = new CorrectKSeqPriorityVisitor().apply(rez.right().get());
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
+            rez = new CorrectLetPriorityVisitor().apply(rez.right().get());
+            if (rez.isLeft())
+                return new Tuple2<>(rez, warn);
             rez = new CorrectCastPriorityVisitor().apply(rez.right().get());
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
