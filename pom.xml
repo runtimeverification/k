@@ -14,7 +14,6 @@
     <module>ktree</module>
     <module>k-distribution</module>
     <module>java-backend</module>
-    <module>ocaml-backend</module>
     <module>haskell-backend</module>
     <module>llvm-backend</module>
     <module>llvm-backend/src/main/native/llvm-backend/matching</module>

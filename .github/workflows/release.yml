@@ -145,9 +145,6 @@ jobs:
           cd homebrew-k-old
           brew tap kframework/k "file:///$(pwd)"
           brew install ${{ needs.macos-build.outputs.bottle_path }} -v
-          brew install opam pkg-config
-          k-configure-opam
-          eval $(opam config env)
           cp -R /usr/local/share/kframework/pl-tutorial ~
           WD=`pwd`
           cd
@@ -158,7 +155,6 @@ jobs:
           make -j`sysctl -n hw.ncpu` ${MAKE_EXTRA_ARGS}
           cd ~
           echo 'module TEST imports BOOL endmodule' > test.k
-          kompile test.k --backend ocaml
           kompile test.k --backend llvm
           kompile test.k --backend haskell
 

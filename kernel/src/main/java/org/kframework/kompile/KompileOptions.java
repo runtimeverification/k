@@ -47,7 +47,7 @@ public class KompileOptions implements Serializable {
     public OutputDirectoryOptions outputDirectory = new OutputDirectoryOptions();
 
     // Common options
-    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [llvm|haskell|kore|java|ocaml]. Each creates the kompiled K definition.")
+    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [llvm|haskell|kore|java]. Each creates the kompiled K definition.")
     public String backend = Backends.LLVM;
 
     private boolean kore;
@@ -70,16 +70,6 @@ public class KompileOptions implements Serializable {
             return mainModule(files) + "-SYNTAX";
         }
         return syntaxModule;
-    }
-
-    @Parameter(names="--non-strict", description="Do not add runtime sort checks for every variable's inferred sort. Only has an effect with `--backend ocaml`.")
-    private boolean nonStrict;
-
-    public boolean strict() {
-        if (nonStrict && ! backend.equals("ocaml")) {
-            throw KEMException.criticalError("Option `--non-strict` only makes sense for `--backend ocaml`.");
-        }
-        return !nonStrict;
     }
 
     @Parameter(names="--coverage", description="Generate coverage data when executing semantics.")
