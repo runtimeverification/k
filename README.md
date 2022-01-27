@@ -22,12 +22,12 @@ the command line, as we do not provide GUI tools at this time.
 _K-based tool users_ should:
 
 1.  Consult their tool documentation for build/installation instructions.
-2.  If needed, download a [packaged release](https://github.com/kframework/k/releases/)
+2.  If needed, download a [packaged release](https://github.com/runtimeverification/k/releases/)
     of the K Framework as part of their tool setup process.
 
 If you are interested in quickly trying out the K Framework without building
 from source, please see our
-[packaged release installation guide](https://github.com/kframework/k/blob/master/k-distribution/INSTALL.md).
+[packaged release installation guide](https://github.com/runtimeverification/k/blob/master/k-distribution/INSTALL.md).
 
 The rest of this file assumes you intend to build and install the K Framework
 from source.
@@ -37,7 +37,7 @@ e.g., this also includes macOS/brew (x86-64) as well as the Windows Subsystem
 for Linux.
 All 32-bit systems are **not supported**.
 See the
-[installation notes](https://github.com/kframework/k/blob/master/k-distribution/INSTALL.md)
+[installation notes](https://github.com/runtimeverification/k/blob/master/k-distribution/INSTALL.md)
 for details about supported configurations and system setup.
 
 ## Contents
@@ -286,7 +286,7 @@ in running the unit tests and checkstyle goals, run `mvn verify -DskipKTest` to
 skip the lengthy `ktest` execution.
 
 # Changing the KORE Data Structures
-If you need to change the KORE data structures (unless you are a K core developer, you probably do not), see [Guide-for-changing-the-KORE-data-structures](https://github.com/kframework/k/wiki/Guide-for-changing-the-KORE-data-structures).
+If you need to change the KORE data structures (unless you are a K core developer, you probably do not), see [Guide-for-changing-the-KORE-data-structures](https://github.com/runtimeverification/k/wiki/Guide-for-changing-the-KORE-data-structures).
 
 # Building the Final Release Directory/Archives
 Call `mvn install` in the base directory. This will attach an artifact to the local
@@ -338,7 +338,7 @@ Common build-time error messages:
       then you have encountered a known issue with the latest versions of GHC. In this
       case, please either:
       -   upgrade to [WSL version 2](https://docs.microsoft.com/en-us/windows/wsl/install-win10),
-      -   install a [packaged release for your WSL version 1 distribution](https://github.com/kframework/k/releases/),
+      -   install a [packaged release for your WSL version 1 distribution](https://github.com/runtimeverification/k/releases/),
       -   switch to a supported system configuration (e.g. Linux on a virtual machine), or
       -   if you do not need the symbolic execution capabilities of the K Framework, disable them
           at build time (and remove the GHC dependency) by doing: `mvn package -Dhaskell.backend.skip`.

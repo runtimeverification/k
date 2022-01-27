@@ -3,7 +3,7 @@ pipeline {
   options { ansiColor('xterm') }
   environment {
     PACKAGE         = 'kframework'
-    ROOT_URL        = 'https://github.com/kframework/k/releases/download'
+    ROOT_URL        = 'https://github.com/runtimeverification/k/releases/download'
     SHORT_REV       = """${sh(returnStdout: true, script: 'git rev-parse --short=7 HEAD').trim()}"""
     LONG_REV        = """${sh(returnStdout: true, script: 'git rev-parse HEAD').trim()}"""
     VERSION         = """${sh(returnStdout: true, script: 'cat package/version').trim()}"""
@@ -403,7 +403,7 @@ pipeline {
         dir('arch')   { unstash 'arch'   }
         sshagent(['rv-jenkins-github']) {
           sh '''
-            git clone 'ssh://github.com/kframework/k.git' k-release
+            git clone 'ssh://github.com/runtimeverification/k.git' k-release
             cd k-release
             git fetch --all
 
@@ -453,7 +453,7 @@ pipeline {
         dir('gh-pages') {
           sshagent(['rv-jenkins-github']) {
             sh '''
-              git clone 'ssh://github.com/kframework/k.git' --depth 1 --no-single-branch --branch master --branch gh-pages
+              git clone 'ssh://github.com/runtimeverification/k.git' --depth 1 --no-single-branch --branch master --branch gh-pages
               cd k
               git checkout -B gh-pages origin/master
               git submodule update --init --recursive -- ./web
@@ -491,7 +491,7 @@ pipeline {
       steps {
         sshagent(['rv-jenkins-github']) {
           sh '''
-            git clone 'ssh://github.com/kframework/k' k-release
+            git clone 'ssh://github.com/runtimeverification/k' k-release
             cd k-release
             git fetch --all
             git checkout -B release origin/release

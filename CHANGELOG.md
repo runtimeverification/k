@@ -101,7 +101,7 @@ Dependency Updates
 - commons-io Java library is bumped to version 2.7.
 
 A more detailed list of changes can be found here:
-https://github.com/kframework/k/issues/1697
+https://github.com/runtimeverification/k/issues/1697
 
 K Framework 5.1.0
 =================

@@ -14,7 +14,7 @@ import collection._
  * the class statically.
  *
  * See the wiki for more details:
- * https://github.com/kframework/k/wiki/KORE-data-structures-guide
+ * https://github.com/runtimeverification/k/wiki/KORE-data-structures-guide
  *
  */
 object KORE extends Constructors with ScalaSugared {

@@ -34,7 +34,7 @@ public class KExceptionManager {
             String message = "Uncaught exception thrown of type " + e.getClass().getSimpleName();
             if (!options.debug()) {
                 message += ".\nPlease rerun your program with the --debug flag to generate a stack trace, "
-                        + "and file a bug report at https://github.com/kframework/k/issues";
+                        + "and file a bug report at https://github.com/runtimeverification/k/issues";
             }
             exceptions.add(new KException(ExceptionType.ERROR, KExceptionGroup.INTERNAL, message, e));
             print();
