@@ -9,7 +9,7 @@ import com.martiansoftware.nailgun.NGContext;
 import com.martiansoftware.nailgun.NGListeningAddress;
 import com.martiansoftware.nailgun.NGServer;
 import com.martiansoftware.nailgun.ThreadLocalPrintStream;
-import org.fusesource.jansi.AnsiOutputStream;
+import org.fusesource.jansi.io.AnsiOutputStream;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.Main;
 import org.kframework.utils.OS;
@@ -58,7 +58,7 @@ public class KServerFrontEnd extends FrontEnd {
     private static KServerFrontEnd instance;
     private static Thread threadInstance;
     private static final ImmutableList<String> tools = ImmutableList.of("-kompile", "-krun", "-kast",
-            "-kdep", "-keq", "-kprove", "-kprovex", "-kbmc", "-kserver");
+            "-kdep", "-keq", "-kprove", "-kprovex", "-kbmc", "-kserver", "-k-compile-search-pattern");
 
     private final KServerOptions options;
     private final Map<String, Injector> injectors = new HashMap<>();
@@ -150,10 +150,10 @@ public class KServerFrontEnd extends FrontEnd {
             Main.seedInjector(requestScope, tool, args, workingDir, env, startTime);
             TTYInfo tty = injector.getInstance(TTYInfo.class);
             if (!tty.stdout) {
-                system_out.init(new PrintStream(new AnsiOutputStream(system_out.getPrintStream())));
+                system_out.init(new PrintStream(system_out.getPrintStream()));
             }
             if (!tty.stderr) {
-                system_err.init(new PrintStream(new AnsiOutputStream(system_err.getPrintStream())));
+                system_err.init(new PrintStream(system_err.getPrintStream()));
             }
 
             int result = launcher.runApplication();

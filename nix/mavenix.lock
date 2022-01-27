@@ -2478,14 +2478,6 @@
       "sha1": "419d0d7f80d7d00f8155bd45de15e7cf5d889f0a"
     },
     {
-      "path": "jline/jline/2.13/jline-2.13.jar",
-      "sha1": "2d9530d0a25daffaffda7c35037b046b627bb171"
-    },
-    {
-      "path": "jline/jline/2.13/jline-2.13.pom",
-      "sha1": "21663b93af1247eab73abb3a1c999e9b4b4c4430"
-    },
-    {
       "path": "jline/jline/2.14.6/jline-2.14.6.pom",
       "sha1": "378c8caace8e1e65314477420d9734373cf29531"
     },
@@ -6854,48 +6846,40 @@
       "sha1": "17d9344459471ef3d2792e7452ead549809eccc5"
     },
     {
-      "path": "org/fusesource/fusesource-pom/1.10/fusesource-pom-1.10.pom",
-      "sha1": "ad0238e7718c2f5f50e3e1bf93ed14c3a3d15675"
-    },
-    {
       "path": "org/fusesource/fusesource-pom/1.11/fusesource-pom-1.11.pom",
       "sha1": "f5547b0657be718d1ec0d2816cbcd5c398d6fccb"
     },
     {
-      "path": "org/fusesource/fusesource-pom/1.8/fusesource-pom-1.8.pom",
-      "sha1": "d4f1b288004e1a8c8bc9f61f5f151d1ef0d4211a"
+      "path": "org/fusesource/fusesource-pom/1.12/fusesource-pom-1.12.pom",
+      "sha1": "778b55850b2bb4ebf48c02bc57a9afb1eec8f52e"
     },
     {
-      "path": "org/fusesource/hawtjni/hawtjni-project/1.10/hawtjni-project-1.10.pom",
-      "sha1": "93faf3c8d4abe722978ac34c95b7b27abce53505"
+      "path": "org/fusesource/hawtjni/hawtjni-project/1.18/hawtjni-project-1.18.pom",
+      "sha1": "f52ccd437991b8c04c2c0101c37ea4134b3aad74"
     },
     {
-      "path": "org/fusesource/hawtjni/hawtjni-runtime/1.10/hawtjni-runtime-1.10.jar",
-      "sha1": "3142d79489369a058889796a65e615eb9d20ba5b"
+      "path": "org/fusesource/hawtjni/hawtjni-runtime/1.18/hawtjni-runtime-1.18.jar",
+      "sha1": "f1a69a4e05337df874739adea6b65935cae195ae"
     },
     {
-      "path": "org/fusesource/hawtjni/hawtjni-runtime/1.10/hawtjni-runtime-1.10.pom",
-      "sha1": "76095710434bbf83b57a6bd5ec8cd9e900283b44"
-    },
-    {
-      "path": "org/fusesource/jansi/jansi-project/1.11/jansi-project-1.11.pom",
-      "sha1": "c1fb6dcfa9faf3eafaf00bd66cbea2dbbc8c11d0"
+      "path": "org/fusesource/hawtjni/hawtjni-runtime/1.18/hawtjni-runtime-1.18.pom",
+      "sha1": "7e400881574d027102e47dc2462d36fd153a2770"
     },
     {
       "path": "org/fusesource/jansi/jansi-project/1.12/jansi-project-1.12.pom",
       "sha1": "deaf98271d58b21e78bc4a20d425447fcc03b781"
     },
     {
-      "path": "org/fusesource/jansi/jansi/1.11/jansi-1.11.jar",
-      "sha1": "655c643309c2f45a56a747fda70e3fadf57e9f11"
-    },
-    {
-      "path": "org/fusesource/jansi/jansi/1.11/jansi-1.11.pom",
-      "sha1": "af75ce5357c0cab4dc273738073fcfb39a10fdfe"
-    },
-    {
       "path": "org/fusesource/jansi/jansi/1.12/jansi-1.12.pom",
       "sha1": "5cc7bd0ed4d411d362a05c3645a87ea76a3f2533"
+    },
+    {
+      "path": "org/fusesource/jansi/jansi/2.4.0/jansi-2.4.0.jar",
+      "sha1": "321c614f85f1dea6bb08c1817c60d53b7f3552fd"
+    },
+    {
+      "path": "org/fusesource/jansi/jansi/2.4.0/jansi-2.4.0.pom",
+      "sha1": "8a24a317c524469da0de8024d764605790db8409"
     },
     {
       "path": "org/glassfish/javax.json/1.0.4/javax.json-1.0.4.jar",
@@ -6958,6 +6942,18 @@
       "sha1": "061c533b685552908a13ff6af0f6deb0d531b312"
     },
     {
+      "path": "org/jline/jline-parent/3.21.0/jline-parent-3.21.0.pom",
+      "sha1": "bcc18b1f077a1bb4368cbe83951a0d8fddddf7a2"
+    },
+    {
+      "path": "org/jline/jline/3.21.0/jline-3.21.0.jar",
+      "sha1": "2bf6f2311356f309fda0412e9389d2499346b5a1"
+    },
+    {
+      "path": "org/jline/jline/3.21.0/jline-3.21.0.pom",
+      "sha1": "bd03ef78247c946d6762aa7c72a7e4f1a2c13ce3"
+    },
+    {
       "path": "org/jsoup/jsoup/1.11.3/jsoup-1.11.3.jar",
       "sha1": "36da09a8f68484523fa2aaa100399d612b247d67"
     },
@@ -6998,32 +6994,20 @@
       "sha1": "e0b9da6ab81c1ba9a08f4898ec0a944c275e2ed6"
     },
     {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.0.1/mpfr_java-1.0.1-linux32.jar",
-      "sha1": "8b08caf73df4aa5489ba23725bdb74ed5378d0d7"
+      "path": "org/kframework/mpfr_java/mpfr_java/1.4/mpfr_java-1.4-linux64.jar",
+      "sha1": "78c13578c9052e9f9dcb6723a267fb183e5ebdac"
     },
     {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.0.1/mpfr_java-1.0.1-linux64.jar",
-      "sha1": "4e0140ec3961442fbdd2fecd7c8d2608c0d142e4"
+      "path": "org/kframework/mpfr_java/mpfr_java/1.4/mpfr_java-1.4-osx.jar",
+      "sha1": "e9b757d86b6777dafc45d5fda43151483ed553d3"
     },
     {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.0.1/mpfr_java-1.0.1-osx.jar",
-      "sha1": "56597fb5adf813c122b618221a682c612d4669d4"
+      "path": "org/kframework/mpfr_java/mpfr_java/1.4/mpfr_java-1.4.jar",
+      "sha1": "326d809a7d7ebd9b648e10ab2e3ec17fa8bab20d"
     },
     {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.0.1/mpfr_java-1.0.1-windows32.jar",
-      "sha1": "8e1c247076e5ad41af6fb04a1017c8cfa8a4e3b7"
-    },
-    {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.0.1/mpfr_java-1.0.1-windows64.jar",
-      "sha1": "fa041868aca85b706788ed9b8a15324bcbb3a4e3"
-    },
-    {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.0.1/mpfr_java-1.0.1.jar",
-      "sha1": "11c5a8ece113121145afb5168b1b9f09ad2ec560"
-    },
-    {
-      "path": "org/kframework/mpfr_java/mpfr_java/1.0.1/mpfr_java-1.0.1.pom",
-      "sha1": "4de2d567cb59bdf86b26d9c4723db7033a6de7d8"
+      "path": "org/kframework/mpfr_java/mpfr_java/1.4/mpfr_java-1.4.pom",
+      "sha1": "0be0710dd4702726211e61ce6dd3b56acc2d052f"
     },
     {
       "path": "org/mockito/mockito-core/1.9.5/mockito-core-1.9.5.jar",
@@ -7718,12 +7702,12 @@
       "sha1": "83c041bde1965b281cf4e6b31ab11bcf4b68a649"
     },
     {
-      "path": "org/yaml/snakeyaml/1.24/snakeyaml-1.24.jar",
-      "sha1": "13a9c0d6776483c3876e3ff9384f9bb55b17001b"
+      "path": "org/yaml/snakeyaml/1.30/snakeyaml-1.30.jar",
+      "sha1": "8fde7fe2586328ac3c68db92045e1c8759125000"
     },
     {
-      "path": "org/yaml/snakeyaml/1.24/snakeyaml-1.24.pom",
-      "sha1": "605d93a1f7549eb22a18cb85dc8970bd4123e234"
+      "path": "org/yaml/snakeyaml/1.30/snakeyaml-1.30.pom",
+      "sha1": "767ab0a7a346f60dad0acebe318e335a5d27fe55"
     },
     {
       "path": "oro/oro/2.0.8/oro-2.0.8.jar",

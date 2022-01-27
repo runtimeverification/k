@@ -31,12 +31,21 @@ RUN    apt-get update            \
         openjdk-11-jdk           \
         parallel                 \
         pkg-config               \
+        python                   \
         python3                  \
         python3-graphviz         \
-        z3                       \
         zlib1g-dev
 
 RUN curl -sSL https://get.haskellstack.org/ | sh
+
+RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.11 \
+    && cd z3                                                         \
+    && python scripts/mk_make.py                                     \
+    && cd build                                                      \
+    && make -j8                                                      \
+    && make install                                                  \
+    && cd ../..                                                      \
+    && rm -rf z3
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000

@@ -16,7 +16,7 @@ instructions for a source build of K.
 
 K is developed as a rolling release, with each change to K that passes our
 CI infrastructure being deployed on GitHub for download. The latest release of
-K can be downloaded [here](https://github.com/kframework/k/releases/latest).
+K can be downloaded [here](https://github.com/runtimeverification/k/releases/latest).
 This page also contains information on how to install K. It is recommended
 that you fully uninstall the old version of K prior to installing the new one,
 as K does not maintain entries in package manager databases, with the exception
@@ -27,11 +27,11 @@ of Homebrew on MacOS.
 You can clone K from GitHub with the following Git command:
 
 ```
-git clone https://github.com/kframework/k --recursive
+git clone https://github.com/runtimeverification/k --recursive
 ```
 
 Instructions on how to build K from source can be found
-[here](../../../../README.md).
+[here](https://github.com/runtimeverification/k/blob/master/README.md).
 
 ## Configuring your editor
 
@@ -54,7 +54,7 @@ welcome pull requests into the repository.
 
 If you have problems installing K, we encourage you to reach out to us. If you
 follow the above install instructions and run into a problem, you can
-[Create a bug report on GitHub](https://github.com/kframework/k/issues/new?assignees=&labels=bug&template=bug-report.md&title=%5BBug%5D+%5Bkompile%7Ckast%7Ckrun%7Ckprove%7Cksearch%5D+-+DESCRIPTION)
+[Create a bug report on GitHub](https://github.com/runtimeverification/k/issues/new?assignees=&labels=bug&template=bug-report.md&title=%5BBug%5D+%5Bkompile%7Ckast%7Ckrun%7Ckprove%7Cksearch%5D+-+DESCRIPTION)
 
 ## Next lesson
 

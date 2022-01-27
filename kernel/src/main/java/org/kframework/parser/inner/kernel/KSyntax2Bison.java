@@ -133,6 +133,7 @@ public class KSyntax2Bison {
         "char *injSymbol(char *, char *);\n" +
         "YYSTYPE mergeAmb(YYSTYPE x0, YYSTYPE x1);\n" +
         "node *result;\n" +
+        "extern char *filename;\n" +
         "# define YYMAXDEPTH " + stackDepth + "\n" +
         "# define YYLLOC_DEFAULT(Cur, Rhs, N)                      \\\n" +
         "do                                                        \\\n" +
@@ -160,6 +161,10 @@ public class KSyntax2Bison {
     bison.append("%lex-param {void *scanner} \n");
     bison.append("%parse-param {void *scanner} \n");
     bison.append("%locations\n");
+    bison.append("%initial-action {\n" +
+        "  @$.filename = filename;\n" +
+        "  @$.first_line = @$.first_column = @$.last_line = @$.last_column = 1;\n" +
+        "}\n");
     if (glr) {
       bison.append("%glr-parser\n");
     }
@@ -220,7 +225,7 @@ public class KSyntax2Bison {
     bison.append("\n%%\n");
     bison.append("\n" +
         "void yyerror (YYLTYPE *loc, void *scanner, const char *s) {\n" +
-        "    fprintf (stderr, \"%d:%d:%d:%d:%s\\n\", loc->first_line, loc->first_column, loc->last_line, loc->last_column, s);\n" +
+        "    fprintf (stderr, \"%s:%d:%d:%d:%d:%s\\n\", loc->filename, loc->first_line, loc->first_column, loc->last_line, loc->last_column, s);\n" +
         "}\n");
     try {
       FileUtils.write(path, bison);
@@ -430,7 +435,7 @@ public class KSyntax2Bison {
           "  n3->children[0] = n2;\n" +
           "  n3->children[1] = $1.nterm;\n" +
           "  n3->sort = \"");
-        encodeKore(prod.getSubsortSort(), bison);
+        encodeKore(prod.sort(), bison);
         bison.append("\";\n" +
           "  value_type result = {.nterm = n3};\n" +
           "  $$ = result;\n" +

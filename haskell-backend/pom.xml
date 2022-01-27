@@ -30,6 +30,7 @@
 
   <properties>
     <haskell.backend.flags.release>-release</haskell.backend.flags.release>
+    <stack.extra-opts value="" />
   </properties>
 
   <profiles>
@@ -76,6 +77,24 @@
                   <arg value="install" />
                   <arg value="--local-bin-path=${project.build.directory}/stack-install" />
                   <arg value="--flag=kore:${haskell.backend.flags.release}" />
+                  <arg line="${stack.extra-opts}" />
+                </exec>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>clean-haskell</id>
+            <phase>clean</phase>
+            <configuration>
+              <skip>${haskell.backend.skip}</skip>
+              <target>
+                <mkdir dir="${project.build.directory}/stack-install" />
+                <exec executable="stack" dir="${project.basedir}/src/main/native/haskell-backend" failonerror="true">
+                  <arg value="clean" />
+                  <arg line="${stack.extra-opts}" />
                 </exec>
               </target>
             </configuration>

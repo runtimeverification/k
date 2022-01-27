@@ -47,7 +47,7 @@ module LAMBDA
   rule let X = E in E':Exp => (lambda X . E') E                        [macro]
 
   syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
-  syntax Id ::= "$x" | "$y"
+  syntax Id ::= "$x" [token] | "$y" [token]
   rule letrec F:Id X:Id = E in E'
     => let F =
          (lambda $x . ((lambda F . lambda X . E) (lambda $y . ($x $x $y))))

@@ -116,19 +116,9 @@ in the **type system** of K: namely, the term inside the cast cannot be a
 `syntax S ::= S2` exists.
 
 As a result, if we were to write in the above grammar the term
-`(I1:Int + I2:Int)::Exp2`, then we would know that the first derivation above
-should be chosen, whereas if we want the second derivation, we could write
+`(I1:Int + I2:Int)::Exp2`, then we would know that the second derivation above
+should be chosen, whereas if we want the first derivation, we could write
 `(I1:Int + I2:Int)::Exp`.
-
-#### Exercise
-
-Write a function `eval` which takes a term of sort `Exp2` and returns an `Int`.
-The function should be capable of evaluating any term of sort `Exp2` to the
-integer value which it expresses. You will need to write strict casts in order
-to disambiguate these rules. You will not be able to directly write terms of
-sort `Exp2` directly in a program, so you will have to create new function
-symbols that rewrite constant symbols to terms of sort `Exp2` and use strict
-casts to disambiguate their right-hand side.
 
 ### Projection casts
 
@@ -162,10 +152,10 @@ What this means is that you take any term of sort `S2` and **cast** it to sort
 `S`. If the term of sort S2 consists of an injection containing a term of sort
 `S`, then this will return that term. Otherwise, an error occurs and rewriting
 fails, returning the projection function which failed to apply. The sort is
-not actually checked at compilation time; rather, it a runtime check is
+not actually checked at compilation time; rather, it is a runtime check is
 inserted into the code that runs when the rule applies.
 
-For example, here is an example that makes use of projection casts:
+For example, here is a module that makes use of projection casts:
 
 ```k
 module LESSON-11-D

@@ -64,8 +64,8 @@ endmodule
 We have introduced three major changes to this definition. First, we have
 removed the `Val` sort. We replace it instead with a function `isKResult`.
 The function in question must have the same signature and attributes as seen in
-this example. It ought to return true whenever a term should not be heated
-(because it is a value) and false when it should be heated (because it is not
+this example. It ought to return `true` whenever a term should not be heated
+(because it is a value) and `false` when it should be heated (because it is not
 a value). We thus also insert `isKResult` calls in the side condition of two
 of the heating rules, where the `Val` sort was previously used.
 
@@ -286,7 +286,7 @@ applies first is non-deterministic, and as we saw in Lesson 1.13, we can
 
 ## Exercises
 
-1. Add integer division to `LESSON-14-C`. Make division and addition `strict`
+1. Add integer division to `LESSON-14-D`. Make division and addition `strict`
 instead of `seqstrict`, and write a rule evaluating integer division with a
 side condition that the denominator is non-zero. Run `krun --search` on the
 program `1 / 0 + 2 / 1` and observe all possible outputs of the program. How

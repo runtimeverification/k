@@ -567,7 +567,7 @@ public class TypeInferencer implements AutoCloseable {
         Sort oldExpectedSort = expectedSort;
         Optional<ProductionReference> oldExpectedParams = expectedParams;
         TermCons tc = (TermCons)pr;
-        // traverse childrfen
+        // traverse children
         for (int i = 0, j = 0; i < tc.production().items().size(); i++) {
           if (tc.production().items().apply(i) instanceof NonTerminal) {
             NonTerminal nt = (NonTerminal)tc.production().items().apply(i);
@@ -617,6 +617,7 @@ public class TypeInferencer implements AutoCloseable {
         if (pr instanceof Constant && (pr.production().sort().equals(Sorts.KVariable()) || pr.production().sort().equals(Sorts.KConfigVar()))) {
           Constant c = (Constant) pr;
           String name;
+          boolean oldStrictEquality = isStrictEquality;
           if (!shared) {
             nextId++;
             variablesById.add(new ArrayList<>());
@@ -624,6 +625,7 @@ public class TypeInferencer implements AutoCloseable {
             pr.setId(Optional.of(id));
             if (isAnonVar(c)) {
               name = "Var" + c.value() + locStr(c);
+              isStrictEquality = true;
             } else {
               name = "Var" + c.value();
             }
@@ -635,6 +637,7 @@ public class TypeInferencer implements AutoCloseable {
             name = variablesById.get(id).get(0);
           }
           pushConstraint(name, c);
+          isStrictEquality = oldStrictEquality;
         } else if (isRealSort(pr.production().sort().head())) {
           pushConstraint(pr.production().sort(), Optional.of(pr));
         }
@@ -650,7 +653,7 @@ public class TypeInferencer implements AutoCloseable {
     }
 
     boolean isAnonVar(Constant var) {
-      return ResolveAnonVar.isAnonVar(KVariable(var.value()));
+      return ResolveAnonVar.isAnonVarOrNamedAnonVar(KVariable(var.value()));
     }
 
     /**
@@ -886,7 +889,10 @@ public class TypeInferencer implements AutoCloseable {
         int endIdx = result.length() - 2;
         result = result.substring(startIdx, endIdx);
       }
-      return new SmtSortParser(new StringReader(result)).Sort();
+      Sort r = new SmtSortParser(new StringReader(result)).Sort();
+      if (DEBUG)
+        sb.append("; ").append(r).append("\n");
+      return r;
     } catch (IOException e) {
       throw KEMException.internalError("Could not read from z3 process", e, currentTerm);
     } catch (ParseException e) {

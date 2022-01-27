@@ -516,4 +516,13 @@ public class RuleGrammarTest {
         parseRule("constr(A, B, C, D) => .K", def, 0, false); // 17 amb at top 16 final
         parseRule("constr(a, a, a) => .K", def, 0, true); // 'a' is not subsorted to the list
     }
+
+    @Test
+    public void test26() {
+        String def = "" +
+                "module TEST " +
+                "syntax Exp ::= \"\" " +
+                "endmodule";
+        parseProgram("", def, "Exp", 0, false);
+    }
 }

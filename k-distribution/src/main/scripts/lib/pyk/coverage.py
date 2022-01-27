@@ -3,10 +3,9 @@
 import json
 import sys
 
+from .util      import *
 from .kast      import *
 from .kastManip import *
-
-from .kast import _fatal, _notif, _warning
 
 def getRuleById(definition, rule_id):
     """Get a rule from the definition by coverage rule id.
@@ -25,7 +24,7 @@ def getRuleById(definition, rule_id):
                 atts = sentence['att']['att']
                 if 'UNIQUE_ID' in atts and atts['UNIQUE_ID'] == rule_id:
                     return sentence
-    _fatal('Could not find rule with ID: ' + rule_id)
+    fatal('Could not find rule with ID: ' + rule_id)
 
 def stripCoverageLogger(rule):
     ruleBody     = rule['body']
@@ -87,11 +86,11 @@ def translateCoverage(src_all_rules, dst_all_rules, dst_definition, src_rules_li
     dst_rule_list = []
     for src_rule in src_rule_list:
         if src_rule not in src_rule_map:
-            _fatal('COULD NOT FIND RULE IN src_rule_map: ' + src_rule)
+            fatal('COULD NOT FIND RULE IN src_rule_map: ' + src_rule)
         src_rule_loc = src_rule_map[src_rule]
 
         if src_rule_loc not in dst_rule_map:
-            _fatal('COULD NOT FIND RULE LOCATION IN dst_rule_map: ' + src_rule_loc)
+            fatal('COULD NOT FIND RULE LOCATION IN dst_rule_map: ' + src_rule_loc)
         dst_rule = dst_rule_map[src_rule_loc]
 
         if dst_rule in dst_non_function_rules:

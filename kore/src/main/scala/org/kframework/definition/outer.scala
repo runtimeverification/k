@@ -3,6 +3,7 @@
 package org.kframework.definition
 
 import java.util.Optional
+import java.lang.Comparable
 import javax.annotation.Nonnull
 
 import dk.brics.automaton.{BasicAutomata, RegExp, RunAutomaton, SpecialOperations}
@@ -234,14 +235,26 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
   lazy val rules: Set[Rule] = sentences collect { case r: Rule => r }
   lazy val rulesAndClaims: Set[RuleOrClaim] = Set[RuleOrClaim]().++(claims).++(rules)
   lazy val rulesFor: Map[KLabel, Set[Rule]] = rules.groupBy(r => matchKLabel(r))
-  lazy val macroKLabels: Set[KLabel] = rules.filter(r => r.isMacro).map(r => matchKLabel(r))
+  lazy val macroKLabels: Set[KLabel] = macroKLabelsFromRules++macroKLabelsFromProductions
+  lazy val macroKLabelsFromRules: Set[KLabel] = rules.filter(r => r.isMacro).map(r => matchKLabel(r))
+  lazy val macroKLabelsFromProductions: Set[KLabel] = productions.filter(p => p.isMacro).map(p => matchKLabel(p))
 
-  private def matchKLabel(r: Rule) = r.body match {
+  def matchKLabel(r: Rule): KLabel = r.body match {
     case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KApply(s, _) :: _) => s
     case Unapply.KApply(Unapply.KLabel("#withConfig"), Unapply.KRewrite(Unapply.KApply(s, _), _) :: _) => s
     case Unapply.KApply(s, _) => s
     case Unapply.KRewrite(Unapply.KApply(s, _), _) => s
     case _ => KORE.KLabel("")
+  }
+
+  private def matchKLabel(p: Production) = p.klabel match {
+    case Some(klabel) => klabel
+    case _ => KORE.KLabel("")
+  }
+
+  def ruleLhsHasMacroKLabel(r: Rule): Boolean = r.body match {
+    case Unapply.KRewrite(Unapply.KApply(l @ Unapply.KLabel(_), _), _) => macroKLabelsFromProductions.contains(l)
+    case _ => false
   }
 
   lazy val contexts: Set[Context] = sentences collect { case r: Context => r }
@@ -638,7 +651,7 @@ sealed trait ProductionItem extends OuterKORE
 
 // marker
 
-sealed trait TerminalLike extends ProductionItem {
+sealed trait TerminalLike extends ProductionItem with Comparable[TerminalLike] {
 }
 
 case class NonTerminal(sort: Sort, name: Option[String]) extends ProductionItem
@@ -653,8 +666,22 @@ case class RegexTerminal(precedeRegex: String, regex: String, followRegex: Strin
     SpecialOperations.reverse(unreversed)
     new RunAutomaton(unreversed, false)
   }
+
+  def compareTo(t: TerminalLike): Int = {
+    if (t.isInstanceOf[Terminal]) {
+      return 1;
+    }
+    return regex.compareTo(t.asInstanceOf[RegexTerminal].regex)
+  }
 }
 
 case class Terminal(value: String) extends TerminalLike // hooked
   with TerminalToString {
+
+  def compareTo(t: TerminalLike): Int = {
+    if (t.isInstanceOf[RegexTerminal]) {
+      return -1;
+    }
+    return value.compareTo(t.asInstanceOf[Terminal].value)
+  }
 }

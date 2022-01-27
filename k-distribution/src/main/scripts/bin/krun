@@ -50,25 +50,18 @@ keepTempsIfDryRun () {
   # kepp files used by dry-run
   if $dryRun; then
     local newArray=()
-    for value in "${tempFiles[@]}"; do
+    for value in ${tempFiles[@]+"${tempFiles[@]}"}; do
         if [[ ! "$@" =~ ${value} ]]; then
           newArray+=($value)
         fi
     done
     tempFiles=()
-    tempFiles=${newArray[@]}
+    tempFiles=${newArray[@]+"${newArray[@]}"}
     unset newArray
   fi
 }
 
-execute () {
-  (
-  if $verbose; then
-    set -x
-  fi
-  "$@"
-  )
-}
+source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 KRUN=$(basename "$0")
 
@@ -433,7 +426,7 @@ if ! $hasKompiledDir; then
 fi
 
 if [ ! -f "$kompiledDir/definition.kore" ]; then
-  "$(dirname "$0")/krun-legacy" "${ORIG_ARGV[@]}"
+  "$(dirname "$0")/krun-legacy" ${ORIG_ARGV[@]+"${ORIG_ARGV[@]}"}
   exit $?
 fi
 
@@ -460,17 +453,17 @@ if $term; then
     execute $parser_PGM "$config_var_PGM" > "$input_file"
   fi
 else
-  for configVar in "${declaredConfigVars[@]}"; do
-    if [[ $configVar != "IO" && $configVar != "STDIN" && ! "${params[@]}" =~ "$configVar" ]]; then
+  for configVar in ${declaredConfigVars[@]+"${declaredConfigVars[@]}"}; do
+    if [[ $configVar != "IO" && $configVar != "STDIN" && ! ${params[@]+"${params[@]}"} =~ "$configVar" ]]; then
       error "Configuration variable missing: \$$configVar. Use -c$configVar=<Value> in the command line to set."
     fi
   done
-  for name in "${params[@]}"; do
+  for name in ${params[@]+"${params[@]}"}; do
     parser_name="parser_$name"
     config_name="config_var_$name"
     tempFile="$(mktemp ${tempDir}/tmp.in."$name".XXXXXXXXXX)"
     tempFiles+=("$tempFile")
-    if [[ ! "${declaredConfigVars[@]}" =~ "$name" ]]; then
+    if [[ ! ${declaredConfigVars[@]+"${declaredConfigVars[@]}"} =~ "$name" ]]; then
       if [ "$name" = "PGM" ]; then
         error "Configuration variable \$PGM does not exist. Do not pass a positional argument to $KRUN."
       else
@@ -496,7 +489,7 @@ else
     else
       parser=("${!parser_name}")
     fi
-    execute ${parser[@]} "${!config_name}" > "$tempFile"
+    execute ${parser[@]+"${parser[@]}"} "${!config_name}" > "$tempFile"
     configVars="$configVars -c $name $(basename $tempFile) $sortName korefile"
   done
   if [[ ${declaredConfigVar_IO+unset} && "${declaredConfigVar_IO}" = "String" ]]; then
@@ -540,20 +533,33 @@ if [ "$backendName" = "llvm" ]; then
   fi
 
   keepTempsIfDryRun "$tempDir" "$expanded_input_file" "$kore_output"
-  if $search; then
+  if $search || [ -n "$pattern" ]; then
     if [ ! -f "$kompiledDir/search" ] || [ ! -x "$kompiledDir/search" ]; then
       error 'You must pass --enable-search to kompile to be able to use krun --search with the LLVM backend'
     fi
-    if [ -n "$pattern" ]; then
-      error "Backend llvm does not support search patterns yet."
+    patternFile="$(mktemp ${tempDir}/tmp.pattern.XXXXXXXXXX)"
+    tempFiles+=("$patternFile")
+    if [ -z "$pattern" ]; then
+      echo '\and{SortGeneratedTopCell{}}(VarResult:SortGeneratedTopCell{},\top{SortGeneratedTopCell{}}())' > "$patternFile"
+    else
+      execute k-compile-search-pattern --directory "$dir" "$pattern" > "$patternFile"
     fi
+
     if [[ $searchType != "FINAL" ]]; then
       error "Backend llvm does not support --search-all, --search-one-or-more-steps, or --search-one-step yet"
     fi
+    disjunctFile="$(mktemp ${tempDir}/tmp.disjunction.XXXXXXXXXX)"
+    tempFiles+=("$disjunctFile")
+    if $search; then
+      llvmCommand="$kompiledDir/search"
+    else
+      llvmCommand="$kompiledDir/interpreter"
+    fi
     set +e
-    execute $cmdprefix "$kompiledDir/search" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags
+    execute $cmdprefix "$llvmCommand" "$expanded_input_file" "${depth:--1}" "$disjunctFile" $interpreter_flags
     result=$?
     set -e
+    execute kore-match-disjunction "$kompiledDir/definition.kore" --module "$mainModuleName" --disjunction "$disjunctFile" --match "$patternFile" --output "$kore_output"
   else
     set +e
     execute $cmdprefix "$kompiledDir/interpreter" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags
@@ -624,7 +630,7 @@ if ! $dryRun; then
       mv "$kore_output2" "$kore_output"
     fi
 
-    execute kore-print --directory "$dir" --output "$outputMode" "$kore_output" --color "$colorOpt" $filterSubst > "$outputFile"
+    output "$outputFile" execute kore-print --directory "$dir" --output "$outputMode" "$kore_output" --color "$colorOpt" $filterSubst
   else
     error "Backend crashed during rewriting with exit code $result"
   fi

@@ -1,0 +1,25 @@
+[Error] Compiler: Claims are not allowed in the definition.
+	Source(existentialCheck.k)
+	Location(14,9,14,29)
+[Error] Compiler: Existential variable ?X found in LHS. Existential variables are only allowed in the RHS.
+	Source(existentialCheck.k)
+	Location(14,13,14,15)
+[Error] Compiler: Found existential variable not supported by concrete backend.
+	Source(existentialCheck.k)
+	Location(14,13,14,15)
+[Error] Compiler: Existential variable ?X found in LHS. Existential variables are only allowed in the RHS.
+	Source(existentialCheck.k)
+	Location(16,12,16,14)
+[Error] Compiler: Found existential variable not supported by concrete backend.
+	Source(existentialCheck.k)
+	Location(16,12,16,14)
+[Error] Compiler: Found existential variable not supported by concrete backend.
+	Source(existentialCheck.k)
+	Location(18,22,18,28)
+[Error] Compiler: Existential variable ?STATE found in LHS. Existential variables are only allowed in the RHS.
+	Source(existentialCheck.k)
+	Location(19,21,19,27)
+[Error] Compiler: Found existential variable not supported by concrete backend.
+	Source(existentialCheck.k)
+	Location(19,21,19,27)
+[Error] Compiler: Had 8 structural errors.
