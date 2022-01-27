@@ -10,6 +10,7 @@
 # your script:
 #
 # source "$(dirname "$0")/../lib/kframework/k-util.sh"
+# ktool=TOOL_NAME
 
 # initialize flags
 fold_lines='fold -s'
@@ -18,11 +19,12 @@ verbose=false
 
 # initialize state
 result=0
+ktool=
 
 error () {
   local result
   result="$1" ; shift
-  printf "[Error] Critical: $*\n" | ${fold_lines} 1>&2
+  printf "[Error] ${ktool}: $*\n" | ${fold_lines} 1>&2
   exit ${result}
 }
 
