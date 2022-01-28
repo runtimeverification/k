@@ -21,10 +21,6 @@ else
   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$K_LIB_DIR/native/linux$ARCH"
 fi
 
-if [ -d "$K_LIB_DIR/opamroot" ]; then
-  eval `opam config env --root="$K_LIB_DIR/opamroot"`
-fi
-
 export LC_ALL=C  # sets locale to C to avoid issues with numeric formats
 if [ -n "${TERM}" ]; then
   export TERM;

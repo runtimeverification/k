@@ -115,21 +115,13 @@ public class ResolveStrict {
         for (int i = 0; i < strictnessPositions.size(); i++) {
             List<K> items = new ArrayList<>();
             for (int j = 0; j < arity; j++) {
-                if (kompileOptions.strict()) {
-                    // Preserve sort information of the production
-                    items.add(cast(production.nonterminal(j).sort(), KVariable("K" + j)));
-                } else {
-                    items.add(KVariable("K" + j));
-                }
+                // Preserve sort information of the production
+                items.add(cast(production.nonterminal(j).sort(), KVariable("K" + j)));
             }
             int strictnessPosition = strictnessPositions.get(i) - 1;
             K hole;
-            if (kompileOptions.strict()) {
-                // Preserve sort information of the production
-                hole = cast(production.nonterminal(strictnessPosition).sort(), KVariable("HOLE"));
-            } else {
-                hole = cast(Sorts.KItem(), KVariable("HOLE"));
-            }
+            // Preserve sort information of the production
+            hole = cast(production.nonterminal(strictnessPosition).sort(), KVariable("HOLE"));
 
             for (ContextAlias alias : aliases) {
                 K body = new TransformK() {
@@ -225,12 +217,8 @@ public class ResolveStrict {
             for (KLabel result : results) {
                 List<K> items = new ArrayList<>();
                 for (int j = 0; j < arity; j++) {
-                    if (kompileOptions.strict()) {
-                        // Preserve sort information of the production
-                        items.add(cast(production.nonterminal(j).sort(), KVariable("K" + j)));
-                    } else {
-                        items.add(KVariable("K" + j));
-                    }
+                    // Preserve sort information of the production
+                    items.add(cast(production.nonterminal(j).sort(), KVariable("K" + j)));
                 }
                 K term = KApply(production.klabel().get(), KList(items));
                 Optional<KApply> sideCondition = allPositions.stream().map(j -> KApply(result, KVariable("K" + (j - 1)))).reduce(BooleanUtils::and);

@@ -155,8 +155,7 @@ if ! $hasKompiledDir; then
 fi
 
 if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then
-  error 1 'Bison is not supported on Java or Ocaml backends.'
-  exit 1
+  error 1 'Bison is not supported on Java backend.'
 fi
 
 if [ -z "${module+unset}" ]; then

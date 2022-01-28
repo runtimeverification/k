@@ -48,11 +48,6 @@ let
     postInstall = ''
       cp -r k-distribution/target/release/k/{bin,include,lib} $out/
 
-      rm "$out/bin/k-configure-opam"
-      rm "$out/bin/k-configure-opam-dev"
-      rm "$out/bin/kserver-opam"
-      rm -fr "$out/lib/opam"
-
       prelude_kore="$out/include/kframework/kore/prelude.kore"
       mkdir -p "$(dirname "$prelude_kore")"
       ln -s "${prelude-kore}" "$prelude_kore"
