@@ -9,8 +9,8 @@
 # You can use this script by adding the following line (minus the comment) to
 # your script:
 #
-# source "$(dirname "$0")/../lib/kframework/k-util.sh"
 # ktool=TOOL_NAME
+# source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 # initialize flags
 fold_lines='fold -s'
@@ -19,7 +19,6 @@ verbose=false
 
 # initialize state
 result=0
-ktool=
 
 error () {
   local result
