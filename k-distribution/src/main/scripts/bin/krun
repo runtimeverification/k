@@ -19,7 +19,6 @@ pattern=
 search=false
 searchType=FINAL
 term=false
-verbose=false
 literal=false
 outputMode=pretty
 statistics=false
@@ -29,12 +28,10 @@ llvm_krun_flags=
 configVars=
 dryRun=false
 expandMacros=true
-result=1
 filterSubst=
-fold_lines="fold -s"
 
 # setup temp files
-now=`date +"%Y-%m-%d-%H-%M-%S"`
+now="$(date +"%Y-%m-%d-%H-%M-%S")"
 tempDir="$(mktemp -d .krun-${now}-XXXXXXXXXX)"
 tempFiles=("$tempDir")
 trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
@@ -61,18 +58,13 @@ keepTempsIfDryRun () {
   fi
 }
 
-source "$(dirname "$0")/../lib/kframework/k-util.sh"
-
 KRUN=$(basename "$0")
 
-error () {
-  printf "[Error] Critical: $@\n" | $fold_lines 1>&2
-  exit $result
-}
-
-warning () {
-  printf "[Warning] Compiler: $@\n" | $fold_lines 1>&2
-}
+ktool="${KRUN}"
+source "$(dirname "$0")/../lib/kframework/k-util.sh"
+if ${verbose}; then
+  llvm_krun_flags="${llvm_krun_flags} -v"
+fi
 
 print_usage () {
 cat <<HERE
@@ -85,6 +77,12 @@ $KRUN expects 0 or 1 positional arguments. If a positional argument is present,
 it must be a file and the contents of that file is parsed using the parser
 specified with --parser and used as the value of \$PGM (unless --term is
 present; see below).
+
+General options:
+
+$(k_util_usage)
+
+$KRUN options:
 
       --bound N            Return at most N solutions  with --search
       --depth N            Execute at most N rewrite steps
@@ -113,8 +111,6 @@ present; see below).
                            stdin/stdout via cells with "stream" attribute.
                            Defaults to enabled when performing concrete
                            execution, and disabled when --search is passed.
-      --no-exc-wrap        Do not wrap exception messages to 80 chars. Keep
-                           long lines.
       --no-expand-macros   Don't expand macros in initial configuration.
                            This assumes that the initial configuration contains
                            no macro terms. Behavior is undefined if this is not
@@ -151,7 +147,6 @@ present; see below).
                            value for \$PGM as the entire input configuration.
                            i.e., skip composing configuration from
                            configuration variables.
-  -v, --verbose            Print significant commands executed by $KRUN.
       --version            Print version of K
       --                   Interpret all arguments following as positional
                            arguments.
@@ -190,7 +185,7 @@ do
         ;;
 
         *)
-        error 'Invalid value for --color. Should be "on" or "off".'
+        error 1 'Invalid value for --color. Should be "on" or "off".'
         ;;
       esac
       shift
@@ -247,14 +242,10 @@ do
         ;;
 
         *)
-        error 'Invalid value for --io. Should be "on" or "off".'
+        error 1 'Invalid value for --io. Should be "on" or "off".'
         ;;
       esac
       shift
-      ;;
-
-      --no-exc-wrap)
-      fold_lines="cat -"
       ;;
 
       --no-substitution-filtering)
@@ -277,7 +268,7 @@ do
         none) ;;
 
         *)
-        error 'Invalid value for --output. Should be one of "pretty", "program", "kast", "binary", "json", "latex", "kore", or "none".'
+        error 1 'Invalid value for --output. Should be one of "pretty", "program", "kast", "binary", "json", "latex", "kore", or "none".'
         ;;
       esac
       outputMode="$2"
@@ -332,7 +323,7 @@ do
         ;;
 
         *)
-        error 'Invalid value for --smt. Should be "z3" or "none".'
+        error 1 'Invalid value for --smt. Should be "z3" or "none".'
         ;;
       esac
       shift
@@ -345,11 +336,6 @@ do
 
       --term)
       term=true
-      ;;
-
-      -v|--verbose)
-      verbose=true
-      llvm_krun_flags="$llvm_krun_flags -v"
       ;;
 
       --save-temps)
@@ -406,7 +392,7 @@ if [ -z "${color+unset}" ]; then
 fi
 
 if [[ "${#ARGV[@]}" -gt 1 ]]; then
-  error 'Cannot pass more than one configuration variable as a positional argument.'
+  error 1 'Cannot pass more than one configuration variable as a positional argument.'
 fi
 
 # Compute kompiled directory
@@ -416,13 +402,13 @@ for file in "$dir"/*-kompiled; do
   [ ! -d "$file" ] && continue
   kompiledDir=$file
   if $hasKompiledDir; then
-    error 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
+    error 1 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
   fi
   hasKompiledDir=true
 done
 
 if ! $hasKompiledDir; then
-  error 'Could not find a compiled definition. Use --directory to specify one.'
+  error 1 'Could not find a compiled definition. Use --directory to specify one.'
 fi
 
 if [ ! -f "$kompiledDir/definition.kore" ]; then
@@ -455,7 +441,7 @@ if $term; then
 else
   for configVar in ${declaredConfigVars[@]+"${declaredConfigVars[@]}"}; do
     if [[ $configVar != "IO" && $configVar != "STDIN" && ! ${params[@]+"${params[@]}"} =~ "$configVar" ]]; then
-      error "Configuration variable missing: \$$configVar. Use -c$configVar=<Value> in the command line to set."
+      error 1 "Configuration variable missing: \$$configVar. Use -c$configVar=<Value> in the command line to set."
     fi
   done
   for name in ${params[@]+"${params[@]}"}; do
@@ -465,9 +451,9 @@ else
     tempFiles+=("$tempFile")
     if [[ ! ${declaredConfigVars[@]+"${declaredConfigVars[@]}"} =~ "$name" ]]; then
       if [ "$name" = "PGM" ]; then
-        error "Configuration variable \$PGM does not exist. Do not pass a positional argument to $KRUN."
+        error 1 "Configuration variable \$PGM does not exist. Do not pass a positional argument to $KRUN."
       else
-        error "Configuration variable \$$name does not exist. Do not pass -c$name to $KRUN."
+        error 1 "Configuration variable \$$name does not exist. Do not pass -c$name to $KRUN."
       fi
     fi
     indirectName="declaredConfigVar_$name"
@@ -535,7 +521,7 @@ if [ "$backendName" = "llvm" ]; then
   keepTempsIfDryRun "$tempDir" "$expanded_input_file" "$kore_output"
   if $search || [ -n "$pattern" ]; then
     if [ ! -f "$kompiledDir/search" ] || [ ! -x "$kompiledDir/search" ]; then
-      error 'You must pass --enable-search to kompile to be able to use krun --search with the LLVM backend'
+      error 1 'You must pass --enable-search to kompile to be able to use krun --search with the LLVM backend'
     fi
     patternFile="$(mktemp ${tempDir}/tmp.pattern.XXXXXXXXXX)"
     tempFiles+=("$patternFile")
@@ -546,7 +532,7 @@ if [ "$backendName" = "llvm" ]; then
     fi
 
     if [[ $searchType != "FINAL" ]]; then
-      error "Backend llvm does not support --search-all, --search-one-or-more-steps, or --search-one-step yet"
+      error 1 'Backend llvm does not support --search-all, --search-one-or-more-steps, or --search-one-step yet.'
     fi
     disjunctFile="$(mktemp ${tempDir}/tmp.disjunction.XXXXXXXXXX)"
     tempFiles+=("$disjunctFile")
@@ -616,7 +602,7 @@ elif [ "$backendName" = "haskell" ] ; then
     set -e
   fi
 else
-  error "Backend $backendName not supported. Use krun-legacy."
+  error 1 "Backend $backendName not supported. Use krun-legacy."
 fi
 
 # Unparsing
@@ -632,8 +618,8 @@ if ! $dryRun; then
 
     output "$outputFile" execute kore-print --directory "$dir" --output "$outputMode" "$kore_output" --color "$colorOpt" $filterSubst
   else
-    error "Backend crashed during rewriting with exit code $result"
+    error ${result} "Backend crashed during rewriting with exit code ${result}"
   fi
 fi
 
-exit $result
+exit ${result}
