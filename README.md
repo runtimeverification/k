@@ -267,7 +267,7 @@ Framework, you can add a `shell.nix` based on this template:
 with pkgs;
 let
   kframework = import ./path/to/k {};
-  inherit (kframework) mkShell;
+  inherit (kframework) mkShell clang;
 in
 mkShell {
   buildInputs = [
