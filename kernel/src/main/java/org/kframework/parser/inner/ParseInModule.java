@@ -190,6 +190,9 @@ public class ParseInModule implements Serializable, AutoCloseable {
         }
         return scanner;
     }
+    public void setScanner(Scanner s) {
+        scanner = s;
+    }
 
     public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
         parseString(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
@@ -252,6 +255,9 @@ public class ParseInModule implements Serializable, AutoCloseable {
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
             rez = new CorrectKSeqPriorityVisitor().apply(rez.right().get());
+            if (rez.isLeft())
+                return new Tuple2<>(rez, warn);
+            rez = new CorrectLetPriorityVisitor().apply(rez.right().get());
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
             rez = new CorrectCastPriorityVisitor().apply(rez.right().get());

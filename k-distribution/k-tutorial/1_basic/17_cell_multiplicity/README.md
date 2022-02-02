@@ -75,12 +75,17 @@ command.
 The second type of cell multiplicity we will discuss is `*`. Simlar to a
 regular expression language, this attribute tells the compiler that this cell
 can appear 0 or more times in the configuration. In other words, it is a
-**cell collection**. All cell collections are required to have the `type`
-attribute set to either `Set` or `Map`. A `Set` cell collection is represented
-as a set and behaves internally the same as the `Set` sort, although it
-actually declares a new sort. A `Map` cell collection is represented as a `Map`
-in which the first subcell of the cell collection is the key and the remaining
-cells are the value.
+**cell collection**. Cells with multiplicity `*` must be the only child of
+their parent cell. As a convention, the inner cell is usually named with the
+singular form of what it contains, and the outer cell with the plural form, for
+example, "thread" and "threads".
+
+All cell collections are required to have the `type` attribute set to either
+`Set` or `Map`. A `Set` cell collection is represented as a set and behaves
+internally the same as the `Set` sort, although it actually declares a new
+sort. A `Map` cell collection is represented as a `Map` in which the first
+subcell of the cell collection is the key and the remaining cells are the
+value.
 
 For example, consider the following module:
 

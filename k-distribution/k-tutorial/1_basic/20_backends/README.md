@@ -66,19 +66,19 @@ definition with the LLVM Backend.
 
 ## Legacy backends
 
-As a quick note, K does provide two other backends, which exist primarily
-as legacy code which should be considered deprecated. These are the
-**Java Backend** and the **OCAML Backend**. The Java Backend is essentially
-a precursor to the Haskell Backend, and the OCAML Backend is essentially a
-precursor to the LLVM Backend. We will not cover these backends in any detail
-since they are deprecated, but we still mention them here for the purposes
-of understanding.
+As a quick note, K does provide one other backend, which exists primarily as
+legacy code which should be considered deprecated. This is the
+**Java Backend**. The Java Backend is essentially a precursor to the Haskell
+Backend. We will not cover this backend in any detail since it is deprecated, 
+but we still mention it here for the purposes of understanding.
 
 ## Exercises
 
 1. Compile your solution to Lesson 1.18, Problem 2 with the Haskell Backend
 and execute some programs. Compare the resulting configurations with the
-output of the same program on the LLVM Backend.
+output of the same program on the LLVM Backend. Note that if you are getting
+different behaviors on the Haskell backend, you might have some luck debugging
+by passing `--search` to `krun` when using the LLVM backend.
 
 ## Next lesson
 

@@ -98,7 +98,7 @@ public class RuleAuditing {
         }
         if (isAudit() && !auditState.get().isSuccess && !auditState.get().isFailure) {
             throw KEMException.internalError("Unexpectedly reached the end of an audit step. Please "
-                    + "file an issue with a minimal example at https://github.com/kframework/k/issues "
+                    + "file an issue with a minimal example at https://github.com/runtimeverification/k/issues "
                     + " so that we can add audit instrumentation for your case.");
         }
         auditState.set(null);

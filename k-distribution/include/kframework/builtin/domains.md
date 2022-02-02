@@ -185,16 +185,6 @@ of any of the syntax defined in any of these modules.
   rule IDX::Int in_keys(arr(_, I::Int, _)) => IDX >=Int 0 andBool IDX <Int I
 endmodule
 
-module ARRAY-CONCRETE [concrete, kast]
-  imports ARRAY-SYNTAX
-  imports LIST
-  imports STRING-SYNTAX
-
-  syntax Array ::= makeEmptyArray(Int) [function, hook(ARRAY.makeEmpty), impure]
-                 | arrayCtor(String, Int, KItem) [function, hook(ARRAY.ctor), symbol]
-                 | makeArray(Int, KItem) [function, hook(ARRAY.make), impure, klabel(makeArrayOcaml)]
-endmodule
-
 module ARRAY-SYMBOLIC [symbolic]
   imports ARRAY-IN-K
 endmodule
@@ -204,7 +194,6 @@ module ARRAY-KORE [kore]
 endmodule
 
 module ARRAY
-  imports ARRAY-CONCRETE
   imports ARRAY-SYMBOLIC
   imports ARRAY-KORE
 endmodule
@@ -1433,7 +1422,7 @@ length of the substring). There are two important facts to note:
     character at `endIndex`, i.e., the range is `[startIndex..endIndex)`.
 2.  this function is only defined on valid indices (i.e., it is defined when
     `startIndex < endIndex` and `endIndex` is less than or equal to the string
-    legnth).
+    length).
 
 ```k
   syntax String ::= substrString ( String , startIndex: Int , endIndex: Int ) [function, functional, hook(STRING.substr)]
@@ -1683,7 +1672,8 @@ consistency.
 module BYTES-SYNTAX
   imports private STRING-SYNTAX
 
-  syntax Bytes [hook(BYTES.Bytes), token]
+  syntax Bytes [hook(BYTES.Bytes)]
+  syntax Bytes ::= r"b[\\\"](([^\\\"\\n\\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]"      [token]
 endmodule
 ```
 
@@ -2439,6 +2429,9 @@ tutorial.
 
 ```k
   syntax Stream ::= #buffer(K)
+                  | #istream(Int)
+                  | #parseInput(String, String)
+                  | #ostream(Int)
 
 endmodule
 
@@ -2454,9 +2447,6 @@ module STDIN-STREAM
   imports LIST
   imports INT
   imports BOOL
-
-  syntax Stream ::= #istream(Int)
-  syntax Stream ::= #parseInput(String, String)
 
   configuration <stdin> ListItem(#buffer($STDIN:String)) ListItem($IO:String) ListItem(#istream(#stdin)) </stdin>
 
@@ -2551,8 +2541,6 @@ module STDOUT-STREAM
   imports K-IO
   imports LIST
   imports STRING
-
-  syntax Stream ::= #ostream(Int)
 
   configuration <stdout> ListItem(#ostream(#stdout)) ListItem($IO:String) ListItem(#buffer("")) </stdout>
 //configuration <stderr> ListItem(#ostream(#stderr)) ListItem($IO:String) ListItem(#buffer("")) </stderr>

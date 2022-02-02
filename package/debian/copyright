@@ -1,7 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: kframework
 Upstream-Contact: Dwight Guth <dwight.guth@runtimeverification.com>
-Source: https://github.com/kframework/k
+Source: https://github.com/runtimeverification/k
 
 Files: *
 Copyright: 2010-2021 K Team <contact@runtimeverification.com>

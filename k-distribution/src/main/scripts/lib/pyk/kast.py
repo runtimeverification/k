@@ -3,37 +3,7 @@
 import sys
 import json
 
-def _notif(msg):
-    sys.stderr.write('\n')
-    sys.stderr.write(msg + '\n')
-    sys.stderr.write(''.join(['=' for c in msg]) + '\n')
-    sys.stderr.flush()
-
-def _warning(msg):
-    _notif('[WARNING] ' + msg)
-
-def _fatal(msg, code = 1):
-    _notif('[FATAL] ' + msg)
-    sys.exit(code)
-
-def combineDicts(*dicts):
-    if len(dicts) == 0:
-        return {}
-    if len(dicts) == 1:
-        return dicts[0]
-    dict1 = dicts[0]
-    dict2 = dicts[1]
-    restDicts = dicts[2:]
-    if dict1 is None or dict2 is None:
-        return None
-    intersecting_keys = set(dict1.keys()).intersection(set(dict2.keys()))
-    for key in intersecting_keys:
-        if dict1[key] != dict2[key]:
-            return None
-    newDict = { key : dict1[key] for key in dict1 }
-    for key in dict2.keys():
-        newDict[key] = dict2[key]
-    return combineDicts(newDict, *restDicts)
+from .util import *
 
 def KApply(label, args):
     return { 'node': 'KApply', 'label': label, 'variable': False, 'arity': len(args), 'args': args }
@@ -167,6 +137,12 @@ def KSyntaxLexical(newSort, oldSort, att = None):
 def isKSyntaxLexical(k):
     return k['node'] == 'KSyntaxLexical'
 
+def KImport(name, public = True):
+    return { 'node': 'KImport', 'name': name, 'isPublic': public }
+
+def isKImport(k):
+    return k['node'] == 'KImport'
+
 def KFlatModule(name, imports, localSentences, att = None):
     return { 'node': 'KFlatModule', 'name': name, 'imports': imports, 'localSentences': localSentences, 'att': att }
 
@@ -216,10 +192,21 @@ def addAttributes(kast, att):
     if isKProduction(kast):
         return KProduction(kast['productionItems'], kast['sort'], att = newAtt)
     else:
-        _notif('Do not know how to add attributes to KAST!')
+        notif('Do not know how to add attributes to KAST!')
         sys.stderr.write(str(kast))
         sys.stderr.flush()
         sys.exit(1)
+
+def flattenLabel(label, kast):
+    """Given a cons list, return a flat Python list of the elements.
+
+    -   Input: Cons operation to flatten.
+    -   Output: Items of cons list.
+    """
+    if isKApply(kast) and kast['label'] == label:
+        items = [ flattenLabel(label, arg) for arg in kast['args'] ]
+        return [ c for cs in items for c in cs ]
+    return [kast]
 
 klabelCells   = '#KCells'
 klabelEmptyK  = '#EmptyK'
@@ -272,7 +259,7 @@ def buildSymbolTable(definition, opinionated = False):
     -   Return: Python dictionary mapping klabels to automatically generated unparsers.
     """
     if not isKDefinition(definition):
-        _fatal('Must supply a KDefinition!')
+        fatal('Must supply a KDefinition!')
 
     def _unparserFromProductionItems(prodItems):
         unparseString = ''
@@ -298,6 +285,33 @@ def buildSymbolTable(definition, opinionated = False):
         symbolTable [ '#Or'  ] = lambda c1, c2: c1 + '\n#Or\n'  + indent(c2, size = 4)
 
     return symbolTable
+
+def readKastTerm(termPath):
+    with open(termPath, 'r') as termFile:
+        return json.loads(termFile.read())['term']
+
+def prettyPrintKastBool(kast, symbolTable, debug = False):
+    """Print out KAST requires/ensures clause.
+
+    -   Input: KAST Bool for requires/ensures clause.
+    -   Output: Best-effort string representation of KAST term.
+    """
+    if debug:
+        sys.stderr.write(str(kast))
+        sys.stderr.write('\n')
+        sys.stderr.flush()
+    if isKApply(kast) and kast['label'] in ['_andBool_', '_orBool_']:
+        clauses    = [ prettyPrintKastBool(c, symbolTable, debug = debug) for c in flattenLabel(kast['label'], kast) ]
+        head       = kast['label'].replace('_', ' ')
+        if head == ' orBool ':
+            head = '  orBool '
+        separator  = ' ' * (len(head) - 7)
+        spacer     = ' ' * len(head)
+        joinSep    = lambda s: ('\n' + separator).join(s.split('\n'))
+        clauses    = ['( ' + joinSep(clauses[0])] + [ head + '( ' + joinSep(c) for c in clauses[1:] ] + [spacer + (')' * len(clauses))]
+        return '\n'.join(clauses)
+    else:
+        return prettyPrintKast(kast, symbolTable, debug = debug)
 
 def prettyPrintKast(kast, symbolTable, debug = False):
     """Print out KAST terms/outer syntax.
@@ -396,15 +410,11 @@ def prettyPrintKast(kast, symbolTable, debug = False):
         requiresStr = ''
         ensuresStr  = ''
         attsStr     = prettyPrintKast(kast['att'], symbolTable, debug = debug)
-        reqEnsSymbolTable = { k: symbolTable[k] for k in symbolTable }
-        reqEnsSymbolTable [ '_andBool_' ] = lambda b1, b2: b1 + '\nandBool ' + b2
         if kast['requires'] is not None:
-            requiresStr = prettyPrintKast(kast['requires'], reqEnsSymbolTable, debug = debug)
-            requiresStr = 'requires ' + '\n   '.join(requiresStr.split('\n'))
+            requiresStr = 'requires ' + '\n  '.join(prettyPrintKastBool(kast['requires'], symbolTable, debug = debug).split('\n'))
         if kast['ensures'] is not None:
-            ensuresStr = prettyPrintKast(kast['ensures'], reqEnsSymbolTable, debug = debug)
-            ensuresStr = 'ensures ' + '\n  '.join(ensuresStr.split('\n'))
-        return ruleStr + '\n  ' + requiresStr + '\n  ' + ensuresStr + '\n  ' + attsStr
+            ensuresStr = 'ensures ' + '\n  '.join(prettyPrintKastBool(kast['ensures'], symbolTable, debug = debug).split('\n'))
+        return ruleStr + '\n  ' + requiresStr + '\n   ' + ensuresStr + '\n  ' + attsStr
     if isKContext(kast):
         body        = indent(prettyPrintKast(kast['body'], symbolTable, debug = debug))
         contextStr  = 'context alias ' + body
@@ -419,13 +429,15 @@ def prettyPrintKast(kast, symbolTable, debug = False):
             return ''
         attStrs = [ att + '(' + kast['att'][att] + ')' for att in kast['att'].keys() ]
         return '[' + ', '.join(attStrs) + ']'
+    if isKImport(kast):
+        return ' '.join(['imports', ('public' if kast['isPublic'] else 'private'), kast['name']])
     if isKFlatModule(kast):
         name = kast['name']
-        imports = '\n'.join(['import ' + kimport for kimport in kast['imports']])
+        imports = '\n'.join([prettyPrintKast(kimport, symbolTable, debug = debug) for kimport in kast['imports']])
         localSentences = '\n\n'.join([prettyPrintKast(sent, symbolTable, debug = debug) for sent in kast['localSentences']])
         contents = imports + '\n\n' + localSentences
         return 'module ' + name                    + '\n    ' \
-             + '\n    '.join(contents.split('\n')) + '\n' \
+             + '\n    '.join(contents.split('\n')) + '\n'     \
              + 'endmodule'
     if isKRequire(kast):
         return 'requires "' + kast['require'] + '"'
@@ -435,7 +447,7 @@ def prettyPrintKast(kast, symbolTable, debug = False):
         return requires + '\n\n' + modules
 
     print()
-    _warning('Error unparsing kast!')
+    warning('Error unparsing kast!')
     print(kast)
-    _fatal('Error unparsing!')
+    fatal('Error unparsing!')
 

@@ -123,10 +123,6 @@ public class Kompile {
                 lookupDirectories, kompileOptions, outerParsingOptions, innerParsingOptions, globalOptions, kem, files,
                 parser, cacheParses, cacheFile, sw);
         this.sw = sw;
-
-        if (kompileOptions.backend.equals("ocaml")) {
-            kem.registerCriticalWarning(ExceptionType.FUTURE_ERROR, "The OCaml backend is in the process of being deprecated (final date May 31, 2020). Please switch to the LLVM backend.");
-        }
     }
 
     /**
@@ -223,10 +219,10 @@ public class Kompile {
         List<String> ruleLocs = new ArrayList<String>();
         for (Sentence s: JavaConverters.setAsJavaSet(def.mainModule().sentences())) {
             if (s instanceof RuleOrClaim) {
-                Optional<Source>   optFile = s.att().getOptional(Source.class);
-                Optional<Location> optLine = s.att().getOptional(Location.class);
-                Optional<Location> optCol  = s.att().getOptional(Location.class);
-                Optional<String>   optId   = s.att().getOptional(Att.UNIQUE_ID());
+                var optFile = s.att().getOptional(Source.class);
+                var optLine = s.att().getOptional(Location.class);
+                var optCol  = s.att().getOptional(Location.class);
+                var optId   = s.att().getOptional(Att.UNIQUE_ID());
                 if (optFile.isPresent() && optLine.isPresent() && optCol.isPresent() && optId.isPresent()) {
                     String file = optFile.get().source();
                     int line    = optLine.get().startLine();
@@ -354,7 +350,7 @@ public class Kompile {
     }
 
     public Rule parseAndCompileRule(CompiledDefinition compiledDef, String contents, Source source, Optional<Rule> parsedRule) {
-        Rule parsed = parsedRule.orElse(parseRule(compiledDef, contents, source));
+        Rule parsed = parsedRule.orElseGet(() -> parseRule(compiledDef, contents, source));
         return compileRule(compiledDef.kompiledDefinition, parsed);
     }
 
@@ -416,7 +412,14 @@ public class Kompile {
             if (m.name().equals(mainDefModule.name()) || mainDefModule.importedModuleNames().contains(m.name()))
                 return s;
             if (!(s instanceof Claim || s.isSyntax())) {
-                errors.add(KEMException.compilerError("Use claim instead of rule to specify proof objectives.", s));
+                if (s instanceof Rule && !s.att().contains(Att.SIMPLIFICATION()))
+                    errors.add(KEMException.compilerError("Only claims and simplification rules are allowed in proof modules.", s));
+            }
+            if (s instanceof Rule && s.att().contains(Att.SIMPLIFICATION())) {
+                // TODO: it should be function like rule
+                KLabel kl = m.matchKLabel((Rule) s);
+                if (!m.functions().contains(kl))
+                    errors.add(KEMException.compilerError("Simplification rules need to be function/functional like.", s));
             }
             return s;
         }, "rules in spec module");

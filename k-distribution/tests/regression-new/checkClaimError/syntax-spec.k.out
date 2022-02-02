@@ -1,6 +1,3 @@
-[Warning] Compiler: The attribute [macro] has been deprecated on rules. Use this label on syntax declarations instead.
-	Source(errorClaim.k)
-	Location(7,10,7,18)
 [Error] Compiler: Found syntax declaration in proof module. Only tokens for existing sorts are allowed.
 	Source(syntax-spec.k)
 	Location(6,18,6,28)

@@ -9,12 +9,9 @@ export PATH="$(cd "$(dirname "$0")"; pwd):$PATH"
 ARGV=()
 bisonFiles=()
 dir=.
-fold_lines="fold -s"
 glr=--gen-parser
 literal=false
-result=1
 stackDepth=10000
-verbose=false
 
 # setup temp files
 now=`date +"%Y-%m-%d-%H-%M-%S"`
@@ -22,22 +19,11 @@ tempDir="$(mktemp -d .kparse-gen-${now}-XXXXXXXXXX)"
 tempFiles=("$tempDir")
 trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
 
-execute () {
-  (
-  if $verbose; then
-    set -x
-  fi
-  "$@"
-  )
-}
-
 KPARSE_GEN=$(basename "$0")
 KAST_UTIL="$(dirname "$0")/kast"
 
-error () {
-  printf "[Error] Inner Parser: $@\n" | $fold_lines 1>&2
-  exit $result
-}
+ktool="${KPARSE_GEN}"
+source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 print_usage () {
 cat <<HERE
@@ -52,6 +38,12 @@ generate an LR(1) parser for the \$PGM configuration variable, but this can be
 customized; see below. If no \$PGM configuration variable exists, it will
 generate a parser for the KItem sort in the main syntax module.
 
+General options:
+
+$(k_util_usage)
+
+$KPARSE_GEN options:
+
       --bison-file FILE    C file that should be linked into the generated
                            parser
       --bison-stack-max-depth  Maximum size of bison stack. Default: 10000
@@ -60,12 +52,9 @@ generate a parser for the KItem sort in the main syntax module.
   -g, --glr                Generate a GLR parser instead of an LR(1) parser
   -h, --help               Display this help and exit
   -m, --module MODULE      Module to use to generate grammar
-      --no-exc-wrap        Do not wrap exception messages to 80 chars. Keep
-                           long lines
-      --save-temps         Do not delete temporary files when $KUNPARSE
+      --save-temps         Do not delete temporary files when $KPARSE_GEN
                            terminates
   -s, --sort               Sort to use as start symbol of parser
-  -v, --verbose            Print significant commands executed by $KUNPARSE
       --version            Print version of K
       --                   Interpret all arguments following as positional
                            arguments
@@ -112,14 +101,6 @@ do
       shift
       ;;
 
-      --no-exc-wrap)
-      fold_lines="cat -"
-      ;;
-
-      -v|--verbose)
-      verbose=true
-      ;;
-
       -s|--sort)
       sort="$2"
       shift
@@ -153,7 +134,7 @@ done
 
 if [[ "${#ARGV[@]}" -ne 1 ]]; then
   print_usage
-  error 'Must pass exactly one writeable file path as a positional argument.'
+  error 1 'Must pass exactly one writeable file path as a positional argument.'
 fi
 output_file="${ARGV[0]}"
 
@@ -164,18 +145,17 @@ for file in "$dir"/*-kompiled; do
   [ ! -d "$file" ] && continue
   kompiledDir=$file
   if $hasKompiledDir; then
-    error 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
+    error 1 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
   fi
   hasKompiledDir=true
 done
 
 if ! $hasKompiledDir; then
-  error 'Could not find a compiled definition. Use --directory to specify one.'
+  error 1 'Could not find a compiled definition. Use --directory to specify one.'
 fi
 
 if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then
-  error 'Bison is not supported on Java or Ocaml backends.'
-  exit 1
+  error 1 'Bison is not supported on Java backend.'
 fi
 
 if [ -z "${module+unset}" ]; then

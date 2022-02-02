@@ -286,8 +286,18 @@ formatter interacts with the list of colors specified by the `colors`
 attribute. You can essentially think of the `color` attribute as a way of
 specifying that you want all the colors in the list to be the same color.
 
-For example, here is a variant of LESSON-09-A which colors the various boolean
-operators:
+Note that the `%c` and `%r` format codes are relatively primitive in nature. 
+The `color` and `colors` attributes merely maintain a list of colors, whereas
+the `%c` and `%r` format codes merely control how to advance through that list
+and how individual text is colored.
+
+It is an error if the `colors` attribute does not provide all the colors needed
+by the terminals and escape codes in the production. `%r` does not change the
+position in the list of colors at all, so the next `%c` will advance to the
+following color.
+
+As a complete example, here is a variant of LESSON-09-A which colors the
+various boolean operators:
 
 ```k
 module LESSON-09-D

@@ -4,7 +4,6 @@ import sys
 import subprocess
 
 from .kast import *
-from .kast import _notif, _warning, _fatal
 
 def buildAssoc(unit, join, ls):
     """Build an associative binary operator term given the join and unit ops.
@@ -146,12 +145,13 @@ def unsafeMlPredToBool(k):
     """
     if k is None:
         return None
-    mlPredToBoolRules = [ (KApply('#Top', [])  , KToken('true', 'Bool'))
-                        , (KApply('#Bottom', []) , KToken('false', 'Bool'))
-                        , (KApply('#And'    , [KVariable('#V1'), KVariable('#V2')]) , KApply('_andBool_' , [KVariable('#V1'), KVariable('#V2')]))
-                        , (KApply('#Or'     , [KVariable('#V1'), KVariable('#V2')]) , KApply('_orBool_'  , [KVariable('#V1'), KVariable('#V2')]))
-                        , (KApply('#Not'    , [KVariable('#V1')])                   , KApply('notBool_'  , [KVariable('#V1')]))
-                        , (KApply('#Equals' , [KVariable('#V1'), KVariable('#V2')]) , KApply('_==K_'     , [KVariable('#V1'), KVariable('#V2')]))
+    mlPredToBoolRules = [ (KApply('#Top'     , [])                                   , KToken('true'          , 'Bool'))
+                        , (KApply('#Bottom'  , [])                                   , KToken('false'         , 'Bool'))
+                        , (KApply('#And'     , [KVariable('#V1'), KVariable('#V2')]) , KApply('_andBool_'     , [KVariable('#V1'), KVariable('#V2')]))
+                        , (KApply('#Or'      , [KVariable('#V1'), KVariable('#V2')]) , KApply('_orBool_'      , [KVariable('#V1'), KVariable('#V2')]))
+                        , (KApply('#Not'     , [KVariable('#V1')])                   , KApply('notBool_'      , [KVariable('#V1')]))
+                        , (KApply('#Equals'  , [KVariable('#V1'), KVariable('#V2')]) , KApply('_==K_'         , [KVariable('#V1'), KVariable('#V2')]))
+                        , (KApply('#Implies' , [KVariable('#V1'), KVariable('#V2')]) , KApply('_impliesBool_' , [KVariable('#V1'), KVariable('#V2')]))
                         ]
     newK = k
     for rule in mlPredToBoolRules:
@@ -213,17 +213,6 @@ def countVarOccurances(kast, numOccurances = None):
 def collectFreeVars(kast):
     return list(countVarOccurances(kast).keys())
 
-def flattenLabel(label, kast):
-    """Given a binary tree of a label, return all the leaves.
-
-    -   Input: label of binary tree, and kast term.
-    -   Output: list of leaves of binary tree (singleton list for no occurance of label at top).
-    """
-    if isKApply(kast) and kast['label'] == label:
-        items = [ flattenLabel(label, arg) for arg in kast['args'] ]
-        return [ c for cs in items for c in cs ]
-    return [kast]
-
 def splitConfigAndConstraints(kast):
     """Split the configuration/term from the constraints.
 
@@ -241,21 +230,6 @@ def splitConfigAndConstraints(kast):
     constraint = buildAssoc(KConstant('#Top'), '#And', constraints)
     return (term, constraint)
 
-def findCommonItems(l1, l2):
-    common = []
-    for i in l1:
-        if i in l2:
-            common.append(i)
-    newL1 = []
-    newL2 = []
-    for i in l1:
-        if not i in common:
-            newL1.append(i)
-    for i in l2:
-        if not i in common:
-            newL2.append(i)
-    return (common, newL1, newL2)
-
 def propagateUpConstraints(k):
     """Try to propagate common constraints up disjuncts.
 
@@ -263,22 +237,19 @@ def propagateUpConstraints(k):
     -   Output: kast where common constraints in the disjunct have been propagated up.
     """
     def _propagateUpConstraints(_k):
-        pattern = KApply('#Or', [KApply('#And', [KVariable('G1'), KVariable('C1')]), KApply('#And', [KVariable('G2'), KVariable('C2')])])
-        pmatch = match(pattern, _k)
-        if pmatch is None:
+        if not (isKApply(_k) and _k['label'] == '#Or'):
             return _k
-        (common1, l1, r1) = findCommonItems(flattenLabel('#And', pmatch['C1']), flattenLabel('#And', pmatch['C2']))
+        conjuncts1        = flattenLabel('#And', _k['args'][0])
+        conjuncts2        = flattenLabel('#And', _k['args'][1])
+        (common1, l1, r1) = findCommonItems(conjuncts1, conjuncts2)
         (common2, r2, l2) = findCommonItems(r1, l1)
         common = common1 + common2
         if len(common) == 0:
             return _k
-        g1 = pmatch['G1']
-        if len(l2) > 0:
-            g1 = buildAssoc(KConstant('#Top'), '#And', [g1] + l2)
-        g2 = pmatch['G2']
-        if len(r2) > 0:
-            g2 = buildAssoc(KConstant('#Top'), '#And', [g2] + r2)
-        return KApply('#And', [KApply('#Or', [g1, g2]), buildAssoc(KConstant('#Top'), '#And', common)])
+        conjunct1 = buildAssoc(KConstant('#Top'), '#And', l2)
+        conjunct2 = buildAssoc(KConstant('#Top'), '#And', r2)
+        disjunct  = KApply('#Or', [conjunct1, conjunct2])
+        return buildAssoc(KConstant('#Top'), '#And', [disjunct] + common)
     return traverseBottomUp(k, _propagateUpConstraints)
 
 def splitConfigFrom(configuration):
@@ -466,19 +437,7 @@ def onAttributes(kast, effect):
         modules = [ onAttributes(mod, effect) for mod in kast['modules'] ]
         requires = None if 'requires' not in kast else kast['requires']
         return KDefinition(kast['mainModule'], modules, requires = requires, att = effect(kast['att']))
-    _fatal('No attributes for: ' + kast['node'] + '.')
-
-def dedupeClauses(terms):
-    """Return a list of terms in the same order with duplicates removed.
-
-    -   Input: a list.
-    -   Output: a list with duplicates removed.
-    """
-    newTerms = []
-    for t in terms:
-        if t not in newTerms:
-            newTerms.append(t)
-    return newTerms
+    fatal('No attributes for: ' + kast['node'] + '.')
 
 def minimizeTerm(term, keepVars = None, abstractLabels = []):
     """Minimize a K term for pretty-printing.
@@ -514,11 +473,11 @@ def minimizeRule(rule, keepVars = []):
     ruleAtts     = rule['att']
 
     if ruleRequires is not None:
-        ruleRequires = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupeClauses(flattenLabel('_andBool_', ruleRequires)))
+        ruleRequires = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupe(flattenLabel('_andBool_', ruleRequires)))
         ruleRequires = simplifyBool(ruleRequires)
 
     if ruleEnsures is not None:
-        ruleEnsures = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupeClauses(flattenLabel('_andBool_', ruleEnsures)))
+        ruleEnsures = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupe(flattenLabel('_andBool_', ruleEnsures)))
         ruleEnsures = simplifyBool(ruleEnsures)
 
     ruleRequires = None if ruleRequires == KToken('true', 'Bool') else ruleRequires
@@ -553,21 +512,3 @@ def removeSourceMap(k):
                     newAtts[attKey] = atts[attKey]
             return KAtt(atts = newAtts)
     return onAttributes(k, _removeSourceMap)
-
-def readKastTerm(termPath):
-    with open(termPath, "r") as termFile:
-        return json.loads(termFile.read())['term']
-
-def writeKDefinition(fileName, kDef, symbolTable):
-    if not isKDefinition(kDef):
-        _notif("Not a K Definition!")
-        print(kDef)
-        sys.exit(1)
-    specText = prettyPrintKast(kDef, symbolTable)
-    with open(fileName, "w") as sfile:
-        sfile.write(specText)
-        _notif("Wrote spec file: " + fileName)
-        print(specText)
-        sys.stdout.flush()
-        return
-    _fatal("Could not write spec file: " + fileName)

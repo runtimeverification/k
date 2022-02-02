@@ -33,12 +33,6 @@
     </dependency>
     <dependency>
       <groupId>com.runtimeverification.k</groupId>
-      <artifactId>ocaml-backend</artifactId>
-      <version>${project.version}</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.runtimeverification.k</groupId>
       <artifactId>java-backend</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>

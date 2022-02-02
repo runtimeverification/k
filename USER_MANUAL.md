@@ -275,16 +275,6 @@ of the import with the `public` or `private` keyword immediately prior to the
 module name. A module imported privately does not export its syntax to modules
 that import the module doing the import.
 
-An import statement can also choose to explicitly hide some or all of the
-syntax being imported. If an import's module name is followed by a `.`
-character followed by an attribute name or klabel, then only sentences that
-have that attribute name or productions that have that klabel attribute will
-be imported by that declaration. For example, if I say `imports FOO.bar`, then
-only productions whose klabel attribute is `bar` or whose attribute list
-contains the `bar` attribute will be visible to the importing module. Note that
-all rules, constructors, and sorts declared in that module will still exist
-in the final interpreter.
-
 Following imports, a module can contain zero or more sentences. A sentence can
 be a syntax declaration, a rule, a configuration declaration, a context, a
 claim, or a context alias. Details on each of these can be found in subsequent
@@ -1387,8 +1377,8 @@ the LHS of a rule to mean the pattern above:
 The `memo` attribute is a hint from the user to the backend to memoize a
 function. Not all backends support memoization, but when the attribute is used
 and the definition is compiled for a `memo`-supporting backend, then calls to
-the function may be cached. At the time of writing, the Haskell and OCaml
-backends support memoization.
+the function may be cached. At the time of writing, only the Haskell
+backend supports memoization.
 
 #### Limitations of memoization with the Haskell backend
 
@@ -1519,10 +1509,9 @@ K also introduces the strict cast:
     syntax S ::= S "::S"
 ```
 
-The meaning at runtime is exactly the same as the semantic cast (except in the
-ocaml backend, where it will match a term of any sort at runtime); however,
-it restricts the sort of the term inside the cast to **exactly** `Sort`. That
-is to say, if you use it on something that is a strictly smaller sort, it will
+The meaning at runtime is exactly the same as the semantic cast; however, it
+restricts the sort of the term inside the cast to **exactly** `Sort`. That is
+to say, if you use it on something that is a strictly smaller sort, it will
 generate a type error. This is useful in certain circumstances to help
 disambiguate terms, when a semantic cast would not have resolved the ambiguity.
 As such, it is primarily used to solve ambiguities rather than to guide
@@ -2658,6 +2647,22 @@ ordinary rewrite rules:
   rule #location(_ / 0, File, StartLine, _StartColumn, _EndLine, _EndColumn) =>
   "Error: Division by zero at " +String File +String ":" Int2String(StartLine)
 ```
+
+Sometimes it is desirable to allow code to be written in a file which
+overwrites the current location information provided by the parser. This can be
+done via a combination of the `#LineMarker` sort and the `--bison-file` flag to
+the parser generator. If you declare a production of sort `#LineMarker` which
+contains a regular expression terminal, this will be treated as a
+**line marker** by the bison parser. The user will then be expected to provide
+an implementation of the parser for the line marker in C. The function expected
+by the parser has the signature `void line_marker(char *, yyscan_t)`, where
+`yyscan_t` is a
+[reentrant flex scanner](https://westes.github.io/flex/manual/Reentrant.html).
+The string value of the line marker token as specified by your regular
+expression can be found in the first parameter of the function, and you can
+set the line number used by the scanner using `yyset_lineno(int, yyscan_t)`. If
+you declare the variable `extern char *filename`, you can also set the current
+file name by writing a malloc'd, zero-terminated string to that variable.
 
 
 Unparsing

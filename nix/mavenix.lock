@@ -7702,12 +7702,12 @@
       "sha1": "83c041bde1965b281cf4e6b31ab11bcf4b68a649"
     },
     {
-      "path": "org/yaml/snakeyaml/1.24/snakeyaml-1.24.jar",
-      "sha1": "13a9c0d6776483c3876e3ff9384f9bb55b17001b"
+      "path": "org/yaml/snakeyaml/1.30/snakeyaml-1.30.jar",
+      "sha1": "8fde7fe2586328ac3c68db92045e1c8759125000"
     },
     {
-      "path": "org/yaml/snakeyaml/1.24/snakeyaml-1.24.pom",
-      "sha1": "605d93a1f7549eb22a18cb85dc8970bd4123e234"
+      "path": "org/yaml/snakeyaml/1.30/snakeyaml-1.30.pom",
+      "sha1": "767ab0a7a346f60dad0acebe318e335a5d27fe55"
     },
     {
       "path": "oro/oro/2.0.8/oro-2.0.8.jar",
@@ -7854,13 +7854,6 @@
       "groupId": "com.runtimeverification.k",
       "name": "ktree-1.0-SNAPSHOT",
       "path": "./ktree",
-      "version": "1.0-SNAPSHOT"
-    },
-    {
-      "artifactId": "ocaml-backend",
-      "groupId": "com.runtimeverification.k",
-      "name": "ocaml-backend-1.0-SNAPSHOT",
-      "path": "./ocaml-backend",
       "version": "1.0-SNAPSHOT"
     },
     {

@@ -51,7 +51,7 @@ public class KAppToTermConsVisitor extends SetsTransformerWithErrors<KEMExceptio
         assert tc.production() != null : this.getClass() + ":" + " production not found." + tc;
         if (tc.production().klabel().isDefined() && tc.production().klabel().get().equals(KLabels.KAPP)) {
             if (!(tc.get(0) instanceof Constant) || !((Constant) tc.get(0)).production().sort().equals(Sorts.KLabel()))
-                // TODO: remove check once the java and ocaml backends are no longer supported.
+                // TODO: remove check once the java backend is no longer supported.
                 return super.apply(tc); // don't do anything if the label is not a token KLabel (in case of variable or casted variable)
             Constant kl = (Constant) tc.get(0);
             String klvalue = kl.value();

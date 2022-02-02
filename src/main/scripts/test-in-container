@@ -1,6 +1,4 @@
 #!/bin/sh -ex
-OPAMROOT=/usr/lib/kframework/opamroot k-configure-opam
-eval $(opam config env)
 cp -R /usr/share/kframework/pl-tutorial ~
 WD=`pwd`
 cd
@@ -11,5 +9,4 @@ echo 'Testing tutorial in user environment...'
 make -j`nproc`
 cd ~
 echo "module TEST imports BOOL endmodule" > test.k
-kompile test.k --backend ocaml
 kompile test.k --backend haskell

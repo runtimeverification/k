@@ -19,7 +19,6 @@ RUN    pacman -Sy   --noconfirm archlinux-keyring \
                        llvm                       \
                        maven                      \
                        mpfr                       \
-                       opam                       \
                        openssh                    \
                        python                     \
                        python-pip                 \
@@ -36,11 +35,6 @@ USER $USER_ID:$GROUP_ID
 
 ENV PATH="${PATH}:/usr/bin/core_perl"
 
-ADD k-distribution/src/main/scripts/bin/k-configure-opam-dev k-distribution/src/main/scripts/bin/k-configure-opam-common /home/user/.tmp-opam/bin/
-ADD k-distribution/src/main/scripts/lib/opam                                                                             /home/user/.tmp-opam/lib/kframework/opam/
-RUN    cd /home/user                        \
-    && ./.tmp-opam/bin/k-configure-opam-dev
-
 ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml        /home/user/.tmp-haskell/
 ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/kore.cabal /home/user/.tmp-haskell/kore/
 RUN    cd /home/user/.tmp-haskell \
@@ -51,7 +45,6 @@ ADD ktree/pom.xml                                              /home/user/.tmp-m
 ADD llvm-backend/pom.xml                                       /home/user/.tmp-maven/llvm-backend/
 ADD llvm-backend/src/main/native/llvm-backend/matching/pom.xml /home/user/.tmp-maven/llvm-backend/src/main/native/llvm-backend/matching/
 ADD haskell-backend/pom.xml                                    /home/user/.tmp-maven/haskell-backend/
-ADD ocaml-backend/pom.xml                                      /home/user/.tmp-maven/ocaml-backend/
 ADD kernel/pom.xml                                             /home/user/.tmp-maven/kernel/
 ADD java-backend/pom.xml                                       /home/user/.tmp-maven/java-backend/
 ADD k-distribution/pom.xml                                     /home/user/.tmp-maven/k-distribution/
