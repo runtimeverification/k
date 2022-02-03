@@ -2,6 +2,6 @@ DEF=def
 EXT=def
 KOMPILE_BACKEND=haskell
 TESTDIR=.
-KPROVE_FLAGS=--spec-module DEF-SPEC --depth 0
+KPROVE_FLAGS=--spec-module DEF-SPEC
 
 include ../../../include/kframework/ktest.mak
