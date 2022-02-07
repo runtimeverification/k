@@ -26,7 +26,6 @@ RUN    apt-get update            \
         libz3-dev                \
         lld-$LLVM_VERSION        \
         llvm-$LLVM_VERSION-tools \
-        make                     \
         maven                    \
         openjdk-11-jdk           \
         parallel                 \
