@@ -131,7 +131,7 @@ public class DefinitionParsing {
         this.sw = sw;
     }
 
-    public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, java.util.Set<String> excludeModules, boolean readOnlyCache) {
+    public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, java.util.Set<String> excludeModules, boolean readOnlyCache, boolean useCachedScanner) {
         Definition def = parser.loadDefinition(
                 mainModule,
                 mutable(definition.getParsedDefinition().modules()),
@@ -174,7 +174,7 @@ public class DefinitionParsing {
             throw new AssertionError("should not reach this statement");
         }
 
-        def = resolveNonConfigBubbles(def, false);
+        def = resolveNonConfigBubbles(def, false, useCachedScanner);
         saveTimings();
         if (! readOnlyCache) {
             saveCaches();
@@ -229,7 +229,7 @@ public class DefinitionParsing {
         sw.printIntermediate("Parse configurations [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " declarations]");
         parsedBubbles.set(0);
         cachedBubbles.set(0);
-        Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles, true);
+        Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles, true, false);
         sw.printIntermediate("Parse rules [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " rules]");
         saveTimings();
         saveCachesAndReportParsingErrors();
@@ -370,17 +370,24 @@ public class DefinitionParsing {
         }, "expand configs").apply(defWithParsedConfigs);
     }
 
-    private Definition resolveNonConfigBubbles(Definition defWithConfig, boolean serializeScanner) {
+    private Definition resolveNonConfigBubbles(Definition defWithConfig, boolean serializeScanner, boolean deserializeScanner) {
         Definition defWithCaches = resolveCachedBubbles(defWithConfig, true);
         RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithCaches);
         Module ruleParserModule = gen.getRuleGrammar(defWithCaches.mainModule());
         ParseCache cache = loadCache(ruleParserModule);
         try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, files, true)) {
-            Scanner scanner = parser.getScanner(globalOptions);
-            if (serializeScanner) {
-                scanner.serialize(files.resolveKompiled("scanner"));
+            Scanner scanner;
+            if (deserializeScanner) {
+                scanner = new Scanner(parser, globalOptions, files.resolveKompiled("scanner"));
+                parser.setScanner(scanner);
+            } else {
+                scanner = parser.getScanner(globalOptions);
+                if (serializeScanner) {
+                    scanner.serialize(files.resolveKompiled("scanner"));
+                }
             }
-            Map<String, Module> parsed = defWithCaches.parMap(m -> this.resolveNonConfigBubbles(m, parser.getScanner(globalOptions), gen));
+            final Scanner realScanner = scanner;
+            Map<String, Module> parsed = defWithCaches.parMap(m -> this.resolveNonConfigBubbles(m, realScanner, gen));
             return DefinitionTransformer.from(m -> Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()), "parsing rules").apply(defWithConfig);
         }
     }
