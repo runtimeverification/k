@@ -163,6 +163,7 @@ public class ToJson {
         JsonArrayBuilder imports = Json.createArrayBuilder();
         stream(mod.imports()).forEach(i -> {
           JsonObjectBuilder jimp = Json.createObjectBuilder();
+          jimp.add("node", JsonParser.KIMPORT);
           jimp.add("name", i.name());
           jimp.add("isPublic", i.isPublic());
           imports.add(jimp.build());
