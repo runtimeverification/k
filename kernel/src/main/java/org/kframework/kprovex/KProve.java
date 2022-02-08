@@ -20,6 +20,8 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.function.Function;
 
@@ -82,6 +84,18 @@ public class KProve {
                 files.saveToKompiled("prove-definition.json", new String(ToJson.apply(compiled._1()), "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 throw KEMException.criticalError("Unsupported encoding `UTF-8` when saving JSON definition.");
+            }
+        }
+
+        if (kproveOptions.emitJsonSpec != null) {
+            try {
+                String out = new String(ToJson.apply(specModule));
+                PrintWriter fOut = new PrintWriter(kproveOptions.emitJsonSpec);
+                fOut.println(out);
+                fOut.close();
+            } catch (FileNotFoundException e) {
+                System.err.println("Could not open node output file: " + kproveOptions.emitJsonSpec);
+                e.printStackTrace();
             }
         }
 
