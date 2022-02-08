@@ -98,6 +98,26 @@ public class ToJson {
         return out.toByteArray();
     }
 
+    public static byte[] apply(Module mod) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            DataOutputStream data = new DataOutputStream(out);
+            JsonWriter jsonWriter = Json.createWriter(data);
+
+            JsonObjectBuilder term = Json.createObjectBuilder();
+            term.add("format", "KAST");
+            term.add("version", 1);
+            term.add("term", toJson(mod));
+
+            jsonWriter.write(term.build());
+            jsonWriter.close();
+            data.close();
+        } catch (IOException e) {
+            throw KEMException.criticalError("Could not write Module to Json", e);
+        }
+        return out.toByteArray();
+    }
+
     public static JsonStructure toJson(Definition def) {
         JsonObjectBuilder jdef = Json.createObjectBuilder();
 
