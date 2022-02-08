@@ -49,7 +49,7 @@ public class ProofDefinitionBuilder {
         File absSpecFile = files.resolveWorkingDirectory(specFile).getAbsoluteFile();
 
         Set<Module> modules = kompile.parseModules(compiledDefinition, defModuleNameUpdated, specModuleNameUpdated, absSpecFile,
-                backend.excludedModuleTags(), true);
+                backend.excludedModuleTags(), true, true);
         Map<String, Module> modulesMap = modules.stream().collect(Collectors.toMap(Module::name, m -> m));
         Definition parsedDefinition = compiledDefinition.getParsedDefinition();
         Module specModule = getModule(specModuleNameUpdated, modulesMap, parsedDefinition);

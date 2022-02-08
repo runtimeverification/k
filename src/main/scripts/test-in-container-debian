@@ -3,5 +3,6 @@ K_VERSION=5.2.0
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get upgrade --yes
+apt-get install --yes make
 apt-get install --yes ./kframework_${K_VERSION}_amd64.deb
 "$(dirname "$0")/test-in-container"
