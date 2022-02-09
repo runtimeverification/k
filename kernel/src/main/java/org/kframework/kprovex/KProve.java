@@ -20,8 +20,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.function.Function;
 
@@ -88,15 +87,7 @@ public class KProve {
         }
 
         if (kproveOptions.emitJsonSpec != null) {
-            try {
-                String out = new String(ToJson.apply(specModule));
-                PrintWriter fOut = new PrintWriter(kproveOptions.emitJsonSpec);
-                fOut.println(out);
-                fOut.close();
-            } catch (FileNotFoundException e) {
-                System.err.println("Could not open node output file: " + kproveOptions.emitJsonSpec);
-                e.printStackTrace();
-            }
+            FileUtil.save(new File(kproveOptions.emitJsonSpec), ToJson.apply(specModule));
         }
 
         RewriterResult results = rewriter.prove(specModule, boundaryPattern, true);
