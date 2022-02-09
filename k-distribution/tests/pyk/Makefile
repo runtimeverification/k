@@ -19,12 +19,12 @@ export PYTHONPATH
 .PHONY: all clean update-results pyk                                                \
         test test-defn test-defn-kast test-defn-prove                               \
         test-kpyk test-kpyk-coverage-log test-kpyk-graphviz test-kpyk-minimize-term \
-		test-emit-json-spec
+        test-emit-json-spec
 
 all: test
 
 clean:
-	rm -rf $(llvm_dir) $(haskell_dir)
+	rm -rf $(llvm_dir) $(haskell_dir) emit-json-spec-tests/verification-kompiled/timestamp emit-json-spec-tests/looping-spec.json
 
 llvm_dir          := llvm
 llvm_imp          := $(llvm_dir)/imp.k
