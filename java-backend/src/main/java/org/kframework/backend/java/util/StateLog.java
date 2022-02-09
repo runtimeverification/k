@@ -132,16 +132,7 @@ public class StateLog {
             String fileCode   = hash(contents);
             File   outputFile = new File(this.blobsDir, fileCode + "." + OutputModes.JSON.ext());
             if (! outputFile.exists()) {
-                try {
-                    String out = new String(this.prettyPrinter.prettyPrintBytes(contents), StandardCharsets.UTF_8);
-                    PrintWriter fOut = new PrintWriter(outputFile);
-                    fOut.println(out);
-                    fOut.close();
-                    writtenHashes.put(objectHash,fileCode);
-                } catch (FileNotFoundException e) {
-                    System.err.println("Could not open node output file: " + outputFile.getAbsolutePath());
-                    e.printStackTrace();
-                }
+                FileUtil.save(outputFile, this.prettyPrinter.prettyPrintBytes(contents));
             }
             return fileCode;
         }
