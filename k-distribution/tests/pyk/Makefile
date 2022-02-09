@@ -11,7 +11,7 @@ KPYK    = $(K_BIN)/kpyk
 
 export PATH := $(K_BIN):$(PATH)
 
-CHECK = git diff --no-index -R
+CHECK = git --no-pager diff --no-index -R
 
 PYTHONPATH := $(K_LIB)
 export PYTHONPATH
