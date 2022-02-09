@@ -18,7 +18,8 @@ export PYTHONPATH
 
 .PHONY: all clean update-results pyk                                                \
         test test-defn test-defn-kast test-defn-prove                               \
-        test-kpyk test-kpyk-coverage-log test-kpyk-graphviz test-kpyk-minimize-term
+        test-kpyk test-kpyk-coverage-log test-kpyk-graphviz test-kpyk-minimize-term \
+		test-emit-json-spec
 
 all: test
 
@@ -49,7 +50,7 @@ kompile: $(llvm_imp_kompiled) $(haskell_imp_kompiled)
 
 # Tests
 
-test: test-unit test-defn test-kpyk
+test: test-unit test-defn test-kpyk test-emit-json-spec
 
 ## Unit Tests
 
@@ -108,3 +109,15 @@ test-kpyk-minimize-term: kpyk-tests/minimize/test.k
 	$(KPYK) kpyk-tests/minimize/test-kompiled prove kpyk-tests/minimize/test.k kpyk-tests/minimize/test.k TEST-SPEC \
 	    | $(KPYK) kpyk-tests/minimize/test-kompiled print /dev/stdin > kpyk-tests/minimize/test.k.out
 	$(CHECK) kpyk-tests/minimize/test.k.out kpyk-tests/minimize/test.k.expected
+
+
+## kprovex --emit-json-spec tests
+
+emit-json-spec-tests/verification-kompiled/timestamp: emit-json-spec-tests/verification.k imp.k
+	kompile $< --backend haskell -I . --emit-json
+
+emit-json-spec-tests/looping-spec.json: emit-json-spec-tests/looping-spec.k emit-json-spec-tests/verification-kompiled/timestamp
+	kprovex $< --backend haskell -I . --directory $(@D) --emit-json-spec $@ --dry-run
+
+test-emit-json-spec: emit-json-spec-tests/emit_json_spec_test.py emit-json-spec-tests/looping-spec.json
+	python3 -m unittest $<
