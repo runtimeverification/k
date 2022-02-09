@@ -77,7 +77,7 @@ execute () {
     set -x
   fi
   if ${profile}; then
-    command time --format '%x %Es %Us %Ss %C' -- "$@"
+    time --format '%x %Es %Us %Ss %C' -- "$@"
   else
     "$@"
   fi
