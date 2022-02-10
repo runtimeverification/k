@@ -87,7 +87,7 @@ public class KProve {
         }
 
         if (kproveOptions.emitJsonSpec != null) {
-            FileUtil.save(new File(kproveOptions.emitJsonSpec), ToJson.apply(specModule));
+            files.saveToWorkingDirectory(kproveOptions.emitJsonSpec, ToJson.apply(specModule));
         }
 
         RewriterResult results = rewriter.prove(specModule, boundaryPattern, true);
