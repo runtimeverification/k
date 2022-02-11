@@ -1,6 +1,6 @@
 [submodule "llvm-backend/src/main/native/llvm-backend"]
 	path = llvm-backend/src/main/native/llvm-backend
-	url = https://github.com/kframework/llvm-backend
+	url = https://github.com/runtimeverification/llvm-backend
 	ignore = untracked
 [submodule "haskell-backend/src/main/native/haskell-backend"]
 	path = haskell-backend/src/main/native/haskell-backend
