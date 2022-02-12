@@ -20,6 +20,7 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.function.Function;
 
@@ -83,6 +84,10 @@ public class KProve {
             } catch (UnsupportedEncodingException e) {
                 throw KEMException.criticalError("Unsupported encoding `UTF-8` when saving JSON definition.");
             }
+        }
+
+        if (kproveOptions.emitJsonSpec != null) {
+            files.saveToWorkingDirectory(kproveOptions.emitJsonSpec, ToJson.apply(specModule));
         }
 
         RewriterResult results = rewriter.prove(specModule, boundaryPattern, true);
