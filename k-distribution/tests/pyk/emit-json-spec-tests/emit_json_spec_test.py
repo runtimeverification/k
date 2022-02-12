@@ -4,7 +4,7 @@ import shutil
 import unittest
 from pathlib import Path
 
-from pyk.kast import KApply, KClaim, KDefinition, KRequire, KVariable
+from pyk.kast import KApply, KAtt, KClaim, KDefinition, KRequire, KRule, KToken, KVariable
 from pyk.kastManip import rewriteAnywhereWith
 from pyk.ktool import KProve
 
@@ -72,6 +72,17 @@ class EmitJsonSpecTest(unittest.TestCase):
 
         # Then
         self.assertEqual(result['label'], '#Top')
+
+    def test_prove_claim_with_lemmas(self):
+        # When
+        new_lemma = KRule(KToken('pred1(3) => true requires pred1(4)', None), att=KAtt(atts={'simplification': ''}))
+        new_claim = KClaim(KToken('<k> foo => bar ... </k> <state> $n |-> 3 </state> requires pred1(4)', None))
+        result1 = self.kprove.proveClaim(new_claim, 'claim-with-lemma')
+        result2 = self.kprove.proveClaim(new_claim, 'claim-with-lemma', lemmas = [new_lemma])
+
+        # Then
+        self.assertNotEqual(result1['label'], '#Top')
+        self.assertEqual(result2['label'], '#Top')
 
 
 def extract_claims(module):
