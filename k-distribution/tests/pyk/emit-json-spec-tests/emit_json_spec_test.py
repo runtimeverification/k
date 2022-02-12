@@ -77,7 +77,7 @@ class EmitJsonSpecTest(unittest.TestCase):
         # When
         new_lemma = KRule(KToken('pred1(3) => true requires pred1(4)', None), att=KAtt(atts={'simplification': ''}))
         new_claim = KClaim(KToken('<k> foo => bar ... </k> <state> $n |-> 3 </state> requires pred1(4)', None))
-        result1 = self.kprove.proveClaim(new_claim, 'claim-with-lemma')
+        result1 = self.kprove.proveClaim(new_claim, 'claim-without-lemma')
         result2 = self.kprove.proveClaim(new_claim, 'claim-with-lemma', lemmas = [new_lemma])
 
         # Then
