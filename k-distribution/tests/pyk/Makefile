@@ -111,13 +111,14 @@ test-kpyk-minimize-term: kpyk-tests/minimize/test.k
 	    | $(KPYK) kpyk-tests/minimize/test-kompiled print /dev/stdin > kpyk-tests/minimize/test.k.out
 	$(CHECK) kpyk-tests/minimize/test.k.out kpyk-tests/minimize/test.k.expected
 
-
-## kprovex --emit-json-spec tests
+## pytests
 
 FILE_DEPS =
 
-pytests = emit_json_spec_test.py
+pytests = defn_test.py           \
+          emit_json_spec_test.py
 
+defn_test.py.pytest:           FILE_DEPS = imp-verification/haskell.kompiled
 emit_json_spec_test.py.pytest: FILE_DEPS = imp-verification/looping-spec.json.json-spec
 
 test-pytest: $(pytests:=.pytest)
