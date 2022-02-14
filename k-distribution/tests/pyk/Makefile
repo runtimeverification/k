@@ -19,12 +19,13 @@ export PYTHONPATH
 .PHONY: all clean update-results pyk                                                \
         test test-defn test-defn-kast test-defn-prove                               \
         test-kpyk test-kpyk-coverage-log test-kpyk-graphviz test-kpyk-minimize-term \
-        test-emit-json-spec
+        test-pytest
 
 all: test
 
 clean:
 	rm -rf $(llvm_dir) $(haskell_dir) emit-json-spec-tests/verification-kompiled emit-json-spec-tests/looping-spec.json
+	rm -rf definitions specs
 
 llvm_dir          := llvm
 llvm_imp          := $(llvm_dir)/imp.k
@@ -113,32 +114,38 @@ test-kpyk-minimize-term: kpyk-tests/minimize/test.k
 
 ## kprovex --emit-json-spec tests
 
+FILE_DEPS =
+
 pytests = emit_json_spec_test.py
 
-test-emit-json-spec: $(pytests:=.pytest)
+emit_json_spec_test.py.pytest: FILE_DEPS = imp-verification/looping-spec.json.json-spec
 
-%.pytest: %
+test-pytest: $(pytests:=.pytest)
+
+.SECONDEXPANSION:
+%.pytest: % $$(FILE_DEPS)
 	python3 -m unittest $<
 
 ## proofs to turn to json ahead of time
 
-KPROVEX_OPTS      =
-KPROVEX_DIRECTORY =
-KPROVEX_FILE      =
+KPROVEX_DEFN =
+KPROVEX_OPTS =
+KPROVEX_FILE =
 
 json_specs := imp-verification/looping-spec.json
 
-imp-verification/looping-spec.json.json-spec: KPROVEX_DIRECTORY = definitions/imp-verification/haskell
-imp-verification/looping-spec.json.json-spec: KPROVEX_FILE      = looping-spec.k
+imp-verification/looping-spec.json.json-spec: KPROVEX_DEFN = imp-verification/haskell
+imp-verification/looping-spec.json.json-spec: KPROVEX_FILE = looping-spec.k
 
 build-specs: $(json_specs:=.json-spec)
 
-%.json-spec: build-definitions
-	$(KPROVEX) k-files/$(KPROVEX_FILE)   \
-	    -I k-files                       \
-	    --backend haskell --dry-run      \
-	    --directory $(KPROVEX_DIRECTORY) \
-	    --emit-json-spec specs/$*        \
+.SECONDEXPANSION:
+%.json-spec: $$(KPROVEX_DEFN).kompiled
+	$(KPROVEX) k-files/$(KPROVEX_FILE)          \
+	    -I k-files                              \
+	    --backend haskell --dry-run             \
+	    --directory definitions/$(KPROVEX_DEFN) \
+	    --emit-json-spec specs/$*               \
 	    $(KPROVEX_OPTS)
 
 ## definitions to build ahead of time
