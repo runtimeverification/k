@@ -53,7 +53,7 @@ class DefnTest(unittest.TestCase):
                                     , '    int x , y ;'
                                     , '  </k>'
                                     , '  <state>'
-                                    , '    STATE'
+                                    , '    .Map'
                                     , '  </state>'
                                     , '</T>'
                                     ])
