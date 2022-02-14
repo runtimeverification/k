@@ -32,12 +32,7 @@ kompile: $(llvm_imp_kompiled) $(haskell_imp_kompiled)
 
 # Tests
 
-test: test-unit test-defn test-kpyk test-emit-json-spec
-
-## Unit Tests
-
-test-unit:
-	python3 unit-test.py
+test: test-kpyk test-pytest
 
 ## kpyk runner tests
 
@@ -60,7 +55,8 @@ test-kpyk-minimize-term: kpyk-tests/minimize/test.k
 FILE_DEPS =
 
 pytests = defn_test.py           \
-          emit_json_spec_test.py
+          emit_json_spec_test.py \
+          unit_test.py
 
 defn_test.py.pytest:           FILE_DEPS = imp-verification/haskell.kompiled
 emit_json_spec_test.py.pytest: FILE_DEPS = imp-verification/looping-spec.json.json-spec
