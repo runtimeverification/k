@@ -38,9 +38,9 @@ test: test-kpyk test-pytest
 
 test-kpyk: test-kpyk-graphviz test-kpyk-minimize-term
 
-test-kpyk-graphviz: $(llvm_imp_kompiled)
-	$(KPYK) $(dir $<) graph-imports
-	cat $(dir $<)import-graph | tr -cd '[:alnum:]\n' | grep . | tr '[:lower:]' '[:upper:]' | sort > import-graph.sorted
+test-kpyk-graphviz: imp-verification/haskell.kompiled
+	$(KPYK) definitions/imp-verification/haskell/imp-verification-kompiled graph-imports
+	cat definitions/imp-verification/haskell/imp-verification-kompiled/import-graph | tr -cd '[:alnum:]\n' | grep . | tr '[:lower:]' '[:upper:]' | sort > import-graph.sorted
 	$(CHECK) import-graph.sorted imp-import-graph.expected
 
 test-kpyk-minimize-term: kpyk-tests/minimize/test.k
