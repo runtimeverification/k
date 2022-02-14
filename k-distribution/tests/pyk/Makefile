@@ -121,3 +121,47 @@ emit-json-spec-tests/looping-spec.json: emit-json-spec-tests/looping-spec.k emit
 
 test-emit-json-spec: emit-json-spec-tests/emit_json_spec_test.py emit-json-spec-tests/looping-spec.json
 	python3 -m unittest $<
+
+## proofs to turn to json ahead of time
+
+KPROVEX_OPTS      =
+KPROVEX_DIRECTORY =
+KPROVEX_FILE      =
+
+json_specs := imp-verification/looping-spec.json
+
+imp-verification/looping-spec.json.json-spec: KPROVEX_DIRECTORY = definitions/imp-verification/haskell
+imp-verification/looping-spec.json.json-spec: KPROVEX_FILE      = looping-spec.k
+
+build-specs: $(json_specs:=.json-spec)
+
+%.json-spec: build-definitions
+	$(KPROVEX) k-files/$(KPROVEX_FILE)   \
+	    -I k-files                       \
+	    --backend haskell --dry-run      \
+	    --directory $(KPROVEX_DIRECTORY) \
+	    --emit-json-spec specs/$*        \
+	    $(KPROVEX_OPTS)
+
+## definitions to build ahead of time
+
+KOMPILE_BACKEND  = haskell
+KOMPILE_COVERAGE =
+KOMPILE_OPTS     =
+
+definitions := imp/llvm                 \
+               imp/haskell              \
+               imp-verification/haskell
+
+imp/llvm.kompiled: KOMPILE_BACKEND  = llvm
+imp/llvm.kompiled: KOMPILE_COVERAGE = --coverage
+
+build-definitions: $(definitions:=.kompiled)
+
+%.kompiled:
+	$(KOMPILE) --directory definitions/$*      \
+	    -I k-files                             \
+	    --backend $(KOMPILE_BACKEND)           \
+	    --emit-json $(KOMPILE_COVERAGE)        \
+	    $(KOMPILE_OPTS)                        \
+	    k-files/$(patsubst %/,%,$(dir $@)).k

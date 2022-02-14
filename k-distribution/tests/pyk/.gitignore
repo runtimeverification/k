@@ -5,3 +5,5 @@
 /kpyk-tests/*.coverage
 /kpyk-tests/minimize/*.out
 /kpyk-tests/minimize/*.json
+/definitions
+/specs
