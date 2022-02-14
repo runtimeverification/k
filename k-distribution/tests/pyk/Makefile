@@ -43,12 +43,10 @@ test-kpyk-graphviz: imp-verification/haskell.kompiled
 	cat definitions/imp-verification/haskell/imp-verification-kompiled/import-graph | tr -cd '[:alnum:]\n' | grep . | tr '[:lower:]' '[:upper:]' | sort > import-graph.sorted
 	$(CHECK) import-graph.sorted imp-import-graph.expected
 
-test-kpyk-minimize-term: kpyk-tests/minimize/test.k
-	$(KOMPILE) kpyk-tests/minimize/test.k --directory kpyk-tests/minimize --backend haskell --emit-json \
-	    --main-module TEST
-	$(KPYK) kpyk-tests/minimize/test-kompiled prove kpyk-tests/minimize/test.k kpyk-tests/minimize/test.k TEST-SPEC \
-	    | $(KPYK) kpyk-tests/minimize/test-kompiled print /dev/stdin > kpyk-tests/minimize/test.k.out
-	$(CHECK) kpyk-tests/minimize/test.k.out kpyk-tests/minimize/test.k.expected
+test-kpyk-minimize-term: imp-verification/haskell.kompiled
+	$(KPYK) definitions/imp-verification/haskell/imp-verification-kompiled prove k-files/imp-verification.k k-files/imp-unproveable-spec.k IMP-UNPROVEABLE-SPEC \
+	    | $(KPYK) definitions/imp-verification/haskell/imp-verification-kompiled print /dev/stdin > imp-unproveable-spec.k.out
+	$(CHECK) imp-unproveable-spec.k.out imp-unproveable-spec.k.expected
 
 ## pytests
 
