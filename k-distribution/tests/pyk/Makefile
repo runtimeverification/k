@@ -113,13 +113,11 @@ test-kpyk-minimize-term: kpyk-tests/minimize/test.k
 
 ## kprovex --emit-json-spec tests
 
-emit-json-spec-tests/verification-kompiled/timestamp: emit-json-spec-tests/verification.k imp.k
-	kompile $< --backend haskell -I . --emit-json
+pytests = emit_json_spec_test.py
 
-emit-json-spec-tests/looping-spec.json: emit-json-spec-tests/looping-spec.k emit-json-spec-tests/verification-kompiled/timestamp
-	kprovex $< --backend haskell -I . --directory $(@D) --emit-json-spec $@ --dry-run
+test-emit-json-spec: $(pytests:=.pytest)
 
-test-emit-json-spec: emit-json-spec-tests/emit_json_spec_test.py emit-json-spec-tests/looping-spec.json
+%.pytest: %
 	python3 -m unittest $<
 
 ## proofs to turn to json ahead of time
@@ -159,9 +157,9 @@ imp/llvm.kompiled: KOMPILE_COVERAGE = --coverage
 build-definitions: $(definitions:=.kompiled)
 
 %.kompiled:
-	$(KOMPILE) --directory definitions/$*      \
-	    -I k-files                             \
-	    --backend $(KOMPILE_BACKEND)           \
-	    --emit-json $(KOMPILE_COVERAGE)        \
-	    $(KOMPILE_OPTS)                        \
+	$(KOMPILE) --directory definitions/$*    \
+	    -I k-files                           \
+	    --backend $(KOMPILE_BACKEND)         \
+	    --emit-json $(KOMPILE_COVERAGE)      \
+	    $(KOMPILE_OPTS)                      \
 	    k-files/$(patsubst %/,%,$(dir $@)).k

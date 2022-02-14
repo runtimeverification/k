@@ -10,19 +10,21 @@ from pyk.ktool import KProve
 
 
 class EmitJsonSpecTest(unittest.TestCase):
+    DEFN_DIR = 'definitions/imp-verification/haskell/imp-verification-kompiled'
+    SPEC_DIR = 'specs/imp-verification'
     TEST_DIR = 'emit-json-spec-tests'
-    MAIN_FILE = 'verification.k'
+    MAIN_FILE = 'imp-verification.k'
     USE_DIR = f'{TEST_DIR}/.kprove'
 
     def setUp(self):
         shutil.rmtree(self.USE_DIR, ignore_errors=True)
         os.makedirs(self.USE_DIR)
 
-        self.kprove = KProve(f'{self.TEST_DIR}/verification-kompiled', self.MAIN_FILE, self.USE_DIR)
-        self.kprove.proverArgs += ['-I', '.']
+        self.kprove = KProve(f'{self.DEFN_DIR}', self.MAIN_FILE, self.USE_DIR)
+        self.kprove.proverArgs += ['-I', 'k-files']
         self._update_symbol_table(self.kprove)
 
-        with open(f'{self.TEST_DIR}/looping-spec.json', 'r') as spec_file:
+        with open(f'{self.SPEC_DIR}/looping-spec.json', 'r') as spec_file:
             module = json.load(spec_file)['term']
 
         claim = extract_claims(module)[0]
