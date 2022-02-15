@@ -6,12 +6,11 @@ from pyk.kast import KApply, KAtt, KClaim, KRule, KToken, KVariable
 from pyk.kastManip import rewriteAnywhereWith
 
 
-class EmitJsonSpecTest(KProveTest):
+class SimpleProofTest(KProveTest):
     DEFN_DIR = 'definitions/simple-proofs/haskell/simple-proofs-kompiled'
     MAIN_FILE_NAME = 'simple-proofs.k'
-    USE_DIR = '.emit-json-spec-test'
+    USE_DIR = '.simple-proof-test'
     INCLUDE_DIRS = ['k-files']
-    SPEC_FILE = 'specs/simple-proofs/looping-spec.json'
 
     def setUp(self):
         super().setUp()
