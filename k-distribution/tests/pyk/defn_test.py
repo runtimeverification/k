@@ -1,12 +1,10 @@
 import json
 import os
 import shutil
-import unittest
 from pathlib import Path
 
+from kprove_test import KProveTest
 from pyk.kast import (
-    assocWithUnit,
-    constLabel,
     KApply,
     KAtt,
     KClaim,
@@ -17,31 +15,22 @@ from pyk.kast import (
     KRule,
     KToken,
     KVariable,
+    assocWithUnit,
+    constLabel,
 )
-from pyk.kastManip import rewriteAnywhereWith, pushDownRewrites, simplifyBool
-from pyk.ktool import KProve
+from pyk.kastManip import pushDownRewrites, rewriteAnywhereWith, simplifyBool
 
-class DefnTest(unittest.TestCase):
+
+class DefnTest(KProveTest):
     DEFN_DIR = 'definitions/imp-verification/haskell/imp-verification-kompiled'
-    TEST_DIR = 'kprint-tests'
-    MAIN_FILE = 'imp-verification.k'
-    USE_DIR = f'{TEST_DIR}/.kprint'
-
-    def setUp(self):
-        shutil.rmtree(self.USE_DIR, ignore_errors=True)
-        os.makedirs(self.USE_DIR)
-
-        self.kprove = KProve(f'{self.DEFN_DIR}', self.MAIN_FILE, self.USE_DIR)
-        self.kprove.proverArgs += ['-I', 'k-files']
-        self._update_symbol_table(self.kprove)
-
-    def tearDown(self):
-        shutil.rmtree(self.USE_DIR)
+    MAIN_FILE_NAME = 'imp-verification.k'
+    USE_DIR = f'.defn-test'
+    INCLUDE_DIRS = ['k-files']
 
     @staticmethod
-    def _update_symbol_table(kprove):
-        kprove.symbolTable['_,_'] = assocWithUnit(' , ', '')
-        kprove.symbolTable['.List{"_,_"}'] = constLabel('')
+    def _update_symbol_table(symbol_table):
+        symbol_table['_,_'] = assocWithUnit(' , ', '')
+        symbol_table['.List{"_,_"}'] = constLabel('')
 
     def test_print_configuration(self):
         # When
