@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from kprove_test import KProveTest
-from pyk.kast import KApply, KAtt, KClaim, KDefinition, KRequire, KRule, KToken, KVariable
+from pyk.kast import KApply, KClaim, KDefinition, KRequire, KVariable
 from pyk.kastManip import rewriteAnywhereWith
 
 
