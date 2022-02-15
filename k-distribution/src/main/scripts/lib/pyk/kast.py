@@ -407,14 +407,14 @@ def prettyPrintKast(kast, symbolTable, debug = False):
         if getAttribute(kast, 'label') is not None:
             ruleStr = ruleStr + '[' + getAttribute(kast, 'label') + ']:'
         ruleStr     = ruleStr + ' ' + body
-        requiresStr = ''
-        ensuresStr  = ''
         attsStr     = prettyPrintKast(kast['att'], symbolTable, debug = debug)
         if kast['requires'] is not None:
             requiresStr = 'requires ' + '\n  '.join(prettyPrintKastBool(kast['requires'], symbolTable, debug = debug).split('\n'))
+            ruleStr = ruleStr + '\n  ' + requiresStr
         if kast['ensures'] is not None:
             ensuresStr = 'ensures ' + '\n  '.join(prettyPrintKastBool(kast['ensures'], symbolTable, debug = debug).split('\n'))
-        return ruleStr + '\n  ' + requiresStr + '\n   ' + ensuresStr + '\n  ' + attsStr
+            ruleStr = ruleStr + '\n   ' + ensuresStr
+        return ruleStr + '\n  ' + attsStr
     if isKContext(kast):
         body        = indent(prettyPrintKast(kast['body'], symbolTable, debug = debug))
         contextStr  = 'context alias ' + body

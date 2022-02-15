@@ -54,10 +54,12 @@ FILE_DEPS =
 
 pytests = defn_test.py           \
           emit_json_spec_test.py \
+          simple_proofs_test.py  \
           unit_test.py
 
 defn_test.py.pytest:           FILE_DEPS = imp-verification/haskell.kompiled
 emit_json_spec_test.py.pytest: FILE_DEPS = imp-verification/looping-spec.json.json-spec
+simple_proofs_test.py.pytest:  FILE_DEPS = simple-proofs/haskell.kompiled
 
 test-pytest: $(pytests:=.pytest)
 
@@ -93,7 +95,8 @@ KOMPILE_BACKEND  = haskell
 KOMPILE_COVERAGE =
 KOMPILE_OPTS     =
 
-definitions := imp-verification/haskell
+definitions := imp-verification/haskell \
+               simple-proofs/haskell
 
 build-definitions: $(definitions:=.kompiled)
 
