@@ -1,28 +1,22 @@
 import json
-import os
-import shutil
-import unittest
 from pathlib import Path
 
+from kprove_test import KProveTest
 from pyk.kast import KApply, KAtt, KClaim, KDefinition, KRequire, KRule, KToken, KVariable
 from pyk.kastManip import rewriteAnywhereWith
-from pyk.ktool import KProve
 
 
-class EmitJsonSpecTest(unittest.TestCase):
-    TEST_DIR = 'emit-json-spec-tests'
-    MAIN_FILE = 'verification.k'
-    USE_DIR = f'{TEST_DIR}/.kprove'
+class EmitJsonSpecTest(KProveTest):
+    DEFN_DIR = 'definitions/imp-verification/haskell/imp-verification-kompiled'
+    MAIN_FILE_NAME = 'imp-verification.k'
+    USE_DIR = '.emit-json-spec-test'
+    INCLUDE_DIRS = ['k-files']
+    SPEC_FILE = 'specs/imp-verification/looping-spec.json'
 
     def setUp(self):
-        shutil.rmtree(self.USE_DIR, ignore_errors=True)
-        os.makedirs(self.USE_DIR)
+        super().setUp()
 
-        self.kprove = KProve(f'{self.TEST_DIR}/verification-kompiled', self.MAIN_FILE, self.USE_DIR)
-        self.kprove.proverArgs += ['-I', '.']
-        self._update_symbol_table(self.kprove)
-
-        with open(f'{self.TEST_DIR}/looping-spec.json', 'r') as spec_file:
+        with open(self.SPEC_FILE, 'r') as spec_file:
             module = json.load(spec_file)['term']
 
         claim = extract_claims(module)[0]
@@ -36,17 +30,14 @@ class EmitJsonSpecTest(unittest.TestCase):
         module['localSentences'] = [self.claim]
         self.module = module
 
-    def tearDown(self):
-        shutil.rmtree(self.USE_DIR)
-
     @staticmethod
-    def _update_symbol_table(kprove):
+    def _update_symbol_table(symbol_table):
         def paren(f):
             def unparse(*args):
                 return '(' + f(*args) + ')'
             return unparse
 
-        kprove.symbolTable['_+Int_'] = paren(kprove.symbolTable['_+Int_'])
+        symbol_table['_+Int_'] = paren(symbol_table['_+Int_'])
 
     def test_prove_claim(self):
         # When
@@ -58,17 +49,17 @@ class EmitJsonSpecTest(unittest.TestCase):
     def test_prove(self):
         # Given
         spec_name = 'looping-2-spec'
-        spec_path = Path(f'{self.USE_DIR}/{spec_name}.k')
+        spec_file = Path(self.USE_DIR) / f'{spec_name}.k'
         spec_module_name = spec_name.upper()
 
         self.module['name'] = spec_module_name
-        definition = KDefinition(self.module, [self.module], requires=[KRequire(self.MAIN_FILE)])
+        definition = KDefinition(self.module, [self.module], requires=[KRequire(self.MAIN_FILE_NAME)])
 
-        with open(spec_path, 'x') as spec_file:
-            spec_file.write(self.kprove.prettyPrint(definition))
+        with open(spec_file, 'x') as f:
+            f.write(self.kprove.prettyPrint(definition))
 
         # When
-        result = self.kprove.prove(spec_path, spec_module_name)
+        result = self.kprove.prove(spec_file, spec_module_name)
 
         # Then
         self.assertEqual(result['label'], '#Top')

@@ -1,0 +1,26 @@
+<generatedTop>
+  <T>
+    <k>
+      3
+      ~> _DotVar2
+    </k>
+    ...
+  </T>
+  <generatedCounter>
+    _DotVar3
+  </generatedCounter>
+</generatedTop>
+#And #Not( #Exists _DotVar3 . #Exists K0 . { _DotVar2 #Equals #freezer K0 + 1 ( )
+~> _DotVar3 } )
+#And #Not( #Exists _DotVar3 . #Exists K0 . { _DotVar2 #Equals #freezer K0 / 1 ( )
+~> _DotVar3 } )
+#And #Not( #Exists _DotVar3 . #Exists K0 . { _DotVar2 #Equals #freezer K0 <= 1 ( )
+~> _DotVar3 } )
+#And #Not( #Exists _DotVar3 . #Exists K0 . { _DotVar2 #Equals #freezer K0 = ;1 ( )
+~> _DotVar3 } )
+#And #Not( #Exists _DotVar3 . #Exists K1 . { _DotVar2 #Equals #freezer K1 + 0 ( )
+~> _DotVar3 } )
+#And #Not( #Exists _DotVar3 . #Exists K1 . { _DotVar2 #Equals #freezer K1 / 0 ( )
+~> _DotVar3 } )
+#And #Not( #Exists _DotVar3 . #Exists K1 . { _DotVar2 #Equals #freezer K1 <= 0 ( )
+~> _DotVar3 } )
