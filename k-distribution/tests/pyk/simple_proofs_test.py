@@ -20,9 +20,11 @@ class SimpleProofTest(KProveTest):
         pass
 
     def test_prove_claim_with_lemmas(self):
-        # When
+        # Given
         new_lemma = KRule(KToken('pred1(3) => true', 'Bool'), requires=KToken('pred1(4)', 'Bool'), att=KAtt(atts={'simplification': ''}))
         new_claim = KClaim(KToken('<k> foo => bar ... </k> <state> 3 |-> 3 </state>', 'TCellFragment'), requires=KToken('pred1(4)', 'Bool'))
+        
+        # When
         result1 = self.kprove.proveClaim(new_claim, 'claim-without-lemma')
         result2 = self.kprove.proveClaim(new_claim, 'claim-with-lemma', lemmas = [new_lemma])
 
