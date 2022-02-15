@@ -33,10 +33,8 @@ class DefnTest(KProveTest):
         symbol_table['.List{"_,_"}'] = constLabel('')
 
     def test_print_configuration(self):
-        # When
+        # Given
         config = KApply('<T>', [KApply('<k>', [KApply('int_;_', [KApply('_,_', [KToken('x', 'Id'), KApply('_,_', [KToken('y', 'Id'), KConstant('.List{"_,_"}')])])])]), KApply('<state>', [KConstant('.Map')])])
-
-        # Then
         config_expected = '\n'.join([ '<T>'
                                     , '  <k>'
                                     , '    int x , y ;'
@@ -46,10 +44,15 @@ class DefnTest(KProveTest):
                                     , '  </state>'
                                     , '</T>'
                                     ])
-        self.assertEqual(config_expected, self.kprove.prettyPrint(config))
+
+        # When
+        config_actual = self.kprove.prettyPrint(config)
+
+        # Then
+        self.assertEqual(config_expected, config_actual)
 
     def test_print_prove_rewrite(self):
-        # When
+        # Given
         claim_rewrite = KRewrite( KApply('<T>', [ KApply('<k>', [KApply('_+_', [KVariable('X'), KVariable('Y')])])
                                                 , KApply('<state>', [KVariable('STATE')])
                                                 ])
@@ -57,10 +60,6 @@ class DefnTest(KProveTest):
                                                 , KApply('<state>', [KVariable('STATE')])
                                                 ])
                                 )
-        minimized_claim_rewrite = pushDownRewrites(claim_rewrite)
-        claim = KClaim(minimized_claim_rewrite)
-
-        # Then
         minimized_claim_rewrite_expected = '\n'.join([ '<T>'
                                                      , '  <k>'
                                                      , '    ( X + Y => X +Int Y )'
@@ -70,17 +69,23 @@ class DefnTest(KProveTest):
                                                      , '  </state>'
                                                      , '</T>'
                                                      ])
-        minimized_claim_rewrite_actual = self.kprove.prettyPrint(minimized_claim_rewrite)
-        self.assertEqual(minimized_claim_rewrite_expected, minimized_claim_rewrite_actual)
 
-        # And Then
+        # When
+        minimized_claim_rewrite = pushDownRewrites(claim_rewrite)
+        claim = KClaim(minimized_claim_rewrite)
+        minimized_claim_rewrite_actual = self.kprove.prettyPrint(minimized_claim_rewrite)
         result = self.kprove.proveClaim(claim, 'simple-step')
+
+        # Then
+        self.assertEqual(minimized_claim_rewrite_expected, minimized_claim_rewrite_actual)
         self.assertEqual('#Top', result['label'])
 
     def test_bool_simplify(self):
-        # When
+        # Given
         bool_test_1 = KApply('_andBool_', [boolToken(False), boolToken(True)])
         bool_test_2 = KApply('_andBool_', [KApply('_==Int_', [intToken(3), intToken(4)]), boolToken(True)])
+
+        # When
         bool_test_1_simplified = simplifyBool(bool_test_1)
         bool_test_2_simplified = simplifyBool(bool_test_2)
 
