@@ -1,7 +1,7 @@
-requires "verification.k"
+requires "imp-verification.k"
 
 module LOOPING-SPEC
-    imports VERIFICATION
+    imports IMP-VERIFICATION
 
     claim <k> while ( 1 <= $n ) {
                 $s = $s + $n ;

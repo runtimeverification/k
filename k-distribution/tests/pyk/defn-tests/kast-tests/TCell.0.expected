@@ -1,9 +1,0 @@
-<T>
-  <k>
-    int x, y, .Ids;
-    { }
-  </k>
-  <state>
-    .Map
-  </state>
-</T>

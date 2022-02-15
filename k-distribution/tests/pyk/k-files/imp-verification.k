@@ -1,12 +1,12 @@
 requires "imp.k"
 
-module VERIFICATION-SYNTAX
+module IMP-VERIFICATION-SYNTAX
     syntax Id ::= "$s" [token]
                 | "$n" [token]
 endmodule
 
-module VERIFICATION
-    imports VERIFICATION-SYNTAX
+module IMP-VERIFICATION
+    imports IMP-VERIFICATION-SYNTAX
     imports IMP
 endmodule
 
