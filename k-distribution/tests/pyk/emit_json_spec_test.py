@@ -64,17 +64,6 @@ class EmitJsonSpecTest(KProveTest):
         # Then
         self.assertEqual(result['label'], '#Top')
 
-    def test_prove_claim_with_lemmas(self):
-        # When
-        new_lemma = KRule(KToken('pred1(3) => true', 'Bool'), requires=KToken('pred1(4)', 'Bool'), att=KAtt(atts={'simplification': ''}))
-        new_claim = KClaim(KToken('<k> foo => bar ... </k> <state> $n |-> 3 </state>', 'TCellFragment'), requires=KToken('pred1(4)', 'Bool'))
-        result1 = self.kprove.proveClaim(new_claim, 'claim-without-lemma')
-        result2 = self.kprove.proveClaim(new_claim, 'claim-with-lemma', lemmas = [new_lemma])
-
-        # Then
-        self.assertNotEqual(result1['label'], '#Top')
-        self.assertEqual(result2['label'], '#Top')
-
 
 def extract_claims(module):
     return [claim for claim in module['localSentences'] if claim['node'] == 'KClaim']
