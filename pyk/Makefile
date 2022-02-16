@@ -17,6 +17,7 @@ clean:
 	rm -rf $(VENV_DEV_DIR) $(VENV_PROD_DIR) definitions build src/pyk.egg-info .myp_cache
 	find -type d -name __pycache__ -prune -exec rm -rf {} \;
 	$(MAKE) -C pyk-tests clean
+	$(MAKE) -C kit-tests clean
 
 
 # Virtualenv
@@ -49,7 +50,7 @@ $(VENV_PROD_DIR): $(VENV_PROD)
 
 # Tests
 
-test: test-unit test-integration test-pyk
+test: test-unit test-integration test-pyk test-kit
 
 test-unit: $(VENV_DEV)
 	$(ACTIVATE_DEV) && python3 -m unittest discover -vt src pyk.tests
@@ -59,7 +60,9 @@ test-integration: $(VENV_DEV)
 
 test-pyk: $(VENV_PROD)
 	$(ACTIVATE_PROD) && $(MAKE) -C pyk-tests
-	rm -rf $(VENV_PROD_DIR) build src/pyk.egg-info
+
+test-kit: $(VENV_PROD)
+	$(ACTIVATE_PROD) && $(MAKE) -C kit-tests
 
 
 # Checks
