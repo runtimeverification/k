@@ -3,8 +3,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-
-_lastTime = time.time()
+_last_time = time.time()
 
 
 def check_dir_path(path: Path) -> None:
@@ -33,20 +32,20 @@ def file_path(s: str) -> Path:
     return path
 
 
-def notif(msg):
-    global _lastTime
-    curTime   = time.time()
-    diffTime  = curTime - _lastTime
-    _lastTime = curTime
-    sys.stderr.write('== ' + sys.argv[0].split('/')[-1] + ' [+' + '{0:8.2f}'.format(diffTime) + ']: ' + msg + '\n')
+def notif(msg: str):
+    global _last_time
+    curr_time = time.time()
+    time_diff = curr_time - _last_time
+    _last_time = curr_time
+    sys.stderr.write('== ' + sys.argv[0].split('/')[-1] + ' [+' + '{0:8.2f}'.format(time_diff) + ']: ' + msg + '\n')
     sys.stderr.flush()
 
 
-def warning(msg):
+def warning(msg: str):
     notif('[WARNING] ' + msg)
 
 
-def fatal(msg, exitCode = 1):
+def fatal(msg: str, exit_code=1):
     notif('[FATAL] ' + msg)
     raise('Quitting')
 
