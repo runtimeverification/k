@@ -94,4 +94,7 @@ public class KProveOptions {
 
     @Parameter(names="--emit-json", description="Emit JSON serialized main definition for proving.")
     public boolean emitJson = false;
+
+    @Parameter(names="--emit-json-spec", description="If set, emit the JSON serialization of the spec module to the specified file.")
+    public String emitJsonSpec = null;
 }

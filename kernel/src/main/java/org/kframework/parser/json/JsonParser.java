@@ -66,6 +66,7 @@ public class JsonParser {
                              , KNONTERMINAL         = "KNonTerminal"
                              , KMODULE              = "KModule"
                              , KFLATMODULE          = "KFlatModule"
+                             , KIMPORT              = "KImport"
                              , KPRODUCTION          = "KProduction"
                              , KREGEXTERMINAL       = "KRegexTerminal"
                              , KREWRITE             = "KRewrite"
