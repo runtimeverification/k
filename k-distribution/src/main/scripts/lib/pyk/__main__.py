@@ -7,6 +7,7 @@ import os.path as path
 import sys
 
 from .      import *
+from .cli_utils import notif, warning
 from .ktool import KPrint, KProve
 
 pykArgs = argparse.ArgumentParser()
