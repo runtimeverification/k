@@ -1,11 +1,14 @@
-#!/usr/bin/env python3
-
-import json
-import sys
-
 from .cli_utils import fatal
-from .kast      import *
-from .kastManip import *
+from .kast import (
+    KRewrite,
+    KRule,
+    isKApply,
+    isKRewrite,
+    isKRule,
+    isKSequence,
+    readKastTerm,
+)
+
 
 def getRuleById(definition, rule_id):
     """Get a rule from the definition by coverage rule id.
