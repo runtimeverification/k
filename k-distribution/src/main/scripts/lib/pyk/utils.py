@@ -25,7 +25,7 @@ def combine_dicts(*dicts: Mapping) -> Optional[Dict]:
     return combine_dicts(newDict, *restDicts)
 
 
-def findCommonItems(l1: Iterable[T], l2: Iterable[T]) -> Tuple[List[T], List[T], List[T]]:
+def find_common_items(l1: Iterable[T], l2: Iterable[T]) -> Tuple[List[T], List[T], List[T]]:
     common = []
     for i in l1:
         if i in l2:

@@ -4,7 +4,7 @@ import sys
 import subprocess
 
 from .cli_utils import fatal
-from .utils import combine_dicts, dedupe, findCommonItems
+from .utils import combine_dicts, dedupe, find_common_items
 from .kast import *
 
 def buildAssoc(unit, join, ls):
@@ -243,8 +243,8 @@ def propagateUpConstraints(k):
             return _k
         conjuncts1        = flattenLabel('#And', _k['args'][0])
         conjuncts2        = flattenLabel('#And', _k['args'][1])
-        (common1, l1, r1) = findCommonItems(conjuncts1, conjuncts2)
-        (common2, r2, l2) = findCommonItems(r1, l1)
+        (common1, l1, r1) = find_common_items(conjuncts1, conjuncts2)
+        (common2, r2, l2) = find_common_items(r1, l1)
         common = common1 + common2
         if len(common) == 0:
             return _k
