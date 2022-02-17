@@ -3,9 +3,10 @@
 import os
 from   pathlib    import Path
 import subprocess
+from typing import List
 
 from .cli_utils import gen_file_timestamp, notif
-from .utils import getAppliedAxiomList, hash_str
+from .utils import hash_str
 from .kastManip import *
 
 class KPrint:
@@ -69,7 +70,7 @@ class KProve(KPrint):
             sys.stderr.write(stdout + '\n')
             sys.stderr.write(stderr + '\n')
             fatal('Exiting...', exitCode = process.returncode)
-        if finalState == KConstant('#Top') and len(getAppliedAxiomList(logFile)) == 0 and not allowZeroStep:
+        if finalState == KConstant('#Top') and len(_getAppliedAxiomList(logFile)) == 0 and not allowZeroStep:
             fatal('Proof took zero steps, likely the LHS is invalid: ' + str(specFile))
         return finalState
 
@@ -91,7 +92,7 @@ class KProve(KPrint):
         logFileName = logAxiomsFile if logAxiomsFile is not None else (self.useDirectory / claimId.lower()).with_suffix('.debug.log')
         nextState   = self.proveClaim(claim, claimId, args = (args + ['--branching-allowed', '1', '--depth', str(maxDepth)]), haskellArgs = haskellArgs, logAxiomsFile = logFileName, allowZeroStep = allowZeroStep)
         depth       = 0
-        for axioms in getAppliedAxiomList(str(logFileName)):
+        for axioms in _getAppliedAxiomList(str(logFileName)):
             depth += 1
             if len(axioms) > 1:
                 break
@@ -114,3 +115,17 @@ class KProve(KPrint):
             tc.write(self.prettyPrint(claimDefinition) + '\n\n')
             tc.flush()
         notif('Wrote claim file: ' + str(tmpClaim) + '.')
+
+
+def _getAppliedAxiomList(debugLogFile: Path) -> List[List[str]]:
+    axioms = []
+    next_axioms = []
+    with open(debugLogFile, 'r') as logFile:
+        for line in logFile:
+            if line.find('DebugTransition') > 0:
+                if line.find('after  apply axioms:') > 0:
+                    next_axioms.append(line[line.find('after  apply axioms:') + len('after  apply axioms:'):])
+                elif len(next_axioms) > 0:
+                    axioms.append(next_axioms)
+                    next_axioms = []
+    return axioms

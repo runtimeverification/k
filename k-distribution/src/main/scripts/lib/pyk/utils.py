@@ -1,5 +1,4 @@
 import hashlib
-from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, TypeVar
 
 T = TypeVar('T')
@@ -47,20 +46,6 @@ def dedupe(xs: Iterable[T]) -> List[T]:
         if x not in res:
             res.append(x)
     return res
-
-
-def getAppliedAxiomList(debugLogFile: Path) -> List[List[str]]:
-    axioms = []
-    next_axioms = []
-    with open(debugLogFile, 'r') as logFile:
-        for line in logFile:
-            if line.find('DebugTransition') > 0:
-                if line.find('after  apply axioms:') > 0:
-                    next_axioms.append(line[line.find('after  apply axioms:') + len('after  apply axioms:'):])
-                elif len(next_axioms) > 0:
-                    axioms.append(next_axioms)
-                    next_axioms = []
-    return axioms
 
 
 def hash_str(x: Any) -> str:
