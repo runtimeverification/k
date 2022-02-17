@@ -3,6 +3,8 @@
 import sys
 import subprocess
 
+from .cli_utils import fatal
+from .utils import combine_dicts, dedupe, find_common_items
 from .kast import *
 
 def buildAssoc(unit, join, ls):
@@ -45,18 +47,18 @@ def match(pattern, kast):
     and pattern["label"] == kast["label"] and len(pattern["args"]) == len(kast["args"]):
         for (patternArg, kastArg) in zip(pattern["args"], kast["args"]):
             argSubst = match(patternArg, kastArg)
-            subst = combineDicts(subst, argSubst)
+            subst = combine_dicts(subst, argSubst)
             if subst is None:
                 return None
         return subst
     if isKRewrite(pattern) and isKRewrite(kast):
         lhsSubst = match(pattern['lhs'], kast['lhs'])
         rhsSubst = match(pattern['rhs'], kast['rhs'])
-        return combineDicts(lhsSubst, rhsSubst)
+        return combine_dicts(lhsSubst, rhsSubst)
     if isKSequence(pattern) and isKSequence(kast) and len(pattern['items']) == len(kast['items']):
         for (patternItem, substItem) in zip(pattern['items'], kast['items']):
             itemSubst = match(patternItem, substItem)
-            subst = combineDicts(subst, itemSubst)
+            subst = combine_dicts(subst, itemSubst)
             if subst is None:
                 return None
         return subst
@@ -241,8 +243,8 @@ def propagateUpConstraints(k):
             return _k
         conjuncts1        = flattenLabel('#And', _k['args'][0])
         conjuncts2        = flattenLabel('#And', _k['args'][1])
-        (common1, l1, r1) = findCommonItems(conjuncts1, conjuncts2)
-        (common2, r2, l2) = findCommonItems(r1, l1)
+        (common1, l1, r1) = find_common_items(conjuncts1, conjuncts2)
+        (common2, r2, l2) = find_common_items(r1, l1)
         common = common1 + common2
         if len(common) == 0:
             return _k
