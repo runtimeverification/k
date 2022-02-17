@@ -1,13 +1,29 @@
-#!/usr/bin/env python3
-
 import argparse
-from   graphviz import Digraph
-import tempfile
+import json
 import os.path as path
 import sys
+from pathlib import Path
 
-from .      import *
-from .cli_utils import notif, warning
+from graphviz import Digraph
+
+from .cli_utils import fatal, notif, warning
+from .coverage import getRuleById, stripCoverageLogger
+from .kast import (
+    KApply,
+    KConstant,
+    buildSymbolTable,
+    flattenLabel,
+    prettyPrintKast,
+    readKastTerm,
+)
+from .kastManip import (
+    buildAssoc,
+    minimizeRule,
+    minimizeTerm,
+    propagateUpConstraints,
+    removeSourceMap,
+    splitConfigAndConstraints,
+)
 from .ktool import KPrint, KProve
 
 pykArgs = argparse.ArgumentParser()
@@ -98,7 +114,7 @@ def main(commandLineArgs, extraMain = None):
         extraMain(args, kompiled_dir)
 
     if returncode != 0:
-        _fatal('Non-zero exit code (' + str(returncode) + '): ' + str(kCommand), code = returncode)
+        fatal('Non-zero exit code (' + str(returncode) + '): ' + str(args['command']))
 
 if __name__ == '__main__':
     # KAST terms can end up nested quite deeply, because of the various assoc operators (eg. _Map_, _Set_, ...).
