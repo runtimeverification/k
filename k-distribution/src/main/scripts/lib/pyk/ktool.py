@@ -4,7 +4,7 @@ import os
 from   pathlib    import Path
 import subprocess
 
-from .cli_utils import genFileTimestamp, notif
+from .cli_utils import gen_file_timestamp, notif
 from .kastManip import *
 
 class KPrint:
@@ -109,7 +109,7 @@ class KProve(KPrint):
         with open(tmpClaim, 'w') as tc:
             claimModule     = KFlatModule(tmpModuleName, [KImport(self.mainModule, True)], lemmas + [claim])
             claimDefinition = KDefinition(tmpModuleName, [claimModule], requires = [KRequire(self.mainFileName)])
-            tc.write(genFileTimestamp() + '\n')
+            tc.write(gen_file_timestamp() + '\n')
             tc.write(self.prettyPrint(claimDefinition) + '\n\n')
             tc.flush()
         notif('Wrote claim file: ' + str(tmpClaim) + '.')
