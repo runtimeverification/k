@@ -1,11 +1,15 @@
 import hashlib
+from pathlib import Path
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, TypeVar
+
+T = TypeVar('T')
 
 
-def combineDicts(*dicts):
+def combineDicts(*dicts: Mapping) -> Optional[Dict]:
     if len(dicts) == 0:
         return {}
     if len(dicts) == 1:
-        return dicts[0]
+        return dict(dicts[0])
     dict1 = dicts[0]
     dict2 = dicts[1]
     restDicts = dicts[2:]
@@ -21,7 +25,7 @@ def combineDicts(*dicts):
     return combineDicts(newDict, *restDicts)
 
 
-def findCommonItems(l1, l2):
+def findCommonItems(l1: Iterable[T], l2: Iterable[T]) -> Tuple[List[T], List[T], List[T]]:
     common = []
     for i in l1:
         if i in l2:
@@ -37,7 +41,7 @@ def findCommonItems(l1, l2):
     return (common, newL1, newL2)
 
 
-def dedupe(xs):
+def dedupe(xs: Iterable[T]) -> List[T]:
     res = []
     for x in xs:
         if x not in res:
@@ -45,7 +49,7 @@ def dedupe(xs):
     return res
 
 
-def getAppliedAxiomList(debugLogFile):
+def getAppliedAxiomList(debugLogFile: Path) -> List[List[str]]:
     axioms = []
     next_axioms = []
     with open(debugLogFile, 'r') as logFile:
@@ -59,7 +63,7 @@ def getAppliedAxiomList(debugLogFile):
     return axioms
 
 
-def strHash(k):
+def strHash(k: Any) -> str:
     hash = hashlib.sha256()
     hash.update(str(k).encode('utf-8'))
     return str(hash.hexdigest())
