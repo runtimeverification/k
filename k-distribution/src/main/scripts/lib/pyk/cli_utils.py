@@ -45,9 +45,9 @@ def warning(msg: str):
     notif('[WARNING] ' + msg)
 
 
-def fatal(msg: str, exit_code=1):
+def fatal(msg: str):
     notif('[FATAL] ' + msg)
-    raise('Quitting')
+    sys.exit('Quitting')
 
 
 def gen_file_timestamp(comment='//'):
