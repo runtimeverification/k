@@ -4,7 +4,7 @@ import sys
 import json
 
 from .cli_utils import fatal, notif, warning
-from .utils import combineDicts
+from .utils import combine_dicts
 
 def KApply(label, args):
     return { 'node': 'KApply', 'label': label, 'variable': False, 'arity': len(args), 'args': args }
@@ -184,7 +184,7 @@ def addAttributes(kast, att):
     -   Output: Same Kast term, with the attributes overwritten/added.
     """
     if isKAtt(kast):
-        return KAtt(combineDicts(att, kast['att']))
+        return KAtt(combine_dicts(att, kast['att']))
     newAtt = KAtt(att) if not ('att' in kast and kast['att'] is not None and isKAtt(kast['att'])) else addAttributes(kast['att'], att)
     if isKRule(kast):
         return KRule(kast['body'], requires = kast['requires'], ensures = kast['ensures'], att = newAtt)

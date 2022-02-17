@@ -5,7 +5,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, TypeVar
 T = TypeVar('T')
 
 
-def combineDicts(*dicts: Mapping) -> Optional[Dict]:
+def combine_dicts(*dicts: Mapping) -> Optional[Dict]:
     if len(dicts) == 0:
         return {}
     if len(dicts) == 1:
@@ -22,7 +22,7 @@ def combineDicts(*dicts: Mapping) -> Optional[Dict]:
     newDict = {key: dict1[key] for key in dict1}
     for key in dict2.keys():
         newDict[key] = dict2[key]
-    return combineDicts(newDict, *restDicts)
+    return combine_dicts(newDict, *restDicts)
 
 
 def findCommonItems(l1: Iterable[T], l2: Iterable[T]) -> Tuple[List[T], List[T], List[T]]:
