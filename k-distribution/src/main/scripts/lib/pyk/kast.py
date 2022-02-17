@@ -4,7 +4,7 @@ import sys
 import json
 
 from .cli_utils import fatal, notif, warning
-from .util import *
+from .util import combineDicts
 
 def KApply(label, args):
     return { 'node': 'KApply', 'label': label, 'variable': False, 'arity': len(args), 'args': args }

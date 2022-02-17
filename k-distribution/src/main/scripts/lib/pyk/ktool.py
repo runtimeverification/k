@@ -5,6 +5,7 @@ from   pathlib    import Path
 import subprocess
 
 from .cli_utils import gen_file_timestamp, notif
+from .util import getAppliedAxiomList, strHash
 from .kastManip import *
 
 class KPrint:
