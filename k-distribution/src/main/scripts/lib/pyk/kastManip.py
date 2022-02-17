@@ -4,7 +4,7 @@ import sys
 import subprocess
 
 from .cli_utils import fatal
-from .util import combineDicts, dedupe, findCommonItems
+from .utils import combineDicts, dedupe, findCommonItems
 from .kast import *
 
 def buildAssoc(unit, join, ls):
