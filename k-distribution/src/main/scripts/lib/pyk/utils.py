@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import hashlib
 
 
@@ -17,10 +15,11 @@ def combineDicts(*dicts):
     for key in intersecting_keys:
         if dict1[key] != dict2[key]:
             return None
-    newDict = { key : dict1[key] for key in dict1 }
+    newDict = {key: dict1[key] for key in dict1}
     for key in dict2.keys():
         newDict[key] = dict2[key]
     return combineDicts(newDict, *restDicts)
+
 
 def findCommonItems(l1, l2):
     common = []
@@ -30,22 +29,24 @@ def findCommonItems(l1, l2):
     newL1 = []
     newL2 = []
     for i in l1:
-        if not i in common:
+        if i not in common:
             newL1.append(i)
     for i in l2:
-        if not i in common:
+        if i not in common:
             newL2.append(i)
     return (common, newL1, newL2)
 
-def dedupe(ls):
-    newL = []
-    for l in ls:
-        if l not in newL:
-            newL.append(l)
-    return newL
+
+def dedupe(xs):
+    res = []
+    for x in xs:
+        if x not in res:
+            res.append(x)
+    return res
+
 
 def getAppliedAxiomList(debugLogFile):
-    axioms      = []
+    axioms = []
     next_axioms = []
     with open(debugLogFile, 'r') as logFile:
         for line in logFile:
@@ -56,6 +57,7 @@ def getAppliedAxiomList(debugLogFile):
                     axioms.append(next_axioms)
                     next_axioms = []
     return axioms
+
 
 def strHash(k):
     hash = hashlib.sha256()
