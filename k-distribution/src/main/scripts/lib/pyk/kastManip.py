@@ -3,6 +3,7 @@
 import sys
 import subprocess
 
+from .cli_utils import fatal
 from .kast import *
 
 def buildAssoc(unit, join, ls):

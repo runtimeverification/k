@@ -3,6 +3,7 @@
 import sys
 import json
 
+from .cli_utils import fatal, notif, warning
 from .util import *
 
 def KApply(label, args):

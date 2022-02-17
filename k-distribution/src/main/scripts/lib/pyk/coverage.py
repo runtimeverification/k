@@ -3,6 +3,7 @@
 import json
 import sys
 
+from .cli_utils import fatal
 from .util      import *
 from .kast      import *
 from .kastManip import *

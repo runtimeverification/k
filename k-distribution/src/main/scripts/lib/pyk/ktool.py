@@ -4,6 +4,7 @@ import os
 from   pathlib    import Path
 import subprocess
 
+from .cli_utils import genFileTimestamp, notif
 from .kastManip import *
 
 class KPrint:
