@@ -1,13 +1,24 @@
-#!/usr/bin/env python3
-
+import json
 import os
-from   pathlib    import Path
 import subprocess
+import sys
+from pathlib import Path
 from typing import List
 
-from .cli_utils import gen_file_timestamp, notif
+from .cli_utils import fatal, gen_file_timestamp, notif
+from .kast import (
+    KConstant,
+    KDefinition,
+    KFlatModule,
+    KImport,
+    KRequire,
+    buildSymbolTable,
+    flattenLabel,
+    prettyPrintKast,
+    readKastTerm,
+)
 from .utils import hash_str
-from .kastManip import *
+
 
 class KPrint:
     """Given a kompiled directory, build an unparser for it.
