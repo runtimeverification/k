@@ -5,7 +5,7 @@ from   pathlib    import Path
 import subprocess
 
 from .cli_utils import gen_file_timestamp, notif
-from .utils import getAppliedAxiomList, strHash
+from .utils import getAppliedAxiomList, hash_str
 from .kastManip import *
 
 class KPrint:
@@ -16,7 +16,7 @@ class KPrint:
         self.kompiledDirectory = Path(kompiledDirectory)
         self.definition        = readKastTerm(self.kompiledDirectory / 'compiled.json')
         self.symbolTable       = buildSymbolTable(self.definition, opinionated = True)
-        self.definitionHash    = strHash(self.definition)
+        self.definitionHash    = hash_str(self.definition)
 
     def prettyPrint(self, kast, debug = False):
         """Given a KAST term, pretty-print it using the current definition.

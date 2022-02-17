@@ -63,7 +63,7 @@ def getAppliedAxiomList(debugLogFile: Path) -> List[List[str]]:
     return axioms
 
 
-def strHash(k: Any) -> str:
+def hash_str(x: Any) -> str:
     hash = hashlib.sha256()
-    hash.update(str(k).encode('utf-8'))
+    hash.update(str(x).encode('utf-8'))
     return str(hash.hexdigest())
