@@ -1,11 +1,53 @@
-#!/usr/bin/env python3
-
-import sys
-import subprocess
-
 from .cli_utils import fatal
-from .utils import combine_dicts, dedupe, find_common_items
-from .kast import *
+from .kast import (
+    KApply,
+    KAs,
+    KAtt,
+    KBubble,
+    KClaim,
+    KConstant,
+    KContext,
+    KDefinition,
+    KFlatModule,
+    KProduction,
+    KRewrite,
+    KRule,
+    KSequence,
+    KSortSynonym,
+    KSyntaxAssociativity,
+    KSyntaxLexical,
+    KSyntaxPriority,
+    KSyntaxSort,
+    KToken,
+    KVariable,
+    addAttributes,
+    flattenLabel,
+    getAttribute,
+    isCellKLabel,
+    isKApply,
+    isKAs,
+    isKAtt,
+    isKBubble,
+    isKClaim,
+    isKContext,
+    isKDefinition,
+    isKFlatModule,
+    isKProduction,
+    isKRewrite,
+    isKRule,
+    isKSequence,
+    isKSortSynonym,
+    isKSyntaxAssociativity,
+    isKSyntaxLexical,
+    isKSyntaxPriority,
+    isKSyntaxSort,
+    isKToken,
+    isKVariable,
+    klabelEmptyK,
+    ktokenDots,
+)
+from .utils import combine_dicts, dedupe, find_common_items, hash_str
+
 
 def buildAssoc(unit, join, ls):
     """Build an associative binary operator term given the join and unit ops.
@@ -714,7 +756,7 @@ def onCells(cellHandler, constrainedTerm):
 
 
 def abstractTermSafely(kast, baseName='V'):
-    vname = strHash(kast)[0:8]
+    vname = hash_str(kast)[0:8]
     return KVariable(baseName + '_' + vname)
 
 
