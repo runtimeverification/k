@@ -7,7 +7,7 @@ from typing import List
 
 from .cli_utils import fatal, gen_file_timestamp, notif
 from .kast import (
-    KConstant,
+    KAst,
     KDefinition,
     KFlatModule,
     KImport,
@@ -17,6 +17,7 @@ from .kast import (
     prettyPrintKast,
     readKastTerm,
 )
+from .prelude import mlTop
 from .utils import hash_str
 
 
@@ -77,12 +78,12 @@ class KProve(KPrint):
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, env=commandEnv)
         stdout, stderr = process.communicate(input=None)
         try:
-            finalState = json.loads(stdout)['term']
+            finalState = KAst.from_dict(json.loads(stdout)['term'])
         except Exception:
             sys.stderr.write(stdout + '\n')
             sys.stderr.write(stderr + '\n')
             fatal(f'Exiting: process returned {process.returncode}')
-        if finalState == KConstant('#Top') and len(_getAppliedAxiomList(logFile)) == 0 and not allowZeroStep:
+        if finalState == mlTop() and len(_getAppliedAxiomList(logFile)) == 0 and not allowZeroStep:
             fatal('Proof took zero steps, likely the LHS is invalid: ' + str(specFile))
         return finalState
 
@@ -121,7 +122,7 @@ class KProve(KPrint):
         tmpModuleName = claimId.upper() if rule else (claimId.upper() + '-SPEC')
         tmpClaim = tmpClaim.with_suffix('.k')
         with open(tmpClaim, 'w') as tc:
-            claimModule = KFlatModule(tmpModuleName, [KImport(self.mainModule, True)], lemmas + [claim])
+            claimModule = KFlatModule(tmpModuleName, lemmas + [claim], imports=[KImport(self.mainModule, True)])
             claimDefinition = KDefinition(tmpModuleName, [claimModule], requires=[KRequire(self.mainFileName)])
             tc.write(gen_file_timestamp() + '\n')
             tc.write(self.prettyPrint(claimDefinition) + '\n\n')

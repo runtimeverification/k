@@ -8,8 +8,6 @@ from pyk.kast import (
     KApply,
     KAtt,
     KClaim,
-    KConstant,
-    KDefinition,
     KRequire,
     KRewrite,
     KRule,
@@ -19,7 +17,7 @@ from pyk.kast import (
     constLabel,
 )
 from pyk.kastManip import pushDownRewrites, rewriteAnywhereWith, simplifyBool
-
+from pyk.prelude import boolToken, intToken
 
 class DefnTest(KProveTest):
     DEFN_DIR = 'definitions/imp-verification/haskell/imp-verification-kompiled'
@@ -34,7 +32,7 @@ class DefnTest(KProveTest):
 
     def test_print_configuration(self):
         # Given
-        config = KApply('<T>', [KApply('<k>', [KApply('int_;_', [KApply('_,_', [KToken('x', 'Id'), KApply('_,_', [KToken('y', 'Id'), KConstant('.List{"_,_"}')])])])]), KApply('<state>', [KConstant('.Map')])])
+        config = KApply('<T>', [KApply('<k>', [KApply('int_;_', [KApply('_,_', [KToken('x', 'Id'), KApply('_,_', [KToken('y', 'Id'), KApply('.List{"_,_"}')])])])]), KApply('<state>', [KApply('.Map')])])
         config_expected = '\n'.join([ '<T>'
                                     , '  <k>'
                                     , '    int x , y ;'
@@ -78,7 +76,7 @@ class DefnTest(KProveTest):
 
         # Then
         self.assertEqual(minimized_claim_rewrite_expected, minimized_claim_rewrite_actual)
-        self.assertEqual('#Top', result['label'])
+        self.assertTop(result)
 
     def test_bool_simplify(self):
         # Given
@@ -92,11 +90,3 @@ class DefnTest(KProveTest):
         # Then
         self.assertEqual(boolToken(False), bool_test_1_simplified)
         self.assertEqual(KApply('_==Int_', [intToken(3), intToken(4)]), bool_test_2_simplified)
-
-
-def boolToken(b):
-    return KToken('true' if b else 'false', 'Bool')
-
-
-def intToken(i):
-    return KToken(str(i), 'Int')

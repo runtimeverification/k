@@ -3,10 +3,11 @@ import shutil
 from abc import ABC, abstractmethod
 from itertools import chain
 from pathlib import Path
-from typing import List
+from typing import List, final
 from unittest import TestCase
 
 from pyk.ktool import KProve
+from pyk.prelude import mlTop
 
 
 class KProveTest(TestCase, ABC):
@@ -28,6 +29,12 @@ class KProveTest(TestCase, ABC):
 
     def tearDown(self):
         shutil.rmtree(self.USE_DIR, ignore_errors=True)
+
+    def assertTop(self, term):
+        self.assertEqual(term, mlTop())
+
+    def assertNotTop(self, term):
+        self.assertNotEqual(term, mlTop())
 
     @staticmethod
     @abstractmethod
