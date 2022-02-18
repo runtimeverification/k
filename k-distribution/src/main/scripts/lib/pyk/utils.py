@@ -1,4 +1,5 @@
 import hashlib
+import string
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, TypeVar
 
 T = TypeVar('T')
@@ -59,12 +60,6 @@ def dedupe(xs: Iterable[T]) -> List[T]:
     return res
 
 
-def hash_str(x: Any) -> str:
-    hash = hashlib.sha256()
-    hash.update(str(x).encode('utf-8'))
-    return str(hash.hexdigest())
-
-
 def nonempty_str(x: Any) -> str:
     if x is None:
         raise ValueError('Expected nonempty string, found: null.')
@@ -73,3 +68,51 @@ def nonempty_str(x: Any) -> str:
     if x == '':
         raise ValueError("Expected nonempty string, found: ''")
     return x
+
+
+# Hashes
+
+def hash_str(x: Any) -> str:
+    hash = hashlib.sha256()
+    hash.update(str(x).encode('utf-8'))
+    return str(hash.hexdigest())
+
+
+def is_hash(x: Any) -> bool:
+    # NB! currently only sha256 in hexdec form is detected
+    # 2b9e b7c5 441e 9f7e 97f9 a4e5 fc04 a0f7 9f62 c8e9 605a ad1e 02db e8de 3c21 0422
+    # 1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
+    return type(x) is str and len(x) == 64 and all(c in string.hexdigits for c in x)
+
+
+def shorten_hash(h: str, leftChars=6, rightChars=6) -> str:
+    left = h[0:leftChars] if leftChars > 0 else ''
+    right = h[-rightChars:] if rightChars > 0 else ''
+    return left + ".." + right
+
+
+def shorten_hashes(value: Any, leftChars=6, rightChars=6) -> Any:
+    result: Any = None
+    if is_hash(value):
+        result = shorten_hash(value, leftChars, rightChars)
+    elif type(value) is tuple:
+        result = tuple([shorten_hashes(item) for item in value])
+    elif type(value) is list:
+        result = [shorten_hashes(v) for v in value]
+    elif type(value) is dict:
+        result = {}
+        for (k, v) in value.items():
+            result[shorten_hashes(k)] = shorten_hashes(v)
+    elif type(value) is set:
+        result = set()
+        for item in value:
+            result.add(shorten_hashes(item))
+    else:
+        result = value
+    return result
+
+
+def compare_short_hashes(lhs: str, rhs: str):
+    left, right = lhs.split('.'), rhs.split('.')
+    (l0, l1, r0, r1) = (left[0].upper(), left[-1].upper(), right[0].upper(), right[-1].upper())
+    return (l0.startswith(r0) or r0.startswith(l0)) and (l1.endswith(r1) or r1.endswith(l1))
