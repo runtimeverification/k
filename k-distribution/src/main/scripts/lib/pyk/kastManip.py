@@ -857,41 +857,6 @@ def substToMap(subst):
     return buildAssoc(KConstant('.Map'), '_Map_', mapItems)
 
 
-def setAttribute(k, key, value):
-    if 'att' in k and k['att'] is not None and isKAtt(k['att']):
-        k['att']['att'][key] = value
-    return k
-
-
-def getLHS(kast):
-    def _getLHS(_k):
-        if isKRewrite(_k):
-            return _k['lhs']
-        return _k
-    return traverseBottomUp(kast, _getLHS)
-
-
-def getRHS(kast):
-    def _getRHS(_k):
-        if isKRewrite(_k):
-            return _k['rhs']
-        return _k
-    return traverseBottomUp(kast, _getRHS)
-
-
-def markExistentialVars(constrainedTerm):
-    (config, constraint) = splitConfigAndConstraints(constrainedTerm)
-    configLhs = getLHS(config)
-    configRhs = getRHS(config)
-    lhsOccurances = countVarOccurances(configLhs)
-    rhsOccurances = countVarOccurances(configRhs)
-    subst = {}
-    for v in rhsOccurances:
-        if v not in lhsOccurances:
-            subst[v] = KVariable('?' + v)
-    return substitute(mlAnd([config, constraint]), subst)
-
-
 def undoAliases(definition, kast):
     alias_undo_rewrites = [(sent['body']['rhs'], sent['body']['lhs']) for module in definition['modules'] for sent in module['localSentences'] if isKRule(sent) and getAttribute(sent, 'alias') is not None]
     newKast = kast
