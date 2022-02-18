@@ -175,7 +175,7 @@ clean:
 	rm -rf $(KOMPILED_DIR) .depend-tmp .depend .kompile-* .krun-* .kprove-* .kbmc-* kore-exec.tar.gz
 
 .depend:
-	@$(KDEP) $(DEF).$(SOURCE_EXT) > .depend-tmp
+	@$(KDEP) $(KDEP_FLAGS) $(DEF).$(SOURCE_EXT) > .depend-tmp
 	@mv .depend-tmp .depend
 
 ifneq ($(MAKECMDGOALS),clean)
