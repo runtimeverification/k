@@ -17,7 +17,6 @@ from .kast import (
     readKastTerm,
 )
 from .kastManip import (
-    buildAssoc,
     minimizeRule,
     minimizeTerm,
     propagateUpConstraints,
@@ -25,7 +24,7 @@ from .kastManip import (
     splitConfigAndConstraints,
 )
 from .ktool import KPrint, KProve
-
+from .prelude import buildAssoc
 
 pykArgs = argparse.ArgumentParser()
 pykArgs.add_argument('kompiled-dir', type=str, help='Kompiled directory for definition.')
