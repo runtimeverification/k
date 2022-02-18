@@ -1,62 +1,80 @@
-#!/usr/bin/env python3
-
 import argparse
-from   graphviz import Digraph
-import tempfile
+import json
 import os.path as path
 import sys
+from pathlib import Path
 
-from .      import *
-from .cli_utils import notif, warning
+from graphviz import Digraph
+
+from .cli_utils import fatal, notif, warning
+from .coverage import getRuleById, stripCoverageLogger
+from .kast import (
+    KApply,
+    KConstant,
+    buildSymbolTable,
+    flattenLabel,
+    prettyPrintKast,
+    readKastTerm,
+)
+from .kastManip import (
+    minimizeRule,
+    minimizeTerm,
+    propagateUpConstraints,
+    removeSourceMap,
+    splitConfigAndConstraints,
+)
 from .ktool import KPrint, KProve
+from .prelude import buildAssoc
 
 pykArgs = argparse.ArgumentParser()
-pykArgs.add_argument('kompiled-dir', type = str, help = 'Kompiled directory for definition.')
+pykArgs.add_argument('kompiled-dir', type=str, help='Kompiled directory for definition.')
 
-pykCommandParsers = pykArgs.add_subparsers(dest = 'command')
+pykCommandParsers = pykArgs.add_subparsers(dest='command')
 
-kprintArgs = pykCommandParsers.add_parser('print', help = 'Pretty print a term.')
-kprintArgs.add_argument('term', type = argparse.FileType('r'), help = 'Input term (in JSON).')
-kprintArgs.add_argument('--minimize', default = True, action = 'store_true', help = 'Minimize the JSON configuration before printing.')
-kprintArgs.add_argument('--no-minimize', dest = 'minimize', action = 'store_false', help = 'Do not minimize the JSON configuration before printing.')
-kprintArgs.add_argument('--omit-labels', default = '', nargs = '?', help = 'List of labels to omit from output.')
-kprintArgs.add_argument('--output-file', type = argparse.FileType('w'), default = '-')
+kprintArgs = pykCommandParsers.add_parser('print', help='Pretty print a term.')
+kprintArgs.add_argument('term', type=argparse.FileType('r'), help='Input term (in JSON).')
+kprintArgs.add_argument('--minimize', default=True, action='store_true', help='Minimize the JSON configuration before printing.')
+kprintArgs.add_argument('--no-minimize', dest='minimize', action='store_false', help='Do not minimize the JSON configuration before printing.')
+kprintArgs.add_argument('--omit-labels', default='', nargs='?', help='List of labels to omit from output.')
+kprintArgs.add_argument('--output-file', type=argparse.FileType('w'), default='-')
 
-kproveArgs = pykCommandParsers.add_parser('prove', help = 'Prove an input specification (using kprovex).')
-kproveArgs.add_argument('main-file', type = str, help = 'Main file used for kompilation.')
-kproveArgs.add_argument('spec-file', type = str, help = 'File with the specification module.')
-kproveArgs.add_argument('spec-module', type = str, help = 'Module with claims to be proven.')
-kproveArgs.add_argument('--output-file', type = argparse.FileType('w'), default = '-')
-kproveArgs.add_argument('kArgs', nargs='*', help = 'Arguments to pass through to K invocation.')
+kproveArgs = pykCommandParsers.add_parser('prove', help='Prove an input specification (using kprovex).')
+kproveArgs.add_argument('main-file', type=str, help='Main file used for kompilation.')
+kproveArgs.add_argument('spec-file', type=str, help='File with the specification module.')
+kproveArgs.add_argument('spec-module', type=str, help='Module with claims to be proven.')
+kproveArgs.add_argument('--output-file', type=argparse.FileType('w'), default='-')
+kproveArgs.add_argument('kArgs', nargs='*', help='Arguments to pass through to K invocation.')
 
-graphImportsArgs = pykCommandParsers.add_parser('graph-imports', help = 'Graph the imports of a given definition.')
+graphImportsArgs = pykCommandParsers.add_parser('graph-imports', help='Graph the imports of a given definition.')
 
-coverageArgs = pykCommandParsers.add_parser('coverage', help = 'Convert coverage file to human readable log.')
-coverageArgs.add_argument('coverage-file', type = argparse.FileType('r'), help = 'Coverage file to build log for.')
-coverageArgs.add_argument('-o', '--output', type = argparse.FileType('w'), default = '-')
+coverageArgs = pykCommandParsers.add_parser('coverage', help='Convert coverage file to human readable log.')
+coverageArgs.add_argument('coverage-file', type=argparse.FileType('r'), help='Coverage file to build log for.')
+coverageArgs.add_argument('-o', '--output', type=argparse.FileType('w'), default='-')
+
 
 def definitionDir(kompiledDir):
     return path.dirname(path.abspath(kompiledDir))
 
-def main(commandLineArgs, extraMain = None):
+
+def main(commandLineArgs, extraMain=None):
     returncode = 0
     args = vars(commandLineArgs.parse_args())
     kompiled_dir = Path(args['kompiled-dir'])
 
     if args['command'] == 'print':
         printer = KPrint(kompiled_dir)
-        term    = json.loads(args['term'].read())
+        term = json.loads(args['term'].read())
         if 'term' in term:
             term = term['term']
         if term == KConstant('#Top'):
             args['output_file'].write(printer.prettyPrint(term))
         else:
             if args['minimize']:
-                abstractLabels     = [] if args['omit_labels'] is None else args['omit_labels'].split(',')
+                abstractLabels = [] if args['omit_labels'] is None else args['omit_labels'].split(',')
                 minimizedDisjuncts = []
                 for d in flattenLabel('#Or', term):
-                    dMinimized = minimizeTerm(d, abstractLabels = abstractLabels)
-                    (dConfig, dConstraint) = splitConfigAndConstraints(dMinimized)
+                    dMinimized = minimizeTerm(d, abstractLabels=abstractLabels)
+                    dConfig, dConstraint = splitConfigAndConstraints(dMinimized)
                     if dConstraint != KConstant('#Top'):
                         minimizedDisjuncts.append(KApply('#And', [dConfig, dConstraint]))
                     else:
@@ -65,17 +83,17 @@ def main(commandLineArgs, extraMain = None):
             args['output_file'].write(printer.prettyPrint(term))
 
     elif args['command'] == 'prove':
-        kprover    = KProve(kompiled_dir, args['main-file'])
-        finalState = kprover.prove(Path(args['spec-file']), args['spec-module'], args = args['kArgs'])
+        kprover = KProve(kompiled_dir, args['main-file'])
+        finalState = kprover.prove(Path(args['spec-file']), args['spec-module'], args=args['kArgs'])
         args['output_file'].write(json.dumps(finalState))
         if finalState != KConstant('#Top'):
             warning('Proof failed!')
 
     elif args['command'] == 'graph-imports':
-        kprinter    = KPrint(kompiled_dir)
-        kDefn       = kprinter.definition
+        kprinter = KPrint(kompiled_dir)
+        kDefn = kprinter.definition
         importGraph = Digraph()
-        graphFile   = kompiled_dir / 'import-graph'
+        graphFile = kompiled_dir / 'import-graph'
         for module in kDefn['modules']:
             modName = module['name']
             importGraph.node(modName)
@@ -98,7 +116,8 @@ def main(commandLineArgs, extraMain = None):
         extraMain(args, kompiled_dir)
 
     if returncode != 0:
-        _fatal('Non-zero exit code (' + str(returncode) + '): ' + str(kCommand), code = returncode)
+        fatal('Non-zero exit code (' + str(returncode) + '): ' + str(args['command']))
+
 
 if __name__ == '__main__':
     # KAST terms can end up nested quite deeply, because of the various assoc operators (eg. _Map_, _Set_, ...).

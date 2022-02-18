@@ -1,12 +1,10 @@
-#!/usr/bin/env python3
-
 import sys
 import unittest
-
 from functools import reduce
 
-# From K's pyk-library
-from pyk import *
+from pyk.kast import KApply, KConstant, KSequence, KVariable, newLines
+from pyk.kastManip import splitConfigFrom
+
 
 class TestPyk(unittest.TestCase):
 
