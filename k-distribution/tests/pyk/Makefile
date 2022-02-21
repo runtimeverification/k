@@ -25,10 +25,20 @@ all: test
 
 clean:
 	rm -rf definitions specs
+	rm -rf venv
 
 update-results: CHECK=cp
 update-results: test
 kompile: $(llvm_imp_kompiled) $(haskell_imp_kompiled)
+
+
+# Virtualenv
+
+VENV     := venv/pyvenv.cfg
+ACTIVATE := . venv/bin/activate
+
+$(VENV):
+	virtualenv -p python3.8 venv && $(ACTIVATE) && pip install graphviz typing_extensions
 
 # Tests
 
@@ -38,13 +48,13 @@ test: test-kpyk test-pytest
 
 test-kpyk: test-kpyk-graphviz test-kpyk-minimize-term
 
-test-kpyk-graphviz: imp-verification/haskell.kompiled
-	$(KPYK) definitions/imp-verification/haskell/imp-verification-kompiled graph-imports
+test-kpyk-graphviz: imp-verification/haskell.kompiled $(VENV)
+	$(ACTIVATE) && $(KPYK) definitions/imp-verification/haskell/imp-verification-kompiled graph-imports
 	cat definitions/imp-verification/haskell/imp-verification-kompiled/import-graph | tr -cd '[:alnum:]\n' | grep . | tr '[:lower:]' '[:upper:]' | sort > import-graph.sorted
 	$(CHECK) import-graph.sorted imp-import-graph.expected
 
-test-kpyk-minimize-term: imp-verification/haskell.kompiled
-	$(KPYK) definitions/imp-verification/haskell/imp-verification-kompiled prove k-files/imp-verification.k k-files/imp-unproveable-spec.k IMP-UNPROVEABLE-SPEC \
+test-kpyk-minimize-term: imp-verification/haskell.kompiled $(VENV)
+	$(ACTIVATE) && $(KPYK) definitions/imp-verification/haskell/imp-verification-kompiled prove k-files/imp-verification.k k-files/imp-unproveable-spec.k IMP-UNPROVEABLE-SPEC \
 	    | $(KPYK) definitions/imp-verification/haskell/imp-verification-kompiled print /dev/stdin > imp-unproveable-spec.k.out
 	$(CHECK) imp-unproveable-spec.k.out imp-unproveable-spec.k.expected
 
@@ -64,8 +74,8 @@ simple_proofs_test.py.pytest:  FILE_DEPS = simple-proofs/haskell.kompiled
 test-pytest: $(pytests:=.pytest)
 
 .SECONDEXPANSION:
-%.pytest: % $$(FILE_DEPS)
-	python3 -m unittest $<
+%.pytest: % $$(FILE_DEPS) $(VENV)
+	$(ACTIVATE) && python3 -m unittest $<
 
 ## proofs to turn to json ahead of time
 
