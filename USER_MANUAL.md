@@ -573,14 +573,18 @@ However, when it has to choose between two different tokens of equal length,
 token productions with higher precedence are tried first. Note that the default
 precedence value is zero when the `prec` attribute is not specified.
 
-We also need to make sorts with more specific tokens subsorts of ones with more
+For example, in the `BUILTIN-ID-TOKENS` module defines `#UpperId` and `#LowerId` with
+attributes `prec(2)`.
+```k
+  syntax #LowerId ::= r"[a-z][a-zA-Z0-9]*"                    [prec(2), token]
+  syntax #UpperId ::= r"[A-Z][a-zA-Z0-9]*"                    [prec(2), token]
+```
+
+Furthermore, we also need to make sorts with more specific tokens subsorts of ones with more
 general tokens. We add the token attribute to this production so that all
 tokens of a particular sort are marked with the sort it is parsed as, and not a
 subsort thereof. e.g. we get `underbar(#token("foo", "NameWithUnderbar"))`
 instead of `underbar(#token("foo", "#LowerId"))`
-
-The `BUILTIN-ID-TOKENS` module defines `#UpperId` and `#LowerId` with
-attributes `prec(2)`.
 
 ```k
 imports BUILTIN-ID-TOKENS
