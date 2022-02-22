@@ -224,6 +224,7 @@ public class RuleGrammarGenerator {
     }
 
     public static Tuple3<Module, Module, Module> getCombinedGrammarImpl(Module mod, boolean isBison, boolean forGlobalScanner) {
+        long t1 = System.currentTimeMillis();
         Set<Sentence> prods = new HashSet<>();
         Set<Sentence> extensionProds = new HashSet<>();
         Set<Sentence> disambProds;
@@ -266,7 +267,53 @@ public class RuleGrammarGenerator {
                 prods.addAll(new GenerateSortProjections(mod).gen(s).collect(Collectors.toSet()));
             }
         }
+        long t2 = System.currentTimeMillis();
 
+        Module finalMod = mod;
+        List<Sort> allSorts = stream(mod.allSorts()).filter(s -> (!isParserSort(s) || s.equals(Sorts.KItem()) || s.equals(Sorts.K()))
+                        && !s.isNat()
+                        && !finalMod.definedInstantiations().contains(s.head())
+        ).collect(Collectors.toList());
+
+        Set<Production> tempProdsFast = new HashSet<>();
+        for (Production p : iterable(mod.productions())) {
+            prods.addAll(new GenerateSortProjections(mod).gen(p).collect(Collectors.toSet()));
+            if (p.params().nonEmpty()) {
+                if (p.params().contains(p.sort())) {
+                    for (Sort s : allSorts) {
+                        List<Sort> instantiationMask = new ArrayList<>();
+                        for (Sort param : mutable(p.params()))
+                            if (param.equals(p.sort()))
+                                instantiationMask.add(s);
+                            else
+                                instantiationMask.add(Sorts.K());
+                        Production subst = p.substitute(immutable(instantiationMask));
+                        Production p1 = Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Att.ORIGINAL_PRD(), Production.class, p));
+                        tempProdsFast.add(p1);
+                    }
+                } else if (p.isSyntacticSubsort()) {
+                    for (Sort s : allSorts) {
+                        if (!p.params().contains(p.sort()) && (s.equals(Sorts.KItem()) || s.equals(Sorts.K())))
+                            continue;
+                        List<Sort> instantiationMask = new ArrayList<>();
+                        instantiationMask.add(s);
+                        Production subst = p.substitute(immutable(instantiationMask));
+                        Production p1 = Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Att.ORIGINAL_PRD(), Production.class, p));
+                        tempProdsFast.add(p1);
+                    }
+                } else {
+                    List<Sort> instantiationMask = new ArrayList<>();
+                    for (Sort param : mutable(p.params()))
+                        instantiationMask.add(Sorts.K());
+                    Production subst = p.substitute(immutable(instantiationMask));
+                    Production p1 = Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Att.ORIGINAL_PRD(), Production.class, p));
+                    tempProdsFast.add(p1);
+                }
+            }
+        }
+        long t3 = System.currentTimeMillis();
+
+        Set<Production> tempProdsOld = new HashSet<>();
         for (Production p : iterable(mod.productions())) {
             prods.addAll(new GenerateSortProjections(mod).gen(p).collect(Collectors.toSet()));
             if (p.params().nonEmpty()) {
@@ -308,11 +355,17 @@ public class RuleGrammarGenerator {
                         }
                     }
                     if (!skip) {
-                        prods.add(Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Att.ORIGINAL_PRD(), Production.class, p)));
+                        Production p1 = Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Att.ORIGINAL_PRD(), Production.class, p));
+                        prods.add(p1);
+                        tempProdsOld.add(p1);
                     }
                 }
             }
         }
+        long t4 = System.currentTimeMillis();
+        //System.out.println("tempProds==: " + tempProdsFast.equals(tempProdsOld));
+        assert tempProdsFast.equals(tempProdsOld) : "Module: " + mod.name();
+
         extensionProds.addAll(prods);
 
         Set<Sentence> recordProds = new HashSet<>();
@@ -480,6 +533,7 @@ public class RuleGrammarGenerator {
             parseProds.addAll(res);
             disambProds.addAll(res);
         }
+        long t5 = System.currentTimeMillis();
 
         parseProds.addAll(recordProds);
         Att att = mod.att();
@@ -491,6 +545,7 @@ public class RuleGrammarGenerator {
         Module disambM = new Module(mod.name() + "-DISAMB", Set(), immutable(disambProds), att);
         Module parseM = new Module(mod.name() + "-PARSER", Set(), immutable(parseProds), att);
         parseM.subsorts();
+        //System.out.format("GetGrammar: %s\n    %d %d %d %d %d = %d\n", mod.name(), t2-t1, t3-t2, t4-t3, t5-t4, System.currentTimeMillis()-t5, System.currentTimeMillis() - t1);
         return Tuple3.apply(extensionM, disambM, parseM);
     }
 
