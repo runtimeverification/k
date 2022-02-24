@@ -61,6 +61,9 @@ public class KProve {
         this.proofDefinitionBuilder = proofDefinitionBuilder;
         this.rewriterGenerator = rewriterGenerator;
         this.sw = sw;
+        if (kproveOptions.emitJsonSpec != null) {
+            throw KEMException.criticalError("Option `--emit-json-spec` only supported in kprovex tool!");
+        }
     }
 
     public int run() {
