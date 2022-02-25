@@ -4,6 +4,7 @@ package org.kframework.parser.inner.generator;
 import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfoFromModule;
@@ -364,7 +365,7 @@ public class RuleGrammarGenerator {
         }
         long t4 = System.currentTimeMillis();
         //System.out.println("tempProds==: " + tempProdsFast.equals(tempProdsOld));
-        assert tempProdsFast.equals(tempProdsOld) : "Module: " + mod.name();
+        assert tempProdsFast.equals(tempProdsOld) : "Module: " + mod.name() + ":" + mod.att().get(Source.class);
 
         extensionProds.addAll(prods);
 
