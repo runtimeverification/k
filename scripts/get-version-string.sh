@@ -13,6 +13,9 @@ if [ ! -d "$SCRIPTS_DIR/../.git" ]; then
 fi
 
 RELEASE_TAG=$("$SCRIPTS_DIR/newest-release-tag.sh")
+if [ -z "$RELEASE_TAG" ]; then
+  exit
+fi
 
 MERGE_BASE=$(git merge-base "$RELEASE_TAG" HEAD)
 VERSION_TAG=$(git describe --contains --always "$MERGE_BASE" | sed 's/~.*//')
