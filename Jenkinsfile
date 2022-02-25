@@ -126,7 +126,10 @@ pipeline {
     }
     stage('Build and Package on Ubuntu Focal') {
       when {
-        branch 'release'
+        anyOf {
+          branch 'release'
+          changeRequest()
+        }
         beforeAgent true
       }
       stages {
@@ -247,7 +250,10 @@ pipeline {
     }
     stage('Build and Package on Arch Linux') {
       when {
-        branch 'release'
+        anyOf {
+          branch 'release'
+          changeRequest()
+        }
         beforeAgent true
       }
       stages {
