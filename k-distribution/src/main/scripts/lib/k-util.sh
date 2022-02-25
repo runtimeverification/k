@@ -53,7 +53,7 @@ do
       profile=true
       ;;
 
-      --verbose)
+      -v|--verbose)
       verbose=true
       ;;
 
