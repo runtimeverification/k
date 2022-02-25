@@ -11,6 +11,7 @@ KPARSE_GEN=${K_BIN}/kparse-gen
 KORE_PRINT=${K_BIN}/kore-print
 
 1.test:
+	./check-git-revision-format "$(GIT_REVISION)"
 	${KAST}       --help    | grep -q -- "--version"
 	${KDEP}       --help    | grep -q -- "--version"
 	${KEQ}        --help    | grep -q -- "--version"
