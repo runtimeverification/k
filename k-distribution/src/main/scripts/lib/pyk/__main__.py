@@ -1,5 +1,4 @@
 import argparse
-import json
 import os.path as path
 import sys
 from pathlib import Path
@@ -10,7 +9,7 @@ from .cli_utils import fatal, notif, warning
 from .coverage import getRuleById, stripCoverageLogger
 from .kast import (
     KApply,
-    KConstant,
+    KAst,
     buildSymbolTable,
     flattenLabel,
     prettyPrintKast,
@@ -24,7 +23,7 @@ from .kastManip import (
     splitConfigAndConstraints,
 )
 from .ktool import KPrint, KProve
-from .prelude import buildAssoc
+from .prelude import buildAssoc, mlBottom, mlTop
 
 pykArgs = argparse.ArgumentParser()
 pykArgs.add_argument('kompiled-dir', type=str, help='Kompiled directory for definition.')
@@ -63,10 +62,10 @@ def main(commandLineArgs, extraMain=None):
 
     if args['command'] == 'print':
         printer = KPrint(kompiled_dir)
-        term = json.loads(args['term'].read())
-        if 'term' in term:
+        term = KAst.from_json(args['term'].read())
+        if type(term) is dict and 'term' in term:
             term = term['term']
-        if term == KConstant('#Top'):
+        if term == mlTop():
             args['output_file'].write(printer.prettyPrint(term))
         else:
             if args['minimize']:
@@ -75,18 +74,18 @@ def main(commandLineArgs, extraMain=None):
                 for d in flattenLabel('#Or', term):
                     dMinimized = minimizeTerm(d, abstractLabels=abstractLabels)
                     dConfig, dConstraint = splitConfigAndConstraints(dMinimized)
-                    if dConstraint != KConstant('#Top'):
+                    if dConstraint != mlTop():
                         minimizedDisjuncts.append(KApply('#And', [dConfig, dConstraint]))
                     else:
                         minimizedDisjuncts.append(dConfig)
-                term = propagateUpConstraints(buildAssoc(KConstant('#Bottom'), '#Or', minimizedDisjuncts))
+                term = propagateUpConstraints(buildAssoc(mlBottom(), '#Or', minimizedDisjuncts))
             args['output_file'].write(printer.prettyPrint(term))
 
     elif args['command'] == 'prove':
         kprover = KProve(kompiled_dir, args['main-file'])
         finalState = kprover.prove(Path(args['spec-file']), args['spec-module'], args=args['kArgs'])
-        args['output_file'].write(json.dumps(finalState))
-        if finalState != KConstant('#Top'):
+        args['output_file'].write(finalState.to_json())
+        if finalState != mlTop():
             warning('Proof failed!')
 
     elif args['command'] == 'graph-imports':
@@ -94,11 +93,11 @@ def main(commandLineArgs, extraMain=None):
         kDefn = kprinter.definition
         importGraph = Digraph()
         graphFile = kompiled_dir / 'import-graph'
-        for module in kDefn['modules']:
-            modName = module['name']
+        for module in kDefn.modules:
+            modName = module.name
             importGraph.node(modName)
-            for moduleImport in module['imports']:
-                importGraph.edge(modName, moduleImport['name'])
+            for moduleImport in module.imports:
+                importGraph.edge(modName, moduleImport.name)
         importGraph.render(graphFile)
         notif('Wrote file: ' + str(graphFile))
 

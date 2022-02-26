@@ -12,9 +12,6 @@ class SimpleProofTest(KProveTest):
     USE_DIR = '.simple-proof-test'
     INCLUDE_DIRS = ['k-files']
 
-    def setUp(self):
-        super().setUp()
-
     @staticmethod
     def _update_symbol_table(symbol_table):
         pass
@@ -26,11 +23,11 @@ class SimpleProofTest(KProveTest):
         
         # When
         result1 = self.kprove.proveClaim(new_claim, 'claim-without-lemma')
-        result2 = self.kprove.proveClaim(new_claim, 'claim-with-lemma', lemmas = [new_lemma])
+        result2 = self.kprove.proveClaim(new_claim, 'claim-with-lemma', lemmas=[new_lemma])
 
         # Then
-        self.assertNotEqual(result1['label'], '#Top')
-        self.assertEqual(result2['label'], '#Top')
+        self.assertNotTop(result1)
+        self.assertTop(result2)
 
 
 def extract_claims(module):
