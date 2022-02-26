@@ -1,48 +1,21 @@
+from typing import Callable, TypeVar
+
 from .cli_utils import fatal
 from .kast import (
     KApply,
-    KAs,
+    KAst,
     KAtt,
-    KBubble,
     KClaim,
-    KConstant,
-    KContext,
     KDefinition,
     KFlatModule,
-    KProduction,
+    KInner,
     KRewrite,
     KRule,
     KSequence,
-    KSortSynonym,
-    KSyntaxAssociativity,
-    KSyntaxLexical,
-    KSyntaxPriority,
-    KSyntaxSort,
     KToken,
     KVariable,
-    addAttributes,
+    WithKAtt,
     flattenLabel,
-    getAttribute,
-    isCellKLabel,
-    isKApply,
-    isKAs,
-    isKAtt,
-    isKBubble,
-    isKClaim,
-    isKContext,
-    isKDefinition,
-    isKFlatModule,
-    isKProduction,
-    isKRewrite,
-    isKRule,
-    isKSequence,
-    isKSortSynonym,
-    isKSyntaxAssociativity,
-    isKSyntaxLexical,
-    isKSyntaxPriority,
-    isKSyntaxSort,
-    isKToken,
-    isKVariable,
     klabelEmptyK,
     ktokenDots,
 )
@@ -57,6 +30,10 @@ from .prelude import (
 )
 from .utils import combine_dicts, dedupe, find_common_items, hash_str
 
+T = TypeVar('T', bound=KAst)
+KI = TypeVar('KI', bound=KInner)
+W = TypeVar('W', bound=WithKAtt)
+
 
 def match(pattern, kast):
     """Perform syntactic pattern matching and return the substitution.
@@ -65,24 +42,24 @@ def match(pattern, kast):
     -   Output: substitution instantiating the pattern to the kast term.
     """
     subst = {}
-    if isKVariable(pattern):
-        return {pattern["name"]: kast}
-    if isKToken(pattern) and isKToken(kast):
-        return {} if pattern["token"] == kast["token"] else None
-    if isKApply(pattern) and isKApply(kast) \
-            and pattern["label"] == kast["label"] and len(pattern["args"]) == len(kast["args"]):
-        for (patternArg, kastArg) in zip(pattern["args"], kast["args"]):
+    if type(pattern) is KVariable:
+        return {pattern.name: kast}
+    if type(pattern) is KToken and type(kast) is KToken:
+        return {} if pattern.token == kast.token else None
+    if type(pattern) is KApply and type(kast) is KApply \
+            and pattern.label == kast.label and pattern.arity == kast.arity:
+        for patternArg, kastArg in zip(pattern.args, kast.args):
             argSubst = match(patternArg, kastArg)
             subst = combine_dicts(subst, argSubst)
             if subst is None:
                 return None
         return subst
-    if isKRewrite(pattern) and isKRewrite(kast):
-        lhsSubst = match(pattern['lhs'], kast['lhs'])
-        rhsSubst = match(pattern['rhs'], kast['rhs'])
+    if type(pattern) is KRewrite and type(kast) is KRewrite:
+        lhsSubst = match(pattern.lhs, kast.lhs)
+        rhsSubst = match(pattern.rhs, kast.rhs)
         return combine_dicts(lhsSubst, rhsSubst)
-    if isKSequence(pattern) and isKSequence(kast) and len(pattern['items']) == len(kast['items']):
-        for (patternItem, substItem) in zip(pattern['items'], kast['items']):
+    if type(pattern) is KSequence and type(kast) is KSequence and pattern.arity == kast.arity:
+        for (patternItem, substItem) in zip(pattern.items, kast.items):
             itemSubst = match(patternItem, substItem)
             subst = combine_dicts(subst, itemSubst)
             if subst is None:
@@ -91,26 +68,23 @@ def match(pattern, kast):
     return None
 
 
-def onChildren(kast, effect):
-    if isKApply(kast):
-        return KApply(kast['label'], [effect(arg) for arg in kast['args']])
-    elif isKRewrite(kast):
-        return KRewrite(effect(kast['lhs']), effect(kast['rhs']))
-    elif isKSequence(kast):
-        return KSequence([effect(item) for item in kast['items']])
-    return kast
+# TODO make method of KInner
+def traverseBottomUp(kinner: KInner, f: Callable[[KInner], KInner]) -> KInner:
+    return f(kinner.map_inner(lambda _kinner: traverseBottomUp(_kinner, f)))
 
 
-def traverseBottomUp(kast, effect):
-    return effect(onChildren(kast, lambda _kast: traverseBottomUp(_kast, effect)))
+# TODO make method of KInner
+def traverseTopDown(kinner: KInner, f: Callable[[KInner], KInner]) -> KInner:
+    return f(kinner).map_inner(lambda _kinner: traverseTopDown(_kinner, f))
 
 
-def traverseTopDown(kast, effect):
-    return onChildren(effect(kast), lambda _kast: traverseTopDown(_kast, effect))
+# TODO replace by method that does not reconstruct the AST
+def collectBottomUp(kinner: KInner, callback: Callable[[KInner], None]) -> None:
+    def f(kinner: KInner) -> KInner:
+        callback(kinner)
+        return kinner
 
-
-def collectBottomUp(kast, callback):
-    callback(onChildren(kast, lambda _kast: collectBottomUp(_kast, callback)))
+    traverseBottomUp(kinner, f)
 
 
 def substitute(pattern, substitution):
@@ -120,8 +94,8 @@ def substitute(pattern, substitution):
     -   Output: the pattern with the substitution applied.
     """
     def replace(k):
-        if isKVariable(k) and k["name"] in substitution:
-            return substitution[k["name"]]
+        if type(k) is KVariable and k.name in substitution:
+            return substitution[k.name]
         return k
     return traverseBottomUp(pattern, replace)
 
@@ -138,8 +112,8 @@ def whereMatchingBottomUp(effect, matchPattern, pattern):
 
 def replaceKLabels(pattern, klabelMap):
     def replace(k):
-        if isKApply(k) and k["label"] in klabelMap:
-            return KApply(klabelMap[k["label"]], k["args"])
+        if type(k) is KApply and k.label in klabelMap:
+            return k.let(label=klabelMap[k.label])
         return k
     return traverseBottomUp(pattern, replace)
 
@@ -185,8 +159,8 @@ def unsafeMlPredToBool(k):
     """
     if k is None:
         return None
-    mlPredToBoolRules = [ (KApply('#Top'     , [])                                   , KToken('true'          , 'Bool'))                                # noqa
-                        , (KApply('#Bottom'  , [])                                   , KToken('false'         , 'Bool'))                                # noqa
+    mlPredToBoolRules = [ (KApply('#Top')                                            , KToken('true'          , 'Bool'))                                # noqa
+                        , (KApply('#Bottom')                                         , KToken('false'         , 'Bool'))                                # noqa
                         , (KApply('#And'     , [KVariable('#V1'), KVariable('#V2')]) , KApply('_andBool_'     , [KVariable('#V1'), KVariable('#V2')]))  # noqa
                         , (KApply('#Or'      , [KVariable('#V1'), KVariable('#V2')]) , KApply('_orBool_'      , [KVariable('#V1'), KVariable('#V2')]))  # noqa
                         , (KApply('#Not'     , [KVariable('#V1')])                   , KApply('notBool_'      , [KVariable('#V1')]))                    # noqa
@@ -247,8 +221,8 @@ def countVarOccurances(kast, numOccurances=None):
     numOccurances = {} if numOccurances is None else numOccurances
 
     def _getNumOccurances(_kast):
-        if isKVariable(_kast):
-            vName = _kast['name']
+        if type(_kast) is KVariable:
+            vName = _kast.name
             if vName in numOccurances:
                 numOccurances[vName] += 1
             else:
@@ -272,11 +246,11 @@ def splitConfigAndConstraints(kast):
     term = None
     constraints = []
     for c in conjuncts:
-        if isKApply(c) and isCellKLabel(c['label']):
+        if type(c) is KApply and c.is_cell:
             term = c
         else:
             constraints.append(c)
-    constraint = buildAssoc(KConstant('#Top'), '#And', constraints)
+    constraint = buildAssoc(mlTop(), '#And', constraints)
     return (term, constraint)
 
 
@@ -287,19 +261,19 @@ def propagateUpConstraints(k):
     -   Output: kast where common constraints in the disjunct have been propagated up.
     """
     def _propagateUpConstraints(_k):
-        if not (isKApply(_k) and _k['label'] == '#Or'):
+        if not (type(_k) is KApply and _k.label == '#Or'):
             return _k
-        conjuncts1 = flattenLabel('#And', _k['args'][0])
-        conjuncts2 = flattenLabel('#And', _k['args'][1])
+        conjuncts1 = flattenLabel('#And', _k.args[0])
+        conjuncts2 = flattenLabel('#And', _k.args[1])
         (common1, l1, r1) = find_common_items(conjuncts1, conjuncts2)
         (common2, r2, l2) = find_common_items(r1, l1)
         common = common1 + common2
         if len(common) == 0:
             return _k
-        conjunct1 = buildAssoc(KConstant('#Top'), '#And', l2)
-        conjunct2 = buildAssoc(KConstant('#Top'), '#And', r2)
+        conjunct1 = buildAssoc(mlTop(), '#And', l2)
+        conjunct2 = buildAssoc(mlTop, '#And', r2)
         disjunct = KApply('#Or', [conjunct1, conjunct2])
-        return buildAssoc(KConstant('#Top'), '#And', [disjunct] + common)
+        return buildAssoc(mlTop(), '#And', [disjunct] + common)
     return traverseBottomUp(k, _propagateUpConstraints)
 
 
@@ -318,11 +292,11 @@ def splitConfigFrom(configuration):
         return label.replace('-', '_').replace('<', '').replace('>', '').upper() + '_CELL'
 
     def _replaceWithVar(k):
-        if isKApply(k) and isCellKLabel(k['label']):
-            if len(k['args']) == 1 and not (isKApply(k['args'][0]) and isCellKLabel(k['args'][0]['label'])):
-                config_var = _mkCellVar(k['label'])
-                initial_substitution[config_var] = k['args'][0]
-                return KApply(k['label'], [KVariable(config_var)])
+        if type(k) is KApply and k.is_cell:
+            if k.arity == 1 and not (type(k.args[0]) is KApply and k.args[0].is_cell):
+                config_var = _mkCellVar(k.label)
+                initial_substitution[config_var] = k.args[0]
+                return KApply(k.label, [KVariable(config_var)])
         return k
 
     symbolic_config = traverseTopDown(configuration, _replaceWithVar)
@@ -336,19 +310,18 @@ def collapseDots(kast):
     -   Output: the same configuration, with the amount of structural framing minimized.
     """
     def _collapseDots(_kast):
-        if isKApply(_kast):
-            label = _kast['label']
-            args = _kast['args']
-            if isCellKLabel(label) and len(args) == 1 and args[0] == ktokenDots:
+        if type(_kast) is KApply:
+            args = _kast.args
+            if _kast.is_cell and _kast.arity == 1 and args[0] == ktokenDots:
                 return ktokenDots
             newArgs = [arg for arg in args if arg != ktokenDots]
-            if isCellKLabel(label) and len(newArgs) == 0:
+            if _kast.is_cell and _kast.arity == 0:
                 return ktokenDots
             if len(newArgs) < len(args):
                 newArgs.append(ktokenDots)
-            return KApply(label, newArgs)
-        elif isKRewrite(_kast):
-            if _kast['lhs'] == ktokenDots:
+            return _kast.let(args=newArgs)
+        elif type(_kast) is KRewrite:
+            if _kast.lhs == ktokenDots:
                 return ktokenDots
         return _kast
     return traverseBottomUp(kast, _collapseDots)
@@ -361,25 +334,25 @@ def pushDownRewrites(kast):
     -   Output: Kast term with rewrites localized (or removed) as much as possible.
     """
     def _pushDownRewrites(_kast):
-        if isKRewrite(_kast):
-            lhs = _kast['lhs']
-            rhs = _kast['rhs']
+        if type(_kast) is KRewrite:
+            lhs = _kast.lhs
+            rhs = _kast.rhs
             if lhs == rhs:
                 return lhs
-            if isKVariable(lhs) and isKVariable(rhs) and lhs['name'] == rhs['name']:
+            if type(lhs) is KVariable and type(rhs) is KVariable and lhs.name == rhs.name:
                 return lhs
-            if isKApply(lhs) and isKApply(rhs) and lhs['label'] == rhs['label'] and len(lhs['args']) == len(rhs['args']):
-                newArgs = [KRewrite(lArg, rArg) for (lArg, rArg) in zip(lhs['args'], rhs['args'])]
-                return KApply(lhs['label'], newArgs)
-            if isKSequence(lhs) and isKSequence(rhs) and len(lhs['items']) > 0 and len(rhs['items']) > 0:
-                if lhs['items'][0] == rhs['items'][0]:
-                    lowerRewrite = KRewrite(KSequence(lhs['items'][1:]), KSequence(rhs['items'][1:]))
-                    return KSequence([lhs['items'][0], lowerRewrite])
-                if lhs['items'][-1] == rhs['items'][-1]:
-                    lowerRewrite = KRewrite(KSequence(lhs['items'][0:-1]), KSequence(rhs['items'][0:-1]))
-                    return KSequence([lowerRewrite, lhs['items'][-1]])
-            if isKSequence(lhs) and len(lhs['items']) > 0 and isKVariable(lhs['items'][-1]) and isKVariable(rhs) and lhs['items'][-1] == rhs:
-                return KSequence([KRewrite(KSequence(lhs['items'][0:-1]), KConstant(klabelEmptyK)), rhs])
+            if type(lhs) is KApply and type(rhs) is KApply and lhs.label == rhs.label and lhs.arity == rhs.arity:
+                newArgs = [KRewrite(lArg, rArg) for (lArg, rArg) in zip(lhs.args, rhs.args)]
+                return lhs.let(args=newArgs)
+            if type(lhs) is KSequence and type(rhs) is KSequence and lhs.arity > 0 and rhs.arity > 0:
+                if lhs.items[0] == rhs.items[0]:
+                    lowerRewrite = KRewrite(KSequence(lhs.items[1:]), KSequence(rhs.items[1:]))
+                    return KSequence([lhs.items[0], lowerRewrite])
+                if lhs.items[-1] == rhs.items[-1]:
+                    lowerRewrite = KRewrite(KSequence(lhs.items[0:-1]), KSequence(rhs.items[0:-1]))
+                    return KSequence([lowerRewrite, lhs.items[-1]])
+            if type(lhs) is KSequence and lhs.arity > 0 and type(lhs.items[-1]) is KVariable and type(rhs) is KVariable and lhs.items[-1] == rhs:
+                return KSequence([KRewrite(KSequence(lhs.items[0:-1]), KApply(klabelEmptyK)), rhs])
         return _kast
     return traverseTopDown(kast, _pushDownRewrites)
 
@@ -391,10 +364,10 @@ def inlineCellMaps(kast):
     -   Output: kast term with cell maps inlined.
     """
     def _inlineCellMaps(_kast):
-        if isKApply(_kast) and _kast["label"].endswith('CellMapItem'):
-            mapKey = _kast["args"][0]
-            if isKApply(mapKey) and isCellKLabel(mapKey["label"]):
-                return _kast["args"][1]
+        if type(_kast) is KApply and _kast.label.endswith('CellMapItem'):
+            mapKey = _kast.args[0]
+            if type(mapKey) is KApply and mapKey.is_cell:
+                return _kast.args[1]
         return _kast
     return traverseBottomUp(kast, _inlineCellMaps)
 
@@ -406,8 +379,8 @@ def removeSemanticCasts(kast):
     -   Output: kast without the `#SemanticCast*` nodes.
     """
     def _removeSemanticCasts(_kast):
-        if isKApply(_kast) and len(_kast['args']) == 1 and _kast['label'].startswith('#SemanticCast'):
-            return _kast['args'][0]
+        if type(_kast) is KApply and _kast.arity == 1 and _kast.label.startswith('#SemanticCast'):
+            return _kast.args[0]
         return _kast
     return traverseBottomUp(kast, _removeSemanticCasts)
 
@@ -444,14 +417,14 @@ def uselessVarsToDots(kast, keepVars=None):
     numOccurances = countVarOccurances(kast, numOccurances=initList)
 
     def _collapseUselessVars(_kast):
-        if isKApply(_kast) and isCellKLabel(_kast['label']):
+        if type(_kast) is KApply and _kast.is_cell:
             newArgs = []
-            for arg in _kast['args']:
-                if isKVariable(arg) and numOccurances[arg['name']] == 1:
+            for arg in _kast.args:
+                if type(arg) is KVariable and numOccurances[arg.name] == 1:
                     newArgs.append(ktokenDots)
                 else:
                     newArgs.append(arg)
-            return KApply(_kast['label'], newArgs)
+            return _kast.let(args=newArgs)
         return _kast
 
     return traverseBottomUp(kast, _collapseUselessVars)
@@ -464,43 +437,26 @@ def labelsToDots(kast, labels):
     -   Output: kast term with those labels abstracted.
     """
     def _labelstoDots(k):
-        if isKApply(k) and isCellKLabel(k['label']) and k['label'] in labels:
+        if type(k) is KApply and k.is_cell and k.label in labels:
             return ktokenDots
         return k
     return traverseBottomUp(kast, _labelstoDots)
 
 
-def onAttributes(kast, effect):
-    if isKAs(kast):
-        return KAs(kast['pattern'], kast['alias'], att=effect(kast['att']))
-    elif isKRule(kast):
-        return KRule(kast['body'], requires=kast['requires'], ensures=kast['ensures'], att=effect(kast['att']))
-    elif isKClaim(kast):
-        return KClaim(kast['body'], requires=kast['requires'], ensures=kast['ensures'], att=effect(kast['att']))
-    elif isKContext(kast):
-        return KContext(kast['body'], requires=kast['requires'], att=effect(kast['att']))
-    elif isKBubble(kast):
-        return KBubble(kast['sentenceType'], kast['contents'], att=effect(kast['att']))
-    elif isKProduction(kast):
-        return KProduction(kast['productionItems'], kast['sort'], att=effect(kast['att']))
-    elif isKSyntaxAssociativity(kast):
-        return KSyntaxAssociativity(kast['assoc'], tags=kast['tags'], att=effect(kast['att']))
-    elif isKSyntaxPriority(kast):
-        return KSyntaxPriority(priorities=kast['priorities'], att=effect(kast['att']))
-    elif isKSyntaxSort(kast):
-        return KSyntaxSort(kast['sort'], att=effect(kast['att']))
-    elif isKSortSynonym(kast):
-        return KSortSynonym(kast['newSort'], kast['oldSort'], att=effect(kast['att']))
-    elif isKSyntaxLexical(kast):
-        return KSyntaxLexical(kast['name'], kast['regex'], att=effect(kast['att']))
-    elif isKFlatModule(kast):
-        localSentences = [onAttributes(sent, effect) for sent in kast['localSentences']]
-        return KFlatModule(kast['name'], kast['imports'], localSentences, att=effect(kast['att']))
-    elif isKDefinition(kast):
-        modules = [onAttributes(mod, effect) for mod in kast['modules']]
-        requires = None if 'requires' not in kast else kast['requires']
-        return KDefinition(kast['mainModule'], modules, requires=requires, att=effect(kast['att']))
-    fatal('No attributes for: ' + kast['node'] + '.')
+def onAttributes(kast: W, f: Callable[[KAtt], KAtt]) -> W:
+    kast = kast.map_att(f)
+
+    # TODO mypy bug: https://github.com/python/mypy/issues/10817
+
+    if type(kast) is KFlatModule:
+        sentences = (sentence.map_att(f) for sentence in kast.sentences)
+        return kast.let(sentences=sentences)  # type: ignore
+
+    if type(kast) is KDefinition:
+        modules = (module.map_att(f) for module in kast.modules)
+        return kast.let(modules=modules)  # type: ignore
+
+    return kast
 
 
 def minimizeTerm(term, keepVars=None, abstractLabels=[]):
@@ -529,38 +485,25 @@ def minimizeRule(rule, keepVars=[]):
         -   Unused cells will be abstracted.
         -   Attempt to remove useless side-conditions.
     """
-    if not (isKRule(rule) or isKClaim(rule)):
+    if not (type(rule) is KRule or type(rule) is KClaim):
         return rule
 
-    ruleBody = rule['body']
-    ruleRequires = rule['requires']
-    ruleEnsures = rule['ensures']
-    ruleAtts = rule['att']
+    ruleBody = rule.body
+    ruleRequires = rule.requires
+    ruleEnsures = rule.ensures
 
-    if ruleRequires is not None:
-        ruleRequires = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupe(flattenLabel('_andBool_', ruleRequires)))
-        ruleRequires = simplifyBool(ruleRequires)
+    ruleRequires = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupe(flattenLabel('_andBool_', ruleRequires)))
+    ruleRequires = simplifyBool(ruleRequires)
 
-    if ruleEnsures is not None:
-        ruleEnsures = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupe(flattenLabel('_andBool_', ruleEnsures)))
-        ruleEnsures = simplifyBool(ruleEnsures)
-
-    ruleRequires = None if ruleRequires == KToken('true', 'Bool') else ruleRequires
-    ruleEnsures = None if ruleEnsures == KToken('true', 'Bool') else ruleEnsures
+    ruleEnsures = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupe(flattenLabel('_andBool_', ruleEnsures)))
+    ruleEnsures = simplifyBool(ruleEnsures)
 
     constrainedVars = [] if keepVars is None else keepVars
-    if ruleRequires is not None:
-        constrainedVars = constrainedVars + collectFreeVars(ruleRequires)
-    if ruleEnsures is not None:
-        constrainedVars = constrainedVars + collectFreeVars(ruleEnsures)
+    constrainedVars = constrainedVars + collectFreeVars(ruleRequires)
+    constrainedVars = constrainedVars + collectFreeVars(ruleEnsures)
     ruleBody = minimizeTerm(ruleBody, keepVars=constrainedVars)
 
-    if ruleRequires == KToken('true', 'Bool'):
-        ruleRequires = None
-    if isKRule(rule):
-        return KRule(ruleBody, requires=ruleRequires, ensures=ruleEnsures, att=ruleAtts)
-    else:
-        return KClaim(ruleBody, requires=ruleRequires, ensures=ruleEnsures, att=ruleAtts)
+    return rule.let(body=ruleBody, requires=ruleRequires, ensures=ruleEnsures)
 
 
 def removeSourceMap(k):
@@ -570,10 +513,10 @@ def removeSourceMap(k):
     Output: The same JSON encoded object, with all source information stripped.
     """
     def _removeSourceMap(att):
-        if isKAtt(att):
-            atts = att['att']
+        if type(att) is KAtt:
+            atts = att.atts
             newAtts = {}
-            for attKey in atts.keys():
+            for attKey in atts:
                 if attKey != 'org.kframework.attributes.Source' and attKey != 'org.kframework.attributes.Location':
                     newAtts[attKey] = atts[attKey]
             return KAtt(atts=newAtts)
@@ -591,13 +534,13 @@ def removeGeneratedCells(constrainedTerm):
 
 
 def isAnonVariable(kast):
-    return isKVariable(kast) and kast['name'].startswith('_')
+    return type(kast) is KVariable and kast.name.startswith('_')
 
 
 def omitLargeTokens(kast, maxLen=78):
     def _largeTokensToDots(_k):
-        if isKToken(_k) and len(_k['token']) > maxLen:
-            return KToken('...', _k['sort'])
+        if type(_k) is KToken and len(_k.token) > maxLen:
+            return KToken('...', _k.sort)
         return _k
     return traverseBottomUp(kast, _largeTokensToDots)
 
@@ -617,8 +560,8 @@ def setCell(constrainedTerm, cellVariable, cellValue):
 
 def structurallyFrameKCell(constrainedTerm):
     kCell = getCell(constrainedTerm, 'K_CELL')
-    if isKSequence(kCell) and len(kCell['items']) > 0 and isAnonVariable(kCell['items'][-1]):
-        kCell = KSequence(kCell['items'][0:-1] + [ktokenDots])
+    if type(kCell) is KSequence and kCell.arity > 0 and isAnonVariable(kCell.items[-1]):
+        kCell = KSequence(kCell.items[0:-1] + [ktokenDots])
     return setCell(constrainedTerm, 'K_CELL', kCell)
 
 
@@ -703,10 +646,10 @@ def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, pr
         rule = KRule(ruleBody, requires=ruleRequires, ensures=ruleEnsures, att=ruleAtt)
     else:
         rule = KClaim(ruleBody, requires=ruleRequires, ensures=ruleEnsures, att=ruleAtt)
-    rule = addAttributes(rule, {'label': ruleId})
+    rule = rule.update_atts({'label': ruleId})
     newKeepVars = None
     if keepVars is not None:
-        newKeepVars = [vSubst[v]['name'] for v in keepVars]
+        newKeepVars = [vSubst[v].name for v in keepVars]
     return (minimizeRule(rule, keepVars=newKeepVars), vremapSubst)
 
 
@@ -739,7 +682,7 @@ def antiUnify(state1, state2):
     subst2 = {}
 
     def _rewritesToAbstractions(_kast):
-        if isKRewrite(_kast):
+        if type(_kast) is KRewrite:
             return abstractTermSafely(_kast)
         return _kast
 
@@ -777,7 +720,7 @@ def antiUnifyWithConstraints(constrainedTerm1, constrainedTerm2, implications=Fa
 
 def removeDisjuncts(constrainedTerm):
     clauses = flattenLabel('#And', constrainedTerm)
-    clauses = [c for c in clauses if not (isKApply(c) and c['label'] == '#Or')]
+    clauses = [c for c in clauses if not (type(c) is KApply and c.label == '#Or')]
     constrainedTerm = mlAnd(clauses)
     return constrainedTerm
 
@@ -787,7 +730,7 @@ def abstractCell(constrainedTerm, cellName):
     constraints = flattenLabel('#And', constraint)
     cell = getCell(state, cellName)
     cellVar = KVariable(cellName)
-    if not isKVariable(cell):
+    if type(cell) is not KVariable:
         state = setCell(state, cellName, cellVar)
         constraints.append(KApply('#Equals', [cellVar, cell]))
     return mlAnd([state] + constraints)
@@ -801,8 +744,8 @@ def applyExistentialSubstitutions(constrainedTerm):
     newConstraints = []
     for c in constraints:
         substMatch = match(substPattern, c)
-        if substMatch is not None and isKVariable(substMatch['#VAR']) and substMatch['#VAR']['name'].startswith('?'):
-            subst[substMatch['#VAR']['name']] = substMatch['#VAL']
+        if substMatch is not None and type(substMatch['#VAR']) is KVariable and substMatch['#VAR'].name.startswith('?'):
+            subst[substMatch['#VAR'].name] = substMatch['#VAL']
         else:
             newConstraints.append(c)
     return substitute(mlAnd([state] + newConstraints), subst)
@@ -811,19 +754,19 @@ def applyExistentialSubstitutions(constrainedTerm):
 def constraintSubsume(constraint1, constraint2):
     if constraint1 == mlTop() or constraint1 == constraint2:
         return True
-    elif isKApply(constraint1) and constraint1['label'] == '#And':
+    elif type(constraint1) is KApply and constraint1.label == '#And':
         constraints1 = flattenLabel('#And', constraint1)
         if all([constraintSubsume(c, constraint2) for c in constraints1]):
             return True
-    elif isKApply(constraint1) and constraint1['label'] == '#Or':
+    elif type(constraint1) is KApply and constraint1.label == '#Or':
         constraints1 = flattenLabel('#Or', constraint1)
         if any([constraintSubsume(c, constraint2) for c in constraints1]):
             return True
-    elif isKApply(constraint2) and constraint2['label'] == '#And':
+    elif type(constraint2) is KApply and constraint2.label == '#And':
         constraints2 = flattenLabel('#And', constraint2)
         if any([constraintSubsume(constraint1, c) for c in constraints2]):
             return True
-    elif isKApply(constraint2) and constraint2['label'] == '#Or':
+    elif type(constraint2) is KApply and constraint2.label == '#Or':
         constraints2 = flattenLabel('#Or', constraint2)
         if all([constraintSubsume(constraint1, c) for c in constraints2]):
             return True
@@ -841,7 +784,7 @@ def matchWithConstraint(constrainedTerm1, constrainedTerm2):
 
 
 def minimizeSubst(subst):
-    return {k: subst[k] for k in subst if not (isKVariable(subst[k]) and k == subst[k]['name'])}
+    return {k: subst[k] for k in subst if not (type(subst[k]) is KVariable and k == subst[k].name)}
 
 
 def substToMlPred(subst):
@@ -854,11 +797,11 @@ def substToMlPred(subst):
 
 def substToMap(subst):
     mapItems = [KApply('_|->_', [KVariable(k), subst[k]]) for k in subst]
-    return buildAssoc(KConstant('.Map'), '_Map_', mapItems)
+    return buildAssoc(KApply('.Map'), '_Map_', mapItems)
 
 
 def undoAliases(definition, kast):
-    alias_undo_rewrites = [(sent['body']['rhs'], sent['body']['lhs']) for module in definition['modules'] for sent in module['localSentences'] if isKRule(sent) and getAttribute(sent, 'alias') is not None]
+    alias_undo_rewrites = [(sent.body.rhs, sent.body.lhs) for module in definition for sent in module if type(sent) is KRule and 'alias' in sent.att]
     newKast = kast
     for r in alias_undo_rewrites:
         newKast = rewriteAnywhereWith(r, newKast)

@@ -2,7 +2,7 @@ import sys
 import unittest
 from functools import reduce
 
-from pyk.kast import KApply, KConstant, KSequence, KVariable, newLines
+from pyk.kast import KApply, KSequence, KVariable, newLines
 from pyk.kastManip import splitConfigFrom
 
 
@@ -13,13 +13,13 @@ class TestPyk(unittest.TestCase):
         self.assertEqual(newLines(['aaa']), 'aaa')
 
     def test_splitConfigFrom(self):
-        k_cell = KSequence([KConstant('foo'), KConstant('bar')])
+        k_cell = KSequence([KApply('foo'), KApply('bar')])
         term   = KApply('<k>', [k_cell])
         (config, subst) = splitConfigFrom(term)
         self.assertEqual(config, KApply('<k>', [KVariable('K_CELL')]))
         self.assertEqual(subst, {'K_CELL': k_cell})
 
-        map_item_cell = KApply('<mapItem>', [KConstant('foo')])
+        map_item_cell = KApply('<mapItem>', [KApply('foo')])
         map_cell      = KApply('<mapCell>', [KApply('map_join', [map_item_cell, map_item_cell])])
         (config, subst) = splitConfigFrom(map_cell)
         self.assertEqual(config, KApply('<mapCell>', [KVariable('MAPCELL_CELL')]))

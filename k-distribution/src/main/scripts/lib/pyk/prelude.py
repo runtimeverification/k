@@ -1,4 +1,4 @@
-from .kast import KApply, KConstant, KToken
+from .kast import BOTTOM, TOP, KApply, KToken
 
 
 def buildAssoc(unit, join, ls):
@@ -28,16 +28,16 @@ def buildCons(unit, cons, ls):
     return KApply(cons, [ls[0], buildCons(unit, cons, ls[1:])])
 
 
-def boolToken(b):
-    return KToken(str(b).lower(), 'Bool')
+def boolToken(b: bool) -> KToken:
+    return KToken('true' if b else 'false', 'Bool')
 
 
-def intToken(i):
+def intToken(i: int) -> KToken:
     return KToken(str(i), 'Int')
 
 
-def stringToken(s):
-    return KToken('"' + s + '"', 'String')
+def stringToken(s: str) -> KToken:
+    return KToken(f'"{s}"', 'String')
 
 
 def ltInt(i1, i2):
@@ -57,11 +57,11 @@ def mlEqualsTrue(b):
 
 
 def mlTop():
-    return KConstant('#Top')
+    return TOP
 
 
 def mlBottom():
-    return KConstant('#Bottom')
+    return BOTTOM
 
 
 def mlAnd(cs):
