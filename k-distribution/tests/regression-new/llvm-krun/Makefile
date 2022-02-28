@@ -6,7 +6,7 @@ KOMPILE_FLAGS+=--gen-glr-bison-parser
 test: test.kore
 	$(LLVM_KRUN) \
 	  -d ./test-kompiled \
-	  -c PGM test.kore KItem korefile \
+	  -c PGM test.kore Foo korefile \
 	  | diff - test.out
 
 test.kore: test.in kompile
