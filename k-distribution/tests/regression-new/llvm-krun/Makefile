@@ -3,11 +3,26 @@ EXT=
 TESTDIR=.
 KOMPILE_FLAGS+=--gen-glr-bison-parser
 
-test: test.kore
-	$(LLVM_KRUN) \
-	  -d ./test-kompiled \
-	  -c PGM test.kore Foo korefile \
-	  | diff - test.out
+CHECK=| diff - test.out
+LLVM_KRUN_FLAGS=-d ./test-kompiled
+
+all: korefile kore prettyfile pretty
+
+korefile: test.kore
+	$(LLVM_KRUN) $(LLVM_KRUN_FLAGS) \
+	  -c PGM $< Foo korefile $(CHECK)
+
+kore: test.kore
+	$(LLVM_KRUN) $(LLVM_KRUN_FLAGS) \
+	  -c PGM "$$(cat $<)" Foo kore $(CHECK)
+
+prettyfile: test.in
+	$(LLVM_KRUN) $(LLVM_KRUN_FLAGS) \
+	  -c PGM $< Foo prettyfile $(CHECK)
+
+pretty: test.in
+	$(LLVM_KRUN) $(LLVM_KRUN_FLAGS) \
+	  -c PGM "$$(cat $<)" Foo pretty $(CHECK)
 
 test.kore: test.in kompile
 	./test-kompiled/parser_PGM $< > $@
