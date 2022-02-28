@@ -1,6 +1,7 @@
 DEF=test
 EXT=
 TESTDIR=.
+KOMPILE_BACKEND=llvm
 KOMPILE_FLAGS+=--gen-glr-bison-parser
 
 CHECK=| diff - test.out
@@ -16,11 +17,11 @@ kore: test.kore
 	$(LLVM_KRUN) $(LLVM_KRUN_FLAGS) \
 	  -c PGM "$$(cat $<)" Foo kore $(CHECK)
 
-prettyfile: test.in
+prettyfile: test.in kompile
 	$(LLVM_KRUN) $(LLVM_KRUN_FLAGS) \
 	  -c PGM $< Foo prettyfile $(CHECK)
 
-pretty: test.in
+pretty: test.in kompile
 	$(LLVM_KRUN) $(LLVM_KRUN_FLAGS) \
 	  -c PGM "$$(cat $<)" Foo pretty $(CHECK)
 
