@@ -4,7 +4,7 @@ TESTDIR=.
 KOMPILE_FLAGS+=--gen-glr-bison-parser
 
 CHECK=| diff - test.out
-LLVM_KRUN_FLAGS=-d ./test-kompiled
+LLVM_KRUN_FLAGS=-p -d ./test-kompiled
 
 all: korefile kore prettyfile pretty
 
