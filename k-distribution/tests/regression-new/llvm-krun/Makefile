@@ -1,5 +1,5 @@
 DEF=test
-EXT=
+EXT=test
 TESTDIR=.
 KOMPILE_BACKEND=llvm
 KOMPILE_FLAGS+=--gen-glr-bison-parser
@@ -7,7 +7,8 @@ KOMPILE_FLAGS+=--gen-glr-bison-parser
 CHECK=| diff - test.out
 LLVM_KRUN_FLAGS=-p -d ./test-kompiled
 
-all: korefile kore prettyfile pretty
+1.test: korefile kore prettyfile pretty
+	@:
 
 korefile: test.kore
 	$(LLVM_KRUN) $(LLVM_KRUN_FLAGS) \
