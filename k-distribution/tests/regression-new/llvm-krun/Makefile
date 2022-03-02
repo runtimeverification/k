@@ -5,6 +5,7 @@ KOMPILE_FLAGS+=--gen-glr-bison-parser
 CHECK=| diff - test.out
 LLVM_KRUN_FLAGS=-p -d ./test-kompiled
 
+.PHONY: all clean korefile kore prettyfile pretty
 all: korefile kore prettyfile pretty
 
 korefile: test.kore
