@@ -13,7 +13,7 @@ export PATH := $(K_BIN):$(PATH)
 
 CHECK = git --no-pager diff --no-index -R
 
-PYTHONPATH := $(K_LIB)
+PYTHONPATH := $(K_LIB)/pyk
 export PYTHONPATH
 
 .PHONY: all clean update-results pyk                         \
