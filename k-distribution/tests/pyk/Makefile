@@ -13,7 +13,6 @@ export PATH := $(K_BIN):$(PATH)
 
 CHECK = git --no-pager diff --no-index -R
 
-PYTHONPATH := $(K_LIB)/pyk
 export PYTHONPATH
 
 .PHONY: all clean update-results pyk                         \
@@ -38,7 +37,7 @@ VENV     := venv/pyvenv.cfg
 ACTIVATE := . venv/bin/activate
 
 $(VENV):
-	virtualenv -p python3.8 venv && $(ACTIVATE) && pip install graphviz typing_extensions
+	virtualenv -p python3.8 venv && $(ACTIVATE) && pip install -e $(K_LIB)/pyk
 
 # Tests
 
