@@ -1,3 +1,5 @@
+from typing import Union
+
 from .kast import BOTTOM, TOP, KApply, KToken
 
 
@@ -26,6 +28,16 @@ def buildCons(unit, cons, ls):
     if len(ls) == 0:
         return unit
     return KApply(cons, [ls[0], buildCons(unit, cons, ls[1:])])
+
+
+def token(x: Union[bool, int, str]) -> KToken:
+    if type(x) is bool:
+        return boolToken(x)
+    if type(x) is int:
+        return intToken(x)
+    if type(x) is str:
+        return stringToken(x)
+    assert False
 
 
 def boolToken(b: bool) -> KToken:
