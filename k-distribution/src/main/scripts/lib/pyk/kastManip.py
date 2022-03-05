@@ -311,13 +311,12 @@ def collapseDots(kast):
     """
     def _collapseDots(_kast):
         if type(_kast) is KApply:
-            args = _kast.args
-            if _kast.is_cell and _kast.arity == 1 and args[0] == ktokenDots:
+            if _kast.is_cell and _kast.arity == 1 and _kast.args[0] == ktokenDots:
                 return ktokenDots
-            newArgs = [arg for arg in args if arg != ktokenDots]
-            if _kast.is_cell and _kast.arity == 0:
+            newArgs = [arg for arg in _kast.args if arg != ktokenDots]
+            if _kast.is_cell and len(newArgs) == 0:
                 return ktokenDots
-            if len(newArgs) < len(args):
+            if len(newArgs) < len(_kast.args):
                 newArgs.append(ktokenDots)
             return _kast.let(args=newArgs)
         elif type(_kast) is KRewrite:
