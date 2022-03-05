@@ -529,7 +529,7 @@ def removeGeneratedCells(constrainedTerm):
     -   Input: Constrained term which contains <generatedTop> and <generatedCounter>.
     -   Output: Constrained term with those cells removed.
     """
-    rule = KApply('<generatedTop>', [KVariable('CONFIG'), KApply('<generatedCounter>', [KVariable('_')])]), KVariable('CONFIG')
+    rule = KApply('<generatedTop>', [KVariable('CONFIG'), KVariable('_')]), KVariable('CONFIG')
     return rewriteAnywhereWith(rule, constrainedTerm)
 
 
