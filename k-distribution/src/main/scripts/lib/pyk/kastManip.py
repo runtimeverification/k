@@ -561,7 +561,7 @@ def setCell(constrainedTerm, cellVariable, cellValue):
 def structurallyFrameKCell(constrainedTerm):
     kCell = getCell(constrainedTerm, 'K_CELL')
     if type(kCell) is KSequence and kCell.arity > 0 and isAnonVariable(kCell.items[-1]):
-        kCell = KSequence(kCell.items[0:-1] + [ktokenDots])
+        kCell = KSequence(kCell.items[0:-1] + (ktokenDots,))
     return setCell(constrainedTerm, 'K_CELL', kCell)
 
 
