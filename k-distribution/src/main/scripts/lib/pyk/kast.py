@@ -114,9 +114,13 @@ class WithKAtt(KAst, ABC):
         ...
 
     def map_att(self: W, f: Callable[[KAtt], KAtt]) -> W:
+        if self.att is None:
+            return self
         return self.let_att(att=f(self.att))
 
     def update_atts(self: W, atts: Mapping[str, Any]) -> W:
+        if self.att is None:
+            return self.let_att(att=KAtt.of(**atts))
         return self.let_att(att=self.att.update(atts))
 
 
