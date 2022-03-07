@@ -613,8 +613,8 @@ class KSortSynonym(KSentence):
     def from_dict(cls: Type['KSortSynonym'], d: Dict[str, Any]) -> 'KSortSynonym':
         cls._check_node(d)
         return KSortSynonym(
-            new_sort=KSort.from_dict(d['new_sort']),
-            old_sort=KSort.from_dict(d['old_sort']),
+            new_sort=KSort.from_dict(d['newSort']),
+            old_sort=KSort.from_dict(d['oldSort']),
             att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
         )
 
