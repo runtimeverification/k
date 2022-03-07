@@ -272,32 +272,26 @@ BOTTOM: Final = KApply('#Bottom')
 
 @final
 @dataclass(frozen=True)
-class KAs(KInner, WithKAtt):
+class KAs(KInner):
     pattern: KInner
     alias: KInner
-    att: KAtt
 
-    def __init__(self, pattern: KInner, alias: KInner, att=EMPTY_ATT):
+    def __init__(self, pattern: KInner, alias: KInner):
         object.__setattr__(self, 'pattern', pattern)
         object.__setattr__(self, 'alias', alias)
-        object.__setattr__(self, 'att', att)
 
     @classmethod
     def from_dict(cls: Type['KAs'], d: Dict[str, Any]) -> 'KAs':
         cls._check_node(d)
-        return KAs(pattern=KInner.from_dict(d['pattern']), alias=KInner.from_dict(d['alias']), att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT)
+        return KAs(pattern=KInner.from_dict(d['pattern']), alias=KInner.from_dict(d['alias']))
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KAs', 'pattern': self.pattern.to_dict(), 'alias': self.alias.to_dict(), 'att': self.att.to_dict()}
+        return {'node': 'KAs', 'pattern': self.pattern.to_dict(), 'alias': self.alias.to_dict()}
 
     def let(self, *, pattern: Optional[KInner] = None, alias: Optional[KInner] = None, att: Optional[KAtt] = None) -> 'KAs':
         pattern = pattern if pattern is not None else self.pattern
         alias = alias if alias is not None else self.alias
-        att = att if att is not None else self.att
-        return KAs(pattern=pattern, alias=alias, att=att)
-
-    def let_att(self, att: KAtt) -> 'KAs':
-        return self.let(att=att)
+        return KAs(pattern=pattern, alias=alias)
 
     def map_inner(self: 'KAs', f: Callable[[KInner], KInner]) -> 'KAs':
         return self.let(pattern=f(self.pattern), alias=f(self.alias))
