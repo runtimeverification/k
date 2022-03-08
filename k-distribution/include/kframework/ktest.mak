@@ -29,6 +29,8 @@ KSEARCH:=$(KRUN) --search-all
 KPRINT=${K_BIN}/kprint
 # and krun-legacy
 KRUN_LEGACY=${K_BIN}/krun-legacy
+# and llvm-krun
+LLVM_KRUN=${K_BIN}/llvm-krun
 # path relative to current definition of test programs
 TESTDIR?=tests
 # path to put -kompiled directory in
