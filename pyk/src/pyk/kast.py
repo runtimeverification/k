@@ -3,6 +3,7 @@ import sys
 from abc import ABC, abstractmethod
 from dataclasses import InitVar, dataclass
 from enum import Enum
+from functools import cached_property
 from itertools import chain
 from typing import (
     Any,
@@ -26,8 +27,11 @@ from typing import (
 from typing_extensions import TypeAlias
 
 from .cli_utils import fatal, warning
+from .utils import FrozenDict, hash_str
 
 T = TypeVar('T', bound='KAst')
+W = TypeVar('W', bound='WithKAtt')
+KI = TypeVar('KI', bound='KInner')
 
 
 class KAst(ABC):
@@ -50,6 +54,11 @@ class KAst(ABC):
     def to_json(self) -> str:
         return json.dumps(self.to_dict(), sort_keys=True)
 
+    @final
+    @cached_property
+    def hash(self) -> str:
+        return hash_str(self.to_json())
+
     @classmethod
     def _check_node(cls: Type[T], d: Dict[str, Any], expected: Optional[str] = None) -> None:
         expected = expected if expected is not None else cls.__name__
@@ -61,23 +70,19 @@ class KAst(ABC):
 @final
 @dataclass(frozen=True)
 class KAtt(KAst, Mapping[str, Any]):
-    _atts: FrozenSet[Tuple[str, Any]]
+    atts: FrozenDict[str, Any]
 
     def __init__(self, atts: Mapping[str, Any] = {}):
-        object.__setattr__(self, '_atts', frozenset(atts.items()))
+        object.__setattr__(self, 'atts', FrozenDict(atts))
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self.atts)
+
+    def __len__(self) -> int:
+        return len(self.atts)
 
     def __getitem__(self, key: str) -> Any:
         return self.atts[key]
-
-    def __iter__(self) -> Iterator[str]:
-        return (k for k, _ in self._atts)
-
-    def __len__(self) -> int:
-        return len(self._atts)
-
-    @property
-    def atts(self) -> Dict[str, Any]:
-        return dict(self._atts)
 
     @staticmethod
     def of(**atts: Any) -> 'KAtt':
@@ -89,7 +94,7 @@ class KAtt(KAst, Mapping[str, Any]):
         return KAtt(atts=d['att'])
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KAtt', 'att': self.atts}
+        return {'node': 'KAtt', 'att': dict(self.atts)}
 
     def let(self, *, atts: Optional[Mapping[str, Any]] = None) -> 'KAtt':
         atts = atts if atts is not None else self.atts
@@ -100,10 +105,6 @@ class KAtt(KAst, Mapping[str, Any]):
 
 
 EMPTY_ATT: Final = KAtt()
-
-
-W = TypeVar('W', bound='WithKAtt')
-KI = TypeVar('KI', bound='KInner')
 
 
 class WithKAtt(KAst, ABC):
@@ -784,9 +785,26 @@ class KBubble(KSentence):
         return self.let(att=att)
 
 
+class KRuleLike(KSentence, ABC):
+    body: KInner
+    requires: KInner
+    ensures: KInner
+
+    _RULE_LIKE_NODES: Final = {'KRule', 'KClaim'}
+
+    @classmethod
+    @abstractmethod
+    def from_dict(cls: Type['KRuleLike'], d: Dict[str, Any]) -> 'KRuleLike':
+        node = d['node']
+        if node in KRuleLike._RULE_LIKE_NODES:
+            return globals()[node].from_dict(d)
+
+        raise ValueError(f"Expected KRuleLike label as 'node' value, found: '{node}'")
+
+
 @final
 @dataclass(frozen=True)
-class KRule(KSentence):
+class KRule(KRuleLike):
     body: KInner
     requires: KInner
     ensures: KInner
@@ -830,7 +848,7 @@ class KRule(KSentence):
 
 @final
 @dataclass(frozen=True)
-class KClaim(KSentence):
+class KClaim(KRuleLike):
     body: KInner
     requires: KInner
     ensures: KInner
@@ -1074,6 +1092,25 @@ class KDefinition(KOuter, WithKAtt):
 
     def let_att(self, att: KAtt) -> 'KDefinition':
         return self.let(att=att)
+
+
+# TODO make method of KInner
+def bottom_up(f: Callable[[KInner], KInner], kinner: KInner) -> KInner:
+    return f(kinner.map_inner(lambda _kinner: bottom_up(f, _kinner)))
+
+
+# TODO make method of KInner
+def top_down(f: Callable[[KInner], KInner], kinner: KInner) -> KInner:
+    return f(kinner).map_inner(lambda _kinner: top_down(f, _kinner))
+
+
+# TODO replace by method that does not reconstruct the AST
+def collect(callback: Callable[[KInner], None], kinner: KInner) -> None:
+    def f(kinner: KInner) -> KInner:
+        callback(kinner)
+        return kinner
+
+    bottom_up(f, kinner)
 
 
 def flattenLabel(label, kast):

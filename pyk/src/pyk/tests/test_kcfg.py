@@ -1,76 +1,97 @@
-from typing import Dict, Hashable, Iterable, Tuple, Union, cast
+from typing import Any, Dict, List, Tuple
 from unittest import TestCase
 
-from ..kast import TOP, KInner
+from ..cterm import CTerm
+from ..kast import TRUE, KApply
 from ..kcfg import KCFG
 from ..prelude import token
 
 
+def nid(i: int) -> str:
+    return node(i).id
+
+
+def term(i: int) -> CTerm:
+    return CTerm(KApply('<top>', [token(i)]))
+
+
+def node(i: int) -> KCFG.Node:
+    return KCFG.Node(term(i))
+
+
+def edge(i: int, j: int) -> KCFG.Edge:
+    return KCFG.Edge(node(i), node(j), TRUE, 1)
+
+
+def node_dicts(n: int) -> List[Dict[str, Any]]:
+    return [node(i).to_dict() for i in range(n)]
+
+
+def edge_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
+    return [
+        {'source': nid(i), 'target': nid(j), 'condition': TRUE.to_dict(), 'depth': 1}
+        for i, j in edges
+    ]
+
+
 class KCFGTestCase(TestCase):
 
-    def test_from_dict_single_state(self):
+    def test_from_dict_single_node(self):
         # Given
-        d = cfg_dict([(0, token(0))])
+        d = {'nodes': node_dicts(1)}
 
         # When
         cfg = KCFG.from_dict(d)
 
         # Then
-        self.assertEqual(len(cfg.states), 1)
-        self.assertEqual(cfg.states[0], token(0))
+        self.assertSetEqual(cfg.nodes, {node(0)})
+        self.assertDictEqual(cfg.to_dict(), d)
 
-    def test_from_dict_two_states(self):
+    def test_from_dict_two_nodes(self):
         # Given
-        d = cfg_dict([(0, token(0)), (1, token(1))])
+        d = {'nodes': node_dicts(2)}
 
         # When
         cfg = KCFG.from_dict(d)
 
         # Then
-        self.assertEqual(len(cfg.states), 2)
-        self.assertEqual(cfg.states[0], token(0))
-        self.assertEqual(cfg.states[1], token(1))
+        self.assertSetEqual(cfg.nodes, {node(0), node(1)})
 
     def test_from_dict_loop_edge(self):
         # Given
-        d = cfg_dict(states=[(0, token(0))], edges=[(0, token(True), 0)])
+        d = {'nodes': node_dicts(1), 'edges': edge_dicts((0, 0))}
 
         # When
         cfg = KCFG.from_dict(d)
 
         # Then
-        self.assertEqual(len(cfg.states), 1)
-        self.assertEqual(cfg.states[0], token(0))
-        self.assertEqual(len(cfg.graph), 1)
-        self.assertEqual(len(cfg.graph[0]), 1)
-        self.assertEqual(cfg.graph[0][0]['condition'], token(True))
+        self.assertSetEqual(cfg.nodes, {node(0)})
+        self.assertSetEqual(cfg.edges(), {edge(0, 0)})
+        self.assertEqual(cfg.edge(nid(0), nid(0)), edge(0, 0))
+        self.assertDictEqual(cfg.to_dict(), d)
 
     def test_from_dict_simple_edge(self):
         # Given
-        d = cfg_dict(states=[(0, token(0)), (1, token(1))], edges=[(0, token(True), 1)])
+        d = {'nodes': node_dicts(2), 'edges': edge_dicts((0, 1))}
 
         # When
         cfg = KCFG.from_dict(d)
 
         # Then
-        self.assertEqual(len(cfg.states), 2)
-        self.assertEqual(cfg.states[0], token(0))
-        self.assertEqual(cfg.states[1], token(1))
-        self.assertEqual(len(cfg.graph), 2)
-        self.assertEqual(len(cfg.graph[0]), 1)
-        self.assertEqual(cfg.graph[0][1]['condition'], token(True))
-        self.assertDictEqual(cfg.graph[1], {})
+        self.assertSetEqual(cfg.nodes, {node(0), node(1)})
+        self.assertSetEqual(cfg.edges(), {edge(0, 1)})
+        self.assertEqual(cfg.edge(nid(0), nid(1)), edge(0, 1))
 
-    def test_insert_node(self):
+    def test_create_node(self):
         # Given
         cfg = KCFG()
 
         # When
-        _, node_id = cfg.insertNode(token(True))
+        new_node = cfg.create_node(term(0))
 
         # Then
-        self.assertEqual(len(cfg.states), 1)
-        self.assertEqual(cfg.states[node_id], token(True))
+        self.assertEqual(new_node, node(0))
+        self.assertSetEqual(cfg.nodes, {node(0)})
 
     def test_remove_unknown_node(self):
         # Given
@@ -79,112 +100,102 @@ class KCFGTestCase(TestCase):
         # Then
         with self.assertRaises(ValueError):
             # When
-            cfg.removeNode(0)
+            cfg.remove_node(nid(0))
 
     def test_remove_node(self):
         # Given
-        d = cfg_dict([0])
+        d = {'nodes': node_dicts(1), 'edges': edge_dicts((0, 0))}
         cfg = KCFG.from_dict(d)
 
         # When
-        cfg.removeNode(0)
+        cfg.remove_node(nid(0))
 
         # Then
-        self.assertEqual(len(cfg.states), 0)
+        self.assertSetEqual(cfg.nodes, set())
+        self.assertSetEqual(cfg.edges(), set())
+        with self.assertRaises(ValueError):
+            cfg.node(nid(0))
+        with self.assertRaises(ValueError):
+            cfg.edge(nid(0), nid(0))
 
     def test_insert_loop_edge(self):
         # Given
-        d = cfg_dict([0])
+        d = {'nodes': node_dicts(1)}
         cfg = KCFG.from_dict(d)
 
         # When
-        cfg.insertEdge(0, token(True), 0, depth=1)
+        new_edge = cfg.create_edge(nid(0), nid(0))
 
         # Then
-        self.assertEqual(len(cfg.graph), 1)
+        self.assertEqual(new_edge, edge(0, 0))
+        self.assertSetEqual(cfg.nodes, {node(0)})
+        self.assertSetEqual(cfg.edges(), {edge(0, 0)})
+        self.assertEqual(cfg.edge(nid(0), nid(0)), edge(0, 0))
 
     def test_insert_simple_edge(self):
         # Given
-        d = cfg_dict([0, 1])
+        d = {'nodes': node_dicts(2)}
         cfg = KCFG.from_dict(d)
 
         # When
-        cfg.insertEdge(0, token(True), 1, depth=1)
+        new_edge = cfg.create_edge(nid(0), nid(1))
 
         # Then
-        self.assertEqual(len(cfg.graph), 2)
-        self.assertEqual(len(cfg.graph[0]), 1)
-        self.assertEqual(cfg.graph[0][1]['condition'], token(True))
-        self.assertDictEqual(cfg.graph[1], {})
+        self.assertEqual(new_edge, edge(0, 1))
+        self.assertSetEqual(cfg.nodes, {node(0), node(1)})
+        self.assertSetEqual(cfg.edges(), {edge(0, 1)})
 
     def test_get_successors(self):
-        d = cfg_dict(states=[0, 1, 2], edges=[(0, 1), (0, 2)])
+        d = {'nodes': node_dicts(3), 'edges': edge_dicts((0, 1), (0, 2))}
         cfg = KCFG.from_dict(d)
 
         # When
-        succs = set(cfg.getSuccessors(0))
+        succs = set(cfg.edges(source_id=nid(0)))
 
         # Then
-        self.assertSetEqual(succs, {1, 2})
+        self.assertSetEqual(succs, {edge(0, 1), edge(0, 2)})
 
     def test_get_predecessors(self):
-        d = cfg_dict(states=[0, 1, 2], edges=[(0, 2), (1, 2)])
+        d = {'nodes': node_dicts(3), 'edges': edge_dicts((0, 2), (1, 2))}
         cfg = KCFG.from_dict(d)
 
         # When
-        preds = set(cfg.getPredecessors(2))
+        preds = set(cfg.edges(target_id=nid(2)))
 
         # Then
-        self.assertSetEqual(preds, {0, 1})
+        self.assertSetEqual(preds, {edge(0, 2), edge(1, 2)})
 
-    def test_get_edges(self):
-        d = cfg_dict(states=[0, 1, 2], edges=[(0, 1), (0, 2), (1, 2)])
-        cfg = KCFG.from_dict(d)
-
-        # When
-        edges = set(cfg.getEdges())
-
-        # Then
-        self.assertSetEqual(edges, {(0, 1), (0, 2), (1, 2)})
-
-    def test_transitive_closure(self):
+    def test_reachable_nodes(self):
         # Given
-        d = cfg_dict(states=[0, 1, 2, 3, 4, 5], edges=[(0, 1), (0, 5), (1, 2), (1, 3), (2, 4), (3, 4), (4, 1)])
+        d = {
+            'nodes': node_dicts(6),
+            'edges': edge_dicts((0, 1), (0, 5), (1, 2), (1, 3), (2, 4), (3, 4), (4, 1)),
+        }
         cfg = KCFG.from_dict(d)
 
         # When
-        node_ids = set(cfg.transitiveClosureFromState(1))
+        nodes = set(cfg.reachable_nodes(nid(1)))
 
         # Then
-        self.assertSetEqual(node_ids, {1, 2, 3, 4})
+        self.assertSetEqual(nodes, {node(1), node(2), node(3), node(4)})
 
-    def test_non_looping_paths_between_states(self):
+    def test_paths_between(self):
         # Given
-        d = cfg_dict(states=[0, 1, 2, 3], edges=[(0, 1), (0, 2), (1, 2), (1, 3), (2, 3), (3, 0)])
+        d = {
+            'nodes': node_dicts(4),
+            'edges': edge_dicts((0, 1), (0, 2), (1, 2), (1, 3), (2, 3), (3, 0)),
+        }
         cfg = KCFG.from_dict(d)
 
         # When
-        paths = set(tuple(path) for path in cfg.nonLoopingPathsBetweenStates(0, 3))
+        paths = set(cfg.paths_between(nid(0), nid(3)))
 
         # Then
-        self.assertSetEqual(paths, {(0, 1, 3), (0, 1, 2, 3), (0, 2, 3)})
-
-
-def cfg_dict(
-    states: Iterable[Union[Hashable, Tuple[Hashable, KInner]]],
-    edges: Iterable[Union[Tuple[Hashable, Hashable], Tuple[Hashable, KInner, Hashable]]] = (),
-) -> Dict:
-    cfg_states = {}
-    for state in states:
-        state_key = state[0] if type(state) is tuple else state
-        state_term = state[1] if type(state) is tuple else TOP
-        cfg_states[state_key] = {'__kcfg_type__': 'k', **state_term.to_dict()}
-
-    cfg_edges: Dict = {state: {} for state in cfg_states}
-    for edge in edges:
-        edge_src = edge[0]
-        edge_term = cast(KInner, edge[1]) if len(edge) == 3 else TOP
-        edge_trg = edge[-1]
-        cfg_edges[edge_src][edge_trg] = {'depth': 1, 'condition': {'__kcfg_type__': 'k', **edge_term.to_dict()}, 'classes': [], 'priority': 50}
-
-    return {'states': cfg_states, 'graph': cfg_edges}
+        self.assertSetEqual(
+            paths,
+            {
+                (edge(0, 1), edge(1, 3)),
+                (edge(0, 2), edge(2, 3)),
+                (edge(0, 1), edge(1, 2), edge(2, 3)),
+            },
+        )

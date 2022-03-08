@@ -1,28 +1,54 @@
 import hashlib
 import string
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, TypeVar
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    Iterator,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    TypeVar,
+)
 
 T = TypeVar('T')
+K = TypeVar('K')
+V = TypeVar('V')
 
 
-def combine_dicts(*dicts: Mapping) -> Optional[Dict]:
-    if len(dicts) == 0:
-        return {}
-    if len(dicts) == 1:
-        return dict(dicts[0])
-    dict1 = dicts[0]
-    dict2 = dicts[1]
-    restDicts = dicts[2:]
-    if dict1 is None or dict2 is None:
-        return None
-    intersecting_keys = set(dict1.keys()).intersection(set(dict2.keys()))
-    for key in intersecting_keys:
-        if dict1[key] != dict2[key]:
-            return None
-    newDict = {key: dict1[key] for key in dict1}
-    for key in dict2.keys():
-        newDict[key] = dict2[key]
-    return combine_dicts(newDict, *restDicts)
+# Based on: https://stackoverflow.com/a/2704866
+# Perhaps one day: https://peps.python.org/pep-0603/
+class FrozenDict(Mapping[K, V]):
+    _dict: Dict[K, V]
+    _hash: Optional[int]
+
+    def __init__(self, *args, **kwargs):
+        self._dict = dict(*args, **kwargs)
+        self._hash = None
+
+    def __iter__(self) -> Iterator[K]:
+        return iter(self._dict)
+
+    def __len__(self) -> int:
+        return len(self._dict)
+
+    def __getitem__(self, key: K) -> V:
+        return self._dict[key]
+
+    def __hash__(self) -> int:
+        if self._hash is None:
+            h = 0
+            for pair in self.items():
+                h ^= hash(pair)
+            self._hash = h
+        return self._hash
+
+    def __str__(self) -> str:
+        return f'FrozenDict({str(self._dict)})'
+
+    def __repr__(self) -> str:
+        return f'FrozenDict({repr(self._dict)})'
 
 
 def merge_with(f, d1: Mapping, d2: Mapping) -> Dict:
