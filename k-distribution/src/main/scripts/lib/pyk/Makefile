@@ -26,7 +26,7 @@ check-isort: $(VENV)
 	$(ACTIVATE) && isort ./pyk --check
 
 check-flake8: $(VENV)
-	$(ACTIVATE) && flake8 ./pyk --ignore=E501
+	$(ACTIVATE) && flake8 ./pyk
 
 check-mypy: $(VENV)
 	$(ACTIVATE) && mypy ./pyk
