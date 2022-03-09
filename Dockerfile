@@ -13,6 +13,7 @@ RUN    apt-get update        \
         libboost-test-dev    \
         libgmp-dev           \
         libjemalloc-dev      \
+        libunwind-dev        \
         libmpfr-dev          \
         libyaml-dev          \
         libz3-dev            \
