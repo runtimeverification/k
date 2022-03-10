@@ -20,6 +20,7 @@ public class KException implements Serializable, HasLocation {
     private final String message;
     private final Throwable exception;
     private final String sourceText;
+    private final boolean printException;
     private StringBuilder trace = new StringBuilder();
 
     private static final Map<KExceptionGroup, String> labels;
@@ -47,7 +48,11 @@ public class KException implements Serializable, HasLocation {
     }
 
     public KException(ExceptionType type, KExceptionGroup label, String message, Source source, Location location) {
-        this(type, label, message, source, location, null);
+        this(type, label, message, source, location, null, true);
+    }
+
+    public KException(ExceptionType type, KExceptionGroup label, String message, Source source, Location location, Throwable exception) {
+        this(type, label, message, source, location, exception, true);
     }
 
     public KException(
@@ -56,7 +61,8 @@ public class KException implements Serializable, HasLocation {
             String message,
             Source source,
             Location location,
-            Throwable exception) {
+            Throwable exception,
+            boolean printException) {
         super();
         this.type = type;
         this.exceptionGroup = label;
@@ -65,6 +71,7 @@ public class KException implements Serializable, HasLocation {
         this.location = location;
         this.exception = exception;
         this.sourceText = getSourceLineText();
+        this.printException = printException;
     }
 
     @Override
@@ -102,9 +109,9 @@ public class KException implements Serializable, HasLocation {
 
     public enum ExceptionType {
         ERROR,
+        RULE_HAS_MACRO_ATT,
         NON_EXHAUSTIVE_MATCH,
         UNDELETED_TEMP_DIR,
-        MISSING_HOOK_OCAML,
         MISSING_SYNTAX_MODULE,
         INVALID_EXIT_CODE,
         INVALID_CONFIG_VAR,
@@ -128,7 +135,7 @@ public class KException implements Serializable, HasLocation {
 
     public String toString(boolean verbose) {
         return "[" + (type == ExceptionType.ERROR ? "Error" : "Warning") + "] " + labels.get(exceptionGroup) + ": " + message
-                + (exception == null ? "" : " (" + exception.getClass().getSimpleName() + ": " + exception.getMessage() + ")")
+                + (exception != null && printException ? " (" + exception.getClass().getSimpleName() + ": " + exception.getMessage() + ")" : "")
                 + trace.toString() + traceTail()
                 + (source == null ? "" : "\n\t" + source)
                 + (location == null ? "" : "\n\t" + location)

@@ -96,7 +96,7 @@ this, the program we mentioned above successfully parses.
 
 ### Exercise
 
-Parse the program `true && false || false` yourself, and confirm that the AST
+Parse the program `true && false || false` using kast, and confirm that the AST
 places `||` as the top level symbol. Then modify the definition so that you
 will get the alternative parse.
 
@@ -191,7 +191,7 @@ multiple modules.
 As a result of this, K provides a second way of declaring priority and
 associativity relations.
 
-Consider the following grammar, which we will name `lesson-04-D.k` and which
+Consider the following grammar, which we will name `lesson-04-d.k` and which
 will express the exact same grammar as `lesson-04-b.k`
 
 ```k
@@ -228,7 +228,7 @@ attributes together into a left-, right-, or non-associative grouping.
 
 ## Prefer/avoid
 
-Sometimes priority and associativity proves insufficient to disambiguate a
+Sometimes priority and associativity prove insufficient to disambiguate a
 grammar. In particular, sometimes it is desirable to be able to choose between
 two ambiguous parses directly while still not rejecting any parses if the term
 parsed is unambiguous. A good example of this is the famous "dangling else"

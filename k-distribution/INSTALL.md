@@ -4,7 +4,7 @@ Installing the K Framework Package
 We currently strive to provide packages for the following platforms:
 
 -   Ubuntu Bionic Beaver (18.04) and Focal Fossa (20.04)
--   Debian Buster
+-   Debian Bullseye
 -   Arch Linux
 -   MacOS X Mojave/Homewbrew
 -   Docker Images
@@ -49,16 +49,18 @@ Pre-installation Notes
 
     where `<package-download-url>` is replaced by the URL you just copied.
 
--   The packages we distribute do **not** include the OCaml backend dependency
-    setup. However, we include
-    [instructions below](#installing-the-ocaml-backend-optional) on using the
-    OCaml backend with the package-installed K.
+-   K depends on version 4.8.11 of Z3, which may not be supplied by package
+    managers. If this is the case, it should be built and installed from source
+    following the
+    [instructions](https://github.com/Z3Prover/z3#building-z3-using-cmake) in
+    the Z3 repository. Other versions (older and newer) are not supported by K,
+    and may lead to incorrect behaviour or performance issues.
 
 Downloading Packages
 --------------------
 
 Download the appropriate package from the GitHub, via the
-[Releases](https://github.com/kframework/k/releases) page.
+[Releases](https://github.com/runtimeverification/k/releases) page.
 Releases are generated as often as possible from `master` build.
 
 Installing Packages
@@ -83,14 +85,10 @@ sudo apt install ./kframework_X.Y.Z_amd64_bionic.deb
 sudo apt install ./kframework_X.Y.Z_amd64_focal.deb
 ```
 
-### Debian Buster
-
-K requires at least LLVM 8, but Debian Buster by default has LLVM 7.
-As a result, you need to enable the Debian Backports apt repository for Debian.
+### Debian Bullseye
 
 ```sh
-echo "deb http://deb.debian.org/debian buster-backports main" > /etc/apt/sources.list.d/buster-backports.list
-sudo apt install ./kframework_X.Y.Z_amd64_buster.deb
+sudo apt install ./kframework_X.Y.Z_amd64_bullseye.deb
 ```
 
 ### Arch Linux
@@ -113,8 +111,9 @@ With brew installed, do the following to install the K Framework brew package
 brew install kframework--X.Y.Z.ID.bottle.BN.tar.gz -v
 ```
 
-Note: the brew package should install on MacOS X Catalina systems even though
-the package was built for Mojave.
+Note: we do not yet have a MacOS Monterey bottle. The existing brew package
+also does not work on M1 Silicon Macs. If you have either of these systems,
+you should build from source for the time being.
 
 #### Homebrew Alternate Installation
 
@@ -158,31 +157,6 @@ FROM runtimeverificationinc/kframework-k:ubuntu-focal-COMMIT_ID
 ```
 
 We also create Ubuntu 18.04 images with the `ubuntu-bionic-COMMIT_ID` tags.
-
-Installing the OCaml Backend (Optional)
----------------------------------------
-
-**NOTE**: It is *strongly* recommended that you use the LLVM backend instead of
-the OCaml backend. The OCaml backend is being sunsetted.
-
-To use the OCaml backend requires an installation of the OCaml package manager
-`opam`. Instructions on installing `opam` are available here:
-<https://opam.ocaml.org/doc/Install.html>.
-You should install on Windows by following the instructions for the Linux
-distribution you installed for Windows Subsystem for Linux.
-
-Once `opam` is installed, you can prepare the installation to run the OCaml
-backend by running (for a user-local install):
-
-```sh
-k-configure-opam
-eval $(opam config env)
-```
-
-`k-configure-opam` is in the `k/bin` directory, and the `eval` command sets up
-your OCaml environment. You can optionally control where the OCaml dependencies
-are installed by setting the `OPAMROOT` environment variable before running the
-above commands with `export OPAMROOT=/path/to/opam/root`.
 
 Testing Packages
 ----------------

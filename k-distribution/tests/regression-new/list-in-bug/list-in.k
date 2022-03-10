@@ -7,6 +7,7 @@ endmodule
 
 module LIST-IN
     imports LIST-IN-SYNTAX
+    imports LIST
 
     configuration <k> $PGM:Pgm </k>
 

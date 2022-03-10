@@ -62,6 +62,8 @@ import scala.collection.JavaConverters;
 import scala.collection.Seq;
 import scala.collection.Set;
 
+import static org.kframework.Collections.*;
+
 /**
  * Writes a KAST term to the KAST Json format.
  */
@@ -92,6 +94,26 @@ public class ToJson {
             data.close();
         } catch (IOException e) {
             throw KEMException.criticalError("Could not write Definition to Json", e);
+        }
+        return out.toByteArray();
+    }
+
+    public static byte[] apply(Module mod) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            DataOutputStream data = new DataOutputStream(out);
+            JsonWriter jsonWriter = Json.createWriter(data);
+
+            JsonObjectBuilder term = Json.createObjectBuilder();
+            term.add("format", "KAST");
+            term.add("version", 1);
+            term.add("term", toJson(mod));
+
+            jsonWriter.write(term.build());
+            jsonWriter.close();
+            data.close();
+        } catch (IOException e) {
+            throw KEMException.criticalError("Could not write Module to Json", e);
         }
         return out.toByteArray();
     }
@@ -139,7 +161,13 @@ public class ToJson {
         jmod.add("node", JsonParser.KFLATMODULE);
 
         JsonArrayBuilder imports = Json.createArrayBuilder();
-        mod.imports().foreach(i -> imports.add(i.name()));
+        stream(mod.imports()).forEach(i -> {
+          JsonObjectBuilder jimp = Json.createObjectBuilder();
+          jimp.add("node", JsonParser.KIMPORT);
+          jimp.add("name", i.name());
+          jimp.add("isPublic", i.isPublic());
+          imports.add(jimp.build());
+        });
 
         JsonArrayBuilder sentences = Json.createArrayBuilder();
         mod.localSentences().foreach(s -> sentences.add(toJson(s)));

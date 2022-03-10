@@ -122,6 +122,8 @@ class KoreToK (sortAtt : Map[String, String]) {
         }
       case "kseq" =>
         KORE.KSequence(args.map(apply(_)): _*)
+      case "append" =>
+        KORE.KSequence(args.map(apply(_)): _*)
       case "dotk" =>
         KORE.KSequence()
       case _ =>

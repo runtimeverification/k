@@ -1,5 +1,6 @@
 module DEF
     imports INT
+    imports BOOL
 
     syntax Term ::= "start" Int
                   | "mid"   Int

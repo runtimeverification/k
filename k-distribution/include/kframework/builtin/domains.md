@@ -55,6 +55,7 @@ module DOMAINS
   imports MAP
   imports SET
   imports ID
+  imports K-EQUAL
 endmodule
 ```
 
@@ -70,7 +71,7 @@ this module should import only the `ARRAY` module.
 
 ```k
 module ARRAY-SYNTAX
-  imports LIST
+  imports private LIST
 
   syntax Array [hook(ARRAY.Array), unit(arrayCtor), element(_[_<-_])]
 ```
@@ -134,11 +135,12 @@ You can test whether an integer is within the bounds of an array in O(1) time.
 ```k
 endmodule
 
-module ARRAY-IN-K
-  imports ARRAY-SYNTAX
-  imports LIST
-  imports K-EQUAL
-  imports INT
+module ARRAY-IN-K [private]
+  imports public ARRAY-SYNTAX
+  imports private LIST
+  imports private K-EQUAL
+  imports private INT
+  imports private BOOL
 ```
 
 ### Array creation
@@ -151,7 +153,7 @@ may incur a one-time O(N) resizing cost, possibly amortized across multiple
 operations.
 
 ```k
-  syntax Array ::= makeArray(length: Int, value: KItem) [function, hook(ARRAY.make)]
+  syntax Array ::= makeArray(length: Int, value: KItem) [function, hook(ARRAY.make), public]
 ```
 
 ### Implementation of Arrays
@@ -183,16 +185,6 @@ of any of the syntax defined in any of these modules.
   rule IDX::Int in_keys(arr(_, I::Int, _)) => IDX >=Int 0 andBool IDX <Int I
 endmodule
 
-module ARRAY-CONCRETE [concrete, kast]
-  imports ARRAY-SYNTAX
-  imports LIST
-  imports STRING-SYNTAX
-
-  syntax Array ::= makeEmptyArray(Int) [function, hook(ARRAY.makeEmpty), impure]
-                 | arrayCtor(String, Int, KItem) [function, hook(ARRAY.ctor), symbol]
-                 | makeArray(Int, KItem) [function, hook(ARRAY.make), impure, klabel(makeArrayOcaml)]
-endmodule
-
 module ARRAY-SYMBOLIC [symbolic]
   imports ARRAY-IN-K
 endmodule
@@ -202,7 +194,6 @@ module ARRAY-KORE [kore]
 endmodule
 
 module ARRAY
-  imports ARRAY-CONCRETE
   imports ARRAY-SYMBOLIC
   imports ARRAY-KORE
 endmodule
@@ -215,14 +206,14 @@ Provided here is the syntax of an implementation of immutable, associative,
 commutative maps from `KItem` to `KItem`. This type is hooked to an
 implementation of maps provided by the backend. For more information on
 matching on maps and allowable patterns for doing so, refer to K's
-[user documentation](pending-documentation.md).
+[user documentation](USER_MANUAL.md).
 
 ```k
 module MAP
-  imports BOOL-SYNTAX
-  imports INT-SYNTAX
-  imports LIST
-  imports SET
+  imports private BOOL-SYNTAX
+  imports private INT-SYNTAX
+  imports private LIST
+  imports private SET
 
   syntax Map [hook(MAP.Map)]
 ```
@@ -414,7 +405,8 @@ endmodule
 
 module MAP-KORE-SYMBOLIC [kore,symbolic]
   imports MAP
-  imports K-EQUAL
+  imports private K-EQUAL
+  imports private BOOL
 
   rule #Ceil(@M:Map [@K:KItem]) => {(@K in_keys(@M)) #Equals true} #And #Ceil(@M) #And #Ceil(@K) [anywhere, simplification]
 
@@ -459,7 +451,8 @@ endmodule
 
 module MAP-JAVA-SYMBOLIC [kast, symbolic]
   imports MAP
-  imports K-EQUAL
+  imports private K-EQUAL
+  imports private BOOL
   rule .Map [ K1 <- V1 ] => K1 |-> V1 [simplification]
 
   rule ((K1 |->  V1) _MAP) [ K2 ] => V1         requires K1  ==K K2 [simplification]
@@ -496,12 +489,12 @@ Provided here is the syntax of an implementation of immutable, associative,
 commutative sets of `KItem`. This type is hooked to an implementation of sets
 provided by the backend. For more information on matching on sets and allowable
 patterns for doing so, refer to K's
-[user documentation](pending-documentation.md).
+[user documentation](USER_MANUAL.md).
 
 ```k
 module SET
-  imports INT-SYNTAX
-  imports BASIC-K
+  imports private INT-SYNTAX
+  imports private BASIC-K
 
   syntax Set [hook(SET.Set)]
 ```
@@ -621,12 +614,12 @@ Provided here is the syntax of an implementation of immutable, associative
 lists of `KItem`. This type is hooked to an implementation of lists provided
 by the backend. For more information on matching on lists and allowable
 patterns for doing so, refer to K's
-[user documentation](pending-documentation).
+[user documentation](USER_MANUAL.md).
 
 ```k
 module LIST
-  imports INT-SYNTAX
-  imports BASIC-K
+  imports private INT-SYNTAX
+  imports private BASIC-K
 
   syntax List [hook(LIST.List)]
 ```
@@ -793,7 +786,7 @@ module BOOL-SYNTAX
 endmodule
 
 module BOOL
-  imports BASIC-K
+  imports private BASIC-K
   imports BOOL-SYNTAX
 ```
 
@@ -896,7 +889,7 @@ endmodule
 
 module INT-COMMON
   imports INT-SYNTAX
-  imports BOOL
+  imports private BOOL
 ```
 
 ### Integer arithmetic
@@ -1017,6 +1010,17 @@ case when the second integer modulo the first integer is equal to zero.
   syntax Bool ::= Int "dividesInt" Int    [function]
 ```
 
+### Random integers
+
+You can, on concrete backends, compute a pseudorandom integer, or seed the
+pseudorandom number generator. These operations are represented as
+uninterpreted functions on symbolic backends.
+
+```k
+  syntax Int ::= randInt(Int) [function, hook(INT.rand), impure]
+  syntax K ::= srandInt(Int) [function, hook(INT.srand), impure]
+```
+
 ### Implementation of Integers
 
 The remainder of this section consists of an implementation in K of some
@@ -1031,6 +1035,7 @@ endmodule
 module INT-SYMBOLIC [symbolic]
   imports INT-COMMON
   imports INT-SYMBOLIC-KORE
+  imports private BOOL
 
   // Arithmetic Normalization
   rule I +Int 0 => I [simplification]
@@ -1049,6 +1054,7 @@ endmodule
 module INT-SYMBOLIC-KORE [symbolic, kore]
   imports INT-COMMON
   imports ML-SYNTAX
+  imports private BOOL
 
   // Definability Conditions
   rule #Ceil(@I1:Int /Int   @I2:Int) => {(@I2 =/=Int 0) #Equals true} #And #Ceil(@I1) #And #Ceil(@I2) [simplification]
@@ -1076,7 +1082,7 @@ module INT-SYMBOLIC-KORE [symbolic, kore]
 endmodule
 
 module INT-KAST [kast]
-  imports K-EQUAL
+  imports private K-EQUAL
   imports INT-COMMON
 
   rule I1:Int ==Int I2:Int => I1 ==K I2
@@ -1084,7 +1090,7 @@ module INT-KAST [kast]
 endmodule
 
 module INT-KORE [kore]
-  imports K-EQUAL
+  imports private K-EQUAL
   imports INT-COMMON
 
   rule I1:Int ==K I2:Int => I1 ==Int I2
@@ -1096,7 +1102,8 @@ module INT
   imports INT-SYMBOLIC
   imports INT-KAST
   imports INT-KORE
-  imports K-EQUAL
+  imports private K-EQUAL
+  imports private BOOL
 
   rule bitRangeInt(I::Int, IDX::Int, LEN::Int) => (I >>Int IDX) modInt (1 <<Int LEN)
 
@@ -1116,11 +1123,8 @@ module INT
   rule I1:Int =/=Int I2:Int => notBool (I1 ==Int I2)
   rule (I1:Int dividesInt I2:Int) => (I2 %Int I1) ==Int 0
 
-  syntax Int ::= freshInt(Int)    [freshGenerator, function, functional]
+  syntax Int ::= freshInt(Int)    [freshGenerator, function, functional, private]
   rule freshInt(I:Int) => I
-
-  syntax Int ::= randInt(Int) [function, hook(INT.rand), impure]
-  syntax K ::= srandInt(Int) [function, hook(INT.srand), impure]
 endmodule
 ```
 
@@ -1165,8 +1169,8 @@ endmodule
 
 module FLOAT
   imports FLOAT-SYNTAX
-  imports BOOL
-  imports INT-SYNTAX
+  imports private BOOL
+  imports private INT-SYNTAX
 ```
 
 ### Float precision
@@ -1244,12 +1248,14 @@ You can:
 * Compute the absolute value `absFloat` of a float.
 * Round a floating-point number to a specified precision and exponent
   range (`roundFloat`). The resulting `Float` will yield the specified values
-  when calling `precisionFloat and `exponentBitsFloat` and when performing
+  when calling `precisionFloat` and `exponentBitsFloat` and when performing
   further computation.
 * Round a float to the next lowest floating-point value which is an integer
   (`floorFloat`).
 * Round a float to the next highest floating-point value which is an integer
   (`ceilFloat`).
+* Round a float to the next closest floating-point value which is an integer, in
+  the direction of zero (`truncFloat`).
 * Compute the natural exponential `expFloat` of a float (i.e. e^x).
 * Compute the natural logarithm `logFloat` of a float.
 * Compute the sine `sinFloat` of a float.
@@ -1273,6 +1279,7 @@ You can:
                  | roundFloat(Float, precision: Int, exponentBits: Int)  [function, hook(FLOAT.round)]
                  | floorFloat(Float)            [function, functional, hook(FLOAT.floor)]
                  | ceilFloat(Float)             [function, functional, hook(FLOAT.ceil)]
+                 | truncFloat(Float)            [function, functional, hook(FLOAT.trunc)]
                  | expFloat(Float)              [function, functional, hook(FLOAT.exp)]
                  | logFloat(Float)              [function, hook(FLOAT.log)]
                  | sinFloat(Float)              [function, functional, hook(FLOAT.sin)]
@@ -1373,9 +1380,10 @@ endmodule
 
 module STRING-COMMON
   imports STRING-SYNTAX
-  imports INT
-  imports FLOAT-SYNTAX
-  imports K-EQUAL
+  imports private INT
+  imports private FLOAT-SYNTAX
+  imports private K-EQUAL
+  imports private BOOL
 ```
 
 ### String concatenation
@@ -1414,7 +1422,7 @@ length of the substring). There are two important facts to note:
     character at `endIndex`, i.e., the range is `[startIndex..endIndex)`.
 2.  this function is only defined on valid indices (i.e., it is defined when
     `startIndex < endIndex` and `endIndex` is less than or equal to the string
-    legnth).
+    length).
 
 ```k
   syntax String ::= substrString ( String , startIndex: Int , endIndex: Int ) [function, functional, hook(STRING.substr)]
@@ -1577,7 +1585,7 @@ of the above operations in K.
 endmodule
 
 module STRING-KAST [kast]
-  imports K-EQUAL
+  imports private K-EQUAL
   imports STRING-COMMON
 
   rule S1:String ==String S2:String => S1 ==K S2
@@ -1585,7 +1593,7 @@ module STRING-KAST [kast]
 endmodule
 
 module STRING-KORE [kore]
-  imports K-EQUAL
+  imports private K-EQUAL
   imports STRING-COMMON
 
   rule S1:String ==K S2:String => S1 ==String S2
@@ -1619,7 +1627,7 @@ implementation of string concatenation. There are three operations:
 
 ```k
 module STRING-BUFFER-IN-K [symbolic]
-  imports BASIC-K
+  imports private BASIC-K
   imports STRING
 
   syntax StringBuffer ::= ".StringBuffer" [function, functional]
@@ -1633,7 +1641,7 @@ module STRING-BUFFER-IN-K [symbolic]
 endmodule
 
 module STRING-BUFFER-HOOKED [concrete]
-  imports BASIC-K
+  imports private BASIC-K
   imports STRING
 
   syntax StringBuffer [hook(BUFFER.StringBuffer)]
@@ -1662,9 +1670,10 @@ consistency.
 
 ```k
 module BYTES-SYNTAX
-  imports STRING-SYNTAX
+  imports private STRING-SYNTAX
 
-  syntax Bytes [hook(BYTES.Bytes), token]
+  syntax Bytes [hook(BYTES.Bytes)]
+  syntax Bytes ::= r"b[\\\"](([^\\\"\\n\\r\\\\])|([\\\\][nrtf\\\"\\\\])|([\\\\][x][0-9a-fA-F]{2})|([\\\\][u][0-9a-fA-F]{4})|([\\\\][U][0-9a-fA-F]{8}))*[\\\"]"      [token]
 endmodule
 ```
 
@@ -1859,6 +1868,7 @@ module BYTES-IN-K [symbolic, kast]
   imports K-EQUAL
   imports STRING
   imports STRING-BUFFER
+  imports BOOL
 
   syntax Bytes ::= "nilBytes"
                  | Int ":" Bytes
@@ -1946,7 +1956,8 @@ endmodule
 
 module BYTES-SYMBOLIC-CEIL [symbolic, kore]
   imports BYTES-HOOKED
-  imports INT
+  imports private INT
+  imports private BOOL
 
   rule #Ceil(padRightBytes(_, LEN, VAL)) => {(0 <=Int LEN andBool 0 <=Int VAL andBool VAL <Int 256) #Equals true} [simplification]
   rule #Ceil(padLeftBytes(_, LEN, VAL))  => {(0 <=Int LEN andBool 0 <=Int VAL andBool VAL <Int 256) #Equals true} [simplification]
@@ -1956,7 +1967,7 @@ module BYTES
   imports BYTES-CONCRETE
   imports BYTES-KORE
   imports BYTES-IN-K
-  imports INT
+  imports private INT
 
   rule Int2Bytes(I::Int, E::Endianness, Unsigned) => Int2Bytes((log2Int(I) +Int 8) /Int 8, I, E)
     requires I >Int 0
@@ -1999,23 +2010,23 @@ endmodule
 
 module ID-COMMON
   imports ID-SYNTAX
-  imports STRING
+  imports private STRING
 
   syntax String ::= Id2String ( Id )    [function, functional, hook(STRING.token2string)]
   syntax Id ::= String2Id (String) [function, functional, hook(STRING.string2token)]
-  syntax Id ::= freshId(Int)    [freshGenerator, function, functional]
+  syntax Id ::= freshId(Int)    [freshGenerator, function, functional, private]
+
+  rule freshId(I:Int) => String2Id("_" +String Int2String(I))
 endmodule
 
 module ID
   imports ID-COMMON
   imports ID-SYMBOLIC
-
-  rule freshId(I:Int) => String2Id("_" +String Int2String(I))
 endmodule
 
-module ID-SYMBOLIC [symbolic, kast]
-  imports ID-COMMON
-  imports STRING
+module ID-SYMBOLIC [symbolic, kast, private]
+  imports public ID-COMMON
+  imports private STRING
 
   syntax KItem  ::= "#parseIdToken"  "(" String "," String ")"  [function, hook(STRING.parseToken)]
   rule String2Id(S:String) => {#parseIdToken("Id", S)}:>Id
@@ -2036,8 +2047,8 @@ Provided here are implementations of two important primitives in K:
 
 ```k
 module K-EQUAL-SYNTAX
-  imports BOOL
-  imports BASIC-K
+  imports private BOOL
+  imports private BASIC-K
 
   syntax Bool ::= left:
                   K "==K" K           [function, functional, smt-hook(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), equalEqualK]
@@ -2050,7 +2061,7 @@ module K-EQUAL-SYNTAX
 endmodule
 
 module K-EQUAL-KORE [kore]
-  import BOOL
+  import private BOOL
   import K-EQUAL-SYNTAX
 
   rule K1:Bool ==K K2:Bool => K1 ==Bool K2
@@ -2058,7 +2069,7 @@ module K-EQUAL-KORE [kore]
 endmodule
 
 module K-EQUAL-KAST [kast]
-  import BOOL
+  import private BOOL
   import K-EQUAL-SYNTAX
 
   rule K1:Bool ==Bool K2:Bool => K1 ==K K2
@@ -2066,7 +2077,7 @@ module K-EQUAL-KAST [kast]
 endmodule
 
 module K-EQUAL
-  import BOOL
+  import private BOOL
   import K-EQUAL-SYNTAX
   import K-EQUAL-KAST
   import K-EQUAL-KORE
@@ -2084,7 +2095,7 @@ Meta operations
 
 Provided below are a few miscellaneous, mostly deprecated functions in K.
 It is not recommended to use any of them directly as they are largely
-unsupported in modern K. There are two exceptions:
+unsupported in modern K. There are a few exceptions:
 
 * `#getenv` - Returns the value of an environment variable
 * `#parseKORE` - Takes a String containing a K intermediate representation of
@@ -2092,6 +2103,9 @@ unsupported in modern K. There are two exceptions:
   This is NOT type-safe. The responsibility is on the user to ensure that the
   string they provide is a valid representation of a term of the sort *exactly*
   equal to the sort where the function appears.
+* `#kompiledDirectory` - Returns the path to the current compiled K definition
+  directory.
+* `#unparseKORE` = Takes a K term and converts it to a string.
 
 ```k
 module K-REFLECTION
@@ -2106,12 +2120,15 @@ module K-REFLECTION
 
   syntax K ::= #getenv(String) [function, impure, hook(KREFLECTION.getenv)]
 
+  syntax String ::= #kompiledDirectory() [function, hook(KREFLECTION.kompiledDir)]
+
   // meaningful only for the purposes of compilation to a binary, otherwise
   // undefined
   syntax List ::= #argv() [function, hook(KREFLECTION.argv)]
 
   // Takes as input a string and returns a K term
   syntax {Sort} Sort ::= #parseKORE(String) [function, hook(KREFLECTION.parseKORE)]
+  syntax {Sort} String ::= #unparseKORE(Sort) [function, hook(KREFLECTION.printKORE)]
   syntax {Sort} Sort ::= #parseKAST(String) [function, hook(KREFLECTION.parseKAST)]
   syntax IOError ::= "#noParse" "(" String ")" [klabel(#noParse), symbol]
 
@@ -2149,8 +2166,9 @@ corresponding to the `errno` returned by the underlying system call.
 
 ```k
 module K-IO
-  imports LIST
-  imports STRING
+  imports private LIST
+  imports private STRING
+  imports private INT
 ```
 
 ### I/O errors
@@ -2411,6 +2429,9 @@ tutorial.
 
 ```k
   syntax Stream ::= #buffer(K)
+                  | #istream(Int)
+                  | #parseInput(String, String)
+                  | #ostream(Int)
 
 endmodule
 
@@ -2423,9 +2444,9 @@ endmodule
 module STDIN-STREAM
   imports K-IO
   imports K-REFLECTION
-
-  syntax Stream ::= #istream(Int)
-  syntax Stream ::= #parseInput(String, String)
+  imports LIST
+  imports INT
+  imports BOOL
 
   configuration <stdin> ListItem(#buffer($STDIN:String)) ListItem($IO:String) ListItem(#istream(#stdin)) </stdin>
 
@@ -2518,8 +2539,8 @@ endmodule
 
 module STDOUT-STREAM
   imports K-IO
-
-  syntax Stream ::= #ostream(Int)
+  imports LIST
+  imports STRING
 
   configuration <stdout> ListItem(#ostream(#stdout)) ListItem($IO:String) ListItem(#buffer("")) </stdout>
 //configuration <stderr> ListItem(#ostream(#stderr)) ListItem($IO:String) ListItem(#buffer("")) </stderr>
@@ -2614,7 +2635,8 @@ endmodule
 
 module MINT
   imports MINT-SYNTAX
-  imports INT
+  imports private INT
+  imports private BOOL
 ```
 
 ### Bitwidth of MInt
@@ -2802,7 +2824,7 @@ definition. This includes the following basic strategy constructs:
 module STRATEGY
     imports ML-SYNTAX
     imports KVARIABLE-SYNTAX
-    imports K-EQUAL
+    imports private K-EQUAL
 
     syntax #RuleTag ::= #KVariable
 

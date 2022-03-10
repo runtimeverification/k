@@ -8,6 +8,7 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import scala.Option;
@@ -36,17 +37,19 @@ public class ProofDefinitionBuilder {
     private final Backend backend;
     private final Kompile kompile;
     private final FileUtil files;
+    private final Stopwatch sw;
     @Inject(optional = true)
     @Named("extraConcreteRuleLabels")
     private List<String> extraConcreteRuleLabels = null;
 
     @Inject
     public ProofDefinitionBuilder(CompiledDefinition compiledDefinition, Backend backend, Kompile kompile,
-                                  FileUtil files) {
+                                  FileUtil files, Stopwatch sw) {
         this.compiledDefinition = compiledDefinition;
         this.backend = backend;
         this.kompile = kompile;
         this.files = files;
+        this.sw = sw;
     }
 
     /**
@@ -67,7 +70,7 @@ public class ProofDefinitionBuilder {
         File absSpecFile = files.resolveWorkingDirectory(specFile).getAbsoluteFile();
 
         Set<Module> modules = kompile.parseModules(compiledDefinition, defModuleNameUpdated, specModuleNameUpdated, absSpecFile,
-                backend.excludedModuleTags(), readOnlyCache);
+                backend.excludedModuleTags(), readOnlyCache, false);
         Map<String, Module> modulesMap = modules.stream().collect(Collectors.toMap(Module::name, m -> m));
         Definition parsedDefinition = compiledDefinition.getParsedDefinition();
         Module specModule = getModule(specModuleNameUpdated, modulesMap, parsedDefinition);
@@ -81,7 +84,7 @@ public class ProofDefinitionBuilder {
         compiledExtendedDef = backend.proofDefinitionNonCachedSteps(extraConcreteRuleLabels).apply(compiledExtendedDef);
 
         specModule = backend.specificationSteps(compiledDefinition.kompiledDefinition).apply(specModule);
-
+        sw.printIntermediate("Apply prover steps");
         return Tuple2.apply(compiledExtendedDef, specModule);
     }
 

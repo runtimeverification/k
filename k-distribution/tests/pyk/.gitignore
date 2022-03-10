@@ -1,5 +1,5 @@
-/kast-tests/*.out
-/kast-tests/*.gen
-/llvm
-/haskell
-/kpyk-tests/*.coverage
+/*.out
+/**/*.debug-log
+/definitions
+/specs
+/import-graph.sorted

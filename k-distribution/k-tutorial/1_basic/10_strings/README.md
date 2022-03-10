@@ -18,18 +18,15 @@ supported:
 
 | Escape Sequence | Meaning                                                   |
 | --------------- | --------------------------------------------------------- |
-| \"              | The literal character "                                   |
-| \\              | The literal character \                                   |
-| \n              | The newline character (ASCII code 0x0a)                   |
-| \r              | The carriage return character (ASCII code 0x0d)           |
-| \t              | The tab character (ASCII code 0x09)                       |
-| \f              | The form feed character (ASCII code 0x0c)                 |
-| \x00            | \x followed by 2 hexadecimal digits indicates a code point
-                    between 0x00 and 0xFF                                     |
-| \u0000          | \u followed by 4 hexadecimal digits indicates a code point
-                    between 0x0000 and 0xFFFF                                 |
-| \U00000000      | \U followed by 8 hexadecimal digits indicates a code point
-                    between 0x0000 and 0x10FFFF                               |
+| `\"`            | The literal character "                                   |
+| `\\`            | The literal character \                                   |
+| `\n`            | The newline character (ASCII code 0x0a)                   |
+| `\r`            | The carriage return character (ASCII code 0x0d)           |
+| `\t`            | The tab character (ASCII code 0x09)                       |
+| `\f`            | The form feed character (ASCII code 0x0c)                 |
+| `\x00`          | \x followed by 2 hexadecimal digits indicates a code point between 0x00 and 0xFF |
+| `\u0000`        | \u followed by 4 hexadecimal digits indicates a code point between 0x0000 and 0xFFFF |
+| `\U00000000`    | \U followed by 8 hexadecimal digits indicates a code point between 0x000000 and 0x10FFFF |
 
 Please note that as of the current moment, K's unicode support is not fully
 complete, so you may run into errors using code points greater than 0xff.
@@ -84,8 +81,8 @@ The return value is the length of the string in **code points**.
 ### Substring computation
 
 The function to compute the substring of a string is `substrString`. It
-takes two string indices, startin from 0, and returns the substring within the
-range [start..end). It is only defined if `end => start`, `start >= 0`, and
+takes two string indices, starting from 0, and returns the substring within the
+range [start..end). It is only defined if `end >= start`, `start >= 0`, and
 `end <= length of string`. Here, for example, we return the first 5 characters
 of a string:
 
@@ -105,8 +102,9 @@ substrString(S, 3, lengthString(S))
 sentences, each ending in a period), and constructs a new (nonsense) sentence
 composed of the first word of each sentence, followed by a period. Do not
 worry about capitalization or periods within the sentence which do not end the
-sentence (e.g. "Dr."). For more information about the functions over strings
-required to implement such a function, refer to `domains.md`.
+sentence (e.g. "Dr."). You can assume that all whitespace within the paragraph
+are spaces. For more information about the functions over strings required to
+implement such a function, refer to `domains.md`.
 
 ## Next lesson
 

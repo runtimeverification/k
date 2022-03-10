@@ -11,6 +11,7 @@
 11
 ```{.k .x}
 module MARKDOWNERRORLOCATION
+  imports INT
 ```
 
 ``` { not used

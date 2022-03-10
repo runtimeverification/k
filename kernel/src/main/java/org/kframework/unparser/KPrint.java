@@ -5,7 +5,7 @@ import com.davekoelle.AlphanumComparator;
 import com.google.inject.Inject;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.HashMultiset;
-import jline.internal.Nullable;
+import javax.annotation.Nullable;
 import org.kframework.attributes.Att;
 import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.builtin.KLabels;
@@ -71,12 +71,6 @@ public class KPrint {
     public KPrint() {
         this(new KExceptionManager(new GlobalOptions()), FileUtil.testFileUtil(), new TTYInfo(false, false, false),
                 new PrintOptions(), null, new KompileOptions());
-    }
-
-    public KPrint(CompiledDefinition compiledDefinition) {
-        this(new KExceptionManager(compiledDefinition.kompileOptions.global), FileUtil.testFileUtil(),
-                new TTYInfo(false, false, false), new PrintOptions(), compiledDefinition,
-                compiledDefinition.kompileOptions);
     }
 
     @Inject

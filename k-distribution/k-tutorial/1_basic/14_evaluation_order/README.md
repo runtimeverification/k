@@ -15,7 +15,7 @@ of the expression is a value.
 
 However, K has built-in support for deciding when to heat and when to cool.
 This support comes in the form of the rule attributes `heat` and `cool` as
-well as the builtin function `isKResult`.
+well as the specially named function `isKResult`.
 
 Consider the following definition, which is equivalent to `LESSON-13-C`
 (`lesson-14-a.k`):
@@ -64,14 +64,14 @@ endmodule
 We have introduced three major changes to this definition. First, we have
 removed the `Val` sort. We replace it instead with a function `isKResult`.
 The function in question must have the same signature and attributes as seen in
-this example. It ought to return true whenever a term should not be heated
-(because it is a value) and false when it should be heated (because it is not
+this example. It ought to return `true` whenever a term should not be heated
+(because it is a value) and `false` when it should be heated (because it is not
 a value). We thus also insert `isKResult` calls in the side condition of two
 of the heating rules, where the `Val` sort was previously used.
 
 Second, we have removed the rule priorities on the heating rules and the use of
 the `Val` sort on the cooling rules, and replaced them with the `heat` and
-`cool` attributes. These attribute instruct the compiler that these rules are
+`cool` attributes. These attributes instruct the compiler that these rules are
 heating and cooling rules, and thus should implicitly apply only when certain
 terms on the LHS either are or are not a `KResult` (i.e., `isKResult` returns
 `true` versus `false`).
@@ -222,7 +222,7 @@ Finally, note that there are a few minor syntactic conveniences provided by the
 exactly like `<k> HERE ...</k>`, you can omit both the `context alias` sentence
 from the definition, and the name from the `seqstrict` attribute.
 
-Second, if the numbered list of offsets contains every nonterminal in the
+Second, if the numbered list of offsets contains every non-terminal in the
 production, it can be omitted from the attribute value.
 
 Thus, we can finally produce the idiomatic K definition for this example
@@ -261,18 +261,18 @@ subtraction.
 
 ## Nondeterministic evaluation order with the `strict` attribute
 
-Thus far, we have focused entirely on determinstic evaluation order. However,
+Thus far, we have focused entirely on deterministic evaluation order. However,
 not all languages are deterministic in the order they evaluate expressions.
 For example, in C, the expression `a() + b() + c()` is guaranteed to parse
 to `(a() + b()) + c()`, but it is not guaranteed that `a` will be called before
-`b` before `c`. In fact, this evaluation order is nondeterministic.
+`b` before `c`. In fact, this evaluation order is non-deterministic.
 
-We can express nondeterministic evaluation orders with the `strict` attribute.
+We can express non-deterministic evaluation orders with the `strict` attribute.
 Its behavior is identical to the `seqstrict` attribute, except that step 3 in
 the above list (with the side condition automatically added) does not take
-place. In other words, if I wrote `syntax Exp ::= Exp "+" Exp [strict]` instead
-of `syntax Exp ::= Exp "+" Exp [seqstrict]`, it would generate the following
-two contexts instead of the ones found in `LESSON-14-B`:
+place. In other words, if we wrote `syntax Exp ::= Exp "+" Exp [strict]`
+instead of `syntax Exp ::= Exp "+" Exp [seqstrict]`, it would generate the
+following two contexts instead of the ones found in `LESSON-14-B`:
 
 ```
   context <k> _:Exp + HOLE:Exp ...</k>
@@ -286,7 +286,7 @@ applies first is non-deterministic, and as we saw in Lesson 1.13, we can
 
 ## Exercises
 
-1. Add integer division to `LESSON-14-C`. Make division and addition `strict`
+1. Add integer division to `LESSON-14-D`. Make division and addition `strict`
 instead of `seqstrict`, and write a rule evaluating integer division with a
 side condition that the denominator is non-zero. Run `krun --search` on the
 program `1 / 0 + 2 / 1` and observe all possible outputs of the program. How
@@ -295,3 +295,8 @@ many are there total, and why?
 2. Modify your solution from lesson 1.11 problem 2 to remove the `eval`
 function and instead evaluate expressions from left to right using the
 `seqstrict` attribute.
+
+## Next lesson
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.15: Configuration Declarations and Cell Nesting](../15_configurations/README.md).

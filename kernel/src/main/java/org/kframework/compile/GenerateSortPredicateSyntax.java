@@ -35,7 +35,7 @@ public class GenerateSortPredicateSyntax {
     public Set<Sentence> gen(Module mod, Sort sort) {
         Production prod = Production(KLabel("is" + sort.toString()), Sorts.Bool(),
                 Seq(Terminal("is" + sort.toString()), Terminal("("), NonTerminal(Sorts.K()), Terminal(")")),
-                Att().add(Att.FUNCTION()).add(Att.PREDICATE(), Sort.class, sort));
+                Att().add(Att.FUNCTION()).add(Att.FUNCTIONAL()).add(Att.PREDICATE(), Sort.class, sort));
         if (!mod.productions().contains(prod))
             return Collections.singleton(prod);
         return Collections.emptySet();

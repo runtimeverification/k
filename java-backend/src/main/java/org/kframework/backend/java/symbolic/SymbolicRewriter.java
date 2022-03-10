@@ -661,7 +661,7 @@ public class SymbolicRewriter {
             System.err.println("\nTarget term\n=====================\n");
             printTermAndConstraint(targetTerm, prettyTarget, initialTerm);
         }
-        int branchingRemaining = global.javaExecutionOptions.branchingAllowed;
+        int branchingRemaining = global.kproveOptions.branchingAllowed;
         boolean nextStepLogEnabled = false;
         boolean originalLog = global.javaExecutionOptions.log;
         prevStats = new TimeMemoryEntry(false);

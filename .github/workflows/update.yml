@@ -18,10 +18,12 @@ jobs:
           submodules: recursive
 
       - name: 'Install Nix'
-        uses: cachix/install-nix-action@v12
+        uses: cachix/install-nix-action@v14.1
+        with:
+          install_url: "https://releases.nixos.org/nix/nix-2.3.16/install"
 
       - name: 'Install Cachix'
-        uses: cachix/cachix-action@v8
+        uses: cachix/cachix-action@v10
         with:
           name: runtimeverification
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
@@ -38,7 +40,7 @@ jobs:
           git config user.email github-actions@github.com
           if [ -n "$(git status --porcelain $file_pattern)" ]; then
             if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
-              echo "::error :: The Maven dependencies changed, so the Nix lock files need to be updated. Please run ./nix/update-maven.sh to update the lock files, or move this branch to the kframework/k repository."
+              echo "::error :: The Maven dependencies changed, so the Nix lock files need to be updated. Please run ./nix/update-maven.sh to update the lock files, or move this branch to the runtimeverification/k repository."
               git diff
               exit 1
             elif [[ $GITHUB_EVENT_NAME == 'push' ]]; then

@@ -1,3 +1,4 @@
 /k-distribution/include/kframework/builtin/* @dwightguth
-/pending-documentation.md @dwightguth
+/USER_MANUAL.md @dwightguth
 /Jenkinsfile @kframework/admin
+/.github/workflows/* @kframework/admin

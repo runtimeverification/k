@@ -71,7 +71,7 @@ module LESSON-05-D-1
   syntax Boolean ::= "not" Boolean [function]
 endmodule
 
-module LESSON-05-D-2
+module LESSON-05-D
   imports LESSON-05-D-1
 
   rule not true => false
@@ -79,21 +79,21 @@ module LESSON-05-D-2
 endmodule
 ```
 
-If we assume that module `LESSON-05-D-2` is the main semantics module of the
-definition, then this K definition is equivalent to the definition expressed
-by the single module `LESSON-05-C`. Essentially, by importing a module, we
-include all of the sentences in the module being imported into the module that
-we import from. There are a few minor differences between importing a module
-and simply including its sentences in another module directly, but we will
-cover these differences later. Essentially, you can think of modules as
-a way of conceptually grouping sentences in a larger K definition.
+This K definition is equivalent to the definition expressed by the single module
+`LESSON-05-C`. Essentially, by importing a module, we include all of the
+sentences in the module being imported into the module that we import from.
+There are a few minor differences between importing a module and simply
+including its sentences in another module directly, but we will cover these
+differences later. Essentially, you can think of modules as a way of
+conceptually grouping sentences in a larger K definition.
 
 ### Exercise
 
 Modify `lesson-05-d.k` to include four modules: one containing the syntax, two
-with one rule each that imports the first module, and one module containing
-no sentences that imports the second and third module. Check to make sure the
-definition still compiles and that you can still evaluate the `not` function.
+with one rule each that imports the first module, and a final module
+`LESSON-05-D` containing no sentences that imports the second and third module.
+Check to make sure the definition still compiles and that you can still evaluate
+the `not` function.
 
 ## Parsing in the presence of multiple modules
 
@@ -225,16 +225,17 @@ relative, a matching file is looked for within all of the
 directories include the current working directory, followed by the
 `include/kframework/builtin` directory within your installation of K. You can
 also pass one or more directories to `kompile` via the `-I` command line flag,
-in which case these directories are prepended on the beginning of the list.
+in which case these directories are prepended to the beginning of the list.
 
 ## Exercises
 
-1. Take the solution to lesson 1.4, problem 1 which included the explicit
+1. Take the solution to lesson 1.4, problem 2 which included the explicit
 priority and associativity declarations, and modify the definition so that
 the syntax of integers and brackets is in one module, the syntax of addition,
 subtraction, and unary negation is in another module, and the syntax of
 multiplication and division is in a third module. Make sure you can still parse
-the same set of expressions as before.
+the same set of expressions as before. Place priority declarations in the main
+module.
 
 2. Modify `lesson-02-d.k` from lesson 1.2 so that the rules and syntax are in
 separate modules in separate files.

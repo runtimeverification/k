@@ -91,7 +91,7 @@ elements, because the `.Ints` is implicitly added after `I2`.
 
 ### Exercise
 
-Write a funtion `concat` which takes a list of `String` and concatenates them
+Write a function `concat` which takes a list of `String` and concatenates them
 all together. Do not worry if the function is O(n^2).
 
 ## Parsing Syntactic Lists in Programs
@@ -119,7 +119,7 @@ of function calls in C very easily (`lesson-12-e.k`):
 
 ```k
 module LESSON-12-E
-  syntax Id ::= "[a-zA-Z_][a-zA-Z0-9_]*" [token]
+  syntax Id ::= r"[a-zA-Z_][a-zA-Z0-9_]*" [token]
   syntax Exp ::= Id | Exp "(" Exps ")"
   syntax Exps ::= List{Exp,","}
 endmodule
@@ -143,7 +143,7 @@ so (`lesson-12-f.k`):
 
 ```k
 module LESSON-12-F
-  syntax Id ::= "[a-zA-Z_][a-zA-Z0-9_]*" [token]
+  syntax Id ::= r"[a-zA-Z_][a-zA-Z0-9_]*" [token]
   syntax Exp ::= Id
 
   syntax EnumSpecifier ::= "enum" Id "{" Ids "}"
@@ -157,13 +157,13 @@ ought to be a syntax error.
 For this reason, we introduce the additional `NeList{}` construct. The syntax
 is identical to `List{}`, except with `NeList` instead of `List` before the
 curly braces. When parsing rules, it behaves identically to the `List{}`
-construct. However, when parsing inputs to `krun`, the above grammar (if we
-replaced `Ids` with an `NeList{}`, would become equivalent to the following
-(`lesson-12-g.k`):
+construct. However, when parsing inputs to `krun`, the above grammar, if we
+replaced `syntax Ids ::= List{Id,","}` with `syntax Ids ::= NeList{Id,","}`,
+would become equivalent to the following (`lesson-12-g.k`):
 
 ```k
 module LESSON-12-G
-  syntax Id ::= "[a-zA-Z_][a-zA-Z0-9_]*" [token]
+  syntax Id ::= r"[a-zA-Z_][a-zA-Z0-9_]*" [token]
   syntax Exp ::= Id
 
   syntax EnumSpecifier ::= "enum" Id "{" Ids "}"

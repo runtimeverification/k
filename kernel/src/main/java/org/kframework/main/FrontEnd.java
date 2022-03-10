@@ -17,7 +17,7 @@ public abstract class FrontEnd {
     protected abstract int run();
 
     private final KExceptionManager kem;
-    private final GlobalOptions globalOptions;
+    protected final GlobalOptions globalOptions;
     private final String usage;
     private final JarInfo jarInfo;
     private final Provider<FileUtil> files;

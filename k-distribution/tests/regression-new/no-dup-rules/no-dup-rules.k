@@ -4,6 +4,8 @@ module NO-DUP-RULES-INIT
     imports STRING-BUFFER
     imports MAP
     imports COLLECTIONS
+    imports INT
+    imports BOOL
 
     syntax KResult ::= Int
 

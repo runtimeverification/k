@@ -30,6 +30,9 @@ module IMP
   imports BOOL
   imports INT
   imports MAP
+  imports SET
+  imports K-EQUAL
+
   syntax KResult ::= Int | Bool
 
   configuration <T color="yellow">

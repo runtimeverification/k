@@ -22,22 +22,22 @@ the command line, as we do not provide GUI tools at this time.
 _K-based tool users_ should:
 
 1.  Consult their tool documentation for build/installation instructions.
-2.  If needed, download a [packaged release](https://github.com/kframework/k/releases/)
+2.  If needed, download a [packaged release](https://github.com/runtimeverification/k/releases/)
     of the K Framework as part of their tool setup process.
 
 If you are interested in quickly trying out the K Framework without building
 from source, please see our
-[packaged release installation guide](https://github.com/kframework/k/blob/master/k-distribution/INSTALL.md).
+[packaged release installation guide](https://github.com/runtimeverification/k/blob/master/k-distribution/INSTALL.md).
 
 The rest of this file assumes you intend to build and install the K Framework
 from source.
 
 Note that the K Framework can only be built on (x86-64) Linux-like systems,
-e.g., this also includies macOS/brew (x86-64) as well as the Windows Subsystem
+e.g., this also includes macOS/brew (x86-64) as well as the Windows Subsystem
 for Linux.
 All 32-bit systems are **not supported**.
 See the
-[installation notes](https://github.com/kframework/k/blob/master/k-distribution/INSTALL.md)
+[installation notes](https://github.com/runtimeverification/k/blob/master/k-distribution/INSTALL.md)
 for details about supported configurations and system setup.
 
 ## Contents
@@ -60,20 +60,28 @@ must first be installed.
 
 On Ubuntu Linux:
 
-```
+```shell
 git submodule update --init --recursive
-sudo apt-get install build-essential m4 openjdk-8-jdk libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 cmake gcc clang-8 lld-8 llvm-8-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
+sudo apt-get install build-essential m4 openjdk-11-jdk libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 cmake gcc clang-10 lld-10 llvm-10-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
 curl -sSL https://get.haskellstack.org/ | sh
 ```
 
+Note: we require version 10 or greater for clang, lld, and llvm-tools.
+
 On Arch Linux:
 
-```
+```shell
 git submodule update --init --recursive
 sudo pacman -S git maven jdk-openjdk cmake boost libyaml jemalloc clang llvm lld zlib gmp mpfr z3 curl stack base-devel base python
 ```
 
 If you install this list of dependencies, continue directly to the [Build and Install Guide](#build-and-install-guide).
+
+On macOS using [Homebrew](https://brew.sh/):
+```shell
+git submodule update --init --recursive
+brew install bison boost cmake flex gcc gmp openjdk jemalloc libyaml llvm make maven mpfr pkg-config python stack zlib z3
+```
 
 ## The Long Version
 
@@ -85,10 +93,10 @@ The following dependencies are needed either at build time or runtime:
 *   [flex](https://github.com/westes/flex)
 *   [gcc](https://gcc.gnu.org/)
 *   [gmp](https://gmplib.org/)
-*   [jdk](https://openjdk.java.net/) (version 8u45 or greater)
+*   [jdk](https://openjdk.java.net/) (version 11 or greater)
 *   [libjemalloc](https://github.com/jemalloc/jemalloc)
 *   [libyaml](https://pyyaml.org/wiki/LibYAML)
-*   [llvm](https://llvm.org/) (on some distributions, the utilities below are also needed and packaged separately)
+*   [llvm](https://llvm.org/) (We require version 10 or greater for clang, lld, and llvm-tools. On some distributions, the utilities below are also needed and packaged separately.)
     * [clang](http://clang.llvm.org/)
     * [lld](https://lld.llvm.org/)
 *   [make](https://www.gnu.org/software/make/)
@@ -98,13 +106,11 @@ The following dependencies are needed either at build time or runtime:
 *   [python](https://www.python.org)
 *   [stack](https://docs.haskellstack.org/en/stable/README/)
 *   [zlib](https://www.zlib.net/)
-*   [z3](https://github.com/Z3Prover/z3) (on some distributions libz3 is also needed and packaged separately)
-    Note that you need at least version 4.6 of Z3, and we recommend at least version 4.8.
-
-The following dependencies are optional and are only needed when building
-the OCaml backend (**not recommended**):
-
-*   [opam](https://opam.ocaml.org/doc/Install.html)
+*   [z3](https://github.com/Z3Prover/z3) (on some distributions libz3 is also
+    needed and packaged separately) Note that you need version 4.8.11 of Z3,
+    which may require you to build and install from source if your package
+    manager does not supply it. Other versions are known to have bugs and
+    performance regressions likely to cause issues in the K test suite.
 
 Typically, these can all be installed from your package manager.
 On some system configurations, special installation steps or post-installation
@@ -113,10 +119,10 @@ See the notes below.
 
 ### Installation Notes
 
-1.  Java Development Kit (required JDK8 version 8u45 or higher)
+1.  Java Development Kit (required JDK11 or higher)
 
     *   Linux: Download from package manager
-        (e.g. `sudo apt-get install openjdk-8-jdk`).
+        (e.g. `sudo apt-get install openjdk-11-jdk`).
 
     *   macOS/brew: Download from package manager
         (e.g. `brew install java`).
@@ -130,7 +136,14 @@ See the notes below.
         explicitly make it available for command line usage. See the results
         of the `brew info llvm` command for more information on how to do this.
 
-3.  Apache Maven
+3.  Flex / Bison
+
+    *   macOS/brew: The versions of these packages supplied by the OS are too
+        old, and are not compatible with the K build. You must ensure that the
+        Homebrew-installed versions are first on your `PATH` when building K
+        (i.e. `which flex` is **not** `/usr/bin/flex`).
+
+4.  Apache Maven
 
     *   Linux: Download from package manager
         (e.g. `sudo apt-get install maven`).
@@ -146,7 +159,7 @@ See the notes below.
     This will provide the information about the JDK Maven is using, in case
     it is the wrong one.
 
-4.   Haskell Stack
+5.   Haskell Stack
 
      To install, go to <https://docs.haskellstack.org/en/stable/README/> and
      follow the instructions.
@@ -167,22 +180,36 @@ You are also encouraged to set the environment variable `MAVEN_OPTS` to
 `-XX:+TieredCompilation`, which will significantly speed up the incremental
 build process.
 
-### Optional OCaml Backend Setup
+### Apple Silicon Support
 
-**If** you want to use the OCaml backend (not recommended), then after running
-`mvn package` for the first time, setup the OCaml dependencies by running
-the following command:
-
-```sh
-k-distribution/target/release/k/bin/k-configure-opam
-eval $(opam config env)
-```
-
-This performs first-time setup of the OCaml backend. You may optionally set
-`OPAMROOT` before running this command to specify where any OCaml dependencies
-should be installed.
+K currently offers partial support for Apple Silicon; the toolchain has been
+tested and works on ARM macOS, but is not yet part of our CI/CI pipeline. To
+build K on an Apple Silicon machine, ensure the following steps are followed in
+addition to the usual Maven build setup:
+* Ensure that Homebrew-installed versions of `llvm-config`, `flex` and `bison`
+  are on your `PATH` ahead of any macOS-supplied versions.
+  * [`direnv`](https://direnv.net/) offers a convenient way to automate this. To
+    do so:
+    ```shell
+    brew install direnv
+    cp macos-envrc .envrc
+    direnv allow
+    ```
+* Pass `-Dstack.extra-opts='--compiler ghc-8.10.7 --system-ghc'` as an
+  additional argument to `mvn package` when building the toolchain.
+  * This is a workaround for `stack` and `ghc` not yet properly supporting ARM
+    macOS; the underlying problem is likely to be fixed at some point in the
+    future.
+  * See [the documentation](https://github.com/kframework/kore#apple-silicon)
+    and [associated PR](https://github.com/kframework/kore/pull/2893) for more
+    details.
 
 ## Building with Nix
+
+By default, Nix will build the project and its transitive dependencies from
+source, which can take up to an hour. We recommend setting up
+[the binary cache](https://app.cachix.org/cache/kore) to speed up the build
+process significantly.
 
 To build the K Framework itself, run:
 
@@ -259,7 +286,7 @@ in running the unit tests and checkstyle goals, run `mvn verify -DskipKTest` to
 skip the lengthy `ktest` execution.
 
 # Changing the KORE Data Structures
-If you need to change the KORE data structures (unless you are a K core developer, you probably do not), see [Guide-for-changing-the-KORE-data-structures](https://github.com/kframework/k/wiki/Guide-for-changing-the-KORE-data-structures).
+If you need to change the KORE data structures (unless you are a K core developer, you probably do not), see [Guide-for-changing-the-KORE-data-structures](https://github.com/runtimeverification/k/wiki/Guide-for-changing-the-KORE-data-structures).
 
 # Building the Final Release Directory/Archives
 Call `mvn install` in the base directory. This will attach an artifact to the local
@@ -295,8 +322,8 @@ Common build-time error messages:
       re-syncing it with the pom.xml.
 
 -   `[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.1:compile
-     (default-compile) on project k-core: Fatal error compiling: invalid target release: 1.8 -> [Help 1]`
-    + You either do not have Java 8 installed, or `$JAVA_HOME` does not point to a Java 8 JDK.
+     (default-compile) on project k-core: Fatal error compiling: invalid target release: 11 -> [Help 1]`
+    + You either do not have Java 11 installed, or `$JAVA_HOME` does not point to a Java 11 JDK.
 
 -   `[ERROR] Failed to execute goal org.apache.maven.plugins:maven-antrun-plugin:1.7:run
      (build-haskell) on project haskell-backend: An Ant BuildException has occured: exec returned: 1`
@@ -311,7 +338,7 @@ Common build-time error messages:
       then you have encountered a known issue with the latest versions of GHC. In this
       case, please either:
       -   upgrade to [WSL version 2](https://docs.microsoft.com/en-us/windows/wsl/install-win10),
-      -   install a [packaged release for your WSL version 1 distribution](https://github.com/kframework/k/releases/),
+      -   install a [packaged release for your WSL version 1 distribution](https://github.com/runtimeverification/k/releases/),
       -   switch to a supported system configuration (e.g. Linux on a virtual machine), or
       -   if you do not need the symbolic execution capabilities of the K Framework, disable them
           at build time (and remove the GHC dependency) by doing: `mvn package -Dhaskell.backend.skip`.
