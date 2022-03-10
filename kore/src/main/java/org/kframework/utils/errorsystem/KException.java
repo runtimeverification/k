@@ -1,12 +1,16 @@
 // Copyright (c) 2012-2019 K Team. All Rights Reserved.
 package org.kframework.utils.errorsystem;
 
+import org.apache.commons.lang3.StringUtils;
 import org.kframework.attributes.HasLocation;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class KException implements Serializable, HasLocation {
     protected final ExceptionType type;
@@ -15,6 +19,7 @@ public class KException implements Serializable, HasLocation {
     private final Location location;
     private final String message;
     private final Throwable exception;
+    private final String sourceText;
     private StringBuilder trace = new StringBuilder();
 
     private static final Map<KExceptionGroup, String> labels;
@@ -59,6 +64,7 @@ public class KException implements Serializable, HasLocation {
         this.source = source;
         this.location = location;
         this.exception = exception;
+        this.sourceText = getSourceLineText();
     }
 
     @Override
@@ -125,7 +131,8 @@ public class KException implements Serializable, HasLocation {
                 + (exception == null ? "" : " (" + exception.getClass().getSimpleName() + ": " + exception.getMessage() + ")")
                 + trace.toString() + traceTail()
                 + (source == null ? "" : "\n\t" + source)
-                + (location == null ? "" : "\n\t" + location);
+                + (location == null ? "" : "\n\t" + location)
+                + (sourceText == null ? "" : sourceText);
     }
 
     public String getMessage() {
@@ -170,6 +177,92 @@ public class KException implements Serializable, HasLocation {
         StringBuilder sb = new StringBuilder();
         new Formatter(sb).format(format, args);
         addTraceFrame(sb);
+    }
+
+    private String getSourceLineText() {
+        try {
+            String sourceLineText;
+            int errorLineCount = location.endLine() - location.startLine() + 1;
+
+            if (errorLineCount == 1) {
+                sourceLineText = getSourceLine();
+            } else if (errorLineCount > 1) {
+                // generate line info for multiple lines
+                sourceLineText = getSourceLine(errorLineCount);
+            } else {
+                sourceLineText = null;
+            }
+            return sourceLineText;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String getSourceLine() throws java.io.IOException {
+        int lineNumberPadding = String.valueOf(location.startLine()).length();
+        StringBuilder sourceText = new StringBuilder();
+
+        sourceText.append("\n\t");
+        sourceText.append(String.valueOf(location.startLine()) + " |\t");
+        Stream lines = Files.lines(Paths.get(getSource().source()));
+        sourceText.append((String) lines.skip(location.startLine() - 1).findFirst().get());
+
+        /* generate a line below the source file that underlines the location of the error */
+
+        sourceText.append("\n\t" + StringUtils.repeat(' ', lineNumberPadding) + " .\t");
+        sourceText.append(StringUtils.repeat(' ', location.startColumn() - 1));
+        sourceText.append('^');
+        sourceText.append(StringUtils.repeat('~', location.endColumn() - location.startColumn() - 1));
+
+        return sourceText.toString();
+    }
+
+    private String getSourceLine(int errorLineCount)  throws java.io.IOException {
+
+        /* The line number padding is based on the endline because this is the largest number of padding needed */
+
+        int lineNumberPadding = String.valueOf(location.endLine()).length();
+        StringBuilder sourceText = new StringBuilder();
+
+        /* generate a line above the source file that indicates the location of the error */
+
+        sourceText.append("\n\t" + StringUtils.repeat(' ', lineNumberPadding) + " .\t");
+        sourceText.append(StringUtils.repeat(' ', location.startColumn() - 1));
+        sourceText.append('v');
+        sourceText.append(StringUtils.repeat('~', location.endColumn() - location.startColumn() - 1));
+
+        sourceText.append("\n\t");
+        sourceText.append(String.valueOf(location.startLine()) + " |\t");
+        Stream lines = Files.lines(Paths.get(getSource().source()));
+        sourceText.append((String) lines.skip(location.startLine() - 1).findFirst().get());
+
+        if (errorLineCount == 3) {
+            sourceText.append("\n\t");
+            sourceText.append(String.valueOf(location.startLine() + 1) + " |\t");
+            Stream secondline = Files.lines(Paths.get(getSource().source()));
+            sourceText.append((String) secondline.skip(location.startLine()).findFirst().get());
+        } else if (errorLineCount > 3) {
+            /*
+             * If the error message spans more than 3 lines, indicate this line with "...".
+             * For errors that span many lines, this is sufficient to get the point across.
+             */
+            sourceText.append("\n\t" + StringUtils.repeat(' ', lineNumberPadding) + " |\t\t...");
+        }
+
+        sourceText.append("\n\t");
+        sourceText.append(String.valueOf(location.endLine()) + " |\t");
+        String lastLine = (String)Files.lines(Paths.get(getSource().source())).skip(location.endLine() -1).findFirst().get();
+        int firstCharIndex = lastLine.indexOf(lastLine.trim());
+        sourceText.append(lastLine);
+
+        /* generate a line below the source file that underlines the location of the error */
+
+        sourceText.append("\n\t" + StringUtils.repeat(' ', lineNumberPadding) + " .\t");
+        sourceText.append(StringUtils.repeat(' ', firstCharIndex));
+        sourceText.append(StringUtils.repeat('~', location.endColumn() - firstCharIndex - 1));
+        sourceText.append('^');
+
+        return sourceText.toString();
     }
 
     public Source getSource() {
