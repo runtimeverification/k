@@ -269,20 +269,24 @@ public class RuleGrammarGenerator {
             }
         }
 
+        for (Production p : iterable(mod.productions()))
+            prods.addAll(new GenerateSortProjections(mod).gen(p).collect(Collectors.toSet()));
+
+        // instantiate parametric productions with concrete sorts for parsing
         List<Sort> allSorts = stream(mod.allSorts()).filter(
                 s -> (!isParserSort(s) || s.equals(Sorts.KItem()) || s.equals(Sorts.K()))).collect(Collectors.toList());
         for (SortHead sh : mutable(mod.definedInstantiations()).keySet()) {
             for (Sort s : mutable(mod.definedInstantiations().apply(sh))) {
+                // syntax MInt{K} ::= MInt{6}
                 Production p1 = Production(Option.empty(), Seq(), Sort(s.name(), Sorts.K()), Seq(NonTerminal(s)), Att());
                 prods.add(p1);
             }
         }
-
         for (Production p : iterable(mod.productions())) {
-            prods.addAll(new GenerateSortProjections(mod).gen(p).collect(Collectors.toSet()));
             if (p.params().nonEmpty()) {
                 if (p.params().contains(p.sort())) {
-                    // syntax {Param} Param ::= ...
+                    // syntax {P, R} P ::= P "+" R "-" Int
+                    // syntax        S ::= S "+" K "-" Int
                     for (Sort s : allSorts) {
                         List<Sort> instantiationMask = new ArrayList<>();
                         for (Sort param : mutable(p.params()))
@@ -295,7 +299,9 @@ public class RuleGrammarGenerator {
                         prods.add(p1);
                     }
                 } else if (!p.sort().params().isEmpty()) {
-                    // syntax {Width} MInt{Width} ::= ...
+                    // TODO: assuming sorts have only one parameter for now
+                    // syntax {W, X, Y} MInt{W} ::= MInt{W} "+" MInt{X} "-" Y "/" Int
+                    // syntax           MInt{6} ::= MInt{6} "+" MInt{K} "-" K "/" Int
                     Set<Sort> instantations = mutable(mod.definedInstantiations().apply(p.sort().head()));
                     for (Sort s : instantations) {
                         List<Sort> instantiationMask = new ArrayList<>();
@@ -309,7 +315,9 @@ public class RuleGrammarGenerator {
                         prods.add(p1);
                     }
                 } else if (p.isSyntacticSubsort()) {
-                    // syntax {Param} KItem ::= Param
+                    // a single production found in kast.md that handles the subsorting to the top sort
+                    // syntax {Sort} KItem ::= Sort
+                    // syntax        KItem ::= Int
                     for (Sort s : allSorts) {
                         if (!p.params().contains(p.sort()) && (s.equals(Sorts.KItem()) || s.equals(Sorts.K())))
                             continue;
@@ -320,7 +328,9 @@ public class RuleGrammarGenerator {
                         prods.add(p1);
                     }
                 } else {
-                    // no need to be specific when the return sort is concrete
+                    // the rest of the productions that return a concrete sort can accept any sort inside
+                    // syntax {P} Int ::= P "+" Int
+                    // syntax     Int ::= K "+" Int
                     List<Sort> instantiationMask = new ArrayList<>();
                     for (Sort param : mutable(p.params()))
                         instantiationMask.add(Sorts.K());
@@ -330,7 +340,6 @@ public class RuleGrammarGenerator {
                 }
             }
         }
-
         extensionProds.addAll(prods);
 
         Set<Sentence> recordProds = new HashSet<>();
