@@ -2,7 +2,6 @@
 package org.kframework.parser.inner.generator;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
-import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
@@ -24,13 +23,14 @@ import org.kframework.definition.Terminal;
 import org.kframework.definition.UidProvider;
 import org.kframework.definition.UserList;
 import org.kframework.kore.Sort;
+import org.kframework.kore.SortHead;
 import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
-import scala.collection.Seq;
 import scala.Option;
 import scala.Tuple3;
+import scala.collection.Seq;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
+import static org.kframework.definition.Constructors.Module;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
@@ -270,17 +271,22 @@ public class RuleGrammarGenerator {
         }
         long t2 = System.currentTimeMillis();
 
-        Module finalMod = mod;
-        List<Sort> allSorts = stream(mod.allSorts()).filter(s -> (!isParserSort(s) || s.equals(Sorts.KItem()) || s.equals(Sorts.K()))
-                        && !s.isNat()
-                        && !finalMod.definedInstantiations().contains(s.head())
-        ).collect(Collectors.toList());
-
+        List<Sort> allSorts = stream(mod.allSorts()).filter(
+                s -> (!isParserSort(s) || s.equals(Sorts.KItem()) || s.equals(Sorts.K()))).collect(Collectors.toList());
+        // TODO: add subsort productions: MInt{K} ::= MInt{6}
         Set<Production> tempProdsFast = new HashSet<>();
+        for (SortHead sh : mutable(mod.definedInstantiations()).keySet()) {
+            for (Sort s : mutable(mod.definedInstantiations().apply(sh))) {
+                Production p1 = Production(Option.empty(), Seq(), Sort(s.name(), Sorts.K()), Seq(NonTerminal(s)), Att());
+                tempProdsFast.add(p1);
+            }
+        }
+
         for (Production p : iterable(mod.productions())) {
             prods.addAll(new GenerateSortProjections(mod).gen(p).collect(Collectors.toSet()));
             if (p.params().nonEmpty()) {
                 if (p.params().contains(p.sort())) {
+                    // syntax {Param} Param ::= ...
                     for (Sort s : allSorts) {
                         List<Sort> instantiationMask = new ArrayList<>();
                         for (Sort param : mutable(p.params()))
@@ -292,7 +298,22 @@ public class RuleGrammarGenerator {
                         Production p1 = Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Att.ORIGINAL_PRD(), Production.class, p));
                         tempProdsFast.add(p1);
                     }
+                } else if (!p.sort().params().isEmpty()) {
+                    // syntax {Width} MInt{Width} ::= ...
+                    Set<Sort> instantations = mutable(mod.definedInstantiations().apply(p.sort().head()));
+                    for (Sort s : instantations) {
+                        List<Sort> instantiationMask = new ArrayList<>();
+                        for (Sort param : mutable(p.params()))
+                            if (param.equals(p.sort().params().apply(0)))
+                                instantiationMask.add(s.params().apply(0));
+                            else
+                                instantiationMask.add(Sorts.K());
+                        Production subst = p.substitute(immutable(instantiationMask));
+                        Production p1 = Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Att.ORIGINAL_PRD(), Production.class, p));
+                        tempProdsFast.add(p1);
+                    }
                 } else if (p.isSyntacticSubsort()) {
+                    // syntax {Param} KItem ::= Param
                     for (Sort s : allSorts) {
                         if (!p.params().contains(p.sort()) && (s.equals(Sorts.KItem()) || s.equals(Sorts.K())))
                             continue;
@@ -303,6 +324,7 @@ public class RuleGrammarGenerator {
                         tempProdsFast.add(p1);
                     }
                 } else {
+                    // no need to be specific when the return sort is concrete
                     List<Sort> instantiationMask = new ArrayList<>();
                     for (Sort param : mutable(p.params()))
                         instantiationMask.add(Sorts.K());
@@ -357,15 +379,17 @@ public class RuleGrammarGenerator {
                     }
                     if (!skip) {
                         Production p1 = Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Att.ORIGINAL_PRD(), Production.class, p));
-                        prods.add(p1);
                         tempProdsOld.add(p1);
                     }
                 }
             }
         }
         long t4 = System.currentTimeMillis();
-        //System.out.println("tempProds==: " + tempProdsFast.equals(tempProdsOld));
-        assert tempProdsFast.equals(tempProdsOld) : "Module: " + mod.name() + ":" + mod.att().get(Source.class);
+        prods.addAll(tempProdsOld);
+        Set<Production> oldMFast = tempProdsOld.stream().filter(x -> !tempProdsFast.contains(x)).collect(Collectors.toSet());
+        Set<Production> fastMold = tempProdsFast.stream().filter(x -> !tempProdsOld.contains(x)).collect(Collectors.toSet());
+        System.out.println("tempProds==: " + tempProdsFast.equals(tempProdsOld) + "  Module: " + mod.name() + ":" + mod.att().get(Source.class));
+        //assert tempProdsFast.equals(tempProdsOld) : "Module: " + mod.name() + ":" + mod.att().get(Source.class);
 
         extensionProds.addAll(prods);
 
@@ -546,7 +570,7 @@ public class RuleGrammarGenerator {
         Module disambM = new Module(mod.name() + "-DISAMB", Set(), immutable(disambProds), att);
         Module parseM = new Module(mod.name() + "-PARSER", Set(), immutable(parseProds), att);
         parseM.subsorts();
-        //System.out.format("GetGrammar: %s\n    %d %d %d %d %d = %d\n", mod.name(), t2-t1, t3-t2, t4-t3, t5-t4, System.currentTimeMillis()-t5, System.currentTimeMillis() - t1);
+        System.out.format("GetGrammar: %s\n    %d %d %d %d %d = %d\n", mod.name(), t2-t1, t3-t2, t4-t3, t5-t4, System.currentTimeMillis()-t5, System.currentTimeMillis() - t1);
         return Tuple3.apply(extensionM, disambM, parseM);
     }
 
