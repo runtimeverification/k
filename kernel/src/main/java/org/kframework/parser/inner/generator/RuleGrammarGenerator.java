@@ -535,28 +535,6 @@ public class RuleGrammarGenerator {
         }
     }
 
-    private static List<List<Sort>> makeAllSortTuples(int size, Module mod) {
-        List<List<Sort>> res = new ArrayList<>();
-        List<Sort> allSorts = stream(mod.allSorts()).filter(s -> !isParserSort(s) || s.equals(Sorts.KItem()) || s.equals(Sorts.K()) || s.isNat()).collect(Collectors.toList());
-        makeAllSortTuples(size, size, allSorts, res, new int[size]);
-        return res;
-    }
-
-    private static void makeAllSortTuples(int level, int size, List<Sort> sorts, List<List<Sort>> res, int[] indices) {
-        if (level == 0) {
-            List<Sort> tuple = new ArrayList<>();
-            for (int i = 0; i < indices.length; i++) {
-                tuple.add(sorts.get(indices[i]));
-            }
-            res.add(tuple);
-        } else {
-            for (int i = 0; i < sorts.size(); i++) {
-                indices[level-1] = i;
-                makeAllSortTuples(level-1, size, sorts, res, indices);
-            }
-        }
-    }
-
     private static Set<Sentence> makeCasts(Sort outerSort, Sort innerSort, Sort castSort, Sort labelSort) {
         Set<Sentence> prods = new HashSet<>();
         Att attrs1 = Att().add(Sort.class, castSort);
