@@ -1,0 +1,221 @@
+#!/usr/bin/env bash
+set -e
+set -o pipefail
+set -u
+
+export PATH="$(cd "$(dirname "$0")"; pwd):$PATH"
+
+# initialize flags
+ARGV=()
+dir=.
+filterSubst=true
+literal=false
+outputFile=-
+outputMode=pretty
+
+# setup temp files
+now=`date +"%Y-%m-%d-%H-%M-%S"`
+tempDir="$(mktemp -d .kore-print-${now}-XXXXXXXXXX)"
+tempFiles=("$tempDir")
+trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
+
+KORE_PRINT=$(basename "$0")
+KAST_UTIL="$(dirname "$0")/kast"
+
+ktool="${KORE_PRINT}"
+source "$(dirname "$0")/../lib/kframework/k-util.sh"
+
+print_usage () {
+cat <<HERE
+Usage: $KORE_PRINT <INPUT.kore> [-d DIR] [-o OUTPUT]
+Convert a KORE term into another format.
+
+Mandatory arguments to long options are mandatory for short options too.
+
+$KORE_PRINT expects exactly 1 positional argument. It must be a file and the
+contents of that file must contain a KORE pattern. By default, $KORE_PRINT will
+pretty print that term, but some customization is possible; see below.
+
+General arguments:
+
+$(k_util_usage)
+
+$KORE_PRINT arguments:
+
+      --color [on|off]     Enable/disable ANSI color codes. Overrides default,
+                           which is determined based on whether stdout is a
+                           terminal
+  -d, --directory DIR      Look for a kompiled directory ending in "-kompiled"
+                           under the directory DIR
+  -h, --help               Display this help and exit
+      --no-substitution-filtering  Don't filter conjuncts with anonymous
+                                   variables from substitution output
+  -o, --output MODE        Select output mode to use when unparsing. Valid
+                           values are pretty, program, kast, binary, json,
+                           latex, kore, and none
+      --output-file FILE   Print converted term to FILE
+      --save-temps         Do not delete temporary files when $KORE_PRINT
+                           terminates
+      --version            Print version of K
+      --                   Interpret all arguments following as positional
+                           arguments
+HERE
+}
+
+ORIG_ARGV=("$@")
+
+# parse options
+while [[ $# -gt 0 ]]
+do
+  arg="$1"
+  if $literal; then
+    ARGV+=("$1")
+  else
+    case "$arg" in
+      --color)
+      case "$2" in
+        on)
+        color=true
+        ;;
+
+        off)
+        color=false
+        ;;
+
+        *)
+        error 1 'Invalid value for --color. Should be "on" or "off".'
+        ;;
+      esac
+      shift
+      ;;
+
+      -d|--directory)
+      dir="$2"
+      shift
+      ;;
+
+      -h|--help)
+      print_usage
+      exit 0
+      ;;
+
+      --no-substitution-filtering)
+      filterSubst=false
+      ;;
+
+      -o|--output)
+      case "$2" in
+        pretty) ;;
+        program) ;;
+        kast) ;;
+        binary) ;;
+        json) ;;
+        latex) ;;
+        kore) ;;
+        none) ;;
+
+        *)
+        error 1 'Invalid value for --output. Should be one of "pretty", "program", "kast", "binary", "json", "latex", "kore", or "none".'
+        ;;
+      esac
+      outputMode="$2"
+      shift
+      ;;
+
+      --output-file)
+      outputFile="$2"
+      shift
+      ;;
+
+      --save-temps)
+      trap - INT TERM EXIT
+      ;;
+
+      --version)
+      kompile --version
+      exit 0
+      ;;
+
+      --)
+      literal=true
+      ;;
+
+      -)
+      ARGV+=("$1")
+      ;;
+
+      -*)
+      print_usage
+      exit 1
+      ;;
+
+      *)
+      ARGV+=("$1")
+      ;;
+    esac
+  fi
+  shift
+done
+
+if [ -z "${color+unset}" ]; then
+  if [[ "$outputFile" == "-" && -t 1 ]]; then
+    color=true
+  else
+    color=false
+  fi
+fi
+
+if [[ "${#ARGV[@]}" -ne 1 ]]; then
+  print_usage
+  error 1 'Must pass exactly one KORE file as a positional argument.'
+fi
+input_file="${ARGV[0]}"
+
+# Compute kompiled directory
+kompiledDir=
+hasKompiledDir=false
+for file in "$dir"/*-kompiled; do
+  [ ! -d "$file" ] && continue
+  kompiledDir=$file
+  if $hasKompiledDir; then
+    error 1 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
+  fi
+  hasKompiledDir=true
+done
+
+if ! $hasKompiledDir; then
+  error 1 'Could not find a compiled definition. Use --directory to specify one.'
+fi
+
+if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then
+  execute "$KAST_UTIL" --input kore "${ORIG_ARGV[@]}"
+  exit $?
+fi
+
+if [[ "$input_file" == "-" ]]; then
+  input_file=/dev/stdin
+elif [ ! -r "$input_file" ]; then
+  error 1 "Could not open file: $input_file"
+fi
+
+if [ "$outputFile" = "-" ]; then
+  outputFile=/dev/stdout
+fi
+
+case "$outputMode" in
+  pretty)
+  output "$outputFile" kprint "$kompiledDir" "$input_file" $color $filterSubst
+  ;;
+
+  kore)
+  output "$outputFile" catNewline "$input_file"
+  ;;
+
+  none)
+  ;;
+
+  *)
+  execute "$KAST_UTIL" --input kore "${ORIG_ARGV[@]}"
+  ;;
+esac
+ 

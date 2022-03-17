@@ -19,7 +19,6 @@ pattern=
 search=false
 searchType=FINAL
 term=false
-verbose=false
 literal=false
 outputMode=pretty
 statistics=false
@@ -29,10 +28,10 @@ llvm_krun_flags=
 configVars=
 dryRun=false
 expandMacros=true
-result=1
+filterSubst=
 
 # setup temp files
-now=`date +"%Y-%m-%d-%H-%M-%S"`
+now="$(date +"%Y-%m-%d-%H-%M-%S")"
 tempDir="$(mktemp -d .krun-${now}-XXXXXXXXXX)"
 tempFiles=("$tempDir")
 trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
@@ -48,50 +47,42 @@ keepTempsIfDryRun () {
   # kepp files used by dry-run
   if $dryRun; then
     local newArray=()
-    for value in "${tempFiles[@]}"; do
+    for value in ${tempFiles[@]+"${tempFiles[@]}"}; do
         if [[ ! "$@" =~ ${value} ]]; then
           newArray+=($value)
         fi
     done
     tempFiles=()
-    tempFiles=${newArray[@]}
+    tempFiles=${newArray[@]+"${newArray[@]}"}
     unset newArray
   fi
 }
 
-execute () {
-  (
-  if $verbose; then
-    set -x
-  fi
-  "$@"
-  )
-}
+KRUN=$(basename "$0")
 
-KX=$(basename "$0")
-
-fold_lines="fold -s"
-
-error () {
-  printf "[Error] Critical: $@\n" | $fold_lines 1>&2
-  exit $result
-}
-
-warning () {
-  printf "[Warning] Compiler: $@\n" | $fold_lines 1>&2
-}
+ktool="${KRUN}"
+source "$(dirname "$0")/../lib/kframework/k-util.sh"
+if ${verbose}; then
+  llvm_krun_flags="${llvm_krun_flags} -v"
+fi
 
 print_usage () {
 cat <<HERE
-Usage: $KX [PROGRAM] [-cNAME=VALUE] [-d DIR]
+Usage: $KRUN [PROGRAM] [-cNAME=VALUE] [-d DIR]
 Execute a program using a K semantics that was built with kompile.
 
 Mandatory arguments to long options are mandatory for short options too.
 
-$KX expects 0 or 1 positional arguments. If a positional argument is present,
+$KRUN expects 0 or 1 positional arguments. If a positional argument is present,
 it must be a file and the contents of that file is parsed using the parser
 specified with --parser and used as the value of \$PGM (unless --term is
 present; see below).
+
+General options:
+
+$(k_util_usage)
+
+$KRUN options:
 
       --bound N            Return at most N solutions  with --search
       --depth N            Execute at most N rewrite steps
@@ -105,7 +96,7 @@ present; see below).
                            the value of \$PGM as a KORE term.
 
   -cNAME=VALUE             Use VALUE as the value for \$NAME. By default,
-                           \`kast -m MAINMODULE -o kore\` is used as the
+                           \`kparse -m MAINMODULE\` is used as the
                            parser. This can be overridden with -p.
       --debugger           Launch the backend in a debugging console.
                            Currently only supported on LLVM backend.
@@ -120,25 +111,25 @@ present; see below).
                            stdin/stdout via cells with "stream" attribute.
                            Defaults to enabled when performing concrete
                            execution, and disabled when --search is passed.
-      --no-exc-wrap        Do not wrap exception messages to 80 chars. Keep
-                           long lines.
       --no-expand-macros   Don't expand macros in initial configuration.
                            This assumes that the initial configuration contains
                            no macro terms. Behavior is undefined if this is not
                            true.
+      --no-substitution-filtering  Don't filter conjuncts with anonymous
+                                   variables from substitution output
   -o, --output MODE        Select output mode to use when unparsing. Valid
                            values are pretty, program, kast, binary, json,
                            latex, kore, and none.
       --output-file FILE   Print final configuration to FILE
       --parser VALUE       Use VALUE as parser to parse \$PGM. For example,
-                           if the user says "$KX --parser cat foo.kore", then
+                           if the user says "$KRUN --parser cat foo.kore", then
                            \`cat foo.kore\` is invoked and the result on stdout
                            is used as the value of \$PGM as a KORE term.
       --pattern PAT        Use PAT as the search pattern with --search. Can
                            also be used without --search to match the output
                            configuration against a pattern and print the
                            substitution. Not supported on LLVM backend.
-      --save-temps         Do not delete temporary files when $KX terminates.
+      --save-temps         Do not delete temporary files when $KRUN terminates.
       --search             Search for all possible output states after
                            rewriting. Only supported on symbolic backends.
       --search-all         Like --search, but also return interim states
@@ -156,7 +147,6 @@ present; see below).
                            value for \$PGM as the entire input configuration.
                            i.e., skip composing configuration from
                            configuration variables.
-  -v, --verbose            Print significant commands executed by $KX.
       --version            Print version of K
       --                   Interpret all arguments following as positional
                            arguments.
@@ -184,6 +174,7 @@ do
       ;;
 
       --color)
+      colorOpt="$2"
       case "$2" in
         on)
         color=true
@@ -194,7 +185,7 @@ do
         ;;
 
         *)
-        error 'Invalid value for --color. Should be "on" or "off".'
+        error 1 'Invalid value for --color. Should be "on" or "off".'
         ;;
       esac
       shift
@@ -251,14 +242,14 @@ do
         ;;
 
         *)
-        error 'Invalid value for --io. Should be "on" or "off".'
+        error 1 'Invalid value for --io. Should be "on" or "off".'
         ;;
       esac
       shift
       ;;
 
-      --no-exc-wrap)
-      fold_lines="cat -"
+      --no-substitution-filtering)
+      filterSubst=--no-substitution-filtering
       ;;
 
       --no-expand-macros)
@@ -277,7 +268,7 @@ do
         none) ;;
 
         *)
-        error 'Invalid value for --output. Should be one of "pretty", "program", "kast", "binary", "json", "latex", "kore", or "none".'
+        error 1 'Invalid value for --output. Should be one of "pretty", "program", "kast", "binary", "json", "latex", "kore", or "none".'
         ;;
       esac
       outputMode="$2"
@@ -332,7 +323,7 @@ do
         ;;
 
         *)
-        error 'Invalid value for --smt. Should be "z3" or "none".'
+        error 1 'Invalid value for --smt. Should be "z3" or "none".'
         ;;
       esac
       shift
@@ -345,11 +336,6 @@ do
 
       --term)
       term=true
-      ;;
-
-      -v|--verbose)
-      verbose=true
-      llvm_krun_flags="$llvm_krun_flags -v"
       ;;
 
       --save-temps)
@@ -398,13 +384,15 @@ fi
 if [ -z "${color+unset}" ]; then
   if [[ "$outputFile" == "-" && -t 1 ]]; then
     color=true
+    colorOpt=on
   else
     color=false
+    colorOpt=off
   fi
 fi
 
 if [[ "${#ARGV[@]}" -gt 1 ]]; then
-  error 'Cannot pass more than one configuration variable as a positional argument.'
+  error 1 'Cannot pass more than one configuration variable as a positional argument.'
 fi
 
 # Compute kompiled directory
@@ -414,17 +402,17 @@ for file in "$dir"/*-kompiled; do
   [ ! -d "$file" ] && continue
   kompiledDir=$file
   if $hasKompiledDir; then
-    error 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
+    error 1 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
   fi
   hasKompiledDir=true
 done
 
 if ! $hasKompiledDir; then
-  error 'Could not find a compiled definition. Use --directory to specify one.'
+  error 1 'Could not find a compiled definition. Use --directory to specify one.'
 fi
 
 if [ ! -f "$kompiledDir/definition.kore" ]; then
-  "$(dirname "$0")/krun-legacy" "${ORIG_ARGV[@]}"
+  "$(dirname "$0")/krun-legacy" ${ORIG_ARGV[@]+"${ORIG_ARGV[@]}"}
   exit $?
 fi
 
@@ -446,46 +434,48 @@ fi
 source "$kompiledDir/configVars.sh"
 if $term; then
   if [ -z "${parser_PGM+unset}" ]; then
-    execute kast --directory "$dir" -m "$mainModuleName" "$config_var_PGM" -o kore > "$input_file"
+    execute kparse --directory "$dir" --module "$mainModuleName" "$config_var_PGM" > "$input_file"
   else
     execute $parser_PGM "$config_var_PGM" > "$input_file"
   fi
 else
-  for configVar in "${declaredConfigVars[@]}"; do
-    if [[ $configVar != "IO" && $configVar != "STDIN" && ! "${params[@]}" =~ "$configVar" ]]; then
-      error "Configuration variable missing: \$$configVar. Use -c$configVar=<Value> in the command line to set."
+  for configVar in ${declaredConfigVars[@]+"${declaredConfigVars[@]}"}; do
+    if [[ $configVar != "IO" && $configVar != "STDIN" && ! ${params[@]+"${params[@]}"} =~ "$configVar" ]]; then
+      error 1 "Configuration variable missing: \$$configVar. Use -c$configVar=<Value> in the command line to set."
     fi
   done
-  for name in "${params[@]}"; do
+  for name in ${params[@]+"${params[@]}"}; do
     parser_name="parser_$name"
     config_name="config_var_$name"
     tempFile="$(mktemp ${tempDir}/tmp.in."$name".XXXXXXXXXX)"
     tempFiles+=("$tempFile")
-    if [[ ! "${declaredConfigVars[@]}" =~ "$name" ]]; then
+    if [[ ! ${declaredConfigVars[@]+"${declaredConfigVars[@]}"} =~ "$name" ]]; then
       if [ "$name" = "PGM" ]; then
-        error "Configuration variable \$PGM does not exist. Do not pass a positional argument to $KX."
+        error 1 "Configuration variable \$PGM does not exist. Do not pass a positional argument to $KRUN."
       else
-        error "Configuration variable \$$name does not exist. Do not pass -c$name to $KX."
+        error 1 "Configuration variable \$$name does not exist. Do not pass -c$name to $KRUN."
       fi
     fi
     indirectName="declaredConfigVar_$name"
+    indirectModuleName="declaredConfigVarModule_$name"
     sortName=${!indirectName}
+    moduleName=${!indirectModuleName:-unset}
     if [ -z "${!parser_name+unset}" ]; then
-      if [ -f "$kompiledDir/parser_$name" ]; then
-        parser=("$kompiledDir/parser_$name")
-      elif [ "$name" = "PGM" ]; then
+      if [ "$name" = "PGM" ]; then
         if $hasArgv; then
-          parser=(kast --directory "$dir" -o kore)
+          parser=(kparse --directory "$dir")
         else
-          parser=(kast --directory "$dir" -m "$mainModuleName" -o kore)
+          parser=(kparse --directory "$dir" --module "$mainModuleName")
         fi
+      elif [ -z "${!indirectModuleName+unset}" ]; then
+        parser=(kparse --sort "$sortName" --directory "$dir" --module "$mainModuleName")
       else
-        parser=(kast -s "$sortName" --directory "$dir" -m "$mainModuleName" -o kore)
+        parser=(kparse --sort "$sortName" --directory "$dir" --module "$moduleName")
       fi
     else
       parser=("${!parser_name}")
     fi
-    execute ${parser[@]} "${!config_name}" > "$tempFile"
+    execute ${parser[@]+"${parser[@]}"} "${!config_name}" > "$tempFile"
     configVars="$configVars -c $name $(basename $tempFile) $sortName korefile"
   done
   if [[ ${declaredConfigVar_IO+unset} && "${declaredConfigVar_IO}" = "String" ]]; then
@@ -529,17 +519,33 @@ if [ "$backendName" = "llvm" ]; then
   fi
 
   keepTempsIfDryRun "$tempDir" "$expanded_input_file" "$kore_output"
-  if $search; then
-    if [ -n "$pattern" ]; then
-      error "Backend llvm does not support search patterns yet."
+  if $search || [ -n "$pattern" ]; then
+    if [ ! -f "$kompiledDir/search" ] || [ ! -x "$kompiledDir/search" ]; then
+      error 1 'You must pass --enable-search to kompile to be able to use krun --search with the LLVM backend'
     fi
+    patternFile="$(mktemp ${tempDir}/tmp.pattern.XXXXXXXXXX)"
+    tempFiles+=("$patternFile")
+    if [ -z "$pattern" ]; then
+      echo '\and{SortGeneratedTopCell{}}(VarResult:SortGeneratedTopCell{},\top{SortGeneratedTopCell{}}())' > "$patternFile"
+    else
+      execute k-compile-search-pattern --directory "$dir" "$pattern" > "$patternFile"
+    fi
+
     if [[ $searchType != "FINAL" ]]; then
-      error "Backend llvm does not support --search-all, --search-one-or-more-steps, or --search-one-step yet"
+      error 1 'Backend llvm does not support --search-all, --search-one-or-more-steps, or --search-one-step yet.'
+    fi
+    disjunctFile="$(mktemp ${tempDir}/tmp.disjunction.XXXXXXXXXX)"
+    tempFiles+=("$disjunctFile")
+    if $search; then
+      llvmCommand="$kompiledDir/search"
+    else
+      llvmCommand="$kompiledDir/interpreter"
     fi
     set +e
-    execute $cmdprefix "$kompiledDir/search" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags
+    execute $cmdprefix "$llvmCommand" "$expanded_input_file" "${depth:--1}" "$disjunctFile" $interpreter_flags
     result=$?
     set -e
+    execute kore-match-disjunction "$kompiledDir/definition.kore" --module "$mainModuleName" --disjunction "$disjunctFile" --match "$patternFile" --output "$kore_output"
   else
     set +e
     execute $cmdprefix "$kompiledDir/interpreter" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags
@@ -596,7 +602,7 @@ elif [ "$backendName" = "haskell" ] ; then
     set -e
   fi
 else
-  error "Backend $backendName not supported. Use krun-legacy."
+  error 1 "Backend $backendName not supported. Use krun-legacy."
 fi
 
 # Unparsing
@@ -610,25 +616,10 @@ if ! $dryRun; then
       mv "$kore_output2" "$kore_output"
     fi
 
-    case "$outputMode" in
-      pretty)
-      execute kprint "$kompiledDir" "$kore_output" $color > "$outputFile"
-      ;;
-
-      kore)
-      cat "$kore_output" > "$outputFile"
-      echo >> "$outputFile"
-      ;;
-
-      none) ;;
-
-      *)
-      execute kast --directory "$dir" -i kore -o "$outputMode" "$kore_output" > "$outputFile"
-      ;;
-    esac
+    output "$outputFile" execute kore-print --directory "$dir" --output "$outputMode" "$kore_output" --color "$colorOpt" $filterSubst
   else
-    error "Backend crashed during rewriting with exit code $result"
+    error ${result} "Backend crashed during rewriting with exit code ${result}"
   fi
 fi
 
-exit $result
+exit ${result}

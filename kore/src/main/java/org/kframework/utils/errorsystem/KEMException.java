@@ -116,6 +116,10 @@ public class KEMException extends RuntimeException {
         return create(ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, message, e, location, source);
     }
 
+    public static KEMException outerParserError(String message, Throwable e, Source source, Location location, boolean printException) {
+        return create(ExceptionType.ERROR, KExceptionGroup.OUTER_PARSER, message, e, location, source, printException);
+    }
+
     public static KEMException asError(KEMException warning) {
         return new KEMException(warning.exception, ExceptionType.ERROR);
     }
@@ -137,6 +141,11 @@ public class KEMException extends RuntimeException {
     private static KEMException create(ExceptionType type, KExceptionGroup group, String message,
                                        Throwable e, Location location, Source source) {
         return new KEMException(new KException(type, group, message, source, location, e));
+    }
+
+    private static KEMException create(ExceptionType type, KExceptionGroup group, String message,
+                                       Throwable e, Location location, Source source, boolean printException) {
+        return new KEMException(new KException(type, group, message, source, location, e, printException));
     }
 
     @Override

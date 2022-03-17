@@ -586,8 +586,13 @@ public class Parser {
             ParseError perror = getErrors();
 
             String msg = s.input.length == perror.position ?
-                    "Parse error: unexpected end of file." :
-                    "Parse error: unexpected token '" + s.input[perror.position].value + "'.";
+                    "Parse error: unexpected end of file" :
+                    "Parse error: unexpected token '" + s.input[perror.position].value + "'";
+            if (perror.position != 0) {
+                msg = msg + " following token '" + s.input[perror.position - 1].value + "'.";
+            } else {
+                msg = msg + ".";
+            }
             Location loc = new Location(perror.startLine, perror.startColumn,
                     perror.endLine, perror.endColumn);
             Source source = perror.source;
@@ -690,15 +695,20 @@ public class Parser {
             return stateReturn.function.add(stateReturn.key.stateCall.function);
         } else if (stateReturn.key.stateCall.key.state instanceof RuleState) {
             int startPosition, endPosition;
-            if (stateReturn.key.stateCall.key.ntCall.key.ntBegin == s.input.length) {
-                startPosition = s.input[s.input.length - 1].endLoc;
+            if (s.input.length == 0) {
+                startPosition = 0;
+                endPosition = 0;
             } else {
-                startPosition = s.input[stateReturn.key.stateCall.key.ntCall.key.ntBegin].startLoc;
-            }
-            if (stateReturn.key.stateEnd == 0) {
-                endPosition = s.input[0].startLoc;
-            } else {
-                endPosition = s.input[stateReturn.key.stateEnd - 1].endLoc;
+                if (stateReturn.key.stateCall.key.ntCall.key.ntBegin == s.input.length) {
+                    startPosition = s.input[s.input.length - 1].endLoc;
+                } else {
+                    startPosition = s.input[stateReturn.key.stateCall.key.ntCall.key.ntBegin].startLoc;
+                }
+                if (stateReturn.key.stateEnd == 0) {
+                    endPosition = s.input[0].startLoc;
+                } else {
+                    endPosition = s.input[stateReturn.key.stateEnd - 1].endLoc;
+                }
             }
             return stateReturn.function.addRule(stateReturn.key.stateCall.function,
                 ((RuleState) stateReturn.key.stateCall.key.state).rule, stateReturn,

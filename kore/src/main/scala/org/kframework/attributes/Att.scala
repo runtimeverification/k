@@ -26,6 +26,22 @@ class Att private (val att: Map[(String, String), Any]) extends AttributesToStri
     case _ => false
   }
 
+  def getMacro: Option[String] = {
+    if (contains(Att.MACRO)){
+      return Some(Att.MACRO)
+    }
+    if (contains(Att.MACRO_REC)) {
+      return Some(Att.MACRO_REC)
+    }
+    if (contains(Att.ALIAS)) {
+      return Some(Att.ALIAS)
+    }
+    if (contains(Att.ALIAS_REC)) {
+      return Some(Att.ALIAS_REC)
+    }
+    return None;
+  }
+
   def contains(cls: Class[_]): Boolean = att.contains((cls.getName, cls.getName))
   def contains(key: String): Boolean = att.contains((key, Att.stringClassName))
   def contains(key: String, cls: Class[_]): Boolean = att.contains((key, cls.getName))
@@ -92,6 +108,7 @@ object Att {
   val SMTLIB = "smtlib"
   val SMT_LEMMA = "smt-lemma"
   val SMT_PRELUDE = "smt-prelude"
+  val NON_EXECUTABLE = "non-executable"
   val ONE_PATH = "one-path"
   val ALL_PATH = "all-path"
   val CELL = "cell"
@@ -111,6 +128,7 @@ object Att {
   val HEAT = "heat"
   val COOL = "cool"
   val TAG = "tag"
+  val TOKEN = "token"
   val USER_LIST = "userList"
   val GENERATED_BY_LIST_SUBSORTING = "generatedByListSubsorting"
   val TRANSITION = "transition"
@@ -124,6 +142,8 @@ object Att {
   val SOURCE = "org.kframework.attributes.Source"
   val LOCATION = "org.kframework.attributes.Location"
   val UNIQUE_ID = "UNIQUE_ID"
+  val PUBLIC = "public"
+  val PRIVATE = "private"
 
   private val stringClassName = classOf[String].getName
   private val intClassName = classOf[java.lang.Integer].getName

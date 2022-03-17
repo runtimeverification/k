@@ -42,8 +42,6 @@ public class OuterParsingOptions implements Serializable {
         return mainDefinitionFile;
     }
 
-    @Parameter(names={"--directory", "-d"}, description="Path to the directory in which the output resides. An output can be either a kompiled K definition or a document which depends on the type of backend. The default is the directory containing the main definition file.")
-    public String directory;
 
     @Parameter(names="-I", description="Add a directory to the search path for requires statements.")
     public List<String> includes = new ArrayList<>();

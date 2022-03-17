@@ -43,7 +43,7 @@ claim
 </lambdaT>
 requires N1 ==Int N2
  andBool M1 ==Int M2
- andBool ?_Ks1 ==K ?_Ks2
+ andBool _Ks1 ==K _Ks2
 
 claim
 <k> check => . </k>

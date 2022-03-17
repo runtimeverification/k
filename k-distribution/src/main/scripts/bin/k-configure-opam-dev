@@ -1,4 +1,0 @@
-#!/bin/sh
-
-. "$(dirname "$0")/k-configure-opam-common"
-opam install -y mlgmp zarith uuidm camomile atdgen atdj ctypes ctypes-foreign csv uri ocamlbuild-atdgen ocp-ocamlres

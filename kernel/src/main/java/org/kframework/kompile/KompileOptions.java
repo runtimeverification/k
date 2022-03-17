@@ -4,20 +4,18 @@ package org.kframework.kompile;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 import org.apache.commons.io.FilenameUtils;
-
 import org.kframework.backend.Backends;
 import org.kframework.main.GlobalOptions;
-import org.kframework.unparser.OutputModes;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.inject.RequestScoped;
+import org.kframework.utils.options.InnerParsingOptions;
 import org.kframework.utils.options.OuterParsingOptions;
+import org.kframework.utils.options.OutputDirectoryOptions;
 import org.kframework.utils.options.SMTOptions;
-import org.kframework.utils.options.BaseEnumConverter;
 import org.kframework.utils.options.StringListConverter;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,13 +28,26 @@ public class KompileOptions implements Serializable {
      * as part of CompiledDefinition, in any other tool. usability depends on context.
      */
     @ParametersDelegate
-    public transient GlobalOptions global = new GlobalOptions();
+    private final transient GlobalOptions global = new GlobalOptions();
+
+    /**
+     * Use only in the Guice Provider method, so it can be replaced by GlobalOptions from other tools.
+     */
+    GlobalOptions getGlobalOptions_UseOnlyInGuiceProvider() {
+        return global;
+    }
 
     @ParametersDelegate
-    public OuterParsingOptions outerParsing = new OuterParsingOptions();
+    public transient OuterParsingOptions outerParsing = new OuterParsingOptions();
+
+    @ParametersDelegate
+    public transient InnerParsingOptions innerParsing = new InnerParsingOptions();
+
+    @ParametersDelegate
+    public OutputDirectoryOptions outputDirectory = new OutputDirectoryOptions();
 
     // Common options
-    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [llvm|haskell|kore|java|ocaml]. Each creates the kompiled K definition.")
+    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [llvm|haskell|kore|java]. Each creates the kompiled K definition.")
     public String backend = Backends.LLVM;
 
     private boolean kore;
@@ -61,21 +72,8 @@ public class KompileOptions implements Serializable {
         return syntaxModule;
     }
 
-    @Parameter(names="--non-strict", description="Do not add runtime sort checks for every variable's inferred sort. Only has an effect with `--backend ocaml`.")
-    private boolean nonStrict;
-
-    public boolean strict() {
-        if (nonStrict && ! backend.equals("ocaml")) {
-            throw KEMException.criticalError("Option `--non-strict` only makes sense for `--backend ocaml`.");
-        }
-        return !nonStrict;
-    }
-
     @Parameter(names="--coverage", description="Generate coverage data when executing semantics.")
     public boolean coverage;
-
-    @Parameter(names="--profile-rule-parsing", description="Generate time in seconds to parse each rule in the semantics. Found in -kompiled directory under timing.log.")
-    public boolean profileRules;
 
     @Parameter(names="--hook-namespaces", listConverter=StringListConverter.class, description="<string> is a whitespace-separated list of namespaces to include in the hooks defined in the definition")
     public List<String> hookNamespaces = Collections.emptyList();
@@ -97,6 +95,10 @@ public class KompileOptions implements Serializable {
 
     @Parameter(names="--read-only-kompiled-directory", description="Files in the generated kompiled directory should be read-only to other frontend tools.")
     public boolean readOnlyKompiledDirectory = false;
+
+    @Parameter(names="--concrete-rules", description="List of rule labels to be considered concrete, in addition to " +
+            "rules marked with `[concrete]` attribute")
+    public List<String> extraConcreteRuleLabels = Collections.emptyList();
 
     public boolean isKore() {
         return backend.equals("kore") || backend.equals("haskell") || backend.equals("llvm");
@@ -127,4 +129,7 @@ public class KompileOptions implements Serializable {
     public List<String> transition = Collections.singletonList(DEFAULT_TRANSITION);
 
     public static final String DEFAULT_TRANSITION = "transition";
+
+    @Parameter(names="--top-cell", description="Choose the top configuration cell when more than one is provided. Does nothing if only one top cell exists.")
+    public String topCell;
 }

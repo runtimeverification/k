@@ -13,7 +13,7 @@ const pageTemplate = fs
 generatePagesFromMarkdownFiles({
   globPattern: path.resolve(__dirname, "../k-distribution/") + "/**/*.md",
   globOptions: {},
-  origin: "https://github.com/kframework/k/tree/master/",
+  origin: "https://github.com/runtimeverification/k/tree/master/",
   sourceDirectory: path.resolve(__dirname, "../k-distribution/"),
   outputDirectory: path.resolve(__dirname, "./public_content/k-distribution/"),
   websiteDirectory: path.resolve(__dirname, "./public_content/"),
@@ -24,7 +24,7 @@ generatePagesFromMarkdownFiles({
 generatePagesFromMarkdownFiles({
   globPattern: path.resolve(__dirname, "./pages/") + "/**/*.md",
   globOptions: {},
-  origin: "https://github.com/kframework/k/tree/master/",
+  origin: "https://github.com/runtimeverification/k/tree/master/",
   sourceDirectory: path.resolve(__dirname, "./pages/"),
   outputDirectory: path.resolve(__dirname, "./public_content/"),
   websiteDirectory: path.resolve(__dirname, "./public_content/"),
@@ -33,9 +33,9 @@ generatePagesFromMarkdownFiles({
   template: pageTemplate,
 });
 generatePagesFromMarkdownFiles({
-  globPattern: path.resolve(__dirname, "../") + "/pending-documentation.md",
+  globPattern: path.resolve(__dirname, "../") + "/USER_MANUAL.md",
   globOptions: {},
-  origin: "https://github.com/kframework/k/tree/master/",
+  origin: "https://github.com/runtimeverification/k/tree/master/",
   sourceDirectory: path.resolve(__dirname, "../"),
   outputDirectory: path.resolve(__dirname, "./public_content/"),
   websiteDirectory: path.resolve(__dirname, "./public_content/"),

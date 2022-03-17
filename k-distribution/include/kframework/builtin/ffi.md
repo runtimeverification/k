@@ -21,7 +21,7 @@ corrupted term representations that lead to undefined behavior at runtime.
 require "domains.md"
 
 module FFI-SYNTAX
-  imports LIST
+  imports private LIST
 ```
 
 The FFIType sort is used to declare the native C ABI types of operands passed
@@ -58,8 +58,11 @@ endmodule
 
 module FFI
   imports FFI-SYNTAX
-  imports BYTES
-  imports STRING
+  imports private BYTES
+  imports private STRING
+  imports private BOOL
+  imports private LIST
+  imports private INT
 
 ```
 

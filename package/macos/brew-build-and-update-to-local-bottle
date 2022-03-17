@@ -2,6 +2,7 @@
 package="$1"  ; shift
 version="$1"  ; shift
 root_url="$1" ; shift
+brew update
 brew tap kframework/k "file://$(pwd)"
 brew install $package --build-bottle -v
 brew bottle --json $package --root-url="$root_url/v$version/"

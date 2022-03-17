@@ -23,6 +23,7 @@ import org.kframework.utils.options.OuterParsingOptions;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,6 +47,7 @@ import java.util.stream.Collectors;
  */
 public class KDepFrontEnd extends FrontEnd {
 
+    private final KDepOptions kdepOptions;
     private final OuterParsingOptions options;
     private final KExceptionManager kem;
     private final Stopwatch sw;
@@ -54,6 +56,7 @@ public class KDepFrontEnd extends FrontEnd {
 
     @Inject
     public KDepFrontEnd(
+            KDepOptions kdepOptions,
             OuterParsingOptions options,
             KExceptionManager kem,
             GlobalOptions globalOptions,
@@ -62,6 +65,7 @@ public class KDepFrontEnd extends FrontEnd {
             JarInfo jarInfo,
             Provider<FileUtil> files) {
         super(kem, globalOptions, usage, jarInfo, files);
+        this.kdepOptions = kdepOptions;
         this.options = options;
         this.globalOptions = globalOptions;
         this.kem = kem;
@@ -104,10 +108,28 @@ public class KDepFrontEnd extends FrontEnd {
                 requiredFiles));;
         Set<File> allFiles = modules.stream().map(m -> new File(m.getSource().source())).collect(Collectors.toSet());
         System.out.println(files.get().resolveWorkingDirectory(".").toURI().relativize(files.get().resolveKompiled("timestamp").toURI()).getPath() + " : \\");
-        for (File file : allFiles) {
+
+        List<File> sortedFiles = new ArrayList<File>(allFiles);
+        Collections.sort(sortedFiles, (File a, File b) -> {
+          return a.getAbsolutePath().compareTo(b.getAbsolutePath());
+        });
+
+        for (File file : sortedFiles) {
             System.out.println("    " + file.getAbsolutePath() + " \\");
         }
         System.out.println();
+
+        if (this.kdepOptions.alsoRemakeDepend) {
+            System.out.println("DEPEND_FILE=$(lastword $(MAKEFILE_LIST))");
+            System.out.println("$(DEPEND_FILE) : " + " \\");
+            System.out.println("    $(wildcard \\");
+
+            for (File file : sortedFiles) {
+                System.out.println("        " + file.getAbsolutePath() + " \\");
+            }
+
+            System.out.println("    )");
+        }
         return 0;
     }
 }

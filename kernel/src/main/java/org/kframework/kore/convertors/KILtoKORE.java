@@ -12,6 +12,7 @@ import org.kframework.definition.Associativity;
 import org.kframework.definition.FlatModule;
 import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
+import org.kframework.definition.SyntaxSort;
 import org.kframework.definition.Tag;
 import org.kframework.kil.*;
 import org.kframework.kil.Definition;
@@ -67,7 +68,18 @@ public class KILtoKORE extends KILTransformation<Object> {
                 .filter(j -> !(j instanceof org.kframework.kil.Import))
                 .flatMap(j -> apply(j).stream()).collect(Collectors.toSet());
 
-        Set<org.kframework.definition.Import> importedModuleNames = m.getItems().stream()
+        // temporarily declare cell sorts used in the RHS of productions until we
+        // can parse the configuration so Module checks don't fail
+        Set<SyntaxSort> tempCellSorts = items.stream().filter(p -> p instanceof org.kframework.definition.Production)
+                .map(p -> (org.kframework.definition.Production) p)
+                .flatMap(p -> stream(p.items()).filter(itm -> itm instanceof org.kframework.definition.NonTerminal)
+                                .map(i -> (org.kframework.definition.NonTerminal) i)
+                                .flatMap(nt -> nt.sort().name().endsWith("Cell") || nt.sort().name().endsWith("CellFragment") ?
+                                        Stream.of(SyntaxSort.apply(Seq(), nt.sort(), Att.empty().add("temporary-cell-sort-decl"))) : Stream.of())
+                                ).collect(Collectors.toSet());
+        items.addAll(tempCellSorts);
+
+        Set<org.kframework.definition.FlatImport> importedModuleNames = m.getItems().stream()
                 .filter(imp -> imp instanceof Import)
                 .map(imp -> apply((Import)imp))
                 .collect(Collectors.toSet());
@@ -77,8 +89,8 @@ public class KILtoKORE extends KILTransformation<Object> {
         return new FlatModule(moduleName, immutable(importedModuleNames), immutable(items), att);
     }
 
-    public org.kframework.definition.Import apply(Import imp) {
-        return org.kframework.definition.Import.apply(imp.getName(), convertAttributes(imp));
+    public org.kframework.definition.FlatImport apply(Import imp) {
+        return org.kframework.definition.FlatImport.apply(imp.getName(), imp.isPublic(), convertAttributes(imp));
     }
 
     public org.kframework.definition.Definition apply(Definition d) {

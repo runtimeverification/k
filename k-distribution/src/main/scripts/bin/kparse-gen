@@ -1,0 +1,174 @@
+#!/usr/bin/env bash
+set -e
+set -o pipefail
+set -u
+
+export PATH="$(cd "$(dirname "$0")"; pwd):$PATH"
+
+# initialize flags
+ARGV=()
+bisonFiles=()
+dir=.
+glr=--gen-parser
+literal=false
+stackDepth=10000
+
+# setup temp files
+now=`date +"%Y-%m-%d-%H-%M-%S"`
+tempDir="$(mktemp -d .kparse-gen-${now}-XXXXXXXXXX)"
+tempFiles=("$tempDir")
+trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
+
+KPARSE_GEN=$(basename "$0")
+KAST_UTIL="$(dirname "$0")/kast"
+
+ktool="${KPARSE_GEN}"
+source "$(dirname "$0")/../lib/kframework/k-util.sh"
+
+print_usage () {
+cat <<HERE
+Usage: $KPARSE_GEN <OUTPUT_FILE> [-d DIR] [-m MODULE] [-s SORT]
+Generate an ahead-of-time parser from a K definition.
+
+Mandatory arguments to long options are mandatory for short options too.
+
+$KPARSE_GEN expects exactly 1 positional argument. It must be a valid path
+where an executable file can be written. By default, $KPARSE_GEN will
+generate an LR(1) parser for the \$PGM configuration variable, but this can be
+customized; see below. If no \$PGM configuration variable exists, it will
+generate a parser for the KItem sort in the main syntax module.
+
+General options:
+
+$(k_util_usage)
+
+$KPARSE_GEN options:
+
+      --bison-file FILE    C file that should be linked into the generated
+                           parser
+      --bison-stack-max-depth  Maximum size of bison stack. Default: 10000
+  -d, --directory DIR      Look for a kompiled directory ending in "-kompiled"
+                           under the directory DIR
+  -g, --glr                Generate a GLR parser instead of an LR(1) parser
+  -h, --help               Display this help and exit
+  -m, --module MODULE      Module to use to generate grammar
+      --save-temps         Do not delete temporary files when $KPARSE_GEN
+                           terminates
+  -s, --sort               Sort to use as start symbol of parser
+      --version            Print version of K
+      --                   Interpret all arguments following as positional
+                           arguments
+HERE
+}
+
+ORIG_ARGV=("$@")
+
+# parse options
+while [[ $# -gt 0 ]]
+do
+  arg="$1"
+  if $literal; then
+    ARGV+=("$1")
+  else
+    case "$arg" in
+      --bison-file)
+      bisonFiles+=("--bison-file")
+      bisonFiles+=("$2")
+      shift
+      ;;
+
+      --bison-stack-max-depth)
+      stackDepth="$2"
+      shift
+      ;;
+
+      -d|--directory)
+      dir="$2"
+      shift
+      ;;
+
+      -g|--glr)
+      glr=--gen-glr-parser
+      ;;
+
+      -h|--help)
+      print_usage
+      exit 0
+      ;;
+
+      -m|--module)
+      module="$2"
+      shift
+      ;;
+
+      -s|--sort)
+      sort="$2"
+      shift
+      ;;
+
+      --save-temps)
+      trap - INT TERM EXIT
+      ;;
+
+      --version)
+      kompile --version
+      exit 0
+      ;;
+
+      --)
+      literal=true
+      ;;
+
+      -*)
+      print_usage
+      exit 1
+      ;;
+
+      *)
+      ARGV+=("$1")
+      ;;
+    esac
+  fi
+  shift
+done
+
+if [[ "${#ARGV[@]}" -ne 1 ]]; then
+  print_usage
+  error 1 'Must pass exactly one writeable file path as a positional argument.'
+fi
+output_file="${ARGV[0]}"
+
+# Compute kompiled directory
+kompiledDir=
+hasKompiledDir=false
+for file in "$dir"/*-kompiled; do
+  [ ! -d "$file" ] && continue
+  kompiledDir=$file
+  if $hasKompiledDir; then
+    error 1 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
+  fi
+  hasKompiledDir=true
+done
+
+if ! $hasKompiledDir; then
+  error 1 'Could not find a compiled definition. Use --directory to specify one.'
+fi
+
+if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then
+  error 1 'Bison is not supported on Java backend.'
+fi
+
+if [ -z "${module+unset}" ]; then
+  module=$(cat "$kompiledDir"/mainSyntaxModule.txt)
+fi
+
+source "$kompiledDir/configVars.sh"
+if [ -z "${sort+unset}" ]; then
+  if [ -z "${declaredConfigVar_PGM+unset}" ]; then
+    sort=KItem
+  else
+    sort="$declaredConfigVar_PGM"
+  fi
+fi
+
+execute "$KAST_UTIL" ${bisonFiles[@]} --bison-stack-max-depth "$stackDepth" --directory "$dir" $glr --module "$module" --sort "$sort" "$output_file"

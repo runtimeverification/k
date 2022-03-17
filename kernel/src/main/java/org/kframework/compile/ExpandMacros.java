@@ -6,6 +6,7 @@ import org.kframework.backend.kore.ModuleToKORE;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.checks.CheckFunctions;
+import org.kframework.compile.checks.CheckSmtLemmas;
 import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.HasAtt;
@@ -19,6 +20,7 @@ import org.kframework.kore.K;
 import org.kframework.kore.KApply;
 import org.kframework.kore.KAs;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KRewrite;
 import org.kframework.kore.KSequence;
 import org.kframework.kore.KToken;
 import org.kframework.kore.KVariable;
@@ -28,6 +30,7 @@ import org.kframework.kore.VisitK;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import scala.Option;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -177,6 +180,26 @@ public class ExpandMacros {
     private Sentence check(Sentence s) {
         Set<KEMException> errors = new HashSet<>();
         new CheckFunctions(errors, mod).check(s);
+        new CheckSmtLemmas(errors, mod).check(s);
+
+        /**
+         * At this point, all macros inside rules should have been expanded. However, a user could have accidentally
+         * left out a rule that expands the macro or incorrectly programmed this rule. If this is the case, rules may
+         * contain macros that have not been expanded.
+         */
+        if (s instanceof RuleOrClaim){
+            new VisitK() {
+                @Override
+                public void apply(KApply k) {
+                    Option<Att> atts = mod.attributesFor().get(k.klabel());
+                    if (atts.isDefined() && mod.attributesFor().apply(k.klabel()).getMacro().isDefined()) {
+                        errors.add(KEMException.compilerError("Rule contains macro symbol that was not expanded", s));
+                    }
+                    k.klist().items().stream().forEach(i -> super.apply(i));
+                }
+            }.accept(((RuleOrClaim) s).body());
+        }
+
         if (!errors.isEmpty()) {
           kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
           throw KEMException.compilerError("Had " + errors.size() + " structural errors after macro expansion.");
@@ -370,7 +393,7 @@ public class ExpandMacros {
     }
 
     public static boolean isMacro(HasAtt s) {
-      return s.att().contains(Att.MACRO()) || s.att().contains(Att.MACRO_REC()) || s.att().contains(Att.ALIAS_REC()) || s.att().contains(Att.ALIAS());
+        return s.isMacro();
     }
 
     public Sentence expand(Sentence s) {
@@ -384,5 +407,4 @@ public class ExpandMacros {
             return s;
         }
     }
-
 }

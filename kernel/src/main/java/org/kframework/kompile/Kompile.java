@@ -21,6 +21,7 @@ import org.kframework.compile.checks.CheckRHSVariables;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
 import org.kframework.compile.checks.CheckStreams;
+import org.kframework.compile.checks.CheckTokens;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -28,6 +29,7 @@ import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
+import org.kframework.main.GlobalOptions;
 import org.kframework.parser.InputModes;
 import org.kframework.parser.KRead;
 import org.kframework.parser.ParserUtils;
@@ -42,6 +44,8 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.file.JarInfo;
 
+import org.kframework.utils.options.InnerParsingOptions;
+import org.kframework.utils.options.OuterParsingOptions;
 import scala.collection.JavaConverters;
 import scala.Function1;
 import scala.Option;
@@ -59,6 +63,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -76,46 +81,48 @@ public class Kompile {
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
     public static final String REQUIRE_PRELUDE_K = "requires \"prelude.md\"\n";
 
-    public final KompileOptions kompileOptions;
+    private final KompileOptions kompileOptions;
+    private final GlobalOptions globalOptions;
     private final FileUtil files;
     private final KExceptionManager kem;
     private final ParserUtils parser;
     private final Stopwatch sw;
     private final DefinitionParsing definitionParsing;
+    private final OuterParsingOptions outerParsingOptions;
+    private final InnerParsingOptions innerParsingOptions;
     java.util.Set<KEMException> errors;
 
-    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, boolean cacheParses) {
-        this(kompileOptions, files, kem, new Stopwatch(kompileOptions.global), cacheParses);
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, InnerParsingOptions innerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, boolean cacheParses) {
+        this(kompileOptions, outerParsingOptions, innerParsingOptions, globalOptions, files, kem, new Stopwatch(globalOptions), cacheParses);
     }
 
-    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem) {
-        this(kompileOptions, files, kem, true);
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, InnerParsingOptions innerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem) {
+        this(kompileOptions, outerParsingOptions, innerParsingOptions, globalOptions, files, kem, true);
     }
 
     @Inject
-    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
-        this(kompileOptions, files, kem, sw, true);
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, InnerParsingOptions innerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, Stopwatch sw) {
+        this(kompileOptions, outerParsingOptions, innerParsingOptions, globalOptions, files, kem, sw, true);
     }
 
-    public Kompile(KompileOptions kompileOptions, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
+    public Kompile(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, InnerParsingOptions innerParsingOptions, GlobalOptions globalOptions, FileUtil files, KExceptionManager kem, Stopwatch sw, boolean cacheParses) {
+        this.outerParsingOptions = outerParsingOptions;
+        this.innerParsingOptions = innerParsingOptions;
         this.kompileOptions = kompileOptions;
+        this.globalOptions = globalOptions;
         this.files = files;
         this.kem = kem;
         this.errors = new HashSet<>();
-        this.parser = new ParserUtils(files, kem, kem.options, kompileOptions.outerParsing);
-        List<File> lookupDirectories = kompileOptions.outerParsing.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
+        this.parser = new ParserUtils(files, kem, kem.options, outerParsingOptions);
+        List<File> lookupDirectories = this.outerParsingOptions.includes.stream().map(files::resolveWorkingDirectory).collect(Collectors.toList());
         // these directories should be relative to the current working directory if we refer to them later after the WD has changed.
-        kompileOptions.outerParsing.includes = lookupDirectories.stream().map(File::getAbsolutePath).collect(Collectors.toList());
+        this.outerParsingOptions.includes = lookupDirectories.stream().map(File::getAbsolutePath).collect(Collectors.toList());
         File cacheFile = kompileOptions.cacheFile != null
                 ? files.resolveWorkingDirectory(kompileOptions.cacheFile) : files.resolveKompiled("cache.bin");
         this.definitionParsing = new DefinitionParsing(
-                lookupDirectories, kompileOptions, kem, files,
+                lookupDirectories, kompileOptions, outerParsingOptions, innerParsingOptions, globalOptions, kem, files,
                 parser, cacheParses, cacheFile, sw);
         this.sw = sw;
-
-        if (kompileOptions.backend.equals("ocaml")) {
-            kem.registerCriticalWarning(ExceptionType.FUTURE_ERROR, "The OCaml backend is in the process of being deprecated (final date May 31, 2020). Please switch to the LLVM backend.");
-        }
     }
 
     /**
@@ -130,13 +137,6 @@ public class Kompile {
     public CompiledDefinition run(File definitionFile, String mainModuleName, String mainProgramsModuleName, Function<Definition, Definition> pipeline, Set<String> excludedModuleTags) {
         files.resolveKompiled(".").mkdirs();
 
-        if (kompileOptions.profileRules) {
-            for (File f : files.resolveKompiled(".").listFiles()) {
-                if (f.getName().matches("timing[0-9]+\\.log")) {
-                    f.delete();
-                }
-            }
-        }
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, excludedModuleTags);
 
         files.saveToKompiled("parsed.txt", parsedDef.toString());
@@ -160,14 +160,21 @@ public class Kompile {
 
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(kompiledDefinition.mainModule());
 
-        CompiledDefinition def = new CompiledDefinition(kompileOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(configInfo.getRootCell()).klabel());
+        boolean isKast = excludedModuleTags.contains(Att.KORE());
+        Sort rootCell;
+        if (isKast) {
+          rootCell = configInfo.getRootCell();
+        } else {
+          rootCell = Sorts.GeneratedTopCell();
+        }
+        CompiledDefinition def = new CompiledDefinition(kompileOptions, kompileOptions.outerParsing, kompileOptions.innerParsing, globalOptions, parsedDef, kompiledDefinition, files, kem, configInfo.getDefaultCell(rootCell).klabel());
 
         if (kompileOptions.genBisonParser || kompileOptions.genGlrBisonParser) {
             if (def.configurationVariableDefaultSorts.containsKey("$PGM")) {
                 String filename = "parser_" + def.programStartSymbol.name() + "_" + def.mainSyntaxModuleName();
                 File outputFile = files.resolveKompiled(filename);
                 File linkFile = files.resolveKompiled("parser_PGM");
-                new KRead(kem, files, InputModes.PROGRAM).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, outputFile, kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth);
+                new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, outputFile, kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth);
                 try {
                     linkFile.delete();
                     Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
@@ -193,7 +200,7 @@ public class Kompile {
                         String filename = "parser_" + sort.name() + "_" + module;
                         File outputFile = files.resolveKompiled(filename);
                         File linkFile = files.resolveKompiled("parser_" + name);
-                        new KRead(kem, files, InputModes.PROGRAM).createBisonParser(mod.get(), sort, outputFile, kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth);
+                        new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(mod.get(), sort, outputFile, kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth);
                         try {
                             linkFile.delete();
                             Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
@@ -212,10 +219,10 @@ public class Kompile {
         List<String> ruleLocs = new ArrayList<String>();
         for (Sentence s: JavaConverters.setAsJavaSet(def.mainModule().sentences())) {
             if (s instanceof RuleOrClaim) {
-                Optional<Source>   optFile = s.att().getOptional(Source.class);
-                Optional<Location> optLine = s.att().getOptional(Location.class);
-                Optional<Location> optCol  = s.att().getOptional(Location.class);
-                Optional<String>   optId   = s.att().getOptional(Att.UNIQUE_ID());
+                var optFile = s.att().getOptional(Source.class);
+                var optLine = s.att().getOptional(Location.class);
+                var optCol  = s.att().getOptional(Location.class);
+                var optId   = s.att().getOptional(Att.UNIQUE_ID());
                 if (optFile.isPresent() && optLine.isPresent() && optCol.isPresent() && optId.isPresent()) {
                     String file = optFile.get().source();
                     int line    = optLine.get().startLine();
@@ -247,7 +254,8 @@ public class Kompile {
     }
 
     private static Module excludeModulesByTag(Set<String> excludedModuleTags, Module mod) {
-        Set<Module> newImports = stream(mod.imports()).filter(_import -> excludedModuleTags.stream().noneMatch(tag -> _import.att().contains(tag))).collect(Collectors.toSet());
+        Predicate<Import> f = _import -> excludedModuleTags.stream().noneMatch(tag -> _import.module().att().contains(tag));
+        Set<Import> newImports = stream(mod.imports()).filter(f).collect(Collectors.toSet());
         return Module(mod.name(), immutable(newImports), mod.localSentences(), mod.att());
     }
 
@@ -268,6 +276,8 @@ public class Kompile {
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
         DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections(kompileOptions.coverage)::gen, "adding sort projections");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
+        Function1<Definition, Definition> propagateMacroToRules =
+                d -> DefinitionTransformer.fromSentenceTransformer((m, s) -> new PropagateMacro(m).propagate(s), "propagate macro labels from production to rules").apply(d);
         Function1<Definition, Definition> expandMacros = d -> {
           ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d, false);
           return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kem, kompileOptions, false).expand(s), "expand macros").apply(d);
@@ -277,6 +287,9 @@ public class Kompile {
         DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
         Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, false)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
+        Function1<Definition, Definition> markExtraConcreteRules = d -> DefinitionTransformer.fromSentenceTransformer((m, s) ->
+                    s instanceof Rule && kompileOptions.extraConcreteRuleLabels.contains(s.att().getOption(Att.LABEL()).getOrElse(() -> null)) ?
+                            Rule.apply(((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att().add(Att.CONCRETE())) : s, "mark extra concrete rules").apply(d);
 
         return def -> resolveIO
                 .andThen(resolveFun)
@@ -290,6 +303,7 @@ public class Kompile {
                 .andThen(subsortKItem)
                 .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
+                .andThen(propagateMacroToRules)
                 .andThen(expandMacros)
                 .andThen(guardOrs)
                 .andThen(Kompile::resolveFreshConstants)
@@ -297,10 +311,11 @@ public class Kompile {
                 .andThen(generateSortProjections)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(d -> new Strategy().addStrategyCellToRulesTransformer(d).apply(d))
-                .andThen(ConcretizeCells::transformDefinition)
+                .andThen(d -> ConcretizeCells.transformDefinition(d, false))
                 .andThen(genCoverage)
                 .andThen(Kompile::addSemanticsModule)
                 .andThen(resolveConfigVar)
+                .andThen(markExtraConcreteRules)
                 .apply(def);
     }
 
@@ -335,7 +350,7 @@ public class Kompile {
     }
 
     public Rule parseAndCompileRule(CompiledDefinition compiledDef, String contents, Source source, Optional<Rule> parsedRule) {
-        Rule parsed = parsedRule.orElse(parseRule(compiledDef, contents, source));
+        Rule parsed = parsedRule.orElseGet(() -> parseRule(compiledDef, contents, source));
         return compileRule(compiledDef.kompiledDefinition, parsed);
     }
 
@@ -385,13 +400,39 @@ public class Kompile {
         return mt.apply(specModule);
     }
 
+    // Extra checks just for the prover specification.
+    public void proverChecksX(Module specModule, Module mainDefModule) {
+        // check rogue syntax in spec module
+        Set<Sentence> toCheck = mutable(specModule.sentences().$minus$minus(mainDefModule.sentences()));
+        for (Sentence s : toCheck)
+            if (s.isSyntax() && (!s.att().contains(Att.TOKEN()) || !mainDefModule.allSorts().contains(((Production) s).sort())))
+                errors.add(KEMException.compilerError("Found syntax declaration in proof module. Only tokens for existing sorts are allowed.", s));
+
+        ModuleTransformer mt = ModuleTransformer.fromSentenceTransformer((m, s) -> {
+            if (m.name().equals(mainDefModule.name()) || mainDefModule.importedModuleNames().contains(m.name()))
+                return s;
+            if (!(s instanceof Claim || s.isSyntax())) {
+                if (s instanceof Rule && !s.att().contains(Att.SIMPLIFICATION()))
+                    errors.add(KEMException.compilerError("Only claims and simplification rules are allowed in proof modules.", s));
+            }
+            if (s instanceof Rule && s.att().contains(Att.SIMPLIFICATION())) {
+                // TODO: it should be function like rule
+                KLabel kl = m.matchKLabel((Rule) s);
+                if (!m.functions().contains(kl))
+                    errors.add(KEMException.compilerError("Simplification rules need to be function/functional like.", s));
+            }
+            return s;
+        }, "rules in spec module");
+        mt.apply(specModule);
+    }
+
     public void structuralChecks(scala.collection.Set<Module> modules, Module mainModule, Option<Module> kModule, Set<String> excludedModuleTags) {
         boolean isSymbolic = excludedModuleTags.contains(Att.CONCRETE());
         boolean isKast = excludedModuleTags.contains(Att.KORE());
         CheckRHSVariables checkRHSVariables = new CheckRHSVariables(errors, !isSymbolic);
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
 
-        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAtt(errors, mainModule, isSymbolic && isKast)::check));
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAtt(errors, kem, mainModule, isSymbolic && isKast)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckConfigurationCells(errors, m, isSymbolic && isKast)::check));
 
@@ -402,6 +443,10 @@ public class Kompile {
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckRewrite(errors, m)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckHOLE(errors, m)::check));
+
+        if (!(isSymbolic && isKast)) { // if it's not the java backend
+            stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckTokens(errors, m)::check));
+        }
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckK(errors)::check));
 
@@ -448,16 +493,16 @@ public class Kompile {
         java.util.Set<Module> allModules = mutable(d.modules());
 
         Module languageParsingModule = Constructors.Module("LANGUAGE-PARSING",
-                Set(d.mainModule(),
-                        d.getModule(d.att().get(Att.SYNTAX_MODULE())).get(),
-                        d.getModule("K-TERM").get(),
-                        d.getModule(RuleGrammarGenerator.ID_PROGRAM_PARSING).get()), Set(), Att());
+                Set(Import(d.mainModule(), true),
+                        Import(d.getModule(d.att().get(Att.SYNTAX_MODULE())).get(), true),
+                        Import(d.getModule("K-TERM").get(), true),
+                        Import(d.getModule(RuleGrammarGenerator.ID_PROGRAM_PARSING).get(), true)), Set(), Att());
         allModules.add(languageParsingModule);
         return Constructors.Definition(d.mainModule(), immutable(allModules), d.att());
     }
 
     public static Definition resolveFreshConstants(Definition input) {
-        return DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(input, false).resolve(m)), "resolving !Var variables")
+        return DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(input, false, null).resolve(m)), "resolving !Var variables")
                 .apply(input);
     }
 
@@ -469,12 +514,8 @@ public class Kompile {
                 .apply(parsedRule);
     }
 
-    public Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, Set<String> excludeModules) {
-        return parseModules(definition, mainModule, entryPointModule, definitionFile, excludeModules, false);
-    }
-
-    public Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, Set<String> excludeModules, boolean readOnlyCache) {
-        Set<Module> modules = definitionParsing.parseModules(definition, mainModule, entryPointModule, definitionFile, excludeModules, readOnlyCache);
+    public Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, Set<String> excludeModules, boolean readOnlyCache, boolean useCachedScanner) {
+        Set<Module> modules = definitionParsing.parseModules(definition, mainModule, entryPointModule, definitionFile, excludeModules, readOnlyCache, useCachedScanner);
         int totalBubbles = definitionParsing.parsedBubbles.get() + definitionParsing.cachedBubbles.get();
         sw.printIntermediate("Parse spec modules [" + definitionParsing.parsedBubbles.get() + "/" + totalBubbles + " rules]");
         return modules;
@@ -484,6 +525,6 @@ public class Kompile {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
-        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule()).concretize(input.mainModule(), s);
+        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule(), kompileOptions.isKore()).concretize(input.mainModule(), s);
     }
 }

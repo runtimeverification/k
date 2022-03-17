@@ -1,0 +1,212 @@
+#!/usr/bin/env bash
+set -e
+set -o pipefail
+set -u
+
+export PATH="$(cd "$(dirname "$0")"; pwd):$PATH"
+
+# initialize flags
+ARGV=()
+dir=.
+inputMode=program
+literal=false
+outputFile=-
+
+# setup temp files
+now=`date +"%Y-%m-%d-%H-%M-%S"`
+tempDir="$(mktemp -d .kparse-${now}-XXXXXXXXXX)"
+tempFiles=("$tempDir")
+trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
+
+KPARSE=$(basename "$0")
+KAST_UTIL="$(dirname "$0")/kast"
+
+ktool="${KPARSE}"
+source "$(dirname "$0")/../lib/kframework/k-util.sh"
+
+print_usage () {
+cat <<HERE
+Usage: $KPARSE <INPUT_FILE> [-d DIR] [-m MODULE] [-s SORT]
+Generate an on-the-fly parser from a K definition and use it to parse a term.
+
+Mandatory arguments to long options are mandatory for short options too.
+
+$KPARSE expects exactly 1 positional argument. It must be either a readable
+file, or '-' (for stdin). By default, this file will be parsed using the main
+syntax module of the K definition and the sort of the \$PGM configuration
+variable. The resulting AST, in KORE format, will be output on stdout. The
+sort, module, and input format used for parsing can be customized; see below.
+If no \$PGM configuration variable exists, the default sort will be the KItem
+sort.
+
+General options:
+
+$(k_util_usage)
+
+$KPARSE options:
+
+  -d, --directory DIR      Look for a kompiled directory ending in "-kompiled"
+                           under the directory DIR
+  -h, --help               Display this help and exit
+  -i, --input MODE         Select input mode to use when parsing. Valid values
+                           are program, kast, binary, json, and kore.
+  -m, --module MODULE      Module to use to generate grammar
+      --output-file FILE   Print resulting AST to FILE
+      --save-temps         Do not delete temporary files when $KPARSE
+                           terminates
+  -s, --sort               Sort to use as start symbol of parser
+      --version            Print version of K
+      --                   Interpret all arguments following as positional
+                           arguments
+HERE
+}
+
+ORIG_ARGV=("$@")
+
+# parse options
+while [[ $# -gt 0 ]]
+do
+  arg="$1"
+  if $literal; then
+    ARGV+=("$1")
+  else
+    case "$arg" in
+      -d|--directory)
+      dir="$2"
+      shift
+      ;;
+
+      -h|--help)
+      print_usage
+      exit 0
+      ;;
+
+      -i|--input)
+      case "$2" in
+        program) ;;
+        kast) ;;
+        binary) ;;
+        json) ;;
+        kore) ;;
+
+        *)
+        error 1 'Invalid value for --input. Should be one of "program", "kast", "binary", "json", or "kore".'
+        ;;
+      esac
+      inputMode="$2"
+      shift
+      ;; 
+
+      -m|--module)
+      module="$2"
+      shift
+      ;;
+
+      --output-file)
+      outputFile="$2"
+      shift
+      ;;
+
+      -s|--sort)
+      sort="$2"
+      shift
+      ;;
+
+      --save-temps)
+      trap - INT TERM EXIT
+      ;;
+
+      --version)
+      kompile --version
+      exit 0
+      ;;
+
+      --)
+      literal=true
+      ;;
+
+      -)
+      ARGV+=("$1")
+      ;;
+
+      -*)
+      print_usage
+      exit 1
+      ;;
+
+      *)
+      ARGV+=("$1")
+      ;;
+    esac
+  fi
+  shift
+done
+
+if [[ "${#ARGV[@]}" -ne 1 ]]; then
+  print_usage
+  error 1 'Must pass exactly one file as a positional argument.'
+fi
+input_file="${ARGV[0]}"
+
+# Compute kompiled directory
+kompiledDir=
+hasKompiledDir=false
+for file in "$dir"/*-kompiled; do
+  [ ! -d "$file" ] && continue
+  kompiledDir=$file
+  if $hasKompiledDir; then
+    error 1 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
+  fi
+  hasKompiledDir=true
+done
+
+if ! $hasKompiledDir; then
+  error 1 'Could not find a compiled definition. Use --directory to specify one.'
+fi
+
+if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then
+  execute "$KAST_UTIL" --output kore "${ORIG_ARGV[@]}"
+  exit $?
+fi
+
+if [[ "$input_file" == "-" ]]; then
+  input_file=/dev/stdin
+elif [ ! -r "$input_file" ]; then
+  error 1 "Could not open file: $input_file"
+fi
+
+if [ "$outputFile" = "-" ]; then
+  outputFile=/dev/stdout
+fi
+
+if [ -z "${module+unset}" ]; then
+  module=$(cat "$kompiledDir"/mainSyntaxModule.txt)
+fi
+
+source "$kompiledDir/configVars.sh"
+if [ -z "${sort+unset}" ]; then
+  if [ -z "${declaredConfigVar_PGM+unset}" ]; then
+    sort=KItem
+  else
+    sort="$declaredConfigVar_PGM"
+  fi
+fi
+
+case "$inputMode" in
+  program)
+  bisonParser="${kompiledDir}/parser_${sort}_${module}" 
+  if [ -x "$bisonParser" ]; then
+    output "$outputFile" execute "$bisonParser" "$input_file"
+  else
+    execute "$KAST_UTIL" --output kore "${ORIG_ARGV[@]}"
+  fi
+  ;;
+
+  kore)
+  output "$outputFile" cat "$input_file"
+  ;;
+
+  *)
+  execute "$KAST_UTIL" --output kore "${ORIG_ARGV[@]}"
+  ;;
+esac

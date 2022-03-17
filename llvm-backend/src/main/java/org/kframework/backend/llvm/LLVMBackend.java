@@ -9,6 +9,7 @@ import org.kframework.backend.kore.KoreBackend;
 import org.kframework.compile.Backend;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KEMException;
@@ -25,6 +26,7 @@ import java.util.Set;
 
 public class LLVMBackend extends KoreBackend {
 
+    private final GlobalOptions globalOptions;
     private final LLVMKompileOptions options;
     private final KExceptionManager kem;
     private final KompileOptions kompileOptions;
@@ -33,11 +35,13 @@ public class LLVMBackend extends KoreBackend {
     @Inject
     public LLVMBackend(
             KompileOptions kompileOptions,
+            GlobalOptions globalOptions,
             FileUtil files,
             KExceptionManager kem,
             LLVMKompileOptions options,
             Tool tool) {
         super(kompileOptions, files, kem, tool);
+        this.globalOptions = globalOptions;
         this.options = options;
         this.kompileOptions = kompileOptions;
         this.kem = kem;
@@ -53,9 +57,17 @@ public class LLVMBackend extends KoreBackend {
         FileUtils.deleteQuietly(files.resolveKompiled("dt"));
         MutableInt warnings = new MutableInt();
         boolean optimize = kompileOptions.optimize1 || kompileOptions.optimize2 || kompileOptions.optimize3;
-        Matching.writeDecisionTreeToFile(files.resolveKompiled("definition.kore"), options.heuristic, files.resolveKompiled("dt"), Matching.getThreshold(getThreshold()), !optimize, kompileOptions.global.includesExceptionType(ExceptionType.USELESS_RULE), options.enableSearch, ex -> {
+        Matching.writeDecisionTreeToFile(
+                files.resolveKompiled("definition.kore"),
+                options.heuristic,
+                files.resolveKompiled("dt"),
+                Matching.getThreshold(getThreshold()),
+                !optimize,
+                globalOptions.includesExceptionType(ExceptionType.USELESS_RULE),
+                options.enableSearch,
+                ex -> {
           kem.addKException(ex);
-          if (kompileOptions.global.includesExceptionType(ex.getType())) {
+          if (globalOptions.includesExceptionType(ex.getType())) {
               warnings.increment();
           }
           return null;
@@ -66,9 +78,29 @@ public class LLVMBackend extends KoreBackend {
         if (options.noLLVMKompile) {
             return;
         }
-        llvmKompile("main", "interpreter");
+        if (options.enableSearch && options.llvmKompileOutput != null) {
+            throw KEMException.criticalError("Can't use --llvm-kompile-output with --enable-search.");
+        }
+        String llvmType;
+        switch (options.llvmKompileType) {
+            case "main":
+            case "search":
+            case "library":
+            case "static":
+                llvmType = options.llvmKompileType;
+                break;
+            default:
+                throw KEMException.criticalError("Non-valid argument for --llvm-kompile-type: " + options.llvmKompileType + ". Expected [main|search|library|static]");
+        }
+
+        String llvmOutput = "interpreter";
+        if (options.llvmKompileOutput != null) {
+            llvmOutput = options.llvmKompileOutput;
+        }
+        llvmKompile(llvmType, llvmOutput);
+
         if (options.enableSearch) {
-          llvmKompile("search", "search");
+            llvmKompile("search", "search");
         }
     }
 

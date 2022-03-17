@@ -2,16 +2,16 @@ Source: kframework
 Section: devel
 Priority: optional
 Maintainer: Dwight Guth <dwight.guth@runtimeverification.com>
-Build-Depends: clang-10 , cmake , debhelper (>=9) , flex , libboost-test-dev , libgmp-dev , libjemalloc-dev , libmpfr-dev , libyaml-dev , maven , openjdk-11-jdk , zlib1g-dev
+Build-Depends: clang-12 , cmake , debhelper (>=9) , flex , libboost-test-dev , libgmp-dev , libjemalloc-dev , libmpfr-dev , libyaml-dev , maven , openjdk-11-jdk , zlib1g-dev
 Standards-Version: 3.9.6
-Homepage: https://github.com/kframework/k
+Homepage: https://github.com/runtimeverification/k
 
 Package: kframework
 Architecture: any
 Section: devel
 Priority: optional
-Depends: bison , clang-10 , default-jre-headless , flex , gcc , libgmp-dev , libjemalloc-dev , libmpfr-dev , libyaml-0-2 , libz3-4 , lld-10 , pkg-config , z3
+Depends: bison , clang-12 , default-jre-headless , flex , gcc , libgmp-dev , libjemalloc-dev , libmpfr-dev , libyaml-0-2 , libz3-4 , lld-12 , pkg-config , z3
 Description: K framework toolchain
  Includes K Framework compiler for K language definitions, and K interpreter
  and prover for programs written in languages defined in K.
-Homepage: https://github.com/kframework/k
+Homepage: https://github.com/runtimeverification/k

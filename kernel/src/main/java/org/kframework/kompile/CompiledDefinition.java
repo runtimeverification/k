@@ -18,6 +18,7 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KToken;
 import org.kframework.kore.Sort;
 import org.kframework.kore.VisitK;
+import org.kframework.main.GlobalOptions;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
@@ -25,6 +26,9 @@ import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
+import org.kframework.utils.StringUtil;
+import org.kframework.utils.options.InnerParsingOptions;
+import org.kframework.utils.options.OuterParsingOptions;
 import scala.Option;
 import scala.Tuple2;
 import scala.util.Either;
@@ -47,6 +51,9 @@ import static org.kframework.kore.KORE.*;
 
 public class CompiledDefinition implements Serializable {
     public final KompileOptions kompileOptions;
+    private final OuterParsingOptions outerParsingOptions;
+    private transient final GlobalOptions globalOptions;
+    private final InnerParsingOptions innerParsingOptions;
     private final Definition parsedDefinition;
     public final Definition kompiledDefinition;
     public final Sort programStartSymbol;
@@ -58,8 +65,11 @@ public class CompiledDefinition implements Serializable {
     private Map<String, Rule> cachedParsedPatterns = new ConcurrentHashMap<>();
 
 
-    public CompiledDefinition(KompileOptions kompileOptions, Definition parsedDefinition, Definition kompiledDefinition, FileUtil files, KExceptionManager kem, KLabel topCellInitializer) {
+    public CompiledDefinition(KompileOptions kompileOptions, OuterParsingOptions outerParsingOptions, InnerParsingOptions innerParsingOptions, GlobalOptions globalOptions, Definition parsedDefinition, Definition kompiledDefinition, FileUtil files, KExceptionManager kem, KLabel topCellInitializer) {
         this.kompileOptions = kompileOptions;
+        this.outerParsingOptions = outerParsingOptions;
+        this.innerParsingOptions = innerParsingOptions;
+        this.globalOptions = globalOptions;
         this.parsedDefinition = parsedDefinition;
         this.kompiledDefinition = kompiledDefinition;
         initializeConfigurationVariableDefaultSorts(files);
@@ -75,7 +85,7 @@ public class CompiledDefinition implements Serializable {
         if (exitCodeRule == null) {
             this.exitCodePattern = null;
         } else {
-            this.exitCodePattern = new Kompile(kompileOptions, files, kem).compileRule(kompiledDefinition, exitCodeRule);
+            this.exitCodePattern = new Kompile(kompileOptions, outerParsingOptions, innerParsingOptions, globalOptions, files, kem).compileRule(kompiledDefinition, exitCodeRule);
         }
     }
 
@@ -125,7 +135,23 @@ public class CompiledDefinition implements Serializable {
                     }.apply(r.body());
                 });
         sb.append(arr);
-        sb.append(")");
+        sb.append(")\n");
+
+        for (Production prod : iterable(kompiledDefinition.mainModule().productions())) {
+            if (prod.att().contains("cell") && prod.att().contains("parser")) {
+                String att = prod.att().get("parser");
+                String[][] parts = StringUtil.splitTwoDimensionalAtt(att);
+                for (String[] part : parts) {
+                    if (part.length != 2) {
+                        throw KEMException.compilerError("Invalid value for parser attribute: " + att, prod);
+                    }
+                    String name = part[0];
+                    String module = part[1];
+                    sb.append("declaredConfigVarModule_" + name + "='" + module + "'\n");
+                }
+            }
+        }
+
         files.saveToKompiled("configVars.sh", sb.toString());
     }
 
@@ -174,26 +200,26 @@ public class CompiledDefinition implements Serializable {
      */
 
     public K parseSingleTerm(Module module, Sort programStartSymbol, KExceptionManager kem, String s, Source source) {
-        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, kompileOptions.strict())) {
+        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, true)) {
             Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> res = parseInModule.parseString(s, programStartSymbol, source);
             kem.addAllKException(res._2().stream().map(e -> e.getKException()).collect(Collectors.toSet()));
             if (res._1().isLeft()) {
                 throw res._1().left().get().iterator().next();
             }
-            return new TreeNodesToKORE(Outer::parseSort, kompileOptions.strict()).down(res._1().right().get());
+            return new TreeNodesToKORE(Outer::parseSort, true).down(res._1().right().get());
         }
     }
 
     public Module getExtensionModule(Module module) {
-        return RuleGrammarGenerator.getCombinedGrammar(module, kompileOptions.strict()).getExtensionModule();
+        return RuleGrammarGenerator.getCombinedGrammar(module, true).getExtensionModule();
     }
 
     public Rule compilePatternIfAbsent(FileUtil files, KExceptionManager kem, String pattern, Source source) {
-        return cachedcompiledPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, files, kem).parseAndCompileRule(this, p, source,
+        return cachedcompiledPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, outerParsingOptions, innerParsingOptions, globalOptions, files, kem).parseAndCompileRule(this, p, source,
                 Optional.of(parsePatternIfAbsent(files, kem, pattern, source))));
     }
 
     public Rule parsePatternIfAbsent(FileUtil files, KExceptionManager kem, String pattern, Source source) {
-        return cachedParsedPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, files, kem).parseRule(this, p, source));
+        return cachedParsedPatterns.computeIfAbsent(pattern, p -> new Kompile(kompileOptions, outerParsingOptions, innerParsingOptions, globalOptions, files, kem).parseRule(this, p, source));
     }
 }

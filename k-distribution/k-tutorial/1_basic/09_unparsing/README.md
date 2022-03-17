@@ -23,7 +23,7 @@ constructing a sound algorithm that takes a grammar and an AST and emits text
 that could be parsed via that grammar to the original AST is an
 **NP-hard problem**. As a result, in the interests of avoiding exponential time
 algorithms when users rarely care about unparsing being completely sound, we
-take certain shortcuts that provide a linear-time algorithm that /approximates/
+take certain shortcuts that provide a linear-time algorithm that _approximates_
 a sound solution to the problem while sacrificing the notion that the result
 can be parsed into the exact original term in all cases.
 
@@ -127,7 +127,7 @@ endmodule
 ```
 
 This is a statement grammar, simplified to the point of meaninglessness, but
-still useful as an objecte lesson in unparsing. Consider the following program
+still useful as an object lesson in unparsing. Consider the following program
 in this grammar (`if.stmt`):
 
 ```
@@ -203,33 +203,39 @@ string.
 Provided for reference is a table with a complete list of all valid format
 codes, followed by their meaning:
 
-| Format Code | Meaning                                                       |
-| ----------- | ------------------------------------------------------------- |
-| n           | Insert '\n' followed by the current indentation level        |
-| i           | Increase the current indentation level by 1                   |
-| d           | Decrease the current indentation level by 1                   |
-| c           | Move to the next color in the list of colors for this
-                production (see next section)                                 |
-| r           | Reset color to the default foreground color for the terminal
-                (see next section)                                            |
-| an integer  | Print a terminal or non-terminal from the production. The
-                integer is treated as a 1-based index into the terminals and
-                non-terminals of the production.
-
-                If the offset refers to a terminal, move to the next color in
-                the list of colors for this production, print the value of
-                that terminal, then reset the color to the default foreground
-                color for the terminal.
-
-                If the offset refers to a regular expression terminal, it is
-                an error.
-
-                If the offset refers to a non-terminal, unparse the
-                corresponding child of the current term (starting with the
-                current indentation level) and print the resulting text, then
-                set the current color and indentation level to the color and
-                indentation level following unparsing that term.              |
-| other char  | Print that character verbatim                                 |
+<table>
+<tr><th> Format Code </th><th> Meaning                                          </th></tr>
+<tr><td> n           </td><td> Insert '\n' followed by the current indentation
+                               level                                            </td></tr>
+<tr><td> i           </td><td> Increase the current indentation level by 1      </td></tr>
+<tr><td> d           </td><td> Decrease the current indentation level by 1      </td></tr>
+<tr><td> c           </td><td> Move to the next color in the list of colors for
+                               this production (see next section)               </td></tr>
+<tr><td> r           </td><td> Reset color to the default foreground color for
+                               the terminal (see next section)                  </td></tr>
+<tr><td> an integer  </td><td> Print a terminal or non-terminal from the
+                               production. The integer is treated as a 1-based
+                               index into the terminals and non-terminals of
+                               the production.
+<br/>
+<br/>                          If the offset refers to a terminal, move to the
+                               next color in the list of colors for this
+                               production, print the value of that terminal,
+                               then reset the color to the default foreground
+                               color for the terminal.
+<br/>
+<br/>                          If the offset refers to a regular expression
+                               terminal, it is an error.
+<br/>
+<br/>                          If the offset refers to a non-terminal, unparse
+                               the corresponding child of the current term
+                               (starting with the current indentation level)
+                               and print the resulting text, then set the
+                               current color and indentation level to the color
+                               and indentation level following unparsing that
+                               term.                                            </td></tr>
+<tr><td> other char  </td><td> Print that character verbatim                    </td></tr>
+</table>
 
 ### Exercise
 
@@ -274,11 +280,44 @@ list of colors associated with each production, and then the format attribute
 is used to control how those colors are used to unparse the term. At its most
 basic level, you can set the `color` attribute to color all the terminals in
 the production a certain color, or you can use the `colors` attribute to
-specify a comma separated list of colors for each non-terminal in the
-production. At a more advanced level, the `%c` and `%r` format codes control
-how the formatter interacts with the list of colors specified by the `colors`
+specify a comma-separated list of colors for each terminal in the production.
+At a more advanced level, the `%c` and `%r` format codes control how the
+formatter interacts with the list of colors specified by the `colors`
 attribute. You can essentially think of the `color` attribute as a way of
 specifying that you want all the colors in the list to be the same color.
+
+Note that the `%c` and `%r` format codes are relatively primitive in nature. 
+The `color` and `colors` attributes merely maintain a list of colors, whereas
+the `%c` and `%r` format codes merely control how to advance through that list
+and how individual text is colored.
+
+It is an error if the `colors` attribute does not provide all the colors needed
+by the terminals and escape codes in the production. `%r` does not change the
+position in the list of colors at all, so the next `%c` will advance to the
+following color.
+
+As a complete example, here is a variant of LESSON-09-A which colors the
+various boolean operators:
+
+```k
+module LESSON-09-D
+  imports BOOL
+
+  syntax Exp ::= "(" Exp ")" [bracket]
+               | Bool
+               > "!" Exp [color(yellow)]
+               > left:
+                 Exp "&&" Exp [color(red)]
+               | Exp "^" Exp [color(blue)]
+               | Exp "||" Exp [color(green)]
+
+  syntax Exp ::= id(Exp) [function]
+  rule id(E) => E
+endmodule
+```
+
+For a complete list of allowed colors, see 
+[here](https://github.com/kframework/llvm-backend/blob/master/lib/ast/AST.cpp#L381).
 
 ## Exercises
 
@@ -290,7 +329,7 @@ specifying that you want all the colors in the list to be the same color.
 style the expression grammar from lesson 1.8, problem 3 according to your own
 personal preferences for syntax highlighting and code formatting. You can
 view the result of the unparser on a function term without evaluating that
-function by means of the command `kast --output pretty <file>`.
+function by means of the command `kparse <file> | kore-print -`.
 
 ## Next lesson
 

@@ -29,11 +29,11 @@ public class CheckRewrite {
 
     public void check(Sentence sentence) {
         if (sentence instanceof RuleOrClaim) {
-            check(((RuleOrClaim) sentence).body(), sentence instanceof Claim);
+            check((RuleOrClaim) sentence, sentence instanceof Claim);
         }
     }
 
-    private void check(K body, boolean isClaim) {
+    private void check(RuleOrClaim sentence, boolean isClaim) {
         class Holder {
             boolean hasRewrite = false;
             boolean inRewrite = false;
@@ -43,7 +43,7 @@ public class CheckRewrite {
             boolean inFunctionBody = false;
         }
         Holder h = new Holder();
-        new VisitK() {
+        VisitK visitor = new VisitK() {
             @Override
             public void apply(KRewrite k) {
                 boolean inRewrite = h.inRewrite;
@@ -77,6 +77,14 @@ public class CheckRewrite {
             }
 
             @Override
+            public void apply(KVariable k) {
+                if (!h.inRewriteRHS && k.name().startsWith("?")) {
+                    errors.add(KEMException.compilerError(
+                            "Existential variable " + k.name() + " found in LHS. Existential variables are only allowed in the RHS.", k));
+                }
+            }
+
+            @Override
             public void apply(KApply k) {
                 if (!(k.klabel() instanceof KVariable) && k.klabel().name().equals("#fun2") || k.klabel().name().equals("#fun3")) {
                     if (k.klabel().name().equals("#fun2")) {
@@ -99,7 +107,7 @@ public class CheckRewrite {
                         h.inFunctionContext = wasInFunctionContext;
                         h.inFunctionBody = wasInFunctionBody;
                         apply(k.items().get(1));
-                    } else {
+                    } else if (k.klabel().name().equals("#fun3")) {
                         boolean wasInRewrite = h.inRewrite;
                         boolean hadRewrite = h.hasRewrite;
                         boolean wasInFunctionContext = h.inFunctionContext;
@@ -117,6 +125,24 @@ public class CheckRewrite {
                         h.inFunctionContext = wasInFunctionContext;
                         h.inFunctionBody = wasInFunctionBody;
                         apply(k.items().get(2));
+                    } else {
+                        boolean wasInRewrite = h.inRewrite;
+                        boolean hadRewrite = h.hasRewrite;
+                        boolean wasInFunctionContext = h.inFunctionContext;
+                        boolean wasInFunctionBody = h.inFunctionBody;
+                        h.inRewrite = true;
+                        h.hasRewrite = true;
+                        h.inFunctionContext = false;
+                        h.inFunctionBody = false;
+                        apply(k.items().get(0));
+                        apply(k.items().get(2));
+                        // in well formed programs this should always reset to true and true, but we want to make sure we
+                        // don't create spurious reports if this constraint was violated by the user.
+                        h.inRewrite = wasInRewrite;
+                        h.hasRewrite = hadRewrite;
+                        h.inFunctionContext = wasInFunctionContext;
+                        h.inFunctionBody = wasInFunctionBody;
+                        apply(k.items().get(1));
                     }
                 } else if (!(k.klabel() instanceof KVariable) && k.klabel().name().equals("#withConfig")) {
                     boolean inFunctionContext = h.inFunctionContext;
@@ -137,9 +163,11 @@ public class CheckRewrite {
                     super.apply(k);
                 }
             }
-        }.accept(body);
+        };
+        visitor.accept(sentence.requires());
+        visitor.accept(sentence.body());
         if (!h.hasRewrite && !isClaim) {
-            errors.add(KEMException.compilerError("Rules must have at least one rewrite.", body));
+            errors.add(KEMException.compilerError("Rules must have at least one rewrite.", sentence.body()));
         }
     }
 }

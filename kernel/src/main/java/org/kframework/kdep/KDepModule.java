@@ -5,6 +5,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
+import org.kframework.kompile.KompileOptions;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
@@ -12,6 +13,7 @@ import org.kframework.utils.inject.Options;
 import org.kframework.utils.inject.OuterParsingModule;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.OuterParsingOptions;
+import org.kframework.utils.options.OutputDirectoryOptions;
 
 /**
  * Guice module for kdep tool. Binds the information needed to compute the kompiled directory as well as the options
@@ -36,7 +38,8 @@ public class KDepModule extends AbstractModule {
     }
 
     @Provides
-    OuterParsingOptions outerParsingOptions(KDepOptions options) {
-        return options.outerParsing;
-    }
+    OuterParsingOptions outerParsingOptions(KDepOptions options) { return options.outerParsing; }
+
+    @Provides
+    OutputDirectoryOptions outputDirectoryOptions(KDepOptions options) { return options.outputDirectory; }
 }

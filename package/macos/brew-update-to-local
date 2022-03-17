@@ -1,6 +1,6 @@
 #!/bin/sh -exu
 package="$1" ; shift
 version="$1" ; shift
-sed -i "" -e '/install-rust/d' -e 's!^  url ".*"$!  url "file:///'$(pwd)/../$package-$version'-src.tar.gz"!' \
+sed -i "" -e 's!^  url ".*"$!  url "file:///'$(pwd)/../$package-$version'-src.tar.gz"!' \
        -e 's!^  sha256 ".*"$!  sha256 "'$(shasum -a 256 ../$package-$version-src.tar.gz | awk '{print $1}')'"!' \
     Formula/$package.rb

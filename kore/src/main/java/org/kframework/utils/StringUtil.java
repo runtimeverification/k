@@ -6,7 +6,9 @@ import org.apache.commons.lang3.StringUtils;
 import com.beust.jcommander.JCommander;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -630,7 +632,18 @@ public class StringUtil {
             "Tild",// 7e
             null// 7f
     };
+    private static final Map<String, Character> asciiReadableEncodingDefaultMap = new HashMap<>();
+    static {
+        for (int i = 0; i < asciiReadableEncodingDefault.length; i++)
+            if (asciiReadableEncodingDefault[i] != null && asciiReadableEncodingDefault[i].length() > 1)
+                asciiReadableEncodingDefaultMap.put(asciiReadableEncodingDefault[i], (char) i);
+    }
 
+    /**
+     * Encode special characters depending on context.
+     * @param asciiReadableEncodingTable Override the default `asciiReadableEncodingDefault` depending on language requirements
+     * @param identChar which characters to replace
+     */
     public static void encodeStringToAlphanumeric(StringBuilder sb, String name, String[] asciiReadableEncodingTable, Pattern identChar, String escapeChar) {
         boolean inIdent = true;
         for (int i = 0; i < name.length(); i++) {
@@ -659,13 +672,24 @@ public class StringUtil {
     }
 
     public static String decodeKoreString(String encoded) {
-        for (int i = 0; i < asciiReadableEncodingDefault.length; i++) {
-            String encoding = asciiReadableEncodingDefault[i];
-            if (encoding == null) continue;
-            encoding = "'" + encoding + "'";
-            encoded = encoded.replaceAll(encoding, String.valueOf((char) i));
+        boolean quotedState = false;
+        StringBuilder resultedEncoding = new StringBuilder();
+        for (int i = 0; i < encoded.length(); i++) {
+            if (quotedState) {
+                if (encoded.charAt(i) == '\'') {
+                    quotedState = false;
+                } else {
+                    resultedEncoding.append(asciiReadableEncodingDefaultMap.get(encoded.substring(i, i + 4)));
+                    i += 3;
+                }
+            } else {
+                if (encoded.charAt(i) == '\'') {
+                    quotedState = true;
+                } else
+                    resultedEncoding.append(encoded.charAt(i));
+            }
         }
-        return encoded;
+        return resultedEncoding.toString();
     }
 
     public static String[] splitOneDimensionalAtt(String att) {

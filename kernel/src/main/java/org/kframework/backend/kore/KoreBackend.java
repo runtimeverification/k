@@ -3,6 +3,7 @@ package org.kframework.backend.kore;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
+import org.kframework.attributes.Att;
 import org.kframework.compile.AbstractBackend;
 import org.kframework.compile.AddCoolLikeAtt;
 import org.kframework.compile.AddImplicitComputationCell;
@@ -22,6 +23,7 @@ import org.kframework.compile.LabelInfo;
 import org.kframework.compile.LabelInfoFromModule;
 import org.kframework.compile.MinimizeTermConstruction;
 import org.kframework.compile.NumberSentences;
+import org.kframework.compile.PropagateMacro;
 import org.kframework.compile.ResolveAnonVar;
 import org.kframework.compile.ResolveContexts;
 import org.kframework.compile.ResolveFreshConstants;
@@ -35,6 +37,7 @@ import org.kframework.definition.Definition;
 import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
 import org.kframework.definition.ModuleTransformer;
+import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
@@ -137,17 +140,22 @@ public class KoreBackend extends AbstractBackend {
         DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections(kompileOptions.coverage)::gen, "adding sort projections");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         Function1<Definition, Definition> addCoolLikeAtt = d -> DefinitionTransformer.fromSentenceTransformer(new AddCoolLikeAtt(d.mainModule())::add, "add cool-like attribute").apply(d);
+        Function1<Definition, Definition> propagateMacroToRules =
+                d -> DefinitionTransformer.fromSentenceTransformer((m, s) -> new PropagateMacro(m).propagate(s), "propagate macro labels from production to rules").apply(d);
         Function1<Definition, Definition> expandMacros = d -> {
           ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d, true);
           return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kem, kompileOptions, false).expand(s), "expand macros").apply(d);
         };
         DefinitionTransformer constantFolding = DefinitionTransformer.fromSentenceTransformer(new ConstantFolding()::fold, "constant expression folding");
-        Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(d, true).resolve(m)), "resolving !Var variables").apply(d);
+        Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(d, true, kompileOptions.topCell).resolve(m)), "resolving !Var variables").apply(d);
         GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
         Function1<Definition, Definition> genCoverage = d -> DefinitionTransformer.fromRuleBodyTransformerWithRule((r, body) -> cov.gen(r, body, d.mainModule()), "generate coverage instrumentation").apply(d);
         DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
         Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, true)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
+        Function1<Definition, Definition> markExtraConcreteRules = d -> DefinitionTransformer.fromSentenceTransformer((m, s) ->
+                s instanceof Rule && kompileOptions.extraConcreteRuleLabels.contains(s.att().getOption(Att.LABEL()).getOrElse(() -> null)) ?
+                        Rule.apply(((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att().add(Att.CONCRETE())) : s, "mark extra concrete rules").apply(d);
 
         return def -> resolveIO
                 .andThen(resolveFun)
@@ -162,6 +170,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
                 .andThen(constantFolding)
+                .andThen(propagateMacroToRules)
                 .andThen(expandMacros)
                 .andThen(guardOrs)
                 .andThen(AddImplicitComputationCell::transformDefinition)
@@ -171,11 +180,12 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(subsortKItem)
                 .andThen(d -> new Strategy().addStrategyCellToRulesTransformer(d).apply(d))
                 .andThen(d -> Strategy.addStrategyRuleToMainModule(def.mainModule().name()).apply(d))
-                .andThen(ConcretizeCells::transformDefinition)
+                .andThen(d -> ConcretizeCells.transformDefinition(d, true))
                 .andThen(genCoverage)
                 .andThen(Kompile::addSemanticsModule)
                 .andThen(resolveConfigVar)
                 .andThen(addCoolLikeAtt)
+                .andThen(markExtraConcreteRules)
                 .apply(def);
     }
 
@@ -191,6 +201,8 @@ public class KoreBackend extends AbstractBackend {
         ModuleTransformer resolveSemanticCasts = ModuleTransformer.fromSentenceTransformer(
                 new ResolveSemanticCasts(true)::resolve,
                 "resolving semantic casts");
+        Function1<Module, Module> propagateMacroToRules =
+                m -> ModuleTransformer.fromSentenceTransformer((m2, s) -> new PropagateMacro(m2).propagate(s), "propagate macro labels from production to rules").apply(m);
         Function1<Module, Module> expandMacros = m -> {
           ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(m, true);
           return ModuleTransformer.fromSentenceTransformer((m2, s) -> new ExpandMacros(transformer, m2, files, kem, kompileOptions, false).expand(s), "expand macros").apply(m);
@@ -199,15 +211,16 @@ public class KoreBackend extends AbstractBackend {
         ModuleTransformer addImplicitComputationCell = ModuleTransformer.fromSentenceTransformer(
                 new AddImplicitComputationCell(configInfo, labelInfo)::apply,
                 "concretizing configuration");
-        Function1<Module, Module> resolveFreshConstants = d -> ModuleTransformer.from(new ResolveFreshConstants(def, true)::resolve, "resolving !Var variables").apply(d);
+        Function1<Module, Module> resolveFreshConstants = d -> ModuleTransformer.from(new ResolveFreshConstants(def, true, kompileOptions.topCell)::resolve, "resolving !Var variables").apply(d);
         ModuleTransformer concretizeCells = ModuleTransformer.fromSentenceTransformer(
-                new ConcretizeCells(configInfo, labelInfo, sortInfo, mod)::concretize,
+                new ConcretizeCells(configInfo, labelInfo, sortInfo, mod, true)::concretize,
                 "concretizing configuration");
         ModuleTransformer generateSortProjections = ModuleTransformer.from(new GenerateSortProjections(false)::gen, "adding sort projections");
 
         return m -> resolveAnonVars
                 .andThen(resolveSemanticCasts)
                 .andThen(generateSortProjections)
+                .andThen(propagateMacroToRules)
                 .andThen(expandMacros)
                 .andThen(addImplicitComputationCell)
                 .andThen(resolveFreshConstants)
