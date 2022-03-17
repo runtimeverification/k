@@ -1,13 +1,5 @@
 from .cli_utils import fatal
-from .kast import (
-    KRewrite,
-    KRule,
-    isKApply,
-    isKRewrite,
-    isKRule,
-    isKSequence,
-    readKastTerm,
-)
+from .kast import KApply, KRewrite, KRule, KSequence, readKastTerm
 
 
 def getRuleById(definition, rule_id):
@@ -21,29 +13,24 @@ def getRuleById(definition, rule_id):
     Output: json encoded rule which has identifier rule_id.
     """
 
-    for module in definition['modules']:
-        for sentence in module['localSentences']:
-            if isKRule(sentence) and 'att' in sentence:
-                atts = sentence['att']['att']
-                if 'UNIQUE_ID' in atts and atts['UNIQUE_ID'] == rule_id:
+    for module in definition.modules:
+        for sentence in module.sentences:
+            if type(sentence) is KRule:
+                if 'UNIQUE_ID' in sentence.att and sentence.att['UNIQUE_ID'] == rule_id:
                     return sentence
     fatal('Could not find rule with ID: ' + rule_id)
 
 
-def stripCoverageLogger(rule):
-    ruleBody = rule['body']
-    ruleRequires = rule['requires']
-    ruleEnsures = rule['ensures']
-    ruleAtts = rule['att']
-
-    if isKRewrite(ruleBody):
-        ruleLHS = ruleBody['lhs']
-        ruleRHS = ruleBody['rhs']
-        if isKApply(ruleRHS) and ruleRHS['label'].startswith('project:'):
-            ruleRHSseq = ruleRHS['args'][0]
-            if isKSequence(ruleRHSseq) and len(ruleRHSseq['items']) == 2:
-                ruleBody = KRewrite(ruleLHS, ruleRHSseq['items'][1])
-    return KRule(ruleBody, requires=ruleRequires, ensures=ruleEnsures, att=ruleAtts)
+def stripCoverageLogger(rule: KRule):
+    ruleBody = rule.body
+    if type(ruleBody) is KRewrite:
+        ruleLHS = ruleBody.lhs
+        ruleRHS = ruleBody.rhs
+        if type(ruleRHS) is KApply and ruleRHS.label.startswith('project:'):
+            ruleRHSseq = ruleRHS.args[0]
+            if type(ruleRHSseq) is KSequence and ruleRHSseq.arity == 2:
+                ruleBody = KRewrite(ruleLHS, ruleRHSseq.items[1])
+    return rule.let(body=ruleBody)
 
 
 def translateCoverage(src_all_rules, dst_all_rules, dst_definition, src_rules_list):
@@ -77,15 +64,14 @@ def translateCoverage(src_all_rules, dst_all_rules, dst_definition, src_rules_li
 
     # Filter out non-functional rules from rule map (determining if they are functional via the top symbol in the rule being `<generatedTop>`)
     dst_non_function_rules = []
-    for module in dst_definition['modules']:
-        for sentence in module['localSentences']:
-            if isKRule(sentence):
-                ruleBody = sentence['body']
-                ruleAtt = sentence['att']['att']
-                if (isKApply(ruleBody) and ruleBody['label'] == '<generatedTop>') \
-                        or (isKRewrite(ruleBody) and isKApply(ruleBody['lhs']) and ruleBody['lhs']['label'] == '<generatedTop>'):
-                    if 'UNIQUE_ID' in ruleAtt:
-                        dst_non_function_rules.append(ruleAtt['UNIQUE_ID'])
+    for module in dst_definition.modules:
+        for sentence in module.sentences:
+            if type(sentence) is KRule:
+                ruleBody = sentence.body
+                if (type(ruleBody) is KApply and ruleBody.label == '<generatedTop>') \
+                        or (type(ruleBody) is KRewrite and type(ruleBody.lhs) is KApply and ruleBody.lhs.label == '<generatedTop>'):
+                    if 'UNIQUE_ID' in sentence.att:
+                        dst_non_function_rules.append(sentence.att['UNIQUE_ID'])
 
     # Convert the src_coverage rules to dst_no_coverage rules via the maps generated above
     dst_rule_list = []
