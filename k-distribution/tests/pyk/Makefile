@@ -37,8 +37,8 @@ VENV     := venv/pyvenv.cfg
 ACTIVATE := . venv/bin/activate
 
 $(VENV):
-	   virtualenv --python python3.8 venv  \
-	&& $(ACTIVATE)                         \
+	   virtualenv --python python3.8 --pip 22.0.4 venv \
+	&& $(ACTIVATE)                                     \
 	&& pip install --editable $(K_LIB)/pyk
 
 # Tests
