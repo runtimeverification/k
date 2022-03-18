@@ -4,13 +4,16 @@ from unittest import TestCase
 from pyk.kast import (
     KApply,
     KDefinition,
+    KRewrite,
     KSequence,
     KVariable,
     ktokenDots,
     readKastTerm,
 )
 from pyk.kastManip import (
+    buildRule,
     collapseDots,
+    getCell,
     removeGeneratedCells,
     structurallyFrameKCell,
     substitute,
@@ -74,3 +77,23 @@ class CollapseDotsTest(ConfigurationTest):
 
         # Then
         self.assertEqual(config_actual, config_expected)
+
+
+class BuildRuleTest(ConfigurationTest):
+
+    def test(self):
+        # Given
+        config_pre = self.GENERATED_TOP_CELL_1
+        config_post = substitute(self.GENERATED_TOP_CELL_1, {'MAP': KVariable('MAP2')})
+
+        state_cell_expected = KRewrite(KVariable('_MAP'), KVariable('?_MAP2'))
+        var_map_expected = {'_MAP': KVariable('MAP'), '?_MAP2': KVariable('MAP2')}
+
+        # When
+        rule, var_map_actual = buildRule('id1', config_pre, config_post)
+        state_cell_actual = getCell(rule.body, 'STATE_CELL')
+
+        # Then
+        self.assertEqual(state_cell_actual, state_cell_expected)
+        for k in var_map_expected:
+            self.assertEqual(var_map_actual[k], var_map_expected[k])
