@@ -25,6 +25,7 @@ RUN    apt-get update        \
         python               \
         python3              \
         python3-graphviz     \
+        python3-venv         \
         zlib1g-dev
 
 RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.11 \
