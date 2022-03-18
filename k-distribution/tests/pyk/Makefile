@@ -33,13 +33,17 @@ kompile: $(llvm_imp_kompiled) $(haskell_imp_kompiled)
 
 # Virtualenv
 
-VENV     := venv/pyvenv.cfg
-ACTIVATE := . venv/bin/activate
+VENV        := venv/pyvenv.cfg
+ACTIVATE    := . venv/bin/activate
+PYTHON      := python3.8
+PIP         := pip
+PIP_VERSION := 22.0.4
 
 $(VENV):
-	   virtualenv --python python3.8 --pip 22.0.4 venv \
-	&& $(ACTIVATE)                                     \
-	&& pip install --editable $(K_LIB)/pyk
+	   $(PYTHON) -m venv venv                 \
+	&& $(ACTIVATE)                            \
+	&& $(PIP) install --upgrade $(PIP)        \
+	&& $(PIP) install --editable $(K_LIB)/pyk
 
 # Tests
 
@@ -76,7 +80,7 @@ test-pytest: $(pytests:=.pytest)
 
 .SECONDEXPANSION:
 %.pytest: % $$(FILE_DEPS) $(VENV)
-	$(ACTIVATE) && python3 -m unittest $<
+	$(ACTIVATE) && $(PYTHON) -m unittest $<
 
 ## proofs to turn to json ahead of time
 
