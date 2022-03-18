@@ -554,7 +554,7 @@ def setCell(constrainedTerm, cellVariable, cellValue):
     (state, constraint) = splitConfigAndConstraints(constrainedTerm)
     (config, subst) = splitConfigFrom(state)
     subst[cellVariable] = cellValue
-    return KApply('#And', [substitute(config, subst), constraint])
+    return mlAnd([substitute(config, subst), constraint])
 
 
 def structurallyFrameKCell(constrainedTerm):
