@@ -640,7 +640,8 @@ def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, pr
     ruleBody = pushDownRewrites(KRewrite(initConfig, finalConfig))
     ruleRequires = simplifyBool(unsafeMlPredToBool(initConstraint))
     ruleEnsures = simplifyBool(unsafeMlPredToBool(finalConstraint))
-    ruleAtt = None if claim or priority is None else KAtt(atts={'priority': str(priority)})
+    attDict = {} if claim or priority is None else {'priority': str(priority)}
+    ruleAtt = KAtt(atts=attDict)
     if not claim:
         rule = KRule(ruleBody, requires=ruleRequires, ensures=ruleEnsures, att=ruleAtt)
     else:
