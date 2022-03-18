@@ -105,7 +105,7 @@ pipeline {
             always {
               sh '''
                 rm -rf k-distribution/k-tutorial/1_basic/build
-                rm -rf kframework-${env.VERSION}
+                rm -rf kframework-${VERSION}
                 make --directory=k-distribution/tests/regression-new clean
                 make --directory=k-exercises clean
                 make --directory=haskell-backend/src/main/native/haskell-backend clean
