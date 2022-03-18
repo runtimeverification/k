@@ -35,7 +35,7 @@ kompile: $(llvm_imp_kompiled) $(haskell_imp_kompiled)
 
 VENV        := venv/pyvenv.cfg
 ACTIVATE    := . venv/bin/activate
-PYTHON      := python3.8
+PYTHON      := python3
 PIP         := pip
 PIP_VERSION := 22.0.4
 

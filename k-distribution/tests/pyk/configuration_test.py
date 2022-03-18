@@ -66,8 +66,8 @@ class CollapseDotsTest(ConfigurationTest):
 
     def test(self):
         # Given
-        config_before = substitute(self.T_CELL, {'MAP': ktokenDots})
-        config_expected = KApply('<T>', [self.K_CELL, ktokenDots])
+        config_before = substitute(self.GENERATED_TOP_CELL_1, {'MAP': ktokenDots, '_GENERATED_COUNTER_PLACEHOLDER': ktokenDots})
+        config_expected = KApply('<generatedTop>', [KApply('<T>', [self.K_CELL, ktokenDots]), ktokenDots])
 
         # When
         config_actual = collapseDots(config_before)
