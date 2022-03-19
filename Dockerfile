@@ -25,7 +25,6 @@ RUN    apt-get update        \
         python               \
         python3              \
         python3-graphviz     \
-        python3-venv         \
         zlib1g-dev
 
 RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.11 \
@@ -74,6 +73,10 @@ ADD k-distribution/pom.xml                                     /home/user/.tmp-m
 ADD kore/pom.xml                                               /home/user/.tmp-maven/kore/
 RUN    cd /home/user/.tmp-maven               \
     && mvn --batch-mode dependency:go-offline
+
+RUN    curl -L https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
+    && python3 get-pip.py                                         \
+    && pip install --upgrade pip virtualenv
 
 RUN    git config --global user.email 'admin@runtimeverification.com' \
     && git config --global user.name  'RV Jenkins'                    \
