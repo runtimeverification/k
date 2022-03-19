@@ -76,14 +76,16 @@ public class MDsourceTest {
         ExtractFencedKCodeFromMarkdown mdExtractor = new ExtractFencedKCodeFromMarkdown(kem, selectExp);
     }
 
+    @Test
     public void test4() {
-        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions(false, GlobalOptions.Warnings.ALL, false));
         TagSelector.parseTags("k a", new Source(MDsourceTest.class.toString()), kem);
         Assert.assertEquals(1, kem.getExceptions().size());
     }
 
+    @Test
     public void test5() {
-        KExceptionManager kem = new KExceptionManager(new GlobalOptions());
+        KExceptionManager kem = new KExceptionManager(new GlobalOptions(false, GlobalOptions.Warnings.ALL, false));
         TagSelector.parseTags("{k a", new Source(MDsourceTest.class.toString()), kem);
         Assert.assertEquals(1, kem.getExceptions().size());
     }
