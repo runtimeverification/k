@@ -7,6 +7,8 @@ spawn-kserver $WD/kserver.log
 cd pl-tutorial
 echo 'Testing tutorial in user environment...'
 make -j`nproc`
+make clean
 cd ~
 echo "module TEST imports BOOL endmodule" > test.k
 kompile test.k --backend haskell
+rm -rf test-kompiled
