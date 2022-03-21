@@ -4,7 +4,7 @@
 	ignore = untracked
 [submodule "haskell-backend/src/main/native/haskell-backend"]
 	path = haskell-backend/src/main/native/haskell-backend
-	url = https://github.com/kframework/kore
+	url = https://github.com/runtimeverification/haskell-backend
 	ignore = untracked
 [submodule "web/k-web-theme"]
 	path = web/k-web-theme

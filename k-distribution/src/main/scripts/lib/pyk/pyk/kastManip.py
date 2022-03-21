@@ -311,13 +311,12 @@ def collapseDots(kast):
     """
     def _collapseDots(_kast):
         if type(_kast) is KApply:
-            args = _kast.args
-            if _kast.is_cell and _kast.arity == 1 and args[0] == ktokenDots:
+            if _kast.is_cell and _kast.arity == 1 and _kast.args[0] == ktokenDots:
                 return ktokenDots
-            newArgs = [arg for arg in args if arg != ktokenDots]
-            if _kast.is_cell and _kast.arity == 0:
+            newArgs = [arg for arg in _kast.args if arg != ktokenDots]
+            if _kast.is_cell and len(newArgs) == 0:
                 return ktokenDots
-            if len(newArgs) < len(args):
+            if len(newArgs) < len(_kast.args):
                 newArgs.append(ktokenDots)
             return _kast.let(args=newArgs)
         elif type(_kast) is KRewrite:
@@ -529,7 +528,7 @@ def removeGeneratedCells(constrainedTerm):
     -   Input: Constrained term which contains <generatedTop> and <generatedCounter>.
     -   Output: Constrained term with those cells removed.
     """
-    rule = KApply('<generatedTop>', [KVariable('CONFIG'), KApply('<generatedCounter>', [KVariable('_')])]), KVariable('CONFIG')
+    rule = KApply('<generatedTop>', [KVariable('CONFIG'), KVariable('_')]), KVariable('CONFIG')
     return rewriteAnywhereWith(rule, constrainedTerm)
 
 
@@ -555,13 +554,13 @@ def setCell(constrainedTerm, cellVariable, cellValue):
     (state, constraint) = splitConfigAndConstraints(constrainedTerm)
     (config, subst) = splitConfigFrom(state)
     subst[cellVariable] = cellValue
-    return KApply('#And', [substitute(config, subst), constraint])
+    return mlAnd([substitute(config, subst), constraint])
 
 
 def structurallyFrameKCell(constrainedTerm):
     kCell = getCell(constrainedTerm, 'K_CELL')
     if type(kCell) is KSequence and kCell.arity > 0 and isAnonVariable(kCell.items[-1]):
-        kCell = KSequence(kCell.items[0:-1] + [ktokenDots])
+        kCell = KSequence(kCell.items[0:-1] + (ktokenDots,))
     return setCell(constrainedTerm, 'K_CELL', kCell)
 
 
@@ -641,7 +640,8 @@ def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, pr
     ruleBody = pushDownRewrites(KRewrite(initConfig, finalConfig))
     ruleRequires = simplifyBool(unsafeMlPredToBool(initConstraint))
     ruleEnsures = simplifyBool(unsafeMlPredToBool(finalConstraint))
-    ruleAtt = None if claim or priority is None else KAtt(atts={'priority': str(priority)})
+    attDict = {} if claim or priority is None else {'priority': str(priority)}
+    ruleAtt = KAtt(atts=attDict)
     if not claim:
         rule = KRule(ruleBody, requires=ruleRequires, ensures=ruleEnsures, att=ruleAtt)
     else:
