@@ -272,7 +272,22 @@ public class RuleGrammarGenerator {
         for (Production p : iterable(mod.productions()))
             prods.addAll(new GenerateSortProjections(mod).gen(p).collect(Collectors.toSet()));
 
-        // instantiate parametric productions with concrete sorts for parsing
+        // Because parametric productions introduce Non-Terminal names that do not exist in the module, we can't
+        // create a valid parsing grammar.
+        // Here we go through every parametric production and, we replace it with concrete sorts.
+        // We have 4 distinct cases depending on whether the return type of the production is parametric or not:
+        //   1 - prod sort is a simple parameter
+        //   2 - prod sort is a parametric sort
+        //   3 - special case for `syntax {Sort} KItem ::= Sort` // the subsort production found in kast.md
+        //   4 - prod sort is a concrete sort.
+        // Because, at parse time, the prod sort is decided by the parent production we can instantiate it with concrete
+        // sorts. Parameters appearing only on the RHS of a production do not have any sort information at parsing time,
+        // so we use the top sort `K` as a placeholder. Meaning we can expect anything there. The connection is then handled
+        // at case 3 where we add subsorts for every parsable sort in the module.
+        // TODO: for now we only have `MInt{Widht}` as parametric sorts, so we can treat it as a corner case.
+        // LHS gets instantiated the same way, but RHS gets instantiated with `MInt{K}` and we need to add an extra subsort
+        // production `syntax MInt{K} ::= MInt{6}` to make the connection between the new sort and the concrete sorts.
+        // This production doesn't have a klabel so it's not going to appear in the final AST.
         List<Sort> allSorts = stream(mod.allSorts()).filter(
                 s -> (!isParserSort(s) || s.equals(Sorts.KItem()) || s.equals(Sorts.K()))).collect(Collectors.toList());
         for (SortHead sh : mutable(mod.definedInstantiations()).keySet()) {
@@ -284,7 +299,7 @@ public class RuleGrammarGenerator {
         }
         for (Production p : iterable(mod.productions())) {
             if (p.params().nonEmpty()) {
-                if (p.params().contains(p.sort())) {
+                if (p.params().contains(p.sort())) { // case 1
                     // syntax {P, R} P ::= P "+" R "-" Int
                     // syntax        S ::= S "+" K "-" Int
                     for (Sort s : allSorts) {
@@ -298,7 +313,7 @@ public class RuleGrammarGenerator {
                         Production p1 = Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Att.ORIGINAL_PRD(), Production.class, p));
                         prods.add(p1);
                     }
-                } else if (!p.sort().params().isEmpty()) {
+                } else if (!p.sort().params().isEmpty()) { // case 2
                     // TODO: assuming sorts have only one parameter for now
                     // syntax {W, X, Y} MInt{W} ::= MInt{W} "+" MInt{X} "-" Y "/" Int
                     // syntax           MInt{6} ::= MInt{6} "+" MInt{K} "-" K "/" Int
@@ -314,7 +329,7 @@ public class RuleGrammarGenerator {
                         Production p1 = Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Att.ORIGINAL_PRD(), Production.class, p));
                         prods.add(p1);
                     }
-                } else if (p.isSyntacticSubsort()) {
+                } else if (p.isSyntacticSubsort()) { // case 3
                     // a single production found in kast.md that handles the subsorting to the top sort
                     // syntax {Sort} KItem ::= Sort
                     // syntax        KItem ::= Int
@@ -327,7 +342,7 @@ public class RuleGrammarGenerator {
                         Production p1 = Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Att.ORIGINAL_PRD(), Production.class, p));
                         prods.add(p1);
                     }
-                } else {
+                } else { // case 4
                     // the rest of the productions that return a concrete sort can accept any sort inside
                     // syntax {P} Int ::= P "+" Int
                     // syntax     Int ::= K "+" Int
