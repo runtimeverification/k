@@ -101,6 +101,16 @@ pipeline {
               }
             }
           }
+          post {
+            always {
+              sh '''
+                rm -rf k-distribution/k-tutorial/1_basic/build
+                make --directory=k-distribution clean
+                make --directory=k-exercises clean
+                make --directory=haskell-backend/src/main/native/haskell-backend clean
+              '''
+            }
+          }
         }
         stage('Test Debian Package') {
           agent {
