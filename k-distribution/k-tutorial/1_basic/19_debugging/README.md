@@ -50,9 +50,9 @@ Find the GDB manual and other documentation resources online at:
 For help, type "help".
 Type "apropos word" to search for commands related to "word"...
 Reading symbols from ./lesson-19-a-kompiled/interpreter...
-warning: File "/home/dwightguth/kframework-5.0.0/llvm-backend/target/build/install/lib/kllvm/gdb/interpreter-gdb.py" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+warning: File "/home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-a-kompiled/interpreter" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
 To enable execution of this file add
-        add-auto-load-safe-path /home/dwightguth/kframework-5.0.0/llvm-backend/target/build/install/lib/kllvm/gdb/interpreter-gdb.py
+        add-auto-load-safe-path /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-a-kompiled/interpreter
 line to your configuration file "/home/dwightguth/.gdbinit".
 To completely disable this security protection add
         set auto-load safe-path /
