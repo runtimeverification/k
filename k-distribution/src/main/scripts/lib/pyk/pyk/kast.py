@@ -1331,7 +1331,7 @@ def prettyPrintKast(kast, symbolTable, debug=False):
         imports = '\n'.join([prettyPrintKast(kimport, symbolTable, debug=debug) for kimport in kast.imports])
         sentences = '\n\n'.join([prettyPrintKast(sentence, symbolTable, debug=debug) for sentence in kast.sentences])
         contents = imports + '\n\n' + sentences
-        return 'module ' + name + '\n    ' + '\n    '.join(contents.split('\n')) + '\nendmodule'
+        return 'module ' + name + '\n    ' + '\n    '.join(contents.split('\n')) + '\n\nendmodule'
     if type(kast) is KRequire:
         return 'requires "' + kast.require + '"'
     if type(kast) is KDefinition:
