@@ -61,12 +61,9 @@ test-kpyk-minimize-term: imp-verification/haskell.kompiled $(VENV)
 
 FILE_DEPS =
 
-pytests = defn_test.py           \
-          emit_json_spec_test.py \
-          parse_kast_test.py     \
-          simple_proofs_test.py  \
-          unit_test.py
+pytests = $(wildcard *_test.py)
 
+configuration_test.py.pytest:  FILE_DEPS = imp-verification/haskell.kompiled
 defn_test.py.pytest:           FILE_DEPS = imp-verification/haskell.kompiled
 emit_json_spec_test.py.pytest: FILE_DEPS = imp-verification/looping-spec.json.json-spec
 parse_kast_test.py.pytest:     FILE_DEPS = contextual-function/haskell.kompiled \
