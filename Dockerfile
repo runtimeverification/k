@@ -74,10 +74,6 @@ ADD kore/pom.xml                                               .tmp-maven/kore/
 RUN    cd .tmp-maven                          \
     && mvn --batch-mode dependency:go-offline
 
-RUN    curl -L https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
-    && python3 get-pip.py                                         \
-    && pip install --upgrade pip virtualenv
-
 RUN    git config --global user.email 'admin@runtimeverification.com' \
     && git config --global user.name  'RV Jenkins'                    \
     && mkdir -p ~/.ssh                                                \
