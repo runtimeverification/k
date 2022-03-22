@@ -117,6 +117,11 @@ public class AddSortInjections {
         return internalAddSortInjections(body, sort);
     }
 
+    private Sort getCellSort(KLabel klabel) {
+        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
+        return configInfo.getCellSort(klabel);
+    }
+
     private K internalAddSortInjections(K term, Sort expectedSort) {
         Sort actualSort = sort(term, expectedSort);
         if (actualSort == null) {
@@ -139,10 +144,15 @@ public class AddSortInjections {
                         KLabel wrappedLabel = KLabel(wrapElement.get());
                         KLabel elementLabel = KLabel(mod.attributesFor().apply(collectionLabel).get("element"));
                         KApply k = (KApply)term;
-                        if (k.klabel().equals(wrappedLabel)) {
+                        if (getCellSort(wrappedLabel).equals(actualSort)) {
                             if (collectionIsMap(collectionLabel)) {
                                 // Map
-                                K key = k.klist().items().get(0);
+                                K key;
+                                if (k.klabel().equals(wrappedLabel)) {
+                                    key = k.klist().items().get(0);
+                                } else {
+                                    key = KApply(KLabel(expectedSort.name() + "Key"), KList(visitChildren(k, actualSort, expectedSort)));
+                                }
                                 Sort adjustedExpectedSort = expectedSort;
                                 if (k.att().contains(Sort.class)) {
                                     adjustedExpectedSort = k.att().get(Sort.class);
