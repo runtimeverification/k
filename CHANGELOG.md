@@ -1,3 +1,70 @@
+K Framework 5.3.0
+=================
+
+Features
+--------
+
+- Moved the main repository from `kframework/k` to `runtimeverification/k`
+
+- Removed the Ocaml backend.
+
+- Added options to modify llvm-kompile's parameters in the Kompile frontend.
+
+- Added support for `--pattern` passed to krun when you use the llvm backend.
+  This delegates the search pattern matching to the haskell backend.
+
+- `Bytes` literals are now supported natively by the K syntax.
+
+- `kprovex` now supports function/functional simplification rules in the spec file.
+  This makes it so you don't have to call kompile if you need to add only simplification
+  rules to the spec file.
+
+- `kprovex` can now print the specification file as JSON with the option `--emit-json-spec`
+
+Misc/Bug Fixes
+--------------
+
+- Check for existential variables in requires clause. Dissallowed since it is considered
+  LHS of the rule.
+
+- Fixed an issue with the eoncding/decoding of anonymous variables in KORE (`decodeKoreString`)
+
+- Fixed an issue where parsing an empty program would throw an `ArrayIndexOutOfBoundsException`.
+
+- Improve checks for format attributes.
+
+- Fixed an issue with `kparse` where it would truncate the output.
+
+- Fixed various issues with the `--version` option.
+
+- Fixed priority of `#let` relative to user syntax.
+  Right now we have `_:Int > user-syntax > #let > ~> > =>`
+
+- Allow macros on hooked sorts
+
+Performance Improvements
+------------------------
+
+- Improved type inference for anonymous variables
+
+- Caching some of the scanners when running `kprovex`
+
+Dependency Updates
+------------------
+
+- Haskell backend is updated to version [ed00c99](https://github.com/runtimeverification/haskell-backend/tree/ed00c99446ef93d291ef651719ae5c634b7cf36e).
+
+- LLVM backend is updated to version [2ac7270](https://github.com/runtimeverification/llvm-backend/tree/2ac72701a91c6c3ff15f65ab425a3674164cf18d).
+
+- K Web Theme is updated to version [b458d14](https://github.com/runtimeverification/k-web-theme/tree/b458d1461c31760024ea06e0e50f25806ace5e2c).
+
+- Require Z3 4.8.11 or higher
+
+- Require Java 11 or higher
+
+A more detailed list of changes can be found here:
+https://github.com/runtimeverification/k/issues/2325
+
 K Framework 5.2.0
 =================
 
