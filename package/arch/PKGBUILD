@@ -1,6 +1,6 @@
 # Maintainer: Dwight Guth <dwight.guth@runtimeverification.com>
 pkgname=kframework-git
-pkgver=5.2.117
+pkgver=5.2.118
 pkgrel=1
 epoch=
 pkgdesc="K framework toolchain. Includes K Framework compiler for K language definitions, and K interpreter and prover for programs written in languages defined in K."
