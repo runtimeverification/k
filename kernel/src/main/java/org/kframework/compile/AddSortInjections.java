@@ -46,6 +46,7 @@ public class AddSortInjections {
 
     private final Module mod;
     private final Map<KLabel, KLabel> collectionFor;
+    private final ConfigurationInfoFromModule configurationInfo;
 
     private int freshSortParamCounter = 0;
     private Set<String> sortParams = new HashSet<>();
@@ -55,6 +56,7 @@ public class AddSortInjections {
     public AddSortInjections(Module mod) {
         this.mod = mod;
         this.collectionFor = ConvertDataStructureToLookup.collectionFor(mod);
+        this.configurationInfo = new ConfigurationInfoFromModule(mod);
     }
 
     public Sentence addInjections(Sentence s) {
@@ -117,11 +119,6 @@ public class AddSortInjections {
         return internalAddSortInjections(body, sort);
     }
 
-    private Sort getCellSort(KLabel klabel) {
-        ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
-        return configInfo.getCellSort(klabel);
-    }
-
     private K internalAddSortInjections(K term, Sort expectedSort) {
         Sort actualSort = sort(term, expectedSort);
         if (actualSort == null) {
@@ -144,7 +141,7 @@ public class AddSortInjections {
                         KLabel wrappedLabel = KLabel(wrapElement.get());
                         KLabel elementLabel = KLabel(mod.attributesFor().apply(collectionLabel).get("element"));
                         KApply k = (KApply)term;
-                        if (getCellSort(wrappedLabel).equals(actualSort)) {
+                        if (configurationInfo.getCellSort(wrappedLabel).equals(actualSort)) {
                             if (collectionIsMap(collectionLabel)) {
                                 // Map
                                 K key;
