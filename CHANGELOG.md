@@ -21,6 +21,9 @@ Features
 
 - `kprovex` can now print the specification file as JSON with the option `--emit-json-spec`
 
+- The LLVM backend now supports binary KORE representation. This can have a significant speed
+  benefit on large definitions.
+
 Misc/Bug Fixes
 --------------
 
@@ -54,7 +57,7 @@ Dependency Updates
 
 - Haskell backend is updated to version [ed00c99](https://github.com/runtimeverification/haskell-backend/tree/ed00c99446ef93d291ef651719ae5c634b7cf36e).
 
-- LLVM backend is updated to version [2ac7270](https://github.com/runtimeverification/llvm-backend/tree/2ac72701a91c6c3ff15f65ab425a3674164cf18d).
+- LLVM backend is updated to version [4dedab7](https://github.com/runtimeverification/llvm-backend/tree/4dedab70ede89d4a5fb637d287f8ccf5bb89d499).
 
 - K Web Theme is updated to version [b458d14](https://github.com/runtimeverification/k-web-theme/tree/b458d1461c31760024ea06e0e50f25806ace5e2c).
 
