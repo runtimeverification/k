@@ -20,22 +20,22 @@ $(VENV):
 check-code-style: check-isort check-flake8 check-mypy
 
 isort: $(VENV)
-	$(ACTIVATE) && isort ./pyk
+	$(ACTIVATE) && isort src
 
 check-isort: $(VENV)
-	$(ACTIVATE) && isort ./pyk --check
+	$(ACTIVATE) && isort --check src
 
 check-flake8: $(VENV)
-	$(ACTIVATE) && flake8 ./pyk
+	$(ACTIVATE) && flake8 src
 
 check-mypy: $(VENV)
-	$(ACTIVATE) && mypy ./pyk
+	$(ACTIVATE) && mypy src
 
 
 # Tests
 
 test: $(VENV)
-	$(ACTIVATE) && python3 -m unittest
+	$(ACTIVATE) && python3 -m unittest discover --start-directory src
 
 
 # Clean
