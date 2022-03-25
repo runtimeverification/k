@@ -1,6 +1,5 @@
-K_RELEASE := $(abspath ../../target/release/k)
-K_BIN     := $(K_RELEASE)/bin
-K_LIB     := $(K_RELEASE)/lib/kframework
+K_ROOT := $(abspath ../../..)
+K_BIN  := $(K_ROOT)/k-distribution/target/release/k/bin
 
 KOMPILE = $(K_BIN)/kompile
 KAST    = $(K_BIN)/kast
@@ -37,7 +36,7 @@ VENV     := venv/pyvenv.cfg
 ACTIVATE := . venv/bin/activate
 
 $(VENV):
-	virtualenv -p python3.8 venv && $(ACTIVATE) && pip install -e $(K_LIB)/pyk
+	virtualenv -p python3.8 venv && $(ACTIVATE) && pip install -e $(K_ROOT)/pyk
 
 # Tests
 
