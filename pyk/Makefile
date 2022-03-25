@@ -1,26 +1,37 @@
-.PHONY: all test integration-test check-code-style isort check-isort check-flake8 test-mypy
+.PHONY: all clean test integration-test                            \
+        $(VENV_DEV_DIR) $(VENV_PROD_DIR)                           \
+        check-code-style isort check-isort check-flake8 check-mypy
+
 
 all: check-code-style test
 
 
 # virtualenv
 
-VENV_DEV     := venv-dev/pyvenv.cfg
-ACTIVATE_DEV := . venv-dev/bin/activate
+VENV_DEV_DIR := venv-dev
+VENV_DEV     := $(VENV_DEV_DIR)/pyvenv.cfg
+ACTIVATE_DEV := . $(VENV_DEV_DIR)/bin/activate
 
 $(VENV_DEV):
-	   virtualenv -p python3.8 venv-dev    \
-	&& $(ACTIVATE_DEV)                     \
+	   virtualenv -p python3.8 $(VENV_DEV_DIR) \
+	&& $(ACTIVATE_DEV)                         \
 	&& pip install -r requirements/dev.txt
 
+$(VENV_DEV_DIR): $(VENV_DEV)
+	@echo $(ACTIVATE_DEV)
 
-VENV_PROD     := venv-prod/pyvenv.cfg
-ACTIVATE_PROD := . venv-prod/bin/activate
+
+VENV_PROD_DIR := venv-prod
+VENV_PROD     := $(VENV_PROD_DIR)/pyvenv.cfg
+ACTIVATE_PROD := . $(VENV_PROD_DIR)/bin/activate
 
 $(VENV_PROD):
-	   virtualenv -p python3.8 venv-prod \
-	&& $(ACTIVATE_PROD)                  \
+	   virtualenv -p python3.8 $(VENV_PROD_DIR) \
+	&& $(ACTIVATE_PROD)                         \
 	&& pip install .
+
+$(VENV_PROD_DIR): $(VENV_PROD)
+	@echo $(ACTIVATE_PROD)
 
 
 # Checks
@@ -47,11 +58,11 @@ test: $(VENV_DEV)
 
 integration-test: $(VENV_PROD)
 	$(ACTIVATE_PROD) && $(MAKE) -C integration_tests
-	rm -rf venv-prod build src/pyk.egg-info
+	rm -rf $(VENV_PROD_DIR) build src/pyk.egg-info
 
 # Clean
 
 clean:
-	rm -rf venv-dev venv-prod build src/pyk.egg-info .myp_cache
+	rm -rf $(VENV_DEV_DIR) $(VENV_PROD_DIR) build src/pyk.egg-info .myp_cache
 	find -type d -name __pycache__ -prune -exec rm -rf {} \;
 	$(MAKE) -C integration_tests clean
