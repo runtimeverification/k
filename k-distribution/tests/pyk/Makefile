@@ -7,7 +7,7 @@ KAST    = $(K_BIN)/kast
 KRUN    = $(K_BIN)/krun
 KPROVE  = $(K_BIN)/kprove
 KPROVEX = $(K_BIN)/kprovex
-KPYK    = $(K_BIN)/kpyk
+PYK     = pyk
 
 export PATH := $(K_BIN):$(PATH)
 
@@ -48,13 +48,13 @@ test: test-kpyk test-pytest
 test-kpyk: test-kpyk-graphviz test-kpyk-minimize-term
 
 test-kpyk-graphviz: imp-verification/haskell.kompiled $(VENV)
-	$(ACTIVATE) && $(KPYK) definitions/imp-verification/haskell/imp-verification-kompiled graph-imports
+	$(ACTIVATE) && $(PYK) definitions/imp-verification/haskell/imp-verification-kompiled graph-imports
 	cat definitions/imp-verification/haskell/imp-verification-kompiled/import-graph | tr -cd '[:alnum:]\n' | grep . | tr '[:lower:]' '[:upper:]' | sort > import-graph.sorted
 	$(CHECK) import-graph.sorted imp-import-graph.expected
 
 test-kpyk-minimize-term: imp-verification/haskell.kompiled $(VENV)
-	$(ACTIVATE) && $(KPYK) definitions/imp-verification/haskell/imp-verification-kompiled prove k-files/imp-verification.k k-files/imp-unproveable-spec.k IMP-UNPROVEABLE-SPEC \
-	    | $(KPYK) definitions/imp-verification/haskell/imp-verification-kompiled print /dev/stdin > imp-unproveable-spec.k.out
+	$(ACTIVATE) && $(PYK) definitions/imp-verification/haskell/imp-verification-kompiled prove k-files/imp-verification.k k-files/imp-unproveable-spec.k IMP-UNPROVEABLE-SPEC \
+	    | $(PYK) definitions/imp-verification/haskell/imp-verification-kompiled print /dev/stdin > imp-unproveable-spec.k.out
 	$(CHECK) imp-unproveable-spec.k.out imp-unproveable-spec.k.expected
 
 ## pytests
