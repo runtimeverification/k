@@ -1,28 +1,22 @@
-import json
-import os
-import shutil
-from pathlib import Path
-
 from kprove_test import KProveTest
+
 from pyk.kast import (
     KApply,
-    KAtt,
     KClaim,
-    KRequire,
     KRewrite,
-    KRule,
     KToken,
     KVariable,
     assocWithUnit,
     constLabel,
 )
-from pyk.kastManip import pushDownRewrites, rewriteAnywhereWith, simplifyBool
+from pyk.kastManip import pushDownRewrites, simplifyBool
 from pyk.prelude import boolToken, intToken
+
 
 class DefnTest(KProveTest):
     DEFN_DIR = 'definitions/imp-verification/haskell/imp-verification-kompiled'
     MAIN_FILE_NAME = 'imp-verification.k'
-    USE_DIR = f'.defn-test'
+    USE_DIR = '.defn-test'
     INCLUDE_DIRS = ['k-files']
 
     @staticmethod
@@ -33,15 +27,15 @@ class DefnTest(KProveTest):
     def test_print_configuration(self):
         # Given
         config = KApply('<T>', [KApply('<k>', [KApply('int_;_', [KApply('_,_', [KToken('x', 'Id'), KApply('_,_', [KToken('y', 'Id'), KApply('.List{"_,_"}')])])])]), KApply('<state>', [KApply('.Map')])])
-        config_expected = '\n'.join([ '<T>'
-                                    , '  <k>'
-                                    , '    int x , y ;'
-                                    , '  </k>'
-                                    , '  <state>'
-                                    , '    .Map'
-                                    , '  </state>'
-                                    , '</T>'
-                                    ])
+        config_expected = '\n'.join([ '<T>'              # noqa
+                                    , '  <k>'            # noqa
+                                    , '    int x , y ;'  # noqa
+                                    , '  </k>'           # noqa
+                                    , '  <state>'        # noqa
+                                    , '    .Map'         # noqa
+                                    , '  </state>'       # noqa
+                                    , '</T>'             # noqa
+                                    ])                   # noqa
 
         # When
         config_actual = self.kprove.prettyPrint(config)
@@ -51,22 +45,23 @@ class DefnTest(KProveTest):
 
     def test_print_prove_rewrite(self):
         # Given
-        claim_rewrite = KRewrite( KApply('<T>', [ KApply('<k>', [KApply('_+_', [KVariable('X'), KVariable('Y')])])
-                                                , KApply('<state>', [KVariable('STATE')])
-                                                ])
-                                , KApply('<T>', [ KApply('<k>', [KApply('_+Int_', [KVariable('X'), KVariable('Y')])])
-                                                , KApply('<state>', [KVariable('STATE')])
-                                                ])
-                                )
-        minimized_claim_rewrite_expected = '\n'.join([ '<T>'
-                                                     , '  <k>'
-                                                     , '    ( X + Y => X +Int Y )'
-                                                     , '  </k>'
-                                                     , '  <state>'
-                                                     , '    STATE'
-                                                     , '  </state>'
-                                                     , '</T>'
-                                                     ])
+        claim_rewrite = KRewrite( KApply('<T>', [ KApply('<k>', [KApply('_+_', [KVariable('X'), KVariable('Y')])])     # noqa
+                                                , KApply('<state>', [KVariable('STATE')])                              # noqa
+                                                ])                                                                     # noqa
+                                , KApply('<T>', [ KApply('<k>', [KApply('_+Int_', [KVariable('X'), KVariable('Y')])])  # noqa
+                                                , KApply('<state>', [KVariable('STATE')])                              # noqa
+                                                ])                                                                     # noqa
+                                )                                                                                      # noqa
+
+        minimized_claim_rewrite_expected = '\n'.join([ '<T>'                        # noqa
+                                                     , '  <k>'                      # noqa
+                                                     , '    ( X + Y => X +Int Y )'  # noqa
+                                                     , '  </k>'                     # noqa
+                                                     , '  <state>'                  # noqa
+                                                     , '    STATE'                  # noqa
+                                                     , '  </state>'                 # noqa
+                                                     , '</T>'                       # noqa
+                                                     ])                             # noqa
 
         # When
         minimized_claim_rewrite = pushDownRewrites(claim_rewrite)

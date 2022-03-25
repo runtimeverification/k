@@ -20,16 +20,16 @@ $(VENV):
 check-code-style: check-isort check-flake8 check-mypy
 
 isort: $(VENV)
-	$(ACTIVATE) && isort src
+	$(ACTIVATE) && isort src integration_tests
 
 check-isort: $(VENV)
-	$(ACTIVATE) && isort --check src
+	$(ACTIVATE) && isort --check src integration_tests
 
 check-flake8: $(VENV)
-	$(ACTIVATE) && flake8 src
+	$(ACTIVATE) && flake8 src integration_tests
 
 check-mypy: $(VENV)
-	$(ACTIVATE) && mypy src
+	$(ACTIVATE) && mypy src integration_tests
 
 
 # Tests

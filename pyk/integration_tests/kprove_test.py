@@ -3,7 +3,7 @@ import shutil
 from abc import ABC, abstractmethod
 from itertools import chain
 from pathlib import Path
-from typing import List, final
+from typing import List
 from unittest import TestCase
 
 from pyk.ktool import KProve
