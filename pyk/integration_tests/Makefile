@@ -1,4 +1,4 @@
-K_ROOT := $(abspath ../../..)
+K_ROOT := $(abspath ../..)
 K_BIN  := $(K_ROOT)/k-distribution/target/release/k/bin
 
 KOMPILE = $(K_BIN)/kompile
