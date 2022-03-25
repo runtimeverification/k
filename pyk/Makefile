@@ -9,9 +9,9 @@ VENV     := venv/pyvenv.cfg
 ACTIVATE := . venv/bin/activate
 
 $(VENV):
-	   virtualenv -p python3.8 venv    \
-	&& $(ACTIVATE)                     \
-	&& pip install -r requirements.txt
+	   virtualenv -p python3.8 venv        \
+	&& $(ACTIVATE)                         \
+	&& pip install -r requirements/dev.txt
 
 
 
