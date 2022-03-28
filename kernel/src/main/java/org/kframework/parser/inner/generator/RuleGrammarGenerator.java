@@ -2,8 +2,8 @@
 package org.kframework.parser.inner.generator;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
-import org.kframework.Collections;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.ConfigurationInfo;
 import org.kframework.compile.ConfigurationInfoFromModule;
@@ -23,13 +23,14 @@ import org.kframework.definition.Terminal;
 import org.kframework.definition.UidProvider;
 import org.kframework.definition.UserList;
 import org.kframework.kore.Sort;
+import org.kframework.kore.SortHead;
 import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
-import scala.collection.Seq;
 import scala.Option;
 import scala.Tuple3;
+import scala.collection.Seq;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
+import static org.kframework.definition.Constructors.Module;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
 
@@ -267,49 +269,89 @@ public class RuleGrammarGenerator {
             }
         }
 
-        for (Production p : iterable(mod.productions())) {
+        for (Production p : iterable(mod.productions()))
             prods.addAll(new GenerateSortProjections(mod).gen(p).collect(Collectors.toSet()));
+
+        // Because parametric productions introduce Non-Terminal names that do not exist in the module, we can't
+        // create a valid parsing grammar.
+        // Here we go through every parametric production and, we replace it with concrete sorts.
+        // We have 4 distinct cases depending on whether the return type of the production is parametric or not:
+        //   1 - prod sort is a simple parameter
+        //   2 - prod sort is a parametric sort
+        //   3 - special case for `syntax {Sort} KItem ::= Sort` // the subsort production found in kast.md
+        //   4 - prod sort is a concrete sort.
+        // Because, at parse time, the prod sort is decided by the parent production we can instantiate it with concrete
+        // sorts. Parameters appearing only on the RHS of a production do not have any sort information at parsing time,
+        // so we use the top sort `K` as a placeholder. Meaning we can expect anything there. The connection is then handled
+        // at case 3 where we add subsorts for every parsable sort in the module.
+        // TODO: for now we only have `MInt{Widht}` as parametric sorts, so we can treat it as a corner case.
+        // LHS gets instantiated the same way, but RHS gets instantiated with `MInt{K}` and we need to add an extra subsort
+        // production `syntax MInt{K} ::= MInt{6}` to make the connection between the new sort and the concrete sorts.
+        // This production doesn't have a klabel so it's not going to appear in the final AST.
+        List<Sort> allSorts = stream(mod.allSorts()).filter(
+                s -> (!isParserSort(s) || s.equals(Sorts.KItem()) || s.equals(Sorts.K()))).collect(Collectors.toList());
+        for (SortHead sh : mutable(mod.definedInstantiations()).keySet()) {
+            for (Sort s : mutable(mod.definedInstantiations().apply(sh))) {
+                // syntax MInt{K} ::= MInt{6}
+                Production p1 = Production(Option.empty(), Seq(), Sort(s.name(), Sorts.K()), Seq(NonTerminal(s)), Att());
+                prods.add(p1);
+            }
+        }
+        for (Production p : iterable(mod.productions())) {
             if (p.params().nonEmpty()) {
-                List<List<Sort>> sortTuples = makeAllSortTuples(p.params().size(), mod);
-                for (List<Sort> tuple : sortTuples) {
-                    for (int i = 0; i < tuple.size(); i++) {
-                        if (p.params().apply(i).equals(p.sort()) || p.sort().params().contains(p.params().apply(i))) {
+                if (p.params().contains(p.sort())) { // case 1
+                    // syntax {P, R} P ::= P "+" R "-" Int
+                    // syntax        S ::= S "+" K "-" Int
+                    for (Sort s : allSorts) {
+                        List<Sort> instantiationMask = new ArrayList<>();
+                        for (Sort param : mutable(p.params()))
+                            if (param.equals(p.sort()))
+                                instantiationMask.add(s);
+                            else
+                                instantiationMask.add(Sorts.K());
+                        Production subst = p.substitute(immutable(instantiationMask));
+                        Production p1 = Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Att.ORIGINAL_PRD(), Production.class, p));
+                        prods.add(p1);
+                    }
+                } else if (!p.sort().params().isEmpty()) { // case 2
+                    // TODO: assuming sorts have only one parameter for now
+                    // syntax {W, X, Y} MInt{W} ::= MInt{W} "+" MInt{X} "-" Y "/" Int
+                    // syntax           MInt{6} ::= MInt{6} "+" MInt{K} "-" K "/" Int
+                    Set<Sort> instantations = mutable(mod.definedInstantiations().apply(p.sort().head()));
+                    for (Sort s : instantations) {
+                        List<Sort> instantiationMask = new ArrayList<>();
+                        for (Sort param : mutable(p.params()))
+                            if (param.equals(p.sort().params().apply(0)))
+                                instantiationMask.add(s.params().apply(0));
+                            else
+                                instantiationMask.add(Sorts.K());
+                        Production subst = p.substitute(immutable(instantiationMask));
+                        Production p1 = Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Att.ORIGINAL_PRD(), Production.class, p));
+                        prods.add(p1);
+                    }
+                } else if (p.isSyntacticSubsort()) { // case 3
+                    // a single production found in kast.md that handles the subsorting to the top sort
+                    // syntax {Sort} KItem ::= Sort
+                    // syntax        KItem ::= Int
+                    for (Sort s : allSorts) {
+                        if (!p.params().contains(p.sort()) && (s.equals(Sorts.KItem()) || s.equals(Sorts.K())))
                             continue;
-                        }
-                        if (p.isSyntacticSubsort()) {
-                            continue;
-                        }
-                        boolean skip = false;
-                        for (NonTerminal nt : iterable(p.nonterminals())) {
-                            if (nt.sort().params().contains(p.params().apply(i))) {
-                              skip = true;
-                              break;
-                            }
-                        }
-                        if (!skip) {
-                          tuple.set(i, Sorts.K());
-                        }
+                        List<Sort> instantiationMask = new ArrayList<>();
+                        instantiationMask.add(s);
+                        Production subst = p.substitute(immutable(instantiationMask));
+                        Production p1 = Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Att.ORIGINAL_PRD(), Production.class, p));
+                        prods.add(p1);
                     }
-                    Production subst = p.substitute(immutable(tuple));
-                    if (p.isSyntacticSubsort() && mod.subsorts().lessThanEq(subst.sort(), subst.getSubsortSort())) {
-                        continue;
-                    }
-                    Set<Sort> sorts = stream(subst.nonterminals()).map(nt -> nt.sort()).collect(Collectors.toSet());
-                    sorts.add(subst.sort());
-                    boolean skip = false;
-                    for (Sort s : sorts) {
-                        if (s.isNat()) {
-                            skip = true;
-                            break;
-                        }
-                        if (mod.definedInstantiations().contains(s.head()) && !mod.definedInstantiations().apply(s.head()).contains(s)) {
-                            skip = true;
-                            break;
-                        }
-                    }
-                    if (!skip) {
-                        prods.add(Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Att.ORIGINAL_PRD(), Production.class, p)));
-                    }
+                } else { // case 4
+                    // the rest of the productions that return a concrete sort can accept any sort inside
+                    // syntax {P} Int ::= P "+" Int
+                    // syntax     Int ::= K "+" Int
+                    List<Sort> instantiationMask = new ArrayList<>();
+                    for (Sort param : mutable(p.params()))
+                        instantiationMask.add(Sorts.K());
+                    Production subst = p.substitute(immutable(instantiationMask));
+                    Production p1 = Production(subst.klabel().map(lbl -> KLabel(lbl.name())), Seq(), subst.sort(), subst.items(), subst.att().add(Att.ORIGINAL_PRD(), Production.class, p));
+                    prods.add(p1);
                 }
             }
         }
@@ -505,28 +547,6 @@ public class RuleGrammarGenerator {
               }
             }
           }
-        }
-    }
-
-    private static List<List<Sort>> makeAllSortTuples(int size, Module mod) {
-        List<List<Sort>> res = new ArrayList<>();
-        List<Sort> allSorts = stream(mod.allSorts()).filter(s -> !isParserSort(s) || s.equals(Sorts.KItem()) || s.equals(Sorts.K()) || s.isNat()).collect(Collectors.toList());
-        makeAllSortTuples(size, size, allSorts, res, new int[size]);
-        return res;
-    }
-
-    private static void makeAllSortTuples(int level, int size, List<Sort> sorts, List<List<Sort>> res, int[] indices) {
-        if (level == 0) {
-            List<Sort> tuple = new ArrayList<>();
-            for (int i = 0; i < indices.length; i++) {
-                tuple.add(sorts.get(indices[i]));
-            }
-            res.add(tuple);
-        } else {
-            for (int i = 0; i < sorts.size(); i++) {
-                indices[level-1] = i;
-                makeAllSortTuples(level-1, size, sorts, res, indices);
-            }
         }
     }
 
