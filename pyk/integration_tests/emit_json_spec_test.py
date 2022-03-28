@@ -2,10 +2,11 @@ import json
 from pathlib import Path
 
 from kprove_test import KProveTest
+
 from pyk.kast import (
     EMPTY_ATT,
-    KAst,
     KApply,
+    KAst,
     KClaim,
     KDefinition,
     KRequire,

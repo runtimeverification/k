@@ -426,7 +426,13 @@ public class GenerateSentencesFromConfigDecl {
             // syntax CellSet ::= Cell
             // syntax CellSet ::= ".CellSet" [hook(SET.unit), function]
             // syntax CellSet ::= CellSetItem(Cell) [hook(SET.element), function]
-            // syntax CellSet ::= CellSet CellSet [assoc, conmm, idem, unit(.CellSet), element(CellSetItem), wrapElement(<cell>), hook(SET.concat), avoid, function]
+            // syntax CellSet ::= CellSet CellSet [assoc, comm, idem, unit(.CellSet), element(CellSetItem), wrapElement(<cell>), hook(SET.concat), avoid, function]
+            // -or-
+            // syntax CellMap [hook(MAP.Map)]
+            // syntax CellMap ::= Cell
+            // syntax CellMap ::= ".CellMap" [hook(MAP.unit), function]
+            // syntax CellMap ::= CellMapItem(KeyCell, Cell) [hook(MAP.element), function]
+            // syntax CellMap ::= CellMap CellMap [assoc, comm, unit(.CellMap), element(CellMapItem), wrapElement(<cell>), hook(MAP.concat), avoid, function]
             // -or-
             // syntax CellList [hook(LIST.List)]
             // syntax CellList ::= Cell
@@ -488,7 +494,17 @@ public class GenerateSentencesFromConfigDecl {
             sentences.add(bagUnit);
             sentences.add(bag);
             if (type.equals("Map")) {
+                // syntax Bool ::= KeyCell "in_keys" "(" CellMap ")" [function, functional, hook(MAP.in_keys)]
                 sentences.add(Production(KLabel(bagSort.name() + ":in_keys"), Sorts.Bool(), Seq(NonTerminal(childSorts.get(0)), Terminal("in_keys"), Terminal("("), NonTerminal(bagSort), Terminal(")")), Att().add(Att.HOOK(), "MAP.in_keys").add(Att.FUNCTION()).add(Att.FUNCTIONAL())));
+
+                // syntax KeyCell ::= CellMapKey(Cell) [function, functional]
+                // rule CellMapKey(<cell> K ...<\cell>) => K
+                KLabel cellMapKeyLabel = KLabel(bagSort.name() + "Key");
+                Production cellMapKeyProduction = Production(cellMapKeyLabel, childSorts.get(0), Seq(Terminal(bagSort.name() + "Key"), Terminal("("), NonTerminal(sort), Terminal(")")), Att().add(Att.FUNCTION()).add(Att.FUNCTIONAL()));
+                KVariable key = KVariable("Key", Att.empty().add(Sort.class, childSorts.get(0)));
+                Rule cellMapKeyRule = Rule(KRewrite(KApply(cellMapKeyLabel, IncompleteCellUtils.make(KLabel(klabel), false, key, true)), key),  BooleanUtils.TRUE, BooleanUtils.TRUE);
+                sentences.add(cellMapKeyProduction);
+                sentences.add(cellMapKeyRule);
             }
             // rule initCell => .CellBag
             // -or-

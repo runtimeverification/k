@@ -1,0 +1,2 @@
+graphviz==0.19.1
+typing_extensions==4.1.1
