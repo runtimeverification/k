@@ -1,11 +1,11 @@
-  #Ceil ( _0 ~> _DotVar1 ~> . )
+  #Ceil ( _Gen0 ~> _DotVar1 ~> . )
 #And
   #Not ( {
     _DotVar1
   #Equals
-    a ~> _0 ~> _DotVar1 ~> .
+    a ~> _Gen0 ~> _DotVar1 ~> .
   } )
 #And
   <k>
-    a ~> _0 ~> _DotVar1 ~> .
+    a ~> _Gen0 ~> _DotVar1 ~> .
   </k>
