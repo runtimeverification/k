@@ -148,7 +148,7 @@ public class ExpandMacros {
     KVariable newDotVariable(Att att) {
         KVariable newLabel;
         do {
-            newLabel = KVariable("_" + (counter++), att.add("anonymous"));
+            newLabel = KVariable("_Gen" + (counter++), att.add("anonymous"));
         } while (vars.contains(newLabel));
         vars.add(newLabel);
         return newLabel;
