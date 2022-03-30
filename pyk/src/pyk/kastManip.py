@@ -1,5 +1,5 @@
 from collections import Counter
-from typing import Callable, Mapping, Type, TypeVar
+from typing import Callable, Dict, Mapping, Tuple, Type, TypeVar
 
 from .cli_utils import fatal
 from .kast import (
@@ -11,6 +11,7 @@ from .kast import (
     KInner,
     KRewrite,
     KRule,
+    KRuleLike,
     KSequence,
     KToken,
     KVariable,
@@ -587,7 +588,7 @@ def hasExistentials(pattern):
     return any([v.startswith('?') for v in collectFreeVars(pattern)])
 
 
-def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, priority=None, keepVars=None):
+def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, priority=None, keepVars=None) -> Tuple[KRuleLike, Dict[str, KVariable]]:
     (initConfig, initConstraint) = splitConfigAndConstraints(initConstrainedTerm)
     (finalConfig, finalConstraint) = splitConfigAndConstraints(finalConstrainedTerm)
     initConstraints = flattenLabel('#And', initConstraint)
@@ -598,8 +599,8 @@ def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, pr
     lhsVars = collectFreeVars(initConstrainedTerm)
     rhsVars = collectFreeVars(finalConstrainedTerm)
     varOccurances = count_vars(mlAnd([initConstrainedTerm, finalConstrainedTerm]))
-    vSubst = {}
-    vremapSubst = {}
+    vSubst: Dict[str, KVariable] = {}
+    vremapSubst: Dict[str, KVariable] = {}
     for v in varOccurances:
         newV = v
         if varOccurances[v] == 1:
@@ -619,10 +620,13 @@ def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, pr
     ruleEnsures = simplifyBool(unsafeMlPredToBool(finalConstraint))
     attDict = {} if claim or priority is None else {'priority': str(priority)}
     ruleAtt = KAtt(atts=attDict)
+
+    rule: KRuleLike
     if not claim:
         rule = KRule(ruleBody, requires=ruleRequires, ensures=ruleEnsures, att=ruleAtt)
     else:
         rule = KClaim(ruleBody, requires=ruleRequires, ensures=ruleEnsures, att=ruleAtt)
+
     rule = rule.update_atts({'label': ruleId})
     newKeepVars = None
     if keepVars is not None:

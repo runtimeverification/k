@@ -60,7 +60,8 @@ class KCFG:
             sentence_id = f'BASIC-BLOCK-{self.source.id}-TO-{self.target.id}'
             init_term = mlAnd([self.source.term, self.condition])
             final_term = self.target.term
-            return buildRule(sentence_id, init_term, final_term, claim=claim, priority=priority)
+            rule, _ = buildRule(sentence_id, init_term, final_term, claim=claim, priority=priority)
+            return rule
 
     @dataclass(frozen=True)
     class Cover(EdgeLike):
