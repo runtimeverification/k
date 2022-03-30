@@ -269,6 +269,10 @@ class KCFG:
         node_id = self._resolve(node_id)
         return self._nodes[node_id]
 
+    def node_with_term(self, term: CTerm) -> Optional[Node]:
+        node = KCFG.Node(term)
+        return self._nodes.get(node.id)
+
     def create_node(self, term: CTerm) -> Node:
         node = KCFG.Node(term)
 
