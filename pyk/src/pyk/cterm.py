@@ -31,15 +31,28 @@ class CTerm:
     def hash(self) -> str:
         return self.cterm.hash
 
-    def match(self, pattern: 'CTerm') -> Optional[Tuple[Subst, KInner]]:
+    def match(self, pattern: 'CTerm') -> Optional[Subst]:
+        match_res = self.match_with_condition(pattern)
+
+        if not match_res:
+            return None
+
+        subst, condition = match_res
+
+        if condition != TOP:
+            return None
+
+        return subst
+
+    def match_with_condition(self, pattern: 'CTerm') -> Optional[Tuple[Subst, KInner]]:
         subst = match(pattern=pattern.config, term=self.config)
 
         if subst is None:
             return None
 
-        obligation = self._ml_impl(self.constraints, map(subst, pattern.constraints))
+        condition = self._ml_impl(self.constraints, map(subst, pattern.constraints))
 
-        return subst, obligation
+        return subst, condition
 
     @staticmethod
     def _ml_impl(antecedents: Iterable[KInner], consequents: Iterable[KInner]) -> KInner:
