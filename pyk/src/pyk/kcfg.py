@@ -110,40 +110,40 @@ class KCFG:
         return False
 
     @property
-    def nodes(self) -> Set[Node]:
-        return set(self._nodes.values())
+    def nodes(self) -> List[Node]:
+        return list(self._nodes.values())
 
     @property
-    def init(self) -> Set[Node]:
-        return {node for node in self.nodes if self.is_init(node.id)}
+    def init(self) -> List[Node]:
+        return [node for node in self.nodes if self.is_init(node.id)]
 
     @property
-    def target(self) -> Set[Node]:
-        return {node for node in self.nodes if self.is_target(node.id)}
+    def target(self) -> List[Node]:
+        return [node for node in self.nodes if self.is_target(node.id)]
 
     @property
-    def stuck(self) -> Set[Node]:
-        return {node for node in self.nodes if self.is_stuck(node.id)}
+    def stuck(self) -> List[Node]:
+        return [node for node in self.nodes if self.is_stuck(node.id)]
 
     @property
-    def leaves(self) -> Set[Node]:
-        return {node for node in self.nodes if self.is_leaf(node.id)}
+    def leaves(self) -> List[Node]:
+        return [node for node in self.nodes if self.is_leaf(node.id)]
 
     @property
-    def covered(self) -> Set[Node]:
-        return {node for node in self.nodes if self.is_covered(node.id)}
+    def covered(self) -> List[Node]:
+        return [node for node in self.nodes if self.is_covered(node.id)]
 
     @property
-    def uncovered(self) -> Set[Node]:
-        return {node for node in self.nodes if not self.is_covered(node.id)}
+    def uncovered(self) -> List[Node]:
+        return [node for node in self.nodes if not self.is_covered(node.id)]
 
     @property
-    def frontier(self) -> Set[Node]:
-        return {node for node in self._nodes.values() if self.is_frontier(node.id)}
+    def frontier(self) -> List[Node]:
+        return [node for node in self._nodes.values() if self.is_frontier(node.id)]
 
     @property
-    def covers(self) -> Set[Cover]:
-        return set(self._covers.values())
+    def covers(self) -> List[Cover]:
+        return list(self._covers.values())
 
     def to_dict(self) -> Dict[str, Any]:
         nodes = [node.to_dict() for node in self.nodes]
@@ -315,7 +315,7 @@ class KCFG:
         target_id = self._resolve(target_id)
         return self._edges.get(source_id, {}).get(target_id)
 
-    def edges(self, *, source_id: Optional[str] = None, target_id: Optional[str] = None) -> Set[Edge]:
+    def edges(self, *, source_id: Optional[str] = None, target_id: Optional[str] = None) -> List[Edge]:
         source_id = self._resolve(source_id) if source_id is not None else None
         target_id = self._resolve(target_id) if target_id is not None else None
 
@@ -325,7 +325,7 @@ class KCFG:
         else:
             res = (edge for _, targets in self._edges.items() for _, edge in targets.items())
 
-        return {edge for edge in res if not target_id or target_id == edge.target.id}
+        return [edge for edge in res if not target_id or target_id == edge.target.id]
 
     def create_cover(self, source_id: str, target_id: str) -> Cover:
         source = self.node(source_id)
@@ -342,9 +342,9 @@ class KCFG:
         node_id = self._resolve(node_id)
         return self._covers.get(node_id)
 
-    def covers_by(self, node_id) -> Set[Cover]:
+    def covers_by(self, node_id) -> List[Cover]:
         node_id = self._resolve(node_id)
-        return {cover for cover in self.covers if cover.target.id == node_id}
+        return [cover for cover in self.covers if cover.target.id == node_id]
 
     def add_init(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
