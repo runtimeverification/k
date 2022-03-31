@@ -935,7 +935,7 @@ class KImport(KOuter):
     name: str
     public: bool
 
-    def __init__(self, name: str, public: bool):
+    def __init__(self, name: str, public=True):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'public', public)
 
