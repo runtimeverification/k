@@ -232,7 +232,7 @@ public class ConvertDataStructureToLookup {
     KVariable newDotVariable() {
         KVariable newLabel;
         do {
-            newLabel = KVariable("_" + (counter++));
+            newLabel = KVariable("_Gen" + (counter++));
         } while (vars.contains(newLabel));
         vars.add(newLabel);
         return newLabel;

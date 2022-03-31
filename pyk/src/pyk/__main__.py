@@ -25,37 +25,15 @@ from .kastManip import (
 from .ktool import KPrint, KProve
 from .prelude import buildAssoc, mlBottom, mlTop
 
-pykArgs = argparse.ArgumentParser()
-pykArgs.add_argument('kompiled-dir', type=str, help='Kompiled directory for definition.')
 
-pykCommandParsers = pykArgs.add_subparsers(dest='command')
+def main(extraMain=None):
+    # KAST terms can end up nested quite deeply, because of the various assoc operators (eg. _Map_, _Set_, ...).
+    # Most pyk operations are defined recursively, meaning you get a callstack the same depth as the term.
+    # This change makes it so that in most cases, by default, pyk doesn't run out of stack space.
+    sys.setrecursionlimit(10 ** 7)
 
-kprintArgs = pykCommandParsers.add_parser('print', help='Pretty print a term.')
-kprintArgs.add_argument('term', type=argparse.FileType('r'), help='Input term (in JSON).')
-kprintArgs.add_argument('--minimize', default=True, action='store_true', help='Minimize the JSON configuration before printing.')
-kprintArgs.add_argument('--no-minimize', dest='minimize', action='store_false', help='Do not minimize the JSON configuration before printing.')
-kprintArgs.add_argument('--omit-labels', default='', nargs='?', help='List of labels to omit from output.')
-kprintArgs.add_argument('--output-file', type=argparse.FileType('w'), default='-')
+    commandLineArgs = create_argument_parser()
 
-kproveArgs = pykCommandParsers.add_parser('prove', help='Prove an input specification (using kprovex).')
-kproveArgs.add_argument('main-file', type=str, help='Main file used for kompilation.')
-kproveArgs.add_argument('spec-file', type=str, help='File with the specification module.')
-kproveArgs.add_argument('spec-module', type=str, help='Module with claims to be proven.')
-kproveArgs.add_argument('--output-file', type=argparse.FileType('w'), default='-')
-kproveArgs.add_argument('kArgs', nargs='*', help='Arguments to pass through to K invocation.')
-
-graphImportsArgs = pykCommandParsers.add_parser('graph-imports', help='Graph the imports of a given definition.')
-
-coverageArgs = pykCommandParsers.add_parser('coverage', help='Convert coverage file to human readable log.')
-coverageArgs.add_argument('coverage-file', type=argparse.FileType('r'), help='Coverage file to build log for.')
-coverageArgs.add_argument('-o', '--output', type=argparse.FileType('w'), default='-')
-
-
-def definitionDir(kompiledDir):
-    return path.dirname(path.abspath(kompiledDir))
-
-
-def main(commandLineArgs, extraMain=None):
     returncode = 0
     args = vars(commandLineArgs.parse_args())
     kompiled_dir = Path(args['kompiled-dir'])
@@ -118,9 +96,39 @@ def main(commandLineArgs, extraMain=None):
         fatal('Non-zero exit code (' + str(returncode) + '): ' + str(args['command']))
 
 
+def create_argument_parser():
+    pykArgs = argparse.ArgumentParser()
+    pykArgs.add_argument('kompiled-dir', type=str, help='Kompiled directory for definition.')
+
+    pykCommandParsers = pykArgs.add_subparsers(dest='command')
+
+    kprintArgs = pykCommandParsers.add_parser('print', help='Pretty print a term.')
+    kprintArgs.add_argument('term', type=argparse.FileType('r'), help='Input term (in JSON).')
+    kprintArgs.add_argument('--minimize', default=True, action='store_true', help='Minimize the JSON configuration before printing.')
+    kprintArgs.add_argument('--no-minimize', dest='minimize', action='store_false', help='Do not minimize the JSON configuration before printing.')
+    kprintArgs.add_argument('--omit-labels', default='', nargs='?', help='List of labels to omit from output.')
+    kprintArgs.add_argument('--output-file', type=argparse.FileType('w'), default='-')
+
+    kproveArgs = pykCommandParsers.add_parser('prove', help='Prove an input specification (using kprovex).')
+    kproveArgs.add_argument('main-file', type=str, help='Main file used for kompilation.')
+    kproveArgs.add_argument('spec-file', type=str, help='File with the specification module.')
+    kproveArgs.add_argument('spec-module', type=str, help='Module with claims to be proven.')
+    kproveArgs.add_argument('--output-file', type=argparse.FileType('w'), default='-')
+    kproveArgs.add_argument('kArgs', nargs='*', help='Arguments to pass through to K invocation.')
+
+    pykCommandParsers.add_parser('graph-imports', help='Graph the imports of a given definition.')
+
+    coverageArgs = pykCommandParsers.add_parser('coverage', help='Convert coverage file to human readable log.')
+    coverageArgs.add_argument('coverage-file', type=argparse.FileType('r'), help='Coverage file to build log for.')
+    coverageArgs.add_argument('-o', '--output', type=argparse.FileType('w'), default='-')
+
+    return pykArgs
+
+
+# TODO remove
+def definitionDir(kompiledDir):
+    return path.dirname(path.abspath(kompiledDir))
+
+
 if __name__ == '__main__':
-    # KAST terms can end up nested quite deeply, because of the various assoc operators (eg. _Map_, _Set_, ...).
-    # Most pyk operations are defined recursively, meaning you get a callstack the same depth as the term.
-    # This change makes it so that in most cases, by default, pyk doesn't run out of stack space.
-    sys.setrecursionlimit(10 ** 7)
-    main(pykArgs)
+    main()

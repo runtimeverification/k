@@ -14,7 +14,7 @@ from pyk.kastManip import (
     buildRule,
     collapseDots,
     getCell,
-    removeGeneratedCells,
+    remove_generated_cells,
     structurallyFrameKCell,
     substitute,
 )
@@ -48,18 +48,18 @@ class StructurallyFrameKCellTest(ConfigurationTest):
         self.assertEqual(config_actual, config_expected)
 
 
-class RemoveGeneratedCounterTest(ConfigurationTest):
+class RemoveGeneratedCellsTest(ConfigurationTest):
 
     def test_first(self):
         # When
-        config_actual = removeGeneratedCells(self.GENERATED_TOP_CELL_1)
+        config_actual = remove_generated_cells(self.GENERATED_TOP_CELL_1)
 
         # Then
         self.assertEqual(config_actual, self.T_CELL)
 
     def test_second(self):
         # When
-        config_actual = removeGeneratedCells(self.GENERATED_TOP_CELL_2)
+        config_actual = remove_generated_cells(self.GENERATED_TOP_CELL_2)
 
         # Then
         self.assertEqual(config_actual, self.T_CELL)

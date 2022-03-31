@@ -1,7 +1,7 @@
 from abc import ABC
 from unittest import TestCase
 
-from pyk.kast import KAs, KDefinition, KRule, KSort, KSortSynonym, readKastTerm
+from pyk.kast import KAs, KDefinition, KSort, KSortSynonym, readKastTerm
 
 
 class ParseKAstTest(TestCase, ABC):
