@@ -334,6 +334,18 @@ class KCFG:
 
         return [edge for edge in res if not target_id or target_id == edge.target.id]
 
+    def remove_edge(self, source_id: str, target_id: str) -> None:
+        source_id = self._resolve(source_id)
+        target_id = self._resolve(target_id)
+        edge = self.edge(source_id, target_id)
+
+        if not edge:
+            raise ValueError(f'Edge does not exist: {source_id} -> {target_id}')
+
+        self._edges[source_id].pop(target_id)
+        if not self._edges[source_id]:
+            self._edges.pop(source_id)
+
     def create_cover(self, source_id: str, target_id: str) -> Cover:
         source = self.node(source_id)
         target = self.node(target_id)
