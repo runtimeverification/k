@@ -78,6 +78,19 @@ def find_common_items(l1: Iterable[T], l2: Iterable[T]) -> Tuple[List[T], List[T
     return (common, newL1, newL2)
 
 
+def intersperse(iterable: Iterable[T], delimiter: T) -> Iterator[T]:
+    it = iter(iterable)
+
+    try:
+        yield next(it)
+    except StopIteration:
+        return
+
+    for x in it:
+        yield delimiter
+        yield x
+
+
 def dedupe(xs: Iterable[T]) -> List[T]:
     res = []
     for x in xs:
