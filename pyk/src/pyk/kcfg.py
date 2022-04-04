@@ -365,6 +365,15 @@ class KCFG:
         node_id = self._resolve(node_id)
         return [cover for cover in self.covers if cover.target.id == node_id]
 
+    def remove_cover(self, source_id: str) -> None:
+        source_id = self._resolve(source_id)
+        cover = self.cover_of(source_id)
+
+        if not cover:
+            raise ValueError(f'Cover does not exist for: {source_id}')
+
+        self._covers.pop(source_id)
+
     def add_init(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
         self._init.add(node_id)
