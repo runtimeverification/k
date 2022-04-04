@@ -13,6 +13,7 @@ from typing import (
     FrozenSet,
     Iterable,
     Iterator,
+    List,
     Mapping,
     Optional,
     Sequence,
@@ -969,6 +970,18 @@ class KFlatModule(KOuter, WithKAtt):
 
     def __iter__(self) -> Iterator[KSentence]:
         return iter(self.sentences)
+
+    @property
+    def productions(self) -> List[KProduction]:
+        return [sentence for sentence in self.sentences if type(sentence) is KProduction]
+
+    @property
+    def rules(self) -> List[KRule]:
+        return [sentence for sentence in self.sentences if type(sentence) is KRule]
+
+    @property
+    def claims(self) -> List[KClaim]:
+        return [sentence for sentence in self.sentences if type(sentence) is KClaim]
 
     @classmethod
     def from_dict(cls: Type['KFlatModule'], d: Dict[str, Any]) -> 'KFlatModule':
