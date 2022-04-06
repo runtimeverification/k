@@ -105,6 +105,10 @@ def replaceAnywhereWith(rule, pattern):
     return bottom_up(lambda p: replaceWith(rule, p), pattern)
 
 
+def boolToMlPred(kast: KInner) -> KInner:
+    return mlAnd([mlEqualsTrue(cond) for cond in flattenLabel('_andBool_', kast)])
+
+
 def unsafeMlPredToBool(k):
     """Attempt to convert an ML Predicate back into a boolean expression.
 
