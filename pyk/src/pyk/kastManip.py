@@ -1,5 +1,5 @@
 from collections import Counter
-from typing import Callable, Dict, Mapping, Tuple, Type, TypeVar
+from typing import Callable, Dict, Mapping, Sequence, Tuple, Type, TypeVar
 
 from .cli_utils import fatal
 from .kast import (
@@ -26,6 +26,7 @@ from .kast import (
 from .prelude import (
     buildAssoc,
     mlAnd,
+    mlBottom,
     mlEquals,
     mlEqualsTrue,
     mlImplies,
@@ -701,6 +702,15 @@ def antiUnifyWithConstraints(constrainedTerm1, constrainedTerm2, implications=Fa
         constraints.append(mlOr([constraint1, constraint2]))
 
     return mlAnd([state] + constraints)
+
+
+def disjunct_constrained_terms(constrained_terms: Sequence[KInner], concave=False) -> KInner:
+    if len(constrained_terms) == 0:
+        return mlBottom()
+    new_constrained_term = constrained_terms[0]
+    for constrained_term in constrained_terms[1:]:
+        new_constrained_term = antiUnifyWithConstraints(new_constrained_term, constrained_term, implications=concave, disjunct=concave)
+    return new_constrained_term
 
 
 def removeDisjuncts(constrainedTerm):
