@@ -98,11 +98,7 @@ public class TypeInferencer implements AutoCloseable {
         int major = Integer.valueOf(parts[0]);
         int minor = Integer.valueOf(parts[1]);
         int patch = Integer.valueOf(parts[2].split(" ")[0]);
-        if (major < 4 || (major == 4 && minor < 6) || (major == 4 && minor == 8 && patch == 9) || (major == 4 && minor == 8 && patch == 11)) {
-          destroyOnReset = true;
-        } else {
-          destroyOnReset = false;
-        }
+        destroyOnReset = true;
     } catch (IOException e) {
       throw KEMException.internalError("Could not read from z3 process", e);
     }
