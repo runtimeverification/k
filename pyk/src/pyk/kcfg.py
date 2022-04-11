@@ -30,17 +30,17 @@ class KCFG:
 
     @dataclass(frozen=True)
     class Node:
-        term: CTerm
+        cterm: CTerm
 
-        def __init__(self, term: CTerm):
-            object.__setattr__(self, 'term', term)
+        def __init__(self, cterm: CTerm):
+            object.__setattr__(self, 'cterm', cterm)
 
         @property
         def id(self) -> str:
-            return self.term.hash
+            return self.cterm.hash
 
         def to_dict(self) -> Dict[str, Any]:
-            return {'id': self.id, 'term': self.term.term.to_dict()}
+            return {'id': self.id, 'term': self.cterm.term.to_dict()}
 
     class EdgeLike(ABC):
         source: 'KCFG.Node'
@@ -58,8 +58,8 @@ class KCFG:
 
         def to_rule(self, claim=False, priority=50) -> KRuleLike:
             sentence_id = f'BASIC-BLOCK-{self.source.id}-TO-{self.target.id}'
-            init_term = mlAnd([self.source.term, self.condition])
-            final_term = self.target.term
+            init_term = mlAnd([self.source.cterm.term, self.condition])
+            final_term = self.target.cterm.term
             rule, _ = buildRule(sentence_id, init_term, final_term, claim=claim, priority=priority)
             return rule
 
@@ -74,7 +74,7 @@ class KCFG:
             object.__setattr__(self, 'source', source)
             object.__setattr__(self, 'target', target)
 
-            match_res = source.term.match_with_constraint(target.term)
+            match_res = source.cterm.match_with_constraint(target.cterm)
             if not match_res:
                 raise ValueError(f'No matching between: {source.id} and {target.id}')
 
@@ -179,8 +179,8 @@ class KCFG:
             return nodes[node_id]
 
         for node_dict in dct.get('nodes') or []:
-            term = CTerm(KInner.from_dict(node_dict['term']))
-            node = cfg.create_node(term)
+            cterm = CTerm(KInner.from_dict(node_dict['term']))
+            node = cfg.create_node(cterm)
 
             node_key = node_dict['id']
             if node_key in nodes:
@@ -272,12 +272,12 @@ class KCFG:
         node_id = self._resolve(node_id)
         return self._nodes[node_id]
 
-    def node_with_term(self, term: CTerm) -> Optional[Node]:
-        node = KCFG.Node(term)
+    def node_with_cterm(self, cterm: CTerm) -> Optional[Node]:
+        node = KCFG.Node(cterm)
         return self._nodes.get(node.id)
 
-    def create_node(self, term: CTerm) -> Node:
-        node = KCFG.Node(term)
+    def create_node(self, cterm: CTerm) -> Node:
+        node = KCFG.Node(cterm)
 
         if node.id in self._nodes:
             raise ValueError(f'Node already exists: {node.id}')
