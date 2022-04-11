@@ -68,11 +68,6 @@ public class TypeInferencer implements AutoCloseable {
   private final Module mod;
   private final java.util.Set<SortHead> sorts;
 
-  // logic QF_DT is best if it exists as it will be faster than ALL. However, some z3 versions do not have this logic.
-  // Fortunately, z3 ignores unknown logics.
-  private static final String PRELUDE1 =
-    "(set-logic QF_DT)\n";
-
   private final boolean destroyOnReset;
 
   private void initProcess() {
@@ -103,7 +98,7 @@ public class TypeInferencer implements AutoCloseable {
         int major = Integer.valueOf(parts[0]);
         int minor = Integer.valueOf(parts[1]);
         int patch = Integer.valueOf(parts[2].split(" ")[0]);
-        if (major < 4 || (major == 4 && minor < 6) || (major == 4 && minor == 8 && patch == 9)) {
+        if (major < 4 || (major == 4 && minor < 6) || (major == 4 && minor == 8 && patch == 9) || (major == 4 && minor == 8 && patch == 11)) {
           destroyOnReset = true;
         } else {
           destroyOnReset = false;
@@ -111,7 +106,6 @@ public class TypeInferencer implements AutoCloseable {
     } catch (IOException e) {
       throw KEMException.internalError("Could not read from z3 process", e);
     }
-    println(PRELUDE1);
     this.debug = debug;
     this.mod = mod;
     this.sorts = stream(mod.definedSorts()).filter(this::isRealSort).collect(Collectors.toSet());
@@ -265,11 +259,11 @@ public class TypeInferencer implements AutoCloseable {
   /**
    * Asserts that none of the sort parameters are of the KLabel sort.
    */
-  private void assertNotKLabel() {
+  private void assertNotKLabel(String solution) {
     if (!sorts.contains(Sorts.KLabel().head()))
       return;
     for (String param : parameters) {
-      print("(distinct |" + param + "| ");
+      print("(distinct (|Sol_" + param + "| " + solution + ") ");
       printSort(Sorts.KLabel());
       print(") ");
     }
@@ -291,7 +285,7 @@ public class TypeInferencer implements AutoCloseable {
     }
     //assert sort parameters are not sort KLabel.
     print("(assert (and true ");
-    assertNotKLabel();
+    assertNotKLabel("theSolution");
     println("))");
     try {
       // sort constraints with upper bounds first
@@ -314,7 +308,7 @@ public class TypeInferencer implements AutoCloseable {
     currentTerm = t;
     currentTopSort = topSort;
     this.isAnywhere = isAnywhere;
-    level+=2;
+    level++;
     println("(push)");
     // compute constraints in non-incremental mode
     ExpectedSortsVisitor viz = new ExpectedSortsVisitor(topSort, isAnywhere, false);
@@ -327,24 +321,59 @@ public class TypeInferencer implements AutoCloseable {
     for (String var : variables) {
       println("(declare-const |" + var + "| Sort)");
     }
+
+    java.util.Set<String> realVariables = new HashSet<>(variables);
+    realVariables.removeAll(parameters);
+
+    // declare solution datatypes
+    print("(declare-datatypes() ((SolutionVariables (SolVars ");
+    for (String var : realVariables) {
+      print("(|Sol_" + var + "| Sort) ");
+    }
+    println("))))");
+ 
+    print("(declare-datatypes() ((Solution (Sol (vars SolutionVariables) ");
+    for (String var : parameters) {
+      print("(|Sol_" + var + "| Sort) ");
+    }
+    println("))))");
+
+    // define the solution as a constant of type Solution
+    print("(define-fun theSolution () Solution (Sol ");
+    if (realVariables.isEmpty()) {
+      print("SolVars ");
+    } else {
+      print("(SolVars ");
+      for (String var : realVariables) {
+        print("|" + var + "| ");
+      }
+      print(") ");
+    }
+    for (String var : parameters) {
+      print("|" + var + "| ");
+    }
+    println("))");
+
+    // define the less-than relation between solutions
+    print("(define-fun lt ((s1 Solution) (s2 Solution)) Bool (and true ");
+    for (String var : realVariables) {
+      print("(<=SortSyntax (|Sol_" + var + "| (vars s1)) (|Sol_" + var + "| (vars s2))) ");
+    }
+    println(" (distinct (vars s1) (vars s2))))");
+ 
     // assert sort parameters are not KLabel
     print("(assert (and true ");
-    assertNotKLabel();
+    assertNotKLabel("theSolution");
     println("))");
     // write constraint declarations
     println(viz.toString());
     // assert top constraint
-    println("(assert " + id + ")");
-    println("(push)");
-    // soft assertions to cut down search space
-    for (String var : variables) {
-      if (mod.allSorts().contains(Sorts.K()))
-        println("(assert-soft ( <=Sort SortK |" + var + "|) :id A)");
-      if (mod.allSorts().contains(Sorts.KItem()))
-        println("(assert-soft ( <=Sort SortKItem |" + var + "|) :id A)");
-      if (mod.allSorts().contains(Sorts.Bag()))
-        println("(assert-soft (<=Sort SortBag |" + var + "|) :id A)");
-    }
+    println("(assert (" + id + " theSolution))");
+
+    // assert that the solution is maximal
+    print("(assert (not (exists ((s Solution)) (and (lt theSolution s) (" + id + " s) ");
+    assertNotKLabel("s");
+    println("))))");
   }
 
   /**
@@ -531,9 +560,9 @@ public class TypeInferencer implements AutoCloseable {
           for (Term i : amb.items()) {
             ids.add(apply(i));
           }
-          sb.append("(define-fun amb").append(id).append(" () Bool (or ");
+          sb.append("(define-fun amb").append(id).append(" ((s Solution)) Bool (or ");
           for (String i : ids) {
-            sb.append(i).append(" ");
+            sb.append("(").append(i).append(" s) ");
           }
           sb.append("))\n");
         }
@@ -611,7 +640,7 @@ public class TypeInferencer implements AutoCloseable {
         // if we are in non-incremental mode and this is the first time reaching this term under this expected sort,
         // define a new function with a conjunction of each of the children of the term and the constraints of the
         // current term.
-        sb.append("(define-fun |constraint").append(id).append("_").append(expected).append("| () Bool (and true ");
+        sb.append("(define-fun |constraint").append(id).append("_").append(expected).append("| ((s Solution)) Bool (and true ");
       }
       if (isIncremental || !shared || !cached) {
         // if we are in incremental mode or this is the first time reaching this term under this expected sort,
@@ -646,7 +675,7 @@ public class TypeInferencer implements AutoCloseable {
       }
       if (!isIncremental && (!shared ||  !cached)) {
         for (String i : ids) {
-          sb.append(i).append(" ");
+          sb.append("(").append(i).append(" s) ");
         }
         sb.append("))\n");
       }
@@ -699,7 +728,11 @@ public class TypeInferencer implements AutoCloseable {
       } else {
         sb.append("(<=Sort ");
       }
-      sb.append("|").append(name).append("| ");
+      if (name.startsWith("Var")) {
+        sb.append("(|Sol_").append(name).append("| (vars s)) ");
+      } else {
+        sb.append("(|Sol_").append(name).append("| s) ");
+      }
       if (mod.subsorts().lessThan(Sorts.K(), expectedSort)) {
           expectedSort = Sorts.K();
       }
@@ -751,7 +784,7 @@ public class TypeInferencer implements AutoCloseable {
   private String printSort(Sort s, Map<Sort, String> params, boolean isIncremental) {
     StringBuilder sb = new StringBuilder();
     if (params.containsKey(s)) {
-      sb.append("|").append(params.get(s)).append("|");
+      sb.append("(|Sol_").append(params.get(s)).append("| s)");
       return sb.toString();
     }
     if (s.params().isEmpty()) {
@@ -842,15 +875,15 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   void pushNotModel() {
-    print("(assert (not (and true");
+    print("(assert (or false ");
     java.util.Set<String> realVariables = new HashSet<>(variables);
     realVariables.removeAll(parameters);
     for (String var : realVariables) {
-      print("(<=SortSyntax   |" + var + "| ");
+      print("(distinct |" + var + "| ");
       printSort(model.get(var));
       print(") ");
     }
-    print(")))");
+    print("))");
     status = null;
   }
 
@@ -930,7 +963,6 @@ public class TypeInferencer implements AutoCloseable {
       z3.close();
       process.destroy();
       initProcess();
-      println(PRELUDE1);
       push(mod);
     }
   }

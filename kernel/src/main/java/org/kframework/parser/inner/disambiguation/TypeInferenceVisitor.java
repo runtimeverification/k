@@ -96,17 +96,14 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
       }
       switch(inferencer.status()) {
       case SATISFIABLE:
-        // there is at least one solution, so compute it and pop the soft constraints
+        // there is at least one maximal solution, so compute it
         inferencer.computeModel();
-        inferencer.pop();
         break;
       case UNKNOWN:
         // constraints could not be solved, so error
-        inferencer.pop();
         throw KEMException.internalError("Could not solve sort constraints.", t);
       case UNSATISFIABLE:
         // no solutions exist. This is a type error, so ask the inferencer for an error message and return
-        inferencer.pop();
         Set<KEMException> kex = inferencer.error();
         return Left.apply(kex);
       }
@@ -136,11 +133,9 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
           break;
         }
       } while (hasAnotherSolution);
-      // remove all models that are not maximal
-      List<Map<String, Sort>> maximalModels = removeNonMaximal(models);
       Set<Term> candidates = new HashSet<>();
       Set<KEMException> exceptions = new HashSet<>();
-      for (Map<String, Sort> model : maximalModels) {
+      for (Map<String, Sort> model : models) {
         // for each model, apply it to the term
         inferencer.selectModel(model);
         Either<Set<KEMException>, Term> result = new TypeCheckVisitor(topSort).apply(t);
