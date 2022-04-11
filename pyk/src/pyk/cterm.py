@@ -32,7 +32,7 @@ class CTerm:
         return self.cterm.hash
 
     def match(self, pattern: 'CTerm') -> Optional[Subst]:
-        match_res = self.match_with_condition(pattern)
+        match_res = self.match_with_constraint(pattern)
 
         if not match_res:
             return None
@@ -44,15 +44,15 @@ class CTerm:
 
         return subst
 
-    def match_with_condition(self, pattern: 'CTerm') -> Optional[Tuple[Subst, KInner]]:
+    def match_with_constraint(self, pattern: 'CTerm') -> Optional[Tuple[Subst, KInner]]:
         subst = match(pattern=pattern.config, term=self.config)
 
         if subst is None:
             return None
 
-        condition = self._ml_impl(self.constraints, map(subst, pattern.constraints))
+        constraint = self._ml_impl(self.constraints, map(subst, pattern.constraints))
 
-        return subst, condition
+        return subst, constraint
 
     @staticmethod
     def _ml_impl(antecedents: Iterable[KInner], consequents: Iterable[KInner]) -> KInner:

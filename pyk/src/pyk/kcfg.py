@@ -68,19 +68,19 @@ class KCFG:
         source: 'KCFG.Node'
         target: 'KCFG.Node'
         subst: Subst
-        condition: KInner
+        constraint: KInner
 
         def __init__(self, source: 'KCFG.Node', target: 'KCFG.Node'):
             object.__setattr__(self, 'source', source)
             object.__setattr__(self, 'target', target)
 
-            match_res = source.term.match_with_condition(target.term)
+            match_res = source.term.match_with_constraint(target.term)
             if not match_res:
                 raise ValueError(f'No matching between: {source.id} and {target.id}')
 
-            subst, condition = match_res
+            subst, constraint = match_res
             object.__setattr__(self, 'subst', subst)
-            object.__setattr__(self, 'condition', condition)
+            object.__setattr__(self, 'constraint', constraint)
 
         def to_dict(self) -> Dict[str, Any]:
             return {'source': self.source.id, 'target': self.target.id}
