@@ -40,7 +40,7 @@ class KCFG:
             return self.term.hash
 
         def to_dict(self) -> Dict[str, Any]:
-            return {'id': self.id, 'term': self.term.cterm.to_dict()}
+            return {'id': self.id, 'term': self.term.term.to_dict()}
 
     class EdgeLike(ABC):
         source: 'KCFG.Node'

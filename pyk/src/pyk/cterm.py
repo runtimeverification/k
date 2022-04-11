@@ -14,8 +14,8 @@ class CTerm:
     config: KInner  # TODO Optional?
     constraints: Tuple[KInner, ...]
 
-    def __init__(self, cterm: KInner) -> None:
-        config, constraint = splitConfigAndConstraints(cterm)
+    def __init__(self, term: KInner) -> None:
+        config, constraint = splitConfigAndConstraints(term)
         constraints = tuple(flattenLabel('#And', constraint))
         object.__setattr__(self, 'config', config)
         object.__setattr__(self, 'constraints', constraints)
@@ -24,12 +24,12 @@ class CTerm:
         return chain([self.config], self.constraints)
 
     @cached_property
-    def cterm(self) -> KInner:
+    def term(self) -> KInner:
         return mlAnd(self)
 
     @property
     def hash(self) -> str:
-        return self.cterm.hash
+        return self.term.hash
 
     def match(self, pattern: 'CTerm') -> Optional[Subst]:
         match_res = self.match_with_constraint(pattern)
