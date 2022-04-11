@@ -279,14 +279,9 @@ public class TypeInferencer implements AutoCloseable {
     // compute constraints in incremental mode
     ExpectedSortsVisitor viz = new ExpectedSortsVisitor(currentTopSort, isAnywhere, true);
     viz.apply(currentTerm);
-    // declare variables
-    for (String var : variables) {
-      println("(declare-const |" + var + "| Sort)");
-    }
-    //assert sort parameters are not sort KLabel.
-    print("(assert (and true ");
-    assertNotKLabel("theSolution");
-    println("))");
+
+    declareSolution();
+
     try {
       // sort constraints with upper bounds first
       viz.constraints.sort(Comparator.comparing(c -> !c.isVar()));
@@ -317,6 +312,21 @@ public class TypeInferencer implements AutoCloseable {
         // there are no variables. so return as there is nothing to infer.
         return;
     }
+
+    declareSolution();
+ 
+    // write constraint declarations
+    println(viz.toString());
+    // assert top constraint
+    println("(assert (" + id + " theSolution))");
+
+    // assert that the solution is maximal
+    print("(assert (not (exists ((s Solution)) (and (lt theSolution s) (" + id + " s) ");
+    assertNotKLabel("s");
+    println("))))");
+  }
+
+  private void declareSolution() {
     // declare variables and sort parameters
     for (String var : variables) {
       println("(declare-const |" + var + "| Sort)");
@@ -360,21 +370,13 @@ public class TypeInferencer implements AutoCloseable {
       print("(<=SortSyntax (|Sol_" + var + "| (vars s1)) (|Sol_" + var + "| (vars s2))) ");
     }
     println(" (distinct (vars s1) (vars s2))))");
- 
+
     // assert sort parameters are not KLabel
     print("(assert (and true ");
     assertNotKLabel("theSolution");
     println("))");
-    // write constraint declarations
-    println(viz.toString());
-    // assert top constraint
-    println("(assert (" + id + " theSolution))");
-
-    // assert that the solution is maximal
-    print("(assert (not (exists ((s Solution)) (and (lt theSolution s) (" + id + " s) ");
-    assertNotKLabel("s");
-    println("))))");
   }
+
 
   /**
    * Returns the top term on the lhs of a rule, if one exists.
@@ -728,10 +730,14 @@ public class TypeInferencer implements AutoCloseable {
       } else {
         sb.append("(<=Sort ");
       }
+      String solutionName = "s";
+      if (isIncremental) {
+        solutionName = "theSolution";
+      }
       if (name.startsWith("Var")) {
-        sb.append("(|Sol_").append(name).append("| (vars s)) ");
+        sb.append("(|Sol_").append(name).append("| (vars ").append(solutionName).append(")) ");
       } else {
-        sb.append("(|Sol_").append(name).append("| s) ");
+        sb.append("(|Sol_").append(name).append("| ").append(solutionName).append(") ");
       }
       if (mod.subsorts().lessThan(Sorts.K(), expectedSort)) {
           expectedSort = Sorts.K();
@@ -783,8 +789,12 @@ public class TypeInferencer implements AutoCloseable {
 
   private String printSort(Sort s, Map<Sort, String> params, boolean isIncremental) {
     StringBuilder sb = new StringBuilder();
+    String solutionName = "s";
+    if (isIncremental) {
+      solutionName = "theSolution";
+    }
     if (params.containsKey(s)) {
-      sb.append("(|Sol_").append(params.get(s)).append("| s)");
+      sb.append("(|Sol_").append(params.get(s)).append("| ").append(solutionName).append(")");
       return sb.toString();
     }
     if (s.params().isEmpty()) {
