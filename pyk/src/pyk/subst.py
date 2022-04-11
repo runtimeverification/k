@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from functools import reduce
 from itertools import chain
 from typing import Dict, Iterator, Mapping, Optional, TypeVar
 
@@ -54,34 +55,6 @@ def match(pattern: KInner, term: KInner) -> Optional[Subst]:
     """
 
     # TODO simplify
-    def merge(*dicts: Optional[Mapping[K, V]]) -> Optional[Dict[K, V]]:
-        if len(dicts) == 0:
-            return {}
-
-        dict1 = dicts[0]
-        if dict1 is None:
-            return None
-
-        if len(dicts) == 1:
-            return dict(dict1)
-
-        dict2 = dicts[1]
-        if dict2 is None:
-            return None
-
-        intersecting_keys = set(dict1.keys()).intersection(set(dict2.keys()))
-        for key in intersecting_keys:
-            if dict1[key] != dict2[key]:
-                return None
-
-        newDict = {key: dict1[key] for key in dict1}
-        for key in dict2.keys():
-            newDict[key] = dict2[key]
-
-        restDicts = dicts[2:]
-        return merge(newDict, *restDicts)
-
-    # TODO simplify
     def _match(pattern: KInner, term: KInner) -> Optional[Dict[str, KInner]]:
         subst: Optional[Dict[str, KInner]] = {}
         if type(pattern) is KVariable:
@@ -92,18 +65,18 @@ def match(pattern: KInner, term: KInner) -> Optional[Subst]:
                 and pattern.label == term.label and pattern.arity == term.arity:
             for patternArg, kastArg in zip(pattern.args, term.args):
                 argSubst = match(patternArg, kastArg)
-                subst = merge(subst, argSubst)
+                subst = combine_all(subst, argSubst)
                 if subst is None:
                     return None
             return subst
         if type(pattern) is KRewrite and type(term) is KRewrite:
             lhsSubst = match(pattern.lhs, term.lhs)
             rhsSubst = match(pattern.rhs, term.rhs)
-            return merge(lhsSubst, rhsSubst)
+            return combine_all(lhsSubst, rhsSubst)
         if type(pattern) is KSequence and type(term) is KSequence and pattern.arity == term.arity:
             for (patternItem, substItem) in zip(pattern.items, term.items):
                 itemSubst = match(patternItem, substItem)
-                subst = merge(subst, itemSubst)
+                subst = combine_all(subst, itemSubst)
                 if subst is None:
                     return None
             return subst
@@ -111,3 +84,22 @@ def match(pattern: KInner, term: KInner) -> Optional[Subst]:
 
     subst = _match(pattern, term)
     return Subst(subst) if subst is not None else None
+
+
+def combine_dicts(dict1: Optional[Mapping[K, V]], dict2: Optional[Mapping[K, V]]) -> Optional[Dict[K, V]]:
+    if dict1 is None:
+        return None
+
+    if dict2 is None:
+        return None
+
+    intersecting_keys = (key for key in dict1 if key in dict2)
+    if any(dict1[key] != dict2[key] for key in intersecting_keys):
+        return None
+
+    return {**dict1, **dict2}
+
+
+def combine_all(*dicts: Optional[Mapping[K, V]]) -> Optional[Dict[K, V]]:
+    unit: Optional[Dict[K, V]] = {}
+    return reduce(combine_dicts, dicts, unit)

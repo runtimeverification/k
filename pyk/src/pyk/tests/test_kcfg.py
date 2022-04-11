@@ -44,7 +44,7 @@ class KCFGTestCase(TestCase):
         cfg = KCFG.from_dict(d)
 
         # Then
-        self.assertSetEqual(cfg.nodes, {node(0)})
+        self.assertSetEqual(set(cfg.nodes), {node(0)})
         self.assertDictEqual(cfg.to_dict(), d)
 
     def test_from_dict_two_nodes(self):
@@ -55,7 +55,7 @@ class KCFGTestCase(TestCase):
         cfg = KCFG.from_dict(d)
 
         # Then
-        self.assertSetEqual(cfg.nodes, {node(0), node(1)})
+        self.assertSetEqual(set(cfg.nodes), {node(0), node(1)})
 
     def test_from_dict_loop_edge(self):
         # Given
@@ -65,8 +65,8 @@ class KCFGTestCase(TestCase):
         cfg = KCFG.from_dict(d)
 
         # Then
-        self.assertSetEqual(cfg.nodes, {node(0)})
-        self.assertSetEqual(cfg.edges(), {edge(0, 0)})
+        self.assertSetEqual(set(cfg.nodes), {node(0)})
+        self.assertSetEqual(set(cfg.edges()), {edge(0, 0)})
         self.assertEqual(cfg.edge(nid(0), nid(0)), edge(0, 0))
         self.assertDictEqual(cfg.to_dict(), d)
 
@@ -78,8 +78,8 @@ class KCFGTestCase(TestCase):
         cfg = KCFG.from_dict(d)
 
         # Then
-        self.assertSetEqual(cfg.nodes, {node(0), node(1)})
-        self.assertSetEqual(cfg.edges(), {edge(0, 1)})
+        self.assertSetEqual(set(cfg.nodes), {node(0), node(1)})
+        self.assertSetEqual(set(cfg.edges()), {edge(0, 1)})
         self.assertEqual(cfg.edge(nid(0), nid(1)), edge(0, 1))
 
     def test_create_node(self):
@@ -91,7 +91,7 @@ class KCFGTestCase(TestCase):
 
         # Then
         self.assertEqual(new_node, node(0))
-        self.assertSetEqual(cfg.nodes, {node(0)})
+        self.assertSetEqual(set(cfg.nodes), {node(0)})
 
     def test_remove_unknown_node(self):
         # Given
@@ -111,8 +111,8 @@ class KCFGTestCase(TestCase):
         cfg.remove_node(nid(0))
 
         # Then
-        self.assertSetEqual(cfg.nodes, set())
-        self.assertSetEqual(cfg.edges(), set())
+        self.assertSetEqual(set(cfg.nodes), set())
+        self.assertSetEqual(set(cfg.edges()), set())
         with self.assertRaises(ValueError):
             cfg.node(nid(0))
         with self.assertRaises(ValueError):
@@ -128,8 +128,8 @@ class KCFGTestCase(TestCase):
 
         # Then
         self.assertEqual(new_edge, edge(0, 0))
-        self.assertSetEqual(cfg.nodes, {node(0)})
-        self.assertSetEqual(cfg.edges(), {edge(0, 0)})
+        self.assertSetEqual(set(cfg.nodes), {node(0)})
+        self.assertSetEqual(set(cfg.edges()), {edge(0, 0)})
         self.assertEqual(cfg.edge(nid(0), nid(0)), edge(0, 0))
 
     def test_insert_simple_edge(self):
@@ -142,8 +142,8 @@ class KCFGTestCase(TestCase):
 
         # Then
         self.assertEqual(new_edge, edge(0, 1))
-        self.assertSetEqual(cfg.nodes, {node(0), node(1)})
-        self.assertSetEqual(cfg.edges(), {edge(0, 1)})
+        self.assertSetEqual(set(cfg.nodes), {node(0), node(1)})
+        self.assertSetEqual(set(cfg.edges()), {edge(0, 1)})
 
     def test_get_successors(self):
         d = {'nodes': node_dicts(3), 'edges': edge_dicts((0, 1), (0, 2))}
@@ -174,7 +174,7 @@ class KCFGTestCase(TestCase):
         cfg = KCFG.from_dict(d)
 
         # When
-        nodes = set(cfg.reachable_nodes(nid(1)))
+        nodes = cfg.reachable_nodes(nid(1))
 
         # Then
         self.assertSetEqual(nodes, {node(1), node(2), node(3), node(4)})

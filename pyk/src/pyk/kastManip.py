@@ -1,5 +1,5 @@
 from collections import Counter
-from typing import Callable, Mapping, Type, TypeVar
+from typing import Callable, Dict, Mapping, Sequence, Tuple, Type, TypeVar
 
 from .cli_utils import fatal
 from .kast import (
@@ -11,6 +11,7 @@ from .kast import (
     KInner,
     KRewrite,
     KRule,
+    KRuleLike,
     KSequence,
     KToken,
     KVariable,
@@ -25,6 +26,7 @@ from .kast import (
 from .prelude import (
     buildAssoc,
     mlAnd,
+    mlBottom,
     mlEquals,
     mlEqualsTrue,
     mlImplies,
@@ -102,6 +104,10 @@ def replaceWith(rule, pattern):
 
 def replaceAnywhereWith(rule, pattern):
     return bottom_up(lambda p: replaceWith(rule, p), pattern)
+
+
+def boolToMlPred(kast: KInner) -> KInner:
+    return mlAnd([mlEqualsTrue(cond) for cond in flattenLabel('_andBool_', kast)])
 
 
 def unsafeMlPredToBool(k):
@@ -587,7 +593,7 @@ def hasExistentials(pattern):
     return any([v.startswith('?') for v in collectFreeVars(pattern)])
 
 
-def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, priority=None, keepVars=None):
+def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, priority=None, keepVars=None) -> Tuple[KRuleLike, Dict[str, KVariable]]:
     (initConfig, initConstraint) = splitConfigAndConstraints(initConstrainedTerm)
     (finalConfig, finalConstraint) = splitConfigAndConstraints(finalConstrainedTerm)
     initConstraints = flattenLabel('#And', initConstraint)
@@ -598,8 +604,8 @@ def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, pr
     lhsVars = collectFreeVars(initConstrainedTerm)
     rhsVars = collectFreeVars(finalConstrainedTerm)
     varOccurances = count_vars(mlAnd([initConstrainedTerm, finalConstrainedTerm]))
-    vSubst = {}
-    vremapSubst = {}
+    vSubst: Dict[str, KVariable] = {}
+    vremapSubst: Dict[str, KVariable] = {}
     for v in varOccurances:
         newV = v
         if varOccurances[v] == 1:
@@ -619,10 +625,13 @@ def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, pr
     ruleEnsures = simplifyBool(unsafeMlPredToBool(finalConstraint))
     attDict = {} if claim or priority is None else {'priority': str(priority)}
     ruleAtt = KAtt(atts=attDict)
+
+    rule: KRuleLike
     if not claim:
         rule = KRule(ruleBody, requires=ruleRequires, ensures=ruleEnsures, att=ruleAtt)
     else:
         rule = KClaim(ruleBody, requires=ruleRequires, ensures=ruleEnsures, att=ruleAtt)
+
     rule = rule.update_atts({'label': ruleId})
     newKeepVars = None
     if keepVars is not None:
@@ -693,6 +702,15 @@ def antiUnifyWithConstraints(constrainedTerm1, constrainedTerm2, implications=Fa
         constraints.append(mlOr([constraint1, constraint2]))
 
     return mlAnd([state] + constraints)
+
+
+def disjunct_constrained_terms(constrained_terms: Sequence[KInner], concave=False) -> KInner:
+    if len(constrained_terms) == 0:
+        return mlBottom()
+    new_constrained_term = constrained_terms[0]
+    for constrained_term in constrained_terms[1:]:
+        new_constrained_term = antiUnifyWithConstraints(new_constrained_term, constrained_term, implications=concave, disjunct=concave)
+    return new_constrained_term
 
 
 def removeDisjuncts(constrainedTerm):
