@@ -34,27 +34,35 @@ import static org.kframework.kore.KORE.*;
 /**
  * Disambiguation transformer which performs type checking and variable type inference.
  *
- * This class is responsible for most of the interaction at the K level, the overall driving of the disambiguation
- * algorithm, and the pruning of ill-typed branches from the parse forest. All of the z3 code is managed by
+ * This class is responsible for most of the interaction at the K level, the overall driving of the
+ * disambiguation algorithm, and the pruning of ill-typed branches from the parse forest. All of
+ * the z3 code is managed by
  * {@link TypeInferencer}.
  *
  * At a high level, the algorithm does the following:
  *
  * 1.  Define all the sorts in z3 and the subsort relationship between sorts.
  * 2.  Declare all the variables and sort parameters in the term as z3 constants.
- * 3.  Assert that the sort parameters are not sort KLabel.
- * 4.  While preserving sharing, assert the constraints that determine whether the term is well-typed.
- * 5.  Add soft constraints indicating that we prefer larger solutions to smaller solutions. These serve as a heuristic
- *     only and do not exhaustively describe maximality. Their purpose is simply to cut the search space.
- * 6.  Check satisfiability. If the constraints cannot be satisfied, replay the constraints one at a time to determine
- *     the constraint at which the solution becomes unsatisfiable, and use the model of the last constraint to be
- *     satisfied to generate a type error. Otherwise:
- * 7.  Assert that the variables are not less than or equal to the model of the first solution, and check for another
- *     solution. Repeat this in a loop until the constraints become unsatisfied.
- * 8.  Filter out all models which are strictly less than some other model we have obtained.
- * 9.  For each remaining model, substitute the sorts of the variables into the term and trim out the branches of the
- *     parse forest for which that solution is not well typed.
- * 10. Disjunct the substituted solutions together and return them.
+ * 3.  Declare two tuple types for solutions: one representing all variables, one representing only
+ *     true variables (ie, not sort parameters)
+ * 4.  Declare an instance of the full solution type corresponding to the constants defined in
+ *     step 2.
+ * 5.  Declare a less-than relation over solutions; the less-than relation compares only true
+ *     variables and concerns itself only with syntactic subsorts.
+ * 6.  Assert that the sort parameters are not sort KLabel.
+ * 7.  While preserving sharing, assert the constraints that determine whether the term is
+ *     well-typed.
+ * 8.  Assert that there does not exist a solution greater than the one we found which also
+ *     satisfies the constraints.
+ * 9.  Check satisfiability. If the constraints cannot be satisfied, replay the constraints one at
+ *     a time to determine the constraint at which the solution becomes unsatisfiable, and use the
+ *     model of the last constraint to be satisfied to generate a type error. Otherwise:
+ * 10. Assert that the variables are not equal to the model of the first solution, and check for
+ *     another solution. Repeat this in a loop until the constraints become unsatisfied.
+ * 11. For each model, which represents a possible maximal solution, substitute the sorts of the
+ *     variables into the term and trim out the branches of the parse forest for which that
+ *     solution is not well typed.
+ * 12. Disjunct the substituted solutions together and return them.
  *
  */
 public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException> {
