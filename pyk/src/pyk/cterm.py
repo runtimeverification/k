@@ -14,8 +14,8 @@ class CTerm:
     config: KInner  # TODO Optional?
     constraints: Tuple[KInner, ...]
 
-    def __init__(self, cterm: KInner) -> None:
-        config, constraint = splitConfigAndConstraints(cterm)
+    def __init__(self, term: KInner) -> None:
+        config, constraint = splitConfigAndConstraints(term)
         constraints = tuple(flattenLabel('#And', constraint))
         object.__setattr__(self, 'config', config)
         object.__setattr__(self, 'constraints', constraints)
@@ -24,22 +24,35 @@ class CTerm:
         return chain([self.config], self.constraints)
 
     @cached_property
-    def cterm(self) -> KInner:
+    def term(self) -> KInner:
         return mlAnd(self)
 
     @property
     def hash(self) -> str:
-        return self.cterm.hash
+        return self.term.hash
 
-    def match(self, pattern: 'CTerm') -> Optional[Tuple[Subst, KInner]]:
+    def match(self, pattern: 'CTerm') -> Optional[Subst]:
+        match_res = self.match_with_constraint(pattern)
+
+        if not match_res:
+            return None
+
+        subst, condition = match_res
+
+        if condition != TOP:
+            return None
+
+        return subst
+
+    def match_with_constraint(self, pattern: 'CTerm') -> Optional[Tuple[Subst, KInner]]:
         subst = match(pattern=pattern.config, term=self.config)
 
         if subst is None:
             return None
 
-        obligation = self._ml_impl(self.constraints, map(subst, pattern.constraints))
+        constraint = self._ml_impl(self.constraints, map(subst, pattern.constraints))
 
-        return subst, obligation
+        return subst, constraint
 
     @staticmethod
     def _ml_impl(antecedents: Iterable[KInner], consequents: Iterable[KInner]) -> KInner:
