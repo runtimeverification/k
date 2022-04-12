@@ -291,11 +291,13 @@ class KCFG:
         self._nodes.pop(node_id)
 
         self._edges.pop(node_id, None)
-        for source_id in self._edges:
+        for source_id in list(self._edges):
             self._edges[source_id].pop(node_id, None)
+            if not self._edges[source_id]:
+                self._edges.pop(source_id)
 
         self._covers.pop(node_id, None)
-        for source_id, cover in self._covers.items():
+        for source_id, cover in list(self._covers.items()):
             if cover.target.id == node_id:
                 self._covers.pop(source_id)
 
