@@ -1,14 +1,16 @@
 from kprove_test import KProveTest
 
-from pyk.kast import KApply, KAtt, KClaim, KRule, KToken, KVariable
-from pyk.kastManip import rewriteAnywhereWith
+from pyk.kast import KAtt, KClaim, KRule, KToken
+from pyk.ktool import KompileBackend
 
 
 class SimpleProofTest(KProveTest):
-    DEFN_DIR = 'definitions/simple-proofs/haskell/simple-proofs-kompiled'
-    MAIN_FILE_NAME = 'simple-proofs.k'
-    USE_DIR = '.simple-proof-test'
-    INCLUDE_DIRS = ['k-files']
+    KOMPILE_MAIN_FILE = 'k-files/simple-proofs.k'
+    KOMPILE_BACKEND = KompileBackend.HASKELL
+    KOMPILE_OUTPUT_DIR = 'definitions/simple-proofs/haskell'
+    KOMPILE_EMIT_JSON = True
+
+    KPROVE_USE_DIR = '.simple-proof-test'
 
     @staticmethod
     def _update_symbol_table(symbol_table):
@@ -26,12 +28,3 @@ class SimpleProofTest(KProveTest):
         # Then
         self.assertNotTop(result1)
         self.assertTop(result2)
-
-
-def extract_claims(module):
-    return [claim for claim in module['localSentences'] if claim['node'] == 'KClaim']
-
-
-def eliminate_generated_top(term):
-    rule = KApply('<generatedTop>', [KVariable('CONFIG'), KVariable('_')]), KVariable('CONFIG')
-    return rewriteAnywhereWith(rule, term)

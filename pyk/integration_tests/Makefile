@@ -54,12 +54,12 @@ FILE_DEPS =
 pytests = $(wildcard *_test.py)
 
 configuration_test.py.pytest:  FILE_DEPS = imp-verification/haskell.kompiled
-defn_test.py.pytest:           FILE_DEPS = imp-verification/haskell.kompiled
+defn_test.py.pytest:           FILE_DEPS =
 emit_json_spec_test.py.pytest: FILE_DEPS = imp-verification/looping-spec.json.json-spec
 parse_kast_test.py.pytest:     FILE_DEPS = contextual-function/haskell.kompiled \
                                            sort-synonym/haskell.kompiled
 simple_kompile_test.py.pytest: FILE_DEPS =
-simple_proofs_test.py.pytest:  FILE_DEPS = simple-proofs/haskell.kompiled
+simple_proofs_test.py.pytest:  FILE_DEPS =
 
 test-pytest: $(pytests:=.pytest)
 
