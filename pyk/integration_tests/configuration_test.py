@@ -1,5 +1,6 @@
 from abc import ABC
-from unittest import TestCase
+
+from kompiled_test import KompiledTest
 
 from pyk.kast import (
     KApply,
@@ -18,9 +19,15 @@ from pyk.kastManip import (
     structurallyFrameKCell,
     substitute,
 )
+from pyk.ktool import KompileBackend
 
 
-class ConfigurationTest(TestCase, ABC):
+class ConfigurationTest(KompiledTest, ABC):
+    KOMPILE_MAIN_FILE = 'k-files/imp.k'
+    KOMPILE_BACKEND = KompileBackend.HASKELL
+    KOMPILE_OUTPUT_DIR = 'definitions/imp-verification/haskell'
+    KOMPILE_EMIT_JSON = True
+
     COMPILED_JSON_PATH = 'definitions/imp-verification/haskell/imp-verification-kompiled/compiled.json'
     MODULE_NAME = 'IMP-VERIFICATION'
 
@@ -31,6 +38,7 @@ class ConfigurationTest(TestCase, ABC):
     GENERATED_TOP_CELL_2 = KApply('<generatedTop>', [T_CELL, GENERATED_COUNTER_CELL])
 
     def setUp(self):
+        super().setUp()
         self.definition = readKastTerm(self.COMPILED_JSON_PATH)
         self.assertIsInstance(self.definition, KDefinition)
 
