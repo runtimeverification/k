@@ -5,8 +5,8 @@ import sys
 from pathlib import Path
 from typing import List
 
-from .cli_utils import fatal, gen_file_timestamp, notif
-from .kast import (
+from ..cli_utils import fatal, gen_file_timestamp, notif
+from ..kast import (
     KAst,
     KDefinition,
     KFlatModule,
@@ -17,8 +17,8 @@ from .kast import (
     prettyPrintKast,
     readKastTerm,
 )
-from .prelude import mlTop
-from .utils import hash_str
+from ..prelude import mlTop
+from ..utils import hash_str
 
 
 class KPrint:
