@@ -1,14 +1,17 @@
 from abc import ABC
-from unittest import TestCase
+
+from kompiled_test import KompiledTest
 
 from pyk.kast import KAs, KDefinition, KSort, KSortSynonym, readKastTerm
+from pyk.ktool import KompileBackend
 
 
-class ParseKAstTest(TestCase, ABC):
+class ParseKAstTest(KompiledTest, ABC):
     COMPILED_JSON_PATH: str
     MODULE_NAME: str
 
     def setUp(self):
+        super().setUp()
         self.definition = readKastTerm(self.COMPILED_JSON_PATH)
         self.assertIsInstance(self.definition, KDefinition)
         modules = [module for module in self.definition if module.name == self.MODULE_NAME]
@@ -17,6 +20,11 @@ class ParseKAstTest(TestCase, ABC):
 
 
 class KSortSynonymTest(ParseKAstTest):
+    KOMPILE_MAIN_FILE = 'k-files/sort-synonym.k'
+    KOMPILE_BACKEND = KompileBackend.HASKELL
+    KOMPILE_OUTPUT_DIR = 'definitions/sort-synonym/haskell'
+    KOMPILE_EMIT_JSON = True
+
     COMPILED_JSON_PATH = 'definitions/sort-synonym/haskell/sort-synonym-kompiled/compiled.json'
     MODULE_NAME = 'SORT-SYNONYM-SYNTAX'
 
@@ -27,6 +35,11 @@ class KSortSynonymTest(ParseKAstTest):
 
 
 class KAsTest(ParseKAstTest):
+    KOMPILE_MAIN_FILE = 'k-files/contextual-function.k'
+    KOMPILE_BACKEND = KompileBackend.HASKELL
+    KOMPILE_OUTPUT_DIR = 'definitions/contextual-function/haskell'
+    KOMPILE_EMIT_JSON = True
+
     COMPILED_JSON_PATH = 'definitions/contextual-function/haskell/contextual-function-kompiled/compiled.json'
     MODULE_NAME = 'CONTEXTUAL-FUNCTION'
 
