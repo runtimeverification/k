@@ -1,2 +1,3 @@
 from .kompile import KompileBackend, kompile
-from .ktool import KPrint, KProve
+from .kprove import KProve
+from .ktool import KPrint
