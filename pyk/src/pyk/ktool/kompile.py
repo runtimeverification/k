@@ -39,9 +39,9 @@ def kompile(
 def _build_arg_list(
     *,
     backend: Optional[KompileBackend],
-    output_dir: Optional[Path] = None,
-    include_dirs: Iterable[Path] = (),
-    emit_json=False,
+    output_dir: Optional[Path],
+    include_dirs: Iterable[Path],
+    emit_json: bool,
 ) -> List[str]:
     args = []
 

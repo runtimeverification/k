@@ -53,35 +53,12 @@ FILE_DEPS =
 
 pytests = $(wildcard *_test.py)
 
-emit_json_spec_test.py.pytest: FILE_DEPS = imp-verification/looping-spec.json.json-spec
-
 test-pytest: $(pytests:=.pytest)
 
 .SECONDEXPANSION:
 %.pytest: % $$(FILE_DEPS)
 	python3 -m unittest $<
 
-## proofs to turn to json ahead of time
-
-KPROVEX_DEFN =
-KPROVEX_OPTS =
-KPROVEX_FILE =
-
-json_specs := imp-verification/looping-spec.json
-
-imp-verification/looping-spec.json.json-spec: KPROVEX_DEFN = imp-verification/haskell
-imp-verification/looping-spec.json.json-spec: KPROVEX_FILE = looping-spec.k
-
-build-specs: $(json_specs:=.json-spec)
-
-.SECONDEXPANSION:
-%.json-spec: $$(KPROVEX_DEFN).kompiled
-	$(KPROVEX) k-files/$(KPROVEX_FILE)          \
-	    -I k-files                              \
-	    --backend haskell --dry-run             \
-	    --directory definitions/$(KPROVEX_DEFN) \
-	    --emit-json-spec specs/$*               \
-	    $(KPROVEX_OPTS)
 
 ## definitions to build ahead of time
 

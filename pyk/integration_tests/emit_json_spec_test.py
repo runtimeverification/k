@@ -5,7 +5,7 @@ from kprove_test import KProveTest
 
 from pyk.kast import EMPTY_ATT, KAst, KDefinition, KRequire
 from pyk.kastManip import remove_generated_cells
-from pyk.ktool import KompileBackend
+from pyk.ktool import KompileBackend, kprovex
 
 
 class EmitJsonSpecTest(KProveTest):
@@ -18,12 +18,18 @@ class EmitJsonSpecTest(KProveTest):
 
     KPROVE_USE_DIR = '.emit-json-spec-test'
 
-    SPEC_FILE = 'specs/imp-verification/looping-spec.json'
+    SPEC_FILE = 'k-files/looping-spec.k'
+    SPEC_JSON_FILE = 'specs/imp-verification/looping-spec.json'
 
     def setUp(self):
         super().setUp()
 
-        with open(self.SPEC_FILE, 'r') as spec_file:
+        spec_file = Path(self.SPEC_FILE)
+        directory = Path(self.KOMPILE_OUTPUT_DIR)
+        emit_json_spec = Path(self.SPEC_JSON_FILE)
+        kprovex(spec_file, directory=directory, emit_json_spec=emit_json_spec, dry_run=True)
+
+        with open(self.SPEC_JSON_FILE, 'r') as spec_file:
             module = KAst.from_dict(json.load(spec_file)['term'])
 
         claim = module.claims[0]

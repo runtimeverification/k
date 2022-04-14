@@ -3,9 +3,16 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import List
+from subprocess import CompletedProcess, run
+from typing import Iterable, List, Optional
 
-from ..cli_utils import fatal, gen_file_timestamp, notif
+from ..cli_utils import (
+    check_dir_path,
+    check_file_path,
+    fatal,
+    gen_file_timestamp,
+    notif,
+)
 from ..kast import (
     KAst,
     KDefinition,
@@ -16,6 +23,62 @@ from ..kast import (
 )
 from ..prelude import mlTop
 from .kprint import KPrint
+
+
+def kprovex(
+    spec_file: Path,
+    *,
+    directory: Optional[Path] = None,
+    include_dirs: Iterable[Path] = (),
+    emit_json_spec: Optional[Path] = None,
+    dry_run=False,
+) -> None:
+    check_file_path(spec_file)
+
+    for include_dir in include_dirs:
+        check_dir_path(include_dir)
+
+    args = _build_arg_list(
+        directory=directory,
+        include_dirs=include_dirs,
+        dry_run=dry_run,
+        emit_json_spec=emit_json_spec,
+    )
+
+    proc_res = _kprovex(str(spec_file), *args)
+
+    if proc_res.returncode:
+        raise RuntimeError(f'Command kprovex failed for: {spec_file}')
+
+
+def _build_arg_list(
+    *,
+    directory: Optional[Path],
+    include_dirs: Iterable[Path],
+    emit_json_spec: Optional[Path],
+    dry_run: bool,
+) -> List[str]:
+    args = []
+
+    if directory:
+        args += ['--directory', str(directory)]
+
+    for include_dir in include_dirs:
+        args += ['-I', str(include_dir)]
+
+    if emit_json_spec:
+        args += ['--emit-json-spec', str(emit_json_spec)]
+
+    if dry_run:
+        args.append('--dry-run')
+
+    return args
+
+
+def _kprovex(spec_file: str, *args: str) -> CompletedProcess:
+    run_args = ['kprovex', spec_file] + list(args)
+    notif(' '.join(run_args))
+    return run(run_args, capture_output=True)
 
 
 class KProve(KPrint):
