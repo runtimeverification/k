@@ -1,6 +1,4 @@
-from kprove_test import KProveTest
-
-from pyk.kast import (
+from ..kast import (
     KApply,
     KClaim,
     KRewrite,
@@ -9,9 +7,10 @@ from pyk.kast import (
     assocWithUnit,
     constLabel,
 )
-from pyk.kastManip import pushDownRewrites, simplifyBool
-from pyk.ktool import KompileBackend
-from pyk.prelude import boolToken, intToken
+from ..kastManip import pushDownRewrites, simplifyBool
+from ..ktool import KompileBackend
+from ..prelude import boolToken, intToken
+from .kprove_test import KProveTest
 
 
 class DefnTest(KProveTest):

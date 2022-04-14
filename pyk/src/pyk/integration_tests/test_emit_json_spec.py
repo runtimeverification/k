@@ -1,11 +1,10 @@
 import json
 from pathlib import Path
 
-from kprove_test import KProveTest
-
-from pyk.kast import EMPTY_ATT, KAst, KDefinition, KRequire
-from pyk.kastManip import remove_generated_cells
-from pyk.ktool import KompileBackend, kprovex
+from ..kast import EMPTY_ATT, KAst, KDefinition, KRequire
+from ..kastManip import remove_generated_cells
+from ..ktool import KompileBackend, kprovex
+from .kprove_test import KProveTest
 
 
 class EmitJsonSpecTest(KProveTest):
@@ -19,7 +18,7 @@ class EmitJsonSpecTest(KProveTest):
     KPROVE_USE_DIR = '.emit-json-spec-test'
 
     SPEC_FILE = 'k-files/looping-spec.k'
-    SPEC_JSON_FILE = 'specs/imp-verification/looping-spec.json'
+    SPEC_JSON_FILE = 'definitions/imp-verification/haskell/looping-spec.json'
 
     def setUp(self):
         super().setUp()

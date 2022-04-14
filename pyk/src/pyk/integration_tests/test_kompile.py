@@ -1,6 +1,5 @@
-from kompiled_test import KompiledTest
-
-from pyk.ktool import KompileBackend
+from ..ktool import KompileBackend
+from .kompiled_test import KompiledTest
 
 
 class SimpleKompileTest(KompiledTest):

@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from pyk.kast import KApply, KSequence, KVariable, newLines
-from pyk.kastManip import splitConfigFrom
+from ..kast import KApply, KSequence, KVariable, newLines
+from ..kastManip import splitConfigFrom
 
 
 class TestPyk(TestCase):

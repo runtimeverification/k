@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Iterable, Optional
 from unittest import TestCase
 
-from pyk.ktool import KompileBackend, kompile
+from ..ktool import KompileBackend, kompile
 
 
 class KompiledTest(TestCase, ABC):

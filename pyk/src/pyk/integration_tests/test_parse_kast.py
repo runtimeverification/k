@@ -1,9 +1,8 @@
 from abc import ABC
 
-from kompiled_test import KompiledTest
-
-from pyk.kast import KAs, KDefinition, KSort, KSortSynonym, readKastTerm
-from pyk.ktool import KompileBackend
+from ..kast import KAs, KDefinition, KSort, KSortSynonym, readKastTerm
+from ..ktool import KompileBackend
+from .kompiled_test import KompiledTest
 
 
 class ParseKAstTest(KompiledTest, ABC):

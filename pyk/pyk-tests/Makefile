@@ -12,17 +12,14 @@ export PATH := $(K_BIN):$(PATH)
 
 CHECK = git --no-pager diff --no-index -R
 
-export PYTHONPATH
 
-.PHONY: all clean update-results pyk                         \
-        test test-defn test-defn-kast test-defn-prove        \
-        test-kpyk test-kpyk-graphviz test-kpyk-minimize-term \
-        test-pytest
+.PHONY: all clean update-results \
+        test test-kpyk test-kpyk-graphviz test-kpyk-minimize-term
 
 all: test
 
 clean:
-	rm -rf definitions specs
+	rm -rf definitions
 
 update-results: CHECK=cp
 update-results: test
@@ -31,7 +28,7 @@ kompile: $(llvm_imp_kompiled) $(haskell_imp_kompiled)
 
 # Tests
 
-test: test-kpyk test-pytest
+test: test-kpyk
 
 ## kpyk runner tests
 
@@ -43,21 +40,9 @@ test-kpyk-graphviz: imp-verification/haskell.kompiled
 	$(CHECK) import-graph.sorted imp-import-graph.expected
 
 test-kpyk-minimize-term: imp-verification/haskell.kompiled
-	$(PYK) definitions/imp-verification/haskell/imp-verification-kompiled prove k-files/imp-verification.k k-files/imp-unproveable-spec.k IMP-UNPROVEABLE-SPEC \
+	$(PYK) definitions/imp-verification/haskell/imp-verification-kompiled prove ../k-files/imp-verification.k ../k-files/imp-unproveable-spec.k IMP-UNPROVEABLE-SPEC \
 	    | $(PYK) definitions/imp-verification/haskell/imp-verification-kompiled print /dev/stdin > imp-unproveable-spec.k.out
 	$(CHECK) imp-unproveable-spec.k.out imp-unproveable-spec.k.expected
-
-## pytests
-
-FILE_DEPS =
-
-pytests = $(wildcard *_test.py)
-
-test-pytest: $(pytests:=.pytest)
-
-.SECONDEXPANSION:
-%.pytest: % $$(FILE_DEPS)
-	python3 -m unittest $<
 
 
 ## definitions to build ahead of time
@@ -66,10 +51,7 @@ KOMPILE_BACKEND  = haskell
 KOMPILE_COVERAGE =
 KOMPILE_OPTS     =
 
-definitions := contextual-function/haskell \
-               imp-verification/haskell    \
-               simple-proofs/haskell       \
-               sort-synonym/haskell
+definitions := imp-verification/haskell
 
 build-definitions: $(definitions:=.kompiled)
 
@@ -79,4 +61,4 @@ build-definitions: $(definitions:=.kompiled)
 	    --backend $(KOMPILE_BACKEND)         \
 	    --emit-json $(KOMPILE_COVERAGE)      \
 	    $(KOMPILE_OPTS)                      \
-	    k-files/$(patsubst %/,%,$(dir $@)).k
+	    ../k-files/$(patsubst %/,%,$(dir $@)).k

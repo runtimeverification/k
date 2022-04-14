@@ -1,7 +1,6 @@
-from kprove_test import KProveTest
-
-from pyk.kast import KAtt, KClaim, KRule, KToken
-from pyk.ktool import KompileBackend
+from ..kast import KAtt, KClaim, KRule, KToken
+from ..ktool import KompileBackend
+from .kprove_test import KProveTest
 
 
 class SimpleProofTest(KProveTest):
