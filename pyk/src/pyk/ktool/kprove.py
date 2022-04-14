@@ -15,7 +15,7 @@ from ..kast import (
     flattenLabel,
 )
 from ..prelude import mlTop
-from .ktool import KPrint
+from .kprint import KPrint
 
 
 class KProve(KPrint):
