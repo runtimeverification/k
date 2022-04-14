@@ -25,9 +25,11 @@ public class MinimizeTermConstruction {
     private final Set<K> usedOnRhs = new HashSet<>();
 
     private final Module module;
+    private final AddSortInjections sorts;
 
     public MinimizeTermConstruction(Module module) {
         this.module = module;
+        this.sorts = new AddSortInjections(module);
     }
 
     void resetVars() {
@@ -93,7 +95,6 @@ public class MinimizeTermConstruction {
    }
 
    void gatherTerms(K term, boolean body) {
-        AddSortInjections sorts = new AddSortInjections(module);
         new RewriteAwareVisitor(body, new HashSet<>()) {
             @Override
             public void apply(K k) {
@@ -150,7 +151,6 @@ public class MinimizeTermConstruction {
     }
 
     K transform(K term, boolean body) {
-        AddSortInjections sorts = new AddSortInjections(module);
         return new RewriteAwareTransformer(body) {
             @Override
             public K apply(K k) {
