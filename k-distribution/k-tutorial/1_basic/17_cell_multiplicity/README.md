@@ -121,7 +121,7 @@ module LESSON-17-B
   rule <k> I1:Int + I2:Int => I1 +Int I2 ...</k>
 
   rule <thread>...
-         <k> spawn { Ss } => NEXTID...</k>
+         <k> spawn { Ss } => NEXTID ...</k>
        ...</thread>
        <next-id> NEXTID => NEXTID +Int 1 </next-id>
        (.Bag => 
