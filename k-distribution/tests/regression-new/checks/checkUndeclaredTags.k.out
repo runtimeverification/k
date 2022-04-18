@@ -1,3 +1,3 @@
 [Error] Outer Parser: Could not find any productions for tag: a
 	Source(checkUndeclaredTags.k)
-	Location(2,3,2,25)
+	Location(2,3,2,26)
