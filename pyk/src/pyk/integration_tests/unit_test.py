@@ -1,7 +1,8 @@
 from unittest import TestCase
 
-from ..kast import KApply, KSequence, KVariable, newLines
+from ..kast import KApply, KSequence, KVariable
 from ..kastManip import splitConfigFrom
+from ..ktool import newLines
 
 
 class TestPyk(TestCase):
