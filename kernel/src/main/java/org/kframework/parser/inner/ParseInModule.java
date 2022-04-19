@@ -63,19 +63,16 @@ public class ParseInModule implements Serializable, AutoCloseable {
     private final boolean isBison;
     private final boolean forGlobalScanner;
     private final FileUtil files;
-    public ParseInModule(Module seedModule) {
-        this(seedModule, seedModule, seedModule, seedModule, null, true, false, false, false, null);
-    }
 
-    public ParseInModule(Module seedModule, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files) {
+    ParseInModule(Module seedModule, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files) {
         this(seedModule, null, null, null, null, strict, profileRules, isBison, forGlobalScanner, files);
     }
 
-    public ParseInModule(Module seedModule, Scanner scanner, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files) {
+    ParseInModule(Module seedModule, Scanner scanner, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files) {
         this(seedModule, null, null, null, scanner, strict, profileRules, isBison, forGlobalScanner, files);
     }
 
-    public ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule, Scanner scanner, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files) {
+    private ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule, Scanner scanner, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files) {
         this.seedModule = seedModule;
         this.extensionModule = extensionModule;
         this.disambModule = disambModule;
