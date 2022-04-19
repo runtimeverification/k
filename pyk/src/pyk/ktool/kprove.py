@@ -78,7 +78,7 @@ def _build_arg_list(
 def _kprovex(spec_file: str, *args: str) -> CompletedProcess:
     run_args = ['kprovex', spec_file] + list(args)
     notif(' '.join(run_args))
-    return run(run_args, capture_output=True)
+    return run(run_args, capture_output=True, text=True)
 
 
 class KProve(KPrint):
