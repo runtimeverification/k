@@ -9,7 +9,7 @@ import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.inner.ParseInModule;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.parser.inner.kernel.KSyntax2Bison;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.json.JsonParser;

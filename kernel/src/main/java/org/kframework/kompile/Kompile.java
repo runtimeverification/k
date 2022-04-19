@@ -33,7 +33,7 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.parser.InputModes;
 import org.kframework.parser.KRead;
 import org.kframework.parser.ParserUtils;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.unparser.ToJson;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;

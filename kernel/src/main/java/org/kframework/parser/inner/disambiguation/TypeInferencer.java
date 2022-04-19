@@ -18,7 +18,7 @@ import org.kframework.parser.Constant;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
 

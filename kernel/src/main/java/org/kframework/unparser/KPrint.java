@@ -28,7 +28,7 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.Term;
 import org.kframework.parser.inner.ParseInModule;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;

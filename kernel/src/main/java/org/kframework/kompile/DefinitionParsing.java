@@ -36,7 +36,7 @@ import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.ParseCache;
 import org.kframework.parser.inner.ParseCache.ParsedSentence;
 import org.kframework.parser.inner.ParseInModule;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.BinaryLoader;

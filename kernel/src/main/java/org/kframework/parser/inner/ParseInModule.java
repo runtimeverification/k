@@ -12,7 +12,6 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.disambiguation.*;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.parser.inner.kernel.EarleyParser;
 import org.kframework.parser.inner.kernel.KSyntax2Bison;
 import org.kframework.parser.inner.kernel.Scanner;

@@ -20,7 +20,6 @@ import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.GlobalOptions.Warnings;
 import org.kframework.parser.ParserUtils;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
