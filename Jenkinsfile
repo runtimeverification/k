@@ -72,6 +72,8 @@ pipeline {
                   export K_OPTS='-Xmx12G'
                   echo 'Building K...'
                   mvn --batch-mode verify -U
+                  echo 'Testing pyk...'
+                  make -C pyk all
                   echo 'Starting kserver...'
                   k-distribution/target/release/k/bin/spawn-kserver kserver.log
                   cd k-exercises/tutorial

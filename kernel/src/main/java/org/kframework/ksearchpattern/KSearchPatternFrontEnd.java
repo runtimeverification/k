@@ -94,11 +94,12 @@ public class KSearchPatternFrontEnd extends FrontEnd {
           K patternTerm = RewriteToTop.toLeft(pattern.body());
           K patternCondition = pattern.requires();
           org.kframework.definition.Module mod = compiledDef.executionModule();
+          AddSortInjections addSortInjections = new AddSortInjections(mod);
           ModuleToKORE converter = new ModuleToKORE(mod, compiledDef.topCellInitializer, kompileOptions);
           StringBuilder sb = new StringBuilder();
           ExpandMacros macroExpander = ExpandMacros.forNonSentences(mod, files, kompileOptions, false);
           K withMacros = macroExpander.expand(patternTerm);
-          K kWithInjections = new AddSortInjections(mod).addInjections(withMacros);
+          K kWithInjections = addSortInjections.addInjections(withMacros);
           sb.append("\\and{SortGeneratedTopCell{}}(");
           converter.convert(kWithInjections, sb);
           sb.append(", ");
@@ -107,7 +108,7 @@ public class KSearchPatternFrontEnd extends FrontEnd {
           } else {
             sb.append("\\equals{SortBool{},SortGeneratedTopCell{}}(");
             withMacros = macroExpander.expand(patternCondition);
-            kWithInjections = new AddSortInjections(mod).addInjections(withMacros);
+            kWithInjections = addSortInjections.addInjections(withMacros);
             converter.convert(kWithInjections, sb);
             sb.append(", \\dv{SortBool{}}(\"true\"))");
           }

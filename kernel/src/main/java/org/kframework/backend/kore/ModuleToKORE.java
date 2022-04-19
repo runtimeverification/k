@@ -102,12 +102,14 @@ public class ModuleToKORE {
     public static final String ALL_PATH_OP = KLabels.RL_wAF.name();
     public static final String HAS_DOMAIN_VALUES = "hasDomainValues";
     private final Module module;
+    private final AddSortInjections addSortInjections;
     private final KLabel topCellInitializer;
     private final Set<String> mlBinders = new HashSet<>();
     private final KompileOptions options;
 
     public ModuleToKORE(Module module, KLabel topCellInitializer, KompileOptions options) {
         this.module = module;
+        this.addSortInjections = new AddSortInjections(module);
         this.topCellInitializer = topCellInitializer;
         this.options = options;
         for (Production prod : iterable(module.sortedProductions())) {
@@ -922,7 +924,7 @@ public class ModuleToKORE {
         SentenceType sentenceType = getSentenceType(rule.att()).orElse(defaultSentenceType);
         // injections should already be present, but this is an ugly hack to get around the
         // cache persistence issue that means that Sort attributes on k terms might not be present.
-        rule = new AddSortInjections(module).addInjections(rule);
+        rule = addSortInjections.addInjections(rule);
         Set<KVariable> existentials = getExistentials(rule);
         ConstructorChecks constructorChecks = new ConstructorChecks(module);
         K left = RewriteToTop.toLeft(rule.body());
