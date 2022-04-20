@@ -2,7 +2,6 @@
 package org.kframework.ksearchpattern;
 
 import com.google.inject.Provider;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import org.kframework.attributes.Source;
@@ -24,15 +23,11 @@ import org.kframework.utils.file.KompiledDir;
 import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.DefinitionScope;
 import org.kframework.utils.inject.JCommanderModule;
-import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Frontend for k-compiled-search-pattern tool.

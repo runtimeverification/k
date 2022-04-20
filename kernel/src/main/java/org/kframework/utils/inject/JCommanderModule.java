@@ -27,8 +27,6 @@ public class JCommanderModule extends AbstractModule  {
 
     @BindingAnnotation @Target({FIELD, PARAMETER, METHOD}) @Retention(RUNTIME)
     public @interface Usage {}
-    @BindingAnnotation @Target({FIELD, PARAMETER, METHOD}) @Retention(RUNTIME)
-    public @interface ExperimentalUsage {}
 
     @Override
     protected void configure() {
