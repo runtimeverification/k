@@ -1,13 +1,18 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
 package org.kframework.compile.checks;
 
+import org.kframework.Collections;
 import org.kframework.attributes.Att;
 import org.kframework.compile.ConfigurationInfoFromModule;
+import org.kframework.compile.GenerateSentencesFromConfigDecl;
+import org.kframework.definition.Configuration;
 import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.definition.Production;
 import org.kframework.definition.ProductionItem;
+import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
+import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
 import org.kframework.utils.errorsystem.KEMException;
 
@@ -36,6 +41,9 @@ public class CheckConfigurationCells {
         if (s instanceof Production) {
             check((Production) s);
         }
+        else if (s instanceof Rule && s.att().contains("initializer")) {
+            check((Rule) s);
+        }
     }
 
     private Set<Sort> cells = new HashSet<>();
@@ -61,6 +69,14 @@ public class CheckConfigurationCells {
                           + "type=\"Set\" and add a unique identifier to each element in the set.", p));
                 }
             }
+        }
+    }
+    private void check(Rule r) {
+        KLabel kLabel = module.matchKLabel(r);
+        if (module.rulesFor().get(kLabel).getOrElse(()-> Collections.Set()).size() > 1) {
+            errors.add(KEMException.compilerError(
+                    "Duplicate initialization of " + kLabel.name().replaceFirst("Cell", "").replaceFirst("init","") +
+                            " cell found. Only one initialization is allowed.", r));
         }
     }
 }
