@@ -1,6 +1,4 @@
-from kprove_test import KProveTest
-
-from pyk.kast import (
+from ..kast import (
     KApply,
     KClaim,
     KRewrite,
@@ -9,15 +7,19 @@ from pyk.kast import (
     assocWithUnit,
     constLabel,
 )
-from pyk.kastManip import pushDownRewrites, simplifyBool
-from pyk.prelude import boolToken, intToken
+from ..kastManip import pushDownRewrites, simplifyBool
+from ..ktool import KompileBackend
+from ..prelude import boolToken, intToken
+from .kprove_test import KProveTest
 
 
 class DefnTest(KProveTest):
-    DEFN_DIR = 'definitions/imp-verification/haskell/imp-verification-kompiled'
-    MAIN_FILE_NAME = 'imp-verification.k'
-    USE_DIR = '.defn-test'
-    INCLUDE_DIRS = ['k-files']
+    KOMPILE_MAIN_FILE = 'k-files/imp-verification.k'
+    KOMPILE_BACKEND = KompileBackend.HASKELL
+    KOMPILE_OUTPUT_DIR = 'definitions/imp-verification/haskell'
+    KOMPILE_EMIT_JSON = True
+
+    KPROVE_USE_DIR = '.defn-test'
 
     @staticmethod
     def _update_symbol_table(symbol_table):
