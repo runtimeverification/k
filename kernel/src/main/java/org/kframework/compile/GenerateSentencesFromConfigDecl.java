@@ -4,6 +4,8 @@ package org.kframework.compile;
 import com.google.common.collect.Lists;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
@@ -101,7 +103,7 @@ public class GenerateSentencesFromConfigDecl {
 
                                 boolean isLeafCell = childResult._4();
                                 Tuple4<Set<Sentence>, Sort, K, Boolean> myResult = computeSentencesOfWellFormedCell(isLeafCell, isStream, kore, multiplicity, cfgAtt, m, cellName, cellProperties,
-                                        childResult._2(), childResult._3(), ensures, hasConfigOrRegularVariable(cellContents, m));
+                                        childResult._2(), childResult._3(), ensures, hasConfigOrRegularVariable(cellContents, m), cellContents);
                                 return Tuple4.apply((Set<Sentence>)childResult._1().$bar(myResult._1()), Lists.newArrayList(myResult._2()), myResult._3(), false);
                             }
                         }
@@ -315,7 +317,8 @@ public class GenerateSentencesFromConfigDecl {
             List<Sort> childSorts,
             K childInitializer,
             K ensures,
-            boolean hasConfigurationOrRegularVariable) {
+            boolean hasConfigurationOrRegularVariable,
+            K cellContents) {
         String sortName = getSortOfCell(cellName);
         Sort sort = Sort(sortName);
 
@@ -365,12 +368,18 @@ public class GenerateSentencesFromConfigDecl {
             initSort = Sort(sortName + type);
         }
 
+        Att sentenceAtt = Att();
+        if (configAtt.getOption(Location.class).isDefined() && configAtt.getOption(Location.class).isDefined()) {
+            sentenceAtt = sentenceAtt.add(Location.class, cellContents.att().get(Location.class));
+            sentenceAtt = sentenceAtt.add(Source.class, cellContents.att().get(Source.class));
+        }
+
         if (hasConfigurationOrRegularVariable || isStream) {
             initializer = Production(KLabel(initLabel), initSort, Seq(Terminal(initLabel), Terminal("("), NonTerminal(Sorts.Map()), Terminal(")")), Att().add("initializer").add("function").add("noThread"));
-            initializerRule = Rule(KRewrite(KApply(KLabel(initLabel), INIT), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add("initializer"));
+            initializerRule = Rule(KRewrite(KApply(KLabel(initLabel), INIT), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add("initializer").addAll(sentenceAtt));
         } else {
             initializer = Production(KLabel(initLabel), initSort, Seq(Terminal(initLabel)), Att().add("initializer").add("function").add("noThread"));
-            initializerRule = Rule(KRewrite(KApply(KLabel(initLabel)), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add("initializer"));
+            initializerRule = Rule(KRewrite(KApply(KLabel(initLabel)), IncompleteCellUtils.make(KLabel("<" + cellName + ">"), false, childInitializer, false)), BooleanUtils.TRUE, ensures == null ? BooleanUtils.TRUE : ensures, Att().add("initializer").addAll(sentenceAtt));
         }
         if (!m.definedKLabels().contains(KLabel(initLabel))) {
             sentences.add(initializer);
