@@ -67,6 +67,8 @@ public class KPrint {
 
     @Nullable
     private final CompiledDefinition compiledDefinition;
+    private final Module executionModule;
+    private final AddSortInjections addSortInjections;
 
     public KPrint() {
         this(new KExceptionManager(new GlobalOptions()), FileUtil.testFileUtil(), new TTYInfo(false, false, false),
@@ -81,6 +83,14 @@ public class KPrint {
         this.tty = tty;
         this.options = options;
         this.compiledDefinition = compiledDefinition;
+        if (compiledDefinition != null) {
+            this.executionModule = compiledDefinition.executionModule();
+            this.addSortInjections = new AddSortInjections(executionModule);
+        } else {
+            this.executionModule = null;
+            this.addSortInjections = null;
+        }
+
         this.kompileOptions = kompileOptions;
     }
 
@@ -140,8 +150,8 @@ public class KPrint {
                     throw KEMException.criticalError("KORE output requires a compiled definition.");
                 }
                 ModuleToKORE converter = new ModuleToKORE(module, compiledDefinition.topCellInitializer, kompileOptions);
-                result = ExpandMacros.forNonSentences(compiledDefinition.executionModule(), files, kompileOptions, false).expand(result);
-                result = new AddSortInjections(compiledDefinition.executionModule()).addSortInjections(result, s);
+                result = ExpandMacros.forNonSentences(executionModule, files, kompileOptions, false).expand(result);
+                result = addSortInjections.addSortInjections(result, s);
                 StringBuilder sb = new StringBuilder();
                 converter.convert(result, sb);
                 return sb.toString().getBytes();

@@ -3,6 +3,7 @@ FROM ${BASE_IMAGE}
 ARG BASE_IMAGE
 
 ARG LLVM_VERSION=10
+ARG PYTHON_VERSION=3.8.12
 
 ENV TZ America/Chicago
 ENV DEBIAN_FRONTEND=noninteractive
@@ -11,6 +12,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN    apt-get update            \
     && apt-get install --yes     \
         bison                    \
+        build-essential          \
         clang-$LLVM_VERSION      \
         cmake                    \
         curl                     \
@@ -19,10 +21,18 @@ RUN    apt-get update            \
         gcc                      \
         git                      \
         libboost-test-dev        \
+        libgdbm-dev              \
         libgmp-dev               \
         libjemalloc-dev          \
+        libffi-dev               \
         libmpfr-dev              \
+        libncurses5-dev          \
+        libnss3-dev              \
+        libreadline-dev          \
+        libsqlite3-dev           \
+        libssl-dev               \
         libyaml-dev              \
+        libbz2-dev               \
         libz3-dev                \
         lld-$LLVM_VERSION        \
         llvm-$LLVM_VERSION-tools \
@@ -33,7 +43,19 @@ RUN    apt-get update            \
         python                   \
         python3                  \
         python3-graphviz         \
+        python3-pip              \
         zlib1g-dev
+
+RUN pip3 install virtualenv
+
+RUN    curl -O https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz \
+    && tar -zxvf Python-${PYTHON_VERSION}.tgz                                                   \
+    && cd Python-${PYTHON_VERSION}                                                              \
+    && ./configure --enable-optimizations                                                       \
+    && make -j8                                                                                 \
+    && make altinstall                                                                          \
+    && cd ..                                                                                    \
+    && rm -rf Python-${PYTHON_VERSION} Python-${PYTHON_VERSION}.tgz
 
 RUN curl -sSL https://get.haskellstack.org/ | sh
 

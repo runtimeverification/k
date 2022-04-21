@@ -72,6 +72,8 @@ pipeline {
                   export K_OPTS='-Xmx12G'
                   echo 'Building K...'
                   mvn --batch-mode verify -U
+                  echo 'Testing pyk...'
+                  make -C pyk all
                   echo 'Starting kserver...'
                   k-distribution/target/release/k/bin/spawn-kserver kserver.log
                   cd k-exercises/tutorial
@@ -99,6 +101,16 @@ pipeline {
                 }
                 stash name: 'bionic', includes: "kframework_${env.VERSION}_amd64.deb"
               }
+            }
+          }
+          post {
+            always {
+              sh '''
+                rm -rf k-distribution/k-tutorial/1_basic/build
+                make --directory=k-distribution clean
+                make --directory=k-exercises clean
+                make --directory=haskell-backend/src/main/native/haskell-backend clean
+              '''
             }
           }
         }

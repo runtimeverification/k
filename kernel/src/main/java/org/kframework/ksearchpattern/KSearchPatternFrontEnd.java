@@ -2,7 +2,6 @@
 package org.kframework.ksearchpattern;
 
 import com.google.inject.Provider;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import org.kframework.attributes.Source;
@@ -24,15 +23,11 @@ import org.kframework.utils.file.KompiledDir;
 import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.DefinitionScope;
 import org.kframework.utils.inject.JCommanderModule;
-import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Frontend for k-compiled-search-pattern tool.
@@ -94,11 +89,12 @@ public class KSearchPatternFrontEnd extends FrontEnd {
           K patternTerm = RewriteToTop.toLeft(pattern.body());
           K patternCondition = pattern.requires();
           org.kframework.definition.Module mod = compiledDef.executionModule();
+          AddSortInjections addSortInjections = new AddSortInjections(mod);
           ModuleToKORE converter = new ModuleToKORE(mod, compiledDef.topCellInitializer, kompileOptions);
           StringBuilder sb = new StringBuilder();
           ExpandMacros macroExpander = ExpandMacros.forNonSentences(mod, files, kompileOptions, false);
           K withMacros = macroExpander.expand(patternTerm);
-          K kWithInjections = new AddSortInjections(mod).addInjections(withMacros);
+          K kWithInjections = addSortInjections.addInjections(withMacros);
           sb.append("\\and{SortGeneratedTopCell{}}(");
           converter.convert(kWithInjections, sb);
           sb.append(", ");
@@ -107,7 +103,7 @@ public class KSearchPatternFrontEnd extends FrontEnd {
           } else {
             sb.append("\\equals{SortBool{},SortGeneratedTopCell{}}(");
             withMacros = macroExpander.expand(patternCondition);
-            kWithInjections = new AddSortInjections(mod).addInjections(withMacros);
+            kWithInjections = addSortInjections.addInjections(withMacros);
             converter.convert(kWithInjections, sb);
             sb.append(", \\dv{SortBool{}}(\"true\"))");
           }
