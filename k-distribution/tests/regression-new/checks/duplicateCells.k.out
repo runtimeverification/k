@@ -1,0 +1,11 @@
+[Error] Compiler: Duplicate initialization of K cell found. Only one initialization is allowed.
+	Source(duplicateCells.k)
+	Location(11,23,11,31)
+	11 |	    configuration <k> $PGM:Int </k>
+	   .	                      ^~~~~~~~
+[Error] Compiler: Duplicate initialization of Test cell found. Only one initialization is allowed.
+	Source(duplicateCells.k)
+	Location(12,26,12,34)
+	12 |	                  <test> $TST:Int</test>
+	   .	                         ^~~~~~~~
+[Error] Compiler: Had 2 structural errors.
