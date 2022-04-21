@@ -1,9 +1,9 @@
-from typing import Callable, TypeVar
+from collections import Counter
+from typing import Callable, Dict, Mapping, Sequence, Tuple, Type, TypeVar
 
 from .cli_utils import fatal
 from .kast import (
     KApply,
-    KAst,
     KAtt,
     KClaim,
     KDefinition,
@@ -11,93 +11,48 @@ from .kast import (
     KInner,
     KRewrite,
     KRule,
+    KRuleLike,
     KSequence,
     KToken,
     KVariable,
     WithKAtt,
+    bottom_up,
+    collect,
     flattenLabel,
     klabelEmptyK,
     ktokenDots,
+    top_down,
 )
 from .prelude import (
     buildAssoc,
     mlAnd,
+    mlBottom,
     mlEquals,
     mlEqualsTrue,
     mlImplies,
     mlOr,
     mlTop,
 )
-from .utils import combine_dicts, dedupe, find_common_items, hash_str
+from .subst import Subst, match
+from .utils import dedupe, find_common_items, hash_str
 
-T = TypeVar('T', bound=KAst)
 KI = TypeVar('KI', bound=KInner)
 W = TypeVar('W', bound=WithKAtt)
 
 
-def match(pattern, kast):
-    """Perform syntactic pattern matching and return the substitution.
-
-    -   Input: a pattern and a kast term.
-    -   Output: substitution instantiating the pattern to the kast term.
-    """
-    subst = {}
-    if type(pattern) is KVariable:
-        return {pattern.name: kast}
-    if type(pattern) is KToken and type(kast) is KToken:
-        return {} if pattern.token == kast.token else None
-    if type(pattern) is KApply and type(kast) is KApply \
-            and pattern.label == kast.label and pattern.arity == kast.arity:
-        for patternArg, kastArg in zip(pattern.args, kast.args):
-            argSubst = match(patternArg, kastArg)
-            subst = combine_dicts(subst, argSubst)
-            if subst is None:
-                return None
-        return subst
-    if type(pattern) is KRewrite and type(kast) is KRewrite:
-        lhsSubst = match(pattern.lhs, kast.lhs)
-        rhsSubst = match(pattern.rhs, kast.rhs)
-        return combine_dicts(lhsSubst, rhsSubst)
-    if type(pattern) is KSequence and type(kast) is KSequence and pattern.arity == kast.arity:
-        for (patternItem, substItem) in zip(pattern.items, kast.items):
-            itemSubst = match(patternItem, substItem)
-            subst = combine_dicts(subst, itemSubst)
-            if subst is None:
-                return None
-        return subst
-    return None
+def if_ktype(ktype: Type[KI], then: Callable[[KI], KInner]) -> Callable[[KInner], KInner]:
+    def fun(term: KInner):
+        if isinstance(term, ktype):
+            return then(term)
+        return term
+    return fun
 
 
-# TODO make method of KInner
-def traverseBottomUp(kinner: KInner, f: Callable[[KInner], KInner]) -> KInner:
-    return f(kinner.map_inner(lambda _kinner: traverseBottomUp(_kinner, f)))
-
-
-# TODO make method of KInner
-def traverseTopDown(kinner: KInner, f: Callable[[KInner], KInner]) -> KInner:
-    return f(kinner).map_inner(lambda _kinner: traverseTopDown(_kinner, f))
-
-
-# TODO replace by method that does not reconstruct the AST
-def collectBottomUp(kinner: KInner, callback: Callable[[KInner], None]) -> None:
-    def f(kinner: KInner) -> KInner:
-        callback(kinner)
-        return kinner
-
-    traverseBottomUp(kinner, f)
-
-
-def substitute(pattern, substitution):
-    """Apply a substitution to a pattern.
-
-    -   Input: a pattern with free variables and a substitution.
-    -   Output: the pattern with the substitution applied.
-    """
-    def replace(k):
-        if type(k) is KVariable and k.name in substitution:
-            return substitution[k.name]
-        return k
-    return traverseBottomUp(pattern, replace)
+# TODO remove
+def substitute(pattern: KInner, subst: Mapping[str, KInner]) -> KInner:
+    if not isinstance(subst, Subst):
+        subst = Subst(subst)
+    return subst(pattern)
 
 
 def whereMatchingBottomUp(effect, matchPattern, pattern):
@@ -107,7 +62,7 @@ def whereMatchingBottomUp(effect, matchPattern, pattern):
         if matchingSubst is not None:
             newK = effect(matchingSubst)
         return newK
-    return traverseBottomUp(_effect, pattern)
+    return bottom_up(_effect, pattern)
 
 
 def replaceKLabels(pattern, klabelMap):
@@ -115,7 +70,7 @@ def replaceKLabels(pattern, klabelMap):
         if type(k) is KApply and k.label in klabelMap:
             return k.let(label=klabelMap[k.label])
         return k
-    return traverseBottomUp(pattern, replace)
+    return bottom_up(replace, pattern)
 
 
 def rewriteWith(rule, pattern):
@@ -137,7 +92,7 @@ def rewriteAnywhereWith(rule, pattern):
     -   Input: A rule to rewrite with, and a pattern to rewrite.
     -   Output: The pattern with rewrites applied at every node once starting from the bottom.
     """
-    return traverseBottomUp(pattern, lambda p: rewriteWith(rule, p))
+    return bottom_up(lambda p: rewriteWith(rule, p), pattern)
 
 
 def replaceWith(rule, pattern):
@@ -148,7 +103,11 @@ def replaceWith(rule, pattern):
 
 
 def replaceAnywhereWith(rule, pattern):
-    return traverseBottomUp(pattern, lambda p: replaceWith(rule, p))
+    return bottom_up(lambda p: replaceWith(rule, p), pattern)
+
+
+def boolToMlPred(kast: KInner) -> KInner:
+    return mlAnd([mlEqualsTrue(cond) for cond in flattenLabel('_andBool_', kast)])
 
 
 def unsafeMlPredToBool(k):
@@ -208,32 +167,63 @@ def getOccurances(kast, pattern):
         if match(pattern, k):
             occurances.append(k)
 
-    collectBottomUp(kast, addOccurance)
+    collect(addOccurance, kast)
     return occurances
 
 
-def countVarOccurances(kast, numOccurances=None):
-    """Count the number of occurances of each variable in a proof.
+def extract_lhs(term: KInner) -> KInner:
+    return top_down(if_ktype(KRewrite, lambda rw: rw.lhs), term)
 
-    -   Input: Kast term.
-    -   Output: Map of variable names to their number of occurances.
-    """
-    numOccurances = {} if numOccurances is None else numOccurances
 
-    def _getNumOccurances(_kast):
-        if type(_kast) is KVariable:
-            vName = _kast.name
-            if vName in numOccurances:
-                numOccurances[vName] += 1
-            else:
-                numOccurances[vName] = 1
+def extract_rhs(term: KInner) -> KInner:
+    return top_down(if_ktype(KRewrite, lambda rw: rw.rhs), term)
 
-    collectBottomUp(kast, _getNumOccurances)
-    return numOccurances
+
+def count_vars(term: KInner) -> Counter:
+    counter: Counter = Counter()
+
+    def count(term: KInner) -> None:
+        if type(term) is KVariable:
+            counter[term.name] += 1
+
+    collect(count, term)
+    return counter
+
+
+def count_rhs_vars(term: KInner) -> Counter:
+    def recur(term: KInner, *, rhs=False) -> Counter:
+        if type(term) is KVariable:
+            return Counter(term.name) if rhs else Counter()
+        if type(term) is KRewrite:
+            return recur(term.rhs, rhs=True)
+        if type(term) is KApply:
+            return sum((recur(t, rhs=rhs) for t in term.args), Counter())
+        if type(term) is KSequence:
+            return sum((recur(t, rhs=rhs) for t in term.items), Counter())
+        return Counter()
+    return recur(term)
 
 
 def collectFreeVars(kast):
-    return list(countVarOccurances(kast).keys())
+    return list(count_vars(kast).keys())
+
+
+def drop_var_prefixes(term: KInner) -> KInner:
+    term = top_down(if_ktype(KVariable, drop_ques), term)
+    term = top_down(if_ktype(KVariable, drop_unds), term)
+    return term
+
+
+def drop_ques(variable: KVariable) -> KVariable:
+    if variable.name.startswith('?'):
+        return variable.let(name=variable.name[1:])
+    return variable
+
+
+def drop_unds(variable: KVariable) -> KVariable:
+    if variable.name.startswith('_'):
+        return variable.let(name=variable.name[1:])
+    return variable
 
 
 def splitConfigAndConstraints(kast):
@@ -274,7 +264,7 @@ def propagateUpConstraints(k):
         conjunct2 = buildAssoc(mlTop, '#And', r2)
         disjunct = KApply('#Or', [conjunct1, conjunct2])
         return buildAssoc(mlTop(), '#And', [disjunct] + common)
-    return traverseBottomUp(k, _propagateUpConstraints)
+    return bottom_up(_propagateUpConstraints, k)
 
 
 def splitConfigFrom(configuration):
@@ -299,7 +289,7 @@ def splitConfigFrom(configuration):
                 return KApply(k.label, [KVariable(config_var)])
         return k
 
-    symbolic_config = traverseTopDown(configuration, _replaceWithVar)
+    symbolic_config = top_down(_replaceWithVar, configuration)
     return (symbolic_config, initial_substitution)
 
 
@@ -323,7 +313,7 @@ def collapseDots(kast):
             if _kast.lhs == ktokenDots:
                 return ktokenDots
         return _kast
-    return traverseBottomUp(kast, _collapseDots)
+    return bottom_up(_collapseDots, kast)
 
 
 def pushDownRewrites(kast):
@@ -353,7 +343,7 @@ def pushDownRewrites(kast):
             if type(lhs) is KSequence and lhs.arity > 0 and type(lhs.items[-1]) is KVariable and type(rhs) is KVariable and lhs.items[-1] == rhs:
                 return KSequence([KRewrite(KSequence(lhs.items[0:-1]), KApply(klabelEmptyK)), rhs])
         return _kast
-    return traverseTopDown(kast, _pushDownRewrites)
+    return top_down(_pushDownRewrites, kast)
 
 
 def inlineCellMaps(kast):
@@ -368,7 +358,7 @@ def inlineCellMaps(kast):
             if type(mapKey) is KApply and mapKey.is_cell:
                 return _kast.args[1]
         return _kast
-    return traverseBottomUp(kast, _inlineCellMaps)
+    return bottom_up(_inlineCellMaps, kast)
 
 
 def removeSemanticCasts(kast):
@@ -381,7 +371,7 @@ def removeSemanticCasts(kast):
         if type(_kast) is KApply and _kast.arity == 1 and _kast.label.startswith('#SemanticCast'):
             return _kast.args[0]
         return _kast
-    return traverseBottomUp(kast, _removeSemanticCasts)
+    return bottom_up(_removeSemanticCasts, kast)
 
 
 def markUselessVars(kast):
@@ -390,7 +380,7 @@ def markUselessVars(kast):
     -   Input: A Kast term.
     -   Output: Kast term with variables appropriately named.
     """
-    occurances = countVarOccurances(kast)
+    occurances = count_vars(kast)
     subst = {}
     for v in occurances:
         if v.startswith('_') and occurances[v] > 1:
@@ -406,14 +396,7 @@ def uselessVarsToDots(kast, keepVars=None):
     -   Input: kast term, and a requires clause and ensures clause.
     -   Output: kast term with the useless vars structurally abstracted.
     """
-    initList = {}
-    if keepVars is not None:
-        for v in keepVars:
-            if v not in initList:
-                initList[v] = 1
-            else:
-                initList[v] += 1
-    numOccurances = countVarOccurances(kast, numOccurances=initList)
+    numOccurances = count_vars(kast) + Counter(keepVars)
 
     def _collapseUselessVars(_kast):
         if type(_kast) is KApply and _kast.is_cell:
@@ -426,7 +409,7 @@ def uselessVarsToDots(kast, keepVars=None):
             return _kast.let(args=newArgs)
         return _kast
 
-    return traverseBottomUp(kast, _collapseUselessVars)
+    return bottom_up(_collapseUselessVars, kast)
 
 
 def labelsToDots(kast, labels):
@@ -439,7 +422,7 @@ def labelsToDots(kast, labels):
         if type(k) is KApply and k.is_cell and k.label in labels:
             return ktokenDots
         return k
-    return traverseBottomUp(kast, _labelstoDots)
+    return bottom_up(_labelstoDots, kast)
 
 
 def onAttributes(kast: W, f: Callable[[KAtt], KAtt]) -> W:
@@ -522,14 +505,14 @@ def removeSourceMap(k):
     return onAttributes(k, _removeSourceMap)
 
 
-def removeGeneratedCells(constrainedTerm):
+def remove_generated_cells(term: KInner) -> KInner:
     """Remove <generatedTop> and <generatedCounter> from a configuration.
 
-    -   Input: Constrained term which contains <generatedTop> and <generatedCounter>.
+    -   Input: Constrained term.
     -   Output: Constrained term with those cells removed.
     """
     rule = KApply('<generatedTop>', [KVariable('CONFIG'), KVariable('_')]), KVariable('CONFIG')
-    return rewriteAnywhereWith(rule, constrainedTerm)
+    return rewriteAnywhereWith(rule, term)
 
 
 def isAnonVariable(kast):
@@ -541,7 +524,7 @@ def omitLargeTokens(kast, maxLen=78):
         if type(_k) is KToken and len(_k.token) > maxLen:
             return KToken('...', _k.sort)
         return _k
-    return traverseBottomUp(kast, _largeTokensToDots)
+    return bottom_up(_largeTokensToDots, kast)
 
 
 def getCell(constrainedTerm, cellVariable):
@@ -610,7 +593,7 @@ def hasExistentials(pattern):
     return any([v.startswith('?') for v in collectFreeVars(pattern)])
 
 
-def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, priority=None, keepVars=None):
+def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, priority=None, keepVars=None) -> Tuple[KRuleLike, Dict[str, KVariable]]:
     (initConfig, initConstraint) = splitConfigAndConstraints(initConstrainedTerm)
     (finalConfig, finalConstraint) = splitConfigAndConstraints(finalConstrainedTerm)
     initConstraints = flattenLabel('#And', initConstraint)
@@ -620,9 +603,9 @@ def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, pr
 
     lhsVars = collectFreeVars(initConstrainedTerm)
     rhsVars = collectFreeVars(finalConstrainedTerm)
-    varOccurances = countVarOccurances(mlAnd([initConstrainedTerm, finalConstrainedTerm]))
-    vSubst = {}
-    vremapSubst = {}
+    varOccurances = count_vars(mlAnd([initConstrainedTerm, finalConstrainedTerm]))
+    vSubst: Dict[str, KVariable] = {}
+    vremapSubst: Dict[str, KVariable] = {}
     for v in varOccurances:
         newV = v
         if varOccurances[v] == 1:
@@ -642,10 +625,13 @@ def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, pr
     ruleEnsures = simplifyBool(unsafeMlPredToBool(finalConstraint))
     attDict = {} if claim or priority is None else {'priority': str(priority)}
     ruleAtt = KAtt(atts=attDict)
+
+    rule: KRuleLike
     if not claim:
         rule = KRule(ruleBody, requires=ruleRequires, ensures=ruleEnsures, att=ruleAtt)
     else:
         rule = KClaim(ruleBody, requires=ruleRequires, ensures=ruleEnsures, att=ruleAtt)
+
     rule = rule.update_atts({'label': ruleId})
     newKeepVars = None
     if keepVars is not None:
@@ -687,7 +673,7 @@ def antiUnify(state1, state2):
         return _kast
 
     minimizedRewrite = pushDownRewrites(KRewrite(state1, state2))
-    abstractedState = traverseBottomUp(minimizedRewrite, _rewritesToAbstractions)
+    abstractedState = bottom_up(_rewritesToAbstractions, minimizedRewrite)
     subst1 = match(abstractedState, state1)
     subst2 = match(abstractedState, state2)
     if subst1 is None or subst2 is None:
@@ -716,6 +702,15 @@ def antiUnifyWithConstraints(constrainedTerm1, constrainedTerm2, implications=Fa
         constraints.append(mlOr([constraint1, constraint2]))
 
     return mlAnd([state] + constraints)
+
+
+def disjunct_constrained_terms(constrained_terms: Sequence[KInner], concave=False) -> KInner:
+    if len(constrained_terms) == 0:
+        return mlBottom()
+    new_constrained_term = constrained_terms[0]
+    for constrained_term in constrained_terms[1:]:
+        new_constrained_term = antiUnifyWithConstraints(new_constrained_term, constrained_term, implications=concave, disjunct=concave)
+    return new_constrained_term
 
 
 def removeDisjuncts(constrainedTerm):

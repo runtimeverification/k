@@ -1,35 +1,38 @@
 import json
 from pathlib import Path
 
-from kprove_test import KProveTest
-
-from pyk.kast import (
-    EMPTY_ATT,
-    KApply,
-    KAst,
-    KClaim,
-    KDefinition,
-    KRequire,
-    KVariable,
-)
-from pyk.kastManip import rewriteAnywhereWith
+from ..kast import EMPTY_ATT, KAst, KDefinition, KRequire
+from ..kastManip import remove_generated_cells
+from ..ktool import KompileBackend, kprovex
+from .kprove_test import KProveTest
 
 
 class EmitJsonSpecTest(KProveTest):
-    DEFN_DIR = 'definitions/imp-verification/haskell/imp-verification-kompiled'
     MAIN_FILE_NAME = 'imp-verification.k'
-    USE_DIR = '.emit-json-spec-test'
-    INCLUDE_DIRS = ['k-files']
-    SPEC_FILE = 'specs/imp-verification/looping-spec.json'
+
+    KOMPILE_MAIN_FILE = f'k-files/{MAIN_FILE_NAME}'
+    KOMPILE_BACKEND = KompileBackend.HASKELL
+    KOMPILE_OUTPUT_DIR = 'definitions/imp-verification/haskell'
+    KOMPILE_EMIT_JSON = True
+
+    KPROVE_USE_DIR = '.emit-json-spec-test'
+
+    SPEC_FILE = 'k-files/looping-spec.k'
+    SPEC_JSON_FILE = 'definitions/imp-verification/haskell/looping-spec.json'
 
     def setUp(self):
         super().setUp()
 
-        with open(self.SPEC_FILE, 'r') as spec_file:
+        spec_file = Path(self.SPEC_FILE)
+        directory = Path(self.KOMPILE_OUTPUT_DIR)
+        emit_json_spec = Path(self.SPEC_JSON_FILE)
+        kprovex(spec_file, directory=directory, emit_json_spec=emit_json_spec, dry_run=True)
+
+        with open(self.SPEC_JSON_FILE, 'r') as spec_file:
             module = KAst.from_dict(json.load(spec_file)['term'])
 
-        claim = extract_claims(module)[0]
-        self.claim = claim.let(body=eliminate_generated_top(claim.body), att=EMPTY_ATT)
+        claim = module.claims[0]
+        self.claim = claim.let(body=remove_generated_cells(claim.body), att=EMPTY_ATT)
         self.module = module.let(sentences=(self.claim,))
 
     @staticmethod
@@ -51,7 +54,7 @@ class EmitJsonSpecTest(KProveTest):
     def test_prove(self):
         # Given
         spec_name = 'looping-2-spec'
-        spec_file = Path(self.USE_DIR) / f'{spec_name}.k'
+        spec_file = Path(self.KPROVE_USE_DIR) / f'{spec_name}.k'
         spec_module_name = spec_name.upper()
 
         self.module = self.module.let(name=spec_module_name)
@@ -65,12 +68,3 @@ class EmitJsonSpecTest(KProveTest):
 
         # Then
         self.assertTop(result)
-
-
-def extract_claims(module):
-    return [claim for claim in module.sentences if type(claim) is KClaim]
-
-
-def eliminate_generated_top(term):
-    rule = KApply('<generatedTop>', [KVariable('CONFIG'), KVariable('_')]), KVariable('CONFIG')
-    return rewriteAnywhereWith(rule, term)

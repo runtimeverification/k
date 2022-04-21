@@ -668,7 +668,7 @@ public class TypeInferencer implements AutoCloseable {
       if (isBadNatSort(actualSort)) {
         sb.append("false ");
       } else {
-        if (isStrictEquality) {
+        if (isStrictEquality || actualParams.get().production().params().contains(actualSort)) {
           sb.append("(= ");
         } else {
           sb.append("(<=Sort ");

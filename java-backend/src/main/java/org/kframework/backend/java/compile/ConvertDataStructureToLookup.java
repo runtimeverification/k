@@ -198,7 +198,7 @@ public class ConvertDataStructureToLookup {
     KVariable newDotVariable(Sort sort) {
         KVariable newLabel;
         do {
-            newLabel = KVariable("_" + (counter++), Att.empty().add(Sort.class, sort));
+            newLabel = KVariable("_Gen" + (counter++), Att.empty().add(Sort.class, sort));
         } while (vars.contains(newLabel));
         vars.add(newLabel);
         return newLabel;
