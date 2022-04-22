@@ -1,4 +1,4 @@
 [Error] Compiler: Invalid colors attribute: expected 5 colors, found 4 colors instead.
 	Source(formatatt.k)
-	Location(4,19,4,119)
+	Location(4,19,4,120)
 [Error] Compiler: Had 1 structural errors.
