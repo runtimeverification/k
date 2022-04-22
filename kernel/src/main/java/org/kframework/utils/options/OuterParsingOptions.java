@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Provides the options needed for tools to perform outer parsing of definitions from source.
@@ -32,10 +33,33 @@ public class OuterParsingOptions implements Serializable {
 
     private File mainDefinitionFile;
 
+    private boolean noParameters() {
+      return parameters == null || parameters.isEmpty();
+    }
+
+    private String mainFileErrorList() {
+      if(noParameters()) {
+        return "[]";
+      } else {
+        String separatedFiles = parameters.stream().collect(Collectors.joining(", "));
+        return "[" + separatedFiles + "]";
+      }
+    }
+
+    private String mainFileErrorMessage() {
+      String base = "You have to provide exactly one main file in order to do outer parsing.";
+
+      if (noParameters()) {
+        return base + " No main file was provided.";
+      } else {
+        return base + " The main files provided were: " + mainFileErrorList();
+      }
+    }
+
     public synchronized File mainDefinitionFile(FileUtil files) {
         if (mainDefinitionFile == null) {
-            if (parameters == null || parameters.size() == 0) {
-                throw KEMException.criticalError("You have to provide exactly one main file in order to do outer parsing.");
+            if (parameters == null || parameters.size() != 1) {
+                throw KEMException.criticalError(mainFileErrorMessage());
             }
             mainDefinitionFile = files.resolveWorkingDirectory(parameters.get(0));
         }
