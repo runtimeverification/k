@@ -1,7 +1,8 @@
 from typing import Callable, Final, Mapping, Tuple
 from unittest import TestCase
 
-from pyk.kast import TRUE, KAst, KRule, prettyPrintKast
+from pyk.kast import TRUE, KAst, KRule
+from pyk.ktool import prettyPrintKast
 
 
 class PrettyPrintKastTest(TestCase):

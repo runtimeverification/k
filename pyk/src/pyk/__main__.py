@@ -7,14 +7,7 @@ from graphviz import Digraph
 
 from .cli_utils import fatal, notif, warning
 from .coverage import getRuleById, stripCoverageLogger
-from .kast import (
-    KApply,
-    KAst,
-    buildSymbolTable,
-    flattenLabel,
-    prettyPrintKast,
-    readKastTerm,
-)
+from .kast import KApply, KAst, flattenLabel, readKastTerm
 from .kastManip import (
     minimizeRule,
     minimizeTerm,
@@ -22,7 +15,7 @@ from .kastManip import (
     removeSourceMap,
     splitConfigAndConstraints,
 )
-from .ktool import KPrint, KProve
+from .ktool import KPrint, KProve, buildSymbolTable, prettyPrintKast
 from .prelude import buildAssoc, mlBottom, mlTop
 
 
