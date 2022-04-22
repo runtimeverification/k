@@ -13,9 +13,8 @@ import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.disambiguation.*;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
-import org.kframework.parser.inner.kernel.Grammar;
-import org.kframework.parser.inner.kernel.KSyntax2GrammarStatesFilter;
-import org.kframework.parser.inner.kernel.Parser;
+import org.kframework.parser.inner.kernel.EarleyParser;
+import org.kframework.parser.inner.kernel.KSyntax2Bison;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
@@ -59,7 +58,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
      * original production, so disambiguation can be done safely.
      */
     private volatile Module parsingModule;
-    private volatile Grammar grammar = null;
+    private volatile EarleyParser parser = null;
     private final boolean strict;
     private final boolean profileRules;
     private final boolean isBison;
@@ -165,11 +164,12 @@ public class ParseInModule implements Serializable, AutoCloseable {
         }
     }
 
-    private Scanner getGrammar(Scanner scanner) {
-        Grammar g = grammar;
-        if (g == null) {
-            g = KSyntax2GrammarStatesFilter.getGrammar(getParsingModule(), scanner);
-            grammar = g;
+    private Scanner getParser(Scanner scanner, Sort startSymbol) {
+        EarleyParser p = parser;
+        if (p == null) {
+            Module m = getParsingModule();
+            p = new EarleyParser(m, scanner, startSymbol);
+            parser = p;
         }
         return scanner;
     }
@@ -223,23 +223,16 @@ public class ParseInModule implements Serializable, AutoCloseable {
      */
     private Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>>
             parseStringTerm(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
-        scanner = getGrammar(scanner);
+        scanner = getParser(scanner, startSymbol);
 
         long start, endParse = 0, startTypeInf = 0, endTypeInf = 0;
         start = profileRules ? System.currentTimeMillis() : 0;
 
         try {
-            Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol.toString());
             Set<KEMException> warn = Sets.newHashSet();
-            if (startSymbolNT == null) {
-                String msg = "Could not find start symbol: " + startSymbol;
-                return new Tuple2<>(Left.apply(Sets.newHashSet(KEMException.criticalError(msg))), warn);
-            }
-
             Term parsed;
             try {
-                Parser parser = new Parser(input, scanner, source, startLine, startColumn);
-                parsed = parser.parse(startSymbolNT, 0);
+                parsed = parser.parse(input, source, startLine, startColumn);
             } catch (KEMException e) {
                 return Tuple2.apply(Left.apply(Collections.singleton(e)), Collections.emptySet());
             }
