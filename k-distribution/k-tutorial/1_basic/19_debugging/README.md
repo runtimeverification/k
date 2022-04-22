@@ -16,6 +16,8 @@ to `kompile`. Second, simply add the command line flags `-ccopt -g -ccopt -O1`
 to `kompile`. The resulting compiled K definition will be ready to support
 debugging.
 
+Note: the 'O' in `-O1` is the letter 'O' not the number 0!
+
 Once you have a compiled K definition and a program you wish to debug, you
 can start the debugger by passing the `--debugger` flag to `krun`. This will
 automatically load the program you are executing into GDB and drop you into
