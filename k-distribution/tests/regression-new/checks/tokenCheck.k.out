@@ -1,7 +1,7 @@
 [Error] Compiler: Sort X was declared as a token. Productions of this sort can only contain [function] or [token] labels.
 	Source(tokenCheck.k)
-	Location(10,16,10,21)
+	Location(10,16,10,22)
 [Error] Compiler: Sort Y was declared as a token. Productions of this sort can only contain [function] or [token] labels.
 	Source(tokenCheck.k)
-	Location(13,16,13,16)
+	Location(13,16,13,17)
 [Error] Compiler: Had 2 structural errors.
