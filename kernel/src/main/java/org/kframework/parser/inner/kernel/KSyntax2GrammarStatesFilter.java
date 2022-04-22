@@ -95,7 +95,8 @@ public class KSyntax2GrammarStatesFilter {
         }
 
         Map<TerminalLike, Tuple2<Integer, Integer>> finalTokens = new HashMap<>();
-        int idx = 0;
+        // token 0 is EOF, so start at index 1
+        int idx = 1;
         for (TerminalLike t : tokens.keySet()) {
             finalTokens.put(t, Tuple2.apply(idx++, tokens.get(t)));
         }
