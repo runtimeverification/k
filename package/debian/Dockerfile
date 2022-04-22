@@ -40,8 +40,8 @@ RUN    apt-get update            \
         openjdk-11-jdk           \
         parallel                 \
         pkg-config               \
-        python3                  \
         python                   \
+        python3                  \
         python3-graphviz         \
         python3-pip              \
         zlib1g-dev
