@@ -73,7 +73,12 @@ To make full advantage of the GDB features of K, you should follow the first
 command listed in this output message and add the corresponding
 `add-auto-load-safe-path` command to your `~/.gdbinit` file as prompted.
 Please note that the path will be different on your machine than the one
-listed above. 
+listed above. Adding directories to the "load safe path" effectively tells GDB
+to trust those directories. All content under a given directory will be recursively
+trusted, so if you want to avoid having to add paths to the "load safe path" every
+time you kompile a different `K` definition, then you can just trust a top-level
+directory containing all your kompiled files. More info on the load safe path
+can be found [here](https://sourceware.org/gdb/onlinedocs/gdb/Auto_002dloading-safe-path.html).
 
 ## Basic commands
 
