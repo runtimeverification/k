@@ -1,4 +1,4 @@
-[Error] Outer Parser: Module DUPLICATEMODULE previously declared at Source(duplicateModule.k) and Location(1,1,3,9)
+[Error] Outer Parser: Module DUPLICATEMODULE previously declared at Source(duplicateModule.k) and Location(1,1,3,10)
 	Source(duplicateModule.k)
-	Location(5,1,7,9)
+	Location(5,1,7,10)
 [Error] Outer Parser: Had 1 outer parsing errors.

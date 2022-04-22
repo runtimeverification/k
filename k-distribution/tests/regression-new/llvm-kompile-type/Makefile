@@ -8,3 +8,4 @@ all:
 	$(MAKE) -C ../imp-llvm clean
 
 clean:
+update-results:
