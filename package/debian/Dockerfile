@@ -44,6 +44,7 @@ RUN    apt-get update            \
         python3                  \
         python3-graphviz         \
         python3-pip              \
+        wget                     \
         zlib1g-dev
 
 RUN pip3 install virtualenv
@@ -57,7 +58,7 @@ RUN    curl -O https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTH
     && cd ..                                                                                    \
     && rm -rf Python-${PYTHON_VERSION} Python-${PYTHON_VERSION}.tgz
 
-RUN curl -sSL https://get.haskellstack.org/ | sh
+RUN wget -qO- https://get.haskellstack.org/ | sh
 
 RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.11 \
     && cd z3                                                         \
