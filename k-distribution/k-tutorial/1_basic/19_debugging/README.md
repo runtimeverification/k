@@ -5,6 +5,10 @@ the K-language support provided in [GDB](https://www.gnu.org/software/gdb/).
 
 ## Getting started
 
+You will need GDB in order to complete this lesson. If you do not already
+have GDB installed, then do so. Steps to install GDB are outlined in
+this [GDB Tutorial](http://www.gdbtutorial.com/tutorial/how-install-gdb).
+
 The first thing neccessary in order to debug a K interpreter in GDB is to
 build the interpreter with full debugging support enabled. This can be done
 relatively simply. First, make sure you have not passed `-O1`, `-O2`, or `-O3`
