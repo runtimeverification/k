@@ -27,7 +27,7 @@ RUN    apt-get update        \
         python3-graphviz     \
         zlib1g-dev
 
-RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.11 \
+RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.15 \
     && cd z3                                                         \
     && python scripts/mk_make.py                                     \
     && cd build                                                      \
