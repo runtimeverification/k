@@ -2419,6 +2419,17 @@ finishes.
   syntax K ::= #logToFile(name: String, value: String) [function, functional, hook(IO.log), impure, returnsUnit, symbol]
 ```
 
+Terms can also be logged to standard error in _surface syntax_, rather than as
+KORE using `#trace`. This operator has similar semantics to `#logToFile` (i.e.
+it returns `.K`, but prints as an impure side effect). Note that calling
+`#trace` is equivalent to invoking the `kprint` tool for **each** term that is
+logged, which requires that the underlying K definition is re-parsed. Doing so
+is expensive, and so `#trace` should only be used as a debugging aid.
+
+```k
+  syntax {Sort} K ::= #trace(value: Sort) [function, functional, hook(IO.traceTerm), impure, returnsUnit, symbol]
+```
+
 ### Implementation of high-level I/O streams in K
 
 Below is an implementation of the `stream="stdin"` and `stream="stdout"`
