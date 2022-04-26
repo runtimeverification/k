@@ -64,18 +64,18 @@ def match(pattern: KInner, term: KInner) -> Optional[Subst]:
         if type(pattern) is KApply and type(term) is KApply \
                 and pattern.label == term.label and pattern.arity == term.arity:
             for patternArg, kastArg in zip(pattern.args, term.args):
-                argSubst = match(patternArg, kastArg)
+                argSubst = _match(patternArg, kastArg)
                 subst = combine_all(subst, argSubst)
                 if subst is None:
                     return None
             return subst
         if type(pattern) is KRewrite and type(term) is KRewrite:
-            lhsSubst = match(pattern.lhs, term.lhs)
-            rhsSubst = match(pattern.rhs, term.rhs)
+            lhsSubst = _match(pattern.lhs, term.lhs)
+            rhsSubst = _match(pattern.rhs, term.rhs)
             return combine_all(lhsSubst, rhsSubst)
         if type(pattern) is KSequence and type(term) is KSequence and pattern.arity == term.arity:
             for (patternItem, substItem) in zip(pattern.items, term.items):
-                itemSubst = match(patternItem, substItem)
+                itemSubst = _match(patternItem, substItem)
                 subst = combine_all(subst, itemSubst)
                 if subst is None:
                     return None
