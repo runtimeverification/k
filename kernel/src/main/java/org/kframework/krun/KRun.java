@@ -222,9 +222,10 @@ public class KRun {
     public K externalParse(String parser, String value, Sort startSymbol, Source source, CompiledDefinition compiledDef) {
         List<String> tokens = new ArrayList<>(Arrays.asList(parser.split(" ")));
         tokens.add(value);
+        tokens.add("--input-kdir");
+        tokens.add(files.resolveKompiled(".").getAbsolutePath());
         Map<String, String> environment = new HashMap<>();
         environment.put("KRUN_SORT", startSymbol.toString());
-        environment.put("KRUN_COMPILED_DEF", files.resolveDefinitionDirectory(".").getAbsolutePath());
         RunProcess.ProcessOutput output = RunProcess.execute(environment, files.getProcessBuilder(), tokens.toArray(new String[tokens.size()]));
 
         if (output.exitCode != 0) {

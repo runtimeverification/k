@@ -19,9 +19,9 @@ public class DefinitionLoadingModuleTest {
         DefinitionLoadingOptions options = new DefinitionLoadingOptions();
         new JCommander(options, "--directory", "src/test/resources");
         DefinitionLoadingModule module = new DefinitionLoadingModule();
-        File defDir = module.directory(options, new File("."), null, System.getenv());
+        File defDir = module.directory(options, new File("."));
         assertEquals(new File("src/test/resources").getCanonicalFile(), defDir.getCanonicalFile());
-        File kompiledDir = module.definition(defDir, null);
+        File kompiledDir = module.definition(defDir);
         assertEquals(new File("src/test/resources/test-kompiled").getCanonicalFile(), kompiledDir.getCanonicalFile());
         assertTrue(kompiledDir.exists());
         assertTrue(kompiledDir.isDirectory());

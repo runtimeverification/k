@@ -14,9 +14,11 @@ public class DefinitionLoadingOptions {
 
     @Parameter(names={"--directory", "-d"}, description="Path to the directory in which the kompiled " +
             "K definition resides. The default is the unique, only directory with the suffix '-kompiled' " +
-            "in the current directory. A definition may also be specified with the 'KRUN_COMPILED_DEF' " +
-            "environment variable, in which case it is used if the option is not specified on the command line.")
+            "in the current directory.")
     public String directory;
+
+    @Parameter(names={"--input-kdir"}, description="Exact path to the kompiled directory.")
+    public String inputDirectory;
 
     public DefinitionLoadingOptions(String dir) {
         this.directory = dir;
