@@ -216,12 +216,14 @@ class KCFG:
     def to_dot(self, kprint: KPrint) -> str:
         def _node_attrs(node_id: str) -> List[str]:
             atts = []
-            if node_id in self._init:
+            if self.is_init(node_id):
                 atts.append('init')
-            if node_id in self._target:
+            if self.is_target(node_id):
                 atts.append('target')
-            if node_id in self._stuck:
+            if self.is_stuck(node_id):
                 atts.append('stuck')
+            if self.is_frontier(node_id):
+                atts.append('frontier')
             return atts
 
         def _short_label(label):
