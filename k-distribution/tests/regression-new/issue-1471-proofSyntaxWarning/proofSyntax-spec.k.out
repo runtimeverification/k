@@ -4,7 +4,7 @@ kore-exec: [] Warning (WarnTrivialClaim):
 #Top
 [Warning] Compiler: Found syntax declaration in proof module. This will not be visible from the main module.
 	Source(proofSyntax-spec.k)
-	Location(16,16,16,18)
+	Location(16,16,16,19)
 [Warning] Compiler: Found syntax declaration in proof module. This will not be visible from the main module.
 	Source(proofSyntax-spec.k)
-	Location(22,16,22,18)
+	Location(22,16,22,19)

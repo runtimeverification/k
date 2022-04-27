@@ -49,7 +49,7 @@ Pre-installation Notes
 
     where `<package-download-url>` is replaced by the URL you just copied.
 
--   K depends on version 4.8.11 of Z3, which may not be supplied by package
+-   K depends on version 4.8.15 of Z3, which may not be supplied by package
     managers. If this is the case, it should be built and installed from source
     following the
     [instructions](https://github.com/Z3Prover/z3#building-z3-using-cmake) in
