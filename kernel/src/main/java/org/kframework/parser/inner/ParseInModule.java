@@ -63,16 +63,17 @@ public class ParseInModule implements Serializable, AutoCloseable {
     private final boolean isBison;
     private final boolean forGlobalScanner;
     private final FileUtil files;
+    private final String typeInferenceDebug;
 
-    ParseInModule(Module seedModule, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files) {
-        this(seedModule, null, null, null, null, strict, profileRules, isBison, forGlobalScanner, files);
+    ParseInModule(Module seedModule, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files, String typeInferenceDebug) {
+        this(seedModule, null, null, null, null, strict, profileRules, isBison, forGlobalScanner, files, typeInferenceDebug);
     }
 
-    ParseInModule(Module seedModule, Scanner scanner, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files) {
-        this(seedModule, null, null, null, scanner, strict, profileRules, isBison, forGlobalScanner, files);
+    ParseInModule(Module seedModule, Scanner scanner, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files, String typeInferenceDebug) {
+        this(seedModule, null, null, null, scanner, strict, profileRules, isBison, forGlobalScanner, files, typeInferenceDebug);
     }
 
-    private ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule, Scanner scanner, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files) {
+    private ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule, Scanner scanner, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files, String typeInferenceDebug) {
         this.seedModule = seedModule;
         this.extensionModule = extensionModule;
         this.disambModule = disambModule;
@@ -83,6 +84,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         this.isBison = isBison;
         this.forGlobalScanner = forGlobalScanner;
         this.files = files;
+        this.typeInferenceDebug = typeInferenceDebug;
     }
 
     /**
@@ -262,11 +264,17 @@ public class ParseInModule implements Serializable, AutoCloseable {
             rez3 = new PushTopAmbiguityUp().apply(rez3);
             startTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
-            TypeInferencer currentInferencer = inferencer.get();
-            if (currentInferencer == null) {
-                currentInferencer = new TypeInferencer(disambModule);
-                inferencer.set(currentInferencer);
+            TypeInferencer currentInferencer;
+            if (isDebug(source, startLine)) {
+                currentInferencer = new TypeInferencer(disambModule, true);
                 inferencers.add(currentInferencer);
+            } else {
+                currentInferencer = inferencer.get();
+                if (currentInferencer == null) {
+                    currentInferencer = new TypeInferencer(disambModule, isDebug(source, startLine));
+                    inferencer.set(currentInferencer);
+                    inferencers.add(currentInferencer);
+                }
             }
 
             rez = new TypeInferenceVisitor(currentInferencer, startSymbol, strict && inferSortChecks, true, isAnywhere).apply(rez3);
@@ -305,6 +313,13 @@ public class ParseInModule implements Serializable, AutoCloseable {
         }
     }
 
+    private boolean isDebug(Source source, int startLine) {
+        if (typeInferenceDebug == null) {
+            return false;
+        }
+        return (source.source() + ":" + startLine).endsWith(typeInferenceDebug);
+    }
+
     public void close() {
         if (scanner != null) {
             scanner.close();
@@ -319,7 +334,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         Term rez3 = new PushTopAmbiguityUp().apply(ambiguity);
         Either<Set<KEMException>, Term> rez;
         Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> rez2;
-        try (TypeInferencer inferencer = new TypeInferencer(mod)) {
+        try (TypeInferencer inferencer = new TypeInferencer(mod, false)) {
             rez = new TypeInferenceVisitor(inferencer, Sorts.K(), false, false, false).apply(rez3);
         }
         if (rez.isLeft()) {

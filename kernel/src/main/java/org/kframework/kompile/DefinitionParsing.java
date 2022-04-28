@@ -318,7 +318,7 @@ public class DefinitionParsing {
                 return m;
             Module configParserModule = gen.getConfigGrammar(m);
             ParseCache cache = loadCache(configParserModule);
-            try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, files)) {
+            try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, files, options.debugTypeInference)) {
                 // each parser gets its own scanner because config labels can conflict with user tokens
                 parser.getScanner(globalOptions);
                 parser.initialize();
@@ -353,7 +353,7 @@ public class DefinitionParsing {
                   (Set<Sentence>) m.localSentences().$bar(importedConfigurationSortsSubsortedToCell),
                   m.att());
 
-            Module extMod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(module), true, profileRules, files).getExtensionModule();
+            Module extMod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(module), true, profileRules, files, options.debugTypeInference).getExtensionModule();
             Set<Sentence> configDeclProductions = stream(module.localSentences())
                       .filter(s -> s instanceof Configuration)
                       .map(b -> (Configuration) b)
@@ -375,7 +375,7 @@ public class DefinitionParsing {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithCaches);
         Module ruleParserModule = gen.getRuleGrammar(defWithCaches.mainModule());
         ParseCache cache = loadCache(ruleParserModule);
-        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, false, true, files)) {
+        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, false, true, files, options.debugTypeInference)) {
             Scanner scanner;
             if (deserializeScanner) {
                 scanner = new Scanner(parser, globalOptions, files.resolveKompiled("scanner"));
@@ -402,8 +402,8 @@ public class DefinitionParsing {
 
         ParseCache cache = loadCache(ruleParserModule);
         try (ParseInModule parser = needNewScanner ?
-                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, files) :
-                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), scanner, true, profileRules, false, files)) {
+                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, files, options.debugTypeInference) :
+                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), scanner, true, profileRules, false, files, options.debugTypeInference)) {
             if (needNewScanner)
                 parser.getScanner(globalOptions);
             parser.initialize();
@@ -513,7 +513,7 @@ public class DefinitionParsing {
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         RuleGrammarGenerator gen = new RuleGrammarGenerator(compiledDef.kompiledDefinition);
         try (ParseInModule parser = RuleGrammarGenerator
-                .getCombinedGrammar(gen.getRuleGrammar(compiledDef.getParsedDefinition().mainModule()), true, profileRules, false, true, files)) {
+                .getCombinedGrammar(gen.getRuleGrammar(compiledDef.getParsedDefinition().mainModule()), true, profileRules, false, true, files, options.debugTypeInference)) {
             parser.setScanner(new Scanner(parser, globalOptions, files.resolveKompiled("scanner")));
             java.util.Set<K> res = parseBubble(parser, new HashMap<>(),
                     new Bubble(rule, contents, Att().add("contentStartLine", 1)
