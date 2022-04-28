@@ -9,6 +9,7 @@ export PATH="$(cd "$(dirname "$0")"; pwd):$PATH"
 ARGV=()
 bisonFiles=()
 dir=.
+kompiledDir=
 glr=--gen-parser
 literal=false
 stackDepth=10000
@@ -49,6 +50,7 @@ $KPARSE_GEN options:
       --bison-stack-max-depth  Maximum size of bison stack. Default: 10000
   -d, --directory DIR      Look for a kompiled directory ending in "-kompiled"
                            under the directory DIR
+      --input-kdir DIR     Exact path to the kompiled directory.
   -g, --glr                Generate a GLR parser instead of an LR(1) parser
   -h, --help               Display this help and exit
   -m, --module MODULE      Module to use to generate grammar
@@ -84,6 +86,11 @@ do
 
       -d|--directory)
       dir="$2"
+      shift
+      ;;
+
+      --input-kdir)
+      kompiledDir="$2"
       shift
       ;;
 
@@ -139,16 +146,19 @@ fi
 output_file="${ARGV[0]}"
 
 # Compute kompiled directory
-kompiledDir=
 hasKompiledDir=false
-for file in "$dir"/*-kompiled; do
-  [ ! -d "$file" ] && continue
-  kompiledDir=$file
-  if $hasKompiledDir; then
-    error 1 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
-  fi
+if [[ -d $kompiledDir ]]; then
   hasKompiledDir=true
-done
+else
+  for file in "$dir"/*-kompiled; do
+    [ ! -d "$file" ] && continue
+    kompiledDir=$file
+    if $hasKompiledDir; then
+      error 1 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
+    fi
+    hasKompiledDir=true
+  done
+fi
 
 if ! $hasKompiledDir; then
   error 1 'Could not find a compiled definition. Use --directory to specify one.'

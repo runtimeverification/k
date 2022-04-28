@@ -26,8 +26,6 @@ public class DefinitionLoadingModule extends AbstractModule {
     protected void configure() {
     }
 
-    private boolean exactDirectory = false;
-
     @Provides @DefinitionScoped
     CompiledDefinition koreDefinition(BinaryLoader loader, FileUtil files) {
         return loader.loadOrDie(CompiledDefinition.class, files.resolveKompiled("compiled.bin"));
@@ -42,26 +40,57 @@ public class DefinitionLoadingModule extends AbstractModule {
     }
 
     @Provides @KompiledDir
-    File definition(@DefinitionDir File defDir) {
+    File directory(DefinitionLoadingOptions options, @WorkingDir File workingDir, @Environment Map<String, String> env) {
         File directory = null;
-        if (exactDirectory) {
-            directory = defDir;
+        if (options.inputDirectory != null) {
+            if (options.directory != null)
+                throw KEMException.criticalError("Cannot use both --directory and --input-kdir at the same time.");
+            File f = new File(options.inputDirectory);
+            if (f.isAbsolute()) {
+                directory = f;
+            } else {
+                directory = new File(workingDir, options.inputDirectory);
+            }
+        } else if (env.get("KRUN_KOMPILED_DIR") != null) {
+            File f = new File(env.get("KRUN_KOMPILED_DIR"));
+            if (f.isAbsolute()) {
+                directory = f;
+            } else {
+                directory = new File(workingDir, env.get("KRUN_KOMPILED_DIR"));
+            }
         } else {
-            File[] dirs = defDir.listFiles(new FilenameFilter() {
-                @Override
-                public boolean accept(File current, String name) {
-                    return new File(current, name).isDirectory();
-                }
-            });
-
-            for (int i = 0; i < dirs.length; i++) {
-                if (dirs[i].getAbsolutePath().endsWith("-kompiled")) {
-                    if (directory != null) {
-                        throw KEMException.criticalError("Multiple compiled definitions found in the "
-                                + "current working directory: " + directory.getAbsolutePath() + " and " +
-                                dirs[i].getAbsolutePath());
+            File whereDir;
+            if (options.directory == null) {
+                if (env.get("KRUN_COMPILED_DEF") != null) {
+                    File f = new File(env.get("KRUN_COMPILED_DEF"));
+                    if (f.isAbsolute()) {
+                        whereDir = f;
                     } else {
-                        directory = dirs[i];
+                        whereDir = new File(workingDir, env.get("KRUN_COMPILED_DEF"));
+                    }
+                } else {
+                    whereDir = workingDir;
+                }
+            } else {
+                File f = new File(options.directory);
+                if (f.isAbsolute()) {
+                    whereDir = f;
+                } else {
+                    whereDir = new File(workingDir, options.directory);
+                }
+            }
+            File[] dirs = whereDir.listFiles((current, name) -> new File(current, name).isDirectory());
+
+            if (dirs != null) {
+                for (File dir : dirs) {
+                    if (dir.getAbsolutePath().endsWith("-kompiled")) {
+                        if (directory != null) {
+                            throw KEMException.criticalError("Multiple compiled definitions found in the "
+                                    + "current working directory: " + directory.getAbsolutePath() + " and " +
+                                    dir.getAbsolutePath());
+                        } else {
+                            directory = dir;
+                        }
                     }
                 }
             }
@@ -69,35 +98,6 @@ public class DefinitionLoadingModule extends AbstractModule {
             if (directory == null) {
                 throw KEMException.criticalError("Could not find a compiled definition. " +
                         "Use --directory or --input-kdir to specify one.");
-            }
-        }
-        if (!directory.isDirectory()) {
-            throw KEMException.criticalError("Does not exist or not a directory: " + directory.getAbsolutePath());
-        }
-        return directory;
-    }
-
-    @Provides @DefinitionDir
-    File directory(DefinitionLoadingOptions options, @WorkingDir File workingDir) {
-        File directory;
-        if (options.inputDirectory != null) {
-            if (options.directory != null)
-                throw KEMException.criticalError("Cannot use both --directory and --input-kdir at the same time.");
-            exactDirectory = true;
-            File f = new File(options.inputDirectory);
-            if (f.isAbsolute()) {
-                directory = f;
-            } else {
-                directory = new File(workingDir, options.inputDirectory);
-            }
-        } else if (options.directory == null) {
-            directory = workingDir;
-        } else {
-            File f = new File(options.directory);
-            if (f.isAbsolute()) {
-                directory = f;
-            } else {
-                directory = new File(workingDir, options.directory);
             }
         }
         if (!directory.isDirectory()) {
