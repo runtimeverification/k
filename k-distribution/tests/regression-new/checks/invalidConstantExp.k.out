@@ -4,3 +4,5 @@
 	Location(4,8,4,21)
 	Source(invalidConstantExp.k)
 	Location(4,13,4,21)
+	4 |	  rule 0 => 1 /Int 0
+	  .	            ^~~~~~~~
