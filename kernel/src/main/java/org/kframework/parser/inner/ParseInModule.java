@@ -13,7 +13,6 @@ import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.disambiguation.*;
 import org.kframework.parser.inner.kernel.EarleyParser;
-import org.kframework.parser.inner.kernel.KSyntax2Bison;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
@@ -24,12 +23,9 @@ import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Queue;
@@ -162,19 +158,18 @@ public class ParseInModule implements Serializable, AutoCloseable {
         }
     }
 
-    private Scanner getParser(Scanner scanner, Sort startSymbol) {
+    private void getParser(Scanner scanner, Sort startSymbol) {
         EarleyParser p = parser;
         if (p == null) {
             Module m = getParsingModule();
             p = new EarleyParser(m, scanner, startSymbol);
             parser = p;
         }
-        return scanner;
     }
 
     private Scanner scanner;
-    private ThreadLocal<TypeInferencer> inferencer = new ThreadLocal<>();
-    private Queue<TypeInferencer> inferencers = new ConcurrentLinkedQueue<>();
+    private final ThreadLocal<TypeInferencer> inferencer = new ThreadLocal<>();
+    private final Queue<TypeInferencer> inferencers = new ConcurrentLinkedQueue<>();
 
     public Scanner getScanner(GlobalOptions go) {
         if (scanner == null) {
@@ -221,7 +216,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
      */
     private Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>>
             parseStringTerm(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
-        scanner = getParser(scanner, startSymbol);
+        getParser(scanner, startSymbol);
 
         long start, endParse = 0, startTypeInf = 0, endTypeInf = 0;
         start = profileRules ? System.currentTimeMillis() : 0;

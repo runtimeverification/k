@@ -82,7 +82,7 @@ public class PriorityVisitor extends SetsTransformerWithErrors<KEMException> {
               java.util.Set<Integer> applyAt = new HashSet<>();
               for (String piece : pieces) {
                   try {
-                      int i = Integer.valueOf(piece.trim());
+                      int i = Integer.parseInt(piece.trim());
                       applyAt.add(i);
                   } catch (NumberFormatException e) {
                       throw KEMException.innerParserError("Invalid applyPriority attribute value: " + piece, e, tc.production().source().orElse(null), tc.production().location().orElse(null));
@@ -134,7 +134,7 @@ public class PriorityVisitor extends SetsTransformerWithErrors<KEMException> {
          * Specifies whether the current node is the left most or the right most child of the parent.
          * This is useful because associativity can be checked at the same time with priorities.
          */
-        public static enum Side {LEFT, RIGHT, MIDDLE}
+        public enum Side {LEFT, RIGHT, MIDDLE}
         private final TermCons parent;
         private final Side side;
         private final POSet<Tag> priorities;
