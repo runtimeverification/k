@@ -369,7 +369,7 @@ public class Scanner implements AutoCloseable {
             process.getOutputStream().write(size.array());
             process.getOutputStream().write(buf);
             process.getOutputStream().flush();
-            return readTokenizedOutput(process, source, lines, columns);
+            return readTokenizedOutput(process, source, lines, columns, input.length());
         } catch (IOException | InterruptedException e) {
             throw KEMException.internalError("Failed to invoke scanner", e);
         } finally {
@@ -377,7 +377,7 @@ public class Scanner implements AutoCloseable {
         }
     }
 
-    private Token[] readTokenizedOutput(Process process, Source source, int[] lines, int[] columns) throws IOException {
+    private Token[] readTokenizedOutput(Process process, Source source, int[] lines, int[] columns, int length) throws IOException {
         List<Token> result = new ArrayList<>();
         boolean success = false;
         try {
@@ -406,6 +406,8 @@ public class Scanner implements AutoCloseable {
                 result.add(t);
             }
             success = true;
+            // add EOF token at end of token sequence
+            result.add(new Token(0, "", length, length));
             return result.toArray(new Token[result.size()]);
         } finally {
             if (success) {
