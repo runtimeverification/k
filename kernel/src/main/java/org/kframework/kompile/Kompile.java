@@ -306,7 +306,7 @@ public class Kompile {
                 .andThen(propagateMacroToRules)
                 .andThen(expandMacros)
                 .andThen(guardOrs)
-                .andThen(Kompile::resolveFreshConstants)
+                .andThen(d -> Kompile.resolveFreshConstants(d, files))
                 .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
                 .andThen(AddImplicitComputationCell::transformDefinition)
@@ -501,8 +501,8 @@ public class Kompile {
         return Constructors.Definition(d.mainModule(), immutable(allModules), d.att());
     }
 
-    public static Definition resolveFreshConstants(Definition input) {
-        return DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(input, false, null).resolve(m)), "resolving !Var variables")
+    public static Definition resolveFreshConstants(Definition input, FileUtil files) {
+        return DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(input, false, null, files).resolve(m)), "resolving !Var variables")
                 .apply(input);
     }
 

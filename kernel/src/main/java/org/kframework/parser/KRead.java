@@ -63,7 +63,7 @@ public class KRead {
             case KORE:
                 return new KoreParser(mod.sortAttributesFor()).parseString(stringToParse);
             case PROGRAM:
-                return def.parseSingleTerm(mod, sort, kem, stringToParse, source);
+                return def.parseSingleTerm(mod, sort, kem, files, stringToParse, source);
             default:
                 throw KEMException.criticalError("Unsupported input mode: " + inputMode);
         }
@@ -71,7 +71,7 @@ public class KRead {
 
     public void createBisonParser(Module mod, Sort sort, File outputFile, boolean glr, String bisonFile, long stackDepth) {
         Stopwatch sw = new Stopwatch(globalOptions);
-        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, true, false, true)) {
+        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, true, false, true, false, files)) {
             try (Scanner scanner = parseInModule.getScanner(kem.options)) {
                 File scannerFile = files.resolveTemp("scanner.l");
                 File scanHdr = files.resolveTemp("scanner.h");

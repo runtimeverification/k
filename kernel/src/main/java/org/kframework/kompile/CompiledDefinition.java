@@ -199,8 +199,8 @@ public class CompiledDefinition implements Serializable {
      * @return the parsed term.
      */
 
-    public K parseSingleTerm(Module module, Sort programStartSymbol, KExceptionManager kem, String s, Source source) {
-        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, true)) {
+    public K parseSingleTerm(Module module, Sort programStartSymbol, KExceptionManager kem, FileUtil files, String s, Source source) {
+        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, true, files)) {
             Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> res = parseInModule.parseString(s, programStartSymbol, source);
             kem.addAllKException(res._2().stream().map(e -> e.getKException()).collect(Collectors.toSet()));
             if (res._1().isLeft()) {
@@ -210,8 +210,8 @@ public class CompiledDefinition implements Serializable {
         }
     }
 
-    public Module getExtensionModule(Module module) {
-        return RuleGrammarGenerator.getCombinedGrammar(module, true).getExtensionModule();
+    public Module getExtensionModule(Module module, FileUtil files) {
+        return RuleGrammarGenerator.getCombinedGrammar(module, true, files).getExtensionModule();
     }
 
     public Rule compilePatternIfAbsent(FileUtil files, KExceptionManager kem, String pattern, Source source) {

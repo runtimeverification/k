@@ -375,7 +375,7 @@ public class DefinitionParsing {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithCaches);
         Module ruleParserModule = gen.getRuleGrammar(defWithCaches.mainModule());
         ParseCache cache = loadCache(ruleParserModule);
-        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, files, true)) {
+        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, false, true, files)) {
             Scanner scanner;
             if (deserializeScanner) {
                 scanner = new Scanner(parser, globalOptions, files.resolveKompiled("scanner"));

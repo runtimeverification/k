@@ -37,11 +37,12 @@ import static org.kframework.kore.KORE.*;
 public class GenerateSentencesFromConfigDeclTest {
 
     Definition def;
+    FileUtil files;
 
     @Before
     public void setUp() {
         String definitionText;
-        FileUtil files = FileUtil.testFileUtil();
+        files = FileUtil.testFileUtil();
         ParserUtils parser = new ParserUtils(files, new KExceptionManager(new GlobalOptions()));
         File definitionFile = new File(Kompile.BUILTIN_DIRECTORY.toString() + "/prelude.md");
         definitionText = files.loadFromWorkingDirectory(definitionFile.getPath());
@@ -65,7 +66,7 @@ public class GenerateSentencesFromConfigDeclTest {
                                         KApply(KLabel(".Opt"), KList(), Att.empty().add(Production.class, prod))))));
         Module m1 = Module("CONFIG", Set(Import(def.getModule("KSEQ").get(), true)), Set(prod), Att());
         RuleGrammarGenerator parserGen = new RuleGrammarGenerator(def);
-        Module m = RuleGrammarGenerator.getCombinedGrammar(parserGen.getConfigGrammar(m1), true).getExtensionModule();
+        Module m = RuleGrammarGenerator.getCombinedGrammar(parserGen.getConfigGrammar(m1), true, files).getExtensionModule();
         Set<Sentence> gen = GenerateSentencesFromConfigDecl.gen(configuration, BooleanUtils.FALSE, Att(), m, false);
         Att initializerAtts = Att().add("initializer");
         Att productionAtts = initializerAtts.add("function").add("noThread");

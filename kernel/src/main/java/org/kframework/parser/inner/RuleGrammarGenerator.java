@@ -184,16 +184,16 @@ public class RuleGrammarGenerator {
     }
 
     /* use this overload if you don't need to profile rule parse times. */
-    public static ParseInModule getCombinedGrammar(Module mod, boolean strict) {
-      return getCombinedGrammar(mod, strict, false, false, false, null);
-    }
-
-    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, boolean isBison) {
-      return getCombinedGrammar(mod, strict, timing, isBison, false, null);
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, FileUtil files) {
+      return getCombinedGrammar(mod, strict, false, false, false, files, null);
     }
 
     public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, FileUtil files) {
       return getCombinedGrammar(mod, strict, timing, false, false, files);
+    }
+
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, boolean isBison, FileUtil files) {
+      return getCombinedGrammar(mod, strict, timing, isBison, false, files);
     }
 
     // the forGlobalScanner flag tells the ParseInModule class not to exclude
@@ -204,9 +204,6 @@ public class RuleGrammarGenerator {
     // modules. This must include the private syntax of those modules,
     // otherwise we would not be able to use it to scan the modules in which
     //  that private syntax is visible.
-    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, FileUtil files, boolean forGlobalScanner) {
-      return getCombinedGrammar(mod, strict, timing, false, forGlobalScanner, files);
-    }
 
     /**
      * Create the rule parser for the given module.

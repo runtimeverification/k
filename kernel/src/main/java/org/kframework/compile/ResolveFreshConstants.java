@@ -26,6 +26,7 @@ import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.StringUtil;
+import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.collection.Set;
 import scala.Option;
@@ -46,6 +47,7 @@ public class ResolveFreshConstants {
 
     private final Definition def;
     private final boolean kore;
+    private final FileUtil files;
     private Module m;
     private java.util.Set<KVariable> freshVars = new HashSet<>();
     private Map<KVariable, Integer> offsets = new HashMap<>();
@@ -224,10 +226,11 @@ public class ResolveFreshConstants {
         return s;
     }
 
-    public ResolveFreshConstants(Definition def, boolean kore, String manualTopCell) {
+    public ResolveFreshConstants(Definition def, boolean kore, String manualTopCell, FileUtil files) {
         this.def = def;
         this.kore = kore;
         this.manualTopCell = manualTopCell;
+        this.files = files;
     }
 
     public Module resolve(Module m) {
@@ -243,7 +246,7 @@ public class ResolveFreshConstants {
         if (m.name().equals(def.mainModule().name()) && kore) {
             if (!m.definedKLabels().contains(KLabels.GENERATED_TOP_CELL)) {
                 RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
-                ParseInModule mod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(m), true);
+                ParseInModule mod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(m), true, files);
                 ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(m);
                 Sort topCellSort;
                 try {
@@ -268,7 +271,7 @@ public class ResolveFreshConstants {
         }
         if (kore && m.localKLabels().contains(KLabels.GENERATED_TOP_CELL)) {
             RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
-            ParseInModule mod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(m), true);
+            ParseInModule mod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(m), true, files);
             Set<Sentence> newSentences = GenerateSentencesFromConfigDecl.gen(freshCell, BooleanUtils.TRUE, Att.empty(), mod.getExtensionModule(), true);
             sentences = (Set<Sentence>) sentences.$bar(newSentences);
             sentences = (Set<Sentence>) sentences.$bar(immutable(counterSentences));
