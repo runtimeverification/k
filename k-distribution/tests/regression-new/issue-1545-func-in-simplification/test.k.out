@@ -1,8 +1,12 @@
 [Error] Compiler: Illegal function symbol _+Int_ on LHS of rule. Consider adding `simplification` attribute to the rule if this is intended.
 	Source(test.k)
 	Location(5,11,5,20)
+	5 |	    rule (A +Int I2) +Int (I3 -Int A) => I2 +Int I3
+	  .	          ^~~~~~~~~
 [Error] Compiler: Illegal function symbol _-Int_ on LHS of rule. Consider adding `simplification` attribute to the rule if this is intended.
 	Source(test.k)
 	Location(5,28,5,37)
+	5 |	    rule (A +Int I2) +Int (I3 -Int A) => I2 +Int I3
+	  .	                           ^~~~~~~~~
 [Error] Compiler: Had 2 structural errors.
 [Warning] Compiler: Could not find main syntax module with name TEST-SYNTAX in definition.  Use --syntax-module to specify one. Using TEST as default.

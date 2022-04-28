@@ -1,3 +1,5 @@
 [Error] Compiler: Requiring a K file in the K builtin directory via a deprecated filename. Please replace "ffi.k" with "ffi.md".
 	Source(requireBuiltinK.k)
 	Location(1,1,1,16)
+	1 |	require "ffi.k"
+	  .	^~~~~~~~~~~~~~~
