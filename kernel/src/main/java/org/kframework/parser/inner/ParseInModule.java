@@ -236,22 +236,8 @@ public class ParseInModule implements Serializable, AutoCloseable {
             }
             endParse = profileRules ? System.currentTimeMillis() : 0;
 
-            Either<Set<KEMException>, Term> rez = new TreeCleanerVisitor().apply(parsed);
-            if (rez.isLeft())
-                return new Tuple2<>(rez, warn);
-            rez = new CollapseRecordProdsVisitor(rez.right().get()).apply(rez.right().get());
-            if (rez.isLeft())
-                return new Tuple2<>(rez, warn);
-            rez = new CorrectRewritePriorityVisitor().apply(rez.right().get());
-            if (rez.isLeft())
-                return new Tuple2<>(rez, warn);
-            rez = new CorrectKSeqPriorityVisitor().apply(rez.right().get());
-            if (rez.isLeft())
-                return new Tuple2<>(rez, warn);
-            rez = new CorrectLetPriorityVisitor().apply(rez.right().get());
-            if (rez.isLeft())
-                return new Tuple2<>(rez, warn);
-            rez = new CorrectCastPriorityVisitor().apply(rez.right().get());
+            Term rez3 = new TreeCleanerVisitor().apply(parsed);
+            Either<Set<KEMException>, Term> rez = new CollapseRecordProdsVisitor(rez3).apply(rez3);
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
             rez = new PriorityVisitor(disambModule.priorities(), disambModule.leftAssoc(), disambModule.rightAssoc()).apply(rez.right().get());
@@ -260,7 +246,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
             rez = new KAppToTermConsVisitor(disambModule).apply(rez.right().get());
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
-            Term rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez.right().get());
+            rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez.right().get());
             rez3 = new PushTopAmbiguityUp().apply(rez3);
             startTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
