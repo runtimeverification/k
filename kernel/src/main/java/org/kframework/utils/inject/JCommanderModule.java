@@ -42,7 +42,7 @@ public class JCommanderModule extends AbstractModule  {
             sw.printIntermediate("Parse command line options");
             return jc;
         } catch (ParameterException e) {
-            throw KEMException.criticalError(e.getMessage(), e);
+            throw KEMException.criticalError(e.getMessage());
         }
     }
 

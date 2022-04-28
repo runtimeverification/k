@@ -24,20 +24,20 @@ public class OuterParsingOptions implements Serializable {
     public OuterParsingOptions(Void v) {}
 
     public OuterParsingOptions(File mainDefinitionFile) {
-      this.mainDefinitionFile = mainDefinitionFile;
+        this.mainDefinitionFile = mainDefinitionFile;
     }
 
     @Parameter(description="<file>")
-    private List<String> parameters;
+    private String mainParameter;
 
     private File mainDefinitionFile;
 
     public synchronized File mainDefinitionFile(FileUtil files) {
         if (mainDefinitionFile == null) {
-            if (parameters == null || parameters.size() == 0) {
+            if (mainParameter == null) {
                 throw KEMException.criticalError("You have to provide exactly one main file in order to do outer parsing.");
             }
-            mainDefinitionFile = files.resolveWorkingDirectory(parameters.get(0));
+            mainDefinitionFile = files.resolveWorkingDirectory(mainParameter);
         }
         return mainDefinitionFile;
     }
