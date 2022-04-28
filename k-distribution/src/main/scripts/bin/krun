@@ -108,7 +108,7 @@ $KRUN options:
       --haskell-backend-command CMD  use CMD instead of kore-exec to invoke
                                      Haskell backend
   -h, --help               Display this help and exit
-      --input-kdir DIR     Exact path to the kompiled directory.
+      --definition DIR     Exact path to the kompiled directory.
       --io [on|off]        Enable/disable reading/writing to actual
                            stdin/stdout via cells with "stream" attribute.
                            Defaults to enabled when performing concrete
@@ -233,7 +233,7 @@ do
       exit 0
       ;;
 
-      --input-kdir)
+      --definition)
       kompiledDir="$2"
       shift
       ;;
@@ -444,7 +444,7 @@ fi
 source "$kompiledDir/configVars.sh"
 if $term; then
   if [ -z "${parser_PGM+unset}" ]; then
-    execute kparse --input-kdir "$kompiledDir" --module "$mainModuleName" "$config_var_PGM" > "$input_file"
+    execute kparse --definition "$kompiledDir" --module "$mainModuleName" "$config_var_PGM" > "$input_file"
   else
     execute $parser_PGM "$config_var_PGM" > "$input_file"
   fi
@@ -473,14 +473,14 @@ else
     if [ -z "${!parser_name+unset}" ]; then
       if [ "$name" = "PGM" ]; then
         if $hasArgv; then
-          parser=(kparse --input-kdir "$kompiledDir")
+          parser=(kparse --definition "$kompiledDir")
         else
-          parser=(kparse --input-kdir "$kompiledDir" --module "$mainModuleName")
+          parser=(kparse --definition "$kompiledDir" --module "$mainModuleName")
         fi
       elif [ -z "${!indirectModuleName+unset}" ]; then
-        parser=(kparse --sort "$sortName" --input-kdir "$kompiledDir" --module "$mainModuleName")
+        parser=(kparse --sort "$sortName" --definition "$kompiledDir" --module "$mainModuleName")
       else
-        parser=(kparse --sort "$sortName" --input-kdir "$kompiledDir" --module "$moduleName")
+        parser=(kparse --sort "$sortName" --definition "$kompiledDir" --module "$moduleName")
       fi
     else
       parser=("${!parser_name}")
@@ -538,7 +538,7 @@ if [ "$backendName" = "llvm" ]; then
     if [ -z "$pattern" ]; then
       echo '\and{SortGeneratedTopCell{}}(VarResult:SortGeneratedTopCell{},\top{SortGeneratedTopCell{}}())' > "$patternFile"
     else
-      execute k-compile-search-pattern --input-kdir "$kompiledDir" "$pattern" > "$patternFile"
+      execute k-compile-search-pattern --definition "$kompiledDir" "$pattern" > "$patternFile"
     fi
 
     if [[ $searchType != "FINAL" ]]; then
@@ -581,7 +581,7 @@ elif [ "$backendName" = "haskell" ] ; then
     if [ -z "$pattern" ]; then
       echo '\and{SortGeneratedTopCell{}}(VarResult:SortGeneratedTopCell{},\top{SortGeneratedTopCell{}}())' > "$patternFile"
     else
-      k-compile-search-pattern --input-kdir "$kompiledDir" "$pattern" > "$patternFile"
+      k-compile-search-pattern --definition "$kompiledDir" "$pattern" > "$patternFile"
     fi
 
     if ! $search; then
@@ -626,7 +626,7 @@ if ! $dryRun; then
       mv "$kore_output2" "$kore_output"
     fi
 
-    output "$outputFile" execute kore-print --input-kdir "$kompiledDir" --output "$outputMode" "$kore_output" --color "$colorOpt" $filterSubst
+    output "$outputFile" execute kore-print --definition "$kompiledDir" --output "$outputMode" "$kore_output" --color "$colorOpt" $filterSubst
   else
     error ${result} "Backend crashed during rewriting with exit code ${result}"
   fi

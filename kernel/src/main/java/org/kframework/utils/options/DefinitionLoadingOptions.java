@@ -17,7 +17,7 @@ public class DefinitionLoadingOptions {
             "in the current directory.")
     public String directory;
 
-    @Parameter(names={"--input-kdir"}, description="Exact path to the kompiled directory.")
+    @Parameter(names={"--definition"}, description="Exact path to the kompiled directory.")
     public String inputDirectory;
 
     public DefinitionLoadingOptions(String dir) {

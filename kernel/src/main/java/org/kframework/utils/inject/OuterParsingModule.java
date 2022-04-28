@@ -36,7 +36,7 @@ public class OuterParsingModule extends AbstractModule {
     File kompiledDir(OuterParsingOptions options, @WorkingDir File workingDir, OutputDirectoryOptions output) {
         if (output.outputDirectory != null) {
             if (output.directory != null)
-                throw KEMException.criticalError("Cannot use both --directory and --output-kdir at the same time.");
+                throw KEMException.criticalError("Cannot use both --directory and --output-definition at the same time.");
             File f = new File(output.outputDirectory);
             if (f.isAbsolute())
                 return f;

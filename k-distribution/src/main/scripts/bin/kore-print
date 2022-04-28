@@ -48,7 +48,7 @@ $KORE_PRINT arguments:
                            terminal
   -d, --directory DIR      Look for a kompiled directory ending in "-kompiled"
                            under the directory DIR
-      --input-kdir DIR     Exact path to the kompiled directory.
+      --definition DIR     Exact path to the kompiled directory.
   -h, --help               Display this help and exit
       --no-substitution-filtering  Don't filter conjuncts with anonymous
                                    variables from substitution output
@@ -96,7 +96,7 @@ do
       shift
       ;;
 
-      --input-kdir)
+      --definition)
       kompiledDir="$2"
       shift
       ;;

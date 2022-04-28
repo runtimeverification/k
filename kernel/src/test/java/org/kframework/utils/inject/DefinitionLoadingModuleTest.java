@@ -31,7 +31,7 @@ public class DefinitionLoadingModuleTest {
     @Test
     public void testReadDefinition2() throws IOException {
         DefinitionLoadingOptions options = new DefinitionLoadingOptions();
-        new JCommander(options, "--input-kdir", "src/test/resources/test-kompiled");
+        new JCommander(options, "--definition", "src/test/resources/test-kompiled");
         DefinitionLoadingModule module = new DefinitionLoadingModule();
         File kompiledDir = module.directory(options, new File("."), System.getenv());
         assertEquals(new File("src/test/resources/test-kompiled").getCanonicalFile(), kompiledDir.getCanonicalFile());

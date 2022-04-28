@@ -50,7 +50,7 @@ $KPARSE_GEN options:
       --bison-stack-max-depth  Maximum size of bison stack. Default: 10000
   -d, --directory DIR      Look for a kompiled directory ending in "-kompiled"
                            under the directory DIR
-      --input-kdir DIR     Exact path to the kompiled directory.
+      --definition DIR     Exact path to the kompiled directory.
   -g, --glr                Generate a GLR parser instead of an LR(1) parser
   -h, --help               Display this help and exit
   -m, --module MODULE      Module to use to generate grammar
@@ -89,7 +89,7 @@ do
       shift
       ;;
 
-      --input-kdir)
+      --definition)
       kompiledDir="$2"
       shift
       ;;

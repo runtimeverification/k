@@ -44,7 +44,7 @@ public class DefinitionLoadingModule extends AbstractModule {
         File directory = null;
         if (options.inputDirectory != null) {
             if (options.directory != null)
-                throw KEMException.criticalError("Cannot use both --directory and --input-kdir at the same time.");
+                throw KEMException.criticalError("Cannot use both --directory and --definition at the same time.");
             File f = new File(options.inputDirectory);
             if (f.isAbsolute()) {
                 directory = f;
@@ -97,7 +97,7 @@ public class DefinitionLoadingModule extends AbstractModule {
 
             if (directory == null) {
                 throw KEMException.criticalError("Could not find a compiled definition. " +
-                        "Use --directory or --input-kdir to specify one.");
+                        "Use --directory or --definition to specify one.");
             }
         }
         if (!directory.isDirectory()) {

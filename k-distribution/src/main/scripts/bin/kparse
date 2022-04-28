@@ -49,7 +49,7 @@ $KPARSE options:
   -d, --directory DIR      Look for a kompiled directory ending in "-kompiled"
                            under the directory DIR
   -h, --help               Display this help and exit
-      --input-kdir DIR     Exact path to the kompiled directory.
+      --definition DIR     Exact path to the kompiled directory.
   -i, --input MODE         Select input mode to use when parsing. Valid values
                            are program, kast, binary, json, and kore.
   -m, --module MODULE      Module to use to generate grammar
@@ -83,7 +83,7 @@ do
       exit 0
       ;;
 
-      --input-kdir)
+      --definition)
       kompiledDir="$2"
       shift
       ;;
@@ -171,7 +171,7 @@ else
 fi
 
 if ! $hasKompiledDir; then
-  error 1 'Could not find a compiled definition. Use --directory or --input-kdir to specify one.'
+  error 1 'Could not find a compiled definition. Use --directory or --definition to specify one.'
 fi
 
 if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then
