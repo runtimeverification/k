@@ -110,7 +110,7 @@ class KProve(KPrint):
         haskellLogArgs = ['--log', str(logFile), '--log-format', 'oneline', '--log-entries', 'DebugTransition']
         command = [c for c in self.prover]
         command += [str(specFile)]
-        command += ['--backend', self.backend, '--directory', str(self.directory), '-I', str(self.directory), '--spec-module', specModuleName, '--output', 'json']
+        command += ['--directory', str(self.directory), '-I', str(self.directory), '--spec-module', specModuleName, '--output', 'json']
         command += [c for c in self.proverArgs]
         command += args
         commandEnv = os.environ.copy()
