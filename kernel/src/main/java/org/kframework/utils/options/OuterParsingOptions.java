@@ -25,43 +25,20 @@ public class OuterParsingOptions implements Serializable {
     public OuterParsingOptions(Void v) {}
 
     public OuterParsingOptions(File mainDefinitionFile) {
-      this.mainDefinitionFile = mainDefinitionFile;
+        this.mainDefinitionFile = mainDefinitionFile;
     }
 
     @Parameter(description="<file>")
-    private List<String> parameters;
+    private String mainParameter;
 
     private File mainDefinitionFile;
 
-    private boolean noParameters() {
-      return parameters == null || parameters.isEmpty();
-    }
-
-    private String mainFileErrorList() {
-      if(noParameters()) {
-        return "[]";
-      } else {
-        String separatedFiles = parameters.stream().collect(Collectors.joining(", "));
-        return "[" + separatedFiles + "]";
-      }
-    }
-
-    private String mainFileErrorMessage() {
-      String base = "You have to provide exactly one main file in order to do outer parsing.";
-
-      if (noParameters()) {
-        return base + " No main file was provided.";
-      } else {
-        return base + " The main files provided were: " + mainFileErrorList();
-      }
-    }
-
     public synchronized File mainDefinitionFile(FileUtil files) {
         if (mainDefinitionFile == null) {
-            if (parameters == null || parameters.size() != 1) {
-                throw KEMException.criticalError(mainFileErrorMessage());
+            if (mainParameter == null) {
+                throw KEMException.criticalError("You have to provide exactly one main file in order to do outer parsing.");
             }
-            mainDefinitionFile = files.resolveWorkingDirectory(parameters.get(0));
+            mainDefinitionFile = files.resolveWorkingDirectory(mainParameter);
         }
         return mainDefinitionFile;
     }
