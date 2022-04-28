@@ -33,17 +33,4 @@ public class TreeCleanerVisitor extends SetsTransformerWithErrors<KEMException> 
         }
         return vis;
     }
-
-    /**
-     * Remove KList artifacts from parsing only when it contains a single element.
-     */
-    @Override
-    public Either<Set<KEMException>, Term> apply(KList node) {
-        Either<Set<KEMException>, Term> res = super.apply(node);
-
-        if (res.isRight() && ((KList) res.right().get()).items().size() == 1)
-            return Right.apply(((KList) res.right().get()).items().get(0));
-        else
-            return res;
-    }
 }
