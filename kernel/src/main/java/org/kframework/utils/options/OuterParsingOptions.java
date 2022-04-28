@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Provides the options needed for tools to perform outer parsing of definitions from source.
