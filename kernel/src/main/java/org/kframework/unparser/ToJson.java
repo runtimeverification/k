@@ -69,10 +69,7 @@ import static org.kframework.Collections.*;
  */
 public class ToJson {
 
-    private DataOutputStream data;
-    private ToJson(DataOutputStream data) {
-        this.data = data;
-    }
+    public static final int version = 2;
 
 ///////////////////////////////
 // ToJson Definition Objects //
@@ -86,7 +83,7 @@ public class ToJson {
 
             JsonObjectBuilder term = Json.createObjectBuilder();
             term.add("format", "KAST");
-            term.add("version", 1);
+            term.add("version", version);
             term.add("term", toJson(def));
 
             jsonWriter.write(term.build());
@@ -106,7 +103,7 @@ public class ToJson {
 
             JsonObjectBuilder term = Json.createObjectBuilder();
             term.add("format", "KAST");
-            term.add("version", 1);
+            term.add("version", version);
             term.add("term", toJson(mod));
 
             jsonWriter.write(term.build());
@@ -385,7 +382,7 @@ public class ToJson {
 
             JsonObjectBuilder kterm = Json.createObjectBuilder();
             kterm.add("format", "KAST");
-            kterm.add("version", 1);
+            kterm.add("version", version);
             kterm.add("term", toJson(k));
 
             jsonWriter.write(kterm.build());
@@ -402,7 +399,7 @@ public class ToJson {
         return out.toByteArray();
     }
 
-    private static JsonStructure toJson(K k) {
+    public static JsonStructure toJson(K k) {
         JsonObjectBuilder knode = Json.createObjectBuilder();
         if (k instanceof KToken) {
             KToken tok = (KToken) k;
@@ -415,8 +412,7 @@ public class ToJson {
             KApply app = (KApply) k;
 
             knode.add("node", JsonParser.KAPPLY);
-            knode.add("label", app.klabel().name());
-            knode.add("variable", app.klabel() instanceof KVariable);
+            knode.add("klabel", toJson(((KApply) k).klabel()));
 
             JsonArrayBuilder args = Json.createArrayBuilder();
             for (K item : app.klist().asIterable()) {
@@ -471,12 +467,24 @@ public class ToJson {
             InjectedKLabel inj = (InjectedKLabel) k;
 
             knode.add("node", JsonParser.INJECTEDKLABEL);
-            knode.add("name", inj.klabel().name());
-            knode.add("variable", inj.klabel() instanceof KVariable);
+            knode.add("klabel", toJson(inj.klabel()));
 
         } else {
             throw KEMException.criticalError("Unimplemented for JSON serialization: ", k);
         }
         return knode.build();
+    }
+
+    public static JsonStructure toJson(KLabel kl) {
+        JsonObjectBuilder jkl = Json.createObjectBuilder();
+        jkl.add("name", kl.name());
+        jkl.add("variable", kl instanceof KVariable);
+        if (!(kl instanceof KVariable)) {
+            JsonArrayBuilder params = Json.createArrayBuilder();
+            for (Sort s : mutable(kl.params()))
+                params.add(s.toString());
+            jkl.add("params", params.build());
+        }
+        return jkl.build();
     }
 }
