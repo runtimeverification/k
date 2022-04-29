@@ -28,7 +28,7 @@ from .kprint import KPrint
 def kprovex(
     spec_file: Path,
     *,
-    directory: Optional[Path] = None,
+    kompiled_dir: Optional[Path] = None,
     include_dirs: Iterable[Path] = (),
     emit_json_spec: Optional[Path] = None,
     dry_run=False,
@@ -39,7 +39,7 @@ def kprovex(
         check_dir_path(include_dir)
 
     args = _build_arg_list(
-        directory=directory,
+        kompiled_dir=kompiled_dir,
         include_dirs=include_dirs,
         dry_run=dry_run,
         emit_json_spec=emit_json_spec,
@@ -53,15 +53,15 @@ def kprovex(
 
 def _build_arg_list(
     *,
-    directory: Optional[Path],
+    kompiled_dir: Optional[Path],
     include_dirs: Iterable[Path],
     emit_json_spec: Optional[Path],
     dry_run: bool,
 ) -> List[str]:
     args = []
 
-    if directory:
-        args += ['--directory', str(directory)]
+    if kompiled_dir:
+        args += ['--definition', str(kompiled_dir)]
 
     for include_dir in include_dirs:
         args += ['-I', str(include_dir)]
@@ -110,7 +110,7 @@ class KProve(KPrint):
         haskellLogArgs = ['--log', str(logFile), '--log-format', 'oneline', '--log-entries', 'DebugTransition']
         command = [c for c in self.prover]
         command += [str(specFile)]
-        command += ['--directory', str(self.directory), '-I', str(self.directory), '--spec-module', specModuleName, '--output', 'json']
+        command += ['--definition', str(self.kompiledDirectory), '-I', str(self.directory), '--spec-module', specModuleName, '--output', 'json']
         command += [c for c in self.proverArgs]
         command += args
         commandEnv = os.environ.copy()
