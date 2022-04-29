@@ -2,6 +2,7 @@
 package org.kframework.utils.inject;
 
 import com.beust.jcommander.JCommander;
+import org.junit.Assert;
 import org.junit.Test;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
@@ -42,18 +43,39 @@ public class DefinitionLoadingModuleTest {
     @Test(expected = KEMException.class)
     public void testReadDefinition3() throws KEMException {
         DefinitionLoadingOptions options = new DefinitionLoadingOptions();
-        new JCommander(options, "--directory", "src/test/resources/test-kompiled");
+        new JCommander(options, "--definition", "src/test/resources/fail");
         DefinitionLoadingModule module = new DefinitionLoadingModule();
         File defDir = module.directory(options, new File("."), System.getenv());
     }
 
     @Test
-    public void testSaveDefinition() throws IOException, KEMException {
-        OutputDirectoryOptions options = new OutputDirectoryOptions();
-        new JCommander(options, "-o", "src/test/resources/test-kompiled");
+    public void testReadDefinition4() throws KEMException {
+        DefinitionLoadingOptions options = new DefinitionLoadingOptions();
+        new JCommander(options, "--definition", "src/test/resources/kmp");
+        DefinitionLoadingModule module = new DefinitionLoadingModule();
+        File defDir = module.directory(options, new File("."), System.getenv());
+        Assert.assertEquals(new File("./src/test/resources/kmp"), defDir);
+    }
 
-        FileUtil fu = new FileUtil(null, new File("."), new File("src/test/resources/test-kompiled"), null, null);
-        File abcd = fu.resolveDefinitionDirectory("abacd");
-        System.out.println(abcd);
+    @Test
+    public void testSaveDefinition() throws KEMException {
+        OutputDirectoryOptions options = new OutputDirectoryOptions();
+        OuterParsingOptions outer = new OuterParsingOptions();
+        new JCommander(options, "-o", "src/test/resources/kmp");
+        OuterParsingModule module = new OuterParsingModule();
+        File kmp = module.kompiledDir(outer, new File("."), options);
+
+        Assert.assertEquals(new File("./src/test/resources/kmp"), kmp);
+    }
+
+    @Test
+    public void testSaveDefinition2() throws KEMException {
+        OutputDirectoryOptions options = new OutputDirectoryOptions();
+        OuterParsingOptions outer = new OuterParsingOptions();
+        new JCommander(options, "-o", "src/test/resources/newkmp");
+        OuterParsingModule module = new OuterParsingModule();
+        File kmp = module.kompiledDir(outer, new File("."), options);
+
+        Assert.assertEquals(new File("./src/test/resources/newkmp"), kmp);
     }
 }
