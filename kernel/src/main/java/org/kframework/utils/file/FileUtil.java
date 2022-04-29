@@ -42,20 +42,17 @@ public class FileUtil {
     private final File tempDir;
     private final File kompiledDir;
     private final File workingDir;
-    private final File definitionDir;
     private final GlobalOptions options;
     private final Map<String, String> env;
 
     @Inject
     public FileUtil(
             @TempDir File tempDir,
-            @DefinitionDir @Nullable File definitionDir,
             @WorkingDir File workingDir,
             @KompiledDir @Nullable File kompiledDir,
             GlobalOptions options,
             @Environment Map<String, String> env) {
         this.tempDir = tempDir;
-        this.definitionDir = definitionDir;
         this.workingDir = workingDir;
         this.kompiledDir = kompiledDir;
         this.options = options;
@@ -64,7 +61,7 @@ public class FileUtil {
 
     public static FileUtil testFileUtil() {
         File workingDir = new File(".");
-        return new FileUtil(workingDir, workingDir, workingDir, workingDir, new GlobalOptions(), System.getenv());
+        return new FileUtil(workingDir, workingDir, workingDir, new GlobalOptions(), System.getenv());
     }
 
     public ProcessBuilder getProcessBuilder() {
@@ -171,7 +168,7 @@ public class FileUtil {
     }
 
     public File resolveDefinitionDirectory(String file) {
-        return new File(definitionDir, file);
+        return kompiledDir == null ? null : new File(kompiledDir.getParentFile(), file);
     }
 
     public File resolveWorkingDirectory(String file) {

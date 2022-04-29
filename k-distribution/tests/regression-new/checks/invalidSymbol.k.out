@@ -1,7 +1,7 @@
 [Error] Compiler: Symbol #KToken is not unique. Previously defined as: syntax KBott ::= "#token" "(" KString "," KString ")" [klabel(#KToken), symbol]
 	Source(invalidSymbol.k)
-	Location(3,16,3,46)
+	Location(3,16,3,47)
 [Error] Compiler: Symbol foo is not unique. Previously defined as: syntax Bar ::= "bar" "(" ")" [klabel(foo), symbol]
 	Source(invalidSymbol.k)
-	Location(6,16,6,42)
+	Location(6,16,6,43)
 [Error] Compiler: Had 2 structural errors.

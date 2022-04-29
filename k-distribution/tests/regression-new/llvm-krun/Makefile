@@ -31,3 +31,5 @@ include ../../../include/kframework/ktest.mak
 
 clean:
 	rm -rf test.kore $(KOMPILED_DIR) .depend-tmp .depend .kompile-* .krun-* .kprove-* kore-exec.tar.gz
+
+update-results: CHECK=> test.out
