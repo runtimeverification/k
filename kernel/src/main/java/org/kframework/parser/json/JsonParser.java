@@ -30,15 +30,12 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KORE;
 import org.kframework.kore.Sort;
 import org.kframework.parser.outer.Outer;
+import org.kframework.unparser.ToJson;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
 import scala.collection.JavaConverters;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonString;
+import javax.json.*;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
@@ -329,8 +326,8 @@ public class JsonParser {
             if (! data.getString("format").equals("KAST")) {
                 throw KEMException.criticalError("Only can deserialize 'KAST' format Json! Found: " + data.getString("format"));
             }
-            if (data.getInt("version") != 1) {
-                throw KEMException.criticalError("Only can deserialize KAST version '1'! Found: " + data.getInt("version"));
+            if (data.getInt("version") != ToJson.version) {
+                throw KEMException.criticalError("Only can deserialize KAST version '" + ToJson.version + "'! Found: " + data.getInt("version"));
             }
             return toK(data.getJsonObject("term"));
         } catch (IOException e) {
@@ -339,7 +336,6 @@ public class JsonParser {
     }
 
     private static K toK(JsonObject data) throws IOException {
-        String label;
         KLabel klabel;
 
         switch (data.getString("node")) {
@@ -350,10 +346,7 @@ public class JsonParser {
             case KAPPLY:
                 int arity = data.getInt("arity");
                 K[] args  = toKs(arity, data.getJsonArray("args"));
-                label     = data.getString("label");
-                klabel    = data.getBoolean("variable")
-                          ? KVariable(label)
-                          : KLabel(label);
+                klabel    = toKLabel(data.getJsonObject("klabel"));
                 return KApply(klabel, args);
 
             case KSEQUENCE:
@@ -375,15 +368,25 @@ public class JsonParser {
                 return KORE.KAs(pattern, alias);
 
             case INJECTEDKLABEL:
-                label  = data.getString("name");
-                klabel = data.getBoolean("variable")
-                       ? KVariable(label)
-                       : KLabel(label);
+                klabel    = toKLabel(data.getJsonObject("klabel"));
                 return InjectedKLabel(klabel);
 
             default:
                 throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
         }
+    }
+
+    private static KLabel toKLabel(JsonObject data) {
+        if (data.getBoolean("variable"))
+            return KVariable(data.getString("name"));
+
+        JsonArray jparams = data.getJsonArray("params");
+        List<Sort> params = new ArrayList<>();
+        for (JsonValue p : jparams) {
+            params.add(Outer.parseSort(((JsonString)p).getString()));
+        }
+        Sort[] sarray = params.toArray(new Sort[0]);
+        return KLabel(data.getString("name"), sarray);
     }
 
     private static K[] toKs(int arity, JsonArray data) throws IOException {
