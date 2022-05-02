@@ -1,7 +1,11 @@
 [Error] Inner Parser: Duplicate record production key: p1
 	Source(checkRecordProdDuplicateLabels.k)
 	Location(41,7,41,41)
+	41 |	 rule invariantStateFull(... p1:X, p1:Y) => 1 // duplicate keys here, rest should be fine
+	   .	      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Inner Parser: Duplicate record production key: p2
 	Source(checkRecordProdDuplicateLabels.k)
 	Location(42,7,42,57)
+	42 |	 rule invariantStateFull(... p2:X, numUsers:_Gen0, p2:Y) => 1 // duplicate keys here, rest should be fine
+	   .	      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 2 parsing errors.
