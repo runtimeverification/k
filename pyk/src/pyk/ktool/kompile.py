@@ -33,7 +33,9 @@ def kompile(
     if proc_res.returncode:
         raise RuntimeError(f'Kompilation failed for: {main_file}')
 
-    return _kompiled_dir(main_file, output_dir)
+    kompiled_dir = _kompiled_dir(main_file, output_dir)
+    assert kompiled_dir.is_dir()
+    return kompiled_dir
 
 
 def _build_arg_list(
@@ -49,7 +51,7 @@ def _build_arg_list(
         args += ['--backend', backend.value]
 
     if output_dir:
-        args += ['--directory', str(output_dir)]
+        args += ['--output-definition', str(output_dir)]
 
     for include_dir in include_dirs:
         args += ['-I', str(include_dir)]
@@ -67,9 +69,7 @@ def _kompile(main_file: str, *args: str) -> CompletedProcess:
 
 
 def _kompiled_dir(main_file: Path, output_dir: Optional[Path] = None) -> Path:
-    kompiled_dir_name = main_file.stem + '-kompiled'
+    if output_dir:
+        return output_dir
 
-    if not output_dir:
-        output_dir = main_file.parent
-
-    return output_dir / kompiled_dir_name
+    return Path(main_file.stem + '-kompiled')

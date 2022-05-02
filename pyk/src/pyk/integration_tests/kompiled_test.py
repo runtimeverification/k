@@ -32,7 +32,5 @@ class KompiledTest(TestCase, ABC):
             emit_json=self.KOMPILE_EMIT_JSON,
         )
 
-        self.assertTrue(self.kompiled_dir.is_dir())
-
     def tearDown(self):
         shutil.rmtree(self.kompiled_dir)
