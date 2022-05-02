@@ -1,4 +1,6 @@
 [Error] Compiler: Symbol 'foo(_)_CHECKUNUSEDSYMBOL_Foo_Int' defined but not used. Add the 'unused' attribute if this is intentional.
 	Source(checkUnusedSymbol.k)
 	Location(9,18,9,26)
+	9 |	  syntax Foo ::= foo(Int)
+	  .	                 ^~~~~~~~
 [Error] Compiler: Had 1 structural errors.

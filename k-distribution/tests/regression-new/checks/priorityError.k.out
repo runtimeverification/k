@@ -1,9 +1,13 @@
 [Error] Inner Parser: Priority filter exception. Cannot use lguard as an immediate child of plus. Consider using parentheses around lguard
 	Source(priorityError.k)
 	Location(19,19,19,22)
+	19 |	    rule . => 1 + l 2 // unable to disambiguate - error
+	   .	                  ^~~
 [Error] Inner Parser: Priority filter exception. Cannot use rguard as an immediate child of plus. Consider using parentheses around rguard
 	Source(priorityError.k)
 	Location(20,15,20,18)
+	20 |	    rule . => 1 r + 2 // unable to disambiguate - error
+	   .	              ^~~
 [Error] Inner Parser: Parsing ambiguity.
 1: syntax Exp ::= Exp "r" [klabel(rguard), symbol]
     rguard(lguard(#token("1","Int")))
@@ -11,4 +15,6 @@
     lguard(rguard(#token("1","Int")))
 	Source(priorityError.k)
 	Location(21,15,21,20)
+	21 |	    rule . => l 1 r   // ambiguous - error
+	   .	              ^~~~~
 [Error] Compiler: Had 3 parsing errors.

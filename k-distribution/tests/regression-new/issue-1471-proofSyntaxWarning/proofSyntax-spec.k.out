@@ -5,6 +5,10 @@ kore-exec: [] Warning (WarnTrivialClaim):
 [Warning] Compiler: Found syntax declaration in proof module. This will not be visible from the main module.
 	Source(proofSyntax-spec.k)
 	Location(16,16,16,19)
+	16 |	  syntax S ::= "g" // warning
+	   .	               ^~~
 [Warning] Compiler: Found syntax declaration in proof module. This will not be visible from the main module.
 	Source(proofSyntax-spec.k)
 	Location(22,16,22,19)
+	22 |	  syntax S ::= "h" // warning
+	   .	               ^~~

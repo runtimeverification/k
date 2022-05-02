@@ -1,12 +1,20 @@
 [Warning] Compiler: Non exhaustive match detected: `.Kat_TEST-SYNTAX_Kat`(.KList)
 	Source(test.k)
 	Location(7,18,7,72)
+	7 |	  syntax Kat ::= ".Kat" [function, functional, hook(KAT.empty), impure]
+	  .	                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Warning] Compiler: Non exhaustive match detected: `notKat_`(_)
 	Source(test.k)
 	Location(20,19,20,172)
+	20 |	                | "notKat" Kat          [function, functional, klabel(notKat_), symbol, smt-hook(not), boolOperation, latex(\neg_{\scriptstyle\it Kat}{#1}), hook(KAT.not)]
+	   .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Warning] Compiler: Non exhaustive match detected: `_andKat_`(_,_)
 	Source(test.k)
 	Location(21,19,21,184)
+	21 |	                > Kat "andKat" Kat     [function, functional, klabel(_andKat_), symbol, left, smt-hook(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Kat}{#2}), hook(KAT.and)]
+	   .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Warning] Compiler: Non exhaustive match detected: `_orKat__TEST_Kat_Kat_Kat`(_,_)
 	Source(test.k)
 	Location(22,19,22,171)
+	22 |	                | Kat "orKat" Kat      [function, functional, klabel(_orKat_), left, smt-hook(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Kat}{#2}), hook(KAT.or)]
+	   .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
