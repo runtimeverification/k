@@ -42,6 +42,7 @@ stdenv.mkDerivation {
       "KRUN=krun"
       "KDEP=kdep"
       "KPROVE_LEGACY=kprove-legacy"
+      "KPROVEX=kprovex"
       "KBMC=kbmc"
       "KAST=kast"
       "KPRINT=kprint"
