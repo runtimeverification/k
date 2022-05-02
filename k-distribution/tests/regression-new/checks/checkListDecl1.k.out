@@ -1,3 +1,5 @@
 [Error] Compiler: KItem can not be extended to be a list sort.
 	Source(checkListDecl1.k)
 	Location(12,18,12,30)
+	12 |	syntax KItem ::= List{Int,""}
+	   .	                 ^~~~~~~~~~~~
