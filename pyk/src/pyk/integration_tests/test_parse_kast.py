@@ -21,10 +21,10 @@ class ParseKAstTest(KompiledTest, ABC):
 class KSortSynonymTest(ParseKAstTest):
     KOMPILE_MAIN_FILE = 'k-files/sort-synonym.k'
     KOMPILE_BACKEND = KompileBackend.HASKELL
-    KOMPILE_OUTPUT_DIR = 'definitions/sort-synonym/haskell'
+    KOMPILE_OUTPUT_DIR = 'definitions/sort-synonym'
     KOMPILE_EMIT_JSON = True
 
-    COMPILED_JSON_PATH = 'definitions/sort-synonym/haskell/sort-synonym-kompiled/compiled.json'
+    COMPILED_JSON_PATH = 'definitions/sort-synonym/compiled.json'
     MODULE_NAME = 'SORT-SYNONYM-SYNTAX'
 
     def test(self):
@@ -36,10 +36,10 @@ class KSortSynonymTest(ParseKAstTest):
 class KAsTest(ParseKAstTest):
     KOMPILE_MAIN_FILE = 'k-files/contextual-function.k'
     KOMPILE_BACKEND = KompileBackend.HASKELL
-    KOMPILE_OUTPUT_DIR = 'definitions/contextual-function/haskell'
+    KOMPILE_OUTPUT_DIR = 'definitions/contextual-function'
     KOMPILE_EMIT_JSON = True
 
-    COMPILED_JSON_PATH = 'definitions/contextual-function/haskell/contextual-function-kompiled/compiled.json'
+    COMPILED_JSON_PATH = 'definitions/contextual-function/compiled.json'
     MODULE_NAME = 'CONTEXTUAL-FUNCTION'
 
     def test(self):

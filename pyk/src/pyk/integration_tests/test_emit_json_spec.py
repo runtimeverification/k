@@ -12,21 +12,20 @@ class EmitJsonSpecTest(KProveTest):
 
     KOMPILE_MAIN_FILE = f'k-files/{MAIN_FILE_NAME}'
     KOMPILE_BACKEND = KompileBackend.HASKELL
-    KOMPILE_OUTPUT_DIR = 'definitions/imp-verification/haskell'
+    KOMPILE_OUTPUT_DIR = 'definitions/imp-verification'
     KOMPILE_EMIT_JSON = True
 
     KPROVE_USE_DIR = '.emit-json-spec-test'
 
     SPEC_FILE = 'k-files/looping-spec.k'
-    SPEC_JSON_FILE = 'definitions/imp-verification/haskell/looping-spec.json'
+    SPEC_JSON_FILE = 'definitions/imp-verification/looping-spec.json'
 
     def setUp(self):
         super().setUp()
 
         spec_file = Path(self.SPEC_FILE)
-        directory = Path(self.KOMPILE_OUTPUT_DIR)
         emit_json_spec = Path(self.SPEC_JSON_FILE)
-        kprovex(spec_file, directory=directory, emit_json_spec=emit_json_spec, dry_run=True)
+        kprovex(spec_file, kompiled_dir=self.KOMPILE_OUTPUT_DIR, emit_json_spec=emit_json_spec, dry_run=True)
 
         with open(self.SPEC_JSON_FILE, 'r') as spec_file:
             module = KAst.from_dict(json.load(spec_file)['term'])

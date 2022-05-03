@@ -6,7 +6,7 @@ from .kprove_test import KProveTest
 class SimpleProofTest(KProveTest):
     KOMPILE_MAIN_FILE = 'k-files/simple-proofs.k'
     KOMPILE_BACKEND = KompileBackend.HASKELL
-    KOMPILE_OUTPUT_DIR = 'definitions/simple-proofs/haskell'
+    KOMPILE_OUTPUT_DIR = 'definitions/simple-proofs'
     KOMPILE_EMIT_JSON = True
 
     KPROVE_USE_DIR = '.simple-proof-test'
