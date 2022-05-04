@@ -24,6 +24,9 @@ import static org.kframework.compile.ResolveHeatCoolAttribute.Mode.*;
 
 public class HaskellBackend extends KoreBackend {
 
+    private final KompileOptions kompileOptions;
+    private final FileUtil files;
+
     @Inject
     public HaskellBackend(
             KompileOptions kompileOptions,
@@ -31,6 +34,8 @@ public class HaskellBackend extends KoreBackend {
             KExceptionManager kem,
             Tool tool) {
         super(kompileOptions, files, kem, EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION), false, tool);
+        this.files = files;
+        this.kompileOptions = kompileOptions;
     }
 
 
@@ -41,9 +46,13 @@ public class HaskellBackend extends KoreBackend {
         files.saveToKompiled("definition.kore", kore);
         ProcessBuilder pb = files.getProcessBuilder();
         List<String> args = new ArrayList<>();
-        args.add("kore-parser");
-        args.add("--no-print-definition");
+        args.add("kore-exec");
         args.add("definition.kore");
+        args.add("--module");
+        args.add(kompileOptions.mainModule(files));
+        args.add("--output");
+        args.add("haskellDefinition.bin");
+        args.add("--serialize");
         try {
           Process p = pb.command(args).directory(files.resolveKompiled(".")).inheritIO().start();
           int exit = p.waitFor();
