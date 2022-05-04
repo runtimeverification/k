@@ -111,7 +111,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 Module mod = getExecutionModule(module);
                 ModuleToKORE converter = new ModuleToKORE(mod, def.topCellInitializer, kompileOptions);
                 String koreOutput = getKoreString(k, mod, converter);
-                String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();
+                String defPath = files.resolveKompiled("haskellDefinition.bin").getAbsolutePath();
                 String moduleName = mod.name();
 
                 files.saveToTemp("execute-initial.kore", koreOutput);
@@ -191,7 +191,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                         + patternTermKore
                         + ", " + patternConditionKore
                         + ")";
-                String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();
+                String defPath = files.resolveKompiled("haskellDefinition.bin").getAbsolutePath();
                 String moduleName = mod.name();
 
                 files.saveToTemp("search-initial.kore", koreOutput);
