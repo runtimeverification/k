@@ -12,26 +12,28 @@ KORE_PRINT=${K_BIN}/kore-print
 
 1.test:
 	./check-git-revision-format "$(GIT_REVISION)"
-	${KAST}       --help    | grep -q -- "--version"
-	${KDEP}       --help    | grep -q -- "--version"
-	${KEQ}        --help    | grep -q -- "--version"
-	${KOMPILE}    --help    | grep -q -- "--version"
-	${KPROVE}     --help    | grep -q -- "--version"
-	${KRUN}       --help    | grep -q -- "--version"
-	${KSERVER}    --help    | grep -q -- "--version"
-	${KPARSE}     --help    | grep -q -- "--version"
-	${KPARSE_GEN} --help    | grep -q -- "--version"
-	${KORE_PRINT} --help    | grep -q -- "--version"
-	${KAST}       --version | grep -q $(VERSION_REGEX)
-	${KDEP}       --version | grep -q $(VERSION_REGEX)
-	${KEQ}        --version | grep -q $(VERSION_REGEX)
-	${KOMPILE}    --version | grep -q $(VERSION_REGEX)
-	${KPROVE}     --version | grep -q $(VERSION_REGEX)
-	${KRUN}       --version | grep -q $(VERSION_REGEX)
-	${KSERVER}    --version | grep -q $(VERSION_REGEX)
-	${KPARSE}     --version | grep -q $(VERSION_REGEX)
-	${KPARSE_GEN} --version | grep -q $(VERSION_REGEX)
-	${KORE_PRINT} --version | grep -q $(VERSION_REGEX)
+	${KAST}          --help    | grep -q -- "--version"
+	${KDEP}          --help    | grep -q -- "--version"
+	${KEQ}           --help    | grep -q -- "--version"
+	${KOMPILE}       --help    | grep -q -- "--version"
+	${KPROVE_LEGACY} --help    | grep -q -- "--version"
+	${KPROVEX}	 --help    | grep -q -- "--version"
+	${KRUN}          --help    | grep -q -- "--version"
+	${KSERVER}       --help    | grep -q -- "--version"
+	${KPARSE}        --help    | grep -q -- "--version"
+	${KPARSE_GEN}    --help    | grep -q -- "--version"
+	${KORE_PRINT}    --help    | grep -q -- "--version"
+	${KAST}          --version | grep -q $(VERSION_REGEX)
+	${KDEP}          --version | grep -q $(VERSION_REGEX)
+	${KEQ}           --version | grep -q $(VERSION_REGEX)
+	${KOMPILE}       --version | grep -q $(VERSION_REGEX)
+	${KPROVE_LEGACY} --version | grep -q $(VERSION_REGEX)
+	${KPROVEX}	 --version | grep -q $(VERSION_REGEX)
+	${KRUN}          --version | grep -q $(VERSION_REGEX)
+	${KSERVER}       --version | grep -q $(VERSION_REGEX)
+	${KPARSE}        --version | grep -q $(VERSION_REGEX)
+	${KPARSE_GEN}    --version | grep -q $(VERSION_REGEX)
+	${KORE_PRINT}    --version | grep -q $(VERSION_REGEX)
 
 
 include ../../../include/kframework/ktest.mak
