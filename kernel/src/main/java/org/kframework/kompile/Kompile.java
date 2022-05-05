@@ -29,8 +29,10 @@ import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
+import org.kframework.krun.RunProcess;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.InputModes;
+import org.kframework.parser.json.JsonParser;
 import org.kframework.parser.KRead;
 import org.kframework.parser.ParserUtils;
 import org.kframework.parser.inner.generator.RuleGrammarGenerator;
@@ -55,10 +57,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -145,6 +150,11 @@ public class Kompile {
         Definition kompiledDefinition = pipeline.apply(parsedDef);
         sw.printIntermediate("Apply compile pipeline");
 
+        if (kompileOptions.postProcess != null) {
+            kompiledDefinition = postProcessJSON(kompiledDefinition, kompileOptions.postProcess);
+            sw.printIntermediate("Post process with: " + kompileOptions.postProcess);
+        }
+
         files.saveToKompiled("parsed.txt", parsedDef.toString());
         files.saveToKompiled("compiled.txt", kompiledDefinition.toString());
         files.saveToKompiled("allRules.txt", ruleSourceMap(kompiledDefinition));
@@ -213,6 +223,20 @@ public class Kompile {
         }
 
         return def;
+    }
+
+    private Definition postProcessJSON(Definition defn, String postProcess) {
+    //public K externalParse(String parser, String value, Sort startSymbol, Source source, CompiledDefinition compiledDef) {
+        List<String> command = new ArrayList<>(Arrays.asList(postProcess.split(" ")));
+        Map<String, String> environment = new HashMap<>();
+        RunProcess.ProcessOutput output = RunProcess.execute(environment, files.getProcessBuilder(), command.toArray(new String[command.size()]));
+
+        if (output.exitCode != 0) {
+            throw KEMException.criticalError("Post-processing returned a non-zero exit code: "
+                    + output.exitCode + "\nStdout:\n" + new String(output.stdout) + "\nStderr:\n" + new String(output.stderr));
+        }
+
+        return JsonParser.parseDefinition(output.stdout);
     }
 
     private static String ruleSourceMap(Definition def) {

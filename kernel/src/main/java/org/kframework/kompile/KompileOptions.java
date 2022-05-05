@@ -132,4 +132,7 @@ public class KompileOptions implements Serializable {
 
     @Parameter(names="--top-cell", description="Choose the top configuration cell when more than one is provided. Does nothing if only one top cell exists.")
     public String topCell;
+
+    @Parameter(names={"--post-process"}, description="JSON KAST => JSON KAST converter to run on definition after kompile pipeline.")
+    public String postProcess;
 }
