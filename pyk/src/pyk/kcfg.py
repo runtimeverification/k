@@ -90,7 +90,7 @@ class KCFG:
     _covers: Dict[str, Dict[str, Cover]]
     _init: Set[str]
     _target: Set[str]
-    _stuck: Set[str]
+    _expanded: Set[str]
     _lock: RLock
 
     def __init__(self):
@@ -99,7 +99,7 @@ class KCFG:
         self._covers = {}
         self._init = set()
         self._target = set()
-        self._stuck = set()
+        self._expanded = set()
         self._lock = RLock()
 
     def __enter__(self):
@@ -125,8 +125,8 @@ class KCFG:
         return [node for node in self.nodes if self.is_target(node.id)]
 
     @property
-    def stuck(self) -> List[Node]:
-        return [node for node in self.nodes if self.is_stuck(node.id)]
+    def expanded(self) -> List[Node]:
+        return [node for node in self.nodes if self.is_expanded(node.id)]
 
     @property
     def leaves(self) -> List[Node]:
@@ -144,6 +144,10 @@ class KCFG:
     def frontier(self) -> List[Node]:
         return [node for node in self._nodes.values() if self.is_frontier(node.id)]
 
+    @property
+    def stuck(self) -> List[Node]:
+        return [node for node in self._nodes.values() if self.is_stuck(node.id)]
+
     def to_dict(self) -> Dict[str, Any]:
         nodes = [node.to_dict() for node in self.nodes]
         edges = [edge.to_dict() for edge in self.edges()]
@@ -151,7 +155,7 @@ class KCFG:
 
         init = list(self._init)
         target = list(self._target)
-        stuck = list(self._stuck)
+        expanded = list(self._expanded)
 
         res = {
             'nodes': nodes,
@@ -159,7 +163,7 @@ class KCFG:
             'covers': covers,
             'init': init,
             'target': target,
-            'stuck': stuck,
+            'expanded': expanded,
         }
         return {k: v for k, v in res.items() if v}
 
@@ -201,8 +205,8 @@ class KCFG:
         for target_id in dct.get('target') or []:
             cfg.add_target(resolve(target_id))
 
-        for stuck_id in dct.get('stuck') or []:
-            cfg.add_stuck(resolve(stuck_id))
+        for expanded_id in dct.get('expanded') or []:
+            cfg.add_expanded(resolve(expanded_id))
 
         return cfg
 
@@ -310,7 +314,7 @@ class KCFG:
 
         self._init.discard(node_id)
         self._target.discard(node_id)
-        self._stuck.discard(node_id)
+        self._expanded.discard(node_id)
 
     def create_edge(self, source_id: str, target_id: str, condition: KInner = TRUE, depth=1) -> Edge:
         source = self.node(source_id)
@@ -406,9 +410,9 @@ class KCFG:
         node_id = self._resolve(node_id)
         self._target.add(node_id)
 
-    def add_stuck(self, node_id: str) -> None:
+    def add_expanded(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
-        self._stuck.add(node_id)
+        self._expanded.add(node_id)
 
     def is_init(self, node_id: str) -> bool:
         node_id = self._resolve(node_id)
@@ -418,9 +422,9 @@ class KCFG:
         node_id = self._resolve(node_id)
         return node_id in self._target
 
-    def is_stuck(self, node_id: str) -> bool:
+    def is_expanded(self, node_id: str) -> bool:
         node_id = self._resolve(node_id)
-        return node_id in self._stuck
+        return node_id in self._expanded
 
     def is_leaf(self, node_id: str) -> bool:
         node_id = self._resolve(node_id)
@@ -432,7 +436,11 @@ class KCFG:
 
     def is_frontier(self, node_id: str) -> bool:
         node_id = self._resolve(node_id)
-        return self.is_leaf(node_id) and not self.is_target(node_id) and not self.is_stuck(node_id) and not self.is_covered(node_id)
+        return not any([self.is_target(node_id), self.is_expanded(node_id), self.is_covered(node_id)])
+
+    def is_stuck(self, node_id: str) -> bool:
+        node_id = self._resolve(node_id)
+        return self.is_expanded(node_id) and self.is_leaf(node_id)
 
     def prune(self, node_id: str) -> None:
         nodes = self.reachable_nodes(node_id)
