@@ -27,7 +27,6 @@ let
           subDir = "haskell-backend/src/main/native/haskell-backend";
         };
       };
-  inherit (haskell-backend-project) ;
 
   llvm-backend-project = import ./llvm-backend/src/main/native/llvm-backend {
     inherit pkgs;
