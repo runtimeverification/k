@@ -226,7 +226,6 @@ public class Kompile {
     }
 
     private Definition postProcessJSON(Definition defn, String postProcess) {
-    //public K externalParse(String parser, String value, Sort startSymbol, Source source, CompiledDefinition compiledDef) {
         List<String> command = new ArrayList<>(Arrays.asList(postProcess.split(" ")));
         Map<String, String> environment = new HashMap<>();
         try {
@@ -235,12 +234,10 @@ public class Kompile {
             throw KEMException.criticalError("Could not encode definition to JSON!");
         }
         RunProcess.ProcessOutput output = RunProcess.execute(environment, files.getProcessBuilder(), command.toArray(new String[command.size()]));
-
         if (output.exitCode != 0) {
             throw KEMException.criticalError("Post-processing returned a non-zero exit code: "
                     + output.exitCode + "\nStdout:\n" + new String(output.stdout) + "\nStderr:\n" + new String(output.stderr));
         }
-
         return JsonParser.parseDefinition(output.stdout);
     }
 
