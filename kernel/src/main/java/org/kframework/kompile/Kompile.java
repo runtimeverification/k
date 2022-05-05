@@ -181,7 +181,16 @@ public class Kompile {
 
         if (kompileOptions.genBisonParser || kompileOptions.genGlrBisonParser) {
             if (def.configurationVariableDefaultSorts.containsKey("$PGM")) {
-                buildBisonParser(def.programStartSymbol, def.mainSyntaxModuleName(), "PGM", def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get());
+                String filename = "parser_" + def.programStartSymbol.name() + "_" + def.mainSyntaxModuleName();
+                File outputFile = files.resolveKompiled(filename);
+                File linkFile = files.resolveKompiled("parser_PGM");
+                new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, outputFile, kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth);
+                try {
+                    linkFile.delete();
+                    Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
+                } catch (IOException e) {
+                    throw KEMException.internalError("Cannot write to kompiled directory.", e);
+                }
             }
             for (Production prod : iterable(kompiledDefinition.mainModule().productions())) {
                 if (prod.att().contains("cell") && prod.att().contains("parser")) {
@@ -198,26 +207,22 @@ public class Kompile {
                             throw KEMException.compilerError("Could not find module referenced by parser attribute: " + module, prod);
                         }
                         Sort sort = def.configurationVariableDefaultSorts.getOrDefault("$" + name, Sorts.K());
-                        buildBisonParser(sort, module, name, mod.get());
+                        String filename = "parser_" + sort.name() + "_" + module;
+                        File outputFile = files.resolveKompiled(filename);
+                        File linkFile = files.resolveKompiled("parser_" + name);
+                        new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(mod.get(), sort, outputFile, kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth);
+                        try {
+                            linkFile.delete();
+                            Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
+                        } catch (IOException e) {
+                            throw KEMException.internalError("Cannot write to kompiled directory.", e);
+                        }
                     }
                 }
             }
         }
 
         return def;
-    }
-
-    private void buildBisonParser(Sort sort, String modName, String name, Module mod) {
-        String filename = "parser_" + sort.name() + "_" + modName;
-        File outputFile = files.resolveKompiled(filename);
-        File linkFile = files.resolveKompiled("parser_" + name);
-        new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(mod, sort, outputFile, kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth);
-        try {
-            linkFile.delete();
-            Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
-        } catch (IOException e) {
-            throw KEMException.internalError("Cannot write to kompiled directory.", e);
-        }
     }
 
     private Definition postProcessJSON(Definition defn, String postProcess) {
