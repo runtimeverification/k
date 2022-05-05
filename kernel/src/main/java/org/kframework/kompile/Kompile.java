@@ -229,6 +229,11 @@ public class Kompile {
     //public K externalParse(String parser, String value, Sort startSymbol, Source source, CompiledDefinition compiledDef) {
         List<String> command = new ArrayList<>(Arrays.asList(postProcess.split(" ")));
         Map<String, String> environment = new HashMap<>();
+        try {
+            String inputDefinition = new String(ToJson.apply(defn), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw KEMException.criticalError("Could not encode definition to JSON!");
+        }
         RunProcess.ProcessOutput output = RunProcess.execute(environment, files.getProcessBuilder(), command.toArray(new String[command.size()]));
 
         if (output.exitCode != 0) {
