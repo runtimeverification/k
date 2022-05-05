@@ -139,14 +139,14 @@ public class Kompile {
 
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, excludedModuleTags);
 
-        files.saveToKompiled("parsed.txt", parsedDef.toString());
         checkDefinition(parsedDef, excludedModuleTags);
         sw.printIntermediate("Validate definition");
 
         Definition kompiledDefinition = pipeline.apply(parsedDef);
-        files.saveToKompiled("compiled.txt", kompiledDefinition.toString());
         sw.printIntermediate("Apply compile pipeline");
 
+        files.saveToKompiled("parsed.txt", parsedDef.toString());
+        files.saveToKompiled("compiled.txt", kompiledDefinition.toString());
         files.saveToKompiled("allRules.txt", ruleSourceMap(kompiledDefinition));
 
         if (kompileOptions.emitJson) {
