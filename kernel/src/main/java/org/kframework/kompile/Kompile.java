@@ -241,7 +241,7 @@ public class Kompile {
             throw KEMException.criticalError("Post-processing returned a non-zero exit code: "
                     + output.exitCode + "\nStdout:\n" + new String(output.stdout) + "\nStderr:\n" + new String(output.stderr));
         }
-        return JsonParser.parseDefinition(output.stdout);
+        return JsonParser.parseDefinition(new String(output.stdout));
     }
 
     private static String ruleSourceMap(Definition def) {
