@@ -2,6 +2,7 @@
 package org.kframework.kompile;
 
 import com.google.inject.Inject;
+import org.apache.commons.io.FileUtils;
 import org.kframework.Strategy;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
@@ -223,18 +224,19 @@ public class Kompile {
     private Definition postProcessJSON(Definition defn, String postProcess) {
         List<String> command = new ArrayList<>(Arrays.asList(postProcess.split(" ")));
         Map<String, String> environment = new HashMap<>();
-        String inputDefinition;
-        File scannerSource;
+        File compiledJson;
         try {
-            inputDefinition = new String(ToJson.apply(defn), "UTF-8");
-            scannerSource = File.createTempFile("tmp-compiled", ".json");
+            String inputDefinition = new String(ToJson.apply(defn), "UTF-8");
+            compiledJson = File.createTempFile("tmp-compiled", ".json");
+            FileUtils.writeStringToFile(compiledJson, inputDefinition);
         } catch (UnsupportedEncodingException e) {
             throw KEMException.criticalError("Could not encode definition to JSON!");
         } catch (IOException e) {
             throw KEMException.criticalError("Could not make temporary file!");
         }
-        command.add(scannerSource.getAbsolutePath());
+        command.add(compiledJson.getAbsolutePath());
         RunProcess.ProcessOutput output = RunProcess.execute(environment, files.getProcessBuilder(), command.toArray(new String[command.size()]));
+        sw.printIntermediate("Post process step: " + String.join(" ", command));
         if (output.exitCode != 0) {
             throw KEMException.criticalError("Post-processing returned a non-zero exit code: "
                     + output.exitCode + "\nStdout:\n" + new String(output.stdout) + "\nStderr:\n" + new String(output.stderr));
