@@ -8,7 +8,7 @@ in
 # Build an optimized release package.
 # Currently requires dependents to use LTO. Use sparingly.
 , release ? false
-, haskell-backend ? null,
+, haskell-backend ? null
 }:
 
 let
