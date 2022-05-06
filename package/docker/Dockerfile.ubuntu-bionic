@@ -10,6 +10,14 @@ RUN    apt-get update                   \
                         git             \
                         python
 
+COPY kframework_amd64_bionic.deb /kframework_amd64_bionic.deb
+RUN    apt-get update                                     \
+    && apt-get upgrade --yes                              \
+    && apt-get install --yes /kframework_amd64_bionic.deb \
+    && dpkg --remove --force-depends z3
+
+RUN rm -rf /kframework_amd64_bionic.deb
+
 RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.15 \
     && cd z3                                                         \
     && python scripts/mk_make.py                                     \
@@ -18,10 +26,3 @@ RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.15 \
     && make install                                                  \
     && cd ../..                                                      \
     && rm -rf z3
-
-COPY kframework_amd64_bionic.deb /kframework_amd64_bionic.deb
-RUN    apt-get update                                     \
-    && apt-get upgrade --yes                              \
-    && apt-get install --yes /kframework_amd64_bionic.deb
-
-RUN rm -rf /kframework_amd64_bionic.deb
