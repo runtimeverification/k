@@ -142,11 +142,11 @@ class KCFG:
 
     @property
     def frontier(self) -> List[Node]:
-        return [node for node in self._nodes.values() if self.is_frontier(node.id)]
+        return [node for node in self.nodes if self.is_frontier(node.id)]
 
     @property
     def stuck(self) -> List[Node]:
-        return [node for node in self._nodes.values() if self.is_stuck(node.id)]
+        return [node for node in self.nodes if self.is_stuck(node.id)]
 
     def to_dict(self) -> Dict[str, Any]:
         nodes = [node.to_dict() for node in self.nodes]
