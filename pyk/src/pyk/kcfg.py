@@ -224,6 +224,8 @@ class KCFG:
                 atts.append('init')
             if self.is_target(node_id):
                 atts.append('target')
+            if self.is_expanded(node_id):
+                atts.append('expanded')
             if self.is_stuck(node_id):
                 atts.append('stuck')
             if self.is_frontier(node_id):
@@ -413,6 +415,36 @@ class KCFG:
     def add_expanded(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
         self._expanded.add(node_id)
+
+    def remove_init(self, node_id: str) -> None:
+        node_id = self._resolve(node_id)
+        if node_id not in self._init:
+            raise ValueError(f'Node is not init: {node_id}')
+        self._init.remove(node_id)
+
+    def remove_target(self, node_id: str) -> None:
+        node_id = self._resolve(node_id)
+        if node_id not in self._target:
+            raise ValueError(f'Node is not target: {node_id}')
+        self._target.remove(node_id)
+
+    def remove_expanded(self, node_id: str) -> None:
+        node_id = self._resolve(node_id)
+        if node_id not in self._expanded:
+            raise ValueError(f'Node is not expanded: {node_id}')
+        self._expanded.remove(node_id)
+
+    def discard_init(self, node_id: str) -> None:
+        node_id = self._resolve(node_id)
+        self._init.discard(node_id)
+
+    def discard_target(self, node_id: str) -> None:
+        node_id = self._resolve(node_id)
+        self._target.discard(node_id)
+
+    def discard_expanded(self, node_id: str) -> None:
+        node_id = self._resolve(node_id)
+        self._expanded.discard(node_id)
 
     def is_init(self, node_id: str) -> bool:
         node_id = self._resolve(node_id)
