@@ -153,9 +153,9 @@ class KCFG:
         edges = [edge.to_dict() for edge in self.edges()]
         covers = [cover.to_dict() for cover in self.covers()]
 
-        init = list(self._init)
-        target = list(self._target)
-        expanded = list(self._expanded)
+        init = sorted(self._init)
+        target = sorted(self._target)
+        expanded = sorted(self._expanded)
 
         res = {
             'nodes': nodes,
