@@ -13,19 +13,19 @@ V = TypeVar('V')
 
 @dataclass(frozen=True)
 class Subst(Mapping[str, KInner]):
-    subst: FrozenDict[str, KInner]
+    _subst: FrozenDict[str, KInner]
 
     def __init__(self, subst: Mapping[str, KInner] = {}):
-        object.__setattr__(self, 'subst', FrozenDict({k: v for k, v in subst.items() if type(v) is not KVariable or v.name != k}))
+        object.__setattr__(self, '_subst', FrozenDict({k: v for k, v in subst.items() if type(v) is not KVariable or v.name != k}))
 
     def __iter__(self) -> Iterator[str]:
-        return iter(self.subst)
+        return iter(self._subst)
 
     def __len__(self) -> int:
-        return len(self.subst)
+        return len(self._subst)
 
     def __getitem__(self, key: str) -> KInner:
-        return self.subst[key]
+        return self._subst[key]
 
     def __mul__(self, other: 'Subst') -> 'Subst':
         return self.compose(other)
