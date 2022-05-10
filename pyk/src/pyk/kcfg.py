@@ -301,13 +301,8 @@ class KCFG:
         self._nodes[node.id] = node
         return node
 
-    def find_or_create_node(self, cterm: CTerm) -> Node:
-        node = self.node_with_cterm(cterm)
-
-        if not node:
-            node = self.create_node(cterm)
-
-        return node
+    def get_or_create_node(self, cterm: CTerm) -> Node:
+        return self.get_node_by_cterm(cterm) or self.create_node(cterm)
 
     def remove_node(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
