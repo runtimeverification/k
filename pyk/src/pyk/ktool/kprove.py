@@ -114,7 +114,9 @@ class KProve(KPrint):
         command += [c for c in self.proverArgs]
         command += args
         commandEnv = os.environ.copy()
-        commandEnv['KORE_EXEC_OPTS'] = ' '.join(haskellArgs + haskellLogArgs)
+        haskellArgsStr = ' '.join(haskellArgs + haskellLogArgs)
+        commandEnv['KORE_EXEC_OPTS'] = haskellArgsStr
+        notif(f'export KORE_EXEC_OPTS= {haskellArgsStr}')
         notif(' '.join(command))
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, env=commandEnv)
         stdout, stderr = process.communicate(input=None)
