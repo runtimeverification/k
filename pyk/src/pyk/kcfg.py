@@ -15,6 +15,7 @@ from typing import (
     Sequence,
     Set,
     Tuple,
+    Union,
 )
 
 from graphviz import Digraph
@@ -27,7 +28,7 @@ from .subst import Subst
 from .utils import compare_short_hashes, shorten_hashes
 
 
-class KCFG(Container['KCFG.Node']):
+class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge']]):
 
     @dataclass(frozen=True)
     class Node:
@@ -106,6 +107,8 @@ class KCFG(Container['KCFG.Node']):
     def __contains__(self, item: object) -> bool:
         if type(item) is KCFG.Node:
             return self.contains_node(item)
+        if type(item) is KCFG.Edge:
+            return self.contains_edge(item)
         return False
 
     def __enter__(self):
@@ -334,20 +337,6 @@ class KCFG(Container['KCFG.Node']):
         self._target.discard(node_id)
         self._expanded.discard(node_id)
 
-    def create_edge(self, source_id: str, target_id: str, condition: KInner = TRUE, depth=1) -> Edge:
-        source = self.node(source_id)
-        target = self.node(target_id)
-
-        if target.id in self._edges.get(source.id, {}):
-            raise ValueError(f'Edge already exists: {source.id} -> {target.id}')
-
-        if source.id not in self._edges:
-            self._edges[source.id] = {}
-
-        edge = KCFG.Edge(source, target, condition, depth)
-        self._edges[source.id][target.id] = edge
-        return edge
-
     def edge(self, source_id: str, target_id: str) -> Optional[Edge]:
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
@@ -364,6 +353,25 @@ class KCFG(Container['KCFG.Node']):
             res = (edge for _, targets in self._edges.items() for _, edge in targets.items())
 
         return [edge for edge in res if not target_id or target_id == edge.target.id]
+
+    def contains_edge(self, edge: Edge) -> bool:
+        if other := self.edge(source_id=edge.source.id, target_id=edge.target.id):
+            return edge == other
+        return False
+
+    def create_edge(self, source_id: str, target_id: str, condition: KInner = TRUE, depth=1) -> Edge:
+        source = self.node(source_id)
+        target = self.node(target_id)
+
+        if target.id in self._edges.get(source.id, {}):
+            raise ValueError(f'Edge already exists: {source.id} -> {target.id}')
+
+        if source.id not in self._edges:
+            self._edges[source.id] = {}
+
+        edge = KCFG.Edge(source, target, condition, depth)
+        self._edges[source.id][target.id] = edge
+        return edge
 
     def remove_edge(self, source_id: str, target_id: str) -> None:
         source_id = self._resolve(source_id)
