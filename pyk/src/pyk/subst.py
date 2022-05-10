@@ -3,8 +3,15 @@ from functools import reduce
 from itertools import chain
 from typing import Dict, Iterator, Mapping, Optional, TypeVar
 
-from .kast import KApply, KInner, KRewrite, KSequence, KToken, KVariable
-from .kastManip import bottom_up
+from .kast import (
+    KApply,
+    KInner,
+    KRewrite,
+    KSequence,
+    KToken,
+    KVariable,
+    bottom_up,
+)
 from .utils import FrozenDict
 
 K = TypeVar('K')
@@ -45,6 +52,12 @@ class Subst(Mapping[str, KInner]):
             return term
 
         return bottom_up(replace, term)
+
+    def unapply(self, term: KInner) -> KInner:
+        new_term = term
+        for var_name in self:
+            new_term = replaceAnywhereWith((self[var_name], KVariable(var_name)), new_term)
+        return new_term
 
 
 def match(pattern: KInner, term: KInner) -> Optional[Subst]:

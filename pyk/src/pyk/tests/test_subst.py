@@ -82,3 +82,22 @@ class SubstTest(TestCase):
 
                 # Then
                 self.assertEqual(actual, expected)
+
+    def test_unapply(self):
+        # Given
+        test_data = (
+            (a, {}, a),
+            (a, {'x': a}, x),
+            (f(a), {'x': f(a)}, x),
+            (f(f(a)), {'x': f(a)}, f(x)),
+            (f(x), {'x': f(a)}, f(x)),
+            (f(x), {'x': f(x)}, x),
+        )
+
+        for i, [term, subst, expected] in enumerate(test_data):
+            with self.subTest(i=i):
+                # When
+                actual = Subst(subst).unapply(term)
+
+                # Then
+                self.assertEqual(actual, expected)
