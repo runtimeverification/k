@@ -6,6 +6,7 @@ from itertools import chain
 from threading import RLock
 from typing import (
     Any,
+    Container,
     Dict,
     Iterable,
     List,
@@ -26,7 +27,7 @@ from .subst import Subst
 from .utils import compare_short_hashes, shorten_hashes
 
 
-class KCFG:
+class KCFG(Container['KCFG.Node']):
 
     @dataclass(frozen=True)
     class Node:
@@ -101,6 +102,11 @@ class KCFG:
         self._target = set()
         self._expanded = set()
         self._lock = RLock()
+
+    def __contains__(self, item: object) -> bool:
+        if type(item) is KCFG.Node:
+            return self.contains_node(item)
+        return False
 
     def __enter__(self):
         self._lock.acquire()
@@ -291,6 +297,9 @@ class KCFG:
     def get_node_by_cterm(self, cterm: CTerm) -> Optional[Node]:
         node = KCFG.Node(cterm)
         return self.get_node(node.id)
+
+    def contains_node(self, node: Node) -> bool:
+        return bool(self.get_node(node.id))
 
     def create_node(self, cterm: CTerm) -> Node:
         node = KCFG.Node(cterm)
