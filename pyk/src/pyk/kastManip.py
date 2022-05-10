@@ -33,7 +33,7 @@ from .prelude import (
     mlOr,
     mlTop,
 )
-from .subst import Subst, match
+from .subst import Subst, match, rewriteAnywhereWith
 from .utils import dedupe, find_common_items, hash_str
 
 KI = TypeVar('KI', bound=KInner)
@@ -71,39 +71,6 @@ def replaceKLabels(pattern, klabelMap):
             return k.let(label=klabelMap[k.label])
         return k
     return bottom_up(replace, pattern)
-
-
-def rewriteWith(rule, pattern):
-    """Rewrite a given pattern at the top with the supplied rule.
-
-    -   Input: A rule to rewrite with and a pattern to rewrite.
-    -   Output: The pattern with the rewrite applied once at the top.
-    """
-    (ruleLHS, ruleRHS) = rule
-    matchingSubst = match(ruleLHS, pattern)
-    if matchingSubst is not None:
-        return substitute(ruleRHS, matchingSubst)
-    return pattern
-
-
-def rewriteAnywhereWith(rule, pattern):
-    """Attempt rewriting once at every position in an AST bottom-up.
-
-    -   Input: A rule to rewrite with, and a pattern to rewrite.
-    -   Output: The pattern with rewrites applied at every node once starting from the bottom.
-    """
-    return bottom_up(lambda p: rewriteWith(rule, p), pattern)
-
-
-def replaceWith(rule, pattern):
-    (ruleLHS, ruleRHS) = rule
-    if ruleLHS == pattern:
-        return ruleRHS
-    return pattern
-
-
-def replaceAnywhereWith(rule, pattern):
-    return bottom_up(lambda p: replaceWith(rule, p), pattern)
 
 
 def boolToMlPred(kast: KInner) -> KInner:

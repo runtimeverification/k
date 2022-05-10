@@ -103,3 +103,36 @@ def combine_dicts(dict1: Optional[Mapping[K, V]], dict2: Optional[Mapping[K, V]]
 def combine_all(*dicts: Optional[Mapping[K, V]]) -> Optional[Dict[K, V]]:
     unit: Optional[Dict[K, V]] = {}
     return reduce(combine_dicts, dicts, unit)
+
+
+def rewriteWith(rule, pattern):
+    """Rewrite a given pattern at the top with the supplied rule.
+
+    -   Input: A rule to rewrite with and a pattern to rewrite.
+    -   Output: The pattern with the rewrite applied once at the top.
+    """
+    (ruleLHS, ruleRHS) = rule
+    matchingSubst = match(ruleLHS, pattern)
+    if matchingSubst is not None:
+        return matchingSubst.apply(ruleRHS)
+    return pattern
+
+
+def rewriteAnywhereWith(rule, pattern):
+    """Attempt rewriting once at every position in an AST bottom-up.
+
+    -   Input: A rule to rewrite with, and a pattern to rewrite.
+    -   Output: The pattern with rewrites applied at every node once starting from the bottom.
+    """
+    return bottom_up(lambda p: rewriteWith(rule, p), pattern)
+
+
+def replaceWith(rule, pattern):
+    (ruleLHS, ruleRHS) = rule
+    if ruleLHS == pattern:
+        return ruleRHS
+    return pattern
+
+
+def replaceAnywhereWith(rule, pattern):
+    return bottom_up(lambda p: replaceWith(rule, p), pattern)
