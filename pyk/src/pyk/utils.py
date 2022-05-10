@@ -91,6 +91,7 @@ def intersperse(iterable: Iterable[T], delimiter: T) -> Iterator[T]:
         yield x
 
 
+# Could be done in O(n) over Iterable[Hashable]
 def dedupe(xs: Iterable[T]) -> List[T]:
     res = []
     for x in xs:
