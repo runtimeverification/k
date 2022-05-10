@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from functools import reduce
 from itertools import chain
-from typing import Dict, Iterator, Mapping, Optional, TypeVar
+from typing import Dict, Iterator, List, Mapping, Optional, Tuple, TypeVar
 
 from .kast import (
     KApply,
@@ -11,7 +11,9 @@ from .kast import (
     KToken,
     KVariable,
     bottom_up,
+    flattenLabel,
 )
+from .prelude import boolToken, mlAnd
 from .utils import FrozenDict
 
 K = TypeVar('K')
@@ -58,6 +60,45 @@ class Subst(Mapping[str, KInner]):
         for var_name in self:
             new_term = replaceAnywhereWith((self[var_name], KVariable(var_name)), new_term)
         return new_term
+
+
+def extract_subst(term: KInner) -> Tuple[Subst, KInner]:
+
+    def _subst_for_terms(term1: KInner, term2: KInner) -> Optional[Subst]:
+        if type(term1) is KVariable and not type(term2) is KVariable:
+            return Subst({term1.name: term2})
+        if type(term2) is KVariable and not type(term1) is KVariable:
+            return Subst({term2.name: term1})
+        return None
+
+    def _extract_subst(conjunct: KInner) -> Optional[Subst]:
+        if type(conjunct) is KApply:
+            if conjunct.label == '#Equals':
+                subst = _subst_for_terms(conjunct.args[0], conjunct.args[1])
+
+                if subst is not None:
+                    return subst
+
+                if conjunct.args[0] == boolToken(True) and type(conjunct.args[1]) is KApply and conjunct.args[1].label in {'_==K_', '_==Int_'}:
+                    subst = _subst_for_terms(conjunct.args[1].args[0], conjunct.args[1].args[1])
+
+                    if subst is not None:
+                        return subst
+
+        return None
+
+    conjuncts = flattenLabel('#And', term)
+    subst = Subst()
+    rem_conjuncts: List[KInner] = []
+
+    for conjunct in conjuncts:
+        new_subst = _extract_subst(conjunct)
+        if new_subst is None:
+            rem_conjuncts.append(conjunct)
+        else:
+            subst = subst.compose(new_subst)
+
+    return subst, mlAnd(rem_conjuncts)
 
 
 def match(pattern: KInner, term: KInner) -> Optional[Subst]:

@@ -1,12 +1,18 @@
 from functools import partial
+from typing import Dict, Final, Tuple
 from unittest import TestCase
 
-from ..kast import KApply, KVariable
-from ..subst import Subst
+from ..kast import KApply, KInner, KVariable
+from ..prelude import mlAnd, mlEquals, mlEqualsTrue, mlTop
+from ..subst import Subst, extract_subst
 
 a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
 x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
 f, g, h = (partial(KApply.of, label) for label in ['f', 'g', 'h'])
+
+
+def int_eq(term1: KInner, term2: KInner) -> KApply:
+    return KApply('_==Int_', [term1, term2])
 
 
 class SubstTest(TestCase):
@@ -101,3 +107,24 @@ class SubstTest(TestCase):
 
                 # Then
                 self.assertEqual(actual, expected)
+
+
+class ExtractSubstTest(TestCase):
+    TEST_DATA: Final[Tuple[Tuple[KInner, Dict[str, KInner], KInner], ...]] = (
+        (a, {}, a),
+        (mlEquals(a, b), {}, mlEquals(a, b)),
+        (mlEquals(x, a), {'x': a}, mlTop()),
+        (mlEquals(x, y), {}, mlEquals(x, y)),
+        (mlAnd([mlEquals(a, b), mlEquals(x, a)]), {'x': a}, mlEquals(a, b)),
+        (mlEqualsTrue(int_eq(a, b)), {}, mlEqualsTrue(int_eq(a, b))),
+    )
+
+    def test(self):
+        for i, [term, expected_subst, expected_term] in enumerate(self.TEST_DATA):
+            with self.subTest(i=i):
+                # When
+                actual_subst, actual_term = extract_subst(term)
+
+                # Then
+                self.assertDictEqual(dict(actual_subst), expected_subst)
+                self.assertEqual(actual_term, expected_term)
