@@ -264,17 +264,29 @@ class KCFG:
 
         return graph.source
 
-    def _resolve(self, short_id: str) -> str:
-        matches = [node_id for node_id in self._nodes if compare_short_hashes(short_id, node_id)]
+    def _resolve_all(self, short_id: str) -> List[str]:
+        return [node_id for node_id in self._nodes if compare_short_hashes(short_id, node_id)]
+
+    def _resolve_or_none(self, short_id: str) -> Optional[str]:
+        matches = self._resolve_all(short_id)
         if not matches:
-            raise ValueError(f'Unknown node: {short_id}')
+            return None
         if len(matches) > 1:
             raise ValueError(f'Multiple nodes for pattern: {short_id} (matches e.g. {matches[0]} and {matches[1]})')
         return matches[0]
 
+    def _resolve(self, short_id: str) -> str:
+        match = self._resolve_or_none(short_id)
+        if not match:
+            raise ValueError(f'Unknown node: {short_id}')
+        return match
+
     def node(self, node_id: str) -> Node:
         node_id = self._resolve(node_id)
         return self._nodes[node_id]
+
+    def get_node(self, id: str) -> Optional[Node]:
+        return self._nodes.get(id)
 
     def node_with_cterm(self, cterm: CTerm) -> Optional[Node]:
         node = KCFG.Node(cterm)
