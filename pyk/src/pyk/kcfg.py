@@ -288,9 +288,9 @@ class KCFG:
     def get_node(self, id: str) -> Optional[Node]:
         return self._nodes.get(id)
 
-    def node_with_cterm(self, cterm: CTerm) -> Optional[Node]:
+    def get_node_by_cterm(self, cterm: CTerm) -> Optional[Node]:
         node = KCFG.Node(cterm)
-        return self._nodes.get(node.id)
+        return self.get_node(node.id)
 
     def create_node(self, cterm: CTerm) -> Node:
         node = KCFG.Node(cterm)
