@@ -106,8 +106,8 @@ public class JsonParser {
             if (! data.getString("format").equals("KAST")) {
                 throw KEMException.criticalError("Only can deserialize 'KAST' format Json! Found: " + data.getString("format"));
             }
-            if (data.getInt("version") != 1) {
-                throw KEMException.criticalError("Only can deserialize KAST version '1'! Found: " + data.getInt("version"));
+            if (data.getInt("version") != ToJson.version) {
+                throw KEMException.criticalError("Only can deserialize KAST version '" + ToJson.version + "'! Found: " + data.getInt("version"));
             }
             return toDefinition(data.getJsonObject("term"));
         } catch (IOException e) {
