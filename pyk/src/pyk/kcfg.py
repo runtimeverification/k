@@ -28,7 +28,7 @@ from .subst import Subst
 from .utils import compare_short_hashes, shorten_hashes
 
 
-class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge']]):
+class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
     @dataclass(frozen=True)
     class Node:
@@ -109,6 +109,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge']]):
             return self.contains_node(item)
         if type(item) is KCFG.Edge:
             return self.contains_edge(item)
+        if type(item) is KCFG.Cover:
+            return self.contains_cover(item)
         return False
 
     def __enter__(self):
@@ -385,20 +387,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge']]):
         if not self._edges[source_id]:
             self._edges.pop(source_id)
 
-    def create_cover(self, source_id: str, target_id: str) -> Cover:
-        source = self.node(source_id)
-        target = self.node(target_id)
-
-        if target.id in self._covers.get(source.id, {}):
-            raise ValueError(f'Cover already exists: {source.id} -> {target.id}')
-
-        if source.id not in self._covers:
-            self._covers[source.id] = {}
-
-        cover = KCFG.Cover(source, target)
-        self._covers[source.id][target.id] = cover
-        return cover
-
     def cover(self, source_id: str, target_id: str) -> Optional[Cover]:
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
@@ -415,6 +403,25 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge']]):
             res = (cover for _, targets in self._covers.items() for _, cover in targets.items())
 
         return [cover for cover in res if not target_id or target_id == cover.target.id]
+
+    def contains_cover(self, cover: Cover) -> bool:
+        if other := self.cover(source_id=cover.source.id, target_id=cover.target.id):
+            return cover == other
+        return False
+
+    def create_cover(self, source_id: str, target_id: str) -> Cover:
+        source = self.node(source_id)
+        target = self.node(target_id)
+
+        if target.id in self._covers.get(source.id, {}):
+            raise ValueError(f'Cover already exists: {source.id} -> {target.id}')
+
+        if source.id not in self._covers:
+            self._covers[source.id] = {}
+
+        cover = KCFG.Cover(source, target)
+        self._covers[source.id][target.id] = cover
+        return cover
 
     def remove_cover(self, source_id: str, target_id: str) -> None:
         source_id = self._resolve(source_id)
