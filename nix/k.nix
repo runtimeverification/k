@@ -45,8 +45,12 @@ let
       patchShebangs k-distribution/src/main/scripts/lib
     '';
 
+    # Make sure to link the cmake/ and include/ folders from the llvm-backend source repo and the llvm-backend derivation, 
+    # as these may be expected/required when compiling other projects, e.g. the evm-semantics repo
     postInstall = ''
       cp -r k-distribution/target/release/k/{bin,include,lib} $out/
+      mkdir -p $out/lib/cmake/kframework && ln -s ${llvm-backend.src}/cmake/* $out/lib/cmake/kframework/
+      ln -s ${llvm-backend}/include/kllvm $out/include/
 
       prelude_kore="$out/include/kframework/kore/prelude.kore"
       mkdir -p "$(dirname "$prelude_kore")"
