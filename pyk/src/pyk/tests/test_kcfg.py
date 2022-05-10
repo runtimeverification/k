@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Tuple
 from unittest import TestCase
 
 from ..cterm import CTerm
-from ..kast import TRUE, KApply
+from ..kast import TRUE, KApply, KVariable
 from ..kcfg import KCFG
 from ..prelude import token
 
@@ -92,6 +92,7 @@ class KCFGTestCase(TestCase):
         # Then
         self.assertEqual(new_node, node(0))
         self.assertSetEqual(set(cfg.nodes), {node(0)})
+        self.assertFalse(cfg.is_expanded(new_node.id))
 
     def test_remove_unknown_node(self):
         # Given
@@ -104,19 +105,47 @@ class KCFGTestCase(TestCase):
 
     def test_remove_node(self):
         # Given
-        d = {'nodes': node_dicts(1), 'edges': edge_dicts((0, 0))}
+        d = {'nodes': node_dicts(2), 'edges': edge_dicts((0, 1))}
         cfg = KCFG.from_dict(d)
 
         # When
         cfg.remove_node(nid(0))
 
         # Then
-        self.assertSetEqual(set(cfg.nodes), set())
+        self.assertSetEqual(set(cfg.nodes), {node(1)})
         self.assertSetEqual(set(cfg.edges()), set())
+        self.assertFalse(cfg.is_expanded(nid(1)))
         with self.assertRaises(ValueError):
             cfg.node(nid(0))
         with self.assertRaises(ValueError):
-            cfg.edge(nid(0), nid(0))
+            cfg.edge(nid(0), nid(1))
+
+    def test_cover_then_remove(self):
+        # Given
+        cfg = KCFG()
+
+        # When
+        node1 = cfg.create_node(CTerm(KApply('<top>', [token(1)])))
+        node2 = cfg.create_node(CTerm(KApply('<top>', [KVariable('X')])))
+        cover = cfg.create_cover(node1.id, node2.id)
+
+        # Then
+        self.assertTrue(cfg.is_covered(node1.id))
+        self.assertFalse(cfg.is_covered(node2.id))
+        self.assertFalse(cfg.is_expanded(node1.id))
+        self.assertFalse(cfg.is_expanded(node2.id))
+        self.assertDictEqual(dict(cover.subst), {'X': token(1)})
+        self.assertEqual(cfg.covers(), [cover])
+
+        # When
+        cfg.remove_cover(node1.id, node2.id)
+
+        # Then
+        self.assertFalse(cfg.is_covered(node1.id))
+        self.assertFalse(cfg.is_covered(node2.id))
+        self.assertFalse(cfg.is_expanded(node1.id))
+        self.assertFalse(cfg.is_expanded(node2.id))
+        self.assertEqual(cfg.covers(), [])
 
     def test_insert_loop_edge(self):
         # Given
