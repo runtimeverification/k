@@ -7,7 +7,6 @@ from .kast import TOP, KInner, flattenLabel
 from .kastManip import match, splitConfigAndConstraints
 from .prelude import mlAnd, mlImplies
 from .subst import Subst
-from .utils import dedupe
 
 
 @dataclass(frozen=True)
@@ -17,10 +16,9 @@ class CTerm:
 
     def __init__(self, term: KInner) -> None:
         config, constraint = splitConfigAndConstraints(term)
-        constraints = dedupe(flattenLabel('#And', constraint))
-        constraints.sort(key=self._constraint_sort_key)
+        constraints = tuple(sorted(set(flattenLabel('#And', constraint)), key=self._constraint_sort_key))
         object.__setattr__(self, 'config', config)
-        object.__setattr__(self, 'constraints', tuple(constraints))
+        object.__setattr__(self, 'constraints', constraints)
 
     @staticmethod
     def _constraint_sort_key(term: KInner) -> Tuple[int, str]:
