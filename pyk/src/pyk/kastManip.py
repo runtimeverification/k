@@ -33,7 +33,7 @@ from .prelude import (
     mlOr,
     mlTop,
 )
-from .subst import Subst, match, rewriteAnywhereWith
+from .subst import Subst, match, rewrite_anywhere
 from .utils import dedupe, find_common_items, hash_str
 
 KI = TypeVar('KI', bound=KInner)
@@ -95,7 +95,7 @@ def unsafeMlPredToBool(k):
                         ]                                                                                                                               # noqa
     newK = k
     for rule in mlPredToBoolRules:
-        newK = rewriteAnywhereWith(rule, newK)
+        newK = rewrite_anywhere(rule, newK)
     return newK
 
 
@@ -123,7 +123,7 @@ def simplifyBool(k):
                     ]                                                                                                                                               # noqa
     newK = k
     for rule in simplifyRules:
-        newK = rewriteAnywhereWith(rule, newK)
+        newK = rewrite_anywhere(rule, newK)
     return newK
 
 
@@ -479,7 +479,7 @@ def remove_generated_cells(term: KInner) -> KInner:
     -   Output: Constrained term with those cells removed.
     """
     rule = KApply('<generatedTop>', [KVariable('CONFIG'), KVariable('_')]), KVariable('CONFIG')
-    return rewriteAnywhereWith(rule, term)
+    return rewrite_anywhere(rule, term)
 
 
 def isAnonVariable(kast):
@@ -766,5 +766,5 @@ def undoAliases(definition, kast):
     alias_undo_rewrites = [(sent.body.rhs, sent.body.lhs) for module in definition for sent in module if type(sent) is KRule and 'alias' in sent.att]
     newKast = kast
     for r in alias_undo_rewrites:
-        newKast = rewriteAnywhereWith(r, newKast)
+        newKast = rewrite_anywhere(r, newKast)
     return newKast

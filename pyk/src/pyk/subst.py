@@ -58,7 +58,7 @@ class Subst(Mapping[str, KInner]):
     def unapply(self, term: KInner) -> KInner:
         new_term = term
         for var_name in self:
-            new_term = replaceAnywhereWith((self[var_name], KVariable(var_name)), new_term)
+            new_term = replace_anywhere((self[var_name], KVariable(var_name)), new_term)
         return new_term
 
 
@@ -159,34 +159,38 @@ def combine_all(*dicts: Optional[Mapping[K, V]]) -> Optional[Dict[K, V]]:
     return reduce(combine_dicts, dicts, unit)
 
 
-def rewriteWith(rule, pattern):
-    """Rewrite a given pattern at the top with the supplied rule.
-
-    -   Input: A rule to rewrite with and a pattern to rewrite.
-    -   Output: The pattern with the rewrite applied once at the top.
+def rewrite(rule: Tuple[KInner, KInner], term: KInner) -> KInner:
     """
-    (ruleLHS, ruleRHS) = rule
-    matchingSubst = match(ruleLHS, pattern)
-    if matchingSubst is not None:
-        return matchingSubst.apply(ruleRHS)
-    return pattern
+    Rewrite a given term at the top with the supplied rule.
 
-
-def rewriteAnywhereWith(rule, pattern):
-    """Attempt rewriting once at every position in an AST bottom-up.
-
-    -   Input: A rule to rewrite with, and a pattern to rewrite.
-    -   Output: The pattern with rewrites applied at every node once starting from the bottom.
+    :param rule: A rewrite rule of the form (lhs, rhs).
+    :param term: Term to rewrite.
+    :return: The term with the rewrite applied once at the top.
     """
-    return bottom_up(lambda p: rewriteWith(rule, p), pattern)
+    lhs, rhs = rule
+    subst = match(lhs, term)
+    if subst is not None:
+        return subst(rhs)
+    return term
 
 
-def replaceWith(rule, pattern):
-    (ruleLHS, ruleRHS) = rule
-    if ruleLHS == pattern:
-        return ruleRHS
-    return pattern
+def rewrite_anywhere(rule: Tuple[KInner, KInner], term: KInner) -> KInner:
+    """
+    Attempt rewriting once at every position in a term bottom-up.
+
+    :param rule: A rewrite rule of the form (lhs, rhs).
+    :param term: Term to rewrite.
+    :return: The term with rewrites applied at every node once starting from the bottom.
+    """
+    return bottom_up(lambda t: rewrite(rule, t), term)
 
 
-def replaceAnywhereWith(rule, pattern):
-    return bottom_up(lambda p: replaceWith(rule, p), pattern)
+def replace(rule: Tuple[KInner, KInner], term: KInner) -> KInner:
+    lhs, rhs = rule
+    if lhs == term:
+        return rhs
+    return term
+
+
+def replace_anywhere(rule: Tuple[KInner, KInner], term: KInner) -> KInner:
+    return bottom_up(lambda t: replace(rule, t), term)
