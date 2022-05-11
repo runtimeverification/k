@@ -58,16 +58,18 @@ class Subst(Mapping[str, KInner]):
     def unapply(self, term: KInner) -> KInner:
         new_term = term
         for var_name in self:
-            new_term = replace_anywhere((self[var_name], KVariable(var_name)), new_term)
+            lhs = self[var_name]
+            rhs = KVariable(var_name)
+            new_term = replace_anywhere((lhs, rhs), new_term)
         return new_term
 
 
 def extract_subst(term: KInner) -> Tuple[Subst, KInner]:
 
     def _subst_for_terms(term1: KInner, term2: KInner) -> Optional[Subst]:
-        if type(term1) is KVariable and not type(term2) is KVariable:
+        if type(term1) is KVariable and type(term2) not in {KToken, KVariable}:
             return Subst({term1.name: term2})
-        if type(term2) is KVariable and not type(term1) is KVariable:
+        if type(term2) is KVariable and type(term1) not in {KToken, KVariable}:
             return Subst({term2.name: term1})
         return None
 

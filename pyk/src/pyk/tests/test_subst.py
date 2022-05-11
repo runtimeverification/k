@@ -2,13 +2,14 @@ from functools import partial
 from typing import Dict, Final, Tuple
 from unittest import TestCase
 
-from ..kast import KApply, KInner, KVariable
+from ..kast import KApply, KInner, KToken, KVariable
 from ..prelude import mlAnd, mlEquals, mlEqualsTrue, mlTop
 from ..subst import Subst, extract_subst
 
 a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
 x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
 f, g, h = (partial(KApply.of, label) for label in ['f', 'g', 'h'])
+t = KToken('t', 'Int')
 
 
 def int_eq(term1: KInner, term2: KInner) -> KApply:
@@ -94,6 +95,7 @@ class SubstTest(TestCase):
         test_data = (
             (a, {}, a),
             (a, {'x': a}, x),
+            (y, {'x': y}, x),
             (f(a), {'x': f(a)}, x),
             (f(f(a)), {'x': f(a)}, f(x)),
             (f(x), {'x': f(a)}, f(x)),
@@ -114,6 +116,7 @@ class ExtractSubstTest(TestCase):
         (a, {}, a),
         (mlEquals(a, b), {}, mlEquals(a, b)),
         (mlEquals(x, a), {'x': a}, mlTop()),
+        (mlEquals(x, t), {}, mlEquals(x, t)),
         (mlEquals(x, y), {}, mlEquals(x, y)),
         (mlAnd([mlEquals(a, b), mlEquals(x, a)]), {'x': a}, mlEquals(a, b)),
         (mlEqualsTrue(int_eq(a, b)), {}, mlEqualsTrue(int_eq(a, b))),
