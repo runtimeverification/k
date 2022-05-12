@@ -191,10 +191,10 @@ public class JsonParser {
             }
             case KSYNTAXASSOCIATIVITY: {
                 String assocString = data.getString("assoc");
-                Associativity assoc = assocString == "Left"     ? Associativity.Left
-                                              : assocString == "Right"    ? Associativity.Right
-                                              : assocString == "NonAssoc" ? Associativity.NonAssoc
-                                              : Associativity.Unspecified;
+                Associativity assoc = "Left".equals(assocString)     ? Associativity.Left
+                                    : "Right".equals(assocString)    ? Associativity.Right
+                                    : "NonAssoc".equals(assocString) ? Associativity.NonAssoc
+                                    :                                  Associativity.Unspecified;
                 scala.collection.Set<Tag> tags = toTags(data.getJsonArray("tags"));
                 Att att = toAtt(data.getJsonObject("att"));
                 return new SyntaxAssociativity(assoc, tags, att);
@@ -290,7 +290,7 @@ public class JsonParser {
 // Parsing Att Json //
 //////////////////////
 
-    public static Att toAtt(JsonObject data) throws IOException {
+    public static Att toAtt(JsonObject data) {
         if (! (data.getString("node").equals(KATT) && data.containsKey("att")))
             throw KEMException.criticalError("Unexpected node found in KAST Json term when unparsing KATT: " + data.getString("node"));
         JsonObject attMap = data.getJsonObject("att");
@@ -346,7 +346,7 @@ public class JsonParser {
             case KAPPLY:
                 int arity = data.getInt("arity");
                 K[] args  = toKs(arity, data.getJsonArray("args"));
-                klabel    = toKLabel(data.getJsonObject("klabel"));
+                klabel    = toKLabel(data.getJsonObject("label"));
                 return KApply(klabel, args);
 
             case KSEQUENCE:
@@ -368,7 +368,7 @@ public class JsonParser {
                 return KORE.KAs(pattern, alias);
 
             case INJECTEDKLABEL:
-                klabel    = toKLabel(data.getJsonObject("klabel"));
+                klabel    = toKLabel(data.getJsonObject("label"));
                 return InjectedKLabel(klabel);
 
             default:
@@ -377,9 +377,6 @@ public class JsonParser {
     }
 
     private static KLabel toKLabel(JsonObject data) {
-        if (data.getBoolean("variable"))
-            return KVariable(data.getString("name"));
-
         JsonArray jparams = data.getJsonArray("params");
         List<Sort> params = new ArrayList<>();
         for (JsonValue p : jparams) {
