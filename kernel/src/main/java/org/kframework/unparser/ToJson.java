@@ -366,7 +366,8 @@ public class ToJson {
         JsonObjectBuilder jsort = Json.createObjectBuilder();
 
         jsort.add("node", JsonParser.KSORT);
-        jsort.add("name", sort.name());
+        // store sort and its parameters as a flat string
+        jsort.add("name", sort.toString());
 
         return jsort.build();
     }
@@ -412,7 +413,7 @@ public class ToJson {
             KApply app = (KApply) k;
 
             knode.add("node", JsonParser.KAPPLY);
-            knode.add("klabel", toJson(((KApply) k).klabel()));
+            knode.add("label", toJson(((KApply) k).klabel()));
 
             JsonArrayBuilder args = Json.createArrayBuilder();
             for (K item : app.klist().asIterable()) {
@@ -467,7 +468,7 @@ public class ToJson {
             InjectedKLabel inj = (InjectedKLabel) k;
 
             knode.add("node", JsonParser.INJECTEDKLABEL);
-            knode.add("klabel", toJson(inj.klabel()));
+            knode.add("label", toJson(inj.klabel()));
 
         } else {
             throw KEMException.criticalError("Unimplemented for JSON serialization: ", k);
@@ -477,14 +478,12 @@ public class ToJson {
 
     public static JsonStructure toJson(KLabel kl) {
         JsonObjectBuilder jkl = Json.createObjectBuilder();
+        jkl.add("node", "KLabel");
         jkl.add("name", kl.name());
-        jkl.add("variable", kl instanceof KVariable);
-        if (!(kl instanceof KVariable)) {
-            JsonArrayBuilder params = Json.createArrayBuilder();
-            for (Sort s : mutable(kl.params()))
-                params.add(s.toString());
-            jkl.add("params", params.build());
-        }
+        JsonArrayBuilder params = Json.createArrayBuilder();
+        for (Sort s : mutable(kl.params()))
+            params.add(s.toString());
+        jkl.add("params", params.build());
         return jkl.build();
     }
 }
