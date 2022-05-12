@@ -121,7 +121,7 @@ class WithKAtt(KAst, ABC):
 
 
 class KInner(KAst, ABC):
-    _INNER_NODES: Final = {'KVariable', 'KSort', 'KToken', 'KApply', 'KAs', 'KRewrite', 'KSequence'}
+    _INNER_NODES: Final = {'KVariable', 'KSort', 'KToken', 'KApply', 'KLabel', 'KAs', 'KRewrite', 'KSequence'}
 
     @classmethod
     @abstractmethod
@@ -223,11 +223,39 @@ class KToken(KInner):
 TRUE = KToken('true', 'Bool')
 FALSE = KToken('false', 'Bool')
 
+@final
+@dataclass(frozen=True)
+class KLabel(KInner):
+    name: str
+    params: Tuple[KSort, ...]
+
+    def __init__(self, name: str, params: Iterable[KSort] = ()):
+        object.__setattr__(self, 'name', name)
+        object.__setattr__(self, 'params', tuple(params))
+
+    def __iter__(self) -> Iterator[Union[str, KSort]]:
+        return chain([self.name], self.params)
+
+    @staticmethod
+    def of(name: str, *params: KSort) -> 'KLabel':
+        return KLabel(name=name, params=params)
+
+    @classmethod
+    def from_dict(cls: Type['KLabel'], d: Dict[str, Any]) -> 'KLabel':
+        cls._check_node(d)
+        return KLabel(name=d['name'], params=(KSort(name=arg) for arg in d['params']))
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {'node': 'KLabel', 'name': self.name, 'params': [arg.to_dict() for arg in self.params]}
+
+    def map_inner(self: 'KLabel', f: Callable[[KInner], KInner]) -> 'KLabel':
+        return self
+
 
 @final
 @dataclass(frozen=True)
 class KApply(KInner):
-    label: str
+    label: KLabel
     args: Tuple[KInner, ...]
 
     def __init__(self, label: str, args: Iterable[KInner] = ()):
@@ -243,16 +271,20 @@ class KApply(KInner):
 
     @property
     def is_cell(self) -> bool:
-        return len(self.label) > 1 and self.label[0] == '<' and self.label[-1] == '>'
+        return len(self.label.name) > 1 and self.label.name[0] == '<' and self.label.name[-1] == '>'
 
     @staticmethod
     def of(label: str, *args: KInner) -> 'KApply':
+        return KApply(label=KLabel(label), args=args)
+
+    @staticmethod
+    def of(label: KLabel, *args: KInner) -> 'KApply':
         return KApply(label=label, args=args)
 
     @classmethod
     def from_dict(cls: Type['KApply'], d: Dict[str, Any]) -> 'KApply':
         cls._check_node(d)
-        return KApply(label=d['label'], args=(KInner.from_dict(arg) for arg in d['args']))
+        return KApply(label=KInner.from_dict(d['label']), args=(KInner.from_dict(arg) for arg in d['args']))
 
     def to_dict(self) -> Dict[str, Any]:
         return {'node': 'KApply', 'label': self.label, 'args': [arg.to_dict() for arg in self.args], 'arity': self.arity, 'variable': False}
@@ -266,8 +298,8 @@ class KApply(KInner):
         return self.let(args=(f(arg) for arg in self.args))
 
 
-TOP: Final = KApply('#Top')
-BOTTOM: Final = KApply('#Bottom')
+TOP: Final = KApply(KLabel('#Top', [KSort("K")]))
+BOTTOM: Final = KApply(KLabel('#Bottom', [KSort("K")]))
 
 
 @final
