@@ -6,7 +6,7 @@ from typing import Iterable, Optional, Tuple
 from .kast import TOP, KInner, flattenLabel
 from .kastManip import match, splitConfigAndConstraints
 from .prelude import mlAnd, mlImplies
-from .subst import Subst
+from .rewrite import Subst
 
 
 @dataclass(frozen=True)

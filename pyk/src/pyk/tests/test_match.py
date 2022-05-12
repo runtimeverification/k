@@ -3,7 +3,7 @@ from typing import Final, Tuple
 from unittest import TestCase
 
 from ..kast import KApply, KInner, KVariable
-from ..subst import match
+from ..rewrite import match
 
 a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
 x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])

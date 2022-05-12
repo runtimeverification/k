@@ -33,7 +33,7 @@ from .prelude import (
     mlOr,
     mlTop,
 )
-from .subst import Subst, match, rewrite_anywhere
+from .rewrite import Subst, match, rewrite_anywhere
 from .utils import dedupe, find_common_items, hash_str
 
 KI = TypeVar('KI', bound=KInner)

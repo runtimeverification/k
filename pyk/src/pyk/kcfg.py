@@ -24,7 +24,7 @@ from .cterm import CTerm
 from .kast import TRUE, KInner, KRuleLike
 from .kastManip import buildRule, mlAnd, simplifyBool, unsafeMlPredToBool
 from .ktool import KPrint
-from .subst import Subst
+from .rewrite import Subst
 from .utils import compare_short_hashes, shorten_hashes
 
 

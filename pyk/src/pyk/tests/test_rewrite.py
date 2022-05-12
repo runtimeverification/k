@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from ..kast import KApply, KInner, KToken, KVariable
 from ..prelude import mlAnd, mlEquals, mlEqualsTrue, mlTop
-from ..subst import Subst, extract_subst
+from ..rewrite import Subst, extract_subst
 
 a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
 x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
