@@ -131,3 +131,30 @@ class ExtractSubstTest(TestCase):
                 # Then
                 self.assertDictEqual(dict(actual_subst), expected_subst)
                 self.assertEqual(actual_term, expected_term)
+
+
+class PropogateSubstTest(TestCase):
+
+    def test(self):
+        # Given
+        v1 = KVariable('V1')
+        x = KVariable('X')
+        bar_x = KApply('bar', [x])
+        config = KApply('<k>', [bar_x])
+
+        subst_conjunct = mlEquals(v1, bar_x)
+        other_conjunct = mlEqualsTrue(KApply('_<=Int_', [v1, KApply('foo', [x, bar_x])]))
+
+        term = mlAnd([config, subst_conjunct, other_conjunct])
+        term_wo_subst = mlAnd([config, other_conjunct])
+
+        # When
+        subst, _ = extract_subst(term)
+        actual = subst.unapply(term_wo_subst)
+
+        # Then
+        expected_config = KApply('<k>', [v1])
+        expected_conjunct = mlEqualsTrue(KApply('_<=Int_', [v1, KApply('foo', [x, v1])]))
+        expected = mlAnd([expected_config, expected_conjunct])
+
+        self.assertEqual(actual, expected)
