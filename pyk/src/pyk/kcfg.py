@@ -21,7 +21,7 @@ from typing import (
 from graphviz import Digraph
 
 from .cterm import CTerm
-from .kast import TRUE, KInner, KRuleLike
+from .kast import KInner, KRuleLike
 from .kastManip import buildRule, mlAnd, simplifyBool, unsafeMlPredToBool
 from .ktool import KPrint
 from .rewrite import Subst
@@ -52,8 +52,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     class Edge(EdgeLike):
         source: 'KCFG.Node'
         target: 'KCFG.Node'
-        condition: KInner = TRUE
-        depth: int = 1
+        condition: KInner
+        depth: int
 
         def to_dict(self) -> Dict[str, Any]:
             return {'source': self.source.id, 'target': self.target.id, 'condition': self.condition.to_dict(), 'depth': self.depth}
@@ -361,7 +361,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             return edge == other
         return False
 
-    def create_edge(self, source_id: str, target_id: str, condition: KInner = TRUE, depth=1) -> Edge:
+    def create_edge(self, source_id: str, target_id: str, condition: KInner, depth: int) -> Edge:
         source = self.node(source_id)
         target = self.node(target_id)
 
