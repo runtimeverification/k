@@ -3,6 +3,7 @@ import string
 from typing import (
     Any,
     Dict,
+    Hashable,
     Iterable,
     Iterator,
     List,
@@ -15,6 +16,7 @@ from typing import (
 T = TypeVar('T')
 K = TypeVar('K')
 V = TypeVar('V')
+H = TypeVar('H', bound=Hashable)
 
 
 # Based on: https://stackoverflow.com/a/2704866
@@ -91,7 +93,16 @@ def intersperse(iterable: Iterable[T], delimiter: T) -> Iterator[T]:
         yield x
 
 
-# Could be done in O(n) over Iterable[Hashable]
+def unique(iterable: Iterable[H]) -> Iterator[H]:
+    elems = set()
+    for elem in iterable:
+        if elem in elems:
+            continue
+        else:
+            elems.add(elem)
+            yield elem
+
+
 def dedupe(xs: Iterable[T]) -> List[T]:
     res = []
     for x in xs:
