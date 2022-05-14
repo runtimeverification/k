@@ -1,6 +1,6 @@
 let
   sources = import ./nix/sources.nix;
-  pinned = import sources."nixpkgs" { config = {}; overlays = []; };
+  pinned = import sources."nixpkgs" { config = {}; overlays = [ ( import ./nix/overlays/z3.nix ) ]; };
 in
 
 { pkgs ? pinned
