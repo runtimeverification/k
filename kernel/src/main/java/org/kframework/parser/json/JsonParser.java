@@ -1,6 +1,7 @@
 // Copyright (c) 2018-2019 K Team. All Rights Reserved.
 package org.kframework.parser.json;
 
+import com.google.common.collect.Sets;
 import org.kframework.attributes.Att;
 import org.kframework.definition.Associativity;
 import org.kframework.definition.Bubble;
@@ -317,11 +318,19 @@ public class JsonParser {
     }
 
     public static K parse(String data) {
+        return parse(data, Module.apply("dummy", immutable(Sets.newHashSet())));
+    }
+
+    public static K parse(String data, Module mod) {
         JsonReader reader = Json.createReader(new StringReader(data));
-        return parseJson(reader.readObject());
+        return parseJson(reader.readObject(), mod);
     }
 
     public static K parseJson(JsonObject data) {
+        return parseJson(data, Module.apply("dummy", immutable(Sets.newHashSet())));
+    }
+
+    public static K parseJson(JsonObject data, Module mod) {
         try {
             if (! (data.containsKey("format") && data.containsKey("version") && data.containsKey("term"))) {
                 throw KEMException.criticalError("Must have `format`, `version`, and `term` fields in serialized Json!");
@@ -332,13 +341,17 @@ public class JsonParser {
             if (data.getInt("version") != 1) {
                 throw KEMException.criticalError("Only can deserialize KAST version '1'! Found: " + data.getInt("version"));
             }
-            return toK(data.getJsonObject("term"));
+            return toK(data.getJsonObject("term"), mod);
         } catch (IOException e) {
             throw KEMException.criticalError("Could not read K term from json", e);
         }
     }
 
     private static K toK(JsonObject data) throws IOException {
+        return toK(data, Module.apply("dummy", immutable(Sets.newHashSet())));
+    }
+
+    private static K toK(JsonObject data, Module mod) throws IOException {
         String label;
         KLabel klabel;
 
@@ -349,16 +362,21 @@ public class JsonParser {
 
             case KAPPLY:
                 int arity = data.getInt("arity");
-                K[] args  = toKs(arity, data.getJsonArray("args"));
+                K[] args  = toKs(arity, data.getJsonArray("args"), mod);
                 label     = data.getString("label");
-                klabel    = data.getBoolean("variable")
-                          ? KVariable(label)
-                          : KLabel(label);
+                if (data.getBoolean("variable"))
+                    klabel = KVariable(label);
+                else {
+                    if (mod.productionsForKLabelName().get(label).isDefined())
+                        klabel = mod.productionsForKLabelName().get(label).get().iterator().next().klabel().get();
+                    else
+                        klabel = KLabel(label);
+                }
                 return KApply(klabel, args);
 
             case KSEQUENCE:
                 int seqLen = data.getInt("arity");
-                K[] items  = toKs(seqLen, data.getJsonArray("items"));
+                K[] items  = toKs(seqLen, data.getJsonArray("items"), mod);
                 return KSequence(items);
 
             case KVARIABLE:
@@ -386,10 +404,10 @@ public class JsonParser {
         }
     }
 
-    private static K[] toKs(int arity, JsonArray data) throws IOException {
+    private static K[] toKs(int arity, JsonArray data, Module mod) throws IOException {
         K[] items = new K[arity];
         for (int i = 0; i < arity; i++) {
-            items[i] = toK(data.getValuesAs(JsonObject.class).get(i));
+            items[i] = toK(data.getValuesAs(JsonObject.class).get(i), mod);
         }
         return items;
     }

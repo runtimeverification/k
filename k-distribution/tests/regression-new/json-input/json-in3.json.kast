@@ -1,0 +1,43 @@
+{
+  "format": "KAST",
+  "version": 1,
+  "term": {
+    "node": "KApply",
+    "label": "#And",
+    "variable": false,
+    "arity": 2,
+    "args": [
+      {
+        "node": "KApply",
+        "label": "<k>",
+        "variable": false,
+        "arity": 1,
+        "args": [
+          {
+            "node": "KVariable",
+            "name": "N",
+            "originalName": "N"
+          }
+        ]
+      },
+      {
+        "node": "KApply",
+        "label": "_>=Int_",
+        "variable": false,
+        "arity": 2,
+        "args": [
+          {
+            "node": "KVariable",
+            "name": "N",
+            "originalName": "N"
+          },
+          {
+            "node": "KToken",
+            "sort": "Int",
+            "token": "0"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -148,6 +148,12 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
       .groupBy(_.klabel.get.head)
       .map { case (l, ps) => (l, ps) }
 
+  lazy val productionsForKLabelName: Map[String, Set[Production]] =
+    productions
+      .collect({ case p if p.klabel.isDefined => p })
+      .groupBy(_.klabel.get.head.name)
+      .map { case (l, ps) => (l, ps) }
+
   lazy val localProductionsFor: Map[KLabel, Set[Production]] =
     localProductions
       .collect({ case p if p.klabel != None => p })

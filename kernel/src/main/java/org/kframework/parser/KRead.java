@@ -59,7 +59,7 @@ public class KRead {
             case BINARY:
             case JSON:
             case KAST:
-                return deserialize(stringToParse, inputMode, source);
+                return deserialize(stringToParse, inputMode, source, mod);
             case KORE:
                 return new KoreParser(mod.sortAttributesFor()).parseString(stringToParse);
             case PROGRAM:
@@ -123,16 +123,12 @@ public class KRead {
         sw.printIntermediate("  New Bison parser: " + mod.name());
     }
 
-    public K deserialize(String stringToParse, Source source) {
-        return deserialize(stringToParse, this.input, source);
-    }
-
-    public static K deserialize(String stringToParse, InputModes inputMode, Source source) {
+    public static K deserialize(String stringToParse, InputModes inputMode, Source source, Module mod) {
         switch (inputMode) {
             case BINARY:
                 return BinaryParser.parse(stringToParse.getBytes());
             case JSON:
-                return JsonParser.parse(stringToParse);
+                return JsonParser.parse(stringToParse, mod);
             case KAST:
                 return KastParser.parse(stringToParse, source);
             default:
