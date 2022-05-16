@@ -33,7 +33,6 @@ from .kast import (
     klabelEmptyK,
     ktokenDots,
     match,
-    rewrite_anywhere,
     top_down,
 )
 from .prelude import (
@@ -108,7 +107,8 @@ def unsafeMlPredToBool(k):
                         ]                                                                                                                               # noqa
     newK = k
     for rule in mlPredToBoolRules:
-        newK = rewrite_anywhere(KRewrite(*rule), newK)
+        rewrite = KRewrite(*rule)
+        newK = rewrite(newK)
     return newK
 
 
@@ -136,7 +136,8 @@ def simplifyBool(k):
                     ]                                                                                                                                               # noqa
     newK = k
     for rule in simplifyRules:
-        newK = rewrite_anywhere(rule, newK)
+        rewrite = KRewrite(*rule)
+        newK = rewrite(newK)
     return newK
 
 
@@ -530,8 +531,8 @@ def remove_generated_cells(term: KInner) -> KInner:
     -   Input: Constrained term.
     -   Output: Constrained term with those cells removed.
     """
-    rule = KRewrite(KApply('<generatedTop>', [KVariable('CONFIG'), KVariable('_')]), KVariable('CONFIG'))
-    return rewrite_anywhere(rule, term)
+    rewrite = KRewrite(KApply('<generatedTop>', [KVariable('CONFIG'), KVariable('_')]), KVariable('CONFIG'))
+    return rewrite(term)
 
 
 def isAnonVariable(kast):
@@ -815,8 +816,8 @@ def substToMap(subst):
 
 
 def undoAliases(definition, kast):
-    alias_undo_rewrites = [(sent.body.rhs, sent.body.lhs) for module in definition for sent in module if type(sent) is KRule and 'alias' in sent.att]
+    alias_undo_rewrites = [KRewrite(rule.body.rhs, rule.body.lhs) for module in definition for rule in module.rules if 'alias' in rule.att]
     newKast = kast
-    for r in alias_undo_rewrites:
-        newKast = rewrite_anywhere(r, newKast)
+    for rewrite in alias_undo_rewrites:
+        newKast = rewrite(newKast)
     return newKast

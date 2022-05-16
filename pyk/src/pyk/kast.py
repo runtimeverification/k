@@ -307,6 +307,12 @@ class KRewrite(KInner):
     def __iter__(self) -> Iterator[KInner]:
         return iter([self.lhs, self.rhs])
 
+    def __call__(self, term: KInner, *, top=False) -> KInner:
+        if top:
+            return self.apply_top(term)
+
+        return self.apply(term)
+
     @classmethod
     def from_dict(cls: Type['KRewrite'], d: Dict[str, Any]) -> 'KRewrite':
         cls._check_node(d)
@@ -322,6 +328,35 @@ class KRewrite(KInner):
 
     def map_inner(self: 'KRewrite', f: Callable[[KInner], KInner]) -> 'KRewrite':
         return self.let(lhs=f(self.lhs), rhs=f(self.rhs))
+
+    def apply_top(self, term: KInner) -> KInner:
+        """
+        Rewrite a given term at the top
+
+        :param term: Term to rewrite.
+        :return: The term with the rewrite applied once at the top.
+        """
+        subst = match(self.lhs, term)
+        if subst is not None:
+            return subst(self.rhs)
+        return term
+
+    def apply(self, term: KInner) -> KInner:
+        """
+        Attempt rewriting once at every position in a term bottom-up.
+
+        :param term: Term to rewrite.
+        :return: The term with rewrites applied at every node once starting from the bottom.
+        """
+        return bottom_up(self.apply_top, term)
+
+    def replace_top(self, term: KInner) -> KInner:
+        if self.lhs == term:
+            return self.rhs
+        return term
+
+    def replace(self, term: KInner) -> KInner:
+        return bottom_up(self.replace_top, term)
 
 
 @final
@@ -1153,7 +1188,7 @@ class Subst(Mapping[str, KInner]):
         for var_name in self:
             lhs = self[var_name]
             rhs = KVariable(var_name)
-            new_term = replace_anywhere(KRewrite(lhs, rhs), new_term)
+            new_term = KRewrite(lhs, rhs).replace(new_term)
         return new_term
 
 
@@ -1231,41 +1266,6 @@ def collect(callback: Callable[[KInner], None], kinner: KInner) -> None:
         return kinner
 
     bottom_up(f, kinner)
-
-
-def rewrite(rule: KRewrite, term: KInner) -> KInner:
-    """
-    Rewrite a given term at the top with the supplied rule.
-
-    :param rule: A rewrite rule of the form (lhs, rhs).
-    :param term: Term to rewrite.
-    :return: The term with the rewrite applied once at the top.
-    """
-    subst = match(rule.lhs, term)
-    if subst is not None:
-        return subst(rule.rhs)
-    return term
-
-
-def rewrite_anywhere(rule: KRewrite, term: KInner) -> KInner:
-    """
-    Attempt rewriting once at every position in a term bottom-up.
-
-    :param rule: A rewrite rule of the form (lhs, rhs).
-    :param term: Term to rewrite.
-    :return: The term with rewrites applied at every node once starting from the bottom.
-    """
-    return bottom_up(lambda t: rewrite(rule, t), term)
-
-
-def replace(rule: KRewrite, term: KInner) -> KInner:
-    if rule.lhs == term:
-        return rule.rhs
-    return term
-
-
-def replace_anywhere(rule: KRewrite, term: KInner) -> KInner:
-    return bottom_up(lambda t: replace(rule, t), term)
 
 
 def flattenLabel(label, kast):
