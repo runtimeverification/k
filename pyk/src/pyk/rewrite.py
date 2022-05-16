@@ -71,7 +71,7 @@ class Subst(Mapping[str, KInner]):
         for var_name in self:
             lhs = self[var_name]
             rhs = KVariable(var_name)
-            new_term = replace_anywhere((lhs, rhs), new_term)
+            new_term = replace_anywhere(KRewrite(lhs, rhs), new_term)
         return new_term
 
 
@@ -171,7 +171,7 @@ def match(pattern: KInner, term: KInner) -> Optional[Subst]:
     return Subst(subst) if subst is not None else None
 
 
-def rewrite(rule: Tuple[KInner, KInner], term: KInner) -> KInner:
+def rewrite(rule: KRewrite, term: KInner) -> KInner:
     """
     Rewrite a given term at the top with the supplied rule.
 
@@ -179,14 +179,13 @@ def rewrite(rule: Tuple[KInner, KInner], term: KInner) -> KInner:
     :param term: Term to rewrite.
     :return: The term with the rewrite applied once at the top.
     """
-    lhs, rhs = rule
-    subst = match(lhs, term)
+    subst = match(rule.lhs, term)
     if subst is not None:
-        return subst(rhs)
+        return subst(rule.rhs)
     return term
 
 
-def rewrite_anywhere(rule: Tuple[KInner, KInner], term: KInner) -> KInner:
+def rewrite_anywhere(rule: KRewrite, term: KInner) -> KInner:
     """
     Attempt rewriting once at every position in a term bottom-up.
 
@@ -197,12 +196,11 @@ def rewrite_anywhere(rule: Tuple[KInner, KInner], term: KInner) -> KInner:
     return bottom_up(lambda t: rewrite(rule, t), term)
 
 
-def replace(rule: Tuple[KInner, KInner], term: KInner) -> KInner:
-    lhs, rhs = rule
-    if lhs == term:
-        return rhs
+def replace(rule: KRewrite, term: KInner) -> KInner:
+    if rule.lhs == term:
+        return rule.rhs
     return term
 
 
-def replace_anywhere(rule: Tuple[KInner, KInner], term: KInner) -> KInner:
+def replace_anywhere(rule: KRewrite, term: KInner) -> KInner:
     return bottom_up(lambda t: replace(rule, t), term)

@@ -95,7 +95,7 @@ def unsafeMlPredToBool(k):
                         ]                                                                                                                               # noqa
     newK = k
     for rule in mlPredToBoolRules:
-        newK = rewrite_anywhere(rule, newK)
+        newK = rewrite_anywhere(KRewrite(*rule), newK)
     return newK
 
 
@@ -478,7 +478,7 @@ def remove_generated_cells(term: KInner) -> KInner:
     -   Input: Constrained term.
     -   Output: Constrained term with those cells removed.
     """
-    rule = KApply('<generatedTop>', [KVariable('CONFIG'), KVariable('_')]), KVariable('CONFIG')
+    rule = KRewrite(KApply('<generatedTop>', [KVariable('CONFIG'), KVariable('_')]), KVariable('CONFIG'))
     return rewrite_anywhere(rule, term)
 
 
