@@ -1193,60 +1193,42 @@ class Subst(Mapping[str, KInner]):
 
 
 def match(pattern: KInner, term: KInner) -> Optional[Subst]:
-    """Perform syntactic pattern matching and return the substitution.
+    """
+    Perform syntactic pattern matching and return the substitution.
 
-    -   Input: a pattern and a term.
-    -   Output: substitution instantiating the pattern to the term.
+    :param pattern: Pattern to match with.
+    :param term: Term to match.
+    :return: Substitution instantiating the pattern to the term..
     """
 
-    # TODO simplify
-    def _match(pattern: KInner, term: KInner) -> Optional[Dict[str, KInner]]:
+    def combine(subst1: Optional[Subst], subst2: Optional[Subst]) -> Optional[Subst]:
+        if subst1 is None or subst2 is None:
+            return None
 
-        def combine_dicts(dict1: Optional[Mapping[K, V]], dict2: Optional[Mapping[K, V]]) -> Optional[Dict[K, V]]:
-            if dict1 is None:
-                return None
+        return subst1.union(subst2)
 
-            if dict2 is None:
-                return None
+    def combine_all(substs: Iterable[Optional[Subst]]) -> Optional[Subst]:
+        unit: Optional[Subst] = Subst()
+        return reduce(combine, substs, unit)
 
-            intersecting_keys = (key for key in dict1 if key in dict2)
-            if any(dict1[key] != dict2[key] for key in intersecting_keys):
-                return None
+    if type(pattern) is KVariable:
+        return Subst({pattern.name: term})
 
-            return {**dict1, **dict2}
+    if type(pattern) is KToken and type(term) is KToken:
+        return Subst() if pattern.token == term.token else None
 
-        def combine(*dicts: Optional[Mapping[K, V]]) -> Optional[Dict[K, V]]:
-            unit: Optional[Dict[K, V]] = {}
-            return reduce(combine_dicts, dicts, unit)
+    if type(pattern) is KRewrite and type(term) is KRewrite:
+        lhs_subst = match(pattern.lhs, term.lhs)
+        rhs_subst = match(pattern.rhs, term.rhs)
+        return combine(lhs_subst, rhs_subst)
 
-        subst: Optional[Dict[str, KInner]] = {}
-        if type(pattern) is KVariable:
-            return {pattern.name: term}
-        if type(pattern) is KToken and type(term) is KToken:
-            return {} if pattern.token == term.token else None
-        if type(pattern) is KApply and type(term) is KApply \
-                and pattern.label == term.label and pattern.arity == term.arity:
-            for patternArg, kastArg in zip(pattern.args, term.args):
-                argSubst = _match(patternArg, kastArg)
-                subst = combine(subst, argSubst)
-                if subst is None:
-                    return None
-            return subst
-        if type(pattern) is KRewrite and type(term) is KRewrite:
-            lhsSubst = _match(pattern.lhs, term.lhs)
-            rhsSubst = _match(pattern.rhs, term.rhs)
-            return combine(lhsSubst, rhsSubst)
-        if type(pattern) is KSequence and type(term) is KSequence and pattern.arity == term.arity:
-            for (patternItem, substItem) in zip(pattern.items, term.items):
-                itemSubst = _match(patternItem, substItem)
-                subst = combine(subst, itemSubst)
-                if subst is None:
-                    return None
-            return subst
-        return None
+    if type(pattern) is KApply and type(term) is KApply and pattern.label == term.label and pattern.arity == term.arity:
+        return combine_all(match(pattern_arg, term_arg) for pattern_arg, term_arg in zip(pattern.args, term.args))
 
-    subst = _match(pattern, term)
-    return Subst(subst) if subst is not None else None
+    if type(pattern) is KSequence and type(term) is KSequence and pattern.arity == term.arity:
+        return combine_all(match(pattern_item, term_item) for pattern_item, term_item in zip(pattern.items, term.items))
+
+    return None
 
 
 # TODO make method of KInner
