@@ -1,5 +1,15 @@
 from collections import Counter
-from typing import Callable, Dict, Mapping, Sequence, Tuple, Type, TypeVar
+from typing import (
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+)
 
 from .cli_utils import fatal
 from .kast import (
@@ -15,15 +25,18 @@ from .kast import (
     KSequence,
     KToken,
     KVariable,
+    Subst,
     WithKAtt,
     bottom_up,
     collect,
     flattenLabel,
     klabelEmptyK,
     ktokenDots,
+    match,
     top_down,
 )
 from .prelude import (
+    boolToken,
     buildAssoc,
     mlAnd,
     mlBottom,
@@ -33,8 +46,7 @@ from .prelude import (
     mlOr,
     mlTop,
 )
-from .subst import Subst, match
-from .utils import dedupe, find_common_items, hash_str
+from .utils import find_common_items, hash_str, unique
 
 KI = TypeVar('KI', bound=KInner)
 W = TypeVar('W', bound=WithKAtt)
@@ -73,39 +85,6 @@ def replaceKLabels(pattern, klabelMap):
     return bottom_up(replace, pattern)
 
 
-def rewriteWith(rule, pattern):
-    """Rewrite a given pattern at the top with the supplied rule.
-
-    -   Input: A rule to rewrite with and a pattern to rewrite.
-    -   Output: The pattern with the rewrite applied once at the top.
-    """
-    (ruleLHS, ruleRHS) = rule
-    matchingSubst = match(ruleLHS, pattern)
-    if matchingSubst is not None:
-        return substitute(ruleRHS, matchingSubst)
-    return pattern
-
-
-def rewriteAnywhereWith(rule, pattern):
-    """Attempt rewriting once at every position in an AST bottom-up.
-
-    -   Input: A rule to rewrite with, and a pattern to rewrite.
-    -   Output: The pattern with rewrites applied at every node once starting from the bottom.
-    """
-    return bottom_up(lambda p: rewriteWith(rule, p), pattern)
-
-
-def replaceWith(rule, pattern):
-    (ruleLHS, ruleRHS) = rule
-    if ruleLHS == pattern:
-        return ruleRHS
-    return pattern
-
-
-def replaceAnywhereWith(rule, pattern):
-    return bottom_up(lambda p: replaceWith(rule, p), pattern)
-
-
 def boolToMlPred(kast: KInner) -> KInner:
     return mlAnd([mlEqualsTrue(cond) for cond in flattenLabel('_andBool_', kast)])
 
@@ -128,7 +107,8 @@ def unsafeMlPredToBool(k):
                         ]                                                                                                                               # noqa
     newK = k
     for rule in mlPredToBoolRules:
-        newK = rewriteAnywhereWith(rule, newK)
+        rewrite = KRewrite(*rule)
+        newK = rewrite(newK)
     return newK
 
 
@@ -156,7 +136,8 @@ def simplifyBool(k):
                     ]                                                                                                                                               # noqa
     newK = k
     for rule in simplifyRules:
-        newK = rewriteAnywhereWith(rule, newK)
+        rewrite = KRewrite(*rule)
+        newK = rewrite(newK)
     return newK
 
 
@@ -177,6 +158,48 @@ def extract_lhs(term: KInner) -> KInner:
 
 def extract_rhs(term: KInner) -> KInner:
     return top_down(if_ktype(KRewrite, lambda rw: rw.rhs), term)
+
+
+def extract_subst(term: KInner) -> Tuple[Subst, KInner]:
+
+    def _subst_for_terms(term1: KInner, term2: KInner) -> Optional[Subst]:
+        if type(term1) is KVariable and type(term2) not in {KToken, KVariable}:
+            return Subst({term1.name: term2})
+        if type(term2) is KVariable and type(term1) not in {KToken, KVariable}:
+            return Subst({term2.name: term1})
+        return None
+
+    def _extract_subst(conjunct: KInner) -> Optional[Subst]:
+        if type(conjunct) is KApply:
+            if conjunct.label == '#Equals':
+                subst = _subst_for_terms(conjunct.args[0], conjunct.args[1])
+
+                if subst is not None:
+                    return subst
+
+                if conjunct.args[0] == boolToken(True) and type(conjunct.args[1]) is KApply and conjunct.args[1].label in {'_==K_', '_==Int_'}:
+                    subst = _subst_for_terms(conjunct.args[1].args[0], conjunct.args[1].args[1])
+
+                    if subst is not None:
+                        return subst
+
+        return None
+
+    conjuncts = flattenLabel('#And', term)
+    subst = Subst()
+    rem_conjuncts: List[KInner] = []
+
+    for conjunct in conjuncts:
+        new_subst = _extract_subst(conjunct)
+        if new_subst is None:
+            rem_conjuncts.append(conjunct)
+        else:
+            new_subst = subst.union(new_subst)
+            if new_subst is None:
+                raise ValueError('Conflicting substitutions')  # TODO handle this case
+            subst = new_subst
+
+    return subst, mlAnd(rem_conjuncts)
 
 
 def count_vars(term: KInner) -> Counter:
@@ -261,7 +284,7 @@ def propagateUpConstraints(k):
         if len(common) == 0:
             return _k
         conjunct1 = buildAssoc(mlTop(), '#And', l2)
-        conjunct2 = buildAssoc(mlTop, '#And', r2)
+        conjunct2 = buildAssoc(mlTop(), '#And', r2)
         disjunct = KApply('#Or', [conjunct1, conjunct2])
         return buildAssoc(mlTop(), '#And', [disjunct] + common)
     return bottom_up(_propagateUpConstraints, k)
@@ -474,10 +497,10 @@ def minimizeRule(rule, keepVars=[]):
     ruleRequires = rule.requires
     ruleEnsures = rule.ensures
 
-    ruleRequires = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupe(flattenLabel('_andBool_', ruleRequires)))
+    ruleRequires = buildAssoc(KToken('true', 'Bool'), '_andBool_', unique(flattenLabel('_andBool_', ruleRequires)))
     ruleRequires = simplifyBool(ruleRequires)
 
-    ruleEnsures = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupe(flattenLabel('_andBool_', ruleEnsures)))
+    ruleEnsures = buildAssoc(KToken('true', 'Bool'), '_andBool_', unique(flattenLabel('_andBool_', ruleEnsures)))
     ruleEnsures = simplifyBool(ruleEnsures)
 
     constrainedVars = [] if keepVars is None else keepVars
@@ -511,8 +534,8 @@ def remove_generated_cells(term: KInner) -> KInner:
     -   Input: Constrained term.
     -   Output: Constrained term with those cells removed.
     """
-    rule = KApply('<generatedTop>', [KVariable('CONFIG'), KVariable('_')]), KVariable('CONFIG')
-    return rewriteAnywhereWith(rule, term)
+    rewrite = KRewrite(KApply('<generatedTop>', [KVariable('CONFIG'), KVariable('_')]), KVariable('CONFIG'))
+    return rewrite(term)
 
 
 def isAnonVariable(kast):
@@ -796,8 +819,8 @@ def substToMap(subst):
 
 
 def undoAliases(definition, kast):
-    alias_undo_rewrites = [(sent.body.rhs, sent.body.lhs) for module in definition for sent in module if type(sent) is KRule and 'alias' in sent.att]
+    alias_undo_rewrites = [KRewrite(rule.body.rhs, rule.body.lhs) for module in definition for rule in module.rules if 'alias' in rule.att]
     newKast = kast
-    for r in alias_undo_rewrites:
-        newKast = rewriteAnywhereWith(r, newKast)
+    for rewrite in alias_undo_rewrites:
+        newKast = rewrite(newKast)
     return newKast

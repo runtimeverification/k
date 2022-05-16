@@ -52,10 +52,10 @@ $(VENV_PROD_DIR): $(VENV_PROD)
 test: test-unit test-integration test-pyk
 
 test-unit: $(VENV_DEV)
-	$(ACTIVATE_DEV) && python3 -m unittest discover -t src pyk.tests
+	$(ACTIVATE_DEV) && python3 -m unittest discover -vt src pyk.tests
 
 test-integration: $(VENV_DEV)
-	$(ACTIVATE_DEV) && python3 -m unittest discover -t src pyk.integration_tests
+	$(ACTIVATE_DEV) && python3 -m unittest discover -vt src pyk.integration_tests
 
 test-pyk: $(VENV_PROD)
 	$(ACTIVATE_PROD) && $(MAKE) -C pyk-tests
