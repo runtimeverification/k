@@ -1,5 +1,15 @@
 from collections import Counter
-from typing import Callable, Dict, Mapping, Sequence, Tuple, Type, TypeVar
+from typing import (
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+)
 
 from .cli_utils import fatal
 from .kast import (
@@ -15,15 +25,19 @@ from .kast import (
     KSequence,
     KToken,
     KVariable,
+    Subst,
     WithKAtt,
     bottom_up,
     collect,
     flattenLabel,
     klabelEmptyK,
     ktokenDots,
+    match,
+    rewrite_anywhere,
     top_down,
 )
 from .prelude import (
+    boolToken,
     buildAssoc,
     mlAnd,
     mlBottom,
@@ -33,7 +47,6 @@ from .prelude import (
     mlOr,
     mlTop,
 )
-from .rewrite import Subst, match, rewrite_anywhere
 from .utils import dedupe, find_common_items, hash_str
 
 KI = TypeVar('KI', bound=KInner)
@@ -144,6 +157,45 @@ def extract_lhs(term: KInner) -> KInner:
 
 def extract_rhs(term: KInner) -> KInner:
     return top_down(if_ktype(KRewrite, lambda rw: rw.rhs), term)
+
+
+def extract_subst(term: KInner) -> Tuple[Subst, KInner]:
+
+    def _subst_for_terms(term1: KInner, term2: KInner) -> Optional[Subst]:
+        if type(term1) is KVariable and type(term2) not in {KToken, KVariable}:
+            return Subst({term1.name: term2})
+        if type(term2) is KVariable and type(term1) not in {KToken, KVariable}:
+            return Subst({term2.name: term1})
+        return None
+
+    def _extract_subst(conjunct: KInner) -> Optional[Subst]:
+        if type(conjunct) is KApply:
+            if conjunct.label == '#Equals':
+                subst = _subst_for_terms(conjunct.args[0], conjunct.args[1])
+
+                if subst is not None:
+                    return subst
+
+                if conjunct.args[0] == boolToken(True) and type(conjunct.args[1]) is KApply and conjunct.args[1].label in {'_==K_', '_==Int_'}:
+                    subst = _subst_for_terms(conjunct.args[1].args[0], conjunct.args[1].args[1])
+
+                    if subst is not None:
+                        return subst
+
+        return None
+
+    conjuncts = flattenLabel('#And', term)
+    subst = Subst()
+    rem_conjuncts: List[KInner] = []
+
+    for conjunct in conjuncts:
+        new_subst = _extract_subst(conjunct)
+        if new_subst is None:
+            rem_conjuncts.append(conjunct)
+        else:
+            subst = subst.compose(new_subst)
+
+    return subst, mlAnd(rem_conjuncts)
 
 
 def count_vars(term: KInner) -> Counter:

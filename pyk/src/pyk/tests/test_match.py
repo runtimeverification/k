@@ -2,8 +2,7 @@ from functools import partial
 from typing import Final, Tuple
 from unittest import TestCase
 
-from ..kast import KApply, KInner, KVariable
-from ..rewrite import match
+from ..kast import KApply, KInner, KVariable, match
 
 a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
 x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])

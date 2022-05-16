@@ -2,9 +2,9 @@ from functools import partial
 from typing import Dict, Final, Tuple
 from unittest import TestCase
 
-from ..kast import KApply, KInner, KToken, KVariable
+from ..kast import KApply, KInner, KToken, KVariable, Subst
+from ..kastManip import extract_subst
 from ..prelude import mlAnd, mlEquals, mlEqualsTrue, mlTop
-from ..rewrite import Subst, extract_subst
 
 a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
 x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])

@@ -21,10 +21,9 @@ from typing import (
 from graphviz import Digraph
 
 from .cterm import CTerm
-from .kast import KInner, KRuleLike
+from .kast import KInner, KRuleLike, Subst
 from .kastManip import buildRule, mlAnd, simplifyBool, unsafeMlPredToBool
 from .ktool import KPrint
-from .rewrite import Subst
 from .utils import compare_short_hashes, shorten_hashes
 
 

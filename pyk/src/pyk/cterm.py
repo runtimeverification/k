@@ -3,10 +3,9 @@ from functools import cached_property
 from itertools import chain
 from typing import Iterable, Optional, Tuple
 
-from .kast import TOP, KApply, KInner, flattenLabel
+from .kast import TOP, KApply, KInner, Subst, flattenLabel
 from .kastManip import match, splitConfigAndConstraints
 from .prelude import mlAnd, mlImplies
-from .rewrite import Subst
 from .utils import unique
 
 
