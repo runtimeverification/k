@@ -194,7 +194,10 @@ def extract_subst(term: KInner) -> Tuple[Subst, KInner]:
         if new_subst is None:
             rem_conjuncts.append(conjunct)
         else:
-            subst = subst.compose(new_subst)
+            new_subst = subst.union(new_subst)
+            if new_subst is None:
+                raise ValueError('Conflicting substitutions')  # TODO handle this case
+            subst = new_subst
 
     return subst, mlAnd(rem_conjuncts)
 
