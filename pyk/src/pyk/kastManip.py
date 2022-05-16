@@ -46,7 +46,7 @@ from .prelude import (
     mlOr,
     mlTop,
 )
-from .utils import dedupe, find_common_items, hash_str
+from .utils import find_common_items, hash_str, unique
 
 KI = TypeVar('KI', bound=KInner)
 W = TypeVar('W', bound=WithKAtt)
@@ -281,7 +281,7 @@ def propagateUpConstraints(k):
         if len(common) == 0:
             return _k
         conjunct1 = buildAssoc(mlTop(), '#And', l2)
-        conjunct2 = buildAssoc(mlTop, '#And', r2)
+        conjunct2 = buildAssoc(mlTop(), '#And', r2)
         disjunct = KApply('#Or', [conjunct1, conjunct2])
         return buildAssoc(mlTop(), '#And', [disjunct] + common)
     return bottom_up(_propagateUpConstraints, k)
@@ -494,10 +494,10 @@ def minimizeRule(rule, keepVars=[]):
     ruleRequires = rule.requires
     ruleEnsures = rule.ensures
 
-    ruleRequires = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupe(flattenLabel('_andBool_', ruleRequires)))
+    ruleRequires = buildAssoc(KToken('true', 'Bool'), '_andBool_', unique(flattenLabel('_andBool_', ruleRequires)))
     ruleRequires = simplifyBool(ruleRequires)
 
-    ruleEnsures = buildAssoc(KToken('true', 'Bool'), '_andBool_', dedupe(flattenLabel('_andBool_', ruleEnsures)))
+    ruleEnsures = buildAssoc(KToken('true', 'Bool'), '_andBool_', unique(flattenLabel('_andBool_', ruleEnsures)))
     ruleEnsures = simplifyBool(ruleEnsures)
 
     constrainedVars = [] if keepVars is None else keepVars

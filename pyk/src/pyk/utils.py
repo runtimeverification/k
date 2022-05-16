@@ -103,14 +103,6 @@ def unique(iterable: Iterable[H]) -> Iterator[H]:
             yield elem
 
 
-def dedupe(xs: Iterable[T]) -> List[T]:
-    res = []
-    for x in xs:
-        if x not in res:
-            res.append(x)
-    return res
-
-
 def nonempty_str(x: Any) -> str:
     if x is None:
         raise ValueError('Expected nonempty string, found: null.')
