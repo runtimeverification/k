@@ -50,6 +50,14 @@ class Subst(Mapping[str, KInner]):
         from_self = ((k, v) for k, v in self.items() if k not in other)
         return Subst(dict(chain(from_other, from_self)))
 
+    def union(self, other: 'Subst') -> Optional['Subst']:
+        subst = dict(self)
+        for v in other:
+            if v in subst and subst[v] != other[v]:
+                return None
+            subst[v] = other[v]
+        return Subst(subst)
+
     def apply(self, term: KInner) -> KInner:
         def replace(term):
             if type(term) is KVariable and term.name in self:

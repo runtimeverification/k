@@ -42,6 +42,30 @@ class SubstTest(TestCase):
                 # Then
                 self.assertDictEqual(actual, expected)
 
+    def test_union(self):
+        # Given
+        test_data = (
+            ({}, {}, {}),
+            ({'x': x}, {}, {'x': x}),
+            ({}, {'x': x}, {'x': x}),
+            ({'x': x, 'y': y}, {'x': x}, {'x': x, 'y': y}),
+            ({'x': x, 'y': y}, {'z': z}, {'x': x, 'y': y, 'z': z}),
+            ({'x': x}, {'x': y}, None),
+            ({'x': x, 'y': y}, {'x': y}, None),
+        )
+
+        for i, [subst1, subst2, expected] in enumerate(test_data):
+            with self.subTest(i=i):
+                # When
+                actual = Subst(subst1).union(Subst(subst2))
+
+                # Then
+                if expected is None:
+                    self.assertIsNone(actual)
+                else:
+                    self.assertIsNotNone(actual)
+                    self.assertDictEqual(dict(actual), expected)
+
     def test_apply(self):
         # Given
         test_data = (
