@@ -1,0 +1,33 @@
+#!/usr/bin/make -f
+# See debhelper(7) (uncomment to enable)
+# output every command that modifies files on the build system.
+#export DH_VERBOSE = 1
+
+
+# see FEATURE AREAS in dpkg-buildflags(1)
+export DEB_BUILD_MAINT_OPTIONS=hardening=-stackprotector optimize=-lto
+
+# see ENVIRONMENT in dpkg-buildflags(1)
+# package maintainers to append CFLAGS
+#export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
+# package maintainers to append LDFLAGS
+#export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+
+%:
+	dh $@ 
+
+override_dh_auto_build:
+	mvn --batch-mode package -DskipTests -Dllvm.backend.prefix=/usr -Dllvm.backend.destdir=$(shell pwd)/debian/kframework
+
+override_dh_auto_install:
+	DESTDIR=$(shell pwd)/debian/kframework PREFIX=/usr package/package
+
+override_dh_strip:
+	dh_strip -Xliballoc.a -Xlibarithmetic.a -XlibAST.a -Xlibutil.a -XlibParser.a -Xlibcollect.a -Xlibcollections.a -Xlibjson.a -Xlibstrings.a -Xlibmeta.a -Xlibio.a
+
+# dh_make generated override targets
+# This is example for Cmake (See https://bugs.debian.org/641051 )
+#override_dh_auto_configure:
+#	dh_auto_configure -- #	-DCMAKE_LIBRARY_PATH=$(DEB_HOST_MULTIARCH)
+

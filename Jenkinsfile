@@ -45,7 +45,7 @@ pipeline {
         stash name: 'src', includes: "kframework-${env.VERSION}-src.tar.gz"
       }
     }
-    stage('Build and Package on Ubuntu Bionic') {
+    stage('Build and Package on Ubuntu Focal') {
       when {
         anyOf {
           branch 'release'
@@ -54,11 +54,11 @@ pipeline {
         beforeAgent true
       }
       stages {
-        stage('Build on Ubuntu Bionic') {
+        stage('Build on Ubuntu Focal') {
           agent {
             dockerfile {
               filename 'package/debian/Dockerfile'
-              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
+              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg LLVM_VERSION=12'
               reuseNode true
             }
           }
@@ -95,11 +95,11 @@ pipeline {
                   checkout scm
                   sh '''
                     mv package/debian ./debian
-                    mv debian/control.bionic debian/control
+                    mv debian/control.focal debian/control
                     dpkg-buildpackage
                   '''
                 }
-                stash name: 'bionic', includes: "kframework_${env.VERSION}_amd64.deb"
+                stash name: 'focal', includes: "kframework_${env.VERSION}_amd64.deb"
               }
             }
           }
@@ -111,58 +111,6 @@ pipeline {
                 make --directory=k-exercises clean
                 make --directory=haskell-backend/src/main/native/haskell-backend clean
               '''
-            }
-          }
-        }
-        stage('Test Debian Package') {
-          agent {
-            docker {
-              image 'ubuntu:bionic'
-              args '-u 0'
-              reuseNode true
-            }
-          }
-          options { skipDefaultCheckout() }
-          steps {
-            unstash 'bionic'
-            sh 'src/main/scripts/test-in-container-debian'
-          }
-          post {
-            always {
-              sh 'stop-kserver || true'
-              archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-            }
-          }
-        }
-      }
-    }
-    stage('Build and Package on Ubuntu Focal') {
-      when {
-        branch 'release'
-        beforeAgent true
-      }
-      stages {
-        stage('Build on Ubuntu Focal') {
-          agent {
-            dockerfile {
-              filename 'package/debian/Dockerfile'
-              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:focal --build-arg LLVM_VERSION=12'
-              reuseNode true
-            }
-          }
-          stages {
-            stage('Build Debian Package') {
-              steps {
-                dir("kframework-${env.VERSION}") {
-                  checkout scm
-                  sh '''
-                    mv package/debian ./debian
-                    mv debian/control.focal debian/control
-                    dpkg-buildpackage
-                  '''
-                }
-                stash name: 'focal', includes: "kframework_${env.VERSION}_amd64.deb"
-              }
             }
           }
         }
@@ -192,6 +140,125 @@ pipeline {
           slackSend color: '#cb2431'                                             \
                   , channel: '#k'                                                \
                   , message: "Ubuntu Focal Packaging Failed: ${env.BUILD_URL}"
+        }
+      }
+    }
+    stage('Build and Package on Ubuntu Bionic') {
+      when {
+        anyOf {
+          branch 'release'
+          changeRequest()
+        }
+        beforeAgent true
+      }
+      stages {
+        stage('Build on Ubuntu Bionic') {
+          agent {
+            dockerfile {
+              filename 'package/debian/Dockerfile'
+              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:bionic'
+              reuseNode true
+            }
+          }
+          stages {
+            stage('Build Debian Package') {
+              steps {
+                dir("kframework-${env.VERSION}") {
+                  checkout scm
+                  sh '''
+                    mv package/debian ./debian
+                    mv debian/control.bionic debian/control
+                    dpkg-buildpackage
+                  '''
+                }
+                stash name: 'bionic', includes: "kframework_${env.VERSION}_amd64.deb"
+              }
+            }
+          }
+        }
+        stage('Test Debian Package') {
+          agent {
+            docker {
+              image 'ubuntu:bionic'
+              args '-u 0'
+              reuseNode true
+            }
+          }
+          options { skipDefaultCheckout() }
+          steps {
+            unstash 'bionic'
+            sh 'src/main/scripts/test-in-container-debian'
+          }
+          post {
+            always {
+              sh 'stop-kserver || true'
+              archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
+            }
+          }
+        }
+      }
+    }
+    stage('Build and Package on Ubuntu Jammy') {
+      when {
+        anyOf {
+          branch 'release'
+          changeRequest()
+        }
+        beforeAgent true
+      }
+      stages {
+        stage('Build on Ubuntu Jammy') {
+          agent {
+            dockerfile {
+              filename 'package/debian/Dockerfile'
+              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14'
+              reuseNode true
+            }
+          }
+          stages {
+            stage('Build Debian Package') {
+              steps {
+                dir("kframework-${env.VERSION}") {
+                  checkout scm
+                  sh '''
+                    mv package/debian ./debian
+                    mv debian/control.jammy debian/control
+                    mv debian/compat.jammy debian/compat
+                    mv debian/rules.jammy debian/rules
+                    dpkg-buildpackage
+                  '''
+                }
+                stash name: 'jammy', includes: "kframework_${env.VERSION}_amd64.deb"
+              }
+            }
+          }
+        }
+        stage('Test Debian Package') {
+          agent {
+            docker {
+              image 'ubuntu:jammy'
+              args '-u 0'
+              reuseNode true
+            }
+          }
+          options { skipDefaultCheckout() }
+          steps {
+            unstash 'jammy'
+            sh 'src/main/scripts/test-in-container-debian'
+          }
+          post {
+            always {
+              sh 'stop-kserver || true'
+              archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
+            }
+          }
+        }
+      }
+      post {
+        failure {
+          slackSend color: '#cb2431'                                             \
+                  , channel: '#k'                                                \
+                  , message: "Ubuntu Jammy Packaging Failed: ${env.BUILD_URL}"
         }
       }
     }
