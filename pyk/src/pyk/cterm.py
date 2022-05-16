@@ -3,10 +3,11 @@ from functools import cached_property
 from itertools import chain
 from typing import Iterable, Optional, Tuple
 
-from .kast import TOP, KInner, flattenLabel
+from .kast import TOP, KApply, KInner, flattenLabel
 from .kastManip import match, splitConfigAndConstraints
 from .prelude import mlAnd, mlImplies
 from .rewrite import Subst
+from .utils import unique
 
 
 @dataclass(frozen=True)
@@ -16,9 +17,20 @@ class CTerm:
 
     def __init__(self, term: KInner) -> None:
         config, constraint = splitConfigAndConstraints(term)
-        constraints = tuple(sorted(set(flattenLabel('#And', constraint)), key=self._constraint_sort_key))
+        constraints = CTerm._normalize_constraints(flattenLabel('#And', constraint))
         object.__setattr__(self, 'config', config)
         object.__setattr__(self, 'constraints', constraints)
+
+    @staticmethod
+    def _normalize_constraints(constraints: Iterable[KInner]) -> Tuple[KInner, ...]:
+        constraints = unique(constraints)
+        constraints = (constraint for constraint in constraints if not CTerm._is_spurious_constraint(constraint))
+        constraints = sorted(constraints, key=CTerm._constraint_sort_key)
+        return tuple(constraints)
+
+    @staticmethod
+    def _is_spurious_constraint(term: KInner) -> bool:
+        return type(term) is KApply and term.label == '#Equals' and term.args[0] == term.args[1]
 
     @staticmethod
     def _constraint_sort_key(term: KInner) -> Tuple[int, str]:
