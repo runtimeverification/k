@@ -123,6 +123,24 @@ def match(pattern: KInner, term: KInner) -> Optional[Subst]:
 
     # TODO simplify
     def _match(pattern: KInner, term: KInner) -> Optional[Dict[str, KInner]]:
+
+        def combine_dicts(dict1: Optional[Mapping[K, V]], dict2: Optional[Mapping[K, V]]) -> Optional[Dict[K, V]]:
+            if dict1 is None:
+                return None
+
+            if dict2 is None:
+                return None
+
+            intersecting_keys = (key for key in dict1 if key in dict2)
+            if any(dict1[key] != dict2[key] for key in intersecting_keys):
+                return None
+
+            return {**dict1, **dict2}
+
+        def combine(*dicts: Optional[Mapping[K, V]]) -> Optional[Dict[K, V]]:
+            unit: Optional[Dict[K, V]] = {}
+            return reduce(combine_dicts, dicts, unit)
+
         subst: Optional[Dict[str, KInner]] = {}
         if type(pattern) is KVariable:
             return {pattern.name: term}
@@ -132,18 +150,18 @@ def match(pattern: KInner, term: KInner) -> Optional[Subst]:
                 and pattern.label == term.label and pattern.arity == term.arity:
             for patternArg, kastArg in zip(pattern.args, term.args):
                 argSubst = _match(patternArg, kastArg)
-                subst = combine_all(subst, argSubst)
+                subst = combine(subst, argSubst)
                 if subst is None:
                     return None
             return subst
         if type(pattern) is KRewrite and type(term) is KRewrite:
             lhsSubst = _match(pattern.lhs, term.lhs)
             rhsSubst = _match(pattern.rhs, term.rhs)
-            return combine_all(lhsSubst, rhsSubst)
+            return combine(lhsSubst, rhsSubst)
         if type(pattern) is KSequence and type(term) is KSequence and pattern.arity == term.arity:
             for (patternItem, substItem) in zip(pattern.items, term.items):
                 itemSubst = _match(patternItem, substItem)
-                subst = combine_all(subst, itemSubst)
+                subst = combine(subst, itemSubst)
                 if subst is None:
                     return None
             return subst
@@ -151,25 +169,6 @@ def match(pattern: KInner, term: KInner) -> Optional[Subst]:
 
     subst = _match(pattern, term)
     return Subst(subst) if subst is not None else None
-
-
-def combine_dicts(dict1: Optional[Mapping[K, V]], dict2: Optional[Mapping[K, V]]) -> Optional[Dict[K, V]]:
-    if dict1 is None:
-        return None
-
-    if dict2 is None:
-        return None
-
-    intersecting_keys = (key for key in dict1 if key in dict2)
-    if any(dict1[key] != dict2[key] for key in intersecting_keys):
-        return None
-
-    return {**dict1, **dict2}
-
-
-def combine_all(*dicts: Optional[Mapping[K, V]]) -> Optional[Dict[K, V]]:
-    unit: Optional[Dict[K, V]] = {}
-    return reduce(combine_dicts, dicts, unit)
 
 
 def rewrite(rule: Tuple[KInner, KInner], term: KInner) -> KInner:
