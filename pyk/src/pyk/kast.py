@@ -24,8 +24,6 @@ from typing import (
     overload,
 )
 
-from typing_extensions import TypeAlias
-
 from .utils import FrozenDict, hash_str
 
 T = TypeVar('T', bound='KAst')
@@ -135,9 +133,6 @@ class KInner(KAst, ABC):
     @abstractmethod
     def map_inner(self: KI, f: Callable[['KInner'], 'KInner']) -> KI:
         ...
-
-
-K: TypeAlias = KInner
 
 
 @final
