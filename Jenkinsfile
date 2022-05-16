@@ -70,6 +70,8 @@ pipeline {
                   sh '''
                     mv package/debian ./debian
                     mv debian/control.jammy debian/control
+                    mv debian/compat.jammy debian/compat
+                    mv debian/rules.jammy debian/rules
                     dpkg-buildpackage
                   '''
                 }
