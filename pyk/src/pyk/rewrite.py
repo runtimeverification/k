@@ -25,7 +25,7 @@ class Subst(Mapping[str, KInner]):
     _subst: FrozenDict[str, KInner]
 
     def __init__(self, subst: Mapping[str, KInner] = {}):
-        object.__setattr__(self, '_subst', FrozenDict({k: v for k, v in subst.items() if type(v) is not KVariable or v.name != k}))
+        object.__setattr__(self, '_subst', FrozenDict(subst))
 
     def __iter__(self) -> Iterator[str]:
         return iter(self._subst)
@@ -41,6 +41,9 @@ class Subst(Mapping[str, KInner]):
 
     def __call__(self, term: KInner) -> KInner:
         return self.apply(term)
+
+    def minimize(self) -> 'Subst':
+        return Subst({k: v for k, v in self.items() if v != KVariable(k)})
 
     def compose(self, other: 'Subst') -> 'Subst':
         from_other = ((k, self(v)) for k, v in other.items())

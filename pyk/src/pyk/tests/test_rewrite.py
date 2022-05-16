@@ -18,34 +18,6 @@ def int_eq(term1: KInner, term2: KInner) -> KApply:
 
 class SubstTest(TestCase):
 
-    def test_eq(self):
-        # Given
-        test_data = (
-            ({}, {}),
-            ({'x': x}, {}),
-            ({}, {'x': x}),
-            ({'x': a}, {'x': a}),
-        )
-
-        for i, [subst1, subst2] in enumerate(test_data):
-            with self.subTest(i=i):
-                # Then
-                self.assertEqual(Subst(subst1), Subst(subst2))
-
-    def test_neq(self):
-        # Given
-        test_data = (
-            ({'x': a}, {}),
-            ({}, {'x': a}),
-            ({'x': a}, {'x': b}),
-            ({'x': y}, {'x': z}),
-        )
-
-        for i, [subst1, subst2] in enumerate(test_data):
-            with self.subTest(i=i):
-                # Then
-                self.assertNotEqual(Subst(subst1), Subst(subst2))
-
     def test_compose(self):
         # Given
         test_data = (
@@ -65,7 +37,7 @@ class SubstTest(TestCase):
         for i, [subst1, subst2, expected] in enumerate(test_data):
             with self.subTest(i=i):
                 # When
-                actual = dict(Subst(subst1) * Subst(subst2))
+                actual = dict((Subst(subst1) * Subst(subst2)).minimize())
 
                 # Then
                 self.assertDictEqual(actual, expected)
