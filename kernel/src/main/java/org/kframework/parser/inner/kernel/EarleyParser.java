@@ -994,16 +994,6 @@ production:
     }
   }
 
-  /*
-   * Construct the new parse tree for a state during the "complete" step.
-   *
-   * @param state The completed state corresponding to the non-terminal that was just parsed
-   * @param nextState The state to compute the parse tree for
-   * @param completed The state that was just prior to the non-terminal that was completed
-   * @param k The end-index of the parse tree
-   * @param data The {@link ParserMetadata} about the sentence being parsed.
-   */
-
   /**
    * Construct the new parse tree for a state during the "complete" step, or after a nullable non-terminal in the
    * "predict" step.
