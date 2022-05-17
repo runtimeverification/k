@@ -1,9 +1,9 @@
-from typing import Union
+from typing import Iterable, Union
 
-from .kast import BOTTOM, TOP, KApply, KToken
+from .kast import BOTTOM, TOP, KApply, KInner, KToken
 
 
-def buildAssoc(unit, join, ls):
+def buildAssoc(unit: KInner, join: str, ls: Iterable[KInner]) -> KInner:
     """Build an associative binary operator term given the join and unit ops.
 
     -   Input: unit, join, and list of elements to join.
