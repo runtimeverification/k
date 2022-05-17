@@ -47,8 +47,8 @@ class CTerm:
     def hash(self) -> str:
         return self.term.hash
 
-    def match(self, pattern: 'CTerm') -> Optional[Subst]:
-        match_res = self.match_with_constraint(pattern)
+    def match(self, cterm: 'CTerm') -> Optional[Subst]:
+        match_res = self.match_with_constraint(cterm)
 
         if not match_res:
             return None
@@ -60,13 +60,13 @@ class CTerm:
 
         return subst
 
-    def match_with_constraint(self, pattern: 'CTerm') -> Optional[Tuple[Subst, KInner]]:
-        subst = match(pattern=pattern.config, term=self.config)
+    def match_with_constraint(self, cterm: 'CTerm') -> Optional[Tuple[Subst, KInner]]:
+        subst = match(pattern=self.config, term=cterm.config)
 
         if subst is None:
             return None
 
-        constraint = self._ml_impl(self.constraints, map(subst, pattern.constraints))
+        constraint = self._ml_impl(cterm.constraints, map(subst, self.constraints))
 
         return subst, constraint
 
