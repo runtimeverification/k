@@ -4,7 +4,7 @@ from itertools import chain
 from typing import Iterable, Optional, Tuple
 
 from .kast import TOP, KApply, KInner, Subst, flattenLabel
-from .kastManip import match, splitConfigAndConstraints
+from .kastManip import splitConfigAndConstraints
 from .prelude import mlAnd, mlImplies
 from .utils import unique
 
@@ -61,7 +61,7 @@ class CTerm:
         return subst
 
     def match_with_constraint(self, cterm: 'CTerm') -> Optional[Tuple[Subst, KInner]]:
-        subst = match(pattern=self.config, term=cterm.config)
+        subst = self.config.match(cterm.config)
 
         if subst is None:
             return None
