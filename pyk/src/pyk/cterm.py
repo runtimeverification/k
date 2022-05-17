@@ -3,10 +3,10 @@ from functools import cached_property
 from itertools import chain
 from typing import Iterable, Optional, Tuple
 
-from .kast import TOP, KInner, flattenLabel
-from .kastManip import match, splitConfigAndConstraints
+from .kast import TOP, KApply, KInner, Subst, flattenLabel
+from .kastManip import splitConfigAndConstraints
 from .prelude import mlAnd, mlImplies
-from .subst import Subst
+from .utils import unique
 
 
 @dataclass(frozen=True)
@@ -16,9 +16,25 @@ class CTerm:
 
     def __init__(self, term: KInner) -> None:
         config, constraint = splitConfigAndConstraints(term)
-        constraints = tuple(flattenLabel('#And', constraint))
+        constraints = CTerm._normalize_constraints(flattenLabel('#And', constraint))
         object.__setattr__(self, 'config', config)
         object.__setattr__(self, 'constraints', constraints)
+
+    @staticmethod
+    def _normalize_constraints(constraints: Iterable[KInner]) -> Tuple[KInner, ...]:
+        constraints = unique(constraints)
+        constraints = (constraint for constraint in constraints if not CTerm._is_spurious_constraint(constraint))
+        constraints = sorted(constraints, key=CTerm._constraint_sort_key)
+        return tuple(constraints)
+
+    @staticmethod
+    def _is_spurious_constraint(term: KInner) -> bool:
+        return type(term) is KApply and term.label == '#Equals' and term.args[0] == term.args[1]
+
+    @staticmethod
+    def _constraint_sort_key(term: KInner) -> Tuple[int, str]:
+        term_str = str(term)
+        return (len(term_str), term_str)
 
     def __iter__(self):
         return chain([self.config], self.constraints)
@@ -31,8 +47,8 @@ class CTerm:
     def hash(self) -> str:
         return self.term.hash
 
-    def match(self, pattern: 'CTerm') -> Optional[Subst]:
-        match_res = self.match_with_constraint(pattern)
+    def match(self, cterm: 'CTerm') -> Optional[Subst]:
+        match_res = self.match_with_constraint(cterm)
 
         if not match_res:
             return None
@@ -44,13 +60,13 @@ class CTerm:
 
         return subst
 
-    def match_with_constraint(self, pattern: 'CTerm') -> Optional[Tuple[Subst, KInner]]:
-        subst = match(pattern=pattern.config, term=self.config)
+    def match_with_constraint(self, cterm: 'CTerm') -> Optional[Tuple[Subst, KInner]]:
+        subst = self.config.match(cterm.config)
 
         if subst is None:
             return None
 
-        constraint = self._ml_impl(self.constraints, map(subst, pattern.constraints))
+        constraint = self._ml_impl(cterm.constraints, map(subst, self.constraints))
 
         return subst, constraint
 

@@ -2,7 +2,7 @@ import json
 from abc import ABC, abstractmethod
 from dataclasses import InitVar, dataclass
 from enum import Enum
-from functools import cached_property
+from functools import cached_property, reduce
 from itertools import chain
 from typing import (
     Any,
@@ -24,13 +24,13 @@ from typing import (
     overload,
 )
 
-from typing_extensions import TypeAlias
-
 from .utils import FrozenDict, hash_str
 
 T = TypeVar('T', bound='KAst')
 W = TypeVar('W', bound='WithKAtt')
 KI = TypeVar('KI', bound='KInner')
+K = TypeVar('K')
+V = TypeVar('V')
 
 
 class KAst(ABC):
@@ -136,8 +136,81 @@ class KInner(KAst, ABC):
     def map_inner(self: KI, f: Callable[['KInner'], 'KInner']) -> KI:
         ...
 
+    @abstractmethod
+    def match(self, term: 'KInner') -> Optional['Subst']:
+        """
+        Perform syntactic pattern matching and return the substitution.
 
-K: TypeAlias = KInner
+        :param term: Term to match.
+        :return: Substitution instantiating self to the term.
+        """
+        ...
+
+    @staticmethod
+    def _combine_matches(substs: Iterable[Optional['Subst']]) -> Optional['Subst']:
+        def combine(subst1: Optional['Subst'], subst2: Optional['Subst']) -> Optional['Subst']:
+            if subst1 is None or subst2 is None:
+                return None
+
+            return subst1.union(subst2)
+
+        unit: Optional[Subst] = Subst()
+        return reduce(combine, substs, unit)
+
+
+@dataclass(frozen=True)
+class Subst(Mapping[str, KInner]):
+    _subst: FrozenDict[str, KInner]
+
+    def __init__(self, subst: Mapping[str, KInner] = {}):
+        object.__setattr__(self, '_subst', FrozenDict(subst))
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._subst)
+
+    def __len__(self) -> int:
+        return len(self._subst)
+
+    def __getitem__(self, key: str) -> KInner:
+        return self._subst[key]
+
+    def __mul__(self, other: 'Subst') -> 'Subst':
+        return self.compose(other)
+
+    def __call__(self, term: KInner) -> KInner:
+        return self.apply(term)
+
+    def minimize(self) -> 'Subst':
+        return Subst({k: v for k, v in self.items() if v != KVariable(k)})
+
+    def compose(self, other: 'Subst') -> 'Subst':
+        from_other = ((k, self(v)) for k, v in other.items())
+        from_self = ((k, v) for k, v in self.items() if k not in other)
+        return Subst(dict(chain(from_other, from_self)))
+
+    def union(self, other: 'Subst') -> Optional['Subst']:
+        subst = dict(self)
+        for v in other:
+            if v in subst and subst[v] != other[v]:
+                return None
+            subst[v] = other[v]
+        return Subst(subst)
+
+    def apply(self, term: KInner) -> KInner:
+        def replace(term):
+            if type(term) is KVariable and term.name in self:
+                return self[term.name]
+            return term
+
+        return bottom_up(replace, term)
+
+    def unapply(self, term: KInner) -> KInner:
+        new_term = term
+        for var_name in self:
+            lhs = self[var_name]
+            rhs = KVariable(var_name)
+            new_term = KRewrite(lhs, rhs).replace(new_term)
+        return new_term
 
 
 @final
@@ -163,6 +236,9 @@ class KVariable(KInner):
     def map_inner(self: 'KVariable', f: Callable[[KInner], KInner]) -> 'KVariable':
         return self
 
+    def match(self, term: KInner) -> Subst:
+        return Subst({self.name: term})
+
 
 @final
 @dataclass(frozen=True)
@@ -186,6 +262,9 @@ class KSort(KInner):
 
     def map_inner(self: 'KSort', f: Callable[[KInner], KInner]) -> 'KSort':
         return self
+
+    def match(self, term: KInner) -> Optional[Subst]:
+        raise TypeError('KSort does not support pattern matching')
 
 
 BOOL = KSort('Bool')
@@ -218,6 +297,11 @@ class KToken(KInner):
 
     def map_inner(self: 'KToken', f: Callable[[KInner], KInner]) -> 'KToken':
         return self
+
+    def match(self, term: KInner) -> Optional[Subst]:
+        if type(term) is KToken:
+            return Subst() if term.token == self.token else None
+        return None
 
 
 TRUE = KToken('true', 'Bool')
@@ -265,6 +349,11 @@ class KApply(KInner):
     def map_inner(self: 'KApply', f: Callable[[KInner], KInner]) -> 'KApply':
         return self.let(args=(f(arg) for arg in self.args))
 
+    def match(self, term: KInner) -> Optional[Subst]:
+        if type(term) is KApply and term.label == self.label and term.arity == self.arity:
+            return KInner._combine_matches(arg.match(term_arg) for arg, term_arg in zip(self.args, term.args))
+        return None
+
 
 TOP: Final = KApply('#Top')
 BOTTOM: Final = KApply('#Bottom')
@@ -296,6 +385,9 @@ class KAs(KInner):
     def map_inner(self: 'KAs', f: Callable[[KInner], KInner]) -> 'KAs':
         return self.let(pattern=f(self.pattern), alias=f(self.alias))
 
+    def match(self, term: KInner) -> Optional[Subst]:
+        raise TypeError('KAs does not support pattern matching')
+
 
 @final
 @dataclass(frozen=True)
@@ -309,6 +401,12 @@ class KRewrite(KInner):
 
     def __iter__(self) -> Iterator[KInner]:
         return iter([self.lhs, self.rhs])
+
+    def __call__(self, term: KInner, *, top=False) -> KInner:
+        if top:
+            return self.apply_top(term)
+
+        return self.apply(term)
 
     @classmethod
     def from_dict(cls: Type['KRewrite'], d: Dict[str, Any]) -> 'KRewrite':
@@ -325,6 +423,44 @@ class KRewrite(KInner):
 
     def map_inner(self: 'KRewrite', f: Callable[[KInner], KInner]) -> 'KRewrite':
         return self.let(lhs=f(self.lhs), rhs=f(self.rhs))
+
+    def match(self, term: KInner) -> Optional[Subst]:
+        if type(term) is KRewrite:
+            lhs_subst = self.lhs.match(term.lhs)
+            rhs_subst = self.rhs.match(term.rhs)
+            if lhs_subst is None or rhs_subst is None:
+                return None
+            return lhs_subst.union(rhs_subst)
+        return None
+
+    def apply_top(self, term: KInner) -> KInner:
+        """
+        Rewrite a given term at the top
+
+        :param term: Term to rewrite.
+        :return: The term with the rewrite applied once at the top.
+        """
+        subst = self.lhs.match(term)
+        if subst is not None:
+            return subst(self.rhs)
+        return term
+
+    def apply(self, term: KInner) -> KInner:
+        """
+        Attempt rewriting once at every position in a term bottom-up.
+
+        :param term: Term to rewrite.
+        :return: The term with rewrites applied at every node once starting from the bottom.
+        """
+        return bottom_up(self.apply_top, term)
+
+    def replace_top(self, term: KInner) -> KInner:
+        if self.lhs == term:
+            return self.rhs
+        return term
+
+    def replace(self, term: KInner) -> KInner:
+        return bottom_up(self.replace_top, term)
 
 
 @final
@@ -371,6 +507,11 @@ class KSequence(KInner, Sequence[KInner]):
 
     def map_inner(self: 'KSequence', f: Callable[[KInner], KInner]) -> 'KSequence':
         return self.let(items=(f(item) for item in self.items))
+
+    def match(self, term: KInner) -> Optional[Subst]:
+        if type(term) is KSequence and term.arity == self.arity:
+            return KInner._combine_matches(item.match(term_item) for item, term_item in zip(self.items, term.items))
+        return None
 
 
 class KOuter(KAst, ABC):

@@ -6,6 +6,7 @@ from itertools import chain
 from threading import RLock
 from typing import (
     Any,
+    Container,
     Dict,
     Iterable,
     List,
@@ -14,19 +15,19 @@ from typing import (
     Sequence,
     Set,
     Tuple,
+    Union,
 )
 
 from graphviz import Digraph
 
 from .cterm import CTerm
-from .kast import TRUE, KInner, KRuleLike
+from .kast import KInner, KRuleLike, Subst
 from .kastManip import buildRule, mlAnd, simplifyBool, unsafeMlPredToBool
 from .ktool import KPrint
-from .subst import Subst
 from .utils import compare_short_hashes, shorten_hashes
 
 
-class KCFG:
+class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
     @dataclass(frozen=True)
     class Node:
@@ -50,8 +51,8 @@ class KCFG:
     class Edge(EdgeLike):
         source: 'KCFG.Node'
         target: 'KCFG.Node'
-        condition: KInner = TRUE
-        depth: int = 1
+        condition: KInner
+        depth: int
 
         def to_dict(self) -> Dict[str, Any]:
             return {'source': self.source.id, 'target': self.target.id, 'condition': self.condition.to_dict(), 'depth': self.depth}
@@ -74,7 +75,7 @@ class KCFG:
             object.__setattr__(self, 'source', source)
             object.__setattr__(self, 'target', target)
 
-            match_res = source.cterm.match_with_constraint(target.cterm)
+            match_res = target.cterm.match_with_constraint(source.cterm)
             if not match_res:
                 raise ValueError(f'No matching between: {source.id} and {target.id}')
 
@@ -101,6 +102,15 @@ class KCFG:
         self._target = set()
         self._expanded = set()
         self._lock = RLock()
+
+    def __contains__(self, item: object) -> bool:
+        if type(item) is KCFG.Node:
+            return self.contains_node(item)
+        if type(item) is KCFG.Edge:
+            return self.contains_edge(item)
+        if type(item) is KCFG.Cover:
+            return self.contains_cover(item)
+        return False
 
     def __enter__(self):
         self._lock.acquire()
@@ -142,20 +152,20 @@ class KCFG:
 
     @property
     def frontier(self) -> List[Node]:
-        return [node for node in self._nodes.values() if self.is_frontier(node.id)]
+        return [node for node in self.nodes if self.is_frontier(node.id)]
 
     @property
     def stuck(self) -> List[Node]:
-        return [node for node in self._nodes.values() if self.is_stuck(node.id)]
+        return [node for node in self.nodes if self.is_stuck(node.id)]
 
     def to_dict(self) -> Dict[str, Any]:
         nodes = [node.to_dict() for node in self.nodes]
         edges = [edge.to_dict() for edge in self.edges()]
         covers = [cover.to_dict() for cover in self.covers()]
 
-        init = list(self._init)
-        target = list(self._target)
-        expanded = list(self._expanded)
+        init = sorted(self._init)
+        target = sorted(self._target)
+        expanded = sorted(self._expanded)
 
         res = {
             'nodes': nodes,
@@ -224,6 +234,8 @@ class KCFG:
                 atts.append('init')
             if self.is_target(node_id):
                 atts.append('target')
+            if self.is_expanded(node_id):
+                atts.append('expanded')
             if self.is_stuck(node_id):
                 atts.append('stuck')
             if self.is_frontier(node_id):
@@ -262,21 +274,36 @@ class KCFG:
 
         return graph.source
 
-    def _resolve(self, short_id: str) -> str:
-        matches = [node_id for node_id in self._nodes if compare_short_hashes(short_id, node_id)]
+    def _resolve_all(self, short_id: str) -> List[str]:
+        return [node_id for node_id in self._nodes if compare_short_hashes(short_id, node_id)]
+
+    def _resolve_or_none(self, short_id: str) -> Optional[str]:
+        matches = self._resolve_all(short_id)
         if not matches:
-            raise ValueError(f'Unknown node: {short_id}')
+            return None
         if len(matches) > 1:
             raise ValueError(f'Multiple nodes for pattern: {short_id} (matches e.g. {matches[0]} and {matches[1]})')
         return matches[0]
+
+    def _resolve(self, short_id: str) -> str:
+        match = self._resolve_or_none(short_id)
+        if not match:
+            raise ValueError(f'Unknown node: {short_id}')
+        return match
 
     def node(self, node_id: str) -> Node:
         node_id = self._resolve(node_id)
         return self._nodes[node_id]
 
-    def node_with_cterm(self, cterm: CTerm) -> Optional[Node]:
+    def get_node(self, id: str) -> Optional[Node]:
+        return self._nodes.get(id)
+
+    def get_node_by_cterm(self, cterm: CTerm) -> Optional[Node]:
         node = KCFG.Node(cterm)
-        return self._nodes.get(node.id)
+        return self.get_node(node.id)
+
+    def contains_node(self, node: Node) -> bool:
+        return bool(self.get_node(node.id))
 
     def create_node(self, cterm: CTerm) -> Node:
         node = KCFG.Node(cterm)
@@ -287,13 +314,8 @@ class KCFG:
         self._nodes[node.id] = node
         return node
 
-    def find_or_create_node(self, cterm: CTerm) -> Node:
-        node = self.node_with_cterm(cterm)
-
-        if not node:
-            node = self.create_node(cterm)
-
-        return node
+    def get_or_create_node(self, cterm: CTerm) -> Node:
+        return self.get_node_by_cterm(cterm) or self.create_node(cterm)
 
     def remove_node(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
@@ -316,20 +338,6 @@ class KCFG:
         self._target.discard(node_id)
         self._expanded.discard(node_id)
 
-    def create_edge(self, source_id: str, target_id: str, condition: KInner = TRUE, depth=1) -> Edge:
-        source = self.node(source_id)
-        target = self.node(target_id)
-
-        if target.id in self._edges.get(source.id, {}):
-            raise ValueError(f'Edge already exists: {source.id} -> {target.id}')
-
-        if source.id not in self._edges:
-            self._edges[source.id] = {}
-
-        edge = KCFG.Edge(source, target, condition, depth)
-        self._edges[source.id][target.id] = edge
-        return edge
-
     def edge(self, source_id: str, target_id: str) -> Optional[Edge]:
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
@@ -347,6 +355,25 @@ class KCFG:
 
         return [edge for edge in res if not target_id or target_id == edge.target.id]
 
+    def contains_edge(self, edge: Edge) -> bool:
+        if other := self.edge(source_id=edge.source.id, target_id=edge.target.id):
+            return edge == other
+        return False
+
+    def create_edge(self, source_id: str, target_id: str, condition: KInner, depth: int) -> Edge:
+        source = self.node(source_id)
+        target = self.node(target_id)
+
+        if target.id in self._edges.get(source.id, {}):
+            raise ValueError(f'Edge already exists: {source.id} -> {target.id}')
+
+        if source.id not in self._edges:
+            self._edges[source.id] = {}
+
+        edge = KCFG.Edge(source, target, condition, depth)
+        self._edges[source.id][target.id] = edge
+        return edge
+
     def remove_edge(self, source_id: str, target_id: str) -> None:
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
@@ -358,20 +385,6 @@ class KCFG:
         self._edges[source_id].pop(target_id)
         if not self._edges[source_id]:
             self._edges.pop(source_id)
-
-    def create_cover(self, source_id: str, target_id: str) -> Cover:
-        source = self.node(source_id)
-        target = self.node(target_id)
-
-        if target.id in self._covers.get(source.id, {}):
-            raise ValueError(f'Cover already exists: {source.id} -> {target.id}')
-
-        if source.id not in self._covers:
-            self._covers[source.id] = {}
-
-        cover = KCFG.Cover(source, target)
-        self._covers[source.id][target.id] = cover
-        return cover
 
     def cover(self, source_id: str, target_id: str) -> Optional[Cover]:
         source_id = self._resolve(source_id)
@@ -389,6 +402,25 @@ class KCFG:
             res = (cover for _, targets in self._covers.items() for _, cover in targets.items())
 
         return [cover for cover in res if not target_id or target_id == cover.target.id]
+
+    def contains_cover(self, cover: Cover) -> bool:
+        if other := self.cover(source_id=cover.source.id, target_id=cover.target.id):
+            return cover == other
+        return False
+
+    def create_cover(self, source_id: str, target_id: str) -> Cover:
+        source = self.node(source_id)
+        target = self.node(target_id)
+
+        if target.id in self._covers.get(source.id, {}):
+            raise ValueError(f'Cover already exists: {source.id} -> {target.id}')
+
+        if source.id not in self._covers:
+            self._covers[source.id] = {}
+
+        cover = KCFG.Cover(source, target)
+        self._covers[source.id][target.id] = cover
+        return cover
 
     def remove_cover(self, source_id: str, target_id: str) -> None:
         source_id = self._resolve(source_id)
@@ -413,6 +445,36 @@ class KCFG:
     def add_expanded(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
         self._expanded.add(node_id)
+
+    def remove_init(self, node_id: str) -> None:
+        node_id = self._resolve(node_id)
+        if node_id not in self._init:
+            raise ValueError(f'Node is not init: {node_id}')
+        self._init.remove(node_id)
+
+    def remove_target(self, node_id: str) -> None:
+        node_id = self._resolve(node_id)
+        if node_id not in self._target:
+            raise ValueError(f'Node is not target: {node_id}')
+        self._target.remove(node_id)
+
+    def remove_expanded(self, node_id: str) -> None:
+        node_id = self._resolve(node_id)
+        if node_id not in self._expanded:
+            raise ValueError(f'Node is not expanded: {node_id}')
+        self._expanded.remove(node_id)
+
+    def discard_init(self, node_id: str) -> None:
+        node_id = self._resolve(node_id)
+        self._init.discard(node_id)
+
+    def discard_target(self, node_id: str) -> None:
+        node_id = self._resolve(node_id)
+        self._target.discard(node_id)
+
+    def discard_expanded(self, node_id: str) -> None:
+        node_id = self._resolve(node_id)
+        self._expanded.discard(node_id)
 
     def is_init(self, node_id: str) -> bool:
         node_id = self._resolve(node_id)
