@@ -440,7 +440,7 @@ class KRewrite(KInner):
         :param term: Term to rewrite.
         :return: The term with the rewrite applied once at the top.
         """
-        subst = match(self.lhs, term)
+        subst = self.lhs.match(term)
         if subst is not None:
             return subst(self.rhs)
         return term
@@ -1244,11 +1244,6 @@ class KDefinition(KOuter, WithKAtt):
 
     def let_att(self, att: KAtt) -> 'KDefinition':
         return self.let(att=att)
-
-
-# TODO remove
-def match(pattern: KInner, term: KInner) -> Optional[Subst]:
-    return pattern.match(term)
 
 
 # TODO make method of KInner
