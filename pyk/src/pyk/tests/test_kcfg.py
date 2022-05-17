@@ -153,7 +153,7 @@ class KCFGTestCase(TestCase):
         cfg = KCFG.from_dict(d)
 
         # When
-        new_edge = cfg.create_edge(nid(0), nid(0))
+        new_edge = cfg.create_edge(nid(0), nid(0), TRUE, 1)
 
         # Then
         self.assertEqual(new_edge, edge(0, 0))
@@ -167,7 +167,7 @@ class KCFGTestCase(TestCase):
         cfg = KCFG.from_dict(d)
 
         # When
-        new_edge = cfg.create_edge(nid(0), nid(1))
+        new_edge = cfg.create_edge(nid(0), nid(1), TRUE, 1)
 
         # Then
         self.assertEqual(new_edge, edge(0, 1))
