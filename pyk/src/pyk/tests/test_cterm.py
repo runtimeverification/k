@@ -2,16 +2,21 @@ from functools import partial
 from typing import Final, Tuple
 from unittest import TestCase
 
-from ..kast import KApply, KInner, KVariable, match
+from ..cterm import CTerm
+from ..kast import KApply, KInner, KVariable
 
 a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
 x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
 f, g, h = (partial(KApply.of, label) for label in ['f', 'g', 'h'])
 
 
-class MatchTest(TestCase):
+def _as_cterm(term: KInner) -> CTerm:
+    return CTerm(KApply('<k>', [term]))
 
-    def test_match_and_subst(self):
+
+class CTermTest(TestCase):
+
+    def test_cterm_match_and_subst(self):
         # Given
         TEST_DATA: Final[Tuple[Tuple[KInner, KInner], ...]] = (
             (a, a),
@@ -29,13 +34,13 @@ class MatchTest(TestCase):
         for i, [term, pattern] in enumerate(TEST_DATA):
             with self.subTest(i=i):
                 # When
-                subst = match(pattern, term)
+                subst_cterm = _as_cterm(pattern).match(_as_cterm(term))
 
                 # Then
-                self.assertIsNotNone(subst)
-                self.assertEqual(subst(pattern), term)
+                self.assertIsNotNone(subst_cterm)
+                self.assertEqual(subst_cterm(pattern), term)
 
-    def test_no_match(self):
+    def test_no_cterm_match(self):
         # Given
         TEST_DATA: Final[Tuple[Tuple[KInner, KInner], ...]] = (
             (f(x, x), f(x, a)),
@@ -44,7 +49,7 @@ class MatchTest(TestCase):
         for i, [term, pattern] in enumerate(TEST_DATA):
             with self.subTest(i=i):
                 # When
-                subst = match(pattern, term)
+                subst_cterm = _as_cterm(pattern).match(_as_cterm(term))
 
                 # Then
-                self.assertIsNone(subst)
+                self.assertIsNone(subst_cterm)
