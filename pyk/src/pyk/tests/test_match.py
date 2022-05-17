@@ -2,7 +2,7 @@ from functools import partial
 from typing import Final, Tuple
 from unittest import TestCase
 
-from ..kast import KApply, KInner, KVariable, match
+from ..kast import KApply, KInner, KVariable
 
 a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
 x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
@@ -29,7 +29,7 @@ class MatchTest(TestCase):
         for i, [term, pattern] in enumerate(TEST_DATA):
             with self.subTest(i=i):
                 # When
-                subst = match(pattern, term)
+                subst = pattern.match(term)
 
                 # Then
                 self.assertIsNotNone(subst)
@@ -44,7 +44,7 @@ class MatchTest(TestCase):
         for i, [term, pattern] in enumerate(TEST_DATA):
             with self.subTest(i=i):
                 # When
-                subst = match(pattern, term)
+                subst = pattern.match(term)
 
                 # Then
                 self.assertIsNone(subst)
