@@ -136,6 +136,82 @@ class KInner(KAst, ABC):
     def map_inner(self: KI, f: Callable[['KInner'], 'KInner']) -> KI:
         ...
 
+    @abstractmethod
+    def match(self, term: 'KInner') -> Optional['Subst']:
+        """
+        Perform syntactic pattern matching and return the substitution.
+
+        :param term: Term to match.
+        :return: Substitution instantiating self to the term.
+        """
+        ...
+
+    @staticmethod
+    def _combine_matches(substs: Iterable[Optional['Subst']]) -> Optional['Subst']:
+        def combine(subst1: Optional['Subst'], subst2: Optional['Subst']) -> Optional['Subst']:
+            if subst1 is None or subst2 is None:
+                return None
+
+            return subst1.union(subst2)
+
+        unit: Optional[Subst] = Subst()
+        return reduce(combine, substs, unit)
+
+
+@dataclass(frozen=True)
+class Subst(Mapping[str, KInner]):
+    _subst: FrozenDict[str, KInner]
+
+    def __init__(self, subst: Mapping[str, KInner] = {}):
+        object.__setattr__(self, '_subst', FrozenDict(subst))
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._subst)
+
+    def __len__(self) -> int:
+        return len(self._subst)
+
+    def __getitem__(self, key: str) -> KInner:
+        return self._subst[key]
+
+    def __mul__(self, other: 'Subst') -> 'Subst':
+        return self.compose(other)
+
+    def __call__(self, term: KInner) -> KInner:
+        return self.apply(term)
+
+    def minimize(self) -> 'Subst':
+        return Subst({k: v for k, v in self.items() if v != KVariable(k)})
+
+    def compose(self, other: 'Subst') -> 'Subst':
+        from_other = ((k, self(v)) for k, v in other.items())
+        from_self = ((k, v) for k, v in self.items() if k not in other)
+        return Subst(dict(chain(from_other, from_self)))
+
+    def union(self, other: 'Subst') -> Optional['Subst']:
+        subst = dict(self)
+        for v in other:
+            if v in subst and subst[v] != other[v]:
+                return None
+            subst[v] = other[v]
+        return Subst(subst)
+
+    def apply(self, term: KInner) -> KInner:
+        def replace(term):
+            if type(term) is KVariable and term.name in self:
+                return self[term.name]
+            return term
+
+        return bottom_up(replace, term)
+
+    def unapply(self, term: KInner) -> KInner:
+        new_term = term
+        for var_name in self:
+            lhs = self[var_name]
+            rhs = KVariable(var_name)
+            new_term = KRewrite(lhs, rhs).replace(new_term)
+        return new_term
+
 
 @final
 @dataclass(frozen=True)
@@ -160,6 +236,9 @@ class KVariable(KInner):
     def map_inner(self: 'KVariable', f: Callable[[KInner], KInner]) -> 'KVariable':
         return self
 
+    def match(self, term: KInner) -> Subst:
+        return Subst({self.name: term})
+
 
 @final
 @dataclass(frozen=True)
@@ -183,6 +262,9 @@ class KSort(KInner):
 
     def map_inner(self: 'KSort', f: Callable[[KInner], KInner]) -> 'KSort':
         return self
+
+    def match(self, term: KInner) -> Optional[Subst]:
+        raise TypeError('KSort does not support pattern matching')
 
 
 BOOL = KSort('Bool')
@@ -215,6 +297,11 @@ class KToken(KInner):
 
     def map_inner(self: 'KToken', f: Callable[[KInner], KInner]) -> 'KToken':
         return self
+
+    def match(self, term: KInner) -> Optional[Subst]:
+        if type(term) is KToken:
+            return Subst() if term.token == self.token else None
+        return None
 
 
 TRUE = KToken('true', 'Bool')
@@ -262,6 +349,11 @@ class KApply(KInner):
     def map_inner(self: 'KApply', f: Callable[[KInner], KInner]) -> 'KApply':
         return self.let(args=(f(arg) for arg in self.args))
 
+    def match(self, term: KInner) -> Optional[Subst]:
+        if type(term) is KApply and term.label == self.label and term.arity == self.arity:
+            return KInner._combine_matches(arg.match(term_arg) for arg, term_arg in zip(self.args, term.args))
+        return None
+
 
 TOP: Final = KApply('#Top')
 BOTTOM: Final = KApply('#Bottom')
@@ -292,6 +384,9 @@ class KAs(KInner):
 
     def map_inner(self: 'KAs', f: Callable[[KInner], KInner]) -> 'KAs':
         return self.let(pattern=f(self.pattern), alias=f(self.alias))
+
+    def match(self, term: KInner) -> Optional[Subst]:
+        raise TypeError('KAs does not support pattern matching')
 
 
 @final
@@ -328,6 +423,15 @@ class KRewrite(KInner):
 
     def map_inner(self: 'KRewrite', f: Callable[[KInner], KInner]) -> 'KRewrite':
         return self.let(lhs=f(self.lhs), rhs=f(self.rhs))
+
+    def match(self, term: KInner) -> Optional[Subst]:
+        if type(term) is KRewrite:
+            lhs_subst = self.lhs.match(term.lhs)
+            rhs_subst = self.rhs.match(term.rhs)
+            if lhs_subst is None or rhs_subst is None:
+                return None
+            return lhs_subst.union(rhs_subst)
+        return None
 
     def apply_top(self, term: KInner) -> KInner:
         """
@@ -403,6 +507,11 @@ class KSequence(KInner, Sequence[KInner]):
 
     def map_inner(self: 'KSequence', f: Callable[[KInner], KInner]) -> 'KSequence':
         return self.let(items=(f(item) for item in self.items))
+
+    def match(self, term: KInner) -> Optional[Subst]:
+        if type(term) is KSequence and term.arity == self.arity:
+            return KInner._combine_matches(item.match(term_item) for item, term_item in zip(self.items, term.items))
+        return None
 
 
 class KOuter(KAst, ABC):
@@ -1137,98 +1246,9 @@ class KDefinition(KOuter, WithKAtt):
         return self.let(att=att)
 
 
-@dataclass(frozen=True)
-class Subst(Mapping[str, KInner]):
-    _subst: FrozenDict[str, KInner]
-
-    def __init__(self, subst: Mapping[str, KInner] = {}):
-        object.__setattr__(self, '_subst', FrozenDict(subst))
-
-    def __iter__(self) -> Iterator[str]:
-        return iter(self._subst)
-
-    def __len__(self) -> int:
-        return len(self._subst)
-
-    def __getitem__(self, key: str) -> KInner:
-        return self._subst[key]
-
-    def __mul__(self, other: 'Subst') -> 'Subst':
-        return self.compose(other)
-
-    def __call__(self, term: KInner) -> KInner:
-        return self.apply(term)
-
-    def minimize(self) -> 'Subst':
-        return Subst({k: v for k, v in self.items() if v != KVariable(k)})
-
-    def compose(self, other: 'Subst') -> 'Subst':
-        from_other = ((k, self(v)) for k, v in other.items())
-        from_self = ((k, v) for k, v in self.items() if k not in other)
-        return Subst(dict(chain(from_other, from_self)))
-
-    def union(self, other: 'Subst') -> Optional['Subst']:
-        subst = dict(self)
-        for v in other:
-            if v in subst and subst[v] != other[v]:
-                return None
-            subst[v] = other[v]
-        return Subst(subst)
-
-    def apply(self, term: KInner) -> KInner:
-        def replace(term):
-            if type(term) is KVariable and term.name in self:
-                return self[term.name]
-            return term
-
-        return bottom_up(replace, term)
-
-    def unapply(self, term: KInner) -> KInner:
-        new_term = term
-        for var_name in self:
-            lhs = self[var_name]
-            rhs = KVariable(var_name)
-            new_term = KRewrite(lhs, rhs).replace(new_term)
-        return new_term
-
-
+# TODO remove
 def match(pattern: KInner, term: KInner) -> Optional[Subst]:
-    """
-    Perform syntactic pattern matching and return the substitution.
-
-    :param pattern: Pattern to match with.
-    :param term: Term to match.
-    :return: Substitution instantiating the pattern to the term..
-    """
-
-    def combine(subst1: Optional[Subst], subst2: Optional[Subst]) -> Optional[Subst]:
-        if subst1 is None or subst2 is None:
-            return None
-
-        return subst1.union(subst2)
-
-    def combine_all(substs: Iterable[Optional[Subst]]) -> Optional[Subst]:
-        unit: Optional[Subst] = Subst()
-        return reduce(combine, substs, unit)
-
-    if type(pattern) is KVariable:
-        return Subst({pattern.name: term})
-
-    if type(pattern) is KToken and type(term) is KToken:
-        return Subst() if pattern.token == term.token else None
-
-    if type(pattern) is KRewrite and type(term) is KRewrite:
-        lhs_subst = match(pattern.lhs, term.lhs)
-        rhs_subst = match(pattern.rhs, term.rhs)
-        return combine(lhs_subst, rhs_subst)
-
-    if type(pattern) is KApply and type(term) is KApply and pattern.label == term.label and pattern.arity == term.arity:
-        return combine_all(match(pattern_arg, term_arg) for pattern_arg, term_arg in zip(pattern.args, term.args))
-
-    if type(pattern) is KSequence and type(term) is KSequence and pattern.arity == term.arity:
-        return combine_all(match(pattern_item, term_item) for pattern_item, term_item in zip(pattern.items, term.items))
-
-    return None
+    return pattern.match(term)
 
 
 # TODO make method of KInner
