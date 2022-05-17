@@ -2,11 +2,16 @@ from functools import partial
 from typing import Final, Tuple
 from unittest import TestCase
 
+from ..cterm import CTerm
 from ..kast import KApply, KInner, KVariable, match
 
 a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
 x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
 f, g, h = (partial(KApply.of, label) for label in ['f', 'g', 'h'])
+
+
+def _as_cterm(term: KInner) -> CTerm:
+    return CTerm(KApply('<k>', [term]))
 
 
 class MatchTest(TestCase):
@@ -30,10 +35,13 @@ class MatchTest(TestCase):
             with self.subTest(i=i):
                 # When
                 subst = match(pattern, term)
+                subst_cterm = _as_cterm(pattern).match(_as_cterm(term))
 
                 # Then
                 self.assertIsNotNone(subst)
                 self.assertEqual(subst(pattern), term)
+                self.assertIsNotNone(subst_cterm)
+                self.assertEqual(subst_cterm(pattern), term)
 
     def test_no_match(self):
         # Given
@@ -45,6 +53,8 @@ class MatchTest(TestCase):
             with self.subTest(i=i):
                 # When
                 subst = match(pattern, term)
+                subst_cterm = _as_cterm(pattern).match(_as_cterm(term))
 
                 # Then
                 self.assertIsNone(subst)
+                self.assertIsNone(subst_cterm)
