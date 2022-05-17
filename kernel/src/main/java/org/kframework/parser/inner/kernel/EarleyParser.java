@@ -487,7 +487,7 @@ public class EarleyParser {
         EarleyNonTerminal nt = (EarleyNonTerminal)state.prod.items.get(state.item);
         completor.get(nt.sort).add(state);
       } else if (state.item == state.prod.items.size()) {
-        // if the state is coimplete, add the proper deriations to the CompleteParseTreeNode
+        // if the state is complete, add the proper derivations to the CompleteParseTreeNode
         Set<Term> parses = completedParses(state.prod.sort, state.start);
         wrapState(parses, state.parseTree(), state.prod, state.start, index, data);
       }
