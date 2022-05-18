@@ -2,6 +2,7 @@ from ..kast import (
     KApply,
     KClaim,
     KRewrite,
+    KSort,
     KToken,
     KVariable,
     assocWithUnit,
@@ -28,7 +29,7 @@ class DefnTest(KProveTest):
 
     def test_print_configuration(self):
         # Given
-        config = KApply('<T>', [KApply('<k>', [KApply('int_;_', [KApply('_,_', [KToken('x', 'Id'), KApply('_,_', [KToken('y', 'Id'), KApply('.List{"_,_"}')])])])]), KApply('<state>', [KApply('.Map')])])
+        config = KApply('<T>', [KApply('<k>', [KApply('int_;_', [KApply('_,_', [KToken('x', KSort('Id')), KApply('_,_', [KToken('y', KSort('Id')), KApply('.List{"_,_"}')])])])]), KApply('<state>', [KApply('.Map')])])
         config_expected = '\n'.join([ '<T>'              # noqa
                                     , '  <k>'            # noqa
                                     , '    int x , y ;'  # noqa

@@ -276,23 +276,23 @@ STRING = KSort('String')
 @dataclass(frozen=True)
 class KToken(KInner):
     token: str
-    sort: str
+    sort: KSort
 
-    def __init__(self, token: str, sort: str):
+    def __init__(self, token: str, sort: KSort):
         object.__setattr__(self, 'token', token)
         object.__setattr__(self, 'sort', sort)
 
     @classmethod
     def from_dict(cls: Type['KToken'], d: Dict[str, Any]) -> 'KToken':
         cls._check_node(d)
-        return KToken(token=d['token'], sort=d['sort'])
+        return KToken(token=d['token'], sort=KSort(d['sort']))
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KToken', 'token': self.token, 'sort': self.sort}
+        return {'node': 'KToken', 'token': self.token, 'sort': self.sort.name}
 
-    def let(self, *, token: Optional[str] = None, sort: Optional[str] = None) -> 'KToken':
+    def let(self, *, token: Optional[str] = None, sort: Optional[KSort] = None) -> 'KToken':
         token = token if token is not None else self.token
-        sort = sort if sort is not None else self.sort
+        sort = sort if sort else self.sort
         return KToken(token=token, sort=sort)
 
     def map_inner(self: 'KToken', f: Callable[[KInner], KInner]) -> 'KToken':
@@ -304,8 +304,8 @@ class KToken(KInner):
         return None
 
 
-TRUE = KToken('true', 'Bool')
-FALSE = KToken('false', 'Bool')
+TRUE = KToken('true', BOOL)
+FALSE = KToken('false', BOOL)
 
 
 @final
@@ -1279,7 +1279,7 @@ def flattenLabel(label, kast):
 
 klabelCells = '#KCells'
 klabelEmptyK = '#EmptyK'
-ktokenDots = KToken('...', 'K')
+ktokenDots = KToken('...', KSort('K'))
 
 
 def constLabel(symbol):
