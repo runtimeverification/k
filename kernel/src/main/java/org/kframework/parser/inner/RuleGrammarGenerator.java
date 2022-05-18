@@ -1,5 +1,5 @@
 // Copyright (c) 2015-2019 K Team. All Rights Reserved.
-package org.kframework.parser.inner.generator;
+package org.kframework.parser.inner;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.kframework.attributes.Att;
@@ -184,16 +184,28 @@ public class RuleGrammarGenerator {
     }
 
     /* use this overload if you don't need to profile rule parse times. */
-    public static ParseInModule getCombinedGrammar(Module mod, boolean strict) {
-      return getCombinedGrammar(mod, strict, false, false, false, null);
-    }
-
-    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, boolean isBison) {
-      return getCombinedGrammar(mod, strict, timing, isBison, false, null);
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, FileUtil files) {
+      return getCombinedGrammar(mod, strict, false, false, false, files, null);
     }
 
     public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, FileUtil files) {
-      return getCombinedGrammar(mod, strict, timing, false, false, files);
+      return getCombinedGrammar(mod, strict, timing, false, false, files, null);
+    }
+
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, FileUtil files, String debugTypeInference) {
+      return getCombinedGrammar(mod, strict, timing, false, false, files, debugTypeInference);
+    }
+
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, boolean isBison, FileUtil files) {
+      return getCombinedGrammar(mod, strict, timing, isBison, false, files, null);
+    }
+
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, boolean isBison, boolean forGlobalScanner, FileUtil files) {
+      return getCombinedGrammar(mod, strict, timing, isBison, forGlobalScanner, files, null);
+    }
+
+    public static ParseInModule getCombinedGrammar(Module mod, Scanner scanner, boolean strict, boolean timing, boolean isBison, FileUtil files) {
+      return getCombinedGrammar(mod, scanner, strict, timing, isBison, files, null);
     }
 
     // the forGlobalScanner flag tells the ParseInModule class not to exclude
@@ -204,9 +216,6 @@ public class RuleGrammarGenerator {
     // modules. This must include the private syntax of those modules,
     // otherwise we would not be able to use it to scan the modules in which
     //  that private syntax is visible.
-    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, FileUtil files, boolean forGlobalScanner) {
-      return getCombinedGrammar(mod, strict, timing, false, forGlobalScanner, files);
-    }
 
     /**
      * Create the rule parser for the given module.
@@ -217,12 +226,12 @@ public class RuleGrammarGenerator {
      * @param mod module for which to create the parser.
      * @return parser which applies disambiguation filters by default.
      */
-    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, boolean isBison, boolean forGlobalScanner, FileUtil files) {
-        return new ParseInModule(mod, strict, timing, isBison, forGlobalScanner, files);
+    public static ParseInModule getCombinedGrammar(Module mod, boolean strict, boolean timing, boolean isBison, boolean forGlobalScanner, FileUtil files, String debugTypeInference) {
+        return new ParseInModule(mod, strict, timing, isBison, forGlobalScanner, files, debugTypeInference);
     }
 
-    public static ParseInModule getCombinedGrammar(Module mod, Scanner scanner, boolean strict, boolean timing, boolean isBison, FileUtil files) {
-        return new ParseInModule(mod, scanner, strict, timing, isBison, false, files);
+    public static ParseInModule getCombinedGrammar(Module mod, Scanner scanner, boolean strict, boolean timing, boolean isBison, FileUtil files, String debugTypeInference) {
+        return new ParseInModule(mod, scanner, strict, timing, isBison, false, files, debugTypeInference);
     }
 
     public static Tuple3<Module, Module, Module> getCombinedGrammarImpl(Module mod, boolean isBison, boolean forGlobalScanner) {

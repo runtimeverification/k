@@ -19,7 +19,7 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.ParserUtils;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -34,6 +34,7 @@ import static org.kframework.kore.KORE.*;
 
 public class AddEmptyListsTest {
     private ParseInModule parser;
+    private FileUtil files;
 
     @Rule
     public TestName testName = new TestName();
@@ -42,7 +43,7 @@ public class AddEmptyListsTest {
     public void setUp() throws Exception {
         RuleGrammarGenerator gen = makeRuleGrammarGenerator();
         Module test = ParserUtils.parseMainModuleOuterSyntax(DEF, Source.apply("AddEmptyListsTest test definition"), "TEST");
-        parser = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(test), true);
+        parser = RuleGrammarGenerator.getCombinedGrammar(gen.getRuleGrammar(test), true, files);
     }
 
     /*
@@ -50,7 +51,7 @@ public class AddEmptyListsTest {
      */
     private RuleGrammarGenerator makeRuleGrammarGenerator() {
         String definitionText;
-        FileUtil files = FileUtil.testFileUtil();
+        files = FileUtil.testFileUtil();
         ParserUtils parser = new ParserUtils(files, new KExceptionManager(new GlobalOptions()));
         File definitionFile = new File(Kompile.BUILTIN_DIRECTORY.toString() + "/prelude.md");
         definitionText = files.loadFromWorkingDirectory(definitionFile.getPath());
