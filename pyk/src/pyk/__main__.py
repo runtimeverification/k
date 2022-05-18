@@ -1,7 +1,6 @@
 import argparse
 import logging
 import sys
-from os import path
 from pathlib import Path
 
 from graphviz import Digraph
@@ -119,11 +118,6 @@ def create_argument_parser():
     coverageArgs.add_argument('-o', '--output', type=argparse.FileType('w'), default='-')
 
     return pykArgs
-
-
-# TODO remove
-def definitionDir(kompiledDir):
-    return path.dirname(path.abspath(kompiledDir))
 
 
 if __name__ == '__main__':
