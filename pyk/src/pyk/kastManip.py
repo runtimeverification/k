@@ -13,6 +13,8 @@ from typing import (
 
 from .cli_utils import fatal
 from .kast import (
+    FALSE,
+    TRUE,
     KApply,
     KAtt,
     KClaim,
@@ -96,8 +98,8 @@ def unsafeMlPredToBool(k):
     """
     if k is None:
         return None
-    mlPredToBoolRules = [ (KApply('#Top')                                            , KToken('true'          , 'Bool'))                                # noqa
-                        , (KApply('#Bottom')                                         , KToken('false'         , 'Bool'))                                # noqa
+    mlPredToBoolRules = [ (KApply('#Top')                                            , TRUE)                                                            # noqa
+                        , (KApply('#Bottom')                                         , FALSE)                                                           # noqa
                         , (KApply('#And'     , [KVariable('#V1'), KVariable('#V2')]) , KApply('_andBool_'     , [KVariable('#V1'), KVariable('#V2')]))  # noqa
                         , (KApply('#Or'      , [KVariable('#V1'), KVariable('#V2')]) , KApply('_orBool_'      , [KVariable('#V1'), KVariable('#V2')]))  # noqa
                         , (KApply('#Not'     , [KVariable('#V1')])                   , KApply('notBool_'      , [KVariable('#V1')]))                    # noqa
@@ -114,24 +116,24 @@ def unsafeMlPredToBool(k):
 def simplifyBool(k):
     if k is None:
         return None
-    simplifyRules = [ (KApply('_==K_', [KVariable('#LHS'), KToken('true', 'Bool')]), KVariable('#LHS'))                                                             # noqa
-                    , (KApply('_==K_', [KToken('true', 'Bool'), KVariable('#RHS')]), KVariable('#RHS'))                                                             # noqa
-                    , (KApply('_==K_', [KVariable('#LHS'), KToken('false', 'Bool')]), KApply('notBool_', [KVariable('#LHS')]))                                      # noqa
-                    , (KApply('_==K_', [KToken('false', 'Bool'), KVariable('#RHS')]), KApply('notBool_', [KVariable('#RHS')]))                                      # noqa
-                    , (KApply('notBool_', [KToken('false' , 'Bool')]), KToken('true'  , 'Bool'))                                                                    # noqa
-                    , (KApply('notBool_', [KToken('true'  , 'Bool')]), KToken('false' , 'Bool'))                                                                    # noqa
+    simplifyRules = [ (KApply('_==K_', [KVariable('#LHS'), TRUE]), KVariable('#LHS'))                                                                               # noqa
+                    , (KApply('_==K_', [TRUE, KVariable('#RHS')]), KVariable('#RHS'))                                                                               # noqa
+                    , (KApply('_==K_', [KVariable('#LHS'), FALSE]), KApply('notBool_', [KVariable('#LHS')]))                                                        # noqa
+                    , (KApply('_==K_', [FALSE, KVariable('#RHS')]), KApply('notBool_', [KVariable('#RHS')]))                                                        # noqa
+                    , (KApply('notBool_', [FALSE]), TRUE)                                                                                                           # noqa
+                    , (KApply('notBool_', [TRUE]), FALSE)                                                                                                           # noqa
                     , (KApply('notBool_', [KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')])]), KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')]))  # noqa
                     , (KApply('notBool_', [KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')])]), KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')]))  # noqa
                     , (KApply('notBool_', [KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')])]), KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')]))  # noqa
                     , (KApply('notBool_', [KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')])]), KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')]))  # noqa
-                    , (KApply('_andBool_', [KToken('true', 'Bool'), KVariable('#REST')]), KVariable('#REST'))                                                       # noqa
-                    , (KApply('_andBool_', [KVariable('#REST'), KToken('true', 'Bool')]), KVariable('#REST'))                                                       # noqa
-                    , (KApply('_andBool_', [KToken('false', 'Bool'), KVariable('#REST')]), KToken('false', 'Bool'))                                                 # noqa
-                    , (KApply('_andBool_', [KVariable('#REST'), KToken('false', 'Bool')]), KToken('false', 'Bool'))                                                 # noqa
-                    , (KApply('_orBool_', [KToken('false', 'Bool'), KVariable('#REST')]), KVariable('#REST'))                                                       # noqa
-                    , (KApply('_orBool_', [KVariable('#REST'), KToken('false', 'Bool')]), KVariable('#REST'))                                                       # noqa
-                    , (KApply('_orBool_', [KToken('true', 'Bool'), KVariable('#REST')]), KToken('true', 'Bool'))                                                    # noqa
-                    , (KApply('_orBool_', [KVariable('#REST'), KToken('true', 'Bool')]), KToken('true', 'Bool'))                                                    # noqa
+                    , (KApply('_andBool_', [TRUE, KVariable('#REST')]), KVariable('#REST'))                                                                         # noqa
+                    , (KApply('_andBool_', [KVariable('#REST'), TRUE]), KVariable('#REST'))                                                                         # noqa
+                    , (KApply('_andBool_', [FALSE, KVariable('#REST')]), FALSE)                                                                                     # noqa
+                    , (KApply('_andBool_', [KVariable('#REST'), FALSE]), FALSE)                                                                                     # noqa
+                    , (KApply('_orBool_', [FALSE, KVariable('#REST')]), KVariable('#REST'))                                                                         # noqa
+                    , (KApply('_orBool_', [KVariable('#REST'), FALSE]), KVariable('#REST'))                                                                         # noqa
+                    , (KApply('_orBool_', [TRUE, KVariable('#REST')]), TRUE)                                                                                        # noqa
+                    , (KApply('_orBool_', [KVariable('#REST'), TRUE]), TRUE)                                                                                        # noqa
                     ]                                                                                                                                               # noqa
     newK = k
     for rule in simplifyRules:
@@ -496,10 +498,10 @@ def minimizeRule(rule, keepVars=[]):
     ruleRequires = rule.requires
     ruleEnsures = rule.ensures
 
-    ruleRequires = buildAssoc(KToken('true', 'Bool'), '_andBool_', unique(flattenLabel('_andBool_', ruleRequires)))
+    ruleRequires = buildAssoc(TRUE, '_andBool_', unique(flattenLabel('_andBool_', ruleRequires)))
     ruleRequires = simplifyBool(ruleRequires)
 
-    ruleEnsures = buildAssoc(KToken('true', 'Bool'), '_andBool_', unique(flattenLabel('_andBool_', ruleEnsures)))
+    ruleEnsures = buildAssoc(TRUE, '_andBool_', unique(flattenLabel('_andBool_', ruleEnsures)))
     ruleEnsures = simplifyBool(ruleEnsures)
 
     constrainedVars = [] if keepVars is None else keepVars

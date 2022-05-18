@@ -2,14 +2,14 @@ from functools import partial
 from typing import Dict, Final, Tuple
 from unittest import TestCase
 
-from ..kast import KApply, KInner, KToken, KVariable, Subst
+from ..kast import INT, KApply, KInner, KToken, KVariable, Subst
 from ..kastManip import extract_subst
 from ..prelude import mlAnd, mlEquals, mlEqualsTrue, mlTop
 
 a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
 x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
 f, g, h = (partial(KApply.of, label) for label in ['f', 'g', 'h'])
-t = KToken('t', 'Int')
+t = KToken('t', INT)
 
 
 def int_eq(term1: KInner, term2: KInner) -> KApply:
