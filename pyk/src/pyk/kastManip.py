@@ -32,7 +32,6 @@ from .kast import (
     flattenLabel,
     klabelEmptyK,
     ktokenDots,
-    match,
     top_down,
 )
 from .prelude import (
@@ -69,7 +68,7 @@ def substitute(pattern: KInner, subst: Mapping[str, KInner]) -> KInner:
 
 def whereMatchingBottomUp(effect, matchPattern, pattern):
     def _effect(k):
-        matchingSubst = match(matchPattern, k)
+        matchingSubst = matchPattern.match(k)
         newK = k
         if matchingSubst is not None:
             newK = effect(matchingSubst)
@@ -145,7 +144,7 @@ def getOccurances(kast, pattern):
     occurances = []
 
     def addOccurance(k):
-        if match(pattern, k):
+        if pattern.match(k) is not None:
             occurances.append(k)
 
     collect(addOccurance, kast)
@@ -697,8 +696,8 @@ def antiUnify(state1, state2):
 
     minimizedRewrite = pushDownRewrites(KRewrite(state1, state2))
     abstractedState = bottom_up(_rewritesToAbstractions, minimizedRewrite)
-    subst1 = match(abstractedState, state1)
-    subst2 = match(abstractedState, state2)
+    subst1 = abstractedState.match(state1)
+    subst2 = abstractedState.match(state2)
     if subst1 is None or subst2 is None:
         fatal('Anti-unification failed to produce a more general state!')
     return (abstractedState, subst1, subst2)
@@ -761,7 +760,7 @@ def applyExistentialSubstitutions(constrainedTerm):
     subst = {}
     newConstraints = []
     for c in constraints:
-        substMatch = match(substPattern, c)
+        substMatch = substPattern.match(c)
         if substMatch is not None and type(substMatch['#VAR']) is KVariable and substMatch['#VAR'].name.startswith('?'):
             subst[substMatch['#VAR'].name] = substMatch['#VAL']
         else:
@@ -795,7 +794,7 @@ def constraintSubsume(constraint1, constraint2):
 def matchWithConstraint(constrainedTerm1, constrainedTerm2):
     (state1, constraint1) = splitConfigAndConstraints(constrainedTerm1)
     (state2, constraint2) = splitConfigAndConstraints(constrainedTerm2)
-    subst = match(state1, state2)
+    subst = state1.match(state2)
     if subst is not None and constraintSubsume(substitute(constraint1, subst), constraint2):
         return subst
     return None
