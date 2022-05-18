@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-from ..cli_utils import fatal, warning
+from ..cli_utils import warning
 from ..kast import (
     TRUE,
     KApply,
@@ -63,7 +63,7 @@ def buildSymbolTable(definition, opinionated=False):
     -   Return: Python dictionary mapping klabels to automatically generated unparsers.
     """
     if type(definition) is not KDefinition:
-        fatal('Must supply a KDefinition!')
+        raise TypeError('Must supply a KDefinition!')
 
     def _unparserFromProductionItems(prodItems):
         unparseString = ''
@@ -224,8 +224,7 @@ def prettyPrintKast(kast, symbolTable, debug=False):
 
     print()
     warning('Error unparsing kast!')
-    print(kast)
-    fatal('Error unparsing!')
+    raise ValueError('Error unparsing: {kast}')
 
 
 def prettyPrintKastBool(kast, symbolTable, debug=False):

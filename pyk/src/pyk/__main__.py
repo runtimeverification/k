@@ -5,7 +5,7 @@ from pathlib import Path
 
 from graphviz import Digraph
 
-from .cli_utils import fatal, notif, warning
+from .cli_utils import notif, warning
 from .coverage import getRuleById, stripCoverageLogger
 from .kast import KApply, KAst, flattenLabel, readKastTerm
 from .kastManip import (
@@ -86,7 +86,8 @@ def main(extraMain=None):
         extraMain(args, kompiled_dir)
 
     if returncode != 0:
-        fatal('Non-zero exit code (' + str(returncode) + '): ' + str(args['command']))
+        print(f"Non-zero exit code ({returncode}): {args['command']}")
+        sys.exit(-1)
 
 
 def create_argument_parser():

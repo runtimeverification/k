@@ -11,7 +11,6 @@ from typing import (
     TypeVar,
 )
 
-from .cli_utils import fatal
 from .kast import (
     FALSE,
     TRUE,
@@ -701,7 +700,7 @@ def antiUnify(state1, state2):
     subst1 = abstractedState.match(state1)
     subst2 = abstractedState.match(state2)
     if subst1 is None or subst2 is None:
-        fatal('Anti-unification failed to produce a more general state!')
+        raise ValueError('Anti-unification failed to produce a more general state!')
     return (abstractedState, subst1, subst2)
 
 

@@ -1,7 +1,6 @@
 import json
 import os
 import subprocess
-import sys
 from pathlib import Path
 from subprocess import CompletedProcess, run
 from typing import Iterable, List, Optional
@@ -9,7 +8,6 @@ from typing import Iterable, List, Optional
 from ..cli_utils import (
     check_dir_path,
     check_file_path,
-    fatal,
     gen_file_timestamp,
     notif,
 )
@@ -121,11 +119,9 @@ class KProve(KPrint):
         try:
             finalState = KAst.from_dict(json.loads(stdout)['term'])
         except Exception:
-            sys.stderr.write(stdout + '\n')
-            sys.stderr.write(stderr + '\n')
-            fatal(f'Exiting: process returned {process.returncode}')
+            raise RuntimeError(f'Process returned {process.returncode}')
         if finalState == mlTop() and len(_getAppliedAxiomList(logFile)) == 0 and not allowZeroStep:
-            fatal('Proof took zero steps, likely the LHS is invalid: ' + str(specFile))
+            raise ValueError(f'Proof took zero steps, likely the LHS is invalid: {specFile}')
         return finalState
 
     def proveClaim(self, claim, claimId, lemmas=[], args=[], haskellArgs=[], logAxiomsFile=None, allowZeroStep=False):
