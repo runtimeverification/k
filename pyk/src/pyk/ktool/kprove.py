@@ -1,16 +1,12 @@
 import json
+import logging
 import os
 import subprocess
 from pathlib import Path
 from subprocess import CompletedProcess, run
-from typing import Iterable, List, Optional
+from typing import Final, Iterable, List, Optional
 
-from ..cli_utils import (
-    check_dir_path,
-    check_file_path,
-    gen_file_timestamp,
-    notif,
-)
+from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp
 from ..kast import (
     KAst,
     KDefinition,
@@ -21,6 +17,8 @@ from ..kast import (
 )
 from ..prelude import mlTop
 from .kprint import KPrint
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 
 def kprovex(
@@ -75,7 +73,7 @@ def _build_arg_list(
 
 def _kprovex(spec_file: str, *args: str) -> CompletedProcess:
     run_args = ['kprovex', spec_file] + list(args)
-    notif(' '.join(run_args))
+    _LOGGER.info(' '.join(run_args))
     return run(run_args, capture_output=True, text=True)
 
 
@@ -113,7 +111,7 @@ class KProve(KPrint):
         command += args
         commandEnv = os.environ.copy()
         commandEnv['KORE_EXEC_OPTS'] = ' '.join(haskellArgs + haskellLogArgs)
-        notif(' '.join(command))
+        _LOGGER.info(' '.join(command))
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, env=commandEnv)
         stdout, stderr = process.communicate(input=None)
         try:
@@ -164,7 +162,7 @@ class KProve(KPrint):
             tc.write(gen_file_timestamp() + '\n')
             tc.write(self.prettyPrint(claimDefinition) + '\n\n')
             tc.flush()
-        notif('Wrote claim file: ' + str(tmpClaim) + '.')
+        _LOGGER.info('Wrote claim file: ' + str(tmpClaim) + '.')
 
 
 def _getAppliedAxiomList(debugLogFile: Path) -> List[List[str]]:

@@ -1,9 +1,12 @@
+import logging
 from enum import Enum
 from pathlib import Path
 from subprocess import CompletedProcess, run
-from typing import Iterable, List, Optional
+from typing import Final, Iterable, List, Optional
 
-from ..cli_utils import check_dir_path, check_file_path, notif
+from ..cli_utils import check_dir_path, check_file_path
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 
 class KompileBackend(Enum):
@@ -64,7 +67,7 @@ def _build_arg_list(
 
 def _kompile(main_file: str, *args: str) -> CompletedProcess:
     run_args = ['kompile', main_file] + list(args)
-    notif(' '.join(run_args))
+    _LOGGER.info(' '.join(run_args))
     return run(run_args, capture_output=True)
 
 

@@ -5,7 +5,6 @@ from pathlib import Path
 
 from graphviz import Digraph
 
-from .cli_utils import notif
 from .coverage import getRuleById, stripCoverageLogger
 from .kast import KApply, KAst, flattenLabel, readKastTerm
 from .kastManip import (
@@ -68,7 +67,7 @@ def main(extraMain=None):
             for moduleImport in module.imports:
                 importGraph.edge(modName, moduleImport.name)
         importGraph.render(graphFile)
-        notif('Wrote file: ' + str(graphFile))
+        print(f'Wrote file: {graphFile}')
 
     elif args['command'] == 'coverage':
         json_definition = removeSourceMap(readKastTerm(kompiled_dir / 'compiled.json'))
