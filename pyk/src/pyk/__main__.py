@@ -25,9 +25,8 @@ def main(extraMain=None):
     sys.setrecursionlimit(10 ** 7)
 
     commandLineArgs = create_argument_parser()
-
-    returncode = 0
     args = vars(commandLineArgs.parse_args())
+
     kompiled_dir = Path(args['kompiled-dir'])
 
     if args['verbose']:
@@ -84,10 +83,6 @@ def main(extraMain=None):
 
     elif extraMain is not None:
         extraMain(args, kompiled_dir)
-
-    if returncode != 0:
-        print(f"Non-zero exit code ({returncode}): {args['command']}")
-        sys.exit(-1)
 
 
 def create_argument_parser():
