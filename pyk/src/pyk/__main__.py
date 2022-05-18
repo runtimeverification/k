@@ -1,6 +1,7 @@
 import argparse
-import os.path as path
+import logging
 import sys
+from os import path
 from pathlib import Path
 
 from graphviz import Digraph
@@ -29,6 +30,9 @@ def main(extraMain=None):
     returncode = 0
     args = vars(commandLineArgs.parse_args())
     kompiled_dir = Path(args['kompiled-dir'])
+
+    if args['verbose']:
+        logging.basicConfig(level=logging.INFO)
 
     if args['command'] == 'print':
         printer = KPrint(kompiled_dir)
@@ -90,6 +94,7 @@ def main(extraMain=None):
 def create_argument_parser():
     pykArgs = argparse.ArgumentParser()
     pykArgs.add_argument('kompiled-dir', type=str, help='Kompiled directory for definition.')
+    pykArgs.add_argument('--verbose', '-v', default=False, action='store_true', help='Set log level to INFO.')
 
     pykCommandParsers = pykArgs.add_subparsers(dest='command')
 
