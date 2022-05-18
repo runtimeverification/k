@@ -98,7 +98,7 @@ class KProve(KPrint):
         with open(self.kompiledDirectory / 'mainModule.txt', 'r') as mm:
             self.mainModule = mm.read()
 
-    def prove(self, spec_file, spec_module_name, args=[], haskell_args=[], log_axioms_file=None, allow_zero_step=False):
+    def prove(self, spec_file, spec_module_name, args=[], haskell_args=[], log_axioms_file=None, allow_zero_step=False, dry_run=False):
         """Given the specification to prove and arguments for the prover, attempt to prove it.
 
         -   Input: Specification file name, specification module name, optionall arguments, haskell backend arguments, and file to log axioms to.
@@ -118,15 +118,16 @@ class KProve(KPrint):
         notif(' '.join(command))
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, env=command_env)
         stdout, stderr = process.communicate(input=None)
-        try:
-            final_state = KAst.from_dict(json.loads(stdout)['term'])
-        except Exception:
-            sys.stderr.write(stdout + '\n')
-            sys.stderr.write(stderr + '\n')
-            fatal(f'Exiting: process returned {process.returncode}')
-        if final_state == mlTop() and len(_getAppliedAxiomList(log_file)) == 0 and not allow_zero_step:
-            fatal('Proof took zero steps, likely the LHS is invalid: ' + str(spec_file))
-        return final_state
+        if not dry_run:
+            try:
+                final_state = KAst.from_dict(json.loads(stdout)['term'])
+            except Exception:
+                sys.stderr.write(stdout + '\n')
+                sys.stderr.write(stderr + '\n')
+                fatal(f'Exiting: process returned {process.returncode}')
+            if final_state == mlTop() and len(_getAppliedAxiomList(log_file)) == 0 and not allow_zero_step:
+                fatal('Proof took zero steps, likely the LHS is invalid: ' + str(spec_file))
+            return final_state
 
     def proveClaim(self, claim, claimId, lemmas=[], args=[], haskellArgs=[], logAxiomsFile=None, allowZeroStep=False):
         """Given a K claim, write the definition needed for the prover, and attempt to prove it.
