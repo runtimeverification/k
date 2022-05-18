@@ -104,7 +104,6 @@ abstract class GeneralTransformer[E, W] extends ChildrenMapping[E, W] {
     val res =
       t match {
         case a: Ambiguity => apply(a)
-        case kl: KList => apply(kl)
         case p: ProductionReference => apply(p)
       }
     cache.put(t, res)
@@ -118,7 +117,6 @@ abstract class GeneralTransformer[E, W] extends ChildrenMapping[E, W] {
 
   def apply(a: Ambiguity): (Either[E, Term], W) = mapChildren(a)
   def apply(tc: TermCons): (Either[E, Term], W) = mapChildrenStrict(tc)
-  def apply(kl: KList): (Either[E, Term], W) = mapChildrenStrict(kl)
   def apply(c: Constant): (Either[E, Term], W) = simpleResult(c)
 }
 
@@ -171,7 +169,6 @@ abstract class TransformerWithErrors[E] extends ChildrenMapping[E, Ignore] {
     val res =
       t match {
         case a: Ambiguity => apply(a)
-        case kl: KList => apply(kl)
         case p: ProductionReference => apply(p)
       }
     cache.put(t, res)
@@ -185,7 +182,6 @@ abstract class TransformerWithErrors[E] extends ChildrenMapping[E, Ignore] {
 
   def apply(a: Ambiguity): Either[E, Term] = mapChildren(a)._1
   def apply(tc: TermCons): Either[E, Term] = mapChildrenStrict(tc)._1
-  def apply(kl: KList): Either[E, Term] = mapChildrenStrict(kl)._1
   def apply(c: Constant): Either[E, Term] = Right(c)
 
   override def mergeWarnings(a: Ignore, b: Ignore) = Ignore
@@ -215,7 +211,6 @@ abstract class SafeTransformer extends ChildrenMapping[Ignore, Ignore] {
     val res =
       t match {
         case a: Ambiguity => apply(a)
-        case kl: KList => apply(kl)
         case p: ProductionReference => apply(p)
       }
     cache.put(t, res)
@@ -229,7 +224,6 @@ abstract class SafeTransformer extends ChildrenMapping[Ignore, Ignore] {
 
   def apply(a: Ambiguity): Term = mapChildren(a)._1.right.get
   def apply(tc: TermCons): Term = mapChildrenStrict(tc)._1.right.get
-  def apply(kl: KList): Term = mapChildrenStrict(kl)._1.right.get
   def apply(c: Constant): Term = c
 
   def mergeWarnings(a: Ignore, b: Ignore) = Ignore
