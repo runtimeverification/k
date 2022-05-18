@@ -98,35 +98,35 @@ class KProve(KPrint):
         with open(self.kompiledDirectory / 'mainModule.txt', 'r') as mm:
             self.mainModule = mm.read()
 
-    def prove(self, specFile, specModuleName, args=[], haskellArgs=[], logAxiomsFile=None, allowZeroStep=False):
+    def prove(self, spec_file, spec_module_name, args=[], haskell_args=[], log_axioms_file=None, allow_zero_step=False):
         """Given the specification to prove and arguments for the prover, attempt to prove it.
 
         -   Input: Specification file name, specification module name, optionall arguments, haskell backend arguments, and file to log axioms to.
         -   Output: KAST represenation of output of prover, or crashed process.
         """
-        logFile = specFile.with_suffix('.debug-log') if logAxiomsFile is None else logAxiomsFile
-        if logFile.exists():
-            logFile.unlink()
-        haskellLogArgs = ['--log', str(logFile), '--log-format', 'oneline', '--log-entries', 'DebugTransition']
+        log_file = spec_file.with_suffix('.debug-log') if log_axioms_file is None else log_axioms_file
+        if log_file.exists():
+            log_file.unlink()
+        haskell_log_args = ['--log', str(log_file), '--log-format', 'oneline', '--log-entries', 'DebugTransition']
         command = [c for c in self.prover]
-        command += [str(specFile)]
-        command += ['--definition', str(self.kompiledDirectory), '-I', str(self.directory), '--spec-module', specModuleName, '--output', 'json']
+        command += [str(spec_file)]
+        command += ['--definition', str(self.kompiledDirectory), '-I', str(self.directory), '--spec-module', spec_module_name, '--output', 'json']
         command += [c for c in self.proverArgs]
         command += args
-        commandEnv = os.environ.copy()
-        commandEnv['KORE_EXEC_OPTS'] = ' '.join(haskellArgs + haskellLogArgs)
+        command_env = os.environ.copy()
+        command_env['KORE_EXEC_OPTS'] = ' '.join(haskell_args + haskell_log_args)
         notif(' '.join(command))
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, env=commandEnv)
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, env=command_env)
         stdout, stderr = process.communicate(input=None)
         try:
-            finalState = KAst.from_dict(json.loads(stdout)['term'])
+            final_state = KAst.from_dict(json.loads(stdout)['term'])
         except Exception:
             sys.stderr.write(stdout + '\n')
             sys.stderr.write(stderr + '\n')
             fatal(f'Exiting: process returned {process.returncode}')
-        if finalState == mlTop() and len(_getAppliedAxiomList(logFile)) == 0 and not allowZeroStep:
-            fatal('Proof took zero steps, likely the LHS is invalid: ' + str(specFile))
-        return finalState
+        if final_state == mlTop() and len(_getAppliedAxiomList(log_file)) == 0 and not allow_zero_step:
+            fatal('Proof took zero steps, likely the LHS is invalid: ' + str(spec_file))
+        return final_state
 
     def proveClaim(self, claim, claimId, lemmas=[], args=[], haskellArgs=[], logAxiomsFile=None, allowZeroStep=False):
         """Given a K claim, write the definition needed for the prover, and attempt to prove it.
