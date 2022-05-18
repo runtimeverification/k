@@ -75,7 +75,8 @@ public class ExtractFencedKCodeFromMarkdown {
             if (TagSelector.eval(mdSelector, tags)) {
                 // navigate from previous offset to the current one and
                 // make everything whitespace to preserve location info
-                while (lastOffset < block.getContentChars().getStartOffset()) {
+                long offset = block.getContentChars().getStartOffset();
+                while (lastOffset < offset) {
                     if (Character.isWhitespace(mdText.charAt(lastOffset))) {
                         kCodeSb.append(mdText.charAt(lastOffset));
                         blankSb.append(mdText.charAt(lastOffset));
@@ -84,7 +85,7 @@ public class ExtractFencedKCodeFromMarkdown {
                     lastOffset++;
                 }
                 // copy each character because block.getContentChars() removes indentation and can offset location info
-                while (lastOffset < block.getContentChars().getEndOffset()) {
+                while (lastOffset < block.getClosingMarker().getStartOffset()) {
                     kCodeSb.append(mdText.charAt(lastOffset));
                     if (Character.isWhitespace(mdText.charAt(lastOffset)))
                         blankSb.append(mdText.charAt(lastOffset));
