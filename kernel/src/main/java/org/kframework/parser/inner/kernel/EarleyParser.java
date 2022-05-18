@@ -672,6 +672,7 @@ public class EarleyParser {
   private EarleyProductionItem toEarley(ProductionItem item, Scanner scanner) {
     if (item instanceof NonTerminal) {
       Integer sort = sorts.get(((NonTerminal)item).sort());
+      // sort may be null because private module imports may cause sort declarations to be missing
       if (sort == null) {
         sort = 1; // <NULL>, a sort with no productions
       }
