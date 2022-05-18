@@ -1,7 +1,6 @@
 import sys
 from pathlib import Path
 
-from ..cli_utils import warning
 from ..kast import (
     TRUE,
     KApply,
@@ -222,8 +221,6 @@ def prettyPrintKast(kast, symbolTable, debug=False):
         modules = '\n\n'.join([prettyPrintKast(module, symbolTable, debug=debug) for module in kast.modules])
         return requires + '\n\n' + modules
 
-    print()
-    warning('Error unparsing kast!')
     raise ValueError('Error unparsing: {kast}')
 
 

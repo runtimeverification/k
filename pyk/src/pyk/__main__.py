@@ -5,7 +5,7 @@ from pathlib import Path
 
 from graphviz import Digraph
 
-from .cli_utils import notif, warning
+from .cli_utils import notif
 from .coverage import getRuleById, stripCoverageLogger
 from .kast import KApply, KAst, flattenLabel, readKastTerm
 from .kastManip import (
@@ -56,8 +56,6 @@ def main(extraMain=None):
         kprover = KProve(kompiled_dir, args['main-file'])
         finalState = kprover.prove(Path(args['spec-file']), args['spec-module'], args=args['kArgs'])
         args['output_file'].write(finalState.to_json())
-        if finalState != mlTop():
-            warning('Proof failed!')
 
     elif args['command'] == 'graph-imports':
         kprinter = KPrint(kompiled_dir)
