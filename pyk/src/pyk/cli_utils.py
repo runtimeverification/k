@@ -1,9 +1,6 @@
 import sys
-import time
 from datetime import datetime
 from pathlib import Path
-
-_last_time = time.time()
 
 
 def check_dir_path(path: Path) -> None:
@@ -30,24 +27,6 @@ def file_path(s: str) -> Path:
     path = Path(s)
     check_file_path(path)
     return path
-
-
-def notif(msg: str):
-    global _last_time
-    curr_time = time.time()
-    time_diff = curr_time - _last_time
-    _last_time = curr_time
-    sys.stderr.write('== ' + sys.argv[0].split('/')[-1] + ' [+' + '{0:8.2f}'.format(time_diff) + ']: ' + msg + '\n')
-    sys.stderr.flush()
-
-
-def warning(msg: str):
-    notif('[WARNING] ' + msg)
-
-
-def fatal(msg: str):
-    notif('[FATAL] ' + msg)
-    sys.exit('Quitting')
 
 
 def gen_file_timestamp(comment='//'):
