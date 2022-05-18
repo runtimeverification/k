@@ -1,4 +1,4 @@
-from ..kast import BOOL, KAtt, KClaim, KRule, KSort, KToken
+from ..kast import BOOL, KAtt, KClaim, KRule, KToken
 from ..ktool import KompileBackend
 from .kprove_test import KProveTest
 
@@ -18,7 +18,7 @@ class SimpleProofTest(KProveTest):
     def test_prove_claim_with_lemmas(self):
         # Given
         new_lemma = KRule(KToken('pred1(3) => true', BOOL), requires=KToken('pred1(4)', BOOL), att=KAtt(atts={'simplification': ''}))
-        new_claim = KClaim(KToken('<k> foo => bar ... </k> <state> 3 |-> 3 </state>', KSort('TCellFragment')), requires=KToken('pred1(4)', BOOL))
+        new_claim = KClaim(KToken('<k> foo => bar ... </k> <state> 3 |-> 3 </state>', 'TCellFragment'), requires=KToken('pred1(4)', BOOL))
 
         # When
         result1 = self.kprove.proveClaim(new_claim, 'claim-without-lemma')

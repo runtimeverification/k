@@ -278,7 +278,10 @@ class KToken(KInner):
     token: str
     sort: KSort
 
-    def __init__(self, token: str, sort: KSort):
+    def __init__(self, token: str, sort: Union[str, KSort]):
+        if type(sort) is str:
+            sort = KSort(sort)
+
         object.__setattr__(self, 'token', token)
         object.__setattr__(self, 'sort', sort)
 
@@ -290,9 +293,9 @@ class KToken(KInner):
     def to_dict(self) -> Dict[str, Any]:
         return {'node': 'KToken', 'token': self.token, 'sort': self.sort.name}
 
-    def let(self, *, token: Optional[str] = None, sort: Optional[KSort] = None) -> 'KToken':
+    def let(self, *, token: Optional[str] = None, sort: Optional[Union[str, KSort]] = None) -> 'KToken':
         token = token if token is not None else self.token
-        sort = sort if sort else self.sort
+        sort = sort if sort is not None else self.sort
         return KToken(token=token, sort=sort)
 
     def map_inner(self: 'KToken', f: Callable[[KInner], KInner]) -> 'KToken':
@@ -1279,7 +1282,7 @@ def flattenLabel(label, kast):
 
 klabelCells = '#KCells'
 klabelEmptyK = '#EmptyK'
-ktokenDots = KToken('...', KSort('K'))
+ktokenDots = KToken('...', 'K')
 
 
 def constLabel(symbol):
