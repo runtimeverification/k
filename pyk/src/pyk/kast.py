@@ -276,21 +276,24 @@ STRING = KSort('String')
 @dataclass(frozen=True)
 class KToken(KInner):
     token: str
-    sort: str
+    sort: KSort
 
-    def __init__(self, token: str, sort: str):
+    def __init__(self, token: str, sort: Union[str, KSort]):
+        if type(sort) is str:
+            sort = KSort(sort)
+
         object.__setattr__(self, 'token', token)
         object.__setattr__(self, 'sort', sort)
 
     @classmethod
     def from_dict(cls: Type['KToken'], d: Dict[str, Any]) -> 'KToken':
         cls._check_node(d)
-        return KToken(token=d['token'], sort=d['sort'])
+        return KToken(token=d['token'], sort=KSort(d['sort']))
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KToken', 'token': self.token, 'sort': self.sort}
+        return {'node': 'KToken', 'token': self.token, 'sort': self.sort.name}
 
-    def let(self, *, token: Optional[str] = None, sort: Optional[str] = None) -> 'KToken':
+    def let(self, *, token: Optional[str] = None, sort: Optional[Union[str, KSort]] = None) -> 'KToken':
         token = token if token is not None else self.token
         sort = sort if sort is not None else self.sort
         return KToken(token=token, sort=sort)
@@ -304,8 +307,8 @@ class KToken(KInner):
         return None
 
 
-TRUE = KToken('true', 'Bool')
-FALSE = KToken('false', 'Bool')
+TRUE = KToken('true', BOOL)
+FALSE = KToken('false', BOOL)
 
 
 @final
@@ -664,7 +667,10 @@ class KProduction(KSentence):
     klabel: str
     att: KAtt
 
-    def __init__(self, sort: KSort, items: Iterable[KProductionItem] = (), klabel='', att=EMPTY_ATT):
+    def __init__(self, sort: Union[str, KSort], items: Iterable[KProductionItem] = (), klabel='', att=EMPTY_ATT):
+        if type(sort) is str:
+            sort = KSort(sort)
+
         object.__setattr__(self, 'sort', sort)
         object.__setattr__(self, 'items', tuple(items))
         object.__setattr__(self, 'klabel', klabel)
@@ -696,12 +702,12 @@ class KProduction(KSentence):
     def let(
         self,
         *,
-        sort: Optional[KSort] = None,
+        sort: Optional[Union[str, KSort]] = None,
         items: Optional[Iterable[KProductionItem]] = None,
         klabel: Optional[str] = None,
         att: Optional[KAtt] = None,
     ) -> 'KProduction':
-        sort = sort or self.sort
+        sort = sort if sort is not None else self.sort
         items = items if items is not None else self.items
         klabel = klabel if klabel is not None else self.klabel
         att = att if att is not None else self.att
