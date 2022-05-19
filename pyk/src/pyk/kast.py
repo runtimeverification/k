@@ -121,7 +121,7 @@ class WithKAtt(KAst, ABC):
 
 
 class KInner(KAst, ABC):
-    _INNER_NODES: Final = {'KVariable', 'KSort', 'KToken', 'KApply', 'KLabel', 'KAs', 'KRewrite', 'KSequence'}
+    _INNER_NODES: Final = {'KVariable', 'KSort', 'KToken', 'KLabel', 'KApply', 'KAs', 'KRewrite', 'KSequence'}
 
     @classmethod
     @abstractmethod
@@ -317,9 +317,11 @@ class KLabel(KInner):
     name: str
     params: Tuple[KSort, ...]
 
-    def __init__(self, name: str, params: Iterable[KSort] = ()):
+    def __init__(self, name: str, params: Iterable[Union[str, KSort]] = ()):
+        params = tuple(KSort(param) if type(param) is str else param for param in params)
+
         object.__setattr__(self, 'name', name)
-        object.__setattr__(self, 'params', tuple(params))
+        object.__setattr__(self, 'params', params)
 
     def __iter__(self) -> Iterator[Union[str, KSort]]:
         return chain([self.name], self.params)
@@ -336,7 +338,7 @@ class KLabel(KInner):
     def to_dict(self) -> Dict[str, Any]:
         return {'node': 'KLabel', 'name': self.name, 'params': [param.to_dict() for param in self.params]}
 
-    def let(self, *, name: Optional[str] = None, params: Optional[Iterable[KSort]] = None) -> 'KLabel':
+    def let(self, *, name: Optional[str] = None, params: Optional[Iterable[Union[str, KSort]]] = None) -> 'KLabel':
         name = name if name is not None else self.name
         params = params if params is not None else self.params
         return KLabel(name=name, params=params)
