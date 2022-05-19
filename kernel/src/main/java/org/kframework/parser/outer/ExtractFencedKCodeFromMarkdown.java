@@ -85,7 +85,8 @@ public class ExtractFencedKCodeFromMarkdown {
                     lastOffset++;
                 }
                 // copy each character because block.getContentChars() removes indentation and can offset location info
-                while (lastOffset < block.getClosingMarker().getStartOffset()) {
+                offset = block.getContentChars().getEndOffset();
+                while (lastOffset < offset) {
                     kCodeSb.append(mdText.charAt(lastOffset));
                     if (Character.isWhitespace(mdText.charAt(lastOffset)))
                         blankSb.append(mdText.charAt(lastOffset));
