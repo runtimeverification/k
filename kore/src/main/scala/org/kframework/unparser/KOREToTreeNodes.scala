@@ -7,7 +7,7 @@ import org.kframework.attributes.{Location, Source}
 import org.kframework.builtin.Sorts
 import org.kframework.definition._
 import org.kframework.kore.{KApply, KToken, KVariable, _}
-import org.kframework.parser.{KList => _, _}
+import org.kframework.parser._
 import org.kframework.utils.StringUtil
 import org.pcollections.ConsPStack
 
