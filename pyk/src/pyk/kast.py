@@ -121,7 +121,7 @@ class WithKAtt(KAst, ABC):
 
 
 class KInner(KAst, ABC):
-    _INNER_NODES: Final = {'KVariable', 'KSort', 'KToken', 'KApply', 'KAs', 'KRewrite', 'KSequence'}
+    _INNER_NODES: Final = {'KVariable', 'KSort', 'KToken', 'KApply', 'KLabel', 'KAs', 'KRewrite', 'KSequence'}
 
     @classmethod
     @abstractmethod
@@ -310,14 +310,48 @@ class KToken(KInner):
 TRUE = KToken('true', BOOL)
 FALSE = KToken('false', BOOL)
 
+@final
+@dataclass(frozen=True)
+class KLabel(KInner):
+    name: str
+    params: Tuple[KSort, ...]
+
+    def __init__(self, name: str, params: Iterable[KSort] = ()):
+        object.__setattr__(self, 'name', name)
+        object.__setattr__(self, 'params', tuple(params))
+
+    def __iter__(self) -> Iterator[Union[str, KSort]]:
+        return chain([self.name], self.params)
+
+    @staticmethod
+    def of(name: str, *params: KSort) -> 'KLabel':
+        return KLabel(name=name, params=params)
+
+    @classmethod
+    def from_dict(cls: Type['KLabel'], d: Dict[str, Any]) -> 'KLabel':
+        cls._check_node(d)
+        return KLabel(name=d['name'], params=(KSort(name=arg) for arg in d['params']))
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {'node': 'KLabel', 'name': self.name, 'params': [arg.to_dict() for arg in self.params]}
+
+    def map_inner(self: 'KLabel', f: Callable[[KInner], KInner]) -> 'KLabel':
+        return self
+
+    def match(self, term: KInner) -> Optional[Subst]:
+        if type(term) is KLabel and term.name == self.name and term.params.count == self.params.count:
+            return KInner._combine_matches(arg.match(term_arg) for arg, term_arg in zip(self.params, term.params))
+        return None
 
 @final
 @dataclass(frozen=True)
 class KApply(KInner):
-    label: str
+    label: KLabel
     args: Tuple[KInner, ...]
 
-    def __init__(self, label: str, args: Iterable[KInner] = ()):
+    def __init__(self, label: Union[str, KLabel], args: Iterable[KInner] = ()):
+        if type(label) is str:
+            label = KLabel(label)
         object.__setattr__(self, 'label', label)
         object.__setattr__(self, 'args', tuple(args))
 
@@ -330,7 +364,7 @@ class KApply(KInner):
 
     @property
     def is_cell(self) -> bool:
-        return len(self.label) > 1 and self.label[0] == '<' and self.label[-1] == '>'
+        return len(self.label.name) > 1 and self.label.name[0] == '<' and self.label.name[-1] == '>'
 
     @staticmethod
     def of(label: str, *args: KInner) -> 'KApply':

@@ -308,7 +308,7 @@ def splitConfigFrom(configuration):
     def _replaceWithVar(k):
         if type(k) is KApply and k.is_cell:
             if k.arity == 1 and not (type(k.args[0]) is KApply and k.args[0].is_cell):
-                config_var = _mkCellVar(k.label)
+                config_var = _mkCellVar(k.label.name)
                 initial_substitution[config_var] = k.args[0]
                 return KApply(k.label, [KVariable(config_var)])
         return k
@@ -377,7 +377,7 @@ def inlineCellMaps(kast):
     -   Output: kast term with cell maps inlined.
     """
     def _inlineCellMaps(_kast):
-        if type(_kast) is KApply and _kast.label.endswith('CellMapItem'):
+        if type(_kast) is KApply and _kast.label.name.endswith('CellMapItem'):
             mapKey = _kast.args[0]
             if type(mapKey) is KApply and mapKey.is_cell:
                 return _kast.args[1]
@@ -392,7 +392,7 @@ def removeSemanticCasts(kast):
     -   Output: kast without the `#SemanticCast*` nodes.
     """
     def _removeSemanticCasts(_kast):
-        if type(_kast) is KApply and _kast.arity == 1 and _kast.label.startswith('#SemanticCast'):
+        if type(_kast) is KApply and _kast.arity == 1 and _kast.label.name.startswith('#SemanticCast'):
             return _kast.args[0]
         return _kast
     return bottom_up(_removeSemanticCasts, kast)
