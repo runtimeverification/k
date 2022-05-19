@@ -110,7 +110,7 @@ def prettyPrintKast(kast, symbolTable, debug=False):
     if type(kast) is KToken:
         return kast.token
     if type(kast) is KApply:
-        label = kast.label
+        label = kast.label.name
         args = kast.args
         unparsedArgs = [prettyPrintKast(arg, symbolTable, debug=debug) for arg in args]
         if kast.is_cell:
