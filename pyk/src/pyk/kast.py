@@ -1311,13 +1311,13 @@ def collect(callback: Callable[[KInner], None], kinner: KInner) -> None:
     bottom_up(f, kinner)
 
 
-def flattenLabel(label, kast):
+def flattenLabel(label: str, kast: KInner) -> List[KInner]:
     """Given a cons list, return a flat Python list of the elements.
 
     -   Input: Cons operation to flatten.
     -   Output: Items of cons list.
     """
-    if type(kast) is KApply and kast.label == label:
+    if type(kast) is KApply and kast.label.name == label:
         items = [flattenLabel(label, arg) for arg in kast.args]
         return [c for cs in items for c in cs]
     return [kast]

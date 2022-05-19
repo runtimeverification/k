@@ -68,8 +68,8 @@ def translateCoverage(src_all_rules, dst_all_rules, dst_definition, src_rules_li
         for sentence in module.sentences:
             if type(sentence) is KRule:
                 ruleBody = sentence.body
-                if (type(ruleBody) is KApply and ruleBody.label == '<generatedTop>') \
-                        or (type(ruleBody) is KRewrite and type(ruleBody.lhs) is KApply and ruleBody.lhs.label == '<generatedTop>'):
+                if (type(ruleBody) is KApply and ruleBody.label.name == '<generatedTop>') \
+                        or (type(ruleBody) is KRewrite and type(ruleBody.lhs) is KApply and ruleBody.lhs.label.name == '<generatedTop>'):
                     if 'UNIQUE_ID' in sentence.att:
                         dst_non_function_rules.append(sentence.att['UNIQUE_ID'])
 
