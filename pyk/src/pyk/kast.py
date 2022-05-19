@@ -121,7 +121,7 @@ class WithKAtt(KAst, ABC):
 
 
 class KInner(KAst, ABC):
-    _INNER_NODES: Final = {'KVariable', 'KSort', 'KToken', 'KApply', 'KAs', 'KRewrite', 'KSequence'}
+    _INNER_NODES: Final = {'KVariable', 'KSort', 'KToken', 'KLabel', 'KApply', 'KAs', 'KRewrite', 'KSequence'}
 
     @classmethod
     @abstractmethod
@@ -313,11 +313,53 @@ FALSE = KToken('false', BOOL)
 
 @final
 @dataclass(frozen=True)
+class KLabel(KInner):
+    name: str
+    params: Tuple[KSort, ...]
+
+    def __init__(self, name: str, params: Iterable[Union[str, KSort]] = ()):
+        params = tuple(KSort(param) if type(param) is str else param for param in params)
+
+        object.__setattr__(self, 'name', name)
+        object.__setattr__(self, 'params', params)
+
+    def __iter__(self) -> Iterator[Union[str, KSort]]:
+        return chain([self.name], self.params)
+
+    @staticmethod
+    def of(name: str, *params: KSort) -> 'KLabel':
+        return KLabel(name=name, params=params)
+
+    @classmethod
+    def from_dict(cls: Type['KLabel'], d: Dict[str, Any]) -> 'KLabel':
+        cls._check_node(d)
+        return KLabel(name=d['name'], params=(KSort.from_dict(param) for param in d['params']))
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {'node': 'KLabel', 'name': self.name, 'params': [param.to_dict() for param in self.params]}
+
+    def let(self, *, name: Optional[str] = None, params: Optional[Iterable[Union[str, KSort]]] = None) -> 'KLabel':
+        name = name if name is not None else self.name
+        params = params if params is not None else self.params
+        return KLabel(name=name, params=params)
+
+    def map_inner(self: 'KLabel', f: Callable[[KInner], KInner]) -> 'KLabel':
+        return self
+
+    def match(self, term: KInner) -> Optional[Subst]:
+        raise TypeError('KLabel does not support pattern matching')
+
+
+@final
+@dataclass(frozen=True)
 class KApply(KInner):
-    label: str
+    label: KLabel
     args: Tuple[KInner, ...]
 
-    def __init__(self, label: str, args: Iterable[KInner] = ()):
+    def __init__(self, label: Union[str, KLabel], args: Iterable[KInner] = ()):
+        if type(label) is str:
+            label = KLabel(label)
+
         object.__setattr__(self, 'label', label)
         object.__setattr__(self, 'args', tuple(args))
 
@@ -330,7 +372,7 @@ class KApply(KInner):
 
     @property
     def is_cell(self) -> bool:
-        return len(self.label) > 1 and self.label[0] == '<' and self.label[-1] == '>'
+        return len(self.label.name) > 1 and self.label.name[0] == '<' and self.label.name[-1] == '>'
 
     @staticmethod
     def of(label: str, *args: KInner) -> 'KApply':
@@ -342,9 +384,9 @@ class KApply(KInner):
         return KApply(label=d['label'], args=(KInner.from_dict(arg) for arg in d['args']))
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KApply', 'label': self.label, 'args': [arg.to_dict() for arg in self.args], 'arity': self.arity, 'variable': False}
+        return {'node': 'KApply', 'label': self.label.name, 'args': [arg.to_dict() for arg in self.args], 'arity': self.arity, 'variable': False}
 
-    def let(self, *, label: Optional[str] = None, args: Optional[Iterable[KInner]] = None) -> 'KApply':
+    def let(self, *, label: Optional[Union[str, KLabel]] = None, args: Optional[Iterable[KInner]] = None) -> 'KApply':
         label = label if label is not None else self.label
         args = args if args is not None else self.args
         return KApply(label=label, args=args)
@@ -1271,13 +1313,13 @@ def collect(callback: Callable[[KInner], None], kinner: KInner) -> None:
     bottom_up(f, kinner)
 
 
-def flattenLabel(label, kast):
+def flattenLabel(label: str, kast: KInner) -> List[KInner]:
     """Given a cons list, return a flat Python list of the elements.
 
     -   Input: Cons operation to flatten.
     -   Output: Items of cons list.
     """
-    if type(kast) is KApply and kast.label == label:
+    if type(kast) is KApply and kast.label.name == label:
         items = [flattenLabel(label, arg) for arg in kast.args]
         return [c for cs in items for c in cs]
     return [kast]

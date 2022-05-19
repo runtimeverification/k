@@ -29,7 +29,7 @@ class CTerm:
 
     @staticmethod
     def _is_spurious_constraint(term: KInner) -> bool:
-        return type(term) is KApply and term.label == '#Equals' and term.args[0] == term.args[1]
+        return type(term) is KApply and term.label.name == '#Equals' and term.args[0] == term.args[1]
 
     @staticmethod
     def _constraint_sort_key(term: KInner) -> Tuple[int, str]:

@@ -172,7 +172,7 @@ def extract_subst(term: KInner) -> Tuple[Subst, KInner]:
 
     def _extract_subst(conjunct: KInner) -> Optional[Subst]:
         if type(conjunct) is KApply:
-            if conjunct.label == '#Equals':
+            if conjunct.label.name == '#Equals':
                 subst = _subst_for_terms(conjunct.args[0], conjunct.args[1])
 
                 if subst is not None:
@@ -275,7 +275,7 @@ def propagateUpConstraints(k):
     -   Output: kast where common constraints in the disjunct have been propagated up.
     """
     def _propagateUpConstraints(_k):
-        if not (type(_k) is KApply and _k.label == '#Or'):
+        if not (type(_k) is KApply and _k.label.name == '#Or'):
             return _k
         conjuncts1 = flattenLabel('#And', _k.args[0])
         conjuncts2 = flattenLabel('#And', _k.args[1])
@@ -308,7 +308,7 @@ def splitConfigFrom(configuration):
     def _replaceWithVar(k):
         if type(k) is KApply and k.is_cell:
             if k.arity == 1 and not (type(k.args[0]) is KApply and k.args[0].is_cell):
-                config_var = _mkCellVar(k.label)
+                config_var = _mkCellVar(k.label.name)
                 initial_substitution[config_var] = k.args[0]
                 return KApply(k.label, [KVariable(config_var)])
         return k
@@ -377,7 +377,7 @@ def inlineCellMaps(kast):
     -   Output: kast term with cell maps inlined.
     """
     def _inlineCellMaps(_kast):
-        if type(_kast) is KApply and _kast.label.endswith('CellMapItem'):
+        if type(_kast) is KApply and _kast.label.name.endswith('CellMapItem'):
             mapKey = _kast.args[0]
             if type(mapKey) is KApply and mapKey.is_cell:
                 return _kast.args[1]
@@ -392,7 +392,7 @@ def removeSemanticCasts(kast):
     -   Output: kast without the `#SemanticCast*` nodes.
     """
     def _removeSemanticCasts(_kast):
-        if type(_kast) is KApply and _kast.arity == 1 and _kast.label.startswith('#SemanticCast'):
+        if type(_kast) is KApply and _kast.arity == 1 and _kast.label.name.startswith('#SemanticCast'):
             return _kast.args[0]
         return _kast
     return bottom_up(_removeSemanticCasts, kast)
@@ -739,7 +739,7 @@ def disjunct_constrained_terms(constrained_terms: Sequence[KInner], concave=Fals
 
 def removeDisjuncts(constrainedTerm):
     clauses = flattenLabel('#And', constrainedTerm)
-    clauses = [c for c in clauses if not (type(c) is KApply and c.label == '#Or')]
+    clauses = [c for c in clauses if not (type(c) is KApply and c.label.name == '#Or')]
     constrainedTerm = mlAnd(clauses)
     return constrainedTerm
 
@@ -773,19 +773,19 @@ def applyExistentialSubstitutions(constrainedTerm):
 def constraintSubsume(constraint1, constraint2):
     if constraint1 == mlTop() or constraint1 == constraint2:
         return True
-    elif type(constraint1) is KApply and constraint1.label == '#And':
+    elif type(constraint1) is KApply and constraint1.label.name == '#And':
         constraints1 = flattenLabel('#And', constraint1)
         if all([constraintSubsume(c, constraint2) for c in constraints1]):
             return True
-    elif type(constraint1) is KApply and constraint1.label == '#Or':
+    elif type(constraint1) is KApply and constraint1.label.name == '#Or':
         constraints1 = flattenLabel('#Or', constraint1)
         if any([constraintSubsume(c, constraint2) for c in constraints1]):
             return True
-    elif type(constraint2) is KApply and constraint2.label == '#And':
+    elif type(constraint2) is KApply and constraint2.label.name == '#And':
         constraints2 = flattenLabel('#And', constraint2)
         if any([constraintSubsume(constraint1, c) for c in constraints2]):
             return True
-    elif type(constraint2) is KApply and constraint2.label == '#Or':
+    elif type(constraint2) is KApply and constraint2.label.name == '#Or':
         constraints2 = flattenLabel('#Or', constraint2)
         if all([constraintSubsume(constraint1, c) for c in constraints2]):
             return True
