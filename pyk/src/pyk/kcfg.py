@@ -75,7 +75,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             object.__setattr__(self, 'source', source)
             object.__setattr__(self, 'target', target)
 
-            match_res = source.cterm.match_with_constraint(target.cterm)
+            match_res = target.cterm.match_with_constraint(source.cterm)
             if not match_res:
                 raise ValueError(f'No matching between: {source.id} and {target.id}')
 

@@ -4,7 +4,7 @@ from itertools import chain
 from typing import Iterable, Optional, Tuple
 
 from .kast import TOP, KApply, KInner, Subst, flattenLabel
-from .kastManip import match, splitConfigAndConstraints
+from .kastManip import splitConfigAndConstraints
 from .prelude import mlAnd, mlImplies
 from .utils import unique
 
@@ -29,7 +29,7 @@ class CTerm:
 
     @staticmethod
     def _is_spurious_constraint(term: KInner) -> bool:
-        return type(term) is KApply and term.label == '#Equals' and term.args[0] == term.args[1]
+        return type(term) is KApply and term.label.name == '#Equals' and term.args[0] == term.args[1]
 
     @staticmethod
     def _constraint_sort_key(term: KInner) -> Tuple[int, str]:
@@ -47,8 +47,8 @@ class CTerm:
     def hash(self) -> str:
         return self.term.hash
 
-    def match(self, pattern: 'CTerm') -> Optional[Subst]:
-        match_res = self.match_with_constraint(pattern)
+    def match(self, cterm: 'CTerm') -> Optional[Subst]:
+        match_res = self.match_with_constraint(cterm)
 
         if not match_res:
             return None
@@ -60,13 +60,13 @@ class CTerm:
 
         return subst
 
-    def match_with_constraint(self, pattern: 'CTerm') -> Optional[Tuple[Subst, KInner]]:
-        subst = match(pattern=pattern.config, term=self.config)
+    def match_with_constraint(self, cterm: 'CTerm') -> Optional[Tuple[Subst, KInner]]:
+        subst = self.config.match(cterm.config)
 
         if subst is None:
             return None
 
-        constraint = self._ml_impl(self.constraints, map(subst, pattern.constraints))
+        constraint = self._ml_impl(cterm.constraints, map(subst, self.constraints))
 
         return subst, constraint
 

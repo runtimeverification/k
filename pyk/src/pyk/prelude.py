@@ -1,6 +1,6 @@
 from typing import Iterable, Union
 
-from .kast import BOTTOM, TOP, KApply, KInner, KToken
+from .kast import BOOL, BOTTOM, INT, STRING, TOP, TRUE, KApply, KInner, KToken
 
 
 def buildAssoc(unit: KInner, join: str, ls: Iterable[KInner]) -> KInner:
@@ -41,15 +41,15 @@ def token(x: Union[bool, int, str]) -> KToken:
 
 
 def boolToken(b: bool) -> KToken:
-    return KToken('true' if b else 'false', 'Bool')
+    return KToken('true' if b else 'false', BOOL)
 
 
 def intToken(i: int) -> KToken:
-    return KToken(str(i), 'Int')
+    return KToken(str(i), INT)
 
 
 def stringToken(s: str) -> KToken:
-    return KToken(f'"{s}"', 'String')
+    return KToken(f'"{s}"', STRING)
 
 
 def ltInt(i1, i2):
@@ -65,7 +65,7 @@ def mlEquals(a1, a2):
 
 
 def mlEqualsTrue(b):
-    return mlEquals(boolToken(True), b)
+    return mlEquals(TRUE, b)
 
 
 def mlTop():

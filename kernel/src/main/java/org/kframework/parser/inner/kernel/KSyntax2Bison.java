@@ -18,7 +18,7 @@ import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
