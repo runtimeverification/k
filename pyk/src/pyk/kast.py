@@ -310,6 +310,7 @@ class KToken(KInner):
 TRUE = KToken('true', BOOL)
 FALSE = KToken('false', BOOL)
 
+
 @final
 @dataclass(frozen=True)
 class KLabel(KInner):
@@ -342,6 +343,7 @@ class KLabel(KInner):
         if type(term) is KLabel and term.name == self.name and term.params.count == self.params.count:
             return KInner._combine_matches(arg.match(term_arg) for arg, term_arg in zip(self.params, term.params))
         return None
+
 
 @final
 @dataclass(frozen=True)
