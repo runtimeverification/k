@@ -331,18 +331,21 @@ class KLabel(KInner):
     @classmethod
     def from_dict(cls: Type['KLabel'], d: Dict[str, Any]) -> 'KLabel':
         cls._check_node(d)
-        return KLabel(name=d['name'], params=(KSort(name=arg) for arg in d['params']))
+        return KLabel(name=d['name'], params=(KSort.from_dict(param) for param in d['params']))
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KLabel', 'name': self.name, 'params': [arg.to_dict() for arg in self.params]}
+        return {'node': 'KLabel', 'name': self.name, 'params': [param.to_dict() for param in self.params]}
+
+    def let(self, *, name: Optional[str] = None, params: Optional[Iterable[KSort]] = None) -> 'KLabel':
+        name = name if name is not None else self.name
+        params = params if params is not None else self.params
+        return KLabel(name=name, params=params)
 
     def map_inner(self: 'KLabel', f: Callable[[KInner], KInner]) -> 'KLabel':
         return self
 
     def match(self, term: KInner) -> Optional[Subst]:
-        if type(term) is KLabel and term.name == self.name and term.params.count == self.params.count:
-            return KInner._combine_matches(arg.match(term_arg) for arg, term_arg in zip(self.params, term.params))
-        return None
+        raise TypeError('KLabel does not support pattern matching')
 
 
 @final
@@ -354,6 +357,7 @@ class KApply(KInner):
     def __init__(self, label: Union[str, KLabel], args: Iterable[KInner] = ()):
         if type(label) is str:
             label = KLabel(label)
+
         object.__setattr__(self, 'label', label)
         object.__setattr__(self, 'args', tuple(args))
 
@@ -378,9 +382,9 @@ class KApply(KInner):
         return KApply(label=d['label'], args=(KInner.from_dict(arg) for arg in d['args']))
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KApply', 'label': self.label, 'args': [arg.to_dict() for arg in self.args], 'arity': self.arity, 'variable': False}
+        return {'node': 'KApply', 'label': self.label.name, 'args': [arg.to_dict() for arg in self.args], 'arity': self.arity, 'variable': False}
 
-    def let(self, *, label: Optional[str] = None, args: Optional[Iterable[KInner]] = None) -> 'KApply':
+    def let(self, *, label: Optional[Union[str, KLabel]] = None, args: Optional[Iterable[KInner]] = None) -> 'KApply':
         label = label if label is not None else self.label
         args = args if args is not None else self.args
         return KApply(label=label, args=args)

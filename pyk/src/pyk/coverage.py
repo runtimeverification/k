@@ -26,7 +26,7 @@ def stripCoverageLogger(rule: KRule):
     if type(ruleBody) is KRewrite:
         ruleLHS = ruleBody.lhs
         ruleRHS = ruleBody.rhs
-        if type(ruleRHS) is KApply and ruleRHS.label.startswith('project:'):
+        if type(ruleRHS) is KApply and ruleRHS.label.name.startswith('project:'):
             ruleRHSseq = ruleRHS.args[0]
             if type(ruleRHSseq) is KSequence and ruleRHSseq.arity == 2:
                 ruleBody = KRewrite(ruleLHS, ruleRHSseq.items[1])
