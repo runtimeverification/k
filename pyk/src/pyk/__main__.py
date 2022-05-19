@@ -2,6 +2,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
+from typing import Final
 
 from graphviz import Digraph
 
@@ -17,6 +18,8 @@ from .kastManip import (
 from .ktool import KPrint, KProve, buildSymbolTable, prettyPrintKast
 from .prelude import buildAssoc, mlBottom, mlTop
 
+_LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
+
 
 def main(extraMain=None):
     # KAST terms can end up nested quite deeply, because of the various assoc operators (eg. _Map_, _Set_, ...).
@@ -30,7 +33,9 @@ def main(extraMain=None):
     kompiled_dir = Path(args['kompiled-dir'])
 
     if args['verbose']:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.DEBUG, format=_LOG_FORMAT)
+    else:
+        logging.basicConfig(level=logging.WARNING, format=_LOG_FORMAT)
 
     if args['command'] == 'print':
         printer = KPrint(kompiled_dir)
