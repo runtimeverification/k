@@ -117,7 +117,7 @@ class KProve(KPrint):
         try:
             finalState = KAst.from_dict(json.loads(stdout)['term'])
         except Exception:
-            raise RuntimeError(f'Process returned {process.returncode}')
+            raise RuntimeError(f'Process exited with code {process.returncode}', process.stdout, process.stderr)
         if finalState == mlTop() and len(_getAppliedAxiomList(logFile)) == 0 and not allowZeroStep:
             raise ValueError(f'Proof took zero steps, likely the LHS is invalid: {specFile}')
         return finalState
