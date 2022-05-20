@@ -341,11 +341,18 @@ def collapseDots(kast):
 
 
 def pushDownRewrites(kast):
-    """Traverse a term and push rewrites down as far as possible.
 
-    -   Input: Kast term potentially with rewrites.
-    -   Output: Kast term with rewrites localized (or removed) as much as possible.
-    """
+    def _flatten_ksequence(_kast):
+        if type(_kast) is KSequence:
+            new_items = []
+            for item in _kast.items:
+                if type(item) is KSequence:
+                    new_items.extend(item.items)
+                else:
+                    new_items.append(item)
+            return KSequence(new_items)
+        return _kast
+
     def _pushDownRewrites(_kast):
         if type(_kast) is KRewrite:
             lhs = _kast.lhs
@@ -358,15 +365,18 @@ def pushDownRewrites(kast):
                 newArgs = [KRewrite(lArg, rArg) for (lArg, rArg) in zip(lhs.args, rhs.args)]
                 return lhs.let(args=newArgs)
             if type(lhs) is KSequence and type(rhs) is KSequence and lhs.arity > 0 and rhs.arity > 0:
+                if lhs.arity == 1 and rhs.arity == 1:
+                    return KRewrite(lhs.items[0], rhs.items[0])
                 if lhs.items[0] == rhs.items[0]:
-                    lowerRewrite = KRewrite(KSequence(lhs.items[1:]), KSequence(rhs.items[1:]))
-                    return KSequence([lhs.items[0], lowerRewrite])
+                    lowerRewrite = _pushDownRewrites(KRewrite(KSequence(lhs.items[1:]), KSequence(rhs.items[1:])))
+                    return _flatten_ksequence(KSequence([lhs.items[0], lowerRewrite]))
                 if lhs.items[-1] == rhs.items[-1]:
-                    lowerRewrite = KRewrite(KSequence(lhs.items[0:-1]), KSequence(rhs.items[0:-1]))
-                    return KSequence([lowerRewrite, lhs.items[-1]])
+                    lowerRewrite = _pushDownRewrites(KRewrite(KSequence(lhs.items[0:-1]), KSequence(rhs.items[0:-1])))
+                    return _flatten_ksequence(KSequence([lowerRewrite, lhs.items[-1]]))
             if type(lhs) is KSequence and lhs.arity > 0 and type(lhs.items[-1]) is KVariable and type(rhs) is KVariable and lhs.items[-1] == rhs:
                 return KSequence([KRewrite(KSequence(lhs.items[0:-1]), KApply(klabelEmptyK)), rhs])
         return _kast
+
     return top_down(_pushDownRewrites, kast)
 
 
