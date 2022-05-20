@@ -226,7 +226,9 @@ public class KException implements Serializable, HasLocation {
         sourceText.append("\n\t" + StringUtils.repeat(' ', lineNumberPadding) + " .\t");
         sourceText.append(StringUtils.repeat(' ', location.startColumn() - 1));
         sourceText.append('^');
-        sourceText.append(StringUtils.repeat('~', location.endColumn() - location.startColumn() - 1));
+        if (location.endColumn() > location.startColumn()) {
+            sourceText.append(StringUtils.repeat('~', location.endColumn() - location.startColumn() - 1));
+        }
 
         return sourceText.toString();
     }
