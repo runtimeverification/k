@@ -340,7 +340,7 @@ def collapseDots(kast):
     return bottom_up(_collapseDots, kast)
 
 
-def pushDownRewrites(kast):
+def push_down_rewrites(kast):
 
     def _flatten_ksequence(_kast):
         if type(_kast) is KSequence:
@@ -353,7 +353,7 @@ def pushDownRewrites(kast):
             return KSequence(new_items)
         return _kast
 
-    def _pushDownRewrites(_kast):
+    def _push_down_rewrites(_kast):
         if type(_kast) is KRewrite:
             lhs = _kast.lhs
             rhs = _kast.rhs
@@ -368,16 +368,16 @@ def pushDownRewrites(kast):
                 if lhs.arity == 1 and rhs.arity == 1:
                     return KRewrite(lhs.items[0], rhs.items[0])
                 if lhs.items[0] == rhs.items[0]:
-                    lowerRewrite = _pushDownRewrites(KRewrite(KSequence(lhs.items[1:]), KSequence(rhs.items[1:])))
+                    lowerRewrite = _push_down_rewrites(KRewrite(KSequence(lhs.items[1:]), KSequence(rhs.items[1:])))
                     return _flatten_ksequence(KSequence([lhs.items[0], lowerRewrite]))
                 if lhs.items[-1] == rhs.items[-1]:
-                    lowerRewrite = _pushDownRewrites(KRewrite(KSequence(lhs.items[0:-1]), KSequence(rhs.items[0:-1])))
+                    lowerRewrite = _push_down_rewrites(KRewrite(KSequence(lhs.items[0:-1]), KSequence(rhs.items[0:-1])))
                     return _flatten_ksequence(KSequence([lowerRewrite, lhs.items[-1]]))
             if type(lhs) is KSequence and lhs.arity > 0 and type(lhs.items[-1]) is KVariable and type(rhs) is KVariable and lhs.items[-1] == rhs:
                 return KSequence([KRewrite(KSequence(lhs.items[0:-1]), KApply(klabelEmptyK)), rhs])
         return _kast
 
-    return top_down(_pushDownRewrites, kast)
+    return top_down(_push_down_rewrites, kast)
 
 
 def inlineCellMaps(kast):
@@ -654,7 +654,7 @@ def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, pr
     (initConfig, initConstraint) = splitConfigAndConstraints(initConstrainedTerm)
     (finalConfig, finalConstraint) = splitConfigAndConstraints(finalConstrainedTerm)
 
-    ruleBody = pushDownRewrites(KRewrite(initConfig, finalConfig))
+    ruleBody = push_down_rewrites(KRewrite(initConfig, finalConfig))
     ruleRequires = simplifyBool(unsafeMlPredToBool(initConstraint))
     ruleEnsures = simplifyBool(unsafeMlPredToBool(finalConstraint))
     attDict = {} if claim or priority is None else {'priority': str(priority)}
@@ -706,7 +706,7 @@ def antiUnify(state1, state2):
             return abstractTermSafely(_kast)
         return _kast
 
-    minimizedRewrite = pushDownRewrites(KRewrite(state1, state2))
+    minimizedRewrite = push_down_rewrites(KRewrite(state1, state2))
     abstractedState = bottom_up(_rewritesToAbstractions, minimizedRewrite)
     subst1 = abstractedState.match(state1)
     subst2 = abstractedState.match(state2)

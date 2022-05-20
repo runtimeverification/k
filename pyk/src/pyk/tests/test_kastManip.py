@@ -2,7 +2,7 @@ from functools import partial
 from unittest import TestCase
 
 from ..kast import INT, KApply, KInner, KRewrite, KSequence, KToken, KVariable
-from ..kastManip import pushDownRewrites
+from ..kastManip import push_down_rewrites
 
 a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
 x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
@@ -16,7 +16,7 @@ def int_eq(term1: KInner, term2: KInner) -> KApply:
 
 class PushDownRewritesTest(TestCase):
 
-    def test_pushDownRewrites(self):
+    def test_push_down_rewrites(self):
         # Given
         test_data = (
             (KRewrite(KSequence([f(a), b]), KSequence([f(c), b])), KSequence([f(KRewrite(a, c)), b])),
@@ -25,7 +25,7 @@ class PushDownRewritesTest(TestCase):
         for i, (before, expected) in enumerate(test_data):
             with self.subTest(i=i):
                 # When
-                actual = pushDownRewrites(before)
+                actual = push_down_rewrites(before)
 
                 # Then
                 self.assertEqual(actual, expected)
