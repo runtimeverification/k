@@ -197,7 +197,10 @@ pipeline {
     }
     stage('Build and Package on Ubuntu Jammy') {
       when {
-        branch 'release'
+        anyOf {
+          branch 'release'
+          changeRequest()
+        }
         beforeAgent true
       }
       stages {
@@ -391,6 +394,8 @@ pipeline {
         BIONIC_BRANCH_TAG  = "ubuntu-bionic-${env.BRANCH_NAME}"
         FOCAL_VERSION_TAG  = "ubuntu-focal-${env.VERSION}"
         FOCAL_BRANCH_TAG   = "ubuntu-focal-${env.BRANCH_NAME}"
+        JAMMY_VERSION_TAG  = "ubuntu-jammy-${env.VERSION}"
+        JAMMY_BRANCH_TAG   = "ubuntu-jammy-${env.BRANCH_NAME}"
         DOCKERHUB_REPO     = "runtimeverificationinc/kframework-k"
       }
       stages {
@@ -415,6 +420,15 @@ pipeline {
                 docker image push "${DOCKERHUB_REPO}:${FOCAL_VERSION_TAG}"
                 docker tag "${DOCKERHUB_REPO}:${FOCAL_VERSION_TAG}" "${DOCKERHUB_REPO}:${FOCAL_BRANCH_TAG}"
                 docker push "${DOCKERHUB_REPO}:${FOCAL_BRANCH_TAG}"
+            '''
+            dir('jammy') { unstash 'jammy' }
+            sh '''
+                mv jammy/kframework_${VERSION}_amd64.deb kframework_amd64_jammy.deb
+                docker login --username "${DOCKERHUB_TOKEN_USR}" --password "${DOCKERHUB_TOKEN_PSW}"
+                docker image build . --file package/docker/Dockerfile.ubuntu-jammy --tag "${DOCKERHUB_REPO}:${JAMMY_VERSION_TAG}"
+                docker image push "${DOCKERHUB_REPO}:${JAMMY_VERSION_TAG}"
+                docker tag "${DOCKERHUB_REPO}:${JAMMY_VERSION_TAG}" "${DOCKERHUB_REPO}:${JAMMY_BRANCH_TAG}"
+                docker push "${DOCKERHUB_REPO}:${JAMMY_BRANCH_TAG}"
             '''
           }
         }
@@ -452,7 +466,23 @@ pipeline {
             '''
           }
         }
-
+        stage('Test Jammy Image') {
+          agent {
+            docker {
+              image "${DOCKERHUB_REPO}:${JAMMY_VERSION_TAG}"
+              args '-u 0'
+              reuseNode true
+            }
+          }
+          steps {
+            sh '''
+              cd ~
+              echo 'module TEST imports BOOL endmodule' > test.k
+              kompile test.k --backend llvm
+              kompile test.k --backend haskell
+            '''
+          }
+        }
       }
     }
     stage('Deploy') {
@@ -472,6 +502,7 @@ pipeline {
         unstash 'src'
         dir('bionic') { unstash 'bionic' }
         dir('focal')  { unstash 'focal' }
+        dir('jammy')  { unstash 'jammy' }
         dir('bullseye') { unstash 'bullseye' }
         dir('arch')   { unstash 'arch'   }
         sshagent(['rv-jenkins-github']) {
@@ -493,6 +524,7 @@ pipeline {
             mv ../kframework-${VERSION}-src.tar.gz                      kframework-${VERSION}-src.tar.gz
             mv ../bionic/kframework_${VERSION}_amd64.deb                kframework_${VERSION}_amd64_bionic.deb
             mv ../focal/kframework_${VERSION}_amd64.deb                 kframework_${VERSION}_amd64_focal.deb
+            mv ../jammy/kframework_${VERSION}_amd64.deb                 kframework_${VERSION}_amd64_jammy.deb
             mv ../bullseye/kframework_${VERSION}_amd64.deb              kframework_${VERSION}_amd64_bullseye.deb
             mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst   kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
 
@@ -503,6 +535,7 @@ pipeline {
                 --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                       \
                 --attach kframework_${VERSION}_amd64_bionic.deb'#Ubuntu Bionic (18.04) Package' \
                 --attach kframework_${VERSION}_amd64_focal.deb'#Ubuntu Focal (20.04) Package'   \
+                --attach kframework_${VERSION}_amd64_jammy.deb'#Ubuntu Jammy (22.04) Package'   \
                 --attach kframework_${VERSION}_amd64_bullseye.deb'#Debian Bullseye (11) Package'    \
                 --attach kframework-git-${VERSION}-1-x86_64.pkg.tar.zst'#Arch Package'          \
                 --file release.md "${K_RELEASE_TAG}"
