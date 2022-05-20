@@ -111,14 +111,20 @@ class KProve(KPrint):
         command += args
         commandEnv = os.environ.copy()
         commandEnv['KORE_EXEC_OPTS'] = ' '.join(haskellArgs + haskellLogArgs)
+
         _LOGGER.info(' '.join(command))
-        proc_res = subprocess.run(command, capture_output=True, env=commandEnv, text=True)
+        proc_output: str
         try:
-            finalState = KAst.from_dict(json.loads(proc_res.stdout)['term'])
-        except Exception:
-            raise RuntimeError(f'Process exited with code {proc_res.returncode}', proc_res.stdout, proc_res.stderr)
+            proc_output = subprocess.run(command, env=commandEnv, capture_output=True, check=True, text=True).stdout
+        except CalledProcessError as err:
+            if err.returncode != 1:
+                raise RuntimeError(f'Command kprovex exited with code {err.returncode} for: {specFile}', err.stdout, err.stderr)
+            proc_output = err.stdout
+
+        finalState = KAst.from_dict(json.loads(proc_output)['term'])
         if finalState == mlTop() and len(_getAppliedAxiomList(logFile)) == 0 and not allowZeroStep:
             raise ValueError(f'Proof took zero steps, likely the LHS is invalid: {specFile}')
+
         return finalState
 
     def proveClaim(self, claim, claimId, lemmas=[], args=[], haskellArgs=[], logAxiomsFile=None, allowZeroStep=False):
