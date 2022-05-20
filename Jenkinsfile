@@ -197,10 +197,7 @@ pipeline {
     }
     stage('Build and Package on Ubuntu Jammy') {
       when {
-        anyOf {
-          branch 'release'
-          changeRequest()
-        }
+        branch 'release'
         beforeAgent true
       }
       stages {
