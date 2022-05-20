@@ -145,10 +145,7 @@ pipeline {
     }
     stage('Build and Package on Ubuntu Bionic') {
       when {
-        anyOf {
-          branch 'release'
-          changeRequest()
-        }
+        branch 'release'
         beforeAgent true
       }
       stages {
@@ -200,10 +197,7 @@ pipeline {
     }
     stage('Build and Package on Ubuntu Jammy') {
       when {
-        anyOf {
-          branch 'release'
-          changeRequest()
-        }
+        branch 'release'
         beforeAgent true
       }
       stages {
