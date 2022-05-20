@@ -1,12 +1,16 @@
 import json
 import logging
 import os
-import subprocess
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
 from typing import Final, Iterable, List, Optional
 
-from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp
+from ..cli_utils import (
+    check_dir_path,
+    check_file_path,
+    gen_file_timestamp,
+    run_process,
+)
 from ..kast import (
     KAst,
     KDefinition,
@@ -73,8 +77,7 @@ def _build_arg_list(
 
 def _kprovex(spec_file: str, *args: str) -> CompletedProcess:
     run_args = ['kprovex', spec_file] + list(args)
-    _LOGGER.info(' '.join(run_args))
-    return subprocess.run(run_args, capture_output=True, check=True, text=True)
+    return run_process(run_args, _LOGGER)
 
 
 class KProve(KPrint):
@@ -112,10 +115,9 @@ class KProve(KPrint):
         commandEnv = os.environ.copy()
         commandEnv['KORE_EXEC_OPTS'] = ' '.join(haskellArgs + haskellLogArgs)
 
-        _LOGGER.info(' '.join(command))
         proc_output: str
         try:
-            proc_output = subprocess.run(command, env=commandEnv, capture_output=True, check=True, text=True).stdout
+            proc_output = run_process(command, _LOGGER, env=commandEnv).stdout
         except CalledProcessError as err:
             if err.returncode != 1:
                 raise RuntimeError(f'Command kprovex exited with code {err.returncode} for: {specFile}', err.stdout, err.stderr)

@@ -1,6 +1,11 @@
+import logging
+import subprocess
 import sys
 from datetime import datetime
+from logging import Logger
 from pathlib import Path
+from subprocess import CalledProcessError, CompletedProcess
+from typing import Mapping, Optional, Sequence, Union
 
 
 def check_dir_path(path: Path) -> None:
@@ -27,6 +32,30 @@ def file_path(s: str) -> Path:
     path = Path(s)
     check_file_path(path)
     return path
+
+
+def run_process(
+    args: Union[str, Sequence[str]],
+    logger: Logger,
+    *,
+    log_level: int = logging.DEBUG,
+    input: Optional[str] = None,
+    env: Optional[Mapping[str, str]] = None,
+) -> CompletedProcess:
+    if type(args) is str:
+        command = args
+    else:
+        command = ' '.join(args)
+
+    logger.log(log_level, f'Running: {command}')
+    try:
+        res = subprocess.run(args, input=input, env=env, capture_output=True, check=True, text=True)
+    except CalledProcessError as err:
+        logger.log(log_level, f'Completed with status {err.returncode}: {command}')
+        raise
+
+    logger.log(log_level, f'Completed: {command}')
+    return res
 
 
 def gen_file_timestamp(comment='//'):

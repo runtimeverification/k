@@ -1,11 +1,10 @@
 import logging
-import subprocess
 from enum import Enum
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
 from typing import Final, Iterable, List, Optional
 
-from ..cli_utils import check_dir_path, check_file_path
+from ..cli_utils import check_dir_path, check_file_path, run_process
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -68,8 +67,7 @@ def _build_arg_list(
 
 def _kompile(main_file: str, *args: str) -> CompletedProcess:
     run_args = ['kompile', main_file] + list(args)
-    _LOGGER.info(' '.join(run_args))
-    return subprocess.run(run_args, capture_output=True, check=True, text=True)
+    return run_process(run_args, _LOGGER)
 
 
 def _kompiled_dir(main_file: Path, output_dir: Optional[Path] = None) -> Path:
