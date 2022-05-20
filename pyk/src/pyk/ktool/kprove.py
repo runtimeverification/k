@@ -3,7 +3,7 @@ import logging
 import os
 import subprocess
 from pathlib import Path
-from subprocess import CompletedProcess, run
+from subprocess import CalledProcessError, CompletedProcess
 from typing import Final, Iterable, List, Optional
 
 from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp
@@ -41,10 +41,10 @@ def kprovex(
         emit_json_spec=emit_json_spec,
     )
 
-    proc_res = _kprovex(str(spec_file), *args)
-
-    if proc_res.returncode:
-        raise RuntimeError(f'Command kprovex failed for: {spec_file}')
+    try:
+        _kprovex(str(spec_file), *args)
+    except CalledProcessError as err:
+        raise RuntimeError(f'Command kprovex exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
 
 
 def _build_arg_list(
@@ -74,7 +74,7 @@ def _build_arg_list(
 def _kprovex(spec_file: str, *args: str) -> CompletedProcess:
     run_args = ['kprovex', spec_file] + list(args)
     _LOGGER.info(' '.join(run_args))
-    return run(run_args, capture_output=True, text=True)
+    return subprocess.run(run_args, capture_output=True, check=True, text=True)
 
 
 class KProve(KPrint):
