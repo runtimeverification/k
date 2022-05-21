@@ -6,5 +6,6 @@ from .kprint import (
     indent,
     prettyPrintKast,
     prettyPrintKastBool,
+    unparser_for_production,
 )
 from .kprove import KProve, kprovex

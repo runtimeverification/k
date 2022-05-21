@@ -56,6 +56,22 @@ class KPrint:
         return prettyPrintKast(kast, self.symbol_table, debug=debug)
 
 
+def unparser_for_production(prod):
+
+    def _unparser(*args):
+        index = 0
+        result = []
+        for item in prod.items:
+            if type(item) is KTerminal:
+                result.append(item.value)
+            elif type(item) is KNonTerminal and index < len(args):
+                result.append(args[index])
+                index += 1
+        return ' '.join(result)
+
+    return _unparser
+
+
 def build_symbol_table(definition, opinionated=False):
     """Build the unparsing symbol table given a JSON encoded definition.
 
@@ -65,28 +81,13 @@ def build_symbol_table(definition, opinionated=False):
     if type(definition) is not KDefinition:
         fatal('Must supply a KDefinition!')
 
-    def _unparser_for_production(prod):
-
-        def _unparser(*args):
-            index = 0
-            result = []
-            for item in prod.items:
-                if type(item) is KTerminal:
-                    result.append(item.value)
-                elif type(item) is KNonTerminal and index < len(args):
-                    result.append(args[index])
-                    index += 1
-            return ' '.join(result)
-
-        return _unparser
-
     symbol_table = {}
     for module in definition.modules:
         for prod in module.productions:
             label = prod.klabel.name
             if 'symbol' in prod.att and 'klabel' in prod.att:
                 label = prod.att['klabel']
-            unparser = _unparser_for_production(prod)
+            unparser = unparser_for_production(prod)
             symbol_table[label] = unparser
 
     if opinionated:
