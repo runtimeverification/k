@@ -92,6 +92,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     _init: Set[str]
     _target: Set[str]
     _expanded: Set[str]
+    _verified: Set[Tuple[str, str]]
     _lock: RLock
 
     def __init__(self):
@@ -101,6 +102,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         self._init = set()
         self._target = set()
         self._expanded = set()
+        self._verified = set()
         self._lock = RLock()
 
     def __contains__(self, item: object) -> bool:
@@ -139,6 +141,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         return [node for node in self.nodes if self.is_expanded(node.id)]
 
     @property
+    def verified(self) -> List[Edge]:
+        return [edge for edge in self.edges() if self.is_verified(edge.source.id, edge.target.id)]
+
+    @property
     def leaves(self) -> List[Node]:
         return [node for node in self.nodes if self.is_leaf(node.id)]
 
@@ -166,6 +172,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         init = sorted(self._init)
         target = sorted(self._target)
         expanded = sorted(self._expanded)
+        verified = [{"source": source, "target": target} for source, target in sorted(self._verified)]
 
         res = {
             'nodes': nodes,
@@ -174,6 +181,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             'init': init,
             'target': target,
             'expanded': expanded,
+            'verified': verified,
         }
         return {k: v for k, v in res.items() if v}
 
@@ -218,6 +226,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         for expanded_id in dct.get('expanded') or []:
             cfg.add_expanded(resolve(expanded_id))
 
+        for verified_ids in dct.get('verified') or []:
+            cfg.add_verified(resolve(verified_ids['source']), resolve(verified_ids['target']))
+
         return cfg
 
     def to_json(self) -> str:
@@ -259,7 +270,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             label = '\nandBool'.join(kprint.pretty_print(display_condition).split(' andBool'))
             label = f'{label}\n{depth} steps'
             label = _short_label(label)
-            graph.edge(tail_name=edge.source.id, head_name=edge.target.id, label=f'  {label}        ')
+            attrs = {'class': 'verified'} if self.is_verified(edge.source.id, edge.target.id) else {'class': 'unverified'}
+            graph.edge(tail_name=edge.source.id, head_name=edge.target.id, label=f'  {label}        ', **attrs)
 
         for cover in self.covers():
             label = ', '.join(f'{k} |-> {kprint.pretty_print(v)}' for k, v in cover.subst.items())
@@ -337,6 +349,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         self._init.discard(node_id)
         self._target.discard(node_id)
         self._expanded.discard(node_id)
+        self._verified = set([(source_id, target_id) for source_id, target_id in self._verified if source_id != node_id and target_id != node_id])
 
     def edge(self, source_id: str, target_id: str) -> Optional[Edge]:
         source_id = self._resolve(source_id)
@@ -446,6 +459,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         node_id = self._resolve(node_id)
         self._expanded.add(node_id)
 
+    def add_verified(self, source_id: str, target_id: str) -> None:
+        source_id = self._resolve(source_id)
+        target_id = self._resolve(target_id)
+        self._verified.add((source_id, target_id))
+
     def remove_init(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
         if node_id not in self._init:
@@ -464,6 +482,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             raise ValueError(f'Node is not expanded: {node_id}')
         self._expanded.remove(node_id)
 
+    def remove_verified(self, source_id: str, target_id: str) -> None:
+        source_id = self._resolve(source_id)
+        target_id = self._resolve(target_id)
+        if (source_id, target_id) not in self._verified:
+            raise ValueError(f'Edge is not verified: {(source_id, target_id)}')
+        self._verified.remove((source_id, target_id))
+
     def discard_init(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
         self._init.discard(node_id)
@@ -475,6 +500,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def discard_expanded(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
         self._expanded.discard(node_id)
+
+    def discard_verified(self, source_id: str, target_id: str) -> None:
+        source_id = self._resolve(source_id)
+        target_id = self._resolve(target_id)
+        self._verified.discard((source_id, target_id))
 
     def is_init(self, node_id: str) -> bool:
         node_id = self._resolve(node_id)
@@ -503,6 +533,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def is_stuck(self, node_id: str) -> bool:
         node_id = self._resolve(node_id)
         return self.is_expanded(node_id) and self.is_leaf(node_id)
+
+    def is_verified(self, source_id: str, target_id: str) -> bool:
+        source_id = self._resolve(source_id)
+        target_id = self._resolve(target_id)
+        return (source_id, target_id) in self._verified
 
     def prune(self, node_id: str) -> None:
         nodes = self.reachable_nodes(node_id)
