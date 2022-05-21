@@ -265,6 +265,8 @@ def splitConfigAndConstraints(kast):
         else:
             constraints.append(c)
     constraint = buildAssoc(mlTop(), '#And', constraints)
+    if not term:
+        fatal(f'Could not find configuration for: {kast}')
     return (term, constraint)
 
 
