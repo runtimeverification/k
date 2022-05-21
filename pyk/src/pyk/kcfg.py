@@ -283,6 +283,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             for node in self.frontier:
                 attrs = {'class': 'target', 'style': 'solid'}
                 graph.edge(tail_name=node.id, head_name=target, label='  ???', **attrs)
+            for node in self.stuck:
+                attrs = {'class': 'target', 'style': 'solid'}
+                graph.edge(tail_name=node.id, head_name=target, label='  false', **attrs)
 
         return graph.source
 
