@@ -712,10 +712,12 @@ class KProduction(KSentence):
     def __init__(self, sort: Union[str, KSort], items: Iterable[KProductionItem] = (), klabel: Union[str, KLabel] = '', att=EMPTY_ATT):
         if type(sort) is str:
             sort = KSort(sort)
+        if type(klabel) is str:
+            klabel = KLabel(klabel)
 
         object.__setattr__(self, 'sort', sort)
         object.__setattr__(self, 'items', tuple(items))
-        object.__setattr__(self, 'klabel', klabel if type(klabel) is KLabel else KLabel(klabel))
+        object.__setattr__(self, 'klabel', klabel)
         object.__setattr__(self, 'att', att)
 
     @property
