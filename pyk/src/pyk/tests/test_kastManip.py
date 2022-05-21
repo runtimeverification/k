@@ -1,17 +1,11 @@
 from functools import partial
 from unittest import TestCase
 
-from ..kast import INT, KApply, KInner, KRewrite, KSequence, KToken, KVariable
+from ..kast import KApply, KRewrite, KSequence
 from ..kastManip import push_down_rewrites
 
 a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
-x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
 f, g, h = (partial(KApply.of, label) for label in ['f', 'g', 'h'])
-t = KToken('t', INT)
-
-
-def int_eq(term1: KInner, term2: KInner) -> KApply:
-    return KApply('_==Int_', [term1, term2])
 
 
 class PushDownRewritesTest(TestCase):
