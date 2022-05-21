@@ -129,23 +129,23 @@ class KProve(KPrint):
                 fatal('Proof took zero steps, likely the LHS is invalid: ' + str(spec_file))
             return final_state
 
-    def proveClaim(self, claim, claimId, lemmas=[], args=[], haskellArgs=[], logAxiomsFile=None, allowZeroStep=False):
+    def proveClaim(self, claim, claimId, lemmas=[], args=[], haskell_args=[], log_axioms_file=None, allow_zero_step=False):
         """Given a K claim, write the definition needed for the prover, and attempt to prove it.
 
         -   Input: KAST representation of a claim to prove, and an identifer for said claim.
         -   Output: KAST representation of final state the prover supplies for it.
         """
         self._writeClaimDefinition(claim, claimId, lemmas=lemmas)
-        return self.prove(self.useDirectory / (claimId.lower() + '-spec.k'), claimId.upper() + '-SPEC', args=args, haskellArgs=haskellArgs, logAxiomsFile=logAxiomsFile, allowZeroStep=allowZeroStep)
+        return self.prove(self.useDirectory / (claimId.lower() + '-spec.k'), claimId.upper() + '-SPEC', args=args, haskell_args=haskell_args, log_axioms_file=log_axioms_file, allow_zero_step=allow_zero_step)
 
-    def proveClaimNoBranching(self, claim, claimId, args=[], haskellArgs=[], logAxiomsFile=None, maxDepth=1000, allowZeroStep=False):
+    def proveClaimNoBranching(self, claim, claimId, args=[], haskell_args=[], log_axioms_file=None, maxDepth=1000, allow_zero_step=False):
         """Given a K claim, attempt to prove it, but do not allow the prover to branch.
 
         -   Input: KAST representation of a claim to prove, and identifier for said claim.
         -   Output: KAST representation of final state of prover.
         """
-        logFileName = logAxiomsFile if logAxiomsFile is not None else (self.useDirectory / claimId.lower()).with_suffix('.debug.log')
-        nextState = self.proveClaim(claim, claimId, args=(args + ['--branching-allowed', '1', '--depth', str(maxDepth)]), haskellArgs=haskellArgs, logAxiomsFile=logFileName, allowZeroStep=allowZeroStep)
+        logFileName = log_axioms_file if log_axioms_file is not None else (self.useDirectory / claimId.lower()).with_suffix('.debug.log')
+        nextState = self.proveClaim(claim, claimId, args=(args + ['--branching-allowed', '1', '--depth', str(maxDepth)]), haskell_args=haskell_args, log_axioms_file=logFileName, allow_zero_step=allow_zero_step)
         depth = 0
         for axioms in _getAppliedAxiomList(str(logFileName)):
             depth += 1
