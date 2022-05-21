@@ -76,13 +76,12 @@ def buildSymbolTable(definition, opinionated=False):
 
     symbol_table = {}
     for module in definition.modules:
-        for sentence in module.sentences:
-            if type(sentence) is KProduction and sentence.klabel:
-                label = sentence.klabel.name
-                if 'symbol' in sentence.att and 'klabel' in sentence.att:
-                    label = sentence.att['klabel']
-                unparser = _unparserFromProductionItems(sentence.items)
-                symbol_table[label] = unparser
+        for prod in module.productions:
+            label = prod.klabel.name
+            if 'symbol' in prod.att and 'klabel' in prod.att:
+                label = prod.att['klabel']
+            unparser = _unparserFromProductionItems(prod.items)
+            symbol_table[label] = unparser
 
     if opinionated:
         symbol_table['#And'] = lambda c1, c2: c1 + '\n#And ' + c2
