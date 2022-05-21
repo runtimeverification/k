@@ -44,7 +44,7 @@ class KPrint:
     def __init__(self, kompiled_directory):
         self.kompiled_directory = Path(kompiled_directory)
         self.definition = readKastTerm(self.kompiled_directory / 'compiled.json')
-        self.symbol_table = buildSymbolTable(self.definition, opinionated=True)
+        self.symbol_table = build_symbol_table(self.definition, opinionated=True)
         self.definition_hash = hash_str(self.definition)
 
     def pretty_print(self, kast, debug=False):
@@ -56,7 +56,7 @@ class KPrint:
         return prettyPrintKast(kast, self.symbol_table, debug=debug)
 
 
-def buildSymbolTable(definition, opinionated=False):
+def build_symbol_table(definition, opinionated=False):
     """Build the unparsing symbol table given a JSON encoded definition.
 
     -   Input: JSON encoded K definition.

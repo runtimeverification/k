@@ -15,7 +15,7 @@ from .kastManip import (
     removeSourceMap,
     splitConfigAndConstraints,
 )
-from .ktool import KPrint, KProve, buildSymbolTable, prettyPrintKast
+from .ktool import KPrint, KProve, build_symbol_table, prettyPrintKast
 from .prelude import buildAssoc, mlBottom, mlTop
 
 
@@ -74,7 +74,7 @@ def main(extraMain=None):
 
     elif args['command'] == 'coverage':
         json_definition = removeSourceMap(readKastTerm(kompiled_dir / 'compiled.json'))
-        symbol_table = buildSymbolTable(json_definition)
+        symbol_table = build_symbol_table(json_definition)
         for rid in args['coverage-file']:
             rule = minimizeRule(stripCoverageLogger(getRuleById(json_definition, rid.strip())))
             args['output'].write('\n\n')

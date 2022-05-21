@@ -3,7 +3,7 @@ from .kprint import (
     KPrint,
     appliedLabelStr,
     binOpStr,
-    buildSymbolTable,
+    build_symbol_table,
     indent,
     newLines,
     paren,
