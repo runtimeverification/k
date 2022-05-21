@@ -274,7 +274,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             graph.edge(tail_name=edge.source.id, head_name=edge.target.id, label=f'  {label}        ', **attrs)
 
         for cover in self.covers():
-            label = ', '.join(f'{k} |-> {kprint.pretty_print(v)}' for k, v in cover.subst.items())
+            label = ', '.join(f'{k} |-> {kprint.pretty_print(v)}' for k, v in cover.subst.minimize().items())
             label = _short_label(label)
             attrs = {'class': 'abstraction', 'style': 'dashed'}
             graph.edge(tail_name=cover.source.id, head_name=cover.target.id, label=f'  {label}        ', **attrs)
