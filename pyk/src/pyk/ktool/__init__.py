@@ -9,6 +9,5 @@ from .kprint import (
     paren,
     prettyPrintKast,
     prettyPrintKastBool,
-    underbarUnparsing,
 )
 from .kprove import KProve, kprovex

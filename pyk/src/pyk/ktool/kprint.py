@@ -65,14 +65,20 @@ def build_symbol_table(definition, opinionated=False):
     if type(definition) is not KDefinition:
         fatal('Must supply a KDefinition!')
 
-    def _unparserFromProductionItems(prodItems):
-        unparseString = ''
-        for prodItem in prodItems:
-            if type(prodItem) is KTerminal:
-                unparseString += prodItem.value
-            elif type(prodItem) is KNonTerminal:
-                unparseString += '_'
-        return underbarUnparsing(unparseString)
+    def _unparser_for_production(prod):
+
+        def _unparser(*args):
+            index = 0
+            result = []
+            for item in prod.items:
+                if type(item) is KTerminal:
+                    result.append(item.value)
+                elif type(item) is KNonTerminal and index < len(args):
+                    result.append(args[index])
+                    index += 1
+            return ' '.join(result)
+
+        return _unparser
 
     symbol_table = {}
     for module in definition.modules:
@@ -80,7 +86,7 @@ def build_symbol_table(definition, opinionated=False):
             label = prod.klabel.name
             if 'symbol' in prod.att and 'klabel' in prod.att:
                 label = prod.att['klabel']
-            unparser = _unparserFromProductionItems(prod.items)
+            unparser = _unparser_for_production(prod)
             symbol_table[label] = unparser
 
     if opinionated:
@@ -252,23 +258,6 @@ def prettyPrintKastBool(kast, symbol_table, debug=False):
         return '\n'.join(clauses)
     else:
         return prettyPrintKast(kast, symbol_table, debug=debug)
-
-
-def underbarUnparsing(symbol):
-    splitSymbol = symbol.split('_')
-
-    def _underbarUnparsing(*args):
-        result = []
-        i = 0
-        for symb in splitSymbol:
-            if symb != '':
-                result.append(symb)
-            if i < len(args):
-                result.append(args[i])
-                i += 1
-        return ' '.join(result)
-
-    return _underbarUnparsing
 
 
 def paren(printer):
