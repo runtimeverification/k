@@ -261,6 +261,10 @@ def prettyPrintKastBool(kast, symbol_table, debug=False):
         return prettyPrintKast(kast, symbol_table, debug=debug)
 
 
+def paren(printer):
+    return (lambda *args: '( ' + printer(*args) + ' )')
+
+
 def appliedLabelStr(symbol):
     return (lambda *args: symbol + ' ( ' + ' , '.join(args) + ' )')
 
