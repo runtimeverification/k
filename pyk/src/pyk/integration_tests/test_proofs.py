@@ -21,8 +21,8 @@ class SimpleProofTest(KProveTest):
         new_claim = KClaim(KToken('<k> foo => bar ... </k> <state> 3 |-> 3 </state>', 'TCellFragment'), requires=KToken('pred1(4)', BOOL))
 
         # When
-        result1 = self.kprove.proveClaim(new_claim, 'claim-without-lemma')
-        result2 = self.kprove.proveClaim(new_claim, 'claim-with-lemma', lemmas=[new_lemma])
+        result1 = self.kprove.prove_claim(new_claim, 'claim-without-lemma')
+        result2 = self.kprove.prove_claim(new_claim, 'claim-with-lemma', lemmas=[new_lemma])
 
         # Then
         self.assertNotTop(result1)

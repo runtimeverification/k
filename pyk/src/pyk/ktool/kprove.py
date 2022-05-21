@@ -13,14 +13,7 @@ from ..cli_utils import (
     gen_file_timestamp,
     notif,
 )
-from ..kast import (
-    KAst,
-    KDefinition,
-    KFlatModule,
-    KImport,
-    KRequire,
-    flattenLabel,
-)
+from ..kast import KAst, KDefinition, KFlatModule, KImport, KRequire
 from ..prelude import mlTop
 from .kprint import KPrint
 
@@ -85,18 +78,18 @@ class KProve(KPrint):
     """Given a kompiled directory and a main file name, build a prover for it.
     """
 
-    def __init__(self, kompiledDirectory, mainFileName, useDirectory=None):
-        super(KProve, self).__init__(kompiledDirectory)
-        self.directory = Path(self.kompiledDirectory).parent
-        self.useDirectory = (self.directory / 'kprove') if useDirectory is None else Path(useDirectory)
-        self.useDirectory.mkdir(parents=True, exist_ok=True)
-        self.mainFileName = mainFileName
+    def __init__(self, kompiled_directory, main_file_name, use_directory=None):
+        super(KProve, self).__init__(kompiled_directory)
+        self.directory = Path(self.kompiled_directory).parent
+        self.use_directory = (self.directory / 'kprove') if use_directory is None else Path(use_directory)
+        self.use_directory.mkdir(parents=True, exist_ok=True)
+        self.main_file_name = main_file_name
         self.prover = ['kprovex']
-        self.proverArgs = []
-        with open(self.kompiledDirectory / 'backend.txt', 'r') as ba:
+        self.prover_args = []
+        with open(self.kompiled_directory / 'backend.txt', 'r') as ba:
             self.backend = ba.read()
-        with open(self.kompiledDirectory / 'mainModule.txt', 'r') as mm:
-            self.mainModule = mm.read()
+        with open(self.kompiled_directory / 'mainModule.txt', 'r') as mm:
+            self.main_module = mm.read()
 
     def prove(self, spec_file, spec_module_name, args=[], haskell_args=[], log_axioms_file=None, allow_zero_step=False, dry_run=False):
         """Given the specification to prove and arguments for the prover, attempt to prove it.
@@ -110,8 +103,8 @@ class KProve(KPrint):
         haskell_log_args = ['--log', str(log_file), '--log-format', 'oneline', '--log-entries', 'DebugTransition']
         command = [c for c in self.prover]
         command += [str(spec_file)]
-        command += ['--definition', str(self.kompiledDirectory), '-I', str(self.directory), '--spec-module', spec_module_name, '--output', 'json']
-        command += [c for c in self.proverArgs]
+        command += ['--definition', str(self.kompiled_directory), '-I', str(self.directory), '--spec-module', spec_module_name, '--output', 'json']
+        command += [c for c in self.prover_args]
         command += args
         command_env = os.environ.copy()
         command_env['KORE_EXEC_OPTS'] = ' '.join(haskell_args + haskell_log_args)
@@ -129,45 +122,29 @@ class KProve(KPrint):
                 fatal('Proof took zero steps, likely the LHS is invalid: ' + str(spec_file))
             return final_state
 
-    def proveClaim(self, claim, claimId, lemmas=[], args=[], haskell_args=[], log_axioms_file=None, allow_zero_step=False):
+    def prove_claim(self, claim, claimId, lemmas=[], args=[], haskell_args=[], log_axioms_file=None, allow_zero_step=False):
         """Given a K claim, write the definition needed for the prover, and attempt to prove it.
 
         -   Input: KAST representation of a claim to prove, and an identifer for said claim.
         -   Output: KAST representation of final state the prover supplies for it.
         """
-        self._writeClaimDefinition(claim, claimId, lemmas=lemmas)
-        return self.prove(self.useDirectory / (claimId.lower() + '-spec.k'), claimId.upper() + '-SPEC', args=args, haskell_args=haskell_args, log_axioms_file=log_axioms_file, allow_zero_step=allow_zero_step)
+        self._write_claim_definition(claim, claimId, lemmas=lemmas)
+        return self.prove(self.use_directory / (claimId.lower() + '-spec.k'), claimId.upper() + '-SPEC', args=args, haskell_args=haskell_args, log_axioms_file=log_axioms_file, allow_zero_step=allow_zero_step)
 
-    def proveClaimNoBranching(self, claim, claimId, args=[], haskell_args=[], log_axioms_file=None, maxDepth=1000, allow_zero_step=False):
-        """Given a K claim, attempt to prove it, but do not allow the prover to branch.
-
-        -   Input: KAST representation of a claim to prove, and identifier for said claim.
-        -   Output: KAST representation of final state of prover.
-        """
-        logFileName = log_axioms_file if log_axioms_file is not None else (self.useDirectory / claimId.lower()).with_suffix('.debug.log')
-        nextState = self.proveClaim(claim, claimId, args=(args + ['--branching-allowed', '1', '--depth', str(maxDepth)]), haskell_args=haskell_args, log_axioms_file=logFileName, allow_zero_step=allow_zero_step)
-        depth = 0
-        for axioms in _getAppliedAxiomList(str(logFileName)):
-            depth += 1
-            if len(axioms) > 1:
-                break
-        nextStates = flattenLabel('#Or', nextState)
-        return (depth, nextStates)
-
-    def _writeClaimDefinition(self, claim, claimId, lemmas=[], rule=False):
+    def _write_claim_definition(self, claim, claimId, lemmas=[], rule=False):
         """Given a K claim, write the definition file needed for the prover to it.
 
         -   Input: KAST representation of a claim to prove, and an identifier for said claim.
         -   Output: Write to filesystem the specification with the claim.
         """
-        tmpClaim = self.useDirectory / (claimId.lower() if rule else (claimId.lower() + '-spec'))
+        tmpClaim = self.use_directory / (claimId.lower() if rule else (claimId.lower() + '-spec'))
         tmpModuleName = claimId.upper() if rule else (claimId.upper() + '-SPEC')
         tmpClaim = tmpClaim.with_suffix('.k')
         with open(tmpClaim, 'w') as tc:
-            claimModule = KFlatModule(tmpModuleName, lemmas + [claim], imports=[KImport(self.mainModule, True)])
-            claimDefinition = KDefinition(tmpModuleName, [claimModule], requires=[KRequire(self.mainFileName)])
+            claimModule = KFlatModule(tmpModuleName, lemmas + [claim], imports=[KImport(self.main_module, True)])
+            claimDefinition = KDefinition(tmpModuleName, [claimModule], requires=[KRequire(self.main_file_name)])
             tc.write(gen_file_timestamp() + '\n')
-            tc.write(self.prettyPrint(claimDefinition) + '\n\n')
+            tc.write(self.pretty_print(claimDefinition) + '\n\n')
             tc.flush()
         notif('Wrote claim file: ' + str(tmpClaim) + '.')
 

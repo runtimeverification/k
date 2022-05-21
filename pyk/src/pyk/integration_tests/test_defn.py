@@ -40,7 +40,7 @@ class DefnTest(KProveTest):
                                     ])                   # noqa
 
         # When
-        config_actual = self.kprove.prettyPrint(config)
+        config_actual = self.kprove.pretty_print(config)
 
         # Then
         self.assertEqual(config_expected, config_actual)
@@ -68,8 +68,8 @@ class DefnTest(KProveTest):
         # When
         minimized_claim_rewrite = push_down_rewrites(claim_rewrite)
         claim = KClaim(minimized_claim_rewrite)
-        minimized_claim_rewrite_actual = self.kprove.prettyPrint(minimized_claim_rewrite)
-        result = self.kprove.proveClaim(claim, 'simple-step')
+        minimized_claim_rewrite_actual = self.kprove.pretty_print(minimized_claim_rewrite)
+        result = self.kprove.prove_claim(claim, 'simple-step')
 
         # Then
         self.assertEqual(minimized_claim_rewrite_expected, minimized_claim_rewrite_actual)

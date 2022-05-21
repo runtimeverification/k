@@ -256,13 +256,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         for edge in self.edges():
             display_condition = simplifyBool(unsafeMlPredToBool(edge.condition))
             depth = edge.depth
-            label = '\nandBool'.join(kprint.prettyPrint(display_condition).split(' andBool'))
+            label = '\nandBool'.join(kprint.pretty_print(display_condition).split(' andBool'))
             label = f'{label}\n{depth} steps'
             label = _short_label(label)
             graph.edge(tail_name=edge.source.id, head_name=edge.target.id, label=f'  {label}        ')
 
         for cover in self.covers():
-            label = ', '.join(f'{k} |-> {kprint.prettyPrint(v)}' for k, v in cover.subst.items())
+            label = ', '.join(f'{k} |-> {kprint.pretty_print(v)}' for k, v in cover.subst.items())
             label = _short_label(label)
             attrs = {'class': 'abstraction', 'style': 'dashed'}
             graph.edge(tail_name=cover.source.id, head_name=cover.target.id, label=f'  {label}        ', **attrs)
