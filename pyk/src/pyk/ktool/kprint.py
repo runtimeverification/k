@@ -78,7 +78,7 @@ def buildSymbolTable(definition, opinionated=False):
     for module in definition.modules:
         for sentence in module.sentences:
             if type(sentence) is KProduction and sentence.klabel:
-                label = sentence.klabel
+                label = sentence.klabel.name
                 if 'symbol' in sentence.att and 'klabel' in sentence.att:
                     label = sentence.att['klabel']
                 unparser = _unparserFromProductionItems(sentence.items)
@@ -146,7 +146,7 @@ def prettyPrintKast(kast, symbol_table, debug=False):
         return prettyPrintKast(kast.sort, symbol_table, debug=debug)
     if type(kast) is KProduction:
         if 'klabel' not in kast.att and kast.klabel:
-            kast = kast.update_atts({'klabel': kast.klabel})
+            kast = kast.update_atts({'klabel': kast.klabel.name})
         sortStr = prettyPrintKast(kast.sort, symbol_table, debug=debug)
         productionStr = ' '.join([prettyPrintKast(pi, symbol_table, debug=debug) for pi in kast.items])
         attStr = prettyPrintKast(kast.att, symbol_table, debug=debug)
