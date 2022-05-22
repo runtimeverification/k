@@ -178,7 +178,7 @@ def extract_subst(term: KInner) -> Tuple[Subst, KInner]:
                 if subst is not None:
                     return subst
 
-                if conjunct.args[0] == boolToken(True) and type(conjunct.args[1]) is KApply and conjunct.args[1].label in {'_==K_', '_==Int_'}:
+                if conjunct.args[0] == boolToken(True) and type(conjunct.args[1]) is KApply and conjunct.args[1].label.name in {'_==K_', '_==Int_'}:
                     subst = _subst_for_terms(conjunct.args[1].args[0], conjunct.args[1].args[1])
 
                     if subst is not None:
@@ -455,7 +455,7 @@ def labelsToDots(kast, labels):
     -   Output: kast term with those labels abstracted.
     """
     def _labelstoDots(k):
-        if type(k) is KApply and k.is_cell and k.label in labels:
+        if type(k) is KApply and k.is_cell and k.label.name in labels:
             return ktokenDots
         return k
     return bottom_up(_labelstoDots, kast)

@@ -244,9 +244,9 @@ def prettyPrintKastBool(kast, symbol_table, debug=False):
         sys.stderr.write(str(kast))
         sys.stderr.write('\n')
         sys.stderr.flush()
-    if type(kast) is KApply and kast.label in ['_andBool_', '_orBool_']:
-        clauses = [prettyPrintKastBool(c, symbol_table, debug=debug) for c in flattenLabel(kast.label, kast)]
-        head = kast.label.replace('_', ' ')
+    if type(kast) is KApply and kast.label.name in ['_andBool_', '_orBool_']:
+        clauses = [prettyPrintKastBool(c, symbol_table, debug=debug) for c in flattenLabel(kast.label.name, kast)]
+        head = kast.label.name.replace('_', ' ')
         if head == ' orBool ':
             head = '  orBool '
         separator = ' ' * (len(head) - 7)
