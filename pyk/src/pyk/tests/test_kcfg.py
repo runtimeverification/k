@@ -105,20 +105,24 @@ class KCFGTestCase(TestCase):
 
     def test_remove_node(self):
         # Given
-        d = {'nodes': node_dicts(2), 'edges': edge_dicts((0, 1))}
+        d = {'nodes': node_dicts(3), 'edges': edge_dicts((0, 1), (1, 2))}
         cfg = KCFG.from_dict(d)
+        cfg.add_expanded(node(0).id)
+        cfg.add_expanded(node(1).id)
 
         # When
-        cfg.remove_node(nid(0))
+        cfg.remove_node(nid(1))
 
         # Then
-        self.assertSetEqual(set(cfg.nodes), {node(1)})
+        self.assertSetEqual(set(cfg.nodes), {node(0), node(2)})
         self.assertSetEqual(set(cfg.edges()), set())
-        self.assertFalse(cfg.is_expanded(nid(1)))
+        self.assertFalse(cfg.is_expanded(nid(0)))
         with self.assertRaises(ValueError):
-            cfg.node(nid(0))
+            cfg.node(nid(1))
         with self.assertRaises(ValueError):
             cfg.edge(nid(0), nid(1))
+        with self.assertRaises(ValueError):
+            cfg.edge(nid(1), nid(2))
 
     def test_cover_then_remove(self):
         # Given
