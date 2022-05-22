@@ -335,6 +335,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def remove_node(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
 
+        for pred in [edge.source for edge in self.edges(target_id=node_id)]:
+            self.discard_expanded(pred.id)
+
         self._nodes.pop(node_id)
 
         self._edges.pop(node_id, None)
