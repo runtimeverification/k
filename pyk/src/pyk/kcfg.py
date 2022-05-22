@@ -606,10 +606,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         return paths
 
     def reachable_nodes(self, node_id: str, *, reverse=False, traverse_covers=False) -> Set[Node]:
-        node = self.node(node_id)
 
         visited: Set[KCFG.Node] = set()
-        worklist: List[KCFG.Node] = [node]
+        worklist: List[KCFG.Node] = [self.node(node_id)]
 
         while worklist:
             node = worklist.pop()
@@ -621,7 +620,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
             edges: Iterable[KCFG.EdgeLike]
             if not reverse:
-                edges = chain(self.edges(source_id=node.id), self.covers(source_id=node_id) if traverse_covers else [])
+                edges = chain(self.edges(source_id=node.id), self.covers(source_id=node.id) if traverse_covers else [])
                 worklist.extend(edge.target for edge in edges)
             else:
                 edges = chain(self.edges(target_id=node.id), self.covers(target_id=node.id) if traverse_covers else [])
