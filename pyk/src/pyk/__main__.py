@@ -9,8 +9,8 @@ from .cli_utils import fatal, notif, warning
 from .coverage import getRuleById, stripCoverageLogger
 from .kast import KApply, KAst, flattenLabel, readKastTerm
 from .kastManip import (
+    minimize_term,
     minimizeRule,
-    minimizeTerm,
     propagateUpConstraints,
     removeSourceMap,
     splitConfigAndConstraints,
@@ -43,7 +43,7 @@ def main(extraMain=None):
                 abstractLabels = [] if args['omit_labels'] is None else args['omit_labels'].split(',')
                 minimizedDisjuncts = []
                 for d in flattenLabel('#Or', term):
-                    dMinimized = minimizeTerm(d, abstractLabels=abstractLabels)
+                    dMinimized = minimize_term(d, abstract_labels=abstractLabels)
                     dConfig, dConstraint = splitConfigAndConstraints(dMinimized)
                     if dConstraint != mlTop():
                         minimizedDisjuncts.append(KApply('#And', [dConfig, dConstraint]))

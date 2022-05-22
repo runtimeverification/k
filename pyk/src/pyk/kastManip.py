@@ -469,7 +469,7 @@ def onAttributes(kast: W, f: Callable[[KAtt], KAtt]) -> W:
     return kast
 
 
-def minimizeTerm(term, keepVars=None, abstractLabels=[]):
+def minimize_term(term, keep_vars=None, abstract_labels=[]):
     """Minimize a K term for pretty-printing.
 
     -   Input: kast term, and optionally requires and ensures clauses with constraints.
@@ -480,8 +480,8 @@ def minimizeTerm(term, keepVars=None, abstractLabels=[]):
     """
     term = inlineCellMaps(term)
     term = removeSemanticCasts(term)
-    term = uselessVarsToDots(term, keepVars=keepVars)
-    term = labelsToDots(term, abstractLabels)
+    term = uselessVarsToDots(term, keepVars=keep_vars)
+    term = labelsToDots(term, abstract_labels)
     term = collapseDots(term)
     return term
 
@@ -511,7 +511,7 @@ def minimizeRule(rule, keepVars=[]):
     constrainedVars = [] if keepVars is None else keepVars
     constrainedVars = constrainedVars + collectFreeVars(ruleRequires)
     constrainedVars = constrainedVars + collectFreeVars(ruleEnsures)
-    ruleBody = minimizeTerm(ruleBody, keepVars=constrainedVars)
+    ruleBody = minimize_term(ruleBody, keep_vars=constrainedVars)
 
     return rule.let(body=ruleBody, requires=ruleRequires, ensures=ruleEnsures)
 
