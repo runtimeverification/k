@@ -605,10 +605,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         return paths
 
-    def reachable_nodes(self, node_id: str, *, reverse=False, traverse_covers=False) -> Set[Node]:
+    def reachable_nodes(self, start_node_id: str, *, reverse=False, traverse_covers=False) -> Set[Node]:
 
         visited: Set[KCFG.Node] = set()
-        worklist: List[KCFG.Node] = [self.node(node_id)]
+        worklist: List[KCFG.Node] = [self.node(start_node_id)]
 
         while worklist:
             node = worklist.pop()
