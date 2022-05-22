@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Tuple
 from unittest import TestCase
 
 from ..cterm import CTerm
-from ..kast import TRUE, KApply, KVariable
+from ..kast import TRUE, KApply, KInner, KVariable
 from ..kcfg import KCFG
 from ..prelude import token
 
@@ -11,8 +11,12 @@ def nid(i: int) -> str:
     return node(i).id
 
 
+# over 10 is variables
 def term(i: int) -> CTerm:
-    return CTerm(KApply('<top>', [token(i)]))
+    inside: KInner = token(i)
+    if i > 10:
+        inside = KVariable('V' + str(i))
+    return CTerm(KApply('<top>', [inside]))
 
 
 def node(i: int) -> KCFG.Node:
@@ -28,6 +32,13 @@ def node_dicts(n: int) -> List[Dict[str, Any]]:
 
 
 def edge_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
+    return [
+        {'source': nid(i), 'target': nid(j), 'condition': TRUE.to_dict(), 'depth': 1}
+        for i, j in edges
+    ]
+
+
+def cover_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
     return [
         {'source': nid(i), 'target': nid(j), 'condition': TRUE.to_dict(), 'depth': 1}
         for i, j in edges
@@ -201,16 +212,19 @@ class KCFGTestCase(TestCase):
     def test_reachable_nodes(self):
         # Given
         d = {
-            'nodes': node_dicts(6),
-            'edges': edge_dicts((0, 1), (0, 5), (1, 2), (1, 3), (2, 4), (3, 4), (4, 1)),
+            'nodes': node_dicts(12),
+            'edges': edge_dicts((0, 1), (0, 5), (0, 11), (1, 2), (1, 3), (2, 4), (3, 4), (4, 1)),
+            'covers': cover_dicts((4, 11)),
         }
         cfg = KCFG.from_dict(d)
 
         # When
-        nodes = cfg.reachable_nodes(nid(1))
+        nodes_1 = cfg.reachable_nodes(nid(1))
+        nodes_2 = cfg.reachable_nodes(nid(1), traverse_covers=True)
 
         # Then
-        self.assertSetEqual(nodes, {node(1), node(2), node(3), node(4)})
+        self.assertSetEqual(nodes_1, {node(1), node(2), node(3), node(4)})
+        self.assertSetEqual(nodes_2, {node(1), node(2), node(3), node(4), node(11)})
 
     def test_paths_between(self):
         # Given
