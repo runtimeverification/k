@@ -78,14 +78,6 @@ def whereMatchingBottomUp(effect, matchPattern, pattern):
     return bottom_up(_effect, pattern)
 
 
-def replaceKLabels(pattern, klabelMap):
-    def replace(k):
-        if type(k) is KApply and k.label in klabelMap:
-            return k.let(label=klabelMap[k.label])
-        return k
-    return bottom_up(replace, pattern)
-
-
 def boolToMlPred(kast: KInner) -> KInner:
     return mlAnd([mlEqualsTrue(cond) for cond in flattenLabel('_andBool_', kast)])
 
