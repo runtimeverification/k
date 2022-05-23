@@ -135,13 +135,6 @@ pipeline {
           }
         }
       }
-      post {
-        failure {
-          slackSend color: '#cb2431'                                             \
-                  , channel: '#k'                                                \
-                  , message: "Ubuntu Focal Packaging Failed: ${env.BUILD_URL}"
-        }
-      }
     }
     stage('Build and Package on Ubuntu Bionic') {
       when {
@@ -192,6 +185,13 @@ pipeline {
               archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
             }
           }
+        }
+      }
+      post {
+        failure {
+          slackSend color: '#cb2431'                                             \
+                  , channel: '#k'                                                \
+                  , message: "Ubuntu Bionic Packaging Failed: ${env.BUILD_URL}"
         }
       }
     }
