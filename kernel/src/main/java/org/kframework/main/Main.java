@@ -185,7 +185,7 @@ public class Main {
                         }
                     }
                     break;
-                case "-kprove":
+                case "-kprove-legacy":
                     modules.addAll(KProveFrontEnd.getModules());
                     for (KModule kModule : kModules) {
                         List<Module> ms = kModule.getKProveModules();
