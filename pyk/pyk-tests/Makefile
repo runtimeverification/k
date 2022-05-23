@@ -34,13 +34,13 @@ test: test-kpyk
 test-kpyk: test-kpyk-graphviz test-kpyk-minimize-term
 
 test-kpyk-graphviz: imp-verification.kompiled
-	$(PYK) definitions/imp-verification graph-imports
+	$(PYK) -v definitions/imp-verification graph-imports
 	cat definitions/imp-verification/import-graph | tr -cd '[:alnum:]\n' | grep . | tr '[:lower:]' '[:upper:]' | sort > import-graph.sorted
 	$(CHECK) import-graph.sorted imp-import-graph.expected
 
 test-kpyk-minimize-term: imp-verification.kompiled
-	$(PYK) definitions/imp-verification prove ../k-files/imp-verification.k ../k-files/imp-unproveable-spec.k IMP-UNPROVEABLE-SPEC \
-	    | $(PYK) definitions/imp-verification print /dev/stdin > imp-unproveable-spec.k.out
+	$(PYK) -v definitions/imp-verification prove ../k-files/imp-verification.k ../k-files/imp-unproveable-spec.k IMP-UNPROVEABLE-SPEC \
+	    | $(PYK) -v definitions/imp-verification print /dev/stdin > imp-unproveable-spec.k.out
 	$(CHECK) imp-unproveable-spec.k.out imp-unproveable-spec.k.expected
 
 
