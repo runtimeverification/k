@@ -381,7 +381,7 @@ class KApply(KInner):
     @classmethod
     def from_dict(cls: Type['KApply'], d: Dict[str, Any]) -> 'KApply':
         cls._check_node(d)
-        return KApply(label=KInner.from_dict(d['label']), args=(KInner.from_dict(arg) for arg in d['args']))
+        return KApply(label=KLabel.from_dict(d['label']), args=(KInner.from_dict(arg) for arg in d['args']))
 
     def to_dict(self) -> Dict[str, Any]:
         return {'node': 'KApply', 'label': self.label.to_dict(), 'args': [arg.to_dict() for arg in self.args], 'arity': self.arity, 'variable': False}
