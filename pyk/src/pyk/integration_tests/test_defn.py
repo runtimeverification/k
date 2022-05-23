@@ -7,7 +7,7 @@ from ..kast import (
     assocWithUnit,
     constLabel,
 )
-from ..kastManip import pushDownRewrites, simplifyBool
+from ..kastManip import push_down_rewrites, simplifyBool
 from ..ktool import KompileBackend
 from ..prelude import boolToken, intToken
 from .kprove_test import KProveTest
@@ -40,7 +40,7 @@ class DefnTest(KProveTest):
                                     ])                   # noqa
 
         # When
-        config_actual = self.kprove.prettyPrint(config)
+        config_actual = self.kprove.pretty_print(config)
 
         # Then
         self.assertEqual(config_expected, config_actual)
@@ -66,10 +66,10 @@ class DefnTest(KProveTest):
                                                      ])                             # noqa
 
         # When
-        minimized_claim_rewrite = pushDownRewrites(claim_rewrite)
+        minimized_claim_rewrite = push_down_rewrites(claim_rewrite)
         claim = KClaim(minimized_claim_rewrite)
-        minimized_claim_rewrite_actual = self.kprove.prettyPrint(minimized_claim_rewrite)
-        result = self.kprove.proveClaim(claim, 'simple-step')
+        minimized_claim_rewrite_actual = self.kprove.pretty_print(minimized_claim_rewrite)
+        result = self.kprove.prove_claim(claim, 'simple-step')
 
         # Then
         self.assertEqual(minimized_claim_rewrite_expected, minimized_claim_rewrite_actual)

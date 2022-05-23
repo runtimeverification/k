@@ -706,12 +706,14 @@ class KNonTerminal(KProductionItem):
 class KProduction(KSentence):
     sort: KSort
     items: Tuple[KProductionItem, ...]
-    klabel: str
+    klabel: KLabel
     att: KAtt
 
-    def __init__(self, sort: Union[str, KSort], items: Iterable[KProductionItem] = (), klabel='', att=EMPTY_ATT):
+    def __init__(self, sort: Union[str, KSort], items: Iterable[KProductionItem] = (), klabel: Union[str, KLabel] = '', att=EMPTY_ATT):
         if type(sort) is str:
             sort = KSort(sort)
+        if type(klabel) is str:
+            klabel = KLabel(klabel)
 
         object.__setattr__(self, 'sort', sort)
         object.__setattr__(self, 'items', tuple(items))
@@ -746,7 +748,7 @@ class KProduction(KSentence):
         *,
         sort: Optional[Union[str, KSort]] = None,
         items: Optional[Iterable[KProductionItem]] = None,
-        klabel: Optional[str] = None,
+        klabel: Optional[Union[str, KLabel]] = None,
         att: Optional[KAtt] = None,
     ) -> 'KProduction':
         sort = sort if sort is not None else self.sort
@@ -1325,8 +1327,8 @@ def flattenLabel(label: str, kast: KInner) -> List[KInner]:
     return [kast]
 
 
-klabelCells = '#KCells'
-klabelEmptyK = '#EmptyK'
+klabelCells = KLabel('#KCells')
+klabelEmptyK = KLabel('#EmptyK')
 ktokenDots = KToken('...', 'K')
 
 
