@@ -1,21 +1,21 @@
 import json
+import logging
 import os
-import subprocess
-import sys
 from pathlib import Path
-from subprocess import CompletedProcess, run
-from typing import Iterable, List, Optional
+from subprocess import CalledProcessError, CompletedProcess
+from typing import Final, Iterable, List, Optional
 
 from ..cli_utils import (
     check_dir_path,
     check_file_path,
-    fatal,
     gen_file_timestamp,
-    notif,
+    run_process,
 )
 from ..kast import KAst, KDefinition, KFlatModule, KImport, KRequire
 from ..prelude import mlTop
 from .kprint import KPrint
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 
 def kprovex(
@@ -38,10 +38,10 @@ def kprovex(
         emit_json_spec=emit_json_spec,
     )
 
-    proc_res = _kprovex(str(spec_file), *args)
-
-    if proc_res.returncode:
-        raise RuntimeError(f'Command kprovex failed for: {spec_file}')
+    try:
+        _kprovex(str(spec_file), *args)
+    except CalledProcessError as err:
+        raise RuntimeError(f'Command kprovex exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
 
 
 def _build_arg_list(
@@ -70,8 +70,7 @@ def _build_arg_list(
 
 def _kprovex(spec_file: str, *args: str) -> CompletedProcess:
     run_args = ['kprovex', spec_file] + list(args)
-    notif(' '.join(run_args))
-    return run(run_args, capture_output=True, text=True)
+    return run_process(run_args, _LOGGER)
 
 
 class KProve(KPrint):
@@ -106,39 +105,38 @@ class KProve(KPrint):
         command += ['--definition', str(self.kompiled_directory), '-I', str(self.directory), '--spec-module', spec_module_name, '--output', 'json']
         command += [c for c in self.prover_args]
         command += args
+
         command_env = os.environ.copy()
         command_env['KORE_EXEC_OPTS'] = ' '.join(haskell_args + haskell_log_args)
-        notif(' '.join(command))
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, env=command_env)
-        stdout, stderr = process.communicate(input=None)
+
+        proc_output: str
+        try:
+            proc_output = run_process(command, _LOGGER, env=command_env).stdout
+        except CalledProcessError as err:
+            if err.returncode != 1:
+                raise RuntimeError(f'Command kprovex exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
+            proc_output = err.stdout
+
         if not dry_run:
-            try:
-                final_state = KAst.from_dict(json.loads(stdout)['term'])
-            except Exception:
-                sys.stderr.write(stdout + '\n')
-                sys.stderr.write(stderr + '\n')
-                fatal(f'Exiting: process returned {process.returncode}')
-            if final_state == mlTop() and len(_getAppliedAxiomList(log_file)) == 0 and not allow_zero_step:
-                fatal('Proof took zero steps, likely the LHS is invalid: ' + str(spec_file))
-            return final_state
 
-    def prove_claim(self, claim, claimId, lemmas=[], args=[], haskell_args=[], log_axioms_file=None, allow_zero_step=False):
-        """Given a K claim, write the definition needed for the prover, and attempt to prove it.
+            finalState = KAst.from_dict(json.loads(proc_output)['term'])
+            if finalState == mlTop() and len(_getAppliedAxiomList(log_file)) == 0 and not allow_zero_step:
+                raise ValueError(f'Proof took zero steps, likely the LHS is invalid: {spec_file}')
 
-        -   Input: KAST representation of a claim to prove, and an identifer for said claim.
-        -   Output: KAST representation of final state the prover supplies for it.
-        """
-        self._write_claim_definition(claim, claimId, lemmas=lemmas)
-        return self.prove(self.use_directory / (claimId.lower() + '-spec.k'), claimId.upper() + '-SPEC', args=args, haskell_args=haskell_args, log_axioms_file=log_axioms_file, allow_zero_step=allow_zero_step)
+            return finalState
 
-    def _write_claim_definition(self, claim, claimId, lemmas=[], rule=False):
+    def prove_claim(self, claim, claim_id, lemmas=[], args=[], haskell_args=[], log_axioms_file=None, allow_zero_step=False):
+        self._write_claim_definition(claim, claim_id, lemmas=lemmas)
+        return self.prove(self.use_directory / (claim_id.lower() + '-spec.k'), claim_id.upper() + '-SPEC', args=args, haskell_args=haskell_args, log_axioms_file=log_axioms_file, allow_zero_step=allow_zero_step)
+
+    def _write_claim_definition(self, claim, claim_id, lemmas=[], rule=False):
         """Given a K claim, write the definition file needed for the prover to it.
 
         -   Input: KAST representation of a claim to prove, and an identifier for said claim.
         -   Output: Write to filesystem the specification with the claim.
         """
-        tmpClaim = self.use_directory / (claimId.lower() if rule else (claimId.lower() + '-spec'))
-        tmpModuleName = claimId.upper() if rule else (claimId.upper() + '-SPEC')
+        tmpClaim = self.use_directory / (claim_id.lower() if rule else (claim_id.lower() + '-spec'))
+        tmpModuleName = claim_id.upper() if rule else (claim_id.upper() + '-SPEC')
         tmpClaim = tmpClaim.with_suffix('.k')
         with open(tmpClaim, 'w') as tc:
             claimModule = KFlatModule(tmpModuleName, lemmas + [claim], imports=[KImport(self.main_module, True)])
@@ -146,7 +144,7 @@ class KProve(KPrint):
             tc.write(gen_file_timestamp() + '\n')
             tc.write(self.pretty_print(claimDefinition) + '\n\n')
             tc.flush()
-        notif('Wrote claim file: ' + str(tmpClaim) + '.')
+        _LOGGER.info('Wrote claim file: ' + str(tmpClaim) + '.')
 
 
 def _getAppliedAxiomList(debugLogFile: Path) -> List[List[str]]:
