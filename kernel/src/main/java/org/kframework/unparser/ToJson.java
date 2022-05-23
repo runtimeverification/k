@@ -482,7 +482,7 @@ public class ToJson {
         jkl.add("name", kl.name());
         JsonArrayBuilder params = Json.createArrayBuilder();
         for (Sort s : mutable(kl.params()))
-            params.add(s.toString());
+            params.add(toJson(s));
         jkl.add("params", params.build());
         return jkl.build();
     }

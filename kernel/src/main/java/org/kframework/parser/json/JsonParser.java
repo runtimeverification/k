@@ -261,7 +261,7 @@ public class JsonParser {
     private static Sort toSort(JsonObject data) {
         if (! data.getString("node").equals(KSORT))
             throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
-        return KORE.Sort(data.getString("name"));
+        return Outer.parseSort(data.getString("name"));
     }
 
     private static ProductionItem toProductionItem(JsonObject data) {
@@ -380,7 +380,7 @@ public class JsonParser {
         JsonArray jparams = data.getJsonArray("params");
         List<Sort> params = new ArrayList<>();
         for (JsonValue p : jparams) {
-            params.add(Outer.parseSort(((JsonString)p).getString()));
+            params.add(toSort((JsonObject)p));
         }
         Sort[] sarray = params.toArray(new Sort[0]);
         return KLabel(data.getString("name"), sarray);

@@ -227,7 +227,7 @@ class KVariable(KInner):
         return KVariable(name=d['name'])
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KVariable', 'name': self.name, 'originalName': self.name}
+        return {'node': 'KVariable', 'name': self.name}
 
     def let(self, *, name: Optional[str] = None) -> 'KVariable':
         name = name if name is not None else self.name
@@ -254,7 +254,7 @@ class KSort(KInner):
         return KSort(name=d['name'])
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KSort', 'name': self.name, 'originalName': self.name}
+        return {'node': 'KSort', 'name': self.name}
 
     def let(self, *, name: Optional[str] = None) -> 'KSort':
         name = name if name is not None else self.name
@@ -381,10 +381,10 @@ class KApply(KInner):
     @classmethod
     def from_dict(cls: Type['KApply'], d: Dict[str, Any]) -> 'KApply':
         cls._check_node(d)
-        return KApply(label=d['label'], args=(KInner.from_dict(arg) for arg in d['args']))
+        return KApply(label=KInner.from_dict(d['label']), args=(KInner.from_dict(arg) for arg in d['args']))
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KApply', 'label': self.label.name, 'args': [arg.to_dict() for arg in self.args], 'arity': self.arity, 'variable': False}
+        return {'node': 'KApply', 'label': self.label.to_dict(), 'args': [arg.to_dict() for arg in self.args], 'arity': self.arity, 'variable': False}
 
     def let(self, *, label: Optional[Union[str, KLabel]] = None, args: Optional[Iterable[KInner]] = None) -> 'KApply':
         label = label if label is not None else self.label
@@ -400,8 +400,8 @@ class KApply(KInner):
         return None
 
 
-TOP: Final = KApply('#Top')
-BOTTOM: Final = KApply('#Bottom')
+TOP: Final = KApply(KLabel('#Top', ['K']))
+BOTTOM: Final = KApply(KLabel('#Bottom', ['K']))
 
 
 @final
