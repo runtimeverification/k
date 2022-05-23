@@ -74,8 +74,6 @@ def _kprovex(spec_file: str, *args: str) -> CompletedProcess:
 
 
 class KProve(KPrint):
-    """Given a kompiled directory and a main file name, build a prover for it.
-    """
 
     def __init__(self, kompiled_directory, main_file_name, use_directory=None):
         super(KProve, self).__init__(kompiled_directory)
@@ -91,11 +89,6 @@ class KProve(KPrint):
             self.main_module = mm.read()
 
     def prove(self, spec_file, spec_module_name, args=[], haskell_args=[], log_axioms_file=None, allow_zero_step=False, dry_run=False):
-        """Given the specification to prove and arguments for the prover, attempt to prove it.
-
-        -   Input: Specification file name, specification module name, optionall arguments, haskell backend arguments, and file to log axioms to.
-        -   Output: KAST represenation of output of prover, or crashed process.
-        """
         log_file = spec_file.with_suffix('.debug-log') if log_axioms_file is None else log_axioms_file
         if log_file.exists():
             log_file.unlink()
@@ -130,11 +123,6 @@ class KProve(KPrint):
         return self.prove(self.use_directory / (claim_id.lower() + '-spec.k'), claim_id.upper() + '-SPEC', args=args, haskell_args=haskell_args, log_axioms_file=log_axioms_file, allow_zero_step=allow_zero_step)
 
     def _write_claim_definition(self, claim, claim_id, lemmas=[], rule=False):
-        """Given a K claim, write the definition file needed for the prover to it.
-
-        -   Input: KAST representation of a claim to prove, and an identifier for said claim.
-        -   Output: Write to filesystem the specification with the claim.
-        """
         tmpClaim = self.use_directory / (claim_id.lower() if rule else (claim_id.lower() + '-spec'))
         tmpModuleName = claim_id.upper() if rule else (claim_id.upper() + '-SPEC')
         tmpClaim = tmpClaim.with_suffix('.k')
