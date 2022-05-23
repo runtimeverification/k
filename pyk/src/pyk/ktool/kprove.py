@@ -1,17 +1,15 @@
 import json
+import logging
 import os
-import subprocess
-import sys
 from pathlib import Path
-from subprocess import CompletedProcess, run
-from typing import Iterable, List, Optional
+from subprocess import CalledProcessError, CompletedProcess
+from typing import Final, Iterable, List, Optional
 
 from ..cli_utils import (
     check_dir_path,
     check_file_path,
-    fatal,
     gen_file_timestamp,
-    notif,
+    run_process,
 )
 from ..kast import (
     KAst,
@@ -23,6 +21,8 @@ from ..kast import (
 )
 from ..prelude import mlTop
 from .kprint import KPrint
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 
 def kprovex(
@@ -45,10 +45,10 @@ def kprovex(
         emit_json_spec=emit_json_spec,
     )
 
-    proc_res = _kprovex(str(spec_file), *args)
-
-    if proc_res.returncode:
-        raise RuntimeError(f'Command kprovex failed for: {spec_file}')
+    try:
+        _kprovex(str(spec_file), *args)
+    except CalledProcessError as err:
+        raise RuntimeError(f'Command kprovex exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
 
 
 def _build_arg_list(
@@ -77,8 +77,7 @@ def _build_arg_list(
 
 def _kprovex(spec_file: str, *args: str) -> CompletedProcess:
     run_args = ['kprovex', spec_file] + list(args)
-    notif(' '.join(run_args))
-    return run(run_args, capture_output=True, text=True)
+    return run_process(run_args, _LOGGER)
 
 
 class KProve(KPrint):
@@ -115,17 +114,19 @@ class KProve(KPrint):
         command += args
         commandEnv = os.environ.copy()
         commandEnv['KORE_EXEC_OPTS'] = ' '.join(haskellArgs + haskellLogArgs)
-        notif(' '.join(command))
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, env=commandEnv)
-        stdout, stderr = process.communicate(input=None)
+
+        proc_output: str
         try:
-            finalState = KAst.from_dict(json.loads(stdout)['term'])
-        except Exception:
-            sys.stderr.write(stdout + '\n')
-            sys.stderr.write(stderr + '\n')
-            fatal(f'Exiting: process returned {process.returncode}')
+            proc_output = run_process(command, _LOGGER, env=commandEnv).stdout
+        except CalledProcessError as err:
+            if err.returncode != 1:
+                raise RuntimeError(f'Command kprovex exited with code {err.returncode} for: {specFile}', err.stdout, err.stderr)
+            proc_output = err.stdout
+
+        finalState = KAst.from_dict(json.loads(proc_output)['term'])
         if finalState == mlTop() and len(_getAppliedAxiomList(logFile)) == 0 and not allowZeroStep:
-            fatal('Proof took zero steps, likely the LHS is invalid: ' + str(specFile))
+            raise ValueError(f'Proof took zero steps, likely the LHS is invalid: {specFile}')
+
         return finalState
 
     def proveClaim(self, claim, claimId, lemmas=[], args=[], haskellArgs=[], logAxiomsFile=None, allowZeroStep=False):
@@ -168,7 +169,7 @@ class KProve(KPrint):
             tc.write(gen_file_timestamp() + '\n')
             tc.write(self.prettyPrint(claimDefinition) + '\n\n')
             tc.flush()
-        notif('Wrote claim file: ' + str(tmpClaim) + '.')
+        _LOGGER.info('Wrote claim file: ' + str(tmpClaim) + '.')
 
 
 def _getAppliedAxiomList(debugLogFile: Path) -> List[List[str]]:

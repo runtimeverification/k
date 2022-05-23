@@ -1,11 +1,11 @@
 import argparse
-import os.path as path
+import logging
 import sys
 from pathlib import Path
+from typing import Final
 
 from graphviz import Digraph
 
-from .cli_utils import fatal, notif, warning
 from .coverage import getRuleById, stripCoverageLogger
 from .kast import KApply, KAst, flattenLabel, readKastTerm
 from .kastManip import (
@@ -18,6 +18,8 @@ from .kastManip import (
 from .ktool import KPrint, KProve, buildSymbolTable, prettyPrintKast
 from .prelude import buildAssoc, mlBottom, mlTop
 
+_LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
+
 
 def main(extraMain=None):
     # KAST terms can end up nested quite deeply, because of the various assoc operators (eg. _Map_, _Set_, ...).
@@ -26,10 +28,14 @@ def main(extraMain=None):
     sys.setrecursionlimit(10 ** 7)
 
     commandLineArgs = create_argument_parser()
-
-    returncode = 0
     args = vars(commandLineArgs.parse_args())
+
     kompiled_dir = Path(args['kompiled-dir'])
+
+    if args['verbose']:
+        logging.basicConfig(level=logging.DEBUG, format=_LOG_FORMAT)
+    else:
+        logging.basicConfig(level=logging.WARNING, format=_LOG_FORMAT)
 
     if args['command'] == 'print':
         printer = KPrint(kompiled_dir)
@@ -56,8 +62,6 @@ def main(extraMain=None):
         kprover = KProve(kompiled_dir, args['main-file'])
         finalState = kprover.prove(Path(args['spec-file']), args['spec-module'], args=args['kArgs'])
         args['output_file'].write(finalState.to_json())
-        if finalState != mlTop():
-            warning('Proof failed!')
 
     elif args['command'] == 'graph-imports':
         kprinter = KPrint(kompiled_dir)
@@ -70,7 +74,7 @@ def main(extraMain=None):
             for moduleImport in module.imports:
                 importGraph.edge(modName, moduleImport.name)
         importGraph.render(graphFile)
-        notif('Wrote file: ' + str(graphFile))
+        print(f'Wrote file: {graphFile}')
 
     elif args['command'] == 'coverage':
         json_definition = removeSourceMap(readKastTerm(kompiled_dir / 'compiled.json'))
@@ -85,13 +89,11 @@ def main(extraMain=None):
     elif extraMain is not None:
         extraMain(args, kompiled_dir)
 
-    if returncode != 0:
-        fatal('Non-zero exit code (' + str(returncode) + '): ' + str(args['command']))
-
 
 def create_argument_parser():
     pykArgs = argparse.ArgumentParser()
     pykArgs.add_argument('kompiled-dir', type=str, help='Kompiled directory for definition.')
+    pykArgs.add_argument('--verbose', '-v', default=False, action='store_true', help='Set log level to INFO.')
 
     pykCommandParsers = pykArgs.add_subparsers(dest='command')
 
@@ -116,11 +118,6 @@ def create_argument_parser():
     coverageArgs.add_argument('-o', '--output', type=argparse.FileType('w'), default='-')
 
     return pykArgs
-
-
-# TODO remove
-def definitionDir(kompiledDir):
-    return path.dirname(path.abspath(kompiledDir))
 
 
 if __name__ == '__main__':

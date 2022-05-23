@@ -1,4 +1,3 @@
-from .cli_utils import fatal
 from .kast import KApply, KRewrite, KRule, KSequence, readKastTerm
 
 
@@ -18,7 +17,7 @@ def getRuleById(definition, rule_id):
             if type(sentence) is KRule:
                 if 'UNIQUE_ID' in sentence.att and sentence.att['UNIQUE_ID'] == rule_id:
                     return sentence
-    fatal('Could not find rule with ID: ' + rule_id)
+    raise ValueError(f'Could not find rule with ID: {rule_id}')
 
 
 def stripCoverageLogger(rule: KRule):
@@ -77,11 +76,11 @@ def translateCoverage(src_all_rules, dst_all_rules, dst_definition, src_rules_li
     dst_rule_list = []
     for src_rule in src_rule_list:
         if src_rule not in src_rule_map:
-            fatal('COULD NOT FIND RULE IN src_rule_map: ' + src_rule)
+            raise ValueError(f'Could not find rule in src_rule_map: {src_rule}')
         src_rule_loc = src_rule_map[src_rule]
 
         if src_rule_loc not in dst_rule_map:
-            fatal('COULD NOT FIND RULE LOCATION IN dst_rule_map: ' + src_rule_loc)
+            raise ValueError(f'Could not find rule location in dst_rule_map: {src_rule_loc}')
         dst_rule = dst_rule_map[src_rule_loc]
 
         if dst_rule in dst_non_function_rules:
