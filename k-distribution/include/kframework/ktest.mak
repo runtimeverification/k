@@ -12,7 +12,7 @@ KRUN=${K_BIN}/krun
 KDEP=${K_BIN}/kdep
 # and kprove
 KPROVE_LEGACY=${K_BIN}/kprove-legacy
-KPROVEX=${K_BIN}/kprovex
+KPROVE=${K_BIN}/kprove
 # and kbmc
 KBMC=${K_BIN}/kbmc
 # and kast
@@ -58,7 +58,7 @@ KPROVE_FLAGS+=--no-exc-wrap
 KRUN_FLAGS+=--no-exc-wrap
 
 KRUN_OR_LEGACY=$(KRUN)
-KPROVE_OR_X=$(KPROVE_LEGACY)
+KPROVE_OR_LEGACY=$(KPROVE_LEGACY)
 
 CHECK?=| diff -
 REMOVE_PATHS=| sed 's!'`pwd`'/\(\./\)\{0,2\}!!g'

@@ -194,7 +194,7 @@ public class Main {
                         }
                     }
                     break;
-                case "-kprovex":
+                case "-kprove":
                     modules.addAll(org.kframework.kprovex.KProveFrontEnd.getModules());
                     for (KModule kModule : kModules) {
                         List<Module> ms = kModule.getKProveModules();
