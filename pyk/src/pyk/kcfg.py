@@ -172,7 +172,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         init = sorted(self._init)
         target = sorted(self._target)
         expanded = sorted(self._expanded)
-        verified = [{"source": source, "target": target} for source, target in sorted(self._verified)]
+        verified = [{"source": source_id, "target": target_id} for source_id, target_id in sorted(self._verified)]
 
         res = {
             'nodes': nodes,
@@ -335,8 +335,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def remove_node(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
 
-        for pred in [edge.source for edge in self.edges(target_id=node_id)]:
-            self.discard_expanded(pred.id)
+        for edge_in in [edge.source for edge in self.edges(target_id=node_id)]:
+            self.discard_expanded(edge_in.id)
 
         self._nodes.pop(node_id)
 
@@ -355,7 +355,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         self._init.discard(node_id)
         self._target.discard(node_id)
         self._expanded.discard(node_id)
-        self._verified = set([(source_id, target_id) for source_id, target_id in self._verified if source_id != node_id and target_id != node_id])
+        self._verified = set((source_id, target_id) for source_id, target_id in self._verified if source_id != node_id and target_id != node_id)
 
     def edge(self, source_id: str, target_id: str) -> Optional[Edge]:
         source_id = self._resolve(source_id)
@@ -605,10 +605,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         return paths
 
-    def reachable_nodes(self, start_node_id: str, *, reverse=False, traverse_covers=False) -> Set[Node]:
+    def reachable_nodes(self, source_id: str, *, reverse=False, traverse_covers=False) -> Set[Node]:
 
         visited: Set[KCFG.Node] = set()
-        worklist: List[KCFG.Node] = [self.node(start_node_id)]
+        worklist: List[KCFG.Node] = [self.node(source_id)]
 
         while worklist:
             node = worklist.pop()
