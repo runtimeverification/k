@@ -27,8 +27,8 @@ class KProveTest(KompiledTest, ABC):
         kprove_include_dirs = [str(kompiled_main_file.parent)] + list(self.KPROVE_INCLUDE_DIRS)
 
         self.kprove = KProve(self.kompiled_dir, kprove_main_file, self.KPROVE_USE_DIR)
-        self.kprove.proverArgs += list(chain.from_iterable(['-I', include_dir] for include_dir in kprove_include_dirs))
-        self._update_symbol_table(self.kprove.symbolTable)
+        self.kprove.prover_args += list(chain.from_iterable(['-I', include_dir] for include_dir in kprove_include_dirs))
+        self._update_symbol_table(self.kprove.symbol_table)
 
     def tearDown(self):
         shutil.rmtree(self.KPROVE_USE_DIR, ignore_errors=True)

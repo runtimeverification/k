@@ -9,13 +9,13 @@ from graphviz import Digraph
 from .coverage import getRuleById, stripCoverageLogger
 from .kast import KApply, KAst, flattenLabel, readKastTerm
 from .kastManip import (
+    minimize_term,
     minimizeRule,
-    minimizeTerm,
     propagateUpConstraints,
     removeSourceMap,
     splitConfigAndConstraints,
 )
-from .ktool import KPrint, KProve, buildSymbolTable, prettyPrintKast
+from .ktool import KPrint, KProve, build_symbol_table, prettyPrintKast
 from .prelude import buildAssoc, mlBottom, mlTop
 
 _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
@@ -43,20 +43,20 @@ def main(extraMain=None):
         if type(term) is dict and 'term' in term:
             term = term['term']
         if term == mlTop():
-            args['output_file'].write(printer.prettyPrint(term))
+            args['output_file'].write(printer.pretty_print(term))
         else:
             if args['minimize']:
                 abstractLabels = [] if args['omit_labels'] is None else args['omit_labels'].split(',')
                 minimizedDisjuncts = []
                 for d in flattenLabel('#Or', term):
-                    dMinimized = minimizeTerm(d, abstractLabels=abstractLabels)
+                    dMinimized = minimize_term(d, abstract_labels=abstractLabels)
                     dConfig, dConstraint = splitConfigAndConstraints(dMinimized)
                     if dConstraint != mlTop():
                         minimizedDisjuncts.append(KApply('#And', [dConfig, dConstraint]))
                     else:
                         minimizedDisjuncts.append(dConfig)
                 term = propagateUpConstraints(buildAssoc(mlBottom(), '#Or', minimizedDisjuncts))
-            args['output_file'].write(printer.prettyPrint(term))
+            args['output_file'].write(printer.pretty_print(term))
 
     elif args['command'] == 'prove':
         kprover = KProve(kompiled_dir, args['main-file'])
@@ -78,13 +78,13 @@ def main(extraMain=None):
 
     elif args['command'] == 'coverage':
         json_definition = removeSourceMap(readKastTerm(kompiled_dir / 'compiled.json'))
-        symbolTable = buildSymbolTable(json_definition)
+        symbol_table = build_symbol_table(json_definition)
         for rid in args['coverage-file']:
             rule = minimizeRule(stripCoverageLogger(getRuleById(json_definition, rid.strip())))
             args['output'].write('\n\n')
             args['output'].write('Rule: ' + rid.strip())
             args['output'].write('\nUnparsed:\n')
-            args['output'].write(prettyPrintKast(rule, symbolTable))
+            args['output'].write(prettyPrintKast(rule, symbol_table))
 
     elif extraMain is not None:
         extraMain(args, kompiled_dir)

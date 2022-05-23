@@ -45,7 +45,7 @@ class EmitJsonSpecTest(KProveTest):
 
     def test_prove_claim(self):
         # When
-        result = self.kprove.proveClaim(self.claim, 'looping-1')
+        result = self.kprove.prove_claim(self.claim, 'looping-1')
 
         # Then
         self.assertTop(result)
@@ -60,7 +60,7 @@ class EmitJsonSpecTest(KProveTest):
         definition = KDefinition(self.module.name, [self.module], requires=[KRequire(self.MAIN_FILE_NAME)])
 
         with open(spec_file, 'x') as f:
-            f.write(self.kprove.prettyPrint(definition))
+            f.write(self.kprove.pretty_print(definition))
 
         # When
         result = self.kprove.prove(spec_file, spec_module_name)

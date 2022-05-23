@@ -116,6 +116,7 @@ class ExtractSubstTest(TestCase):
         (mlEquals(x, y), {}, mlEquals(x, y)),
         (mlAnd([mlEquals(a, b), mlEquals(x, a)]), {'x': a}, mlEquals(a, b)),
         (mlEqualsTrue(int_eq(a, b)), {}, mlEqualsTrue(int_eq(a, b))),
+        (mlEqualsTrue(int_eq(x, a)), {'x': a}, mlTop()),
     )
 
     def test(self):
