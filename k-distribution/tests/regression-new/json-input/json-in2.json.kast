@@ -1,1 +1,1 @@
-{"format":"KAST","version":2,"term":{"node":"KApply","label":{"node":"KLabel","name":"#Equals","params":[{"node":"KSort","name":"Sort1"},{"node":"KSort","name":"Sort2"}]},"arity":2,"args":[{"node":"KToken","sort":"Int","token":"3"},{"node":"KToken","sort":"Int","token":"3"}]}}
+{"format":"KAST","version":2,"term":{"node":"KApply","label":{"node":"KLabel","name":"#Equals","params":[{"node":"KSort","name":"K"},{"node":"KSort","name":"K"}]},"arity":2,"args":[{"node":"KToken","sort":"Int","token":"3"},{"node":"KToken","sort":"Int","token":"3"}]}}
