@@ -30,15 +30,12 @@ import org.kframework.kore.KLabel;
 import org.kframework.kore.KORE;
 import org.kframework.kore.Sort;
 import org.kframework.parser.outer.Outer;
+import org.kframework.unparser.ToJson;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Option;
 import scala.collection.JavaConverters;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonString;
+import javax.json.*;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
@@ -109,8 +106,8 @@ public class JsonParser {
             if (! data.getString("format").equals("KAST")) {
                 throw KEMException.criticalError("Only can deserialize 'KAST' format Json! Found: " + data.getString("format"));
             }
-            if (data.getInt("version") != 1) {
-                throw KEMException.criticalError("Only can deserialize KAST version '1'! Found: " + data.getInt("version"));
+            if (data.getInt("version") != ToJson.version) {
+                throw KEMException.criticalError("Only can deserialize KAST version '" + ToJson.version + "'! Found: " + data.getInt("version"));
             }
             return toDefinition(data.getJsonObject("term"));
         } catch (IOException e) {
@@ -194,10 +191,10 @@ public class JsonParser {
             }
             case KSYNTAXASSOCIATIVITY: {
                 String assocString = data.getString("assoc");
-                Associativity assoc = assocString == "Left"     ? Associativity.Left
-                                              : assocString == "Right"    ? Associativity.Right
-                                              : assocString == "NonAssoc" ? Associativity.NonAssoc
-                                              : Associativity.Unspecified;
+                Associativity assoc = "Left".equals(assocString)     ? Associativity.Left
+                                    : "Right".equals(assocString)    ? Associativity.Right
+                                    : "NonAssoc".equals(assocString) ? Associativity.NonAssoc
+                                    :                                  Associativity.Unspecified;
                 scala.collection.Set<Tag> tags = toTags(data.getJsonArray("tags"));
                 Att att = toAtt(data.getJsonObject("att"));
                 return new SyntaxAssociativity(assoc, tags, att);
@@ -264,7 +261,7 @@ public class JsonParser {
     private static Sort toSort(JsonObject data) {
         if (! data.getString("node").equals(KSORT))
             throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
-        return KORE.Sort(data.getString("name"));
+        return Outer.parseSort(data.getString("name"));
     }
 
     private static ProductionItem toProductionItem(JsonObject data) {
@@ -293,7 +290,7 @@ public class JsonParser {
 // Parsing Att Json //
 //////////////////////
 
-    public static Att toAtt(JsonObject data) throws IOException {
+    public static Att toAtt(JsonObject data) {
         if (! (data.getString("node").equals(KATT) && data.containsKey("att")))
             throw KEMException.criticalError("Unexpected node found in KAST Json term when unparsing KATT: " + data.getString("node"));
         JsonObject attMap = data.getJsonObject("att");
@@ -329,8 +326,8 @@ public class JsonParser {
             if (! data.getString("format").equals("KAST")) {
                 throw KEMException.criticalError("Only can deserialize 'KAST' format Json! Found: " + data.getString("format"));
             }
-            if (data.getInt("version") != 1) {
-                throw KEMException.criticalError("Only can deserialize KAST version '1'! Found: " + data.getInt("version"));
+            if (data.getInt("version") != ToJson.version) {
+                throw KEMException.criticalError("Only can deserialize KAST version '" + ToJson.version + "'! Found: " + data.getInt("version"));
             }
             return toK(data.getJsonObject("term"));
         } catch (IOException e) {
@@ -339,21 +336,17 @@ public class JsonParser {
     }
 
     private static K toK(JsonObject data) throws IOException {
-        String label;
         KLabel klabel;
 
         switch (data.getString("node")) {
 
             case KTOKEN:
-                return KToken(data.getString("token"), Outer.parseSort(data.getString("sort")));
+                return KToken(data.getString("token"), toSort(data.getJsonObject("sort")));
 
             case KAPPLY:
                 int arity = data.getInt("arity");
                 K[] args  = toKs(arity, data.getJsonArray("args"));
-                label     = data.getString("label");
-                klabel    = data.getBoolean("variable")
-                          ? KVariable(label)
-                          : KLabel(label);
+                klabel    = toKLabel(data.getJsonObject("label"));
                 return KApply(klabel, args);
 
             case KSEQUENCE:
@@ -375,15 +368,22 @@ public class JsonParser {
                 return KORE.KAs(pattern, alias);
 
             case INJECTEDKLABEL:
-                label  = data.getString("name");
-                klabel = data.getBoolean("variable")
-                       ? KVariable(label)
-                       : KLabel(label);
+                klabel    = toKLabel(data.getJsonObject("label"));
                 return InjectedKLabel(klabel);
 
             default:
                 throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
         }
+    }
+
+    private static KLabel toKLabel(JsonObject data) {
+        JsonArray jparams = data.getJsonArray("params");
+        List<Sort> params = new ArrayList<>();
+        for (JsonValue p : jparams) {
+            params.add(toSort((JsonObject)p));
+        }
+        Sort[] sarray = params.toArray(new Sort[0]);
+        return KLabel(data.getString("name"), sarray);
     }
 
     private static K[] toKs(int arity, JsonArray data) throws IOException {
