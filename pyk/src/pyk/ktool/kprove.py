@@ -18,7 +18,7 @@ from .kprint import KPrint
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-def kprovex(
+def kprove(
     spec_file: Path,
     *,
     kompiled_dir: Optional[Path] = None,
@@ -39,9 +39,9 @@ def kprovex(
     )
 
     try:
-        _kprovex(str(spec_file), *args)
+        _kprove(str(spec_file), *args)
     except CalledProcessError as err:
-        raise RuntimeError(f'Command kprovex exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
+        raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
 
 
 def _build_arg_list(
@@ -68,8 +68,8 @@ def _build_arg_list(
     return args
 
 
-def _kprovex(spec_file: str, *args: str) -> CompletedProcess:
-    run_args = ['kprovex', spec_file] + list(args)
+def _kprove(spec_file: str, *args: str) -> CompletedProcess:
+    run_args = ['kprove', spec_file] + list(args)
     return run_process(run_args, _LOGGER)
 
 
@@ -81,7 +81,7 @@ class KProve(KPrint):
         self.use_directory = (self.directory / 'kprove') if use_directory is None else Path(use_directory)
         self.use_directory.mkdir(parents=True, exist_ok=True)
         self.main_file_name = main_file_name
-        self.prover = ['kprovex']
+        self.prover = ['kprove']
         self.prover_args = []
         with open(self.kompiled_directory / 'backend.txt', 'r') as ba:
             self.backend = ba.read()
@@ -107,7 +107,7 @@ class KProve(KPrint):
             proc_output = run_process(command, _LOGGER, env=command_env).stdout
         except CalledProcessError as err:
             if err.returncode != 1:
-                raise RuntimeError(f'Command kprovex exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
+                raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
             proc_output = err.stdout
 
         if not dry_run:
@@ -132,7 +132,7 @@ class KProve(KPrint):
             tc.write(gen_file_timestamp() + '\n')
             tc.write(self.pretty_print(claimDefinition) + '\n\n')
             tc.flush()
-        _LOGGER.info('Wrote claim file: ' + str(tmpClaim) + '.')
+        _LOGGER.debug(f'Wrote claim file: {tmpClaim}.')
 
 
 def _getAppliedAxiomList(debugLogFile: Path) -> List[List[str]]:
