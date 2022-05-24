@@ -162,7 +162,7 @@ public class JsonParser {
 // Parsing Sentence Json //
 ///////////////////////////
 
-    public static Sentence toSentence(JsonObject data) throws IOException {
+    public static Sentence toSentence(JsonObject data) {
         switch(data.getString("node")) {
             case KCONTEXT: {
                 K body     = toK(data.getJsonObject("body"));
@@ -235,7 +235,7 @@ public class JsonParser {
                 return new Bubble(sentenceType, contents, att);
             }
             case KPRODUCTION: {
-                Option<KLabel> klabel = Option.apply(data.containsKey("klabel") ? KLabel(data.getString("klabel")) : null);
+                Option<KLabel> klabel = Option.apply(data.containsKey("klabel") ? toKLabel(data.getJsonObject("klabel")) : null);
                 Sort sort             = toSort(data.getJsonObject("sort"));
                 Att att               = toAtt(data.getJsonObject("att"));
 
@@ -303,6 +303,8 @@ public class JsonParser {
                 newAtt = newAtt.add(Location.class, Location(locarr.getInt(0), locarr.getInt(1), locarr.getInt(2), locarr.getInt(3)));
             } else if (key.equals(Source.class.getName())) {
                 newAtt = newAtt.add(Source.class, Source.apply(attMap.getString(key)));
+            } else if (key.equals(Production.class.getName())) {
+                newAtt = newAtt.add(Production.class, (Production) toSentence(attMap.getJsonObject(key)));
             } else if (key.equals("bracketLabel")) {
                 newAtt = newAtt.add("bracketLabel", KLabel.class, toKLabel(attMap.getJsonObject(key)));
             } else
@@ -329,23 +331,19 @@ public class JsonParser {
     }
 
     public static K parseJson(JsonObject data) {
-        try {
-            if (! (data.containsKey("format") && data.containsKey("version") && data.containsKey("term"))) {
-                throw KEMException.criticalError("Must have `format`, `version`, and `term` fields in serialized Json!");
-            }
-            if (! data.getString("format").equals("KAST")) {
-                throw KEMException.criticalError("Only can deserialize 'KAST' format Json! Found: " + data.getString("format"));
-            }
-            if (data.getInt("version") != ToJson.version) {
-                throw KEMException.criticalError("Only can deserialize KAST version '" + ToJson.version + "'! Found: " + data.getInt("version"));
-            }
-            return toK(data.getJsonObject("term"));
-        } catch (IOException e) {
-            throw KEMException.criticalError("Could not read K term from json", e);
+        if (! (data.containsKey("format") && data.containsKey("version") && data.containsKey("term"))) {
+            throw KEMException.criticalError("Must have `format`, `version`, and `term` fields in serialized Json!");
         }
+        if (! data.getString("format").equals("KAST")) {
+            throw KEMException.criticalError("Only can deserialize 'KAST' format Json! Found: " + data.getString("format"));
+        }
+        if (data.getInt("version") != ToJson.version) {
+            throw KEMException.criticalError("Only can deserialize KAST version '" + ToJson.version + "'! Found: " + data.getInt("version"));
+        }
+        return toK(data.getJsonObject("term"));
     }
 
-    private static K toK(JsonObject data) throws IOException {
+    private static K toK(JsonObject data) {
         KLabel klabel;
 
         switch (data.getString("node")) {
@@ -396,7 +394,7 @@ public class JsonParser {
         return KLabel(data.getString("name"), sarray);
     }
 
-    private static K[] toKs(int arity, JsonArray data) throws IOException {
+    private static K[] toKs(int arity, JsonArray data) {
         K[] items = new K[arity];
         for (int i = 0; i < arity; i++) {
             items[i] = toK(data.getValuesAs(JsonObject.class).get(i));

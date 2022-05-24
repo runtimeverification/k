@@ -149,6 +149,8 @@ public class ToJson {
                 jattKeys.add(key._1(), locarr.build());
             } else if (key._1().equals(Source.class.getName())){
                 jattKeys.add(key._1(), att.get(Source.class).source());
+            } else if (key._1().equals(Production.class.getName())){
+                jattKeys.add(key._1(), toJson(att.get(Production.class)));
             } else if (key._1().equals("bracketLabel")) {
                 jattKeys.add(key._1(), toJson(att.get("bracketLabel", KLabel.class)));
             } else
@@ -335,7 +337,7 @@ public class ToJson {
 
         Option<KLabel> klabel = pro.klabel();
         if (! klabel.isEmpty()) {
-            jpro.add("klabel", klabel.get().name());
+            jpro.add("klabel", toJson(klabel.get()));
         }
 
         JsonArrayBuilder productionItems = Json.createArrayBuilder();
