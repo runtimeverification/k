@@ -2,14 +2,9 @@ from unittest import TestCase
 
 from ..kast import KApply, KSequence, KVariable
 from ..kastManip import splitConfigFrom
-from ..ktool import newLines
 
 
 class TestPyk(TestCase):
-
-    def test_newLines(self):
-        self.assertEqual(newLines(['aaa', 'bbb']), 'aaa\nbbb')
-        self.assertEqual(newLines(['aaa']), 'aaa')
 
     def test_splitConfigFrom(self):
         k_cell = KSequence([KApply('foo'), KApply('bar')])
