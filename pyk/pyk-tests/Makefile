@@ -2,10 +2,6 @@ K_ROOT := $(abspath ../..)
 K_BIN  := $(K_ROOT)/k-distribution/target/release/k/bin
 
 KOMPILE = $(K_BIN)/kompile
-KAST    = $(K_BIN)/kast
-KRUN    = $(K_BIN)/krun
-KPROVE  = $(K_BIN)/kprove
-KPROVEX = $(K_BIN)/kprovex
 PYK     = pyk
 
 export PATH := $(K_BIN):$(PATH)
