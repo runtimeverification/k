@@ -3,7 +3,7 @@ from pathlib import Path
 
 from ..kast import EMPTY_ATT, KAst, KDefinition, KRequire
 from ..kastManip import remove_generated_cells
-from ..ktool import KompileBackend, kprovex
+from ..ktool import KompileBackend, kprove
 from .kprove_test import KProveTest
 
 
@@ -25,7 +25,7 @@ class EmitJsonSpecTest(KProveTest):
 
         spec_file = Path(self.SPEC_FILE)
         emit_json_spec = Path(self.SPEC_JSON_FILE)
-        kprovex(spec_file, kompiled_dir=self.KOMPILE_OUTPUT_DIR, emit_json_spec=emit_json_spec, dry_run=True)
+        kprove(spec_file, kompiled_dir=self.KOMPILE_OUTPUT_DIR, emit_json_spec=emit_json_spec, dry_run=True)
 
         with open(self.SPEC_JSON_FILE, 'r') as spec_file:
             module = KAst.from_dict(json.load(spec_file)['term'])
