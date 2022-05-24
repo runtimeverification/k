@@ -2,6 +2,8 @@
 package org.kframework.parser.json;
 
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.definition.Associativity;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Claim;
@@ -145,7 +147,7 @@ public class JsonParser {
 
         JsonArray jsonimports = data.getJsonArray("imports");
         Set<FlatImport> imports = new HashSet<>();
-        jsonimports.getValuesAs(JsonObject.class).forEach(i -> imports.add(FlatImport.apply(i.getString("name"), i.getBoolean("public"), Att.empty())));
+        jsonimports.getValuesAs(JsonObject.class).forEach(i -> imports.add(FlatImport.apply(i.getString("name"), i.getBoolean("isPublic"), Att.empty())));
 
         JsonArray sentences = data.getJsonArray("localSentences");
         Set<Sentence> localSentences = new HashSet<>();
@@ -296,7 +298,15 @@ public class JsonParser {
         JsonObject attMap = data.getJsonObject("att");
         Att newAtt = Att.empty();
         for (String key: attMap.keySet()) {
-            newAtt = newAtt.add(key, attMap.getString(key));
+            if (key.equals(Location.class.getName())) {
+                JsonArray locarr = attMap.getJsonArray(Location.class.getName());
+                newAtt = newAtt.add(Location.class, Location(locarr.getInt(0), locarr.getInt(1), locarr.getInt(2), locarr.getInt(3)));
+            } else if (key.equals(Source.class.getName())) {
+                newAtt = newAtt.add(Source.class, Source.apply(attMap.getString(key)));
+            } else if (key.equals("bracketLabel")) {
+                newAtt = newAtt.add("bracketLabel", KLabel.class, toKLabel(attMap.getJsonObject(key)));
+            } else
+                newAtt = newAtt.add(key, attMap.getString(key));
         }
         return newAtt;
     }

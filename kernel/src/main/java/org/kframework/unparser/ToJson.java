@@ -2,6 +2,8 @@
 package org.kframework.unparser;
 
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.definition.Associativity;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Claim;
@@ -137,7 +139,20 @@ public class ToJson {
 
         JsonObjectBuilder jattKeys = Json.createObjectBuilder();
         for (Tuple2<String,String> key: JavaConverters.seqAsJavaList(att.att().keys().toSeq())) {
-            jattKeys.add(key._1(), att.att().get(key).get().toString());
+            if (key._1().equals(Location.class.getName())) {
+                JsonArrayBuilder locarr = Json.createArrayBuilder();
+                Location loc = att.get(Location.class);
+                locarr.add(loc.startLine());
+                locarr.add(loc.startColumn());
+                locarr.add(loc.endLine());
+                locarr.add(loc.endColumn());
+                jattKeys.add(key._1(), locarr.build());
+            } else if (key._1().equals(Source.class.getName())){
+                jattKeys.add(key._1(), att.get(Source.class).source());
+            } else if (key._1().equals("bracketLabel")) {
+                jattKeys.add(key._1(), toJson(att.get("bracketLabel", KLabel.class)));
+            } else
+                jattKeys.add(key._1(), att.att().get(key).get().toString());
         }
         jatt.add("att", jattKeys.build());
 

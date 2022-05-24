@@ -153,7 +153,6 @@ public class Kompile {
 
         if (kompileOptions.postProcess != null) {
             kompiledDefinition = postProcessJSON(kompiledDefinition, kompileOptions.postProcess);
-            sw.printIntermediate("Post process with: " + kompileOptions.postProcess);
         }
 
         files.saveToKompiled("parsed.txt", parsedDef.toString());
@@ -227,7 +226,7 @@ public class Kompile {
         File compiledJson;
         try {
             String inputDefinition = new String(ToJson.apply(defn), "UTF-8");
-            compiledJson = File.createTempFile("tmp-compiled", ".json");
+            compiledJson = files.resolveTemp("post-process-compiled.json");
             FileUtils.writeStringToFile(compiledJson, inputDefinition);
         } catch (UnsupportedEncodingException e) {
             throw KEMException.criticalError("Could not encode definition to JSON!");
@@ -236,7 +235,7 @@ public class Kompile {
         }
         command.add(compiledJson.getAbsolutePath());
         RunProcess.ProcessOutput output = RunProcess.execute(environment, files.getProcessBuilder(), command.toArray(new String[command.size()]));
-        sw.printIntermediate("Post process step: " + String.join(" ", command));
+        sw.printIntermediate("Post process JSON: " + String.join(" ", command));
         if (output.exitCode != 0) {
             throw KEMException.criticalError("Post-processing returned a non-zero exit code: "
                     + output.exitCode + "\nStdout:\n" + new String(output.stdout) + "\nStderr:\n" + new String(output.stderr));
