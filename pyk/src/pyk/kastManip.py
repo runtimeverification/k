@@ -11,7 +11,6 @@ from typing import (
     TypeVar,
 )
 
-from .cli_utils import fatal
 from .kast import (
     FALSE,
     TRUE,
@@ -76,14 +75,6 @@ def whereMatchingBottomUp(effect, matchPattern, pattern):
             newK = effect(matchingSubst)
         return newK
     return bottom_up(_effect, pattern)
-
-
-def replaceKLabels(pattern, klabelMap):
-    def replace(k):
-        if type(k) is KApply and k.label in klabelMap:
-            return k.let(label=klabelMap[k.label])
-        return k
-    return bottom_up(replace, pattern)
 
 
 def boolToMlPred(kast: KInner) -> KInner:
@@ -178,7 +169,7 @@ def extract_subst(term: KInner) -> Tuple[Subst, KInner]:
                 if subst is not None:
                     return subst
 
-                if conjunct.args[0] == boolToken(True) and type(conjunct.args[1]) is KApply and conjunct.args[1].label in {'_==K_', '_==Int_'}:
+                if conjunct.args[0] == boolToken(True) and type(conjunct.args[1]) is KApply and conjunct.args[1].label.name in {'_==K_', '_==Int_'}:
                     subst = _subst_for_terms(conjunct.args[1].args[0], conjunct.args[1].args[1])
 
                     if subst is not None:
@@ -265,6 +256,8 @@ def splitConfigAndConstraints(kast):
         else:
             constraints.append(c)
     constraint = buildAssoc(mlTop(), '#And', constraints)
+    if not term:
+        raise ValueError(f'Could not find configuration for: {kast}')
     return (term, constraint)
 
 
@@ -340,13 +333,20 @@ def collapseDots(kast):
     return bottom_up(_collapseDots, kast)
 
 
-def pushDownRewrites(kast):
-    """Traverse a term and push rewrites down as far as possible.
+def push_down_rewrites(kast):
 
-    -   Input: Kast term potentially with rewrites.
-    -   Output: Kast term with rewrites localized (or removed) as much as possible.
-    """
-    def _pushDownRewrites(_kast):
+    def _flatten_ksequence(_kast):
+        if type(_kast) is KSequence:
+            new_items = []
+            for item in _kast.items:
+                if type(item) is KSequence:
+                    new_items.extend(item.items)
+                else:
+                    new_items.append(item)
+            return KSequence(new_items)
+        return _kast
+
+    def _push_down_rewrites(_kast):
         if type(_kast) is KRewrite:
             lhs = _kast.lhs
             rhs = _kast.rhs
@@ -358,16 +358,19 @@ def pushDownRewrites(kast):
                 newArgs = [KRewrite(lArg, rArg) for (lArg, rArg) in zip(lhs.args, rhs.args)]
                 return lhs.let(args=newArgs)
             if type(lhs) is KSequence and type(rhs) is KSequence and lhs.arity > 0 and rhs.arity > 0:
+                if lhs.arity == 1 and rhs.arity == 1:
+                    return KRewrite(lhs.items[0], rhs.items[0])
                 if lhs.items[0] == rhs.items[0]:
-                    lowerRewrite = KRewrite(KSequence(lhs.items[1:]), KSequence(rhs.items[1:]))
-                    return KSequence([lhs.items[0], lowerRewrite])
+                    lowerRewrite = _push_down_rewrites(KRewrite(KSequence(lhs.items[1:]), KSequence(rhs.items[1:])))
+                    return _flatten_ksequence(KSequence([lhs.items[0], lowerRewrite]))
                 if lhs.items[-1] == rhs.items[-1]:
-                    lowerRewrite = KRewrite(KSequence(lhs.items[0:-1]), KSequence(rhs.items[0:-1]))
-                    return KSequence([lowerRewrite, lhs.items[-1]])
+                    lowerRewrite = _push_down_rewrites(KRewrite(KSequence(lhs.items[0:-1]), KSequence(rhs.items[0:-1])))
+                    return _flatten_ksequence(KSequence([lowerRewrite, lhs.items[-1]]))
             if type(lhs) is KSequence and lhs.arity > 0 and type(lhs.items[-1]) is KVariable and type(rhs) is KVariable and lhs.items[-1] == rhs:
                 return KSequence([KRewrite(KSequence(lhs.items[0:-1]), KApply(klabelEmptyK)), rhs])
         return _kast
-    return top_down(_pushDownRewrites, kast)
+
+    return top_down(_push_down_rewrites, kast)
 
 
 def inlineCellMaps(kast):
@@ -443,7 +446,7 @@ def labelsToDots(kast, labels):
     -   Output: kast term with those labels abstracted.
     """
     def _labelstoDots(k):
-        if type(k) is KApply and k.is_cell and k.label in labels:
+        if type(k) is KApply and k.is_cell and k.label.name in labels:
             return ktokenDots
         return k
     return bottom_up(_labelstoDots, kast)
@@ -465,7 +468,7 @@ def onAttributes(kast: W, f: Callable[[KAtt], KAtt]) -> W:
     return kast
 
 
-def minimizeTerm(term, keepVars=None, abstractLabels=[]):
+def minimize_term(term, keep_vars=None, abstract_labels=[]):
     """Minimize a K term for pretty-printing.
 
     -   Input: kast term, and optionally requires and ensures clauses with constraints.
@@ -476,8 +479,8 @@ def minimizeTerm(term, keepVars=None, abstractLabels=[]):
     """
     term = inlineCellMaps(term)
     term = removeSemanticCasts(term)
-    term = uselessVarsToDots(term, keepVars=keepVars)
-    term = labelsToDots(term, abstractLabels)
+    term = uselessVarsToDots(term, keepVars=keep_vars)
+    term = labelsToDots(term, abstract_labels)
     term = collapseDots(term)
     return term
 
@@ -507,7 +510,7 @@ def minimizeRule(rule, keepVars=[]):
     constrainedVars = [] if keepVars is None else keepVars
     constrainedVars = constrainedVars + collectFreeVars(ruleRequires)
     constrainedVars = constrainedVars + collectFreeVars(ruleEnsures)
-    ruleBody = minimizeTerm(ruleBody, keepVars=constrainedVars)
+    ruleBody = minimize_term(ruleBody, keep_vars=constrainedVars)
 
     return rule.let(body=ruleBody, requires=ruleRequires, ensures=ruleEnsures)
 
@@ -644,7 +647,7 @@ def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, pr
     (initConfig, initConstraint) = splitConfigAndConstraints(initConstrainedTerm)
     (finalConfig, finalConstraint) = splitConfigAndConstraints(finalConstrainedTerm)
 
-    ruleBody = pushDownRewrites(KRewrite(initConfig, finalConfig))
+    ruleBody = push_down_rewrites(KRewrite(initConfig, finalConfig))
     ruleRequires = simplifyBool(unsafeMlPredToBool(initConstraint))
     ruleEnsures = simplifyBool(unsafeMlPredToBool(finalConstraint))
     attDict = {} if claim or priority is None else {'priority': str(priority)}
@@ -696,12 +699,12 @@ def antiUnify(state1, state2):
             return abstractTermSafely(_kast)
         return _kast
 
-    minimizedRewrite = pushDownRewrites(KRewrite(state1, state2))
+    minimizedRewrite = push_down_rewrites(KRewrite(state1, state2))
     abstractedState = bottom_up(_rewritesToAbstractions, minimizedRewrite)
     subst1 = abstractedState.match(state1)
     subst2 = abstractedState.match(state2)
     if subst1 is None or subst2 is None:
-        fatal('Anti-unification failed to produce a more general state!')
+        raise ValueError('Anti-unification failed to produce a more general state!')
     return (abstractedState, subst1, subst2)
 
 

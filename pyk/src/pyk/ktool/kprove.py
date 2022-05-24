@@ -1,28 +1,21 @@
 import json
+import logging
 import os
-import subprocess
-import sys
 from pathlib import Path
-from subprocess import CompletedProcess, run
-from typing import Iterable, List, Optional
+from subprocess import CalledProcessError, CompletedProcess
+from typing import Final, Iterable, List, Optional
 
 from ..cli_utils import (
     check_dir_path,
     check_file_path,
-    fatal,
     gen_file_timestamp,
-    notif,
+    run_process,
 )
-from ..kast import (
-    KAst,
-    KDefinition,
-    KFlatModule,
-    KImport,
-    KRequire,
-    flattenLabel,
-)
+from ..kast import KAst, KDefinition, KFlatModule, KImport, KRequire
 from ..prelude import mlTop
 from .kprint import KPrint
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 
 def kprovex(
@@ -45,10 +38,10 @@ def kprovex(
         emit_json_spec=emit_json_spec,
     )
 
-    proc_res = _kprovex(str(spec_file), *args)
-
-    if proc_res.returncode:
-        raise RuntimeError(f'Command kprovex failed for: {spec_file}')
+    try:
+        _kprovex(str(spec_file), *args)
+    except CalledProcessError as err:
+        raise RuntimeError(f'Command kprovex exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
 
 
 def _build_arg_list(
@@ -77,98 +70,69 @@ def _build_arg_list(
 
 def _kprovex(spec_file: str, *args: str) -> CompletedProcess:
     run_args = ['kprovex', spec_file] + list(args)
-    notif(' '.join(run_args))
-    return run(run_args, capture_output=True, text=True)
+    return run_process(run_args, _LOGGER)
 
 
 class KProve(KPrint):
-    """Given a kompiled directory and a main file name, build a prover for it.
-    """
 
-    def __init__(self, kompiledDirectory, mainFileName, useDirectory=None):
-        super(KProve, self).__init__(kompiledDirectory)
-        self.directory = Path(self.kompiledDirectory).parent
-        self.useDirectory = (self.directory / 'kprove') if useDirectory is None else Path(useDirectory)
-        self.useDirectory.mkdir(parents=True, exist_ok=True)
-        self.mainFileName = mainFileName
+    def __init__(self, kompiled_directory, main_file_name, use_directory=None):
+        super(KProve, self).__init__(kompiled_directory)
+        self.directory = Path(self.kompiled_directory).parent
+        self.use_directory = (self.directory / 'kprove') if use_directory is None else Path(use_directory)
+        self.use_directory.mkdir(parents=True, exist_ok=True)
+        self.main_file_name = main_file_name
         self.prover = ['kprovex']
-        self.proverArgs = []
-        with open(self.kompiledDirectory / 'backend.txt', 'r') as ba:
+        self.prover_args = []
+        with open(self.kompiled_directory / 'backend.txt', 'r') as ba:
             self.backend = ba.read()
-        with open(self.kompiledDirectory / 'mainModule.txt', 'r') as mm:
-            self.mainModule = mm.read()
+        with open(self.kompiled_directory / 'mainModule.txt', 'r') as mm:
+            self.main_module = mm.read()
 
-    def prove(self, specFile, specModuleName, args=[], haskellArgs=[], logAxiomsFile=None, allowZeroStep=False):
-        """Given the specification to prove and arguments for the prover, attempt to prove it.
-
-        -   Input: Specification file name, specification module name, optionall arguments, haskell backend arguments, and file to log axioms to.
-        -   Output: KAST represenation of output of prover, or crashed process.
-        """
-        logFile = specFile.with_suffix('.debug-log') if logAxiomsFile is None else logAxiomsFile
-        if logFile.exists():
-            logFile.unlink()
-        haskellLogArgs = ['--log', str(logFile), '--log-format', 'oneline', '--log-entries', 'DebugTransition']
+    def prove(self, spec_file, spec_module_name, args=[], haskell_args=[], log_axioms_file=None, allow_zero_step=False, dry_run=False):
+        log_file = spec_file.with_suffix('.debug-log') if log_axioms_file is None else log_axioms_file
+        if log_file.exists():
+            log_file.unlink()
+        haskell_log_args = ['--log', str(log_file), '--log-format', 'oneline', '--log-entries', 'DebugTransition']
         command = [c for c in self.prover]
-        command += [str(specFile)]
-        command += ['--definition', str(self.kompiledDirectory), '-I', str(self.directory), '--spec-module', specModuleName, '--output', 'json']
-        command += [c for c in self.proverArgs]
+        command += [str(spec_file)]
+        command += ['--definition', str(self.kompiled_directory), '-I', str(self.directory), '--spec-module', spec_module_name, '--output', 'json']
+        command += [c for c in self.prover_args]
         command += args
-        commandEnv = os.environ.copy()
-        commandEnv['KORE_EXEC_OPTS'] = ' '.join(haskellArgs + haskellLogArgs)
-        notif(' '.join(command))
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, env=commandEnv)
-        stdout, stderr = process.communicate(input=None)
+
+        command_env = os.environ.copy()
+        command_env['KORE_EXEC_OPTS'] = ' '.join(haskell_args + haskell_log_args)
+
+        proc_output: str
         try:
-            finalState = KAst.from_dict(json.loads(stdout)['term'])
-        except Exception:
-            sys.stderr.write(stdout + '\n')
-            sys.stderr.write(stderr + '\n')
-            fatal(f'Exiting: process returned {process.returncode}')
-        if finalState == mlTop() and len(_getAppliedAxiomList(logFile)) == 0 and not allowZeroStep:
-            fatal('Proof took zero steps, likely the LHS is invalid: ' + str(specFile))
-        return finalState
+            proc_output = run_process(command, _LOGGER, env=command_env).stdout
+        except CalledProcessError as err:
+            if err.returncode != 1:
+                raise RuntimeError(f'Command kprovex exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
+            proc_output = err.stdout
 
-    def proveClaim(self, claim, claimId, lemmas=[], args=[], haskellArgs=[], logAxiomsFile=None, allowZeroStep=False):
-        """Given a K claim, write the definition needed for the prover, and attempt to prove it.
+        if not dry_run:
 
-        -   Input: KAST representation of a claim to prove, and an identifer for said claim.
-        -   Output: KAST representation of final state the prover supplies for it.
-        """
-        self._writeClaimDefinition(claim, claimId, lemmas=lemmas)
-        return self.prove(self.useDirectory / (claimId.lower() + '-spec.k'), claimId.upper() + '-SPEC', args=args, haskellArgs=haskellArgs, logAxiomsFile=logAxiomsFile, allowZeroStep=allowZeroStep)
+            finalState = KAst.from_dict(json.loads(proc_output)['term'])
+            if finalState == mlTop() and len(_getAppliedAxiomList(log_file)) == 0 and not allow_zero_step:
+                raise ValueError(f'Proof took zero steps, likely the LHS is invalid: {spec_file}')
 
-    def proveClaimNoBranching(self, claim, claimId, args=[], haskellArgs=[], logAxiomsFile=None, maxDepth=1000, allowZeroStep=False):
-        """Given a K claim, attempt to prove it, but do not allow the prover to branch.
+            return finalState
 
-        -   Input: KAST representation of a claim to prove, and identifier for said claim.
-        -   Output: KAST representation of final state of prover.
-        """
-        logFileName = logAxiomsFile if logAxiomsFile is not None else (self.useDirectory / claimId.lower()).with_suffix('.debug.log')
-        nextState = self.proveClaim(claim, claimId, args=(args + ['--branching-allowed', '1', '--depth', str(maxDepth)]), haskellArgs=haskellArgs, logAxiomsFile=logFileName, allowZeroStep=allowZeroStep)
-        depth = 0
-        for axioms in _getAppliedAxiomList(str(logFileName)):
-            depth += 1
-            if len(axioms) > 1:
-                break
-        nextStates = flattenLabel('#Or', nextState)
-        return (depth, nextStates)
+    def prove_claim(self, claim, claim_id, lemmas=[], args=[], haskell_args=[], log_axioms_file=None, allow_zero_step=False):
+        self._write_claim_definition(claim, claim_id, lemmas=lemmas)
+        return self.prove(self.use_directory / (claim_id.lower() + '-spec.k'), claim_id.upper() + '-SPEC', args=args, haskell_args=haskell_args, log_axioms_file=log_axioms_file, allow_zero_step=allow_zero_step)
 
-    def _writeClaimDefinition(self, claim, claimId, lemmas=[], rule=False):
-        """Given a K claim, write the definition file needed for the prover to it.
-
-        -   Input: KAST representation of a claim to prove, and an identifier for said claim.
-        -   Output: Write to filesystem the specification with the claim.
-        """
-        tmpClaim = self.useDirectory / (claimId.lower() if rule else (claimId.lower() + '-spec'))
-        tmpModuleName = claimId.upper() if rule else (claimId.upper() + '-SPEC')
+    def _write_claim_definition(self, claim, claim_id, lemmas=[], rule=False):
+        tmpClaim = self.use_directory / (claim_id.lower() if rule else (claim_id.lower() + '-spec'))
+        tmpModuleName = claim_id.upper() if rule else (claim_id.upper() + '-SPEC')
         tmpClaim = tmpClaim.with_suffix('.k')
         with open(tmpClaim, 'w') as tc:
-            claimModule = KFlatModule(tmpModuleName, lemmas + [claim], imports=[KImport(self.mainModule, True)])
-            claimDefinition = KDefinition(tmpModuleName, [claimModule], requires=[KRequire(self.mainFileName)])
+            claimModule = KFlatModule(tmpModuleName, lemmas + [claim], imports=[KImport(self.main_module, True)])
+            claimDefinition = KDefinition(tmpModuleName, [claimModule], requires=[KRequire(self.main_file_name)])
             tc.write(gen_file_timestamp() + '\n')
-            tc.write(self.prettyPrint(claimDefinition) + '\n\n')
+            tc.write(self.pretty_print(claimDefinition) + '\n\n')
             tc.flush()
-        notif('Wrote claim file: ' + str(tmpClaim) + '.')
+        _LOGGER.info('Wrote claim file: ' + str(tmpClaim) + '.')
 
 
 def _getAppliedAxiomList(debugLogFile: Path) -> List[List[str]]:
