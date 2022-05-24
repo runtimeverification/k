@@ -406,7 +406,7 @@ public class ToJson {
             KToken tok = (KToken) k;
 
             knode.add("node", JsonParser.KTOKEN);
-            knode.add("sort", tok.sort().toString());
+            knode.add("sort", toJson(tok.sort()));
             knode.add("token", tok.s());
 
         } else if (k instanceof KApply) {

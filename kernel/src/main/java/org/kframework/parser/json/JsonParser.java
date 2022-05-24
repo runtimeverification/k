@@ -341,7 +341,7 @@ public class JsonParser {
         switch (data.getString("node")) {
 
             case KTOKEN:
-                return KToken(data.getString("token"), Outer.parseSort(data.getString("sort")));
+                return KToken(data.getString("token"), toSort(data.getJsonObject("sort")));
 
             case KAPPLY:
                 int arity = data.getInt("arity");

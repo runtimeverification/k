@@ -288,10 +288,10 @@ class KToken(KInner):
     @classmethod
     def from_dict(cls: Type['KToken'], d: Dict[str, Any]) -> 'KToken':
         cls._check_node(d)
-        return KToken(token=d['token'], sort=KSort(d['sort']))
+        return KToken(token=d['token'], sort=KSort.from_dict(d['sort']))
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KToken', 'token': self.token, 'sort': self.sort.name}
+        return {'node': 'KToken', 'token': self.token, 'sort': self.sort.to_dict()}
 
     def let(self, *, token: Optional[str] = None, sort: Optional[Union[str, KSort]] = None) -> 'KToken':
         token = token if token is not None else self.token
