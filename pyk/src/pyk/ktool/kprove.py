@@ -3,7 +3,7 @@ import logging
 import os
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
-from typing import Final, Iterable, List, Optional
+from typing import Final, Iterable, List, Optional, Tuple
 
 from ..cli_utils import (
     check_dir_path,
@@ -88,7 +88,7 @@ class KProve(KPrint):
         with open(self.kompiled_directory / 'mainModule.txt', 'r') as mm:
             self.main_module = mm.read()
 
-    def prove(self, spec_file, spec_module_name, args=[], haskell_args=[], haskell_log_entries=[], log_axioms_file=None, allow_zero_step=False, dry_run=False):
+    def prove(self, spec_file, spec_module_name, args=[], haskell_args=[], haskell_log_entries=[], log_axioms_file=None, allow_zero_step=False, dry_run=False, rule_profile=False):
         log_file = spec_file.with_suffix('.debug-log') if log_axioms_file is None else log_axioms_file
         if log_file.exists():
             log_file.unlink()
@@ -114,7 +114,7 @@ class KProve(KPrint):
         if not dry_run:
 
             finalState = KAst.from_dict(json.loads(proc_output)['term'])
-            if finalState == mlTop() and len(_getAppliedAxiomList(log_file)) == 0 and not allow_zero_step:
+            if finalState == mlTop() and len(_get_rule_log(log_file)) == 0 and not allow_zero_step:
                 raise ValueError(f'Proof took zero steps, likely the LHS is invalid: {spec_file}')
 
             return finalState
@@ -136,15 +136,37 @@ class KProve(KPrint):
         _LOGGER.debug(f'Wrote claim file: {tmpClaim}.')
 
 
-def _getAppliedAxiomList(debugLogFile: Path) -> List[List[str]]:
-    axioms = []
-    next_axioms = []
-    with open(debugLogFile, 'r') as logFile:
-        for line in logFile:
-            if line.find('DebugTransition') > 0:
-                if line.find('after  apply axioms:') > 0:
-                    next_axioms.append(line[line.find('after  apply axioms:') + len('after  apply axioms:'):])
-                elif len(next_axioms) > 0:
-                    axioms.append(next_axioms)
-                    next_axioms = []
+def _get_rule_log(debug_log_file: Path) -> List[List[Tuple[str, bool, int]]]:
+
+    # rule_loc, is_success, rule_time
+    def _get_rule_line(_line: str) -> Optional[Tuple[str, bool, int]]:
+        time = int(_line.split('[')[1].split(']')[0])
+        if _line.find('(DebugTransition): after  apply axioms: '):
+            rule_name = ':'.join(_line.split(':')[-4:]).strip()
+            return (rule_name, True, time)
+        elif _line.find('(DebugAttemptedRewriteRules): '):
+            rule_name = ':'.join(_line.split(':')[-4:]).strip()
+            return (rule_name, False, time)
+        return None
+
+    log_lines: List[Tuple[str, bool, int]] = []
+    with open(debug_log_file, 'r') as log_file:
+        for line in log_file.read().split('\n'):
+            if processed_line := _get_rule_line(line):
+                log_lines.append(processed_line)
+
+    axioms: List[List[Tuple[str, bool, int]]] = [[]]
+    just_applied = True
+    for rule_name, is_application, rule_time in log_lines:
+        if not is_application:
+            if just_applied:
+                axioms.append([])
+            just_applied = False
+        else:
+            just_applied = True
+        axioms[-1].append((rule_name, is_application, rule_time))
+
+    if len(axioms[-1]) == 0:
+        axioms.pop(-1)
+
     return axioms
