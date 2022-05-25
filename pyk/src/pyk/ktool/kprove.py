@@ -75,7 +75,7 @@ def _kprove(spec_file: str, *args: str) -> CompletedProcess:
 
 class KProve(KPrint):
 
-    def __init__(self, kompiled_directory, main_file_name, use_directory=None):
+    def __init__(self, kompiled_directory, main_file_name=None, use_directory=None):
         super(KProve, self).__init__(kompiled_directory)
         self.directory = Path(self.kompiled_directory).parent
         self.use_directory = (self.directory / 'kprove') if use_directory is None else Path(use_directory)
