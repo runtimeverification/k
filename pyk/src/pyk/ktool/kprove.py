@@ -142,13 +142,14 @@ def _get_rule_log(debug_log_file: Path) -> List[List[Tuple[str, bool, int]]]:
 
     # rule_loc, is_success, ellapsed_time_since_start
     def _get_rule_line(_line: str) -> Optional[Tuple[str, bool, int]]:
-        time = int(_line.split('[')[1].split(']')[0])
-        if _line.find('(DebugTransition): after  apply axioms: '):
-            rule_name = ':'.join(_line.split(':')[-4:]).strip()
-            return (rule_name, True, time)
-        elif _line.find('(DebugAttemptedRewriteRules): '):
-            rule_name = ':'.join(_line.split(':')[-4:]).strip()
-            return (rule_name, False, time)
+        if _line.startswith('kore-exec: ['):
+            time = int(_line.split('[')[1].split(']')[0])
+            if _line.find('(DebugTransition): after  apply axioms: '):
+                rule_name = ':'.join(_line.split(':')[-4:]).strip()
+                return (rule_name, True, time)
+            elif _line.find('(DebugAttemptedRewriteRules): '):
+                rule_name = ':'.join(_line.split(':')[-4:]).strip()
+                return (rule_name, False, time)
         return None
 
     log_lines: List[Tuple[str, bool, int]] = []
