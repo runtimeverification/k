@@ -356,15 +356,31 @@ class KApply(KInner):
     label: KLabel
     args: Tuple[KInner, ...]
 
-    def __init__(self, label: Union[str, KLabel], args: Iterable[KInner] = ()):
+    @overload
+    def __init__(self, label: Union[str, KLabel], args: Iterable[KInner]):
+        ...
+
+    @overload
+    def __init__(self, label: Union[str, KLabel], *args: KInner):
+        ...
+
+    def __init__(self, label, *args, **kwargs):
         if type(label) is str:
             label = KLabel(label)
 
+        if kwargs:
+            bad_arg = next((arg for arg in kwargs if arg != 'args'), None)
+            if bad_arg:
+                raise TypeError(f"KApply() got an unexpected keyword argument '{bad_arg}'")
+            if args:
+                raise TypeError("KApply() got multiple values for argument 'args'")
+            args = kwargs['args']
+
+        elif len(args) == 1 and isinstance(args[0], Iterable) and not isinstance(args[0], KInner):
+            args = args[0]
+
         object.__setattr__(self, 'label', label)
         object.__setattr__(self, 'args', tuple(args))
-
-    def __iter__(self) -> Iterator[Union[str, KInner]]:
-        return chain([self.label], self.args)
 
     @property
     def arity(self) -> int:
@@ -373,10 +389,6 @@ class KApply(KInner):
     @property
     def is_cell(self) -> bool:
         return len(self.label.name) > 1 and self.label.name[0] == '<' and self.label.name[-1] == '>'
-
-    @staticmethod
-    def of(label: str, *args: KInner) -> 'KApply':
-        return KApply(label=label, args=args)
 
     @classmethod
     def from_dict(cls: Type['KApply'], d: Dict[str, Any]) -> 'KApply':
