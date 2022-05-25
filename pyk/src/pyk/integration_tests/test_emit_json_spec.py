@@ -63,7 +63,7 @@ class EmitJsonSpecTest(KProveTest):
             f.write(self.kprove.pretty_print(definition))
 
         # When
-        result = self.kprove.prove(spec_file, spec_module_name)
+        result = self.kprove.prove(spec_file, spec_module_name=spec_module_name)
 
         # Then
         self.assertTop(result)

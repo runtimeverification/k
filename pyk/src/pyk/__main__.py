@@ -60,7 +60,7 @@ def main(extraMain=None):
 
     elif args['command'] == 'prove':
         kprover = KProve(kompiled_dir, args['main-file'])
-        finalState = kprover.prove(Path(args['spec-file']), args['spec-module'], args=args['kArgs'])
+        finalState = kprover.prove(Path(args['spec-file']), spec_module_name=args['spec-module'], args=args['kArgs'])
         args['output_file'].write(finalState.to_json())
 
     elif args['command'] == 'graph-imports':

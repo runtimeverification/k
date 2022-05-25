@@ -89,7 +89,7 @@ class KProve(KPrint):
         with open(self.kompiled_directory / 'mainModule.txt', 'r') as mm:
             self.main_module = mm.read()
 
-    def prove(self, spec_file, spec_module_name, args=[], haskell_args=[], haskell_log_entries=[], log_axioms_file=None, allow_zero_step=False, dry_run=False, rule_profile=False):
+    def prove(self, spec_file, spec_module_name=None, args=[], haskell_args=[], haskell_log_entries=[], log_axioms_file=None, allow_zero_step=False, dry_run=False, rule_profile=False):
         log_file = spec_file.with_suffix('.debug-log') if log_axioms_file is None else log_axioms_file
         if log_file.exists():
             log_file.unlink()
@@ -97,7 +97,8 @@ class KProve(KPrint):
         haskell_log_args = ['--log', str(log_file), '--log-format', 'oneline', '--log-entries', ','.join(haskell_log_entries)]
         command = [c for c in self.prover]
         command += [str(spec_file)]
-        command += ['--definition', str(self.kompiled_directory), '-I', str(self.directory), '--spec-module', spec_module_name, '--output', 'json']
+        command += ['--definition', str(self.kompiled_directory), '-I', str(self.directory), '--output', 'json']
+        command += ['--spec-module', spec_module_name] if spec_module_name is not None else []
         command += [c for c in self.prover_args]
         command += args
 
@@ -122,7 +123,7 @@ class KProve(KPrint):
 
     def prove_claim(self, claim, claim_id, lemmas=[], args=[], haskell_args=[], log_axioms_file=None, allow_zero_step=False):
         self._write_claim_definition(claim, claim_id, lemmas=lemmas)
-        return self.prove(self.use_directory / (claim_id.lower() + '-spec.k'), claim_id.upper() + '-SPEC', args=args, haskell_args=haskell_args, log_axioms_file=log_axioms_file, allow_zero_step=allow_zero_step)
+        return self.prove(self.use_directory / (claim_id.lower() + '-spec.k'), spec_module_name=(claim_id.upper() + '-SPEC'), args=args, haskell_args=haskell_args, log_axioms_file=log_axioms_file, allow_zero_step=allow_zero_step)
 
     def _write_claim_definition(self, claim, claim_id, lemmas=[], rule=False):
         tmpClaim = self.use_directory / (claim_id.lower() if rule else (claim_id.lower() + '-spec'))
