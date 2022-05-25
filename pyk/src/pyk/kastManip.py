@@ -9,11 +9,13 @@ from typing import (
     Tuple,
     Type,
     TypeVar,
+    Union,
 )
 
 from .kast import (
     FALSE,
     TRUE,
+    K,
     KApply,
     KAtt,
     KClaim,
@@ -24,6 +26,7 @@ from .kast import (
     KRule,
     KRuleLike,
     KSequence,
+    KSort,
     KToken,
     KVariable,
     Subst,
@@ -241,7 +244,8 @@ def drop_unds(variable: KVariable) -> KVariable:
     return variable
 
 
-def splitConfigAndConstraints(kast):
+# TODO infer sort based on cell name
+def splitConfigAndConstraints(kast, sort: Union[str, KSort] = K):
     """Split the configuration/term from the constraints.
 
     -   Input: kast conjunct representing a constrained term.
@@ -255,7 +259,7 @@ def splitConfigAndConstraints(kast):
             term = c
         else:
             constraints.append(c)
-    constraint = buildAssoc(mlTop(), '#And', constraints)
+    constraint = mlAnd(constraints, sort)
     if not term:
         raise ValueError(f'Could not find configuration for: {kast}')
     return (term, constraint)

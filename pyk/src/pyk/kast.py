@@ -29,8 +29,6 @@ from .utils import FrozenDict, hash_str
 T = TypeVar('T', bound='KAst')
 W = TypeVar('W', bound='WithKAtt')
 KI = TypeVar('KI', bound='KInner')
-K = TypeVar('K')
-V = TypeVar('V')
 
 
 class KAst(ABC):
@@ -270,6 +268,8 @@ class KSort(KInner):
 BOOL = KSort('Bool')
 INT = KSort('Int')
 STRING = KSort('String')
+K = KSort('K')
+GENERATED_TOP_CELL = KSort('GeneratedTopCell')
 
 
 @final
@@ -398,10 +398,6 @@ class KApply(KInner):
         if type(term) is KApply and term.label == self.label and term.arity == self.arity:
             return KInner._combine_matches(arg.match(term_arg) for arg, term_arg in zip(self.args, term.args))
         return None
-
-
-TOP: Final = KApply(KLabel('#Top', ['K']))
-BOTTOM: Final = KApply(KLabel('#Bottom', ['K']))
 
 
 @final

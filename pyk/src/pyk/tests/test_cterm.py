@@ -3,7 +3,7 @@ from typing import Final, Tuple
 from unittest import TestCase
 
 from ..cterm import CTerm
-from ..kast import KApply, KInner, KVariable
+from ..kast import GENERATED_TOP_CELL, KApply, KInner, KLabel, KVariable
 
 a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
 x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
@@ -11,7 +11,7 @@ f, g, h = (partial(KApply.of, label) for label in ['f', 'g', 'h'])
 
 
 def _as_cterm(term: KInner) -> CTerm:
-    return CTerm(KApply('<k>', [term]))
+    return CTerm(KApply(KLabel('<generatedTop>', (GENERATED_TOP_CELL,)), (term,)))
 
 
 class CTermTest(TestCase):
