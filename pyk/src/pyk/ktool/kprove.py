@@ -80,6 +80,7 @@ class KProve(KPrint):
         self.directory = Path(self.kompiled_directory).parent
         self.use_directory = (self.directory / 'kprove') if use_directory is None else Path(use_directory)
         self.use_directory.mkdir(parents=True, exist_ok=True)
+        # TODO: we should not have to supply main_file_name, it should be read
         self.main_file_name = main_file_name
         self.prover = ['kprove']
         self.prover_args = []
