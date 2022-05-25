@@ -395,7 +395,7 @@ class KApply(KInner):
         return self.let(args=(f(arg) for arg in self.args))
 
     def match(self, term: KInner) -> Optional[Subst]:
-        if type(term) is KApply and term.label == self.label and term.arity == self.arity:
+        if type(term) is KApply and term.label.name == self.label.name and term.arity == self.arity:
             return KInner._combine_matches(arg.match(term_arg) for arg, term_arg in zip(self.args, term.args))
         return None
 
