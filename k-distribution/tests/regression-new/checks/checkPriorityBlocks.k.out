@@ -1,4 +1,6 @@
 [Error] Inner Parser: Priority filter exception. Cannot use _+__CHECKPRIORITYBLOCKS_Exp_Exp_Exp as an immediate child of [_]_CHECKPRIORITYBLOCKS_Exp_Exp. Consider using parentheses around _+__CHECKPRIORITYBLOCKS_Exp_Exp_Exp
 	Source(checkPriorityBlocks.k)
 	Location(7,9,7,14)
+	7 |	  rule [1 + 2] => .K
+	  .	        ^~~~~
 [Error] Compiler: Had 1 parsing errors.

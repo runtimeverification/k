@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ubuntu:bionic
+ARG BASE_IMAGE=ubuntu:focal
 FROM ${BASE_IMAGE}
 ARG BASE_IMAGE
 
@@ -40,7 +40,6 @@ RUN    apt-get update            \
         openjdk-11-jdk           \
         parallel                 \
         pkg-config               \
-        python                   \
         python3                  \
         python3-graphviz         \
         python3-pip              \
@@ -59,9 +58,9 @@ RUN    curl -O https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTH
 
 RUN curl -sSL https://get.haskellstack.org/ | sh
 
-RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.11 \
+RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.15 \
     && cd z3                                                         \
-    && python scripts/mk_make.py                                     \
+    && python3 scripts/mk_make.py                                     \
     && cd build                                                      \
     && make -j8                                                      \
     && make install                                                  \

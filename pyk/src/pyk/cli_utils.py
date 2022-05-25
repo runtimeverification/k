@@ -1,9 +1,11 @@
+import logging
+import subprocess
 import sys
-import time
 from datetime import datetime
+from logging import Logger
 from pathlib import Path
-
-_last_time = time.time()
+from subprocess import CalledProcessError, CompletedProcess
+from typing import Mapping, Optional, Sequence, Union
 
 
 def check_dir_path(path: Path) -> None:
@@ -32,22 +34,28 @@ def file_path(s: str) -> Path:
     return path
 
 
-def notif(msg: str):
-    global _last_time
-    curr_time = time.time()
-    time_diff = curr_time - _last_time
-    _last_time = curr_time
-    sys.stderr.write('== ' + sys.argv[0].split('/')[-1] + ' [+' + '{0:8.2f}'.format(time_diff) + ']: ' + msg + '\n')
-    sys.stderr.flush()
+def run_process(
+    args: Union[str, Sequence[str]],
+    logger: Logger,
+    *,
+    log_level: int = logging.DEBUG,
+    input: Optional[str] = None,
+    env: Optional[Mapping[str, str]] = None,
+) -> CompletedProcess:
+    if type(args) is str:
+        command = args
+    else:
+        command = ' '.join(args)
 
+    logger.log(log_level, f'Running: {command}')
+    try:
+        res = subprocess.run(args, input=input, env=env, capture_output=True, check=True, text=True)
+    except CalledProcessError as err:
+        logger.log(log_level, f'Completed with status {err.returncode}: {command}')
+        raise
 
-def warning(msg: str):
-    notif('[WARNING] ' + msg)
-
-
-def fatal(msg: str):
-    notif('[FATAL] ' + msg)
-    sys.exit('Quitting')
+    logger.log(log_level, f'Completed: {command}')
+    return res
 
 
 def gen_file_timestamp(comment='//'):

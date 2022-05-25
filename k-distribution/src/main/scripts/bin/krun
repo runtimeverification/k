@@ -12,6 +12,7 @@ depth=
 params=()
 allPath=true
 dir=.
+kompiledDir=
 haskellCmd=kore-exec
 cmdprefix=
 outputFile=-
@@ -107,6 +108,7 @@ $KRUN options:
       --haskell-backend-command CMD  use CMD instead of kore-exec to invoke
                                      Haskell backend
   -h, --help               Display this help and exit
+      --definition DIR     Exact path to the kompiled directory.
       --io [on|off]        Enable/disable reading/writing to actual
                            stdin/stdout via cells with "stream" attribute.
                            Defaults to enabled when performing concrete
@@ -229,6 +231,11 @@ do
       -h|--help)
       print_usage
       exit 0
+      ;;
+
+      --definition)
+      kompiledDir="$2"
+      shift
       ;;
 
       --io)
@@ -396,16 +403,19 @@ if [[ "${#ARGV[@]}" -gt 1 ]]; then
 fi
 
 # Compute kompiled directory
-kompiledDir=
 hasKompiledDir=false
-for file in "$dir"/*-kompiled; do
-  [ ! -d "$file" ] && continue
-  kompiledDir=$file
-  if $hasKompiledDir; then
-    error 1 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
-  fi
+if [[ -d $kompiledDir ]]; then
   hasKompiledDir=true
-done
+else
+  for file in "$dir"/*-kompiled; do
+    [ ! -d "$file" ] && continue
+    kompiledDir=$file
+    if $hasKompiledDir; then
+      error 1 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
+    fi
+    hasKompiledDir=true
+  done
+fi
 
 if ! $hasKompiledDir; then
   error 1 'Could not find a compiled definition. Use --directory to specify one.'
@@ -434,7 +444,7 @@ fi
 source "$kompiledDir/configVars.sh"
 if $term; then
   if [ -z "${parser_PGM+unset}" ]; then
-    execute kparse --directory "$dir" --module "$mainModuleName" "$config_var_PGM" > "$input_file"
+    execute kparse --definition "$kompiledDir" --module "$mainModuleName" "$config_var_PGM" > "$input_file"
   else
     execute $parser_PGM "$config_var_PGM" > "$input_file"
   fi
@@ -463,14 +473,14 @@ else
     if [ -z "${!parser_name+unset}" ]; then
       if [ "$name" = "PGM" ]; then
         if $hasArgv; then
-          parser=(kparse --directory "$dir")
+          parser=(kparse --definition "$kompiledDir")
         else
-          parser=(kparse --directory "$dir" --module "$mainModuleName")
+          parser=(kparse --definition "$kompiledDir" --module "$mainModuleName")
         fi
       elif [ -z "${!indirectModuleName+unset}" ]; then
-        parser=(kparse --sort "$sortName" --directory "$dir" --module "$mainModuleName")
+        parser=(kparse --sort "$sortName" --definition "$kompiledDir" --module "$mainModuleName")
       else
-        parser=(kparse --sort "$sortName" --directory "$dir" --module "$moduleName")
+        parser=(kparse --sort "$sortName" --definition "$kompiledDir" --module "$moduleName")
       fi
     else
       parser=("${!parser_name}")
@@ -528,7 +538,7 @@ if [ "$backendName" = "llvm" ]; then
     if [ -z "$pattern" ]; then
       echo '\and{SortGeneratedTopCell{}}(VarResult:SortGeneratedTopCell{},\top{SortGeneratedTopCell{}}())' > "$patternFile"
     else
-      execute k-compile-search-pattern --directory "$dir" "$pattern" > "$patternFile"
+      execute k-compile-search-pattern --definition "$kompiledDir" "$pattern" > "$patternFile"
     fi
 
     if [[ $searchType != "FINAL" ]]; then
@@ -571,7 +581,7 @@ elif [ "$backendName" = "haskell" ] ; then
     if [ -z "$pattern" ]; then
       echo '\and{SortGeneratedTopCell{}}(VarResult:SortGeneratedTopCell{},\top{SortGeneratedTopCell{}}())' > "$patternFile"
     else
-      k-compile-search-pattern --directory "$dir" "$pattern" > "$patternFile"
+      k-compile-search-pattern --definition "$kompiledDir" "$pattern" > "$patternFile"
     fi
 
     if ! $search; then
@@ -579,7 +589,7 @@ elif [ "$backendName" = "haskell" ] ; then
       tempFiles+=("$final_input")
       keepTempsIfDryRun "$tempDir" "$final_input" "$expanded_input_file" "$kore_output"
       set +e
-      execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$final_input" $koreExecFlags
+      execute $cmdprefix "$haskellCmd" "$kompiledDir/haskellDefinition.bin" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$final_input" $koreExecFlags
       set -e
       depthFlags="--depth 0"
     else
@@ -591,13 +601,13 @@ elif [ "$backendName" = "haskell" ] ; then
     fi
     keepTempsIfDryRun "$tempDir" "$final_input" "$patternFile" "$kore_output"
     set +e
-    execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$final_input" --output "$kore_output" --searchType "$searchType" --search "$patternFile" $koreExecFlags $depthFlags
+    execute $cmdprefix "$haskellCmd" "$kompiledDir/haskellDefinition.bin" --module "$mainModuleName" --pattern "$final_input" --output "$kore_output" --searchType "$searchType" --search "$patternFile" $koreExecFlags $depthFlags
     result=$?
     set -e
   else
     keepTempsIfDryRun "$tempDir" "$expanded_input_file" "$kore_output"
     set +e
-    execute $cmdprefix "$haskellCmd" "$kompiledDir/definition.kore" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$kore_output" $koreExecFlags $depthFlags
+    execute $cmdprefix "$haskellCmd" "$kompiledDir/haskellDefinition.bin" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$kore_output" $koreExecFlags $depthFlags
     result=$?
     set -e
   fi
@@ -616,7 +626,7 @@ if ! $dryRun; then
       mv "$kore_output2" "$kore_output"
     fi
 
-    output "$outputFile" execute kore-print --directory "$dir" --output "$outputMode" "$kore_output" --color "$colorOpt" $filterSubst
+    output "$outputFile" execute kore-print --definition "$kompiledDir" --output "$outputMode" "$kore_output" --color "$colorOpt" $filterSubst
   else
     error ${result} "Backend crashed during rewriting with exit code ${result}"
   fi

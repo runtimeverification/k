@@ -1,3 +1,5 @@
 [Error] Outer Parser: bracket productions should have exactly one non-terminal of the same sort as the production.
 	Source(checkBracketSupersort.k)
-	Location(4,16,4,36)
+	Location(4,16,4,37)
+	4 |	  syntax A ::= "(" Exp ")" [bracket]
+	  .	               ^~~~~~~~~~~~~~~~~~~~~

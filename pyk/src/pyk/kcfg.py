@@ -6,6 +6,7 @@ from itertools import chain
 from threading import RLock
 from typing import (
     Any,
+    Container,
     Dict,
     Iterable,
     List,
@@ -14,33 +15,33 @@ from typing import (
     Sequence,
     Set,
     Tuple,
+    Union,
 )
 
 from graphviz import Digraph
 
 from .cterm import CTerm
-from .kast import TRUE, KInner, KRuleLike
+from .kast import KInner, KRuleLike, Subst
 from .kastManip import buildRule, mlAnd, simplifyBool, unsafeMlPredToBool
 from .ktool import KPrint
-from .subst import Subst
 from .utils import compare_short_hashes, shorten_hashes
 
 
-class KCFG:
+class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
     @dataclass(frozen=True)
     class Node:
-        term: CTerm
+        cterm: CTerm
 
-        def __init__(self, term: CTerm):
-            object.__setattr__(self, 'term', term)
+        def __init__(self, cterm: CTerm):
+            object.__setattr__(self, 'cterm', cterm)
 
         @property
         def id(self) -> str:
-            return self.term.hash
+            return self.cterm.hash
 
         def to_dict(self) -> Dict[str, Any]:
-            return {'id': self.id, 'term': self.term.cterm.to_dict()}
+            return {'id': self.id, 'term': self.cterm.term.to_dict()}
 
     class EdgeLike(ABC):
         source: 'KCFG.Node'
@@ -50,44 +51,48 @@ class KCFG:
     class Edge(EdgeLike):
         source: 'KCFG.Node'
         target: 'KCFG.Node'
-        condition: KInner = TRUE
-        depth: int = 1
+        condition: KInner
+        depth: int
 
         def to_dict(self) -> Dict[str, Any]:
             return {'source': self.source.id, 'target': self.target.id, 'condition': self.condition.to_dict(), 'depth': self.depth}
 
         def to_rule(self, claim=False, priority=50) -> KRuleLike:
             sentence_id = f'BASIC-BLOCK-{self.source.id}-TO-{self.target.id}'
-            init_term = mlAnd([self.source.term, self.condition])
-            final_term = self.target.term
-            return buildRule(sentence_id, init_term, final_term, claim=claim, priority=priority)
+            init_term = mlAnd([self.source.cterm.term, self.condition])
+            final_term = self.target.cterm.term
+            rule, _ = buildRule(sentence_id, init_term, final_term, claim=claim, priority=priority)
+            return rule
 
     @dataclass(frozen=True)
     class Cover(EdgeLike):
         source: 'KCFG.Node'
         target: 'KCFG.Node'
         subst: Subst
+        constraint: KInner
 
         def __init__(self, source: 'KCFG.Node', target: 'KCFG.Node'):
             object.__setattr__(self, 'source', source)
             object.__setattr__(self, 'target', target)
 
-            match_res = source.term.match(target.term)
+            match_res = target.cterm.match_with_constraint(source.cterm)
             if not match_res:
                 raise ValueError(f'No matching between: {source.id} and {target.id}')
 
-            subst, _ = match_res
+            subst, constraint = match_res
             object.__setattr__(self, 'subst', subst)
+            object.__setattr__(self, 'constraint', constraint)
 
         def to_dict(self) -> Dict[str, Any]:
             return {'source': self.source.id, 'target': self.target.id}
 
     _nodes: Dict[str, Node]
     _edges: Dict[str, Dict[str, Edge]]
-    _covers: Dict[str, Cover]
+    _covers: Dict[str, Dict[str, Cover]]
     _init: Set[str]
     _target: Set[str]
-    _stuck: Set[str]
+    _expanded: Set[str]
+    _verified: Set[Tuple[str, str]]
     _lock: RLock
 
     def __init__(self):
@@ -96,8 +101,18 @@ class KCFG:
         self._covers = {}
         self._init = set()
         self._target = set()
-        self._stuck = set()
+        self._expanded = set()
+        self._verified = set()
         self._lock = RLock()
+
+    def __contains__(self, item: object) -> bool:
+        if type(item) is KCFG.Node:
+            return self.contains_node(item)
+        if type(item) is KCFG.Edge:
+            return self.contains_edge(item)
+        if type(item) is KCFG.Cover:
+            return self.contains_cover(item)
+        return False
 
     def __enter__(self):
         self._lock.acquire()
@@ -110,49 +125,54 @@ class KCFG:
         return False
 
     @property
-    def nodes(self) -> Set[Node]:
-        return set(self._nodes.values())
+    def nodes(self) -> List[Node]:
+        return list(self._nodes.values())
 
     @property
-    def init(self) -> Set[Node]:
-        return {node for node in self.nodes if self.is_init(node.id)}
+    def init(self) -> List[Node]:
+        return [node for node in self.nodes if self.is_init(node.id)]
 
     @property
-    def target(self) -> Set[Node]:
-        return {node for node in self.nodes if self.is_target(node.id)}
+    def target(self) -> List[Node]:
+        return [node for node in self.nodes if self.is_target(node.id)]
 
     @property
-    def stuck(self) -> Set[Node]:
-        return {node for node in self.nodes if self.is_stuck(node.id)}
+    def expanded(self) -> List[Node]:
+        return [node for node in self.nodes if self.is_expanded(node.id)]
 
     @property
-    def leaves(self) -> Set[Node]:
-        return {node for node in self.nodes if self.is_leaf(node.id)}
+    def verified(self) -> List[Edge]:
+        return [edge for edge in self.edges() if self.is_verified(edge.source.id, edge.target.id)]
 
     @property
-    def covered(self) -> Set[Node]:
-        return {node for node in self.nodes if self.is_covered(node.id)}
+    def leaves(self) -> List[Node]:
+        return [node for node in self.nodes if self.is_leaf(node.id)]
 
     @property
-    def uncovered(self) -> Set[Node]:
-        return {node for node in self.nodes if not self.is_covered(node.id)}
+    def covered(self) -> List[Node]:
+        return [node for node in self.nodes if self.is_covered(node.id)]
 
     @property
-    def frontier(self) -> Set[Node]:
-        return {node for node in self._nodes.values() if self.is_frontier(node.id)}
+    def uncovered(self) -> List[Node]:
+        return [node for node in self.nodes if not self.is_covered(node.id)]
 
     @property
-    def covers(self) -> Set[Cover]:
-        return set(self._covers.values())
+    def frontier(self) -> List[Node]:
+        return [node for node in self.nodes if self.is_frontier(node.id)]
+
+    @property
+    def stuck(self) -> List[Node]:
+        return [node for node in self.nodes if self.is_stuck(node.id)]
 
     def to_dict(self) -> Dict[str, Any]:
         nodes = [node.to_dict() for node in self.nodes]
         edges = [edge.to_dict() for edge in self.edges()]
-        covers = [cover.to_dict() for cover in self.covers]
+        covers = [cover.to_dict() for cover in self.covers()]
 
-        init = list(self._init)
-        target = list(self._target)
-        stuck = list(self._stuck)
+        init = sorted(self._init)
+        target = sorted(self._target)
+        expanded = sorted(self._expanded)
+        verified = [{"source": source_id, "target": target_id} for source_id, target_id in sorted(self._verified)]
 
         res = {
             'nodes': nodes,
@@ -160,7 +180,8 @@ class KCFG:
             'covers': covers,
             'init': init,
             'target': target,
-            'stuck': stuck,
+            'expanded': expanded,
+            'verified': verified,
         }
         return {k: v for k, v in res.items() if v}
 
@@ -176,8 +197,8 @@ class KCFG:
             return nodes[node_id]
 
         for node_dict in dct.get('nodes') or []:
-            term = CTerm(KInner.from_dict(node_dict['term']))
-            node = cfg.create_node(term)
+            cterm = CTerm(KInner.from_dict(node_dict['term']))
+            node = cfg.create_node(cterm)
 
             node_key = node_dict['id']
             if node_key in nodes:
@@ -202,8 +223,11 @@ class KCFG:
         for target_id in dct.get('target') or []:
             cfg.add_target(resolve(target_id))
 
-        for stuck_id in dct.get('stuck') or []:
-            cfg.add_stuck(resolve(stuck_id))
+        for expanded_id in dct.get('expanded') or []:
+            cfg.add_expanded(resolve(expanded_id))
+
+        for verified_ids in dct.get('verified') or []:
+            cfg.add_verified(resolve(verified_ids['source']), resolve(verified_ids['target']))
 
         return cfg
 
@@ -217,12 +241,16 @@ class KCFG:
     def to_dot(self, kprint: KPrint) -> str:
         def _node_attrs(node_id: str) -> List[str]:
             atts = []
-            if node_id in self._init:
+            if self.is_init(node_id):
                 atts.append('init')
-            if node_id in self._target:
+            if self.is_target(node_id):
                 atts.append('target')
-            if node_id in self._stuck:
+            if self.is_expanded(node_id):
+                atts.append('expanded')
+            if self.is_stuck(node_id):
                 atts.append('stuck')
+            if self.is_frontier(node_id):
+                atts.append('frontier')
             return atts
 
         def _short_label(label):
@@ -239,13 +267,14 @@ class KCFG:
         for edge in self.edges():
             display_condition = simplifyBool(unsafeMlPredToBool(edge.condition))
             depth = edge.depth
-            label = '\nandBool'.join(kprint.prettyPrint(display_condition).split(' andBool'))
+            label = '\nandBool'.join(kprint.pretty_print(display_condition).split(' andBool'))
             label = f'{label}\n{depth} steps'
             label = _short_label(label)
-            graph.edge(tail_name=edge.source.id, head_name=edge.target.id, label=f'  {label}        ')
+            attrs = {'class': 'verified'} if self.is_verified(edge.source.id, edge.target.id) else {'class': 'unverified'}
+            graph.edge(tail_name=edge.source.id, head_name=edge.target.id, label=f'  {label}        ', **attrs)
 
-        for cover in self.covers:
-            label = ', '.join(f'{k} |-> {kprint.prettyPrint(v)}' for k, v in cover.subst.items())
+        for cover in self.covers():
+            label = ', '.join(f'{k} |-> {kprint.pretty_print(v)}' for k, v in cover.subst.minimize().items())
             label = _short_label(label)
             attrs = {'class': 'abstraction', 'style': 'dashed'}
             graph.edge(tail_name=cover.source.id, head_name=cover.target.id, label=f'  {label}        ', **attrs)
@@ -254,23 +283,45 @@ class KCFG:
             for node in self.frontier:
                 attrs = {'class': 'target', 'style': 'solid'}
                 graph.edge(tail_name=node.id, head_name=target, label='  ???', **attrs)
+            for node in self.stuck:
+                attrs = {'class': 'target', 'style': 'solid'}
+                graph.edge(tail_name=node.id, head_name=target, label='  false', **attrs)
 
         return graph.source
 
-    def _resolve(self, short_id: str) -> str:
-        matches = [node_id for node_id in self._nodes if compare_short_hashes(short_id, node_id)]
+    def _resolve_all(self, short_id: str) -> List[str]:
+        return [node_id for node_id in self._nodes if compare_short_hashes(short_id, node_id)]
+
+    def _resolve_or_none(self, short_id: str) -> Optional[str]:
+        matches = self._resolve_all(short_id)
         if not matches:
-            raise ValueError(f'Unknown node: {short_id}')
+            return None
         if len(matches) > 1:
             raise ValueError(f'Multiple nodes for pattern: {short_id} (matches e.g. {matches[0]} and {matches[1]})')
         return matches[0]
+
+    def _resolve(self, short_id: str) -> str:
+        match = self._resolve_or_none(short_id)
+        if not match:
+            raise ValueError(f'Unknown node: {short_id}')
+        return match
 
     def node(self, node_id: str) -> Node:
         node_id = self._resolve(node_id)
         return self._nodes[node_id]
 
-    def create_node(self, term: CTerm) -> Node:
-        node = KCFG.Node(term)
+    def get_node(self, id: str) -> Optional[Node]:
+        return self._nodes.get(id)
+
+    def get_node_by_cterm(self, cterm: CTerm) -> Optional[Node]:
+        node = KCFG.Node(cterm)
+        return self.get_node(node.id)
+
+    def contains_node(self, node: Node) -> bool:
+        return bool(self.get_node(node.id))
+
+    def create_node(self, cterm: CTerm) -> Node:
+        node = KCFG.Node(cterm)
 
         if node.id in self._nodes:
             raise ValueError(f'Node already exists: {node.id}')
@@ -278,25 +329,57 @@ class KCFG:
         self._nodes[node.id] = node
         return node
 
+    def get_or_create_node(self, cterm: CTerm) -> Node:
+        return self.get_node_by_cterm(cterm) or self.create_node(cterm)
+
     def remove_node(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
+
+        for edge_in in [edge.source for edge in self.edges(target_id=node_id)]:
+            self.discard_expanded(edge_in.id)
 
         self._nodes.pop(node_id)
 
         self._edges.pop(node_id, None)
-        for source_id in self._edges:
+        for source_id in list(self._edges):
             self._edges[source_id].pop(node_id, None)
+            if not self._edges[source_id]:
+                self._edges.pop(source_id)
 
         self._covers.pop(node_id, None)
-        for source_id, cover in self._covers.items():
-            if cover.target.id == node_id:
+        for source_id in list(self._covers):
+            self._covers[source_id].pop(node_id, None)
+            if not self._covers[source_id]:
                 self._covers.pop(source_id)
 
         self._init.discard(node_id)
         self._target.discard(node_id)
-        self._stuck.discard(node_id)
+        self._expanded.discard(node_id)
+        self._verified = set((source_id, target_id) for source_id, target_id in self._verified if source_id != node_id and target_id != node_id)
 
-    def create_edge(self, source_id: str, target_id: str, condition: KInner = TRUE, depth=1) -> Edge:
+    def edge(self, source_id: str, target_id: str) -> Optional[Edge]:
+        source_id = self._resolve(source_id)
+        target_id = self._resolve(target_id)
+        return self._edges.get(source_id, {}).get(target_id)
+
+    def edges(self, *, source_id: Optional[str] = None, target_id: Optional[str] = None) -> List[Edge]:
+        source_id = self._resolve(source_id) if source_id is not None else None
+        target_id = self._resolve(target_id) if target_id is not None else None
+
+        res: Iterable[KCFG.Edge]
+        if source_id:
+            res = self._edges.get(source_id, {}).values()
+        else:
+            res = (edge for _, targets in self._edges.items() for _, edge in targets.items())
+
+        return [edge for edge in res if not target_id or target_id == edge.target.id]
+
+    def contains_edge(self, edge: Edge) -> bool:
+        if other := self.edge(source_id=edge.source.id, target_id=edge.target.id):
+            return edge == other
+        return False
+
+    def create_edge(self, source_id: str, target_id: str, condition: KInner, depth: int) -> Edge:
         source = self.node(source_id)
         target = self.node(target_id)
 
@@ -310,41 +393,65 @@ class KCFG:
         self._edges[source.id][target.id] = edge
         return edge
 
-    def edge(self, source_id: str, target_id: str) -> Optional[Edge]:
+    def remove_edge(self, source_id: str, target_id: str) -> None:
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
-        return self._edges.get(source_id, {}).get(target_id)
+        edge = self.edge(source_id, target_id)
 
-    def edges(self, *, source_id: Optional[str] = None, target_id: Optional[str] = None) -> Set[Edge]:
+        if not edge:
+            raise ValueError(f'Edge does not exist: {source_id} -> {target_id}')
+
+        self._edges[source_id].pop(target_id)
+        if not self._edges[source_id]:
+            self._edges.pop(source_id)
+
+    def cover(self, source_id: str, target_id: str) -> Optional[Cover]:
+        source_id = self._resolve(source_id)
+        target_id = self._resolve(target_id)
+        return self._covers.get(source_id, {}).get(target_id)
+
+    def covers(self, *, source_id: Optional[str] = None, target_id: Optional[str] = None) -> List[Cover]:
         source_id = self._resolve(source_id) if source_id is not None else None
         target_id = self._resolve(target_id) if target_id is not None else None
 
-        res: Iterable[KCFG.Edge]
+        res: Iterable[KCFG.Cover]
         if source_id:
-            res = self._edges.get(source_id, {}).values()
+            res = self._covers.get(source_id, {}).values()
         else:
-            res = (edge for _, targets in self._edges.items() for _, edge in targets.items())
+            res = (cover for _, targets in self._covers.items() for _, cover in targets.items())
 
-        return {edge for edge in res if not target_id or target_id == edge.target.id}
+        return [cover for cover in res if not target_id or target_id == cover.target.id]
+
+    def contains_cover(self, cover: Cover) -> bool:
+        if other := self.cover(source_id=cover.source.id, target_id=cover.target.id):
+            return cover == other
+        return False
 
     def create_cover(self, source_id: str, target_id: str) -> Cover:
         source = self.node(source_id)
         target = self.node(target_id)
 
-        if source.id in self._covers:
-            raise ValueError(f'Cover already exists: {source.id} -> {self._covers[source.id].target.id}')
+        if target.id in self._covers.get(source.id, {}):
+            raise ValueError(f'Cover already exists: {source.id} -> {target.id}')
+
+        if source.id not in self._covers:
+            self._covers[source.id] = {}
 
         cover = KCFG.Cover(source, target)
-        self._covers[source.id] = cover
+        self._covers[source.id][target.id] = cover
         return cover
 
-    def cover_of(self, node_id) -> Optional[Cover]:
-        node_id = self._resolve(node_id)
-        return self._covers.get(node_id)
+    def remove_cover(self, source_id: str, target_id: str) -> None:
+        source_id = self._resolve(source_id)
+        target_id = self._resolve(target_id)
+        cover = self.cover(source_id, target_id)
 
-    def covers_by(self, node_id) -> Set[Cover]:
-        node_id = self._resolve(node_id)
-        return {cover for cover in self.covers if cover.target.id == node_id}
+        if not cover:
+            raise ValueError(f'Cover does not exist: {source_id} -> {target_id}')
+
+        self._covers[source_id].pop(target_id)
+        if not self._covers[source_id]:
+            self._covers.pop(source_id)
 
     def add_init(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
@@ -354,9 +461,56 @@ class KCFG:
         node_id = self._resolve(node_id)
         self._target.add(node_id)
 
-    def add_stuck(self, node_id: str) -> None:
+    def add_expanded(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
-        self._stuck.add(node_id)
+        self._expanded.add(node_id)
+
+    def add_verified(self, source_id: str, target_id: str) -> None:
+        source_id = self._resolve(source_id)
+        target_id = self._resolve(target_id)
+        self._verified.add((source_id, target_id))
+
+    def remove_init(self, node_id: str) -> None:
+        node_id = self._resolve(node_id)
+        if node_id not in self._init:
+            raise ValueError(f'Node is not init: {node_id}')
+        self._init.remove(node_id)
+
+    def remove_target(self, node_id: str) -> None:
+        node_id = self._resolve(node_id)
+        if node_id not in self._target:
+            raise ValueError(f'Node is not target: {node_id}')
+        self._target.remove(node_id)
+
+    def remove_expanded(self, node_id: str) -> None:
+        node_id = self._resolve(node_id)
+        if node_id not in self._expanded:
+            raise ValueError(f'Node is not expanded: {node_id}')
+        self._expanded.remove(node_id)
+
+    def remove_verified(self, source_id: str, target_id: str) -> None:
+        source_id = self._resolve(source_id)
+        target_id = self._resolve(target_id)
+        if (source_id, target_id) not in self._verified:
+            raise ValueError(f'Edge is not verified: {(source_id, target_id)}')
+        self._verified.remove((source_id, target_id))
+
+    def discard_init(self, node_id: str) -> None:
+        node_id = self._resolve(node_id)
+        self._init.discard(node_id)
+
+    def discard_target(self, node_id: str) -> None:
+        node_id = self._resolve(node_id)
+        self._target.discard(node_id)
+
+    def discard_expanded(self, node_id: str) -> None:
+        node_id = self._resolve(node_id)
+        self._expanded.discard(node_id)
+
+    def discard_verified(self, source_id: str, target_id: str) -> None:
+        source_id = self._resolve(source_id)
+        target_id = self._resolve(target_id)
+        self._verified.discard((source_id, target_id))
 
     def is_init(self, node_id: str) -> bool:
         node_id = self._resolve(node_id)
@@ -366,9 +520,9 @@ class KCFG:
         node_id = self._resolve(node_id)
         return node_id in self._target
 
-    def is_stuck(self, node_id: str) -> bool:
+    def is_expanded(self, node_id: str) -> bool:
         node_id = self._resolve(node_id)
-        return node_id in self._stuck
+        return node_id in self._expanded
 
     def is_leaf(self, node_id: str) -> bool:
         node_id = self._resolve(node_id)
@@ -380,7 +534,16 @@ class KCFG:
 
     def is_frontier(self, node_id: str) -> bool:
         node_id = self._resolve(node_id)
-        return self.is_leaf(node_id) and not self.is_target(node_id) and not self.is_stuck(node_id) and not self.is_covered(node_id)
+        return not any([self.is_target(node_id), self.is_expanded(node_id), self.is_covered(node_id)])
+
+    def is_stuck(self, node_id: str) -> bool:
+        node_id = self._resolve(node_id)
+        return self.is_expanded(node_id) and self.is_leaf(node_id)
+
+    def is_verified(self, source_id: str, target_id: str) -> bool:
+        source_id = self._resolve(source_id)
+        target_id = self._resolve(target_id)
+        return (source_id, target_id) in self._verified
 
     def prune(self, node_id: str) -> None:
         nodes = self.reachable_nodes(node_id)
@@ -433,8 +596,8 @@ class KCFG:
             worklist.append(node_id)
 
             edges: List[KCFG.EdgeLike] = list(self.edges(source_id=node_id))
-            if traverse_covers and (cover := self.cover_of(node_id)):
-                edges.append(cover)
+            if traverse_covers:
+                edges += self.covers(source_id=node_id)
 
             for edge in edges:
                 worklist.append(POP_PATH)
@@ -442,11 +605,10 @@ class KCFG:
 
         return paths
 
-    def reachable_nodes(self, node_id: str, *, reverse=False, traverse_covers=False) -> Set[Node]:
-        node = self.node(node_id)
+    def reachable_nodes(self, source_id: str, *, reverse=False, traverse_covers=False) -> Set[Node]:
 
         visited: Set[KCFG.Node] = set()
-        worklist: List[KCFG.Node] = [node]
+        worklist: List[KCFG.Node] = [self.node(source_id)]
 
         while worklist:
             node = worklist.pop()
@@ -458,11 +620,10 @@ class KCFG:
 
             edges: Iterable[KCFG.EdgeLike]
             if not reverse:
-                cover = self.cover_of(node.id)
-                edges = chain(self.edges(source_id=node.id), [cover] if cover and traverse_covers else [])
+                edges = chain(self.edges(source_id=node.id), self.covers(source_id=node.id) if traverse_covers else [])
                 worklist.extend(edge.target for edge in edges)
             else:
-                edges = chain(self.edges(target_id=node.id), self.covers_by(node.id) if traverse_covers else [])
+                edges = chain(self.edges(target_id=node.id), self.covers(target_id=node.id) if traverse_covers else [])
                 worklist.extend(edge.source for edge in edges)
 
         return visited

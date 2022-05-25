@@ -46,5 +46,17 @@
         "type": "tarball",
         "url": "https://github.com/ttuegel/nix-lib/archive/66bb0ab890ff4d828a2dcfc7d5968465d0c7084f.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "z3": {
+        "branch": "z3-4.8.15",
+        "description": "The Z3 Theorem Prover",
+        "homepage": null,
+        "owner": "Z3Prover",
+        "repo": "z3",
+        "rev": "f1806d32d6f21fd4df7a08719abbc1f6493d9dc5",
+        "sha256": "0xkwqz0y5d1lfb6kfqy8wn8n2dqalzf4c8ghmjsajc1bpdl70yc5",
+        "type": "tarball",
+        "url": "https://github.com/Z3Prover/z3/archive/f1806d32d6f21fd4df7a08719abbc1f6493d9dc5.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }
