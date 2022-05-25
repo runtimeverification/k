@@ -138,7 +138,7 @@ class KProve(KPrint):
 
 def _get_rule_log(debug_log_file: Path) -> List[List[Tuple[str, bool, int]]]:
 
-    # rule_loc, is_success, rule_time
+    # rule_loc, is_success, ellapsed_time_since_start
     def _get_rule_line(_line: str) -> Optional[Tuple[str, bool, int]]:
         time = int(_line.split('[')[1].split(']')[0])
         if _line.find('(DebugTransition): after  apply axioms: '):
@@ -155,16 +155,20 @@ def _get_rule_log(debug_log_file: Path) -> List[List[Tuple[str, bool, int]]]:
             if processed_line := _get_rule_line(line):
                 log_lines.append(processed_line)
 
+    # rule_loc, is_success, time_delta
     axioms: List[List[Tuple[str, bool, int]]] = [[]]
     just_applied = True
+    prev_time = 0
     for rule_name, is_application, rule_time in log_lines:
+        rtime = rule_time - prev_time
+        prev_time = rule_time
         if not is_application:
             if just_applied:
                 axioms.append([])
             just_applied = False
         else:
             just_applied = True
-        axioms[-1].append((rule_name, is_application, rule_time))
+        axioms[-1].append((rule_name, is_application, rtime))
 
     if len(axioms[-1]) == 0:
         axioms.pop(-1)
