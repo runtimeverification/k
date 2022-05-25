@@ -88,11 +88,12 @@ class KProve(KPrint):
         with open(self.kompiled_directory / 'mainModule.txt', 'r') as mm:
             self.main_module = mm.read()
 
-    def prove(self, spec_file, spec_module_name, args=[], haskell_args=[], log_axioms_file=None, allow_zero_step=False, dry_run=False):
+    def prove(self, spec_file, spec_module_name, args=[], haskell_args=[], haskell_log_entries=[], log_axioms_file=None, allow_zero_step=False, dry_run=False):
         log_file = spec_file.with_suffix('.debug-log') if log_axioms_file is None else log_axioms_file
         if log_file.exists():
             log_file.unlink()
-        haskell_log_args = ['--log', str(log_file), '--log-format', 'oneline', '--log-entries', 'DebugTransition']
+        haskell_log_entries = set(['DebugTransition', 'DebugAttemptedRewriteRules'] + haskell_log_entries)
+        haskell_log_args = ['--log', str(log_file), '--log-format', 'oneline', '--log-entries', ','.join(haskell_log_entries)]
         command = [c for c in self.prover]
         command += [str(spec_file)]
         command += ['--definition', str(self.kompiled_directory), '-I', str(self.directory), '--spec-module', spec_module_name, '--output', 'json']
