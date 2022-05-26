@@ -135,9 +135,26 @@ class KProve(KPrint):
                 raise ValueError(f'Proof took zero steps, likely the LHS is invalid: {spec_file}')
 
             if rule_profile:
-                rule_profile_data = _get_rule_profile(debug_log)
+                rule_data = _get_rule_profile(debug_log)
+                table_lines = []
+                total_success_time = 0.0
+                total_failure_time = 0.0
+                total_success_n = 0.0
+                total_failure_n = 0.0
+                for rule_name in rule_data:
+                    table_line = [rule_name, *rule_data[rule_name]]
+                    table_lines.append(table_line)
+                    total_success_time += table_line[1]
+                    total_failure_time += table_line[4]
+                    total_success_n += table_line[2]
+                    total_failure_n += table_line[5]
+                avg_success_time = total_success_time / total_success_n if total_success_n > 0 else 0.0
+                avg_failure_time = total_failure_time / total_failure_n if total_failure_n > 0 else 0.0
+                productivity = total_success_time / (total_success_time + total_failure_time)
+                table_lines.append(['TOTAL', total_success_time, total_success_n, avg_success_time, total_failure_time, total_failure_n, avg_failure_time, productivity])
+                table_lines = sorted(table_lines, key=lambda x: x[1] + x[4])
                 with open(rule_profile, 'w') as rp:
-                    rp.write(tabulate(rule_profile_data, headers=('Rule', 'Total Success Time', '# Successes', 'Avg. Success Time', 'Total Failure Time', '# Failures', 'Avg. Failure Time', 'Productivity')))
+                    rp.write(tabulate(table_lines, headers=('Rule', 'Total Success Time', '# Successes', 'Avg. Success Time', 'Total Failure Time', '# Failures', 'Avg. Failure Time', 'Productivity')))
                     _LOGGER.info(f'Wrote rule profile: {rule_profile}')
 
             return final_state
@@ -195,8 +212,8 @@ def _get_rule_profile(debug_log: List[List[Tuple[str, bool, int]]]) -> Mapping[s
             else:
                 failure_time += time
                 failure_n += 1
-        success_avg = success_time / success_n
-        failure_avg = failure_time / failure_n
+        success_avg = success_time / success_n if success_n > 0 else 0.0
+        failure_avg = failure_time / failure_n if failure_n > 0 else 0.0
         productivity = success_time / (success_time + failure_time)
         return (success_time, success_n, success_avg, failure_time, failure_n, failure_avg, productivity)
 
@@ -215,10 +232,10 @@ def _get_rule_log(debug_log_file: Path) -> List[List[Tuple[str, bool, int]]]:
     def _get_rule_line(_line: str) -> Optional[Tuple[str, bool, int]]:
         if _line.startswith('kore-exec: ['):
             time = int(_line.split('[')[1].split(']')[0])
-            if _line.find('(DebugTransition): after  apply axioms: '):
+            if _line.find('(DebugTransition): after  apply axioms: ') > 0:
                 rule_name = ':'.join(_line.split(':')[-4:]).strip()
                 return (rule_name, True, time)
-            elif _line.find('(DebugAttemptedRewriteRules): '):
+            elif _line.find('(DebugAttemptedRewriteRules): ') > 0:
                 rule_name = ':'.join(_line.split(':')[-4:]).strip()
                 return (rule_name, False, time)
         return None
