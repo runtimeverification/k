@@ -9,4 +9,4 @@ from .kprint import (
     prettyPrintKastBool,
     unparser_for_production,
 )
-from .kprove import KProve, kprovex
+from .kprove import KProve, kprove

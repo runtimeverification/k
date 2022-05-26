@@ -360,11 +360,15 @@ public class KSyntax2Bison {
           "  node *n = malloc(sizeof(node));\n" +
           "  n->symbol = ");
       boolean isString = module.sortAttributesFor().get(prod.sort().head()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("").equals("STRING.String");
-      if (!isString) {
+      boolean isBytes  = module.sortAttributesFor().get(prod.sort().head()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("").equals("BYTES.Bytes");
+      if (!isString && !isBytes) {
         bison.append("enquote(");
       }
       bison.append("$1.token");
-      if (!isString) {
+      if (isBytes) {
+        bison.append("+1"); // skip the first 'b' char
+      }
+      if (!isString && !isBytes) {
         bison.append(")");
       }
       bison.append(";\n" +
