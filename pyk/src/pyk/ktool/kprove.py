@@ -142,9 +142,31 @@ class KProve(KPrint):
 
             return final_state
 
-    def prove_claim(self, claim, claim_id, lemmas=[], args=[], haskell_args=[], log_axioms_file=None, allow_zero_step=False):
+    def prove_claim(
+        self,
+        claim,
+        claim_id,
+        lemmas=[],
+        args=[],
+        haskell_args=[],
+        haskell_log_entries=[],
+        log_axioms_file=None,
+        allow_zero_step=False,
+        dry_run=False,
+        rule_profile=False,
+    ):
         self._write_claim_definition(claim, claim_id, lemmas=lemmas)
-        return self.prove(self.use_directory / (claim_id.lower() + '-spec.k'), spec_module_name=(claim_id.upper() + '-SPEC'), args=args, haskell_args=haskell_args, log_axioms_file=log_axioms_file, allow_zero_step=allow_zero_step)
+        return self.prove(
+            self.use_directory / (claim_id.lower() + '-spec.k'),
+            spec_module_name=(claim_id.upper() + '-SPEC'),
+            args=args,
+            haskell_args=haskell_args,
+            haskell_log_entries=haskell_log_entries,
+            log_axioms_file=log_axioms_file,
+            allow_zero_step=allow_zero_step,
+            dry_run=dry_run,
+            rule_profile=rule_profile,
+        )
 
     def _write_claim_definition(self, claim, claim_id, lemmas=[], rule=False):
         tmpClaim = self.use_directory / (claim_id.lower() if rule else (claim_id.lower() + '-spec'))
