@@ -3,7 +3,9 @@ import logging
 import os
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
-from typing import Final, Iterable, List, Optional, Tuple
+from typing import Dict, Final, Iterable, List, Mapping, Optional, Tuple
+
+from tabulate import tabulate
 
 from ..cli_utils import (
     check_dir_path,
@@ -89,7 +91,18 @@ class KProve(KPrint):
         with open(self.kompiled_directory / 'mainModule.txt', 'r') as mm:
             self.main_module = mm.read()
 
-    def prove(self, spec_file, spec_module_name=None, args=[], haskell_args=[], haskell_log_entries=[], log_axioms_file=None, allow_zero_step=False, dry_run=False, rule_profile=False):
+    def prove(
+        self,
+        spec_file,
+        spec_module_name=None,
+        args=[],
+        haskell_args=[],
+        haskell_log_entries=[],
+        log_axioms_file=None,
+        allow_zero_step=False,
+        dry_run=False,
+        rule_profile=None,
+    ):
         log_file = spec_file.with_suffix('.debug-log') if log_axioms_file is None else log_axioms_file
         if log_file.exists():
             log_file.unlink()
@@ -115,11 +128,19 @@ class KProve(KPrint):
 
         if not dry_run:
 
-            finalState = KAst.from_dict(json.loads(proc_output)['term'])
-            if finalState == mlTop() and len(_get_rule_log(log_file)) == 0 and not allow_zero_step:
+            debug_log = _get_rule_log(log_file)
+
+            final_state = KAst.from_dict(json.loads(proc_output)['term'])
+            if final_state == mlTop() and len(debug_log) == 0 and not allow_zero_step:
                 raise ValueError(f'Proof took zero steps, likely the LHS is invalid: {spec_file}')
 
-            return finalState
+            if rule_profile:
+                rule_profile_data = _get_rule_profile(debug_log)
+                with open(rule_profile, 'w') as rp:
+                    rp.write(tabulate(rule_profile_data, headers=('Rule', 'Total Success Time', '# Successes', 'Avg. Success Time', 'Total Failure Time', '# Failures', 'Avg. Failure Time', 'Productivity')))
+                    _LOGGER.info(f'Wrote rule profile: {rule_profile}')
+
+            return final_state
 
     def prove_claim(self, claim, claim_id, lemmas=[], args=[], haskell_args=[], log_axioms_file=None, allow_zero_step=False):
         self._write_claim_definition(claim, claim_id, lemmas=lemmas)
@@ -136,6 +157,34 @@ class KProve(KPrint):
             tc.write(self.pretty_print(claimDefinition) + '\n\n')
             tc.flush()
         _LOGGER.debug(f'Wrote claim file: {tmpClaim}.')
+
+
+def _get_rule_profile(debug_log: List[List[Tuple[str, bool, int]]]) -> Mapping[str, Tuple[float, int, float, float, int, float, float]]:
+
+    def _get_single_rule_profile(_rule_log: List[Tuple[float, bool]]) -> Tuple[float, int, float, float, int, float, float]:
+        success_time = 0.0
+        failure_time = 0.0
+        success_n = 0
+        failure_n = 0
+        for time, success in _rule_log:
+            if success:
+                success_time += time
+                success_n += 1
+            else:
+                failure_time += time
+                failure_n += 1
+        success_avg = success_time / success_n
+        failure_avg = failure_time / failure_n
+        productivity = success_time / (success_time + failure_time)
+        return (success_time, success_n, success_avg, failure_time, failure_n, failure_avg, productivity)
+
+    rule_data: Dict[str, List[Tuple[float, bool]]] = {}
+    for rule_name, apply_success, apply_time in [rl for rls in debug_log for rl in rls]:
+        if rule_name not in rule_data:
+            rule_data[rule_name] = []
+        rule_data[rule_name].append((apply_time, apply_success))
+
+    return {rule_name: _get_single_rule_profile(rule_data[rule_name]) for rule_name in rule_data}
 
 
 def _get_rule_log(debug_log_file: Path) -> List[List[Tuple[str, bool, int]]]:
