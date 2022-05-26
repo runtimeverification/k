@@ -1,4 +1,4 @@
-{ stdenv, lib, mavenix, cleanGit, cleanSourceWith, runCommand, makeWrapper
+{ src, stdenv, lib, mavenix, runCommand, makeWrapper
 , bison, flex, gcc, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3
 , haskell-backend, prelude-kore, llvm-backend
 }:
@@ -7,19 +7,7 @@ let
   unwrapped = mavenix.buildMaven {
     name = "k-5.3.0";
     infoFile = ./mavenix.lock;
-    src =
-      cleanSourceWith {
-        name = "k";
-        src = cleanGit { src = ./..; name = "k"; };
-        ignore =
-          [
-            "result*" "nix/" "*.nix"
-            "haskell-backend/src/main/native/haskell-backend/*"
-            "llvm-backend/src/main/native/llvm-backend/*"
-            "!llvm-backend/src/main/native/llvm-backend/matching"  # need pom.xml
-            "k-distribution/tests/regression-new"
-          ];
-      };
+    inherit src;
 
     # Cannot enable unit tests until a bug is fixed upstream (in Mavenix).
     doCheck = false;

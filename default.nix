@@ -28,8 +28,19 @@ let
   inherit (llvm-backend-project) clang llvm-backend;
 
   k = callPackage ./nix/k.nix {
+    src = ttuegel.cleanSourceWith {
+        name = "k";
+        src = ttuegel.cleanGit { src = ./.; name = "k"; };
+        ignore =
+          [
+            "result*" "nix/" "*.nix"
+            "haskell-backend/src/main/native/haskell-backend/*"
+            "llvm-backend/src/main/native/llvm-backend/*"
+            "!llvm-backend/src/main/native/llvm-backend/matching"  # need pom.xml
+            "k-distribution/tests/regression-new"
+          ];
+      };
     inherit haskell-backend llvm-backend mavenix prelude-kore;
-    inherit (ttuegel) cleanGit cleanSourceWith;
   };
 
   haskell-backend-project = import ./haskell-backend/src/main/native/haskell-backend {
