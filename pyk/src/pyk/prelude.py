@@ -15,20 +15,20 @@ class Sorts:
         raise ValueError('Class Sorts should not be instantiated')
 
 
-def buildAssoc(unit: KInner, label: Union[str, KLabel], ls: Iterable[KInner]) -> KInner:
+def buildAssoc(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner]) -> KInner:
     """Build an associative binary operator term given the join and unit ops.
 
     -   Input: unit, label, and list of elements to join.
     -   Output: cons-list style construction of the joined term.
     """
-    ls = list(filter(lambda l: l != unit, ls))
-    if len(ls) == 0:
+    terms = list(term for term in terms if term != unit)
+    if len(terms) == 0:
         return unit
-    if len(ls) == 1:
-        return ls[0]
-    if ls[0] == unit:
-        return buildAssoc(unit, label, ls[1:])
-    return KApply(label, [ls[0], buildAssoc(unit, label, ls[1:])])
+    if len(terms) == 1:
+        return terms[0]
+    if terms[0] == unit:
+        return buildAssoc(unit, label, terms[1:])
+    return KApply(label, [terms[0], buildAssoc(unit, label, terms[1:])])
 
 
 def buildCons(unit, cons, ls):
@@ -65,16 +65,16 @@ def stringToken(s: str) -> KToken:
 
 
 def ltInt(i1, i2):
-    return KApply('_<Int_', [i1, i2])
+    return KApply('_<Int_', i1, i2)
 
 
 def leInt(i1, i2):
-    return KApply('_<=Int_', [i1, i2])
+    return KApply('_<=Int_', i1, i2)
 
 
 # TODO default sort K can be tightened using basic type inference
 def mlEquals(term1: KInner, term2: KInner, sort1: Union[str, KSort] = Sorts.K, sort2: Union[str, KSort] = Sorts.K) -> KApply:
-    return KApply(KLabel('#Equals', (sort1, sort2)), (term1, term2))
+    return KLabel('#Equals', sort1, sort2)(term1, term2)
 
 
 def mlEqualsTrue(term: KInner) -> KApply:
@@ -82,24 +82,24 @@ def mlEqualsTrue(term: KInner) -> KApply:
 
 
 def mlTop(sort: Union[str, KSort] = Sorts.K) -> KApply:
-    return KApply(KLabel('#Top', (sort,)))
+    return KLabel('#Top', sort)()
 
 
 def mlBottom(sort: Union[str, KSort] = Sorts.K) -> KApply:
-    return KApply(KLabel('#Top', (sort,)))
+    return KLabel('#Top', sort)()
 
 
 def mlNot(term: KInner, sort: Union[str, KSort] = Sorts.K) -> KApply:
-    return KApply(KLabel('#Not', (sort,)), (term,))
+    return KLabel('#Not', sort)(term)
 
 
 def mlAnd(conjuncts: Iterable[KInner], sort: Union[str, KSort] = Sorts.K) -> KInner:
-    return buildAssoc(mlTop(sort), KLabel('#And', (sort,)), conjuncts)
+    return buildAssoc(mlTop(sort), KLabel('#And', sort), conjuncts)
 
 
 def mlOr(disjuncts: Iterable[KInner], sort: Union[str, KSort] = Sorts.K) -> KInner:
-    return buildAssoc(mlBottom(sort), KLabel('#Or', (sort,)), disjuncts)
+    return buildAssoc(mlBottom(sort), KLabel('#Or', sort), disjuncts)
 
 
 def mlImplies(antecedent: KInner, consequent: KInner, sort: Union[str, KSort] = Sorts.K) -> KApply:
-    return KApply(KLabel('#Implies', (sort,)), (antecedent, consequent))
+    return KLabel('#Implies', sort)(antecedent, consequent)
