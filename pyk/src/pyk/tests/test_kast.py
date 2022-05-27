@@ -1,9 +1,72 @@
 from typing import Final, List, Tuple
 from unittest import TestCase
 
-from ..kast import KApply, KInner, KLabel, KSequence, KVariable
+from ..kast import (
+    BOOL,
+    INT,
+    STRING,
+    KApply,
+    KInner,
+    KLabel,
+    KSequence,
+    KVariable,
+)
 
 x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
+
+
+class KLabelTest(TestCase):
+    TEST_DATA: Final[Tuple[List[KInner], ...]] = (
+        [],
+        [BOOL],
+        [BOOL, INT],
+        [BOOL, INT, STRING],
+    )
+
+    def test_init(self):
+        for i, params in enumerate(self.TEST_DATA):
+            with self.subTest(i=i):
+                # When
+                terms = (
+                    KLabel('f', params),
+                    KLabel('f', *params),
+                    KLabel('f', params=params),
+                    KLabel(name='f', params=params),
+                )
+
+                # Then
+                for term in terms:
+                    self.assertEqual(term.name, 'f')
+                    self.assertTupleEqual(term.params, tuple(params))
+
+    def test_init_multiple_values(self):
+        # Given
+        test_data = self.TEST_DATA[1:]
+        expected_message = "KLabel() got multiple values for argument 'params'"
+
+        for i, params in enumerate(test_data):
+            with self.subTest(i=i):
+                with self.assertRaises(TypeError) as context:
+                    # When
+                    KLabel('f', *params, params=params)
+
+                # Then
+                actual_message = context.exception.args[0]
+                self.assertEqual(actual_message, expected_message)
+
+    def test_init_unkown_keyword(self):
+        # Given
+        expected_message = "KLabel() got an unexpected keyword argument 'key'"
+
+        for i, params in enumerate(self.TEST_DATA):
+            with self.subTest(i=i):
+                with self.assertRaises(TypeError) as context:
+                    # When
+                    KLabel('f', *params, key='value')
+
+                # Then
+                actual_message = context.exception.args[0]
+                self.assertEqual(actual_message, expected_message)
 
 
 class KApplyTest(TestCase):

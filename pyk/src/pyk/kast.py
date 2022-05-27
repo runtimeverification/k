@@ -317,9 +317,30 @@ class KLabel(KInner):
     name: str
     params: Tuple[KSort, ...]
 
-    def __init__(self, name: str, params: Iterable[Union[str, KSort]] = ()):
-        params = tuple(KSort(param) if type(param) is str else param for param in params)
+    @overload
+    def __init__(self, name: str, params: Iterable[Union[str, KSort]]):
+        ...
 
+    @overload
+    def __init__(self, name: str, *params: Union[str, KSort]):
+        ...
+
+    def __init__(self, name, *args, **kwargs):
+        if kwargs:
+            bad_arg = next((arg for arg in kwargs if arg != 'params'), None)
+            if bad_arg:
+                raise TypeError(f"KLabel() got an unexpected keyword argument '{bad_arg}'")
+            if args:
+                raise TypeError("KLabel() got multiple values for argument 'params'")
+            params = kwargs['params']
+
+        elif len(args) == 1 and isinstance(args[0], Iterable) and not isinstance(args[0], KInner):
+            params = args[0]
+
+        else:
+            params = args
+
+        params = tuple(KSort(param) if type(param) is str else param for param in params)
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'params', params)
 
@@ -336,10 +357,6 @@ class KLabel(KInner):
 
     def __call__(self, *args, **kwargs):
         return self.apply(*args, **kwargs)
-
-    @staticmethod
-    def of(name: str, *params: KSort) -> 'KLabel':
-        return KLabel(name=name, params=params)
 
     @classmethod
     def from_dict(cls: Type['KLabel'], d: Dict[str, Any]) -> 'KLabel':
