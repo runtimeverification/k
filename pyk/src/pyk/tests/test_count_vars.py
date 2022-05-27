@@ -1,12 +1,9 @@
 from typing import Final, Mapping, Tuple
 from unittest import TestCase
 
-from ..kast import KApply, KInner, KLabel, KVariable
+from ..kast import KInner
 from ..kastManip import count_vars
-
-a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
-x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
-f, g, h = (KLabel(label) for label in ['f', 'g', 'h'])
+from .utils import a, b, c, f, g, h, x, y, z
 
 
 class CountVarTest(TestCase):

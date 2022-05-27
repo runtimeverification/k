@@ -1,10 +1,8 @@
 from unittest import TestCase
 
-from ..kast import KApply, KLabel, KRewrite, KSequence, ktokenDots
+from ..kast import KRewrite, KSequence, ktokenDots
 from ..kastManip import minimize_term, push_down_rewrites
-
-a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
-f, g, k = (KLabel(label) for label in ['f', 'g', '<k>'])
+from .utils import a, b, c, f, k
 
 
 class PushDownRewritesTest(TestCase):

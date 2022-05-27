@@ -1,11 +1,8 @@
 from typing import Final, Tuple
 from unittest import TestCase
 
-from ..kast import KApply, KInner, KLabel, KVariable
-
-a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
-x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
-f, g, h = (KLabel(label) for label in ['f', 'g', 'h'])
+from ..kast import KInner
+from .utils import a, b, c, f, g, h, x, y, z
 
 
 class MatchTest(TestCase):
