@@ -1,4 +1,4 @@
-from typing import Final, Iterable, Union, final
+from typing import Final, Iterable, Optional, Union, final
 
 from .kast import TRUE, KApply, KInner, KLabel, KSort, KToken
 
@@ -21,14 +21,19 @@ def buildAssoc(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner])
     -   Input: unit, label, and list of elements to join.
     -   Output: cons-list style construction of the joined term.
     """
-    terms = list(term for term in terms if term != unit)
-    if len(terms) == 0:
-        return unit
-    if len(terms) == 1:
-        return terms[0]
-    if terms[0] == unit:
-        return buildAssoc(unit, label, terms[1:])
-    return KApply(label, [terms[0], buildAssoc(unit, label, terms[1:])])
+    _label = label if type(label) is KLabel else KLabel(label)
+
+    res: Optional[KInner] = None
+    for term in reversed(list(terms)):
+        if term == unit:
+            continue
+
+        if not res:
+            res = term
+        else:
+            res = _label(term, res)
+
+    return res or unit
 
 
 def buildCons(unit, cons, ls):
