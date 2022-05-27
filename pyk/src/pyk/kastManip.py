@@ -89,8 +89,8 @@ def unsafeMlPredToBool(k):
     """
     if k is None:
         return None
-    mlPredToBoolRules = [ (KApply('#Top')                                            , TRUE)                                                            # noqa
-                        , (KApply('#Bottom')                                         , FALSE)                                                           # noqa
+    mlPredToBoolRules = [ (mlTop()                                                   , TRUE)                                                            # noqa
+                        , (mlBottom()                                                , FALSE)                                                           # noqa
                         , (KApply('#And'     , [KVariable('#V1'), KVariable('#V2')]) , KApply('_andBool_'     , [KVariable('#V1'), KVariable('#V2')]))  # noqa
                         , (KApply('#Or'      , [KVariable('#V1'), KVariable('#V2')]) , KApply('_orBool_'      , [KVariable('#V1'), KVariable('#V2')]))  # noqa
                         , (KApply('#Not'     , [KVariable('#V1')])                   , KApply('notBool_'      , [KVariable('#V1')]))                    # noqa
