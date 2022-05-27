@@ -3,9 +3,9 @@ from functools import cached_property
 from itertools import chain
 from typing import Iterable, Optional, Tuple
 
-from .kast import GENERATED_TOP_CELL, KApply, KInner, Subst, flattenLabel
+from .kast import KApply, KInner, Subst, flattenLabel
 from .kastManip import splitConfigAndConstraints
-from .prelude import mlAnd, mlImplies, mlTop
+from .prelude import Sorts, mlAnd, mlImplies, mlTop
 from .utils import unique
 
 
@@ -15,7 +15,7 @@ class CTerm:
     constraints: Tuple[KInner, ...]
 
     def __init__(self, term: KInner) -> None:
-        config, constraint = splitConfigAndConstraints(term, GENERATED_TOP_CELL)
+        config, constraint = splitConfigAndConstraints(term, Sorts.GENERATED_TOP_CELL)
         constraints = CTerm._normalize_constraints(flattenLabel('#And', constraint))
         object.__setattr__(self, 'config', config)
         object.__setattr__(self, 'constraints', constraints)
@@ -41,7 +41,7 @@ class CTerm:
 
     @cached_property
     def term(self) -> KInner:
-        return mlAnd(self, GENERATED_TOP_CELL)
+        return mlAnd(self, Sorts.GENERATED_TOP_CELL)
 
     @property
     def hash(self) -> str:
@@ -55,7 +55,7 @@ class CTerm:
 
         subst, condition = match_res
 
-        if condition != mlTop(GENERATED_TOP_CELL):
+        if condition != mlTop(Sorts.GENERATED_TOP_CELL):
             return None
 
         return subst
@@ -72,10 +72,10 @@ class CTerm:
 
     @staticmethod
     def _ml_impl(antecedents: Iterable[KInner], consequents: Iterable[KInner]) -> KInner:
-        antecedent = mlAnd(unique(antecedents), GENERATED_TOP_CELL)
-        consequent = mlAnd(unique(term for term in consequents if term not in set(antecedents)), GENERATED_TOP_CELL)
+        antecedent = mlAnd(unique(antecedents), Sorts.GENERATED_TOP_CELL)
+        consequent = mlAnd(unique(term for term in consequents if term not in set(antecedents)), Sorts.GENERATED_TOP_CELL)
 
-        if mlTop(GENERATED_TOP_CELL) in {antecedent, consequent}:
+        if mlTop(Sorts.GENERATED_TOP_CELL) in {antecedent, consequent}:
             return consequent
 
-        return mlImplies(antecedent, consequent, GENERATED_TOP_CELL)
+        return mlImplies(antecedent, consequent, Sorts.GENERATED_TOP_CELL)

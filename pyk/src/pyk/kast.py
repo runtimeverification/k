@@ -265,13 +265,6 @@ class KSort(KInner):
         raise TypeError('KSort does not support pattern matching')
 
 
-BOOL = KSort('Bool')
-INT = KSort('Int')
-STRING = KSort('String')
-K = KSort('K')
-GENERATED_TOP_CELL = KSort('GeneratedTopCell')
-
-
 @final
 @dataclass(frozen=True)
 class KToken(KInner):
@@ -307,8 +300,8 @@ class KToken(KInner):
         return None
 
 
-TRUE = KToken('true', BOOL)
-FALSE = KToken('false', BOOL)
+TRUE = KToken('true', KSort('Bool'))
+FALSE = KToken('false', KSort('Bool'))
 
 
 @final

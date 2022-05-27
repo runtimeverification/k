@@ -1,16 +1,8 @@
 from typing import Final, List, Tuple
 from unittest import TestCase
 
-from ..kast import (
-    BOOL,
-    INT,
-    STRING,
-    KApply,
-    KInner,
-    KLabel,
-    KSequence,
-    KVariable,
-)
+from ..kast import KApply, KInner, KLabel, KSequence, KVariable
+from ..prelude import Sorts
 
 x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
 
@@ -18,9 +10,9 @@ x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
 class KLabelTest(TestCase):
     TEST_DATA: Final[Tuple[List[KInner], ...]] = (
         [],
-        [BOOL],
-        [BOOL, INT],
-        [BOOL, INT, STRING],
+        [Sorts.BOOL],
+        [Sorts.BOOL, Sorts.INT],
+        [Sorts.BOOL, Sorts.INT, Sorts.STRING],
     )
 
     def test_init(self):

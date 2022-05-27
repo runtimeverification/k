@@ -15,7 +15,6 @@ from typing import (
 from .kast import (
     FALSE,
     TRUE,
-    K,
     KApply,
     KAtt,
     KClaim,
@@ -39,6 +38,7 @@ from .kast import (
     top_down,
 )
 from .prelude import (
+    Sorts,
     boolToken,
     buildAssoc,
     mlAnd,
@@ -245,7 +245,7 @@ def drop_unds(variable: KVariable) -> KVariable:
 
 
 # TODO infer sort based on cell name
-def splitConfigAndConstraints(kast, sort: Union[str, KSort] = K):
+def splitConfigAndConstraints(kast, sort: Union[str, KSort] = Sorts.K):
     """Split the configuration/term from the constraints.
 
     -   Input: kast conjunct representing a constrained term.

@@ -2,12 +2,13 @@ from typing import Final, Tuple
 from unittest import TestCase
 
 from ..cterm import CTerm
-from ..kast import GENERATED_TOP_CELL, KApply, KInner, KLabel
+from ..kast import KApply, KInner, KLabel
+from ..prelude import Sorts
 from .utils import a, b, c, f, g, h, x, y, z
 
 
 def _as_cterm(term: KInner) -> CTerm:
-    return CTerm(KApply(KLabel('<generatedTop>', (GENERATED_TOP_CELL,)), (term,)))
+    return CTerm(KApply(KLabel('<generatedTop>', (Sorts.GENERATED_TOP_CELL,)), (term,)))
 
 
 class CTermTest(TestCase):
