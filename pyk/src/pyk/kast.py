@@ -521,7 +521,29 @@ class KRewrite(KInner):
 class KSequence(KInner, Sequence[KInner]):
     items: Tuple[KInner, ...]
 
-    def __init__(self, items: Iterable[KInner] = ()):
+    @overload
+    def __init__(self, items: Iterable[KInner]):
+        ...
+
+    @overload
+    def __init__(self, *items: KInner):
+        ...
+
+    def __init__(self, *args, **kwargs):
+        if kwargs:
+            bad_arg = next((arg for arg in kwargs if arg != 'items'), None)
+            if bad_arg:
+                raise TypeError(f"KSequence() got an unexpected keyword argument '{bad_arg}'")
+            if args:
+                raise TypeError("KSequence() got multiple values for argument 'items'")
+            items = kwargs['items']
+
+        elif len(args) == 1 and isinstance(args[0], Iterable) and not isinstance(args[0], KInner):
+            items = args[0]
+
+        else:
+            items = args
+
         object.__setattr__(self, 'items', tuple(items))
 
     @overload
@@ -541,10 +563,6 @@ class KSequence(KInner, Sequence[KInner]):
     @property
     def arity(self) -> int:
         return len(self.items)
-
-    @staticmethod
-    def of(*items: KInner) -> 'KSequence':
-        return KSequence(items=items)
 
     @classmethod
     def from_dict(cls: Type['KSequence'], d: Dict[str, Any]) -> 'KSequence':

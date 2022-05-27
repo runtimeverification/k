@@ -1,7 +1,7 @@
 from typing import Final, List, Tuple
 from unittest import TestCase
 
-from ..kast import KApply, KInner, KLabel, KVariable
+from ..kast import KApply, KInner, KLabel, KSequence, KVariable
 
 x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
 
@@ -54,6 +54,58 @@ class KApplyTest(TestCase):
                 with self.assertRaises(TypeError) as context:
                     # When
                     KApply('f', *args, key='value')
+
+                # Then
+                actual_message = context.exception.args[0]
+                self.assertEqual(actual_message, expected_message)
+
+
+class KSequenceTest(TestCase):
+    TEST_DATA: Final[Tuple[List[KInner], ...]] = (
+        [],
+        [x],
+        [x, y],
+        [x, y, z],
+    )
+
+    def test_init(self):
+        for i, items in enumerate(self.TEST_DATA):
+            with self.subTest(i=i):
+                # When
+                terms = (
+                    KSequence(items),
+                    KSequence(*items),
+                    KSequence(items=items),
+                )
+
+                # Then
+                for term in terms:
+                    self.assertTupleEqual(term.items, tuple(items))
+
+    def test_init_multiple_values(self):
+        # Given
+        test_data = self.TEST_DATA[1:]
+        expected_message = "KSequence() got multiple values for argument 'items'"
+
+        for i, items in enumerate(test_data):
+            with self.subTest(i=i):
+                with self.assertRaises(TypeError) as context:
+                    # When
+                    KSequence(*items, items=items)
+
+                # Then
+                actual_message = context.exception.args[0]
+                self.assertEqual(actual_message, expected_message)
+
+    def test_init_unkown_keyword(self):
+        # Given
+        expected_message = "KSequence() got an unexpected keyword argument 'key'"
+
+        for i, items in enumerate(self.TEST_DATA):
+            with self.subTest(i=i):
+                with self.assertRaises(TypeError) as context:
+                    # When
+                    KSequence(*items, key='value')
 
                 # Then
                 actual_message = context.exception.args[0]
