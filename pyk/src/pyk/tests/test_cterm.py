@@ -1,4 +1,3 @@
-from functools import partial
 from typing import Final, Tuple
 from unittest import TestCase
 
@@ -7,7 +6,7 @@ from ..kast import GENERATED_TOP_CELL, KApply, KInner, KLabel, KVariable
 
 a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
 x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
-f, g, h = (partial(KApply, label) for label in ['f', 'g', 'h'])
+f, g, h = (KLabel(label) for label in ['f', 'g', 'h'])
 
 
 def _as_cterm(term: KInner) -> CTerm:

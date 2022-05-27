@@ -326,6 +326,17 @@ class KLabel(KInner):
     def __iter__(self) -> Iterator[Union[str, KSort]]:
         return chain([self.name], self.params)
 
+    @overload
+    def __call__(self, args: Iterable[KInner]) -> 'KApply':
+        ...
+
+    @overload
+    def __call__(self, *args: KInner) -> 'KApply':
+        ...
+
+    def __call__(self, *args, **kwargs):
+        return self.apply(*args, **kwargs)
+
     @staticmethod
     def of(name: str, *params: KSort) -> 'KLabel':
         return KLabel(name=name, params=params)
@@ -348,6 +359,17 @@ class KLabel(KInner):
 
     def match(self, term: KInner) -> Optional[Subst]:
         raise TypeError('KLabel does not support pattern matching')
+
+    @overload
+    def apply(self, args: Iterable[KInner]) -> 'KApply':
+        ...
+
+    @overload
+    def apply(self, *args: KInner) -> 'KApply':
+        ...
+
+    def apply(self, *args, **kwargs):
+        return KApply(self, *args, **kwargs)
 
 
 @final
