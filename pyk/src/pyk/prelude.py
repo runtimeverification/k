@@ -15,6 +15,15 @@ class Sorts:
         raise ValueError('Class Sorts should not be instantiated')
 
 
+@final
+class Labels:
+    K_CELLS: Final = KLabel('#KCells')
+    EMPTY_K: Final = KLabel('#EmptyK')
+
+    def __init__(self):
+        raise ValueError('Class Labels should not be instantiated')
+
+
 def buildAssoc(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner]) -> KInner:
     """Build an associative binary operator term given the join and unit ops.
 

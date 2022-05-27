@@ -300,8 +300,9 @@ class KToken(KInner):
         return None
 
 
-TRUE = KToken('true', KSort('Bool'))
-FALSE = KToken('false', KSort('Bool'))
+TRUE = KToken('true', 'Bool')
+FALSE = KToken('false', 'Bool')
+ktokenDots = KToken('...', 'K')
 
 
 @final
@@ -1383,11 +1384,6 @@ def flattenLabel(label: str, kast: KInner) -> List[KInner]:
         items = [flattenLabel(label, arg) for arg in kast.args]
         return [c for cs in items for c in cs]
     return [kast]
-
-
-klabelCells = KLabel('#KCells')
-klabelEmptyK = KLabel('#EmptyK')
-ktokenDots = KToken('...', 'K')
 
 
 def constLabel(symbol):

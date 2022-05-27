@@ -33,11 +33,11 @@ from .kast import (
     bottom_up,
     collect,
     flattenLabel,
-    klabelEmptyK,
     ktokenDots,
     top_down,
 )
 from .prelude import (
+    Labels,
     Sorts,
     boolToken,
     buildAssoc,
@@ -371,7 +371,7 @@ def push_down_rewrites(kast):
                     lowerRewrite = _push_down_rewrites(KRewrite(KSequence(lhs.items[0:-1]), KSequence(rhs.items[0:-1])))
                     return _flatten_ksequence(KSequence([lowerRewrite, lhs.items[-1]]))
             if type(lhs) is KSequence and lhs.arity > 0 and type(lhs.items[-1]) is KVariable and type(rhs) is KVariable and lhs.items[-1] == rhs:
-                return KSequence([KRewrite(KSequence(lhs.items[0:-1]), KApply(klabelEmptyK)), rhs])
+                return KSequence([KRewrite(KSequence(lhs.items[0:-1]), KApply(Labels.EMPTY_K)), rhs])
         return _kast
 
     return top_down(_push_down_rewrites, kast)
