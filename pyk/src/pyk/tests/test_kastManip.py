@@ -66,6 +66,7 @@ class MlPredToBoolTest(TestCase):
             (KApply(KLabel('#Equals'), [x, f(a)]), KApply('_==K_', [x, f(a)])),
             (KApply(KLabel('#Equals'), [TRUE, f(a)]), f(a)),
             (KApply(KLabel('#Equals', [KSort('Int'), KSort('GeneratedTopCell')]), [intToken(3), f(a)]), KApply('_==K_', [intToken(3), f(a)])),
+            (KApply(KLabel('#Not', [KSort('GeneratedTopCell')]), [mlTop()]), KApply('notBool_', [TRUE])),
         )
 
         for i, (before, expected) in enumerate(test_data):
