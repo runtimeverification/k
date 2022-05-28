@@ -85,7 +85,7 @@ def bool_to_ml_pred(kast: KInner) -> KInner:
 
 def ml_pred_to_bool(kast: KInner) -> KInner:
 
-    def _ml_constraint_to_bool(_kast: KInner) -> Optional[KInner]:
+    def _ml_constraint_to_bool(_kast: KInner) -> KInner:
         if type(_kast) is KApply and _kast.label.params[0] == KSort('Bool'):
             if _kast.label.name == '#Top':
                 return TRUE
@@ -96,14 +96,9 @@ def ml_pred_to_bool(kast: KInner) -> KInner:
                     return _kast.args[1]
                 if _kast.args[0] == FALSE:
                     return KApply(KLabel('notBool_', [KSort('Bool'), KSort('Bool')]), [_kast.args[1]])
-        return None
+        raise ValueError(f'Could not convert ML predicate to sort Bool: {_kast}')
 
-    constraints = flattenLabel('#And', kast)
-    bool_constraints: List[KInner] = []
-    for constraint in constraints:
-        if bool_constraint := _ml_constraint_to_bool(constraint):
-            bool_constraints.append(bool_constraint)
-
+    bool_constraints = [_ml_constraint_to_bool(constraint) for constraint in flattenLabel('#And', kast)]
     return buildAssoc(TRUE, KLabel('_andBool_', [KSort('Bool'), KSort('Bool'), KSort('Bool')]), bool_constraints)
 
 
