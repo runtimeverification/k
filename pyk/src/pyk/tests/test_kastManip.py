@@ -4,6 +4,7 @@ from unittest import TestCase
 
 from ..kast import TRUE, KApply, KLabel, KRewrite, KSequence, KSort, ktokenDots
 from ..kastManip import minimize_term, ml_pred_to_bool, push_down_rewrites
+from ..prelude import mlTop
 
 a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
 f, g, k = (partial(KApply.of, label) for label in ['f', 'g', '<k>'])
@@ -50,8 +51,10 @@ class MlPredToBoolTest(TestCase):
         # Given
         test_data = (
             (KApply(KLabel('#Equals', [KSort('Bool'), KSort('GeneratedTopCell')]), [TRUE, f(a)]), f(a)),
+            (KApply(KLabel('#Top', [KSort('Bool')])), TRUE),
+            (KApply('#Top'), TRUE),
+            (mlTop(), TRUE),
         )
-        sys.stderr.write(str(test_data))
 
         for i, (before, expected) in enumerate(test_data):
             with self.subTest(i=i):
