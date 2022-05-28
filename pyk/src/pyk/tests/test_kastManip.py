@@ -64,6 +64,7 @@ class MlPredToBoolTest(TestCase):
             (KApply('#Top'), TRUE),
             (mlTop(), TRUE),
             (KApply(KLabel('#Equals'), [x, f(a)]), KApply('_==K_', [x, f(a)])),
+            (KApply(KLabel('#Equals'), [TRUE, f(a)]), f(a)),
         )
 
         for i, (before, expected) in enumerate(test_data):
