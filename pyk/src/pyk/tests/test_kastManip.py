@@ -1,12 +1,22 @@
 from functools import partial
 from unittest import TestCase
 
-from ..kast import TRUE, KApply, KLabel, KRewrite, KSequence, KSort, ktokenDots
+from ..kast import (
+    TRUE,
+    KApply,
+    KLabel,
+    KRewrite,
+    KSequence,
+    KSort,
+    KVariable,
+    ktokenDots,
+)
 from ..kastManip import minimize_term, ml_pred_to_bool, push_down_rewrites
 from ..prelude import mlTop
 
 a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
 f, g, k = (partial(KApply.of, label) for label in ['f', 'g', '<k>'])
+x = KVariable('X')
 
 
 class PushDownRewritesTest(TestCase):
@@ -53,6 +63,7 @@ class MlPredToBoolTest(TestCase):
             (KApply(KLabel('#Top', [KSort('Bool')])), TRUE),
             (KApply('#Top'), TRUE),
             (mlTop(), TRUE),
+            (KApply(KLabel('#Equals'), [x, f(a)]), KApply('_==K_', [x, f(a)])),
         )
 
         for i, (before, expected) in enumerate(test_data):
