@@ -25,7 +25,6 @@ from .kast import (
     KRule,
     KRuleLike,
     KSequence,
-    KSort,
     KToken,
     KVariable,
     Subst,
@@ -103,7 +102,7 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
                 if _kast.args[0] == TRUE:
                     return _kast.args[1]
                 if _kast.args[0] == FALSE:
-                    return KApply(KLabel('notBool_', [KSort('Bool'), KSort('Bool')]), [_kast.args[1]])
+                    return KApply(KLabel('notBool_'), [_kast.args[1]])
                 if type(_kast.args[0]) in [KVariable, KToken]:
                     return KApply('_==K_', _kast.args)
                 if unsafe:
