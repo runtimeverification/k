@@ -92,12 +92,12 @@ def ml_pred_to_bool(kast: KInner) -> KInner:
             if _kast.label.name == '#Bottom':
                 return FALSE
             if _kast.label.name == '#Equals':
-                if type(_kast.args[0]) is KVariable:
-                    return KApply('_==K_', _kast.args)
                 if _kast.args[0] == TRUE:
                     return _kast.args[1]
                 if _kast.args[0] == FALSE:
                     return KApply(KLabel('notBool_', [KSort('Bool'), KSort('Bool')]), [_kast.args[1]])
+                if type(_kast.args[0]) in [KVariable, KToken]:
+                    return KApply('_==K_', _kast.args)
         raise ValueError(f'Could not convert ML predicate to sort Bool: {_kast}')
 
     bool_constraints = [_ml_constraint_to_bool(constraint) for constraint in flattenLabel('#And', kast)]
