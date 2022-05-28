@@ -12,7 +12,7 @@ from ..kast import (
     ktokenDots,
 )
 from ..kastManip import minimize_term, ml_pred_to_bool, push_down_rewrites
-from ..prelude import intToken, mlTop
+from ..prelude import intToken, mlEqualsTrue, mlTop
 
 a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
 f, g, k = (partial(KApply.of, label) for label in ['f', 'g', '<k>'])
@@ -68,6 +68,7 @@ class MlPredToBoolTest(TestCase):
             (False, KApply(KLabel('#Equals', [KSort('Int'), KSort('GeneratedTopCell')]), [intToken(3), f(a)]), KApply('_==K_', [intToken(3), f(a)])),
             (False, KApply(KLabel('#Not', [KSort('GeneratedTopCell')]), [mlTop()]), KApply('notBool_', [TRUE])),
             (True, KApply(KLabel('#Equals'), [f(a), f(x)]), KApply('_==K_', [f(a), f(x)])),
+            (False, KApply(KLabel('#And', [KSort('GeneratedTopCell')]), [mlEqualsTrue(TRUE), mlEqualsTrue(TRUE)]), KApply('_andBool_', [TRUE, TRUE]))
         )
 
         for i, (unsafe, before, expected) in enumerate(test_data):
