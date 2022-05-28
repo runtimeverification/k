@@ -112,6 +112,7 @@ class KProve(KPrint):
         command += [str(spec_file)]
         command += ['--definition', str(self.kompiled_directory), '-I', str(self.directory), '--output', 'json']
         command += ['--spec-module', spec_module_name] if spec_module_name is not None else []
+        command += ['--dry-run'] if dry_run else []
         command += [c for c in self.prover_args]
         command += args
 
