@@ -745,17 +745,6 @@ def removeDisjuncts(constrainedTerm):
     return constrainedTerm
 
 
-def abstractCell(constrainedTerm, cellName):
-    (state, constraint) = splitConfigAndConstraints(constrainedTerm)
-    constraints = flattenLabel('#And', constraint)
-    cell = getCell(state, cellName)
-    cellVar = KVariable(cellName)
-    if type(cell) is not KVariable:
-        state = setCell(state, cellName, cellVar)
-        constraints.append(KApply('#Equals', [cellVar, cell]))
-    return mlAnd([state] + constraints)
-
-
 def applyExistentialSubstitutions(constrainedTerm):
     (state, constraint) = splitConfigAndConstraints(constrainedTerm)
     constraints = flattenLabel('#And', constraint)
