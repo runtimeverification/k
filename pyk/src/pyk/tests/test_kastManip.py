@@ -59,20 +59,21 @@ class MlPredToBoolTest(TestCase):
     def test_ml_pred_to_bool(self):
         # Given
         test_data = (
-            (KApply(KLabel('#Equals', [KSort('Bool'), KSort('GeneratedTopCell')]), [TRUE, f(a)]), f(a)),
-            (KApply(KLabel('#Top', [KSort('Bool')])), TRUE),
-            (KApply('#Top'), TRUE),
-            (mlTop(), TRUE),
-            (KApply(KLabel('#Equals'), [x, f(a)]), KApply('_==K_', [x, f(a)])),
-            (KApply(KLabel('#Equals'), [TRUE, f(a)]), f(a)),
-            (KApply(KLabel('#Equals', [KSort('Int'), KSort('GeneratedTopCell')]), [intToken(3), f(a)]), KApply('_==K_', [intToken(3), f(a)])),
-            (KApply(KLabel('#Not', [KSort('GeneratedTopCell')]), [mlTop()]), KApply('notBool_', [TRUE])),
+            (False, KApply(KLabel('#Equals', [KSort('Bool'), KSort('GeneratedTopCell')]), [TRUE, f(a)]), f(a)),
+            (False, KApply(KLabel('#Top', [KSort('Bool')])), TRUE),
+            (False, KApply('#Top'), TRUE),
+            (False, mlTop(), TRUE),
+            (False, KApply(KLabel('#Equals'), [x, f(a)]), KApply('_==K_', [x, f(a)])),
+            (False, KApply(KLabel('#Equals'), [TRUE, f(a)]), f(a)),
+            (False, KApply(KLabel('#Equals', [KSort('Int'), KSort('GeneratedTopCell')]), [intToken(3), f(a)]), KApply('_==K_', [intToken(3), f(a)])),
+            (False, KApply(KLabel('#Not', [KSort('GeneratedTopCell')]), [mlTop()]), KApply('notBool_', [TRUE])),
+            (True, KApply(KLabel('#Equals'), [f(a), f(x)]), KApply('_==K_', [f(a), f(x)])),
         )
 
-        for i, (before, expected) in enumerate(test_data):
+        for i, (unsafe, before, expected) in enumerate(test_data):
             with self.subTest(i=i):
                 # When
-                actual = ml_pred_to_bool(before)
+                actual = ml_pred_to_bool(before, unsafe=unsafe)
 
                 # Then
                 self.assertEqual(actual, expected)
