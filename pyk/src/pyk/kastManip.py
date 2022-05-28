@@ -20,10 +20,12 @@ from .kast import (
     KDefinition,
     KFlatModule,
     KInner,
+    KLabel,
     KRewrite,
     KRule,
     KRuleLike,
     KSequence,
+    KSort,
     KToken,
     KVariable,
     Subst,
@@ -77,31 +79,32 @@ def whereMatchingBottomUp(effect, matchPattern, pattern):
     return bottom_up(_effect, pattern)
 
 
-def boolToMlPred(kast: KInner) -> KInner:
+def bool_to_ml_pred(kast: KInner) -> KInner:
     return mlAnd([mlEqualsTrue(cond) for cond in flattenLabel('_andBool_', kast)])
 
 
-def unsafeMlPredToBool(k):
-    """Attempt to convert an ML Predicate back into a boolean expression.
+def ml_pred_to_bool(kast: KInner) -> KInner:
 
-    This is unsafe in general because not every ML Predicate can be represented correctly as a boolean expression.
-    This function just makes a best-effort to do this.
-    """
-    if k is None:
+    def _ml_constraint_to_bool(_kast: KInner) -> Optional[KInner]:
+        if type(_kast) is KApply and _kast.label.params[0] == KSort('Bool'):
+            if _kast.label.name == '#Top':
+                return TRUE
+            if _kast.label.name == '#Bottom':
+                return FALSE
+            if _kast.label.name == '#Equals':
+                if _kast.args[0] == TRUE:
+                    return _kast.args[1]
+                if _kast.args[0] == FALSE:
+                    return KApply(KLabel('notBool_', [KSort('Bool'), KSort('Bool')]), [_kast.args[1]])
         return None
-    mlPredToBoolRules = [ (mlTop()                                                   , TRUE)                                                            # noqa
-                        , (mlBottom()                                                , FALSE)                                                           # noqa
-                        , (KApply('#And'     , [KVariable('#V1'), KVariable('#V2')]) , KApply('_andBool_'     , [KVariable('#V1'), KVariable('#V2')]))  # noqa
-                        , (KApply('#Or'      , [KVariable('#V1'), KVariable('#V2')]) , KApply('_orBool_'      , [KVariable('#V1'), KVariable('#V2')]))  # noqa
-                        , (KApply('#Not'     , [KVariable('#V1')])                   , KApply('notBool_'      , [KVariable('#V1')]))                    # noqa
-                        , (KApply('#Equals'  , [KVariable('#V1'), KVariable('#V2')]) , KApply('_==K_'         , [KVariable('#V1'), KVariable('#V2')]))  # noqa
-                        , (KApply('#Implies' , [KVariable('#V1'), KVariable('#V2')]) , KApply('_impliesBool_' , [KVariable('#V1'), KVariable('#V2')]))  # noqa
-                        ]                                                                                                                               # noqa
-    newK = k
-    for rule in mlPredToBoolRules:
-        rewrite = KRewrite(*rule)
-        newK = rewrite(newK)
-    return newK
+
+    constraints = flattenLabel('#And', kast)
+    bool_constraints: List[KInner] = []
+    for constraint in constraints:
+        if bool_constraint := _ml_constraint_to_bool(constraint):
+            bool_constraints.append(bool_constraint)
+
+    return buildAssoc(TRUE, KLabel('_andBool_', [KSort('Bool'), KSort('Bool'), KSort('Bool')]), bool_constraints)
 
 
 def simplifyBool(k):
@@ -648,8 +651,8 @@ def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, pr
     (finalConfig, finalConstraint) = splitConfigAndConstraints(finalConstrainedTerm)
 
     ruleBody = push_down_rewrites(KRewrite(initConfig, finalConfig))
-    ruleRequires = simplifyBool(unsafeMlPredToBool(initConstraint))
-    ruleEnsures = simplifyBool(unsafeMlPredToBool(finalConstraint))
+    ruleRequires = simplifyBool(ml_pred_to_bool(initConstraint))
+    ruleEnsures = simplifyBool(ml_pred_to_bool(finalConstraint))
     attDict = {} if claim or priority is None else {'priority': str(priority)}
     ruleAtt = KAtt(atts=attDict)
 

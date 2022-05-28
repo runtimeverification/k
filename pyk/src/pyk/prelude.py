@@ -1,14 +1,22 @@
 from typing import Iterable, Union
 
-from .kast import BOOL, BOTTOM, INT, STRING, TOP, TRUE, KApply, KInner, KToken
+from .kast import (
+    BOOL,
+    BOTTOM,
+    INT,
+    STRING,
+    TOP,
+    TRUE,
+    KApply,
+    KInner,
+    KLabel,
+    KToken,
+)
 
 
-def buildAssoc(unit: KInner, join: str, ls: Iterable[KInner]) -> KInner:
-    """Build an associative binary operator term given the join and unit ops.
-
-    -   Input: unit, join, and list of elements to join.
-    -   Output: cons-list style construction of the joined term.
-    """
+def buildAssoc(unit: KInner, join: Union[str, KLabel], ls: Iterable[KInner]) -> KInner:
+    if type(join) is str:
+        join = KLabel(join)
     ls = list(filter(lambda l: l != unit, ls))
     if len(ls) == 0:
         return unit
