@@ -86,12 +86,12 @@ def bool_to_ml_pred(kast: KInner) -> KInner:
 def ml_pred_to_bool(kast: KInner) -> KInner:
 
     def _ml_constraint_to_bool(_kast: KInner) -> KInner:
-        if type(_kast) is KApply and _kast.label.params[0] == KSort('Bool'):
+        if type(_kast) is KApply:
             if _kast.label.name == '#Top':
                 return TRUE
             if _kast.label.name == '#Bottom':
                 return FALSE
-            if _kast.label.name == '#Equals':
+            if _kast.label.name == '#Equals' and len(_kast.label.params) > 0 and _kast.label.params[0] == KSort('Bool'):
                 if _kast.args[0] == TRUE:
                     return _kast.args[1]
                 if _kast.args[0] == FALSE:
