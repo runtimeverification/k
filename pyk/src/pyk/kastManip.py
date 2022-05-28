@@ -92,7 +92,13 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
             if _kast.label.name == '#Bottom':
                 return FALSE
             if _kast.label.name == '#Not':
-                return KApply('notBool_', [_ml_constraint_to_bool(_kast.args[0])])
+                return KApply('notBool_', map(_ml_constraint_to_bool, _kast.args))
+            if _kast.label.name == '#And':
+                return KApply('_andBool_', map(_ml_constraint_to_bool, _kast.args))
+            if _kast.label.name == '#Or':
+                return KApply('_orBool_', map(_ml_constraint_to_bool, _kast.args))
+            if _kast.label.name == '#Implies':
+                return KApply('_impliesBool_', map(_ml_constraint_to_bool, _kast.args))
             if _kast.label.name == '#Equals':
                 if _kast.args[0] == TRUE:
                     return _kast.args[1]
@@ -104,8 +110,7 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
                     return KApply('_==K_', _kast.args)
         raise ValueError(f'Could not convert ML predicate to sort Bool: {_kast}')
 
-    bool_constraints = [_ml_constraint_to_bool(constraint) for constraint in flattenLabel('#And', kast)]
-    return buildAssoc(TRUE, '_andBool_', bool_constraints)
+    return _ml_constraint_to_bool(kast)
 
 
 def simplifyBool(k):
