@@ -91,6 +91,8 @@ def ml_pred_to_bool(kast: KInner) -> KInner:
                 return TRUE
             if _kast.label.name == '#Bottom':
                 return FALSE
+            if _kast.label.name == '#Not':
+                return KApply('notBool_', [_ml_constraint_to_bool(_kast.args[0])])
             if _kast.label.name == '#Equals':
                 if _kast.args[0] == TRUE:
                     return _kast.args[1]
