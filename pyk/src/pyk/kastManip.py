@@ -101,7 +101,7 @@ def ml_pred_to_bool(kast: KInner) -> KInner:
         raise ValueError(f'Could not convert ML predicate to sort Bool: {_kast}')
 
     bool_constraints = [_ml_constraint_to_bool(constraint) for constraint in flattenLabel('#And', kast)]
-    return buildAssoc(TRUE, KLabel('_andBool_', [KSort('Bool'), KSort('Bool'), KSort('Bool')]), bool_constraints)
+    return buildAssoc(TRUE, '_andBool_', bool_constraints)
 
 
 def simplifyBool(k):
