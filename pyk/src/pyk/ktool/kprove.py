@@ -15,6 +15,7 @@ from ..cli_utils import (
 )
 from ..kast import KAst, KDefinition, KFlatModule, KImport, KRequire
 from ..prelude import mlTop
+from ..utils import unique
 from .kprint import KPrint
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -106,7 +107,9 @@ class KProve(KPrint):
         log_file = spec_file.with_suffix('.debug-log') if log_axioms_file is None else log_axioms_file
         if log_file.exists():
             log_file.unlink()
-        haskell_log_entries = set(['DebugTransition', 'DebugAttemptedRewriteRules'] + haskell_log_entries)
+        haskell_log_entries += ['DebugTransition']
+        haskell_log_entries += ['DebugAttemptedRewriteRules'] if rule_profile else []
+        haskell_log_entries = unique(haskell_log_entries)
         haskell_log_args = ['--log', str(log_file), '--log-format', 'oneline', '--log-entries', ','.join(haskell_log_entries)]
         command = [c for c in self.prover]
         command += [str(spec_file)]
@@ -116,8 +119,10 @@ class KProve(KPrint):
         command += [c for c in self.prover_args]
         command += args
 
+        kore_exec_opts = ' '.join(haskell_args + haskell_log_args)
+        _LOGGER.debug(f'export KORE_EXEC_OPTS="{kore_exec_opts}"')
         command_env = os.environ.copy()
-        command_env['KORE_EXEC_OPTS'] = ' '.join(haskell_args + haskell_log_args)
+        command_env['KORE_EXEC_OPTS'] = kore_exec_opts
 
         proc_output: str
         try:
