@@ -29,10 +29,10 @@ from ..kast import (
     KToken,
     KVariable,
     flattenLabel,
-    klabelEmptyK,
     ktokenDots,
     readKastTerm,
 )
+from ..prelude import Labels
 from ..utils import hash_str
 
 
@@ -134,7 +134,7 @@ def prettyPrintKast(kast, symbol_table, debug=False):
         return '( ' + lhsStr + ' => ' + rhsStr + ' )'
     if type(kast) is KSequence:
         if kast.arity == 0:
-            return prettyPrintKast(KApply(klabelEmptyK), symbol_table, debug=debug)
+            return prettyPrintKast(KApply(Labels.EMPTY_K), symbol_table, debug=debug)
         if kast.arity == 1:
             return prettyPrintKast(kast.items[0], symbol_table, debug=debug)
         unparsedKSequence = '\n~> '.join([prettyPrintKast(item, symbol_table, debug=debug) for item in kast.items[0:-1]])

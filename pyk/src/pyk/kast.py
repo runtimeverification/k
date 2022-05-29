@@ -29,8 +29,6 @@ from .utils import FrozenDict, hash_str
 T = TypeVar('T', bound='KAst')
 W = TypeVar('W', bound='WithKAtt')
 KI = TypeVar('KI', bound='KInner')
-K = TypeVar('K')
-V = TypeVar('V')
 
 
 class KAst(ABC):
@@ -267,11 +265,6 @@ class KSort(KInner):
         raise TypeError('KSort does not support pattern matching')
 
 
-BOOL = KSort('Bool')
-INT = KSort('Int')
-STRING = KSort('String')
-
-
 @final
 @dataclass(frozen=True)
 class KToken(KInner):
@@ -307,8 +300,9 @@ class KToken(KInner):
         return None
 
 
-TRUE = KToken('true', BOOL)
-FALSE = KToken('false', BOOL)
+TRUE = KToken('true', 'Bool')
+FALSE = KToken('false', 'Bool')
+ktokenDots = KToken('...', 'K')
 
 
 @final
@@ -317,18 +311,46 @@ class KLabel(KInner):
     name: str
     params: Tuple[KSort, ...]
 
-    def __init__(self, name: str, params: Iterable[Union[str, KSort]] = ()):
-        params = tuple(KSort(param) if type(param) is str else param for param in params)
+    @overload
+    def __init__(self, name: str, params: Iterable[Union[str, KSort]]):
+        ...
 
+    @overload
+    def __init__(self, name: str, *params: Union[str, KSort]):
+        ...
+
+    def __init__(self, name, *args, **kwargs):
+        if kwargs:
+            bad_arg = next((arg for arg in kwargs if arg != 'params'), None)
+            if bad_arg:
+                raise TypeError(f"KLabel() got an unexpected keyword argument '{bad_arg}'")
+            if args:
+                raise TypeError("KLabel() got multiple values for argument 'params'")
+            params = kwargs['params']
+
+        elif len(args) == 1 and isinstance(args[0], Iterable) and not isinstance(args[0], KInner):
+            params = args[0]
+
+        else:
+            params = args
+
+        params = tuple(KSort(param) if type(param) is str else param for param in params)
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'params', params)
 
     def __iter__(self) -> Iterator[Union[str, KSort]]:
         return chain([self.name], self.params)
 
-    @staticmethod
-    def of(name: str, *params: KSort) -> 'KLabel':
-        return KLabel(name=name, params=params)
+    @overload
+    def __call__(self, args: Iterable[KInner]) -> 'KApply':
+        ...
+
+    @overload
+    def __call__(self, *args: KInner) -> 'KApply':
+        ...
+
+    def __call__(self, *args, **kwargs):
+        return self.apply(*args, **kwargs)
 
     @classmethod
     def from_dict(cls: Type['KLabel'], d: Dict[str, Any]) -> 'KLabel':
@@ -349,6 +371,17 @@ class KLabel(KInner):
     def match(self, term: KInner) -> Optional[Subst]:
         raise TypeError('KLabel does not support pattern matching')
 
+    @overload
+    def apply(self, args: Iterable[KInner]) -> 'KApply':
+        ...
+
+    @overload
+    def apply(self, *args: KInner) -> 'KApply':
+        ...
+
+    def apply(self, *args, **kwargs):
+        return KApply(self, *args, **kwargs)
+
 
 @final
 @dataclass(frozen=True)
@@ -356,15 +389,31 @@ class KApply(KInner):
     label: KLabel
     args: Tuple[KInner, ...]
 
-    def __init__(self, label: Union[str, KLabel], args: Iterable[KInner] = ()):
+    @overload
+    def __init__(self, label: Union[str, KLabel], args: Iterable[KInner]):
+        ...
+
+    @overload
+    def __init__(self, label: Union[str, KLabel], *args: KInner):
+        ...
+
+    def __init__(self, label, *args, **kwargs):
         if type(label) is str:
             label = KLabel(label)
 
+        if kwargs:
+            bad_arg = next((arg for arg in kwargs if arg != 'args'), None)
+            if bad_arg:
+                raise TypeError(f"KApply() got an unexpected keyword argument '{bad_arg}'")
+            if args:
+                raise TypeError("KApply() got multiple values for argument 'args'")
+            args = kwargs['args']
+
+        elif len(args) == 1 and isinstance(args[0], Iterable) and not isinstance(args[0], KInner):
+            args = args[0]
+
         object.__setattr__(self, 'label', label)
         object.__setattr__(self, 'args', tuple(args))
-
-    def __iter__(self) -> Iterator[Union[str, KInner]]:
-        return chain([self.label], self.args)
 
     @property
     def arity(self) -> int:
@@ -373,10 +422,6 @@ class KApply(KInner):
     @property
     def is_cell(self) -> bool:
         return len(self.label.name) > 1 and self.label.name[0] == '<' and self.label.name[-1] == '>'
-
-    @staticmethod
-    def of(label: str, *args: KInner) -> 'KApply':
-        return KApply(label=label, args=args)
 
     @classmethod
     def from_dict(cls: Type['KApply'], d: Dict[str, Any]) -> 'KApply':
@@ -395,13 +440,9 @@ class KApply(KInner):
         return self.let(args=(f(arg) for arg in self.args))
 
     def match(self, term: KInner) -> Optional[Subst]:
-        if type(term) is KApply and term.label == self.label and term.arity == self.arity:
+        if type(term) is KApply and term.label.name == self.label.name and term.arity == self.arity:
             return KInner._combine_matches(arg.match(term_arg) for arg, term_arg in zip(self.args, term.args))
         return None
-
-
-TOP: Final = KApply(KLabel('#Top', ['K']))
-BOTTOM: Final = KApply(KLabel('#Bottom', ['K']))
 
 
 @final
@@ -513,7 +554,29 @@ class KRewrite(KInner):
 class KSequence(KInner, Sequence[KInner]):
     items: Tuple[KInner, ...]
 
-    def __init__(self, items: Iterable[KInner] = ()):
+    @overload
+    def __init__(self, items: Iterable[KInner]):
+        ...
+
+    @overload
+    def __init__(self, *items: KInner):
+        ...
+
+    def __init__(self, *args, **kwargs):
+        if kwargs:
+            bad_arg = next((arg for arg in kwargs if arg != 'items'), None)
+            if bad_arg:
+                raise TypeError(f"KSequence() got an unexpected keyword argument '{bad_arg}'")
+            if args:
+                raise TypeError("KSequence() got multiple values for argument 'items'")
+            items = kwargs['items']
+
+        elif len(args) == 1 and isinstance(args[0], Iterable) and not isinstance(args[0], KInner):
+            items = args[0]
+
+        else:
+            items = args
+
         object.__setattr__(self, 'items', tuple(items))
 
     @overload
@@ -533,10 +596,6 @@ class KSequence(KInner, Sequence[KInner]):
     @property
     def arity(self) -> int:
         return len(self.items)
-
-    @staticmethod
-    def of(*items: KInner) -> 'KSequence':
-        return KSequence(items=items)
 
     @classmethod
     def from_dict(cls: Type['KSequence'], d: Dict[str, Any]) -> 'KSequence':
@@ -1325,11 +1384,6 @@ def flattenLabel(label: str, kast: KInner) -> List[KInner]:
         items = [flattenLabel(label, arg) for arg in kast.args]
         return [c for cs in items for c in cs]
     return [kast]
-
-
-klabelCells = KLabel('#KCells')
-klabelEmptyK = KLabel('#EmptyK')
-ktokenDots = KToken('...', 'K')
 
 
 def constLabel(symbol):
