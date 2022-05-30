@@ -71,16 +71,6 @@ def substitute(pattern: KInner, subst: Mapping[str, KInner]) -> KInner:
     return subst(pattern)
 
 
-def whereMatchingBottomUp(effect, matchPattern, pattern):
-    def _effect(k):
-        matchingSubst = matchPattern.match(k)
-        newK = k
-        if matchingSubst is not None:
-            newK = effect(matchingSubst)
-        return newK
-    return bottom_up(_effect, pattern)
-
-
 def bool_to_ml_pred(kast: KInner) -> KInner:
     return mlAnd([mlEqualsTrue(cond) for cond in flattenLabel('_andBool_', kast)])
 
@@ -144,17 +134,6 @@ def simplifyBool(k):
     return newK
 
 
-def getOccurances(kast, pattern):
-    occurances = []
-
-    def addOccurance(k):
-        if pattern.match(k) is not None:
-            occurances.append(k)
-
-    collect(addOccurance, kast)
-    return occurances
-
-
 def extract_lhs(term: KInner) -> KInner:
     return top_down(if_ktype(KRewrite, lambda rw: rw.lhs), term)
 
@@ -216,40 +195,8 @@ def count_vars(term: KInner) -> Counter:
     return counter
 
 
-def count_rhs_vars(term: KInner) -> Counter:
-    def recur(term: KInner, *, rhs=False) -> Counter:
-        if type(term) is KVariable:
-            return Counter(term.name) if rhs else Counter()
-        if type(term) is KRewrite:
-            return recur(term.rhs, rhs=True)
-        if type(term) is KApply:
-            return sum((recur(t, rhs=rhs) for t in term.args), Counter())
-        if type(term) is KSequence:
-            return sum((recur(t, rhs=rhs) for t in term.items), Counter())
-        return Counter()
-    return recur(term)
-
-
 def collectFreeVars(kast):
     return list(count_vars(kast).keys())
-
-
-def drop_var_prefixes(term: KInner) -> KInner:
-    term = top_down(if_ktype(KVariable, drop_ques), term)
-    term = top_down(if_ktype(KVariable, drop_unds), term)
-    return term
-
-
-def drop_ques(variable: KVariable) -> KVariable:
-    if variable.name.startswith('?'):
-        return variable.let(name=variable.name[1:])
-    return variable
-
-
-def drop_unds(variable: KVariable) -> KVariable:
-    if variable.name.startswith('_'):
-        return variable.let(name=variable.name[1:])
-    return variable
 
 
 # TODO infer sort based on cell name
@@ -579,21 +526,6 @@ def setCell(constrainedTerm, cellVariable, cellValue):
     return mlAnd([substitute(config, subst), constraint])
 
 
-def structurallyFrameKCell(constrainedTerm):
-    kCell = getCell(constrainedTerm, 'K_CELL')
-    if type(kCell) is KSequence and kCell.arity > 0 and isAnonVariable(kCell.items[-1]):
-        kCell = KSequence(kCell.items[0:-1] + (ktokenDots,))
-    return setCell(constrainedTerm, 'K_CELL', kCell)
-
-
-def applyCellSubst(constrainedTerm, cellSubst):
-    (state, constraint) = splitConfigAndConstraints(constrainedTerm)
-    (config, subst) = splitConfigFrom(state)
-    for k in cellSubst:
-        subst[k] = cellSubst[k]
-    return KApply('#And', [substitute(config, subst), constraint])
-
-
 def removeUselessConstraints(constrainedTerm, keepVars=None):
     (state, constraint) = splitConfigAndConstraints(constrainedTerm)
     constraints = flattenLabel('#And', constraint)
@@ -626,10 +558,6 @@ def removeConstraintsFor(varNames, constrainedTerm):
     (state, constraint) = splitConfigAndConstraints(constrainedTerm)
     constraint = removeConstraintClausesFor(varNames, constraint)
     return mlAnd([state, constraint])
-
-
-def hasExistentials(pattern):
-    return any([v.startswith('?') for v in collectFreeVars(pattern)])
 
 
 def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, priority=None, keepVars=None) -> Tuple[KRuleLike, Dict[str, KVariable]]:
@@ -676,25 +604,6 @@ def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, pr
     if keepVars is not None:
         newKeepVars = [vSubst[v].name for v in keepVars]
     return (minimizeRule(rule, keepVars=newKeepVars), vremapSubst)
-
-
-def onCells(cellHandler, constrainedTerm):
-    """Given an effect and a constrained term, return the effect applied to the cells in the term.
-
-    -   Input: Effect that takes as input a cell name and the contents of the cell, and a constrained term.
-    -   Output: Constrained term with the effect applied to each cell.
-    """
-    (config, constraint) = splitConfigAndConstraints(constrainedTerm)
-    constraints = flattenLabel('#And', constraint)
-    (emptyConfig, subst) = splitConfigFrom(config)
-    for k in subst:
-        newCell = cellHandler(k, subst[k])
-        if newCell is not None:
-            (term, constraint) = newCell
-            subst[k] = term
-            if constraint not in constraints:
-                constraints.append(constraint)
-    return mlAnd([substitute(emptyConfig, subst)] + constraints)
 
 
 def abstractTermSafely(kast, baseName='V'):
