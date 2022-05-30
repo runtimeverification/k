@@ -189,7 +189,7 @@ public class JsonParser {
                 Att att = toAtt(data.getJsonObject("att"));
                 List<scala.collection.Set<Tag>> syntaxPriorities = new ArrayList<>();
                 priorities.getValuesAs(JsonArray.class).forEach(tags -> syntaxPriorities.add(toTags(tags)));
-                return new SyntaxPriority(JavaConverters.iterableAsScalaIterableConverter(syntaxPriorities).asScala().toSeq(), att);
+                return new SyntaxPriority(immutable(syntaxPriorities), att);
             }
             case KSYNTAXASSOCIATIVITY: {
                 String assocString = data.getString("assoc");
@@ -214,7 +214,7 @@ public class JsonParser {
                 for (JsonObject s : data.getJsonArray("params").getValuesAs(JsonObject.class)) {
                     params.add(toSort(s));
                 }
-                return new SyntaxSort(JavaConverters.asScalaIteratorConverter(params.iterator()).asScala().toSeq(), sort, att);
+                return new SyntaxSort(immutable(params), sort, att);
             }
             case KSORTSYNONYM: {
                 Sort newSort = toSort(data.getJsonObject("newSort"));
@@ -247,7 +247,7 @@ public class JsonParser {
                 for (JsonObject s : data.getJsonArray("params").getValuesAs(JsonObject.class)) {
                     params.add(toSort(s));
                 }
-                return new Production(klabel, JavaConverters.asScalaIteratorConverter(params.iterator()).asScala().toSeq(), sort, JavaConverters.asScalaIteratorConverter(pItems.iterator()).asScala().toSeq(), att);
+                return new Production(klabel, immutable(params), sort, immutable(pItems), att);
             }
             default:
                 throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
