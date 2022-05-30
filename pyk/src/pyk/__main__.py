@@ -7,7 +7,7 @@ from typing import Final
 from graphviz import Digraph
 
 from .coverage import getRuleById, stripCoverageLogger
-from .kast import KApply, KAst, flattenLabel, readKastTerm
+from .kast import KApply, KAst, KLabel, flattenLabel, readKastTerm
 from .kastManip import (
     minimize_term,
     minimizeRule,
@@ -16,7 +16,7 @@ from .kastManip import (
     splitConfigAndConstraints,
 )
 from .ktool import KPrint, KProve, build_symbol_table, prettyPrintKast
-from .prelude import build_assoc, mlBottom, mlTop
+from .prelude import Sorts, mlOr, mlTop
 
 _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 
@@ -52,10 +52,10 @@ def main(extraMain=None):
                     dMinimized = minimize_term(d, abstract_labels=abstractLabels)
                     dConfig, dConstraint = splitConfigAndConstraints(dMinimized)
                     if dConstraint != mlTop():
-                        minimizedDisjuncts.append(KApply('#And', [dConfig, dConstraint]))
+                        minimizedDisjuncts.append(KApply(KLabel('#And', Sorts.GENERATED_TOP_CELL), [dConfig, dConstraint]))
                     else:
                         minimizedDisjuncts.append(dConfig)
-                term = propagateUpConstraints(build_assoc(mlBottom(), '#Or', minimizedDisjuncts))
+                term = propagateUpConstraints(mlOr(minimizedDisjuncts, sort=Sorts.GENERATED_TOP_CELL))
             args['output_file'].write(printer.pretty_print(term))
 
     elif args['command'] == 'prove':

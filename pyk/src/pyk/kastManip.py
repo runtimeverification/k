@@ -221,14 +221,10 @@ def splitConfigAndConstraints(kast, sort: Union[str, KSort] = Sorts.K):
 
 
 def propagateUpConstraints(k):
-    """Try to propagate common constraints up disjuncts.
-
-    -   Input: kast disjunct of constrained terms (conjuncts).
-    -   Output: kast where common constraints in the disjunct have been propagated up.
-    """
     def _propagateUpConstraints(_k):
         if not (type(_k) is KApply and _k.label.name == '#Or'):
             return _k
+        top_sort = _k.label.params[0]
         conjuncts1 = flattenLabel('#And', _k.args[0])
         conjuncts2 = flattenLabel('#And', _k.args[1])
         (common1, l1, r1) = find_common_items(conjuncts1, conjuncts2)
@@ -236,10 +232,10 @@ def propagateUpConstraints(k):
         common = common1 + common2
         if len(common) == 0:
             return _k
-        conjunct1 = build_assoc(mlTop(), '#And', l2)
-        conjunct2 = build_assoc(mlTop(), '#And', r2)
-        disjunct = KApply('#Or', [conjunct1, conjunct2])
-        return build_assoc(mlTop(), '#And', [disjunct] + common)
+        conjunct1 = mlAnd(l2, sort=top_sort)
+        conjunct2 = mlAnd(r2, sort=top_sort)
+        disjunct = mlOr([conjunct1, conjunct2], sort=top_sort)
+        return mlAnd([disjunct] + common, sort=top_sort)
     return bottom_up(_propagateUpConstraints, k)
 
 
