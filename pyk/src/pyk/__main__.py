@@ -11,7 +11,7 @@ from .kast import KApply, KAst, KLabel, flattenLabel, readKastTerm
 from .kastManip import (
     minimize_term,
     minimizeRule,
-    propagateUpConstraints,
+    propagate_up_constraints,
     removeSourceMap,
     splitConfigAndConstraints,
 )
@@ -55,7 +55,7 @@ def main(extraMain=None):
                         minimizedDisjuncts.append(KApply(KLabel('#And', Sorts.GENERATED_TOP_CELL), [dConfig, dConstraint]))
                     else:
                         minimizedDisjuncts.append(dConfig)
-                term = propagateUpConstraints(mlOr(minimizedDisjuncts, sort=Sorts.GENERATED_TOP_CELL))
+                term = propagate_up_constraints(mlOr(minimizedDisjuncts, sort=Sorts.GENERATED_TOP_CELL))
             args['output_file'].write(printer.pretty_print(term))
 
     elif args['command'] == 'prove':
