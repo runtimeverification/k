@@ -7,16 +7,16 @@ from typing import Final
 from graphviz import Digraph
 
 from .coverage import getRuleById, stripCoverageLogger
-from .kast import KApply, KAst, flattenLabel, readKastTerm
+from .kast import KAst, flattenLabel, readKastTerm
 from .kastManip import (
     minimize_term,
     minimizeRule,
-    propagateUpConstraints,
+    propagate_up_constraints,
     removeSourceMap,
     splitConfigAndConstraints,
 )
 from .ktool import KPrint, KProve, build_symbol_table, prettyPrintKast
-from .prelude import buildAssoc, mlBottom, mlTop
+from .prelude import Sorts, mlAnd, mlOr, mlTop
 
 _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 
@@ -52,15 +52,15 @@ def main(extraMain=None):
                     dMinimized = minimize_term(d, abstract_labels=abstractLabels)
                     dConfig, dConstraint = splitConfigAndConstraints(dMinimized)
                     if dConstraint != mlTop():
-                        minimizedDisjuncts.append(KApply('#And', [dConfig, dConstraint]))
+                        minimizedDisjuncts.append(mlAnd([dConfig, dConstraint], sort=Sorts.GENERATED_TOP_CELL))
                     else:
                         minimizedDisjuncts.append(dConfig)
-                term = propagateUpConstraints(buildAssoc(mlBottom(), '#Or', minimizedDisjuncts))
+                term = propagate_up_constraints(mlOr(minimizedDisjuncts, sort=Sorts.GENERATED_TOP_CELL))
             args['output_file'].write(printer.pretty_print(term))
 
     elif args['command'] == 'prove':
         kprover = KProve(kompiled_dir, args['main-file'])
-        finalState = kprover.prove(Path(args['spec-file']), args['spec-module'], args=args['kArgs'])
+        finalState = kprover.prove(Path(args['spec-file']), spec_module_name=args['spec-module'], args=args['kArgs'])
         args['output_file'].write(finalState.to_json())
 
     elif args['command'] == 'graph-imports':
