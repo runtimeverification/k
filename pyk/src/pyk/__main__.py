@@ -16,7 +16,7 @@ from .kastManip import (
     splitConfigAndConstraints,
 )
 from .ktool import KPrint, KProve, build_symbol_table, prettyPrintKast
-from .prelude import buildAssoc, mlBottom, mlTop
+from .prelude import build_assoc, mlBottom, mlTop
 
 _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 
@@ -55,7 +55,7 @@ def main(extraMain=None):
                         minimizedDisjuncts.append(KApply('#And', [dConfig, dConstraint]))
                     else:
                         minimizedDisjuncts.append(dConfig)
-                term = propagateUpConstraints(buildAssoc(mlBottom(), '#Or', minimizedDisjuncts))
+                term = propagateUpConstraints(build_assoc(mlBottom(), '#Or', minimizedDisjuncts))
             args['output_file'].write(printer.pretty_print(term))
 
     elif args['command'] == 'prove':

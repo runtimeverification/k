@@ -14,7 +14,7 @@ from .kast import (
 )
 
 
-def buildAssoc(unit: KInner, join: Union[str, KLabel], ls: Iterable[KInner]) -> KInner:
+def build_assoc(unit: KInner, join: Union[str, KLabel], ls: Iterable[KInner]) -> KInner:
     if type(join) is str:
         join = KLabel(join)
     ls = list(filter(lambda l: l != unit, ls))
@@ -23,8 +23,8 @@ def buildAssoc(unit: KInner, join: Union[str, KLabel], ls: Iterable[KInner]) -> 
     if len(ls) == 1:
         return ls[0]
     if ls[0] == unit:
-        return buildAssoc(unit, join, ls[1:])
-    return KApply(join, [ls[0], buildAssoc(unit, join, ls[1:])])
+        return build_assoc(unit, join, ls[1:])
+    return KApply(join, [ls[0], build_assoc(unit, join, ls[1:])])
 
 
 def buildCons(unit, cons, ls):
@@ -85,11 +85,11 @@ def mlBottom():
 
 
 def mlAnd(cs):
-    return buildAssoc(mlTop(), '#And', cs)
+    return build_assoc(mlTop(), '#And', cs)
 
 
 def mlOr(cs):
-    return buildAssoc(mlBottom(), '#Or', cs)
+    return build_assoc(mlBottom(), '#Or', cs)
 
 
 def mlImplies(an, co):

@@ -38,7 +38,7 @@ from .kast import (
 )
 from .prelude import (
     boolToken,
-    buildAssoc,
+    build_assoc,
     mlAnd,
     mlBottom,
     mlEquals,
@@ -263,7 +263,7 @@ def splitConfigAndConstraints(kast):
             term = c
         else:
             constraints.append(c)
-    constraint = buildAssoc(mlTop(), '#And', constraints)
+    constraint = build_assoc(mlTop(), '#And', constraints)
     if not term:
         raise ValueError(f'Could not find configuration for: {kast}')
     return (term, constraint)
@@ -285,10 +285,10 @@ def propagateUpConstraints(k):
         common = common1 + common2
         if len(common) == 0:
             return _k
-        conjunct1 = buildAssoc(mlTop(), '#And', l2)
-        conjunct2 = buildAssoc(mlTop(), '#And', r2)
+        conjunct1 = build_assoc(mlTop(), '#And', l2)
+        conjunct2 = build_assoc(mlTop(), '#And', r2)
         disjunct = KApply('#Or', [conjunct1, conjunct2])
-        return buildAssoc(mlTop(), '#And', [disjunct] + common)
+        return build_assoc(mlTop(), '#And', [disjunct] + common)
     return bottom_up(_propagateUpConstraints, k)
 
 
@@ -509,10 +509,10 @@ def minimizeRule(rule, keepVars=[]):
     ruleRequires = rule.requires
     ruleEnsures = rule.ensures
 
-    ruleRequires = buildAssoc(TRUE, '_andBool_', unique(flattenLabel('_andBool_', ruleRequires)))
+    ruleRequires = build_assoc(TRUE, '_andBool_', unique(flattenLabel('_andBool_', ruleRequires)))
     ruleRequires = simplifyBool(ruleRequires)
 
-    ruleEnsures = buildAssoc(TRUE, '_andBool_', unique(flattenLabel('_andBool_', ruleEnsures)))
+    ruleEnsures = build_assoc(TRUE, '_andBool_', unique(flattenLabel('_andBool_', ruleEnsures)))
     ruleEnsures = simplifyBool(ruleEnsures)
 
     constrainedVars = [] if keepVars is None else keepVars
@@ -816,7 +816,7 @@ def substToMlPred(subst):
 
 def substToMap(subst):
     mapItems = [KApply('_|->_', [KVariable(k), subst[k]]) for k in subst]
-    return buildAssoc(KApply('.Map'), '_Map_', mapItems)
+    return build_assoc(KApply('.Map'), '_Map_', mapItems)
 
 
 def undoAliases(definition, kast):
