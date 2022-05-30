@@ -1,8 +1,8 @@
 {
   description = "K Framework";
   inputs = {
-    haskell-backend.url = "github:runtimeverification/haskell-backend/e315e34fc61390f786bac543daf3d6715567e640";
-    llvm-backend.url = "github:runtimeverification/llvm-backend/c3b4d54eec8fe7079e6fc085322b09334a629c61";
+    haskell-backend.url = "github:runtimeverification/haskell-backend/37feddd0afc662d9f259136d9e1d598505ddd9c2";
+    llvm-backend.url = "github:runtimeverification/llvm-backend/ce2f876264eda6cf6ca59bc00d6d18254d3b6689";
     nixpkgs.follows = "haskell-backend/nixpkgs";
     llvm-backend.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
     flake-utils.follows = "haskell-backend/flake-utils";
@@ -16,7 +16,7 @@
         (final: prev: 
           { release = false; }
         )
-        llvm-backend.overlay
+        llvm-backend.overlays.default
         haskell-backend.overlay
         (final: prev: 
           let 

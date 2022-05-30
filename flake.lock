@@ -158,17 +158,17 @@
         "z3src": "z3src"
       },
       "locked": {
-        "lastModified": 1653557760,
-        "narHash": "sha256-FE2BhetkwUneKPxkccfyT25KIkVAn84ZO57Rs6o73YY=",
+        "lastModified": 1653897366,
+        "narHash": "sha256-8mjnROll3JJtSxqbZrXjoxd6TPrwJtiyPV3WZAedmOE=",
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "e315e34fc61390f786bac543daf3d6715567e640",
+        "rev": "37feddd0afc662d9f259136d9e1d598505ddd9c2",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "e315e34fc61390f786bac543daf3d6715567e640",
+        "rev": "37feddd0afc662d9f259136d9e1d598505ddd9c2",
         "type": "github"
       }
     },
@@ -271,25 +271,26 @@
     "llvm-backend": {
       "inputs": {
         "immer-src": "immer-src",
+        "mavenix": "mavenix",
         "nixpkgs": [
           "haskell-backend",
           "nixpkgs"
         ],
         "rapidjson-src": "rapidjson-src",
-        "utils": "utils"
+        "utils": "utils_2"
       },
       "locked": {
-        "lastModified": 1653562729,
-        "narHash": "sha256-fklBj2Ey+up4I/3LpwfvxpOMgwMvOtuTLK3uQPCbe9w=",
+        "lastModified": 1653914253,
+        "narHash": "sha256-xs3Uh790mEWm/THskMAozh5jBSeW7Dfhoa1eqJra3lw=",
         "owner": "runtimeverification",
         "repo": "llvm-backend",
-        "rev": "c3b4d54eec8fe7079e6fc085322b09334a629c61",
+        "rev": "ce2f876264eda6cf6ca59bc00d6d18254d3b6689",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
         "repo": "llvm-backend",
-        "rev": "c3b4d54eec8fe7079e6fc085322b09334a629c61",
+        "rev": "ce2f876264eda6cf6ca59bc00d6d18254d3b6689",
         "type": "github"
       }
     },
@@ -312,7 +313,26 @@
     "mavenix": {
       "inputs": {
         "nixpkgs": "nixpkgs_2",
-        "utils": "utils_2"
+        "utils": "utils"
+      },
+      "locked": {
+        "lastModified": 1643802645,
+        "narHash": "sha256-BynM25iwp/l3FyrcHqiNJdDxvN6IxSM3/zkFR6PD3B0=",
+        "owner": "nix-community",
+        "repo": "mavenix",
+        "rev": "ce9ddfd7f361190e8e8dcfaf6b8282eebbb3c7cb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "mavenix",
+        "type": "github"
+      }
+    },
+    "mavenix_2": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_3",
+        "utils": "utils_3"
       },
       "locked": {
         "lastModified": 1643802645,
@@ -473,6 +493,20 @@
         "type": "indirect"
       }
     },
+    "nixpkgs_3": {
+      "locked": {
+        "lastModified": 1621552131,
+        "narHash": "sha256-AD/AEXv+QOYAg0PIqMYv2nbGOGTIwfOGKtz3rE+y+Tc=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "d42cd445dde587e9a993cd9434cb43da07c4c5de",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "type": "indirect"
+      }
+    },
     "old-ghc-nix": {
       "flake": false,
       "locked": {
@@ -515,7 +549,7 @@
         ],
         "haskell-backend": "haskell-backend",
         "llvm-backend": "llvm-backend",
-        "mavenix": "mavenix",
+        "mavenix": "mavenix_2",
         "nixpkgs": [
           "haskell-backend",
           "nixpkgs"
@@ -540,6 +574,21 @@
     },
     "utils": {
       "locked": {
+        "lastModified": 1620759905,
+        "narHash": "sha256-WiyWawrgmyN0EdmiHyG2V+fqReiVi8bM9cRdMaKQOFg=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "b543720b25df6ffdfcf9227afafc5b8c1fabfae8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "utils_2": {
+      "locked": {
         "lastModified": 1652776076,
         "narHash": "sha256-gzTw/v1vj4dOVbpBSJX4J0DwUR6LIyXo7/SuuTJp1kM=",
         "owner": "numtide",
@@ -553,7 +602,7 @@
         "type": "github"
       }
     },
-    "utils_2": {
+    "utils_3": {
       "locked": {
         "lastModified": 1620759905,
         "narHash": "sha256-WiyWawrgmyN0EdmiHyG2V+fqReiVi8bM9cRdMaKQOFg=",
