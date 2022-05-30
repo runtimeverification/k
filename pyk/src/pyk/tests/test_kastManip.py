@@ -1,4 +1,3 @@
-from functools import partial
 from unittest import TestCase
 
 from ..kast import (
@@ -13,9 +12,8 @@ from ..kast import (
 )
 from ..kastManip import minimize_term, ml_pred_to_bool, push_down_rewrites
 from ..prelude import intToken, mlEqualsTrue, mlTop
+from .utils import a, b, c, f, k
 
-a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
-f, g, k = (partial(KApply.of, label) for label in ['f', 'g', '<k>'])
 x = KVariable('X')
 
 

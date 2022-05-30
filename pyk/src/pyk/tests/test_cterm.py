@@ -1,17 +1,14 @@
-from functools import partial
 from typing import Final, Tuple
 from unittest import TestCase
 
 from ..cterm import CTerm
-from ..kast import KApply, KInner, KVariable
-
-a, b, c = (KApply(label) for label in ['a', 'b', 'c'])
-x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
-f, g, h = (partial(KApply.of, label) for label in ['f', 'g', 'h'])
+from ..kast import KApply, KInner, KLabel
+from ..prelude import Sorts
+from .utils import a, b, c, f, g, h, x, y, z
 
 
 def _as_cterm(term: KInner) -> CTerm:
-    return CTerm(KApply('<k>', [term]))
+    return CTerm(KApply(KLabel('<generatedTop>', (Sorts.GENERATED_TOP_CELL,)), (term,)))
 
 
 class CTermTest(TestCase):

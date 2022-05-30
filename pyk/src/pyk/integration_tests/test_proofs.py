@@ -1,5 +1,6 @@
-from ..kast import BOOL, KAtt, KClaim, KRule, KToken
+from ..kast import KAtt, KClaim, KRule, KToken
 from ..ktool import KompileBackend
+from ..prelude import Sorts
 from .kprove_test import KProveTest
 
 
@@ -17,8 +18,8 @@ class SimpleProofTest(KProveTest):
 
     def test_prove_claim_with_lemmas(self):
         # Given
-        new_lemma = KRule(KToken('pred1(3) => true', BOOL), requires=KToken('pred1(4)', BOOL), att=KAtt(atts={'simplification': ''}))
-        new_claim = KClaim(KToken('<k> foo => bar ... </k> <state> 3 |-> 3 </state>', 'TCellFragment'), requires=KToken('pred1(4)', BOOL))
+        new_lemma = KRule(KToken('pred1(3) => true', Sorts.BOOL), requires=KToken('pred1(4)', Sorts.BOOL), att=KAtt(atts={'simplification': ''}))
+        new_claim = KClaim(KToken('<k> foo => bar ... </k> <state> 3 |-> 3 </state>', 'TCellFragment'), requires=KToken('pred1(4)', Sorts.BOOL))
 
         # When
         result1 = self.kprove.prove_claim(new_claim, 'claim-without-lemma')
@@ -30,8 +31,8 @@ class SimpleProofTest(KProveTest):
 
     def test_prove_claim_rule_profile(self):
         # Given
-        new_lemma = KRule(KToken('pred1(3) => true', BOOL), requires=KToken('pred1(4)', BOOL), att=KAtt(atts={'simplification': ''}))
-        new_claim = KClaim(KToken('<k> foo => bar ... </k> <state> 3 |-> 3 </state>', 'TCellFragment'), requires=KToken('pred1(4)', BOOL))
+        new_lemma = KRule(KToken('pred1(3) => true', Sorts.BOOL), requires=KToken('pred1(4)', Sorts.BOOL), att=KAtt(atts={'simplification': ''}))
+        new_claim = KClaim(KToken('<k> foo => bar ... </k> <state> 3 |-> 3 </state>', 'TCellFragment'), requires=KToken('pred1(4)', Sorts.BOOL))
         rule_profile = self.KPROVE_USE_DIR + '/rule-profile'
 
         # When

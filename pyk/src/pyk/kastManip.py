@@ -9,6 +9,7 @@ from typing import (
     Tuple,
     Type,
     TypeVar,
+    Union,
 )
 
 from .kast import (
@@ -25,6 +26,7 @@ from .kast import (
     KRule,
     KRuleLike,
     KSequence,
+    KSort,
     KToken,
     KVariable,
     Subst,
@@ -32,11 +34,12 @@ from .kast import (
     bottom_up,
     collect,
     flattenLabel,
-    klabelEmptyK,
     ktokenDots,
     top_down,
 )
 from .prelude import (
+    Labels,
+    Sorts,
     boolToken,
     build_assoc,
     mlAnd,
@@ -249,7 +252,8 @@ def drop_unds(variable: KVariable) -> KVariable:
     return variable
 
 
-def splitConfigAndConstraints(kast):
+# TODO infer sort based on cell name
+def splitConfigAndConstraints(kast, sort: Union[str, KSort] = Sorts.K):
     """Split the configuration/term from the constraints.
 
     -   Input: kast conjunct representing a constrained term.
@@ -263,7 +267,7 @@ def splitConfigAndConstraints(kast):
             term = c
         else:
             constraints.append(c)
-    constraint = build_assoc(mlTop(), '#And', constraints)
+    constraint = mlAnd(constraints, sort)
     if not term:
         raise ValueError(f'Could not find configuration for: {kast}')
     return (term, constraint)
@@ -375,7 +379,7 @@ def push_down_rewrites(kast):
                     lowerRewrite = _push_down_rewrites(KRewrite(KSequence(lhs.items[0:-1]), KSequence(rhs.items[0:-1])))
                     return _flatten_ksequence(KSequence([lowerRewrite, lhs.items[-1]]))
             if type(lhs) is KSequence and lhs.arity > 0 and type(lhs.items[-1]) is KVariable and type(rhs) is KVariable and lhs.items[-1] == rhs:
-                return KSequence([KRewrite(KSequence(lhs.items[0:-1]), KApply(klabelEmptyK)), rhs])
+                return KSequence([KRewrite(KSequence(lhs.items[0:-1]), KApply(Labels.EMPTY_K)), rhs])
         return _kast
 
     return top_down(_push_down_rewrites, kast)

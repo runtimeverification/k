@@ -1,30 +1,40 @@
-from typing import Iterable, Union
+from typing import Final, Iterable, Optional, Union, final
 
-from .kast import (
-    BOOL,
-    BOTTOM,
-    INT,
-    STRING,
-    TOP,
-    TRUE,
-    KApply,
-    KInner,
-    KLabel,
-    KToken,
-)
+from .kast import TRUE, KApply, KInner, KLabel, KSort, KToken
 
 
-def build_assoc(unit: KInner, join: Union[str, KLabel], ls: Iterable[KInner]) -> KInner:
-    if type(join) is str:
-        join = KLabel(join)
-    ls = list(filter(lambda l: l != unit, ls))
-    if len(ls) == 0:
-        return unit
-    if len(ls) == 1:
-        return ls[0]
-    if ls[0] == unit:
-        return build_assoc(unit, join, ls[1:])
-    return KApply(join, [ls[0], build_assoc(unit, join, ls[1:])])
+@final
+class Sorts:
+    BOOL: Final = KSort('Bool')
+    INT: Final = KSort('Int')
+    STRING: Final = KSort('String')
+    K: Final = KSort('K')
+    GENERATED_TOP_CELL: Final = KSort('GeneratedTopCell')
+
+    def __init__(self):
+        raise ValueError('Class Sorts should not be instantiated')
+
+
+@final
+class Labels:
+    K_CELLS: Final = KLabel('#KCells')
+    EMPTY_K: Final = KLabel('#EmptyK')
+
+    def __init__(self):
+        raise ValueError('Class Labels should not be instantiated')
+
+
+def build_assoc(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner]) -> KInner:
+    _label = label if type(label) is KLabel else KLabel(label)
+    res: Optional[KInner] = None
+    for term in reversed(list(terms)):
+        if term == unit:
+            continue
+        if not res:
+            res = term
+        else:
+            res = _label(term, res)
+    return res or unit
 
 
 def buildCons(unit, cons, ls):
@@ -49,48 +59,53 @@ def token(x: Union[bool, int, str]) -> KToken:
 
 
 def boolToken(b: bool) -> KToken:
-    return KToken('true' if b else 'false', BOOL)
+    return KToken('true' if b else 'false', Sorts.BOOL)
 
 
 def intToken(i: int) -> KToken:
-    return KToken(str(i), INT)
+    return KToken(str(i), Sorts.INT)
 
 
 def stringToken(s: str) -> KToken:
-    return KToken(f'"{s}"', STRING)
+    return KToken(f'"{s}"', Sorts.STRING)
 
 
 def ltInt(i1, i2):
-    return KApply('_<Int_', [i1, i2])
+    return KApply('_<Int_', i1, i2)
 
 
 def leInt(i1, i2):
-    return KApply('_<=Int_', [i1, i2])
+    return KApply('_<=Int_', i1, i2)
 
 
-def mlEquals(a1, a2):
-    return KApply('#Equals', [a1, a2])
+# TODO default sort K can be tightened using basic type inference
+def mlEquals(term1: KInner, term2: KInner, sort1: Union[str, KSort] = Sorts.K, sort2: Union[str, KSort] = Sorts.K) -> KApply:
+    return KLabel('#Equals', sort1, sort2)(term1, term2)
 
 
-def mlEqualsTrue(b):
-    return mlEquals(TRUE, b)
+def mlEqualsTrue(term: KInner) -> KApply:
+    return mlEquals(TRUE, term, Sorts.BOOL)
 
 
-def mlTop():
-    return TOP
+def mlTop(sort: Union[str, KSort] = Sorts.K) -> KApply:
+    return KLabel('#Top', sort)()
 
 
-def mlBottom():
-    return BOTTOM
+def mlBottom(sort: Union[str, KSort] = Sorts.K) -> KApply:
+    return KLabel('#Top', sort)()
 
 
-def mlAnd(cs):
-    return build_assoc(mlTop(), '#And', cs)
+def mlNot(term: KInner, sort: Union[str, KSort] = Sorts.K) -> KApply:
+    return KLabel('#Not', sort)(term)
 
 
-def mlOr(cs):
-    return build_assoc(mlBottom(), '#Or', cs)
+def mlAnd(conjuncts: Iterable[KInner], sort: Union[str, KSort] = Sorts.K) -> KInner:
+    return build_assoc(mlTop(sort), KLabel('#And', sort), conjuncts)
 
 
-def mlImplies(an, co):
-    return KApply('#Implies', [an, co])
+def mlOr(disjuncts: Iterable[KInner], sort: Union[str, KSort] = Sorts.K) -> KInner:
+    return build_assoc(mlBottom(sort), KLabel('#Or', sort), disjuncts)
+
+
+def mlImplies(antecedent: KInner, consequent: KInner, sort: Union[str, KSort] = Sorts.K) -> KApply:
+    return KLabel('#Implies', sort)(antecedent, consequent)
