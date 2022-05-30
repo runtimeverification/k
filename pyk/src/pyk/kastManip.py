@@ -222,7 +222,7 @@ def splitConfigAndConstraints(kast, sort: Union[str, KSort] = Sorts.K):
 
 def propagate_up_constraints(k):
 
-    def _propagat_up_constraints(_k):
+    def _propagate_up_constraints(_k):
         if not (type(_k) is KApply and _k.label.name == '#Or'):
             return _k
         top_sort = _k.label.params[0]
@@ -238,7 +238,7 @@ def propagate_up_constraints(k):
         disjunct = mlOr([conjunct1, conjunct2], sort=top_sort)
         return mlAnd([disjunct] + common, sort=top_sort)
 
-    return bottom_up(_propagat_up_constraints, k)
+    return bottom_up(_propagate_up_constraints, k)
 
 
 def splitConfigFrom(configuration):
