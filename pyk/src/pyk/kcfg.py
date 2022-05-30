@@ -22,7 +22,7 @@ from graphviz import Digraph
 
 from .cterm import CTerm
 from .kast import KInner, KRuleLike, Subst
-from .kastManip import buildRule, mlAnd, simplifyBool, unsafeMlPredToBool
+from .kastManip import buildRule, ml_pred_to_bool, mlAnd, simplifyBool
 from .ktool import KPrint
 from .utils import compare_short_hashes, shorten_hashes
 
@@ -265,7 +265,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             graph.node(name=node.id, label=label, **attrs)
 
         for edge in self.edges():
-            display_condition = simplifyBool(unsafeMlPredToBool(edge.condition))
+            display_condition = simplifyBool(ml_pred_to_bool(edge.condition))
             depth = edge.depth
             label = '\nandBool'.join(kprint.pretty_print(display_condition).split(' andBool'))
             label = f'{label}\n{depth} steps'

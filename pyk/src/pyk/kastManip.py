@@ -21,6 +21,7 @@ from .kast import (
     KDefinition,
     KFlatModule,
     KInner,
+    KLabel,
     KRewrite,
     KRule,
     KRuleLike,
@@ -40,7 +41,7 @@ from .prelude import (
     Labels,
     Sorts,
     boolToken,
-    buildAssoc,
+    build_assoc,
     mlAnd,
     mlBottom,
     mlEquals,
@@ -70,41 +71,38 @@ def substitute(pattern: KInner, subst: Mapping[str, KInner]) -> KInner:
     return subst(pattern)
 
 
-def whereMatchingBottomUp(effect, matchPattern, pattern):
-    def _effect(k):
-        matchingSubst = matchPattern.match(k)
-        newK = k
-        if matchingSubst is not None:
-            newK = effect(matchingSubst)
-        return newK
-    return bottom_up(_effect, pattern)
-
-
-def boolToMlPred(kast: KInner) -> KInner:
+def bool_to_ml_pred(kast: KInner) -> KInner:
     return mlAnd([mlEqualsTrue(cond) for cond in flattenLabel('_andBool_', kast)])
 
 
-def unsafeMlPredToBool(k):
-    """Attempt to convert an ML Predicate back into a boolean expression.
+def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
 
-    This is unsafe in general because not every ML Predicate can be represented correctly as a boolean expression.
-    This function just makes a best-effort to do this.
-    """
-    if k is None:
-        return None
-    mlPredToBoolRules = [ (KApply('#Top')                                            , TRUE)                                                            # noqa
-                        , (KApply('#Bottom')                                         , FALSE)                                                           # noqa
-                        , (KApply('#And'     , [KVariable('#V1'), KVariable('#V2')]) , KApply('_andBool_'     , [KVariable('#V1'), KVariable('#V2')]))  # noqa
-                        , (KApply('#Or'      , [KVariable('#V1'), KVariable('#V2')]) , KApply('_orBool_'      , [KVariable('#V1'), KVariable('#V2')]))  # noqa
-                        , (KApply('#Not'     , [KVariable('#V1')])                   , KApply('notBool_'      , [KVariable('#V1')]))                    # noqa
-                        , (KApply('#Equals'  , [KVariable('#V1'), KVariable('#V2')]) , KApply('_==K_'         , [KVariable('#V1'), KVariable('#V2')]))  # noqa
-                        , (KApply('#Implies' , [KVariable('#V1'), KVariable('#V2')]) , KApply('_impliesBool_' , [KVariable('#V1'), KVariable('#V2')]))  # noqa
-                        ]                                                                                                                               # noqa
-    newK = k
-    for rule in mlPredToBoolRules:
-        rewrite = KRewrite(*rule)
-        newK = rewrite(newK)
-    return newK
+    def _ml_constraint_to_bool(_kast: KInner) -> KInner:
+        if type(_kast) is KApply:
+            if _kast.label.name == '#Top':
+                return TRUE
+            if _kast.label.name == '#Bottom':
+                return FALSE
+            if _kast.label.name == '#Not':
+                return KApply('notBool_', map(_ml_constraint_to_bool, _kast.args))
+            if _kast.label.name == '#And':
+                return KApply('_andBool_', map(_ml_constraint_to_bool, _kast.args))
+            if _kast.label.name == '#Or':
+                return KApply('_orBool_', map(_ml_constraint_to_bool, _kast.args))
+            if _kast.label.name == '#Implies':
+                return KApply('_impliesBool_', map(_ml_constraint_to_bool, _kast.args))
+            if _kast.label.name == '#Equals':
+                if _kast.args[0] == TRUE:
+                    return _kast.args[1]
+                if _kast.args[0] == FALSE:
+                    return KApply(KLabel('notBool_'), [_kast.args[1]])
+                if type(_kast.args[0]) in [KVariable, KToken]:
+                    return KApply('_==K_', _kast.args)
+                if unsafe:
+                    return KApply('_==K_', _kast.args)
+        raise ValueError(f'Could not convert ML predicate to sort Bool: {_kast}')
+
+    return _ml_constraint_to_bool(kast)
 
 
 def simplifyBool(k):
@@ -134,17 +132,6 @@ def simplifyBool(k):
         rewrite = KRewrite(*rule)
         newK = rewrite(newK)
     return newK
-
-
-def getOccurances(kast, pattern):
-    occurances = []
-
-    def addOccurance(k):
-        if pattern.match(k) is not None:
-            occurances.append(k)
-
-    collect(addOccurance, kast)
-    return occurances
 
 
 def extract_lhs(term: KInner) -> KInner:
@@ -208,40 +195,8 @@ def count_vars(term: KInner) -> Counter:
     return counter
 
 
-def count_rhs_vars(term: KInner) -> Counter:
-    def recur(term: KInner, *, rhs=False) -> Counter:
-        if type(term) is KVariable:
-            return Counter(term.name) if rhs else Counter()
-        if type(term) is KRewrite:
-            return recur(term.rhs, rhs=True)
-        if type(term) is KApply:
-            return sum((recur(t, rhs=rhs) for t in term.args), Counter())
-        if type(term) is KSequence:
-            return sum((recur(t, rhs=rhs) for t in term.items), Counter())
-        return Counter()
-    return recur(term)
-
-
 def collectFreeVars(kast):
     return list(count_vars(kast).keys())
-
-
-def drop_var_prefixes(term: KInner) -> KInner:
-    term = top_down(if_ktype(KVariable, drop_ques), term)
-    term = top_down(if_ktype(KVariable, drop_unds), term)
-    return term
-
-
-def drop_ques(variable: KVariable) -> KVariable:
-    if variable.name.startswith('?'):
-        return variable.let(name=variable.name[1:])
-    return variable
-
-
-def drop_unds(variable: KVariable) -> KVariable:
-    if variable.name.startswith('_'):
-        return variable.let(name=variable.name[1:])
-    return variable
 
 
 # TODO infer sort based on cell name
@@ -265,15 +220,12 @@ def splitConfigAndConstraints(kast, sort: Union[str, KSort] = Sorts.K):
     return (term, constraint)
 
 
-def propagateUpConstraints(k):
-    """Try to propagate common constraints up disjuncts.
+def propagate_up_constraints(k):
 
-    -   Input: kast disjunct of constrained terms (conjuncts).
-    -   Output: kast where common constraints in the disjunct have been propagated up.
-    """
-    def _propagateUpConstraints(_k):
+    def _propagate_up_constraints(_k):
         if not (type(_k) is KApply and _k.label.name == '#Or'):
             return _k
+        top_sort = _k.label.params[0]
         conjuncts1 = flattenLabel('#And', _k.args[0])
         conjuncts2 = flattenLabel('#And', _k.args[1])
         (common1, l1, r1) = find_common_items(conjuncts1, conjuncts2)
@@ -281,11 +233,12 @@ def propagateUpConstraints(k):
         common = common1 + common2
         if len(common) == 0:
             return _k
-        conjunct1 = buildAssoc(mlTop(), '#And', l2)
-        conjunct2 = buildAssoc(mlTop(), '#And', r2)
-        disjunct = KApply('#Or', [conjunct1, conjunct2])
-        return buildAssoc(mlTop(), '#And', [disjunct] + common)
-    return bottom_up(_propagateUpConstraints, k)
+        conjunct1 = mlAnd(l2, sort=top_sort)
+        conjunct2 = mlAnd(r2, sort=top_sort)
+        disjunct = mlOr([conjunct1, conjunct2], sort=top_sort)
+        return mlAnd([disjunct] + common, sort=top_sort)
+
+    return bottom_up(_propagate_up_constraints, k)
 
 
 def splitConfigFrom(configuration):
@@ -505,10 +458,10 @@ def minimizeRule(rule, keepVars=[]):
     ruleRequires = rule.requires
     ruleEnsures = rule.ensures
 
-    ruleRequires = buildAssoc(TRUE, '_andBool_', unique(flattenLabel('_andBool_', ruleRequires)))
+    ruleRequires = build_assoc(TRUE, '_andBool_', unique(flattenLabel('_andBool_', ruleRequires)))
     ruleRequires = simplifyBool(ruleRequires)
 
-    ruleEnsures = buildAssoc(TRUE, '_andBool_', unique(flattenLabel('_andBool_', ruleEnsures)))
+    ruleEnsures = build_assoc(TRUE, '_andBool_', unique(flattenLabel('_andBool_', ruleEnsures)))
     ruleEnsures = simplifyBool(ruleEnsures)
 
     constrainedVars = [] if keepVars is None else keepVars
@@ -571,21 +524,6 @@ def setCell(constrainedTerm, cellVariable, cellValue):
     return mlAnd([substitute(config, subst), constraint])
 
 
-def structurallyFrameKCell(constrainedTerm):
-    kCell = getCell(constrainedTerm, 'K_CELL')
-    if type(kCell) is KSequence and kCell.arity > 0 and isAnonVariable(kCell.items[-1]):
-        kCell = KSequence(kCell.items[0:-1] + (ktokenDots,))
-    return setCell(constrainedTerm, 'K_CELL', kCell)
-
-
-def applyCellSubst(constrainedTerm, cellSubst):
-    (state, constraint) = splitConfigAndConstraints(constrainedTerm)
-    (config, subst) = splitConfigFrom(state)
-    for k in cellSubst:
-        subst[k] = cellSubst[k]
-    return KApply('#And', [substitute(config, subst), constraint])
-
-
 def removeUselessConstraints(constrainedTerm, keepVars=None):
     (state, constraint) = splitConfigAndConstraints(constrainedTerm)
     constraints = flattenLabel('#And', constraint)
@@ -620,10 +558,6 @@ def removeConstraintsFor(varNames, constrainedTerm):
     return mlAnd([state, constraint])
 
 
-def hasExistentials(pattern):
-    return any([v.startswith('?') for v in collectFreeVars(pattern)])
-
-
 def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, priority=None, keepVars=None) -> Tuple[KRuleLike, Dict[str, KVariable]]:
     (initConfig, initConstraint) = splitConfigAndConstraints(initConstrainedTerm)
     (finalConfig, finalConstraint) = splitConfigAndConstraints(finalConstrainedTerm)
@@ -652,8 +586,8 @@ def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, pr
     (finalConfig, finalConstraint) = splitConfigAndConstraints(finalConstrainedTerm)
 
     ruleBody = push_down_rewrites(KRewrite(initConfig, finalConfig))
-    ruleRequires = simplifyBool(unsafeMlPredToBool(initConstraint))
-    ruleEnsures = simplifyBool(unsafeMlPredToBool(finalConstraint))
+    ruleRequires = simplifyBool(ml_pred_to_bool(initConstraint))
+    ruleEnsures = simplifyBool(ml_pred_to_bool(finalConstraint))
     attDict = {} if claim or priority is None else {'priority': str(priority)}
     ruleAtt = KAtt(atts=attDict)
 
@@ -668,25 +602,6 @@ def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, pr
     if keepVars is not None:
         newKeepVars = [vSubst[v].name for v in keepVars]
     return (minimizeRule(rule, keepVars=newKeepVars), vremapSubst)
-
-
-def onCells(cellHandler, constrainedTerm):
-    """Given an effect and a constrained term, return the effect applied to the cells in the term.
-
-    -   Input: Effect that takes as input a cell name and the contents of the cell, and a constrained term.
-    -   Output: Constrained term with the effect applied to each cell.
-    """
-    (config, constraint) = splitConfigAndConstraints(constrainedTerm)
-    constraints = flattenLabel('#And', constraint)
-    (emptyConfig, subst) = splitConfigFrom(config)
-    for k in subst:
-        newCell = cellHandler(k, subst[k])
-        if newCell is not None:
-            (term, constraint) = newCell
-            subst[k] = term
-            if constraint not in constraints:
-                constraints.append(constraint)
-    return mlAnd([substitute(emptyConfig, subst)] + constraints)
 
 
 def abstractTermSafely(kast, baseName='V'):
@@ -751,17 +666,6 @@ def removeDisjuncts(constrainedTerm):
     return constrainedTerm
 
 
-def abstractCell(constrainedTerm, cellName):
-    (state, constraint) = splitConfigAndConstraints(constrainedTerm)
-    constraints = flattenLabel('#And', constraint)
-    cell = getCell(state, cellName)
-    cellVar = KVariable(cellName)
-    if type(cell) is not KVariable:
-        state = setCell(state, cellName, cellVar)
-        constraints.append(KApply('#Equals', [cellVar, cell]))
-    return mlAnd([state] + constraints)
-
-
 def applyExistentialSubstitutions(constrainedTerm):
     (state, constraint) = splitConfigAndConstraints(constrainedTerm)
     constraints = flattenLabel('#And', constraint)
@@ -823,7 +727,7 @@ def substToMlPred(subst):
 
 def substToMap(subst):
     mapItems = [KApply('_|->_', [KVariable(k), subst[k]]) for k in subst]
-    return buildAssoc(KApply('.Map'), '_Map_', mapItems)
+    return build_assoc(KApply('.Map'), '_Map_', mapItems)
 
 
 def undoAliases(definition, kast):
