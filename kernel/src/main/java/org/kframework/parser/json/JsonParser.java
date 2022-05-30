@@ -305,8 +305,18 @@ public class JsonParser {
                 newAtt = newAtt.add(Source.class, Source.apply(attMap.getString(key)));
             } else if (key.equals(Production.class.getName())) {
                 newAtt = newAtt.add(Production.class, (Production) toSentence(attMap.getJsonObject(key)));
+            } else if (key.equals(Sort.class.getName())) {
+                newAtt = newAtt.add(Sort.class, toSort(attMap.getJsonObject(key)));
             } else if (key.equals("bracketLabel")) {
                 newAtt = newAtt.add("bracketLabel", KLabel.class, toKLabel(attMap.getJsonObject(key)));
+            } else if (key.equals(Att.PREDICATE())) {
+                newAtt = newAtt.add(Att.PREDICATE(), Sort.class, toSort(attMap.getJsonObject(key)));
+            } else if (key.equals("cellOptAbsent")) {
+                newAtt = newAtt.add("cellOptAbsent", Sort.class, toSort(attMap.getJsonObject(key)));
+            } else if (key.equals("cellFragment")) {
+                newAtt = newAtt.add("cellFragment", Sort.class, toSort(attMap.getJsonObject(key)));
+            } else if (key.equals("sortParams")) {
+                newAtt = newAtt.add("sortParams", Sort.class, toSort(attMap.getJsonObject(key)));
             } else
                 newAtt = newAtt.add(key, attMap.getString(key));
         }
@@ -363,17 +373,17 @@ public class JsonParser {
                 return KSequence(items);
 
             case KVARIABLE:
-                return KVariable(data.getString("name"));
+                return KVariable(data.getString("name"), toAtt(data.getJsonObject("att")));
 
             case KREWRITE:
                 K lhs = toK(data.getJsonObject("lhs"));
                 K rhs = toK(data.getJsonObject("rhs"));
-                return KRewrite(lhs, rhs);
+                return KRewrite(lhs, rhs, toAtt(data.getJsonObject("att")));
 
             case KAS:
                 K pattern = toK(data.getJsonObject("pattern"));
                 K alias   = toK(data.getJsonObject("alias"));
-                return KORE.KAs(pattern, alias);
+                return KORE.KAs(pattern, alias, toAtt(data.getJsonObject("att")));
 
             case INJECTEDKLABEL:
                 klabel    = toKLabel(data.getJsonObject("label"));
