@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+from typing import Optional
 
 from ..kast import (
     TRUE,
@@ -83,11 +84,16 @@ def build_symbol_table(definition, opinionated=False):
     symbol_table = {}
     for module in definition.modules:
         for prod in module.productions:
-            label = prod.klabel.name
-            if 'symbol' in prod.att and 'klabel' in prod.att:
+            label: Optional[str] = None
+
+            if prod.klabel:
+                label = prod.klabel.name
+            elif 'symbol' in prod.att and 'klabel' in prod.att:
                 label = prod.att['klabel']
-            unparser = unparser_for_production(prod)
-            symbol_table[label] = unparser
+
+            if label:
+                unparser = unparser_for_production(prod)
+                symbol_table[label] = unparser
 
     if opinionated:
         symbol_table['#And'] = lambda c1, c2: c1 + '\n#And ' + c2

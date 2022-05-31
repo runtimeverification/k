@@ -706,10 +706,10 @@ class KNonTerminal(KProductionItem):
 class KProduction(KSentence):
     sort: KSort
     items: Tuple[KProductionItem, ...]
-    klabel: KLabel
+    klabel: Optional[KLabel]
     att: KAtt
 
-    def __init__(self, sort: Union[str, KSort], items: Iterable[KProductionItem] = (), klabel: Union[str, KLabel] = '', att=EMPTY_ATT):
+    def __init__(self, sort: Union[str, KSort], items: Iterable[KProductionItem] = (), klabel: Optional[Union[str, KLabel]] = None, att=EMPTY_ATT):
         if type(sort) is str:
             sort = KSort(sort)
         if type(klabel) is str:
@@ -730,7 +730,7 @@ class KProduction(KSentence):
         return KProduction(
             sort=KSort.from_dict(d['sort']),
             items=(KProductionItem.from_dict(item) for item in d['productionItems']),
-            klabel=d.get('klabel', ''),
+            klabel=KLabel.from_dict(d['klabel']) if d.get('klabel') else None,
             att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
         )
 
@@ -739,7 +739,7 @@ class KProduction(KSentence):
             'node': 'KProduction',
             'sort': self.sort.to_dict(),
             'productionItems': [item.to_dict() for item in self.items],
-            'klabel': self.klabel or None,
+            'klabel': self.klabel.to_dict() if self.klabel else None,
             'att': self.att.to_dict(),
         }
 
@@ -753,7 +753,7 @@ class KProduction(KSentence):
     ) -> 'KProduction':
         sort = sort if sort is not None else self.sort
         items = items if items is not None else self.items
-        klabel = klabel if klabel is not None else self.klabel
+        klabel = klabel if klabel is not None else self.klabel  # TODO figure out a way to set klabel to None
         att = att if att is not None else self.att
         return KProduction(sort=sort, items=items, klabel=klabel, att=att)
 
