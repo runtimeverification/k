@@ -298,6 +298,23 @@ class KCFGTestCase(TestCase):
         with self.assertRaisesRegex(ValueError, 'Multiple nodes for pattern: ...'):
             cfg.node('3...')
 
+    def test_aliases(self):
+        # Given
+        d = {
+            'nodes': node_dicts(2),
+            'edges': edge_dicts((0, 1)),
+            'aliases': { 'foo': nid(1) }
+        }
+
+        cfg = KCFG.from_dict(d)
+        self.assertEqual(cfg.node('foo'), node(1))
+
+        cfg.add_alias('bar', node(0).id)
+        self.assertEqual(cfg.node('bar'), node(0))
+
+        with self.assertRaisesRegex(ValueError, 'Unknown node: '):
+            cfg.add_alias('buzz', node(3).id)
+
     def test_pretty_print(self):
         d = {
             'init': [nid(0)],

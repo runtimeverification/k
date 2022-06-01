@@ -117,6 +117,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     _target: Set[str]
     _expanded: Set[str]
     _verified: Set[Tuple[str, str]]
+    _aliases: Dict[str, str]
     _lock: RLock
 
     def __init__(self):
@@ -127,6 +128,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         self._target = set()
         self._expanded = set()
         self._verified = set()
+        self._aliases = dict()
         self._lock = RLock()
 
     def __contains__(self, item: object) -> bool:
@@ -197,6 +199,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         target = sorted(self._target)
         expanded = sorted(self._expanded)
         verified = [{"source": source_id, "target": target_id} for source_id, target_id in sorted(self._verified)]
+        aliases = self._aliases
 
         res = {
             'nodes': nodes,
@@ -206,6 +209,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             'target': target,
             'expanded': expanded,
             'verified': verified,
+            'aliases': aliases
         }
         return {k: v for k, v in res.items() if v}
 
@@ -252,6 +256,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         for verified_ids in dct.get('verified') or []:
             cfg.add_verified(resolve(verified_ids['source']), resolve(verified_ids['target']))
+
+        for alias, id in (dct.get('aliases') or {}).items():
+            cfg.add_alias(name=alias, id=id)
 
         return cfg
 
@@ -351,21 +358,23 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         return graph.source
 
-    def _resolve_all(self, short_id: str) -> List[str]:
-        return [node_id for node_id in self._nodes if compare_short_hashes(short_id, node_id)]
+    def _resolve_all(self, id_like: str) -> List[str]:
+        if id_like in self._aliases:
+            return [self._aliases[id_like]]
+        return [node_id for node_id in self._nodes if compare_short_hashes(id_like, node_id)]
 
-    def _resolve_or_none(self, short_id: str) -> Optional[str]:
-        matches = self._resolve_all(short_id)
+    def _resolve_or_none(self, id_like: str) -> Optional[str]:
+        matches = self._resolve_all(id_like)
         if not matches:
             return None
         if len(matches) > 1:
-            raise ValueError(f'Multiple nodes for pattern: {short_id} (matches e.g. {matches[0]} and {matches[1]})')
+            raise ValueError(f'Multiple nodes for pattern: {id_like} (matches e.g. {matches[0]} and {matches[1]})')
         return matches[0]
 
-    def _resolve(self, short_id: str) -> str:
-        match = self._resolve_or_none(short_id)
+    def _resolve(self, id_like: str) -> str:
+        match = self._resolve_or_none(id_like)
         if not match:
-            raise ValueError(f'Unknown node: {short_id}')
+            raise ValueError(f'Unknown node: {id_like}')
         return match
 
     def node(self, node_id: str) -> Node:
@@ -536,6 +545,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
         self._verified.add((source_id, target_id))
+
+    def add_alias(self, name: str, id: str) -> None:
+        id = self._resolve(id)
+        self._aliases[name] = id
 
     def remove_init(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
