@@ -168,7 +168,7 @@ def deconstruct_short_hash(h: str) -> Tuple[str, str]:
     (l, sep, r) = x.partition('..')
     if sep == '..' and is_hexstring(x) and is_hexstring(r):
         return (l, r)
-    raise ValueError(f'Bad short hash: {x}')
+    raise ValueError(f'Bad short hash: {h}')
 
 def compare_short_hashes(lhs: str, rhs: str):
     (l0, l1) = deconstruct_short_hash(lhs)

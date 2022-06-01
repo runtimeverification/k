@@ -278,9 +278,17 @@ class KCFGTestCase(TestCase):
         with self.assertRaisesRegex(ValueError, 'Unknown node: deadbeef\.\.\.d8'):
             self.assertEqual(node(1), cfg.node('deadbeef...d8'))
 
-        # Bad short hash
+        # Bad short hash: Has digits between dots
         with self.assertRaisesRegex(ValueError, 'Bad short hash: 3\.c62e73544\.\.\.'):
             cfg.node('3.c62e73544...')
+
+        # Bad short hash: Has non hex digits
+        with self.assertRaisesRegex(ValueError, 'Bad short hash: 3\.\.\.XXX'):
+            cfg.node('3...XXX')
+
+        # Bad short hash: Has more than three dots
+        with self.assertRaisesRegex(ValueError, 'Bad short hash: 3\.\.\.\.\.adf'):
+            cfg.node('3.....adf')
 
         # Matches all nodes
         with self.assertRaisesRegex(ValueError, 'Multiple nodes for pattern: ...'):
