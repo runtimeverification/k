@@ -278,6 +278,10 @@ class KCFGTestCase(TestCase):
         with self.assertRaisesRegex(ValueError, 'Unknown node: deadbeef\.\.\.d8'):
             self.assertEqual(node(1), cfg.node('deadbeef...d8'))
 
+        # Bad short hash
+        with self.assertRaisesRegex(ValueError, 'Bad short hash: 3\.c62e73544\.\.\.'):
+            cfg.node('3.c62e73544...')
+
         # Matches all nodes
         with self.assertRaisesRegex(ValueError, 'Multiple nodes for pattern: ...'):
             cfg.node('...')
