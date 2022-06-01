@@ -263,6 +263,29 @@ class KCFGTestCase(TestCase):
             },
         )
 
+    def test_resolve(self):
+        # Given
+        d = {
+            'nodes': node_dicts(4),
+            'edges': edge_dicts((0, 1), (0, 2), (1, 2), (1, 3), (2, 3), (3, 0)),
+        }
+        cfg = KCFG.from_dict(d)
+
+        self.assertEqual(node(1), cfg.node('d33...d8'))
+        self.assertEqual(node(1), cfg.node(node(1).id))
+
+        # Matches no nodes
+        with self.assertRaisesRegex(ValueError, 'Unknown node: deadbeef\.\.\.d8'):
+            self.assertEqual(node(1), cfg.node('deadbeef...d8'))
+
+        # Matches all nodes
+        with self.assertRaisesRegex(ValueError, 'Multiple nodes for pattern: ...'):
+            cfg.node('...')
+
+        # Matches node(0) and node(2)
+        with self.assertRaisesRegex(ValueError, 'Multiple nodes for pattern: ...'):
+            cfg.node('3...')
+
     def test_pretty_print(self):
         d = {
             'init': [nid(0)],
@@ -319,3 +342,4 @@ class KCFGTestCase(TestCase):
                                   f"    ├  {short_id(11)} (frontier)\n"
                                   f"    ┊ (looped back)\n\n"
                                   )
+
