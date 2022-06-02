@@ -275,19 +275,19 @@ class KCFGTestCase(TestCase):
         self.assertEqual(node(1), cfg.node(node(1).id))
 
         # Matches no nodes
-        with self.assertRaisesRegex(ValueError, 'Unknown node: deadbeef\.\.\.d8'):
+        with self.assertRaisesRegex(ValueError, 'Unknown node: deadbeef\\.\\.\\.d8'):
             self.assertEqual(node(1), cfg.node('deadbeef...d8'))
 
         # Bad short hash: Has digits between dots
-        with self.assertRaisesRegex(ValueError, 'Bad short hash: 3\.c62e73544\.\.\.'):
+        with self.assertRaisesRegex(ValueError, 'Bad short hash: 3\\.c62e73544\\.\\.\\.'):
             cfg.node('3.c62e73544...')
 
         # Bad short hash: Has non hex digits
-        with self.assertRaisesRegex(ValueError, 'Bad short hash: 3\.\.\.XXX'):
+        with self.assertRaisesRegex(ValueError, 'Bad short hash: 3\\.\\.\\.XXX'):
             cfg.node('3...XXX')
 
         # Bad short hash: Has more than three dots
-        with self.assertRaisesRegex(ValueError, 'Bad short hash: 3\.\.\.\.\.adf'):
+        with self.assertRaisesRegex(ValueError, 'Bad short hash: 3\\.\\.\\.\\.\\.adf'):
             cfg.node('3.....adf')
 
         # Matches all nodes
@@ -303,7 +303,7 @@ class KCFGTestCase(TestCase):
         d = {
             'nodes': node_dicts(2),
             'edges': edge_dicts((0, 1)),
-            'aliases': { 'foo': nid(1) }
+            'aliases': {'foo': nid(1)}
         }
 
         cfg = KCFG.from_dict(d)

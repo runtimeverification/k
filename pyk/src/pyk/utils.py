@@ -117,14 +117,17 @@ def add_indent(indent: str, lines: List[str]) -> List[str]:
     return list(map(lambda line: indent + line, lines))
 
 
+def is_hexstring(x: str) -> bool:
+    return all(c in string.hexdigits for c in x)
+
+
 # Hashes
 
 def hash_str(x: Any) -> str:
     hash = hashlib.sha256()
     hash.update(str(x).encode('utf-8'))
     return str(hash.hexdigest())
-def is_hexstring(x: str) -> bool:
-    return all(c in string.hexdigits for c in x)
+
 
 def is_hash(x: Any) -> bool:
     # NB! currently only sha256 in hexdec form is detected
@@ -159,9 +162,11 @@ def shorten_hashes(value: Any, leftChars=6, rightChars=6) -> Any:
         result = value
     return result
 
+
 def deconstruct_short_hash(h: str) -> Tuple[str, str]:
     x = h.lower()
-    if is_hash(x): return (x, x)
+    if is_hash(x):
+        return (x, x)
     (l, sep, r) = x.partition('...')
     if sep == '...' and is_hexstring(l) and is_hexstring(r):
         return (l, r)
@@ -169,6 +174,7 @@ def deconstruct_short_hash(h: str) -> Tuple[str, str]:
     if sep == '..' and is_hexstring(x) and is_hexstring(r):
         return (l, r)
     raise ValueError(f'Bad short hash: {h}')
+
 
 def compare_short_hashes(lhs: str, rhs: str):
     (l0, l1) = deconstruct_short_hash(lhs)
