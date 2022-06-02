@@ -8,8 +8,8 @@ module SET-TESTS-SYNTAX
 
     syntax MyId ::= "x" | "y" | "z" | foo ( MyId )
 
-    syntax Test ::= union       ( Set ) | inSet       ( Bool ) | diff       ( Set )
-                  | unionResult ( Set ) | inSetResult ( Bool ) | diffResult ( Set )
+    syntax Test ::= union       ( Set ) | inSet       ( Bool ) | diff       ( K )
+                  | unionResult ( Set ) | inSetResult ( Bool ) | diffResult ( K )
 endmodule
 
 module SET-TESTS

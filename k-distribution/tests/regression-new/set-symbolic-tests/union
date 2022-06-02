@@ -23,26 +23,26 @@ claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) |Set SetItem(Z:
 claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) |Set SetItem(Z:MyId) ) => . </k> requires Z  ==K Y
 claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) |Set SetItem(Z:MyId) ) => . </k> requires Z =/=K Y
 claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) |Set SetItem(Z:MyId) ) => . </k> requires Z =/=K Y andBool Z =/=K X
-claim <k> union ( SetItem(X:MyId) SetItem(1) |Set SetItem(0) ) => . </k> requires X =/=K 1
+claim <k> union ( (SetItem(X:MyId) SetItem(1)) |Set SetItem(0) ) => . </k> requires X =/=K 1
 claim <k> union ( SetItem(X:MyId) |Set SetItem(X) ) => . </k>
-claim <k> union ( SetItem(X:MyId) SetItem(y) |Set SetItem(x) ) => . </k> requires X =/=K y
-claim <k> union ( ( SetItem(X:MyId) SetItem(Y:MyId) SET:Set ) |Set SetItem(Y) ) => . </k> requires X =/=K Y
-claim <k> union ( ( SetItem( foo(X:MyId) ) SetItem( foo(Y:MyId) ) MAP:Map ) |Set SetItem( foo(Y) ) ) => . </k> requires       X   =/=K       Y
-claim <k> union ( ( SetItem( foo(X:MyId) ) SetItem( foo(Y:MyId) ) MAP:Map ) |Set SetItem( foo(Y) ) ) => . </k> requires foo ( X ) =/=K foo ( Y )
+claim <k> union ( (SetItem(X:MyId) SetItem(y)) |Set SetItem(x) ) => . </k> requires X =/=K y
+claim <k> union ( (SetItem(X:MyId) SetItem(Y:MyId) SET:Set) |Set SetItem(Y) ) => . </k> requires X =/=K Y
+claim <k> union ( (SetItem( foo(X:MyId) ) SetItem( foo(Y:MyId) ) SET:Set) |Set SetItem( foo(Y) ) ) => . </k> requires       X   =/=K       Y
+claim <k> union ( (SetItem( foo(X:MyId) ) SetItem( foo(Y:MyId) ) SET:Set) |Set SetItem( foo(Y) ) ) => . </k> requires foo ( X ) =/=K foo ( Y )
 
-claim <k> union ( .Set |Set SetItem(x) SetItem(y) ) => . </k>
-claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) SetItem(Z:MyId) ) => . </k>
-claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) SetItem(Z:MyId) ) => . </k> requires Y =/=K X
-claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) SetItem(Z:MyId) ) => . </k> requires Y =/=K X andBool Y in SET
-claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) SetItem(Z:MyId) ) => . </k> requires Y =/=K X andBool notBool Y in SET
-claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) SetItem(Z:MyId) ) => . </k> requires Y ==K X
-claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) SetItem(Z:MyId) ) => . </k> requires Y ==K X andBool Z in SET
-claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) SetItem(Z:MyId) ) => . </k> requires Y ==K X andBool notBool Z in SET
-claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) SetItem(Z:MyId) ) => . </k> requires Y =/=K X andBool Z =/=K X
-claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) SetItem(Z:MyId) ) => . </k> requires Y  ==K X andBool Z =/=K X
-claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) SetItem(Z:MyId) ) => . </k> requires Y =/=K X andBool notBool Y in SET andBool Z in SET
-claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) SetItem(Z:MyId) ) => . </k> requires Y =/=K X andBool Z  ==K X
-claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) SetItem(Z:MyId) ) => . </k> requires Y =/=K X andBool Z =/=K X andBool Y in SET andBool Z in SET
-claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) SetItem(Z:MyId) ) => . </k> requires Y =/=K X andBool Z =/=K X andBool notBool Y in SET andBool notBool Z in SET
-claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) SetItem(Z:MyId) ) => . </k> requires Z  ==K X
-claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) SetItem(Z:MyId) ) => . </k> requires Z =/=K X
+claim <k> union ( .Set                      |Set (SetItem(x) SetItem(y))           ) => . </k>
+claim <k> union ( (SET:Set SetItem(X:MyId)) |Set (SetItem(Y:MyId) SetItem(Z:MyId)) ) => . </k>
+claim <k> union ( (SET:Set SetItem(X:MyId)) |Set (SetItem(Y:MyId) SetItem(Z:MyId)) ) => . </k> requires Y =/=K X
+claim <k> union ( (SET:Set SetItem(X:MyId)) |Set (SetItem(Y:MyId) SetItem(Z:MyId)) ) => . </k> requires Y =/=K X andBool Y in SET
+claim <k> union ( (SET:Set SetItem(X:MyId)) |Set (SetItem(Y:MyId) SetItem(Z:MyId)) ) => . </k> requires Y =/=K X andBool notBool Y in SET
+claim <k> union ( (SET:Set SetItem(X:MyId)) |Set (SetItem(Y:MyId) SetItem(Z:MyId)) ) => . </k> requires Y ==K X
+claim <k> union ( (SET:Set SetItem(X:MyId)) |Set (SetItem(Y:MyId) SetItem(Z:MyId)) ) => . </k> requires Y ==K X andBool Z in SET
+claim <k> union ( (SET:Set SetItem(X:MyId)) |Set (SetItem(Y:MyId) SetItem(Z:MyId)) ) => . </k> requires Y ==K X andBool notBool Z in SET
+claim <k> union ( (SET:Set SetItem(X:MyId)) |Set (SetItem(Y:MyId) SetItem(Z:MyId)) ) => . </k> requires Y =/=K X andBool Z =/=K X
+claim <k> union ( (SET:Set SetItem(X:MyId)) |Set (SetItem(Y:MyId) SetItem(Z:MyId)) ) => . </k> requires Y  ==K X andBool Z =/=K X
+claim <k> union ( (SET:Set SetItem(X:MyId)) |Set (SetItem(Y:MyId) SetItem(Z:MyId)) ) => . </k> requires Y =/=K X andBool notBool Y in SET andBool Z in SET
+claim <k> union ( (SET:Set SetItem(X:MyId)) |Set (SetItem(Y:MyId) SetItem(Z:MyId)) ) => . </k> requires Y =/=K X andBool Z  ==K X
+claim <k> union ( (SET:Set SetItem(X:MyId)) |Set (SetItem(Y:MyId) SetItem(Z:MyId)) ) => . </k> requires Y =/=K X andBool Z =/=K X andBool Y in SET andBool Z in SET
+claim <k> union ( (SET:Set SetItem(X:MyId)) |Set (SetItem(Y:MyId) SetItem(Z:MyId)) ) => . </k> requires Y =/=K X andBool Z =/=K X andBool notBool Y in SET andBool notBool Z in SET
+claim <k> union ( (SET:Set SetItem(X:MyId)) |Set (SetItem(Y:MyId) SetItem(Z:MyId)) ) => . </k> requires Z  ==K X
+claim <k> union ( (SET:Set SetItem(X:MyId)) |Set (SetItem(Y:MyId) SetItem(Z:MyId)) ) => . </k> requires Z =/=K X
