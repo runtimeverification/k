@@ -1,0 +1,17 @@
+claim <k> inSet ( X:MyId in ( .Set  ) )                                             => . </k>
+claim <k> inSet ( X:MyId in ( SET:Set SetItem(X) ) )                                => . </k>
+claim <k> inSet ( Y:MyId in ( SET:Set SetItem(X:MyId) ) )                           => . </k>
+claim <k> inSet ( Y:MyId in ( SET:Set SetItem(X:MyId) ) )                           => . </k> requires Y in(SET)
+claim <k> inSet ( Y:MyId in ( SET:Set SetItem(X:MyId) ) )                           => . </k> requires notBool Y in(SET)
+claim <k> inSet ( X:MyId in ( SetItem(Z:MyId) SET:Set SetItem(X) ) )                => . </k>
+claim <k> inSet ( Y:MyId in ( SetItem(Z:MyId) SET:Set SetItem(X:MyId) ) )           => . </k>
+claim <k> inSet ( Y:MyId in ( SetItem(Z:MyId) SET:Set SetItem(X:MyId) ) )           => . </k> requires Y in(SET)
+claim <k> inSet ( Y:MyId in ( SetItem(Z:MyId) SET:Set SetItem(X:MyId) ) )           => . </k> requires notBool Y in(SET)
+claim <k> inSet ( X:MyId in ( SET:Set |Set SetItem(X) ) )                           => . </k>
+claim <k> inSet ( Y:MyId in ( SET:Set |Set SetItem(X:MyId) ) )                      => . </k>
+claim <k> inSet ( Y:MyId in ( SET:Set |Set SetItem(X:MyId) ) )                      => . </k> requires Y in(SET)
+claim <k> inSet ( Y:MyId in ( SET:Set |Set SetItem(X:MyId) ) )                      => . </k> requires notBool Y in(SET)
+claim <k> inSet ( X:MyId in ( SET:Set |Set SetItem(Z:MyId) |Set SetItem(X) ) )      => . </k>
+claim <k> inSet ( Y:MyId in ( SET:Set |Set SetItem(Z:MyId) |Set SetItem(X:MyId) ) ) => . </k>
+claim <k> inSet ( Y:MyId in ( SET:Set |Set SetItem(Z:MyId) |Set SetItem(X:MyId) ) ) => . </k> requires Y in(SET)
+claim <k> inSet ( Y:MyId in ( SET:Set |Set SetItem(Z:MyId) |Set SetItem(X:MyId) ) ) => . </k> requires notBool Y in(SET)

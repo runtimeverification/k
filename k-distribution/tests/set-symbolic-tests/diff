@@ -1,0 +1,18 @@
+claim <k> diff ( Z:MyId in ( (SET:Set SetItem(X:MyId))    -Set SetItem(Y:MyId) ) ) => . </k> requires Y ==K X
+claim <k> diff ( Z:MyId in ( (SET:Set SetItem(X:MyId))    -Set SetItem(Y:MyId) ) ) => . </k> requires Y ==K X andBool Z  ==K Y andBool Z  ==K X
+claim <k> diff ( Z:MyId in ( (SET:Set SetItem(X:MyId))    -Set SetItem(Y:MyId) ) ) => . </k> requires Y ==K X andBool Z =/=K Y andBool Z =/=K X
+claim <k> diff ( Z:MyId in ( (SET:Set SetItem(X:MyId))    -Set SetItem(Y:MyId) ) ) => . </k>
+claim <k> diff ( Z:MyId in ( (SET:Set SetItem(X:MyId))    -Set SetItem(Y:MyId) ) ) => . </k> requires Y =/=K X
+claim <k> diff ( Z:MyId in ( (SET:Set SetItem(X:MyId))    -Set SetItem(Y:MyId) ) ) => . </k> requires Y =/=K X andBool Z =/=K X
+claim <k> diff ( Z:MyId in ( (SET:Set SetItem(X:MyId))    -Set SetItem(Y:MyId) ) ) => . </k> requires Y =/=K X andBool Z =/=K Y
+claim <k> diff ( Z:MyId in ( (SET:Set SetItem(X:MyId))    -Set SetItem(Y:MyId) ) ) => . </k> requires Y =/=K X andBool Z  ==K Y andBool Z =/=K X
+claim <k> diff ( Z:MyId in ( (SET:Set SetItem(X:MyId))    -Set SetItem(Y:MyId) ) ) => . </k> requires Y =/=K X andBool Z =/=K Y andBool Z =/=K X
+claim <k> diff ( Z:MyId in ( (SET:Set SetItem(X:MyId))    -Set SetItem(Y:MyId) ) ) => . </k> requires Z  ==K X
+claim <k> diff ( Z:MyId in ( (SET:Set SetItem(X:MyId))    -Set SetItem(Y:MyId) ) ) => . </k> requires Z =/=K X
+claim <k> diff ( Z:MyId in ( (SET:Set SetItem(X:MyId))    -Set SetItem(Y:MyId) ) ) => . </k> requires Z  ==K Y
+claim <k> diff ( Z:MyId in ( (SET:Set SetItem(X:MyId))    -Set SetItem(Y:MyId) ) ) => . </k> requires Z =/=K Y
+claim <k> diff ( Z:MyId in ( (SET:Set SetItem(X:MyId))    -Set SetItem(Y:MyId) ) ) => . </k> requires Z =/=K Y andBool Z =/=K X
+claim <k> diff ( Z:MyId in ( (SET:Set SetItem(X:MyId))    -Set SetItem(Y:MyId) ) ) => . </k> requires Z =/=K Y andBool Z  ==K X andBool Y =/=K X
+claim <k> diff ( X      in ( SetItem((X:MyId) SetItem(y)) -Set SetItem(x) )      ) => . </k> requires X =/=K x
+claim <k> diff ( X      in ( SetItem((X:MyId) SetItem(y)) -Set SetItem(x) )      ) => . </k> requires X =/=K y
+claim <k> diff (             SetItem((X:MyId) SetItem(Y:MyId)) -Set SetItem(X)   ) => . </k>

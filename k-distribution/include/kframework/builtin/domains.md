@@ -605,6 +605,16 @@ that two different sets will return the same element, even if they are similar.
 
 ```k
 endmodule
+
+module SET-KORE-SYMBOLIC [kore,symbolic]
+  imports SET
+  imports private K-EQUAL
+  imports private BOOL
+endmodule                      
+
+module SET-SYMBOLIC
+  imports SET-KORE-SYMBOLIC
+endmodule
 ```
 
 Lists
