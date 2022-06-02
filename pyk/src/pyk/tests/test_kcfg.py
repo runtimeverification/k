@@ -315,6 +315,10 @@ class KCFGTestCase(TestCase):
         with self.assertRaisesRegex(ValueError, 'Unknown node: '):
             cfg.add_alias('buzz', node(3).id)
 
+        cfg.remove_alias('bar', node(0).id)
+        with self.assertRaisesRegex(ValueError, 'Bad short hash: bar'):
+            cfg.node('bar')
+
     def test_pretty_print(self):
         d = {
             'init': [nid(0)],
