@@ -517,7 +517,7 @@ number of unbound keys being mached. In other words, one unbound variable is
 linear, two is quadratic, three is cubic, etc.
 
 ```k
-  syntax Set ::= Set Set                  [left, function, functional, hook(SET.concat), klabel(_Set_), symbol, assoc, comm, unit(.Set), idem, element(SetItem), format(%1%n%2)]
+  syntax Set ::= Set Set                  [left, function, hook(SET.concat), klabel(_Set_), symbol, assoc, comm, unit(.Set), idem, element(SetItem), format(%1%n%2)]
 ```
 
 ### Set unit
@@ -614,6 +614,11 @@ endmodule
 
 module SET-SYMBOLIC
   imports SET-KORE-SYMBOLIC
+
+  //todo temp rule, should be generated in front-end
+  rule #Ceil(@S:Set SetItem(@E:KItem)) => {(@E in @S) #Equals false} #And #Ceil(@S) #And #Ceil(@E)
+    [anywhere, simplification]
+
 endmodule
 ```
 
