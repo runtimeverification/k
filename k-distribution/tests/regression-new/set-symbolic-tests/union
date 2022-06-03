@@ -1,4 +1,5 @@
 claim <k> union ( .Set |Set SetItem(x) ) => . </k>
+claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) ) => . </k>
 claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) |Set SetItem(Z:MyId) ) => . </k>
 claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) |Set SetItem(Z:MyId) ) => . </k> requires Y =/=K X
 claim <k> union ( (SET:Set SetItem(X:MyId)) |Set SetItem(Y:MyId) |Set SetItem(Z:MyId) ) => . </k> requires Y =/=K X andBool Y in SET
