@@ -610,15 +610,14 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   imports SET
   imports private K-EQUAL
   imports private BOOL
-endmodule                      
-
-module SET-SYMBOLIC
-  imports SET-KORE-SYMBOLIC
 
   //todo temp rule, should be generated in front-end
   rule #Ceil(@S:Set SetItem(@E:KItem)) => {(@E in @S) #Equals false} #And #Ceil(@S) #And #Ceil(@E)
     [anywhere, simplification]
+endmodule                      
 
+module SET-SYMBOLIC
+  imports SET-KORE-SYMBOLIC
 endmodule
 ```
 
