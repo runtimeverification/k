@@ -295,7 +295,7 @@ class KCFGTestCase(TestCase):
             f"┃   ├  {short_id(5)} (frontier)\n"
             f"┃   ┊ (1 steps)\n"
             f"┃   ├  {short_id(2)} (frontier)\n"
-            f"┃   ┊ (loops back)\n"
+            f"┃   ┊ (continues as previously)\n"
             f"┃\n"
             f"┣━ {short_id(5)} (frontier)\n"
             f"┃   ┊ (continues as previously)\n"
@@ -314,5 +314,5 @@ class KCFGTestCase(TestCase):
             f"    │         V11 |-> KToken(token='8', sort=KSort(name='Int'))\n"
             f"    │\n"
             f"    ├  {short_id(11)} (frontier)\n"
-            f"    ┊ (loops back)\n\n"
+            f"    ┊ (continues as previously)\n\n"
         )

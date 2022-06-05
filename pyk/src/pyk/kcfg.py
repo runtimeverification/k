@@ -256,13 +256,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             return cast(List[KCFG.EdgeLike], self.edges(source_id=node.id)) \
                  + cast(List[KCFG.EdgeLike], self.covers(source_id=node.id))
 
-        def completes_loop(node: KCFG.Node) -> bool:
-            prior_nodes = self.nontrivial_reachable_nodes(node, reverse=True, traverse_covers=True)
-            for node in prior_nodes:
-                if node.cterm.match(node.cterm):
-                    return True
-            return False
-
         processed_nodes : List[KCFG.Node] = []
 
         def print_subgraph(indent: str, curr_node: KCFG.Node) -> List[str]:
@@ -271,13 +264,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
             if curr_node in processed_nodes:
                 if len(edge_likes_from(curr_node)) == 0:
-                    print('ret 1')
                     return ret
-                if completes_loop(curr_node):
-                    ret.append(indent + '┊ (looped back)')
-                else:
-                    ret.append(indent + '┊ (continues as previously)')
-                print('ret 2')
+                ret.append(indent + '┊ (continues as previously)')
                 return ret
             processed_nodes.append(curr_node)
 
@@ -312,7 +300,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 ret.extend(print_subgraph(new_indent, edge_like.target))
                 if is_branch:
                     ret.append(new_indent.rstrip())
-            print('ret 3')
             return ret
 
         return [show_node(self.init[0])] + print_subgraph('', self.init[0])
@@ -711,18 +698,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 worklist.extend(edge.source for edge in edges)
 
         return visited
-
-    def nontrivial_reachable_nodes(self, node: 'KCFG.Node', reverse=False, traverse_covers=False) -> Iterable['KCFG.Node']:
-        def _has_zero_step_path(source_id: str, target_id: str) -> bool:
-            if source_id == target_id:
-                return True
-            edge_target_ids = [edge.target.id for edge in self.edges(source_id=source_id) if edge.depth == 0]
-            cover_target_ids = [cover.target.id for cover in self.covers(source_id=source_id)]
-            return any(_has_zero_step_path(sid, target_id) for sid in edge_target_ids + cover_target_ids)
-
-        predecessors = self.reachable_nodes(node.id, reverse=reverse, traverse_covers=traverse_covers)
-        return (pred for pred in predecessors if not _has_zero_step_path(pred.id, node.id))
-
 
 
 def path_condition(path: Sequence[KCFG.EdgeLike]) -> Tuple[KInner, Subst, int]:
