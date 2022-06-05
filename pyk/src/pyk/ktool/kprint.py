@@ -5,6 +5,7 @@ from ..kast import (
     TRUE,
     KApply,
     KAs,
+    KAst,
     KAtt,
     KBubble,
     KClaim,
@@ -28,6 +29,7 @@ from ..kast import (
     KTerminal,
     KToken,
     KVariable,
+    Subst,
     flattenLabel,
     ktokenDots,
     readKastTerm,
@@ -46,13 +48,17 @@ class KPrint:
         self.symbol_table = build_symbol_table(self.definition, opinionated=True)
         self.definition_hash = hash_str(self.definition)
 
-    def pretty_print(self, kast, debug=False):
-        """Given a KAST term, pretty-print it using the current definition.
+    def pretty_print(self, subject, debug=False):
+        """ subject: KAST term or Subst from variables to KAST terms.
 
-        -   Input: KAST term in JSON.
+        -   Input: KAST term, or Subst.
         -   Output: Best-effort pretty-printed representation of the KAST term.
         """
-        return prettyPrintKast(kast, self.symbol_table, debug=debug)
+        if isinstance(subject, Subst):
+            return [f'{k:>10} |-> {self.pretty_print(v)}' for k, v in subst.minimize().items()]
+        if isinstance(subject, KAst): 
+            return prettyPrintKast(subject, self.symbol_table, debug=debug)
+        assert(False)
 
 
 def unparser_for_production(prod):
