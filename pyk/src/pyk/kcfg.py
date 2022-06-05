@@ -294,7 +294,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                     ret.append(indent + '│  constraint: ' + str(kprint.pretty_print(edge_like.constraint)))
                     ret.append(indent + '│  subst:')
                     ret.extend(add_indent(indent + '│  ', pretty_print_subst(edge_like.subst)))
-                    ret.append(indent + '│')
 
                 ret.append((indent + elbow + ' ' + show_node(edge_like.target)))
                 ret.extend(print_subgraph(new_indent, edge_like.target))
