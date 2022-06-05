@@ -16,6 +16,7 @@ from typing import (
     Set,
     Tuple,
     Union,
+    cast,
 )
 
 from graphviz import Digraph
@@ -238,28 +239,94 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def from_json(s: str) -> 'KCFG':
         return KCFG.from_dict(json.loads(s))
 
-    def to_dot(self, kprint: KPrint) -> str:
-        def _node_attrs(node_id: str) -> List[str]:
-            atts = []
-            if self.is_init(node_id):
-                atts.append('init')
-            if self.is_target(node_id):
-                atts.append('target')
-            if self.is_expanded(node_id):
-                atts.append('expanded')
-            if self.is_stuck(node_id):
-                atts.append('stuck')
-            if self.is_frontier(node_id):
-                atts.append('frontier')
-            return atts
 
+    def pretty_print(self, kprint: KPrint) -> Iterable[str]:
+        def show_node(node: KCFG.Node) -> str:
+            attrs = self.node_attrs(node.id)
+            attr_string = ' (' + ', '.join(attrs) + ')' if attrs else ''
+            return shorten_hashes(node.id) + attr_string
+
+        def add_indent(indent: str, lines: List[str]) -> Iterable[str]:
+            return map(lambda line: indent + line, lines)
+
+        def pretty_print_subst(subst: Subst) -> List[str]:
+            return [f'{k:>10} |-> {kprint.pretty_print(v)}' for k, v in subst.minimize().items()]
+
+        def edge_likes_from(node: KCFG.Node) -> List[KCFG.EdgeLike]:
+            return cast(List[KCFG.EdgeLike], self.edges(source_id=node.id)) \
+                 + cast(List[KCFG.EdgeLike], self.covers(source_id=node.id))
+
+        def completes_loop(node: KCFG.Node) -> bool:
+            prior_nodes = self.nontrivial_reachable_nodes(node, reverse=True, traverse_covers=True)
+            for node in prior_nodes:
+                if node.cterm.match(node.cterm):
+                    return True
+            return False
+
+        processed_nodes : List[KCFG.Node] = []
+
+        def print_subgraph(indent: str, curr_node: KCFG.Node) -> List[str]:
+
+            ret : List[str] = []
+
+            if curr_node in processed_nodes:
+                if len(edge_likes_from(curr_node)) == 0:
+                    print('ret 1')
+                    return ret
+                if completes_loop(curr_node):
+                    ret.append(indent + '┊ (looped back)')
+                else:
+                    ret.append(indent + '┊ (continues as previously)')
+                print('ret 2')
+                return ret
+            processed_nodes.append(curr_node)
+
+            num_children = len(edge_likes_from(curr_node))
+            is_branch = num_children > 1
+            for i, edge_like in enumerate(edge_likes_from(curr_node)):
+                is_first_child = i == 0
+                is_last_child = i == num_children - 1
+
+                if not is_branch:
+                    elbow = '├ ' if len(edge_likes_from(edge_like.target)) else '└ '
+                    new_indent = indent
+                elif is_first_child:
+                    elbow = '┢━'
+                    new_indent = indent + '┃   '
+                elif is_last_child:
+                    elbow = '┗━'
+                    new_indent = indent + '    '
+                else:
+                    elbow = '┣━'
+                    new_indent = indent + '┃   '
+
+                if isinstance(edge_like, KCFG.Edge) and edge_like.depth > 0:
+                    ret.append(indent + '┊ (' + str(edge_like.depth) + ' steps)')
+                elif isinstance(edge_like, KCFG.Cover):
+                    ret.append(indent + '│  constraint: ' + str(kprint.pretty_print(edge_like.constraint)))
+                    ret.append(indent + '│  subst:')
+                    ret.extend(add_indent(indent + '│  ', pretty_print_subst(edge_like.subst)))
+                    ret.append(indent + '│')
+
+                ret.append((indent + elbow + ' ' + show_node(edge_like.target)))
+                ret.extend(print_subgraph(new_indent, edge_like.target))
+                if is_branch:
+                    ret.append(new_indent.rstrip())
+            print('ret 3')
+            return ret
+
+        return [show_node(self.init[0])] + print_subgraph('', self.init[0])
+
+    def to_dot(self, kprint: KPrint) -> str:
         def _short_label(label):
             return '\n'.join([label_line if len(label_line) < 100 else (label_line[0:100] + ' ...') for label_line in label.split('\n')])
 
         graph = Digraph()
 
         for node in self.nodes:
-            classAttrs = ' '.join(_node_attrs(node.id))
+            nodeAttrs = self.node_attrs(node.id)
+            nodeAttrs.remove('leaf') # Leaf nodes are self-evident when looking at a graph visually.
+            classAttrs = ' '.join(nodeAttrs)
             label = shorten_hashes(node.id) + (classAttrs and ' ' + classAttrs)
             attrs = {'class': classAttrs} if classAttrs else {}
             graph.node(name=node.id, label=label, **attrs)
@@ -545,6 +612,23 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         target_id = self._resolve(target_id)
         return (source_id, target_id) in self._verified
 
+    def node_attrs(self, node_id: str) -> List[str]:
+        attrs = []
+        if self.is_init(node_id):
+            attrs.append('init')
+        if self.is_target(node_id):
+            attrs.append('target')
+        if self.is_expanded(node_id):
+            attrs.append('expanded')
+        if self.is_stuck(node_id):
+            attrs.append('stuck')
+        if self.is_frontier(node_id):
+            attrs.append('frontier')
+        if self.is_leaf(node_id):
+            attrs.append('leaf')
+        return attrs
+
+
     def prune(self, node_id: str) -> None:
         nodes = self.reachable_nodes(node_id)
         for node in nodes:
@@ -627,6 +711,18 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 worklist.extend(edge.source for edge in edges)
 
         return visited
+
+    def nontrivial_reachable_nodes(self, node: 'KCFG.Node', reverse=False, traverse_covers=False) -> Iterable['KCFG.Node']:
+        def _has_zero_step_path(source_id: str, target_id: str) -> bool:
+            if source_id == target_id:
+                return True
+            edge_target_ids = [edge.target.id for edge in self.edges(source_id=source_id) if edge.depth == 0]
+            cover_target_ids = [cover.target.id for cover in self.covers(source_id=source_id)]
+            return any(_has_zero_step_path(sid, target_id) for sid in edge_target_ids + cover_target_ids)
+
+        predecessors = self.reachable_nodes(node.id, reverse=reverse, traverse_covers=traverse_covers)
+        return (pred for pred in predecessors if not _has_zero_step_path(pred.id, node.id))
+
 
 
 def path_condition(path: Sequence[KCFG.EdgeLike]) -> Tuple[KInner, Subst, int]:
