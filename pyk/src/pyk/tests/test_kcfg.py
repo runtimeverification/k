@@ -295,7 +295,7 @@ class KCFGTestCase(TestCase):
             f"┃   ├  {short_id(5)} (frontier)\n"
             f"┃   ┊ (1 steps)\n"
             f"┃   ├  {short_id(2)} (frontier)\n"
-            f"┃   ┊ (continues as previously)\n"
+            f"┃   ┊ (looped back)\n"
             f"┃\n"
             f"┣━ {short_id(5)} (frontier)\n"
             f"┃   ┊ (continues as previously)\n"
@@ -313,5 +313,5 @@ class KCFGTestCase(TestCase):
             f"    │  subst:\n"
             f"    │    KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='V11'), KToken(token='8', sort=KSort(name='Int'))))\n"
             f"    ├  {short_id(11)} (frontier)\n"
-            f"    ┊ (continues as previously)\n\n"
+            f"    ┊ (looped back)\n\n"
         )
