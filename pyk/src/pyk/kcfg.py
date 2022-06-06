@@ -23,7 +23,13 @@ from graphviz import Digraph
 
 from .cterm import CTerm
 from .kast import KInner, KRuleLike, Subst
-from .kastManip import buildRule, ml_pred_to_bool, mlAnd, simplifyBool, substToMlPred
+from .kastManip import (
+    buildRule,
+    ml_pred_to_bool,
+    mlAnd,
+    simplifyBool,
+    substToMlPred,
+)
 from .ktool import KPrint
 from .utils import compare_short_hashes, shorten_hashes
 
