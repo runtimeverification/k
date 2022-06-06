@@ -41,7 +41,7 @@ def edge_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
 
     def _make_edge_dict(i, j, depth=1):
         return {'source': nid(i), 'target': nid(j), 'condition': TRUE.to_dict(), 'depth': depth}
-        
+
     return [_make_edge_dict(*edge) for edge in edges]
 
 

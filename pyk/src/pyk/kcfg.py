@@ -246,15 +246,15 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         return KCFG.from_dict(json.loads(s))
 
     def pretty_print(self, kprint: KPrint) -> Iterable[str]:
-        def show_node(node: KCFG.Node) -> str:
+        def _show_node(node: KCFG.Node) -> str:
             attrs = self.node_attrs(node.id)
             attr_string = ' (' + ', '.join(attrs) + ')' if attrs else ''
             return shorten_hashes(node.id) + attr_string
 
-        def add_indent(indent: str, lines: List[str]) -> Iterable[str]:
+        def _add_indent(indent: str, lines: List[str]) -> Iterable[str]:
             return map(lambda line: indent + line, lines)
 
-        def edge_likes_from(node: KCFG.Node) -> List[KCFG.EdgeLike]:
+        def _edge_likes_from(node: KCFG.Node) -> List[KCFG.EdgeLike]:
             return \
                 cast(List[KCFG.EdgeLike], self.edges(source_id=node.id)) + \
                 cast(List[KCFG.EdgeLike], self.covers(source_id=node.id))
@@ -265,7 +265,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             ret: List[str] = []
 
             if curr_node in processed_nodes:
-                if len(edge_likes_from(curr_node)) == 0:
+                if len(_edge_likes_from(curr_node)) == 0:
                     return ret
                 if curr_node in visited_nodes:
                     ret.append(indent + '┊ (looped back)')
@@ -274,14 +274,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 return ret
             processed_nodes.append(curr_node)
 
-            num_children = len(edge_likes_from(curr_node))
+            num_children = len(_edge_likes_from(curr_node))
             is_branch = num_children > 1
-            for i, edge_like in enumerate(edge_likes_from(curr_node)):
+            for i, edge_like in enumerate(_edge_likes_from(curr_node)):
                 is_first_child = i == 0
                 is_last_child = i == num_children - 1
 
                 if not is_branch:
-                    elbow = '├ ' if len(edge_likes_from(edge_like.target)) else '└ '
+                    elbow = '├ ' if len(_edge_likes_from(edge_like.target)) else '└ '
                     new_indent = indent
                 elif is_first_child:
                     elbow = '┢━'
@@ -298,15 +298,15 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 elif isinstance(edge_like, KCFG.Cover):
                     ret.append(indent + '│  constraint: ' + kprint.pretty_print(edge_like.constraint))
                     ret.append(indent + '│  subst:')
-                    ret.extend(add_indent(indent + '│    ', kprint.pretty_print(substToMlPred(edge_like.subst)).split('\n')))
+                    ret.extend(_add_indent(indent + '│    ', kprint.pretty_print(substToMlPred(edge_like.subst)).split('\n')))
 
-                ret.append((indent + elbow + ' ' + show_node(edge_like.target)))
+                ret.append((indent + elbow + ' ' + _show_node(edge_like.target)))
                 ret.extend(print_subgraph(new_indent, edge_like.target, visited_nodes + [edge_like.source]))
                 if is_branch:
                     ret.append(new_indent.rstrip())
             return ret
 
-        return [show_node(self.init[0])] + print_subgraph('', self.init[0], [self.init[0]])
+        return [_show_node(self.init[0])] + print_subgraph('', self.init[0], [self.init[0]])
 
     def to_dot(self, kprint: KPrint) -> str:
         def _short_label(label):
