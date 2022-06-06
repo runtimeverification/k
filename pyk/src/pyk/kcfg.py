@@ -245,7 +245,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def from_json(s: str) -> 'KCFG':
         return KCFG.from_dict(json.loads(s))
 
-
     def pretty_print(self, kprint: KPrint) -> Iterable[str]:
         def show_node(node: KCFG.Node) -> str:
             attrs = self.node_attrs(node.id)
@@ -256,13 +255,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             return map(lambda line: indent + line, lines)
 
         def edge_likes_from(node: KCFG.Node) -> List[KCFG.EdgeLike]:
-            return cast(List[KCFG.EdgeLike], self.edges(source_id=node.id)) \
-                 + cast(List[KCFG.EdgeLike], self.covers(source_id=node.id))
+            return \
+                cast(List[KCFG.EdgeLike], self.edges(source_id=node.id)) + \
+                cast(List[KCFG.EdgeLike], self.covers(source_id=node.id))
 
-        processed_nodes : List[KCFG.Node] = []
+        processed_nodes: List[KCFG.Node] = []
 
         def print_subgraph(indent: str, curr_node: KCFG.Node, visited_nodes: List[KCFG.Node]) -> List[str]:
-            ret : List[str] = []
+            ret: List[str] = []
 
             if curr_node in processed_nodes:
                 if len(edge_likes_from(curr_node)) == 0:
@@ -316,7 +316,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         for node in self.nodes:
             nodeAttrs = self.node_attrs(node.id)
-            nodeAttrs.remove('leaf') # Leaf nodes are self-evident when looking at a graph visually.
+            nodeAttrs.remove('leaf')    # Leaf nodes are self-evident when looking at a graph visually.
             classAttrs = ' '.join(nodeAttrs)
             label = shorten_hashes(node.id) + (classAttrs and ' ' + classAttrs)
             attrs = {'class': classAttrs} if classAttrs else {}
@@ -618,7 +618,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         if self.is_leaf(node_id):
             attrs.append('leaf')
         return attrs
-
 
     def prune(self, node_id: str) -> None:
         nodes = self.reachable_nodes(node_id)
