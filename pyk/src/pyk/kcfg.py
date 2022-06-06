@@ -261,13 +261,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         processed_nodes: List[KCFG.Node] = []
 
-        def print_subgraph(indent: str, curr_node: KCFG.Node, visited_nodes: List[KCFG.Node]) -> List[str]:
+        def print_subgraph(indent: str, curr_node: KCFG.Node, prior_on_trace: List[KCFG.Node]) -> List[str]:
             ret: List[str] = []
 
             if curr_node in processed_nodes:
                 if len(_edge_likes_from(curr_node)) == 0:
                     return ret
-                if curr_node in visited_nodes:
+                if curr_node in prior_on_trace:
                     ret.append(indent + '┊ (looped back)')
                 else:
                     ret.append(indent + '┊ (continues as previously)')
@@ -301,7 +301,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                     ret.extend(_add_indent(indent + '│    ', kprint.pretty_print(substToMlPred(edge_like.subst)).split('\n')))
 
                 ret.append((indent + elbow + ' ' + _show_node(edge_like.target)))
-                ret.extend(print_subgraph(new_indent, edge_like.target, visited_nodes + [edge_like.source]))
+                ret.extend(print_subgraph(new_indent, edge_like.target, prior_on_trace + [edge_like.source]))
                 if is_branch:
                     ret.append(new_indent.rstrip())
             return ret
