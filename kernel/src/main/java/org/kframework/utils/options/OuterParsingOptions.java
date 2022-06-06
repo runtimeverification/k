@@ -37,7 +37,11 @@ public class OuterParsingOptions implements Serializable {
             if (mainParameter == null) {
                 throw KEMException.criticalError("You have to provide exactly one main file in order to do outer parsing.");
             }
-            mainDefinitionFile = files.resolveWorkingDirectory(mainParameter);
+            if (mainParameter.equals("-")) {
+                mainDefinitionFile = new File("/dev/stdin");
+            } else {
+                mainDefinitionFile = files.resolveWorkingDirectory(mainParameter);
+            }
         }
         return mainDefinitionFile;
     }
