@@ -316,7 +316,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         for node in self.nodes:
             nodeAttrs = self.node_attrs(node.id)
-            nodeAttrs.remove('leaf')    # Leaf nodes are self-evident when looking at a graph visually.
             classAttrs = ' '.join(nodeAttrs)
             label = shorten_hashes(node.id) + (classAttrs and ' ' + classAttrs)
             attrs = {'class': classAttrs} if classAttrs else {}
