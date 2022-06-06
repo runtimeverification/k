@@ -38,9 +38,11 @@ def node_dicts(n: int) -> List[Dict[str, Any]]:
 
 
 def edge_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
-    def make_edge_dict(i, j, depth=1):
+
+    def _make_edge_dict(i, j, depth=1):
         return {'source': nid(i), 'target': nid(j), 'condition': TRUE.to_dict(), 'depth': depth}
-    return [make_edge_dict(*edge) for edge in edges]
+        
+    return [_make_edge_dict(*edge) for edge in edges]
 
 
 def cover_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
