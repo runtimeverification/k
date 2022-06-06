@@ -23,7 +23,7 @@ from graphviz import Digraph
 
 from .cterm import CTerm
 from .kast import KInner, KRuleLike, Subst
-from .kastManip import buildRule, ml_pred_to_bool, mlAnd, simplifyBool
+from .kastManip import buildRule, ml_pred_to_bool, mlAnd, simplifyBool, substToMlPred
 from .ktool import KPrint
 from .utils import compare_short_hashes, shorten_hashes
 
@@ -249,9 +249,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         def add_indent(indent: str, lines: List[str]) -> Iterable[str]:
             return map(lambda line: indent + line, lines)
 
-        def pretty_print_subst(subst: Subst) -> List[str]:
-            return [f'{k:>10} |-> {kprint.pretty_print(v)}' for k, v in subst.minimize().items()]
-
         def edge_likes_from(node: KCFG.Node) -> List[KCFG.EdgeLike]:
             return cast(List[KCFG.EdgeLike], self.edges(source_id=node.id)) \
                  + cast(List[KCFG.EdgeLike], self.covers(source_id=node.id))
@@ -291,9 +288,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 if isinstance(edge_like, KCFG.Edge) and edge_like.depth > 0:
                     ret.append(indent + '┊ (' + str(edge_like.depth) + ' steps)')
                 elif isinstance(edge_like, KCFG.Cover):
-                    ret.append(indent + '│  constraint: ' + str(kprint.pretty_print(edge_like.constraint)))
+                    ret.append(indent + '│  constraint: ' + kprint.pretty_print(edge_like.constraint))
                     ret.append(indent + '│  subst:')
-                    ret.extend(add_indent(indent + '│  ', pretty_print_subst(edge_like.subst)))
+                    ret.extend(add_indent(indent + '│    ', kprint.pretty_print(substToMlPred(edge_like.subst)).split('\n')))
 
                 ret.append((indent + elbow + ' ' + show_node(edge_like.target)))
                 ret.extend(print_subgraph(new_indent, edge_like.target))

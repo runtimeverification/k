@@ -311,7 +311,7 @@ class KCFGTestCase(TestCase):
             f"    ├  {short_id(8)} (leaf)\n"
             f"    │  constraint: KApply(label=KLabel(name='#Top', params=(KSort(name='GeneratedTopCell'),)), args=())\n"
             f"    │  subst:\n"
-            f"    │         V11 |-> KToken(token='8', sort=KSort(name='Int'))\n"
+            f"    │    KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='V11'), KToken(token='8', sort=KSort(name='Int'))))\n"
             f"    ├  {short_id(11)} (frontier)\n"
             f"    ┊ (continues as previously)\n\n"
         )
