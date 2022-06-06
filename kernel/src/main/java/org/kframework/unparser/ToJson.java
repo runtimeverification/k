@@ -2,8 +2,6 @@
 package org.kframework.unparser;
 
 import org.kframework.attributes.Att;
-import org.kframework.attributes.Location;
-import org.kframework.attributes.Source;
 import org.kframework.definition.Associativity;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Claim;
@@ -139,32 +137,7 @@ public class ToJson {
 
         JsonObjectBuilder jattKeys = Json.createObjectBuilder();
         for (Tuple2<String,String> key: JavaConverters.seqAsJavaList(att.att().keys().toSeq())) {
-            if (key._1().equals(Location.class.getName())) {
-                JsonArrayBuilder locarr = Json.createArrayBuilder();
-                Location loc = att.get(Location.class);
-                locarr.add(loc.startLine());
-                locarr.add(loc.startColumn());
-                locarr.add(loc.endLine());
-                locarr.add(loc.endColumn());
-                jattKeys.add(key._1(), locarr.build());
-            } else if (key._1().equals(Source.class.getName())){
-                jattKeys.add(key._1(), att.get(Source.class).source());
-            } else if (key._1().equals(Production.class.getName())){
-                jattKeys.add(key._1(), toJson(att.get(Production.class)));
-            } else if (key._1().equals(Sort.class.getName())){
-                jattKeys.add(key._1(), toJson(att.get(Sort.class)));
-            } else if (key._1().equals("bracketLabel")) {
-                jattKeys.add(key._1(), toJson(att.get("bracketLabel", KLabel.class)));
-            } else if (key._1().equals(Att.PREDICATE())) {
-                jattKeys.add(key._1(), toJson(att.get(Att.PREDICATE(), Sort.class)));
-            } else if (key._1().equals("cellOptAbsent")) {
-                jattKeys.add(key._1(), toJson(att.get("cellOptAbsent", Sort.class)));
-            } else if (key._1().equals("cellFragment")) {
-                jattKeys.add(key._1(), toJson(att.get("cellFragment", Sort.class)));
-            } else if (key._1().equals("sortParams")) {
-                jattKeys.add(key._1(), toJson(att.get("sortParams", Sort.class)));
-            } else
-                jattKeys.add(key._1(), att.att().get(key).get().toString());
+            jattKeys.add(key._1(), att.att().get(key).get().toString());
         }
         jatt.add("att", jattKeys.build());
 
@@ -347,7 +320,7 @@ public class ToJson {
 
         Option<KLabel> klabel = pro.klabel();
         if (! klabel.isEmpty()) {
-            jpro.add("klabel", toJson(klabel.get()));
+            jpro.add("klabel", klabel.get().name());
         }
 
         JsonArrayBuilder productionItems = Json.createArrayBuilder();
@@ -435,7 +408,6 @@ public class ToJson {
             knode.add("node", JsonParser.KTOKEN);
             knode.add("sort", toJson(tok.sort()));
             knode.add("token", tok.s());
-            knode.add("att", toJson(k.att()));
 
         } else if (k instanceof KApply) {
             KApply app = (KApply) k;
@@ -450,7 +422,6 @@ public class ToJson {
 
             knode.add("arity", app.klist().size());
             knode.add("args", args.build());
-            knode.add("att", toJson(k.att()));
 
         } else if (k instanceof KSequence) {
             KSequence seq = (KSequence) k;
@@ -470,7 +441,12 @@ public class ToJson {
 
             knode.add("node", JsonParser.KVARIABLE);
             knode.add("name", var.name());
-            knode.add("att", toJson(k.att()));
+            Optional<String> origName = var.att().getOptional("originalName");
+            if (origName.isPresent()) {
+                knode.add("originalName", origName.get());
+            } else {
+                knode.add("originalName", var.name());
+            }
 
         } else if (k instanceof KRewrite) {
             KRewrite rew = (KRewrite) k;
@@ -478,7 +454,7 @@ public class ToJson {
             knode.add("node", JsonParser.KREWRITE);
             knode.add("lhs", toJson(rew.left()));
             knode.add("rhs", toJson(rew.right()));
-            knode.add("att", toJson(k.att()));
+            knode.add("att", rew.att().toString());
 
         } else if (k instanceof KAs) {
             KAs alias = (KAs) k;
@@ -486,14 +462,13 @@ public class ToJson {
             knode.add("node", JsonParser.KAS);
             knode.add("pattern", toJson(alias.pattern()));
             knode.add("alias",   toJson(alias.alias()));
-            knode.add("att", toJson(k.att()));
+            knode.add("att", alias.att().toString());
 
         } else if (k instanceof InjectedKLabel) {
             InjectedKLabel inj = (InjectedKLabel) k;
 
             knode.add("node", JsonParser.INJECTEDKLABEL);
             knode.add("label", toJson(inj.klabel()));
-            knode.add("att", toJson(k.att()));
 
         } else {
             throw KEMException.criticalError("Unimplemented for JSON serialization: ", k);
