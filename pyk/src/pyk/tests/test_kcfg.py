@@ -269,7 +269,7 @@ class KCFGTestCase(TestCase):
             'target': [nid(6)],
             'nodes': node_dicts(12),
                                                              # Each of the branching edges have given depth=0 # noqa: E131
-            'edges': edge_dicts((0, 1), (1, 2), (2, 3),      # Initial Linear segment
+            'edges': edge_dicts((0, 1), (1, 2, 5), (2, 3),   # Initial Linear segment
                                 (3, 4, 0), (4, 5), (5, 2),   # Loops back
                                 (3, 5, 0),                   # Go to previous non-terminal node not as loop
                                 (3, 6, 0),                   # Terminates
@@ -288,16 +288,16 @@ class KCFGTestCase(TestCase):
         actual = '\n'.join(cfg.pretty_print(mock_kprint())) + '\n'
         self.assertMultiLineEqual(actual,
                                   f"{short_id(0)} (init, frontier)\n"
-                                  f"┊ (1 steps)\n"
+                                  f"│  (1 step)\n"
                                   f"├  {short_id(1)} (frontier)\n"
-                                  f"┊ (1 steps)\n"
+                                  f"│  (5 steps)\n"
                                   f"├  {short_id(2)} (frontier)\n"
-                                  f"┊ (1 steps)\n"
+                                  f"│  (1 step)\n"
                                   f"├  {short_id(3)} (frontier)\n"
                                   f"┢━ {short_id(4)} (frontier)\n"
-                                  f"┃   ┊ (1 steps)\n"
+                                  f"┃   │  (1 step)\n"
                                   f"┃   ├  {short_id(5)} (frontier)\n"
-                                  f"┃   ┊ (1 steps)\n"
+                                  f"┃   │  (1 step)\n"
                                   f"┃   ├  {short_id(2)} (frontier)\n"
                                   f"┃   ┊ (looped back)\n"
                                   f"┃\n"
@@ -307,11 +307,11 @@ class KCFGTestCase(TestCase):
                                   f"┣━ {short_id(6)} (target, leaf)\n"
                                   f"┃\n"
                                   f"┣━ {short_id(7)} (frontier)\n"
-                                  f"┃   ┊ (1 steps)\n"
+                                  f"┃   │  (1 step)\n"
                                   f"┃   └  {short_id(6)} (target, leaf)\n"
                                   f"┃\n"
                                   f"┗━ {short_id(11)} (frontier)\n"
-                                  f"    ┊ (1 steps)\n"
+                                  f"    │  (1 step)\n"
                                   f"    ├  {short_id(8)} (leaf)\n"
                                   f"    │  constraint: KApply(label=KLabel(name='#Top', params=(KSort(name='GeneratedTopCell'),)), args=())\n"
                                   f"    │  subst:\n"

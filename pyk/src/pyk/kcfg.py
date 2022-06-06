@@ -1,5 +1,5 @@
 import json
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import reduce
 from itertools import chain
@@ -31,7 +31,7 @@ from .kastManip import (
     substToMlPred,
 )
 from .ktool import KPrint
-from .utils import compare_short_hashes, shorten_hashes
+from .utils import add_indent, compare_short_hashes, shorten_hashes
 
 
 class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
@@ -54,6 +54,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         source: 'KCFG.Node'
         target: 'KCFG.Node'
 
+        @abstractmethod
+        def pretty_print(self, kprint: KPrint) -> List[str]:
+            assert False, 'Must be overridden'
+
     @dataclass(frozen=True)
     class Edge(EdgeLike):
         source: 'KCFG.Node'
@@ -70,6 +74,12 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             final_term = self.target.cterm.term
             rule, _ = buildRule(sentence_id, init_term, final_term, claim=claim, priority=priority)
             return rule
+
+        def pretty_print(self, kprint: KPrint) -> List[str]:
+            if self.depth == 1:
+                return ['(' + str(self.depth) + ' step)']
+            else:
+                return ['(' + str(self.depth) + ' steps)']
 
     @dataclass(frozen=True)
     class Cover(EdgeLike):
@@ -92,6 +102,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         def to_dict(self) -> Dict[str, Any]:
             return {'source': self.source.id, 'target': self.target.id}
+
+        def pretty_print(self, kprint: KPrint) -> List[str]:
+            return [
+                'constraint: ' + kprint.pretty_print(self.constraint),
+                'subst:',
+                *add_indent('  ', kprint.pretty_print(substToMlPred(self.subst)).split('\n')),
+            ]
 
     _nodes: Dict[str, Node]
     _edges: Dict[str, Dict[str, Edge]]
@@ -245,14 +262,12 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def from_json(s: str) -> 'KCFG':
         return KCFG.from_dict(json.loads(s))
 
-    def pretty_print(self, kprint: KPrint) -> Iterable[str]:
-        def _show_node(node: KCFG.Node) -> str:
-            attrs = self.node_attrs(node.id)
-            attr_string = ' (' + ', '.join(attrs) + ')' if attrs else ''
-            return shorten_hashes(node.id) + attr_string
+    def node_short_info(self, node: Node) -> str:
+        attrs = self.node_attrs(node.id)
+        attr_string = ' (' + ', '.join(attrs) + ')' if attrs else ''
+        return shorten_hashes(node.id) + attr_string
 
-        def _add_indent(indent: str, lines: List[str]) -> Iterable[str]:
-            return map(lambda line: indent + line, lines)
+    def pretty_print(self, kprint: KPrint) -> List[str]:
 
         def _edge_likes_from(node: KCFG.Node) -> List[KCFG.EdgeLike]:
             return \
@@ -293,20 +308,15 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                     elbow = '┣━'
                     new_indent = indent + '┃   '
 
-                if isinstance(edge_like, KCFG.Edge) and edge_like.depth > 0:
-                    ret.append(indent + '┊ (' + str(edge_like.depth) + ' steps)')
-                elif isinstance(edge_like, KCFG.Cover):
-                    ret.append(indent + '│  constraint: ' + kprint.pretty_print(edge_like.constraint))
-                    ret.append(indent + '│  subst:')
-                    ret.extend(_add_indent(indent + '│    ', kprint.pretty_print(substToMlPred(edge_like.subst)).split('\n')))
-
-                ret.append((indent + elbow + ' ' + _show_node(edge_like.target)))
+                if not(isinstance(edge_like, KCFG.Edge) and edge_like.depth == 0):
+                    ret.extend(add_indent(indent + '│  ', edge_like.pretty_print(kprint)))
+                ret.append(indent + elbow + ' ' + self.node_short_info(edge_like.target))
                 ret.extend(print_subgraph(new_indent, edge_like.target, prior_on_trace + [edge_like.source]))
                 if is_branch:
                     ret.append(new_indent.rstrip())
             return ret
 
-        return [_show_node(self.init[0])] + print_subgraph('', self.init[0], [self.init[0]])
+        return [self.node_short_info(self.init[0])] + print_subgraph('', self.init[0], [self.init[0]])
 
     def to_dot(self, kprint: KPrint) -> str:
         def _short_label(label):
