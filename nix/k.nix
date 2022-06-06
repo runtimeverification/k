@@ -1,4 +1,4 @@
-{ src, stdenv, lib, mavenix, runCommand, makeWrapper
+{ src, clang, stdenv, lib, mavenix, runCommand, makeWrapper
 , bison, flex, gcc, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3
 , haskell-backend, prelude-kore, llvm-backend
 }:
@@ -16,7 +16,7 @@ let
     #
     nativeBuildInputs = [ makeWrapper ];
 
-    buildInputs = [ flex gcc git gmp jdk mpfr pkgconfig python3 z3 ];
+    buildInputs = [ clang flex gcc git gmp jdk mpfr pkgconfig python3 z3 ];
 
     # Set build environment variables
     #
@@ -79,7 +79,7 @@ in
 
 let
   hostInputs = [
-    bison flex gcc gmp jdk mpfr ncurses pkgconfig python3 z3
+    bison flex clang gcc gmp jdk mpfr ncurses pkgconfig python3 z3
     haskell-backend llvm-backend
   ];
   # PATH used at runtime
