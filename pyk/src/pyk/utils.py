@@ -113,6 +113,10 @@ def nonempty_str(x: Any) -> str:
     return x
 
 
+def add_indent(indent: str, lines: List[str]) -> List[str]:
+    return list(map(lambda line: indent + line, lines))
+
+
 # Hashes
 
 def hash_str(x: Any) -> str:
