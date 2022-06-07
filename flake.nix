@@ -3,8 +3,7 @@
   inputs = {
     haskell-backend.url =
       "github:runtimeverification/haskell-backend/3bab611b2286dc3be4ce93c37e21581c68a1a8de";
-    llvm-backend.url =
-      "github:runtimeverification/llvm-backend/c599fbfd18300ccf6afc9fc9669d8b62cf86a3a1";
+    llvm-backend.url = "github:runtimeverification/llvm-backend";
     nixpkgs.follows = "haskell-backend/nixpkgs";
     llvm-backend.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
     flake-utils.follows = "haskell-backend/flake-utils";
