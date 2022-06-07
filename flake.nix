@@ -62,5 +62,8 @@
         inherit overlays;
         packages = { inherit (pkgs) k; };
         defaultPackage = pkgs.k;
-      });
+      }) // {
+        overlays.llvm-backend = llvm-backend.overlays.default;
+        overlays.haskell-backend = haskell-backend.overlay;
+      };
 }
