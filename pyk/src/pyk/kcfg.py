@@ -271,7 +271,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         processed_nodes: List[KCFG.Node] = []
 
-        def print_subgraph(indent: str, curr_node: KCFG.Node, prior_on_trace: List[KCFG.Node]) -> List[str]:
+        def _print_subgraph(indent: str, curr_node: KCFG.Node, prior_on_trace: List[KCFG.Node]) -> List[str]:
             ret: List[str] = []
 
             if curr_node in processed_nodes:
@@ -306,12 +306,12 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 if not(isinstance(edge_like, KCFG.Edge) and edge_like.depth == 0):
                     ret.extend(add_indent(indent + '│  ', edge_like.pretty_print(kprint)))
                 ret.append(indent + elbow + ' ' + self.node_short_info(edge_like.target))
-                ret.extend(print_subgraph(new_indent, edge_like.target, prior_on_trace + [edge_like.source]))
+                ret.extend(_print_subgraph(new_indent, edge_like.target, prior_on_trace + [edge_like.source]))
                 if is_branch:
                     ret.append(new_indent.rstrip())
             return ret
 
-        return [self.node_short_info(self.init[0])] + print_subgraph('', self.init[0], [self.init[0]])
+        return [self.node_short_info(self.init[0])] + _print_subgraph('', self.init[0], [self.init[0]])
 
     def to_dot(self, kprint: KPrint) -> str:
         def _short_label(label):
