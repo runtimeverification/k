@@ -47,6 +47,11 @@ let
       ];
     };
     inherit haskell-backend llvm-backend mavenix prelude-kore;
+    debugger =
+      if pkgs.system == "x86_64-darwin" || pkgs.system == "aarch64-darwin" then
+        pkgs.lldb
+      else
+        pkgs.gdb;
   };
 
   haskell-backend-project =

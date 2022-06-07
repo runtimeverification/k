@@ -1,7 +1,6 @@
-{ src, clang, stdenv, lib, mavenix, runCommand, makeWrapper
-, bison, flex, gcc, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3
-, haskell-backend, prelude-kore, llvm-backend
-}:
+{ src, clang, stdenv, lib, mavenix, runCommand, makeWrapper, bison, flex, gcc
+, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3, haskell-backend
+, prelude-kore, llvm-backend, debugger }:
 
 let
   unwrapped = mavenix.buildMaven {
@@ -75,35 +74,43 @@ let
     #remotes = { central = "https://repo.maven.apache.org/maven2"; };
     #settings = ./settings.xml;
   };
-in
 
-let
+in let
   hostInputs = [
-    bison flex clang gcc gmp jdk mpfr ncurses pkgconfig python3 z3
-    haskell-backend llvm-backend
+    bison
+    flex
+    clang
+    gcc
+    gmp
+    jdk
+    mpfr
+    ncurses
+    pkgconfig
+    python3
+    z3
+    haskell-backend
+    llvm-backend
+    debugger
   ];
   # PATH used at runtime
   hostPATH = lib.makeBinPath hostInputs;
-in
 
-runCommand unwrapped.name
-  {
-    nativeBuildInputs = [ makeWrapper ];
-    passthru = { inherit unwrapped; };
-    inherit unwrapped;
-  }
-  ''
-    mkdir -p $out/bin
+in runCommand unwrapped.name {
+  nativeBuildInputs = [ makeWrapper ];
+  passthru = { inherit unwrapped; };
+  inherit unwrapped;
+} ''
+  mkdir -p $out/bin
 
-    # Wrap bin/ to augment PATH.
-    for prog in $unwrapped/bin/*
-    do
-      makeWrapper $prog $out/bin/$(basename $prog) --prefix PATH : ${hostPATH}
-    done
+  # Wrap bin/ to augment PATH.
+  for prog in $unwrapped/bin/*
+  do
+    makeWrapper $prog $out/bin/$(basename $prog) --prefix PATH : ${hostPATH}
+  done
 
-    # Link each top-level package directory, for dependents that need that.
-    for each in include lib share
-    do
-      ln -sf $unwrapped/$each $out/$each
-    done
-  ''
+  # Link each top-level package directory, for dependents that need that.
+  for each in include lib share
+  do
+    ln -sf $unwrapped/$each $out/$each
+  done
+''

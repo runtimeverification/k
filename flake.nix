@@ -13,7 +13,7 @@
   outputs =
     { self, nixpkgs, flake-utils, haskell-backend, llvm-backend, mavenix }:
     let
-      overlays = [
+      overlays = system: [
         mavenix.overlay
         (final: prev: { llvm-backend-release = false; })
         llvm-backend.overlays.default
@@ -48,6 +48,11 @@
               haskell-backend = kore;
               inherit (haskell-backend) prelude-kore;
               inherit src;
+              debugger =
+                if system == "x86_64-darwin" || system == "aarch64-darwin" then
+                  prev.lldb
+                else
+                  prev.gdb;
             };
           })
       ];
@@ -57,7 +62,11 @@
       "aarch64-linux"
       "aarch64-darwin"
     ] (system:
-      let pkgs = import nixpkgs { inherit system overlays; };
+      let
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = (overlays system);
+        };
       in {
         inherit overlays;
         packages = { inherit (pkgs) k; };
