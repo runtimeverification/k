@@ -60,7 +60,7 @@ let
   inherit (haskell-backend-project) prelude-kore;
 
   self = {
-    inherit k llvm-backend haskell-backend;
+    inherit k clang llvm-backend haskell-backend;
     inherit mavenix;
     inherit (pkgs) mkShell;
   };

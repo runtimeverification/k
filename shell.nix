@@ -11,7 +11,7 @@ let
   inherit (pkgs) mkShell;
 
   default = import ./. { inherit pkgs; };
-  inherit (default) k llvm-backend haskell-backend;
+  inherit (default) k clang llvm-backend haskell-backend;
   inherit (default) mavenix;
 
 in mkShell {

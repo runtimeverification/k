@@ -37,12 +37,12 @@ let
     # as these may be expected/required when compiling other projects, e.g. the evm-semantics repo
     postInstall = ''
       cp -r k-distribution/target/release/k/{bin,include,lib} $out/
-      mkdir -p $out/lib/cmake/kframework && ln -s ${llvm-backend.src}/cmake/* $out/lib/cmake/kframework/
-      ln -s ${llvm-backend}/include/kllvm $out/include/
+      mkdir -p $out/lib/cmake/kframework && ln -sf ${llvm-backend.src}/cmake/* $out/lib/cmake/kframework/
+      ln -sf ${llvm-backend}/include/kllvm $out/include/
 
       prelude_kore="$out/include/kframework/kore/prelude.kore"
       mkdir -p "$(dirname "$prelude_kore")"
-      ln -s "${prelude-kore}" "$prelude_kore"
+      ln -sf "${prelude-kore}" "$prelude_kore"
     '';
 
     preFixup = lib.optionalString (!stdenv.isDarwin) ''
@@ -104,6 +104,6 @@ runCommand unwrapped.name
     # Link each top-level package directory, for dependents that need that.
     for each in include lib share
     do
-      ln -s $unwrapped/$each $out/$each
+      ln -sf $unwrapped/$each $out/$each
     done
   ''
