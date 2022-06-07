@@ -31,6 +31,12 @@ dryRun=false
 expandMacros=true
 filterSubst=
 
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  DBG_CMD="lldb -- "
+else
+  DBG_CMD="gdb --args "
+fi
+
 # setup temp files
 now="$(date +"%Y-%m-%d-%H-%M-%S")"
 tempDir="$(mktemp -d .krun-${now}-XXXXXXXXXX)"
@@ -356,7 +362,7 @@ do
       ;;
 
       --debugger)
-      cmdprefix="gdb --args "
+      cmdprefix="$DBG_CMD"
       ;;
 
       --statistics)
