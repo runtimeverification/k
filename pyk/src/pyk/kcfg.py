@@ -269,18 +269,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
     def pretty_print(self, kprint: KPrint) -> List[str]:
 
-        def _edge_likes_from(node: KCFG.Node) -> List[KCFG.EdgeLike]:
-            return \
-                cast(List[KCFG.EdgeLike], self.edges(source_id=node.id)) + \
-                cast(List[KCFG.EdgeLike], self.covers(source_id=node.id))
-
         processed_nodes: List[KCFG.Node] = []
 
         def print_subgraph(indent: str, curr_node: KCFG.Node, prior_on_trace: List[KCFG.Node]) -> List[str]:
             ret: List[str] = []
 
             if curr_node in processed_nodes:
-                if len(_edge_likes_from(curr_node)) == 0:
+                if len(self.edge_likes(source_id=curr_node.id)) == 0:
                     return ret
                 if curr_node in prior_on_trace:
                     ret.append(indent + '┊ (looped back)')
@@ -289,14 +284,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 return ret
             processed_nodes.append(curr_node)
 
-            num_children = len(_edge_likes_from(curr_node))
+            num_children = len(self.edge_likes(source_id=curr_node.id))
             is_branch = num_children > 1
-            for i, edge_like in enumerate(_edge_likes_from(curr_node)):
+            for i, edge_like in enumerate(self.edge_likes(source_id=curr_node.id)):
                 is_first_child = i == 0
                 is_last_child = i == num_children - 1
 
                 if not is_branch:
-                    elbow = '├ ' if len(_edge_likes_from(edge_like.target)) else '└ '
+                    elbow = '├ ' if len(self.edge_likes(source_id=edge_like.target.id)) else '└ '
                     new_indent = indent
                 elif is_first_child:
                     elbow = '┢━'
@@ -519,6 +514,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         self._covers[source_id].pop(target_id)
         if not self._covers[source_id]:
             self._covers.pop(source_id)
+
+    def edge_likes(self, *, source_id: Optional[str] = None, target_id: Optional[str] = None) -> List[EdgeLike]:
+        return \
+            cast(List[KCFG.EdgeLike], self.edges(source_id=source_id, target_id=target_id)) + \
+            cast(List[KCFG.EdgeLike], self.covers(source_id=source_id, target_id=target_id))
 
     def add_init(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
