@@ -317,6 +317,10 @@ class KCFGTestCase(TestCase):
         with self.assertRaisesRegex(ValueError, 'Unknown node: '):
             cfg.add_alias('buzz', node(3).id)
 
+        cfg.remove_node(nid(1))
+        cfg.create_node(term(1))
+        self.assertNotEqual(cfg.short_name(node(1)), 'foo')
+
     def test_pretty_print(self):
         d = {
             'init': [nid(0)],
