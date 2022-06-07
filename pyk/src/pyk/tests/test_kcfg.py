@@ -375,4 +375,3 @@ class KCFGTestCase(TestCase):
                                   f"    ├  {short_id(11)} (frontier)\n"
                                   f"    ┊ (looped back)\n\n"
                                   )
-
