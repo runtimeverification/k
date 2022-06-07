@@ -272,6 +272,7 @@ class KCFGTestCase(TestCase):
         cfg = KCFG.from_dict(d)
 
         self.assertEqual(node(1), cfg.node('d33...d8'))
+        self.assertEqual(node(1), cfg.node('d33..d8'))
         self.assertEqual(node(1), cfg.node(node(1).id))
 
         # Matches no nodes

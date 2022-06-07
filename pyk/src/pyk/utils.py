@@ -171,7 +171,7 @@ def deconstruct_short_hash(h: str) -> Tuple[str, str]:
     if sep == '...' and is_hexstring(l) and is_hexstring(r):
         return (l, r)
     (l, sep, r) = x.partition('..')
-    if sep == '..' and is_hexstring(x) and is_hexstring(r):
+    if sep == '..' and is_hexstring(l) and is_hexstring(r):
         return (l, r)
     raise ValueError(f'Bad short hash: {h}')
 
