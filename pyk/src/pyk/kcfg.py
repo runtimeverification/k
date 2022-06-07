@@ -31,12 +31,7 @@ from .kastManip import (
     substToMlPred,
 )
 from .ktool import KPrint
-from .utils import (
-    add_indent,
-    compare_short_hashes,
-    shorten_hash,
-    shorten_hashes,
-)
+from .utils import add_indent, compare_short_hashes, shorten_hash
 
 
 class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
@@ -267,7 +262,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         return cfg
 
-    def short_name(self, node: Node) -> str:
+    def short_id(self, node: Node) -> str:
         for alias, hash in self._aliases.items():
             if node.id == hash:
                 return alias
@@ -276,7 +271,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def short_names(self, value: Any, leftChars=6, rightChars=6) -> Any:
         result: Any = None
         if isinstance(value, KCFG.Node):
-            result = self.short_name(value)
+            result = self.short_id(value)
         elif type(value) is tuple:
             result = tuple([self.short_names(item) for item in value])
         elif type(value) is list:
@@ -303,7 +298,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def node_short_info(self, node: Node) -> str:
         attrs = self.node_attrs(node.id)
         attr_string = ' (' + ', '.join(attrs) + ')' if attrs else ''
-        return self.short_name(node) + attr_string
+        return self.short_id(node) + attr_string
 
     def pretty_print(self, kprint: KPrint) -> List[str]:
 
@@ -360,7 +355,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         for node in self.nodes:
             nodeAttrs = self.node_attrs(node.id)
             classAttrs = ' '.join(nodeAttrs)
-            label = self.short_name(node) + (classAttrs and ' ' + classAttrs)
+            label = self.short_id(node) + (classAttrs and ' ' + classAttrs)
             attrs = {'class': classAttrs} if classAttrs else {}
             graph.node(name=node.id, label=label, **attrs)
 

@@ -304,22 +304,22 @@ class KCFGTestCase(TestCase):
 
         cfg = KCFG.from_dict(d)
         self.assertEqual(cfg.node('foo'), node(1))
-        self.assertEqual(cfg.short_name(node(1)), 'foo')
+        self.assertEqual(cfg.short_id(node(1)), 'foo')
 
-        self.assertNotEqual(cfg.short_name(node(0)), 'bar')
+        self.assertNotEqual(cfg.short_id(node(0)), 'bar')
         cfg.add_alias('bar', node(0).id)
         self.assertEqual(cfg.node('bar'), node(0))
         cfg.remove_alias('bar', node(0).id)
         with self.assertRaisesRegex(ValueError, 'Bad short hash: bar'):
             cfg.node('bar')
-        self.assertNotEqual(cfg.short_name(node(0)), 'bar')
+        self.assertNotEqual(cfg.short_id(node(0)), 'bar')
 
         with self.assertRaisesRegex(ValueError, 'Unknown node: '):
             cfg.add_alias('buzz', node(3).id)
 
         cfg.remove_node(nid(1))
         cfg.create_node(term(1))
-        self.assertNotEqual(cfg.short_name(node(1)), 'foo')
+        self.assertNotEqual(cfg.short_id(node(1)), 'foo')
 
     def test_pretty_print(self):
         d = {
@@ -339,43 +339,43 @@ class KCFGTestCase(TestCase):
         }
         cfg = KCFG.from_dict(d)
 
-        def _short_name(i) -> str:
-            return cfg.short_name(node(i))
+        def _short_id(i) -> str:
+            return cfg.short_id(node(i))
 
         # TODO: Why are all nodes (besides the target) frontiers?
         # TODO: Add a cover
         self.maxDiff = None
         actual = '\n'.join(cfg.pretty_print(mock_kprint())) + '\n'
         self.assertMultiLineEqual(actual,
-                                  f"{_short_name(0)} (init, frontier)\n"
+                                  f"{_short_id(0)} (init, frontier)\n"
                                   f"│  (1 step)\n"
-                                  f"├  {_short_name(1)} (frontier)\n"
+                                  f"├  {_short_id(1)} (frontier)\n"
                                   f"│  (5 steps)\n"
-                                  f"├  {_short_name(2)} (frontier)\n"
+                                  f"├  {_short_id(2)} (frontier)\n"
                                   f"│  (1 step)\n"
-                                  f"├  {_short_name(3)} (frontier)\n"
-                                  f"┢━ {_short_name(4)} (frontier)\n"
+                                  f"├  {_short_id(3)} (frontier)\n"
+                                  f"┢━ {_short_id(4)} (frontier)\n"
                                   f"┃   │  (1 step)\n"
-                                  f"┃   ├  {_short_name(5)} (frontier)\n"
+                                  f"┃   ├  {_short_id(5)} (frontier)\n"
                                   f"┃   │  (1 step)\n"
-                                  f"┃   ├  {_short_name(2)} (frontier)\n"
+                                  f"┃   ├  {_short_id(2)} (frontier)\n"
                                   f"┃   ┊ (looped back)\n"
                                   f"┃\n"
-                                  f"┣━ {_short_name(5)} (frontier)\n"
+                                  f"┣━ {_short_id(5)} (frontier)\n"
                                   f"┃   ┊ (continues as previously)\n"
                                   f"┃\n"
-                                  f"┣━ {_short_name(6)} (target, leaf)\n"
+                                  f"┣━ {_short_id(6)} (target, leaf)\n"
                                   f"┃\n"
-                                  f"┣━ {_short_name(7)} (frontier)\n"
+                                  f"┣━ {_short_id(7)} (frontier)\n"
                                   f"┃   │  (1 step)\n"
-                                  f"┃   └  {_short_name(6)} (target, leaf)\n"
+                                  f"┃   └  {_short_id(6)} (target, leaf)\n"
                                   f"┃\n"
-                                  f"┗━ {_short_name(11)} (frontier)\n"
+                                  f"┗━ {_short_id(11)} (frontier)\n"
                                   f"    │  (1 step)\n"
-                                  f"    ├  {_short_name(8)} (leaf)\n"
+                                  f"    ├  {_short_id(8)} (leaf)\n"
                                   f"    │  constraint: KApply(label=KLabel(name='#Top', params=(KSort(name='GeneratedTopCell'),)), args=())\n"
                                   f"    │  subst:\n"
                                   f"    │    KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='V11'), KToken(token='8', sort=KSort(name='Int'))))\n"
-                                  f"    ├  {_short_name(11)} (frontier)\n"
+                                  f"    ├  {_short_id(11)} (frontier)\n"
                                   f"    ┊ (looped back)\n\n"
                                   )
