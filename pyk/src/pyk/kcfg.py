@@ -31,7 +31,12 @@ from .kastManip import (
     substToMlPred,
 )
 from .ktool import KPrint
-from .utils import add_indent, compare_short_hashes, shorten_hashes
+from .utils import (
+    add_indent,
+    compare_short_hashes,
+    shorten_hash,
+    shorten_hashes,
+)
 
 
 class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
@@ -261,6 +266,32 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             cfg.add_alias(name=alias, id=id)
 
         return cfg
+
+    def short_name(self, node: Node) -> str:
+        for alias, hash in self._aliases.items():
+            if node.id == hash:
+                return alias
+        return shorten_hash(node.id)
+
+    def short_names(self, value: Any, leftChars=6, rightChars=6) -> Any:
+        result: Any = None
+        if isinstance(value, KCFG.Node):
+            result = self.short_name(value)
+        elif type(value) is tuple:
+            result = tuple([self.short_names(item) for item in value])
+        elif type(value) is list:
+            result = [self.short_names(item) for item in value]
+        elif type(value) is dict:
+            result = {}
+            for (k, v) in value.items():
+                result[self.short_names(k)] = self.short_names(v)
+        elif type(value) is set:
+            result = set()
+            for item in value:
+                result.add(self.short_names(item))
+        else:
+            assert(False)
+        return result
 
     def to_json(self) -> str:
         return json.dumps(self.to_dict(), sort_keys=True)
