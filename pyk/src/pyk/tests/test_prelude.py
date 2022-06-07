@@ -1,7 +1,7 @@
 from typing import Final
 from unittest import TestCase
 
-from ..prelude import buildAssoc, token
+from ..prelude import build_assoc, token
 from .utils import f, x, y, z
 
 
@@ -29,7 +29,7 @@ class BuildAssocTest(TestCase):
         for i, (terms, expected) in enumerate(self.TEST_DATA):
             with self.subTest(i=i):
                 # When
-                actual = buildAssoc(self._0, f, terms)
+                actual = build_assoc(self._0, f, terms)
 
                 # Then
                 self.assertEqual(actual, expected)

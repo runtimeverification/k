@@ -24,24 +24,16 @@ class Labels:
         raise ValueError('Class Labels should not be instantiated')
 
 
-def buildAssoc(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner]) -> KInner:
-    """Build an associative binary operator term given the join and unit ops.
-
-    -   Input: unit, label, and list of elements to join.
-    -   Output: cons-list style construction of the joined term.
-    """
+def build_assoc(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner]) -> KInner:
     _label = label if type(label) is KLabel else KLabel(label)
-
     res: Optional[KInner] = None
     for term in reversed(list(terms)):
         if term == unit:
             continue
-
         if not res:
             res = term
         else:
             res = _label(term, res)
-
     return res or unit
 
 
@@ -108,11 +100,11 @@ def mlNot(term: KInner, sort: Union[str, KSort] = Sorts.K) -> KApply:
 
 
 def mlAnd(conjuncts: Iterable[KInner], sort: Union[str, KSort] = Sorts.K) -> KInner:
-    return buildAssoc(mlTop(sort), KLabel('#And', sort), conjuncts)
+    return build_assoc(mlTop(sort), KLabel('#And', sort), conjuncts)
 
 
 def mlOr(disjuncts: Iterable[KInner], sort: Union[str, KSort] = Sorts.K) -> KInner:
-    return buildAssoc(mlBottom(sort), KLabel('#Or', sort), disjuncts)
+    return build_assoc(mlBottom(sort), KLabel('#Or', sort), disjuncts)
 
 
 def mlImplies(antecedent: KInner, consequent: KInner, sort: Union[str, KSort] = Sorts.K) -> KApply:

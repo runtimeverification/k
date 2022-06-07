@@ -14,7 +14,6 @@ from ..kastManip import (
     collapseDots,
     getCell,
     remove_generated_cells,
-    structurallyFrameKCell,
     substitute,
 )
 from ..ktool import KompileBackend
@@ -40,19 +39,6 @@ class ConfigurationTest(KompiledTest, ABC):
         super().setUp()
         self.definition = readKastTerm(self.COMPILED_JSON_PATH)
         self.assertIsInstance(self.definition, KDefinition)
-
-
-class StructurallyFrameKCellTest(ConfigurationTest):
-
-    def test(self):
-        # Given
-        config_expected = substitute(self.GENERATED_TOP_CELL_1, {'_DotVar0': ktokenDots})
-
-        # When
-        config_actual = structurallyFrameKCell(self.GENERATED_TOP_CELL_1)
-
-        # Then
-        self.assertEqual(config_actual, config_expected)
 
 
 class RemoveGeneratedCellsTest(ConfigurationTest):

@@ -368,6 +368,20 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     case _ =>
   }
 
+  def checkUserLists(): Unit = localSentences foreach {
+    case p@Production(_, _, srt, _, atts) =>
+      if (atts.contains(Att.USER_LIST)) {
+        val prev = importedSentences.find(s => s.isInstanceOf[Production]
+          && s.asInstanceOf[Production].sort.equals(srt)
+          && s.att.contains(Att.USER_LIST))
+        if (prev.isDefined)
+          throw KEMException.compilerError("Sort " + srt + " previously declared as a user list at "
+            + prev.get.source.get() + " and "
+            + prev.get.location.get(), p)
+      }
+    case _ =>
+  }
+
   lazy val recordProjections = productions.flatMap(p => p.nonterminals.filter(_.name.isDefined).map(nt => "project:" ++ p.klabel.get.name ++ ":" ++ nt.name.get))
   lazy val semanticCasts = allSorts.map("#SemanticCastTo" + _)
   lazy val sortProjections = allSorts.map("project:" + _)

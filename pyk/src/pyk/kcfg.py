@@ -1,5 +1,5 @@
 import json
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import reduce
 from itertools import chain
@@ -16,15 +16,22 @@ from typing import (
     Set,
     Tuple,
     Union,
+    cast,
 )
 
 from graphviz import Digraph
 
 from .cterm import CTerm
 from .kast import KInner, KRuleLike, Subst
-from .kastManip import buildRule, mlAnd, simplifyBool, unsafeMlPredToBool
+from .kastManip import (
+    buildRule,
+    ml_pred_to_bool,
+    mlAnd,
+    simplifyBool,
+    substToMlPred,
+)
 from .ktool import KPrint
-from .utils import compare_short_hashes, shorten_hashes
+from .utils import add_indent, compare_short_hashes, shorten_hashes
 
 
 class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
@@ -47,6 +54,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         source: 'KCFG.Node'
         target: 'KCFG.Node'
 
+        @abstractmethod
+        def pretty_print(self, kprint: KPrint) -> List[str]:
+            assert False, 'Must be overridden'
+
     @dataclass(frozen=True)
     class Edge(EdgeLike):
         source: 'KCFG.Node'
@@ -63,6 +74,12 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             final_term = self.target.cterm.term
             rule, _ = buildRule(sentence_id, init_term, final_term, claim=claim, priority=priority)
             return rule
+
+        def pretty_print(self, kprint: KPrint) -> List[str]:
+            if self.depth == 1:
+                return ['(' + str(self.depth) + ' step)']
+            else:
+                return ['(' + str(self.depth) + ' steps)']
 
     @dataclass(frozen=True)
     class Cover(EdgeLike):
@@ -85,6 +102,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         def to_dict(self) -> Dict[str, Any]:
             return {'source': self.source.id, 'target': self.target.id}
+
+        def pretty_print(self, kprint: KPrint) -> List[str]:
+            return [
+                'constraint: ' + kprint.pretty_print(self.constraint),
+                'subst:',
+                *add_indent('  ', kprint.pretty_print(substToMlPred(self.subst)).split('\n')),
+            ]
 
     _nodes: Dict[str, Node]
     _edges: Dict[str, Dict[str, Edge]]
@@ -238,34 +262,72 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def from_json(s: str) -> 'KCFG':
         return KCFG.from_dict(json.loads(s))
 
-    def to_dot(self, kprint: KPrint) -> str:
-        def _node_attrs(node_id: str) -> List[str]:
-            atts = []
-            if self.is_init(node_id):
-                atts.append('init')
-            if self.is_target(node_id):
-                atts.append('target')
-            if self.is_expanded(node_id):
-                atts.append('expanded')
-            if self.is_stuck(node_id):
-                atts.append('stuck')
-            if self.is_frontier(node_id):
-                atts.append('frontier')
-            return atts
+    def node_short_info(self, node: Node) -> str:
+        attrs = self.node_attrs(node.id)
+        attr_string = ' (' + ', '.join(attrs) + ')' if attrs else ''
+        return shorten_hashes(node.id) + attr_string
 
+    def pretty_print(self, kprint: KPrint) -> List[str]:
+
+        processed_nodes: List[KCFG.Node] = []
+
+        def _print_subgraph(indent: str, curr_node: KCFG.Node, prior_on_trace: List[KCFG.Node]) -> List[str]:
+            ret: List[str] = []
+
+            if curr_node in processed_nodes:
+                if len(self.edge_likes(source_id=curr_node.id)) == 0:
+                    return ret
+                if curr_node in prior_on_trace:
+                    ret.append(indent + '┊ (looped back)')
+                else:
+                    ret.append(indent + '┊ (continues as previously)')
+                return ret
+            processed_nodes.append(curr_node)
+
+            num_children = len(self.edge_likes(source_id=curr_node.id))
+            is_branch = num_children > 1
+            for i, edge_like in enumerate(self.edge_likes(source_id=curr_node.id)):
+                is_first_child = i == 0
+                is_last_child = i == num_children - 1
+
+                if not is_branch:
+                    elbow = '├ ' if len(self.edge_likes(source_id=edge_like.target.id)) else '└ '
+                    new_indent = indent
+                elif is_first_child:
+                    elbow = '┢━'
+                    new_indent = indent + '┃   '
+                elif is_last_child:
+                    elbow = '┗━'
+                    new_indent = indent + '    '
+                else:
+                    elbow = '┣━'
+                    new_indent = indent + '┃   '
+
+                if not(isinstance(edge_like, KCFG.Edge) and edge_like.depth == 0):
+                    ret.extend(add_indent(indent + '│  ', edge_like.pretty_print(kprint)))
+                ret.append(indent + elbow + ' ' + self.node_short_info(edge_like.target))
+                ret.extend(_print_subgraph(new_indent, edge_like.target, prior_on_trace + [edge_like.source]))
+                if is_branch:
+                    ret.append(new_indent.rstrip())
+            return ret
+
+        return [self.node_short_info(self.init[0])] + _print_subgraph('', self.init[0], [self.init[0]])
+
+    def to_dot(self, kprint: KPrint) -> str:
         def _short_label(label):
             return '\n'.join([label_line if len(label_line) < 100 else (label_line[0:100] + ' ...') for label_line in label.split('\n')])
 
         graph = Digraph()
 
         for node in self.nodes:
-            classAttrs = ' '.join(_node_attrs(node.id))
+            nodeAttrs = self.node_attrs(node.id)
+            classAttrs = ' '.join(nodeAttrs)
             label = shorten_hashes(node.id) + (classAttrs and ' ' + classAttrs)
             attrs = {'class': classAttrs} if classAttrs else {}
             graph.node(name=node.id, label=label, **attrs)
 
         for edge in self.edges():
-            display_condition = simplifyBool(unsafeMlPredToBool(edge.condition))
+            display_condition = simplifyBool(ml_pred_to_bool(edge.condition))
             depth = edge.depth
             label = '\nandBool'.join(kprint.pretty_print(display_condition).split(' andBool'))
             label = f'{label}\n{depth} steps'
@@ -453,6 +515,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         if not self._covers[source_id]:
             self._covers.pop(source_id)
 
+    def edge_likes(self, *, source_id: Optional[str] = None, target_id: Optional[str] = None) -> List[EdgeLike]:
+        return \
+            cast(List[KCFG.EdgeLike], self.edges(source_id=source_id, target_id=target_id)) + \
+            cast(List[KCFG.EdgeLike], self.covers(source_id=source_id, target_id=target_id))
+
     def add_init(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
         self._init.add(node_id)
@@ -544,6 +611,22 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
         return (source_id, target_id) in self._verified
+
+    def node_attrs(self, node_id: str) -> List[str]:
+        attrs = []
+        if self.is_init(node_id):
+            attrs.append('init')
+        if self.is_target(node_id):
+            attrs.append('target')
+        if self.is_expanded(node_id):
+            attrs.append('expanded')
+        if self.is_stuck(node_id):
+            attrs.append('stuck')
+        if self.is_frontier(node_id):
+            attrs.append('frontier')
+        if self.is_leaf(node_id):
+            attrs.append('leaf')
+        return attrs
 
     def prune(self, node_id: str) -> None:
         nodes = self.reachable_nodes(node_id)
