@@ -326,6 +326,7 @@ class KCFGTestCase(TestCase):
             'init': [nid(0)],
             'target': [nid(6)],
             'nodes': node_dicts(12),
+            'aliases': {'foo': nid(3)},
                                                              # Each of the branching edges have given depth=0 # noqa: E131
             'edges': edge_dicts((0, 1), (1, 2, 5), (2, 3),   # Initial Linear segment
                                 (3, 4, 0), (4, 5), (5, 2),   # Loops back
@@ -334,7 +335,7 @@ class KCFGTestCase(TestCase):
                                 (3, 7, 0), (7, 6),           # Go to previous terminal node not as loop
                                 (3, 11, 0), (11, 8)          # Covered
                                 ),
-            'covers': cover_dicts((8, 11))                   # Loops back
+            'covers': cover_dicts((8, 11)),                  # Loops back
         }
         cfg = KCFG.from_dict(d)
 

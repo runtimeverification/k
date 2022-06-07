@@ -303,7 +303,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def node_short_info(self, node: Node) -> str:
         attrs = self.node_attrs(node.id)
         attr_string = ' (' + ', '.join(attrs) + ')' if attrs else ''
-        return shorten_hashes(node.id) + attr_string
+        return self.short_name(node) + attr_string
 
     def pretty_print(self, kprint: KPrint) -> List[str]:
 
@@ -360,7 +360,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         for node in self.nodes:
             nodeAttrs = self.node_attrs(node.id)
             classAttrs = ' '.join(nodeAttrs)
-            label = shorten_hashes(node.id) + (classAttrs and ' ' + classAttrs)
+            label = self.short_name(node) + (classAttrs and ' ' + classAttrs)
             attrs = {'class': classAttrs} if classAttrs else {}
             graph.node(name=node.id, label=label, **attrs)
 
