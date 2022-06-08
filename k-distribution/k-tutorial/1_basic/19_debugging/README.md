@@ -69,6 +69,8 @@ command listed in this output message and add the corresponding
 Please note that the path will be different on your machine than the one
 listed above. 
 
+> *Note* The `krun --debugger` command will launch the `lldb` debugger on macOS instead of `gdb`. See https://lldb.llvm.org/use/map.html for a mapping between `gdb` and `lldb` commands. 
+
 ## Basic commands
 
 The most basic commands you can execute in the K GDB session are to run your
