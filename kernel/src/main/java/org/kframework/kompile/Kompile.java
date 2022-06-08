@@ -2,7 +2,6 @@
 package org.kframework.kompile;
 
 import com.google.inject.Inject;
-import org.apache.commons.io.FileUtils;
 import org.kframework.Strategy;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
@@ -30,10 +29,8 @@ import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
-import org.kframework.krun.RunProcess;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.InputModes;
-import org.kframework.parser.json.JsonParser;
 import org.kframework.parser.KRead;
 import org.kframework.parser.ParserUtils;
 import org.kframework.parser.inner.RuleGrammarGenerator;
@@ -58,13 +55,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -145,18 +139,14 @@ public class Kompile {
 
         Definition parsedDef = parseDefinition(definitionFile, mainModuleName, mainProgramsModuleName, excludedModuleTags);
 
+        files.saveToKompiled("parsed.txt", parsedDef.toString());
         checkDefinition(parsedDef, excludedModuleTags);
         sw.printIntermediate("Validate definition");
 
         Definition kompiledDefinition = pipeline.apply(parsedDef);
+        files.saveToKompiled("compiled.txt", kompiledDefinition.toString());
         sw.printIntermediate("Apply compile pipeline");
 
-        if (kompileOptions.postProcess != null) {
-            kompiledDefinition = postProcessJSON(kompiledDefinition, kompileOptions.postProcess);
-        }
-
-        files.saveToKompiled("parsed.txt", parsedDef.toString());
-        files.saveToKompiled("compiled.txt", kompiledDefinition.toString());
         files.saveToKompiled("allRules.txt", ruleSourceMap(kompiledDefinition));
 
         if (kompileOptions.emitJson) {
@@ -181,7 +171,16 @@ public class Kompile {
 
         if (kompileOptions.genBisonParser || kompileOptions.genGlrBisonParser) {
             if (def.configurationVariableDefaultSorts.containsKey("$PGM")) {
-                buildBisonParser(def.programStartSymbol, def.mainSyntaxModuleName(), "PGM", def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get());
+                String filename = "parser_" + def.programStartSymbol.name() + "_" + def.mainSyntaxModuleName();
+                File outputFile = files.resolveKompiled(filename);
+                File linkFile = files.resolveKompiled("parser_PGM");
+                new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, outputFile, kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth);
+                try {
+                    linkFile.delete();
+                    Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
+                } catch (IOException e) {
+                    throw KEMException.internalError("Cannot write to kompiled directory.", e);
+                }
             }
             for (Production prod : iterable(kompiledDefinition.mainModule().productions())) {
                 if (prod.att().contains("cell") && prod.att().contains("parser")) {
@@ -198,49 +197,22 @@ public class Kompile {
                             throw KEMException.compilerError("Could not find module referenced by parser attribute: " + module, prod);
                         }
                         Sort sort = def.configurationVariableDefaultSorts.getOrDefault("$" + name, Sorts.K());
-                        buildBisonParser(sort, module, name, mod.get());
+                        String filename = "parser_" + sort.name() + "_" + module;
+                        File outputFile = files.resolveKompiled(filename);
+                        File linkFile = files.resolveKompiled("parser_" + name);
+                        new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(mod.get(), sort, outputFile, kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth);
+                        try {
+                            linkFile.delete();
+                            Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
+                        } catch (IOException e) {
+                            throw KEMException.internalError("Cannot write to kompiled directory.", e);
+                        }
                     }
                 }
             }
         }
 
         return def;
-    }
-
-    private void buildBisonParser(Sort sort, String modName, String name, Module mod) {
-        String filename = "parser_" + sort.name() + "_" + modName;
-        File outputFile = files.resolveKompiled(filename);
-        File linkFile = files.resolveKompiled("parser_" + name);
-        new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(mod, sort, outputFile, kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth);
-        try {
-            linkFile.delete();
-            Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
-        } catch (IOException e) {
-            throw KEMException.internalError("Cannot write to kompiled directory.", e);
-        }
-    }
-
-    private Definition postProcessJSON(Definition defn, String postProcess) {
-        List<String> command = new ArrayList<>(Arrays.asList(postProcess.split(" ")));
-        Map<String, String> environment = new HashMap<>();
-        File compiledJson;
-        try {
-            String inputDefinition = new String(ToJson.apply(defn), "UTF-8");
-            compiledJson = files.resolveTemp("post-process-compiled.json");
-            FileUtils.writeStringToFile(compiledJson, inputDefinition);
-        } catch (UnsupportedEncodingException e) {
-            throw KEMException.criticalError("Could not encode definition to JSON!");
-        } catch (IOException e) {
-            throw KEMException.criticalError("Could not make temporary file!");
-        }
-        command.add(compiledJson.getAbsolutePath());
-        RunProcess.ProcessOutput output = RunProcess.execute(environment, files.getProcessBuilder(), command.toArray(new String[command.size()]));
-        sw.printIntermediate("Post process JSON: " + String.join(" ", command));
-        if (output.exitCode != 0) {
-            throw KEMException.criticalError("Post-processing returned a non-zero exit code: "
-                    + output.exitCode + "\nStdout:\n" + new String(output.stdout) + "\nStderr:\n" + new String(output.stderr));
-        }
-        return JsonParser.parseDefinition(new String(output.stdout));
     }
 
     private static String ruleSourceMap(Definition def) {

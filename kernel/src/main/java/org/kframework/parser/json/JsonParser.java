@@ -2,8 +2,6 @@
 package org.kframework.parser.json;
 
 import org.kframework.attributes.Att;
-import org.kframework.attributes.Location;
-import org.kframework.attributes.Source;
 import org.kframework.definition.Associativity;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Claim;
@@ -147,7 +145,7 @@ public class JsonParser {
 
         JsonArray jsonimports = data.getJsonArray("imports");
         Set<FlatImport> imports = new HashSet<>();
-        jsonimports.getValuesAs(JsonObject.class).forEach(i -> imports.add(FlatImport.apply(i.getString("name"), i.getBoolean("isPublic"), Att.empty())));
+        jsonimports.getValuesAs(JsonObject.class).forEach(i -> imports.add(FlatImport.apply(i.getString("name"), i.getBoolean("public"), Att.empty())));
 
         JsonArray sentences = data.getJsonArray("localSentences");
         Set<Sentence> localSentences = new HashSet<>();
@@ -162,7 +160,7 @@ public class JsonParser {
 // Parsing Sentence Json //
 ///////////////////////////
 
-    public static Sentence toSentence(JsonObject data) {
+    public static Sentence toSentence(JsonObject data) throws IOException {
         switch(data.getString("node")) {
             case KCONTEXT: {
                 K body     = toK(data.getJsonObject("body"));
@@ -189,7 +187,7 @@ public class JsonParser {
                 Att att = toAtt(data.getJsonObject("att"));
                 List<scala.collection.Set<Tag>> syntaxPriorities = new ArrayList<>();
                 priorities.getValuesAs(JsonArray.class).forEach(tags -> syntaxPriorities.add(toTags(tags)));
-                return new SyntaxPriority(immutable(syntaxPriorities), att);
+                return new SyntaxPriority(JavaConverters.iterableAsScalaIterableConverter(syntaxPriorities).asScala().toSeq(), att);
             }
             case KSYNTAXASSOCIATIVITY: {
                 String assocString = data.getString("assoc");
@@ -214,7 +212,7 @@ public class JsonParser {
                 for (JsonObject s : data.getJsonArray("params").getValuesAs(JsonObject.class)) {
                     params.add(toSort(s));
                 }
-                return new SyntaxSort(immutable(params), sort, att);
+                return new SyntaxSort(JavaConverters.asScalaIteratorConverter(params.iterator()).asScala().toSeq(), sort, att);
             }
             case KSORTSYNONYM: {
                 Sort newSort = toSort(data.getJsonObject("newSort"));
@@ -235,7 +233,7 @@ public class JsonParser {
                 return new Bubble(sentenceType, contents, att);
             }
             case KPRODUCTION: {
-                Option<KLabel> klabel = Option.apply(data.containsKey("klabel") ? toKLabel(data.getJsonObject("klabel")) : null);
+                Option<KLabel> klabel = Option.apply(data.containsKey("klabel") ? KLabel(data.getString("klabel")) : null);
                 Sort sort             = toSort(data.getJsonObject("sort"));
                 Att att               = toAtt(data.getJsonObject("att"));
 
@@ -247,7 +245,7 @@ public class JsonParser {
                 for (JsonObject s : data.getJsonArray("params").getValuesAs(JsonObject.class)) {
                     params.add(toSort(s));
                 }
-                return new Production(klabel, immutable(params), sort, immutable(pItems), att);
+                return new Production(klabel, JavaConverters.asScalaIteratorConverter(params.iterator()).asScala().toSeq(), sort, JavaConverters.asScalaIteratorConverter(pItems.iterator()).asScala().toSeq(), att);
             }
             default:
                 throw KEMException.criticalError("Unexpected node found in KAST Json term: " + data.getString("node"));
@@ -298,27 +296,7 @@ public class JsonParser {
         JsonObject attMap = data.getJsonObject("att");
         Att newAtt = Att.empty();
         for (String key: attMap.keySet()) {
-            if (key.equals(Location.class.getName())) {
-                JsonArray locarr = attMap.getJsonArray(Location.class.getName());
-                newAtt = newAtt.add(Location.class, Location(locarr.getInt(0), locarr.getInt(1), locarr.getInt(2), locarr.getInt(3)));
-            } else if (key.equals(Source.class.getName())) {
-                newAtt = newAtt.add(Source.class, Source.apply(attMap.getString(key)));
-            } else if (key.equals(Production.class.getName())) {
-                newAtt = newAtt.add(Production.class, (Production) toSentence(attMap.getJsonObject(key)));
-            } else if (key.equals(Sort.class.getName())) {
-                newAtt = newAtt.add(Sort.class, toSort(attMap.getJsonObject(key)));
-            } else if (key.equals("bracketLabel")) {
-                newAtt = newAtt.add("bracketLabel", KLabel.class, toKLabel(attMap.getJsonObject(key)));
-            } else if (key.equals(Att.PREDICATE())) {
-                newAtt = newAtt.add(Att.PREDICATE(), Sort.class, toSort(attMap.getJsonObject(key)));
-            } else if (key.equals("cellOptAbsent")) {
-                newAtt = newAtt.add("cellOptAbsent", Sort.class, toSort(attMap.getJsonObject(key)));
-            } else if (key.equals("cellFragment")) {
-                newAtt = newAtt.add("cellFragment", Sort.class, toSort(attMap.getJsonObject(key)));
-            } else if (key.equals("sortParams")) {
-                newAtt = newAtt.add("sortParams", Sort.class, toSort(attMap.getJsonObject(key)));
-            } else
-                newAtt = newAtt.add(key, attMap.getString(key));
+            newAtt = newAtt.add(key, attMap.getString(key));
         }
         return newAtt;
     }
@@ -341,19 +319,23 @@ public class JsonParser {
     }
 
     public static K parseJson(JsonObject data) {
-        if (! (data.containsKey("format") && data.containsKey("version") && data.containsKey("term"))) {
-            throw KEMException.criticalError("Must have `format`, `version`, and `term` fields in serialized Json!");
+        try {
+            if (! (data.containsKey("format") && data.containsKey("version") && data.containsKey("term"))) {
+                throw KEMException.criticalError("Must have `format`, `version`, and `term` fields in serialized Json!");
+            }
+            if (! data.getString("format").equals("KAST")) {
+                throw KEMException.criticalError("Only can deserialize 'KAST' format Json! Found: " + data.getString("format"));
+            }
+            if (data.getInt("version") != ToJson.version) {
+                throw KEMException.criticalError("Only can deserialize KAST version '" + ToJson.version + "'! Found: " + data.getInt("version"));
+            }
+            return toK(data.getJsonObject("term"));
+        } catch (IOException e) {
+            throw KEMException.criticalError("Could not read K term from json", e);
         }
-        if (! data.getString("format").equals("KAST")) {
-            throw KEMException.criticalError("Only can deserialize 'KAST' format Json! Found: " + data.getString("format"));
-        }
-        if (data.getInt("version") != ToJson.version) {
-            throw KEMException.criticalError("Only can deserialize KAST version '" + ToJson.version + "'! Found: " + data.getInt("version"));
-        }
-        return toK(data.getJsonObject("term"));
     }
 
-    private static K toK(JsonObject data) {
+    private static K toK(JsonObject data) throws IOException {
         KLabel klabel;
 
         switch (data.getString("node")) {
@@ -373,17 +355,17 @@ public class JsonParser {
                 return KSequence(items);
 
             case KVARIABLE:
-                return KVariable(data.getString("name"), toAtt(data.getJsonObject("att")));
+                return KVariable(data.getString("name"));
 
             case KREWRITE:
                 K lhs = toK(data.getJsonObject("lhs"));
                 K rhs = toK(data.getJsonObject("rhs"));
-                return KRewrite(lhs, rhs, toAtt(data.getJsonObject("att")));
+                return KRewrite(lhs, rhs);
 
             case KAS:
                 K pattern = toK(data.getJsonObject("pattern"));
                 K alias   = toK(data.getJsonObject("alias"));
-                return KORE.KAs(pattern, alias, toAtt(data.getJsonObject("att")));
+                return KORE.KAs(pattern, alias);
 
             case INJECTEDKLABEL:
                 klabel    = toKLabel(data.getJsonObject("label"));
@@ -404,7 +386,7 @@ public class JsonParser {
         return KLabel(data.getString("name"), sarray);
     }
 
-    private static K[] toKs(int arity, JsonArray data) {
+    private static K[] toKs(int arity, JsonArray data) throws IOException {
         K[] items = new K[arity];
         for (int i = 0; i < arity; i++) {
             items[i] = toK(data.getValuesAs(JsonObject.class).get(i));
