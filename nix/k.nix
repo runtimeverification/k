@@ -1,10 +1,10 @@
 { src, clang, stdenv, lib, mavenix, runCommand, makeWrapper, bison, flex, gcc
 , git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3, haskell-backend
-, prelude-kore, llvm-backend, debugger }:
+, prelude-kore, llvm-backend, debugger, version }:
 
 let
   unwrapped = mavenix.buildMaven {
-    name = "k-5.3.0";
+    name = "k-${version}";
     infoFile = ./mavenix.lock;
     inherit src;
 

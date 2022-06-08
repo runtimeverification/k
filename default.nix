@@ -52,6 +52,7 @@ let
         pkgs.lldb
       else
         pkgs.gdb;
+    version = pkgs.lib.removeSuffix "\n" (builtins.readFile ./package/version);
   };
 
   haskell-backend-project =

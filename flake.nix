@@ -23,7 +23,7 @@
             version =
               prev.haskell-backend-stackProject.hsPkgs.kore.components.exes.kore-exec.version;
             kore = prev.symlinkJoin {
-              name = "kore-${version}";
+              name = "kore-${version}-${haskell-backend.sourceInfo.shortRev}";
               paths = prev.lib.attrValues
                 prev.haskell-backend-stackProject.hsPkgs.kore.components.exes;
             };
@@ -53,6 +53,10 @@
                   prev.lldb
                 else
                   prev.gdb;
+              version = let
+                package-version = prev.lib.removeSuffix "\n"
+                  (builtins.readFile ./package/version);
+              in "${package-version}-${self.rev or "dirty"}";
             };
           })
       ];
@@ -69,7 +73,37 @@
         };
       in {
         inherit overlays;
-        packages = { inherit (pkgs) k; };
+        packages = {
+          inherit (pkgs) k;
+
+          checkVersions = let
+            hashes = [
+              {
+                name = "llvm-mackend";
+                rev = llvm-backend.rev;
+              }
+              {
+                name = "haskell-mackend";
+                rev = haskell-backend.rev;
+              }
+            ];
+          in pkgs.writeShellScriptBin "checkVersions" ''
+            STATUS=$(git submodule status);
+            for elem in ${
+              pkgs.lib.concatMapStringsSep " " ({ name, rev }: "${name},${rev}")
+              hashes
+            }; do
+              IFS=","; set -- $elem;
+              if ! grep -q "$2" <<< "$STATUS";
+              then
+                  echo "$1 with hash '$2' does not match any current submodules:"
+                  git submodule status
+                  exit 1
+              fi
+            done
+            echo "All dependencies match"
+          '';
+        };
         defaultPackage = pkgs.k;
       }) // {
         overlays.llvm-backend = llvm-backend.overlays.default;
