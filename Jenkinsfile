@@ -473,6 +473,7 @@ pipeline {
               cd web
               npm install
               npm run build
+              npm run build-book
               npm run build-sitemap
               cd -
               mv web/public_content ./

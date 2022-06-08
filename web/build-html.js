@@ -1,8 +1,10 @@
-const { cleanUpFiles, generatePagesFromMarkdownFiles } = require("k-web-theme");
+const {
+  generatePagesFromMarkdownFiles,
+  convertSidebarToCToHTML,
+  md,
+} = require("k-web-theme");
 const path = require("path");
 const fs = require("fs");
-
-cleanUpFiles(path.resolve(__dirname, "./public_content/"));
 
 const tutorialTemplate = fs
   .readFileSync("./static_content/html/tutorial_template.html")
@@ -10,6 +12,16 @@ const tutorialTemplate = fs
 const pageTemplate = fs
   .readFileSync("./static_content/html/page_template.html")
   .toString("utf-8");
+const tocMarkdown = fs.readFileSync("./toc.md").toString("utf-8");
+const tocHTML = convertSidebarToCToHTML(tocMarkdown, (url) => {
+  return url
+    .replace(/(index|README)\.md$/, "")
+    .replace(/\.md$/, "/")
+    .replace(/\/web\/pages\//, "/")
+    .replace(/^\//, "{{$ROOT}}/")
+    .replace(/\/+$/, "/");
+});
+
 generatePagesFromMarkdownFiles({
   globPattern: path.resolve(__dirname, "../k-distribution/") + "/**/*.md",
   globOptions: {},
@@ -20,6 +32,9 @@ generatePagesFromMarkdownFiles({
   websiteOrigin: "https://kframework.org",
   includeFileBasePath: path.resolve(__dirname, "./static_content/html/"),
   template: tutorialTemplate,
+  variables: {
+    TOC: tocHTML,
+  },
 });
 generatePagesFromMarkdownFiles({
   globPattern: path.resolve(__dirname, "./pages/") + "/**/*.md",
@@ -31,6 +46,9 @@ generatePagesFromMarkdownFiles({
   websiteOrigin: "https://kframework.org",
   includeFileBasePath: path.resolve(__dirname, "./static_content/html/"),
   template: pageTemplate,
+  variables: {
+    TOC: tocHTML,
+  },
 });
 generatePagesFromMarkdownFiles({
   globPattern: path.resolve(__dirname, "../") + "/USER_MANUAL.md",
@@ -42,4 +60,7 @@ generatePagesFromMarkdownFiles({
   websiteOrigin: "https://kframework.org",
   includeFileBasePath: path.resolve(__dirname, "./static_content/html/"),
   template: pageTemplate,
+  variables: {
+    TOC: tocHTML,
+  },
 });
