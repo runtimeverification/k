@@ -2,8 +2,8 @@ import json
 import logging
 import os
 from pathlib import Path
-from tempfile import mkdtemp
 from subprocess import CalledProcessError, CompletedProcess
+from tempfile import mkdtemp
 from typing import Dict, Final, Iterable, List, Mapping, Optional, Tuple
 
 from tabulate import tabulate
@@ -79,11 +79,10 @@ def _kprove(spec_file: str, *args: str) -> CompletedProcess:
 
 class KProve(KPrint):
 
-    def __init__(self, kompiled_directory, main_file_name=None, use_directory=mkdtemp()):
+    def __init__(self, kompiled_directory, main_file_name=None, use_directory=None):
         super(KProve, self).__init__(kompiled_directory)
         self.directory = Path(self.kompiled_directory).parent
-        self.use_directory = (self.directory / 'kprove') if use_directory is None else Path(use_directory)
-        self.use_directory.mkdir(parents=True, exist_ok=True)
+        self.use_directory = (mkdtemp() / 'kprove') if use_directory is None else Path(use_directory)
         # TODO: we should not have to supply main_file_name, it should be read
         self.main_file_name = main_file_name
         self.prover = ['kprove']
