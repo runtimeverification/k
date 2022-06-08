@@ -2427,7 +2427,8 @@ logged, which requires re-parsing the underlying K definition. Subsequent calls
 do not incur this overhead again; the definition is cached.
 
 ```k
-  syntax {Sort} K ::= #trace(value: Sort) [function, functional, hook(IO.traceTerm), impure, returnsUnit, symbol]
+  syntax K ::= #trace(value: KItem) [function, functional, hook(IO.traceTerm), impure, returnsUnit, symbol]
+             | #traceK(value: K)    [function, functional, hook(IO.traceTerm), impure, returnsUnit, symbol]
 ```
 
 ### Implementation of high-level I/O streams in K

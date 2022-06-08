@@ -10,5 +10,5 @@ module TEST
 
   rule bar F1 * F2 =>
     #let _ = #trace(F1) #in
-    (#trace(F2) ~> #trace(bar foo(2) * foo(0)) ~> .K)
+    (#trace(F2) ~> #trace("builtin") ~> #trace(bar foo(2) * foo(0)) ~> .K)
 endmodule
