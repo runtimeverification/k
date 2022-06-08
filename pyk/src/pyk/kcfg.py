@@ -580,7 +580,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         id = self._resolve(id)
         self._aliases[name] = id
 
-    def remove_alias(self, name: str, alias: str) -> None:
+    def remove_alias(self, name: str) -> None:
         self._aliases.pop(name)
 
     def remove_init(self, node_id: str) -> None:

@@ -309,7 +309,7 @@ class KCFGTestCase(TestCase):
         self.assertNotEqual(cfg.short_id(node(0)), 'bar')
         cfg.add_alias('bar', node(0).id)
         self.assertEqual(cfg.node('bar'), node(0))
-        cfg.remove_alias('bar', node(0).id)
+        cfg.remove_alias('bar')
         with self.assertRaisesRegex(ValueError, 'Bad short hash: bar'):
             cfg.node('bar')
         self.assertNotEqual(cfg.short_id(node(0)), 'bar')
