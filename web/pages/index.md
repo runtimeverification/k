@@ -29,10 +29,10 @@ call/cc.
 
 ## Learn K
 
-- Do the <a style="font-size:24px" href="./k-distribution/pl-tutorial.md">K Tutorial!</a>
+- Do the <a style="font-size:24px" href="/k-distribution/pl-tutorial/README.md">K Tutorial!</a>
 - Read some papers about K on the [Formal Systems Laboratory (FSL)](https://fsl.cs.illinois.edu/publications/).  
-- <a href="./USER_MANUAL/">User documentation</a>
-- <a href="./k-distribution/include/kframework/builtin/">Builtins</a>
+- <a href="/USER_MANUAL.md">User documentation</a>
+- <a href="/k-distribution/include/kframework/builtin/README.md">Builtins</a>
 
 ## Links
 
