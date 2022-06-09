@@ -44,6 +44,11 @@ public class HaskellBackendKModule extends AbstractKModule {
     }
 
     @Override
+    public List<Pair<Class<?>, Boolean>> kompileOptions() {
+        return Collections.singletonList(Pair.of(HaskellKompileOptions.class, true));
+    }
+
+    @Override
     public List<Module> getKRunModules() {
         return Collections.singletonList(new AbstractModule() {
             @Override
