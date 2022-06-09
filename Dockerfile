@@ -34,6 +34,7 @@ RUN    apt-get update        \
         python3              \
         python3-graphviz     \
         texlive-xetex        \
+        wget                 \
         zlib1g-dev
 
 RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.15 \
