@@ -82,7 +82,7 @@ class KProve(KPrint):
     def __init__(self, kompiled_directory, main_file_name=None, use_directory=None):
         super(KProve, self).__init__(kompiled_directory)
         self.directory = Path(self.kompiled_directory).parent
-        self.use_directory = ( mkdtemp() ) if use_directory is None else Path(use_directory)
+        self.use_directory = (mkdtemp()) if use_directory is None else Path(use_directory)
         # TODO: we should not have to supply main_file_name, it should be read
         self.main_file_name = main_file_name
         self.prover = ['kprove']
