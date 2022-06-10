@@ -85,7 +85,7 @@ class KProve(KPrint):
         if not use_directory:
             self._temp_dir = TemporaryDirectory()
             self.use_directory = self._temp_dir.name
-        else: 
+        else:
             self.use_directory = Path(use_directory)
         # TODO: we should not have to supply main_file_name, it should be read
         self.main_file_name = main_file_name
