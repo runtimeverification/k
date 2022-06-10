@@ -3,7 +3,7 @@ import logging
 import os
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
-from tempfile import mkdtemp
+from tempfile import TemporaryDirectory
 from typing import Dict, Final, Iterable, List, Mapping, Optional, Tuple
 
 from tabulate import tabulate
@@ -82,7 +82,11 @@ class KProve(KPrint):
     def __init__(self, kompiled_directory, main_file_name=None, use_directory=None):
         super(KProve, self).__init__(kompiled_directory)
         self.directory = Path(self.kompiled_directory).parent
-        self.use_directory = (mkdtemp()) if use_directory is None else Path(use_directory)
+        if not use_directory:
+            self._temp_dir = TemporaryDirectory()
+            self.use_directory = self._temp_dir.name
+        else: 
+            self.use_directory = Path(use_directory)
         # TODO: we should not have to supply main_file_name, it should be read
         self.main_file_name = main_file_name
         self.prover = ['kprove']
