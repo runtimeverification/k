@@ -27,13 +27,13 @@ RUN    apt-get update        \
         llvm-10-tools        \
         maven                \
         openjdk-11-jdk       \
-        pandoc               \
         parallel             \
         pkg-config           \
         python               \
         python3              \
         python3-graphviz     \
         texlive-xetex        \
+        wget                 \
         zlib1g-dev
 
 RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.15 \
@@ -51,6 +51,7 @@ RUN    apt-get update               \
     && apt-get install --yes nodejs
 
 RUN wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin
+RUN wget https://github.com/jgm/pandoc/releases/download/2.18/pandoc-2.18-1-amd64.deb -O /tmp/pandoc.deb && dpkg -i /tmp/pandoc.deb
 
 RUN curl -sSL https://get.haskellstack.org/ | sh
 
