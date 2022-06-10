@@ -26,6 +26,7 @@ public class HaskellBackendKModule extends AbstractKModule {
         mods.add(new AbstractModule() {
             @Override
             protected void configure() {
+                bindOptions(HaskellBackendKModule.this::kompileOptions, binder());
                 installHaskellBackend(binder());
             }
         });
