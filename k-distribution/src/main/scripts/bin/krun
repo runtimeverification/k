@@ -566,6 +566,11 @@ elif [ "$backendName" = "haskell" ] ; then
   # Haskell backend
   koreExecFlags=
   depthFlags=
+  defFile="definition.kore"
+  if [ -f "$kompiledDir/haskellDefinition.bin" ]; then
+    defFile="haskellDefinition.bin"
+  fi
+
   if [ -n "$depth" ]; then
     depthFlags="--depth $depth"
   fi
@@ -589,7 +594,7 @@ elif [ "$backendName" = "haskell" ] ; then
       tempFiles+=("$final_input")
       keepTempsIfDryRun "$tempDir" "$final_input" "$expanded_input_file" "$kore_output"
       set +e
-      execute $cmdprefix "$haskellCmd" "$kompiledDir/haskellDefinition.bin" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$final_input" $koreExecFlags
+      execute $cmdprefix "$haskellCmd" "$kompiledDir/$defFile" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$final_input" $koreExecFlags
       set -e
       depthFlags="--depth 0"
     else
@@ -601,13 +606,13 @@ elif [ "$backendName" = "haskell" ] ; then
     fi
     keepTempsIfDryRun "$tempDir" "$final_input" "$patternFile" "$kore_output"
     set +e
-    execute $cmdprefix "$haskellCmd" "$kompiledDir/haskellDefinition.bin" --module "$mainModuleName" --pattern "$final_input" --output "$kore_output" --searchType "$searchType" --search "$patternFile" $koreExecFlags $depthFlags
+    execute $cmdprefix "$haskellCmd" "$kompiledDir/$defFile" --module "$mainModuleName" --pattern "$final_input" --output "$kore_output" --searchType "$searchType" --search "$patternFile" $koreExecFlags $depthFlags
     result=$?
     set -e
   else
     keepTempsIfDryRun "$tempDir" "$expanded_input_file" "$kore_output"
     set +e
-    execute $cmdprefix "$haskellCmd" "$kompiledDir/haskellDefinition.bin" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$kore_output" $koreExecFlags $depthFlags
+    execute $cmdprefix "$haskellCmd" "$kompiledDir/$defFile" --module "$mainModuleName" --pattern "$expanded_input_file" --output "$kore_output" $koreExecFlags $depthFlags
     result=$?
     set -e
   fi
