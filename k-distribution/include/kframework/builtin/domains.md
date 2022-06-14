@@ -254,7 +254,7 @@ An element of a `Map` is constructed via the `|->` operator. The key is on the
 left and the value is on the right.
 
 ```k
-  syntax Map ::= KItem "|->" KItem                      [function, functional, hook(MAP.element), klabel(_|->_), symbol, latex({#1}\mapsto{#2})]
+  syntax Map ::= KItem "|->" KItem                      [function, functional, hook(MAP.element), klabel(_|->_), symbol, latex({#1}\mapsto{#2}), injective]
 
   syntax priorities _|->_ > _Map_ .Map
   syntax non-assoc _|->_
@@ -533,7 +533,7 @@ The set with zero elements is represented by `.Set`.
 An element of a `Set` is constructed via the `SetItem` operator.
 
 ```k
-  syntax Set ::= SetItem(KItem)               [function, functional, hook(SET.element), klabel(SetItem), symbol]
+  syntax Set ::= SetItem(KItem)               [function, functional, hook(SET.element), klabel(SetItem), symbol, injective]
 ```
 
 ### Set union
