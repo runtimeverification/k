@@ -859,6 +859,11 @@ operations listed above.
   rule B:Bool impliesBool false => notBool B
 
   rule B1:Bool =/=Bool B2:Bool => notBool (B1 ==Bool B2)
+
+  rule {true #Equals notBool B} => {false #Equals B} [simplification]
+  rule {notBool B #Equals true} => {B #Equals false} [simplification]
+  rule {false #Equals notBool B} => {true #Equals B} [simplification]
+  rule {notBool B #Equals false} => {B #Equals true} [simplification]
 endmodule
 ```
 
