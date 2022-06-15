@@ -1,4 +1,5 @@
 FROM ubuntu:bionic
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ENV TZ=American/Chicago
 
