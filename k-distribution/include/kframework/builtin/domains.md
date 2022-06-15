@@ -1106,9 +1106,18 @@ endmodule
 
 module INT-KORE [kore]
   imports private K-EQUAL
+  imports private BOOL
   imports INT-COMMON
 
   rule I1:Int ==K I2:Int => I1 ==Int I2 [simplification]
+  rule {K1 ==Int K2 #Equals true} => {K1 #Equals K2} [simplification]
+  rule {true #Equals K1 ==Int K2} => {K1 #Equals K2} [simplification]
+  rule {K1 ==Int K2 #Equals false} => #Not({K1 #Equals K2}) [simplification]
+  rule {false #Equals K1 ==Int K2} => #Not({K1 #Equals K2}) [simplification]
+  rule {K1 =/=Int K2 #Equals true} => #Not({K1 #Equals K2}) [simplification]
+  rule {true #Equals K1 =/=Int K2} => #Not({K1 #Equals K2}) [simplification]
+  rule {K1 =/=Int K2 #Equals false} => {K1 #Equals K2} [simplification]
+  rule {false #Equals K1 =/=Int K2} => {K1 #Equals K2} [simplification]
 
 endmodule
 
