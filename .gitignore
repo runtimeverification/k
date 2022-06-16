@@ -7,6 +7,8 @@
 *.pdf
 *.swp
 *.kore
+*.mobi
+*.epub
 .metadata
 .recommenders
 .cache
