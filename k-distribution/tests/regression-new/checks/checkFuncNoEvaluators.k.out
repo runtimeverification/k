@@ -1,0 +1,11 @@
+[Error] Compiler: Found function with no rules: thing_CHECKFUNCNOEVALUATORS-SYNTAX_Thing add no-evaluators to suppress this error.
+	Source(checkFuncNoEvaluators.k)
+	Location(3,20,3,38)
+	3 |	  syntax Thing ::= "thing" [function]
+	  .	                   ^~~~~~~~~~~~~~~~~~
+[Error] Compiler: Found function with no rules: another_CHECKFUNCNOEVALUATORS-SYNTAX_Another add no-evaluators to suppress this error.
+	Source(checkFuncNoEvaluators.k)
+	Location(4,22,4,42)
+	4 |	  syntax Another ::= "another" [function]
+	  .	                     ^~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 2 structural errors.

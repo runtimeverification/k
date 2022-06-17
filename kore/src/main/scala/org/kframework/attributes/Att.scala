@@ -82,6 +82,7 @@ object Att {
   val BRACKET = "bracket"
   val FUNCTION = "function"
   val FUNCTIONAL = "functional"
+  val NO_EVALUATORS = "no-evaluators"
   val SIMPLIFICATION = "simplification"
   val ASSOC = "assoc"
   val COMM = "comm"

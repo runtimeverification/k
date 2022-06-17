@@ -431,6 +431,13 @@ public class Kompile {
         CheckRHSVariables checkRHSVariables = new CheckRHSVariables(errors, !isSymbolic);
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
 
+        // check for functions with no rules
+        stream(mainModule.productions()).forEach(prod -> {
+            if (prod.att().contains(Att.FUNCTION()) && !prod.att().contains(Att.HOOK()) && !prod.att().contains(Att.NO_EVALUATORS()))
+                if (mainModule.rulesFor().get(prod.klabel().get()).isEmpty())
+                    errors.add(KEMException.compilerError("Found function with no rules: " + prod.klabel().get()+ " add " + Att.NO_EVALUATORS() + " to suppress this error.", prod));
+        });
+
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAtt(errors, kem, mainModule, isSymbolic && isKast)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckConfigurationCells(errors, m, isSymbolic && isKast)::check));
