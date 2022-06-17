@@ -4,7 +4,7 @@
 
 let
   unwrapped = mavenix.buildMaven {
-    name = "k-${version}";
+    name = "k-5.3.0";
     infoFile = ./mavenix.lock;
     inherit src;
 
