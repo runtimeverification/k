@@ -22,7 +22,9 @@
             version =
               prev.haskell-backend-stackProject.hsPkgs.kore.components.exes.kore-exec.version;
             kore = prev.symlinkJoin {
-              name = "kore-${version}-${haskell-backend.sourceInfo.shortRev or "local"}";
+              name = "kore-${version}-${
+                  haskell-backend.sourceInfo.shortRev or "local"
+                }";
               paths = prev.lib.attrValues
                 prev.haskell-backend-stackProject.hsPkgs.kore.components.exes;
             };
@@ -30,7 +32,17 @@
             src = prev.stdenv.mkDerivation {
               name = "llvm-source";
               src = prev.lib.cleanSource
-                (prev.nix-gitignore.gitignoreSourcePure [ ] ./.);
+                (prev.nix-gitignore.gitignoreSourcePure [
+                  "/nix"
+                  "*.nix"
+                  "*.nix.sh"
+                  "/.github"
+                  "flake.lock"
+                  ./.gitignore
+                  "result*"
+                  "haskell-backend/*"
+                  "llvm-backend/*"
+                ] ./.);
               dontBuild = true;
               installPhase = ''
                 mkdir $out
