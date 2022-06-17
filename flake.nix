@@ -1,12 +1,11 @@
 {
   description = "K Framework";
   inputs = {
-    haskell-backend.url =
-      "github:runtimeverification/haskell-backend/3bab611b2286dc3be4ce93c37e21581c68a1a8de";
+    haskell-backend.url = "github:runtimeverification/haskell-backend";
     llvm-backend.url = "github:runtimeverification/llvm-backend";
     nixpkgs.follows = "haskell-backend/nixpkgs";
     llvm-backend.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
-    flake-utils.follows = "haskell-backend/flake-utils";
+    flake-utils.url = "github:numtide/flake-utils";
     mavenix.url = "github:nix-community/mavenix";
   };
 
@@ -23,7 +22,7 @@
             version =
               prev.haskell-backend-stackProject.hsPkgs.kore.components.exes.kore-exec.version;
             kore = prev.symlinkJoin {
-              name = "kore-${version}-${haskell-backend.sourceInfo.shortRev}";
+              name = "kore-${version}-${haskell-backend.sourceInfo.shortRev or "local"}";
               paths = prev.lib.attrValues
                 prev.haskell-backend-stackProject.hsPkgs.kore.components.exes;
             };

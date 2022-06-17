@@ -93,8 +93,9 @@
         "type": "github"
       },
       "original": {
-        "id": "flake-utils",
-        "type": "indirect"
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
       }
     },
     "flake-utils_2": {
@@ -147,7 +148,6 @@
     },
     "haskell-backend": {
       "inputs": {
-        "flake-utils": "flake-utils",
         "haskell-nix": "haskell-nix",
         "nixpkgs": [
           "haskell-backend",
@@ -157,17 +157,16 @@
         "z3-src": "z3-src"
       },
       "locked": {
-        "lastModified": 1654517608,
-        "narHash": "sha256-sYIzlvfcxcRwZsUac3/XQDf4gdYmCkoajwMNI7G4dO0=",
+        "lastModified": 1655383426,
+        "narHash": "sha256-VgsxCDkKC1ubi8rYA7eWMhBCrwn6wvhafgejEY/XQQM=",
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "3bab611b2286dc3be4ce93c37e21581c68a1a8de",
+        "rev": "8623518f30cf98e2cf8f32c35bbb64119a2d1f0d",
         "type": "github"
       },
       "original": {
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "3bab611b2286dc3be4ce93c37e21581c68a1a8de",
         "type": "github"
       }
     },
@@ -279,11 +278,11 @@
         "utils": "utils_2"
       },
       "locked": {
-        "lastModified": 1654681596,
-        "narHash": "sha256-dUx9UPslYhmEjXooJJLOlb1n9leNb/UFd5VRnD2Nwrs=",
+        "lastModified": 1655328587,
+        "narHash": "sha256-Gtmghg292qm2H2QBOWpxEZ0K2bD51jRhwhqi8Hbhmf4=",
         "owner": "runtimeverification",
         "repo": "llvm-backend",
-        "rev": "bb2cde20a42d79129278aac8585d669dcea3828c",
+        "rev": "8243ca9e201f9be793b57ddfb54cc77043a14dd4",
         "type": "github"
       },
       "original": {
@@ -541,10 +540,7 @@
     },
     "root": {
       "inputs": {
-        "flake-utils": [
-          "haskell-backend",
-          "flake-utils"
-        ],
+        "flake-utils": "flake-utils",
         "haskell-backend": "haskell-backend",
         "llvm-backend": "llvm-backend",
         "mavenix": "mavenix_2",
