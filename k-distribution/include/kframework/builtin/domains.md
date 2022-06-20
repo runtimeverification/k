@@ -613,7 +613,7 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
 
   // Symbolic in
   rule E  in (S1 -Set (SetItem(E) S1)) => false                                  [simplification]
-  rule E  in (S SetItem(E))            => true                                   [simplification]
+  rule E  in (_S SetItem(E))           => true                                   [simplification]
   rule E1 in (S SetItem(E2))           => true requires E1 ==K E2 orBool E1 in S [simplification]
   rule E1 in (S SetItem(E2))           => E1 in S requires E1 =/=K E2            [simplification]                  
 
