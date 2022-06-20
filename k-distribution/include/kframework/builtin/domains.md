@@ -611,6 +611,12 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   imports private K-EQUAL
   imports private BOOL
 
+  // Symbolic in
+  rule E  in (S1 -Set (SetItem(E) S1)) => false                                  [simplification]
+  rule E  in (S SetItem(E))            => true                                   [simplification]
+  rule E1 in (S SetItem(E2))           => true requires E1 ==K E2 orBool E1 in S [simplification]
+  rule E1 in (S SetItem(E2))           => E1 in S requires E1 =/=K E2            [simplification]                  
+
   //todo temp rule, should be generated in front-end
   rule #Ceil(@S:Set SetItem(@E:KItem)) => {(@E in @S) #Equals false} #And #Ceil(@S) #And #Ceil(@E)
     [anywhere, simplification]
