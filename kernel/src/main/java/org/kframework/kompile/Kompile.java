@@ -449,8 +449,7 @@ public class Kompile {
                 if (s instanceof Rule && !s.att().contains(Att.SIMPLIFICATION()))
                     errors.add(KEMException.compilerError("Only claims and simplification rules are allowed in proof modules.", s));
             }
-            if (s instanceof Rule && s.att().contains(Att.SIMPLIFICATION())) {
-                // TODO: it should be function like rule
+            if (s instanceof Rule && (s.att().contains(Att.SIMPLIFICATION()) && !s.att().contains(Att.ANYWHERE()))) {
                 KLabel kl = m.matchKLabel((Rule) s);
                 if (!m.functions().contains(kl))
                     errors.add(KEMException.compilerError("Simplification rules need to be function/functional like.", s));
