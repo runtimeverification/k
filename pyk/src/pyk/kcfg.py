@@ -258,7 +258,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             cfg.add_verified(resolve(verified_ids['source']), resolve(verified_ids['target']))
 
         for alias, id in dct.get('aliases', {}).items():
-            cfg.add_alias(name=alias, id=id)
+            cfg.add_alias(name=alias, id=resolve(id))
 
         return cfg
 
