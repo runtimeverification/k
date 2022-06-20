@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-for test_list in union inset diff; do
+# for test_list in union inset diff; do
+for test_list in inset; do
     i=1
     while read line; do
         spec_file="$test_list-$i-spec.k"
