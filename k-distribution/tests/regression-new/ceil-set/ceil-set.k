@@ -9,7 +9,7 @@ module CEIL-SET-SYNTAX
 endmodule
 
 module CEIL-SET
-    imports SET-TESTS-SYNTAX
+    imports CEIL-SET-SYNTAX
 
     configuration <k> $PGM:Test </k>
 
