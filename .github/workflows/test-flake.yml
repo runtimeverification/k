@@ -26,5 +26,11 @@ jobs:
           extraPullNames: kore
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
 
+      - name: 'Add haskell.nix pub keys'
+        run: sed -i '/^trusted-public-keys =/ s/$/ hydra.iohk.io:f\/Ea+s+dFdN+3Y\/G+FDgSq+a5NEWhJGzdjvKNGv0\/EQ=/' ~/.config/nix/nix.conf
+
+      - name: 'Add haskell.nix substituters'
+        run: sed -i '/^substituters =/ s/$/ https:\/\/cache.iog.io/' ~/.config/nix/nix.conf
+
       - name: 'Build K Framework'
         run: nix build .
