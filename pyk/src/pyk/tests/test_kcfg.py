@@ -6,6 +6,7 @@ from ..kast import TRUE, KApply, KAst, KInner, KVariable
 from ..kcfg import KCFG
 from ..ktool import KPrint
 from ..prelude import token
+from ..utils import shorten_hash
 
 
 def nid(i: int) -> str:
@@ -315,7 +316,7 @@ class KCFGTestCase(TestCase):
             'init': [nid(0)],
             'target': [nid(6)],
             'nodes': node_dicts(12),
-            'aliases': {'foo': nid(3)},
+            'aliases': {'foo': nid(3), 'bar': nid(3)},
                                                              # Each of the branching edges have given depth=0 # noqa: E131
             'edges': edge_dicts((0, 1), (1, 2, 5), (2, 3),   # Initial Linear segment
                                 (3, 4, 0), (4, 5), (5, 2),   # Loops back
@@ -329,44 +330,44 @@ class KCFGTestCase(TestCase):
         }
         cfg = KCFG.from_dict(d)
 
-        def _short_id(i) -> str:
-            return cfg.short_id(node(i))
+        def _short_hash(i) -> str:
+            return shorten_hash(nid(i))
 
         self.maxDiff = None
         actual = '\n'.join(cfg.pretty_print(mock_kprint())) + '\n'
         self.assertMultiLineEqual(actual,
-                                  f"{_short_id(0)} (init, expanded)\n"
+                                  f"{_short_hash(0)} (init, expanded)\n"
                                   f"│  (1 step)\n"
-                                  f"├  {_short_id(1)} (expanded)\n"
+                                  f"├  {_short_hash(1)} (expanded)\n"
                                   f"│  (5 steps)\n"
-                                  f"├  {_short_id(2)} (expanded)\n"
+                                  f"├  {_short_hash(2)} (expanded)\n"
                                   f"│  (1 step)\n"
-                                  f"├  {_short_id(3)} (expanded)\n"
-                                  f"┢━ {_short_id(4)} (expanded)\n"
+                                  f"├  {_short_hash(3)} (expanded, @foo, @bar)\n"
+                                  f"┢━ {_short_hash(4)} (expanded)\n"
                                   f"┃   │  (1 step)\n"
-                                  f"┃   ├  {_short_id(5)} (expanded)\n"
+                                  f"┃   ├  {_short_hash(5)} (expanded)\n"
                                   f"┃   │  (1 step)\n"
-                                  f"┃   ├  {_short_id(2)} (expanded)\n"
+                                  f"┃   ├  {_short_hash(2)} (expanded)\n"
                                   f"┃   ┊ (looped back)\n"
                                   f"┃\n"
-                                  f"┣━ {_short_id(5)} (expanded)\n"
+                                  f"┣━ {_short_hash(5)} (expanded)\n"
                                   f"┃   ┊ (continues as previously)\n"
                                   f"┃\n"
-                                  f"┣━ {_short_id(6)} (target, leaf)\n"
+                                  f"┣━ {_short_hash(6)} (target, leaf)\n"
                                   f"┃\n"
-                                  f"┣━ {_short_id(7)} (expanded)\n"
+                                  f"┣━ {_short_hash(7)} (expanded)\n"
                                   f"┃   │  (1 step)\n"
-                                  f"┃   └  {_short_id(6)} (target, leaf)\n"
+                                  f"┃   └  {_short_hash(6)} (target, leaf)\n"
                                   f"┃\n"
-                                  f"┗━ {_short_id(11)} (expanded)\n"
+                                  f"┗━ {_short_hash(11)} (expanded)\n"
                                   f"    │  (1 step)\n"
-                                  f"    ├  {_short_id(8)} (leaf)\n"
+                                  f"    ├  {_short_hash(8)} (leaf)\n"
                                   f"    │  constraint: KApply(label=KLabel(name='#Top', params=(KSort(name='GeneratedTopCell'),)), args=())\n"
                                   f"    │  subst:\n"
                                   f"    │    KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='V11'), KToken(token='8', sort=KSort(name='Int'))))\n"
-                                  f"    ├  {_short_id(11)} (expanded)\n"
+                                  f"    ├  {_short_hash(11)} (expanded)\n"
                                   f"    ┊ (looped back)\n\n"
                                   f""
-                                  f"{_short_id(9)} (frontier, leaf)\n"
-                                  f"{_short_id(10)} (frontier, leaf)\n"
+                                  f"{_short_hash(9)} (frontier, leaf)\n"
+                                  f"{_short_hash(10)} (frontier, leaf)\n"
                                   )

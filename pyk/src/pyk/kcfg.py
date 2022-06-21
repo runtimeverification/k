@@ -262,6 +262,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         return cfg
 
+    def aliases(self, node_id: str) -> List[str]:
+        node_id = self._resolve(node_id)
+        return [alias for alias, value in self._aliases.items() if node_id == value]
+
     def short_id(self, node: Node) -> str:
         """ Return a user friendly name for a node. This may be either an alias or a shortened hash. """
         for alias, hash in self._aliases.items():
@@ -297,9 +301,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         return KCFG.from_dict(json.loads(s))
 
     def node_short_info(self, node: Node) -> str:
-        attrs = self.node_attrs(node.id)
+        attrs = self.node_attrs(node.id) + ['@' + alias for alias in self.aliases(node.id)]
         attr_string = ' (' + ', '.join(attrs) + ')' if attrs else ''
-        return self.short_id(node) + attr_string
+        return shorten_hash(node.id) + attr_string
 
     def pretty_print(self, kprint: KPrint) -> List[str]:
 
@@ -589,9 +593,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         id = self._resolve(id)
         self._aliases[name] = id
 
-    def remove_alias(self, name: str) -> None:
-        self._aliases.pop(name)
-
     def remove_init(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
         if node_id not in self._init:
@@ -616,6 +617,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         if (source_id, target_id) not in self._verified:
             raise ValueError(f'Edge is not verified: {(source_id, target_id)}')
         self._verified.remove((source_id, target_id))
+
+    def remove_alias(self, name: str) -> None:
+        self._aliases.pop(name)
 
     def discard_init(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
