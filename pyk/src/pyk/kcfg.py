@@ -265,7 +265,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def short_id(self, node: Node) -> str:
         for alias, hash in self._aliases.items():
             if node.id == hash:
-                return alias
+                return '@' + alias
         return shorten_hash(node.id)
 
     def short_names(self, value: Any, leftChars=6, rightChars=6) -> Any:
@@ -391,8 +391,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         return graph.source
 
     def _resolve_all(self, id_like: str) -> List[str]:
-        if id_like in self._aliases:
-            return [self._aliases[id_like]]
+        if id_like.startswith('@'):
+            if id_like[1:] in self._aliases:
+                return [self._aliases[id_like[1:]]]
+            raise ValueError(f'Unknown alias: {id_like}')
         return [node_id for node_id in self._nodes if compare_short_hashes(id_like, node_id)]
 
     def _resolve_or_none(self, id_like: str) -> Optional[str]:

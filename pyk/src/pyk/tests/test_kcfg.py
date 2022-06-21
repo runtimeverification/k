@@ -290,23 +290,25 @@ class KCFGTestCase(TestCase):
         }
 
         cfg = KCFG.from_dict(d)
-        self.assertEqual(cfg.node('foo'), node(1))
-        self.assertEqual(cfg.short_id(node(1)), 'foo')
+        self.assertEqual(cfg.node('@foo'), node(1))
+        self.assertEqual(cfg.short_id(node(1)), '@foo')
 
-        self.assertNotEqual(cfg.short_id(node(0)), 'bar')
+        self.assertNotEqual(cfg.short_id(node(0)), '@bar')
         cfg.add_alias('bar', node(0).id)
-        self.assertEqual(cfg.node('bar'), node(0))
+        cfg.add_alias('bar2', node(0).id)
+        self.assertEqual(cfg.node('@bar'), node(0))
+        self.assertEqual(cfg.node('@bar2'), node(0))
         cfg.remove_alias('bar')
-        with self.assertRaisesRegex(ValueError, 'Bad short hash: bar'):
-            cfg.node('bar')
-        self.assertNotEqual(cfg.short_id(node(0)), 'bar')
+        with self.assertRaisesRegex(ValueError, 'Unknown alias: @bar'):
+            cfg.node('@bar')
+        self.assertNotEqual(cfg.short_id(node(0)), '@bar')
 
         with self.assertRaisesRegex(ValueError, 'Unknown node: '):
-            cfg.add_alias('buzz', node(3).id)
+            cfg.add_alias('@buzz', node(3).id)
 
         cfg.remove_node(nid(1))
         cfg.create_node(term(1))
-        self.assertNotEqual(cfg.short_id(node(1)), 'foo')
+        self.assertNotEqual(cfg.short_id(node(1)), '@foo')
 
     def test_pretty_print(self):
         d = {
