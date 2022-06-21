@@ -19,18 +19,29 @@
         haskell-backend.overlay
         (final: prev:
           let
-            version =
+            kore-version =
               prev.haskell-backend-stackProject.hsPkgs.kore.components.exes.kore-exec.version;
             kore = prev.symlinkJoin {
-              name = "kore-${version}-${haskell-backend.sourceInfo.shortRev or "local"}";
+              name = "kore-${kore-version}-${
+                  haskell-backend.sourceInfo.shortRev or "local"
+                }";
               paths = prev.lib.attrValues
                 prev.haskell-backend-stackProject.hsPkgs.kore.components.exes;
             };
-
+            k-version =
+              prev.lib.removeSuffix "\n" (builtins.readFile ./package/version);
             src = prev.stdenv.mkDerivation {
-              name = "llvm-source";
+              name = "k-${k-version}-${self.rev or "dirty"}-src";
               src = prev.lib.cleanSource
-                (prev.nix-gitignore.gitignoreSourcePure [ ] ./.);
+                (prev.nix-gitignore.gitignoreSourcePure [
+                  ./.gitignore
+                  "result*"
+                  "nix/"
+                  "*.nix"
+                  "haskell-backend/src/main/native/haskell-backend/*"
+                  "llvm-backend/src/main/native/llvm-backend/*"
+                  "k-distribution/tests/regression-new"
+                ] ./.);
               dontBuild = true;
               installPhase = ''
                 mkdir $out
@@ -52,10 +63,7 @@
                   prev.lldb
                 else
                   prev.gdb;
-              version = let
-                package-version = prev.lib.removeSuffix "\n"
-                  (builtins.readFile ./package/version);
-              in "${package-version}-${self.rev or "dirty"}";
+              version = "${k-version}-${self.rev or "dirty"}";
             };
           })
       ];
@@ -102,6 +110,52 @@
             done
             echo "All dependencies match"
           '';
+
+          test = with pkgs;
+            let
+              k-version =
+                lib.removeSuffix "\n" (builtins.readFile ./package/version);
+            in stdenv.mkDerivation {
+              name = "k-${k-version}-${self.rev or "dirty"}-test";
+              src = lib.cleanSource
+                (nix-gitignore.gitignoreSourcePure [ ./.gitignore ]
+                  ./k-distribution);
+              preferLocalBuild = true;
+              buildInputs = [ k haskell-backend llvm-backend ];
+              postPatch = ''
+                patchShebangs tests/regression-new/*
+              '';
+              buildFlags = [
+                # Find executables on PATH
+                "KOMPILE=${k}/bin/kompile"
+                "KRUN=${k}/bin/krun"
+                "KDEP=${k}/bin/kdep"
+                "KPROVE_LEGACY=${k}/bin/kprove-legacy"
+                "KPROVE=${k}/bin/kprove"
+                "KBMC=${k}/bin/kbmc"
+                "KAST=${k}/bin/kast"
+                "KPRINT=${k}/bin/kprint"
+                "KRUN_LEGACY=${k}/bin/krun-legacy"
+                "KEQ=${k}/bin/keq"
+                "KSERVER=${k}/bin/kserver"
+                "KPARSE=${k}/bin/kparse"
+                "KPARSE_GEN=${k}/bin/kparse-gen"
+                "KORE_PRINT=${k}/bin/kore-print"
+                "PACKAGE_VERSION=${k-version}"
+                "--output-sync"
+                # "-C help"
+              ];
+              enableParallelBuilding = true;
+              preBuild = ''
+                cd tests/regression-new
+              '';
+              installPhase = ''
+                runHook preInstall
+                touch "$out"
+                runHook postInstall
+              '';
+            };
+
         };
         defaultPackage = pkgs.k;
       }) // {
