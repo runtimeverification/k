@@ -263,27 +263,28 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         return cfg
 
     def short_id(self, node: Node) -> str:
+        """ Return a user friendly name for a node. This may be either an alias or a shortened hash. """
         for alias, hash in self._aliases.items():
             if node.id == hash:
                 return '@' + alias
         return shorten_hash(node.id)
 
-    def short_names(self, value: Any, leftChars=6, rightChars=6) -> Any:
+    def short_ids(self, value: Any, leftChars=6, rightChars=6) -> Any:
         result: Any = None
         if isinstance(value, KCFG.Node):
             result = self.short_id(value)
         elif type(value) is tuple:
-            result = tuple([self.short_names(item) for item in value])
+            result = tuple([self.short_ids(item) for item in value])
         elif type(value) is list:
-            result = [self.short_names(item) for item in value]
+            result = [self.short_ids(item) for item in value]
         elif type(value) is dict:
             result = {}
             for (k, v) in value.items():
-                result[self.short_names(k)] = self.short_names(v)
+                result[self.short_ids(k)] = self.short_ids(v)
         elif type(value) is set:
             result = set()
             for item in value:
-                result.add(self.short_names(item))
+                result.add(self.short_ids(item))
         else:
             assert(False)
         return result
