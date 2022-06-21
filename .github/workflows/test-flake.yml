@@ -42,4 +42,4 @@ jobs:
         if: ${{ !startsWith(matrix.os, 'macos') }}
 
       - name: 'Build K Framework'
-        run: nix build .
+        run: GC_DONT_GC=1 nix build .
