@@ -266,21 +266,20 @@ class KCFGTestCase(TestCase):
         }
         cfg = KCFG.from_dict(d)
 
-        self.assertEqual(node(1), cfg.node('d33...d8'))
         self.assertEqual(node(1), cfg.node('d33..d8'))
         self.assertEqual(node(1), cfg.node(node(1).id))
 
         # Matches no nodes
-        with self.assertRaisesRegex(ValueError, 'Unknown node: deadbeef\\.\\.\\.d8'):
-            self.assertEqual(node(1), cfg.node('deadbeef...d8'))
+        with self.assertRaises(ValueError, msg='Unknown node: deadbeef..d8'):
+            self.assertEqual(node(1), cfg.node('deadbeef..d8'))
 
         # Matches all nodes
         with self.assertRaisesRegex(ValueError, 'Multiple nodes for pattern: ...'):
-            cfg.node('...')
+            cfg.node('..')
 
         # Matches node(0) and node(2)
         with self.assertRaisesRegex(ValueError, 'Multiple nodes for pattern: ...'):
-            cfg.node('3...')
+            cfg.node('3..')
 
     def test_aliases(self):
         # Given

@@ -167,9 +167,6 @@ def deconstruct_short_hash(h: str) -> Tuple[str, str]:
     x = h.lower()
     if is_hash(x):
         return (x, x)
-    (l, sep, r) = x.partition('...')
-    if sep == '...' and is_hexstring(l) and is_hexstring(r):
-        return (l, r)
     (l, sep, r) = x.partition('..')
     if sep == '..' and is_hexstring(l) and is_hexstring(r):
         return (l, r)

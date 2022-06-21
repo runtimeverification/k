@@ -13,6 +13,6 @@ class KCFGTestCase(TestCase):
         with self.assertRaises(ValueError, msg='Bad short hash: 3...XXX'):
             deconstruct_short_hash('3...XXX')
 
-        # Bad short hash: Has more than three dots
+        # Bad short hash: Has more than two dots
         with self.assertRaises(ValueError, msg='Bad short hash: 3.....adf'):
-            deconstruct_short_hash('3.....adf')
+            deconstruct_short_hash('3...adf')
