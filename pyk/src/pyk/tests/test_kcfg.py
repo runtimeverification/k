@@ -377,4 +377,7 @@ class KCFGTestCase(TestCase):
                                   f"    │    KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='V11'), KToken(token='8', sort=KSort(name='Int'))))\n"
                                   f"    ├  {_short_id(11)} (expanded)\n"
                                   f"    ┊ (looped back)\n\n"
+                                  f""
+                                  f"{_short_id(9)} (frontier, leaf)\n"
+                                  f"{_short_id(10)} (frontier, leaf)\n"
                                   )

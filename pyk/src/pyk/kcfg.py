@@ -344,7 +344,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                     ret.append(new_indent.rstrip())
             return ret
 
-        return [self.node_short_info(self.init[0])] + _print_subgraph('', self.init[0], [self.init[0]])
+        ret = []
+        init = self.init
+        while init:
+            ret.append(self.node_short_info(init[0]))
+            ret.extend(_print_subgraph('', init[0], [init[0]]))
+            init = [node for node in self.nodes if node not in processed_nodes]
+        return ret
 
     def to_dot(self, kprint: KPrint) -> str:
         def _short_label(label):
