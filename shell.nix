@@ -1,9 +1,11 @@
 let
   sources = import ./nix/sources.nix;
-  pinned = import sources."nixpkgs" { config = {}; overlays = []; };
-in
+  pinned = import sources."nixpkgs" {
+    config = { };
+    overlays = [ ];
+  };
 
-{ pkgs ? pinned }:
+in { pkgs ? pinned }:
 
 let
   inherit (pkgs) mkShell;
@@ -13,13 +15,7 @@ let
   inherit (default) mavenix;
 
 in mkShell {
-  inputsFrom = [
-    k
-  ];
+  inputsFrom = [ k ];
 
-  buildInputs = [
-    clang llvm-backend
-    haskell-backend
-    mavenix.cli
-  ];
+  buildInputs = [ llvm-backend haskell-backend mavenix.cli ];
 }
