@@ -34,11 +34,11 @@ jobs:
         if: ${{ !startsWith(matrix.os, 'macos') }}
 
       - name: 'Add haskell.nix substituters (macOS)'
-        run: gsed -i "" '/^substituters =/ s/$/ https:\/\/cache.iog.io/' ~/.config/nix/nix.conf
+        run: gsed -i '/^substituters =/ s/$/ https:\/\/cache.iog.io/' ~/.config/nix/nix.conf
         if: ${{ startsWith(matrix.os, 'macos') }}
 
       - name: 'Add haskell.nix substituters (linux)'
-        run: sed -i "" '/^substituters =/ s/$/ https:\/\/cache.iog.io/' ~/.config/nix/nix.conf
+        run: sed -i '/^substituters =/ s/$/ https:\/\/cache.iog.io/' ~/.config/nix/nix.conf
         if: ${{ !startsWith(matrix.os, 'macos') }}
 
       - name: 'Build K Framework'
