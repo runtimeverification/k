@@ -790,7 +790,7 @@ module BOOL-SYNTAX
   syntax Bool ::= "false" [token]
 endmodule
 
-module BOOL
+module BOOL-COMMON
   imports private BASIC-K
   imports BOOL-SYNTAX
 ```
@@ -864,6 +864,10 @@ operations listed above.
   rule B:Bool impliesBool false => notBool B
 
   rule B1:Bool =/=Bool B2:Bool => notBool (B1 ==Bool B2)
+endmodule
+
+module BOOL-KORE [kore]
+  imports BOOL-COMMON
 
   rule {true #Equals notBool @B} => {false #Equals @B} [simplification]
   rule {notBool @B #Equals true} => {@B #Equals false} [simplification]
@@ -874,6 +878,11 @@ operations listed above.
   rule {@B1 andBool @B2 #Equals true} => {@B1 #Equals true} #And {@B2 #Equals true} [simplification]
   rule {false #Equals @B1 orBool @B2} => {false #Equals @B1} #And {false #Equals @B2} [simplification]
   rule {@B1 orBool @B2 #Equals false} => {@B1 #Equals false} #And {@B2 #Equals false} [simplification]
+endmodule
+
+module BOOL
+  imports BOOL-COMMON
+  imports BOOL-KORE
 endmodule
 ```
 
