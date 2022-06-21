@@ -866,7 +866,7 @@ operations listed above.
   rule B1:Bool =/=Bool B2:Bool => notBool (B1 ==Bool B2)
 endmodule
 
-module BOOL-KORE [kore]
+module BOOL-KORE [kore, symbolic]
   imports BOOL-COMMON
 
   rule {true #Equals notBool @B} => {false #Equals @B} [simplification]
@@ -1113,7 +1113,7 @@ module INT-KAST [kast]
 
 endmodule
 
-module INT-KORE [kore]
+module INT-KORE [kore, symbolic]
   imports private K-EQUAL
   imports private BOOL
   imports INT-COMMON
@@ -1625,7 +1625,7 @@ module STRING-KAST [kast]
 
 endmodule
 
-module STRING-KORE [kore]
+module STRING-KORE [kore, symbolic]
   imports private K-EQUAL
   imports STRING-COMMON
 
@@ -2093,7 +2093,7 @@ module K-EQUAL-SYNTAX
 
 endmodule
 
-module K-EQUAL-KORE [kore]
+module K-EQUAL-KORE [kore, symbolic]
   import private BOOL
   import K-EQUAL-SYNTAX
 
