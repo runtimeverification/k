@@ -14,7 +14,6 @@ jobs:
         with:
           # Check out pull request HEAD instead of merge commit.
           ref: ${{ github.event.pull_request.head.sha }}
-          submodules: recursive
 
       - name: 'Install Nix'
         uses: cachix/install-nix-action@v15
@@ -31,15 +30,15 @@ jobs:
         if: ${{ startsWith(matrix.os, 'macos') }}
 
       - name: 'Add haskell.nix pub keys (linux)'
-        run: gsed -i '/^trusted-public-keys =/ s/$/ hydra.iohk.io:f\/Ea+s+dFdN+3Y\/G+FDgSq+a5NEWhJGzdjvKNGv0\/EQ=/' ~/.config/nix/nix.conf
+        run: sed -i '/^trusted-public-keys =/ s/$/ hydra.iohk.io:f\/Ea+s+dFdN+3Y\/G+FDgSq+a5NEWhJGzdjvKNGv0\/EQ=/' ~/.config/nix/nix.conf
         if: ${{ !startsWith(matrix.os, 'macos') }}
 
       - name: 'Add haskell.nix substituters (macOS)'
-        run: sed -i "" '/^substituters =/ s/$/ https:\/\/cache.iog.io/' ~/.config/nix/nix.conf
+        run: gsed -i "" '/^substituters =/ s/$/ https:\/\/cache.iog.io/' ~/.config/nix/nix.conf
         if: ${{ startsWith(matrix.os, 'macos') }}
 
       - name: 'Add haskell.nix substituters (linux)'
-        run: gsed -i "" '/^substituters =/ s/$/ https:\/\/cache.iog.io/' ~/.config/nix/nix.conf
+        run: sed -i "" '/^substituters =/ s/$/ https:\/\/cache.iog.io/' ~/.config/nix/nix.conf
         if: ${{ !startsWith(matrix.os, 'macos') }}
 
       - name: 'Build K Framework'
