@@ -364,9 +364,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         graph = Digraph()
 
         for node in self.nodes:
-            nodeAttrs = self.node_attrs(node.id)
-            classAttrs = ' '.join(nodeAttrs)
-            label = self.short_id(node) + (classAttrs and ' ' + classAttrs)
+            label = self.node_short_info(node)
+            classAttrs = ' '.join(self.node_attrs(node.id))
             attrs = {'class': classAttrs} if classAttrs else {}
             graph.node(name=node.id, label=label, **attrs)
 
