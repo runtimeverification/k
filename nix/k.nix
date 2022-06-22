@@ -38,6 +38,8 @@ let
       cp -r k-distribution/target/release/k/{bin,include,lib} $out/
       mkdir -p $out/lib/cmake/kframework && ln -sf ${llvm-backend.src}/cmake/* $out/lib/cmake/kframework/
       ln -sf ${llvm-backend}/include/kllvm $out/include/
+      ln -sf ${llvm-backend}/lib/kllvm $out/lib/
+      ln -sf ${llvm-backend}/bin/* $out/bin/
 
       prelude_kore="$out/include/kframework/kore/prelude.kore"
       mkdir -p "$(dirname "$prelude_kore")"
@@ -90,8 +92,7 @@ in let
     z3
     haskell-backend
     llvm-backend
-    debugger
-  ];
+  ] ++ lib.lists.optional (debugger != null) debugger;
   # PATH used at runtime
   hostPATH = lib.makeBinPath hostInputs;
 

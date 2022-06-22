@@ -60,7 +60,7 @@
               inherit src;
               debugger =
                 if system == "x86_64-darwin" || system == "aarch64-darwin" then
-                  prev.lldb
+                  null
                 else
                   prev.gdb;
               version = "${k-version}-${self.rev or "dirty"}";
@@ -121,12 +121,21 @@
                 (nix-gitignore.gitignoreSourcePure [ ./.gitignore ]
                   ./k-distribution);
               preferLocalBuild = true;
-              buildInputs = [ k haskell-backend llvm-backend ];
+              buildInputs = [
+                # diffutils
+                # ncurses
+                # bison
+                # clang
+                gmp
+                mpfr
+                # libffi
+                # jemalloc
+                k
+              ];
               postPatch = ''
                 patchShebangs tests/regression-new/*
               '';
               buildFlags = [
-                # Find executables on PATH
                 "KOMPILE=${k}/bin/kompile"
                 "KRUN=${k}/bin/krun"
                 "KDEP=${k}/bin/kdep"
@@ -141,6 +150,7 @@
                 "KPARSE=${k}/bin/kparse"
                 "KPARSE_GEN=${k}/bin/kparse-gen"
                 "KORE_PRINT=${k}/bin/kore-print"
+                "KLLVMLIB=${k}/lib/kllvm"
                 "PACKAGE_VERSION=${k-version}"
                 "--output-sync"
                 # "-C help"
