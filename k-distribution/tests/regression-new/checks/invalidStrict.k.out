@@ -1,25 +1,41 @@
 [Error] Compiler: Cannot put a strict attribute on a production with no nonterminals
 	Source(invalidStrict.k)
-	Location(4,16,4,32)
+	Location(4,16,4,33)
+	4 |	syntax Foo ::= foo() [strict(1)]
+	  .	               ^~~~~~~~~~~~~~~~~
 [Error] Compiler: Expecting a number between 1 and 1, but found 2 as a strict position in [2]
 	Source(invalidStrict.k)
-	Location(6,16,6,35)
+	Location(6,16,6,36)
+	6 |	syntax Foo ::= foo(Foo) [strict(2)]
+	  .	               ^~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Invalid strict attribute containing invalid semicolons. Must contain 0, 1, 2, or an even number of components.
 	Source(invalidStrict.k)
-	Location(8,16,8,45)
+	Location(8,16,8,46)
+	8 |	syntax Foo ::= bar(Foo) [strict(foo; bar; 1)]
+	  .	               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Cannot heat a nonterminal of sort K. Did you mean KItem?
 	Source(invalidStrict.k)
-	Location(10,16,10,30)
+	Location(10,16,10,31)
+	10 |	syntax Bar ::= baz(K) [strict]
+	   .	               ^~~~~~~~~~~~~~~
 [Error] Compiler: Cannot heat a nonterminal of sort K. Did you mean KItem?
 	Source(invalidStrict.k)
-	Location(12,16,12,40)
+	Location(12,16,12,41)
+	12 |	syntax Bar ::= stuff(K, Foo) [strict(1)]
+	   .	               ^~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Cannot heat a HOLE of sort K. Did you mean to sort it to KItem?
 	Source(invalidStrict.k)
 	Location(20,15,20,21)
+	20 |	context plugh(HOLE:K)
+	   .	              ^~~~~~
 [Error] Compiler: Cannot heat a HOLE of sort K. Did you mean to sort it to KItem?
 	Source(invalidStrict.k)
 	Location(22,15,22,19)
+	22 |	context plugh(HOLE)
+	   .	              ^~~~
 [Error] Compiler: Cannot heat a nonterminal of sort K. Did you mean KItem?
 	Source(invalidStrict.k)
-	Location(26,16,26,39)
+	Location(26,16,26,40)
+	26 |	syntax Baz ::= thingy(K) [seqstrict(x)]
+	   .	               ^~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 8 structural errors.

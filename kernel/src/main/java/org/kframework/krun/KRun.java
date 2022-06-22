@@ -224,7 +224,7 @@ public class KRun {
         tokens.add(value);
         Map<String, String> environment = new HashMap<>();
         environment.put("KRUN_SORT", startSymbol.toString());
-        environment.put("KRUN_COMPILED_DEF", files.resolveDefinitionDirectory(".").getAbsolutePath());
+        environment.put("KRUN_KOMPILED_DIR", files.resolveKompiled(".").getAbsolutePath());
         RunProcess.ProcessOutput output = RunProcess.execute(environment, files.getProcessBuilder(), tokens.toArray(new String[tokens.size()]));
 
         if (output.exitCode != 0) {

@@ -66,7 +66,7 @@ you need short circuiting behavior, it is better to use a side condition.
 `Int`: the `Int` should be 0 if the terms are equal and 1 if the terms are 
 unequal.
 
-2. Modify your solution to Lesson 1.16, Problem 1 and introduce an `if`
+2. Modify your solution to [Lesson 1.16](../16_collections/README.md), Problem 1 and introduce an `if`
 `Stmt` to the syntax of the language, then implement it using the `#if` symbol.
 Make sure to write tests for the resulting interpreter.
 

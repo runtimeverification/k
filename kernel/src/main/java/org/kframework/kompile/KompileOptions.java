@@ -50,8 +50,6 @@ public class KompileOptions implements Serializable {
     @Parameter(names="--backend", description="Choose a backend. <backend> is one of [llvm|haskell|kore|java]. Each creates the kompiled K definition.")
     public String backend = Backends.LLVM;
 
-    private boolean kore;
-
     @Parameter(names="--main-module", description="Specify main module in which a program starts to execute. This information is used by 'krun'. The default is the name of the given K definition file without the extension (.k).")
     private String mainModule;
 
@@ -132,4 +130,7 @@ public class KompileOptions implements Serializable {
 
     @Parameter(names="--top-cell", description="Choose the top configuration cell when more than one is provided. Does nothing if only one top cell exists.")
     public String topCell;
+
+    @Parameter(names="--debug-type-inference", description="Filename and source line of rule to debug type inference for. This is generally an option used only by maintaners.")
+    public String debugTypeInference;
 }

@@ -33,7 +33,7 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.parser.InputModes;
 import org.kframework.parser.KRead;
 import org.kframework.parser.ParserUtils;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.unparser.ToJson;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
@@ -306,7 +306,7 @@ public class Kompile {
                 .andThen(propagateMacroToRules)
                 .andThen(expandMacros)
                 .andThen(guardOrs)
-                .andThen(Kompile::resolveFreshConstants)
+                .andThen(d -> Kompile.resolveFreshConstants(d, files))
                 .andThen(generateSortPredicateSyntax)
                 .andThen(generateSortProjections)
                 .andThen(AddImplicitComputationCell::transformDefinition)
@@ -415,8 +415,7 @@ public class Kompile {
                 if (s instanceof Rule && !s.att().contains(Att.SIMPLIFICATION()))
                     errors.add(KEMException.compilerError("Only claims and simplification rules are allowed in proof modules.", s));
             }
-            if (s instanceof Rule && s.att().contains(Att.SIMPLIFICATION())) {
-                // TODO: it should be function like rule
+            if (s instanceof Rule && (s.att().contains(Att.SIMPLIFICATION()) && !s.att().contains(Att.ANYWHERE()))) {
                 KLabel kl = m.matchKLabel((Rule) s);
                 if (!m.functions().contains(kl))
                     errors.add(KEMException.compilerError("Simplification rules need to be function/functional like.", s));
@@ -501,8 +500,8 @@ public class Kompile {
         return Constructors.Definition(d.mainModule(), immutable(allModules), d.att());
     }
 
-    public static Definition resolveFreshConstants(Definition input) {
-        return DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(input, false, null).resolve(m)), "resolving !Var variables")
+    public static Definition resolveFreshConstants(Definition input, FileUtil files) {
+        return DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(input, false, null, files).resolve(m)), "resolving !Var variables")
                 .apply(input);
     }
 

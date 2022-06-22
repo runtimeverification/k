@@ -1,16 +1,28 @@
 [Error] Compiler: Attributes macro|macro-rec|alias|alias-rec are not allowed on function rules.
 	Source(checkFuncRuleAtt.k)
 	Location(10,10,10,18)
+	10 |	    rule foo => 0 [macro]
+	   .	         ^~~~~~~~
 [Error] Compiler: Attributes macro|macro-rec|alias|alias-rec are not allowed on function rules.
 	Source(checkFuncRuleAtt.k)
 	Location(11,10,11,18)
+	11 |	    rule foo => 1 [macro-rec]
+	   .	         ^~~~~~~~
 [Error] Compiler: Attributes macro|macro-rec|alias|alias-rec are not allowed on function rules.
 	Source(checkFuncRuleAtt.k)
 	Location(12,10,12,18)
+	12 |	    rule foo => 2 [alias]
+	   .	         ^~~~~~~~
 [Error] Compiler: Attributes macro|macro-rec|alias|alias-rec are not allowed on function rules.
 	Source(checkFuncRuleAtt.k)
 	Location(13,10,13,18)
+	13 |	    rule foo => 3 [alias-rec]
+	   .	         ^~~~~~~~
 [Error] Compiler: Attributes macro|macro-rec|alias|alias-rec are not allowed on function rules.
 	Source(checkFuncRuleAtt.k)
 	Location(16,10,17,26)
+	   .	         v~~~~~~~~~~~~~
+	16 |	    rule [[ foo => 6 ]]
+	17 |	         <notk> 7 </notk> [macro]
+	   .	         ~~~~~~~~~~~~~~~^
 [Error] Compiler: Had 5 structural errors.

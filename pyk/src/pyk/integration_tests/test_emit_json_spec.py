@@ -3,7 +3,7 @@ from pathlib import Path
 
 from ..kast import EMPTY_ATT, KAst, KDefinition, KRequire
 from ..kastManip import remove_generated_cells
-from ..ktool import KompileBackend, kprovex
+from ..ktool import KompileBackend, kprove
 from .kprove_test import KProveTest
 
 
@@ -12,21 +12,20 @@ class EmitJsonSpecTest(KProveTest):
 
     KOMPILE_MAIN_FILE = f'k-files/{MAIN_FILE_NAME}'
     KOMPILE_BACKEND = KompileBackend.HASKELL
-    KOMPILE_OUTPUT_DIR = 'definitions/imp-verification/haskell'
+    KOMPILE_OUTPUT_DIR = 'definitions/imp-verification'
     KOMPILE_EMIT_JSON = True
 
     KPROVE_USE_DIR = '.emit-json-spec-test'
 
     SPEC_FILE = 'k-files/looping-spec.k'
-    SPEC_JSON_FILE = 'definitions/imp-verification/haskell/looping-spec.json'
+    SPEC_JSON_FILE = 'definitions/imp-verification/looping-spec.json'
 
     def setUp(self):
         super().setUp()
 
         spec_file = Path(self.SPEC_FILE)
-        directory = Path(self.KOMPILE_OUTPUT_DIR)
         emit_json_spec = Path(self.SPEC_JSON_FILE)
-        kprovex(spec_file, directory=directory, emit_json_spec=emit_json_spec, dry_run=True)
+        kprove(spec_file, kompiled_dir=self.KOMPILE_OUTPUT_DIR, emit_json_spec=emit_json_spec, dry_run=True)
 
         with open(self.SPEC_JSON_FILE, 'r') as spec_file:
             module = KAst.from_dict(json.load(spec_file)['term'])
@@ -46,7 +45,7 @@ class EmitJsonSpecTest(KProveTest):
 
     def test_prove_claim(self):
         # When
-        result = self.kprove.proveClaim(self.claim, 'looping-1')
+        result = self.kprove.prove_claim(self.claim, 'looping-1')
 
         # Then
         self.assertTop(result)
@@ -61,10 +60,10 @@ class EmitJsonSpecTest(KProveTest):
         definition = KDefinition(self.module.name, [self.module], requires=[KRequire(self.MAIN_FILE_NAME)])
 
         with open(spec_file, 'x') as f:
-            f.write(self.kprove.prettyPrint(definition))
+            f.write(self.kprove.pretty_print(definition))
 
         # When
-        result = self.kprove.prove(spec_file, spec_module_name)
+        result = self.kprove.prove(spec_file, spec_module_name=spec_module_name)
 
         # Then
         self.assertTop(result)

@@ -1,18 +1,28 @@
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, cast
 from unittest import TestCase
 
 from ..cterm import CTerm
-from ..kast import TRUE, KApply
+from ..kast import TRUE, KApply, KAst, KInner, KVariable
 from ..kcfg import KCFG
+from ..ktool import KPrint
 from ..prelude import token
+from ..utils import shorten_hashes
 
 
 def nid(i: int) -> str:
     return node(i).id
 
 
+def short_id(i: int) -> str:
+    return shorten_hashes(nid(i))
+
+
+# over 10 is variables
 def term(i: int) -> CTerm:
-    return CTerm(KApply('<top>', [token(i)]))
+    inside: KInner = token(i)
+    if i > 10:
+        inside = KVariable('V' + str(i))
+    return CTerm(KApply('<top>', [inside]))
 
 
 def node(i: int) -> KCFG.Node:
@@ -28,10 +38,27 @@ def node_dicts(n: int) -> List[Dict[str, Any]]:
 
 
 def edge_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
+
+    def _make_edge_dict(i, j, depth=1):
+        return {'source': nid(i), 'target': nid(j), 'condition': TRUE.to_dict(), 'depth': depth}
+
+    return [_make_edge_dict(*edge) for edge in edges]
+
+
+def cover_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
     return [
         {'source': nid(i), 'target': nid(j), 'condition': TRUE.to_dict(), 'depth': 1}
         for i, j in edges
     ]
+
+
+class MockKPrint:
+    def pretty_print(self, term: KAst) -> str:
+        return str(term)
+
+
+def mock_kprint() -> KPrint:
+    return cast(KPrint, MockKPrint())
 
 
 class KCFGTestCase(TestCase):
@@ -92,6 +119,7 @@ class KCFGTestCase(TestCase):
         # Then
         self.assertEqual(new_node, node(0))
         self.assertSetEqual(set(cfg.nodes), {node(0)})
+        self.assertFalse(cfg.is_expanded(new_node.id))
 
     def test_remove_unknown_node(self):
         # Given
@@ -104,19 +132,51 @@ class KCFGTestCase(TestCase):
 
     def test_remove_node(self):
         # Given
-        d = {'nodes': node_dicts(1), 'edges': edge_dicts((0, 0))}
+        d = {'nodes': node_dicts(3), 'edges': edge_dicts((0, 1), (1, 2))}
         cfg = KCFG.from_dict(d)
+        cfg.add_expanded(node(0).id)
+        cfg.add_expanded(node(1).id)
 
         # When
-        cfg.remove_node(nid(0))
+        cfg.remove_node(nid(1))
 
         # Then
-        self.assertSetEqual(set(cfg.nodes), set())
+        self.assertSetEqual(set(cfg.nodes), {node(0), node(2)})
         self.assertSetEqual(set(cfg.edges()), set())
+        self.assertFalse(cfg.is_expanded(nid(0)))
         with self.assertRaises(ValueError):
-            cfg.node(nid(0))
+            cfg.node(nid(1))
         with self.assertRaises(ValueError):
-            cfg.edge(nid(0), nid(0))
+            cfg.edge(nid(0), nid(1))
+        with self.assertRaises(ValueError):
+            cfg.edge(nid(1), nid(2))
+
+    def test_cover_then_remove(self):
+        # Given
+        cfg = KCFG()
+
+        # When
+        node1 = cfg.create_node(CTerm(KApply('<top>', [token(1)])))
+        node2 = cfg.create_node(CTerm(KApply('<top>', [KVariable('X')])))
+        cover = cfg.create_cover(node1.id, node2.id)
+
+        # Then
+        self.assertTrue(cfg.is_covered(node1.id))
+        self.assertFalse(cfg.is_covered(node2.id))
+        self.assertFalse(cfg.is_expanded(node1.id))
+        self.assertFalse(cfg.is_expanded(node2.id))
+        self.assertDictEqual(dict(cover.subst), {'X': token(1)})
+        self.assertEqual(cfg.covers(), [cover])
+
+        # When
+        cfg.remove_cover(node1.id, node2.id)
+
+        # Then
+        self.assertFalse(cfg.is_covered(node1.id))
+        self.assertFalse(cfg.is_covered(node2.id))
+        self.assertFalse(cfg.is_expanded(node1.id))
+        self.assertFalse(cfg.is_expanded(node2.id))
+        self.assertEqual(cfg.covers(), [])
 
     def test_insert_loop_edge(self):
         # Given
@@ -124,7 +184,7 @@ class KCFGTestCase(TestCase):
         cfg = KCFG.from_dict(d)
 
         # When
-        new_edge = cfg.create_edge(nid(0), nid(0))
+        new_edge = cfg.create_edge(nid(0), nid(0), TRUE, 1)
 
         # Then
         self.assertEqual(new_edge, edge(0, 0))
@@ -138,7 +198,7 @@ class KCFGTestCase(TestCase):
         cfg = KCFG.from_dict(d)
 
         # When
-        new_edge = cfg.create_edge(nid(0), nid(1))
+        new_edge = cfg.create_edge(nid(0), nid(1), TRUE, 1)
 
         # Then
         self.assertEqual(new_edge, edge(0, 1))
@@ -168,16 +228,19 @@ class KCFGTestCase(TestCase):
     def test_reachable_nodes(self):
         # Given
         d = {
-            'nodes': node_dicts(6),
-            'edges': edge_dicts((0, 1), (0, 5), (1, 2), (1, 3), (2, 4), (3, 4), (4, 1)),
+            'nodes': node_dicts(12),
+            'edges': edge_dicts((0, 1), (0, 5), (0, 11), (1, 2), (1, 3), (2, 4), (3, 4), (4, 1)),
+            'covers': cover_dicts((4, 11)),
         }
         cfg = KCFG.from_dict(d)
 
         # When
-        nodes = cfg.reachable_nodes(nid(1))
+        nodes_1 = cfg.reachable_nodes(nid(1))
+        nodes_2 = cfg.reachable_nodes(nid(1), traverse_covers=True)
 
         # Then
-        self.assertSetEqual(nodes, {node(1), node(2), node(3), node(4)})
+        self.assertSetEqual(nodes_1, {node(1), node(2), node(3), node(4)})
+        self.assertSetEqual(nodes_2, {node(1), node(2), node(3), node(4), node(11)})
 
     def test_paths_between(self):
         # Given
@@ -199,3 +262,60 @@ class KCFGTestCase(TestCase):
                 (edge(0, 1), edge(1, 2), edge(2, 3)),
             },
         )
+
+    def test_pretty_print(self):
+        d = {
+            'init': [nid(0)],
+            'target': [nid(6)],
+            'nodes': node_dicts(12),
+                                                             # Each of the branching edges have given depth=0 # noqa: E131
+            'edges': edge_dicts((0, 1), (1, 2, 5), (2, 3),   # Initial Linear segment
+                                (3, 4, 0), (4, 5), (5, 2),   # Loops back
+                                (3, 5, 0),                   # Go to previous non-terminal node not as loop
+                                (3, 6, 0),                   # Terminates
+                                (3, 7, 0), (7, 6),           # Go to previous terminal node not as loop
+                                (3, 11, 0), (11, 8)          # Covered
+                                ),
+            'covers': cover_dicts((8, 11))                   # Loops back
+        }
+        cfg = KCFG.from_dict(d)
+
+        print(set(map(lambda node: node.id, cfg.reachable_nodes(nid(5), reverse=True, traverse_covers=True))))
+
+        # TODO: Why are all nodes (besides the target) frontiers?
+        # TODO: Add a cover
+        self.maxDiff = None
+        actual = '\n'.join(cfg.pretty_print(mock_kprint())) + '\n'
+        self.assertMultiLineEqual(actual,
+                                  f"{short_id(0)} (init, frontier)\n"
+                                  f"│  (1 step)\n"
+                                  f"├  {short_id(1)} (frontier)\n"
+                                  f"│  (5 steps)\n"
+                                  f"├  {short_id(2)} (frontier)\n"
+                                  f"│  (1 step)\n"
+                                  f"├  {short_id(3)} (frontier)\n"
+                                  f"┢━ {short_id(4)} (frontier)\n"
+                                  f"┃   │  (1 step)\n"
+                                  f"┃   ├  {short_id(5)} (frontier)\n"
+                                  f"┃   │  (1 step)\n"
+                                  f"┃   ├  {short_id(2)} (frontier)\n"
+                                  f"┃   ┊ (looped back)\n"
+                                  f"┃\n"
+                                  f"┣━ {short_id(5)} (frontier)\n"
+                                  f"┃   ┊ (continues as previously)\n"
+                                  f"┃\n"
+                                  f"┣━ {short_id(6)} (target, leaf)\n"
+                                  f"┃\n"
+                                  f"┣━ {short_id(7)} (frontier)\n"
+                                  f"┃   │  (1 step)\n"
+                                  f"┃   └  {short_id(6)} (target, leaf)\n"
+                                  f"┃\n"
+                                  f"┗━ {short_id(11)} (frontier)\n"
+                                  f"    │  (1 step)\n"
+                                  f"    ├  {short_id(8)} (leaf)\n"
+                                  f"    │  constraint: KApply(label=KLabel(name='#Top', params=(KSort(name='GeneratedTopCell'),)), args=())\n"
+                                  f"    │  subst:\n"
+                                  f"    │    KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='V11'), KToken(token='8', sort=KSort(name='Int'))))\n"
+                                  f"    ├  {short_id(11)} (frontier)\n"
+                                  f"    ┊ (looped back)\n\n"
+                                  )
