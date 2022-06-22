@@ -304,8 +304,12 @@ class KCFGTestCase(TestCase):
             cfg.node('@bar')
         self.assertNotEqual(cfg.short_id(node(0)), '@bar')
 
-        with self.assertRaisesRegex(ValueError, 'Unknown node: '):
-            cfg.add_alias('@buzz', node(3).id)
+        with self.assertRaises(ValueError, msg='Duplicate alias "bar2"'):
+            cfg.add_alias('bar2', node(1).id)
+        with self.assertRaises(ValueError, msg='Alias may not contain "@"'):
+            cfg.add_alias('@buzz', node(1).id)
+        with self.assertRaises(ValueError, msg=f'Unknown node: {nid(3)}'):
+            cfg.add_alias('buzz', node(3).id)
 
         cfg.remove_node(nid(1))
         cfg.create_node(term(1))

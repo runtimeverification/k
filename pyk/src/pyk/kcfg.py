@@ -258,7 +258,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             cfg.add_verified(resolve(verified_ids['source']), resolve(verified_ids['target']))
 
         for alias, id in dct.get('aliases', {}).items():
-            cfg.add_alias(name=alias, id=resolve(id))
+            cfg.add_alias(alias=alias, node_id=resolve(id))
 
         return cfg
 
@@ -589,9 +589,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         target_id = self._resolve(target_id)
         self._verified.add((source_id, target_id))
 
-    def add_alias(self, name: str, id: str) -> None:
-        id = self._resolve(id)
-        self._aliases[name] = id
+    def add_alias(self, alias: str, node_id: str) -> None:
+        if '@' in alias:
+            raise ValueError('Alias may not contain "@"')
+        if alias in self._aliases:
+            raise ValueError(f'Duplicate alias "{alias}"')
+        node_id = self._resolve(node_id)
+        self._aliases[alias] = node_id
 
     def remove_init(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
