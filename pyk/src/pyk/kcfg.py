@@ -367,15 +367,15 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         return graph.source
 
-    def _resolve_all(self, id_like: str) -> List[str]:
-        if id_like.startswith('@'):
-            if id_like[1:] in self._aliases:
-                return [self._aliases[id_like[1:]]]
-            raise ValueError(f'Unknown alias: {id_like}')
+    def _resolve_hash(self, id_like: str) -> List[str]:
         return [node_id for node_id in self._nodes if compare_short_hashes(id_like, node_id)]
 
     def _resolve_or_none(self, id_like: str) -> Optional[str]:
-        matches = self._resolve_all(id_like)
+        if id_like.startswith('@'):
+            if id_like[1:] in self._aliases:
+                return self._aliases[id_like[1:]]
+            raise ValueError(f'Unknown alias: {id_like}')
+        matches = self._resolve_hash(id_like)
         if not matches:
             return None
         if len(matches) > 1:
