@@ -300,7 +300,7 @@ class KCFGTestCase(TestCase):
         self.assertEqual(cfg.node('@bar'), node(0))
         self.assertEqual(cfg.node('@bar2'), node(0))
         cfg.remove_alias('bar')
-        with self.assertRaisesRegex(ValueError, 'Unknown alias: @bar'):
+        with self.assertRaises(ValueError, msg='Unknown alias: @bar'):
             cfg.node('@bar')
         self.assertNotEqual(cfg.short_id(node(0)), '@bar')
 

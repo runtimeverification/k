@@ -622,8 +622,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             raise ValueError(f'Edge is not verified: {(source_id, target_id)}')
         self._verified.remove((source_id, target_id))
 
-    def remove_alias(self, name: str) -> None:
-        self._aliases.pop(name)
+    def remove_alias(self, alias: str) -> None:
+        if alias not in self._aliases:
+            raise ValueError(f'Alias does not exist: {alias}')
+        self._aliases.pop(alias)
 
     def discard_init(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
