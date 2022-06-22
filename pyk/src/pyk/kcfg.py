@@ -440,7 +440,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         self._verified = set((source_id, target_id) for source_id, target_id in self._verified if source_id != node_id and target_id != node_id)
 
         for alias in [alias for alias, id in self._aliases.items() if id == node_id]:
-            del self._aliases[alias]
+            self.remove_alias(alias)
 
     def edge(self, source_id: str, target_id: str) -> Optional[Edge]:
         source_id = self._resolve(source_id)
