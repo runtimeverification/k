@@ -618,7 +618,11 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   rule E1 in (S SetItem(E2))           => E1 in S requires E1 =/=K E2            [simplification]                  
 
   //todo temp rule, should be generated in front-end
-  rule #Ceil(@S1:Set @S2:Set) => {intersectSet(@S1, @S2) #Equals .Set} #And #Ceil(@S1) #And #Ceil(@S2)
+  /*rule #Ceil(@S1:Set @S2:Set) => {intersectSet(@S1, @S2) #Equals .Set} #And #Ceil(@S1) #And #Ceil(@S2)
+    [anywhere, simplification]*/ 
+    
+  //simplified #Ceil. Matching for above version not implemented yet: https://github.com/runtimeverification/haskell-backend/issues/3107
+  rule #Ceil(@S:Set SetItem(@E:KItem)) => {(@E in @S) #Equals false} #And #Ceil(@S) #And #Ceil(@E)
     [anywhere, simplification]
 endmodule                      
 
