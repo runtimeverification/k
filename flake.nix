@@ -35,6 +35,7 @@
               src = prev.lib.cleanSource
                 (prev.nix-gitignore.gitignoreSourcePure [
                   ./.gitignore
+                  ".github/"
                   "result*"
                   "nix/"
                   "*.nix"
@@ -121,39 +122,17 @@
                 (nix-gitignore.gitignoreSourcePure [ ./.gitignore ]
                   ./k-distribution);
               preferLocalBuild = true;
-              buildInputs = [
-                # diffutils
-                # ncurses
-                # bison
-                # clang
-                gmp
-                mpfr
-                # libffi
-                # jemalloc
-                k
-              ];
+              buildInputs = [ gmp mpfr k ];
               postPatch = ''
                 patchShebangs tests/regression-new/*
+                substituteInPlace tests/regression-new/append/kparse-twice \
+                  --replace '"$(dirname "$0")/../../../bin/kparse"' '"${k}/bin/kparse"'
               '';
               buildFlags = [
-                "KOMPILE=${k}/bin/kompile"
-                "KRUN=${k}/bin/krun"
-                "KDEP=${k}/bin/kdep"
-                "KPROVE_LEGACY=${k}/bin/kprove-legacy"
-                "KPROVE=${k}/bin/kprove"
-                "KBMC=${k}/bin/kbmc"
-                "KAST=${k}/bin/kast"
-                "KPRINT=${k}/bin/kprint"
-                "KRUN_LEGACY=${k}/bin/krun-legacy"
-                "KEQ=${k}/bin/keq"
-                "KSERVER=${k}/bin/kserver"
-                "KPARSE=${k}/bin/kparse"
-                "KPARSE_GEN=${k}/bin/kparse-gen"
-                "KORE_PRINT=${k}/bin/kore-print"
+                "K_BIN=${k}/bin"
                 "KLLVMLIB=${k}/lib/kllvm"
                 "PACKAGE_VERSION=${k-version}"
                 "--output-sync"
-                # "-C help"
               ];
               enableParallelBuilding = true;
               preBuild = ''

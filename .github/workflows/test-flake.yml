@@ -17,6 +17,10 @@ jobs:
 
       - name: 'Install Nix'
         uses: cachix/install-nix-action@v15
+        with:
+          extra_nix_config: |
+            substituters = http://cache.nixos.org https://cache.iog.io
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
 
       - name: 'Install Cachix'
         uses: cachix/cachix-action@v10
@@ -24,22 +28,6 @@ jobs:
           name: runtimeverification
           extraPullNames: kore
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
-
-      - name: 'Add haskell.nix pub keys (macOS)'
-        run: sed -i "" '/^trusted-public-keys =/ s/$/ hydra.iohk.io:f\/Ea+s+dFdN+3Y\/G+FDgSq+a5NEWhJGzdjvKNGv0\/EQ=/' ~/.config/nix/nix.conf
-        if: ${{ startsWith(matrix.os, 'macos') }}
-
-      - name: 'Add haskell.nix pub keys (linux)'
-        run: sed -i '/^trusted-public-keys =/ s/$/ hydra.iohk.io:f\/Ea+s+dFdN+3Y\/G+FDgSq+a5NEWhJGzdjvKNGv0\/EQ=/' ~/.config/nix/nix.conf
-        if: ${{ !startsWith(matrix.os, 'macos') }}
-
-      - name: 'Add haskell.nix substituters (macOS)'
-        run: sed -i "" '/^substituters =/ s/$/ https:\/\/cache.iog.io/' ~/.config/nix/nix.conf
-        if: ${{ startsWith(matrix.os, 'macos') }}
-
-      - name: 'Add haskell.nix substituters (linux)'
-        run: sed -i '/^substituters =/ s/$/ https:\/\/cache.iog.io/' ~/.config/nix/nix.conf
-        if: ${{ !startsWith(matrix.os, 'macos') }}
 
       - name: 'Build K Framework'
         run: GC_DONT_GC=1 nix build .
