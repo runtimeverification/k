@@ -69,6 +69,12 @@ let
     inherit k clang llvm-backend haskell-backend;
     inherit mavenix;
     inherit (pkgs) mkShell;
+
+    dummy = pkgs.stdenv.mkDerivation {
+      name = "dummy";
+      src = ./package;
+      installPhase = ''cp $src/version $out'';
+    };
   };
 
 in self

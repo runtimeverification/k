@@ -28,15 +28,5 @@ jobs:
           extraPullNames: kore
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
 
-      - name: 'Build K Framework'
-        run: nix-build -A k -A llvm-backend -A haskell-backend
-
-      - name: 'Build K Framework with LTO'
-        run: nix-build -A k -A llvm-backend -A haskell-backend --arg release true
-        if: ${{ !startsWith(matrix.os, 'macos') }}
-
-      - name: 'Check development environment'
-        run: nix-shell --run "echo OK"
-
-      - name: 'Run selected integration tests'
-        run: nix-build test.nix --argstr test help
+      - name: 'Build Dummy package'
+        run: nix-build -A dummy
