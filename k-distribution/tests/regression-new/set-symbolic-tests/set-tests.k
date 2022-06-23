@@ -7,9 +7,10 @@ module SET-TESTS-SYNTAX
     imports BOOL
 
     syntax MyId ::= "x" | "y" | "z" | foo ( MyId )
+    syntax Exp ::= Bool | Set
 
-    syntax Test ::= inSet       ( Bool ) | union       ( K ) | diff       ( K ) | intersect       ( K )
-                  | inSetResult ( Bool ) | unionResult ( K ) | diffResult ( K ) | intersectResult ( K )
+    syntax Test ::= inSet       ( Exp ) | union       ( Exp ) | diff       ( Exp ) | intersect       ( Exp )
+                  | inSetResult ( Exp ) | unionResult ( Exp ) | diffResult ( Exp ) | intersectResult ( Exp )
 endmodule
 
 module SET-TESTS
@@ -18,8 +19,8 @@ module SET-TESTS
 
     configuration <k> $PGM:Test </k>
 
-    rule <k> inSet     ( B ) => inSetResult     ( B ) </k>
-    rule <k> union     ( S ) => unionResult     ( S ) </k>
-    rule <k> diff      ( S ) => diffResult      ( S ) </k>
-    rule <k> intersect ( S ) => intersectResult ( S ) </k>
+    rule <k> inSet     ( E ) => inSetResult     ( E ) </k>
+    rule <k> union     ( E ) => unionResult     ( E ) </k>
+    rule <k> diff      ( E ) => diffResult      ( E ) </k>
+    rule <k> intersect ( E ) => intersectResult ( E ) </k>
 endmodule
