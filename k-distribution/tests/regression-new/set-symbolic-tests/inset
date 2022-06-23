@@ -1,5 +1,6 @@
 claim <k> inSet ( X:MyId in ( .Set  ) )                                   => . </k>
-claim <k> inSet ( X:MyId in ( SET:Set SetItem(X) ) )                      => . </k>
+claim <k> inSet ( X      in ( SET:Set SetItem(X:MyId) ) )                 => . </k>
+claim <k> inSet ( X      in ( SET:Set SetItem(X:MyId) ) )                 => . </k> requires notBool X in SET
 claim <k> inSet ( Y:MyId in ( SET:Set SetItem(X:MyId) ) )                 => . </k>
 claim <k> inSet ( Y:MyId in ( SET:Set SetItem(X:MyId) ) )                 => . </k> requires Y =/=K X
 claim <k> inSet ( Y:MyId in ( SET:Set SetItem(X:MyId) ) )                 => . </k> requires Y in SET
