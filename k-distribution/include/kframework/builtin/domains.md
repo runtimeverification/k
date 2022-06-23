@@ -611,11 +611,12 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   imports private K-EQUAL
   imports private BOOL
 
-  // Symbolic in
+  // Symbolic in                                                                 
+  rule E  in ( S1 S2)                  => E in S1 requires notBool E in S2       [simplification]
+  rule E  in (_S1 S2)                  => true    requires         E in S2       [simplification]
   rule E  in (S1 -Set (SetItem(E) S1)) => false                                  [simplification]
-  rule E  in (_S SetItem(E))           => true                                   [simplification]
-  rule E1 in (S SetItem(E2))           => true requires E1 ==K E2 orBool E1 in S [simplification]
-  rule E1 in (S SetItem(E2))           => E1 in S requires E1 =/=K E2            [simplification]                  
+  //rule E1 in (S SetItem(E2))           => true requires E1 ==K E2 orBool E1 in S [simplification]
+  //rule E1 in (S SetItem(E2))           => E1 in S requires E1 =/=K E2            [simplification]                  
 
   //todo temp rule, should be generated in front-end
   /*rule #Ceil(@S1:Set @S2:Set) => {intersectSet(@S1, @S2) #Equals .Set} #And #Ceil(@S1) #And #Ceil(@S2)
