@@ -611,7 +611,8 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   imports private K-EQUAL
   imports private BOOL
 
-  // Symbolic in                                                                 
+  // Symbolic in
+  rule E1 in SetItem(E2)               => E1 ==K E2                              [simplification]                                   
   rule E  in ( S1 S2)                  => E in S1 requires notBool E in S2       [simplification]
   rule E  in (_S1 S2)                  => true    requires         E in S2       [simplification]
   rule E  in (S1 -Set (SetItem(E) S1)) => false                                  [simplification]
