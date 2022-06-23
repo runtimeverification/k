@@ -8,8 +8,8 @@ module SET-TESTS-SYNTAX
 
     syntax MyId ::= "x" | "y" | "z" | foo ( MyId )
 
-    syntax Test ::= union       ( Set ) | inSet       ( Bool ) | diff       ( K )
-                  | unionResult ( Set ) | inSetResult ( Bool ) | diffResult ( K )
+    syntax Test ::= inSet       ( Bool ) | union       ( K ) | diff       ( K ) | intersect       ( K )
+                  | inSetResult ( Bool ) | unionResult ( K ) | diffResult ( K ) | intersectResult ( K )
 endmodule
 
 module SET-TESTS
@@ -18,7 +18,8 @@ module SET-TESTS
 
     configuration <k> $PGM:Test </k>
 
-    rule <k> union ( S ) => unionResult ( S ) </k>
-    rule <k> inSet ( B ) => inSetResult ( B ) </k>
-    rule <k> diff  ( S ) => diffResult  ( S ) </k>
+    rule <k> inSet     ( B ) => inSetResult     ( B ) </k>
+    rule <k> union     ( S ) => unionResult     ( S ) </k>
+    rule <k> diff      ( S ) => diffResult      ( S ) </k>
+    rule <k> intersect ( S ) => intersectResult ( S ) </k>
 endmodule
