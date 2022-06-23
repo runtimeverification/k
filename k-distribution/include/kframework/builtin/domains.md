@@ -616,8 +616,8 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   //rule E  in ( S1 S2)                  => E in S2 requires notBool E in S1       [simplification]
   //rule E  in (S1 _S2)                  => true    requires         E in S1       [simplification]
   rule E1 in (S SetItem(E2))           => true requires E1 ==K E2 orBool E1 in S [simplification]
-  rule E1 in (S SetItem(E2))           => E1 in S requires E1 =/=K E2            [simplification]                  
-  rule E1 in (S SetItem(E2))           => E1 ==K E2 requires notBool E1 in S     [simplification]
+  rule E1 in (S SetItem(E2))           => E1 in S           requires E1 =/=K E2      [simplification]                  
+  rule E1 in (S SetItem(E2))           => E1 in SetItem(E2) requires notBool E1 in S [simplification]
   rule E  in (S1 -Set (SetItem(E) S1)) => false                                  [simplification]
 
   //todo temp rule, should be generated in front-end
