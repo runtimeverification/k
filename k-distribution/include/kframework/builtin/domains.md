@@ -624,9 +624,10 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   rule intersectSet(_S, .Set) => .Set                                                              [simplification]                                                                                         
   rule intersectSet(.Set, _S) => .Set                                                              [simplification]
   rule intersectSet(S, S) => S                                                                     [simplification]
-  rule intersectSet(S1 SetItem(E), S2) => intersectSet(S1, S2)            requires notBool E in S2 [simplification]     
-  rule intersectSet(S1, S2 SetItem(E)) => intersectSet(S1, S2)            requires notBool E in S1 [simplification]
-  rule intersectSet(S1 SetItem(E), S2) => intersectSet(S1, S2) SetItem(E) requires E in S2         [simplification]
+  //#Ceil constraints are hacks to force generating #Ceil constraints for set constructor.
+  rule intersectSet(S1 SetItem(E), S2) => intersectSet(S1, S2)            requires notBool E in S2 andBool #Ceil(S1 SetItem(E)) [simplification]     
+  rule intersectSet(S1, S2 SetItem(E)) => intersectSet(S1, S2)            requires notBool E in S1 andBool #Ceil(S1 SetItem(E)) [simplification]
+  rule intersectSet(S1 SetItem(E), S2) => intersectSet(S1, S2) SetItem(E) requires E in S2 andBool #Ceil(S1 SetItem(E))         [simplification]
   rule E in intersectSet(S1, S2) => true  requires         E in S1 andBool         E in S2         [simplification]
   rule E in intersectSet(S1, S2) => false requires notBool E in S1  orBool notBool E in S2         [simplification]
 
