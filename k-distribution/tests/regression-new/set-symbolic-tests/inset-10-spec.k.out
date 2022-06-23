@@ -1,0 +1,16 @@
+  <k>
+    inSetResult ( true ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in SET
+    SetItem ( Z:MyId )
+  }
+#And
+  {
+    false
+  #Equals
+    Z:MyId in SET
+  }

@@ -1,0 +1,21 @@
+  #Not ( {
+    X
+  #Equals
+    Y
+  } )
+#And
+  <k>
+    inSetResult ( false ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in SET
+  }
+#And
+  {
+    false
+  #Equals
+    Y:MyId in SET
+  }
