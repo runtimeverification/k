@@ -50,6 +50,12 @@
                 chmod -R u+w $out
                 mkdir -p $out/llvm-backend/src/main/native/llvm-backend/matching
                 cp -rv ${llvm-backend}/matching/* $out/llvm-backend/src/main/native/llvm-backend/matching
+                ${prev.lib.optionalString prev.stdenv.isDarwin ''
+                  substituteInPlace $out/kernel/src/main/java/org/kframework/parser/KRead.java \
+                    --replace 'gcc' 'clang'
+                  substituteInPlace $out/kernel/src/main/java/org/kframework/parser/inner/kernel/Scanner.java \
+                    --replace 'gcc' 'clang'
+                ''}
               '';
             };
           in {
@@ -127,6 +133,13 @@
                 patchShebangs tests/regression-new/*
                 substituteInPlace tests/regression-new/append/kparse-twice \
                   --replace '"$(dirname "$0")/../../../bin/kparse"' '"${k}/bin/kparse"'
+                ${lib.optionalString stdenv.isDarwin ''
+                  for mak in include/kframework/*.mak
+                  do
+                    substituteInPlace $mak \
+                      --replace 'KOMPILE_FLAGS+=--no-exc-wrap' 'KOMPILE_FLAGS+=--no-exc-wrap --no-haskell-binary'
+                  done
+                ''}
               '';
               buildFlags = [
                 "K_BIN=${k}/bin"

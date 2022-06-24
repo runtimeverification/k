@@ -15,7 +15,7 @@ let
     #
     nativeBuildInputs = [ makeWrapper ];
 
-    buildInputs = [ clang flex gcc git gmp jdk mpfr pkgconfig python3 z3 ];
+    buildInputs = [ flex git gmp jdk mpfr pkgconfig python3 z3 ];
 
     # Set build environment variables
     #
@@ -60,8 +60,7 @@ in let
   hostInputs = [
     bison
     flex
-    clang
-    gcc
+    (if stdenv.isDarwin then clang else gcc)
     gmp
     jdk
     mpfr
@@ -71,7 +70,7 @@ in let
     z3
     haskell-backend
     llvm-backend
-  ] ++ lib.lists.optional (debugger != null) debugger;
+  ] ++ lib.optional (debugger != null) debugger;
   # PATH used at runtime
   hostPATH = lib.makeBinPath hostInputs;
 
