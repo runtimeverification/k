@@ -1,0 +1,8 @@
+foo ( 34 )
+frob ( "Hello" , false )
+"builtin"
+bar
+  foo ( 2 ) * foo ( 0 )
+<k>
+  .
+</k>
