@@ -1619,8 +1619,8 @@ public class ModuleToKORE {
         if (klabel.name().equals(KLabels.INJ))
             return instantiatePolySorts ? INJ_PROD.substitute(term.klabel().params()) : INJ_PROD;
         Option<scala.collection.Set<Production>> prods = module.productionsFor().get(klabel.head());
-        assert(prods.nonEmpty());
-        assert(prods.get().size() == 1);
+        if (!(prods.nonEmpty() && prods.get().size() == 1))
+            throw KEMException.compilerError("Expected to find exactly one production for KLabel: " + klabel + " found: " + prods.getOrElse(Collections::Set).size());
         return instantiatePolySorts ? prods.get().head().substitute(term.klabel().params()) : prods.get().head();
     }
 
