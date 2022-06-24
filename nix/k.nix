@@ -4,7 +4,7 @@
 
 let
   unwrapped = mavenix.buildMaven {
-    name = "k-${version}";
+    name = "k-${version}-maven";
     infoFile = ./mavenix.lock;
     inherit src;
 
@@ -54,27 +54,6 @@ let
     installCheckPhase = ''
       $out/bin/ng --help
     '';
-
-    # Add extra maven dependencies which might not have been picked up
-    #   automatically
-    #
-    #deps = [
-    #  { path = "org/group-id/artifactId/version/file.jar"; sha1 = "0123456789abcdef"; }
-    #  { path = "org/group-id/artifactId/version/file.pom"; sha1 = "123456789abcdef0"; }
-    #];
-
-    # Add dependencies on other mavenix derivations
-    #
-    #drvs = [ (import ../other/mavenix/derivation {}) ];
-
-    # Override which maven package to build with
-    #
-    #maven = maven.overrideAttrs (_: { jdk = pkgs.oraclejdk10; });
-
-    # Override remote repository URLs and settings.xml
-    #
-    #remotes = { central = "https://repo.maven.apache.org/maven2"; };
-    #settings = ./settings.xml;
   };
 
 in let
@@ -96,7 +75,7 @@ in let
   # PATH used at runtime
   hostPATH = lib.makeBinPath hostInputs;
 
-in runCommand unwrapped.name {
+in runCommand (lib.removeSuffix "-maven" unwrapped.name) {
   nativeBuildInputs = [ makeWrapper ];
   passthru = { inherit unwrapped; };
   inherit unwrapped;
