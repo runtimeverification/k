@@ -50,6 +50,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         def to_dict(self) -> Dict[str, Any]:
             return {'id': self.id, 'term': self.cterm.term.to_dict()}
 
+        def __lt__(self, other):
+            if not isinstance(other, KCFG.Node):
+                return NotImplemented
+            return self.id < other.id
+
     class EdgeLike(ABC):
         source: 'KCFG.Node'
         target: 'KCFG.Node'
@@ -57,6 +62,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         @abstractmethod
         def pretty_print(self, kprint: KPrint) -> List[str]:
             assert False, 'Must be overridden'
+
+        def __lt__(self, other):
+            if not isinstance(other, KCFG.EdgeLike):
+                return NotImplemented
+            return (self.source, self.target) < (other.source, other.target)
 
     @dataclass(frozen=True)
     class Edge(EdgeLike):
@@ -285,8 +295,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         def _print_subgraph(indent: str, curr_node: KCFG.Node, prior_on_trace: List[KCFG.Node]) -> List[str]:
             ret: List[str] = []
 
+            edges_from = sorted(self.edge_likes(source_id=curr_node.id))
             if curr_node in processed_nodes:
-                if len(self.edge_likes(source_id=curr_node.id)) == 0:
+                if len(edges_from) == 0:
                     return ret
                 if curr_node in prior_on_trace:
                     ret.append(indent + '┊ (looped back)')
@@ -295,9 +306,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 return ret
             processed_nodes.append(curr_node)
 
-            num_children = len(self.edge_likes(source_id=curr_node.id))
+            num_children = len(edges_from)
             is_branch = num_children > 1
-            for i, edge_like in enumerate(self.edge_likes(source_id=curr_node.id)):
+            for i, edge_like in enumerate(edges_from):
                 is_first_child = i == 0
                 is_last_child = i == num_children - 1
 
@@ -323,11 +334,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             return ret
 
         ret = []
-        init = self.init
+        init = sorted(self.init)
         while init:
             ret.append(self.node_short_info(init[0]))
             ret.extend(_print_subgraph('', init[0], [init[0]]))
-            init = [node for node in self.nodes if node not in processed_nodes]
+            init = [node for node in sorted(self.nodes) if node not in processed_nodes]
         return ret
 
     def to_dot(self, kprint: KPrint) -> str:
