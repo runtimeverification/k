@@ -339,7 +339,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         while init:
             ret.append(self.node_short_info(init[0]))
             ret.extend(_print_subgraph('', init[0], [init[0]]))
-            init = [node for node in sorted(self.nodes) if node not in processed_nodes]
+            init = sorted(node for node in self.nodes if node not in processed_nodes)
         return ret
 
     def to_dot(self, kprint: KPrint) -> str:
