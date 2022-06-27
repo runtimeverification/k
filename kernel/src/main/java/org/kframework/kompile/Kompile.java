@@ -158,7 +158,7 @@ public class Kompile {
             m.checkSorts();
         if (kompileOptions.postProcess != null) {
             kompiledDefinition = postProcessJSON(kompiledDefinition, kompileOptions.postProcess);
-            files.saveToKompiled("jsoned.txt", kompiledDefinition.toString());
+            files.saveToKompiled("post-processed.txt", kompiledDefinition.toString());
         }
 
         files.saveToKompiled("allRules.txt", ruleSourceMap(kompiledDefinition));
