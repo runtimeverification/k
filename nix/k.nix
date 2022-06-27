@@ -8,6 +8,11 @@ let
     infoFile = ./mavenix.lock;
     inherit src;
 
+    # By default, mavenix copies the jars defined in `submodules` of mavenix.lock to `$out/share/java`.
+    # The following flag disables this, since we copy the jars ourselves.
+    # Otherwise, the jars are needlessly duplicated and bloat the cachix cache.
+    copySubmodules = false;
+
     # Cannot enable unit tests until a bug is fixed upstream (in Mavenix).
     doCheck = false;
 
@@ -32,10 +37,22 @@ let
       patchShebangs k-distribution/src/main/scripts/lib
     '';
 
-    # Make sure to link the cmake/ and include/ folders from the llvm-backend source repo and the llvm-backend derivation, 
-    # as these may be expected/required when compiling other projects, e.g. the evm-semantics repo
+    # We first copy the bin, include and lib folders from the build and then replace all copied jars which aready exist
+    # in $out/share/mavenix/repo with a symlink to reduce the derivation size. This is done to reduce the cachix upload sizes
+    # We also have to make sure to link the cmake/ and include/ folders from the llvm-backend source repo and the llvm-backend derivation, 
+    # as these will be expected/required when compiling other projects, e.g. the evm-semantics repo
     postInstall = ''
       cp -r k-distribution/target/release/k/{bin,include,lib} $out/
+
+      for file in $out/lib/kframework/java/*; do
+        file_name=$(basename $file)
+        found_in_share="$(find -L $out/share/mavenix/repo -maxdepth 20 -name "$file_name")"
+        if [ ! -z "$found_in_share" ]; then
+          rm "$file"
+          ln -sf "$found_in_share" "$file"
+        fi
+      done
+
       mkdir -p $out/lib/cmake/kframework && ln -sf ${llvm-backend.src}/cmake/* $out/lib/cmake/kframework/
       ln -sf ${llvm-backend}/include/kllvm $out/include/
       ln -sf ${llvm-backend}/lib/kllvm $out/lib/

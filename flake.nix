@@ -6,7 +6,7 @@
     nixpkgs.follows = "haskell-backend/nixpkgs";
     llvm-backend.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
-    mavenix.url = "github:nix-community/mavenix";
+    mavenix.url = "github:goodlyrottenapple/mavenix";
   };
 
   outputs =
@@ -67,6 +67,8 @@
               inherit src;
               debugger =
                 if system == "x86_64-darwin" || system == "aarch64-darwin" then
+                  # TODO lldb is broken on nixpkgs unstable, once the lldb support for 
+                  # k is done we should add lldb as runtime dependency here
                   null
                 else
                   prev.gdb;

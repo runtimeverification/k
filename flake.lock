@@ -332,15 +332,15 @@
         "utils": "utils_3"
       },
       "locked": {
-        "lastModified": 1643802645,
-        "narHash": "sha256-BynM25iwp/l3FyrcHqiNJdDxvN6IxSM3/zkFR6PD3B0=",
-        "owner": "nix-community",
+        "lastModified": 1656336549,
+        "narHash": "sha256-J0sv7wu1hZqAEct6amzlhnGDkHN0bs4bu+/qq/HO2wQ=",
+        "owner": "goodlyrottenapple",
         "repo": "mavenix",
-        "rev": "ce9ddfd7f361190e8e8dcfaf6b8282eebbb3c7cb",
+        "rev": "c2f3618ce413ad541027a163a85985760ce1ee75",
         "type": "github"
       },
       "original": {
-        "owner": "nix-community",
+        "owner": "goodlyrottenapple",
         "repo": "mavenix",
         "type": "github"
       }
