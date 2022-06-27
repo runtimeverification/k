@@ -5,7 +5,7 @@ requires "ceil-order.k"
 module CEIL-ORDER-2-SPEC
     imports CEIL-ORDER
 
-  claim <k> step ( intersectSet(_S1 SetItem(X:Int), S2 ) ) => done ( intersectSet(_S1, S2 ) ) </k>
+  claim <k> step ( intersectSet(S1 SetItem(X:Int), S2 ) ) => done ( intersectSet(S1, S2 ) ) </k>
     requires notBool X in S2
 
 endmodule
