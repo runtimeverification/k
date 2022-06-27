@@ -22,7 +22,6 @@ version_sub() {
     local version
     version="$(cat $version_file)"
     sed --in-place 's/^K_VERSION=.*$/K_VERSION='${version}'/'                                                         install-k
-    sed --in-place 's/^    name = "k-.*";$/    name = "k-'${version}'";/'                                             nix/k.nix
     sed --in-place 's/^pkgver=.*$/pkgver='${version}'/'                                                               package/arch/PKGBUILD
     sed --in-place 's/^kframework (.*) unstable; urgency=medium$/kframework ('${version}') unstable; urgency=medium/' package/debian/changelog
     sed --in-place 's/^K_VERSION=.*$/K_VERSION='${version}'/'                                                         src/main/scripts/test-in-container-debian

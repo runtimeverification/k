@@ -398,11 +398,11 @@ public class ExpandMacros {
 
     public Sentence expand(Sentence s) {
         if (s instanceof Rule && !isMacro(s)) {
-            return transformer.resolve(mod, expand((Rule) s));
+            return transformer.resolve(expand((Rule) s), mod);
         } else if (s instanceof Claim) {
-            return transformer.resolve(mod, expand((Claim) s));
+            return transformer.resolve(expand((Claim) s), mod);
         } else if (s instanceof Context) {
-            return transformer.resolve(mod, expand((Context) s));
+            return transformer.resolve(expand((Context) s), mod);
         } else {
             return s;
         }
