@@ -298,7 +298,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
             edges_from = sorted(self.edge_likes(source_id=curr_node.id))
             if curr_node in processed_nodes:
-                if len(edges_from) == 0:
+                if not edges_from:
                     return ret
                 if curr_node in prior_on_trace:
                     ret.append(indent + '┊ (looped back)')
