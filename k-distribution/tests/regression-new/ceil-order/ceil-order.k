@@ -20,4 +20,8 @@ module CEIL-ORDER
     requires notBool E in S1 andBool notBool E in S2
     [simplification]
 
+  rule E1 in (S SetItem(E2)) => E1 in S
+    requires E1 =/=K E2
+    [simplification]
+
 endmodule
