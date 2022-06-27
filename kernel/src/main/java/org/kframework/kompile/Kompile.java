@@ -153,6 +153,9 @@ public class Kompile {
         files.saveToKompiled("compiled.txt", kompiledDefinition.toString());
         sw.printIntermediate("Apply compile pipeline");
 
+        // final check for sort correctness
+        for (Module m : mutable(kompiledDefinition.modules()))
+            m.checkSorts();
         if (kompileOptions.postProcess != null) {
             kompiledDefinition = postProcessJSON(kompiledDefinition, kompileOptions.postProcess);
             files.saveToKompiled("jsoned.txt", kompiledDefinition.toString());
@@ -306,7 +309,7 @@ public class Kompile {
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve, "resolving semantic casts");
         DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun(false)::resolve, "resolving #fun");
-        Function1<Definition, Definition> resolveFunctionWithConfig = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, false)::resolve, "resolving functions with config context").apply(d);
+        Function1<Definition, Definition> resolveFunctionWithConfig = d -> DefinitionTransformer.from(new ResolveFunctionWithConfig(d, false)::moduleResolve, "resolving functions with config context").apply(d);
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
         DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections(kompileOptions.coverage)::gen, "adding sort projections");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");

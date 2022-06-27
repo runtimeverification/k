@@ -357,7 +357,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     }
 
   // check that non-terminals have a defined sort
-  def checkSorts () = sentences foreach {
+  def checkSorts (): Unit = localSentences foreach {
     case p@Production(_, params, _, items, _) =>
       val res = items collect
       { case nt: NonTerminal if !p.isSortVariable(nt.sort) && !definedSorts.contains(nt.sort.head) && !sortSynonymMap.contains(nt.sort) => nt
