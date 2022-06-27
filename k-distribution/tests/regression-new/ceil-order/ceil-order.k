@@ -16,8 +16,8 @@ module CEIL-ORDER
     requires E in S2
     [simplification]
 
-  rule intersectSet(S1, S2 SetItem(E)) => intersectSet(S1, S2) SetItem(E)
-    requires E in S1 andBool notBool E in S2
-    [simplification]
+  //rule intersectSet(S1, S2 SetItem(E)) => intersectSet(S1, S2) SetItem(E)
+  //  requires E in S1 andBool notBool E in S2
+  //  [simplification]
 
 endmodule
