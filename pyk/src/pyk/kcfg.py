@@ -285,7 +285,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         return KCFG.from_dict(json.loads(s))
 
     def node_short_info(self, node: Node) -> str:
-        attrs = self.node_attrs(node.id) + ['@' + alias for alias in self.aliases(node.id)]
+        attrs = self.node_attrs(node.id) + ['@' + alias for alias in sorted(self.aliases(node.id))]
         attr_string = ' (' + ', '.join(attrs) + ')' if attrs else ''
         return shorten_hash(node.id) + attr_string
 

@@ -342,7 +342,7 @@ class KCFGTestCase(TestCase):
                                   f"│  (5 steps)\n"
                                   f"├  {_short_hash(2)} (expanded)\n"
                                   f"│  (1 step)\n"
-                                  f"├  {_short_hash(3)} (expanded, @foo, @bar)\n"
+                                  f"├  {_short_hash(3)} (expanded, @bar, @foo)\n"
                                   f"┢━ {_short_hash(6)} (target, leaf)\n"
                                   f"┃\n"
                                   f"┣━ {_short_hash(5)} (expanded)\n"
