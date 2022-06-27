@@ -3,6 +3,8 @@
 module CEIL-ORDER
     imports SET
     imports INT
+    imports K-EQUAL
+    imports BOOL
 
   syntax KItem ::= step ( Set ) | done ( Set )
   rule <k> step ( Set ) => done ( Set ) </k>
