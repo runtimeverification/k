@@ -59,7 +59,7 @@
               '';
             };
           in {
-            k = prev.callPackage ./nix/k-flake.nix {
+            k = prev.callPackage ./nix/k.nix {
               inherit (prev) llvm-backend;
               mavenix = { inherit (prev) buildMaven; };
               haskell-backend = kore;
