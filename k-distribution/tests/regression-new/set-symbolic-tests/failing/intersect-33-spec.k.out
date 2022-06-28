@@ -5,8 +5,8 @@
   } )
 #And
   <k>
-    intersectResult ( Z:MyId in intersectSet ( S
-    SetItem ( X:MyId ) , SetItem ( Y:MyId ) ) ) ~> .
+    intersectResult ( Z:MyId in intersectSet ( S ,
+    SetItem ( Y:MyId ) ) ) ~> .
   </k>
 #And
   {

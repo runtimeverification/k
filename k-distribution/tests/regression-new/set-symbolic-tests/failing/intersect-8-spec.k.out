@@ -1,6 +1,6 @@
   <k>
-    intersectResult ( intersectSet ( SetItem ( Y:MyId ) , S
-    SetItem ( X:MyId ) ) ) ~> .
+    intersectResult ( intersectSet ( SetItem ( X:MyId ) ,
+    SetItem ( Y:MyId ) ) ) ~> .
   </k>
 #And
   {
