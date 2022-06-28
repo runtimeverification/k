@@ -1,7 +1,9 @@
+import logging
 from collections import Counter
 from typing import (
     Callable,
     Dict,
+    Final,
     List,
     Mapping,
     Optional,
@@ -52,6 +54,8 @@ from .prelude import (
 )
 from .utils import find_common_items, hash_str, unique
 
+_LOGGER: Final = logging.getLogger(__name__)
+
 KI = TypeVar('KI', bound=KInner)
 W = TypeVar('W', bound=WithKAtt)
 
@@ -98,8 +102,17 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
                     return KApply(KLabel('notBool_'), [_kast.args[1]])
                 if type(_kast.args[0]) in [KVariable, KToken]:
                     return KApply('_==K_', _kast.args)
-                if unsafe:
+            if unsafe:
+                if _kast.label.name == '#Equals':
                     return KApply('_==K_', _kast.args)
+                if _kast.label.name == '#Ceil':
+                    ceil_var = abstract_term_safely(_kast, base_name='Ceil')
+                    _LOGGER.warning(f'Converting #Ceil condition to variable {ceil_var.name}: {_kast}')
+                    return ceil_var
+                if _kast.label.name == '#Exists':
+                    exists_var = abstract_term_safely(_kast, base_name='Exists')
+                    _LOGGER.warning(f'Converting #Exists condition to variable {exists_var.name}: {_kast}')
+                    return exists_var
         raise ValueError(f'Could not convert ML predicate to sort Bool: {_kast}')
 
     return _ml_constraint_to_bool(kast)
@@ -604,9 +617,9 @@ def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, pr
     return (minimizeRule(rule, keepVars=newKeepVars), vremapSubst)
 
 
-def abstractTermSafely(kast, baseName='V'):
+def abstract_term_safely(kast: KInner, base_name: str = 'V') -> KVariable:
     vname = hash_str(kast)[0:8]
-    return KVariable(baseName + '_' + vname)
+    return KVariable(base_name + '_' + vname)
 
 
 def antiUnify(state1, state2):
@@ -615,7 +628,7 @@ def antiUnify(state1, state2):
 
     def _rewritesToAbstractions(_kast):
         if type(_kast) is KRewrite:
-            return abstractTermSafely(_kast)
+            return abstract_term_safely(_kast)
         return _kast
 
     minimizedRewrite = push_down_rewrites(KRewrite(state1, state2))
