@@ -618,7 +618,6 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   rule E1 in (S SetItem(E2))           => true requires E1 ==K E2 orBool E1 in S     [simplification]
   rule E1 in (S SetItem(E2))           => E1 in S           requires E1 =/=K E2      [simplification]                  
   rule E1 in (S SetItem(E2))           => E1 in SetItem(E2) requires notBool E1 in S [simplification]
-  rule E  in (S1 -Set (SetItem(E) S1)) => false                                      [simplification]
 
   // Symbolic intersectSet
   rule intersectSet(_S, .Set) => .Set                                                              [simplification]                                                                                         
