@@ -617,7 +617,7 @@ def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, pr
     return (minimizeRule(rule, keepVars=newKeepVars), vremapSubst)
 
 
-def abstract_term_safely(kast, base_name='V'):
+def abstract_term_safely(kast: KInner, base_name: str = 'V') -> KVariable:
     vname = hash_str(kast)[0:8]
     return KVariable(base_name + '_' + vname)
 
