@@ -109,6 +109,10 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
                     ceil_var = abstractTermSafely(_kast, baseName='Ceil')
                     _LOGGER.warning(f'Converting #Ceil condition to variable {ceil_var.name}: {_kast}')
                     return ceil_var
+                if _kast.label.name == '#Exists':
+                    exists_var = abstractTermSafely(_kast, baseName='Exists')
+                    _LOGGER.warning(f'Converting #Exists condition to variable {exists_var.name}: {_kast}')
+                    return exists_var
         raise ValueError(f'Could not convert ML predicate to sort Bool: {_kast}')
 
     return _ml_constraint_to_bool(kast)
