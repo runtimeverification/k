@@ -615,10 +615,10 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   //Unsupported  - "Set1 Set2" matching not currently supported, just "Set Setitem(E)"
   //rule E  in ( S1 S2)                  => E in S2 requires notBool E in S1       [simplification]
   //rule E  in (S1 _S2)                  => true    requires         E in S1       [simplification]
-  rule E1 in (S SetItem(E2))           => true requires E1 ==K E2 orBool E1 in S [simplification]
+  rule E1 in (S SetItem(E2))           => true requires E1 ==K E2 orBool E1 in S     [simplification]
   rule E1 in (S SetItem(E2))           => E1 in S           requires E1 =/=K E2      [simplification]                  
   rule E1 in (S SetItem(E2))           => E1 in SetItem(E2) requires notBool E1 in S [simplification]
-  rule E  in (S1 -Set (SetItem(E) S1)) => false                                  [simplification]
+  rule E  in (S1 -Set (SetItem(E) S1)) => false                                      [simplification]
 
   // Symbolic intersectSet
   rule intersectSet(_S, .Set) => .Set                                                              [simplification]                                                                                         
@@ -629,8 +629,9 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   rule intersectSet(S1 SetItem(E), S2) => intersectSet(S1, S2) SetItem(E) requires E in S2         [simplification]
   rule intersectSet(S1, S2 SetItem(E)) => intersectSet(S1, S2) SetItem(E) requires E in S1         [simplification]
   
-  rule E in intersectSet(S1, S2) => true  requires         E in S1 andBool         E in S2         [simplification]
-  rule E in intersectSet(S1, S2) => false requires notBool E in S1  orBool notBool E in S2         [simplification]
+  rule E in intersectSet(S1, S2) => E in S1 requires E in S2                                       [simplification]
+  rule E in intersectSet(S1, S2) => E in S2 requires E in S1                                       [simplification]
+  rule E in intersectSet(S1, S2) => false   requires notBool E in S1  orBool notBool E in S2       [simplification]
 
   //todo temp rule, should be generated in front-end
   /*rule #Ceil(@S1:Set @S2:Set) => {intersectSet(@S1, @S2) #Equals .Set} #And #Ceil(@S1) #And #Ceil(@S2)
