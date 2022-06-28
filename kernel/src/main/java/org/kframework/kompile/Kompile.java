@@ -2,6 +2,7 @@
 package org.kframework.kompile;
 
 import com.google.inject.Inject;
+import org.apache.commons.io.FileUtils;
 import org.kframework.Strategy;
 import org.kframework.attributes.Att;
 import org.kframework.attributes.Location;
@@ -29,8 +30,10 @@ import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
+import org.kframework.krun.RunProcess;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.InputModes;
+import org.kframework.parser.json.JsonParser;
 import org.kframework.parser.KRead;
 import org.kframework.parser.ParserUtils;
 import org.kframework.parser.inner.RuleGrammarGenerator;
@@ -55,10 +58,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -147,6 +153,14 @@ public class Kompile {
         files.saveToKompiled("compiled.txt", kompiledDefinition.toString());
         sw.printIntermediate("Apply compile pipeline");
 
+        // final check for sort correctness
+        for (Module m : mutable(kompiledDefinition.modules()))
+            m.checkSorts();
+        if (kompileOptions.postProcess != null) {
+            kompiledDefinition = postProcessJSON(kompiledDefinition, kompileOptions.postProcess);
+            files.saveToKompiled("post-processed.txt", kompiledDefinition.toString());
+        }
+
         files.saveToKompiled("allRules.txt", ruleSourceMap(kompiledDefinition));
 
         if (kompileOptions.emitJson) {
@@ -215,6 +229,29 @@ public class Kompile {
         return def;
     }
 
+    private Definition postProcessJSON(Definition defn, String postProcess) {
+        List<String> command = new ArrayList<>(Arrays.asList(postProcess.split(" ")));
+        Map<String, String> environment = new HashMap<>();
+        File compiledJson;
+        try {
+            String inputDefinition = new String(ToJson.apply(defn), "UTF-8");
+            compiledJson = files.resolveTemp("post-process-compiled.json");
+            FileUtils.writeStringToFile(compiledJson, inputDefinition);
+        } catch (UnsupportedEncodingException e) {
+            throw KEMException.criticalError("Could not encode definition to JSON!");
+        } catch (IOException e) {
+            throw KEMException.criticalError("Could not make temporary file!");
+        }
+        command.add(compiledJson.getAbsolutePath());
+        RunProcess.ProcessOutput output = RunProcess.execute(environment, files.getProcessBuilder(), command.toArray(new String[command.size()]));
+        sw.printIntermediate("Post process JSON: " + String.join(" ", command));
+        if (output.exitCode != 0) {
+            throw KEMException.criticalError("Post-processing returned a non-zero exit code: "
+                    + output.exitCode + "\nStdout:\n" + new String(output.stdout) + "\nStderr:\n" + new String(output.stderr));
+        }
+        return JsonParser.parseDefinition(new String(output.stdout));
+    }
+
     private static String ruleSourceMap(Definition def) {
         List<String> ruleLocs = new ArrayList<String>();
         for (Sentence s: JavaConverters.setAsJavaSet(def.mainModule().sentences())) {
@@ -272,7 +309,7 @@ public class Kompile {
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve, "resolving semantic casts");
         DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun(false)::resolve, "resolving #fun");
-        Function1<Definition, Definition> resolveFunctionWithConfig = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, false)::resolve, "resolving functions with config context").apply(d);
+        Function1<Definition, Definition> resolveFunctionWithConfig = d -> DefinitionTransformer.from(new ResolveFunctionWithConfig(d, false)::moduleResolve, "resolving functions with config context").apply(d);
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
         DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections(kompileOptions.coverage)::gen, "adding sort projections");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");

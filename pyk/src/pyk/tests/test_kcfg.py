@@ -6,15 +6,11 @@ from ..kast import TRUE, KApply, KAst, KInner, KVariable
 from ..kcfg import KCFG
 from ..ktool import KPrint
 from ..prelude import token
-from ..utils import shorten_hashes
+from ..utils import shorten_hash
 
 
 def nid(i: int) -> str:
     return node(i).id
-
-
-def short_id(i: int) -> str:
-    return shorten_hashes(nid(i))
 
 
 # over 10 is variables
@@ -263,11 +259,64 @@ class KCFGTestCase(TestCase):
             },
         )
 
+    def test_resolve(self):
+        # Given
+        d = {
+            'nodes': node_dicts(4),
+            'edges': edge_dicts((0, 1), (0, 2), (1, 2), (1, 3), (2, 3), (3, 0)),
+        }
+        cfg = KCFG.from_dict(d)
+
+        self.assertEqual(node(1), cfg.node('d33..d8'))
+        self.assertEqual(node(1), cfg.node(node(1).id))
+
+        # Matches no nodes
+        with self.assertRaises(ValueError, msg='Unknown node: deadbeef..d8'):
+            self.assertEqual(node(1), cfg.node('deadbeef..d8'))
+
+        # Matches all nodes
+        with self.assertRaisesRegex(ValueError, 'Multiple nodes for pattern: ...'):
+            cfg.node('..')
+
+        # Matches node(0) and node(2)
+        with self.assertRaisesRegex(ValueError, 'Multiple nodes for pattern: ...'):
+            cfg.node('3..')
+
+    def test_aliases(self):
+        # Given
+        d = {
+            'nodes': node_dicts(2),
+            'edges': edge_dicts((0, 1)),
+            'aliases': {'foo': nid(1)}
+        }
+
+        cfg = KCFG.from_dict(d)
+        self.assertEqual(cfg.node('@foo'), node(1))
+
+        cfg.add_alias('bar', node(0).id)
+        cfg.add_alias('bar2', node(0).id)
+        self.assertEqual(cfg.node('@bar'), node(0))
+        self.assertEqual(cfg.node('@bar2'), node(0))
+        cfg.remove_alias('bar')
+        with self.assertRaises(ValueError, msg='Unknown alias: @bar'):
+            cfg.node('@bar')
+
+        with self.assertRaises(ValueError, msg='Duplicate alias "bar2"'):
+            cfg.add_alias('bar2', node(1).id)
+        with self.assertRaises(ValueError, msg='Alias may not contain "@"'):
+            cfg.add_alias('@buzz', node(1).id)
+        with self.assertRaises(ValueError, msg=f'Unknown node: {nid(3)}'):
+            cfg.add_alias('buzz', node(3).id)
+
+        cfg.remove_node(nid(1))
+        cfg.create_node(term(1))
+
     def test_pretty_print(self):
         d = {
             'init': [nid(0)],
             'target': [nid(6)],
             'nodes': node_dicts(12),
+            'aliases': {'foo': nid(3), 'bar': nid(3)},
                                                              # Each of the branching edges have given depth=0 # noqa: E131
             'edges': edge_dicts((0, 1), (1, 2, 5), (2, 3),   # Initial Linear segment
                                 (3, 4, 0), (4, 5), (5, 2),   # Loops back
@@ -276,46 +325,49 @@ class KCFGTestCase(TestCase):
                                 (3, 7, 0), (7, 6),           # Go to previous terminal node not as loop
                                 (3, 11, 0), (11, 8)          # Covered
                                 ),
-            'covers': cover_dicts((8, 11))                   # Loops back
+            'covers': cover_dicts((8, 11)),                  # Loops back
+            'expanded': [nid(i) for i in [0, 1, 2, 3, 4, 5, 7, 11]],
         }
         cfg = KCFG.from_dict(d)
 
-        print(set(map(lambda node: node.id, cfg.reachable_nodes(nid(5), reverse=True, traverse_covers=True))))
+        def _short_hash(i) -> str:
+            return shorten_hash(nid(i))
 
-        # TODO: Why are all nodes (besides the target) frontiers?
-        # TODO: Add a cover
         self.maxDiff = None
         actual = '\n'.join(cfg.pretty_print(mock_kprint())) + '\n'
         self.assertMultiLineEqual(actual,
-                                  f"{short_id(0)} (init, frontier)\n"
+                                  f"{_short_hash(0)} (init, expanded)\n"
                                   f"│  (1 step)\n"
-                                  f"├  {short_id(1)} (frontier)\n"
+                                  f"├  {_short_hash(1)} (expanded)\n"
                                   f"│  (5 steps)\n"
-                                  f"├  {short_id(2)} (frontier)\n"
+                                  f"├  {_short_hash(2)} (expanded)\n"
                                   f"│  (1 step)\n"
-                                  f"├  {short_id(3)} (frontier)\n"
-                                  f"┢━ {short_id(4)} (frontier)\n"
+                                  f"├  {_short_hash(3)} (expanded, @bar, @foo)\n"
+                                  f"┢━ {_short_hash(6)} (target, leaf)\n"
+                                  f"┃\n"
+                                  f"┣━ {_short_hash(5)} (expanded)\n"
                                   f"┃   │  (1 step)\n"
-                                  f"┃   ├  {short_id(5)} (frontier)\n"
-                                  f"┃   │  (1 step)\n"
-                                  f"┃   ├  {short_id(2)} (frontier)\n"
+                                  f"┃   ├  {_short_hash(2)} (expanded)\n"
                                   f"┃   ┊ (looped back)\n"
                                   f"┃\n"
-                                  f"┣━ {short_id(5)} (frontier)\n"
+                                  f"┣━ {_short_hash(11)} (expanded)\n"
+                                  f"┃   │  (1 step)\n"
+                                  f"┃   ├  {_short_hash(8)} (leaf)\n"
+                                  f"┃   │  constraint: KApply(label=KLabel(name='#Top', params=(KSort(name='GeneratedTopCell'),)), args=())\n"
+                                  f"┃   │  subst:\n"
+                                  f"┃   │    KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='V11'), KToken(token='8', sort=KSort(name='Int'))))\n"
+                                  f"┃   ├  {_short_hash(11)} (expanded)\n"
+                                  f"┃   ┊ (looped back)\n"
+                                  f"┃\n"
+                                  f"┣━ {_short_hash(4)} (expanded)\n"
+                                  f"┃   │  (1 step)\n"
+                                  f"┃   ├  {_short_hash(5)} (expanded)\n"
                                   f"┃   ┊ (continues as previously)\n"
                                   f"┃\n"
-                                  f"┣━ {short_id(6)} (target, leaf)\n"
-                                  f"┃\n"
-                                  f"┣━ {short_id(7)} (frontier)\n"
-                                  f"┃   │  (1 step)\n"
-                                  f"┃   └  {short_id(6)} (target, leaf)\n"
-                                  f"┃\n"
-                                  f"┗━ {short_id(11)} (frontier)\n"
+                                  f"┗━ {_short_hash(7)} (expanded)\n"
                                   f"    │  (1 step)\n"
-                                  f"    ├  {short_id(8)} (leaf)\n"
-                                  f"    │  constraint: KApply(label=KLabel(name='#Top', params=(KSort(name='GeneratedTopCell'),)), args=())\n"
-                                  f"    │  subst:\n"
-                                  f"    │    KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='V11'), KToken(token='8', sort=KSort(name='Int'))))\n"
-                                  f"    ├  {short_id(11)} (frontier)\n"
-                                  f"    ┊ (looped back)\n\n"
+                                  f"    └  {_short_hash(6)} (target, leaf)\n"
+                                  f"\n"
+                                  f"{_short_hash(9)} (frontier, leaf)\n"
+                                  f"{_short_hash(10)} (frontier, leaf)\n"
                                   )

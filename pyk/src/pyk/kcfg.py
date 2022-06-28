@@ -31,7 +31,7 @@ from .kastManip import (
     substToMlPred,
 )
 from .ktool import KPrint
-from .utils import add_indent, compare_short_hashes, shorten_hashes
+from .utils import add_indent, compare_short_hashes, shorten_hash
 
 
 class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
@@ -50,6 +50,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         def to_dict(self) -> Dict[str, Any]:
             return {'id': self.id, 'term': self.cterm.term.to_dict()}
 
+        def __lt__(self, other):
+            if not isinstance(other, KCFG.Node):
+                return NotImplemented
+            return self.id < other.id
+
     class EdgeLike(ABC):
         source: 'KCFG.Node'
         target: 'KCFG.Node'
@@ -57,6 +62,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         @abstractmethod
         def pretty_print(self, kprint: KPrint) -> List[str]:
             assert False, 'Must be overridden'
+
+        def __lt__(self, other):
+            if not isinstance(other, KCFG.EdgeLike):
+                return NotImplemented
+            return (self.source, self.target) < (other.source, other.target)
 
     @dataclass(frozen=True)
     class Edge(EdgeLike):
@@ -117,6 +127,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     _target: Set[str]
     _expanded: Set[str]
     _verified: Set[Tuple[str, str]]
+    _aliases: Dict[str, str]
     _lock: RLock
 
     def __init__(self):
@@ -127,6 +138,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         self._target = set()
         self._expanded = set()
         self._verified = set()
+        self._aliases = dict()
         self._lock = RLock()
 
     def __contains__(self, item: object) -> bool:
@@ -197,6 +209,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         target = sorted(self._target)
         expanded = sorted(self._expanded)
         verified = [{"source": source_id, "target": target_id} for source_id, target_id in sorted(self._verified)]
+        aliases = dict(sorted(self._aliases.items()))
 
         res = {
             'nodes': nodes,
@@ -206,6 +219,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             'target': target,
             'expanded': expanded,
             'verified': verified,
+            'aliases': aliases
         }
         return {k: v for k, v in res.items() if v}
 
@@ -253,7 +267,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         for verified_ids in dct.get('verified') or []:
             cfg.add_verified(resolve(verified_ids['source']), resolve(verified_ids['target']))
 
+        for alias, id in dct.get('aliases', {}).items():
+            cfg.add_alias(alias=alias, node_id=resolve(id))
+
         return cfg
+
+    def aliases(self, node_id: str) -> List[str]:
+        node_id = self._resolve(node_id)
+        return [alias for alias, value in self._aliases.items() if node_id == value]
 
     def to_json(self) -> str:
         return json.dumps(self.to_dict(), sort_keys=True)
@@ -263,9 +284,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         return KCFG.from_dict(json.loads(s))
 
     def node_short_info(self, node: Node) -> str:
-        attrs = self.node_attrs(node.id)
+        attrs = self.node_attrs(node.id) + ['@' + alias for alias in sorted(self.aliases(node.id))]
         attr_string = ' (' + ', '.join(attrs) + ')' if attrs else ''
-        return shorten_hashes(node.id) + attr_string
+        return shorten_hash(node.id) + attr_string
 
     def pretty_print(self, kprint: KPrint) -> List[str]:
 
@@ -274,8 +295,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         def _print_subgraph(indent: str, curr_node: KCFG.Node, prior_on_trace: List[KCFG.Node]) -> List[str]:
             ret: List[str] = []
 
+            edges_from = sorted(self.edge_likes(source_id=curr_node.id))
             if curr_node in processed_nodes:
-                if len(self.edge_likes(source_id=curr_node.id)) == 0:
+                if not edges_from:
                     return ret
                 if curr_node in prior_on_trace:
                     ret.append(indent + '┊ (looped back)')
@@ -284,9 +306,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 return ret
             processed_nodes.append(curr_node)
 
-            num_children = len(self.edge_likes(source_id=curr_node.id))
+            num_children = len(edges_from)
             is_branch = num_children > 1
-            for i, edge_like in enumerate(self.edge_likes(source_id=curr_node.id)):
+            for i, edge_like in enumerate(edges_from):
                 is_first_child = i == 0
                 is_last_child = i == num_children - 1
 
@@ -311,7 +333,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                     ret.append(new_indent.rstrip())
             return ret
 
-        return [self.node_short_info(self.init[0])] + _print_subgraph('', self.init[0], [self.init[0]])
+        ret = []
+        init = sorted(self.init)
+        while init:
+            ret.append(self.node_short_info(init[0]))
+            ret.extend(_print_subgraph('', init[0], [init[0]]))
+            init = sorted(node for node in self.nodes if node not in processed_nodes)
+        return ret
 
     def to_dot(self, kprint: KPrint) -> str:
         def _short_label(label):
@@ -320,9 +348,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         graph = Digraph()
 
         for node in self.nodes:
-            nodeAttrs = self.node_attrs(node.id)
-            classAttrs = ' '.join(nodeAttrs)
-            label = shorten_hashes(node.id) + (classAttrs and ' ' + classAttrs)
+            label = self.node_short_info(node)
+            classAttrs = ' '.join(self.node_attrs(node.id))
             attrs = {'class': classAttrs} if classAttrs else {}
             graph.node(name=node.id, label=label, **attrs)
 
@@ -351,21 +378,25 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         return graph.source
 
-    def _resolve_all(self, short_id: str) -> List[str]:
-        return [node_id for node_id in self._nodes if compare_short_hashes(short_id, node_id)]
+    def _resolve_hash(self, id_like: str) -> List[str]:
+        return [node_id for node_id in self._nodes if compare_short_hashes(id_like, node_id)]
 
-    def _resolve_or_none(self, short_id: str) -> Optional[str]:
-        matches = self._resolve_all(short_id)
+    def _resolve_or_none(self, id_like: str) -> Optional[str]:
+        if id_like.startswith('@'):
+            if id_like[1:] in self._aliases:
+                return self._aliases[id_like[1:]]
+            raise ValueError(f'Unknown alias: {id_like}')
+        matches = self._resolve_hash(id_like)
         if not matches:
             return None
         if len(matches) > 1:
-            raise ValueError(f'Multiple nodes for pattern: {short_id} (matches e.g. {matches[0]} and {matches[1]})')
+            raise ValueError(f'Multiple nodes for pattern: {id_like} (matches e.g. {matches[0]} and {matches[1]})')
         return matches[0]
 
-    def _resolve(self, short_id: str) -> str:
-        match = self._resolve_or_none(short_id)
+    def _resolve(self, id_like: str) -> str:
+        match = self._resolve_or_none(id_like)
         if not match:
-            raise ValueError(f'Unknown node: {short_id}')
+            raise ValueError(f'Unknown node: {id_like}')
         return match
 
     def node(self, node_id: str) -> Node:
@@ -418,6 +449,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         self._target.discard(node_id)
         self._expanded.discard(node_id)
         self._verified = set((source_id, target_id) for source_id, target_id in self._verified if source_id != node_id and target_id != node_id)
+
+        for alias in [alias for alias, id in self._aliases.items() if id == node_id]:
+            self.remove_alias(alias)
 
     def edge(self, source_id: str, target_id: str) -> Optional[Edge]:
         source_id = self._resolve(source_id)
@@ -537,6 +571,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         target_id = self._resolve(target_id)
         self._verified.add((source_id, target_id))
 
+    def add_alias(self, alias: str, node_id: str) -> None:
+        if '@' in alias:
+            raise ValueError('Alias may not contain "@"')
+        if alias in self._aliases:
+            raise ValueError(f'Duplicate alias "{alias}"')
+        node_id = self._resolve(node_id)
+        self._aliases[alias] = node_id
+
     def remove_init(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
         if node_id not in self._init:
@@ -561,6 +603,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         if (source_id, target_id) not in self._verified:
             raise ValueError(f'Edge is not verified: {(source_id, target_id)}')
         self._verified.remove((source_id, target_id))
+
+    def remove_alias(self, alias: str) -> None:
+        if alias not in self._aliases:
+            raise ValueError(f'Alias does not exist: {alias}')
+        self._aliases.pop(alias)
 
     def discard_init(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
