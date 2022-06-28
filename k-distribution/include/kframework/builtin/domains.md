@@ -620,7 +620,7 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   rule E1 in (S SetItem(E2))           => E1 in SetItem(E2) requires notBool E1 in S [simplification]
 
   // Symbolic intersectSet
-  rule intersectSet(_S, .Set) => .Set                                                              [simplification]                                                                                         
+  //rule intersectSet(_S, .Set) => .Set                                                              [simplification]                                                                                         
   rule intersectSet(.Set, _S) => .Set                                                              [simplification]
   rule intersectSet(S, S) => S                                                                     [simplification]
   rule intersectSet(S1 SetItem(E), S2) => intersectSet(S1, S2) SetItem(E) requires         E in S2 [simplification]
@@ -646,7 +646,7 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   rule E in ( S1 -Set  S2) => E in S1         requires notBool E in S2             [simplification]
 
   // Symbolic |Set
-  rule S    |Set .Set => S                                                        [simplification]                                                                                         
+  //rule S    |Set .Set => S                                                        [simplification]                                                                                         
   rule .Set |Set S    => S                                                        [simplification]
   rule S    |Set S    => S                                                        [simplification]
   //Last side conditions are workarounds for: https://github.com/runtimeverification/haskell-backend/issues/3124
