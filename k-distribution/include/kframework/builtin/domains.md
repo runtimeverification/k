@@ -620,6 +620,9 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   rule E1 in (S SetItem(E2))           => E1 in SetItem(E2) requires notBool E1 in S [simplification]
 
   // Symbolic intersectSet
+  rule intersectSet(_S, .Set) => .Set                                                              [simplification]                                                                                         
+  rule intersectSet(.Set, _S) => .Set                                                              [simplification]
+  rule intersectSet(S, S) => S                                                                     [simplification]
   rule intersectSet(S1 SetItem(E), S2) => intersectSet(S1, S2) SetItem(E) requires         E in S2 [simplification]
   rule intersectSet(S1 SetItem(E), S2) => intersectSet(S1, S2)            requires notBool E in S2 [simplification]     
   rule intersectSet(S1, S2 SetItem(E)) => intersectSet(S1, S2) SetItem(E) requires         E in S1 [simplification]
@@ -630,6 +633,9 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   rule E in intersectSet(S1, S2) => false   requires notBool E in S1  orBool notBool E in S2       [simplification]
 
   // Symbolic -Set
+  rule S -Set .Set  => S                                                           [simplification]                                                                                         
+  rule .Set -Set _S => .Set                                                        [simplification]
+  rule S -Set S     => .Set                                                        [simplification]
   //Last side conditions are workarounds for: https://github.com/runtimeverification/haskell-backend/issues/3124
   rule (S1 SetItem(E)) -Set S2 =>  S1 -Set S2             requires         E in S2 andBool notBool E in S1 [simplification]
   rule (S1 SetItem(E)) -Set S2 => (S1 -Set S2) SetItem(E) requires notBool E in S2 andBool notBool E in S1 [simplification]     
@@ -641,6 +647,9 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   rule E in ( S1 -Set  S2) => E in S1         requires notBool E in S2             [simplification]
 
   // Symbolic |Set
+  rule S    |Set .Set => S                                                        [simplification]                                                                                         
+  rule .Set |Set S    => S                                                        [simplification]
+  rule S    |Set S    => S                                                        [simplification]
   //Last side conditions are workarounds for: https://github.com/runtimeverification/haskell-backend/issues/3124
   rule (S1 SetItem(E)) |Set S2 =>  S1 |Set S2             requires         E in S2 andBool notBool E in S1 [simplification]
   rule (S1 SetItem(E)) |Set S2 => (S1 |Set S2) SetItem(E) requires notBool E in S2 andBool notBool E in S1 [simplification]     
