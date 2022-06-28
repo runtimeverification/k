@@ -1,7 +1,9 @@
+import logging
 from collections import Counter
 from typing import (
     Callable,
     Dict,
+    Final,
     List,
     Mapping,
     Optional,
@@ -52,6 +54,8 @@ from .prelude import (
 )
 from .utils import find_common_items, hash_str, unique
 
+_LOGGER: Final = logging.getLogger(__name__)
+
 KI = TypeVar('KI', bound=KInner)
 W = TypeVar('W', bound=WithKAtt)
 
@@ -98,8 +102,13 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
                     return KApply(KLabel('notBool_'), [_kast.args[1]])
                 if type(_kast.args[0]) in [KVariable, KToken]:
                     return KApply('_==K_', _kast.args)
-                if unsafe:
+            if unsafe:
+                if _kast.label.name == '#Equals':
                     return KApply('_==K_', _kast.args)
+                if _kast.label.name == '#Ceil':
+                    ceil_var = abstractTermSafely(_kast, baseName='Ceil')
+                    _LOGGER.warning(f'Converting #Ceil condition to variable {ceil_var.name}: {_kast}')
+                    return ceil_var
         raise ValueError(f'Could not convert ML predicate to sort Bool: {_kast}')
 
     return _ml_constraint_to_bool(kast)
