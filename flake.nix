@@ -7,10 +7,14 @@
     llvm-backend.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
     mavenix.url = "github:goodlyrottenapple/mavenix";
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
   };
 
   outputs =
-    { self, nixpkgs, flake-utils, haskell-backend, llvm-backend, mavenix }:
+    { self, nixpkgs, flake-utils, haskell-backend, llvm-backend, mavenix, flake-compat }:
     let
       overlays = system: [
         mavenix.overlay
@@ -67,8 +71,8 @@
               inherit src;
               debugger =
                 if system == "x86_64-darwin" || system == "aarch64-darwin" then
-                  # TODO lldb is broken on nixpkgs unstable, once the lldb support for 
-                  # k is done we should add lldb as runtime dependency here
+                # TODO lldb is broken on nixpkgs unstable, once the lldb support for 
+                # k is done we should add lldb as runtime dependency here
                   null
                 else
                   prev.gdb;
@@ -91,6 +95,15 @@
         inherit overlays;
         packages = {
           inherit (pkgs) k;
+
+          update-maven =
+            pkgs.writeShellScriptBin "update-maven" ''
+              #!/bin/sh
+              ${pkgs.nix}/bin/nix-build --no-out-link -E 'import ./nix/flake-compat-k-unwrapped.nix' \
+                || echo "^~~~ expected error"
+
+              ${pkgs.mavenix-cli}/bin/mvnix-update -l ./nix/mavenix.lock -E 'import ./nix/flake-compat-k-unwrapped.nix'
+            '';
 
           checkVersions = let
             hashes = [

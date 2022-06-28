@@ -83,6 +83,22 @@
         "type": "github"
       }
     },
+    "flake-compat": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1650374568,
+        "narHash": "sha256-Z+s0J8/r907g149rllvwhb4pKi8Wam5ij0st8PwAh+E=",
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "rev": "b4a34015c698c7793d592d66adbab377907a2be8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "locked": {
         "lastModified": 1653893745,
@@ -332,11 +348,11 @@
         "utils": "utils_3"
       },
       "locked": {
-        "lastModified": 1656336549,
-        "narHash": "sha256-J0sv7wu1hZqAEct6amzlhnGDkHN0bs4bu+/qq/HO2wQ=",
+        "lastModified": 1656435814,
+        "narHash": "sha256-Gx4QoWB9eI437/66iqTr6AUjxGgN6WslqrQ57s+sL6A=",
         "owner": "goodlyrottenapple",
         "repo": "mavenix",
-        "rev": "c2f3618ce413ad541027a163a85985760ce1ee75",
+        "rev": "0cbd57b2494d52909b27f57d03580acc66bf0298",
         "type": "github"
       },
       "original": {
@@ -540,6 +556,7 @@
     },
     "root": {
       "inputs": {
+        "flake-compat": "flake-compat",
         "flake-utils": "flake-utils",
         "haskell-backend": "haskell-backend",
         "llvm-backend": "llvm-backend",
