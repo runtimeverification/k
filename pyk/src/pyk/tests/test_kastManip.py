@@ -11,7 +11,7 @@ from ..kast import (
     ktokenDots,
 )
 from ..kastManip import minimize_term, ml_pred_to_bool, push_down_rewrites
-from ..prelude import intToken, mlEqualsTrue, mlTop
+from ..prelude import Sorts, intToken, mlEqualsTrue, mlTop
 from .utils import a, b, c, f, k
 
 x = KVariable('X')
@@ -57,16 +57,19 @@ class MlPredToBoolTest(TestCase):
     def test_ml_pred_to_bool(self):
         # Given
         test_data = (
-            (False, KApply(KLabel('#Equals', [KSort('Bool'), KSort('GeneratedTopCell')]), [TRUE, f(a)]), f(a)),
-            (False, KApply(KLabel('#Top', [KSort('Bool')])), TRUE),
+            (False, KApply(KLabel('#Equals', [Sorts.BOOL, Sorts.GENERATED_TOP_CELL]), [TRUE, f(a)]), f(a)),
+            (False, KApply(KLabel('#Top', [Sorts.BOOL])), TRUE),
             (False, KApply('#Top'), TRUE),
             (False, mlTop(), TRUE),
             (False, KApply(KLabel('#Equals'), [x, f(a)]), KApply('_==K_', [x, f(a)])),
             (False, KApply(KLabel('#Equals'), [TRUE, f(a)]), f(a)),
-            (False, KApply(KLabel('#Equals', [KSort('Int'), KSort('GeneratedTopCell')]), [intToken(3), f(a)]), KApply('_==K_', [intToken(3), f(a)])),
-            (False, KApply(KLabel('#Not', [KSort('GeneratedTopCell')]), [mlTop()]), KApply('notBool_', [TRUE])),
+            (False, KApply(KLabel('#Equals', [KSort('Int'), Sorts.GENERATED_TOP_CELL]), [intToken(3), f(a)]), KApply('_==K_', [intToken(3), f(a)])),
+            (False, KApply(KLabel('#Not', [Sorts.GENERATED_TOP_CELL]), [mlTop()]), KApply('notBool_', [TRUE])),
             (True, KApply(KLabel('#Equals'), [f(a), f(x)]), KApply('_==K_', [f(a), f(x)])),
-            (False, KApply(KLabel('#And', [KSort('GeneratedTopCell')]), [mlEqualsTrue(TRUE), mlEqualsTrue(TRUE)]), KApply('_andBool_', [TRUE, TRUE]))
+            (False, KApply(KLabel('#And', [Sorts.GENERATED_TOP_CELL]), [mlEqualsTrue(TRUE), mlEqualsTrue(TRUE)]), KApply('_andBool_', [TRUE, TRUE])),
+            (True, KApply(KLabel('#Ceil', [KSort('Set'), Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('_Set_', [KVariable('_'), KVariable('_')]))]), KVariable('Ceil_d06736ac')),
+            (True, KApply(KLabel('#Not', [Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('#Ceil', [KSort('Set'), Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('_Set_', [KVariable('_'), KVariable('_')]))])]), KApply('notBool_', [KVariable('Ceil_d06736ac')])),
+            (True, KApply(KLabel('#Exists', [Sorts.INT, Sorts.BOOL]), [KVariable('X'), KApply('_==Int_', [KVariable('X'), KVariable('Y')])]), KVariable('Exists_8676e20c')),
         )
 
         for i, (unsafe, before, expected) in enumerate(test_data):
