@@ -37,7 +37,7 @@ let
       patchShebangs k-distribution/src/main/scripts/lib
     '';
 
-    # We first copy the bin, include and lib folders from the build and then replace all copied jars which aready exist
+    # We first copy the bin, include and lib folders from the build and then replace all copied jars which already exist
     # in $out/share/mavenix/repo with a symlink to reduce the derivation size. This is done to reduce the cachix upload sizes
     # We also have to make sure to link the cmake/ and include/ folders from the llvm-backend source repo and the llvm-backend derivation, 
     # as these will be expected/required when compiling other projects, e.g. the evm-semantics repo
