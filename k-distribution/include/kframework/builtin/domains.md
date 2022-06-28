@@ -624,14 +624,27 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   rule intersectSet(_S, .Set) => .Set                                                              [simplification]                                                                                         
   rule intersectSet(.Set, _S) => .Set                                                              [simplification]
   rule intersectSet(S, S) => S                                                                     [simplification]
+  rule intersectSet(S1 SetItem(E), S2) => intersectSet(S1, S2) SetItem(E) requires         E in S2 [simplification]
   rule intersectSet(S1 SetItem(E), S2) => intersectSet(S1, S2)            requires notBool E in S2 [simplification]     
+  rule intersectSet(S1, S2 SetItem(E)) => intersectSet(S1, S2) SetItem(E) requires         E in S1 [simplification]
   rule intersectSet(S1, S2 SetItem(E)) => intersectSet(S1, S2)            requires notBool E in S1 [simplification]
-  rule intersectSet(S1 SetItem(E), S2) => intersectSet(S1, S2) SetItem(E) requires E in S2         [simplification]
-  rule intersectSet(S1, S2 SetItem(E)) => intersectSet(S1, S2) SetItem(E) requires E in S1         [simplification]
   
   rule E in intersectSet(S1, S2) => E in S1 requires E in S2                                       [simplification]
   rule E in intersectSet(S1, S2) => E in S2 requires E in S1                                       [simplification]
   rule E in intersectSet(S1, S2) => false   requires notBool E in S1  orBool notBool E in S2       [simplification]
+
+  // Symbolic -Set
+  rule S -Set .Set  => S                                                           [simplification]                                                                                         
+  rule .Set -Set _S => .Set                                                        [simplification]
+  rule S -Set S     => .Set                                                        [simplification]
+  rule (S1 SetItem(E)) -Set S2 =>  S1 -Set S2             requires         E in S2 [simplification]
+  rule (S1 SetItem(E)) -Set S2 => (S1 -Set S2) SetItem(E) requires notBool E in S2 [simplification]     
+  rule S1 -Set (S2 SetItem(E)) =>  S1 -Set S2             requires notBool E in S1 [simplification]
+                                                             
+  rule E in ( S1 -Set  S2) => notBool E in S2 requires         E in S1             [simplification]
+  rule E in ( S1 -Set _S2) => false           requires notBool E in S1             [simplification]
+  rule E in (_S1 -Set  S2) => false           requires         E in S2             [simplification]
+  rule E in ( S1 -Set  S2) => E in S1         requires notBool E in S2             [simplification]
 
   //todo temp rule, should be generated in front-end
   /*rule #Ceil(@S1:Set @S2:Set) => {intersectSet(@S1, @S2) #Equals .Set} #And #Ceil(@S1) #And #Ceil(@S2)
