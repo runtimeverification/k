@@ -1,0 +1,9 @@
+  <k>
+    intersectResult ( S:Set ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in S
+  }

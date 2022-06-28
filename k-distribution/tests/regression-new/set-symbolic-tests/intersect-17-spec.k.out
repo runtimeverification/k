@@ -1,0 +1,10 @@
+  <k>
+    intersectResult ( intersectSet ( S1
+    SetItem ( X:MyId ) , S2 ) ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in S1
+  }
