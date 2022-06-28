@@ -68,7 +68,8 @@ class MlPredToBoolTest(TestCase):
             (True, KApply(KLabel('#Equals'), [f(a), f(x)]), KApply('_==K_', [f(a), f(x)])),
             (False, KApply(KLabel('#And', [Sorts.GENERATED_TOP_CELL]), [mlEqualsTrue(TRUE), mlEqualsTrue(TRUE)]), KApply('_andBool_', [TRUE, TRUE])),
             (True, KApply(KLabel('#Ceil', [KSort('Set'), Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('_Set_', [KVariable('_'), KVariable('_')]))]), KVariable('Ceil_d06736ac')),
-            (True, KApply(KLabel('#Not', [Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('#Ceil', [KSort('Set'), Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('_Set_', [KVariable('_'), KVariable('_')]))])]), KApply('notBool_', [KVariable('Ceil_d06736ac')]))
+            (True, KApply(KLabel('#Not', [Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('#Ceil', [KSort('Set'), Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('_Set_', [KVariable('_'), KVariable('_')]))])]), KApply('notBool_', [KVariable('Ceil_d06736ac')])),
+            (True, KApply(KLabel('#Exists', [Sorts.INT, Sorts.BOOL]), [KVariable('X'), KApply('_==Int_', [KVariable('X'), KVariable('Y')])]), KVariable('Exists_8676e20c')),
         )
 
         for i, (unsafe, before, expected) in enumerate(test_data):
