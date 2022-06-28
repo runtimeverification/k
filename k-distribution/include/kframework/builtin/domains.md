@@ -612,7 +612,7 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   imports private BOOL
 
   // Symbolic in
-  //Unsupported  - "Set1 Set2" matching not currently supported, just "Set Setitem(E)"
+  //Unsupported: "Set1 Set2" matching. Using "Set SetItem(E) instead."
   //rule E  in ( S1 S2)                  => E in S2 requires notBool E in S1       [simplification]
   //rule E  in (S1 _S2)                  => true    requires         E in S1       [simplification]
   rule E1 in (S SetItem(E2))           => true requires E1 ==K E2 orBool E1 in S     [simplification]
