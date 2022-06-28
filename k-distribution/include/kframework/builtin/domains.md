@@ -637,9 +637,10 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   rule S -Set .Set  => S                                                           [simplification]                                                                                         
   rule .Set -Set _S => .Set                                                        [simplification]
   rule S -Set S     => .Set                                                        [simplification]
-  rule (S1 SetItem(E)) -Set S2 =>  S1 -Set S2             requires         E in S2 [simplification]
-  rule (S1 SetItem(E)) -Set S2 => (S1 -Set S2) SetItem(E) requires notBool E in S2 [simplification]     
-  rule S1 -Set (S2 SetItem(E)) =>  S1 -Set S2             requires notBool E in S1 [simplification]
+  //Last side conditions are workarounds for: https://github.com/runtimeverification/haskell-backend/issues/3124
+  rule (S1 SetItem(E)) -Set S2 =>  S1 -Set S2             requires         E in S2 andBool notBool E in S1 [simplification]
+  rule (S1 SetItem(E)) -Set S2 => (S1 -Set S2) SetItem(E) requires notBool E in S2 andBool notBool E in S1 [simplification]     
+  rule S1 -Set (S2 SetItem(E)) =>  S1 -Set S2             requires notBool E in S1 andBool notBool E in S2 [simplification]
                                                              
   rule E in ( S1 -Set  S2) => notBool E in S2 requires         E in S1             [simplification]
   rule E in ( S1 -Set _S2) => false           requires notBool E in S1             [simplification]
