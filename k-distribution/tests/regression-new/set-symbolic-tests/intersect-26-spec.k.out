@@ -1,0 +1,15 @@
+  #Not ( {
+    Y
+  #Equals
+    Z
+  } )
+#And
+  <k>
+    intersectResult ( false ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    Z:MyId in S
+  }

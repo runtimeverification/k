@@ -1,0 +1,9 @@
+  <k>
+    intersectResult ( true ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    Z:MyId in S
+  }
