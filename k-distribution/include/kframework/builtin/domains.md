@@ -545,7 +545,7 @@ elements present in either set.
 
 ```k
   syntax Set ::= Set "|Set" Set            [left, function, functional, hook(SET.union)]
-  rule S1:Set |Set S2:Set => S1 (S2 -Set S1)
+  rule S1:Set |Set S2:Set => S1 (S2 -Set S1) [concrete]
 ```
 
 ### Set intersection
@@ -647,7 +647,20 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   rule E in (_S1 -Set  S2) => false           requires         E in S2             [simplification]
   rule E in ( S1 -Set  S2) => E in S1         requires notBool E in S2             [simplification]
 
-  //todo temp rule, should be generated in front-end
+  // Symbolic |Set
+  rule S    |Set .Set => S                                                        [simplification]                                                                                         
+  rule .Set |Set S    => S                                                        [simplification]
+  rule S    |Set S    => S                                                        [simplification]
+  //Last side conditions are workarounds for: https://github.com/runtimeverification/haskell-backend/issues/3124
+  rule (S1 SetItem(E)) |Set S2 =>  S1 |Set S2             requires         E in S2 andBool notBool E in S1 [simplification]
+  rule (S1 SetItem(E)) |Set S2 => (S1 |Set S2) SetItem(E) requires notBool E in S2 andBool notBool E in S1 [simplification]     
+  rule S1 |Set (S2 SetItem(E)) => (S1 |Set S2) SetItem(E) requires notBool E in S1 andBool notBool E in S2 [simplification]
+                                                             
+  rule E in (S1 |Set S2) => true    requires E in S1 orBool E in S2      [simplification]
+  rule E in (S1 |Set S2) => E in S2 requires notBool E in S1             [simplification]
+  rule E in (S1 |Set S2) => E in S1 requires notBool E in S2             [simplification]
+
+  //Temp rule, should be generated in front-end
   /*rule #Ceil(@S1:Set @S2:Set) => {intersectSet(@S1, @S2) #Equals .Set} #And #Ceil(@S1) #And #Ceil(@S2)
     [anywhere, simplification]*/ 
     
