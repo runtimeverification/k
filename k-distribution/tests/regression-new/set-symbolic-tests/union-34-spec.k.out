@@ -1,0 +1,9 @@
+  <k>
+    unionResult ( true ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in S
+  }

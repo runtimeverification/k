@@ -1,0 +1,10 @@
+  <k>
+    unionResult ( Z:MyId in S
+    SetItem ( Y:MyId ) ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    Y:MyId in S
+  }

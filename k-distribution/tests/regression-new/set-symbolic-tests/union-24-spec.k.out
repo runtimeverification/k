@@ -1,0 +1,16 @@
+  #Not ( {
+    X
+  #Equals
+    Y
+  } )
+#And
+  <k>
+    unionResult ( Z:MyId in ( S |Set SetItem ( Y:MyId ) )
+    SetItem ( X:MyId ) ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in S
+  }

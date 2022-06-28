@@ -1,0 +1,15 @@
+  #Not ( {
+    Y
+  #Equals
+    Z
+  } )
+#And
+  <k>
+    unionResult ( true ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    Z:MyId in S
+  }
