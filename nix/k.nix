@@ -13,9 +13,6 @@ let
     # Otherwise, the jars are needlessly duplicated and bloat the cachix cache.
     copySubmodules = false;
 
-    # Cannot enable unit tests until a bug is fixed upstream (in Mavenix).
-    # doCheck = false;
-
     # Set build environment variables
     #
     MAVEN_OPTS = [
