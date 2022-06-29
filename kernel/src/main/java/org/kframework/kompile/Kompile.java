@@ -465,7 +465,7 @@ public class Kompile {
     public void structuralChecks(scala.collection.Set<Module> modules, Module mainModule, Option<Module> kModule, Set<String> excludedModuleTags) {
         boolean isSymbolic = excludedModuleTags.contains(Att.CONCRETE());
         boolean isKast = excludedModuleTags.contains(Att.KORE());
-        CheckRHSVariables checkRHSVariables = new CheckRHSVariables(errors, !isSymbolic);
+        CheckRHSVariables checkRHSVariables = new CheckRHSVariables(errors, !isSymbolic, kompileOptions.backend);
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(checkRHSVariables::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAtt(errors, kem, mainModule, isSymbolic && isKast)::check));
