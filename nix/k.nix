@@ -13,19 +13,17 @@ let
     # Otherwise, the jars are needlessly duplicated and bloat the cachix cache.
     copySubmodules = false;
 
-    # Cannot enable unit tests until a bug is fixed upstream (in Mavenix).
-    doCheck = false;
+    # Add build dependencies
+    buildInputs = [ git ];
 
     # Set build environment variables
-    #
     MAVEN_OPTS = [
       "-DskipKTest=true"
       "-Dllvm.backend.skip=true"
       "-Dhaskell.backend.skip=true"
     ];
     # Attributes are passed to the underlying `stdenv.mkDerivation`, so build
-    #   hooks can be set here also.
-    #
+    # hooks can also be set here.
     postPatch = ''
       patchShebangs k-distribution/src/main/scripts/bin
       patchShebangs k-distribution/src/main/scripts/lib
