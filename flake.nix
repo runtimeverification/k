@@ -54,12 +54,6 @@
                 chmod -R u+w $out
                 mkdir -p $out/llvm-backend/src/main/native/llvm-backend/matching
                 cp -rv ${llvm-backend}/matching/* $out/llvm-backend/src/main/native/llvm-backend/matching
-                ${prev.lib.optionalString prev.stdenv.isDarwin ''
-                  substituteInPlace $out/kernel/src/main/java/org/kframework/parser/KRead.java \
-                    --replace 'gcc' 'clang'
-                  substituteInPlace $out/kernel/src/main/java/org/kframework/parser/inner/kernel/Scanner.java \
-                    --replace 'gcc' 'clang'
-                ''}
               '';
             };
           in {
@@ -105,7 +99,7 @@
               ${pkgs.mavenix-cli}/bin/mvnix-update -l ./nix/mavenix.lock -E 'import ./nix/flake-compat-k-unwrapped.nix'
             '';
 
-          checkVersions = let
+          check-versions = let
             hashes = [
               {
                 name = "llvm-mackend";
@@ -116,7 +110,7 @@
                 rev = haskell-backend.rev;
               }
             ];
-          in pkgs.writeShellScriptBin "checkVersions" ''
+          in pkgs.writeShellScriptBin "check-versions" ''
             STATUS=$(git submodule status);
             for elem in ${
               pkgs.lib.concatMapStringsSep " " ({ name, rev }: "${name},${rev}")
