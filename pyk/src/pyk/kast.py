@@ -1224,6 +1224,10 @@ class KFlatModule(KOuter, WithKAtt):
         return [sentence for sentence in self.sentences if type(sentence) is KProduction]
 
     @property
+    def syntax_productions(self) -> List[KProduction]:
+        return [prod for prod in self.productions if prod.klabel]
+
+    @property
     def rules(self) -> List[KRule]:
         return [sentence for sentence in self.sentences if type(sentence) is KRule]
 
@@ -1353,6 +1357,14 @@ class KDefinition(KOuter, WithKAtt):
 
     def let_att(self, att: KAtt) -> 'KDefinition':
         return self.let(att=att)
+
+    @property
+    def productions(self) -> List[KProduction]:
+        return [prod for module in self.modules for prod in module.productions]
+
+    @property
+    def syntax_productions(self) -> List[KProduction]:
+        return [prod for module in self.modules for prod in module.syntax_productions]
 
 
 # TODO make method of KInner
