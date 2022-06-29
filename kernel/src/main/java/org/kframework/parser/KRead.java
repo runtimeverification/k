@@ -98,7 +98,7 @@ public class KRead {
                 }
                 List<String> command = new ArrayList<>();
                 command.addAll(Arrays.asList(
-                      "gcc",
+                      Scanner.COMPILER,
                       files.resolveKInclude("cparser/main.c").getAbsolutePath(),
                       files.resolveTemp("lex.yy.c").getAbsolutePath(),
                       files.resolveTemp("parser.tab.c").getAbsolutePath(),
@@ -114,7 +114,7 @@ public class KRead {
                   .start()
                   .waitFor();
                 if (exit != 0) {
-                    throw KEMException.internalError("gcc returned nonzero exit code: " + exit + "\n");
+                    throw KEMException.internalError(Scanner.COMPILER + " returned nonzero exit code: " + exit + "\n");
                 }
             } catch(IOException | InterruptedException e) {
               throw KEMException.internalError("Failed to execute process.", e);
