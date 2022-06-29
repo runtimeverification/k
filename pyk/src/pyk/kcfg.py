@@ -86,7 +86,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             return rule
 
         def pretty_print(self, kprint: KPrint) -> List[str]:
-            if self.depth == 1:
+            if self.depth == 0:
+                return ['\nandBool'.join(kprint.pretty_print(self.condition).split(' andBool'))]
+            elif self.depth == 1:
                 return ['(' + str(self.depth) + ' step)']
             else:
                 return ['(' + str(self.depth) + ' steps)']
@@ -292,6 +294,15 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         processed_nodes: List[KCFG.Node] = []
 
+        def _bold(text: str) -> str:
+            return '\033[1m' + text + '\033[0m'
+
+        def _print_node(node: KCFG.Node) -> str:
+            short_info = self.node_short_info(node)
+            if self.is_frontier(node.id):
+                short_info = _bold(short_info)
+            return short_info
+
         def _print_subgraph(indent: str, curr_node: KCFG.Node, prior_on_trace: List[KCFG.Node]) -> List[str]:
             ret: List[str] = []
 
@@ -309,15 +320,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             num_children = len(edges_from)
             is_branch = num_children > 1
             for i, edge_like in enumerate(edges_from):
-                is_first_child = i == 0
                 is_last_child = i == num_children - 1
 
                 if not is_branch:
                     elbow = '├ ' if len(self.edge_likes(source_id=edge_like.target.id)) else '└ '
                     new_indent = indent
-                elif is_first_child:
-                    elbow = '┢━'
-                    new_indent = indent + '┃   '
                 elif is_last_child:
                     elbow = '┗━'
                     new_indent = indent + '    '
@@ -325,9 +332,17 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                     elbow = '┣━'
                     new_indent = indent + '┃   '
 
-                if not(isinstance(edge_like, KCFG.Edge) and edge_like.depth == 0):
-                    ret.extend(add_indent(indent + '│  ', edge_like.pretty_print(kprint)))
-                ret.append(indent + elbow + ' ' + self.node_short_info(edge_like.target))
+                extension_char = ''
+                if isinstance(edge_like, KCFG.Edge):
+                    if edge_like.depth == 0:
+                        extension_char = '┃'
+                    else:
+                        extension_char = '│'
+                elif isinstance(edge_like, KCFG.Cover):
+                    extension_char = '┊'
+                ret.extend(add_indent(indent + extension_char + '  ', edge_like.pretty_print(kprint)))
+
+                ret.append(indent + elbow + ' ' + _print_node(edge_like.target))
                 ret.extend(_print_subgraph(new_indent, edge_like.target, prior_on_trace + [edge_like.source]))
                 if is_branch:
                     ret.append(new_indent.rstrip())
@@ -336,7 +351,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         ret = []
         init = sorted(self.init)
         while init:
-            ret.append(self.node_short_info(init[0]))
+            ret.append(_print_node(init[0]))
             ret.extend(_print_subgraph('', init[0], [init[0]]))
             init = sorted(node for node in self.nodes if node not in processed_nodes)
         return ret
