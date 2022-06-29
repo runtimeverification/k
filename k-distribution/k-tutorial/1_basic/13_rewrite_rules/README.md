@@ -170,7 +170,7 @@ matches a K cell in which the first element of the K sequence is an `Exp` whose
 arguments are values, and rewrites the first element of the sequence to the
 result of that expression. The second also matches a K cell with an `Exp` in
 the first element of its K sequence, but it matches when one or both arguments
-of the `Exp` are not values, and replace the first element of the K sequence
+of the `Exp` are not values, and replaces the first element of the K sequence
 with two new elements: one being an argument to evaluate, and the other being
 a special constructor called a **freezer**. Finally, the third matches a K
 sequence where a `Val` is first, and a freezer is second, and replaces them
