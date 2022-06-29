@@ -218,9 +218,9 @@ As you can see if you work through the process, the above code will ultimately
 generate the same contexts present in `LESSON-14-B`.
 
 Finally, note that there are a few minor syntactic conveniences provided by the
-`seqstrict` attribute. First, if you want your `context alias` sentence to look
-exactly like `<k> HERE ...</k>`, you can omit both the `context alias` sentence
-from the definition, and the name from the `seqstrict` attribute.
+`seqstrict` attribute. First, in the special case of the `context alias` sentence
+being `<k> HERE ...</k>`, you can omit both the `context alias` sentence
+and the name from the `seqstrict` attribute.
 
 Second, if the numbered list of offsets contains every non-terminal in the
 production, it can be omitted from the attribute value.
