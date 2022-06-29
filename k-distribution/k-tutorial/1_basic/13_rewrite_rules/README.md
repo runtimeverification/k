@@ -86,7 +86,7 @@ of those rules, apply it, and continue rewriting. However, it is
 By passing the `--search` flag to `krun`, you are able to tell `krun` to 
 explore all possible non-deterministic choices, and generate a complete list of
 all possible final configurations reachable by each nondeterminstic choice that
-can be made. Note that the `--search` flag to krun only functions if you pass
+can be made. Note that the `--search` flag to krun only works if you pass
 `--enable-search` to kompile first.
 
 ### Exercise
