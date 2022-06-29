@@ -183,6 +183,12 @@ public class ModuleToKORE {
                         return prod;
                     }
             );
+            module.sortedProductions().toStream().filter(this::isGeneratedInSetOp).foreach(
+                    inSetProduction -> {
+                        sortedRules.add(buildCeilSetRule(inSetProduction));
+                        return inSetProduction;
+                    }
+            );
         }
         SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
         for (Rule rule : sortedRules) {
@@ -609,6 +615,78 @@ public class ModuleToKORE {
                         , Att.empty().add(Att.SIMPLIFICATION())
                 );
         rules.add(ceilMapRule);
+    }
+
+    private boolean isGeneratedInSetOp(Production prod) {
+        Option<String> hook = prod.att().getOption(Att.HOOK());
+        return !hook.isEmpty() && hook.get().equals("SET.in") && (!prod.klabel().isEmpty());
+    }
+
+    /**
+     * Generating for each set production the #Ceil rule:
+     * <p/>
+     * rule
+     *   #Ceil(SetItem(@K0, @K1, ..., @Kn) @Rest:Set)
+     * =>
+     *   {(@K0 in @Rest) #Equals false} #And #Ceil(@K0) #And ... #And #Ceil(@Kn) #And #Ceil(@Rest)
+     * [anywhere, simplification]
+     * @param inSetProduction "syntax Bool ::= KItem "in" Set"
+     * @return
+     */
+    private Rule buildCeilSetRule(Production inSetProduction) {
+        Sort setSort = inSetProduction.nonterminal(1).sort();
+        scala.collection.Set<Production> setProductions = module.productionsForSort().apply(setSort.head());
+        Production setConcatProd = setProductions.find(p -> hasHookValue(p.att(), "SET.concat")).get();    //set concatenation: `Set ::= Set Set`
+        Production setElementProd = setProductions.find(p -> hasHookValue(p.att(), "SET.element")).get();  //set element: `Set ::= SetItem(K1, ..., Kn)`
+        Seq<NonTerminal> elemProdNonterminals = setElementProd.nonterminals();
+        Sort sortParam = Sort(AddSortInjections.SORTPARAM_NAME, Sort("Q"));
+
+        KVariable restVar = KVariable("@Rest", Att.empty().add(Sort.class, setSort)); //variable @Rest
+        KLabel ceilSetLabel = KLabel(KLabels.ML_CEIL.name(), setSort, sortParam);           //label of #Ceil(Set) for this set
+        KLabel andLabel = KLabel(KLabels.ML_AND.name(), sortParam);                         //label #And
+
+        List<K> setItemArgVars = new ArrayList<>();
+        K setArgsCeil = KApply(ceilSetLabel, restVar);                                                    //initializing with #Ceil(Rest)
+        for (int i = 0; i < elemProdNonterminals.length(); i++) {
+            Sort setItemElemSort = elemProdNonterminals.apply(i).sort();                                  //Sort for SetItem element
+            KVariable kiVar = KVariable("@K" + i, Att.empty().add(Sort.class, setItemElemSort));    //variable @Ki
+            setItemArgVars.add(kiVar);                                                                    //K0,K2,...,Kn
+            KLabel ceilElemLabel = KLabel(KLabels.ML_CEIL.name(), setItemElemSort, sortParam);            //#Ceil label for SetItem element
+            setArgsCeil = KApply(andLabel, setArgsCeil, KApply(ceilElemLabel, kiVar));                    //#And #Ceil(@K0) #And ... #And #Ceil(@Kn) #And #Ceil(@Rest)
+        }
+        Seq<K> setArgsSeq = JavaConverters.iterableAsScalaIterable(setItemArgVars).toSeq();   //K0,...,Kn as sequence
+
+        KLabel equalsLabel = KLabel(KLabels.ML_EQUALS.name(), Sorts.Bool(), sortParam); //Label #Equals
+        K setItemTerm = KApply(setElementProd.klabel().get(),                           //SetItem(@K0, @K2, ..., @Kn)
+                               setArgsSeq,
+                               Att.empty()
+        );
+        Rule ceilSetRule =
+                Rule(
+                        KRewrite(
+                                KApply(ceilSetLabel,                                    //#Ceil(SetItem(@K0, @K2, ..., @Kn) @Rest:Set)
+                                        KApply(setConcatProd.klabel().get(),            //SetItem(@K0, @K2, ..., @Kn) @Rest:Set
+                                                setItemTerm,
+                                                restVar
+                                        )
+                                )
+                                ,
+                                KApply(andLabel,                                        //{(@K0 in @Rest) #Equals false} #And #Ceil(@K0) #And ... #And #Ceil(@Kn) #And #Ceil(@Rest)
+                                        KApply(equalsLabel,                             //{(@K0 in @Rest) #Equals false}
+                                                KApply(inSetProduction.klabel().get(),  //@K0 in @Rest
+                                                        setItemArgVars.get(0),
+                                                        restVar
+                                                ),
+                                                BooleanUtils.FALSE
+                                        ),
+                                        setArgsCeil
+                                )
+                        )
+                        , BooleanUtils.TRUE
+                        , BooleanUtils.TRUE
+                        , Att.empty().add(Att.ANYWHERE()).add(Att.SIMPLIFICATION())
+                );
+        return ceilSetRule;
     }
 
     static boolean hasHookValue(Att atts, String value) {
