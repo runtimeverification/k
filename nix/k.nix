@@ -14,13 +14,7 @@ let
     copySubmodules = false;
 
     # Cannot enable unit tests until a bug is fixed upstream (in Mavenix).
-    doCheck = false;
-
-    # Add build dependencies
-    #
-    nativeBuildInputs = [ makeWrapper ];
-
-    buildInputs = [ flex git gmp jdk mpfr pkgconfig python3 z3 ];
+    # doCheck = false;
 
     # Set build environment variables
     #
