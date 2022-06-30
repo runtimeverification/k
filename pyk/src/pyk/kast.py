@@ -30,8 +30,6 @@ T = TypeVar('T', bound='KAst')
 W = TypeVar('W', bound='WithKAtt')
 KI = TypeVar('KI', bound='KInner')
 
-NON_FREE_CONSTRUCTORS: Final = ['_Set_', '_List_', '_Map_', 'SetItem', 'ListItem', '_|->_']
-
 
 class KAst(ABC):
 
@@ -1229,9 +1227,15 @@ class KFlatModule(KOuter, WithKAtt):
     def syntax_productions(self) -> List[KProduction]:
         return [prod for prod in self.productions if prod.klabel]
 
+    @staticmethod
+    def _is_non_free_constructor(label: str) -> bool:
+        is_cell_map_constructor = label.endswith('CellMapItem') or label.endswith('CellMap_')
+        is_builtin_data_constructor = label in ['_Set_', '_List_', '_Map_', 'SetItem', 'ListItem', '_|->_']
+        return is_cell_map_constructor or is_builtin_data_constructor
+
     @property
     def functions(self) -> List[KProduction]:
-        return [prod for prod in self.syntax_productions if 'function' in prod.att or 'functional' and ((not prod.klabel) or prod.klabel.name not in NON_FREE_CONSTRUCTORS)]
+        return [prod for prod in self.syntax_productions if 'function' in prod.att.atts or 'functional' in prod.att.atts and not (prod.klabel and KFlatModule._is_non_free_constructor(prod.klabel.name))]
 
     @property
     def constructors(self) -> List[KProduction]:
