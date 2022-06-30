@@ -1224,6 +1224,26 @@ class KFlatModule(KOuter, WithKAtt):
         return [sentence for sentence in self.sentences if type(sentence) is KProduction]
 
     @property
+    def syntax_productions(self) -> List[KProduction]:
+        return [prod for prod in self.productions if prod.klabel]
+
+    @property
+    def functions(self) -> List[KProduction]:
+
+        def _is_non_free_constructor(label: str) -> bool:
+            is_cell_map_constructor = label.endswith('CellMapItem') or label.endswith('CellMap_')
+            is_builtin_data_constructor = label in {'_Set_', '_List_', '_Map_', 'SetItem', 'ListItem', '_|->_'}
+            return is_cell_map_constructor or is_builtin_data_constructor
+
+        _functions = [prod for prod in self.syntax_productions if 'function' in prod.att.atts or 'functional' in prod.att.atts]
+        _functions = [f for f in _functions if not (f.klabel and _is_non_free_constructor(f.klabel.name))]
+        return _functions
+
+    @property
+    def constructors(self) -> List[KProduction]:
+        return [prod for prod in self.syntax_productions if prod not in self.functions]
+
+    @property
     def rules(self) -> List[KRule]:
         return [sentence for sentence in self.sentences if type(sentence) is KRule]
 
@@ -1353,6 +1373,22 @@ class KDefinition(KOuter, WithKAtt):
 
     def let_att(self, att: KAtt) -> 'KDefinition':
         return self.let(att=att)
+
+    @property
+    def productions(self) -> List[KProduction]:
+        return [prod for module in self.modules for prod in module.productions]
+
+    @property
+    def syntax_productions(self) -> List[KProduction]:
+        return [prod for module in self.modules for prod in module.syntax_productions]
+
+    @property
+    def functions(self) -> List[KProduction]:
+        return [prod for module in self.modules for prod in module.functions]
+
+    @property
+    def constructors(self) -> List[KProduction]:
+        return [prod for module in self.modules for prod in module.constructors]
 
 
 # TODO make method of KInner
