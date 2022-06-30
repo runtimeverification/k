@@ -1235,7 +1235,9 @@ class KFlatModule(KOuter, WithKAtt):
 
     @property
     def functions(self) -> List[KProduction]:
-        return [prod for prod in self.syntax_productions if 'function' in prod.att.atts or 'functional' in prod.att.atts and not (prod.klabel and KFlatModule._is_non_free_constructor(prod.klabel.name))]
+        _functions = [prod for prod in self.syntax_productions if 'function' in prod.att.atts or 'functional' in prod.att.atts]
+        _functions = [f for f in _functions if not (f.klabel and KFlatModule._is_non_free_constructor(f.klabel.name))]
+        return _functions
 
     @property
     def constructors(self) -> List[KProduction]:
