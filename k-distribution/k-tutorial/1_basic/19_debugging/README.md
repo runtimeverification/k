@@ -76,8 +76,8 @@ Please note that the path will be different on your machine than the one
 listed above. Adding directories to the "load safe path" effectively tells GDB
 to trust those directories. All content under a given directory will be recursively
 trusted, so if you want to avoid having to add paths to the "load safe path" every
-time you kompile a different `K` definition, then you can just trust a top-level
-directory containing all your kompiled files. More info on the load safe path
+time you kompile a different `K` definition, then you can just trust a minimal
+directory containing all your kompiled files; however, do not choose a top-level directory containing arbitrary files as this amounts to trusting arbitrary files and is a security risk. More info on the load safe path
 can be found [here](https://sourceware.org/gdb/onlinedocs/gdb/Auto_002dloading-safe-path.html).
 
 ## Basic commands
