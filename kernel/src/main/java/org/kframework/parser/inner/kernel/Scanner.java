@@ -54,7 +54,7 @@ public class Scanner implements AutoCloseable {
     private final Module module;
     private GlobalOptions go = new GlobalOptions();
 
-    private static final String EXE_EXTENSION = OS.current().equals(OS.WINDOWS) ? ".exe" : "";
+    public static final String COMPILER = OS.current().equals(OS.OSX) ? "clang" : "gcc";
 
     public static Map<TerminalLike, Tuple2<Integer, Integer>> getTokens(Module module) {
         Map<TerminalLike, Integer> tokens = new TreeMap<>();
@@ -289,16 +289,16 @@ public class Scanner implements AutoCloseable {
                 throw KEMException.internalError(
                         "Flex returned nonzero exit code. See output for details. flex command: " + pb.command());
             }
-            scanner = File.createTempFile("tmp-kompile-", EXE_EXTENSION);
+            scanner = File.createTempFile("tmp-kompile-", "");
             scanner.deleteOnExit();
             //Option -lfl unnecessary. Same effect achieved by --noyywrap above.
-            pb = new ProcessBuilder("gcc", scannerCSource.getAbsolutePath(), "-o", scanner.getAbsolutePath(), "-Wno-unused-result");
+            pb = new ProcessBuilder(COMPILER, scannerCSource.getAbsolutePath(), "-o", scanner.getAbsolutePath(), "-Wno-unused-result");
             pb.inheritIO();
             exit = pb.start().waitFor();
             scanner.setExecutable(true);
             if (exit != 0) {
                 throw KEMException.internalError(
-                        "gcc returned nonzero exit code. See output for details. gcc command: " + pb.command());
+                        COMPILER + " returned nonzero exit code. See output for details. " + COMPILER + " command: " + pb.command());
             }
         } catch (IOException | InterruptedException e) {
             throw KEMException.internalError("Failed to write file for scanner", e);

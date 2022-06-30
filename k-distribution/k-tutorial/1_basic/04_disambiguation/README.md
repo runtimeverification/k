@@ -12,7 +12,7 @@ languages is asymptotically faster than parsing ambiguous languages.
 Programming language designers instead usually use the notions of operator
 precedence and associativity to make expression grammars unambiguous. These
 mechanisms work by instructing the parser to reject certain ASTs in favor of
-others in case of ambiguities; often it is possible to remove *all* ambiguities
+others in case of ambiguities; it is often possible to remove *all* ambiguities
 in a grammar with these techniques.
 
 While it is sometimes possible to explicitly rewrite the grammar to remove

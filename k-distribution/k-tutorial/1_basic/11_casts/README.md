@@ -152,7 +152,7 @@ What this means is that you take any term of sort `S2` and **cast** it to sort
 `S`. If the term of sort S2 consists of an injection containing a term of sort
 `S`, then this will return that term. Otherwise, an error occurs and rewriting
 fails, returning the projection function which failed to apply. The sort is
-not actually checked at compilation time; rather, it is a runtime check is
+not actually checked at compilation time; rather, it is a runtime check
 inserted into the code that runs when the rule applies.
 
 For example, here is a module that makes use of projection casts:
