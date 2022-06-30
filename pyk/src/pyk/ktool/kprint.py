@@ -66,10 +66,7 @@ def unparser_for_production(prod):
             elif type(item) is KNonTerminal and index < len(args):
                 result.append(args[index])
                 index += 1
-        unparsed = ' '.join(result)
-        if type(prod.items[0]) is KNonTerminal or type(prod.items[-1]) is KNonTerminal:
-            unparsed = '( ' + unparsed + ' )'
-        return unparsed
+        return ' '.join(result)
 
     return _unparser
 
