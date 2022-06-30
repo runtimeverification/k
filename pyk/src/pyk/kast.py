@@ -30,6 +30,8 @@ T = TypeVar('T', bound='KAst')
 W = TypeVar('W', bound='WithKAtt')
 KI = TypeVar('KI', bound='KInner')
 
+NON_FREE_CONSTRUCTORS: Final = ['_Set_', '_List_', '_Map_', 'SetItem', 'ListItem', '_|->_']
+
 
 class KAst(ABC):
 
@@ -1228,6 +1230,14 @@ class KFlatModule(KOuter, WithKAtt):
         return [prod for prod in self.productions if prod.klabel]
 
     @property
+    def constructors(self) -> List[KProduction]:
+        return [prod for prod in self.syntax_productions if 'constructor' in prod.att or (prod.klabel and prod.klabel.name in NON_FREE_CONSTRUCTORS)]
+
+    @property
+    def functions(self) -> List[KProduction]:
+        return [prod for prod in self.syntax_productions if 'function' in prod.att or 'functional' and ((not prod.klabel) or prod.klabel.name not in NON_FREE_CONSTRUCTORS)]
+
+    @property
     def rules(self) -> List[KRule]:
         return [sentence for sentence in self.sentences if type(sentence) is KRule]
 
@@ -1365,6 +1375,14 @@ class KDefinition(KOuter, WithKAtt):
     @property
     def syntax_productions(self) -> List[KProduction]:
         return [prod for module in self.modules for prod in module.syntax_productions]
+
+    @property
+    def constructors(self) -> List[KProduction]:
+        return [prod for module in self.modules for prod in module.constructors]
+
+    @property
+    def functions(self) -> List[KProduction]:
+        return [prod for module in self.modules for prod in module.functions]
 
 
 # TODO make method of KInner
