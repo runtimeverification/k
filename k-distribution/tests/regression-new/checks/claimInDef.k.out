@@ -1,4 +1,6 @@
 [Error] Compiler: Claims are not allowed in the definition.
 	Source(claimInDef.k)
 	Location(5,11,5,17)
+	5 |	    claim _ => .
+	  .	          ^~~~~~
 [Error] Compiler: Had 1 structural errors.

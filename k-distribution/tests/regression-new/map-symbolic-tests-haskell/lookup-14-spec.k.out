@@ -23,8 +23,8 @@
   {
     true
   #Equals
-    Z:MyId in_keys ( MAP
-    ( X:MyId |-> 1 ) )
+    Z:MyId in_keys ( ( MAP
+    X:MyId |-> 1 ) [ Y:MyId <- 2 ] )
   }
 #And
   {

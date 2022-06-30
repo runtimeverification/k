@@ -1,4 +1,6 @@
 [Error] Compiler: Rewrites are not allowed in the context of a function rule.
 	Source(rewriteInFunctionContext.k)
 	Location(11,12,11,18)
+	11 |	     <bar> 0 => 1 </bar>
+	   .	           ^~~~~~
 [Error] Compiler: Had 1 structural errors.

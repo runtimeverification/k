@@ -1,22 +1,24 @@
 import argparse
-import os.path as path
+import logging
 import sys
 from pathlib import Path
+from typing import Final
 
 from graphviz import Digraph
 
-from .cli_utils import fatal, notif, warning
 from .coverage import getRuleById, stripCoverageLogger
-from .kast import KApply, KAst, flattenLabel, readKastTerm
+from .kast import KAst, flattenLabel, readKastTerm
 from .kastManip import (
+    minimize_term,
     minimizeRule,
-    minimizeTerm,
-    propagateUpConstraints,
+    propagate_up_constraints,
     removeSourceMap,
     splitConfigAndConstraints,
 )
-from .ktool import KPrint, KProve, buildSymbolTable, prettyPrintKast
-from .prelude import buildAssoc, mlBottom, mlTop
+from .ktool import KPrint, KProve, build_symbol_table, prettyPrintKast
+from .prelude import Sorts, mlAnd, mlOr, mlTop
+
+_LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 
 
 def main(extraMain=None):
@@ -26,10 +28,14 @@ def main(extraMain=None):
     sys.setrecursionlimit(10 ** 7)
 
     commandLineArgs = create_argument_parser()
-
-    returncode = 0
     args = vars(commandLineArgs.parse_args())
+
     kompiled_dir = Path(args['kompiled-dir'])
+
+    if args['verbose']:
+        logging.basicConfig(level=logging.DEBUG, format=_LOG_FORMAT)
+    else:
+        logging.basicConfig(level=logging.WARNING, format=_LOG_FORMAT)
 
     if args['command'] == 'print':
         printer = KPrint(kompiled_dir)
@@ -37,27 +43,25 @@ def main(extraMain=None):
         if type(term) is dict and 'term' in term:
             term = term['term']
         if term == mlTop():
-            args['output_file'].write(printer.prettyPrint(term))
+            args['output_file'].write(printer.pretty_print(term))
         else:
             if args['minimize']:
                 abstractLabels = [] if args['omit_labels'] is None else args['omit_labels'].split(',')
                 minimizedDisjuncts = []
                 for d in flattenLabel('#Or', term):
-                    dMinimized = minimizeTerm(d, abstractLabels=abstractLabels)
+                    dMinimized = minimize_term(d, abstract_labels=abstractLabels)
                     dConfig, dConstraint = splitConfigAndConstraints(dMinimized)
                     if dConstraint != mlTop():
-                        minimizedDisjuncts.append(KApply('#And', [dConfig, dConstraint]))
+                        minimizedDisjuncts.append(mlAnd([dConfig, dConstraint], sort=Sorts.GENERATED_TOP_CELL))
                     else:
                         minimizedDisjuncts.append(dConfig)
-                term = propagateUpConstraints(buildAssoc(mlBottom(), '#Or', minimizedDisjuncts))
-            args['output_file'].write(printer.prettyPrint(term))
+                term = propagate_up_constraints(mlOr(minimizedDisjuncts, sort=Sorts.GENERATED_TOP_CELL))
+            args['output_file'].write(printer.pretty_print(term))
 
     elif args['command'] == 'prove':
         kprover = KProve(kompiled_dir, args['main-file'])
-        finalState = kprover.prove(Path(args['spec-file']), args['spec-module'], args=args['kArgs'])
+        finalState = kprover.prove(Path(args['spec-file']), spec_module_name=args['spec-module'], args=args['kArgs'])
         args['output_file'].write(finalState.to_json())
-        if finalState != mlTop():
-            warning('Proof failed!')
 
     elif args['command'] == 'graph-imports':
         kprinter = KPrint(kompiled_dir)
@@ -70,28 +74,26 @@ def main(extraMain=None):
             for moduleImport in module.imports:
                 importGraph.edge(modName, moduleImport.name)
         importGraph.render(graphFile)
-        notif('Wrote file: ' + str(graphFile))
+        print(f'Wrote file: {graphFile}')
 
     elif args['command'] == 'coverage':
         json_definition = removeSourceMap(readKastTerm(kompiled_dir / 'compiled.json'))
-        symbolTable = buildSymbolTable(json_definition)
+        symbol_table = build_symbol_table(json_definition)
         for rid in args['coverage-file']:
             rule = minimizeRule(stripCoverageLogger(getRuleById(json_definition, rid.strip())))
             args['output'].write('\n\n')
             args['output'].write('Rule: ' + rid.strip())
             args['output'].write('\nUnparsed:\n')
-            args['output'].write(prettyPrintKast(rule, symbolTable))
+            args['output'].write(prettyPrintKast(rule, symbol_table))
 
     elif extraMain is not None:
         extraMain(args, kompiled_dir)
-
-    if returncode != 0:
-        fatal('Non-zero exit code (' + str(returncode) + '): ' + str(args['command']))
 
 
 def create_argument_parser():
     pykArgs = argparse.ArgumentParser()
     pykArgs.add_argument('kompiled-dir', type=str, help='Kompiled directory for definition.')
+    pykArgs.add_argument('--verbose', '-v', default=False, action='store_true', help='Set log level to INFO.')
 
     pykCommandParsers = pykArgs.add_subparsers(dest='command')
 
@@ -116,11 +118,6 @@ def create_argument_parser():
     coverageArgs.add_argument('-o', '--output', type=argparse.FileType('w'), default='-')
 
     return pykArgs
-
-
-# TODO remove
-def definitionDir(kompiledDir):
-    return path.dirname(path.abspath(kompiledDir))
 
 
 if __name__ == '__main__':

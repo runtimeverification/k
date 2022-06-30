@@ -14,7 +14,6 @@ from ..kastManip import (
     collapseDots,
     getCell,
     remove_generated_cells,
-    structurallyFrameKCell,
     substitute,
 )
 from ..ktool import KompileBackend
@@ -24,10 +23,10 @@ from .kompiled_test import KompiledTest
 class ConfigurationTest(KompiledTest, ABC):
     KOMPILE_MAIN_FILE = 'k-files/imp.k'
     KOMPILE_BACKEND = KompileBackend.HASKELL
-    KOMPILE_OUTPUT_DIR = 'definitions/imp/haskell'
+    KOMPILE_OUTPUT_DIR = 'definitions/imp'
     KOMPILE_EMIT_JSON = True
 
-    COMPILED_JSON_PATH = 'definitions/imp/haskell/imp-kompiled/compiled.json'
+    COMPILED_JSON_PATH = 'definitions/imp/compiled.json'
     MODULE_NAME = 'IMP-VERIFICATION'
 
     K_CELL = KApply('<k>', [KSequence([KVariable('S1'), KVariable('_DotVar0')])])
@@ -40,19 +39,6 @@ class ConfigurationTest(KompiledTest, ABC):
         super().setUp()
         self.definition = readKastTerm(self.COMPILED_JSON_PATH)
         self.assertIsInstance(self.definition, KDefinition)
-
-
-class StructurallyFrameKCellTest(ConfigurationTest):
-
-    def test(self):
-        # Given
-        config_expected = substitute(self.GENERATED_TOP_CELL_1, {'_DotVar0': ktokenDots})
-
-        # When
-        config_actual = structurallyFrameKCell(self.GENERATED_TOP_CELL_1)
-
-        # Then
-        self.assertEqual(config_actual, config_expected)
 
 
 class RemoveGeneratedCellsTest(ConfigurationTest):

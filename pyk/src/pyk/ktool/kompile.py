@@ -1,9 +1,12 @@
+import logging
 from enum import Enum
 from pathlib import Path
-from subprocess import CompletedProcess, run
-from typing import Iterable, List, Optional
+from subprocess import CalledProcessError, CompletedProcess
+from typing import Final, Iterable, List, Optional
 
-from ..cli_utils import check_dir_path, check_file_path, notif
+from ..cli_utils import check_dir_path, check_file_path, run_process
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 
 class KompileBackend(Enum):
@@ -28,12 +31,14 @@ def kompile(
 
     args = _build_arg_list(backend=backend, output_dir=output_dir, include_dirs=include_dirs, emit_json=emit_json)
 
-    proc_res = _kompile(str(main_file), *args)
+    try:
+        _kompile(str(main_file), *args)
+    except CalledProcessError as err:
+        raise RuntimeError(f'Command kompile exited with code {err.returncode} for: {main_file}', err.stdout, err.stderr)
 
-    if proc_res.returncode:
-        raise RuntimeError(f'Kompilation failed for: {main_file}')
-
-    return _kompiled_dir(main_file, output_dir)
+    kompiled_dir = _kompiled_dir(main_file, output_dir)
+    assert kompiled_dir.is_dir()
+    return kompiled_dir
 
 
 def _build_arg_list(
@@ -49,7 +54,7 @@ def _build_arg_list(
         args += ['--backend', backend.value]
 
     if output_dir:
-        args += ['--directory', str(output_dir)]
+        args += ['--output-definition', str(output_dir)]
 
     for include_dir in include_dirs:
         args += ['-I', str(include_dir)]
@@ -62,14 +67,11 @@ def _build_arg_list(
 
 def _kompile(main_file: str, *args: str) -> CompletedProcess:
     run_args = ['kompile', main_file] + list(args)
-    notif(' '.join(run_args))
-    return run(run_args, capture_output=True)
+    return run_process(run_args, _LOGGER)
 
 
 def _kompiled_dir(main_file: Path, output_dir: Optional[Path] = None) -> Path:
-    kompiled_dir_name = main_file.stem + '-kompiled'
+    if output_dir:
+        return output_dir
 
-    if not output_dir:
-        output_dir = main_file.parent
-
-    return output_dir / kompiled_dir_name
+    return Path(main_file.stem + '-kompiled')

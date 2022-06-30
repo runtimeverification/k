@@ -135,7 +135,7 @@ public class KoreBackend extends AbstractBackend {
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(true)::resolve, "resolving semantic casts");
         DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun(true)::resolve, "resolving #fun");
-        Function1<Definition, Definition> resolveFunctionWithConfig = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, true)::resolve, "resolving functions with config context").apply(d);
+        Function1<Definition, Definition> resolveFunctionWithConfig = d -> DefinitionTransformer.from(new ResolveFunctionWithConfig(d, true)::moduleResolve, "resolving functions with config context").apply(d);
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
         DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections(kompileOptions.coverage)::gen, "adding sort projections");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
@@ -147,7 +147,7 @@ public class KoreBackend extends AbstractBackend {
           return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kem, kompileOptions, false).expand(s), "expand macros").apply(d);
         };
         DefinitionTransformer constantFolding = DefinitionTransformer.fromSentenceTransformer(new ConstantFolding()::fold, "constant expression folding");
-        Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(d, true, kompileOptions.topCell).resolve(m)), "resolving !Var variables").apply(d);
+        Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(d, true, kompileOptions.topCell, files).resolve(m)), "resolving !Var variables").apply(d);
         GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
         Function1<Definition, Definition> genCoverage = d -> DefinitionTransformer.fromRuleBodyTransformerWithRule((r, body) -> cov.gen(r, body, d.mainModule()), "generate coverage instrumentation").apply(d);
         DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
@@ -211,7 +211,7 @@ public class KoreBackend extends AbstractBackend {
         ModuleTransformer addImplicitComputationCell = ModuleTransformer.fromSentenceTransformer(
                 new AddImplicitComputationCell(configInfo, labelInfo)::apply,
                 "concretizing configuration");
-        Function1<Module, Module> resolveFreshConstants = d -> ModuleTransformer.from(new ResolveFreshConstants(def, true, kompileOptions.topCell)::resolve, "resolving !Var variables").apply(d);
+        Function1<Module, Module> resolveFreshConstants = d -> ModuleTransformer.from(new ResolveFreshConstants(def, true, kompileOptions.topCell, files)::resolve, "resolving !Var variables").apply(d);
         ModuleTransformer concretizeCells = ModuleTransformer.fromSentenceTransformer(
                 new ConcretizeCells(configInfo, labelInfo, sortInfo, mod, true)::concretize,
                 "concretizing configuration");

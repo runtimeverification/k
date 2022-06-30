@@ -18,7 +18,7 @@ import org.kframework.parser.Constant;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
 
@@ -64,6 +64,7 @@ public class TypeInferencer implements AutoCloseable {
   private Process process;
   private PrintStream z3;
   private BufferedReader output;
+  private final boolean debug;
   private final Module mod;
   private final java.util.Set<SortHead> sorts;
 
@@ -89,7 +90,7 @@ public class TypeInferencer implements AutoCloseable {
    * Create a new z3 process and write the sorts and subsort relation to it.
    * @param mod the module to create an inferencer for.
    */
-  public TypeInferencer(Module mod) {
+  public TypeInferencer(Module mod, boolean debug) {
     initProcess();
     println("(get-info :version)");
     try {
@@ -111,6 +112,7 @@ public class TypeInferencer implements AutoCloseable {
       throw KEMException.internalError("Could not read from z3 process", e);
     }
     println(PRELUDE1);
+    this.debug = debug;
     this.mod = mod;
     this.sorts = stream(mod.definedSorts()).filter(this::isRealSort).collect(Collectors.toSet());
     push(mod);
@@ -147,7 +149,7 @@ public class TypeInferencer implements AutoCloseable {
     makeSubsorts(mod, "<=Sort", mod.subsorts());
     makeSubsorts(mod, "<=SortSyntax", mod.syntacticSubsorts());
 
-    if (DEBUG) {
+    if (debug) {
       debugPrelude = sb.toString();
     }
   }
@@ -890,7 +892,7 @@ public class TypeInferencer implements AutoCloseable {
         result = result.substring(startIdx, endIdx);
       }
       Sort r = new SmtSortParser(new StringReader(result)).Sort();
-      if (DEBUG)
+      if (debug)
         sb.append("; ").append(r).append("\n");
       return r;
     } catch (IOException e) {
@@ -913,7 +915,7 @@ public class TypeInferencer implements AutoCloseable {
   private void reset() {
     if (level > 0)
       return;
-    if (DEBUG) {
+    if (debug) {
       System.err.print(sb.toString());
       sb = new StringBuilder();
     }
@@ -945,12 +947,10 @@ public class TypeInferencer implements AutoCloseable {
     return pr.id().get() + suffix;
   }
 
-  private static final boolean DEBUG = false;
-
   private StringBuilder sb = new StringBuilder();
 
   private void println(String s) {
-    if (DEBUG) {
+    if (debug) {
       sb.append(s).append('\n');
     }
     z3.println(s);
@@ -958,7 +958,7 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   private void print(String s) {
-    if (DEBUG) {
+    if (debug) {
       sb.append(s);
     }
     z3.print(s);

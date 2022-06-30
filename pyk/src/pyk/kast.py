@@ -2,7 +2,7 @@ import json
 from abc import ABC, abstractmethod
 from dataclasses import InitVar, dataclass
 from enum import Enum
-from functools import cached_property
+from functools import cached_property, reduce
 from itertools import chain
 from typing import (
     Any,
@@ -23,8 +23,6 @@ from typing import (
     final,
     overload,
 )
-
-from typing_extensions import TypeAlias
 
 from .utils import FrozenDict, hash_str
 
@@ -121,7 +119,7 @@ class WithKAtt(KAst, ABC):
 
 
 class KInner(KAst, ABC):
-    _INNER_NODES: Final = {'KVariable', 'KSort', 'KToken', 'KApply', 'KAs', 'KRewrite', 'KSequence'}
+    _INNER_NODES: Final = {'KVariable', 'KSort', 'KToken', 'KLabel', 'KApply', 'KAs', 'KRewrite', 'KSequence'}
 
     @classmethod
     @abstractmethod
@@ -136,8 +134,81 @@ class KInner(KAst, ABC):
     def map_inner(self: KI, f: Callable[['KInner'], 'KInner']) -> KI:
         ...
 
+    @abstractmethod
+    def match(self, term: 'KInner') -> Optional['Subst']:
+        """
+        Perform syntactic pattern matching and return the substitution.
 
-K: TypeAlias = KInner
+        :param term: Term to match.
+        :return: Substitution instantiating self to the term.
+        """
+        ...
+
+    @staticmethod
+    def _combine_matches(substs: Iterable[Optional['Subst']]) -> Optional['Subst']:
+        def combine(subst1: Optional['Subst'], subst2: Optional['Subst']) -> Optional['Subst']:
+            if subst1 is None or subst2 is None:
+                return None
+
+            return subst1.union(subst2)
+
+        unit: Optional[Subst] = Subst()
+        return reduce(combine, substs, unit)
+
+
+@dataclass(frozen=True)
+class Subst(Mapping[str, KInner]):
+    _subst: FrozenDict[str, KInner]
+
+    def __init__(self, subst: Mapping[str, KInner] = {}):
+        object.__setattr__(self, '_subst', FrozenDict(subst))
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._subst)
+
+    def __len__(self) -> int:
+        return len(self._subst)
+
+    def __getitem__(self, key: str) -> KInner:
+        return self._subst[key]
+
+    def __mul__(self, other: 'Subst') -> 'Subst':
+        return self.compose(other)
+
+    def __call__(self, term: KInner) -> KInner:
+        return self.apply(term)
+
+    def minimize(self) -> 'Subst':
+        return Subst({k: v for k, v in self.items() if v != KVariable(k)})
+
+    def compose(self, other: 'Subst') -> 'Subst':
+        from_other = ((k, self(v)) for k, v in other.items())
+        from_self = ((k, v) for k, v in self.items() if k not in other)
+        return Subst(dict(chain(from_other, from_self)))
+
+    def union(self, other: 'Subst') -> Optional['Subst']:
+        subst = dict(self)
+        for v in other:
+            if v in subst and subst[v] != other[v]:
+                return None
+            subst[v] = other[v]
+        return Subst(subst)
+
+    def apply(self, term: KInner) -> KInner:
+        def replace(term):
+            if type(term) is KVariable and term.name in self:
+                return self[term.name]
+            return term
+
+        return bottom_up(replace, term)
+
+    def unapply(self, term: KInner) -> KInner:
+        new_term = term
+        for var_name in self:
+            lhs = self[var_name]
+            rhs = KVariable(var_name)
+            new_term = KRewrite(lhs, rhs).replace(new_term)
+        return new_term
 
 
 @final
@@ -154,7 +225,7 @@ class KVariable(KInner):
         return KVariable(name=d['name'])
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KVariable', 'name': self.name, 'originalName': self.name}
+        return {'node': 'KVariable', 'name': self.name}
 
     def let(self, *, name: Optional[str] = None) -> 'KVariable':
         name = name if name is not None else self.name
@@ -162,6 +233,9 @@ class KVariable(KInner):
 
     def map_inner(self: 'KVariable', f: Callable[[KInner], KInner]) -> 'KVariable':
         return self
+
+    def match(self, term: KInner) -> Subst:
+        return Subst({self.name: term})
 
 
 @final
@@ -178,7 +252,7 @@ class KSort(KInner):
         return KSort(name=d['name'])
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KSort', 'name': self.name, 'originalName': self.name}
+        return {'node': 'KSort', 'name': self.name}
 
     def let(self, *, name: Optional[str] = None) -> 'KSort':
         name = name if name is not None else self.name
@@ -187,31 +261,32 @@ class KSort(KInner):
     def map_inner(self: 'KSort', f: Callable[[KInner], KInner]) -> 'KSort':
         return self
 
-
-BOOL = KSort('Bool')
-INT = KSort('Int')
-STRING = KSort('String')
+    def match(self, term: KInner) -> Optional[Subst]:
+        raise TypeError('KSort does not support pattern matching')
 
 
 @final
 @dataclass(frozen=True)
 class KToken(KInner):
     token: str
-    sort: str
+    sort: KSort
 
-    def __init__(self, token: str, sort: str):
+    def __init__(self, token: str, sort: Union[str, KSort]):
+        if type(sort) is str:
+            sort = KSort(sort)
+
         object.__setattr__(self, 'token', token)
         object.__setattr__(self, 'sort', sort)
 
     @classmethod
     def from_dict(cls: Type['KToken'], d: Dict[str, Any]) -> 'KToken':
         cls._check_node(d)
-        return KToken(token=d['token'], sort=d['sort'])
+        return KToken(token=d['token'], sort=KSort.from_dict(d['sort']))
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KToken', 'token': self.token, 'sort': self.sort}
+        return {'node': 'KToken', 'token': self.token, 'sort': self.sort.to_dict()}
 
-    def let(self, *, token: Optional[str] = None, sort: Optional[str] = None) -> 'KToken':
+    def let(self, *, token: Optional[str] = None, sort: Optional[Union[str, KSort]] = None) -> 'KToken':
         token = token if token is not None else self.token
         sort = sort if sort is not None else self.sort
         return KToken(token=token, sort=sort)
@@ -219,23 +294,126 @@ class KToken(KInner):
     def map_inner(self: 'KToken', f: Callable[[KInner], KInner]) -> 'KToken':
         return self
 
+    def match(self, term: KInner) -> Optional[Subst]:
+        if type(term) is KToken:
+            return Subst() if term.token == self.token else None
+        return None
+
 
 TRUE = KToken('true', 'Bool')
 FALSE = KToken('false', 'Bool')
+ktokenDots = KToken('...', 'K')
+
+
+@final
+@dataclass(frozen=True)
+class KLabel(KInner):
+    name: str
+    params: Tuple[KSort, ...]
+
+    @overload
+    def __init__(self, name: str, params: Iterable[Union[str, KSort]]):
+        ...
+
+    @overload
+    def __init__(self, name: str, *params: Union[str, KSort]):
+        ...
+
+    def __init__(self, name, *args, **kwargs):
+        if kwargs:
+            bad_arg = next((arg for arg in kwargs if arg != 'params'), None)
+            if bad_arg:
+                raise TypeError(f"KLabel() got an unexpected keyword argument '{bad_arg}'")
+            if args:
+                raise TypeError("KLabel() got multiple values for argument 'params'")
+            params = kwargs['params']
+
+        elif len(args) == 1 and isinstance(args[0], Iterable) and not isinstance(args[0], KInner):
+            params = args[0]
+
+        else:
+            params = args
+
+        params = tuple(KSort(param) if type(param) is str else param for param in params)
+        object.__setattr__(self, 'name', name)
+        object.__setattr__(self, 'params', params)
+
+    def __iter__(self) -> Iterator[Union[str, KSort]]:
+        return chain([self.name], self.params)
+
+    @overload
+    def __call__(self, args: Iterable[KInner]) -> 'KApply':
+        ...
+
+    @overload
+    def __call__(self, *args: KInner) -> 'KApply':
+        ...
+
+    def __call__(self, *args, **kwargs):
+        return self.apply(*args, **kwargs)
+
+    @classmethod
+    def from_dict(cls: Type['KLabel'], d: Dict[str, Any]) -> 'KLabel':
+        cls._check_node(d)
+        return KLabel(name=d['name'], params=(KSort.from_dict(param) for param in d['params']))
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {'node': 'KLabel', 'name': self.name, 'params': [param.to_dict() for param in self.params]}
+
+    def let(self, *, name: Optional[str] = None, params: Optional[Iterable[Union[str, KSort]]] = None) -> 'KLabel':
+        name = name if name is not None else self.name
+        params = params if params is not None else self.params
+        return KLabel(name=name, params=params)
+
+    def map_inner(self: 'KLabel', f: Callable[[KInner], KInner]) -> 'KLabel':
+        return self
+
+    def match(self, term: KInner) -> Optional[Subst]:
+        raise TypeError('KLabel does not support pattern matching')
+
+    @overload
+    def apply(self, args: Iterable[KInner]) -> 'KApply':
+        ...
+
+    @overload
+    def apply(self, *args: KInner) -> 'KApply':
+        ...
+
+    def apply(self, *args, **kwargs):
+        return KApply(self, *args, **kwargs)
 
 
 @final
 @dataclass(frozen=True)
 class KApply(KInner):
-    label: str
+    label: KLabel
     args: Tuple[KInner, ...]
 
-    def __init__(self, label: str, args: Iterable[KInner] = ()):
+    @overload
+    def __init__(self, label: Union[str, KLabel], args: Iterable[KInner]):
+        ...
+
+    @overload
+    def __init__(self, label: Union[str, KLabel], *args: KInner):
+        ...
+
+    def __init__(self, label, *args, **kwargs):
+        if type(label) is str:
+            label = KLabel(label)
+
+        if kwargs:
+            bad_arg = next((arg for arg in kwargs if arg != 'args'), None)
+            if bad_arg:
+                raise TypeError(f"KApply() got an unexpected keyword argument '{bad_arg}'")
+            if args:
+                raise TypeError("KApply() got multiple values for argument 'args'")
+            args = kwargs['args']
+
+        elif len(args) == 1 and isinstance(args[0], Iterable) and not isinstance(args[0], KInner):
+            args = args[0]
+
         object.__setattr__(self, 'label', label)
         object.__setattr__(self, 'args', tuple(args))
-
-    def __iter__(self) -> Iterator[Union[str, KInner]]:
-        return chain([self.label], self.args)
 
     @property
     def arity(self) -> int:
@@ -243,21 +421,17 @@ class KApply(KInner):
 
     @property
     def is_cell(self) -> bool:
-        return len(self.label) > 1 and self.label[0] == '<' and self.label[-1] == '>'
-
-    @staticmethod
-    def of(label: str, *args: KInner) -> 'KApply':
-        return KApply(label=label, args=args)
+        return len(self.label.name) > 1 and self.label.name[0] == '<' and self.label.name[-1] == '>'
 
     @classmethod
     def from_dict(cls: Type['KApply'], d: Dict[str, Any]) -> 'KApply':
         cls._check_node(d)
-        return KApply(label=d['label'], args=(KInner.from_dict(arg) for arg in d['args']))
+        return KApply(label=KLabel.from_dict(d['label']), args=(KInner.from_dict(arg) for arg in d['args']))
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KApply', 'label': self.label, 'args': [arg.to_dict() for arg in self.args], 'arity': self.arity, 'variable': False}
+        return {'node': 'KApply', 'label': self.label.to_dict(), 'args': [arg.to_dict() for arg in self.args], 'arity': self.arity, 'variable': False}
 
-    def let(self, *, label: Optional[str] = None, args: Optional[Iterable[KInner]] = None) -> 'KApply':
+    def let(self, *, label: Optional[Union[str, KLabel]] = None, args: Optional[Iterable[KInner]] = None) -> 'KApply':
         label = label if label is not None else self.label
         args = args if args is not None else self.args
         return KApply(label=label, args=args)
@@ -265,9 +439,10 @@ class KApply(KInner):
     def map_inner(self: 'KApply', f: Callable[[KInner], KInner]) -> 'KApply':
         return self.let(args=(f(arg) for arg in self.args))
 
-
-TOP: Final = KApply('#Top')
-BOTTOM: Final = KApply('#Bottom')
+    def match(self, term: KInner) -> Optional[Subst]:
+        if type(term) is KApply and term.label.name == self.label.name and term.arity == self.arity:
+            return KInner._combine_matches(arg.match(term_arg) for arg, term_arg in zip(self.args, term.args))
+        return None
 
 
 @final
@@ -296,6 +471,9 @@ class KAs(KInner):
     def map_inner(self: 'KAs', f: Callable[[KInner], KInner]) -> 'KAs':
         return self.let(pattern=f(self.pattern), alias=f(self.alias))
 
+    def match(self, term: KInner) -> Optional[Subst]:
+        raise TypeError('KAs does not support pattern matching')
+
 
 @final
 @dataclass(frozen=True)
@@ -309,6 +487,12 @@ class KRewrite(KInner):
 
     def __iter__(self) -> Iterator[KInner]:
         return iter([self.lhs, self.rhs])
+
+    def __call__(self, term: KInner, *, top=False) -> KInner:
+        if top:
+            return self.apply_top(term)
+
+        return self.apply(term)
 
     @classmethod
     def from_dict(cls: Type['KRewrite'], d: Dict[str, Any]) -> 'KRewrite':
@@ -326,13 +510,73 @@ class KRewrite(KInner):
     def map_inner(self: 'KRewrite', f: Callable[[KInner], KInner]) -> 'KRewrite':
         return self.let(lhs=f(self.lhs), rhs=f(self.rhs))
 
+    def match(self, term: KInner) -> Optional[Subst]:
+        if type(term) is KRewrite:
+            lhs_subst = self.lhs.match(term.lhs)
+            rhs_subst = self.rhs.match(term.rhs)
+            if lhs_subst is None or rhs_subst is None:
+                return None
+            return lhs_subst.union(rhs_subst)
+        return None
+
+    def apply_top(self, term: KInner) -> KInner:
+        """
+        Rewrite a given term at the top
+
+        :param term: Term to rewrite.
+        :return: The term with the rewrite applied once at the top.
+        """
+        subst = self.lhs.match(term)
+        if subst is not None:
+            return subst(self.rhs)
+        return term
+
+    def apply(self, term: KInner) -> KInner:
+        """
+        Attempt rewriting once at every position in a term bottom-up.
+
+        :param term: Term to rewrite.
+        :return: The term with rewrites applied at every node once starting from the bottom.
+        """
+        return bottom_up(self.apply_top, term)
+
+    def replace_top(self, term: KInner) -> KInner:
+        if self.lhs == term:
+            return self.rhs
+        return term
+
+    def replace(self, term: KInner) -> KInner:
+        return bottom_up(self.replace_top, term)
+
 
 @final
 @dataclass(frozen=True)
 class KSequence(KInner, Sequence[KInner]):
     items: Tuple[KInner, ...]
 
-    def __init__(self, items: Iterable[KInner] = ()):
+    @overload
+    def __init__(self, items: Iterable[KInner]):
+        ...
+
+    @overload
+    def __init__(self, *items: KInner):
+        ...
+
+    def __init__(self, *args, **kwargs):
+        if kwargs:
+            bad_arg = next((arg for arg in kwargs if arg != 'items'), None)
+            if bad_arg:
+                raise TypeError(f"KSequence() got an unexpected keyword argument '{bad_arg}'")
+            if args:
+                raise TypeError("KSequence() got multiple values for argument 'items'")
+            items = kwargs['items']
+
+        elif len(args) == 1 and isinstance(args[0], Iterable) and not isinstance(args[0], KInner):
+            items = args[0]
+
+        else:
+            items = args
+
         object.__setattr__(self, 'items', tuple(items))
 
     @overload
@@ -353,10 +597,6 @@ class KSequence(KInner, Sequence[KInner]):
     def arity(self) -> int:
         return len(self.items)
 
-    @staticmethod
-    def of(*items: KInner) -> 'KSequence':
-        return KSequence(items=items)
-
     @classmethod
     def from_dict(cls: Type['KSequence'], d: Dict[str, Any]) -> 'KSequence':
         cls._check_node(d)
@@ -371,6 +611,11 @@ class KSequence(KInner, Sequence[KInner]):
 
     def map_inner(self: 'KSequence', f: Callable[[KInner], KInner]) -> 'KSequence':
         return self.let(items=(f(item) for item in self.items))
+
+    def match(self, term: KInner) -> Optional[Subst]:
+        if type(term) is KSequence and term.arity == self.arity:
+            return KInner._combine_matches(item.match(term_item) for item, term_item in zip(self.items, term.items))
+        return None
 
 
 class KOuter(KAst, ABC):
@@ -520,10 +765,15 @@ class KNonTerminal(KProductionItem):
 class KProduction(KSentence):
     sort: KSort
     items: Tuple[KProductionItem, ...]
-    klabel: str
+    klabel: Optional[KLabel]
     att: KAtt
 
-    def __init__(self, sort: KSort, items: Iterable[KProductionItem] = (), klabel='', att=EMPTY_ATT):
+    def __init__(self, sort: Union[str, KSort], items: Iterable[KProductionItem] = (), klabel: Optional[Union[str, KLabel]] = None, att=EMPTY_ATT):
+        if type(sort) is str:
+            sort = KSort(sort)
+        if type(klabel) is str:
+            klabel = KLabel(klabel)
+
         object.__setattr__(self, 'sort', sort)
         object.__setattr__(self, 'items', tuple(items))
         object.__setattr__(self, 'klabel', klabel)
@@ -539,7 +789,7 @@ class KProduction(KSentence):
         return KProduction(
             sort=KSort.from_dict(d['sort']),
             items=(KProductionItem.from_dict(item) for item in d['productionItems']),
-            klabel=d.get('klabel', ''),
+            klabel=KLabel.from_dict(d['klabel']) if d.get('klabel') else None,
             att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
         )
 
@@ -548,21 +798,21 @@ class KProduction(KSentence):
             'node': 'KProduction',
             'sort': self.sort.to_dict(),
             'productionItems': [item.to_dict() for item in self.items],
-            'klabel': self.klabel or None,
+            'klabel': self.klabel.to_dict() if self.klabel else None,
             'att': self.att.to_dict(),
         }
 
     def let(
         self,
         *,
-        sort: Optional[KSort] = None,
+        sort: Optional[Union[str, KSort]] = None,
         items: Optional[Iterable[KProductionItem]] = None,
-        klabel: Optional[str] = None,
+        klabel: Optional[Union[str, KLabel]] = None,
         att: Optional[KAtt] = None,
     ) -> 'KProduction':
-        sort = sort or self.sort
+        sort = sort if sort is not None else self.sort
         items = items if items is not None else self.items
-        klabel = klabel if klabel is not None else self.klabel
+        klabel = klabel if klabel is not None else self.klabel  # TODO figure out a way to set klabel to None
         att = att if att is not None else self.att
         return KProduction(sort=sort, items=items, klabel=klabel, att=att)
 
@@ -1124,21 +1374,16 @@ def collect(callback: Callable[[KInner], None], kinner: KInner) -> None:
     bottom_up(f, kinner)
 
 
-def flattenLabel(label, kast):
+def flattenLabel(label: str, kast: KInner) -> List[KInner]:
     """Given a cons list, return a flat Python list of the elements.
 
     -   Input: Cons operation to flatten.
     -   Output: Items of cons list.
     """
-    if type(kast) is KApply and kast.label == label:
+    if type(kast) is KApply and kast.label.name == label:
         items = [flattenLabel(label, arg) for arg in kast.args]
         return [c for cs in items for c in cs]
     return [kast]
-
-
-klabelCells = '#KCells'
-klabelEmptyK = '#EmptyK'
-ktokenDots = KToken('...', 'K')
 
 
 def constLabel(symbol):

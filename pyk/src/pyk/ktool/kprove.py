@@ -1,34 +1,31 @@
 import json
+import logging
 import os
-import subprocess
-import sys
 from pathlib import Path
-from subprocess import CompletedProcess, run
-from typing import Iterable, List, Optional
+from subprocess import CalledProcessError, CompletedProcess
+from tempfile import TemporaryDirectory
+from typing import Dict, Final, Iterable, List, Mapping, Optional, Tuple
+
+from tabulate import tabulate
 
 from ..cli_utils import (
     check_dir_path,
     check_file_path,
-    fatal,
     gen_file_timestamp,
-    notif,
+    run_process,
 )
-from ..kast import (
-    KAst,
-    KDefinition,
-    KFlatModule,
-    KImport,
-    KRequire,
-    flattenLabel,
-)
+from ..kast import KAst, KDefinition, KFlatModule, KImport, KRequire
 from ..prelude import mlTop
+from ..utils import unique
 from .kprint import KPrint
 
+_LOGGER: Final = logging.getLogger(__name__)
 
-def kprovex(
+
+def kprove(
     spec_file: Path,
     *,
-    directory: Optional[Path] = None,
+    kompiled_dir: Optional[Path] = None,
     include_dirs: Iterable[Path] = (),
     emit_json_spec: Optional[Path] = None,
     dry_run=False,
@@ -39,29 +36,29 @@ def kprovex(
         check_dir_path(include_dir)
 
     args = _build_arg_list(
-        directory=directory,
+        kompiled_dir=kompiled_dir,
         include_dirs=include_dirs,
         dry_run=dry_run,
         emit_json_spec=emit_json_spec,
     )
 
-    proc_res = _kprovex(str(spec_file), *args)
-
-    if proc_res.returncode:
-        raise RuntimeError(f'Command kprovex failed for: {spec_file}')
+    try:
+        _kprove(str(spec_file), *args)
+    except CalledProcessError as err:
+        raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
 
 
 def _build_arg_list(
     *,
-    directory: Optional[Path],
+    kompiled_dir: Optional[Path],
     include_dirs: Iterable[Path],
     emit_json_spec: Optional[Path],
     dry_run: bool,
 ) -> List[str]:
     args = []
 
-    if directory:
-        args += ['--directory', str(directory)]
+    if kompiled_dir:
+        args += ['--definition', str(kompiled_dir)]
 
     for include_dir in include_dirs:
         args += ['-I', str(include_dir)]
@@ -75,111 +72,207 @@ def _build_arg_list(
     return args
 
 
-def _kprovex(spec_file: str, *args: str) -> CompletedProcess:
-    run_args = ['kprovex', spec_file] + list(args)
-    notif(' '.join(run_args))
-    return run(run_args, capture_output=True, text=True)
+def _kprove(spec_file: str, *args: str) -> CompletedProcess:
+    run_args = ['kprove', spec_file] + list(args)
+    return run_process(run_args, _LOGGER)
 
 
 class KProve(KPrint):
-    """Given a kompiled directory and a main file name, build a prover for it.
-    """
 
-    def __init__(self, kompiledDirectory, mainFileName, useDirectory=None):
-        super(KProve, self).__init__(kompiledDirectory)
-        self.directory = Path(self.kompiledDirectory).parent
-        self.useDirectory = (self.directory / 'kprove') if useDirectory is None else Path(useDirectory)
-        self.useDirectory.mkdir(parents=True, exist_ok=True)
-        self.mainFileName = mainFileName
-        self.prover = ['kprovex']
-        self.proverArgs = []
-        with open(self.kompiledDirectory / 'backend.txt', 'r') as ba:
+    def __init__(self, kompiled_directory, main_file_name=None, use_directory=None):
+        super(KProve, self).__init__(kompiled_directory)
+        self.directory = Path(self.kompiled_directory).parent
+        if not use_directory:
+            self._temp_dir = TemporaryDirectory()
+            self.use_directory = self._temp_dir.name
+        else:
+            self.use_directory = Path(use_directory)
+            check_dir_path(self.use_directory)
+        # TODO: we should not have to supply main_file_name, it should be read
+        self.main_file_name = main_file_name
+        self.prover = ['kprove']
+        self.prover_args = []
+        with open(self.kompiled_directory / 'backend.txt', 'r') as ba:
             self.backend = ba.read()
-        with open(self.kompiledDirectory / 'mainModule.txt', 'r') as mm:
-            self.mainModule = mm.read()
+        with open(self.kompiled_directory / 'mainModule.txt', 'r') as mm:
+            self.main_module = mm.read()
 
-    def prove(self, specFile, specModuleName, args=[], haskellArgs=[], logAxiomsFile=None, allowZeroStep=False):
-        """Given the specification to prove and arguments for the prover, attempt to prove it.
-
-        -   Input: Specification file name, specification module name, optionall arguments, haskell backend arguments, and file to log axioms to.
-        -   Output: KAST represenation of output of prover, or crashed process.
-        """
-        logFile = specFile.with_suffix('.debug-log') if logAxiomsFile is None else logAxiomsFile
-        if logFile.exists():
-            logFile.unlink()
-        haskellLogArgs = ['--log', str(logFile), '--log-format', 'oneline', '--log-entries', 'DebugTransition']
+    def prove(
+        self,
+        spec_file,
+        spec_module_name=None,
+        args=[],
+        haskell_args=[],
+        haskell_log_entries=[],
+        log_axioms_file=None,
+        allow_zero_step=False,
+        dry_run=False,
+        rule_profile=None,
+    ):
+        log_file = spec_file.with_suffix('.debug-log') if log_axioms_file is None else log_axioms_file
+        if log_file.exists():
+            log_file.unlink()
+        haskell_log_entries += ['DebugTransition']
+        haskell_log_entries += ['DebugAttemptedRewriteRules'] if rule_profile else []
+        haskell_log_entries = unique(haskell_log_entries)
+        haskell_log_args = ['--log', str(log_file), '--log-format', 'oneline', '--log-entries', ','.join(haskell_log_entries)]
         command = [c for c in self.prover]
-        command += [str(specFile)]
-        command += ['--backend', self.backend, '--directory', str(self.directory), '-I', str(self.directory), '--spec-module', specModuleName, '--output', 'json']
-        command += [c for c in self.proverArgs]
+        command += [str(spec_file)]
+        command += ['--definition', str(self.kompiled_directory), '-I', str(self.directory), '--output', 'json']
+        command += ['--spec-module', spec_module_name] if spec_module_name is not None else []
+        command += ['--dry-run'] if dry_run else []
+        command += [c for c in self.prover_args]
         command += args
-        commandEnv = os.environ.copy()
-        commandEnv['KORE_EXEC_OPTS'] = ' '.join(haskellArgs + haskellLogArgs)
-        notif(' '.join(command))
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, env=commandEnv)
-        stdout, stderr = process.communicate(input=None)
+
+        kore_exec_opts = ' '.join(haskell_args + haskell_log_args)
+        _LOGGER.debug(f'export KORE_EXEC_OPTS="{kore_exec_opts}"')
+        command_env = os.environ.copy()
+        command_env['KORE_EXEC_OPTS'] = kore_exec_opts
+
+        proc_output: str
         try:
-            finalState = KAst.from_dict(json.loads(stdout)['term'])
-        except Exception:
-            sys.stderr.write(stdout + '\n')
-            sys.stderr.write(stderr + '\n')
-            fatal(f'Exiting: process returned {process.returncode}')
-        if finalState == mlTop() and len(_getAppliedAxiomList(logFile)) == 0 and not allowZeroStep:
-            fatal('Proof took zero steps, likely the LHS is invalid: ' + str(specFile))
-        return finalState
+            proc_output = run_process(command, _LOGGER, env=command_env).stdout
+        except CalledProcessError as err:
+            if err.returncode != 1:
+                raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
+            proc_output = err.stdout
 
-    def proveClaim(self, claim, claimId, lemmas=[], args=[], haskellArgs=[], logAxiomsFile=None, allowZeroStep=False):
-        """Given a K claim, write the definition needed for the prover, and attempt to prove it.
+        if not dry_run:
 
-        -   Input: KAST representation of a claim to prove, and an identifer for said claim.
-        -   Output: KAST representation of final state the prover supplies for it.
-        """
-        self._writeClaimDefinition(claim, claimId, lemmas=lemmas)
-        return self.prove(self.useDirectory / (claimId.lower() + '-spec.k'), claimId.upper() + '-SPEC', args=args, haskellArgs=haskellArgs, logAxiomsFile=logAxiomsFile, allowZeroStep=allowZeroStep)
+            debug_log = _get_rule_log(log_file)
 
-    def proveClaimNoBranching(self, claim, claimId, args=[], haskellArgs=[], logAxiomsFile=None, maxDepth=1000, allowZeroStep=False):
-        """Given a K claim, attempt to prove it, but do not allow the prover to branch.
+            final_state = KAst.from_dict(json.loads(proc_output)['term'])
+            if final_state == mlTop() and len(debug_log) == 0 and not allow_zero_step:
+                raise ValueError(f'Proof took zero steps, likely the LHS is invalid: {spec_file}')
 
-        -   Input: KAST representation of a claim to prove, and identifier for said claim.
-        -   Output: KAST representation of final state of prover.
-        """
-        logFileName = logAxiomsFile if logAxiomsFile is not None else (self.useDirectory / claimId.lower()).with_suffix('.debug.log')
-        nextState = self.proveClaim(claim, claimId, args=(args + ['--branching-allowed', '1', '--depth', str(maxDepth)]), haskellArgs=haskellArgs, logAxiomsFile=logFileName, allowZeroStep=allowZeroStep)
-        depth = 0
-        for axioms in _getAppliedAxiomList(str(logFileName)):
-            depth += 1
-            if len(axioms) > 1:
-                break
-        nextStates = flattenLabel('#Or', nextState)
-        return (depth, nextStates)
+            if rule_profile:
+                rule_data = _get_rule_profile(debug_log)
+                table_lines = []
+                total_success_time = 0.0
+                total_failure_time = 0.0
+                total_success_n = 0.0
+                total_failure_n = 0.0
+                for rule_name in rule_data:
+                    table_line = [rule_name, *rule_data[rule_name]]
+                    table_lines.append(table_line)
+                    total_success_time += table_line[1]
+                    total_failure_time += table_line[4]
+                    total_success_n += table_line[2]
+                    total_failure_n += table_line[5]
+                avg_success_time = total_success_time / total_success_n if total_success_n > 0 else 0.0
+                avg_failure_time = total_failure_time / total_failure_n if total_failure_n > 0 else 0.0
+                productivity = total_success_time / (total_success_time + total_failure_time)
+                table_lines.append(['TOTAL', total_success_time, total_success_n, avg_success_time, total_failure_time, total_failure_n, avg_failure_time, productivity])
+                table_lines = sorted(table_lines, key=lambda x: x[1] + x[4])
+                with open(rule_profile, 'w') as rp:
+                    rp.write(tabulate(table_lines, headers=('Rule', 'Total Success Time', '# Successes', 'Avg. Success Time', 'Total Failure Time', '# Failures', 'Avg. Failure Time', 'Productivity')))
+                    _LOGGER.info(f'Wrote rule profile: {rule_profile}')
 
-    def _writeClaimDefinition(self, claim, claimId, lemmas=[], rule=False):
-        """Given a K claim, write the definition file needed for the prover to it.
+            return final_state
 
-        -   Input: KAST representation of a claim to prove, and an identifier for said claim.
-        -   Output: Write to filesystem the specification with the claim.
-        """
-        tmpClaim = self.useDirectory / (claimId.lower() if rule else (claimId.lower() + '-spec'))
-        tmpModuleName = claimId.upper() if rule else (claimId.upper() + '-SPEC')
+    def prove_claim(
+        self,
+        claim,
+        claim_id,
+        lemmas=[],
+        args=[],
+        haskell_args=[],
+        haskell_log_entries=[],
+        log_axioms_file=None,
+        allow_zero_step=False,
+        dry_run=False,
+        rule_profile=False,
+    ):
+        self._write_claim_definition(claim, claim_id, lemmas=lemmas)
+        return self.prove(
+            self.use_directory / (claim_id.lower() + '-spec.k'),
+            spec_module_name=(claim_id.upper() + '-SPEC'),
+            args=args,
+            haskell_args=haskell_args,
+            haskell_log_entries=haskell_log_entries,
+            log_axioms_file=log_axioms_file,
+            allow_zero_step=allow_zero_step,
+            dry_run=dry_run,
+            rule_profile=rule_profile,
+        )
+
+    def _write_claim_definition(self, claim, claim_id, lemmas=[], rule=False):
+        tmpClaim = self.use_directory / (claim_id.lower() if rule else (claim_id.lower() + '-spec'))
+        tmpModuleName = claim_id.upper() if rule else (claim_id.upper() + '-SPEC')
         tmpClaim = tmpClaim.with_suffix('.k')
         with open(tmpClaim, 'w') as tc:
-            claimModule = KFlatModule(tmpModuleName, lemmas + [claim], imports=[KImport(self.mainModule, True)])
-            claimDefinition = KDefinition(tmpModuleName, [claimModule], requires=[KRequire(self.mainFileName)])
+            claimModule = KFlatModule(tmpModuleName, lemmas + [claim], imports=[KImport(self.main_module, True)])
+            claimDefinition = KDefinition(tmpModuleName, [claimModule], requires=[KRequire(self.main_file_name)])
             tc.write(gen_file_timestamp() + '\n')
-            tc.write(self.prettyPrint(claimDefinition) + '\n\n')
+            tc.write(self.pretty_print(claimDefinition) + '\n\n')
             tc.flush()
-        notif('Wrote claim file: ' + str(tmpClaim) + '.')
+        _LOGGER.debug(f'Wrote claim file: {tmpClaim}.')
 
 
-def _getAppliedAxiomList(debugLogFile: Path) -> List[List[str]]:
-    axioms = []
-    next_axioms = []
-    with open(debugLogFile, 'r') as logFile:
-        for line in logFile:
-            if line.find('DebugTransition') > 0:
-                if line.find('after  apply axioms:') > 0:
-                    next_axioms.append(line[line.find('after  apply axioms:') + len('after  apply axioms:'):])
-                elif len(next_axioms) > 0:
-                    axioms.append(next_axioms)
-                    next_axioms = []
+def _get_rule_profile(debug_log: List[List[Tuple[str, bool, int]]]) -> Mapping[str, Tuple[float, int, float, float, int, float, float]]:
+
+    def _get_single_rule_profile(_rule_log: List[Tuple[float, bool]]) -> Tuple[float, int, float, float, int, float, float]:
+        success_time = 0.0
+        failure_time = 0.0
+        success_n = 0
+        failure_n = 0
+        for time, success in _rule_log:
+            if success:
+                success_time += time
+                success_n += 1
+            else:
+                failure_time += time
+                failure_n += 1
+        success_avg = success_time / success_n if success_n > 0 else 0.0
+        failure_avg = failure_time / failure_n if failure_n > 0 else 0.0
+        productivity = success_time / (success_time + failure_time)
+        return (success_time, success_n, success_avg, failure_time, failure_n, failure_avg, productivity)
+
+    rule_data: Dict[str, List[Tuple[float, bool]]] = {}
+    for rule_name, apply_success, apply_time in [rl for rls in debug_log for rl in rls]:
+        if rule_name not in rule_data:
+            rule_data[rule_name] = []
+        rule_data[rule_name].append((apply_time, apply_success))
+
+    return {rule_name: _get_single_rule_profile(rule_data[rule_name]) for rule_name in rule_data}
+
+
+def _get_rule_log(debug_log_file: Path) -> List[List[Tuple[str, bool, int]]]:
+
+    # rule_loc, is_success, ellapsed_time_since_start
+    def _get_rule_line(_line: str) -> Optional[Tuple[str, bool, int]]:
+        if _line.startswith('kore-exec: ['):
+            time = int(_line.split('[')[1].split(']')[0])
+            if _line.find('(DebugTransition): after  apply axioms: ') > 0:
+                rule_name = ':'.join(_line.split(':')[-4:]).strip()
+                return (rule_name, True, time)
+            elif _line.find('(DebugAttemptedRewriteRules): ') > 0:
+                rule_name = ':'.join(_line.split(':')[-4:]).strip()
+                return (rule_name, False, time)
+        return None
+
+    log_lines: List[Tuple[str, bool, int]] = []
+    with open(debug_log_file, 'r') as log_file:
+        for line in log_file.read().split('\n'):
+            if processed_line := _get_rule_line(line):
+                log_lines.append(processed_line)
+
+    # rule_loc, is_success, time_delta
+    axioms: List[List[Tuple[str, bool, int]]] = [[]]
+    just_applied = True
+    prev_time = 0
+    for rule_name, is_application, rule_time in log_lines:
+        rtime = rule_time - prev_time
+        prev_time = rule_time
+        if not is_application:
+            if just_applied:
+                axioms.append([])
+            just_applied = False
+        else:
+            just_applied = True
+        axioms[-1].append((rule_name, is_application, rtime))
+
+    if len(axioms[-1]) == 0:
+        axioms.pop(-1)
+
     return axioms

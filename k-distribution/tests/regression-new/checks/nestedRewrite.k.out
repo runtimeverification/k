@@ -1,7 +1,11 @@
 [Error] Compiler: Rewrites are not allowed to be nested.
 	Source(nestedRewrite.k)
 	Location(4,7,4,13)
+	4 |	rule (1 => 2) => 3
+	  .	      ^~~~~~
 [Error] Compiler: Rewrites are not allowed to be nested.
 	Source(nestedRewrite.k)
 	Location(5,12,5,18)
+	5 |	rule 1 => (2 => 3)
+	  .	           ^~~~~~
 [Error] Compiler: Had 2 structural errors.

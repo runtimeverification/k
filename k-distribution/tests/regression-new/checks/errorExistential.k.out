@@ -1,4 +1,6 @@
 [Error] Compiler: Found existential variable not supported by concrete backend.
 	Source(errorExistential.k)
 	Location(4,11,4,13)
+	4 |	rule 0 => ?I:Int
+	  .	          ^~
 [Error] Compiler: Had 1 structural errors.

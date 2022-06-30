@@ -2,13 +2,11 @@ from .kompile import KompileBackend, kompile
 from .kprint import (
     KPrint,
     appliedLabelStr,
-    binOpStr,
-    buildSymbolTable,
+    build_symbol_table,
     indent,
-    newLines,
     paren,
     prettyPrintKast,
     prettyPrintKastBool,
-    underbarUnparsing,
+    unparser_for_production,
 )
-from .kprove import KProve, kprovex
+from .kprove import KProve, kprove

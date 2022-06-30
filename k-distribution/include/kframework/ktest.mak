@@ -11,8 +11,8 @@ KRUN=${K_BIN}/krun
 # and kdep
 KDEP=${K_BIN}/kdep
 # and kprove
+KPROVE_LEGACY=${K_BIN}/kprove-legacy
 KPROVE=${K_BIN}/kprove
-KPROVEX=${K_BIN}/kprovex
 # and kbmc
 KBMC=${K_BIN}/kbmc
 # and kast
@@ -58,7 +58,7 @@ KPROVE_FLAGS+=--no-exc-wrap
 KRUN_FLAGS+=--no-exc-wrap
 
 KRUN_OR_LEGACY=$(KRUN)
-KPROVE_OR_X=$(KPROVE)
+KPROVE_OR_LEGACY=$(KPROVE_LEGACY)
 
 CHECK?=| diff -
 REMOVE_PATHS=| sed 's!'`pwd`'/\(\./\)\{0,2\}!!g'
@@ -118,16 +118,16 @@ endif
 
 %-spec.k %-spec.md: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
-	$(KPROVE_OR_X) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_PROVER_ERRORS) $(REMOVE_PATHS) $(CHECK) $@.out
+	$(KPROVE_OR_LEGACY) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_PROVER_ERRORS) $(REMOVE_PATHS) $(CHECK) $@.out
 else
-	$(KPROVE_OR_X) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_PROVER_ERRORS) $(REMOVE_PATHS) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+	$(KPROVE_OR_LEGACY) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_PROVER_ERRORS) $(REMOVE_PATHS) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %-broken-spec.k %-broken-spec.md: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
-	$(KPROVE_OR_X) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_ERRORS) $(REMOVE_PATHS) $(CHECK) $@.out
+	$(KPROVE_OR_LEGACY) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_ERRORS) $(REMOVE_PATHS) $(CHECK) $@.out
 else
-	$(KPROVE_OR_X) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_ERRORS) $(REMOVE_PATHS) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+	$(KPROVE_OR_LEGACY) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_ERRORS) $(REMOVE_PATHS) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %-spec-bmc.k %-spec-bmc.md: kompile
