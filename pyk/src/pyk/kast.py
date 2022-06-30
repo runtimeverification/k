@@ -1230,7 +1230,7 @@ class KFlatModule(KOuter, WithKAtt):
     @staticmethod
     def _is_non_free_constructor(label: str) -> bool:
         is_cell_map_constructor = label.endswith('CellMapItem') or label.endswith('CellMap_')
-        is_builtin_data_constructor = label in ['_Set_', '_List_', '_Map_', 'SetItem', 'ListItem', '_|->_']
+        is_builtin_data_constructor = label in {'_Set_', '_List_', '_Map_', 'SetItem', 'ListItem', '_|->_'}
         return is_cell_map_constructor or is_builtin_data_constructor
 
     @property
