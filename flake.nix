@@ -16,9 +16,8 @@
   outputs =
     { self, nixpkgs, flake-utils, haskell-backend, llvm-backend, mavenix, flake-compat }:
     let
-      overlays = system: [
+      allOverlays = [
         mavenix.overlay
-        (final: prev: { llvm-backend-release = false; })
         llvm-backend.overlays.default
         haskell-backend.overlay
         (final: prev:
@@ -64,7 +63,7 @@
               inherit (haskell-backend) prelude-kore;
               inherit src;
               debugger =
-                if system == "x86_64-darwin" || system == "aarch64-darwin" then
+                if prev.stdenv.isDarwin then
                 # TODO lldb is broken on nixpkgs unstable, once the lldb support for 
                 # k is done we should add lldb as runtime dependency here
                   null
@@ -83,10 +82,9 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = (overlays system);
+          overlays = [(final: prev: { llvm-backend-release = false; })] ++ allOverlays;
         };
       in {
-        inherit overlays;
         packages = {
           inherit (pkgs) k;
 
@@ -172,5 +170,7 @@
       }) // {
         overlays.llvm-backend = llvm-backend.overlays.default;
         overlays.haskell-backend = haskell-backend.overlay;
+
+        overlay = nixpkgs.lib.composeManyExtensions allOverlays;
       };
 }
