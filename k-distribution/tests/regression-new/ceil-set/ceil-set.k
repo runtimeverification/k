@@ -27,15 +27,15 @@ module CEIL-SET
 
     rule <k> testGenerated (I1, I2, I3, I4) => done(.) </k>
          <genSet>
-           (. => <genElem>
-                    <cellA> partialInt(I1) </cellA>
-                    <cellB> partialInt(I2) </cellB>
-                 </genElem> )
-           (. => <genElem>
-                    <cellA> partialInt(I3) </cellA>
-                    <cellB> partialInt(I4) </cellB>
-                 </genElem> )
-           ...
+          ( REST => <genElem>
+                        <cellA> partialInt(I1) </cellA>
+                        <cellB> partialInt(I2) </cellB>
+                    </genElem>
+                    <genElem>
+                        <cellA> partialInt(I3) </cellA>
+                        <cellB> partialInt(I4) </cellB>
+                    </genElem>
+                    REST )
          </genSet>
 
 endmodule
