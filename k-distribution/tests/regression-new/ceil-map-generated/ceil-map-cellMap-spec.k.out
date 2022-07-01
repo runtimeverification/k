@@ -1,0 +1,50 @@
+  #Not ( {
+    partialInt ( _K1 )
+  #Equals
+    partialInt ( _K2 )
+  } )
+#And
+  <generatedTop>
+    <k>
+      done ( . ) ~> .
+    </k>
+    <cellMap>
+      <cellElem>
+        <key>
+          partialInt ( _K1 )
+        </key>
+        <cellA>
+          partialInt ( _A1 )
+        </cellA>
+        <cellB>
+          partialInt ( _B1 )
+        </cellB>
+      </cellElem> <cellElem>
+        <key>
+          partialInt ( _K2 )
+        </key>
+        <cellA>
+          partialInt ( _A2 )
+        </cellA>
+        <cellB>
+          partialInt ( _B2 )
+        </cellB>
+      </cellElem> _CELLMAP
+    </cellMap>
+  </generatedTop>
+#And
+  {
+    false
+  #Equals
+    <key>
+      partialInt ( _K1 )
+    </key> in_keys ( _CELLMAP )
+  }
+#And
+  {
+    false
+  #Equals
+    <key>
+      partialInt ( _K2 )
+    </key> in_keys ( _CELLMAP )
+  }

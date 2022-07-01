@@ -1,0 +1,34 @@
+  #Ceil ( partialInt ( _K1 ) )
+#And
+  #Ceil ( partialInt ( _V1 ) )
+#And
+  #Ceil ( partialInt ( _V2 ) )
+#And
+  #Not ( {
+    partialInt ( _K1 )
+  #Equals
+    partialInt ( _K2 )
+  } )
+#And
+  <generatedTop>
+    <k>
+      done ( partialInt ( _K1 ) |-> partialInt ( _V1 )
+      partialInt ( _K2 ) |-> partialInt ( _V2 )
+      partialMap ( _S ) ~> . ) ~> .
+    </k>
+    <cellMap>
+      _CELLMAP
+    </cellMap>
+  </generatedTop>
+#And
+  {
+    false
+  #Equals
+    partialInt ( _K1 ) in_keys ( partialMap ( _S ) )
+  }
+#And
+  {
+    false
+  #Equals
+    partialInt ( _K2 ) in_keys ( partialMap ( _S ) )
+  }
