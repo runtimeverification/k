@@ -629,7 +629,7 @@ public class ModuleToKORE {
      *   #Ceil(SetItem(@K0, @K1, ..., @Kn) @Rest:Set)
      * =>
      *   {(@K0 in @Rest) #Equals false} #And #Ceil(@K0) #And ... #And #Ceil(@Kn) #And #Ceil(@Rest)
-     * [anywhere, simplification]
+     * [simplification]
      * @param inSetProduction "syntax Bool ::= KItem "in" Set"
      * @return
      */
@@ -684,7 +684,7 @@ public class ModuleToKORE {
                         )
                         , BooleanUtils.TRUE
                         , BooleanUtils.TRUE
-                        , Att.empty().add(Att.ANYWHERE()).add(Att.SIMPLIFICATION())
+                        , Att.empty().add(Att.SIMPLIFICATION())
                 );
         return ceilSetRule;
     }
