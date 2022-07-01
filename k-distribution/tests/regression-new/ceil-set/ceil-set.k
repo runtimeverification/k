@@ -38,4 +38,7 @@ module CEIL-SET
                     REST )
          </genSet>
 
+    rule partialSet(.Set) => .Set
+    rule partialInt(0) => 0
+
 endmodule
