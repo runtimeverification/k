@@ -6,6 +6,6 @@ module CEIL-SET-REGULARSET-SPEC
     imports CEIL-SET
 
     claim <k> testRegular(_S, _I1, _I2) => . </k>
-          <genSet> _GENSET </genSet>
+          <cellSet> _CELLSET </cellSet>
 
 endmodule
