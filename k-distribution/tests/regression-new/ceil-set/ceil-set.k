@@ -13,7 +13,6 @@ endmodule
 
 module CEIL-SET
     imports CEIL-SET-SYNTAX
-    imports MAP-SYMBOLIC
 
     configuration <k> $PGM:Test </k>
                   <cellSet>
