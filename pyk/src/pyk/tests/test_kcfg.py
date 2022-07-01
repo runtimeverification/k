@@ -5,7 +5,7 @@ from ..cterm import CTerm
 from ..kast import TRUE, KApply, KAst, KInner, KVariable
 from ..kcfg import KCFG
 from ..ktool import KPrint
-from ..prelude import token
+from ..prelude import mlEquals, token
 from ..utils import shorten_hash
 
 
@@ -35,8 +35,8 @@ def node_dicts(n: int) -> List[Dict[str, Any]]:
 
 def edge_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
 
-    def _make_edge_dict(i, j, depth=1):
-        return {'source': nid(i), 'target': nid(j), 'condition': TRUE.to_dict(), 'depth': depth}
+    def _make_edge_dict(i, j, depth=1, condition=TRUE):
+        return {'source': nid(i), 'target': nid(j), 'condition': condition.to_dict(), 'depth': depth}
 
     return [_make_edge_dict(*edge) for edge in edges]
 
@@ -319,11 +319,11 @@ class KCFGTestCase(TestCase):
             'aliases': {'foo': nid(3), 'bar': nid(3)},
                                                              # Each of the branching edges have given depth=0 # noqa: E131
             'edges': edge_dicts((0, 1), (1, 2, 5), (2, 3),   # Initial Linear segment
-                                (3, 4, 0), (4, 5), (5, 2),   # Loops back
-                                (3, 5, 0),                   # Go to previous non-terminal node not as loop
-                                (3, 6, 0),                   # Terminates
-                                (3, 7, 0), (7, 6),           # Go to previous terminal node not as loop
-                                (3, 11, 0), (11, 8)          # Covered
+                                (3, 4, 0, mlEquals(KVariable('x'), token(4))), (4, 5), (5, 2),   # Loops back
+                                (3, 5, 0, mlEquals(KVariable('x'), token(5))),                   # Go to previous non-terminal node not as loop
+                                (3, 6, 0, mlEquals(KVariable('x'), token(6))),                   # Terminates
+                                (3, 7, 0, mlEquals(KVariable('x'), token(7))), (7, 6),           # Go to previous terminal node not as loop
+                                (3, 11, 0, mlEquals(KVariable('x'), token(11))), (11, 8)         # Covered
                                 ),
             'covers': cover_dicts((8, 11)),                  # Loops back
             'expanded': [nid(i) for i in [0, 1, 2, 3, 4, 5, 7, 11]],
@@ -343,31 +343,36 @@ class KCFGTestCase(TestCase):
                                   f"├  {_short_hash(2)} (expanded)\n"
                                   f"│  (1 step)\n"
                                   f"├  {_short_hash(3)} (expanded, @bar, @foo)\n"
-                                  f"┢━ {_short_hash(6)} (target, leaf)\n"
+                                  f"┃  KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='x'), KToken(token='6', sort=KSort(name='Int'))))\n"
+                                  f"┣━ {_short_hash(6)} (target, leaf)\n"
                                   f"┃\n"
+                                  f"┃  KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='x'), KToken(token='5', sort=KSort(name='Int'))))\n"
                                   f"┣━ {_short_hash(5)} (expanded)\n"
                                   f"┃   │  (1 step)\n"
                                   f"┃   ├  {_short_hash(2)} (expanded)\n"
                                   f"┃   ┊ (looped back)\n"
                                   f"┃\n"
+                                  f"┃  KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='x'), KToken(token='11', sort=KSort(name='Int'))))\n"
                                   f"┣━ {_short_hash(11)} (expanded)\n"
                                   f"┃   │  (1 step)\n"
                                   f"┃   ├  {_short_hash(8)} (leaf)\n"
-                                  f"┃   │  constraint: KApply(label=KLabel(name='#Top', params=(KSort(name='GeneratedTopCell'),)), args=())\n"
-                                  f"┃   │  subst:\n"
-                                  f"┃   │    KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='V11'), KToken(token='8', sort=KSort(name='Int'))))\n"
+                                  f"┃   ┊  constraint: KApply(label=KLabel(name='#Top', params=(KSort(name='GeneratedTopCell'),)), args=())\n"
+                                  f"┃   ┊  subst:\n"
+                                  f"┃   ┊    KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='V11'), KToken(token='8', sort=KSort(name='Int'))))\n"
                                   f"┃   ├  {_short_hash(11)} (expanded)\n"
                                   f"┃   ┊ (looped back)\n"
                                   f"┃\n"
+                                  f"┃  KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='x'), KToken(token='4', sort=KSort(name='Int'))))\n"
                                   f"┣━ {_short_hash(4)} (expanded)\n"
                                   f"┃   │  (1 step)\n"
                                   f"┃   ├  {_short_hash(5)} (expanded)\n"
                                   f"┃   ┊ (continues as previously)\n"
                                   f"┃\n"
+                                  f"┃  KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='x'), KToken(token='7', sort=KSort(name='Int'))))\n"
                                   f"┗━ {_short_hash(7)} (expanded)\n"
                                   f"    │  (1 step)\n"
                                   f"    └  {_short_hash(6)} (target, leaf)\n"
                                   f"\n"
-                                  f"{_short_hash(9)} (frontier, leaf)\n"
-                                  f"{_short_hash(10)} (frontier, leaf)\n"
+                                  f"\033[1m{_short_hash(9)} (frontier, leaf)\033[0m\n"
+                                  f"\033[1m{_short_hash(10)} (frontier, leaf)\033[0m\n"
                                   )
