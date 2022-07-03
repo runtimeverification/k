@@ -571,50 +571,50 @@ def removeConstraintsFor(varNames, constrainedTerm):
     return mlAnd([state, constraint])
 
 
-def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, priority=None, keepVars=None) -> Tuple[KRuleLike, Dict[str, KVariable]]:
-    (initConfig, initConstraint) = splitConfigAndConstraints(initConstrainedTerm)
-    (finalConfig, finalConstraint) = splitConfigAndConstraints(finalConstrainedTerm)
-    initConstraints = flattenLabel('#And', initConstraint)
-    finalConstraints = [c for c in flattenLabel('#And', finalConstraint) if c not in initConstraints]
-    initConstrainedTerm = mlAnd([initConfig] + initConstraints)
-    finalConstrainedTerm = mlAnd([finalConfig] + finalConstraints)
+def buildRule(rule_id, init_cterm, final_cterm, claim=False, priority=None, keep_vars=None) -> Tuple[KRuleLike, Dict[str, KVariable]]:
+    (init_config, init_constraint) = splitConfigAndConstraints(init_cterm)
+    (final_config, final_constraint) = splitConfigAndConstraints(final_cterm)
+    init_constraints = flattenLabel('#And', init_constraint)
+    final_constraints = [c for c in flattenLabel('#And', final_constraint) if c not in init_constraints]
+    init_cterm = mlAnd([init_config] + init_constraints)
+    final_cterm = mlAnd([final_config] + final_constraints)
 
-    lhsVars = collectFreeVars(initConstrainedTerm)
-    rhsVars = collectFreeVars(finalConstrainedTerm)
-    varOccurances = count_vars(mlAnd([initConstrainedTerm, finalConstrainedTerm]))
-    vSubst: Dict[str, KVariable] = {}
-    vremapSubst: Dict[str, KVariable] = {}
-    for v in varOccurances:
-        newV = v
-        if varOccurances[v] == 1:
-            newV = '_' + newV
-        if v in rhsVars and v not in lhsVars:
-            newV = '?' + newV
-        vSubst[v] = KVariable(newV)
-        vremapSubst[newV] = KVariable(v)
+    lhs_vars = collectFreeVars(init_cterm)
+    rhs_vars = collectFreeVars(final_cterm)
+    var_occurances = count_vars(mlAnd([init_cterm, final_cterm]))
+    v_subst: Dict[str, KVariable] = {}
+    vremap_subst: Dict[str, KVariable] = {}
+    for v in var_occurances:
+        new_v = v
+        if var_occurances[v] == 1:
+            new_v = '_' + new_v
+        if v in rhs_vars and v not in lhs_vars:
+            new_v = '?' + new_v
+        v_subst[v] = KVariable(new_v)
+        vremap_subst[new_v] = KVariable(v)
 
-    initConstrainedTerm = substitute(initConstrainedTerm, vSubst)
-    finalConstrainedTerm = applyExistentialSubstitutions(substitute(finalConstrainedTerm, vSubst))
-    (initConfig, initConstraint) = splitConfigAndConstraints(initConstrainedTerm)
-    (finalConfig, finalConstraint) = splitConfigAndConstraints(finalConstrainedTerm)
+    init_cterm = substitute(init_cterm, v_subst)
+    final_cterm = applyExistentialSubstitutions(substitute(final_cterm, v_subst))
+    (init_config, init_constraint) = splitConfigAndConstraints(init_cterm)
+    (final_config, final_constraint) = splitConfigAndConstraints(final_cterm)
 
-    ruleBody = push_down_rewrites(KRewrite(initConfig, finalConfig))
-    ruleRequires = simplifyBool(ml_pred_to_bool(initConstraint))
-    ruleEnsures = simplifyBool(ml_pred_to_bool(finalConstraint))
-    attDict = {} if claim or priority is None else {'priority': str(priority)}
-    ruleAtt = KAtt(atts=attDict)
+    rule_body = push_down_rewrites(KRewrite(init_config, final_config))
+    rule_requires = simplifyBool(ml_pred_to_bool(init_constraint))
+    rule_ensures = simplifyBool(ml_pred_to_bool(final_constraint))
+    att_dict = {} if claim or priority is None else {'priority': str(priority)}
+    rule_att = KAtt(atts=att_dict)
 
     rule: KRuleLike
     if not claim:
-        rule = KRule(ruleBody, requires=ruleRequires, ensures=ruleEnsures, att=ruleAtt)
+        rule = KRule(rule_body, requires=rule_requires, ensures=rule_ensures, att=rule_att)
     else:
-        rule = KClaim(ruleBody, requires=ruleRequires, ensures=ruleEnsures, att=ruleAtt)
+        rule = KClaim(rule_body, requires=rule_requires, ensures=rule_ensures, att=rule_att)
 
-    rule = rule.update_atts({'label': ruleId})
-    newKeepVars = None
-    if keepVars is not None:
-        newKeepVars = [vSubst[v].name for v in keepVars]
-    return (minimizeRule(rule, keepVars=newKeepVars), vremapSubst)
+    rule = rule.update_atts({'label': rule_id})
+    new_keep_vars = None
+    if keep_vars is not None:
+        new_keep_vars = [v_subst[v].name for v in keep_vars]
+    return (minimizeRule(rule, keepVars=new_keep_vars), vremap_subst)
 
 
 def abstract_term_safely(kast: KInner, base_name: str = 'V') -> KVariable:
