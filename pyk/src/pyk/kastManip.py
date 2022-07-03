@@ -40,6 +40,7 @@ from .kast import (
 )
 from .prelude import (
     Labels,
+    Sorts,
     boolToken,
     build_assoc,
     mlAnd,
@@ -565,7 +566,7 @@ def build_rule(
 
     lhs_vars = collectFreeVars(init_term)
     rhs_vars = collectFreeVars(final_term)
-    var_occurances = count_vars(mlAnd([init_term, final_term]))
+    var_occurances = count_vars(mlAnd([push_down_rewrites(KRewrite(init_config, final_config))] + init_constraints + final_constraints, Sorts.GENERATED_TOP_CELL))
     v_subst: Dict[str, KVariable] = {}
     vremap_subst: Dict[str, KVariable] = {}
     for v in var_occurances:
