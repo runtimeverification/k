@@ -10,7 +10,7 @@ from ..kast import (
     readKastTerm,
 )
 from ..kastManip import (
-    buildRule,
+    build_rule,
     collapseDots,
     getCell,
     remove_generated_cells,
@@ -83,7 +83,7 @@ class BuildRuleTest(ConfigurationTest):
         var_map_expected = {'_MAP': KVariable('MAP'), '?_MAP2': KVariable('MAP2')}
 
         # When
-        rule, var_map_actual = buildRule('id1', config_pre, config_post)
+        rule, var_map_actual = build_rule('id1', config_pre, config_post)
         state_cell_actual = getCell(rule.body, 'STATE_CELL')
 
         # Then

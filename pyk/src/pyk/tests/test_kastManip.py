@@ -12,7 +12,7 @@ from ..kast import (
     ktokenDots,
 )
 from ..kastManip import (
-    buildRule,
+    build_rule,
     minimize_term,
     ml_pred_to_bool,
     push_down_rewrites,
@@ -57,7 +57,7 @@ class BuildRuleTest(TestCase):
         for i, (lhs, rhs, expected) in enumerate(test_data):
             with self.subTest(i=i):
                 # When
-                rule, _ = buildRule(f'test-{i}', CTerm(lhs), CTerm(rhs))
+                rule, _ = build_rule(f'test-{i}', CTerm(lhs), CTerm(rhs))
                 actual = rule.body
 
                 # Then
