@@ -548,7 +548,15 @@ def removeConstraintsFor(varNames, constrainedTerm):
     return mlAnd([state, constraint])
 
 
-def build_rule(rule_id: str, init_cterm: CTerm, final_cterm: CTerm, claim: bool = False, priority: Optional[int] = None, keep_vars: Optional[List[str]] = None) -> Tuple[KRuleLike, Dict[str, KVariable]]:
+def build_rule(
+    rule_id: str,
+    init_cterm: CTerm,
+    final_cterm: CTerm,
+    claim: bool = False,
+    priority: Optional[int] = None,
+    keep_vars: Optional[List[str]] = None
+) -> Tuple[KRuleLike, Dict[str, KVariable]]:
+
     init_config, *init_constraints = init_cterm
     final_config, *final_constraints = final_cterm
     final_constraints = [c for c in final_constraints if c not in init_constraints]
