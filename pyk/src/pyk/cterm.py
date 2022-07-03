@@ -4,7 +4,6 @@ from itertools import chain
 from typing import Iterable, Optional, Tuple
 
 from .kast import KApply, KInner, Subst, flattenLabel
-from .kastManip import splitConfigAndConstraints
 from .prelude import Sorts, mlAnd, mlImplies, mlTop
 from .utils import unique
 
@@ -15,10 +14,24 @@ class CTerm:
     constraints: Tuple[KInner, ...]
 
     def __init__(self, term: KInner) -> None:
-        config, constraint = splitConfigAndConstraints(term, Sorts.GENERATED_TOP_CELL)
+        config, constraint = CTerm._split_config_and_constraints(term)
         constraints = CTerm._normalize_constraints(flattenLabel('#And', constraint))
         object.__setattr__(self, 'config', config)
         object.__setattr__(self, 'constraints', constraints)
+
+    @staticmethod
+    def _split_config_and_constraints(kast: KInner) -> Tuple[KInner, KInner]:
+        conjuncts = flattenLabel('#And', kast)
+        term = None
+        constraints = []
+        for c in conjuncts:
+            if type(c) is KApply and c.is_cell:
+                term = c
+            else:
+                constraints.append(c)
+        if not term:
+            raise ValueError(f'Could not find configuration for: {kast}')
+        return (term, mlAnd(constraints, Sorts.GENERATED_TOP_CELL))
 
     @staticmethod
     def _normalize_constraints(constraints: Iterable[KInner]) -> Tuple[KInner, ...]:
