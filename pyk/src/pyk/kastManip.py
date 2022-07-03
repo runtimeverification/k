@@ -548,18 +548,16 @@ def removeConstraintsFor(varNames, constrainedTerm):
     return mlAnd([state, constraint])
 
 
-def buildRule(rule_id: str, init_cterm: KInner, final_cterm: KInner, claim: bool = False, priority: Optional[int] = None, keep_vars: Optional[List[str]] = None) -> Tuple[KRuleLike, Dict[str, KVariable]]:
-    init_config, init_constraint = CTerm._split_config_and_constraints(init_cterm)
-    final_config, final_constraint = CTerm._split_config_and_constraints(final_cterm)
-    init_constraints = flattenLabel('#And', init_constraint)
-    final_constraints = flattenLabel('#And', final_constraint)
+def buildRule(rule_id: str, init_cterm: CTerm, final_cterm: CTerm, claim: bool = False, priority: Optional[int] = None, keep_vars: Optional[List[str]] = None) -> Tuple[KRuleLike, Dict[str, KVariable]]:
+    init_config, *init_constraints = init_cterm
+    final_config, *final_constraints = final_cterm
     final_constraints = [c for c in final_constraints if c not in init_constraints]
-    init_cterm = mlAnd([init_config] + init_constraints)
-    final_cterm = mlAnd([final_config] + final_constraints)
+    init_term = mlAnd([init_config] + init_constraints)
+    final_term = mlAnd([final_config] + final_constraints)
 
-    lhs_vars = collectFreeVars(init_cterm)
-    rhs_vars = collectFreeVars(final_cterm)
-    var_occurances = count_vars(mlAnd([init_cterm, final_cterm]))
+    lhs_vars = collectFreeVars(init_term)
+    rhs_vars = collectFreeVars(final_term)
+    var_occurances = count_vars(mlAnd([init_term, final_term]))
     v_subst: Dict[str, KVariable] = {}
     vremap_subst: Dict[str, KVariable] = {}
     for v in var_occurances:
@@ -571,10 +569,10 @@ def buildRule(rule_id: str, init_cterm: KInner, final_cterm: KInner, claim: bool
         v_subst[v] = KVariable(new_v)
         vremap_subst[new_v] = KVariable(v)
 
-    init_cterm = substitute(init_cterm, v_subst)
-    final_cterm = applyExistentialSubstitutions(substitute(final_cterm, v_subst))
-    (init_config, init_constraint) = CTerm._split_config_and_constraints(init_cterm)
-    (final_config, final_constraint) = CTerm._split_config_and_constraints(final_cterm)
+    init_term = substitute(init_term, v_subst)
+    final_term = applyExistentialSubstitutions(substitute(final_term, v_subst))
+    (init_config, init_constraint) = CTerm._split_config_and_constraints(init_term)
+    (final_config, final_constraint) = CTerm._split_config_and_constraints(final_term)
 
     rule_body = push_down_rewrites(KRewrite(init_config, final_config))
     rule_requires = simplifyBool(ml_pred_to_bool(init_constraint))
