@@ -50,14 +50,15 @@ class BuildRuleTest(TestCase):
             (
                 T(k(KVariable('K_CELL')), mem(KVariable('MEM_CELL'))),
                 T(k(KVariable('K_CELL')), mem(KApply('_[_<-_]', [KVariable('MEM_CELL'), KVariable('KEY'), KVariable('VALUE')]))),
-                T(k(KVariable('_K_CELL')), mem(KRewrite(KVariable('MEM_CELL'), KApply('_[_<-_]', [KVariable('MEM_CELL'), KVariable('KEY'), KVariable('VALUE')]))))
+                ['K_CELL'],
+                T(k(KVariable('_K_CELL')), mem(KRewrite(KVariable('MEM_CELL'), KApply('_[_<-_]', [KVariable('MEM_CELL'), KVariable('?_KEY'), KVariable('?_VALUE')]))))
             )
         ]
 
-        for i, (lhs, rhs, expected) in enumerate(test_data):
+        for i, (lhs, rhs, keep_vars, expected) in enumerate(test_data):
             with self.subTest(i=i):
                 # When
-                rule, _ = build_rule(f'test-{i}', CTerm(lhs), CTerm(rhs))
+                rule, _ = build_rule(f'test-{i}', CTerm(lhs), CTerm(rhs), keep_vars=keep_vars)
                 actual = rule.body
 
                 # Then
