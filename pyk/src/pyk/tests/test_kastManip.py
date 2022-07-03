@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+from ..cterm import CTerm
 from ..kast import (
     TRUE,
     KApply,
@@ -10,11 +11,18 @@ from ..kast import (
     KVariable,
     ktokenDots,
 )
-from ..kastManip import minimize_term, ml_pred_to_bool, push_down_rewrites
+from ..kastManip import (
+    buildRule,
+    minimize_term,
+    ml_pred_to_bool,
+    push_down_rewrites,
+)
 from ..prelude import Sorts, intToken, mlEqualsTrue, mlTop
 from .utils import a, b, c, f, k
 
 x = KVariable('X')
+mem = KLabel('<mem>')
+T = KLabel('<T>')
 
 
 class PushDownRewritesTest(TestCase):
@@ -29,6 +37,28 @@ class PushDownRewritesTest(TestCase):
             with self.subTest(i=i):
                 # When
                 actual = push_down_rewrites(before)
+
+                # Then
+                self.assertEqual(actual, expected)
+
+
+class BuildRuleTest(TestCase):
+
+    def test_build_rule(self):
+        # Given
+        test_data = [
+            (
+                T(k(KVariable('K_CELL')), mem(KVariable('MEM_CELL'))),
+                T(k(KVariable('K_CELL')), mem(KApply('_[_<-_]', [KVariable('MEM_CELL'), KVariable('KEY'), KVariable('VALUE')]))),
+                T(k(KVariable('_K_CELL')), mem(KRewrite(KVariable('MEM_CELL'), KApply('_[_<-_]', [KVariable('MEM_CELL'), KVariable('KEY'), KVariable('VALUE')]))))
+            )
+        ]
+
+        for i, (lhs, rhs, expected) in enumerate(test_data):
+            with self.subTest(i=i):
+                # When
+                rule, _ = buildRule(f'test-{i}', CTerm(lhs), CTerm(rhs))
+                actual = rule.body
 
                 # Then
                 self.assertEqual(actual, expected)
