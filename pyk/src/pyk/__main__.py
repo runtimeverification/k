@@ -7,13 +7,13 @@ from typing import Final
 from graphviz import Digraph
 
 from .coverage import getRuleById, stripCoverageLogger
+from .cterm import CTerm
 from .kast import KAst, flattenLabel, readKastTerm
 from .kastManip import (
     minimize_term,
     minimizeRule,
     propagate_up_constraints,
     removeSourceMap,
-    splitConfigAndConstraints,
 )
 from .ktool import KPrint, KProve, build_symbol_table, prettyPrintKast
 from .prelude import Sorts, mlAnd, mlOr, mlTop
@@ -50,7 +50,7 @@ def main(extraMain=None):
                 minimizedDisjuncts = []
                 for d in flattenLabel('#Or', term):
                     dMinimized = minimize_term(d, abstract_labels=abstractLabels)
-                    dConfig, dConstraint = splitConfigAndConstraints(dMinimized)
+                    dConfig, dConstraint = CTerm._split_config_and_constraints(dMinimized)
                     if dConstraint != mlTop():
                         minimizedDisjuncts.append(mlAnd([dConfig, dConstraint], sort=Sorts.GENERATED_TOP_CELL))
                     else:
