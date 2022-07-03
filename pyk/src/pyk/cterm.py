@@ -92,3 +92,6 @@ class CTerm:
             return consequent
 
         return mlImplies(antecedent, consequent, Sorts.GENERATED_TOP_CELL)
+
+    def with_constraint(self, new_constraint: KInner) -> 'CTerm':
+        return CTerm(mlAnd([self.config, new_constraint] + list(self.constraints), Sorts.GENERATED_TOP_CELL))
