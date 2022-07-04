@@ -1,6 +1,6 @@
 from abc import ABC
 from dataclasses import dataclass
-from typing import Final, Iterable, Iterator, Tuple
+from typing import Final, Iterable, Iterator, Tuple, final
 
 KEYWORDS: Final = {
     "module",
@@ -68,7 +68,6 @@ def check_set_var_id(s: str) -> None:
         raise ValueError(f'Expected set variable identifier, found: {s}')
 
 
-# TODO @final
 # TODO @overload
 
 
@@ -76,6 +75,7 @@ class Kore(ABC):
     ...
 
 
+@final
 @dataclass(frozen=True)
 class StrLit(Kore):
     value: str  # TODO validate, pretty-print, etc.
@@ -85,6 +85,7 @@ class Sort(Kore, ABC):
     name: str
 
 
+@final
 @dataclass(frozen=True)
 class SortVar(Sort):
     name: str
@@ -94,6 +95,7 @@ class SortVar(Sort):
         object.__setattr__(self, 'name', name)
 
 
+@final
 @dataclass(frozen=True)
 class SortCons(Sort):
     name: str
@@ -114,6 +116,7 @@ class VarPattern(Pattern, ABC):
     sort: Sort
 
 
+@final
 @dataclass(frozen=True)
 class ElemVar(VarPattern):
     name: str
@@ -125,6 +128,7 @@ class ElemVar(VarPattern):
         object.__setattr__(self, 'sort', sort)
 
 
+@final
 @dataclass(frozen=True)
 class SetVar(VarPattern):
     name: str
@@ -136,6 +140,7 @@ class SetVar(VarPattern):
         object.__setattr__(self, 'sort', sort)
 
 
+@final
 @dataclass(frozen=True)
 class Apply(Pattern):
     symbol: str
@@ -161,11 +166,13 @@ class NullaryConn(MLConn, ABC):
     ...
 
 
+@final
 @dataclass(frozen=True)
 class Top(NullaryConn):
     sort: Sort
 
 
+@final
 @dataclass(frozen=True)
 class Bottom(NullaryConn):
     sort: Sort
@@ -175,6 +182,7 @@ class UnaryConn(MLConn, ABC):
     pattern: Pattern
 
 
+@final
 @dataclass(frozen=True)
 class Not(UnaryConn):
     sort: Sort
@@ -190,6 +198,7 @@ class BinaryConn(MLConn, ABC):
         yield self.right
 
 
+@final
 @dataclass(frozen=True)
 class And(BinaryConn):
     sort: Sort
@@ -197,6 +206,7 @@ class And(BinaryConn):
     right: Pattern
 
 
+@final
 @dataclass(frozen=True)
 class Or(BinaryConn):
     sort: Sort
@@ -204,6 +214,7 @@ class Or(BinaryConn):
     right: Pattern
 
 
+@final
 @dataclass(frozen=True)
 class Implies(BinaryConn):
     sort: Sort
@@ -211,6 +222,7 @@ class Implies(BinaryConn):
     right: Pattern
 
 
+@final
 @dataclass(frozen=True)
 class Iff(BinaryConn):
     sort: Sort
@@ -224,6 +236,7 @@ class MLQuant(MLPattern, ABC):
     pattern: Pattern
 
 
+@final
 @dataclass(frozen=True)
 class Exists(MLQuant):
     sort: Sort
@@ -231,6 +244,7 @@ class Exists(MLQuant):
     pattern: Pattern
 
 
+@final
 @dataclass(frozen=True)
 class Forall(MLQuant):
     sort: Sort
@@ -243,12 +257,14 @@ class MLFixpoint(MLPattern, ABC):
     pattern: Pattern
 
 
+@final
 @dataclass(frozen=True)
 class Mu(MLFixpoint):
     var: SetVar
     pattern: Pattern
 
 
+@final
 @dataclass(frozen=True)
 class Nu(MLFixpoint):
     var: SetVar
@@ -259,6 +275,7 @@ class MLPred(MLPattern, ABC):
     ...
 
 
+@final
 @dataclass(frozen=True)
 class Ceil(MLPred):
     op_sort: Sort
@@ -266,6 +283,7 @@ class Ceil(MLPred):
     pattern: Pattern
 
 
+@final
 @dataclass(frozen=True)
 class Floor(MLPred):
     op_sort: Sort
@@ -273,6 +291,7 @@ class Floor(MLPred):
     pattern: Pattern
 
 
+@final
 @dataclass(frozen=True)
 class Equals(MLPred):
     left_sort: Sort
@@ -281,6 +300,7 @@ class Equals(MLPred):
     right_pattern: Pattern
 
 
+@final
 @dataclass(frozen=True)
 class In(MLPred):
     left_sort: Sort
@@ -293,12 +313,14 @@ class MLRewrite(MLPattern, ABC):
     sort: Sort
 
 
+@final
 @dataclass(frozen=True)
 class Next(MLRewrite):
     sort: Sort
     pattern: Pattern
 
 
+@final
 @dataclass(frozen=True)
 class Rewrites(MLRewrite):
     sort: Sort
@@ -306,6 +328,7 @@ class Rewrites(MLRewrite):
     right: Pattern
 
 
+@final
 @dataclass(frozen=True)
 class DomVal(MLPattern):
     sort: Sort
@@ -317,6 +340,7 @@ class MLSyntaxSugar(MLPattern, ABC):
     ...
 
 
+@final
 @dataclass(frozen=True)
 class Attr(Kore):
     symbol: str
@@ -336,6 +360,7 @@ class Sentence(Kore, WithAttrs, ABC):
     ...
 
 
+@final
 @dataclass(frozen=True)
 class Import(Sentence):
     module_name: str
@@ -347,6 +372,7 @@ class Import(Sentence):
         object.__setattr__(self, 'attrs', tuple(attrs))
 
 
+@final
 @dataclass(frozen=True)
 class SortDecl(Sentence):
     name: str
@@ -362,6 +388,7 @@ class SortDecl(Sentence):
         object.__setattr__(self, 'attrs', tuple(attrs))
 
 
+@final
 @dataclass(frozen=True)
 class Symbol(Kore):
     name: str
@@ -373,6 +400,7 @@ class Symbol(Kore):
         object.__setattr__(self, 'vars', tuple(vars))
 
 
+@final
 @dataclass(frozen=True)
 class SymbolDecl(Sentence):
     symbol: Symbol
@@ -389,6 +417,7 @@ class SymbolDecl(Sentence):
         object.__setattr__(self, 'attrs', tuple(attrs))
 
 
+@final
 @dataclass(frozen=True)
 class AliasDecl(Sentence):
     alias: Symbol
@@ -423,6 +452,7 @@ class AxiomLike(Sentence, ABC):
     pattern: Pattern
 
 
+@final
 @dataclass(frozen=True)
 class Axiom(AxiomLike):
     vars: Tuple[SortVar, ...]
@@ -435,6 +465,7 @@ class Axiom(AxiomLike):
         object.__setattr__(self, 'attrs', tuple(attrs))
 
 
+@final
 @dataclass(frozen=True)
 class Claim(AxiomLike):
     vars: Tuple[SortVar, ...]
@@ -447,6 +478,7 @@ class Claim(AxiomLike):
         object.__setattr__(self, 'attrs', tuple(attrs))
 
 
+@final
 @dataclass(frozen=True)
 class Module(Kore, WithAttrs):
     name: str
@@ -460,6 +492,7 @@ class Module(Kore, WithAttrs):
         object.__setattr__(self, 'attrs', tuple(attrs))
 
 
+@final
 @dataclass(frozen=True)
 class Definition(Kore, WithAttrs):
     modules: Tuple[Module, ...]
