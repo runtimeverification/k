@@ -14,6 +14,8 @@ def split_config_and_constraints(kast: KInner) -> Tuple[KInner, KInner]:
     constraints = []
     for c in conjuncts:
         if type(c) is KApply and c.is_cell:
+            if term:
+                raise ValueError(f'Found two configurations in pattern:\n\n{term}\n\nand\n\n{c}')
             term = c
         else:
             constraints.append(c)
