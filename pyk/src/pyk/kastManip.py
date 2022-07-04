@@ -13,7 +13,7 @@ from typing import (
     TypeVar,
 )
 
-from .cterm import CTerm
+from .cterm import CTerm, split_config_and_constraints
 from .kast import (
     FALSE,
     TRUE,
@@ -503,20 +503,20 @@ def omitLargeTokens(kast, maxLen=78):
 
 
 def getCell(constrainedTerm, cellVariable):
-    (state, _) = CTerm._split_config_and_constraints(constrainedTerm)
+    (state, _) = split_config_and_constraints(constrainedTerm)
     (_, subst) = splitConfigFrom(state)
     return subst[cellVariable]
 
 
 def setCell(constrainedTerm, cellVariable, cellValue):
-    (state, constraint) = CTerm._split_config_and_constraints(constrainedTerm)
+    (state, constraint) = split_config_and_constraints(constrainedTerm)
     (config, subst) = splitConfigFrom(state)
     subst[cellVariable] = cellValue
     return mlAnd([substitute(config, subst), constraint])
 
 
 def removeUselessConstraints(constrainedTerm, keepVars=None):
-    (state, constraint) = CTerm._split_config_and_constraints(constrainedTerm)
+    (state, constraint) = split_config_and_constraints(constrainedTerm)
     constraints = flattenLabel('#And', constraint)
     usedVars = collectFreeVars(state)
     usedVars = usedVars if keepVars is None else (usedVars + keepVars)
@@ -544,7 +544,7 @@ def removeConstraintClausesFor(varNames, constraint):
 
 
 def removeConstraintsFor(varNames, constrainedTerm):
-    (state, constraint) = CTerm._split_config_and_constraints(constrainedTerm)
+    (state, constraint) = split_config_and_constraints(constrainedTerm)
     constraint = removeConstraintClausesFor(varNames, constraint)
     return mlAnd([state, constraint])
 
@@ -580,8 +580,8 @@ def build_rule(
 
     init_term = substitute(init_term, v_subst)
     final_term = applyExistentialSubstitutions(substitute(final_term, v_subst))
-    (init_config, init_constraint) = CTerm._split_config_and_constraints(init_term)
-    (final_config, final_constraint) = CTerm._split_config_and_constraints(final_term)
+    (init_config, init_constraint) = split_config_and_constraints(init_term)
+    (final_config, final_constraint) = split_config_and_constraints(final_term)
 
     rule_body = push_down_rewrites(KRewrite(init_config, final_config))
     rule_requires = simplifyBool(ml_pred_to_bool(init_constraint))
@@ -626,8 +626,8 @@ def antiUnify(state1, state2):
 
 
 def antiUnifyWithConstraints(constrainedTerm1, constrainedTerm2, implications=False, disjunct=False):
-    (state1, constraint1) = CTerm._split_config_and_constraints(constrainedTerm1)
-    (state2, constraint2) = CTerm._split_config_and_constraints(constrainedTerm2)
+    (state1, constraint1) = split_config_and_constraints(constrainedTerm1)
+    (state2, constraint2) = split_config_and_constraints(constrainedTerm2)
     constraints1 = flattenLabel('#And', constraint1)
     constraints2 = flattenLabel('#And', constraint2)
     (state, subst1, subst2) = antiUnify(state1, state2)
@@ -665,7 +665,7 @@ def removeDisjuncts(constrainedTerm):
 
 
 def applyExistentialSubstitutions(constrainedTerm):
-    (state, constraint) = CTerm._split_config_and_constraints(constrainedTerm)
+    (state, constraint) = split_config_and_constraints(constrainedTerm)
     constraints = flattenLabel('#And', constraint)
     substPattern = mlEqualsTrue(KApply('_==K_', [KVariable('#VAR'), KVariable('#VAL')]))
     subst = {}
@@ -703,8 +703,8 @@ def constraintSubsume(constraint1, constraint2):
 
 
 def matchWithConstraint(constrainedTerm1, constrainedTerm2):
-    (state1, constraint1) = CTerm._split_config_and_constraints(constrainedTerm1)
-    (state2, constraint2) = CTerm._split_config_and_constraints(constrainedTerm2)
+    (state1, constraint1) = split_config_and_constraints(constrainedTerm1)
+    (state2, constraint2) = split_config_and_constraints(constrainedTerm2)
     subst = state1.match(state2)
     if subst is not None and constraintSubsume(substitute(constraint1, subst), constraint2):
         return subst
