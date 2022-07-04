@@ -13,16 +13,25 @@ from ..kast import (
 )
 from ..kastManip import (
     build_rule,
+    collapseDots,
     minimize_term,
     ml_pred_to_bool,
     push_down_rewrites,
+    remove_generated_cells,
+    substitute,
 )
 from ..prelude import Sorts, intToken, mlEqualsTrue, mlTop
 from .utils import a, b, c, f, k
 
 x = KVariable('X')
 mem = KLabel('<mem>')
+
 T = KLabel('<T>')
+K_CELL = KApply('<k>', [KSequence([KVariable('S1'), KVariable('_DotVar0')])])
+T_CELL = KApply('<T>', [K_CELL, KApply('<state>', [KVariable('MAP')])])
+GENERATED_COUNTER_CELL = KApply('<generatedCounter>', [KVariable('X')])
+GENERATED_TOP_CELL_1 = KApply('<generatedTop>', [T_CELL, KVariable('_GENERATED_COUNTER_PLACEHOLDER')])
+GENERATED_TOP_CELL_2 = KApply('<generatedTop>', [T_CELL, GENERATED_COUNTER_CELL])
 
 
 class PushDownRewritesTest(TestCase):
@@ -110,3 +119,34 @@ class MlPredToBoolTest(TestCase):
 
                 # Then
                 self.assertEqual(actual, expected)
+
+
+class RemoveGeneratedCellsTest(TestCase):
+
+    def test_first(self):
+        # When
+        config_actual = remove_generated_cells(GENERATED_TOP_CELL_1)
+
+        # Then
+        self.assertEqual(config_actual, T_CELL)
+
+    def test_second(self):
+        # When
+        config_actual = remove_generated_cells(GENERATED_TOP_CELL_2)
+
+        # Then
+        self.assertEqual(config_actual, T_CELL)
+
+
+class CollapseDotsTest(TestCase):
+
+    def test(self):
+        # Given
+        config_before = substitute(GENERATED_TOP_CELL_1, {'MAP': ktokenDots, '_GENERATED_COUNTER_PLACEHOLDER': ktokenDots})
+        config_expected = KApply('<generatedTop>', [KApply('<T>', [K_CELL, ktokenDots]), ktokenDots])
+
+        # When
+        config_actual = collapseDots(config_before)
+
+        # Then
+        self.assertEqual(config_actual, config_expected)
