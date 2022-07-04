@@ -1,8 +1,18 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import IntEnum
 from itertools import chain
-from typing import Final, Iterable, Iterator, List, Optional, Tuple, final
+from typing import (
+    ClassVar,
+    Final,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    final,
+)
 
 KEYWORDS: Final = {
     "module",
@@ -70,11 +80,33 @@ def check_set_var_id(s: str) -> None:
         raise ValueError(f'Expected set variable identifier, found: {s}')
 
 
+def _bracketed(elems: Iterable[str], lbrac: str, rbrac: str) -> str:
+    elems = tuple(elems)
+    return lbrac + ' ' + ', '.join(elems) + (' ' if elems else '') + rbrac
+
+
+def _braced(elems: Iterable[str]) -> str:
+    return _bracketed(elems, '{', '}')
+
+
+def _brackd(elems: Iterable[str]) -> str:
+    return _bracketed(elems, '[', ']')
+
+
+def _parend(elems: Iterable[str]) -> str:
+    return _bracketed(elems, '(', ')')
+
+
 # TODO @overload
 
 
 class Kore(ABC):
     ...
+
+    @property
+    @abstractmethod
+    def text(self) -> str:
+        ...
 
 
 class StrLitLexer(Iterator[Tuple[str, 'StrLitLexer.TokenType']]):
@@ -188,7 +220,7 @@ class StrLitLexer(Iterator[Tuple[str, 'StrLitLexer.TokenType']]):
 
 @final
 @dataclass(frozen=True)
-class StrLit(Kore):
+class StrLit(Kore):  # TODO Is an MLPattern
     value: str
 
     def __init__(self, value: str):
@@ -197,7 +229,12 @@ class StrLit(Kore):
 
         object.__setattr__(self, 'value', value)
 
-    def decode(self) -> str:
+    @property
+    def text(self) -> str:
+        return f'"{self.value}"'
+
+    @property
+    def decoded(self) -> str:
         return bytes(self.value, 'ascii').decode('unicode-escape')
 
 
@@ -214,6 +251,10 @@ class SortVar(Sort):
         check_id(name)
         object.__setattr__(self, 'name', name)
 
+    @property
+    def text(self) -> str:
+        return self.name
+
 
 @final
 @dataclass(frozen=True)
@@ -226,6 +267,10 @@ class SortCons(Sort):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sorts', tuple(sorts))
 
+    @property
+    def text(self) -> str:
+        return self.name + ' ' + _braced(sort.text for sort in self.sorts)
+
 
 class Pattern(Kore, ABC):
     ...
@@ -234,6 +279,10 @@ class Pattern(Kore, ABC):
 class VarPattern(Pattern, ABC):
     name: str
     sort: Sort
+
+    @property
+    def text(self) -> str:
+        return f'{self.name} : {self.sort.text}'
 
 
 @final
@@ -273,38 +322,61 @@ class Apply(Pattern):
         object.__setattr__(self, 'sorts', tuple(sorts))
         object.__setattr__(self, 'patterns', tuple(patterns))
 
+    @property
+    def text(self) -> str:
+        return self.symbol + ' ' + _braced(sort.text for sort in self.sorts) + ' ' + _parend(pattern.text for pattern in self.patterns)
+
 
 class MLPattern(Pattern, ABC):
-    ...
+    symbol: ClassVar[str]
 
 
 class MLConn(MLPattern, ABC):
     sort: Sort
 
+    @property
+    @abstractmethod
+    def patterns(self) -> Tuple[Pattern, ...]:
+        ...
+
+    @property
+    def text(self) -> str:
+        return self.symbol + ' { ' + self.sort.text + ' } ' + _parend(pattern.text for pattern in self.patterns)
+
 
 class NullaryConn(MLConn, ABC):
-    ...
+
+    @property
+    def patterns(self) -> Tuple[Pattern, ...]:
+        return ()
 
 
 @final
 @dataclass(frozen=True)
 class Top(NullaryConn):
+    symbol = '\\top'
     sort: Sort
 
 
 @final
 @dataclass(frozen=True)
 class Bottom(NullaryConn):
+    symbol = '\\bottom'
     sort: Sort
 
 
 class UnaryConn(MLConn, ABC):
     pattern: Pattern
 
+    @property
+    def patterns(self) -> Tuple[Pattern, ...]:
+        return (self.pattern,)
+
 
 @final
 @dataclass(frozen=True)
 class Not(UnaryConn):
+    symbol = '\\not'
     sort: Sort
     pattern: Pattern
 
@@ -317,10 +389,15 @@ class BinaryConn(MLConn, ABC):
         yield self.left
         yield self.right
 
+    @property
+    def patterns(self) -> Tuple[Pattern, ...]:
+        return (self.left, self.right)
+
 
 @final
 @dataclass(frozen=True)
 class And(BinaryConn):
+    symbol = '\\and'
     sort: Sort
     left: Pattern
     right: Pattern
@@ -329,6 +406,7 @@ class And(BinaryConn):
 @final
 @dataclass(frozen=True)
 class Or(BinaryConn):
+    symbol = '\\or'
     sort: Sort
     left: Pattern
     right: Pattern
@@ -337,6 +415,7 @@ class Or(BinaryConn):
 @final
 @dataclass(frozen=True)
 class Implies(BinaryConn):
+    symbol = '\\implies'
     sort: Sort
     left: Pattern
     right: Pattern
@@ -345,6 +424,7 @@ class Implies(BinaryConn):
 @final
 @dataclass(frozen=True)
 class Iff(BinaryConn):
+    symbol = '\\iff'
     sort: Sort
     left: Pattern
     right: Pattern
@@ -355,10 +435,15 @@ class MLQuant(MLPattern, ABC):
     var: ElemVar
     pattern: Pattern
 
+    @property
+    def text(self) -> str:
+        return self.symbol + ' { ' + self.sort.text + ' } ' + _parend((self.var.text, self.pattern.text))
+
 
 @final
 @dataclass(frozen=True)
 class Exists(MLQuant):
+    symbol = '\\exists'
     sort: Sort
     var: ElemVar
     pattern: Pattern
@@ -367,6 +452,7 @@ class Exists(MLQuant):
 @final
 @dataclass(frozen=True)
 class Forall(MLQuant):
+    symbol = '\\forall'
     sort: Sort
     var: ElemVar
     pattern: Pattern
@@ -376,10 +462,15 @@ class MLFixpoint(MLPattern, ABC):
     var: SetVar
     pattern: Pattern
 
+    @property
+    def text(self) -> str:
+        return self.symbol + ' { } ' + _parend((self.var.text, self.pattern.text))
+
 
 @final
 @dataclass(frozen=True)
 class Mu(MLFixpoint):
+    symbol = '\\mu'
     var: SetVar
     pattern: Pattern
 
@@ -387,6 +478,7 @@ class Mu(MLFixpoint):
 @final
 @dataclass(frozen=True)
 class Nu(MLFixpoint):
+    symbol = '\\nu'
     var: SetVar
     pattern: Pattern
 
@@ -398,35 +490,63 @@ class MLPred(MLPattern, ABC):
 @final
 @dataclass(frozen=True)
 class Ceil(MLPred):
+    symbol = '\\ceil'
     op_sort: Sort
     sort: Sort
     pattern: Pattern
+
+    # TODO Extract to some reasonably named superclass
+    @property
+    def text(self) -> str:
+        return self.symbol + ' ' + _braced((self.op_sort.text, self.sort.text)) + ' ( ' + self.pattern.text + ' )'
 
 
 @final
 @dataclass(frozen=True)
 class Floor(MLPred):
+    symbol = '\\floor'
     op_sort: Sort
     sort: Sort
     pattern: Pattern
+
+    # TODO Extract to some reasonably named superclass
+    @property
+    def text(self) -> str:
+        return self.symbol + ' ' + _braced((self.op_sort.text, self.sort.text)) + ' ( ' + self.pattern.text + ' )'
 
 
 @final
 @dataclass(frozen=True)
 class Equals(MLPred):
+    symbol = '\\equals'
     left_sort: Sort
     right_sort: Sort
-    left_pattern: Pattern
-    right_pattern: Pattern
+    left: Pattern
+    right: Pattern
+
+    # TODO Extract to some reasonably named superclass
+    @property
+    def text(self) -> str:
+        return self.symbol + ' ' + _braced((self.left_sort.text, self.right_sort.text)) + ' ' + _parend((self.left.text, self.right.text))
 
 
 @final
 @dataclass(frozen=True)
 class In(MLPred):
+    symbol = '\\in'
     left_sort: Sort
     right_sort: Sort
-    left_pattern: Pattern
-    right_pattern: Pattern
+    left: Pattern
+    right: Pattern
+
+    # TODO Extract to some reasonably named superclass
+    @property
+    def text(self) -> str:
+        return ' '.join([
+            self.symbol,
+            _braced((self.left_sort.text, self.right_sort.text)),
+            _parend((self.left.text, self.right.text)),
+        ])
 
 
 class MLRewrite(MLPattern, ABC):
@@ -436,23 +556,38 @@ class MLRewrite(MLPattern, ABC):
 @final
 @dataclass(frozen=True)
 class Next(MLRewrite):
+    symbol = '\\next'
     sort: Sort
     pattern: Pattern
+
+    @property
+    def text(self) -> str:
+        return self.symbol + ' { ' + self.sort.text + ' } ( ' + self.pattern.text + ' )'
 
 
 @final
 @dataclass(frozen=True)
 class Rewrites(MLRewrite):
+    symbol = '\\rewrites'
     sort: Sort
     left: Pattern
     right: Pattern
+
+    @property
+    def text(self) -> str:
+        return self.symbol + ' { ' + self.sort.text + ' } ' + _parend((self.left.text, self.right.text))
 
 
 @final
 @dataclass(frozen=True)
 class DomVal(MLPattern):
+    symbol = '\\dv'
     sort: Sort
     value: StrLit
+
+    @property
+    def text(self) -> str:
+        return self.symbol + ' { ' + self.sort.text + ' } ( ' + self.value.text + ' )'
 
 
 # TODO
@@ -464,12 +599,16 @@ class MLSyntaxSugar(MLPattern, ABC):
 @dataclass(frozen=True)
 class Attr(Kore):
     symbol: str
-    params: Tuple[StrLit, ...]
+    params: Tuple[Union[StrLit, 'Attr'], ...]
 
-    def __init__(self, symbol: str, params: Iterable[StrLit]):
+    def __init__(self, symbol: str, params: Iterable[Union[StrLit, 'Attr']] = ()):
         check_symbol_id(symbol)
         object.__setattr__(self, 'symbol', symbol)
         object.__setattr__(self, 'params', tuple(params))
+
+    @property
+    def text(self) -> str:
+        return self.symbol + ' { } ' + _parend(param.text for param in self.params)
 
 
 class WithAttrs(ABC):
@@ -491,6 +630,14 @@ class Import(Sentence):
         object.__setattr__(self, 'module_name', module_name)
         object.__setattr__(self, 'attrs', tuple(attrs))
 
+    @property
+    def text(self) -> str:
+        return ' '.join([
+            'import',
+            self.module_name,
+            _brackd(attr.text for attr in self.attrs),
+        ])
+
 
 @final
 @dataclass(frozen=True)
@@ -507,6 +654,15 @@ class SortDecl(Sentence):
         object.__setattr__(self, 'hooked', hooked)
         object.__setattr__(self, 'attrs', tuple(attrs))
 
+    @property
+    def text(self) -> str:
+        return ' '.join([
+            'hooked-sort' if self.hooked else 'sort',
+            self.name,
+            _braced(var.text for var in self.vars),
+            _brackd(attr.text for attr in self.attrs),
+        ])
+
 
 @final
 @dataclass(frozen=True)
@@ -514,10 +670,14 @@ class Symbol(Kore):
     name: str
     vars: Tuple[SortVar, ...]
 
-    def __init__(self, name: str, vars: Iterable[SortVar]):
+    def __init__(self, name: str, vars: Iterable[SortVar] = ()):
         check_symbol_id(name)
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'vars', tuple(vars))
+
+    @property
+    def text(self) -> str:
+        return self.name + ' ' + _braced(var.text for var in self.vars)
 
 
 @final
@@ -535,6 +695,17 @@ class SymbolDecl(Sentence):
         object.__setattr__(self, 'sort', sort)
         object.__setattr__(self, 'hooked', hooked)
         object.__setattr__(self, 'attrs', tuple(attrs))
+
+    @property
+    def text(self) -> str:
+        return ' '.join([
+            'hooked-symbol' if self.hooked else 'symbol',
+            self.symbol.text,
+            _parend(sort.text for sort in self.sort_params),
+            ':',
+            self.sort.text,
+            _brackd(attr.text for attr in self.attrs),
+        ])
 
 
 @final
@@ -566,15 +737,41 @@ class AliasDecl(Sentence):
         object.__setattr__(self, 'hooked', hooked)
         object.__setattr__(self, 'attrs', tuple(attrs))
 
+    @property
+    def text(self) -> str:
+        return ' '.join([
+            'alias',
+            self.alias.text,
+            _parend(sort.text for sort in self.sort_params),
+            ':',
+            self.sort.text,
+            'where',
+            self.left.text,
+            ':=',
+            self.right.text,
+            _brackd(attr.text for attr in self.attrs),
+        ])
+
 
 class AxiomLike(Sentence, ABC):
+    label: ClassVar[str]
     vars: Tuple[SortVar, ...]
     pattern: Pattern
+
+    @property
+    def text(self) -> str:
+        return ' '.join([
+            self.label,
+            _braced(var.text for var in self.vars),
+            self.pattern.text,
+            _brackd(attr.text for attr in self.attrs),
+        ])
 
 
 @final
 @dataclass(frozen=True)
 class Axiom(AxiomLike):
+    label = 'axiom'
     vars: Tuple[SortVar, ...]
     pattern: Pattern
     attrs: Tuple[Attr, ...]
@@ -588,6 +785,7 @@ class Axiom(AxiomLike):
 @final
 @dataclass(frozen=True)
 class Claim(AxiomLike):
+    label = 'claim'
     vars: Tuple[SortVar, ...]
     pattern: Pattern
     attrs: Tuple[Attr, ...]
@@ -611,6 +809,14 @@ class Module(Kore, WithAttrs):
         object.__setattr__(self, 'sentences', tuple(sentences))
         object.__setattr__(self, 'attrs', tuple(attrs))
 
+    @property
+    def text(self) -> str:
+        return '\n'.join(
+            [f'module {self.name}'] +                                   # noqa: W504
+            [f'    {sentence.text}' for sentence in self.sentences] +   # noqa: W504
+            ['endmodule ' + _brackd(attr.text for attr in self.attrs)]  # noqa: W504
+        )
+
 
 @final
 @dataclass(frozen=True)
@@ -621,3 +827,9 @@ class Definition(Kore, WithAttrs):
     def __init__(self, modules: Iterable[Module] = (), attrs: Iterable[Attr] = ()):
         object.__setattr__(self, 'modules', tuple(modules))
         object.__setattr__(self, 'attrs', tuple(attrs))
+
+    @property
+    def text(self) -> str:
+        return '\n'.join([
+            _brackd(attr.text for attr in self.attrs),
+        ] + [module.text for module in self.modules])
