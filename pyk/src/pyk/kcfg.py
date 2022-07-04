@@ -80,7 +80,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         def to_rule(self, claim=False, priority=50) -> KRuleLike:
             sentence_id = f'BASIC-BLOCK-{self.source.id}-TO-{self.target.id}'
-            rule, _ = build_rule(sentence_id, self.source.cterm.with_constraint(self.condition), self.target.cterm, claim=claim, priority=priority)
+            rule, _ = build_rule(sentence_id, self.source.cterm.add_constraint(self.condition), self.target.cterm, claim=claim, priority=priority)
             return rule
 
         def pretty_print(self, kprint: KPrint) -> List[str]:
