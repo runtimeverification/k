@@ -3,19 +3,12 @@ from abc import ABC
 from ..kast import (
     KApply,
     KDefinition,
-    KRewrite,
     KSequence,
     KVariable,
     ktokenDots,
     readKastTerm,
 )
-from ..kastManip import (
-    build_rule,
-    collapseDots,
-    getCell,
-    remove_generated_cells,
-    substitute,
-)
+from ..kastManip import collapseDots, remove_generated_cells, substitute
 from ..ktool import KompileBackend
 from .kompiled_test import KompiledTest
 
@@ -70,23 +63,3 @@ class CollapseDotsTest(ConfigurationTest):
 
         # Then
         self.assertEqual(config_actual, config_expected)
-
-
-class BuildRuleTest(ConfigurationTest):
-
-    def test(self):
-        # Given
-        config_pre = self.GENERATED_TOP_CELL_1
-        config_post = substitute(self.GENERATED_TOP_CELL_1, {'MAP': KVariable('MAP2')})
-
-        state_cell_expected = KRewrite(KVariable('_MAP'), KVariable('?_MAP2'))
-        var_map_expected = {'_MAP': KVariable('MAP'), '?_MAP2': KVariable('MAP2')}
-
-        # When
-        rule, var_map_actual = build_rule('id1', config_pre, config_post)
-        state_cell_actual = getCell(rule.body, 'STATE_CELL')
-
-        # Then
-        self.assertEqual(state_cell_actual, state_cell_expected)
-        for k in var_map_expected:
-            self.assertEqual(var_map_actual[k], var_map_expected[k])
