@@ -311,7 +311,7 @@ inspecting its contents:
 STORE [ $a <- A:Int ] [ $b <- B:Int ] [ $c <- B:Int ]
 ```
 
-we see that we should be in the constraints of the `ensures`, since the value
+we see that we should be within the constraints of the `ensures`, since the value
 of `$c` in the store equals `B` in this branch. We next examine the negative
 and positive constraints of the output and, more often than not, the goal is to
 instruct K how to use the information from the final configuration and the
