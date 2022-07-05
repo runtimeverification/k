@@ -19,17 +19,32 @@ class KompileBackend(Enum):
 def kompile(
     main_file: Path,
     *,
+    main_module: Optional[str] = None,
+    syntax_module: Optional[str] = None,
     backend: Optional[KompileBackend],
     output_dir: Optional[Path] = None,
     include_dirs: Iterable[Path] = (),
+    md_selector: Optional[str] = None,
+    hook_namespaces: Iterable[str] = (),
     emit_json=False,
+    concrete_rules: Iterable[str] = (),
 ) -> Path:
     check_file_path(main_file)
 
     for include_dir in include_dirs:
         check_dir_path(include_dir)
 
-    args = _build_arg_list(backend=backend, output_dir=output_dir, include_dirs=include_dirs, emit_json=emit_json)
+    args = _build_arg_list(
+        main_module=main_module,
+        syntax_module=syntax_module,
+        backend=backend,
+        output_dir=output_dir,
+        include_dirs=include_dirs,
+        md_selector=md_selector,
+        hook_namespaces=hook_namespaces,
+        emit_json=emit_json,
+        concrete_rules=concrete_rules
+    )
 
     try:
         _kompile(str(main_file), *args)
@@ -43,12 +58,23 @@ def kompile(
 
 def _build_arg_list(
     *,
+    main_module: Optional[str],
+    syntax_module: Optional[str],
     backend: Optional[KompileBackend],
     output_dir: Optional[Path],
     include_dirs: Iterable[Path],
-    emit_json: bool,
+    md_selector: Optional[str],
+    hook_namespaces: Iterable[str],
+    emit_json,
+    concrete_rules: Iterable[str],
 ) -> List[str]:
     args = []
+
+    if main_module:
+        args.extend(['--main-module', main_module])
+
+    if syntax_module:
+        args.extend(['--syntax-module', syntax_module])
 
     if backend:
         args += ['--backend', backend.value]
@@ -59,8 +85,17 @@ def _build_arg_list(
     for include_dir in include_dirs:
         args += ['-I', str(include_dir)]
 
+    if md_selector:
+        args.extend(['--md-selector', md_selector])
+
+    if hook_namespaces:
+        args.extend(['--hook-namespaces', ' '.join(hook_namespaces)])
+
     if emit_json:
         args.append('--emit-json')
+
+    if concrete_rules:
+        args.extend(['--concrete-rules', ','.join(concrete_rules)])
 
     return args
 
