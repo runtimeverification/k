@@ -28,6 +28,7 @@ def kompile(
     hook_namespaces: Iterable[str] = (),
     emit_json=False,
     concrete_rules: Iterable[str] = (),
+    additional_args: Iterable[str] = ()
 ) -> Path:
     check_file_path(main_file)
 
@@ -43,7 +44,8 @@ def kompile(
         md_selector=md_selector,
         hook_namespaces=hook_namespaces,
         emit_json=emit_json,
-        concrete_rules=concrete_rules
+        concrete_rules=concrete_rules,
+        additional_args=additional_args
     )
 
     try:
@@ -67,6 +69,7 @@ def _build_arg_list(
     hook_namespaces: Iterable[str],
     emit_json,
     concrete_rules: Iterable[str],
+    additional_args: Iterable[str]
 ) -> List[str]:
     args = []
 
@@ -96,6 +99,8 @@ def _build_arg_list(
 
     if concrete_rules:
         args.extend(['--concrete-rules', ','.join(concrete_rules)])
+
+    args.extend(additional_args)
 
     return args
 

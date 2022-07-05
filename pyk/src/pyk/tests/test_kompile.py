@@ -15,7 +15,8 @@ class BuildArgsTest(TestCase):
             md_selector='k & ! nobytes & ! node',
             hook_namespaces=['JSON', 'KRYPTO', 'BLOCKCHAIN'],
             emit_json=True,
-            concrete_rules=['foo', 'bar']
+            concrete_rules=['foo', 'bar'],
+            additional_args=['--new-fangled-option', 'buzz']
         )
         expected = [
             '--main-module', 'MAIN-MODULE',
@@ -28,5 +29,6 @@ class BuildArgsTest(TestCase):
             '--hook-namespaces', 'JSON KRYPTO BLOCKCHAIN',
             '--emit-json',
             '--concrete-rules', 'foo,bar',
+            '--new-fangled-option', 'buzz'
         ]
         self.assertEqual(actual, expected)
