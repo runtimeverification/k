@@ -33,13 +33,13 @@ kompile lesson-02-a.k
 ```
 
 `kompile` is K's compiler. By default, it takes a program or specification
-written in K and compiles it into an interpreter for that input. Right now
-we are compiling a single file. A set of K files that are compiled together
-are called a **K definition**. We will cover multiple file K definitions later
-on. `kompile` will output a directory containing everything needed to execute
-programs or perform proofs using that definition. In this case, the directory
-`kompile` will create by default will be in the current directory and will be
-called `lesson-02-a-kompiled`.
+written in K and compiles it into an interpreter for that input. Right now we
+are compiling a single file. A set of K files that are compiled together are
+called a **K definition**. We will cover multiple file K definitions later on.
+`kompile` will output a directory containing everything needed to execute
+programs and perform proofs using that definition. In this case, `kompile` will
+(by default) create the directory `lesson-02-a-kompiled` under the current
+directory.
 
 Now, save the following input file in your editor as `banana.color` in the same
 directory as `lesson-02-a.k`:
