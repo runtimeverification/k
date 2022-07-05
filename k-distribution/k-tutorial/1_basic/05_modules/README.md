@@ -141,11 +141,9 @@ main syntax module will be `FOO-SYNTAX`.
 
 ## Splitting a definition into multiple files
 
-So far, while we have discussed ways to break definitions into multiple
-conceptual components, this is of limited usefulness because we are still
-forced to put all the modules in the definition into a single file. This is
-obviously not desirable. As a result, K provides a mechanism for combining
-files in a K definition, namely, the **requires** directive.
+So far, while we have discussed ways to break definitions into separate
+conceptual components (modules), K also provides a mechanism for combining
+multiple files into a single K definition, namely, the **requires** directive.
 
 In K, the `requires` keyword has two meanings. The first, the **requires**
 statement, appears at the top of a K file, prior to any module declarations. It
