@@ -349,13 +349,13 @@ falsifying the outside `#Not`. We just need to show `K` how to conclude that
 rule { M:Map [ K <- V ] #Equals M [ K <- V' ] } => { V #Equals V' } [simplification, anywhere]
 ```
 
-which formalizes our internal understanding of why `?C ==Int B`, stating that
-we update the same key in the same map with two values, and the resulting maps
-are equal, then the two values must be equal as well. The `[simplification]`
-attribute indicates to K to use this rule to simplify the state when trying to
-prove claims. We will ignore the `anywhere` attribute for now. Re-run the K
-prover, which should now return `#Top`, indicating that K was able to use the
-simplification and prove the required claims.
+which formalizes our internal understanding of `?C ==Int B`. The rule states
+that when we update the same key in the same map with two values, and the
+resulting maps are equal, then the two values must be equal as well. The
+`[simplification]` attribute indicates to K to use this rule to simplify the
+state when trying to prove claims. We will ignore the `anywhere` attribute for
+now. Re-run the K prover, which should now return `#Top`, indicating that K was
+able to use the simplification and prove the required claims.
 
 4. Next, we show how to state and prove properties of `while` loops. In particular, we consider the following loop
 
