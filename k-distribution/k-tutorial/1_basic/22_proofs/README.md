@@ -357,7 +357,8 @@ state when trying to prove claims. We will ignore the `anywhere` attribute for
 now. Re-run the K prover, which should now return `#Top`, indicating that K was
 able to use the simplification and prove the required claims.
 
-4. Next, we show how to state and prove properties of `while` loops. In particular, we consider the following loop
+4. Next, we show how to state and prove properties of `while` loops. In
+   particular, we consider the following loop
 
 ```
 claim
