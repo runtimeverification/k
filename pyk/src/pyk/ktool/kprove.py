@@ -17,7 +17,6 @@ from ..cli_utils import (
 from ..kast import KAst, KDefinition, KFlatModule, KImport, KRequire
 from ..prelude import mlTop
 from ..utils import unique
-from .kompile import kompile
 from .kprint import KPrint
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -98,10 +97,6 @@ class KProve(KPrint):
             self.backend = ba.read()
         with open(self.kompiled_directory / 'mainModule.txt', 'r') as mm:
             self.main_module = mm.read()
-
-    @staticmethod
-    def kompile(main_file: Path, *args, **kwargs) -> 'KProve':
-        return KProve(kompile(main_file, *args, **kwargs))
 
     def prove(
         self,
