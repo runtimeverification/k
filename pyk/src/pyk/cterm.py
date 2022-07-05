@@ -4,9 +4,24 @@ from itertools import chain
 from typing import Iterable, Optional, Tuple
 
 from .kast import KApply, KInner, Subst, flattenLabel
-from .kastManip import splitConfigAndConstraints
 from .prelude import Sorts, mlAnd, mlImplies, mlTop
 from .utils import unique
+
+
+def split_config_and_constraints(kast: KInner) -> Tuple[KInner, KInner]:
+    conjuncts = flattenLabel('#And', kast)
+    term = None
+    constraints = []
+    for c in conjuncts:
+        if type(c) is KApply and c.is_cell:
+            if term:
+                raise ValueError(f'Found two configurations in pattern:\n\n{term}\n\nand\n\n{c}')
+            term = c
+        else:
+            constraints.append(c)
+    if not term:
+        raise ValueError(f'Could not find configuration for: {kast}')
+    return (term, mlAnd(constraints, Sorts.GENERATED_TOP_CELL))
 
 
 @dataclass(frozen=True)
@@ -15,7 +30,7 @@ class CTerm:
     constraints: Tuple[KInner, ...]
 
     def __init__(self, term: KInner) -> None:
-        config, constraint = splitConfigAndConstraints(term, Sorts.GENERATED_TOP_CELL)
+        config, constraint = split_config_and_constraints(term)
         constraints = CTerm._normalize_constraints(flattenLabel('#And', constraint))
         object.__setattr__(self, 'config', config)
         object.__setattr__(self, 'constraints', constraints)
@@ -79,3 +94,6 @@ class CTerm:
             return consequent
 
         return mlImplies(antecedent, consequent, Sorts.GENERATED_TOP_CELL)
+
+    def add_constraint(self, new_constraint: KInner) -> 'CTerm':
+        return CTerm(mlAnd([self.config, new_constraint] + list(self.constraints), Sorts.GENERATED_TOP_CELL))
