@@ -205,7 +205,7 @@ claim <k> if ( 3 + 4 ==Int 7 ) {
 ```
 
 stating that the given program terminates (`=> .`), and when it does, the value
-of the variable `$a` updated to `1`, meaning that the execution will have taken
+of the variable `$a` is set to `1`, meaning that the execution will have taken
 the `then` branch. Add this claim to the `PROCEDURES-SPEC` module, but also add
 
 ```
