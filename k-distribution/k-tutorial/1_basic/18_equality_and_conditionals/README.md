@@ -25,7 +25,7 @@ each with a side condition (or one rule with a side condition and another with
 the `owise` attribute). However, sometimes it is useful to explicitly write
 a conditional expression directly in the right-hand side of a rule. For this
 purpose, K defines one more operator in the `K-EQUAL` module, which corresponds
-to the usual ternary operator in many languages. Here is an example of its 
+to the usual ternary operator found in many languages. Here is an example of its
 usage (`lesson-18.k`):
 
 ```k
