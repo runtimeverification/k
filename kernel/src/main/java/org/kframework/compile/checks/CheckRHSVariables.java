@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import org.kframework.attributes.Att;
 import org.kframework.backend.Backends;
 import org.kframework.compile.GatherVarsVisitor;
+import org.kframework.compile.PatternValueAwareVisitor;
 import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
@@ -44,6 +45,9 @@ public class CheckRHSVariables {
         resetVars();
         Set<String> unboundVariableNames = getUnboundVarNames(rule);
         boolean errorExistential = this.errorExistential && !(rule.att().contains(Att.LABEL()) && rule.att().get(Att.LABEL()).equals("STDIN-STREAM.stdinUnblock"));
+        new PatternValueAwareVisitor(true, errors).apply(rule.body());
+        new PatternValueAwareVisitor(false, errors).apply(rule.requires());
+        new PatternValueAwareVisitor(false, errors).apply(rule.ensures());
         gatherVars(true, rule.body(), errorExistential);
         gatherVars(false, rule.ensures(), errorExistential);
         if (rule instanceof Claim || (rule instanceof Rule && backend.equals(Backends.HASKELL))) {
