@@ -241,7 +241,7 @@ and `B`, and `$c` updated to *some* symbolic integer value `?C`. Via the
 after execution, we also state that this existentially quantified `?C` equals
 either `A` or `B`.
 
-Add the productions declaring `$b` and `$c` as tokens to
+Add the productions declaring `$b` and `$c` as tokens to the
 `PROCEDURES-SPEC-SYNTAX` module, the claim to the `PROCEDURES-SPEC` module, run
 the K prover again, and observe the output, which should not be `#Top` this
 time. This means that K was not able to prove the claim, and we now need to
