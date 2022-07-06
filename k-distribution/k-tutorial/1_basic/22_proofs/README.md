@@ -375,7 +375,7 @@ claim
     requires N >=Int 0
 ```
 
-which adds the sum of first `$n` integers to `$s`, assuming the value of `$n`
+which adds the sum of the first `$n` integers to `$s`, assuming the value of `$n`
 is non-negative to begin with. This is reflected in the store by stating that,
 after the execution of the loop, the original value of `$s` (which is set to
 equal some symbolic integer `S`) is incremented by `((N +Int 1) *Int N /Int
@@ -408,7 +408,7 @@ claim
 Essentially, we have wrapped the `while` loop from claim 3.4 into a function
 `$sum`, and then called that function with a symbolic integer `N`, storing the
 return value in the variable `$s`. The specification states that this program
-ends up storing the sum of first `N` integers in the variable `$n`. Add `$sum`
+ends up storing the sum of the first `N` integers in the variable `$n`. Add `$sum`
 to the `PROCEDURES-SPEC-SYNTAX` module, the above claim to the
 `PROCEDURES-SPEC` module, and run the K prover, which should again return
 `#Top`.
