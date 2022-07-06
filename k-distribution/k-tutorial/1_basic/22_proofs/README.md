@@ -195,7 +195,7 @@ context, that all claims have been proven correctly.
 2. The second claim reasons about the `if` statement that has a concrete condition:
 
 ```
-claim <k> if ( 3 + 4 ==Int 7 ) {
+claim <k> if ( 3 + 4 == 7 ) {
             $a = 1 ;
             } else {
             $a = 2 ;
