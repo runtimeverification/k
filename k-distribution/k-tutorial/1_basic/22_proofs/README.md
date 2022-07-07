@@ -157,7 +157,6 @@ lesson progresses.
 
 ```
 requires "lesson-22.k"
-requires "domains.md"
 
 module LESSON-22-SPEC-SYNTAX
     imports LESSON-22-SYNTAX
