@@ -7,10 +7,10 @@ deductive program verification.
 
 We base this lesson on a simple programming language with functions,
 assignment, if conditionals, and while loops. Take your time to study its
-formalization below and save it in `procedures.k`:
+formalization below (`lesson-22.k`):
 
 ```
-module PROCEDURES-SYNTAX
+module LESSON-22-SYNTAX
     imports INT-SYNTAX
     imports BOOL-SYNTAX
     imports ID
@@ -74,12 +74,12 @@ module PROCEDURES-SYNTAX
        | "{" "}"         // Empty block
 endmodule
 
-module PROCEDURES
+module LESSON-22
     imports INT
     imports BOOL
     imports LIST
     imports MAP
-    imports PROCEDURES-SYNTAX
+    imports LESSON-22-SYNTAX
 
     configuration
       <k> $PGM:Stmt </k>
@@ -145,33 +145,33 @@ module PROCEDURES
 endmodule
 ```
 
-Next, compile this example using `kompile procedures.k --backend haskell`. If
+Next, compile this example using `kompile lesson-22.k --backend haskell`. If
 your processor is an Apple Silicon processor, add the `--no-haskell-binary`
 flag if the compilation fails.
 
 ## 2. Setup: Proof Environment
 
-Next, take the following snippet of K code and save it in `procedures-spec.k`.
+Next, take the following snippet of K code and save it in `lesson-22-spec.k`.
 This is a skeleton of the proof environment, and we will complete it as the
 lesson progresses.
 
 ```
-requires "procedures.k"
+requires "lesson-22.k"
 requires "domains.md"
 
-module PROCEDURES-SPEC-SYNTAX
-    imports PROCEDURES-SYNTAX
+module LESSON-22-SPEC-SYNTAX
+    imports LESSON-22-SYNTAX
 
 endmodule
 
 module VERIFICATION
     imports K-EQUAL
-    imports PROCEDURES-SPEC-SYNTAX
-    imports PROCEDURES
+    imports LESSON-22-SPEC-SYNTAX
+    imports LESSON-22
 
 endmodule
 
-module PROCEDURES-SPEC
+module LESSON-22-SPEC
     imports VERIFICATION
 
 endmodule
@@ -187,8 +187,8 @@ endmodule
 claim <k> 3 + 4 => 7 ... </k>
 ```
 
-Add this claim to the `PROCEDURES-SPEC` module and run the K prover using the
-command `kprove procedures-spec.k`. You should get back the output `#Top`,
+Add this claim to the `LESSON-22-SPEC` module and run the K prover using the
+command `kprove lesson-22-spec.k`. You should get back the output `#Top`,
 which denotes the Matching Logic equivalent of `true` and means, in this
 context, that all claims have been proven correctly.
 
@@ -206,13 +206,13 @@ claim <k> if ( 3 + 4 == 7 ) {
 
 stating that the given program terminates (`=> .`), and when it does, the value
 of the variable `$a` is set to `1`, meaning that the execution will have taken
-the `then` branch. Add this claim to the `PROCEDURES-SPEC` module, but also add
+the `then` branch. Add this claim to the `LESSON-22-SPEC` module, but also add
 
 ```
 syntax Id ::= "$a" [token]
 ```
 
-to the `PROCEDURES-SPEC-SYNTAX` module in order to declare `$a` as a token so
+to the `LESSON-22-SPEC-SYNTAX` module in order to declare `$a` as a token so
 that it can be used as a program variable. Re-run the K prover, which should
 again return `#Top`.
 
@@ -242,7 +242,7 @@ after execution, we also state that this existentially quantified `?C` equals
 either `A` or `B`.
 
 Add the productions declaring `$b` and `$c` as tokens to the
-`PROCEDURES-SPEC-SYNTAX` module, the claim to the `PROCEDURES-SPEC` module, run
+`LESSON-22-SPEC-SYNTAX` module, the claim to the `LESSON-22-SPEC` module, run
 the K prover again, and observe the output, which should not be `#Top` this
 time. This means that K was not able to prove the claim, and we now need to
 understand why. We do so by examining the output, which should look as follows:
@@ -380,7 +380,7 @@ is non-negative to begin with. This is reflected in the store by stating that,
 after the execution of the loop, the original value of `$s` (which is set to
 equal some symbolic integer `S`) is incremented by `((N +Int 1) *Int N /Int
 2)`, and the value of `$n` always equals `0`. Add `$n` and `$s` as tokens in
-the `PROCEDURES-SPEC-SYNTAX` module, the above claim to the `PROCEDURES-SPEC`
+the `LESSON-22-SPEC-SYNTAX` module, the above claim to the `LESSON-22-SPEC`
 module, and run the K prover, which should return `#Top`.
 
 5. Finally, our last claim is about a program that uses function calls:
@@ -409,8 +409,8 @@ Essentially, we have wrapped the `while` loop from claim 3.4 into a function
 `$sum`, and then called that function with a symbolic integer `N`, storing the
 return value in the variable `$s`. The specification states that this program
 ends up storing the sum of the first `N` integers in the variable `$n`. Add `$sum`
-to the `PROCEDURES-SPEC-SYNTAX` module, the above claim to the
-`PROCEDURES-SPEC` module, and run the K prover, which should again return
+to the `LESSON-22-SPEC-SYNTAX` module, the above claim to the
+`LESSON-22-SPEC` module, and run the K prover, which should again return
 `#Top`.
 
 ## Exercises
