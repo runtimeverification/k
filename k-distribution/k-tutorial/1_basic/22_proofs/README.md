@@ -13,7 +13,7 @@ formalization below (`lesson-22.k`):
 module LESSON-22-SYNTAX
     imports INT-SYNTAX
     imports BOOL-SYNTAX
-    imports ID
+    imports ID-SYNTAX
 
     syntax Exp ::= IExp | BExp
 
