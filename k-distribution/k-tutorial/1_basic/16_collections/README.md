@@ -10,7 +10,7 @@ provided by K for this purpose is the `Map` sort, and it is provided in
 [domains.md](../../../include/kframework/builtin/domains.md) in the `MAP`
 module. This type is not (currently) polymorphic. All `Map` terms are maps that
 map terms of sort `KItem` to other terms of sort `KItem`. A `KItem` can contain
-any other sort except a `K` sequence. If you need to store such a term in a
+any sort except a `K` sequence. If you need to store such a term in a
 map, you can always use a wrapper such as `syntax KItem ::= kseq(K)`.
 
 A `Map` pattern consists of zero or more map elements (as represented by the
