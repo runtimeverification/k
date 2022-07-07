@@ -66,7 +66,7 @@ Releases are generated as often as possible from `master` build.
 Installing Packages
 -------------------
 
-For version `X.Y.Z`, disto `DISTRO`, and package ID `ID`, the following
+For version `X.Y.Z`, distribution `DISTRO`, and package ID `ID`, the following
 instructions tell you how to install on each system. Note that this typically
 requires about ~1.4GB of dependencies and will take some time.
 

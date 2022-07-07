@@ -5,12 +5,18 @@ the K-language support provided in [GDB](https://www.gnu.org/software/gdb/).
 
 ## Getting started
 
+You will need GDB in order to complete this lesson. If you do not already
+have GDB installed, then do so. Steps to install GDB are outlined in
+this [GDB Tutorial](http://www.gdbtutorial.com/tutorial/how-install-gdb).
+
 The first thing neccessary in order to debug a K interpreter in GDB is to
 build the interpreter with full debugging support enabled. This can be done
 relatively simply. First, make sure you have not passed `-O1`, `-O2`, or `-O3`
 to `kompile`. Second, simply add the command line flags `-ccopt -g -ccopt -O1`
 to `kompile`. The resulting compiled K definition will be ready to support
 debugging.
+
+Note: the 'O' in `-O1` is the letter 'O' not the number 0!
 
 Once you have a compiled K definition and a program you wish to debug, you
 can start the debugger by passing the `--debugger` flag to `krun`. This will
@@ -67,7 +73,12 @@ To make full advantage of the GDB features of K, you should follow the first
 command listed in this output message and add the corresponding
 `add-auto-load-safe-path` command to your `~/.gdbinit` file as prompted.
 Please note that the path will be different on your machine than the one
-listed above. 
+listed above. Adding directories to the "load safe path" effectively tells GDB
+to trust those directories. All content under a given directory will be recursively
+trusted, so if you want to avoid having to add paths to the "load safe path" every
+time you kompile a different `K` definition, then you can just trust a minimal
+directory containing all your kompiled files; however, do not choose a top-level directory containing arbitrary files as this amounts to trusting arbitrary files and is a security risk. More info on the load safe path
+can be found [here](https://sourceware.org/gdb/onlinedocs/gdb/Auto_002dloading-safe-path.html).
 
 ## Basic commands
 
