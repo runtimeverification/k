@@ -107,6 +107,21 @@ def unique(iterable: Iterable[H]) -> Iterator[H]:
             yield elem
 
 
+def repeat_last(iterable: Iterable[T]) -> Iterator[T]:
+    it = iter(iterable)
+    last: Optional[T] = None
+    while True:
+        try:
+            last = next(it)
+            yield last
+
+        except StopIteration:
+            if last is None:
+                return
+
+            yield last
+
+
 def nonempty_str(x: Any) -> str:
     if x is None:
         raise ValueError('Expected nonempty string, found: null.')
