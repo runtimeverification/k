@@ -24,7 +24,7 @@ from graphviz import Digraph
 from .cterm import CTerm
 from .kast import KInner, KRuleLike, Subst
 from .kastManip import (
-    buildRule,
+    build_rule,
     ml_pred_to_bool,
     mlAnd,
     simplifyBool,
@@ -80,9 +80,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         def to_rule(self, claim=False, priority=50) -> KRuleLike:
             sentence_id = f'BASIC-BLOCK-{self.source.id}-TO-{self.target.id}'
-            init_term = mlAnd([self.source.cterm.term, self.condition])
-            final_term = self.target.cterm.term
-            rule, _ = buildRule(sentence_id, init_term, final_term, claim=claim, priority=priority)
+            rule, _ = build_rule(sentence_id, self.source.cterm.add_constraint(self.condition), self.target.cterm, claim=claim, priority=priority)
             return rule
 
         def pretty_print(self, kprint: KPrint) -> List[str]:
