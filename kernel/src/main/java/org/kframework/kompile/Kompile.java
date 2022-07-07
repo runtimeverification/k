@@ -22,6 +22,7 @@ import org.kframework.compile.checks.CheckRHSVariables;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
 import org.kframework.compile.checks.CheckStreams;
+import org.kframework.compile.checks.CheckSyntaxGroups;
 import org.kframework.compile.checks.CheckTokens;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
@@ -490,6 +491,8 @@ public class Kompile {
               new CheckFunctions(errors, m)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAnonymous(errors, m, kem)::check));
+
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckSyntaxGroups(errors, m, kem)::check));
 
         Set<String> moduleNames = new HashSet<>();
         stream(modules).forEach(m -> {
