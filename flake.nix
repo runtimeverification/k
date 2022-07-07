@@ -11,10 +11,11 @@
       url = "github:edolstra/flake-compat";
       flake = false;
     };
+    pynixify.url = "github:goodlyrottenapple/pynixify";
   };
 
-  outputs =
-    { self, nixpkgs, flake-utils, haskell-backend, llvm-backend, mavenix, flake-compat }:
+  outputs = { self, nixpkgs, flake-utils, haskell-backend, llvm-backend, mavenix
+    , flake-compat, pynixify }:
     let
       allOverlays = [
         mavenix.overlay
@@ -55,23 +56,37 @@
                 cp -rv ${llvm-backend}/matching/* $out/llvm-backend/src/main/native/llvm-backend/matching
               '';
             };
+            pythonOverrides = import ./pyk/nix/overlay.nix;
           in {
+            inherit pythonOverrides;
             k = prev.callPackage ./nix/k.nix {
               inherit (prev) llvm-backend;
               mavenix = { inherit (prev) buildMaven; };
               haskell-backend = kore;
               inherit (haskell-backend) prelude-kore;
               inherit src;
-              debugger =
-                if prev.stdenv.isDarwin then
-                # TODO lldb is broken on nixpkgs unstable, once the lldb support for 
-                # k is done we should add lldb as runtime dependency here
-                  null
-                else
-                  prev.gdb;
+              debugger = if prev.stdenv.isDarwin then
+              # TODO lldb is broken on nixpkgs unstable, once the lldb support for 
+              # k is done we should add lldb as runtime dependency here
+                null
+              else
+                prev.gdb;
               version = "${k-version}-${self.rev or "dirty"}";
             };
-          })
+          } // prev.lib.genAttrs [
+            "python2"
+            "python27"
+            "python3"
+            "python35"
+            "python36"
+            "python37"
+            "python38"
+            "python39"
+            "python310"
+          ] (python:
+            prev.${python}.override {
+              packageOverrides = pythonOverrides;
+            }))
       ];
     in flake-utils.lib.eachSystem [
       "x86_64-linux"
@@ -82,20 +97,30 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [(final: prev: { llvm-backend-release = false; })] ++ allOverlays;
+          overlays = [ (final: prev: { llvm-backend-release = false; }) ]
+            ++ allOverlays;
         };
       in {
+
         packages = {
           inherit (pkgs) k;
+          pyk = pkgs.python38Packages.pyk;
 
-          update-maven =
-            pkgs.writeShellScriptBin "update-maven" ''
-              #!/bin/sh
-              ${pkgs.nix}/bin/nix-build --no-out-link -E 'import ./nix/flake-compat-k-unwrapped.nix' \
-                || echo "^~~~ expected error"
+          update-maven = pkgs.writeShellScriptBin "update-maven" ''
+            #!/bin/sh
+            ${pkgs.nix}/bin/nix-build --no-out-link -E 'import ./nix/flake-compat-k-unwrapped.nix' \
+              || echo "^~~~ expected error"
 
-              ${pkgs.mavenix-cli}/bin/mvnix-update -l ./nix/mavenix.lock -E 'import ./nix/flake-compat-k-unwrapped.nix'
-            '';
+            ${pkgs.mavenix-cli}/bin/mvnix-update -l ./nix/mavenix.lock -E 'import ./nix/flake-compat-k-unwrapped.nix'
+          '';
+
+          update-python = pkgs.writeShellScriptBin "update-python" ''
+            #!/bin/sh
+            cd pyk
+            ${
+              pynixify.packages.${system}.pynixify
+            }/bin/pynixify -l pyk --overlay-only --output ./nix
+          '';
 
           check-versions = let
             hashes = [
