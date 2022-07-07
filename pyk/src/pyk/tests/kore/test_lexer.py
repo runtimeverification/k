@@ -34,7 +34,7 @@ class LexerTest(TestCase):
                 actual = [token.type for token in KoreLexer(text)]
 
                 # Then
-                self.assertListEqual(actual, expected)
+                self.assertListEqual(actual, expected + [TT.EOF])
 
     def test_lexer_failure(self):
         # Given

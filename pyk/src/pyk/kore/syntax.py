@@ -644,15 +644,15 @@ class Import(Sentence):
 class SortDecl(Sentence):
     name: str
     vars: Tuple[SortVar, ...]
-    hooked: bool
     attrs: Tuple[Attr, ...]
+    hooked: bool
 
-    def __init__(self, name: str, vars: Iterable[SortVar], hooked=False, attrs: Iterable[Attr] = ()):
+    def __init__(self, name: str, vars: Iterable[SortVar], attrs: Iterable[Attr] = (), *, hooked=False):
         check_id(name)
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'vars', tuple(vars))
-        object.__setattr__(self, 'hooked', hooked)
         object.__setattr__(self, 'attrs', tuple(attrs))
+        object.__setattr__(self, 'hooked', hooked)
 
     @property
     def text(self) -> str:
@@ -686,15 +686,15 @@ class SymbolDecl(Sentence):
     symbol: Symbol
     sort_params: Tuple[Sort, ...]
     sort: Sort
-    hooked: bool
     attrs: Tuple[Attr, ...]
+    hooked: bool
 
-    def __init__(self, symbol: Symbol, sort_params: Iterable[Sort], sort: Sort, hooked=False, attrs: Iterable[Attr] = ()):
+    def __init__(self, symbol: Symbol, sort_params: Iterable[Sort], sort: Sort, attrs: Iterable[Attr] = (), *, hooked=False):
         object.__setattr__(self, 'symbol', symbol)
         object.__setattr__(self, 'sort_params', tuple(sort_params))
         object.__setattr__(self, 'sort', sort)
-        object.__setattr__(self, 'hooked', hooked)
         object.__setattr__(self, 'attrs', tuple(attrs))
+        object.__setattr__(self, 'hooked', hooked)
 
     @property
     def text(self) -> str:
@@ -716,7 +716,6 @@ class AliasDecl(Sentence):
     sort: Sort
     left: Apply
     right: Pattern
-    hooked: bool
     attrs: Tuple[Attr, ...]
 
     def __init__(
@@ -726,15 +725,13 @@ class AliasDecl(Sentence):
         sort: Sort,
         left: Apply,
         right: Pattern,
-        hooked=False,
-        attrs: Iterable[Attr] = ()
+        attrs: Iterable[Attr] = (),
     ):
         object.__setattr__(self, 'alias', alias)
         object.__setattr__(self, 'sort_params', tuple(sort_params))
         object.__setattr__(self, 'sort', sort)
         object.__setattr__(self, 'left', left)
         object.__setattr__(self, 'right', right)
-        object.__setattr__(self, 'hooked', hooked)
         object.__setattr__(self, 'attrs', tuple(attrs))
 
     @property
@@ -830,6 +827,6 @@ class Definition(Kore, WithAttrs):
 
     @property
     def text(self) -> str:
-        return '\n'.join([
+        return '\n\n'.join([
             _brackd(attr.text for attr in self.attrs),
         ] + [module.text for module in self.modules])
