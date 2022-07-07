@@ -221,9 +221,9 @@ again return `#Top`.
 ```
 claim <k> $a = A:Int ; $b = B:Int ;
           if (A < B) {
-            $c = B ;
+            $c = $b ;
           } else {
-            $c = A ;
+            $c = $a ;
           }
         => . ... </k>
         <store> STORE => STORE [ $a <- A ] [ $b <- B ] [ $c <- ?C:Int ] </store>
