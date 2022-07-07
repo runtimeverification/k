@@ -218,26 +218,6 @@ class StrLitLexer(Iterator[Tuple[str, 'StrLitLexer.TokenType']]):
         return ''.join(chars)
 
 
-@final
-@dataclass(frozen=True)
-class StrLit(Kore):  # TODO Is an MLPattern
-    value: str
-
-    def __init__(self, value: str):
-        for _ in StrLitLexer(value):
-            pass  # validate value
-
-        object.__setattr__(self, 'value', value)
-
-    @property
-    def text(self) -> str:
-        return f'"{self.value}"'
-
-    @property
-    def decoded(self) -> str:
-        return bytes(self.value, 'ascii').decode('unicode-escape')
-
-
 class Sort(Kore, ABC):
     name: str
 
@@ -307,6 +287,26 @@ class SetVar(VarPattern):
         check_set_var_id(name)
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sort', sort)
+
+
+@final
+@dataclass(frozen=True)
+class StrLit(Pattern):
+    value: str
+
+    def __init__(self, value: str):
+        for _ in StrLitLexer(value):
+            pass  # validate value
+
+        object.__setattr__(self, 'value', value)
+
+    @property
+    def text(self) -> str:
+        return f'"{self.value}"'
+
+    @property
+    def decoded(self) -> str:
+        return bytes(self.value, 'ascii').decode('unicode-escape')
 
 
 @final
