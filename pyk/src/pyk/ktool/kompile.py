@@ -28,7 +28,7 @@ def kompile(
     hook_namespaces: Iterable[str] = (),
     emit_json=False,
     concrete_rules: Iterable[str] = (),
-    additional_args: Iterable[str] = ()
+    additional_args: Iterable[str] = (),
 ) -> Path:
     check_file_path(main_file)
 
