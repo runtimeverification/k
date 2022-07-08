@@ -63,6 +63,15 @@ from .syntax import (
     VarPattern,
 )
 
+T = TypeVar('T')
+NC = TypeVar('NC', bound=NullaryConn)
+UC = TypeVar('UC', bound=Union[UnaryConn, Next])
+BC = TypeVar('BC', bound=Union[BinaryConn, Rewrites])
+QF = TypeVar('QF', bound=MLQuant)
+FP = TypeVar('FP', bound=MLFixpoint)
+RP = TypeVar('RP', bound=RoundPred)
+BP = TypeVar('BP', bound=BinaryPred)
+
 
 @dataclass(frozen=True)
 class KoreToken:
@@ -273,16 +282,6 @@ class KoreLexer(Iterator[KoreToken]):
         while self._la is not None and not self._la.isspace() and self._la not in self._DELIMITERS:
             buf += self._match(*self._ID_CHARS)
         return ''.join(buf)
-
-
-T = TypeVar('T')
-NC = TypeVar('NC', bound=NullaryConn)
-UC = TypeVar('UC', bound=Union[UnaryConn, Next])
-BC = TypeVar('BC', bound=Union[BinaryConn, Rewrites])
-QF = TypeVar('QF', bound=MLQuant)
-FP = TypeVar('FP', bound=MLFixpoint)
-RP = TypeVar('RP', bound=RoundPred)
-BP = TypeVar('BP', bound=BinaryPred)
 
 
 class KoreParser:
