@@ -85,7 +85,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         def pretty_print(self, kprint: KPrint) -> List[str]:
             if self.depth == 0:
-                return ['\nandBool'.join(kprint.pretty_print(self.condition).split(' andBool'))]
+                return ['\nandBool'.join(kprint.pretty_print(ml_pred_to_bool(self.condition)).split(' andBool'))]
             elif self.depth == 1:
                 return ['(' + str(self.depth) + ' step)']
             else:
