@@ -1,17 +1,17 @@
 from typing import Final, List, Tuple
 from unittest import TestCase
 
-from pyk.kore.parser import KoreLexer
+from pyk.kore.parser import KoreLexer, KoreToken
 
 # Abbreviate for convenience
-TT = KoreLexer.TokenType
+TT = KoreToken.Type
 
 
 class LexerTest(TestCase):
 
     def test_lexer_success(self):
         # Given
-        TEST_DATA: Final[Tuple[Tuple[str, List[KoreLexer.TokenType]], ...]] = (
+        TEST_DATA: Final[Tuple[Tuple[str, List[KoreToken.Type]], ...]] = (
             ('', []),
             (' ', []),
             ('//', []),
