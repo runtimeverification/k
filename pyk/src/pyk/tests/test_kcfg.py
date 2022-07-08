@@ -285,13 +285,18 @@ class KCFGTestCase(TestCase):
     def test_aliases(self):
         # Given
         d = {
-            'nodes': node_dicts(2),
+            'init': [nid(0)],
+            'target': [nid(3)],
+            'nodes': node_dicts(4),
             'edges': edge_dicts((0, 1)),
             'aliases': {'foo': nid(1)}
         }
 
         cfg = KCFG.from_dict(d)
         self.assertEqual(cfg.node('@foo'), node(1))
+
+        self.assertEqual(cfg.node('#init'), node(0))
+        self.assertEqual(cfg.node('#target'), node(3))
 
         cfg.add_alias('bar', node(0).id)
         cfg.add_alias('bar2', node(0).id)
@@ -306,7 +311,7 @@ class KCFGTestCase(TestCase):
         with self.assertRaises(ValueError, msg='Alias may not contain "@"'):
             cfg.add_alias('@buzz', node(1).id)
         with self.assertRaises(ValueError, msg=f'Unknown node: {nid(3)}'):
-            cfg.add_alias('buzz', node(3).id)
+            cfg.add_alias('buzz', node(9).id)
 
         cfg.remove_node(nid(1))
         cfg.create_node(term(1))

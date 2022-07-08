@@ -395,6 +395,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         return [node_id for node_id in self._nodes if compare_short_hashes(id_like, node_id)]
 
     def _resolve_or_none(self, id_like: str) -> Optional[str]:
+        if id_like == '#init':
+            if len(self.init) > 1:
+                raise ValueError(f'Multiple init nodes found: {list(shorten_hash(n.id) for n in self.init)}')
+            return self.init[0].id
+        if id_like == '#target':
+            if len(self.target) > 1:
+                raise ValueError(f'Multiple target nodes found: {list(shorten_hash(n.id) for n in self.target)}')
+            return self.target[0].id
         if id_like.startswith('@'):
             if id_like[1:] in self._aliases:
                 return self._aliases[id_like[1:]]
