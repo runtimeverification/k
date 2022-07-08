@@ -361,7 +361,7 @@ class KCFGTestCase(TestCase):
                                   f"┃  KApply(label=KLabel(name='_==K_', params=()), args=(KVariable(name='x'), KToken(token='11', sort=KSort(name='Int'))))\n"
                                   f"┃   │  (1 step)\n"
                                   f"┃   ├  {_short_hash(8)} (leaf)\n"
-                                  f"┃   ┊  constraint: KApply(label=KLabel(name='#Top', params=(KSort(name='GeneratedTopCell'),)), args=())\n"
+                                  f"┃   ┊  constraint: KToken(token='true', sort=KSort(name='Bool'))\n"
                                   f"┃   ┊  subst:\n"
                                   f"┃   ┊    KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='V11'), KToken(token='8', sort=KSort(name='Int'))))\n"
                                   f"┃   ├  {_short_hash(11)} (expanded)\n"

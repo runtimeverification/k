@@ -115,7 +115,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         def pretty_print(self, kprint: KPrint) -> List[str]:
             return [
-                'constraint: ' + kprint.pretty_print(self.constraint),
+                'constraint: ' + kprint.pretty_print(ml_pred_to_bool(self.constraint)),
                 'subst:',
                 *add_indent('  ', kprint.pretty_print(substToMlPred(self.subst)).split('\n')),
             ]
