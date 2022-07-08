@@ -4,6 +4,7 @@ from itertools import chain, islice
 from typing import (
     Callable,
     Final,
+    Generic,
     Iterator,
     List,
     Mapping,
@@ -284,16 +285,48 @@ class KoreLexer(Iterator[KoreToken]):
         return ''.join(buf)
 
 
+class _LookaheadBuffer(Generic[T]):
+    """Circular buffer over an infinite stream"""
+
+    _la: int
+    _it: Iterator[T]
+    _buf: List[T]
+    _pos: int
+
+    def __init__(self, la: int, it: Iterator[T]):
+        if la < 1:
+            raise ValueError(f'Expected buffer size of at least 1, found: {la}')
+
+        self._la = la
+        self._it = it
+        self._buf = list(islice(it, la))
+        self._pos = 0
+
+    def __call__(self, k=1) -> T:
+        return self.lookahead(k)
+
+    def lookahead(self, k=1) -> T:
+        if not (1 <= k <= self._la):
+            raise ValueError(f'Illegal lookahed value: {k}')
+
+        return self._buf[(self._pos + k - 1) % self._la]
+
+    def consume(self) -> T:
+        res = self._buf[self._pos]
+        self._buf[self._pos] = next(self._it)
+        self._pos = (self._pos + 1) % self._la
+        return res
+
+
 class KoreParser:
-    _LA: Final = 2  # TODO extract class
+    _la: _LookaheadBuffer[KoreToken]
 
     _ml_symbols: Mapping[str, Callable[[], MLPattern]]
     _sentence_keywords: Mapping[KoreToken.Type, Callable[[], Sentence]]
-    _iter: Iterator[KoreToken]
-    _la_buf: List[KoreToken]
-    _la_pos: int
 
     def __init__(self, text: str):
+        self._la = _LookaheadBuffer(2, repeat_last(KoreLexer(text)))
+
         self._ml_symbols = {
             '\\top': self.top,
             '\\bottom': self.bottom,
@@ -328,23 +361,11 @@ class KoreParser:
             KoreToken.Type.KW_CLAIM: self.claim,
         }
 
-        self._iter = repeat_last(KoreLexer(text))  # ensures easier handling of the circlar buffer
-        self._la_buf = list(islice(self._iter, self._LA))
-        self._la_pos = 0
-
-    def _la(self, k=1) -> KoreToken:
-        if not (1 <= k <= self._LA):
-            raise ValueError(f'Illegal lookahed: {k}')
-        return self._la_buf[(self._la_pos + k - 1) % self._LA]
-
     def _consume(self) -> str:
         if self._la().type == KoreToken.Type.EOF:
             raise ValueError('Unexpected EOF')
 
-        text = self._la_buf[self._la_pos].text
-        self._la_buf[self._la_pos] = next(self._iter)
-        self._la_pos = (self._la_pos + 1) % self._LA
-        return text
+        return self._la.consume().text
 
     def _match(self, token_type: KoreToken.Type) -> str:
         if self._la().type != token_type:
