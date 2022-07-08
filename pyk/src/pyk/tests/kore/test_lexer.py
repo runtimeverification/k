@@ -1,7 +1,7 @@
 from typing import Final, List, Tuple
 from unittest import TestCase
 
-from pyk.kore.parser import KoreLexer, KoreToken
+from pyk.kore.lexer import KoreLexer, KoreToken
 
 # Abbreviate for convenience
 TT = KoreToken.Type
