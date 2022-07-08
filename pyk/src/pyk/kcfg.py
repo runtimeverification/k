@@ -301,6 +301,12 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 short_info = _bold(short_info)
             return short_info
 
+        def _is_rewrite_edge(edge_like: KCFG.EdgeLike) -> bool:
+            return isinstance(edge_like, KCFG.Edge) and edge_like.depth != 0
+
+        def _is_case_split_edge(edge_like: KCFG.EdgeLike) -> bool:
+            return isinstance(edge_like, KCFG.Edge) and edge_like.depth == 0
+
         def _print_subgraph(indent: str, curr_node: KCFG.Node, prior_on_trace: List[KCFG.Node]) -> List[str]:
             ret: List[str] = []
 
@@ -330,17 +336,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                     elbow = '┣━'
                     new_indent = indent + '┃   '
 
-                extension_char = ''
-                if isinstance(edge_like, KCFG.Edge):
-                    if edge_like.depth == 0:
-                        extension_char = '┃'
-                    else:
-                        extension_char = '│'
+                if isinstance(edge_like, KCFG.Edge) and edge_like.depth:
+                    ret.extend(add_indent(indent + '│  ', edge_like.pretty_print(kprint)))
                 elif isinstance(edge_like, KCFG.Cover):
-                    extension_char = '┊'
-                ret.extend(add_indent(indent + extension_char + '  ', edge_like.pretty_print(kprint)))
-
+                    ret.extend(add_indent(indent + '┊  ', edge_like.pretty_print(kprint)))
                 ret.append(indent + elbow + ' ' + _print_node(edge_like.target))
+                if isinstance(edge_like, KCFG.Edge) and edge_like.depth == 0:
+                    ret.extend(add_indent(new_indent[0:-1], edge_like.pretty_print(kprint)))
+
                 ret.extend(_print_subgraph(new_indent, edge_like.target, prior_on_trace + [edge_like.source]))
                 if is_branch:
                     ret.append(new_indent.rstrip())
