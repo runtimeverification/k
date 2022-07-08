@@ -379,6 +379,11 @@ class KoreParser:
 
         return self._match(KoreToken.Type.ID)
 
+    def _match_symbol_id(self, symbol: str) -> None:
+        actual = self.symbol_id()
+        if actual != symbol:
+            raise ValueError(f'Expected symbol {symbol}, found: {actual}')
+
     def set_var_id(self) -> str:
         return self._match(KoreToken.Type.SET_VAR_ID)
 
@@ -461,11 +466,7 @@ class KoreParser:
         return parse
 
     def _nullary(self, symbol: str, cls: Type[NC]) -> NC:
-        # TODO Extract logic
-        actual = self.symbol_id()
-        if symbol != actual:
-            raise ValueError(f'Expected {symbol}, found: {actual}')
-
+        self._match_symbol_id(symbol)
         self._match(KoreToken.Type.LBRACE)
         sort = self.sort()
         self._match(KoreToken.Type.RBRACE)
@@ -482,10 +483,7 @@ class KoreParser:
         return self._nullary('\\bottom', Bottom)
 
     def _unary(self, symbol: str, cls: Type[UC]) -> UC:
-        actual = self.symbol_id()
-        if symbol != actual:
-            raise ValueError(f'Expected {symbol}, found: {actual}')
-
+        self._match_symbol_id(symbol)
         self._match(KoreToken.Type.LBRACE)
         sort = self.sort()
         self._match(KoreToken.Type.RBRACE)
@@ -498,10 +496,7 @@ class KoreParser:
         return self._unary('\\not', Not)
 
     def _binary(self, symbol: str, cls: Type[BC]) -> BC:
-        actual = self.symbol_id()
-        if symbol != actual:
-            raise ValueError(f'Expected {symbol}, found: {actual}')
-
+        self._match_symbol_id(symbol)
         self._match(KoreToken.Type.LBRACE)
         sort = self.sort()
         self._match(KoreToken.Type.RBRACE)
@@ -525,10 +520,7 @@ class KoreParser:
         return self._binary('\\iff', Iff)
 
     def _quantifier(self, symbol: str, cls: Type[QF]) -> QF:
-        actual = self.symbol_id()
-        if symbol != actual:
-            raise ValueError(f'Expected {symbol}, found: {actual}')
-
+        self._match_symbol_id(symbol)
         self._match(KoreToken.Type.LBRACE)
         sort = self.sort()
         self._match(KoreToken.Type.RBRACE)
@@ -546,10 +538,7 @@ class KoreParser:
         return self._quantifier('\\forall', Forall)
 
     def _fixpoint(self, symbol: str, cls: Type[FP]) -> FP:
-        actual = self.symbol_id()
-        if symbol != actual:
-            raise ValueError(f'Expected {symbol}, found: {actual}')
-
+        self._match_symbol_id(symbol)
         self._match(KoreToken.Type.LBRACE)
         self._match(KoreToken.Type.RBRACE)
         self._match(KoreToken.Type.LPAREN)
@@ -566,10 +555,7 @@ class KoreParser:
         return self._fixpoint('\\nu', Nu)
 
     def _round_pred(self, symbol: str, cls: Type[RP]) -> RP:
-        actual = self.symbol_id()
-        if symbol != actual:
-            raise ValueError(f'Expected {symbol}, found: {actual}')
-
+        self._match_symbol_id(symbol)
         self._match(KoreToken.Type.LBRACE)
         op_sort = self.sort()
         self._match(KoreToken.Type.COMMA)
@@ -587,10 +573,7 @@ class KoreParser:
         return self._round_pred('\\floor', Floor)
 
     def _binary_pred(self, symbol: str, cls: Type[BP]) -> BP:
-        actual = self.symbol_id()
-        if symbol != actual:
-            raise ValueError(f'Expected {symbol}, found: {actual}')
-
+        self._match_symbol_id(symbol)
         self._match(KoreToken.Type.LBRACE)
         left_sort = self.sort()
         self._match(KoreToken.Type.COMMA)
@@ -616,10 +599,7 @@ class KoreParser:
         return self._binary('\\rewrites', Rewrites)
 
     def dv(self) -> DomVal:
-        symbol = self.symbol_id()
-        if symbol != '\\dv':
-            raise ValueError(f'Expected \\dv, found: {symbol}')
-
+        self._match_symbol_id('\\dv')
         self._match(KoreToken.Type.LBRACE)
         sort = self.sort()
         self._match(KoreToken.Type.RBRACE)
