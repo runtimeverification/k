@@ -25,10 +25,11 @@ from .cterm import CTerm
 from .kast import KInner, KRuleLike, Subst
 from .kastManip import (
     build_rule,
+    minimizeSubst,
     ml_pred_to_bool,
     mlAnd,
     simplifyBool,
-    substToMlPred,
+    substToMap,
 )
 from .ktool import KPrint
 from .utils import add_indent, compare_short_hashes, shorten_hash
@@ -117,7 +118,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             return [
                 'constraint: ' + kprint.pretty_print(ml_pred_to_bool(self.constraint)),
                 'subst:',
-                *add_indent('  ', kprint.pretty_print(substToMlPred(self.subst)).split('\n')),
+                *add_indent('  ', kprint.pretty_print(substToMap(minimizeSubst(self.subst))).split('\n')),
             ]
 
     _nodes: Dict[str, Node]
@@ -322,15 +323,16 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             processed_nodes.append(curr_node)
 
             num_children = len(edges_from)
+            is_cover = (num_children == 1 and isinstance(edges_from[0], KCFG.Cover))
             is_branch = num_children > 1
             for i, edge_like in enumerate(edges_from):
                 is_last_child = i == num_children - 1
 
-                if not is_branch:
+                if not (is_branch or is_cover):
                     elbow = '├ ' if len(self.edge_likes(source_id=edge_like.target.id)) else '└ '
                     new_indent = indent
                 elif is_last_child:
-                    elbow = '┗━'
+                    elbow = '└╌'if is_cover else '┗━'
                     new_indent = indent + '    '
                 else:
                     elbow = '┣━'
@@ -342,7 +344,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                     ret.extend(add_indent(indent + '┊  ', edge_like.pretty_print(kprint)))
                 ret.append(indent + elbow + ' ' + _print_node(edge_like.target))
                 if isinstance(edge_like, KCFG.Edge) and edge_like.depth == 0:
-                    ret.extend(add_indent(new_indent[0:-1], edge_like.pretty_print(kprint)))
+                    first, *rest = edge_like.pretty_print(kprint)
+                    ret[-1] += '    ' + first
+                    ret.extend(add_indent(new_indent + (7 + len(_print_node(edge_like.target))) * ' ', rest))
 
                 ret.extend(_print_subgraph(new_indent, edge_like.target, prior_on_trace + [edge_like.source]))
                 if is_branch:
