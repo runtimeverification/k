@@ -296,6 +296,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         def _bold(text: str) -> str:
             return '\033[1m' + text + '\033[0m'
 
+        def _green(text: str) -> str:
+            return '\033[32m' + text + '\033[0m'
+
         def _print_node(node: KCFG.Node) -> str:
             short_info = self.node_short_info(node)
             if self.is_frontier(node.id):
@@ -339,6 +342,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                     new_indent = indent + '┃   '
 
                 if isinstance(edge_like, KCFG.Edge) and edge_like.depth:
+                    if self.is_verified(edge_like.source.id, edge_like.target.id):
+                        ret.append(indent + '│  ' + _bold(_green('(verified)')))
                     ret.extend(add_indent(indent + '│  ', edge_like.pretty_print(kprint)))
                 elif isinstance(edge_like, KCFG.Cover):
                     ret.extend(add_indent(indent + '┊  ', edge_like.pretty_print(kprint)))
