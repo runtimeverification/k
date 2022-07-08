@@ -21,6 +21,7 @@ from .syntax import (
     Attr,
     Axiom,
     BinaryConn,
+    BinaryPred,
     Bottom,
     Ceil,
     Claim,
@@ -47,6 +48,7 @@ from .syntax import (
     Or,
     Pattern,
     Rewrites,
+    RoundPred,
     Sentence,
     SetVar,
     Sort,
@@ -279,10 +281,8 @@ UC = TypeVar('UC', bound=Union[UnaryConn, Next])
 BC = TypeVar('BC', bound=Union[BinaryConn, Rewrites])
 QF = TypeVar('QF', bound=MLQuant)
 FP = TypeVar('FP', bound=MLFixpoint)
-# TODO Create class RoundPred in syntax.py, define with bound
-RP = TypeVar('RP', Ceil, Floor)
-# TODO Create class BinaryPred in syntax.py, define with bound
-BP = TypeVar('BP', Equals, In)
+RP = TypeVar('RP', bound=RoundPred)
+BP = TypeVar('BP', bound=BinaryPred)
 
 
 class KoreParser:

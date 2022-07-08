@@ -487,59 +487,40 @@ class MLPred(MLPattern, ABC):
     ...
 
 
+class RoundPred(MLPred, ABC):
+    op_sort: Sort
+    sort: Sort
+    pattern: Pattern
+
+    @property
+    def text(self) -> str:
+        return self.symbol + ' ' + _braced((self.op_sort.text, self.sort.text)) + ' ( ' + self.pattern.text + ' )'
+
+
 @final
 @dataclass(frozen=True)
-class Ceil(MLPred):
+class Ceil(RoundPred):
     symbol = '\\ceil'
     op_sort: Sort
     sort: Sort
     pattern: Pattern
 
-    # TODO Extract to some reasonably named superclass
-    @property
-    def text(self) -> str:
-        return self.symbol + ' ' + _braced((self.op_sort.text, self.sort.text)) + ' ( ' + self.pattern.text + ' )'
-
 
 @final
 @dataclass(frozen=True)
-class Floor(MLPred):
+class Floor(RoundPred):
     symbol = '\\floor'
     op_sort: Sort
     sort: Sort
     pattern: Pattern
 
-    # TODO Extract to some reasonably named superclass
-    @property
-    def text(self) -> str:
-        return self.symbol + ' ' + _braced((self.op_sort.text, self.sort.text)) + ' ( ' + self.pattern.text + ' )'
 
-
-@final
-@dataclass(frozen=True)
-class Equals(MLPred):
-    symbol = '\\equals'
+class BinaryPred(MLPred, ABC):
     left_sort: Sort
     right_sort: Sort
     left: Pattern
     right: Pattern
 
-    # TODO Extract to some reasonably named superclass
-    @property
-    def text(self) -> str:
-        return self.symbol + ' ' + _braced((self.left_sort.text, self.right_sort.text)) + ' ' + _parend((self.left.text, self.right.text))
-
-
-@final
-@dataclass(frozen=True)
-class In(MLPred):
-    symbol = '\\in'
-    left_sort: Sort
-    right_sort: Sort
-    left: Pattern
-    right: Pattern
-
-    # TODO Extract to some reasonably named superclass
     @property
     def text(self) -> str:
         return ' '.join([
@@ -547,6 +528,26 @@ class In(MLPred):
             _braced((self.left_sort.text, self.right_sort.text)),
             _parend((self.left.text, self.right.text)),
         ])
+
+
+@final
+@dataclass(frozen=True)
+class Equals(BinaryPred):
+    symbol = '\\equals'
+    left_sort: Sort
+    right_sort: Sort
+    left: Pattern
+    right: Pattern
+
+
+@final
+@dataclass(frozen=True)
+class In(BinaryPred):
+    symbol = '\\in'
+    left_sort: Sort
+    right_sort: Sort
+    left: Pattern
+    right: Pattern
 
 
 class MLRewrite(MLPattern, ABC):
