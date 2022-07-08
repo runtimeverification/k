@@ -122,6 +122,8 @@ class KoreLexer(Iterator[KoreToken]):
         ']': KoreToken.Type.RBRACK,
     }
 
+    # TODO Eliminate duplication in kore.syntax: maybe extract lexer to own module
+    # TODO Maybe StrLit lexer can be moved there as well
     _ID_FIRST_CHARS: Final = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
     _ID_CHARS: Final = set("01234567890'-").union(_ID_FIRST_CHARS)
     _DELIMITERS: Final = set(':/').union(_SIMPLE_CHARS)
@@ -379,6 +381,14 @@ class KoreParser:
 
         return self._match(KoreToken.Type.ID)
 
+    def _custom_symbol_id(self) -> str:
+        symbol = self.symbol_id()
+
+        if symbol in self._ml_symbols:
+            raise ValueError(f'Expected custom symbol, found matching logic symbol: {symbol}')
+
+        return symbol
+
     def _match_symbol_id(self, symbol: str) -> None:
         actual = self.symbol_id()
         if actual != symbol:
@@ -425,7 +435,7 @@ class KoreParser:
         return StrLit(value[1:-1])
 
     def apply(self) -> Apply:
-        symbol = self.symbol_id()
+        symbol = self._custom_symbol_id()
         sorts = self._sort_list()
         patterns = self._pattern_list()
         return Apply(symbol, sorts, patterns)
@@ -609,7 +619,7 @@ class KoreParser:
         return DomVal(sort, value)
 
     def attr(self) -> Attr:
-        symbol = self.symbol_id()  # TODO ensure not ml_symbol: custom_symbol() perhaps?
+        symbol = self._custom_symbol_id()
         self._match(KoreToken.Type.LBRACE)
         self._match(KoreToken.Type.RBRACE)
         params = self._attr_param_list()
