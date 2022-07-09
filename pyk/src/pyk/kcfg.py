@@ -406,15 +406,29 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def _resolve_hash(self, id_like: str) -> List[str]:
         return [node_id for node_id in self._nodes if compare_short_hashes(id_like, node_id)]
 
+    def get_unique_init(self) -> Node:
+        if len(self.init) > 1:
+            raise ValueError(f'Multiple init nodes found: {list(shorten_hash(n.id) for n in self.init)}')
+        return self.init[0]
+
+    def get_unique_target(self) -> Node:
+        if len(self.target) > 1:
+            raise ValueError(f'Multiple target nodes found: {list(shorten_hash(n.id) for n in self.target)}')
+        return self.target[0]
+
+    def get_first_frontier(self) -> Node:
+        if len(self.frontier) == 0:
+            raise ValueError('No frontiers remaining!')
+        return self.frontier[0]
+
     def _resolve_or_none(self, id_like: str) -> Optional[str]:
         if id_like == '#init':
-            if len(self.init) > 1:
-                raise ValueError(f'Multiple init nodes found: {list(shorten_hash(n.id) for n in self.init)}')
-            return self.init[0].id
+            return self.get_unique_init().id
         if id_like == '#target':
-            if len(self.target) > 1:
-                raise ValueError(f'Multiple target nodes found: {list(shorten_hash(n.id) for n in self.target)}')
-            return self.target[0].id
+            return self.get_unique_target().id
+        if id_like == '#frontier':
+            return self.get_first_frontier().id
+
         if id_like.startswith('@'):
             if id_like[1:] in self._aliases:
                 return self._aliases[id_like[1:]]

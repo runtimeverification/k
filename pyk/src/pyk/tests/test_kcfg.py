@@ -288,7 +288,7 @@ class KCFGTestCase(TestCase):
             'init': [nid(0)],
             'target': [nid(3)],
             'nodes': node_dicts(4),
-            'edges': edge_dicts((0, 1)),
+            'edges': edge_dicts((0, 1), (1, 2)),
             'aliases': {'foo': nid(1)}
         }
 
@@ -297,6 +297,9 @@ class KCFGTestCase(TestCase):
 
         self.assertEqual(cfg.node('#init'), node(0))
         self.assertEqual(cfg.node('#target'), node(3))
+        cfg.add_expanded(nid(0))
+        cfg.add_expanded(nid(1))
+        self.assertEqual(cfg.node('#frontier'), node(2))
 
         cfg.add_alias('bar', node(0).id)
         cfg.add_alias('bar2', node(0).id)
