@@ -114,7 +114,7 @@ def nonempty_str(x: Any) -> str:
 
 
 def add_indent(indent: str, lines: Iterable[str]) -> List[str]:
-    return list(map(lambda line: indent + line, lines))
+    return [indent + line for line in lines]
 
 
 def is_hexstring(x: str) -> bool:
