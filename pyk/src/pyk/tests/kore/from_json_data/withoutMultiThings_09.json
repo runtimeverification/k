@@ -1,0 +1,98 @@
+{
+  "tag": "Floor",
+  "argSort": {
+    "tag": "SortApp",
+    "name": "sCzOO33TgeebVK",
+    "args": []
+  },
+  "resultSort": {
+    "tag": "SortVariable",
+    "name": "DIhkUDOsGYuhg3"
+  },
+  "arg": {
+    "tag": "Equals",
+    "argSort": {
+      "tag": "SortApp",
+      "name": "EmN6F08",
+      "args": []
+    },
+    "resultSort": {
+      "tag": "SortVariable",
+      "name": "sli'LFXEfD'849"
+    },
+    "first": {
+      "tag": "And",
+      "sort": {
+        "tag": "SortVariable",
+        "name": "Dn3r_51"
+      },
+      "first": {
+        "tag": "dv",
+        "sort": {
+          "tag": "SortApp",
+          "name": "ifB4L7527",
+          "args": []
+        },
+        "value": "\t!"
+      },
+      "second": {
+        "tag": "SVar",
+        "name": "@tMlD6JB",
+        "sort": {
+          "tag": "SortApp",
+          "name": "W_f",
+          "args": []
+        }
+      }
+    },
+    "second": {
+      "tag": "Mu",
+      "var": "@KtDZ0RcUQF817",
+      "varSort": {
+        "tag": "SortVariable",
+        "name": "x_oP7"
+      },
+      "arg": {
+        "tag": "Next",
+        "sort": {
+          "tag": "SortVariable",
+          "name": "Er9PA39"
+        },
+        "dest": {
+          "tag": "Equals",
+          "argSort": {
+            "tag": "SortApp",
+            "name": "i38",
+            "args": []
+          },
+          "resultSort": {
+            "tag": "SortVariable",
+            "name": "v6857"
+          },
+          "first": {
+            "tag": "dv",
+            "sort": {
+              "tag": "SortVariable",
+              "name": "L1Y4301"
+            },
+            "value": ""
+          },
+          "second": {
+            "tag": "Next",
+            "sort": {
+              "tag": "SortVariable",
+              "name": "a_2"
+            },
+            "dest": {
+              "tag": "Bottom",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "s4273"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

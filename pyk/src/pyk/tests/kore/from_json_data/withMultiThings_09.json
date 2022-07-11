@@ -1,0 +1,58 @@
+{
+  "tag": "Forall",
+  "sort": {
+    "tag": "SortVariable",
+    "name": "X'UMB9"
+  },
+  "var": "TU_1mfz3_L8UW4",
+  "varSort": {
+    "tag": "SortVariable",
+    "name": "Ux"
+  },
+  "arg": {
+    "tag": "Iff",
+    "sort": {
+      "tag": "SortApp",
+      "name": "ve'ky_DCoQ63",
+      "args": []
+    },
+    "first": {
+      "tag": "EVar",
+      "name": "Gu3'99815",
+      "sort": {
+        "tag": "SortVariable",
+        "name": "B2B59eG0_o_'ay71880"
+      }
+    },
+    "second": {
+      "tag": "Exists",
+      "sort": {
+        "tag": "SortApp",
+        "name": "aghbK372",
+        "args": []
+      },
+      "var": "lIu40358",
+      "varSort": {
+        "tag": "SortApp",
+        "name": "f",
+        "args": []
+      },
+      "arg": {
+        "tag": "Next",
+        "sort": {
+          "tag": "SortVariable",
+          "name": "wQc9ku239"
+        },
+        "dest": {
+          "tag": "EVar",
+          "name": "JOHPZ8174",
+          "sort": {
+            "tag": "SortApp",
+            "name": "uL8191",
+            "args": []
+          }
+        }
+      }
+    }
+  }
+}

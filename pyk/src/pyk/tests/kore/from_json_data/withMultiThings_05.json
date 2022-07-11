@@ -1,0 +1,266 @@
+{
+  "tag": "Rewrites",
+  "sort": {
+    "tag": "SortApp",
+    "name": "IaYTTR_q02699",
+    "args": [
+      {
+        "tag": "SortVariable",
+        "name": "zOzx70FW1pnC1'E50619"
+      }
+    ]
+  },
+  "source": {
+    "tag": "Or",
+    "sort": {
+      "tag": "SortApp",
+      "name": "y",
+      "args": []
+    },
+    "first": {
+      "tag": "Forall",
+      "sort": {
+        "tag": "SortVariable",
+        "name": "boNTIhNdga"
+      },
+      "var": "RneU5",
+      "varSort": {
+        "tag": "SortApp",
+        "name": "l4z",
+        "args": []
+      },
+      "arg": {
+        "tag": "In",
+        "argSort": {
+          "tag": "SortApp",
+          "name": "V",
+          "args": []
+        },
+        "resultSort": {
+          "tag": "SortApp",
+          "name": "u5",
+          "args": []
+        },
+        "first": {
+          "tag": "String",
+          "value": ""
+        },
+        "second": {
+          "tag": "Mu",
+          "var": "@F87",
+          "varSort": {
+            "tag": "SortVariable",
+            "name": "d91"
+          },
+          "arg": {
+            "tag": "Or",
+            "sort": {
+              "tag": "SortVariable",
+              "name": "h82"
+            },
+            "first": {
+              "tag": "String",
+              "value": ""
+            },
+            "second": {
+              "tag": "Bottom",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "q9"
+              }
+            }
+          }
+        }
+      }
+    },
+    "second": {
+      "tag": "Iff",
+      "sort": {
+        "tag": "SortVariable",
+        "name": "U104"
+      },
+      "first": {
+        "tag": "Forall",
+        "sort": {
+          "tag": "SortVariable",
+          "name": "P40"
+        },
+        "var": "fC573",
+        "varSort": {
+          "tag": "SortApp",
+          "name": "c4r41031",
+          "args": []
+        },
+        "arg": {
+          "tag": "Forall",
+          "sort": {
+            "tag": "SortVariable",
+            "name": "P4313"
+          },
+          "var": "zRg",
+          "varSort": {
+            "tag": "SortVariable",
+            "name": "Pg0978"
+          },
+          "arg": {
+            "tag": "Implies",
+            "sort": {
+              "tag": "SortVariable",
+              "name": "x48116"
+            },
+            "first": {
+              "tag": "EVar",
+              "name": "D'",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "mt0"
+              }
+            },
+            "second": {
+              "tag": "dv",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "XC325"
+              },
+              "value": ""
+            }
+          }
+        }
+      },
+      "second": {
+        "tag": "In",
+        "argSort": {
+          "tag": "SortVariable",
+          "name": "Ts2434"
+        },
+        "resultSort": {
+          "tag": "SortVariable",
+          "name": "F31096"
+        },
+        "first": {
+          "tag": "And",
+          "sort": {
+            "tag": "SortVariable",
+            "name": "x4M"
+          },
+          "first": {
+            "tag": "And",
+            "sort": {
+              "tag": "SortVariable",
+              "name": "CN73604"
+            },
+            "first": {
+              "tag": "EVar",
+              "name": "GH39151",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "qZ16"
+              }
+            },
+            "second": {
+              "tag": "Bottom",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "E082"
+              }
+            }
+          },
+          "second": {
+            "tag": "Not",
+            "sort": {
+              "tag": "SortVariable",
+              "name": "Xx0336"
+            },
+            "arg": {
+              "tag": "Bottom",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "A83"
+              }
+            }
+          }
+        },
+        "second": {
+          "tag": "SVar",
+          "name": "@XbQS69120",
+          "sort": {
+            "tag": "SortApp",
+            "name": "wL",
+            "args": []
+          }
+        }
+      }
+    }
+  },
+  "dest": {
+    "tag": "Forall",
+    "sort": {
+      "tag": "SortVariable",
+      "name": "cu28rl77_i8863"
+    },
+    "var": "b351758",
+    "varSort": {
+      "tag": "SortApp",
+      "name": "ycLhk_777",
+      "args": []
+    },
+    "arg": {
+      "tag": "Or",
+      "sort": {
+        "tag": "SortApp",
+        "name": "qJlgk294",
+        "args": []
+      },
+      "first": {
+        "tag": "Mu",
+        "var": "@rM143",
+        "varSort": {
+          "tag": "SortVariable",
+          "name": "Mtkc37"
+        },
+        "arg": {
+          "tag": "Iff",
+          "sort": {
+            "tag": "SortApp",
+            "name": "fP",
+            "args": []
+          },
+          "first": {
+            "tag": "Mu",
+            "var": "@P75",
+            "varSort": {
+              "tag": "SortVariable",
+              "name": "U62257"
+            },
+            "arg": {
+              "tag": "Bottom",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "lk890"
+              }
+            }
+          },
+          "second": {
+            "tag": "Mu",
+            "var": "@P",
+            "varSort": {
+              "tag": "SortVariable",
+              "name": "N1759"
+            },
+            "arg": {
+              "tag": "String",
+              "value": ""
+            }
+          }
+        }
+      },
+      "second": {
+        "tag": "Top",
+        "sort": {
+          "tag": "SortVariable",
+          "name": "KfC9JGD42"
+        }
+      }
+    }
+  }
+}

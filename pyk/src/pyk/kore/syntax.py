@@ -117,6 +117,10 @@ class Kore(ABC):
         ...
 
     @classmethod
+    def from_json(cls: Type[T], s: str) -> T:
+        return (cls.from_dict(json.loads(s)))
+
+    @classmethod
     def _check_tag(cls: Type[T], dct: Mapping[str, Any], expected: Optional[str] = None) -> None:
         expected = expected if expected is not None else cls.__name__
         actual = dct['tag']

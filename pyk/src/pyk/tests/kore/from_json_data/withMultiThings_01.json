@@ -1,0 +1,41 @@
+{
+  "tag": "Floor",
+  "argSort": {
+    "tag": "SortApp",
+    "name": "Ip23",
+    "args": [
+      {
+        "tag": "SortApp",
+        "name": "tgZW",
+        "args": []
+      }
+    ]
+  },
+  "resultSort": {
+    "tag": "SortApp",
+    "name": "A'JME1qF5278",
+    "args": []
+  },
+  "arg": {
+    "tag": "Implies",
+    "sort": {
+      "tag": "SortVariable",
+      "name": "qyb4cu4NOIQ_fg452"
+    },
+    "first": {
+      "tag": "Bottom",
+      "sort": {
+        "tag": "SortVariable",
+        "name": "q5ye7AUuboJXXa56"
+      }
+    },
+    "second": {
+      "tag": "Top",
+      "sort": {
+        "tag": "SortApp",
+        "name": "c22",
+        "args": []
+      }
+    }
+  }
+}

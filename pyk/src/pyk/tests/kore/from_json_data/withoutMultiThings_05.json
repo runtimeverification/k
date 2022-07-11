@@ -1,0 +1,167 @@
+{
+  "tag": "Floor",
+  "argSort": {
+    "tag": "SortApp",
+    "name": "SyZy7yFdc7512",
+    "args": []
+  },
+  "resultSort": {
+    "tag": "SortVariable",
+    "name": "G6"
+  },
+  "arg": {
+    "tag": "Floor",
+    "argSort": {
+      "tag": "SortVariable",
+      "name": "G_Ex8z908B3qUO8"
+    },
+    "resultSort": {
+      "tag": "SortVariable",
+      "name": "LJ233"
+    },
+    "arg": {
+      "tag": "Or",
+      "sort": {
+        "tag": "SortVariable",
+        "name": "x9ih9K9"
+      },
+      "first": {
+        "tag": "Next",
+        "sort": {
+          "tag": "SortApp",
+          "name": "Ok2560",
+          "args": []
+        },
+        "dest": {
+          "tag": "Or",
+          "sort": {
+            "tag": "SortVariable",
+            "name": "Crt817"
+          },
+          "first": {
+            "tag": "Next",
+            "sort": {
+              "tag": "SortVariable",
+              "name": "t135"
+            },
+            "dest": {
+              "tag": "String",
+              "value": ""
+            }
+          },
+          "second": {
+            "tag": "In",
+            "argSort": {
+              "tag": "SortVariable",
+              "name": "q09357"
+            },
+            "resultSort": {
+              "tag": "SortVariable",
+              "name": "z315"
+            },
+            "first": {
+              "tag": "EVar",
+              "name": "k24",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "q11615"
+              }
+            },
+            "second": {
+              "tag": "EVar",
+              "name": "N23514",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "ca36256"
+              }
+            }
+          }
+        }
+      },
+      "second": {
+        "tag": "Equals",
+        "argSort": {
+          "tag": "SortVariable",
+          "name": "ygD9c"
+        },
+        "resultSort": {
+          "tag": "SortApp",
+          "name": "F1",
+          "args": []
+        },
+        "first": {
+          "tag": "Iff",
+          "sort": {
+            "tag": "SortApp",
+            "name": "a9",
+            "args": []
+          },
+          "first": {
+            "tag": "Mu",
+            "var": "@qo13134",
+            "varSort": {
+              "tag": "SortVariable",
+              "name": "M2"
+            },
+            "arg": {
+              "tag": "String",
+              "value": ""
+            }
+          },
+          "second": {
+            "tag": "Implies",
+            "sort": {
+              "tag": "SortVariable",
+              "name": "t534449"
+            },
+            "first": {
+              "tag": "Bottom",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "r714"
+              }
+            },
+            "second": {
+              "tag": "dv",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "n265"
+              },
+              "value": ""
+            }
+          }
+        },
+        "second": {
+          "tag": "Not",
+          "sort": {
+            "tag": "SortApp",
+            "name": "JK6777",
+            "args": []
+          },
+          "arg": {
+            "tag": "And",
+            "sort": {
+              "tag": "SortVariable",
+              "name": "E0421"
+            },
+            "first": {
+              "tag": "dv",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "W"
+              },
+              "value": ""
+            },
+            "second": {
+              "tag": "Top",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "Er"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

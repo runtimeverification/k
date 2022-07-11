@@ -1,0 +1,145 @@
+{
+  "tag": "Nu",
+  "var": "@OatT59BNw72g0X'2C8PSu'5",
+  "varSort": {
+    "tag": "SortVariable",
+    "name": "UGK6"
+  },
+  "arg": {
+    "tag": "Implies",
+    "sort": {
+      "tag": "SortApp",
+      "name": "Km_X'25",
+      "args": []
+    },
+    "first": {
+      "tag": "Mu",
+      "var": "@fe4sF0qQ949440",
+      "varSort": {
+        "tag": "SortApp",
+        "name": "FazGJ",
+        "args": []
+      },
+      "arg": {
+        "tag": "Ceil",
+        "argSort": {
+          "tag": "SortVariable",
+          "name": "Cb8kL72"
+        },
+        "resultSort": {
+          "tag": "SortVariable",
+          "name": "gs98675"
+        },
+        "arg": {
+          "tag": "Not",
+          "sort": {
+            "tag": "SortVariable",
+            "name": "Xv25"
+          },
+          "arg": {
+            "tag": "Rewrites",
+            "sort": {
+              "tag": "SortVariable",
+              "name": "B36704"
+            },
+            "source": {
+              "tag": "Bottom",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "O97128"
+              }
+            },
+            "dest": {
+              "tag": "Top",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "Z96367"
+              }
+            }
+          }
+        }
+      }
+    },
+    "second": {
+      "tag": "In",
+      "argSort": {
+        "tag": "SortVariable",
+        "name": "f8l554"
+      },
+      "resultSort": {
+        "tag": "SortVariable",
+        "name": "l2h4U934788117"
+      },
+      "first": {
+        "tag": "Floor",
+        "argSort": {
+          "tag": "SortVariable",
+          "name": "kxOmD01"
+        },
+        "resultSort": {
+          "tag": "SortVariable",
+          "name": "RguA065"
+        },
+        "arg": {
+          "tag": "String",
+          "value": ""
+        }
+      },
+      "second": {
+        "tag": "Iff",
+        "sort": {
+          "tag": "SortVariable",
+          "name": "V358"
+        },
+        "first": {
+          "tag": "Equals",
+          "argSort": {
+            "tag": "SortApp",
+            "name": "gy38846",
+            "args": []
+          },
+          "resultSort": {
+            "tag": "SortVariable",
+            "name": "I6"
+          },
+          "first": {
+            "tag": "Nu",
+            "var": "@q",
+            "varSort": {
+              "tag": "SortVariable",
+              "name": "zm132"
+            },
+            "arg": {
+              "tag": "dv",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "oQ87150"
+              },
+              "value": ""
+            }
+          },
+          "second": {
+            "tag": "String",
+            "value": ""
+          }
+        },
+        "second": {
+          "tag": "Ceil",
+          "argSort": {
+            "tag": "SortVariable",
+            "name": "b_p7"
+          },
+          "resultSort": {
+            "tag": "SortApp",
+            "name": "HW30",
+            "args": []
+          },
+          "arg": {
+            "tag": "String",
+            "value": ""
+          }
+        }
+      }
+    }
+  }
+}

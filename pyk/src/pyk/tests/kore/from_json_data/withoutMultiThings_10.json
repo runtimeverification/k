@@ -1,0 +1,31 @@
+{
+  "tag": "Mu",
+  "var": "@gtLR'wSM6fbA4LtTX95w6",
+  "varSort": {
+    "tag": "SortVariable",
+    "name": "hT_30533"
+  },
+  "arg": {
+    "tag": "Iff",
+    "sort": {
+      "tag": "SortVariable",
+      "name": "v5JOH2IB9PQ79230"
+    },
+    "first": {
+      "tag": "dv",
+      "sort": {
+        "tag": "SortVariable",
+        "name": "ZXiQTJliH_ebE7'c05454"
+      },
+      "value": "o/Pfp"
+    },
+    "second": {
+      "tag": "SVar",
+      "name": "@A'327",
+      "sort": {
+        "tag": "SortVariable",
+        "name": "oSX8B2840"
+      }
+    }
+  }
+}

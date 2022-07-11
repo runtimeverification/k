@@ -1,0 +1,129 @@
+{
+  "tag": "In",
+  "argSort": {
+    "tag": "SortVariable",
+    "name": "e'571"
+  },
+  "resultSort": {
+    "tag": "SortVariable",
+    "name": "V0_tTdYPoBr6KQvFmm'mx3"
+  },
+  "first": {
+    "tag": "Iff",
+    "sort": {
+      "tag": "SortVariable",
+      "name": "n3IH0hx_mn"
+    },
+    "first": {
+      "tag": "Not",
+      "sort": {
+        "tag": "SortApp",
+        "name": "quAE7",
+        "args": []
+      },
+      "arg": {
+        "tag": "App",
+        "name": "\\EmC480076",
+        "sorts": [
+          {
+            "tag": "SortApp",
+            "name": "bO05438",
+            "args": []
+          }
+        ],
+        "args": []
+      }
+    },
+    "second": {
+      "tag": "Exists",
+      "sort": {
+        "tag": "SortVariable",
+        "name": "M_Lmumzz"
+      },
+      "var": "V8fNX2gh'E59",
+      "varSort": {
+        "tag": "SortVariable",
+        "name": "pn4"
+      },
+      "arg": {
+        "tag": "Forall",
+        "sort": {
+          "tag": "SortApp",
+          "name": "E95",
+          "args": []
+        },
+        "var": "G9dlCh2784",
+        "varSort": {
+          "tag": "SortVariable",
+          "name": "plfnW908624"
+        },
+        "arg": {
+          "tag": "And",
+          "sort": {
+            "tag": "SortVariable",
+            "name": "I6M8"
+          },
+          "first": {
+            "tag": "Exists",
+            "sort": {
+              "tag": "SortVariable",
+              "name": "F537"
+            },
+            "var": "SO3",
+            "varSort": {
+              "tag": "SortVariable",
+              "name": "E"
+            },
+            "arg": {
+              "tag": "EVar",
+              "name": "cZ22",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "M"
+              }
+            }
+          },
+          "second": {
+            "tag": "Equals",
+            "argSort": {
+              "tag": "SortVariable",
+              "name": "A62216"
+            },
+            "resultSort": {
+              "tag": "SortVariable",
+              "name": "s0901"
+            },
+            "first": {
+              "tag": "dv",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "FA47"
+              },
+              "value": ""
+            },
+            "second": {
+              "tag": "Bottom",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "pt98"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "second": {
+    "tag": "Bottom",
+    "sort": {
+      "tag": "SortApp",
+      "name": "QZor82230",
+      "args": [
+        {
+          "tag": "SortVariable",
+          "name": "cUq4Ht9v9'GAXtc976"
+        }
+      ]
+    }
+  }
+}

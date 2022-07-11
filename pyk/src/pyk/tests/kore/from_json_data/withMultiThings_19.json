@@ -1,0 +1,105 @@
+{
+  "tag": "Implies",
+  "sort": {
+    "tag": "SortApp",
+    "name": "Pq'NqYdA76353",
+    "args": []
+  },
+  "first": {
+    "tag": "Exists",
+    "sort": {
+      "tag": "SortVariable",
+      "name": "oM9WSSx5PWH_A5Q921"
+    },
+    "var": "ZfuEP1TYF60",
+    "varSort": {
+      "tag": "SortApp",
+      "name": "m_XH",
+      "args": []
+    },
+    "arg": {
+      "tag": "Ceil",
+      "argSort": {
+        "tag": "SortApp",
+        "name": "sf978",
+        "args": []
+      },
+      "resultSort": {
+        "tag": "SortApp",
+        "name": "D0974236",
+        "args": []
+      },
+      "arg": {
+        "tag": "Bottom",
+        "sort": {
+          "tag": "SortVariable",
+          "name": "K7EdZ108"
+        }
+      }
+    }
+  },
+  "second": {
+    "tag": "Or",
+    "sort": {
+      "tag": "SortApp",
+      "name": "C'E4V5",
+      "args": []
+    },
+    "first": {
+      "tag": "Top",
+      "sort": {
+        "tag": "SortVariable",
+        "name": "N0Zmeh4yc5u88371"
+      }
+    },
+    "second": {
+      "tag": "Forall",
+      "sort": {
+        "tag": "SortVariable",
+        "name": "Q9M'7yVP7'71"
+      },
+      "var": "pBm14169",
+      "varSort": {
+        "tag": "SortApp",
+        "name": "Bpmz355",
+        "args": []
+      },
+      "arg": {
+        "tag": "Mu",
+        "var": "@k",
+        "varSort": {
+          "tag": "SortApp",
+          "name": "n39461",
+          "args": []
+        },
+        "arg": {
+          "tag": "Nu",
+          "var": "@t16460",
+          "varSort": {
+            "tag": "SortApp",
+            "name": "R067",
+            "args": []
+          },
+          "arg": {
+            "tag": "Floor",
+            "argSort": {
+              "tag": "SortVariable",
+              "name": "Gy8"
+            },
+            "resultSort": {
+              "tag": "SortVariable",
+              "name": "C04"
+            },
+            "arg": {
+              "tag": "Bottom",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "K895"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

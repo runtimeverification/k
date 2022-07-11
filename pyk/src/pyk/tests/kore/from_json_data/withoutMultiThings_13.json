@@ -1,0 +1,124 @@
+{
+  "tag": "Forall",
+  "sort": {
+    "tag": "SortApp",
+    "name": "nb444550",
+    "args": []
+  },
+  "var": "lkqEWw5sd8E'2C2sQFgQ3120",
+  "varSort": {
+    "tag": "SortApp",
+    "name": "R",
+    "args": []
+  },
+  "arg": {
+    "tag": "Exists",
+    "sort": {
+      "tag": "SortVariable",
+      "name": "dr4hH'W65352"
+    },
+    "var": "xKwo",
+    "varSort": {
+      "tag": "SortVariable",
+      "name": "QkQq'2eVpEP03606"
+    },
+    "arg": {
+      "tag": "In",
+      "argSort": {
+        "tag": "SortVariable",
+        "name": "NV9"
+      },
+      "resultSort": {
+        "tag": "SortApp",
+        "name": "zTE9I930794",
+        "args": []
+      },
+      "first": {
+        "tag": "Iff",
+        "sort": {
+          "tag": "SortApp",
+          "name": "oy2990",
+          "args": []
+        },
+        "first": {
+          "tag": "EVar",
+          "name": "sL9p3",
+          "sort": {
+            "tag": "SortVariable",
+            "name": "N445"
+          }
+        },
+        "second": {
+          "tag": "EVar",
+          "name": "r",
+          "sort": {
+            "tag": "SortVariable",
+            "name": "T1iS54"
+          }
+        }
+      },
+      "second": {
+        "tag": "Or",
+        "sort": {
+          "tag": "SortVariable",
+          "name": "wV35901"
+        },
+        "first": {
+          "tag": "Mu",
+          "var": "@ln818",
+          "varSort": {
+            "tag": "SortVariable",
+            "name": "b958"
+          },
+          "arg": {
+            "tag": "Not",
+            "sort": {
+              "tag": "SortVariable",
+              "name": "ks2"
+            },
+            "arg": {
+              "tag": "SVar",
+              "name": "@y17174",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "S2782"
+              }
+            }
+          }
+        },
+        "second": {
+          "tag": "And",
+          "sort": {
+            "tag": "SortVariable",
+            "name": "l4"
+          },
+          "first": {
+            "tag": "SVar",
+            "name": "@Dz65616",
+            "sort": {
+              "tag": "SortApp",
+              "name": "yS6853",
+              "args": []
+            }
+          },
+          "second": {
+            "tag": "Nu",
+            "var": "@V",
+            "varSort": {
+              "tag": "SortVariable",
+              "name": "Z'243"
+            },
+            "arg": {
+              "tag": "EVar",
+              "name": "R",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "zB9"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

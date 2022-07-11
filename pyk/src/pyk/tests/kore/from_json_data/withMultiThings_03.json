@@ -1,0 +1,79 @@
+{
+  "tag": "Mu",
+  "var": "@b1_B_xY29",
+  "varSort": {
+    "tag": "SortApp",
+    "name": "pFVhPp9",
+    "args": []
+  },
+  "arg": {
+    "tag": "Iff",
+    "sort": {
+      "tag": "SortVariable",
+      "name": "wh8302"
+    },
+    "first": {
+      "tag": "Rewrites",
+      "sort": {
+        "tag": "SortApp",
+        "name": "idk",
+        "args": []
+      },
+      "source": {
+        "tag": "String",
+        "value": ""
+      },
+      "dest": {
+        "tag": "In",
+        "argSort": {
+          "tag": "SortVariable",
+          "name": "e8425"
+        },
+        "resultSort": {
+          "tag": "SortVariable",
+          "name": "Je"
+        },
+        "first": {
+          "tag": "Mu",
+          "var": "@fy0370",
+          "varSort": {
+            "tag": "SortVariable",
+            "name": "JS3"
+          },
+          "arg": {
+            "tag": "Ceil",
+            "argSort": {
+              "tag": "SortVariable",
+              "name": "RY878"
+            },
+            "resultSort": {
+              "tag": "SortVariable",
+              "name": "S1413"
+            },
+            "arg": {
+              "tag": "EVar",
+              "name": "Y730",
+              "sort": {
+                "tag": "SortVariable",
+                "name": "U9491"
+              }
+            }
+          }
+        },
+        "second": {
+          "tag": "SVar",
+          "name": "@XesL0F78465",
+          "sort": {
+            "tag": "SortApp",
+            "name": "Hl152",
+            "args": []
+          }
+        }
+      }
+    },
+    "second": {
+      "tag": "String",
+      "value": "杺9^ A-L&zFy%"
+    }
+  }
+}

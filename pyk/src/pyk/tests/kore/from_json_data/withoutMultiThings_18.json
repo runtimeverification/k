@@ -1,0 +1,58 @@
+{
+  "tag": "Iff",
+  "sort": {
+    "tag": "SortApp",
+    "name": "VK57552",
+    "args": [
+      {
+        "tag": "SortApp",
+        "name": "JY6gQ1021",
+        "args": []
+      }
+    ]
+  },
+  "first": {
+    "tag": "Exists",
+    "sort": {
+      "tag": "SortVariable",
+      "name": "ro62'13"
+    },
+    "var": "P_w8uf3KyJtWBY_P40048",
+    "varSort": {
+      "tag": "SortVariable",
+      "name": "ohV1mbbd4IK7"
+    },
+    "arg": {
+      "tag": "App",
+      "name": "\\wwP1",
+      "sorts": [
+        {
+          "tag": "SortApp",
+          "name": "C194348",
+          "args": []
+        }
+      ],
+      "args": []
+    }
+  },
+  "second": {
+    "tag": "Not",
+    "sort": {
+      "tag": "SortApp",
+      "name": "epZ",
+      "args": []
+    },
+    "arg": {
+      "tag": "App",
+      "name": "\\sED_Gy_64990",
+      "sorts": [
+        {
+          "tag": "SortApp",
+          "name": "h",
+          "args": []
+        }
+      ],
+      "args": []
+    }
+  }
+}
