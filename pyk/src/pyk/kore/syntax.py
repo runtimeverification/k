@@ -109,21 +109,66 @@ def _parend(elems: Iterable[str]) -> str:
 T = TypeVar('T', bound='Kore')
 
 
+def unimplemented() -> Any:
+    raise RuntimeError('Unimplemented operation')
+
+
+def unsupported() -> Any:
+    raise RuntimeError('Unsupported operation')
+
+
 class Kore(ABC):
+    _TAGS: Final[Mapping[str, str]] = {
+        'SortVariable': 'SortVar',
+        'SortApp': 'SortCons',
+        'EVar': 'ElemVar',
+        'SVar': 'SetVar',
+        'String': 'StrLit',
+        'App': 'Apply',
+        'dv': 'DomVal',
+        **{k: k for k in (
+            'Top',
+            'Bottom',
+            'Not',
+            'And',
+            'Or',
+            'Implies',
+            'Iff',
+            'Exists',
+            'Forall',
+            'Mu',
+            'Nu',
+            'Ceil',
+            'Floor',
+            'Equals',
+            'In',
+            'Next',
+            'Rewrites',
+        )},
+    }
 
     @classmethod
     def from_dict(cls: Type[T], dct: Mapping[str, Any]) -> T:
-        # TODO
-        ...
+        tag = cls._get_tag(dct)
+        if tag not in cls._TAGS:
+            raise ValueError(f"Expected Kore tag, found: {tag}")
+        cls_id = cls._TAGS[tag]
+        return globals()[cls_id].from_dict(dct)
 
     @classmethod
     def from_json(cls: Type[T], s: str) -> T:
         return (cls.from_dict(json.loads(s)))
 
+    @staticmethod
+    def _get_tag(dct: Mapping[str, Any]) -> str:
+        if 'tag' not in dct:
+            raise ValueError("Attribute 'tag' is missing")
+        return dct['tag']
+
     @classmethod
     def _check_tag(cls: Type[T], dct: Mapping[str, Any], expected: Optional[str] = None) -> None:
         expected = expected if expected is not None else cls.__name__
-        actual = dct['tag']
+        actual = cls._get_tag(dct)
         if actual != expected:
             raise ValueError(f"Expected '{expected}' as 'tag' value, found: '{actual}'")
 
@@ -215,7 +260,7 @@ class StrLitLexer(Iterator[Tuple[str, 'StrLitLexer.TokenType']]):
         assert self._la != '"'
         assert self._la != '\\'
 
-        if not (32 <= ord(self._la) <= 122):
+        if not (32 <= ord(self._la) <= 126):
             raise ValueError(f'Expected printable ASCII character, found: character with code {ord(self._la)}')
 
         token = self._la
@@ -252,12 +297,17 @@ class StrLitLexer(Iterator[Tuple[str, 'StrLitLexer.TokenType']]):
 
 
 class Sort(Kore, ABC):
+    _SORT_TAGS: Final = {'SortVariable', 'SortApp'}
+
     name: str
 
     @classmethod
     def from_dict(cls: Type['Sort'], dct: Mapping[str, Any]) -> 'Sort':
-        # TODO
-        ...
+        tag = cls._get_tag(dct)
+        if tag not in cls._SORT_TAGS:
+            raise ValueError(f'Expected Sort tag, found: {tag}')
+        cls_id = cls._TAGS[tag]
+        return globals()[cls_id].from_dict(dct)
 
 
 @final
@@ -271,13 +321,13 @@ class SortVar(Sort):
 
     @classmethod
     def from_dict(cls: Type['SortVar'], dct: Mapping[str, Any]) -> 'SortVar':
-        # TODO
-        ...
+        cls._check_tag(dct, 'SortVariable')  # SortVar would be more consistent with SortApp, EVar
+        return SortVar(name=dct['name'])
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
     @property
     def text(self) -> str:
@@ -297,13 +347,13 @@ class SortCons(Sort):
 
     @classmethod
     def from_dict(cls: Type['SortCons'], dct: Mapping[str, Any]) -> 'SortCons':
-        # TODO
-        ...
+        cls._check_tag(dct, 'SortApp')
+        return SortCons(name=dct['name'], sorts=(Sort.from_dict(arg) for arg in dct['args']))
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
     @property
     def text(self) -> str:
@@ -311,21 +361,35 @@ class SortCons(Sort):
 
 
 class Pattern(Kore, ABC):
+    _PATTERN_TAGS: Final = {
+        'EVar', 'SVar', 'String', 'App', 'Top', 'Bottom', 'Not', 'And', 'Or',
+        'Implies', 'Iff', 'Exists', 'Forall', 'Mu', 'Nu', 'Ceil', 'Floor',
+        'Equals', 'In', 'Next', 'Rewrites', 'dv',
+    }
 
     @classmethod
     def from_dict(cls: Type['Pattern'], dct: Mapping[str, Any]) -> 'Pattern':
-        # TODO
-        ...
+        # TODO extract logic
+        tag = cls._get_tag(dct)
+        if tag not in cls._PATTERN_TAGS:
+            raise ValueError(f'Expected Pattern tag, found: {tag}')
+        cls_id = cls._TAGS[tag]
+        return globals()[cls_id].from_dict(dct)
 
 
 class VarPattern(Pattern, ABC):
+    _VAR_PATTERN_TAGS: Final = {'EVar', 'SVar'}
+
     name: str
     sort: Sort
 
     @classmethod
     def from_dict(cls: Type['VarPattern'], dct: Mapping[str, Any]) -> 'VarPattern':
-        # TODO
-        ...
+        tag = cls._get_tag(dct)
+        if tag not in cls._PATTERN_TAGS:
+            raise ValueError(f'Expected VarPattern tag, found: {tag}')
+        cls_id = cls._TAGS[tag]
+        return globals()[cls_id].from_dict(dct)
 
     @property
     def text(self) -> str:
@@ -345,13 +409,13 @@ class ElemVar(VarPattern):
 
     @classmethod
     def from_dict(cls: Type['ElemVar'], dct: Mapping[str, Any]) -> 'ElemVar':
-        # TODO
-        ...
+        cls._check_tag(dct, 'EVar')
+        return ElemVar(name=dct['name'], sort=Sort.from_dict(dct['sort']))
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
 
 @final
@@ -367,13 +431,13 @@ class SetVar(VarPattern):
 
     @classmethod
     def from_dict(cls: Type['SetVar'], dct: Mapping[str, Any]) -> 'SetVar':
-        # TODO
-        ...
+        cls._check_tag(dct, 'SVar')
+        return SetVar(name=dct['name'], sort=Sort.from_dict(dct['sort']))
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
 
 @final
@@ -389,13 +453,13 @@ class StrLit(Pattern):
 
     @classmethod
     def from_dict(cls: Type['StrLit'], dct: Mapping[str, Any]) -> 'StrLit':
-        # TODO
-        ...
+        cls._check_tag(dct, 'String')
+        return StrLit(value=dct['value'])
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
     @property
     def text(self) -> str:
@@ -421,13 +485,17 @@ class Apply(Pattern):
 
     @classmethod
     def from_dict(cls: Type['Apply'], dct: Mapping[str, Any]) -> 'Apply':
-        # TODO
-        ...
+        cls._check_tag(dct, 'App')  # TODO Are there tests for this?
+        return Apply(
+            symbol=dct['name'],
+            sorts=(Sort.from_dict(sort) for sort in dct['sorts']),
+            patterns=(Pattern.from_dict(arg) for arg in dct['args']),
+        )
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
     @property
     def text(self) -> str:
@@ -435,15 +503,26 @@ class Apply(Pattern):
 
 
 class MLPattern(Pattern, ABC):
+    _ML_PATTERN_TAGS: Final = {
+        'Top', 'Bottom', 'Not', 'And', 'Or', 'Implies', 'Iff', 'Exists',
+        'Forall', 'Mu', 'Nu', 'Ceil', 'Floor', 'Equals', 'In', 'Next',
+        'Rewrites', 'dv',
+    }
+
     symbol: ClassVar[str]
 
     @classmethod
     def from_dict(cls: Type['MLPattern'], dct: Mapping[str, Any]) -> 'MLPattern':
-        # TODO
-        ...
+        tag = cls._get_tag(dct)
+        if tag not in cls._ML_PATTERN_TAGS:
+            raise ValueError(f'Expected MLPattern tag, found: {tag}')
+        cls_id = cls._TAGS[tag]
+        return globals()[cls_id].from_dict(dct)
 
 
 class MLConn(MLPattern, ABC):
+    _ML_CONN_TAGS: Final = {'Top', 'Bottom', 'Not', 'And', 'Or', 'Implies', 'Iff'}
+
     sort: Sort
 
     @property
@@ -453,8 +532,11 @@ class MLConn(MLPattern, ABC):
 
     @classmethod
     def from_dict(cls: Type['MLConn'], dct: Mapping[str, Any]) -> 'MLConn':
-        # TODO
-        ...
+        tag = cls._get_tag(dct)
+        if tag not in cls._ML_CONN_TAGS:
+            raise ValueError(f'Expected MLConn tag, found: {tag}')
+        cls_id = cls._TAGS[tag]
+        return globals()[cls_id].from_dict(dct)
 
     @property
     def text(self) -> str:
@@ -462,11 +544,15 @@ class MLConn(MLPattern, ABC):
 
 
 class NullaryConn(MLConn, ABC):
+    _NULLARY_CONN_TAGS: Final = {'Top', 'Bottom'}
 
     @classmethod
     def from_dict(cls: Type['NullaryConn'], dct: Mapping[str, Any]) -> 'NullaryConn':
-        # TODO
-        ...
+        tag = cls._get_tag(dct)
+        if tag not in cls._NULLARY_CONN_TAGS:
+            raise ValueError(f'Expected NullaryConn tag, found: {tag}')
+        cls_id = cls._TAGS[tag]
+        return globals()[cls_id].from_dict(dct)
 
     @property
     def patterns(self) -> Tuple[Pattern, ...]:
@@ -481,13 +567,13 @@ class Top(NullaryConn):
 
     @classmethod
     def from_dict(cls: Type['Top'], dct: Mapping[str, Any]) -> 'Top':
-        # TODO
-        ...
+        cls._check_tag(dct)
+        return Top(sort=Sort.from_dict(dct['sort']))
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
 
 @final
@@ -498,22 +584,27 @@ class Bottom(NullaryConn):
 
     @classmethod
     def from_dict(cls: Type['Bottom'], dct: Mapping[str, Any]) -> 'Bottom':
-        # TODO
-        ...
+        cls._check_tag(dct)
+        return Bottom(sort=Sort.from_dict(dct['sort']))
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
 
 class UnaryConn(MLConn, ABC):
+    _UNARY_CONN_TAGS: Final = {'Not'}
+
     pattern: Pattern
 
     @classmethod
     def from_dict(cls: Type['UnaryConn'], dct: Mapping[str, Any]) -> 'UnaryConn':
-        # TODO
-        ...
+        tag = cls._get_tag(dct)
+        if tag not in cls._UNARY_CONN_TAGS:
+            raise ValueError(f'Expected UnaryConn tag, found: {tag}')
+        cls_id = cls._TAGS[tag]
+        return globals()[cls_id].from_dict(dct)
 
     @property
     def patterns(self) -> Tuple[Pattern, ...]:
@@ -529,16 +620,18 @@ class Not(UnaryConn):
 
     @classmethod
     def from_dict(cls: Type['Not'], dct: Mapping[str, Any]) -> 'Not':
-        # TODO
-        ...
+        cls._check_tag(dct)
+        return Not(sort=Sort.from_dict(dct['sort']), pattern=Pattern.from_dict(dct['arg']))
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
 
 class BinaryConn(MLConn, ABC):
+    _BINARY_CONN_TAGS: Final = {'And', 'Or', 'Implies', 'Iff'}
+
     left: Pattern
     right: Pattern
 
@@ -548,8 +641,11 @@ class BinaryConn(MLConn, ABC):
 
     @classmethod
     def from_dict(cls: Type['BinaryConn'], dct: Mapping[str, Any]) -> 'BinaryConn':
-        # TODO
-        ...
+        tag = cls._get_tag(dct)
+        if tag not in cls._BINARY_CONN_TAGS:
+            raise ValueError(f'Expected BinaryConn tag, found: {tag}')
+        cls_id = cls._TAGS[tag]
+        return globals()[cls_id].from_dict(dct)
 
     @property
     def patterns(self) -> Tuple[Pattern, ...]:
@@ -566,13 +662,18 @@ class And(BinaryConn):
 
     @classmethod
     def from_dict(cls: Type['And'], dct: Mapping[str, Any]) -> 'And':
-        # TODO
-        ...
+        # TODO Consider implementing in BinaryConn
+        cls._check_tag(dct)
+        return And(
+            sort=Sort.from_dict(dct['sort']),
+            left=Pattern.from_dict(dct['first']),
+            right=Pattern.from_dict(dct['second']),
+        )
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
 
 @final
@@ -585,13 +686,17 @@ class Or(BinaryConn):
 
     @classmethod
     def from_dict(cls: Type['Or'], dct: Mapping[str, Any]) -> 'Or':
-        # TODO
-        ...
+        cls._check_tag(dct)
+        return Or(
+            sort=Sort.from_dict(dct['sort']),
+            left=Pattern.from_dict(dct['first']),
+            right=Pattern.from_dict(dct['second']),
+        )
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
 
 @final
@@ -604,13 +709,17 @@ class Implies(BinaryConn):
 
     @classmethod
     def from_dict(cls: Type['Implies'], dct: Mapping[str, Any]) -> 'Implies':
-        # TODO
-        ...
+        cls._check_tag(dct)
+        return Implies(
+            sort=Sort.from_dict(dct['sort']),
+            left=Pattern.from_dict(dct['first']),
+            right=Pattern.from_dict(dct['second']),
+        )
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
 
 @final
@@ -623,24 +732,33 @@ class Iff(BinaryConn):
 
     @classmethod
     def from_dict(cls: Type['Iff'], dct: Mapping[str, Any]) -> 'Iff':
-        # TODO
-        ...
+        cls._check_tag(dct)
+        return Iff(
+            sort=Sort.from_dict(dct['sort']),
+            left=Pattern.from_dict(dct['first']),
+            right=Pattern.from_dict(dct['second']),
+        )
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
 
 class MLQuant(MLPattern, ABC):
+    _ML_QUANT_TAGS: Final = {'Exists', 'Forall'}
+
     sort: Sort
     var: ElemVar
     pattern: Pattern
 
     @classmethod
     def from_dict(cls: Type['MLQuant'], dct: Mapping[str, Any]) -> 'MLQuant':
-        # TODO
-        ...
+        tag = cls._get_tag(dct)
+        if tag not in cls._ML_QUANT_TAGS:
+            raise ValueError(f'Expected MLQuant tag, found: {tag}')
+        cls_id = cls._TAGS[tag]
+        return globals()[cls_id].from_dict(dct)
 
     @property
     def text(self) -> str:
@@ -657,13 +775,17 @@ class Exists(MLQuant):
 
     @classmethod
     def from_dict(cls: Type['Exists'], dct: Mapping[str, Any]) -> 'Exists':
-        # TODO
-        ...
+        cls._check_tag(dct)
+        return Exists(
+            sort=Sort.from_dict(dct['sort']),
+            var=ElemVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),  # TODO ElemVar.from_dict(...) would be nicer
+            pattern=Pattern.from_dict(dct['arg']),
+        )
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
 
 @final
@@ -676,23 +798,32 @@ class Forall(MLQuant):
 
     @classmethod
     def from_dict(cls: Type['Forall'], dct: Mapping[str, Any]) -> 'Forall':
-        # TODO
-        ...
+        cls._check_tag(dct)
+        return Forall(
+            sort=Sort.from_dict(dct['sort']),
+            var=ElemVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),  # TODO ElemVar.from_dict(...) would be nicer
+            pattern=Pattern.from_dict(dct['arg']),
+        )
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
 
 class MLFixpoint(MLPattern, ABC):
+    _ML_FIXPOINT_TAGS: Final = {'Mu', 'Nu'}
+
     var: SetVar
     pattern: Pattern
 
     @classmethod
     def from_dict(cls: Type['MLFixpoint'], dct: Mapping[str, Any]) -> 'MLFixpoint':
-        # TODO
-        ...
+        tag = cls._get_tag(dct)
+        if tag not in cls._ML_FIXPOINT_TAGS:
+            raise ValueError(f'Expected MLFixpoint tag, found: {tag}')
+        cls_id = cls._TAGS[tag]
+        return globals()[cls_id].from_dict(dct)
 
     @property
     def text(self) -> str:
@@ -708,13 +839,16 @@ class Mu(MLFixpoint):
 
     @classmethod
     def from_dict(cls: Type['Mu'], dct: Mapping[str, Any]) -> 'Mu':
-        # TODO
-        ...
+        cls._check_tag(dct)
+        return Mu(
+            var=SetVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),  # TODO SetVar.from_dict(...) would be nicer
+            pattern=Pattern.from_dict(dct['arg']),
+        )
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
 
 @final
@@ -726,28 +860,44 @@ class Nu(MLFixpoint):
 
     @classmethod
     def from_dict(cls: Type['Nu'], dct: Mapping[str, Any]) -> 'Nu':
-        # TODO
-        ...
+        cls._check_tag(dct)
+        return Nu(
+            var=SetVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),  # TODO SetVar.from_dict(...) would be nicer
+            pattern=Pattern.from_dict(dct['arg']),
+        )
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
 
 class MLPred(MLPattern, ABC):
-    ...
+    _ML_PRED_TAGS: Final = {'Ceil', 'Floor', 'Equals', 'In'}
+
+    @classmethod
+    def from_dict(cls: Type['MLPred'], dct: Mapping[str, Any]) -> 'MLPred':
+        tag = cls._get_tag(dct)
+        if tag not in cls._ML_PRED_TAGS:
+            raise ValueError(f'Expected MLPred tag, found: {tag}')
+        cls_id = cls._TAGS[tag]
+        return globals()[cls_id].from_dict(dct)
 
 
 class RoundPred(MLPred, ABC):
+    _ROUND_PRED_TAGS: Final = {'Ceil', 'Floor'}
+
     op_sort: Sort
     sort: Sort
     pattern: Pattern
 
     @classmethod
     def from_dict(cls: Type['RoundPred'], dct: Mapping[str, Any]) -> 'RoundPred':
-        # TODO
-        ...
+        tag = cls._get_tag(dct)
+        if tag not in cls._ROUND_PRED_TAGS:
+            raise ValueError(f'Expected RoundPred tag, found: {tag}')
+        cls_id = cls._TAGS[tag]
+        return globals()[cls_id].from_dict(dct)
 
     @property
     def text(self) -> str:
@@ -764,13 +914,17 @@ class Ceil(RoundPred):
 
     @classmethod
     def from_dict(cls: Type['Ceil'], dct: Mapping[str, Any]) -> 'Ceil':
-        # TODO
-        ...
+        cls._check_tag(dct)
+        return Ceil(
+            op_sort=Sort.from_dict(dct['argSort']),
+            sort=Sort.from_dict(dct['resultSort']),
+            pattern=Pattern.from_dict(dct['arg']),
+        )
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
 
 @final
@@ -783,16 +937,22 @@ class Floor(RoundPred):
 
     @classmethod
     def from_dict(cls: Type['Floor'], dct: Mapping[str, Any]) -> 'Floor':
-        # TODO
-        ...
+        cls._check_tag(dct)
+        return Floor(
+            op_sort=Sort.from_dict(dct['argSort']),
+            sort=Sort.from_dict(dct['resultSort']),
+            pattern=Pattern.from_dict(dct['arg']),
+        )
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
 
 class BinaryPred(MLPred, ABC):
+    _BINARY_PRED_TAGS: Final = {'Equals', 'In'}
+
     left_sort: Sort
     right_sort: Sort
     left: Pattern
@@ -800,8 +960,11 @@ class BinaryPred(MLPred, ABC):
 
     @classmethod
     def from_dict(cls: Type['BinaryPred'], dct: Mapping[str, Any]) -> 'BinaryPred':
-        # TODO
-        ...
+        tag = cls._get_tag(dct)
+        if tag not in cls._BINARY_PRED_TAGS:
+            raise ValueError(f'Expected BinaryPred tag, found: {tag}')
+        cls_id = cls._TAGS[tag]
+        return globals()[cls_id].from_dict(dct)
 
     @property
     def text(self) -> str:
@@ -823,13 +986,18 @@ class Equals(BinaryPred):
 
     @classmethod
     def from_dict(cls: Type['Equals'], dct: Mapping[str, Any]) -> 'Equals':
-        # TODO
-        ...
+        cls._check_tag(dct)
+        return Equals(
+            left_sort=Sort.from_dict(dct['argSort']),      # TODO Shouldn't this be firstSort instead?
+            right_sort=Sort.from_dict(dct['resultSort']),  # TODO Shoulnd't this be secondSort instead?
+            left=Pattern.from_dict(dct['first']),
+            right=Pattern.from_dict(dct['second']),
+        )
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
 
 @final
@@ -843,22 +1011,32 @@ class In(BinaryPred):
 
     @classmethod
     def from_dict(cls: Type['In'], dct: Mapping[str, Any]) -> 'In':
-        # TODO
-        ...
+        cls._check_tag(dct)
+        return In(
+            left_sort=Sort.from_dict(dct['argSort']),      # TODO Shouldn't this be firstSort instead?
+            right_sort=Sort.from_dict(dct['resultSort']),  # TODO Shoulnd't this be secondSort instead?
+            left=Pattern.from_dict(dct['first']),
+            right=Pattern.from_dict(dct['second']),
+        )
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
 
 class MLRewrite(MLPattern, ABC):
+    _ML_REWRITE_TAGS: Final = {'Next', 'Rewrites'}
+
     sort: Sort
 
     @classmethod
     def from_dict(cls: Type['MLRewrite'], dct: Mapping[str, Any]) -> 'MLRewrite':
-        # TODO
-        ...
+        tag = cls._get_tag(dct)
+        if tag not in cls._ML_REWRITE_TAGS:
+            raise ValueError(f'Expected MLRewrite tag, found: {tag}')
+        cls_id = cls._TAGS[tag]
+        return globals()[cls_id].from_dict(dct)
 
 
 @final
@@ -870,13 +1048,16 @@ class Next(MLRewrite):
 
     @classmethod
     def from_dict(cls: Type['Next'], dct: Mapping[str, Any]) -> 'Next':
-        # TODO
-        ...
+        cls._check_tag(dct)
+        return Next(
+            sort=Sort.from_dict(dct['sort']),
+            pattern=Pattern.from_dict(dct['dest']),
+        )
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
     @property
     def text(self) -> str:
@@ -893,13 +1074,17 @@ class Rewrites(MLRewrite):
 
     @classmethod
     def from_dict(cls: Type['Rewrites'], dct: Mapping[str, Any]) -> 'Rewrites':
-        # TODO
-        ...
+        cls._check_tag(dct)
+        return Rewrites(
+            sort=Sort.from_dict(dct['sort']),
+            left=Pattern.from_dict(dct['source']),
+            right=Pattern.from_dict(dct['dest']),
+        )
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
     @property
     def text(self) -> str:
@@ -915,13 +1100,16 @@ class DomVal(MLPattern):
 
     @classmethod
     def from_dict(cls: Type['DomVal'], dct: Mapping[str, Any]) -> 'DomVal':
-        # TODO
-        ...
+        cls._check_tag(dct, 'dv')  # TODO Consider 'DV' as tag
+        return DomVal(
+            sort=Sort.from_dict(dct['sort']),
+            value=StrLit(dct['value']),  # TODO StrLit.from_dict(...) would be nicer
+        )
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unimplemented()
 
     @property
     def text(self) -> str:
@@ -947,12 +1135,12 @@ class Attr(Kore):
     @classmethod
     def from_dict(cls: Type['Attr'], dct: Mapping[str, Any]) -> 'Attr':
         # TODO
-        ...
+        return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unsupported()
 
     @property
     def text(self) -> str:
@@ -968,7 +1156,7 @@ class Sentence(Kore, WithAttrs, ABC):
     @classmethod
     def from_dict(cls: Type['Sentence'], dct: Mapping[str, Any]) -> 'Sentence':
         # TODO
-        ...
+        return unsupported()
 
 
 @final
@@ -985,12 +1173,12 @@ class Import(Sentence):
     @classmethod
     def from_dict(cls: Type['Import'], dct: Mapping[str, Any]) -> 'Import':
         # TODO
-        ...
+        return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unsupported()
 
     @property
     def text(self) -> str:
@@ -1019,12 +1207,12 @@ class SortDecl(Sentence):
     @classmethod
     def from_dict(cls: Type['SortDecl'], dct: Mapping[str, Any]) -> 'SortDecl':
         # TODO
-        ...
+        return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unsupported()
 
     @property
     def text(self) -> str:
@@ -1050,12 +1238,12 @@ class Symbol(Kore):
     @classmethod
     def from_dict(cls: Type['Symbol'], dct: Mapping[str, Any]) -> 'Symbol':
         # TODO
-        ...
+        return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unsupported()
 
     @property
     def text(self) -> str:
@@ -1081,12 +1269,12 @@ class SymbolDecl(Sentence):
     @classmethod
     def from_dict(cls: Type['SymbolDecl'], dct: Mapping[str, Any]) -> 'SymbolDecl':
         # TODO
-        ...
+        return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unsupported()
 
     @property
     def text(self) -> str:
@@ -1129,12 +1317,12 @@ class AliasDecl(Sentence):
     @classmethod
     def from_dict(cls: Type['AliasDecl'], dct: Mapping[str, Any]) -> 'AliasDecl':
         # TODO
-        ...
+        return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unsupported()
 
     @property
     def text(self) -> str:
@@ -1160,7 +1348,7 @@ class AxiomLike(Sentence, ABC):
     @classmethod
     def from_dict(cls: Type['AxiomLike'], dct: Mapping[str, Any]) -> 'AxiomLike':
         # TODO
-        ...
+        return unsupported()
 
     @property
     def text(self) -> str:
@@ -1188,12 +1376,12 @@ class Axiom(AxiomLike):
     @classmethod
     def from_dict(cls: Type['Axiom'], dct: Mapping[str, Any]) -> 'Axiom':
         # TODO
-        ...
+        return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unsupported()
 
 
 @final
@@ -1212,12 +1400,12 @@ class Claim(AxiomLike):
     @classmethod
     def from_dict(cls: Type['Claim'], dct: Mapping[str, Any]) -> 'Claim':
         # TODO
-        ...
+        return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unsupported()
 
 
 @final
@@ -1236,12 +1424,12 @@ class Module(Kore, WithAttrs):
     @classmethod
     def from_dict(cls: Type['Module'], dct: Mapping[str, Any]) -> 'Module':
         # TODO
-        ...
+        return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unsupported()
 
     @property
     def text(self) -> str:
@@ -1265,12 +1453,12 @@ class Definition(Kore, WithAttrs):
     @classmethod
     def from_dict(cls: Type['Definition'], dct: Mapping[str, Any]) -> 'Definition':
         # TODO
-        ...
+        return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
         # TODO
-        ...
+        return unsupported()
 
     @property
     def text(self) -> str:
