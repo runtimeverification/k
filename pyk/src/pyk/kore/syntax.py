@@ -1,15 +1,21 @@
+import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import IntEnum
 from itertools import chain
 from typing import (
+    Any,
     ClassVar,
+    Dict,
     Final,
     Iterable,
     Iterator,
     List,
+    Mapping,
     Optional,
     Tuple,
+    Type,
+    TypeVar,
     Union,
     final,
 )
@@ -100,8 +106,31 @@ def _parend(elems: Iterable[str]) -> str:
 # TODO @overload
 
 
+T = TypeVar('T', bound='Kore')
+
+
 class Kore(ABC):
-    ...
+
+    @classmethod
+    def from_dict(cls: Type[T], dct: Mapping[str, Any]) -> T:
+        # TODO
+        ...
+
+    @classmethod
+    def _check_tag(cls: Type[T], dct: Mapping[str, Any], expected: Optional[str] = None) -> None:
+        expected = expected if expected is not None else cls.__name__
+        actual = dct['tag']
+        if actual != expected:
+            raise ValueError(f"Expected '{expected}' as 'tag' value, found: '{actual}'")
+
+    @property
+    def json(self) -> str:
+        return json.dumps(self.dict, sort_keys=True)
+
+    @property
+    @abstractmethod
+    def dict(self) -> Dict[str, Any]:
+        ...
 
     @property
     @abstractmethod
@@ -221,6 +250,11 @@ class StrLitLexer(Iterator[Tuple[str, 'StrLitLexer.TokenType']]):
 class Sort(Kore, ABC):
     name: str
 
+    @classmethod
+    def from_dict(cls: Type['Sort'], dct: Mapping[str, Any]) -> 'Sort':
+        # TODO
+        ...
+
 
 @final
 @dataclass(frozen=True)
@@ -230,6 +264,16 @@ class SortVar(Sort):
     def __init__(self, name: str):
         check_id(name)
         object.__setattr__(self, 'name', name)
+
+    @classmethod
+    def from_dict(cls: Type['SortVar'], dct: Mapping[str, Any]) -> 'SortVar':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
 
     @property
     def text(self) -> str:
@@ -247,18 +291,37 @@ class SortCons(Sort):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sorts', tuple(sorts))
 
+    @classmethod
+    def from_dict(cls: Type['SortCons'], dct: Mapping[str, Any]) -> 'SortCons':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
     @property
     def text(self) -> str:
         return self.name + ' ' + _braced(sort.text for sort in self.sorts)
 
 
 class Pattern(Kore, ABC):
-    ...
+
+    @classmethod
+    def from_dict(cls: Type['Pattern'], dct: Mapping[str, Any]) -> 'Pattern':
+        # TODO
+        ...
 
 
 class VarPattern(Pattern, ABC):
     name: str
     sort: Sort
+
+    @classmethod
+    def from_dict(cls: Type['VarPattern'], dct: Mapping[str, Any]) -> 'VarPattern':
+        # TODO
+        ...
 
     @property
     def text(self) -> str:
@@ -276,6 +339,16 @@ class ElemVar(VarPattern):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sort', sort)
 
+    @classmethod
+    def from_dict(cls: Type['ElemVar'], dct: Mapping[str, Any]) -> 'ElemVar':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
 
 @final
 @dataclass(frozen=True)
@@ -288,6 +361,16 @@ class SetVar(VarPattern):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sort', sort)
 
+    @classmethod
+    def from_dict(cls: Type['SetVar'], dct: Mapping[str, Any]) -> 'SetVar':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
 
 @final
 @dataclass(frozen=True)
@@ -299,6 +382,16 @@ class StrLit(Pattern):
             pass  # validate value
 
         object.__setattr__(self, 'value', value)
+
+    @classmethod
+    def from_dict(cls: Type['StrLit'], dct: Mapping[str, Any]) -> 'StrLit':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
 
     @property
     def text(self) -> str:
@@ -322,6 +415,16 @@ class Apply(Pattern):
         object.__setattr__(self, 'sorts', tuple(sorts))
         object.__setattr__(self, 'patterns', tuple(patterns))
 
+    @classmethod
+    def from_dict(cls: Type['Apply'], dct: Mapping[str, Any]) -> 'Apply':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
     @property
     def text(self) -> str:
         return self.symbol + ' ' + _braced(sort.text for sort in self.sorts) + ' ' + _parend(pattern.text for pattern in self.patterns)
@@ -329,6 +432,11 @@ class Apply(Pattern):
 
 class MLPattern(Pattern, ABC):
     symbol: ClassVar[str]
+
+    @classmethod
+    def from_dict(cls: Type['MLPattern'], dct: Mapping[str, Any]) -> 'MLPattern':
+        # TODO
+        ...
 
 
 class MLConn(MLPattern, ABC):
@@ -339,12 +447,22 @@ class MLConn(MLPattern, ABC):
     def patterns(self) -> Tuple[Pattern, ...]:
         ...
 
+    @classmethod
+    def from_dict(cls: Type['MLConn'], dct: Mapping[str, Any]) -> 'MLConn':
+        # TODO
+        ...
+
     @property
     def text(self) -> str:
         return self.symbol + ' { ' + self.sort.text + ' } ' + _parend(pattern.text for pattern in self.patterns)
 
 
 class NullaryConn(MLConn, ABC):
+
+    @classmethod
+    def from_dict(cls: Type['NullaryConn'], dct: Mapping[str, Any]) -> 'NullaryConn':
+        # TODO
+        ...
 
     @property
     def patterns(self) -> Tuple[Pattern, ...]:
@@ -357,6 +475,16 @@ class Top(NullaryConn):
     symbol = '\\top'
     sort: Sort
 
+    @classmethod
+    def from_dict(cls: Type['Top'], dct: Mapping[str, Any]) -> 'Top':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
 
 @final
 @dataclass(frozen=True)
@@ -364,9 +492,24 @@ class Bottom(NullaryConn):
     symbol = '\\bottom'
     sort: Sort
 
+    @classmethod
+    def from_dict(cls: Type['Bottom'], dct: Mapping[str, Any]) -> 'Bottom':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
 
 class UnaryConn(MLConn, ABC):
     pattern: Pattern
+
+    @classmethod
+    def from_dict(cls: Type['UnaryConn'], dct: Mapping[str, Any]) -> 'UnaryConn':
+        # TODO
+        ...
 
     @property
     def patterns(self) -> Tuple[Pattern, ...]:
@@ -380,6 +523,16 @@ class Not(UnaryConn):
     sort: Sort
     pattern: Pattern
 
+    @classmethod
+    def from_dict(cls: Type['Not'], dct: Mapping[str, Any]) -> 'Not':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
 
 class BinaryConn(MLConn, ABC):
     left: Pattern
@@ -388,6 +541,11 @@ class BinaryConn(MLConn, ABC):
     def __iter__(self) -> Iterator[Pattern]:
         yield self.left
         yield self.right
+
+    @classmethod
+    def from_dict(cls: Type['BinaryConn'], dct: Mapping[str, Any]) -> 'BinaryConn':
+        # TODO
+        ...
 
     @property
     def patterns(self) -> Tuple[Pattern, ...]:
@@ -402,6 +560,16 @@ class And(BinaryConn):
     left: Pattern
     right: Pattern
 
+    @classmethod
+    def from_dict(cls: Type['And'], dct: Mapping[str, Any]) -> 'And':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
 
 @final
 @dataclass(frozen=True)
@@ -410,6 +578,16 @@ class Or(BinaryConn):
     sort: Sort
     left: Pattern
     right: Pattern
+
+    @classmethod
+    def from_dict(cls: Type['Or'], dct: Mapping[str, Any]) -> 'Or':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
 
 
 @final
@@ -420,6 +598,16 @@ class Implies(BinaryConn):
     left: Pattern
     right: Pattern
 
+    @classmethod
+    def from_dict(cls: Type['Implies'], dct: Mapping[str, Any]) -> 'Implies':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
 
 @final
 @dataclass(frozen=True)
@@ -429,11 +617,26 @@ class Iff(BinaryConn):
     left: Pattern
     right: Pattern
 
+    @classmethod
+    def from_dict(cls: Type['Iff'], dct: Mapping[str, Any]) -> 'Iff':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
 
 class MLQuant(MLPattern, ABC):
     sort: Sort
     var: ElemVar
     pattern: Pattern
+
+    @classmethod
+    def from_dict(cls: Type['MLQuant'], dct: Mapping[str, Any]) -> 'MLQuant':
+        # TODO
+        ...
 
     @property
     def text(self) -> str:
@@ -448,6 +651,16 @@ class Exists(MLQuant):
     var: ElemVar
     pattern: Pattern
 
+    @classmethod
+    def from_dict(cls: Type['Exists'], dct: Mapping[str, Any]) -> 'Exists':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
 
 @final
 @dataclass(frozen=True)
@@ -457,10 +670,25 @@ class Forall(MLQuant):
     var: ElemVar
     pattern: Pattern
 
+    @classmethod
+    def from_dict(cls: Type['Forall'], dct: Mapping[str, Any]) -> 'Forall':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
 
 class MLFixpoint(MLPattern, ABC):
     var: SetVar
     pattern: Pattern
+
+    @classmethod
+    def from_dict(cls: Type['MLFixpoint'], dct: Mapping[str, Any]) -> 'MLFixpoint':
+        # TODO
+        ...
 
     @property
     def text(self) -> str:
@@ -474,6 +702,16 @@ class Mu(MLFixpoint):
     var: SetVar
     pattern: Pattern
 
+    @classmethod
+    def from_dict(cls: Type['Mu'], dct: Mapping[str, Any]) -> 'Mu':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
 
 @final
 @dataclass(frozen=True)
@@ -481,6 +719,16 @@ class Nu(MLFixpoint):
     symbol = '\\nu'
     var: SetVar
     pattern: Pattern
+
+    @classmethod
+    def from_dict(cls: Type['Nu'], dct: Mapping[str, Any]) -> 'Nu':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
 
 
 class MLPred(MLPattern, ABC):
@@ -491,6 +739,11 @@ class RoundPred(MLPred, ABC):
     op_sort: Sort
     sort: Sort
     pattern: Pattern
+
+    @classmethod
+    def from_dict(cls: Type['RoundPred'], dct: Mapping[str, Any]) -> 'RoundPred':
+        # TODO
+        ...
 
     @property
     def text(self) -> str:
@@ -505,6 +758,16 @@ class Ceil(RoundPred):
     sort: Sort
     pattern: Pattern
 
+    @classmethod
+    def from_dict(cls: Type['Ceil'], dct: Mapping[str, Any]) -> 'Ceil':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
 
 @final
 @dataclass(frozen=True)
@@ -514,12 +777,27 @@ class Floor(RoundPred):
     sort: Sort
     pattern: Pattern
 
+    @classmethod
+    def from_dict(cls: Type['Floor'], dct: Mapping[str, Any]) -> 'Floor':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
 
 class BinaryPred(MLPred, ABC):
     left_sort: Sort
     right_sort: Sort
     left: Pattern
     right: Pattern
+
+    @classmethod
+    def from_dict(cls: Type['BinaryPred'], dct: Mapping[str, Any]) -> 'BinaryPred':
+        # TODO
+        ...
 
     @property
     def text(self) -> str:
@@ -539,6 +817,16 @@ class Equals(BinaryPred):
     left: Pattern
     right: Pattern
 
+    @classmethod
+    def from_dict(cls: Type['Equals'], dct: Mapping[str, Any]) -> 'Equals':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
 
 @final
 @dataclass(frozen=True)
@@ -549,9 +837,24 @@ class In(BinaryPred):
     left: Pattern
     right: Pattern
 
+    @classmethod
+    def from_dict(cls: Type['In'], dct: Mapping[str, Any]) -> 'In':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
 
 class MLRewrite(MLPattern, ABC):
     sort: Sort
+
+    @classmethod
+    def from_dict(cls: Type['MLRewrite'], dct: Mapping[str, Any]) -> 'MLRewrite':
+        # TODO
+        ...
 
 
 @final
@@ -560,6 +863,16 @@ class Next(MLRewrite):
     symbol = '\\next'
     sort: Sort
     pattern: Pattern
+
+    @classmethod
+    def from_dict(cls: Type['Next'], dct: Mapping[str, Any]) -> 'Next':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
 
     @property
     def text(self) -> str:
@@ -574,6 +887,16 @@ class Rewrites(MLRewrite):
     left: Pattern
     right: Pattern
 
+    @classmethod
+    def from_dict(cls: Type['Rewrites'], dct: Mapping[str, Any]) -> 'Rewrites':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
     @property
     def text(self) -> str:
         return self.symbol + ' { ' + self.sort.text + ' } ' + _parend((self.left.text, self.right.text))
@@ -585,6 +908,16 @@ class DomVal(MLPattern):
     symbol = '\\dv'
     sort: Sort
     value: StrLit
+
+    @classmethod
+    def from_dict(cls: Type['DomVal'], dct: Mapping[str, Any]) -> 'DomVal':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
 
     @property
     def text(self) -> str:
@@ -607,6 +940,16 @@ class Attr(Kore):
         object.__setattr__(self, 'symbol', symbol)
         object.__setattr__(self, 'params', tuple(params))
 
+    @classmethod
+    def from_dict(cls: Type['Attr'], dct: Mapping[str, Any]) -> 'Attr':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
     @property
     def text(self) -> str:
         return self.symbol + ' { } ' + _parend(param.text for param in self.params)
@@ -617,7 +960,11 @@ class WithAttrs(ABC):
 
 
 class Sentence(Kore, WithAttrs, ABC):
-    ...
+
+    @classmethod
+    def from_dict(cls: Type['Sentence'], dct: Mapping[str, Any]) -> 'Sentence':
+        # TODO
+        ...
 
 
 @final
@@ -630,6 +977,16 @@ class Import(Sentence):
         check_id(module_name)
         object.__setattr__(self, 'module_name', module_name)
         object.__setattr__(self, 'attrs', tuple(attrs))
+
+    @classmethod
+    def from_dict(cls: Type['Import'], dct: Mapping[str, Any]) -> 'Import':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
 
     @property
     def text(self) -> str:
@@ -655,6 +1012,16 @@ class SortDecl(Sentence):
         object.__setattr__(self, 'attrs', tuple(attrs))
         object.__setattr__(self, 'hooked', hooked)
 
+    @classmethod
+    def from_dict(cls: Type['SortDecl'], dct: Mapping[str, Any]) -> 'SortDecl':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
     @property
     def text(self) -> str:
         return ' '.join([
@@ -676,6 +1043,16 @@ class Symbol(Kore):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'vars', tuple(vars))
 
+    @classmethod
+    def from_dict(cls: Type['Symbol'], dct: Mapping[str, Any]) -> 'Symbol':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
     @property
     def text(self) -> str:
         return self.name + ' ' + _braced(var.text for var in self.vars)
@@ -696,6 +1073,16 @@ class SymbolDecl(Sentence):
         object.__setattr__(self, 'sort', sort)
         object.__setattr__(self, 'attrs', tuple(attrs))
         object.__setattr__(self, 'hooked', hooked)
+
+    @classmethod
+    def from_dict(cls: Type['SymbolDecl'], dct: Mapping[str, Any]) -> 'SymbolDecl':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
 
     @property
     def text(self) -> str:
@@ -735,6 +1122,16 @@ class AliasDecl(Sentence):
         object.__setattr__(self, 'right', right)
         object.__setattr__(self, 'attrs', tuple(attrs))
 
+    @classmethod
+    def from_dict(cls: Type['AliasDecl'], dct: Mapping[str, Any]) -> 'AliasDecl':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
     @property
     def text(self) -> str:
         return ' '.join([
@@ -752,9 +1149,14 @@ class AliasDecl(Sentence):
 
 
 class AxiomLike(Sentence, ABC):
-    label: ClassVar[str]
+    label: ClassVar[str]  # TODO pull up to Sentence
     vars: Tuple[SortVar, ...]
     pattern: Pattern
+
+    @classmethod
+    def from_dict(cls: Type['AxiomLike'], dct: Mapping[str, Any]) -> 'AxiomLike':
+        # TODO
+        ...
 
     @property
     def text(self) -> str:
@@ -779,6 +1181,16 @@ class Axiom(AxiomLike):
         object.__setattr__(self, 'pattern', pattern)
         object.__setattr__(self, 'attrs', tuple(attrs))
 
+    @classmethod
+    def from_dict(cls: Type['Axiom'], dct: Mapping[str, Any]) -> 'Axiom':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
 
 @final
 @dataclass(frozen=True)
@@ -793,6 +1205,16 @@ class Claim(AxiomLike):
         object.__setattr__(self, 'pattern', pattern)
         object.__setattr__(self, 'attrs', tuple(attrs))
 
+    @classmethod
+    def from_dict(cls: Type['Claim'], dct: Mapping[str, Any]) -> 'Claim':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
+
 
 @final
 @dataclass(frozen=True)
@@ -806,6 +1228,16 @@ class Module(Kore, WithAttrs):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sentences', tuple(sentences))
         object.__setattr__(self, 'attrs', tuple(attrs))
+
+    @classmethod
+    def from_dict(cls: Type['Module'], dct: Mapping[str, Any]) -> 'Module':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
 
     @property
     def text(self) -> str:
@@ -825,6 +1257,16 @@ class Definition(Kore, WithAttrs):
     def __init__(self, modules: Iterable[Module] = (), attrs: Iterable[Attr] = ()):
         object.__setattr__(self, 'modules', tuple(modules))
         object.__setattr__(self, 'attrs', tuple(attrs))
+
+    @classmethod
+    def from_dict(cls: Type['Definition'], dct: Mapping[str, Any]) -> 'Definition':
+        # TODO
+        ...
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        # TODO
+        ...
 
     @property
     def text(self) -> str:
