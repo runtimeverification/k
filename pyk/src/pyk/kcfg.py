@@ -23,14 +23,7 @@ from graphviz import Digraph
 
 from .cterm import CTerm
 from .kast import KInner, KRuleLike, Subst
-from .kastManip import (
-    build_rule,
-    minimizeSubst,
-    ml_pred_to_bool,
-    mlAnd,
-    simplifyBool,
-    substToMap,
-)
+from .kastManip import build_rule, ml_pred_to_bool, mlAnd, simplifyBool
 from .ktool import KPrint
 from .utils import add_indent, compare_short_hashes, shorten_hash
 
@@ -118,7 +111,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             return [
                 'constraint: ' + kprint.pretty_print(ml_pred_to_bool(self.constraint)),
                 'subst:',
-                *add_indent('  ', kprint.pretty_print(substToMap(minimizeSubst(self.subst))).split('\n')),
+                *add_indent('  ', kprint.pretty_print(dict(self.subst.minimize())).split('\n')),
             ]
 
     _nodes: Dict[str, Node]

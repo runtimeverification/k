@@ -365,7 +365,7 @@ class KCFGTestCase(TestCase):
                                   f"┃   ├  {_short_hash(8)} (leaf)\n"
                                   f"┃   ┊  constraint: KToken(token='true', sort=KSort(name='Bool'))\n"
                                   f"┃   ┊  subst:\n"
-                                  f"┃   ┊    KApply(label=KLabel(name='_|->_', params=()), args=(KVariable(name='V11'), KToken(token='8', sort=KSort(name='Int'))))\n"
+                                   "┃   ┊    {'V11': KToken(token='8', sort=KSort(name='Int'))}\n" # noqa
                                   f"┃   └╌ {_short_hash(11)} (expanded)\n"
                                   f"┃       ┊ (looped back)\n"
                                   f"┃\n"
