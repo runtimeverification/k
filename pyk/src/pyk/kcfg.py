@@ -30,7 +30,7 @@ from .utils import add_indent, compare_short_hashes, shorten_hash
 
 class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
-    @dataclass(frozen=True)
+    @dataclass(frozen=True, order=True)
     class Node:
         cterm: CTerm
 
@@ -43,11 +43,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         def to_dict(self) -> Dict[str, Any]:
             return {'id': self.id, 'term': self.cterm.term.to_dict()}
-
-        def __lt__(self, other):
-            if not isinstance(other, KCFG.Node):
-                return NotImplemented
-            return self.id < other.id
 
     class EdgeLike(ABC):
         source: 'KCFG.Node'

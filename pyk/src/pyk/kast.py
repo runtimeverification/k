@@ -1,6 +1,6 @@
 import json
 from abc import ABC, abstractmethod
-from dataclasses import InitVar, dataclass
+from dataclasses import InitVar, dataclass, fields
 from enum import Enum
 from functools import cached_property, reduce
 from itertools import chain
@@ -62,6 +62,17 @@ class KAst(ABC):
         actual = d['node']
         if actual != expected:
             raise ValueError(f"Expected '{expected}' as 'node' value, found: '{actual}'")
+
+    def _as_shallow_tuple(self) -> Tuple[Any, ...]:
+        # shallow copy version of dataclass.astuple.
+        return tuple([self.__dict__[field.name] for field in fields(type(self))])
+
+    def __lt__(t1, t2):
+        if not isinstance(t2, KAst):
+            return NotImplemented
+        if type(t1) == type(t2):
+            return t1._as_shallow_tuple() < t2._as_shallow_tuple()
+        return type(t1).__name__ < type(t2).__name__
 
 
 @final
