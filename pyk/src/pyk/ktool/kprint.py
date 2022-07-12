@@ -181,7 +181,7 @@ def prettyPrintKast(kast, symbol_table, debug=False):
         attStr = prettyPrintKast(kast.att, symbol_table, debug=debug)
         return 'syntax priority ' + prioritiesStr + ' ' + attStr
     if type(kast) is KBubble:
-        body = '// KBubble(' + kast.sentence_type + ', ' + kast.contents + ')'
+        body = '// KBubble(' + kast.sentence_type + ', ' + kast.content + ')'
         attStr = prettyPrintKast(kast.att, symbol_table, debug=debug)
         return body + ' ' + attStr
     if type(kast) is KRule or type(kast) is KClaim:
