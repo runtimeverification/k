@@ -249,7 +249,7 @@ To build the K Framework itself, run:
 nix build .
 ```
 
-This will build all of K and put a link to the resultingbinaries in the `result/` folder.
+This will build all of K and put a link to the resulting binaries in the `result/` folder.
 
 If you want to temporarily add the K binaries (such as `kompile` or `kast`) to the current shell, run
 
