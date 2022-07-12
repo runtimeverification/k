@@ -9,7 +9,7 @@
     "tag": "Implies",
     "sort": {
       "tag": "SortApp",
-      "name": "Km_X'25",
+      "name": "Km-X'25",
       "args": []
     },
     "first": {
@@ -127,7 +127,7 @@
           "tag": "Ceil",
           "argSort": {
             "tag": "SortVariable",
-            "name": "b_p7"
+            "name": "b-p7"
           },
           "resultSort": {
             "tag": "SortApp",

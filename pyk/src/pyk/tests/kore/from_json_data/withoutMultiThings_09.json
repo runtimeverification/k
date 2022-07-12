@@ -24,7 +24,7 @@
       "tag": "And",
       "sort": {
         "tag": "SortVariable",
-        "name": "Dn3r_51"
+        "name": "Dn3r-51"
       },
       "first": {
         "tag": "dv",
@@ -33,14 +33,14 @@
           "name": "ifB4L7527",
           "args": []
         },
-        "value": "\t!"
+        "value": "\\t!"
       },
       "second": {
         "tag": "SVar",
         "name": "@tMlD6JB",
         "sort": {
           "tag": "SortApp",
-          "name": "W_f",
+          "name": "W-f",
           "args": []
         }
       }
@@ -50,7 +50,7 @@
       "var": "@KtDZ0RcUQF817",
       "varSort": {
         "tag": "SortVariable",
-        "name": "x_oP7"
+        "name": "x-oP7"
       },
       "arg": {
         "tag": "Next",
@@ -81,7 +81,7 @@
             "tag": "Next",
             "sort": {
               "tag": "SortVariable",
-              "name": "a_2"
+              "name": "a-2"
             },
             "dest": {
               "tag": "Bottom",

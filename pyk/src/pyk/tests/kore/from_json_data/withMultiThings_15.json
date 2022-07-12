@@ -2,7 +2,7 @@
   "tag": "Implies",
   "sort": {
     "tag": "SortApp",
-    "name": "WMgHQZo7x_T811",
+    "name": "WMgHQZo7x-T811",
     "args": [
       {
         "tag": "SortApp",
@@ -17,14 +17,14 @@
       "tag": "SortVariable",
       "name": "UtNHLKa45"
     },
-    "var": "fyxnaKX_8hXRcp89",
+    "var": "fyxnaKX-8hXRcp89",
     "varSort": {
       "tag": "SortVariable",
       "name": "JakZg7OsFL4KL41O51"
     },
     "arg": {
       "tag": "App",
-      "name": "vE1yu_",
+      "name": "vE1yu-",
       "sorts": [
         {
           "tag": "SortApp",
@@ -54,7 +54,7 @@
         "tag": "SortVariable",
         "name": "PT'2xt5O63"
       },
-      "var": "z085_F0214",
+      "var": "z085-F0214",
       "varSort": {
         "tag": "SortVariable",
         "name": "Up10"
@@ -66,7 +66,7 @@
           "name": "NWG17",
           "args": []
         },
-        "value": "\""
+        "value": "\\\""
       }
     }
   }

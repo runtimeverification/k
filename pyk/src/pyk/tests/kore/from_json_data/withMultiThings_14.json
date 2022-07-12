@@ -6,13 +6,13 @@
   },
   "resultSort": {
     "tag": "SortVariable",
-    "name": "V0_tTdYPoBr6KQvFmm'mx3"
+    "name": "V0-tTdYPoBr6KQvFmm'mx3"
   },
   "first": {
     "tag": "Iff",
     "sort": {
       "tag": "SortVariable",
-      "name": "n3IH0hx_mn"
+      "name": "n3IH0hx-mn"
     },
     "first": {
       "tag": "Not",
@@ -38,7 +38,7 @@
       "tag": "Exists",
       "sort": {
         "tag": "SortVariable",
-        "name": "M_Lmumzz"
+        "name": "M-Lmumzz"
       },
       "var": "V8fNX2gh'E59",
       "varSort": {

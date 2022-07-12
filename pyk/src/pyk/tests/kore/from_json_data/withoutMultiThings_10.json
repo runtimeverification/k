@@ -3,7 +3,7 @@
   "var": "@gtLR'wSM6fbA4LtTX95w6",
   "varSort": {
     "tag": "SortVariable",
-    "name": "hT_30533"
+    "name": "hT-30533"
   },
   "arg": {
     "tag": "Iff",
@@ -15,7 +15,7 @@
       "tag": "dv",
       "sort": {
         "tag": "SortVariable",
-        "name": "ZXiQTJliH_ebE7'c05454"
+        "name": "ZXiQTJliH-ebE7'c05454"
       },
       "value": "o/Pfp"
     },

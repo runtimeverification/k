@@ -1,6 +1,6 @@
 {
   "tag": "Mu",
-  "var": "@iOB7C_URMMw70G87",
+  "var": "@iOB7C-URMMw70G87",
   "varSort": {
     "tag": "SortVariable",
     "name": "ql98DM0SY752"
@@ -21,7 +21,7 @@
       "tag": "Forall",
       "sort": {
         "tag": "SortVariable",
-        "name": "T_xIqD535"
+        "name": "T-xIqD535"
       },
       "var": "LcJkgL429",
       "varSort": {

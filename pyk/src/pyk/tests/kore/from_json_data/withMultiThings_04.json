@@ -7,7 +7,7 @@
   },
   "first": {
     "tag": "String",
-    "value": "䆭9SdD}!Dx=u(jD"
+    "value": "\\u41AD9SdD}!Dx=u(jD"
   },
   "second": {
     "tag": "Equals",
@@ -27,7 +27,7 @@
         "name": "FJ3hYB0",
         "args": []
       },
-      "value": "₾㕥"
+      "value": "\\u20BE\\u3565"
     },
     "second": {
       "tag": "Not",

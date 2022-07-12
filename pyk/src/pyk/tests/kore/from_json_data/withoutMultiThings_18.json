@@ -17,7 +17,7 @@
       "tag": "SortVariable",
       "name": "ro62'13"
     },
-    "var": "P_w8uf3KyJtWBY_P40048",
+    "var": "P-w8uf3KyJtWBY-P40048",
     "varSort": {
       "tag": "SortVariable",
       "name": "ohV1mbbd4IK7"
@@ -44,7 +44,7 @@
     },
     "arg": {
       "tag": "App",
-      "name": "\\sED_Gy_64990",
+      "name": "\\sED-Gy-64990",
       "sorts": [
         {
           "tag": "SortApp",

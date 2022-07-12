@@ -2,11 +2,11 @@
   "tag": "Or",
   "sort": {
     "tag": "SortApp",
-    "name": "egn6CO1_42362",
+    "name": "egn6CO1-42362",
     "args": [
       {
         "tag": "SortVariable",
-        "name": "Auc_mw264"
+        "name": "Auc-mw264"
       }
     ]
   },
@@ -163,7 +163,7 @@
     "var": "R6V6OEUAK6d81uL",
     "varSort": {
       "tag": "SortApp",
-      "name": "grVXz_FLl14286",
+      "name": "grVXz-FLl14286",
       "args": []
     },
     "arg": {
@@ -180,7 +180,7 @@
         "tag": "Equals",
         "argSort": {
           "tag": "SortVariable",
-          "name": "m_u58"
+          "name": "m-u58"
         },
         "resultSort": {
           "tag": "SortApp",
@@ -227,7 +227,7 @@
           "tag": "Next",
           "sort": {
             "tag": "SortVariable",
-            "name": "C_93513"
+            "name": "C-93513"
           },
           "dest": {
             "tag": "SVar",

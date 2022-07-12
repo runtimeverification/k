@@ -20,7 +20,7 @@
     "tag": "Implies",
     "sort": {
       "tag": "SortVariable",
-      "name": "vcaBtF7u_y"
+      "name": "vcaBtF7u-y"
     },
     "first": {
       "tag": "Equals",
@@ -36,7 +36,7 @@
         "tag": "Ceil",
         "argSort": {
           "tag": "SortVariable",
-          "name": "fvlx9_8891"
+          "name": "fvlx9-8891"
         },
         "resultSort": {
           "tag": "SortVariable",

@@ -9,7 +9,7 @@
     "tag": "Rewrites",
     "sort": {
       "tag": "SortVariable",
-      "name": "KEGO2Lbng1_pO_bE936"
+      "name": "KEGO2Lbng1-pO-bE936"
     },
     "source": {
       "tag": "Forall",
@@ -41,7 +41,7 @@
     "tag": "dv",
     "sort": {
       "tag": "SortApp",
-      "name": "Xmbw_201210",
+      "name": "Xmbw-201210",
       "args": [
         {
           "tag": "SortApp",
@@ -50,6 +50,6 @@
         }
       ]
     },
-    "value": "ᘢ+粏〞\t"
+    "value": "\\u1622+\\u7C8F\\u301E\\t"
   }
 }

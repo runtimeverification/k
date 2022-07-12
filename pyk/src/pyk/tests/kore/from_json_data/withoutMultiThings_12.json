@@ -2,7 +2,7 @@
   "tag": "And",
   "sort": {
     "tag": "SortVariable",
-    "name": "PHc5_I18S17zq'6B9inv'eb3"
+    "name": "PHc5-I18S17zq'6B9inv'eb3"
   },
   "first": {
     "tag": "Implies",
@@ -13,7 +13,7 @@
     },
     "first": {
       "tag": "EVar",
-      "name": "PF7_8R0678",
+      "name": "PF7-8R0678",
       "sort": {
         "tag": "SortVariable",
         "name": "QHsu0'Sonu8347"
@@ -25,7 +25,7 @@
       "sorts": [
         {
           "tag": "SortVariable",
-          "name": "XfV_L077"
+          "name": "XfV-L077"
         }
       ],
       "args": []
@@ -33,7 +33,7 @@
   },
   "second": {
     "tag": "SVar",
-    "name": "@OnoFVY4mfQ_GJqDoXRl5i45",
+    "name": "@OnoFVY4mfQ-GJqDoXRl5i45",
     "sort": {
       "tag": "SortApp",
       "name": "bMZJkFDbcEvBaR8515",

@@ -2,7 +2,7 @@
   "tag": "Rewrites",
   "sort": {
     "tag": "SortApp",
-    "name": "IaYTTR_q02699",
+    "name": "IaYTTR-q02699",
     "args": [
       {
         "tag": "SortVariable",
@@ -196,12 +196,12 @@
     "tag": "Forall",
     "sort": {
       "tag": "SortVariable",
-      "name": "cu28rl77_i8863"
+      "name": "cu28rl77-i8863"
     },
     "var": "b351758",
     "varSort": {
       "tag": "SortApp",
-      "name": "ycLhk_777",
+      "name": "ycLhk-777",
       "args": []
     },
     "arg": {

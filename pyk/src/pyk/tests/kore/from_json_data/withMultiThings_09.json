@@ -4,7 +4,7 @@
     "tag": "SortVariable",
     "name": "X'UMB9"
   },
-  "var": "TU_1mfz3_L8UW4",
+  "var": "TU-1mfz3-L8UW4",
   "varSort": {
     "tag": "SortVariable",
     "name": "Ux"
@@ -13,7 +13,7 @@
     "tag": "Iff",
     "sort": {
       "tag": "SortApp",
-      "name": "ve'ky_DCoQ63",
+      "name": "ve'ky-DCoQ63",
       "args": []
     },
     "first": {
@@ -21,7 +21,7 @@
       "name": "Gu3'99815",
       "sort": {
         "tag": "SortVariable",
-        "name": "B2B59eG0_o_'ay71880"
+        "name": "B2B59eG0-o-'ay71880"
       }
     },
     "second": {

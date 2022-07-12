@@ -8,7 +8,7 @@
     "tag": "Floor",
     "argSort": {
       "tag": "SortVariable",
-      "name": "C_C_Oz"
+      "name": "C-C-Oz"
     },
     "resultSort": {
       "tag": "SortApp",
@@ -193,7 +193,7 @@
           "name": "@b65585",
           "sort": {
             "tag": "SortVariable",
-            "name": "H0_uV3668"
+            "name": "H0-uV3668"
           }
         }
       }
