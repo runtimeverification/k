@@ -22,7 +22,6 @@ class PrettyPrintKastTest(TestCase):
         (KRule(TRUE), 'rule  true\n  '),
         (KRule(TRUE, ensures=TRUE), 'rule  true\n  '),
         (KRule(TRUE, ensures=KApply('_andBool_', [TRUE, TRUE])), 'rule  true\n   ensures ( true\n   andBool ( true\n           ))\n  '),
-        (Subst({'X': TRUE, 'Y': KApply('_andBool_', [TRUE, TRUE])}), 'X |-> true\nY |-> _andBool_ ( true , true )'),
     )
 
     SYMBOL_TABLE: Final[Mapping[str, Callable]] = {}
