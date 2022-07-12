@@ -4,7 +4,7 @@ from unittest import TestCase
 from ..cterm import CTerm
 from ..kast import TRUE, KApply, KAst, KInner, KVariable
 from ..kcfg import KCFG
-from ..ktool import KPrint
+from ..ktool import KPrint, prettyPrintKast
 from ..prelude import mlEquals, token
 from ..utils import shorten_hash
 
@@ -50,7 +50,7 @@ def cover_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
 
 class MockKPrint:
     def pretty_print(self, term: KAst) -> str:
-        return str(term)
+        return prettyPrintKast(term, symbol_table={})
 
 
 def mock_kprint() -> KPrint:
@@ -353,28 +353,28 @@ class KCFGTestCase(TestCase):
                                   f"├  {_short_hash(2)} (expanded)\n"
                                   f"│  (1 step)\n"
                                   f"├  {_short_hash(3)} (expanded, @bar, @foo)\n"
-                                  f"┣━ {_short_hash(6)} (target, leaf)    KApply(label=KLabel(name='_==K_', params=()), args=(KVariable(name='x'), KToken(token='6', sort=KSort(name='Int'))))\n"
+                                  f"┣━ {_short_hash(6)} (target, leaf)    _==K_ ( x , 6 )\n"
                                   f"┃\n"
-                                  f"┣━ {_short_hash(5)} (expanded)    KApply(label=KLabel(name='_==K_', params=()), args=(KVariable(name='x'), KToken(token='5', sort=KSort(name='Int'))))\n"
+                                  f"┣━ {_short_hash(5)} (expanded)    _==K_ ( x , 5 )\n"
                                   f"┃   │  (1 step)\n"
                                   f"┃   ├  {_short_hash(2)} (expanded)\n"
                                   f"┃   ┊ (looped back)\n"
                                   f"┃\n"
-                                  f"┣━ {_short_hash(11)} (expanded)    KApply(label=KLabel(name='_==K_', params=()), args=(KVariable(name='x'), KToken(token='11', sort=KSort(name='Int'))))\n"
+                                  f"┣━ {_short_hash(11)} (expanded)    _==K_ ( x , 11 )\n"
                                   f"┃   │  (1 step)\n"
                                   f"┃   ├  {_short_hash(8)} (leaf)\n"
-                                  f"┃   ┊  constraint: KToken(token='true', sort=KSort(name='Bool'))\n"
+                                  f"┃   ┊  constraint: true\n"
                                   f"┃   ┊  subst:\n"
-                                   "┃   ┊    Subst(_subst=FrozenDict({'V11': KToken(token='8', sort=KSort(name='Int'))}))\n" # noqa
+                                  f"┃   ┊    V11 |-> 8\n"
                                   f"┃   └╌ {_short_hash(11)} (expanded)\n"
                                   f"┃       ┊ (looped back)\n"
                                   f"┃\n"
-                                  f"┣━ {_short_hash(4)} (expanded)    KApply(label=KLabel(name='_==K_', params=()), args=(KVariable(name='x'), KToken(token='4', sort=KSort(name='Int'))))\n"
+                                  f"┣━ {_short_hash(4)} (expanded)    _==K_ ( x , 4 )\n"
                                   f"┃   │  (1 step)\n"
                                   f"┃   ├  {_short_hash(5)} (expanded)\n"
                                   f"┃   ┊ (continues as previously)\n"
                                   f"┃\n"
-                                  f"┗━ {_short_hash(7)} (expanded)    KApply(label=KLabel(name='_==K_', params=()), args=(KVariable(name='x'), KToken(token='7', sort=KSort(name='Int'))))\n"
+                                  f"┗━ {_short_hash(7)} (expanded)    _==K_ ( x , 7 )\n"
                                   f"    │  (1 step)\n"
                                   f"    └  {_short_hash(6)} (target, leaf)\n"
                                   f"\n"
