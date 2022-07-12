@@ -147,6 +147,10 @@ class KoreParser:
             KoreToken.Type.KW_CLAIM: self.claim,
         }
 
+    @property
+    def eof(self) -> bool:
+        return self._la().type == KoreToken.Type.EOF
+
     def _consume(self) -> str:
         if self._la().type == KoreToken.Type.EOF:
             raise ValueError('Unexpected EOF')
