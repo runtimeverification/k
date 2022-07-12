@@ -108,8 +108,6 @@ def prettyPrintKast(kast: KAst, symbol_table: SymbolTable, debug=False):
         sys.stderr.write(str(kast))
         sys.stderr.write('\n')
         sys.stderr.flush()
-    if kast is None or kast == {}:
-        return ""
     if type(kast) is KVariable:
         return kast.name
     if type(kast) is KSort:
