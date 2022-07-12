@@ -15,7 +15,6 @@ pipeline {
       when { changeRequest() }
       steps {
         script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" }
-        milestone(1)
       }
     }
     stage('Create source tarball') {
