@@ -51,7 +51,7 @@ RUN    apt-get update               \
     && apt-get upgrade --yes        \
     && apt-get install --yes nodejs
 
-RUN wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin
+RUN wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=5.42.0
 RUN wget https://github.com/jgm/pandoc/releases/download/2.18/pandoc-2.18-1-amd64.deb -O /tmp/pandoc.deb && dpkg -i /tmp/pandoc.deb
 
 RUN curl -sSL https://get.haskellstack.org/ | sh
