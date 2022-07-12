@@ -6,7 +6,7 @@ from pyk.kore.syntax import Kore
 
 
 class FromJsonTest(TestCase):
-    TEST_DATA_DIR: Final[Path] = Path(__file__).parent / 'from_json_data'
+    TEST_DATA_DIR: Final[Path] = Path(__file__).parent / 'json_data'
     TEST_FILES: Final[Tuple[Path, ...]] = tuple(TEST_DATA_DIR.iterdir())
 
     def test_from_json(self):
