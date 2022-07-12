@@ -1,10 +1,12 @@
 import sys
 from pathlib import Path
+from typing import Callable, Mapping
 
 from ..kast import (
     TRUE,
     KApply,
     KAs,
+    KAst,
     KAtt,
     KBubble,
     KClaim,
@@ -35,18 +37,20 @@ from ..kast import (
 from ..prelude import Labels
 from ..utils import hash_str
 
+SymbolTable = Mapping[str, Callable]
+
 
 class KPrint:
     """Given a kompiled directory, build an unparser for it.
     """
 
-    def __init__(self, kompiled_directory):
+    def __init__(self, kompiled_directory: str):
         self.kompiled_directory = Path(kompiled_directory)
         self.definition = readKastTerm(self.kompiled_directory / 'compiled.json')
         self.symbol_table = build_symbol_table(self.definition, opinionated=True)
         self.definition_hash = hash_str(self.definition)
 
-    def pretty_print(self, kast, debug=False):
+    def pretty_print(self, kast: KAst, debug=False):
         """Given a KAST term, pretty-print it using the current definition.
 
         -   Input: KAST term in JSON.
@@ -71,18 +75,16 @@ def unparser_for_production(prod):
     return _unparser
 
 
-def build_symbol_table(definition, opinionated=False):
+def build_symbol_table(definition: KDefinition, opinionated=False) -> SymbolTable:
     """Build the unparsing symbol table given a JSON encoded definition.
 
     -   Input: JSON encoded K definition.
     -   Return: Python dictionary mapping klabels to automatically generated unparsers.
     """
-    if type(definition) is not KDefinition:
-        raise TypeError('Must supply a KDefinition!')
-
     symbol_table = {}
     for module in definition.modules:
         for prod in module.syntax_productions:
+            assert(prod.klabel)
             label = prod.klabel.name
             if 'symbol' in prod.att and 'klabel' in prod.att:
                 label = prod.att['klabel']
@@ -96,7 +98,7 @@ def build_symbol_table(definition, opinionated=False):
     return symbol_table
 
 
-def prettyPrintKast(kast, symbol_table, debug=False):
+def prettyPrintKast(kast: KAst, symbol_table: SymbolTable, debug=False):
     """Print out KAST terms/outer syntax.
 
     -   Input: KAST term.
@@ -227,7 +229,7 @@ def prettyPrintKast(kast, symbol_table, debug=False):
         modules = '\n\n'.join([prettyPrintKast(module, symbol_table, debug=debug) for module in kast.modules])
         return requires + '\n\n' + modules
 
-    raise ValueError('Error unparsing: {kast}')
+    raise ValueError(f'Error unparsing: {kast}')
 
 
 def prettyPrintKastBool(kast, symbol_table, debug=False):
