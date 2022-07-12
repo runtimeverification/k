@@ -1,12 +1,12 @@
-from typing import Any, Dict, List, Tuple, cast
+from typing import Any, Dict, List, Tuple
 from unittest import TestCase
 
 from ..cterm import CTerm
-from ..kast import TRUE, KApply, KAst, KInner, KVariable
+from ..kast import TRUE, KApply, KInner, KVariable
 from ..kcfg import KCFG
-from ..ktool import KPrint, prettyPrintKast
 from ..prelude import mlEquals, token
 from ..utils import shorten_hash
+from .mock_kprint import mock_kprint
 
 
 def nid(i: int) -> str:
@@ -46,15 +46,6 @@ def cover_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
         {'source': nid(i), 'target': nid(j), 'condition': TRUE.to_dict(), 'depth': 1}
         for i, j in edges
     ]
-
-
-class MockKPrint:
-    def pretty_print(self, term: KAst) -> str:
-        return prettyPrintKast(term, symbol_table={})
-
-
-def mock_kprint() -> KPrint:
-    return cast(KPrint, MockKPrint())
 
 
 class KCFGTestCase(TestCase):
