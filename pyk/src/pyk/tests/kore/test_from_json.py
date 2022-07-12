@@ -5,7 +5,6 @@ from unittest import TestCase
 from pyk.kore.syntax import Kore
 
 
-# TODO extend test input with field for textual Kore for comparing parse results
 class FromJsonTest(TestCase):
     TEST_DATA_DIR: Final[Path] = Path(__file__).parent / 'from_json_data'
     TEST_FILES: Final[Tuple[Path, ...]] = tuple(TEST_DATA_DIR.iterdir())
@@ -15,7 +14,8 @@ class FromJsonTest(TestCase):
             with self.subTest(i=test_file.name):
                 with open(test_file, 'r') as f:
                     # When
-                    kore = Kore.from_json(f.read())
+                    kore1 = Kore.from_json(f.read())
+                    kore2 = Kore.from_dict(kore1.dict)
 
                     # Then
-                    self.assertIsNotNone(kore)
+                    self.assertEqual(kore1, kore2)

@@ -109,10 +109,6 @@ def _parend(elems: Iterable[str]) -> str:
 T = TypeVar('T', bound='Kore')
 
 
-def unimplemented() -> Any:
-    raise RuntimeError('Unimplemented operation')
-
-
 def unsupported() -> Any:
     raise RuntimeError('Unsupported operation')
 
@@ -333,8 +329,7 @@ class SortVar(Sort):
 
     @property
     def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
+        return {'tag': self._tag, 'name': self.name}
 
     @property
     def text(self) -> str:
@@ -361,8 +356,7 @@ class SortCons(Sort):
 
     @property
     def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
+        return {'tag': self._tag, 'name': self.name, 'args': [sort.dict for sort in self.sorts]}
 
     @property
     def text(self) -> str:
@@ -401,6 +395,10 @@ class VarPattern(Pattern, ABC):
         return globals()[cls_id].from_dict(dct)
 
     @property
+    def dict(self) -> Dict[str, Any]:
+        return {'tag': self._tag, 'name': self.name, 'sort': self.sort.dict}
+
+    @property
     def text(self) -> str:
         return f'{self.name} : {self.sort.text}'
 
@@ -418,15 +416,11 @@ class ElemVar(VarPattern):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sort', sort)
 
+    # TODO Can be pulled up? (Similarly for other classes.)
     @classmethod
     def from_dict(cls: Type['ElemVar'], dct: Mapping[str, Any]) -> 'ElemVar':
         cls._check_tag(dct)
         return ElemVar(name=dct['name'], sort=Sort.from_dict(dct['sort']))
-
-    @property
-    def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
 
 
 @final
@@ -446,11 +440,6 @@ class SetVar(VarPattern):
     def from_dict(cls: Type['SetVar'], dct: Mapping[str, Any]) -> 'SetVar':
         cls._check_tag(dct)
         return SetVar(name=dct['name'], sort=Sort.from_dict(dct['sort']))
-
-    @property
-    def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
 
 
 @final
@@ -473,8 +462,7 @@ class StrLit(Pattern):
 
     @property
     def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
+        return {'tag': self._tag, 'value': self.value}
 
     @property
     def text(self) -> str:
@@ -511,8 +499,12 @@ class Apply(Pattern):
 
     @property
     def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
+        return {
+            'tag': self._tag,
+            'name': self.symbol,
+            'sorts': [sort.dict for sort in self.sorts],
+            'args': [pattern.dict for pattern in self.patterns],
+        }
 
     @property
     def text(self) -> str:
@@ -576,6 +568,10 @@ class NullaryConn(MLConn, ABC):
         return globals()[cls_id].from_dict(dct)
 
     @property
+    def dict(self) -> Dict[str, Any]:
+        return {'tag': self._tag, 'sort': self.sort.dict}
+
+    @property
     def patterns(self) -> Tuple[Pattern, ...]:
         return ()
 
@@ -593,11 +589,6 @@ class Top(NullaryConn):
         cls._check_tag(dct)
         return Top(sort=Sort.from_dict(dct['sort']))
 
-    @property
-    def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
-
 
 @final
 @dataclass(frozen=True)
@@ -612,11 +603,6 @@ class Bottom(NullaryConn):
         cls._check_tag(dct)
         return Bottom(sort=Sort.from_dict(dct['sort']))
 
-    @property
-    def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
-
 
 class UnaryConn(MLConn, ABC):
     _UNARY_CONN_TAGS: Final = {'Not'}
@@ -630,6 +616,10 @@ class UnaryConn(MLConn, ABC):
             raise ValueError(f'Expected UnaryConn tag, found: {tag}')
         cls_id = cls._TAGS[tag]
         return globals()[cls_id].from_dict(dct)
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        return {'tag': self._tag, 'sort': self.sort.dict, 'arg': self.pattern.dict}
 
     @property
     def patterns(self) -> Tuple[Pattern, ...]:
@@ -650,11 +640,6 @@ class Not(UnaryConn):
         cls._check_tag(dct)
         return Not(sort=Sort.from_dict(dct['sort']), pattern=Pattern.from_dict(dct['arg']))
 
-    @property
-    def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
-
 
 class BinaryConn(MLConn, ABC):
     _BINARY_CONN_TAGS: Final = {'And', 'Or', 'Implies', 'Iff'}
@@ -673,6 +658,15 @@ class BinaryConn(MLConn, ABC):
             raise ValueError(f'Expected BinaryConn tag, found: {tag}')
         cls_id = cls._TAGS[tag]
         return globals()[cls_id].from_dict(dct)
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        return {
+            'tag': self._tag,
+            'sort': self.sort.dict,
+            'first': self.left.dict,
+            'second': self.right.dict,
+        }
 
     @property
     def patterns(self) -> Tuple[Pattern, ...]:
@@ -699,11 +693,6 @@ class And(BinaryConn):
             right=Pattern.from_dict(dct['second']),
         )
 
-    @property
-    def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
-
 
 @final
 @dataclass(frozen=True)
@@ -723,11 +712,6 @@ class Or(BinaryConn):
             left=Pattern.from_dict(dct['first']),
             right=Pattern.from_dict(dct['second']),
         )
-
-    @property
-    def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
 
 
 @final
@@ -749,11 +733,6 @@ class Implies(BinaryConn):
             right=Pattern.from_dict(dct['second']),
         )
 
-    @property
-    def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
-
 
 @final
 @dataclass(frozen=True)
@@ -774,11 +753,6 @@ class Iff(BinaryConn):
             right=Pattern.from_dict(dct['second']),
         )
 
-    @property
-    def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
-
 
 class MLQuant(MLPattern, ABC):
     _ML_QUANT_TAGS: Final = {'Exists', 'Forall'}
@@ -794,6 +768,16 @@ class MLQuant(MLPattern, ABC):
             raise ValueError(f'Expected MLQuant tag, found: {tag}')
         cls_id = cls._TAGS[tag]
         return globals()[cls_id].from_dict(dct)
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        return {
+            'tag': self._tag,
+            'sort': self.sort.dict,
+            'var': self.var.name,
+            'varSort': self.var.sort.dict,
+            'arg': self.pattern.dict,
+        }
 
     @property
     def text(self) -> str:
@@ -819,11 +803,6 @@ class Exists(MLQuant):
             pattern=Pattern.from_dict(dct['arg']),
         )
 
-    @property
-    def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
-
 
 @final
 @dataclass(frozen=True)
@@ -844,11 +823,6 @@ class Forall(MLQuant):
             pattern=Pattern.from_dict(dct['arg']),
         )
 
-    @property
-    def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
-
 
 class MLFixpoint(MLPattern, ABC):
     _ML_FIXPOINT_TAGS: Final = {'Mu', 'Nu'}
@@ -863,6 +837,15 @@ class MLFixpoint(MLPattern, ABC):
             raise ValueError(f'Expected MLFixpoint tag, found: {tag}')
         cls_id = cls._TAGS[tag]
         return globals()[cls_id].from_dict(dct)
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        return {
+            'tag': self._tag,
+            'var': self.var.name,
+            'varSort': self.var.sort.dict,
+            'arg': self.pattern.dict,
+        }
 
     @property
     def text(self) -> str:
@@ -886,11 +869,6 @@ class Mu(MLFixpoint):
             pattern=Pattern.from_dict(dct['arg']),
         )
 
-    @property
-    def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
-
 
 @final
 @dataclass(frozen=True)
@@ -908,11 +886,6 @@ class Nu(MLFixpoint):
             var=SetVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),  # TODO Haskell: SetVar.from_dict(...) would be nicer
             pattern=Pattern.from_dict(dct['arg']),
         )
-
-    @property
-    def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
 
 
 class MLPred(MLPattern, ABC):
@@ -943,6 +916,15 @@ class RoundPred(MLPred, ABC):
         return globals()[cls_id].from_dict(dct)
 
     @property
+    def dict(self) -> Dict[str, Any]:
+        return {
+            'tag': self._tag,
+            'argSort': self.op_sort.dict,
+            'resultSort': self.sort.dict,
+            'arg': self.pattern.dict,
+        }
+
+    @property
     def text(self) -> str:
         return self._symbol + ' ' + _braced((self.op_sort.text, self.sort.text)) + ' ( ' + self.pattern.text + ' )'
 
@@ -962,14 +944,9 @@ class Ceil(RoundPred):
         cls._check_tag(dct)
         return Ceil(
             op_sort=Sort.from_dict(dct['argSort']),
-            sort=Sort.from_dict(dct['resultSort']),
+            sort=Sort.from_dict(dct['resultSort']),  # TODO Haskell: 'resSort' would be more consistent with 'argSort'
             pattern=Pattern.from_dict(dct['arg']),
         )
-
-    @property
-    def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
 
 
 @final
@@ -987,14 +964,9 @@ class Floor(RoundPred):
         cls._check_tag(dct)
         return Floor(
             op_sort=Sort.from_dict(dct['argSort']),
-            sort=Sort.from_dict(dct['resultSort']),
+            sort=Sort.from_dict(dct['resultSort']),  # TODO Haskell: 'resSort' would be more consistent with 'argSort'
             pattern=Pattern.from_dict(dct['arg']),
         )
-
-    @property
-    def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
 
 
 class BinaryPred(MLPred, ABC):
@@ -1012,6 +984,16 @@ class BinaryPred(MLPred, ABC):
             raise ValueError(f'Expected BinaryPred tag, found: {tag}')
         cls_id = cls._TAGS[tag]
         return globals()[cls_id].from_dict(dct)
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        return {
+            'tag': self._tag,
+            'argSort': self.left_sort.dict,
+            'resultSort': self.right_sort.dict,
+            'first': self.left.dict,
+            'second': self.right.dict,
+        }
 
     @property
     def text(self) -> str:
@@ -1043,11 +1025,6 @@ class Equals(BinaryPred):
             right=Pattern.from_dict(dct['second']),
         )
 
-    @property
-    def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
-
 
 @final
 @dataclass(frozen=True)
@@ -1069,11 +1046,6 @@ class In(BinaryPred):
             left=Pattern.from_dict(dct['first']),
             right=Pattern.from_dict(dct['second']),
         )
-
-    @property
-    def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
 
 
 class MLRewrite(MLPattern, ABC):
@@ -1109,8 +1081,7 @@ class Next(MLRewrite):
 
     @property
     def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
+        return {'tag': self._tag, 'sort': self.sort.dict, 'dest': self.pattern.dict}
 
     @property
     def text(self) -> str:
@@ -1138,8 +1109,12 @@ class Rewrites(MLRewrite):
 
     @property
     def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
+        return {
+            'tag': self._tag,
+            'sort': self.sort.dict,
+            'source': self.left.dict,
+            'dest': self.right.dict,
+        }
 
     @property
     def text(self) -> str:
@@ -1165,8 +1140,7 @@ class DomVal(MLPattern):
 
     @property
     def dict(self) -> Dict[str, Any]:
-        # TODO
-        return unimplemented()
+        return {'tag': self._tag, 'sort': self.sort.dict, 'value': self.value.value}
 
     @property
     def text(self) -> str:
