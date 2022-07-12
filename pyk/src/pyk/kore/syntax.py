@@ -148,6 +148,12 @@ class Kore(ABC):
     }
 
     @classmethod
+    @property
+    @abstractmethod
+    def _tag(cls):
+        ...
+
+    @classmethod
     def from_dict(cls: Type[T], dct: Mapping[str, Any]) -> T:
         tag = cls._get_tag(dct)
         if tag not in cls._TAGS:
@@ -166,11 +172,10 @@ class Kore(ABC):
         return dct['tag']
 
     @classmethod
-    def _check_tag(cls: Type[T], dct: Mapping[str, Any], expected: Optional[str] = None) -> None:
-        expected = expected if expected is not None else cls.__name__
-        actual = cls._get_tag(dct)
-        if actual != expected:
-            raise ValueError(f"Expected '{expected}' as 'tag' value, found: '{actual}'")
+    def _check_tag(cls: Type[T], dct: Mapping[str, Any]) -> None:
+        tag = cls._get_tag(dct)
+        if tag != cls._tag:
+            raise ValueError(f"Expected '{cls._tag}' as 'tag' value, found: '{tag}'")
 
     @property
     def json(self) -> str:
@@ -313,6 +318,8 @@ class Sort(Kore, ABC):
 @final
 @dataclass(frozen=True)
 class SortVar(Sort):
+    _tag = 'SortVariable'  # TODO Haskell: SortVar would be more consistent with SortApp, EVar
+
     name: str
 
     def __init__(self, name: str):
@@ -321,7 +328,7 @@ class SortVar(Sort):
 
     @classmethod
     def from_dict(cls: Type['SortVar'], dct: Mapping[str, Any]) -> 'SortVar':
-        cls._check_tag(dct, 'SortVariable')  # SortVar would be more consistent with SortApp, EVar
+        cls._check_tag(dct)
         return SortVar(name=dct['name'])
 
     @property
@@ -337,6 +344,8 @@ class SortVar(Sort):
 @final
 @dataclass(frozen=True)
 class SortCons(Sort):
+    _tag = 'SortApp'
+
     name: str
     sorts: Tuple[Sort, ...]
 
@@ -347,7 +356,7 @@ class SortCons(Sort):
 
     @classmethod
     def from_dict(cls: Type['SortCons'], dct: Mapping[str, Any]) -> 'SortCons':
-        cls._check_tag(dct, 'SortApp')
+        cls._check_tag(dct)
         return SortCons(name=dct['name'], sorts=(Sort.from_dict(arg) for arg in dct['args']))
 
     @property
@@ -399,6 +408,8 @@ class VarPattern(Pattern, ABC):
 @final
 @dataclass(frozen=True)
 class ElemVar(VarPattern):
+    _tag = 'EVar'
+
     name: str
     sort: Sort
 
@@ -409,7 +420,7 @@ class ElemVar(VarPattern):
 
     @classmethod
     def from_dict(cls: Type['ElemVar'], dct: Mapping[str, Any]) -> 'ElemVar':
-        cls._check_tag(dct, 'EVar')
+        cls._check_tag(dct)
         return ElemVar(name=dct['name'], sort=Sort.from_dict(dct['sort']))
 
     @property
@@ -421,6 +432,8 @@ class ElemVar(VarPattern):
 @final
 @dataclass(frozen=True)
 class SetVar(VarPattern):
+    _tag = 'SVar'
+
     name: str
     sort: Sort
 
@@ -431,7 +444,7 @@ class SetVar(VarPattern):
 
     @classmethod
     def from_dict(cls: Type['SetVar'], dct: Mapping[str, Any]) -> 'SetVar':
-        cls._check_tag(dct, 'SVar')
+        cls._check_tag(dct)
         return SetVar(name=dct['name'], sort=Sort.from_dict(dct['sort']))
 
     @property
@@ -443,6 +456,8 @@ class SetVar(VarPattern):
 @final
 @dataclass(frozen=True)
 class StrLit(Pattern):
+    _tag = 'String'
+
     value: str
 
     def __init__(self, value: str):
@@ -453,7 +468,7 @@ class StrLit(Pattern):
 
     @classmethod
     def from_dict(cls: Type['StrLit'], dct: Mapping[str, Any]) -> 'StrLit':
-        cls._check_tag(dct, 'String')
+        cls._check_tag(dct)
         return StrLit(value=dct['value'])
 
     @property
@@ -473,6 +488,8 @@ class StrLit(Pattern):
 @final
 @dataclass(frozen=True)
 class Apply(Pattern):
+    _tag = 'App'  # TODO Haskell: Are there tests for this?
+
     symbol: str
     sorts: Tuple[Sort, ...]
     patterns: Tuple[Pattern, ...]
@@ -485,7 +502,7 @@ class Apply(Pattern):
 
     @classmethod
     def from_dict(cls: Type['Apply'], dct: Mapping[str, Any]) -> 'Apply':
-        cls._check_tag(dct, 'App')  # TODO Are there tests for this?
+        cls._check_tag(dct)
         return Apply(
             symbol=dct['name'],
             sorts=(Sort.from_dict(sort) for sort in dct['sorts']),
@@ -566,6 +583,7 @@ class NullaryConn(MLConn, ABC):
 @final
 @dataclass(frozen=True)
 class Top(NullaryConn):
+    _tag = 'Top'
     _symbol = '\\top'
 
     sort: Sort
@@ -584,6 +602,7 @@ class Top(NullaryConn):
 @final
 @dataclass(frozen=True)
 class Bottom(NullaryConn):
+    _tag = 'Bottom'
     _symbol = '\\bottom'
 
     sort: Sort
@@ -620,6 +639,7 @@ class UnaryConn(MLConn, ABC):
 @final
 @dataclass(frozen=True)
 class Not(UnaryConn):
+    _tag = 'Not'
     _symbol = '\\not'
 
     sort: Sort
@@ -662,6 +682,7 @@ class BinaryConn(MLConn, ABC):
 @final
 @dataclass(frozen=True)
 class And(BinaryConn):
+    _tag = 'And'
     _symbol = '\\and'
 
     sort: Sort
@@ -687,6 +708,7 @@ class And(BinaryConn):
 @final
 @dataclass(frozen=True)
 class Or(BinaryConn):
+    _tag = 'Or'
     _symbol = '\\or'
 
     sort: Sort
@@ -711,6 +733,7 @@ class Or(BinaryConn):
 @final
 @dataclass(frozen=True)
 class Implies(BinaryConn):
+    _tag = 'Implies'
     _symbol = '\\implies'
 
     sort: Sort
@@ -735,6 +758,7 @@ class Implies(BinaryConn):
 @final
 @dataclass(frozen=True)
 class Iff(BinaryConn):
+    _tag = 'Iff'
     _symbol = '\\iff'
 
     sort: Sort
@@ -779,6 +803,7 @@ class MLQuant(MLPattern, ABC):
 @final
 @dataclass(frozen=True)
 class Exists(MLQuant):
+    _tag = 'Exists'
     _symbol = '\\exists'
 
     sort: Sort
@@ -790,7 +815,7 @@ class Exists(MLQuant):
         cls._check_tag(dct)
         return Exists(
             sort=Sort.from_dict(dct['sort']),
-            var=ElemVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),  # TODO ElemVar.from_dict(...) would be nicer
+            var=ElemVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),  # TODO Haskell: ElemVar.from_dict(...) would be nicer
             pattern=Pattern.from_dict(dct['arg']),
         )
 
@@ -803,6 +828,7 @@ class Exists(MLQuant):
 @final
 @dataclass(frozen=True)
 class Forall(MLQuant):
+    _tag = 'Forall'
     _symbol = '\\forall'
 
     sort: Sort
@@ -814,7 +840,7 @@ class Forall(MLQuant):
         cls._check_tag(dct)
         return Forall(
             sort=Sort.from_dict(dct['sort']),
-            var=ElemVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),  # TODO ElemVar.from_dict(...) would be nicer
+            var=ElemVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),  # TODO Haskell: ElemVar.from_dict(...) would be nicer
             pattern=Pattern.from_dict(dct['arg']),
         )
 
@@ -846,6 +872,7 @@ class MLFixpoint(MLPattern, ABC):
 @final
 @dataclass(frozen=True)
 class Mu(MLFixpoint):
+    _tag = 'Mu'
     _symbol = '\\mu'
 
     var: SetVar
@@ -868,6 +895,7 @@ class Mu(MLFixpoint):
 @final
 @dataclass(frozen=True)
 class Nu(MLFixpoint):
+    _tag = 'Nu'
     _symbol = '\\nu'
 
     var: SetVar
@@ -877,7 +905,7 @@ class Nu(MLFixpoint):
     def from_dict(cls: Type['Nu'], dct: Mapping[str, Any]) -> 'Nu':
         cls._check_tag(dct)
         return Nu(
-            var=SetVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),  # TODO SetVar.from_dict(...) would be nicer
+            var=SetVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),  # TODO Haskell: SetVar.from_dict(...) would be nicer
             pattern=Pattern.from_dict(dct['arg']),
         )
 
@@ -922,6 +950,7 @@ class RoundPred(MLPred, ABC):
 @final
 @dataclass(frozen=True)
 class Ceil(RoundPred):
+    _tag = 'Ceil'
     _symbol = '\\ceil'
 
     op_sort: Sort
@@ -946,6 +975,7 @@ class Ceil(RoundPred):
 @final
 @dataclass(frozen=True)
 class Floor(RoundPred):
+    _tag = 'Floor'
     _symbol = '\\floor'
 
     op_sort: Sort
@@ -995,6 +1025,7 @@ class BinaryPred(MLPred, ABC):
 @final
 @dataclass(frozen=True)
 class Equals(BinaryPred):
+    _tag = 'Equals'
     _symbol = '\\equals'
 
     left_sort: Sort
@@ -1006,8 +1037,8 @@ class Equals(BinaryPred):
     def from_dict(cls: Type['Equals'], dct: Mapping[str, Any]) -> 'Equals':
         cls._check_tag(dct)
         return Equals(
-            left_sort=Sort.from_dict(dct['argSort']),      # TODO Shouldn't this be firstSort instead?
-            right_sort=Sort.from_dict(dct['resultSort']),  # TODO Shoulnd't this be secondSort instead?
+            left_sort=Sort.from_dict(dct['argSort']),      # TODO Haskell: Shouldn't this be firstSort instead?
+            right_sort=Sort.from_dict(dct['resultSort']),  # TODO Haskell: Shoulnd't this be secondSort instead?
             left=Pattern.from_dict(dct['first']),
             right=Pattern.from_dict(dct['second']),
         )
@@ -1021,6 +1052,7 @@ class Equals(BinaryPred):
 @final
 @dataclass(frozen=True)
 class In(BinaryPred):
+    _tag = 'In'
     _symbol = '\\in'
 
     left_sort: Sort
@@ -1032,8 +1064,8 @@ class In(BinaryPred):
     def from_dict(cls: Type['In'], dct: Mapping[str, Any]) -> 'In':
         cls._check_tag(dct)
         return In(
-            left_sort=Sort.from_dict(dct['argSort']),      # TODO Shouldn't this be firstSort instead?
-            right_sort=Sort.from_dict(dct['resultSort']),  # TODO Shoulnd't this be secondSort instead?
+            left_sort=Sort.from_dict(dct['argSort']),      # TODO Haskell: Shouldn't this be firstSort instead?
+            right_sort=Sort.from_dict(dct['resultSort']),  # TODO Haskell: Shoulnd't this be secondSort instead?
             left=Pattern.from_dict(dct['first']),
             right=Pattern.from_dict(dct['second']),
         )
@@ -1061,6 +1093,7 @@ class MLRewrite(MLPattern, ABC):
 @final
 @dataclass(frozen=True)
 class Next(MLRewrite):
+    _tag = 'Next'
     _symbol = '\\next'
 
     sort: Sort
@@ -1087,6 +1120,7 @@ class Next(MLRewrite):
 @final
 @dataclass(frozen=True)
 class Rewrites(MLRewrite):
+    _tag = 'Rewrites'
     _symbol = '\\rewrites'
 
     sort: Sort
@@ -1115,6 +1149,7 @@ class Rewrites(MLRewrite):
 @final
 @dataclass(frozen=True)
 class DomVal(MLPattern):
+    _tag = 'dv'  # TODO Haskell: Consider 'DV' as tag
     _symbol = '\\dv'
 
     sort: Sort
@@ -1122,10 +1157,10 @@ class DomVal(MLPattern):
 
     @classmethod
     def from_dict(cls: Type['DomVal'], dct: Mapping[str, Any]) -> 'DomVal':
-        cls._check_tag(dct, 'dv')  # TODO Consider 'DV' as tag
+        cls._check_tag(dct)
         return DomVal(
             sort=Sort.from_dict(dct['sort']),
-            value=StrLit(dct['value']),  # TODO StrLit.from_dict(...) would be nicer
+            value=StrLit(dct['value']),  # TODO Haskell: StrLit.from_dict(...) would be nicer
         )
 
     @property
@@ -1153,6 +1188,12 @@ class Attr(Kore):
         check_symbol_id(symbol)
         object.__setattr__(self, 'symbol', symbol)
         object.__setattr__(self, 'params', tuple(params))
+
+    @classmethod
+    @property
+    def _tag(cls) -> str:
+        # TODO
+        return unsupported()
 
     @classmethod
     def from_dict(cls: Type['Attr'], dct: Mapping[str, Any]) -> 'Attr':
@@ -1193,6 +1234,12 @@ class Import(Sentence):
         object.__setattr__(self, 'attrs', tuple(attrs))
 
     @classmethod
+    @property
+    def _tag(cls) -> str:
+        # TODO
+        return unsupported()
+
+    @classmethod
     def from_dict(cls: Type['Import'], dct: Mapping[str, Any]) -> 'Import':
         # TODO
         return unsupported()
@@ -1227,6 +1274,12 @@ class SortDecl(Sentence):
         object.__setattr__(self, 'hooked', hooked)
 
     @classmethod
+    @property
+    def _tag(cls) -> str:
+        # TODO
+        return unsupported()
+
+    @classmethod
     def from_dict(cls: Type['SortDecl'], dct: Mapping[str, Any]) -> 'SortDecl':
         # TODO
         return unsupported()
@@ -1258,6 +1311,12 @@ class Symbol(Kore):
         object.__setattr__(self, 'vars', tuple(vars))
 
     @classmethod
+    @property
+    def _tag(cls) -> str:
+        # TODO
+        return unsupported()
+
+    @classmethod
     def from_dict(cls: Type['Symbol'], dct: Mapping[str, Any]) -> 'Symbol':
         # TODO
         return unsupported()
@@ -1287,6 +1346,12 @@ class SymbolDecl(Sentence):
         object.__setattr__(self, 'sort', sort)
         object.__setattr__(self, 'attrs', tuple(attrs))
         object.__setattr__(self, 'hooked', hooked)
+
+    @classmethod
+    @property
+    def _tag(cls) -> str:
+        # TODO
+        return unsupported()
 
     @classmethod
     def from_dict(cls: Type['SymbolDecl'], dct: Mapping[str, Any]) -> 'SymbolDecl':
@@ -1335,6 +1400,12 @@ class AliasDecl(Sentence):
         object.__setattr__(self, 'left', left)
         object.__setattr__(self, 'right', right)
         object.__setattr__(self, 'attrs', tuple(attrs))
+
+    @classmethod
+    @property
+    def _tag(cls) -> str:
+        # TODO
+        return unsupported()
 
     @classmethod
     def from_dict(cls: Type['AliasDecl'], dct: Mapping[str, Any]) -> 'AliasDecl':
@@ -1396,6 +1467,12 @@ class Axiom(AxiomLike):
         object.__setattr__(self, 'attrs', tuple(attrs))
 
     @classmethod
+    @property
+    def _tag(cls) -> str:
+        # TODO
+        return unsupported()
+
+    @classmethod
     def from_dict(cls: Type['Axiom'], dct: Mapping[str, Any]) -> 'Axiom':
         # TODO
         return unsupported()
@@ -1420,6 +1497,12 @@ class Claim(AxiomLike):
         object.__setattr__(self, 'attrs', tuple(attrs))
 
     @classmethod
+    @property
+    def _tag(cls) -> str:
+        # TODO
+        return unsupported()
+
+    @classmethod
     def from_dict(cls: Type['Claim'], dct: Mapping[str, Any]) -> 'Claim':
         # TODO
         return unsupported()
@@ -1442,6 +1525,12 @@ class Module(Kore, WithAttrs):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sentences', tuple(sentences))
         object.__setattr__(self, 'attrs', tuple(attrs))
+
+    @classmethod
+    @property
+    def _tag(cls) -> str:
+        # TODO
+        return unsupported()
 
     @classmethod
     def from_dict(cls: Type['Module'], dct: Mapping[str, Any]) -> 'Module':
@@ -1471,6 +1560,12 @@ class Definition(Kore, WithAttrs):
     def __init__(self, modules: Iterable[Module] = (), attrs: Iterable[Attr] = ()):
         object.__setattr__(self, 'modules', tuple(modules))
         object.__setattr__(self, 'attrs', tuple(attrs))
+
+    @classmethod
+    @property
+    def _tag(cls) -> str:
+        # TODO
+        return unsupported()
 
     @classmethod
     def from_dict(cls: Type['Definition'], dct: Mapping[str, Any]) -> 'Definition':
