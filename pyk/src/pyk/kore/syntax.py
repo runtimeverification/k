@@ -509,7 +509,11 @@ class MLPattern(Pattern, ABC):
         'Rewrites', 'dv',
     }
 
-    symbol: ClassVar[str]
+    @classmethod
+    @property
+    @abstractmethod
+    def _symbol(cls):
+        ...
 
     @classmethod
     def from_dict(cls: Type['MLPattern'], dct: Mapping[str, Any]) -> 'MLPattern':
@@ -540,7 +544,7 @@ class MLConn(MLPattern, ABC):
 
     @property
     def text(self) -> str:
-        return self.symbol + ' { ' + self.sort.text + ' } ' + _parend(pattern.text for pattern in self.patterns)
+        return self._symbol + ' { ' + self.sort.text + ' } ' + _parend(pattern.text for pattern in self.patterns)
 
 
 class NullaryConn(MLConn, ABC):
@@ -562,7 +566,8 @@ class NullaryConn(MLConn, ABC):
 @final
 @dataclass(frozen=True)
 class Top(NullaryConn):
-    symbol = '\\top'
+    _symbol = '\\top'
+
     sort: Sort
 
     @classmethod
@@ -579,7 +584,8 @@ class Top(NullaryConn):
 @final
 @dataclass(frozen=True)
 class Bottom(NullaryConn):
-    symbol = '\\bottom'
+    _symbol = '\\bottom'
+
     sort: Sort
 
     @classmethod
@@ -614,7 +620,8 @@ class UnaryConn(MLConn, ABC):
 @final
 @dataclass(frozen=True)
 class Not(UnaryConn):
-    symbol = '\\not'
+    _symbol = '\\not'
+
     sort: Sort
     pattern: Pattern
 
@@ -655,7 +662,8 @@ class BinaryConn(MLConn, ABC):
 @final
 @dataclass(frozen=True)
 class And(BinaryConn):
-    symbol = '\\and'
+    _symbol = '\\and'
+
     sort: Sort
     left: Pattern
     right: Pattern
@@ -679,7 +687,8 @@ class And(BinaryConn):
 @final
 @dataclass(frozen=True)
 class Or(BinaryConn):
-    symbol = '\\or'
+    _symbol = '\\or'
+
     sort: Sort
     left: Pattern
     right: Pattern
@@ -702,7 +711,8 @@ class Or(BinaryConn):
 @final
 @dataclass(frozen=True)
 class Implies(BinaryConn):
-    symbol = '\\implies'
+    _symbol = '\\implies'
+
     sort: Sort
     left: Pattern
     right: Pattern
@@ -725,7 +735,8 @@ class Implies(BinaryConn):
 @final
 @dataclass(frozen=True)
 class Iff(BinaryConn):
-    symbol = '\\iff'
+    _symbol = '\\iff'
+
     sort: Sort
     left: Pattern
     right: Pattern
@@ -762,13 +773,14 @@ class MLQuant(MLPattern, ABC):
 
     @property
     def text(self) -> str:
-        return self.symbol + ' { ' + self.sort.text + ' } ' + _parend((self.var.text, self.pattern.text))
+        return self._symbol + ' { ' + self.sort.text + ' } ' + _parend((self.var.text, self.pattern.text))
 
 
 @final
 @dataclass(frozen=True)
 class Exists(MLQuant):
-    symbol = '\\exists'
+    _symbol = '\\exists'
+
     sort: Sort
     var: ElemVar
     pattern: Pattern
@@ -791,7 +803,8 @@ class Exists(MLQuant):
 @final
 @dataclass(frozen=True)
 class Forall(MLQuant):
-    symbol = '\\forall'
+    _symbol = '\\forall'
+
     sort: Sort
     var: ElemVar
     pattern: Pattern
@@ -827,13 +840,14 @@ class MLFixpoint(MLPattern, ABC):
 
     @property
     def text(self) -> str:
-        return self.symbol + ' { } ' + _parend((self.var.text, self.pattern.text))
+        return self._symbol + ' { } ' + _parend((self.var.text, self.pattern.text))
 
 
 @final
 @dataclass(frozen=True)
 class Mu(MLFixpoint):
-    symbol = '\\mu'
+    _symbol = '\\mu'
+
     var: SetVar
     pattern: Pattern
 
@@ -854,7 +868,8 @@ class Mu(MLFixpoint):
 @final
 @dataclass(frozen=True)
 class Nu(MLFixpoint):
-    symbol = '\\nu'
+    _symbol = '\\nu'
+
     var: SetVar
     pattern: Pattern
 
@@ -901,13 +916,14 @@ class RoundPred(MLPred, ABC):
 
     @property
     def text(self) -> str:
-        return self.symbol + ' ' + _braced((self.op_sort.text, self.sort.text)) + ' ( ' + self.pattern.text + ' )'
+        return self._symbol + ' ' + _braced((self.op_sort.text, self.sort.text)) + ' ( ' + self.pattern.text + ' )'
 
 
 @final
 @dataclass(frozen=True)
 class Ceil(RoundPred):
-    symbol = '\\ceil'
+    _symbol = '\\ceil'
+
     op_sort: Sort
     sort: Sort
     pattern: Pattern
@@ -930,7 +946,8 @@ class Ceil(RoundPred):
 @final
 @dataclass(frozen=True)
 class Floor(RoundPred):
-    symbol = '\\floor'
+    _symbol = '\\floor'
+
     op_sort: Sort
     sort: Sort
     pattern: Pattern
@@ -969,7 +986,7 @@ class BinaryPred(MLPred, ABC):
     @property
     def text(self) -> str:
         return ' '.join([
-            self.symbol,
+            self._symbol,
             _braced((self.left_sort.text, self.right_sort.text)),
             _parend((self.left.text, self.right.text)),
         ])
@@ -978,7 +995,8 @@ class BinaryPred(MLPred, ABC):
 @final
 @dataclass(frozen=True)
 class Equals(BinaryPred):
-    symbol = '\\equals'
+    _symbol = '\\equals'
+
     left_sort: Sort
     right_sort: Sort
     left: Pattern
@@ -1003,7 +1021,8 @@ class Equals(BinaryPred):
 @final
 @dataclass(frozen=True)
 class In(BinaryPred):
-    symbol = '\\in'
+    _symbol = '\\in'
+
     left_sort: Sort
     right_sort: Sort
     left: Pattern
@@ -1042,7 +1061,8 @@ class MLRewrite(MLPattern, ABC):
 @final
 @dataclass(frozen=True)
 class Next(MLRewrite):
-    symbol = '\\next'
+    _symbol = '\\next'
+
     sort: Sort
     pattern: Pattern
 
@@ -1061,13 +1081,14 @@ class Next(MLRewrite):
 
     @property
     def text(self) -> str:
-        return self.symbol + ' { ' + self.sort.text + ' } ( ' + self.pattern.text + ' )'
+        return self._symbol + ' { ' + self.sort.text + ' } ( ' + self.pattern.text + ' )'
 
 
 @final
 @dataclass(frozen=True)
 class Rewrites(MLRewrite):
-    symbol = '\\rewrites'
+    _symbol = '\\rewrites'
+
     sort: Sort
     left: Pattern
     right: Pattern
@@ -1088,13 +1109,14 @@ class Rewrites(MLRewrite):
 
     @property
     def text(self) -> str:
-        return self.symbol + ' { ' + self.sort.text + ' } ' + _parend((self.left.text, self.right.text))
+        return self._symbol + ' { ' + self.sort.text + ' } ' + _parend((self.left.text, self.right.text))
 
 
 @final
 @dataclass(frozen=True)
 class DomVal(MLPattern):
-    symbol = '\\dv'
+    _symbol = '\\dv'
+
     sort: Sort
     value: StrLit
 
@@ -1113,7 +1135,7 @@ class DomVal(MLPattern):
 
     @property
     def text(self) -> str:
-        return self.symbol + ' { ' + self.sort.text + ' } ( ' + self.value.text + ' )'
+        return self._symbol + ' { ' + self.sort.text + ' } ( ' + self.value.text + ' )'
 
 
 # TODO
