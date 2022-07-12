@@ -285,13 +285,21 @@ class KCFGTestCase(TestCase):
     def test_aliases(self):
         # Given
         d = {
-            'nodes': node_dicts(2),
-            'edges': edge_dicts((0, 1)),
+            'init': [nid(0)],
+            'target': [nid(3)],
+            'nodes': node_dicts(4),
+            'edges': edge_dicts((0, 1), (1, 2)),
             'aliases': {'foo': nid(1)}
         }
 
         cfg = KCFG.from_dict(d)
         self.assertEqual(cfg.node('@foo'), node(1))
+
+        self.assertEqual(cfg.node('#init'), node(0))
+        self.assertEqual(cfg.node('#target'), node(3))
+        cfg.add_expanded(nid(0))
+        cfg.add_expanded(nid(1))
+        self.assertEqual(cfg.node('#frontier'), node(2))
 
         cfg.add_alias('bar', node(0).id)
         cfg.add_alias('bar2', node(0).id)
@@ -306,7 +314,7 @@ class KCFGTestCase(TestCase):
         with self.assertRaises(ValueError, msg='Alias may not contain "@"'):
             cfg.add_alias('@buzz', node(1).id)
         with self.assertRaises(ValueError, msg=f'Unknown node: {nid(3)}'):
-            cfg.add_alias('buzz', node(3).id)
+            cfg.add_alias('buzz', node(9).id)
 
         cfg.remove_node(nid(1))
         cfg.create_node(term(1))
@@ -327,6 +335,7 @@ class KCFGTestCase(TestCase):
                                 ),
             'covers': cover_dicts((8, 11)),                  # Loops back
             'expanded': [nid(i) for i in [0, 1, 2, 3, 4, 5, 7, 11]],
+            'verified': edge_dicts((1, 2)),
         }
         cfg = KCFG.from_dict(d)
 
@@ -339,37 +348,33 @@ class KCFGTestCase(TestCase):
                                   f"{_short_hash(0)} (init, expanded)\n"
                                   f"│  (1 step)\n"
                                   f"├  {_short_hash(1)} (expanded)\n"
+                                  f"│  \033[1m\33[32m(verified)\033[0m\033[0m\n"
                                   f"│  (5 steps)\n"
                                   f"├  {_short_hash(2)} (expanded)\n"
                                   f"│  (1 step)\n"
                                   f"├  {_short_hash(3)} (expanded, @bar, @foo)\n"
-                                  f"┃  KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='x'), KToken(token='6', sort=KSort(name='Int'))))\n"
-                                  f"┣━ {_short_hash(6)} (target, leaf)\n"
+                                  f"┣━ {_short_hash(6)} (target, leaf)    KApply(label=KLabel(name='_==K_', params=()), args=(KVariable(name='x'), KToken(token='6', sort=KSort(name='Int'))))\n"
                                   f"┃\n"
-                                  f"┃  KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='x'), KToken(token='5', sort=KSort(name='Int'))))\n"
-                                  f"┣━ {_short_hash(5)} (expanded)\n"
+                                  f"┣━ {_short_hash(5)} (expanded)    KApply(label=KLabel(name='_==K_', params=()), args=(KVariable(name='x'), KToken(token='5', sort=KSort(name='Int'))))\n"
                                   f"┃   │  (1 step)\n"
                                   f"┃   ├  {_short_hash(2)} (expanded)\n"
                                   f"┃   ┊ (looped back)\n"
                                   f"┃\n"
-                                  f"┃  KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='x'), KToken(token='11', sort=KSort(name='Int'))))\n"
-                                  f"┣━ {_short_hash(11)} (expanded)\n"
+                                  f"┣━ {_short_hash(11)} (expanded)    KApply(label=KLabel(name='_==K_', params=()), args=(KVariable(name='x'), KToken(token='11', sort=KSort(name='Int'))))\n"
                                   f"┃   │  (1 step)\n"
                                   f"┃   ├  {_short_hash(8)} (leaf)\n"
-                                  f"┃   ┊  constraint: KApply(label=KLabel(name='#Top', params=(KSort(name='GeneratedTopCell'),)), args=())\n"
+                                  f"┃   ┊  constraint: KToken(token='true', sort=KSort(name='Bool'))\n"
                                   f"┃   ┊  subst:\n"
-                                  f"┃   ┊    KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='V11'), KToken(token='8', sort=KSort(name='Int'))))\n"
-                                  f"┃   ├  {_short_hash(11)} (expanded)\n"
-                                  f"┃   ┊ (looped back)\n"
+                                   "┃   ┊    {'V11': KToken(token='8', sort=KSort(name='Int'))}\n" # noqa
+                                  f"┃   └╌ {_short_hash(11)} (expanded)\n"
+                                  f"┃       ┊ (looped back)\n"
                                   f"┃\n"
-                                  f"┃  KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='x'), KToken(token='4', sort=KSort(name='Int'))))\n"
-                                  f"┣━ {_short_hash(4)} (expanded)\n"
+                                  f"┣━ {_short_hash(4)} (expanded)    KApply(label=KLabel(name='_==K_', params=()), args=(KVariable(name='x'), KToken(token='4', sort=KSort(name='Int'))))\n"
                                   f"┃   │  (1 step)\n"
                                   f"┃   ├  {_short_hash(5)} (expanded)\n"
                                   f"┃   ┊ (continues as previously)\n"
                                   f"┃\n"
-                                  f"┃  KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='x'), KToken(token='7', sort=KSort(name='Int'))))\n"
-                                  f"┗━ {_short_hash(7)} (expanded)\n"
+                                  f"┗━ {_short_hash(7)} (expanded)    KApply(label=KLabel(name='_==K_', params=()), args=(KVariable(name='x'), KToken(token='7', sort=KSort(name='Int'))))\n"
                                   f"    │  (1 step)\n"
                                   f"    └  {_short_hash(6)} (target, leaf)\n"
                                   f"\n"
