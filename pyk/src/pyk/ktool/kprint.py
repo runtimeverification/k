@@ -28,6 +28,7 @@ from ..kast import (
     KTerminal,
     KToken,
     KVariable,
+    Subst,
     flattenLabel,
     ktokenDots,
     readKastTerm,
@@ -108,6 +109,8 @@ def prettyPrintKast(kast, symbol_table, debug=False):
         sys.stderr.flush()
     if kast is None or kast == {}:
         return ""
+    if type(kast) is Subst:
+        return '\n'.join(key + ' |-> ' + prettyPrintKast(value, symbol_table) for key, value in kast.items())
     if type(kast) is KVariable:
         return kast.name
     if type(kast) is KSort:

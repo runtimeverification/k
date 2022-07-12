@@ -111,7 +111,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             return [
                 'constraint: ' + kprint.pretty_print(ml_pred_to_bool(self.constraint)),
                 'subst:',
-                *add_indent('  ', kprint.pretty_print(dict(self.subst.minimize())).split('\n')),
+                *add_indent('  ', kprint.pretty_print(self.subst.minimize()).split('\n')),
             ]
 
     _nodes: Dict[str, Node]
