@@ -7,7 +7,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.definition.Module;
-import scala.collection.JavaConverters;
+import static org.kframework.Collections.*;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class CheckSyntaxGroups {
 
     public void check(Sentence s) {
         if(s instanceof SyntaxAssociativity) {
-            Set<Tag> tags = JavaConverters.setAsJavaSet(((SyntaxAssociativity) s).tags());
+            Set<Tag> tags = mutable(((SyntaxAssociativity) s).tags());
             List<Tag> tagList = new ArrayList(tags);
 
             for(int i = 0; i < tagList.size(); ++i) {

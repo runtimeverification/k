@@ -1,7 +1,6 @@
 module SYNTAXGROUPS-SYNTAX
-  syntax Exp  ::= foo()
-                > Exp "*" Exp [times]
-                > Exp "+" Exp [plus]
+  syntax Exp  ::= Exp "*" Exp [times, unused]
+                > Exp "+" Exp [plus,  unused]
 
   syntax left times plus
 endmodule
