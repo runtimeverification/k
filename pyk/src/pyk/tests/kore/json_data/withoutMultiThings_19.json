@@ -23,7 +23,7 @@
       "name": "C2y",
       "args": []
     },
-    "resultSort": {
+    "sort": {
       "tag": "SortVar",
       "name": "F0g0O60S5Q1"
     },
@@ -33,7 +33,7 @@
         "tag": "SortVar",
         "name": "xsBT3X60043"
       },
-      "resultSort": {
+      "sort": {
         "tag": "SortVar",
         "name": "MDLhfw5SXi7498"
       },

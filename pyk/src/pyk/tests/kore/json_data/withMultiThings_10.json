@@ -39,7 +39,7 @@
             "name": "s",
             "args": []
           },
-          "resultSort": {
+          "sort": {
             "tag": "SortApp",
             "name": "C'",
             "args": []
@@ -109,7 +109,7 @@
         "name": "f4Zv9868",
         "args": []
       },
-      "resultSort": {
+      "sort": {
         "tag": "SortApp",
         "name": "B70mb4",
         "args": []
@@ -120,7 +120,7 @@
           "tag": "SortVar",
           "name": "D3iLIQ93326"
         },
-        "resultSort": {
+        "sort": {
           "tag": "SortVar",
           "name": "d6Cb19926"
         },
@@ -172,7 +172,7 @@
         "tag": "SortVar",
         "name": "NqxdiR082"
       },
-      "resultSort": {
+      "sort": {
         "tag": "SortVar",
         "name": "GXOr'vfZSm26939"
       },
@@ -182,7 +182,7 @@
           "tag": "SortVar",
           "name": "m-u58"
         },
-        "resultSort": {
+        "sort": {
           "tag": "SortApp",
           "name": "u",
           "args": []
@@ -254,7 +254,7 @@
             "name": "J1",
             "args": []
           },
-          "resultSort": {
+          "sort": {
             "tag": "SortApp",
             "name": "H9",
             "args": []
@@ -265,7 +265,7 @@
               "tag": "SortVar",
               "name": "d70097"
             },
-            "resultSort": {
+            "sort": {
               "tag": "SortVar",
               "name": "eD7"
             },

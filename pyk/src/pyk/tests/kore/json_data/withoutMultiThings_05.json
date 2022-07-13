@@ -5,7 +5,7 @@
     "name": "SyZy7yFdc7512",
     "args": []
   },
-  "resultSort": {
+  "sort": {
     "tag": "SortVar",
     "name": "G6"
   },
@@ -15,7 +15,7 @@
       "tag": "SortVar",
       "name": "G-Ex8z908B3qUO8"
     },
-    "resultSort": {
+    "sort": {
       "tag": "SortVar",
       "name": "LJ233"
     },
@@ -55,7 +55,7 @@
               "tag": "SortVar",
               "name": "q09357"
             },
-            "resultSort": {
+            "sort": {
               "tag": "SortVar",
               "name": "z315"
             },
@@ -84,7 +84,7 @@
           "tag": "SortVar",
           "name": "ygD9c"
         },
-        "resultSort": {
+        "sort": {
           "tag": "SortApp",
           "name": "F1",
           "args": []

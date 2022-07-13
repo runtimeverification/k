@@ -891,6 +891,9 @@ class Nu(MLFixpoint):
 class MLPred(MLPattern, ABC):
     _ML_PRED_TAGS: Final = {'Ceil', 'Floor', 'Equals', 'In'}
 
+    op_sort: Sort
+    sort: Sort
+
     @classmethod
     def from_dict(cls: Type['MLPred'], dct: Mapping[str, Any]) -> 'MLPred':
         tag = cls._get_tag(dct)
@@ -903,8 +906,6 @@ class MLPred(MLPattern, ABC):
 class RoundPred(MLPred, ABC):
     _ROUND_PRED_TAGS: Final = {'Ceil', 'Floor'}
 
-    op_sort: Sort
-    sort: Sort
     pattern: Pattern
 
     @classmethod
@@ -920,7 +921,7 @@ class RoundPred(MLPred, ABC):
         return {
             'tag': self._tag,
             'argSort': self.op_sort.dict,
-            'resultSort': self.sort.dict,
+            'sort': self.sort.dict,
             'arg': self.pattern.dict,
         }
 
@@ -944,7 +945,7 @@ class Ceil(RoundPred):
         cls._check_tag(dct)
         return Ceil(
             op_sort=Sort.from_dict(dct['argSort']),
-            sort=Sort.from_dict(dct['resultSort']),  # TODO Haskell: rename to sort
+            sort=Sort.from_dict(dct['sort']),
             pattern=Pattern.from_dict(dct['arg']),
         )
 
@@ -964,7 +965,7 @@ class Floor(RoundPred):
         cls._check_tag(dct)
         return Floor(
             op_sort=Sort.from_dict(dct['argSort']),
-            sort=Sort.from_dict(dct['resultSort']),  # TODO Haskell: rentame to sort
+            sort=Sort.from_dict(dct['sort']),
             pattern=Pattern.from_dict(dct['arg']),
         )
 
@@ -972,8 +973,6 @@ class Floor(RoundPred):
 class BinaryPred(MLPred, ABC):
     _BINARY_PRED_TAGS: Final = {'Equals', 'In'}
 
-    left_sort: Sort
-    right_sort: Sort
     left: Pattern
     right: Pattern
 
@@ -989,8 +988,8 @@ class BinaryPred(MLPred, ABC):
     def dict(self) -> Dict[str, Any]:
         return {
             'tag': self._tag,
-            'argSort': self.left_sort.dict,
-            'resultSort': self.right_sort.dict,
+            'argSort': self.op_sort.dict,
+            'sort': self.sort.dict,
             'first': self.left.dict,
             'second': self.right.dict,
         }
@@ -999,7 +998,7 @@ class BinaryPred(MLPred, ABC):
     def text(self) -> str:
         return ' '.join([
             self._symbol,
-            _braced((self.left_sort.text, self.right_sort.text)),
+            _braced((self.op_sort.text, self.sort.text)),
             _parend((self.left.text, self.right.text)),
         ])
 
@@ -1010,8 +1009,8 @@ class Equals(BinaryPred):
     _tag = 'Equals'
     _symbol = '\\equals'
 
-    left_sort: Sort
-    right_sort: Sort
+    op_sort: Sort
+    sort: Sort
     left: Pattern
     right: Pattern
 
@@ -1019,8 +1018,8 @@ class Equals(BinaryPred):
     def from_dict(cls: Type['Equals'], dct: Mapping[str, Any]) -> 'Equals':
         cls._check_tag(dct)
         return Equals(
-            left_sort=Sort.from_dict(dct['argSort']),      # TODO rename to op_sort
-            right_sort=Sort.from_dict(dct['resultSort']),  # TODO Haskell: rename to sort | TODO rename to sort
+            op_sort=Sort.from_dict(dct['argSort']),
+            sort=Sort.from_dict(dct['sort']),
             left=Pattern.from_dict(dct['first']),
             right=Pattern.from_dict(dct['second']),
         )
@@ -1032,8 +1031,8 @@ class In(BinaryPred):
     _tag = 'In'
     _symbol = '\\in'
 
-    left_sort: Sort
-    right_sort: Sort
+    op_sort: Sort
+    sort: Sort
     left: Pattern
     right: Pattern
 
@@ -1041,8 +1040,8 @@ class In(BinaryPred):
     def from_dict(cls: Type['In'], dct: Mapping[str, Any]) -> 'In':
         cls._check_tag(dct)
         return In(
-            left_sort=Sort.from_dict(dct['argSort']),      # TODO rename to op_sort
-            right_sort=Sort.from_dict(dct['resultSort']),  # TODO Haskell: rename to sort | TODO rename to sort
+            op_sort=Sort.from_dict(dct['argSort']),
+            sort=Sort.from_dict(dct['sort']),
             left=Pattern.from_dict(dct['first']),
             right=Pattern.from_dict(dct['second']),
         )

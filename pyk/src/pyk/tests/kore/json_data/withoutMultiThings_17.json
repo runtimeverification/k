@@ -10,7 +10,7 @@
       "tag": "SortVar",
       "name": "C-C-Oz"
     },
-    "resultSort": {
+    "sort": {
       "tag": "SortApp",
       "name": "Lv",
       "args": []
@@ -92,7 +92,7 @@
             "tag": "SortVar",
             "name": "QX6587"
           },
-          "resultSort": {
+          "sort": {
             "tag": "SortApp",
             "name": "M",
             "args": []
@@ -103,7 +103,7 @@
               "tag": "SortVar",
               "name": "U33320"
             },
-            "resultSort": {
+            "sort": {
               "tag": "SortVar",
               "name": "w4"
             },

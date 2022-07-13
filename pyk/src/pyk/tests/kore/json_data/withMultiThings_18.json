@@ -23,7 +23,7 @@
           "tag": "SortVar",
           "name": "v985"
         },
-        "resultSort": {
+        "sort": {
           "tag": "SortApp",
           "name": "t81",
           "args": []

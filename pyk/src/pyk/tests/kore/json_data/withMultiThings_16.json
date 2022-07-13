@@ -5,7 +5,7 @@
     "name": "Vra82",
     "args": []
   },
-  "resultSort": {
+  "sort": {
     "tag": "SortApp",
     "name": "dgU8M",
     "args": [
@@ -28,7 +28,7 @@
         "tag": "SortVar",
         "name": "f0"
       },
-      "resultSort": {
+      "sort": {
         "tag": "SortVar",
         "name": "HfPNaT294"
       },
@@ -38,7 +38,7 @@
           "tag": "SortVar",
           "name": "fvlx9-8891"
         },
-        "resultSort": {
+        "sort": {
           "tag": "SortVar",
           "name": "aF0N0"
         },

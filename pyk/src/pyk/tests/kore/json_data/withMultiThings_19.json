@@ -24,7 +24,7 @@
         "name": "sf978",
         "args": []
       },
-      "resultSort": {
+      "sort": {
         "tag": "SortApp",
         "name": "D0974236",
         "args": []
@@ -86,7 +86,7 @@
               "tag": "SortVar",
               "name": "Gy8"
             },
-            "resultSort": {
+            "sort": {
               "tag": "SortVar",
               "name": "C04"
             },

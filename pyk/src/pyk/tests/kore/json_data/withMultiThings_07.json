@@ -4,7 +4,7 @@
     "tag": "SortVar",
     "name": "R'Q2'0IyMV-unHTH7hlStWs8Q12475"
   },
-  "resultSort": {
+  "sort": {
     "tag": "SortVar",
     "name": "i4Our0''"
   },
@@ -15,7 +15,7 @@
       "name": "diTAnY667P82",
       "args": []
     },
-    "resultSort": {
+    "sort": {
       "tag": "SortApp",
       "name": "cY2O",
       "args": []
@@ -27,7 +27,7 @@
         "name": "F49c698",
         "args": []
       },
-      "resultSort": {
+      "sort": {
         "tag": "SortVar",
         "name": "n5AlyZ4857"
       },
@@ -43,7 +43,7 @@
             "tag": "SortVar",
             "name": "eO944"
           },
-          "resultSort": {
+          "sort": {
             "tag": "SortVar",
             "name": "qOm41561"
           },
@@ -110,7 +110,7 @@
         "name": "i",
         "args": []
       },
-      "resultSort": {
+      "sort": {
         "tag": "SortVar",
         "name": "s4EF5280"
       },
@@ -121,7 +121,7 @@
           "name": "sv0",
           "args": []
         },
-        "resultSort": {
+        "sort": {
           "tag": "SortVar",
           "name": "WDPw316"
         },

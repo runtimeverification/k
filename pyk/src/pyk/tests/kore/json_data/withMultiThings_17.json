@@ -18,7 +18,7 @@
         "name": "OBQOb1906",
         "args": []
       },
-      "resultSort": {
+      "sort": {
         "tag": "SortVar",
         "name": "rcZ4t15451"
       },
@@ -43,7 +43,7 @@
             "tag": "SortVar",
             "name": "i-30121"
           },
-          "resultSort": {
+          "sort": {
             "tag": "SortApp",
             "name": "qP1716",
             "args": []

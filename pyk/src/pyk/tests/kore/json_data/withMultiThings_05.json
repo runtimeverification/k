@@ -36,7 +36,7 @@
           "name": "V",
           "args": []
         },
-        "resultSort": {
+        "sort": {
           "tag": "SortApp",
           "name": "u5",
           "args": []
@@ -133,7 +133,7 @@
           "tag": "SortVar",
           "name": "Ts2434"
         },
-        "resultSort": {
+        "sort": {
           "tag": "SortVar",
           "name": "F31096"
         },

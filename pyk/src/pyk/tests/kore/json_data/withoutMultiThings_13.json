@@ -28,7 +28,7 @@
         "tag": "SortVar",
         "name": "NV9"
       },
-      "resultSort": {
+      "sort": {
         "tag": "SortApp",
         "name": "zTE9I930794",
         "args": []

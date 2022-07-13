@@ -4,7 +4,7 @@
     "tag": "SortVar",
     "name": "e'571"
   },
-  "resultSort": {
+  "sort": {
     "tag": "SortVar",
     "name": "V0-tTdYPoBr6KQvFmm'mx3"
   },
@@ -89,7 +89,7 @@
               "tag": "SortVar",
               "name": "A62216"
             },
-            "resultSort": {
+            "sort": {
               "tag": "SortVar",
               "name": "s0901"
             },

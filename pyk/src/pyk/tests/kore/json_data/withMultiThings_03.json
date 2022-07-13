@@ -29,7 +29,7 @@
           "tag": "SortVar",
           "name": "e8425"
         },
-        "resultSort": {
+        "sort": {
           "tag": "SortVar",
           "name": "Je"
         },
@@ -46,7 +46,7 @@
               "tag": "SortVar",
               "name": "RY878"
             },
-            "resultSort": {
+            "sort": {
               "tag": "SortVar",
               "name": "S1413"
             },

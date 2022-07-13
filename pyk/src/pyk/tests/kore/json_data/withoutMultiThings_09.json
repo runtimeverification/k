@@ -5,7 +5,7 @@
     "name": "sCzOO33TgeebVK",
     "args": []
   },
-  "resultSort": {
+  "sort": {
     "tag": "SortVar",
     "name": "DIhkUDOsGYuhg3"
   },
@@ -16,7 +16,7 @@
       "name": "EmN6F08",
       "args": []
     },
-    "resultSort": {
+    "sort": {
       "tag": "SortVar",
       "name": "sli'LFXEfD'849"
     },
@@ -65,7 +65,7 @@
             "name": "i38",
             "args": []
           },
-          "resultSort": {
+          "sort": {
             "tag": "SortVar",
             "name": "v6857"
           },

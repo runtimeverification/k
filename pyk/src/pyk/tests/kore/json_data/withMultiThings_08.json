@@ -26,7 +26,7 @@
           "tag": "SortVar",
           "name": "Cb8kL72"
         },
-        "resultSort": {
+        "sort": {
           "tag": "SortVar",
           "name": "gs98675"
         },
@@ -66,7 +66,7 @@
         "tag": "SortVar",
         "name": "f8l554"
       },
-      "resultSort": {
+      "sort": {
         "tag": "SortVar",
         "name": "l2h4U934788117"
       },
@@ -76,7 +76,7 @@
           "tag": "SortVar",
           "name": "kxOmD01"
         },
-        "resultSort": {
+        "sort": {
           "tag": "SortVar",
           "name": "RguA065"
         },
@@ -98,7 +98,7 @@
             "name": "gy38846",
             "args": []
           },
-          "resultSort": {
+          "sort": {
             "tag": "SortVar",
             "name": "I6"
           },
@@ -129,7 +129,7 @@
             "tag": "SortVar",
             "name": "b-p7"
           },
-          "resultSort": {
+          "sort": {
             "tag": "SortApp",
             "name": "HW30",
             "args": []
