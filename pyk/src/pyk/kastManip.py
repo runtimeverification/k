@@ -711,21 +711,12 @@ def matchWithConstraint(constrainedTerm1, constrainedTerm2):
     return None
 
 
-def minimizeSubst(subst):
-    return {k: subst[k] for k in subst if not (type(subst[k]) is KVariable and k == subst[k].name)}
-
-
 def substToMlPred(subst):
     mlTerms = []
     for k in subst:
         if KVariable(k) != subst[k]:
             mlTerms.append(mlEquals(KVariable(k), subst[k]))
     return mlAnd(mlTerms)
-
-
-def substToMap(subst):
-    mapItems = [KApply('_|->_', [KVariable(k), subst[k]]) for k in subst]
-    return build_assoc(KApply('.Map'), '_Map_', mapItems)
 
 
 def undoAliases(definition, kast):
