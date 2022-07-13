@@ -55,7 +55,7 @@ class StrLitLexer(Iterator[Tuple[str, 'StrLitLexer.TokenType']]):
             nr_digits, validate, token_type = hexa_params[char]
             hexa = self._match_hexa(nr_digits)
             validate(hexa)
-            token = f'\\x{hexa}'
+            token = f'\\{char}{hexa}'
             return token, token_type
 
         raise ValueError(f'Unexpected character: {self._la}')

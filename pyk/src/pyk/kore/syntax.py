@@ -8,6 +8,7 @@ from typing import (
     Final,
     Iterable,
     Iterator,
+    List,
     Mapping,
     Tuple,
     Type,
@@ -31,7 +32,6 @@ KEYWORDS: Final = {
     "alias",
     "where",
 }
-
 
 _A_TO_Z_LC: Final = 'abcdefghijklmnopqrstuvwxyz'
 _A_TO_Z_UC: Final = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -82,6 +82,30 @@ def check_symbol_id(s: str) -> None:
 def check_set_var_id(s: str) -> None:
     if not is_set_var_id(s):
         raise ValueError(f'Expected set variable identifier, found: {s}')
+
+
+def encode_kore_str(s: str) -> str:
+    res: List[str] = []
+    for c in s:
+        if ord(c) == 12:
+            res += '\\f'
+        elif ord(c) == 34:
+            res += '\\"'
+        else:
+            res += c.encode('unicode-escape').decode('ascii')
+    return ''.join(res)
+
+
+def decode_kore_str(s: str) -> str:
+    res: List[str] = []
+    for token, _ in StrLitLexer(s):
+        if token == '\\f':
+            res += '\f'
+        elif token == '\\"':
+            res += '"'
+        else:
+            res += token.encode('ascii').decode('unicode-escape')
+    return ''.join(res)
 
 
 def _bracketed(elems: Iterable[str], lbrac: str, rbrac: str) -> str:
@@ -338,12 +362,6 @@ class StrLit(Pattern):
 
     value: str
 
-    def __init__(self, value: str):
-        for _ in StrLitLexer(value):
-            pass  # validate value
-
-        object.__setattr__(self, 'value', value)
-
     @classmethod
     def from_dict(cls: Type['StrLit'], dct: Mapping[str, Any]) -> 'StrLit':
         cls._check_tag(dct)
@@ -355,11 +373,7 @@ class StrLit(Pattern):
 
     @property
     def text(self) -> str:
-        return f'"{self.value}"'
-
-    @property
-    def decoded(self) -> str:
-        return bytes(self.value, 'ascii').decode('unicode-escape')
+        return f'"{encode_kore_str(self.value)}"'
 
 
 @final

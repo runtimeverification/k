@@ -59,6 +59,7 @@ from .syntax import (
     Top,
     UnaryConn,
     VarPattern,
+    decode_kore_str,
 )
 
 T = TypeVar('T')
@@ -242,7 +243,7 @@ class KoreParser:
 
     def str_lit(self) -> StrLit:
         value = self._match(KoreToken.Type.STRING)
-        return StrLit(value[1:-1])
+        return StrLit(decode_kore_str(value[1:-1]))
 
     def apply(self) -> Apply:
         symbol = self._custom_symbol_id()
