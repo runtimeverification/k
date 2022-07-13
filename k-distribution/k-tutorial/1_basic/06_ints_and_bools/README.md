@@ -149,7 +149,7 @@ integers, is the `INT` module. The second, which provides just the syntax
 of integer literals themselves, is the `INT-SYNTAX` module. However, unlike
 most builtin sorts in K, K also provides a third module for the `Int` sort:
 the `UNSIGNED-INT-SYNTAX` module. This module provides only the syntax of
-**non-negative integers**, i.e., whole numbers. The reasons for this involve
+**non-negative integers**, i.e., natural numbers. The reasons for this involve
 lexical ambiguity. Generally speaking, in most programming languages, `-1` is
 not a literal, but instead a literal to which the unary negation operator is
 applied. K thus provides this module to ease in specifying the syntax of such

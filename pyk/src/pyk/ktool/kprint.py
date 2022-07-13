@@ -82,7 +82,7 @@ def build_symbol_table(definition, opinionated=False):
 
     symbol_table = {}
     for module in definition.modules:
-        for prod in module.productions:
+        for prod in module.syntax_productions:
             label = prod.klabel.name
             if 'symbol' in prod.att and 'klabel' in prod.att:
                 label = prod.att['klabel']

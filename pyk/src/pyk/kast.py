@@ -765,10 +765,10 @@ class KNonTerminal(KProductionItem):
 class KProduction(KSentence):
     sort: KSort
     items: Tuple[KProductionItem, ...]
-    klabel: KLabel
+    klabel: Optional[KLabel]
     att: KAtt
 
-    def __init__(self, sort: Union[str, KSort], items: Iterable[KProductionItem] = (), klabel: Union[str, KLabel] = '', att=EMPTY_ATT):
+    def __init__(self, sort: Union[str, KSort], items: Iterable[KProductionItem] = (), klabel: Optional[Union[str, KLabel]] = None, att=EMPTY_ATT):
         if type(sort) is str:
             sort = KSort(sort)
         if type(klabel) is str:
@@ -789,7 +789,7 @@ class KProduction(KSentence):
         return KProduction(
             sort=KSort.from_dict(d['sort']),
             items=(KProductionItem.from_dict(item) for item in d['productionItems']),
-            klabel=d.get('klabel', ''),
+            klabel=KLabel.from_dict(d['klabel']) if d.get('klabel') else None,
             att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
         )
 
@@ -798,7 +798,7 @@ class KProduction(KSentence):
             'node': 'KProduction',
             'sort': self.sort.to_dict(),
             'productionItems': [item.to_dict() for item in self.items],
-            'klabel': self.klabel or None,
+            'klabel': self.klabel.to_dict() if self.klabel else None,
             'att': self.att.to_dict(),
         }
 
@@ -812,7 +812,7 @@ class KProduction(KSentence):
     ) -> 'KProduction':
         sort = sort if sort is not None else self.sort
         items = items if items is not None else self.items
-        klabel = klabel if klabel is not None else self.klabel
+        klabel = klabel if klabel is not None else self.klabel  # TODO figure out a way to set klabel to None
         att = att if att is not None else self.att
         return KProduction(sort=sort, items=items, klabel=klabel, att=att)
 
@@ -1224,6 +1224,26 @@ class KFlatModule(KOuter, WithKAtt):
         return [sentence for sentence in self.sentences if type(sentence) is KProduction]
 
     @property
+    def syntax_productions(self) -> List[KProduction]:
+        return [prod for prod in self.productions if prod.klabel]
+
+    @property
+    def functions(self) -> List[KProduction]:
+
+        def _is_non_free_constructor(label: str) -> bool:
+            is_cell_map_constructor = label.endswith('CellMapItem') or label.endswith('CellMap_')
+            is_builtin_data_constructor = label in {'_Set_', '_List_', '_Map_', 'SetItem', 'ListItem', '_|->_'}
+            return is_cell_map_constructor or is_builtin_data_constructor
+
+        _functions = [prod for prod in self.syntax_productions if 'function' in prod.att.atts or 'functional' in prod.att.atts]
+        _functions = [f for f in _functions if not (f.klabel and _is_non_free_constructor(f.klabel.name))]
+        return _functions
+
+    @property
+    def constructors(self) -> List[KProduction]:
+        return [prod for prod in self.syntax_productions if prod not in self.functions]
+
+    @property
     def rules(self) -> List[KRule]:
         return [sentence for sentence in self.sentences if type(sentence) is KRule]
 
@@ -1353,6 +1373,22 @@ class KDefinition(KOuter, WithKAtt):
 
     def let_att(self, att: KAtt) -> 'KDefinition':
         return self.let(att=att)
+
+    @property
+    def productions(self) -> List[KProduction]:
+        return [prod for module in self.modules for prod in module.productions]
+
+    @property
+    def syntax_productions(self) -> List[KProduction]:
+        return [prod for module in self.modules for prod in module.syntax_productions]
+
+    @property
+    def functions(self) -> List[KProduction]:
+        return [prod for module in self.modules for prod in module.functions]
+
+    @property
+    def constructors(self) -> List[KProduction]:
+        return [prod for module in self.modules for prod in module.constructors]
 
 
 # TODO make method of KInner

@@ -113,6 +113,14 @@ def nonempty_str(x: Any) -> str:
     return x
 
 
+def add_indent(indent: str, lines: Iterable[str]) -> List[str]:
+    return [indent + line for line in lines]
+
+
+def is_hexstring(x: str) -> bool:
+    return all(c in string.hexdigits for c in x)
+
+
 # Hashes
 
 def hash_str(x: Any) -> str:
@@ -125,7 +133,7 @@ def is_hash(x: Any) -> bool:
     # NB! currently only sha256 in hexdec form is detected
     # 2b9e b7c5 441e 9f7e 97f9 a4e5 fc04 a0f7 9f62 c8e9 605a ad1e 02db e8de 3c21 0422
     # 1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
-    return type(x) is str and len(x) == 64 and all(c in string.hexdigits for c in x)
+    return type(x) is str and len(x) == 64 and is_hexstring(x)
 
 
 def shorten_hash(h: str, leftChars=6, rightChars=6) -> str:
@@ -155,7 +163,17 @@ def shorten_hashes(value: Any, leftChars=6, rightChars=6) -> Any:
     return result
 
 
+def deconstruct_short_hash(h: str) -> Tuple[str, str]:
+    x = h.lower()
+    if is_hash(x):
+        return (x, x)
+    (l, sep, r) = x.partition('..')
+    if sep == '..' and is_hexstring(l) and is_hexstring(r):
+        return (l, r)
+    raise ValueError(f'Bad short hash: {h}')
+
+
 def compare_short_hashes(lhs: str, rhs: str):
-    left, right = lhs.split('.'), rhs.split('.')
-    (l0, l1, r0, r1) = (left[0].upper(), left[-1].upper(), right[0].upper(), right[-1].upper())
+    (l0, l1) = deconstruct_short_hash(lhs)
+    (r0, r1) = deconstruct_short_hash(rhs)
     return (l0.startswith(r0) or r0.startswith(l0)) and (l1.endswith(r1) or r1.endswith(l1))

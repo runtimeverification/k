@@ -29,10 +29,10 @@ test: test-kpyk
 
 test-kpyk: test-kpyk-graphviz test-kpyk-minimize-term
 
-test-kpyk-graphviz: imp-verification.kompiled
-	$(PYK) -v definitions/imp-verification graph-imports
-	cat definitions/imp-verification/import-graph | tr -cd '[:alnum:]\n' | grep . | tr '[:lower:]' '[:upper:]' | sort > import-graph.sorted
-	$(CHECK) import-graph.sorted imp-import-graph.expected
+test-kpyk-graphviz: d.kompiled
+	$(PYK) -v definitions/d graph-imports
+	cat definitions/d/import-graph | tr -cd '[:alnum:]\n' | grep . | tr '[:lower:]' '[:upper:]' | grep -xFf import-graph.expected | sort > import-graph.out
+	$(CHECK) import-graph.out import-graph.expected
 
 test-kpyk-minimize-term: imp-verification.kompiled
 	$(PYK) -v definitions/imp-verification prove ../k-files/imp-verification.k ../k-files/imp-unproveable-spec.k IMP-UNPROVEABLE-SPEC \
@@ -50,5 +50,4 @@ build-definitions: $(definitions:=.kompiled)
 	$(KOMPILE) ../k-files/$*.k             \
 	    --output-definition definitions/$* \
 	    --backend haskell                  \
-	    -I k-files                         \
 	    --emit-json
