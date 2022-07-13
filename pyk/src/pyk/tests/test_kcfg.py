@@ -6,7 +6,7 @@ from ..kast import TRUE, KApply, KInner, KVariable
 from ..kcfg import KCFG
 from ..prelude import mlEquals, token
 from ..utils import shorten_hash
-from .mock_kprint import mock_kprint
+from .mock_kprint import MockKPrint
 
 
 def nid(i: int) -> str:
@@ -334,7 +334,7 @@ class KCFGTestCase(TestCase):
             return shorten_hash(nid(i))
 
         self.maxDiff = None
-        actual = '\n'.join(cfg.pretty_print(mock_kprint())) + '\n'
+        actual = '\n'.join(cfg.pretty_print(MockKPrint())) + '\n'
         self.assertMultiLineEqual(actual,
                                   f"{_short_hash(0)} (init, expanded)\n"
                                   f"│  (1 step)\n"

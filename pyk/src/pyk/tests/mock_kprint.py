@@ -1,13 +1,7 @@
-from typing import cast
-
-from ..kast import KAst
-from ..ktool.kprint import KPrint, prettyPrintKast
+from ..ktool.kprint import KPrint
 
 
-class MockKPrint:
-    def pretty_print(self, term: KAst) -> str:
-        return prettyPrintKast(term, symbol_table={})
-
-
-def mock_kprint() -> KPrint:
-    return cast(KPrint, MockKPrint())
+class MockKPrint(KPrint):
+    def __init__(self):
+        self.symbol_table = {}
+        return
