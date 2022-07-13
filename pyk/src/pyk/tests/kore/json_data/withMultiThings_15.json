@@ -14,12 +14,12 @@
   "first": {
     "tag": "Exists",
     "sort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "UtNHLKa45"
     },
     "var": "fyxnaKX-8hXRcp89",
     "varSort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "JakZg7OsFL4KL41O51"
     },
     "arg": {
@@ -38,25 +38,25 @@
   "second": {
     "tag": "Iff",
     "sort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "g08"
     },
     "first": {
       "tag": "Bottom",
       "sort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "qO1JzE6"
       }
     },
     "second": {
       "tag": "Exists",
       "sort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "PT'2xt5O63"
       },
       "var": "z085-F0214",
       "varSort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "Up10"
       },
       "arg": {

@@ -5,7 +5,7 @@
     "name": "KK7c8ls2Nkodbk7603",
     "args": [
       {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "k3RZmoDT9EuNLM3229"
       }
     ]
@@ -14,13 +14,13 @@
     "tag": "Mu",
     "var": "@KC69BzNnlyr99312",
     "varSort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "k0"
     },
     "arg": {
       "tag": "dv",
       "sort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "aGy6D-FDgVozK2t3"
       },
       "value": "\\u6E5D"

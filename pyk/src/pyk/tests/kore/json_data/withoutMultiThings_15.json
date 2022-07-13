@@ -1,11 +1,11 @@
 {
   "tag": "Floor",
   "argSort": {
-    "tag": "SortVariable",
+    "tag": "SortVar",
     "name": "ZquOg5'3VomezsXpL95506"
   },
   "resultSort": {
-    "tag": "SortVariable",
+    "tag": "SortVar",
     "name": "k10"
   },
   "arg": {

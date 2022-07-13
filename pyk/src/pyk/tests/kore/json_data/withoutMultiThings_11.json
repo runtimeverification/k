@@ -5,7 +5,7 @@
     "name": "hY'fGgofwkKr8948",
     "args": [
       {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "zX7GFbHJXUuv678"
       }
     ]
@@ -57,7 +57,7 @@
       "arg": {
         "tag": "Not",
         "sort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "gq3'6457"
         },
         "arg": {
@@ -69,21 +69,21 @@
           },
           "var": "NZ29",
           "varSort": {
-            "tag": "SortVariable",
+            "tag": "SortVar",
             "name": "l5z5765"
           },
           "arg": {
             "tag": "Mu",
             "var": "@Z",
             "varSort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "J756"
             },
             "arg": {
               "tag": "EVar",
               "name": "kh6",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "yf"
               }
             }

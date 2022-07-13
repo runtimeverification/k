@@ -23,29 +23,29 @@
         "tag": "Nu",
         "var": "@pnX313",
         "varSort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "EMWD"
         },
         "arg": {
           "tag": "In",
           "argSort": {
-            "tag": "SortVariable",
+            "tag": "SortVar",
             "name": "oP95"
           },
           "resultSort": {
-            "tag": "SortVariable",
+            "tag": "SortVar",
             "name": "XMc7399"
           },
           "first": {
             "tag": "Next",
             "sort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "z97937"
             },
             "dest": {
               "tag": "Bottom",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "ZC7"
               }
             }
@@ -53,7 +53,7 @@
           "second": {
             "tag": "dv",
             "sort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "r2z56872"
             },
             "value": ""
@@ -73,13 +73,13 @@
       "tag": "Nu",
       "var": "@Q",
       "varSort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "i'Z29"
       },
       "arg": {
         "tag": "Not",
         "sort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "U31"
         },
         "arg": {
@@ -92,7 +92,7 @@
           "first": {
             "tag": "Top",
             "sort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "k11017"
             }
           },
@@ -130,14 +130,14 @@
         },
         "var": "mi3x28725",
         "varSort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "nk2i25527"
         },
         "arg": {
           "tag": "SVar",
           "name": "@LUSm5",
           "sort": {
-            "tag": "SortVariable",
+            "tag": "SortVar",
             "name": "ehV"
           }
         }

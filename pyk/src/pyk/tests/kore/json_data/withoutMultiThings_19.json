@@ -5,7 +5,7 @@
     "name": "Nqn4MqKvPhHAp4y22280",
     "args": [
       {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "R'glPiK824"
       }
     ]
@@ -24,23 +24,23 @@
       "args": []
     },
     "resultSort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "F0g0O60S5Q1"
     },
     "arg": {
       "tag": "Floor",
       "argSort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "xsBT3X60043"
       },
       "resultSort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "MDLhfw5SXi7498"
       },
       "arg": {
         "tag": "dv",
         "sort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "ukd696l75A74731"
         },
         "value": "dY{^-"

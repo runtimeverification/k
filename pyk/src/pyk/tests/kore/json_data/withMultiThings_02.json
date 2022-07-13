@@ -1,13 +1,13 @@
 {
   "tag": "Not",
   "sort": {
-    "tag": "SortVariable",
+    "tag": "SortVar",
     "name": "TD9VYMUt"
   },
   "arg": {
     "tag": "In",
     "argSort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "Xlsu33'vs'802"
     },
     "resultSort": {
@@ -27,7 +27,7 @@
         "tag": "Nu",
         "var": "@Uxt2td79",
         "varSort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "K67173"
         },
         "arg": {
@@ -39,7 +39,7 @@
     "second": {
       "tag": "Bottom",
       "sort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "SkS1A'9"
       }
     }

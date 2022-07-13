@@ -1,7 +1,7 @@
 {
   "tag": "And",
   "sort": {
-    "tag": "SortVariable",
+    "tag": "SortVar",
     "name": "PHc5-I18S17zq'6B9inv'eb3"
   },
   "first": {
@@ -15,7 +15,7 @@
       "tag": "EVar",
       "name": "PF7-8R0678",
       "sort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "QHsu0'Sonu8347"
       }
     },
@@ -24,7 +24,7 @@
       "name": "\\ZwHeuU9",
       "sorts": [
         {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "XfV-L077"
         }
       ],

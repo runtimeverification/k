@@ -6,7 +6,7 @@
     "args": []
   },
   "resultSort": {
-    "tag": "SortVariable",
+    "tag": "SortVar",
     "name": "DIhkUDOsGYuhg3"
   },
   "arg": {
@@ -17,13 +17,13 @@
       "args": []
     },
     "resultSort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "sli'LFXEfD'849"
     },
     "first": {
       "tag": "And",
       "sort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "Dn3r-51"
       },
       "first": {
@@ -49,13 +49,13 @@
       "tag": "Mu",
       "var": "@KtDZ0RcUQF817",
       "varSort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "x-oP7"
       },
       "arg": {
         "tag": "Next",
         "sort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "Er9PA39"
         },
         "dest": {
@@ -66,13 +66,13 @@
             "args": []
           },
           "resultSort": {
-            "tag": "SortVariable",
+            "tag": "SortVar",
             "name": "v6857"
           },
           "first": {
             "tag": "dv",
             "sort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "L1Y4301"
             },
             "value": ""
@@ -80,13 +80,13 @@
           "second": {
             "tag": "Next",
             "sort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "a-2"
             },
             "dest": {
               "tag": "Bottom",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "s4273"
               }
             }

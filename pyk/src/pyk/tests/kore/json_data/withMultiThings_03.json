@@ -9,7 +9,7 @@
   "arg": {
     "tag": "Iff",
     "sort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "wh8302"
     },
     "first": {
@@ -26,35 +26,35 @@
       "dest": {
         "tag": "In",
         "argSort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "e8425"
         },
         "resultSort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "Je"
         },
         "first": {
           "tag": "Mu",
           "var": "@fy0370",
           "varSort": {
-            "tag": "SortVariable",
+            "tag": "SortVar",
             "name": "JS3"
           },
           "arg": {
             "tag": "Ceil",
             "argSort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "RY878"
             },
             "resultSort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "S1413"
             },
             "arg": {
               "tag": "EVar",
               "name": "Y730",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "U9491"
               }
             }

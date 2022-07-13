@@ -19,27 +19,27 @@
   "arg": {
     "tag": "Implies",
     "sort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "vcaBtF7u-y"
     },
     "first": {
       "tag": "Equals",
       "argSort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "f0"
       },
       "resultSort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "HfPNaT294"
       },
       "first": {
         "tag": "Ceil",
         "argSort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "fvlx9-8891"
         },
         "resultSort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "aF0N0"
         },
         "arg": {
@@ -53,7 +53,7 @@
             "tag": "SVar",
             "name": "@x8246",
             "sort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "St9980"
             }
           }
@@ -64,7 +64,7 @@
         "name": "lb",
         "sorts": [
           {
-            "tag": "SortVariable",
+            "tag": "SortVar",
             "name": "f30740"
           }
         ],
@@ -74,7 +74,7 @@
     "second": {
       "tag": "Next",
       "sort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "Uo57428"
       },
       "dest": {

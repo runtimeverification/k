@@ -1,7 +1,7 @@
 {
   "tag": "Not",
   "sort": {
-    "tag": "SortVariable",
+    "tag": "SortVar",
     "name": "U3BPmzqv0MOI2P77100"
   },
   "arg": {
@@ -14,13 +14,13 @@
     "first": {
       "tag": "Next",
       "sort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "fcv2293"
       },
       "dest": {
         "tag": "Floor",
         "argSort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "v985"
         },
         "resultSort": {
@@ -39,13 +39,13 @@
           "arg": {
             "tag": "Implies",
             "sort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "P1"
             },
             "first": {
               "tag": "Top",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "y6"
               }
             },

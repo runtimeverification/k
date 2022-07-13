@@ -14,12 +14,12 @@
   "first": {
     "tag": "Exists",
     "sort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "ro62'13"
     },
     "var": "P-w8uf3KyJtWBY-P40048",
     "varSort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "ohV1mbbd4IK7"
     },
     "arg": {

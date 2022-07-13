@@ -1,7 +1,7 @@
 {
   "tag": "Next",
   "sort": {
-    "tag": "SortVariable",
+    "tag": "SortVar",
     "name": "XZN04oXPg4'"
   },
   "dest": {
@@ -19,7 +19,7 @@
         "args": []
       },
       "resultSort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "rcZ4t15451"
       },
       "first": {
@@ -34,13 +34,13 @@
       "second": {
         "tag": "And",
         "sort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "nkCgH7"
         },
         "first": {
           "tag": "In",
           "argSort": {
-            "tag": "SortVariable",
+            "tag": "SortVar",
             "name": "i-30121"
           },
           "resultSort": {
@@ -55,14 +55,14 @@
           "second": {
             "tag": "Not",
             "sort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "t"
             },
             "arg": {
               "tag": "EVar",
               "name": "I",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "l5"
               }
             }
@@ -79,20 +79,20 @@
             "tag": "EVar",
             "name": "u7",
             "sort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "N212"
             }
           },
           "second": {
             "tag": "Next",
             "sort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "B"
             },
             "dest": {
               "tag": "dv",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "Wg140"
               },
               "value": ""
@@ -106,7 +106,7 @@
       "name": "\\tUmkgz765",
       "sorts": [
         {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "H4CUbp14"
         }
       ],

@@ -1,17 +1,17 @@
 {
   "tag": "In",
   "argSort": {
-    "tag": "SortVariable",
+    "tag": "SortVar",
     "name": "e'571"
   },
   "resultSort": {
-    "tag": "SortVariable",
+    "tag": "SortVar",
     "name": "V0-tTdYPoBr6KQvFmm'mx3"
   },
   "first": {
     "tag": "Iff",
     "sort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "n3IH0hx-mn"
     },
     "first": {
@@ -37,12 +37,12 @@
     "second": {
       "tag": "Exists",
       "sort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "M-Lmumzz"
       },
       "var": "V8fNX2gh'E59",
       "varSort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "pn4"
       },
       "arg": {
@@ -54,31 +54,31 @@
         },
         "var": "G9dlCh2784",
         "varSort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "plfnW908624"
         },
         "arg": {
           "tag": "And",
           "sort": {
-            "tag": "SortVariable",
+            "tag": "SortVar",
             "name": "I6M8"
           },
           "first": {
             "tag": "Exists",
             "sort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "F537"
             },
             "var": "SO3",
             "varSort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "E"
             },
             "arg": {
               "tag": "EVar",
               "name": "cZ22",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "M"
               }
             }
@@ -86,17 +86,17 @@
           "second": {
             "tag": "Equals",
             "argSort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "A62216"
             },
             "resultSort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "s0901"
             },
             "first": {
               "tag": "dv",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "FA47"
               },
               "value": ""
@@ -104,7 +104,7 @@
             "second": {
               "tag": "Bottom",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "pt98"
               }
             }
@@ -120,7 +120,7 @@
       "name": "QZor82230",
       "args": [
         {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "cUq4Ht9v9'GAXtc976"
         }
       ]

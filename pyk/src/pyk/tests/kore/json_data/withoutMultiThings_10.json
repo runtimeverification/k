@@ -2,19 +2,19 @@
   "tag": "Mu",
   "var": "@gtLR'wSM6fbA4LtTX95w6",
   "varSort": {
-    "tag": "SortVariable",
+    "tag": "SortVar",
     "name": "hT-30533"
   },
   "arg": {
     "tag": "Iff",
     "sort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "v5JOH2IB9PQ79230"
     },
     "first": {
       "tag": "dv",
       "sort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "ZXiQTJliH-ebE7'c05454"
       },
       "value": "o/Pfp"
@@ -23,7 +23,7 @@
       "tag": "SVar",
       "name": "@A'327",
       "sort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "oSX8B2840"
       }
     }

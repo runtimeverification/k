@@ -115,7 +115,6 @@ def unsupported() -> Any:
 
 class Kore(ABC):
     _TAGS: Final[Mapping[str, str]] = {
-        'SortVariable': 'SortVar',
         'SortApp': 'SortCons',
         'EVar': 'ElemVar',
         'SVar': 'SetVar',
@@ -123,6 +122,7 @@ class Kore(ABC):
         'App': 'Apply',
         'dv': 'DomVal',
         **{k: k for k in (
+            'SortVar',
             'Top',
             'Bottom',
             'Not',
@@ -298,7 +298,7 @@ class StrLitLexer(Iterator[Tuple[str, 'StrLitLexer.TokenType']]):
 
 
 class Sort(Kore, ABC):
-    _SORT_TAGS: Final = {'SortVariable', 'SortApp'}
+    _SORT_TAGS: Final = {'SortVar', 'SortApp'}
 
     name: str
 
@@ -314,7 +314,7 @@ class Sort(Kore, ABC):
 @final
 @dataclass(frozen=True)
 class SortVar(Sort):
-    _tag = 'SortVariable'  # TODO Haskell: rename to SortVar
+    _tag = 'SortVar'
 
     name: str
 

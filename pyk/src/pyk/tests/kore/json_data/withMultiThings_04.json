@@ -12,7 +12,7 @@
   "second": {
     "tag": "Equals",
     "argSort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "TH5pKDmw67htB036"
     },
     "resultSort": {
@@ -41,7 +41,7 @@
         "name": "\\nhc657806",
         "sorts": [
           {
-            "tag": "SortVariable",
+            "tag": "SortVar",
             "name": "nSv0490"
           }
         ],

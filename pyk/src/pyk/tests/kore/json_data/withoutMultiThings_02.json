@@ -8,13 +8,13 @@
   "source": {
     "tag": "Rewrites",
     "sort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "KEGO2Lbng1-pO-bE936"
     },
     "source": {
       "tag": "Forall",
       "sort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "CP9y6O2e0"
       },
       "var": "f694aaau3",

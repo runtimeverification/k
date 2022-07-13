@@ -19,13 +19,13 @@
   "arg": {
     "tag": "Implies",
     "sort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "qyb4cu4NOIQ-fg452"
     },
     "first": {
       "tag": "Bottom",
       "sort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "q5ye7AUuboJXXa56"
       }
     },

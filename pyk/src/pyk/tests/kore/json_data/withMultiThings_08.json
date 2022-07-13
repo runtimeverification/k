@@ -2,7 +2,7 @@
   "tag": "Nu",
   "var": "@OatT59BNw72g0X'2C8PSu'5",
   "varSort": {
-    "tag": "SortVariable",
+    "tag": "SortVar",
     "name": "UGK6"
   },
   "arg": {
@@ -23,36 +23,36 @@
       "arg": {
         "tag": "Ceil",
         "argSort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "Cb8kL72"
         },
         "resultSort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "gs98675"
         },
         "arg": {
           "tag": "Not",
           "sort": {
-            "tag": "SortVariable",
+            "tag": "SortVar",
             "name": "Xv25"
           },
           "arg": {
             "tag": "Rewrites",
             "sort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "B36704"
             },
             "source": {
               "tag": "Bottom",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "O97128"
               }
             },
             "dest": {
               "tag": "Top",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "Z96367"
               }
             }
@@ -63,21 +63,21 @@
     "second": {
       "tag": "In",
       "argSort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "f8l554"
       },
       "resultSort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "l2h4U934788117"
       },
       "first": {
         "tag": "Floor",
         "argSort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "kxOmD01"
         },
         "resultSort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "RguA065"
         },
         "arg": {
@@ -88,7 +88,7 @@
       "second": {
         "tag": "Iff",
         "sort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "V358"
         },
         "first": {
@@ -99,20 +99,20 @@
             "args": []
           },
           "resultSort": {
-            "tag": "SortVariable",
+            "tag": "SortVar",
             "name": "I6"
           },
           "first": {
             "tag": "Nu",
             "var": "@q",
             "varSort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "zm132"
             },
             "arg": {
               "tag": "dv",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "oQ87150"
               },
               "value": ""
@@ -126,7 +126,7 @@
         "second": {
           "tag": "Ceil",
           "argSort": {
-            "tag": "SortVariable",
+            "tag": "SortVar",
             "name": "b-p7"
           },
           "resultSort": {

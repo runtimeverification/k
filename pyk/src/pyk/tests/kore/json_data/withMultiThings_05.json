@@ -5,7 +5,7 @@
     "name": "IaYTTR-q02699",
     "args": [
       {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "zOzx70FW1pnC1'E50619"
       }
     ]
@@ -20,7 +20,7 @@
     "first": {
       "tag": "Forall",
       "sort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "boNTIhNdga"
       },
       "var": "RneU5",
@@ -49,13 +49,13 @@
           "tag": "Mu",
           "var": "@F87",
           "varSort": {
-            "tag": "SortVariable",
+            "tag": "SortVar",
             "name": "d91"
           },
           "arg": {
             "tag": "Or",
             "sort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "h82"
             },
             "first": {
@@ -65,7 +65,7 @@
             "second": {
               "tag": "Bottom",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "q9"
               }
             }
@@ -76,13 +76,13 @@
     "second": {
       "tag": "Iff",
       "sort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "U104"
       },
       "first": {
         "tag": "Forall",
         "sort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "P40"
         },
         "var": "fC573",
@@ -94,32 +94,32 @@
         "arg": {
           "tag": "Forall",
           "sort": {
-            "tag": "SortVariable",
+            "tag": "SortVar",
             "name": "P4313"
           },
           "var": "zRg",
           "varSort": {
-            "tag": "SortVariable",
+            "tag": "SortVar",
             "name": "Pg0978"
           },
           "arg": {
             "tag": "Implies",
             "sort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "x48116"
             },
             "first": {
               "tag": "EVar",
               "name": "D'",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "mt0"
               }
             },
             "second": {
               "tag": "dv",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "XC325"
               },
               "value": ""
@@ -130,37 +130,37 @@
       "second": {
         "tag": "In",
         "argSort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "Ts2434"
         },
         "resultSort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "F31096"
         },
         "first": {
           "tag": "And",
           "sort": {
-            "tag": "SortVariable",
+            "tag": "SortVar",
             "name": "x4M"
           },
           "first": {
             "tag": "And",
             "sort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "CN73604"
             },
             "first": {
               "tag": "EVar",
               "name": "GH39151",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "qZ16"
               }
             },
             "second": {
               "tag": "Bottom",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "E082"
               }
             }
@@ -168,13 +168,13 @@
           "second": {
             "tag": "Not",
             "sort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "Xx0336"
             },
             "arg": {
               "tag": "Bottom",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "A83"
               }
             }
@@ -195,7 +195,7 @@
   "dest": {
     "tag": "Forall",
     "sort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "cu28rl77-i8863"
     },
     "var": "b351758",
@@ -215,7 +215,7 @@
         "tag": "Mu",
         "var": "@rM143",
         "varSort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "Mtkc37"
         },
         "arg": {
@@ -229,13 +229,13 @@
             "tag": "Mu",
             "var": "@P75",
             "varSort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "U62257"
             },
             "arg": {
               "tag": "Bottom",
               "sort": {
-                "tag": "SortVariable",
+                "tag": "SortVar",
                 "name": "lk890"
               }
             }
@@ -244,7 +244,7 @@
             "tag": "Mu",
             "var": "@P",
             "varSort": {
-              "tag": "SortVariable",
+              "tag": "SortVar",
               "name": "N1759"
             },
             "arg": {
@@ -257,7 +257,7 @@
       "second": {
         "tag": "Top",
         "sort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "KfC9JGD42"
         }
       }

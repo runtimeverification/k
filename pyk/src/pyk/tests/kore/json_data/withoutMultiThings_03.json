@@ -2,7 +2,7 @@
   "tag": "Mu",
   "var": "@iOB7C-URMMw70G87",
   "varSort": {
-    "tag": "SortVariable",
+    "tag": "SortVar",
     "name": "ql98DM0SY752"
   },
   "arg": {
@@ -20,7 +20,7 @@
     "arg": {
       "tag": "Forall",
       "sort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "T-xIqD535"
       },
       "var": "LcJkgL429",

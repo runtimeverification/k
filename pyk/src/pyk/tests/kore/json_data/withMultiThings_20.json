@@ -1,12 +1,12 @@
 {
   "tag": "Exists",
   "sort": {
-    "tag": "SortVariable",
+    "tag": "SortVar",
     "name": "A'ZEhaHBM1ytS3xyV3S5'uEG93"
   },
   "var": "DgAJfEl230",
   "varSort": {
-    "tag": "SortVariable",
+    "tag": "SortVar",
     "name": "Nir'124IRCY8pOt76lX-JAs'41"
   },
   "arg": {

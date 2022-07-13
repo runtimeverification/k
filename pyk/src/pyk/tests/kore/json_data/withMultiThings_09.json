@@ -1,12 +1,12 @@
 {
   "tag": "Forall",
   "sort": {
-    "tag": "SortVariable",
+    "tag": "SortVar",
     "name": "X'UMB9"
   },
   "var": "TU-1mfz3-L8UW4",
   "varSort": {
-    "tag": "SortVariable",
+    "tag": "SortVar",
     "name": "Ux"
   },
   "arg": {
@@ -20,7 +20,7 @@
       "tag": "EVar",
       "name": "Gu3'99815",
       "sort": {
-        "tag": "SortVariable",
+        "tag": "SortVar",
         "name": "B2B59eG0-o-'ay71880"
       }
     },
@@ -40,7 +40,7 @@
       "arg": {
         "tag": "Next",
         "sort": {
-          "tag": "SortVariable",
+          "tag": "SortVar",
           "name": "wQc9ku239"
         },
         "dest": {

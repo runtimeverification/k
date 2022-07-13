@@ -1,7 +1,7 @@
 {
   "tag": "Forall",
   "sort": {
-    "tag": "SortVariable",
+    "tag": "SortVar",
     "name": "QIUBf'xwORA6QR'M75353"
   },
   "var": "wJ5K6'2",
@@ -19,12 +19,12 @@
   "arg": {
     "tag": "Forall",
     "sort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "SL625899"
     },
     "var": "Pp277",
     "varSort": {
-      "tag": "SortVariable",
+      "tag": "SortVar",
       "name": "z6rdQaAadC"
     },
     "arg": {
