@@ -65,7 +65,7 @@ class KAst(ABC):
 
     def _as_shallow_tuple(self) -> Tuple[Any, ...]:
         # shallow copy version of dataclass.astuple.
-        return tuple([self.__dict__[field.name] for field in fields(type(self))])
+        return tuple(self.__dict__[field.name] for field in fields(type(self)))
 
     def __lt__(t1, t2):
         if not isinstance(t2, KAst):
