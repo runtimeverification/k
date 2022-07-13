@@ -1,4 +1,4 @@
-from typing import Final, Tuple, Union
+from typing import Final, Tuple
 from unittest import TestCase
 
 from pyk.kast import (
@@ -10,7 +10,6 @@ from pyk.kast import (
     KRule,
     KSort,
     KTerminal,
-    Subst,
 )
 from pyk.ktool.kprint import (
     SymbolTable,
@@ -22,7 +21,7 @@ success_production = KProduction(KSort('EndStatusCode'), [KTerminal('EVMC_SUCCES
 
 
 class PrettyPrintKastTest(TestCase):
-    TEST_DATA: Final[Tuple[Tuple[Union[KAst, Subst], str], ...]] = (
+    TEST_DATA: Final[Tuple[Tuple[KAst, str], ...]] = (
         (KRule(TRUE), 'rule  true\n  '),
         (KRule(TRUE, ensures=TRUE), 'rule  true\n  '),
         (KRule(TRUE, ensures=KApply('_andBool_', [TRUE, TRUE])), 'rule  true\n   ensures ( true\n   andBool ( true\n           ))\n  '),
