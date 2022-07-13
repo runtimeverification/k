@@ -49,7 +49,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         target: 'KCFG.Node'
 
         @abstractmethod
-        def pretty_print(self, kprint: KPrint) -> List[str]:
+        def pretty(self, kprint: KPrint) -> Iterable[str]:
             assert False, 'Must be overridden'
 
         def __lt__(self, other):
@@ -72,7 +72,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             rule, _ = build_rule(sentence_id, self.source.cterm.add_constraint(self.condition), self.target.cterm, claim=claim, priority=priority)
             return rule
 
-        def pretty_print(self, kprint: KPrint) -> List[str]:
+        def pretty(self, kprint: KPrint) -> Iterable[str]:
             if self.depth == 0:
                 return ['\nandBool'.join(kprint.pretty_print(ml_pred_to_bool(self.condition)).split(' andBool'))]
             elif self.depth == 1:
@@ -102,7 +102,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         def to_dict(self) -> Dict[str, Any]:
             return {'source': self.source.id, 'target': self.target.id}
 
-        def pretty_print(self, kprint: KPrint) -> List[str]:
+        def pretty(self, kprint: KPrint) -> Iterable[str]:
             return [
                 'constraint: ' + kprint.pretty_print(ml_pred_to_bool(self.constraint)),
                 'subst:',
@@ -277,7 +277,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         attr_string = ' (' + ', '.join(attrs) + ')' if attrs else ''
         return shorten_hash(node.id) + attr_string
 
-    def pretty_print(self, kprint: KPrint) -> List[str]:
+    def pretty(self, kprint: KPrint) -> Iterable[str]:
 
         processed_nodes: List[KCFG.Node] = []
 
@@ -332,12 +332,12 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 if isinstance(edge_like, KCFG.Edge) and edge_like.depth:
                     if self.is_verified(edge_like.source.id, edge_like.target.id):
                         ret.append(indent + '│  ' + _bold(_green('(verified)')))
-                    ret.extend(add_indent(indent + '│  ', edge_like.pretty_print(kprint)))
+                    ret.extend(add_indent(indent + '│  ', edge_like.pretty(kprint)))
                 elif isinstance(edge_like, KCFG.Cover):
-                    ret.extend(add_indent(indent + '┊  ', edge_like.pretty_print(kprint)))
+                    ret.extend(add_indent(indent + '┊  ', edge_like.pretty(kprint)))
                 ret.append(indent + elbow + ' ' + _print_node(edge_like.target))
                 if isinstance(edge_like, KCFG.Edge) and edge_like.depth == 0:
-                    first, *rest = edge_like.pretty_print(kprint)
+                    first, *rest = edge_like.pretty(kprint)
                     ret[-1] += '    ' + first
                     ret.extend(add_indent(new_indent + (7 + len(_print_node(edge_like.target))) * ' ', rest))
 

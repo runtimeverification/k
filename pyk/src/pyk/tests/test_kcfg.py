@@ -334,7 +334,7 @@ class KCFGTestCase(TestCase):
             return shorten_hash(nid(i))
 
         self.maxDiff = None
-        actual = '\n'.join(cfg.pretty_print(MockKPrint())) + '\n'
+        actual = '\n'.join(cfg.pretty(MockKPrint())) + '\n'
         self.assertMultiLineEqual(actual,
                                   f"{_short_hash(0)} (init, expanded)\n"
                                   f"│  (1 step)\n"
