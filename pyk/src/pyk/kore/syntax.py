@@ -314,7 +314,7 @@ class Sort(Kore, ABC):
 @final
 @dataclass(frozen=True)
 class SortVar(Sort):
-    _tag = 'SortVariable'  # TODO Haskell: SortVar would be more consistent with SortApp, EVar
+    _tag = 'SortVariable'  # TODO Haskell: rename to SortVar
 
     name: str
 
@@ -476,7 +476,7 @@ class StrLit(Pattern):
 @final
 @dataclass(frozen=True)
 class Apply(Pattern):
-    _tag = 'App'  # TODO Haskell: Are there tests for this?
+    _tag = 'App'
 
     symbol: str
     sorts: Tuple[Sort, ...]
@@ -758,7 +758,7 @@ class MLQuant(MLPattern, ABC):
     _ML_QUANT_TAGS: Final = {'Exists', 'Forall'}
 
     sort: Sort
-    var: ElemVar
+    var: ElemVar  # TODO Should this be inlined to var_name, var_sort?
     pattern: Pattern
 
     @classmethod
@@ -799,7 +799,7 @@ class Exists(MLQuant):
         cls._check_tag(dct)
         return Exists(
             sort=Sort.from_dict(dct['sort']),
-            var=ElemVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),  # TODO Haskell: ElemVar.from_dict(...) would be nicer
+            var=ElemVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),
             pattern=Pattern.from_dict(dct['arg']),
         )
 
@@ -819,7 +819,7 @@ class Forall(MLQuant):
         cls._check_tag(dct)
         return Forall(
             sort=Sort.from_dict(dct['sort']),
-            var=ElemVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),  # TODO Haskell: ElemVar.from_dict(...) would be nicer
+            var=ElemVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),
             pattern=Pattern.from_dict(dct['arg']),
         )
 
@@ -827,7 +827,7 @@ class Forall(MLQuant):
 class MLFixpoint(MLPattern, ABC):
     _ML_FIXPOINT_TAGS: Final = {'Mu', 'Nu'}
 
-    var: SetVar
+    var: SetVar  # TODO Should this be inlined to var_name, var_sort?
     pattern: Pattern
 
     @classmethod
@@ -865,7 +865,7 @@ class Mu(MLFixpoint):
     def from_dict(cls: Type['Mu'], dct: Mapping[str, Any]) -> 'Mu':
         cls._check_tag(dct)
         return Mu(
-            var=SetVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),  # TODO SetVar.from_dict(...) would be nicer
+            var=SetVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),
             pattern=Pattern.from_dict(dct['arg']),
         )
 
@@ -883,7 +883,7 @@ class Nu(MLFixpoint):
     def from_dict(cls: Type['Nu'], dct: Mapping[str, Any]) -> 'Nu':
         cls._check_tag(dct)
         return Nu(
-            var=SetVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),  # TODO Haskell: SetVar.from_dict(...) would be nicer
+            var=SetVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),
             pattern=Pattern.from_dict(dct['arg']),
         )
 
@@ -944,7 +944,7 @@ class Ceil(RoundPred):
         cls._check_tag(dct)
         return Ceil(
             op_sort=Sort.from_dict(dct['argSort']),
-            sort=Sort.from_dict(dct['resultSort']),  # TODO Haskell: 'resSort' would be more consistent with 'argSort'
+            sort=Sort.from_dict(dct['resultSort']),  # TODO Haskell: rename to sort
             pattern=Pattern.from_dict(dct['arg']),
         )
 
@@ -964,7 +964,7 @@ class Floor(RoundPred):
         cls._check_tag(dct)
         return Floor(
             op_sort=Sort.from_dict(dct['argSort']),
-            sort=Sort.from_dict(dct['resultSort']),  # TODO Haskell: 'resSort' would be more consistent with 'argSort'
+            sort=Sort.from_dict(dct['resultSort']),  # TODO Haskell: rentame to sort
             pattern=Pattern.from_dict(dct['arg']),
         )
 
@@ -1019,8 +1019,8 @@ class Equals(BinaryPred):
     def from_dict(cls: Type['Equals'], dct: Mapping[str, Any]) -> 'Equals':
         cls._check_tag(dct)
         return Equals(
-            left_sort=Sort.from_dict(dct['argSort']),      # TODO Haskell: Shouldn't this be firstSort instead?
-            right_sort=Sort.from_dict(dct['resultSort']),  # TODO Haskell: Shoulnd't this be secondSort instead?
+            left_sort=Sort.from_dict(dct['argSort']),      # TODO rename to op_sort
+            right_sort=Sort.from_dict(dct['resultSort']),  # TODO Haskell: rename to sort | TODO rename to sort
             left=Pattern.from_dict(dct['first']),
             right=Pattern.from_dict(dct['second']),
         )
@@ -1041,8 +1041,8 @@ class In(BinaryPred):
     def from_dict(cls: Type['In'], dct: Mapping[str, Any]) -> 'In':
         cls._check_tag(dct)
         return In(
-            left_sort=Sort.from_dict(dct['argSort']),      # TODO Haskell: Shouldn't this be firstSort instead?
-            right_sort=Sort.from_dict(dct['resultSort']),  # TODO Haskell: Shoulnd't this be secondSort instead?
+            left_sort=Sort.from_dict(dct['argSort']),      # TODO rename to op_sort
+            right_sort=Sort.from_dict(dct['resultSort']),  # TODO Haskell: rename to sort | TODO rename to sort
             left=Pattern.from_dict(dct['first']),
             right=Pattern.from_dict(dct['second']),
         )
@@ -1124,18 +1124,18 @@ class Rewrites(MLRewrite):
 @final
 @dataclass(frozen=True)
 class DomVal(MLPattern):
-    _tag = 'dv'  # TODO Haskell: Consider 'DV' as tag
+    _tag = 'dv'  # TODO Haskell: Change tag to DV
     _symbol = '\\dv'
 
     sort: Sort
-    value: StrLit
+    value: StrLit  # TODO Should this be changed to str?
 
     @classmethod
     def from_dict(cls: Type['DomVal'], dct: Mapping[str, Any]) -> 'DomVal':
         cls._check_tag(dct)
         return DomVal(
             sort=Sort.from_dict(dct['sort']),
-            value=StrLit(dct['value']),  # TODO Haskell: StrLit.from_dict(...) would be nicer
+            value=StrLit(dct['value']),
         )
 
     @property
