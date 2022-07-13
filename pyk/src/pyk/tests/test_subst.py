@@ -100,11 +100,10 @@ class SubstTest(TestCase):
                 # Then
                 self.assertEqual(actual, expected)
 
-    def test_pretty_print(self):
-        self.assertMultiLineEqual(
-            Subst({'X': TRUE, 'Y': KApply('_andBool_', [TRUE, TRUE])}).pretty_print(MockKPrint()),
-            'X |-> true\n'
-            'Y |-> _andBool_ ( true , true )'
+    def test_pretty(self):
+        self.assertListEqual(
+            list(Subst({'X': TRUE, 'Y': KApply('_andBool_', [TRUE, TRUE])}).pretty(MockKPrint())),
+            ['X |-> true', 'Y |-> _andBool_ ( true , true )']
         )
 
 

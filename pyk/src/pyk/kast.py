@@ -221,8 +221,8 @@ class Subst(Mapping[str, KInner]):
             new_term = KRewrite(lhs, rhs).replace(new_term)
         return new_term
 
-    def pretty_print(self, kprint) -> str:
-        return '\n'.join(key + ' |-> ' + kprint.pretty_print(value) for key, value in self.items())
+    def pretty(self, kprint) -> Iterable[str]:
+        return (key + ' |-> ' + kprint.pretty_print(value) for key, value in self.items())
 
 
 @final
