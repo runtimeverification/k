@@ -271,7 +271,7 @@ nix run .#update-maven
 
 and commit the updated `nix/mavenix.lock` file.
 
-## Building with Nix
+## Building with Nix (not recommended, use Nix flakes)
 
 To build the K Framework itself, run:
 
