@@ -120,7 +120,7 @@ class Kore(ABC):
         'SVar': 'SetVar',
         'String': 'StrLit',
         'App': 'Apply',
-        'dv': 'DomVal',
+        'DV': 'DomVal',
         **{k: k for k in (
             'SortVar',
             'Top',
@@ -367,7 +367,7 @@ class Pattern(Kore, ABC):
     _PATTERN_TAGS: Final = {
         'EVar', 'SVar', 'String', 'App', 'Top', 'Bottom', 'Not', 'And', 'Or',
         'Implies', 'Iff', 'Exists', 'Forall', 'Mu', 'Nu', 'Ceil', 'Floor',
-        'Equals', 'In', 'Next', 'Rewrites', 'dv',
+        'Equals', 'In', 'Next', 'Rewrites', 'DV',
     }
 
     @classmethod
@@ -515,7 +515,7 @@ class MLPattern(Pattern, ABC):
     _ML_PATTERN_TAGS: Final = {
         'Top', 'Bottom', 'Not', 'And', 'Or', 'Implies', 'Iff', 'Exists',
         'Forall', 'Mu', 'Nu', 'Ceil', 'Floor', 'Equals', 'In', 'Next',
-        'Rewrites', 'dv',
+        'Rewrites', 'DV',
     }
 
     @classmethod
@@ -1124,7 +1124,7 @@ class Rewrites(MLRewrite):
 @final
 @dataclass(frozen=True)
 class DomVal(MLPattern):
-    _tag = 'dv'  # TODO Haskell: Change tag to DV
+    _tag = 'DV'
     _symbol = '\\dv'
 
     sort: Sort

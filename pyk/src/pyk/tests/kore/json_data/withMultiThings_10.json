@@ -274,7 +274,7 @@
               "value": ""
             },
             "second": {
-              "tag": "dv",
+              "tag": "DV",
               "sort": {
                 "tag": "SortVar",
                 "name": "T"

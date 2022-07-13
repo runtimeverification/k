@@ -90,7 +90,7 @@
               "name": "B"
             },
             "dest": {
-              "tag": "dv",
+              "tag": "DV",
               "sort": {
                 "tag": "SortVar",
                 "name": "Wg140"

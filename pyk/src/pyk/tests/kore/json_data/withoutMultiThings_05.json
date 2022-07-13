@@ -122,7 +122,7 @@
               }
             },
             "second": {
-              "tag": "dv",
+              "tag": "DV",
               "sort": {
                 "tag": "SortVar",
                 "name": "n265"
@@ -145,7 +145,7 @@
               "name": "E0421"
             },
             "first": {
-              "tag": "dv",
+              "tag": "DV",
               "sort": {
                 "tag": "SortVar",
                 "name": "W"

@@ -37,7 +37,7 @@
         "args": []
       },
       "second": {
-        "tag": "dv",
+        "tag": "DV",
         "sort": {
           "tag": "SortApp",
           "name": "n0",
