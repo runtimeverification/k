@@ -1,7 +1,116 @@
 from dataclasses import dataclass
-from enum import Enum, auto
+from enum import Enum, IntEnum, auto
 from itertools import chain
-from typing import Final, Iterator, List, Optional, final
+from typing import Final, Iterator, List, Optional, Tuple, final
+
+
+class StrLitLexer(Iterator[Tuple[str, 'StrLitLexer.TokenType']]):
+
+    class TokenType(IntEnum):
+        ASCII = 1
+        ESC = 2
+        UTF_8 = 3
+        UTF_16 = 4
+        UTF_32 = 5
+
+    _iter: Iterator[Optional[str]]
+    _la: Optional[str]
+
+    def __init__(self, s: str):
+        self._iter = iter(chain(s, [None]))
+        self._la = next(self._iter)
+
+    def __next__(self) -> Tuple[str, TokenType]:
+        if self._la is None:
+            raise StopIteration()
+
+        if self._la == '"':
+            raise ValueError('Unexpected character: "')
+
+        if self._la == '\\':
+            return self._escape_sequence()
+
+        return self._printable_ascii_char()
+
+    def _escape_sequence(self) -> Tuple[str, TokenType]:
+        assert self._la is not None
+        assert self._la == '\\'
+
+        self._match('\\')
+
+        if self._la in {'t', 'n', 'f', 'r', '"', '\\'}:
+            token = f'\\{self._la}'
+            self._consume()
+            return token, self.TokenType.ESC
+
+        hexa_params = {
+            'x': (2, lambda x: None, self.TokenType.UTF_8),
+            'u': (4, self._validate_utf_16, self.TokenType.UTF_16),
+            'U': (8, self._validate_utf_32, self.TokenType.UTF_32),
+        }
+
+        if self._la in hexa_params:
+            char = self._la
+            self._consume()
+            nr_digits, validate, token_type = hexa_params[char]
+            hexa = self._match_hexa(nr_digits)
+            validate(hexa)
+            token = f'\\x{hexa}'
+            return token, token_type
+
+        raise ValueError(f'Unexpected character: {self._la}')
+
+    @staticmethod
+    def _validate_utf_16(hexa: str) -> None:
+        if 0xD800 <= int(hexa, 16) <= 0xDFFF:
+            raise ValueError(f'Illegal UTF-16 code point: {hexa}')
+
+    @staticmethod
+    def _validate_utf_32(hexa: str) -> None:
+        StrLitLexer._validate_utf_16(hexa)
+
+        if int(hexa, 16) > 0x10FFFF:
+            raise ValueError(f'Illegal UTF-32 code point: {hexa}')
+
+    def _printable_ascii_char(self) -> Tuple[str, TokenType]:
+        assert self._la is not None
+        assert self._la != '"'
+        assert self._la != '\\'
+
+        if not (32 <= ord(self._la) <= 126):
+            raise ValueError(f'Expected printable ASCII character, found: character with code {ord(self._la)}')
+
+        token = self._la
+        self._consume()
+        return token, self.TokenType.ASCII
+
+    def _match(self, c: str) -> None:
+        actual = '<EOF>' if self._la is None else self._la
+
+        if self._la != c:
+            raise ValueError(f'Expected {c}, found: {actual}')
+
+        self._consume()
+
+    def _consume(self) -> None:
+        assert self._la is not None
+        self._la = next(self._iter)
+
+    def _match_hexa(self, length: int) -> str:
+        if length < 0:
+            raise ValueError(f'Expected nonnegative length, got: {length}')
+
+        chars: List[str] = []
+        for _ in range(length):
+            actual = '<EOF>' if self._la is None else self._la
+
+            if self._la not in set('0123456789abcdefABCDEF'):
+                raise ValueError(f'Expected hexadecimal digit, found: {actual}')
+
+            chars += self._la
+            self._consume()
+
+        return ''.join(chars)
 
 
 @final
