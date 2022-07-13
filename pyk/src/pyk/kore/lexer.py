@@ -183,11 +183,12 @@ class KoreLexer(Iterator[KoreToken]):
 
     def _string(self) -> KoreToken:
         buf: List[str] = []
-
         buf += self._match('"')
         while self._la != '"':
+            if self._la == '\\':
+                buf += self._consume()
             buf += self._consume()
-        buf += self._match('"')
+        buf += self._consume()
 
         return KoreToken(''.join(buf), KoreToken.Type.STRING)
 
