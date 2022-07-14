@@ -50,7 +50,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         @abstractmethod
         def pretty(self, kprint: KPrint) -> Iterable[str]:
-            assert False, 'Must be overridden'
+            ...
 
         def __lt__(self, other):
             if not isinstance(other, KCFG.EdgeLike):
