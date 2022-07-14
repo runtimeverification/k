@@ -66,8 +66,8 @@
               inherit (haskell-backend) prelude-kore;
               inherit src;
               debugger = if prev.stdenv.isDarwin then
-              # TODO lldb is broken on nixpkgs unstable, once the lldb support for 
-              # k is done we should add lldb as runtime dependency here
+              # lldb is broken on this version of nixpkgs-unstable and there is no point including it
+              # before the lldb support for k is added: https://github.com/runtimeverification/k/issues/2650
                 null
               else
                 prev.gdb;
@@ -84,9 +84,7 @@
             "python39"
             "python310"
           ] (python:
-            prev.${python}.override {
-              packageOverrides = pythonOverrides;
-            }))
+            prev.${python}.override { packageOverrides = pythonOverrides; }))
       ];
     in flake-utils.lib.eachSystem [
       "x86_64-linux"
@@ -106,6 +104,14 @@
           inherit (pkgs) k;
           pyk = pkgs.python38Packages.pyk;
 
+          # This is a copy of the `nix/update-maven.sh` script, which should be
+          # eventually removed. Having this inside the flake provides a uniform
+          # interface, i.e. we have `update-maven`/`update-python` in k and 
+          # `update-cabal` in the haskell-backend.
+          # The first `nix-build` command below ensures k source is loaded into the Nix store. 
+          # This command will fail, but only after loading the source. 
+          # mavenix will not do this automatically because we it uses restrict-eval, 
+          # and we are using filterSource, which is disabled under restrict-eval. 
           update-maven = pkgs.writeShellScriptBin "update-maven" ''
             #!/bin/sh
             ${pkgs.nix}/bin/nix-build --no-out-link -E 'import ./nix/flake-compat-k-unwrapped.nix' \
@@ -165,7 +171,11 @@
                 patchShebangs tests/regression-new/*
                 substituteInPlace tests/regression-new/append/kparse-twice \
                   --replace '"$(dirname "$0")/../../../bin/kparse"' '"${k}/bin/kparse"'
-                ${lib.optionalString stdenv.isDarwin ''
+                ${
+                # we add the `--no-haskell-binary` flag due to the compact library
+                # (used to create the binary haskell files) being broken on Mac
+                # https://github.com/runtimeverification/haskell-backend/issues/3137
+                lib.optionalString stdenv.isDarwin ''
                   for mak in include/kframework/*.mak
                   do
                     substituteInPlace $mak \

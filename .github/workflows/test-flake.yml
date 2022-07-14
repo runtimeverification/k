@@ -31,6 +31,3 @@ jobs:
 
       - name: 'Build K Framework'
         run: GC_DONT_GC=1 nix build .
-
-      # - name: 'Test K Framework'
-      #   run: GC_DONT_GC=1 nix build .#test
