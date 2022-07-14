@@ -204,12 +204,78 @@ addition to the usual Maven build setup:
     and [associated PR](https://github.com/kframework/kore/pull/2893) for more
     details.
 
-## Building with Nix
+## Building with Nix flakes (Recommended)
+
+We now support building K using [nix flakes](https://nixos.wiki/wiki/Flakes).
+To set up nix flakes you will need to be on `nix` 2.4 or higher and follow the instructions [here](https://nixos.wiki/wiki/Flakes).
+
+For example, if you are on a standard Linux distribution, such as Ubuntu, first [install nix](https://nixos.org/download.html#download-nix)
+and then enable flakes by editing either `~/.config/nix/nix.conf` or `/etc/nix/nix.conf` and adding:
+
+```
+experimental-features = nix-command flakes
+```
+
+This is needed to expose the Nix 2.0 CLI and flakes support that are hidden behind feature-flags.
+
 
 By default, Nix will build the project and its transitive dependencies from
 source, which can take up to an hour. We recommend setting up
 [the binary cache](https://app.cachix.org/cache/kore) to speed up the build
-process significantly.
+process significantly. You will also need to add the following sections to `/etc/nix/nix.conf` or, if you are a trusted user, `~/.config/nix/nix.conf` (if you don't know what a "trusted user" is, you probably want to do the former):
+
+```
+trusted-public-keys = ... hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
+substituters = ... https://cache.iog.io
+```
+
+i.e. if the file was originally
+
+```
+substituters = https://cache.nixos.org
+trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
+```
+
+it will now read
+
+```
+substituters = https://cache.nixos.org https://cache.iog.io
+trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
+```
+
+To build the K Framework itself, run:
+
+```bash
+nix build .
+```
+
+This will build all of K and put a link to the resulting binaries in the `result/` folder.
+
+
+_Note: Mac users, especially those running M1/M2 Macs may find nix segfaulting on occasion. If this happens, try running the nix command like this: `GC_DONT_GC=1 nix build .`_ 
+
+
+If you want to temporarily add the K binaries (such as `kompile` or `kast`) to the current shell, run
+
+```bash
+nix shell .
+```
+
+To run the integration tests:
+
+```
+nix build .#test
+```
+
+If you change any `pom.xml`, you must run 
+
+```
+nix run .#update-maven
+```
+
+and commit the updated `nix/mavenix.lock` file.
+
+## Building with Nix (not recommended, use Nix flakes)
 
 To build the K Framework itself, run:
 
