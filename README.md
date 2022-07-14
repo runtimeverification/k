@@ -251,6 +251,10 @@ nix build .
 
 This will build all of K and put a link to the resulting binaries in the `result/` folder.
 
+
+_Note: Mac users, especially those running M1/M2 Macs may find nix segfaulting on occasion. If this happens, try running the nix command like this: `GC_DONT_GC=1 nix build .`_ 
+
+
 If you want to temporarily add the K binaries (such as `kompile` or `kast`) to the current shell, run
 
 ```bash
