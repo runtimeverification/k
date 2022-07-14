@@ -24,7 +24,7 @@ def split_config_and_constraints(kast: KInner) -> Tuple[KInner, KInner]:
     return (term, mlAnd(constraints, Sorts.GENERATED_TOP_CELL))
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class CTerm:
     config: KInner  # TODO Optional?
     constraints: Tuple[KInner, ...]
