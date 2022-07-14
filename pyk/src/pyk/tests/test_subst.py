@@ -1,9 +1,12 @@
 from typing import Dict, Final, Tuple
 from unittest import TestCase
 
+from pyk.kast import TRUE
+
 from ..kast import KApply, KInner, KLabel, KVariable, Subst
 from ..kastManip import extract_subst
 from ..prelude import mlAnd, mlEquals, mlEqualsTrue, mlTop, token
+from .mock_kprint import MockKPrint
 from .utils import a, b, c, f, g, h, x, y, z
 
 
@@ -96,6 +99,12 @@ class SubstTest(TestCase):
 
                 # Then
                 self.assertEqual(actual, expected)
+
+    def test_pretty(self):
+        self.assertListEqual(
+            list(Subst({'X': TRUE, 'Y': KApply('_andBool_', [TRUE, TRUE])}).pretty(MockKPrint())),
+            ['X |-> true', 'Y |-> _andBool_ ( true , true )']
+        )
 
 
 class ExtractSubstTest(TestCase):

@@ -1,12 +1,12 @@
-from typing import Any, Dict, List, Tuple, cast
+from typing import Any, Dict, List, Tuple
 from unittest import TestCase
 
 from ..cterm import CTerm
-from ..kast import TRUE, KApply, KAst, KInner, KVariable
+from ..kast import TRUE, KApply, KInner, KVariable
 from ..kcfg import KCFG
-from ..ktool import KPrint
 from ..prelude import mlEquals, token
 from ..utils import shorten_hash
+from .mock_kprint import MockKPrint
 
 
 def nid(i: int) -> str:
@@ -46,15 +46,6 @@ def cover_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
         {'source': nid(i), 'target': nid(j), 'condition': TRUE.to_dict(), 'depth': 1}
         for i, j in edges
     ]
-
-
-class MockKPrint:
-    def pretty_print(self, term: KAst) -> str:
-        return str(term)
-
-
-def mock_kprint() -> KPrint:
-    return cast(KPrint, MockKPrint())
 
 
 class KCFGTestCase(TestCase):
@@ -343,7 +334,7 @@ class KCFGTestCase(TestCase):
             return shorten_hash(nid(i))
 
         self.maxDiff = None
-        actual = '\n'.join(cfg.pretty_print(mock_kprint())) + '\n'
+        actual = '\n'.join(cfg.pretty(MockKPrint())) + '\n'
         self.assertMultiLineEqual(actual,
                                   f"{_short_hash(0)} (init, expanded)\n"
                                   f"│  (1 step)\n"
@@ -353,31 +344,31 @@ class KCFGTestCase(TestCase):
                                   f"├  {_short_hash(2)} (expanded)\n"
                                   f"│  (1 step)\n"
                                   f"├  {_short_hash(3)} (expanded, @bar, @foo)\n"
-                                  f"┣━ {_short_hash(6)} (target, leaf)    KApply(label=KLabel(name='_==K_', params=()), args=(KVariable(name='x'), KToken(token='6', sort=KSort(name='Int'))))\n"
-                                  f"┃\n"
-                                  f"┣━ {_short_hash(5)} (expanded)    KApply(label=KLabel(name='_==K_', params=()), args=(KVariable(name='x'), KToken(token='5', sort=KSort(name='Int'))))\n"
+                                  f"┣━ {_short_hash(4)} (expanded)    _==K_ ( x , 4 )\n"
+                                  f"┃   │  (1 step)\n"
+                                  f"┃   ├  {_short_hash(5)} (expanded)\n"
                                   f"┃   │  (1 step)\n"
                                   f"┃   ├  {_short_hash(2)} (expanded)\n"
                                   f"┃   ┊ (looped back)\n"
                                   f"┃\n"
-                                  f"┣━ {_short_hash(11)} (expanded)    KApply(label=KLabel(name='_==K_', params=()), args=(KVariable(name='x'), KToken(token='11', sort=KSort(name='Int'))))\n"
-                                  f"┃   │  (1 step)\n"
-                                  f"┃   ├  {_short_hash(8)} (leaf)\n"
-                                  f"┃   ┊  constraint: KToken(token='true', sort=KSort(name='Bool'))\n"
-                                  f"┃   ┊  subst:\n"
-                                   "┃   ┊    {'V11': KToken(token='8', sort=KSort(name='Int'))}\n" # noqa
-                                  f"┃   └╌ {_short_hash(11)} (expanded)\n"
-                                  f"┃       ┊ (looped back)\n"
-                                  f"┃\n"
-                                  f"┣━ {_short_hash(4)} (expanded)    KApply(label=KLabel(name='_==K_', params=()), args=(KVariable(name='x'), KToken(token='4', sort=KSort(name='Int'))))\n"
-                                  f"┃   │  (1 step)\n"
-                                  f"┃   ├  {_short_hash(5)} (expanded)\n"
+                                  f"┣━ {_short_hash(5)} (expanded)    _==K_ ( x , 5 )\n"
                                   f"┃   ┊ (continues as previously)\n"
                                   f"┃\n"
-                                  f"┗━ {_short_hash(7)} (expanded)    KApply(label=KLabel(name='_==K_', params=()), args=(KVariable(name='x'), KToken(token='7', sort=KSort(name='Int'))))\n"
+                                  f"┣━ {_short_hash(6)} (target, leaf)    _==K_ ( x , 6 )\n"
+                                  f"┃\n"
+                                  f"┣━ {_short_hash(7)} (expanded)    _==K_ ( x , 7 )\n"
+                                  f"┃   │  (1 step)\n"
+                                  f"┃   └  {_short_hash(6)} (target, leaf)\n"
+                                  f"┃\n"
+                                  f"┗━ {_short_hash(11)} (expanded)    _==K_ ( x , 11 )\n"
                                   f"    │  (1 step)\n"
-                                  f"    └  {_short_hash(6)} (target, leaf)\n"
+                                  f"    ├  {_short_hash(8)} (leaf)\n"
+                                  f"    ┊  constraint: true\n"
+                                  f"    ┊  subst:\n"
+                                  f"    ┊    V11 |-> 8\n"
+                                  f"    └╌ {_short_hash(11)} (expanded)\n"
+                                  f"        ┊ (looped back)\n"
                                   f"\n"
-                                  f"\033[1m{_short_hash(9)} (frontier, leaf)\033[0m\n"
                                   f"\033[1m{_short_hash(10)} (frontier, leaf)\033[0m\n"
+                                  f"\033[1m{_short_hash(9)} (frontier, leaf)\033[0m\n"
                                   )
