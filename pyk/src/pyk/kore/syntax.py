@@ -45,6 +45,7 @@ def _has_id_syntax(s: str) -> bool:
     return len(s) > 0 and s[0] in _ID_FST_CHR and all(c in _ID_CHR for c in s[1:])
 
 
+# TODO implement in terms of KoreLexer
 def is_id(s: str) -> bool:
     return _has_id_syntax(s) and s not in KEYWORDS
 
