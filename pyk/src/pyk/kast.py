@@ -1278,6 +1278,7 @@ class KFlatModule(KOuter, WithKAtt):
     def to_dict(self) -> Dict[str, Any]:
         return {
             'node': 'KFlatModule',
+            'name': self.name,
             'localSentences': [sentence.to_dict() for sentence in self.sentences],
             'imports': [imp.to_dict() for imp in self.imports],
             'att': self.att.to_dict(),
