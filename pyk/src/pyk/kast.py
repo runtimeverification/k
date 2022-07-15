@@ -500,13 +500,14 @@ class KAs(KInner):
 
 @final
 @dataclass(frozen=True)
-class KRewrite(KInner):
+class KRewrite(KInner, WithKAtt):
     lhs: KInner
     rhs: KInner
 
-    def __init__(self, lhs: KInner, rhs: KInner):
+    def __init__(self, lhs: KInner, rhs: KInner, att=EMPTY_ATT):
         object.__setattr__(self, 'lhs', lhs)
         object.__setattr__(self, 'rhs', rhs)
+        object.__setattr__(self, 'att', att)
 
     def __iter__(self) -> Iterator[KInner]:
         return iter([self.lhs, self.rhs])
@@ -520,15 +521,34 @@ class KRewrite(KInner):
     @classmethod
     def from_dict(cls: Type['KRewrite'], d: Dict[str, Any]) -> 'KRewrite':
         cls._check_node(d)
-        return KRewrite(lhs=KInner.from_dict(d['lhs']), rhs=KInner.from_dict(d['rhs']))
+        return KRewrite(
+            lhs=KInner.from_dict(d['lhs']),
+            rhs=KInner.from_dict(d['rhs']),
+            att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
+        )
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KRewrite', 'lhs': self.lhs.to_dict(), 'rhs': self.rhs.to_dict()}
+        return {
+            'node': 'KRewrite',
+            'lhs': self.lhs.to_dict(),
+            'rhs': self.rhs.to_dict(),
+            'att': self.att.to_dict(),
+        }
 
-    def let(self, *, lhs: Optional[KInner] = None, rhs: Optional[KInner] = None) -> 'KRewrite':
+    def let(
+        self,
+        *,
+        lhs: Optional[KInner] = None,
+        rhs: Optional[KInner] = None,
+        att: Optional[KAtt] = None,
+    ) -> 'KRewrite':
         lhs = lhs if lhs is not None else self.lhs
         rhs = rhs if rhs is not None else self.rhs
-        return KRewrite(lhs=lhs, rhs=rhs)
+        att = att if att is not None else self.att
+        return KRewrite(lhs=lhs, rhs=rhs, att=att)
+
+    def let_att(self, att: KAtt) -> 'KRewrite':
+        return self.let(att=att)
 
     def map_inner(self: 'KRewrite', f: Callable[[KInner], KInner]) -> 'KRewrite':
         return self.let(lhs=f(self.lhs), rhs=f(self.rhs))
