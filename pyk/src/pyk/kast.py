@@ -227,23 +227,32 @@ class Subst(Mapping[str, KInner]):
 
 @final
 @dataclass(frozen=True)
-class KVariable(KInner):
+class KVariable(KInner, WithKAtt):
     name: str
+    att: KAtt
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, att: KAtt = EMPTY_ATT):
         object.__setattr__(self, 'name', name)
+        object.__setattr__(self, 'att', att)
 
     @classmethod
     def from_dict(cls: Type['KVariable'], d: Dict[str, Any]) -> 'KVariable':
         cls._check_node(d)
-        return KVariable(name=d['name'])
+        return KVariable(
+            name=d['name'],
+            att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
+        )
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KVariable', 'name': self.name}
+        return {'node': 'KVariable', 'name': self.name, 'att': self.att.to_dict()}
 
-    def let(self, *, name: Optional[str] = None) -> 'KVariable':
+    def let(self, *, name: Optional[str] = None, att: Optional[KAtt] = None) -> 'KVariable':
         name = name if name is not None else self.name
-        return KVariable(name=name)
+        att = att if att is not None else self.att
+        return KVariable(name=name, att=att)
+
+    def let_att(self, att: KAtt) -> 'KVariable':
+        return self.let(att=att)
 
     def map_inner(self: 'KVariable', f: Callable[[KInner], KInner]) -> 'KVariable':
         return self
