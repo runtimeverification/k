@@ -757,7 +757,7 @@ class KRegexTerminal(KProductionItem):
     precede_regex: str
     follow_regex: str
 
-    def __init__(self, regex: str, precede_regex: str = '', follow_regex: str = ''):
+    def __init__(self, regex: str, precede_regex: str, follow_regex: str):
         object.__setattr__(self, 'regex', regex)
         object.__setattr__(self, 'precede_regex', precede_regex)
         object.__setattr__(self, 'follow_regex', follow_regex)
@@ -767,14 +767,13 @@ class KRegexTerminal(KProductionItem):
         cls._check_node(d)
         return KRegexTerminal(
             regex=d['regex'],
-            precede_regex=d.get('precede_regex', ''),
-            follow_regex=d.get('follow_regex', ''),
+            precede_regex=d['precedeRegex'],
+            follow_regex=d['followRegex'],
         )
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KRegexTerminal', 'regex': self.regex, 'precedeRegex': self.precede_regex or None, 'follow_regex': self.follow_regex or None}
+        return {'node': 'KRegexTerminal', 'regex': self.regex, 'precedeRegex': self.precede_regex, 'followRegex': self.follow_regex}
 
-    # TODO consider nullable fields and make sure their value can be erased
     def let(self, *, regex: Optional[str] = None, precede_regex: Optional[str] = None, follow_regex: Optional[str] = None) -> 'KRegexTerminal':
         regex = regex if regex is not None else self.regex
         precede_regex = precede_regex if precede_regex is not None else self.precede_regex
