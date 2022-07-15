@@ -777,19 +777,31 @@ class KNonTerminal(KProductionItem):
 @final
 @dataclass(frozen=True)
 class KProduction(KSentence):
+    # TODO Order in Java implementation: klabel, params, sort, items, att
     sort: KSort
     items: Tuple[KProductionItem, ...]
+    params: Tuple[KSort, ...]
     klabel: Optional[KLabel]
     att: KAtt
 
-    def __init__(self, sort: Union[str, KSort], items: Iterable[KProductionItem] = (), klabel: Optional[Union[str, KLabel]] = None, att=EMPTY_ATT):
+    def __init__(
+        self,
+        sort: Union[str, KSort],
+        items: Iterable[KProductionItem] = (),
+        params: Iterable[Union[str, KSort]] = (),
+        klabel: Optional[Union[str, KLabel]] = None,
+        att=EMPTY_ATT,
+    ):
         if type(sort) is str:
             sort = KSort(sort)
         if type(klabel) is str:
             klabel = KLabel(klabel)
 
+        params = tuple(KSort(param) if type(param) is str else param for param in params)
+
         object.__setattr__(self, 'sort', sort)
         object.__setattr__(self, 'items', tuple(items))
+        object.__setattr__(self, 'params', params)
         object.__setattr__(self, 'klabel', klabel)
         object.__setattr__(self, 'att', att)
 
@@ -803,6 +815,7 @@ class KProduction(KSentence):
         return KProduction(
             sort=KSort.from_dict(d['sort']),
             items=(KProductionItem.from_dict(item) for item in d['productionItems']),
+            params=(KSort.from_dict(param) for param in d['params']),
             klabel=KLabel.from_dict(d['klabel']) if d.get('klabel') else None,
             att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
         )
@@ -812,6 +825,7 @@ class KProduction(KSentence):
             'node': 'KProduction',
             'sort': self.sort.to_dict(),
             'productionItems': [item.to_dict() for item in self.items],
+            'params': [param.to_dict() for param in self.params],
             'klabel': self.klabel.to_dict() if self.klabel else None,
             'att': self.att.to_dict(),
         }
@@ -821,14 +835,16 @@ class KProduction(KSentence):
         *,
         sort: Optional[Union[str, KSort]] = None,
         items: Optional[Iterable[KProductionItem]] = None,
+        params: Optional[Iterable[Union[str, KSort]]] = None,
         klabel: Optional[Union[str, KLabel]] = None,
         att: Optional[KAtt] = None,
     ) -> 'KProduction':
         sort = sort if sort is not None else self.sort
         items = items if items is not None else self.items
+        params = params if params is not None else self.params
         klabel = klabel if klabel is not None else self.klabel  # TODO figure out a way to set klabel to None
         att = att if att is not None else self.att
-        return KProduction(sort=sort, items=items, klabel=klabel, att=att)
+        return KProduction(sort=sort, items=items, params=params, klabel=klabel, att=att)
 
     def let_att(self, att: KAtt) -> 'KProduction':
         return self.let(att=att)
