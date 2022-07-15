@@ -854,24 +854,43 @@ class KProduction(KSentence):
 @dataclass(frozen=True)
 class KSyntaxSort(KSentence):
     sort: KSort
+    params: Tuple[KSort, ...]
     att: KAtt
 
-    def __init__(self, sort: KSort, att=EMPTY_ATT):
+    def __init__(self, sort: KSort, params: Iterable[Union[str, KSort]] = (), att=EMPTY_ATT):
+        params = tuple(KSort(param) if type(param) is str else param for param in params)
         object.__setattr__(self, 'sort', sort)
+        object.__setattr__(self, 'params', params)
         object.__setattr__(self, 'att', att)
 
     @classmethod
     def from_dict(cls: Type['KSyntaxSort'], d: Dict[str, Any]) -> 'KSyntaxSort':
         cls._check_node(d)
-        return KSyntaxSort(sort=KSort.from_dict(d['sort']), att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT)
+        return KSyntaxSort(
+            sort=KSort.from_dict(d['sort']),
+            params=(KSort.from_dict(param) for param in d['params']),
+            att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
+        )
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KSyntaxSort', 'sort': self.sort.to_dict(), 'att': self.att.to_dict()}
+        return {
+            'node': 'KSyntaxSort',
+            'sort': self.sort.to_dict(),
+            'params': [param.to_dict() for param in self.params],
+            'att': self.att.to_dict(),
+        }
 
-    def let(self, *, sort: Optional[KSort] = None, att: Optional[KAtt] = None) -> 'KSyntaxSort':
+    def let(
+        self,
+        *,
+        sort: Optional[KSort] = None,
+        params: Optional[Iterable[Union[str, KSort]]] = None,
+        att: Optional[KAtt] = None,
+    ) -> 'KSyntaxSort':
         sort = sort or self.sort
+        params = params if params is not None else self.params
         att = att if att is not None else self.att
-        return KSyntaxSort(sort=sort, att=att)
+        return KSyntaxSort(sort=sort, params=params, att=att)
 
     def let_att(self, att: KAtt) -> 'KSyntaxSort':
         return self.let(att=att)
