@@ -1,0 +1,3 @@
+#!/bin/sh
+
+kompile --version | head -1 | grep -o 'v[0-9]*.[0-9*].[0-9]*'
