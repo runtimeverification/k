@@ -15,7 +15,6 @@ pipeline {
       when { changeRequest() }
       steps {
         script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" }
-        milestone(1)
       }
     }
     stage('Create source tarball') {
@@ -338,7 +337,7 @@ pipeline {
         stage('Build Image') {
           agent { label 'docker' }
           steps {
-            milestone(2)
+            milestone(1)
             dir('focal') { unstash 'focal' }
             sh '''
                 mv focal/kframework_${VERSION}_amd64.deb kframework_amd64_focal.deb
