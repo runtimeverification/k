@@ -24,7 +24,7 @@ from typing import (
     overload,
 )
 
-from .utils import FrozenDict, hash_str
+from .utils import FrozenDict, filter_none, hash_str
 
 T = TypeVar('T', bound='KAst')
 W = TypeVar('W', bound='WithKAtt')
@@ -850,14 +850,14 @@ class KProduction(KSentence):
         )
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        return filter_none({
             'node': 'KProduction',
             'sort': self.sort.to_dict(),
             'productionItems': [item.to_dict() for item in self.items],
             'params': [param.to_dict() for param in self.params],
             'klabel': self.klabel.to_dict() if self.klabel else None,
             'att': self.att.to_dict(),
-        }
+        })
 
     def let(
         self,

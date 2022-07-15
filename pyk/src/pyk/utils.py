@@ -64,6 +64,10 @@ def merge_with(f, d1: Mapping, d2: Mapping) -> Dict:
     return res
 
 
+def filter_none(mapping: Mapping[K, V]) -> Dict[K, V]:
+    return {k: v for k, v in mapping.items() if v is not None}
+
+
 def find_common_items(l1: Iterable[T], l2: Iterable[T]) -> Tuple[List[T], List[T], List[T]]:
     common = []
     for i in l1:
