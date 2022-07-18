@@ -10,6 +10,7 @@ from typing import (
     Iterator,
     List,
     Mapping,
+    Optional,
     Tuple,
     Type,
     TypeVar,
@@ -198,6 +199,10 @@ class SortVar(Sort):
         check_id(name)
         object.__setattr__(self, 'name', name)
 
+    def let(self, *, name: Optional[str] = None) -> 'SortVar':
+        name = name if name is not None else self.name
+        return SortVar(name=name)
+
     @classmethod
     def from_dict(cls: Type['SortVar'], dct: Mapping[str, Any]) -> 'SortVar':
         cls._check_tag(dct)
@@ -224,6 +229,11 @@ class SortCons(Sort):
         check_id(name)
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sorts', tuple(sorts))
+
+    def let(self, *, name: Optional[str] = None, sorts: Optional[Iterable[Sort]] = None) -> 'SortCons':
+        name = name if name is not None else self.name
+        sorts = sorts if sorts is not None else self.sorts
+        return SortCons(name=name, sorts=sorts)
 
     @classmethod
     def from_dict(cls: Type['SortCons'], dct: Mapping[str, Any]) -> 'SortCons':
@@ -292,6 +302,11 @@ class ElemVar(VarPattern):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sort', sort)
 
+    def let(self, *, name: Optional[str] = None, sort: Optional[Sort] = None) -> 'ElemVar':
+        name = name if name is not None else self.name
+        sort = sort if sort is not None else self.sort
+        return ElemVar(name=name, sort=sort)
+
     # TODO Can be pulled up? (Similarly for other classes.)
     @classmethod
     def from_dict(cls: Type['ElemVar'], dct: Mapping[str, Any]) -> 'ElemVar':
@@ -312,6 +327,11 @@ class SetVar(VarPattern):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sort', sort)
 
+    def let(self, *, name: Optional[str] = None, sort: Optional[Sort] = None) -> 'SetVar':
+        name = name if name is not None else self.name
+        sort = sort if sort is not None else self.sort
+        return SetVar(name=name, sort=sort)
+
     @classmethod
     def from_dict(cls: Type['SetVar'], dct: Mapping[str, Any]) -> 'SetVar':
         cls._check_tag(dct)
@@ -324,6 +344,10 @@ class StrLit(Pattern):
     _tag = 'String'
 
     value: str
+
+    def let(self, *, value: Optional[str] = None) -> 'StrLit':
+        value = value if value is not None else self.value
+        return StrLit(value=value)
 
     @classmethod
     def from_dict(cls: Type['StrLit'], dct: Mapping[str, Any]) -> 'StrLit':
@@ -353,6 +377,18 @@ class Apply(Pattern):
         object.__setattr__(self, 'symbol', symbol)
         object.__setattr__(self, 'sorts', tuple(sorts))
         object.__setattr__(self, 'patterns', tuple(patterns))
+
+    def let(
+        self,
+        *,
+        symbol: Optional[str] = None,
+        sorts: Optional[Iterable] = None,
+        patterns: Optional[Iterable] = None,
+    ) -> 'Apply':
+        symbol = symbol if symbol is not None else self.symbol
+        sorts = sorts if sorts is not None else self.sorts
+        patterns = patterns if patterns is not None else self.patterns
+        return Apply(symbol=symbol, sorts=sorts, patterns=patterns)
 
     @classmethod
     def from_dict(cls: Type['Apply'], dct: Mapping[str, Any]) -> 'Apply':
@@ -399,6 +435,7 @@ class MLPattern(Pattern, ABC):
         return globals()[cls_id].from_dict(dct)
 
 
+# TODO let_sort, ...
 class MLConn(MLPattern, ABC):
     _ML_CONN_TAGS: Final = {'Top', 'Bottom', 'Not', 'And', 'Or', 'Implies', 'Iff'}
 
@@ -450,6 +487,11 @@ class Top(NullaryConn):
 
     sort: Sort
 
+    # TODO pull up to superclass
+    def let(self, *, sort: Optional[Sort] = None) -> 'Top':
+        sort = sort if sort is not None else self.sort
+        return Top(sort=sort)
+
     @classmethod
     def from_dict(cls: Type['Top'], dct: Mapping[str, Any]) -> 'Top':
         cls._check_tag(dct)
@@ -463,6 +505,10 @@ class Bottom(NullaryConn):
     _symbol = '\\bottom'
 
     sort: Sort
+
+    def let(self, *, sort: Optional[Sort] = None) -> 'Bottom':
+        sort = sort if sort is not None else self.sort
+        return Bottom(sort=sort)
 
     @classmethod
     def from_dict(cls: Type['Bottom'], dct: Mapping[str, Any]) -> 'Bottom':
@@ -500,6 +546,11 @@ class Not(UnaryConn):
 
     sort: Sort
     pattern: Pattern
+
+    def let(self, *, sort: Optional[Sort] = None, pattern: Optional[Pattern] = None) -> 'Not':
+        sort = sort if sort is not None else self.sort
+        pattern = pattern if pattern is not None else self.pattern
+        return Not(sort=sort, pattern=pattern)
 
     @classmethod
     def from_dict(cls: Type['Not'], dct: Mapping[str, Any]) -> 'Not':
@@ -549,6 +600,18 @@ class And(BinaryConn):
     left: Pattern
     right: Pattern
 
+    def let(
+        self,
+        *,
+        sort: Optional[Sort] = None,
+        left: Optional[Pattern] = None,
+        right: Optional[Pattern] = None,
+    ) -> 'And':
+        sort = sort if sort is not None else self.sort
+        left = left if left is not None else self.left
+        right = right if right is not None else self.right
+        return And(sort=sort, left=left, right=right)
+
     @classmethod
     def from_dict(cls: Type['And'], dct: Mapping[str, Any]) -> 'And':
         # TODO Consider implementing in BinaryConn
@@ -570,6 +633,18 @@ class Or(BinaryConn):
     left: Pattern
     right: Pattern
 
+    def let(
+        self,
+        *,
+        sort: Optional[Sort] = None,
+        left: Optional[Pattern] = None,
+        right: Optional[Pattern] = None,
+    ) -> 'Or':
+        sort = sort if sort is not None else self.sort
+        left = left if left is not None else self.left
+        right = right if right is not None else self.right
+        return Or(sort=sort, left=left, right=right)
+
     @classmethod
     def from_dict(cls: Type['Or'], dct: Mapping[str, Any]) -> 'Or':
         cls._check_tag(dct)
@@ -590,6 +665,18 @@ class Implies(BinaryConn):
     left: Pattern
     right: Pattern
 
+    def let(
+        self,
+        *,
+        sort: Optional[Sort] = None,
+        left: Optional[Pattern] = None,
+        right: Optional[Pattern] = None,
+    ) -> 'Implies':
+        sort = sort if sort is not None else self.sort
+        left = left if left is not None else self.left
+        right = right if right is not None else self.right
+        return Implies(sort=sort, left=left, right=right)
+
     @classmethod
     def from_dict(cls: Type['Implies'], dct: Mapping[str, Any]) -> 'Implies':
         cls._check_tag(dct)
@@ -609,6 +696,18 @@ class Iff(BinaryConn):
     sort: Sort
     left: Pattern
     right: Pattern
+
+    def let(
+        self,
+        *,
+        sort: Optional[Sort] = None,
+        left: Optional[Pattern] = None,
+        right: Optional[Pattern] = None,
+    ) -> 'Iff':
+        sort = sort if sort is not None else self.sort
+        left = left if left is not None else self.left
+        right = right if right is not None else self.right
+        return Iff(sort=sort, left=left, right=right)
 
     @classmethod
     def from_dict(cls: Type['Iff'], dct: Mapping[str, Any]) -> 'Iff':
@@ -660,6 +759,18 @@ class Exists(MLQuant):
     var: ElemVar
     pattern: Pattern
 
+    def let(
+        self,
+        *,
+        sort: Optional[Sort] = None,
+        var: Optional[ElemVar] = None,
+        pattern: Optional[Pattern] = None,
+    ) -> 'Exists':
+        sort = sort if sort is not None else self.sort
+        var = var if var is not None else self.var
+        pattern = pattern if pattern is not None else self.pattern
+        return Exists(sort=sort, var=var, pattern=pattern)
+
     @classmethod
     def from_dict(cls: Type['Exists'], dct: Mapping[str, Any]) -> 'Exists':
         cls._check_tag(dct)
@@ -679,6 +790,18 @@ class Forall(MLQuant):
     sort: Sort
     var: ElemVar
     pattern: Pattern
+
+    def let(
+        self,
+        *,
+        sort: Optional[Sort] = None,
+        var: Optional[ElemVar] = None,
+        pattern: Optional[Pattern] = None,
+    ) -> 'Forall':
+        sort = sort if sort is not None else self.sort
+        var = var if var is not None else self.var
+        pattern = pattern if pattern is not None else self.pattern
+        return Forall(sort=sort, var=var, pattern=pattern)
 
     @classmethod
     def from_dict(cls: Type['Forall'], dct: Mapping[str, Any]) -> 'Forall':
@@ -727,6 +850,11 @@ class Mu(MLFixpoint):
     var: SetVar
     pattern: Pattern
 
+    def let(self, *, var: Optional[SetVar] = None, pattern: Optional[Pattern] = None) -> 'Mu':
+        var = var if var is not None else self.var
+        pattern = pattern if pattern is not None else self.pattern
+        return Mu(var=var, pattern=pattern)
+
     @classmethod
     def from_dict(cls: Type['Mu'], dct: Mapping[str, Any]) -> 'Mu':
         cls._check_tag(dct)
@@ -744,6 +872,11 @@ class Nu(MLFixpoint):
 
     var: SetVar
     pattern: Pattern
+
+    def let(self, *, var: Optional[SetVar] = None, pattern: Optional[Pattern] = None) -> 'Nu':
+        var = var if var is not None else self.var
+        pattern = pattern if pattern is not None else self.pattern
+        return Nu(var=var, pattern=pattern)
 
     @classmethod
     def from_dict(cls: Type['Nu'], dct: Mapping[str, Any]) -> 'Nu':
@@ -806,6 +939,18 @@ class Ceil(RoundPred):
     sort: Sort
     pattern: Pattern
 
+    def let(
+        self,
+        *,
+        op_sort: Optional[Sort] = None,
+        sort: Optional[Sort] = None,
+        pattern: Optional[Pattern] = None,
+    ) -> 'Ceil':
+        op_sort = op_sort if op_sort is not None else self.op_sort
+        sort = sort if sort is not None else self.sort
+        pattern = pattern if pattern is not None else self.pattern
+        return Ceil(op_sort=op_sort, sort=sort, pattern=pattern)
+
     @classmethod
     def from_dict(cls: Type['Ceil'], dct: Mapping[str, Any]) -> 'Ceil':
         cls._check_tag(dct)
@@ -825,6 +970,18 @@ class Floor(RoundPred):
     op_sort: Sort
     sort: Sort
     pattern: Pattern
+
+    def let(
+        self,
+        *,
+        op_sort: Optional[Sort] = None,
+        sort: Optional[Sort] = None,
+        pattern: Optional[Pattern] = None,
+    ) -> 'Floor':
+        op_sort = op_sort if op_sort is not None else self.op_sort
+        sort = sort if sort is not None else self.sort
+        pattern = pattern if pattern is not None else self.pattern
+        return Floor(op_sort=op_sort, sort=sort, pattern=pattern)
 
     @classmethod
     def from_dict(cls: Type['Floor'], dct: Mapping[str, Any]) -> 'Floor':
@@ -880,6 +1037,20 @@ class Equals(BinaryPred):
     left: Pattern
     right: Pattern
 
+    def let(
+        self,
+        *,
+        op_sort: Optional[Sort] = None,
+        sort: Optional[Sort] = None,
+        left: Optional[Pattern] = None,
+        right: Optional[Pattern] = None,
+    ) -> 'Equals':
+        op_sort = op_sort if op_sort is not None else self.op_sort
+        sort = sort if sort is not None else self.sort
+        left = left if left is not None else self.left
+        right = right if right is not None else self.right
+        return Equals(op_sort=op_sort, sort=sort, left=left, right=right)
+
     @classmethod
     def from_dict(cls: Type['Equals'], dct: Mapping[str, Any]) -> 'Equals':
         cls._check_tag(dct)
@@ -901,6 +1072,20 @@ class In(BinaryPred):
     sort: Sort
     left: Pattern
     right: Pattern
+
+    def let(
+        self,
+        *,
+        op_sort: Optional[Sort] = None,
+        sort: Optional[Sort] = None,
+        left: Optional[Pattern] = None,
+        right: Optional[Pattern] = None,
+    ) -> 'In':
+        op_sort = op_sort if op_sort is not None else self.op_sort
+        sort = sort if sort is not None else self.sort
+        left = left if left is not None else self.left
+        right = right if right is not None else self.right
+        return In(op_sort=op_sort, sort=sort, left=left, right=right)
 
     @classmethod
     def from_dict(cls: Type['In'], dct: Mapping[str, Any]) -> 'In':
@@ -936,6 +1121,11 @@ class Next(MLRewrite):
     sort: Sort
     pattern: Pattern
 
+    def let(self, *, sort: Optional[Sort] = None, pattern: Optional[Pattern] = None) -> 'Next':
+        sort = sort if sort is not None else self.sort
+        pattern = pattern if pattern is not None else self.pattern
+        return Next(sort=sort, pattern=pattern)
+
     @classmethod
     def from_dict(cls: Type['Next'], dct: Mapping[str, Any]) -> 'Next':
         cls._check_tag(dct)
@@ -962,6 +1152,18 @@ class Rewrites(MLRewrite):
     sort: Sort
     left: Pattern
     right: Pattern
+
+    def let(
+        self,
+        *,
+        sort: Optional[Sort] = None,
+        left: Optional[Pattern] = None,
+        right: Optional[Pattern] = None,
+    ) -> 'Rewrites':
+        sort = sort if sort is not None else self.sort
+        left = left if left is not None else self.left
+        right = right if right is not None else self.right
+        return Rewrites(sort=sort, left=left, right=right)
 
     @classmethod
     def from_dict(cls: Type['Rewrites'], dct: Mapping[str, Any]) -> 'Rewrites':
@@ -994,6 +1196,11 @@ class DomVal(MLPattern):
 
     sort: Sort
     value: StrLit  # TODO Should this be changed to str?
+
+    def let(self, *, sort: Optional[Sort] = None, value: Optional[StrLit] = None) -> 'DomVal':
+        sort = sort if sort is not None else self.sort
+        value = value if value is not None else self.value
+        return DomVal(sort=sort, value=value)
 
     @classmethod
     def from_dict(cls: Type['DomVal'], dct: Mapping[str, Any]) -> 'DomVal':
@@ -1028,6 +1235,11 @@ class Attr(Kore):
         object.__setattr__(self, 'symbol', symbol)
         object.__setattr__(self, 'params', tuple(params))
 
+    def let(self, *, symbol: Optional[str] = None, params: Optional[Iterable[Union[StrLit, 'Attr']]] = None) -> 'Attr':
+        symbol = symbol if symbol is not None else self.symbol
+        params = params if params is not None else self.params
+        return Attr(symbol=symbol, params=params)
+
     @classmethod
     @property
     def _tag(cls) -> str:
@@ -1049,6 +1261,7 @@ class Attr(Kore):
         return self.symbol + ' { } ' + _parend(param.text for param in self.params)
 
 
+# TODO let_attrs
 class WithAttrs(ABC):
     attrs: Tuple[Attr, ...]
 
@@ -1071,6 +1284,11 @@ class Import(Sentence):
         check_id(module_name)
         object.__setattr__(self, 'module_name', module_name)
         object.__setattr__(self, 'attrs', tuple(attrs))
+
+    def let(self, *, module_name: Optional[str] = None, attrs: Optional[Iterable[Attr]] = None) -> 'Import':
+        module_name = module_name if module_name is not None else self.module_name
+        attrs = attrs if attrs is not None else self.attrs
+        return Import(module_name=module_name, attrs=attrs)
 
     @classmethod
     @property
@@ -1112,6 +1330,19 @@ class SortDecl(Sentence):
         object.__setattr__(self, 'attrs', tuple(attrs))
         object.__setattr__(self, 'hooked', hooked)
 
+    def let(
+        self,
+        *,
+        name: Optional[str] = None,
+        vars: Optional[Iterable[SortVar]] = None,
+        attrs: Optional[Iterable[Attr]] = None,
+        hooked: Optional[bool] = None,
+    ) -> 'SortDecl':
+        name = name if name is not None else self.name
+        vars = vars if vars is not None else self.vars
+        attrs = attrs if attrs is not None else self.attrs
+        return SortDecl(name=name, vars=vars, attrs=attrs, hooked=hooked)
+
     @classmethod
     @property
     def _tag(cls) -> str:
@@ -1149,6 +1380,11 @@ class Symbol(Kore):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'vars', tuple(vars))
 
+    def let(self, *, name: Optional[str] = None, vars: Optional[Iterable[SortVar]] = None) -> 'Symbol':
+        name = name if name is not None else self.name
+        vars = vars if vars is not None else self.vars
+        return Symbol(name=name, vars=vars)
+
     @classmethod
     @property
     def _tag(cls) -> str:
@@ -1185,6 +1421,22 @@ class SymbolDecl(Sentence):
         object.__setattr__(self, 'sort', sort)
         object.__setattr__(self, 'attrs', tuple(attrs))
         object.__setattr__(self, 'hooked', hooked)
+
+    def let(
+        self,
+        *,
+        symbol: Optional[Symbol] = None,
+        sort_params: Optional[Iterable[Sort]] = None,
+        sort: Optional[Sort] = None,
+        attrs: Optional[Iterable[Attr]] = None,
+        hooked: Optional[bool] = None,
+    ) -> 'SymbolDecl':
+        symbol = symbol if symbol is not None else self.symbol
+        sort_params = sort_params if sort_params is not None else self.sort_params
+        sort = sort if sort is not None else self.sort
+        attrs = attrs if attrs is not None else self.attrs
+        hooked = hooked if hooked is not None else self.hooked
+        return SymbolDecl(symbol=symbol, sort_params=sort_params, sort=sort, attrs=attrs, hooked=hooked)
 
     @classmethod
     @property
@@ -1240,6 +1492,24 @@ class AliasDecl(Sentence):
         object.__setattr__(self, 'right', right)
         object.__setattr__(self, 'attrs', tuple(attrs))
 
+    def let(
+        self,
+        *,
+        alias: Optional[Symbol] = None,
+        sort_params: Optional[Iterable[Sort]] = None,
+        sort: Optional[Sort] = None,
+        left: Optional[Apply] = None,
+        right: Optional[Pattern] = None,
+        attrs: Optional[Iterable[Attr]] = None,
+    ) -> 'AliasDecl':
+        alias = alias if alias is not None else self.alias
+        sort_params = sort_params if sort_params is not None else self.sort_params
+        sort = sort if sort is not None else self.sort
+        left = left if left is not None else self.left
+        right = right if right is not None else self.right
+        attrs = attrs if attrs is not None else self.attrs
+        return AliasDecl(alias=alias, sort_params=sort_params, sort=sort, left=left, right=right, attrs=attrs)
+
     @classmethod
     @property
     def _tag(cls) -> str:
@@ -1273,7 +1543,8 @@ class AliasDecl(Sentence):
 
 
 class AxiomLike(Sentence, ABC):
-    label: ClassVar[str]  # TODO pull up to Sentence
+    _label: ClassVar[str]  # TODO pull up to Sentence
+
     vars: Tuple[SortVar, ...]
     pattern: Pattern
 
@@ -1285,7 +1556,7 @@ class AxiomLike(Sentence, ABC):
     @property
     def text(self) -> str:
         return ' '.join([
-            self.label,
+            self._label,
             _braced(var.text for var in self.vars),
             self.pattern.text,
             _brackd(attr.text for attr in self.attrs),
@@ -1295,7 +1566,8 @@ class AxiomLike(Sentence, ABC):
 @final
 @dataclass(frozen=True)
 class Axiom(AxiomLike):
-    label = 'axiom'
+    _label = 'axiom'
+
     vars: Tuple[SortVar, ...]
     pattern: Pattern
     attrs: Tuple[Attr, ...]
@@ -1304,6 +1576,18 @@ class Axiom(AxiomLike):
         object.__setattr__(self, 'vars', tuple(vars))
         object.__setattr__(self, 'pattern', pattern)
         object.__setattr__(self, 'attrs', tuple(attrs))
+
+    def let(
+        self,
+        *,
+        vars: Optional[Iterable[SortVar]] = None,
+        pattern: Optional[Pattern] = None,
+        attrs: Optional[Iterable[Attr]] = None,
+    ) -> 'Axiom':
+        vars = vars if vars is not None else self.vars
+        pattern = pattern if pattern is not None else self.pattern
+        attrs = attrs if attrs is not None else self.attrs
+        return Axiom(vars=vars, pattern=pattern, attrs=attrs)
 
     @classmethod
     @property
@@ -1325,7 +1609,8 @@ class Axiom(AxiomLike):
 @final
 @dataclass(frozen=True)
 class Claim(AxiomLike):
-    label = 'claim'
+    _label = 'claim'
+
     vars: Tuple[SortVar, ...]
     pattern: Pattern
     attrs: Tuple[Attr, ...]
@@ -1334,6 +1619,18 @@ class Claim(AxiomLike):
         object.__setattr__(self, 'vars', tuple(vars))
         object.__setattr__(self, 'pattern', pattern)
         object.__setattr__(self, 'attrs', tuple(attrs))
+
+    def let(
+        self,
+        *,
+        vars: Optional[Iterable[SortVar]] = None,
+        pattern: Optional[Pattern] = None,
+        attrs: Optional[Iterable[Attr]] = None,
+    ) -> 'Claim':
+        vars = vars if vars is not None else self.vars
+        pattern = pattern if pattern is not None else self.pattern
+        attrs = attrs if attrs is not None else self.attrs
+        return Claim(vars=vars, pattern=pattern, attrs=attrs)
 
     @classmethod
     @property
@@ -1364,6 +1661,18 @@ class Module(Kore, WithAttrs):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sentences', tuple(sentences))
         object.__setattr__(self, 'attrs', tuple(attrs))
+
+    def let(
+        self,
+        *,
+        name: Optional[str] = None,
+        sentences: Optional[Iterable[Sentence]] = None,
+        attrs: Optional[Iterable[Attr]] = None,
+    ) -> 'Module':
+        name = name if name is not None else self.name
+        sentences = sentences if sentences is not None else self.sentences
+        attrs = attrs if attrs is not None else self.attrs
+        return Module(name=name, sentences=sentences, attrs=attrs)
 
     @classmethod
     @property
@@ -1399,6 +1708,11 @@ class Definition(Kore, WithAttrs):
     def __init__(self, modules: Iterable[Module] = (), attrs: Iterable[Attr] = ()):
         object.__setattr__(self, 'modules', tuple(modules))
         object.__setattr__(self, 'attrs', tuple(attrs))
+
+    def let(self, *, modules: Optional[Iterable[Module]] = None, attrs: Optional[Iterable[Attr]] = None) -> 'Definition':
+        modules = modules if modules is not None else self.modules
+        attrs = attrs if attrs is not None else self.attrs
+        return Definition(modules=modules, attrs=attrs)
 
     @classmethod
     @property
