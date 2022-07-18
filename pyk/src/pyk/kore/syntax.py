@@ -93,6 +93,7 @@ def _parend(elems: Iterable[str]) -> str:
 
 
 T = TypeVar('T', bound='Kore')
+WA = TypeVar('WA', bound='WithAttrs')
 
 
 def unsupported() -> Any:
@@ -1261,9 +1262,12 @@ class Attr(Kore):
         return self.symbol + ' { } ' + _parend(param.text for param in self.params)
 
 
-# TODO let_attrs
 class WithAttrs(ABC):
     attrs: Tuple[Attr, ...]
+
+    @abstractmethod
+    def let_attrs(self: WA, attrs: Iterable[Attr]) -> WA:
+        ...
 
 
 class Sentence(Kore, WithAttrs, ABC):
@@ -1289,6 +1293,9 @@ class Import(Sentence):
         module_name = module_name if module_name is not None else self.module_name
         attrs = attrs if attrs is not None else self.attrs
         return Import(module_name=module_name, attrs=attrs)
+
+    def let_attrs(self: 'Import', attrs: Iterable[Attr]) -> 'Import':
+        return self.let(attrs=attrs)
 
     @classmethod
     @property
@@ -1342,6 +1349,9 @@ class SortDecl(Sentence):
         vars = vars if vars is not None else self.vars
         attrs = attrs if attrs is not None else self.attrs
         return SortDecl(name=name, vars=vars, attrs=attrs, hooked=hooked)
+
+    def let_attrs(self: 'SortDecl', attrs: Iterable[Attr]) -> 'SortDecl':
+        return self.let(attrs=attrs)
 
     @classmethod
     @property
@@ -1438,6 +1448,9 @@ class SymbolDecl(Sentence):
         hooked = hooked if hooked is not None else self.hooked
         return SymbolDecl(symbol=symbol, sort_params=sort_params, sort=sort, attrs=attrs, hooked=hooked)
 
+    def let_attrs(self: 'SymbolDecl', attrs: Iterable[Attr]) -> 'SymbolDecl':
+        return self.let(attrs=attrs)
+
     @classmethod
     @property
     def _tag(cls) -> str:
@@ -1509,6 +1522,9 @@ class AliasDecl(Sentence):
         right = right if right is not None else self.right
         attrs = attrs if attrs is not None else self.attrs
         return AliasDecl(alias=alias, sort_params=sort_params, sort=sort, left=left, right=right, attrs=attrs)
+
+    def let_attrs(self: 'AliasDecl', attrs: Iterable[Attr]) -> 'AliasDecl':
+        return self.let(attrs=attrs)
 
     @classmethod
     @property
@@ -1589,6 +1605,9 @@ class Axiom(AxiomLike):
         attrs = attrs if attrs is not None else self.attrs
         return Axiom(vars=vars, pattern=pattern, attrs=attrs)
 
+    def let_attrs(self: 'Axiom', attrs: Iterable[Attr]) -> 'Axiom':
+        return self.let(attrs=attrs)
+
     @classmethod
     @property
     def _tag(cls) -> str:
@@ -1632,6 +1651,9 @@ class Claim(AxiomLike):
         attrs = attrs if attrs is not None else self.attrs
         return Claim(vars=vars, pattern=pattern, attrs=attrs)
 
+    def let_attrs(self: 'Claim', attrs: Iterable[Attr]) -> 'Claim':
+        return self.let(attrs=attrs)
+
     @classmethod
     @property
     def _tag(cls) -> str:
@@ -1674,6 +1696,9 @@ class Module(Kore, WithAttrs):
         attrs = attrs if attrs is not None else self.attrs
         return Module(name=name, sentences=sentences, attrs=attrs)
 
+    def let_attrs(self: 'Module', attrs: Iterable[Attr]) -> 'Module':
+        return self.let(attrs=attrs)
+
     @classmethod
     @property
     def _tag(cls) -> str:
@@ -1713,6 +1738,9 @@ class Definition(Kore, WithAttrs):
         modules = modules if modules is not None else self.modules
         attrs = attrs if attrs is not None else self.attrs
         return Definition(modules=modules, attrs=attrs)
+
+    def let_attrs(self: 'Definition', attrs: Iterable[Attr]) -> 'Definition':
+        return self.let(attrs=attrs)
 
     @classmethod
     @property
