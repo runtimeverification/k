@@ -941,7 +941,11 @@ public class ModuleToKORE {
                 .stream().collect(Collectors.toMap(KVariable::name, Function.identity()));
         if (ruleInfo.isEquation) {
             assertNoExistentials(rule, existentials);
-            sb.append("  axiom{R");
+            if (rule instanceof Claim) {
+                sb.append("  claim{R");
+            } else {
+                sb.append("  axiom{R");
+            }
             Option<Sort> sortParamsWrapper = rule.att().getOption("sortParams", Sort.class);
             Option<Set<String>> sortParams = sortParamsWrapper.map(s -> stream(s.params()).map(sort -> sort.name()).collect(Collectors.toSet()));
             if (sortParams.nonEmpty()) {
@@ -1054,7 +1058,7 @@ public class ModuleToKORE {
                 sb.append(")))\n  ");
                 convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
                 sb.append("\n\n");
-            } else if (rule.att().contains(Att.SIMPLIFICATION())) {
+            } else if (rule.att().contains(Att.SIMPLIFICATION()) || rule instanceof Claim) {
                 sb.append("\\implies{R} (\n    ");
                 convertSideCondition(requires, sb);
                 sb.append(",\n    \\equals{");
