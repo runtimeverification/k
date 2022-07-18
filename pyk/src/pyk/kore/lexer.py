@@ -174,9 +174,6 @@ class KoreLexer(Iterator[KoreToken]):
         ']': KoreToken.Type.RBRACK,
     }
 
-    # TODO Consider validating identifiers in kore.syntax with KoreLexer
-    # TODO For this introduce a lexer mode that also emits WHITESPACE, {BLOCK, LINE}_COMMENT tokens
-    # TODO Maybe StrLit lexer can also be moved to kore.lexer
     _ID_FIRST_CHARS: Final = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
     _ID_CHARS: Final = set("01234567890'-").union(_ID_FIRST_CHARS)
     _DELIMITERS: Final = set(':/').union(_SIMPLE_CHARS)

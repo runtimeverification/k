@@ -1317,17 +1317,14 @@ class Attr(Kore):
     @classmethod
     @property
     def _tag(cls) -> str:
-        # TODO
         return unsupported()
 
     @classmethod
     def from_dict(cls: Type['Attr'], dct: Mapping[str, Any]) -> 'Attr':
-        # TODO
         return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
-        # TODO
         return unsupported()
 
     @property
@@ -1350,7 +1347,6 @@ class Sentence(Kore, WithAttrs, ABC):
 
     @classmethod
     def from_dict(cls: Type['Sentence'], dct: Mapping[str, Any]) -> 'Sentence':
-        # TODO
         return unsupported()
 
 
@@ -1376,17 +1372,14 @@ class Import(Sentence):
     @classmethod
     @property
     def _tag(cls) -> str:
-        # TODO
         return unsupported()
 
     @classmethod
     def from_dict(cls: Type['Import'], dct: Mapping[str, Any]) -> 'Import':
-        # TODO
         return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
-        # TODO
         return unsupported()
 
     @property
@@ -1432,17 +1425,14 @@ class SortDecl(Sentence):
     @classmethod
     @property
     def _tag(cls) -> str:
-        # TODO
         return unsupported()
 
     @classmethod
     def from_dict(cls: Type['SortDecl'], dct: Mapping[str, Any]) -> 'SortDecl':
-        # TODO
         return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
-        # TODO
         return unsupported()
 
     @property
@@ -1474,17 +1464,14 @@ class Symbol(Kore):
     @classmethod
     @property
     def _tag(cls) -> str:
-        # TODO
         return unsupported()
 
     @classmethod
     def from_dict(cls: Type['Symbol'], dct: Mapping[str, Any]) -> 'Symbol':
-        # TODO
         return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
-        # TODO
         return unsupported()
 
     @property
@@ -1530,17 +1517,14 @@ class SymbolDecl(Sentence):
     @classmethod
     @property
     def _tag(cls) -> str:
-        # TODO
         return unsupported()
 
     @classmethod
     def from_dict(cls: Type['SymbolDecl'], dct: Mapping[str, Any]) -> 'SymbolDecl':
-        # TODO
         return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
-        # TODO
         return unsupported()
 
     @property
@@ -1605,17 +1589,14 @@ class AliasDecl(Sentence):
     @classmethod
     @property
     def _tag(cls) -> str:
-        # TODO
         return unsupported()
 
     @classmethod
     def from_dict(cls: Type['AliasDecl'], dct: Mapping[str, Any]) -> 'AliasDecl':
-        # TODO
         return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
-        # TODO
         return unsupported()
 
     @property
@@ -1642,7 +1623,6 @@ class AxiomLike(Sentence, ABC):
 
     @classmethod
     def from_dict(cls: Type['AxiomLike'], dct: Mapping[str, Any]) -> 'AxiomLike':
-        # TODO
         return unsupported()
 
     @property
@@ -1687,17 +1667,14 @@ class Axiom(AxiomLike):
     @classmethod
     @property
     def _tag(cls) -> str:
-        # TODO
         return unsupported()
 
     @classmethod
     def from_dict(cls: Type['Axiom'], dct: Mapping[str, Any]) -> 'Axiom':
-        # TODO
         return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
-        # TODO
         return unsupported()
 
 
@@ -1733,17 +1710,14 @@ class Claim(AxiomLike):
     @classmethod
     @property
     def _tag(cls) -> str:
-        # TODO
         return unsupported()
 
     @classmethod
     def from_dict(cls: Type['Claim'], dct: Mapping[str, Any]) -> 'Claim':
-        # TODO
         return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
-        # TODO
         return unsupported()
 
 
@@ -1778,17 +1752,14 @@ class Module(Kore, WithAttrs):
     @classmethod
     @property
     def _tag(cls) -> str:
-        # TODO
         return unsupported()
 
     @classmethod
     def from_dict(cls: Type['Module'], dct: Mapping[str, Any]) -> 'Module':
-        # TODO
         return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
-        # TODO
         return unsupported()
 
     @property
@@ -1821,17 +1792,14 @@ class Definition(Kore, WithAttrs):
     @classmethod
     @property
     def _tag(cls) -> str:
-        # TODO
         return unsupported()
 
     @classmethod
     def from_dict(cls: Type['Definition'], dct: Mapping[str, Any]) -> 'Definition':
-        # TODO
         return unsupported()
 
     @property
     def dict(self) -> Dict[str, Any]:
-        # TODO
         return unsupported()
 
     @property
