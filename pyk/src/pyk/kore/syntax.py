@@ -95,6 +95,7 @@ def _parend(elems: Iterable[str]) -> str:
 
 T = TypeVar('T', bound='Kore')
 P = TypeVar('P', bound='Pattern')
+WS = TypeVar('WS', bound='WithSort')
 WA = TypeVar('WA', bound='WithAttrs')
 
 
@@ -191,6 +192,17 @@ class Sort(Kore, ABC):
         return globals()[cls_id].from_dict(dct)
 
 
+class WithSort(ABC):
+    sort: Sort
+
+    @abstractmethod
+    def let_sort(self: WS, sort: Sort) -> WS:
+        ...
+
+    def map_sort(self: WS, f: Callable[[Sort], Sort]) -> WS:
+        return self.let_sort(f(self.sort))
+
+
 @final
 @dataclass(frozen=True)
 class SortVar(Sort):
@@ -273,7 +285,7 @@ class Pattern(Kore, ABC):
         return globals()[cls_id].from_dict(dct)
 
 
-class VarPattern(Pattern, ABC):
+class VarPattern(Pattern, WithSort, ABC):
     _VAR_PATTERN_TAGS: Final = {'EVar', 'SVar'}
 
     name: str
@@ -314,6 +326,9 @@ class ElemVar(VarPattern):
         sort = sort if sort is not None else self.sort
         return ElemVar(name=name, sort=sort)
 
+    def let_sort(self, sort: Sort) -> 'ElemVar':
+        return self.let(sort=sort)
+
     def map_pattern(self: 'ElemVar', f: Callable[[Pattern], Pattern]) -> 'ElemVar':
         return self
 
@@ -341,6 +356,9 @@ class SetVar(VarPattern):
         name = name if name is not None else self.name
         sort = sort if sort is not None else self.sort
         return SetVar(name=name, sort=sort)
+
+    def let_sort(self, sort: Sort) -> 'SetVar':
+        return self.let(sort=sort)
 
     def map_pattern(self: 'SetVar', f: Callable[[Pattern], Pattern]) -> 'SetVar':
         return self
@@ -454,11 +472,8 @@ class MLPattern(Pattern, ABC):
         return globals()[cls_id].from_dict(dct)
 
 
-# TODO let_sort, ...
-class MLConn(MLPattern, ABC):
+class MLConn(MLPattern, WithSort, ABC):
     _ML_CONN_TAGS: Final = {'Top', 'Bottom', 'Not', 'And', 'Or', 'Implies', 'Iff'}
-
-    sort: Sort
 
     @property
     @abstractmethod
@@ -511,6 +526,9 @@ class Top(NullaryConn):
         sort = sort if sort is not None else self.sort
         return Top(sort=sort)
 
+    def let_sort(self: 'Top', sort: Sort) -> 'Top':
+        return self.let(sort=sort)
+
     # TODO pull up to superclass
     def map_pattern(self: 'Top', f: Callable[[Pattern], Pattern]) -> 'Top':
         return self
@@ -532,6 +550,9 @@ class Bottom(NullaryConn):
     def let(self, *, sort: Optional[Sort] = None) -> 'Bottom':
         sort = sort if sort is not None else self.sort
         return Bottom(sort=sort)
+
+    def let_sort(self: 'Bottom', sort: Sort) -> 'Bottom':
+        return self.let(sort=sort)
 
     def map_pattern(self: 'Bottom', f: Callable[[Pattern], Pattern]) -> 'Bottom':
         return self
@@ -577,6 +598,9 @@ class Not(UnaryConn):
         sort = sort if sort is not None else self.sort
         pattern = pattern if pattern is not None else self.pattern
         return Not(sort=sort, pattern=pattern)
+
+    def let_sort(self: 'Not', sort: Sort) -> 'Not':
+        return self.let(sort=sort)
 
     def map_pattern(self: 'Not', f: Callable[[Pattern], Pattern]) -> 'Not':
         return self.let(pattern=f(self.pattern))
@@ -641,6 +665,9 @@ class And(BinaryConn):
         right = right if right is not None else self.right
         return And(sort=sort, left=left, right=right)
 
+    def let_sort(self: 'And', sort: Sort) -> 'And':
+        return self.let(sort=sort)
+
     def map_pattern(self: 'And', f: Callable[[Pattern], Pattern]) -> 'And':
         return self.let(left=f(self.left), right=f(self.right))
 
@@ -677,6 +704,9 @@ class Or(BinaryConn):
         right = right if right is not None else self.right
         return Or(sort=sort, left=left, right=right)
 
+    def let_sort(self: 'Or', sort: Sort) -> 'Or':
+        return self.let(sort=sort)
+
     def map_pattern(self: 'Or', f: Callable[[Pattern], Pattern]) -> 'Or':
         return self.let(left=f(self.left), right=f(self.right))
 
@@ -711,6 +741,9 @@ class Implies(BinaryConn):
         left = left if left is not None else self.left
         right = right if right is not None else self.right
         return Implies(sort=sort, left=left, right=right)
+
+    def let_sort(self: 'Implies', sort: Sort) -> 'Implies':
+        return self.let(sort=sort)
 
     def map_pattern(self: 'Implies', f: Callable[[Pattern], Pattern]) -> 'Implies':
         return self.let(left=f(self.left), right=f(self.right))
@@ -747,6 +780,9 @@ class Iff(BinaryConn):
         right = right if right is not None else self.right
         return Iff(sort=sort, left=left, right=right)
 
+    def let_sort(self: 'Iff', sort: Sort) -> 'Iff':
+        return self.let(sort=sort)
+
     def map_pattern(self: 'Iff', f: Callable[[Pattern], Pattern]) -> 'Iff':
         return self.let(left=f(self.left), right=f(self.right))
 
@@ -760,7 +796,7 @@ class Iff(BinaryConn):
         )
 
 
-class MLQuant(MLPattern, ABC):
+class MLQuant(MLPattern, WithSort, ABC):
     _ML_QUANT_TAGS: Final = {'Exists', 'Forall'}
 
     sort: Sort
@@ -812,6 +848,9 @@ class Exists(MLQuant):
         pattern = pattern if pattern is not None else self.pattern
         return Exists(sort=sort, var=var, pattern=pattern)
 
+    def let_sort(self, sort: Sort) -> 'Exists':
+        return self.let(sort=sort)
+
     def map_pattern(self: 'Exists', f: Callable[[Pattern], Pattern]) -> 'Exists':
         return self.let(pattern=f(self.pattern))
 
@@ -846,6 +885,9 @@ class Forall(MLQuant):
         var = var if var is not None else self.var
         pattern = pattern if pattern is not None else self.pattern
         return Forall(sort=sort, var=var, pattern=pattern)
+
+    def let_sort(self, sort: Sort) -> 'Forall':
+        return self.let(sort=sort)
 
     def map_pattern(self: 'Forall', f: Callable[[Pattern], Pattern]) -> 'Forall':
         return self.let(pattern=f(self.pattern))
@@ -940,11 +982,10 @@ class Nu(MLFixpoint):
         )
 
 
-class MLPred(MLPattern, ABC):
+class MLPred(MLPattern, WithSort, ABC):
     _ML_PRED_TAGS: Final = {'Ceil', 'Floor', 'Equals', 'In'}
 
     op_sort: Sort
-    sort: Sort
 
     @classmethod
     def from_dict(cls: Type['MLPred'], dct: Mapping[str, Any]) -> 'MLPred':
@@ -1004,6 +1045,9 @@ class Ceil(RoundPred):
         pattern = pattern if pattern is not None else self.pattern
         return Ceil(op_sort=op_sort, sort=sort, pattern=pattern)
 
+    def let_sort(self, sort: Sort) -> 'Ceil':
+        return self.let(sort=sort)
+
     def map_pattern(self: 'Ceil', f: Callable[[Pattern], Pattern]) -> 'Ceil':
         return self.let(pattern=f(self.pattern))
 
@@ -1038,6 +1082,9 @@ class Floor(RoundPred):
         sort = sort if sort is not None else self.sort
         pattern = pattern if pattern is not None else self.pattern
         return Floor(op_sort=op_sort, sort=sort, pattern=pattern)
+
+    def let_sort(self, sort: Sort) -> 'Floor':
+        return self.let(sort=sort)
 
     def map_pattern(self: 'Floor', f: Callable[[Pattern], Pattern]) -> 'Floor':
         return self.let(pattern=f(self.pattern))
@@ -1110,6 +1157,9 @@ class Equals(BinaryPred):
         right = right if right is not None else self.right
         return Equals(op_sort=op_sort, sort=sort, left=left, right=right)
 
+    def let_sort(self, sort: Sort) -> 'Equals':
+        return self.let(sort=sort)
+
     def map_pattern(self: 'Equals', f: Callable[[Pattern], Pattern]) -> 'Equals':
         return self.let(left=f(self.left), right=f(self.right))
 
@@ -1149,6 +1199,9 @@ class In(BinaryPred):
         right = right if right is not None else self.right
         return In(op_sort=op_sort, sort=sort, left=left, right=right)
 
+    def let_sort(self, sort: Sort) -> 'In':
+        return self.let(sort=sort)
+
     def map_pattern(self: 'In', f: Callable[[Pattern], Pattern]) -> 'In':
         return self.let(left=f(self.left), right=f(self.right))
 
@@ -1163,10 +1216,8 @@ class In(BinaryPred):
         )
 
 
-class MLRewrite(MLPattern, ABC):
+class MLRewrite(MLPattern, WithSort, ABC):
     _ML_REWRITE_TAGS: Final = {'Next', 'Rewrites'}
-
-    sort: Sort
 
     @classmethod
     def from_dict(cls: Type['MLRewrite'], dct: Mapping[str, Any]) -> 'MLRewrite':
@@ -1190,6 +1241,9 @@ class Next(MLRewrite):
         sort = sort if sort is not None else self.sort
         pattern = pattern if pattern is not None else self.pattern
         return Next(sort=sort, pattern=pattern)
+
+    def let_sort(self, sort: Sort) -> 'Next':
+        return self.let(sort=sort)
 
     def map_pattern(self: 'Next', f: Callable[[Pattern], Pattern]) -> 'Next':
         return self.let(pattern=f(self.pattern))
@@ -1233,6 +1287,9 @@ class Rewrites(MLRewrite):
         right = right if right is not None else self.right
         return Rewrites(sort=sort, left=left, right=right)
 
+    def let_sort(self, sort: Sort) -> 'Rewrites':
+        return self.let(sort=sort)
+
     def map_pattern(self: 'Rewrites', f: Callable[[Pattern], Pattern]) -> 'Rewrites':
         return self.let(left=f(self.left), right=f(self.right))
 
@@ -1261,7 +1318,7 @@ class Rewrites(MLRewrite):
 
 @final
 @dataclass(frozen=True)
-class DomVal(MLPattern):
+class DomVal(MLPattern, WithSort):
     _tag = 'DV'
     _symbol = '\\dv'
 
@@ -1272,6 +1329,9 @@ class DomVal(MLPattern):
         sort = sort if sort is not None else self.sort
         value = value if value is not None else self.value
         return DomVal(sort=sort, value=value)
+
+    def let_sort(self, sort: Sort) -> 'DomVal':
+        return self.let(sort=sort)
 
     def map_pattern(self: 'DomVal', f: Callable[[Pattern], Pattern]) -> 'DomVal':
         return self
