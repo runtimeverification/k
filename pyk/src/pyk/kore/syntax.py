@@ -1342,6 +1342,9 @@ class WithAttrs(ABC):
     def let_attrs(self: WA, attrs: Iterable[Attr]) -> WA:
         ...
 
+    def map_attrs(self: WA, f: Callable[[Tuple[Attr, ...]], Iterable[Attr]]) -> WA:
+        return self.let_attrs(f(self.attrs))
+
 
 class Sentence(Kore, WithAttrs, ABC):
 
