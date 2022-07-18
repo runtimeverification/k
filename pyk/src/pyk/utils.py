@@ -53,6 +53,15 @@ class FrozenDict(Mapping[K, V]):
         return f'FrozenDict({repr(self._dict)})'
 
 
+def raised(f, *args, **kwargs) -> Optional[BaseException]:
+    try:
+        f(*args, **kwargs)
+    except BaseException as e:
+        return e
+
+    return None
+
+
 def merge_with(f, d1: Mapping, d2: Mapping) -> Dict:
     res = dict(d1)
     for k, v2 in d2.items():

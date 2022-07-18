@@ -1,6 +1,7 @@
 from unittest import TestCase
 
-from pyk.kore.syntax import is_id, is_set_var_id, is_symbol_id
+from pyk.kore.syntax import check_id, check_set_var_id, check_symbol_id
+from pyk.utils import raised
 
 
 class IdentifierTest(TestCase):
@@ -27,7 +28,7 @@ class IdentifierTest(TestCase):
         for i, (s, expected) in enumerate(self.ID_TEST_DATA):
             with self.subTest(i=i):
                 # When
-                actual = is_id(s)
+                actual = not raised(check_id, s)
 
                 # Then
                 self.assertEqual(actual, expected)
@@ -36,7 +37,7 @@ class IdentifierTest(TestCase):
         for i, (s, expected) in enumerate(self.SYMBOL_ID_TEST_DATA):
             with self.subTest(i=i):
                 # When
-                actual = is_symbol_id(s)
+                actual = not raised(check_symbol_id, s)
 
                 # Then
                 self.assertEqual(actual, expected)
@@ -45,7 +46,7 @@ class IdentifierTest(TestCase):
         for i, (s, expected) in enumerate(self.SET_VARIABLE_ID_TEST_DATA):
             with self.subTest(i=i):
                 # When
-                actual = is_set_var_id(s)
+                actual = not raised(check_set_var_id, s)
 
                 # Then
                 self.assertEqual(actual, expected)

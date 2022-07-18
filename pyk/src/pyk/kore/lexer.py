@@ -197,7 +197,7 @@ class KoreLexer(Iterator[KoreToken]):
                     raise StopIteration
 
                 self._done = True
-                return self._eof()
+                return self._eof_token()
 
             if self._la.isspace():
                 self._consume()
@@ -208,24 +208,41 @@ class KoreLexer(Iterator[KoreToken]):
                 continue
 
             if self._la in self._SIMPLE_CHARS:
-                return self._simple_char()
+                return self._simple_char_token()
 
             if self._la == ':':
-                return self._colon_or_walrus()
+                return self._colon_or_walrus_token()
 
             if self._la == '"':
-                return self._string()
+                return self._string_token()
 
             if self._la == '\\':
-                return self._symbol_id()
+                return self._symbol_id_token()
 
             if self._la == '@':
-                return self._set_var_id()
+                return self._set_var_id_token()
 
             if self._la in self._ID_FIRST_CHARS:
-                return self._id_or_keyword()
+                return self._id_or_keyword_token()
 
             raise ValueError(f'Unexpected character: {self._la}')
+
+    def eof(self) -> None:
+        self._eof_token()
+
+    def id(self) -> str:
+        name = self._id_text()
+        if name in self._KEYWORDS:
+            raise ValueError(f'Expected identifier, found keyword: {name}')
+        return name
+
+    def symbol_id(self) -> str:
+        if self._la == '\\':
+            return self._match('\\') + self._id_text()
+        return self.id()
+
+    def set_var_id(self) -> str:
+        return self._match('@') + self._id_text()
 
     def _consume(self) -> str:
         if not self._la:
@@ -274,14 +291,16 @@ class KoreLexer(Iterator[KoreToken]):
                 self._consume()
                 break
 
-    def _eof(self) -> KoreToken:
+    def _eof_token(self) -> KoreToken:
+        if self._la is not None:
+            raise ValueError(f'Expected <EOF>, found: {self._la}')
         return KoreToken('', KoreToken.Type.EOF)
 
-    def _simple_char(self) -> KoreToken:
+    def _simple_char_token(self) -> KoreToken:
         char = self._match(*self._SIMPLE_CHARS)
         return KoreToken(char, self._SIMPLE_CHARS[char])
 
-    def _colon_or_walrus(self) -> KoreToken:
+    def _colon_or_walrus_token(self) -> KoreToken:
         self._match(':')
 
         if self._la == '=':
@@ -290,7 +309,7 @@ class KoreLexer(Iterator[KoreToken]):
 
         return KoreToken(':', KoreToken.Type.COLON)
 
-    def _string(self) -> KoreToken:
+    def _string_token(self) -> KoreToken:
         buf: List[str] = []
         buf += self._match('"')
         while self._la != '"':
@@ -301,17 +320,17 @@ class KoreLexer(Iterator[KoreToken]):
 
         return KoreToken(''.join(buf), KoreToken.Type.STRING)
 
-    def _symbol_id(self) -> KoreToken:
+    def _symbol_id_token(self) -> KoreToken:
         self._match('\\')
         name = self._id_text()
         return KoreToken(f'\\{name}', KoreToken.Type.SYMBOL_ID)
 
-    def _set_var_id(self) -> KoreToken:
+    def _set_var_id_token(self) -> KoreToken:
         self._match('@')
         name = self._id_text()
         return KoreToken(f'@{name}', KoreToken.Type.SET_VAR_ID)
 
-    def _id_or_keyword(self) -> KoreToken:
+    def _id_or_keyword_token(self) -> KoreToken:
         name = self._id_text()
 
         if name in self._KEYWORDS:
