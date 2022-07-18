@@ -90,7 +90,7 @@ def _parend(elems: Iterable[str]) -> str:
     return _bracketed(elems, '(', ')')
 
 
-# TODO @overload
+# TODO Constructor @overloads
 
 
 T = TypeVar('T', bound='Kore')
@@ -141,11 +141,17 @@ class Kore(ABC):
 
     @classmethod
     def from_dict(cls: Type[T], dct: Mapping[str, Any]) -> T:
-        tag = cls._get_tag(dct)
-        if tag not in cls._TAGS:
-            raise ValueError(f"Expected Kore tag, found: {tag}")
-        cls_id = cls._TAGS[tag]
-        return globals()[cls_id].from_dict(dct)
+        tag = Kore._get_tag(dct)
+
+        if tag not in Kore._TAGS:
+            raise ValueError(f'Invalid Kore tag: {tag}')
+
+        actual_cls = globals()[Kore._TAGS[tag]]
+
+        if not issubclass(actual_cls, cls):
+            raise ValueError(f'Expected {cls.__name__} tag, found: {tag}')
+
+        return actual_cls.from_dict(dct)
 
     @classmethod
     def from_json(cls: Type[T], s: str) -> T:
@@ -179,17 +185,7 @@ class Kore(ABC):
 
 
 class Sort(Kore, ABC):
-    _SORT_TAGS: Final = {'SortVar', 'SortApp'}
-
     name: str
-
-    @classmethod
-    def from_dict(cls: Type['Sort'], dct: Mapping[str, Any]) -> 'Sort':
-        tag = cls._get_tag(dct)
-        if tag not in cls._SORT_TAGS:
-            raise ValueError(f'Expected Sort tag, found: {tag}')
-        cls_id = cls._TAGS[tag]
-        return globals()[cls_id].from_dict(dct)
 
 
 class WithSort(ABC):
@@ -265,39 +261,15 @@ class SortCons(Sort):
 
 
 class Pattern(Kore, ABC):
-    _PATTERN_TAGS: Final = {
-        'EVar', 'SVar', 'String', 'App', 'Top', 'Bottom', 'Not', 'And', 'Or',
-        'Implies', 'Iff', 'Exists', 'Forall', 'Mu', 'Nu', 'Ceil', 'Floor',
-        'Equals', 'In', 'Next', 'Rewrites', 'DV',
-    }
 
     @abstractmethod
     def map_pattern(self: P, f: Callable[['Pattern'], 'Pattern']) -> P:
         ...
 
-    @classmethod
-    def from_dict(cls: Type['Pattern'], dct: Mapping[str, Any]) -> 'Pattern':
-        # TODO extract logic
-        tag = cls._get_tag(dct)
-        if tag not in cls._PATTERN_TAGS:
-            raise ValueError(f'Expected Pattern tag, found: {tag}')
-        cls_id = cls._TAGS[tag]
-        return globals()[cls_id].from_dict(dct)
-
 
 class VarPattern(Pattern, WithSort, ABC):
-    _VAR_PATTERN_TAGS: Final = {'EVar', 'SVar'}
-
     name: str
     sort: Sort
-
-    @classmethod
-    def from_dict(cls: Type['VarPattern'], dct: Mapping[str, Any]) -> 'VarPattern':
-        tag = cls._get_tag(dct)
-        if tag not in cls._PATTERN_TAGS:
-            raise ValueError(f'Expected VarPattern tag, found: {tag}')
-        cls_id = cls._TAGS[tag]
-        return globals()[cls_id].from_dict(dct)
 
     @property
     def dict(self) -> Dict[str, Any]:
@@ -332,7 +304,6 @@ class ElemVar(VarPattern):
     def map_pattern(self: 'ElemVar', f: Callable[[Pattern], Pattern]) -> 'ElemVar':
         return self
 
-    # TODO Can be pulled up? (Similarly for other classes.)
     @classmethod
     def from_dict(cls: Type['ElemVar'], dct: Mapping[str, Any]) -> 'ElemVar':
         cls._check_tag(dct)
@@ -451,11 +422,6 @@ class Apply(Pattern):
 
 
 class MLPattern(Pattern, ABC):
-    _ML_PATTERN_TAGS: Final = {
-        'Top', 'Bottom', 'Not', 'And', 'Or', 'Implies', 'Iff', 'Exists',
-        'Forall', 'Mu', 'Nu', 'Ceil', 'Floor', 'Equals', 'In', 'Next',
-        'Rewrites', 'DV',
-    }
 
     @classmethod
     @property
@@ -463,30 +429,13 @@ class MLPattern(Pattern, ABC):
     def _symbol(cls):
         ...
 
-    @classmethod
-    def from_dict(cls: Type['MLPattern'], dct: Mapping[str, Any]) -> 'MLPattern':
-        tag = cls._get_tag(dct)
-        if tag not in cls._ML_PATTERN_TAGS:
-            raise ValueError(f'Expected MLPattern tag, found: {tag}')
-        cls_id = cls._TAGS[tag]
-        return globals()[cls_id].from_dict(dct)
-
 
 class MLConn(MLPattern, WithSort, ABC):
-    _ML_CONN_TAGS: Final = {'Top', 'Bottom', 'Not', 'And', 'Or', 'Implies', 'Iff'}
 
     @property
     @abstractmethod
     def patterns(self) -> Tuple[Pattern, ...]:
         ...
-
-    @classmethod
-    def from_dict(cls: Type['MLConn'], dct: Mapping[str, Any]) -> 'MLConn':
-        tag = cls._get_tag(dct)
-        if tag not in cls._ML_CONN_TAGS:
-            raise ValueError(f'Expected MLConn tag, found: {tag}')
-        cls_id = cls._TAGS[tag]
-        return globals()[cls_id].from_dict(dct)
 
     @property
     def text(self) -> str:
@@ -494,15 +443,6 @@ class MLConn(MLPattern, WithSort, ABC):
 
 
 class NullaryConn(MLConn, ABC):
-    _NULLARY_CONN_TAGS: Final = {'Top', 'Bottom'}
-
-    @classmethod
-    def from_dict(cls: Type['NullaryConn'], dct: Mapping[str, Any]) -> 'NullaryConn':
-        tag = cls._get_tag(dct)
-        if tag not in cls._NULLARY_CONN_TAGS:
-            raise ValueError(f'Expected NullaryConn tag, found: {tag}')
-        cls_id = cls._TAGS[tag]
-        return globals()[cls_id].from_dict(dct)
 
     @property
     def dict(self) -> Dict[str, Any]:
@@ -521,7 +461,6 @@ class Top(NullaryConn):
 
     sort: Sort
 
-    # TODO pull up to superclass
     def let(self, *, sort: Optional[Sort] = None) -> 'Top':
         sort = sort if sort is not None else self.sort
         return Top(sort=sort)
@@ -529,7 +468,6 @@ class Top(NullaryConn):
     def let_sort(self: 'Top', sort: Sort) -> 'Top':
         return self.let(sort=sort)
 
-    # TODO pull up to superclass
     def map_pattern(self: 'Top', f: Callable[[Pattern], Pattern]) -> 'Top':
         return self
 
@@ -564,17 +502,7 @@ class Bottom(NullaryConn):
 
 
 class UnaryConn(MLConn, ABC):
-    _UNARY_CONN_TAGS: Final = {'Not'}
-
     pattern: Pattern
-
-    @classmethod
-    def from_dict(cls: Type['UnaryConn'], dct: Mapping[str, Any]) -> 'UnaryConn':
-        tag = cls._get_tag(dct)
-        if tag not in cls._UNARY_CONN_TAGS:
-            raise ValueError(f'Expected UnaryConn tag, found: {tag}')
-        cls_id = cls._TAGS[tag]
-        return globals()[cls_id].from_dict(dct)
 
     @property
     def dict(self) -> Dict[str, Any]:
@@ -612,22 +540,12 @@ class Not(UnaryConn):
 
 
 class BinaryConn(MLConn, ABC):
-    _BINARY_CONN_TAGS: Final = {'And', 'Or', 'Implies', 'Iff'}
-
     left: Pattern
     right: Pattern
 
     def __iter__(self) -> Iterator[Pattern]:
         yield self.left
         yield self.right
-
-    @classmethod
-    def from_dict(cls: Type['BinaryConn'], dct: Mapping[str, Any]) -> 'BinaryConn':
-        tag = cls._get_tag(dct)
-        if tag not in cls._BINARY_CONN_TAGS:
-            raise ValueError(f'Expected BinaryConn tag, found: {tag}')
-        cls_id = cls._TAGS[tag]
-        return globals()[cls_id].from_dict(dct)
 
     @property
     def dict(self) -> Dict[str, Any]:
@@ -673,7 +591,6 @@ class And(BinaryConn):
 
     @classmethod
     def from_dict(cls: Type['And'], dct: Mapping[str, Any]) -> 'And':
-        # TODO Consider implementing in BinaryConn
         cls._check_tag(dct)
         return And(
             sort=Sort.from_dict(dct['sort']),
@@ -797,19 +714,9 @@ class Iff(BinaryConn):
 
 
 class MLQuant(MLPattern, WithSort, ABC):
-    _ML_QUANT_TAGS: Final = {'Exists', 'Forall'}
-
     sort: Sort
     var: ElemVar  # TODO Should this be inlined to var_name, var_sort?
     pattern: Pattern
-
-    @classmethod
-    def from_dict(cls: Type['MLQuant'], dct: Mapping[str, Any]) -> 'MLQuant':
-        tag = cls._get_tag(dct)
-        if tag not in cls._ML_QUANT_TAGS:
-            raise ValueError(f'Expected MLQuant tag, found: {tag}')
-        cls_id = cls._TAGS[tag]
-        return globals()[cls_id].from_dict(dct)
 
     @property
     def dict(self) -> Dict[str, Any]:
@@ -903,18 +810,8 @@ class Forall(MLQuant):
 
 
 class MLFixpoint(MLPattern, ABC):
-    _ML_FIXPOINT_TAGS: Final = {'Mu', 'Nu'}
-
     var: SetVar  # TODO Should this be inlined to var_name, var_sort?
     pattern: Pattern
-
-    @classmethod
-    def from_dict(cls: Type['MLFixpoint'], dct: Mapping[str, Any]) -> 'MLFixpoint':
-        tag = cls._get_tag(dct)
-        if tag not in cls._ML_FIXPOINT_TAGS:
-            raise ValueError(f'Expected MLFixpoint tag, found: {tag}')
-        cls_id = cls._TAGS[tag]
-        return globals()[cls_id].from_dict(dct)
 
     @property
     def dict(self) -> Dict[str, Any]:
@@ -983,31 +880,11 @@ class Nu(MLFixpoint):
 
 
 class MLPred(MLPattern, WithSort, ABC):
-    _ML_PRED_TAGS: Final = {'Ceil', 'Floor', 'Equals', 'In'}
-
     op_sort: Sort
-
-    @classmethod
-    def from_dict(cls: Type['MLPred'], dct: Mapping[str, Any]) -> 'MLPred':
-        tag = cls._get_tag(dct)
-        if tag not in cls._ML_PRED_TAGS:
-            raise ValueError(f'Expected MLPred tag, found: {tag}')
-        cls_id = cls._TAGS[tag]
-        return globals()[cls_id].from_dict(dct)
 
 
 class RoundPred(MLPred, ABC):
-    _ROUND_PRED_TAGS: Final = {'Ceil', 'Floor'}
-
     pattern: Pattern
-
-    @classmethod
-    def from_dict(cls: Type['RoundPred'], dct: Mapping[str, Any]) -> 'RoundPred':
-        tag = cls._get_tag(dct)
-        if tag not in cls._ROUND_PRED_TAGS:
-            raise ValueError(f'Expected RoundPred tag, found: {tag}')
-        cls_id = cls._TAGS[tag]
-        return globals()[cls_id].from_dict(dct)
 
     @property
     def dict(self) -> Dict[str, Any]:
@@ -1100,18 +977,8 @@ class Floor(RoundPred):
 
 
 class BinaryPred(MLPred, ABC):
-    _BINARY_PRED_TAGS: Final = {'Equals', 'In'}
-
     left: Pattern
     right: Pattern
-
-    @classmethod
-    def from_dict(cls: Type['BinaryPred'], dct: Mapping[str, Any]) -> 'BinaryPred':
-        tag = cls._get_tag(dct)
-        if tag not in cls._BINARY_PRED_TAGS:
-            raise ValueError(f'Expected BinaryPred tag, found: {tag}')
-        cls_id = cls._TAGS[tag]
-        return globals()[cls_id].from_dict(dct)
 
     @property
     def dict(self) -> Dict[str, Any]:
@@ -1217,15 +1084,7 @@ class In(BinaryPred):
 
 
 class MLRewrite(MLPattern, WithSort, ABC):
-    _ML_REWRITE_TAGS: Final = {'Next', 'Rewrites'}
-
-    @classmethod
-    def from_dict(cls: Type['MLRewrite'], dct: Mapping[str, Any]) -> 'MLRewrite':
-        tag = cls._get_tag(dct)
-        if tag not in cls._ML_REWRITE_TAGS:
-            raise ValueError(f'Expected MLRewrite tag, found: {tag}')
-        cls_id = cls._TAGS[tag]
-        return globals()[cls_id].from_dict(dct)
+    ...
 
 
 @final
@@ -1676,7 +1535,7 @@ class AliasDecl(Sentence):
 
 
 class AxiomLike(Sentence, ABC):
-    _label: ClassVar[str]  # TODO pull up to Sentence
+    _label: ClassVar[str]
 
     vars: Tuple[SortVar, ...]
     pattern: Pattern
