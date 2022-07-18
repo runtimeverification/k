@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import (
     Any,
+    Callable,
     ClassVar,
     Dict,
     Final,
@@ -93,6 +94,7 @@ def _parend(elems: Iterable[str]) -> str:
 
 
 T = TypeVar('T', bound='Kore')
+P = TypeVar('P', bound='Pattern')
 WA = TypeVar('WA', bound='WithAttrs')
 
 
@@ -257,6 +259,10 @@ class Pattern(Kore, ABC):
         'Equals', 'In', 'Next', 'Rewrites', 'DV',
     }
 
+    @abstractmethod
+    def map_pattern(self: P, f: Callable[['Pattern'], 'Pattern']) -> P:
+        ...
+
     @classmethod
     def from_dict(cls: Type['Pattern'], dct: Mapping[str, Any]) -> 'Pattern':
         # TODO extract logic
@@ -308,6 +314,9 @@ class ElemVar(VarPattern):
         sort = sort if sort is not None else self.sort
         return ElemVar(name=name, sort=sort)
 
+    def map_pattern(self: 'ElemVar', f: Callable[[Pattern], Pattern]) -> 'ElemVar':
+        return self
+
     # TODO Can be pulled up? (Similarly for other classes.)
     @classmethod
     def from_dict(cls: Type['ElemVar'], dct: Mapping[str, Any]) -> 'ElemVar':
@@ -333,6 +342,9 @@ class SetVar(VarPattern):
         sort = sort if sort is not None else self.sort
         return SetVar(name=name, sort=sort)
 
+    def map_pattern(self: 'SetVar', f: Callable[[Pattern], Pattern]) -> 'SetVar':
+        return self
+
     @classmethod
     def from_dict(cls: Type['SetVar'], dct: Mapping[str, Any]) -> 'SetVar':
         cls._check_tag(dct)
@@ -349,6 +361,9 @@ class StrLit(Pattern):
     def let(self, *, value: Optional[str] = None) -> 'StrLit':
         value = value if value is not None else self.value
         return StrLit(value=value)
+
+    def map_pattern(self: 'StrLit', f: Callable[[Pattern], Pattern]) -> 'StrLit':
+        return self
 
     @classmethod
     def from_dict(cls: Type['StrLit'], dct: Mapping[str, Any]) -> 'StrLit':
@@ -390,6 +405,9 @@ class Apply(Pattern):
         sorts = sorts if sorts is not None else self.sorts
         patterns = patterns if patterns is not None else self.patterns
         return Apply(symbol=symbol, sorts=sorts, patterns=patterns)
+
+    def map_pattern(self: 'Apply', f: Callable[[Pattern], Pattern]) -> 'Apply':
+        return self.let(patterns=(f(pattern) for pattern in self.patterns))
 
     @classmethod
     def from_dict(cls: Type['Apply'], dct: Mapping[str, Any]) -> 'Apply':
@@ -493,6 +511,10 @@ class Top(NullaryConn):
         sort = sort if sort is not None else self.sort
         return Top(sort=sort)
 
+    # TODO pull up to superclass
+    def map_pattern(self: 'Top', f: Callable[[Pattern], Pattern]) -> 'Top':
+        return self
+
     @classmethod
     def from_dict(cls: Type['Top'], dct: Mapping[str, Any]) -> 'Top':
         cls._check_tag(dct)
@@ -510,6 +532,9 @@ class Bottom(NullaryConn):
     def let(self, *, sort: Optional[Sort] = None) -> 'Bottom':
         sort = sort if sort is not None else self.sort
         return Bottom(sort=sort)
+
+    def map_pattern(self: 'Bottom', f: Callable[[Pattern], Pattern]) -> 'Bottom':
+        return self
 
     @classmethod
     def from_dict(cls: Type['Bottom'], dct: Mapping[str, Any]) -> 'Bottom':
@@ -552,6 +577,9 @@ class Not(UnaryConn):
         sort = sort if sort is not None else self.sort
         pattern = pattern if pattern is not None else self.pattern
         return Not(sort=sort, pattern=pattern)
+
+    def map_pattern(self: 'Not', f: Callable[[Pattern], Pattern]) -> 'Not':
+        return self.let(pattern=f(self.pattern))
 
     @classmethod
     def from_dict(cls: Type['Not'], dct: Mapping[str, Any]) -> 'Not':
@@ -613,6 +641,9 @@ class And(BinaryConn):
         right = right if right is not None else self.right
         return And(sort=sort, left=left, right=right)
 
+    def map_pattern(self: 'And', f: Callable[[Pattern], Pattern]) -> 'And':
+        return self.let(left=f(self.left), right=f(self.right))
+
     @classmethod
     def from_dict(cls: Type['And'], dct: Mapping[str, Any]) -> 'And':
         # TODO Consider implementing in BinaryConn
@@ -646,6 +677,9 @@ class Or(BinaryConn):
         right = right if right is not None else self.right
         return Or(sort=sort, left=left, right=right)
 
+    def map_pattern(self: 'Or', f: Callable[[Pattern], Pattern]) -> 'Or':
+        return self.let(left=f(self.left), right=f(self.right))
+
     @classmethod
     def from_dict(cls: Type['Or'], dct: Mapping[str, Any]) -> 'Or':
         cls._check_tag(dct)
@@ -678,6 +712,9 @@ class Implies(BinaryConn):
         right = right if right is not None else self.right
         return Implies(sort=sort, left=left, right=right)
 
+    def map_pattern(self: 'Implies', f: Callable[[Pattern], Pattern]) -> 'Implies':
+        return self.let(left=f(self.left), right=f(self.right))
+
     @classmethod
     def from_dict(cls: Type['Implies'], dct: Mapping[str, Any]) -> 'Implies':
         cls._check_tag(dct)
@@ -709,6 +746,9 @@ class Iff(BinaryConn):
         left = left if left is not None else self.left
         right = right if right is not None else self.right
         return Iff(sort=sort, left=left, right=right)
+
+    def map_pattern(self: 'Iff', f: Callable[[Pattern], Pattern]) -> 'Iff':
+        return self.let(left=f(self.left), right=f(self.right))
 
     @classmethod
     def from_dict(cls: Type['Iff'], dct: Mapping[str, Any]) -> 'Iff':
@@ -772,6 +812,9 @@ class Exists(MLQuant):
         pattern = pattern if pattern is not None else self.pattern
         return Exists(sort=sort, var=var, pattern=pattern)
 
+    def map_pattern(self: 'Exists', f: Callable[[Pattern], Pattern]) -> 'Exists':
+        return self.let(pattern=f(self.pattern))
+
     @classmethod
     def from_dict(cls: Type['Exists'], dct: Mapping[str, Any]) -> 'Exists':
         cls._check_tag(dct)
@@ -803,6 +846,9 @@ class Forall(MLQuant):
         var = var if var is not None else self.var
         pattern = pattern if pattern is not None else self.pattern
         return Forall(sort=sort, var=var, pattern=pattern)
+
+    def map_pattern(self: 'Forall', f: Callable[[Pattern], Pattern]) -> 'Forall':
+        return self.let(pattern=f(self.pattern))
 
     @classmethod
     def from_dict(cls: Type['Forall'], dct: Mapping[str, Any]) -> 'Forall':
@@ -856,6 +902,9 @@ class Mu(MLFixpoint):
         pattern = pattern if pattern is not None else self.pattern
         return Mu(var=var, pattern=pattern)
 
+    def map_pattern(self: 'Mu', f: Callable[[Pattern], Pattern]) -> 'Mu':
+        return self.let(pattern=f(self.pattern))
+
     @classmethod
     def from_dict(cls: Type['Mu'], dct: Mapping[str, Any]) -> 'Mu':
         cls._check_tag(dct)
@@ -878,6 +927,9 @@ class Nu(MLFixpoint):
         var = var if var is not None else self.var
         pattern = pattern if pattern is not None else self.pattern
         return Nu(var=var, pattern=pattern)
+
+    def map_pattern(self: 'Nu', f: Callable[[Pattern], Pattern]) -> 'Nu':
+        return self.let(pattern=f(self.pattern))
 
     @classmethod
     def from_dict(cls: Type['Nu'], dct: Mapping[str, Any]) -> 'Nu':
@@ -952,6 +1004,9 @@ class Ceil(RoundPred):
         pattern = pattern if pattern is not None else self.pattern
         return Ceil(op_sort=op_sort, sort=sort, pattern=pattern)
 
+    def map_pattern(self: 'Ceil', f: Callable[[Pattern], Pattern]) -> 'Ceil':
+        return self.let(pattern=f(self.pattern))
+
     @classmethod
     def from_dict(cls: Type['Ceil'], dct: Mapping[str, Any]) -> 'Ceil':
         cls._check_tag(dct)
@@ -983,6 +1038,9 @@ class Floor(RoundPred):
         sort = sort if sort is not None else self.sort
         pattern = pattern if pattern is not None else self.pattern
         return Floor(op_sort=op_sort, sort=sort, pattern=pattern)
+
+    def map_pattern(self: 'Floor', f: Callable[[Pattern], Pattern]) -> 'Floor':
+        return self.let(pattern=f(self.pattern))
 
     @classmethod
     def from_dict(cls: Type['Floor'], dct: Mapping[str, Any]) -> 'Floor':
@@ -1052,6 +1110,9 @@ class Equals(BinaryPred):
         right = right if right is not None else self.right
         return Equals(op_sort=op_sort, sort=sort, left=left, right=right)
 
+    def map_pattern(self: 'Equals', f: Callable[[Pattern], Pattern]) -> 'Equals':
+        return self.let(left=f(self.left), right=f(self.right))
+
     @classmethod
     def from_dict(cls: Type['Equals'], dct: Mapping[str, Any]) -> 'Equals':
         cls._check_tag(dct)
@@ -1087,6 +1148,9 @@ class In(BinaryPred):
         left = left if left is not None else self.left
         right = right if right is not None else self.right
         return In(op_sort=op_sort, sort=sort, left=left, right=right)
+
+    def map_pattern(self: 'In', f: Callable[[Pattern], Pattern]) -> 'In':
+        return self.let(left=f(self.left), right=f(self.right))
 
     @classmethod
     def from_dict(cls: Type['In'], dct: Mapping[str, Any]) -> 'In':
@@ -1127,6 +1191,9 @@ class Next(MLRewrite):
         pattern = pattern if pattern is not None else self.pattern
         return Next(sort=sort, pattern=pattern)
 
+    def map_pattern(self: 'Next', f: Callable[[Pattern], Pattern]) -> 'Next':
+        return self.let(pattern=f(self.pattern))
+
     @classmethod
     def from_dict(cls: Type['Next'], dct: Mapping[str, Any]) -> 'Next':
         cls._check_tag(dct)
@@ -1166,6 +1233,9 @@ class Rewrites(MLRewrite):
         right = right if right is not None else self.right
         return Rewrites(sort=sort, left=left, right=right)
 
+    def map_pattern(self: 'Rewrites', f: Callable[[Pattern], Pattern]) -> 'Rewrites':
+        return self.let(left=f(self.left), right=f(self.right))
+
     @classmethod
     def from_dict(cls: Type['Rewrites'], dct: Mapping[str, Any]) -> 'Rewrites':
         cls._check_tag(dct)
@@ -1202,6 +1272,9 @@ class DomVal(MLPattern):
         sort = sort if sort is not None else self.sort
         value = value if value is not None else self.value
         return DomVal(sort=sort, value=value)
+
+    def map_pattern(self: 'DomVal', f: Callable[[Pattern], Pattern]) -> 'DomVal':
+        return self
 
     @classmethod
     def from_dict(cls: Type['DomVal'], dct: Mapping[str, Any]) -> 'DomVal':
