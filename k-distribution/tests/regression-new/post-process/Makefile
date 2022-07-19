@@ -1,8 +1,5 @@
-MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-MAKEFILE_DIR  := $(dir $(MAKEFILE_PATH))
-
 VENV_DIR := venv
-ACTIVATE := . $(MAKEFILE_DIR)$(VENV_DIR)/bin/activate
+ACTIVATE := . $(VENV_DIR)/bin/activate
 VENV     := $(VENV_DIR)/pyvenv.cfg
 
 KOMPILED_DIR := kompiled
@@ -19,7 +16,7 @@ $(KOMPILED_DIR)/timestamp: assign.k transform.py $(VENV)
 	   --backend haskell            \
 	   --output-definition kompiled \
 	   --emit-json                  \
-	   --post-process 'python3 $(MAKEFILE_DIR)transform.py'
+	   --post-process 'python3 transform.py'
 
 
 # virtualenv
