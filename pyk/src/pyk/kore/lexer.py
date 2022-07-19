@@ -32,6 +32,18 @@ class KoreStringLexer(Iterator[Tuple[str, 'KoreStringLexer.TokenType']]):
 
         return self._printable_ascii_char()
 
+    def _match(self, c: str) -> None:
+        actual = '<EOF>' if self._la is None else self._la
+
+        if self._la != c:
+            raise ValueError(f'Expected {c}, found: {actual}')
+
+        self._consume()
+
+    def _consume(self) -> None:
+        assert self._la is not None
+        self._la = next(self._iter)
+
     def _escape_sequence(self) -> Tuple[str, TokenType]:
         assert self._la is not None
         assert self._la == '\\'
@@ -53,7 +65,7 @@ class KoreStringLexer(Iterator[Tuple[str, 'KoreStringLexer.TokenType']]):
             char = self._la
             self._consume()
             nr_digits, validate, token_type = hexa_params[char]
-            hexa = self._match_hexa(nr_digits)
+            hexa = self._hexa(nr_digits)
             validate(hexa)
             token = f'\\{char}{hexa}'
             return token, token_type
@@ -84,19 +96,7 @@ class KoreStringLexer(Iterator[Tuple[str, 'KoreStringLexer.TokenType']]):
         self._consume()
         return token, self.TokenType.ASCII
 
-    def _match(self, c: str) -> None:
-        actual = '<EOF>' if self._la is None else self._la
-
-        if self._la != c:
-            raise ValueError(f'Expected {c}, found: {actual}')
-
-        self._consume()
-
-    def _consume(self) -> None:
-        assert self._la is not None
-        self._la = next(self._iter)
-
-    def _match_hexa(self, length: int) -> str:
+    def _hexa(self, length: int) -> str:
         if length < 0:
             raise ValueError(f'Expected nonnegative length, got: {length}')
 
