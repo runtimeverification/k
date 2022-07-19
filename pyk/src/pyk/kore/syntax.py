@@ -19,7 +19,7 @@ from typing import (
     final,
 )
 
-from .lexer import KoreLexer, StrLitLexer
+from .lexer import KoreLexer, KoreStringLexer
 
 
 def check_id(s: str) -> None:
@@ -63,7 +63,7 @@ def encode_kore_str(s: str) -> str:
 
 def decode_kore_str(s: str) -> str:
     res: List[str] = []
-    for token, _ in StrLitLexer(s):
+    for token, _ in KoreStringLexer(s):
         if token == '\\f':
             res += '\f'
         elif token == '\\"':
@@ -107,11 +107,11 @@ class Kore(ABC):
     _TAGS: Final[Mapping[str, str]] = {
         'EVar': 'ElemVar',
         'SVar': 'SetVar',
-        'String': 'StrLit',
         'DV': 'DomVal',
         **{k: k for k in (
             'SortVar',
             'SortApp',
+            'String',
             'App',
             'Top',
             'Bottom',
@@ -342,22 +342,22 @@ class SetVar(VarPattern):
 
 @final
 @dataclass(frozen=True)
-class StrLit(Pattern):
+class String(Pattern):
     _tag = 'String'
 
     value: str
 
-    def let(self, *, value: Optional[str] = None) -> 'StrLit':
+    def let(self, *, value: Optional[str] = None) -> 'String':
         value = value if value is not None else self.value
-        return StrLit(value=value)
+        return String(value=value)
 
-    def map_pattern(self: 'StrLit', f: Callable[[Pattern], Pattern]) -> 'StrLit':
+    def map_pattern(self: 'String', f: Callable[[Pattern], Pattern]) -> 'String':
         return self
 
     @classmethod
-    def from_dict(cls: Type['StrLit'], dct: Mapping[str, Any]) -> 'StrLit':
+    def from_dict(cls: Type['String'], dct: Mapping[str, Any]) -> 'String':
         cls._check_tag(dct)
-        return StrLit(value=dct['value'])
+        return String(value=dct['value'])
 
     @property
     def dict(self) -> Dict[str, Any]:
@@ -1182,9 +1182,9 @@ class DomVal(MLPattern, WithSort):
     _symbol = '\\dv'
 
     sort: Sort
-    value: StrLit  # TODO Should this be changed to str?
+    value: String  # TODO Should this be changed to str?
 
-    def let(self, *, sort: Optional[Sort] = None, value: Optional[StrLit] = None) -> 'DomVal':
+    def let(self, *, sort: Optional[Sort] = None, value: Optional[String] = None) -> 'DomVal':
         sort = sort if sort is not None else self.sort
         value = value if value is not None else self.value
         return DomVal(sort=sort, value=value)
@@ -1200,7 +1200,7 @@ class DomVal(MLPattern, WithSort):
         cls._check_tag(dct)
         return DomVal(
             sort=Sort.from_dict(dct['sort']),
-            value=StrLit(dct['value']),
+            value=String(dct['value']),
         )
 
     @property
@@ -1221,14 +1221,14 @@ class MLSyntaxSugar(MLPattern, ABC):
 @dataclass(frozen=True)
 class Attr(Kore):
     symbol: str
-    params: Tuple[Union[StrLit, 'Attr'], ...]
+    params: Tuple[Union[String, 'Attr'], ...]
 
-    def __init__(self, symbol: str, params: Iterable[Union[StrLit, 'Attr']] = ()):
+    def __init__(self, symbol: str, params: Iterable[Union[String, 'Attr']] = ()):
         check_symbol_id(symbol)
         object.__setattr__(self, 'symbol', symbol)
         object.__setattr__(self, 'params', tuple(params))
 
-    def let(self, *, symbol: Optional[str] = None, params: Optional[Iterable[Union[StrLit, 'Attr']]] = None) -> 'Attr':
+    def let(self, *, symbol: Optional[str] = None, params: Optional[Iterable[Union[String, 'Attr']]] = None) -> 'Attr':
         symbol = symbol if symbol is not None else self.symbol
         params = params if params is not None else self.params
         return Attr(symbol=symbol, params=params)

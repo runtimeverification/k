@@ -53,7 +53,7 @@ from .syntax import (
     SortApp,
     SortDecl,
     SortVar,
-    StrLit,
+    String,
     Symbol,
     SymbolDecl,
     Top,
@@ -228,7 +228,7 @@ class KoreParser:
 
     def pattern(self) -> Pattern:
         if self._la().type == KoreToken.Type.STRING:
-            return self.str_lit()
+            return self.string()
 
         if self._la().type == KoreToken.Type.SYMBOL_ID and self._la().text in self._ml_symbols:
             return self.ml_pattern()
@@ -241,9 +241,9 @@ class KoreParser:
     def _pattern_list(self) -> List[Pattern]:
         return self._delimited_list_of(self.pattern, KoreToken.Type.LPAREN, KoreToken.Type.RPAREN)
 
-    def str_lit(self) -> StrLit:
+    def string(self) -> String:
         value = self._match(KoreToken.Type.STRING)
-        return StrLit(decode_kore_str(value[1:-1]))
+        return String(decode_kore_str(value[1:-1]))
 
     def app(self) -> App:
         symbol = self._custom_symbol_id()
@@ -425,7 +425,7 @@ class KoreParser:
         sort = self.sort()
         self._match(KoreToken.Type.RBRACE)
         self._match(KoreToken.Type.LPAREN)
-        value = self.str_lit()
+        value = self.string()
         self._match(KoreToken.Type.RPAREN)
         return DomVal(sort, value)
 
@@ -436,13 +436,13 @@ class KoreParser:
         params = self._attr_param_list()
         return Attr(symbol, params)
 
-    def _attr_param(self) -> Union[StrLit, Attr]:
+    def _attr_param(self) -> Union[String, Attr]:
         if self._la().type == KoreToken.Type.STRING:
-            return self.str_lit()
+            return self.string()
 
         return self.attr()
 
-    def _attr_param_list(self) -> List[Union[StrLit, Attr]]:
+    def _attr_param_list(self) -> List[Union[String, Attr]]:
         return self._delimited_list_of(self._attr_param, KoreToken.Type.LPAREN, KoreToken.Type.RPAREN)
 
     def _attr_list(self) -> List[Attr]:

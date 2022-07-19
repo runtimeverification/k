@@ -4,7 +4,7 @@ from itertools import chain
 from typing import Final, Iterator, List, Optional, Tuple, final
 
 
-class StrLitLexer(Iterator[Tuple[str, 'StrLitLexer.TokenType']]):
+class KoreStringLexer(Iterator[Tuple[str, 'KoreStringLexer.TokenType']]):
 
     class TokenType(IntEnum):
         ASCII = 1
@@ -67,7 +67,7 @@ class StrLitLexer(Iterator[Tuple[str, 'StrLitLexer.TokenType']]):
 
     @staticmethod
     def _validate_utf_32(hexa: str) -> None:
-        StrLitLexer._validate_utf_16(hexa)
+        KoreStringLexer._validate_utf_16(hexa)
 
         if int(hexa, 16) > 0x10FFFF:
             raise ValueError(f'Illegal UTF-32 code point: {hexa}')
