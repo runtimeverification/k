@@ -14,8 +14,12 @@ KOMPILED_DIR := kompiled
 # kompile
 
 $(KOMPILED_DIR)/timestamp: assign.k transform.py $(VENV)
-	   $(ACTIVATE) \
-	&& kompile assign.k --backend haskell --output-definition kompiled --post-process 'python3 $(MAKEFILE_DIR)transform.py'
+	   $(ACTIVATE)                  \
+	&& kompile assign.k             \
+	   --backend haskell            \
+	   --output-definition kompiled \
+	   --emit-json                  \
+	   --post-process 'python3 $(MAKEFILE_DIR)transform.py'
 
 
 # virtualenv

@@ -2,7 +2,8 @@ import json
 from argparse import ArgumentParser
 from sys import stdin
 
-from pyk.kast import KDefinition, KRule, KSentence
+from pyk.kast import KDefinition, KInner, KRule, KSentence, KVariable, top_down
+from pyk.kastManip import if_ktype
 
 
 def main():
@@ -45,9 +46,23 @@ def transform_definition(definition: KDefinition) -> KDefinition:
 def transform_sentence(sentence: KSentence) -> KSentence:
     return transform_rule(sentence) if type(sentence) is KRule else sentence
 
+
 def transform_rule(rule: KRule) -> KRule:
-    # TODO
-    return rule
+    return rule.let(
+        body=rename_anon_vars(rule.body),
+        requires=rename_anon_vars(rule.requires),
+        ensures=rename_anon_vars(rule.ensures),
+    )
+
+
+def rename_anon_vars(kinner: KInner) -> KInner:
+    return top_down(if_ktype(KVariable, rename_anon), kinner)
+
+
+def rename_anon(var: KVariable) -> KVariable:
+    if var.name.startswith('_Gen'):
+        return var.let(name='_Var' + var.name[4:])
+    return var
 
 
 if __name__ == "__main__":
