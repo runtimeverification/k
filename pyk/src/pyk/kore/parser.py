@@ -48,12 +48,12 @@ from .syntax import (
     Rewrites,
     RoundPred,
     Sentence,
-    SetVar,
     Sort,
     SortApp,
     SortDecl,
     SortVar,
     String,
+    SVar,
     Symbol,
     SymbolDecl,
     Top,
@@ -257,11 +257,11 @@ class KoreParser:
 
         return self.elem_var()
 
-    def set_var(self) -> SetVar:
+    def set_var(self) -> SVar:
         name = self._match(KoreToken.Type.SET_VAR_ID)
         self._match(KoreToken.Type.COLON)
         sort = self.sort()
-        return SetVar(name, sort)
+        return SVar(name, sort)
 
     def elem_var(self) -> EVar:
         name = self._match(KoreToken.Type.ID)

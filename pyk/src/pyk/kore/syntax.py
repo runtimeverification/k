@@ -105,13 +105,13 @@ def unsupported() -> Any:
 
 class Kore(ABC):
     _TAGS: Final[Mapping[str, str]] = {
-        'SVar': 'SetVar',
         'DV': 'DomVal',
         **{k: k for k in (
             'SortVar',
             'SortApp',
             'String',
             'EVar',
+            'SVar',
             'App',
             'Top',
             'Bottom',
@@ -312,7 +312,7 @@ class EVar(VarPattern):
 
 @final
 @dataclass(frozen=True)
-class SetVar(VarPattern):
+class SVar(VarPattern):
     _tag = 'SVar'
 
     name: str
@@ -323,21 +323,21 @@ class SetVar(VarPattern):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sort', sort)
 
-    def let(self, *, name: Optional[str] = None, sort: Optional[Sort] = None) -> 'SetVar':
+    def let(self, *, name: Optional[str] = None, sort: Optional[Sort] = None) -> 'SVar':
         name = name if name is not None else self.name
         sort = sort if sort is not None else self.sort
-        return SetVar(name=name, sort=sort)
+        return SVar(name=name, sort=sort)
 
-    def let_sort(self, sort: Sort) -> 'SetVar':
+    def let_sort(self, sort: Sort) -> 'SVar':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'SetVar', f: Callable[[Pattern], Pattern]) -> 'SetVar':
+    def map_pattern(self: 'SVar', f: Callable[[Pattern], Pattern]) -> 'SVar':
         return self
 
     @classmethod
-    def from_dict(cls: Type['SetVar'], dct: Mapping[str, Any]) -> 'SetVar':
+    def from_dict(cls: Type['SVar'], dct: Mapping[str, Any]) -> 'SVar':
         cls._check_tag(dct)
-        return SetVar(name=dct['name'], sort=Sort.from_dict(dct['sort']))
+        return SVar(name=dct['name'], sort=Sort.from_dict(dct['sort']))
 
 
 @final
@@ -810,7 +810,7 @@ class Forall(MLQuant):
 
 
 class MLFixpoint(MLPattern, ABC):
-    var: SetVar  # TODO Should this be inlined to var_name, var_sort?
+    var: SVar  # TODO Should this be inlined to var_name, var_sort?
     pattern: Pattern
 
     @property
@@ -833,10 +833,10 @@ class Mu(MLFixpoint):
     _tag = 'Mu'
     _symbol = '\\mu'
 
-    var: SetVar
+    var: SVar
     pattern: Pattern
 
-    def let(self, *, var: Optional[SetVar] = None, pattern: Optional[Pattern] = None) -> 'Mu':
+    def let(self, *, var: Optional[SVar] = None, pattern: Optional[Pattern] = None) -> 'Mu':
         var = var if var is not None else self.var
         pattern = pattern if pattern is not None else self.pattern
         return Mu(var=var, pattern=pattern)
@@ -848,7 +848,7 @@ class Mu(MLFixpoint):
     def from_dict(cls: Type['Mu'], dct: Mapping[str, Any]) -> 'Mu':
         cls._check_tag(dct)
         return Mu(
-            var=SetVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),
+            var=SVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),
             pattern=Pattern.from_dict(dct['arg']),
         )
 
@@ -859,10 +859,10 @@ class Nu(MLFixpoint):
     _tag = 'Nu'
     _symbol = '\\nu'
 
-    var: SetVar
+    var: SVar
     pattern: Pattern
 
-    def let(self, *, var: Optional[SetVar] = None, pattern: Optional[Pattern] = None) -> 'Nu':
+    def let(self, *, var: Optional[SVar] = None, pattern: Optional[Pattern] = None) -> 'Nu':
         var = var if var is not None else self.var
         pattern = pattern if pattern is not None else self.pattern
         return Nu(var=var, pattern=pattern)
@@ -874,7 +874,7 @@ class Nu(MLFixpoint):
     def from_dict(cls: Type['Nu'], dct: Mapping[str, Any]) -> 'Nu':
         cls._check_tag(dct)
         return Nu(
-            var=SetVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),
+            var=SVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),
             pattern=Pattern.from_dict(dct['arg']),
         )
 
