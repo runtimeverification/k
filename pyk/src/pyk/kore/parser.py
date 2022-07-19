@@ -25,8 +25,8 @@ from .syntax import (
     Claim,
     Definition,
     DomVal,
-    ElemVar,
     Equals,
+    EVar,
     Exists,
     Floor,
     Forall,
@@ -263,11 +263,11 @@ class KoreParser:
         sort = self.sort()
         return SetVar(name, sort)
 
-    def elem_var(self) -> ElemVar:
+    def elem_var(self) -> EVar:
         name = self._match(KoreToken.Type.ID)
         self._match(KoreToken.Type.COLON)
         sort = self.sort()
-        return ElemVar(name, sort)
+        return EVar(name, sort)
 
     def ml_pattern(self) -> MLPattern:
         if self._la().type != KoreToken.Type.SYMBOL_ID:

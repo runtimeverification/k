@@ -105,13 +105,13 @@ def unsupported() -> Any:
 
 class Kore(ABC):
     _TAGS: Final[Mapping[str, str]] = {
-        'EVar': 'ElemVar',
         'SVar': 'SetVar',
         'DV': 'DomVal',
         **{k: k for k in (
             'SortVar',
             'SortApp',
             'String',
+            'EVar',
             'App',
             'Top',
             'Bottom',
@@ -282,7 +282,7 @@ class VarPattern(Pattern, WithSort, ABC):
 
 @final
 @dataclass(frozen=True)
-class ElemVar(VarPattern):
+class EVar(VarPattern):
     _tag = 'EVar'
 
     name: str
@@ -293,21 +293,21 @@ class ElemVar(VarPattern):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sort', sort)
 
-    def let(self, *, name: Optional[str] = None, sort: Optional[Sort] = None) -> 'ElemVar':
+    def let(self, *, name: Optional[str] = None, sort: Optional[Sort] = None) -> 'EVar':
         name = name if name is not None else self.name
         sort = sort if sort is not None else self.sort
-        return ElemVar(name=name, sort=sort)
+        return EVar(name=name, sort=sort)
 
-    def let_sort(self, sort: Sort) -> 'ElemVar':
+    def let_sort(self, sort: Sort) -> 'EVar':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'ElemVar', f: Callable[[Pattern], Pattern]) -> 'ElemVar':
+    def map_pattern(self: 'EVar', f: Callable[[Pattern], Pattern]) -> 'EVar':
         return self
 
     @classmethod
-    def from_dict(cls: Type['ElemVar'], dct: Mapping[str, Any]) -> 'ElemVar':
+    def from_dict(cls: Type['EVar'], dct: Mapping[str, Any]) -> 'EVar':
         cls._check_tag(dct)
-        return ElemVar(name=dct['name'], sort=Sort.from_dict(dct['sort']))
+        return EVar(name=dct['name'], sort=Sort.from_dict(dct['sort']))
 
 
 @final
@@ -715,7 +715,7 @@ class Iff(BinaryConn):
 
 class MLQuant(MLPattern, WithSort, ABC):
     sort: Sort
-    var: ElemVar  # TODO Should this be inlined to var_name, var_sort?
+    var: EVar  # TODO Should this be inlined to var_name, var_sort?
     pattern: Pattern
 
     @property
@@ -740,14 +740,14 @@ class Exists(MLQuant):
     _symbol = '\\exists'
 
     sort: Sort
-    var: ElemVar
+    var: EVar
     pattern: Pattern
 
     def let(
         self,
         *,
         sort: Optional[Sort] = None,
-        var: Optional[ElemVar] = None,
+        var: Optional[EVar] = None,
         pattern: Optional[Pattern] = None,
     ) -> 'Exists':
         sort = sort if sort is not None else self.sort
@@ -766,7 +766,7 @@ class Exists(MLQuant):
         cls._check_tag(dct)
         return Exists(
             sort=Sort.from_dict(dct['sort']),
-            var=ElemVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),
+            var=EVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),
             pattern=Pattern.from_dict(dct['arg']),
         )
 
@@ -778,14 +778,14 @@ class Forall(MLQuant):
     _symbol = '\\forall'
 
     sort: Sort
-    var: ElemVar
+    var: EVar
     pattern: Pattern
 
     def let(
         self,
         *,
         sort: Optional[Sort] = None,
-        var: Optional[ElemVar] = None,
+        var: Optional[EVar] = None,
         pattern: Optional[Pattern] = None,
     ) -> 'Forall':
         sort = sort if sort is not None else self.sort
@@ -804,7 +804,7 @@ class Forall(MLQuant):
         cls._check_tag(dct)
         return Forall(
             sort=Sort.from_dict(dct['sort']),
-            var=ElemVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),
+            var=EVar(name=dct['var'], sort=Sort.from_dict(dct['varSort'])),
             pattern=Pattern.from_dict(dct['arg']),
         )
 
