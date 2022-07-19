@@ -13,6 +13,7 @@ from typing import (
 from ..utils import repeat_last
 from .lexer import KoreLexer, KoreToken
 from .syntax import (
+    DV,
     AliasDecl,
     And,
     App,
@@ -24,7 +25,6 @@ from .syntax import (
     Ceil,
     Claim,
     Definition,
-    DomVal,
     Equals,
     EVar,
     Exists,
@@ -419,7 +419,7 @@ class KoreParser:
     def rewrites(self) -> Rewrites:
         return self._binary('\\rewrites', Rewrites)
 
-    def dv(self) -> DomVal:
+    def dv(self) -> DV:
         self._match_symbol_id('\\dv')
         self._match(KoreToken.Type.LBRACE)
         sort = self.sort()
@@ -427,7 +427,7 @@ class KoreParser:
         self._match(KoreToken.Type.LPAREN)
         value = self.string()
         self._match(KoreToken.Type.RPAREN)
-        return DomVal(sort, value)
+        return DV(sort, value)
 
     def attr(self) -> Attr:
         symbol = self._custom_symbol_id()

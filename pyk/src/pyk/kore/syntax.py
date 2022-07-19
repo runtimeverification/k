@@ -105,8 +105,7 @@ def unsupported() -> Any:
 
 class Kore(ABC):
     _TAGS: Final[Mapping[str, str]] = {
-        'DV': 'DomVal',
-        **{k: k for k in (
+        k: k for k in (
             'SortVar',
             'SortApp',
             'String',
@@ -130,7 +129,8 @@ class Kore(ABC):
             'In',
             'Next',
             'Rewrites',
-        )},
+            'DV',
+        )
     }
 
     @classmethod
@@ -1177,28 +1177,28 @@ class Rewrites(MLRewrite):
 
 @final
 @dataclass(frozen=True)
-class DomVal(MLPattern, WithSort):
+class DV(MLPattern, WithSort):
     _tag = 'DV'
     _symbol = '\\dv'
 
     sort: Sort
     value: String  # TODO Should this be changed to str?
 
-    def let(self, *, sort: Optional[Sort] = None, value: Optional[String] = None) -> 'DomVal':
+    def let(self, *, sort: Optional[Sort] = None, value: Optional[String] = None) -> 'DV':
         sort = sort if sort is not None else self.sort
         value = value if value is not None else self.value
-        return DomVal(sort=sort, value=value)
+        return DV(sort=sort, value=value)
 
-    def let_sort(self, sort: Sort) -> 'DomVal':
+    def let_sort(self, sort: Sort) -> 'DV':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'DomVal', f: Callable[[Pattern], Pattern]) -> 'DomVal':
+    def map_pattern(self: 'DV', f: Callable[[Pattern], Pattern]) -> 'DV':
         return self
 
     @classmethod
-    def from_dict(cls: Type['DomVal'], dct: Mapping[str, Any]) -> 'DomVal':
+    def from_dict(cls: Type['DV'], dct: Mapping[str, Any]) -> 'DV':
         cls._check_tag(dct)
-        return DomVal(
+        return DV(
             sort=Sort.from_dict(dct['sort']),
             value=String(dct['value']),
         )
