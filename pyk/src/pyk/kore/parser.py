@@ -15,7 +15,7 @@ from .lexer import KoreLexer, KoreToken
 from .syntax import (
     AliasDecl,
     And,
-    Apply,
+    App,
     Attr,
     Axiom,
     BinaryConn,
@@ -236,7 +236,7 @@ class KoreParser:
         if self._la(2).type == KoreToken.Type.COLON:
             return self.var_pattern()
 
-        return self.apply()
+        return self.app()
 
     def _pattern_list(self) -> List[Pattern]:
         return self._delimited_list_of(self.pattern, KoreToken.Type.LPAREN, KoreToken.Type.RPAREN)
@@ -245,11 +245,11 @@ class KoreParser:
         value = self._match(KoreToken.Type.STRING)
         return StrLit(decode_kore_str(value[1:-1]))
 
-    def apply(self) -> Apply:
+    def app(self) -> App:
         symbol = self._custom_symbol_id()
         sorts = self._sort_list()
         patterns = self._pattern_list()
-        return Apply(symbol, sorts, patterns)
+        return App(symbol, sorts, patterns)
 
     def var_pattern(self) -> VarPattern:
         if self._la().type == KoreToken.Type.SET_VAR_ID:
@@ -505,7 +505,7 @@ class KoreParser:
         self._match(KoreToken.Type.COLON)
         sort = self.sort()
         self._match(KoreToken.Type.KW_WHERE)
-        left = self.apply()
+        left = self.app()
         self._match(KoreToken.Type.WALRUS)
         right = self.pattern()
         attrs = self._attr_list()

@@ -108,11 +108,11 @@ class Kore(ABC):
         'EVar': 'ElemVar',
         'SVar': 'SetVar',
         'String': 'StrLit',
-        'App': 'Apply',
         'DV': 'DomVal',
         **{k: k for k in (
             'SortVar',
             'SortApp',
+            'App',
             'Top',
             'Bottom',
             'Not',
@@ -370,7 +370,7 @@ class StrLit(Pattern):
 
 @final
 @dataclass(frozen=True)
-class Apply(Pattern):
+class App(Pattern):
     _tag = 'App'
 
     symbol: str
@@ -389,19 +389,19 @@ class Apply(Pattern):
         symbol: Optional[str] = None,
         sorts: Optional[Iterable] = None,
         patterns: Optional[Iterable] = None,
-    ) -> 'Apply':
+    ) -> 'App':
         symbol = symbol if symbol is not None else self.symbol
         sorts = sorts if sorts is not None else self.sorts
         patterns = patterns if patterns is not None else self.patterns
-        return Apply(symbol=symbol, sorts=sorts, patterns=patterns)
+        return App(symbol=symbol, sorts=sorts, patterns=patterns)
 
-    def map_pattern(self: 'Apply', f: Callable[[Pattern], Pattern]) -> 'Apply':
+    def map_pattern(self: 'App', f: Callable[[Pattern], Pattern]) -> 'App':
         return self.let(patterns=(f(pattern) for pattern in self.patterns))
 
     @classmethod
-    def from_dict(cls: Type['Apply'], dct: Mapping[str, Any]) -> 'Apply':
+    def from_dict(cls: Type['App'], dct: Mapping[str, Any]) -> 'App':
         cls._check_tag(dct)
-        return Apply(
+        return App(
             symbol=dct['name'],
             sorts=(Sort.from_dict(sort) for sort in dct['sorts']),
             patterns=(Pattern.from_dict(arg) for arg in dct['args']),
@@ -1464,7 +1464,7 @@ class AliasDecl(Sentence):
     alias: Symbol
     sort_params: Tuple[Sort, ...]
     sort: Sort
-    left: Apply
+    left: App
     right: Pattern
     attrs: Tuple[Attr, ...]
 
@@ -1473,7 +1473,7 @@ class AliasDecl(Sentence):
         alias: Symbol,
         sort_params: Iterable[Sort],
         sort: Sort,
-        left: Apply,
+        left: App,
         right: Pattern,
         attrs: Iterable[Attr] = (),
     ):
@@ -1490,7 +1490,7 @@ class AliasDecl(Sentence):
         alias: Optional[Symbol] = None,
         sort_params: Optional[Iterable[Sort]] = None,
         sort: Optional[Sort] = None,
-        left: Optional[Apply] = None,
+        left: Optional[App] = None,
         right: Optional[Pattern] = None,
         attrs: Optional[Iterable[Attr]] = None,
     ) -> 'AliasDecl':
