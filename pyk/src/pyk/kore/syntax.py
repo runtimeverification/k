@@ -104,33 +104,31 @@ def unsupported() -> Any:
 
 
 class Kore(ABC):
-    _TAGS: Final[Mapping[str, str]] = {
-        k: k for k in (
-            'SortVar',
-            'SortApp',
-            'String',
-            'EVar',
-            'SVar',
-            'App',
-            'Top',
-            'Bottom',
-            'Not',
-            'And',
-            'Or',
-            'Implies',
-            'Iff',
-            'Exists',
-            'Forall',
-            'Mu',
-            'Nu',
-            'Ceil',
-            'Floor',
-            'Equals',
-            'In',
-            'Next',
-            'Rewrites',
-            'DV',
-        )
+    _TAGS: Final = {
+        'SortVar',
+        'SortApp',
+        'String',
+        'EVar',
+        'SVar',
+        'App',
+        'Top',
+        'Bottom',
+        'Not',
+        'And',
+        'Or',
+        'Implies',
+        'Iff',
+        'Exists',
+        'Forall',
+        'Mu',
+        'Nu',
+        'Ceil',
+        'Floor',
+        'Equals',
+        'In',
+        'Next',
+        'Rewrites',
+        'DV',
     }
 
     @classmethod
@@ -146,7 +144,7 @@ class Kore(ABC):
         if tag not in Kore._TAGS:
             raise ValueError(f'Invalid Kore tag: {tag}')
 
-        actual_cls = globals()[Kore._TAGS[tag]]
+        actual_cls = globals()[tag]
 
         if not issubclass(actual_cls, cls):
             raise ValueError(f'Expected {cls.__name__} tag, found: {tag}')
