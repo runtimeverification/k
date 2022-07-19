@@ -174,5 +174,8 @@ public class CheckAtt {
         if (att.contains(Att.PRIORITY()) && att.contains(Att.SIMPLIFICATION())) {
           errors.add(KEMException.compilerError("priority attribute is not supported on simplification rules.", loc));
         }
+        if(att.contains(Att.ANYWHERE()) && att.contains(Att.SIMPLIFICATION())) {
+          errors.add(KEMException.compilerError("anywhere attribute is not supported on simplification rules.", loc));
+        }
     }
 }
