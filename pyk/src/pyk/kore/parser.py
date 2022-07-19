@@ -50,7 +50,7 @@ from .syntax import (
     Sentence,
     SetVar,
     Sort,
-    SortCons,
+    SortApp,
     SortDecl,
     SortVar,
     StrLit,
@@ -210,7 +210,7 @@ class KoreParser:
 
     def sort(self) -> Sort:
         if self._la(2).type == KoreToken.Type.LBRACE:
-            return self.sort_cons()
+            return self.sort_app()
 
         return self.sort_var()
 
@@ -221,10 +221,10 @@ class KoreParser:
         name = self._match(KoreToken.Type.ID)
         return SortVar(name)
 
-    def sort_cons(self) -> SortCons:
+    def sort_app(self) -> SortApp:
         name = self._match(KoreToken.Type.ID)
         sorts = self._sort_list()
-        return SortCons(name, sorts)
+        return SortApp(name, sorts)
 
     def pattern(self) -> Pattern:
         if self._la().type == KoreToken.Type.STRING:

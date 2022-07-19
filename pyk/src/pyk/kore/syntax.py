@@ -105,7 +105,6 @@ def unsupported() -> Any:
 
 class Kore(ABC):
     _TAGS: Final[Mapping[str, str]] = {
-        'SortApp': 'SortCons',
         'EVar': 'ElemVar',
         'SVar': 'SetVar',
         'String': 'StrLit',
@@ -113,6 +112,7 @@ class Kore(ABC):
         'DV': 'DomVal',
         **{k: k for k in (
             'SortVar',
+            'SortApp',
             'Top',
             'Bottom',
             'Not',
@@ -230,7 +230,7 @@ class SortVar(Sort):
 
 @final
 @dataclass(frozen=True)
-class SortCons(Sort):
+class SortApp(Sort):
     _tag = 'SortApp'
 
     name: str
@@ -241,15 +241,15 @@ class SortCons(Sort):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sorts', tuple(sorts))
 
-    def let(self, *, name: Optional[str] = None, sorts: Optional[Iterable[Sort]] = None) -> 'SortCons':
+    def let(self, *, name: Optional[str] = None, sorts: Optional[Iterable[Sort]] = None) -> 'SortApp':
         name = name if name is not None else self.name
         sorts = sorts if sorts is not None else self.sorts
-        return SortCons(name=name, sorts=sorts)
+        return SortApp(name=name, sorts=sorts)
 
     @classmethod
-    def from_dict(cls: Type['SortCons'], dct: Mapping[str, Any]) -> 'SortCons':
+    def from_dict(cls: Type['SortApp'], dct: Mapping[str, Any]) -> 'SortApp':
         cls._check_tag(dct)
-        return SortCons(name=dct['name'], sorts=(Sort.from_dict(arg) for arg in dct['args']))
+        return SortApp(name=dct['name'], sorts=(Sort.from_dict(arg) for arg in dct['args']))
 
     @property
     def dict(self) -> Dict[str, Any]:
