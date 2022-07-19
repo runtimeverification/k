@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum, IntEnum, auto
 from itertools import chain
-from typing import Final, Iterator, List, Optional, Tuple, final
+from typing import Final, Iterable, Iterator, List, Optional, Tuple, final
 
 
 class KoreStringLexer(Iterator[Tuple[str, 'KoreStringLexer.TokenType']]):
@@ -249,19 +249,25 @@ class KoreLexer(Iterator[KoreToken]):
         self._la = next(self._iter)
         return consumed
 
-    # TODO _match() for sets of strings
-    def _match(self, *cs: str) -> str:
+    def _match(self, c: str) -> str:
         actual = '<EOF>' if self._la is None else self._la
 
-        if self._la not in cs:
-            expected = ', '.join(cs)
-            raise ValueError(f'Expected {expected}, found: {actual}')
+        if self._la != c:
+            raise ValueError(f'Expected {c}, found: {actual}')
+
+        return self._consume()
+
+    def _match_any(self, cs: Iterable[str]) -> str:
+        actual = '<EOF>' if self._la is None else self._la
+
+        if self._la is None or self._la not in cs:
+            raise ValueError(f'Expected {sorted(cs)}, found: {actual}')
 
         return self._consume()
 
     def _comment(self) -> None:
         self._match('/')
-        char = self._match('/', '*')
+        char = self._match_any({'/', '*'})
 
         if char == '/':
             self._line_comment_rest()
@@ -294,7 +300,7 @@ class KoreLexer(Iterator[KoreToken]):
         return KoreToken('', KoreToken.Type.EOF)
 
     def _simple_char_token(self) -> KoreToken:
-        char = self._match(*self._SIMPLE_CHARS)
+        char = self._match_any(self._SIMPLE_CHARS)
         return KoreToken(char, self._SIMPLE_CHARS[char])
 
     def _colon_or_walrus_token(self) -> KoreToken:
@@ -337,7 +343,7 @@ class KoreLexer(Iterator[KoreToken]):
 
     def _id_text(self) -> str:
         buf: List[str] = []
-        buf += self._match(*self._ID_FIRST_CHARS)
+        buf += self._match_any(self._ID_FIRST_CHARS)
         while self._la is not None and not self._la.isspace() and self._la not in self._DELIMITERS:
-            buf += self._match(*self._ID_CHARS)
+            buf += self._match_any(self._ID_CHARS)
         return ''.join(buf)
