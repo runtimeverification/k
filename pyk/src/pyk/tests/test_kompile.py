@@ -15,8 +15,9 @@ class BuildArgsTest(TestCase):
             md_selector='k & ! nobytes & ! node',
             hook_namespaces=['JSON', 'KRYPTO', 'BLOCKCHAIN'],
             emit_json=True,
+            post_process='echo "hello"',
             concrete_rules=['foo', 'bar'],
-            additional_args=['--new-fangled-option', 'buzz']
+            additional_args=['--new-fangled-option', 'buzz'],
         )
         expected = [
             '--main-module', 'MAIN-MODULE',
@@ -28,6 +29,7 @@ class BuildArgsTest(TestCase):
             '--md-selector', 'k & ! nobytes & ! node',
             '--hook-namespaces', 'JSON KRYPTO BLOCKCHAIN',
             '--emit-json',
+            '--post-process', "'echo \"hello\"'",
             '--concrete-rules', 'foo,bar',
             '--new-fangled-option', 'buzz'
         ]

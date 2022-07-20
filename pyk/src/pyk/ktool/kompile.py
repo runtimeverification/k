@@ -1,4 +1,5 @@
 import logging
+import shlex
 from enum import Enum
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
@@ -27,6 +28,7 @@ def kompile(
     md_selector: Optional[str] = None,
     hook_namespaces: Iterable[str] = (),
     emit_json=False,
+    post_process: Optional[str] = None,
     concrete_rules: Iterable[str] = (),
     additional_args: Iterable[str] = (),
 ) -> Path:
@@ -44,6 +46,7 @@ def kompile(
         md_selector=md_selector,
         hook_namespaces=hook_namespaces,
         emit_json=emit_json,
+        post_process=post_process,
         concrete_rules=concrete_rules,
         additional_args=additional_args
     )
@@ -67,7 +70,8 @@ def _build_arg_list(
     include_dirs: Iterable[Path],
     md_selector: Optional[str],
     hook_namespaces: Iterable[str],
-    emit_json,
+    emit_json: bool,
+    post_process: Optional[str],
     concrete_rules: Iterable[str],
     additional_args: Iterable[str]
 ) -> List[str]:
@@ -96,6 +100,9 @@ def _build_arg_list(
 
     if emit_json:
         args.append('--emit-json')
+
+    if post_process:
+        args.extend(['--post-process', shlex.quote(post_process)])
 
     if concrete_rules:
         args.extend(['--concrete-rules', ','.join(concrete_rules)])
