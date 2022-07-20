@@ -115,6 +115,7 @@ public class KException implements Serializable, HasLocation {
         MISSING_SYNTAX_MODULE,
         INVALID_EXIT_CODE,
         INVALID_CONFIG_VAR,
+        INVALID_ASSOCIATIVITY,
         FUTURE_ERROR,
         UNUSED_VAR,
         PROOF_LINT,
