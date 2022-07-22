@@ -6,6 +6,7 @@ from dataclasses import InitVar, dataclass
 from enum import Enum
 from typing import (
     Any,
+    ContextManager,
     Dict,
     Final,
     Iterable,
@@ -27,15 +28,93 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 @final
 @dataclass(frozen=True)
+class JsonRpcError(Exception):
+    message: str
+    code: int
+    data: Any
+
+    def __init__(self, message: str, code: int, data: Any):
+        object.__setattr__(self, 'message', message)
+        object.__setattr__(self, 'code', code)
+        object.__setattr__(self, 'data', data)
+        super().__init__(message)
+
+
+class JsonRpcClient(ContextManager['JsonRpcClient']):
+    _JSON_RPC_VERSION: Final = '2.0'
+
+    _host: str
+    _port: int
+    _sock: socket.socket
+    _file: TextIO
+    _req_id: int
+
+    def __init__(self, host: str, port: int):
+        self._host = host
+        self._port = port
+        self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._file = self._sock.makefile('r')
+        self._req_id = 1
+
+        try:
+            self._sock.connect((host, port))
+        except BaseException:
+            raise RuntimeError(f"Couldn't connect to host: {host}:{port}")
+
+        _LOGGER.info(f'Connected to host: {host}:{port}')
+
+    def __enter__(self) -> 'JsonRpcClient':
+        return self
+
+    def __exit__(self, *args) -> None:
+        self._file.__exit__(*args)
+        self._sock.__exit__(*args)
+
+    def close(self) -> None:
+        self._file.close
+        self._sock.close
+
+    def request(self, method: str, **params: Any) -> Dict[str, Any]:
+        payload = {
+            'jsonrpc': self._JSON_RPC_VERSION,
+            'id': self._req_id,
+            'method': method,
+            'params': params,
+        }
+        old_id = self._req_id
+        self._req_id += 1
+
+        server_addr = f'{self._host}:{self._port}'
+        req = json.dumps(payload)
+        _LOGGER.info(f'Sending request to {server_addr}: {req}')
+        self._sock.sendall(req.encode())
+        _LOGGER.info(f'Waiting for response from {server_addr}...')
+        resp = self._file.readline()
+        _LOGGER.info(f'Received response from {server_addr}: {resp}')
+
+        data = json.loads(resp)
+        self._check(data)
+
+        assert data['id'] == old_id
+        return data['result']
+
+    @staticmethod
+    def _check(response: Mapping[str, Any]) -> None:
+        if 'error' not in response:
+            return
+
+        raise JsonRpcError(**response['error'])
+
+
+@final
+@dataclass(frozen=True)
 class KoreClientError(Exception):
     message: str
     context: Tuple[str, ...]
-    code: int
 
-    def __init__(self, message: str, code: int, context: Sequence[str] = ()):
+    def __init__(self, message: str, context: Sequence[str] = ()):
         object.__setattr__(self, 'message', message)
         object.__setattr__(self, 'context', tuple(context))
-        object.__setattr__(self, 'code', code)
         super().__init__(message)
 
 
@@ -148,72 +227,29 @@ class BranchingResult(ExecuteResult, Iterable[BranchingState]):
         return BranchingResult(states=states, depth=depth)
 
 
-class KoreClient:
+class KoreClient(ContextManager['KoreClient']):
     _KORE_JSON_VERSION: Final = 1
 
-    _host: str
-    _port: int
-    _sock: socket.socket
-    _file: TextIO
-    _req_id: int
+    _client: JsonRpcClient
 
     def __init__(self, host: str, port: int):
-        self._host = host
-        self._port = port
-        self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._file = self._sock.makefile()
-        self._req_id = 1
-
-        try:
-            self._sock.connect((host, port))
-        except BaseException:
-            raise RuntimeError(f"Couldn't connect to host: {host}:{port}")
-
-        _LOGGER.info(f'Connected to server: {host}:{port}')
+        self._client = JsonRpcClient(host, port)
 
     def __enter__(self):
         return self
 
     def __exit__(self, *args):
-        self._file.close()
-        self._sock.__exit__()
+        self._client.__exit__(*args)
 
     def close(self) -> None:
-        self._file.close()
-        self._sock.close()
+        self._client.close()
 
-    def _request(self, method: str, **params) -> Dict[str, Any]:
-        payload = {
-            'jsonrpc': '2.0',
-            'id': self._req_id,
-            'method': method,
-            'params': params,
-        }
-        self._req_id += 1
-
-        server_addr = f'{self._host}:{self._port}'
-        request = json.dumps(payload)
-        _LOGGER.info(f'Sending request to {server_addr}: {request}')
-        self._sock.sendall(request.encode())
-        _LOGGER.info(f'Waiting for response from {server_addr}...')
-        response = self._file.readline()
-        _LOGGER.info(f'Received response from {server_addr}: {response}')
-        return json.loads(response)
-
-    @staticmethod
-    def _check(response: Mapping[str, Any]) -> None:
-        if 'error' not in response:
-            return
-
-        error = response['error']
-
-        code = error['code']
-        assert code != -32602, 'Malformed request'
-
-        message = error['data']['error']
-        context = error['data']['context']
-
-        raise KoreClientError(message, code, context)
+    def _request(self, method: str, **params: Any) -> Dict[str, Any]:
+        try:
+            return self._client.request(method, **params)
+        except JsonRpcError as e:
+            assert e.code != -32602, 'Malformed request'
+            raise KoreClientError(message=e.data['error'], context=e.data['context'])
 
     @staticmethod
     def _state(pattern: Pattern) -> Dict[str, Any]:
@@ -238,10 +274,7 @@ class KoreClient:
             'state': self._state(pattern),
         })
 
-        response = self._request('execute', **params)
-        self._check(response)
-
-        result = response['result']
+        result = self._request('execute', **params)
         return ExecuteResult.from_dict(result)
 
     def implies(self, ant: Pattern, con: Pattern) -> Tuple[bool, Optional[Pattern], Optional[Pattern]]:
@@ -250,10 +283,7 @@ class KoreClient:
             'consequent': self._state(con),
         }
 
-        response = self._request('implies', **params)
-        self._check(response)
-
-        result = response['result']
+        result = self._request('implies', **params)
         satisfiable = result['satisfiable']
         substitution = Pattern.from_dict(result['substitution']) if 'substitution' in result else None
         predicate = Pattern.from_dict(result['predicate']) if 'predicate' in result else None
@@ -264,7 +294,5 @@ class KoreClient:
             'state': self._state(pattern),
         }
 
-        response = self._request('simplify', **params)
-        self._check(response)
-
-        return Pattern.from_dict(response['result']['state']['term'])
+        result = self._request('simplify', **params)
+        return Pattern.from_dict(result['state']['term'])
