@@ -35,7 +35,7 @@ class KAst(ABC):
 
     @classmethod
     @abstractmethod
-    def from_dict(cls: Type[T], d: Dict[str, Any]) -> 'KAst':
+    def from_dict(cls: Type[T], d: Dict[str, Any]) -> T:
         node = d['node']
         return globals()[node].from_dict(d)
 
@@ -43,9 +43,9 @@ class KAst(ABC):
     def to_dict(self) -> Dict[str, Any]:
         ...
 
-    @staticmethod
-    def from_json(s: str) -> 'KAst':
-        return KAst.from_dict(json.loads(s))
+    @classmethod
+    def from_json(cls: Type[T], s: str) -> T:
+        return cls.from_dict(json.loads(s))
 
     @final
     def to_json(self) -> str:

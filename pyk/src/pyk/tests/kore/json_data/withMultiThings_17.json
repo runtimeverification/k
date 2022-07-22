@@ -1,0 +1,116 @@
+{
+  "tag": "Next",
+  "sort": {
+    "tag": "SortVar",
+    "name": "XZN04oXPg4'"
+  },
+  "dest": {
+    "tag": "And",
+    "sort": {
+      "tag": "SortApp",
+      "name": "f'Es44691",
+      "args": []
+    },
+    "first": {
+      "tag": "In",
+      "argSort": {
+        "tag": "SortApp",
+        "name": "OBQOb1906",
+        "args": []
+      },
+      "sort": {
+        "tag": "SortVar",
+        "name": "rcZ4t15451"
+      },
+      "first": {
+        "tag": "EVar",
+        "name": "zVs458",
+        "sort": {
+          "tag": "SortApp",
+          "name": "gq1B391",
+          "args": []
+        }
+      },
+      "second": {
+        "tag": "And",
+        "sort": {
+          "tag": "SortVar",
+          "name": "nkCgH7"
+        },
+        "first": {
+          "tag": "In",
+          "argSort": {
+            "tag": "SortVar",
+            "name": "i-30121"
+          },
+          "sort": {
+            "tag": "SortApp",
+            "name": "qP1716",
+            "args": []
+          },
+          "first": {
+            "tag": "String",
+            "value": ""
+          },
+          "second": {
+            "tag": "Not",
+            "sort": {
+              "tag": "SortVar",
+              "name": "t"
+            },
+            "arg": {
+              "tag": "EVar",
+              "name": "I",
+              "sort": {
+                "tag": "SortVar",
+                "name": "l5"
+              }
+            }
+          }
+        },
+        "second": {
+          "tag": "Or",
+          "sort": {
+            "tag": "SortApp",
+            "name": "i493",
+            "args": []
+          },
+          "first": {
+            "tag": "EVar",
+            "name": "u7",
+            "sort": {
+              "tag": "SortVar",
+              "name": "N212"
+            }
+          },
+          "second": {
+            "tag": "Next",
+            "sort": {
+              "tag": "SortVar",
+              "name": "B"
+            },
+            "dest": {
+              "tag": "DV",
+              "sort": {
+                "tag": "SortVar",
+                "name": "Wg140"
+              },
+              "value": ""
+            }
+          }
+        }
+      }
+    },
+    "second": {
+      "tag": "App",
+      "name": "\\tUmkgz765",
+      "sorts": [
+        {
+          "tag": "SortVar",
+          "name": "H4CUbp14"
+        }
+      ],
+      "args": []
+    }
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "tag": "Nu",
+  "var": "@OatT59BNw72g0X'2C8PSu'5",
+  "varSort": {
+    "tag": "SortVar",
+    "name": "UGK6"
+  },
+  "arg": {
+    "tag": "Implies",
+    "sort": {
+      "tag": "SortApp",
+      "name": "Km-X'25",
+      "args": []
+    },
+    "first": {
+      "tag": "Mu",
+      "var": "@fe4sF0qQ949440",
+      "varSort": {
+        "tag": "SortApp",
+        "name": "FazGJ",
+        "args": []
+      },
+      "arg": {
+        "tag": "Ceil",
+        "argSort": {
+          "tag": "SortVar",
+          "name": "Cb8kL72"
+        },
+        "sort": {
+          "tag": "SortVar",
+          "name": "gs98675"
+        },
+        "arg": {
+          "tag": "Not",
+          "sort": {
+            "tag": "SortVar",
+            "name": "Xv25"
+          },
+          "arg": {
+            "tag": "Rewrites",
+            "sort": {
+              "tag": "SortVar",
+              "name": "B36704"
+            },
+            "source": {
+              "tag": "Bottom",
+              "sort": {
+                "tag": "SortVar",
+                "name": "O97128"
+              }
+            },
+            "dest": {
+              "tag": "Top",
+              "sort": {
+                "tag": "SortVar",
+                "name": "Z96367"
+              }
+            }
+          }
+        }
+      }
+    },
+    "second": {
+      "tag": "In",
+      "argSort": {
+        "tag": "SortVar",
+        "name": "f8l554"
+      },
+      "sort": {
+        "tag": "SortVar",
+        "name": "l2h4U934788117"
+      },
+      "first": {
+        "tag": "Floor",
+        "argSort": {
+          "tag": "SortVar",
+          "name": "kxOmD01"
+        },
+        "sort": {
+          "tag": "SortVar",
+          "name": "RguA065"
+        },
+        "arg": {
+          "tag": "String",
+          "value": ""
+        }
+      },
+      "second": {
+        "tag": "Iff",
+        "sort": {
+          "tag": "SortVar",
+          "name": "V358"
+        },
+        "first": {
+          "tag": "Equals",
+          "argSort": {
+            "tag": "SortApp",
+            "name": "gy38846",
+            "args": []
+          },
+          "sort": {
+            "tag": "SortVar",
+            "name": "I6"
+          },
+          "first": {
+            "tag": "Nu",
+            "var": "@q",
+            "varSort": {
+              "tag": "SortVar",
+              "name": "zm132"
+            },
+            "arg": {
+              "tag": "DV",
+              "sort": {
+                "tag": "SortVar",
+                "name": "oQ87150"
+              },
+              "value": ""
+            }
+          },
+          "second": {
+            "tag": "String",
+            "value": ""
+          }
+        },
+        "second": {
+          "tag": "Ceil",
+          "argSort": {
+            "tag": "SortVar",
+            "name": "b-p7"
+          },
+          "sort": {
+            "tag": "SortApp",
+            "name": "HW30",
+            "args": []
+          },
+          "arg": {
+            "tag": "String",
+            "value": ""
+          }
+        }
+      }
+    }
+  }
+}

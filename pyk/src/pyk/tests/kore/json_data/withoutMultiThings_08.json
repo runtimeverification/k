@@ -1,0 +1,33 @@
+{
+  "tag": "And",
+  "sort": {
+    "tag": "SortApp",
+    "name": "KK7c8ls2Nkodbk7603",
+    "args": [
+      {
+        "tag": "SortVar",
+        "name": "k3RZmoDT9EuNLM3229"
+      }
+    ]
+  },
+  "first": {
+    "tag": "Mu",
+    "var": "@KC69BzNnlyr99312",
+    "varSort": {
+      "tag": "SortVar",
+      "name": "k0"
+    },
+    "arg": {
+      "tag": "DV",
+      "sort": {
+        "tag": "SortVar",
+        "name": "aGy6D-FDgVozK2t3"
+      },
+      "value": "湝"
+    }
+  },
+  "second": {
+    "tag": "String",
+    "value": "析\tk2L%: |:!"
+  }
+}
