@@ -1,0 +1,52 @@
+{
+  "tag": "And",
+  "sort": {
+    "tag": "SortApp",
+    "name": "K4HSWW0Dvn5",
+    "args": []
+  },
+  "first": {
+    "tag": "String",
+    "value": "䆭9SdD}!Dx=u(jD"
+  },
+  "second": {
+    "tag": "Equals",
+    "argSort": {
+      "tag": "SortVar",
+      "name": "TH5pKDmw67htB036"
+    },
+    "sort": {
+      "tag": "SortApp",
+      "name": "T0o5",
+      "args": []
+    },
+    "first": {
+      "tag": "DV",
+      "sort": {
+        "tag": "SortApp",
+        "name": "FJ3hYB0",
+        "args": []
+      },
+      "value": "₾㕥"
+    },
+    "second": {
+      "tag": "Not",
+      "sort": {
+        "tag": "SortApp",
+        "name": "P36117",
+        "args": []
+      },
+      "arg": {
+        "tag": "App",
+        "name": "\\nhc657806",
+        "sorts": [
+          {
+            "tag": "SortVar",
+            "name": "nSv0490"
+          }
+        ],
+        "args": []
+      }
+    }
+  }
+}

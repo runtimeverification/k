@@ -1,0 +1,47 @@
+{
+  "tag": "Not",
+  "sort": {
+    "tag": "SortVar",
+    "name": "TD9VYMUt"
+  },
+  "arg": {
+    "tag": "In",
+    "argSort": {
+      "tag": "SortVar",
+      "name": "Xlsu33'vs'802"
+    },
+    "sort": {
+      "tag": "SortApp",
+      "name": "fLmoz8474",
+      "args": []
+    },
+    "first": {
+      "tag": "Nu",
+      "var": "@m1B'CX514",
+      "varSort": {
+        "tag": "SortApp",
+        "name": "C0511",
+        "args": []
+      },
+      "arg": {
+        "tag": "Nu",
+        "var": "@Uxt2td79",
+        "varSort": {
+          "tag": "SortVar",
+          "name": "K67173"
+        },
+        "arg": {
+          "tag": "String",
+          "value": ""
+        }
+      }
+    },
+    "second": {
+      "tag": "Bottom",
+      "sort": {
+        "tag": "SortVar",
+        "name": "SkS1A'9"
+      }
+    }
+  }
+}
