@@ -106,12 +106,17 @@ public class ToJson {
             JsonObjectBuilder term = Json.createObjectBuilder();
             term.add("format", "KAST");
             term.add("version", version);
-            term.add("mainSpecModule", mainSpecModule);
+            JsonObjectBuilder jmodlist = Json.createObjectBuilder();
+
+            jmodlist.add("node", JsonParser.KFLATMODULELIST);
+            jmodlist.add("mainModule", mainSpecModule);
+
             JsonArrayBuilder jmods = Json.createArrayBuilder();
             for (Module m : mods) {
                 jmods.add(toJson(m));
             }
-            term.add("term", jmods);
+            jmodlist.add("term", jmods);
+            term.add("term", jmodlist);
 
             jsonWriter.write(term.build());
             jsonWriter.close();

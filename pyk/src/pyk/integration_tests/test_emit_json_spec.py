@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from ..kast import EMPTY_ATT, KAst, KDefinition, KRequire
+from ..kast import EMPTY_ATT, KAst, KDefinition, KFlatModuleList, KRequire
 from ..kastManip import remove_generated_cells
 from ..ktool import KompileBackend, kprove
 from .kprove_test import KProveTest
@@ -28,8 +28,9 @@ class EmitJsonSpecTest(KProveTest):
         kprove(spec_file, kompiled_dir=self.KOMPILE_OUTPUT_DIR, emit_json_spec=emit_json_spec, dry_run=True)
 
         with open(self.SPEC_JSON_FILE, 'r') as spec_file:
-            module = KAst.from_dict(json.load(spec_file)['term'])
+            kfml:KFlatModuleList = KAst.from_dict(json.load(spec_file)['term'])
 
+        module = list(kfml.modules)[0]
         claim = module.claims[0]
         self.claim = claim.let(body=remove_generated_cells(claim.body), att=EMPTY_ATT)
         self.module = module.let(sentences=(self.claim,))
