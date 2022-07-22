@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from typing import Callable, Mapping
+from typing import Callable, Dict
 
 from ..kast import (
     TRUE,
@@ -37,7 +37,7 @@ from ..kast import (
 from ..prelude import Labels
 from ..utils import hash_str
 
-SymbolTable = Mapping[str, Callable]
+SymbolTable = Dict[str, Callable]
 
 
 class KPrint:
