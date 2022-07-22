@@ -2,7 +2,7 @@
 # If you run pynixify again, the file will be either overwritten or
 # deleted, and you will lose the changes you made to it.
 
-{ buildPythonPackage, fetchPypi, graphviz, lib, tabulate, types-tabulate }:
+{ buildPythonPackage, fetchPypi, graphviz, lib }:
 
 buildPythonPackage rec {
   pname = "pyk";
@@ -10,7 +10,7 @@ buildPythonPackage rec {
 
   src = lib.cleanSource ../../..;
 
-  propagatedBuildInputs = [ graphviz tabulate types-tabulate ];
+  propagatedBuildInputs = [ graphviz ];
 
   # TODO FIXME
   doCheck = false;
