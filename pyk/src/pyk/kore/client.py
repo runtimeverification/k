@@ -110,10 +110,12 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
 @dataclass(frozen=True)
 class KoreClientError(Exception):
     message: str
+    code: int
     context: Tuple[str, ...]
 
-    def __init__(self, message: str, context: Sequence[str] = ()):
+    def __init__(self, message: str, code: int, context: Sequence[str] = ()):
         object.__setattr__(self, 'message', message)
+        object.__setattr__(self, 'code', code)
         object.__setattr__(self, 'context', tuple(context))
         super().__init__(message)
 
@@ -249,7 +251,7 @@ class KoreClient(ContextManager['KoreClient']):
             return self._client.request(method, **params)
         except JsonRpcError as e:
             assert e.code != -32602, 'Malformed request'
-            raise KoreClientError(message=e.data['error'], context=e.data['context'])
+            raise KoreClientError(message=e.data['error'], code=e.code, context=e.data['context'])
 
     @staticmethod
     def _state(pattern: Pattern) -> Dict[str, Any]:
