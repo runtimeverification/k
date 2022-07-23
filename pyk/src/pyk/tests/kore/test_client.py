@@ -31,6 +31,13 @@ class KoreClientTest(TestCase):
         MockClient.assert_called_with('localhost', 3000)
         self.assertEqual(self.client._client, self.mock)
 
+    def tearDown(self):
+        # When
+        self.client.close()
+
+        # Then
+        self.mock.close.assert_called()
+
     def assumeResponse(self, response):
         self.mock.request.return_value = response
 
