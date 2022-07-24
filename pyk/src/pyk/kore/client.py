@@ -103,6 +103,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         if 'error' not in response:
             return
 
+        assert response['error']['code'] not in {-32700, -32600}, 'Malformed JSON-RPC request'
         raise JsonRpcError(**response['error'])
 
 
@@ -250,7 +251,7 @@ class KoreClient(ContextManager['KoreClient']):
         try:
             return self._client.request(method, **params)
         except JsonRpcError as e:
-            assert e.code != -32602, 'Malformed request'
+            assert e.code not in {-32601, -32602}, 'Malformed Kore-RPC request'
             raise KoreClientError(message=e.data['error'], code=e.code, context=e.data['context'])
 
     @staticmethod
