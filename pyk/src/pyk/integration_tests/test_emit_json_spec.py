@@ -28,7 +28,7 @@ class EmitJsonSpecTest(KProveTest):
         kprove(spec_file, kompiled_dir=self.KOMPILE_OUTPUT_DIR, emit_json_spec=emit_json_spec, dry_run=True)
 
         with open(self.SPEC_JSON_FILE, 'r') as spec_file:
-            kfml:KFlatModuleList = KAst.from_dict(json.load(spec_file)['term'])
+            kfml: KFlatModuleList = KAst.from_dict(json.load(spec_file)['term'])
 
         module = list(kfml.modules)[0]
         claim = module.claims[0]
