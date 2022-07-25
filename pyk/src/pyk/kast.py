@@ -1372,7 +1372,7 @@ class KFlatModuleList(KOuter):
     mainModule: str
     modules: Tuple[KFlatModule, ...]
 
-    def __init__(self, mainModule: str, modules: Tuple[KFlatModule, ...]):
+    def __init__(self, mainModule: str, modules: Iterable[KFlatModule]):
         object.__setattr__(self, 'mainModule', mainModule)
         object.__setattr__(self, 'modules', modules)
 
@@ -1384,7 +1384,7 @@ class KFlatModuleList(KOuter):
     def to_dict(self) -> Dict[str, Any]:
         return {'node': 'KFlatModuleList', 'mainModule': self.mainModule, 'term': [mod.to_dict() for mod in self.modules]}
 
-    def let(self, *, mainModule: Optional[str] = None, modules: Optional[Tuple[KFlatModule, ...]] = None) -> 'KFlatModuleList':
+    def let(self, *, mainModule: Optional[str] = None, modules: Optional[Iterable[KFlatModule]] = None) -> 'KFlatModuleList':
         mainModule = mainModule if mainModule is not None else self.mainModule
         modules = modules if modules is not None else self.modules
         return KFlatModuleList(mainModule=mainModule, modules=modules)
