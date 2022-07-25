@@ -1,3 +1,4 @@
+import csv
 import json
 import logging
 import os
@@ -5,8 +6,6 @@ from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
 from tempfile import TemporaryDirectory
 from typing import Dict, Final, Iterable, List, Mapping, Optional, Tuple
-
-from tabulate import tabulate
 
 from ..cli_utils import (
     check_dir_path,
@@ -165,8 +164,10 @@ class KProve(KPrint):
                 productivity = total_success_time / (total_success_time + total_failure_time)
                 table_lines.append(['TOTAL', total_success_time, total_success_n, avg_success_time, total_failure_time, total_failure_n, avg_failure_time, productivity])
                 table_lines = sorted(table_lines, key=lambda x: x[1] + x[4])
-                with open(rule_profile, 'w') as rp:
-                    rp.write(tabulate(table_lines, headers=('Rule', 'Total Success Time', '# Successes', 'Avg. Success Time', 'Total Failure Time', '# Failures', 'Avg. Failure Time', 'Productivity')))
+                with open(rule_profile, 'w') as rp_file:
+                    writer = csv.writer(rp_file)
+                    writer.writerow(('Rule', 'Total Success Time', '# Successes', 'Avg. Success Time', 'Total Failure Time', '# Failures', 'Avg. Failure Time', 'Productivity'))
+                    writer.writerows(table_lines)
                     _LOGGER.info(f'Wrote rule profile: {rule_profile}')
 
             return final_state

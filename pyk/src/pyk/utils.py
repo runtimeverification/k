@@ -53,6 +53,15 @@ class FrozenDict(Mapping[K, V]):
         return f'FrozenDict({repr(self._dict)})'
 
 
+def raised(f, *args, **kwargs) -> Optional[BaseException]:
+    try:
+        f(*args, **kwargs)
+    except BaseException as e:
+        return e
+
+    return None
+
+
 def merge_with(f, d1: Mapping, d2: Mapping) -> Dict:
     res = dict(d1)
     for k, v2 in d2.items():
@@ -105,6 +114,21 @@ def unique(iterable: Iterable[H]) -> Iterator[H]:
         else:
             elems.add(elem)
             yield elem
+
+
+def repeat_last(iterable: Iterable[T]) -> Iterator[T]:
+    it = iter(iterable)
+    last: Optional[T] = None
+    while True:
+        try:
+            last = next(it)
+            yield last
+
+        except StopIteration:
+            if last is None:
+                return
+
+            yield last
 
 
 def nonempty_str(x: Any) -> str:
