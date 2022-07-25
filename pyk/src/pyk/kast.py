@@ -1365,6 +1365,7 @@ class KFlatModule(KOuter, WithKAtt):
     def let_att(self, att: KAtt) -> 'KFlatModule':
         return self.let(att=att)
 
+
 @final
 @dataclass(frozen=True)
 class KFlatModuleList(KOuter):
@@ -1387,6 +1388,7 @@ class KFlatModuleList(KOuter):
         mainModule = mainModule if mainModule is not None else self.mainModule
         modules = modules if modules is not None else self.modules
         return KFlatModuleList(mainModule=mainModule, modules=modules)
+
 
 @final
 @dataclass(frozen=True)
