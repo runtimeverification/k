@@ -45,6 +45,8 @@ import org.kframework.kore.VisitK;
 import org.kframework.unparser.Formatter;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
@@ -107,7 +109,14 @@ public class ModuleToKORE {
     private final Set<String> mlBinders = new HashSet<>();
     private final KompileOptions options;
 
+    private final KExceptionManager kem;
+
     public ModuleToKORE(Module module, KLabel topCellInitializer, KompileOptions options) {
+        this(module, topCellInitializer, options, null);
+    }
+
+    public ModuleToKORE(Module module, KLabel topCellInitializer, KompileOptions options, KExceptionManager kem) {
+        this.kem = kem;
         this.module = module;
         this.addSortInjections = new AddSortInjections(module);
         this.topCellInitializer = topCellInitializer;
@@ -943,6 +952,8 @@ public class ModuleToKORE {
             assertNoExistentials(rule, existentials);
             if (rule instanceof Claim) {
                 sb.append("  claim{R");
+                if (kem != null) // TODO: remove once https://github.com/runtimeverification/haskell-backend/issues/3010 is implemented
+                    kem.registerCompilerWarning(KException.ExceptionType.FUTURE_ERROR, "Functional claims not yet supported. https://github.com/runtimeverification/haskell-backend/issues/3010", rule);
             } else {
                 sb.append("  axiom{R");
             }
