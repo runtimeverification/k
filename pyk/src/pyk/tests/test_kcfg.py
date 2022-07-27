@@ -1,20 +1,16 @@
-from typing import Any, Dict, List, Tuple, cast
+from typing import Any, Dict, List, Tuple
 from unittest import TestCase
 
 from ..cterm import CTerm
-from ..kast import TRUE, KApply, KAst, KInner, KVariable
+from ..kast import TRUE, KApply, KInner, KVariable
 from ..kcfg import KCFG
-from ..ktool import KPrint
-from ..prelude import token
-from ..utils import shorten_hashes
+from ..prelude import mlEquals, token
+from ..utils import shorten_hash
+from .mock_kprint import MockKPrint
 
 
 def nid(i: int) -> str:
     return node(i).id
-
-
-def short_id(i: int) -> str:
-    return shorten_hashes(nid(i))
 
 
 # over 10 is variables
@@ -39,8 +35,8 @@ def node_dicts(n: int) -> List[Dict[str, Any]]:
 
 def edge_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
 
-    def _make_edge_dict(i, j, depth=1):
-        return {'source': nid(i), 'target': nid(j), 'condition': TRUE.to_dict(), 'depth': depth}
+    def _make_edge_dict(i, j, depth=1, condition=TRUE):
+        return {'source': nid(i), 'target': nid(j), 'condition': condition.to_dict(), 'depth': depth}
 
     return [_make_edge_dict(*edge) for edge in edges]
 
@@ -50,15 +46,6 @@ def cover_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
         {'source': nid(i), 'target': nid(j), 'condition': TRUE.to_dict(), 'depth': 1}
         for i, j in edges
     ]
-
-
-class MockKPrint:
-    def pretty_print(self, term: KAst) -> str:
-        return str(term)
-
-
-def mock_kprint() -> KPrint:
-    return cast(KPrint, MockKPrint())
 
 
 class KCFGTestCase(TestCase):
@@ -263,59 +250,125 @@ class KCFGTestCase(TestCase):
             },
         )
 
+    def test_resolve(self):
+        # Given
+        d = {
+            'nodes': node_dicts(4),
+            'edges': edge_dicts((0, 1), (0, 2), (1, 2), (1, 3), (2, 3), (3, 0)),
+        }
+        cfg = KCFG.from_dict(d)
+
+        self.assertEqual(node(1), cfg.node('d33..d8'))
+        self.assertEqual(node(1), cfg.node(node(1).id))
+
+        # Matches no nodes
+        with self.assertRaises(ValueError, msg='Unknown node: deadbeef..d8'):
+            self.assertEqual(node(1), cfg.node('deadbeef..d8'))
+
+        # Matches all nodes
+        with self.assertRaisesRegex(ValueError, 'Multiple nodes for pattern: ...'):
+            cfg.node('..')
+
+        # Matches node(0) and node(2)
+        with self.assertRaisesRegex(ValueError, 'Multiple nodes for pattern: ...'):
+            cfg.node('3..')
+
+    def test_aliases(self):
+        # Given
+        d = {
+            'init': [nid(0)],
+            'target': [nid(3)],
+            'nodes': node_dicts(4),
+            'edges': edge_dicts((0, 1), (1, 2)),
+            'aliases': {'foo': nid(1)}
+        }
+
+        cfg = KCFG.from_dict(d)
+        self.assertEqual(cfg.node('@foo'), node(1))
+
+        self.assertEqual(cfg.node('#init'), node(0))
+        self.assertEqual(cfg.node('#target'), node(3))
+        cfg.add_expanded(nid(0))
+        cfg.add_expanded(nid(1))
+        self.assertEqual(cfg.node('#frontier'), node(2))
+
+        cfg.add_alias('bar', node(0).id)
+        cfg.add_alias('bar2', node(0).id)
+        self.assertEqual(cfg.node('@bar'), node(0))
+        self.assertEqual(cfg.node('@bar2'), node(0))
+        cfg.remove_alias('bar')
+        with self.assertRaises(ValueError, msg='Unknown alias: @bar'):
+            cfg.node('@bar')
+
+        with self.assertRaises(ValueError, msg='Duplicate alias "bar2"'):
+            cfg.add_alias('bar2', node(1).id)
+        with self.assertRaises(ValueError, msg='Alias may not contain "@"'):
+            cfg.add_alias('@buzz', node(1).id)
+        with self.assertRaises(ValueError, msg=f'Unknown node: {nid(3)}'):
+            cfg.add_alias('buzz', node(9).id)
+
+        cfg.remove_node(nid(1))
+        cfg.create_node(term(1))
+
     def test_pretty_print(self):
         d = {
             'init': [nid(0)],
             'target': [nid(6)],
             'nodes': node_dicts(12),
+            'aliases': {'foo': nid(3), 'bar': nid(3)},
                                                              # Each of the branching edges have given depth=0 # noqa: E131
             'edges': edge_dicts((0, 1), (1, 2, 5), (2, 3),   # Initial Linear segment
-                                (3, 4, 0), (4, 5), (5, 2),   # Loops back
-                                (3, 5, 0),                   # Go to previous non-terminal node not as loop
-                                (3, 6, 0),                   # Terminates
-                                (3, 7, 0), (7, 6),           # Go to previous terminal node not as loop
-                                (3, 11, 0), (11, 8)          # Covered
+                                (3, 4, 0, mlEquals(KVariable('x'), token(4))), (4, 5), (5, 2),   # Loops back
+                                (3, 5, 0, mlEquals(KVariable('x'), token(5))),                   # Go to previous non-terminal node not as loop
+                                (3, 6, 0, mlEquals(KVariable('x'), token(6))),                   # Terminates
+                                (3, 7, 0, mlEquals(KVariable('x'), token(7))), (7, 6),           # Go to previous terminal node not as loop
+                                (3, 11, 0, mlEquals(KVariable('x'), token(11))), (11, 8)         # Covered
                                 ),
-            'covers': cover_dicts((8, 11))                   # Loops back
+            'covers': cover_dicts((8, 11)),                  # Loops back
+            'expanded': [nid(i) for i in [0, 1, 2, 3, 4, 5, 7, 11]],
+            'verified': edge_dicts((1, 2)),
         }
         cfg = KCFG.from_dict(d)
 
-        print(set(map(lambda node: node.id, cfg.reachable_nodes(nid(5), reverse=True, traverse_covers=True))))
+        def _short_hash(i) -> str:
+            return shorten_hash(nid(i))
 
-        # TODO: Why are all nodes (besides the target) frontiers?
-        # TODO: Add a cover
         self.maxDiff = None
-        actual = '\n'.join(cfg.pretty_print(mock_kprint())) + '\n'
+        actual = '\n'.join(cfg.pretty(MockKPrint())) + '\n'
         self.assertMultiLineEqual(actual,
-                                  f"{short_id(0)} (init, frontier)\n"
+                                  f"{_short_hash(0)} (init, expanded)\n"
                                   f"│  (1 step)\n"
-                                  f"├  {short_id(1)} (frontier)\n"
+                                  f"├  {_short_hash(1)} (expanded)\n"
+                                  f"│  \033[1m\33[32m(verified)\033[0m\033[0m\n"
                                   f"│  (5 steps)\n"
-                                  f"├  {short_id(2)} (frontier)\n"
+                                  f"├  {_short_hash(2)} (expanded)\n"
                                   f"│  (1 step)\n"
-                                  f"├  {short_id(3)} (frontier)\n"
-                                  f"┢━ {short_id(4)} (frontier)\n"
+                                  f"├  {_short_hash(3)} (expanded, @bar, @foo)\n"
+                                  f"┣━ {_short_hash(4)} (expanded)    _==K_ ( x , 4 )\n"
                                   f"┃   │  (1 step)\n"
-                                  f"┃   ├  {short_id(5)} (frontier)\n"
+                                  f"┃   ├  {_short_hash(5)} (expanded)\n"
                                   f"┃   │  (1 step)\n"
-                                  f"┃   ├  {short_id(2)} (frontier)\n"
+                                  f"┃   ├  {_short_hash(2)} (expanded)\n"
                                   f"┃   ┊ (looped back)\n"
                                   f"┃\n"
-                                  f"┣━ {short_id(5)} (frontier)\n"
+                                  f"┣━ {_short_hash(5)} (expanded)    _==K_ ( x , 5 )\n"
                                   f"┃   ┊ (continues as previously)\n"
                                   f"┃\n"
-                                  f"┣━ {short_id(6)} (target, leaf)\n"
+                                  f"┣━ {_short_hash(6)} (target, leaf)    _==K_ ( x , 6 )\n"
                                   f"┃\n"
-                                  f"┣━ {short_id(7)} (frontier)\n"
+                                  f"┣━ {_short_hash(7)} (expanded)    _==K_ ( x , 7 )\n"
                                   f"┃   │  (1 step)\n"
-                                  f"┃   └  {short_id(6)} (target, leaf)\n"
+                                  f"┃   └  {_short_hash(6)} (target, leaf)\n"
                                   f"┃\n"
-                                  f"┗━ {short_id(11)} (frontier)\n"
+                                  f"┗━ {_short_hash(11)} (expanded)    _==K_ ( x , 11 )\n"
                                   f"    │  (1 step)\n"
-                                  f"    ├  {short_id(8)} (leaf)\n"
-                                  f"    │  constraint: KApply(label=KLabel(name='#Top', params=(KSort(name='GeneratedTopCell'),)), args=())\n"
-                                  f"    │  subst:\n"
-                                  f"    │    KApply(label=KLabel(name='#Equals', params=(KSort(name='K'), KSort(name='K'))), args=(KVariable(name='V11'), KToken(token='8', sort=KSort(name='Int'))))\n"
-                                  f"    ├  {short_id(11)} (frontier)\n"
-                                  f"    ┊ (looped back)\n\n"
+                                  f"    ├  {_short_hash(8)} (leaf)\n"
+                                  f"    ┊  constraint: true\n"
+                                  f"    ┊  subst:\n"
+                                  f"    ┊    V11 |-> 8\n"
+                                  f"    └╌ {_short_hash(11)} (expanded)\n"
+                                  f"        ┊ (looped back)\n"
+                                  f"\n"
+                                  f"\033[1m{_short_hash(10)} (frontier, leaf)\033[0m\n"
+                                  f"\033[1m{_short_hash(9)} (frontier, leaf)\033[0m\n"
                                   )

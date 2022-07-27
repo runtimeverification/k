@@ -1,0 +1,21 @@
+[Error] Compiler: Found #fun expression in a pattern location (LHS and outside of rewrite).
+	Source(checkRHSHaskell.k)
+	Location(23,14,23,33)
+	23 |	    rule <k> #let _ = 1 #in true => 2 </k>
+	   .	             ^~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Found #fun expression in a pattern location (LHS and outside of rewrite).
+	Source(checkRHSHaskell.k)
+	Location(25,40,25,59)
+	25 |	    rule <k> a => b </k> requires #let #let _ = 2 #in true = 1 #in true
+	   .	                                       ^~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Found #fun expression in a pattern location (LHS and outside of rewrite).
+	Source(checkRHSHaskell.k)
+	Location(27,26,27,47)
+	27 |	    rule <k> (1 => 2) ~> #fun ( _ => 2 ) ( 2 ) </k>
+	   .	                         ^~~~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Found #fun expression in a pattern location (LHS and outside of rewrite).
+	Source(checkRHSHaskell.k)
+	Location(29,42,29,61)
+	29 |	    rule <k> 1 => 2 </k> requires #fun ( #let _ = 1 #in true => true ) ( 5 )
+	   .	                                         ^~~~~~~~~~~~~~~~~~~
+[Error] Compiler: Had 4 structural errors.
