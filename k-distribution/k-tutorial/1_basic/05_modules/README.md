@@ -6,14 +6,14 @@ complete K definition.
 
 ## K's outer syntax
 
-Recall from [Lesson 1.3](../03_parsing/README.md) that K's grammar is broken into
-two components: the **outer syntax** of K and the **inner syntax** of K. Outer
-syntax, as previously mentioned, consists of **requires**, **modules**,
+Recall from [Lesson 1.3](../03_parsing/README.md) that K's grammar is broken
+into two components: the **outer syntax** of K and the **inner syntax** of K.
+Outer syntax, as previously mentioned, consists of **requires**, **modules**,
 **imports**, and **sentences**. A K semantics is expressed by the set of
 sentences contained in the definition. The scope of what is considered
-contained in that definition is determined both by the
-**main semantics module** of a K definition, as well as the requires and
-imports present in the file that contains that module.
+contained in that definition is determined both by the **main semantics
+module** of a K definition, as well as the **requires** and **imports** present
+in the file that contains that module.
 
 ## Basic module syntax
 
@@ -141,22 +141,20 @@ main syntax module will be `FOO-SYNTAX`.
 
 ## Splitting a definition into multiple files
 
-So far, while we have discussed ways to break definitions into multiple
-conceptual components, this is of limited usefulness because we are still
-forced to put all the modules in the definition into a single file. This is
-obviously not desirable. As a result, K provides a mechanism for combining
-files in a K definition, namely, the **requires** directive.
+So far, while we have discussed ways to break definitions into separate
+conceptual components (modules), K also provides a mechanism for combining
+multiple files into a single K definition, namely, the **requires** directive.
 
-In K, the `requires` keyword has two meanings. The first, the requires
+In K, the `requires` keyword has two meanings. The first, the **requires**
 statement, appears at the top of a K file, prior to any module declarations. It
 consists of the keyword `requires` followed by a double-quoted string. The
 second meaning of the `requires` keyword will be covered in a later lesson,
 but it is distinguished because the second case occurs only inside modules.
 
-The string passed to the requires statement contains a filename. When you run
+The string passed to the **requires** statement contains a filename. When you run
 `kompile` on a file, it will look at all of the `requires` statements in that
 file, look up those files on disk, parse them, and then recursively process all
-the requires statements in those files. It then combines all the modules in all
+the **requires** statements in those files. It then combines all the modules in all
 of those files together, and uses them collectively as the set of modules to
 which `imports` statements can refer.
 

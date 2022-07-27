@@ -2,15 +2,35 @@
   class="navbar navbar-expand navbar-dark flex-column flex-md-row bd-navbar"
 >
   <a class="logo-link" href="{{$ROOT}}/index.html">
-    <img
-      class="logo-dark"
-      srcset="{{$ROOT}}/assets/img/k-logo.png"
-      alt="K"
-      style="height: 48px;"
-    />
+    <picture>
+      <source
+        srcset="{{$ROOT}}/assets/img/k-logo-dark.png"
+        media="(prefers-color-scheme: dark)"
+      />
+      <img src="{{$ROOT}}/assets/img/k-logo.png" alt="K" style="height: 48px" />
+    </picture>
     Semantic Framework
   </a>
   <ul class="navbar-nav ml-md-auto">
+    <li class="nav-item dropdown">
+      <a
+        class="nav-link dropdown-toggle"
+        href="#"
+        id="navbarDropdown"
+        role="button"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        <i class="fas fa-book"></i>
+      </a>
+      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <a class="dropdown-item" href="{{$ROOT}}/exports/K.pdf">pdf</a>
+        <a class="dropdown-item" href="{{$ROOT}}/exports/K.epub">epub</a>
+        <a class="dropdown-item" href="{{$ROOT}}/exports/K.mobi">mobi</a>
+        <a class="dropdown-item" href="{{$ROOT}}/exports/K.html">html</a>
+      </div>
+    </li>
     <li class="nav-item">
       <a
         class="nav-link pl-2 pr-1 mx-1 py-3 my-n2"
@@ -29,3 +49,9 @@
     >Download</a
   >
 </header>
+<style>
+  .dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0; /* remove the gap so it doesn't close */
+  }
+</style>

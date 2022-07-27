@@ -290,14 +290,14 @@ semantics later. For example:
 syntax Id ::= "main" [token]
 ```
 
-Here we declare that `main` is a token of sort `Id`. Instead of being parsed
+Here, we declare that `main` is a token of sort `Id`. Instead of being parsed
 as a symbol, it gets parsed as a token, generating a typed string in the AST.
 This is useful in a semantics of C because the parser generally does not treat
 the `main` function in C specially; only the semantics treats it specially.
 
-Of course, each language may have different lexical syntax, some of which may
-be more complex. For example, if we wish to define the syntax of integers in C,
-we could use the following production:
+Of course, languages can have more complex lexical syntax. For example, if we
+wish to define the syntax of integers in C, we could use the following
+production:
 
 ```{.k .exclude}
 syntax IntConstant ::= r"(([1-9][0-9]*)|(0[0-7]*)|(0[xX][0-9a-fA-F]+))(([uU][lL]?)|([uU]((ll)|(LL)))|([lL][uU]?)|(((ll)|(LL))[uU]?))?" [token]

@@ -1,0 +1,55 @@
+{
+  "tag": "Rewrites",
+  "sort": {
+    "tag": "SortApp",
+    "name": "EyozcWbqpI'AB9s3282",
+    "args": []
+  },
+  "source": {
+    "tag": "Rewrites",
+    "sort": {
+      "tag": "SortVar",
+      "name": "KEGO2Lbng1-pO-bE936"
+    },
+    "source": {
+      "tag": "Forall",
+      "sort": {
+        "tag": "SortVar",
+        "name": "CP9y6O2e0"
+      },
+      "var": "f694aaau3",
+      "varSort": {
+        "tag": "SortApp",
+        "name": "R7tL",
+        "args": []
+      },
+      "arg": {
+        "tag": "Bottom",
+        "sort": {
+          "tag": "SortApp",
+          "name": "XIfDE024",
+          "args": []
+        }
+      }
+    },
+    "dest": {
+      "tag": "String",
+      "value": ""
+    }
+  },
+  "dest": {
+    "tag": "DV",
+    "sort": {
+      "tag": "SortApp",
+      "name": "Xmbw-201210",
+      "args": [
+        {
+          "tag": "SortApp",
+          "name": "n09",
+          "args": []
+        }
+      ]
+    },
+    "value": "ᘢ+粏〞\t"
+  }
+}

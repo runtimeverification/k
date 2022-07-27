@@ -142,7 +142,7 @@ public class KILtoKORE extends KILTransformation<Object> {
         scala.collection.Set<Tag> tags = toTags(ii.getTags(), ii);
         String assocOrig = ii.getAssoc();
         Associativity assoc = applyAssoc(assocOrig);
-        return SyntaxAssociativity(assoc, tags);
+        return SyntaxAssociativity(assoc, tags, convertAttributes(ii));
     }
 
     public Associativity applyAssoc(String assocOrig) {

@@ -3,10 +3,13 @@ package org.kframework.compile.checks;
 
 import com.google.common.collect.Sets;
 import org.kframework.attributes.Att;
+import org.kframework.backend.Backends;
 import org.kframework.compile.GatherVarsVisitor;
+import org.kframework.compile.PatternValueAwareVisitor;
 import org.kframework.definition.Claim;
 import org.kframework.definition.Context;
 import org.kframework.definition.ContextAlias;
+import org.kframework.definition.Rule;
 import org.kframework.definition.RuleOrClaim;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.K;
@@ -31,18 +34,23 @@ import java.util.Set;
 public class CheckRHSVariables {
     private final Set<KEMException> errors;
     private final boolean errorExistential;
+    private final String backend;
 
-    public CheckRHSVariables(Set<KEMException> errors, boolean errorExistential) {
+    public CheckRHSVariables(Set<KEMException> errors, boolean errorExistential, String backend) {
         this.errors = errors;
         this.errorExistential = errorExistential;
+        this.backend = backend;
     }
     private void check(RuleOrClaim rule) {
         resetVars();
         Set<String> unboundVariableNames = getUnboundVarNames(rule);
         boolean errorExistential = this.errorExistential && !(rule.att().contains(Att.LABEL()) && rule.att().get(Att.LABEL()).equals("STDIN-STREAM.stdinUnblock"));
+        new PatternValueAwareVisitor(true, errors).apply(rule.body());
+        new PatternValueAwareVisitor(false, errors).apply(rule.requires());
+        new PatternValueAwareVisitor(false, errors).apply(rule.ensures());
         gatherVars(true, rule.body(), errorExistential);
         gatherVars(false, rule.ensures(), errorExistential);
-        if (rule instanceof Claim) {
+        if (rule instanceof Claim || (rule instanceof Rule && backend.equals(Backends.HASKELL))) {
             gatherVars(true, rule.requires(), errorExistential);
             check(rule.body(), true, false, unboundVariableNames);
             check(rule.requires(), true, false, unboundVariableNames);

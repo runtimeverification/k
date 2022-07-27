@@ -1,7 +1,9 @@
+import logging
 from collections import Counter
 from typing import (
     Callable,
     Dict,
+    Final,
     List,
     Mapping,
     Optional,
@@ -9,9 +11,9 @@ from typing import (
     Tuple,
     Type,
     TypeVar,
-    Union,
 )
 
+from .cterm import CTerm, split_config_and_constraints
 from .kast import (
     FALSE,
     TRUE,
@@ -26,7 +28,6 @@ from .kast import (
     KRule,
     KRuleLike,
     KSequence,
-    KSort,
     KToken,
     KVariable,
     Subst,
@@ -51,6 +52,8 @@ from .prelude import (
     mlTop,
 )
 from .utils import find_common_items, hash_str, unique
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 KI = TypeVar('KI', bound=KInner)
 W = TypeVar('W', bound=WithKAtt)
@@ -98,8 +101,17 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
                     return KApply(KLabel('notBool_'), [_kast.args[1]])
                 if type(_kast.args[0]) in [KVariable, KToken]:
                     return KApply('_==K_', _kast.args)
-                if unsafe:
+            if unsafe:
+                if _kast.label.name == '#Equals':
                     return KApply('_==K_', _kast.args)
+                if _kast.label.name == '#Ceil':
+                    ceil_var = abstract_term_safely(_kast, base_name='Ceil')
+                    _LOGGER.warning(f'Converting #Ceil condition to variable {ceil_var.name}: {_kast}')
+                    return ceil_var
+                if _kast.label.name == '#Exists':
+                    exists_var = abstract_term_safely(_kast, base_name='Exists')
+                    _LOGGER.warning(f'Converting #Exists condition to variable {exists_var.name}: {_kast}')
+                    return exists_var
         raise ValueError(f'Could not convert ML predicate to sort Bool: {_kast}')
 
     return _ml_constraint_to_bool(kast)
@@ -197,27 +209,6 @@ def count_vars(term: KInner) -> Counter:
 
 def collectFreeVars(kast):
     return list(count_vars(kast).keys())
-
-
-# TODO infer sort based on cell name
-def splitConfigAndConstraints(kast, sort: Union[str, KSort] = Sorts.K):
-    """Split the configuration/term from the constraints.
-
-    -   Input: kast conjunct representing a constrained term.
-    -   Output: tuple of term and constraint.
-    """
-    conjuncts = flattenLabel('#And', kast)
-    term = None
-    constraints = []
-    for c in conjuncts:
-        if type(c) is KApply and c.is_cell:
-            term = c
-        else:
-            constraints.append(c)
-    constraint = mlAnd(constraints, sort)
-    if not term:
-        raise ValueError(f'Could not find configuration for: {kast}')
-    return (term, constraint)
 
 
 def propagate_up_constraints(k):
@@ -512,20 +503,20 @@ def omitLargeTokens(kast, maxLen=78):
 
 
 def getCell(constrainedTerm, cellVariable):
-    (state, _) = splitConfigAndConstraints(constrainedTerm)
+    (state, _) = split_config_and_constraints(constrainedTerm)
     (_, subst) = splitConfigFrom(state)
     return subst[cellVariable]
 
 
 def setCell(constrainedTerm, cellVariable, cellValue):
-    (state, constraint) = splitConfigAndConstraints(constrainedTerm)
+    (state, constraint) = split_config_and_constraints(constrainedTerm)
     (config, subst) = splitConfigFrom(state)
     subst[cellVariable] = cellValue
     return mlAnd([substitute(config, subst), constraint])
 
 
 def removeUselessConstraints(constrainedTerm, keepVars=None):
-    (state, constraint) = splitConfigAndConstraints(constrainedTerm)
+    (state, constraint) = split_config_and_constraints(constrainedTerm)
     constraints = flattenLabel('#And', constraint)
     usedVars = collectFreeVars(state)
     usedVars = usedVars if keepVars is None else (usedVars + keepVars)
@@ -553,60 +544,67 @@ def removeConstraintClausesFor(varNames, constraint):
 
 
 def removeConstraintsFor(varNames, constrainedTerm):
-    (state, constraint) = splitConfigAndConstraints(constrainedTerm)
+    (state, constraint) = split_config_and_constraints(constrainedTerm)
     constraint = removeConstraintClausesFor(varNames, constraint)
     return mlAnd([state, constraint])
 
 
-def buildRule(ruleId, initConstrainedTerm, finalConstrainedTerm, claim=False, priority=None, keepVars=None) -> Tuple[KRuleLike, Dict[str, KVariable]]:
-    (initConfig, initConstraint) = splitConfigAndConstraints(initConstrainedTerm)
-    (finalConfig, finalConstraint) = splitConfigAndConstraints(finalConstrainedTerm)
-    initConstraints = flattenLabel('#And', initConstraint)
-    finalConstraints = [c for c in flattenLabel('#And', finalConstraint) if c not in initConstraints]
-    initConstrainedTerm = mlAnd([initConfig] + initConstraints)
-    finalConstrainedTerm = mlAnd([finalConfig] + finalConstraints)
+def build_rule(
+    rule_id: str,
+    init_cterm: CTerm,
+    final_cterm: CTerm,
+    claim: bool = False,
+    priority: Optional[int] = None,
+    keep_vars: Optional[List[str]] = None
+) -> Tuple[KRuleLike, Dict[str, KVariable]]:
 
-    lhsVars = collectFreeVars(initConstrainedTerm)
-    rhsVars = collectFreeVars(finalConstrainedTerm)
-    varOccurances = count_vars(mlAnd([initConstrainedTerm, finalConstrainedTerm]))
-    vSubst: Dict[str, KVariable] = {}
-    vremapSubst: Dict[str, KVariable] = {}
-    for v in varOccurances:
-        newV = v
-        if varOccurances[v] == 1:
-            newV = '_' + newV
-        if v in rhsVars and v not in lhsVars:
-            newV = '?' + newV
-        vSubst[v] = KVariable(newV)
-        vremapSubst[newV] = KVariable(v)
+    init_config, *init_constraints = init_cterm
+    final_config, *final_constraints = final_cterm
+    final_constraints = [c for c in final_constraints if c not in init_constraints]
+    init_term = mlAnd([init_config] + init_constraints)
+    final_term = mlAnd([final_config] + final_constraints)
 
-    initConstrainedTerm = substitute(initConstrainedTerm, vSubst)
-    finalConstrainedTerm = applyExistentialSubstitutions(substitute(finalConstrainedTerm, vSubst))
-    (initConfig, initConstraint) = splitConfigAndConstraints(initConstrainedTerm)
-    (finalConfig, finalConstraint) = splitConfigAndConstraints(finalConstrainedTerm)
+    lhs_vars = collectFreeVars(init_term)
+    rhs_vars = collectFreeVars(final_term)
+    var_occurances = count_vars(mlAnd([push_down_rewrites(KRewrite(init_config, final_config))] + init_constraints + final_constraints, Sorts.GENERATED_TOP_CELL))
+    v_subst: Dict[str, KVariable] = {}
+    vremap_subst: Dict[str, KVariable] = {}
+    for v in var_occurances:
+        new_v = v
+        if var_occurances[v] == 1:
+            new_v = '_' + new_v
+        if v in rhs_vars and v not in lhs_vars:
+            new_v = '?' + new_v
+        v_subst[v] = KVariable(new_v)
+        vremap_subst[new_v] = KVariable(v)
 
-    ruleBody = push_down_rewrites(KRewrite(initConfig, finalConfig))
-    ruleRequires = simplifyBool(ml_pred_to_bool(initConstraint))
-    ruleEnsures = simplifyBool(ml_pred_to_bool(finalConstraint))
-    attDict = {} if claim or priority is None else {'priority': str(priority)}
-    ruleAtt = KAtt(atts=attDict)
+    init_term = substitute(init_term, v_subst)
+    final_term = applyExistentialSubstitutions(substitute(final_term, v_subst))
+    (init_config, init_constraint) = split_config_and_constraints(init_term)
+    (final_config, final_constraint) = split_config_and_constraints(final_term)
+
+    rule_body = push_down_rewrites(KRewrite(init_config, final_config))
+    rule_requires = simplifyBool(ml_pred_to_bool(init_constraint))
+    rule_ensures = simplifyBool(ml_pred_to_bool(final_constraint))
+    att_dict = {} if claim or priority is None else {'priority': str(priority)}
+    rule_att = KAtt(atts=att_dict)
 
     rule: KRuleLike
     if not claim:
-        rule = KRule(ruleBody, requires=ruleRequires, ensures=ruleEnsures, att=ruleAtt)
+        rule = KRule(rule_body, requires=rule_requires, ensures=rule_ensures, att=rule_att)
     else:
-        rule = KClaim(ruleBody, requires=ruleRequires, ensures=ruleEnsures, att=ruleAtt)
+        rule = KClaim(rule_body, requires=rule_requires, ensures=rule_ensures, att=rule_att)
 
-    rule = rule.update_atts({'label': ruleId})
-    newKeepVars = None
-    if keepVars is not None:
-        newKeepVars = [vSubst[v].name for v in keepVars]
-    return (minimizeRule(rule, keepVars=newKeepVars), vremapSubst)
+    rule = rule.update_atts({'label': rule_id})
+    new_keep_vars = None
+    if keep_vars is not None:
+        new_keep_vars = [v_subst[v].name for v in keep_vars]
+    return (minimizeRule(rule, keepVars=new_keep_vars), vremap_subst)
 
 
-def abstractTermSafely(kast, baseName='V'):
+def abstract_term_safely(kast: KInner, base_name: str = 'V') -> KVariable:
     vname = hash_str(kast)[0:8]
-    return KVariable(baseName + '_' + vname)
+    return KVariable(base_name + '_' + vname)
 
 
 def antiUnify(state1, state2):
@@ -615,7 +613,7 @@ def antiUnify(state1, state2):
 
     def _rewritesToAbstractions(_kast):
         if type(_kast) is KRewrite:
-            return abstractTermSafely(_kast)
+            return abstract_term_safely(_kast)
         return _kast
 
     minimizedRewrite = push_down_rewrites(KRewrite(state1, state2))
@@ -628,8 +626,8 @@ def antiUnify(state1, state2):
 
 
 def antiUnifyWithConstraints(constrainedTerm1, constrainedTerm2, implications=False, disjunct=False):
-    (state1, constraint1) = splitConfigAndConstraints(constrainedTerm1)
-    (state2, constraint2) = splitConfigAndConstraints(constrainedTerm2)
+    (state1, constraint1) = split_config_and_constraints(constrainedTerm1)
+    (state2, constraint2) = split_config_and_constraints(constrainedTerm2)
     constraints1 = flattenLabel('#And', constraint1)
     constraints2 = flattenLabel('#And', constraint2)
     (state, subst1, subst2) = antiUnify(state1, state2)
@@ -667,7 +665,7 @@ def removeDisjuncts(constrainedTerm):
 
 
 def applyExistentialSubstitutions(constrainedTerm):
-    (state, constraint) = splitConfigAndConstraints(constrainedTerm)
+    (state, constraint) = split_config_and_constraints(constrainedTerm)
     constraints = flattenLabel('#And', constraint)
     substPattern = mlEqualsTrue(KApply('_==K_', [KVariable('#VAR'), KVariable('#VAL')]))
     subst = {}
@@ -705,16 +703,12 @@ def constraintSubsume(constraint1, constraint2):
 
 
 def matchWithConstraint(constrainedTerm1, constrainedTerm2):
-    (state1, constraint1) = splitConfigAndConstraints(constrainedTerm1)
-    (state2, constraint2) = splitConfigAndConstraints(constrainedTerm2)
+    (state1, constraint1) = split_config_and_constraints(constrainedTerm1)
+    (state2, constraint2) = split_config_and_constraints(constrainedTerm2)
     subst = state1.match(state2)
     if subst is not None and constraintSubsume(substitute(constraint1, subst), constraint2):
         return subst
     return None
-
-
-def minimizeSubst(subst):
-    return {k: subst[k] for k in subst if not (type(subst[k]) is KVariable and k == subst[k].name)}
 
 
 def substToMlPred(subst):
@@ -723,11 +717,6 @@ def substToMlPred(subst):
         if KVariable(k) != subst[k]:
             mlTerms.append(mlEquals(KVariable(k), subst[k]))
     return mlAnd(mlTerms)
-
-
-def substToMap(subst):
-    mapItems = [KApply('_|->_', [KVariable(k), subst[k]]) for k in subst]
-    return build_assoc(KApply('.Map'), '_Map_', mapItems)
 
 
 def undoAliases(definition, kast):

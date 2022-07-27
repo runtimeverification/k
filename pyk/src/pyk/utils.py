@@ -53,6 +53,15 @@ class FrozenDict(Mapping[K, V]):
         return f'FrozenDict({repr(self._dict)})'
 
 
+def raised(f, *args, **kwargs) -> Optional[BaseException]:
+    try:
+        f(*args, **kwargs)
+    except BaseException as e:
+        return e
+
+    return None
+
+
 def merge_with(f, d1: Mapping, d2: Mapping) -> Dict:
     res = dict(d1)
     for k, v2 in d2.items():
@@ -62,6 +71,10 @@ def merge_with(f, d1: Mapping, d2: Mapping) -> Dict:
         else:
             res[k] = v2
     return res
+
+
+def filter_none(mapping: Mapping[K, V]) -> Dict[K, V]:
+    return {k: v for k, v in mapping.items() if v is not None}
 
 
 def find_common_items(l1: Iterable[T], l2: Iterable[T]) -> Tuple[List[T], List[T], List[T]]:
@@ -103,6 +116,21 @@ def unique(iterable: Iterable[H]) -> Iterator[H]:
             yield elem
 
 
+def repeat_last(iterable: Iterable[T]) -> Iterator[T]:
+    it = iter(iterable)
+    last: Optional[T] = None
+    while True:
+        try:
+            last = next(it)
+            yield last
+
+        except StopIteration:
+            if last is None:
+                return
+
+            yield last
+
+
 def nonempty_str(x: Any) -> str:
     if x is None:
         raise ValueError('Expected nonempty string, found: null.')
@@ -111,6 +139,14 @@ def nonempty_str(x: Any) -> str:
     if x == '':
         raise ValueError("Expected nonempty string, found: ''")
     return x
+
+
+def add_indent(indent: str, lines: Iterable[str]) -> List[str]:
+    return [indent + line for line in lines]
+
+
+def is_hexstring(x: str) -> bool:
+    return all(c in string.hexdigits for c in x)
 
 
 # Hashes
@@ -125,7 +161,7 @@ def is_hash(x: Any) -> bool:
     # NB! currently only sha256 in hexdec form is detected
     # 2b9e b7c5 441e 9f7e 97f9 a4e5 fc04 a0f7 9f62 c8e9 605a ad1e 02db e8de 3c21 0422
     # 1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
-    return type(x) is str and len(x) == 64 and all(c in string.hexdigits for c in x)
+    return type(x) is str and len(x) == 64 and is_hexstring(x)
 
 
 def shorten_hash(h: str, leftChars=6, rightChars=6) -> str:
@@ -155,7 +191,17 @@ def shorten_hashes(value: Any, leftChars=6, rightChars=6) -> Any:
     return result
 
 
+def deconstruct_short_hash(h: str) -> Tuple[str, str]:
+    x = h.lower()
+    if is_hash(x):
+        return (x, x)
+    (l, sep, r) = x.partition('..')
+    if sep == '..' and is_hexstring(l) and is_hexstring(r):
+        return (l, r)
+    raise ValueError(f'Bad short hash: {h}')
+
+
 def compare_short_hashes(lhs: str, rhs: str):
-    left, right = lhs.split('.'), rhs.split('.')
-    (l0, l1, r0, r1) = (left[0].upper(), left[-1].upper(), right[0].upper(), right[-1].upper())
+    (l0, l1) = deconstruct_short_hash(lhs)
+    (r0, r1) = deconstruct_short_hash(rhs)
     return (l0.startswith(r0) or r0.startswith(l0)) and (l1.endswith(r1) or r1.endswith(l1))

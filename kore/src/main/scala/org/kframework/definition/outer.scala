@@ -357,7 +357,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
     }
 
   // check that non-terminals have a defined sort
-  def checkSorts () = sentences foreach {
+  def checkSorts (): Unit = localSentences foreach {
     case p@Production(_, params, _, items, _) =>
       val res = items collect
       { case nt: NonTerminal if !p.isSortVariable(nt.sort) && !definedSorts.contains(nt.sort.head) && !sortSynonymMap.contains(nt.sort) => nt
@@ -365,6 +365,20 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
       }
       if (res.nonEmpty)
         throw KEMException.compilerError("Could not find sorts: " + res.asJava, p)
+    case _ =>
+  }
+
+  def checkUserLists(): Unit = localSentences foreach {
+    case p@Production(_, _, srt, _, atts) =>
+      if (atts.contains(Att.USER_LIST)) {
+        val prev = importedSentences.find(s => s.isInstanceOf[Production]
+          && s.asInstanceOf[Production].sort.equals(srt)
+          && s.att.contains(Att.USER_LIST))
+        if (prev.isDefined)
+          throw KEMException.compilerError("Sort " + srt + " previously declared as a user list at "
+            + prev.get.source.get() + " and "
+            + prev.get.location.get(), p)
+      }
     case _ =>
   }
 
