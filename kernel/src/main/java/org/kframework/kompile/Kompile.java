@@ -447,6 +447,15 @@ public class Kompile {
                 errors.add(KEMException.compilerError("Found syntax declaration in proof module. Only tokens for existing sorts are allowed.", s));
 
         ModuleTransformer mt = ModuleTransformer.fromSentenceTransformer((m, s) -> {
+            if (s instanceof Rule && (s.att().contains(Att.SIMPLIFICATION()))) {
+                KLabel kl = m.matchKLabel((Rule) s);
+                scala.collection.Set<Production> prods = m.productionsFor().get(kl).getOrElse(() -> {
+                    throw KEMException.criticalError("Could not find productions for label " + kl.name(), s);
+                });
+                Att atts = prods.iterator().next().att();
+                if (!(atts.contains(Att.FUNCTION()) || atts.contains(Att.FUNCTIONAL()) || atts.contains("mlOp")))
+                    errors.add(KEMException.compilerError("Simplification rules need to be function/functional/mlOp like.", s));
+            }
             if (m.name().equals(mainDefModule.name()) || mainDefModule.importedModuleNames().contains(m.name()))
                 return s;
             if (!(s instanceof Claim || s.isSyntax())) {
