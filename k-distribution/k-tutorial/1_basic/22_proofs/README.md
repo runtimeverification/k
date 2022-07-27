@@ -290,7 +290,11 @@ understand why. We do so by examining the output, which should look as follows:
 This output starts with a message telling us at which point the proof failed,
 followed by the final state, which consists of three parts: some negative
 Matching Logic (ML) constraints, the final configuration (`<generatedTop> ...
-</generatedTop>`), and some positive ML constraints.
+</generatedTop>`), and some positive ML constraints. Generally speaking,
+these positive and the negative constraints could arise from various sources,
+such as (but not limited to) branches taken by the execution
+(e.g. `{ true #Equals A <Int B }` or `#Not ( { true #Equals A <Int B>} ) `),
+or `ensures` constraints.
 
 First, we examine the message:
 
