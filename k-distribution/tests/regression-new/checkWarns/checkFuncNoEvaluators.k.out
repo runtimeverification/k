@@ -1,0 +1,5 @@
+[Error] Compiler: Found function with no rules: thing_CHECKFUNCNOEVALUATORS-SYNTAX_Thing. Add no-evaluators to suppress this warning.
+	Source(checkFuncNoEvaluators.k)
+	Location(3,20,3,38)
+	3 |	  syntax Thing ::= "thing" [function]
+	  .	                   ^~~~~~~~~~~~~~~~~~

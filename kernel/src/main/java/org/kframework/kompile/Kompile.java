@@ -468,7 +468,8 @@ public class Kompile {
         stream(mainModule.productions()).forEach(prod -> {
             if (prod.att().contains(Att.FUNCTION()) && !prod.att().contains(Att.HOOK()) && !prod.att().contains(Att.NO_EVALUATORS()))
                 if (mainModule.rulesFor().get(prod.klabel().get()).isEmpty())
-                    errors.add(KEMException.compilerError("Found function with no rules: " + prod.klabel().get()+ " add " + Att.NO_EVALUATORS() + " to suppress this error.", prod));
+                    kem.registerCompilerWarning(ExceptionType.NON_EXHAUSTIVE_MATCH,"Found function with no rules: "
+                            + prod.klabel().get()+ ". Add " + Att.NO_EVALUATORS() + " to suppress this warning.", prod);
         });
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAtt(errors, kem, mainModule, isSymbolic && isKast)::check));
