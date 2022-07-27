@@ -29,7 +29,6 @@
   </dependencies>
 
   <properties>
-    <haskell.backend.flags.release>-release</haskell.backend.flags.release>
     <stack.extra-opts value="" />
   </properties>
 
@@ -42,9 +41,6 @@
           <value>Release</value>
         </property>
       </activation>
-      <properties>
-        <haskell.backend.flags.release>release</haskell.backend.flags.release>
-      </properties>
     </profile>
     <profile>
       <id>haskell.backend.RelWithDebug</id>
@@ -54,9 +50,6 @@
           <value>RelWithDebug</value>
         </property>
       </activation>
-      <properties>
-        <haskell.backend.flags.release>release</haskell.backend.flags.release>
-      </properties>
     </profile>
   </profiles>
 
@@ -75,9 +68,8 @@
                 <mkdir dir="${project.build.directory}/stack-install" />
                 <exec executable="stack" dir="${project.basedir}/src/main/native/haskell-backend" failonerror="true">
                   <arg value="install" />
-                  <arg value="--local-bin-path=${project.build.directory}/stack-install" />
-                  <arg value="--flag=kore:${haskell.backend.flags.release}" />
                   <arg line="${stack.extra-opts}" />
+                  <arg value="--local-bin-path=${project.build.directory}/stack-install" />
                 </exec>
               </target>
             </configuration>

@@ -3,6 +3,7 @@ package org.kframework.kprovex;
 
 import com.google.inject.Inject;
 import org.kframework.RewriterResult;
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
@@ -22,7 +23,11 @@ import scala.Tuple2;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static org.kframework.Collections.*;
 
 public class KProve {
 
@@ -87,7 +92,10 @@ public class KProve {
         }
 
         if (kproveOptions.emitJsonSpec != null) {
-            files.saveToWorkingDirectory(kproveOptions.emitJsonSpec, ToJson.apply(specModule));
+            Set<String> names = stream(compiled._1().modules()).map(Module::name).collect(Collectors.toSet());
+            Set<Module> specMods = stream(specModule.importedModules()).filter(m -> !names.contains(m.name())).collect(Collectors.toSet());
+            specMods.add(specModule);
+            files.saveToWorkingDirectory(kproveOptions.emitJsonSpec, ToJson.apply(specMods, specModule.name()));
         }
 
         RewriterResult results = rewriter.prove(specModule, boundaryPattern, true);

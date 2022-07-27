@@ -1,0 +1,65 @@
+{
+  "tag": "Equals",
+  "argSort": {
+    "tag": "SortVar",
+    "name": "qw'Exhr55F6y0FqaJtwHw4T3432"
+  },
+  "sort": {
+    "tag": "SortVar",
+    "name": "Xeg8ZV-cY0Lx7wEY4m-96Rdh444"
+  },
+  "first": {
+    "tag": "Forall",
+    "sort": {
+      "tag": "SortApp",
+      "name": "IQ4819",
+      "args": []
+    },
+    "var": "yl9845",
+    "varSort": {
+      "tag": "SortVar",
+      "name": "O'cuAftsN266"
+    },
+    "arg": {
+      "tag": "Mu",
+      "var": "@XD7CZb3i756",
+      "varSort": {
+        "tag": "SortVar",
+        "name": "KYu051119"
+      },
+      "arg": {
+        "tag": "Mu",
+        "var": "@q522882",
+        "varSort": {
+          "tag": "SortApp",
+          "name": "Vro4847",
+          "args": []
+        },
+        "arg": {
+          "tag": "Not",
+          "sort": {
+            "tag": "SortVar",
+            "name": "DHl"
+          },
+          "arg": {
+            "tag": "SVar",
+            "name": "@c19984",
+            "sort": {
+              "tag": "SortApp",
+              "name": "g57",
+              "args": []
+            }
+          }
+        }
+      }
+    }
+  },
+  "second": {
+    "tag": "DV",
+    "sort": {
+      "tag": "SortVar",
+      "name": "X497B4138cLKJOh9J7GPJT6"
+    },
+    "value": "FfYL`sc"
+  }
+}
