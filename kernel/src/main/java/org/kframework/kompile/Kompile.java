@@ -454,7 +454,7 @@ public class Kompile {
                 });
                 Att atts = prods.iterator().next().att();
                 if (!(atts.contains(Att.FUNCTION()) || atts.contains(Att.FUNCTIONAL()) || atts.contains("mlOp")))
-                    errors.add(KEMException.compilerError("Simplification rules need to be function/functional/mlOp like.", s));
+                    errors.add(KEMException.compilerError("Simplification rules expect function/functional/mlOp symbols at the top of the left hand side term.", s));
             }
             if (m.name().equals(mainDefModule.name()) || mainDefModule.importedModuleNames().contains(m.name()))
                 return s;

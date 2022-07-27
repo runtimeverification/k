@@ -1,9 +1,9 @@
-[Error] Compiler: Simplification rules need to be function/functional/mlOp like.
+[Error] Compiler: Simplification rules expect function/functional/mlOp symbols at the top of the left hand side term.
 	Source(a2-spec.k)
 	Location(7,8,7,55)
 	7 |	  rule <k> (X +Int Y) +Int Z => Z +Int (X +Int Y) </k> [simplification, symbolic(X), concrete(Y, Z)]
 	  .	       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-[Error] Compiler: Simplification rules need to be function/functional/mlOp like.
+[Error] Compiler: Simplification rules expect function/functional/mlOp symbols at the top of the left hand side term.
 	Source(a2-spec.k)
 	Location(8,8,8,25)
 	8 |	  rule notAFunction => 1 [simplification]
