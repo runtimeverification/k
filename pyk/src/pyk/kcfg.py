@@ -22,8 +22,14 @@ from typing import (
 from graphviz import Digraph
 
 from .cterm import CTerm
-from .kast import KInner, KRuleLike, Subst
-from .kastManip import build_rule, ml_pred_to_bool, mlAnd, simplifyBool
+from .kast import KClaim, KInner, KRule, Subst
+from .kastManip import (
+    build_claim,
+    build_rule,
+    ml_pred_to_bool,
+    mlAnd,
+    simplifyBool,
+)
 from .ktool import KPrint
 from .utils import add_indent, compare_short_hashes, shorten_hash
 
@@ -67,10 +73,15 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         def to_dict(self) -> Dict[str, Any]:
             return {'source': self.source.id, 'target': self.target.id, 'condition': self.condition.to_dict(), 'depth': self.depth}
 
-        def to_rule(self, claim=False, priority=50) -> KRuleLike:
+        def to_rule(self, priority=50) -> KRule:
             sentence_id = f'BASIC-BLOCK-{self.source.id}-TO-{self.target.id}'
-            rule, _ = build_rule(sentence_id, self.source.cterm.add_constraint(self.condition), self.target.cterm, claim=claim, priority=priority)
+            rule, _ = build_rule(sentence_id, self.source.cterm.add_constraint(self.condition), self.target.cterm, priority=priority)
             return rule
+
+        def to_claim(self) -> KClaim:
+            sentence_id = f'BASIC-BLOCK-{self.source.id}-TO-{self.target.id}'
+            claim, _ = build_claim(sentence_id, self.source.cterm.add_constraint(self.condition), self.target.cterm)
+            return claim
 
         def pretty(self, kprint: KPrint) -> Iterable[str]:
             if self.depth == 0:

@@ -26,7 +26,6 @@ from .kast import (
     KLabel,
     KRewrite,
     KRule,
-    KRuleLike,
     KSequence,
     KToken,
     KVariable,
@@ -553,10 +552,9 @@ def build_rule(
     rule_id: str,
     init_cterm: CTerm,
     final_cterm: CTerm,
-    claim: bool = False,
     priority: Optional[int] = None,
     keep_vars: Optional[List[str]] = None
-) -> Tuple[KRuleLike, Dict[str, KVariable]]:
+) -> Tuple[KRule, Dict[str, KVariable]]:
 
     init_config, *init_constraints = init_cterm
     final_config, *final_constraints = final_cterm
@@ -586,20 +584,26 @@ def build_rule(
     rule_body = push_down_rewrites(KRewrite(init_config, final_config))
     rule_requires = simplifyBool(ml_pred_to_bool(init_constraint))
     rule_ensures = simplifyBool(ml_pred_to_bool(final_constraint))
-    att_dict = {} if claim or priority is None else {'priority': str(priority)}
+    att_dict = {} if priority is None else {'priority': str(priority)}
     rule_att = KAtt(atts=att_dict)
 
-    rule: KRuleLike
-    if not claim:
-        rule = KRule(rule_body, requires=rule_requires, ensures=rule_ensures, att=rule_att)
-    else:
-        rule = KClaim(rule_body, requires=rule_requires, ensures=rule_ensures, att=rule_att)
-
+    rule = KRule(rule_body, requires=rule_requires, ensures=rule_ensures, att=rule_att)
     rule = rule.update_atts({'label': rule_id})
     new_keep_vars = None
     if keep_vars is not None:
         new_keep_vars = [v_subst[v].name for v in keep_vars]
     return (minimizeRule(rule, keepVars=new_keep_vars), vremap_subst)
+
+
+def build_claim(
+    claim_id: str,
+    init_cterm: CTerm,
+    final_cterm: CTerm,
+    keep_vars: Optional[List[str]] = None
+) -> Tuple[KClaim, Dict[str, KVariable]]:
+    rule, var_map = build_rule(claim_id, init_cterm, final_cterm, keep_vars=keep_vars)
+    claim = KClaim(rule.body, requires=rule.requires, ensures=rule.ensures, att=rule.att)
+    return claim, var_map
 
 
 def abstract_term_safely(kast: KInner, base_name: str = 'V') -> KVariable:
