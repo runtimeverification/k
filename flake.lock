@@ -572,11 +572,11 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1657037286,
-        "narHash": "sha256-6qBJHtsmIbMPMzy34u5OD3kF7A5QsgIDbPUjNUy/ox8=",
+        "lastModified": 1658931565,
+        "narHash": "sha256-yVl+89bhiN39vutoZmHMu5dPRc6l8eiF6eoTvOpjXzA=",
         "owner": "goodlyrottenapple",
         "repo": "pynixify",
-        "rev": "a0648c1fcd73bd75247b564e84cb3175b16d79d2",
+        "rev": "1347b6782c7b7951303d6bc378f21df8ac606fec",
         "type": "github"
       },
       "original": {
