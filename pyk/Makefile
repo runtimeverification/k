@@ -55,10 +55,10 @@ install:
 test: test-unit test-integration test-pyk
 
 test-unit: $(VENV_DEV)
-	$(ACTIVATE_DEV) && python3 -m unittest discover -vt src pyk.tests
+	$(ACTIVATE_DEV) && python3 -m unittest discover --verbose --top src pyk.tests
 
 test-integration: $(VENV_DEV)
-	$(ACTIVATE_DEV) && python3 -m unittest discover -vt src pyk.integration_tests
+	$(ACTIVATE_DEV) && python3 -m unittest discover --verbose --top src pyk.integration_tests
 
 test-pyk: $(VENV_PROD)
 	$(ACTIVATE_PROD) && $(MAKE) -C pyk-tests
