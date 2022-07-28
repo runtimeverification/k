@@ -4,7 +4,7 @@ K_BIN  := $(K_ROOT)/k-distribution/target/release/k/bin
 export PATH := $(K_BIN):$(PATH)
 
 
-.PHONY: default all clean                                          \
+.PHONY: default all clean install                                  \
         $(VENV_DEV_DIR) $(VENV_PROD_DIR)                           \
         test test-unit test-integration test-pyk                   \
         check-code-style isort check-isort check-flake8 check-mypy
@@ -45,6 +45,9 @@ $(VENV_PROD):
 
 $(VENV_PROD_DIR): $(VENV_PROD)
 	@echo $(ACTIVATE_PROD)
+
+install:
+	pip3 install . --root=$(DESTDIR) --prefix=$(PREFIX) --system
 
 
 # Tests
