@@ -17,7 +17,7 @@ from ..kastManip import (
     ml_pred_to_bool,
     push_down_rewrites,
     remove_generated_cells,
-    simplifyBool,
+    simplify_bool,
     substitute,
 )
 from ..prelude import Bool, Sorts, intToken, mlEqualsTrue, mlTop
@@ -160,8 +160,8 @@ class BooleanTest(TestCase):
         bool_test_2 = Bool.andBool([KApply('_==Int_', [intToken(3), intToken(4)]), Bool.true])
 
         # When
-        bool_test_1_simplified = simplifyBool(bool_test_1)
-        bool_test_2_simplified = simplifyBool(bool_test_2)
+        bool_test_1_simplified = simplify_bool(bool_test_1)
+        bool_test_2_simplified = simplify_bool(bool_test_2)
 
         # Then
         self.assertEqual(Bool.false, bool_test_1_simplified)

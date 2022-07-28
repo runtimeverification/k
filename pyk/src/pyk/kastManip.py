@@ -112,33 +112,33 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
     return _ml_constraint_to_bool(kast)
 
 
-def simplifyBool(k):
+def simplify_bool(k):
     if k is None:
         return None
-    simplifyRules = [ (KApply('_==K_', [KVariable('#LHS'), Bool.true]), KVariable('#LHS'))                                                                      # noqa
-                    , (KApply('_==K_', [Bool.true, KVariable('#RHS')]), KVariable('#RHS'))                                                                      # noqa
-                    , (KApply('_==K_', [KVariable('#LHS'), Bool.false]), Bool.notBool([KVariable('#LHS')]))                                                     # noqa
-                    , (KApply('_==K_', [Bool.false, KVariable('#RHS')]), Bool.notBool([KVariable('#RHS')]))                                                     # noqa
-                    , (Bool.notBool([Bool.false]), Bool.true)                                                                                                   # noqa
-                    , (Bool.notBool([Bool.true]), Bool.false)                                                                                                   # noqa
-                    , (Bool.notBool([KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')])]), KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')]))    # noqa
-                    , (Bool.notBool([KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')])]), KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')]))    # noqa
-                    , (Bool.notBool([KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')])]), KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')]))    # noqa
-                    , (Bool.notBool([KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')])]), KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')]))    # noqa
-                    , (Bool.andBool([Bool.true, KVariable('#REST')]), KVariable('#REST'))                                                                       # noqa
-                    , (Bool.andBool([KVariable('#REST'), Bool.true]), KVariable('#REST'))                                                                       # noqa
-                    , (Bool.andBool([Bool.false, KVariable('#REST')]), Bool.false)                                                                              # noqa
-                    , (Bool.andBool([KVariable('#REST'), Bool.false]), Bool.false)                                                                              # noqa
-                    , (Bool.orBool([Bool.false, KVariable('#REST')]), KVariable('#REST'))                                                                       # noqa
-                    , (Bool.orBool([KVariable('#REST'), Bool.false]), KVariable('#REST'))                                                                       # noqa
-                    , (Bool.orBool([Bool.true, KVariable('#REST')]), Bool.true)                                                                                 # noqa
-                    , (Bool.orBool([KVariable('#REST'), Bool.true]), Bool.true)                                                                                 # noqa
-                    ]                                                                                                                                           # noqa
-    newK = k
-    for rule in simplifyRules:
+    simplify_rules = [ (KApply('_==K_', [KVariable('#LHS'), Bool.true]), KVariable('#LHS'))                                                                     # noqa
+                     , (KApply('_==K_', [Bool.true, KVariable('#RHS')]), KVariable('#RHS'))                                                                     # noqa
+                     , (KApply('_==K_', [KVariable('#LHS'), Bool.false]), Bool.notBool([KVariable('#LHS')]))                                                    # noqa
+                     , (KApply('_==K_', [Bool.false, KVariable('#RHS')]), Bool.notBool([KVariable('#RHS')]))                                                    # noqa
+                     , (Bool.notBool([Bool.false]), Bool.true)                                                                                                  # noqa
+                     , (Bool.notBool([Bool.true]), Bool.false)                                                                                                  # noqa
+                     , (Bool.notBool([KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')])]), KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')]))   # noqa
+                     , (Bool.notBool([KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')])]), KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')]))   # noqa
+                     , (Bool.notBool([KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')])]), KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')]))   # noqa
+                     , (Bool.notBool([KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')])]), KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')]))   # noqa
+                     , (Bool.andBool([Bool.true, KVariable('#REST')]), KVariable('#REST'))                                                                      # noqa
+                     , (Bool.andBool([KVariable('#REST'), Bool.true]), KVariable('#REST'))                                                                      # noqa
+                     , (Bool.andBool([Bool.false, KVariable('#REST')]), Bool.false)                                                                             # noqa
+                     , (Bool.andBool([KVariable('#REST'), Bool.false]), Bool.false)                                                                             # noqa
+                     , (Bool.orBool([Bool.false, KVariable('#REST')]), KVariable('#REST'))                                                                      # noqa
+                     , (Bool.orBool([KVariable('#REST'), Bool.false]), KVariable('#REST'))                                                                      # noqa
+                     , (Bool.orBool([Bool.true, KVariable('#REST')]), Bool.true)                                                                                # noqa
+                     , (Bool.orBool([KVariable('#REST'), Bool.true]), Bool.true)                                                                                # noqa
+                     ]                                                                                                                                          # noqa
+    new_k = k
+    for rule in simplify_rules:
         rewrite = KRewrite(*rule)
-        newK = rewrite(newK)
-    return newK
+        new_k = rewrite(new_k)
+    return new_k
 
 
 def extract_lhs(term: KInner) -> KInner:
@@ -445,10 +445,10 @@ def minimizeRule(rule, keepVars=[]):
     ruleEnsures = rule.ensures
 
     ruleRequires = Bool.andBool(flattenLabel('_andBool_', ruleRequires))
-    ruleRequires = simplifyBool(ruleRequires)
+    ruleRequires = simplify_bool(ruleRequires)
 
     ruleEnsures = Bool.andBool(flattenLabel('_andBool_', ruleEnsures))
-    ruleEnsures = simplifyBool(ruleEnsures)
+    ruleEnsures = simplify_bool(ruleEnsures)
 
     constrainedVars = [] if keepVars is None else keepVars
     constrainedVars = constrainedVars + collectFreeVars(ruleRequires)
@@ -578,8 +578,8 @@ def build_rule(
     (final_config, final_constraint) = split_config_and_constraints(final_term)
 
     rule_body = push_down_rewrites(KRewrite(init_config, final_config))
-    rule_requires = simplifyBool(ml_pred_to_bool(init_constraint))
-    rule_ensures = simplifyBool(ml_pred_to_bool(final_constraint))
+    rule_requires = simplify_bool(ml_pred_to_bool(init_constraint))
+    rule_ensures = simplify_bool(ml_pred_to_bool(final_constraint))
     att_dict = {} if priority is None else {'priority': str(priority)}
     rule_att = KAtt(atts=att_dict)
 

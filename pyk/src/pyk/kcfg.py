@@ -28,7 +28,7 @@ from .kastManip import (
     build_rule,
     ml_pred_to_bool,
     mlAnd,
-    simplifyBool,
+    simplify_bool,
 )
 from .ktool import KPrint
 from .utils import add_indent, compare_short_hashes, shorten_hash
@@ -378,7 +378,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             graph.node(name=node.id, label=label, **attrs)
 
         for edge in self.edges():
-            display_condition = simplifyBool(ml_pred_to_bool(edge.condition))
+            display_condition = simplify_bool(ml_pred_to_bool(edge.condition))
             depth = edge.depth
             label = '\nandBool'.join(kprint.pretty_print(display_condition).split(' andBool'))
             label = f'{label}\n{depth} steps'
