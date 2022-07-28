@@ -18,9 +18,10 @@ from ..kastManip import (
     ml_pred_to_bool,
     push_down_rewrites,
     remove_generated_cells,
+    simplifyBool,
     substitute,
 )
-from ..prelude import Sorts, intToken, mlEqualsTrue, mlTop
+from ..prelude import Sorts, boolToken, intToken, mlEqualsTrue, mlTop
 from .utils import a, b, c, f, k
 
 x = KVariable('X')
@@ -150,3 +151,19 @@ class CollapseDotsTest(TestCase):
 
         # Then
         self.assertEqual(config_actual, config_expected)
+
+
+class BooleanTest(TestCase):
+
+    def test_bool_simplify(self):
+        # Given
+        bool_test_1 = KApply('_andBool_', [boolToken(False), boolToken(True)])
+        bool_test_2 = KApply('_andBool_', [KApply('_==Int_', [intToken(3), intToken(4)]), boolToken(True)])
+
+        # When
+        bool_test_1_simplified = simplifyBool(bool_test_1)
+        bool_test_2_simplified = simplifyBool(bool_test_2)
+
+        # Then
+        self.assertEqual(boolToken(False), bool_test_1_simplified)
+        self.assertEqual(KApply('_==Int_', [intToken(3), intToken(4)]), bool_test_2_simplified)

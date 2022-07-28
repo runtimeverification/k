@@ -7,9 +7,8 @@ from ..kast import (
     assocWithUnit,
     constLabel,
 )
-from ..kastManip import push_down_rewrites, simplifyBool
+from ..kastManip import push_down_rewrites
 from ..ktool import KompileBackend
-from ..prelude import boolToken, intToken
 from .kprove_test import KProveTest
 
 
@@ -74,16 +73,3 @@ class DefnTest(KProveTest):
         # Then
         self.assertEqual(minimized_claim_rewrite_expected, minimized_claim_rewrite_actual)
         self.assertTop(result)
-
-    def test_bool_simplify(self):
-        # Given
-        bool_test_1 = KApply('_andBool_', [boolToken(False), boolToken(True)])
-        bool_test_2 = KApply('_andBool_', [KApply('_==Int_', [intToken(3), intToken(4)]), boolToken(True)])
-
-        # When
-        bool_test_1_simplified = simplifyBool(bool_test_1)
-        bool_test_2_simplified = simplifyBool(bool_test_2)
-
-        # Then
-        self.assertEqual(boolToken(False), bool_test_1_simplified)
-        self.assertEqual(KApply('_==Int_', [intToken(3), intToken(4)]), bool_test_2_simplified)
