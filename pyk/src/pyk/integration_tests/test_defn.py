@@ -2,6 +2,7 @@ from ..kast import (
     KApply,
     KClaim,
     KRewrite,
+    KSort,
     KToken,
     KVariable,
     assocWithUnit,
@@ -9,6 +10,7 @@ from ..kast import (
 )
 from ..kastManip import push_down_rewrites
 from ..ktool import KompileBackend
+from ..prelude import Sorts
 from .kprove_test import KProveTest
 
 
@@ -73,3 +75,37 @@ class DefnTest(KProveTest):
         # Then
         self.assertEqual(minimized_claim_rewrite_expected, minimized_claim_rewrite_actual)
         self.assertTop(result)
+
+    def test_empty_config(self):
+        # Given
+        empty_config_generated_top = self.kprove.definition.empty_config(Sorts.GENERATED_TOP_CELL)
+        empty_config_t = self.kprove.definition.empty_config(KSort('TCell'))
+
+        empty_config_generated_top_printed = '\n'.join([ '<generatedTop>'               # noqa
+                                                       , '  <T>'                        # noqa
+                                                       , '    <k>'                      # noqa
+                                                       , '      K_CELL'                 # noqa
+                                                       , '    </k>'                     # noqa
+                                                       , '    <state>'                  # noqa
+                                                       , '      STATE_CELL'             # noqa
+                                                       , '    </state>'                 # noqa
+                                                       , '  </T>'                       # noqa
+                                                       , '  <generatedCounter>'         # noqa
+                                                       , '    GENERATEDCOUNTER_CELL'    # noqa
+                                                       , '  </generatedCounter>'        # noqa
+                                                       , '</generatedTop>'              # noqa
+                                                       ])                               # noqa
+
+        empty_config_t_printed = '\n'.join([ '<T>'                # noqa
+                                           , '  <k>'              # noqa
+                                           , '    K_CELL'         # noqa
+                                           , '  </k>'             # noqa
+                                           , '  <state>'          # noqa
+                                           , '    STATE_CELL'     # noqa
+                                           , '  </state>'         # noqa
+                                           , '</T>'               # noqa
+                                           ])                     # noqa
+
+        # Then
+        self.assertEqual(empty_config_generated_top_printed, self.kprove.pretty_print(empty_config_generated_top))
+        self.assertEqual(empty_config_t_printed, self.kprove.pretty_print(empty_config_t))
