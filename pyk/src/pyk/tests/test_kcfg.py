@@ -2,9 +2,9 @@ from typing import Any, Dict, List, Tuple
 from unittest import TestCase
 
 from ..cterm import CTerm
-from ..kast import TRUE, KApply, KInner, KVariable
+from ..kast import KApply, KInner, KVariable
 from ..kcfg import KCFG
-from ..prelude import mlEquals, token
+from ..prelude import Bool, mlEquals, token
 from ..utils import shorten_hash
 from .mock_kprint import MockKPrint
 
@@ -26,7 +26,7 @@ def node(i: int) -> KCFG.Node:
 
 
 def edge(i: int, j: int) -> KCFG.Edge:
-    return KCFG.Edge(node(i), node(j), TRUE, 1)
+    return KCFG.Edge(node(i), node(j), Bool.true, 1)
 
 
 def node_dicts(n: int) -> List[Dict[str, Any]]:
@@ -35,7 +35,7 @@ def node_dicts(n: int) -> List[Dict[str, Any]]:
 
 def edge_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
 
-    def _make_edge_dict(i, j, depth=1, condition=TRUE):
+    def _make_edge_dict(i, j, depth=1, condition=Bool.true):
         return {'source': nid(i), 'target': nid(j), 'condition': condition.to_dict(), 'depth': depth}
 
     return [_make_edge_dict(*edge) for edge in edges]
@@ -43,7 +43,7 @@ def edge_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
 
 def cover_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
     return [
-        {'source': nid(i), 'target': nid(j), 'condition': TRUE.to_dict(), 'depth': 1}
+        {'source': nid(i), 'target': nid(j), 'condition': Bool.true.to_dict(), 'depth': 1}
         for i, j in edges
     ]
 
@@ -171,7 +171,7 @@ class KCFGTestCase(TestCase):
         cfg = KCFG.from_dict(d)
 
         # When
-        new_edge = cfg.create_edge(nid(0), nid(0), TRUE, 1)
+        new_edge = cfg.create_edge(nid(0), nid(0), Bool.true, 1)
 
         # Then
         self.assertEqual(new_edge, edge(0, 0))
@@ -185,7 +185,7 @@ class KCFGTestCase(TestCase):
         cfg = KCFG.from_dict(d)
 
         # When
-        new_edge = cfg.create_edge(nid(0), nid(1), TRUE, 1)
+        new_edge = cfg.create_edge(nid(0), nid(1), Bool.true, 1)
 
         # Then
         self.assertEqual(new_edge, edge(0, 1))

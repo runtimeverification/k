@@ -15,15 +15,12 @@ from typing import (
 
 from .cterm import CTerm, split_config_and_constraints
 from .kast import (
-    FALSE,
-    TRUE,
     KApply,
     KAtt,
     KClaim,
     KDefinition,
     KFlatModule,
     KInner,
-    KLabel,
     KRewrite,
     KRule,
     KSequence,
@@ -38,10 +35,9 @@ from .kast import (
     top_down,
 )
 from .prelude import (
+    Bool,
     Labels,
     Sorts,
-    boolToken,
-    build_assoc,
     mlAnd,
     mlBottom,
     mlEquals,
@@ -50,7 +46,7 @@ from .prelude import (
     mlOr,
     mlTop,
 )
-from .utils import find_common_items, hash_str, unique
+from .utils import find_common_items, hash_str
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -82,22 +78,22 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
     def _ml_constraint_to_bool(_kast: KInner) -> KInner:
         if type(_kast) is KApply:
             if _kast.label.name == '#Top':
-                return TRUE
+                return Bool.true
             if _kast.label.name == '#Bottom':
-                return FALSE
-            if _kast.label.name == '#Not':
-                return KApply('notBool_', map(_ml_constraint_to_bool, _kast.args))
+                return Bool.false
+            if _kast.label.name == '#Not' and len(_kast.args) == 1:
+                return Bool.notBool(_ml_constraint_to_bool(_kast.args[0]))
             if _kast.label.name == '#And':
-                return KApply('_andBool_', map(_ml_constraint_to_bool, _kast.args))
+                return Bool.andBool(map(_ml_constraint_to_bool, _kast.args))
             if _kast.label.name == '#Or':
-                return KApply('_orBool_', map(_ml_constraint_to_bool, _kast.args))
-            if _kast.label.name == '#Implies':
-                return KApply('_impliesBool_', map(_ml_constraint_to_bool, _kast.args))
+                return Bool.orBool(map(_ml_constraint_to_bool, _kast.args))
+            if _kast.label.name == '#Implies' and len(_kast.args) == 2:
+                return Bool.impliesBool(_ml_constraint_to_bool(_kast.args[0]), _ml_constraint_to_bool(_kast.args[1]))
             if _kast.label.name == '#Equals':
-                if _kast.args[0] == TRUE:
+                if _kast.args[0] == Bool.true:
                     return _kast.args[1]
-                if _kast.args[0] == FALSE:
-                    return KApply(KLabel('notBool_'), [_kast.args[1]])
+                if _kast.args[0] == Bool.false:
+                    return Bool.notBool(_kast.args[1])
                 if type(_kast.args[0]) in [KVariable, KToken]:
                     return KApply('_==K_', _kast.args)
             if unsafe:
@@ -119,25 +115,25 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
 def simplifyBool(k):
     if k is None:
         return None
-    simplifyRules = [ (KApply('_==K_', [KVariable('#LHS'), TRUE]), KVariable('#LHS'))                                                                               # noqa
-                    , (KApply('_==K_', [TRUE, KVariable('#RHS')]), KVariable('#RHS'))                                                                               # noqa
-                    , (KApply('_==K_', [KVariable('#LHS'), FALSE]), KApply('notBool_', [KVariable('#LHS')]))                                                        # noqa
-                    , (KApply('_==K_', [FALSE, KVariable('#RHS')]), KApply('notBool_', [KVariable('#RHS')]))                                                        # noqa
-                    , (KApply('notBool_', [FALSE]), TRUE)                                                                                                           # noqa
-                    , (KApply('notBool_', [TRUE]), FALSE)                                                                                                           # noqa
-                    , (KApply('notBool_', [KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')])]), KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')]))  # noqa
-                    , (KApply('notBool_', [KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')])]), KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')]))  # noqa
-                    , (KApply('notBool_', [KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')])]), KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')]))  # noqa
-                    , (KApply('notBool_', [KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')])]), KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')]))  # noqa
-                    , (KApply('_andBool_', [TRUE, KVariable('#REST')]), KVariable('#REST'))                                                                         # noqa
-                    , (KApply('_andBool_', [KVariable('#REST'), TRUE]), KVariable('#REST'))                                                                         # noqa
-                    , (KApply('_andBool_', [FALSE, KVariable('#REST')]), FALSE)                                                                                     # noqa
-                    , (KApply('_andBool_', [KVariable('#REST'), FALSE]), FALSE)                                                                                     # noqa
-                    , (KApply('_orBool_', [FALSE, KVariable('#REST')]), KVariable('#REST'))                                                                         # noqa
-                    , (KApply('_orBool_', [KVariable('#REST'), FALSE]), KVariable('#REST'))                                                                         # noqa
-                    , (KApply('_orBool_', [TRUE, KVariable('#REST')]), TRUE)                                                                                        # noqa
-                    , (KApply('_orBool_', [KVariable('#REST'), TRUE]), TRUE)                                                                                        # noqa
-                    ]                                                                                                                                               # noqa
+    simplifyRules = [ (KApply('_==K_', [KVariable('#LHS'), Bool.true]), KVariable('#LHS'))                                                                      # noqa
+                    , (KApply('_==K_', [Bool.true, KVariable('#RHS')]), KVariable('#RHS'))                                                                      # noqa
+                    , (KApply('_==K_', [KVariable('#LHS'), Bool.false]), Bool.notBool([KVariable('#LHS')]))                                                     # noqa
+                    , (KApply('_==K_', [Bool.false, KVariable('#RHS')]), Bool.notBool([KVariable('#RHS')]))                                                     # noqa
+                    , (Bool.notBool([Bool.false]), Bool.true)                                                                                                   # noqa
+                    , (Bool.notBool([Bool.true]), Bool.false)                                                                                                   # noqa
+                    , (Bool.notBool([KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')])]), KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')]))    # noqa
+                    , (Bool.notBool([KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')])]), KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')]))    # noqa
+                    , (Bool.notBool([KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')])]), KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')]))    # noqa
+                    , (Bool.notBool([KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')])]), KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')]))    # noqa
+                    , (Bool.andBool([Bool.true, KVariable('#REST')]), KVariable('#REST'))                                                                       # noqa
+                    , (Bool.andBool([KVariable('#REST'), Bool.true]), KVariable('#REST'))                                                                       # noqa
+                    , (Bool.andBool([Bool.false, KVariable('#REST')]), Bool.false)                                                                              # noqa
+                    , (Bool.andBool([KVariable('#REST'), Bool.false]), Bool.false)                                                                              # noqa
+                    , (Bool.orBool([Bool.false, KVariable('#REST')]), KVariable('#REST'))                                                                       # noqa
+                    , (Bool.orBool([KVariable('#REST'), Bool.false]), KVariable('#REST'))                                                                       # noqa
+                    , (Bool.orBool([Bool.true, KVariable('#REST')]), Bool.true)                                                                                 # noqa
+                    , (Bool.orBool([KVariable('#REST'), Bool.true]), Bool.true)                                                                                 # noqa
+                    ]                                                                                                                                           # noqa
     newK = k
     for rule in simplifyRules:
         rewrite = KRewrite(*rule)
@@ -170,7 +166,7 @@ def extract_subst(term: KInner) -> Tuple[Subst, KInner]:
                 if subst is not None:
                     return subst
 
-                if conjunct.args[0] == boolToken(True) and type(conjunct.args[1]) is KApply and conjunct.args[1].label.name in {'_==K_', '_==Int_'}:
+                if conjunct.args[0] == Bool.true and type(conjunct.args[1]) is KApply and conjunct.args[1].label.name in {'_==K_', '_==Int_'}:
                     subst = _subst_for_terms(conjunct.args[1].args[0], conjunct.args[1].args[1])
 
                     if subst is not None:
@@ -448,10 +444,10 @@ def minimizeRule(rule, keepVars=[]):
     ruleRequires = rule.requires
     ruleEnsures = rule.ensures
 
-    ruleRequires = build_assoc(TRUE, '_andBool_', unique(flattenLabel('_andBool_', ruleRequires)))
+    ruleRequires = Bool.andBool(flattenLabel('_andBool_', ruleRequires))
     ruleRequires = simplifyBool(ruleRequires)
 
-    ruleEnsures = build_assoc(TRUE, '_andBool_', unique(flattenLabel('_andBool_', ruleEnsures)))
+    ruleEnsures = Bool.andBool(flattenLabel('_andBool_', ruleEnsures))
     ruleEnsures = simplifyBool(ruleEnsures)
 
     constrainedVars = [] if keepVars is None else keepVars
