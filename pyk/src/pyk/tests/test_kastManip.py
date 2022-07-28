@@ -154,7 +154,7 @@ class CollapseDotsTest(TestCase):
 
 class BooleanTest(TestCase):
 
-    def test_bool_simplify(self):
+    def test_simplify_bool(self):
         # Given
         bool_test_1 = Bool.andBool([Bool.false, Bool.true])
         bool_test_2 = Bool.andBool([KApply('_==Int_', [intToken(3), intToken(4)]), Bool.true])
