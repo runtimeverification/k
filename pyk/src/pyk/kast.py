@@ -1478,6 +1478,10 @@ class KDefinition(KOuter, WithKAtt):
         return self.let(att=att)
 
     @property
+    def module_names(self) -> List[str]:
+        return [_m.name for _m in self.modules]
+
+    @property
     def productions(self) -> List[KProduction]:
         return [prod for module in self.modules for prod in module.productions]
 
