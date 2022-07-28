@@ -47,7 +47,7 @@ $(VENV_PROD_DIR): $(VENV_PROD)
 	@echo $(ACTIVATE_PROD)
 
 install:
-	pip3 install . --root=$(DESTDIR) --prefix=$(PREFIX) --system
+	pip3 install . --root=$(DESTDIR) --prefix=$(PREFIX)
 
 
 # Tests
