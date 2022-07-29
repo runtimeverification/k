@@ -449,10 +449,7 @@ public class Kompile {
         ModuleTransformer mt = ModuleTransformer.fromSentenceTransformer((m, s) -> {
             if (s instanceof Rule && (s.att().contains(Att.SIMPLIFICATION()))) {
                 KLabel kl = m.matchKLabel((Rule) s);
-                scala.collection.Set<Production> prods = m.productionsFor().get(kl).getOrElse(() -> {
-                    throw KEMException.criticalError("Could not find productions for label " + kl.name(), s);
-                });
-                Att atts = prods.iterator().next().att();
+                Att atts = m.attributesFor().get(kl).getOrElse(Att::empty);
                 if (!(atts.contains(Att.FUNCTION()) || atts.contains(Att.FUNCTIONAL()) || atts.contains("mlOp")))
                     errors.add(KEMException.compilerError("Simplification rules expect function/functional/mlOp symbols at the top of the left hand side term.", s));
             }
