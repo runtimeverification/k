@@ -41,8 +41,12 @@ RUN    apt-get update            \
         parallel                 \
         pkg-config               \
         python3                  \
+        python3-all              \
         python3-graphviz         \
         python3-pip              \
+        python3-setuptools       \
+        python-all               \
+        python-setuptools        \
         zlib1g-dev
 
 RUN pip3 install virtualenv

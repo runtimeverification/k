@@ -447,6 +447,12 @@ public class Kompile {
                 errors.add(KEMException.compilerError("Found syntax declaration in proof module. Only tokens for existing sorts are allowed.", s));
 
         ModuleTransformer mt = ModuleTransformer.fromSentenceTransformer((m, s) -> {
+            if (s instanceof Rule && (s.att().contains(Att.SIMPLIFICATION()))) {
+                KLabel kl = m.matchKLabel((Rule) s);
+                Att atts = m.attributesFor().get(kl).getOrElse(Att::empty);
+                if (!(atts.contains(Att.FUNCTION()) || atts.contains(Att.FUNCTIONAL()) || atts.contains("mlOp")))
+                    errors.add(KEMException.compilerError("Simplification rules expect function/functional/mlOp symbols at the top of the left hand side term.", s));
+            }
             if (m.name().equals(mainDefModule.name()) || mainDefModule.importedModuleNames().contains(m.name()))
                 return s;
             if (!(s instanceof Claim || s.isSyntax())) {
