@@ -89,9 +89,6 @@ jobs:
 
 
       - name: Update Nix flake inputs from submodules
-        run: GC_DONT_GC=1 nix run .#update-from-submodules
-
-      - name: Update branch
         env:
           GITHUB_EVENT_NAME: ${{ github.event_name }}
         run: |
@@ -102,6 +99,7 @@ jobs:
                 exit 1
               fi
             fi
+            GC_DONT_GC=1 nix run .#update-from-submodules
             if [ -n "$(git status --porcelain 'flake.lock')" ]; then
               if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
                 echo 2>&1 "Error: submodules do not match the flake inputs"
