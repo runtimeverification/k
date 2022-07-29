@@ -2,7 +2,7 @@ Source: kframework
 Section: devel
 Priority: optional
 Maintainer: Dwight Guth <dwight.guth@runtimeverification.com>
-Build-Depends: clang-14 , cmake , debhelper (>=10) , flex , libboost-test-dev , libgmp-dev , libjemalloc-dev , libmpfr-dev , libyaml-dev , maven , openjdk-11-jdk , zlib1g-dev
+Build-Depends: clang-14 , cmake , debhelper (>=10) , flex , libboost-test-dev , libgmp-dev , libjemalloc-dev , libmpfr-dev , libyaml-dev , maven , openjdk-11-jdk , python-all , python-setuptools , python3-all , python3-setuptools , zlib1g-dev
 Standards-Version: 3.9.6
 Homepage: https://github.com/runtimeverification/k
 
@@ -10,7 +10,7 @@ Package: kframework
 Architecture: any
 Section: devel
 Priority: optional
-Depends: bison , clang-14 , default-jre-headless , flex , gcc , libffi-dev , libgmp-dev , libjemalloc-dev , libmpfr-dev , libtinfo-dev , libyaml-0-2 , libz3-4 , lld-14 , pkg-config , llvm-14
+Depends: bison , clang-14 , default-jre-headless , flex , gcc , libffi-dev , libgmp-dev , libjemalloc-dev , libmpfr-dev , libtinfo-dev , libyaml-0-2 , libz3-4 , lld-14 , llvm-14 , pkg-config , python3-graphviz
 Recommends: z3
 Description: K framework toolchain
  Includes K Framework compiler for K language definitions, and K interpreter

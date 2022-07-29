@@ -182,7 +182,11 @@ pipeline {
           options { skipDefaultCheckout() }
           steps {
             unstash 'jammy'
-            sh 'src/main/scripts/test-in-container-debian'
+            sh '''
+              src/main/scripts/test-in-container-debian
+              pyk --help
+              python3 -m pyk --help
+            '''
           }
           post {
             always {
