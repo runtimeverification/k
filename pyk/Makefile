@@ -47,7 +47,9 @@ $(VENV_PROD_DIR): $(VENV_PROD)
 	@echo $(ACTIVATE_PROD)
 
 install:
-	pip3 install . --root=$(DESTDIR) --prefix=$(PREFIX)
+	   virtualenv -p python3.8 $(VENV_PROD_DIR)            \
+	&& $(ACTIVATE_PROD)                                    \
+	&& pip3 install . --root=$(DESTDIR) --prefix=$(PREFIX)
 
 
 # Tests
