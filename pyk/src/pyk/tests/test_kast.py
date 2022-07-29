@@ -1,7 +1,15 @@
 from typing import Final, List, Tuple
 from unittest import TestCase
 
-from ..kast import KApply, KInner, KLabel, KSequence, KVariable
+from ..kast import (
+    KApply,
+    KDefinition,
+    KFlatModule,
+    KInner,
+    KLabel,
+    KSequence,
+    KVariable,
+)
 from ..prelude import Sorts
 
 x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])
@@ -165,3 +173,9 @@ class KSequenceTest(TestCase):
                 # Then
                 actual_message = context.exception.args[0]
                 self.assertEqual(actual_message, expected_message)
+
+
+class KDefinitionTest(TestCase):
+    def test(self):
+        defn = KDefinition('FOO', [KFlatModule('BAR', [], []), KFlatModule('FOO', [], [])])
+        self.assertCountEqual(defn.module_names, ['FOO', 'BAR'])
