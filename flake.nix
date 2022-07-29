@@ -6,6 +6,7 @@
     nixpkgs.follows = "haskell-backend/nixpkgs";
     llvm-backend.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
+    rv-utils.url = "github:runtimeverification/rv-nix-tools";
     mavenix.url = "github:goodlyrottenapple/mavenix";
     flake-compat = {
       url = "github:edolstra/flake-compat";
@@ -14,7 +15,7 @@
     pynixify.url = "github:goodlyrottenapple/pynixify";
   };
 
-  outputs = { self, nixpkgs, flake-utils, haskell-backend, llvm-backend, mavenix
+  outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend, llvm-backend, mavenix
     , flake-compat, pynixify }:
     let
       allOverlays = [
@@ -128,33 +129,14 @@
             }/bin/pynixify -l pyk --overlay-only --output ./nix
           '';
 
-          check-versions = let
-            hashes = [
-              {
-                name = "llvm-mackend";
-                rev = llvm-backend.rev;
-              }
-              {
-                name = "haskell-mackend";
-                rev = haskell-backend.rev;
-              }
-            ];
-          in pkgs.writeShellScriptBin "check-versions" ''
-            STATUS=$(git submodule status);
-            for elem in ${
-              pkgs.lib.concatMapStringsSep " " ({ name, rev }: "${name},${rev}")
-              hashes
-            }; do
-              IFS=","; set -- $elem;
-              if ! grep -q "$2" <<< "$STATUS";
-              then
-                  echo "$1 with hash '$2' does not match any current submodules:"
-                  git submodule status
-                  exit 1
-              fi
-            done
-            echo "All dependencies match"
-          '';
+          check-submodules = rv-utils.lib.check-submodules pkgs {
+            inherit llvm-backend haskell-backend;
+          };
+          
+          update-from-submodules = rv-utils.lib.update-from-submodules pkgs ./flake.lock {
+            haskell-backend.submodule = "haskell-backend/src/main/native/haskell-backend";
+            llvm-backend.submodule = "llvm-backend/src/main/native/llvm-backend";
+          };
 
           test = with pkgs;
             let
