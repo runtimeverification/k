@@ -31,3 +31,6 @@ jobs:
 
       - name: 'Build K Framework'
         run: GC_DONT_GC=1 nix build .
+      
+      - name: 'Check submodules are in sync with flake inputs (if not, run `nix run .#update-from-submodules`)'
+        run: GC_DONT_GC=1 nix run .#check-submodules
