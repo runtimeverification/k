@@ -255,7 +255,7 @@ class SortApp(Sort):
 
     @property
     def text(self) -> str:
-        return self.name + ' ' + _braced(sort.text for sort in self.sorts)
+        return self.name
 
 
 class Pattern(Kore, ABC):
