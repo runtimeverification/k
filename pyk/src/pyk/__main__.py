@@ -19,6 +19,7 @@ from .ktool import KPrint, KProve, build_symbol_table, prettyPrintKast
 from .prelude import Sorts, mlAnd, mlOr, mlTop
 
 _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
+_LOGGER: Final = logging.getLogger(__name__)
 
 
 def main():
@@ -41,12 +42,11 @@ def main():
 
     if args['command'] == 'print':
         printer = KPrint(kompiled_dir)
+        _LOGGER.info(f'Reading Kast from file: {args["term"].name}')
         term = KAst.from_json(args['term'].read())
         if type(term) is dict and 'term' in term:
             term = term['term']
-        if term == mlTop():
-            args['output_file'].write(printer.pretty_print(term))
-        else:
+        if term != mlTop():
             if args['minimize']:
                 abstractLabels = [] if args['omit_labels'] is None else args['omit_labels'].split(',')
                 minimizedDisjuncts = []
@@ -58,12 +58,14 @@ def main():
                     else:
                         minimizedDisjuncts.append(dConfig)
                 term = propagate_up_constraints(mlOr(minimizedDisjuncts, sort=Sorts.GENERATED_TOP_CELL))
-            args['output_file'].write(printer.pretty_print(term))
+        args['output_file'].write(printer.pretty_print(term))
+        _LOGGER.info(f'Wrote file: {args["output_file"].name}')
 
     elif args['command'] == 'prove':
         kprover = KProve(kompiled_dir, args['main-file'])
         finalState = kprover.prove(Path(args['spec-file']), spec_module_name=args['spec-module'], args=args['kArgs'])
         args['output_file'].write(finalState.to_json())
+        _LOGGER.info(f'Wrote file: {args["output_file"].name}')
 
     elif args['command'] == 'graph-imports':
         kprinter = KPrint(kompiled_dir)
@@ -76,7 +78,7 @@ def main():
             for moduleImport in module.imports:
                 importGraph.edge(modName, moduleImport.name)
         importGraph.render(graphFile)
-        print(f'Wrote file: {graphFile}')
+        _LOGGER.info(f'Wrote file: {graphFile}')
 
     elif args['command'] == 'coverage':
         json_definition = removeSourceMap(readKastTerm(kompiled_dir / 'compiled.json'))
@@ -87,6 +89,7 @@ def main():
             args['output'].write('Rule: ' + rid.strip())
             args['output'].write('\nUnparsed:\n')
             args['output'].write(prettyPrintKast(rule, symbol_table))
+        _LOGGER.info(f'Wrote file: {args["output"].name}')
 
     else:
         raise ValueError(f'Unknown command: {args["command"]}')
