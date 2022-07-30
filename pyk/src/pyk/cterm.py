@@ -55,12 +55,12 @@ class CTerm:
         return chain([self.config], self.constraints)
 
     @cached_property
-    def term(self) -> KInner:
+    def kast(self) -> KInner:
         return mlAnd(self, Sorts.GENERATED_TOP_CELL)
 
     @property
     def hash(self) -> str:
-        return self.term.hash
+        return self.kast.hash
 
     def match(self, cterm: 'CTerm') -> Optional[Subst]:
         match_res = self.match_with_constraint(cterm)

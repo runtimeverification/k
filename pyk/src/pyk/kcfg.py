@@ -48,7 +48,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             return self.cterm.hash
 
         def to_dict(self) -> Dict[str, Any]:
-            return {'id': self.id, 'term': self.cterm.term.to_dict()}
+            return {'id': self.id, 'term': self.cterm.kast.to_dict()}
 
     class EdgeLike(ABC):
         source: 'KCFG.Node'

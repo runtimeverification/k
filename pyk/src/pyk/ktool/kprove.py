@@ -181,10 +181,10 @@ class KProve(KPrint):
         log_axioms_file: Path = None,
         allow_zero_step: bool = False,
     ) -> List[KInner]:
-        claim, var_map = build_claim(claim_id, init_cterm, target_cterm, keep_vars=collectFreeVars(init_cterm.term))
+        claim, var_map = build_claim(claim_id, init_cterm, target_cterm, keep_vars=collectFreeVars(init_cterm.kast))
         next_state = self.prove_claim(claim, claim_id, lemmas=lemmas, args=args, haskell_args=haskell_args, log_axioms_file=log_axioms_file, allow_zero_step=allow_zero_step)
         next_states = [var_map(ns) for ns in flatten_label('#Or', next_state)]
-        constraint_subst, _ = extract_subst(init_cterm.term)
+        constraint_subst, _ = extract_subst(init_cterm.kast)
         next_states = [mlAnd([constraint_subst.unapply(ns), constraint_subst.ml_pred]) if ns not in [mlTop(), mlBottom()] else ns for ns in next_states]
         return next_states
 
