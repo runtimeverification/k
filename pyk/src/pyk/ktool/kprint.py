@@ -33,6 +33,7 @@ from ..kast import (
     ktokenDots,
     readKastTerm,
 )
+from ..kore.syntax import Kore
 from ..prelude import Bool, Labels
 from ..utils import hash_str
 
@@ -48,6 +49,9 @@ class KPrint:
         self.definition = readKastTerm(self.kompiled_directory / 'compiled.json')
         self.symbol_table = build_symbol_table(self.definition, opinionated=True)
         self.definition_hash = hash_str(self.definition)
+
+    def kore_to_kast(self, kore: Kore) -> KAst:
+        raise ValueError('Not Implemented')
 
     def pretty_print(self, kast: KAst, debug=False):
         """Given a KAST term, pretty-print it using the current definition.
