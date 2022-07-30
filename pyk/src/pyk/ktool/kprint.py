@@ -68,7 +68,7 @@ class KPrint:
             proc_result = run_process(kast_command, _LOGGER, env=command_env)
             if proc_result.returncode != 0:
                 raise RuntimeError(f'Calling kast failed: {kast_command}')
-            return KAst.from_json(proc_result.stdout)
+            return KAst.from_dict(json.loads(proc_result.stdout)['term'])
 
     def kast_to_kore(self, kast: KAst) -> Kore:
         with NamedTemporaryFile('w') as ntf:
