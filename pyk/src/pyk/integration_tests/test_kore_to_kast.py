@@ -18,7 +18,7 @@ class KoreToKastTest(KProveTest):
         pass
 
     def test_kast_to_kore(self):
-        __import__('sys').modules['unittest.util']._MAX_LENGTH = 999999999
+        # TODO: We want to not have to store 2 lists, and want to test (kast_to_kore(kore_to_kast(kore)) == id)
         kast_to_kore_pairs = (
             (App('inj', [SortApp('SortBool'), SortApp('SortKItem')], [App('Lblpred1', [], [DV(SortApp('SortInt'), String('3'))])]), KApply('pred1', [intToken(3)])),
         )
