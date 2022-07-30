@@ -1,9 +1,8 @@
 import sys
 from pathlib import Path
-from typing import Callable, Mapping
+from typing import Callable, Dict
 
 from ..kast import (
-    TRUE,
     KApply,
     KAs,
     KAst,
@@ -34,10 +33,10 @@ from ..kast import (
     ktokenDots,
     readKastTerm,
 )
-from ..prelude import Labels
+from ..prelude import Bool, Labels
 from ..utils import hash_str
 
-SymbolTable = Mapping[str, Callable]
+SymbolTable = Dict[str, Callable]
 
 
 class KPrint:
@@ -191,10 +190,10 @@ def prettyPrintKast(kast: KAst, symbol_table: SymbolTable, debug=False):
             ruleStr = ruleStr + '[' + kast.att['label'] + ']:'
         ruleStr = ruleStr + ' ' + body
         attsStr = prettyPrintKast(kast.att, symbol_table, debug=debug)
-        if kast.requires != TRUE:
+        if kast.requires != Bool.true:
             requiresStr = 'requires ' + '\n  '.join(prettyPrintKastBool(kast.requires, symbol_table, debug=debug).split('\n'))
             ruleStr = ruleStr + '\n  ' + requiresStr
-        if kast.ensures != TRUE:
+        if kast.ensures != Bool.true:
             ensuresStr = 'ensures ' + '\n  '.join(prettyPrintKastBool(kast.ensures, symbol_table, debug=debug).split('\n'))
             ruleStr = ruleStr + '\n   ' + ensuresStr
         return ruleStr + '\n  ' + attsStr
@@ -203,7 +202,7 @@ def prettyPrintKast(kast: KAst, symbol_table: SymbolTable, debug=False):
         contextStr = 'context alias ' + body
         requiresStr = ''
         attsStr = prettyPrintKast(kast.att, symbol_table, debug=debug)
-        if kast.requires != TRUE:
+        if kast.requires != Bool.true:
             requiresStr = prettyPrintKast(kast.requires, symbol_table, debug=debug)
             requiresStr = 'requires ' + indent(requiresStr)
         return contextStr + '\n  ' + requiresStr + '\n  ' + attsStr
