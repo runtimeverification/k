@@ -1,7 +1,12 @@
+import json
+import logging
+import os
 import sys
 from pathlib import Path
-from typing import Callable, Dict
+from tempfile import NamedTemporaryFile
+from typing import Callable, Dict, Final
 
+from ..cli_utils import run_process
 from ..kast import (
     KApply,
     KAs,
@@ -33,9 +38,12 @@ from ..kast import (
     ktokenDots,
     readKastTerm,
 )
+from ..kore.parser import KoreParser
 from ..kore.syntax import Kore
 from ..prelude import Bool, Labels
 from ..utils import hash_str
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 SymbolTable = Dict[str, Callable]
 
@@ -51,7 +59,29 @@ class KPrint:
         self.definition_hash = hash_str(self.definition)
 
     def kore_to_kast(self, kore: Kore) -> KAst:
-        raise ValueError('Not Implemented')
+        with NamedTemporaryFile('w') as ntf:
+            ntf.write(kore.text)
+            ntf.flush()
+            _LOGGER.info(f'Wrote file: {ntf.name}')
+            kast_command = ['kast', '--input', 'kore', '--output', 'json', ntf.name, '--definition', str(self.kompiled_directory)]
+            command_env = os.environ.copy()
+            proc_result = run_process(kast_command, _LOGGER, env=command_env)
+            if proc_result.returncode != 0:
+                raise RuntimeError(f'Calling kast failed: {kast_command}')
+            return KAst.from_json(proc_result.stdout)
+
+    def kast_to_kore(self, kast: KAst) -> Kore:
+        with NamedTemporaryFile('w') as ntf:
+            kast_json = {'format': 'KAST', 'version': 2, 'term': kast.to_dict()}
+            ntf.write(json.dumps(kast_json, sort_keys=True))
+            ntf.flush()
+            _LOGGER.info(f'Wrote file: {ntf.name}')
+            kast_command = ['kast', '--input', 'json', '--output', 'kore', ntf.name, '--definition', str(self.kompiled_directory)]
+            command_env = os.environ.copy()
+            proc_result = run_process(kast_command, _LOGGER, env=command_env)
+            if proc_result.returncode != 0:
+                raise RuntimeError(f'Calling kast failed: {kast_command}')
+            return KoreParser(proc_result.stdout).pattern()
 
     def pretty_print(self, kast: KAst, debug=False):
         """Given a KAST term, pretty-print it using the current definition.
