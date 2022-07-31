@@ -140,10 +140,10 @@ pipeline {
       }
     }
     stage('Build and Package on Ubuntu Jammy') {
-      // when {
-      //   branch 'release'
-      //   beforeAgent true
-      // }
+      when {
+        branch 'release'
+        beforeAgent true
+      }
       stages {
         stage('Build on Ubuntu Jammy') {
           agent {
