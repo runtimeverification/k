@@ -205,10 +205,10 @@ pipeline {
       }
     }
     stage('Build and Package on Debian Bullseye') {
-      // when {
-      //   branch 'release'
-      //   beforeAgent true
-      // }
+      when {
+        branch 'release'
+        beforeAgent true
+      }
       stages {
         stage('Build on Debian Bullseye') {
           agent {
@@ -267,10 +267,10 @@ pipeline {
       }
     }
     stage('Build and Package on Arch Linux') {
-      // when {
-      //   branch 'release'
-      //   beforeAgent true
-      // }
+      when {
+        branch 'release'
+        beforeAgent true
+      }
       stages {
         stage('Build on Arch Linux') {
           agent {
