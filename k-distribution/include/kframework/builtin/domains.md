@@ -408,7 +408,7 @@ module MAP-KORE-SYMBOLIC [kore,symbolic]
   imports private K-EQUAL
   imports private BOOL
 
-  rule #Ceil(@M:Map [@K:KItem]) => {(@K in_keys(@M)) #Equals true} #And #Ceil(@M) #And #Ceil(@K) [anywhere, simplification]
+  rule #Ceil(@M:Map [@K:KItem]) => {(@K in_keys(@M)) #Equals true} #And #Ceil(@M) #And #Ceil(@K) [simplification]
 
   // Symbolic update
 
@@ -450,7 +450,7 @@ module MAP-KORE-SYMBOLIC [kore,symbolic]
 // hooked to MAP.Map. It is left here to serve as documentation.
 
   rule #Ceil(@M:Map (@K:KItem |-> @V:KItem)) => {(@K in_keys(@M)) #Equals false} #And #Ceil(@M) #And #Ceil(@K) #And #Ceil(@V)
-    [anywhere, simplification]
+    [simplification]
 */
 endmodule
 

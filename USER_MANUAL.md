@@ -756,6 +756,13 @@ syntax left mult
 syntax right add
 ```
 
+Note that `syntax [left|right|non-assoc]` should not be used to group together
+productions with different priorities. For example, this code would be invalid:
+```k
+syntax priorities mult > add
+syntax left mult add
+```
+
 Note that there is one other way to describe associativity, but it is
 prone to a very common mistake. You can apply the attribute `left`, `right`,
 or `non-assoc` directly to a production to indicate that it is, by itself,

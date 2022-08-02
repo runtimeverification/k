@@ -1,6 +1,7 @@
 from typing import Final, Iterable, Optional, Union, final
 
-from .kast import TRUE, KApply, KInner, KLabel, KSort, KToken
+from .kast import FALSE, TRUE, KApply, KInner, KLabel, KSort, KToken
+from .utils import unique
 
 
 @final
@@ -22,6 +23,36 @@ class Labels:
 
     def __init__(self):
         raise ValueError('Class Labels should not be instantiated')
+
+
+@final
+class Bool:
+
+    true: Final = TRUE
+    false: Final = FALSE
+
+    def __init__(self):
+        raise ValueError('Class Bool should not be instantiated')
+
+    @staticmethod
+    def of(b: bool) -> KToken:
+        return Bool.true if b else Bool.false
+
+    @staticmethod
+    def andBool(items: Iterable[KInner]) -> KInner:
+        return build_assoc(Bool.true, KLabel('_andBool_'), unique(items))
+
+    @staticmethod
+    def orBool(items: Iterable[KInner]) -> KInner:
+        return build_assoc(Bool.false, KLabel('_orBool_'), unique(items))
+
+    @staticmethod
+    def notBool(item: KInner) -> KApply:
+        return KApply(KLabel('notBool_'), [item])
+
+    @staticmethod
+    def impliesBool(antecedent: KInner, consequent: KInner) -> KApply:
+        return KApply(KLabel('_impliesBool_'), [antecedent, consequent])
 
 
 def build_assoc(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner]) -> KInner:
@@ -50,16 +81,12 @@ def buildCons(unit, cons, ls):
 
 def token(x: Union[bool, int, str]) -> KToken:
     if type(x) is bool:
-        return boolToken(x)
+        return Bool.of(x)
     if type(x) is int:
         return intToken(x)
     if type(x) is str:
         return stringToken(x)
     assert False
-
-
-def boolToken(b: bool) -> KToken:
-    return KToken('true' if b else 'false', Sorts.BOOL)
 
 
 def intToken(i: int) -> KToken:
@@ -84,7 +111,7 @@ def mlEquals(term1: KInner, term2: KInner, sort1: Union[str, KSort] = Sorts.K, s
 
 
 def mlEqualsTrue(term: KInner) -> KApply:
-    return mlEquals(TRUE, term, Sorts.BOOL)
+    return mlEquals(Bool.true, term, Sorts.BOOL)
 
 
 def mlTop(sort: Union[str, KSort] = Sorts.K) -> KApply:
