@@ -19,10 +19,10 @@ class KoreToKastTest(KProveTest):
 
     def test_kast_to_kore(self):
         # TODO: We want to not have to store 2 lists, and want to test (kast_to_kore(kore_to_kast(kore)) == kore)
-        kast_to_kore_pairs = (
+        kore_kast_pairs = (
             (App('inj', [SortApp('SortBool'), SortApp('SortKItem')], [App('Lblpred1', [], [DV(SortApp('SortInt'), String('3'))])]), KApply('pred1', [intToken(3)])),
         )
-        for i, (kore, kast) in enumerate(kast_to_kore_pairs):
+        for i, (kore, kast) in enumerate(kore_kast_pairs):
             with self.subTest(i=i):
                 kore_actual = self.kprove.kast_to_kore(kast)
                 kast_actual = self.kprove.kore_to_kast(kore)
