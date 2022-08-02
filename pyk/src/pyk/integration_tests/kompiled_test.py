@@ -1,10 +1,12 @@
+import json
 import shutil
 from abc import ABC
 from pathlib import Path
 from typing import Iterable, Optional
 from unittest import TestCase
 
-from ..ktool import KompileBackend, kompile
+from pyk.kast import KDefinition
+from pyk.ktool import KompileBackend, kompile
 
 
 class KompiledTest(TestCase, ABC):
@@ -13,6 +15,7 @@ class KompiledTest(TestCase, ABC):
     KOMPILE_OUTPUT_DIR: Optional[str] = None
     KOMPILE_INCLUDE_DIRS: Iterable[str] = []
     KOMPILE_EMIT_JSON = False
+    KOMPILE_POST_PROCESS: Optional[str] = None
 
     def setUp(self):
         main_file = Path(self.KOMPILE_MAIN_FILE)
@@ -30,7 +33,13 @@ class KompiledTest(TestCase, ABC):
             output_dir=output_dir,
             include_dirs=include_dirs,
             emit_json=self.KOMPILE_EMIT_JSON,
+            post_process=self.KOMPILE_POST_PROCESS,
         )
+
+        if self.KOMPILE_EMIT_JSON:
+            with open(self.kompiled_dir / 'compiled.json', 'r') as f:
+                json_dct = json.load(f)
+                self.definition = KDefinition.from_dict(json_dct['term'])
 
     def tearDown(self):
         shutil.rmtree(self.kompiled_dir)

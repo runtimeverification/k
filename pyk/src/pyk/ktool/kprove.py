@@ -1,3 +1,4 @@
+import csv
 import json
 import logging
 import os
@@ -5,8 +6,6 @@ from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
 from tempfile import TemporaryDirectory
 from typing import Dict, Final, Iterable, List, Mapping, Optional, Tuple
-
-from tabulate import tabulate
 
 from ..cli_utils import (
     check_dir_path,
@@ -82,9 +81,10 @@ class KProve(KPrint):
     def __init__(self, kompiled_directory, main_file_name=None, use_directory=None):
         super(KProve, self).__init__(kompiled_directory)
         self.directory = Path(self.kompiled_directory).parent
+        self.use_directory: Path
         if not use_directory:
             self._temp_dir = TemporaryDirectory()
-            self.use_directory = self._temp_dir.name
+            self.use_directory = Path(self._temp_dir.name)
         else:
             self.use_directory = Path(use_directory)
             check_dir_path(self.use_directory)
@@ -164,8 +164,10 @@ class KProve(KPrint):
                 productivity = total_success_time / (total_success_time + total_failure_time)
                 table_lines.append(['TOTAL', total_success_time, total_success_n, avg_success_time, total_failure_time, total_failure_n, avg_failure_time, productivity])
                 table_lines = sorted(table_lines, key=lambda x: x[1] + x[4])
-                with open(rule_profile, 'w') as rp:
-                    rp.write(tabulate(table_lines, headers=('Rule', 'Total Success Time', '# Successes', 'Avg. Success Time', 'Total Failure Time', '# Failures', 'Avg. Failure Time', 'Productivity')))
+                with open(rule_profile, 'w') as rp_file:
+                    writer = csv.writer(rp_file)
+                    writer.writerow(('Rule', 'Total Success Time', '# Successes', 'Avg. Success Time', 'Total Failure Time', '# Failures', 'Avg. Failure Time', 'Productivity'))
+                    writer.writerows(table_lines)
                     _LOGGER.info(f'Wrote rule profile: {rule_profile}')
 
             return final_state

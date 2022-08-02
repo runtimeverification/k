@@ -45,6 +45,8 @@ import org.kframework.kore.VisitK;
 import org.kframework.unparser.Formatter;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
@@ -107,7 +109,14 @@ public class ModuleToKORE {
     private final Set<String> mlBinders = new HashSet<>();
     private final KompileOptions options;
 
+    private final KExceptionManager kem;
+
     public ModuleToKORE(Module module, KLabel topCellInitializer, KompileOptions options) {
+        this(module, topCellInitializer, options, null);
+    }
+
+    public ModuleToKORE(Module module, KLabel topCellInitializer, KompileOptions options, KExceptionManager kem) {
+        this.kem = kem;
         this.module = module;
         this.addSortInjections = new AddSortInjections(module);
         this.topCellInitializer = topCellInitializer;
@@ -559,7 +568,7 @@ public class ModuleToKORE {
         //  {(@K1 in_keys(@Rest)) #Equals false} #And #Ceil(@K2) #And ... #And #Ceil(@Kn)
         // Note: The {_ in_keys(_) #Equals false} condition implies
         // #Ceil(@K1) and #Ceil(@Rest).
-        // [anywhere, simplification]
+        // [simplification]
 
         K restMapSet = KVariable("@Rest", Att.empty().add(Sort.class, mapSort));
         KLabel ceilMapLabel = KLabel(KLabels.ML_CEIL.name(), mapSort, sortParam);
@@ -941,7 +950,13 @@ public class ModuleToKORE {
                 .stream().collect(Collectors.toMap(KVariable::name, Function.identity()));
         if (ruleInfo.isEquation) {
             assertNoExistentials(rule, existentials);
-            sb.append("  axiom{R");
+            if (rule instanceof Claim) {
+                sb.append("  claim{R");
+                if (kem != null) // TODO: remove once https://github.com/runtimeverification/haskell-backend/issues/3010 is implemented
+                    kem.registerCompilerWarning(KException.ExceptionType.FUTURE_ERROR, "Functional claims not yet supported. https://github.com/runtimeverification/haskell-backend/issues/3010", rule);
+            } else {
+                sb.append("  axiom{R");
+            }
             Option<Sort> sortParamsWrapper = rule.att().getOption("sortParams", Sort.class);
             Option<Set<String>> sortParams = sortParamsWrapper.map(s -> stream(s.params()).map(sort -> sort.name()).collect(Collectors.toSet()));
             if (sortParams.nonEmpty()) {
@@ -1054,7 +1069,7 @@ public class ModuleToKORE {
                 sb.append(")))\n  ");
                 convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
                 sb.append("\n\n");
-            } else if (rule.att().contains(Att.SIMPLIFICATION())) {
+            } else if (rule.att().contains(Att.SIMPLIFICATION()) || rule instanceof Claim) {
                 sb.append("\\implies{R} (\n    ");
                 convertSideCondition(requires, sb);
                 sb.append(",\n    \\equals{");

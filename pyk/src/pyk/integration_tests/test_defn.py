@@ -2,14 +2,15 @@ from ..kast import (
     KApply,
     KClaim,
     KRewrite,
+    KSort,
     KToken,
     KVariable,
     assocWithUnit,
     constLabel,
 )
-from ..kastManip import push_down_rewrites, simplifyBool
+from ..kastManip import push_down_rewrites
 from ..ktool import KompileBackend
-from ..prelude import boolToken, intToken
+from ..prelude import Sorts
 from .kprove_test import KProveTest
 
 
@@ -75,15 +76,36 @@ class DefnTest(KProveTest):
         self.assertEqual(minimized_claim_rewrite_expected, minimized_claim_rewrite_actual)
         self.assertTop(result)
 
-    def test_bool_simplify(self):
+    def test_empty_config(self):
         # Given
-        bool_test_1 = KApply('_andBool_', [boolToken(False), boolToken(True)])
-        bool_test_2 = KApply('_andBool_', [KApply('_==Int_', [intToken(3), intToken(4)]), boolToken(True)])
+        empty_config_generated_top = self.kprove.definition.empty_config(Sorts.GENERATED_TOP_CELL)
+        empty_config_t = self.kprove.definition.empty_config(KSort('TCell'))
 
-        # When
-        bool_test_1_simplified = simplifyBool(bool_test_1)
-        bool_test_2_simplified = simplifyBool(bool_test_2)
+        empty_config_generated_top_printed = '\n'.join([ '<generatedTop>'               # noqa
+                                                       , '  <T>'                        # noqa
+                                                       , '    <k>'                      # noqa
+                                                       , '      K_CELL'                 # noqa
+                                                       , '    </k>'                     # noqa
+                                                       , '    <state>'                  # noqa
+                                                       , '      STATE_CELL'             # noqa
+                                                       , '    </state>'                 # noqa
+                                                       , '  </T>'                       # noqa
+                                                       , '  <generatedCounter>'         # noqa
+                                                       , '    GENERATEDCOUNTER_CELL'    # noqa
+                                                       , '  </generatedCounter>'        # noqa
+                                                       , '</generatedTop>'              # noqa
+                                                       ])                               # noqa
+
+        empty_config_t_printed = '\n'.join([ '<T>'                # noqa
+                                           , '  <k>'              # noqa
+                                           , '    K_CELL'         # noqa
+                                           , '  </k>'             # noqa
+                                           , '  <state>'          # noqa
+                                           , '    STATE_CELL'     # noqa
+                                           , '  </state>'         # noqa
+                                           , '</T>'               # noqa
+                                           ])                     # noqa
 
         # Then
-        self.assertEqual(boolToken(False), bool_test_1_simplified)
-        self.assertEqual(KApply('_==Int_', [intToken(3), intToken(4)]), bool_test_2_simplified)
+        self.assertEqual(empty_config_generated_top_printed, self.kprove.pretty_print(empty_config_generated_top))
+        self.assertEqual(empty_config_t_printed, self.kprove.pretty_print(empty_config_t))

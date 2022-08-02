@@ -15,7 +15,6 @@ pipeline {
       when { changeRequest() }
       steps {
         script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" }
-        milestone(1)
       }
     }
     stage('Create source tarball') {
@@ -125,7 +124,11 @@ pipeline {
           options { skipDefaultCheckout() }
           steps {
             unstash 'focal'
-            sh 'src/main/scripts/test-in-container-debian'
+            sh '''
+              src/main/scripts/test-in-container-debian
+              pyk --help
+              python3 -m pyk --help
+            '''
           }
           post {
             always {
@@ -179,7 +182,11 @@ pipeline {
           options { skipDefaultCheckout() }
           steps {
             unstash 'jammy'
-            sh 'src/main/scripts/test-in-container-debian'
+            sh '''
+              src/main/scripts/test-in-container-debian
+              pyk --help
+              python3 -m pyk --help
+            '''
           }
           post {
             always {
@@ -338,7 +345,7 @@ pipeline {
         stage('Build Image') {
           agent { label 'docker' }
           steps {
-            milestone(2)
+            milestone(1)
             dir('focal') { unstash 'focal' }
             sh '''
                 mv focal/kframework_${VERSION}_amd64.deb kframework_amd64_focal.deb

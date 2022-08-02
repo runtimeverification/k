@@ -22,13 +22,13 @@ from typing import (
 from graphviz import Digraph
 
 from .cterm import CTerm
-from .kast import KInner, KRuleLike, Subst
+from .kast import KClaim, KInner, KRule, Subst
 from .kastManip import (
-    buildRule,
+    build_claim,
+    build_rule,
     ml_pred_to_bool,
     mlAnd,
-    simplifyBool,
-    substToMlPred,
+    simplify_bool,
 )
 from .ktool import KPrint
 from .utils import add_indent, compare_short_hashes, shorten_hash
@@ -36,7 +36,7 @@ from .utils import add_indent, compare_short_hashes, shorten_hash
 
 class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
-    @dataclass(frozen=True)
+    @dataclass(frozen=True, order=True)
     class Node:
         cterm: CTerm
 
@@ -50,18 +50,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         def to_dict(self) -> Dict[str, Any]:
             return {'id': self.id, 'term': self.cterm.term.to_dict()}
 
-        def __lt__(self, other):
-            if not isinstance(other, KCFG.Node):
-                return NotImplemented
-            return self.id < other.id
-
     class EdgeLike(ABC):
         source: 'KCFG.Node'
         target: 'KCFG.Node'
 
         @abstractmethod
-        def pretty_print(self, kprint: KPrint) -> List[str]:
-            assert False, 'Must be overridden'
+        def pretty(self, kprint: KPrint) -> Iterable[str]:
+            ...
 
         def __lt__(self, other):
             if not isinstance(other, KCFG.EdgeLike):
@@ -78,16 +73,19 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         def to_dict(self) -> Dict[str, Any]:
             return {'source': self.source.id, 'target': self.target.id, 'condition': self.condition.to_dict(), 'depth': self.depth}
 
-        def to_rule(self, claim=False, priority=50) -> KRuleLike:
+        def to_rule(self, priority=50) -> KRule:
             sentence_id = f'BASIC-BLOCK-{self.source.id}-TO-{self.target.id}'
-            init_term = mlAnd([self.source.cterm.term, self.condition])
-            final_term = self.target.cterm.term
-            rule, _ = buildRule(sentence_id, init_term, final_term, claim=claim, priority=priority)
+            rule, _ = build_rule(sentence_id, self.source.cterm.add_constraint(self.condition), self.target.cterm, priority=priority)
             return rule
 
-        def pretty_print(self, kprint: KPrint) -> List[str]:
+        def to_claim(self) -> KClaim:
+            sentence_id = f'BASIC-BLOCK-{self.source.id}-TO-{self.target.id}'
+            claim, _ = build_claim(sentence_id, self.source.cterm.add_constraint(self.condition), self.target.cterm)
+            return claim
+
+        def pretty(self, kprint: KPrint) -> Iterable[str]:
             if self.depth == 0:
-                return ['\nandBool'.join(kprint.pretty_print(self.condition).split(' andBool'))]
+                return ['\nandBool'.join(kprint.pretty_print(ml_pred_to_bool(self.condition)).split(' andBool'))]
             elif self.depth == 1:
                 return ['(' + str(self.depth) + ' step)']
             else:
@@ -115,11 +113,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         def to_dict(self) -> Dict[str, Any]:
             return {'source': self.source.id, 'target': self.target.id}
 
-        def pretty_print(self, kprint: KPrint) -> List[str]:
+        def pretty(self, kprint: KPrint) -> Iterable[str]:
             return [
-                'constraint: ' + kprint.pretty_print(self.constraint),
+                'constraint: ' + kprint.pretty_print(ml_pred_to_bool(self.constraint)),
                 'subst:',
-                *add_indent('  ', kprint.pretty_print(substToMlPred(self.subst)).split('\n')),
+                *add_indent('  ', self.subst.minimize().pretty(kprint)),
             ]
 
     _nodes: Dict[str, Node]
@@ -290,18 +288,27 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         attr_string = ' (' + ', '.join(attrs) + ')' if attrs else ''
         return shorten_hash(node.id) + attr_string
 
-    def pretty_print(self, kprint: KPrint) -> List[str]:
+    def pretty(self, kprint: KPrint) -> Iterable[str]:
 
         processed_nodes: List[KCFG.Node] = []
 
         def _bold(text: str) -> str:
             return '\033[1m' + text + '\033[0m'
 
+        def _green(text: str) -> str:
+            return '\033[32m' + text + '\033[0m'
+
         def _print_node(node: KCFG.Node) -> str:
             short_info = self.node_short_info(node)
             if self.is_frontier(node.id):
                 short_info = _bold(short_info)
             return short_info
+
+        def _is_rewrite_edge(edge_like: KCFG.EdgeLike) -> bool:
+            return isinstance(edge_like, KCFG.Edge) and edge_like.depth != 0
+
+        def _is_case_split_edge(edge_like: KCFG.EdgeLike) -> bool:
+            return isinstance(edge_like, KCFG.Edge) and edge_like.depth == 0
 
         def _print_subgraph(indent: str, curr_node: KCFG.Node, prior_on_trace: List[KCFG.Node]) -> List[str]:
             ret: List[str] = []
@@ -318,31 +325,33 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             processed_nodes.append(curr_node)
 
             num_children = len(edges_from)
+            is_cover = (num_children == 1 and isinstance(edges_from[0], KCFG.Cover))
             is_branch = num_children > 1
             for i, edge_like in enumerate(edges_from):
                 is_last_child = i == num_children - 1
 
-                if not is_branch:
+                if not (is_branch or is_cover):
                     elbow = '├ ' if len(self.edge_likes(source_id=edge_like.target.id)) else '└ '
                     new_indent = indent
                 elif is_last_child:
-                    elbow = '┗━'
+                    elbow = '└╌'if is_cover else '┗━'
                     new_indent = indent + '    '
                 else:
                     elbow = '┣━'
                     new_indent = indent + '┃   '
 
-                extension_char = ''
-                if isinstance(edge_like, KCFG.Edge):
-                    if edge_like.depth == 0:
-                        extension_char = '┃'
-                    else:
-                        extension_char = '│'
+                if isinstance(edge_like, KCFG.Edge) and edge_like.depth:
+                    if self.is_verified(edge_like.source.id, edge_like.target.id):
+                        ret.append(indent + '│  ' + _bold(_green('(verified)')))
+                    ret.extend(add_indent(indent + '│  ', edge_like.pretty(kprint)))
                 elif isinstance(edge_like, KCFG.Cover):
-                    extension_char = '┊'
-                ret.extend(add_indent(indent + extension_char + '  ', edge_like.pretty_print(kprint)))
-
+                    ret.extend(add_indent(indent + '┊  ', edge_like.pretty(kprint)))
                 ret.append(indent + elbow + ' ' + _print_node(edge_like.target))
+                if isinstance(edge_like, KCFG.Edge) and edge_like.depth == 0:
+                    first, *rest = edge_like.pretty(kprint)
+                    ret[-1] += '    ' + first
+                    ret.extend(add_indent(new_indent + (7 + len(_print_node(edge_like.target))) * ' ', rest))
+
                 ret.extend(_print_subgraph(new_indent, edge_like.target, prior_on_trace + [edge_like.source]))
                 if is_branch:
                     ret.append(new_indent.rstrip())
@@ -369,7 +378,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             graph.node(name=node.id, label=label, **attrs)
 
         for edge in self.edges():
-            display_condition = simplifyBool(ml_pred_to_bool(edge.condition))
+            display_condition = simplify_bool(ml_pred_to_bool(edge.condition))
             depth = edge.depth
             label = '\nandBool'.join(kprint.pretty_print(display_condition).split(' andBool'))
             label = f'{label}\n{depth} steps'
@@ -396,7 +405,29 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def _resolve_hash(self, id_like: str) -> List[str]:
         return [node_id for node_id in self._nodes if compare_short_hashes(id_like, node_id)]
 
+    def get_unique_init(self) -> Node:
+        if len(self.init) > 1:
+            raise ValueError(f'Multiple init nodes found: {list(shorten_hash(n.id) for n in self.init)}')
+        return self.init[0]
+
+    def get_unique_target(self) -> Node:
+        if len(self.target) > 1:
+            raise ValueError(f'Multiple target nodes found: {list(shorten_hash(n.id) for n in self.target)}')
+        return self.target[0]
+
+    def get_first_frontier(self) -> Node:
+        if len(self.frontier) == 0:
+            raise ValueError('No frontiers remaining!')
+        return self.frontier[0]
+
     def _resolve_or_none(self, id_like: str) -> Optional[str]:
+        if id_like == '#init':
+            return self.get_unique_init().id
+        if id_like == '#target':
+            return self.get_unique_target().id
+        if id_like == '#frontier':
+            return self.get_first_frontier().id
+
         if id_like.startswith('@'):
             if id_like[1:] in self._aliases:
                 return self._aliases[id_like[1:]]

@@ -1,10 +1,11 @@
 # path to the current makefile
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # path to the kompile binary of this distribuition
-KOMPILE=$(abspath $(MAKEFILE_PATH)/../../bin/kompile)
+K_BIN=$(abspath $(MAKEFILE_PATH)/../../bin)
+KOMPILE=${K_BIN}/kompile
 KOMPILE_BACKEND=java
 # ditto for keq
-KEQ=$(abspath $(MAKEFILE_PATH)/../../bin/keq)
+KEQ=${K_BIN}/keq
 
 BASIC_SMT=$(abspath $(MAKEFILE_PATH)/z3/basic.smt2)
 

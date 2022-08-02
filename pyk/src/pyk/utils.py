@@ -53,6 +53,15 @@ class FrozenDict(Mapping[K, V]):
         return f'FrozenDict({repr(self._dict)})'
 
 
+def raised(f, *args, **kwargs) -> Optional[BaseException]:
+    try:
+        f(*args, **kwargs)
+    except BaseException as e:
+        return e
+
+    return None
+
+
 def merge_with(f, d1: Mapping, d2: Mapping) -> Dict:
     res = dict(d1)
     for k, v2 in d2.items():
@@ -62,6 +71,10 @@ def merge_with(f, d1: Mapping, d2: Mapping) -> Dict:
         else:
             res[k] = v2
     return res
+
+
+def filter_none(mapping: Mapping[K, V]) -> Dict[K, V]:
+    return {k: v for k, v in mapping.items() if v is not None}
 
 
 def find_common_items(l1: Iterable[T], l2: Iterable[T]) -> Tuple[List[T], List[T], List[T]]:
@@ -103,6 +116,21 @@ def unique(iterable: Iterable[H]) -> Iterator[H]:
             yield elem
 
 
+def repeat_last(iterable: Iterable[T]) -> Iterator[T]:
+    it = iter(iterable)
+    last: Optional[T] = None
+    while True:
+        try:
+            last = next(it)
+            yield last
+
+        except StopIteration:
+            if last is None:
+                return
+
+            yield last
+
+
 def nonempty_str(x: Any) -> str:
     if x is None:
         raise ValueError('Expected nonempty string, found: null.')
@@ -113,8 +141,8 @@ def nonempty_str(x: Any) -> str:
     return x
 
 
-def add_indent(indent: str, lines: List[str]) -> List[str]:
-    return list(map(lambda line: indent + line, lines))
+def add_indent(indent: str, lines: Iterable[str]) -> List[str]:
+    return [indent + line for line in lines]
 
 
 def is_hexstring(x: str) -> bool:

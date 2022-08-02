@@ -3,7 +3,8 @@ from unittest import TestCase
 
 from ..kast import KApply, KInner, KLabel, KVariable, Subst
 from ..kastManip import extract_subst
-from ..prelude import mlAnd, mlEquals, mlEqualsTrue, mlTop, token
+from ..prelude import Bool, mlAnd, mlEquals, mlEqualsTrue, mlTop, token
+from .mock_kprint import MockKPrint
 from .utils import a, b, c, f, g, h, x, y, z
 
 
@@ -96,6 +97,12 @@ class SubstTest(TestCase):
 
                 # Then
                 self.assertEqual(actual, expected)
+
+    def test_pretty(self):
+        self.assertListEqual(
+            list(Subst({'X': Bool.true, 'Y': KApply('_andBool_', [Bool.true, Bool.true])}).pretty(MockKPrint())),
+            ['X |-> true', 'Y |-> _andBool_ ( true , true )']
+        )
 
 
 class ExtractSubstTest(TestCase):

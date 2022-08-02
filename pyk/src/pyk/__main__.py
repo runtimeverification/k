@@ -7,13 +7,13 @@ from typing import Final
 from graphviz import Digraph
 
 from .coverage import getRuleById, stripCoverageLogger
+from .cterm import split_config_and_constraints
 from .kast import KAst, flattenLabel, readKastTerm
 from .kastManip import (
     minimize_term,
     minimizeRule,
     propagate_up_constraints,
     removeSourceMap,
-    splitConfigAndConstraints,
 )
 from .ktool import KPrint, KProve, build_symbol_table, prettyPrintKast
 from .prelude import Sorts, mlAnd, mlOr, mlTop
@@ -21,7 +21,7 @@ from .prelude import Sorts, mlAnd, mlOr, mlTop
 _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 
 
-def main(extraMain=None):
+def main():
     # KAST terms can end up nested quite deeply, because of the various assoc operators (eg. _Map_, _Set_, ...).
     # Most pyk operations are defined recursively, meaning you get a callstack the same depth as the term.
     # This change makes it so that in most cases, by default, pyk doesn't run out of stack space.
@@ -50,7 +50,7 @@ def main(extraMain=None):
                 minimizedDisjuncts = []
                 for d in flattenLabel('#Or', term):
                     dMinimized = minimize_term(d, abstract_labels=abstractLabels)
-                    dConfig, dConstraint = splitConfigAndConstraints(dMinimized)
+                    dConfig, dConstraint = split_config_and_constraints(dMinimized)
                     if dConstraint != mlTop():
                         minimizedDisjuncts.append(mlAnd([dConfig, dConstraint], sort=Sorts.GENERATED_TOP_CELL))
                     else:
@@ -86,8 +86,8 @@ def main(extraMain=None):
             args['output'].write('\nUnparsed:\n')
             args['output'].write(prettyPrintKast(rule, symbol_table))
 
-    elif extraMain is not None:
-        extraMain(args, kompiled_dir)
+    else:
+        raise ValueError(f'Unknown command: {args["command"]}')
 
 
 def create_argument_parser():

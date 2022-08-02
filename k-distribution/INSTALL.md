@@ -6,7 +6,7 @@ We currently strive to provide packages for the following platforms:
 -   Ubuntu Focal Fossa (20.04) and Jammy Jellyfish (22.04)
 -   Debian Bullseye
 -   Arch Linux
--   MacOS X Mojave/Homewbrew
+-   macOS Catalina (10.15), Big Sur (11) and Monterey (12) via Homebrew
 -   Docker Images
 
 Pre-installation Notes
@@ -66,7 +66,7 @@ Releases are generated as often as possible from `master` build.
 Installing Packages
 -------------------
 
-For version `X.Y.Z`, disto `DISTRO`, and package ID `ID`, the following
+For version `X.Y.Z`, distribution `DISTRO`, and package ID `ID`, the following
 instructions tell you how to install on each system. Note that this typically
 requires about ~1.4GB of dependencies and will take some time.
 
