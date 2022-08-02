@@ -18,7 +18,6 @@ class KoreToKastTest(KProveTest):
         pass
 
     def test_kast_to_kore(self):
-        # TODO: We want to not have to store 2 lists, and want to test (kast_to_kore(kore_to_kast(kore)) == kore)
         kore_kast_pairs = (
             (App('inj', [SortApp('SortBool'), SortApp('SortKItem')], [App('Lblpred1', [], [DV(SortApp('SortInt'), String('3'))])]), KApply('pred1', [intToken(3)])),
         )
