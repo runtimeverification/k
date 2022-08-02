@@ -157,6 +157,7 @@ lesson progresses.
 
 ```
 requires "lesson-22.k"
+requires "domains.md"
 
 module LESSON-22-SPEC-SYNTAX
     imports LESSON-22-SYNTAX
@@ -167,6 +168,7 @@ module VERIFICATION
     imports K-EQUAL
     imports LESSON-22-SPEC-SYNTAX
     imports LESSON-22
+    imports MAP-SYMBOLIC
 
 endmodule
 
@@ -220,7 +222,7 @@ again return `#Top`.
 
 ```
 claim <k> $a = A:Int ; $b = B:Int ;
-          if (A < B) {
+          if ($a < $b) {
             $c = $b ;
           } else {
             $c = $a ;
@@ -293,7 +295,7 @@ Matching Logic (ML) constraints, the final configuration (`<generatedTop> ...
 </generatedTop>`), and some positive ML constraints. Generally speaking,
 these positive and the negative constraints could arise from various sources,
 such as (but not limited to) branches taken by the execution
-(e.g. `{ true #Equals A <Int B }` or `#Not ( { true #Equals A <Int B>} ) `),
+(e.g. `{ true #Equals A <Int B }` or `#Not ( { true #Equals A <Int B } ) `),
 or `ensures` constraints.
 
 First, we examine the message:
@@ -349,16 +351,16 @@ falsifying the outside `#Not`. We just need to show `K` how to conclude that
 `VERIFICATION` module:
 
 ```
-rule { M:Map [ K <- V ] #Equals M [ K <- V' ] } => { V #Equals V' } [simplification, anywhere]
+rule { M:Map [ K <- V ] #Equals M [ K <- V' ] } => { V #Equals V' } [simplification]
 ```
 
 which formalizes our internal understanding of `?C ==Int B`. The rule states
 that when we update the same key in the same map with two values, and the
 resulting maps are equal, then the two values must be equal as well. The
 `[simplification]` attribute indicates to K to use this rule to simplify the
-state when trying to prove claims. We will ignore the `anywhere` attribute for
-now. Re-run the K prover, which should now return `#Top`, indicating that K was
-able to use the simplification and prove the required claims.
+state when trying to prove claims. Re-run the K prover, which should now return
+`#Top`, indicating that K was able to use the simplification and prove the
+required claims.
 
 4. Next, we show how to state and prove properties of `while` loops. In
    particular, we consider the following loop
