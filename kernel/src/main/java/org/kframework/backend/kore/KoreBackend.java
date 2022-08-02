@@ -165,6 +165,7 @@ public class KoreBackend extends AbstractBackend {
 
     @Override
     public Function<Module, Module> specificationSteps(Definition def) {
+        ModuleTransformer resolveComm = ModuleTransformer.from(new ResolveComm(kem)::resolve, "resolve comm simplification rules");
         Module mod = def.mainModule();
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
         LabelInfo labelInfo = new LabelInfoFromModule(mod);
@@ -191,7 +192,8 @@ public class KoreBackend extends AbstractBackend {
                 "concretizing configuration");
         ModuleTransformer generateSortProjections = ModuleTransformer.from(new GenerateSortProjections(false)::gen, "adding sort projections");
 
-        return m -> resolveAnonVars
+        return m -> resolveComm
+                .andThen(resolveAnonVars)
                 .andThen(resolveSemanticCasts)
                 .andThen(generateSortProjections)
                 .andThen(propagateMacroToRules)
