@@ -2,7 +2,6 @@ from unittest import TestCase
 
 from ..cterm import CTerm
 from ..kast import (
-    TRUE,
     KApply,
     KLabel,
     KRewrite,
@@ -18,9 +17,10 @@ from ..kastManip import (
     ml_pred_to_bool,
     push_down_rewrites,
     remove_generated_cells,
+    simplify_bool,
     substitute,
 )
-from ..prelude import Sorts, intToken, mlEqualsTrue, mlTop
+from ..prelude import Bool, Sorts, intToken, mlEqualsTrue, mlTop
 from .utils import a, b, c, f, k
 
 x = KVariable('X')
@@ -97,18 +97,18 @@ class MlPredToBoolTest(TestCase):
     def test_ml_pred_to_bool(self):
         # Given
         test_data = (
-            (False, KApply(KLabel('#Equals', [Sorts.BOOL, Sorts.GENERATED_TOP_CELL]), [TRUE, f(a)]), f(a)),
-            (False, KApply(KLabel('#Top', [Sorts.BOOL])), TRUE),
-            (False, KApply('#Top'), TRUE),
-            (False, mlTop(), TRUE),
+            (False, KApply(KLabel('#Equals', [Sorts.BOOL, Sorts.GENERATED_TOP_CELL]), [Bool.true, f(a)]), f(a)),
+            (False, KApply(KLabel('#Top', [Sorts.BOOL])), Bool.true),
+            (False, KApply('#Top'), Bool.true),
+            (False, mlTop(), Bool.true),
             (False, KApply(KLabel('#Equals'), [x, f(a)]), KApply('_==K_', [x, f(a)])),
-            (False, KApply(KLabel('#Equals'), [TRUE, f(a)]), f(a)),
+            (False, KApply(KLabel('#Equals'), [Bool.true, f(a)]), f(a)),
             (False, KApply(KLabel('#Equals', [KSort('Int'), Sorts.GENERATED_TOP_CELL]), [intToken(3), f(a)]), KApply('_==K_', [intToken(3), f(a)])),
-            (False, KApply(KLabel('#Not', [Sorts.GENERATED_TOP_CELL]), [mlTop()]), KApply('notBool_', [TRUE])),
+            (False, KApply(KLabel('#Not', [Sorts.GENERATED_TOP_CELL]), [mlTop()]), Bool.notBool(Bool.true)),
             (True, KApply(KLabel('#Equals'), [f(a), f(x)]), KApply('_==K_', [f(a), f(x)])),
-            (False, KApply(KLabel('#And', [Sorts.GENERATED_TOP_CELL]), [mlEqualsTrue(TRUE), mlEqualsTrue(TRUE)]), KApply('_andBool_', [TRUE, TRUE])),
+            (False, KApply(KLabel('#And', [Sorts.GENERATED_TOP_CELL]), [mlEqualsTrue(Bool.true), mlEqualsTrue(Bool.true)]), Bool.true),
             (True, KApply(KLabel('#Ceil', [KSort('Set'), Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('_Set_', [KVariable('_'), KVariable('_')]))]), KVariable('Ceil_37f1b5e5')),
-            (True, KApply(KLabel('#Not', [Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('#Ceil', [KSort('Set'), Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('_Set_', [KVariable('_'), KVariable('_')]))])]), KApply('notBool_', [KVariable('Ceil_37f1b5e5')])),
+            (True, KApply(KLabel('#Not', [Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('#Ceil', [KSort('Set'), Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('_Set_', [KVariable('_'), KVariable('_')]))])]), Bool.notBool(KVariable('Ceil_37f1b5e5'))),
             (True, KApply(KLabel('#Exists', [Sorts.INT, Sorts.BOOL]), [KVariable('X'), KApply('_==Int_', [KVariable('X'), KVariable('Y')])]), KVariable('Exists_6acf2557')),
         )
 
@@ -150,3 +150,19 @@ class CollapseDotsTest(TestCase):
 
         # Then
         self.assertEqual(config_actual, config_expected)
+
+
+class BooleanTest(TestCase):
+
+    def test_simplify_bool(self):
+        # Given
+        bool_test_1 = Bool.andBool([Bool.false, Bool.true])
+        bool_test_2 = Bool.andBool([KApply('_==Int_', [intToken(3), intToken(4)]), Bool.true])
+
+        # When
+        bool_test_1_simplified = simplify_bool(bool_test_1)
+        bool_test_2_simplified = simplify_bool(bool_test_2)
+
+        # Then
+        self.assertEqual(Bool.false, bool_test_1_simplified)
+        self.assertEqual(KApply('_==Int_', [intToken(3), intToken(4)]), bool_test_2_simplified)
