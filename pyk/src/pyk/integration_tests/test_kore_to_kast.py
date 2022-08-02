@@ -1,4 +1,4 @@
-from ..kast import KApply, KToken
+from ..kast import KApply
 from ..kore.syntax import DV, App, SortApp, String
 from ..ktool import KompileBackend
 from ..prelude import intToken
@@ -22,14 +22,9 @@ class KoreToKastTest(KProveTest):
         kast_to_kore_pairs = (
             (App('inj', [SortApp('SortBool'), SortApp('SortKItem')], [App('Lblpred1', [], [DV(SortApp('SortInt'), String('3'))])]), KApply('pred1', [intToken(3)])),
         )
-        kore_to_kast_pairs = (
-            (App('inj', [SortApp('SortBool'), SortApp('SortKItem')], [App('Lblpred1', [], [DV(SortApp('SortInt'), String('3'))])]), KApply('pred1', [KToken('3', 'K')])),
-        )
         for i, (kore, kast) in enumerate(kast_to_kore_pairs):
             with self.subTest(i=i):
                 kore_actual = self.kprove.kast_to_kore(kast)
-                self.assertEqual(kore_actual, kore)
-        for i, (kore, kast) in enumerate(kore_to_kast_pairs):
-            with self.subTest(i=i):
                 kast_actual = self.kprove.kore_to_kast(kore)
+                self.assertEqual(kore_actual, kore)
                 self.assertEqual(kast_actual, kast)
