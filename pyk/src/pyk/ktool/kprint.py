@@ -152,6 +152,8 @@ def prettyPrintKast(kast: KAst, symbol_table: SymbolTable, debug=False):
         if 'klabel' not in kast.att and kast.klabel:
             kast = kast.update_atts({'klabel': kast.klabel.name})
         sortStr = prettyPrintKast(kast.sort, symbol_table, debug=debug)
+        if not kast.items:
+            return 'syntax ' + sortStr
         productionStr = ' '.join([prettyPrintKast(pi, symbol_table, debug=debug) for pi in kast.items])
         attStr = prettyPrintKast(kast.att, symbol_table, debug=debug)
         return 'syntax ' + sortStr + ' ::= ' + productionStr + ' ' + attStr
