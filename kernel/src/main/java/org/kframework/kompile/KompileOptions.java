@@ -136,4 +136,7 @@ public class KompileOptions implements Serializable {
 
     @Parameter(names={"--post-process"}, description="JSON KAST => JSON KAST converter to run on definition after kompile pipeline.")
     public String postProcess;
+
+    @Parameter(names={"--disable-ceil-simplification-rules"}, description="Disable all rules with the simplification attribute whose left-hand side has a #Ceil at the top.")
+    public boolean disableCeilSimplificationRules;
 }
