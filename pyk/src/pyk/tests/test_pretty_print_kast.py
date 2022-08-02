@@ -17,6 +17,7 @@ class PrettyPrintKastTest(TestCase):
         (KRule(Bool.true), 'rule  true\n  '),
         (KRule(Bool.true, ensures=Bool.true), 'rule  true\n  '),
         (KRule(Bool.true, ensures=KApply('_andBool_', [Bool.true, Bool.true])), 'rule  true\n   ensures ( true\n   andBool ( true\n           ))\n  '),
+        (KProduction(KSort('Test')), 'syntax Test'),
     )
 
     SYMBOL_TABLE: Final[SymbolTable] = {}
