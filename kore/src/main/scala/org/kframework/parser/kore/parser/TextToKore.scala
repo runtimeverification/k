@@ -615,7 +615,7 @@ class TextToKore(b: Builders = DefaultBuilders) {
   // Sort = SortVariable | Name { List{Sort, ",", ")"} }
   private def parseSort(parsingLevel: ParsingLevel = both): Sort = {
     val name = parseId(parsingLevel)
-    scanner.next() match {
+    scanner.nextWithSkippingWhitespaces() match {
       case '{' =>
         if (previousParsingLevel == meta) { // name is a meta-level id
           val metalevelSorts = Seq("#Char", "#CharList", "#String", "#Sort", "#SortList",
