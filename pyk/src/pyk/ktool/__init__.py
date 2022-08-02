@@ -5,8 +5,7 @@ from .kprint import (
     build_symbol_table,
     indent,
     paren,
-    prettyPrintKast,
-    prettyPrintKastBool,
+    pretty_print_kast,
     unparser_for_production,
 )
 from .kprove import KProve, kprove

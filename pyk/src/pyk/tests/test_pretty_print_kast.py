@@ -4,7 +4,7 @@ from unittest import TestCase
 from pyk.kast import KApply, KAst, KLabel, KProduction, KRule, KSort, KTerminal
 from pyk.ktool.kprint import (
     SymbolTable,
-    prettyPrintKast,
+    pretty_print_kast,
     unparser_for_production,
 )
 from pyk.prelude import Bool
@@ -25,7 +25,7 @@ class PrettyPrintKastTest(TestCase):
     def test_pretty_print(self):
         for i, (kast, expected) in enumerate(self.TEST_DATA):
             with self.subTest(i=i):
-                actual = prettyPrintKast(kast, self.SYMBOL_TABLE)
+                actual = pretty_print_kast(kast, self.SYMBOL_TABLE)
                 actual_tokens = actual.split('\n')
                 expected_tokens = expected.split('\n')
                 self.assertListEqual(actual_tokens, expected_tokens)
