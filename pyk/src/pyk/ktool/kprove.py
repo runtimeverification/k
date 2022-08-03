@@ -198,17 +198,17 @@ class KProve(KPrint):
             rule_profile=rule_profile,
         )
 
-    def _write_claim_definition(self, claim, claim_id, lemmas=[], rule=False):
-        tmpClaim = self.use_directory / (claim_id.lower() if rule else (claim_id.lower() + '-spec'))
-        tmpModuleName = claim_id.upper() if rule else (claim_id.upper() + '-SPEC')
-        tmpClaim = tmpClaim.with_suffix('.k')
-        with open(tmpClaim, 'w') as tc:
-            claimModule = KFlatModule(tmpModuleName, lemmas + [claim], imports=[KImport(self.main_module, True)])
-            claimDefinition = KDefinition(tmpModuleName, [claimModule], requires=[KRequire(self.main_file_name)])
+    def _write_claim_definition(self, claim: KClaim, claim_id: str, lemmas: List[KRule] = []):
+        tmp_claim = self.use_directory / (claim_id.lower() + '-spec')
+        tmp_module_name = claim_id.upper() if rule else (claim_id.upper() + '-SPEC')
+        tmp_claim = tmp_claim.with_suffix('.k')
+        with open(tmp_claim, 'w') as tc:
+            claim_module = KFlatModule(tmp_module_name, lemmas + [claim], imports=[KImport(self.main_module, True)])
+            claim_definition = KDefinition(tmp_module_name, [claim_module], requires=[KRequire(self.main_file_name)])
             tc.write(gen_file_timestamp() + '\n')
-            tc.write(self.pretty_print(claimDefinition) + '\n\n')
+            tc.write(self.pretty_print(claim_definition) + '\n\n')
             tc.flush()
-        _LOGGER.debug(f'Wrote claim file: {tmpClaim}.')
+        _LOGGER.debug(f'Wrote claim file: {tmp_claim}.')
 
 
 def _get_rule_profile(debug_log: List[List[Tuple[str, bool, int]]]) -> Mapping[str, Tuple[float, int, float, float, int, float, float]]:
