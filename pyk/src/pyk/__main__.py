@@ -98,7 +98,7 @@ def main():
 def create_argument_parser():
 
     logging_args = argparse.ArgumentParser(add_help=False)
-    logging_args.add_argument('-v', '--verbose', action='count', help='Verbosity level, repeat for more verbosity.')
+    logging_args.add_argument('-v', '--verbose', action='count', help='Verbosity level, repeat for more verbosity (up to two times).')
 
     definition_args = argparse.ArgumentParser(add_help=False)
     definition_args.add_argument('definition', type=str, help='Kompiled directory for definition.')
