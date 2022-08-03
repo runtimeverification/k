@@ -13,7 +13,16 @@ from ..cli_utils import (
     gen_file_timestamp,
     run_process,
 )
-from ..kast import KAst, KDefinition, KFlatModule, KImport, KRequire
+from ..kast import (
+    KAst,
+    KClaim,
+    KDefinition,
+    KFlatModule,
+    KImport,
+    KRequire,
+    KRule,
+    KSentence,
+)
 from ..prelude import mlTop
 from ..utils import unique
 from .kprint import KPrint
@@ -185,10 +194,10 @@ class KProve(KPrint):
         dry_run=False,
         rule_profile=False,
     ):
-        self._write_claim_definition(claim, claim_id, lemmas=lemmas)
+        claim_path, claim_module_name = self._write_claim_definition(claim, claim_id, lemmas=lemmas)
         return self.prove(
-            self.use_directory / (claim_id.lower() + '-spec.k'),
-            spec_module_name=(claim_id.upper() + '-SPEC'),
+            claim_path,
+            spec_module_name=claim_module_name,
             args=args,
             haskell_args=haskell_args,
             haskell_log_entries=haskell_log_entries,
@@ -198,17 +207,21 @@ class KProve(KPrint):
             rule_profile=rule_profile,
         )
 
-    def _write_claim_definition(self, claim: KClaim, claim_id: str, lemmas: List[KRule] = []):
+    def _write_claim_definition(self, claim: KClaim, claim_id: str, lemmas: List[KRule] = []) -> Tuple[Path, str]:
         tmp_claim = self.use_directory / (claim_id.lower() + '-spec')
-        tmp_module_name = claim_id.upper() if rule else (claim_id.upper() + '-SPEC')
+        tmp_module_name = claim_id.upper() + '-SPEC'
         tmp_claim = tmp_claim.with_suffix('.k')
+        sentences: List[KSentence] = []
+        sentences.extend(lemmas)
+        sentences.append(claim)
         with open(tmp_claim, 'w') as tc:
-            claim_module = KFlatModule(tmp_module_name, lemmas + [claim], imports=[KImport(self.main_module, True)])
+            claim_module = KFlatModule(tmp_module_name, sentences, imports=[KImport(self.main_module, True)])
             claim_definition = KDefinition(tmp_module_name, [claim_module], requires=[KRequire(self.main_file_name)])
             tc.write(gen_file_timestamp() + '\n')
             tc.write(self.pretty_print(claim_definition) + '\n\n')
             tc.flush()
         _LOGGER.debug(f'Wrote claim file: {tmp_claim}.')
+        return tmp_claim, tmp_module_name
 
 
 def _get_rule_profile(debug_log: List[List[Tuple[str, bool, int]]]) -> Mapping[str, Tuple[float, int, float, float, int, float, float]]:
