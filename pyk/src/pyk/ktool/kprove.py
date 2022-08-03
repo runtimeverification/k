@@ -19,6 +19,7 @@ from ..kast import (
     KDefinition,
     KFlatModule,
     KImport,
+    KInner,
     KRequire,
     KRule,
     KSentence,
@@ -206,6 +207,43 @@ class KProve(KPrint):
             dry_run=dry_run,
             rule_profile=rule_profile,
         )
+
+    def get_claim_basic_block(self, claim_id: str, claim: KClaim, lemmas: List[KRule] = [], args: List[str] = [], haskell_args: List[str] = [], max_depth: int = 1000) -> Tuple[int, bool, KInner]:
+
+        def _is_fatal_error_log_entry(line: str) -> bool:
+            decide_predicate_unknown = line.find('(ErrorDecidePredicateUnknown): ErrorDecidePredicateUnknown') >= 0
+            return decide_predicate_unknown
+
+        claim_path, claim_module = self._write_claim_definition(claim, claim_id, lemmas=lemmas)
+        log_axioms_file = claim_path.with_suffix('.debug.log')
+        next_states = self.prove(claim_path, spec_module_name=claim_module, args=(args + ['--depth', str(max_depth)]), haskell_args=(['--execute-to-branch'] + haskell_args), log_axioms_file=log_axioms_file)
+        if len(next_states) != 1:
+            raise AssertionError(f'get_basic_block execeted 1 state from Haskell backend, got: {next_states}')
+        next_state = next_states[0]
+        with open(log_axioms_file) as lf:
+            log_file = lf.readlines()
+        depth = -1
+        branching = False
+        could_be_branching = False
+        rule_count = 0
+        _LOGGER.info(f'log_file: {log_axioms_file}')
+        for log_line in log_file:
+            if _is_fatal_error_log_entry(log_line):
+                depth = rule_count
+                _LOGGER.warning(f'Fatal backend error: {log_line}')
+            elif log_line.find('InfoUnprovenDepth') >= 0 or log_line.find('InfoProvenDepth') >= 0:
+                # example:
+                # kore-exec: [12718755] Info (InfoProofDepth): InfoUnprovenDepth : 48
+                depth = int(log_line.split(':')[-1].strip())
+            elif log_line.find('(DebugTransition): after  apply axioms: ') >= 0:
+                rule_count += 1
+                # example:
+                # kore-exec: [24422822] Debug (DebugTransition): after  apply axioms: /home/dev/src/erc20-verification-pr/.build/usr/lib/ktoken/kevm/lib/kevm/include/kframework/evm.md:1858:10-1859:38
+                branching = branching or could_be_branching
+                could_be_branching = True
+            else:
+                could_be_branching = False
+        return depth, branching, next_state
 
     def _write_claim_definition(self, claim: KClaim, claim_id: str, lemmas: List[KRule] = []) -> Tuple[Path, str]:
         tmp_claim = self.use_directory / (claim_id.lower() + '-spec')
