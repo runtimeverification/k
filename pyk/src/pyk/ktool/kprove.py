@@ -23,6 +23,7 @@ from ..kast import (
     KRequire,
     KRule,
     KSentence,
+    flatten_label,
 )
 from ..prelude import mlTop
 from ..utils import unique
@@ -216,10 +217,9 @@ class KProve(KPrint):
 
         claim_path, claim_module = self._write_claim_definition(claim, claim_id, lemmas=lemmas)
         log_axioms_file = claim_path.with_suffix('.debug.log')
-        next_states = self.prove(claim_path, spec_module_name=claim_module, args=(args + ['--depth', str(max_depth)]), haskell_args=(['--execute-to-branch'] + haskell_args), log_axioms_file=log_axioms_file)
-        if len(next_states) != 1:
-            raise AssertionError(f'get_basic_block execeted 1 state from Haskell backend, got: {next_states}')
-        next_state = next_states[0]
+        next_state = self.prove(claim_path, spec_module_name=claim_module, args=(args + ['--depth', str(max_depth)]), haskell_args=(['--execute-to-branch'] + haskell_args), log_axioms_file=log_axioms_file)
+        if len(flatten_label('#And', next_state)) != 1:
+            raise AssertionError(f'get_basic_block execeted 1 state from Haskell backend, got: {next_state}')
         with open(log_axioms_file) as lf:
             log_file = lf.readlines()
         depth = -1
