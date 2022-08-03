@@ -1,7 +1,16 @@
 from typing import Final, Tuple
 from unittest import TestCase
 
-from pyk.kast import KApply, KAst, KLabel, KProduction, KRule, KSort, KTerminal
+from pyk.kast import (
+    KApply,
+    KAst,
+    KAtt,
+    KLabel,
+    KProduction,
+    KRule,
+    KSort,
+    KTerminal,
+)
 from pyk.ktool.kprint import (
     SymbolTable,
     pretty_print_kast,
@@ -18,6 +27,7 @@ class PrettyPrintKastTest(TestCase):
         (KRule(Bool.true, ensures=Bool.true), 'rule  true\n  '),
         (KRule(Bool.true, ensures=KApply('_andBool_', [Bool.true, Bool.true])), 'rule  true\n   ensures ( true\n   andBool ( true\n           ))\n  '),
         (KProduction(KSort('Test')), 'syntax Test'),
+        (KProduction(KSort('Test'), att=KAtt({'token': ''})), 'syntax Test [token()]'),
     )
 
     SYMBOL_TABLE: Final[SymbolTable] = {}

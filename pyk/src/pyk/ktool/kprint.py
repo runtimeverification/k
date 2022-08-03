@@ -151,12 +151,13 @@ def pretty_print_kast(kast: KAst, symbol_table: SymbolTable, debug=False):
     if type(kast) is KProduction:
         if 'klabel' not in kast.att and kast.klabel:
             kast = kast.update_atts({'klabel': kast.klabel.name})
-        sort_str = pretty_print_kast(kast.sort, symbol_table, debug=debug)
-        if not kast.items:
-            return 'syntax ' + sort_str
-        production_str = ' '.join([pretty_print_kast(pi, symbol_table, debug=debug) for pi in kast.items])
+        syntax_str = 'syntax ' + pretty_print_kast(kast.sort, symbol_table, debug=debug)
+        if kast.items:
+            syntax_str += ' '.join([pretty_print_kast(pi, symbol_table, debug=debug) for pi in kast.items])
         att_str = pretty_print_kast(kast.att, symbol_table, debug=debug)
-        return 'syntax ' + sort_str + ' ::= ' + production_str + ' ' + att_str
+        if att_str:
+            syntax_str += ' ' + att_str
+        return syntax_str
     if type(kast) is KSyntaxSort:
         sort_str = pretty_print_kast(kast.sort, symbol_table, debug=debug)
         att_str = pretty_print_kast(kast.att, symbol_table, debug=debug)
