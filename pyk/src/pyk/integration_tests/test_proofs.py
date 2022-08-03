@@ -42,3 +42,33 @@ class SimpleProofTest(KProveTest):
         with open(rule_profile, 'r') as rp:
             lines = rp.read().split('\n')
             self.assertEqual(len(lines), 4)
+
+
+class ImpProofTest(KProveTest):
+    KOMPILE_MAIN_FILE = 'k-files/imp-verification.k'
+    KOMPILE_BACKEND = KompileBackend.HASKELL
+    KOMPILE_OUTPUT_DIR = 'definitions/imp'
+    KOMPILE_EMIT_JSON = True
+
+    KPROVE_USE_DIR = '.imp'
+
+    @staticmethod
+    def _update_symbol_table(symbol_table):
+        pass
+
+    def test_get_basic_block(self):
+        # Given
+        new_claim = KClaim(KToken('<k> s = 0 ; while ( n > 0 ) { s = s + n ; n = n - 1 ; } => . ... </k> <state> n |-> (N => 0) s |-> (_ => (N *Int (N +Int 1)) /Int 2) </state>', 'KCell'))
+
+        # When
+        post_state = self.kprove.get_basic_block(new_claim, 'imp-spec')
+        post_state_pretty_actual = self.kprove.pretty_print(post_state)
+
+        post_state_pretty_expected = '<generatedTop>\n' +                                                                                                            \
+                                     '  <T>\n' +                                                                                                                     \
+                                     '    <k> if ( N >Int 0 ) { s = s + n ; n = n - 1 ; while ( n > 0 ) { s = s + n ; n = n - 1 ; } } else { } ~> _DotVar0 </k>\n' + \
+                                     '    <state> n |-> N s |-> 0 </state>\n' +                                                                                      \
+                                     '  </T>\n' +                                                                                                                    \
+                                     '</generatedTop>\n'
+
+        self.assertEqual(post_state_pretty_actual, post_state_pretty_expected)
