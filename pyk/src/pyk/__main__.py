@@ -31,7 +31,7 @@ def main():
     cli_parser = create_argument_parser()
     args = vars(cli_parser.parse_args())
 
-    kompiled_dir = Path(args['kompiled-dir'])
+    kompiled_dir = Path(args['definition'])
 
     if not args['verbose']:
         logging.basicConfig(level=logging.WARNING, format=_LOG_FORMAT)
@@ -100,29 +100,29 @@ def create_argument_parser():
     logging_args = argparse.ArgumentParser(add_help=False)
     logging_args.add_argument('-v', '--verbose', action='count', help='Verbosity level, repeat for more verbosity.')
 
-    kompiled_definition_options = argparse.ArgumentParser(add_help=False)
-    kompiled_definition_options.add_argument('kompiled-dir', type=str, help='Kompiled directory for definition.')
+    definition_args = argparse.ArgumentParser(add_help=False)
+    definition_args.add_argument('definition', type=str, help='Kompiled directory for definition.')
 
     pyk_args = argparse.ArgumentParser()
     pyk_args_command = pyk_args.add_subparsers(dest='command')
 
-    print_args = pyk_args_command.add_parser('print', help='Pretty print a term.', parents=[logging_args, kompiled_definition_options])
+    print_args = pyk_args_command.add_parser('print', help='Pretty print a term.', parents=[logging_args, definition_args])
     print_args.add_argument('term', type=argparse.FileType('r'), help='Input term (in JSON).')
     print_args.add_argument('--minimize', default=True, action='store_true', help='Minimize the JSON configuration before printing.')
     print_args.add_argument('--no-minimize', dest='minimize', action='store_false', help='Do not minimize the JSON configuration before printing.')
     print_args.add_argument('--omit-labels', default='', nargs='?', help='List of labels to omit from output.')
     print_args.add_argument('--output-file', type=argparse.FileType('w'), default='-')
 
-    prove_args = pyk_args_command.add_parser('prove', help='Prove an input specification (using kprovex).', parents=[logging_args, kompiled_definition_options])
+    prove_args = pyk_args_command.add_parser('prove', help='Prove an input specification (using kprovex).', parents=[logging_args, definition_args])
     prove_args.add_argument('main-file', type=str, help='Main file used for kompilation.')
     prove_args.add_argument('spec-file', type=str, help='File with the specification module.')
     prove_args.add_argument('spec-module', type=str, help='Module with claims to be proven.')
     prove_args.add_argument('--output-file', type=argparse.FileType('w'), default='-')
     prove_args.add_argument('kArgs', nargs='*', help='Arguments to pass through to K invocation.')
 
-    pyk_args_command.add_parser('graph-imports', help='Graph the imports of a given definition.', parents=[logging_args, kompiled_definition_options])
+    pyk_args_command.add_parser('graph-imports', help='Graph the imports of a given definition.', parents=[logging_args, definition_args])
 
-    coverage_args = pyk_args_command.add_parser('coverage', help='Convert coverage file to human readable log.', parents=[logging_args, kompiled_definition_options])
+    coverage_args = pyk_args_command.add_parser('coverage', help='Convert coverage file to human readable log.', parents=[logging_args, definition_args])
     coverage_args.add_argument('coverage-file', type=argparse.FileType('r'), help='Coverage file to build log for.')
     coverage_args.add_argument('-o', '--output', type=argparse.FileType('w'), default='-')
 
