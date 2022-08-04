@@ -66,20 +66,20 @@ class ImpProofTest(KProveTest):
 
         post_depth_expected = 9
         post_branching_expected = True
-        post_state_pretty_expected = '<generatedTop>\n' +                                                                                                            \
-                                     '  <T>\n' +                                                                                                                     \
-                                     '    <k>\n' +                                                                                                                   \
-                                     '      if ( 0 <=Int N ) { { $s = $s + $n ; $n = $n + -1 ; } while ( 0 <= $n ) { $s = $s + $n ; $n = $n + -1 ; } } else { }\n' + \
-                                     '      ~> _DotVar2\n' +                                                                                                         \
-                                     '    </k>\n' +                                                                                                                  \
-                                     '    <state>\n' +                                                                                                               \
-                                     '      $n |-> N $s |-> 0\n' +                                                                                                   \
-                                     '    </state>\n' +                                                                                                              \
-                                     '  </T>\n' +                                                                                                                    \
-                                     '  <generatedCounter>\n' +                                                                                                      \
-                                     '    _DotVar3\n' +                                                                                                              \
-                                     '  </generatedCounter>\n' +                                                                                                     \
-                                     '</generatedTop>'
+        post_state_pretty_expected = ('<generatedTop>\n'
+                                      '  <T>\n'
+                                      '    <k>\n'
+                                      '      if ( 0 <=Int N ) { { $s = $s + $n ; $n = $n + -1 ; } while ( 0 <= $n ) { $s = $s + $n ; $n = $n + -1 ; } } else { }\n'
+                                      '      ~> _DotVar2\n'
+                                      '    </k>\n'
+                                      '    <state>\n'
+                                      '      $n |-> N $s |-> 0\n'
+                                      '    </state>\n'
+                                      '  </T>\n'
+                                      '  <generatedCounter>\n'
+                                      '    _DotVar3\n'
+                                      '  </generatedCounter>\n'
+                                      '</generatedTop>')
 
         self.assertEqual(post_depth_actual, post_depth_expected)
         self.assertEqual(post_branching_actual, post_branching_expected)
