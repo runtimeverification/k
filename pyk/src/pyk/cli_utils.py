@@ -51,12 +51,8 @@ def run_process(
     try:
         res = subprocess.run(args, input=input, env=env, capture_output=True, check=True, text=True)
     except CalledProcessError as err:
-        sys.stderr.write(err.stderr)
-        sys.stderr.flush()
         logger.log(log_level, f'Completed with status {err.returncode}: {command}')
         raise
-    sys.stderr.write(res.stderr)
-    sys.stderr.flush()
 
     logger.log(log_level, f'Completed: {command}')
     return res
