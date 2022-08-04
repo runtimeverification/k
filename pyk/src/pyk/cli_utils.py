@@ -41,6 +41,7 @@ def run_process(
     log_level: int = logging.DEBUG,
     input: Optional[str] = None,
     env: Optional[Mapping[str, str]] = None,
+    propogate_stderr: bool = True,
 ) -> CompletedProcess:
     if type(args) is str:
         command = args
@@ -55,8 +56,9 @@ def run_process(
         sys.stderr.flush()
         logger.log(log_level, f'Completed with status {err.returncode}: {command}')
         raise
-    sys.stderr.write(res.stderr)
-    sys.stderr.flush()
+    if propogate_stderr:
+        sys.stderr.write(res.stderr)
+        sys.stderr.flush()
 
     logger.log(log_level, f'Completed: {command}')
     return res
