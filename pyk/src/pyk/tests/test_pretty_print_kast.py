@@ -6,6 +6,7 @@ from pyk.kast import (
     KAst,
     KAtt,
     KLabel,
+    KNonTerminal,
     KProduction,
     KRule,
     KSort,
@@ -28,6 +29,7 @@ class PrettyPrintKastTest(TestCase):
         (KRule(Bool.true, ensures=KApply('_andBool_', [Bool.true, Bool.true])), 'rule  true\n   ensures ( true\n   andBool ( true\n           ))\n  '),
         (KProduction(KSort('Test')), 'syntax Test'),
         (KProduction(KSort('Test'), att=KAtt({'token': ''})), 'syntax Test [token()]'),
+        (KProduction(KSort('Test'), [KTerminal('foo'), KNonTerminal(KSort('Int'))], att=KAtt({'function': ''})), 'syntax Test ::= "foo" Int [function()]'),
     )
 
     SYMBOL_TABLE: Final[SymbolTable] = {}

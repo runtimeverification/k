@@ -153,7 +153,7 @@ def pretty_print_kast(kast: KAst, symbol_table: SymbolTable, debug=False):
             kast = kast.update_atts({'klabel': kast.klabel.name})
         syntax_str = 'syntax ' + pretty_print_kast(kast.sort, symbol_table, debug=debug)
         if kast.items:
-            syntax_str += ' '.join([pretty_print_kast(pi, symbol_table, debug=debug) for pi in kast.items])
+            syntax_str += ' ::= ' + ' '.join([pretty_print_kast(pi, symbol_table, debug=debug) for pi in kast.items])
         att_str = pretty_print_kast(kast.att, symbol_table, debug=debug)
         if att_str:
             syntax_str += ' ' + att_str
