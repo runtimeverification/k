@@ -8,14 +8,14 @@ from graphviz import Digraph
 
 from .coverage import getRuleById, stripCoverageLogger
 from .cterm import split_config_and_constraints
-from .kast import KAst, flattenLabel, readKastTerm
+from .kast import KAst, flatten_label, readKastTerm
 from .kastManip import (
     minimize_term,
     minimizeRule,
     propagate_up_constraints,
     removeSourceMap,
 )
-from .ktool import KPrint, KProve, build_symbol_table, prettyPrintKast
+from .ktool import KPrint, KProve, build_symbol_table, pretty_print_kast
 from .prelude import Sorts, mlAnd, mlOr, mlTop
 
 _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
@@ -53,7 +53,7 @@ def main():
             if args['minimize']:
                 abstractLabels = [] if args['omit_labels'] is None else args['omit_labels'].split(',')
                 minimizedDisjuncts = []
-                for d in flattenLabel('#Or', term):
+                for d in flatten_label('#Or', term):
                     dMinimized = minimize_term(d, abstract_labels=abstractLabels)
                     dConfig, dConstraint = split_config_and_constraints(dMinimized)
                     if dConstraint != mlTop():
@@ -91,7 +91,7 @@ def main():
             args['output'].write('\n\n')
             args['output'].write('Rule: ' + rid.strip())
             args['output'].write('\nUnparsed:\n')
-            args['output'].write(prettyPrintKast(rule, symbol_table))
+            args['output'].write(pretty_print_kast(rule, symbol_table))
         _LOGGER.info(f'Wrote file: {args["output"].name}')
 
     else:
