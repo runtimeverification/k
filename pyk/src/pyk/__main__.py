@@ -46,7 +46,10 @@ def main():
         term = KAst.from_json(args['term'].read())
         if type(term) is dict and 'term' in term:
             term = term['term']
-        if term != mlTop():
+        if term == mlTop():
+            args['output_file'].write(printer.pretty_print(term))
+            _LOGGER.info(f'Wrote file: {args["output_file"].name}')
+        else:
             if args['minimize']:
                 abstractLabels = [] if args['omit_labels'] is None else args['omit_labels'].split(',')
                 minimizedDisjuncts = []
@@ -58,8 +61,8 @@ def main():
                     else:
                         minimizedDisjuncts.append(dConfig)
                 term = propagate_up_constraints(mlOr(minimizedDisjuncts, sort=Sorts.GENERATED_TOP_CELL))
-        args['output_file'].write(printer.pretty_print(term))
-        _LOGGER.info(f'Wrote file: {args["output_file"].name}')
+            args['output_file'].write(printer.pretty_print(term))
+            _LOGGER.info(f'Wrote file: {args["output_file"].name}')
 
     elif args['command'] == 'prove':
         kprover = KProve(kompiled_dir, args['main-file'])
