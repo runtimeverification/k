@@ -29,7 +29,7 @@ from ..kast import (
     KTerminal,
     KToken,
     KVariable,
-    flattenLabel,
+    flatten_label,
     ktokenDots,
     readKastTerm,
 )
@@ -243,7 +243,7 @@ def pretty_print_kast_bool(kast, symbol_table, debug=False):
         sys.stderr.write('\n')
         sys.stderr.flush()
     if type(kast) is KApply and kast.label.name in ['_andBool_', '_orBool_']:
-        clauses = [pretty_print_kast_bool(c, symbol_table, debug=debug) for c in flattenLabel(kast.label.name, kast)]
+        clauses = [pretty_print_kast_bool(c, symbol_table, debug=debug) for c in flatten_label(kast.label.name, kast)]
         head = kast.label.name.replace('_', ' ')
         if head == ' orBool ':
             head = '  orBool '

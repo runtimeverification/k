@@ -8,7 +8,7 @@ from graphviz import Digraph
 
 from .coverage import getRuleById, stripCoverageLogger
 from .cterm import split_config_and_constraints
-from .kast import KAst, flattenLabel, readKastTerm
+from .kast import KAst, flatten_label, readKastTerm
 from .kastManip import (
     minimize_term,
     minimizeRule,
@@ -48,7 +48,7 @@ def main():
             if args['minimize']:
                 abstractLabels = [] if args['omit_labels'] is None else args['omit_labels'].split(',')
                 minimizedDisjuncts = []
-                for d in flattenLabel('#Or', term):
+                for d in flatten_label('#Or', term):
                     dMinimized = minimize_term(d, abstract_labels=abstractLabels)
                     dConfig, dConstraint = split_config_and_constraints(dMinimized)
                     if dConstraint != mlTop():
