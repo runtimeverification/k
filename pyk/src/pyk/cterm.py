@@ -3,13 +3,13 @@ from functools import cached_property
 from itertools import chain
 from typing import Iterable, Optional, Tuple
 
-from .kast import KApply, KInner, Subst, flattenLabel
+from .kast import KApply, KInner, Subst, flatten_label
 from .prelude import Sorts, mlAnd, mlImplies, mlTop
 from .utils import unique
 
 
 def split_config_and_constraints(kast: KInner) -> Tuple[KInner, KInner]:
-    conjuncts = flattenLabel('#And', kast)
+    conjuncts = flatten_label('#And', kast)
     term = None
     constraints = []
     for c in conjuncts:
@@ -31,7 +31,7 @@ class CTerm:
 
     def __init__(self, term: KInner) -> None:
         config, constraint = split_config_and_constraints(term)
-        constraints = CTerm._normalize_constraints(flattenLabel('#And', constraint))
+        constraints = CTerm._normalize_constraints(flatten_label('#And', constraint))
         object.__setattr__(self, 'config', config)
         object.__setattr__(self, 'constraints', constraints)
 
