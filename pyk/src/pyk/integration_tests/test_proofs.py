@@ -42,3 +42,45 @@ class SimpleProofTest(KProveTest):
         with open(rule_profile, 'r') as rp:
             lines = rp.read().split('\n')
             self.assertEqual(len(lines), 4)
+
+
+class ImpProofTest(KProveTest):
+    KOMPILE_MAIN_FILE = 'k-files/imp-verification.k'
+    KOMPILE_BACKEND = KompileBackend.HASKELL
+    KOMPILE_OUTPUT_DIR = 'definitions/imp'
+    KOMPILE_EMIT_JSON = True
+
+    KPROVE_USE_DIR = '.imp'
+
+    @staticmethod
+    def _update_symbol_table(symbol_table):
+        pass
+
+    def test_get_basic_block(self):
+        # Given
+        new_claim = KClaim(KToken('<k> $s = 0 ; while ( 0 <= $n ) { $s = $s + $n ; $n = $n + -1 ; } => . ... </k> <state> $n |-> (N => 0) $s |-> (_ => (N *Int (N +Int 1)) /Int 2) </state>', 'KCell'))
+
+        # When
+        post_depth_actual, post_branching_actual, post_state = self.kprove.get_claim_basic_block('imp-basic-block', new_claim)
+        post_state_pretty_actual = self.kprove.pretty_print(post_state)
+
+        post_depth_expected = 9
+        post_branching_expected = True
+        post_state_pretty_expected = ('<generatedTop>\n'
+                                      '  <T>\n'
+                                      '    <k>\n'
+                                      '      if ( 0 <=Int N ) { { $s = $s + $n ; $n = $n + -1 ; } while ( 0 <= $n ) { $s = $s + $n ; $n = $n + -1 ; } } else { }\n'
+                                      '      ~> _DotVar2\n'
+                                      '    </k>\n'
+                                      '    <state>\n'
+                                      '      $n |-> N $s |-> 0\n'
+                                      '    </state>\n'
+                                      '  </T>\n'
+                                      '  <generatedCounter>\n'
+                                      '    _DotVar3\n'
+                                      '  </generatedCounter>\n'
+                                      '</generatedTop>')
+
+        self.assertEqual(post_depth_actual, post_depth_expected)
+        self.assertEqual(post_branching_actual, post_branching_expected)
+        self.assertEqual(post_state_pretty_actual, post_state_pretty_expected)
