@@ -145,7 +145,7 @@ module ML-SYNTAX [not-lr1]
 
   syntax {Sort1, Sort2} Sort2 ::= "#Ceil" "(" Sort1 ")" [klabel(#Ceil), symbol, mlOp, mlUnary]
                                 | "#Floor" "(" Sort1 ")" [klabel(#Floor), symbol, mlOp, mlUnary]
-                                | "{" Sort1 "#Equals" Sort1 "}" [klabel(#Equals), symbol, mlOp, mlEquals, format(%1%i%n%2%d%n%3%i%n%4%d%n%5)]
+                                | "{" Sort1 "#Equals" Sort1 "}" [klabel(#Equals), symbol, mlOp, mlEquals, comm, format(%1%i%n%2%d%n%3%i%n%4%d%n%5)]
 
   syntax priorities mlUnary > mlEquals > mlAnd
 
