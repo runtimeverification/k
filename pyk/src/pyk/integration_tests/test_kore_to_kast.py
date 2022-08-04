@@ -19,10 +19,10 @@ class KoreToKastTest(KProveTest):
 
     def test_kast_to_kore(self):
         kore_kast_pairs = (
-            (App('inj', [SortApp('SortBool'), SortApp('SortKItem')], [App('Lblpred1', [], [DV(SortApp('SortInt'), String('3'))])]), KApply('pred1', [intToken(3)])),
+            ('issue:k/2762', App('inj', [SortApp('SortBool'), SortApp('SortKItem')], [App('Lblpred1', [], [DV(SortApp('SortInt'), String('3'))])]), KApply('pred1', [intToken(3)])),
         )
-        for i, (kore, kast) in enumerate(kore_kast_pairs):
-            with self.subTest(i=i):
+        for (name, kore, kast) in kore_kast_pairs:
+            with self.subTest(name):
                 kore_actual = self.kprove.kast_to_kore(kast)
                 kast_actual = self.kprove.kore_to_kast(kore)
                 self.assertEqual(kore_actual, kore)
