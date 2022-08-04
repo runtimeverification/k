@@ -15,7 +15,7 @@ from .kastManip import (
     propagate_up_constraints,
     removeSourceMap,
 )
-from .ktool import KPrint, KProve, build_symbol_table, prettyPrintKast
+from .ktool import KPrint, KProve, build_symbol_table, pretty_print_kast
 from .prelude import Sorts, mlAnd, mlOr, mlTop
 
 _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
@@ -84,7 +84,7 @@ def main():
             args['output'].write('\n\n')
             args['output'].write('Rule: ' + rid.strip())
             args['output'].write('\nUnparsed:\n')
-            args['output'].write(prettyPrintKast(rule, symbol_table))
+            args['output'].write(pretty_print_kast(rule, symbol_table))
 
     else:
         raise ValueError(f'Unknown command: {args["command"]}')
