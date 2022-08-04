@@ -35,17 +35,23 @@ public class ResolveComm {
 
 
     public Module resolve(Module m) {
-        Set<Sentence> commRulesToAdd = stream(m.localSentences())
+        // generate a duplicate simplification rule for symbols that are labeled as `comm`
+        // remove this attribute from the rules because the Haskell Backend has a different meaning for it
+        Set<Sentence> commSimpRules = stream(m.localSentences())
                 .filter(s -> s instanceof Rule && s.att().contains(Att.SIMPLIFICATION()) && s.att().contains(Att.COMM()))
+                .collect(Collectors.toSet());
+        Set<Sentence> commRulesToAdd = commSimpRules.stream()
                 .flatMap(s -> {
                     Rule r = (Rule) s;
                     K newBody = genCommRule(r.body(), m);
                     if (!newBody.equals(r.body()))
-                        return Stream.of(Rule.apply(newBody, r.requires(), r.ensures(), r.att()));
+                        return Stream.of(
+                                Rule.apply(newBody, r.requires(), r.ensures(), r.att().remove(Att.COMM())),
+                                Rule.apply(r.body(), r.requires(), r.ensures(), r.att().remove(Att.COMM())));
                     return Stream.empty();
                 })
                 .collect(Collectors.toSet());
-        return Module(m.name(), m.imports(), m.localSentences().$bar(immutable(commRulesToAdd)).seq(), m.att());
+        return Module(m.name(), m.imports(), m.localSentences().$minus$minus(immutable(commSimpRules)).$bar(immutable(commRulesToAdd)).seq(), m.att());
     }
 
     public K genCommRule(K body, Module m) {
