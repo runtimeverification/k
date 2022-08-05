@@ -34,6 +34,7 @@ def kompile(
 ) -> Path:
     check_file_path(main_file)
 
+    include_dirs = list(include_dirs)
     for include_dir in include_dirs:
         check_dir_path(include_dir)
 
