@@ -51,7 +51,7 @@ SymbolTable = Dict[str, Callable]
 class KPrint:
 
     definition_dir: Path
-    use_dir: Path
+    use_directory: Path
     definition: KDefinition
     symbol_table: SymbolTable
     definition_hash: str
