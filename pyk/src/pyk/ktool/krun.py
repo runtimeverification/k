@@ -1,10 +1,13 @@
 import logging
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
-from tempfile import TemporaryDirectory
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 from typing import Final, List, Optional
 
 from ..cli_utils import check_dir_path, check_file_path, run_process
+from ..cterm import CTerm
+from ..kast import KInner
+from ..kore.parser import KoreParser
 from .kprint import KPrint
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -62,3 +65,17 @@ class KRun(KPrint):
             self.backend = ba.read()
         with open(self.definition_dir / 'mainModule.txt', 'r') as mm:
             self.main_module = mm.read()
+
+    def run(self, init_cterm: CTerm, depth: Optional[int] = None) -> CTerm:
+        kore = self.kast_to_kore(init_cterm.term)
+        ntf = NamedTemporaryFile('w', dir=self.use_directory)
+        ntf.write(kore.text)
+        ntf.close()
+        interpreter_command = [str(self.definition_dir / 'interpreter')]
+        proc_result = run_process(interpreter_command, _LOGGER)
+        if proc_result.returncode != 0:
+            raise RuntimeError('Non-zero exit-code from interpreter.')
+        result_kore = KoreParser(proc_result.stdout).pattern()
+        result_kast = self.kore_to_kast(result_kore)
+        assert isinstance(result_kast, KInner)
+        return CTerm(result_kast)
