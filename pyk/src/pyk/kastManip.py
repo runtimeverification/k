@@ -1,7 +1,8 @@
 import logging
 from collections import Counter
+from typing import Callable
+from typing import Counter as CounterType
 from typing import (
-    Callable,
     Dict,
     Final,
     List,
@@ -141,6 +142,10 @@ def simplify_bool(k):
     return new_k
 
 
+def is_top(term: KInner) -> bool:
+    return isinstance(term, KApply) and term.label.name == '#Top'
+
+
 def extract_lhs(term: KInner) -> KInner:
     return top_down(if_ktype(KRewrite, lambda rw: rw.lhs), term)
 
@@ -191,8 +196,8 @@ def extract_subst(term: KInner) -> Tuple[Subst, KInner]:
     return subst, mlAnd(rem_conjuncts)
 
 
-def count_vars(term: KInner) -> Counter:
-    counter: Counter = Counter()
+def count_vars(term: KInner) -> CounterType[str]:
+    counter: CounterType[str] = Counter()
 
     def count(term: KInner) -> None:
         if type(term) is KVariable:
@@ -202,7 +207,7 @@ def count_vars(term: KInner) -> Counter:
     return counter
 
 
-def collectFreeVars(kast):
+def collectFreeVars(kast: KInner) -> List[str]:
     return list(count_vars(kast).keys())
 
 

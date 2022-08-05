@@ -12,53 +12,23 @@ from ..cfg_manager import (
     sanitize_config,
 )
 from ..cterm import CTerm
-from ..kast import (
-    KApply,
-    KFlatModuleList,
-    KInner,
-    KRule,
-    KSequence,
-    KToken,
-    flatten_label,
-)
+from ..kast import KApply, KFlatModuleList, KInner, KRule, KToken
 from ..kastManip import (
     build_claim,
     collectFreeVars,
     extract_subst,
-    getCell,
+    flatten_label,
     minimize_term,
     substitute,
     substToMlPred,
-    remove_useless_constraints,
 )
 from ..kcfg import KCFG
 from ..ktool import KProve
-from ..prelude import Bool, mlAnd, mlBottom, mlEqualsTrue, mlOr, mlTop
+from ..prelude import mlAnd, mlBottom, mlEqualsTrue, mlOr, mlTop
 from ..utils import add_indent, shorten_hashes
 
 _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 _LOGGER: Final = logging.getLogger(__name__)
-
-
-def pyk_kast_is_ml_top(pattern: KInner):
-    return isinstance(pattern, KApply) and pattern.label.name == '#Top'
-
-
-# TODO: Should not rely on kprove, should just call `kast` when that supports frontend syntax such as variables.
-def KProve_parse_token(kprove: KProve, ktoken: KToken, kast_args=[]) -> KInner:
-    cterm = CTerm(mlAnd([KApply('<k>', [ktoken])]))
-
-    claim_id = 'simplify-token'
-    claim, var_map = build_claim(claim_id, cterm, CTerm(mlAnd([cterm.term, mlEqualsTrue(Bool.false)])), keep_vars=collectFreeVars(cterm.term))
-    kprove_result = kprove.prove_claim(claim, claim_id, args=['--depth', '0'], allow_zero_step=True)
-    kprove_result = substitute(kprove_result, var_map)
-    simp_cterm = CTerm(sanitize_config(kprove.definition, kprove_result))
-    simp_cterm = remove_useless_constraints(simp_cterm)
-    simp_k_cell = getCell(simp_cterm.term, 'K_CELL')
-    if type(simp_k_cell) is KSequence:
-        simp_result = simp_k_cell.items[0]
-
-    return mlAnd([simp_result] + list(c for c in simp_cterm.constraints if not pyk_kast_is_ml_top(c)))
 
 
 def KProve_prove_cterm(
@@ -334,7 +304,7 @@ def remove_alias(manager: SummaryManager, kprove: KProve, args, cfg_id: str, cfg
 
 def case_split(manager: SummaryManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
     node_id = args['node']
-    condition = KProve_parse_token(kprove, KToken(args['condition'], 'Bool'))
+    condition = kprove.parse_token(KToken(args['condition'], 'Bool'))
     true_node_id, false_node_id = KCFG_case_split_node(cfg, cfg.node(node_id), [mlEqualsTrue(condition), mlEqualsTrue(KApply('notBool', [condition]))])
     if args['alias_true']:
         cfg.add_alias(args['alias_true'], true_node_id)
