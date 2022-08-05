@@ -3,10 +3,10 @@ import logging
 import os
 import sys
 from pathlib import Path
-from tempfile import NamedTemporaryFile
-from typing import Callable, Dict, Final
+from tempfile import NamedTemporaryFile, TemporaryDirectory
+from typing import Callable, Dict, Final, Optional
 
-from ..cli_utils import run_process
+from ..cli_utils import check_dir_path, run_process
 from ..kast import (
     KApply,
     KAs,
@@ -51,12 +51,15 @@ SymbolTable = Dict[str, Callable]
 class KPrint:
 
     definition_dir: Path
+    use_dir: Path
     definition: KDefinition
     symbol_table: SymbolTable
     definition_hash: str
 
-    def __init__(self, definition_dir: str):
+    def __init__(self, definition_dir: Path, use_directory: Optional[Path] = None) -> None:
         self.definition_dir = Path(definition_dir)
+        self.use_directory = Path(TemporaryDirectory().name) if not use_directory else use_directory
+        check_dir_path(self.use_directory)
         self.definition = readKastTerm(self.definition_dir / 'compiled.json')
         self.symbol_table = build_symbol_table(self.definition, opinionated=True)
         self.definition_hash = hash_str(self.definition)

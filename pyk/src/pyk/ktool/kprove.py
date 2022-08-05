@@ -4,7 +4,6 @@ import logging
 import os
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
-from tempfile import TemporaryDirectory
 from typing import Dict, Final, Iterable, List, Mapping, Optional, Tuple
 
 from ..cli_utils import (
@@ -89,7 +88,6 @@ def _kprove(spec_file: str, *args: str) -> CompletedProcess:
 
 class KProve(KPrint):
 
-    use_directory: Path
     main_file_name: Optional[str]
     prover: List[str]
     prover_args: List[str]
@@ -97,13 +95,7 @@ class KProve(KPrint):
     main_module: str
 
     def __init__(self, definition_dir, main_file_name=None, use_directory=None):
-        super(KProve, self).__init__(definition_dir)
-        if not use_directory:
-            _temp_dir = TemporaryDirectory()
-            self.use_directory = Path(_temp_dir.name)
-        else:
-            self.use_directory = Path(use_directory)
-            check_dir_path(self.use_directory)
+        super(KProve, self).__init__(definition_dir, use_directory=use_directory)
         # TODO: we should not have to supply main_file_name, it should be read
         self.main_file_name = main_file_name
         self.prover = ['kprove']
