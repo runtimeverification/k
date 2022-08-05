@@ -91,7 +91,6 @@ class KProve(KPrint):
 
     def __init__(self, definition_dir, main_file_name=None, use_directory=None):
         super(KProve, self).__init__(definition_dir)
-        self.directory = Path(self.definition_dir).parent
         self.use_directory: Path
         if not use_directory:
             self._temp_dir = TemporaryDirectory()
@@ -129,7 +128,7 @@ class KProve(KPrint):
         haskell_log_args = ['--log', str(log_file), '--log-format', 'oneline', '--log-entries', ','.join(haskell_log_entries)]
         command = [c for c in self.prover]
         command += [str(spec_file)]
-        command += ['--definition', str(self.definition_dir), '-I', str(self.directory), '--output', 'json']
+        command += ['--definition', str(self.definition_dir), '--output', 'json']
         command += ['--spec-module', spec_module_name] if spec_module_name is not None else []
         command += ['--dry-run'] if dry_run else []
         command += [c for c in self.prover_args]
