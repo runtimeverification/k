@@ -49,12 +49,15 @@ SymbolTable = Dict[str, Callable]
 
 
 class KPrint:
-    """Given a kompiled directory, build an unparser for it.
-    """
 
-    def __init__(self, kompiled_directory: str):
-        self.kompiled_directory = Path(kompiled_directory)
-        self.definition = readKastTerm(self.kompiled_directory / 'compiled.json')
+    definition_dir: Path
+    definition: KDefinition
+    symbol_table: SymbolTable
+    definition_hash: str
+
+    def __init__(self, definition_dir: str):
+        self.definition_dir = Path(definition_dir)
+        self.definition = readKastTerm(self.definition_dir / 'compiled.json')
         self.symbol_table = build_symbol_table(self.definition, opinionated=True)
         self.definition_hash = hash_str(self.definition)
 
@@ -63,7 +66,7 @@ class KPrint:
             ntf.write(kore.text)
             ntf.flush()
             _LOGGER.info(f'Wrote file: {ntf.name}')
-            kast_command = ['kast', '--input', 'kore', '--output', 'json', ntf.name, '--definition', str(self.kompiled_directory)]
+            kast_command = ['kast', '--input', 'kore', '--output', 'json', ntf.name, '--definition', str(self.definition_dir)]
             command_env = os.environ.copy()
             proc_result = run_process(kast_command, _LOGGER, env=command_env)
             if proc_result.returncode != 0:
@@ -76,7 +79,7 @@ class KPrint:
             ntf.write(json.dumps(kast_json, sort_keys=True))
             ntf.flush()
             _LOGGER.info(f'Wrote file: {ntf.name}')
-            kast_command = ['kast', '--input', 'json', '--output', 'kore', ntf.name, '--definition', str(self.kompiled_directory)]
+            kast_command = ['kast', '--input', 'json', '--output', 'kore', ntf.name, '--definition', str(self.definition_dir)]
             command_env = os.environ.copy()
             proc_result = run_process(kast_command, _LOGGER, env=command_env)
             if proc_result.returncode != 0:
@@ -84,11 +87,6 @@ class KPrint:
             return KoreParser(proc_result.stdout).pattern()
 
     def pretty_print(self, kast: KAst, debug=False):
-        """Given a KAST term, pretty-print it using the current definition.
-
-        -   Input: KAST term in JSON.
-        -   Output: Best-effort pretty-printed representation of the KAST term.
-        """
         return pretty_print_kast(kast, self.symbol_table, debug=debug)
 
 

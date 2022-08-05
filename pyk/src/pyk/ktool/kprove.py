@@ -89,9 +89,9 @@ def _kprove(spec_file: str, *args: str) -> CompletedProcess:
 
 class KProve(KPrint):
 
-    def __init__(self, kompiled_directory, main_file_name=None, use_directory=None):
-        super(KProve, self).__init__(kompiled_directory)
-        self.directory = Path(self.kompiled_directory).parent
+    def __init__(self, definition_dir, main_file_name=None, use_directory=None):
+        super(KProve, self).__init__(definition_dir)
+        self.directory = Path(self.definition_dir).parent
         self.use_directory: Path
         if not use_directory:
             self._temp_dir = TemporaryDirectory()
@@ -103,9 +103,9 @@ class KProve(KPrint):
         self.main_file_name = main_file_name
         self.prover = ['kprove']
         self.prover_args = []
-        with open(self.kompiled_directory / 'backend.txt', 'r') as ba:
+        with open(self.definition_dir / 'backend.txt', 'r') as ba:
             self.backend = ba.read()
-        with open(self.kompiled_directory / 'mainModule.txt', 'r') as mm:
+        with open(self.definition_dir / 'mainModule.txt', 'r') as mm:
             self.main_module = mm.read()
 
     def prove(
@@ -129,7 +129,7 @@ class KProve(KPrint):
         haskell_log_args = ['--log', str(log_file), '--log-format', 'oneline', '--log-entries', ','.join(haskell_log_entries)]
         command = [c for c in self.prover]
         command += [str(spec_file)]
-        command += ['--definition', str(self.kompiled_directory), '-I', str(self.directory), '--output', 'json']
+        command += ['--definition', str(self.definition_dir), '-I', str(self.directory), '--output', 'json']
         command += ['--spec-module', spec_module_name] if spec_module_name is not None else []
         command += ['--dry-run'] if dry_run else []
         command += [c for c in self.prover_args]
