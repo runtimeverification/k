@@ -89,12 +89,18 @@ def _kprove(spec_file: str, *args: str) -> CompletedProcess:
 
 class KProve(KPrint):
 
+    use_directory: Path
+    main_file_name: Optional[str]
+    prover: List[str]
+    prover_args: List[str]
+    backend: str
+    main_module: str
+
     def __init__(self, definition_dir, main_file_name=None, use_directory=None):
         super(KProve, self).__init__(definition_dir)
-        self.use_directory: Path
         if not use_directory:
-            self._temp_dir = TemporaryDirectory()
-            self.use_directory = Path(self._temp_dir.name)
+            _temp_dir = TemporaryDirectory()
+            self.use_directory = Path(_temp_dir.name)
         else:
             self.use_directory = Path(use_directory)
             check_dir_path(self.use_directory)
@@ -253,6 +259,7 @@ class KProve(KPrint):
         sentences.append(claim)
         with open(tmp_claim, 'w') as tc:
             claim_module = KFlatModule(tmp_module_name, sentences, imports=[KImport(self.main_module, True)])
+            assert self.main_file_name is not None
             claim_definition = KDefinition(tmp_module_name, [claim_module], requires=[KRequire(self.main_file_name)])
             tc.write(gen_file_timestamp() + '\n')
             tc.write(self.pretty_print(claim_definition) + '\n\n')
