@@ -1,8 +1,9 @@
 K_ROOT := $(abspath ../..)
 K_BIN  := $(K_ROOT)/k-distribution/target/release/k/bin
 
-KOMPILE = $(K_BIN)/kompile
-PYK     = pyk
+KOMPILE     = $(K_BIN)/kompile
+PYK         = pyk
+PYK_OPTIONS = --verbose
 
 export PATH := $(K_BIN):$(PATH)
 
@@ -31,13 +32,13 @@ test: test-kpyk
 test-kpyk: test-kpyk-graphviz test-kpyk-minimize-term test-post-process
 
 test-kpyk-graphviz: d.kompiled
-	$(PYK) -v definitions/d graph-imports
+	$(PYK) graph-imports $(PYK_OPTIONS) definitions/d
 	cat definitions/d/import-graph | tr -cd '[:alnum:]\n' | grep . | tr '[:lower:]' '[:upper:]' | grep -xFf import-graph.expected | sort > import-graph.out
 	$(CHECK) import-graph.out import-graph.expected
 
 test-kpyk-minimize-term: imp-verification.kompiled
-	$(PYK) -v definitions/imp-verification prove ../k-files/imp-verification.k ../k-files/imp-unproveable-spec.k IMP-UNPROVEABLE-SPEC \
-	    | $(PYK) -v definitions/imp-verification print /dev/stdin > imp-unproveable-spec.k.out
+	$(PYK) prove $(PYK_OPTIONS) definitions/imp-verification ../k-files/imp-verification.k ../k-files/imp-unproveable-spec.k IMP-UNPROVEABLE-SPEC \
+	    | $(PYK) print $(PYK_OPTIONS) definitions/imp-verification /dev/stdin > imp-unproveable-spec.k.out
 	$(CHECK) imp-unproveable-spec.k.out imp-unproveable-spec.k.expected
 
 test-post-process:
