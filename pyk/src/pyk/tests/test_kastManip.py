@@ -158,6 +158,7 @@ class SimplifyBoolTest(TestCase):
         bool_tests = (
             ('trivial-false', Bool.andBool([Bool.false, Bool.true]), Bool.false),
             ('and-true', Bool.andBool([KApply('_==Int_', [intToken(3), intToken(4)]), Bool.true]), KApply('_==Int_', [intToken(3), intToken(4)])),
+            ('not-false', Bool.notBool(Bool.false), Bool.true),
         )
 
         for test_name, bool_in, bool_out in bool_tests:

@@ -117,14 +117,14 @@ def simplify_bool(k):
         return None
     simplify_rules = [ (KApply('_==K_', [KVariable('#LHS'), Bool.true]), KVariable('#LHS'))                                                                     # noqa
                      , (KApply('_==K_', [Bool.true, KVariable('#RHS')]), KVariable('#RHS'))                                                                     # noqa
-                     , (KApply('_==K_', [KVariable('#LHS'), Bool.false]), Bool.notBool([KVariable('#LHS')]))                                                    # noqa
-                     , (KApply('_==K_', [Bool.false, KVariable('#RHS')]), Bool.notBool([KVariable('#RHS')]))                                                    # noqa
-                     , (Bool.notBool([Bool.false]), Bool.true)                                                                                                  # noqa
-                     , (Bool.notBool([Bool.true]), Bool.false)                                                                                                  # noqa
-                     , (Bool.notBool([KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')])]), KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')]))   # noqa
-                     , (Bool.notBool([KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')])]), KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')]))   # noqa
-                     , (Bool.notBool([KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')])]), KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')]))   # noqa
-                     , (Bool.notBool([KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')])]), KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')]))   # noqa
+                     , (KApply('_==K_', [KVariable('#LHS'), Bool.false]), Bool.notBool(KVariable('#LHS')))                                                      # noqa
+                     , (KApply('_==K_', [Bool.false, KVariable('#RHS')]), Bool.notBool(KVariable('#RHS')))                                                      # noqa
+                     , (Bool.notBool(Bool.false), Bool.true)                                                                                                    # noqa
+                     , (Bool.notBool(Bool.true), Bool.false)                                                                                                    # noqa
+                     , (Bool.notBool(KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')])), KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')]))     # noqa
+                     , (Bool.notBool(KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')])), KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')]))     # noqa
+                     , (Bool.notBool(KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')])), KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')]))     # noqa
+                     , (Bool.notBool(KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')])), KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')]))     # noqa
                      , (Bool.andBool([Bool.true, KVariable('#REST')]), KVariable('#REST'))                                                                      # noqa
                      , (Bool.andBool([KVariable('#REST'), Bool.true]), KVariable('#REST'))                                                                      # noqa
                      , (Bool.andBool([Bool.false, KVariable('#REST')]), Bool.false)                                                                             # noqa
