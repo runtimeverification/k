@@ -1,6 +1,6 @@
 from ..kast import KApply, KToken
 from ..ktool import KompileBackend
-from ..prelude import intToken
+from ..prelude import Labels, intToken
 from .kprove_test import KProveTest
 
 
@@ -21,6 +21,7 @@ class ImpParseTest(KProveTest):
             ('int-token', KToken('3', 'Int'), intToken(3)),
             ('id-token', KToken('abc', 'Id'), KToken('abc', 'Id')),
             ('add-aexp', KToken('3 + 4', 'AExp'), KApply('_+_', [intToken(3), intToken(4)])),
+            ('k-cell', KToken('<k> . </k>', 'KCell'), KApply('<k>', [KApply(Labels.EMPTY_K)])),
         )
 
         for name, token, kast in test_parses:
