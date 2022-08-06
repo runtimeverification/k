@@ -6,8 +6,8 @@ from typing import Iterable, Optional
 from unittest import TestCase
 
 from pyk.kast import KDefinition
+from pyk.kastManip import is_top
 from pyk.ktool import KompileBackend, kompile
-from pyk.prelude import mlTop
 
 
 class KompiledTest(TestCase, ABC):
@@ -45,8 +45,8 @@ class KompiledTest(TestCase, ABC):
     def tearDown(self):
         shutil.rmtree(self.kompiled_dir)
 
-    def assertTop(self, term):
-        self.assertEqual(term, mlTop())
+    def assertTop(self, term: KInner) -> None:
+        self.assertTrue(is_top(term), f'{term} is not #Top')
 
-    def assertNotTop(self, term):
-        self.assertNotEqual(term, mlTop())
+    def assertNotTop(self, term: KInner) -> None:
+        self.assertFalse(is_top(term), f'{term} is #Top')
