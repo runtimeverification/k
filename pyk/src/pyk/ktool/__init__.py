@@ -9,3 +9,4 @@ from .kprint import (
     unparser_for_production,
 )
 from .kprove import KProve, kprove
+from .krun import KRun, krun
