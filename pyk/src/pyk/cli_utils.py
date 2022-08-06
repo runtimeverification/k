@@ -38,6 +38,7 @@ def run_process(
     args: Union[str, Sequence[str]],
     logger: Logger,
     *,
+    suppress_stderr: bool = False,
     log_level: int = logging.DEBUG,
     input: Optional[str] = None,
     env: Optional[Mapping[str, str]] = None,
@@ -49,7 +50,8 @@ def run_process(
 
     logger.log(log_level, f'Running: {command}')
     try:
-        res = subprocess.run(args, input=input, env=env, capture_output=True, check=True, text=True)
+        stderr = subprocess.PIPE if suppress_stderr else None
+        res = subprocess.run(args, input=input, env=env, stdout=subprocess.PIPE, stderr=stderr, check=True, text=True)
     except CalledProcessError as err:
         logger.log(log_level, f'Completed with status {err.returncode}: {command}')
         raise
