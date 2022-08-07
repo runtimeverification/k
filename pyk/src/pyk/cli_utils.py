@@ -39,6 +39,7 @@ def file_path(s: str) -> Path:
 def run_process(
     args: Union[str, Sequence[str]],
     *,
+    check: bool = True,
     suppress_stderr: bool = False,
     input: Optional[str] = None,
     env: Optional[Mapping[str, str]] = None,
@@ -55,7 +56,7 @@ def run_process(
     logger.info(f'Running: {command}')
     try:
         stderr = subprocess.PIPE if suppress_stderr else None
-        res = subprocess.run(args, input=input, env=env, stdout=subprocess.PIPE, stderr=stderr, check=True, text=True)
+        res = subprocess.run(args, input=input, env=env, stdout=subprocess.PIPE, stderr=stderr, check=check, text=True)
     except CalledProcessError as err:
         logger.info(f'Completed with status {err.returncode}: {command}')
         raise
