@@ -88,17 +88,17 @@ def _kprove(spec_file: str, *args: str) -> CompletedProcess:
 
 class KProve(KPrint):
 
-    main_file_name: Optional[Path]
+    main_file: Optional[Path]
     prover: List[str]
     prover_args: List[str]
     backend: str
     main_module: str
 
-    def __init__(self, definition_dir: Path, main_file_name: Optional[Path] = None, use_directory: Optional[Path] = None):
+    def __init__(self, definition_dir: Path, main_file: Optional[Path] = None, use_directory: Optional[Path] = None):
         super(KProve, self).__init__(definition_dir, use_directory=use_directory)
-        # TODO: we should not have to supply main_file_name, it should be read
+        # TODO: we should not have to supply main_file, it should be read
         # TODO: setting use_directory manually should set temp files to not be deleted and a log message
-        self.main_file_name = main_file_name
+        self.main_file = main_file
         self.prover = ['kprove']
         self.prover_args = []
         with open(self.definition_dir / 'backend.txt', 'r') as ba:
@@ -252,8 +252,8 @@ class KProve(KPrint):
         sentences.append(claim)
         with open(tmp_claim, 'w') as tc:
             claim_module = KFlatModule(tmp_module_name, sentences, imports=[KImport(self.main_module, True)])
-            assert self.main_file_name is not None
-            claim_definition = KDefinition(tmp_module_name, [claim_module], requires=[KRequire(str(self.main_file_name))])
+            assert self.main_file is not None
+            claim_definition = KDefinition(tmp_module_name, [claim_module], requires=[KRequire(str(self.main_file))])
             tc.write(gen_file_timestamp() + '\n')
             tc.write(self.pretty_print(claim_definition) + '\n\n')
             tc.flush()
