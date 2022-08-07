@@ -77,7 +77,11 @@ class KPrint:
 
     def __init__(self, definition_dir: Path, use_directory: Optional[Path] = None) -> None:
         self.definition_dir = Path(definition_dir)
-        self.use_directory = Path(TemporaryDirectory().name) if not use_directory else use_directory
+        if use_directory:
+            self.use_directory = use_directory
+        else:
+            td = TemporaryDirectory()
+            self.use_directory = Path(td.name)
         check_dir_path(self.use_directory)
         self.definition = readKastTerm(self.definition_dir / 'compiled.json')
         self.symbol_table = build_symbol_table(self.definition, opinionated=True)
