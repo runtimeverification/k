@@ -21,14 +21,13 @@ def _krun(
 ) -> CompletedProcess:
     check_file_path(input_file)
 
-    args = ['--definition', str(definition_dir)]
+    krun_command = ['krun', '--definition', str(definition_dir), str(input_file)]
 
     if depth and depth >= 0:
         args += ['--depth', str(depth)]
 
     try:
-        run_command = ['krun', str(input_file)] + args
-        return run_process(run_command, _LOGGER)
+        return run_process(krun_command + args, _LOGGER)
     except CalledProcessError as err:
         raise RuntimeError(f'Command krun exited with code {err.returncode} for: {input_file}', err.stdout, err.stderr)
 
