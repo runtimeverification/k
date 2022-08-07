@@ -40,7 +40,6 @@ from .prelude import (
     Sorts,
     mlAnd,
     mlBottom,
-    mlEquals,
     mlEqualsTrue,
     mlImplies,
     mlOr,
@@ -635,8 +634,8 @@ def antiUnifyWithConstraints(constrainedTerm1, constrainedTerm2, implications=Fa
     constraints = [c for c in constraints1 if c in constraints2]
     constraint1 = mlAnd([c for c in constraints1 if c not in constraints])
     constraint2 = mlAnd([c for c in constraints2 if c not in constraints])
-    implication1 = mlImplies(constraint1, substToMlPred(subst1))
-    implication2 = mlImplies(constraint2, substToMlPred(subst2))
+    implication1 = mlImplies(constraint1, subst1.to_ml_pred)
+    implication2 = mlImplies(constraint2, subst2.to_ml_pred)
 
     if implications:
         constraints.append(implication1)
@@ -709,14 +708,6 @@ def matchWithConstraint(constrainedTerm1, constrainedTerm2):
     if subst is not None and constraintSubsume(substitute(constraint1, subst), constraint2):
         return subst
     return None
-
-
-def substToMlPred(subst):
-    mlTerms = []
-    for k in subst:
-        if KVariable(k) != subst[k]:
-            mlTerms.append(mlEquals(KVariable(k), subst[k]))
-    return mlAnd(mlTerms)
 
 
 def undoAliases(definition, kast):

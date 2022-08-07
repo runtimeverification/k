@@ -224,6 +224,14 @@ class Subst(Mapping[str, KInner]):
     def pretty(self, kprint) -> Iterable[str]:
         return (key + ' |-> ' + kprint.pretty_print(value) for key, value in self.items())
 
+    @property
+    def to_ml_pred(self) -> KInner:
+        ml_term: KInner = TRUE
+        for k in self:
+            if KVariable(k) != self[k]:
+                ml_term = KApply('#And', [ml_term, KApply('#Equals', [KVariable(k), self[k]])])
+        return ml_term
+
 
 @final
 @dataclass(frozen=True)
