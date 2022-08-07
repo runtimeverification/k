@@ -252,12 +252,14 @@ class KProve(KPrint):
         sentences.append(claim)
         with open(tmp_claim, 'w') as tc:
             claim_module = KFlatModule(tmp_module_name, sentences, imports=[KImport(self.main_module, True)])
-            assert self.main_file is not None
-            claim_definition = KDefinition(tmp_module_name, [claim_module], requires=[KRequire(str(self.main_file))])
+            requires = []
+            if self.main_file is not None:
+                requires += [KRequire(str(self.main_file))]
+            claim_definition = KDefinition(tmp_module_name, [claim_module], requires=requires)
             tc.write(gen_file_timestamp() + '\n')
             tc.write(self.pretty_print(claim_definition) + '\n\n')
             tc.flush()
-        _LOGGER.debug(f'Wrote claim file: {tmp_claim}.')
+        _LOGGER.info(f'Wrote claim file: {tmp_claim}.')
         return tmp_claim, tmp_module_name
 
 
