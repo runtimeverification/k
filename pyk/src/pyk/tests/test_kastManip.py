@@ -3,6 +3,8 @@ from unittest import TestCase
 from ..cterm import CTerm
 from ..kast import (
     KApply,
+    KAtt,
+    KClaim,
     KLabel,
     KRewrite,
     KSequence,
@@ -11,6 +13,7 @@ from ..kast import (
     ktokenDots,
 )
 from ..kastManip import (
+    build_claim,
     build_rule,
     collapseDots,
     minimize_term,
@@ -20,7 +23,7 @@ from ..kastManip import (
     simplify_bool,
     substitute,
 )
-from ..prelude import Bool, Sorts, intToken, mlEqualsTrue, mlTop
+from ..prelude import Bool, Sorts, intToken, mlAnd, mlEqualsTrue, mlTop
 from .utils import a, b, c, f, k
 
 x = KVariable('X')
@@ -32,6 +35,13 @@ T_CELL = KApply('<T>', [K_CELL, KApply('<state>', [KVariable('MAP')])])
 GENERATED_COUNTER_CELL = KApply('<generatedCounter>', [KVariable('X')])
 GENERATED_TOP_CELL_1 = KApply('<generatedTop>', [T_CELL, KVariable('_GENERATED_COUNTER_PLACEHOLDER')])
 GENERATED_TOP_CELL_2 = KApply('<generatedTop>', [T_CELL, GENERATED_COUNTER_CELL])
+
+v1 = KVariable('V1')
+v2 = KVariable('V2')
+unds_v1 = KVariable('_V1')
+unds_v2 = KVariable('_V2')
+ques_v2 = KVariable('?V2')
+ques_unds_v2 = KVariable('?_V2')
 
 
 class PushDownRewritesTest(TestCase):
@@ -164,3 +174,38 @@ class SimplifyBoolTest(TestCase):
         for test_name, bool_in, bool_out in bool_tests:
             bool_out_actual = simplify_bool(bool_in)
             self.assertEqual(bool_out_actual, bool_out)
+
+
+class BuildClaimtest(TestCase):
+
+    def test_build_claim(self):
+        # (<k> V1 </k> #And { true #Equals 0 <=Int V2}) => <k> V2 </k>      expected: <k> _V1 => V2 </k> requires 0 <=Int V2
+        # <k> V1 </k> => <k> V2 </k>                                        expected: <k> _V1 => ?_V2 </k>
+        # <k> V1 </k> => <k> V2 </k> #And { true #Equals 0 <=Int V2 }       expected: <k> _V1 => ?V2 </k> ensures 0 <=Int ?V2
+
+        constraint_1 = KApply('_<=Int_', [intToken(0), v2])
+        constraint_2 = KApply('_<=Int_', [intToken(0), ques_v2])
+
+        init_1 = mlAnd([k(v1), mlEqualsTrue(constraint_1)])
+        init_2 = k(v1)
+        init_3 = k(v1)
+
+        target_1 = k(v2)
+        target_2 = k(v2)
+        target_3 = mlAnd([k(v2), mlEqualsTrue(constraint_1)])
+
+        claim_1 = KClaim(k(KRewrite(unds_v1, v2)), requires=constraint_1, att=KAtt({'label': 'claim0'}))
+        claim_2 = KClaim(k(KRewrite(unds_v1, ques_unds_v2)), att=KAtt({'label': 'claim1'}))
+        claim_3 = KClaim(k(KRewrite(unds_v1, ques_v2)), ensures=constraint_2, att=KAtt({'label': 'claim2'}))
+
+        test_data = (
+            (init_1, target_1, claim_1),
+            (init_2, target_2, claim_2),
+            (init_3, target_3, claim_3),
+        )
+
+        for i, (init, target, claim) in enumerate(test_data):
+            init_cterm = CTerm(init)
+            target_cterm = CTerm(target)
+            kclaim, _ = build_claim(f'claim{i}', init_cterm, target_cterm)
+            self.assertEqual(kclaim, claim)
