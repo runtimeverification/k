@@ -9,5 +9,5 @@ from .kprint import (
     pretty_print_kast,
     unparser_for_production,
 )
-from .kprove import KProve, kprove
+from .kprove import KProve, _kprove
 from .krun import KRun, _krun
