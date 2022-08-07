@@ -13,38 +13,24 @@ from .kprint import KPrint
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-def krun(
+def _krun(
+    definition_dir: Path,
     input_file: Path,
-    *,
-    kompiled_dir: Optional[Path] = None,
-) -> None:
+    depth: Optional[int] = None,
+    args: List[str] = [],
+) -> CompletedProcess:
     check_file_path(input_file)
 
-    args = _build_arg_list(
-        kompiled_dir=kompiled_dir,
-    )
+    args = ['--definition', str(definition_dir)]
+
+    if depth and depth >= 0:
+        args += ['--depth', str(depth)]
 
     try:
-        _krun(str(input_file), *args)
+        run_command = ['krun', str(input_file)] + args
+        return run_process(run_command, _LOGGER)
     except CalledProcessError as err:
         raise RuntimeError(f'Command krun exited with code {err.returncode} for: {input_file}', err.stdout, err.stderr)
-
-
-def _build_arg_list(
-    *,
-    kompiled_dir: Optional[Path],
-) -> List[str]:
-    args = []
-
-    if kompiled_dir:
-        args += ['--definition', str(kompiled_dir)]
-
-    return args
-
-
-def _krun(input_file: str, *args: str) -> CompletedProcess:
-    run_args = ['krun', input_file] + list(args)
-    return run_process(run_args, _LOGGER)
 
 
 class KRun(KPrint):
@@ -69,14 +55,9 @@ class KRun(KPrint):
         with NamedTemporaryFile('w', dir=self.use_directory, delete=False) as ntf:
             ntf.write(self.pretty_print(init_PGM))
             ntf.flush()
-            krun_command = ['krun', '--definition', str(self.definition_dir), ntf.name]
-            krun_command += ['--output', 'json']
-            if depth is not None and depth >= 0:
-                krun_command += ['--depth', str(depth)]
-            krun_command += args
-            proc_result = run_process(krun_command, _LOGGER)
-            if proc_result.returncode != 0:
+            result = _krun(self.definition_dir, Path(ntf.name), depth=depth, args=['--output', 'json'])
+            if result.returncode != 0:
                 raise RuntimeError('Non-zero exit-code from krun.')
-            result_kast = KAst.from_dict(json.loads(proc_result.stdout)['term'])
+            result_kast = KAst.from_dict(json.loads(result.stdout)['term'])
             assert isinstance(result_kast, KInner)
             return CTerm(result_kast)
