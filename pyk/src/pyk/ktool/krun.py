@@ -60,7 +60,6 @@ class KRun(KPrint):
         else:
             self.use_directory = Path(use_directory)
             check_dir_path(self.use_directory)
-        # TODO: we should not have to supply main_file_name, it should be read
         with open(self.definition_dir / 'backend.txt', 'r') as ba:
             self.backend = ba.read()
         with open(self.definition_dir / 'mainModule.txt', 'r') as mm:
