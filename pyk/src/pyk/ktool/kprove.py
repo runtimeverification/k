@@ -83,7 +83,7 @@ def _build_arg_list(
 
 def _kprove(spec_file: str, *args: str) -> CompletedProcess:
     run_args = ['kprove', spec_file] + list(args)
-    return run_process(run_args, _LOGGER)
+    return run_process(run_args, logger=_LOGGER)
 
 
 class KProve(KPrint):
@@ -140,7 +140,7 @@ class KProve(KPrint):
 
         proc_output: str
         try:
-            proc_output = run_process(command, _LOGGER, env=command_env).stdout
+            proc_output = run_process(command, logger=_LOGGER, env=command_env).stdout
         except CalledProcessError as err:
             if err.returncode != 1:
                 raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)

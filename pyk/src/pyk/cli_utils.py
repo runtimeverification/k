@@ -5,7 +5,9 @@ from datetime import datetime
 from logging import Logger
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
-from typing import Mapping, Optional, Sequence, Union
+from typing import Final, Mapping, Optional, Sequence, Union
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 
 def check_dir_path(path: Path) -> None:
@@ -36,27 +38,29 @@ def file_path(s: str) -> Path:
 
 def run_process(
     args: Union[str, Sequence[str]],
-    logger: Logger,
     *,
     suppress_stderr: bool = False,
-    log_level: int = logging.DEBUG,
     input: Optional[str] = None,
     env: Optional[Mapping[str, str]] = None,
+    logger: Optional[Logger] = None,
 ) -> CompletedProcess:
     if type(args) is str:
         command = args
     else:
         command = ' '.join(args)
 
-    logger.log(log_level, f'Running: {command}')
+    if not logger:
+        logger = _LOGGER
+
+    logger.info(f'Running: {command}')
     try:
         stderr = subprocess.PIPE if suppress_stderr else None
         res = subprocess.run(args, input=input, env=env, stdout=subprocess.PIPE, stderr=stderr, check=True, text=True)
     except CalledProcessError as err:
-        logger.log(log_level, f'Completed with status {err.returncode}: {command}')
+        logger.info(f'Completed with status {err.returncode}: {command}')
         raise
 
-    logger.log(log_level, f'Completed: {command}')
+    logger.info(f'Completed: {command}')
     return res
 
 

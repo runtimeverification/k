@@ -27,7 +27,7 @@ def _krun(
         args += ['--depth', str(depth)]
 
     try:
-        return run_process(krun_command + args, _LOGGER)
+        return run_process(krun_command + args, logger=_LOGGER)
     except CalledProcessError as err:
         raise RuntimeError(f'Command krun exited with code {err.returncode} for: {input_file}', err.stdout, err.stderr) from err
 

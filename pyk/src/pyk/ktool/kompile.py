@@ -114,7 +114,7 @@ def _build_arg_list(
 
 def _kompile(main_file: str, *args: str) -> CompletedProcess:
     run_args = ['kompile', main_file] + list(args)
-    return run_process(run_args, _LOGGER)
+    return run_process(run_args, logger=_LOGGER)
 
 
 def _kompiled_dir(main_file: Path, output_dir: Optional[Path] = None) -> Path:

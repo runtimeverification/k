@@ -61,7 +61,7 @@ def _kast(
     kast_command += ['--sort', sort.name]
     kast_command += ['--expression', expression]
     command_env = os.environ.copy()
-    proc_result = run_process(kast_command, _LOGGER, env=command_env)
+    proc_result = run_process(kast_command, env=command_env, logger=_LOGGER)
     if proc_result.returncode != 0:
         raise RuntimeError(f'Calling kast failed: {kast_command}')
     return proc_result.stdout
