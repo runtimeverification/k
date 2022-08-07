@@ -12,6 +12,7 @@ from ..cli_utils import (
     gen_file_timestamp,
     run_process,
 )
+from ..cterm import CTerm
 from ..kast import (
     KAst,
     KClaim,
@@ -24,7 +25,8 @@ from ..kast import (
     KSentence,
     flatten_label,
 )
-from ..prelude import mlTop
+from ..kastManip import build_claim, collectFreeVars, extract_subst
+from ..prelude import mlAnd, mlBottom, mlTop
 from ..utils import unique
 from .kprint import KPrint
 
@@ -203,6 +205,24 @@ class KProve(KPrint):
             dry_run=dry_run,
             rule_profile=rule_profile,
         )
+
+    def prove_cterm(
+        self,
+        claim_id: str,
+        init_cterm: CTerm,
+        target_cterm: CTerm,
+        lemmas: Iterable[KRule] = [],
+        args: List[str] = [],
+        haskell_args: List[str] = [],
+        log_axioms_file: Path = None,
+        allow_zero_step: bool = False,
+    ) -> List[KInner]:
+        claim, var_map = build_claim(claim_id, init_cterm, target_cterm, keep_vars=collectFreeVars(init_cterm.term))
+        next_state = self.prove_claim(claim, claim_id, lemmas=lemmas, args=args, haskell_args=haskell_args, log_axioms_file=log_axioms_file, allow_zero_step=allow_zero_step)
+        next_states = [var_map(ns) for ns in flatten_label('#Or', next_state)]
+        constraint_subst, _ = extract_subst(init_cterm.term)
+        next_states = [mlAnd([constraint_subst.unapply(ns), constraint_subst.to_ml_pred]) if ns not in [mlTop(), mlBottom()] else ns for ns in next_states]
+        return next_states
 
     def get_claim_basic_block(self, claim_id: str, claim: KClaim, lemmas: List[KRule] = [], args: List[str] = [], haskell_args: List[str] = [], max_depth: int = 1000) -> Tuple[int, bool, KInner]:
 
