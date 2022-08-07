@@ -1,6 +1,7 @@
 from .kompile import KompileBackend, kompile
 from .kprint import (
     KPrint,
+    _kast,
     applied_label_str,
     build_symbol_table,
     indent,
