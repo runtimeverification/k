@@ -88,7 +88,7 @@ class KPrint:
         self.definition_hash = hash_str(self.definition)
 
     def kore_to_kast(self, kore: Kore) -> KAst:
-        output = _kast(self.definition_dir, kore.text, input='kore')
+        output = _kast(self.definition_dir, kore.text, input='kore', output='json')
         return KAst.from_dict(json.loads(output)['term'])
 
     def kast_to_kore(self, kast: KAst) -> Kore:
