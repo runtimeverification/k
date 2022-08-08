@@ -41,7 +41,7 @@ ACTIVATE_PROD := . $(VENV_PROD_DIR)/bin/activate
 $(VENV_PROD):
 	   virtualenv -p python3 $(VENV_PROD_DIR) \
 	&& $(ACTIVATE_PROD)                       \
-	&& pip install .
+	&& pip install --editable .
 
 $(VENV_PROD_DIR): $(VENV_PROD)
 	@echo $(ACTIVATE_PROD)
