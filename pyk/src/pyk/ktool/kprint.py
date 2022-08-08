@@ -93,7 +93,7 @@ class KPrint:
         self._profile = profile
 
     def parse_token(self, ktoken: KToken) -> KInner:
-        output = _kast(self.definition_dir, ktoken.token, sort=ktoken.sort)
+        output = _kast(self.definition_dir, ktoken.token, sort=ktoken.sort, profile=self._profile)
         kast_token = KAst.from_dict(json.loads(output)['term'])
         assert isinstance(kast_token, KInner)
         return kast_token
