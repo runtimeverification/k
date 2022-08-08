@@ -1,0 +1,8 @@
+/build/
+/definitions/
+/src/pyk.egg-info/
+
+
+/kit-tests/imp/*.json
+/kit-tests/imp/*.run.out
+/kit-tests/imp/*_summary/
