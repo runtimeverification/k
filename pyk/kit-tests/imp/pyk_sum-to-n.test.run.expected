@@ -1,17 +1,17 @@
-+ init pyk_sum-to-n tests/summarize/examples/imp/pyk_sum-to-n-spec.k
++ init pyk_sum-to-n pyk_sum-to-n-spec.k
 + list-cfgs
 PYK_SUM-TO-N-SPEC.main
 + case-split #init N ==Int 1 --alias-true init-1 --alias-false init-not-1
 + case-split @init-not-1 N ==Int 10 --alias-true init-10
 + show-edge @init-not-1,@init-10
-1031de..6fed25 (expanded, @init-not-1)
+f2cbe0..e9a24e (expanded, @init-not-1)
 │ N ==Int 10
-b76e6f..217e26 (frontier, leaf, @init-10)
+83a76a..b8e508 (frontier, leaf, @init-10)
 
 + show-node @init-10
 <T>
   <k>
-    int n , sum , .Ids ; n = N ; sum = 0 ; while ( ! n <= 0 ) { sum = sum + n ; n = n + -1 ; }
+    int $n , $s , .Ids ; $n = N ; $s = 0 ; while ( ! $n <= 0 ) { $s = $s + $n ; $n = $n + -1 ; }
   </k>
   <state>
     .Map
@@ -25,18 +25,18 @@ b76e6f..217e26 (frontier, leaf, @init-10)
 + build-edges @init-10,#target
 + verify-edges --edges @init-10,#target
 + show-cfg
-a44804..75e065 (init, expanded)
-┣━ 619b2f..3bcf37 (expanded, @init-1)    N ==Int 1
+84f5b5..dc759b (init, expanded)
+┣━ eca873..d67a69 (expanded, @init-1)    N ==Int 1
 ┃   │  [1m[32m(verified)[0m[0m
 ┃   │  (-1 steps)
-┃   └  770f2f..0f29f4 (target, leaf)
+┃   └  6a6e72..499ac5 (target, leaf)
 ┃
-┗━ 1031de..6fed25 (expanded, @init-not-1)    notBool ( N ==Int 1 )
-    ┣━ b76e6f..217e26 (expanded, @init-10)    N ==Int 10
+┗━ f2cbe0..e9a24e (expanded, @init-not-1)    notBool ( N ==Int 1 )
+    ┣━ 83a76a..b8e508 (expanded, @init-10)    N ==Int 10
     ┃   │  [1m[32m(verified)[0m[0m
     ┃   │  (-1 steps)
-    ┃   └  770f2f..0f29f4 (target, leaf)
+    ┃   └  6a6e72..499ac5 (target, leaf)
     ┃
-    ┗━ [1m5186c5..58eeba (frontier, leaf)[0m    notBool ( N ==Int 10 )
+    ┗━ [1me1e770..1ff619 (frontier, leaf)[0m    notBool ( N ==Int 10 )
 
 
