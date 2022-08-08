@@ -1,6 +1,7 @@
 import logging
 import subprocess
 import sys
+import time
 from datetime import datetime
 from logging import Logger
 from pathlib import Path
@@ -40,6 +41,7 @@ def run_process(
     args: Union[str, Sequence[str]],
     *,
     check: bool = True,
+    profile: bool = False,
     suppress_stderr: bool = False,
     input: Optional[str] = None,
     env: Optional[Mapping[str, str]] = None,
@@ -56,10 +58,17 @@ def run_process(
     logger.info(f'Running: {command}')
     try:
         stderr = subprocess.PIPE if suppress_stderr else None
+        if profile:
+            start_time = time.time()
         res = subprocess.run(args, input=input, env=env, stdout=subprocess.PIPE, stderr=stderr, check=check, text=True)
     except CalledProcessError as err:
         logger.info(f'Completed with status {err.returncode}: {command}')
         raise
+
+    if profile:
+        stop_time = time.time()
+        delta_time = stop_time - start_time
+        logger.info(f'Timing [{delta_time:.3f}]: {command}')
 
     logger.info(f'Completed: {command}')
     return res

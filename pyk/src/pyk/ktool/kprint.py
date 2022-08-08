@@ -52,6 +52,7 @@ def _kast(
     definition: Path,
     expression: str,
     check: bool = True,
+    profile: bool = False,
     input: str = 'program',
     output: str = 'json',
     sort: KSort = Sorts.K,
@@ -62,7 +63,7 @@ def _kast(
     kast_command += ['--sort', sort.name]
     kast_command += ['--expression', expression]
     command_env = os.environ.copy()
-    proc_result = run_process(kast_command, env=command_env, logger=_LOGGER, check=check)
+    proc_result = run_process(kast_command, env=command_env, logger=_LOGGER, check=check, profile=profile)
     if proc_result.returncode != 0:
         raise RuntimeError(f'Calling kast failed: {kast_command}')
     return proc_result.stdout
@@ -75,8 +76,9 @@ class KPrint:
     definition: KDefinition
     symbol_table: SymbolTable
     definition_hash: str
+    _profile: bool
 
-    def __init__(self, definition_dir: Path, use_directory: Optional[Path] = None) -> None:
+    def __init__(self, definition_dir: Path, use_directory: Optional[Path] = None, profile: bool = False) -> None:
         self.definition_dir = Path(definition_dir)
         if use_directory:
             self.use_directory = use_directory
@@ -87,14 +89,15 @@ class KPrint:
         self.definition = readKastTerm(self.definition_dir / 'compiled.json')
         self.symbol_table = build_symbol_table(self.definition, opinionated=True)
         self.definition_hash = hash_str(self.definition)
+        self._profile = profile
 
     def kore_to_kast(self, kore: Kore) -> KAst:
-        output = _kast(self.definition_dir, kore.text, input='kore', output='json')
+        output = _kast(self.definition_dir, kore.text, input='kore', output='json', profile=self._profile)
         return KAst.from_dict(json.loads(output)['term'])
 
     def kast_to_kore(self, kast: KAst) -> Kore:
         kast_json = {'format': 'KAST', 'version': 2, 'term': kast.to_dict()}
-        output = _kast(self.definition_dir, json.dumps(kast_json), input='json', output='kore')
+        output = _kast(self.definition_dir, json.dumps(kast_json), input='json', output='kore', profile=self._profile)
         return KoreParser(output).pattern()
 
     def pretty_print(self, kast: KAst, debug=False):

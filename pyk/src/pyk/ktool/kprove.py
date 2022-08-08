@@ -35,6 +35,7 @@ def kprove(
     spec_file: Path,
     *,
     check: bool = True,
+    profile: bool = False,
     kompiled_dir: Optional[Path] = None,
     include_dirs: Iterable[Path] = (),
     emit_json_spec: Optional[Path] = None,
@@ -53,7 +54,7 @@ def kprove(
     )
 
     try:
-        _kprove(str(spec_file), *args, check=check)
+        _kprove(str(spec_file), *args, check=check, profile=profile)
     except CalledProcessError as err:
         raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr) from err
 
@@ -82,9 +83,9 @@ def _build_arg_list(
     return args
 
 
-def _kprove(spec_file: str, *args: str, check: bool = True) -> CompletedProcess:
+def _kprove(spec_file: str, *args: str, check: bool = True, profile: bool = False) -> CompletedProcess:
     run_args = ['kprove', spec_file] + list(args)
-    return run_process(run_args, logger=_LOGGER, check=check)
+    return run_process(run_args, logger=_LOGGER, check=check, profile=profile)
 
 
 class KProve(KPrint):
@@ -95,8 +96,8 @@ class KProve(KPrint):
     backend: str
     main_module: str
 
-    def __init__(self, definition_dir: Path, main_file: Optional[Path] = None, use_directory: Optional[Path] = None):
-        super(KProve, self).__init__(definition_dir, use_directory=use_directory)
+    def __init__(self, definition_dir: Path, main_file: Optional[Path] = None, use_directory: Optional[Path] = None, profile: bool = False):
+        super(KProve, self).__init__(definition_dir, use_directory=use_directory, profile=profile)
         # TODO: we should not have to supply main_file, it should be read
         # TODO: setting use_directory manually should set temp files to not be deleted and a log message
         self.main_file = main_file
@@ -139,7 +140,7 @@ class KProve(KPrint):
         command_env = os.environ.copy()
         command_env['KORE_EXEC_OPTS'] = kore_exec_opts
 
-        proc_result = run_process(command, logger=_LOGGER, env=command_env, check=False)
+        proc_result = run_process(command, logger=_LOGGER, env=command_env, check=False, profile=self._profile)
 
         if not dry_run:
 

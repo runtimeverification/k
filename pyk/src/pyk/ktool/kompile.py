@@ -21,6 +21,7 @@ def kompile(
     main_file: Path,
     *,
     check: bool = True,
+    profile: bool = False,
     main_module: Optional[str] = None,
     syntax_module: Optional[str] = None,
     backend: Optional[KompileBackend],
@@ -53,7 +54,7 @@ def kompile(
     )
 
     try:
-        _kompile(str(main_file), check=check, *args)
+        _kompile(str(main_file), check=check, profile=profile, *args)
     except CalledProcessError as err:
         raise RuntimeError(f'Command kompile exited with code {err.returncode} for: {main_file}', err.stdout, err.stderr) from err
 
@@ -113,9 +114,9 @@ def _build_arg_list(
     return _args
 
 
-def _kompile(main_file: str, *args: str, check: bool = True) -> CompletedProcess:
+def _kompile(main_file: str, *args: str, check: bool = True, profile: bool = False) -> CompletedProcess:
     run_args = ['kompile', main_file] + list(args)
-    return run_process(run_args, check=check, logger=_LOGGER)
+    return run_process(run_args, logger=_LOGGER, check=check, profile=profile)
 
 
 def _kompiled_dir(main_file: Path, output_dir: Optional[Path] = None) -> Path:
