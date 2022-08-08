@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
 from tempfile import NamedTemporaryFile
-from typing import Final, List, Optional
+from typing import Final, Iterable, List, Optional
 
 from ..cli_utils import check_file_path, run_process
 from ..cterm import CTerm
@@ -44,7 +44,7 @@ class KRun(KPrint):
         with open(self.definition_dir / 'mainModule.txt', 'r') as mm:
             self.main_module = mm.read()
 
-    def run(self, init_PGM: KInner, depth: Optional[int] = None, args: List[str] = []) -> CTerm:
+    def run(self, init_PGM: KInner, depth: Optional[int] = None, args: Iterable[str] = ()) -> CTerm:
         with NamedTemporaryFile('w', dir=self.use_directory, delete=False) as ntf:
             ntf.write(self.pretty_print(init_PGM))
             ntf.flush()
