@@ -3,46 +3,19 @@ import logging
 import sys
 from argparse import ArgumentParser, FileType
 from pathlib import Path
-from typing import Any, Dict, Final, Iterable, List, Optional
+from typing import Any, Dict, Final, List, Optional
 
-from ..cfg_manager import (
-    KCFG_from_claim,
-    SummaryManager,
-    check_implication,
-    sanitize_config,
-)
+from ..cfg_manager import KCFG_from_claim, SummaryManager, check_implication
 from ..cterm import CTerm
-from ..kast import KApply, KFlatModuleList, KInner, KRule, KToken
-from ..kastManip import (
-    build_claim,
-    collectFreeVars,
-    extract_subst,
-    flatten_label,
-    minimize_term,
-    substitute,
-    substToMlPred,
-)
+from ..kast import KApply, KFlatModuleList, KInner, KToken
+from ..kastManip import minimize_term
 from ..kcfg import KCFG
 from ..ktool import KProve
-from ..prelude import mlAnd, mlBottom, mlEqualsTrue, mlOr, mlTop
+from ..prelude import mlEqualsTrue, mlOr, mlTop
 from ..utils import add_indent, shorten_hashes
 
 _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 _LOGGER: Final = logging.getLogger(__name__)
-
-
-def KCFG_case_split_node(self: KCFG, node: KCFG.Node, constraints: Iterable[KInner]) -> List[str]:
-
-    def _case_split_node(_constraint: KInner) -> str:
-        _cterm = CTerm(mlAnd([node.cterm.term, _constraint]))
-        _node = self.get_or_create_node(_cterm)
-        self.create_edge(node.id, _node.id, _constraint, 0)
-        self.add_verified(node.id, _node.id)
-        return _node.id
-
-    branch_node_ids = [_case_split_node(constraint) for constraint in constraints]
-    self.add_expanded(node.id)
-    return branch_node_ids
 
 
 # TODO: These do not include the cterm's constraints. Is that OK?
@@ -286,7 +259,7 @@ def remove_alias(manager: SummaryManager, kprove: KProve, args, cfg_id: str, cfg
 def case_split(manager: SummaryManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
     node_id = args['node']
     condition = kprove.parse_token(KToken(args['condition'], 'Bool'))
-    true_node_id, false_node_id = KCFG_case_split_node(cfg, cfg.node(node_id), [mlEqualsTrue(condition), mlEqualsTrue(KApply('notBool', [condition]))])
+    true_node_id, false_node_id = cfg.create_case_split(node_id, [mlEqualsTrue(condition), mlEqualsTrue(KApply('notBool', [condition]))])
     if args['alias_true']:
         cfg.add_alias(args['alias_true'], true_node_id)
     if args['alias_false']:

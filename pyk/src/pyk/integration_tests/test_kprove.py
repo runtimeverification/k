@@ -1,7 +1,7 @@
 from ..cterm import CTerm
 from ..kast import KApply, KAtt, KClaim, KRule, KToken
 from ..ktool import KompileBackend
-from ..prelude import Sorts, mlAnd, mlEqualsTrue
+from ..prelude import Sorts
 from .kprove_test import KProveTest
 
 
