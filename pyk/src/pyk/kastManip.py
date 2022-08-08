@@ -111,7 +111,7 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
     return _ml_constraint_to_bool(kast)
 
 
-def simplify_bool(k):
+def simplify_bool(k: KInner) -> KInner:
     if k is None:
         return None
     simplify_rules = [ (KApply('_==K_', [KVariable('#LHS'), Bool.true]), KVariable('#LHS'))                                                                     # noqa
