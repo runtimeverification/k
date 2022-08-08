@@ -102,7 +102,7 @@ def create_argument_parser():
 
     logging_args = argparse.ArgumentParser(add_help=False)
     logging_args.add_argument('-v', '--verbose', action='count', help='Verbosity level, repeat for more verbosity (up to two times).')
-    logging_args.add_argument('--profile', type=bool, default=False, action='store_true', help='Enable coarse-grained process profiling.')
+    logging_args.add_argument('--profile', dest='profile', default=False, action='store_true', help='Enable coarse-grained process profiling.')
 
     definition_args = argparse.ArgumentParser(add_help=False)
     definition_args.add_argument('definition', type=str, help='Kompiled directory for definition.')
@@ -112,7 +112,7 @@ def create_argument_parser():
 
     print_args = pyk_args_command.add_parser('print', help='Pretty print a term.', parents=[logging_args, definition_args])
     print_args.add_argument('term', type=argparse.FileType('r'), help='Input term (in JSON).')
-    print_args.add_argument('--minimize', default=True, action='store_true', help='Minimize the JSON configuration before printing.')
+    print_args.add_argument('--minimize', dest='minimize', default=True, action='store_true', help='Minimize the JSON configuration before printing.')
     print_args.add_argument('--no-minimize', dest='minimize', action='store_false', help='Do not minimize the JSON configuration before printing.')
     print_args.add_argument('--omit-labels', default='', nargs='?', help='List of labels to omit from output.')
     print_args.add_argument('--output-file', type=argparse.FileType('w'), default='-')
