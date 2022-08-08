@@ -34,6 +34,7 @@ _LOGGER: Final = logging.getLogger(__name__)
 def kprove(
     spec_file: Path,
     *,
+    check: bool = True,
     kompiled_dir: Optional[Path] = None,
     include_dirs: Iterable[Path] = (),
     emit_json_spec: Optional[Path] = None,
@@ -52,7 +53,7 @@ def kprove(
     )
 
     try:
-        _kprove(str(spec_file), *args)
+        _kprove(str(spec_file), *args, check=check)
     except CalledProcessError as err:
         raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr) from err
 
@@ -81,9 +82,9 @@ def _build_arg_list(
     return args
 
 
-def _kprove(spec_file: str, *args: str) -> CompletedProcess:
+def _kprove(spec_file: str, *args: str, check: bool = True) -> CompletedProcess:
     run_args = ['kprove', spec_file] + list(args)
-    return run_process(run_args, logger=_LOGGER)
+    return run_process(run_args, logger=_LOGGER, check=check)
 
 
 class KProve(KPrint):
@@ -138,19 +139,13 @@ class KProve(KPrint):
         command_env = os.environ.copy()
         command_env['KORE_EXEC_OPTS'] = kore_exec_opts
 
-        proc_output: str
-        try:
-            proc_output = run_process(command, logger=_LOGGER, env=command_env).stdout
-        except CalledProcessError as err:
-            if err.returncode != 1:
-                raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
-            proc_output = err.stdout
+        proc_result = run_process(command, logger=_LOGGER, env=command_env, check=False)
 
         if not dry_run:
 
             debug_log = _get_rule_log(log_file)
 
-            final_state = KAst.from_dict(json.loads(proc_output)['term'])
+            final_state = KAst.from_dict(json.loads(proc_result.stdout)['term'])
             if final_state == mlTop() and len(debug_log) == 0 and not allow_zero_step:
                 raise ValueError(f'Proof took zero steps, likely the LHS is invalid: {spec_file}')
 

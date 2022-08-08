@@ -51,6 +51,7 @@ SymbolTable = Dict[str, Callable]
 def _kast(
     definition: Path,
     expression: str,
+    check: bool = True,
     input: str = 'program',
     output: str = 'json',
     sort: KSort = Sorts.K,
@@ -61,7 +62,7 @@ def _kast(
     kast_command += ['--sort', sort.name]
     kast_command += ['--expression', expression]
     command_env = os.environ.copy()
-    proc_result = run_process(kast_command, env=command_env, logger=_LOGGER)
+    proc_result = run_process(kast_command, env=command_env, logger=_LOGGER, check=check)
     if proc_result.returncode != 0:
         raise RuntimeError(f'Calling kast failed: {kast_command}')
     return proc_result.stdout
