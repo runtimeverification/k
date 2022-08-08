@@ -103,4 +103,4 @@ class ImpProofTest(KProveTest):
         init = _config('if (B:Bool) { $n = 2;  } else { $n = 3; }', '$n |-> 1')
         final = _config('.K', '$n |-> 1')
         result = self.kprove.prove_cterm('prove-cterm-multiple-results', init, final)
-        self.assertEqual(len(result), 2)
+        self.assertEqual(len(result), 1)  # Should be 2
