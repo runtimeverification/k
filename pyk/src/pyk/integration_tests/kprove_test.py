@@ -5,8 +5,8 @@ from itertools import chain
 from pathlib import Path
 from typing import Iterable
 
-from ..ktool import KProve
-from ..prelude import mlTop
+from pyk.ktool import KProve
+
 from .kompiled_test import KompiledTest
 
 
@@ -33,12 +33,6 @@ class KProveTest(KompiledTest, ABC):
     def tearDown(self):
         shutil.rmtree(self.KPROVE_USE_DIR, ignore_errors=True)
         super().tearDown()
-
-    def assertTop(self, term):
-        self.assertEqual(term, mlTop())
-
-    def assertNotTop(self, term):
-        self.assertNotEqual(term, mlTop())
 
     @staticmethod
     @abstractmethod

@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Iterable
 
-from ..ktool import KRun
-from ..prelude import mlTop
+from pyk.ktool import KRun
+
 from .kompiled_test import KompiledTest
 
 
@@ -24,12 +24,6 @@ class KRunTest(KompiledTest, ABC):
     def tearDown(self):
         shutil.rmtree(self.KRUN_USE_DIR, ignore_errors=True)
         super().tearDown()
-
-    def assertTop(self, term):
-        self.assertEqual(term, mlTop())
-
-    def assertNotTop(self, term):
-        self.assertNotEqual(term, mlTop())
 
     @staticmethod
     @abstractmethod
