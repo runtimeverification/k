@@ -74,7 +74,7 @@ class KPrint:
 
     definition_dir: Path
     use_directory: Path
-    definition: KDefinition
+    _definition: Optional[KDefinition]
     symbol_table: SymbolTable
     definition_hash: str
     _profile: bool
@@ -87,10 +87,16 @@ class KPrint:
             td = TemporaryDirectory()
             self.use_directory = Path(td.name)
         check_dir_path(self.use_directory)
-        self.definition = readKastTerm(self.definition_dir / 'compiled.json')
         self.symbol_table = build_symbol_table(self.definition, opinionated=True)
         self.definition_hash = hash_str(self.definition)
         self._profile = profile
+
+    @property
+    def definition(self) -> KDefinition:
+        if not self._definition:
+            self._definition = readKastTerm(self.definition_dir / 'compiled.json')
+            assert self._definition is not None
+        return self._definition
 
     def parse_token(self, ktoken: KToken) -> KInner:
         output = _kast(self.definition_dir, ktoken.token, sort=ktoken.sort, profile=self._profile)
