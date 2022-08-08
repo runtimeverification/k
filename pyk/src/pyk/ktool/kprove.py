@@ -4,7 +4,6 @@ import logging
 import os
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
-from tempfile import TemporaryDirectory
 from typing import Dict, Final, Iterable, List, Mapping, Optional, Tuple
 
 from ..cli_utils import (
@@ -55,7 +54,7 @@ def kprove(
     try:
         _kprove(str(spec_file), *args)
     except CalledProcessError as err:
-        raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
+        raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr) from err
 
 
 def _build_arg_list(
@@ -89,23 +88,22 @@ def _kprove(spec_file: str, *args: str) -> CompletedProcess:
 
 class KProve(KPrint):
 
-    def __init__(self, kompiled_directory, main_file_name=None, use_directory=None):
-        super(KProve, self).__init__(kompiled_directory)
-        self.directory = Path(self.kompiled_directory).parent
-        self.use_directory: Path
-        if not use_directory:
-            self._temp_dir = TemporaryDirectory()
-            self.use_directory = Path(self._temp_dir.name)
-        else:
-            self.use_directory = Path(use_directory)
-            check_dir_path(self.use_directory)
-        # TODO: we should not have to supply main_file_name, it should be read
-        self.main_file_name = main_file_name
+    main_file: Optional[Path]
+    prover: List[str]
+    prover_args: List[str]
+    backend: str
+    main_module: str
+
+    def __init__(self, definition_dir: Path, main_file: Optional[Path] = None, use_directory: Optional[Path] = None):
+        super(KProve, self).__init__(definition_dir, use_directory=use_directory)
+        # TODO: we should not have to supply main_file, it should be read
+        # TODO: setting use_directory manually should set temp files to not be deleted and a log message
+        self.main_file = main_file
         self.prover = ['kprove']
         self.prover_args = []
-        with open(self.kompiled_directory / 'backend.txt', 'r') as ba:
+        with open(self.definition_dir / 'backend.txt', 'r') as ba:
             self.backend = ba.read()
-        with open(self.kompiled_directory / 'mainModule.txt', 'r') as mm:
+        with open(self.definition_dir / 'mainModule.txt', 'r') as mm:
             self.main_module = mm.read()
 
     def prove(
@@ -129,7 +127,7 @@ class KProve(KPrint):
         haskell_log_args = ['--log', str(log_file), '--log-format', 'oneline', '--log-entries', ','.join(haskell_log_entries)]
         command = [c for c in self.prover]
         command += [str(spec_file)]
-        command += ['--definition', str(self.kompiled_directory), '-I', str(self.directory), '--output', 'json']
+        command += ['--definition', str(self.definition_dir), '--output', 'json']
         command += ['--spec-module', spec_module_name] if spec_module_name is not None else []
         command += ['--dry-run'] if dry_run else []
         command += [c for c in self.prover_args]
@@ -255,11 +253,14 @@ class KProve(KPrint):
         sentences.append(claim)
         with open(tmp_claim, 'w') as tc:
             claim_module = KFlatModule(tmp_module_name, sentences, imports=[KImport(self.main_module, True)])
-            claim_definition = KDefinition(tmp_module_name, [claim_module], requires=[KRequire(self.main_file_name)])
+            requires = []
+            if self.main_file is not None:
+                requires += [KRequire(str(self.main_file))]
+            claim_definition = KDefinition(tmp_module_name, [claim_module], requires=requires)
             tc.write(gen_file_timestamp() + '\n')
             tc.write(self.pretty_print(claim_definition) + '\n\n')
             tc.flush()
-        _LOGGER.debug(f'Wrote claim file: {tmp_claim}.')
+        _LOGGER.info(f'Wrote claim file: {tmp_claim}.')
         return tmp_claim, tmp_module_name
 
 
