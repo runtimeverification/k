@@ -30,7 +30,7 @@ def kompile(
     emit_json=False,
     post_process: Optional[str] = None,
     concrete_rules: Iterable[str] = (),
-    additional_args: Iterable[str] = (),
+    args: Iterable[str] = (),
 ) -> Path:
     check_file_path(main_file)
 
@@ -48,7 +48,7 @@ def kompile(
         emit_json=emit_json,
         post_process=post_process,
         concrete_rules=concrete_rules,
-        additional_args=additional_args
+        args=args
     )
 
     try:
@@ -73,43 +73,43 @@ def _build_arg_list(
     emit_json: bool,
     post_process: Optional[str],
     concrete_rules: Iterable[str],
-    additional_args: Iterable[str]
+    args: Iterable[str]
 ) -> List[str]:
-    args = []
+    _args = []
 
     if main_module:
-        args.extend(['--main-module', main_module])
+        _args.extend(['--main-module', main_module])
 
     if syntax_module:
-        args.extend(['--syntax-module', syntax_module])
+        _args.extend(['--syntax-module', syntax_module])
 
     if backend:
-        args += ['--backend', backend.value]
+        _args += ['--backend', backend.value]
 
     if output_dir:
-        args += ['--output-definition', str(output_dir)]
+        _args += ['--output-definition', str(output_dir)]
 
     for include_dir in include_dirs:
-        args += ['-I', str(include_dir)]
+        _args += ['-I', str(include_dir)]
 
     if md_selector:
-        args.extend(['--md-selector', md_selector])
+        _args.extend(['--md-selector', md_selector])
 
     if hook_namespaces:
-        args.extend(['--hook-namespaces', ' '.join(hook_namespaces)])
+        _args.extend(['--hook-namespaces', ' '.join(hook_namespaces)])
 
     if emit_json:
-        args.append('--emit-json')
+        _args.append('--emit-json')
 
     if post_process:
-        args.extend(['--post-process', shlex.quote(post_process)])
+        _args.extend(['--post-process', shlex.quote(post_process)])
 
     if concrete_rules:
-        args.extend(['--concrete-rules', ','.join(concrete_rules)])
+        _args.extend(['--concrete-rules', ','.join(concrete_rules)])
 
-    args.extend(additional_args)
+    _args.extend(args)
 
-    return args
+    return _args
 
 
 def _kompile(main_file: str, *args: str) -> CompletedProcess:
