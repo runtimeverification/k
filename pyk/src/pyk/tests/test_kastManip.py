@@ -152,17 +152,15 @@ class CollapseDotsTest(TestCase):
         self.assertEqual(config_actual, config_expected)
 
 
-class BooleanTest(TestCase):
+class SimplifyBoolTest(TestCase):
 
     def test_simplify_bool(self):
-        # Given
-        bool_test_1 = Bool.andBool([Bool.false, Bool.true])
-        bool_test_2 = Bool.andBool([KApply('_==Int_', [intToken(3), intToken(4)]), Bool.true])
+        bool_tests = (
+            ('trivial-false', Bool.andBool([Bool.false, Bool.true]), Bool.false),
+            ('and-true', Bool.andBool([KApply('_==Int_', [intToken(3), intToken(4)]), Bool.true]), KApply('_==Int_', [intToken(3), intToken(4)])),
+            ('not-false', Bool.notBool(Bool.false), Bool.true),
+        )
 
-        # When
-        bool_test_1_simplified = simplify_bool(bool_test_1)
-        bool_test_2_simplified = simplify_bool(bool_test_2)
-
-        # Then
-        self.assertEqual(Bool.false, bool_test_1_simplified)
-        self.assertEqual(KApply('_==Int_', [intToken(3), intToken(4)]), bool_test_2_simplified)
+        for test_name, bool_in, bool_out in bool_tests:
+            bool_out_actual = simplify_bool(bool_in)
+            self.assertEqual(bool_out_actual, bool_out)
