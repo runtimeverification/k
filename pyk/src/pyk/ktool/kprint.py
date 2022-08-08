@@ -74,10 +74,11 @@ class KPrint:
 
     definition_dir: Path
     use_directory: Path
-    _definition: Optional[KDefinition]
-    symbol_table: SymbolTable
-    definition_hash: str
     _profile: bool
+
+    _definition: Optional[KDefinition]
+    _definition_hash: Optional[str]
+    _symbol_table: Optional[SymbolTable]
 
     def __init__(self, definition_dir: Path, use_directory: Optional[Path] = None, profile: bool = False) -> None:
         self.definition_dir = Path(definition_dir)
@@ -87,8 +88,9 @@ class KPrint:
             td = TemporaryDirectory()
             self.use_directory = Path(td.name)
         check_dir_path(self.use_directory)
-        self.symbol_table = build_symbol_table(self.definition, opinionated=True)
-        self.definition_hash = hash_str(self.definition)
+        self._definition = None
+        self._definition_hash = None
+        self._symbol_table = None
         self._profile = profile
 
     @property
@@ -97,6 +99,20 @@ class KPrint:
             self._definition = readKastTerm(self.definition_dir / 'compiled.json')
             assert self._definition is not None
         return self._definition
+
+    @property
+    def definition_hash(self) -> str:
+        if not self._definition_hash:
+            self._definition_hash = hash_str(self.definition)
+            assert self._definition_hash is not None
+        return self._definition_hash
+
+    @property
+    def symbol_table(self) -> SymbolTable:
+        if not self._symbol_table:
+            self._symbol_table = build_symbol_table(self.definition, opinionated=True)
+            assert self._symbol_table is not None
+        return self._symbol_table
 
     def parse_token(self, ktoken: KToken) -> KInner:
         output = _kast(self.definition_dir, ktoken.token, sort=ktoken.sort, profile=self._profile)
