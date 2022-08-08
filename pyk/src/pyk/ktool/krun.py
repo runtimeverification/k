@@ -29,7 +29,7 @@ def _krun(
     try:
         return run_process(krun_command + args, _LOGGER)
     except CalledProcessError as err:
-        raise RuntimeError(f'Command krun exited with code {err.returncode} for: {input_file}', err.stdout, err.stderr)
+        raise RuntimeError(f'Command krun exited with code {err.returncode} for: {input_file}', err.stdout, err.stderr) from err
 
 
 class KRun(KPrint):

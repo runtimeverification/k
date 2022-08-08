@@ -54,7 +54,7 @@ def kompile(
     try:
         _kompile(str(main_file), *args)
     except CalledProcessError as err:
-        raise RuntimeError(f'Command kompile exited with code {err.returncode} for: {main_file}', err.stdout, err.stderr)
+        raise RuntimeError(f'Command kompile exited with code {err.returncode} for: {main_file}', err.stdout, err.stderr) from err
 
     kompiled_dir = _kompiled_dir(main_file, output_dir)
     assert kompiled_dir.is_dir()

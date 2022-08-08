@@ -54,7 +54,7 @@ def kprove(
     try:
         _kprove(str(spec_file), *args)
     except CalledProcessError as err:
-        raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
+        raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr) from err
 
 
 def _build_arg_list(
