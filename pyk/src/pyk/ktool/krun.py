@@ -16,18 +16,20 @@ _LOGGER: Final = logging.getLogger(__name__)
 def _krun(
     definition_dir: Path,
     input_file: Path,
+    check: bool = True,
+    output: str = 'json',
     depth: Optional[int] = None,
     args: List[str] = [],
 ) -> CompletedProcess:
     check_file_path(input_file)
 
-    krun_command = ['krun', '--definition', str(definition_dir), str(input_file)]
+    krun_command = ['krun', '--definition', str(definition_dir), str(input_file), '--output', output]
 
     if depth and depth >= 0:
         args += ['--depth', str(depth)]
 
     try:
-        return run_process(krun_command + args, logger=_LOGGER)
+        return run_process(krun_command + args, logger=_LOGGER, check=check)
     except CalledProcessError as err:
         raise RuntimeError(f'Command krun exited with code {err.returncode} for: {input_file}', err.stdout, err.stderr) from err
 
