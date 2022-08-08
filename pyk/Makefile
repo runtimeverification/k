@@ -54,7 +54,7 @@ install:
 
 PYK_TEST_ARGS :=
 
-test: test-unit test-integration test-pyk
+test: test-unit test-integration test-pyk test-kit
 
 test-unit: $(VENV_DEV)
 	$(ACTIVATE_DEV) && python3 -m unittest discover --verbose --top src pyk.tests $(PYK_TEST_ARGS)
@@ -64,8 +64,9 @@ test-integration: $(VENV_DEV)
 
 test-pyk: $(VENV_PROD)
 	$(ACTIVATE_PROD) && $(MAKE) -C pyk-tests
-	rm -rf $(VENV_PROD_DIR) build src/pyk.egg-info
 
+test-kit: $(VENV_PROD)
+	$(ACTIVATE_PROD) && $(MAKE) -C kit-tests
 
 # Checks
 
