@@ -143,7 +143,7 @@ class KProve(KPrint):
             proc_output = run_process(command, _LOGGER, env=command_env).stdout
         except CalledProcessError as err:
             if err.returncode != 1:
-                raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
+                raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr) from err
             proc_output = err.stdout
 
         if not dry_run:
