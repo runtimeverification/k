@@ -33,7 +33,6 @@ from .kastManip import (
     ml_pred_to_bool,
     push_down_rewrites,
     remove_generated_cells,
-    removeUselessConstraints,
     simplify_bool,
     splitConfigFrom,
     substitute,
@@ -43,10 +42,6 @@ from .ktool.kprint import KPrint
 from .prelude import Bool, Sorts, mlAnd, mlBottom, mlTop
 
 _LOGGER: Final = logging.getLogger(__name__)
-
-
-def remove_useless_constraints(cterm: CTerm, keep_vars: Optional[Iterable[str]] = None) -> CTerm:
-    return CTerm(removeUselessConstraints(cterm.term, keepVars=keep_vars))
 
 
 def no_cell_rewrite_to_dots(term: KInner):

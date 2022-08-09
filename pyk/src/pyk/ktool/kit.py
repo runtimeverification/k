@@ -9,7 +9,6 @@ from ..cfg_manager import (
     KCFG_from_claim,
     SummaryManager,
     check_implication,
-    remove_useless_constraints,
     sanitize_config,
 )
 from ..cterm import CTerm
@@ -30,6 +29,7 @@ from ..kastManip import (
     minimize_term,
     substitute,
     substToMlPred,
+    remove_useless_constraints,
 )
 from ..kcfg import KCFG
 from ..ktool import KProve
