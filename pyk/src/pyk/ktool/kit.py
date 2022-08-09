@@ -18,15 +18,6 @@ _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-# TODO: These do not include the cterm's constraints. Is that OK?
-def KCFG_Edge_pre(self: KCFG.Edge) -> CTerm:
-    return self.source.cterm.add_constraint(self.condition)
-
-
-def KCFG_Edge_post(self: KCFG.Edge) -> CTerm:
-    return self.target.cterm
-
-
 def edge_prove(kprove: KProve, cfg: KCFG, edge: KCFG.Edge, min_depth: Optional[int] = None) -> List[KInner]:
     claim_id = f'BASIC-BLOCK-{edge.source.id}-TO-{edge.target.id}'
     haskell_args = []
@@ -34,7 +25,7 @@ def edge_prove(kprove: KProve, cfg: KCFG, edge: KCFG.Edge, min_depth: Optional[i
         haskell_args += ['--min-depth', str(min_depth)]
     elif edge.depth > 0:
         haskell_args += ['--min-depth', str(edge.depth)]
-    return kprove.prove_cterm(claim_id, KCFG_Edge_pre(edge), KCFG_Edge_post(edge), haskell_args=haskell_args)
+    return kprove.prove_cterm(claim_id, edge.pre(), edge.post(), haskell_args=haskell_args)
 
 
 def parse_spec_to_json(kprove: KProve, *, spec_file: Path, out: Path, spec_module: Optional[str]) -> None:

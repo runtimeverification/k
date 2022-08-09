@@ -91,6 +91,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             else:
                 return ['(' + str(self.depth) + ' steps)']
 
+        # TODO: These should only be available for split case nodes and return a Node rather than a CTerm,
+        # when we extract a class for them.
+        def pre(self) -> CTerm:
+            return self.source.cterm.add_constraint(self.condition)
+
+        def post(self) -> CTerm:
+            return self.target.cterm
+
     @dataclass(frozen=True)
     class Cover(EdgeLike):
         source: 'KCFG.Node'
