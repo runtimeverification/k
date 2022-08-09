@@ -75,6 +75,9 @@ check-code-style: check-isort check-flake8 check-mypy
 isort: $(VENV_DEV)
 	$(ACTIVATE_DEV) && isort src
 
+autoflake: $(VENV_DEV)
+	$(ACTIVATE_DEV) && autoflake -r --in-place --remove-all-unused-imports --ignore-init-module-imports src
+
 check-isort: $(VENV_DEV)
 	$(ACTIVATE_DEV) && isort --check src
 
