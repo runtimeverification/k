@@ -1,6 +1,7 @@
-from ..kast import KAtt, KClaim, KRule, KToken
+from ..cterm import CTerm
+from ..kast import KApply, KAtt, KClaim, KRule, KToken
 from ..ktool import KompileBackend
-from ..prelude import Sorts
+from ..prelude import Sorts, mlAnd, mlEqualsTrue
 from .kprove_test import KProveTest
 
 
@@ -84,3 +85,22 @@ class ImpProofTest(KProveTest):
         self.assertEqual(post_depth_actual, post_depth_expected)
         self.assertEqual(post_branching_actual, post_branching_expected)
         self.assertEqual(post_state_pretty_actual, post_state_pretty_expected)
+
+    def test_prove_cterm(self) -> None:
+
+        def _config(k: str, state: str) -> CTerm:
+            return CTerm(KApply('<T>', (KApply('<k>', (KToken(k, 'K'),)),
+                                        KApply('<state>', (KToken(state, 'Map'),)))))
+
+        init = _config('$n', '$n |-> 1')
+        final = _config('1', '$n |-> 1')
+        result = self.kprove.prove_cterm('prove-cterm-top', init, final)
+        self.assertEqual(len(result), 1)
+        self.assertTop(result[0])
+
+        # Failing should return 2 result, but get only one.
+        # This might be a kprove bug?
+        init = _config('if (B:Bool) { $n = 2;  } else { $n = 3; }', '$n |-> 1')
+        final = _config('.K', '$n |-> 1')
+        result = self.kprove.prove_cterm('prove-cterm-multiple-results', init, final)
+        self.assertEqual(len(result), 2)

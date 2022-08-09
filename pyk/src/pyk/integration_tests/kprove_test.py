@@ -7,6 +7,9 @@ from typing import Iterable
 
 from pyk.ktool import KProve
 
+from ..kast import KInner
+from ..ktool import KProve
+from ..prelude import mlTop
 from .kompiled_test import KompiledTest
 
 
