@@ -18,16 +18,6 @@ _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-def edge_prove(kprove: KProve, cfg: KCFG, edge: KCFG.Edge, min_depth: Optional[int] = None) -> List[KInner]:
-    claim_id = f'BASIC-BLOCK-{edge.source.id}-TO-{edge.target.id}'
-    haskell_args = []
-    if min_depth is not None:
-        haskell_args += ['--min-depth', str(min_depth)]
-    elif edge.depth > 0:
-        haskell_args += ['--min-depth', str(edge.depth)]
-    return kprove.prove_cterm(claim_id, edge.pre(), edge.post(), haskell_args=haskell_args)
-
-
 def parse_spec_to_json(kprove: KProve, *, spec_file: Path, out: Path, spec_module: Optional[str]) -> None:
     kprove_args = ['--emit-json-spec', str(out)]
     if spec_module:
@@ -271,6 +261,16 @@ def build_edges(manager: SummaryManager, kprove: KProve, args, cfg_id: str, cfg:
 
 
 def verify_edges(manager: SummaryManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> None:
+
+    def _edge_prove(edge: KCFG.Edge, min_depth: Optional[int]) -> List[KInner]:
+        claim_id = f'BASIC-BLOCK-{edge.source.id}-TO-{edge.target.id}'
+        haskell_args = []
+        if min_depth is not None:
+            haskell_args += ['--min-depth', str(min_depth)]
+        elif edge.depth > 0:
+            haskell_args += ['--min-depth', str(edge.depth)]
+        return kprove.prove_cterm(claim_id, edge.pre(), edge.post(), haskell_args=haskell_args)
+
     edges: List[KCFG.Edge] = []
     if args.get('edges'):
         edges = [edge for (source_id, target_id) in args['edges'] for edge in cfg.edges(source_id=source_id, target_id=target_id)]
@@ -286,7 +286,7 @@ def verify_edges(manager: SummaryManager, kprove: KProve, args, cfg_id: str, cfg
     for edge in edges:
         _LOGGER.info(f'Verifying edge: {shorten_hashes((edge.source.id, edge.target.id))}')
         basic_block_id = f'BASIC-BLOCK-{edge.source.id}-TO-{edge.target.id}'
-        proven_states = edge_prove(kprove, cfg, edge, min_depth=args.get('min_depth'))
+        proven_states = _edge_prove(edge, min_depth=args.get('min_depth'))
         if len(proven_states) == 1 and proven_states[0] == mlTop():
             cfg.add_verified(edge.source.id, edge.target.id)
             manager.writeCFG(cfg_id, cfg)
