@@ -3,7 +3,15 @@ from unittest import TestCase
 
 from ..kast import KApply, KInner, KLabel, KVariable, Subst
 from ..kastManip import extract_subst
-from ..prelude import Bool, mlAnd, mlEquals, mlEqualsTrue, mlTop, token
+from ..prelude import (
+    Bool,
+    intToken,
+    mlAnd,
+    mlEquals,
+    mlEqualsTrue,
+    mlTop,
+    token,
+)
 from .mock_kprint import MockKPrint
 from .utils import a, b, c, f, g, h, x, y, z
 
@@ -103,6 +111,16 @@ class SubstTest(TestCase):
             list(Subst({'X': Bool.true, 'Y': KApply('_andBool_', [Bool.true, Bool.true])}).pretty(MockKPrint())),
             ['X |-> true', 'Y |-> _andBool_ ( true , true )']
         )
+
+    def test_ml_pred(self):
+        subst_pred_pairs = (
+            ('empty', Subst({}), KApply('#Top')),
+            ('singleton', Subst({'X': Bool.true}), KApply('#Equals', [KVariable('X'), Bool.true])),
+            ('double', Subst({'X': Bool.true, 'Y': intToken(4)}), KApply('#And', [KApply('#Equals', [KVariable('X'), Bool.true]), KApply('#Equals', [KVariable('Y'), intToken(4)])])),
+        )
+        for name, subst, pred in subst_pred_pairs:
+            with self.subTest(name):
+                self.assertEqual(subst.ml_pred, pred)
 
 
 class ExtractSubstTest(TestCase):
