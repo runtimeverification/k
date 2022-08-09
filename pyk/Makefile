@@ -70,7 +70,7 @@ test-unit: venv-dev
 test-integration: venv-dev
 	$(ACTIVATE_DEV) && python3 -m unittest discover --verbose --top src pyk.integration_tests $(PYK_TEST_ARGS)
 
-test-pyk: $(VENV_PROD)
+test-pyk: venv-prod
 	$(ACTIVATE_PROD) && $(MAKE) -C pyk-tests
 	rm -rf $(VENV_PROD_DIR) build src/pyk.egg-info
 
