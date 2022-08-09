@@ -26,8 +26,8 @@ VENV_DEV     := $(VENV_DEV_DIR)/pyvenv.cfg
 ACTIVATE_DEV := . $(VENV_DEV_DIR)/bin/activate
 
 $(VENV_DEV):
-	   virtualenv -p python3.8 $(VENV_DEV_DIR) \
-	&& $(ACTIVATE_DEV)                         \
+	   virtualenv -p python3 $(VENV_DEV_DIR) \
+	&& $(ACTIVATE_DEV)                       \
 	&& pip install -r requirements/dev.txt
 
 $(VENV_DEV_DIR): $(VENV_DEV)
@@ -39,8 +39,8 @@ VENV_PROD     := $(VENV_PROD_DIR)/pyvenv.cfg
 ACTIVATE_PROD := . $(VENV_PROD_DIR)/bin/activate
 
 $(VENV_PROD):
-	   virtualenv -p python3.8 $(VENV_PROD_DIR) \
-	&& $(ACTIVATE_PROD)                         \
+	   virtualenv -p python3 $(VENV_PROD_DIR) \
+	&& $(ACTIVATE_PROD)                       \
 	&& pip install .
 
 $(VENV_PROD_DIR): $(VENV_PROD)

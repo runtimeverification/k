@@ -1234,7 +1234,7 @@ class Attr(Kore):
     @classmethod
     @property
     def _tag(cls) -> str:
-        return unsupported()
+        return 'Attr'
 
     @classmethod
     def from_dict(cls: Type['Attr'], dct: Mapping[str, Any]) -> 'Attr':
@@ -1289,7 +1289,7 @@ class Import(Sentence):
     @classmethod
     @property
     def _tag(cls) -> str:
-        return unsupported()
+        return 'Import'
 
     @classmethod
     def from_dict(cls: Type['Import'], dct: Mapping[str, Any]) -> 'Import':
@@ -1342,7 +1342,7 @@ class SortDecl(Sentence):
     @classmethod
     @property
     def _tag(cls) -> str:
-        return unsupported()
+        return 'SortDecl'
 
     @classmethod
     def from_dict(cls: Type['SortDecl'], dct: Mapping[str, Any]) -> 'SortDecl':
@@ -1381,7 +1381,7 @@ class Symbol(Kore):
     @classmethod
     @property
     def _tag(cls) -> str:
-        return unsupported()
+        return 'Symbol'
 
     @classmethod
     def from_dict(cls: Type['Symbol'], dct: Mapping[str, Any]) -> 'Symbol':
@@ -1434,7 +1434,7 @@ class SymbolDecl(Sentence):
     @classmethod
     @property
     def _tag(cls) -> str:
-        return unsupported()
+        return 'SymbolDecl'
 
     @classmethod
     def from_dict(cls: Type['SymbolDecl'], dct: Mapping[str, Any]) -> 'SymbolDecl':
@@ -1506,7 +1506,7 @@ class AliasDecl(Sentence):
     @classmethod
     @property
     def _tag(cls) -> str:
-        return unsupported()
+        return 'AliasDecl'
 
     @classmethod
     def from_dict(cls: Type['AliasDecl'], dct: Mapping[str, Any]) -> 'AliasDecl':
@@ -1584,7 +1584,7 @@ class Axiom(AxiomLike):
     @classmethod
     @property
     def _tag(cls) -> str:
-        return unsupported()
+        return 'Axiom'
 
     @classmethod
     def from_dict(cls: Type['Axiom'], dct: Mapping[str, Any]) -> 'Axiom':
@@ -1627,7 +1627,7 @@ class Claim(AxiomLike):
     @classmethod
     @property
     def _tag(cls) -> str:
-        return unsupported()
+        return 'Claim'
 
     @classmethod
     def from_dict(cls: Type['Claim'], dct: Mapping[str, Any]) -> 'Claim':
@@ -1669,7 +1669,7 @@ class Module(Kore, WithAttrs):
     @classmethod
     @property
     def _tag(cls) -> str:
-        return unsupported()
+        return 'Module'
 
     @classmethod
     def from_dict(cls: Type['Module'], dct: Mapping[str, Any]) -> 'Module':
@@ -1709,7 +1709,7 @@ class Definition(Kore, WithAttrs):
     @classmethod
     @property
     def _tag(cls) -> str:
-        return unsupported()
+        return 'Definition'
 
     @classmethod
     def from_dict(cls: Type['Definition'], dct: Mapping[str, Any]) -> 'Definition':
