@@ -68,7 +68,7 @@ def substitute(pattern: KInner, subst: Mapping[str, KInner]) -> KInner:
     return subst(pattern)
 
 
-def bool_to_ml_pred(kast: KInner) -> KInner:
+def bool_ml_pred(kast: KInner) -> KInner:
     return mlAnd([mlEqualsTrue(cond) for cond in flatten_label('_andBool_', kast)])
 
 
@@ -634,8 +634,8 @@ def antiUnifyWithConstraints(constrainedTerm1, constrainedTerm2, implications=Fa
     constraints = [c for c in constraints1 if c in constraints2]
     constraint1 = mlAnd([c for c in constraints1 if c not in constraints])
     constraint2 = mlAnd([c for c in constraints2 if c not in constraints])
-    implication1 = mlImplies(constraint1, subst1.to_ml_pred)
-    implication2 = mlImplies(constraint2, subst2.to_ml_pred)
+    implication1 = mlImplies(constraint1, subst1.ml_pred)
+    implication2 = mlImplies(constraint2, subst2.ml_pred)
 
     if implications:
         constraints.append(implication1)
