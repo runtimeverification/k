@@ -40,18 +40,17 @@ from .prelude import Bool, Sorts, mlAnd, mlBottom, mlTop
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-def no_cell_rewrite_to_dots(term: KInner):
-    def _no_cell_rewrite_to_dots(_term: KInner):
-        if type(_term) is KApply and _term.is_cell:
-            lhs = extract_lhs(_term)
-            rhs = extract_rhs(_term)
-            if lhs == rhs:
-                return KApply(_term.label, [abstract_term_safely(lhs, base_name=_term.label.name)])
-        return _term
-    return bottom_up(_no_cell_rewrite_to_dots, term)
-
-
 def check_implication(kprint: KPrint, concrete: CTerm, abstract: CTerm) -> Tuple[bool, str]:
+
+    def _no_cell_rewrite_to_dots(term: KInner) -> KInner:
+        def _no_cell_rewrite_to_dots(_term: KInner):
+            if type(_term) is KApply and _term.is_cell:
+                lhs = extract_lhs(_term)
+                rhs = extract_rhs(_term)
+                if lhs == rhs:
+                    return KApply(_term.label, [abstract_term_safely(lhs, base_name=_term.label.name)])
+            return _term
+        return bottom_up(_no_cell_rewrite_to_dots, term)
 
     def _is_cell_subst(csubst: KInner) -> bool:
         if type(csubst) is KApply and csubst.label.name == '_==K_':
@@ -84,7 +83,7 @@ def check_implication(kprint: KPrint, concrete: CTerm, abstract: CTerm) -> Tuple
             cell_match = abstract_cell.match(concrete_cell)
             if cell_match is None:
                 failing_cell = push_down_rewrites(KRewrite(concrete_cell, abstract_cell))
-                failing_cell = no_cell_rewrite_to_dots(failing_cell)
+                failing_cell = _no_cell_rewrite_to_dots(failing_cell)
                 failing_cells.append((cell, failing_cell))
             else:
                 abstract_config = cell_match.apply(abstract_config)
