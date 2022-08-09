@@ -170,7 +170,8 @@ class KProve(KPrint):
                     total_failure_n += table_line[5]
                 avg_success_time = total_success_time / total_success_n if total_success_n > 0 else 0.0
                 avg_failure_time = total_failure_time / total_failure_n if total_failure_n > 0 else 0.0
-                productivity = total_success_time / (total_success_time + total_failure_time)
+                total_time = total_success_time + total_failure_time
+                productivity = total_success_time / total_time if total_time > 0.0 else 0.0
                 table_lines.append(['TOTAL', total_success_time, total_success_n, avg_success_time, total_failure_time, total_failure_n, avg_failure_time, productivity])
                 table_lines = sorted(table_lines, key=lambda x: x[1] + x[4])
                 with open(rule_profile, 'w') as rp_file:
