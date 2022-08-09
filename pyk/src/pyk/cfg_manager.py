@@ -142,7 +142,7 @@ def applyMacros(definition: KDefinition, term: KInner) -> KInner:
 
 def getAliases(definition: KDefinition) -> List[KRule]:
 
-    def _applyMacrosToAlias(sent):
+    def _applyMacrosToAlias(sent: KRule) -> KRule: # Typing fails
         lhs = sent.body.lhs
         rhs = sent.body.rhs
         new_rhs = applyMacros(definition, rhs)
