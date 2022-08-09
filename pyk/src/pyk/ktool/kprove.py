@@ -29,8 +29,15 @@ from ..kast import (
     Subst,
     flatten_label,
 )
-from ..kastManip import build_claim, collectFreeVars, getCell, is_top
-from ..prelude import Bool, mlAnd, mlEqualsTrue, mlTop
+from ..kastManip import (
+    build_claim,
+    collectFreeVars,
+    extract_subst,
+    getCell,
+    is_top,
+    substToMlPred,
+)
+from ..prelude import Bool, mlAnd, mlBottom, mlEqualsTrue, mlTop
 from ..utils import unique
 from .kprint import KPrint
 
@@ -226,6 +233,27 @@ class KProve(KPrint):
             dry_run=dry_run,
             rule_profile=rule_profile,
         )
+
+    def prove_cterm(
+        self,
+        claim_id: str,
+        init_cterm: CTerm,
+        target_cterm: CTerm,
+        lemmas: Iterable[KRule] = [],
+        args: List[str] = [],
+        haskell_args: List[str] = [],
+        log_axioms_file: Path = None,
+        allow_zero_step: bool = False,
+    ) -> List[KInner]:
+        claim, var_map = build_claim(claim_id, init_cterm, target_cterm, keep_vars=collectFreeVars(init_cterm.term))
+        next_state = self.prove_claim(claim, claim_id, lemmas=lemmas, args=args, haskell_args=haskell_args, log_axioms_file=log_axioms_file, allow_zero_step=allow_zero_step)
+        next_states = [Subst(var_map).apply(ns) for ns in flatten_label('#Or', next_state)]
+        constraint_subst, _ = extract_subst(init_cterm.term)
+
+        # TODO: This should return the empty disjunction `[]` instead of `#Top`.
+        # The prover should never return #Bottom, so we can ignore that case.
+        # Once those are taken care of, we can change the return type to a CTerm
+        return [mlAnd([constraint_subst.unapply(ns), substToMlPred(constraint_subst)]) if ns not in [mlTop(), mlBottom()] else ns for ns in next_states]
 
     def get_claim_basic_block(self, claim_id: str, claim: KClaim, lemmas: List[KRule] = [], args: List[str] = [], haskell_args: List[str] = [], max_depth: int = 1000) -> Tuple[int, bool, KInner]:
 

@@ -5,12 +5,11 @@ from itertools import chain
 from pathlib import Path
 from typing import Iterable
 
-from ..kast import KInner
-from ..ktool import KProve
-from ..ktool import KProve
-from ..prelude import mlTop
 from pyk.ktool import KProve
 
+from ..kast import KInner
+from ..ktool import KProve
+from ..prelude import mlTop
 from .kompiled_test import KompiledTest
 
 

@@ -31,25 +31,6 @@ _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-def KProve_prove_cterm(
-    kprove: KProve,
-    claim_id: str,
-    init_cterm: CTerm,
-    target_cterm: CTerm,
-    lemmas: Iterable[KRule] = [],
-    args: List[str] = [],
-    haskell_args: List[str] = [],
-    log_axioms_file: Path = None,
-    allow_zero_step: bool = False,
-) -> List[KInner]:
-    claim, var_map = build_claim(claim_id, init_cterm, target_cterm, keep_vars=collectFreeVars(init_cterm.term))
-    next_state = kprove.prove_claim(claim, claim_id, lemmas=lemmas, args=args, haskell_args=haskell_args, log_axioms_file=log_axioms_file, allow_zero_step=allow_zero_step)
-    next_states = [substitute(sanitize_config(kprove.definition, ns), var_map) for ns in flatten_label('#Or', next_state)]
-    constraint_subst, _ = extract_subst(init_cterm.term)
-    next_states = [mlAnd([constraint_subst.unapply(ns), substToMlPred(constraint_subst)]) if ns not in [mlTop(), mlBottom()] else ns for ns in next_states]
-    return next_states
-
-
 def KCFG_case_split_node(self: KCFG, node: KCFG.Node, constraints: Iterable[KInner]) -> List[str]:
 
     def _case_split_node(_constraint: KInner) -> str:
@@ -80,7 +61,7 @@ def edge_prove(kprove: KProve, cfg: KCFG, edge: KCFG.Edge, min_depth: Optional[i
         haskell_args += ['--min-depth', str(min_depth)]
     elif edge.depth > 0:
         haskell_args += ['--min-depth', str(edge.depth)]
-    return KProve_prove_cterm(kprove, claim_id, KCFG_Edge_pre(edge), KCFG_Edge_post(edge), haskell_args=haskell_args)
+    return kprove.prove_cterm(claim_id, KCFG_Edge_pre(edge), KCFG_Edge_post(edge), haskell_args=haskell_args)
 
 
 def parse_spec_to_json(kprove: KProve, *, spec_file: Path, out: Path, spec_module: Optional[str]) -> None:
