@@ -1,9 +1,8 @@
 import json
 import logging
 import os
-from functools import reduce
 from pathlib import Path
-from typing import Any, Dict, Final, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Final, Iterable, Optional, Tuple
 
 from .cli_utils import check_dir_path, check_file_path
 from .cterm import CTerm, split_config_and_constraints
@@ -14,8 +13,6 @@ from .kast import (
     KInner,
     KNonTerminal,
     KRewrite,
-    KRule,
-    KSequence,
     KVariable,
     Subst,
 )
@@ -33,7 +30,6 @@ from .kastManip import (
     ml_pred_to_bool,
     push_down_rewrites,
     remove_generated_cells,
-    simplify_bool,
     splitConfigFrom,
     substitute,
 )
@@ -123,145 +119,6 @@ def instantiate_cell_vars(definition: KDefinition, term: KInner) -> KInner:
     return bottom_up(_cellVarsToLabels, term)
 
 
-def getMacros(definition: KDefinition) -> List[KRule]:
-    return [rule for module in definition for rule in module.rules if 'macro' in rule.att or 'alias' in rule.att]
-
-
-def applyMacros(definition: KDefinition, term: KInner) -> KInner:
-    macros = getMacros(definition)
-    new_term = term
-    old_term = None
-    while new_term != old_term:
-        old_term = new_term
-        for macro in macros:
-            assert type(macro.body) is KRewrite
-            lhs, rhs = macro.body.lhs, macro.body.rhs
-            new_term = KRewrite(lhs, rhs)(new_term)
-    return new_term
-
-
-def getAliases(definition: KDefinition) -> List[KRule]:
-
-    def _applyMacrosToAlias(sent: KRule) -> KRule: # Typing fails
-        lhs = sent.body.lhs
-        rhs = sent.body.rhs
-        new_rhs = applyMacros(definition, rhs)
-        return KRule(KRewrite(lhs, new_rhs))
-
-    return [_applyMacrosToAlias(sent) for module in definition.modules for sent in module.sentences if type(sent) is KRule and 'alias' in sent.att]
-
-
-def undo_aliases(definition: KDefinition, term: KInner) -> KInner:
-    sorted_aliases = sorted(getAliases(definition), key=lambda r: termSize(r.body), reverse=True)
-
-    alias_undo_rewrites: List[KRewrite] = []
-    for sent in sorted_aliases:
-        rewrite = sent.body
-        assert type(rewrite) is KRewrite
-        alias_undo_rewrites.append(KRewrite(rewrite.rhs, rewrite.lhs))
-
-    new_term = term
-    old_term = None
-    while new_term != old_term:
-        old_term = new_term
-        for rewrite in alias_undo_rewrites:
-            if not (type(rewrite.lhs) is KApply and rewrite.lhs.label.name == '_andBool_'):
-                new_term = rewrite(new_term)
-            else:
-                new_term = rewriteAndBoolACAnywhereWith(rewrite, new_term)
-            if new_term != old_term:
-                break
-    return new_term
-
-
-# todo: less asbtract interpretation, better heuristic for ordering aliases
-def termSize(term: KInner) -> int:
-    if type(term) is KRewrite:
-        return termSize(term.lhs) + termSize(term.rhs)
-    if type(term) is KApply and len(term.args) > 0:
-        return 1 + reduce(lambda a, b: a + b, [termSize(arg) for arg in term.args])
-    if type(term) is KSequence:
-        return reduce(lambda a, b: a + b, [termSize(arg) for arg in term.items])
-    return 1
-
-
-def rewriteAndBoolACAnywhereWith(rewrite: KRewrite, term: KInner) -> KInner:
-    config, constraint = split_config_and_constraints(term)
-    constraints = [simplify_bool(ml_pred_to_bool(c, unsafe=True)) for c in flatten_label('#And', constraint)]
-    changed = True
-    while changed:
-        changed = False
-
-        alias_clauses = flatten_label('_andBool_', rewrite.lhs)
-        ac_matches = matchAC(alias_clauses, constraints)
-        if ac_matches is None:
-            continue
-        matches = []
-        all_constraint_ids = []
-        for constraint_ids, subst in ac_matches:
-            if not any(cid in all_constraint_ids for cid in constraint_ids):
-                matches.append(subst)
-                all_constraint_ids.extend(constraint_ids)
-        new_constraints = []
-        for constraint_id, constraint in enumerate(constraints):
-            if constraint_id not in constraint_ids:
-                new_constraints.append(constraint)
-        for subst in matches:
-            new_constraints.append(substitute(rewrite.rhs, subst))
-            changed = True
-        constraints = new_constraints
-
-    return mlAnd([config] + [bool_to_ml_pred(c) for c in constraints])
-
-
-def matchAC(clauses: Sequence[KInner], terms: Sequence[KInner]) -> Optional[List[Tuple[List[int], Subst]]]:
-
-    def _combineClauseMatchPair(
-        match_1: Tuple[List[int], Subst],
-        match_2: Tuple[List[int], Subst],
-    ) -> List[Tuple[List[int], Subst]]:
-        term_ids_1, subst_1 = match_1
-        term_ids_2, subst_2 = match_2
-        if any(cid in term_ids_2 for cid in term_ids_1):
-            return []
-        subst = subst_1.union(subst_2)
-        if subst is None:
-            return []
-        return [(term_ids_1 + term_ids_2, subst)]
-
-    def _combineClauseMatches(
-        matches_1: Sequence[Tuple[List[int], Subst]],
-        matches_2: Sequence[Tuple[List[int], Subst]],
-    ) -> List[Tuple[List[int], Subst]]:
-        clause_matches = []
-        for match_1 in matches_1:
-            for match_2 in matches_2:
-                clause_matches.extend(_combineClauseMatchPair(match_1, match_2))
-        return clause_matches
-
-    missing_clause = False
-    matches: List[List[Tuple[List[int], Subst]]] = [[] for _ in clauses]
-    for i, clause in enumerate(clauses):
-        missing_this_clause = True
-        for j, term in enumerate(terms):
-            clause_match = clause.match(term)
-            if clause_match is not None:
-                missing_this_clause = False
-                matches[i].append(([j], clause_match))
-        missing_clause = missing_clause or missing_this_clause
-        if missing_clause:
-            break
-
-    if missing_clause:
-        return None
-
-    else:
-        full_matches = reduce(_combineClauseMatches, matches)
-        if len(full_matches) == 0:
-            return None
-        return full_matches
-
-
 def rename_generated_vars(cterm: CTerm) -> CTerm:
     state, *constraints = cterm
     _, config_subst = splitConfigFrom(state)
@@ -310,7 +167,6 @@ def sanitize_config(defn: KDefinition, init_term: KInner) -> KInner:
         config, constraint = split_config_and_constraints(new_term)
         constraints = [bool_to_ml_pred(ml_pred_to_bool(c, unsafe=True)) for c in flatten_label('#And', constraint)]
         new_term = mlAnd([config] + constraints)
-        new_term = undo_aliases(defn, new_term)
 
     return new_term
 
