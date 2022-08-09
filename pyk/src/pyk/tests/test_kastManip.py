@@ -5,6 +5,7 @@ from ..kast import (
     KApply,
     KAtt,
     KClaim,
+    KInner,
     KLabel,
     KRewrite,
     KSequence,
@@ -183,29 +184,18 @@ class BuildClaimtest(TestCase):
         # <k> V1 </k> => <k> V2 </k>                                        expected: <k> _V1 => ?_V2 </k>
         # <k> V1 </k> => <k> V2 </k> #And { true #Equals 0 <=Int V2 }       expected: <k> _V1 => ?V2 </k> ensures 0 <=Int ?V2
 
-        constraint_1 = KApply('_<=Int_', [intToken(0), v2])
-        constraint_2 = KApply('_<=Int_', [intToken(0), ques_v2])
-
-        init_1 = mlAnd([k(v1), mlEqualsTrue(constraint_1)])
-        init_2 = k(v1)
-        init_3 = k(v1)
-
-        target_1 = k(v2)
-        target_2 = k(v2)
-        target_3 = mlAnd([k(v2), mlEqualsTrue(constraint_1)])
-
-        claim_1 = KClaim(k(KRewrite(unds_v1, v2)), requires=constraint_1, att=KAtt({'label': 'claim0'}))
-        claim_2 = KClaim(k(KRewrite(unds_v1, ques_unds_v2)), att=KAtt({'label': 'claim1'}))
-        claim_3 = KClaim(k(KRewrite(unds_v1, ques_v2)), ensures=constraint_2, att=KAtt({'label': 'claim2'}))
+        def constraint(v: KVariable) -> KInner:
+            return KApply('_<=Int_', [intToken(0), v])
 
         test_data = (
-            (init_1, target_1, claim_1),
-            (init_2, target_2, claim_2),
-            (init_3, target_3, claim_3),
+            ('req-rhs', mlAnd([k(v1), mlEqualsTrue(constraint(v2))]), k(v2), KClaim(k(KRewrite(unds_v1, v2)), requires=constraint(v2), att=KAtt({'label': 'claim'}))),
+            ('free-rhs', k(v1), k(v2), KClaim(k(KRewrite(unds_v1, ques_unds_v2)), att=KAtt({'label': 'claim'}))),
+            ('bound-rhs', k(v1), mlAnd([k(v2), mlEqualsTrue(constraint(v2))]), KClaim(k(KRewrite(unds_v1, ques_v2)), ensures=constraint(ques_v2), att=KAtt({'label': 'claim'}))),
         )
 
-        for i, (init, target, claim) in enumerate(test_data):
-            init_cterm = CTerm(init)
-            target_cterm = CTerm(target)
-            kclaim, _ = build_claim(f'claim{i}', init_cterm, target_cterm)
-            self.assertEqual(kclaim, claim)
+        for name, init, target, claim in test_data:
+            with self.subTest(name):
+                init_cterm = CTerm(init)
+                target_cterm = CTerm(target)
+                kclaim, _ = build_claim('claim', init_cterm, target_cterm)
+                self.assertEqual(kclaim, claim)
