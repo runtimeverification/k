@@ -261,6 +261,7 @@ def matchAC(clauses: Sequence[KInner], terms: Sequence[KInner]) -> Optional[List
             return None
         return full_matches
 
+
 def rename_generated_vars(cterm: CTerm) -> CTerm:
     state, *constraints = cterm
     _, config_subst = splitConfigFrom(state)
