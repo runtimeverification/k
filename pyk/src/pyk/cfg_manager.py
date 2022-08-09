@@ -103,7 +103,7 @@ def sanitize_config(defn: KDefinition, init_term: KInner) -> KInner:
     return new_term
 
 
-class SummaryManager:
+class CFGManager:
     summary_name: Final[str]
     strategy_name: Final[str]
     spec_file: Final[Path]
@@ -117,8 +117,8 @@ class SummaryManager:
     cfg_ids_json_file: Final[Path]
 
     @staticmethod
-    def create(*, summary_name: str, strategy_name: str, summary_dir: Path, spec_file: Path, main_file: Optional[Path]) -> 'SummaryManager':
-        manager = SummaryManager(
+    def create(*, summary_name: str, strategy_name: str, summary_dir: Path, spec_file: Path, main_file: Optional[Path]) -> 'CFGManager':
+        manager = CFGManager(
             summary_name=summary_name,
             strategy_name=strategy_name,
             summary_dir=summary_dir,
@@ -133,11 +133,11 @@ class SummaryManager:
         return manager
 
     @staticmethod
-    def load(summary_dir: Path) -> 'SummaryManager':
+    def load(summary_dir: Path) -> 'CFGManager':
         config = None
         with open(summary_dir / 'config.json', 'r') as config_file:
             config = json.load(config_file)
-        manager = SummaryManager(
+        manager = CFGManager(
             summary_name=config['summaryName'],
             strategy_name=config['strategy_name'],
             summary_dir=summary_dir,

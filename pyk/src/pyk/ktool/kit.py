@@ -5,7 +5,7 @@ from argparse import ArgumentParser, FileType
 from pathlib import Path
 from typing import Any, Dict, Final, List, Optional, Tuple
 
-from ..cfg_manager import SummaryManager
+from ..cfg_manager import CFGManager
 from ..cterm import CTerm
 from ..kast import (
     KApply,
@@ -151,7 +151,7 @@ def main() -> None:
         return
 
     # CFG READERS
-    manager = SummaryManager.load(summary_dir)
+    manager = CFGManager.load(summary_dir)
     if args['command'] == 'list-cfgs':
         list_cfgs(manager)
         return
@@ -184,7 +184,7 @@ def configure_logger(args) -> None:
 def init(summary_dir: Path, args: Dict[str, Any]) -> None:
     spec_file = Path(args['spec-file'])
     summary_name = args['summary-name']
-    manager = SummaryManager.create(
+    manager = CFGManager.create(
         summary_name=summary_name,
         summary_dir=summary_dir,
         spec_file=spec_file,
@@ -206,7 +206,7 @@ def init(summary_dir: Path, args: Dict[str, Any]) -> None:
         manager._writeCFGs(cfgs_from_spec(manager, kprove.definition, json_spec_file))
 
 
-def cfgs_from_spec(manager: SummaryManager, kdef: KDefinition, json_spec_file: Path) -> Dict[str, KCFG]:
+def cfgs_from_spec(manager: CFGManager, kdef: KDefinition, json_spec_file: Path) -> Dict[str, KCFG]:
     with open(json_spec_file, 'r') as jsp:
         spec = json.loads(jsp.read())
         module_list = KFlatModuleList.from_dict(spec['term'])
@@ -215,15 +215,15 @@ def cfgs_from_spec(manager: SummaryManager, kdef: KDefinition, json_spec_file: P
     return {claim.att['label']: manager.cfg_from_claim(kdef, claim) for claim in proof_module.claims}
 
 
-def list_cfgs(manager: SummaryManager) -> None:
+def list_cfgs(manager: CFGManager) -> None:
     print('\n'.join(manager.listCFGs()))
 
 
-def show_cfg(manager: SummaryManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> None:
+def show_cfg(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> None:
     list(map(print, cfg.pretty(kprove)))
 
 
-def show_node(manager: SummaryManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> None:
+def show_node(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> None:
     node = cfg.node(args['node'])
     term = node.cterm.term
     if args['minimize']:
@@ -233,7 +233,7 @@ def show_node(manager: SummaryManager, kprove: KProve, args, cfg_id: str, cfg: K
     _LOGGER.info(f'Wrote node: {shorten_hashes((node.id))}')
 
 
-def show_edge(manager: SummaryManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> None:
+def show_edge(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> None:
     (source, target) = args['edge']
     edges = cfg.edge_likes(source_id=source, target_id=target)
 
@@ -247,17 +247,17 @@ def show_edge(manager: SummaryManager, kprove: KProve, args, cfg_id: str, cfg: K
         raise ValueError(f'Could not find edge: {source},{target}')
 
 
-def add_alias(manager: SummaryManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
+def add_alias(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
     cfg.add_alias(args['name'], args['node'])
     return True
 
 
-def remove_alias(manager: SummaryManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
+def remove_alias(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
     cfg.remove_alias(args['alias'])
     return True
 
 
-def case_split(manager: SummaryManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
+def case_split(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
     node_id = args['node']
     condition = kprove.parse_token(KToken(args['condition'], 'Bool'))
     true_node_id, false_node_id = cfg.create_case_split(node_id, [mlEqualsTrue(condition), mlEqualsTrue(KApply('notBool', [condition]))])
@@ -269,7 +269,7 @@ def case_split(manager: SummaryManager, kprove: KProve, args, cfg_id: str, cfg: 
     return True
 
 
-def build_edges(manager: SummaryManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
+def build_edges(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
     for source_id, target_id in args['edges']:
         if not cfg.is_frontier(source_id):
             raise ValueError(f'Not a frontier node: {source_id}.')
@@ -342,7 +342,7 @@ def check_implication(kprint: KPrint, concrete: CTerm, abstract: CTerm) -> Tuple
     return (True, '')
 
 
-def verify_edges(manager: SummaryManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> None:
+def verify_edges(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> None:
 
     def _edge_prove(edge: KCFG.Edge, min_depth: Optional[int]) -> List[KInner]:
         claim_id = f'BASIC-BLOCK-{edge.source.id}-TO-{edge.target.id}'
