@@ -12,15 +12,10 @@ from ..cfg_manager import (
     remove_useless_constraints,
     sanitize_config,
 )
-from ..cli_utils import gen_file_timestamp
 from ..cterm import CTerm
 from ..kast import (
     KApply,
-    KClaim,
-    KDefinition,
-    KFlatModule,
     KFlatModuleList,
-    KImport,
     KInner,
     KRule,
     KSequence,
