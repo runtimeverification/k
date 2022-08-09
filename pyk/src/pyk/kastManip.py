@@ -40,7 +40,6 @@ from .prelude import (
     Sorts,
     mlAnd,
     mlBottom,
-    mlEquals,
     mlEqualsTrue,
     mlImplies,
     mlOr,
@@ -69,7 +68,7 @@ def substitute(pattern: KInner, subst: Mapping[str, KInner]) -> KInner:
     return subst(pattern)
 
 
-def bool_to_ml_pred(kast: KInner) -> KInner:
+def bool_ml_pred(kast: KInner) -> KInner:
     return mlAnd([mlEqualsTrue(cond) for cond in flatten_label('_andBool_', kast)])
 
 
@@ -550,7 +549,7 @@ def build_rule(
     final_cterm: CTerm,
     priority: Optional[int] = None,
     keep_vars: Optional[List[str]] = None
-) -> Tuple[KRule, Dict[str, KVariable]]:
+) -> Tuple[KRule, Subst]:
 
     init_config, *init_constraints = init_cterm
     final_config, *final_constraints = final_cterm
@@ -588,7 +587,7 @@ def build_rule(
     new_keep_vars = None
     if keep_vars is not None:
         new_keep_vars = [v_subst[v].name for v in keep_vars]
-    return (minimizeRule(rule, keepVars=new_keep_vars), vremap_subst)
+    return (minimizeRule(rule, keepVars=new_keep_vars), Subst(vremap_subst))
 
 
 def build_claim(
@@ -596,7 +595,7 @@ def build_claim(
     init_cterm: CTerm,
     final_cterm: CTerm,
     keep_vars: Optional[List[str]] = None
-) -> Tuple[KClaim, Dict[str, KVariable]]:
+) -> Tuple[KClaim, Subst]:
     rule, var_map = build_rule(claim_id, init_cterm, final_cterm, keep_vars=keep_vars)
     claim = KClaim(rule.body, requires=rule.requires, ensures=rule.ensures, att=rule.att)
     return claim, var_map
@@ -635,8 +634,8 @@ def antiUnifyWithConstraints(constrainedTerm1, constrainedTerm2, implications=Fa
     constraints = [c for c in constraints1 if c in constraints2]
     constraint1 = mlAnd([c for c in constraints1 if c not in constraints])
     constraint2 = mlAnd([c for c in constraints2 if c not in constraints])
-    implication1 = mlImplies(constraint1, substToMlPred(subst1))
-    implication2 = mlImplies(constraint2, substToMlPred(subst2))
+    implication1 = mlImplies(constraint1, subst1.ml_pred)
+    implication2 = mlImplies(constraint2, subst2.ml_pred)
 
     if implications:
         constraints.append(implication1)
@@ -709,14 +708,6 @@ def matchWithConstraint(constrainedTerm1, constrainedTerm2):
     if subst is not None and constraintSubsume(substitute(constraint1, subst), constraint2):
         return subst
     return None
-
-
-def substToMlPred(subst):
-    mlTerms = []
-    for k in subst:
-        if KVariable(k) != subst[k]:
-            mlTerms.append(mlEquals(KVariable(k), subst[k]))
-    return mlAnd(mlTerms)
 
 
 def undoAliases(definition, kast):
