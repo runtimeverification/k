@@ -5,9 +5,9 @@ from argparse import ArgumentParser, FileType
 from pathlib import Path
 from typing import Any, Dict, Final, List, Optional
 
-from ..cfg_manager import KCFG_from_claim, SummaryManager, check_implication
+from ..cfg_manager import SummaryManager, check_implication
 from ..cterm import CTerm
-from ..kast import KApply, KFlatModuleList, KInner, KToken
+from ..kast import KApply, KDefinition, KFlatModuleList, KInner, KToken
 from ..kastManip import minimize_term
 from ..kcfg import KCFG
 from ..ktool import KProve
@@ -193,16 +193,16 @@ def init(summary_dir: Path, args: Dict[str, Any]) -> None:
         parse_spec_to_json(kprove, spec_file=spec_file, out=json_spec_file, spec_module=args.get('spec-module', None))
 
     if args['reinit']:
-        manager._writeCFGs(cfgs_from_spec(kprove, json_spec_file))
+        manager._writeCFGs(cfgs_from_spec(manager, kprove.definition, json_spec_file))
 
 
-def cfgs_from_spec(kprove: KProve, json_spec_file: Path) -> Dict[str, KCFG]:
+def cfgs_from_spec(manager: SummaryManager, kdef: KDefinition, json_spec_file: Path) -> Dict[str, KCFG]:
     with open(json_spec_file, 'r') as jsp:
         spec = json.loads(jsp.read())
         module_list = KFlatModuleList.from_dict(spec['term'])
         proof_module = [module for module in module_list.modules if module.name == module_list.mainModule][0]
     _LOGGER.info(f'Initializing: {json_spec_file}')
-    return {claim.att['label']: KCFG_from_claim(kprove.definition, claim) for claim in proof_module.claims}
+    return {claim.att['label']: manager.cfg_from_claim(kdef, claim) for claim in proof_module.claims}
 
 
 def list_cfgs(manager: SummaryManager) -> None:

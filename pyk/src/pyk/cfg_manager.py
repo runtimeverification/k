@@ -315,27 +315,6 @@ def sanitize_config(defn: KDefinition, init_term: KInner) -> KInner:
     return new_term
 
 
-def KCFG_from_claim(defn: KDefinition, claim: KClaim) -> KCFG:
-    cfg = KCFG()
-    claim_body = claim.body
-    claim_body = instantiate_cell_vars(defn, claim_body)
-    claim_body = rename_generated_vars(CTerm(claim_body)).term
-
-    claim_lhs = extract_lhs(claim_body)
-    claim_lhs = claim_lhs if claim.requires == Bool.true else mlAnd([claim_lhs, bool_to_ml_pred(claim.requires)])
-    claim_lhs_cterm = CTerm(sanitize_config(defn, claim_lhs))
-    init_state = cfg.create_node(claim_lhs_cterm)
-    cfg.add_init(init_state.id)
-
-    claim_rhs = extract_rhs(claim_body)
-    claim_rhs = claim_rhs if claim.ensures == Bool.true else mlAnd([claim_rhs, bool_to_ml_pred(claim.ensures)])
-    claim_rhs_cterm = CTerm(sanitize_config(defn, claim_rhs))
-    target_state = cfg.create_node(claim_rhs_cterm)
-    cfg.add_target(target_state.id)
-
-    return cfg
-
-
 class SummaryManager:
     summary_name: Final[str]
     strategy_name: Final[str]
@@ -425,6 +404,26 @@ class SummaryManager:
 
     def emptyCFG(self) -> KCFG:
         return KCFG()
+
+    def cfg_from_claim(self, defn: KDefinition, claim: KClaim) -> KCFG:
+        cfg = KCFG()
+        claim_body = claim.body
+        claim_body = instantiate_cell_vars(defn, claim_body)
+        claim_body = rename_generated_vars(CTerm(claim_body)).term
+
+        claim_lhs = extract_lhs(claim_body)
+        claim_lhs = claim_lhs if claim.requires == Bool.true else mlAnd([claim_lhs, bool_to_ml_pred(claim.requires)])
+        claim_lhs_cterm = CTerm(sanitize_config(defn, claim_lhs))
+        init_state = cfg.create_node(claim_lhs_cterm)
+        cfg.add_init(init_state.id)
+
+        claim_rhs = extract_rhs(claim_body)
+        claim_rhs = claim_rhs if claim.ensures == Bool.true else mlAnd([claim_rhs, bool_to_ml_pred(claim.ensures)])
+        claim_rhs_cterm = CTerm(sanitize_config(defn, claim_rhs))
+        target_state = cfg.create_node(claim_rhs_cterm)
+        cfg.add_target(target_state.id)
+
+        return cfg
 
     def listCFGs(self) -> Iterable[str]:
         return self._readCFGs().keys()
