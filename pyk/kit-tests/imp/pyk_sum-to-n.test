@@ -27,10 +27,12 @@ verify-edges --edges "@init-10,#target"
 # Expected failure
 build-edges "@init-2,@init-10"
 ( kit-set log-format '%(levelname)s - %(message)s'
+  kit-set log-file ./tmp.log
   kit-unset debug
   kit-unset verbose
   kit-unset profile
-  verify-edges --edges "@init-2,@init-10" 2>&1 || true
+  verify-edges --edges "@init-2,@init-10" || true
+  cat ./tmp.log
 )
 
 show-cfg

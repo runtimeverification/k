@@ -329,7 +329,7 @@ def verify_edges(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KC
             result_disj = mlOr(kprove_result)
             result_disj = minimize_term(result_disj) if args['minimize'] else result_disj
             prover_output = kprove.pretty_print(result_disj)
-            _LOGGER.warning(f'Could not verify claim: {basic_block_id}\n\nProver output:\n\n{prover_output}.')
+            _LOGGER.fatal(f'Could not verify claim: {basic_block_id}\n\nProver output:\n\n{prover_output}.')
 
     if failed:
         edge_strs = [(edge.source.id, edge.target.id) for edge in failed]

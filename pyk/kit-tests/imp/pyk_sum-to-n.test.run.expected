@@ -27,7 +27,7 @@ PYK_SUM-TO-N-SPEC.main
 + build-edges @init-10,#target
 + verify-edges --edges @init-10,#target
 + build-edges @init-2,@init-10
-WARNING - Could not verify claim: BASIC-BLOCK-0ed49998a22b5c6b5e3437971ac547d2099fbf20b7a7d3618ce3af6d93008667-TO-4f5415276b3303caf34067893f845971f27a0da075a5f39b86e064a2ccce8fe8
+CRITICAL - Could not verify claim: BASIC-BLOCK-0ed49998a22b5c6b5e3437971ac547d2099fbf20b7a7d3618ce3af6d93008667-TO-4f5415276b3303caf34067893f845971f27a0da075a5f39b86e064a2ccce8fe8
 
 Prover output:
 
@@ -41,15 +41,8 @@ Prover output:
     </state>
   </T>
   ...
-</generatedTop>.
-Traceback (most recent call last):
-  File "/home/njr/co/github.com/runtimeverification/k/pyk/venv-prod/bin/kit.py", line 33, in <module>
-    sys.exit(load_entry_point('pyk', 'console_scripts', 'kit.py')())
-  File "/home/njr/co/github.com/runtimeverification/k/pyk/src/pyk/ktool/kit.py", line 167, in main
-    if args['callback_cfg'](manager, kprove, args, cfg_id, cfg):
-  File "/home/njr/co/github.com/runtimeverification/k/pyk/src/pyk/ktool/kit.py", line 323, in verify_edges
-    raise ValueError(f'Failed to verify {len(failed)} edges: {shorten_hashes(edge_strs)}!')
-ValueError: Failed to verify 1 edges: [('0ed499..008667', '4f5415..ce8fe8')]!
+</generatedTop>
+#And #Top.
 + show-cfg
 5fa35d..e09951 (init, expanded)
 ┣━ fdeda8..09e172 (expanded, @init-1)    N ==Int 1
