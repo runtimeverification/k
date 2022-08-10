@@ -1,4 +1,4 @@
-from ..kast import KApply, KToken
+from ..kast import KApply, KToken, KVariable
 from ..ktool import KompileBackend
 from ..prelude import intToken
 from .kprove_test import KProveTest
@@ -21,6 +21,7 @@ class ImpParseTest(KProveTest):
             ('int-token', KToken('3', 'Int'), intToken(3)),
             ('id-token', KToken('abc', 'Id'), KToken('abc', 'Id')),
             ('add-aexp', KToken('3 + 4', 'AExp'), KApply('_+_', [intToken(3), intToken(4)])),
+            # TODO: ('add-int', KToken('3 +Int V', 'Int'), KApply('_+Int_', [intToken(3), KVariable('V')])),
             # TODO: ('k-cell', KToken('<k> . </k>', 'KCell'), KApply('<k>', [KApply(Labels.EMPTY_K)])),
         )
 
