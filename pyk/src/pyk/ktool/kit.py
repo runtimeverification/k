@@ -3,35 +3,14 @@ import logging
 import sys
 from argparse import ArgumentParser, FileType
 from pathlib import Path
-from typing import Any, Dict, Final, List, Optional, Tuple
+from typing import Any, Dict, Final, List, Optional
 
 from ..cfg_manager import CFGManager
-from ..cterm import CTerm
-from ..kast import (
-    KApply,
-    KDefinition,
-    KFlatModuleList,
-    KInner,
-    KRewrite,
-    KToken,
-    KVariable,
-)
-from ..kastManip import (
-    abstract_term_safely,
-    bottom_up,
-    extract_lhs,
-    extract_rhs,
-    flatten_label,
-    getCell,
-    minimize_term,
-    ml_pred_to_bool,
-    push_down_rewrites,
-    splitConfigFrom,
-)
+from ..kast import KApply, KDefinition, KFlatModuleList, KInner, KToken
+from ..kastManip import minimize_term
 from ..kcfg import KCFG
 from ..ktool import KProve
-from ..ktool.kprint import KPrint
-from ..prelude import Sorts, mlEqualsTrue, mlOr, mlTop
+from ..prelude import mlEqualsTrue, mlOr, mlTop
 from ..utils import add_indent, shorten_hashes
 
 _LOGGER: Final = logging.getLogger(__name__)
