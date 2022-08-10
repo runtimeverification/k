@@ -4,7 +4,6 @@ import logging
 import os
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
-from tempfile import TemporaryDirectory
 from typing import Dict, Final, Iterable, List, Mapping, Optional, Tuple
 
 from ..cli_utils import (
@@ -13,7 +12,18 @@ from ..cli_utils import (
     gen_file_timestamp,
     run_process,
 )
-from ..kast import KAst, KDefinition, KFlatModule, KImport, KRequire
+from ..kast import (
+    KAst,
+    KClaim,
+    KDefinition,
+    KFlatModule,
+    KImport,
+    KInner,
+    KRequire,
+    KRule,
+    KSentence,
+    flatten_label,
+)
 from ..prelude import mlTop
 from ..utils import unique
 from .kprint import KPrint
@@ -24,6 +34,8 @@ _LOGGER: Final = logging.getLogger(__name__)
 def kprove(
     spec_file: Path,
     *,
+    check: bool = True,
+    profile: bool = False,
     kompiled_dir: Optional[Path] = None,
     include_dirs: Iterable[Path] = (),
     emit_json_spec: Optional[Path] = None,
@@ -42,9 +54,9 @@ def kprove(
     )
 
     try:
-        _kprove(str(spec_file), *args)
+        _kprove(str(spec_file), *args, check=check, profile=profile)
     except CalledProcessError as err:
-        raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
+        raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr) from err
 
 
 def _build_arg_list(
@@ -71,30 +83,29 @@ def _build_arg_list(
     return args
 
 
-def _kprove(spec_file: str, *args: str) -> CompletedProcess:
+def _kprove(spec_file: str, *args: str, check: bool = True, profile: bool = False) -> CompletedProcess:
     run_args = ['kprove', spec_file] + list(args)
-    return run_process(run_args, _LOGGER)
+    return run_process(run_args, logger=_LOGGER, check=check, profile=profile)
 
 
 class KProve(KPrint):
 
-    def __init__(self, kompiled_directory, main_file_name=None, use_directory=None):
-        super(KProve, self).__init__(kompiled_directory)
-        self.directory = Path(self.kompiled_directory).parent
-        self.use_directory: Path
-        if not use_directory:
-            self._temp_dir = TemporaryDirectory()
-            self.use_directory = Path(self._temp_dir.name)
-        else:
-            self.use_directory = Path(use_directory)
-            check_dir_path(self.use_directory)
-        # TODO: we should not have to supply main_file_name, it should be read
-        self.main_file_name = main_file_name
+    main_file: Optional[Path]
+    prover: List[str]
+    prover_args: List[str]
+    backend: str
+    main_module: str
+
+    def __init__(self, definition_dir: Path, main_file: Optional[Path] = None, use_directory: Optional[Path] = None, profile: bool = False):
+        super(KProve, self).__init__(definition_dir, use_directory=use_directory, profile=profile)
+        # TODO: we should not have to supply main_file, it should be read
+        # TODO: setting use_directory manually should set temp files to not be deleted and a log message
+        self.main_file = main_file
         self.prover = ['kprove']
         self.prover_args = []
-        with open(self.kompiled_directory / 'backend.txt', 'r') as ba:
+        with open(self.definition_dir / 'backend.txt', 'r') as ba:
             self.backend = ba.read()
-        with open(self.kompiled_directory / 'mainModule.txt', 'r') as mm:
+        with open(self.definition_dir / 'mainModule.txt', 'r') as mm:
             self.main_module = mm.read()
 
     def prove(
@@ -118,7 +129,7 @@ class KProve(KPrint):
         haskell_log_args = ['--log', str(log_file), '--log-format', 'oneline', '--log-entries', ','.join(haskell_log_entries)]
         command = [c for c in self.prover]
         command += [str(spec_file)]
-        command += ['--definition', str(self.kompiled_directory), '-I', str(self.directory), '--output', 'json']
+        command += ['--definition', str(self.definition_dir), '--output', 'json']
         command += ['--spec-module', spec_module_name] if spec_module_name is not None else []
         command += ['--dry-run'] if dry_run else []
         command += [c for c in self.prover_args]
@@ -129,19 +140,13 @@ class KProve(KPrint):
         command_env = os.environ.copy()
         command_env['KORE_EXEC_OPTS'] = kore_exec_opts
 
-        proc_output: str
-        try:
-            proc_output = run_process(command, _LOGGER, env=command_env).stdout
-        except CalledProcessError as err:
-            if err.returncode != 1:
-                raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
-            proc_output = err.stdout
+        proc_result = run_process(command, logger=_LOGGER, env=command_env, check=False, profile=self._profile)
 
         if not dry_run:
 
             debug_log = _get_rule_log(log_file)
 
-            final_state = KAst.from_dict(json.loads(proc_output)['term'])
+            final_state = KAst.from_dict(json.loads(proc_result.stdout)['term'])
             if final_state == mlTop() and len(debug_log) == 0 and not allow_zero_step:
                 raise ValueError(f'Proof took zero steps, likely the LHS is invalid: {spec_file}')
 
@@ -161,7 +166,8 @@ class KProve(KPrint):
                     total_failure_n += table_line[5]
                 avg_success_time = total_success_time / total_success_n if total_success_n > 0 else 0.0
                 avg_failure_time = total_failure_time / total_failure_n if total_failure_n > 0 else 0.0
-                productivity = total_success_time / (total_success_time + total_failure_time)
+                total_time = total_success_time + total_failure_time
+                productivity = total_success_time / total_time if total_time > 0.0 else 0.0
                 table_lines.append(['TOTAL', total_success_time, total_success_n, avg_success_time, total_failure_time, total_failure_n, avg_failure_time, productivity])
                 table_lines = sorted(table_lines, key=lambda x: x[1] + x[4])
                 with open(rule_profile, 'w') as rp_file:
@@ -185,10 +191,10 @@ class KProve(KPrint):
         dry_run=False,
         rule_profile=False,
     ):
-        self._write_claim_definition(claim, claim_id, lemmas=lemmas)
+        claim_path, claim_module_name = self._write_claim_definition(claim, claim_id, lemmas=lemmas)
         return self.prove(
-            self.use_directory / (claim_id.lower() + '-spec.k'),
-            spec_module_name=(claim_id.upper() + '-SPEC'),
+            claim_path,
+            spec_module_name=claim_module_name,
             args=args,
             haskell_args=haskell_args,
             haskell_log_entries=haskell_log_entries,
@@ -198,17 +204,60 @@ class KProve(KPrint):
             rule_profile=rule_profile,
         )
 
-    def _write_claim_definition(self, claim, claim_id, lemmas=[], rule=False):
-        tmpClaim = self.use_directory / (claim_id.lower() if rule else (claim_id.lower() + '-spec'))
-        tmpModuleName = claim_id.upper() if rule else (claim_id.upper() + '-SPEC')
-        tmpClaim = tmpClaim.with_suffix('.k')
-        with open(tmpClaim, 'w') as tc:
-            claimModule = KFlatModule(tmpModuleName, lemmas + [claim], imports=[KImport(self.main_module, True)])
-            claimDefinition = KDefinition(tmpModuleName, [claimModule], requires=[KRequire(self.main_file_name)])
+    def get_claim_basic_block(self, claim_id: str, claim: KClaim, lemmas: List[KRule] = [], args: List[str] = [], haskell_args: List[str] = [], max_depth: int = 1000) -> Tuple[int, bool, KInner]:
+
+        def _is_fatal_error_log_entry(line: str) -> bool:
+            decide_predicate_unknown = line.find('(ErrorDecidePredicateUnknown): ErrorDecidePredicateUnknown') >= 0
+            return decide_predicate_unknown
+
+        claim_path, claim_module = self._write_claim_definition(claim, claim_id, lemmas=lemmas)
+        log_axioms_file = claim_path.with_suffix('.debug.log')
+        next_state = self.prove(claim_path, spec_module_name=claim_module, args=(args + ['--depth', str(max_depth)]), haskell_args=(['--execute-to-branch'] + haskell_args), log_axioms_file=log_axioms_file)
+        if len(flatten_label('#And', next_state)) != 1:
+            raise AssertionError(f'get_basic_block execeted 1 state from Haskell backend, got: {next_state}')
+        with open(log_axioms_file) as lf:
+            log_file = lf.readlines()
+        depth = -1
+        branching = False
+        could_be_branching = False
+        rule_count = 0
+        _LOGGER.info(f'log_file: {log_axioms_file}')
+        for log_line in log_file:
+            if _is_fatal_error_log_entry(log_line):
+                depth = rule_count
+                _LOGGER.warning(f'Fatal backend error: {log_line}')
+            elif log_line.find('InfoUnprovenDepth') >= 0 or log_line.find('InfoProvenDepth') >= 0:
+                # example:
+                # kore-exec: [12718755] Info (InfoProofDepth): InfoUnprovenDepth : 48
+                depth = int(log_line.split(':')[-1].strip())
+            elif log_line.find('(DebugTransition): after  apply axioms: ') >= 0:
+                rule_count += 1
+                # example:
+                # kore-exec: [24422822] Debug (DebugTransition): after  apply axioms: /home/dev/src/erc20-verification-pr/.build/usr/lib/ktoken/kevm/lib/kevm/include/kframework/evm.md:1858:10-1859:38
+                branching = branching or could_be_branching
+                could_be_branching = True
+            else:
+                could_be_branching = False
+        return depth, branching, next_state
+
+    def _write_claim_definition(self, claim: KClaim, claim_id: str, lemmas: List[KRule] = []) -> Tuple[Path, str]:
+        tmp_claim = self.use_directory / (claim_id.lower() + '-spec')
+        tmp_module_name = claim_id.upper() + '-SPEC'
+        tmp_claim = tmp_claim.with_suffix('.k')
+        sentences: List[KSentence] = []
+        sentences.extend(lemmas)
+        sentences.append(claim)
+        with open(tmp_claim, 'w') as tc:
+            claim_module = KFlatModule(tmp_module_name, sentences, imports=[KImport(self.main_module, True)])
+            requires = []
+            if self.main_file is not None:
+                requires += [KRequire(str(self.main_file))]
+            claim_definition = KDefinition(tmp_module_name, [claim_module], requires=requires)
             tc.write(gen_file_timestamp() + '\n')
-            tc.write(self.pretty_print(claimDefinition) + '\n\n')
+            tc.write(self.pretty_print(claim_definition) + '\n\n')
             tc.flush()
-        _LOGGER.debug(f'Wrote claim file: {tmpClaim}.')
+        _LOGGER.info(f'Wrote claim file: {tmp_claim}.')
+        return tmp_claim, tmp_module_name
 
 
 def _get_rule_profile(debug_log: List[List[Tuple[str, bool, int]]]) -> Mapping[str, Tuple[float, int, float, float, int, float, float]]:

@@ -224,6 +224,19 @@ class Subst(Mapping[str, KInner]):
     def pretty(self, kprint) -> Iterable[str]:
         return (key + ' |-> ' + kprint.pretty_print(value) for key, value in self.items())
 
+    @property
+    def ml_pred(self) -> KInner:
+        items = []
+        for k in self:
+            if KVariable(k) != self[k]:
+                items.append(KApply('#Equals', [KVariable(k), self[k]]))
+        if len(items) == 0:
+            return KApply('#Top')
+        ml_term = items[0]
+        for _i in items[1:]:
+            ml_term = KApply('#And', [ml_term, _i])
+        return ml_term
+
 
 @final
 @dataclass(frozen=True)
@@ -1478,6 +1491,10 @@ class KDefinition(KOuter, WithKAtt):
         return self.let(att=att)
 
     @property
+    def module_names(self) -> List[str]:
+        return [_m.name for _m in self.modules]
+
+    @property
     def productions(self) -> List[KProduction]:
         return [prod for module in self.modules for prod in module.productions]
 
@@ -1492,6 +1509,51 @@ class KDefinition(KOuter, WithKAtt):
     @property
     def constructors(self) -> List[KProduction]:
         return [prod for module in self.modules for prod in module.constructors]
+
+    def production_for_klabel(self, klabel: KLabel) -> KProduction:
+        productions = [prod for prod in self.productions if prod.klabel and prod.klabel == klabel]
+        if len(productions) != 1:
+            raise ValueError(f'Expected 1 production for label {klabel}, not {productions}.')
+        return productions[0]
+
+    def production_for_cell_sort(self, sort: KSort) -> KProduction:
+        # Typical cell production has 3 productions:
+        #     syntax KCell ::= "project:KCell" "(" K ")" [function, projection]
+        #     syntax KCell ::= "initKCell" "(" Map ")" [function, initializer, noThread]
+        #     syntax KCell ::= "<k>" K "</k>" [cell, cellName(k), format(%1%i%n%2%d%n%3), maincell, org.kframework.definition.Production(syntax #RuleContent ::= #RuleBody [klabel(#ruleNoConditions), symbol])]
+        # And it may have a 4th:
+        #     syntax GeneratedCounterCell ::= "getGeneratedCounterCell" "(" GeneratedTopCell ")" [function]
+        # We want the actual label one (3rd one in the list).
+        if not sort.name.endswith('Cell'):
+            raise ValueError(f'Method production_for_cell_sort only intended to be called on sorts ending in "Cell", not: {sort}')
+        productions = [prod for prod in self.productions if prod.sort == sort and 'cell' in prod.att]
+        if len(productions) != 1:
+            raise ValueError(f'Expected 1 cell production for sort {sort}, not: {productions}')
+        return productions[0]
+
+    def empty_config(self, sort: KSort) -> KInner:
+
+        def _kdefinition_empty_config(_sort):
+            cell_prod = self.production_for_cell_sort(_sort)
+            cell_klabel = cell_prod.klabel
+            assert cell_klabel is not None
+            production = self.production_for_klabel(cell_klabel)
+            args = []
+            num_nonterminals = 0
+            num_freshvars = 0
+            for p_item in production.items:
+                if type(p_item) is KNonTerminal:
+                    num_nonterminals += 1
+                    if p_item.sort.name.endswith('Cell'):
+                        args.append(_kdefinition_empty_config(p_item.sort))
+                    else:
+                        num_freshvars += 1
+                        args.append(KVariable(_sort.name[0:-4].upper() + '_CELL'))
+            if num_nonterminals > 1 and num_freshvars > 0:
+                raise ValueError(f'Found mixed cell and non-cell arguments to cell constructor for: {sort}')
+            return KApply(cell_klabel, args)
+
+        return _kdefinition_empty_config(sort)
 
 
 # TODO make method of KInner
@@ -1513,14 +1575,14 @@ def collect(callback: Callable[[KInner], None], kinner: KInner) -> None:
     bottom_up(f, kinner)
 
 
-def flattenLabel(label: str, kast: KInner) -> List[KInner]:
+def flatten_label(label: str, kast: KInner) -> List[KInner]:
     """Given a cons list, return a flat Python list of the elements.
 
     -   Input: Cons operation to flatten.
     -   Output: Items of cons list.
     """
     if type(kast) is KApply and kast.label.name == label:
-        items = [flattenLabel(label, arg) for arg in kast.args]
+        items = [flatten_label(label, arg) for arg in kast.args]
         return [c for cs in items for c in cs]
     return [kast]
 

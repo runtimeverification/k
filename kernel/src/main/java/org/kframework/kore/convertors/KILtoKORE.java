@@ -24,11 +24,7 @@ import org.kframework.kore.KLabel;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.collection.Seq;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -242,6 +238,16 @@ public class KILtoKORE extends KILTransformation<Object> {
                     }
 
                     org.kframework.attributes.Att attrs = convertAttributes(p);
+                    if (!kore) {
+                        // https://github.com/runtimeverification/k/pull/2754#issuecomment-1198279737
+                        // Adding a new behavior to the 'comm' attribute, but it conflicts with the Java backend
+                        // so, we remove it in certain conditions
+                        Optional<?> assoc = attrs.getOptional(Att.ASSOC());
+                        Optional<?> comm = attrs.getOptional(Att.COMM());
+                        Optional<?> idem = attrs.getOptional(Att.IDEM());
+                        if (comm.isPresent() && assoc.isEmpty() && idem.isEmpty())
+                            attrs = attrs.remove(Att.COMM());
+                    }
                     if (attrs.contains(Att.BRACKET())) {
                       attrs = attrs.add("bracketLabel", KLabel.class, KLabel(p.getBracketLabel(kore), immutable(p.getParams())));
                     }
