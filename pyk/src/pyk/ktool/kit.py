@@ -275,8 +275,6 @@ def build_edges(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCF
     for source_id, target_id in args['edges']:
         if not cfg.is_frontier(source_id):
             raise ValueError(f'Not a frontier node: {source_id}.')
-        if not cfg.is_target(target_id):
-            raise ValueError(f'Not a target node: {target_id}.')
         cfg.create_edge(source_id, target_id, mlTop(), -1)
         cfg.add_expanded(source_id)
     return True
