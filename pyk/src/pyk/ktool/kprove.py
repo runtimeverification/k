@@ -119,9 +119,7 @@ class KProve(KPrint):
         log_file = spec_file.with_suffix('.debug-log') if log_axioms_file is None else log_axioms_file
         if log_file.exists():
             log_file.unlink()
-        haskell_log_entries = list(haskell_log_entries)
-        haskell_log_entries += ['DebugTransition']
-        haskell_log_entries = list(unique(haskell_log_entries))
+        haskell_log_entries = unique(list(haskell_log_entries) + ['DebugTransition'])
         haskell_log_args = ['--log', str(log_file), '--log-format', 'oneline', '--log-entries', ','.join(haskell_log_entries)]
         command = [c for c in self.prover]
         command += [str(spec_file)]
