@@ -1,4 +1,4 @@
-from ..kast import KApply, KToken, KVariable
+from ..kast import KApply, KToken
 from ..ktool import KompileBackend
 from ..prelude import intToken
 from .kprove_test import KProveTest
