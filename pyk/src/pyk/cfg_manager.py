@@ -74,7 +74,7 @@ class CFGManager:
     main_file: Final[Optional[Path]]
     summary_dir: Final[Path]
     config_file: Final[Path]
-    kompiled_dir: Final[Path]
+    definition_dir: Final[Path]
     use_directory: Final[Path]
     cfg_file: Final[Path]
     cfg_json_file: Final[Path]
@@ -118,7 +118,7 @@ class CFGManager:
         self.main_file = main_file
         self.summary_dir = summary_dir
         self.config_file = summary_dir / 'config.json'
-        self.kompiled_dir = summary_dir / 'kompiled'
+        self.definition_dir = summary_dir / 'kompiled'
         self.use_directory = summary_dir / 'blobs'
         self.cfg_file = self.use_directory / 'cfg'
         self.cfg_json_file = self.cfg_file.with_suffix('.json')

@@ -156,7 +156,7 @@ def main() -> None:
         list_cfgs(manager)
         return
 
-    kprove = KProve(manager.kompiled_dir, use_directory=manager.use_directory)
+    kprove = KProve(manager.definition_dir, use_directory=manager.use_directory)
     if args['bug_report']:
         kprove.prover_args.append('--bug-report')
     cfg_id = args['cfg-id'] if args.get('cfg-id') else manager.default_cfg_id()
@@ -192,12 +192,12 @@ def init(summary_dir: Path, args: Dict[str, Any]) -> None:
         strategy_name='default'
     )
 
-    kompiled_timestamp = manager.kompiled_dir / 'timestamp'
+    kompiled_timestamp = manager.definition_dir / 'timestamp'
     json_spec_file = spec_file.with_suffix('.json')
 
     if not kompiled_timestamp.exists():
-        raise ValueError(f'Summary directory must contain K semantics kompiled with `--emit-json` at {str(manager.kompiled_dir)}')
-    kprove = KProve(manager.kompiled_dir, use_directory=manager.use_directory)
+        raise ValueError(f'Summary directory must contain K semantics kompiled with `--emit-json` at {str(manager.definition_dir)}')
+    kprove = KProve(manager.definition_dir, use_directory=manager.use_directory)
 
     if not json_spec_file.exists() or args['reparse']:
         parse_spec_to_json(kprove, spec_file=spec_file, out=json_spec_file, spec_module=args.get('spec-module', None))
