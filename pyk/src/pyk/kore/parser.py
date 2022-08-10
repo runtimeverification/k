@@ -1,14 +1,5 @@
 from itertools import islice
-from typing import (
-    Callable,
-    Generic,
-    Iterator,
-    List,
-    Mapping,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import Callable, Generic, Iterator, List, Mapping, Type, TypeVar, Union
 
 from ..utils import repeat_last
 from .lexer import KoreLexer, KoreToken

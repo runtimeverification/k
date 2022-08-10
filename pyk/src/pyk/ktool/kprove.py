@@ -5,25 +5,9 @@ from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
 from typing import Final, Iterable, List, Optional, Tuple
 
-from ..cli_utils import (
-    check_dir_path,
-    check_file_path,
-    gen_file_timestamp,
-    run_process,
-)
+from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp, run_process
 from ..cterm import CTerm
-from ..kast import (
-    KAst,
-    KClaim,
-    KDefinition,
-    KFlatModule,
-    KImport,
-    KInner,
-    KRequire,
-    KRule,
-    KSentence,
-    flatten_label,
-)
+from ..kast import KAst, KClaim, KDefinition, KFlatModule, KImport, KInner, KRequire, KRule, KSentence, flatten_label
 from ..kastManip import build_claim, collectFreeVars, extract_subst
 from ..prelude import mlAnd, mlBottom, mlTop
 from ..utils import unique
@@ -58,7 +42,9 @@ def _kprove(
         run_args = [str(_a) for _a in ['kprove', spec_file] + list(args)]
         return run_process(run_args, logger=_LOGGER, check=check, profile=profile)
     except CalledProcessError as err:
-        raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr) from err
+        raise RuntimeError(
+            f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr
+        ) from err
 
 
 def _build_arg_list(
@@ -93,7 +79,13 @@ class KProve(KPrint):
     backend: str
     main_module: str
 
-    def __init__(self, definition_dir: Path, main_file: Optional[Path] = None, use_directory: Optional[Path] = None, profile: bool = False):
+    def __init__(
+        self,
+        definition_dir: Path,
+        main_file: Optional[Path] = None,
+        use_directory: Optional[Path] = None,
+        profile: bool = False,
+    ):
         super(KProve, self).__init__(definition_dir, use_directory=use_directory, profile=profile)
         # TODO: we should not have to supply main_file, it should be read
         # TODO: setting use_directory manually should set temp files to not be deleted and a log message
@@ -120,7 +112,14 @@ class KProve(KPrint):
         if log_file.exists():
             log_file.unlink()
         haskell_log_entries = unique(list(haskell_log_entries) + ['DebugTransition'])
-        haskell_log_args = ['--log', str(log_file), '--log-format', 'oneline', '--log-entries', ','.join(haskell_log_entries)]
+        haskell_log_args = [
+            '--log',
+            str(log_file),
+            '--log-format',
+            'oneline',
+            '--log-entries',
+            ','.join(haskell_log_entries),
+        ]
         command = [c for c in self.prover]
         command += [str(spec_file)]
         command += ['--definition', str(self.definition_dir), '--output', 'json']
@@ -182,21 +181,45 @@ class KProve(KPrint):
         allow_zero_step: bool = False,
     ) -> List[KInner]:
         claim, var_map = build_claim(claim_id, init_cterm, target_cterm, keep_vars=collectFreeVars(init_cterm.term))
-        next_state = self.prove_claim(claim, claim_id, lemmas=lemmas, args=args, haskell_args=haskell_args, log_axioms_file=log_axioms_file, allow_zero_step=allow_zero_step)
+        next_state = self.prove_claim(
+            claim,
+            claim_id,
+            lemmas=lemmas,
+            args=args,
+            haskell_args=haskell_args,
+            log_axioms_file=log_axioms_file,
+            allow_zero_step=allow_zero_step,
+        )
         next_states = [var_map(ns) for ns in flatten_label('#Or', next_state)]
         constraint_subst, _ = extract_subst(init_cterm.term)
-        next_states = [mlAnd([constraint_subst.unapply(ns), constraint_subst.ml_pred]) if ns not in [mlTop(), mlBottom()] else ns for ns in next_states]
+        next_states = [
+            mlAnd([constraint_subst.unapply(ns), constraint_subst.ml_pred]) if ns not in [mlTop(), mlBottom()] else ns
+            for ns in next_states
+        ]
         return next_states
 
-    def get_claim_basic_block(self, claim_id: str, claim: KClaim, lemmas: List[KRule] = [], args: List[str] = [], haskell_args: List[str] = [], max_depth: int = 1000) -> Tuple[int, bool, KInner]:
-
+    def get_claim_basic_block(
+        self,
+        claim_id: str,
+        claim: KClaim,
+        lemmas: List[KRule] = [],
+        args: List[str] = [],
+        haskell_args: List[str] = [],
+        max_depth: int = 1000,
+    ) -> Tuple[int, bool, KInner]:
         def _is_fatal_error_log_entry(line: str) -> bool:
             decide_predicate_unknown = line.find('(ErrorDecidePredicateUnknown): ErrorDecidePredicateUnknown') >= 0
             return decide_predicate_unknown
 
         claim_path, claim_module = self._write_claim_definition(claim, claim_id, lemmas=lemmas)
         log_axioms_file = claim_path.with_suffix('.debug.log')
-        next_state = self.prove(claim_path, spec_module_name=claim_module, args=(args + ['--depth', str(max_depth)]), haskell_args=(['--execute-to-branch'] + haskell_args), log_axioms_file=log_axioms_file)
+        next_state = self.prove(
+            claim_path,
+            spec_module_name=claim_module,
+            args=(args + ['--depth', str(max_depth)]),
+            haskell_args=(['--execute-to-branch'] + haskell_args),
+            log_axioms_file=log_axioms_file,
+        )
         if len(flatten_label('#And', next_state)) != 1:
             raise AssertionError(f'get_basic_block execeted 1 state from Haskell backend, got: {next_state}')
         with open(log_axioms_file) as lf:

@@ -32,7 +32,9 @@ def _krun(
     try:
         return run_process(krun_command + args, logger=_LOGGER, check=check, profile=profile)
     except CalledProcessError as err:
-        raise RuntimeError(f'Command krun exited with code {err.returncode} for: {input_file}', err.stdout, err.stderr) from err
+        raise RuntimeError(
+            f'Command krun exited with code {err.returncode} for: {input_file}', err.stdout, err.stderr
+        ) from err
 
 
 class KRun(KPrint):
@@ -51,7 +53,9 @@ class KRun(KPrint):
         with NamedTemporaryFile('w', dir=self.use_directory, delete=False) as ntf:
             ntf.write(self.pretty_print(init_PGM))
             ntf.flush()
-            result = _krun(self.definition_dir, Path(ntf.name), depth=depth, args=['--output', 'json'], profile=self._profile)
+            result = _krun(
+                self.definition_dir, Path(ntf.name), depth=depth, args=['--output', 'json'], profile=self._profile
+            )
             if result.returncode != 0:
                 raise RuntimeError('Non-zero exit-code from krun.')
             result_kast = KAst.from_dict(json.loads(result.stdout)['term'])
