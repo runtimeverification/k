@@ -33,51 +33,61 @@ from .kprint import KPrint
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-def _kprove(
-    definition_dir: Path,
+def kprove(
     spec_file: Path,
     *,
     check: bool = True,
     profile: bool = False,
-    output: str = 'json',
-    main_module: Optional[str] = None,
-    spec_module: Optional[str] = None,
+    kompiled_dir: Optional[Path] = None,
     include_dirs: Iterable[Path] = (),
     emit_json_spec: Optional[Path] = None,
     dry_run=False,
-    args: List[str] = [],
-    kore_exec_args: List[str] = [],
-) -> CompletedProcess:
+) -> None:
     check_file_path(spec_file)
 
     for include_dir in include_dirs:
         check_dir_path(include_dir)
 
-    kprove_command = ['kprove', str(spec_file), '--definition', str(definition_dir), '--output', output]
-
-    if main_module is not None:
-        kprove_command += ['--main-module', main_module]
-
-    if spec_module is not None:
-        kprove_command += ['--spec-module', spec_module]
-
-    for include_dir in include_dirs:
-        kprove_command += ['-I', str(include_dir)]
-
-    if emit_json_spec:
-        kprove_command += ['--emit-json-spec', str(emit_json_spec)]
-
-    if dry_run:
-        kprove_command.append('--dry-run')
-
-    if kore_exec_args:
-        os.environ['KORE_EXEC_OPTS'] = ' '.join(kore_exec_args)
-        _LOGGER.info(f'export KORE_EXEC_OPTS="{kore_exec_args}"')
+    args = _build_arg_list(
+        kompiled_dir=kompiled_dir,
+        include_dirs=include_dirs,
+        dry_run=dry_run,
+        emit_json_spec=emit_json_spec,
+    )
 
     try:
-        return run_process(kprove_command + args, logger=_LOGGER, check=check, profile=profile)
+        _kprove(str(spec_file), *args, check=check, profile=profile)
     except CalledProcessError as err:
-        raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr)
+        raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr) from err
+
+
+def _build_arg_list(
+    *,
+    kompiled_dir: Optional[Path],
+    include_dirs: Iterable[Path],
+    emit_json_spec: Optional[Path],
+    dry_run: bool,
+) -> List[str]:
+    args = []
+
+    if kompiled_dir:
+        args += ['--definition', str(kompiled_dir)]
+
+    for include_dir in include_dirs:
+        args += ['-I', str(include_dir)]
+
+    if emit_json_spec:
+        args += ['--emit-json-spec', str(emit_json_spec)]
+
+    if dry_run:
+        args.append('--dry-run')
+
+    return args
+
+
+def _kprove(spec_file: str, *args: str, check: bool = True, profile: bool = False) -> CompletedProcess:
+    run_args = ['kprove', spec_file] + list(args)
+    return run_process(run_args, logger=_LOGGER, check=check, profile=profile)
 
 
 class KProve(KPrint):
@@ -93,6 +103,7 @@ class KProve(KPrint):
         # TODO: we should not have to supply main_file, it should be read
         # TODO: setting use_directory manually should set temp files to not be deleted and a log message
         self.main_file = main_file
+        self.prover = ['kprove']
         self.prover_args = []
         with open(self.definition_dir / 'backend.txt', 'r') as ba:
             self.backend = ba.read()
@@ -118,17 +129,20 @@ class KProve(KPrint):
         haskell_log_entries += ['DebugAttemptedRewriteRules'] if rule_profile else []
         haskell_log_entries = unique(haskell_log_entries)
         haskell_log_args = ['--log', str(log_file), '--log-format', 'oneline', '--log-entries', ','.join(haskell_log_entries)]
+        command = [c for c in self.prover]
+        command += [str(spec_file)]
+        command += ['--definition', str(self.definition_dir), '--output', 'json']
+        command += ['--spec-module', spec_module_name] if spec_module_name is not None else []
+        command += ['--dry-run'] if dry_run else []
+        command += [c for c in self.prover_args]
+        command += args
 
-        proc_result = _kprove(
-            self.definition_dir,
-            spec_file,
-            check=False,
-            profile=self._profile,
-            spec_module=spec_module_name,
-            dry_run=dry_run,
-            args=(args + self.prover_args),
-            kore_exec_args=(haskell_args + haskell_log_args),
-        )
+        kore_exec_opts = ' '.join(haskell_args + haskell_log_args)
+        _LOGGER.debug(f'export KORE_EXEC_OPTS="{kore_exec_opts}"')
+        command_env = os.environ.copy()
+        command_env['KORE_EXEC_OPTS'] = kore_exec_opts
+
+        proc_result = run_process(command, logger=_LOGGER, env=command_env, check=False, profile=self._profile)
 
         if not dry_run:
 
