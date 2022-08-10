@@ -108,23 +108,24 @@ class KProve(KPrint):
 
     def prove(
         self,
-        spec_file,
-        spec_module_name=None,
-        args=[],
-        haskell_args=[],
-        haskell_log_entries=[],
-        log_axioms_file=None,
-        allow_zero_step=False,
-        dry_run=False,
-        rule_profile=None,
+        spec_file: Path,
+        spec_module_name: Optional[str] = None,
+        args: Iterable[str] = (),
+        haskell_args: Iterable[str] = (),
+        haskell_log_entries: Iterable[str] = (),
+        log_axioms_file: Optional[Path] = None,
+        allow_zero_step: bool = False,
+        dry_run: bool = False,
+        rule_profile: Optional[Path] = None,
     ):
         log_file = spec_file.with_suffix('.debug-log') if log_axioms_file is None else log_axioms_file
         if log_file.exists():
             log_file.unlink()
-        haskell_log_entries += ['DebugTransition']
-        haskell_log_entries += ['DebugAttemptedRewriteRules'] if rule_profile else []
-        haskell_log_entries = unique(haskell_log_entries)
-        haskell_log_args = ['--log', str(log_file), '--log-format', 'oneline', '--log-entries', ','.join(haskell_log_entries)]
+        _haskell_log_entries = list(haskell_log_entries)
+        _haskell_log_entries += ['DebugTransition']
+        _haskell_log_entries += ['DebugAttemptedRewriteRules'] if rule_profile else []
+        _haskell_log_entries = list(unique(_haskell_log_entries))
+        _haskell_log_args = ['--log', str(log_file), '--log-format', 'oneline', '--log-entries', ','.join(_haskell_log_entries)]
         command = [c for c in self.prover]
         command += [str(spec_file)]
         command += ['--definition', str(self.definition_dir), '--output', 'json']
@@ -133,7 +134,7 @@ class KProve(KPrint):
         command += [c for c in self.prover_args]
         command += args
 
-        kore_exec_opts = ' '.join(haskell_args + haskell_log_args)
+        kore_exec_opts = ' '.join(list(haskell_args) + _haskell_log_args)
         _LOGGER.debug(f'export KORE_EXEC_OPTS="{kore_exec_opts}"')
         command_env = os.environ.copy()
         command_env['KORE_EXEC_OPTS'] = kore_exec_opts
