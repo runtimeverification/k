@@ -73,7 +73,7 @@ test-integration: venv-dev
 test-pyk: venv-prod
 	$(ACTIVATE_PROD) && $(MAKE) -C pyk-tests
 
-test-kit: $(VENV_PROD)
+test-kit: venv-prod
 	$(ACTIVATE_PROD) && $(MAKE) -C kit-tests
 
 # Checks
