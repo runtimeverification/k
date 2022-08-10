@@ -31,20 +31,6 @@ class SimpleProofTest(KProveTest):
         self.assertNotTop(result1)
         self.assertTop(result2)
 
-    def test_prove_claim_rule_profile(self):
-        # Given
-        new_lemma = KRule(KToken('pred1(3) => true', Sorts.BOOL), requires=KToken('pred1(4)', Sorts.BOOL), att=KAtt(atts={'simplification': ''}))
-        new_claim = KClaim(KToken('<k> foo => bar ... </k> <state> 3 |-> 3 </state>', 'TCellFragment'), requires=KToken('pred1(4)', Sorts.BOOL))
-        rule_profile = self.KPROVE_USE_DIR + '/rule-profile'
-
-        # When
-        _ = self.kprove.prove_claim(new_claim, 'claim-with-lemma', lemmas=[new_lemma], rule_profile=rule_profile)
-
-        # Then
-        with open(rule_profile, 'r') as rp:
-            lines = rp.read().split('\n')
-            self.assertEqual(len(lines), 4)
-
 
 class ImpProofTest(KProveTest):
     KOMPILE_MAIN_FILE = 'k-files/imp-verification.k'
