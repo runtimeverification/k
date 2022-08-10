@@ -73,6 +73,7 @@ class KIT:
         argument_parser.add_argument('summary-dir', type=str, help='Where to store summarized output.')
         argument_parser.add_argument('-v', '--verbose', action='count', help='Verbosity level, repeat for more verbosity.')
         argument_parser.add_argument('--log-format', type=str, default='%(levelname)s %(asctime)s %(name)s - %(message)s', help='Log format string. See https://docs.python.org/3/library/logging.html#logging.Formatter')
+        argument_parser.add_argument('--log-file', type=FileType('w'), help='File to write log to.')
         argument_parser.add_argument('--bug-report', default=False, action='store_true', help='Produce Haskell backend bug reports for each proof run.')
 
         command_subparsers = argument_parser.add_subparsers(dest='command')
@@ -167,13 +168,17 @@ def main() -> None:
 
 def configure_logger(args) -> None:
     log_format = args['log_format']
+    log_stream = None
+
+    if 'log_file' in args:
+        log_stream = args['log_file']
 
     if not args['verbose']:
-        logging.basicConfig(level=logging.WARNING, format=log_format)
+        logging.basicConfig(level=logging.WARNING, format=log_format, stream=log_stream)
     elif args['verbose'] == 1:
-        logging.basicConfig(level=logging.INFO, format=log_format)
+        logging.basicConfig(level=logging.INFO, format=log_format, stream=log_stream)
     elif args['verbose'] > 1:
-        logging.basicConfig(level=logging.DEBUG, format=log_format)
+        logging.basicConfig(level=logging.DEBUG, format=log_format, stream=log_stream)
     _LOGGER.info(f'Command: {args["command"]}')
 
 
