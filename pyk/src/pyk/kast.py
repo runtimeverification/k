@@ -83,10 +83,13 @@ class KAtt(KAst, Mapping[str, Any]):
     def __init__(self, atts: Mapping[str, Any] = {}):
 
         def _freeze(m: Any) -> Any:
-            # TODO: This should properly recurse through the data structure.
-            if isinstance(m, dict):
+            if isinstance(m, (int, str, tuple, FrozenDict, FrozenSet)):
+                return m
+            elif isinstance(m, list):
+                return tuple((v for v in m))
+            elif isinstance(m, dict):
                 return FrozenDict(((k, _freeze(v)) for (k, v) in m.items()))
-            return m
+            raise ValueError(f"Don't know how to freeze attribute value {m} of type {type(m)}.")
 
         frozen = _freeze(atts)
         assert isinstance(frozen, FrozenDict)
@@ -113,7 +116,6 @@ class KAtt(KAst, Mapping[str, Any]):
     def to_dict(self) -> Dict[str, Any]:
 
         def _to_dict(m: Any) -> Any:
-            # TODO: This should properly recurse through the data structure.
             if isinstance(m, FrozenDict):
                 return dict(((k, _to_dict(v)) for (k, v) in m.items()))
             return m
