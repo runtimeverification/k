@@ -33,7 +33,7 @@ from .kprint import KPrint
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-def kprove(
+def _kprove(
     spec_file: Path,
     *,
     check: bool = True,
@@ -42,7 +42,7 @@ def kprove(
     include_dirs: Iterable[Path] = (),
     emit_json_spec: Optional[Path] = None,
     dry_run=False,
-) -> None:
+) -> CompletedProcess:
     check_file_path(spec_file)
 
     for include_dir in include_dirs:
@@ -56,7 +56,8 @@ def kprove(
     )
 
     try:
-        _kprove(str(spec_file), *args, check=check, profile=profile)
+        run_args = [str(_a) for _a in ['kprove', spec_file] + list(args)]
+        return run_process(run_args, logger=_LOGGER, check=check, profile=profile)
     except CalledProcessError as err:
         raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr) from err
 
@@ -83,11 +84,6 @@ def _build_arg_list(
         args.append('--dry-run')
 
     return args
-
-
-def _kprove(spec_file: str, *args: str, check: bool = True, profile: bool = False) -> CompletedProcess:
-    run_args = ['kprove', spec_file] + list(args)
-    return run_process(run_args, logger=_LOGGER, check=check, profile=profile)
 
 
 class KProve(KPrint):
