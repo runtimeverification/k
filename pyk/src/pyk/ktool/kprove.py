@@ -26,12 +26,7 @@ from ..kast import (
     Subst,
     flatten_label,
 )
-from ..kastManip import (
-    build_claim,
-    collectFreeVars,
-    extract_subst,
-    substToMlPred,
-)
+from ..kastManip import build_claim, collectFreeVars, extract_subst
 from ..prelude import mlAnd, mlBottom, mlTop
 from ..utils import unique
 from .kprint import KPrint
@@ -231,7 +226,7 @@ class KProve(KPrint):
         # TODO: This should return the empty disjunction `[]` instead of `#Top`.
         # The prover should never return #Bottom, so we can ignore that case.
         # Once those are taken care of, we can change the return type to a CTerm
-        return [mlAnd([constraint_subst.unapply(ns), substToMlPred(constraint_subst)]) if ns not in [mlTop(), mlBottom()] else ns for ns in next_states]
+        return [mlAnd([constraint_subst.unapply(ns), constraint_subst.ml_pred]) if ns not in [mlTop(), mlBottom()] else ns for ns in next_states]
 
     def get_claim_basic_block(self, claim_id: str, claim: KClaim, lemmas: List[KRule] = [], args: List[str] = [], haskell_args: List[str] = [], max_depth: int = 1000) -> Tuple[int, bool, KInner]:
 
