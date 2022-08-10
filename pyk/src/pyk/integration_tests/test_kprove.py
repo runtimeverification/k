@@ -1,6 +1,6 @@
 from ..cterm import CTerm
 from ..kast import KApply, KAtt, KClaim, KRule, KToken
-from ..kastManip import flatten_label, getCell
+from ..kastManip import getCell
 from ..ktool import KompileBackend
 from ..prelude import Sorts
 from .kprove_test import KProveTest
@@ -56,6 +56,7 @@ class ImpProofTest(KProveTest):
 
     @staticmethod
     def _update_symbol_table(symbol_table):
+        symbol_table['.List{"_,_"}_Ids'] = lambda: '.Ids'
         pass
 
     def test_get_basic_block(self):
@@ -97,13 +98,13 @@ class ImpProofTest(KProveTest):
         post_state = '?_POST_STATE_MAP'
 
         test_data = (
-            ('simple-step', ['--depth', '1'], 'int $n , $s ; $n = 3 ;', [('.', '.Map')]),
-            ('simple-step', ['--depth', '2'], 'int $n , $s ; $n = 3 ;', [('.', '.Map')]),
-            ('simple-step', ['--max-counterexamples', '2', '--depth', '20'], 'int $n ; if (B:Bool) { $n = 1; } else { $n = 2; }', [('.', '$n |-> 1'), ('.', '$n |-> 2')]),
+            ('step-1', ['--depth', '1'], 'int $n , $s ; $n = 3 ;', [('int $s , .Ids ; $n = 3 ;', '$n |-> 0')]),
+            ('step-2', ['--depth', '2'], 'int $n , $s ; $n = 3 ;', [('int .Ids ; $n = 3 ;', '$n |-> 0 $s |-> 0')]),
+            ('branch', ['--max-counterexamples', '2', '--depth', '4'], 'int $n ; if (_B:Bool) { $n = 1; } else { $n = 2; }', [('$n = 1 ;', '$n |-> 0'), ('$n = 2 ;', '$n |-> 0')]),
         )
 
         for name, haskell_args, pre_k, posts_expected_strs in test_data:
-            result = self.kprove.prove_cterm('prove-cterm', _config(pre_k, pre_state), _config(post_k, post_state), haskell_args=haskell_args)
-            posts_actual = [(getCell(_p, 'K_CELL'), getCell(_p, 'STATE_CELL')) for _p in flatten_label('#Or', result)]
+            results = self.kprove.prove_cterm('prove-cterm', _config(pre_k, pre_state), _config(post_k, post_state), haskell_args=haskell_args)
+            posts_actual = [(getCell(_p, 'K_CELL'), getCell(_p, 'STATE_CELL')) for _p in results]
             posts_actual_strs = [(self.kprove.pretty_print(k), self.kprove.pretty_print(s)) for k, s in posts_actual]
             self.assertCountEqual(posts_expected_strs, posts_actual_strs)
