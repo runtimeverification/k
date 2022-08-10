@@ -94,7 +94,7 @@ class ImpProofTest(KProveTest):
 
         pre_state = '.Map'
         post_k = '.'
-        post_state = 'POST_STATE_MAP'
+        post_state = '?_POST_STATE_MAP'
 
         test_data = (
             ('simple-step', ['--depth', '1'], 'int $n , $s ; $n = 3 ;', [('.', '.Map')]),
