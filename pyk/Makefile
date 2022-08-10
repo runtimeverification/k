@@ -77,7 +77,7 @@ test-pyk: venv-prod
 
 # Checks
 
-check-code-style: check-isort check-flake8 check-mypy
+check-code-style: check-isort check-flake8 check-black check-mypy
 
 isort: venv-dev
 	$(ACTIVATE_DEV) && isort src
@@ -87,6 +87,12 @@ check-isort: venv-dev
 
 check-flake8: venv-dev
 	$(ACTIVATE_DEV) && flake8 src
+
+black: venv-dev
+	$(ACTIVATE_DEV) && black src
+
+check-black: venv-dev
+	$(ACTIVATE_DEV) && black --check src
 
 check-mypy: venv-dev
 	$(ACTIVATE_DEV) && mypy src
