@@ -4,9 +4,9 @@ PYK_SUM-TO-N-SPEC.main
 + case-split #init N ==Int 1 --alias-true init-1 --alias-false init-not-1
 + case-split @init-not-1 N ==Int 10 --alias-true init-10
 + show-edge @init-not-1,@init-10
-fe1970..2d5302 (expanded, @init-not-1)
+e3a5fd..bf2324 (expanded, @init-not-1)
 │ N ==Int 10
-616bd9..181a8e (frontier, leaf, @init-10)
+a1a89d..d4e478 (frontier, leaf, @init-10)
 
 + show-node @init-10
 <T>
@@ -17,26 +17,26 @@ fe1970..2d5302 (expanded, @init-not-1)
     .Map
   </state>
 </T>
-#And { true #Equals N >=Int 0 }
 #And { true #Equals N ==Int 10 }
 #And { true #Equals notBool ( N ==Int 1 ) }
+#And { true #Equals N >=Int 0 }
 + build-edges @init-1,#target
 + verify-edges --edges @init-1,#target
 + build-edges @init-10,#target
 + verify-edges --edges @init-10,#target
 + show-cfg
-84f5b5..dc759b (init, expanded)
-┣━ 5189cb..42eed2 (expanded, @init-1)    N ==Int 1
+5fa35d..e09951 (init, expanded)
+┣━ fdeda8..09e172 (expanded, @init-1)    N ==Int 1
 ┃   │  [1m[32m(verified)[0m[0m
 ┃   │  (-1 steps)
 ┃   └  6a6e72..499ac5 (target, leaf)
 ┃
-┗━ fe1970..2d5302 (expanded, @init-not-1)    notBool ( N ==Int 1 )
-    ┣━ 616bd9..181a8e (expanded, @init-10)    N ==Int 10
+┗━ e3a5fd..bf2324 (expanded, @init-not-1)    notBool ( N ==Int 1 )
+    ┣━ a1a89d..d4e478 (expanded, @init-10)    N ==Int 10
     ┃   │  [1m[32m(verified)[0m[0m
     ┃   │  (-1 steps)
     ┃   └  6a6e72..499ac5 (target, leaf)
     ┃
-    ┗━ [1m1413d6..8f4a4c (frontier, leaf)[0m    notBool ( N ==Int 10 )
+    ┗━ [1me4765a..0dc322 (frontier, leaf)[0m    notBool ( N ==Int 10 )
 
 

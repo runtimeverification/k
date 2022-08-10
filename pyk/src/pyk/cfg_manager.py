@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, Final, Iterable, Optional
 
 from .cli_utils import check_dir_path, check_file_path
-from .cterm import CTerm, split_config_and_constraints
+from .cterm import CTerm
 from .kast import (
     KApply,
     KClaim,
@@ -23,14 +23,10 @@ from .kastManip import (
     count_vars,
     extract_lhs,
     extract_rhs,
-    flatten_label,
-    ml_pred_to_bool,
     remove_generated_cells,
     splitConfigFrom,
-    substitute,
 )
 from .kcfg import KCFG
-from .prelude import Bool, mlAnd, mlBottom, mlTop
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -69,38 +65,6 @@ def rename_generated_vars(cterm: CTerm) -> CTerm:
             var_subst[v] = new_v
             free_vars.append(new_v.name)
     return CTerm(Subst(var_subst).apply(cterm.term))
-
-
-def sanitize_config(defn: KDefinition, init_term: KInner) -> KInner:
-
-    def _var_name(vname):
-        new_vname = vname
-        while new_vname.startswith('_') or new_vname.startswith('?'):
-            new_vname = new_vname[1:]
-        return new_vname
-
-    free_vars_subst = {vname: KVariable(_var_name(vname)) for vname in collectFreeVars(init_term)}
-
-    # TODO: This is somewhat hacky. We shouldn't have to touch the config this much.
-    # Likely, the frontend should just be giving us initial states with these already in place.
-    def _remove_cell_map_definedness(_kast):
-        if type(_kast) is KApply:
-            if _kast.label.name.endswith('CellMap:in_keys'):
-                return Bool.false
-            elif _kast.label.name.endswith('CellMapItem'):
-                return _kast.args[1]
-        return _kast
-
-    new_term = substitute(init_term, free_vars_subst)
-    new_term = remove_generated_cells(new_term)
-    new_term = bottom_up(_remove_cell_map_definedness, new_term)
-
-    if new_term not in [mlTop(), mlBottom()]:
-        config, constraint = split_config_and_constraints(new_term)
-        constraints = [bool_to_ml_pred(ml_pred_to_bool(c, unsafe=True)) for c in flatten_label('#And', constraint)]
-        new_term = mlAnd([config] + constraints)
-
-    return new_term
 
 
 class CFGManager:
@@ -199,16 +163,12 @@ class CFGManager:
         claim_body = instantiate_cell_vars(defn, claim_body)
         claim_body = rename_generated_vars(CTerm(claim_body)).term
 
-        claim_lhs = extract_lhs(claim_body)
-        claim_lhs = claim_lhs if claim.requires == Bool.true else mlAnd([claim_lhs, bool_to_ml_pred(claim.requires)])
-        claim_lhs_cterm = CTerm(sanitize_config(defn, claim_lhs))
-        init_state = cfg.create_node(claim_lhs_cterm)
+        claim_lhs = CTerm(extract_lhs(remove_generated_cells(claim_body))).add_constraint(bool_to_ml_pred(claim.requires))
+        init_state = cfg.create_node(claim_lhs)
         cfg.add_init(init_state.id)
 
-        claim_rhs = extract_rhs(claim_body)
-        claim_rhs = claim_rhs if claim.ensures == Bool.true else mlAnd([claim_rhs, bool_to_ml_pred(claim.ensures)])
-        claim_rhs_cterm = CTerm(sanitize_config(defn, claim_rhs))
-        target_state = cfg.create_node(claim_rhs_cterm)
+        claim_rhs = CTerm(extract_rhs(remove_generated_cells(claim_body))).add_constraint(bool_to_ml_pred(claim.ensures))
+        target_state = cfg.create_node(claim_rhs)
         cfg.add_target(target_state.id)
 
         return cfg
