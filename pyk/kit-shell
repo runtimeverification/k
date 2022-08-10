@@ -9,6 +9,7 @@ kit-set() {
         profile) kit_profile=true ;;
         verbose) kit_verbose=true ;;
         debug) kit_debug=true ;;
+        log-format) kit_log_format="$1"; shift ;;
     esac
 }
 
@@ -19,6 +20,7 @@ kit-unset() {
         profile) kit_profile=false ;;
         verbose) kit_verbose=false ;;
         debug) kit_debug=false ;;
+        log-format) unset kit_log_format ;;
     esac
 }
 
@@ -33,6 +35,7 @@ kit-params() {
     echo "kit_verbose=${kit_verbose}"
     echo "kit_debug=${kit_debug}"
     echo "kit_profile=${kit_profile}"
+    echo "kit_log_format=${kit_log_format}"
     echo "summary_strategy=${summary_strategy}"
     echo "summary_name=${summary_name}"
     echo "summary_spec=${summary_spec}"
@@ -61,6 +64,9 @@ kit() {
         fi
         if ${kit_debug}; then
             kit_base+=(--verbose --verbose)
+        fi
+        if [[ -n ${kit_log_format-} ]]; then
+            kit_base+=(--log-format "${kit_log_format}")
         fi
 
         kit_command=("${command}")

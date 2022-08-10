@@ -34,7 +34,6 @@ from ..ktool.kprint import KPrint
 from ..prelude import Sorts, mlEqualsTrue, mlOr, mlTop
 from ..utils import add_indent, shorten_hashes
 
-_LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 _LOGGER: Final = logging.getLogger(__name__)
 
 
@@ -79,6 +78,7 @@ class KIT:
         argument_parser = ArgumentParser()
         argument_parser.add_argument('summary-dir', type=str, help='Where to store summarized output.')
         argument_parser.add_argument('-v', '--verbose', action='count', help='Verbosity level, repeat for more verbosity.')
+        argument_parser.add_argument('--log-format', type=str, default='%(levelname)s %(asctime)s %(name)s - %(message)s', help='Log format string. See https://docs.python.org/3/library/logging.html#logging.Formatter')
         argument_parser.add_argument('--bug-report', default=False, action='store_true', help='Produce Haskell backend bug reports for each proof run.')
 
         command_subparsers = argument_parser.add_subparsers(dest='command')
@@ -172,12 +172,14 @@ def main() -> None:
 
 
 def configure_logger(args) -> None:
+    log_format = args['log_format']
+
     if not args['verbose']:
-        logging.basicConfig(level=logging.WARNING, format=_LOG_FORMAT)
+        logging.basicConfig(level=logging.WARNING, format=log_format)
     elif args['verbose'] == 1:
-        logging.basicConfig(level=logging.INFO, format=_LOG_FORMAT)
+        logging.basicConfig(level=logging.INFO, format=log_format)
     elif args['verbose'] > 1:
-        logging.basicConfig(level=logging.DEBUG, format=_LOG_FORMAT)
+        logging.basicConfig(level=logging.DEBUG, format=log_format)
     _LOGGER.info(f'Command: {args["command"]}')
 
 
