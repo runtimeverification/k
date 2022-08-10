@@ -3,7 +3,8 @@ from pathlib import Path
 
 from ..kast import EMPTY_ATT, KAst, KDefinition, KFlatModuleList, KRequire
 from ..kastManip import remove_generated_cells
-from ..ktool import KompileBackend, _kprove
+from ..ktool import KompileBackend
+from ..ktool.kprove import _kprove
 from .kprove_test import KProveTest
 
 
