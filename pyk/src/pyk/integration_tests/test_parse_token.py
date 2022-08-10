@@ -2,6 +2,7 @@ from typing import Iterable, Tuple
 
 from ..kast import KApply, KAtt, KInner, KToken, KVariable
 from ..ktool import KompileBackend
+from ..ktool.kit import parse_token_rule_syntax
 from ..prelude import intToken
 from ..utils import FrozenDict
 from .kprove_test import KProveTest
@@ -29,5 +30,5 @@ class ParseTokenTest(KProveTest):
 
         for (name, token, expected) in tests:
             with self.subTest(name):
-                actual = self.kprove.parse_token(token)
+                actual = parse_token_rule_syntax(self.kprove, token)
                 self.assertEqual(actual, expected)

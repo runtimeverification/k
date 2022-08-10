@@ -6,11 +6,26 @@ from pathlib import Path
 from typing import Any, Dict, Final, List, Optional
 
 from ..cfg_manager import CFGManager
-from ..kast import KApply, KDefinition, KFlatModuleList, KInner, KToken
-from ..kastManip import minimize_term
+from ..cterm import CTerm
+from ..kast import (
+    KApply,
+    KDefinition,
+    KFlatModuleList,
+    KInner,
+    KSequence,
+    KToken,
+    Subst,
+)
+from ..kastManip import (
+    build_claim,
+    collectFreeVars,
+    getCell,
+    is_top,
+    minimize_term,
+)
 from ..kcfg import KCFG
 from ..ktool import KProve
-from ..prelude import mlEqualsTrue, mlOr, mlTop
+from ..prelude import Bool, mlAnd, mlEqualsTrue, mlOr, mlTop
 from ..utils import add_indent, shorten_hashes
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -238,9 +253,23 @@ def remove_alias(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KC
     return True
 
 
+# TODO: Should not rely on kprove, should just call `KPrint.parse_token` when that supports frontend syntax such as variables.
+def parse_token_rule_syntax(kprove, ktoken: KToken, kast_args=[]) -> KInner:
+    cterm = CTerm(mlAnd([KApply('<k>', [ktoken])]))
+    claim_id = 'simplify-token'
+    claim, var_map = build_claim(claim_id, cterm, CTerm(mlAnd([cterm.term, mlEqualsTrue(Bool.false)])), keep_vars=collectFreeVars(cterm.term))
+    kprove_result = kprove.prove_claim(claim, claim_id, args=['--depth', '0'], allow_zero_step=True)
+    kprove_result = Subst(var_map).apply(kprove_result)
+    simp_cterm = CTerm(kprove_result)
+    result = getCell(simp_cterm.term, 'K_CELL')
+    if type(result) is KSequence:
+        result = result.items[0]
+    return mlAnd([result] + list(c for c in simp_cterm.constraints if not is_top(c)))
+
+
 def case_split(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
     node_id = args['node']
-    condition = kprove.parse_token(KToken(args['condition'], 'Bool'))
+    condition = parse_token_rule_syntax(kprove, KToken(args['condition'], 'Bool'))
     true_node_id, false_node_id = cfg.create_case_split(node_id, [mlEqualsTrue(condition), mlEqualsTrue(KApply('notBool', [condition]))])
     if args['alias_true']:
         cfg.add_alias(args['alias_true'], true_node_id)

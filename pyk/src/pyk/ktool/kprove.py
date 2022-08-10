@@ -14,7 +14,6 @@ from ..cli_utils import (
 )
 from ..cterm import CTerm
 from ..kast import (
-    KApply,
     KAst,
     KClaim,
     KDefinition,
@@ -24,8 +23,6 @@ from ..kast import (
     KRequire,
     KRule,
     KSentence,
-    KSequence,
-    KToken,
     Subst,
     flatten_label,
 )
@@ -33,11 +30,9 @@ from ..kastManip import (
     build_claim,
     collectFreeVars,
     extract_subst,
-    getCell,
-    is_top,
     substToMlPred,
 )
-from ..prelude import Bool, mlAnd, mlBottom, mlEqualsTrue, mlTop
+from ..prelude import mlAnd, mlBottom, mlTop
 from ..utils import unique
 from .kprint import KPrint
 
@@ -118,19 +113,6 @@ class KProve(KPrint):
             self.backend = ba.read()
         with open(self.definition_dir / 'mainModule.txt', 'r') as mm:
             self.main_module = mm.read()
-
-    # TODO: Should not rely on kprove, should just call `kast` when that supports frontend syntax such as variables.
-    def parse_token(self, ktoken: KToken, kast_args=[]) -> KInner:
-        cterm = CTerm(mlAnd([KApply('<k>', [ktoken])]))
-        claim_id = 'simplify-token'
-        claim, var_map = build_claim(claim_id, cterm, CTerm(mlAnd([cterm.term, mlEqualsTrue(Bool.false)])), keep_vars=collectFreeVars(cterm.term))
-        kprove_result = self.prove_claim(claim, claim_id, args=['--depth', '0'], allow_zero_step=True)
-        kprove_result = Subst(var_map).apply(kprove_result)
-        simp_cterm = CTerm(kprove_result)
-        result = getCell(simp_cterm.term, 'K_CELL')
-        if type(result) is KSequence:
-            result = result.items[0]
-        return mlAnd([result] + list(c for c in simp_cterm.constraints if not is_top(c)))
 
     def prove(
         self,
