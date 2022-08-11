@@ -9,6 +9,8 @@ kit-init pyk_sum-to-n pyk_sum-to-n-spec.k
 
 list-cfgs
 
+cat pyk_sum-to-n_summary/blobs/cfg.json
+
 split-node '#init'         'N ==Int 1'   --alias-true init-1   --alias-false init-not-1
 split-node '@init-not-1'   'N ==Int 2'   --alias-true init-2   --alias-false init-not-1-2
 split-node '@init-not-1-2' 'N ==Int 10'  --alias-true init-10
