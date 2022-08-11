@@ -68,7 +68,7 @@ def substitute(pattern: KInner, subst: Mapping[str, KInner]) -> KInner:
     return subst(pattern)
 
 
-def bool_ml_pred(kast: KInner) -> KInner:
+def bool_to_ml_pred(kast: KInner) -> KInner:
     return mlAnd([mlEqualsTrue(cond) for cond in flatten_label('_andBool_', kast)])
 
 
