@@ -74,17 +74,19 @@ class RuleInfo {
     boolean isEquation;
     boolean isOwise;
     boolean isKore;
+    boolean isCeil;
     Production production;
     String productionSortStr;
     List<Sort> prodChildrenSorts;
     KLabel productionLabel;
     List<K> leftChildren;
 
-    public RuleInfo(boolean equation, boolean owise, boolean kore, Production production,
+    public RuleInfo(boolean equation, boolean owise, boolean kore, boolean ceil, Production production,
                     String prodSortStr, List<Sort> prodChildrenSorts, KLabel prodLabel, List<K> leftChildren) {
         this.isEquation = equation;
         this.isOwise = owise;
         this.isKore = kore;
+        this.isCeil = ceil;
         this.production = production;
         this.productionSortStr = prodSortStr;
         this.prodChildrenSorts = prodChildrenSorts;
@@ -188,7 +190,9 @@ public class ModuleToKORE {
         if (options.backend.equals("haskell")) {
             module.sortedProductions().toStream().filter(this::isGeneratedInKeysOp).foreach(
                     prod -> {
-                        genMapCeilAxioms(prod, sortedRules);
+                        if (!options.disableCeilSimplificationRules) {
+                            genMapCeilAxioms(prod, sortedRules);
+                        }
                         return prod;
                     }
             );
@@ -890,6 +894,7 @@ public class ModuleToKORE {
         boolean equation = false;
         boolean owise = false;
         boolean kore = rule.att().contains(Att.KORE());
+        boolean ceil = false;
         Production production = null;
         Sort productionSort = null;
         String productionSortStr = null;
@@ -911,6 +916,9 @@ public class ModuleToKORE {
                     .map(i -> (NonTerminal) i)
                     .map(NonTerminal::sort).collect(Collectors.toList());
             productionLabel = production.klabel().get();
+            if (productionLabel.name().equals("#Ceil") && rule.att().contains(Att.SIMPLIFICATION())) {
+                ceil = true;
+            }
             if (isFunction(production) || rule.att().contains(Att.SIMPLIFICATION()) || rule.att().contains(Att.ANYWHERE()) && !kore) {
                 leftChildren = ((KApply) leftPattern).items();
                 equation = true;
@@ -921,7 +929,7 @@ public class ModuleToKORE {
             owise = rule.att().contains(Att.OWISE());
         }
 
-        return new RuleInfo(equation, owise, kore, production,
+        return new RuleInfo(equation, owise, kore, ceil, production,
                 productionSortStr, productionSorts, productionLabel, leftChildren);
     }
 
@@ -945,6 +953,9 @@ public class ModuleToKORE {
         sb.append("// ");
         sb.append(rule.toString());
         sb.append("\n");
+        if (ruleInfo.isCeil && options.disableCeilSimplificationRules) {
+          return;
+        }
         Set<KVariable> freeVariables = collectLHSFreeVariables(requires, left);
         Map<String,KVariable> freeVarsMap = freeVariables
                 .stream().collect(Collectors.toMap(KVariable::name, Function.identity()));
