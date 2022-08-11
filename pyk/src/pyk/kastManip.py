@@ -1,8 +1,8 @@
 import logging
+import typing
 from collections import Counter
-from typing import Callable
-from typing import Counter as CounterType
 from typing import (
+    Callable,
     Dict,
     Final,
     List,
@@ -195,8 +195,8 @@ def extract_subst(term: KInner) -> Tuple[Subst, KInner]:
     return subst, mlAnd(rem_conjuncts)
 
 
-def count_vars(term: KInner) -> CounterType[str]:
-    counter: CounterType[str] = Counter()
+def count_vars(term: KInner) -> typing.Counter[str]:
+    counter: typing.Counter[str] = Counter()
 
     def count(term: KInner) -> None:
         if type(term) is KVariable:
