@@ -15,7 +15,8 @@ from .kastManip import (
     propagate_up_constraints,
     removeSourceMap,
 )
-from .ktool import KPrint, KProve, build_symbol_table, pretty_print_kast
+from .ktool import KPrint, KProve
+from .ktool.kprint import build_symbol_table, pretty_print_kast
 from .prelude import Sorts, mlAnd, mlOr, mlTop
 
 _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
