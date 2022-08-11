@@ -1,7 +1,12 @@
+import json
+import logging
+import os
 import sys
 from pathlib import Path
-from typing import Callable, Dict
+from tempfile import TemporaryDirectory
+from typing import Callable, Dict, Final, List, Optional
 
+from ..cli_utils import check_dir_path, run_process
 from ..kast import (
     KApply,
     KAs,
@@ -33,28 +38,69 @@ from ..kast import (
     ktokenDots,
     readKastTerm,
 )
-from ..prelude import Bool, Labels
+from ..kore.parser import KoreParser
+from ..kore.syntax import Kore
+from ..prelude import Bool, Labels, Sorts
 from ..utils import hash_str
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 SymbolTable = Dict[str, Callable]
 
 
-class KPrint:
-    """Given a kompiled directory, build an unparser for it.
-    """
+def _kast(
+    definition: Path,
+    expression: str,
+    check: bool = True,
+    profile: bool = False,
+    input: str = 'program',
+    output: str = 'json',
+    sort: KSort = Sorts.K,
+    args: List[str] = []
+) -> str:
+    kast_command = ['kast', '--definition', str(definition)]
+    kast_command += ['--input', input, '--output', output]
+    kast_command += ['--sort', sort.name]
+    kast_command += ['--expression', expression]
+    command_env = os.environ.copy()
+    proc_result = run_process(kast_command, env=command_env, logger=_LOGGER, check=check, profile=profile)
+    if proc_result.returncode != 0:
+        raise RuntimeError(f'Calling kast failed: {kast_command}')
+    return proc_result.stdout
 
-    def __init__(self, kompiled_directory: str):
-        self.kompiled_directory = Path(kompiled_directory)
-        self.definition = readKastTerm(self.kompiled_directory / 'compiled.json')
+
+class KPrint:
+
+    definition_dir: Path
+    use_directory: Path
+    definition: KDefinition
+    symbol_table: SymbolTable
+    definition_hash: str
+    _profile: bool
+
+    def __init__(self, definition_dir: Path, use_directory: Optional[Path] = None, profile: bool = False) -> None:
+        self.definition_dir = Path(definition_dir)
+        if use_directory:
+            self.use_directory = use_directory
+        else:
+            td = TemporaryDirectory()
+            self.use_directory = Path(td.name)
+        check_dir_path(self.use_directory)
+        self.definition = readKastTerm(self.definition_dir / 'compiled.json')
         self.symbol_table = build_symbol_table(self.definition, opinionated=True)
         self.definition_hash = hash_str(self.definition)
+        self._profile = profile
+
+    def kore_to_kast(self, kore: Kore) -> KAst:
+        output = _kast(self.definition_dir, kore.text, input='kore', output='json', profile=self._profile)
+        return KAst.from_dict(json.loads(output)['term'])
+
+    def kast_to_kore(self, kast: KAst) -> Kore:
+        kast_json = {'format': 'KAST', 'version': 2, 'term': kast.to_dict()}
+        output = _kast(self.definition_dir, json.dumps(kast_json), input='json', output='kore', profile=self._profile)
+        return KoreParser(output).pattern()
 
     def pretty_print(self, kast: KAst, debug=False):
-        """Given a KAST term, pretty-print it using the current definition.
-
-        -   Input: KAST term in JSON.
-        -   Output: Best-effort pretty-printed representation of the KAST term.
-        """
         return pretty_print_kast(kast, self.symbol_table, debug=debug)
 
 
