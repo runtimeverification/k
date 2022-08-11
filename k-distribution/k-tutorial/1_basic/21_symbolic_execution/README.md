@@ -172,3 +172,6 @@ ten to a symbolic even integer less than 10 and greater than 0. This rule will
 now apply nondeterministically along with the existing rules. Predict what the
 resulting output configuration will be from rewriting `0` after adding this
 rule. Then run the program and see whether your prediction is correct.
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.22: Basics of Deductive Program Verification using K](../22_proofs/README.md).

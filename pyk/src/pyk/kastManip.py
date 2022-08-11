@@ -30,7 +30,7 @@ from .kast import (
     WithKAtt,
     bottom_up,
     collect,
-    flattenLabel,
+    flatten_label,
     ktokenDots,
     top_down,
 )
@@ -40,7 +40,6 @@ from .prelude import (
     Sorts,
     mlAnd,
     mlBottom,
-    mlEquals,
     mlEqualsTrue,
     mlImplies,
     mlOr,
@@ -69,8 +68,8 @@ def substitute(pattern: KInner, subst: Mapping[str, KInner]) -> KInner:
     return subst(pattern)
 
 
-def bool_to_ml_pred(kast: KInner) -> KInner:
-    return mlAnd([mlEqualsTrue(cond) for cond in flattenLabel('_andBool_', kast)])
+def bool_ml_pred(kast: KInner) -> KInner:
+    return mlAnd([mlEqualsTrue(cond) for cond in flatten_label('_andBool_', kast)])
 
 
 def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
@@ -117,14 +116,14 @@ def simplify_bool(k):
         return None
     simplify_rules = [ (KApply('_==K_', [KVariable('#LHS'), Bool.true]), KVariable('#LHS'))                                                                     # noqa
                      , (KApply('_==K_', [Bool.true, KVariable('#RHS')]), KVariable('#RHS'))                                                                     # noqa
-                     , (KApply('_==K_', [KVariable('#LHS'), Bool.false]), Bool.notBool([KVariable('#LHS')]))                                                    # noqa
-                     , (KApply('_==K_', [Bool.false, KVariable('#RHS')]), Bool.notBool([KVariable('#RHS')]))                                                    # noqa
-                     , (Bool.notBool([Bool.false]), Bool.true)                                                                                                  # noqa
-                     , (Bool.notBool([Bool.true]), Bool.false)                                                                                                  # noqa
-                     , (Bool.notBool([KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')])]), KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')]))   # noqa
-                     , (Bool.notBool([KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')])]), KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')]))   # noqa
-                     , (Bool.notBool([KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')])]), KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')]))   # noqa
-                     , (Bool.notBool([KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')])]), KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')]))   # noqa
+                     , (KApply('_==K_', [KVariable('#LHS'), Bool.false]), Bool.notBool(KVariable('#LHS')))                                                      # noqa
+                     , (KApply('_==K_', [Bool.false, KVariable('#RHS')]), Bool.notBool(KVariable('#RHS')))                                                      # noqa
+                     , (Bool.notBool(Bool.false), Bool.true)                                                                                                    # noqa
+                     , (Bool.notBool(Bool.true), Bool.false)                                                                                                    # noqa
+                     , (Bool.notBool(KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')])), KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')]))     # noqa
+                     , (Bool.notBool(KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')])), KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')]))     # noqa
+                     , (Bool.notBool(KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')])), KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')]))     # noqa
+                     , (Bool.notBool(KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')])), KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')]))     # noqa
                      , (Bool.andBool([Bool.true, KVariable('#REST')]), KVariable('#REST'))                                                                      # noqa
                      , (Bool.andBool([KVariable('#REST'), Bool.true]), KVariable('#REST'))                                                                      # noqa
                      , (Bool.andBool([Bool.false, KVariable('#REST')]), Bool.false)                                                                             # noqa
@@ -174,7 +173,7 @@ def extract_subst(term: KInner) -> Tuple[Subst, KInner]:
 
         return None
 
-    conjuncts = flattenLabel('#And', term)
+    conjuncts = flatten_label('#And', term)
     subst = Subst()
     rem_conjuncts: List[KInner] = []
 
@@ -212,8 +211,8 @@ def propagate_up_constraints(k):
         if not (type(_k) is KApply and _k.label.name == '#Or'):
             return _k
         top_sort = _k.label.params[0]
-        conjuncts1 = flattenLabel('#And', _k.args[0])
-        conjuncts2 = flattenLabel('#And', _k.args[1])
+        conjuncts1 = flatten_label('#And', _k.args[0])
+        conjuncts2 = flatten_label('#And', _k.args[1])
         (common1, l1, r1) = find_common_items(conjuncts1, conjuncts2)
         (common2, r2, l2) = find_common_items(r1, l1)
         common = common1 + common2
@@ -444,10 +443,10 @@ def minimizeRule(rule, keepVars=[]):
     ruleRequires = rule.requires
     ruleEnsures = rule.ensures
 
-    ruleRequires = Bool.andBool(flattenLabel('_andBool_', ruleRequires))
+    ruleRequires = Bool.andBool(flatten_label('_andBool_', ruleRequires))
     ruleRequires = simplify_bool(ruleRequires)
 
-    ruleEnsures = Bool.andBool(flattenLabel('_andBool_', ruleEnsures))
+    ruleEnsures = Bool.andBool(flatten_label('_andBool_', ruleEnsures))
     ruleEnsures = simplify_bool(ruleEnsures)
 
     constrainedVars = [] if keepVars is None else keepVars
@@ -512,7 +511,7 @@ def setCell(constrainedTerm, cellVariable, cellValue):
 
 def removeUselessConstraints(constrainedTerm, keepVars=None):
     (state, constraint) = split_config_and_constraints(constrainedTerm)
-    constraints = flattenLabel('#And', constraint)
+    constraints = flatten_label('#And', constraint)
     usedVars = collectFreeVars(state)
     usedVars = usedVars if keepVars is None else (usedVars + keepVars)
     prevLenUsedVars = 0
@@ -530,7 +529,7 @@ def removeUselessConstraints(constrainedTerm, keepVars=None):
 
 
 def removeConstraintClausesFor(varNames, constraint):
-    constraints = flattenLabel('#And', constraint)
+    constraints = flatten_label('#And', constraint)
     newConstraints = []
     for c in constraints:
         if not any([v in varNames for v in collectFreeVars(c)]):
@@ -550,7 +549,7 @@ def build_rule(
     final_cterm: CTerm,
     priority: Optional[int] = None,
     keep_vars: Optional[List[str]] = None
-) -> Tuple[KRule, Dict[str, KVariable]]:
+) -> Tuple[KRule, Subst]:
 
     init_config, *init_constraints = init_cterm
     final_config, *final_constraints = final_cterm
@@ -588,7 +587,7 @@ def build_rule(
     new_keep_vars = None
     if keep_vars is not None:
         new_keep_vars = [v_subst[v].name for v in keep_vars]
-    return (minimizeRule(rule, keepVars=new_keep_vars), vremap_subst)
+    return (minimizeRule(rule, keepVars=new_keep_vars), Subst(vremap_subst))
 
 
 def build_claim(
@@ -596,7 +595,7 @@ def build_claim(
     init_cterm: CTerm,
     final_cterm: CTerm,
     keep_vars: Optional[List[str]] = None
-) -> Tuple[KClaim, Dict[str, KVariable]]:
+) -> Tuple[KClaim, Subst]:
     rule, var_map = build_rule(claim_id, init_cterm, final_cterm, keep_vars=keep_vars)
     claim = KClaim(rule.body, requires=rule.requires, ensures=rule.ensures, att=rule.att)
     return claim, var_map
@@ -628,15 +627,15 @@ def antiUnify(state1, state2):
 def antiUnifyWithConstraints(constrainedTerm1, constrainedTerm2, implications=False, disjunct=False):
     (state1, constraint1) = split_config_and_constraints(constrainedTerm1)
     (state2, constraint2) = split_config_and_constraints(constrainedTerm2)
-    constraints1 = flattenLabel('#And', constraint1)
-    constraints2 = flattenLabel('#And', constraint2)
+    constraints1 = flatten_label('#And', constraint1)
+    constraints2 = flatten_label('#And', constraint2)
     (state, subst1, subst2) = antiUnify(state1, state2)
 
     constraints = [c for c in constraints1 if c in constraints2]
     constraint1 = mlAnd([c for c in constraints1 if c not in constraints])
     constraint2 = mlAnd([c for c in constraints2 if c not in constraints])
-    implication1 = mlImplies(constraint1, substToMlPred(subst1))
-    implication2 = mlImplies(constraint2, substToMlPred(subst2))
+    implication1 = mlImplies(constraint1, subst1.ml_pred)
+    implication2 = mlImplies(constraint2, subst2.ml_pred)
 
     if implications:
         constraints.append(implication1)
@@ -658,7 +657,7 @@ def disjunct_constrained_terms(constrained_terms: Sequence[KInner], concave=Fals
 
 
 def removeDisjuncts(constrainedTerm):
-    clauses = flattenLabel('#And', constrainedTerm)
+    clauses = flatten_label('#And', constrainedTerm)
     clauses = [c for c in clauses if not (type(c) is KApply and c.label.name == '#Or')]
     constrainedTerm = mlAnd(clauses)
     return constrainedTerm
@@ -666,7 +665,7 @@ def removeDisjuncts(constrainedTerm):
 
 def applyExistentialSubstitutions(constrainedTerm):
     (state, constraint) = split_config_and_constraints(constrainedTerm)
-    constraints = flattenLabel('#And', constraint)
+    constraints = flatten_label('#And', constraint)
     substPattern = mlEqualsTrue(KApply('_==K_', [KVariable('#VAR'), KVariable('#VAL')]))
     subst = {}
     newConstraints = []
@@ -683,19 +682,19 @@ def constraintSubsume(constraint1, constraint2):
     if constraint1 == mlTop() or constraint1 == constraint2:
         return True
     elif type(constraint1) is KApply and constraint1.label.name == '#And':
-        constraints1 = flattenLabel('#And', constraint1)
+        constraints1 = flatten_label('#And', constraint1)
         if all([constraintSubsume(c, constraint2) for c in constraints1]):
             return True
     elif type(constraint1) is KApply and constraint1.label.name == '#Or':
-        constraints1 = flattenLabel('#Or', constraint1)
+        constraints1 = flatten_label('#Or', constraint1)
         if any([constraintSubsume(c, constraint2) for c in constraints1]):
             return True
     elif type(constraint2) is KApply and constraint2.label.name == '#And':
-        constraints2 = flattenLabel('#And', constraint2)
+        constraints2 = flatten_label('#And', constraint2)
         if any([constraintSubsume(constraint1, c) for c in constraints2]):
             return True
     elif type(constraint2) is KApply and constraint2.label.name == '#Or':
-        constraints2 = flattenLabel('#Or', constraint2)
+        constraints2 = flatten_label('#Or', constraint2)
         if all([constraintSubsume(constraint1, c) for c in constraints2]):
             return True
     else:
@@ -709,14 +708,6 @@ def matchWithConstraint(constrainedTerm1, constrainedTerm2):
     if subst is not None and constraintSubsume(substitute(constraint1, subst), constraint2):
         return subst
     return None
-
-
-def substToMlPred(subst):
-    mlTerms = []
-    for k in subst:
-        if KVariable(k) != subst[k]:
-            mlTerms.append(mlEquals(KVariable(k), subst[k]))
-    return mlAnd(mlTerms)
 
 
 def undoAliases(definition, kast):

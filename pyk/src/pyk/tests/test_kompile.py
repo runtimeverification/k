@@ -17,7 +17,7 @@ class BuildArgsTest(TestCase):
             emit_json=True,
             post_process='echo "hello"',
             concrete_rules=['foo', 'bar'],
-            additional_args=['--new-fangled-option', 'buzz'],
+            args=['--new-fangled-option', 'buzz'],
         )
         expected = [
             '--main-module', 'MAIN-MODULE',

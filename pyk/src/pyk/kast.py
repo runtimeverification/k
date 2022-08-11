@@ -224,6 +224,19 @@ class Subst(Mapping[str, KInner]):
     def pretty(self, kprint) -> Iterable[str]:
         return (key + ' |-> ' + kprint.pretty_print(value) for key, value in self.items())
 
+    @property
+    def ml_pred(self) -> KInner:
+        items = []
+        for k in self:
+            if KVariable(k) != self[k]:
+                items.append(KApply('#Equals', [KVariable(k), self[k]]))
+        if len(items) == 0:
+            return KApply('#Top')
+        ml_term = items[0]
+        for _i in items[1:]:
+            ml_term = KApply('#And', [ml_term, _i])
+        return ml_term
+
 
 @final
 @dataclass(frozen=True)
@@ -1562,14 +1575,14 @@ def collect(callback: Callable[[KInner], None], kinner: KInner) -> None:
     bottom_up(f, kinner)
 
 
-def flattenLabel(label: str, kast: KInner) -> List[KInner]:
+def flatten_label(label: str, kast: KInner) -> List[KInner]:
     """Given a cons list, return a flat Python list of the elements.
 
     -   Input: Cons operation to flatten.
     -   Output: Items of cons list.
     """
     if type(kast) is KApply and kast.label.name == label:
-        items = [flattenLabel(label, arg) for arg in kast.args]
+        items = [flatten_label(label, arg) for arg in kast.args]
         return [c for cs in items for c in cs]
     return [kast]
 
