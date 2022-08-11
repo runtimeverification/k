@@ -841,6 +841,30 @@ public class TypeInferencer implements AutoCloseable {
     return new HashMap<>(model);
   }
 
+  void pushGreater() {
+    level++;
+    println("(push)");
+    java.util.Set<String> realVariables = new HashSet<>(variables);
+    realVariables.removeAll(parameters);
+    for (String var : realVariables) {
+      print("(assert (<=SortSyntax ");
+      printSort(model.get(var));
+      print(" |");
+      print(var);
+      println("|))");
+    }
+    print("(assert (or false ");
+    for (String var : realVariables) {
+      print("(distinct ");
+      printSort(model.get(var));
+      print(" |");
+      print(var);
+      print("|) ");
+    }
+    println("))");
+    status = null;
+  }
+
   void pushNotModel() {
     print("(assert (not (and true");
     java.util.Set<String> realVariables = new HashSet<>(variables);
@@ -850,7 +874,7 @@ public class TypeInferencer implements AutoCloseable {
       printSort(model.get(var));
       print(") ");
     }
-    print(")))");
+    println(")))");
     status = null;
   }
 
