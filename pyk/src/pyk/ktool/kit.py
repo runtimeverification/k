@@ -106,8 +106,8 @@ class KIT:
         remove_alias_subparser.set_defaults(callback_cfg=remove_alias)
         remove_alias_subparser.add_argument('alias', type=str, help='Name of the alias.')
 
-        case_split_subparser = command_subparsers.add_parser('case-split', help='Split the given node on a given boolean condition.', parents=[self.generic_args()])
-        case_split_subparser.set_defaults(callback_cfg=case_split)
+        case_split_subparser = command_subparsers.add_parser('split-node', help='Split the given node on a given boolean condition.', parents=[self.generic_args()])
+        case_split_subparser.set_defaults(callback_cfg=split_node)
         case_split_subparser.add_argument('node', type=str, help='Node identifier to perform case-splitting on.')
         case_split_subparser.add_argument('condition', type=str, help='Boolean condition to case split on.')
         case_split_subparser.add_argument('--alias-true', type=str, default=None, help='Alias for true branch.')
@@ -272,10 +272,10 @@ def parse_token_rule_syntax(kprove, ktoken: KToken, kast_args=[]) -> KInner:
     return mlAnd([result] + list(c for c in simp_cterm.constraints if not is_top(c)))
 
 
-def case_split(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
+def split_node(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
     node_id = args['node']
     condition = parse_token_rule_syntax(kprove, KToken(args['condition'], 'Bool'))
-    true_node_id, false_node_id = cfg.create_case_split(node_id, [mlEqualsTrue(condition), mlEqualsTrue(KApply('notBool', [condition]))])
+    true_node_id, false_node_id = cfg.split_node(node_id, [mlEqualsTrue(condition), mlEqualsTrue(KApply('notBool', [condition]))])
     if args['alias_true']:
         cfg.add_alias(args['alias_true'], true_node_id)
     if args['alias_false']:

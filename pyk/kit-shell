@@ -119,4 +119,4 @@ build-edges()  { kit build-edges  "$@" ; }
 verify-edges() { kit verify-edges "$@" ; }
 remove-edges() { kit remove-edges "$@" ; }
 
-case-split()   { kit case-split   "$@" ; }
+split-node()   { kit split-node   "$@" ; }

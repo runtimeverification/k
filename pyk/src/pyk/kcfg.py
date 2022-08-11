@@ -543,18 +543,18 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         self._edges[source.id][target.id] = edge
         return edge
 
-    def create_case_split(self, source_id: str, constraints: Iterable[KInner]) -> List[str]:
+    def split_node(self, source_id: str, constraints: Iterable[KInner]) -> List[str]:
 
         source = self.node(source_id)
 
-        def _case_split_node(_constraint: KInner) -> str:
+        def _add_case_edge(_constraint: KInner) -> str:
             _cterm = CTerm(mlAnd([source.cterm.term, _constraint]))
             _node = self.get_or_create_node(_cterm)
             self.create_edge(source.id, _node.id, _constraint, 0)
             self.add_verified(source.id, _node.id)
             return _node.id
 
-        branch_node_ids = [_case_split_node(constraint) for constraint in constraints]
+        branch_node_ids = [_add_case_edge(constraint) for constraint in constraints]
         self.add_expanded(source.id)
         return branch_node_ids
 
