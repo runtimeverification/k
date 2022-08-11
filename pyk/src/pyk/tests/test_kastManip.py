@@ -103,32 +103,27 @@ class MinimizeTermTest(TestCase):
                 self.assertEqual(actual, expected)
 
 
-class MlPredToBoolTest(TestCase):
+class BoolMlPredConversionsTest(TestCase):
+    test_data = (
+        ('equals-true', False, KApply(KLabel('#Equals', [Sorts.BOOL, Sorts.GENERATED_TOP_CELL]), [Bool.true, f(a)]), f(a)),
+        ('top-sort-bool', False, KApply(KLabel('#Top', [Sorts.BOOL])), Bool.true),
+        ('top-no-sort', False, KApply('#Top'), Bool.true),
+        ('top-no-sort', False, mlTop(), Bool.true),
+        ('equals-variabl', False, KApply(KLabel('#Equals'), [x, f(a)]), KApply('_==K_', [x, f(a)])),
+        ('equals-true-no-sort', False, KApply(KLabel('#Equals'), [Bool.true, f(a)]), f(a)),
+        ('equals-token', False, KApply(KLabel('#Equals', [KSort('Int'), Sorts.GENERATED_TOP_CELL]), [intToken(3), f(a)]), KApply('_==K_', [intToken(3), f(a)])),
+        ('not-top', False, KApply(KLabel('#Not', [Sorts.GENERATED_TOP_CELL]), [mlTop()]), Bool.notBool(Bool.true)),
+        ('equals-term', True, KApply(KLabel('#Equals'), [f(a), f(x)]), KApply('_==K_', [f(a), f(x)])),
+        ('simplify-and-true', False, KApply(KLabel('#And', [Sorts.GENERATED_TOP_CELL]), [mlEqualsTrue(Bool.true), mlEqualsTrue(Bool.true)]), Bool.true),
+        ('ceil-set-concat-no-sort', True, KApply(KLabel('#Ceil', [KSort('Set'), Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('_Set_'), [KVariable('_'), KVariable('_')])]), KVariable('Ceil_0f9c9997')),
+        ('ceil-set-concat-sort', True, KApply(KLabel('#Not', [Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('#Ceil', [KSort('Set'), Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('_Set_'), [KVariable('_'), KVariable('_')])])]), Bool.notBool(KVariable('Ceil_0f9c9997'))),
+        ('exists-equal-int', True, KApply(KLabel('#Exists', [Sorts.INT, Sorts.BOOL]), [KVariable('X'), KApply('_==Int_', [KVariable('X'), KVariable('Y')])]), KVariable('Exists_6acf2557')),
+    )
 
     def test_ml_pred_to_bool(self):
-        # Given
-        test_data = (
-            (False, KApply(KLabel('#Equals', [Sorts.BOOL, Sorts.GENERATED_TOP_CELL]), [Bool.true, f(a)]), f(a)),
-            (False, KApply(KLabel('#Top', [Sorts.BOOL])), Bool.true),
-            (False, KApply('#Top'), Bool.true),
-            (False, mlTop(), Bool.true),
-            (False, KApply(KLabel('#Equals'), [x, f(a)]), KApply('_==K_', [x, f(a)])),
-            (False, KApply(KLabel('#Equals'), [Bool.true, f(a)]), f(a)),
-            (False, KApply(KLabel('#Equals', [KSort('Int'), Sorts.GENERATED_TOP_CELL]), [intToken(3), f(a)]), KApply('_==K_', [intToken(3), f(a)])),
-            (False, KApply(KLabel('#Not', [Sorts.GENERATED_TOP_CELL]), [mlTop()]), Bool.notBool(Bool.true)),
-            (True, KApply(KLabel('#Equals'), [f(a), f(x)]), KApply('_==K_', [f(a), f(x)])),
-            (False, KApply(KLabel('#And', [Sorts.GENERATED_TOP_CELL]), [mlEqualsTrue(Bool.true), mlEqualsTrue(Bool.true)]), Bool.true),
-            (True, KApply(KLabel('#Ceil', [KSort('Set'), Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('_Set_', [KVariable('_'), KVariable('_')]))]), KVariable('Ceil_37f1b5e5')),
-            (True, KApply(KLabel('#Not', [Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('#Ceil', [KSort('Set'), Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('_Set_', [KVariable('_'), KVariable('_')]))])]), Bool.notBool(KVariable('Ceil_37f1b5e5'))),
-            (True, KApply(KLabel('#Exists', [Sorts.INT, Sorts.BOOL]), [KVariable('X'), KApply('_==Int_', [KVariable('X'), KVariable('Y')])]), KVariable('Exists_6acf2557')),
-        )
-
-        for i, (unsafe, before, expected) in enumerate(test_data):
-            with self.subTest(i=i):
-                # When
+        for name, unsafe, before, expected in self.test_data:
+            with self.subTest(name):
                 actual = ml_pred_to_bool(before, unsafe=unsafe)
-
-                # Then
                 self.assertEqual(actual, expected)
 
 
