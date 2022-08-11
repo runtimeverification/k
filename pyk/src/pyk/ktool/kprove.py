@@ -11,6 +11,7 @@ from ..cli_utils import (
     gen_file_timestamp,
     run_process,
 )
+from ..cterm import CTerm
 from ..kast import (
     KAst,
     KClaim,
@@ -23,14 +24,15 @@ from ..kast import (
     KSentence,
     flatten_label,
 )
-from ..prelude import mlTop
+from ..kastManip import build_claim, collectFreeVars, extract_subst
+from ..prelude import mlAnd, mlBottom, mlTop
 from ..utils import unique
 from .kprint import KPrint
 
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-def kprove(
+def _kprove(
     spec_file: Path,
     *,
     check: bool = True,
@@ -39,7 +41,7 @@ def kprove(
     include_dirs: Iterable[Path] = (),
     emit_json_spec: Optional[Path] = None,
     dry_run=False,
-) -> None:
+) -> CompletedProcess:
     check_file_path(spec_file)
 
     for include_dir in include_dirs:
@@ -53,7 +55,8 @@ def kprove(
     )
 
     try:
-        _kprove(str(spec_file), *args, check=check, profile=profile)
+        run_args = [str(_a) for _a in ['kprove', spec_file] + list(args)]
+        return run_process(run_args, logger=_LOGGER, check=check, profile=profile)
     except CalledProcessError as err:
         raise RuntimeError(f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr) from err
 
@@ -82,11 +85,6 @@ def _build_arg_list(
     return args
 
 
-def _kprove(spec_file: str, *args: str, check: bool = True, profile: bool = False) -> CompletedProcess:
-    run_args = ['kprove', spec_file] + list(args)
-    return run_process(run_args, logger=_LOGGER, check=check, profile=profile)
-
-
 class KProve(KPrint):
 
     main_file: Optional[Path]
@@ -109,20 +107,19 @@ class KProve(KPrint):
 
     def prove(
         self,
-        spec_file,
-        spec_module_name=None,
-        args=[],
-        haskell_args=[],
-        haskell_log_entries=[],
-        log_axioms_file=None,
-        allow_zero_step=False,
-        dry_run=False,
+        spec_file: Path,
+        spec_module_name: Optional[str] = None,
+        args: Iterable[str] = (),
+        haskell_args: Iterable[str] = (),
+        haskell_log_entries: Iterable[str] = (),
+        log_axioms_file: Optional[Path] = None,
+        allow_zero_step: bool = False,
+        dry_run: bool = False,
     ):
         log_file = spec_file.with_suffix('.debug-log') if log_axioms_file is None else log_axioms_file
         if log_file.exists():
             log_file.unlink()
-        haskell_log_entries += ['DebugTransition']
-        haskell_log_entries = unique(haskell_log_entries)
+        haskell_log_entries = unique(list(haskell_log_entries) + ['DebugTransition'])
         haskell_log_args = ['--log', str(log_file), '--log-format', 'oneline', '--log-entries', ','.join(haskell_log_entries)]
         command = [c for c in self.prover]
         command += [str(spec_file)]
@@ -132,7 +129,7 @@ class KProve(KPrint):
         command += [c for c in self.prover_args]
         command += args
 
-        kore_exec_opts = ' '.join(haskell_args + haskell_log_args)
+        kore_exec_opts = ' '.join(list(haskell_args) + haskell_log_args)
         _LOGGER.debug(f'export KORE_EXEC_OPTS="{kore_exec_opts}"')
         command_env = os.environ.copy()
         command_env['KORE_EXEC_OPTS'] = kore_exec_opts
@@ -169,6 +166,27 @@ class KProve(KPrint):
             allow_zero_step=allow_zero_step,
             dry_run=dry_run,
         )
+
+    # TODO: This should return the empty disjunction `[]` instead of `#Top`.
+    # The prover should never return #Bottom, so we can ignore that case.
+    # Once those are taken care of, we can change the return type to a CTerm
+    def prove_cterm(
+        self,
+        claim_id: str,
+        init_cterm: CTerm,
+        target_cterm: CTerm,
+        lemmas: Iterable[KRule] = [],
+        args: List[str] = [],
+        haskell_args: List[str] = [],
+        log_axioms_file: Path = None,
+        allow_zero_step: bool = False,
+    ) -> List[KInner]:
+        claim, var_map = build_claim(claim_id, init_cterm, target_cterm, keep_vars=collectFreeVars(init_cterm.term))
+        next_state = self.prove_claim(claim, claim_id, lemmas=lemmas, args=args, haskell_args=haskell_args, log_axioms_file=log_axioms_file, allow_zero_step=allow_zero_step)
+        next_states = [var_map(ns) for ns in flatten_label('#Or', next_state)]
+        constraint_subst, _ = extract_subst(init_cterm.term)
+        next_states = [mlAnd([constraint_subst.unapply(ns), constraint_subst.ml_pred]) if ns not in [mlTop(), mlBottom()] else ns for ns in next_states]
+        return next_states
 
     def get_claim_basic_block(self, claim_id: str, claim: KClaim, lemmas: List[KRule] = [], args: List[str] = [], haskell_args: List[str] = [], max_depth: int = 1000) -> Tuple[int, bool, KInner]:
 
