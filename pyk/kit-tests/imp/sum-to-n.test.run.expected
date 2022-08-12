@@ -1,6 +1,6 @@
 + init sum-to-n sum-to-n-spec.k
 + list-cfgs
-PYK_SUM-TO-N-SPEC.main
+SUM-TO-N-SPEC.main
 + split-node #init N ==Int 1 --alias-true init-1 --alias-false init-not-1
 + split-node @init-not-1 N ==Int 2 --alias-true init-2 --alias-false init-not-1-2
 + split-node @init-not-1-2 N ==Int 10 --alias-true init-10
