@@ -3,21 +3,12 @@ from unittest import TestCase
 
 from ..kast import KApply, KInner, KLabel, KVariable, Subst
 from ..kastManip import extract_subst
-from ..prelude import (
-    Bool,
-    intToken,
-    mlAnd,
-    mlEquals,
-    mlEqualsTrue,
-    mlTop,
-    token,
-)
+from ..prelude import Bool, intToken, mlAnd, mlEquals, mlEqualsTrue, mlTop, token
 from .mock_kprint import MockKPrint
 from .utils import a, b, c, f, g, h, x, y, z
 
 
 class SubstTest(TestCase):
-
     def test_compose(self):
         # Given
         test_data = (
@@ -75,7 +66,7 @@ class SubstTest(TestCase):
             (x, {'x': a}, a),
             (f(x), {'x': f(x)}, f(f(x))),
             (f(a, g(x, a)), {'x': b}, f(a, g(b, a))),
-            (f(g(h(x, y, z))), {'x': a, 'y': b, 'z': c}, f(g(h(a, b, c))))
+            (f(g(h(x, y, z))), {'x': a, 'y': b, 'z': c}, f(g(h(a, b, c)))),
         )
 
         for i, [pattern, subst, expected] in enumerate(test_data):
@@ -109,14 +100,21 @@ class SubstTest(TestCase):
     def test_pretty(self):
         self.assertListEqual(
             list(Subst({'X': Bool.true, 'Y': KApply('_andBool_', [Bool.true, Bool.true])}).pretty(MockKPrint())),
-            ['X |-> true', 'Y |-> _andBool_ ( true , true )']
+            ['X |-> true', 'Y |-> _andBool_ ( true , true )'],
         )
 
     def test_ml_pred(self):
         subst_pred_pairs = (
             ('empty', Subst({}), KApply('#Top')),
             ('singleton', Subst({'X': Bool.true}), KApply('#Equals', [KVariable('X'), Bool.true])),
-            ('double', Subst({'X': Bool.true, 'Y': intToken(4)}), KApply('#And', [KApply('#Equals', [KVariable('X'), Bool.true]), KApply('#Equals', [KVariable('Y'), intToken(4)])])),
+            (
+                'double',
+                Subst({'X': Bool.true, 'Y': intToken(4)}),
+                KApply(
+                    '#And',
+                    [KApply('#Equals', [KVariable('X'), Bool.true]), KApply('#Equals', [KVariable('Y'), intToken(4)])],
+                ),
+            ),
         )
         for name, subst, pred in subst_pred_pairs:
             with self.subTest(name):
@@ -150,7 +148,6 @@ class ExtractSubstTest(TestCase):
 
 
 class PropogateSubstTest(TestCase):
-
     def test(self):
         # Given
         v1 = KVariable('V1')
