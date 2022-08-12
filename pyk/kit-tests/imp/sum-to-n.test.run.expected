@@ -1,4 +1,4 @@
-+ init pyk_sum-to-n pyk_sum-to-n-spec.k
++ init sum-to-n sum-to-n-spec.k
 + list-cfgs
 PYK_SUM-TO-N-SPEC.main
 + split-node #init N ==Int 1 --alias-true init-1 --alias-false init-not-1

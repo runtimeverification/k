@@ -3,6 +3,6 @@
 /src/pyk.egg-info/
 
 
-/kit-tests/imp/*.json
-/kit-tests/imp/*.run.out
-/kit-tests/imp/*_summary/
+/kit-tests/**/*.json
+/kit-tests/**/*.run.out
+/kit-tests/**/*_summary/
