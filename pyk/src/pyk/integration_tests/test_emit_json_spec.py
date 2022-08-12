@@ -41,6 +41,7 @@ class EmitJsonSpecTest(KProveTest):
         def paren(f):
             def unparse(*args):
                 return '(' + f(*args) + ')'
+
             return unparse
 
         symbol_table['_+Int_'] = paren(symbol_table['_+Int_'])

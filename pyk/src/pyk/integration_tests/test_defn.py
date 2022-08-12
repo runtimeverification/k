@@ -1,13 +1,4 @@
-from ..kast import (
-    KApply,
-    KClaim,
-    KRewrite,
-    KSort,
-    KToken,
-    KVariable,
-    assocWithUnit,
-    constLabel,
-)
+from ..kast import KApply, KClaim, KRewrite, KSort, KToken, KVariable, assocWithUnit, constLabel
 from ..kastManip import push_down_rewrites
 from ..ktool import KompileBackend
 from ..prelude import Sorts
@@ -29,16 +20,23 @@ class DefnTest(KProveTest):
 
     def test_print_configuration(self):
         # Given
+
+        # fmt: off
         config = KApply('<T>', [KApply('<k>', [KApply('int_;_', [KApply('_,_', [KToken('x', 'Id'), KApply('_,_', [KToken('y', 'Id'), KApply('.List{"_,_"}')])])])]), KApply('<state>', [KApply('.Map')])])
-        config_expected = '\n'.join([ '<T>'              # noqa
-                                    , '  <k>'            # noqa
-                                    , '    int x , y ;'  # noqa
-                                    , '  </k>'           # noqa
-                                    , '  <state>'        # noqa
-                                    , '    .Map'         # noqa
-                                    , '  </state>'       # noqa
-                                    , '</T>'             # noqa
-                                    ])                   # noqa
+        # fmt: on
+
+        config_expected = '\n'.join(
+            [
+                '<T>',
+                '  <k>',
+                '    int x , y ;',
+                '  </k>',
+                '  <state>',
+                '    .Map',
+                '  </state>',
+                '</T>',
+            ]
+        )
 
         # When
         config_actual = self.kprove.pretty_print(config)
@@ -48,23 +46,28 @@ class DefnTest(KProveTest):
 
     def test_print_prove_rewrite(self):
         # Given
-        claim_rewrite = KRewrite( KApply('<T>', [ KApply('<k>', [KApply('_+_', [KVariable('X'), KVariable('Y')])])     # noqa
-                                                , KApply('<state>', [KVariable('STATE')])                              # noqa
-                                                ])                                                                     # noqa
-                                , KApply('<T>', [ KApply('<k>', [KApply('_+Int_', [KVariable('X'), KVariable('Y')])])  # noqa
-                                                , KApply('<state>', [KVariable('STATE')])                              # noqa
-                                                ])                                                                     # noqa
-                                )                                                                                      # noqa
+        # fmt: off
+        claim_rewrite = KRewrite( KApply('<T>', [ KApply('<k>', [KApply('_+_', [KVariable('X'), KVariable('Y')])])
+                                                , KApply('<state>', [KVariable('STATE')])
+                                                ])
+                                , KApply('<T>', [ KApply('<k>', [KApply('_+Int_', [KVariable('X'), KVariable('Y')])])
+                                                , KApply('<state>', [KVariable('STATE')])
+                                                ])
+                                )
+        # fmt: on
 
-        minimized_claim_rewrite_expected = '\n'.join([ '<T>'                        # noqa
-                                                     , '  <k>'                      # noqa
-                                                     , '    ( X + Y => X +Int Y )'  # noqa
-                                                     , '  </k>'                     # noqa
-                                                     , '  <state>'                  # noqa
-                                                     , '    STATE'                  # noqa
-                                                     , '  </state>'                 # noqa
-                                                     , '</T>'                       # noqa
-                                                     ])                             # noqa
+        minimized_claim_rewrite_expected = '\n'.join(
+            [
+                '<T>',
+                '  <k>',
+                '    ( X + Y => X +Int Y )',
+                '  </k>',
+                '  <state>',
+                '    STATE',
+                '  </state>',
+                '</T>',
+            ]
+        )
 
         # When
         minimized_claim_rewrite = push_down_rewrites(claim_rewrite)
@@ -81,30 +84,36 @@ class DefnTest(KProveTest):
         empty_config_generated_top = self.kprove.definition.empty_config(Sorts.GENERATED_TOP_CELL)
         empty_config_t = self.kprove.definition.empty_config(KSort('TCell'))
 
-        empty_config_generated_top_printed = '\n'.join([ '<generatedTop>'               # noqa
-                                                       , '  <T>'                        # noqa
-                                                       , '    <k>'                      # noqa
-                                                       , '      K_CELL'                 # noqa
-                                                       , '    </k>'                     # noqa
-                                                       , '    <state>'                  # noqa
-                                                       , '      STATE_CELL'             # noqa
-                                                       , '    </state>'                 # noqa
-                                                       , '  </T>'                       # noqa
-                                                       , '  <generatedCounter>'         # noqa
-                                                       , '    GENERATEDCOUNTER_CELL'    # noqa
-                                                       , '  </generatedCounter>'        # noqa
-                                                       , '</generatedTop>'              # noqa
-                                                       ])                               # noqa
+        empty_config_generated_top_printed = '\n'.join(
+            [
+                '<generatedTop>',
+                '  <T>',
+                '    <k>',
+                '      K_CELL',
+                '    </k>',
+                '    <state>',
+                '      STATE_CELL',
+                '    </state>',
+                '  </T>',
+                '  <generatedCounter>',
+                '    GENERATEDCOUNTER_CELL',
+                '  </generatedCounter>',
+                '</generatedTop>',
+            ]
+        )
 
-        empty_config_t_printed = '\n'.join([ '<T>'                # noqa
-                                           , '  <k>'              # noqa
-                                           , '    K_CELL'         # noqa
-                                           , '  </k>'             # noqa
-                                           , '  <state>'          # noqa
-                                           , '    STATE_CELL'     # noqa
-                                           , '  </state>'         # noqa
-                                           , '</T>'               # noqa
-                                           ])                     # noqa
+        empty_config_t_printed = '\n'.join(
+            [
+                '<T>',
+                '  <k>',
+                '    K_CELL',
+                '  </k>',
+                '  <state>',
+                '    STATE_CELL',
+                '  </state>',
+                '</T>',
+            ]
+        )
 
         # Then
         self.assertEqual(empty_config_generated_top_printed, self.kprove.pretty_print(empty_config_generated_top))

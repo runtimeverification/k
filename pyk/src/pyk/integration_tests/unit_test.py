@@ -5,7 +5,6 @@ from ..kastManip import splitConfigFrom
 
 
 class TestPyk(TestCase):
-
     def test_splitConfigFrom(self):
         k_cell = KSequence([KApply('foo'), KApply('bar')])
         term = KApply('<k>', [k_cell])

@@ -5,7 +5,6 @@ from typing import Final, Iterable, Iterator, List, Optional, Tuple, final
 
 
 class KoreStringLexer(Iterator[Tuple[str, 'KoreStringLexer.TokenType']]):
-
     class TokenType(IntEnum):
         ASCII = 1
         ESC = 2
@@ -116,7 +115,6 @@ class KoreStringLexer(Iterator[Tuple[str, 'KoreStringLexer.TokenType']]):
 @final
 @dataclass(frozen=True)
 class KoreToken:
-
     class Type(Enum):
         EOF = 0
         COMMA = auto()

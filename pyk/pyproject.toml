@@ -4,3 +4,15 @@ requires = [
   "wheel",
 ]
 build-backend = "setuptools.build_meta"
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.black]
+line-length = 120
+skip-string-normalization = true
+
+[[tool.mypy.overrides]]
+module = "graphviz"
+ignore_missing_imports = true

@@ -88,7 +88,9 @@ class CTerm:
     @staticmethod
     def _ml_impl(antecedents: Iterable[KInner], consequents: Iterable[KInner]) -> KInner:
         antecedent = mlAnd(unique(antecedents), Sorts.GENERATED_TOP_CELL)
-        consequent = mlAnd(unique(term for term in consequents if term not in set(antecedents)), Sorts.GENERATED_TOP_CELL)
+        consequent = mlAnd(
+            unique(term for term in consequents if term not in set(antecedents)), Sorts.GENERATED_TOP_CELL
+        )
 
         if mlTop(Sorts.GENERATED_TOP_CELL) in {antecedent, consequent}:
             return consequent
