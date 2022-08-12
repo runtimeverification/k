@@ -28,6 +28,8 @@ from .kastManip import (
     build_rule,
     ml_pred_to_bool,
     mlAnd,
+    remove_generated_cells,
+    remove_source_attributes,
     simplify_bool,
 )
 from .ktool import KPrint
@@ -468,6 +470,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         return bool(self.get_node(node.id))
 
     def create_node(self, cterm: CTerm) -> Node:
+        term = cterm.term
+        term = remove_generated_cells(term)
+        term = remove_source_attributes(term)
+        cterm = CTerm(term)
         node = KCFG.Node(cterm)
 
         if node.id in self._nodes:

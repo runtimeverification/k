@@ -2,6 +2,7 @@ import logging
 import typing
 from collections import Counter
 from typing import (
+    Any,
     Callable,
     Dict,
     Final,
@@ -477,6 +478,19 @@ def removeSourceMap(k):
                     newAtts[attKey] = atts[attKey]
             return KAtt(atts=newAtts)
     return onAttributes(k, _removeSourceMap)
+
+
+def remove_source_attributes(term: KInner) -> KInner:
+
+    def _is_source_att(att: Tuple[str, Any]) -> bool:
+        return att[0] in ('org.kframework.attributes.Source', 'org.kframework.attributes.Location')
+
+    def _remove_source_attr(att: KInner) -> KInner:
+        if not isinstance(att, KAtt):
+            return att
+        return KAtt(filter(_is_source_att), att.atts)
+
+    return top_down(if_ktype(KRewrite, lambda rw: rw.lhs), term)
 
 
 def remove_generated_cells(term: KInner) -> KInner:

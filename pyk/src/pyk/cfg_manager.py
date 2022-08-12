@@ -23,7 +23,6 @@ from .kastManip import (
     count_vars,
     extract_lhs,
     extract_rhs,
-    remove_generated_cells,
     splitConfigFrom,
 )
 from .kcfg import KCFG
@@ -163,11 +162,11 @@ class CFGManager:
         claim_body = instantiate_cell_vars(defn, claim_body)
         claim_body = rename_generated_vars(CTerm(claim_body)).term
 
-        claim_lhs = CTerm(extract_lhs(remove_generated_cells(claim_body))).add_constraint(bool_to_ml_pred(claim.requires))
+        claim_lhs = CTerm(extract_lhs(claim_body)).add_constraint(bool_to_ml_pred(claim.requires))
         init_state = cfg.create_node(claim_lhs)
         cfg.add_init(init_state.id)
 
-        claim_rhs = CTerm(extract_rhs(remove_generated_cells(claim_body))).add_constraint(bool_to_ml_pred(claim.ensures))
+        claim_rhs = CTerm(extract_rhs(claim_body)).add_constraint(bool_to_ml_pred(claim.ensures))
         target_state = cfg.create_node(claim_rhs)
         cfg.add_target(target_state.id)
 
