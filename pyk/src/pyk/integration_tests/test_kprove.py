@@ -1,4 +1,6 @@
-from ..kast import KAtt, KClaim, KRule, KToken
+from ..cterm import CTerm
+from ..kast import KApply, KAtt, KClaim, KRule, KToken
+from ..kastManip import getCell
 from ..ktool import KompileBackend
 from ..prelude import Sorts
 from .kprove_test import KProveTest
@@ -40,6 +42,7 @@ class ImpProofTest(KProveTest):
 
     @staticmethod
     def _update_symbol_table(symbol_table):
+        symbol_table['.List{"_,_"}_Ids'] = lambda: '.Ids'
         pass
 
     def test_get_basic_block(self):
@@ -70,3 +73,24 @@ class ImpProofTest(KProveTest):
         self.assertEqual(post_depth_actual, post_depth_expected)
         self.assertEqual(post_branching_actual, post_branching_expected)
         self.assertEqual(post_state_pretty_actual, post_state_pretty_expected)
+
+    def test_prove_cterm(self) -> None:
+
+        def _config(k: str, state: str) -> CTerm:
+            return CTerm(KApply('<T>', (KApply('<k>', (KToken(k, 'K'),)), KApply('<state>', (KToken(state, 'Map'),)))))
+
+        pre_state = '.Map'
+        post_k = '.'
+        post_state = '?_POST_STATE_MAP'
+
+        test_data = (
+            ('step-1', ['--depth', '1'], 'int $n , $s ; $n = 3 ;', [('int $s , .Ids ; $n = 3 ;', '$n |-> 0')]),
+            ('step-2', ['--depth', '2'], 'int $n , $s ; $n = 3 ;', [('int .Ids ; $n = 3 ;', '$n |-> 0 $s |-> 0')]),
+            ('branch', ['--max-counterexamples', '2', '--depth', '4'], 'int $n ; if (_B:Bool) { $n = 1; } else { $n = 2; }', [('$n = 1 ;', '$n |-> 0'), ('$n = 2 ;', '$n |-> 0')]),
+        )
+
+        for name, haskell_args, pre_k, posts_expected_strs in test_data:
+            results = self.kprove.prove_cterm('prove-cterm', _config(pre_k, pre_state), _config(post_k, post_state), haskell_args=haskell_args)
+            posts_actual = [(getCell(_p, 'K_CELL'), getCell(_p, 'STATE_CELL')) for _p in results]
+            posts_actual_strs = [(self.kprove.pretty_print(k), self.kprove.pretty_print(s)) for k, s in posts_actual]
+            self.assertCountEqual(posts_expected_strs, posts_actual_strs)
