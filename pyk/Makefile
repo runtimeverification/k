@@ -78,7 +78,7 @@ test-kit: venv-prod
 
 # Checks
 
-check-code-style: check-isort check-flake8 check-mypy
+check-code-style: check-isort check-autoflake check-black check-mypy
 
 isort: venv-dev
 	$(ACTIVATE_DEV) && isort src
@@ -89,8 +89,31 @@ autoflake: venv-dev
 check-isort: venv-dev
 	$(ACTIVATE_DEV) && isort --check src
 
-check-flake8: venv-dev
-	$(ACTIVATE_DEV) && flake8 src
+autoflake: venv-dev
+	$(ACTIVATE_DEV) && autoflake src \
+	  --in-place                     \
+	  --recursive                    \
+	  --expand-star-imports          \
+	  --remove-all-unused-imports    \
+	  --ignore-init-module-imports   \
+	  --remove-duplicate-keys        \
+	  --remove-unused-variables
+
+check-autoflake: venv-dev
+	$(ACTIVATE_DEV) && autoflake src \
+	  --check                        \
+	  --recursive                    \
+	  --expand-star-imports          \
+	  --remove-all-unused-imports    \
+	  --ignore-init-module-imports   \
+	  --remove-duplicate-keys        \
+	  --remove-unused-variables
+
+black: venv-dev
+	$(ACTIVATE_DEV) && black src
+
+check-black: venv-dev
+	$(ACTIVATE_DEV) && black --check src
 
 check-mypy: venv-dev
 	$(ACTIVATE_DEV) && mypy src

@@ -51,13 +51,15 @@ def kompile(
         emit_json=emit_json,
         post_process=post_process,
         concrete_rules=concrete_rules,
-        args=args
+        args=args,
     )
 
     try:
         _kompile(str(main_file), check=check, profile=profile, *args)
     except CalledProcessError as err:
-        raise RuntimeError(f'Command kompile exited with code {err.returncode} for: {main_file}', err.stdout, err.stderr) from err
+        raise RuntimeError(
+            f'Command kompile exited with code {err.returncode} for: {main_file}', err.stdout, err.stderr
+        ) from err
 
     kompiled_dir = _kompiled_dir(main_file, output_dir)
     assert kompiled_dir.is_dir()
@@ -76,7 +78,7 @@ def _build_arg_list(
     emit_json: bool,
     post_process: Optional[str],
     concrete_rules: Iterable[str],
-    args: Iterable[str]
+    args: Iterable[str],
 ) -> List[str]:
     _args = []
 

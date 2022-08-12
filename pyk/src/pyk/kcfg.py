@@ -4,20 +4,7 @@ from dataclasses import dataclass
 from functools import reduce
 from itertools import chain
 from threading import RLock
-from typing import (
-    Any,
-    Container,
-    Dict,
-    Iterable,
-    List,
-    Mapping,
-    Optional,
-    Sequence,
-    Set,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import Any, Container, Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple, Union, cast
 
 from graphviz import Digraph
 
@@ -37,7 +24,6 @@ from .utils import add_indent, compare_short_hashes, shorten_hash
 
 
 class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
-
     @dataclass(frozen=True, order=True)
     class Node:
         cterm: CTerm
@@ -73,11 +59,18 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         depth: int
 
         def to_dict(self) -> Dict[str, Any]:
-            return {'source': self.source.id, 'target': self.target.id, 'condition': self.condition.to_dict(), 'depth': self.depth}
+            return {
+                'source': self.source.id,
+                'target': self.target.id,
+                'condition': self.condition.to_dict(),
+                'depth': self.depth,
+            }
 
         def to_rule(self, priority=50) -> KRule:
             sentence_id = f'BASIC-BLOCK-{self.source.id}-TO-{self.target.id}'
-            rule, _ = build_rule(sentence_id, self.source.cterm.add_constraint(self.condition), self.target.cterm, priority=priority)
+            rule, _ = build_rule(
+                sentence_id, self.source.cterm.add_constraint(self.condition), self.target.cterm, priority=priority
+            )
             return rule
 
         def to_claim(self) -> KClaim:
@@ -229,7 +222,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             'target': target,
             'expanded': expanded,
             'verified': verified,
-            'aliases': aliases
+            'aliases': aliases,
         }
         return {k: v for k, v in res.items() if v}
 
@@ -335,7 +328,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             processed_nodes.append(curr_node)
 
             num_children = len(edges_from)
-            is_cover = (num_children == 1 and isinstance(edges_from[0], KCFG.Cover))
+            is_cover = num_children == 1 and isinstance(edges_from[0], KCFG.Cover)
             is_branch = num_children > 1
             for i, edge_like in enumerate(edges_from):
                 is_last_child = i == num_children - 1
@@ -344,7 +337,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                     elbow = '├ ' if len(self.edge_likes(source_id=edge_like.target.id)) else '└ '
                     new_indent = indent
                 elif is_last_child:
-                    elbow = '└╌'if is_cover else '┗━'
+                    elbow = '└╌' if is_cover else '┗━'
                     new_indent = indent + '    '
                 else:
                     elbow = '┣━'
@@ -377,7 +370,12 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
     def to_dot(self, kprint: KPrint) -> str:
         def _short_label(label):
-            return '\n'.join([label_line if len(label_line) < 100 else (label_line[0:100] + ' ...') for label_line in label.split('\n')])
+            return '\n'.join(
+                [
+                    label_line if len(label_line) < 100 else (label_line[0:100] + ' ...')
+                    for label_line in label.split('\n')
+                ]
+            )
 
         graph = Digraph()
 
@@ -393,7 +391,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             label = '\nandBool'.join(kprint.pretty_print(display_condition).split(' andBool'))
             label = f'{label}\n{depth} steps'
             label = _short_label(label)
-            attrs = {'class': 'verified'} if self.is_verified(edge.source.id, edge.target.id) else {'class': 'unverified'}
+            attrs = (
+                {'class': 'verified'} if self.is_verified(edge.source.id, edge.target.id) else {'class': 'unverified'}
+            )
             graph.edge(tail_name=edge.source.id, head_name=edge.target.id, label=f'  {label}        ', **attrs)
 
         for cover in self.covers():
@@ -508,7 +508,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         self._init.discard(node_id)
         self._target.discard(node_id)
         self._expanded.discard(node_id)
-        self._verified = set((source_id, target_id) for source_id, target_id in self._verified if source_id != node_id and target_id != node_id)
+        self._verified = set(
+            (source_id, target_id)
+            for source_id, target_id in self._verified
+            if source_id != node_id and target_id != node_id
+        )
 
         for alias in [alias for alias, id in self._aliases.items() if id == node_id]:
             self.remove_alias(alias)
@@ -625,9 +629,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             self._covers.pop(source_id)
 
     def edge_likes(self, *, source_id: Optional[str] = None, target_id: Optional[str] = None) -> List[EdgeLike]:
-        return \
-            cast(List[KCFG.EdgeLike], self.edges(source_id=source_id, target_id=target_id)) + \
-            cast(List[KCFG.EdgeLike], self.covers(source_id=source_id, target_id=target_id))
+        return cast(List[KCFG.EdgeLike], self.edges(source_id=source_id, target_id=target_id)) + cast(
+            List[KCFG.EdgeLike], self.covers(source_id=source_id, target_id=target_id)
+        )
 
     def add_init(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
