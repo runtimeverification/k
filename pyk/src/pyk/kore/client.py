@@ -1,8 +1,8 @@
 import json
 import logging
 import socket
-from abc import ABC
-from dataclasses import InitVar, dataclass
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from enum import Enum
 from typing import (
     Any,
@@ -10,13 +10,13 @@ from typing import (
     Dict,
     Final,
     Iterable,
-    Iterator,
-    Literal,
     Mapping,
     Optional,
     Sequence,
     TextIO,
     Tuple,
+    Type,
+    TypeVar,
     final,
 )
 
@@ -24,6 +24,8 @@ from ..utils import filter_none
 from .syntax import Pattern
 
 _LOGGER: Final = logging.getLogger(__name__)
+
+ER = TypeVar('ER', bound='ExecuteResult')
 
 
 @final
@@ -122,115 +124,159 @@ class KoreClientError(Exception):
 
 
 class StopReason(str, Enum):
-    FINAL_STATE = 'final-state'
     STUCK = 'stuck'
     DEPTH_BOUND = 'depth-bound'
+    BRANCHING = 'branching'
     CUT_POINT_RULE = 'cut-point-rule'
     TERMINAL_RULE = 'terminal-rule'
-    BRANCHING = 'branching'
-
-
-class State(ABC):
-    pattern: Pattern
 
 
 @final
 @dataclass(frozen=True)
-class DirectState(State):
-    pattern: Pattern
+class State:
+    term: Pattern
+    substitution: Optional[Pattern]
+    predicate: Optional[Pattern]
 
-
-@final
-@dataclass(frozen=True)
-class BranchingState(State):
-    pattern: Pattern
-    substitution: Pattern
-    predicate: Pattern
+    @staticmethod
+    def from_dict(dct: Mapping[str, Any]) -> 'State':
+        return State(
+            term=Pattern.from_dict(dct['term']['term']),
+            substitution=Pattern.from_dict(dct['substitution']['term']) if 'substitution' in dct else None,
+            predicate=Pattern.from_dict(dct['predicate']['term']) if 'predicate' in dct else None,
+        )
 
 
 class ExecuteResult(ABC):
-    states: Tuple[State, ...]
+    _TYPES: Mapping[StopReason, str] = {
+        StopReason.STUCK: 'StuckResult',
+        StopReason.DEPTH_BOUND: 'DepthBoundResult',
+        StopReason.BRANCHING: 'BranchingResult',
+        StopReason.CUT_POINT_RULE: 'CutPointResult',
+        StopReason.TERMINAL_RULE: 'TerminalResult',
+    }
+
+    state: State
     depth: int
-    reason: StopReason
+    next_states: Optional[Tuple[State, ...]]
+    rule: Optional[str]
 
-    @staticmethod
-    def from_dict(dct: Mapping[str, Any]) -> 'ExecuteResult':
-        if dct['reason'] is StopReason.BRANCHING:
-            return BranchingResult.from_dict(dct)
+    @classmethod
+    @property
+    @abstractmethod
+    def reason(cls) -> StopReason:
+        ...
 
-        return DirectResult.from_dict(dct)
+    @classmethod
+    def from_dict(cls: Type[ER], dct: Mapping[str, Any]) -> ER:
+        return globals()[ExecuteResult._TYPES[StopReason(dct['reason'])]].from_dict(dct)  # type: ignore
+
+    @classmethod
+    def _check_reason(cls: Type[ER], dct: Mapping[str, Any]) -> None:
+        reason = StopReason(dct['reason'])
+        if reason is not cls.reason:
+            raise ValueError(f"Expected {cls.reason} as 'reason', found: {reason}")
 
 
 @final
 @dataclass(frozen=True)
-class DirectResult(ExecuteResult):
-    state: DirectState
-    depth: int
-    reason: StopReason
+class StuckResult(ExecuteResult):
+    # These fields should be Final, but it makes mypy crash
+    # https://github.com/python/mypy/issues/10090
+    reason = StopReason.STUCK
+    next_states = None
+    rule = None
 
-    states: InitVar[Tuple[DirectState]]
-
-    def __init__(self, state: DirectState, depth: int, reason: StopReason):
-        if reason is StopReason.BRANCHING:
-            raise ValueError(f'Illegal value for reason: {reason}')
-
-        object.__setattr__(self, 'state', state)
-        object.__setattr__(self, 'depth', depth)
-        object.__setattr__(self, 'reason', reason)
-        object.__setattr__(self, 'states', (state,))
-
-    @staticmethod
-    def from_dict(dct: Mapping[str, Any]) -> 'DirectResult':
-        reason = StopReason(dct['reason'])
-
-        state_list = dct['states']
-        if len(state_list) != 1:
-            raise ValueError('Expected states to be a single-element sequence')
-        depth = state_list[0]['depth']
-        state = DirectState(Pattern.from_dict(state_list[0]['state']['term']))
-
-        return DirectResult(state=state, depth=depth, reason=reason)
-
-
-@final
-@dataclass(frozen=True)
-class BranchingResult(ExecuteResult, Iterable[BranchingState]):
-    states: Tuple[BranchingState, ...]
+    state: State
     depth: int
 
-    reason: InitVar[Literal[StopReason.BRANCHING]]
-
-    def __init__(self, states: Iterable[BranchingState], depth: int):
-        object.__setattr__(self, 'states', tuple(states))
-        object.__setattr__(self, 'depth', depth)
-        object.__setattr__(self, 'reason', StopReason.BRANCHING)
-
-    def __iter__(self) -> Iterator[BranchingState]:
-        return iter(self.states)
-
-    @staticmethod
-    def from_dict(dct: Mapping[str, Any]) -> 'BranchingResult':
-        reason = StopReason(dct['reason'])
-        if reason is not StopReason.BRANCHING:
-            raise ValueError(f'Expected {StopReason.BRANCHING} as reason value, found: {reason}')
-
-        state_list = dct['states']
-        if not state_list:
-            raise ValueError('Expected states to be nonempty')
-
-        assert all(state['depth'] == state_list[0]['depth'] for state in state_list)
-        depth = state_list[0]['depth']
-
-        states = (
-            BranchingState(
-                pattern=Pattern.from_dict(state['term']),
-                substitution=Pattern.from_dict(state['condition']['substitution']),
-                predicate=Pattern.from_dict(state['condition']['predicate']),
-            )
-            for state in state_list
+    @classmethod
+    def from_dict(cls: Type['StuckResult'], dct: Mapping[str, Any]) -> 'StuckResult':
+        cls._check_reason(dct)
+        return StuckResult(
+            state=State.from_dict(dct['state']),
+            depth=dct['depth'],
         )
 
-        return BranchingResult(states=states, depth=depth)
+
+@final
+@dataclass(frozen=True)
+class DepthBoundResult(ExecuteResult):
+    reason = StopReason.DEPTH_BOUND
+    next_states = None
+    rule = None
+
+    state: State
+    depth: int
+
+    @classmethod
+    def from_dict(cls: Type['DepthBoundResult'], dct: Mapping[str, Any]) -> 'DepthBoundResult':
+        cls._check_reason(dct)
+        return DepthBoundResult(
+            state=State.from_dict(dct['state']),
+            depth=dct['depth'],
+        )
+
+
+@final
+@dataclass(frozen=True)
+class BranchingResult(ExecuteResult):
+    reason = StopReason.BRANCHING
+    rule = None
+
+    state: State
+    depth: int
+    next_states: Tuple[State, ...]
+
+    @classmethod
+    def from_dict(cls: Type['BranchingResult'], dct: Mapping[str, Any]) -> 'BranchingResult':
+        cls._check_reason(dct)
+        return BranchingResult(
+            state=State.from_dict(dct['state']),
+            depth=dct['depth'],
+            next_states=tuple(State.from_dict(next_state) for next_state in dct['next-states']),
+        )
+
+
+@final
+@dataclass(frozen=True)
+class CutPointResult(ExecuteResult):
+    reason = StopReason.CUT_POINT_RULE
+
+    state: State
+    depth: int
+    next_states: Tuple[State, ...]
+    rule: str
+
+    @classmethod
+    def from_dict(cls: Type['CutPointResult'], dct: Mapping[str, Any]) -> 'CutPointResult':
+        cls._check_reason(dct)
+        return CutPointResult(
+            state=State.from_dict(dct['state']),
+            depth=dct['depth'],
+            next_states=tuple(State.from_dict(next_state) for next_state in dct['next-states']),
+            rule=dct['rule'],
+        )
+
+
+@final
+@dataclass(frozen=True)
+class TerminalResult(ExecuteResult):
+    reason = StopReason.TERMINAL_RULE
+    next_states = None
+
+    state: State
+    depth: int
+    rule: str
+
+    @classmethod
+    def from_dict(cls: Type['TerminalResult'], dct: Mapping[str, Any]) -> 'TerminalResult':
+        cls._check_reason(dct)
+        return TerminalResult(
+            state=State.from_dict(dct['state']),
+            depth=dct['depth'],
+            rule=dct['rule'],
+        )
 
 
 class KoreClient(ContextManager['KoreClient']):
