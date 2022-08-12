@@ -1,6 +1,6 @@
 // Copyright (c) 2016-2019 K Team. All Rights Reserved.
 
-module PYK_SUM-TO-N-SPEC
+module SUM-TO-N-SPEC
   imports IMP-VERIFICATION
   claim [main]:
         <k> int $n, $s;

@@ -135,6 +135,8 @@ class KProve(KPrint):
         command_env['KORE_EXEC_OPTS'] = kore_exec_opts
 
         proc_result = run_process(command, logger=_LOGGER, env=command_env, check=False, profile=self._profile)
+        if proc_result.returncode not in (0, 1):
+            raise RuntimeError('kprove failed!')
 
         if not dry_run:
             debug_log = _get_rule_log(log_file)
