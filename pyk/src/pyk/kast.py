@@ -4,6 +4,7 @@ from dataclasses import InitVar, dataclass, fields
 from enum import Enum
 from functools import cached_property, reduce
 from itertools import chain
+from pathlib import Path
 from typing import (
     Any,
     Callable,
@@ -1598,6 +1599,12 @@ def assocWithUnit(assocJoin, unit):
     return _assocWithUnit
 
 
-def readKastTerm(termPath):
+def readKastTerm(termPath: Path) -> KAst:
     with open(termPath, 'r') as termFile:
         return KAst.from_dict(json.loads(termFile.read())['term'])
+
+
+def read_kast_definition(ifile: Path) -> KDefinition:
+    _defn = readKastTerm(ifile)
+    assert isinstance(_defn, KDefinition)
+    return _defn
