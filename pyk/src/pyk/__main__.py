@@ -8,7 +8,7 @@ from graphviz import Digraph
 
 from .coverage import getRuleById, stripCoverageLogger
 from .cterm import split_config_and_constraints
-from .kast import KAst, flatten_label, readKastTerm
+from .kast import KAst, flatten_label, read_kast_definition
 from .kastManip import (
     minimize_term,
     minimizeRule,
@@ -85,7 +85,7 @@ def main():
         _LOGGER.info(f'Wrote file: {graphFile}')
 
     elif args['command'] == 'coverage':
-        json_definition = removeSourceMap(readKastTerm(kompiled_dir / 'compiled.json'))
+        json_definition = removeSourceMap(read_kast_definition(kompiled_dir / 'compiled.json'))
         symbol_table = build_symbol_table(json_definition)
         for rid in args['coverage-file']:
             rule = minimizeRule(stripCoverageLogger(getRuleById(json_definition, rid.strip())))

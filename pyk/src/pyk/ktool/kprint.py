@@ -37,7 +37,7 @@ from ..kast import (
     KVariable,
     flatten_label,
     ktokenDots,
-    readKastTerm,
+    read_kast_definition,
 )
 from ..kore.parser import KoreParser
 from ..kore.syntax import Kore
@@ -96,22 +96,19 @@ class KPrint:
     @property
     def definition(self) -> KDefinition:
         if not self._definition:
-            self._definition = readKastTerm(self.definition_dir / 'compiled.json')
-            assert self._definition is not None
+            self._definition = read_kast_definition(self.definition_dir / 'compiled.json')
         return self._definition
 
     @property
     def definition_hash(self) -> str:
         if not self._definition_hash:
             self._definition_hash = hash_str(self.definition)
-            assert self._definition_hash is not None
         return self._definition_hash
 
     @property
     def symbol_table(self) -> SymbolTable:
         if not self._symbol_table:
             self._symbol_table = build_symbol_table(self.definition, opinionated=True)
-            assert self._symbol_table is not None
         return self._symbol_table
 
     def parse_token(self, ktoken: KToken) -> KInner:
