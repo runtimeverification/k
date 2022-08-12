@@ -23,9 +23,9 @@ class RegexTerminalTest(KompiledTest):
         module = [module for module in self.definition if module.name == 'REGEX-TERMINAL-SYNTAX'][0]
         productions = sorted(
             (
-                prod for prod in module.productions
-                if prod.sort.name in {'T0', 'T1', 'T2', 'T3'}
-                and type(prod.items[0]) is KRegexTerminal  # noqa: W503
+                prod
+                for prod in module.productions
+                if prod.sort.name in {'T0', 'T1', 'T2', 'T3'} and type(prod.items[0]) is KRegexTerminal
             ),
             key=lambda prod: prod.sort.name,
         )

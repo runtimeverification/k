@@ -106,7 +106,9 @@ def leInt(i1, i2):
 
 
 # TODO default sort K can be tightened using basic type inference
-def mlEquals(term1: KInner, term2: KInner, sort1: Union[str, KSort] = Sorts.K, sort2: Union[str, KSort] = Sorts.K) -> KApply:
+def mlEquals(
+    term1: KInner, term2: KInner, sort1: Union[str, KSort] = Sorts.K, sort2: Union[str, KSort] = Sorts.K
+) -> KApply:
     return KLabel('#Equals', sort1, sort2)(term1, term2)
 
 

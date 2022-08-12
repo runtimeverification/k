@@ -19,6 +19,7 @@ class BuildArgsTest(TestCase):
             concrete_rules=['foo', 'bar'],
             args=['--new-fangled-option', 'buzz'],
         )
+        # fmt: off
         expected = [
             '--main-module', 'MAIN-MODULE',
             '--syntax-module', 'SYNTAX-MODULE',
@@ -33,4 +34,5 @@ class BuildArgsTest(TestCase):
             '--concrete-rules', 'foo,bar',
             '--new-fangled-option', 'buzz'
         ]
+        # fmt: on
         self.assertEqual(actual, expected)

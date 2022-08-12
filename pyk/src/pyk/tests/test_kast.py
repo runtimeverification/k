@@ -1,15 +1,7 @@
 from typing import Final, List, Tuple
 from unittest import TestCase
 
-from ..kast import (
-    KApply,
-    KDefinition,
-    KFlatModule,
-    KInner,
-    KLabel,
-    KSequence,
-    KVariable,
-)
+from ..kast import KApply, KDefinition, KFlatModule, KInner, KLabel, KSequence, KVariable
 from ..prelude import Sorts
 
 x, y, z = (KVariable(name) for name in ['x', 'y', 'z'])

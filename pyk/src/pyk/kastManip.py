@@ -1,17 +1,6 @@
 import logging
 from collections import Counter
-from typing import (
-    Callable,
-    Dict,
-    Final,
-    List,
-    Mapping,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
-    TypeVar,
-)
+from typing import Callable, Dict, Final, List, Mapping, Optional, Sequence, Tuple, Type, TypeVar
 
 from .cterm import CTerm, split_config_and_constraints
 from .kast import (
@@ -34,17 +23,7 @@ from .kast import (
     ktokenDots,
     top_down,
 )
-from .prelude import (
-    Bool,
-    Labels,
-    Sorts,
-    mlAnd,
-    mlBottom,
-    mlEqualsTrue,
-    mlImplies,
-    mlOr,
-    mlTop,
-)
+from .prelude import Bool, Labels, Sorts, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlOr, mlTop
 from .utils import find_common_items, hash_str
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -58,6 +37,7 @@ def if_ktype(ktype: Type[KI], then: Callable[[KI], KInner]) -> Callable[[KInner]
         if isinstance(term, ktype):
             return then(term)
         return term
+
     return fun
 
 
@@ -73,7 +53,6 @@ def bool_ml_pred(kast: KInner) -> KInner:
 
 
 def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
-
     def _ml_constraint_to_bool(_kast: KInner) -> KInner:
         if type(_kast) is KApply:
             if _kast.label.name == '#Top':
@@ -114,25 +93,29 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
 def simplify_bool(k):
     if k is None:
         return None
-    simplify_rules = [ (KApply('_==K_', [KVariable('#LHS'), Bool.true]), KVariable('#LHS'))                                                                     # noqa
-                     , (KApply('_==K_', [Bool.true, KVariable('#RHS')]), KVariable('#RHS'))                                                                     # noqa
-                     , (KApply('_==K_', [KVariable('#LHS'), Bool.false]), Bool.notBool(KVariable('#LHS')))                                                      # noqa
-                     , (KApply('_==K_', [Bool.false, KVariable('#RHS')]), Bool.notBool(KVariable('#RHS')))                                                      # noqa
-                     , (Bool.notBool(Bool.false), Bool.true)                                                                                                    # noqa
-                     , (Bool.notBool(Bool.true), Bool.false)                                                                                                    # noqa
-                     , (Bool.notBool(KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')])), KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')]))     # noqa
-                     , (Bool.notBool(KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')])), KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')]))     # noqa
-                     , (Bool.notBool(KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')])), KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')]))     # noqa
-                     , (Bool.notBool(KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')])), KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')]))     # noqa
-                     , (Bool.andBool([Bool.true, KVariable('#REST')]), KVariable('#REST'))                                                                      # noqa
-                     , (Bool.andBool([KVariable('#REST'), Bool.true]), KVariable('#REST'))                                                                      # noqa
-                     , (Bool.andBool([Bool.false, KVariable('#REST')]), Bool.false)                                                                             # noqa
-                     , (Bool.andBool([KVariable('#REST'), Bool.false]), Bool.false)                                                                             # noqa
-                     , (Bool.orBool([Bool.false, KVariable('#REST')]), KVariable('#REST'))                                                                      # noqa
-                     , (Bool.orBool([KVariable('#REST'), Bool.false]), KVariable('#REST'))                                                                      # noqa
-                     , (Bool.orBool([Bool.true, KVariable('#REST')]), Bool.true)                                                                                # noqa
-                     , (Bool.orBool([KVariable('#REST'), Bool.true]), Bool.true)                                                                                # noqa
-                     ]                                                                                                                                          # noqa
+
+    # fmt: off
+    simplify_rules = [ (KApply('_==K_', [KVariable('#LHS'), Bool.true]), KVariable('#LHS'))
+                     , (KApply('_==K_', [Bool.true, KVariable('#RHS')]), KVariable('#RHS'))
+                     , (KApply('_==K_', [KVariable('#LHS'), Bool.false]), Bool.notBool(KVariable('#LHS')))
+                     , (KApply('_==K_', [Bool.false, KVariable('#RHS')]), Bool.notBool(KVariable('#RHS')))
+                     , (Bool.notBool(Bool.false), Bool.true)
+                     , (Bool.notBool(Bool.true), Bool.false)
+                     , (Bool.notBool(KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')])), KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')]))
+                     , (Bool.notBool(KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')])), KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')]))
+                     , (Bool.notBool(KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')])), KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')]))
+                     , (Bool.notBool(KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')])), KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')]))
+                     , (Bool.andBool([Bool.true, KVariable('#REST')]), KVariable('#REST'))
+                     , (Bool.andBool([KVariable('#REST'), Bool.true]), KVariable('#REST'))
+                     , (Bool.andBool([Bool.false, KVariable('#REST')]), Bool.false)
+                     , (Bool.andBool([KVariable('#REST'), Bool.false]), Bool.false)
+                     , (Bool.orBool([Bool.false, KVariable('#REST')]), KVariable('#REST'))
+                     , (Bool.orBool([KVariable('#REST'), Bool.false]), KVariable('#REST'))
+                     , (Bool.orBool([Bool.true, KVariable('#REST')]), Bool.true)
+                     , (Bool.orBool([KVariable('#REST'), Bool.true]), Bool.true)
+                     ]
+    # fmt: on
+
     new_k = k
     for rule in simplify_rules:
         rewrite = KRewrite(*rule)
@@ -149,7 +132,6 @@ def extract_rhs(term: KInner) -> KInner:
 
 
 def extract_subst(term: KInner) -> Tuple[Subst, KInner]:
-
     def _subst_for_terms(term1: KInner, term2: KInner) -> Optional[Subst]:
         if type(term1) is KVariable and type(term2) not in {KToken, KVariable}:
             return Subst({term1.name: term2})
@@ -165,7 +147,11 @@ def extract_subst(term: KInner) -> Tuple[Subst, KInner]:
                 if subst is not None:
                     return subst
 
-                if conjunct.args[0] == Bool.true and type(conjunct.args[1]) is KApply and conjunct.args[1].label.name in {'_==K_', '_==Int_'}:
+                if (
+                    conjunct.args[0] == Bool.true
+                    and type(conjunct.args[1]) is KApply
+                    and conjunct.args[1].label.name in {'_==K_', '_==Int_'}
+                ):
                     subst = _subst_for_terms(conjunct.args[1].args[0], conjunct.args[1].args[1])
 
                     if subst is not None:
@@ -206,7 +192,6 @@ def collectFreeVars(kast):
 
 
 def propagate_up_constraints(k):
-
     def _propagate_up_constraints(_k):
         if not (type(_k) is KApply and _k.label.name == '#Or'):
             return _k
@@ -258,6 +243,7 @@ def collapseDots(kast):
     -   Input: a configuration, potentially with structural frames.
     -   Output: the same configuration, with the amount of structural framing minimized.
     """
+
     def _collapseDots(_kast):
         if type(_kast) is KApply:
             if _kast.is_cell and _kast.arity == 1 and _kast.args[0] == ktokenDots:
@@ -272,11 +258,11 @@ def collapseDots(kast):
             if _kast.lhs == ktokenDots:
                 return ktokenDots
         return _kast
+
     return bottom_up(_collapseDots, kast)
 
 
 def push_down_rewrites(kast):
-
     def _flatten_ksequence(_kast):
         if type(_kast) is KSequence:
             new_items = []
@@ -308,7 +294,13 @@ def push_down_rewrites(kast):
                 if lhs.items[-1] == rhs.items[-1]:
                     lowerRewrite = _push_down_rewrites(KRewrite(KSequence(lhs.items[0:-1]), KSequence(rhs.items[0:-1])))
                     return _flatten_ksequence(KSequence([lowerRewrite, lhs.items[-1]]))
-            if type(lhs) is KSequence and lhs.arity > 0 and type(lhs.items[-1]) is KVariable and type(rhs) is KVariable and lhs.items[-1] == rhs:
+            if (
+                type(lhs) is KSequence
+                and lhs.arity > 0
+                and type(lhs.items[-1]) is KVariable
+                and type(rhs) is KVariable
+                and lhs.items[-1] == rhs
+            ):
                 return KSequence([KRewrite(KSequence(lhs.items[0:-1]), KApply(Labels.EMPTY_K)), rhs])
         return _kast
 
@@ -321,12 +313,14 @@ def inlineCellMaps(kast):
     -   Input: kast term.
     -   Output: kast term with cell maps inlined.
     """
+
     def _inlineCellMaps(_kast):
         if type(_kast) is KApply and _kast.label.name.endswith('CellMapItem'):
             mapKey = _kast.args[0]
             if type(mapKey) is KApply and mapKey.is_cell:
                 return _kast.args[1]
         return _kast
+
     return bottom_up(_inlineCellMaps, kast)
 
 
@@ -336,10 +330,12 @@ def removeSemanticCasts(kast):
     -   Input: kast (possibly) containing automatically injected `#SemanticCast*` KApply nodes.
     -   Output: kast without the `#SemanticCast*` nodes.
     """
+
     def _removeSemanticCasts(_kast):
         if type(_kast) is KApply and _kast.arity == 1 and _kast.label.name.startswith('#SemanticCast'):
             return _kast.args[0]
         return _kast
+
     return bottom_up(_removeSemanticCasts, kast)
 
 
@@ -387,10 +383,12 @@ def labelsToDots(kast, labels):
     -   Input: kast term, and list of labels to abstract.
     -   Output: kast term with those labels abstracted.
     """
+
     def _labelstoDots(k):
         if type(k) is KApply and k.is_cell and k.label.name in labels:
             return ktokenDots
         return k
+
     return bottom_up(_labelstoDots, kast)
 
 
@@ -463,6 +461,7 @@ def removeSourceMap(k):
     Input: A JSON encoded K object.
     Output: The same JSON encoded object, with all source information stripped.
     """
+
     def _removeSourceMap(att):
         if type(att) is KAtt:
             atts = att.atts
@@ -471,6 +470,7 @@ def removeSourceMap(k):
                 if attKey != 'org.kframework.attributes.Source' and attKey != 'org.kframework.attributes.Location':
                     newAtts[attKey] = atts[attKey]
             return KAtt(atts=newAtts)
+
     return onAttributes(k, _removeSourceMap)
 
 
@@ -493,6 +493,7 @@ def omitLargeTokens(kast, maxLen=78):
         if type(_k) is KToken and len(_k.token) > maxLen:
             return KToken('...', _k.sort)
         return _k
+
     return bottom_up(_largeTokensToDots, kast)
 
 
@@ -548,7 +549,7 @@ def build_rule(
     init_cterm: CTerm,
     final_cterm: CTerm,
     priority: Optional[int] = None,
-    keep_vars: Optional[List[str]] = None
+    keep_vars: Optional[List[str]] = None,
 ) -> Tuple[KRule, Subst]:
 
     init_config, *init_constraints = init_cterm
@@ -559,7 +560,12 @@ def build_rule(
 
     lhs_vars = collectFreeVars(init_term)
     rhs_vars = collectFreeVars(final_term)
-    var_occurances = count_vars(mlAnd([push_down_rewrites(KRewrite(init_config, final_config))] + init_constraints + final_constraints, Sorts.GENERATED_TOP_CELL))
+    var_occurances = count_vars(
+        mlAnd(
+            [push_down_rewrites(KRewrite(init_config, final_config))] + init_constraints + final_constraints,
+            Sorts.GENERATED_TOP_CELL,
+        )
+    )
     v_subst: Dict[str, KVariable] = {}
     vremap_subst: Dict[str, KVariable] = {}
     for v in var_occurances:
@@ -591,10 +597,7 @@ def build_rule(
 
 
 def build_claim(
-    claim_id: str,
-    init_cterm: CTerm,
-    final_cterm: CTerm,
-    keep_vars: Optional[List[str]] = None
+    claim_id: str, init_cterm: CTerm, final_cterm: CTerm, keep_vars: Optional[List[str]] = None
 ) -> Tuple[KClaim, Subst]:
     rule, var_map = build_rule(claim_id, init_cterm, final_cterm, keep_vars=keep_vars)
     claim = KClaim(rule.body, requires=rule.requires, ensures=rule.ensures, att=rule.att)
@@ -652,7 +655,9 @@ def disjunct_constrained_terms(constrained_terms: Sequence[KInner], concave=Fals
         return mlBottom()
     new_constrained_term = constrained_terms[0]
     for constrained_term in constrained_terms[1:]:
-        new_constrained_term = antiUnifyWithConstraints(new_constrained_term, constrained_term, implications=concave, disjunct=concave)
+        new_constrained_term = antiUnifyWithConstraints(
+            new_constrained_term, constrained_term, implications=concave, disjunct=concave
+        )
     return new_constrained_term
 
 
@@ -711,7 +716,9 @@ def matchWithConstraint(constrainedTerm1, constrainedTerm2):
 
 
 def undoAliases(definition, kast):
-    alias_undo_rewrites = [KRewrite(rule.body.rhs, rule.body.lhs) for module in definition for rule in module.rules if 'alias' in rule.att]
+    alias_undo_rewrites = [
+        KRewrite(rule.body.rhs, rule.body.lhs) for module in definition for rule in module.rules if 'alias' in rule.att
+    ]
     newKast = kast
     for rewrite in alias_undo_rewrites:
         newKast = rewrite(newKast)
