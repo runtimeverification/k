@@ -28,7 +28,9 @@ class KProveTest(KompiledTest, ABC):
 
         self.kprove = KProve(self.kompiled_dir, kprove_main_file, Path(self.KPROVE_USE_DIR))
         self.kprove.prover_args += list(chain.from_iterable(['-I', include_dir] for include_dir in kprove_include_dirs))
-        self._update_symbol_table(self.kprove._symbol_table)
+        # force computation of the symbol_table before updating it
+        if self.kprove.symbol_table:
+            self._update_symbol_table(self.kprove._symbol_table)
 
     def tearDown(self):
         shutil.rmtree(self.KPROVE_USE_DIR, ignore_errors=True)
