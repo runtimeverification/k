@@ -18,6 +18,7 @@ from ..kast import (
     KDefinition,
     KFlatModule,
     KImport,
+    KInner,
     KNonTerminal,
     KProduction,
     KRegexTerminal,
@@ -90,6 +91,12 @@ class KPrint:
         self.symbol_table = build_symbol_table(self.definition, opinionated=True)
         self.definition_hash = hash_str(self.definition)
         self._profile = profile
+
+    def parse_token(self, ktoken: KToken) -> KInner:
+        output = _kast(self.definition_dir, ktoken.token, sort=ktoken.sort, profile=self._profile)
+        kast_token = KAst.from_dict(json.loads(output)['term'])
+        assert isinstance(kast_token, KInner)
+        return kast_token
 
     def kore_to_kast(self, kore: Kore) -> KAst:
         output = _kast(self.definition_dir, kore.text, input='kore', output='json', profile=self._profile)

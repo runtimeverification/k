@@ -1,5 +1,6 @@
 from ..cterm import CTerm
 from ..kast import KApply, KAtt, KClaim, KRule, KToken
+from ..kastManip import getCell
 from ..ktool import KompileBackend
 from ..prelude import Sorts
 from .kprove_test import KProveTest
@@ -41,7 +42,7 @@ class ImpProofTest(KProveTest):
 
     @staticmethod
     def _update_symbol_table(symbol_table):
-        pass
+        symbol_table['.List{"_,_"}_Ids'] = lambda: '.Ids'
 
     def test_get_basic_block(self):
         # Given
@@ -75,18 +76,20 @@ class ImpProofTest(KProveTest):
     def test_prove_cterm(self) -> None:
 
         def _config(k: str, state: str) -> CTerm:
-            return CTerm(KApply('<T>', (KApply('<k>', (KToken(k, 'K'),)),
-                                        KApply('<state>', (KToken(state, 'Map'),)))))
+            return CTerm(KApply('<T>', (KApply('<k>', (KToken(k, 'K'),)), KApply('<state>', (KToken(state, 'Map'),)))))
 
-        init = _config('$n', '$n |-> 1')
-        final = _config('1', '$n |-> 1')
-        result = self.kprove.prove_cterm('prove-cterm-top', init, final)
-        self.assertEqual(len(result), 1)
-        self.assertTop(result[0])
+        pre_state = '.Map'
+        post_k = '.'
+        post_state = '?_POST_STATE_MAP'
 
-        # Failing should return 2 result, but get only one.
-        # This might be a kprove bug?
-        init = _config('if (B:Bool) { $n = 2;  } else { $n = 3; }', '$n |-> 1')
-        final = _config('.K', '$n |-> 1')
-        result = self.kprove.prove_cterm('prove-cterm-multiple-results', init, final)
-        self.assertEqual(len(result), 1)  # Should be 2
+        test_data = (
+            ('step-1', ['--depth', '1'], 'int $n , $s ; $n = 3 ;', [('int $s , .Ids ; $n = 3 ;', '$n |-> 0')]),
+            ('step-2', ['--depth', '2'], 'int $n , $s ; $n = 3 ;', [('int .Ids ; $n = 3 ;', '$n |-> 0 $s |-> 0')]),
+            ('branch', ['--max-counterexamples', '2', '--depth', '4'], 'int $n ; if (_B:Bool) { $n = 1; } else { $n = 2; }', [('$n = 1 ;', '$n |-> 0'), ('$n = 2 ;', '$n |-> 0')]),
+        )
+
+        for name, haskell_args, pre_k, posts_expected_strs in test_data:
+            results = self.kprove.prove_cterm('prove-cterm', _config(pre_k, pre_state), _config(post_k, post_state), haskell_args=haskell_args)
+            posts_actual = [(getCell(_p, 'K_CELL'), getCell(_p, 'STATE_CELL')) for _p in results]
+            posts_actual_strs = [(self.kprove.pretty_print(k), self.kprove.pretty_print(s)) for k, s in posts_actual]
+            self.assertCountEqual(posts_expected_strs, posts_actual_strs)
