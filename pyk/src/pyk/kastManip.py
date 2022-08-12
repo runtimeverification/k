@@ -528,21 +528,21 @@ def setCell(constrainedTerm, cellVariable, cellValue):
     return mlAnd([substitute(config, subst), constraint])
 
 
-def remove_useless_constraints(cterm: CTerm, keepVars=None) -> CTerm:
-    usedVars = collectFreeVars(cterm.config)
-    usedVars = usedVars if keepVars is None else (usedVars + keepVars)
-    prevLenUsedVars = 0
-    newConstraints = []
-    while len(usedVars) > prevLenUsedVars:
-        prevLenUsedVars = len(usedVars)
+def remove_useless_constraints(cterm: CTerm, keep_vars=None) -> CTerm:
+    used_vars = collectFreeVars(cterm.config)
+    used_vars = used_vars if keep_vars is None else (used_vars + keep_vars)
+    prev_len_unsed_vars = 0
+    new_constraints = []
+    while len(used_vars) > prev_len_unsed_vars:
+        prev_len_unsed_vars = len(used_vars)
         for c in cterm.constraints:
-            if c not in newConstraints:
+            if c not in new_constraints:
                 newVars = collectFreeVars(c)
-                if any([v in usedVars for v in newVars]):
-                    newConstraints.append(c)
-                    usedVars.extend(newVars)
-        usedVars = list(set(usedVars))
-    return CTerm(mlAnd([cterm.config] + newConstraints))
+                if any([v in used_vars for v in newVars]):
+                    new_constraints.append(c)
+                    used_vars.extend(newVars)
+        used_vars = list(set(used_vars))
+    return CTerm(mlAnd([cterm.config] + new_constraints))
 
 
 def removeConstraintClausesFor(varNames, constraint):
