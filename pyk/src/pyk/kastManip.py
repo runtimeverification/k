@@ -482,15 +482,15 @@ def removeSourceMap(k):
 
 def remove_source_attributes(term: KInner) -> KInner:
 
-    def _is_source_att(att: Tuple[str, Any]) -> bool:
-        return att[0] in ('org.kframework.attributes.Source', 'org.kframework.attributes.Location')
+    def _is_not_source_att(att: Tuple[str, Any]) -> bool:
+        return att[0] not in ('org.kframework.attributes.Source', 'org.kframework.attributes.Location')
 
-    def _remove_source_attr(att: KInner) -> KInner:
-        if not isinstance(att, KAtt):
-            return att
-        return KAtt(filter(_is_source_att), att.atts)
+    def _remove_source_attr(term: KInner) -> KInner:
+        if not isinstance(term, WithKAtt):
+            return term
+        return term.let_att(KAtt(dict(filter(_is_not_source_att, term.att.atts.items()))))
 
-    return top_down(if_ktype(KRewrite, lambda rw: rw.lhs), term)
+    return top_down(_remove_source_attr, term)
 
 
 def remove_generated_cells(term: KInner) -> KInner:

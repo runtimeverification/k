@@ -1,13 +1,13 @@
 + init pyk_sum-to-n pyk_sum-to-n-spec.k
 + list-cfgs
 PYK_SUM-TO-N-SPEC.main
-+ case-split #init N ==Int 1 --alias-true init-1 --alias-false init-not-1
-+ case-split @init-not-1 N ==Int 2 --alias-true init-2 --alias-false init-not-1-2
-+ case-split @init-not-1-2 N ==Int 10 --alias-true init-10
++ split-node #init N ==Int 1 --alias-true init-1 --alias-false init-not-1
++ split-node @init-not-1 N ==Int 2 --alias-true init-2 --alias-false init-not-1-2
++ split-node @init-not-1-2 N ==Int 10 --alias-true init-10
 + show-edge @init-not-1-2,@init-10
-75668e..993baf (expanded, @init-not-1-2)
+1a257b..1bd4cd (expanded, @init-not-1-2)
 │ N ==Int 10
-4f5415..ce8fe8 (frontier, leaf, @init-10)
+a425e5..4b490f (frontier, leaf, @init-10)
 
 + show-node @init-10
 <T>
@@ -18,16 +18,16 @@ PYK_SUM-TO-N-SPEC.main
     .Map
   </state>
 </T>
+#And { true #Equals N >=Int 0 }
 #And { true #Equals N ==Int 10 }
 #And { true #Equals notBool ( N ==Int 1 ) }
 #And { true #Equals notBool ( N ==Int 2 ) }
-#And { true #Equals N >=Int 0 }
 + build-edges @init-1,#target
 + verify-edges --edges @init-1,#target
 + build-edges @init-10,#target
 + verify-edges --edges @init-10,#target
 + build-edges @init-2,@init-10
-CRITICAL - Could not verify claim: BASIC-BLOCK-0ed49998a22b5c6b5e3437971ac547d2099fbf20b7a7d3618ce3af6d93008667-TO-4f5415276b3303caf34067893f845971f27a0da075a5f39b86e064a2ccce8fe8
+CRITICAL - Could not verify claim: BASIC-BLOCK-cdb3dba1208f967019d9a737b5ae9c3f99e01ec8d4add5721d99e070388863e3-TO-a425e5e2ed1348d1503e07d50814643227f6db35ff58ba78b384a78ade4b490f
 
 Prover output:
 
@@ -44,25 +44,25 @@ Prover output:
 </generatedTop>
 #And #Top.
 + show-cfg
-5fa35d..e09951 (init, expanded)
-┣━ fdeda8..09e172 (expanded, @init-1)    N ==Int 1
+508444..3623d3 (init, expanded)
+┣━ 16058b..29d5c1 (expanded, @init-1)    N ==Int 1
 ┃   │  [1m[32m(verified)[0m[0m
 ┃   │  (-1 steps)
 ┃   └  6a6e72..499ac5 (target, leaf)
 ┃
-┗━ e3a5fd..bf2324 (expanded, @init-not-1)    notBool ( N ==Int 1 )
-    ┣━ 0ed499..008667 (expanded, @init-2)    N ==Int 2
+┗━ 73e36d..9633b6 (expanded, @init-not-1)    notBool ( N ==Int 1 )
+    ┣━ cdb3db..8863e3 (expanded, @init-2)    N ==Int 2
     ┃   │  (-1 steps)
-    ┃   ├  4f5415..ce8fe8 (expanded, @init-10)
+    ┃   ├  a425e5..4b490f (expanded, @init-10)
     ┃   │  [1m[32m(verified)[0m[0m
     ┃   │  (-1 steps)
     ┃   └  6a6e72..499ac5 (target, leaf)
     ┃
-    ┗━ 75668e..993baf (expanded, @init-not-1-2)    notBool ( N ==Int 2 )
-        ┣━ 4f5415..ce8fe8 (expanded, @init-10)    N ==Int 10
+    ┗━ 1a257b..1bd4cd (expanded, @init-not-1-2)    notBool ( N ==Int 2 )
+        ┣━ a425e5..4b490f (expanded, @init-10)    N ==Int 10
         ┃   ┊ (continues as previously)
         ┃
-        ┗━ [1m8a6c54..dc26ce (frontier, leaf)[0m    notBool ( N ==Int 10 )
+        ┗━ [1md4bf3e..e01c82 (frontier, leaf)[0m    notBool ( N ==Int 10 )
 
 
 
