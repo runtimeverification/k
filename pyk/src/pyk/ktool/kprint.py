@@ -87,7 +87,6 @@ class KPrint:
             self.use_directory = Path(td.name)
         check_dir_path(self.use_directory)
         self._definition = None
-        self._definition_hash = None
         self._symbol_table = None
         self._profile = profile
 
