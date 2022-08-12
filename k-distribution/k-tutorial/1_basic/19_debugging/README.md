@@ -5,10 +5,10 @@ the K-language support provided in [GDB](https://www.gnu.org/software/gdb/).
 
 ## Caveats
 
-Debugging K definitions using GDB is currently only supported on Linux; it is
-unlikely that the instructions in this section will work properly on macOS.
-Support for debugging K using LLDB is a work in progress, and this chapter will
-be updated when doing so is possible.
+Debugging K definitions using GDB is currently only supported on Linux; the
+instructions in this section will not work properly on macOS. Support for
+debugging K using LLDB is a work in progress, and this chapter will be updated
+when doing so is possible.
 
 ## Getting started
 
