@@ -134,7 +134,7 @@ class Kore(ABC):
     @classmethod
     @property
     @abstractmethod
-    def _tag(cls):
+    def _tag(cls) -> str:
         ...
 
     @classmethod
