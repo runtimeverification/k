@@ -32,7 +32,6 @@ KI = TypeVar('KI', bound='KInner')
 
 
 class KAst(ABC):
-
     @classmethod
     @abstractmethod
     def from_dict(cls: Type[T], d: Dict[str, Any]) -> T:
@@ -465,7 +464,13 @@ class KApply(KInner):
         return KApply(label=KLabel.from_dict(d['label']), args=(KInner.from_dict(arg) for arg in d['args']))
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KApply', 'label': self.label.to_dict(), 'args': [arg.to_dict() for arg in self.args], 'arity': self.arity, 'variable': False}
+        return {
+            'node': 'KApply',
+            'label': self.label.to_dict(),
+            'args': [arg.to_dict() for arg in self.args],
+            'arity': self.arity,
+            'variable': False,
+        }
 
     def let(self, *, label: Optional[Union[str, KLabel]] = None, args: Optional[Iterable[KInner]] = None) -> 'KApply':
         label = label if label is not None else self.label
@@ -499,7 +504,9 @@ class KAs(KInner):
     def to_dict(self) -> Dict[str, Any]:
         return {'node': 'KAs', 'pattern': self.pattern.to_dict(), 'alias': self.alias.to_dict()}
 
-    def let(self, *, pattern: Optional[KInner] = None, alias: Optional[KInner] = None, att: Optional[KAtt] = None) -> 'KAs':
+    def let(
+        self, *, pattern: Optional[KInner] = None, alias: Optional[KInner] = None, att: Optional[KAtt] = None
+    ) -> 'KAs':
         pattern = pattern if pattern is not None else self.pattern
         alias = alias if alias is not None else self.alias
         return KAs(pattern=pattern, alias=alias)
@@ -786,9 +793,16 @@ class KRegexTerminal(KProductionItem):
         )
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KRegexTerminal', 'regex': self.regex, 'precedeRegex': self.precede_regex, 'followRegex': self.follow_regex}
+        return {
+            'node': 'KRegexTerminal',
+            'regex': self.regex,
+            'precedeRegex': self.precede_regex,
+            'followRegex': self.follow_regex,
+        }
 
-    def let(self, *, regex: Optional[str] = None, precede_regex: Optional[str] = None, follow_regex: Optional[str] = None) -> 'KRegexTerminal':
+    def let(
+        self, *, regex: Optional[str] = None, precede_regex: Optional[str] = None, follow_regex: Optional[str] = None
+    ) -> 'KRegexTerminal':
         regex = regex if regex is not None else self.regex
         precede_regex = precede_regex if precede_regex is not None else self.precede_regex
         follow_regex = follow_regex if follow_regex is not None else self.follow_regex
@@ -863,14 +877,16 @@ class KProduction(KSentence):
         )
 
     def to_dict(self) -> Dict[str, Any]:
-        return filter_none({
-            'node': 'KProduction',
-            'sort': self.sort.to_dict(),
-            'productionItems': [item.to_dict() for item in self.items],
-            'params': [param.to_dict() for param in self.params],
-            'klabel': self.klabel.to_dict() if self.klabel else None,
-            'att': self.att.to_dict(),
-        })
+        return filter_none(
+            {
+                'node': 'KProduction',
+                'sort': self.sort.to_dict(),
+                'productionItems': [item.to_dict() for item in self.items],
+                'params': [param.to_dict() for param in self.params],
+                'klabel': self.klabel.to_dict() if self.klabel else None,
+                'att': self.att.to_dict(),
+            }
+        )
 
     def let(
         self,
@@ -967,7 +983,9 @@ class KSortSynonym(KSentence):
             'att': self.att.to_dict(),
         }
 
-    def let(self, *, old_sort: Optional[KSort] = None, new_sort: Optional[KSort] = None, att: Optional[KAtt] = None) -> 'KSortSynonym':
+    def let(
+        self, *, old_sort: Optional[KSort] = None, new_sort: Optional[KSort] = None, att: Optional[KAtt] = None
+    ) -> 'KSortSynonym':
         new_sort = new_sort or self.new_sort
         old_sort = old_sort or self.old_sort
         att = att if att is not None else self.att
@@ -1006,7 +1024,9 @@ class KSyntaxLexical(KSentence):
             'att': self.att.to_dict(),
         }
 
-    def let(self, *, name: Optional[str] = None, regex: Optional[str] = None, att: Optional[KAtt] = None) -> 'KSyntaxLexical':
+    def let(
+        self, *, name: Optional[str] = None, regex: Optional[str] = None, att: Optional[KAtt] = None
+    ) -> 'KSyntaxLexical':
         name = name if name is not None else self.name
         regex = regex if regex is not None else self.regex
         att = att if att is not None else self.att
@@ -1044,9 +1064,16 @@ class KSyntaxAssociativity(KSentence):
         )
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KSyntaxAssociativity', 'assoc': self.assoc.value, 'tags': list(self.tags), 'att': self.att.to_dict()}
+        return {
+            'node': 'KSyntaxAssociativity',
+            'assoc': self.assoc.value,
+            'tags': list(self.tags),
+            'att': self.att.to_dict(),
+        }
 
-    def let(self, *, assoc: Optional[KAssoc] = None, tags: Optional[Iterable[str]] = None, att: Optional[KAtt] = None) -> 'KSyntaxAssociativity':
+    def let(
+        self, *, assoc: Optional[KAssoc] = None, tags: Optional[Iterable[str]] = None, att: Optional[KAtt] = None
+    ) -> 'KSyntaxAssociativity':
         assoc = assoc or self.assoc
         tags = tags if tags is not None else self.tags
         att = att if att is not None else self.att
@@ -1075,9 +1102,15 @@ class KSyntaxPriority(KSentence):
         )
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KSyntaxPriority', 'priorities': [list(group) for group in self.priorities], 'att': self.att.to_dict()}
+        return {
+            'node': 'KSyntaxPriority',
+            'priorities': [list(group) for group in self.priorities],
+            'att': self.att.to_dict(),
+        }
 
-    def let(self, *, priorities: Optional[Iterable[Iterable[str]]] = None, att: Optional[KAtt] = None) -> 'KSyntaxPriority':
+    def let(
+        self, *, priorities: Optional[Iterable[Iterable[str]]] = None, att: Optional[KAtt] = None
+    ) -> 'KSyntaxPriority':
         priorities = priorities if priorities is not None else self.priorities
         att = att if att is not None else self.att
         return KSyntaxPriority(priorities=priorities, att=att)
@@ -1115,7 +1148,9 @@ class KBubble(KSentence):
             'att': self.att.to_dict(),
         }
 
-    def let(self, *, sentence_type: Optional[str] = None, content: Optional[str] = None, att: Optional[KAtt] = None) -> 'KBubble':
+    def let(
+        self, *, sentence_type: Optional[str] = None, content: Optional[str] = None, att: Optional[KAtt] = None
+    ) -> 'KBubble':
         sentence_type = sentence_type if sentence_type is not None else self.sentence_type
         content = content if content is not None else self.content
         att = att if att is not None else self.att
@@ -1175,7 +1210,14 @@ class KRule(KRuleLike):
             'att': self.att.to_dict(),
         }
 
-    def let(self, *, body: Optional[KInner] = None, requires: Optional[KInner] = None, ensures: Optional[KInner] = None, att: Optional[KAtt] = None) -> 'KRule':
+    def let(
+        self,
+        *,
+        body: Optional[KInner] = None,
+        requires: Optional[KInner] = None,
+        ensures: Optional[KInner] = None,
+        att: Optional[KAtt] = None,
+    ) -> 'KRule':
         body = body if body is not None else self.body
         requires = requires if requires is not None else self.requires
         ensures = ensures if ensures is not None else self.ensures
@@ -1219,7 +1261,14 @@ class KClaim(KRuleLike):
             'att': self.att.to_dict(),
         }
 
-    def let(self, *, body: Optional[KInner] = None, requires: Optional[KInner] = None, ensures: Optional[KInner] = None, att: Optional[KAtt] = None) -> 'KClaim':
+    def let(
+        self,
+        *,
+        body: Optional[KInner] = None,
+        requires: Optional[KInner] = None,
+        ensures: Optional[KInner] = None,
+        att: Optional[KAtt] = None,
+    ) -> 'KClaim':
         body = body if body is not None else self.body
         requires = requires if requires is not None else self.requires
         ensures = ensures if ensures is not None else self.ensures
@@ -1259,7 +1308,9 @@ class KContext(KSentence):
             'att': self.att.to_dict(),
         }
 
-    def let(self, *, body: Optional[KInner] = None, requires: Optional[KInner] = None, att: Optional[KAtt] = None) -> 'KContext':
+    def let(
+        self, *, body: Optional[KInner] = None, requires: Optional[KInner] = None, att: Optional[KAtt] = None
+    ) -> 'KContext':
         body = body if body is not None else self.body
         requires = requires if requires is not None else self.requires
         att = att if att is not None else self.att
@@ -1320,13 +1371,14 @@ class KFlatModule(KOuter, WithKAtt):
 
     @property
     def functions(self) -> List[KProduction]:
-
         def _is_non_free_constructor(label: str) -> bool:
             is_cell_map_constructor = label.endswith('CellMapItem') or label.endswith('CellMap_')
             is_builtin_data_constructor = label in {'_Set_', '_List_', '_Map_', 'SetItem', 'ListItem', '_|->_'}
             return is_cell_map_constructor or is_builtin_data_constructor
 
-        _functions = [prod for prod in self.syntax_productions if 'function' in prod.att.atts or 'functional' in prod.att.atts]
+        _functions = [
+            prod for prod in self.syntax_productions if 'function' in prod.att.atts or 'functional' in prod.att.atts
+        ]
         _functions = [f for f in _functions if not (f.klabel and _is_non_free_constructor(f.klabel.name))]
         return _functions
 
@@ -1395,9 +1447,15 @@ class KFlatModuleList(KOuter):
         return KFlatModuleList(mainModule=d['mainModule'], modules=(KFlatModule.from_dict(kfm) for kfm in d['term']))
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KFlatModuleList', 'mainModule': self.mainModule, 'term': [mod.to_dict() for mod in self.modules]}
+        return {
+            'node': 'KFlatModuleList',
+            'mainModule': self.mainModule,
+            'term': [mod.to_dict() for mod in self.modules],
+        }
 
-    def let(self, *, mainModule: Optional[str] = None, modules: Optional[Iterable[KFlatModule]] = None) -> 'KFlatModuleList':
+    def let(
+        self, *, mainModule: Optional[str] = None, modules: Optional[Iterable[KFlatModule]] = None
+    ) -> 'KFlatModuleList':
         mainModule = mainModule if mainModule is not None else self.mainModule
         modules = modules if modules is not None else self.modules
         return KFlatModuleList(mainModule=mainModule, modules=modules)
@@ -1434,7 +1492,9 @@ class KDefinition(KOuter, WithKAtt):
 
     main_module: InitVar[KFlatModule]
 
-    def __init__(self, main_module_name: str, modules: Iterable[KFlatModule], requires: Iterable[KRequire] = (), att=EMPTY_ATT):
+    def __init__(
+        self, main_module_name: str, modules: Iterable[KFlatModule], requires: Iterable[KRequire] = (), att=EMPTY_ATT
+    ):
         modules = tuple(modules)
         main_modules = [module for module in modules if module.name == main_module_name]
 
@@ -1525,14 +1585,15 @@ class KDefinition(KOuter, WithKAtt):
         #     syntax GeneratedCounterCell ::= "getGeneratedCounterCell" "(" GeneratedTopCell ")" [function]
         # We want the actual label one (3rd one in the list).
         if not sort.name.endswith('Cell'):
-            raise ValueError(f'Method production_for_cell_sort only intended to be called on sorts ending in "Cell", not: {sort}')
+            raise ValueError(
+                f'Method production_for_cell_sort only intended to be called on sorts ending in "Cell", not: {sort}'
+            )
         productions = [prod for prod in self.productions if prod.sort == sort and 'cell' in prod.att]
         if len(productions) != 1:
             raise ValueError(f'Expected 1 cell production for sort {sort}, not: {productions}')
         return productions[0]
 
     def empty_config(self, sort: KSort) -> KInner:
-
         def _kdefinition_empty_config(_sort):
             cell_prod = self.production_for_cell_sort(_sort)
             cell_klabel = cell_prod.klabel
@@ -1588,13 +1649,14 @@ def flatten_label(label: str, kast: KInner) -> List[KInner]:
 
 
 def constLabel(symbol):
-    return (lambda: symbol)
+    return lambda: symbol
 
 
 def assocWithUnit(assocJoin, unit):
     def _assocWithUnit(*args):
         newArgs = [arg for arg in args if arg != unit]
         return assocJoin.join(newArgs)
+
     return _assocWithUnit
 
 

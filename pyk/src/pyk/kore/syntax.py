@@ -153,7 +153,7 @@ class Kore(ABC):
 
     @classmethod
     def from_json(cls: Type[T], s: str) -> T:
-        return (cls.from_dict(json.loads(s)))
+        return cls.from_dict(json.loads(s))
 
     @staticmethod
     def _get_tag(dct: Mapping[str, Any]) -> str:
@@ -259,7 +259,6 @@ class SortApp(Sort):
 
 
 class Pattern(Kore, ABC):
-
     @abstractmethod
     def map_pattern(self: P, f: Callable[['Pattern'], 'Pattern']) -> P:
         ...
@@ -416,11 +415,16 @@ class App(Pattern):
 
     @property
     def text(self) -> str:
-        return self.symbol + ' ' + _braced(sort.text for sort in self.sorts) + ' ' + _parend(pattern.text for pattern in self.patterns)
+        return (
+            self.symbol
+            + ' '
+            + _braced(sort.text for sort in self.sorts)
+            + ' '
+            + _parend(pattern.text for pattern in self.patterns)
+        )
 
 
 class MLPattern(Pattern, ABC):
-
     @classmethod
     @property
     @abstractmethod
@@ -429,7 +433,6 @@ class MLPattern(Pattern, ABC):
 
 
 class MLConn(MLPattern, WithSort, ABC):
-
     @property
     @abstractmethod
     def patterns(self) -> Tuple[Pattern, ...]:
@@ -441,7 +444,6 @@ class MLConn(MLPattern, WithSort, ABC):
 
 
 class NullaryConn(MLConn, ABC):
-
     @property
     def dict(self) -> Dict[str, Any]:
         return {'tag': self._tag, 'sort': self.sort.dict}
@@ -990,11 +992,13 @@ class BinaryPred(MLPred, ABC):
 
     @property
     def text(self) -> str:
-        return ' '.join([
-            self._symbol,
-            _braced((self.op_sort.text, self.sort.text)),
-            _parend((self.left.text, self.right.text)),
-        ])
+        return ' '.join(
+            [
+                self._symbol,
+                _braced((self.op_sort.text, self.sort.text)),
+                _parend((self.left.text, self.right.text)),
+            ]
+        )
 
 
 @final
@@ -1261,7 +1265,6 @@ class WithAttrs(ABC):
 
 
 class Sentence(Kore, WithAttrs, ABC):
-
     @classmethod
     def from_dict(cls: Type['Sentence'], dct: Mapping[str, Any]) -> 'Sentence':
         return unsupported()
@@ -1301,11 +1304,13 @@ class Import(Sentence):
 
     @property
     def text(self) -> str:
-        return ' '.join([
-            'import',
-            self.module_name,
-            _brackd(attr.text for attr in self.attrs),
-        ])
+        return ' '.join(
+            [
+                'import',
+                self.module_name,
+                _brackd(attr.text for attr in self.attrs),
+            ]
+        )
 
 
 @final
@@ -1354,12 +1359,14 @@ class SortDecl(Sentence):
 
     @property
     def text(self) -> str:
-        return ' '.join([
-            'hooked-sort' if self.hooked else 'sort',
-            self.name,
-            _braced(var.text for var in self.vars),
-            _brackd(attr.text for attr in self.attrs),
-        ])
+        return ' '.join(
+            [
+                'hooked-sort' if self.hooked else 'sort',
+                self.name,
+                _braced(var.text for var in self.vars),
+                _brackd(attr.text for attr in self.attrs),
+            ]
+        )
 
 
 @final
@@ -1405,7 +1412,9 @@ class SymbolDecl(Sentence):
     attrs: Tuple[Attr, ...]
     hooked: bool
 
-    def __init__(self, symbol: Symbol, sort_params: Iterable[Sort], sort: Sort, attrs: Iterable[Attr] = (), *, hooked=False):
+    def __init__(
+        self, symbol: Symbol, sort_params: Iterable[Sort], sort: Sort, attrs: Iterable[Attr] = (), *, hooked=False
+    ):
         object.__setattr__(self, 'symbol', symbol)
         object.__setattr__(self, 'sort_params', tuple(sort_params))
         object.__setattr__(self, 'sort', sort)
@@ -1446,14 +1455,16 @@ class SymbolDecl(Sentence):
 
     @property
     def text(self) -> str:
-        return ' '.join([
-            'hooked-symbol' if self.hooked else 'symbol',
-            self.symbol.text,
-            _parend(sort.text for sort in self.sort_params),
-            ':',
-            self.sort.text,
-            _brackd(attr.text for attr in self.attrs),
-        ])
+        return ' '.join(
+            [
+                'hooked-symbol' if self.hooked else 'symbol',
+                self.symbol.text,
+                _parend(sort.text for sort in self.sort_params),
+                ':',
+                self.sort.text,
+                _brackd(attr.text for attr in self.attrs),
+            ]
+        )
 
 
 @final
@@ -1518,18 +1529,20 @@ class AliasDecl(Sentence):
 
     @property
     def text(self) -> str:
-        return ' '.join([
-            'alias',
-            self.alias.text,
-            _parend(sort.text for sort in self.sort_params),
-            ':',
-            self.sort.text,
-            'where',
-            self.left.text,
-            ':=',
-            self.right.text,
-            _brackd(attr.text for attr in self.attrs),
-        ])
+        return ' '.join(
+            [
+                'alias',
+                self.alias.text,
+                _parend(sort.text for sort in self.sort_params),
+                ':',
+                self.sort.text,
+                'where',
+                self.left.text,
+                ':=',
+                self.right.text,
+                _brackd(attr.text for attr in self.attrs),
+            ]
+        )
 
 
 class AxiomLike(Sentence, ABC):
@@ -1544,12 +1557,14 @@ class AxiomLike(Sentence, ABC):
 
     @property
     def text(self) -> str:
-        return ' '.join([
-            self._label,
-            _braced(var.text for var in self.vars),
-            self.pattern.text,
-            _brackd(attr.text for attr in self.attrs),
-        ])
+        return ' '.join(
+            [
+                self._label,
+                _braced(var.text for var in self.vars),
+                self.pattern.text,
+                _brackd(attr.text for attr in self.attrs),
+            ]
+        )
 
 
 @final
@@ -1682,9 +1697,9 @@ class Module(Kore, WithAttrs):
     @property
     def text(self) -> str:
         return '\n'.join(
-            [f'module {self.name}'] +                                   # noqa: W504
-            [f'    {sentence.text}' for sentence in self.sentences] +   # noqa: W504
-            ['endmodule ' + _brackd(attr.text for attr in self.attrs)]  # noqa: W504
+            [f'module {self.name}']
+            + [f'    {sentence.text}' for sentence in self.sentences]
+            + ['endmodule ' + _brackd(attr.text for attr in self.attrs)]
         )
 
 
@@ -1698,7 +1713,9 @@ class Definition(Kore, WithAttrs):
         object.__setattr__(self, 'modules', tuple(modules))
         object.__setattr__(self, 'attrs', tuple(attrs))
 
-    def let(self, *, modules: Optional[Iterable[Module]] = None, attrs: Optional[Iterable[Attr]] = None) -> 'Definition':
+    def let(
+        self, *, modules: Optional[Iterable[Module]] = None, attrs: Optional[Iterable[Attr]] = None
+    ) -> 'Definition':
         modules = modules if modules is not None else self.modules
         attrs = attrs if attrs is not None else self.attrs
         return Definition(modules=modules, attrs=attrs)
@@ -1721,6 +1738,9 @@ class Definition(Kore, WithAttrs):
 
     @property
     def text(self) -> str:
-        return '\n\n'.join([
-            _brackd(attr.text for attr in self.attrs),
-        ] + [module.text for module in self.modules])
+        return '\n\n'.join(
+            [
+                _brackd(attr.text for attr in self.attrs),
+            ]
+            + [module.text for module in self.modules]
+        )

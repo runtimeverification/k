@@ -34,7 +34,6 @@ def node_dicts(n: int) -> List[Dict[str, Any]]:
 
 
 def edge_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
-
     def _make_edge_dict(i, j, depth=1, condition=Bool.true):
         return {'source': nid(i), 'target': nid(j), 'condition': condition.to_dict(), 'depth': depth}
 
@@ -42,14 +41,10 @@ def edge_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
 
 
 def cover_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
-    return [
-        {'source': nid(i), 'target': nid(j), 'condition': Bool.true.to_dict(), 'depth': 1}
-        for i, j in edges
-    ]
+    return [{'source': nid(i), 'target': nid(j), 'condition': Bool.true.to_dict(), 'depth': 1} for i, j in edges]
 
 
 class KCFGTestCase(TestCase):
-
     def test_from_dict_single_node(self):
         # Given
         d = {'nodes': node_dicts(1)}
@@ -280,7 +275,7 @@ class KCFGTestCase(TestCase):
             'target': [nid(3)],
             'nodes': node_dicts(4),
             'edges': edge_dicts((0, 1), (1, 2)),
-            'aliases': {'foo': nid(1)}
+            'aliases': {'foo': nid(1)},
         }
 
         cfg = KCFG.from_dict(d)
@@ -316,7 +311,8 @@ class KCFGTestCase(TestCase):
             'target': [nid(6)],
             'nodes': node_dicts(12),
             'aliases': {'foo': nid(3), 'bar': nid(3)},
-                                                             # Each of the branching edges have given depth=0 # noqa: E131
+            # Each of the branching edges have given depth=0
+            # fmt: off
             'edges': edge_dicts((0, 1), (1, 2, 5), (2, 3),   # Initial Linear segment
                                 (3, 4, 0, mlEquals(KVariable('x'), token(4))), (4, 5), (5, 2),   # Loops back
                                 (3, 5, 0, mlEquals(KVariable('x'), token(5))),                   # Go to previous non-terminal node not as loop
@@ -324,7 +320,8 @@ class KCFGTestCase(TestCase):
                                 (3, 7, 0, mlEquals(KVariable('x'), token(7))), (7, 6),           # Go to previous terminal node not as loop
                                 (3, 11, 0, mlEquals(KVariable('x'), token(11))), (11, 8)         # Covered
                                 ),
-            'covers': cover_dicts((8, 11)),                  # Loops back
+            # fmt: on
+            'covers': cover_dicts((8, 11)),  # Loops back
             'expanded': [nid(i) for i in [0, 1, 2, 3, 4, 5, 7, 11]],
             'verified': edge_dicts((1, 2)),
         }
@@ -335,40 +332,41 @@ class KCFGTestCase(TestCase):
 
         self.maxDiff = None
         actual = '\n'.join(cfg.pretty(MockKPrint())) + '\n'
-        self.assertMultiLineEqual(actual,
-                                  f"{_short_hash(0)} (init, expanded)\n"
-                                  f"│  (1 step)\n"
-                                  f"├  {_short_hash(1)} (expanded)\n"
-                                  f"│  \033[1m\33[32m(verified)\033[0m\033[0m\n"
-                                  f"│  (5 steps)\n"
-                                  f"├  {_short_hash(2)} (expanded)\n"
-                                  f"│  (1 step)\n"
-                                  f"├  {_short_hash(3)} (expanded, @bar, @foo)\n"
-                                  f"┣━ {_short_hash(4)} (expanded)    _==K_ ( x , 4 )\n"
-                                  f"┃   │  (1 step)\n"
-                                  f"┃   ├  {_short_hash(5)} (expanded)\n"
-                                  f"┃   │  (1 step)\n"
-                                  f"┃   ├  {_short_hash(2)} (expanded)\n"
-                                  f"┃   ┊ (looped back)\n"
-                                  f"┃\n"
-                                  f"┣━ {_short_hash(5)} (expanded)    _==K_ ( x , 5 )\n"
-                                  f"┃   ┊ (continues as previously)\n"
-                                  f"┃\n"
-                                  f"┣━ {_short_hash(6)} (target, leaf)    _==K_ ( x , 6 )\n"
-                                  f"┃\n"
-                                  f"┣━ {_short_hash(7)} (expanded)    _==K_ ( x , 7 )\n"
-                                  f"┃   │  (1 step)\n"
-                                  f"┃   └  {_short_hash(6)} (target, leaf)\n"
-                                  f"┃\n"
-                                  f"┗━ {_short_hash(11)} (expanded)    _==K_ ( x , 11 )\n"
-                                  f"    │  (1 step)\n"
-                                  f"    ├  {_short_hash(8)} (leaf)\n"
-                                  f"    ┊  constraint: true\n"
-                                  f"    ┊  subst:\n"
-                                  f"    ┊    V11 |-> 8\n"
-                                  f"    └╌ {_short_hash(11)} (expanded)\n"
-                                  f"        ┊ (looped back)\n"
-                                  f"\n"
-                                  f"\033[1m{_short_hash(10)} (frontier, leaf)\033[0m\n"
-                                  f"\033[1m{_short_hash(9)} (frontier, leaf)\033[0m\n"
-                                  )
+        self.assertMultiLineEqual(
+            actual,
+            f"{_short_hash(0)} (init, expanded)\n"
+            f"│  (1 step)\n"
+            f"├  {_short_hash(1)} (expanded)\n"
+            f"│  \033[1m\33[32m(verified)\033[0m\033[0m\n"
+            f"│  (5 steps)\n"
+            f"├  {_short_hash(2)} (expanded)\n"
+            f"│  (1 step)\n"
+            f"├  {_short_hash(3)} (expanded, @bar, @foo)\n"
+            f"┣━ {_short_hash(4)} (expanded)    _==K_ ( x , 4 )\n"
+            f"┃   │  (1 step)\n"
+            f"┃   ├  {_short_hash(5)} (expanded)\n"
+            f"┃   │  (1 step)\n"
+            f"┃   ├  {_short_hash(2)} (expanded)\n"
+            f"┃   ┊ (looped back)\n"
+            f"┃\n"
+            f"┣━ {_short_hash(5)} (expanded)    _==K_ ( x , 5 )\n"
+            f"┃   ┊ (continues as previously)\n"
+            f"┃\n"
+            f"┣━ {_short_hash(6)} (target, leaf)    _==K_ ( x , 6 )\n"
+            f"┃\n"
+            f"┣━ {_short_hash(7)} (expanded)    _==K_ ( x , 7 )\n"
+            f"┃   │  (1 step)\n"
+            f"┃   └  {_short_hash(6)} (target, leaf)\n"
+            f"┃\n"
+            f"┗━ {_short_hash(11)} (expanded)    _==K_ ( x , 11 )\n"
+            f"    │  (1 step)\n"
+            f"    ├  {_short_hash(8)} (leaf)\n"
+            f"    ┊  constraint: true\n"
+            f"    ┊  subst:\n"
+            f"    ┊    V11 |-> 8\n"
+            f"    └╌ {_short_hash(11)} (expanded)\n"
+            f"        ┊ (looped back)\n"
+            f"\n"
+            f"\033[1m{_short_hash(10)} (frontier, leaf)\033[0m\n"
+            f"\033[1m{_short_hash(9)} (frontier, leaf)\033[0m\n",
+        )

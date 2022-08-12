@@ -2,13 +2,7 @@ from typing import Any, Dict
 from unittest import TestCase
 from unittest.mock import patch
 
-from pyk.kore.client import (
-    DirectResult,
-    DirectState,
-    JsonRpcClient,
-    KoreClient,
-    StopReason,
-)
+from pyk.kore.client import DirectResult, DirectState, JsonRpcClient, KoreClient, StopReason
 from pyk.kore.syntax import DV, And, App, Bottom, Pattern, SortApp, String, Top
 
 
