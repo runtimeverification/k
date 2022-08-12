@@ -107,7 +107,8 @@ class MinimizeTermTest(TestCase):
 class BoolMlPredConversionsTest(TestCase):
 
     # TODO: We'd like for bool_to_ml_pred and ml_pred_to_bool to be somewhat invertible.
-    test_data_1 = (
+
+    test_data_ml_pred_to_bool = (
         ('equals-true', False, KApply(KLabel('#Equals', [Sorts.BOOL, Sorts.GENERATED_TOP_CELL]), [Bool.true, f(a)]), f(a)),
         ('top-sort-bool', False, KApply(KLabel('#Top', [Sorts.BOOL])), Bool.true),
         ('top-no-sort', False, KApply('#Top'), Bool.true),
@@ -122,18 +123,19 @@ class BoolMlPredConversionsTest(TestCase):
         ('ceil-set-concat-sort', True, KApply(KLabel('#Not', [Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('#Ceil', [KSort('Set'), Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('_Set_'), [KVariable('_'), KVariable('_')])])]), Bool.notBool(KVariable('Ceil_0f9c9997'))),
         ('exists-equal-int', True, KApply(KLabel('#Exists', [Sorts.INT, Sorts.BOOL]), [KVariable('X'), KApply('_==Int_', [KVariable('X'), KVariable('Y')])]), KVariable('Exists_6acf2557')),
     )
-    test_data_2 = (
-        ('equals-true', False, KApply(KLabel('#Equals', [Sorts.BOOL, Sorts.K]), [Bool.true, f(a)]), f(a)),
-    )
 
     def test_ml_pred_to_bool(self):
-        for name, unsafe, ml_pred, bool_expected in self.test_data_1:
+        for name, unsafe, ml_pred, bool_expected in self.test_data_ml_pred_to_bool:
             with self.subTest(name):
                 bool_actual = ml_pred_to_bool(ml_pred, unsafe=unsafe)
                 self.assertEqual(bool_actual, bool_expected)
 
+    test_data_bool_to_ml_pred = (
+        ('equals-true', False, KApply(KLabel('#Equals', [Sorts.BOOL, Sorts.K]), [Bool.true, f(a)]), f(a)),
+    )
+
     def test_bool_to_ml_pred(self):
-        for name, unsafe, ml_pred_expected, bool_in in self.test_data_2:
+        for name, unsafe, ml_pred_expected, bool_in in self.test_data_bool_to_ml_pred:
             with self.subTest(name):
                 ml_pred_actual = bool_to_ml_pred(bool_in)
                 self.assertEqual(ml_pred_actual, ml_pred_expected)
