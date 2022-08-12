@@ -221,11 +221,14 @@ class BranchingResult(ExecuteResult, Iterable[BranchingState]):
         assert all(state['depth'] == state_list[0]['depth'] for state in state_list)
         depth = state_list[0]['depth']
 
-        states = (BranchingState(
-            pattern=Pattern.from_dict(state['term']),
-            substitution=Pattern.from_dict(state['condition']['substitution']),
-            predicate=Pattern.from_dict(state['condition']['predicate']),
-        ) for state in state_list)
+        states = (
+            BranchingState(
+                pattern=Pattern.from_dict(state['term']),
+                substitution=Pattern.from_dict(state['condition']['substitution']),
+                predicate=Pattern.from_dict(state['condition']['predicate']),
+            )
+            for state in state_list
+        )
 
         return BranchingResult(states=states, depth=depth)
 
@@ -270,12 +273,14 @@ class KoreClient(ContextManager['KoreClient']):
         cut_point_rules: Optional[Iterable[str]] = None,
         terminal_rules: Optional[Iterable[str]] = None,
     ) -> ExecuteResult:
-        params = filter_none({
-            'max-depth': max_depth,
-            'cut-point-rules': list(cut_point_rules) if cut_point_rules is not None else None,
-            'terminal-rules': list(terminal_rules) if terminal_rules is not None else None,
-            'state': self._state(pattern),
-        })
+        params = filter_none(
+            {
+                'max-depth': max_depth,
+                'cut-point-rules': list(cut_point_rules) if cut_point_rules is not None else None,
+                'terminal-rules': list(terminal_rules) if terminal_rules is not None else None,
+                'state': self._state(pattern),
+            }
+        )
 
         result = self._request('execute', **params)
         return ExecuteResult.from_dict(result)

@@ -7,7 +7,6 @@ from .utils import JSON_TEST_FILES, KORE_PASS_TEST_FILES
 
 
 class ParserTest(TestCase):
-
     def test_parse_kore(self):
         for test_file in KORE_PASS_TEST_FILES:
             with self.subTest(i=test_file.name):

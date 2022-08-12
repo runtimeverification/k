@@ -1,17 +1,6 @@
 import hashlib
 import string
-from typing import (
-    Any,
-    Dict,
-    Hashable,
-    Iterable,
-    Iterator,
-    List,
-    Mapping,
-    Optional,
-    Tuple,
-    TypeVar,
-)
+from typing import Any, Dict, Hashable, Iterable, Iterator, List, Mapping, Optional, Tuple, TypeVar
 
 T = TypeVar('T')
 K = TypeVar('K')
@@ -150,6 +139,7 @@ def is_hexstring(x: str) -> bool:
 
 
 # Hashes
+
 
 def hash_str(x: Any) -> str:
     hash = hashlib.sha256()
