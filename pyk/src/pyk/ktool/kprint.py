@@ -42,7 +42,6 @@ from ..kast import (
 from ..kore.parser import KoreParser
 from ..kore.syntax import Kore
 from ..prelude import Bool, Labels, Sorts
-from ..utils import hash_str
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -77,7 +76,6 @@ class KPrint:
     _profile: bool
 
     _definition: Optional[KDefinition]
-    _definition_hash: Optional[str]
     _symbol_table: Optional[SymbolTable]
 
     def __init__(self, definition_dir: Path, use_directory: Optional[Path] = None, profile: bool = False) -> None:
@@ -101,9 +99,7 @@ class KPrint:
 
     @property
     def definition_hash(self) -> str:
-        if not self._definition_hash:
-            self._definition_hash = hash_str(self.definition)
-        return self._definition_hash
+        return self.definition.hash
 
     @property
     def symbol_table(self) -> SymbolTable:
