@@ -136,8 +136,9 @@ public class KastFrontEnd extends FrontEnd {
                     LabelInfo labelInfo = new LabelInfoFromModule(mod);
                     SortInfo sortInfo = SortInfo.fromModule(mod);
 
-                    Rule r = (Rule) new CloseCells(configInfo, sortInfo, labelInfo).close(Rule.apply(parsed, BooleanUtils.TRUE, BooleanUtils.TRUE, Att.empty()));
-                    r = (Rule) new ResolveSemanticCasts(false).resolve(r);
+                    Rule r = Rule.apply(parsed, BooleanUtils.TRUE, BooleanUtils.TRUE, Att.empty());
+                    r = (Rule) new CloseCells(configInfo, sortInfo, labelInfo).close(r);
+                    r = (Rule) new ResolveSemanticCasts(false).resolve(r); // move casts to side condition then discard them
 
                     kprint.get().prettyPrint(def.kompiledDefinition, unparsingMod, s -> kprint.get().outputFile(s), r.body(), sort);
                 }
