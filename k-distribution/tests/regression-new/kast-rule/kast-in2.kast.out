@@ -1,1 +1,1 @@
-`<generatedTop>`(`<k>`(#Equals(#token("3","Int"),#token("4","Int"))=>#token("2","Int")),V0)
+`<k>`(#Equals(#token("3","Int"),#token("4","Int"))=>#token("2","Int"))

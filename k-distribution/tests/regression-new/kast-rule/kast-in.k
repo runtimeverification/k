@@ -11,5 +11,6 @@ endmodule
 
 module KAST-IN
   imports KAST-IN-SYNTAX
+  imports INT
   configuration <k color="green"> $PGM:Pgm </k>
 endmodule
