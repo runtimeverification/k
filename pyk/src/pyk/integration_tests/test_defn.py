@@ -105,3 +105,47 @@ class DefnTest(KProveTest):
 
         self.assertEqual(empty_config_generated_top_printed, self.kprove.pretty_print(empty_config_generated_top))
         self.assertEqual(empty_config_t_printed, self.kprove.pretty_print(empty_config_t))
+
+    def test_init_config(self):
+        init_config_generated_top = self.kprove.definition.init_config(Sorts.GENERATED_TOP_CELL)
+        init_config_t = self.kprove.definition.init_config(KSort('TCell'))
+        init_config_state = self.kprove.definition.init_config(KSort('StateCell'))
+
+        # fmt: off
+        empty_config_generated_top_printed = (
+            f'<generatedTop>\n'
+            f'  <T>\n'
+            f'    <k>\n'
+            f'      .\n'
+            f'    </k>\n'
+            f'    <state>\n'
+            f'      .Map\n'
+            f'    </state>\n'
+            f'  </T>\n'
+            f'  <generatedCounter>\n'
+            f'    GENERATEDCOUNTER_CELL\n'
+            f'  </generatedCounter>\n'
+            f'</generatedTop>\n'
+        )
+
+        empty_config_t_printed = (
+            f'<T>\n'
+            f'  <k>\n'
+            f'    .\n'
+            f'  </k>\n'
+            f'  <state>\n'
+            f'    .Map\n'
+            f'  </state>\n'
+            f'</T>\n'
+        )
+
+        empty_config_state_printed = (
+            f'<state>\n'
+            f'  .Map\n'
+            f'</state>\n'
+        )
+        # fmt: on
+
+        self.assertEqual(init_config_generated_top_printed, self.kprove.pretty_print(init_config_generated_top))
+        self.assertEqual(init_config_t_printed, self.kprove.pretty_print(init_config_t))
+        self.assertEqual(init_config_state_printed, self.kprove.pretty_print(init_config_state))
