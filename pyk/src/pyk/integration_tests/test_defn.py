@@ -135,7 +135,7 @@ class DefnTest(KProveTest):
                     f'    </state>\n'
                     f'  </T>\n'
                     f'  <generatedCounter>\n'
-                    f'    GENERATEDCOUNTER_CELL\n'
+                    f'    0\n'
                     f'  </generatedCounter>\n'
                     f'</generatedTop>'
                 ),
