@@ -1622,14 +1622,17 @@ class KDefinition(KOuter, WithKAtt):
         return _kdefinition_empty_config(sort)
 
     def init_config(self, sort: KSort, config_var_map: Optional[KInner] = None) -> KInner:
+
         if not config_var_map:
             config_var_map = KApply('.Map')
+
         init_prods = [prod for prod in self.syntax_productions if 'initializer' in prod.att]
-        # init_rules = [rule for rule in self.rules if 'initializer' in rule.att]
         _init_prod = [prod for prod in init_prods if prod.sort == sort]
         if len(_init_prod) != 1:
             raise ValueError(f'Did not find unique initializer for sort: {sort}')
         init_prod = _init_prod[0]
+
+        init_config: KInner
         prod_klabel = init_prod.klabel
         assert prod_klabel is not None
         arg_sorts = [nt.sort for nt in init_prod.items if type(nt) is KNonTerminal]
@@ -1639,6 +1642,15 @@ class KDefinition(KOuter, WithKAtt):
             init_config = KApply(prod_klabel, [config_var_map])
         else:
             raise ValueError(f'Cannot handle initializer for label: {prod_klabel}')
+
+        init_rewrites = [rule.body for rule in self.rules if 'initializer' in rule.att]
+        old_init_config: Optional[KInner] = None
+        while init_config != old_init_config:
+            old_init_config = init_config
+            for rew in init_rewrites:
+                assert type(rew) is KRewrite
+                init_config = rew(init_config)
+
         return init_config
 
 
