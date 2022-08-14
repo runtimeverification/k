@@ -156,6 +156,6 @@ class DefnTest(KProveTest):
 
         for name, sort, map, expected in test_data:
             with self.subTest(name):
-                init_config = self.kprove.definition.init_config(sort)
+                init_config = self.kprove.definition.init_config(sort, config_var_map=map)
                 actual = self.kprove.pretty_print(init_config)
                 self.assertEqual(actual, expected)

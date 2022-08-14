@@ -1617,18 +1617,24 @@ class KDefinition(KOuter, WithKAtt):
 
         return _kdefinition_empty_config(sort)
 
-    def init_config(self, sort: KSort) -> KInner:
+    def init_config(self, sort: KSort, config_var_map: Optional[KInner] = None) -> KInner:
+        if not config_var_map:
+            config_var_map = KApply('.Map')
         init_prods = [prod for prod in self.syntax_productions if 'initializer' in prod.att]
         # init_rules = [rule for rule in self.rules if 'initializer' in rule.att]
         _init_prod = [prod for prod in init_prods if prod.sort == sort]
         if len(_init_prod) != 1:
             raise ValueError(f'Did not find unique initializer for sort: {sort}')
         init_prod = _init_prod[0]
-        if len(list(nt for nt in init_prod.items if type(nt) is KNonTerminal)) > 0:
-            raise ValueError(f'Cannot handle inializer cells with arguments yet: {sort}')
         prod_klabel = init_prod.klabel
         assert prod_klabel is not None
-        init_config = KApply(prod_klabel)
+        arg_sorts = [nt.sort for nt in init_prod.items if type(nt) is KNonTerminal]
+        if len(arg_sorts) == 0:
+            init_config = KApply(prod_klabel)
+        elif len(arg_sorts) == 1 and arg_sorts[0] == KSort('Map'):
+            init_config = KApply(prod_klabel, [config_var_map])
+        else:
+            raise ValueError(f'Cannot handle initializer for label: {prod_klabel}')
         return init_config
 
 
