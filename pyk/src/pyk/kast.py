@@ -1571,6 +1571,10 @@ class KDefinition(KOuter, WithKAtt):
     def constructors(self) -> List[KProduction]:
         return [prod for module in self.modules for prod in module.constructors]
 
+    @property
+    def rules(self) -> List[KRule]:
+        return [rule for module in self.modules for rule in module.rules]
+
     def production_for_klabel(self, klabel: KLabel) -> KProduction:
         productions = [prod for prod in self.productions if prod.klabel and prod.klabel == klabel]
         if len(productions) != 1:
