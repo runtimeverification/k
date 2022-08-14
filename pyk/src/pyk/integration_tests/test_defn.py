@@ -71,81 +71,91 @@ class DefnTest(KProveTest):
         self.assertTop(result)
 
     def test_empty_config(self):
-        empty_config_generated_top = self.kprove.definition.empty_config(Sorts.GENERATED_TOP_CELL)
-        empty_config_t = self.kprove.definition.empty_config(KSort('TCell'))
-
-        empty_config_generated_top_printed = (
-            f'<generatedTop>\n'
-            f'  <T>\n'
-            f'    <k>\n'
-            f'      K_CELL\n'
-            f'    </k>\n'
-            f'    <state>\n'
-            f'      STATE_CELL\n'
-            f'    </state>\n'
-            f'  </T>\n'
-            f'  <generatedCounter>\n'
-            f'    GENERATEDCOUNTER_CELL\n'
-            f'  </generatedCounter>\n'
-            f'</generatedTop>'
+        test_data = (
+            (
+                'generatedTop-no-map',
+                Sorts.GENERATED_TOP_CELL,
+                (
+                    f'<generatedTop>\n'
+                    f'  <T>\n'
+                    f'    <k>\n'
+                    f'      K_CELL\n'
+                    f'    </k>\n'
+                    f'    <state>\n'
+                    f'      STATE_CELL\n'
+                    f'    </state>\n'
+                    f'  </T>\n'
+                    f'  <generatedCounter>\n'
+                    f'    GENERATEDCOUNTER_CELL\n'
+                    f'  </generatedCounter>\n'
+                    f'</generatedTop>'
+                ),
+            ),
+            (
+                'TCell-no-map',
+                KSort('TCell'),
+                (
+                    f'<T>\n'
+                    f'  <k>\n'
+                    f'    K_CELL\n'
+                    f'  </k>\n'
+                    f'  <state>\n'
+                    f'    STATE_CELL\n'
+                    f'  </state>\n'
+                    f'</T>'
+                ),
+            ),
+            (
+                'stateCell-no-map',
+                KSort('StateCell'),
+                (f'<state>\n' f'  STATE_CELL\n' f'</state>'),
+            ),
         )
 
-        # fmt: off
-        empty_config_t_printed = (
-            f'<T>\n'
-            f'  <k>\n'
-            f'    K_CELL\n'
-            f'  </k>\n'
-            f'  <state>\n'
-            f'    STATE_CELL\n'
-            f'  </state>\n'
-            f'</T>'
-        )
-        # fmt: on
-
-        self.assertEqual(empty_config_generated_top_printed, self.kprove.pretty_print(empty_config_generated_top))
-        self.assertEqual(empty_config_t_printed, self.kprove.pretty_print(empty_config_t))
+        for name, sort, expected in test_data:
+            with subTest(name):
+                empty_config = self.kprove.definition.empty_config(sort)
+                actual = self.kprove.pretty_print(empty_config)
+                self.assertEqual(actual, expected)
 
     def test_init_config(self):
-        init_config_generated_top = self.kprove.definition.init_config(Sorts.GENERATED_TOP_CELL)
-        init_config_t = self.kprove.definition.init_config(KSort('TCell'))
-        init_config_state = self.kprove.definition.init_config(KSort('StateCell'))
-
-        # fmt: off
-        empty_config_generated_top_printed = (
-            f'<generatedTop>\n'
-            f'  <T>\n'
-            f'    <k>\n'
-            f'      .\n'
-            f'    </k>\n'
-            f'    <state>\n'
-            f'      .Map\n'
-            f'    </state>\n'
-            f'  </T>\n'
-            f'  <generatedCounter>\n'
-            f'    GENERATEDCOUNTER_CELL\n'
-            f'  </generatedCounter>\n'
-            f'</generatedTop>\n'
+        test_data = (
+            (
+                'generatedTop-no-map',
+                Sorts.GENERATED_TOP_CELL,
+                KApply('.Map'),
+                (
+                    f'<generatedTop>\n'
+                    f'  <T>\n'
+                    f'    <k>\n'
+                    f'      .\n'
+                    f'    </k>\n'
+                    f'    <state>\n'
+                    f'      .Map\n'
+                    f'    </state>\n'
+                    f'  </T>\n'
+                    f'  <generatedCounter>\n'
+                    f'    GENERATEDCOUNTER_CELL\n'
+                    f'  </generatedCounter>\n'
+                    f'</generatedTop>'
+                ),
+            ),
+            (
+                'TCell-no-map',
+                KSort('TCell'),
+                KApply('.Map'),
+                (f'<T>\n' f'  <k>\n' f'    .\n' f'  </k>\n' f'  <state>\n' f'    .Map\n' f'  </state>\n' f'</T>'),
+            ),
+            (
+                'stateCell-no-map',
+                KSort('StateCell'),
+                KApply('.Map'),
+                (f'<state>\n' f'  .Map\n' f'</state>'),
+            ),
         )
 
-        empty_config_t_printed = (
-            f'<T>\n'
-            f'  <k>\n'
-            f'    .\n'
-            f'  </k>\n'
-            f'  <state>\n'
-            f'    .Map\n'
-            f'  </state>\n'
-            f'</T>\n'
-        )
-
-        empty_config_state_printed = (
-            f'<state>\n'
-            f'  .Map\n'
-            f'</state>\n'
-        )
-        # fmt: on
-
-        self.assertEqual(init_config_generated_top_printed, self.kprove.pretty_print(init_config_generated_top))
-        self.assertEqual(init_config_t_printed, self.kprove.pretty_print(init_config_t))
-        self.assertEqual(init_config_state_printed, self.kprove.pretty_print(init_config_state))
+        for name, sort, map, expected in test_data:
+            with subTest(name):
+                init_config = self.kprove.definition.init_config(sort)
+                actual = self.kprove.pretty_print(init_config)
+                self.assertEqual(actual, expected)
