@@ -44,6 +44,7 @@ class KIT:
     def arg_list_of(elem_type, delim=';'):
         def parse(s):
             return [elem_type(elem) for elem in s.split(delim)]
+
         return parse
 
     @staticmethod
@@ -54,6 +55,7 @@ class KIT:
             if length != 2:
                 raise ValueError(f'Expected 2 elements, found {length}')
             return fst_type(elems[0]), snd_type(elems[1])
+
         return parse
 
     @staticmethod
@@ -64,17 +66,31 @@ class KIT:
         ret = ArgumentParser(add_help=False)
         ret.add_argument('--cfg-id', type=str, dest='cfg-id', help='CFG identifier to work with.')
         ret.add_argument('--minimize', default=True, action='store_true', help='Minimize output before printing.')
-        ret.add_argument('--no-minimize', dest='minimize', action='store_false', help='Do not minimize output before printing.')
+        ret.add_argument(
+            '--no-minimize', dest='minimize', action='store_false', help='Do not minimize output before printing.'
+        )
         ret.add_argument('-o', '--output', type=FileType('w'), default='-', help='File to write to.')
         return ret
 
     def create_argument_parser(self) -> ArgumentParser:
         argument_parser = ArgumentParser()
         argument_parser.add_argument('summary-dir', type=str, help='Where to store summarized output.')
-        argument_parser.add_argument('-v', '--verbose', action='count', help='Verbosity level, repeat for more verbosity.')
-        argument_parser.add_argument('--log-format', type=str, default='%(levelname)s %(asctime)s %(name)s - %(message)s', help='Log format string. See https://docs.python.org/3/library/logging.html#logging.Formatter')
+        argument_parser.add_argument(
+            '-v', '--verbose', action='count', help='Verbosity level, repeat for more verbosity.'
+        )
+        argument_parser.add_argument(
+            '--log-format',
+            type=str,
+            default='%(levelname)s %(asctime)s %(name)s - %(message)s',
+            help='Log format string. See https://docs.python.org/3/library/logging.html#logging.Formatter',
+        )
         argument_parser.add_argument('--log-file', type=FileType('w'), help='File to write log to.')
-        argument_parser.add_argument('--bug-report', default=False, action='store_true', help='Produce Haskell backend bug reports for each proof run.')
+        argument_parser.add_argument(
+            '--bug-report',
+            default=False,
+            action='store_true',
+            help='Produce Haskell backend bug reports for each proof run.',
+        )
 
         command_subparsers = argument_parser.add_subparsers(dest='command')
         self.create_subparsers(command_subparsers)
@@ -83,53 +99,95 @@ class KIT:
     def create_subparsers(self, command_subparsers) -> None:
         self.create_init_subparser(command_subparsers)
 
-        list_cfgs_subparser = command_subparsers.add_parser('list-cfgs', help='List the CFGs in the summary.', parents=[self.generic_args()])
+        list_cfgs_subparser = command_subparsers.add_parser(
+            'list-cfgs', help='List the CFGs in the summary.', parents=[self.generic_args()]
+        )
         list_cfgs_subparser.set_defaults(callback_cfg=list_cfgs)
 
-        show_cfg_subparser = command_subparsers.add_parser('show-cfg', help='Show the details of a CFG.', parents=[self.generic_args()])
+        show_cfg_subparser = command_subparsers.add_parser(
+            'show-cfg', help='Show the details of a CFG.', parents=[self.generic_args()]
+        )
         show_cfg_subparser.set_defaults(callback_cfg=show_cfg)
 
-        show_edge_subparser = command_subparsers.add_parser('show-edge', help='Show the details of a CFG.', parents=[self.generic_args()])
+        show_edge_subparser = command_subparsers.add_parser(
+            'show-edge', help='Show the details of a CFG.', parents=[self.generic_args()]
+        )
         show_edge_subparser.set_defaults(callback_cfg=show_edge)
-        show_edge_subparser.add_argument('edge', type=KIT.arg_pair_of(str, str), help='"source,target" pair identifying edge to pretty-print.')
+        show_edge_subparser.add_argument(
+            'edge', type=KIT.arg_pair_of(str, str), help='"source,target" pair identifying edge to pretty-print.'
+        )
 
-        show_node_subparser = command_subparsers.add_parser('show-node', help='Write out pretty version of node.', parents=[self.generic_args()])
+        show_node_subparser = command_subparsers.add_parser(
+            'show-node', help='Write out pretty version of node.', parents=[self.generic_args()]
+        )
         show_node_subparser.set_defaults(callback_cfg=show_node)
         show_node_subparser.add_argument('node', type=str, help='Node to write out state for.')
 
-        add_alias_subparser = command_subparsers.add_parser('add-alias', help='Add alias for a node in a CFG.', parents=[self.generic_args()])
+        add_alias_subparser = command_subparsers.add_parser(
+            'add-alias', help='Add alias for a node in a CFG.', parents=[self.generic_args()]
+        )
         add_alias_subparser.set_defaults(callback_cfg=add_alias)
         add_alias_subparser.add_argument('name', type=str, help='Name of the alias.')
         add_alias_subparser.add_argument('node', type=str, help='Node id of the for the alias to map to.')
 
-        remove_alias_subparser = command_subparsers.add_parser('remove-alias', help='Add alias for a node in a CFG.', parents=[self.generic_args()])
+        remove_alias_subparser = command_subparsers.add_parser(
+            'remove-alias', help='Add alias for a node in a CFG.', parents=[self.generic_args()]
+        )
         remove_alias_subparser.set_defaults(callback_cfg=remove_alias)
         remove_alias_subparser.add_argument('alias', type=str, help='Name of the alias.')
 
-        case_split_subparser = command_subparsers.add_parser('split-node', help='Split the given node on a given boolean condition.', parents=[self.generic_args()])
+        case_split_subparser = command_subparsers.add_parser(
+            'split-node', help='Split the given node on a given boolean condition.', parents=[self.generic_args()]
+        )
         case_split_subparser.set_defaults(callback_cfg=split_node)
         case_split_subparser.add_argument('node', type=str, help='Node identifier to perform case-splitting on.')
         case_split_subparser.add_argument('condition', type=str, help='Boolean condition to case split on.')
         case_split_subparser.add_argument('--alias-true', type=str, default=None, help='Alias for true branch.')
         case_split_subparser.add_argument('--alias-false', type=str, default=None, help='Alias for false branch.')
 
-        build_edges_subparser = command_subparsers.add_parser('build-edges', help='Add (unverified) rewrite edges.', parents=[self.generic_args()])
+        build_edges_subparser = command_subparsers.add_parser(
+            'build-edges', help='Add (unverified) rewrite edges.', parents=[self.generic_args()]
+        )
         build_edges_subparser.set_defaults(callback_cfg=build_edges)
-        build_edges_subparser.add_argument('edges', type=KIT.arg_edges(), help='Semicolon-separated list of state pairs "start,stop" with existing paths between them to build edges between.')
+        build_edges_subparser.add_argument(
+            'edges',
+            type=KIT.arg_edges(),
+            help='Semicolon-separated list of state pairs "start,stop" with existing paths between them to build edges between.',
+        )
 
-        verify_edges_subparser = command_subparsers.add_parser('verify-edges', help='Verify generated basic blocks.', parents=[self.generic_args()])
+        verify_edges_subparser = command_subparsers.add_parser(
+            'verify-edges', help='Verify generated basic blocks.', parents=[self.generic_args()]
+        )
         verify_edges_subparser.set_defaults(callback_cfg=verify_edges)
-        verify_edges_subparser.add_argument('--edges', type=KIT.arg_edges(), help='Semicolon-separated list of state pairs "start,stop" to verify edges between (defaults to all edges).')
-        verify_edges_subparser.add_argument('--exclude-edges', type=KIT.arg_edges(), default=[], help='Semicolon-separated list of state pairs "start,stop" to exclude from verification.')
-        verify_edges_subparser.add_argument('--min-depth', type=int, default=0, help='Minimum number K steps to take in exploration.')
+        verify_edges_subparser.add_argument(
+            '--edges',
+            type=KIT.arg_edges(),
+            help='Semicolon-separated list of state pairs "start,stop" to verify edges between (defaults to all edges).',
+        )
+        verify_edges_subparser.add_argument(
+            '--exclude-edges',
+            type=KIT.arg_edges(),
+            default=[],
+            help='Semicolon-separated list of state pairs "start,stop" to exclude from verification.',
+        )
+        verify_edges_subparser.add_argument(
+            '--min-depth', type=int, default=0, help='Minimum number K steps to take in exploration.'
+        )
 
     def create_init_subparser(self, command_subparsers) -> None:
         init_subparser = command_subparsers.add_parser('init', help='Initialize a summary.')
         init_subparser.add_argument('summary-name', type=str, help='ID for summary. Used for display purposes.')
         init_subparser.add_argument('spec-file', type=str, help='File with specifications to prove.')
-        init_subparser.add_argument('--reparse', default=False, action='store_true', help='Reparse the specification file even if target json file exists.')
+        init_subparser.add_argument(
+            '--reparse',
+            default=False,
+            action='store_true',
+            help='Reparse the specification file even if target json file exists.',
+        )
         init_subparser.add_argument('--reinit', default=True, action='store_true', help='Reinitialize the CFG.')
-        init_subparser.add_argument('--no-reinit', dest='reinit', action='store_false', help='Do not reinitialize the CFG.')
+        init_subparser.add_argument(
+            '--no-reinit', dest='reinit', action='store_false', help='Do not reinitialize the CFG.'
+        )
 
 
 def main() -> None:
@@ -186,18 +244,16 @@ def init(summary_dir: Path, args: Dict[str, Any]) -> None:
     spec_file = Path(args['spec-file'])
     summary_name = args['summary-name']
     manager = CFGManager.create(
-        summary_name=summary_name,
-        summary_dir=summary_dir,
-        spec_file=spec_file,
-        main_file=None,
-        strategy_name='default'
+        summary_name=summary_name, summary_dir=summary_dir, spec_file=spec_file, main_file=None, strategy_name='default'
     )
 
     kompiled_timestamp = manager.definition_dir / 'timestamp'
     json_spec_file = spec_file.with_suffix('.json')
 
     if not kompiled_timestamp.exists():
-        raise ValueError(f'Summary directory must contain K semantics kompiled with `--emit-json` at {str(manager.definition_dir)}')
+        raise ValueError(
+            f'Summary directory must contain K semantics kompiled with `--emit-json` at {str(manager.definition_dir)}'
+        )
     kprove = KProve(manager.definition_dir, use_directory=manager.use_directory)
 
     if not json_spec_file.exists() or args['reparse']:
@@ -262,7 +318,9 @@ def remove_alias(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KC
 def parse_token_rule_syntax(kprove, ktoken: KToken, kast_args=[]) -> KInner:
     cterm = CTerm(mlAnd([KApply('<k>', [ktoken])]))
     claim_id = 'simplify-token'
-    claim, var_map = build_claim(claim_id, cterm, CTerm(mlAnd([cterm.term, mlEqualsTrue(Bool.false)])), keep_vars=collectFreeVars(cterm.term))
+    claim, var_map = build_claim(
+        claim_id, cterm, CTerm(mlAnd([cterm.term, mlEqualsTrue(Bool.false)])), keep_vars=collectFreeVars(cterm.term)
+    )
     kprove_result = kprove.prove_claim(claim, claim_id, args=['--depth', '0'], allow_zero_step=True)
     kprove_result = Subst(var_map).apply(kprove_result)
     simp_cterm = CTerm(kprove_result)
@@ -275,12 +333,16 @@ def parse_token_rule_syntax(kprove, ktoken: KToken, kast_args=[]) -> KInner:
 def split_node(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
     node_id = args['node']
     condition = parse_token_rule_syntax(kprove, KToken(args['condition'], 'Bool'))
-    true_node_id, false_node_id = cfg.split_node(node_id, [mlEqualsTrue(condition), mlEqualsTrue(KApply('notBool', [condition]))])
+    true_node_id, false_node_id = cfg.split_node(
+        node_id, [mlEqualsTrue(condition), mlEqualsTrue(KApply('notBool', [condition]))]
+    )
     if args['alias_true']:
         cfg.add_alias(args['alias_true'], true_node_id)
     if args['alias_false']:
         cfg.add_alias(args['alias_false'], false_node_id)
-    _LOGGER.info(f'Case split: {node_id} on predicate {kprove.pretty_print(condition)} to make {shorten_hashes((true_node_id, false_node_id))}\n')
+    _LOGGER.info(
+        f'Case split: {node_id} on predicate {kprove.pretty_print(condition)} to make {shorten_hashes((true_node_id, false_node_id))}\n'
+    )
     return True
 
 
@@ -294,7 +356,6 @@ def build_edges(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCF
 
 
 def verify_edges(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> None:
-
     def _edge_prove(edge: KCFG.Edge, min_depth: Optional[int]) -> List[KInner]:
         claim_id = f'BASIC-BLOCK-{edge.source.id}-TO-{edge.target.id}'
         haskell_args = []
@@ -306,7 +367,11 @@ def verify_edges(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KC
 
     edges: List[KCFG.Edge] = []
     if args.get('edges'):
-        edges = [edge for (source_id, target_id) in args['edges'] for edge in cfg.edges(source_id=source_id, target_id=target_id)]
+        edges = [
+            edge
+            for (source_id, target_id) in args['edges']
+            for edge in cfg.edges(source_id=source_id, target_id=target_id)
+        ]
     else:
         edges = [edge for edge in cfg.edges()]
     edges = [edge for edge in edges if shorten_hashes((edge.source.id, edge.target.id)) not in args['exclude_edges']]

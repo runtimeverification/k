@@ -43,6 +43,7 @@ def instantiate_cell_vars(definition: KDefinition, term: KInner) -> KInner:
                     new_args.append(arg)
             return KApply(_kast.label, new_args)
         return _kast
+
     return bottom_up(_cellVarsToLabels, term)
 
 
@@ -80,7 +81,9 @@ class CFGManager:
     cfg_ids_json_file: Final[Path]
 
     @staticmethod
-    def create(*, summary_name: str, strategy_name: str, summary_dir: Path, spec_file: Path, main_file: Optional[Path]) -> 'CFGManager':
+    def create(
+        *, summary_name: str, strategy_name: str, summary_dir: Path, spec_file: Path, main_file: Optional[Path]
+    ) -> 'CFGManager':
         manager = CFGManager(
             summary_name=summary_name,
             strategy_name=strategy_name,
@@ -105,12 +108,14 @@ class CFGManager:
             strategy_name=config['strategy_name'],
             summary_dir=summary_dir,
             spec_file=Path(config['specificationFile']),
-            main_file=Path(config['verificationFile']) if config['verificationFile'] else None
+            main_file=Path(config['verificationFile']) if config['verificationFile'] else None,
         )
         manager._check_paths()
         return manager
 
-    def __init__(self, *, summary_name: str, strategy_name: str, summary_dir: Path, spec_file: Path, main_file: Optional[Path]):
+    def __init__(
+        self, *, summary_name: str, strategy_name: str, summary_dir: Path, spec_file: Path, main_file: Optional[Path]
+    ):
         self.summary_name = summary_name
         self.strategy_name = strategy_name
         self.spec_file = spec_file
@@ -135,12 +140,10 @@ class CFGManager:
             # Used by KIT
             # -----------
             "specificationFile": str(self.spec_file),
-
             # Used by KSummarize
             # ------------------
             "verificationFile": str(self.main_file) if self.main_file else None,
             "strategy_name": self.strategy_name,
-
             # Used by the web interface
             # -------------------------
             # TODO: These should be managed by the web interface, though we

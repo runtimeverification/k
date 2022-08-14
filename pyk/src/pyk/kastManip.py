@@ -492,7 +492,6 @@ def removeSourceMap(k):
 
 
 def remove_source_attributes(term: KInner) -> KInner:
-
     def _is_not_source_att(att: Tuple[str, Any]) -> bool:
         return att[0] not in ('org.kframework.attributes.Source', 'org.kframework.attributes.Location')
 

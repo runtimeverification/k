@@ -80,7 +80,6 @@ class KAtt(KAst, Mapping[str, Any]):
     atts: FrozenDict[str, Any]
 
     def __init__(self, atts: Mapping[str, Any] = {}):
-
         def _freeze(m: Any) -> Any:
             if isinstance(m, (int, str, tuple, FrozenDict, FrozenSet)):
                 return m
@@ -113,7 +112,6 @@ class KAtt(KAst, Mapping[str, Any]):
         return KAtt(atts=d['att'])
 
     def to_dict(self) -> Dict[str, Any]:
-
         def _to_dict(m: Any) -> Any:
             if isinstance(m, FrozenDict):
                 return dict(((k, _to_dict(v)) for (k, v) in m.items()))
