@@ -1617,6 +1617,20 @@ class KDefinition(KOuter, WithKAtt):
 
         return _kdefinition_empty_config(sort)
 
+    def init_config(self, sort: KSort) -> KInner:
+        init_prods = [prod for prod in self.syntax_productions if 'initializer' in prod.att]
+        # init_rules = [rule for rule in self.rules if 'initializer' in rule.att]
+        _init_prod = [prod for prod in init_prods if prod.sort == sort]
+        if len(_init_prod) != 1:
+            raise ValueError(f'Did not find unique initializer for sort: {sort}')
+        init_prod = _init_prod[0]
+        if len(list(nt for nt in init_prod.items if type(nt) is KNonTerminal)) > 0:
+            raise ValueError(f'Cannot handle inializer cells with arguments yet: {sort}')
+        prod_klabel = init_prod.klabel
+        assert prod_klabel is not None
+        init_config = KApply(prod_klabel)
+        return init_config
+
 
 # TODO make method of KInner
 def bottom_up(f: Callable[[KInner], KInner], kinner: KInner) -> KInner:
