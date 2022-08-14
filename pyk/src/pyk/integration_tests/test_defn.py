@@ -113,7 +113,7 @@ class DefnTest(KProveTest):
         )
 
         for name, sort, expected in test_data:
-            with subTest(name):
+            with self.subTest(name):
                 empty_config = self.kprove.definition.empty_config(sort)
                 actual = self.kprove.pretty_print(empty_config)
                 self.assertEqual(actual, expected)
@@ -155,7 +155,7 @@ class DefnTest(KProveTest):
         )
 
         for name, sort, map, expected in test_data:
-            with subTest(name):
+            with self.subTest(name):
                 init_config = self.kprove.definition.init_config(sort)
                 actual = self.kprove.pretty_print(init_config)
                 self.assertEqual(actual, expected)
