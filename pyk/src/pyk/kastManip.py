@@ -1,19 +1,7 @@
 import logging
 import typing
 from collections import Counter
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Final,
-    List,
-    Mapping,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
-    TypeVar,
-)
+from typing import Any, Callable, Dict, Final, List, Mapping, Optional, Sequence, Tuple, Type, TypeVar
 
 from .cterm import CTerm, split_config_and_constraints
 from .kast import (

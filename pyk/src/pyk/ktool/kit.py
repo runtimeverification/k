@@ -7,22 +7,8 @@ from typing import Any, Dict, Final, List, Optional
 
 from ..cfg_manager import CFGManager
 from ..cterm import CTerm
-from ..kast import (
-    KApply,
-    KDefinition,
-    KFlatModuleList,
-    KInner,
-    KSequence,
-    KToken,
-    Subst,
-)
-from ..kastManip import (
-    build_claim,
-    collectFreeVars,
-    getCell,
-    is_top,
-    minimize_term,
-)
+from ..kast import KApply, KDefinition, KFlatModuleList, KInner, KSequence, KToken, Subst
+from ..kastManip import build_claim, collectFreeVars, getCell, is_top, minimize_term
 from ..kcfg import KCFG
 from ..ktool import KProve
 from ..prelude import Bool, mlAnd, mlEqualsTrue, mlOr, mlTop
