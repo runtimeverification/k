@@ -123,12 +123,12 @@ class DefnTest(KProveTest):
             (
                 'generatedTop-no-map',
                 Sorts.GENERATED_TOP_CELL,
-                KApply('.Map'),
+                KVariable('CONFIG_VAR_MAP'),
                 (
                     f'<generatedTop>\n'
                     f'  <T>\n'
                     f'    <k>\n'
-                    f'      .\n'
+                    f'      project:Pgm ( CONFIG_VAR_MAP [ $PGM ] )\n'
                     f'    </k>\n'
                     f'    <state>\n'
                     f'      .Map\n'
@@ -143,8 +143,17 @@ class DefnTest(KProveTest):
             (
                 'TCell-no-map',
                 KSort('TCell'),
-                KApply('.Map'),
-                (f'<T>\n' f'  <k>\n' f'    .\n' f'  </k>\n' f'  <state>\n' f'    .Map\n' f'  </state>\n' f'</T>'),
+                KVariable('CONFIG_VAR_MAP'),
+                (
+                    f'<T>\n'
+                    f'  <k>\n'
+                    f'    project:Pgm ( CONFIG_VAR_MAP [ $PGM ] )\n'
+                    f'  </k>\n'
+                    f'  <state>\n'
+                    f'    .Map\n'
+                    f'  </state>\n'
+                    f'</T>'
+                ),
             ),
             (
                 'stateCell-no-map',
