@@ -37,12 +37,11 @@ from ..kast import (
     KVariable,
     flatten_label,
     ktokenDots,
-    readKastTerm,
+    read_kast_definition,
 )
 from ..kore.parser import KoreParser
 from ..kore.syntax import Kore
 from ..prelude import Bool, Labels, Sorts
-from ..utils import hash_str
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -57,7 +56,7 @@ def _kast(
     input: str = 'program',
     output: str = 'json',
     sort: KSort = Sorts.K,
-    args: List[str] = []
+    args: List[str] = [],
 ) -> str:
     kast_command = ['kast', '--definition', str(definition)]
     kast_command += ['--input', input, '--output', output]
@@ -74,10 +73,10 @@ class KPrint:
 
     definition_dir: Path
     use_directory: Path
-    definition: KDefinition
-    symbol_table: SymbolTable
-    definition_hash: str
     _profile: bool
+
+    _definition: Optional[KDefinition]
+    _symbol_table: Optional[SymbolTable]
 
     def __init__(self, definition_dir: Path, use_directory: Optional[Path] = None, profile: bool = False) -> None:
         self.definition_dir = Path(definition_dir)
@@ -87,10 +86,25 @@ class KPrint:
             td = TemporaryDirectory()
             self.use_directory = Path(td.name)
         check_dir_path(self.use_directory)
-        self.definition = readKastTerm(self.definition_dir / 'compiled.json')
-        self.symbol_table = build_symbol_table(self.definition, opinionated=True)
-        self.definition_hash = hash_str(self.definition)
+        self._definition = None
+        self._symbol_table = None
         self._profile = profile
+
+    @property
+    def definition(self) -> KDefinition:
+        if not self._definition:
+            self._definition = read_kast_definition(self.definition_dir / 'compiled.json')
+        return self._definition
+
+    @property
+    def definition_hash(self) -> str:
+        return self.definition.hash
+
+    @property
+    def symbol_table(self) -> SymbolTable:
+        if not self._symbol_table:
+            self._symbol_table = build_symbol_table(self.definition, opinionated=True)
+        return self._symbol_table
 
     def parse_token(self, ktoken: KToken) -> KInner:
         output = _kast(self.definition_dir, ktoken.token, sort=ktoken.sort, profile=self._profile)
@@ -112,7 +126,6 @@ class KPrint:
 
 
 def unparser_for_production(prod):
-
     def _unparser(*args):
         index = 0
         result = []
@@ -136,7 +149,7 @@ def build_symbol_table(definition: KDefinition, opinionated=False) -> SymbolTabl
     symbol_table = {}
     for module in definition.modules:
         for prod in module.syntax_productions:
-            assert(prod.klabel)
+            assert prod.klabel
             label = prod.klabel.name
             if 'symbol' in prod.att and 'klabel' in prod.att:
                 label = prod.att['klabel']
@@ -247,10 +260,14 @@ def pretty_print_kast(kast: KAst, symbol_table: SymbolTable, debug=False):
         rule_str = rule_str + ' ' + body
         atts_str = pretty_print_kast(kast.att, symbol_table, debug=debug)
         if kast.requires != Bool.true:
-            requires_str = 'requires ' + '\n  '.join(pretty_print_kast_bool(kast.requires, symbol_table, debug=debug).split('\n'))
+            requires_str = 'requires ' + '\n  '.join(
+                pretty_print_kast_bool(kast.requires, symbol_table, debug=debug).split('\n')
+            )
             rule_str = rule_str + '\n  ' + requires_str
         if kast.ensures != Bool.true:
-            ensures_str = 'ensures ' + '\n  '.join(pretty_print_kast_bool(kast.ensures, symbol_table, debug=debug).split('\n'))
+            ensures_str = 'ensures ' + '\n  '.join(
+                pretty_print_kast_bool(kast.ensures, symbol_table, debug=debug).split('\n')
+            )
             rule_str = rule_str + '\n   ' + ensures_str
         return rule_str + '\n  ' + atts_str
     if type(kast) is KContext:
@@ -306,18 +323,22 @@ def pretty_print_kast_bool(kast, symbol_table, debug=False):
         def joinSep(s):
             return ('\n' + separator).join(s.split('\n'))
 
-        clauses = ['( ' + joinSep(clauses[0])] + [head + '( ' + joinSep(c) for c in clauses[1:]] + [spacer + (')' * len(clauses))]
+        clauses = (
+            ['( ' + joinSep(clauses[0])]
+            + [head + '( ' + joinSep(c) for c in clauses[1:]]
+            + [spacer + (')' * len(clauses))]
+        )
         return '\n'.join(clauses)
     else:
         return pretty_print_kast(kast, symbol_table, debug=debug)
 
 
 def paren(printer):
-    return (lambda *args: '( ' + printer(*args) + ' )')
+    return lambda *args: '( ' + printer(*args) + ' )'
 
 
 def applied_label_str(symbol):
-    return (lambda *args: symbol + ' ( ' + ' , '.join(args) + ' )')
+    return lambda *args: symbol + ' ( ' + ' , '.join(args) + ' )'
 
 
 def indent(input, size=2):

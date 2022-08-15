@@ -14,5 +14,9 @@ _KORE_TEST_INPUT: Final = tuple(
     if test_file.suffix == '.kore'
 )
 
-KORE_PASS_TEST_FILES: Final = tuple(test_file for test_file, golden_file in _KORE_TEST_INPUT if golden_file.stat().st_size == 0)
-KORE_FAIL_TEST_FILES: Final = tuple(test_file for test_file, golden_file in _KORE_TEST_INPUT if golden_file.stat().st_size > 0)
+KORE_PASS_TEST_FILES: Final = tuple(
+    test_file for test_file, golden_file in _KORE_TEST_INPUT if golden_file.stat().st_size == 0
+)
+KORE_FAIL_TEST_FILES: Final = tuple(
+    test_file for test_file, golden_file in _KORE_TEST_INPUT if golden_file.stat().st_size > 0
+)

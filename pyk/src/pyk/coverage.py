@@ -1,4 +1,4 @@
-from .kast import KApply, KRewrite, KRule, KSequence, readKastTerm
+from .kast import KApply, KRewrite, KRule, KSequence, read_kast_definition
 
 
 def getRuleById(definition, rule_id):
@@ -67,8 +67,11 @@ def translateCoverage(src_all_rules, dst_all_rules, dst_definition, src_rules_li
         for sentence in module.sentences:
             if type(sentence) is KRule:
                 ruleBody = sentence.body
-                if (type(ruleBody) is KApply and ruleBody.label.name == '<generatedTop>') \
-                        or (type(ruleBody) is KRewrite and type(ruleBody.lhs) is KApply and ruleBody.lhs.label.name == '<generatedTop>'):
+                if (type(ruleBody) is KApply and ruleBody.label.name == '<generatedTop>') or (
+                    type(ruleBody) is KRewrite
+                    and type(ruleBody.lhs) is KApply
+                    and ruleBody.lhs.label.name == '<generatedTop>'
+                ):
                     if 'UNIQUE_ID' in sentence.att:
                         dst_non_function_rules.append(sentence.att['UNIQUE_ID'])
 
@@ -108,7 +111,7 @@ def translateCoverageFromPaths(src_kompiled_dir, dst_kompiled_dir, src_rules_fil
     with open(dst_kompiled_dir + '/allRules.txt', 'r') as dst_all_rules_file:
         dst_all_rules = [line.strip() for line in dst_all_rules_file]
 
-    dst_definition = readKastTerm(dst_kompiled_dir + '/compiled.json')
+    dst_definition = read_kast_definition(dst_kompiled_dir + '/compiled.json')
 
     src_rules_list = []
     with open(src_rules_file, 'r') as src_rules:

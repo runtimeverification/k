@@ -20,9 +20,15 @@ class IdentifierTest(TestCase):
 
     ID_TEST_DATA = BASE_TEST_DATA + (('sort', False),)
 
-    SYMBOL_ID_TEST_DATA = ID_TEST_DATA + tuple(('\\' + s, expected) for s, expected in BASE_TEST_DATA) + (('\\sort', True),)
+    SYMBOL_ID_TEST_DATA = (
+        ID_TEST_DATA + tuple(('\\' + s, expected) for s, expected in BASE_TEST_DATA) + (('\\sort', True),)
+    )
 
-    SET_VARIABLE_ID_TEST_DATA = tuple(('@' + s, expected) for s, expected in BASE_TEST_DATA) + tuple((s, False) for s, _ in ID_TEST_DATA) + (('@sort', True),)
+    SET_VARIABLE_ID_TEST_DATA = (
+        tuple(('@' + s, expected) for s, expected in BASE_TEST_DATA)
+        + tuple((s, False) for s, _ in ID_TEST_DATA)
+        + (('@sort', True),)
+    )
 
     def test_is_id(self):
         for i, (s, expected) in enumerate(self.ID_TEST_DATA):

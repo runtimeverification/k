@@ -1,6 +1,6 @@
 from abc import ABC
 
-from ..kast import KAs, KDefinition, KSort, KSortSynonym, readKastTerm
+from ..kast import KAs, KSort, KSortSynonym, read_kast_definition
 from ..ktool import KompileBackend
 from .kompiled_test import KompiledTest
 
@@ -11,8 +11,7 @@ class ParseKAstTest(KompiledTest, ABC):
 
     def setUp(self):
         super().setUp()
-        self.definition = readKastTerm(self.COMPILED_JSON_PATH)
-        self.assertIsInstance(self.definition, KDefinition)
+        self.definition = read_kast_definition(self.COMPILED_JSON_PATH)
         modules = [module for module in self.definition if module.name == self.MODULE_NAME]
         self.assertEqual(len(modules), 1)
         self.module = modules[0]

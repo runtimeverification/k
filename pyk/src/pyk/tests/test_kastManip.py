@@ -1,19 +1,9 @@
 from unittest import TestCase
 
 from ..cterm import CTerm
-from ..kast import (
-    KApply,
-    KAtt,
-    KClaim,
-    KInner,
-    KLabel,
-    KRewrite,
-    KSequence,
-    KSort,
-    KVariable,
-    ktokenDots,
-)
+from ..kast import KApply, KAtt, KClaim, KInner, KLabel, KRewrite, KSequence, KSort, KVariable, ktokenDots
 from ..kastManip import (
+    bool_to_ml_pred,
     build_claim,
     build_rule,
     collapseDots,
@@ -46,12 +36,9 @@ ques_unds_v2 = KVariable('?_V2')
 
 
 class PushDownRewritesTest(TestCase):
-
     def test_push_down_rewrites(self):
         # Given
-        test_data = (
-            (KRewrite(KSequence([f(a), b]), KSequence([f(c), b])), KSequence([f(KRewrite(a, c)), b])),
-        )
+        test_data = ((KRewrite(KSequence([f(a), b]), KSequence([f(c), b])), KSequence([f(KRewrite(a, c)), b])),)
 
         for i, (before, expected) in enumerate(test_data):
             with self.subTest(i=i):
@@ -63,15 +50,25 @@ class PushDownRewritesTest(TestCase):
 
 
 class BuildRuleTest(TestCase):
-
     def test_build_rule(self):
         # Given
         test_data = [
             (
                 T(k(KVariable('K_CELL')), mem(KVariable('MEM_CELL'))),
-                T(k(KVariable('K_CELL')), mem(KApply('_[_<-_]', [KVariable('MEM_CELL'), KVariable('KEY'), KVariable('VALUE')]))),
+                T(
+                    k(KVariable('K_CELL')),
+                    mem(KApply('_[_<-_]', [KVariable('MEM_CELL'), KVariable('KEY'), KVariable('VALUE')])),
+                ),
                 ['K_CELL'],
-                T(k(KVariable('_K_CELL')), mem(KRewrite(KVariable('MEM_CELL'), KApply('_[_<-_]', [KVariable('MEM_CELL'), KVariable('?_KEY'), KVariable('?_VALUE')]))))
+                T(
+                    k(KVariable('_K_CELL')),
+                    mem(
+                        KRewrite(
+                            KVariable('MEM_CELL'),
+                            KApply('_[_<-_]', [KVariable('MEM_CELL'), KVariable('?_KEY'), KVariable('?_VALUE')]),
+                        )
+                    ),
+                ),
             )
         ]
 
@@ -86,7 +83,6 @@ class BuildRuleTest(TestCase):
 
 
 class MinimizeTermTest(TestCase):
-
     def test_minimize_term(self):
         # Given
         test_data = (
@@ -103,37 +99,88 @@ class MinimizeTermTest(TestCase):
                 self.assertEqual(actual, expected)
 
 
-class MlPredToBoolTest(TestCase):
+class BoolMlPredConversionsTest(TestCase):
+
+    # TODO: We'd like for bool_to_ml_pred and ml_pred_to_bool to be somewhat invertible.
+
+    test_data_ml_pred_to_bool = (
+        (
+            'equals-true',
+            False,
+            KApply(KLabel('#Equals', [Sorts.BOOL, Sorts.GENERATED_TOP_CELL]), [Bool.true, f(a)]),
+            f(a),
+        ),
+        ('top-sort-bool', False, KApply(KLabel('#Top', [Sorts.BOOL])), Bool.true),
+        ('top-no-sort', False, KApply('#Top'), Bool.true),
+        ('top-no-sort', False, mlTop(), Bool.true),
+        ('equals-variabl', False, KApply(KLabel('#Equals'), [x, f(a)]), KApply('_==K_', [x, f(a)])),
+        ('equals-true-no-sort', False, KApply(KLabel('#Equals'), [Bool.true, f(a)]), f(a)),
+        (
+            'equals-token',
+            False,
+            KApply(KLabel('#Equals', [KSort('Int'), Sorts.GENERATED_TOP_CELL]), [intToken(3), f(a)]),
+            KApply('_==K_', [intToken(3), f(a)]),
+        ),
+        ('not-top', False, KApply(KLabel('#Not', [Sorts.GENERATED_TOP_CELL]), [mlTop()]), Bool.notBool(Bool.true)),
+        ('equals-term', True, KApply(KLabel('#Equals'), [f(a), f(x)]), KApply('_==K_', [f(a), f(x)])),
+        (
+            'simplify-and-true',
+            False,
+            KApply(KLabel('#And', [Sorts.GENERATED_TOP_CELL]), [mlEqualsTrue(Bool.true), mlEqualsTrue(Bool.true)]),
+            Bool.true,
+        ),
+        (
+            'ceil-set-concat-no-sort',
+            True,
+            KApply(
+                KLabel('#Ceil', [KSort('Set'), Sorts.GENERATED_TOP_CELL]),
+                [KApply(KLabel('_Set_'), [KVariable('_'), KVariable('_')])],
+            ),
+            KVariable('Ceil_0f9c9997'),
+        ),
+        (
+            'ceil-set-concat-sort',
+            True,
+            KApply(
+                KLabel('#Not', [Sorts.GENERATED_TOP_CELL]),
+                [
+                    KApply(
+                        KLabel('#Ceil', [KSort('Set'), Sorts.GENERATED_TOP_CELL]),
+                        [KApply(KLabel('_Set_'), [KVariable('_'), KVariable('_')])],
+                    )
+                ],
+            ),
+            Bool.notBool(KVariable('Ceil_0f9c9997')),
+        ),
+        (
+            'exists-equal-int',
+            True,
+            KApply(
+                KLabel('#Exists', [Sorts.INT, Sorts.BOOL]),
+                [KVariable('X'), KApply('_==Int_', [KVariable('X'), KVariable('Y')])],
+            ),
+            KVariable('Exists_6acf2557'),
+        ),
+    )
 
     def test_ml_pred_to_bool(self):
-        # Given
-        test_data = (
-            (False, KApply(KLabel('#Equals', [Sorts.BOOL, Sorts.GENERATED_TOP_CELL]), [Bool.true, f(a)]), f(a)),
-            (False, KApply(KLabel('#Top', [Sorts.BOOL])), Bool.true),
-            (False, KApply('#Top'), Bool.true),
-            (False, mlTop(), Bool.true),
-            (False, KApply(KLabel('#Equals'), [x, f(a)]), KApply('_==K_', [x, f(a)])),
-            (False, KApply(KLabel('#Equals'), [Bool.true, f(a)]), f(a)),
-            (False, KApply(KLabel('#Equals', [KSort('Int'), Sorts.GENERATED_TOP_CELL]), [intToken(3), f(a)]), KApply('_==K_', [intToken(3), f(a)])),
-            (False, KApply(KLabel('#Not', [Sorts.GENERATED_TOP_CELL]), [mlTop()]), Bool.notBool(Bool.true)),
-            (True, KApply(KLabel('#Equals'), [f(a), f(x)]), KApply('_==K_', [f(a), f(x)])),
-            (False, KApply(KLabel('#And', [Sorts.GENERATED_TOP_CELL]), [mlEqualsTrue(Bool.true), mlEqualsTrue(Bool.true)]), Bool.true),
-            (True, KApply(KLabel('#Ceil', [KSort('Set'), Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('_Set_', [KVariable('_'), KVariable('_')]))]), KVariable('Ceil_37f1b5e5')),
-            (True, KApply(KLabel('#Not', [Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('#Ceil', [KSort('Set'), Sorts.GENERATED_TOP_CELL]), [KApply(KLabel('_Set_', [KVariable('_'), KVariable('_')]))])]), Bool.notBool(KVariable('Ceil_37f1b5e5'))),
-            (True, KApply(KLabel('#Exists', [Sorts.INT, Sorts.BOOL]), [KVariable('X'), KApply('_==Int_', [KVariable('X'), KVariable('Y')])]), KVariable('Exists_6acf2557')),
-        )
+        for name, unsafe, ml_pred, bool_expected in self.test_data_ml_pred_to_bool:
+            with self.subTest(name):
+                bool_actual = ml_pred_to_bool(ml_pred, unsafe=unsafe)
+                self.assertEqual(bool_actual, bool_expected)
 
-        for i, (unsafe, before, expected) in enumerate(test_data):
-            with self.subTest(i=i):
-                # When
-                actual = ml_pred_to_bool(before, unsafe=unsafe)
+    test_data_bool_to_ml_pred = (
+        ('equals-true', False, KApply(KLabel('#Equals', [Sorts.BOOL, Sorts.K]), [Bool.true, f(a)]), f(a)),
+    )
 
-                # Then
-                self.assertEqual(actual, expected)
+    def test_bool_to_ml_pred(self):
+        for name, unsafe, ml_pred_expected, bool_in in self.test_data_bool_to_ml_pred:
+            with self.subTest(name):
+                ml_pred_actual = bool_to_ml_pred(bool_in)
+                self.assertEqual(ml_pred_actual, ml_pred_expected)
 
 
 class RemoveGeneratedCellsTest(TestCase):
-
     def test_first(self):
         # When
         config_actual = remove_generated_cells(GENERATED_TOP_CELL_1)
@@ -150,10 +197,11 @@ class RemoveGeneratedCellsTest(TestCase):
 
 
 class CollapseDotsTest(TestCase):
-
     def test(self):
         # Given
-        config_before = substitute(GENERATED_TOP_CELL_1, {'MAP': ktokenDots, '_GENERATED_COUNTER_PLACEHOLDER': ktokenDots})
+        config_before = substitute(
+            GENERATED_TOP_CELL_1, {'MAP': ktokenDots, '_GENERATED_COUNTER_PLACEHOLDER': ktokenDots}
+        )
         config_expected = KApply('<generatedTop>', [KApply('<T>', [K_CELL, ktokenDots]), ktokenDots])
 
         # When
@@ -164,11 +212,14 @@ class CollapseDotsTest(TestCase):
 
 
 class SimplifyBoolTest(TestCase):
-
-    def test_simplify_bool(self):
+    def test_simplify_bool(self) -> None:
         bool_tests = (
             ('trivial-false', Bool.andBool([Bool.false, Bool.true]), Bool.false),
-            ('and-true', Bool.andBool([KApply('_==Int_', [intToken(3), intToken(4)]), Bool.true]), KApply('_==Int_', [intToken(3), intToken(4)])),
+            (
+                'and-true',
+                Bool.andBool([KApply('_==Int_', [intToken(3), intToken(4)]), Bool.true]),
+                KApply('_==Int_', [intToken(3), intToken(4)]),
+            ),
             ('not-false', Bool.notBool(Bool.false), Bool.true),
         )
 
@@ -178,7 +229,6 @@ class SimplifyBoolTest(TestCase):
 
 
 class BuildClaimtest(TestCase):
-
     def test_build_claim(self):
         # (<k> V1 </k> #And { true #Equals 0 <=Int V2}) => <k> V2 </k>      expected: <k> _V1 => V2 </k> requires 0 <=Int V2
         # <k> V1 </k> => <k> V2 </k>                                        expected: <k> _V1 => ?_V2 </k>
@@ -188,9 +238,19 @@ class BuildClaimtest(TestCase):
             return KApply('_<=Int_', [intToken(0), v])
 
         test_data = (
-            ('req-rhs', mlAnd([k(v1), mlEqualsTrue(constraint(v2))]), k(v2), KClaim(k(KRewrite(unds_v1, v2)), requires=constraint(v2), att=KAtt({'label': 'claim'}))),
+            (
+                'req-rhs',
+                mlAnd([k(v1), mlEqualsTrue(constraint(v2))]),
+                k(v2),
+                KClaim(k(KRewrite(unds_v1, v2)), requires=constraint(v2), att=KAtt({'label': 'claim'})),
+            ),
             ('free-rhs', k(v1), k(v2), KClaim(k(KRewrite(unds_v1, ques_unds_v2)), att=KAtt({'label': 'claim'}))),
-            ('bound-rhs', k(v1), mlAnd([k(v2), mlEqualsTrue(constraint(v2))]), KClaim(k(KRewrite(unds_v1, ques_v2)), ensures=constraint(ques_v2), att=KAtt({'label': 'claim'}))),
+            (
+                'bound-rhs',
+                k(v1),
+                mlAnd([k(v2), mlEqualsTrue(constraint(v2))]),
+                KClaim(k(KRewrite(unds_v1, ques_v2)), ensures=constraint(ques_v2), att=KAtt({'label': 'claim'})),
+            ),
         )
 
         for name, init, target, claim in test_data:
