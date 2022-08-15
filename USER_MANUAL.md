@@ -2832,6 +2832,14 @@ on a particular program by passing the `--debugger` flag to krun, or by
 invoking the llvm backend interpreter directly. Below we provide a simple
 tutorial to explain some of the basic commands supported by the LLVM backend.
 
+### LLDB Support
+
+GDB is not well-supported on macOS, particularly on newer OS versions and Apple
+Silicon ARM hardware. Consequently, if the `--debugger` option is passed to krun
+on macOS, LLDB[^1] is launched instead of GDB. However, the K-specific debugger
+scripts that GDB uses have not been ported to LLDB yet, and so the instructions
+in the rest of this section will not work.
+
 ### The K Definition
 
 Here is a sample K definition we will use to demonstrate debugging
@@ -3238,3 +3246,6 @@ sed 's/hook(//' | sed 's/)//' | sort | uniq | grep -v org.kframework
 ```
 
 All of these hooks will also eventually need documentation.
+
+[^1]: More precisely, a lightly-customized debugger built using the LLDB Python
+  API.
