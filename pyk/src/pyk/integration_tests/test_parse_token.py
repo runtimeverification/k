@@ -30,7 +30,7 @@ class ParseTokenTest(KProveTest):
                 '==Int',
                 KToken('N ==Int 1', 'Bool'),
                 KApply('_==Int_', KVariable('N', vattr('Int')), intToken(1)),
-            ),  # noqa
+            ),
         )
 
         for (name, token, expected) in tests:
