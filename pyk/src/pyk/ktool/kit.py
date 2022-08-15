@@ -268,7 +268,7 @@ def show_cfg(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) 
 
 def show_node(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> None:
     node = cfg.node(args['node'])
-    term = node.cterm.term
+    term = node.cterm.kast
     if args['minimize']:
         term = minimize_term(term)
     args['output'].write(kprove.pretty_print(term) + '\n')
@@ -305,12 +305,12 @@ def parse_token_rule_syntax(kprove, ktoken: KToken, kast_args=[]) -> KInner:
     cterm = CTerm(mlAnd([KApply('<k>', [ktoken])]))
     claim_id = 'simplify-token'
     claim, var_map = build_claim(
-        claim_id, cterm, CTerm(mlAnd([cterm.term, mlEqualsTrue(Bool.false)])), keep_vars=collectFreeVars(cterm.term)
+        claim_id, cterm, CTerm(mlAnd([cterm.kast, mlEqualsTrue(Bool.false)])), keep_vars=collectFreeVars(cterm.kast)
     )
     kprove_result = kprove.prove_claim(claim, claim_id, args=['--depth', '0'], allow_zero_step=True)
     kprove_result = Subst(var_map).apply(kprove_result)
     simp_cterm = CTerm(kprove_result)
-    result = getCell(simp_cterm.term, 'K_CELL')
+    result = getCell(simp_cterm.kast, 'K_CELL')
     if type(result) is KSequence:
         result = result.items[0]
     return mlAnd([result] + list(c for c in simp_cterm.constraints if not is_top(c)))

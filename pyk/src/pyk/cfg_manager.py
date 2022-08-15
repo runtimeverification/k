@@ -43,7 +43,7 @@ def rename_generated_vars(cterm: CTerm) -> CTerm:
     state, *constraints = cterm
     _, config_subst = splitConfigFrom(state)
     config_var_count = {cvar: count_vars(ccontents) for cvar, ccontents in config_subst.items()}
-    free_vars = collectFreeVars(cterm.term)
+    free_vars = collectFreeVars(cterm.kast)
     var_subst: Dict[str, KInner] = {}
     for v in free_vars:
         if v.startswith('_Gen') or v.startswith('?_Gen') or v.startswith('_DotVar') or v.startswith('?_DotVar'):
@@ -56,7 +56,7 @@ def rename_generated_vars(cterm: CTerm) -> CTerm:
                 new_v = abstract_term_safely(KVariable(new_v.name), base_name=cvar)
             var_subst[v] = new_v
             free_vars.append(new_v.name)
-    return CTerm(Subst(var_subst).apply(cterm.term))
+    return CTerm(Subst(var_subst).apply(cterm.kast))
 
 
 class CFGManager:
@@ -155,7 +155,7 @@ class CFGManager:
         cfg = KCFG()
         claim_body = claim.body
         claim_body = instantiate_cell_vars(defn, claim_body)
-        claim_body = rename_generated_vars(CTerm(claim_body)).term
+        claim_body = rename_generated_vars(CTerm(claim_body)).kast
 
         claim_lhs = CTerm(extract_lhs(claim_body)).add_constraint(bool_to_ml_pred(claim.requires))
         init_state = cfg.create_node(claim_lhs)

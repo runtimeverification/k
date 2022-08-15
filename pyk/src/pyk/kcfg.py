@@ -470,7 +470,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         return bool(self.get_node(node.id))
 
     def create_node(self, cterm: CTerm) -> Node:
-        term = cterm.term
+        term = cterm.kast
         term = remove_generated_cells(term)
         term = remove_source_attributes(term)
         cterm = CTerm(term)
@@ -558,7 +558,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         source = self.node(source_id)
 
         def _add_case_edge(_constraint: KInner) -> str:
-            _cterm = CTerm(mlAnd([source.cterm.term, _constraint]))
+            _cterm = CTerm(mlAnd([source.cterm.kast, _constraint]))
             _node = self.get_or_create_node(_cterm)
             self.create_edge(source.id, _node.id, _constraint, 0)
             self.add_verified(source.id, _node.id)
