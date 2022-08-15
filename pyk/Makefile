@@ -4,14 +4,15 @@ K_BIN  := $(K_ROOT)/k-distribution/target/release/k/bin
 export PATH := $(K_BIN):$(PATH)
 
 
-.PHONY: default all clean install                                  \
-        venv venv-dev venv-clean                                   \
-        test test-unit test-integration test-pyk                   \
-        check-code-style isort check-isort check-flake8 check-mypy
+.PHONY: default all clean install                                \
+        venv venv-dev venv-clean                                 \
+        test test-unit test-integration test-pyk                 \
+        format isort autoflake black                             \
+        check check-isort check-autoflake check-black check-mypy
 
-default: check-code-style test-unit
+default: check test-unit
 
-all: check-code-style test
+all: check test
 
 clean: venv-clean
 	rm -rf definitions build src/pyk.egg-info .myp_cache
@@ -76,9 +77,10 @@ test-pyk: venv-prod
 test-kit: venv-prod
 	$(ACTIVATE_PROD) && $(MAKE) -C kit-tests
 
-# Checks
+# Checks and formatting
 
-check-code-style: check-isort check-autoflake check-black check-mypy
+format: isort autoflake black
+check: check-isort check-autoflake check-black check-mypy
 
 isort: venv-dev
 	$(ACTIVATE_DEV) && isort src
