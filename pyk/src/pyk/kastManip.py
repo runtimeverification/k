@@ -1,6 +1,7 @@
 import logging
+import typing
 from collections import Counter
-from typing import Callable, Dict, Final, List, Mapping, Optional, Sequence, Tuple, Type, TypeVar
+from typing import Any, Callable, Dict, Final, List, Mapping, Optional, Sequence, Tuple, Type, TypeVar
 
 from .cterm import CTerm, split_config_and_constraints
 from .kast import (
@@ -123,6 +124,10 @@ def simplify_bool(k: KInner) -> KInner:
     return new_k
 
 
+def is_top(term: KInner) -> bool:
+    return isinstance(term, KApply) and term.label.name == '#Top'
+
+
 def extract_lhs(term: KInner) -> KInner:
     return top_down(if_ktype(KRewrite, lambda rw: rw.lhs), term)
 
@@ -176,8 +181,8 @@ def extract_subst(term: KInner) -> Tuple[Subst, KInner]:
     return subst, mlAnd(rem_conjuncts)
 
 
-def count_vars(term: KInner) -> Counter:
-    counter: Counter = Counter()
+def count_vars(term: KInner) -> typing.Counter[str]:
+    counter: typing.Counter[str] = Counter()
 
     def count(term: KInner) -> None:
         if type(term) is KVariable:
@@ -187,7 +192,7 @@ def count_vars(term: KInner) -> Counter:
     return counter
 
 
-def collectFreeVars(kast):
+def collectFreeVars(kast: KInner) -> List[str]:
     return list(count_vars(kast).keys())
 
 
@@ -474,6 +479,18 @@ def removeSourceMap(k):
     return onAttributes(k, _removeSourceMap)
 
 
+def remove_source_attributes(term: KInner) -> KInner:
+    def _is_not_source_att(att: Tuple[str, Any]) -> bool:
+        return att[0] not in ('org.kframework.attributes.Source', 'org.kframework.attributes.Location')
+
+    def _remove_source_attr(term: KInner) -> KInner:
+        if not isinstance(term, WithKAtt):
+            return term
+        return term.let_att(KAtt(dict(filter(_is_not_source_att, term.att.atts.items()))))
+
+    return top_down(_remove_source_attr, term)
+
+
 def remove_generated_cells(term: KInner) -> KInner:
     """Remove <generatedTop> and <generatedCounter> from a configuration.
 
@@ -510,23 +527,21 @@ def setCell(constrainedTerm, cellVariable, cellValue):
     return mlAnd([substitute(config, subst), constraint])
 
 
-def removeUselessConstraints(constrainedTerm, keepVars=None):
-    (state, constraint) = split_config_and_constraints(constrainedTerm)
-    constraints = flatten_label('#And', constraint)
-    usedVars = collectFreeVars(state)
-    usedVars = usedVars if keepVars is None else (usedVars + keepVars)
-    prevLenUsedVars = 0
-    newConstraints = []
-    while len(usedVars) > prevLenUsedVars:
-        prevLenUsedVars = len(usedVars)
-        for c in constraints:
-            if c not in newConstraints:
+def remove_useless_constraints(cterm: CTerm, keep_vars=None) -> CTerm:
+    used_vars = collectFreeVars(cterm.config)
+    used_vars = used_vars if keep_vars is None else (used_vars + keep_vars)
+    prev_len_unsed_vars = 0
+    new_constraints = []
+    while len(used_vars) > prev_len_unsed_vars:
+        prev_len_unsed_vars = len(used_vars)
+        for c in cterm.constraints:
+            if c not in new_constraints:
                 newVars = collectFreeVars(c)
-                if any([v in usedVars for v in newVars]):
-                    newConstraints.append(c)
-                    usedVars.extend(newVars)
-        usedVars = list(set(usedVars))
-    return mlAnd([state] + newConstraints)
+                if any([v in used_vars for v in newVars]):
+                    new_constraints.append(c)
+                    used_vars.extend(newVars)
+        used_vars = list(set(used_vars))
+    return CTerm(mlAnd([cterm.config] + new_constraints))
 
 
 def removeConstraintClausesFor(varNames, constraint):

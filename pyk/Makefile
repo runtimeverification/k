@@ -42,7 +42,7 @@ ACTIVATE_PROD := . $(CURDIR)/$(VENV_PROD_DIR)/bin/activate
 $(VENV_PROD):
 	   virtualenv -p python3 $(VENV_PROD_DIR) \
 	&& $(ACTIVATE_PROD)                       \
-	&& pip install .
+	&& pip install --editable .
 
 $(VENV_PROD_DIR): $(VENV_PROD)
 	@echo $(ACTIVATE_PROD)
@@ -63,7 +63,7 @@ install:
 
 PYK_TEST_ARGS :=
 
-test: test-unit test-integration test-pyk
+test: test-unit test-integration test-pyk test-kit
 
 test-unit: venv-dev
 	$(ACTIVATE_DEV) && python3 -m unittest discover --verbose --top src pyk.tests $(PYK_TEST_ARGS)
@@ -73,8 +73,9 @@ test-integration: venv-dev
 
 test-pyk: venv-prod
 	$(ACTIVATE_PROD) && $(MAKE) -C pyk-tests
-	rm -rf $(VENV_PROD_DIR) build src/pyk.egg-info
 
+test-kit: venv-prod
+	$(ACTIVATE_PROD) && $(MAKE) -C kit-tests
 
 # Checks and formatting
 
@@ -83,6 +84,9 @@ check: check-isort check-autoflake check-black check-mypy
 
 isort: venv-dev
 	$(ACTIVATE_DEV) && isort src
+
+autoflake: venv-dev
+	$(ACTIVATE_DEV) && autoflake -r --in-place --remove-all-unused-imports --ignore-init-module-imports src
 
 check-isort: venv-dev
 	$(ACTIVATE_DEV) && isort --check src

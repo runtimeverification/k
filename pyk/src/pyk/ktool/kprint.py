@@ -151,10 +151,11 @@ def build_symbol_table(definition: KDefinition, opinionated=False) -> SymbolTabl
         for prod in module.syntax_productions:
             assert prod.klabel
             label = prod.klabel.name
-            if 'symbol' in prod.att and 'klabel' in prod.att:
-                label = prod.att['klabel']
             unparser = unparser_for_production(prod)
+
             symbol_table[label] = unparser
+            if 'symbol' in prod.att and 'klabel' in prod.att:
+                symbol_table[prod.att['klabel']] = unparser
 
     if opinionated:
         symbol_table['#And'] = lambda c1, c2: c1 + '\n#And ' + c2
