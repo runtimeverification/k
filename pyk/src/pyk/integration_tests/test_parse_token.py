@@ -25,7 +25,7 @@ class ParseTokenTest(KProveTest):
             return KAtt(FrozenDict({'org.kframework.kore.Sort': FrozenDict({'node': 'KSort', 'name': sort})}))
 
         tests: Iterable[Tuple[str, KToken, KInner]] = (
-            ('variable', KToken('N', 'Int'), KVariable('N', vattr('K'))),  # TODO: This should parse as an int.   # noqa
+            ('variable', KToken('N', 'Int'), KVariable('N', vattr('K'))),  # TODO: This should parse as an int.
             (
                 '==Int',
                 KToken('N ==Int 1', 'Bool'),
