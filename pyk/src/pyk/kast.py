@@ -81,7 +81,18 @@ class KAtt(KAst, Mapping[str, Any]):
     atts: FrozenDict[str, Any]
 
     def __init__(self, atts: Mapping[str, Any] = {}):
-        object.__setattr__(self, 'atts', FrozenDict(atts))
+        def _freeze(m: Any) -> Any:
+            if isinstance(m, (int, str, tuple, FrozenDict, FrozenSet)):
+                return m
+            elif isinstance(m, list):
+                return tuple((v for v in m))
+            elif isinstance(m, dict):
+                return FrozenDict(((k, _freeze(v)) for (k, v) in m.items()))
+            raise ValueError(f"Don't know how to freeze attribute value {m} of type {type(m)}.")
+
+        frozen = _freeze(atts)
+        assert isinstance(frozen, FrozenDict)
+        object.__setattr__(self, 'atts', frozen)
 
     def __iter__(self) -> Iterator[str]:
         return iter(self.atts)
@@ -102,7 +113,12 @@ class KAtt(KAst, Mapping[str, Any]):
         return KAtt(atts=d['att'])
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KAtt', 'att': dict(self.atts)}
+        def _to_dict(m: Any) -> Any:
+            if isinstance(m, FrozenDict):
+                return dict(((k, _to_dict(v)) for (k, v) in m.items()))
+            return m
+
+        return {'node': 'KAtt', 'att': _to_dict(self.atts)}
 
     def let(self, *, atts: Optional[Mapping[str, Any]] = None) -> 'KAtt':
         atts = atts if atts is not None else self.atts
