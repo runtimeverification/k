@@ -1637,10 +1637,18 @@ class KDefinition(KOuter, WithKAtt):
 
         return _kdefinition_empty_config(sort)
 
-    def init_config(self, sort: KSort, config_var_map: Optional[KInner] = None) -> KInner:
+    def init_config(self, sort: KSort) -> KInner:
 
-        if not config_var_map:
-            config_var_map = KApply('.Map')
+        config_var_map = KVariable('__###CONFIG_VAR_MAP###__')
+
+        def _remove_config_var_lookups(_kast: KInner) -> KInner:
+            if type(_kast) is KApply and _kast.label.name.startswith('project:') and len(_kast.args) == 1:
+                _term = _kast.args[0]
+                if type(_term) is KApply and _term.label == KLabel('Map:lookup') and _term.args[0] == config_var_map:
+                    _token_var = _term.args[1]
+                    if type(_token_var) is KToken and _token_var.sort == KSort('KConfigVar'):
+                        return KVariable(_token_var.token)
+            return _kast
 
         init_prods = [prod for prod in self.syntax_productions if 'initializer' in prod.att]
         _init_prod = [prod for prod in init_prods if prod.sort == sort]
@@ -1666,6 +1674,8 @@ class KDefinition(KOuter, WithKAtt):
             for rew in init_rewrites:
                 assert type(rew) is KRewrite
                 init_config = rew(init_config)
+
+        init_config = top_down(_remove_config_var_lookups, init_config)
 
         return init_config
 
