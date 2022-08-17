@@ -73,7 +73,7 @@ class DefnTest(KProveTest):
     def test_empty_config(self):
         test_data = (
             (
-                'generatedTop-no-map',
+                'generatedTop',
                 Sorts.GENERATED_TOP_CELL,
                 (
                     f'<generatedTop>\n'
@@ -92,7 +92,7 @@ class DefnTest(KProveTest):
                 ),
             ),
             (
-                'TCell-no-map',
+                'TCell',
                 KSort('TCell'),
                 (
                     f'<T>\n'
@@ -106,7 +106,7 @@ class DefnTest(KProveTest):
                 ),
             ),
             (
-                'stateCell-no-map',
+                'stateCell',
                 KSort('StateCell'),
                 (f'<state>\n' f'  STATE_CELL\n' f'</state>'),
             ),
@@ -123,12 +123,11 @@ class DefnTest(KProveTest):
             (
                 'generatedTop-no-map',
                 Sorts.GENERATED_TOP_CELL,
-                KVariable('CONFIG_VAR_MAP'),
                 (
                     f'<generatedTop>\n'
                     f'  <T>\n'
                     f'    <k>\n'
-                    f'      project:Pgm ( CONFIG_VAR_MAP [ $PGM ] )\n'
+                    f'      $PGM\n'
                     f'    </k>\n'
                     f'    <state>\n'
                     f'      .Map\n'
@@ -143,28 +142,17 @@ class DefnTest(KProveTest):
             (
                 'TCell-no-map',
                 KSort('TCell'),
-                KVariable('CONFIG_VAR_MAP'),
-                (
-                    f'<T>\n'
-                    f'  <k>\n'
-                    f'    project:Pgm ( CONFIG_VAR_MAP [ $PGM ] )\n'
-                    f'  </k>\n'
-                    f'  <state>\n'
-                    f'    .Map\n'
-                    f'  </state>\n'
-                    f'</T>'
-                ),
+                (f'<T>\n' f'  <k>\n' f'    $PGM\n' f'  </k>\n' f'  <state>\n' f'    .Map\n' f'  </state>\n' f'</T>'),
             ),
             (
                 'stateCell-no-map',
                 KSort('StateCell'),
-                KApply('.Map'),
                 (f'<state>\n' f'  .Map\n' f'</state>'),
             ),
         )
 
-        for name, sort, map, expected in test_data:
+        for name, sort, expected in test_data:
             with self.subTest(name):
-                init_config = self.kprove.definition.init_config(sort, config_var_map=map)
+                init_config = self.kprove.definition.init_config(sort)
                 actual = self.kprove.pretty_print(init_config)
                 self.assertEqual(actual, expected)
