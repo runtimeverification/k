@@ -81,7 +81,18 @@ class KAtt(KAst, Mapping[str, Any]):
     atts: FrozenDict[str, Any]
 
     def __init__(self, atts: Mapping[str, Any] = {}):
-        object.__setattr__(self, 'atts', FrozenDict(atts))
+        def _freeze(m: Any) -> Any:
+            if isinstance(m, (int, str, tuple, FrozenDict, FrozenSet)):
+                return m
+            elif isinstance(m, list):
+                return tuple((v for v in m))
+            elif isinstance(m, dict):
+                return FrozenDict(((k, _freeze(v)) for (k, v) in m.items()))
+            raise ValueError(f"Don't know how to freeze attribute value {m} of type {type(m)}.")
+
+        frozen = _freeze(atts)
+        assert isinstance(frozen, FrozenDict)
+        object.__setattr__(self, 'atts', frozen)
 
     def __iter__(self) -> Iterator[str]:
         return iter(self.atts)
@@ -102,7 +113,12 @@ class KAtt(KAst, Mapping[str, Any]):
         return KAtt(atts=d['att'])
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KAtt', 'att': dict(self.atts)}
+        def _to_dict(m: Any) -> Any:
+            if isinstance(m, FrozenDict):
+                return dict(((k, _to_dict(v)) for (k, v) in m.items()))
+            return m
+
+        return {'node': 'KAtt', 'att': _to_dict(self.atts)}
 
     def let(self, *, atts: Optional[Mapping[str, Any]] = None) -> 'KAtt':
         atts = atts if atts is not None else self.atts
@@ -1571,6 +1587,10 @@ class KDefinition(KOuter, WithKAtt):
     def constructors(self) -> List[KProduction]:
         return [prod for module in self.modules for prod in module.constructors]
 
+    @property
+    def rules(self) -> List[KRule]:
+        return [rule for module in self.modules for rule in module.rules]
+
     def production_for_klabel(self, klabel: KLabel) -> KProduction:
         productions = [prod for prod in self.productions if prod.klabel and prod.klabel == klabel]
         if len(productions) != 1:
@@ -1616,6 +1636,48 @@ class KDefinition(KOuter, WithKAtt):
             return KApply(cell_klabel, args)
 
         return _kdefinition_empty_config(sort)
+
+    def init_config(self, sort: KSort) -> KInner:
+
+        config_var_map = KVariable('__###CONFIG_VAR_MAP###__')
+
+        def _remove_config_var_lookups(_kast: KInner) -> KInner:
+            if type(_kast) is KApply and _kast.label.name.startswith('project:') and len(_kast.args) == 1:
+                _term = _kast.args[0]
+                if type(_term) is KApply and _term.label == KLabel('Map:lookup') and _term.args[0] == config_var_map:
+                    _token_var = _term.args[1]
+                    if type(_token_var) is KToken and _token_var.sort == KSort('KConfigVar'):
+                        return KVariable(_token_var.token)
+            return _kast
+
+        init_prods = [prod for prod in self.syntax_productions if 'initializer' in prod.att]
+        _init_prod = [prod for prod in init_prods if prod.sort == sort]
+        if len(_init_prod) != 1:
+            raise ValueError(f'Did not find unique initializer for sort: {sort}')
+        init_prod = _init_prod[0]
+
+        init_config: KInner
+        prod_klabel = init_prod.klabel
+        assert prod_klabel is not None
+        arg_sorts = [nt.sort for nt in init_prod.items if type(nt) is KNonTerminal]
+        if len(arg_sorts) == 0:
+            init_config = KApply(prod_klabel)
+        elif len(arg_sorts) == 1 and arg_sorts[0] == KSort('Map'):
+            init_config = KApply(prod_klabel, [config_var_map])
+        else:
+            raise ValueError(f'Cannot handle initializer for label: {prod_klabel}')
+
+        init_rewrites = [rule.body for rule in self.rules if 'initializer' in rule.att]
+        old_init_config: Optional[KInner] = None
+        while init_config != old_init_config:
+            old_init_config = init_config
+            for rew in init_rewrites:
+                assert type(rew) is KRewrite
+                init_config = rew(init_config)
+
+        init_config = top_down(_remove_config_var_lookups, init_config)
+
+        return init_config
 
 
 # TODO make method of KInner
