@@ -133,6 +133,9 @@ public final class KastOptions {
             description="How to read kast input in. <mode> is either [program|binary|kast|json|kore|rule].")
     public InputModes input = InputModes.PROGRAM;
 
+    @Parameter(names={"--steps"}, description="Apply specified kompilation steps to the parsed term. Only for --input rule. Use --steps help for a detailed description of available steps.")
+    public String steps = "closeCells,resolveCasts,body";
+
     public static class InputModeConverter extends BaseEnumConverter<InputModes> {
 
         public InputModeConverter(String optionName) {

@@ -99,6 +99,17 @@ public class KastFrontEnd extends FrontEnd {
      */
     @Override
     public int run() {
+        if (options.steps.equals("help")) {
+            System.out.println(
+                    "For --input rule, apply these steps, separated by comma:\n" +
+                            "   closeCells - transform #Dots and #NoDots, into appropriate collection elements\n" +
+                            "   resolveCasts - transform #SemanticCastToSort nodes to side conditions\n" +
+                            "   macros - apply macro transformations\n" +
+                            "   body - return only the body of the rule\n" +
+                            "   addImplicitComputationCell - add the <generatedTop> cell\n" +
+                            "   concretizeCells - configuration concretization");
+            return 0;
+        }
         scope.enter(kompiledDir.get());
         try {
             CompiledDefinition def = compiledDef.get();
