@@ -3,7 +3,9 @@ import logging
 import socket
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import Enum
+from time import sleep
 from typing import (
     Any,
     ContextManager,
@@ -51,17 +53,30 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
     _file: TextIO
     _req_id: int
 
-    def __init__(self, host: str, port: int):
+    def __init__(self, host: str, port: int, *, timeout: Optional[int] = None):
+        if timeout is not None and timeout < 0:
+            raise ValueError(f'Expected nonnegative timeout value, got: {timeout}')
+
         self._host = host
         self._port = port
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._file = self._sock.makefile('r')
         self._req_id = 1
 
-        try:
-            self._sock.connect((host, port))
-        except BaseException as err:
-            raise RuntimeError(f"Couldn't connect to host: {host}:{port}") from err
+        connected = False
+        timeout_datetime = datetime.now() + timedelta(milliseconds=timeout) if timeout is not None else None
+
+        _LOGGER.info(f'Connecting to host: {host}:{port}')
+        while not connected and (timeout_datetime is None or datetime.now() < timeout_datetime):
+            try:
+                self._sock.connect((host, port))
+                connected = True
+            except BaseException:  # TODO refine
+                sleep(0.1)
+
+        if not connected:
+            self.close()
+            raise RuntimeError(f"Couldn't connect to host: {host}:{port}")
 
         _LOGGER.info(f'Connected to host: {host}:{port}')
 
@@ -73,8 +88,8 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         self._sock.__exit__(*args)
 
     def close(self) -> None:
-        self._file.close
-        self._sock.close
+        self._file.close()
+        self._sock.close()
 
     def request(self, method: str, **params: Any) -> Dict[str, Any]:
         payload = {
@@ -284,8 +299,8 @@ class KoreClient(ContextManager['KoreClient']):
 
     _client: JsonRpcClient
 
-    def __init__(self, host: str, port: int):
-        self._client = JsonRpcClient(host, port)
+    def __init__(self, host: str, port: int, *, timeout: Optional[int] = None):
+        self._client = JsonRpcClient(host, port, timeout=timeout)
 
     def __enter__(self):
         return self

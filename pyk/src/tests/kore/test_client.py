@@ -22,7 +22,7 @@ class KoreClientTest(TestCase):
 
         # Then
         self.assertIsInstance(self.mock, JsonRpcClient)
-        MockClient.assert_called_with('localhost', 3000)
+        MockClient.assert_called_with('localhost', 3000, timeout=None)
         self.assertEqual(self.client._client, self.mock)
 
     def tearDown(self):
