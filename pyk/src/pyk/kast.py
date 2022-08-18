@@ -68,12 +68,12 @@ class KAst(ABC):
         # shallow copy version of dataclass.astuple.
         return tuple(self.__dict__[field.name] for field in fields(type(self)))
 
-    def __lt__(t1, t2):
-        if not isinstance(t2, KAst):
+    def __lt__(self, other):
+        if not isinstance(other, KAst):
             return NotImplemented
-        if type(t1) == type(t2):
-            return t1._as_shallow_tuple() < t2._as_shallow_tuple()
-        return type(t1).__name__ < type(t2).__name__
+        if type(self) == type(other):
+            return self._as_shallow_tuple() < other._as_shallow_tuple()
+        return type(self).__name__ < type(other).__name__
 
 
 @final
