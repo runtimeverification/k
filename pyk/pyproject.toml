@@ -15,6 +15,7 @@ graphviz = "^0.20.1"
 [tool.poetry.dev-dependencies]
 autoflake = "^1.4"
 black = "^22.6.0"
+flake8 = "^5.0.4"
 isort = "^5.10.1"
 mypy = "^0.971"
 
