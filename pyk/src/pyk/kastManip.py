@@ -1,7 +1,21 @@
 import logging
 import typing
 from collections import Counter
-from typing import Any, Callable, Dict, Final, List, Mapping, Optional, Sequence, Tuple, Type, TypeVar
+from typing import (
+    Any,
+    Callable,
+    Collection,
+    Dict,
+    Final,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+)
 
 from .cterm import CTerm, split_config_and_constraints
 from .kast import (
@@ -13,6 +27,7 @@ from .kast import (
     KInner,
     KRewrite,
     KRule,
+    KRuleLike,
     KSequence,
     KToken,
     KVariable,
@@ -31,6 +46,7 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 KI = TypeVar('KI', bound=KInner)
 W = TypeVar('W', bound=WithKAtt)
+RL = TypeVar('RL', bound=KRuleLike)
 
 
 def if_ktype(ktype: Type[KI], then: Callable[[KI], KInner]) -> Callable[[KInner], KInner]:
@@ -360,13 +376,13 @@ def markUselessVars(kast):
     return substitute(kast, subst)
 
 
-def uselessVarsToDots(kast, keepVars=None):
+def uselessVarsToDots(kast: KInner, keep_vars: Iterable[str] = ()) -> KInner:
     """Structurally abstract away useless variables.
 
     -   Input: kast term, and a requires clause and ensures clause.
     -   Output: kast term with the useless vars structurally abstracted.
     """
-    numOccurances = count_vars(kast) + Counter(keepVars)
+    numOccurances = count_vars(kast) + Counter(keep_vars)
 
     def _collapseUselessVars(_kast):
         if type(_kast) is KApply and _kast.is_cell:
@@ -382,7 +398,7 @@ def uselessVarsToDots(kast, keepVars=None):
     return bottom_up(_collapseUselessVars, kast)
 
 
-def labelsToDots(kast, labels):
+def labelsToDots(kast: KInner, labels: Collection[str]) -> KInner:
     """Abstract specific labels for printing.
 
     -   Input: kast term, and list of labels to abstract.
@@ -413,7 +429,7 @@ def onAttributes(kast: W, f: Callable[[KAtt], KAtt]) -> W:
     return kast
 
 
-def minimize_term(term, keep_vars=None, abstract_labels=[]):
+def minimize_term(term: KInner, keep_vars: Iterable[str] = (), abstract_labels: Collection[str] = ()) -> KInner:
     """Minimize a K term for pretty-printing.
 
     -   Input: kast term, and optionally requires and ensures clauses with constraints.
@@ -424,13 +440,13 @@ def minimize_term(term, keep_vars=None, abstract_labels=[]):
     """
     term = inlineCellMaps(term)
     term = removeSemanticCasts(term)
-    term = uselessVarsToDots(term, keepVars=keep_vars)
+    term = uselessVarsToDots(term, keep_vars=keep_vars)
     term = labelsToDots(term, abstract_labels)
     term = collapseDots(term)
     return term
 
 
-def minimizeRule(rule, keepVars=[]):
+def minimize_rule(rule: RL, keep_vars: Iterable[str] = ()) -> RL:
     """Minimize a K rule or claim for pretty-printing.
 
     -   Input: kast representing a K rule or claim.
@@ -439,25 +455,22 @@ def minimizeRule(rule, keepVars=[]):
         -   Unused cells will be abstracted.
         -   Attempt to remove useless side-conditions.
     """
-    if not (type(rule) is KRule or type(rule) is KClaim):
-        return rule
+    body = rule.body
+    requires = rule.requires
+    ensures = rule.ensures
 
-    ruleBody = rule.body
-    ruleRequires = rule.requires
-    ruleEnsures = rule.ensures
+    requires = Bool.andBool(flatten_label('_andBool_', requires))
+    requires = simplify_bool(requires)
 
-    ruleRequires = Bool.andBool(flatten_label('_andBool_', ruleRequires))
-    ruleRequires = simplify_bool(ruleRequires)
+    ensures = Bool.andBool(flatten_label('_andBool_', ensures))
+    ensures = simplify_bool(ensures)
 
-    ruleEnsures = Bool.andBool(flatten_label('_andBool_', ruleEnsures))
-    ruleEnsures = simplify_bool(ruleEnsures)
+    constrained_vars = list(keep_vars)
+    constrained_vars = constrained_vars + collectFreeVars(requires)
+    constrained_vars = constrained_vars + collectFreeVars(ensures)
+    body = minimize_term(body, keep_vars=constrained_vars)
 
-    constrainedVars = [] if keepVars is None else keepVars
-    constrainedVars = constrainedVars + collectFreeVars(ruleRequires)
-    constrainedVars = constrainedVars + collectFreeVars(ruleEnsures)
-    ruleBody = minimize_term(ruleBody, keep_vars=constrainedVars)
-
-    return rule.let(body=ruleBody, requires=ruleRequires, ensures=ruleEnsures)
+    return rule.let(body=body, requires=requires, ensures=ensures)
 
 
 def removeSourceMap(k):
@@ -564,7 +577,7 @@ def build_rule(
     init_cterm: CTerm,
     final_cterm: CTerm,
     priority: Optional[int] = None,
-    keep_vars: Optional[List[str]] = None,
+    keep_vars: Iterable[str] = (),
 ) -> Tuple[KRule, Subst]:
 
     init_config, *init_constraints = init_cterm
@@ -605,14 +618,12 @@ def build_rule(
 
     rule = KRule(rule_body, requires=rule_requires, ensures=rule_ensures, att=rule_att)
     rule = rule.update_atts({'label': rule_id})
-    new_keep_vars = None
-    if keep_vars is not None:
-        new_keep_vars = [v_subst[v].name for v in keep_vars]
-    return (minimizeRule(rule, keepVars=new_keep_vars), Subst(vremap_subst))
+    new_keep_vars = [v_subst[v].name for v in keep_vars]
+    return (minimize_rule(rule, keep_vars=new_keep_vars), Subst(vremap_subst))
 
 
 def build_claim(
-    claim_id: str, init_cterm: CTerm, final_cterm: CTerm, keep_vars: Optional[List[str]] = None
+    claim_id: str, init_cterm: CTerm, final_cterm: CTerm, keep_vars: Iterable[str] = ()
 ) -> Tuple[KClaim, Subst]:
     rule, var_map = build_rule(claim_id, init_cterm, final_cterm, keep_vars=keep_vars)
     claim = KClaim(rule.body, requires=rule.requires, ensures=rule.ensures, att=rule.att)

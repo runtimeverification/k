@@ -30,6 +30,7 @@ from .utils import FrozenDict, filter_none, hash_str
 T = TypeVar('T', bound='KAst')
 W = TypeVar('W', bound='WithKAtt')
 KI = TypeVar('KI', bound='KInner')
+RL = TypeVar('RL', bound='KRuleLike')
 
 
 class KAst(ABC):
@@ -1192,6 +1193,17 @@ class KRuleLike(KSentence, ABC):
             return globals()[node].from_dict(d)
 
         raise ValueError(f"Expected KRuleLike label as 'node' value, found: '{node}'")
+
+    @abstractmethod
+    def let(
+        self: RL,
+        *,
+        body: Optional[KInner] = None,
+        requires: Optional[KInner] = None,
+        ensures: Optional[KInner] = None,
+        att: Optional[KAtt] = None,
+    ) -> RL:
+        ...
 
 
 @final
