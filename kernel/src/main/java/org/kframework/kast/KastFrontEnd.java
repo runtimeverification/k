@@ -9,7 +9,6 @@ import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
 import org.kframework.compile.*;
 import org.kframework.definition.Module;
-import org.kframework.definition.ModuleTransformer;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
@@ -21,6 +20,7 @@ import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.parser.outer.Outer;
 import org.kframework.unparser.KPrint;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.Environment;
@@ -31,8 +31,6 @@ import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.DefinitionScope;
 import org.kframework.utils.inject.JCommanderModule;
 import org.kframework.utils.inject.JCommanderModule.Usage;
-import org.kframework.utils.Stopwatch;
-import scala.Function1;
 import scala.Option;
 import scala.Tuple2;
 import scala.util.Either;
@@ -47,6 +45,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.kframework.kore.KORE.*;
 
 public class KastFrontEnd extends FrontEnd {
 
@@ -102,12 +102,12 @@ public class KastFrontEnd extends FrontEnd {
         if (options.steps.equals("help")) {
             System.out.println(
                     "For --input rule, apply these steps, separated by comma:\n" +
+                            "   macros - apply macro transformations\n" +
                             "   closeCells - transform #Dots and #NoDots, into appropriate collection elements\n" +
                             "   resolveCasts - transform #SemanticCastToSort nodes to side conditions\n" +
-                            "   macros - apply macro transformations\n" +
-                            "   body - return only the body of the rule\n" +
                             "   addImplicitComputationCell - add the <generatedTop> cell\n" +
-                            "   concretizeCells - configuration concretization");
+                            "   concretizeCells - configuration concretization" +
+                            "   body - return only the body of the rule\n");
             return 0;
         }
         scope.enter(kompiledDir.get());
@@ -148,10 +148,18 @@ public class KastFrontEnd extends FrontEnd {
                     SortInfo sortInfo = SortInfo.fromModule(mod);
 
                     Rule r = Rule.apply(parsed, BooleanUtils.TRUE, BooleanUtils.TRUE, Att.empty());
-                    r = (Rule) new CloseCells(configInfo, sortInfo, labelInfo).close(r);
-                    r = (Rule) new ResolveSemanticCasts(false).resolve(r); // move casts to side condition then discard them
-
-                    kprint.get().prettyPrint(def.kompiledDefinition, unparsingMod, s -> kprint.get().outputFile(s), r.body(), sort);
+                    if (options.steps.contains("macros"))
+                        r = (Rule) ExpandMacros.forNonSentences(unparsingMod, files.get(), def.kompileOptions, false).expand(r);
+                    if (options.steps.contains("closeCells"))
+                        r = (Rule) new CloseCells(configInfo, sortInfo, labelInfo).close(r);
+                    if (options.steps.contains("resolveCasts")) // move casts to side condition predicates
+                        r = (Rule) new ResolveSemanticCasts(false).resolve(r);
+                    if (options.steps.contains("addImplicitComputationCell"))
+                        r = (Rule) new AddImplicitComputationCell(configInfo, labelInfo).apply(mod, r);
+                    if (options.steps.contains("concretizeCells"))
+                        r = (Rule) new ConcretizeCells(configInfo, labelInfo, sortInfo, mod, true).concretize(mod, r);
+                    K result = options.steps.contains("body") ? r.body() : KApply(KLabel("#ruleRequiresEnsures"), KList(r.body(), r.requires(), r.ensures()));
+                    kprint.get().prettyPrint(def.kompiledDefinition, unparsingMod, s -> kprint.get().outputFile(s), result, sort);
                 }
 
                 sw.printTotal("Total");
