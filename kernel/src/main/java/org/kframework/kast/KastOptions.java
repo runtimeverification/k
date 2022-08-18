@@ -4,6 +4,7 @@ package org.kframework.kast;
 import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.kframework.attributes.Source;
@@ -24,6 +25,7 @@ import java.io.InputStreamReader;
 import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Collections;
 import java.util.List;
 
 @RequestScoped
@@ -134,7 +136,7 @@ public final class KastOptions {
     public InputModes input = InputModes.PROGRAM;
 
     @Parameter(names={"--steps"}, description="Apply specified kompilation steps to the parsed term. Only for --input rule. Use --steps help for a detailed description of available steps.")
-    public String steps = "closeCells,resolveCasts,body";
+    public List<KastFrontEnd.KompileSteps> steps = Lists.newArrayList(KastFrontEnd.KompileSteps.closeCells, KastFrontEnd.KompileSteps.resolveCasts, KastFrontEnd.KompileSteps.body);
 
     public static class InputModeConverter extends BaseEnumConverter<InputModes> {
 

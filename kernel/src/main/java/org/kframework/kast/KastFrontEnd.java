@@ -93,21 +93,25 @@ public class KastFrontEnd extends FrontEnd {
         this.scope = scope;
     }
 
+    public enum KompileSteps {
+        help, macros, closeCells, resolveCasts, addImplicitComputationCell, concretizeCells, body
+    }
+
     /**
      *
      * @return true if the application terminated normally; false otherwise
      */
     @Override
     public int run() {
-        if (options.steps.equals("help")) {
+        if (options.steps.contains(KompileSteps.help)) {
             System.out.println(
-                    "For --input rule, apply these steps, separated by comma:\n" +
+                    "For --input rule, apply these steps, in this order, separated by comma:\n" +
                             "   macros - apply macro transformations\n" +
                             "   closeCells - transform #Dots and #NoDots, into appropriate collection elements\n" +
                             "   resolveCasts - transform #SemanticCastToSort nodes to side conditions\n" +
                             "   addImplicitComputationCell - add the <generatedTop> cell\n" +
-                            "   concretizeCells - configuration concretization" +
-                            "   body - return only the body of the rule\n");
+                            "   concretizeCells - configuration concretization\n" +
+                            "   body - return only the body of the rule");
             return 0;
         }
         scope.enter(kompiledDir.get());
@@ -148,17 +152,17 @@ public class KastFrontEnd extends FrontEnd {
                     SortInfo sortInfo = SortInfo.fromModule(mod);
 
                     Rule r = Rule.apply(parsed, BooleanUtils.TRUE, BooleanUtils.TRUE, Att.empty());
-                    if (options.steps.contains("macros"))
+                    if (options.steps.contains(KompileSteps.macros))
                         r = (Rule) ExpandMacros.forNonSentences(unparsingMod, files.get(), def.kompileOptions, false).expand(r);
-                    if (options.steps.contains("closeCells"))
+                    if (options.steps.contains(KompileSteps.closeCells))
                         r = (Rule) new CloseCells(configInfo, sortInfo, labelInfo).close(r);
-                    if (options.steps.contains("resolveCasts")) // move casts to side condition predicates
+                    if (options.steps.contains(KompileSteps.resolveCasts)) // move casts to side condition predicates
                         r = (Rule) new ResolveSemanticCasts(false).resolve(r);
-                    if (options.steps.contains("addImplicitComputationCell"))
+                    if (options.steps.contains(KompileSteps.addImplicitComputationCell))
                         r = (Rule) new AddImplicitComputationCell(configInfo, labelInfo).apply(mod, r);
-                    if (options.steps.contains("concretizeCells"))
+                    if (options.steps.contains(KompileSteps.concretizeCells))
                         r = (Rule) new ConcretizeCells(configInfo, labelInfo, sortInfo, mod, true).concretize(mod, r);
-                    K result = options.steps.contains("body") ? r.body() : KApply(KLabel("#ruleRequiresEnsures"), KList(r.body(), r.requires(), r.ensures()));
+                    K result = options.steps.contains(KompileSteps.body) ? r.body() : KApply(KLabel("#ruleRequiresEnsures"), KList(r.body(), r.requires(), r.ensures()));
                     kprint.get().prettyPrint(def.kompiledDefinition, unparsingMod, s -> kprint.get().outputFile(s), result, sort);
                 }
 
