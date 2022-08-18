@@ -1,3 +1,4 @@
 [flake8]
 max-line-length = 120
-ignore = E,W1,W2,W3,W4,W5,F401
+extend-select = B9
+extend-ignore = B950,E,F401,W1,W2,W3,W4,W5
