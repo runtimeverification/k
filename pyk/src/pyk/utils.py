@@ -1,6 +1,6 @@
 import hashlib
 import string
-from typing import Any, Dict, Hashable, Iterable, Iterator, List, Mapping, Optional, Tuple, TypeVar
+from typing import Any, Dict, Final, Hashable, Iterable, Iterator, List, Mapping, Optional, Tuple, TypeVar
 
 T = TypeVar('T')
 K = TypeVar('K')
@@ -40,6 +40,9 @@ class FrozenDict(Mapping[K, V]):
 
     def __repr__(self) -> str:
         return f'FrozenDict({repr(self._dict)})'
+
+
+EMPTY_FROZEN_DICT: Final[FrozenDict] = FrozenDict()
 
 
 def raised(f, *args, **kwargs) -> Optional[BaseException]:

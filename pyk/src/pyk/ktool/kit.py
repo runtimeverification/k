@@ -3,7 +3,7 @@ import logging
 import sys
 from argparse import ArgumentParser, FileType
 from pathlib import Path
-from typing import Any, Dict, Final, List, Optional
+from typing import Any, Dict, Final, Iterable, List, Optional
 
 from ..cfg_manager import CFGManager
 from ..cterm import CTerm
@@ -301,7 +301,7 @@ def remove_alias(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KC
 
 
 # TODO: Should not rely on kprove, should just call `KPrint.parse_token` when that supports frontend syntax such as variables.
-def parse_token_rule_syntax(kprove, ktoken: KToken, kast_args=[]) -> KInner:
+def parse_token_rule_syntax(kprove, ktoken: KToken, kast_args: Iterable[str] = ()) -> KInner:
     cterm = CTerm(mlAnd([KApply('<k>', [ktoken])]))
     claim_id = 'simplify-token'
     claim, var_map = build_claim(

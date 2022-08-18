@@ -25,7 +25,7 @@ from typing import (
     overload,
 )
 
-from .utils import FrozenDict, filter_none, hash_str
+from .utils import EMPTY_FROZEN_DICT, FrozenDict, filter_none, hash_str
 
 T = TypeVar('T', bound='KAst')
 W = TypeVar('W', bound='WithKAtt')
@@ -81,7 +81,7 @@ class KAst(ABC):
 class KAtt(KAst, Mapping[str, Any]):
     atts: FrozenDict[str, Any]
 
-    def __init__(self, atts: Mapping[str, Any] = {}):
+    def __init__(self, atts: Mapping[str, Any] = EMPTY_FROZEN_DICT):
         def _freeze(m: Any) -> Any:
             if isinstance(m, (int, str, tuple, FrozenDict, FrozenSet)):
                 return m
@@ -188,7 +188,7 @@ class KInner(KAst, ABC):
 class Subst(Mapping[str, KInner]):
     _subst: FrozenDict[str, KInner]
 
-    def __init__(self, subst: Mapping[str, KInner] = {}):
+    def __init__(self, subst: Mapping[str, KInner] = EMPTY_FROZEN_DICT):
         object.__setattr__(self, '_subst', FrozenDict(subst))
 
     def __iter__(self) -> Iterator[str]:
