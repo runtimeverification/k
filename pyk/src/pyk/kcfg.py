@@ -850,7 +850,7 @@ def path_condition(path: Sequence[KCFG.EdgeLike]) -> Tuple[KInner, Subst, int]:
         elif type(edge) == KCFG.Cover:
             substitutions.append(edge.subst)
         else:
-            assert False
+            raise AssertionError
 
     substitution = reduce(Subst.compose, reversed(substitutions), Subst())
     return mlAnd(constraints), substitution, depth

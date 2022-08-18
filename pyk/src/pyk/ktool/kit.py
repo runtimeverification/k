@@ -207,7 +207,7 @@ def main() -> None:
             manager.writeCFG(cfg_id, cfg)
         return
 
-    assert False, '!!! Should be unreachable. `callback_cfg` not set.'
+    raise AssertionError('!!! Should be unreachable. `callback_cfg` not set.')
 
 
 def configure_logger(args) -> None:
