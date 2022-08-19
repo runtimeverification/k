@@ -10,7 +10,7 @@ from .kore_client_test import KoreClientTest
 
 def term(n: int) -> Pattern:
     template = Template(
-        '''
+        r'''
     Lbl'-LT-'generatedTop'-GT-'{}(
         Lbl'-LT-'k'-GT-'{}(
             kseq{}(
