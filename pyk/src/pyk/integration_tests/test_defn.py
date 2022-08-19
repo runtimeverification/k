@@ -24,14 +24,14 @@ class DefnTest(KProveTest):
         config = KApply('<T>', [KApply('<k>', [KApply('int_;_', [KApply('_,_', [KToken('x', 'Id'), KApply('_,_', [KToken('y', 'Id'), KApply('.List{"_,_"}')])])])]), KApply('<state>', [KApply('.Map')])])
 
         config_expected = (
-            f'<T>\n'
-            f'  <k>\n'
-            f'    int x , y ;\n'
-            f'  </k>\n'
-            f'  <state>\n'
-            f'    .Map\n'
-            f'  </state>\n'
-            f'</T>'
+            '<T>\n'
+            '  <k>\n'
+            '    int x , y ;\n'
+            '  </k>\n'
+            '  <state>\n'
+            '    .Map\n'
+            '  </state>\n'
+            '</T>'
         )
         # fmt: on
 
@@ -52,14 +52,7 @@ class DefnTest(KProveTest):
         # fmt: on
 
         minimized_claim_rewrite_expected = (
-            f'<T>\n'
-            f'  <k>\n'
-            f'    ( X + Y => X +Int Y )\n'
-            f'  </k>\n'
-            f'  <state>\n'
-            f'    STATE\n'
-            f'  </state>\n'
-            f'</T>'
+            '<T>\n' '  <k>\n' '    ( X + Y => X +Int Y )\n' '  </k>\n' '  <state>\n' '    STATE\n' '  </state>\n' '</T>'
         )
 
         minimized_claim_rewrite = push_down_rewrites(claim_rewrite)
@@ -76,39 +69,30 @@ class DefnTest(KProveTest):
                 'generatedTop',
                 Sorts.GENERATED_TOP_CELL,
                 (
-                    f'<generatedTop>\n'
-                    f'  <T>\n'
-                    f'    <k>\n'
-                    f'      K_CELL\n'
-                    f'    </k>\n'
-                    f'    <state>\n'
-                    f'      STATE_CELL\n'
-                    f'    </state>\n'
-                    f'  </T>\n'
-                    f'  <generatedCounter>\n'
-                    f'    GENERATEDCOUNTER_CELL\n'
-                    f'  </generatedCounter>\n'
-                    f'</generatedTop>'
+                    '<generatedTop>\n'
+                    '  <T>\n'
+                    '    <k>\n'
+                    '      K_CELL\n'
+                    '    </k>\n'
+                    '    <state>\n'
+                    '      STATE_CELL\n'
+                    '    </state>\n'
+                    '  </T>\n'
+                    '  <generatedCounter>\n'
+                    '    GENERATEDCOUNTER_CELL\n'
+                    '  </generatedCounter>\n'
+                    '</generatedTop>'
                 ),
             ),
             (
                 'TCell',
                 KSort('TCell'),
-                (
-                    f'<T>\n'
-                    f'  <k>\n'
-                    f'    K_CELL\n'
-                    f'  </k>\n'
-                    f'  <state>\n'
-                    f'    STATE_CELL\n'
-                    f'  </state>\n'
-                    f'</T>'
-                ),
+                ('<T>\n' '  <k>\n' '    K_CELL\n' '  </k>\n' '  <state>\n' '    STATE_CELL\n' '  </state>\n' '</T>'),
             ),
             (
                 'stateCell',
                 KSort('StateCell'),
-                (f'<state>\n' f'  STATE_CELL\n' f'</state>'),
+                ('<state>\n' '  STATE_CELL\n' '</state>'),
             ),
         )
 
@@ -124,30 +108,30 @@ class DefnTest(KProveTest):
                 'generatedTop-no-map',
                 Sorts.GENERATED_TOP_CELL,
                 (
-                    f'<generatedTop>\n'
-                    f'  <T>\n'
-                    f'    <k>\n'
-                    f'      $PGM\n'
-                    f'    </k>\n'
-                    f'    <state>\n'
-                    f'      .Map\n'
-                    f'    </state>\n'
-                    f'  </T>\n'
-                    f'  <generatedCounter>\n'
-                    f'    0\n'
-                    f'  </generatedCounter>\n'
-                    f'</generatedTop>'
+                    '<generatedTop>\n'
+                    '  <T>\n'
+                    '    <k>\n'
+                    '      $PGM\n'
+                    '    </k>\n'
+                    '    <state>\n'
+                    '      .Map\n'
+                    '    </state>\n'
+                    '  </T>\n'
+                    '  <generatedCounter>\n'
+                    '    0\n'
+                    '  </generatedCounter>\n'
+                    '</generatedTop>'
                 ),
             ),
             (
                 'TCell-no-map',
                 KSort('TCell'),
-                (f'<T>\n' f'  <k>\n' f'    $PGM\n' f'  </k>\n' f'  <state>\n' f'    .Map\n' f'  </state>\n' f'</T>'),
+                ('<T>\n' '  <k>\n' '    $PGM\n' '  </k>\n' '  <state>\n' '    .Map\n' '  </state>\n' '</T>'),
             ),
             (
                 'stateCell-no-map',
                 KSort('StateCell'),
-                (f'<state>\n' f'  .Map\n' f'</state>'),
+                ('<state>\n' '  .Map\n' '</state>'),
             ),
         )
 
