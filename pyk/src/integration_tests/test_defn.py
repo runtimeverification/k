@@ -53,7 +53,7 @@ class DefnTest(KProveTest):
         # fmt: on
 
         minimized_claim_rewrite_expected = (
-            '<T>\n' '  <k>\n' '    ( X + Y => X +Int Y )\n' '  </k>\n' '  <state>\n' '    STATE\n' '  </state>\n' '</T>'
+            '<T>\n  <k>\n     X + Y => X +Int Y \n  </k>\n  <state>\n    STATE\n  </state>\n</T>'
         )
 
         minimized_claim_rewrite = push_down_rewrites(claim_rewrite)
@@ -88,12 +88,12 @@ class DefnTest(KProveTest):
             (
                 'TCell',
                 KSort('TCell'),
-                ('<T>\n' '  <k>\n' '    K_CELL\n' '  </k>\n' '  <state>\n' '    STATE_CELL\n' '  </state>\n' '</T>'),
+                '<T>\n  <k>\n    K_CELL\n  </k>\n  <state>\n    STATE_CELL\n  </state>\n</T>',
             ),
             (
                 'stateCell',
                 KSort('StateCell'),
-                ('<state>\n' '  STATE_CELL\n' '</state>'),
+                '<state>\n  STATE_CELL\n</state>',
             ),
         )
 
@@ -127,12 +127,12 @@ class DefnTest(KProveTest):
             (
                 'TCell-no-map',
                 KSort('TCell'),
-                ('<T>\n' '  <k>\n' '    $PGM\n' '  </k>\n' '  <state>\n' '    .Map\n' '  </state>\n' '</T>'),
+                '<T>\n  <k>\n    $PGM\n  </k>\n  <state>\n    .Map\n  </state>\n</T>',
             ),
             (
                 'stateCell-no-map',
                 KSort('StateCell'),
-                ('<state>\n' '  .Map\n' '</state>'),
+                '<state>\n  .Map\n</state>',
             ),
         )
 
