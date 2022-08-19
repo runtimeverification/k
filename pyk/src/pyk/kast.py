@@ -25,11 +25,12 @@ from typing import (
     overload,
 )
 
-from .utils import FrozenDict, filter_none, hash_str
+from .utils import EMPTY_FROZEN_DICT, FrozenDict, filter_none, hash_str
 
 T = TypeVar('T', bound='KAst')
 W = TypeVar('W', bound='WithKAtt')
 KI = TypeVar('KI', bound='KInner')
+RL = TypeVar('RL', bound='KRuleLike')
 
 
 class KAst(ABC):
@@ -67,12 +68,12 @@ class KAst(ABC):
         # shallow copy version of dataclass.astuple.
         return tuple(self.__dict__[field.name] for field in fields(type(self)))
 
-    def __lt__(t1, t2):
-        if not isinstance(t2, KAst):
+    def __lt__(self, other):
+        if not isinstance(other, KAst):
             return NotImplemented
-        if type(t1) == type(t2):
-            return t1._as_shallow_tuple() < t2._as_shallow_tuple()
-        return type(t1).__name__ < type(t2).__name__
+        if type(self) == type(other):
+            return self._as_shallow_tuple() < other._as_shallow_tuple()
+        return type(self).__name__ < type(other).__name__
 
 
 @final
@@ -80,7 +81,7 @@ class KAst(ABC):
 class KAtt(KAst, Mapping[str, Any]):
     atts: FrozenDict[str, Any]
 
-    def __init__(self, atts: Mapping[str, Any] = {}):
+    def __init__(self, atts: Mapping[str, Any] = EMPTY_FROZEN_DICT):
         def _freeze(m: Any) -> Any:
             if isinstance(m, (int, str, tuple, FrozenDict, FrozenSet)):
                 return m
@@ -187,7 +188,7 @@ class KInner(KAst, ABC):
 class Subst(Mapping[str, KInner]):
     _subst: FrozenDict[str, KInner]
 
-    def __init__(self, subst: Mapping[str, KInner] = {}):
+    def __init__(self, subst: Mapping[str, KInner] = EMPTY_FROZEN_DICT):
         object.__setattr__(self, '_subst', FrozenDict(subst))
 
     def __iter__(self) -> Iterator[str]:
@@ -1192,6 +1193,17 @@ class KRuleLike(KSentence, ABC):
             return globals()[node].from_dict(d)
 
         raise ValueError(f"Expected KRuleLike label as 'node' value, found: '{node}'")
+
+    @abstractmethod
+    def let(
+        self: RL,
+        *,
+        body: Optional[KInner] = None,
+        requires: Optional[KInner] = None,
+        ensures: Optional[KInner] = None,
+        att: Optional[KAtt] = None,
+    ) -> RL:
+        ...
 
 
 @final

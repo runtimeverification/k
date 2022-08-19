@@ -6,7 +6,7 @@ from datetime import datetime
 from logging import Logger
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
-from typing import Final, Mapping, Optional, Sequence, Union
+from typing import Final, Iterable, Mapping, Optional, Union
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ def file_path(s: str) -> Path:
 
 
 def run_process(
-    args: Union[str, Sequence[str]],
+    args: Union[str, Iterable[str]],
     *,
     check: bool = True,
     profile: bool = False,
@@ -47,9 +47,11 @@ def run_process(
     env: Optional[Mapping[str, str]] = None,
     logger: Optional[Logger] = None,
 ) -> CompletedProcess:
+
     if type(args) is str:
         command = args
     else:
+        args = tuple(args)
         command = ' '.join(args)
 
     if not logger:

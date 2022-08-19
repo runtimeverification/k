@@ -27,8 +27,8 @@ def check_id(s: str) -> None:
     try:
         lexer.id()
         lexer.eof()
-    except ValueError:
-        raise ValueError(f'Expected identifier, found: {s}')
+    except ValueError as err:
+        raise ValueError(f'Expected identifier, found: {s}') from err
 
 
 def check_symbol_id(s: str) -> None:
@@ -36,8 +36,8 @@ def check_symbol_id(s: str) -> None:
     try:
         lexer.symbol_id()
         lexer.eof()
-    except ValueError:
-        raise ValueError(f'Expected symbol identifier, found: {s}')
+    except ValueError as err:
+        raise ValueError(f'Expected symbol identifier, found: {s}') from err
 
 
 def check_set_var_id(s: str) -> None:
@@ -45,8 +45,8 @@ def check_set_var_id(s: str) -> None:
     try:
         lexer.set_var_id()
         lexer.eof()
-    except ValueError:
-        raise ValueError(f'Expected set variable identifier, found: {s}')
+    except ValueError as err:
+        raise ValueError(f'Expected set variable identifier, found: {s}') from err
 
 
 def encode_kore_str(s: str) -> str:
