@@ -1,8 +1,8 @@
 from unittest import TestCase
 
-from ..cterm import CTerm
-from ..kast import KApply, KAtt, KClaim, KInner, KLabel, KRewrite, KSequence, KSort, KVariable, ktokenDots
-from ..kastManip import (
+from pyk.cterm import CTerm
+from pyk.kast import KApply, KAtt, KClaim, KInner, KLabel, KRewrite, KSequence, KSort, KVariable, ktokenDots
+from pyk.kastManip import (
     bool_to_ml_pred,
     build_claim,
     build_rule,
@@ -12,9 +12,11 @@ from ..kastManip import (
     push_down_rewrites,
     remove_generated_cells,
     simplify_bool,
+    splitConfigFrom,
     substitute,
 )
-from ..prelude import Bool, Sorts, intToken, mlAnd, mlEqualsTrue, mlTop
+from pyk.prelude import Bool, Sorts, intToken, mlAnd, mlEqualsTrue, mlTop
+
 from .utils import a, b, c, f, k
 
 x = KVariable('X')
@@ -259,3 +261,18 @@ class BuildClaimtest(TestCase):
                 target_cterm = CTerm(target)
                 kclaim, _ = build_claim('claim', init_cterm, target_cterm)
                 self.assertEqual(kclaim, claim)
+
+
+class SplitConfigTest(TestCase):
+    def test_splitConfigFrom(self):
+        k_cell = KSequence([KApply('foo'), KApply('bar')])
+        term = KApply('<k>', [k_cell])
+        config, subst = splitConfigFrom(term)
+        self.assertEqual(config, KApply('<k>', [KVariable('K_CELL')]))
+        self.assertEqual(subst, {'K_CELL': k_cell})
+
+        map_item_cell = KApply('<mapItem>', [KApply('foo')])
+        map_cell = KApply('<mapCell>', [KApply('map_join', [map_item_cell, map_item_cell])])
+        config, subst = splitConfigFrom(map_cell)
+        self.assertEqual(config, KApply('<mapCell>', [KVariable('MAPCELL_CELL')]))
+        self.assertEqual(subst, {'MAPCELL_CELL': KApply('map_join', [map_item_cell, map_item_cell])})

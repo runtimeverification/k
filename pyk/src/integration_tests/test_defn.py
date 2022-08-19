@@ -1,7 +1,8 @@
-from ..kast import KApply, KClaim, KRewrite, KSort, KToken, KVariable, assocWithUnit, constLabel
-from ..kastManip import push_down_rewrites
-from ..ktool import KompileBackend
-from ..prelude import Sorts
+from pyk.kast import KApply, KClaim, KRewrite, KSort, KToken, KVariable, assocWithUnit, constLabel
+from pyk.kastManip import push_down_rewrites
+from pyk.ktool import KompileBackend
+from pyk.prelude import Sorts
+
 from .kprove_test import KProveTest
 
 

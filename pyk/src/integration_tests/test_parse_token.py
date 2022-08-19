@@ -1,10 +1,11 @@
 from typing import Iterable, Tuple
 
-from ..kast import KApply, KAtt, KInner, KToken, KVariable
-from ..ktool import KompileBackend
-from ..ktool.kit import parse_token_rule_syntax
-from ..prelude import intToken
-from ..utils import FrozenDict
+from pyk.kast import KApply, KAtt, KInner, KToken, KVariable
+from pyk.ktool import KompileBackend
+from pyk.ktool.kit import parse_token_rule_syntax
+from pyk.prelude import intToken
+from pyk.utils import FrozenDict
+
 from .kprove_test import KProveTest
 
 

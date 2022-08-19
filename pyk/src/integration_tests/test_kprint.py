@@ -1,6 +1,7 @@
-from ..kast import KApply, KToken
-from ..ktool import KompileBackend
-from ..prelude import intToken
+from pyk.kast import KApply, KToken
+from pyk.ktool import KompileBackend
+from pyk.prelude import intToken
+
 from .kprove_test import KProveTest
 
 

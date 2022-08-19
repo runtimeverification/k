@@ -1,18 +1,13 @@
 from typing import Final, Tuple
 from unittest import TestCase
 
-from ..cterm import CTerm
-from ..kast import KApply, KInner, KLabel
-from ..prelude import Sorts
+from pyk.kast import KInner
+
 from .utils import a, b, c, f, g, h, x, y, z
 
 
-def _as_cterm(term: KInner) -> CTerm:
-    return CTerm(KApply(KLabel('<generatedTop>', (Sorts.GENERATED_TOP_CELL,)), (term,)))
-
-
-class CTermTest(TestCase):
-    def test_cterm_match_and_subst(self):
+class MatchTest(TestCase):
+    def test_match_and_subst(self):
         # Given
         TEST_DATA: Final[Tuple[Tuple[KInner, KInner], ...]] = (
             (a, a),
@@ -30,20 +25,20 @@ class CTermTest(TestCase):
         for i, [term, pattern] in enumerate(TEST_DATA):
             with self.subTest(i=i):
                 # When
-                subst_cterm = _as_cterm(pattern).match(_as_cterm(term))
+                subst = pattern.match(term)
 
                 # Then
-                self.assertIsNotNone(subst_cterm)
-                self.assertEqual(subst_cterm(pattern), term)
+                self.assertIsNotNone(subst)
+                self.assertEqual(subst(pattern), term)
 
-    def test_no_cterm_match(self):
+    def test_no_match(self):
         # Given
         TEST_DATA: Final[Tuple[Tuple[KInner, KInner], ...]] = ((f(x, x), f(x, a)),)
 
         for i, [term, pattern] in enumerate(TEST_DATA):
             with self.subTest(i=i):
                 # When
-                subst_cterm = _as_cterm(pattern).match(_as_cterm(term))
+                subst = pattern.match(term)
 
                 # Then
-                self.assertIsNone(subst_cterm)
+                self.assertIsNone(subst)

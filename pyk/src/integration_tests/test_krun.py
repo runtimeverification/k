@@ -1,7 +1,8 @@
-from ..kast import KApply, KSequence, KToken
-from ..kastManip import flatten_label, getCell
-from ..ktool import KompileBackend
-from ..prelude import intToken
+from pyk.kast import KApply, KSequence, KToken
+from pyk.kastManip import flatten_label, getCell
+from pyk.ktool import KompileBackend
+from pyk.prelude import intToken
+
 from .krun_test import KRunTest
 
 

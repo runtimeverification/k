@@ -1,8 +1,9 @@
-from ..cterm import CTerm
-from ..kast import KApply, KAtt, KClaim, KRule, KToken
-from ..kastManip import getCell
-from ..ktool import KompileBackend
-from ..prelude import Sorts
+from pyk.cterm import CTerm
+from pyk.kast import KApply, KAtt, KClaim, KRule, KToken
+from pyk.kastManip import getCell
+from pyk.ktool import KompileBackend
+from pyk.prelude import Sorts
+
 from .kprove_test import KProveTest
 
 
