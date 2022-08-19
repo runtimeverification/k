@@ -18,6 +18,9 @@ class KompiledTest(TestCase, ABC):
     KOMPILE_EMIT_JSON = False
     KOMPILE_POST_PROCESS: Optional[str] = None
 
+    kompiled_dir: Path
+    definition: KDefinition
+
     def setUp(self):
         main_file = Path(self.KOMPILE_MAIN_FILE)
         self.assertTrue(main_file.is_file())
