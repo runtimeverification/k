@@ -1,8 +1,8 @@
 from unittest import TestCase
 
-from ..cterm import CTerm
-from ..kast import KApply, KAtt, KClaim, KInner, KLabel, KRewrite, KSequence, KSort, KVariable, ktokenDots
-from ..kastManip import (
+from pyk.cterm import CTerm
+from pyk.kast import KApply, KAtt, KClaim, KInner, KLabel, KRewrite, KSequence, KSort, KVariable, ktokenDots
+from pyk.kastManip import (
     bool_to_ml_pred,
     build_claim,
     build_rule,
@@ -14,7 +14,8 @@ from ..kastManip import (
     simplify_bool,
     substitute,
 )
-from ..prelude import Bool, Sorts, intToken, mlAnd, mlEqualsTrue, mlTop
+from pyk.prelude import Bool, Sorts, intToken, mlAnd, mlEqualsTrue, mlTop
+
 from .utils import a, b, c, f, k
 
 x = KVariable('X')

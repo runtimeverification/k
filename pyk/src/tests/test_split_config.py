@@ -1,10 +1,10 @@
 from unittest import TestCase
 
-from ..kast import KApply, KSequence, KVariable
-from ..kastManip import splitConfigFrom
+from pyk.kast import KApply, KSequence, KVariable
+from pyk.kastManip import splitConfigFrom
 
 
-class TestPyk(TestCase):
+class SplitConfigTest(TestCase):
     def test_splitConfigFrom(self):
         k_cell = KSequence([KApply('foo'), KApply('bar')])
         term = KApply('<k>', [k_cell])

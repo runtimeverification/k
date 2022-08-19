@@ -65,11 +65,11 @@ PYK_TEST_ARGS :=
 
 test: test-unit test-integration test-pyk test-kit
 
-test-unit: venv-dev
-	$(ACTIVATE_DEV) && python3 -m unittest discover --verbose --top src pyk.tests $(PYK_TEST_ARGS)
+test-unit: venv-prod
+	$(ACTIVATE_PROD) && python3 -m unittest discover tests --verbose $(PYK_TEST_ARGS)
 
-test-integration: venv-dev
-	$(ACTIVATE_DEV) && python3 -m unittest discover --verbose --top src pyk.integration_tests $(PYK_TEST_ARGS)
+test-integration: venv-prod
+	$(ACTIVATE_PROD) && python3 -m unittest discover integration_tests --verbose $(PYK_TEST_ARGS)
 
 test-pyk: venv-prod
 	$(ACTIVATE_PROD) && $(MAKE) -C pyk-tests
@@ -84,9 +84,6 @@ check: check-isort check-autoflake check-black check-mypy
 
 isort: venv-dev
 	$(ACTIVATE_DEV) && isort src
-
-autoflake: venv-dev
-	$(ACTIVATE_DEV) && autoflake -r --in-place --remove-all-unused-imports --ignore-init-module-imports src
 
 check-isort: venv-dev
 	$(ACTIVATE_DEV) && isort --check src
@@ -119,4 +116,3 @@ check-black: venv-dev
 
 check-mypy: venv-dev
 	$(ACTIVATE_DEV) && mypy src
-
