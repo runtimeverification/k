@@ -1,7 +1,7 @@
-/build/
-/definitions/
-/src/pyk.egg-info/
+/dist/
+poetry.lock
 
+/definitions/
 
 /kit-tests/**/*.json
 /kit-tests/**/*.run.out

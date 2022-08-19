@@ -4,7 +4,7 @@ K_BIN  := $(K_ROOT)/k-distribution/target/release/k/bin
 export PATH := $(K_BIN):$(PATH)
 
 
-.PHONY: default all clean install                                \
+.PHONY: default all clean build install                          \
         poetry-install                                           \
         test test-unit test-integration test-pyk                 \
         format isort autoflake black                             \
@@ -19,6 +19,8 @@ clean:
 	find -type d -name __pycache__ -prune -exec rm -rf {} \;
 	$(MAKE) -C pyk-tests clean
 
+build:
+	poetry build
 
 install:
 	pip3 install . --root=$(DESTDIR) --prefix=$(PREFIX)
