@@ -172,11 +172,11 @@ class BoolMlPredConversionsTest(TestCase):
                 self.assertEqual(bool_actual, bool_expected)
 
     test_data_bool_to_ml_pred = (
-        ('equals-true', False, KApply(KLabel('#Equals', [Sorts.BOOL, Sorts.K]), [Bool.true, f(a)]), f(a)),
+        ('equals-true', KApply(KLabel('#Equals', [Sorts.BOOL, Sorts.K]), [Bool.true, f(a)]), f(a)),
     )
 
     def test_bool_to_ml_pred(self):
-        for name, unsafe, ml_pred_expected, bool_in in self.test_data_bool_to_ml_pred:
+        for name, ml_pred_expected, bool_in in self.test_data_bool_to_ml_pred:
             with self.subTest(name):
                 ml_pred_actual = bool_to_ml_pred(bool_in)
                 self.assertEqual(ml_pred_actual, ml_pred_expected)
@@ -215,6 +215,7 @@ class CollapseDotsTest(TestCase):
 
 class SimplifyBoolTest(TestCase):
     def test_simplify_bool(self) -> None:
+        # Given
         bool_tests = (
             ('trivial-false', Bool.andBool([Bool.false, Bool.true]), Bool.false),
             (
@@ -226,8 +227,12 @@ class SimplifyBoolTest(TestCase):
         )
 
         for test_name, bool_in, bool_out in bool_tests:
-            bool_out_actual = simplify_bool(bool_in)
-            self.assertEqual(bool_out_actual, bool_out)
+            with self.subTest(test_name):
+                # When
+                bool_out_actual = simplify_bool(bool_in)
+
+                # Then
+                self.assertEqual(bool_out_actual, bool_out)
 
 
 class BuildClaimtest(TestCase):
