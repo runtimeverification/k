@@ -53,7 +53,7 @@ class DefnTest(KProveTest):
         # fmt: on
 
         minimized_claim_rewrite_expected = (
-            '<T>\n  <k>\n     X + Y => X +Int Y \n  </k>\n  <state>\n    STATE\n  </state>\n</T>'
+            '<T>\n  <k>\n    ( X + Y => X +Int Y )\n  </k>\n  <state>\n    STATE\n  </state>\n</T>'
         )
 
         minimized_claim_rewrite = push_down_rewrites(claim_rewrite)
