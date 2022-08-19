@@ -49,7 +49,7 @@ RUN    apt-get update            \
         python-setuptools        \
         zlib1g-dev
 
-RUN pip3 install virtualenv
+RUN pip3 install poetry
 
 RUN    curl -O https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz \
     && tar -zxvf Python-${PYTHON_VERSION}.tgz                                                   \
