@@ -1,5 +1,5 @@
-from ..kast import KDefinition, KFlatModule
-from ..ktool.kprint import KPrint
+from pyk.kast import KDefinition, KFlatModule
+from pyk.ktool.kprint import KPrint
 
 
 class MockKPrint(KPrint):

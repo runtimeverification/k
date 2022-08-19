@@ -1,8 +1,9 @@
-from ..cterm import CTerm
-from ..kast import KApply, KAtt, KClaim, KRule, KToken
-from ..kastManip import getCell
-from ..ktool import KompileBackend
-from ..prelude import Sorts
+from pyk.cterm import CTerm
+from pyk.kast import KApply, KAtt, KClaim, KRule, KToken
+from pyk.kastManip import getCell
+from pyk.ktool import KompileBackend
+from pyk.prelude import Sorts
+
 from .kprove_test import KProveTest
 
 
@@ -93,6 +94,7 @@ class ImpProofTest(KProveTest):
         def _config(k: str, state: str) -> CTerm:
             return CTerm(KApply('<T>', (KApply('<k>', (KToken(k, 'K'),)), KApply('<state>', (KToken(state, 'Map'),)))))
 
+        # Given
         pre_state = '.Map'
         post_k = '.'
         post_state = '?_POST_STATE_MAP'
@@ -109,9 +111,15 @@ class ImpProofTest(KProveTest):
         )
 
         for name, haskell_args, pre_k, posts_expected_strs in test_data:
-            results = self.kprove.prove_cterm(
-                'prove-cterm', _config(pre_k, pre_state), _config(post_k, post_state), haskell_args=haskell_args
-            )
-            posts_actual = [(getCell(_p, 'K_CELL'), getCell(_p, 'STATE_CELL')) for _p in results]
-            posts_actual_strs = [(self.kprove.pretty_print(k), self.kprove.pretty_print(s)) for k, s in posts_actual]
-            self.assertCountEqual(posts_expected_strs, posts_actual_strs)
+            with self.subTest(name):
+                # When
+                results = self.kprove.prove_cterm(
+                    'prove-cterm', _config(pre_k, pre_state), _config(post_k, post_state), haskell_args=haskell_args
+                )
+                posts_actual = [(getCell(_p, 'K_CELL'), getCell(_p, 'STATE_CELL')) for _p in results]
+                posts_actual_strs = [
+                    (self.kprove.pretty_print(k), self.kprove.pretty_print(s)) for k, s in posts_actual
+                ]
+
+                # Then
+                self.assertCountEqual(posts_expected_strs, posts_actual_strs)

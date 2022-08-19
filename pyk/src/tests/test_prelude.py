@@ -1,7 +1,8 @@
 from typing import Final
 from unittest import TestCase
 
-from ..prelude import build_assoc, token
+from pyk.prelude import build_assoc, token
+
 from .utils import f, x, y, z
 
 

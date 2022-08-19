@@ -58,8 +58,8 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
 
         try:
             self._sock.connect((host, port))
-        except BaseException:
-            raise RuntimeError(f"Couldn't connect to host: {host}:{port}")
+        except BaseException as err:
+            raise RuntimeError(f"Couldn't connect to host: {host}:{port}") from err
 
         _LOGGER.info(f'Connected to host: {host}:{port}')
 
@@ -253,9 +253,9 @@ class KoreClient(ContextManager['KoreClient']):
     def _request(self, method: str, **params: Any) -> Dict[str, Any]:
         try:
             return self._client.request(method, **params)
-        except JsonRpcError as e:
-            assert e.code not in {-32601, -32602}, 'Malformed Kore-RPC request'
-            raise KoreClientError(message=e.data['error'], code=e.code, context=e.data['context'])
+        except JsonRpcError as err:
+            assert err.code not in {-32601, -32602}, 'Malformed Kore-RPC request'
+            raise KoreClientError(message=err.data['error'], code=err.code, context=err.data['context']) from err
 
     @staticmethod
     def _state(pattern: Pattern) -> Dict[str, Any]:

@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from ..utils import deconstruct_short_hash
+from pyk.utils import deconstruct_short_hash
 
 
 class ShortHashTest(TestCase):

@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
 from tempfile import NamedTemporaryFile
-from typing import Final, Iterable, List, Optional
+from typing import Final, Iterable, Optional
 
 from ..cli_utils import check_file_path, run_process
 from ..cterm import CTerm
@@ -20,11 +20,12 @@ def _krun(
     profile: bool = True,
     output: str = 'json',
     depth: Optional[int] = None,
-    args: List[str] = [],
+    args: Iterable[str] = (),
 ) -> CompletedProcess:
     check_file_path(input_file)
 
     krun_command = ['krun', '--definition', str(definition_dir), str(input_file), '--output', output]
+    args = list(args)
 
     if depth and depth >= 0:
         args += ['--depth', str(depth)]

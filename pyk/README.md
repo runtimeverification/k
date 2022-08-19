@@ -11,9 +11,13 @@ pip install git+https://github.com/runtimeverification/k.git[@<ref>]#subdirector
 
 ## For Developers
 
-Prerequsite: `virtualenv >= 20.13.4`.
+Prerequsite: `poetry >= 1.1.4`.
 
-Use `make` to run tests in virtual environments.
+Use `make` to run common tasks (see the [Makefile](Makefile) for a complete list of available targets).
 
-* `make`: check code style and run tests in `src/pyk/tests/`.
-* `make test-integration`: run tests in `integration_tests/`.
+* `make check`: check code style
+* `make format`: format code
+* `make test-unit`: run unit tests
+* `make test-integration`: run integration tests
+
+For interactive use, spawn a shell with `poetry shell` (after `poetry install`), then run an interpreter.

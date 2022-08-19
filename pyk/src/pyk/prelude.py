@@ -86,7 +86,7 @@ def token(x: Union[bool, int, str]) -> KToken:
         return intToken(x)
     if type(x) is str:
         return stringToken(x)
-    assert False
+    raise AssertionError()
 
 
 def intToken(i: int) -> KToken:

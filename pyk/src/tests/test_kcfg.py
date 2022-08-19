@@ -1,11 +1,12 @@
 from typing import Any, Dict, List, Tuple
 from unittest import TestCase
 
-from ..cterm import CTerm
-from ..kast import KApply, KInner, KVariable
-from ..kcfg import KCFG
-from ..prelude import Bool, mlEquals, token
-from ..utils import shorten_hash
+from pyk.cterm import CTerm
+from pyk.kast import KApply, KInner, KVariable
+from pyk.kcfg import KCFG
+from pyk.prelude import Bool, mlEquals, token
+from pyk.utils import shorten_hash
+
 from .mock_kprint import MockKPrint
 
 

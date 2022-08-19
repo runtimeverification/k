@@ -1,7 +1,8 @@
-from ..kast import KApply
-from ..kore.syntax import DV, App, SortApp, String
-from ..ktool import KompileBackend
-from ..prelude import intToken
+from pyk.kast import KApply
+from pyk.kore.syntax import DV, App, SortApp, String
+from pyk.ktool import KompileBackend
+from pyk.prelude import intToken
+
 from .kprove_test import KProveTest
 
 
