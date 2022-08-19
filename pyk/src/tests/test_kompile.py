@@ -1,7 +1,7 @@
 from pathlib import Path
 from unittest import TestCase
 
-from ..ktool.kompile import KompileBackend, _build_arg_list
+from pyk.ktool.kompile import KompileBackend, _build_arg_list
 
 
 class BuildArgsTest(TestCase):

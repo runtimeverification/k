@@ -1,9 +1,10 @@
 from typing import Dict, Final, Tuple
 from unittest import TestCase
 
-from ..kast import KApply, KInner, KLabel, KVariable, Subst
-from ..kastManip import extract_subst
-from ..prelude import Bool, intToken, mlAnd, mlEquals, mlEqualsTrue, mlTop, token
+from pyk.kast import KApply, KInner, KLabel, KVariable, Subst
+from pyk.kastManip import extract_subst
+from pyk.prelude import Bool, intToken, mlAnd, mlEquals, mlEqualsTrue, mlTop, token
+
 from .mock_kprint import MockKPrint
 from .utils import a, b, c, f, g, h, x, y, z
 

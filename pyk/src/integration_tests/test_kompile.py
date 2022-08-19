@@ -1,4 +1,5 @@
-from ..ktool import KompileBackend
+from pyk.ktool import KompileBackend
+
 from .kompiled_test import KompiledTest
 
 

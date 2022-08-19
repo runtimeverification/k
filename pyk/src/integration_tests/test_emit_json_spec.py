@@ -1,10 +1,11 @@
 import json
 from pathlib import Path
 
-from ..kast import EMPTY_ATT, KAst, KDefinition, KFlatModuleList, KRequire
-from ..kastManip import remove_generated_cells
-from ..ktool import KompileBackend
-from ..ktool.kprove import _kprove
+from pyk.kast import EMPTY_ATT, KAst, KDefinition, KFlatModuleList, KRequire
+from pyk.kastManip import remove_generated_cells
+from pyk.ktool import KompileBackend
+from pyk.ktool.kprove import _kprove
+
 from .kprove_test import KProveTest
 
 

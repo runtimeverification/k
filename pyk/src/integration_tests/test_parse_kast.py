@@ -1,7 +1,8 @@
 from abc import ABC
 
-from ..kast import KAs, KSort, KSortSynonym, read_kast_definition
-from ..ktool import KompileBackend
+from pyk.kast import KAs, KSort, KSortSynonym, read_kast_definition
+from pyk.ktool import KompileBackend
+
 from .kompiled_test import KompiledTest
 
 
