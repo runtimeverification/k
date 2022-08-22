@@ -1723,10 +1723,6 @@ def flatten_label(label: str, kast: KInner) -> List[KInner]:
     return [kast]
 
 
-def constLabel(symbol):
-    return lambda: symbol
-
-
 def assocWithUnit(assocJoin, unit):
     def _assocWithUnit(*args):
         newArgs = [arg for arg in args if arg != unit]
