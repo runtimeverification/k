@@ -1147,10 +1147,16 @@ public class ModuleToKORE {
         } else if (ruleInfo.isKore) {
             assertNoExistentials(rule, existentials);
             if (rule instanceof Claim) {
-                sb.append("  claim{} ");
+                sb.append("  claim{");
             } else {
-                sb.append("  axiom{} ");
+                sb.append("  axiom{");
             }
+            Option<Sort> sortParamsWrapper = rule.att().getOption("sortParams", Sort.class);
+            Option<Set<String>> sortParams = sortParamsWrapper.map(s -> stream(s.params()).map(sort -> sort.name()).collect(Collectors.toSet()));
+            if (sortParams.nonEmpty()) {
+                sb.append(String.join(",", sortParams.get()));
+            }
+            sb.append("} ");
             convert(left, sb);
             sb.append("\n  ");
             convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);

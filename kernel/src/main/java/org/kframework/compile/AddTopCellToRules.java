@@ -143,6 +143,7 @@ public class AddTopCellToRules {
     private boolean skipSentence(Sentence s) {
         return ExpandMacros.isMacro(s)
                 || s.att().contains(Att.ANYWHERE())
-                || s.att().contains(Att.SIMPLIFICATION());
+                || s.att().contains(Att.SIMPLIFICATION())
+                || s.att().contains(Att.KORE());
     }
 }
