@@ -68,15 +68,13 @@ def build_assoc(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner]
     return res or unit
 
 
-def buildCons(unit, cons, ls):
-    """Build a cons operator term given the cons and unit ops.
-
-    -   Input: unit, cons, and list of elements to join.
-    -   Output: cons-list style construction of the joined term.
-    """
-    if len(ls) == 0:
+def build_cons(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner]) -> KInner:
+    it = iter(terms)
+    try:
+        fst = next(it)
+        return KApply(label, (fst, build_cons(unit, label, it)))
+    except StopIteration:
         return unit
-    return KApply(cons, [ls[0], buildCons(unit, cons, ls[1:])])
 
 
 def token(x: Union[bool, int, str]) -> KToken:
