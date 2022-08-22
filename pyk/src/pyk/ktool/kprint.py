@@ -4,7 +4,7 @@ import os
 import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Callable, Dict, Final, List, Optional
+from typing import Callable, Dict, Final, Iterable, Optional
 
 from ..cli_utils import check_dir_path, run_process
 from ..kast import (
@@ -56,7 +56,7 @@ def _kast(
     input: str = 'program',
     output: str = 'json',
     sort: KSort = Sorts.K,
-    args: List[str] = [],
+    args: Iterable[str] = (),
 ) -> str:
     kast_command = ['kast', '--definition', str(definition)]
     kast_command += ['--input', input, '--output', output]

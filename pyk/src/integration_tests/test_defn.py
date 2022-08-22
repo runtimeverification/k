@@ -20,33 +20,28 @@ class DefnTest(KProveTest):
         symbol_table['.List{"_,_"}'] = constLabel('')
 
     def test_print_configuration(self):
-        # Given
 
         # fmt: off
         config = KApply('<T>', [KApply('<k>', [KApply('int_;_', [KApply('_,_', [KToken('x', 'Id'), KApply('_,_', [KToken('y', 'Id'), KApply('.List{"_,_"}')])])])]), KApply('<state>', [KApply('.Map')])])
+
+        config_expected = (
+            '<T>\n'
+            '  <k>\n'
+            '    int x , y ;\n'
+            '  </k>\n'
+            '  <state>\n'
+            '    .Map\n'
+            '  </state>\n'
+            '</T>'
+        )
         # fmt: on
 
-        config_expected = '\n'.join(
-            [
-                '<T>',
-                '  <k>',
-                '    int x , y ;',
-                '  </k>',
-                '  <state>',
-                '    .Map',
-                '  </state>',
-                '</T>',
-            ]
-        )
-
-        # When
         config_actual = self.kprove.pretty_print(config)
 
-        # Then
         self.assertEqual(config_expected, config_actual)
 
     def test_print_prove_rewrite(self):
-        # Given
+
         # fmt: off
         claim_rewrite = KRewrite( KApply('<T>', [ KApply('<k>', [KApply('_+_', [KVariable('X'), KVariable('Y')])])
                                                 , KApply('<state>', [KVariable('STATE')])
@@ -57,65 +52,92 @@ class DefnTest(KProveTest):
                                 )
         # fmt: on
 
-        minimized_claim_rewrite_expected = '\n'.join(
-            [
-                '<T>',
-                '  <k>',
-                '    ( X + Y => X +Int Y )',
-                '  </k>',
-                '  <state>',
-                '    STATE',
-                '  </state>',
-                '</T>',
-            ]
+        minimized_claim_rewrite_expected = (
+            '<T>\n  <k>\n    ( X + Y => X +Int Y )\n  </k>\n  <state>\n    STATE\n  </state>\n</T>'
         )
 
-        # When
         minimized_claim_rewrite = push_down_rewrites(claim_rewrite)
         claim = KClaim(minimized_claim_rewrite)
         minimized_claim_rewrite_actual = self.kprove.pretty_print(minimized_claim_rewrite)
         result = self.kprove.prove_claim(claim, 'simple-step')
 
-        # Then
         self.assertEqual(minimized_claim_rewrite_expected, minimized_claim_rewrite_actual)
         self.assertTop(result)
 
     def test_empty_config(self):
-        # Given
-        empty_config_generated_top = self.kprove.definition.empty_config(Sorts.GENERATED_TOP_CELL)
-        empty_config_t = self.kprove.definition.empty_config(KSort('TCell'))
-
-        empty_config_generated_top_printed = '\n'.join(
-            [
-                '<generatedTop>',
-                '  <T>',
-                '    <k>',
-                '      K_CELL',
-                '    </k>',
-                '    <state>',
-                '      STATE_CELL',
-                '    </state>',
-                '  </T>',
-                '  <generatedCounter>',
-                '    GENERATEDCOUNTER_CELL',
-                '  </generatedCounter>',
-                '</generatedTop>',
-            ]
+        test_data = (
+            (
+                'generatedTop',
+                Sorts.GENERATED_TOP_CELL,
+                (
+                    '<generatedTop>\n'
+                    '  <T>\n'
+                    '    <k>\n'
+                    '      K_CELL\n'
+                    '    </k>\n'
+                    '    <state>\n'
+                    '      STATE_CELL\n'
+                    '    </state>\n'
+                    '  </T>\n'
+                    '  <generatedCounter>\n'
+                    '    GENERATEDCOUNTER_CELL\n'
+                    '  </generatedCounter>\n'
+                    '</generatedTop>'
+                ),
+            ),
+            (
+                'TCell',
+                KSort('TCell'),
+                '<T>\n  <k>\n    K_CELL\n  </k>\n  <state>\n    STATE_CELL\n  </state>\n</T>',
+            ),
+            (
+                'stateCell',
+                KSort('StateCell'),
+                '<state>\n  STATE_CELL\n</state>',
+            ),
         )
 
-        empty_config_t_printed = '\n'.join(
-            [
-                '<T>',
-                '  <k>',
-                '    K_CELL',
-                '  </k>',
-                '  <state>',
-                '    STATE_CELL',
-                '  </state>',
-                '</T>',
-            ]
+        for name, sort, expected in test_data:
+            with self.subTest(name):
+                empty_config = self.kprove.definition.empty_config(sort)
+                actual = self.kprove.pretty_print(empty_config)
+                self.assertEqual(actual, expected)
+
+    def test_init_config(self):
+        test_data = (
+            (
+                'generatedTop-no-map',
+                Sorts.GENERATED_TOP_CELL,
+                (
+                    '<generatedTop>\n'
+                    '  <T>\n'
+                    '    <k>\n'
+                    '      $PGM\n'
+                    '    </k>\n'
+                    '    <state>\n'
+                    '      .Map\n'
+                    '    </state>\n'
+                    '  </T>\n'
+                    '  <generatedCounter>\n'
+                    '    0\n'
+                    '  </generatedCounter>\n'
+                    '</generatedTop>'
+                ),
+            ),
+            (
+                'TCell-no-map',
+                KSort('TCell'),
+                '<T>\n  <k>\n    $PGM\n  </k>\n  <state>\n    .Map\n  </state>\n</T>',
+            ),
+            (
+                'stateCell-no-map',
+                KSort('StateCell'),
+                '<state>\n  .Map\n</state>',
+            ),
         )
 
-        # Then
-        self.assertEqual(empty_config_generated_top_printed, self.kprove.pretty_print(empty_config_generated_top))
-        self.assertEqual(empty_config_t_printed, self.kprove.pretty_print(empty_config_t))
+        for name, sort, expected in test_data:
+            with self.subTest(name):
+                init_config = self.kprove.definition.init_config(sort)
+                actual = self.kprove.pretty_print(init_config)
+                self.assertEqual(actual, expected)

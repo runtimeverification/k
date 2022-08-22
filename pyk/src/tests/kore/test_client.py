@@ -2,7 +2,7 @@ from typing import Any, Dict
 from unittest import TestCase
 from unittest.mock import patch
 
-from pyk.kore.client import DirectResult, DirectState, JsonRpcClient, KoreClient, StopReason
+from pyk.kore.client import JsonRpcClient, KoreClient, State, StuckResult
 from pyk.kore.syntax import DV, And, App, Bottom, Pattern, SortApp, String, Top
 
 
@@ -22,7 +22,7 @@ class KoreClientTest(TestCase):
 
         # Then
         self.assertIsInstance(self.mock, JsonRpcClient)
-        MockClient.assert_called_with('localhost', 3000)
+        MockClient.assert_called_with('localhost', 3000, timeout=None)
         self.assertEqual(self.client._client, self.mock)
 
     def tearDown(self):
@@ -42,9 +42,13 @@ class KoreClientTest(TestCase):
         test_data = (
             (
                 App('IntAdd', (), (intDV(1), intDV(1))),
-                {'state': state(App('IntAdd', [], [intDV(1), intDV(1)]))},
-                {'states': [{'state': state(intDV(2)), 'depth': 1}], 'reason': 'final-state'},
-                DirectResult(DirectState(intDV(2)), 1, StopReason.FINAL_STATE),
+                {'state': kore(App('IntAdd', [], [intDV(1), intDV(1)]))},
+                {
+                    'state': {'term': kore(intDV(2)), 'substitution': kore(intTop), 'predicate': kore(intTop)},
+                    'depth': 1,
+                    'reason': 'stuck',
+                },
+                StuckResult(State(intDV(2), intTop, intTop), 1),
             ),
         )
 
@@ -63,9 +67,9 @@ class KoreClientTest(TestCase):
     def test_implies(self):
         test_data = (
             (
-                Bottom(intSort),
-                Top(intSort),
-                {'antecedent': state(Bottom(intSort)), 'consequent': state(Top(intSort))},
+                intBottom,
+                intTop,
+                {'antecedent': kore(intBottom), 'consequent': kore(intTop)},
                 {'satisfiable': True},
                 (True, None, None),
             ),
@@ -86,10 +90,10 @@ class KoreClientTest(TestCase):
     def test_simplify(self):
         test_data = (
             (
-                And(intSort, Top(intSort), Top(intSort)),
-                {'state': state(And(intSort, Top(intSort), Top(intSort)))},
-                {'state': state(Top(intSort))},
-                Top(intSort),
+                And(intSort, intTop, intTop),
+                {'state': kore(And(intSort, intTop, intTop))},
+                {'state': kore(intTop)},
+                intTop,
             ),
         )
 
@@ -107,13 +111,15 @@ class KoreClientTest(TestCase):
 
 
 intSort = SortApp('IntSort')
+intTop = Top(intSort)
+intBottom = Bottom(intSort)
 
 
 def intDV(n: int) -> DV:
     return DV(intSort, String(str(n)))
 
 
-def state(pattern: Pattern) -> Dict[str, Any]:
+def kore(pattern: Pattern) -> Dict[str, Any]:
     return {
         'format': 'KORE',
         'version': 1,

@@ -4,11 +4,11 @@ K_BIN  := $(K_ROOT)/k-distribution/target/release/k/bin
 export PATH := $(K_BIN):$(PATH)
 
 
-.PHONY: default all clean build install                          \
-        poetry-install                                           \
-        test test-unit test-integration test-pyk                 \
-        format isort autoflake black                             \
-        check check-isort check-autoflake check-black check-mypy
+.PHONY: default all clean build install          \
+        poetry-install                           \
+        test test-unit test-integration test-pyk \
+        format isort autoflake black             \
+        check check-isort check-autoflake check-black check-flake8 check-mypy
 
 default: check test-unit
 
@@ -37,10 +37,10 @@ PYK_TEST_ARGS :=
 test: test-unit test-integration test-pyk test-kit
 
 test-unit: poetry-install
-	$(POETRY_RUN) python -m unittest discover tests --verbose $(PYK_TEST_ARGS)
+	$(POETRY_RUN) python -m unittest discover tests --failfast --verbose $(PYK_TEST_ARGS)
 
 test-integration: poetry-install
-	$(POETRY_RUN) python -m unittest discover integration_tests --verbose $(PYK_TEST_ARGS)
+	$(POETRY_RUN) python -m unittest discover integration_tests --failfast --verbose $(PYK_TEST_ARGS)
 
 test-pyk: poetry-install
 	$(POETRY_RUN) $(MAKE) -C pyk-tests
@@ -51,7 +51,7 @@ test-kit: poetry-install
 # Checks and formatting
 
 format: isort autoflake black
-check: check-isort check-autoflake check-black check-mypy
+check: check-isort check-autoflake check-black check-flake8 check-mypy
 
 isort: poetry-install
 	$(POETRY_RUN) isort src
@@ -78,6 +78,9 @@ check-autoflake: poetry-install
 	  --ignore-init-module-imports \
 	  --remove-duplicate-keys      \
 	  --remove-unused-variables
+
+check-flake8: poetry-install
+	$(POETRY_RUN) flake8 src
 
 black: poetry-install
 	$(POETRY_RUN) black src
