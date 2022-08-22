@@ -2,7 +2,7 @@ Source: kframework
 Section: devel
 Priority: optional
 Maintainer: Dwight Guth <dwight.guth@runtimeverification.com>
-Build-Depends: clang-12 , cmake , debhelper (>=9) , flex , libboost-test-dev , libgmp-dev , libjemalloc-dev , libmpfr-dev , libyaml-dev , maven , openjdk-11-jdk , python-all , python-setuptools , python3-all , python3-pip , python3-setuptools , zlib1g-dev
+Build-Depends: clang-12 , cmake , debhelper (>=9) , flex , libboost-test-dev , libgmp-dev , libjemalloc-dev , libmpfr-dev , libyaml-dev , maven , openjdk-11-jdk , python-all , python-setuptools , python3-all , python3-distutils , python3-pip , python3-setuptools , zlib1g-dev
 Standards-Version: 3.9.6
 Homepage: https://github.com/runtimeverification/k
 

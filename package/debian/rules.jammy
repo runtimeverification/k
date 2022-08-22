@@ -33,6 +33,7 @@ override_dh_auto_build:
 override_dh_auto_install:
 	package/package
 	mv $(DESTDIR)$(PREFIX)/local/bin/pyk $(DESTDIR)$(PREFIX)/bin/pyk
+	mv $(DESTDIR)$(PREFIX)/local/bin/kit.py $(DESTDIR)$(PREFIX)/bin/kit.py
 	mv $(DESTDIR)$(PREFIX)/local/lib/$(PYTHON_VERSION) $(DESTDIR)$(PREFIX)/lib/$(PYTHON_VERSION)
 	@mkdir -p $(DESTDIR)$(PREFIX)/lib/$(PYTHON_DEB_VERSION)/dist-packages
 	ln --symbolic --relative $(DESTDIR)$(PREFIX)/lib/$(PYTHON_VERSION)/site-packages/pyk $(DESTDIR)$(PREFIX)/lib/$(PYTHON_DEB_VERSION)/dist-packages/pyk
