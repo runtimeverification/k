@@ -285,6 +285,17 @@ public class DefinitionParsing {
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         caches = loadCaches();
 
+        // Check to ensure that the k cell is not duplicated.
+        // Note: this is done before the configuration bubbles are resolved because it allows us to use location
+        // information from the sentences that declare the configuration cells.
+        List<Bubble> KCellDeclarations = stream(definition.getAllConfigDecls())
+                .filter(s -> s.contents().contains("<k>") && s.contents().contains("</k>"))
+                .collect(Collectors.toList());
+        if (KCellDeclarations.size() > 1) {
+            KCellDeclarations.stream().forEach(k ->
+                errors.add(KEMException.compilerError("Multiple K cell declarations detected. Only one declaration is allowed.", k)));
+        }
+
         Definition result;
         try {
             result = resolveConfigBubbles(definitionWithMapForConfig);

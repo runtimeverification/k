@@ -58,6 +58,11 @@ case class Definition(
   def parMap(f: Module => Module): java.util.Map[String, Module] = {
     (entryModules | entryModules.flatMap(_.importedModules)).par.map(f).seq.map(m => m.name -> m).toMap.asJava
   }
+
+  lazy val getAllConfigDecls = {
+    entryModules.map(m => m.localSentences collect { case b: Bubble => b }).toList.flatten
+      .filter(s => s.sentenceType.equals("config"))
+  }
 }
 
 trait Sorting {
