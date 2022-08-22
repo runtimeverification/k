@@ -6,9 +6,9 @@ from subprocess import CalledProcessError, CompletedProcess
 from typing import Final, Iterable, List, Optional, Tuple
 
 from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp, run_process
-from ..cterm import CTerm
+from ..cterm import CTerm, build_claim
 from ..kast import KAst, KClaim, KDefinition, KFlatModule, KImport, KInner, KRequire, KRule, KSentence, flatten_label
-from ..kastManip import build_claim, collectFreeVars, extract_subst
+from ..kastManip import collectFreeVars, extract_subst
 from ..prelude import mlAnd, mlBottom, mlTop
 from ..utils import unique
 from .kprint import KPrint
