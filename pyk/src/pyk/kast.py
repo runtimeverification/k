@@ -1711,18 +1711,6 @@ def collect(callback: Callable[[KInner], None], kinner: KInner) -> None:
     bottom_up(f, kinner)
 
 
-def flatten_label(label: str, kast: KInner) -> List[KInner]:
-    """Given a cons list, return a flat Python list of the elements.
-
-    -   Input: Cons operation to flatten.
-    -   Output: Items of cons list.
-    """
-    if type(kast) is KApply and kast.label.name == label:
-        items = [flatten_label(label, arg) for arg in kast.args]
-        return [c for cs in items for c in cs]
-    return [kast]
-
-
 def read_kast(ifile: Path) -> KAst:
     with open(ifile, 'r') as _f:
         return KAst.from_dict(json.loads(_f.read())['term'])

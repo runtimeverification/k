@@ -8,8 +8,8 @@ from graphviz import Digraph
 
 from .coverage import getRuleById, stripCoverageLogger
 from .cterm import split_config_and_constraints
-from .kast import KAst, flatten_label, read_kast_definition
-from .kastManip import minimize_rule, minimize_term, propagate_up_constraints, removeSourceMap
+from .kast import KAst, read_kast_definition
+from .kastManip import flatten_label, minimize_rule, minimize_term, propagate_up_constraints, removeSourceMap
 from .ktool import KPrint, KProve
 from .ktool.kprint import build_symbol_table, pretty_print_kast
 from .prelude import Sorts, mlAnd, mlOr, mlTop

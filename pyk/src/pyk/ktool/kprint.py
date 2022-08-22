@@ -36,9 +36,9 @@ from ..kast import (
     KTerminal,
     KToken,
     KVariable,
-    flatten_label,
     read_kast_definition,
 )
+from ..kastManip import flatten_label
 from ..kore.parser import KoreParser
 from ..kore.syntax import Kore
 from ..prelude import Bool, Labels, Sorts

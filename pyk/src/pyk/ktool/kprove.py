@@ -7,8 +7,8 @@ from typing import Final, Iterable, List, Optional, Tuple
 
 from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp, run_process
 from ..cterm import CTerm, build_claim
-from ..kast import KAst, KClaim, KDefinition, KFlatModule, KImport, KInner, KRequire, KRule, KSentence, flatten_label
-from ..kastManip import collectFreeVars, extract_subst
+from ..kast import KAst, KClaim, KDefinition, KFlatModule, KImport, KInner, KRequire, KRule, KSentence
+from ..kastManip import collectFreeVars, extract_subst, flatten_label
 from ..prelude import mlAnd, mlBottom, mlTop
 from ..utils import unique
 from .kprint import KPrint

@@ -19,7 +19,6 @@ from .kast import (
     WithKAtt,
     bottom_up,
     collect,
-    flatten_label,
     top_down,
 )
 from .prelude import Bool, Labels, Sorts, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlOr, mlTop
@@ -30,6 +29,18 @@ _LOGGER: Final = logging.getLogger(__name__)
 KI = TypeVar('KI', bound=KInner)
 W = TypeVar('W', bound=WithKAtt)
 RL = TypeVar('RL', bound=KRuleLike)
+
+
+def flatten_label(label: str, kast: KInner) -> List[KInner]:
+    """Given a cons list, return a flat Python list of the elements.
+
+    -   Input: Cons operation to flatten.
+    -   Output: Items of cons list.
+    """
+    if type(kast) is KApply and kast.label.name == label:
+        items = (flatten_label(label, arg) for arg in kast.args)
+        return [c for cs in items for c in cs]
+    return [kast]
 
 
 def if_ktype(ktype: Type[KI], then: Callable[[KI], KInner]) -> Callable[[KInner], KInner]:

@@ -3,11 +3,12 @@ from functools import cached_property
 from itertools import chain
 from typing import Dict, Iterable, Optional, Tuple
 
-from .kast import KApply, KAtt, KClaim, KInner, KRewrite, KRule, KVariable, Subst, flatten_label
+from .kast import KApply, KAtt, KClaim, KInner, KRewrite, KRule, KVariable, Subst
 from .kastManip import (
     applyExistentialSubstitutions,
     collectFreeVars,
     count_vars,
+    flatten_label,
     minimize_rule,
     ml_pred_to_bool,
     push_down_rewrites,
