@@ -3,13 +3,13 @@ from unittest import TestCase
 from pyk.kast import DOTS, KApply, KLabel, KRewrite, KSequence, KSort, KVariable
 from pyk.kastManip import (
     bool_to_ml_pred,
-    collapseDots,
+    collapse_dots,
     minimize_term,
     ml_pred_to_bool,
     push_down_rewrites,
     remove_generated_cells,
     simplify_bool,
-    splitConfigFrom,
+    split_config_from,
     substitute,
 )
 from pyk.prelude import Bool, Sorts, intToken, mlEqualsTrue, mlTop
@@ -158,7 +158,7 @@ class CollapseDotsTest(TestCase):
         config_expected = KApply('<generatedTop>', [KApply('<T>', [K_CELL, DOTS]), DOTS])
 
         # When
-        config_actual = collapseDots(config_before)
+        config_actual = collapse_dots(config_before)
 
         # Then
         self.assertEqual(config_actual, config_expected)
@@ -187,15 +187,15 @@ class SimplifyBoolTest(TestCase):
 
 
 class SplitConfigTest(TestCase):
-    def test_splitConfigFrom(self):
+    def test_split_config_from(self):
         k_cell = KSequence([KApply('foo'), KApply('bar')])
         term = KApply('<k>', [k_cell])
-        config, subst = splitConfigFrom(term)
+        config, subst = split_config_from(term)
         self.assertEqual(config, KApply('<k>', [KVariable('K_CELL')]))
         self.assertEqual(subst, {'K_CELL': k_cell})
 
         map_item_cell = KApply('<mapItem>', [KApply('foo')])
         map_cell = KApply('<mapCell>', [KApply('map_join', [map_item_cell, map_item_cell])])
-        config, subst = splitConfigFrom(map_cell)
+        config, subst = split_config_from(map_cell)
         self.assertEqual(config, KApply('<mapCell>', [KVariable('MAPCELL_CELL')]))
         self.assertEqual(subst, {'MAPCELL_CELL': KApply('map_join', [map_item_cell, map_item_cell])})

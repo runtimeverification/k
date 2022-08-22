@@ -373,8 +373,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         for node in self.nodes:
             label = self.node_short_info(node)
-            classAttrs = ' '.join(self.node_attrs(node.id))
-            attrs = {'class': classAttrs} if classAttrs else {}
+            class_attrs = ' '.join(self.node_attrs(node.id))
+            attrs = {'class': class_attrs} if class_attrs else {}
             graph.node(name=node.id, label=label, **attrs)
 
         for edge in self.edges():
@@ -755,8 +755,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
 
-        INIT = 1
-        POP_PATH = 2
+        INIT = 1  # noqa: N806
+        POP_PATH = 2  # noqa: N806
 
         visited: Set[str] = set()
         path: List[KCFG.EdgeLike] = []

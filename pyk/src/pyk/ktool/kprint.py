@@ -321,12 +321,12 @@ def pretty_print_kast_bool(kast, symbol_table, debug=False):
         separator = ' ' * (len(head) - 7)
         spacer = ' ' * len(head)
 
-        def joinSep(s):
+        def join_sep(s):
             return ('\n' + separator).join(s.split('\n'))
 
         clauses = (
-            ['( ' + joinSep(clauses[0])]
-            + [head + '( ' + joinSep(c) for c in clauses[1:]]
+            ['( ' + join_sep(clauses[0])]
+            + [head + '( ' + join_sep(c) for c in clauses[1:]]
             + [spacer + (')' * len(clauses))]
         )
         return '\n'.join(clauses)
@@ -346,8 +346,8 @@ def indent(input, size=2):
     return '\n'.join([(' ' * size) + line for line in input.split('\n')])
 
 
-def assocWithUnit(assocJoin: str, unit: str) -> Callable[..., str]:
-    def _assocWithUnit(*args: str):
-        return assocJoin.join(arg for arg in args if arg != unit)
+def assoc_with_unit(assoc_join: str, unit: str) -> Callable[..., str]:
+    def _assoc_with_unit(*args: str):
+        return assoc_join.join(arg for arg in args if arg != unit)
 
-    return _assocWithUnit
+    return _assoc_with_unit

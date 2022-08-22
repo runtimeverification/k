@@ -5,10 +5,10 @@ from typing import Dict, Iterable, Optional, Tuple
 
 from .kast import KApply, KAtt, KClaim, KInner, KRewrite, KRule, KVariable, Subst
 from .kastManip import (
-    applyExistentialSubstitutions,
-    collectFreeVars,
+    apply_existential_substitutions,
     count_vars,
     flatten_label,
+    free_vars,
     minimize_rule,
     ml_pred_to_bool,
     push_down_rewrites,
@@ -98,7 +98,7 @@ class CTerm:
 
 
 def remove_useless_constraints(cterm: CTerm, keep_vars=None) -> CTerm:
-    used_vars = collectFreeVars(cterm.config)
+    used_vars = free_vars(cterm.config)
     used_vars = used_vars if keep_vars is None else (used_vars + keep_vars)
     prev_len_unsed_vars = 0
     new_constraints = []
@@ -106,10 +106,10 @@ def remove_useless_constraints(cterm: CTerm, keep_vars=None) -> CTerm:
         prev_len_unsed_vars = len(used_vars)
         for c in cterm.constraints:
             if c not in new_constraints:
-                newVars = collectFreeVars(c)
-                if any([v in used_vars for v in newVars]):
+                new_vars = free_vars(c)
+                if any([v in used_vars for v in new_vars]):
                     new_constraints.append(c)
-                    used_vars.extend(newVars)
+                    used_vars.extend(new_vars)
         used_vars = list(set(used_vars))
     return CTerm(mlAnd([cterm.config] + new_constraints))
 
@@ -136,8 +136,8 @@ def build_rule(
     init_term = mlAnd([init_config] + init_constraints)
     final_term = mlAnd([final_config] + final_constraints)
 
-    lhs_vars = collectFreeVars(init_term)
-    rhs_vars = collectFreeVars(final_term)
+    lhs_vars = free_vars(init_term)
+    rhs_vars = free_vars(final_term)
     var_occurances = count_vars(
         mlAnd(
             [push_down_rewrites(KRewrite(init_config, final_config))] + init_constraints + final_constraints,
@@ -156,7 +156,7 @@ def build_rule(
         vremap_subst[new_v] = KVariable(v)
 
     init_term = substitute(init_term, v_subst)
-    final_term = applyExistentialSubstitutions(substitute(final_term, v_subst))
+    final_term = apply_existential_substitutions(substitute(final_term, v_subst))
     (init_config, init_constraint) = split_config_and_constraints(init_term)
     (final_config, final_constraint) = split_config_and_constraints(final_term)
 

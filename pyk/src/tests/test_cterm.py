@@ -26,7 +26,7 @@ def _as_cterm(term: KInner) -> CTerm:
 class CTermTest(TestCase):
     def test_cterm_match_and_subst(self):
         # Given
-        TEST_DATA: Final[Tuple[Tuple[KInner, KInner], ...]] = (
+        test_data: Final[Tuple[Tuple[KInner, KInner], ...]] = (
             (a, a),
             (a, x),
             (f(a), x),
@@ -39,7 +39,7 @@ class CTermTest(TestCase):
             (f(a, g(b, h(c))), f(x, y)),
         )
 
-        for i, [term, pattern] in enumerate(TEST_DATA):
+        for i, [term, pattern] in enumerate(test_data):
             with self.subTest(i=i):
                 # When
                 subst_cterm = _as_cterm(pattern).match(_as_cterm(term))
@@ -50,9 +50,9 @@ class CTermTest(TestCase):
 
     def test_no_cterm_match(self):
         # Given
-        TEST_DATA: Final[Tuple[Tuple[KInner, KInner], ...]] = ((f(x, x), f(x, a)),)
+        test_data: Final[Tuple[Tuple[KInner, KInner], ...]] = ((f(x, x), f(x, a)),)
 
-        for i, [term, pattern] in enumerate(TEST_DATA):
+        for i, [term, pattern] in enumerate(test_data):
             with self.subTest(i=i):
                 # When
                 subst_cterm = _as_cterm(pattern).match(_as_cterm(term))

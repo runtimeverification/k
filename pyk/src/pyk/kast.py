@@ -1463,31 +1463,31 @@ class KFlatModule(KOuter, WithKAtt):
 @final
 @dataclass(frozen=True)
 class KFlatModuleList(KOuter):
-    mainModule: str
+    main_module: str
     modules: Tuple[KFlatModule, ...]
 
-    def __init__(self, mainModule: str, modules: Iterable[KFlatModule]):
-        object.__setattr__(self, 'mainModule', mainModule)
+    def __init__(self, main_module: str, modules: Iterable[KFlatModule]):
+        object.__setattr__(self, 'main_module', main_module)
         object.__setattr__(self, 'modules', modules)
 
     @classmethod
     def from_dict(cls: Type['KFlatModuleList'], d: Dict[str, Any]) -> 'KFlatModuleList':
         cls._check_node(d)
-        return KFlatModuleList(mainModule=d['mainModule'], modules=(KFlatModule.from_dict(kfm) for kfm in d['term']))
+        return KFlatModuleList(main_module=d['mainModule'], modules=(KFlatModule.from_dict(kfm) for kfm in d['term']))
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             'node': 'KFlatModuleList',
-            'mainModule': self.mainModule,
+            'mainModule': self.main_module,
             'term': [mod.to_dict() for mod in self.modules],
         }
 
     def let(
-        self, *, mainModule: Optional[str] = None, modules: Optional[Iterable[KFlatModule]] = None
+        self, *, main_module: Optional[str] = None, modules: Optional[Iterable[KFlatModule]] = None
     ) -> 'KFlatModuleList':
-        mainModule = mainModule if mainModule is not None else self.mainModule
+        main_module = main_module if main_module is not None else self.main_module
         modules = modules if modules is not None else self.modules
-        return KFlatModuleList(mainModule=mainModule, modules=modules)
+        return KFlatModuleList(main_module=main_module, modules=modules)
 
 
 @final

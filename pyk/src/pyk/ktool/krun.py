@@ -50,7 +50,7 @@ class KRun(KPrint):
         with open(self.definition_dir / 'mainModule.txt', 'r') as mm:
             self.main_module = mm.read()
 
-    def run(self, init_PGM: KInner, depth: Optional[int] = None, args: Iterable[str] = ()) -> CTerm:
+    def run(self, init_PGM: KInner, depth: Optional[int] = None, args: Iterable[str] = ()) -> CTerm:  # noqa: N803
         with NamedTemporaryFile('w', dir=self.use_directory, delete=False) as ntf:
             ntf.write(self.pretty_print(init_PGM))
             ntf.flush()

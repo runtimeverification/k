@@ -48,8 +48,8 @@ class KompiledTest(TestCase, ABC):
     def tearDown(self):
         shutil.rmtree(self.kompiled_dir)
 
-    def assertTop(self, term: KInner) -> None:
+    def assertTop(self, term: KInner) -> None:  # noqa: N802
         self.assertTrue(is_top(term), f'{term} is not #Top')
 
-    def assertNotTop(self, term: KInner) -> None:
+    def assertNotTop(self, term: KInner) -> None:  # noqa: N802
         self.assertFalse(is_top(term), f'{term} is #Top')
