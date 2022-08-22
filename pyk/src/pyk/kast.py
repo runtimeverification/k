@@ -353,9 +353,9 @@ class KToken(KInner):
         return None
 
 
-TRUE = KToken('true', 'Bool')
-FALSE = KToken('false', 'Bool')
-ktokenDots = KToken('...', 'K')
+TRUE: Final = KToken('true', 'Bool')
+FALSE: Final = KToken('false', 'Bool')
+DOTS: Final = KToken('...', 'K')
 
 
 @final

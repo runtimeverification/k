@@ -8,6 +8,7 @@ from typing import Callable, Dict, Final, Iterable, Optional
 
 from ..cli_utils import check_dir_path, run_process
 from ..kast import (
+    DOTS,
     KApply,
     KAs,
     KAst,
@@ -36,7 +37,6 @@ from ..kast import (
     KToken,
     KVariable,
     flatten_label,
-    ktokenDots,
     read_kast_definition,
 )
 from ..kore.parser import KoreParser
@@ -204,8 +204,8 @@ def pretty_print_kast(kast: KAst, symbol_table: SymbolTable, debug=False):
         if kast.arity == 1:
             return pretty_print_kast(kast.items[0], symbol_table, debug=debug)
         unparsed_k_seq = '\n~> '.join([pretty_print_kast(item, symbol_table, debug=debug) for item in kast.items[0:-1]])
-        if kast.items[-1] == ktokenDots:
-            unparsed_k_seq = unparsed_k_seq + '\n' + pretty_print_kast(ktokenDots, symbol_table, debug=debug)
+        if kast.items[-1] == DOTS:
+            unparsed_k_seq = unparsed_k_seq + '\n' + pretty_print_kast(DOTS, symbol_table, debug=debug)
         else:
             unparsed_k_seq = unparsed_k_seq + '\n~> ' + pretty_print_kast(kast.items[-1], symbol_table, debug=debug)
         return unparsed_k_seq

@@ -19,6 +19,7 @@ from typing import (
 
 from .cterm import CTerm, split_config_and_constraints
 from .kast import (
+    DOTS,
     KApply,
     KAtt,
     KClaim,
@@ -36,7 +37,6 @@ from .kast import (
     bottom_up,
     collect,
     flatten_label,
-    ktokenDots,
     top_down,
 )
 from .prelude import Bool, Labels, Sorts, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlOr, mlTop
@@ -267,17 +267,17 @@ def collapseDots(kast):
 
     def _collapseDots(_kast):
         if type(_kast) is KApply:
-            if _kast.is_cell and _kast.arity == 1 and _kast.args[0] == ktokenDots:
-                return ktokenDots
-            newArgs = [arg for arg in _kast.args if arg != ktokenDots]
+            if _kast.is_cell and _kast.arity == 1 and _kast.args[0] == DOTS:
+                return DOTS
+            newArgs = [arg for arg in _kast.args if arg != DOTS]
             if _kast.is_cell and len(newArgs) == 0:
-                return ktokenDots
+                return DOTS
             if len(newArgs) < len(_kast.args):
-                newArgs.append(ktokenDots)
+                newArgs.append(DOTS)
             return _kast.let(args=newArgs)
         elif type(_kast) is KRewrite:
-            if _kast.lhs == ktokenDots:
-                return ktokenDots
+            if _kast.lhs == DOTS:
+                return DOTS
         return _kast
 
     return bottom_up(_collapseDots, kast)
@@ -389,7 +389,7 @@ def uselessVarsToDots(kast: KInner, keep_vars: Iterable[str] = ()) -> KInner:
             newArgs = []
             for arg in _kast.args:
                 if type(arg) is KVariable and numOccurances[arg.name] == 1:
-                    newArgs.append(ktokenDots)
+                    newArgs.append(DOTS)
                 else:
                     newArgs.append(arg)
             return _kast.let(args=newArgs)
@@ -407,7 +407,7 @@ def labelsToDots(kast: KInner, labels: Collection[str]) -> KInner:
 
     def _labelstoDots(k):
         if type(k) is KApply and k.is_cell and k.label.name in labels:
-            return ktokenDots
+            return DOTS
         return k
 
     return bottom_up(_labelstoDots, kast)

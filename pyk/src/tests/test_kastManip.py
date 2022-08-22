@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from pyk.cterm import CTerm
-from pyk.kast import KApply, KAtt, KClaim, KInner, KLabel, KRewrite, KSequence, KSort, KVariable, ktokenDots
+from pyk.kast import DOTS, KApply, KAtt, KClaim, KInner, KLabel, KRewrite, KSequence, KSort, KVariable
 from pyk.kastManip import (
     bool_to_ml_pred,
     build_claim,
@@ -88,7 +88,7 @@ class MinimizeTermTest(TestCase):
     def test_minimize_term(self):
         # Given
         test_data = (
-            (f(k(a)), ['<k>'], f(ktokenDots)),
+            (f(k(a)), ['<k>'], f(DOTS)),
             (f(k(a)), [], f(k(a))),
         )
 
@@ -201,10 +201,8 @@ class RemoveGeneratedCellsTest(TestCase):
 class CollapseDotsTest(TestCase):
     def test(self):
         # Given
-        config_before = substitute(
-            GENERATED_TOP_CELL_1, {'MAP': ktokenDots, '_GENERATED_COUNTER_PLACEHOLDER': ktokenDots}
-        )
-        config_expected = KApply('<generatedTop>', [KApply('<T>', [K_CELL, ktokenDots]), ktokenDots])
+        config_before = substitute(GENERATED_TOP_CELL_1, {'MAP': DOTS, '_GENERATED_COUNTER_PLACEHOLDER': DOTS})
+        config_expected = KApply('<generatedTop>', [KApply('<T>', [K_CELL, DOTS]), DOTS])
 
         # When
         config_actual = collapseDots(config_before)
