@@ -1,6 +1,7 @@
 // Copyright (c) 2012-2019 K Team. All Rights Reserved.
 package org.kframework.kast;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.kframework.attributes.Att;
@@ -168,6 +169,8 @@ public class KastFrontEnd extends FrontEnd {
 
                 sw.printTotal("Total");
                 return 0;
+            } else if (!options.steps.equals(Lists.newArrayList(KastFrontEnd.KompileSteps.closeCells, KastFrontEnd.KompileSteps.resolveCasts, KastFrontEnd.KompileSteps.body))) {
+                throw KEMException.innerParserError("Option --steps is available only with --input rule.");
             }
 
             Module unparsingMod;
