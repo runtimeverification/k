@@ -10,7 +10,15 @@ from graphviz import Digraph
 
 from .cterm import CTerm
 from .kast import KClaim, KInner, KRule, Subst
-from .kastManip import build_claim, build_rule, ml_pred_to_bool, mlAnd, simplify_bool
+from .kastManip import (
+    build_claim,
+    build_rule,
+    ml_pred_to_bool,
+    mlAnd,
+    remove_generated_cells,
+    remove_source_attributes,
+    simplify_bool,
+)
 from .ktool import KPrint
 from .utils import add_indent, compare_short_hashes, shorten_hash
 
@@ -77,6 +85,14 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 return ['(' + str(self.depth) + ' step)']
             else:
                 return ['(' + str(self.depth) + ' steps)']
+
+        # TODO: These should only be available for split case nodes and return a Node rather than a CTerm,
+        # when we extract a class for them.
+        def pre(self) -> CTerm:
+            return self.source.cterm.add_constraint(self.condition)
+
+        def post(self) -> CTerm:
+            return self.target.cterm
 
     @dataclass(frozen=True)
     class Cover(EdgeLike):
@@ -454,6 +470,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         return bool(self.get_node(node.id))
 
     def create_node(self, cterm: CTerm) -> Node:
+        term = cterm.kast
+        term = remove_generated_cells(term)
+        term = remove_source_attributes(term)
+        cterm = CTerm(term)
         node = KCFG.Node(cterm)
 
         if node.id in self._nodes:
@@ -532,6 +552,21 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         edge = KCFG.Edge(source, target, condition, depth)
         self._edges[source.id][target.id] = edge
         return edge
+
+    def split_node(self, source_id: str, constraints: Iterable[KInner]) -> List[str]:
+
+        source = self.node(source_id)
+
+        def _add_case_edge(_constraint: KInner) -> str:
+            _cterm = CTerm(mlAnd([source.cterm.kast, _constraint]))
+            _node = self.get_or_create_node(_cterm)
+            self.create_edge(source.id, _node.id, _constraint, 0)
+            self.add_verified(source.id, _node.id)
+            return _node.id
+
+        branch_node_ids = [_add_case_edge(constraint) for constraint in constraints]
+        self.add_expanded(source.id)
+        return branch_node_ids
 
     def remove_edge(self, source_id: str, target_id: str) -> None:
         source_id = self._resolve(source_id)
@@ -815,7 +850,7 @@ def path_condition(path: Sequence[KCFG.EdgeLike]) -> Tuple[KInner, Subst, int]:
         elif type(edge) == KCFG.Cover:
             substitutions.append(edge.subst)
         else:
-            assert False
+            raise AssertionError
 
     substitution = reduce(Subst.compose, reversed(substitutions), Subst())
     return mlAnd(constraints), substitution, depth

@@ -4,7 +4,7 @@ import os
 import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Callable, Dict, Final, List, Optional
+from typing import Callable, Dict, Final, Iterable, Optional
 
 from ..cli_utils import check_dir_path, run_process
 from ..kast import (
@@ -56,7 +56,7 @@ def _kast(
     input: str = 'program',
     output: str = 'json',
     sort: KSort = Sorts.K,
-    args: List[str] = [],
+    args: Iterable[str] = (),
 ) -> str:
     kast_command = ['kast', '--definition', str(definition)]
     kast_command += ['--input', input, '--output', output]
@@ -151,10 +151,11 @@ def build_symbol_table(definition: KDefinition, opinionated=False) -> SymbolTabl
         for prod in module.syntax_productions:
             assert prod.klabel
             label = prod.klabel.name
-            if 'symbol' in prod.att and 'klabel' in prod.att:
-                label = prod.att['klabel']
             unparser = unparser_for_production(prod)
+
             symbol_table[label] = unparser
+            if 'symbol' in prod.att and 'klabel' in prod.att:
+                symbol_table[prod.att['klabel']] = unparser
 
     if opinionated:
         symbol_table['#And'] = lambda c1, c2: c1 + '\n#And ' + c2
