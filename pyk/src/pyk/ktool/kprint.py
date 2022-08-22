@@ -344,3 +344,10 @@ def applied_label_str(symbol):
 
 def indent(input, size=2):
     return '\n'.join([(' ' * size) + line for line in input.split('\n')])
+
+
+def assocWithUnit(assocJoin: str, unit: str) -> Callable[..., str]:
+    def _assocWithUnit(*args: str):
+        return assocJoin.join(arg for arg in args if arg != unit)
+
+    return _assocWithUnit

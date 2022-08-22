@@ -1723,14 +1723,6 @@ def flatten_label(label: str, kast: KInner) -> List[KInner]:
     return [kast]
 
 
-def assocWithUnit(assocJoin, unit):
-    def _assocWithUnit(*args):
-        newArgs = [arg for arg in args if arg != unit]
-        return assocJoin.join(newArgs)
-
-    return _assocWithUnit
-
-
 def read_kast(ifile: Path) -> KAst:
     with open(ifile, 'r') as _f:
         return KAst.from_dict(json.loads(_f.read())['term'])
