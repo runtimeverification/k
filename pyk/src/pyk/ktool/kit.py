@@ -6,9 +6,9 @@ from pathlib import Path
 from typing import Any, Dict, Final, Iterable, List, Optional
 
 from ..cfg_manager import CFGManager
-from ..cterm import CTerm
+from ..cterm import CTerm, build_claim
 from ..kast import KApply, KDefinition, KFlatModuleList, KInner, KSequence, KToken, Subst
-from ..kastManip import build_claim, collectFreeVars, getCell, is_top, minimize_term
+from ..kastManip import free_vars, get_cell, is_top, minimize_term
 from ..kcfg import KCFG
 from ..ktool import KProve
 from ..prelude import Bool, mlAnd, mlEqualsTrue, mlOr, mlTop
@@ -201,10 +201,10 @@ def main() -> None:
     cfg_id = args['cfg-id'] if args.get('cfg-id') else manager.default_cfg_id()
     del args['cfg-id']
 
-    cfg = manager.readCFG(cfg_id)
+    cfg = manager.read_cfg(cfg_id)
     if 'callback_cfg' in args:
         if args['callback_cfg'](manager, kprove, args, cfg_id, cfg):
-            manager.writeCFG(cfg_id, cfg)
+            manager.write_cfg(cfg_id, cfg)
         return
 
     raise AssertionError('!!! Should be unreachable. `callback_cfg` not set.')
@@ -246,20 +246,20 @@ def init(summary_dir: Path, args: Dict[str, Any]) -> None:
         parse_spec_to_json(kprove, spec_file=spec_file, out=json_spec_file, spec_module=args.get('spec-module', None))
 
     if args['reinit']:
-        manager._writeCFGs(cfgs_from_spec(manager, kprove.definition, json_spec_file))
+        manager._write_cfgs(cfgs_from_spec(manager, kprove.definition, json_spec_file))
 
 
 def cfgs_from_spec(manager: CFGManager, kdef: KDefinition, json_spec_file: Path) -> Dict[str, KCFG]:
     with open(json_spec_file, 'r') as jsp:
         spec = json.loads(jsp.read())
         module_list = KFlatModuleList.from_dict(spec['term'])
-        proof_module = [module for module in module_list.modules if module.name == module_list.mainModule][0]
+        proof_module = [module for module in module_list.modules if module.name == module_list.main_module][0]
     _LOGGER.info(f'Initializing: {json_spec_file}')
     return {claim.att['label']: manager.cfg_from_claim(kdef, claim) for claim in proof_module.claims}
 
 
 def list_cfgs(manager: CFGManager) -> None:
-    print('\n'.join(manager.listCFGs()))
+    print('\n'.join(manager.list_cfgs()))
 
 
 def show_cfg(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> None:
@@ -305,12 +305,12 @@ def parse_token_rule_syntax(kprove, ktoken: KToken, kast_args: Iterable[str] = (
     cterm = CTerm(mlAnd([KApply('<k>', [ktoken])]))
     claim_id = 'simplify-token'
     claim, var_map = build_claim(
-        claim_id, cterm, CTerm(mlAnd([cterm.kast, mlEqualsTrue(Bool.false)])), keep_vars=collectFreeVars(cterm.kast)
+        claim_id, cterm, CTerm(mlAnd([cterm.kast, mlEqualsTrue(Bool.false)])), keep_vars=free_vars(cterm.kast)
     )
     kprove_result = kprove.prove_claim(claim, claim_id, args=['--depth', '0'], allow_zero_step=True)
     kprove_result = Subst(var_map).apply(kprove_result)
     simp_cterm = CTerm(kprove_result)
-    result = getCell(simp_cterm.kast, 'K_CELL')
+    result = get_cell(simp_cterm.kast, 'K_CELL')
     if type(result) is KSequence:
         result = result.items[0]
     return mlAnd([result] + list(c for c in simp_cterm.constraints if not is_top(c)))
@@ -373,7 +373,7 @@ def verify_edges(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KC
         kprove_result = _edge_prove(edge, min_depth=args.get('min_depth'))
         if len(kprove_result) == 1 and kprove_result[0] == mlTop():
             cfg.add_verified(edge.source.id, edge.target.id)
-            manager.writeCFG(cfg_id, cfg)
+            manager.write_cfg(cfg_id, cfg)
             _LOGGER.info(f'Verified claim: {basic_block_id}')
         else:
             failed.append(edge)

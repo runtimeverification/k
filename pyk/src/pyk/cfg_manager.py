@@ -11,11 +11,11 @@ from .kastManip import (
     abstract_term_safely,
     bool_to_ml_pred,
     bottom_up,
-    collectFreeVars,
     count_vars,
     extract_lhs,
     extract_rhs,
-    splitConfigFrom,
+    free_vars,
+    split_config_from,
 )
 from .kcfg import KCFG
 
@@ -23,7 +23,7 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 
 def instantiate_cell_vars(definition: KDefinition, term: KInner) -> KInner:
-    def _cellVarsToLabels(_kast):
+    def _cell_vars_to_labels(_kast):
         if type(_kast) is KApply and _kast.is_cell:
             production = definition.production_for_klabel(_kast.label)
             production_arity = [prod_item.sort for prod_item in production.items if type(prod_item) is KNonTerminal]
@@ -36,26 +36,26 @@ def instantiate_cell_vars(definition: KDefinition, term: KInner) -> KInner:
             return KApply(_kast.label, new_args)
         return _kast
 
-    return bottom_up(_cellVarsToLabels, term)
+    return bottom_up(_cell_vars_to_labels, term)
 
 
 def rename_generated_vars(cterm: CTerm) -> CTerm:
     state, *constraints = cterm
-    _, config_subst = splitConfigFrom(state)
+    _, config_subst = split_config_from(state)
     config_var_count = {cvar: count_vars(ccontents) for cvar, ccontents in config_subst.items()}
-    free_vars = collectFreeVars(cterm.kast)
+    vs = free_vars(cterm.kast)
     var_subst: Dict[str, KInner] = {}
-    for v in free_vars:
+    for v in vs:
         if v.startswith('_Gen') or v.startswith('?_Gen') or v.startswith('_DotVar') or v.startswith('?_DotVar'):
             cvars = [cv for cv in config_var_count if v in config_var_count[cv]]
             if len(cvars) > 1:
                 raise ValueError(f'Found "Gen*" or "DotVar*" variable with multiple occurances: {v}')
             cvar = cvars[0]
             new_v = abstract_term_safely(KVariable(v), base_name=cvar)
-            while new_v.name in free_vars:
+            while new_v.name in vs:
                 new_v = abstract_term_safely(KVariable(new_v.name), base_name=cvar)
             var_subst[v] = new_v
-            free_vars.append(new_v.name)
+            vs.append(new_v.name)
     return CTerm(Subst(var_subst).apply(cterm.kast))
 
 
@@ -148,7 +148,7 @@ class CFGManager:
             "totalProcesses": 0,
         }
 
-    def emptyCFG(self) -> KCFG:
+    def empty_cfg(self) -> KCFG:
         return KCFG()
 
     def cfg_from_claim(self, defn: KDefinition, claim: KClaim) -> KCFG:
@@ -167,23 +167,26 @@ class CFGManager:
 
         return cfg
 
-    def listCFGs(self) -> Iterable[str]:
-        return self._readCFGs().keys()
+    def list_cfgs(self) -> Iterable[str]:
+        return self._read_cfgs().keys()
 
-    def writeCFG(self, name: str, cfg: KCFG) -> None:
-        dct = self._readCFGs()
+    def write_cfg(self, name: str, cfg: KCFG) -> None:
+        dct = self._read_cfgs()
         dct[name] = cfg
-        self._writeCFGs(dct)
+        self._write_cfgs(dct)
 
-    def readCFG(self, name: str) -> KCFG:
-        return self._readCFGs()[name]
+    def read_cfg(self, name: str) -> KCFG:
+        return self._read_cfgs()[name]
 
-    def _readCFGs(self) -> Dict[str, KCFG]:
-        with open(self.cfg_json_file, 'r') as c_file:
-            dct = json.loads(c_file.read())
-            return {name: KCFG.from_dict(dct[name]) for name in dct}
+    def default_cfg_id(self) -> str:
+        all_cfgs = self._read_cfgs()
+        if len(all_cfgs) == 0:
+            raise ValueError(f'No CFGs found in {self.cfg_file}.')
+        if len(all_cfgs) > 1:
+            raise ValueError(f'More than 1 CFG found in {self.cfg_file}, could not select default.')
+        return list(all_cfgs.keys())[0]
 
-    def _writeCFGs(self, cfgs: Dict[str, KCFG]) -> None:
+    def _write_cfgs(self, cfgs: Dict[str, KCFG]) -> None:
         dct = {name: cfgs[name].to_dict() for name in cfgs}
         with open(self.cfg_ids_json_file, 'w+') as c_file:
             c_file.write(json.dumps(list(dct.keys()), sort_keys=True))
@@ -192,10 +195,7 @@ class CFGManager:
             c_file.flush()
             _LOGGER.info('Wrote CFG: ' + str(self.cfg_json_file))
 
-    def default_cfg_id(self) -> str:
-        all_cfgs = self._readCFGs()
-        if len(all_cfgs) == 0:
-            raise ValueError(f'No CFGs found in {self.cfg_file}.')
-        if len(all_cfgs) > 1:
-            raise ValueError(f'More than 1 CFG found in {self.cfg_file}, could not select default.')
-        return list(all_cfgs.keys())[0]
+    def _read_cfgs(self) -> Dict[str, KCFG]:
+        with open(self.cfg_json_file, 'r') as c_file:
+            dct = json.loads(c_file.read())
+            return {name: KCFG.from_dict(dct[name]) for name in dct}

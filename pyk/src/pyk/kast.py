@@ -353,9 +353,9 @@ class KToken(KInner):
         return None
 
 
-TRUE = KToken('true', 'Bool')
-FALSE = KToken('false', 'Bool')
-ktokenDots = KToken('...', 'K')
+TRUE: Final = KToken('true', 'Bool')
+FALSE: Final = KToken('false', 'Bool')
+DOTS: Final = KToken('...', 'K')
 
 
 @final
@@ -1463,31 +1463,31 @@ class KFlatModule(KOuter, WithKAtt):
 @final
 @dataclass(frozen=True)
 class KFlatModuleList(KOuter):
-    mainModule: str
+    main_module: str
     modules: Tuple[KFlatModule, ...]
 
-    def __init__(self, mainModule: str, modules: Iterable[KFlatModule]):
-        object.__setattr__(self, 'mainModule', mainModule)
+    def __init__(self, main_module: str, modules: Iterable[KFlatModule]):
+        object.__setattr__(self, 'main_module', main_module)
         object.__setattr__(self, 'modules', modules)
 
     @classmethod
     def from_dict(cls: Type['KFlatModuleList'], d: Dict[str, Any]) -> 'KFlatModuleList':
         cls._check_node(d)
-        return KFlatModuleList(mainModule=d['mainModule'], modules=(KFlatModule.from_dict(kfm) for kfm in d['term']))
+        return KFlatModuleList(main_module=d['mainModule'], modules=(KFlatModule.from_dict(kfm) for kfm in d['term']))
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             'node': 'KFlatModuleList',
-            'mainModule': self.mainModule,
+            'mainModule': self.main_module,
             'term': [mod.to_dict() for mod in self.modules],
         }
 
     def let(
-        self, *, mainModule: Optional[str] = None, modules: Optional[Iterable[KFlatModule]] = None
+        self, *, main_module: Optional[str] = None, modules: Optional[Iterable[KFlatModule]] = None
     ) -> 'KFlatModuleList':
-        mainModule = mainModule if mainModule is not None else self.mainModule
+        main_module = main_module if main_module is not None else self.main_module
         modules = modules if modules is not None else self.modules
-        return KFlatModuleList(mainModule=mainModule, modules=modules)
+        return KFlatModuleList(main_module=main_module, modules=modules)
 
 
 @final
@@ -1709,30 +1709,6 @@ def collect(callback: Callable[[KInner], None], kinner: KInner) -> None:
         return kinner
 
     bottom_up(f, kinner)
-
-
-def flatten_label(label: str, kast: KInner) -> List[KInner]:
-    """Given a cons list, return a flat Python list of the elements.
-
-    -   Input: Cons operation to flatten.
-    -   Output: Items of cons list.
-    """
-    if type(kast) is KApply and kast.label.name == label:
-        items = [flatten_label(label, arg) for arg in kast.args]
-        return [c for cs in items for c in cs]
-    return [kast]
-
-
-def constLabel(symbol):
-    return lambda: symbol
-
-
-def assocWithUnit(assocJoin, unit):
-    def _assocWithUnit(*args):
-        newArgs = [arg for arg in args if arg != unit]
-        return assocJoin.join(newArgs)
-
-    return _assocWithUnit
 
 
 def read_kast(ifile: Path) -> KAst:

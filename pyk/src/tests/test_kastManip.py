@@ -1,40 +1,26 @@
 from unittest import TestCase
 
-from pyk.cterm import CTerm
-from pyk.kast import KApply, KAtt, KClaim, KInner, KLabel, KRewrite, KSequence, KSort, KVariable, ktokenDots
+from pyk.kast import DOTS, KApply, KLabel, KRewrite, KSequence, KSort, KVariable
 from pyk.kastManip import (
     bool_to_ml_pred,
-    build_claim,
-    build_rule,
-    collapseDots,
+    collapse_dots,
     minimize_term,
     ml_pred_to_bool,
     push_down_rewrites,
     remove_generated_cells,
     simplify_bool,
-    splitConfigFrom,
+    split_config_from,
     substitute,
 )
-from pyk.prelude import Bool, Sorts, intToken, mlAnd, mlEqualsTrue, mlTop
+from pyk.prelude import Bool, Sorts, intToken, mlEqualsTrue, mlTop
 
-from .utils import a, b, c, f, k
+from .utils import a, b, c, f, k, x
 
-x = KVariable('X')
-mem = KLabel('<mem>')
-
-T = KLabel('<T>')
 K_CELL = KApply('<k>', [KSequence([KVariable('S1'), KVariable('_DotVar0')])])
 T_CELL = KApply('<T>', [K_CELL, KApply('<state>', [KVariable('MAP')])])
 GENERATED_COUNTER_CELL = KApply('<generatedCounter>', [KVariable('X')])
 GENERATED_TOP_CELL_1 = KApply('<generatedTop>', [T_CELL, KVariable('_GENERATED_COUNTER_PLACEHOLDER')])
 GENERATED_TOP_CELL_2 = KApply('<generatedTop>', [T_CELL, GENERATED_COUNTER_CELL])
-
-v1 = KVariable('V1')
-v2 = KVariable('V2')
-unds_v1 = KVariable('_V1')
-unds_v2 = KVariable('_V2')
-ques_v2 = KVariable('?V2')
-ques_unds_v2 = KVariable('?_V2')
 
 
 class PushDownRewritesTest(TestCase):
@@ -51,44 +37,11 @@ class PushDownRewritesTest(TestCase):
                 self.assertEqual(actual, expected)
 
 
-class BuildRuleTest(TestCase):
-    def test_build_rule(self):
-        # Given
-        test_data = [
-            (
-                T(k(KVariable('K_CELL')), mem(KVariable('MEM_CELL'))),
-                T(
-                    k(KVariable('K_CELL')),
-                    mem(KApply('_[_<-_]', [KVariable('MEM_CELL'), KVariable('KEY'), KVariable('VALUE')])),
-                ),
-                ['K_CELL'],
-                T(
-                    k(KVariable('_K_CELL')),
-                    mem(
-                        KRewrite(
-                            KVariable('MEM_CELL'),
-                            KApply('_[_<-_]', [KVariable('MEM_CELL'), KVariable('?_KEY'), KVariable('?_VALUE')]),
-                        )
-                    ),
-                ),
-            )
-        ]
-
-        for i, (lhs, rhs, keep_vars, expected) in enumerate(test_data):
-            with self.subTest(i=i):
-                # When
-                rule, _ = build_rule(f'test-{i}', CTerm(lhs), CTerm(rhs), keep_vars=keep_vars)
-                actual = rule.body
-
-                # Then
-                self.assertEqual(actual, expected)
-
-
 class MinimizeTermTest(TestCase):
     def test_minimize_term(self):
         # Given
         test_data = (
-            (f(k(a)), ['<k>'], f(ktokenDots)),
+            (f(k(a)), ['<k>'], f(DOTS)),
             (f(k(a)), [], f(k(a))),
         )
 
@@ -201,13 +154,11 @@ class RemoveGeneratedCellsTest(TestCase):
 class CollapseDotsTest(TestCase):
     def test(self):
         # Given
-        config_before = substitute(
-            GENERATED_TOP_CELL_1, {'MAP': ktokenDots, '_GENERATED_COUNTER_PLACEHOLDER': ktokenDots}
-        )
-        config_expected = KApply('<generatedTop>', [KApply('<T>', [K_CELL, ktokenDots]), ktokenDots])
+        config_before = substitute(GENERATED_TOP_CELL_1, {'MAP': DOTS, '_GENERATED_COUNTER_PLACEHOLDER': DOTS})
+        config_expected = KApply('<generatedTop>', [KApply('<T>', [K_CELL, DOTS]), DOTS])
 
         # When
-        config_actual = collapseDots(config_before)
+        config_actual = collapse_dots(config_before)
 
         # Then
         self.assertEqual(config_actual, config_expected)
@@ -235,49 +186,16 @@ class SimplifyBoolTest(TestCase):
                 self.assertEqual(bool_out_actual, bool_out)
 
 
-class BuildClaimtest(TestCase):
-    def test_build_claim(self):
-        # (<k> V1 </k> #And { true #Equals 0 <=Int V2}) => <k> V2 </k>      expected: <k> _V1 => V2 </k> requires 0 <=Int V2
-        # <k> V1 </k> => <k> V2 </k>                                        expected: <k> _V1 => ?_V2 </k>
-        # <k> V1 </k> => <k> V2 </k> #And { true #Equals 0 <=Int V2 }       expected: <k> _V1 => ?V2 </k> ensures 0 <=Int ?V2
-
-        def constraint(v: KVariable) -> KInner:
-            return KApply('_<=Int_', [intToken(0), v])
-
-        test_data = (
-            (
-                'req-rhs',
-                mlAnd([k(v1), mlEqualsTrue(constraint(v2))]),
-                k(v2),
-                KClaim(k(KRewrite(unds_v1, v2)), requires=constraint(v2), att=KAtt({'label': 'claim'})),
-            ),
-            ('free-rhs', k(v1), k(v2), KClaim(k(KRewrite(unds_v1, ques_unds_v2)), att=KAtt({'label': 'claim'}))),
-            (
-                'bound-rhs',
-                k(v1),
-                mlAnd([k(v2), mlEqualsTrue(constraint(v2))]),
-                KClaim(k(KRewrite(unds_v1, ques_v2)), ensures=constraint(ques_v2), att=KAtt({'label': 'claim'})),
-            ),
-        )
-
-        for name, init, target, claim in test_data:
-            with self.subTest(name):
-                init_cterm = CTerm(init)
-                target_cterm = CTerm(target)
-                kclaim, _ = build_claim('claim', init_cterm, target_cterm)
-                self.assertEqual(kclaim, claim)
-
-
 class SplitConfigTest(TestCase):
-    def test_splitConfigFrom(self):
+    def test_split_config_from(self):
         k_cell = KSequence([KApply('foo'), KApply('bar')])
         term = KApply('<k>', [k_cell])
-        config, subst = splitConfigFrom(term)
+        config, subst = split_config_from(term)
         self.assertEqual(config, KApply('<k>', [KVariable('K_CELL')]))
         self.assertEqual(subst, {'K_CELL': k_cell})
 
         map_item_cell = KApply('<mapItem>', [KApply('foo')])
         map_cell = KApply('<mapCell>', [KApply('map_join', [map_item_cell, map_item_cell])])
-        config, subst = splitConfigFrom(map_cell)
+        config, subst = split_config_from(map_cell)
         self.assertEqual(config, KApply('<mapCell>', [KVariable('MAPCELL_CELL')]))
         self.assertEqual(subst, {'MAPCELL_CELL': KApply('map_join', [map_item_cell, map_item_cell])})
