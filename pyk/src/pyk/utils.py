@@ -1,6 +1,6 @@
 import hashlib
 import string
-from typing import Any, Dict, Final, Hashable, Iterable, Iterator, List, Mapping, Optional, Tuple, TypeVar
+from typing import Any, Dict, Final, Hashable, Iterable, Iterator, List, Mapping, Optional, Tuple, TypeVar, cast
 
 T = TypeVar('T')
 K = TypeVar('K')
@@ -106,6 +106,22 @@ def unique(iterable: Iterable[H]) -> Iterator[H]:
         else:
             elems.add(elem)
             yield elem
+
+
+def single(iterable: Iterable[T]) -> T:
+    it = iter(iterable)
+    sentinel = object()
+
+    fst = next(it, sentinel)
+    if fst is sentinel:
+        raise ValueError('Expected a single element, found none')
+    fst = cast(T, fst)
+
+    snd = next(it, sentinel)
+    if snd is not sentinel:
+        raise ValueError('Expected a single element, found more', fst, snd)
+
+    return fst
 
 
 def repeat_last(iterable: Iterable[T]) -> Iterator[T]:
