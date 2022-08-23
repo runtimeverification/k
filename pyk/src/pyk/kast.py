@@ -25,7 +25,7 @@ from typing import (
     overload,
 )
 
-from .utils import EMPTY_FROZEN_DICT, FrozenDict, filter_none, hash_str
+from .utils import EMPTY_FROZEN_DICT, FrozenDict, filter_none, hash_str, single
 
 T = TypeVar('T', bound='KAst')
 W = TypeVar('W', bound='WithKAtt')
@@ -1604,10 +1604,10 @@ class KDefinition(KOuter, WithKAtt):
         return [rule for module in self.modules for rule in module.rules]
 
     def production_for_klabel(self, klabel: KLabel) -> KProduction:
-        productions = [prod for prod in self.productions if prod.klabel and prod.klabel == klabel]
-        if len(productions) != 1:
-            raise ValueError(f'Expected 1 production for label {klabel}, not {productions}.')
-        return productions[0]
+        try:
+            return single(prod for prod in self.productions if prod.klabel and prod.klabel == klabel)
+        except ValueError as err:
+            raise ValueError(f'Expected a single production for label {klabel}') from err
 
     def production_for_cell_sort(self, sort: KSort) -> KProduction:
         # Typical cell production has 3 productions:
@@ -1621,10 +1621,10 @@ class KDefinition(KOuter, WithKAtt):
             raise ValueError(
                 f'Method production_for_cell_sort only intended to be called on sorts ending in "Cell", not: {sort}'
             )
-        productions = [prod for prod in self.productions if prod.sort == sort and 'cell' in prod.att]
-        if len(productions) != 1:
-            raise ValueError(f'Expected 1 cell production for sort {sort}, not: {productions}')
-        return productions[0]
+        try:
+            return single(prod for prod in self.productions if prod.sort == sort and 'cell' in prod.att)
+        except ValueError as err:
+            raise ValueError(f'Expected a single cell production for sort {sort}') from err
 
     def empty_config(self, sort: KSort) -> KInner:
         def _kdefinition_empty_config(_sort):
@@ -1662,16 +1662,16 @@ class KDefinition(KOuter, WithKAtt):
                         return KVariable(_token_var.token)
             return _kast
 
-        init_prods = [prod for prod in self.syntax_productions if 'initializer' in prod.att]
-        _init_prod = [prod for prod in init_prods if prod.sort == sort]
-        if len(_init_prod) != 1:
-            raise ValueError(f'Did not find unique initializer for sort: {sort}')
-        init_prod = _init_prod[0]
+        init_prods = (prod for prod in self.syntax_productions if 'initializer' in prod.att)
+        try:
+            init_prod = single(prod for prod in init_prods if prod.sort == sort)
+        except ValueError as err:
+            raise ValueError(f'Did not find unique initializer for sort: {sort}') from err
 
-        init_config: KInner
         prod_klabel = init_prod.klabel
         assert prod_klabel is not None
         arg_sorts = [nt.sort for nt in init_prod.items if type(nt) is KNonTerminal]
+        init_config: KInner
         if len(arg_sorts) == 0:
             init_config = KApply(prod_klabel)
         elif len(arg_sorts) == 1 and arg_sorts[0] == KSort('Map'):
