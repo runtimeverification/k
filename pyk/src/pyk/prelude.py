@@ -107,10 +107,10 @@ def leInt(i1, i2):  # noqa: N802
 def mlEquals(  # noqa: N802
     term1: KInner,
     term2: KInner,
-    sort1: Union[str, KSort] = Sorts.K,
-    sort2: Union[str, KSort] = Sorts.K,
+    arg_sort: Union[str, KSort] = Sorts.K,
+    sort: Union[str, KSort] = Sorts.K,
 ) -> KApply:
-    return KLabel('#Equals', sort1, sort2)(term1, term2)
+    return KLabel('#Equals', arg_sort, sort)(term1, term2)
 
 
 def mlEqualsTrue(term: KInner) -> KApply:  # noqa: N802
