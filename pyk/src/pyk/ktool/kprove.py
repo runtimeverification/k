@@ -6,9 +6,9 @@ from subprocess import CalledProcessError, CompletedProcess
 from typing import Final, Iterable, List, Optional, Tuple
 
 from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp, run_process
-from ..cterm import CTerm
-from ..kast import KAst, KClaim, KDefinition, KFlatModule, KImport, KInner, KRequire, KRule, KSentence, flatten_label
-from ..kastManip import build_claim, collectFreeVars, extract_subst
+from ..cterm import CTerm, build_claim
+from ..kast import KAst, KClaim, KDefinition, KFlatModule, KImport, KInner, KRequire, KRule, KSentence
+from ..kastManip import extract_subst, flatten_label, free_vars
 from ..prelude import mlAnd, mlBottom, mlTop
 from ..utils import unique
 from .kprint import KPrint
@@ -182,7 +182,7 @@ class KProve(KPrint):
         log_axioms_file: Path = None,
         allow_zero_step: bool = False,
     ) -> List[KInner]:
-        claim, var_map = build_claim(claim_id, init_cterm, target_cterm, keep_vars=collectFreeVars(init_cterm.kast))
+        claim, var_map = build_claim(claim_id, init_cterm, target_cterm, keep_vars=free_vars(init_cterm.kast))
         next_state = self.prove_claim(
             claim,
             claim_id,

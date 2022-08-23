@@ -8,17 +8,9 @@ from typing import Any, Container, Dict, Iterable, List, Mapping, Optional, Sequ
 
 from graphviz import Digraph
 
-from .cterm import CTerm
+from .cterm import CTerm, build_claim, build_rule
 from .kast import KClaim, KInner, KRule, Subst
-from .kastManip import (
-    build_claim,
-    build_rule,
-    ml_pred_to_bool,
-    mlAnd,
-    remove_generated_cells,
-    remove_source_attributes,
-    simplify_bool,
-)
+from .kastManip import ml_pred_to_bool, mlAnd, remove_generated_cells, remove_source_attributes, simplify_bool
 from .ktool import KPrint
 from .utils import add_indent, compare_short_hashes, shorten_hash
 
@@ -381,8 +373,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         for node in self.nodes:
             label = self.node_short_info(node)
-            classAttrs = ' '.join(self.node_attrs(node.id))
-            attrs = {'class': classAttrs} if classAttrs else {}
+            class_attrs = ' '.join(self.node_attrs(node.id))
+            attrs = {'class': class_attrs} if class_attrs else {}
             graph.node(name=node.id, label=label, **attrs)
 
         for edge in self.edges():
@@ -763,8 +755,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
 
-        INIT = 1
-        POP_PATH = 2
+        INIT = 1  # noqa: N806
+        POP_PATH = 2  # noqa: N806
 
         visited: Set[str] = set()
         path: List[KCFG.EdgeLike] = []
