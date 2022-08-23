@@ -22,6 +22,7 @@ RUN    pacman -Sy   --noconfirm archlinux-keyring \
                        openssh                    \
                        python                     \
                        python-pip                 \
+                       python-poetry              \
                        stack                      \
                        z3                         \
                        zlib
