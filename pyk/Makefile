@@ -22,8 +22,8 @@ clean:
 build:
 	poetry build
 
-install:
-	pip3 install . --root=$(DESTDIR) --prefix=$(PREFIX)
+install: build
+	pip3 install ./dist/*.whl --root=$(DESTDIR) --prefix=$(PREFIX)
 
 poetry-install:
 	poetry install
