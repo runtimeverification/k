@@ -116,7 +116,7 @@ class KAtt(KAst, Mapping[str, Any]):
     def to_dict(self) -> Dict[str, Any]:
         def _to_dict(m: Any) -> Any:
             if isinstance(m, FrozenDict):
-                return dict(((k, _to_dict(v)) for (k, v) in m.items()))
+                return {k: _to_dict(v) for (k, v) in m.items()}
             return m
 
         return {'node': 'KAtt', 'att': _to_dict(self.atts)}

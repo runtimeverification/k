@@ -133,7 +133,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         self._target = set()
         self._expanded = set()
         self._verified = set()
-        self._aliases = dict()
+        self._aliases = {}
         self._lock = RLock()
 
     def __contains__(self, item: object) -> bool:
@@ -409,12 +409,12 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
     def get_unique_init(self) -> Node:
         if len(self.init) > 1:
-            raise ValueError(f'Multiple init nodes found: {list(shorten_hash(n.id) for n in self.init)}')
+            raise ValueError(f'Multiple init nodes found: {[shorten_hash(n.id) for n in self.init]}')
         return self.init[0]
 
     def get_unique_target(self) -> Node:
         if len(self.target) > 1:
-            raise ValueError(f'Multiple target nodes found: {list(shorten_hash(n.id) for n in self.target)}')
+            raise ValueError(f'Multiple target nodes found: {[shorten_hash(n.id) for n in self.target]}')
         return self.target[0]
 
     def get_first_frontier(self) -> Node:
@@ -500,11 +500,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         self._init.discard(node_id)
         self._target.discard(node_id)
         self._expanded.discard(node_id)
-        self._verified = set(
+        self._verified = {
             (source_id, target_id)
             for source_id, target_id in self._verified
             if source_id != node_id and target_id != node_id
-        )
+        }
 
         for alias in [alias for alias, id in self._aliases.items() if id == node_id]:
             self.remove_alias(alias)

@@ -313,7 +313,7 @@ def parse_token_rule_syntax(kprove, ktoken: KToken, kast_args: Iterable[str] = (
     result = get_cell(simp_cterm.kast, 'K_CELL')
     if type(result) is KSequence:
         result = result.items[0]
-    return mlAnd([result] + list(c for c in simp_cterm.constraints if not is_top(c)))
+    return mlAnd([result] + [c for c in simp_cterm.constraints if not is_top(c)])
 
 
 def split_node(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
@@ -359,7 +359,7 @@ def verify_edges(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KC
             for edge in cfg.edges(source_id=source_id, target_id=target_id)
         ]
     else:
-        edges = [edge for edge in cfg.edges()]
+        edges = list(cfg.edges())
     edges = [edge for edge in edges if shorten_hashes((edge.source.id, edge.target.id)) not in args['exclude_edges']]
     edges = [edge for edge in edges if edge.depth != 0 and not cfg.is_verified(edge.source.id, edge.target.id)]
     if len(edges) == 0:

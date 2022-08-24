@@ -120,12 +120,12 @@ class KProve(KPrint):
             '--log-entries',
             ','.join(haskell_log_entries),
         ]
-        command = [c for c in self.prover]
+        command = list(self.prover)
         command += [str(spec_file)]
         command += ['--definition', str(self.definition_dir), '--output', 'json']
         command += ['--spec-module', spec_module_name] if spec_module_name is not None else []
         command += ['--dry-run'] if dry_run else []
-        command += [c for c in self.prover_args]
+        command += self.prover_args
         command += list(args)
 
         kore_exec_opts = ' '.join(list(haskell_args) + haskell_log_args)
