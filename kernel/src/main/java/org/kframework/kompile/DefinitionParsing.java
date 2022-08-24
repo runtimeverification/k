@@ -29,7 +29,9 @@ import org.kframework.definition.SyntaxSort;
 import org.kframework.kore.AddAttRec;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KToken;
 import org.kframework.kore.Sort;
+import org.kframework.kore.VisitK;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ParserUtils;
 import org.kframework.parser.TreeNodesToKORE;
@@ -285,17 +287,6 @@ public class DefinitionParsing {
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         caches = loadCaches();
 
-        // Check to ensure that the k cell is not duplicated.
-        // Note: this is done before the configuration bubbles are resolved because it allows us to use location
-        // information from the sentences that declare the configuration cells.
-        List<Bubble> KCellDeclarations = stream(definition.getAllConfigDecls())
-                .filter(s -> s.contents().contains("<k>") && s.contents().contains("</k>"))
-                .collect(Collectors.toList());
-        if (KCellDeclarations.size() > 1) {
-            KCellDeclarations.stream().forEach(k ->
-                errors.add(KEMException.compilerError("Multiple K cell declarations detected. Only one declaration is allowed.", k)));
-        }
-
         Definition result;
         try {
             result = resolveConfigBubbles(definitionWithMapForConfig);
@@ -314,6 +305,24 @@ public class DefinitionParsing {
     public java.util.Set<KEMException> errors() {
         return errors;
     }
+
+    private class ConfigVistor extends VisitK {
+        private boolean exists = false;
+        private String CellName = new String();
+
+        public Boolean process(K k, String CellName) {
+            this.CellName = CellName;
+            apply(k);
+            return exists;
+        }
+
+        @Override
+        public void apply(KToken k) {
+            exists = k.s().equals(CellName);
+        }
+    }
+
+    private ConfigVistor configNameMatches = new ConfigVistor();
 
     private Definition resolveConfigBubbles(Definition def) {
         Definition defWithCaches = resolveCachedBubbles(def, false);
@@ -349,6 +358,13 @@ public class DefinitionParsing {
         Definition defWithParsedConfigs = DefinitionTransformer.from(m ->
                 Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()),
                 "replace configs").apply(defWithCaches);
+
+        List<Configuration> KCellDeclarations = stream(defWithParsedConfigs.Configs())
+                .filter(c -> configNameMatches.process(c.body(), "k")).collect(Collectors.toList());
+        if (KCellDeclarations.size() > 1) {
+            KCellDeclarations.stream().forEach(k ->
+                    errors.add(KEMException.compilerError("Multiple K cell declarations detected. Only one declaration is allowed.", k)));
+        }
 
         // replace config bubbles with the generated syntax and rules
         return DefinitionTransformer.from(m -> {

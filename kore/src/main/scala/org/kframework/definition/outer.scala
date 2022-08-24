@@ -59,9 +59,8 @@ case class Definition(
     (entryModules | entryModules.flatMap(_.importedModules)).par.map(f).seq.map(m => m.name -> m).toMap.asJava
   }
 
-  lazy val getAllConfigDecls = {
-    entryModules.map(m => m.localSentences collect { case b: Bubble => b }).toList.flatten
-      .filter(s => s.sentenceType.equals("config"))
+  lazy val Configs = {
+    entryModules.map(m => m.localConfigurations).toList.flatten
   }
 }
 
@@ -119,6 +118,8 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
   lazy val importedModuleNames: Set[String] = importedModules.map(_.name)
 
   lazy val productions: Set[Production] = sentences collect { case p: Production => p }
+
+  lazy val localConfigurations: Set[Configuration] = localSentences collect { case c: Configuration => c }
 
   lazy val publicSentences: Set[Sentence] = {
     if (att.contains(Att.PRIVATE)) {
