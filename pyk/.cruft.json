@@ -1,0 +1,18 @@
+{
+  "template": "https://github.com/runtimeverification/python-project-template.git",
+  "commit": "46685b928f6e7765d42b98c59cc0cdc5217e12f9",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "project_name": "pyk",
+      "project_slug": "pyk",
+      "package_name": "pyk",
+      "version": "0.1.0",
+      "description": "",
+      "author_name": "Runtime Verification, Inc.",
+      "author_email": "contact@runtimeverification.com",
+      "_template": "https://github.com/runtimeverification/python-project-template.git"
+    }
+  },
+  "directory": null
+}
