@@ -182,7 +182,7 @@ class Kore(ABC):
         ...
 
 
-class Sort(Kore, ABC):
+class Sort(Kore):
     name: str
 
 
@@ -258,13 +258,13 @@ class SortApp(Sort):
         return self.name + ' ' + _braced(sort.text for sort in self.sorts)
 
 
-class Pattern(Kore, ABC):
+class Pattern(Kore):
     @abstractmethod
     def map_pattern(self: P, f: Callable[['Pattern'], 'Pattern']) -> P:
         ...
 
 
-class VarPattern(Pattern, WithSort, ABC):
+class VarPattern(Pattern, WithSort):
     name: str
     sort: Sort
 
@@ -424,7 +424,7 @@ class App(Pattern):
         )
 
 
-class MLPattern(Pattern, ABC):
+class MLPattern(Pattern):
     @classmethod
     @property
     @abstractmethod
@@ -432,7 +432,7 @@ class MLPattern(Pattern, ABC):
         ...
 
 
-class MLConn(MLPattern, WithSort, ABC):
+class MLConn(MLPattern, WithSort):
     @property
     @abstractmethod
     def patterns(self) -> Tuple[Pattern, ...]:
@@ -443,7 +443,7 @@ class MLConn(MLPattern, WithSort, ABC):
         return self._symbol + ' { ' + self.sort.text + ' } ' + _parend(pattern.text for pattern in self.patterns)
 
 
-class NullaryConn(MLConn, ABC):
+class NullaryConn(MLConn):
     @property
     def dict(self) -> Dict[str, Any]:
         return {'tag': self._tag, 'sort': self.sort.dict}
@@ -501,7 +501,7 @@ class Bottom(NullaryConn):
         return Bottom(sort=Sort.from_dict(dct['sort']))
 
 
-class UnaryConn(MLConn, ABC):
+class UnaryConn(MLConn):
     pattern: Pattern
 
     @property
@@ -539,7 +539,7 @@ class Not(UnaryConn):
         return Not(sort=Sort.from_dict(dct['sort']), pattern=Pattern.from_dict(dct['arg']))
 
 
-class BinaryConn(MLConn, ABC):
+class BinaryConn(MLConn):
     left: Pattern
     right: Pattern
 
@@ -713,7 +713,7 @@ class Iff(BinaryConn):
         )
 
 
-class MLQuant(MLPattern, WithSort, ABC):
+class MLQuant(MLPattern, WithSort):
     sort: Sort
     var: EVar  # TODO Should this be inlined to var_name, var_sort?
     pattern: Pattern
@@ -809,7 +809,7 @@ class Forall(MLQuant):
         )
 
 
-class MLFixpoint(MLPattern, ABC):
+class MLFixpoint(MLPattern):
     var: SVar  # TODO Should this be inlined to var_name, var_sort?
     pattern: Pattern
 
@@ -879,11 +879,11 @@ class Nu(MLFixpoint):
         )
 
 
-class MLPred(MLPattern, WithSort, ABC):
+class MLPred(MLPattern, WithSort):
     op_sort: Sort
 
 
-class RoundPred(MLPred, ABC):
+class RoundPred(MLPred):
     pattern: Pattern
 
     @property
@@ -976,7 +976,7 @@ class Floor(RoundPred):
         )
 
 
-class BinaryPred(MLPred, ABC):
+class BinaryPred(MLPred):
     left: Pattern
     right: Pattern
 
@@ -1085,7 +1085,7 @@ class In(BinaryPred):
         )
 
 
-class MLRewrite(MLPattern, WithSort, ABC):
+class MLRewrite(MLPattern, WithSort):
     ...
 
 
@@ -1215,7 +1215,7 @@ class DV(MLPattern, WithSort):
 
 
 # TODO
-class MLSyntaxSugar(MLPattern, ABC):
+class MLSyntaxSugar(MLPattern):
     ...
 
 
@@ -1264,7 +1264,7 @@ class WithAttrs(ABC):
         return self.let_attrs(f(self.attrs))
 
 
-class Sentence(Kore, WithAttrs, ABC):
+class Sentence(Kore, WithAttrs):
     @classmethod
     def from_dict(cls: Type['Sentence'], dct: Mapping[str, Any]) -> 'Sentence':
         return unsupported()
@@ -1545,7 +1545,7 @@ class AliasDecl(Sentence):
         )
 
 
-class AxiomLike(Sentence, ABC):
+class AxiomLike(Sentence):
     _label: ClassVar[str]
 
     vars: Tuple[SortVar, ...]
