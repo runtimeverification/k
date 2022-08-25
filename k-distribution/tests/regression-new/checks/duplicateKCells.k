@@ -5,7 +5,7 @@ module DUPLICATERULES-SYNTAX
 endmodule
 
 module DUPLICATEKCELLS
-    imports DUPLICATERULES-SYNTAX
+    imports DUPLICATEKCELLS-SYNTAX
 
     configuration <k> $PGM:Int </k>
 
