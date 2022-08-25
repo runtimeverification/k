@@ -1,11 +1,11 @@
 [Error] Compiler: Multiple K cell declarations detected. Only one declaration is allowed.
 	Source(duplicateKCells.k)
-	Location(3,5,3,34)
+	Location(3,19,3,34)
 	3 |	    configuration <k> $PGM:K </k>
-	  .	    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	  .	                  ^~~~~~~~~~~~~~~
 [Error] Compiler: Multiple K cell declarations detected. Only one declaration is allowed.
 	Source(duplicateKCells.k)
-	Location(10,5,10,36)
+	Location(10,19,10,36)
 	10 |	    configuration <k> $PGM:Int </k>
-	   .	    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	   .	                  ^~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 2 parsing errors.
