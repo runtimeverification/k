@@ -95,7 +95,7 @@ public class KastFrontEnd extends FrontEnd {
     }
 
     public enum KompileSteps {
-        help, macros, closeCells, resolveCasts, addImplicitComputationCell, concretizeCells, body
+        help, concretizeCells, anonVars
     }
 
     /**
@@ -107,12 +107,9 @@ public class KastFrontEnd extends FrontEnd {
         if (options.steps.contains(KompileSteps.help)) {
             System.out.println(
                     "For --input rule, apply these steps, in this order, separated by comma:\n" +
-                            "   macros - apply macro transformations\n" +
-                            "   closeCells - transform #Dots and #NoDots, into appropriate collection elements\n" +
-                            "   resolveCasts - transform #SemanticCastToSort nodes to side conditions\n" +
-                            "   addImplicitComputationCell - add the <generatedTop> cell\n" +
                             "   concretizeCells - configuration concretization\n" +
-                            "   body - return only the body of the rule");
+                            "   anonVars - rename anonymous variables to be unique\n" +
+                            "   , - empty list of steps");
             return 0;
         }
         scope.enter(kompiledDir.get());
@@ -153,23 +150,22 @@ public class KastFrontEnd extends FrontEnd {
                     SortInfo sortInfo = SortInfo.fromModule(mod);
 
                     Rule r = Rule.apply(parsed, BooleanUtils.TRUE, BooleanUtils.TRUE, Att.empty());
-                    if (options.steps.contains(KompileSteps.macros))
-                        r = (Rule) ExpandMacros.forNonSentences(unparsingMod, files.get(), def.kompileOptions, false).expand(r);
-                    if (options.steps.contains(KompileSteps.closeCells))
-                        r = (Rule) new CloseCells(configInfo, sortInfo, labelInfo).close(r);
-                    if (options.steps.contains(KompileSteps.resolveCasts)) // move casts to side condition predicates
-                        r = (Rule) new ResolveSemanticCasts(false).resolve(r);
-                    if (options.steps.contains(KompileSteps.addImplicitComputationCell))
+                    if (options.steps.contains(KompileSteps.anonVars))
+                        r = (Rule) new ResolveAnonVar().resolve(r);
+                    r = (Rule) new ResolveSemanticCasts(false).resolve(r); // move casts to side condition predicates
+                    r = (Rule) new ConstantFolding().fold(unparsingMod, r);
+                    if (options.steps.contains(KompileSteps.concretizeCells)) {
                         r = (Rule) new AddImplicitComputationCell(configInfo, labelInfo).apply(mod, r);
-                    if (options.steps.contains(KompileSteps.concretizeCells))
                         r = (Rule) new ConcretizeCells(configInfo, labelInfo, sortInfo, mod, true).concretize(mod, r);
-                    K result = options.steps.contains(KompileSteps.body) ? r.body() : KApply(KLabel("#ruleRequiresEnsures"), KList(r.body(), r.requires(), r.ensures()));
+                    }
+                    r = (Rule) new CloseCells(configInfo, sortInfo, labelInfo).close(r);
+                    K result = r.body();
                     kprint.get().prettyPrint(def.kompiledDefinition, unparsingMod, s -> kprint.get().outputFile(s), result, sort);
                 }
 
                 sw.printTotal("Total");
                 return 0;
-            } else if (!options.steps.equals(Lists.newArrayList(KastFrontEnd.KompileSteps.closeCells, KastFrontEnd.KompileSteps.resolveCasts, KastFrontEnd.KompileSteps.body))) {
+            } else if (!options.steps.equals(Lists.newArrayList(KompileSteps.anonVars))) {
                 throw KEMException.innerParserError("Option --steps is available only with --input rule.");
             }
 

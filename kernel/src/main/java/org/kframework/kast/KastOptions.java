@@ -136,7 +136,7 @@ public final class KastOptions {
     public InputModes input = InputModes.PROGRAM;
 
     @Parameter(names={"--steps"}, description="Apply specified kompilation steps to the parsed term. Only for --input rule. Use --steps help for a detailed description of available steps.")
-    public List<KastFrontEnd.KompileSteps> steps = Lists.newArrayList(KastFrontEnd.KompileSteps.closeCells, KastFrontEnd.KompileSteps.resolveCasts, KastFrontEnd.KompileSteps.body);
+    public List<KastFrontEnd.KompileSteps> steps = Lists.newArrayList(KastFrontEnd.KompileSteps.anonVars);
 
     public static class InputModeConverter extends BaseEnumConverter<InputModes> {
 
