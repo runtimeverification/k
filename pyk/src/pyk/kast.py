@@ -116,7 +116,7 @@ class KAtt(KAst, Mapping[str, Any]):
     def to_dict(self) -> Dict[str, Any]:
         def _to_dict(m: Any) -> Any:
             if isinstance(m, FrozenDict):
-                return dict(((k, _to_dict(v)) for (k, v) in m.items()))
+                return {k: _to_dict(v) for (k, v) in m.items()}
             return m
 
         return {'node': 'KAtt', 'att': _to_dict(self.atts)}
@@ -132,7 +132,7 @@ class KAtt(KAst, Mapping[str, Any]):
 EMPTY_ATT: Final = KAtt()
 
 
-class WithKAtt(KAst, ABC):
+class WithKAtt(ABC):
     att: KAtt
 
     @abstractmethod
@@ -146,7 +146,7 @@ class WithKAtt(KAst, ABC):
         return self.let_att(att=self.att.update(atts))
 
 
-class KInner(KAst, ABC):
+class KInner(KAst):
     _INNER_NODES: Final = {'KVariable', 'KSort', 'KToken', 'KLabel', 'KApply', 'KAs', 'KRewrite', 'KSequence'}
 
     @classmethod
@@ -699,7 +699,7 @@ class KSequence(KInner, Sequence[KInner]):
         return None
 
 
-class KOuter(KAst, ABC):
+class KOuter(KAst):
     _OUTER_NODES: Final = {
         'KTerminal',
         'KRegexTerminal',
@@ -731,7 +731,7 @@ class KOuter(KAst, ABC):
         raise ValueError(f"Expected KOuter label as 'node' value, found: '{node}'")
 
 
-class KProductionItem(KOuter, ABC):
+class KProductionItem(KOuter):
     _PRODUCTION_ITEM_NODES: Final = {'KTerminal', 'KRegexTerminal', 'KNonTerminal'}
 
     @classmethod
@@ -744,7 +744,7 @@ class KProductionItem(KOuter, ABC):
         raise ValueError(f"Expected KProductionItem label as 'node' value, found: '{node}'")
 
 
-class KSentence(KOuter, WithKAtt, ABC):
+class KSentence(KOuter, WithKAtt):
     _SENTENCE_NODES: Final = {
         'KProduction',
         'KSyntaxSort',
@@ -1178,7 +1178,7 @@ class KBubble(KSentence):
         return self.let(att=att)
 
 
-class KRuleLike(KSentence, ABC):
+class KRuleLike(KSentence):
     body: KInner
     requires: KInner
     ensures: KInner

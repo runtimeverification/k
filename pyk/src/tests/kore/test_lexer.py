@@ -46,4 +46,4 @@ class LexerTest(TestCase):
             with self.subTest(i=i):
                 # Then
                 with self.assertRaises(ValueError):
-                    [token for token in KoreLexer(text)]
+                    list(KoreLexer(text))
