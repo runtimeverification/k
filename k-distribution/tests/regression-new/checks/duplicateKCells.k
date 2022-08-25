@@ -1,4 +1,4 @@
-module DUPLICATERULES-SYNTAX
+module DUPLICATEKCELLS-SYNTAX
 
     configuration <k> $PGM:K </k>
 
