@@ -8,17 +8,9 @@ from typing import Any, Container, Dict, Iterable, List, Mapping, Optional, Sequ
 
 from graphviz import Digraph
 
-from .cterm import CTerm
+from .cterm import CTerm, build_claim, build_rule
 from .kast import KClaim, KInner, KRule, Subst
-from .kastManip import (
-    build_claim,
-    build_rule,
-    ml_pred_to_bool,
-    mlAnd,
-    remove_generated_cells,
-    remove_source_attributes,
-    simplify_bool,
-)
+from .kastManip import ml_pred_to_bool, mlAnd, remove_generated_cells, remove_source_attributes, simplify_bool
 from .ktool import KPrint
 from .utils import add_indent, compare_short_hashes, shorten_hash
 
@@ -141,7 +133,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         self._target = set()
         self._expanded = set()
         self._verified = set()
-        self._aliases = dict()
+        self._aliases = {}
         self._lock = RLock()
 
     def __contains__(self, item: object) -> bool:
@@ -381,8 +373,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         for node in self.nodes:
             label = self.node_short_info(node)
-            classAttrs = ' '.join(self.node_attrs(node.id))
-            attrs = {'class': classAttrs} if classAttrs else {}
+            class_attrs = ' '.join(self.node_attrs(node.id))
+            attrs = {'class': class_attrs} if class_attrs else {}
             graph.node(name=node.id, label=label, **attrs)
 
         for edge in self.edges():
@@ -417,12 +409,12 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
     def get_unique_init(self) -> Node:
         if len(self.init) > 1:
-            raise ValueError(f'Multiple init nodes found: {list(shorten_hash(n.id) for n in self.init)}')
+            raise ValueError(f'Multiple init nodes found: {[shorten_hash(n.id) for n in self.init]}')
         return self.init[0]
 
     def get_unique_target(self) -> Node:
         if len(self.target) > 1:
-            raise ValueError(f'Multiple target nodes found: {list(shorten_hash(n.id) for n in self.target)}')
+            raise ValueError(f'Multiple target nodes found: {[shorten_hash(n.id) for n in self.target]}')
         return self.target[0]
 
     def get_first_frontier(self) -> Node:
@@ -508,11 +500,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         self._init.discard(node_id)
         self._target.discard(node_id)
         self._expanded.discard(node_id)
-        self._verified = set(
+        self._verified = {
             (source_id, target_id)
             for source_id, target_id in self._verified
             if source_id != node_id and target_id != node_id
-        )
+        }
 
         for alias in [alias for alias, id in self._aliases.items() if id == node_id]:
             self.remove_alias(alias)
@@ -763,8 +755,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
 
-        INIT = 1
-        POP_PATH = 2
+        INIT = 1  # noqa: N806
+        POP_PATH = 2  # noqa: N806
 
         visited: Set[str] = set()
         path: List[KCFG.EdgeLike] = []

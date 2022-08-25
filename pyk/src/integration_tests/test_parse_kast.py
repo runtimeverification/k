@@ -1,12 +1,10 @@
-from abc import ABC
-
 from pyk.kast import KAs, KSort, KSortSynonym, read_kast_definition
 from pyk.ktool import KompileBackend
 
 from .kompiled_test import KompiledTest
 
 
-class ParseKAstTest(KompiledTest, ABC):
+class ParseKAstTest(KompiledTest):
     COMPILED_JSON_PATH: str
     MODULE_NAME: str
 

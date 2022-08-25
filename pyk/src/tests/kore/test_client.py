@@ -13,7 +13,7 @@ class KoreClientTest(TestCase):
     def setUp(self):
         # Given
         patcher = patch('pyk.kore.client.JsonRpcClient', spec=True)
-        MockClient = patcher.start()
+        MockClient = patcher.start()  # noqa: N806
         self.addCleanup(patcher.stop)
         self.mock = MockClient.return_value
 
@@ -32,23 +32,23 @@ class KoreClientTest(TestCase):
         # Then
         self.mock.close.assert_called()
 
-    def assumeResponse(self, response):
+    def assumeResponse(self, response):  # noqa: N802
         self.mock.request.return_value = response
 
-    def assertRequest(self, method, **params):
+    def assertRequest(self, method, **params):  # noqa: N802
         self.mock.request.assert_called_with(method, **params)
 
     def test_execute(self):
         test_data = (
             (
-                App('IntAdd', (), (intDV(1), intDV(1))),
-                {'state': kore(App('IntAdd', [], [intDV(1), intDV(1)]))},
+                App('IntAdd', (), (int_dv(1), int_dv(1))),
+                {'state': kore(App('IntAdd', [], [int_dv(1), int_dv(1)]))},
                 {
-                    'state': {'term': kore(intDV(2)), 'substitution': kore(intTop), 'predicate': kore(intTop)},
+                    'state': {'term': kore(int_dv(2)), 'substitution': kore(int_top), 'predicate': kore(int_top)},
                     'depth': 1,
                     'reason': 'stuck',
                 },
-                StuckResult(State(intDV(2), intTop, intTop), 1),
+                StuckResult(State(int_dv(2), int_top, int_top), 1),
             ),
         )
 
@@ -67,9 +67,9 @@ class KoreClientTest(TestCase):
     def test_implies(self):
         test_data = (
             (
-                intBottom,
-                intTop,
-                {'antecedent': kore(intBottom), 'consequent': kore(intTop)},
+                int_bottom,
+                int_top,
+                {'antecedent': kore(int_bottom), 'consequent': kore(int_top)},
                 {'satisfiable': True},
                 (True, None, None),
             ),
@@ -90,10 +90,10 @@ class KoreClientTest(TestCase):
     def test_simplify(self):
         test_data = (
             (
-                And(intSort, intTop, intTop),
-                {'state': kore(And(intSort, intTop, intTop))},
-                {'state': kore(intTop)},
-                intTop,
+                And(int_sort, int_top, int_top),
+                {'state': kore(And(int_sort, int_top, int_top))},
+                {'state': kore(int_top)},
+                int_top,
             ),
         )
 
@@ -110,13 +110,13 @@ class KoreClientTest(TestCase):
                 self.assertEqual(expected, actual)
 
 
-intSort = SortApp('IntSort')
-intTop = Top(intSort)
-intBottom = Bottom(intSort)
+int_sort = SortApp('IntSort')
+int_top = Top(int_sort)
+int_bottom = Bottom(int_sort)
 
 
-def intDV(n: int) -> DV:
-    return DV(intSort, String(str(n)))
+def int_dv(n: int) -> DV:
+    return DV(int_sort, String(str(n)))
 
 
 def kore(pattern: Pattern) -> Dict[str, Any]:

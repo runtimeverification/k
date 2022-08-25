@@ -1,6 +1,6 @@
 import hashlib
 import string
-from typing import Any, Dict, Final, Hashable, Iterable, Iterator, List, Mapping, Optional, Tuple, TypeVar
+from typing import Any, Dict, Final, Hashable, Iterable, Iterator, List, Mapping, Optional, Tuple, TypeVar, cast
 
 T = TypeVar('T')
 K = TypeVar('K')
@@ -74,15 +74,15 @@ def find_common_items(l1: Iterable[T], l2: Iterable[T]) -> Tuple[List[T], List[T
     for i in l1:
         if i in l2:
             common.append(i)
-    newL1 = []
-    newL2 = []
+    new_l1 = []
+    new_l2 = []
     for i in l1:
         if i not in common:
-            newL1.append(i)
+            new_l1.append(i)
     for i in l2:
         if i not in common:
-            newL2.append(i)
-    return (common, newL1, newL2)
+            new_l2.append(i)
+    return (common, new_l1, new_l2)
 
 
 def intersperse(iterable: Iterable[T], delimiter: T) -> Iterator[T]:
@@ -106,6 +106,22 @@ def unique(iterable: Iterable[H]) -> Iterator[H]:
         else:
             elems.add(elem)
             yield elem
+
+
+def single(iterable: Iterable[T]) -> T:
+    it = iter(iterable)
+    sentinel = object()
+
+    fst = next(it, sentinel)
+    if fst is sentinel:
+        raise ValueError('Expected a single element, found none')
+    fst = cast(T, fst)
+
+    snd = next(it, sentinel)
+    if snd is not sentinel:
+        raise ValueError('Expected a single element, found more', fst, snd)
+
+    return fst
 
 
 def repeat_last(iterable: Iterable[T]) -> Iterator[T]:
@@ -157,16 +173,16 @@ def is_hash(x: Any) -> bool:
     return type(x) is str and len(x) == 64 and is_hexstring(x)
 
 
-def shorten_hash(h: str, leftChars=6, rightChars=6) -> str:
-    left = h[0:leftChars] if leftChars > 0 else ''
-    right = h[-rightChars:] if rightChars > 0 else ''
+def shorten_hash(h: str, left_chars=6, right_chars=6) -> str:
+    left = h[0:left_chars] if left_chars > 0 else ''
+    right = h[-right_chars:] if right_chars > 0 else ''
     return left + ".." + right
 
 
-def shorten_hashes(value: Any, leftChars=6, rightChars=6) -> Any:
+def shorten_hashes(value: Any, left_chars=6, right_chars=6) -> Any:
     result: Any = None
     if is_hash(value):
-        result = shorten_hash(value, leftChars, rightChars)
+        result = shorten_hash(value, left_chars, right_chars)
     elif type(value) is tuple:
         result = tuple([shorten_hashes(item) for item in value])
     elif type(value) is list:

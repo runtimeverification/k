@@ -1,5 +1,5 @@
 from pyk.kast import KApply, KSequence, KToken
-from pyk.kastManip import flatten_label, getCell
+from pyk.kastManip import flatten_label, get_cell
 from pyk.ktool import KompileBackend
 from pyk.prelude import intToken
 
@@ -29,8 +29,8 @@ class ImpRunTest(KRunTest):
             KApply('_|->_', [KToken('n', 'Id'), intToken(-1)]),
         ]
 
-        k_actual = getCell(final_cterm.config, 'K_CELL')
-        state_actual_map_items = flatten_label('_Map_', getCell(final_cterm.config, 'STATE_CELL'))
+        k_actual = get_cell(final_cterm.config, 'K_CELL')
+        state_actual_map_items = flatten_label('_Map_', get_cell(final_cterm.config, 'STATE_CELL'))
 
         self.maxDiff = None
         self.assertEqual(k_actual, k_expected)
