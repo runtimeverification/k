@@ -1,6 +1,7 @@
-from pyk.kast import KApply, KClaim, KRewrite, KSort, KToken, KVariable, assocWithUnit, constLabel
+from pyk.kast import KApply, KClaim, KRewrite, KSort, KToken, KVariable
 from pyk.kastManip import push_down_rewrites
 from pyk.ktool import KompileBackend
+from pyk.ktool.kprint import assoc_with_unit
 from pyk.prelude import Sorts
 
 from .kprove_test import KProveTest
@@ -16,8 +17,8 @@ class DefnTest(KProveTest):
 
     @staticmethod
     def _update_symbol_table(symbol_table):
-        symbol_table['_,_'] = assocWithUnit(' , ', '')
-        symbol_table['.List{"_,_"}'] = constLabel('')
+        symbol_table['_,_'] = assoc_with_unit(' , ', '')
+        symbol_table['.List{"_,_"}'] = lambda: ''
 
     def test_print_configuration(self):
 

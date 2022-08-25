@@ -1,4 +1,3 @@
-from abc import ABC
 from subprocess import Popen
 
 from pyk.kore.client import KoreClient
@@ -7,7 +6,7 @@ from pyk.ktool import KompileBackend
 from ..kompiled_test import KompiledTest
 
 
-class KoreClientTest(KompiledTest, ABC):
+class KoreClientTest(KompiledTest):
     KOMPILE_BACKEND = KompileBackend.HASKELL
 
     KORE_MODULE_NAME: str

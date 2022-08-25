@@ -10,7 +10,7 @@ TT = KoreToken.Type
 class LexerTest(TestCase):
     def test_lexer_success(self):
         # Given
-        TEST_DATA: Final[Tuple[Tuple[str, List[KoreToken.Type]], ...]] = (
+        test_data: Final[Tuple[Tuple[str, List[KoreToken.Type]], ...]] = (
             ('', []),
             (' ', []),
             ('//', []),
@@ -30,7 +30,7 @@ class LexerTest(TestCase):
             ),
         )
 
-        for i, (text, expected) in enumerate(TEST_DATA):
+        for i, (text, expected) in enumerate(test_data):
             with self.subTest(i=i):
                 # When
                 actual = [token.type for token in KoreLexer(text)]
@@ -40,10 +40,10 @@ class LexerTest(TestCase):
 
     def test_lexer_failure(self):
         # Given
-        TEST_DATA: Final[Tuple[str, ...]] = ('-a', "'a", '*', '/*', '\\', '@', '\\@')
+        test_data: Final[Tuple[str, ...]] = ('-a', "'a", '*', '/*', '\\', '@', '\\@')
 
-        for i, text in enumerate(TEST_DATA):
+        for i, text in enumerate(test_data):
             with self.subTest(i=i):
                 # Then
                 with self.assertRaises(ValueError):
-                    [token for token in KoreLexer(text)]
+                    list(KoreLexer(text))

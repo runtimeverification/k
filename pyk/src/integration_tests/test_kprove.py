@@ -1,6 +1,6 @@
 from pyk.cterm import CTerm
 from pyk.kast import KApply, KAtt, KClaim, KRule, KToken
-from pyk.kastManip import getCell
+from pyk.kastManip import get_cell
 from pyk.ktool import KompileBackend
 from pyk.prelude import Sorts
 
@@ -116,7 +116,7 @@ class ImpProofTest(KProveTest):
                 results = self.kprove.prove_cterm(
                     'prove-cterm', _config(pre_k, pre_state), _config(post_k, post_state), haskell_args=haskell_args
                 )
-                posts_actual = [(getCell(_p, 'K_CELL'), getCell(_p, 'STATE_CELL')) for _p in results]
+                posts_actual = [(get_cell(_p, 'K_CELL'), get_cell(_p, 'STATE_CELL')) for _p in results]
                 posts_actual_strs = [
                     (self.kprove.pretty_print(k), self.kprove.pretty_print(s)) for k, s in posts_actual
                 ]

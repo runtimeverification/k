@@ -116,7 +116,7 @@ class KAtt(KAst, Mapping[str, Any]):
     def to_dict(self) -> Dict[str, Any]:
         def _to_dict(m: Any) -> Any:
             if isinstance(m, FrozenDict):
-                return dict(((k, _to_dict(v)) for (k, v) in m.items()))
+                return {k: _to_dict(v) for (k, v) in m.items()}
             return m
 
         return {'node': 'KAtt', 'att': _to_dict(self.atts)}
@@ -132,7 +132,7 @@ class KAtt(KAst, Mapping[str, Any]):
 EMPTY_ATT: Final = KAtt()
 
 
-class WithKAtt(KAst, ABC):
+class WithKAtt(ABC):
     att: KAtt
 
     @abstractmethod
@@ -146,7 +146,7 @@ class WithKAtt(KAst, ABC):
         return self.let_att(att=self.att.update(atts))
 
 
-class KInner(KAst, ABC):
+class KInner(KAst):
     _INNER_NODES: Final = {'KVariable', 'KSort', 'KToken', 'KLabel', 'KApply', 'KAs', 'KRewrite', 'KSequence'}
 
     @classmethod
@@ -353,9 +353,9 @@ class KToken(KInner):
         return None
 
 
-TRUE = KToken('true', 'Bool')
-FALSE = KToken('false', 'Bool')
-ktokenDots = KToken('...', 'K')
+TRUE: Final = KToken('true', 'Bool')
+FALSE: Final = KToken('false', 'Bool')
+DOTS: Final = KToken('...', 'K')
 
 
 @final
@@ -699,7 +699,7 @@ class KSequence(KInner, Sequence[KInner]):
         return None
 
 
-class KOuter(KAst, ABC):
+class KOuter(KAst):
     _OUTER_NODES: Final = {
         'KTerminal',
         'KRegexTerminal',
@@ -731,7 +731,7 @@ class KOuter(KAst, ABC):
         raise ValueError(f"Expected KOuter label as 'node' value, found: '{node}'")
 
 
-class KProductionItem(KOuter, ABC):
+class KProductionItem(KOuter):
     _PRODUCTION_ITEM_NODES: Final = {'KTerminal', 'KRegexTerminal', 'KNonTerminal'}
 
     @classmethod
@@ -744,7 +744,7 @@ class KProductionItem(KOuter, ABC):
         raise ValueError(f"Expected KProductionItem label as 'node' value, found: '{node}'")
 
 
-class KSentence(KOuter, WithKAtt, ABC):
+class KSentence(KOuter, WithKAtt):
     _SENTENCE_NODES: Final = {
         'KProduction',
         'KSyntaxSort',
@@ -1178,7 +1178,7 @@ class KBubble(KSentence):
         return self.let(att=att)
 
 
-class KRuleLike(KSentence, ABC):
+class KRuleLike(KSentence):
     body: KInner
     requires: KInner
     ensures: KInner
@@ -1463,31 +1463,31 @@ class KFlatModule(KOuter, WithKAtt):
 @final
 @dataclass(frozen=True)
 class KFlatModuleList(KOuter):
-    mainModule: str
+    main_module: str
     modules: Tuple[KFlatModule, ...]
 
-    def __init__(self, mainModule: str, modules: Iterable[KFlatModule]):
-        object.__setattr__(self, 'mainModule', mainModule)
+    def __init__(self, main_module: str, modules: Iterable[KFlatModule]):
+        object.__setattr__(self, 'main_module', main_module)
         object.__setattr__(self, 'modules', modules)
 
     @classmethod
     def from_dict(cls: Type['KFlatModuleList'], d: Dict[str, Any]) -> 'KFlatModuleList':
         cls._check_node(d)
-        return KFlatModuleList(mainModule=d['mainModule'], modules=(KFlatModule.from_dict(kfm) for kfm in d['term']))
+        return KFlatModuleList(main_module=d['mainModule'], modules=(KFlatModule.from_dict(kfm) for kfm in d['term']))
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             'node': 'KFlatModuleList',
-            'mainModule': self.mainModule,
+            'mainModule': self.main_module,
             'term': [mod.to_dict() for mod in self.modules],
         }
 
     def let(
-        self, *, mainModule: Optional[str] = None, modules: Optional[Iterable[KFlatModule]] = None
+        self, *, main_module: Optional[str] = None, modules: Optional[Iterable[KFlatModule]] = None
     ) -> 'KFlatModuleList':
-        mainModule = mainModule if mainModule is not None else self.mainModule
+        main_module = main_module if main_module is not None else self.main_module
         modules = modules if modules is not None else self.modules
-        return KFlatModuleList(mainModule=mainModule, modules=modules)
+        return KFlatModuleList(main_module=main_module, modules=modules)
 
 
 @final
@@ -1709,30 +1709,6 @@ def collect(callback: Callable[[KInner], None], kinner: KInner) -> None:
         return kinner
 
     bottom_up(f, kinner)
-
-
-def flatten_label(label: str, kast: KInner) -> List[KInner]:
-    """Given a cons list, return a flat Python list of the elements.
-
-    -   Input: Cons operation to flatten.
-    -   Output: Items of cons list.
-    """
-    if type(kast) is KApply and kast.label.name == label:
-        items = [flatten_label(label, arg) for arg in kast.args]
-        return [c for cs in items for c in cs]
-    return [kast]
-
-
-def constLabel(symbol):
-    return lambda: symbol
-
-
-def assocWithUnit(assocJoin, unit):
-    def _assocWithUnit(*args):
-        newArgs = [arg for arg in args if arg != unit]
-        return assocJoin.join(newArgs)
-
-    return _assocWithUnit
 
 
 def read_kast(ifile: Path) -> KAst:

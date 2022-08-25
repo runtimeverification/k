@@ -1,6 +1,5 @@
 import json
 import shutil
-from abc import ABC
 from pathlib import Path
 from typing import Iterable, Optional
 from unittest import TestCase
@@ -10,7 +9,7 @@ from pyk.kastManip import is_top
 from pyk.ktool import KompileBackend, kompile
 
 
-class KompiledTest(TestCase, ABC):
+class KompiledTest(TestCase):
     KOMPILE_MAIN_FILE: str
     KOMPILE_BACKEND: Optional[KompileBackend] = None
     KOMPILE_OUTPUT_DIR: Optional[str] = None
@@ -48,8 +47,8 @@ class KompiledTest(TestCase, ABC):
     def tearDown(self):
         shutil.rmtree(self.kompiled_dir)
 
-    def assertTop(self, term: KInner) -> None:
+    def assertTop(self, term: KInner) -> None:  # noqa: N802
         self.assertTrue(is_top(term), f'{term} is not #Top')
 
-    def assertNotTop(self, term: KInner) -> None:
+    def assertNotTop(self, term: KInner) -> None:  # noqa: N802
         self.assertFalse(is_top(term), f'{term} is #Top')
