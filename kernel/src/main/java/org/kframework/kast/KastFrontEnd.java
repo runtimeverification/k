@@ -154,11 +154,11 @@ public class KastFrontEnd extends FrontEnd {
                         r = (Rule) new ResolveAnonVar().resolve(r);
                     r = (Rule) new ResolveSemanticCasts(false).resolve(r); // move casts to side condition predicates
                     r = (Rule) new ConstantFolding().fold(unparsingMod, r);
+                    r = (Rule) new CloseCells(configInfo, sortInfo, labelInfo).close(r);
                     if (options.steps.contains(KompileSteps.concretizeCells)) {
                         r = (Rule) new AddImplicitComputationCell(configInfo, labelInfo).apply(mod, r);
                         r = (Rule) new ConcretizeCells(configInfo, labelInfo, sortInfo, mod, true).concretize(mod, r);
                     }
-                    r = (Rule) new CloseCells(configInfo, sortInfo, labelInfo).close(r);
                     K result = r.body();
                     kprint.get().prettyPrint(def.kompiledDefinition, unparsingMod, s -> kprint.get().outputFile(s), result, sort);
                 }
