@@ -30,23 +30,25 @@ poetry-install:
 
 POETRY_RUN := poetry run
 
+
 # Tests
 
-PYK_TEST_ARGS :=
+TEST_ARGS :=
 
 test: test-unit test-integration test-pyk test-kit
 
 test-unit: poetry-install
-	$(POETRY_RUN) python -m unittest discover tests --failfast --verbose $(PYK_TEST_ARGS)
+	$(POETRY_RUN) python -m unittest discover tests --failfast --verbose $(TEST_ARGS)
 
 test-integration: poetry-install
-	$(POETRY_RUN) python -m unittest discover integration_tests --failfast --verbose $(PYK_TEST_ARGS)
+	$(POETRY_RUN) python -m unittest discover integration_tests --failfast --verbose $(TEST_ARGS)
 
 test-pyk: poetry-install
 	$(POETRY_RUN) $(MAKE) -C pyk-tests
 
 test-kit: poetry-install
 	$(POETRY_RUN) $(MAKE) -C kit-tests
+
 
 # Checks and formatting
 
