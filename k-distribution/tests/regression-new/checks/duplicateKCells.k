@@ -9,4 +9,7 @@ module DUPLICATEKCELLS
 
     configuration <k> $PGM:Int </k>
 
+    configuration <k> $PGM:Int </k>
+                  <state> .Map </state>
+
 endmodule
