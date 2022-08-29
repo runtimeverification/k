@@ -306,23 +306,30 @@ public class DefinitionParsing {
         return errors;
     }
 
-    private class ConfigVistor extends VisitK {
-        private boolean exists = false;
-        private String CellName = new String();
-
-        public Boolean process(K k, String CellName) {
-            this.CellName = CellName;
-            apply(k);
-            return exists;
+    private void checkDuplicateKCells(Definition defWithParsedConfigs) {
+        // check for duplicate <k> cell declarations
+        List<K> kcells = new ArrayList<>();
+        stream(defWithParsedConfigs.mainModule().sentences())
+                .filter(s -> s instanceof Configuration)
+                .forEach(s -> new VisitK() {
+                    @Override
+                    public void apply(KApply k) {
+                        if (k.klabel().equals(KLabel("#configCell"))) {
+                            KToken kt = (KToken) k.klist().items().get(0);
+                            assert kt.sort().equals(Sorts.CellName());
+                            if (kt.s().equals("k"))
+                                kcells.add(k);
+                        }
+                        super.apply(k);
+                    }
+                }.apply(((Configuration) s).body()));
+        if (kcells.size() <= 1) {
+            return;
         }
-
-        @Override
-        public void apply(KToken k) {
-            exists = k.s().equals(CellName);
+        for (K kCellDecl: kcells) {
+            this.errors.add(KEMException.compilerError("Multiple K cell declarations detected. Only one <k> cell declaration is allowed.", kCellDecl));
         }
     }
-
-    private ConfigVistor configNameMatches = new ConfigVistor();
 
     private Definition resolveConfigBubbles(Definition def) {
         Definition defWithCaches = resolveCachedBubbles(def, false);
@@ -359,12 +366,7 @@ public class DefinitionParsing {
                 Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()),
                 "replace configs").apply(defWithCaches);
 
-        List<Configuration> KCellDeclarations = stream(defWithParsedConfigs.Configs())
-                .filter(c -> configNameMatches.process(c.body(), "k")).collect(Collectors.toList());
-        if (KCellDeclarations.size() > 1) {
-            KCellDeclarations.stream().forEach(k ->
-                    errors.add(KEMException.compilerError("Multiple K cell declarations detected. Only one declaration is allowed.", k)));
-        }
+        checkDuplicateKCells(defWithParsedConfigs);
 
         // replace config bubbles with the generated syntax and rules
         return DefinitionTransformer.from(m -> {
