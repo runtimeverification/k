@@ -103,10 +103,11 @@ public class ProofDefinitionBuilder {
                             unused.remove(label);
                             return Stream.empty();
                         }
-                        if (proveOptions.claims != null && proveOptions.claims.contains(label))
-                            unused.remove(label);
-                        else
-                            return Stream.empty();
+                        if (proveOptions.claims != null)
+                            if (proveOptions.claims.contains(label))
+                                unused.remove(label);
+                            else
+                                return Stream.empty();
                     }
                     return Stream.of(s);
                 }).collect(Collectors.toSet());
