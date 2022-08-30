@@ -17,6 +17,7 @@ import org.kframework.unparser.ToJson;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
@@ -32,6 +33,9 @@ import static org.kframework.Collections.*;
 public class KProve {
 
     public static final String BOUNDARY_CELL_PREFIX = "BOUND_";
+
+    private static final int KPROVE_SUCCESS_EXIT_CODE = 0;
+    private static final int KPROVE_STUCK_STATE_EXIT_CODE = 1;
 
     private final KExceptionManager kem;
     private final FileUtil files;
@@ -103,6 +107,21 @@ public class KProve {
         kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), kprint::outputFile,
                 results.k());
         sw.printTotal("Total");
+
+        int errCode = results.exitCode().orElse(0);
+        switch (errCode) {
+        case KPROVE_SUCCESS_EXIT_CODE:
+            break;
+        case KPROVE_STUCK_STATE_EXIT_CODE:
+            kem.addKException( new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.PROVER,
+                    "proof was terminated due to stuck state"));
+            break;
+        default:
+            kem.addKException( new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.PROVER,
+                    "backend crashed with exit code " + String.valueOf(errCode)));
+            break;
+        }
+
         return results.exitCode().orElse(KEMException.TERMINATED_WITH_ERRORS_EXIT_CODE);
     }
 
