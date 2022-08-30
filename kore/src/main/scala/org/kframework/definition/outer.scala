@@ -58,10 +58,6 @@ case class Definition(
   def parMap(f: Module => Module): java.util.Map[String, Module] = {
     (entryModules | entryModules.flatMap(_.importedModules)).par.map(f).seq.map(m => m.name -> m).toMap.asJava
   }
-
-  lazy val Configs = {
-    entryModules.map(m => m.localConfigurations).toList.flatten
-  }
 }
 
 trait Sorting {
@@ -118,8 +114,6 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
   lazy val importedModuleNames: Set[String] = importedModules.map(_.name)
 
   lazy val productions: Set[Production] = sentences collect { case p: Production => p }
-
-  lazy val localConfigurations: Set[Configuration] = localSentences collect { case c: Configuration => c }
 
   lazy val publicSentences: Set[Sentence] = {
     if (att.contains(Att.PRIVATE)) {
