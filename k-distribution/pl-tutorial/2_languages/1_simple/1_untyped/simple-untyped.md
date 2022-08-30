@@ -175,13 +175,13 @@ whenever requested (e.g., when they appear as strict arguments of
 the constructs above).
 
 ```k
-  syntax Ids  ::= List{Id,","}
+  syntax Ids  ::= List{Id,","}           [klabel(Exps)]
   syntax Exps ::= List{Exp,","}          [klabel(Exps), strict]  // automatically hybrid now
   syntax Exps ::= Ids
   syntax Val
   syntax Vals ::= List{Val,","}          [klabel(Exps)]
   syntax Bottom
-  syntax Bottoms ::= List{Bottom,","}
+  syntax Bottoms ::= List{Bottom,","}    [klabel(Exps)]
   syntax Ids ::= Bottoms
 ```
 
