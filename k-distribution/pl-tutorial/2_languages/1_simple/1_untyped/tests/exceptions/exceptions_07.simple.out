@@ -1,3 +1,11 @@
-  S ==K "2 5\n"
+{
+  S:String
+#Equals
+  "2 5\n"
+}
 #Or
-  S ==K "2 6\n"
+{
+  S:String
+#Equals
+  "2 6\n"
+}

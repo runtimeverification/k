@@ -1,3 +1,11 @@
-  S ==K "5\n"
+  {
+    S:String
+  #Equals
+    "5\n"
+  }
 #Or
-  S ==K "7\n"
+  {
+    S:String
+  #Equals
+    "7\n"
+  }
