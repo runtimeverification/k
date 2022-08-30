@@ -176,10 +176,10 @@ the constructs above).
 
 ```k
   syntax Ids  ::= List{Id,","}
-  syntax Exps ::= List{Exp,","}          [strict]  // automatically hybrid now
+  syntax Exps ::= List{Exp,","}          [klabel(Exps), strict]  // automatically hybrid now
   syntax Exps ::= Ids
   syntax Val
-  syntax Vals ::= List{Val,","}
+  syntax Vals ::= List{Val,","}          [klabel(Exps)]
   syntax Bottom
   syntax Bottoms ::= List{Bottom,","}
   syntax Ids ::= Bottoms
@@ -211,11 +211,11 @@ arguments.
   syntax Stmt ::= Block
                 | Exp ";"                               [strict]
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
-                | "if" "(" Exp ")" Block
+                | "if" "(" Exp ")" Block                [macro]
                 | "while" "(" Exp ")" Block
-                | "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmt Exp ";" Exp ")" Block  [macro]
                 | "return" Exp ";"                      [strict]
-                | "return" ";"
+                | "return" ";"                          [macro]
                 | "print" "(" Exps ")" ";"              [strict]
 // NOTE: print strict allows non-deterministic evaluation of its arguments
 // Either keep like this but document, or otherwise make Exps seqstrict.
@@ -258,11 +258,11 @@ We only want to give semantics to core constructs, so we get rid of the
 derived ones before we start the semantics.  All desugaring macros below are
 straightforward.
 ```k
-  rule if (E) S => if (E) S else {}                                 [macro]
-  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
-  rule for(Start Cond; Step) {} => {Start while (Cond) {Step;}}     [macro]
-  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;          [macro-rec]
-  rule var X:Id = E; => var X; X = E;                               [macro]
+  rule if (E) S => if (E) S else {}
+  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}
+  rule for(Start Cond; Step) {} => {Start while (Cond) {Step;}}
+  rule var E1:Exp, E2:Exp, Es:Exps; => var E1; var E2, Es;
+  rule var X:Id = E; => var X; X = E;
 ```
 
 For the semantics, we can therefore assume from now on that each
@@ -371,7 +371,8 @@ to the **K** tool, as indicated by the `$PGM` variable, followed by the
 
   configuration <T color="red">
                   <threads color="orange">
-                    <thread multiplicity="*" color="yellow">
+                    <thread multiplicity="*" type="Map" color="yellow">
+                      <id color="pink"> 0 </id>
                       <k color="green"> $PGM:Stmt ~> execute </k>
                     //<br/> // TODO(KORE): support latex annotations #1799
                       <control color="cyan">
@@ -381,7 +382,6 @@ to the **K** tool, as indicated by the `$PGM` variable, followed by the
                     //<br/> // TODO(KORE): support latex annotations #1799
                       <env color="violet"> .Map </env>
                       <holds color="black"> .Map </holds>
-                      <id color="pink"> 0 </id>
                     </thread>
                   </threads>
                 //<br/> // TODO(KORE): support latex annotations #1799
@@ -487,7 +487,7 @@ To this aim, we introduce two special unique variable identifiers,
 through and initializes each element of the first dimension with an array
 of the remaining dimensions, declared as variable `$2`:
 ```k
-  syntax Id ::= "$1" | "$2"
+  syntax Id ::= "$1" [token] | "$2" [token]
   rule var X:Id[N1:Int, N2:Int, Vs:Vals];
     => var X[N1];
        {
@@ -713,7 +713,7 @@ nulary `return;` statements.
        <env> _ => Env </env>
 
   syntax Val ::= "nothing"
-  rule return; => return nothing;   [macro]
+  rule return; => return nothing;
 ```
 Like for division-by-zero, it is left unspecified what happens
 when the `nothing` value is used in domain calculations.  For
