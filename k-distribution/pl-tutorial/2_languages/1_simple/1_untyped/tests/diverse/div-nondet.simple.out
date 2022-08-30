@@ -1,12 +1,6 @@
   {
     S:String
   #Equals
-    "0\n"
-  }
-#Or
-  {
-    S:String
-  #Equals
     "1\n"
   }
 #Or
