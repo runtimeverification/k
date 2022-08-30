@@ -49,30 +49,28 @@
                 cp -rv ${llvm-backend}/matching/* $out/llvm-backend/src/main/native/llvm-backend/matching
               '';
             };
-            # pythonOverrides = import ./pyk/nix/overlay.nix;
           in {
-            # inherit pythonOverrides;
-            k-framework = haskell-backend-bins: prev.callPackage ./nix/k.nix {
-              inherit (prev) llvm-backend;
-              mavenix = { inherit (prev) buildMaven; };
-              haskell-backend = haskell-backend-bins;
-              inherit (haskell-backend) prelude-kore;
-              inherit src;
-              debugger = if prev.stdenv.isDarwin then
-              # lldb is broken on this version of nixpkgs-unstable and there is no point including it
-              # before the lldb support for k is added: https://github.com/runtimeverification/k/issues/2650
-                null
-              else
-                prev.gdb;
-              version = "${k-version}-${self.rev or "dirty"}";
-            };
+            k-framework = haskell-backend-bins:
+              prev.callPackage ./nix/k.nix {
+                inherit (prev) llvm-backend;
+                mavenix = { inherit (prev) buildMaven; };
+                haskell-backend = haskell-backend-bins;
+                inherit (haskell-backend) prelude-kore;
+                inherit src;
+                debugger = if prev.stdenv.isDarwin then
+                # lldb is broken on this version of nixpkgs-unstable and there is no point including it
+                # before the lldb support for k is added: https://github.com/runtimeverification/k/issues/2650
+                  null
+                else
+                  prev.gdb;
+                version = "${k-version}-${self.rev or "dirty"}";
+              };
 
             pyk = prev.poetry2nix.mkPoetryApplication {
               python = prev.python39;
               projectDir = ./pyk;
             };
-          }
-        )
+          })
       ];
     in flake-utils.lib.eachSystem [
       "x86_64-linux"
@@ -93,12 +91,13 @@
           name = "kore-${haskell-backend-bins-version}-${
               haskell-backend.sourceInfo.shortRev or "local"
             }";
-          paths = let p = haskell-backend.packages.${system}; in [ 
-            p."kore:exe:kore-exec" 
-            p."kore:exe:kore-rpc" 
-            p."kore:exe:kore-repl" 
+          paths = let p = haskell-backend.packages.${system};
+          in [
+            p."kore:exe:kore-exec"
+            p."kore:exe:kore-rpc"
+            p."kore:exe:kore-repl"
             p."kore:exe:kore-prof"
-            p."kore:exe:kore-match-disjunction" 
+            p."kore:exe:kore-match-disjunction"
           ];
         };
 
