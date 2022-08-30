@@ -4,6 +4,7 @@ package org.kframework.kast;
 import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.kframework.attributes.Source;
@@ -24,6 +25,7 @@ import java.io.InputStreamReader;
 import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Collections;
 import java.util.List;
 
 @RequestScoped
@@ -130,8 +132,11 @@ public final class KastOptions {
     public boolean expandMacros = false;
 
     @Parameter(names={"--input", "-i"}, converter=InputModeConverter.class,
-            description="How to read kast input in. <mode> is either [program|binary|kast|json|kore].")
+            description="How to read kast input in. <mode> is either [program|binary|kast|json|kore|rule].")
     public InputModes input = InputModes.PROGRAM;
+
+    @Parameter(names={"--steps"}, description="Apply specified kompilation steps to the parsed term. Only for --input rule. Use --steps help for a detailed description of available steps.")
+    public List<KastFrontEnd.KompileSteps> steps = Lists.newArrayList(KastFrontEnd.KompileSteps.anonVars);
 
     public static class InputModeConverter extends BaseEnumConverter<InputModes> {
 

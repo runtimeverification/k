@@ -64,6 +64,8 @@ public class KRead {
                 return new KoreParser(mod.sortAttributesFor()).parseString(stringToParse);
             case PROGRAM:
                 return def.parseSingleTerm(mod, sort, kem, files, stringToParse, source);
+            case RULE:
+                throw KEMException.internalError("Should have been handled directly by the kast front end: " + inputMode);
             default:
                 throw KEMException.criticalError("Unsupported input mode: " + inputMode);
         }
