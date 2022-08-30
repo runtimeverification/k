@@ -372,7 +372,7 @@ to the **K** tool, as indicated by the `$PGM` variable, followed by the
   configuration <T color="red">
                   <threads color="orange">
                     <thread multiplicity="*" type="Map" color="yellow">
-                      <id color="pink"> 0 </id>
+                      <id color="pink"> -1 </id>
                       <k color="green"> $PGM:Stmt ~> execute </k>
                     //<br/> // TODO(KORE): support latex annotations #1799
                       <control color="cyan">
