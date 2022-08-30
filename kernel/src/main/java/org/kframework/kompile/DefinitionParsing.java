@@ -329,6 +329,7 @@ public class DefinitionParsing {
         for (K kCellDecl: kcells) {
             this.errors.add(KEMException.compilerError("Multiple K cell declarations detected. Only one <k> cell declaration is allowed.", kCellDecl));
         }
+        throwExceptionIfThereAreErrors();
     }
 
     private Definition resolveConfigBubbles(Definition def) {
