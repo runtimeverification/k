@@ -3,21 +3,21 @@
 
 ## Installation
 
-Prerequsites: `python 3.8.*`, `pip >= 20.0.2`.
+Prerequsites: `python 3.8.*`, `pip >= 20.0.2`, `poetry >= 1.1.14`.
 
 ```bash
-pip install git+https://github.com/runtimeverification/k.git[@<ref>]#subdirectory=pyk
+make build
+pip install dist/*.whl
 ```
+
 
 ## For Developers
 
-Prerequsite: `poetry >= 1.1.4`.
-
 Use `make` to run common tasks (see the [Makefile](Makefile) for a complete list of available targets).
 
-* `make check`: check code style
-* `make format`: format code
-* `make test-unit`: run unit tests
-* `make test-integration`: run integration tests
+* `make build`: Build wheel
+* `make check`: Check code style
+* `make format`: Format code
+* `make test-unit`: Run unit tests
 
 For interactive use, spawn a shell with `poetry shell` (after `poetry install`), then run an interpreter.
