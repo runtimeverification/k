@@ -1,37 +1,30 @@
 {
   description = "K Framework";
   inputs = {
+    nixpkgs.url = "nixpkgs/nixos-22.05";
     haskell-backend.url = "github:runtimeverification/haskell-backend";
     llvm-backend.url = "github:runtimeverification/llvm-backend";
-    nixpkgs.follows = "haskell-backend/nixpkgs";
     llvm-backend.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
     mavenix.url = "github:goodlyrottenapple/mavenix";
+    # needed by nix/flake-compat-k-unwrapped.nix
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
     };
-    pynixify.url = "github:goodlyrottenapple/pynixify";
+    poetry2nix.url = "github:nix-community/poetry2nix";
   };
 
   outputs = { self, nixpkgs, flake-utils, haskell-backend, llvm-backend, mavenix
-    , flake-compat, pynixify }:
+    , flake-compat, poetry2nix }:
     let
       allOverlays = [
+        poetry2nix.overlay
         mavenix.overlay
         llvm-backend.overlays.default
-        haskell-backend.overlay
+        haskell-backend.overlay # used only to override the z3 version to the same one as used by the haskell backend.
         (final: prev:
           let
-            kore-version =
-              prev.haskell-backend-stackProject.hsPkgs.kore.components.exes.kore-exec.version;
-            kore = prev.symlinkJoin {
-              name = "kore-${kore-version}-${
-                  haskell-backend.sourceInfo.shortRev or "local"
-                }";
-              paths = prev.lib.attrValues
-                prev.haskell-backend-stackProject.hsPkgs.kore.components.exes;
-            };
             k-version =
               prev.lib.removeSuffix "\n" (builtins.readFile ./package/version);
             src = prev.stdenv.mkDerivation {
@@ -56,13 +49,13 @@
                 cp -rv ${llvm-backend}/matching/* $out/llvm-backend/src/main/native/llvm-backend/matching
               '';
             };
-            pythonOverrides = import ./pyk/nix/overlay.nix;
+            # pythonOverrides = import ./pyk/nix/overlay.nix;
           in {
-            inherit pythonOverrides;
-            k = prev.callPackage ./nix/k.nix {
+            # inherit pythonOverrides;
+            k-framework = haskell-backend-bins: prev.callPackage ./nix/k.nix {
               inherit (prev) llvm-backend;
               mavenix = { inherit (prev) buildMaven; };
-              haskell-backend = kore;
+              haskell-backend = haskell-backend-bins;
               inherit (haskell-backend) prelude-kore;
               inherit src;
               debugger = if prev.stdenv.isDarwin then
@@ -73,18 +66,13 @@
                 prev.gdb;
               version = "${k-version}-${self.rev or "dirty"}";
             };
-          } // prev.lib.genAttrs [
-            "python2"
-            "python27"
-            "python3"
-            "python35"
-            "python36"
-            "python37"
-            "python38"
-            "python39"
-            "python310"
-          ] (python:
-            prev.${python}.override { packageOverrides = pythonOverrides; }))
+
+            pyk = prev.poetry2nix.mkPoetryApplication {
+              python = prev.python39;
+              projectDir = ./pyk;
+            };
+          }
+        )
       ];
     in flake-utils.lib.eachSystem [
       "x86_64-linux"
@@ -98,11 +86,27 @@
           overlays = [ (final: prev: { llvm-backend-release = false; }) ]
             ++ allOverlays;
         };
-      in {
 
-        packages = {
-          inherit (pkgs) k;
-          pyk = pkgs.python38Packages.pyk;
+        haskell-backend-bins-version =
+          haskell-backend.packages.${system}."kore:exe:kore-exec".version;
+        haskell-backend-bins = pkgs.symlinkJoin {
+          name = "kore-${haskell-backend-bins-version}-${
+              haskell-backend.sourceInfo.shortRev or "local"
+            }";
+          paths = let p = haskell-backend.packages.${system}; in [ 
+            p."kore:exe:kore-exec" 
+            p."kore:exe:kore-rpc" 
+            p."kore:exe:kore-repl" 
+            p."kore:exe:kore-prof"
+            p."kore:exe:kore-match-disjunction" 
+          ];
+        };
+
+      in rec {
+
+        packages = rec {
+          inherit (pkgs) pyk;
+          k = pkgs.k-framework haskell-backend-bins;
 
           # This is a copy of the `nix/update-maven.sh` script, which should be
           # eventually removed. Having this inside the flake provides a uniform
@@ -118,14 +122,6 @@
               || echo "^~~~ expected error"
 
             ${pkgs.mavenix-cli}/bin/mvnix-update -l ./nix/mavenix.lock -E 'import ./nix/flake-compat-k-unwrapped.nix'
-          '';
-
-          update-python = pkgs.writeShellScriptBin "update-python" ''
-            #!/bin/sh
-            cd pyk
-            ${
-              pynixify.packages.${system}.pynixify
-            }/bin/pynixify -l pyk --overlay-only --output ./nix
           '';
 
           check-versions = let
@@ -201,10 +197,10 @@
             };
 
         };
-        defaultPackage = pkgs.k;
+        defaultPackage = packages.k;
       }) // {
         overlays.llvm-backend = llvm-backend.overlays.default;
-        overlays.haskell-backend = haskell-backend.overlay;
+        overlays.z3 = haskell-backend.overlay;
 
         overlay = nixpkgs.lib.composeManyExtensions allOverlays;
       };
