@@ -29,7 +29,7 @@ build: deps
 install: build
 	pip3 install ./dist/*.whl --root=$(DESTDIR) --prefix=$(PREFIX)
 
-poetry-install:
+poetry-install: deps
 	poetry install
 
 POETRY_RUN := poetry run
