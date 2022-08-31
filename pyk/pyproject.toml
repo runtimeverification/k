@@ -10,8 +10,8 @@ authors = [
     "Runtime Verification, Inc. <contact@runtimeverification.com>",
 ]
 packages = [
-  { include = "kllvm" },
-  { include = "pyk", from = "src" },
+  { include = "pyk",   from = "src" },
+  { include = "kllvm", from = "src" },
 ]
 
 [tool.poetry.dependencies]
