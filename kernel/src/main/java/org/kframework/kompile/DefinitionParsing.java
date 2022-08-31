@@ -29,7 +29,9 @@ import org.kframework.definition.SyntaxSort;
 import org.kframework.kore.AddAttRec;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KToken;
 import org.kframework.kore.Sort;
+import org.kframework.kore.VisitK;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ParserUtils;
 import org.kframework.parser.TreeNodesToKORE;
@@ -304,6 +306,32 @@ public class DefinitionParsing {
         return errors;
     }
 
+    private void checkDuplicateKCells(Definition defWithParsedConfigs) {
+        // check for duplicate <k> cell declarations
+        List<K> kcells = new ArrayList<>();
+        stream(defWithParsedConfigs.mainModule().sentences())
+                .filter(s -> s instanceof Configuration)
+                .forEach(s -> new VisitK() {
+                    @Override
+                    public void apply(KApply k) {
+                        if (k.klabel().equals(KLabel("#configCell"))) {
+                            KToken kt = (KToken) k.klist().items().get(0);
+                            assert kt.sort().equals(Sorts.CellName());
+                            if (kt.s().equals("k"))
+                                kcells.add(k);
+                        }
+                        super.apply(k);
+                    }
+                }.apply(((Configuration) s).body()));
+        if (kcells.size() <= 1) {
+            return;
+        }
+        for (K kCellDecl: kcells) {
+            this.errors.add(KEMException.compilerError("Multiple K cell declarations detected. Only one <k> cell declaration is allowed.", kCellDecl));
+        }
+        throwExceptionIfThereAreErrors();
+    }
+
     private Definition resolveConfigBubbles(Definition def) {
         Definition defWithCaches = resolveCachedBubbles(def, false);
         RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
@@ -338,6 +366,8 @@ public class DefinitionParsing {
         Definition defWithParsedConfigs = DefinitionTransformer.from(m ->
                 Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()),
                 "replace configs").apply(defWithCaches);
+
+        checkDuplicateKCells(defWithParsedConfigs);
 
         // replace config bubbles with the generated syntax and rules
         return DefinitionTransformer.from(m -> {
