@@ -1,10 +1,11 @@
 K_ROOT := $(abspath ..)
 K_BIN  := $(K_ROOT)/k-distribution/target/release/k/bin
+K_LIB  := $(K_ROOT)/k-distribution/target/release/k/lib
 
 export PATH := $(K_BIN):$(PATH)
 
 
-.PHONY: default all clean build install          \
+.PHONY: default all deps clean build install     \
         poetry-install                           \
         test test-unit test-integration test-pyk \
         format isort autoflake black             \
@@ -14,12 +15,15 @@ default: check test-unit
 
 all: check test
 
+deps:
+	cp $(K_LIB)/kllvm/kllvm$(shell python3-config --extension-suffix) kllvm
+
 clean:
 	rm -rf definitions dist .mypy_cache
 	find -type d -name __pycache__ -prune -exec rm -rf {} \;
 	$(MAKE) -C pyk-tests clean
 
-build:
+build: deps
 	poetry build
 
 install: build
