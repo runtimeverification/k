@@ -29,3 +29,5 @@ result*
 .envrc
 flake.lock
 .DS_Store
+*.so
+*.dylib
