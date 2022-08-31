@@ -1,2 +1,2 @@
 from . import kllvm
-from .kllvm import *
+from .kllvm import ast
