@@ -3,6 +3,7 @@ package org.kframework.parser.inner;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
+import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
@@ -216,6 +217,8 @@ public class ParseInModule implements Serializable, AutoCloseable {
      */
     private Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>>
             parseStringTerm(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
+        if (!parsingModule.definedSorts().contains(startSymbol.head()))
+            throw KEMException.innerParserError("Could not find start symbol: " + startSymbol, source, Location.apply(startLine, startColumn, startLine, startColumn + 1));
         getParser(scanner, startSymbol);
 
         long start, endParse = 0, startTypeInf = 0, endTypeInf = 0;
