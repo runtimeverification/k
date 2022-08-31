@@ -16,7 +16,7 @@ default: check test-unit
 all: check test
 
 deps:
-	ln -sf $(K_LIB)/kllvm/kllvm$(shell python3-config --extension-suffix) src/kllvm
+	cp $(K_LIB)/kllvm/kllvm$(shell python3-config --extension-suffix) src/kllvm
 
 clean:
 	rm -rf definitions dist .mypy_cache
