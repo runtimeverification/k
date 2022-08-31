@@ -191,6 +191,15 @@ public class CompiledDefinition implements Serializable {
         }
     }
 
+    public Option<Module> ruleParsingModuleFor(String moduleName) {
+        RuleGrammarGenerator gen = new RuleGrammarGenerator(kompiledDefinition);
+
+        Option<Module> moduleOption = kompiledDefinition.getModule(moduleName);
+        if (!moduleOption.isDefined())
+            return Option.empty();
+        return Option.apply(gen.getRuleGrammar(moduleOption.get()));
+    }
+
     public Module languageParsingModule() { return languageParsingModule; }
 
     /**
