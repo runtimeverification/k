@@ -38,5 +38,5 @@ line-length = 120
 skip-string-normalization = true
 
 [[tool.mypy.overrides]]
-module = "graphviz"
+module = ["graphviz", "kllvm"]
 ignore_missing_imports = true
