@@ -3,6 +3,7 @@ package org.kframework.parser.inner.disambiguation;
 
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Production;
+import org.kframework.definition.Module;
 import org.kframework.definition.NonTerminal;
 import org.kframework.kore.Sort;
 import org.kframework.parser.Ambiguity;
@@ -10,8 +11,11 @@ import org.kframework.parser.Constant;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
+import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.SetsTransformerWithErrors;
+import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.compile.AddSortInjections;
 
 import org.pcollections.ConsPStack;
 
@@ -192,8 +196,12 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
 
     private Sort expectedSort;
     private boolean hasCastAlready = false, hasCheckAlready = false;
+    private TreeNodesToKORE converter;
+    private AddSortInjections inj;
     public TypeCheckVisitor(Sort topSort) {
       this.expectedSort = topSort;
+      this.converter = new TreeNodesToKORE(Outer::parseSort, true);
+      this.inj = new AddSortInjections(inferencer.module());
     }
 
     private Either<Set<KEMException>, Term> typeError(ProductionReference pr, Sort expectedSort, Sort actualSort) {
@@ -223,8 +231,31 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
         // well typed, so add a cast and return
         return wrapTermWithCast((Constant)pr, inferred);
       }
+
       // compute the instantiated production with its sort parameters
-      Production substituted = pr.production().substitute(inferencer.getArgs(pr));
+      Production substituted = pr.production();
+      if (pr.production().params().nonEmpty()) {
+          List<Term> args = new ArrayList<>();
+          if (pr instanceof TermCons) {
+              TermCons tc = (TermCons)pr;
+              for (int i = 0; i < tc.items().size(); i++) {
+                  if (tc.get(i) instanceof Ambiguity) {
+                      // If one of the children is an ambiguity,
+                      // push it up and reapply over the new ast
+                      Ambiguity old = (Ambiguity)tc.get(i);
+                      Set<Term> newTerms = new HashSet<>();
+                      for (Term child : old.items()) {
+                          Term newTerm = tc.with(i, child);
+                          newTerms.add(newTerm);
+                      }
+                      return super.apply(Ambiguity.apply(newTerms));
+                  }
+                  args.add(tc.get(i));
+              }
+          }
+          substituted = inj.substituteProd(substituted, expectedSort, (i, fresh2) -> inj.sort(converter.apply(args.get(i)), fresh2.nonterminals().apply(i).sort()), pr);
+      }
+
       Sort actualSort = substituted.sort();
       boolean isExactSort = hasCastAlready && !hasCheckAlready;
       // check type: inner casts and syntactic casts indicate type equality, everything else is <=
