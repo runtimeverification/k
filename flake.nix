@@ -3,7 +3,8 @@
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-22.05";
     haskell-backend.url = "github:runtimeverification/haskell-backend";
-    llvm-backend.url = "github:runtimeverification/llvm-backend";
+    # llvm-backend.url = "github:runtimeverification/llvm-backend/pybind-flake";
+    llvm-backend.url = "path:/home/bruce/code/llvm-backend";
     llvm-backend.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
     mavenix.url = "github:goodlyrottenapple/mavenix";
@@ -69,6 +70,8 @@
             pyk = prev.poetry2nix.mkPoetryApplication {
               python = prev.python39;
               projectDir = ./pyk;
+              overrides = prev.poetry2nix.overrides.withDefaults
+                (finalPython: prevPython: { kllvm = prev.kllvm; });
             };
           })
       ];

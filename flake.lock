@@ -305,21 +305,19 @@
           "haskell-backend",
           "nixpkgs"
         ],
+        "pybind11-src": "pybind11-src",
         "rapidjson-src": "rapidjson-src",
         "utils": "utils_2"
       },
       "locked": {
-        "lastModified": 1657022727,
-        "narHash": "sha256-C7UiBy0WFJjF3D+7uYT7VcUoT/F1z3IpzqTFSyxJ+X4=",
-        "owner": "runtimeverification",
-        "repo": "llvm-backend",
-        "rev": "60478d66beba786090c444bb4300706cbc83a8a3",
-        "type": "github"
+        "lastModified": 1662116880,
+        "narHash": "sha256-vJI6ZiKHA+RhLf03RxKf6ybqjhnUcZHGAMOExwTRR5M=",
+        "path": "/home/bruce/code/llvm-backend",
+        "type": "path"
       },
       "original": {
-        "owner": "runtimeverification",
-        "repo": "llvm-backend",
-        "type": "github"
+        "path": "/home/bruce/code/llvm-backend",
+        "type": "path"
       }
     },
     "lowdown-src": {
@@ -598,6 +596,23 @@
       "original": {
         "owner": "nix-community",
         "repo": "poetry2nix",
+        "type": "github"
+      }
+    },
+    "pybind11-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1657936673,
+        "narHash": "sha256-/X8DZPFsNrKGbhjZ1GFOj17/NU6p4R+saCW3pLKVNeA=",
+        "owner": "pybind",
+        "repo": "pybind11",
+        "rev": "0ba639d6177659c5dc2955ac06ad7b5b0d22e05c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pybind",
+        "repo": "pybind11",
+        "rev": "0ba639d6177659c5dc2955ac06ad7b5b0d22e05c",
         "type": "github"
       }
     },
