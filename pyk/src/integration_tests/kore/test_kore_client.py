@@ -41,7 +41,7 @@ class SimpleKoreClientTest(KoreClientTest):
     TEST_DATA: Final[Tuple[Tuple[int, Mapping[str, Any], ExecuteResult], ...]] = (
         (0, {}, BranchingResult(state=state(2), depth=2, next_states=(state(4), state(3)))),
         (0, {'max_depth': 2}, DepthBoundResult(state=state(2), depth=2)),
-        (4, {}, StuckResult(state=state(6), depth=3)),
+        (4, {}, StuckResult(state=state(6), depth=2)),
     )
 
     def test_execute(self):
