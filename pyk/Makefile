@@ -1,6 +1,11 @@
 K_ROOT := $(abspath ..)
 K_BIN  := $(K_ROOT)/k-distribution/target/release/k/bin
+
+ifeq ($(DESTDIR),)
 K_LIB  := $(K_ROOT)/k-distribution/target/release/k/lib
+else
+K_LIB  := $(DESTDIR)$(PREFIX)/lib
+endif
 
 export PATH := $(K_BIN):$(PATH)
 
