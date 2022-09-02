@@ -5,7 +5,6 @@ from typing import Final, Iterable, Iterator, List, Optional, Tuple, final
 
 
 class KoreStringLexer(Iterator[Tuple[str, 'KoreStringLexer.TokenType']]):
-
     class TokenType(IntEnum):
         ASCII = 1
         ESC = 2
@@ -116,7 +115,6 @@ class KoreStringLexer(Iterator[Tuple[str, 'KoreStringLexer.TokenType']]):
 @final
 @dataclass(frozen=True)
 class KoreToken:
-
     class Type(Enum):
         EOF = 0
         COMMA = auto()
@@ -274,7 +272,7 @@ class KoreLexer(Iterator[KoreToken]):
         elif char == '*':
             self._block_comment_rest()
         else:
-            assert False
+            raise AssertionError()
 
     def _line_comment_rest(self) -> None:
         while self._la is not None and self._la != '\n':

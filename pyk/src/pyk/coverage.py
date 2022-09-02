@@ -1,7 +1,7 @@
-from .kast import KApply, KRewrite, KRule, KSequence, readKastTerm
+from .kast import KApply, KRewrite, KRule, KSequence, read_kast_definition
 
 
-def getRuleById(definition, rule_id):
+def get_rule_by_id(definition, rule_id):
     """Get a rule from the definition by coverage rule id.
 
     Input:
@@ -20,19 +20,19 @@ def getRuleById(definition, rule_id):
     raise ValueError(f'Could not find rule with ID: {rule_id}')
 
 
-def stripCoverageLogger(rule: KRule):
-    ruleBody = rule.body
-    if type(ruleBody) is KRewrite:
-        ruleLHS = ruleBody.lhs
-        ruleRHS = ruleBody.rhs
-        if type(ruleRHS) is KApply and ruleRHS.label.name.startswith('project:'):
-            ruleRHSseq = ruleRHS.args[0]
-            if type(ruleRHSseq) is KSequence and ruleRHSseq.arity == 2:
-                ruleBody = KRewrite(ruleLHS, ruleRHSseq.items[1])
-    return rule.let(body=ruleBody)
+def strip_coverage_logger(rule: KRule):
+    body = rule.body
+    if type(body) is KRewrite:
+        lhs = body.lhs
+        rhs = body.rhs
+        if type(rhs) is KApply and rhs.label.name.startswith('project:'):
+            rhs_seq = rhs.args[0]
+            if type(rhs_seq) is KSequence and rhs_seq.arity == 2:
+                body = KRewrite(lhs, rhs_seq.items[1])
+    return rule.let(body=body)
 
 
-def translateCoverage(src_all_rules, dst_all_rules, dst_definition, src_rules_list):
+def translate_coverage(src_all_rules, dst_all_rules, dst_definition, src_rules_list):
     """Translate the coverage data from one kompiled definition to another.
 
     Input:
@@ -66,9 +66,10 @@ def translateCoverage(src_all_rules, dst_all_rules, dst_definition, src_rules_li
     for module in dst_definition.modules:
         for sentence in module.sentences:
             if type(sentence) is KRule:
-                ruleBody = sentence.body
-                if (type(ruleBody) is KApply and ruleBody.label.name == '<generatedTop>') \
-                        or (type(ruleBody) is KRewrite and type(ruleBody.lhs) is KApply and ruleBody.lhs.label.name == '<generatedTop>'):
+                body = sentence.body
+                if (type(body) is KApply and body.label.name == '<generatedTop>') or (
+                    type(body) is KRewrite and type(body.lhs) is KApply and body.lhs.label.name == '<generatedTop>'
+                ):
                     if 'UNIQUE_ID' in sentence.att:
                         dst_non_function_rules.append(sentence.att['UNIQUE_ID'])
 
@@ -89,7 +90,7 @@ def translateCoverage(src_all_rules, dst_all_rules, dst_definition, src_rules_li
     return dst_rule_list
 
 
-def translateCoverageFromPaths(src_kompiled_dir, dst_kompiled_dir, src_rules_file):
+def translate_coverage_from_paths(src_kompiled_dir, dst_kompiled_dir, src_rules_file):
     """Translate coverage information given paths to needed files.
 
     Input:
@@ -108,10 +109,10 @@ def translateCoverageFromPaths(src_kompiled_dir, dst_kompiled_dir, src_rules_fil
     with open(dst_kompiled_dir + '/allRules.txt', 'r') as dst_all_rules_file:
         dst_all_rules = [line.strip() for line in dst_all_rules_file]
 
-    dst_definition = readKastTerm(dst_kompiled_dir + '/compiled.json')
+    dst_definition = read_kast_definition(dst_kompiled_dir + '/compiled.json')
 
     src_rules_list = []
     with open(src_rules_file, 'r') as src_rules:
         src_rules_list = [line.strip() for line in src_rules]
 
-    return translateCoverage(src_all_rules, dst_all_rules, dst_definition, src_rules_list)
+    return translate_coverage(src_all_rules, dst_all_rules, dst_definition, src_rules_list)

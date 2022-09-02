@@ -48,7 +48,7 @@ public class ResolveComm {
                         return Stream.of(
                                 Rule.apply(newBody, r.requires(), r.ensures(), r.att().remove(Att.COMM())),
                                 Rule.apply(r.body(), r.requires(), r.ensures(), r.att().remove(Att.COMM())));
-                    return Stream.empty();
+                    return Stream.of(Rule.apply(r.body(), r.requires(), r.ensures(), r.att().remove(Att.COMM())));
                 })
                 .collect(Collectors.toSet());
         return Module(m.name(), m.imports(), m.localSentences().$minus$minus(immutable(commSimpRules)).$bar(immutable(commRulesToAdd)).seq(), m.att());
@@ -59,8 +59,7 @@ public class ResolveComm {
             @Override
             public K apply(KApply k) {
                 if (k.klabel().name().equals("#withConfig")) {
-                    super.apply(k);
-                    return k;
+                    return super.apply(k);
                 }
                 if ((isRHS() && !isLHS()) || k.klabel() instanceof KVariable || !m.attributesFor().contains(k.klabel())) {
                     return k;

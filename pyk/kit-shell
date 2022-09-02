@@ -1,0 +1,122 @@
+kit_debug=${kit_debug:-false}
+kit_verbose=${kit_verbose:-false}
+kit_profile=${kit_profile:-false}
+
+kit-set() {
+    local variable
+    variable="$1" ; shift
+    case "${variable}" in
+        profile) kit_profile=true ;;
+        verbose) kit_verbose=true ;;
+        debug) kit_debug=true ;;
+        log-format) kit_log_format="$1"; shift ;;
+        log-file) kit_log_file="$1"; shift ;;
+    esac
+}
+
+kit-unset() {
+    local variable
+    variable="$1" ; shift
+    case "${variable}" in
+        profile) kit_profile=false ;;
+        verbose) kit_verbose=false ;;
+        debug) kit_debug=false ;;
+        log-format) unset kit_log_format ;;
+        log-format) unset kit_log_file ;;
+    esac
+}
+
+kit-load() {
+    summary_dir="$1"; shift
+    cfg_id=()
+    kit_exe=kit.py
+}
+
+kit-params() {
+    ( set +u
+    echo "kit_verbose=${kit_verbose}"
+    echo "kit_debug=${kit_debug}"
+    echo "kit_profile=${kit_profile}"
+    echo "kit_log_format=${kit_log_format}"
+    echo "kit_log_format=${kit_log_file}"
+    echo "summary_strategy=${summary_strategy}"
+    echo "summary_name=${summary_name}"
+    echo "summary_spec=${summary_spec}"
+    echo "summary_verif_file=${summary_verif_file}"
+    echo "summary_dir=${summary_dir}"
+    echo "cfg_id=(${cfg_id[@]})"
+    )
+}
+
+select-cfg() {
+    if [[ $# != 1 ]]; then 
+        echo >&2 "Usage: select-cfg <cfg-id>"
+        return 1
+    fi
+    cfg_id=(--cfg-id "$1")
+}
+
+kit() {
+    (
+        local command kit_base kit_command
+        command="$1" ; shift
+        kit_base=(${kit_exe} ${summary_dir})
+
+        if ${kit_verbose}; then
+            kit_base+=(--verbose)
+        fi
+        if ${kit_debug}; then
+            kit_base+=(--verbose --verbose)
+        fi
+        if [[ -n ${kit_log_format-} ]]; then
+            kit_base+=(--log-format "${kit_log_format}")
+        fi
+        if [[ -n ${kit_log_file-} ]]; then
+            kit_base+=(--log-file "${kit_log_file}")
+        fi
+
+        kit_command=("${command}")
+        if [[ "${command}" != 'init' ]]; then
+            kit_command+=("${cfg_id[@]}")
+        fi
+        kit_command+=("$@")
+
+        if ${kit_debug}; then
+            echo "+ ${kit_base[*]} ${kit_command[*]}"
+        elif ${kit_verbose}; then
+            echo "+ ${kit_command[*]}"
+        fi
+
+        if ${kit_profile}; then
+            TIMEFORMAT="%lR %lU %lS ${kit_command[*]}"
+            TIMEFMT="%*E %*U %*S ${kit_command[*]}"
+            time "${kit_base[@]}" "${kit_command[@]}"
+        else
+            "${kit_base[@]}" "${kit_command[@]}"
+        fi
+    )
+}
+
+kit-clean() {
+    rm -rf "${summary_dir}"
+}
+
+kit-init() {
+    kit init "$@"
+}
+
+list-cfgs()    { kit list-cfgs  "$@" ; }
+show-cfg()     { kit show-cfg   "$@" ; }
+show-edge()    { kit show-edge  "$@" ; }
+show-node()    { kit show-node "$@" ; }
+
+add-alias()    { kit add-alias    "$@" ; }
+remove-alias() { kit remove-alias "$@" ; }
+
+remove-nodes() { kit remove-nodes "$@" ; }
+
+build-edges()  { kit build-edges  "$@" ; }
+verify-edges() { kit verify-edges "$@" ; }
+remove-edges() { kit remove-edges "$@" ; }
+
+split-node()   { kit split-node   "$@" ; }

@@ -1,22 +1,24 @@
 import json
 import logging
 import socket
-from abc import ABC
-from dataclasses import InitVar, dataclass
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import Enum
+from time import sleep
 from typing import (
     Any,
     ContextManager,
     Dict,
     Final,
     Iterable,
-    Iterator,
-    Literal,
     Mapping,
     Optional,
     Sequence,
     TextIO,
     Tuple,
+    Type,
+    TypeVar,
     final,
 )
 
@@ -24,6 +26,8 @@ from ..utils import filter_none
 from .syntax import Pattern
 
 _LOGGER: Final = logging.getLogger(__name__)
+
+ER = TypeVar('ER', bound='ExecuteResult')
 
 
 @final
@@ -49,16 +53,29 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
     _file: TextIO
     _req_id: int
 
-    def __init__(self, host: str, port: int):
+    def __init__(self, host: str, port: int, *, timeout: Optional[int] = None):
+        if timeout is not None and timeout < 0:
+            raise ValueError(f'Expected nonnegative timeout value, got: {timeout}')
+
         self._host = host
         self._port = port
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._file = self._sock.makefile('r')
         self._req_id = 1
 
-        try:
-            self._sock.connect((host, port))
-        except BaseException:
+        connected = False
+        timeout_datetime = datetime.now() + timedelta(milliseconds=timeout) if timeout is not None else None
+
+        _LOGGER.info(f'Connecting to host: {host}:{port}')
+        while not connected and (timeout_datetime is None or datetime.now() < timeout_datetime):
+            try:
+                self._sock.connect((host, port))
+                connected = True
+            except BaseException:  # TODO refine
+                sleep(0.1)
+
+        if not connected:
+            self.close()
             raise RuntimeError(f"Couldn't connect to host: {host}:{port}")
 
         _LOGGER.info(f'Connected to host: {host}:{port}')
@@ -71,8 +88,8 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         self._sock.__exit__(*args)
 
     def close(self) -> None:
-        self._file.close
-        self._sock.close
+        self._file.close()
+        self._sock.close()
 
     def request(self, method: str, **params: Any) -> Dict[str, Any]:
         payload = {
@@ -122,112 +139,159 @@ class KoreClientError(Exception):
 
 
 class StopReason(str, Enum):
-    FINAL_STATE = 'final-state'
     STUCK = 'stuck'
     DEPTH_BOUND = 'depth-bound'
+    BRANCHING = 'branching'
     CUT_POINT_RULE = 'cut-point-rule'
     TERMINAL_RULE = 'terminal-rule'
-    BRANCHING = 'branching'
-
-
-class State(ABC):
-    pattern: Pattern
 
 
 @final
 @dataclass(frozen=True)
-class DirectState(State):
-    pattern: Pattern
+class State:
+    term: Pattern
+    substitution: Optional[Pattern]
+    predicate: Optional[Pattern]
 
-
-@final
-@dataclass(frozen=True)
-class BranchingState(State):
-    pattern: Pattern
-    substitution: Pattern
-    predicate: Pattern
+    @staticmethod
+    def from_dict(dct: Mapping[str, Any]) -> 'State':
+        return State(
+            term=Pattern.from_dict(dct['term']['term']),
+            substitution=Pattern.from_dict(dct['substitution']['term']) if 'substitution' in dct else None,
+            predicate=Pattern.from_dict(dct['predicate']['term']) if 'predicate' in dct else None,
+        )
 
 
 class ExecuteResult(ABC):
-    states: Tuple[State, ...]
+    _TYPES: Mapping[StopReason, str] = {
+        StopReason.STUCK: 'StuckResult',
+        StopReason.DEPTH_BOUND: 'DepthBoundResult',
+        StopReason.BRANCHING: 'BranchingResult',
+        StopReason.CUT_POINT_RULE: 'CutPointResult',
+        StopReason.TERMINAL_RULE: 'TerminalResult',
+    }
+
+    state: State
     depth: int
-    reason: StopReason
+    next_states: Optional[Tuple[State, ...]]
+    rule: Optional[str]
 
-    @staticmethod
-    def from_dict(dct: Mapping[str, Any]) -> 'ExecuteResult':
-        if dct['reason'] is StopReason.BRANCHING:
-            return BranchingResult.from_dict(dct)
+    @classmethod
+    @property
+    @abstractmethod
+    def reason(cls) -> StopReason:
+        ...
 
-        return DirectResult.from_dict(dct)
+    @classmethod
+    def from_dict(cls: Type[ER], dct: Mapping[str, Any]) -> ER:
+        return globals()[ExecuteResult._TYPES[StopReason(dct['reason'])]].from_dict(dct)  # type: ignore
+
+    @classmethod
+    def _check_reason(cls: Type[ER], dct: Mapping[str, Any]) -> None:
+        reason = StopReason(dct['reason'])
+        if reason is not cls.reason:
+            raise ValueError(f"Expected {cls.reason} as 'reason', found: {reason}")
 
 
 @final
 @dataclass(frozen=True)
-class DirectResult(ExecuteResult):
-    state: DirectState
+class StuckResult(ExecuteResult):
+    # These fields should be Final, but it makes mypy crash
+    # https://github.com/python/mypy/issues/10090
+    reason = StopReason.STUCK
+    next_states = None
+    rule = None
+
+    state: State
     depth: int
-    reason: StopReason
 
-    states: InitVar[Tuple[DirectState]]
-
-    def __init__(self, state: DirectState, depth: int, reason: StopReason):
-        if reason is StopReason.BRANCHING:
-            raise ValueError(f'Illegal value for reason: {reason}')
-
-        object.__setattr__(self, 'state', state)
-        object.__setattr__(self, 'depth', depth)
-        object.__setattr__(self, 'reason', reason)
-        object.__setattr__(self, 'states', (state,))
-
-    @staticmethod
-    def from_dict(dct: Mapping[str, Any]) -> 'DirectResult':
-        reason = StopReason(dct['reason'])
-
-        state_list = dct['states']
-        if len(state_list) != 1:
-            raise ValueError('Expected states to be a single-element sequence')
-        depth = state_list[0]['depth']
-        state = DirectState(Pattern.from_dict(state_list[0]['state']['term']))
-
-        return DirectResult(state=state, depth=depth, reason=reason)
+    @classmethod
+    def from_dict(cls: Type['StuckResult'], dct: Mapping[str, Any]) -> 'StuckResult':
+        cls._check_reason(dct)
+        return StuckResult(
+            state=State.from_dict(dct['state']),
+            depth=dct['depth'],
+        )
 
 
 @final
 @dataclass(frozen=True)
-class BranchingResult(ExecuteResult, Iterable[BranchingState]):
-    states: Tuple[BranchingState, ...]
+class DepthBoundResult(ExecuteResult):
+    reason = StopReason.DEPTH_BOUND
+    next_states = None
+    rule = None
+
+    state: State
     depth: int
 
-    reason: InitVar[Literal[StopReason.BRANCHING]]
+    @classmethod
+    def from_dict(cls: Type['DepthBoundResult'], dct: Mapping[str, Any]) -> 'DepthBoundResult':
+        cls._check_reason(dct)
+        return DepthBoundResult(
+            state=State.from_dict(dct['state']),
+            depth=dct['depth'],
+        )
 
-    def __init__(self, states: Iterable[BranchingState], depth: int):
-        object.__setattr__(self, 'states', tuple(states))
-        object.__setattr__(self, 'depth', depth)
-        object.__setattr__(self, 'reason', StopReason.BRANCHING)
 
-    def __iter__(self) -> Iterator[BranchingState]:
-        return iter(self.states)
+@final
+@dataclass(frozen=True)
+class BranchingResult(ExecuteResult):
+    reason = StopReason.BRANCHING
+    rule = None
 
-    @staticmethod
-    def from_dict(dct: Mapping[str, Any]) -> 'BranchingResult':
-        reason = StopReason(dct['reason'])
-        if reason is not StopReason.BRANCHING:
-            raise ValueError(f'Expected {StopReason.BRANCHING} as reason value, found: {reason}')
+    state: State
+    depth: int
+    next_states: Tuple[State, ...]
 
-        state_list = dct['states']
-        if not state_list:
-            raise ValueError('Expected states to be nonempty')
+    @classmethod
+    def from_dict(cls: Type['BranchingResult'], dct: Mapping[str, Any]) -> 'BranchingResult':
+        cls._check_reason(dct)
+        return BranchingResult(
+            state=State.from_dict(dct['state']),
+            depth=dct['depth'],
+            next_states=tuple(State.from_dict(next_state) for next_state in dct['next-states']),
+        )
 
-        assert all(state['depth'] == state_list[0]['depth'] for state in state_list)
-        depth = state_list[0]['depth']
 
-        states = (BranchingState(
-            pattern=Pattern.from_dict(state['term']),
-            substitution=Pattern.from_dict(state['condition']['substitution']),
-            predicate=Pattern.from_dict(state['condition']['predicate']),
-        ) for state in state_list)
+@final
+@dataclass(frozen=True)
+class CutPointResult(ExecuteResult):
+    reason = StopReason.CUT_POINT_RULE
 
-        return BranchingResult(states=states, depth=depth)
+    state: State
+    depth: int
+    next_states: Tuple[State, ...]
+    rule: str
+
+    @classmethod
+    def from_dict(cls: Type['CutPointResult'], dct: Mapping[str, Any]) -> 'CutPointResult':
+        cls._check_reason(dct)
+        return CutPointResult(
+            state=State.from_dict(dct['state']),
+            depth=dct['depth'],
+            next_states=tuple(State.from_dict(next_state) for next_state in dct['next-states']),
+            rule=dct['rule'],
+        )
+
+
+@final
+@dataclass(frozen=True)
+class TerminalResult(ExecuteResult):
+    reason = StopReason.TERMINAL_RULE
+    next_states = None
+
+    state: State
+    depth: int
+    rule: str
+
+    @classmethod
+    def from_dict(cls: Type['TerminalResult'], dct: Mapping[str, Any]) -> 'TerminalResult':
+        cls._check_reason(dct)
+        return TerminalResult(
+            state=State.from_dict(dct['state']),
+            depth=dct['depth'],
+            rule=dct['rule'],
+        )
 
 
 class KoreClient(ContextManager['KoreClient']):
@@ -235,8 +299,8 @@ class KoreClient(ContextManager['KoreClient']):
 
     _client: JsonRpcClient
 
-    def __init__(self, host: str, port: int):
-        self._client = JsonRpcClient(host, port)
+    def __init__(self, host: str, port: int, *, timeout: Optional[int] = None):
+        self._client = JsonRpcClient(host, port, timeout=timeout)
 
     def __enter__(self):
         return self
@@ -250,9 +314,9 @@ class KoreClient(ContextManager['KoreClient']):
     def _request(self, method: str, **params: Any) -> Dict[str, Any]:
         try:
             return self._client.request(method, **params)
-        except JsonRpcError as e:
-            assert e.code not in {-32601, -32602}, 'Malformed Kore-RPC request'
-            raise KoreClientError(message=e.data['error'], code=e.code, context=e.data['context'])
+        except JsonRpcError as err:
+            assert err.code not in {-32601, -32602}, 'Malformed Kore-RPC request'
+            raise KoreClientError(message=err.data['error'], code=err.code, context=err.data['context']) from err
 
     @staticmethod
     def _state(pattern: Pattern) -> Dict[str, Any]:
@@ -270,12 +334,14 @@ class KoreClient(ContextManager['KoreClient']):
         cut_point_rules: Optional[Iterable[str]] = None,
         terminal_rules: Optional[Iterable[str]] = None,
     ) -> ExecuteResult:
-        params = filter_none({
-            'max-depth': max_depth,
-            'cut-point-rules': list(cut_point_rules) if cut_point_rules is not None else None,
-            'terminal-rules': list(terminal_rules) if terminal_rules is not None else None,
-            'state': self._state(pattern),
-        })
+        params = filter_none(
+            {
+                'max-depth': max_depth,
+                'cut-point-rules': list(cut_point_rules) if cut_point_rules is not None else None,
+                'terminal-rules': list(terminal_rules) if terminal_rules is not None else None,
+                'state': self._state(pattern),
+            }
+        )
 
         result = self._request('execute', **params)
         return ExecuteResult.from_dict(result)
