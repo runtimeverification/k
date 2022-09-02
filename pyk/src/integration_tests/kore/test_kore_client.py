@@ -1,9 +1,9 @@
 from string import Template
 from typing import Any, Final, Mapping, Tuple
 
-from pyk.kore.client import BranchingResult, DepthBoundResult, ExecuteResult, State, StuckResult
+from pyk.kore.client import BranchingResult, DepthBoundResult, ExecuteResult, ImpliesResult, State, StuckResult
 from pyk.kore.parser import KoreParser
-from pyk.kore.syntax import Pattern
+from pyk.kore.syntax import DV, Implies, Pattern, SortApp, String, Top
 
 from .kore_client_test import KoreClientTest
 
@@ -38,17 +38,41 @@ class SimpleKoreClientTest(KoreClientTest):
     KOMPILE_MAIN_FILE = 'k-files/kore-rpc-test.k'
     KORE_MODULE_NAME = 'KORE-RPC-TEST'
 
-    TEST_DATA: Final[Tuple[Tuple[int, Mapping[str, Any], ExecuteResult], ...]] = (
-        (0, {}, BranchingResult(state=state(2), depth=2, next_states=(state(4), state(3)))),
-        (0, {'max_depth': 2}, DepthBoundResult(state=state(2), depth=2)),
-        (4, {}, StuckResult(state=state(6), depth=2)),
-    )
-
     def test_execute(self):
-        for i, (n, params, expected) in enumerate(self.TEST_DATA):
+        # Given
+        test_data: Final[Tuple[Tuple[int, Mapping[str, Any], ExecuteResult], ...]] = (
+            (0, {}, BranchingResult(state=state(2), depth=2, next_states=(state(4), state(3)))),
+            (0, {'max_depth': 2}, DepthBoundResult(state=state(2), depth=2)),
+            (4, {}, StuckResult(state=state(6), depth=2)),
+        )
+
+        for i, (n, params, expected) in enumerate(test_data):
             with self.subTest(i=i):
                 # When
                 actual = self.client.execute(term(n), **params)
 
                 # Then
                 self.assertEqual(actual, expected)
+
+    def test_implies(self):
+        # Given
+        test_data = (
+            (int_dv(0), int_top, ImpliesResult(True, Implies(int_sort, int_dv(0), int_top), int_top, int_top)),
+            (int_dv(0), int_dv(1), ImpliesResult(False, Implies(int_sort, int_dv(0), int_dv(1)), None, None)),
+        )
+
+        for i, (antecedent, consequent, expected) in enumerate(test_data):
+            with self.subTest(i=i):
+                # When
+                actual = self.client.implies(antecedent, consequent)
+
+                # Then
+                self.assertEqual(actual, expected)
+
+
+int_sort = SortApp('SortInt')
+int_top = Top(int_sort)
+
+
+def int_dv(n: int) -> DV:
+    return DV(int_sort, String(str(n)))
