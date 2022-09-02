@@ -36,8 +36,8 @@ jobs:
         env:
           file_pattern: 'nix/'
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git config user.name rv-devops
+          git config user.email devops@runtimeverification.com
           if [ -n "$(git status --porcelain $file_pattern)" ]; then
             if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
               echo "::error :: The Maven dependencies changed, so the Nix lock files need to be updated. Please run ./nix/update-maven.sh to update the lock files, or move this branch to the runtimeverification/k repository."
