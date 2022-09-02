@@ -1,5 +1,6 @@
 K_ROOT := $(abspath ..)
 K_BIN  := $(K_ROOT)/k-distribution/target/release/k/bin
+K_LIB  := $(K_ROOT)/k-distribution/target/release/k/lib
 
 export PATH := $(K_BIN):$(PATH)
 
@@ -23,7 +24,10 @@ build:
 	poetry build
 
 install: build
-	pip3 install ./dist/*.whl --root=$(DESTDIR) --prefix=$(PREFIX)
+	poetry export -f requirements.txt --without-hashes | \
+	pip3 install -r /dev/stdin --root=$(DESTDIR) --prefix=$(PREFIX)
+	pip3 install $(K_LIB)/python --root=$(DESTDIR) --prefix=$(PREFIX)
+	pip3 install ./dist/*.whl --no-dependencies --root=$(DESTDIR) --prefix=$(PREFIX)
 
 poetry-install:
 	poetry install
