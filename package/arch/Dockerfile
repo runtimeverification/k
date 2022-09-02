@@ -22,10 +22,11 @@ RUN    pacman -Sy   --noconfirm archlinux-keyring \
                        openssh                    \
                        python                     \
                        python-pip                 \
-                       python-poetry              \
                        stack                      \
                        z3                         \
                        zlib
+
+RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/usr python3 - && poetry --version
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
