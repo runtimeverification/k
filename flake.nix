@@ -16,13 +16,8 @@
     poetry2nix.url = "github:nix-community/poetry2nix";
   };
 
-<<<<<<< HEAD
-  outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend, llvm-backend, mavenix
-    , flake-compat, pynixify }:
-=======
-  outputs = { self, nixpkgs, flake-utils, haskell-backend, llvm-backend, mavenix
-    , flake-compat, poetry2nix }:
->>>>>>> origin/master
+  outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend
+    , llvm-backend, mavenix, flake-compat, poetry2nix }:
     let
       allOverlays = [
         poetry2nix.overlay
@@ -129,15 +124,17 @@
             ${pkgs.mavenix-cli}/bin/mvnix-update -l ./nix/mavenix.lock -E 'import ./nix/flake-compat-k-unwrapped.nix'
           '';
 
-
           check-submodules = rv-utils.lib.check-submodules pkgs {
             inherit llvm-backend haskell-backend;
           };
-          
-          update-from-submodules = rv-utils.lib.update-from-submodules pkgs ./flake.lock {
-            haskell-backend.submodule = "haskell-backend/src/main/native/haskell-backend";
-            llvm-backend.submodule = "llvm-backend/src/main/native/llvm-backend";
-          };
+
+          update-from-submodules =
+            rv-utils.lib.update-from-submodules pkgs ./flake.lock {
+              haskell-backend.submodule =
+                "haskell-backend/src/main/native/haskell-backend";
+              llvm-backend.submodule =
+                "llvm-backend/src/main/native/llvm-backend";
+            };
 
           test = with pkgs;
             let
