@@ -19,18 +19,18 @@ from .kore_client_test import KoreClientTest
 def term(n: int) -> Pattern:
     template = Template(
         r'''
-    Lbl'-LT-'generatedTop'-GT-'{}(
-        Lbl'-LT-'k'-GT-'{}(
-            kseq{}(
-                inj{SortInt{}, SortKItem{}}(
-                    \dv{SortInt{}}("$n")
-                ),
-                K:SortK{}
-            )
-        ),
-        GCC:SortGeneratedCounterCell{}
-    )
-    '''
+        Lbl'-LT-'generatedTop'-GT-'{}(
+            Lbl'-LT-'k'-GT-'{}(
+                kseq{}(
+                    inj{SortInt{}, SortKItem{}}(
+                        \dv{SortInt{}}("$n")
+                    ),
+                    K:SortK{}
+                )
+            ),
+            GCC:SortGeneratedCounterCell{}
+        )
+        '''
     )
     parser = KoreParser(template.substitute(n=n))
     pattern = parser.pattern()
