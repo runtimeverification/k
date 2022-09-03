@@ -41,13 +41,13 @@ class SimpleKoreClientTest(KoreClientTest):
     def test_execute(self):
         # Given
         test_data: Final[Tuple[Tuple[int, Mapping[str, Any], ExecuteResult], ...]] = (
-            (0, {}, BranchingResult(state=state(2), depth=2, next_states=(state(4), state(3)))),
-            (0, {'max_depth': 2}, DepthBoundResult(state=state(2), depth=2)),
-            (4, {}, StuckResult(state=state(6), depth=2)),
+            ('branching', 0, {}, BranchingResult(state=state(2), depth=2, next_states=(state(4), state(3)))),
+            ('depth-bound', 0, {'max_depth': 2}, DepthBoundResult(state=state(2), depth=2)),
+            ('stuck', 4, {}, StuckResult(state=state(6), depth=2)),
         )
 
-        for i, (n, params, expected) in enumerate(test_data):
-            with self.subTest(i=i):
+        for test_name, n, params, expected in test_data:
+            with self.subTest(test_name):
                 # When
                 actual = self.client.execute(term(n), **params)
 
@@ -57,12 +57,17 @@ class SimpleKoreClientTest(KoreClientTest):
     def test_implies(self):
         # Given
         test_data = (
-            (int_dv(0), int_top, ImpliesResult(True, Implies(int_sort, int_dv(0), int_top), int_top, int_top)),
-            (int_dv(0), int_dv(1), ImpliesResult(False, Implies(int_sort, int_dv(0), int_dv(1)), None, None)),
+            (
+                '0 -> T',
+                int_dv(0),
+                int_top,
+                ImpliesResult(True, Implies(int_sort, int_dv(0), int_top), int_top, int_top),
+            ),
+            ('0 -> 1', int_dv(0), int_dv(1), ImpliesResult(False, Implies(int_sort, int_dv(0), int_dv(1)), None, None)),
         )
 
-        for i, (antecedent, consequent, expected) in enumerate(test_data):
-            with self.subTest(i=i):
+        for test_name, antecedent, consequent, expected in test_data:
+            with self.subTest(test_name):
                 # When
                 actual = self.client.implies(antecedent, consequent)
 
