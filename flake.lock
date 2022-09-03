@@ -321,16 +321,15 @@
           "haskell-backend",
           "nixpkgs"
         ],
-        "pybind11-src": "pybind11-src",
         "rapidjson-src": "rapidjson-src",
         "utils": "utils_2"
       },
       "locked": {
-        "lastModified": 1662128262,
-        "narHash": "sha256-Ke+Q03gw8d1mCHTpC9oe3XjOjYh7UrEdcX6iY9+m/Zo=",
+        "lastModified": 1662045455,
+        "narHash": "sha256-8I2dkFnUhTbw6V6R5fcXbQgaCA4SD+ZTtDvlgVmQgDI=",
         "owner": "runtimeverification",
         "repo": "llvm-backend",
-        "rev": "b0d4ff16c76230034907f9a8e3c75cb06c6f5827",
+        "rev": "2125afb2f46faceb4d653ca0da545faf3b43f894",
         "type": "github"
       },
       "original": {
@@ -589,11 +588,11 @@
     },
     "nixpkgs_5": {
       "locked": {
-        "lastModified": 1662025319,
-        "narHash": "sha256-ZJlBQ7jXynq4+Jg9+DgOe8FJG8sDIeFFYP3V3K98KUs=",
+        "lastModified": 1662099760,
+        "narHash": "sha256-MdZLCTJPeHi/9fg6R9fiunyDwP3XHJqDd51zWWz9px0=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "b82ccafb54163ab9024e893e578d840577785fea",
+        "rev": "67e45078141102f45eff1589a831aeaa3182b41e",
         "type": "github"
       },
       "original": {
@@ -604,11 +603,11 @@
     },
     "nixpkgs_6": {
       "locked": {
-        "lastModified": 1662134245,
-        "narHash": "sha256-vM/E6a3bNO3gBGVXHVNVQ0Xfl1Qn3FYrJwbqX/qzoto=",
+        "lastModified": 1662237791,
+        "narHash": "sha256-stOuxAUn7ujFzlrJXfe19GRiUUD+bLyOQ1DpcHziu94=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "715fa052ab6a688cf6700fd489b56906fe975ad5",
+        "rev": "9b214e6dad0fd515b83ebd065302fc2ca93c4afb",
         "type": "github"
       },
       "original": {
@@ -650,23 +649,6 @@
       "original": {
         "owner": "nix-community",
         "repo": "poetry2nix",
-        "type": "github"
-      }
-    },
-    "pybind11-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1657936673,
-        "narHash": "sha256-/X8DZPFsNrKGbhjZ1GFOj17/NU6p4R+saCW3pLKVNeA=",
-        "owner": "pybind",
-        "repo": "pybind11",
-        "rev": "0ba639d6177659c5dc2955ac06ad7b5b0d22e05c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "pybind",
-        "repo": "pybind11",
-        "rev": "0ba639d6177659c5dc2955ac06ad7b5b0d22e05c",
         "type": "github"
       }
     },
