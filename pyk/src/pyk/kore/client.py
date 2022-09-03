@@ -294,6 +294,26 @@ class TerminalResult(ExecuteResult):
         )
 
 
+@final
+@dataclass(frozen=True)
+class ImpliesResult:
+    satisfiable: bool
+    implication: Pattern
+    substitution: Optional[Pattern]
+    predicate: Optional[Pattern]
+
+    @staticmethod
+    def from_dict(dct: Mapping[str, Any]) -> 'ImpliesResult':
+        substitution = dct.get('condition', {}).get('substitution', {}).get('term')
+        predicate = dct.get('condition', {}).get('predicate', {}).get('term')
+        return ImpliesResult(
+            satisfiable=dct['satisfiable'],
+            implication=Pattern.from_dict(dct['implication']['term']),
+            substitution=Pattern.from_dict(substitution) if substitution is not None else None,
+            predicate=Pattern.from_dict(predicate) if predicate is not None else None,
+        )
+
+
 class KoreClient(ContextManager['KoreClient']):
     _KORE_JSON_VERSION: Final = 1
 
@@ -346,17 +366,14 @@ class KoreClient(ContextManager['KoreClient']):
         result = self._request('execute', **params)
         return ExecuteResult.from_dict(result)
 
-    def implies(self, ant: Pattern, con: Pattern) -> Tuple[bool, Optional[Pattern], Optional[Pattern]]:
+    def implies(self, ant: Pattern, con: Pattern) -> ImpliesResult:
         params = {
             'antecedent': self._state(ant),
             'consequent': self._state(con),
         }
 
         result = self._request('implies', **params)
-        satisfiable = result['satisfiable']
-        substitution = Pattern.from_dict(result['substitution']) if 'substitution' in result else None
-        predicate = Pattern.from_dict(result['predicate']) if 'predicate' in result else None
-        return satisfiable, substitution, predicate
+        return ImpliesResult.from_dict(result)
 
     def simplify(self, pattern: Pattern) -> Pattern:
         params = {
