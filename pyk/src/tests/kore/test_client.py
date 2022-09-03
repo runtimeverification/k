@@ -2,7 +2,7 @@ from typing import Any, Dict
 from unittest import TestCase
 from unittest.mock import patch
 
-from pyk.kore.client import JsonRpcClient, KoreClient, State, StuckResult
+from pyk.kore.client import ImpliesResult, JsonRpcClient, KoreClient, State, StuckResult
 from pyk.kore.syntax import DV, And, App, Bottom, Pattern, SortApp, String, Top
 
 
@@ -70,8 +70,8 @@ class KoreClientTest(TestCase):
                 int_bottom,
                 int_top,
                 {'antecedent': kore(int_bottom), 'consequent': kore(int_top)},
-                {'satisfiable': True},
-                (True, None, None),
+                {'satisfiable': True, 'implication': kore(int_top)},
+                ImpliesResult(True, int_top, None, None),
             ),
         )
 
