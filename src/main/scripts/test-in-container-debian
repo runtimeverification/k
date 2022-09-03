@@ -1,5 +1,5 @@
 #!/bin/sh -ex
-K_VERSION=5.3.191
+K_VERSION=5.3.192
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get upgrade --yes
