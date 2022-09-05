@@ -179,7 +179,6 @@
                 runHook postInstall
               '';
             };
-
         };
         defaultPackage = packages.k;
       }) // {
