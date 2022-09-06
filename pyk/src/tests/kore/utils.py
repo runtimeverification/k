@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Final
 
 # JSON files for random generated patterns
-_JSON_TEST_DIR: Final = Path(__file__).parent / 'json_data'
+_JSON_TEST_DIR: Final = Path(__file__).parent / 'json-data'
 JSON_TEST_FILES: Final = tuple(_JSON_TEST_DIR.iterdir())
 
 # Kore test files containing definitions
