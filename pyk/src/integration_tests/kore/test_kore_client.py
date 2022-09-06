@@ -1,7 +1,8 @@
 from string import Template
 from typing import Any, Final, Mapping, Tuple
 
-from pyk.kore.client import (
+from pyk.kore.parser import KoreParser
+from pyk.kore.rpc import (
     BranchingResult,
     DepthBoundResult,
     ExecuteResult,
@@ -10,7 +11,6 @@ from pyk.kore.client import (
     State,
     StuckResult,
 )
-from pyk.kore.parser import KoreParser
 from pyk.kore.syntax import DV, Equals, EVar, Implies, Pattern, SortApp, SortVar, String, Top
 
 from .kore_client_test import KoreClientTest

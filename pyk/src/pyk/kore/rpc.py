@@ -5,6 +5,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
+from pathlib import Path
+from subprocess import Popen
 from time import sleep
 from typing import (
     Any,
@@ -22,6 +24,7 @@ from typing import (
     final,
 )
 
+from ..cli_utils import check_dir_path, check_file_path
 from ..utils import filter_none
 from .syntax import Pattern
 
@@ -382,3 +385,32 @@ class KoreClient(ContextManager['KoreClient']):
 
         result = self._request('simplify', **params)
         return Pattern.from_dict(result['state']['term'])
+
+
+class KoreServer(ContextManager['KoreServer']):
+    _proc: Popen
+    _port: int
+    _pid: int
+
+    def __init__(self, kompiled_dir: Path, module_name: str, port: int):
+        check_dir_path(kompiled_dir)
+
+        definition_file = kompiled_dir / 'definition.kore'
+        check_file_path(definition_file)
+
+        self._port = port
+        _LOGGER.info(f'Starting KoreServer: port={self._port}')
+        self._proc = Popen(['kore-rpc', str(definition_file), '--module', module_name, '--server-port', str(port)])
+        self._pid = self._proc.pid
+        _LOGGER.info(f'KoreServer started: port={self._port}, pid={self._pid}')
+
+    def __enter__(self) -> 'KoreServer':
+        return self
+
+    def __exit__(self, *args) -> None:
+        self.close()
+
+    def close(self) -> None:
+        self._proc.terminate()
+        self._proc.wait()
+        _LOGGER.info(f'KoreServer stopped: port={self._port}, pid={self._pid}')
