@@ -1,4 +1,4 @@
-from pyk.kore.client import KoreClient, KoreServer
+from pyk.kore.rpc import KoreClient, KoreServer
 from pyk.ktool import KompileBackend
 
 from ..kompiled_test import KompiledTest

@@ -2,7 +2,7 @@ from typing import Any, Dict
 from unittest import TestCase
 from unittest.mock import patch
 
-from pyk.kore.client import ImpliesResult, JsonRpcClient, KoreClient, State, StuckResult
+from pyk.kore.rpc import ImpliesResult, JsonRpcClient, KoreClient, State, StuckResult
 from pyk.kore.syntax import DV, And, App, Bottom, Pattern, SortApp, String, Top
 
 
@@ -12,7 +12,7 @@ class KoreClientTest(TestCase):
 
     def setUp(self):
         # Given
-        patcher = patch('pyk.kore.client.JsonRpcClient', spec=True)
+        patcher = patch('pyk.kore.rpc.JsonRpcClient', spec=True)
         MockClient = patcher.start()  # noqa: N806
         self.addCleanup(patcher.stop)
         self.mock = MockClient.return_value
