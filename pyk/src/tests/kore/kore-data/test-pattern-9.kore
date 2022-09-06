@@ -1,0 +1,8 @@
+[]
+
+module TEST-PATTERN-9
+
+  axiom{S}
+    \forall{S}(X:S,X:S) []
+
+endmodule []

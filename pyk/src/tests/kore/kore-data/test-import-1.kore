@@ -1,0 +1,8 @@
+[]
+
+module TEST-1
+endmodule []
+
+module TEST-2
+  import TEST-1 []
+endmodule []
