@@ -70,7 +70,7 @@ pipeline {
                   echo 'Setting up environment...'
                   export K_OPTS='-Xmx12G'
                   echo 'Building K...'
-                  mvn --batch-mode package -DskipTests -U --Dhaskell.backend.skip
+                  mvn --batch-mode package -DskipTests -U -Dhaskell.backend.skip
                   echo 'Testing pyk...'
                   echo 'Starting kserver...'
                   k-distribution/target/release/k/bin/spawn-kserver kserver.log
