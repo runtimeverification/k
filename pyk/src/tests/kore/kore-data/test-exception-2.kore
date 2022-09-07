@@ -1,8 +1,0 @@
-[]
-
-module TEST-EXCEPTION-2
-
-  axiom{S}
-    sort:S []
-
-endmodule []

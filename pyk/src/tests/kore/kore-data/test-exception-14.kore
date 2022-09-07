@@ -1,8 +1,0 @@
-[]
-
-module TEST-EXCEPTION-14
-
-  axiom{}
-    f{S{}}() []
-
-endmodule []
