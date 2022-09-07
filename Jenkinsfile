@@ -73,14 +73,12 @@ pipeline {
                   mvn --batch-mode -DskipTests -U
                   echo 'Testing pyk...'
                   echo 'Starting kserver...'
-                  k-distribution/target/release/k/bin/spawn-kserver kserver.log
                   cd k-exercises/tutorial
                   cd ../../k-distribution/k-tutorial/1_basic
                 '''
               }
               post {
                 always {
-                  sh 'k-distribution/target/release/k/bin/stop-kserver || true'
                   archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
                 }
               }
