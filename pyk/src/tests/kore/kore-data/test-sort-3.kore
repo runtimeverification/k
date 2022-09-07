@@ -1,0 +1,7 @@
+[]
+
+module TEST-SORT-3
+
+  sort Map{S1,S2} []
+
+endmodule []

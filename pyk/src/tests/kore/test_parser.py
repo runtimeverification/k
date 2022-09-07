@@ -1,7 +1,8 @@
+import json
 from unittest import TestCase
 
 from pyk.kore.parser import KoreParser
-from pyk.kore.syntax import Kore
+from pyk.kore.syntax import Kore, kore_term
 
 from .utils import JSON_TEST_FILES, KORE_PASS_TEST_FILES
 
@@ -9,7 +10,7 @@ from .utils import JSON_TEST_FILES, KORE_PASS_TEST_FILES
 class ParserTest(TestCase):
     def test_parse_kore(self):
         for test_file in KORE_PASS_TEST_FILES:
-            with self.subTest(i=test_file.name):
+            with self.subTest(test_file.name):
                 # Given
                 with open(test_file, 'r') as f:
                     parser1 = KoreParser(f.read())
@@ -26,18 +27,19 @@ class ParserTest(TestCase):
 
     def test_parse_json(self):
         for test_file in JSON_TEST_FILES:
-            with self.subTest(i=test_file.name):
+            with open(test_file, 'r') as f:
                 # Given
-                with open(test_file, 'r') as f:
-                    json_text = f.read()
+                terms = json.load(f)
 
-                # When
-                kore1 = Kore.from_json(json_text)
-                parser = KoreParser(kore1.text)
-                kore2 = parser.pattern()
-                kore3 = Kore.from_json(kore1.json)
+                for i, term in enumerate(terms):
+                    with self.subTest(test_file.name, i=i):
+                        # When
+                        kore1 = kore_term(term)
+                        parser = KoreParser(kore1.text)
+                        kore2 = parser.pattern()
+                        kore3 = Kore.from_json(kore1.json)
 
-                # Then
-                self.assertTrue(parser.eof)
-                self.assertEqual(kore1, kore2)
-                self.assertEqual(kore1, kore3)
+                        # Then
+                        self.assertTrue(parser.eof)
+                        self.assertEqual(kore1, kore2)
+                        self.assertEqual(kore1, kore3)

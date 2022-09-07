@@ -1,0 +1,7 @@
+[]
+
+module TEST-ATTRIBUTE-1
+
+  hooked-sort Nat{} [hook{}("Nat")]
+
+endmodule []

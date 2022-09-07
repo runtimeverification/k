@@ -1,0 +1,7 @@
+[]
+
+module TEST-SORT-5
+
+  sort a{} []
+
+endmodule []

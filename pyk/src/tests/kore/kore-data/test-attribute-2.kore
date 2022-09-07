@@ -1,0 +1,13 @@
+[]
+
+module TEST-ATTRIBUTE-2
+
+  hooked-sort Nat{} [hook{}("NAT.Nat")]
+
+  hooked-symbol plus{}(Nat{},Nat{}) : Nat{}
+    [ hook{}("NAT.plus")
+    , associative{}()
+    , commutative{}()
+    ]
+
+endmodule []

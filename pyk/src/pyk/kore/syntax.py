@@ -1744,3 +1744,13 @@ class Definition(Kore, WithAttrs):
             ]
             + [module.text for module in self.modules]
         )
+
+
+def kore_term(dct: Mapping[str, Any], cls: Type[T] = Kore) -> T:  # type: ignore
+    if dct['format'] != 'KORE':
+        raise ValueError(f"Invalid format: {dct['format']}")
+
+    if dct['version'] != 1:
+        raise ValueError(f"Invalid version: {dct['version']}")
+
+    return cls.from_dict(dct['term'])
