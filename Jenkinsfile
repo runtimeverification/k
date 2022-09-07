@@ -137,7 +137,10 @@ pipeline {
     }
     stage('Build and Package on Ubuntu Jammy') {
       when {
-        branch 'release'
+        anyOf {
+          branch 'release'
+          changeRequest()
+        }
         beforeAgent true
       }
       stages {
@@ -190,17 +193,13 @@ pipeline {
           }
         }
       }
-      post {
-        failure {
-          slackSend color: '#cb2431'                                             \
-                  , channel: '#k'                                                \
-                  , message: "Ubuntu Jammy Packaging Failed: ${env.BUILD_URL}"
-        }
-      }
     }
     stage('Build and Package on Debian Bullseye') {
       when {
-        branch 'release'
+        anyOf {
+          branch 'release'
+          changeRequest()
+        }
         beforeAgent true
       }
       stages {
@@ -252,17 +251,13 @@ pipeline {
           }
         }
       }
-      post {
-        failure {
-          slackSend color: '#cb2431'                                             \
-                  , channel: '#k'                                                \
-                  , message: "Debian Bullseye Packaging Failed: ${env.BUILD_URL}"
-        }
-      }
     }
     stage('Build and Package on Arch Linux') {
       when {
-        branch 'release'
+        anyOf {
+          branch 'release'
+          changeRequest()
+        }
         beforeAgent true
       }
       stages {
@@ -312,13 +307,6 @@ pipeline {
               archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
             }
           }
-        }
-      }
-      post {
-        failure {
-          slackSend color: '#cb2431'                                         \
-                  , channel: '#k'                                            \
-                  , message: "Arch Linux Packaging Failed: ${env.BUILD_URL}"
         }
       }
     }
