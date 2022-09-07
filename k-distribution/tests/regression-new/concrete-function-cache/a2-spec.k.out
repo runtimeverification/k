@@ -1,3 +1,4 @@
 <k>
   end ( bar1 ( V0 ) )
 </k>
+[Error] Prover: proof was terminated due to stuck state
