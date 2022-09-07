@@ -1,0 +1,9 @@
+[]
+
+module TEST-HOOKS-1
+
+  hooked-sort S{} [hook{}("S.S")]
+
+  hooked-symbol f{}() : S{} [hook{}("S.f")]
+
+endmodule []

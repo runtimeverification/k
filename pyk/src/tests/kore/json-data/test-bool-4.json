@@ -1,0 +1,15 @@
+[
+ {
+  "format": "KORE",
+  "version": 1,
+  "term": {
+    "tag": "DV",
+    "sort": {
+      "tag": "SortApp",
+      "name": "Bool",
+      "args": []
+    },
+    "value": "untrue"
+  }
+} 
+]

@@ -1,0 +1,29 @@
+[
+ {
+  "format": "KORE",
+  "version": 1,
+  "term": {
+    "tag": "Rewrites",
+    "sort": {
+      "tag": "SortVar",
+      "name": "S"
+    },
+    "source": {
+      "tag": "EVar",
+      "name": "X",
+      "sort": {
+        "tag": "SortVar",
+        "name": "S"
+      }
+    },
+    "dest": {
+      "tag": "EVar",
+      "name": "X",
+      "sort": {
+        "tag": "SortVar",
+        "name": "S"
+      }
+    }
+  }
+} 
+]
