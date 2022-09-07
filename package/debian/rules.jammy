@@ -19,8 +19,6 @@ export DEB_BUILD_MAINT_OPTIONS=hardening=-stackprotector optimize=-lto
 
 DESTDIR=$(shell pwd)/debian/kframework
 PREFIX=/usr
-PYTHON_VERSION=python3.10
-PYTHON_DEB_VERSION=python3
 export DESTDIR
 export PREFIX
 
@@ -32,11 +30,6 @@ override_dh_auto_build:
 
 override_dh_auto_install:
 	package/package
-	mv $(DESTDIR)$(PREFIX)/local/bin/pyk $(DESTDIR)$(PREFIX)/bin/pyk
-	mv $(DESTDIR)$(PREFIX)/local/bin/kit.py $(DESTDIR)$(PREFIX)/bin/kit.py
-	mv $(DESTDIR)$(PREFIX)/local/lib/$(PYTHON_VERSION) $(DESTDIR)$(PREFIX)/lib/$(PYTHON_VERSION)
-	@mkdir -p $(DESTDIR)$(PREFIX)/lib/$(PYTHON_DEB_VERSION)/dist-packages
-	ln --symbolic --relative $(DESTDIR)$(PREFIX)/lib/$(PYTHON_VERSION)/site-packages/pyk $(DESTDIR)$(PREFIX)/lib/$(PYTHON_DEB_VERSION)/dist-packages/pyk
 
 override_dh_strip:
 	dh_strip -Xliballoc.a -Xlibarithmetic.a -XlibAST.a -Xlibutil.a -XlibParser.a -Xlibcollect.a -Xlibcollections.a -Xlibjson.a -Xlibstrings.a -Xlibmeta.a -Xlibio.a
