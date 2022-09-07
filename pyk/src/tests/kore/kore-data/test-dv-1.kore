@@ -1,0 +1,6 @@
+[]
+module DV-1
+    sort Nat{} [hasDomainValues{}()]
+    axiom {} \dv{Nat{}}("0") []
+endmodule
+[]
