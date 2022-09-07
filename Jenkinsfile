@@ -426,7 +426,6 @@ pipeline {
             release_commit="$LONG_REV"
             git checkout $release_commit
 
-            hub release delete "${K_RELEASE_TAG}" || true
 
 
             mv ../kframework-${VERSION}-src.tar.gz                      kframework-${VERSION}-src.tar.gz
@@ -438,13 +437,6 @@ pipeline {
             echo "K Framework Release ${VERSION}"  > release.md
             echo ''                               >> release.md
             cat k-distribution/INSTALL.md         >> release.md
-            hub release create --prerelease                                                     \
-                --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                       \
-                --attach kframework_${VERSION}_amd64_focal.deb'#Ubuntu Focal (20.04) Package'   \
-                --attach kframework_${VERSION}_amd64_jammy.deb'#Ubuntu Jammy (22.04) Package'   \
-                --attach kframework_${VERSION}_amd64_bullseye.deb'#Debian Bullseye (11) Package'    \
-                --attach kframework-git-${VERSION}-1-x86_64.pkg.tar.zst'#Arch Package'          \
-                --file release.md "${K_RELEASE_TAG}"
           '''
         }
       }
