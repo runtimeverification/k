@@ -70,7 +70,7 @@ pipeline {
                   echo 'Setting up environment...'
                   export K_OPTS='-Xmx12G'
                   echo 'Building K...'
-                  mvn --batch-mode -DskipTests -U
+                  mvn --batch-mode package -DskipTests -U
                   echo 'Testing pyk...'
                   echo 'Starting kserver...'
                   cd k-exercises/tutorial
