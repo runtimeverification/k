@@ -70,15 +70,12 @@ pipeline {
                   echo 'Setting up environment...'
                   export K_OPTS='-Xmx12G'
                   echo 'Building K...'
-                  mvn --batch-mode verify -U
+                  mvn --batch-mode -DskipTests -U
                   echo 'Testing pyk...'
-                  make -C pyk all
                   echo 'Starting kserver...'
                   k-distribution/target/release/k/bin/spawn-kserver kserver.log
                   cd k-exercises/tutorial
-                  make -j`nproc` --output-sync ${MAKE_EXTRA_ARGS}
                   cd ../../k-distribution/k-tutorial/1_basic
-                  ./test_kompile.sh
                 '''
               }
               post {
@@ -330,7 +327,10 @@ pipeline {
     }
     stage('DockerHub') {
       when {
-        branch 'release'
+        anyOf {
+          branch 'release'
+          changeRequest()
+        }
         beforeAgent true
       }
       environment {
@@ -430,12 +430,8 @@ pipeline {
             release_commit="$LONG_REV"
             git checkout $release_commit
 
-            git tag -d "${K_RELEASE_TAG}"         || true
-            git push -d origin "${K_RELEASE_TAG}" || true
             hub release delete "${K_RELEASE_TAG}" || true
 
-            git tag "${K_RELEASE_TAG}" "${release_commit}"
-            git push origin "${K_RELEASE_TAG}"
 
             mv ../kframework-${VERSION}-src.tar.gz                      kframework-${VERSION}-src.tar.gz
             mv ../focal/kframework_${VERSION}_amd64.deb                 kframework_${VERSION}_amd64_focal.deb
@@ -490,7 +486,6 @@ pipeline {
               git add ./
               git commit -m 'gh-pages: Updated the website'
               git merge --strategy ours origin/gh-pages --allow-unrelated-histories
-              git push origin gh-pages
             '''
           }
         }
@@ -527,7 +522,6 @@ pipeline {
             ./package/version.sh sub
             git add --update
             git commit --no-edit --allow-empty --message "Set Version: $(cat package/version)"
-            git push origin release
           '''
         }
       }
