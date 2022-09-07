@@ -1,0 +1,43 @@
+name: 'Run Tests'
+on:
+  pull_request:
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  run-tests:
+    name: 'Run Tests'
+    runs-on: [self-hosted, linux]
+    strategy:
+      matrix:
+        distro: ['focal', 'jammy']
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+      - name: 'Build Docker image'
+        run: |
+          COMMIT=$(git rev-parse --short=7 HEAD)
+          K_VERSION=$(cat deps/K_VERSION)
+
+          docker build .                              \
+            --build-arg K_DISTRO=${{ matrix.distro }} \
+            --build-arg K_VERSION=${K_VERSION}        \
+            --tag runtimeverificationinc/pyk-ci:${COMMIT}
+
+          docker run                 \
+            --name pyk-ci            \
+            --rm                     \
+            --interactive            \
+            --tty                    \
+            --detach                 \
+            runtimeverificationinc/pyk-ci:${COMMIT}
+
+          docker cp . pyk-ci:/home/user
+      - name: 'Run code checks and tests'
+        run: docker exec pyk-ci make all
+      - name: 'Tear down Docker container'
+        if: always()
+        run: |
+          docker stop pyk-ci

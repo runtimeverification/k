@@ -1,0 +1,4 @@
+Error:
+  module 'TEST-HOOKS-4':
+  hooked-sort 'S' declaration (test-hooks-4.kore 6:15):
+    missing hook attribute

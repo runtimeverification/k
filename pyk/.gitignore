@@ -1,0 +1,8 @@
+/dist/
+__pycache__/
+
+/definitions/
+
+/kit-tests/**/*.json
+/kit-tests/**/*.run.out
+/kit-tests/**/*_summary/
