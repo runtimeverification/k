@@ -70,7 +70,7 @@ pipeline {
                   echo 'Setting up environment...'
                   export K_OPTS='-Xmx12G'
                   echo 'Building K...'
-                  mvn --batch-mode package -DskipTests -U
+                  mvn --batch-mode package -DskipTests -U --haskell.backend.skip
                   echo 'Testing pyk...'
                   echo 'Starting kserver...'
                   k-distribution/target/release/k/bin/spawn-kserver kserver.log
@@ -85,19 +85,6 @@ pipeline {
                 }
               }
             }
-            stage('Build Debian Package') {
-              steps {
-                dir("kframework-${env.VERSION}") {
-                  checkout scm
-                  sh '''
-                    mv package/debian ./debian
-                    mv debian/control.focal debian/control
-                    dpkg-buildpackage
-                  '''
-                }
-                stash name: 'focal', includes: "kframework_${env.VERSION}_amd64.deb"
-              }
-            }
           }
           post {
             always {
@@ -107,30 +94,6 @@ pipeline {
                 make --directory=k-exercises clean
                 make --directory=haskell-backend/src/main/native/haskell-backend clean
               '''
-            }
-          }
-        }
-        stage('Test Debian Package') {
-          agent {
-            docker {
-              image 'ubuntu:focal'
-              args '-u 0'
-              reuseNode true
-            }
-          }
-          options { skipDefaultCheckout() }
-          steps {
-            unstash 'focal'
-            sh '''
-              src/main/scripts/test-in-container-debian
-              pyk --help
-              python3 -m pyk --help
-            '''
-          }
-          post {
-            always {
-              sh 'stop-kserver || true'
-              archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
             }
           }
         }
@@ -373,7 +336,6 @@ pipeline {
               cd ~
               echo 'module TEST imports BOOL endmodule' > test.k
               kompile test.k --backend llvm
-              kompile test.k --backend haskell
             '''
           }
         }
@@ -390,7 +352,6 @@ pipeline {
               cd ~
               echo 'module TEST imports BOOL endmodule' > test.k
               kompile test.k --backend llvm
-              kompile test.k --backend haskell
             '''
           }
         }
