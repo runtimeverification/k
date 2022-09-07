@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# This script is designed to be called _only_ during the K debian packaging
+# process. It will make a destructive change to the Pyk project file to point to
+# the debian root's installed path, rather than the default K build path. 
+
+ORIGINAL='kllvm = { path = "../k-distribution/target/release/k/lib/python" }'
+NEW="kllvm = { path = \"$DESTDIR$PREFIX/lib/python\" }"
+
+sed -i "s|$ORIGINAL|$NEW|g" pyk/pyproject.toml
