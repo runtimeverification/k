@@ -1,8 +1,8 @@
 ---
 name: Performance Test and Report Generation
 description: Provide test file and CI will generate a report for further investigation 
-title: "[Performance Test: K]"
-labels: ["performance-report"]
+title: "[K-Performance] <Title>"
+labels: ["performance", "k"]
 body:
   - type: markdown
     attributes:
