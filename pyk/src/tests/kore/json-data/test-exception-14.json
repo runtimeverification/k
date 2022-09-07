@@ -1,0 +1,18 @@
+[
+ {
+  "format": "KORE",
+  "version": 1,
+  "term": {
+    "tag": "App",
+    "name": "f",
+    "sorts": [
+      {
+        "tag": "SortApp",
+        "name": "S",
+        "args": []
+      }
+    ],
+    "args": []
+  }
+} 
+]
