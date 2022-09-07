@@ -8,14 +8,15 @@ body:
     attributes:
       value: |
         # Performance Test Form & Report Generator
-        ## For Internal Use Only
+        ## -- For Internal Use Only -- 
+        Test Data will only be generated for RV Organization users 
         1. Please attach test file to kick off tests
         
-        Results will be attached to the issue after testing completes
+        Results will be attached to the created issue after testing completes
   
   - type: textarea
     attributes:
-      label: Please Upload Test Data File
+      label: Please Prepare Test Data
       placeholder: < Drag and Drop file here >
     validations:
       required: true

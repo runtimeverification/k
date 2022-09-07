@@ -3,23 +3,26 @@ name: "[K-Bug] Report"
 description: Create a bug report to help us improve
 title: "[K-Bug] <TITLE>"
 labels: ["k-bug", "k"]
-
+assignees:
+  - ana-pantilie
+  
 body:
   - type: markdown
     attributes:
       value: |
         # Please Fill out the Form to the best of your ability.
         ## Briefly what we're looking for:
-        ### Input Files
-        *Minimized* files need to produce the bug.
-        When providing K definitions, a _single_ file should be provided (if possible), and as few modules and sentences as possible.
-        When providing programs or proofs, a _single_ program should be provided with a minimized definition which _quickly_ reproduces the issue.
+        ### Input Guidelines: 
+        1. *Minimized* files need to produce the bug.
+        2. When providing K definitions, a _single_ file should be provided (if possible), and as few modules and sentences as possible.
+        3. When providing programs or proofs, a _single_ program should be provided with a minimized definition which _quickly_ reproduces the issue.
 
         ### Reproduction Steps
         Steps to reproduce the behavior (including _code blocks_ with what to run, and _code blocks_ with resulting output).
 
         ### Expected Behavior
         A clear and concise description of what you expected to happen.
+        ---------------------------------------------------------------
 
   - type: dropdown
     attributes:
