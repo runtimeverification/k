@@ -1,5 +1,5 @@
 pipeline {
-  agent { label 'docker' }
+  agent none
   options { ansiColor('xterm') }
   environment {
     PACKAGE         = 'kframework'
