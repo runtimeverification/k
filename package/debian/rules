@@ -28,6 +28,7 @@ override_dh_auto_build:
 
 override_dh_auto_install:
 	package/fix-debian-kllvm-path
+	(cd pyk && poetry update)
 	package/package
 	@mkdir -p $(DESTDIR)$(PREFIX)/lib/$(PYTHON_DEB_VERSION)/dist-packages
 	ln --symbolic --relative $(DESTDIR)$(PREFIX)/lib/$(PYTHON_VERSION)/site-packages/pyk $(DESTDIR)$(PREFIX)/lib/$(PYTHON_DEB_VERSION)/dist-packages/pyk

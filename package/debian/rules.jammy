@@ -32,6 +32,7 @@ override_dh_auto_build:
 
 override_dh_auto_install:
 	package/fix-debian-kllvm-path
+	(cd pyk && poetry update)
 	package/package
 	mv $(DESTDIR)$(PREFIX)/local/bin/pyk $(DESTDIR)$(PREFIX)/bin/pyk
 	mv $(DESTDIR)$(PREFIX)/local/bin/kit.py $(DESTDIR)$(PREFIX)/bin/kit.py
