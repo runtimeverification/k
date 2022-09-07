@@ -1,9 +1,0 @@
-[]
-
-module TEST-SYMBOL-7
-
-  sort Nat{} []
-
-  symbol f{S}(Nat{}) : S []
-
-endmodule []
