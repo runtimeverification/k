@@ -1,5 +1,5 @@
 pipeline {
-  agent none
+  agent { label 'docker' }
   options { ansiColor('xterm') }
   environment {
     PACKAGE         = 'kframework'
@@ -343,7 +343,7 @@ pipeline {
       }
       stages {
         stage('Build Image') {
-          agent none
+          agent { label 'docker' }
           steps {
             milestone(1)
             dir('focal') { unstash 'focal' }
