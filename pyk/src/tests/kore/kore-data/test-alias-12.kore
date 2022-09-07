@@ -1,0 +1,8 @@
+[]
+module TEST-ALIAS-12
+
+  alias f{s}(s) : s
+  where f{s}(a : s) := \next{s}(a : s) []
+
+endmodule
+[]

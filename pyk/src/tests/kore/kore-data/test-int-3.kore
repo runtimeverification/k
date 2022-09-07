@@ -1,0 +1,18 @@
+[]
+module K
+    sort K{} []
+endmodule
+[]
+
+module BOOL
+    hooked-sort Bool{} [hook{}("BOOL.Bool")]
+endmodule
+[]
+
+module INT
+    import K []
+    import BOOL []
+    hooked-sort Int{} [hook{}("INT.Int")]
+    hooked-symbol geInt{}(Int{}) : Bool{} [hook{}("INT.ge")]
+endmodule
+[]

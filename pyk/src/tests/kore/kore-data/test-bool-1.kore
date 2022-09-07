@@ -1,0 +1,16 @@
+[]
+module BOOL
+    hooked-sort Bool{} [hook{}("BOOL.Bool"), hasDomainValues{}()]
+    hooked-symbol andBool{}(Bool{}, Bool{}) : Bool{} [hook{}("BOOL.and")]
+    hooked-symbol orBool{}(Bool{}, Bool{}) : Bool{} [hook{}("BOOL.or")]
+    hooked-symbol andThenBool{}(Bool{}, Bool{}) : Bool{} [hook{}("BOOL.andThen")]
+    hooked-symbol orElseBool{}(Bool{}, Bool{}) : Bool{} [hook{}("BOOL.orElse")]
+    hooked-symbol xorBool{}(Bool{}, Bool{}) : Bool{} [hook{}("BOOL.xor")]
+    hooked-symbol impliesBool{}(Bool{}, Bool{}) : Bool{} [hook{}("BOOL.implies")]
+    hooked-symbol neBool{}(Bool{}, Bool{}) : Bool{} [hook{}("BOOL.ne")]
+    hooked-symbol eqBool{}(Bool{}, Bool{}) : Bool{} [hook{}("BOOL.eq")]
+    hooked-symbol notBool{}(Bool{}) : Bool{} [hook{}("BOOL.not")]
+    alias trueBool{}() : Bool{} where trueBool{}() := \dv{Bool{}}("true") []
+    alias falseBool{}() : Bool{} where falseBool{}() := \dv{Bool{}}("false") []
+endmodule
+[]

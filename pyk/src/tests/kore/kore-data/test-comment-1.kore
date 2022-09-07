@@ -1,0 +1,8 @@
+[]
+
+module TEST-COMMENT-1
+
+  // This is a line comment.
+
+endmodule []
+
