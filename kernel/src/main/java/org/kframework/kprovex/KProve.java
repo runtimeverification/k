@@ -3,7 +3,6 @@ package org.kframework.kprovex;
 
 import com.google.inject.Inject;
 import org.kframework.RewriterResult;
-import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
@@ -22,7 +21,6 @@ import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
 
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.Set;
 import java.util.function.Function;
@@ -35,7 +33,7 @@ public class KProve {
     public static final String BOUNDARY_CELL_PREFIX = "BOUND_";
 
     private static final int KPROVE_SUCCESS_EXIT_CODE = 0;
-    private static final int KPROVE_STUCK_STATE_EXIT_CODE = 1;
+    private static final int KPROVE_MISMATCH_CONFIG_CODE = 1;
 
     private final KExceptionManager kem;
     private final FileUtil files;
@@ -112,9 +110,9 @@ public class KProve {
         switch (errCode) {
         case KPROVE_SUCCESS_EXIT_CODE:
             break;
-        case KPROVE_STUCK_STATE_EXIT_CODE:
+        case KPROVE_MISMATCH_CONFIG_CODE:
             kem.addKException( new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.PROVER,
-                    "proof was terminated due to stuck state"));
+                    "backend terminated because the configuration cannot be rewritten further. See output for more details."));
             break;
         default:
             kem.addKException( new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.PROVER,
