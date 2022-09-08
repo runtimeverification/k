@@ -25,10 +25,10 @@ export PREFIX
 
 override_dh_auto_build:
 	mvn --batch-mode package -DskipTests -Dllvm.backend.prefix=$(PREFIX) -Dllvm.backend.destdir=$(DESTDIR)
-
-override_dh_auto_install:
 	package/fix-debian-kllvm-path
 	(cd pyk && rm poetry.lock && poetry update)
+
+override_dh_auto_install:
 	package/package
 	@mkdir -p $(DESTDIR)$(PREFIX)/lib/$(PYTHON_DEB_VERSION)/dist-packages
 	ln --symbolic --relative $(DESTDIR)$(PREFIX)/lib/$(PYTHON_VERSION)/site-packages/pyk $(DESTDIR)$(PREFIX)/lib/$(PYTHON_DEB_VERSION)/dist-packages/pyk
