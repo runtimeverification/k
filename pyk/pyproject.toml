@@ -13,7 +13,6 @@ authors = [
 [tool.poetry.dependencies]
 python = "^3.8"
 graphviz = "^0.20.1"
-kllvm = { path = "../k-distribution/target/release/k/lib/python" }
 
 [tool.poetry.dev-dependencies]
 autoflake = "*"
@@ -24,6 +23,7 @@ flake8-comprehensions = "*"
 isort = "*"
 mypy = "*"
 pep8-naming = "*"
+kllvm = { path = "../k-distribution/target/release/k/lib/python" }
 
 [tool.poetry.scripts]
 pyk = "pyk.__main__:main"
