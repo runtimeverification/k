@@ -1,4 +1,4 @@
-kore-exec: [501960] Error (ErrorException):
+kore-exec:  Error (ErrorException):
     Error: missing hook
     Symbol
         Lblcrash'LParUndsRParUnds'VERIF-SYNTAX'Unds'Pgm'Unds'Int{}

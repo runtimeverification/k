@@ -1,7 +1,7 @@
-kore-exec: [780738] Warning (WarnStuckClaimState):
+kore-exec:  Warning (WarnStuckClaimState):
     (InfoReachability) while checking the implication:
     The configuration's term doesn't unify with the destination's term and the configuration cannot be rewritten further. Location: stuck-claim-spec.k:8:10-14:61
-kore-exec: [789669] Warning (WarnUnexploredBranches):
+kore-exec:  Warning (WarnUnexploredBranches):
     5 branches were still unexplored when the action failed.
   #Not ( #Exists _DotVar2 . #Exists I . {
       _DotVar1
