@@ -3,8 +3,6 @@ name: "[K-Bug] Report"
 description: Create a bug report to help us improve
 title: "[K-Bug] <TITLE>"
 labels: ["k-bug", "k"]
-assignees:
-  - ana-pantilie
   
 body:
   - type: markdown
