@@ -13,7 +13,7 @@ jobs:
           set -x
           git config user.name devops
           git config user.email devops@runtimeverification.com
-          git pull
+          git fetch origin ${GITHUB_BASE_REF}
           if ! git diff --exit-code origin/${GITHUB_BASE_REF} ${GITHUB_HEAD_REF} -- package/version; then
               ./package/version.sh bump
               ./package/version.sh sub
