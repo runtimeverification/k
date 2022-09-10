@@ -1,9 +1,6 @@
 name: 'Update'
 on:
   pull_request:
-  push:
-    branches-ignore:
-      - 'master'
 jobs:
   version-bump:
     name: 'Version Bump'
