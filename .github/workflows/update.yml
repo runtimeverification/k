@@ -10,13 +10,15 @@ jobs:
         uses: actions/checkout@v3
       - name: 'Update Version'
         run: |
+          git remote remove origin || true
+          git remote add origin 'https://github.com/runtimeverification/k'
           old_master="$(git merge-base origin/master HEAD)"
           new_master="$(git rev-parse origin/master)"
           if ! git diff --exit-code ${old_master} ${new_master} -- package/version; then
               ./package/version.sh bump
               ./package/version.sh sub
               git add --update
-              git commit --no-edit --allow-empty --message "Set Version: $(cat package/version)"
+              git commit --message "Set Version: $(cat package/version)"
               git push
           fi
 
