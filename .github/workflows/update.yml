@@ -12,6 +12,7 @@ jobs:
         run: |
           git remote remove origin || true
           git remote add origin 'https://github.com/runtimeverification/k'
+          git fetch --all
           old_master="$(git merge-base origin/master HEAD)"
           new_master="$(git rev-parse origin/master)"
           if ! git diff --exit-code ${old_master} ${new_master} -- package/version; then
