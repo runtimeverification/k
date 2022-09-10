@@ -5,6 +5,27 @@ on:
     branches-ignore:
       - 'master'
 jobs:
+  version-bump:
+    name: 'Version Bump'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
+      - name: 'Update Version'
+        run: |
+          old_master="$(git merge-base origin/master HEAD)"
+          new_master="$(git rev-parse origin/master)"
+          if ! git diff --exit-code ${old_master} ${new_master} -- package/version; then
+              ./package/version.sh bump
+              ./package/version.sh sub
+              git add --update
+              git commit --no-edit --allow-empty --message "Set Version: $(cat package/version)"
+              git push
+          fi
+
   # Update the pinned Maven dependencies for Nix.
   # This job only runs on push events because we cannot push changes back to a
   # pull request branch from a fork.
