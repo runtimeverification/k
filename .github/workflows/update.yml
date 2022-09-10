@@ -19,6 +19,7 @@ jobs:
           git fetch origin ${GITHUB_BASE_REF} ${GITHUB_HEAD_REF}
           git checkout -B ${GITHUB_HEAD_REF} origin/${GITHUB_HEAD_REF}
           git pull
+          git diff origin/${GITHUB_BASE_REF} ${GITHUB_HEAD_REF} -- package/version
           if ! git diff --exit-code origin/${GITHUB_BASE_REF} ${GITHUB_HEAD_REF} -- package/version; then
               ./package/version.sh bump
               ./package/version.sh sub
