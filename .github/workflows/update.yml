@@ -1,6 +1,9 @@
 name: 'Update'
 on:
   pull_request:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   version-bump:
     name: 'Version Bump'
