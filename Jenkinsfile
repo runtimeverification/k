@@ -428,7 +428,7 @@ pipeline {
             git fetch --all
 
             release_commit="$LONG_REV"
-            git checkout $release_commit
+            git checkout ${release_commit}
 
             git tag -d "${K_RELEASE_TAG}"         || true
             git push -d origin "${K_RELEASE_TAG}" || true
