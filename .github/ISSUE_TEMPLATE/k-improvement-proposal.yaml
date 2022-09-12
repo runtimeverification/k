@@ -1,0 +1,98 @@
+---
+name: "[KIP] - K Improvment Proposal"
+description: Suggest a new feature for the K Language
+title: "[K-Improvement] <Title>"
+labels: ["request", "k", "improvement"]
+
+body:
+- type: markdown
+  attributes:
+    value: |
+      # First fill in the title (template provided).
+      ## Example:
+
+      [K-Improvement] - Use `foo` instead of `syntax` for declaring productions
+
+      # Motivation
+
+      -   Is there a semantics which you are developing which this feature would simplify?
+      -   Is this feature similar to a feature offered by another programming language?
+      -   Any other motivation?
+
+      # Example K Code
+
+      Provide a small, complete, and self-contained example of what you would like to be able to say in K.
+      Try to make it so that your example would `kompile` correctly if this feature were implemented.
+
+      ## Example:
+
+      I would like to be able to use `foo` instead of `syntax` for declaring AST nodes:
+
+      ```
+      module MYMODULE
+        imports BOOL
+
+        foo    Bar ::= "newBar" [function]
+        syntax Bar ::= "anotherBar"
+      endmodule
+      ```
+
+      # Documentation
+
+      Provide (initial) documentation for this new feature.
+
+      ## Example:
+
+      A user may choose to use `foo` instead of `syntax` when declaring new production in K.
+      The meaning is exactly identical to `syntax`, but it requires 3 fewer characters to type, which saves on average 17s/month of semantics development.
+
+      # Potential Alternatives/Work-arounds
+      
+      If there is an obvious alternative way to implement this or an existing work-around, please briefly describe it here.
+
+      ## Example:
+
+      -   Users could also type `fo`, because it's even shorter. But because they are already pressing the `o` key, pressing `o` a second time has been shown to only increase the time per month by 2s (compared to the 17s overall), which means that the added benefit of programmers being familiar with the word `foo` outweighs the performance gains.
+      -   The keyword `bar` was also considered, but because `foo` has double-`o`, it's faster to type.
+
+      # Testing Approach
+      
+      If the feature is directly testable using the existing K test harness, provide an example test input/output here.
+      Otherwise, describe the testing approach you would use for this feature.
+
+      ## Example:
+
+      We could:
+
+      -   Modify `IMP` in the tutorial to use `foo` instead of `syntax` in a few places, or
+      -   Add the following definition to `tests/regression-new/foo-syntax.k`:
+
+          ```
+          module TEST
+            imports BOOL
+            configuration <k> $PGM:A </k>
+
+            syntax A ::= "blah"
+            foo A ::= "halb"
+
+            rule <k> blah => halb ... </k>
+          endmodule
+          ```
+
+          with the following input file:
+
+          ```
+          blah
+          ```
+
+          and expected output:
+
+          ```
+          halb
+          ```
+
+- type: textarea
+  attributes: 
+    label: Per the Examples above please provide some Imrovement Suggestions
+    placeholder: <This field will be rendered into MarkDown> 
+    render: Markdown
