@@ -6,10 +6,10 @@ from typing import Final
 
 from graphviz import Digraph
 
-from .coverage import getRuleById, stripCoverageLogger
+from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import split_config_and_constraints
-from .kast import KAst, flatten_label, read_kast_definition
-from .kastManip import minimize_term, minimizeRule, propagate_up_constraints, removeSourceMap
+from .kast import KAst, read_kast_definition
+from .kastManip import flatten_label, minimize_rule, minimize_term, propagate_up_constraints, remove_source_map
 from .ktool import KPrint, KProve
 from .ktool.kprint import build_symbol_table, pretty_print_kast
 from .prelude import Sorts, mlAnd, mlOr, mlTop
@@ -47,43 +47,43 @@ def main():
             _LOGGER.info(f'Wrote file: {args["output_file"].name}')
         else:
             if args['minimize']:
-                abstractLabels = [] if args['omit_labels'] is None else args['omit_labels'].split(',')
-                minimizedDisjuncts = []
-                for d in flatten_label('#Or', term):
-                    dMinimized = minimize_term(d, abstract_labels=abstractLabels)
-                    dConfig, dConstraint = split_config_and_constraints(dMinimized)
-                    if dConstraint != mlTop():
-                        minimizedDisjuncts.append(mlAnd([dConfig, dConstraint], sort=Sorts.GENERATED_TOP_CELL))
+                abstract_labels = [] if args['omit_labels'] is None else args['omit_labels'].split(',')
+                minimized_disjuncts = []
+                for disjunct in flatten_label('#Or', term):
+                    minimized = minimize_term(disjunct, abstract_labels=abstract_labels)
+                    config, constraint = split_config_and_constraints(minimized)
+                    if constraint != mlTop():
+                        minimized_disjuncts.append(mlAnd([config, constraint], sort=Sorts.GENERATED_TOP_CELL))
                     else:
-                        minimizedDisjuncts.append(dConfig)
-                term = propagate_up_constraints(mlOr(minimizedDisjuncts, sort=Sorts.GENERATED_TOP_CELL))
+                        minimized_disjuncts.append(config)
+                term = propagate_up_constraints(mlOr(minimized_disjuncts, sort=Sorts.GENERATED_TOP_CELL))
             args['output_file'].write(printer.pretty_print(term))
             _LOGGER.info(f'Wrote file: {args["output_file"].name}')
 
     elif args['command'] == 'prove':
         kprover = KProve(kompiled_dir, args['main-file'], profile=args['profile'])
-        finalState = kprover.prove(Path(args['spec-file']), spec_module_name=args['spec-module'], args=args['kArgs'])
-        args['output_file'].write(finalState.to_json())
+        final_state = kprover.prove(Path(args['spec-file']), spec_module_name=args['spec-module'], args=args['kArgs'])
+        args['output_file'].write(final_state.to_json())
         _LOGGER.info(f'Wrote file: {args["output_file"].name}')
 
     elif args['command'] == 'graph-imports':
         kprinter = KPrint(kompiled_dir, profile=args['profile'])
-        kDefn = kprinter.definition
-        importGraph = Digraph()
-        graphFile = kompiled_dir / 'import-graph'
-        for module in kDefn.modules:
-            modName = module.name
-            importGraph.node(modName)
-            for moduleImport in module.imports:
-                importGraph.edge(modName, moduleImport.name)
-        importGraph.render(graphFile)
-        _LOGGER.info(f'Wrote file: {graphFile}')
+        definition = kprinter.definition
+        import_graph = Digraph()
+        graph_file = kompiled_dir / 'import-graph'
+        for module in definition.modules:
+            module_name = module.name
+            import_graph.node(module_name)
+            for module_import in module.imports:
+                import_graph.edge(module_name, module_import.name)
+        import_graph.render(graph_file)
+        _LOGGER.info(f'Wrote file: {graph_file}')
 
     elif args['command'] == 'coverage':
-        json_definition = removeSourceMap(read_kast_definition(kompiled_dir / 'compiled.json'))
+        json_definition = remove_source_map(read_kast_definition(kompiled_dir / 'compiled.json'))
         symbol_table = build_symbol_table(json_definition)
         for rid in args['coverage-file']:
-            rule = minimizeRule(stripCoverageLogger(getRuleById(json_definition, rid.strip())))
+            rule = minimize_rule(strip_coverage_logger(get_rule_by_id(json_definition, rid.strip())))
             args['output'].write('\n\n')
             args['output'].write('Rule: ' + rid.strip())
             args['output'].write('\nUnparsed:\n')

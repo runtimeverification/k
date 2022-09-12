@@ -25,11 +25,12 @@ from typing import (
     overload,
 )
 
-from .utils import FrozenDict, filter_none, hash_str
+from .utils import EMPTY_FROZEN_DICT, FrozenDict, filter_none, hash_str, single
 
 T = TypeVar('T', bound='KAst')
 W = TypeVar('W', bound='WithKAtt')
 KI = TypeVar('KI', bound='KInner')
+RL = TypeVar('RL', bound='KRuleLike')
 
 
 class KAst(ABC):
@@ -67,12 +68,12 @@ class KAst(ABC):
         # shallow copy version of dataclass.astuple.
         return tuple(self.__dict__[field.name] for field in fields(type(self)))
 
-    def __lt__(t1, t2):
-        if not isinstance(t2, KAst):
+    def __lt__(self, other):
+        if not isinstance(other, KAst):
             return NotImplemented
-        if type(t1) == type(t2):
-            return t1._as_shallow_tuple() < t2._as_shallow_tuple()
-        return type(t1).__name__ < type(t2).__name__
+        if type(self) == type(other):
+            return self._as_shallow_tuple() < other._as_shallow_tuple()
+        return type(self).__name__ < type(other).__name__
 
 
 @final
@@ -80,8 +81,19 @@ class KAst(ABC):
 class KAtt(KAst, Mapping[str, Any]):
     atts: FrozenDict[str, Any]
 
-    def __init__(self, atts: Mapping[str, Any] = {}):
-        object.__setattr__(self, 'atts', FrozenDict(atts))
+    def __init__(self, atts: Mapping[str, Any] = EMPTY_FROZEN_DICT):
+        def _freeze(m: Any) -> Any:
+            if isinstance(m, (int, str, tuple, FrozenDict, FrozenSet)):
+                return m
+            elif isinstance(m, list):
+                return tuple((v for v in m))
+            elif isinstance(m, dict):
+                return FrozenDict(((k, _freeze(v)) for (k, v) in m.items()))
+            raise ValueError(f"Don't know how to freeze attribute value {m} of type {type(m)}.")
+
+        frozen = _freeze(atts)
+        assert isinstance(frozen, FrozenDict)
+        object.__setattr__(self, 'atts', frozen)
 
     def __iter__(self) -> Iterator[str]:
         return iter(self.atts)
@@ -102,7 +114,12 @@ class KAtt(KAst, Mapping[str, Any]):
         return KAtt(atts=d['att'])
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KAtt', 'att': dict(self.atts)}
+        def _to_dict(m: Any) -> Any:
+            if isinstance(m, FrozenDict):
+                return {k: _to_dict(v) for (k, v) in m.items()}
+            return m
+
+        return {'node': 'KAtt', 'att': _to_dict(self.atts)}
 
     def let(self, *, atts: Optional[Mapping[str, Any]] = None) -> 'KAtt':
         atts = atts if atts is not None else self.atts
@@ -115,7 +132,7 @@ class KAtt(KAst, Mapping[str, Any]):
 EMPTY_ATT: Final = KAtt()
 
 
-class WithKAtt(KAst, ABC):
+class WithKAtt(ABC):
     att: KAtt
 
     @abstractmethod
@@ -129,7 +146,7 @@ class WithKAtt(KAst, ABC):
         return self.let_att(att=self.att.update(atts))
 
 
-class KInner(KAst, ABC):
+class KInner(KAst):
     _INNER_NODES: Final = {'KVariable', 'KSort', 'KToken', 'KLabel', 'KApply', 'KAs', 'KRewrite', 'KSequence'}
 
     @classmethod
@@ -171,7 +188,7 @@ class KInner(KAst, ABC):
 class Subst(Mapping[str, KInner]):
     _subst: FrozenDict[str, KInner]
 
-    def __init__(self, subst: Mapping[str, KInner] = {}):
+    def __init__(self, subst: Mapping[str, KInner] = EMPTY_FROZEN_DICT):
         object.__setattr__(self, '_subst', FrozenDict(subst))
 
     def __iter__(self) -> Iterator[str]:
@@ -336,9 +353,9 @@ class KToken(KInner):
         return None
 
 
-TRUE = KToken('true', 'Bool')
-FALSE = KToken('false', 'Bool')
-ktokenDots = KToken('...', 'K')
+TRUE: Final = KToken('true', 'Bool')
+FALSE: Final = KToken('false', 'Bool')
+DOTS: Final = KToken('...', 'K')
 
 
 @final
@@ -682,7 +699,7 @@ class KSequence(KInner, Sequence[KInner]):
         return None
 
 
-class KOuter(KAst, ABC):
+class KOuter(KAst):
     _OUTER_NODES: Final = {
         'KTerminal',
         'KRegexTerminal',
@@ -714,7 +731,7 @@ class KOuter(KAst, ABC):
         raise ValueError(f"Expected KOuter label as 'node' value, found: '{node}'")
 
 
-class KProductionItem(KOuter, ABC):
+class KProductionItem(KOuter):
     _PRODUCTION_ITEM_NODES: Final = {'KTerminal', 'KRegexTerminal', 'KNonTerminal'}
 
     @classmethod
@@ -727,7 +744,7 @@ class KProductionItem(KOuter, ABC):
         raise ValueError(f"Expected KProductionItem label as 'node' value, found: '{node}'")
 
 
-class KSentence(KOuter, WithKAtt, ABC):
+class KSentence(KOuter, WithKAtt):
     _SENTENCE_NODES: Final = {
         'KProduction',
         'KSyntaxSort',
@@ -1161,7 +1178,7 @@ class KBubble(KSentence):
         return self.let(att=att)
 
 
-class KRuleLike(KSentence, ABC):
+class KRuleLike(KSentence):
     body: KInner
     requires: KInner
     ensures: KInner
@@ -1176,6 +1193,17 @@ class KRuleLike(KSentence, ABC):
             return globals()[node].from_dict(d)
 
         raise ValueError(f"Expected KRuleLike label as 'node' value, found: '{node}'")
+
+    @abstractmethod
+    def let(
+        self: RL,
+        *,
+        body: Optional[KInner] = None,
+        requires: Optional[KInner] = None,
+        ensures: Optional[KInner] = None,
+        att: Optional[KAtt] = None,
+    ) -> RL:
+        ...
 
 
 @final
@@ -1435,31 +1463,31 @@ class KFlatModule(KOuter, WithKAtt):
 @final
 @dataclass(frozen=True)
 class KFlatModuleList(KOuter):
-    mainModule: str
+    main_module: str
     modules: Tuple[KFlatModule, ...]
 
-    def __init__(self, mainModule: str, modules: Iterable[KFlatModule]):
-        object.__setattr__(self, 'mainModule', mainModule)
+    def __init__(self, main_module: str, modules: Iterable[KFlatModule]):
+        object.__setattr__(self, 'main_module', main_module)
         object.__setattr__(self, 'modules', modules)
 
     @classmethod
     def from_dict(cls: Type['KFlatModuleList'], d: Dict[str, Any]) -> 'KFlatModuleList':
         cls._check_node(d)
-        return KFlatModuleList(mainModule=d['mainModule'], modules=(KFlatModule.from_dict(kfm) for kfm in d['term']))
+        return KFlatModuleList(main_module=d['mainModule'], modules=(KFlatModule.from_dict(kfm) for kfm in d['term']))
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             'node': 'KFlatModuleList',
-            'mainModule': self.mainModule,
+            'mainModule': self.main_module,
             'term': [mod.to_dict() for mod in self.modules],
         }
 
     def let(
-        self, *, mainModule: Optional[str] = None, modules: Optional[Iterable[KFlatModule]] = None
+        self, *, main_module: Optional[str] = None, modules: Optional[Iterable[KFlatModule]] = None
     ) -> 'KFlatModuleList':
-        mainModule = mainModule if mainModule is not None else self.mainModule
+        main_module = main_module if main_module is not None else self.main_module
         modules = modules if modules is not None else self.modules
-        return KFlatModuleList(mainModule=mainModule, modules=modules)
+        return KFlatModuleList(main_module=main_module, modules=modules)
 
 
 @final
@@ -1571,11 +1599,15 @@ class KDefinition(KOuter, WithKAtt):
     def constructors(self) -> List[KProduction]:
         return [prod for module in self.modules for prod in module.constructors]
 
+    @property
+    def rules(self) -> List[KRule]:
+        return [rule for module in self.modules for rule in module.rules]
+
     def production_for_klabel(self, klabel: KLabel) -> KProduction:
-        productions = [prod for prod in self.productions if prod.klabel and prod.klabel == klabel]
-        if len(productions) != 1:
-            raise ValueError(f'Expected 1 production for label {klabel}, not {productions}.')
-        return productions[0]
+        try:
+            return single(prod for prod in self.productions if prod.klabel and prod.klabel == klabel)
+        except ValueError as err:
+            raise ValueError(f'Expected a single production for label {klabel}') from err
 
     def production_for_cell_sort(self, sort: KSort) -> KProduction:
         # Typical cell production has 3 productions:
@@ -1589,10 +1621,10 @@ class KDefinition(KOuter, WithKAtt):
             raise ValueError(
                 f'Method production_for_cell_sort only intended to be called on sorts ending in "Cell", not: {sort}'
             )
-        productions = [prod for prod in self.productions if prod.sort == sort and 'cell' in prod.att]
-        if len(productions) != 1:
-            raise ValueError(f'Expected 1 cell production for sort {sort}, not: {productions}')
-        return productions[0]
+        try:
+            return single(prod for prod in self.productions if prod.sort == sort and 'cell' in prod.att)
+        except ValueError as err:
+            raise ValueError(f'Expected a single cell production for sort {sort}') from err
 
     def empty_config(self, sort: KSort) -> KInner:
         def _kdefinition_empty_config(_sort):
@@ -1617,6 +1649,48 @@ class KDefinition(KOuter, WithKAtt):
 
         return _kdefinition_empty_config(sort)
 
+    def init_config(self, sort: KSort) -> KInner:
+
+        config_var_map = KVariable('__###CONFIG_VAR_MAP###__')
+
+        def _remove_config_var_lookups(_kast: KInner) -> KInner:
+            if type(_kast) is KApply and _kast.label.name.startswith('project:') and len(_kast.args) == 1:
+                _term = _kast.args[0]
+                if type(_term) is KApply and _term.label == KLabel('Map:lookup') and _term.args[0] == config_var_map:
+                    _token_var = _term.args[1]
+                    if type(_token_var) is KToken and _token_var.sort == KSort('KConfigVar'):
+                        return KVariable(_token_var.token)
+            return _kast
+
+        init_prods = (prod for prod in self.syntax_productions if 'initializer' in prod.att)
+        try:
+            init_prod = single(prod for prod in init_prods if prod.sort == sort)
+        except ValueError as err:
+            raise ValueError(f'Did not find unique initializer for sort: {sort}') from err
+
+        prod_klabel = init_prod.klabel
+        assert prod_klabel is not None
+        arg_sorts = [nt.sort for nt in init_prod.items if type(nt) is KNonTerminal]
+        init_config: KInner
+        if len(arg_sorts) == 0:
+            init_config = KApply(prod_klabel)
+        elif len(arg_sorts) == 1 and arg_sorts[0] == KSort('Map'):
+            init_config = KApply(prod_klabel, [config_var_map])
+        else:
+            raise ValueError(f'Cannot handle initializer for label: {prod_klabel}')
+
+        init_rewrites = [rule.body for rule in self.rules if 'initializer' in rule.att]
+        old_init_config: Optional[KInner] = None
+        while init_config != old_init_config:
+            old_init_config = init_config
+            for rew in init_rewrites:
+                assert type(rew) is KRewrite
+                init_config = rew(init_config)
+
+        init_config = top_down(_remove_config_var_lookups, init_config)
+
+        return init_config
+
 
 # TODO make method of KInner
 def bottom_up(f: Callable[[KInner], KInner], kinner: KInner) -> KInner:
@@ -1635,30 +1709,6 @@ def collect(callback: Callable[[KInner], None], kinner: KInner) -> None:
         return kinner
 
     bottom_up(f, kinner)
-
-
-def flatten_label(label: str, kast: KInner) -> List[KInner]:
-    """Given a cons list, return a flat Python list of the elements.
-
-    -   Input: Cons operation to flatten.
-    -   Output: Items of cons list.
-    """
-    if type(kast) is KApply and kast.label.name == label:
-        items = [flatten_label(label, arg) for arg in kast.args]
-        return [c for cs in items for c in cs]
-    return [kast]
-
-
-def constLabel(symbol):
-    return lambda: symbol
-
-
-def assocWithUnit(assocJoin, unit):
-    def _assocWithUnit(*args):
-        newArgs = [arg for arg in args if arg != unit]
-        return assocJoin.join(newArgs)
-
-    return _assocWithUnit
 
 
 def read_kast(ifile: Path) -> KAst:

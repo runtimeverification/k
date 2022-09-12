@@ -1,0 +1,38 @@
+kit-load sum-to-n_summary
+
+kit-clean
+kit-set verbose
+
+mkdir -p "${summary_dir}"
+kompile --backend haskell -o "${summary_dir}/kompiled" --emit-json ../../k-files/imp-verification.k
+kit-init sum-to-n sum-to-n-spec.k
+
+list-cfgs
+
+split-node '#init'         'N ==Int 1'   --alias-true init-1   --alias-false init-not-1
+split-node '@init-not-1'   'N ==Int 2'   --alias-true init-2   --alias-false init-not-1-2
+split-node '@init-not-1-2' 'N ==Int 10'  --alias-true init-10
+
+show-edge @init-not-1-2,@init-10
+show-node @init-10
+
+kit-set profile
+
+build-edges "@init-1,#target"
+verify-edges --edges "@init-1,#target"
+
+build-edges "@init-10,#target"
+verify-edges --edges "@init-10,#target"
+
+# Expected failure
+build-edges "@init-2,@init-10"
+( kit-set log-format '%(levelname)s - %(message)s'
+  kit-set log-file "${summary_dir}/log"
+  kit-unset debug
+  kit-unset verbose
+  kit-unset profile
+  verify-edges --edges "@init-2,@init-10" || true
+  cat "${summary_dir}/log"
+)
+
+show-cfg

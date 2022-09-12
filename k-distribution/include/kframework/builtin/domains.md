@@ -946,7 +946,7 @@ You can:
                  Int "^Int" Int                 [function, klabel(_^Int_), symbol, left, smt-hook(^), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
                | Int "^%Int" Int Int            [function, klabel(_^%Int__), symbol, left, smt-hook((mod (^ #1 #2) #3)), hook(INT.powmod)]
                > left:
-                 Int "*Int" Int                 [function, functional, klabel(_*Int_), symbol, left, smt-hook(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
+                 Int "*Int" Int                 [function, functional, klabel(_*Int_), symbol, left, comm, smt-hook(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
                /* FIXME: translate /Int and %Int into smtlib */
                /* /Int and %Int implement t-division, which rounds towards 0 */
                | Int "/Int" Int                 [function, klabel(_/Int_), symbol, left, smt-hook(div), latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(INT.tdiv)]
@@ -955,17 +955,17 @@ You can:
                | Int "divInt" Int               [function, klabel(_divInt_), symbol, left, smt-hook(div), hook(INT.ediv)]
                | Int "modInt" Int               [function, klabel(_modInt_), symbol, left, smt-hook(mod), hook(INT.emod)]
                > left:
-                 Int "+Int" Int                 [function, functional, klabel(_+Int_), symbol, left, smt-hook(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(INT.add)]
+                 Int "+Int" Int                 [function, functional, klabel(_+Int_), symbol, left, comm, smt-hook(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(INT.add)]
                | Int "-Int" Int                 [function, functional, klabel(_-Int_), symbol, left, smt-hook(-), latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(INT.sub)]
                > left:
                  Int ">>Int" Int                [function, klabel(_>>Int_), symbol, left, latex({#1}\mathrel{\gg_{\scriptstyle\it Int}}{#2}), hook(INT.shr), smtlib(shrInt)]
                | Int "<<Int" Int                [function, klabel(_<<Int_), symbol, left, latex({#1}\mathrel{\ll_{\scriptstyle\it Int}}{#2}), hook(INT.shl), smtlib(shlInt)]
                > left:
-                 Int "&Int" Int                 [function, functional, klabel(_&Int_), symbol, left, latex({#1}\mathrel{\&_{\scriptstyle\it Int}}{#2}), hook(INT.and), smtlib(andInt)]
+                 Int "&Int" Int                 [function, functional, klabel(_&Int_), symbol, left, comm, latex({#1}\mathrel{\&_{\scriptstyle\it Int}}{#2}), hook(INT.and), smtlib(andInt)]
                > left:
-                 Int "xorInt" Int               [function, functional, klabel(_xorInt_), symbol, left, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(INT.xor), smtlib(xorInt)]
+                 Int "xorInt" Int               [function, functional, klabel(_xorInt_), symbol, left, comm, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(INT.xor), smtlib(xorInt)]
                > left:
-                 Int "|Int" Int                 [function, functional, klabel(_|Int_), symbol, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(INT.or), smtlib(orInt)]
+                 Int "|Int" Int                 [function, functional, klabel(_|Int_), symbol, left, comm, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(INT.or), smtlib(orInt)]
 ```
 
 ### Integer minimum and maximum

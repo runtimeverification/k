@@ -1,0 +1,1 @@
+`<k>`(#Equals(#token("3","Int"),#token("4","Int"))=>#token("2","Int"))

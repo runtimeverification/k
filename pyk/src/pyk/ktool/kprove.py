@@ -6,9 +6,9 @@ from subprocess import CalledProcessError, CompletedProcess
 from typing import Final, Iterable, List, Optional, Tuple
 
 from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp, run_process
-from ..cterm import CTerm
-from ..kast import KAst, KClaim, KDefinition, KFlatModule, KImport, KInner, KRequire, KRule, KSentence, flatten_label
-from ..kastManip import build_claim, collectFreeVars, extract_subst
+from ..cterm import CTerm, build_claim
+from ..kast import KAst, KClaim, KDefinition, KFlatModule, KImport, KInner, KRequire, KRule, KSentence
+from ..kastManip import extract_subst, flatten_label, free_vars
 from ..prelude import mlAnd, mlBottom, mlTop
 from ..utils import unique
 from .kprint import KPrint
@@ -120,13 +120,13 @@ class KProve(KPrint):
             '--log-entries',
             ','.join(haskell_log_entries),
         ]
-        command = [c for c in self.prover]
+        command = list(self.prover)
         command += [str(spec_file)]
         command += ['--definition', str(self.definition_dir), '--output', 'json']
         command += ['--spec-module', spec_module_name] if spec_module_name is not None else []
         command += ['--dry-run'] if dry_run else []
-        command += [c for c in self.prover_args]
-        command += args
+        command += self.prover_args
+        command += list(args)
 
         kore_exec_opts = ' '.join(list(haskell_args) + haskell_log_args)
         _LOGGER.debug(f'export KORE_EXEC_OPTS="{kore_exec_opts}"')
@@ -134,6 +134,8 @@ class KProve(KPrint):
         command_env['KORE_EXEC_OPTS'] = kore_exec_opts
 
         proc_result = run_process(command, logger=_LOGGER, env=command_env, check=False, profile=self._profile)
+        if proc_result.returncode not in (0, 1):
+            raise RuntimeError('kprove failed!')
 
         if not dry_run:
             debug_log = _get_rule_log(log_file)
@@ -146,10 +148,10 @@ class KProve(KPrint):
         self,
         claim,
         claim_id,
-        lemmas=[],
-        args=[],
-        haskell_args=[],
-        haskell_log_entries=[],
+        lemmas: Iterable[KRule] = (),
+        args: Iterable[str] = (),
+        haskell_args: Iterable[str] = (),
+        haskell_log_entries: Iterable[str] = (),
         log_axioms_file=None,
         allow_zero_step=False,
         dry_run=False,
@@ -174,13 +176,13 @@ class KProve(KPrint):
         claim_id: str,
         init_cterm: CTerm,
         target_cterm: CTerm,
-        lemmas: Iterable[KRule] = [],
-        args: List[str] = [],
-        haskell_args: List[str] = [],
+        lemmas: Iterable[KRule] = (),
+        args: Iterable[str] = (),
+        haskell_args: Iterable[str] = (),
         log_axioms_file: Path = None,
         allow_zero_step: bool = False,
     ) -> List[KInner]:
-        claim, var_map = build_claim(claim_id, init_cterm, target_cterm, keep_vars=collectFreeVars(init_cterm.kast))
+        claim, var_map = build_claim(claim_id, init_cterm, target_cterm, keep_vars=free_vars(init_cterm.kast))
         next_state = self.prove_claim(
             claim,
             claim_id,
@@ -202,9 +204,9 @@ class KProve(KPrint):
         self,
         claim_id: str,
         claim: KClaim,
-        lemmas: List[KRule] = [],
-        args: List[str] = [],
-        haskell_args: List[str] = [],
+        lemmas: Iterable[KRule] = (),
+        args: Iterable[str] = (),
+        haskell_args: Iterable[str] = (),
         max_depth: int = 1000,
     ) -> Tuple[int, bool, KInner]:
         def _is_fatal_error_log_entry(line: str) -> bool:
@@ -216,8 +218,8 @@ class KProve(KPrint):
         next_state = self.prove(
             claim_path,
             spec_module_name=claim_module,
-            args=(args + ['--depth', str(max_depth)]),
-            haskell_args=(['--execute-to-branch'] + haskell_args),
+            args=list(args) + ['--depth', str(max_depth)],
+            haskell_args=(['--execute-to-branch'] + list(haskell_args)),
             log_axioms_file=log_axioms_file,
         )
         if len(flatten_label('#And', next_state)) != 1:
@@ -247,7 +249,7 @@ class KProve(KPrint):
                 could_be_branching = False
         return depth, branching, next_state
 
-    def _write_claim_definition(self, claim: KClaim, claim_id: str, lemmas: List[KRule] = []) -> Tuple[Path, str]:
+    def _write_claim_definition(self, claim: KClaim, claim_id: str, lemmas: Iterable[KRule] = ()) -> Tuple[Path, str]:
         tmp_claim = self.use_directory / (claim_id.lower() + '-spec')
         tmp_module_name = claim_id.upper() + '-SPEC'
         tmp_claim = tmp_claim.with_suffix('.k')

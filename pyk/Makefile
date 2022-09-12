@@ -4,115 +4,93 @@ K_BIN  := $(K_ROOT)/k-distribution/target/release/k/bin
 export PATH := $(K_BIN):$(PATH)
 
 
-.PHONY: default all clean install                                \
-        venv venv-dev venv-clean                                 \
-        test test-unit test-integration test-pyk                 \
-        format isort autoflake black                             \
-        check check-isort check-autoflake check-black check-mypy
+.PHONY: default all clean build install          \
+        poetry-install                           \
+        test test-unit test-integration test-pyk \
+        format isort autoflake black             \
+        check check-isort check-autoflake check-black check-flake8 check-mypy
 
 default: check test-unit
 
 all: check test
 
-clean: venv-clean
-	rm -rf definitions build src/pyk.egg-info .myp_cache
+clean:
+	rm -rf definitions dist .mypy_cache
 	find -type d -name __pycache__ -prune -exec rm -rf {} \;
 	$(MAKE) -C pyk-tests clean
 
+build:
+	poetry build
 
-# Virtualenv
+install: build
+	pip3 install ./dist/*.whl --root=$(DESTDIR) --prefix=$(PREFIX)
 
-VENV_DEV_DIR := build
-VENV_DEV     := $(VENV_DEV_DIR)/pyvenv.cfg
-ACTIVATE_DEV := . $(CURDIR)/$(VENV_DEV_DIR)/bin/activate
+poetry-install:
+	poetry install
 
-$(VENV_DEV):
-	   virtualenv -p python3 $(VENV_DEV_DIR) \
-	&& $(ACTIVATE_DEV)                       \
-	&& pip install -r requirements/dev.txt
-
-$(VENV_DEV_DIR): $(VENV_DEV)
-	@echo $(ACTIVATE_DEV)
-
-
-VENV_PROD_DIR := venv-prod
-VENV_PROD     := $(VENV_PROD_DIR)/pyvenv.cfg
-ACTIVATE_PROD := . $(CURDIR)/$(VENV_PROD_DIR)/bin/activate
-
-$(VENV_PROD):
-	   virtualenv -p python3 $(VENV_PROD_DIR) \
-	&& $(ACTIVATE_PROD)                       \
-	&& pip install .
-
-$(VENV_PROD_DIR): $(VENV_PROD)
-	@echo $(ACTIVATE_PROD)
-
-venv: $(VENV_PROD_DIR)
-
-venv-dev: $(VENV_DEV_DIR)
-
-venv-clean:
-	rm -rf $(VENV_PROD_DIR)
-	rm -rf $(VENV_DEV_DIR)
-
-install:
-	pip3 install . --root=$(DESTDIR) --prefix=$(PREFIX)
+POETRY_RUN := poetry run
 
 
 # Tests
 
-PYK_TEST_ARGS :=
+TEST_ARGS :=
 
-test: test-unit test-integration test-pyk
+test: test-unit test-integration test-pyk test-kit
 
-test-unit: venv-dev
-	$(ACTIVATE_DEV) && python3 -m unittest discover --verbose --top src pyk.tests $(PYK_TEST_ARGS)
+test-unit: poetry-install
+	$(POETRY_RUN) python -m unittest discover tests --failfast --verbose $(TEST_ARGS)
 
-test-integration: venv-dev
-	$(ACTIVATE_DEV) && python3 -m unittest discover --verbose --top src pyk.integration_tests $(PYK_TEST_ARGS)
+test-integration: poetry-install
+	$(POETRY_RUN) python -m unittest discover integration_tests --failfast --verbose $(TEST_ARGS)
 
-test-pyk: venv-prod
-	$(ACTIVATE_PROD) && $(MAKE) -C pyk-tests
-	rm -rf $(VENV_PROD_DIR) build src/pyk.egg-info
+test-pyk: poetry-install
+	$(POETRY_RUN) $(MAKE) -C pyk-tests
+
+test-kit: poetry-install
+	$(POETRY_RUN) $(MAKE) -C kit-tests
 
 
 # Checks and formatting
 
 format: isort autoflake black
-check: check-isort check-autoflake check-black check-mypy
+check: check-isort check-autoflake check-black check-flake8 check-mypy
 
-isort: venv-dev
-	$(ACTIVATE_DEV) && isort src
+isort: poetry-install
+	$(POETRY_RUN) isort src
 
-check-isort: venv-dev
-	$(ACTIVATE_DEV) && isort --check src
+check-isort: poetry-install
+	$(POETRY_RUN) isort --check src
 
-autoflake: venv-dev
-	$(ACTIVATE_DEV) && autoflake src \
-	  --in-place                     \
-	  --recursive                    \
-	  --expand-star-imports          \
-	  --remove-all-unused-imports    \
-	  --ignore-init-module-imports   \
-	  --remove-duplicate-keys        \
+autoflake: poetry-install
+	$(POETRY_RUN) autoflake src    \
+	  --in-place                   \
+	  --quiet                      \
+	  --recursive                  \
+	  --expand-star-imports        \
+	  --remove-all-unused-imports  \
+	  --ignore-init-module-imports \
+	  --remove-duplicate-keys      \
 	  --remove-unused-variables
 
-check-autoflake: venv-dev
-	$(ACTIVATE_DEV) && autoflake src \
-	  --check                        \
-	  --recursive                    \
-	  --expand-star-imports          \
-	  --remove-all-unused-imports    \
-	  --ignore-init-module-imports   \
-	  --remove-duplicate-keys        \
+check-autoflake: poetry-install
+	$(POETRY_RUN) autoflake src    \
+	  --check                      \
+	  --quiet                      \
+	  --recursive                  \
+	  --expand-star-imports        \
+	  --remove-all-unused-imports  \
+	  --ignore-init-module-imports \
+	  --remove-duplicate-keys      \
 	  --remove-unused-variables
 
-black: venv-dev
-	$(ACTIVATE_DEV) && black src
+check-flake8: poetry-install
+	$(POETRY_RUN) flake8 src
 
-check-black: venv-dev
-	$(ACTIVATE_DEV) && black --check src
+black: poetry-install
+	$(POETRY_RUN) black src
 
-check-mypy: venv-dev
-	$(ACTIVATE_DEV) && mypy src
+check-black: poetry-install
+	$(POETRY_RUN) black --check src
 
+check-mypy: poetry-install
+	$(POETRY_RUN) mypy src

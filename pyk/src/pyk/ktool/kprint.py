@@ -4,10 +4,11 @@ import os
 import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Callable, Dict, Final, List, Optional
+from typing import Callable, Dict, Final, Iterable, Optional
 
 from ..cli_utils import check_dir_path, run_process
 from ..kast import (
+    DOTS,
     KApply,
     KAs,
     KAst,
@@ -35,10 +36,9 @@ from ..kast import (
     KTerminal,
     KToken,
     KVariable,
-    flatten_label,
-    ktokenDots,
     read_kast_definition,
 )
+from ..kastManip import flatten_label
 from ..kore.parser import KoreParser
 from ..kore.syntax import Kore
 from ..prelude import Bool, Labels, Sorts
@@ -56,7 +56,7 @@ def _kast(
     input: str = 'program',
     output: str = 'json',
     sort: KSort = Sorts.K,
-    args: List[str] = [],
+    args: Iterable[str] = (),
 ) -> str:
     kast_command = ['kast', '--definition', str(definition)]
     kast_command += ['--input', input, '--output', output]
@@ -151,10 +151,11 @@ def build_symbol_table(definition: KDefinition, opinionated=False) -> SymbolTabl
         for prod in module.syntax_productions:
             assert prod.klabel
             label = prod.klabel.name
-            if 'symbol' in prod.att and 'klabel' in prod.att:
-                label = prod.att['klabel']
             unparser = unparser_for_production(prod)
+
             symbol_table[label] = unparser
+            if 'symbol' in prod.att and 'klabel' in prod.att:
+                symbol_table[prod.att['klabel']] = unparser
 
     if opinionated:
         symbol_table['#And'] = lambda c1, c2: c1 + '\n#And ' + c2
@@ -203,8 +204,8 @@ def pretty_print_kast(kast: KAst, symbol_table: SymbolTable, debug=False):
         if kast.arity == 1:
             return pretty_print_kast(kast.items[0], symbol_table, debug=debug)
         unparsed_k_seq = '\n~> '.join([pretty_print_kast(item, symbol_table, debug=debug) for item in kast.items[0:-1]])
-        if kast.items[-1] == ktokenDots:
-            unparsed_k_seq = unparsed_k_seq + '\n' + pretty_print_kast(ktokenDots, symbol_table, debug=debug)
+        if kast.items[-1] == DOTS:
+            unparsed_k_seq = unparsed_k_seq + '\n' + pretty_print_kast(DOTS, symbol_table, debug=debug)
         else:
             unparsed_k_seq = unparsed_k_seq + '\n~> ' + pretty_print_kast(kast.items[-1], symbol_table, debug=debug)
         return unparsed_k_seq
@@ -320,12 +321,12 @@ def pretty_print_kast_bool(kast, symbol_table, debug=False):
         separator = ' ' * (len(head) - 7)
         spacer = ' ' * len(head)
 
-        def joinSep(s):
+        def join_sep(s):
             return ('\n' + separator).join(s.split('\n'))
 
         clauses = (
-            ['( ' + joinSep(clauses[0])]
-            + [head + '( ' + joinSep(c) for c in clauses[1:]]
+            ['( ' + join_sep(clauses[0])]
+            + [head + '( ' + join_sep(c) for c in clauses[1:]]
             + [spacer + (')' * len(clauses))]
         )
         return '\n'.join(clauses)
@@ -343,3 +344,10 @@ def applied_label_str(symbol):
 
 def indent(input, size=2):
     return '\n'.join([(' ' * size) + line for line in input.split('\n')])
+
+
+def assoc_with_unit(assoc_join: str, unit: str) -> Callable[..., str]:
+    def _assoc_with_unit(*args: str):
+        return assoc_join.join(arg for arg in args if arg != unit)
+
+    return _assoc_with_unit

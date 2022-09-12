@@ -272,7 +272,7 @@ class KoreLexer(Iterator[KoreToken]):
         elif char == '*':
             self._block_comment_rest()
         else:
-            assert False
+            raise AssertionError()
 
     def _line_comment_rest(self) -> None:
         while self._la is not None and self._la != '\n':

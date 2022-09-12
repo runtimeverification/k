@@ -39,19 +39,19 @@ class Bool:
         return Bool.true if b else Bool.false
 
     @staticmethod
-    def andBool(items: Iterable[KInner]) -> KInner:
+    def andBool(items: Iterable[KInner]) -> KInner:  # noqa: N802
         return build_assoc(Bool.true, KLabel('_andBool_'), unique(items))
 
     @staticmethod
-    def orBool(items: Iterable[KInner]) -> KInner:
+    def orBool(items: Iterable[KInner]) -> KInner:  # noqa: N802
         return build_assoc(Bool.false, KLabel('_orBool_'), unique(items))
 
     @staticmethod
-    def notBool(item: KInner) -> KApply:
+    def notBool(item: KInner) -> KApply:  # noqa: N802
         return KApply(KLabel('notBool_'), [item])
 
     @staticmethod
-    def impliesBool(antecedent: KInner, consequent: KInner) -> KApply:
+    def impliesBool(antecedent: KInner, consequent: KInner) -> KApply:  # noqa: N802
         return KApply(KLabel('_impliesBool_'), [antecedent, consequent])
 
 
@@ -68,15 +68,13 @@ def build_assoc(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner]
     return res or unit
 
 
-def buildCons(unit, cons, ls):
-    """Build a cons operator term given the cons and unit ops.
-
-    -   Input: unit, cons, and list of elements to join.
-    -   Output: cons-list style construction of the joined term.
-    """
-    if len(ls) == 0:
+def build_cons(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner]) -> KInner:
+    it = iter(terms)
+    try:
+        fst = next(it)
+        return KApply(label, (fst, build_cons(unit, label, it)))
+    except StopIteration:
         return unit
-    return KApply(cons, [ls[0], buildCons(unit, cons, ls[1:])])
 
 
 def token(x: Union[bool, int, str]) -> KToken:
@@ -86,55 +84,58 @@ def token(x: Union[bool, int, str]) -> KToken:
         return intToken(x)
     if type(x) is str:
         return stringToken(x)
-    assert False
+    raise AssertionError()
 
 
-def intToken(i: int) -> KToken:
+def intToken(i: int) -> KToken:  # noqa: N802
     return KToken(str(i), Sorts.INT)
 
 
-def stringToken(s: str) -> KToken:
+def stringToken(s: str) -> KToken:  # noqa: N802
     return KToken(f'"{s}"', Sorts.STRING)
 
 
-def ltInt(i1, i2):
+def ltInt(i1, i2):  # noqa: N802
     return KApply('_<Int_', i1, i2)
 
 
-def leInt(i1, i2):
+def leInt(i1, i2):  # noqa: N802
     return KApply('_<=Int_', i1, i2)
 
 
 # TODO default sort K can be tightened using basic type inference
-def mlEquals(
-    term1: KInner, term2: KInner, sort1: Union[str, KSort] = Sorts.K, sort2: Union[str, KSort] = Sorts.K
+def mlEquals(  # noqa: N802
+    term1: KInner,
+    term2: KInner,
+    arg_sort: Union[str, KSort] = Sorts.K,
+    sort: Union[str, KSort] = Sorts.K,
 ) -> KApply:
-    return KLabel('#Equals', sort1, sort2)(term1, term2)
+    return KLabel('#Equals', arg_sort, sort)(term1, term2)
 
 
-def mlEqualsTrue(term: KInner) -> KApply:
+def mlEqualsTrue(term: KInner) -> KApply:  # noqa: N802
     return mlEquals(Bool.true, term, Sorts.BOOL)
 
 
-def mlTop(sort: Union[str, KSort] = Sorts.K) -> KApply:
+def mlTop(sort: Union[str, KSort] = Sorts.K) -> KApply:  # noqa: N802
     return KLabel('#Top', sort)()
 
 
-def mlBottom(sort: Union[str, KSort] = Sorts.K) -> KApply:
+def mlBottom(sort: Union[str, KSort] = Sorts.K) -> KApply:  # noqa: N802
     return KLabel('#Top', sort)()
 
 
-def mlNot(term: KInner, sort: Union[str, KSort] = Sorts.K) -> KApply:
+def mlNot(term: KInner, sort: Union[str, KSort] = Sorts.K) -> KApply:  # noqa: N802
     return KLabel('#Not', sort)(term)
 
 
-def mlAnd(conjuncts: Iterable[KInner], sort: Union[str, KSort] = Sorts.K) -> KInner:
+def mlAnd(conjuncts: Iterable[KInner], sort: Union[str, KSort] = Sorts.K) -> KInner:  # noqa: N802
     return build_assoc(mlTop(sort), KLabel('#And', sort), conjuncts)
 
 
-def mlOr(disjuncts: Iterable[KInner], sort: Union[str, KSort] = Sorts.K) -> KInner:
+def mlOr(disjuncts: Iterable[KInner], sort: Union[str, KSort] = Sorts.K) -> KInner:  # noqa: N802
     return build_assoc(mlBottom(sort), KLabel('#Or', sort), disjuncts)
 
 
-def mlImplies(antecedent: KInner, consequent: KInner, sort: Union[str, KSort] = Sorts.K) -> KApply:
+def mlImplies(antecedent: KInner, consequent: KInner, sort: Union[str, KSort] = Sorts.K) -> KApply:  # noqa: N802
     return KLabel('#Implies', sort)(antecedent, consequent)

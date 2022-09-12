@@ -1,17 +1,17 @@
 import logging
+import typing
 from collections import Counter
-from typing import Callable, Dict, Final, List, Mapping, Optional, Sequence, Tuple, Type, TypeVar
+from typing import Any, Callable, Collection, Final, Iterable, List, Mapping, Optional, Sequence, Tuple, Type, TypeVar
 
-from .cterm import CTerm, split_config_and_constraints
 from .kast import (
+    DOTS,
     KApply,
     KAtt,
-    KClaim,
     KDefinition,
     KFlatModule,
     KInner,
     KRewrite,
-    KRule,
+    KRuleLike,
     KSequence,
     KToken,
     KVariable,
@@ -19,8 +19,6 @@ from .kast import (
     WithKAtt,
     bottom_up,
     collect,
-    flatten_label,
-    ktokenDots,
     top_down,
 )
 from .prelude import Bool, Labels, Sorts, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlOr, mlTop
@@ -30,6 +28,19 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 KI = TypeVar('KI', bound=KInner)
 W = TypeVar('W', bound=WithKAtt)
+RL = TypeVar('RL', bound=KRuleLike)
+
+
+def flatten_label(label: str, kast: KInner) -> List[KInner]:
+    """Given a cons list, return a flat Python list of the elements.
+
+    -   Input: Cons operation to flatten.
+    -   Output: Items of cons list.
+    """
+    if type(kast) is KApply and kast.label.name == label:
+        items = (flatten_label(label, arg) for arg in kast.args)
+        return [c for cs in items for c in cs]
+    return [kast]
 
 
 def if_ktype(ktype: Type[KI], then: Callable[[KI], KInner]) -> Callable[[KInner], KInner]:
@@ -123,6 +134,10 @@ def simplify_bool(k: KInner) -> KInner:
     return new_k
 
 
+def is_top(term: KInner) -> bool:
+    return isinstance(term, KApply) and term.label.name == '#Top'
+
+
 def extract_lhs(term: KInner) -> KInner:
     return top_down(if_ktype(KRewrite, lambda rw: rw.lhs), term)
 
@@ -176,8 +191,8 @@ def extract_subst(term: KInner) -> Tuple[Subst, KInner]:
     return subst, mlAnd(rem_conjuncts)
 
 
-def count_vars(term: KInner) -> Counter:
-    counter: Counter = Counter()
+def count_vars(term: KInner) -> typing.Counter[str]:
+    counter: typing.Counter[str] = Counter()
 
     def count(term: KInner) -> None:
         if type(term) is KVariable:
@@ -187,7 +202,7 @@ def count_vars(term: KInner) -> Counter:
     return counter
 
 
-def collectFreeVars(kast):
+def free_vars(kast: KInner) -> List[str]:
     return list(count_vars(kast).keys())
 
 
@@ -211,7 +226,23 @@ def propagate_up_constraints(k):
     return bottom_up(_propagate_up_constraints, k)
 
 
-def splitConfigFrom(configuration):
+def split_config_and_constraints(kast: KInner) -> Tuple[KInner, KInner]:
+    conjuncts = flatten_label('#And', kast)
+    term = None
+    constraints = []
+    for c in conjuncts:
+        if type(c) is KApply and c.is_cell:
+            if term:
+                raise ValueError(f'Found two configurations in pattern:\n\n{term}\n\nand\n\n{c}')
+            term = c
+        else:
+            constraints.append(c)
+    if not term:
+        raise ValueError(f'Could not find configuration for: {kast}')
+    return (term, mlAnd(constraints, Sorts.GENERATED_TOP_CELL))
+
+
+def split_config_from(configuration):
     """Split the substitution from a given configuration.
 
     Given an input configuration `config`, will return a tuple `(symbolic_config, subst)`, where:
@@ -222,44 +253,44 @@ def splitConfigFrom(configuration):
     """
     initial_substitution = {}
 
-    def _mkCellVar(label):
+    def _mk_cell_var(label):
         return label.replace('-', '_').replace('<', '').replace('>', '').upper() + '_CELL'
 
-    def _replaceWithVar(k):
+    def _replace_with_var(k):
         if type(k) is KApply and k.is_cell:
             if k.arity == 1 and not (type(k.args[0]) is KApply and k.args[0].is_cell):
-                config_var = _mkCellVar(k.label.name)
+                config_var = _mk_cell_var(k.label.name)
                 initial_substitution[config_var] = k.args[0]
                 return KApply(k.label, [KVariable(config_var)])
         return k
 
-    symbolic_config = top_down(_replaceWithVar, configuration)
+    symbolic_config = top_down(_replace_with_var, configuration)
     return (symbolic_config, initial_substitution)
 
 
-def collapseDots(kast):
+def collapse_dots(kast):
     """Given a configuration with structural frames `...`, minimize the structural frames needed.
 
     -   Input: a configuration, potentially with structural frames.
     -   Output: the same configuration, with the amount of structural framing minimized.
     """
 
-    def _collapseDots(_kast):
+    def _collapse_dots(_kast):
         if type(_kast) is KApply:
-            if _kast.is_cell and _kast.arity == 1 and _kast.args[0] == ktokenDots:
-                return ktokenDots
-            newArgs = [arg for arg in _kast.args if arg != ktokenDots]
-            if _kast.is_cell and len(newArgs) == 0:
-                return ktokenDots
-            if len(newArgs) < len(_kast.args):
-                newArgs.append(ktokenDots)
-            return _kast.let(args=newArgs)
+            if _kast.is_cell and _kast.arity == 1 and _kast.args[0] == DOTS:
+                return DOTS
+            new_args = [arg for arg in _kast.args if arg != DOTS]
+            if _kast.is_cell and len(new_args) == 0:
+                return DOTS
+            if len(new_args) < len(_kast.args):
+                new_args.append(DOTS)
+            return _kast.let(args=new_args)
         elif type(_kast) is KRewrite:
-            if _kast.lhs == ktokenDots:
-                return ktokenDots
+            if _kast.lhs == DOTS:
+                return DOTS
         return _kast
 
-    return bottom_up(_collapseDots, kast)
+    return bottom_up(_collapse_dots, kast)
 
 
 def push_down_rewrites(kast):
@@ -283,17 +314,19 @@ def push_down_rewrites(kast):
             if type(lhs) is KVariable and type(rhs) is KVariable and lhs.name == rhs.name:
                 return lhs
             if type(lhs) is KApply and type(rhs) is KApply and lhs.label == rhs.label and lhs.arity == rhs.arity:
-                newArgs = [KRewrite(lArg, rArg) for (lArg, rArg) in zip(lhs.args, rhs.args)]
-                return lhs.let(args=newArgs)
+                new_args = [KRewrite(left_arg, right_arg) for left_arg, right_arg in zip(lhs.args, rhs.args)]
+                return lhs.let(args=new_args)
             if type(lhs) is KSequence and type(rhs) is KSequence and lhs.arity > 0 and rhs.arity > 0:
                 if lhs.arity == 1 and rhs.arity == 1:
                     return KRewrite(lhs.items[0], rhs.items[0])
                 if lhs.items[0] == rhs.items[0]:
-                    lowerRewrite = _push_down_rewrites(KRewrite(KSequence(lhs.items[1:]), KSequence(rhs.items[1:])))
-                    return _flatten_ksequence(KSequence([lhs.items[0], lowerRewrite]))
+                    lower_rewrite = _push_down_rewrites(KRewrite(KSequence(lhs.items[1:]), KSequence(rhs.items[1:])))
+                    return _flatten_ksequence(KSequence([lhs.items[0], lower_rewrite]))
                 if lhs.items[-1] == rhs.items[-1]:
-                    lowerRewrite = _push_down_rewrites(KRewrite(KSequence(lhs.items[0:-1]), KSequence(rhs.items[0:-1])))
-                    return _flatten_ksequence(KSequence([lowerRewrite, lhs.items[-1]]))
+                    lower_rewrite = _push_down_rewrites(
+                        KRewrite(KSequence(lhs.items[0:-1]), KSequence(rhs.items[0:-1]))
+                    )
+                    return _flatten_ksequence(KSequence([lower_rewrite, lhs.items[-1]]))
             if (
                 type(lhs) is KSequence
                 and lhs.arity > 0
@@ -307,39 +340,39 @@ def push_down_rewrites(kast):
     return top_down(_push_down_rewrites, kast)
 
 
-def inlineCellMaps(kast):
+def inline_cell_maps(kast):
     """Ensure that cell map collections are printed nicely, not as Maps."
 
     -   Input: kast term.
     -   Output: kast term with cell maps inlined.
     """
 
-    def _inlineCellMaps(_kast):
+    def _inline_cell_maps(_kast):
         if type(_kast) is KApply and _kast.label.name.endswith('CellMapItem'):
-            mapKey = _kast.args[0]
-            if type(mapKey) is KApply and mapKey.is_cell:
+            map_key = _kast.args[0]
+            if type(map_key) is KApply and map_key.is_cell:
                 return _kast.args[1]
         return _kast
 
-    return bottom_up(_inlineCellMaps, kast)
+    return bottom_up(_inline_cell_maps, kast)
 
 
-def removeSemanticCasts(kast):
+def remove_semantic_casts(kast):
     """Remove injected `#SemanticCast*` nodes in AST.
 
     -   Input: kast (possibly) containing automatically injected `#SemanticCast*` KApply nodes.
     -   Output: kast without the `#SemanticCast*` nodes.
     """
 
-    def _removeSemanticCasts(_kast):
+    def _remove_semtnaic_casts(_kast):
         if type(_kast) is KApply and _kast.arity == 1 and _kast.label.name.startswith('#SemanticCast'):
             return _kast.args[0]
         return _kast
 
-    return bottom_up(_removeSemanticCasts, kast)
+    return bottom_up(_remove_semtnaic_casts, kast)
 
 
-def markUselessVars(kast):
+def mark_useless_vars(kast):
     """Given a kast term as input with variables, return one where the useless vars are appropriately marked.
 
     -   Input: A Kast term.
@@ -355,44 +388,44 @@ def markUselessVars(kast):
     return substitute(kast, subst)
 
 
-def uselessVarsToDots(kast, keepVars=None):
+def useless_vars_to_dots(kast: KInner, keep_vars: Iterable[str] = ()) -> KInner:
     """Structurally abstract away useless variables.
 
     -   Input: kast term, and a requires clause and ensures clause.
     -   Output: kast term with the useless vars structurally abstracted.
     """
-    numOccurances = count_vars(kast) + Counter(keepVars)
+    num_occs = count_vars(kast) + Counter(keep_vars)
 
-    def _collapseUselessVars(_kast):
+    def _collapse_useless_vars(_kast):
         if type(_kast) is KApply and _kast.is_cell:
-            newArgs = []
+            new_args = []
             for arg in _kast.args:
-                if type(arg) is KVariable and numOccurances[arg.name] == 1:
-                    newArgs.append(ktokenDots)
+                if type(arg) is KVariable and num_occs[arg.name] == 1:
+                    new_args.append(DOTS)
                 else:
-                    newArgs.append(arg)
-            return _kast.let(args=newArgs)
+                    new_args.append(arg)
+            return _kast.let(args=new_args)
         return _kast
 
-    return bottom_up(_collapseUselessVars, kast)
+    return bottom_up(_collapse_useless_vars, kast)
 
 
-def labelsToDots(kast, labels):
+def labels_to_dots(kast: KInner, labels: Collection[str]) -> KInner:
     """Abstract specific labels for printing.
 
     -   Input: kast term, and list of labels to abstract.
     -   Output: kast term with those labels abstracted.
     """
 
-    def _labelstoDots(k):
+    def _labels_to_dots(k):
         if type(k) is KApply and k.is_cell and k.label.name in labels:
-            return ktokenDots
+            return DOTS
         return k
 
-    return bottom_up(_labelstoDots, kast)
+    return bottom_up(_labels_to_dots, kast)
 
 
-def onAttributes(kast: W, f: Callable[[KAtt], KAtt]) -> W:
+def on_attributes(kast: W, f: Callable[[KAtt], KAtt]) -> W:
     kast = kast.map_att(f)
 
     # TODO mypy bug: https://github.com/python/mypy/issues/10817
@@ -408,7 +441,7 @@ def onAttributes(kast: W, f: Callable[[KAtt], KAtt]) -> W:
     return kast
 
 
-def minimize_term(term, keep_vars=None, abstract_labels=[]):
+def minimize_term(term: KInner, keep_vars: Iterable[str] = (), abstract_labels: Collection[str] = ()) -> KInner:
     """Minimize a K term for pretty-printing.
 
     -   Input: kast term, and optionally requires and ensures clauses with constraints.
@@ -417,15 +450,15 @@ def minimize_term(term, keep_vars=None, abstract_labels=[]):
         -   Unused cells will be abstracted.
         -   Attempt to remove useless conditions.
     """
-    term = inlineCellMaps(term)
-    term = removeSemanticCasts(term)
-    term = uselessVarsToDots(term, keepVars=keep_vars)
-    term = labelsToDots(term, abstract_labels)
-    term = collapseDots(term)
+    term = inline_cell_maps(term)
+    term = remove_semantic_casts(term)
+    term = useless_vars_to_dots(term, keep_vars=keep_vars)
+    term = labels_to_dots(term, abstract_labels)
+    term = collapse_dots(term)
     return term
 
 
-def minimizeRule(rule, keepVars=[]):
+def minimize_rule(rule: RL, keep_vars: Iterable[str] = ()) -> RL:
     """Minimize a K rule or claim for pretty-printing.
 
     -   Input: kast representing a K rule or claim.
@@ -434,44 +467,53 @@ def minimizeRule(rule, keepVars=[]):
         -   Unused cells will be abstracted.
         -   Attempt to remove useless side-conditions.
     """
-    if not (type(rule) is KRule or type(rule) is KClaim):
-        return rule
+    body = rule.body
+    requires = rule.requires
+    ensures = rule.ensures
 
-    ruleBody = rule.body
-    ruleRequires = rule.requires
-    ruleEnsures = rule.ensures
+    requires = Bool.andBool(flatten_label('_andBool_', requires))
+    requires = simplify_bool(requires)
 
-    ruleRequires = Bool.andBool(flatten_label('_andBool_', ruleRequires))
-    ruleRequires = simplify_bool(ruleRequires)
+    ensures = Bool.andBool(flatten_label('_andBool_', ensures))
+    ensures = simplify_bool(ensures)
 
-    ruleEnsures = Bool.andBool(flatten_label('_andBool_', ruleEnsures))
-    ruleEnsures = simplify_bool(ruleEnsures)
+    constrained_vars = list(keep_vars)
+    constrained_vars = constrained_vars + free_vars(requires)
+    constrained_vars = constrained_vars + free_vars(ensures)
+    body = minimize_term(body, keep_vars=constrained_vars)
 
-    constrainedVars = [] if keepVars is None else keepVars
-    constrainedVars = constrainedVars + collectFreeVars(ruleRequires)
-    constrainedVars = constrainedVars + collectFreeVars(ruleEnsures)
-    ruleBody = minimize_term(ruleBody, keep_vars=constrainedVars)
-
-    return rule.let(body=ruleBody, requires=ruleRequires, ensures=ruleEnsures)
+    return rule.let(body=body, requires=requires, ensures=ensures)
 
 
-def removeSourceMap(k):
+def remove_source_map(k):
     """Remove source map information from a given definition.
 
     Input: A JSON encoded K object.
     Output: The same JSON encoded object, with all source information stripped.
     """
 
-    def _removeSourceMap(att):
+    def _remove_source_map(att):
         if type(att) is KAtt:
             atts = att.atts
-            newAtts = {}
-            for attKey in atts:
-                if attKey != 'org.kframework.attributes.Source' and attKey != 'org.kframework.attributes.Location':
-                    newAtts[attKey] = atts[attKey]
-            return KAtt(atts=newAtts)
+            new_atts = {}
+            for att_key in atts:
+                if att_key != 'org.kframework.attributes.Source' and att_key != 'org.kframework.attributes.Location':
+                    new_atts[att_key] = atts[att_key]
+            return KAtt(atts=new_atts)
 
-    return onAttributes(k, _removeSourceMap)
+    return on_attributes(k, _remove_source_map)
+
+
+def remove_source_attributes(term: KInner) -> KInner:
+    def _is_not_source_att(att: Tuple[str, Any]) -> bool:
+        return att[0] not in ('org.kframework.attributes.Source', 'org.kframework.attributes.Location')
+
+    def _remove_source_attr(term: KInner) -> KInner:
+        if not isinstance(term, WithKAtt):
+            return term
+        return term.let_att(KAtt(dict(filter(_is_not_source_att, term.att.atts.items()))))
+
+    return top_down(_remove_source_attr, term)
 
 
 def remove_generated_cells(term: KInner) -> KInner:
@@ -484,124 +526,45 @@ def remove_generated_cells(term: KInner) -> KInner:
     return rewrite(term)
 
 
-def isAnonVariable(kast):
+def is_anon_var(kast):
     return type(kast) is KVariable and kast.name.startswith('_')
 
 
-def omitLargeTokens(kast, maxLen=78):
-    def _largeTokensToDots(_k):
-        if type(_k) is KToken and len(_k.token) > maxLen:
+def omit_large_tokens(kast, max_len=78):
+    def _large_tokens_to_dots(_k):
+        if type(_k) is KToken and len(_k.token) > max_len:
             return KToken('...', _k.sort)
         return _k
 
-    return bottom_up(_largeTokensToDots, kast)
+    return bottom_up(_large_tokens_to_dots, kast)
 
 
-def getCell(constrainedTerm, cellVariable):
-    (state, _) = split_config_and_constraints(constrainedTerm)
-    (_, subst) = splitConfigFrom(state)
-    return subst[cellVariable]
+def get_cell(constrained_term, cell_variable):
+    state, _ = split_config_and_constraints(constrained_term)
+    _, subst = split_config_from(state)
+    return subst[cell_variable]
 
 
-def setCell(constrainedTerm, cellVariable, cellValue):
-    (state, constraint) = split_config_and_constraints(constrainedTerm)
-    (config, subst) = splitConfigFrom(state)
-    subst[cellVariable] = cellValue
+def set_cell(constrained_term, cell_variable, cell_value):
+    state, constraint = split_config_and_constraints(constrained_term)
+    config, subst = split_config_from(state)
+    subst[cell_variable] = cell_value
     return mlAnd([substitute(config, subst), constraint])
 
 
-def removeUselessConstraints(constrainedTerm, keepVars=None):
-    (state, constraint) = split_config_and_constraints(constrainedTerm)
+def remove_constraint_clauses_for(var_names, constraint):
     constraints = flatten_label('#And', constraint)
-    usedVars = collectFreeVars(state)
-    usedVars = usedVars if keepVars is None else (usedVars + keepVars)
-    prevLenUsedVars = 0
-    newConstraints = []
-    while len(usedVars) > prevLenUsedVars:
-        prevLenUsedVars = len(usedVars)
-        for c in constraints:
-            if c not in newConstraints:
-                newVars = collectFreeVars(c)
-                if any([v in usedVars for v in newVars]):
-                    newConstraints.append(c)
-                    usedVars.extend(newVars)
-        usedVars = list(set(usedVars))
-    return mlAnd([state] + newConstraints)
-
-
-def removeConstraintClausesFor(varNames, constraint):
-    constraints = flatten_label('#And', constraint)
-    newConstraints = []
+    new_constraints = []
     for c in constraints:
-        if not any([v in varNames for v in collectFreeVars(c)]):
-            newConstraints.append(c)
-    return mlAnd(newConstraints)
+        if not any([v in var_names for v in free_vars(c)]):
+            new_constraints.append(c)
+    return mlAnd(new_constraints)
 
 
-def removeConstraintsFor(varNames, constrainedTerm):
-    (state, constraint) = split_config_and_constraints(constrainedTerm)
-    constraint = removeConstraintClausesFor(varNames, constraint)
+def remove_constraints_for(var_names, constrained_term):
+    state, constraint = split_config_and_constraints(constrained_term)
+    constraint = remove_constraint_clauses_for(var_names, constraint)
     return mlAnd([state, constraint])
-
-
-def build_rule(
-    rule_id: str,
-    init_cterm: CTerm,
-    final_cterm: CTerm,
-    priority: Optional[int] = None,
-    keep_vars: Optional[List[str]] = None,
-) -> Tuple[KRule, Subst]:
-
-    init_config, *init_constraints = init_cterm
-    final_config, *final_constraints = final_cterm
-    final_constraints = [c for c in final_constraints if c not in init_constraints]
-    init_term = mlAnd([init_config] + init_constraints)
-    final_term = mlAnd([final_config] + final_constraints)
-
-    lhs_vars = collectFreeVars(init_term)
-    rhs_vars = collectFreeVars(final_term)
-    var_occurances = count_vars(
-        mlAnd(
-            [push_down_rewrites(KRewrite(init_config, final_config))] + init_constraints + final_constraints,
-            Sorts.GENERATED_TOP_CELL,
-        )
-    )
-    v_subst: Dict[str, KVariable] = {}
-    vremap_subst: Dict[str, KVariable] = {}
-    for v in var_occurances:
-        new_v = v
-        if var_occurances[v] == 1:
-            new_v = '_' + new_v
-        if v in rhs_vars and v not in lhs_vars:
-            new_v = '?' + new_v
-        v_subst[v] = KVariable(new_v)
-        vremap_subst[new_v] = KVariable(v)
-
-    init_term = substitute(init_term, v_subst)
-    final_term = applyExistentialSubstitutions(substitute(final_term, v_subst))
-    (init_config, init_constraint) = split_config_and_constraints(init_term)
-    (final_config, final_constraint) = split_config_and_constraints(final_term)
-
-    rule_body = push_down_rewrites(KRewrite(init_config, final_config))
-    rule_requires = simplify_bool(ml_pred_to_bool(init_constraint))
-    rule_ensures = simplify_bool(ml_pred_to_bool(final_constraint))
-    att_dict = {} if priority is None else {'priority': str(priority)}
-    rule_att = KAtt(atts=att_dict)
-
-    rule = KRule(rule_body, requires=rule_requires, ensures=rule_ensures, att=rule_att)
-    rule = rule.update_atts({'label': rule_id})
-    new_keep_vars = None
-    if keep_vars is not None:
-        new_keep_vars = [v_subst[v].name for v in keep_vars]
-    return (minimizeRule(rule, keepVars=new_keep_vars), Subst(vremap_subst))
-
-
-def build_claim(
-    claim_id: str, init_cterm: CTerm, final_cterm: CTerm, keep_vars: Optional[List[str]] = None
-) -> Tuple[KClaim, Subst]:
-    rule, var_map = build_rule(claim_id, init_cterm, final_cterm, keep_vars=keep_vars)
-    claim = KClaim(rule.body, requires=rule.requires, ensures=rule.ensures, att=rule.att)
-    return claim, var_map
 
 
 def abstract_term_safely(kast: KInner, base_name: str = 'V') -> KVariable:
@@ -609,30 +572,30 @@ def abstract_term_safely(kast: KInner, base_name: str = 'V') -> KVariable:
     return KVariable(base_name + '_' + vname)
 
 
-def antiUnify(state1, state2):
+def anti_unify(state1, state2):
     subst1 = {}
     subst2 = {}
 
-    def _rewritesToAbstractions(_kast):
+    def _rewrites_to_abstractions(_kast):
         if type(_kast) is KRewrite:
             return abstract_term_safely(_kast)
         return _kast
 
-    minimizedRewrite = push_down_rewrites(KRewrite(state1, state2))
-    abstractedState = bottom_up(_rewritesToAbstractions, minimizedRewrite)
-    subst1 = abstractedState.match(state1)
-    subst2 = abstractedState.match(state2)
+    minimized_rewrite = push_down_rewrites(KRewrite(state1, state2))
+    abstracted_state = bottom_up(_rewrites_to_abstractions, minimized_rewrite)
+    subst1 = abstracted_state.match(state1)
+    subst2 = abstracted_state.match(state2)
     if subst1 is None or subst2 is None:
         raise ValueError('Anti-unification failed to produce a more general state!')
-    return (abstractedState, subst1, subst2)
+    return (abstracted_state, subst1, subst2)
 
 
-def antiUnifyWithConstraints(constrainedTerm1, constrainedTerm2, implications=False, disjunct=False):
-    (state1, constraint1) = split_config_and_constraints(constrainedTerm1)
-    (state2, constraint2) = split_config_and_constraints(constrainedTerm2)
+def anti_unify_with_constraints(constrained_term_1, constrained_term_2, implications=False, disjunct=False):
+    state1, constraint1 = split_config_and_constraints(constrained_term_1)
+    state2, constraint2 = split_config_and_constraints(constrained_term_2)
     constraints1 = flatten_label('#And', constraint1)
     constraints2 = flatten_label('#And', constraint2)
-    (state, subst1, subst2) = antiUnify(state1, state2)
+    state, subst1, subst2 = anti_unify(state1, state2)
 
     constraints = [c for c in constraints1 if c in constraints2]
     constraint1 = mlAnd([c for c in constraints1 if c not in constraints])
@@ -655,71 +618,70 @@ def disjunct_constrained_terms(constrained_terms: Sequence[KInner], concave=Fals
         return mlBottom()
     new_constrained_term = constrained_terms[0]
     for constrained_term in constrained_terms[1:]:
-        new_constrained_term = antiUnifyWithConstraints(
+        new_constrained_term = anti_unify_with_constraints(
             new_constrained_term, constrained_term, implications=concave, disjunct=concave
         )
     return new_constrained_term
 
 
-def removeDisjuncts(constrainedTerm):
-    clauses = flatten_label('#And', constrainedTerm)
+def remove_disjuncts(constrained_term):
+    clauses = flatten_label('#And', constrained_term)
     clauses = [c for c in clauses if not (type(c) is KApply and c.label.name == '#Or')]
-    constrainedTerm = mlAnd(clauses)
-    return constrainedTerm
+    constrained_term = mlAnd(clauses)
+    return constrained_term
 
 
-def applyExistentialSubstitutions(constrainedTerm):
-    (state, constraint) = split_config_and_constraints(constrainedTerm)
+def apply_existential_substitutions(constrained_term):
+    state, constraint = split_config_and_constraints(constrained_term)
     constraints = flatten_label('#And', constraint)
-    substPattern = mlEqualsTrue(KApply('_==K_', [KVariable('#VAR'), KVariable('#VAL')]))
+    pattern = mlEqualsTrue(KApply('_==K_', [KVariable('#VAR'), KVariable('#VAL')]))
     subst = {}
-    newConstraints = []
+    new_constraints = []
     for c in constraints:
-        substMatch = substPattern.match(c)
-        if substMatch is not None and type(substMatch['#VAR']) is KVariable and substMatch['#VAR'].name.startswith('?'):
-            subst[substMatch['#VAR'].name] = substMatch['#VAL']
+        match = pattern.match(c)
+        if match is not None and type(match['#VAR']) is KVariable and match['#VAR'].name.startswith('?'):
+            subst[match['#VAR'].name] = match['#VAL']
         else:
-            newConstraints.append(c)
-    return substitute(mlAnd([state] + newConstraints), subst)
+            new_constraints.append(c)
+    return substitute(mlAnd([state] + new_constraints), subst)
 
 
-def constraintSubsume(constraint1, constraint2):
+def constraint_subsume(constraint1, constraint2):
     if constraint1 == mlTop() or constraint1 == constraint2:
         return True
     elif type(constraint1) is KApply and constraint1.label.name == '#And':
         constraints1 = flatten_label('#And', constraint1)
-        if all([constraintSubsume(c, constraint2) for c in constraints1]):
+        if all([constraint_subsume(c, constraint2) for c in constraints1]):
             return True
     elif type(constraint1) is KApply and constraint1.label.name == '#Or':
         constraints1 = flatten_label('#Or', constraint1)
-        if any([constraintSubsume(c, constraint2) for c in constraints1]):
+        if any([constraint_subsume(c, constraint2) for c in constraints1]):
             return True
     elif type(constraint2) is KApply and constraint2.label.name == '#And':
         constraints2 = flatten_label('#And', constraint2)
-        if any([constraintSubsume(constraint1, c) for c in constraints2]):
+        if any([constraint_subsume(constraint1, c) for c in constraints2]):
             return True
     elif type(constraint2) is KApply and constraint2.label.name == '#Or':
         constraints2 = flatten_label('#Or', constraint2)
-        if all([constraintSubsume(constraint1, c) for c in constraints2]):
+        if all([constraint_subsume(constraint1, c) for c in constraints2]):
             return True
     else:
         return False
 
 
-def matchWithConstraint(constrainedTerm1, constrainedTerm2):
-    (state1, constraint1) = split_config_and_constraints(constrainedTerm1)
-    (state2, constraint2) = split_config_and_constraints(constrainedTerm2)
+def match_with_constraint(constrained_term_1, constrained_term_2):
+    state1, constraint1 = split_config_and_constraints(constrained_term_1)
+    state2, constraint2 = split_config_and_constraints(constrained_term_2)
     subst = state1.match(state2)
-    if subst is not None and constraintSubsume(substitute(constraint1, subst), constraint2):
+    if subst is not None and constraint_subsume(substitute(constraint1, subst), constraint2):
         return subst
     return None
 
 
-def undoAliases(definition, kast):
+def undo_aliases(definition, kast):
     alias_undo_rewrites = [
         KRewrite(rule.body.rhs, rule.body.lhs) for module in definition for rule in module.rules if 'alias' in rule.att
     ]
-    newKast = kast
     for rewrite in alias_undo_rewrites:
-        newKast = rewrite(newKast)
-    return newKast
+        kast = rewrite(kast)
+    return kast
