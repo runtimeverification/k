@@ -69,7 +69,7 @@ body:
   - type: textarea
     attributes:
       label: Steps to Reproduce
-      description: Any informaiton you think is relevant for us to understand the issue. Code blocks are acceptable. 
+      description: Any information you think is relevant for us to understand the issue. Code blocks are acceptable.
       placeholder: |
         < ATTACH LOG HERE (IF POSSIBLE) > 
     validations:
