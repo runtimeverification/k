@@ -58,6 +58,10 @@ programming language and then compile and execute it. Instead, it is an
 interpreter which reads the generated IR from `kompile` and implements in
 Haskell an interpreter that is capable of interpreting any K definition.
 
+Note that on arm64 macOS (Apple Silicon), there is a known issue with the `Compact`
+library that causes crashes in the Haskell backend. Pass the additional flag
+`--no-haskell-binary` to `kompile` to resolve this.
+
 ### Exercise
 
 Try running the program `0` in this K definition on the Haskell Backend and
