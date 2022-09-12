@@ -3054,6 +3054,7 @@ JEMalloc, Crypto++, SECP256K1, etc with the following `exports`.
 ```sh
 export CFLAGS="-DNDEBUG -O2 -fno-omit-frame-pointer"
 export CXXFLAGS="-DNDEBUG -O2 -fno-omit-frame-pointer"
+```
 
 You can skip this step, but if you do, any samples within these
 libraries will not have correct stack trace information, which means
