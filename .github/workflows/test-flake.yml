@@ -1,4 +1,4 @@
-name: "Test"
+name: 'Test Nix Flake'
 on:
   pull_request:
 concurrency:
