@@ -1,4 +1,4 @@
-name: 'Update'
+name: 'Bump Version'
 on:
   pull_request:
 concurrency:
