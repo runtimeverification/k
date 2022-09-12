@@ -21,9 +21,8 @@ jobs:
           git fetch origin ${GITHUB_BASE_REF} ${GITHUB_HEAD_REF}
           git checkout -B ${GITHUB_HEAD_REF} origin/${GITHUB_HEAD_REF}
           git pull
-          if git diff --exit-code origin/${GITHUB_BASE_REF} ${GITHUB_HEAD_REF} -- package/version; then
-            ./package/version.sh bump
-          fi
+          version_base="$(git show origin/${GITHUB_BASE_REF}:package/version)"
+          ./package/version.sh bump "${version_base}"
           ./package/version.sh sub
           git add --update
           if git commit --message "Set Version: $(cat package/version)"; then
