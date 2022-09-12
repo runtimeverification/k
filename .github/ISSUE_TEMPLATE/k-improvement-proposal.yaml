@@ -1,5 +1,5 @@
 ---
-name: "[KIP] - K Improvment Proposal"
+name: "[KIP] - K Improvement Proposal"
 description: Suggest a new feature for the K Language
 title: "[K-Improvement] <Title>"
 labels: ["request", "k", "improvement"]
@@ -46,9 +46,9 @@ body:
       A user may choose to use `foo` instead of `syntax` when declaring new production in K.
       The meaning is exactly identical to `syntax`, but it requires 3 fewer characters to type, which saves on average 17s/month of semantics development.
 
-      # Potential Alternatives/Work-arounds
+      # Potential Alternatives/Workarounds
       
-      If there is an obvious alternative way to implement this or an existing work-around, please briefly describe it here.
+      If there is an obvious alternative way to implement this or an existing workaround, please briefly describe it here.
 
       ## Example:
 
@@ -93,6 +93,6 @@ body:
 
 - type: textarea
   attributes: 
-    label: Per the Examples above please provide some Imrovement Suggestions
+    label: Per the Examples above please provide some Improvement Suggestions
     placeholder: <This field will be rendered into MarkDown> 
     render: Markdown
