@@ -20,10 +20,8 @@ jobs:
         run: |
           git config user.name devops
           git config user.email devops@runtimeverification.com
-          git fetch origin foo
-          git checkout -B foo origin/foo
-          git pull
-          version_base="$(git show ${GITHUB_SHA}^:package/version)"
+          git fetch origin
+          version_base=$(git show 'HEAD^:package/version')
           ./package/version.sh bump "${version_base}"
           ./package/version.sh sub
           git add --update
