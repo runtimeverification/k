@@ -16,17 +16,17 @@ jobs:
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
       - name: 'Update Version'
         run: |
           git config user.name devops
           git config user.email devops@runtimeverification.com
-          git fetch origin master
-          git checkout -B master origin/master
-          git pull
-          version_base="$(git show 'origin/master^:package/version')"
-          ./package/version.sh bump "${version_base}"
+          if git show --exit-code ${GITHUB_REF_NAME} -- package/version; then
+            ./package/version.sh bump
+          fi
           ./package/version.sh sub
           git add --update
           if git commit --message "Set Version: $(cat package/version)"; then
-            git push origin master
+            git push origin ${GITHUB_REF_NAME}
           fi
