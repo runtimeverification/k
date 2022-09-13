@@ -1,5 +1,5 @@
 pipeline {
-  agent none
+  agent { label 'docker' }
   options { ansiColor('xterm') }
   environment {
     PACKAGE         = 'kframework'
@@ -12,6 +12,7 @@ pipeline {
   }
   stages {
     stage('Init title') {
+      agent { label 'docker' }
       when { changeRequest() }
       steps {
         script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" }
