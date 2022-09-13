@@ -1,5 +1,5 @@
 pipeline {
-  agent { label 'docker' }
+  agent none
   options { ansiColor('xterm') }
   environment {
     PACKAGE         = 'kframework'
@@ -12,7 +12,6 @@ pipeline {
   }
   stages {
     stage('Init title') {
-      agent { label 'docker' }
       when { changeRequest() }
       steps {
         script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" }
@@ -281,7 +280,6 @@ pipeline {
       }
       stages {
         stage('Build Image') {
-          agent { label 'docker' }
           steps {
             milestone(1)
             dir('focal') { unstash 'focal' }
