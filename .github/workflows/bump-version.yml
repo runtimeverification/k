@@ -21,8 +21,9 @@ jobs:
           git config user.name devops
           git config user.email devops@runtimeverification.com
           git fetch origin
-          version_base=$(git show 'HEAD^:package/version')
-          ./package/version.sh bump "${version_base}"
+          if git diff --exit-code 'HEAD^' HEAD -- package/version; then
+            ./package/version.sh bump
+          fi
           ./package/version.sh sub
           git add --update
           if git commit --message "Set Version: $(cat package/version)"; then
