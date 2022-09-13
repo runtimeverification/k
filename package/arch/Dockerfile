@@ -21,6 +21,7 @@ RUN    pacman -Sy   --noconfirm archlinux-keyring \
                        mpfr                       \
                        openssh                    \
                        python                     \
+                       python-pip                 \
                        stack                      \
                        z3                         \
                        zlib
