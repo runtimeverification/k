@@ -1,8 +1,0 @@
-[]
-
-module TEST-PATTERN-6
-
-  axiom{S}
-    \implies{S}(X:S,X:S) []
-
-endmodule []

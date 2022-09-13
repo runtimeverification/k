@@ -1,5 +1,0 @@
-Error:
-  module 'BOOL':
-  hooked-symbol 'andBool' declaration (test-bool-3.kore 4:19):
-  In argument sorts:
-    Expected 2 arguments, found 1
