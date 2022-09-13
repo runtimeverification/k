@@ -17,6 +17,7 @@ jobs:
         with:
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           ref: ${{ github.ref_name }}
+          # fetch-depth 0 means deep clone the repo
           fetch-depth: 0
       - name: 'Update Version'
         run: |
