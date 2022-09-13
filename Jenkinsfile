@@ -20,7 +20,7 @@ pipeline {
     stage('Create source tarball') {
       when {
         anyOf {
-          branch 'master'
+          branch 'release'
           changeRequest()
         }
         beforeAgent true
@@ -47,7 +47,7 @@ pipeline {
     stage('Build and Package on Ubuntu Focal') {
       when {
         anyOf {
-          branch 'master'
+          branch 'release'
           changeRequest()
         }
         beforeAgent true
@@ -141,7 +141,7 @@ pipeline {
     }
     stage('Build and Package on Ubuntu Jammy') {
       when {
-        branch 'master'
+        branch 'release'
         beforeAgent true
       }
       stages {
@@ -206,7 +206,7 @@ pipeline {
     }
     stage('Build and Package on Debian Bullseye') {
       when {
-        branch 'master'
+        branch 'release'
         beforeAgent true
       }
       stages {
@@ -268,7 +268,7 @@ pipeline {
     }
     stage('Build and Package on Arch Linux') {
       when {
-        branch 'master'
+        branch 'release'
         beforeAgent true
       }
       stages {
@@ -330,7 +330,7 @@ pipeline {
     }
     stage('DockerHub') {
       when {
-        branch 'master'
+        branch 'release'
         beforeAgent true
       }
       environment {
@@ -404,7 +404,7 @@ pipeline {
     }
     stage('Deploy') {
       when {
-        branch 'master'
+        branch 'release'
         beforeAgent true
       }
       agent {
@@ -428,7 +428,7 @@ pipeline {
             git fetch --all
 
             release_commit="$LONG_REV"
-            git checkout ${release_commit}
+            git checkout $release_commit
 
             git tag -d "${K_RELEASE_TAG}"         || true
             git push -d origin "${K_RELEASE_TAG}" || true
@@ -446,12 +446,12 @@ pipeline {
             echo "K Framework Release ${VERSION}"  > release.md
             echo ''                               >> release.md
             cat k-distribution/INSTALL.md         >> release.md
-            hub release create --prerelease                                                      \
-                --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                        \
-                --attach kframework_${VERSION}_amd64_focal.deb'#Ubuntu Focal (20.04) Package'    \
-                --attach kframework_${VERSION}_amd64_jammy.deb'#Ubuntu Jammy (22.04) Package'    \
-                --attach kframework_${VERSION}_amd64_bullseye.deb'#Debian Bullseye (11) Package' \
-                --attach kframework-git-${VERSION}-1-x86_64.pkg.tar.zst'#Arch Package'           \
+            hub release create --prerelease                                                     \
+                --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                       \
+                --attach kframework_${VERSION}_amd64_focal.deb'#Ubuntu Focal (20.04) Package'   \
+                --attach kframework_${VERSION}_amd64_jammy.deb'#Ubuntu Jammy (22.04) Package'   \
+                --attach kframework_${VERSION}_amd64_bullseye.deb'#Debian Bullseye (11) Package'    \
+                --attach kframework-git-${VERSION}-1-x86_64.pkg.tar.zst'#Arch Package'          \
                 --file release.md "${K_RELEASE_TAG}"
           '''
         }
@@ -459,7 +459,7 @@ pipeline {
     }
     stage('GitHub Pages') {
       when {
-        branch 'master'
+        branch 'release'
         beforeAgent true
       }
       agent {
@@ -493,6 +493,42 @@ pipeline {
               git push origin gh-pages
             '''
           }
+        }
+      }
+    }
+    stage('Trigger Release') {
+      when {
+        branch 'master'
+        beforeAgent true
+      }
+      agent {
+        dockerfile {
+          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
+          reuseNode true
+        }
+      }
+      options { skipDefaultCheckout() }
+      post { failure { slackSend color: '#cb2431' , channel: '#k' , message: "Failed to trigger Release: ${env.BUILD_URL}" } }
+      steps {
+        sshagent(['rv-jenkins-github']) {
+          sh '''
+            git clone 'ssh://github.com/runtimeverification/k' k-release
+            cd k-release
+            git fetch --all
+            git checkout -B release origin/release
+            old_master="$(git merge-base origin/master origin/release)"
+            new_master="$(git rev-parse origin/master)"
+            if git diff --exit-code ${old_master} ${new_master} -- package/version; then
+                git merge --no-edit origin/master
+                ./package/version.sh bump
+            else
+                git merge --no-edit --strategy-option=theirs origin/master
+            fi
+            ./package/version.sh sub
+            git add --update
+            git commit --no-edit --allow-empty --message "Set Version: $(cat package/version)"
+            git push origin release
+          '''
         }
       }
     }
