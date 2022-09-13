@@ -77,6 +77,19 @@ pipeline {
                 '''
               }
             }
+            stage('Build Debian Package') {
+              steps {
+                dir("kframework-${env.VERSION}") {
+                  checkout scm
+                  sh '''
+                    mv package/debian ./debian
+                    mv debian/control.focal debian/control
+                    dpkg-buildpackage
+                  '''
+                }
+                stash name: 'focal', includes: "kframework_${env.VERSION}_amd64.deb"
+              }
+            }
           }
           post {
             always {
