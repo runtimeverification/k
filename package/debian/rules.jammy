@@ -19,6 +19,8 @@ export DEB_BUILD_MAINT_OPTIONS=hardening=-stackprotector optimize=-lto
 
 DESTDIR=$(shell pwd)/debian/kframework
 PREFIX=/usr
+PYTHON_VERSION=python3.10
+PYTHON_DEB_VERSION=python3
 export DESTDIR
 export PREFIX
 

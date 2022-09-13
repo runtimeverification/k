@@ -42,6 +42,7 @@ RUN    apt-get update            \
         python3                  \
         python3-dev              \
         python3-distutils        \
+        python3-pip              \
         zlib1g-dev
 
 RUN curl -sSL https://get.haskellstack.org/ | sh
