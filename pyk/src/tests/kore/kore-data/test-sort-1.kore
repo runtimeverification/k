@@ -1,7 +1,0 @@
-[]
-
-module TEST-SORT-1
-
-  sort Nat{} []
-
-endmodule []

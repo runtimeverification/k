@@ -1,7 +1,0 @@
-[]
-
-module TEST-EXCEPTION-21
-
-  sort C ["d"]
-
-endmodule []
