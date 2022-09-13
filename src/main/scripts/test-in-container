@@ -12,3 +12,6 @@ cd ~
 echo "module TEST imports BOOL endmodule" > test.k
 kompile test.k --backend haskell
 rm -rf test-kompiled
+
+# Make sure that the KLLVM bindings have been installed properly.
+python3 -c 'import kllvm'
