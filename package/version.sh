@@ -8,12 +8,16 @@ fatal() { echo "[FATAL] $@" ; exit 1 ; }
 version_file="package/version"
 
 version_bump() {
-    local release_commit version_major version_minor version_patch new_version
-
-    version_major="$(cat $version_file | cut --delimiter '.' --field 1)"
-    version_minor="$(cat $version_file | cut --delimiter '.' --field 2)"
-    version_patch="$(cat $version_file | cut --delimiter '.' --field 3)"
-    new_version="${version_major}.${version_minor}.$((version_patch + 1))"
+    local version release_commit version_major version_minor version_patch new_version
+    version="$1"
+    version_major="$(echo ${version} | cut --delimiter '.' --field 1)"
+    version_minor="$(echo ${version} | cut --delimiter '.' --field 2)"
+    version_patch="$(echo ${version} | cut --delimiter '.' --field 3)"
+    current_version="$(cat ${version_file})"
+    new_version="${current_version}"
+    if [[ "${version}" == "${current_version}" ]]; then
+        new_version="${version_major}.${version_minor}.$((version_patch + 1))"
+    fi
     echo "${new_version}" > "${version_file}"
     notif "Version: ${new_version}"
 }
@@ -29,8 +33,8 @@ version_sub() {
 
 version_command="$1"
 
-case "$version_command" in
-    bump) version_bump "$@"                    ;;
-    sub)  version_sub  "$@"                    ;;
-    *)    fatal "No command: $version_command" ;;
+case "${version_command}" in
+    bump) version_bump "$@"                      ;;
+    sub)  version_sub  "$@"                      ;;
+    *)    fatal "No command: ${version_command}" ;;
 esac
