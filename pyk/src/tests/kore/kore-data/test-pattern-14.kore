@@ -1,8 +1,0 @@
-[]
-
-module TEST-PATTERN-14
-
-  axiom{S}
-    \next{S}(X:S) []
-
-endmodule []

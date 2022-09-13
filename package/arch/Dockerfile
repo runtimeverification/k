@@ -26,8 +26,6 @@ RUN    pacman -Sy   --noconfirm archlinux-keyring \
                        z3                         \
                        zlib
 
-RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/usr python3 - && poetry --version
-
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 RUN    groupadd -g $GROUP_ID user                     \
@@ -53,5 +51,3 @@ ADD k-distribution/pom.xml                                     /home/user/.tmp-m
 ADD kore/pom.xml                                               /home/user/.tmp-maven/kore/
 RUN    cd /home/user/.tmp-maven               \
     && mvn --batch-mode dependency:go-offline
-
-RUN pip3 install --user graphviz

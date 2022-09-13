@@ -1,6 +1,0 @@
-[]
-module BOOL
-    hooked-sort Bool{} [hook{}("BOOL.Bool")]
-    hooked-symbol andBool{}(Bool{}) : Bool{} [hook{}("BOOL.and")]
-endmodule
-[]

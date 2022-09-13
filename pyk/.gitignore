@@ -1,9 +1,0 @@
-/dist/
-
-/definitions/
-
-/kit-tests/**/*.json
-/kit-tests/**/*.run.out
-/kit-tests/**/*_summary/
-
-!/src/tests/kore/kore-data/*.kore
