@@ -20,6 +20,9 @@ jobs:
         run: |
           git config user.name devops
           git config user.email devops@runtimeverification.com
+          git fetch origin ${GITHUB_REF_NAME}
+          git checkout -B ${GITHUB_REF_NAME} origin/${GITHUB_REF_NAME}
+          git pull
           if git show --exit-code -- package/version; then
             ./package/version.sh bump
           fi
