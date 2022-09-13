@@ -71,19 +71,11 @@ pipeline {
                   echo 'Setting up environment...'
                   export K_OPTS='-Xmx12G'
                   echo 'Building K...'
-                  mvn --batch-mode package -DskipTests -U -Dhaskell.backend.skip
                   echo 'Testing pyk...'
                   echo 'Starting kserver...'
-                  k-distribution/target/release/k/bin/spawn-kserver kserver.log
                   cd k-exercises/tutorial
                   cd ../../k-distribution/k-tutorial/1_basic
                 '''
-              }
-              post {
-                always {
-                  sh 'k-distribution/target/release/k/bin/stop-kserver || true'
-                  archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-                }
               }
             }
           }
@@ -149,12 +141,6 @@ pipeline {
               python3 -m pyk --help
             '''
           }
-          post {
-            always {
-              sh 'stop-kserver || true'
-              archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-            }
-          }
         }
       }
       post {
@@ -210,12 +196,6 @@ pipeline {
               # echo "deb http://deb.debian.org/debian bullseye-backports main" > /etc/apt/sources.list.d/bullseye-backports.list
               src/main/scripts/test-in-container-debian
             '''
-          }
-          post {
-            always {
-              sh 'stop-kserver || true'
-              archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-            }
           }
         }
       }
@@ -273,12 +253,6 @@ pipeline {
               src/main/scripts/test-in-container
             '''
           }
-          post {
-            always {
-              sh 'stop-kserver || true'
-              archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-            }
-          }
         }
       }
       post {
@@ -307,7 +281,7 @@ pipeline {
       }
       stages {
         stage('Build Image') {
-          agent any
+          agent { label 'docker' }
           steps {
             milestone(1)
             dir('focal') { unstash 'focal' }
