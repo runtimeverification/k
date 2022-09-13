@@ -12,4 +12,3 @@ cp -R k-distribution/target/release/k/share/* $DESTDIR$PREFIX/share
     poetry build &&
     pip3 install ./dist/*.whl --root=$DESTDIR --prefix=$PREFIX)
 rm -rf $DESTDIR$PREFIX/bindings
-( cd pyk && make install DESTDIR=$DESTDIR PREFIX=$PREFIX )

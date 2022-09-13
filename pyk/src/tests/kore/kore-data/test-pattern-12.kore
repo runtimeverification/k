@@ -1,8 +1,0 @@
-[]
-
-module TEST-PATTERN-12
-
-  axiom{S}
-    \ceil{S,S}(X:S) [simplification{}()]
-
-endmodule []

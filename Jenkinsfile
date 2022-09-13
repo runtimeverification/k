@@ -71,8 +71,6 @@ pipeline {
                   export K_OPTS='-Xmx12G'
                   echo 'Building K...'
                   mvn --batch-mode verify -U
-                  echo 'Testing pyk...'
-                  make -C pyk all
                   echo 'Starting kserver...'
                   k-distribution/target/release/k/bin/spawn-kserver kserver.log
                   cd k-exercises/tutorial
@@ -126,8 +124,6 @@ pipeline {
             unstash 'focal'
             sh '''
               src/main/scripts/test-in-container-debian
-              pyk --help
-              python3 -m pyk --help
             '''
           }
           post {
@@ -184,8 +180,6 @@ pipeline {
             unstash 'jammy'
             sh '''
               src/main/scripts/test-in-container-debian
-              pyk --help
-              python3 -m pyk --help
             '''
           }
           post {

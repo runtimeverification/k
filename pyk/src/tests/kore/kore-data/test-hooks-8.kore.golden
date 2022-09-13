@@ -1,4 +1,0 @@
-Error:
-  module 'TEST-HOOKS-8':
-  sort 'S' declaration (test-hooks-8.kore 5:8):
-    Unexpected 'hook' attribute

@@ -15,8 +15,6 @@ export DEB_BUILD_MAINT_OPTIONS=hardening=-stackprotector
 
 DESTDIR=$(shell pwd)/debian/kframework
 PREFIX=/usr
-PYTHON_VERSION=python3.8
-PYTHON_DEB_VERSION=python3
 export DESTDIR
 export PREFIX
 
@@ -29,7 +27,6 @@ override_dh_auto_build:
 override_dh_auto_install:
 	package/package
 	@mkdir -p $(DESTDIR)$(PREFIX)/lib/$(PYTHON_DEB_VERSION)/dist-packages
-	ln --symbolic --relative $(DESTDIR)$(PREFIX)/lib/$(PYTHON_VERSION)/site-packages/pyk $(DESTDIR)$(PREFIX)/lib/$(PYTHON_DEB_VERSION)/dist-packages/pyk
 	ln --symbolic --relative $(DESTDIR)$(PREFIX)/lib/$(PYTHON_VERSION)/site-packages/kllvm $(DESTDIR)$(PREFIX)/lib/$(PYTHON_DEB_VERSION)/dist-packages/kllvm
 
 override_dh_strip:
