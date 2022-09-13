@@ -307,7 +307,7 @@ pipeline {
       }
       stages {
         stage('Build Image') {
-          agent { label 'docker' }
+          agent any
           steps {
             milestone(1)
             dir('focal') { unstash 'focal' }
