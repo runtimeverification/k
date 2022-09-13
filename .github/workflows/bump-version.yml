@@ -26,5 +26,5 @@ jobs:
           ./package/version.sh sub
           git add --update
           if git commit --message "Set Version: $(cat package/version)"; then
-            git push origin foo
+            git push origin ${GITHUB_REF_NAME}
           fi
