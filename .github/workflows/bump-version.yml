@@ -23,7 +23,7 @@ jobs:
           git fetch origin ${GITHUB_REF_NAME}
           git checkout -B ${GITHUB_REF_NAME} origin/${GITHUB_REF_NAME}
           git pull
-          if git show --exit-code -- package/version; then
+          if git show --exit-code ${GITHUB_SHA} -- package/version; then
             ./package/version.sh bump
           fi
           ./package/version.sh sub
