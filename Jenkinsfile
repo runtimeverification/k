@@ -282,6 +282,12 @@ pipeline {
         stage('Build Image') {
           steps {
             milestone(1)
+            dir('focal') { unstash 'focal' }
+            sh '''
+                mv focal/kframework_${VERSION}_amd64.deb kframework_amd64_focal.deb
+                docker login --username "${DOCKERHUB_TOKEN_USR}" --password "${DOCKERHUB_TOKEN_PSW}"
+                docker image build . --file package/docker/Dockerfile.ubuntu-focal --tag "${DOCKERHUB_REPO}:${FOCAL_VERSION_TAG}"
+            '''
             dir('jammy') { unstash 'jammy' }
             sh '''
                 mv jammy/kframework_${VERSION}_amd64.deb kframework_amd64_jammy.deb
