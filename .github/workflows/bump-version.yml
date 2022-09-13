@@ -23,7 +23,8 @@ jobs:
           git fetch origin foo
           git checkout -B foo origin/foo
           git pull
-          version_base="$(git show 'foo^:package/version')"
+          orig_version_commit="$(git rev-parse 'foo^')"
+          version_base="$(git show ${orig_version_commit}:package/version)"
           ./package/version.sh bump "${version_base}"
           ./package/version.sh sub
           git add --update
