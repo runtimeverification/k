@@ -2,7 +2,7 @@ name: 'Bump Version'
 on:
   push:
     branches:
-      - 'master'
+      - 'foo'
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -20,13 +20,13 @@ jobs:
         run: |
           git config user.name devops
           git config user.email devops@runtimeverification.com
-          git fetch origin master
-          git checkout -B master origin/master
+          git fetch origin foo
+          git checkout -B foo origin/foo
           git pull
-          version_base="$(git show 'master^:package/version')"
+          version_base="$(git show 'foo^:package/version')"
           ./package/version.sh bump "${version_base}"
           ./package/version.sh sub
           git add --update
           if git commit --message "Set Version: $(cat package/version)"; then
-            git push origin master
+            git push origin foo
           fi
