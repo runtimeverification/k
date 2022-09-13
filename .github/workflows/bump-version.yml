@@ -20,8 +20,7 @@ jobs:
         run: |
           git config user.name devops
           git config user.email devops@runtimeverification.com
-          git fetch origin
-          if git diff --exit-code 'HEAD^' HEAD -- package/version; then
+          if git show --exit-code -- package/version; then
             ./package/version.sh bump
           fi
           ./package/version.sh sub
