@@ -8,5 +8,8 @@ cp -R k-distribution/target/release/k/include/* $DESTDIR$PREFIX/include
 cp -R k-distribution/target/release/k/lib/* $DESTDIR$PREFIX/lib
 cp -R k-distribution/target/release/k/share/* $DESTDIR$PREFIX/share
 ( cd llvm-backend/target/build && make install )
-pip3 install k-distribution/target/release/k/bindings/python --root=$DESTDIR --prefix=$PREFIX
+( cd $DESTDIR$PREFIX/bindings/python &&
+    poetry build &&
+    pip3 install ./dist/*.whl --root=$DESTDIR --prefix=$PREFIX)
+rm -rf $DESTDIR$PREFIX/bindings
 ( cd pyk && make install DESTDIR=$DESTDIR PREFIX=$PREFIX )
