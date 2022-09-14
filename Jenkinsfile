@@ -220,6 +220,7 @@ pipeline {
                   sh '''
                     mv package/debian ./debian
                     mv debian/control.debian debian/control
+                    mv debian/rules.debian debian/rules
                     dpkg-buildpackage
                   '''
                 }
@@ -337,7 +338,6 @@ pipeline {
       }
       stages {
         stage('Build Image') {
-          agent { label 'docker' }
           steps {
             milestone(1)
             dir('focal') { unstash 'focal' }
