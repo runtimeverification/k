@@ -200,7 +200,10 @@ pipeline {
     }
     stage('Build and Package on Debian Bullseye') {
       when {
-        branch 'master'
+        anyOf {
+          branch 'master'
+          branch 'bullseye-fix'
+        }
         beforeAgent true
       }
       stages {
