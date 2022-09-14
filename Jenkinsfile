@@ -202,7 +202,7 @@ pipeline {
       when {
         anyOf {
           branch 'master'
-          branch 'bullseye-fix'
+          changeRequest()
         }
         beforeAgent true
       }
