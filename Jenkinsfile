@@ -200,10 +200,7 @@ pipeline {
     }
     stage('Build and Package on Debian Bullseye') {
       when {
-        anyOf {
-          branch 'master'
-          changeRequest()
-        }
+        branch 'master'
         beforeAgent true
       }
       stages {
