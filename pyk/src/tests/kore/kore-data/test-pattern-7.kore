@@ -1,8 +1,0 @@
-[]
-
-module TEST-PATTERN-7
-
-  axiom{S}
-    \iff{S}(X:S,X:S) []
-
-endmodule []

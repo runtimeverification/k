@@ -1,9 +1,0 @@
-[]
-
-module TEST-HOOKSYMBOL-1
-
-  sort S{} []
-
-  hooked-symbol f{}() : S{} [hook{}("S.f")]
-
-endmodule []

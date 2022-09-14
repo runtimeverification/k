@@ -49,7 +49,8 @@ for details about supported configurations and system setup.
 5.  [Changing the KORE Data Structures](#changing-the-kore-data-structures)
 6.  [Building the Final Release Directory/Archives](#building-the-final-release-directoryarchives)
 7.  [Compiling Definitions and Running Programs](#compiling-definitions-and-running-programs)
-8.  [Troubleshooting](#troubleshooting)
+8.  [Installing Python Support](#installing-python-support)
+9.  [Troubleshooting](#troubleshooting)
 
 # Prerequisite Install Guide
 
@@ -365,6 +366,10 @@ Assuming k-distribution/target/release/k/bin is in your path, you can compile de
 the `kompile` command.  To execute a program you can use `krun`.
 
 For running either program in the debugger, use the main class `org.kframework.main.Main` with an additional argument `-kompile` or `-krun` added before other command line arguments, and use the classpath from the `k-distribution` module.
+
+# Installing Python Support
+
+Python tools for K can be found under [runtimeverification/pyk](https://github.com/runtimeverification/pyk).
 
 # Troubleshooting
 Common build-time error messages:
