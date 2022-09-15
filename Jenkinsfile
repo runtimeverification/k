@@ -263,7 +263,10 @@ pipeline {
     }
     stage('Build and Package on Arch Linux') {
       when {
-        branch 'master'
+        anyOf {
+          branch 'master'
+          changeRequest()
+        }
         beforeAgent true
       }
       stages {
