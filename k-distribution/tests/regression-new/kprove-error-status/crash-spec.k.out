@@ -10,6 +10,6 @@ kore-exec:  Error (ErrorException):
     and include the text of this message.
     Workaround: Give rules for Lblcrash'LParUndsRParUnds'VERIF-SYNTAX'Unds'Pgm'Unds'Int{}
     CallStack (from HasCallStack):
-      error, called at src/Kore/Rewrite/Function/Evaluator.hs:274:6 in kore-0.60.0.0-C6NIGnCldg2CHYuzj5V8fi:Kore.Rewrite.Function.Evaluator
+      error, called at 
 Created bug report: kore-exec.tar.gz
 [Error] Critical: Haskell Backend execution failed with code 1 and produced no output.
