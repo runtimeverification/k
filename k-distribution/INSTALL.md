@@ -140,8 +140,6 @@ Docker images with K pre-installed are available at the
 
 Each release at `COMMIT_ID` has an image associated with it at
 `runtimeverificationinc/kframework-k:ubuntu-focal-COMMIT_ID`.
-The latest `master` build Docker image can be accessed with `COMMIT_ID` set to
-`master`.
 
 To run the image directly:
 
