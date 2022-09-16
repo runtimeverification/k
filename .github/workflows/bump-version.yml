@@ -1,8 +1,6 @@
 name: 'Bump Version'
 on:
-  push:
-    branches:
-      - 'master'
+  pull_request:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -23,8 +21,8 @@ jobs:
         run: |
           git config user.name devops
           git config user.email devops@runtimeverification.com
-          if git show --exit-code ${GITHUB_REF_NAME} -- package/version; then
-            ./package/version.sh bump
+          if git diff --exit-code origin/${GITHUB_BASE_REF} ${GITHUB_REF} -- package/version; then
+            ./package/version.sh bump $(git show origin/${GITHUB_BASE_REF}:package/version)
           fi
           ./package/version.sh sub
           git add --update
