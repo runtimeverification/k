@@ -353,9 +353,9 @@ class KToken(KInner):
         return None
 
 
-TRUE: Final = KToken('true', 'Bool')
-FALSE: Final = KToken('false', 'Bool')
-DOTS: Final = KToken('...', 'K')
+BOOL: Final = KSort('Bool')
+TRUE: Final = KToken('true', BOOL)
+FALSE: Final = KToken('false', BOOL)
 
 
 @final
@@ -1709,6 +1709,28 @@ def collect(callback: Callable[[KInner], None], kinner: KInner) -> None:
         return kinner
 
     bottom_up(f, kinner)
+
+
+def build_assoc(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner]) -> KInner:
+    _label = label if type(label) is KLabel else KLabel(label)
+    res: Optional[KInner] = None
+    for term in reversed(list(terms)):
+        if term == unit:
+            continue
+        if not res:
+            res = term
+        else:
+            res = _label(term, res)
+    return res or unit
+
+
+def build_cons(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner]) -> KInner:
+    it = iter(terms)
+    try:
+        fst = next(it)
+        return KApply(label, (fst, build_cons(unit, label, it)))
+    except StopIteration:
+        return unit
 
 
 def read_kast(ifile: Path) -> KAst:

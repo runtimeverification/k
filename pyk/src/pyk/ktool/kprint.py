@@ -8,7 +8,6 @@ from typing import Callable, Dict, Final, Iterable, Optional
 
 from ..cli_utils import check_dir_path, run_process
 from ..kast import (
-    DOTS,
     KApply,
     KAs,
     KAst,
@@ -41,7 +40,8 @@ from ..kast import (
 from ..kastManip import flatten_label
 from ..kore.parser import KoreParser
 from ..kore.syntax import Kore
-from ..prelude import Bool, Labels, Sorts
+from ..prelude.k import DOTS, EMPTY_K, K
+from ..prelude.kbool import TRUE
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ def _kast(
     profile: bool = False,
     input: str = 'program',
     output: str = 'json',
-    sort: KSort = Sorts.K,
+    sort: KSort = K,
     args: Iterable[str] = (),
 ) -> str:
     kast_command = ['kast', '--definition', str(definition)]
@@ -200,7 +200,7 @@ def pretty_print_kast(kast: KAst, symbol_table: SymbolTable, debug=False):
         return '( ' + lhs_str + ' => ' + rhs_str + ' )'
     if type(kast) is KSequence:
         if kast.arity == 0:
-            return pretty_print_kast(KApply(Labels.EMPTY_K), symbol_table, debug=debug)
+            return pretty_print_kast(EMPTY_K, symbol_table, debug=debug)
         if kast.arity == 1:
             return pretty_print_kast(kast.items[0], symbol_table, debug=debug)
         unparsed_k_seq = '\n~> '.join([pretty_print_kast(item, symbol_table, debug=debug) for item in kast.items[0:-1]])
@@ -260,12 +260,12 @@ def pretty_print_kast(kast: KAst, symbol_table: SymbolTable, debug=False):
             rule_str = rule_str + '[' + kast.att['label'] + ']:'
         rule_str = rule_str + ' ' + body
         atts_str = pretty_print_kast(kast.att, symbol_table, debug=debug)
-        if kast.requires != Bool.true:
+        if kast.requires != TRUE:
             requires_str = 'requires ' + '\n  '.join(
                 pretty_print_kast_bool(kast.requires, symbol_table, debug=debug).split('\n')
             )
             rule_str = rule_str + '\n  ' + requires_str
-        if kast.ensures != Bool.true:
+        if kast.ensures != TRUE:
             ensures_str = 'ensures ' + '\n  '.join(
                 pretty_print_kast_bool(kast.ensures, symbol_table, debug=debug).split('\n')
             )
@@ -276,7 +276,7 @@ def pretty_print_kast(kast: KAst, symbol_table: SymbolTable, debug=False):
         context_str = 'context alias ' + body
         requires_str = ''
         atts_str = pretty_print_kast(kast.att, symbol_table, debug=debug)
-        if kast.requires != Bool.true:
+        if kast.requires != TRUE:
             requires_str = pretty_print_kast(kast.requires, symbol_table, debug=debug)
             requires_str = 'requires ' + indent(requires_str)
         return context_str + '\n  ' + requires_str + '\n  ' + atts_str
