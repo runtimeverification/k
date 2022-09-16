@@ -20,6 +20,8 @@ jobs:
         run: |
           git config user.name devops
           git config user.email devops@runtimeverification.com
+          echo ${GITHUB_BASE_REF}
+          echo ${GITHUB_REF_NAME}
           if git diff --exit-code origin/${GITHUB_BASE_REF} ${GITHUB_REF_NAME} -- package/version; then
             ./package/version.sh bump $(git show origin/${GITHUB_BASE_REF}:package/version)
           fi
