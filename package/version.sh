@@ -27,7 +27,7 @@ version_sub() {
     sed --in-place 's/^K_VERSION=.*$/K_VERSION='${version}'/'                                                         src/main/scripts/test-in-container-debian
 }
 
-version_command="$1"
+version_command="$1" ; shift
 
 case "${version_command}" in
     bump) version_bump "$@"                      ;;
