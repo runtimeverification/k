@@ -16,7 +16,8 @@ from .kastManip import (
     split_config_and_constraints,
     substitute,
 )
-from .prelude import Sorts, mlAnd, mlImplies, mlTop
+from .prelude.k import GENERATED_TOP_CELL
+from .prelude.ml import mlAnd, mlImplies, mlTop
 from .utils import unique
 
 
@@ -52,7 +53,7 @@ class CTerm:
 
     @cached_property
     def kast(self) -> KInner:
-        return mlAnd(self, Sorts.GENERATED_TOP_CELL)
+        return mlAnd(self, GENERATED_TOP_CELL)
 
     @property
     def hash(self) -> str:
@@ -66,7 +67,7 @@ class CTerm:
 
         subst, condition = match_res
 
-        if condition != mlTop(Sorts.GENERATED_TOP_CELL):
+        if condition != mlTop(GENERATED_TOP_CELL):
             return None
 
         return subst
@@ -83,18 +84,16 @@ class CTerm:
 
     @staticmethod
     def _ml_impl(antecedents: Iterable[KInner], consequents: Iterable[KInner]) -> KInner:
-        antecedent = mlAnd(unique(antecedents), Sorts.GENERATED_TOP_CELL)
-        consequent = mlAnd(
-            unique(term for term in consequents if term not in set(antecedents)), Sorts.GENERATED_TOP_CELL
-        )
+        antecedent = mlAnd(unique(antecedents), GENERATED_TOP_CELL)
+        consequent = mlAnd(unique(term for term in consequents if term not in set(antecedents)), GENERATED_TOP_CELL)
 
-        if mlTop(Sorts.GENERATED_TOP_CELL) in {antecedent, consequent}:
+        if mlTop(GENERATED_TOP_CELL) in {antecedent, consequent}:
             return consequent
 
-        return mlImplies(antecedent, consequent, Sorts.GENERATED_TOP_CELL)
+        return mlImplies(antecedent, consequent, GENERATED_TOP_CELL)
 
     def add_constraint(self, new_constraint: KInner) -> 'CTerm':
-        return CTerm(mlAnd([self.config, new_constraint] + list(self.constraints), Sorts.GENERATED_TOP_CELL))
+        return CTerm(mlAnd([self.config, new_constraint] + list(self.constraints), GENERATED_TOP_CELL))
 
 
 def remove_useless_constraints(cterm: CTerm, keep_vars=None) -> CTerm:
@@ -141,7 +140,7 @@ def build_rule(
     var_occurances = count_vars(
         mlAnd(
             [push_down_rewrites(KRewrite(init_config, final_config))] + init_constraints + final_constraints,
-            Sorts.GENERATED_TOP_CELL,
+            GENERATED_TOP_CELL,
         )
     )
     v_subst: Dict[str, KVariable] = {}

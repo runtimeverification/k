@@ -3,7 +3,9 @@ from unittest import TestCase
 
 from pyk.kast import KApply, KInner, KLabel, KVariable, Subst
 from pyk.kastManip import extract_subst
-from pyk.prelude import Bool, intToken, mlAnd, mlEquals, mlEqualsTrue, mlTop, token
+from pyk.prelude.kbool import TRUE
+from pyk.prelude.kint import intToken
+from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlTop
 
 from .mock_kprint import MockKPrint
 from .utils import a, b, c, f, g, h, x, y, z
@@ -100,20 +102,20 @@ class SubstTest(TestCase):
 
     def test_pretty(self):
         self.assertListEqual(
-            list(Subst({'X': Bool.true, 'Y': KApply('_andBool_', [Bool.true, Bool.true])}).pretty(MockKPrint())),
+            list(Subst({'X': TRUE, 'Y': KApply('_andBool_', [TRUE, TRUE])}).pretty(MockKPrint())),
             ['X |-> true', 'Y |-> _andBool_ ( true , true )'],
         )
 
     def test_ml_pred(self):
         subst_pred_pairs = (
             ('empty', Subst({}), KApply('#Top')),
-            ('singleton', Subst({'X': Bool.true}), KApply('#Equals', [KVariable('X'), Bool.true])),
+            ('singleton', Subst({'X': TRUE}), KApply('#Equals', [KVariable('X'), TRUE])),
             (
                 'double',
-                Subst({'X': Bool.true, 'Y': intToken(4)}),
+                Subst({'X': TRUE, 'Y': intToken(4)}),
                 KApply(
                     '#And',
-                    [KApply('#Equals', [KVariable('X'), Bool.true]), KApply('#Equals', [KVariable('Y'), intToken(4)])],
+                    [KApply('#Equals', [KVariable('X'), TRUE]), KApply('#Equals', [KVariable('Y'), intToken(4)])],
                 ),
             ),
         )
@@ -123,7 +125,7 @@ class SubstTest(TestCase):
 
 
 class ExtractSubstTest(TestCase):
-    _0 = token(0)
+    _0 = intToken(0)
     _EQ = KLabel('_==Int_')
 
     TEST_DATA: Final[Tuple[Tuple[KInner, Dict[str, KInner], KInner], ...]] = (

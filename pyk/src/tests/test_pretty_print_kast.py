@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from pyk.kast import KApply, KAst, KAtt, KLabel, KNonTerminal, KProduction, KRule, KSort, KTerminal
 from pyk.ktool.kprint import SymbolTable, pretty_print_kast, unparser_for_production
-from pyk.prelude import Bool
+from pyk.prelude.kbool import TRUE
 
 success_production = KProduction(
     KSort('EndStatusCode'), [KTerminal('EVMC_SUCCESS')], klabel=KLabel('EVMC_SUCCESS_NETWORK_EndStatusCode')
@@ -12,10 +12,10 @@ success_production = KProduction(
 
 class PrettyPrintKastTest(TestCase):
     TEST_DATA: Final[Tuple[Tuple[KAst, str], ...]] = (
-        (KRule(Bool.true), 'rule  true\n  '),
-        (KRule(Bool.true, ensures=Bool.true), 'rule  true\n  '),
+        (KRule(TRUE), 'rule  true\n  '),
+        (KRule(TRUE, ensures=TRUE), 'rule  true\n  '),
         (
-            KRule(Bool.true, ensures=KApply('_andBool_', [Bool.true, Bool.true])),
+            KRule(TRUE, ensures=KApply('_andBool_', [TRUE, TRUE])),
             'rule  true\n   ensures ( true\n   andBool ( true\n           ))\n  ',
         ),
         (KProduction(KSort('Test')), 'syntax Test'),

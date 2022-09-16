@@ -1,7 +1,7 @@
 from pyk.kast import KApply
 from pyk.kore.syntax import DV, App, SortApp, String
 from pyk.ktool import KompileBackend
-from pyk.prelude import intToken
+from pyk.prelude.kint import intToken
 
 from .kprove_test import KProveTest
 
@@ -29,7 +29,7 @@ class KoreToKastTest(KProveTest):
                 ),
                 KApply('pred1', [intToken(3)]),
             ),
-            # TODO: ('cells-conversion', App("Lbl'-LT-'k'-GT-'", [], [App('EmptyK', [], [])]), KApply('<k>', [KApply(Labels.EMPTY_K)])),
+            # TODO: ('cells-conversion', App("Lbl'-LT-'k'-GT-'", [], [App('EmptyK', [], [])]), KApply('<k>', [EMPTY_K])),
         )
         for (name, kore, kast) in kore_kast_pairs:
             with self.subTest(name):
