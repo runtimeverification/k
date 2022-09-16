@@ -18,6 +18,7 @@ jobs:
           fetch-depth: 0
       - name: 'Update Version'
         run: |
+          set -x
           git config user.name devops
           git config user.email devops@runtimeverification.com
           if git diff --exit-code origin/${GITHUB_BASE_REF} origin/${GITHUB_HEAD_REF} -- package/version; then
