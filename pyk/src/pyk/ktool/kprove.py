@@ -9,7 +9,7 @@ from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp, run
 from ..cterm import CTerm, build_claim
 from ..kast import KAst, KClaim, KDefinition, KFlatModule, KImport, KInner, KRequire, KRule, KSentence
 from ..kastManip import extract_subst, flatten_label, free_vars
-from ..prelude import mlAnd, mlBottom, mlTop
+from ..prelude.ml import mlAnd, mlBottom, mlTop
 from ..utils import unique
 from .kprint import KPrint
 

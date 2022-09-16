@@ -2,7 +2,7 @@ from pyk.cterm import CTerm
 from pyk.kast import KApply, KAtt, KClaim, KRule, KToken
 from pyk.kastManip import get_cell
 from pyk.ktool import KompileBackend
-from pyk.prelude import Sorts
+from pyk.prelude.kbool import BOOL
 
 from .kprove_test import KProveTest
 
@@ -22,13 +22,13 @@ class SimpleProofTest(KProveTest):
     def test_prove_claim_with_lemmas(self):
         # Given
         new_lemma = KRule(
-            KToken('pred1(3) => true', Sorts.BOOL),
-            requires=KToken('pred1(4)', Sorts.BOOL),
+            KToken('pred1(3) => true', BOOL),
+            requires=KToken('pred1(4)', BOOL),
             att=KAtt(atts={'simplification': ''}),
         )
         new_claim = KClaim(
             KToken('<k> foo => bar ... </k> <state> 3 |-> 3 </state>', 'TCellFragment'),
-            requires=KToken('pred1(4)', Sorts.BOOL),
+            requires=KToken('pred1(4)', BOOL),
         )
 
         # When

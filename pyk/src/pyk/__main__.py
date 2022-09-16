@@ -12,7 +12,8 @@ from .kast import KAst, read_kast_definition
 from .kastManip import flatten_label, minimize_rule, minimize_term, propagate_up_constraints, remove_source_map
 from .ktool import KPrint, KProve
 from .ktool.kprint import build_symbol_table, pretty_print_kast
-from .prelude import Sorts, mlAnd, mlOr, mlTop
+from .prelude.k import GENERATED_TOP_CELL
+from .prelude.ml import mlAnd, mlOr, mlTop
 
 _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 _LOGGER: Final = logging.getLogger(__name__)
@@ -53,10 +54,10 @@ def main():
                     minimized = minimize_term(disjunct, abstract_labels=abstract_labels)
                     config, constraint = split_config_and_constraints(minimized)
                     if constraint != mlTop():
-                        minimized_disjuncts.append(mlAnd([config, constraint], sort=Sorts.GENERATED_TOP_CELL))
+                        minimized_disjuncts.append(mlAnd([config, constraint], sort=GENERATED_TOP_CELL))
                     else:
                         minimized_disjuncts.append(config)
-                term = propagate_up_constraints(mlOr(minimized_disjuncts, sort=Sorts.GENERATED_TOP_CELL))
+                term = propagate_up_constraints(mlOr(minimized_disjuncts, sort=GENERATED_TOP_CELL))
             args['output_file'].write(printer.pretty_print(term))
             _LOGGER.info(f'Wrote file: {args["output_file"].name}')
 

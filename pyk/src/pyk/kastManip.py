@@ -4,7 +4,6 @@ from collections import Counter
 from typing import Any, Callable, Collection, Final, Iterable, List, Mapping, Optional, Sequence, Tuple, Type, TypeVar
 
 from .kast import (
-    DOTS,
     KApply,
     KAtt,
     KDefinition,
@@ -21,7 +20,9 @@ from .kast import (
     collect,
     top_down,
 )
-from .prelude import Bool, Labels, Sorts, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlOr, mlTop
+from .prelude.k import DOTS, EMPTY_K, GENERATED_TOP_CELL
+from .prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
+from .prelude.ml import mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlOr, mlTop
 from .utils import find_common_items, hash_str
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -67,22 +68,22 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
     def _ml_constraint_to_bool(_kast: KInner) -> KInner:
         if type(_kast) is KApply:
             if _kast.label.name == '#Top':
-                return Bool.true
+                return TRUE
             if _kast.label.name == '#Bottom':
-                return Bool.false
+                return FALSE
             if _kast.label.name == '#Not' and len(_kast.args) == 1:
-                return Bool.notBool(_ml_constraint_to_bool(_kast.args[0]))
+                return notBool(_ml_constraint_to_bool(_kast.args[0]))
             if _kast.label.name == '#And':
-                return Bool.andBool(map(_ml_constraint_to_bool, _kast.args))
+                return andBool(map(_ml_constraint_to_bool, _kast.args))
             if _kast.label.name == '#Or':
-                return Bool.orBool(map(_ml_constraint_to_bool, _kast.args))
+                return orBool(map(_ml_constraint_to_bool, _kast.args))
             if _kast.label.name == '#Implies' and len(_kast.args) == 2:
-                return Bool.impliesBool(_ml_constraint_to_bool(_kast.args[0]), _ml_constraint_to_bool(_kast.args[1]))
+                return impliesBool(_ml_constraint_to_bool(_kast.args[0]), _ml_constraint_to_bool(_kast.args[1]))
             if _kast.label.name == '#Equals':
-                if _kast.args[0] == Bool.true:
+                if _kast.args[0] == TRUE:
                     return _kast.args[1]
-                if _kast.args[0] == Bool.false:
-                    return Bool.notBool(_kast.args[1])
+                if _kast.args[0] == FALSE:
+                    return notBool(_kast.args[1])
                 if type(_kast.args[0]) in [KVariable, KToken]:
                     return KApply('_==K_', _kast.args)
             if unsafe:
@@ -106,24 +107,24 @@ def simplify_bool(k: KInner) -> KInner:
         return None
 
     # fmt: off
-    simplify_rules = [ (KApply('_==K_', [KVariable('#LHS'), Bool.true]), KVariable('#LHS'))
-                     , (KApply('_==K_', [Bool.true, KVariable('#RHS')]), KVariable('#RHS'))
-                     , (KApply('_==K_', [KVariable('#LHS'), Bool.false]), Bool.notBool(KVariable('#LHS')))
-                     , (KApply('_==K_', [Bool.false, KVariable('#RHS')]), Bool.notBool(KVariable('#RHS')))
-                     , (Bool.notBool(Bool.false), Bool.true)
-                     , (Bool.notBool(Bool.true), Bool.false)
-                     , (Bool.notBool(KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')])), KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')]))
-                     , (Bool.notBool(KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')])), KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')]))
-                     , (Bool.notBool(KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')])), KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')]))
-                     , (Bool.notBool(KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')])), KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')]))
-                     , (Bool.andBool([Bool.true, KVariable('#REST')]), KVariable('#REST'))
-                     , (Bool.andBool([KVariable('#REST'), Bool.true]), KVariable('#REST'))
-                     , (Bool.andBool([Bool.false, KVariable('#REST')]), Bool.false)
-                     , (Bool.andBool([KVariable('#REST'), Bool.false]), Bool.false)
-                     , (Bool.orBool([Bool.false, KVariable('#REST')]), KVariable('#REST'))
-                     , (Bool.orBool([KVariable('#REST'), Bool.false]), KVariable('#REST'))
-                     , (Bool.orBool([Bool.true, KVariable('#REST')]), Bool.true)
-                     , (Bool.orBool([KVariable('#REST'), Bool.true]), Bool.true)
+    simplify_rules = [ (KApply('_==K_', [KVariable('#LHS'), TRUE]), KVariable('#LHS'))
+                     , (KApply('_==K_', [TRUE, KVariable('#RHS')]), KVariable('#RHS'))
+                     , (KApply('_==K_', [KVariable('#LHS'), FALSE]), notBool(KVariable('#LHS')))
+                     , (KApply('_==K_', [FALSE, KVariable('#RHS')]), notBool(KVariable('#RHS')))
+                     , (notBool(FALSE), TRUE)
+                     , (notBool(TRUE), FALSE)
+                     , (notBool(KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')])), KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')]))
+                     , (notBool(KApply('_=/=K_'   , [KVariable('#V1'), KVariable('#V2')])), KApply('_==K_'    , [KVariable('#V1'), KVariable('#V2')]))
+                     , (notBool(KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')])), KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')]))
+                     , (notBool(KApply('_=/=Int_' , [KVariable('#V1'), KVariable('#V2')])), KApply('_==Int_'  , [KVariable('#V1'), KVariable('#V2')]))
+                     , (andBool([TRUE, KVariable('#REST')]), KVariable('#REST'))
+                     , (andBool([KVariable('#REST'), TRUE]), KVariable('#REST'))
+                     , (andBool([FALSE, KVariable('#REST')]), FALSE)
+                     , (andBool([KVariable('#REST'), FALSE]), FALSE)
+                     , (orBool([FALSE, KVariable('#REST')]), KVariable('#REST'))
+                     , (orBool([KVariable('#REST'), FALSE]), KVariable('#REST'))
+                     , (orBool([TRUE, KVariable('#REST')]), TRUE)
+                     , (orBool([KVariable('#REST'), TRUE]), TRUE)
                      ]
     # fmt: on
 
@@ -163,7 +164,7 @@ def extract_subst(term: KInner) -> Tuple[Subst, KInner]:
                     return subst
 
                 if (
-                    conjunct.args[0] == Bool.true
+                    conjunct.args[0] == TRUE
                     and type(conjunct.args[1]) is KApply
                     and conjunct.args[1].label.name in {'_==K_', '_==Int_'}
                 ):
@@ -239,7 +240,7 @@ def split_config_and_constraints(kast: KInner) -> Tuple[KInner, KInner]:
             constraints.append(c)
     if not term:
         raise ValueError(f'Could not find configuration for: {kast}')
-    return (term, mlAnd(constraints, Sorts.GENERATED_TOP_CELL))
+    return (term, mlAnd(constraints, GENERATED_TOP_CELL))
 
 
 def split_config_from(configuration):
@@ -334,7 +335,7 @@ def push_down_rewrites(kast):
                 and type(rhs) is KVariable
                 and lhs.items[-1] == rhs
             ):
-                return KSequence([KRewrite(KSequence(lhs.items[0:-1]), KApply(Labels.EMPTY_K)), rhs])
+                return KSequence([KRewrite(KSequence(lhs.items[0:-1]), EMPTY_K), rhs])
         return _kast
 
     return top_down(_push_down_rewrites, kast)
@@ -471,10 +472,10 @@ def minimize_rule(rule: RL, keep_vars: Iterable[str] = ()) -> RL:
     requires = rule.requires
     ensures = rule.ensures
 
-    requires = Bool.andBool(flatten_label('_andBool_', requires))
+    requires = andBool(flatten_label('_andBool_', requires))
     requires = simplify_bool(requires)
 
-    ensures = Bool.andBool(flatten_label('_andBool_', ensures))
+    ensures = andBool(flatten_label('_andBool_', ensures))
     ensures = simplify_bool(ensures)
 
     constrained_vars = list(keep_vars)

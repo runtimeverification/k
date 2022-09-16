@@ -1,6 +1,6 @@
 from pyk.kast import KApply, KToken
 from pyk.ktool import KompileBackend
-from pyk.prelude import intToken
+from pyk.prelude.kint import intToken
 
 from .kprove_test import KProveTest
 
@@ -23,7 +23,7 @@ class ImpParseTest(KProveTest):
             ('id-token', KToken('abc', 'Id'), KToken('abc', 'Id')),
             ('add-aexp', KToken('3 + 4', 'AExp'), KApply('_+_', [intToken(3), intToken(4)])),
             # TODO: ('add-int', KToken('3 +Int V', 'Int'), KApply('_+Int_', [intToken(3), KVariable('V')])),
-            # TODO: ('k-cell', KToken('<k> . </k>', 'KCell'), KApply('<k>', [KApply(Labels.EMPTY_K)])),
+            # TODO: ('k-cell', KToken('<k> . </k>', 'KCell'), KApply('<k>', [EMPTY_K])),
         )
 
         for name, token, kast in test_parses:

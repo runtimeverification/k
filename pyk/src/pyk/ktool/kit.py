@@ -11,7 +11,8 @@ from ..kast import KApply, KDefinition, KFlatModuleList, KInner, KSequence, KTok
 from ..kastManip import free_vars, get_cell, is_top, minimize_term
 from ..kcfg import KCFG
 from ..ktool import KProve
-from ..prelude import Bool, mlAnd, mlEqualsTrue, mlOr, mlTop
+from ..prelude.kbool import FALSE
+from ..prelude.ml import mlAnd, mlEqualsTrue, mlOr, mlTop
 from ..utils import add_indent, shorten_hashes
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -305,7 +306,7 @@ def parse_token_rule_syntax(kprove, ktoken: KToken, kast_args: Iterable[str] = (
     cterm = CTerm(mlAnd([KApply('<k>', [ktoken])]))
     claim_id = 'simplify-token'
     claim, var_map = build_claim(
-        claim_id, cterm, CTerm(mlAnd([cterm.kast, mlEqualsTrue(Bool.false)])), keep_vars=free_vars(cterm.kast)
+        claim_id, cterm, CTerm(mlAnd([cterm.kast, mlEqualsTrue(FALSE)])), keep_vars=free_vars(cterm.kast)
     )
     kprove_result = kprove.prove_claim(claim, claim_id, args=['--depth', '0'], allow_zero_step=True)
     kprove_result = Subst(var_map).apply(kprove_result)
