@@ -46,9 +46,9 @@ class SimpleKoreClientTest(KoreClientTest):
     KOMPILE_MAIN_FILE = 'k-files/kore-rpc-test.k'
     KORE_MODULE_NAME = 'KORE-RPC-TEST'
 
-    def test_execute(self):
+    def test_execute(self) -> None:
         # Given
-        test_data: Final[Tuple[Tuple[int, Mapping[str, Any], ExecuteResult], ...]] = (
+        test_data: Final[Tuple[Tuple[str, int, Mapping[str, Any], ExecuteResult], ...]] = (
             ('branching', 0, {}, BranchingResult(state=state(2), depth=2, next_states=(state(4), state(3)))),
             ('depth-bound', 0, {'max_depth': 2}, DepthBoundResult(state=state(2), depth=2)),
             ('stuck', 4, {}, StuckResult(state=state(6), depth=2)),
@@ -62,7 +62,7 @@ class SimpleKoreClientTest(KoreClientTest):
                 # Then
                 self.assertEqual(actual, expected)
 
-    def test_implies(self):
+    def test_implies(self) -> None:
         # Given
         test_data = (
             (
@@ -99,7 +99,7 @@ class SimpleKoreClientTest(KoreClientTest):
                 # Then
                 self.assertEqual(actual, expected)
 
-    def test_implies_error(self):
+    def test_implies_error(self) -> None:
         # Given
         test_data = (
             ('0 -> X', int_dv(0), x),

@@ -4,7 +4,7 @@ import os
 import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Callable, Dict, Final, Iterable, Optional
+from typing import Any, Callable, Dict, Final, Iterable, Optional
 
 from ..cli_utils import check_dir_path, run_process
 from ..kast import (
@@ -45,7 +45,7 @@ from ..prelude.kbool import TRUE
 
 _LOGGER: Final = logging.getLogger(__name__)
 
-SymbolTable = Dict[str, Callable]
+SymbolTable = Dict[str, Callable[..., str]]
 
 
 def _kast(
@@ -121,12 +121,12 @@ class KPrint:
         output = _kast(self.definition_dir, json.dumps(kast_json), input='json', output='kore', profile=self._profile)
         return KoreParser(output).pattern()
 
-    def pretty_print(self, kast: KAst, debug=False):
+    def pretty_print(self, kast: KAst, debug: bool = False) -> str:
         return pretty_print_kast(kast, self.symbol_table, debug=debug)
 
 
-def unparser_for_production(prod):
-    def _unparser(*args):
+def unparser_for_production(prod: KProduction) -> Callable[..., str]:
+    def _unparser(*args: Any) -> str:
         index = 0
         result = []
         for item in prod.items:
@@ -140,7 +140,7 @@ def unparser_for_production(prod):
     return _unparser
 
 
-def build_symbol_table(definition: KDefinition, opinionated=False) -> SymbolTable:
+def build_symbol_table(definition: KDefinition, opinionated: bool = False) -> SymbolTable:
     """Build the unparsing symbol table given a JSON encoded definition.
 
     -   Input: JSON encoded K definition.
@@ -164,7 +164,7 @@ def build_symbol_table(definition: KDefinition, opinionated=False) -> SymbolTabl
     return symbol_table
 
 
-def pretty_print_kast(kast: KAst, symbol_table: SymbolTable, debug=False):
+def pretty_print_kast(kast: KAst, symbol_table: SymbolTable, debug: bool = False) -> str:
     """Print out KAST terms/outer syntax.
 
     -   Input: KAST term.
@@ -303,7 +303,7 @@ def pretty_print_kast(kast: KAst, symbol_table: SymbolTable, debug=False):
     raise ValueError(f'Error unparsing: {kast}')
 
 
-def pretty_print_kast_bool(kast, symbol_table, debug=False):
+def pretty_print_kast_bool(kast: KAst, symbol_table: SymbolTable, debug: bool = False) -> str:
     """Print out KAST requires/ensures clause.
 
     -   Input: KAST Bool for requires/ensures clause.
@@ -321,7 +321,7 @@ def pretty_print_kast_bool(kast, symbol_table, debug=False):
         separator = ' ' * (len(head) - 7)
         spacer = ' ' * len(head)
 
-        def join_sep(s):
+        def join_sep(s: str) -> str:
             return ('\n' + separator).join(s.split('\n'))
 
         clauses = (
@@ -334,20 +334,20 @@ def pretty_print_kast_bool(kast, symbol_table, debug=False):
         return pretty_print_kast(kast, symbol_table, debug=debug)
 
 
-def paren(printer):
+def paren(printer: Callable[..., str]) -> Callable[..., str]:
     return lambda *args: '( ' + printer(*args) + ' )'
 
 
-def applied_label_str(symbol):
+def applied_label_str(symbol: str) -> Callable[..., str]:
     return lambda *args: symbol + ' ( ' + ' , '.join(args) + ' )'
 
 
-def indent(input, size=2):
-    return '\n'.join([(' ' * size) + line for line in input.split('\n')])
+def indent(text: str, size: int = 2) -> str:
+    return '\n'.join([(' ' * size) + line for line in text.split('\n')])
 
 
 def assoc_with_unit(assoc_join: str, unit: str) -> Callable[..., str]:
-    def _assoc_with_unit(*args: str):
+    def _assoc_with_unit(*args: str) -> str:
         return assoc_join.join(arg for arg in args if arg != unit)
 
     return _assoc_with_unit

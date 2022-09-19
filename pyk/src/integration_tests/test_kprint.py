@@ -1,5 +1,6 @@
 from pyk.kast import KApply, KToken
 from pyk.ktool import KompileBackend
+from pyk.ktool.kprint import SymbolTable
 from pyk.prelude.kint import intToken
 
 from .kprove_test import KProveTest
@@ -14,10 +15,10 @@ class ImpParseTest(KProveTest):
     KPROVE_USE_DIR = '.imp'
 
     @staticmethod
-    def _update_symbol_table(symbol_table):
+    def _update_symbol_table(symbol_table: SymbolTable) -> None:
         pass
 
-    def test_parse_token(self):
+    def test_parse_token(self) -> None:
         test_parses = (
             ('int-token', KToken('3', 'Int'), intToken(3)),
             ('id-token', KToken('abc', 'Id'), KToken('abc', 'Id')),

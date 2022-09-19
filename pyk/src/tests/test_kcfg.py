@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, Iterable, List, Tuple
 from unittest import TestCase
 
 from pyk.cterm import CTerm
@@ -36,8 +36,8 @@ def node_dicts(n: int) -> List[Dict[str, Any]]:
     return [node(i).to_dict() for i in range(n)]
 
 
-def edge_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
-    def _make_edge_dict(i, j, depth=1, condition=TRUE):
+def edge_dicts(*edges: Iterable) -> List[Dict[str, Any]]:
+    def _make_edge_dict(i: int, j: int, depth: int = 1, condition: KInner = TRUE) -> Dict[str, Any]:
         return {'source': nid(i), 'target': nid(j), 'condition': condition.to_dict(), 'depth': depth}
 
     return [_make_edge_dict(*edge) for edge in edges]
@@ -48,7 +48,7 @@ def cover_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
 
 
 class KCFGTestCase(TestCase):
-    def test_from_dict_single_node(self):
+    def test_from_dict_single_node(self) -> None:
         # Given
         d = {'nodes': node_dicts(1)}
 
@@ -59,7 +59,7 @@ class KCFGTestCase(TestCase):
         self.assertSetEqual(set(cfg.nodes), {node(0)})
         self.assertDictEqual(cfg.to_dict(), d)
 
-    def test_from_dict_two_nodes(self):
+    def test_from_dict_two_nodes(self) -> None:
         # Given
         d = {'nodes': node_dicts(2)}
 
@@ -69,7 +69,7 @@ class KCFGTestCase(TestCase):
         # Then
         self.assertSetEqual(set(cfg.nodes), {node(0), node(1)})
 
-    def test_from_dict_loop_edge(self):
+    def test_from_dict_loop_edge(self) -> None:
         # Given
         d = {'nodes': node_dicts(1), 'edges': edge_dicts((0, 0))}
 
@@ -82,7 +82,7 @@ class KCFGTestCase(TestCase):
         self.assertEqual(cfg.edge(nid(0), nid(0)), edge(0, 0))
         self.assertDictEqual(cfg.to_dict(), d)
 
-    def test_from_dict_simple_edge(self):
+    def test_from_dict_simple_edge(self) -> None:
         # Given
         d = {'nodes': node_dicts(2), 'edges': edge_dicts((0, 1))}
 
@@ -94,7 +94,7 @@ class KCFGTestCase(TestCase):
         self.assertSetEqual(set(cfg.edges()), {edge(0, 1)})
         self.assertEqual(cfg.edge(nid(0), nid(1)), edge(0, 1))
 
-    def test_create_node(self):
+    def test_create_node(self) -> None:
         # Given
         cfg = KCFG()
 
@@ -106,7 +106,7 @@ class KCFGTestCase(TestCase):
         self.assertSetEqual(set(cfg.nodes), {node(0)})
         self.assertFalse(cfg.is_expanded(new_node.id))
 
-    def test_remove_unknown_node(self):
+    def test_remove_unknown_node(self) -> None:
         # Given
         cfg = KCFG()
 
@@ -115,7 +115,7 @@ class KCFGTestCase(TestCase):
             # When
             cfg.remove_node(nid(0))
 
-    def test_remove_node(self):
+    def test_remove_node(self) -> None:
         # Given
         d = {'nodes': node_dicts(3), 'edges': edge_dicts((0, 1), (1, 2))}
         cfg = KCFG.from_dict(d)
@@ -136,7 +136,7 @@ class KCFGTestCase(TestCase):
         with self.assertRaises(ValueError):
             cfg.edge(nid(1), nid(2))
 
-    def test_cover_then_remove(self):
+    def test_cover_then_remove(self) -> None:
         # Given
         cfg = KCFG()
 
@@ -163,7 +163,7 @@ class KCFGTestCase(TestCase):
         self.assertFalse(cfg.is_expanded(node2.id))
         self.assertEqual(cfg.covers(), [])
 
-    def test_insert_loop_edge(self):
+    def test_insert_loop_edge(self) -> None:
         # Given
         d = {'nodes': node_dicts(1)}
         cfg = KCFG.from_dict(d)
@@ -177,7 +177,7 @@ class KCFGTestCase(TestCase):
         self.assertSetEqual(set(cfg.edges()), {edge(0, 0)})
         self.assertEqual(cfg.edge(nid(0), nid(0)), edge(0, 0))
 
-    def test_insert_simple_edge(self):
+    def test_insert_simple_edge(self) -> None:
         # Given
         d = {'nodes': node_dicts(2)}
         cfg = KCFG.from_dict(d)
@@ -190,7 +190,7 @@ class KCFGTestCase(TestCase):
         self.assertSetEqual(set(cfg.nodes), {node(0), node(1)})
         self.assertSetEqual(set(cfg.edges()), {edge(0, 1)})
 
-    def test_get_successors(self):
+    def test_get_successors(self) -> None:
         d = {'nodes': node_dicts(3), 'edges': edge_dicts((0, 1), (0, 2))}
         cfg = KCFG.from_dict(d)
 
@@ -200,7 +200,7 @@ class KCFGTestCase(TestCase):
         # Then
         self.assertSetEqual(succs, {edge(0, 1), edge(0, 2)})
 
-    def test_get_predecessors(self):
+    def test_get_predecessors(self) -> None:
         d = {'nodes': node_dicts(3), 'edges': edge_dicts((0, 2), (1, 2))}
         cfg = KCFG.from_dict(d)
 
@@ -210,7 +210,7 @@ class KCFGTestCase(TestCase):
         # Then
         self.assertSetEqual(preds, {edge(0, 2), edge(1, 2)})
 
-    def test_reachable_nodes(self):
+    def test_reachable_nodes(self) -> None:
         # Given
         d = {
             'nodes': node_dicts(12),
@@ -227,7 +227,7 @@ class KCFGTestCase(TestCase):
         self.assertSetEqual(nodes_1, {node(1), node(2), node(3), node(4)})
         self.assertSetEqual(nodes_2, {node(1), node(2), node(3), node(4), node(11)})
 
-    def test_paths_between(self):
+    def test_paths_between(self) -> None:
         # Given
         d = {
             'nodes': node_dicts(4),
@@ -248,7 +248,7 @@ class KCFGTestCase(TestCase):
             },
         )
 
-    def test_resolve(self):
+    def test_resolve(self) -> None:
         # Given
         d = {
             'nodes': node_dicts(4),
@@ -271,7 +271,7 @@ class KCFGTestCase(TestCase):
         with self.assertRaisesRegex(ValueError, 'Multiple nodes for pattern: ...'):
             cfg.node('3..')
 
-    def test_aliases(self):
+    def test_aliases(self) -> None:
         # Given
         d = {
             'init': [nid(0)],
@@ -308,7 +308,7 @@ class KCFGTestCase(TestCase):
         cfg.remove_node(nid(1))
         cfg.create_node(term(1))
 
-    def test_pretty_print(self):
+    def test_pretty_print(self) -> None:
         d = {
             'init': [nid(0)],
             'target': [nid(6)],
@@ -330,7 +330,7 @@ class KCFGTestCase(TestCase):
         }
         cfg = KCFG.from_dict(d)
 
-        def _short_hash(i) -> str:
+        def _short_hash(i: int) -> str:
             return shorten_hash(nid(i))
 
         self.maxDiff = None

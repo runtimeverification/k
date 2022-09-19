@@ -8,7 +8,7 @@ TT = KoreToken.Type
 
 
 class LexerTest(TestCase):
-    def test_lexer_success(self):
+    def test_lexer_success(self) -> None:
         # Given
         test_data: Final[Tuple[Tuple[str, List[KoreToken.Type]], ...]] = (
             ('', []),
@@ -38,7 +38,7 @@ class LexerTest(TestCase):
                 # Then
                 self.assertListEqual(actual, expected + [TT.EOF])
 
-    def test_lexer_failure(self):
+    def test_lexer_failure(self) -> None:
         # Given
         test_data: Final[Tuple[str, ...]] = ('-a', "'a", '*', '/*', '\\', '@', '\\@')
 

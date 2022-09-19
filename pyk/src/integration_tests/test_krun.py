@@ -1,6 +1,7 @@
 from pyk.kast import KApply, KSequence, KToken
 from pyk.kastManip import flatten_label, get_cell
 from pyk.ktool import KompileBackend
+from pyk.ktool.kprint import SymbolTable
 from pyk.prelude.kint import intToken
 
 from .krun_test import KRunTest
@@ -15,10 +16,10 @@ class ImpRunTest(KRunTest):
     KRUN_USE_DIR = '.imp'
 
     @staticmethod
-    def _update_symbol_table(symbol_table):
+    def _update_symbol_table(symbol_table: SymbolTable) -> None:
         pass
 
-    def test_run(self):
+    def test_run(self) -> None:
         # Given
         init_pgm_token = KToken('int n , s ; n = 2 ; s = 0 ; while ( 0 <= n ) { s = s + n ; n = n + -1 ; }', 'Pgm')
         final_cterm = self.krun.run(init_pgm_token)

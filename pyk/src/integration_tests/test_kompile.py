@@ -9,5 +9,5 @@ class SimpleKompileTest(KompiledTest):
     KOMPILE_OUTPUT_DIR = 'definitions/imp'
     KOMPILE_EMIT_JSON = True
 
-    def test(self):
+    def test(self) -> None:
         pass

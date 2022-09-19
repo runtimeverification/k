@@ -2,6 +2,7 @@ from pyk.cterm import CTerm
 from pyk.kast import KApply, KAtt, KClaim, KRule, KToken
 from pyk.kastManip import get_cell
 from pyk.ktool import KompileBackend
+from pyk.ktool.kprint import SymbolTable
 from pyk.prelude.kbool import BOOL
 
 from .kprove_test import KProveTest
@@ -16,10 +17,10 @@ class SimpleProofTest(KProveTest):
     KPROVE_USE_DIR = '.simple-proof-test'
 
     @staticmethod
-    def _update_symbol_table(symbol_table):
+    def _update_symbol_table(symbol_table: SymbolTable) -> None:
         pass
 
-    def test_prove_claim_with_lemmas(self):
+    def test_prove_claim_with_lemmas(self) -> None:
         # Given
         new_lemma = KRule(
             KToken('pred1(3) => true', BOOL),
@@ -49,10 +50,10 @@ class ImpProofTest(KProveTest):
     KPROVE_USE_DIR = '.imp'
 
     @staticmethod
-    def _update_symbol_table(symbol_table):
+    def _update_symbol_table(symbol_table: SymbolTable) -> None:
         symbol_table['.List{"_,_"}_Ids'] = lambda: '.Ids'
 
-    def test_get_basic_block(self):
+    def test_get_basic_block(self) -> None:
         # Given
         new_claim = KClaim(
             KToken(

@@ -1,9 +1,9 @@
 import json
 import logging
 import sys
-from argparse import ArgumentParser, FileType
+from argparse import ArgumentParser, FileType, _SubParsersAction
 from pathlib import Path
-from typing import Any, Dict, Final, Iterable, List, Optional
+from typing import Any, Callable, Dict, Final, Iterable, List, Mapping, Optional, Tuple, TypeVar
 
 from ..cfg_manager import CFGManager
 from ..cterm import CTerm, build_claim
@@ -14,6 +14,10 @@ from ..ktool import KProve
 from ..prelude.kbool import FALSE
 from ..prelude.ml import mlAnd, mlEqualsTrue, mlOr, mlTop
 from ..utils import add_indent, shorten_hashes
+
+T = TypeVar('T')
+T1 = TypeVar('T1')
+T2 = TypeVar('T2')
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -28,15 +32,17 @@ def parse_spec_to_json(kprove: KProve, *, spec_file: Path, out: Path, spec_modul
 
 class KIT:
     @staticmethod
-    def arg_list_of(elem_type, delim=';'):
-        def parse(s):
+    def arg_list_of(elem_type: Callable[[str], T], delim: str = ';') -> Callable[[str], List[T]]:
+        def parse(s: str) -> List[T]:
             return [elem_type(elem) for elem in s.split(delim)]
 
         return parse
 
     @staticmethod
-    def arg_pair_of(fst_type, snd_type, delim=','):
-        def parse(s):
+    def arg_pair_of(
+        fst_type: Callable[[str], T1], snd_type: Callable[[str], T2], delim: str = ','
+    ) -> Callable[[str], Tuple[T1, T2]]:
+        def parse(s: str) -> Tuple[T1, T2]:
             elems = s.split(delim)
             length = len(elems)
             if length != 2:
@@ -46,7 +52,7 @@ class KIT:
         return parse
 
     @staticmethod
-    def arg_edges():
+    def arg_edges() -> Callable[[str], List[Tuple[str, str]]]:  # TODO why not final class attribute?
         return KIT.arg_list_of(KIT.arg_pair_of(str, str))
 
     def generic_args(self) -> ArgumentParser:
@@ -83,7 +89,7 @@ class KIT:
         self.create_subparsers(command_subparsers)
         return argument_parser
 
-    def create_subparsers(self, command_subparsers) -> None:
+    def create_subparsers(self, command_subparsers: _SubParsersAction) -> None:
         self.create_init_subparser(command_subparsers)
 
         list_cfgs_subparser = command_subparsers.add_parser(
@@ -161,7 +167,7 @@ class KIT:
             '--min-depth', type=int, default=0, help='Minimum number K steps to take in exploration.'
         )
 
-    def create_init_subparser(self, command_subparsers) -> None:
+    def create_init_subparser(self, command_subparsers: _SubParsersAction) -> None:
         init_subparser = command_subparsers.add_parser('init', help='Initialize a summary.')
         init_subparser.add_argument('summary-name', type=str, help='ID for summary. Used for display purposes.')
         init_subparser.add_argument('spec-file', type=str, help='File with specifications to prove.')
@@ -211,7 +217,7 @@ def main() -> None:
     raise AssertionError('!!! Should be unreachable. `callback_cfg` not set.')
 
 
-def configure_logger(args) -> None:
+def configure_logger(args: Mapping[str, Any]) -> None:
     log_format = args['log_format']
     log_stream = None
 
@@ -227,7 +233,7 @@ def configure_logger(args) -> None:
     _LOGGER.info(f'Command: {args["command"]}')
 
 
-def init(summary_dir: Path, args: Dict[str, Any]) -> None:
+def init(summary_dir: Path, args: Mapping[str, Any]) -> None:
     spec_file = Path(args['spec-file'])
     summary_name = args['summary-name']
     manager = CFGManager.create(
@@ -263,11 +269,11 @@ def list_cfgs(manager: CFGManager) -> None:
     print('\n'.join(manager.list_cfgs()))
 
 
-def show_cfg(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> None:
+def show_cfg(manager: CFGManager, kprove: KProve, args: Mapping[str, Any], cfg_id: str, cfg: KCFG) -> None:
     list(map(print, cfg.pretty(kprove)))
 
 
-def show_node(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> None:
+def show_node(manager: CFGManager, kprove: KProve, args: Mapping[str, Any], cfg_id: str, cfg: KCFG) -> None:
     node = cfg.node(args['node'])
     term = node.cterm.kast
     if args['minimize']:
@@ -277,7 +283,7 @@ def show_node(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG)
     _LOGGER.info(f'Wrote node: {shorten_hashes((node.id))}')
 
 
-def show_edge(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> None:
+def show_edge(manager: CFGManager, kprove: KProve, args: Mapping[str, Any], cfg_id: str, cfg: KCFG) -> None:
     (source, target) = args['edge']
     edges = cfg.edge_likes(source_id=source, target_id=target)
 
@@ -291,18 +297,18 @@ def show_edge(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG)
         raise ValueError(f'Could not find edge: {source},{target}')
 
 
-def add_alias(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
+def add_alias(manager: CFGManager, kprove: KProve, args: Mapping[str, Any], cfg_id: str, cfg: KCFG) -> bool:
     cfg.add_alias(args['name'], args['node'])
     return True
 
 
-def remove_alias(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
+def remove_alias(manager: CFGManager, kprove: KProve, args: Mapping[str, Any], cfg_id: str, cfg: KCFG) -> bool:
     cfg.remove_alias(args['alias'])
     return True
 
 
 # TODO: Should not rely on kprove, should just call `KPrint.parse_token` when that supports frontend syntax such as variables.
-def parse_token_rule_syntax(kprove, ktoken: KToken, kast_args: Iterable[str] = ()) -> KInner:
+def parse_token_rule_syntax(kprove: KProve, ktoken: KToken, kast_args: Iterable[str] = ()) -> KInner:
     cterm = CTerm(mlAnd([KApply('<k>', [ktoken])]))
     claim_id = 'simplify-token'
     claim, var_map = build_claim(
@@ -317,7 +323,7 @@ def parse_token_rule_syntax(kprove, ktoken: KToken, kast_args: Iterable[str] = (
     return mlAnd([result] + [c for c in simp_cterm.constraints if not is_top(c)])
 
 
-def split_node(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
+def split_node(manager: CFGManager, kprove: KProve, args: Mapping[str, Any], cfg_id: str, cfg: KCFG) -> bool:
     node_id = args['node']
     condition = parse_token_rule_syntax(kprove, KToken(args['condition'], 'Bool'))
     true_node_id, false_node_id = cfg.split_node(
@@ -333,7 +339,7 @@ def split_node(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG
     return True
 
 
-def build_edges(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> bool:
+def build_edges(manager: CFGManager, kprove: KProve, args: Mapping[str, Any], cfg_id: str, cfg: KCFG) -> bool:
     for source_id, target_id in args['edges']:
         if not cfg.is_frontier(source_id):
             raise ValueError(f'Not a frontier node: {source_id}.')
@@ -342,7 +348,7 @@ def build_edges(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCF
     return True
 
 
-def verify_edges(manager: CFGManager, kprove: KProve, args, cfg_id: str, cfg: KCFG) -> None:
+def verify_edges(manager: CFGManager, kprove: KProve, args: Mapping[str, Any], cfg_id: str, cfg: KCFG) -> None:
     def _edge_prove(edge: KCFG.Edge, min_depth: Optional[int]) -> List[KInner]:
         claim_id = f'BASIC-BLOCK-{edge.source.id}-TO-{edge.target.id}'
         haskell_args = []

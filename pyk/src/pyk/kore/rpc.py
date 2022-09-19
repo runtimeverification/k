@@ -86,7 +86,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
     def __enter__(self) -> 'JsonRpcClient':
         return self
 
-    def __exit__(self, *args) -> None:
+    def __exit__(self, *args: Any) -> None:
         self._file.__exit__(*args)
         self._sock.__exit__(*args)
 
@@ -325,10 +325,10 @@ class KoreClient(ContextManager['KoreClient']):
     def __init__(self, host: str, port: int, *, timeout: Optional[int] = None):
         self._client = JsonRpcClient(host, port, timeout=timeout)
 
-    def __enter__(self):
+    def __enter__(self) -> 'KoreClient':
         return self
 
-    def __exit__(self, *args):
+    def __exit__(self, *args: Any) -> None:
         self._client.__exit__(*args)
 
     def close(self) -> None:
@@ -407,7 +407,7 @@ class KoreServer(ContextManager['KoreServer']):
     def __enter__(self) -> 'KoreServer':
         return self
 
-    def __exit__(self, *args) -> None:
+    def __exit__(self, *args: Any) -> None:
         self.close()
 
     def close(self) -> None:

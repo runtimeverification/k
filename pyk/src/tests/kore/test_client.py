@@ -1,16 +1,16 @@
 from typing import Any, Dict
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from pyk.kore.rpc import ImpliesResult, JsonRpcClient, KoreClient, State, StuckResult
 from pyk.kore.syntax import DV, And, App, Bottom, Pattern, SortApp, String, Top
 
 
 class KoreClientTest(TestCase):
-    mock: JsonRpcClient
+    mock: Mock
     client: KoreClient
 
-    def setUp(self):
+    def setUp(self) -> None:
         # Given
         patcher = patch('pyk.kore.rpc.JsonRpcClient', spec=True)
         MockClient = patcher.start()  # noqa: N806
@@ -25,20 +25,20 @@ class KoreClientTest(TestCase):
         MockClient.assert_called_with('localhost', 3000, timeout=None)
         self.assertEqual(self.client._client, self.mock)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         # When
         self.client.close()
 
         # Then
         self.mock.close.assert_called()
 
-    def assumeResponse(self, response):  # noqa: N802
+    def assumeResponse(self, response: Dict[str, Any]) -> None:  # noqa: N802
         self.mock.request.return_value = response
 
-    def assertRequest(self, method, **params):  # noqa: N802
+    def assertRequest(self, method: str, **params: Any) -> None:  # noqa: N802
         self.mock.request.assert_called_with(method, **params)
 
-    def test_execute(self):
+    def test_execute(self) -> None:
         test_data = (
             (
                 App('IntAdd', (), (int_dv(1), int_dv(1))),
@@ -64,7 +64,7 @@ class KoreClientTest(TestCase):
                 self.assertRequest('execute', **params)
                 self.assertEqual(expected, actual)
 
-    def test_implies(self):
+    def test_implies(self) -> None:
         test_data = (
             (
                 int_bottom,
@@ -87,7 +87,7 @@ class KoreClientTest(TestCase):
                 self.assertRequest('implies', **params)
                 self.assertEqual(expected, actual)
 
-    def test_simplify(self):
+    def test_simplify(self) -> None:
         test_data = (
             (
                 And(int_sort, int_top, int_top),

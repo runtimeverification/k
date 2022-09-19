@@ -11,7 +11,7 @@ class RegexTerminalTest(KompiledTest):
     KOMPILE_EMIT_JSON = True
     KOMPILE_POST_PROCESS = 'cat'  # This ensures that the compiled JSON is read back by K
 
-    def test(self):
+    def test(self) -> None:
         # Given
         expected = [
             KRegexTerminal('b', '#', '#'),

@@ -3,6 +3,7 @@ from typing import Iterable, Tuple
 from pyk.kast import KApply, KAtt, KInner, KToken, KVariable
 from pyk.ktool import KompileBackend
 from pyk.ktool.kit import parse_token_rule_syntax
+from pyk.ktool.kprint import SymbolTable
 from pyk.prelude.kint import intToken
 from pyk.utils import FrozenDict
 
@@ -18,7 +19,7 @@ class ParseTokenTest(KProveTest):
     KPROVE_USE_DIR = '.simple-proof-test'
 
     @staticmethod
-    def _update_symbol_table(symbol_table):
+    def _update_symbol_table(symbol_table: SymbolTable) -> None:
         pass
 
     def test_parse_token(self) -> None:

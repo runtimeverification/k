@@ -1,7 +1,10 @@
-from .kast import KApply, KRewrite, KRule, KSequence, read_kast_definition
+from os import PathLike
+from typing import Iterable, List
+
+from .kast import KApply, KDefinition, KRewrite, KRule, KSequence, read_kast_definition
 
 
-def get_rule_by_id(definition, rule_id):
+def get_rule_by_id(definition: KDefinition, rule_id: str) -> KRule:
     """Get a rule from the definition by coverage rule id.
 
     Input:
@@ -20,7 +23,7 @@ def get_rule_by_id(definition, rule_id):
     raise ValueError(f'Could not find rule with ID: {rule_id}')
 
 
-def strip_coverage_logger(rule: KRule):
+def strip_coverage_logger(rule: KRule) -> KRule:
     body = rule.body
     if type(body) is KRewrite:
         lhs = body.lhs
@@ -32,7 +35,12 @@ def strip_coverage_logger(rule: KRule):
     return rule.let(body=body)
 
 
-def translate_coverage(src_all_rules, dst_all_rules, dst_definition, src_rules_list):
+def translate_coverage(
+    src_all_rules: Iterable[str],
+    dst_all_rules: Iterable[str],
+    dst_definition: KDefinition,
+    src_rules_list: Iterable[str],
+) -> List[str]:
     """Translate the coverage data from one kompiled definition to another.
 
     Input:
@@ -90,7 +98,7 @@ def translate_coverage(src_all_rules, dst_all_rules, dst_definition, src_rules_l
     return dst_rule_list
 
 
-def translate_coverage_from_paths(src_kompiled_dir, dst_kompiled_dir, src_rules_file):
+def translate_coverage_from_paths(src_kompiled_dir: str, dst_kompiled_dir: str, src_rules_file: PathLike) -> List[str]:
     """Translate coverage information given paths to needed files.
 
     Input:

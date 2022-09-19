@@ -5,13 +5,13 @@ from pyk.ktool.kompile import KompileBackend, _build_arg_list
 
 
 class BuildArgsTest(TestCase):
-    def test_all_args(self):
+    def test_all_args(self) -> None:
         actual = _build_arg_list(
             main_module='MAIN-MODULE',
             syntax_module='SYNTAX-MODULE',
             backend=KompileBackend.HASKELL,
             output_dir=Path('path/to/kompiled'),
-            include_dirs=['/', '/include/lib'],
+            include_dirs=(Path(path) for path in ['/', '/include/lib']),
             md_selector='k & ! nobytes & ! node',
             hook_namespaces=['JSON', 'KRYPTO', 'BLOCKCHAIN'],
             emit_json=True,
