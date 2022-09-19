@@ -41,11 +41,12 @@ def run_process(
     args: Union[str, Iterable[str]],
     *,
     check: bool = True,
-    profile: bool = False,
-    suppress_stderr: bool = False,
     input: Optional[str] = None,
+    pipe_stdout: bool = True,
+    pipe_stderr: bool = False,
     env: Optional[Mapping[str, str]] = None,
     logger: Optional[Logger] = None,
+    profile: bool = False,
 ) -> CompletedProcess:
 
     if type(args) is str:
@@ -57,12 +58,14 @@ def run_process(
     if not logger:
         logger = _LOGGER
 
+    stdout = subprocess.PIPE if pipe_stdout else None
+    stderr = subprocess.PIPE if pipe_stderr else None
+
     logger.info(f'Running: {command}')
     try:
-        stderr = subprocess.PIPE if suppress_stderr else None
         if profile:
             start_time = time.time()
-        res = subprocess.run(args, input=input, env=env, stdout=subprocess.PIPE, stderr=stderr, check=check, text=True)
+        res = subprocess.run(args, input=input, env=env, stdout=stdout, stderr=stderr, check=check, text=True)
     except CalledProcessError as err:
         logger.info(f'Completed with status {err.returncode}: {command}')
         raise
