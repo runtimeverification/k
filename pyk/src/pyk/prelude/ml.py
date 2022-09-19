@@ -5,6 +5,10 @@ from .k import K
 from .kbool import BOOL, TRUE
 
 
+def is_top(term: KInner) -> bool:
+    return isinstance(term, KApply) and term.label.name == '#Top'
+
+
 # TODO default sort K can be tightened using basic type inference
 def mlEquals(  # noqa: N802
     term1: KInner,

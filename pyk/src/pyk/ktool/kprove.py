@@ -9,7 +9,7 @@ from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp, run
 from ..cterm import CTerm, build_claim
 from ..kast import KClaim, KDefinition, KFlatModule, KImport, KInner, KRequire, KRule, KSentence
 from ..kastManip import extract_subst, flatten_label, free_vars
-from ..prelude.ml import mlAnd, mlBottom, mlTop
+from ..prelude.ml import is_top, mlAnd, mlBottom, mlTop
 from ..utils import unique
 from .kprint import KPrint
 
@@ -142,7 +142,7 @@ class KProve(KPrint):
 
         debug_log = _get_rule_log(log_file)
         final_state = KInner.from_dict(json.loads(proc_result.stdout)['term'])
-        if final_state == mlTop() and len(debug_log) == 0 and not allow_zero_step:
+        if is_top(final_state) and len(debug_log) == 0 and not allow_zero_step:
             raise ValueError(f'Proof took zero steps, likely the LHS is invalid: {spec_file}')
         return final_state
 
