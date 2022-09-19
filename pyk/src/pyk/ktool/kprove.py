@@ -7,7 +7,7 @@ from typing import Final, Iterable, List, Optional, Tuple
 
 from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp, run_process
 from ..cterm import CTerm, build_claim
-from ..kast import KAst, KClaim, KDefinition, KFlatModule, KImport, KInner, KRequire, KRule, KSentence
+from ..kast import KClaim, KDefinition, KFlatModule, KImport, KInner, KRequire, KRule, KSentence
 from ..kastManip import extract_subst, flatten_label, free_vars
 from ..prelude.ml import mlAnd, mlBottom, mlTop
 from ..utils import unique
@@ -24,7 +24,7 @@ def _kprove(
     kompiled_dir: Optional[Path] = None,
     include_dirs: Iterable[Path] = (),
     emit_json_spec: Optional[Path] = None,
-    dry_run=False,
+    dry_run: bool = False,
 ) -> CompletedProcess:
     check_file_path(spec_file)
 
@@ -107,7 +107,7 @@ class KProve(KPrint):
         log_axioms_file: Optional[Path] = None,
         allow_zero_step: bool = False,
         dry_run: bool = False,
-    ):
+    ) -> KInner:
         log_file = spec_file.with_suffix('.debug-log') if log_axioms_file is None else log_axioms_file
         if log_file.exists():
             log_file.unlink()
@@ -137,25 +137,27 @@ class KProve(KPrint):
         if proc_result.returncode not in (0, 1):
             raise RuntimeError('kprove failed!')
 
-        if not dry_run:
-            debug_log = _get_rule_log(log_file)
-            final_state = KAst.from_dict(json.loads(proc_result.stdout)['term'])
-            if final_state == mlTop() and len(debug_log) == 0 and not allow_zero_step:
-                raise ValueError(f'Proof took zero steps, likely the LHS is invalid: {spec_file}')
-            return final_state
+        if dry_run:
+            return mlTop()
+
+        debug_log = _get_rule_log(log_file)
+        final_state = KInner.from_dict(json.loads(proc_result.stdout)['term'])
+        if final_state == mlTop() and len(debug_log) == 0 and not allow_zero_step:
+            raise ValueError(f'Proof took zero steps, likely the LHS is invalid: {spec_file}')
+        return final_state
 
     def prove_claim(
         self,
-        claim,
-        claim_id,
+        claim: KClaim,
+        claim_id: str,
         lemmas: Iterable[KRule] = (),
         args: Iterable[str] = (),
         haskell_args: Iterable[str] = (),
         haskell_log_entries: Iterable[str] = (),
-        log_axioms_file=None,
-        allow_zero_step=False,
-        dry_run=False,
-    ):
+        log_axioms_file: Optional[Path] = None,
+        allow_zero_step: bool = False,
+        dry_run: bool = False,
+    ) -> KInner:
         claim_path, claim_module_name = self._write_claim_definition(claim, claim_id, lemmas=lemmas)
         return self.prove(
             claim_path,

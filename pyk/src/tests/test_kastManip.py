@@ -1,6 +1,7 @@
+from typing import List, Tuple
 from unittest import TestCase
 
-from pyk.kast import KApply, KLabel, KRewrite, KSequence, KSort, KVariable
+from pyk.kast import KApply, KInner, KLabel, KRewrite, KSequence, KSort, KVariable
 from pyk.kastManip import (
     bool_to_ml_pred,
     collapse_dots,
@@ -27,7 +28,7 @@ GENERATED_TOP_CELL_2 = KApply('<generatedTop>', [T_CELL, GENERATED_COUNTER_CELL]
 
 
 class PushDownRewritesTest(TestCase):
-    def test_push_down_rewrites(self):
+    def test_push_down_rewrites(self) -> None:
         # Given
         test_data = ((KRewrite(KSequence([f(a), b]), KSequence([f(c), b])), KSequence([f(KRewrite(a, c)), b])),)
 
@@ -41,9 +42,9 @@ class PushDownRewritesTest(TestCase):
 
 
 class MinimizeTermTest(TestCase):
-    def test_minimize_term(self):
+    def test_minimize_term(self) -> None:
         # Given
-        test_data = (
+        test_data: Tuple[Tuple[KInner, List[str], KInner], ...] = (
             (f(k(a)), ['<k>'], f(DOTS)),
             (f(k(a)), [], f(k(a))),
         )
@@ -121,7 +122,7 @@ class BoolMlPredConversionsTest(TestCase):
         ),
     )
 
-    def test_ml_pred_to_bool(self):
+    def test_ml_pred_to_bool(self) -> None:
         for name, unsafe, ml_pred, bool_expected in self.test_data_ml_pred_to_bool:
             with self.subTest(name):
                 bool_actual = ml_pred_to_bool(ml_pred, unsafe=unsafe)
@@ -129,7 +130,7 @@ class BoolMlPredConversionsTest(TestCase):
 
     test_data_bool_to_ml_pred = (('equals-true', KApply(KLabel('#Equals', [BOOL, K]), [TRUE, f(a)]), f(a)),)
 
-    def test_bool_to_ml_pred(self):
+    def test_bool_to_ml_pred(self) -> None:
         for name, ml_pred_expected, bool_in in self.test_data_bool_to_ml_pred:
             with self.subTest(name):
                 ml_pred_actual = bool_to_ml_pred(bool_in)
@@ -137,14 +138,14 @@ class BoolMlPredConversionsTest(TestCase):
 
 
 class RemoveGeneratedCellsTest(TestCase):
-    def test_first(self):
+    def test_first(self) -> None:
         # When
         config_actual = remove_generated_cells(GENERATED_TOP_CELL_1)
 
         # Then
         self.assertEqual(config_actual, T_CELL)
 
-    def test_second(self):
+    def test_second(self) -> None:
         # When
         config_actual = remove_generated_cells(GENERATED_TOP_CELL_2)
 
@@ -153,7 +154,7 @@ class RemoveGeneratedCellsTest(TestCase):
 
 
 class CollapseDotsTest(TestCase):
-    def test(self):
+    def test(self) -> None:
         # Given
         config_before = substitute(GENERATED_TOP_CELL_1, {'MAP': DOTS, '_GENERATED_COUNTER_PLACEHOLDER': DOTS})
         config_expected = KApply('<generatedTop>', [KApply('<T>', [K_CELL, DOTS]), DOTS])
@@ -188,7 +189,7 @@ class SimplifyBoolTest(TestCase):
 
 
 class SplitConfigTest(TestCase):
-    def test_split_config_from(self):
+    def test_split_config_from(self) -> None:
         k_cell = KSequence([KApply('foo'), KApply('bar')])
         term = KApply('<k>', [k_cell])
         config, subst = split_config_from(term)

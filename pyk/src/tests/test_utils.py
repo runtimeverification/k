@@ -4,7 +4,7 @@ from pyk.utils import deconstruct_short_hash
 
 
 class ShortHashTest(TestCase):
-    def test_parse_short_id(self):
+    def test_parse_short_id(self) -> None:
         # prefix with / without the dots, suffix, both prefix and suffix, full hash, etc).
         self.assertEqual(deconstruct_short_hash('..abcdef'), ('', 'abcdef'))
         self.assertEqual(deconstruct_short_hash('abcdef..'), ('abcdef', ''))

@@ -1,6 +1,7 @@
 from pyk.kast import KApply
 from pyk.kore.syntax import DV, App, SortApp, String
 from pyk.ktool import KompileBackend
+from pyk.ktool.kprint import SymbolTable
 from pyk.prelude.kint import intToken
 
 from .kprove_test import KProveTest
@@ -15,10 +16,10 @@ class KoreToKastTest(KProveTest):
     KPROVE_USE_DIR = '.simple-proof-test'
 
     @staticmethod
-    def _update_symbol_table(symbol_table):
+    def _update_symbol_table(symbol_table: SymbolTable) -> None:
         pass
 
-    def test_kast_to_kore(self):
+    def test_kast_to_kore(self) -> None:
         kore_kast_pairs = (
             (
                 'issue:k/2762',

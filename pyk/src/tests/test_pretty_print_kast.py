@@ -28,7 +28,7 @@ class PrettyPrintKastTest(TestCase):
 
     SYMBOL_TABLE: Final[SymbolTable] = {}
 
-    def test_pretty_print(self):
+    def test_pretty_print(self) -> None:
         for i, (kast, expected) in enumerate(self.TEST_DATA):
             with self.subTest(i=i):
                 actual = pretty_print_kast(kast, self.SYMBOL_TABLE)
@@ -36,7 +36,7 @@ class PrettyPrintKastTest(TestCase):
                 expected_tokens = expected.split('\n')
                 self.assertListEqual(actual_tokens, expected_tokens)
 
-    def test_unparser_underbars(self):
+    def test_unparser_underbars(self) -> None:
         unparser = unparser_for_production(success_production)
         expected = 'EVMC_SUCCESS'
         actual = unparser(KApply('EVMC_SUCCESS_NETWORK_EndStatusCode'))

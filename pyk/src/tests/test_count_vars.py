@@ -25,7 +25,7 @@ class CountVarTest(TestCase):
         (f(x, g(x, h(x, y, z))), {'x': 3, 'y': 1, 'z': 1}),
     )
 
-    def test(self):
+    def test(self) -> None:
         # Given
         for i, [term, expected] in enumerate(self.TEST_DATA):
             with self.subTest(i=i):

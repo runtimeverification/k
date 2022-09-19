@@ -1,6 +1,20 @@
 import hashlib
 import string
-from typing import Any, Dict, Final, Hashable, Iterable, Iterator, List, Mapping, Optional, Tuple, TypeVar, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Final,
+    Hashable,
+    Iterable,
+    Iterator,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    TypeVar,
+    cast,
+)
 
 T = TypeVar('T')
 K = TypeVar('K')
@@ -14,7 +28,9 @@ class FrozenDict(Mapping[K, V]):
     _dict: Dict[K, V]
     _hash: Optional[int]
 
-    def __init__(self, *args, **kwargs):
+    # TODO overload
+    # TODO try __init__(self: FrozenDict[str, V], **kwargs: V)
+    def __init__(self, *args: Any, **kwargs: Any):
         self._dict = dict(*args, **kwargs)
         self._hash = None
 
@@ -45,7 +61,7 @@ class FrozenDict(Mapping[K, V]):
 EMPTY_FROZEN_DICT: Final[FrozenDict] = FrozenDict()
 
 
-def raised(f, *args, **kwargs) -> Optional[BaseException]:
+def raised(f: Callable, *args: Any, **kwargs: Any) -> Optional[BaseException]:
     try:
         f(*args, **kwargs)
     except BaseException as e:
@@ -54,7 +70,7 @@ def raised(f, *args, **kwargs) -> Optional[BaseException]:
     return None
 
 
-def merge_with(f, d1: Mapping, d2: Mapping) -> Dict:
+def merge_with(f: Callable[[V, V], V], d1: Mapping[K, V], d2: Mapping[K, V]) -> Dict[K, V]:
     res = dict(d1)
     for k, v2 in d2.items():
         if k in d1:
@@ -173,13 +189,13 @@ def is_hash(x: Any) -> bool:
     return type(x) is str and len(x) == 64 and is_hexstring(x)
 
 
-def shorten_hash(h: str, left_chars=6, right_chars=6) -> str:
+def shorten_hash(h: str, left_chars: int = 6, right_chars: int = 6) -> str:
     left = h[0:left_chars] if left_chars > 0 else ''
     right = h[-right_chars:] if right_chars > 0 else ''
     return left + ".." + right
 
 
-def shorten_hashes(value: Any, left_chars=6, right_chars=6) -> Any:
+def shorten_hashes(value: Any, left_chars: int = 6, right_chars: int = 6) -> Any:
     result: Any = None
     if is_hash(value):
         result = shorten_hash(value, left_chars, right_chars)
@@ -210,7 +226,7 @@ def deconstruct_short_hash(h: str) -> Tuple[str, str]:
     raise ValueError(f'Bad short hash: {h}')
 
 
-def compare_short_hashes(lhs: str, rhs: str):
+def compare_short_hashes(lhs: str, rhs: str) -> bool:
     (l0, l1) = deconstruct_short_hash(lhs)
     (r0, r1) = deconstruct_short_hash(rhs)
     return (l0.startswith(r0) or r0.startswith(l0)) and (l1.endswith(r1) or r1.endswith(l1))

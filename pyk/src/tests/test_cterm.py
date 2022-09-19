@@ -26,7 +26,7 @@ def _as_cterm(term: KInner) -> CTerm:
 
 
 class CTermTest(TestCase):
-    def test_cterm_match_and_subst(self):
+    def test_cterm_match_and_subst(self) -> None:
         # Given
         test_data: Final[Tuple[Tuple[KInner, KInner], ...]] = (
             (a, a),
@@ -48,9 +48,10 @@ class CTermTest(TestCase):
 
                 # Then
                 self.assertIsNotNone(subst_cterm)
+                assert subst_cterm is not None  # https://github.com/python/mypy/issues/4063
                 self.assertEqual(subst_cterm(pattern), term)
 
-    def test_no_cterm_match(self):
+    def test_no_cterm_match(self) -> None:
         # Given
         test_data: Final[Tuple[Tuple[KInner, KInner], ...]] = ((f(x, x), f(x, a)),)
 
@@ -64,7 +65,7 @@ class CTermTest(TestCase):
 
 
 class BuildRuleTest(TestCase):
-    def test_build_rule(self):
+    def test_build_rule(self) -> None:
         # Given
         test_data = [
             (
@@ -97,7 +98,7 @@ class BuildRuleTest(TestCase):
 
 
 class BuildClaimtest(TestCase):
-    def test_build_claim(self):
+    def test_build_claim(self) -> None:
         # (<k> V1 </k> #And { true #Equals 0 <=Int V2}) => <k> V2 </k>      expected: <k> _V1 => V2 </k> requires 0 <=Int V2
         # <k> V1 </k> => <k> V2 </k>                                        expected: <k> _V1 => ?_V2 </k>
         # <k> V1 </k> => <k> V2 </k> #And { true #Equals 0 <=Int V2 }       expected: <k> _V1 => ?V2 </k> ensures 0 <=Int ?V2

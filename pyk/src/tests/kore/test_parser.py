@@ -8,7 +8,7 @@ from .utils import JSON_TEST_FILES, KORE_PASS_TEST_FILES
 
 
 class ParserTest(TestCase):
-    def test_parse_kore(self):
+    def test_parse_kore(self) -> None:
         for test_file in KORE_PASS_TEST_FILES:
             with self.subTest(test_file.name):
                 # Given
@@ -25,7 +25,7 @@ class ParserTest(TestCase):
                 self.assertTrue(parser2.eof)
                 self.assertEqual(definition1, definition2)
 
-    def test_parse_json(self):
+    def test_parse_json(self) -> None:
         for test_file in JSON_TEST_FILES:
             with open(test_file, 'r') as f:
                 # Given
@@ -34,7 +34,7 @@ class ParserTest(TestCase):
                 for i, term in enumerate(terms):
                     with self.subTest(test_file.name, i=i):
                         # When
-                        kore1 = kore_term(term)
+                        kore1: Kore = kore_term(term)  # TODO type hint should be unnecessary
                         parser = KoreParser(kore1.text)
                         kore2 = parser.pattern()
                         kore3 = Kore.from_json(kore1.json)

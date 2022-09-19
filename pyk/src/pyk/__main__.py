@@ -1,6 +1,6 @@
-import argparse
 import logging
 import sys
+from argparse import ArgumentParser, FileType
 from pathlib import Path
 from typing import Final
 
@@ -8,7 +8,7 @@ from graphviz import Digraph
 
 from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import split_config_and_constraints
-from .kast import KAst, read_kast_definition
+from .kast import KInner, read_kast_definition
 from .kastManip import flatten_label, minimize_rule, minimize_term, propagate_up_constraints, remove_source_map
 from .ktool import KPrint, KProve
 from .ktool.kprint import build_symbol_table, pretty_print_kast
@@ -19,7 +19,7 @@ _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 _LOGGER: Final = logging.getLogger(__name__)
 
 
-def main():
+def main() -> None:
     # KAST terms can end up nested quite deeply, because of the various assoc operators (eg. _Map_, _Set_, ...).
     # Most pyk operations are defined recursively, meaning you get a callstack the same depth as the term.
     # This change makes it so that in most cases, by default, pyk doesn't run out of stack space.
@@ -40,9 +40,7 @@ def main():
     if args['command'] == 'print':
         printer = KPrint(kompiled_dir, profile=args['profile'])
         _LOGGER.info(f'Reading Kast from file: {args["term"].name}')
-        term = KAst.from_json(args['term'].read())
-        if type(term) is dict and 'term' in term:
-            term = term['term']
+        term = KInner.from_json(args['term'].read())
         if term == mlTop():
             args['output_file'].write(printer.pretty_print(term))
             _LOGGER.info(f'Wrote file: {args["output_file"].name}')
@@ -95,9 +93,9 @@ def main():
         raise ValueError(f'Unknown command: {args["command"]}')
 
 
-def create_argument_parser():
+def create_argument_parser() -> ArgumentParser:
 
-    logging_args = argparse.ArgumentParser(add_help=False)
+    logging_args = ArgumentParser(add_help=False)
     logging_args.add_argument(
         '-v', '--verbose', action='count', help='Verbosity level, repeat for more verbosity (up to two times).'
     )
@@ -105,16 +103,16 @@ def create_argument_parser():
         '--profile', dest='profile', default=False, action='store_true', help='Enable coarse-grained process profiling.'
     )
 
-    definition_args = argparse.ArgumentParser(add_help=False)
+    definition_args = ArgumentParser(add_help=False)
     definition_args.add_argument('definition', type=str, help='Kompiled directory for definition.')
 
-    pyk_args = argparse.ArgumentParser()
+    pyk_args = ArgumentParser()
     pyk_args_command = pyk_args.add_subparsers(dest='command')
 
     print_args = pyk_args_command.add_parser(
         'print', help='Pretty print a term.', parents=[logging_args, definition_args]
     )
-    print_args.add_argument('term', type=argparse.FileType('r'), help='Input term (in JSON).')
+    print_args.add_argument('term', type=FileType('r'), help='Input term (in JSON).')
     print_args.add_argument(
         '--minimize',
         dest='minimize',
@@ -129,7 +127,7 @@ def create_argument_parser():
         help='Do not minimize the JSON configuration before printing.',
     )
     print_args.add_argument('--omit-labels', default='', nargs='?', help='List of labels to omit from output.')
-    print_args.add_argument('--output-file', type=argparse.FileType('w'), default='-')
+    print_args.add_argument('--output-file', type=FileType('w'), default='-')
 
     prove_args = pyk_args_command.add_parser(
         'prove', help='Prove an input specification (using kprovex).', parents=[logging_args, definition_args]
@@ -137,7 +135,7 @@ def create_argument_parser():
     prove_args.add_argument('main-file', type=str, help='Main file used for kompilation.')
     prove_args.add_argument('spec-file', type=str, help='File with the specification module.')
     prove_args.add_argument('spec-module', type=str, help='Module with claims to be proven.')
-    prove_args.add_argument('--output-file', type=argparse.FileType('w'), default='-')
+    prove_args.add_argument('--output-file', type=FileType('w'), default='-')
     prove_args.add_argument('kArgs', nargs='*', help='Arguments to pass through to K invocation.')
 
     pyk_args_command.add_parser(
@@ -147,8 +145,8 @@ def create_argument_parser():
     coverage_args = pyk_args_command.add_parser(
         'coverage', help='Convert coverage file to human readable log.', parents=[logging_args, definition_args]
     )
-    coverage_args.add_argument('coverage-file', type=argparse.FileType('r'), help='Coverage file to build log for.')
-    coverage_args.add_argument('-o', '--output', type=argparse.FileType('w'), default='-')
+    coverage_args.add_argument('coverage-file', type=FileType('r'), help='Coverage file to build log for.')
+    coverage_args.add_argument('-o', '--output', type=FileType('w'), default='-')
 
     return pyk_args
 
