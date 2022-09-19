@@ -4,8 +4,3 @@
 	Location(6,10,6,43)
 	6 |	    rule <k> doIt(foo) => doIt(0) ... </k>
 	  .	         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-[Warning] Compiler: The attribute [macro] has been deprecated on rules. Use this label on syntax declarations instead.
-	Source(warnClaim.k)
-	Location(9,10,9,18)
-	9 |	    rule foo => 3 [macro]
-	  .	         ^~~~~~~~

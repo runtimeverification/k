@@ -184,7 +184,7 @@ module IELE-COMMON
   syntax CondJumpInst  ::=
     "br" Operand "," IeleName [hybrid, strict(1)]
   syntax LocalCallInst  ::=
-    "call" Operand "(" Operands ")"
+    "call" Operand "(" Operands ")" [alias]
   | LValues "=" "call" Operand "(" Operands ")" [hybrid, strict(2,3)]
   syntax AccountCallInst  ::=
     LValues "=" "call" Operand "at" Operand "(" Operands ")" "send" Operand "," "gaslimit" Operand [hybrid, seqstrict(2,3,4,5,6)]
@@ -194,7 +194,7 @@ module IELE-COMMON
     LValue "=" "calladdress" GlobalName "at" Operand [hybrid, strict(3)]
   syntax ReturnInst  ::=
     "ret" NonEmptyOperands [hybrid, strict(1)]
-  | "ret" "void"
+  | "ret" "void" [alias]
   syntax RevertInst  ::=
     "revert" Operand [hybrid, strict(1)]
   syntax LogInst  ::=
@@ -328,8 +328,8 @@ module IELE-COMMON
     "deposit" [token]
   syntax IeleNameToken  ::=
     "init" [token]
-  rule call NAME ( ARGS ) => .LValues = call NAME ( ARGS )  [alias]
-  rule ret void => ret .NonEmptyOperands  [alias]
+  rule call NAME ( ARGS ) => .LValues = call NAME ( ARGS )
+  rule ret void => ret .NonEmptyOperands
 endmodule
 
 module IELE
