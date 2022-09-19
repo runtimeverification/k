@@ -1,9 +1,11 @@
 import json
 import logging
 import os
+from enum import Enum
+from itertools import chain
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
-from typing import Final, Iterable, List, Optional, Tuple
+from typing import Final, Iterable, List, Mapping, Optional, Tuple
 
 from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp, run_process
 from ..cterm import CTerm, build_claim
@@ -16,31 +18,49 @@ from .kprint import KPrint
 _LOGGER: Final = logging.getLogger(__name__)
 
 
+class KProveOutput(Enum):
+    PRETTY = 'pretty'
+    PROGAM = 'program'
+    KAST = 'KAST'
+    BINARY = 'binary'
+    JSON = 'json'
+    LATEX = 'latex'
+    KORE = 'kore'
+    NONE = 'none'
+
+
 def _kprove(
     spec_file: Path,
     *,
-    check: bool = True,
-    profile: bool = False,
+    command: Iterable[str] = ('kprove',),
     kompiled_dir: Optional[Path] = None,
+    spec_module_name: Optional[str] = None,
     include_dirs: Iterable[Path] = (),
     emit_json_spec: Optional[Path] = None,
+    output: Optional[KProveOutput] = None,
     dry_run: bool = False,
+    args: Iterable[str] = (),
+    env: Optional[Mapping[str, str]] = None,
+    check: bool = True,
+    profile: bool = False,
 ) -> CompletedProcess:
     check_file_path(spec_file)
 
     for include_dir in include_dirs:
         check_dir_path(include_dir)
 
-    args = _build_arg_list(
+    typed_args = _build_arg_list(
         kompiled_dir=kompiled_dir,
+        spec_module_name=spec_module_name,
         include_dirs=include_dirs,
-        dry_run=dry_run,
         emit_json_spec=emit_json_spec,
+        output=output,
+        dry_run=dry_run,
     )
 
     try:
-        run_args = [str(_a) for _a in ['kprove', spec_file] + list(args)]
-        return run_process(run_args, logger=_LOGGER, check=check, profile=profile)
+        run_args = tuple(chain(command, [str(spec_file)], typed_args, args))
+        return run_process(run_args, logger=_LOGGER, env=env, check=check, profile=profile)
     except CalledProcessError as err:
         raise RuntimeError(
             f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr
@@ -50,8 +70,10 @@ def _kprove(
 def _build_arg_list(
     *,
     kompiled_dir: Optional[Path],
+    spec_module_name: Optional[str],
     include_dirs: Iterable[Path],
     emit_json_spec: Optional[Path],
+    output: Optional[KProveOutput],
     dry_run: bool,
 ) -> List[str]:
     args = []
@@ -59,11 +81,17 @@ def _build_arg_list(
     if kompiled_dir:
         args += ['--definition', str(kompiled_dir)]
 
+    if spec_module_name:
+        args += ['--spec-module', spec_module_name]
+
     for include_dir in include_dirs:
         args += ['-I', str(include_dir)]
 
     if emit_json_spec:
         args += ['--emit-json-spec', str(emit_json_spec)]
+
+    if output:
+        args += ['--output', output.value]
 
     if dry_run:
         args.append('--dry-run')
@@ -72,7 +100,6 @@ def _build_arg_list(
 
 
 class KProve(KPrint):
-
     main_file: Optional[Path]
     prover: List[str]
     prover_args: List[str]
@@ -120,25 +147,30 @@ class KProve(KPrint):
             '--log-entries',
             ','.join(haskell_log_entries),
         ]
-        command = list(self.prover)
-        command += [str(spec_file)]
-        command += ['--definition', str(self.definition_dir), '--output', 'json']
-        command += ['--spec-module', spec_module_name] if spec_module_name is not None else []
-        command += ['--dry-run'] if dry_run else []
-        command += self.prover_args
-        command += list(args)
 
         kore_exec_opts = ' '.join(list(haskell_args) + haskell_log_args)
         _LOGGER.debug(f'export KORE_EXEC_OPTS="{kore_exec_opts}"')
-        command_env = os.environ.copy()
-        command_env['KORE_EXEC_OPTS'] = kore_exec_opts
+        env = os.environ.copy()
+        env['KORE_EXEC_OPTS'] = kore_exec_opts
 
-        proc_result = run_process(command, logger=_LOGGER, env=command_env, check=False, profile=self._profile)
+        proc_result = _kprove(
+            spec_file=spec_file,
+            command=self.prover,
+            kompiled_dir=self.definition_dir,
+            spec_module_name=spec_module_name,
+            output=KProveOutput.JSON,
+            dry_run=dry_run,
+            args=self.prover_args + list(args),
+            env=env,
+            check=False,
+            profile=self._profile,
+        )
+
         if proc_result.returncode not in (0, 1):
             raise RuntimeError('kprove failed!')
 
         if dry_run:
-            return mlTop()
+            return mlBottom()
 
         debug_log = _get_rule_log(log_file)
         final_state = KInner.from_dict(json.loads(proc_result.stdout)['term'])
