@@ -1,7 +1,7 @@
 from pyk.kast import KApply, KClaim, KRewrite, KSort, KToken, KVariable
 from pyk.kastManip import push_down_rewrites
 from pyk.ktool import KompileBackend
-from pyk.ktool.kprint import assoc_with_unit
+from pyk.ktool.kprint import SymbolTable, assoc_with_unit
 from pyk.prelude.k import GENERATED_TOP_CELL
 
 from .kprove_test import KProveTest
@@ -16,11 +16,11 @@ class DefnTest(KProveTest):
     KPROVE_USE_DIR = '.defn-test'
 
     @staticmethod
-    def _update_symbol_table(symbol_table):
+    def _update_symbol_table(symbol_table: SymbolTable) -> None:
         symbol_table['_,_'] = assoc_with_unit(' , ', '')
         symbol_table['.List{"_,_"}'] = lambda: ''
 
-    def test_print_configuration(self):
+    def test_print_configuration(self) -> None:
 
         # fmt: off
         config = KApply('<T>', [KApply('<k>', [KApply('int_;_', [KApply('_,_', [KToken('x', 'Id'), KApply('_,_', [KToken('y', 'Id'), KApply('.List{"_,_"}')])])])]), KApply('<state>', [KApply('.Map')])])
@@ -41,7 +41,7 @@ class DefnTest(KProveTest):
 
         self.assertEqual(config_expected, config_actual)
 
-    def test_print_prove_rewrite(self):
+    def test_print_prove_rewrite(self) -> None:
 
         # fmt: off
         claim_rewrite = KRewrite( KApply('<T>', [ KApply('<k>', [KApply('_+_', [KVariable('X'), KVariable('Y')])])
@@ -65,7 +65,7 @@ class DefnTest(KProveTest):
         self.assertEqual(minimized_claim_rewrite_expected, minimized_claim_rewrite_actual)
         self.assertTop(result)
 
-    def test_empty_config(self):
+    def test_empty_config(self) -> None:
         test_data = (
             (
                 'generatedTop',
@@ -104,7 +104,7 @@ class DefnTest(KProveTest):
                 actual = self.kprove.pretty_print(empty_config)
                 self.assertEqual(actual, expected)
 
-    def test_init_config(self):
+    def test_init_config(self) -> None:
         test_data = (
             (
                 'generatedTop-no-map',

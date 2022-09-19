@@ -1,7 +1,7 @@
 from typing import Final, List, Tuple
 from unittest import TestCase
 
-from pyk.kast import KApply, KDefinition, KFlatModule, KInner, KLabel, KSequence, build_assoc
+from pyk.kast import KApply, KDefinition, KFlatModule, KInner, KLabel, KSequence, KSort, build_assoc
 from pyk.prelude.kbool import BOOL
 from pyk.prelude.kint import INT
 from pyk.prelude.string import STRING
@@ -11,14 +11,14 @@ from .utils import f, x, y, z
 
 
 class KLabelTest(TestCase):
-    TEST_DATA: Final[Tuple[List[KInner], ...]] = (
+    TEST_DATA: Final[Tuple[List[KSort], ...]] = (
         [],
         [BOOL],
         [BOOL, INT],
         [BOOL, INT, STRING],
     )
 
-    def test_init(self):
+    def test_init(self) -> None:
         for i, params in enumerate(self.TEST_DATA):
             with self.subTest(i=i):
                 # When
@@ -34,7 +34,7 @@ class KLabelTest(TestCase):
                     self.assertEqual(term.name, 'f')
                     self.assertTupleEqual(term.params, tuple(params))
 
-    def test_init_multiple_values(self):
+    def test_init_multiple_values(self) -> None:
         # Given
         test_data = self.TEST_DATA[1:]
         expected_message = "KLabel() got multiple values for argument 'params'"
@@ -43,13 +43,13 @@ class KLabelTest(TestCase):
             with self.subTest(i=i):
                 with self.assertRaises(TypeError) as context:
                     # When
-                    KLabel('f', *params, params=params)
+                    KLabel('f', *params, params=params)  # type: ignore
 
                 # Then
                 actual_message = context.exception.args[0]
                 self.assertEqual(actual_message, expected_message)
 
-    def test_init_unkown_keyword(self):
+    def test_init_unkown_keyword(self) -> None:
         # Given
         expected_message = "KLabel() got an unexpected keyword argument 'key'"
 
@@ -57,7 +57,7 @@ class KLabelTest(TestCase):
             with self.subTest(i=i):
                 with self.assertRaises(TypeError) as context:
                     # When
-                    KLabel('f', *params, key='value')
+                    KLabel('f', *params, key='value')  # type: ignore
 
                 # Then
                 actual_message = context.exception.args[0]
@@ -72,7 +72,7 @@ class KApplyTest(TestCase):
         [x, y, z],
     )
 
-    def test_init(self):
+    def test_init(self) -> None:
         for i, args in enumerate(self.TEST_DATA):
             with self.subTest(i=i):
                 # When
@@ -88,7 +88,7 @@ class KApplyTest(TestCase):
                     self.assertEqual(term.label, KLabel('f'))
                     self.assertTupleEqual(term.args, tuple(args))
 
-    def test_init_multiple_values(self):
+    def test_init_multiple_values(self) -> None:
         # Given
         test_data = self.TEST_DATA[1:]
         expected_message = "KApply() got multiple values for argument 'args'"
@@ -97,13 +97,13 @@ class KApplyTest(TestCase):
             with self.subTest(i=i):
                 with self.assertRaises(TypeError) as context:
                     # When
-                    KApply('f', *args, args=args)
+                    KApply('f', *args, args=args)  # type: ignore
 
                 # Then
                 actual_message = context.exception.args[0]
                 self.assertEqual(actual_message, expected_message)
 
-    def test_init_unkown_keyword(self):
+    def test_init_unkown_keyword(self) -> None:
         # Given
         expected_message = "KApply() got an unexpected keyword argument 'key'"
 
@@ -111,7 +111,7 @@ class KApplyTest(TestCase):
             with self.subTest(i=i):
                 with self.assertRaises(TypeError) as context:
                     # When
-                    KApply('f', *args, key='value')
+                    KApply('f', *args, key='value')  # type: ignore
 
                 # Then
                 actual_message = context.exception.args[0]
@@ -126,7 +126,7 @@ class KSequenceTest(TestCase):
         [x, y, z],
     )
 
-    def test_init(self):
+    def test_init(self) -> None:
         for i, items in enumerate(self.TEST_DATA):
             with self.subTest(i=i):
                 # When
@@ -140,7 +140,7 @@ class KSequenceTest(TestCase):
                 for term in terms:
                     self.assertTupleEqual(term.items, tuple(items))
 
-    def test_init_multiple_values(self):
+    def test_init_multiple_values(self) -> None:
         # Given
         test_data = self.TEST_DATA[1:]
         expected_message = "KSequence() got multiple values for argument 'items'"
@@ -149,13 +149,13 @@ class KSequenceTest(TestCase):
             with self.subTest(i=i):
                 with self.assertRaises(TypeError) as context:
                     # When
-                    KSequence(*items, items=items)
+                    KSequence(*items, items=items)  # type: ignore
 
                 # Then
                 actual_message = context.exception.args[0]
                 self.assertEqual(actual_message, expected_message)
 
-    def test_init_unkown_keyword(self):
+    def test_init_unkown_keyword(self) -> None:
         # Given
         expected_message = "KSequence() got an unexpected keyword argument 'key'"
 
@@ -163,7 +163,7 @@ class KSequenceTest(TestCase):
             with self.subTest(i=i):
                 with self.assertRaises(TypeError) as context:
                     # When
-                    KSequence(*items, key='value')
+                    KSequence(*items, key='value')  # type: ignore
 
                 # Then
                 actual_message = context.exception.args[0]
@@ -171,7 +171,7 @@ class KSequenceTest(TestCase):
 
 
 class KDefinitionTest(TestCase):
-    def test(self):
+    def test(self) -> None:
         defn = KDefinition('FOO', [KFlatModule('BAR', [], []), KFlatModule('FOO', [], [])])
         self.assertCountEqual(defn.module_names, ['FOO', 'BAR'])
 
@@ -196,7 +196,7 @@ class BuildAssocTest(TestCase):
         ((_0, x, _0, y, _0, z, _0), f(x, f(y, z))),
     )
 
-    def test(self):
+    def test(self) -> None:
         for i, (terms, expected) in enumerate(self.TEST_DATA):
             with self.subTest(i=i):
                 # When

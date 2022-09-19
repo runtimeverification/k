@@ -20,7 +20,7 @@ class KompiledTest(TestCase):
     kompiled_dir: Path
     definition: KDefinition
 
-    def setUp(self):
+    def setUp(self) -> None:
         main_file = Path(self.KOMPILE_MAIN_FILE)
         self.assertTrue(main_file.is_file())
         self.assertEqual(main_file.suffix, '.k')
@@ -44,7 +44,7 @@ class KompiledTest(TestCase):
                 json_dct = json.load(f)
                 self.definition = KDefinition.from_dict(json_dct['term'])
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         shutil.rmtree(self.kompiled_dir)
 
     def assertTop(self, term: KInner) -> None:  # noqa: N802

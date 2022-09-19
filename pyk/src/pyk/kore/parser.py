@@ -80,10 +80,10 @@ class _LookaheadBuffer(Generic[T]):
         self._buf = list(islice(it, la))
         self._pos = 0
 
-    def __call__(self, k=1) -> T:
+    def __call__(self, k: int = 1) -> T:
         return self.lookahead(k)
 
-    def lookahead(self, k=1) -> T:
+    def lookahead(self, k: int = 1) -> T:
         if not (1 <= k <= self._la):
             raise ValueError(f'Illegal lookahed value: {k}')
 
@@ -160,7 +160,7 @@ class KoreParser:
         parse: Callable[[], T],
         ldelim: KoreToken.Type,
         rdelim: KoreToken.Type,
-        sep=KoreToken.Type.COMMA,
+        sep: KoreToken.Type = KoreToken.Type.COMMA,
     ) -> List[T]:
         res: List[T] = []
 
@@ -272,7 +272,7 @@ class KoreParser:
         return parse()
 
     def _unsupported_ml_symbol(self, symbol: str) -> Callable[[], MLPattern]:
-        def parse():
+        def parse() -> MLPattern:
             raise ValueError(f'Unsupported matching logic symbol: {symbol}')
 
         return parse

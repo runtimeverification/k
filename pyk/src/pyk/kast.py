@@ -4,7 +4,7 @@ from dataclasses import InitVar, dataclass, fields
 from enum import Enum
 from functools import cached_property, reduce
 from itertools import chain
-from pathlib import Path
+from os import PathLike
 from typing import (
     Any,
     Callable,
@@ -68,7 +68,7 @@ class KAst(ABC):
         # shallow copy version of dataclass.astuple.
         return tuple(self.__dict__[field.name] for field in fields(type(self)))
 
-    def __lt__(self, other):
+    def __lt__(self, other: Any) -> bool:
         if not isinstance(other, KAst):
             return NotImplemented
         if type(self) == type(other):
@@ -223,7 +223,7 @@ class Subst(Mapping[str, KInner]):
         return Subst(subst)
 
     def apply(self, term: KInner) -> KInner:
-        def replace(term):
+        def replace(term: KInner) -> KInner:
             if type(term) is KVariable and term.name in self:
                 return self[term.name]
             return term
@@ -238,7 +238,8 @@ class Subst(Mapping[str, KInner]):
             new_term = KRewrite(lhs, rhs).replace(new_term)
         return new_term
 
-    def pretty(self, kprint) -> Iterable[str]:
+    # TODO `kprint: KPrint` introcudes a circular dependency
+    def pretty(self, kprint: Any) -> Iterable[str]:
         return (key + ' |-> ' + kprint.pretty_print(value) for key, value in self.items())
 
     @property
@@ -372,7 +373,8 @@ class KLabel(KInner):
     def __init__(self, name: str, *params: Union[str, KSort]):
         ...
 
-    def __init__(self, name, *args, **kwargs):
+    # TODO Is it possible to extract a decorator?
+    def __init__(self, name: str, *args: Any, **kwargs: Any):
         if kwargs:
             bad_arg = next((arg for arg in kwargs if arg != 'params'), None)
             if bad_arg:
@@ -402,7 +404,7 @@ class KLabel(KInner):
     def __call__(self, *args: KInner) -> 'KApply':
         ...
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args: Any, **kwargs: Any) -> 'KApply':
         return self.apply(*args, **kwargs)
 
     @classmethod
@@ -432,7 +434,7 @@ class KLabel(KInner):
     def apply(self, *args: KInner) -> 'KApply':
         ...
 
-    def apply(self, *args, **kwargs):
+    def apply(self, *args: Any, **kwargs: Any) -> 'KApply':
         return KApply(self, *args, **kwargs)
 
 
@@ -450,7 +452,7 @@ class KApply(KInner):
     def __init__(self, label: Union[str, KLabel], *args: KInner):
         ...
 
-    def __init__(self, label, *args, **kwargs):
+    def __init__(self, label: Union[str, KLabel], *args: Any, **kwargs: Any):
         if type(label) is str:
             label = KLabel(label)
 
@@ -460,13 +462,16 @@ class KApply(KInner):
                 raise TypeError(f"KApply() got an unexpected keyword argument '{bad_arg}'")
             if args:
                 raise TypeError("KApply() got multiple values for argument 'args'")
-            args = kwargs['args']
+            _args = kwargs['args']
 
         elif len(args) == 1 and isinstance(args[0], Iterable) and not isinstance(args[0], KInner):
-            args = args[0]
+            _args = args[0]
+
+        else:
+            _args = args
 
         object.__setattr__(self, 'label', label)
-        object.__setattr__(self, 'args', tuple(args))
+        object.__setattr__(self, 'args', tuple(_args))
 
     @property
     def arity(self) -> int:
@@ -542,7 +547,7 @@ class KRewrite(KInner, WithKAtt):
     lhs: KInner
     rhs: KInner
 
-    def __init__(self, lhs: KInner, rhs: KInner, att=EMPTY_ATT):
+    def __init__(self, lhs: KInner, rhs: KInner, att: KAtt = EMPTY_ATT):
         object.__setattr__(self, 'lhs', lhs)
         object.__setattr__(self, 'rhs', rhs)
         object.__setattr__(self, 'att', att)
@@ -550,7 +555,7 @@ class KRewrite(KInner, WithKAtt):
     def __iter__(self) -> Iterator[KInner]:
         return iter([self.lhs, self.rhs])
 
-    def __call__(self, term: KInner, *, top=False) -> KInner:
+    def __call__(self, term: KInner, *, top: bool = False) -> KInner:
         if top:
             return self.apply_top(term)
 
@@ -643,7 +648,7 @@ class KSequence(KInner, Sequence[KInner]):
     def __init__(self, *items: KInner):
         ...
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         if kwargs:
             bad_arg = next((arg for arg in kwargs if arg != 'items'), None)
             if bad_arg:
@@ -864,7 +869,7 @@ class KProduction(KSentence):
         items: Iterable[KProductionItem] = (),
         params: Iterable[Union[str, KSort]] = (),
         klabel: Optional[Union[str, KLabel]] = None,
-        att=EMPTY_ATT,
+        att: KAtt = EMPTY_ATT,
     ):
         if type(sort) is str:
             sort = KSort(sort)
@@ -933,7 +938,7 @@ class KSyntaxSort(KSentence):
     params: Tuple[KSort, ...]
     att: KAtt
 
-    def __init__(self, sort: KSort, params: Iterable[Union[str, KSort]] = (), att=EMPTY_ATT):
+    def __init__(self, sort: KSort, params: Iterable[Union[str, KSort]] = (), att: KAtt = EMPTY_ATT):
         params = tuple(KSort(param) if type(param) is str else param for param in params)
         object.__setattr__(self, 'sort', sort)
         object.__setattr__(self, 'params', params)
@@ -979,7 +984,7 @@ class KSortSynonym(KSentence):
     old_sort: KSort
     att: KAtt
 
-    def __init__(self, new_sort: KSort, old_sort: KSort, att=EMPTY_ATT):
+    def __init__(self, new_sort: KSort, old_sort: KSort, att: KAtt = EMPTY_ATT):
         object.__setattr__(self, 'new_sort', new_sort)
         object.__setattr__(self, 'old_sort', old_sort)
         object.__setattr__(self, 'att', att)
@@ -1020,7 +1025,7 @@ class KSyntaxLexical(KSentence):
     regex: str
     att: KAtt
 
-    def __init__(self, name: str, regex: str, att=EMPTY_ATT):
+    def __init__(self, name: str, regex: str, att: KAtt = EMPTY_ATT):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'regex', regex)
         object.__setattr__(self, 'att', att)
@@ -1067,7 +1072,7 @@ class KSyntaxAssociativity(KSentence):
     tags: FrozenSet[str]
     att: KAtt
 
-    def __init__(self, assoc: KAssoc, tags: Iterable[str] = frozenset(), att=EMPTY_ATT):
+    def __init__(self, assoc: KAssoc, tags: Iterable[str] = frozenset(), att: KAtt = EMPTY_ATT):
         object.__setattr__(self, 'assoc', assoc)
         object.__setattr__(self, 'tags', frozenset(tags))
         object.__setattr__(self, 'att', att)
@@ -1107,7 +1112,7 @@ class KSyntaxPriority(KSentence):
     priorities: Tuple[FrozenSet[str], ...]
     att: KAtt
 
-    def __init__(self, priorities: Iterable[Iterable[str]] = (), att=EMPTY_ATT):
+    def __init__(self, priorities: Iterable[Iterable[str]] = (), att: KAtt = EMPTY_ATT):
         object.__setattr__(self, 'priorities', tuple(frozenset(group) for group in priorities))
         object.__setattr__(self, 'att', att)
 
@@ -1144,7 +1149,7 @@ class KBubble(KSentence):
     content: str
     att: KAtt
 
-    def __init__(self, sentence_type: str, content: str, att=EMPTY_ATT):
+    def __init__(self, sentence_type: str, content: str, att: KAtt = EMPTY_ATT):
         object.__setattr__(self, 'sentence_type', sentence_type)
         object.__setattr__(self, 'content', content)
         object.__setattr__(self, 'att', att)
@@ -1214,7 +1219,7 @@ class KRule(KRuleLike):
     ensures: KInner
     att: KAtt
 
-    def __init__(self, body: KInner, requires: KInner = TRUE, ensures: KInner = TRUE, att=EMPTY_ATT):
+    def __init__(self, body: KInner, requires: KInner = TRUE, ensures: KInner = TRUE, att: KAtt = EMPTY_ATT):
         object.__setattr__(self, 'body', body)
         object.__setattr__(self, 'requires', requires)
         object.__setattr__(self, 'ensures', ensures)
@@ -1265,7 +1270,7 @@ class KClaim(KRuleLike):
     ensures: KInner
     att: KAtt
 
-    def __init__(self, body: KInner, requires: KInner = TRUE, ensures: KInner = TRUE, att=EMPTY_ATT):
+    def __init__(self, body: KInner, requires: KInner = TRUE, ensures: KInner = TRUE, att: KAtt = EMPTY_ATT):
         object.__setattr__(self, 'body', body)
         object.__setattr__(self, 'requires', requires)
         object.__setattr__(self, 'ensures', ensures)
@@ -1315,7 +1320,7 @@ class KContext(KSentence):
     requires: KInner
     att: KAtt
 
-    def __init__(self, body: KInner, requires: KInner = TRUE, att=EMPTY_ATT):
+    def __init__(self, body: KInner, requires: KInner = TRUE, att: KAtt = EMPTY_ATT):
         object.__setattr__(self, 'body', body)
         object.__setattr__(self, 'requires', requires)
         object.__setattr__(self, 'att', att)
@@ -1355,7 +1360,7 @@ class KImport(KOuter):
     name: str
     public: bool
 
-    def __init__(self, name: str, public=True):
+    def __init__(self, name: str, public: bool = True):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'public', public)
 
@@ -1381,7 +1386,9 @@ class KFlatModule(KOuter, WithKAtt):
     imports: Tuple[KImport, ...]
     att: KAtt
 
-    def __init__(self, name: str, sentences: Iterable[KSentence] = (), imports: Iterable[KImport] = (), att=EMPTY_ATT):
+    def __init__(
+        self, name: str, sentences: Iterable[KSentence] = (), imports: Iterable[KImport] = (), att: KAtt = EMPTY_ATT
+    ):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sentences', tuple(sentences))
         object.__setattr__(self, 'imports', tuple(imports))
@@ -1522,7 +1529,11 @@ class KDefinition(KOuter, WithKAtt):
     main_module: InitVar[KFlatModule]
 
     def __init__(
-        self, main_module_name: str, modules: Iterable[KFlatModule], requires: Iterable[KRequire] = (), att=EMPTY_ATT
+        self,
+        main_module_name: str,
+        modules: Iterable[KFlatModule],
+        requires: Iterable[KRequire] = (),
+        att: KAtt = EMPTY_ATT,
     ):
         modules = tuple(modules)
         main_modules = [module for module in modules if module.name == main_module_name]
@@ -1627,12 +1638,12 @@ class KDefinition(KOuter, WithKAtt):
             raise ValueError(f'Expected a single cell production for sort {sort}') from err
 
     def empty_config(self, sort: KSort) -> KInner:
-        def _kdefinition_empty_config(_sort):
+        def _kdefinition_empty_config(_sort: KSort) -> KApply:
             cell_prod = self.production_for_cell_sort(_sort)
             cell_klabel = cell_prod.klabel
             assert cell_klabel is not None
             production = self.production_for_klabel(cell_klabel)
-            args = []
+            args: List[KInner] = []
             num_nonterminals = 0
             num_freshvars = 0
             for p_item in production.items:
@@ -1733,12 +1744,12 @@ def build_cons(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner])
         return unit
 
 
-def read_kast(ifile: Path) -> KAst:
-    with open(ifile, 'r') as _f:
+def read_kast(path: Union[str, PathLike]) -> KAst:
+    with open(path, 'r') as _f:
         return KAst.from_dict(json.loads(_f.read())['term'])
 
 
-def read_kast_definition(ifile: Path) -> KDefinition:
-    _defn = read_kast(ifile)
+def read_kast_definition(path: Union[str, PathLike]) -> KDefinition:
+    _defn = read_kast(path)
     assert isinstance(_defn, KDefinition)
     return _defn

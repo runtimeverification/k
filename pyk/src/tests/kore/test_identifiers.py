@@ -30,7 +30,7 @@ class IdentifierTest(TestCase):
         + (('@sort', True),)
     )
 
-    def test_is_id(self):
+    def test_is_id(self) -> None:
         for i, (s, expected) in enumerate(self.ID_TEST_DATA):
             with self.subTest(i=i):
                 # When
@@ -39,7 +39,7 @@ class IdentifierTest(TestCase):
                 # Then
                 self.assertEqual(actual, expected)
 
-    def test_is_symbol_id(self):
+    def test_is_symbol_id(self) -> None:
         for i, (s, expected) in enumerate(self.SYMBOL_ID_TEST_DATA):
             with self.subTest(i=i):
                 # When
@@ -48,7 +48,7 @@ class IdentifierTest(TestCase):
                 # Then
                 self.assertEqual(actual, expected)
 
-    def test_is_set_variable_id(self):
+    def test_is_set_variable_id(self) -> None:
         for i, (s, expected) in enumerate(self.SET_VARIABLE_ID_TEST_DATA):
             with self.subTest(i=i):
                 # When

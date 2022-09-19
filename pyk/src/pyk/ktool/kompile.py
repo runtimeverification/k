@@ -29,7 +29,7 @@ def kompile(
     include_dirs: Iterable[Path] = (),
     md_selector: Optional[str] = None,
     hook_namespaces: Iterable[str] = (),
-    emit_json=False,
+    emit_json: bool = False,
     post_process: Optional[str] = None,
     concrete_rules: Iterable[str] = (),
     args: Iterable[str] = (),

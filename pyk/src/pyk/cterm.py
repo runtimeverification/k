@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from functools import cached_property
 from itertools import chain
-from typing import Dict, Iterable, Optional, Tuple
+from typing import Dict, Iterable, Iterator, Optional, Tuple
 
 from .kast import KApply, KAtt, KClaim, KInner, KRewrite, KRule, KVariable, Subst
 from .kastManip import (
@@ -48,7 +48,7 @@ class CTerm:
         term_str = str(term)
         return (len(term_str), term_str)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[KInner]:
         return chain([self.config], self.constraints)
 
     @cached_property
@@ -96,9 +96,8 @@ class CTerm:
         return CTerm(mlAnd([self.config, new_constraint] + list(self.constraints), GENERATED_TOP_CELL))
 
 
-def remove_useless_constraints(cterm: CTerm, keep_vars=None) -> CTerm:
-    used_vars = free_vars(cterm.config)
-    used_vars = used_vars if keep_vars is None else (used_vars + keep_vars)
+def remove_useless_constraints(cterm: CTerm, keep_vars: Iterable[str] = ()) -> CTerm:
+    used_vars = free_vars(cterm.config) + list(keep_vars)
     prev_len_unsed_vars = 0
     new_constraints = []
     while len(used_vars) > prev_len_unsed_vars:

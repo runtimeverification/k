@@ -23,7 +23,7 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 
 def instantiate_cell_vars(definition: KDefinition, term: KInner) -> KInner:
-    def _cell_vars_to_labels(_kast):
+    def _cell_vars_to_labels(_kast: KInner) -> KInner:
         if type(_kast) is KApply and _kast.is_cell:
             production = definition.production_for_klabel(_kast.label)
             production_arity = [prod_item.sort for prod_item in production.items if type(prod_item) is KNonTerminal]

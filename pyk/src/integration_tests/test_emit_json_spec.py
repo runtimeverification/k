@@ -4,6 +4,7 @@ from pathlib import Path
 from pyk.kast import EMPTY_ATT, KAst, KDefinition, KFlatModuleList, KRequire
 from pyk.kastManip import remove_generated_cells
 from pyk.ktool import KompileBackend
+from pyk.ktool.kprint import SymbolTable, paren
 from pyk.ktool.kprove import _kprove
 
 from .kprove_test import KProveTest
@@ -22,15 +23,17 @@ class EmitJsonSpecTest(KProveTest):
     SPEC_FILE = 'k-files/looping-spec.k'
     SPEC_JSON_FILE = 'definitions/imp-verification/looping-spec.json'
 
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
 
         spec_file = Path(self.SPEC_FILE)
+        kompiled_dir = Path(self.KOMPILE_OUTPUT_DIR)
         emit_json_spec = Path(self.SPEC_JSON_FILE)
-        _kprove(spec_file, kompiled_dir=self.KOMPILE_OUTPUT_DIR, emit_json_spec=emit_json_spec, dry_run=True)
+        _kprove(spec_file, kompiled_dir=kompiled_dir, emit_json_spec=emit_json_spec, dry_run=True)
 
-        with open(self.SPEC_JSON_FILE, 'r') as spec_file:
-            kfml: KFlatModuleList = KAst.from_dict(json.load(spec_file)['term'])
+        with open(self.SPEC_JSON_FILE, 'r') as f:
+            kfml = KAst.from_dict(json.load(f)['term'])
+            assert type(kfml) is KFlatModuleList
 
         module = list(kfml.modules)[0]
         claim = module.claims[0]
@@ -38,23 +41,17 @@ class EmitJsonSpecTest(KProveTest):
         self.module = module.let(sentences=(self.claim,))
 
     @staticmethod
-    def _update_symbol_table(symbol_table):
-        def paren(f):
-            def unparse(*args):
-                return '(' + f(*args) + ')'
-
-            return unparse
-
+    def _update_symbol_table(symbol_table: SymbolTable) -> None:
         symbol_table['_+Int_'] = paren(symbol_table['_+Int_'])
 
-    def test_prove_claim(self):
+    def test_prove_claim(self) -> None:
         # When
         result = self.kprove.prove_claim(self.claim, 'looping-1')
 
         # Then
         self.assertTop(result)
 
-    def test_prove(self):
+    def test_prove(self) -> None:
         # Given
         spec_name = 'looping-2-spec'
         spec_file = Path(self.KPROVE_USE_DIR) / f'{spec_name}.k'

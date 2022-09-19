@@ -428,7 +428,7 @@ class MLPattern(Pattern):
     @classmethod
     @property
     @abstractmethod
-    def _symbol(cls):
+    def _symbol(cls) -> str:
         ...
 
 
@@ -1321,7 +1321,7 @@ class SortDecl(Sentence):
     attrs: Tuple[Attr, ...]
     hooked: bool
 
-    def __init__(self, name: str, vars: Iterable[SortVar], attrs: Iterable[Attr] = (), *, hooked=False):
+    def __init__(self, name: str, vars: Iterable[SortVar], attrs: Iterable[Attr] = (), *, hooked: bool = False):
         check_id(name)
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'vars', tuple(vars))
@@ -1339,6 +1339,7 @@ class SortDecl(Sentence):
         name = name if name is not None else self.name
         vars = vars if vars is not None else self.vars
         attrs = attrs if attrs is not None else self.attrs
+        hooked = hooked if hooked is not None else self.hooked
         return SortDecl(name=name, vars=vars, attrs=attrs, hooked=hooked)
 
     def let_attrs(self: 'SortDecl', attrs: Iterable[Attr]) -> 'SortDecl':
@@ -1413,7 +1414,13 @@ class SymbolDecl(Sentence):
     hooked: bool
 
     def __init__(
-        self, symbol: Symbol, sort_params: Iterable[Sort], sort: Sort, attrs: Iterable[Attr] = (), *, hooked=False
+        self,
+        symbol: Symbol,
+        sort_params: Iterable[Sort],
+        sort: Sort,
+        attrs: Iterable[Attr] = (),
+        *,
+        hooked: bool = False,
     ):
         object.__setattr__(self, 'symbol', symbol)
         object.__setattr__(self, 'sort_params', tuple(sort_params))

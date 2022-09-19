@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from functools import reduce
 from itertools import chain
 from threading import RLock
-from typing import Any, Container, Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple, Union, cast
+from types import TracebackType
+from typing import Any, Container, Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple, Type, Union, cast
 
 from graphviz import Digraph
 
@@ -38,7 +39,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         def pretty(self, kprint: KPrint) -> Iterable[str]:
             ...
 
-        def __lt__(self, other):
+        def __lt__(self, other: Any) -> bool:
             if not isinstance(other, KCFG.EdgeLike):
                 return NotImplemented
             return (self.source, self.target) < (other.source, other.target)
@@ -58,7 +59,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 'depth': self.depth,
             }
 
-        def to_rule(self, priority=50) -> KRule:
+        def to_rule(self, priority: int = 50) -> KRule:
             sentence_id = f'BASIC-BLOCK-{self.source.id}-TO-{self.target.id}'
             rule, _ = build_rule(
                 sentence_id, self.source.cterm.add_constraint(self.condition), self.target.cterm, priority=priority
@@ -125,7 +126,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     _aliases: Dict[str, str]
     _lock: RLock
 
-    def __init__(self):
+    def __init__(self) -> None:  # TODO should be unnecessary
         self._nodes = {}
         self._edges = {}
         self._covers = {}
@@ -145,11 +146,16 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             return self.contains_cover(item)
         return False
 
-    def __enter__(self):
+    def __enter__(self) -> 'KCFG':
         self._lock.acquire()
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> bool:
         self._lock.release()
         if exc_type is None:
             return True
@@ -361,7 +367,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         return ret
 
     def to_dot(self, kprint: KPrint) -> str:
-        def _short_label(label):
+        def _short_label(label: str) -> str:
             return '\n'.join(
                 [
                     label_line if len(label_line) < 100 else (label_line[0:100] + ' ...')
@@ -751,7 +757,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         for node in nodes:
             self.remove_node(node.id)
 
-    def paths_between(self, source_id: str, target_id: str, *, traverse_covers=False) -> List[Tuple[EdgeLike, ...]]:
+    def paths_between(
+        self, source_id: str, target_id: str, *, traverse_covers: bool = False
+    ) -> List[Tuple[EdgeLike, ...]]:
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
 
@@ -806,7 +814,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         return paths
 
-    def reachable_nodes(self, source_id: str, *, reverse=False, traverse_covers=False) -> Set[Node]:
+    def reachable_nodes(self, source_id: str, *, reverse: bool = False, traverse_covers: bool = False) -> Set[Node]:
 
         visited: Set[KCFG.Node] = set()
         worklist: List[KCFG.Node] = [self.node(source_id)]

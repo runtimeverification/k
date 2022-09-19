@@ -1,4 +1,4 @@
-from typing import Dict, Final, Tuple
+from typing import Dict, Final, Optional, Tuple
 from unittest import TestCase
 
 from pyk.kast import KApply, KInner, KLabel, KVariable, Subst
@@ -12,9 +12,9 @@ from .utils import a, b, c, f, g, h, x, y, z
 
 
 class SubstTest(TestCase):
-    def test_compose(self):
+    def test_compose(self) -> None:
         # Given
-        test_data = (
+        test_data: Tuple[Tuple[Dict[str, KInner], Dict[str, KInner], Dict[str, KInner]], ...] = (
             ({}, {}, {}),
             ({'x': x}, {}, {}),
             ({}, {'x': x}, {}),
@@ -36,9 +36,9 @@ class SubstTest(TestCase):
                 # Then
                 self.assertDictEqual(actual, expected)
 
-    def test_union(self):
+    def test_union(self) -> None:
         # Given
-        test_data = (
+        test_data: Tuple[Tuple[Dict[str, KInner], Dict[str, KInner], Optional[Dict[str, KInner]]], ...] = (
             ({}, {}, {}),
             ({'x': x}, {}, {'x': x}),
             ({}, {'x': x}, {'x': x}),
@@ -58,11 +58,12 @@ class SubstTest(TestCase):
                     self.assertIsNone(actual)
                 else:
                     self.assertIsNotNone(actual)
+                    assert actual is not None  # https://github.com/python/mypy/issues/4063
                     self.assertDictEqual(dict(actual), expected)
 
-    def test_apply(self):
+    def test_apply(self) -> None:
         # Given
-        test_data = (
+        test_data: Tuple[Tuple[KInner, Dict[str, KInner], KInner], ...] = (
             (a, {}, a),
             (x, {}, x),
             (a, {'x': b}, a),
@@ -80,9 +81,9 @@ class SubstTest(TestCase):
                 # Then
                 self.assertEqual(actual, expected)
 
-    def test_unapply(self):
+    def test_unapply(self) -> None:
         # Given
-        test_data = (
+        test_data: Tuple[Tuple[KInner, Dict[str, KInner], KInner], ...] = (
             (a, {}, a),
             (a, {'x': a}, x),
             (y, {'x': y}, x),
@@ -100,13 +101,13 @@ class SubstTest(TestCase):
                 # Then
                 self.assertEqual(actual, expected)
 
-    def test_pretty(self):
+    def test_pretty(self) -> None:
         self.assertListEqual(
             list(Subst({'X': TRUE, 'Y': KApply('_andBool_', [TRUE, TRUE])}).pretty(MockKPrint())),
             ['X |-> true', 'Y |-> _andBool_ ( true , true )'],
         )
 
-    def test_ml_pred(self):
+    def test_ml_pred(self) -> None:
         subst_pred_pairs = (
             ('empty', Subst({}), KApply('#Top')),
             ('singleton', Subst({'X': TRUE}), KApply('#Equals', [KVariable('X'), TRUE])),
@@ -139,7 +140,7 @@ class ExtractSubstTest(TestCase):
         (mlEqualsTrue(_EQ(x, a)), {'x': a}, mlTop()),
     )
 
-    def test(self):
+    def test(self) -> None:
         for i, [term, expected_subst, expected_term] in enumerate(self.TEST_DATA):
             with self.subTest(i=i):
                 # When
@@ -151,7 +152,7 @@ class ExtractSubstTest(TestCase):
 
 
 class PropogateSubstTest(TestCase):
-    def test(self):
+    def test(self) -> None:
         # Given
         v1 = KVariable('V1')
         x = KVariable('X')
