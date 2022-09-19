@@ -5,8 +5,8 @@ from typing import Iterable, Optional
 from unittest import TestCase
 
 from pyk.kast import KDefinition, KInner
-from pyk.kastManip import is_top
 from pyk.ktool import KompileBackend, kompile
+from pyk.prelude.ml import is_top
 
 
 class KompiledTest(TestCase):

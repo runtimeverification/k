@@ -8,11 +8,11 @@ from typing import Any, Callable, Dict, Final, Iterable, List, Mapping, Optional
 from ..cfg_manager import CFGManager
 from ..cterm import CTerm, build_claim
 from ..kast import KApply, KDefinition, KFlatModuleList, KInner, KSequence, KToken, Subst
-from ..kastManip import free_vars, get_cell, is_top, minimize_term
+from ..kastManip import free_vars, get_cell, minimize_term
 from ..kcfg import KCFG
 from ..ktool import KProve
 from ..prelude.kbool import FALSE
-from ..prelude.ml import mlAnd, mlEqualsTrue, mlOr, mlTop
+from ..prelude.ml import is_top, mlAnd, mlEqualsTrue, mlOr, mlTop
 from ..utils import add_indent, shorten_hashes
 
 T = TypeVar('T')
@@ -378,7 +378,7 @@ def verify_edges(manager: CFGManager, kprove: KProve, args: Mapping[str, Any], c
         _LOGGER.info(f'Verifying edge: {shorten_hashes((edge.source.id, edge.target.id))}')
         basic_block_id = f'BASIC-BLOCK-{edge.source.id}-TO-{edge.target.id}'
         kprove_result = _edge_prove(edge, min_depth=args.get('min_depth'))
-        if len(kprove_result) == 1 and kprove_result[0] == mlTop():
+        if len(kprove_result) == 1 and is_top(kprove_result[0]):
             cfg.add_verified(edge.source.id, edge.target.id)
             manager.write_cfg(cfg_id, cfg)
             _LOGGER.info(f'Verified claim: {basic_block_id}')
