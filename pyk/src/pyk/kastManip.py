@@ -36,7 +36,7 @@ from .kast import (
 )
 from .prelude.k import DOTS, EMPTY_K, GENERATED_TOP_CELL
 from .prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
-from .prelude.ml import mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlOr, mlTop
+from .prelude.ml import is_top, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlOr
 from .utils import find_common_items, hash_str
 
 _LOGGER: Final = logging.getLogger(__name__)
@@ -147,10 +147,6 @@ def simplify_bool(k: KInner) -> KInner:
         rewrite = KRewrite(*rule)
         new_k = rewrite(new_k)
     return new_k
-
-
-def is_top(term: KInner) -> bool:
-    return isinstance(term, KApply) and term.label.name == '#Top'
 
 
 def extract_lhs(term: KInner) -> KInner:
@@ -655,7 +651,7 @@ def apply_existential_substitutions(constrained_term: KInner) -> KInner:
 
 
 def constraint_subsume(constraint1: KInner, constraint2: KInner) -> bool:
-    if constraint1 == mlTop() or constraint1 == constraint2:
+    if is_top(constraint1) or constraint1 == constraint2:
         return True
     elif type(constraint1) is KApply and constraint1.label.name == '#And':
         constraints1 = flatten_label('#And', constraint1)

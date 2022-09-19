@@ -13,7 +13,7 @@ from .kastManip import flatten_label, minimize_rule, minimize_term, propagate_up
 from .ktool import KPrint, KProve
 from .ktool.kprint import build_symbol_table, pretty_print_kast
 from .prelude.k import GENERATED_TOP_CELL
-from .prelude.ml import mlAnd, mlOr, mlTop
+from .prelude.ml import is_top, mlAnd, mlOr
 
 _LOG_FORMAT: Final = '%(levelname)s %(asctime)s %(name)s - %(message)s'
 _LOGGER: Final = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ def main() -> None:
         printer = KPrint(kompiled_dir, profile=args['profile'])
         _LOGGER.info(f'Reading Kast from file: {args["term"].name}')
         term = KInner.from_json(args['term'].read())
-        if term == mlTop():
+        if is_top(term):
             args['output_file'].write(printer.pretty_print(term))
             _LOGGER.info(f'Wrote file: {args["output_file"].name}')
         else:
@@ -51,7 +51,7 @@ def main() -> None:
                 for disjunct in flatten_label('#Or', term):
                     minimized = minimize_term(disjunct, abstract_labels=abstract_labels)
                     config, constraint = split_config_and_constraints(minimized)
-                    if constraint != mlTop():
+                    if not is_top(constraint):
                         minimized_disjuncts.append(mlAnd([config, constraint], sort=GENERATED_TOP_CELL))
                     else:
                         minimized_disjuncts.append(config)
