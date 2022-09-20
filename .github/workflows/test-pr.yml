@@ -223,6 +223,9 @@ jobs:
             ubuntu:jammy
       - name: 'Build Jammy Package'
         run: |
+          sleep 2
+          pwd
+          ls
           cd k-repo
           mv package/debian debian
           mv debian/control.jammy debian/control
