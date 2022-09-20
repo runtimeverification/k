@@ -150,7 +150,8 @@ jobs:
       - name: 'Set up Docker'
         run: |
           docker build . --file .github/workflows/Dockerfile --tag runtimeverification/k-ci \
-            --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14
+            --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14                 \
+            --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)
           docker run                        \
             --name k-ci                     \
             --rm -it                        \
@@ -196,7 +197,8 @@ jobs:
       - name: 'Set up Docker'
         run: |
           docker build . --file .github/workflows/Dockerfile --tag runtimeverification/k-jammy-package-build \
-            --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14
+            --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14                                  \
+            --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)
           docker run                        \
             --name k-jammy-package-build    \
             --rm -it                        \

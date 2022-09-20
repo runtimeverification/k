@@ -49,9 +49,34 @@ RUN curl -sSL https://get.haskellstack.org/ | sh
 
 RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.15 \
     && cd z3                                                         \
-    && python3 scripts/mk_make.py                                     \
+    && python3 scripts/mk_make.py                                    \
     && cd build                                                      \
     && make -j8                                                      \
     && make install                                                  \
     && cd ../..                                                      \
     && rm -rf z3
+
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+RUN    groupadd -g $GROUP_ID user                     \
+    && useradd -m -u $USER_ID -s /bin/sh -g user user
+
+USER user:user
+WORKDIR /home/user
+
+ENV LC_ALL=C.UTF-8
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml      .tmp-haskell/
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/kore.cabal .tmp-haskell/kore/
+RUN cd .tmp-haskell && stack build --only-snapshot
+
+ADD pom.xml                                                    .tmp-maven/
+ADD ktree/pom.xml                                              .tmp-maven/ktree/
+ADD llvm-backend/pom.xml                                       .tmp-maven/llvm-backend/
+ADD llvm-backend/src/main/native/llvm-backend/matching/pom.xml .tmp-maven/llvm-backend/src/main/native/llvm-backend/matching/
+ADD haskell-backend/pom.xml                                    .tmp-maven/haskell-backend/
+ADD kernel/pom.xml                                             .tmp-maven/kernel/
+ADD java-backend/pom.xml                                       .tmp-maven/java-backend/
+ADD k-distribution/pom.xml                                     .tmp-maven/k-distribution/
+ADD kore/pom.xml                                               .tmp-maven/kore/
+RUN    cd .tmp-maven                          \
+    && mvn --batch-mode dependency:go-offline
