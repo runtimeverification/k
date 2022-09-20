@@ -106,8 +106,9 @@ class KPrint:
             self._symbol_table = build_symbol_table(self.definition, opinionated=True)
         return self._symbol_table
 
-    def parse_token(self, ktoken: KToken) -> KInner:
-        output = _kast(self.definition_dir, ktoken.token, sort=ktoken.sort, profile=self._profile)
+    def parse_token(self, ktoken: KToken, *, as_rule: bool = False) -> KInner:
+        input = 'rule' if as_rule else 'program'
+        output = _kast(self.definition_dir, ktoken.token, sort=ktoken.sort, input=input, profile=self._profile)
         kast_token = KAst.from_dict(json.loads(output)['term'])
         assert isinstance(kast_token, KInner)
         return kast_token

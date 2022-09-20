@@ -1,4 +1,4 @@
-from pyk.kast import KApply
+from pyk.kast import KApply, KSequence
 from pyk.kore.syntax import DV, App, SortApp, String
 from pyk.ktool import KompileBackend
 from pyk.ktool.kprint import SymbolTable
@@ -30,7 +30,15 @@ class KoreToKastTest(KProveTest):
                 ),
                 KApply('pred1', [intToken(3)]),
             ),
-            # TODO: ('cells-conversion', App("Lbl'-LT-'k'-GT-'", [], [App('EmptyK', [], [])]), KApply('<k>', [EMPTY_K])),
+            (
+                'cells-conversion',
+                App(
+                    'inj',
+                    [SortApp('SortKCell'), SortApp('SortKItem')],
+                    [App("Lbl'-LT-'k'-GT-'", [], [App('dotk', [], [])])],
+                ),
+                KApply('<k>', [KSequence()]),
+            ),
         )
         for (name, kore, kast) in kore_kast_pairs:
             with self.subTest(name):
