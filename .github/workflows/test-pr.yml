@@ -149,7 +149,10 @@ jobs:
       - name: 'Check out k-exercises'
         uses: actions/checkout@v3
         with:
+          repo: runtimeverification/k-exercises
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
           submodules: recursive
+          path: k-exercises
       - name: 'Set up Docker'
         run: |
           docker build . --file Dockerfile.gh --tag runtimeverification/k-ci
