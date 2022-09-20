@@ -141,7 +141,7 @@ jobs:
             fi
           fi
 
-  compile-nix-flake:
+  build-nix-flake:
     name: 'Nix flake'
     strategy:
       matrix:
