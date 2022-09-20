@@ -140,7 +140,7 @@ jobs:
 
   test-k:
     needs: nix-maven
-    name: 'K unit tests'
+    name: 'K Tests'
     runs-on: [self-hosted, linux]
     steps:
       - name: 'Check out code'
