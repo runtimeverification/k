@@ -115,7 +115,7 @@
             <configuration>
               <target>
                 <exec dir="${ktestDir}" executable="make" failonerror="true">
-                  <arg value="-j12" />
+                  <arg value="-j20" />
                   <arg line="${make.args}" />
                 </exec>
               </target>
