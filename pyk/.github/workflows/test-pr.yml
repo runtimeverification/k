@@ -32,8 +32,22 @@ jobs:
             git push origin HEAD:${GITHUB_HEAD_REF}
           fi
 
-  unit-tests:
+  code-quality-checks:
     needs: version-bump
+    name: 'Code Quality Checks'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+      - name: 'Install dependencies'
+        run: |
+          curl -sSL https://install.python-poetry.org | sudo bash -c 'POETRY_HOME=/usr python3 -'
+          poetry --version
+      - name: 'Build and run code quality checks'
+        run: make check
+
+  unit-tests:
+    needs: code-quality-checks
     name: 'Unit Tests'
     runs-on: ubuntu-latest
     steps:
