@@ -223,6 +223,7 @@ jobs:
             ubuntu:jammy
       - name: 'Build Jammy Package'
         run: |
+          cd k-repo
           mv package/debian debian
           mv debian/control.jammy debian/control
           docker exec -t k-jammy-package-build /bin/bash -c 'dpkg-buildpackage'
