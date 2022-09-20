@@ -183,6 +183,55 @@ jobs:
         run: |
           docker stop k-ci
 
+  test-ubuntu-package:
+    needs: nix-maven
+    name: 'K Ubuntu Jammy Package'
+    runs-on: [self-hosted, linux]
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          path: k-repo
+      - name: 'Set up Docker'
+        run: |
+          docker build . --file package/debian/Dockerfile.gh --tag runtimeverification/k-jammy-package-build \
+            --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14
+          docker run                        \
+            --name k-jammy-package-build    \
+            --rm -it                        \
+            --detach                        \
+            --workdir /opt/workspace        \
+            --user $(id -u):$(id -g)        \
+            -v ${HOME}:${HOME}              \
+            -v "$(pwd):/opt/workspace"      \
+            -v "/etc/passwd:/etc/passwd:ro" \
+            -v "/etc/group:/etc/group:ro"   \
+            runtimeverification/k-jammy-package-build
+          docker run                          \
+            --name k-jammy-package-test       \
+            --rm -it                          \
+            --detach                          \
+            --workdir /opt/workspace          \
+            --user $(id -u):$(id -g)          \
+            -v ${HOME}:${HOME}                \
+            -v "$(pwd):/opt/workspace"        \
+            -v "/etc/passwd:/etc/passwd:ro"   \
+            -v "/etc/group:/etc/group:ro"     \
+            runtimeverification/k-jammy-package-test
+      - name: 'Build Jammy Package'
+        run: |
+          mv k-repo/package/debian k-repo/debian
+          mv k-repo/debian/control.jammy k-repo/debian/control
+          docker exec -t k-jammy-package-build /bin/bash -c 'cd k-repo && dpkg-buildpackage'
+          VERSION=$(cat package/version)
+      - name: 'Test Jammy Package'
+        run: docker exec -t k-jammy-package-test /bin/bash -c 'src/main/scripts/test-in-container-debian'
+      - name: 'Tear down Docker'
+        if: always()
+        run: |
+          docker stop k-ci
+
   build-nix-flake:
     name: 'Nix flake'
     strategy:
