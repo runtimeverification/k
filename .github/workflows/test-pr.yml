@@ -231,7 +231,8 @@ jobs:
       - name: 'Tear down Docker'
         if: always()
         run: |
-          docker stop k-ci
+          docker stop k-jammy-package-build || true
+          docker stop k-jammy-package-test || true
 
   build-nix-flake:
     name: 'Nix flake'
