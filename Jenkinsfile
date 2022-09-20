@@ -74,7 +74,7 @@ pipeline {
                   echo 'Starting kserver...'
                   k-distribution/target/release/k/bin/spawn-kserver kserver.log
                   cd k-exercises/tutorial
-                  time make -j20 --output-sync ${MAKE_EXTRA_ARGS}
+                  make -j20 --output-sync ${MAKE_EXTRA_ARGS}
                   cd ../../k-distribution/k-tutorial/1_basic
                   ./test_kompile.sh
                 '''
