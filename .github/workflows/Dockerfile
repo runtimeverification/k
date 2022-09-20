@@ -55,21 +55,3 @@ RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.15 \
     && make install                                                  \
     && cd ../..                                                      \
     && rm -rf z3
-
-ENV LC_ALL=C.UTF-8
-ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml        /home/user/.tmp-haskell/
-ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/kore.cabal /home/user/.tmp-haskell/kore/
-RUN    cd /home/user/.tmp-haskell  \
-    && stack build --only-snapshot
-
-ADD pom.xml                                                    /home/user/.tmp-maven/
-ADD ktree/pom.xml                                              /home/user/.tmp-maven/ktree/
-ADD llvm-backend/pom.xml                                       /home/user/.tmp-maven/llvm-backend/
-ADD llvm-backend/src/main/native/llvm-backend/matching/pom.xml /home/user/.tmp-maven/llvm-backend/src/main/native/llvm-backend/matching/
-ADD haskell-backend/pom.xml                                    /home/user/.tmp-maven/haskell-backend/
-ADD kernel/pom.xml                                             /home/user/.tmp-maven/kernel/
-ADD java-backend/pom.xml                                       /home/user/.tmp-maven/java-backend/
-ADD k-distribution/pom.xml                                     /home/user/.tmp-maven/k-distribution/
-ADD kore/pom.xml                                               /home/user/.tmp-maven/kore/
-RUN    cd /home/user/.tmp-maven               \
-    && mvn --batch-mode dependency:go-offline
