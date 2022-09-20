@@ -141,6 +141,45 @@ jobs:
             fi
           fi
 
+  test-k:
+    needs: nix-flake-submodules
+    name: 'Build and Test K'
+    runs-on: [self-hosted, linux]
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: 'Set up Docker'
+        run: |
+          docker build . --file Dockerfile --tag runtimeverification/k-ci
+          docker run                        \
+            --name k-ci                     \
+            --rm -it                        \
+            --detach                        \
+            --workdir /opt/workspace        \
+            --user $(id -u):$(id -g)        \
+            -v ${HOME}:${HOME}              \
+            -v "$(pwd):/opt/workspace"      \
+            -v "/etc/passwd:/etc/passwd:ro" \
+            -v "/etc/group:/etc/group:ro"   \
+            runtimeverification/k-ci
+      - name: 'Build K'
+        run: docker exec -t k-ci /bin/bash -c 'mvn package -DskipTests'
+      - name: 'Unit Tests'
+        run: docker exec -t k-ci /bin/bash -c 'mvn --batch-mode verify -U'
+      - name: 'Tutorial Integration Tests'
+        run: |
+          docker exec -t k-ci /bin/bash -c 'k-distribution/target/release/k/bin/spawn-kserver kserver.log'
+          docker exec -t k-ci /bin/bash -c 'cd k-exercises/tutorial && make -j12 --output-sync'
+          docker exec -t k-ci /bin/bash -c 'cd k-distribution/k-tutorial/1_basic && ./test_kompile.sh'
+          docker exec -t k-ci /bin/bash -c 'cd k-distribution/k-tutorial/1_basic && ./test_kompile.sh'
+      - name: 'Tear down Docker'
+        if: always()
+        run: |
+          docker exec -t k-ci /bin/bash -c 'k-distribution/target/release/k/bin/stop-kserver || true'
+          docker stop k-ci
+
   build-nix-flake:
     name: 'Nix flake'
     strategy:
