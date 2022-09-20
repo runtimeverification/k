@@ -152,7 +152,7 @@ jobs:
           submodules: recursive
       - name: 'Set up Docker'
         run: |
-          docker build . --file Dockerfile --tag runtimeverification/k-ci
+          docker build . --file Dockerfile.gh --tag runtimeverification/k-ci
           docker run                        \
             --name k-ci                     \
             --rm -it                        \
