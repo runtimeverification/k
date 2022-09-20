@@ -219,7 +219,7 @@ jobs:
             -v "$(pwd):/opt/workspace"        \
             -v "/etc/passwd:/etc/passwd:ro"   \
             -v "/etc/group:/etc/group:ro"     \
-            runtimeverification/k-jammy-package-test
+            ubuntu:jammy
       - name: 'Build Jammy Package'
         run: |
           cd k-repo
