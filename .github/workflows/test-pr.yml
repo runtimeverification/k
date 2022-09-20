@@ -138,7 +138,7 @@ jobs:
             fi
           fi
 
-  unit-test:
+  test-k:
     needs: nix-maven
     name: 'K unit tests'
     runs-on: [self-hosted, linux]
@@ -165,19 +165,6 @@ jobs:
         run: docker exec -t k-ci /bin/bash -c 'mvn package -DskipTests'
       - name: 'Unit Tests'
         run: docker exec -t k-ci /bin/bash -c 'mvn --batch-mode verify -U'
-      - name: 'Tear down Docker'
-        if: always()
-        run: |
-          docker stop k-ci
-
-  integration-test:
-    name: 'K integration tests'
-    runs-on: [self-hosted, linux]
-    steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
       - name: 'Check out k-exercises'
         uses: actions/checkout@v3
         with:
@@ -185,22 +172,6 @@ jobs:
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           submodules: recursive
           path: k-exercises
-      - name: 'Set up Docker'
-        run: |
-          docker build . --file Dockerfile.gh --tag runtimeverification/k-ci
-          docker run                        \
-            --name k-ci                     \
-            --rm -it                        \
-            --detach                        \
-            --workdir /opt/workspace        \
-            --user $(id -u):$(id -g)        \
-            -v ${HOME}:${HOME}              \
-            -v "$(pwd):/opt/workspace"      \
-            -v "/etc/passwd:/etc/passwd:ro" \
-            -v "/etc/group:/etc/group:ro"   \
-            runtimeverification/k-ci
-      - name: 'Build K'
-        run: docker exec -t k-ci /bin/bash -c 'mvn package -DskipTests'
       - name: 'Tutorial Integration Tests'
         run: |
           docker exec -t k-ci /bin/bash -c 'k-distribution/target/release/k/bin/spawn-kserver kserver.log'
@@ -210,7 +181,6 @@ jobs:
       - name: 'Tear down Docker'
         if: always()
         run: |
-          docker exec -t k-ci /bin/bash -c 'k-distribution/target/release/k/bin/stop-kserver || true'
           docker stop k-ci
 
   build-nix-flake:
