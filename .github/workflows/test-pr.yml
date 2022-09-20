@@ -195,6 +195,7 @@ jobs:
           path: k-repo
       - name: 'Set up Docker'
         run: |
+          cd k-repo
           docker build . --file package/debian/Dockerfile.gh --tag runtimeverification/k-jammy-package-build \
             --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14
           docker run                        \
@@ -221,12 +222,12 @@ jobs:
             runtimeverification/k-jammy-package-test
       - name: 'Build Jammy Package'
         run: |
-          mv k-repo/package/debian k-repo/debian
-          mv k-repo/debian/control.jammy k-repo/debian/control
+          cd k-repo
+          mv package/debian debian
+          mv debian/control.jammy debian/control
           docker exec -t k-jammy-package-build /bin/bash -c 'cd k-repo && dpkg-buildpackage'
-          VERSION=$(cat package/version)
       - name: 'Test Jammy Package'
-        run: docker exec -t k-jammy-package-test /bin/bash -c 'src/main/scripts/test-in-container-debian'
+        run: docker exec -t k-jammy-package-test /bin/bash -c 'cd k-repo && src/main/scripts/test-in-container-debian'
       - name: 'Tear down Docker'
         if: always()
         run: |
