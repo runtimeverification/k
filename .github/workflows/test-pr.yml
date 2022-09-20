@@ -149,7 +149,8 @@ jobs:
           submodules: recursive
       - name: 'Set up Docker'
         run: |
-          docker build . --file Dockerfile.gh --tag runtimeverification/k-ci
+          docker build . --file .github/workflows/Dockerfile --tag runtimeverification/k-ci \
+            --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14
           docker run                        \
             --name k-ci                     \
             --rm -it                        \
@@ -181,7 +182,7 @@ jobs:
       - name: 'Tear down Docker'
         if: always()
         run: |
-          docker stop k-ci
+          docker stop k-ci || true
 
   test-ubuntu-package:
     # needs: nix-maven
@@ -196,7 +197,7 @@ jobs:
       - name: 'Set up Docker'
         run: |
           cd k-repo
-          docker build . --file package/debian/Dockerfile.gh --tag runtimeverification/k-jammy-package-build \
+          docker build . --file .github/workflows/Dockerfile --tag runtimeverification/k-jammy-package-build \
             --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14
           docker run                        \
             --name k-jammy-package-build    \
