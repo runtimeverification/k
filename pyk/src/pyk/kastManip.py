@@ -18,6 +18,7 @@ from typing import (
 )
 
 from .kast import (
+    EMPTY_ATT,
     KApply,
     KAtt,
     KDefinition,
@@ -506,6 +507,15 @@ def remove_source_map(definition: KDefinition) -> KDefinition:
         return KAtt(atts=new_atts)
 
     return on_attributes(definition, _remove_source_map)
+
+
+def remove_attrs(term: KInner) -> KInner:
+    def remove_attr(term: KInner) -> KInner:
+        if isinstance(term, WithKAtt):
+            return term.let_att(EMPTY_ATT)
+        return term
+
+    return top_down(remove_attr, term)
 
 
 def remove_source_attributes(term: KInner) -> KInner:
