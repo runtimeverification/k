@@ -20,10 +20,11 @@ RUN    apt-get update            \
         gcc                      \
         git                      \
         libboost-test-dev        \
+        libbz2-dev               \
+        libffi-dev               \
         libgdbm-dev              \
         libgmp-dev               \
         libjemalloc-dev          \
-        libffi-dev               \
         libmpfr-dev              \
         libncurses5-dev          \
         libnss3-dev              \
@@ -31,7 +32,6 @@ RUN    apt-get update            \
         libsqlite3-dev           \
         libssl-dev               \
         libyaml-dev              \
-        libbz2-dev               \
         libz3-dev                \
         lld-$LLVM_VERSION        \
         llvm-$LLVM_VERSION-tools \
@@ -77,5 +77,4 @@ ADD kernel/pom.xml                                             /home/user/.tmp-m
 ADD java-backend/pom.xml                                       /home/user/.tmp-maven/java-backend/
 ADD k-distribution/pom.xml                                     /home/user/.tmp-maven/k-distribution/
 ADD kore/pom.xml                                               /home/user/.tmp-maven/kore/
-RUN    cd /home/user/.tmp-maven                          \
-    && mvn --batch-mode dependency:go-offline
+RUN cd /home/user/.tmp-maven && mvn --batch-mode dependency:go-offline
