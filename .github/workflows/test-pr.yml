@@ -216,7 +216,9 @@ jobs:
       - name: 'Build Jammy Package'
         run: |
           docker exec -t k-jammy-package-build /bin/bash -c 'mv package/debian debian'
+          docker exec -t k-jammy-package-build /bin/bash -c 'mv debian/compat.jammy debian/compat'
           docker exec -t k-jammy-package-build /bin/bash -c 'mv debian/control.jammy debian/control'
+          docker exec -t k-jammy-package-build /bin/bash -c 'mv debian/rules.jammy debian/rules'
           docker exec -t k-jammy-package-build /bin/bash -c 'dpkg-buildpackage'
           docker stop k-jammy-package-build
       - name: 'Set up Docker Test Image'
