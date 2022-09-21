@@ -197,40 +197,42 @@ jobs:
           submodules: recursive
       - name: 'Set up Docker Build Image'
         run: |
+          workspace=$(pwd)
           cd k-repo
           docker build . --file .github/workflows/Dockerfile --tag runtimeverification/k-jammy-package-build \
             --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14                                  \
             --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)
-          docker run                        \
-            --name k-jammy-package-build    \
-            --rm -it                        \
-            --detach                        \
-            --workdir /opt/workspace/k-repo \
-            --user $(id -u):$(id -g)        \
-            -v ${HOME}:${HOME}              \
-            -v "$(pwd):/opt/workspace"      \
-            -v "/etc/passwd:/etc/passwd:ro" \
-            -v "/etc/group:/etc/group:ro"   \
+          docker run                         \
+            --name k-jammy-package-build     \
+            --rm -it                         \
+            --detach                         \
+            --workdir /opt/workspace/k-repo  \
+            --user $(id -u):$(id -g)         \
+            -v ${HOME}:${HOME}               \
+            -v "${workspace}:/opt/workspace" \
+            -v "/etc/passwd:/etc/passwd:ro"  \
+            -v "/etc/group:/etc/group:ro"    \
             runtimeverification/k-jammy-package-build
       - name: 'Build Jammy Package'
         run: |
-          docker exec -t k-jammy-package-build /bin/bash -c 'cd /opt/workspace/k-repo && mv package/debian debian'
-          docker exec -t k-jammy-package-build /bin/bash -c 'cd /opt/workspace/k-repo && mv debian/control.jammy debian/control'
-          docker exec -t k-jammy-package-build /bin/bash -c 'cd /opt/workspace/k-repo && dpkg-buildpackage'
+          docker exec -t k-jammy-package-build /bin/bash -c 'mv package/debian debian'
+          docker exec -t k-jammy-package-build /bin/bash -c 'mv debian/control.jammy debian/control'
+          docker exec -t k-jammy-package-build /bin/bash -c 'dpkg-buildpackage'
           docker stop k-jammy-package-build
       - name: 'Set up Docker Test Image'
         run: |
+          workspace=$(pwd)
           cd k-repo
-          docker run                          \
-            --name k-jammy-package-test       \
-            --rm -it                          \
-            --detach                          \
-            --workdir /opt/workspace          \
-            --user $(id -u):$(id -g)          \
-            -v ${HOME}:${HOME}                \
-            -v "$(pwd):/opt/workspace"        \
-            -v "/etc/passwd:/etc/passwd:ro"   \
-            -v "/etc/group:/etc/group:ro"     \
+          docker run                         \
+            --name k-jammy-package-test      \
+            --rm -it                         \
+            --detach                         \
+            --workdir /opt/workspace         \
+            --user $(id -u):$(id -g)         \
+            -v ${HOME}:${HOME}               \
+            -v "${workspace}:/opt/workspace" \
+            -v "/etc/passwd:/etc/passwd:ro"  \
+            -v "/etc/group:/etc/group:ro"    \
             ubuntu:jammy
       - name: 'Test Jammy Package'
         run: |
