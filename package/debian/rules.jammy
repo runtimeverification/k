@@ -9,7 +9,7 @@
 # The LLVM backend is built using Clang, which is incompatible with LTO flags
 # added by default in newer versions of dpkg.
 # https://wiki.debian.org/ToolChain/LTO
-export DEB_BUILD_MAINT_OPTIONS=hardening=-stackprotector
+export DEB_BUILD_MAINT_OPTIONS=hardening=-stackprotector optimize=-lto
 
 # see ENVIRONMENT in dpkg-buildflags(1)
 # package maintainers to append CFLAGS
