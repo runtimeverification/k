@@ -230,7 +230,6 @@ jobs:
             --rm -it                         \
             --detach                         \
             --workdir /opt/workspace         \
-            --user $(id -u):$(id -g)         \
             -v ${HOME}:${HOME}               \
             -v "${workspace}:/opt/workspace" \
             -v "/etc/passwd:/etc/passwd:ro"  \
