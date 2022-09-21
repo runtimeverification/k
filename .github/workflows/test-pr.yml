@@ -186,7 +186,7 @@ jobs:
           docker stop k-ci || true
 
   test-ubuntu-package:
-    # needs: nix-maven
+    needs: nix-maven
     name: 'K Ubuntu Jammy Package'
     runs-on: [self-hosted, linux]
     steps:
