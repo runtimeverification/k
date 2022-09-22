@@ -6,7 +6,9 @@ import org.kframework.attributes.Att;
 import org.kframework.backend.kore.KoreBackend;
 import org.kframework.compile.Backend;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
@@ -24,12 +26,14 @@ import static org.kframework.compile.ResolveHeatCoolAttribute.Mode.*;
 public class HaskellBackend extends KoreBackend {
 
     private final KompileOptions kompileOptions;
+    private final GlobalOptions globalOptions;
     private final FileUtil files;
     private final HaskellKompileOptions haskellKompileOptions;
 
     @Inject
     public HaskellBackend(
             KompileOptions kompileOptions,
+            GlobalOptions globalOptions,
             HaskellKompileOptions haskellKompileOptions,
             FileUtil files,
             KExceptionManager kem,
@@ -38,14 +42,18 @@ public class HaskellBackend extends KoreBackend {
         this.files = files;
         this.haskellKompileOptions = haskellKompileOptions;
         this.kompileOptions = kompileOptions;
+        this.globalOptions = globalOptions;
     }
 
 
     @Override
     public void accept(Backend.Holder h) {
+        Stopwatch sw1 = new Stopwatch(globalOptions);
         String kore = getKompiledString(h.def);
         h.def = null;
         files.saveToKompiled("definition.kore", kore);
+        sw1.printIntermediate("  Print definition.kore");
+        Stopwatch sw2 = new Stopwatch(globalOptions);
         ProcessBuilder pb = files.getProcessBuilder();
         List<String> args = new ArrayList<>();
         if (haskellKompileOptions.noHaskellBinary) {
@@ -70,6 +78,7 @@ public class HaskellBackend extends KoreBackend {
         } catch (IOException | InterruptedException e) {
             throw KEMException.criticalError("Error with I/O while executing kore-parser", e);
         }
+        sw2.printIntermediate("  Validate def");
     }
 
     @Override
