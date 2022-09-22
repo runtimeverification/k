@@ -48,12 +48,11 @@ public class HaskellBackend extends KoreBackend {
 
     @Override
     public void accept(Backend.Holder h) {
-        Stopwatch sw1 = new Stopwatch(globalOptions);
+        Stopwatch sw = new Stopwatch(globalOptions);
         String kore = getKompiledString(h.def);
         h.def = null;
         files.saveToKompiled("definition.kore", kore);
-        sw1.printIntermediate("  Print definition.kore");
-        Stopwatch sw2 = new Stopwatch(globalOptions);
+        sw.printIntermediate("  Print definition.kore");
         ProcessBuilder pb = files.getProcessBuilder();
         List<String> args = new ArrayList<>();
         if (haskellKompileOptions.noHaskellBinary) {
@@ -78,7 +77,7 @@ public class HaskellBackend extends KoreBackend {
         } catch (IOException | InterruptedException e) {
             throw KEMException.criticalError("Error with I/O while executing kore-parser", e);
         }
-        sw2.printIntermediate("  Validate def");
+        sw.printIntermediate("  Validate def");
     }
 
     @Override

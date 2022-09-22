@@ -53,15 +53,14 @@ public class LLVMBackend extends KoreBackend {
 
     @Override
     public void accept(Backend.Holder h) {
-        Stopwatch sw1 = new Stopwatch(globalOptions);
+        Stopwatch sw = new Stopwatch(globalOptions);
         String kore = getKompiledString(h.def);
         h.def = null;
         files.saveToKompiled("definition.kore", kore);
-        sw1.printIntermediate("  Print definition.kore");
+        sw.printIntermediate("  Print definition.kore");
         FileUtils.deleteQuietly(files.resolveKompiled("dt"));
         MutableInt warnings = new MutableInt();
         boolean optimize = kompileOptions.optimize1 || kompileOptions.optimize2 || kompileOptions.optimize3;
-        Stopwatch sw2 = new Stopwatch(globalOptions);
         Matching.writeDecisionTreeToFile(
                 files.resolveKompiled("definition.kore"),
                 options.heuristic,
@@ -77,7 +76,7 @@ public class LLVMBackend extends KoreBackend {
           }
           return null;
         });
-        sw2.printIntermediate("  Write decision tree");
+        sw.printIntermediate("  Write decision tree");
         if (warnings.intValue() > 0 && kem.options.warnings2errors) {
           throw KEMException.compilerError("Had " + warnings.intValue() + " pattern matching errors.");
         }
