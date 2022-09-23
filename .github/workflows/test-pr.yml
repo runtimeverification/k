@@ -30,8 +30,10 @@ jobs:
             git push origin HEAD:${GITHUB_HEAD_REF}
           fi
 
+  # Update the pinned Maven dependencies for Nix.
+  # This job only runs on push events because we cannot push changes back to a
+  # pull request branch from a fork.
   nix-maven:
-    needs: version-bump
     name: 'Nix: Maven'
     runs-on: ubuntu-latest
     steps:
@@ -77,7 +79,6 @@ jobs:
           fi
 
   nix-flake-submodules:
-    needs: nix-maven
     name: 'Nix flake sumbodule sync'
     runs-on: ubuntu-latest
     steps:
@@ -110,6 +111,7 @@ jobs:
           name: runtimeverification
           extraPullNames: kore
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+
 
       - name: Update Nix flake inputs from submodules
         env:
@@ -171,9 +173,8 @@ jobs:
         run: |
           docker stop k-ci
 
-  build-nix-flake:
-    needs: nix-flake-submodules
-    name: 'Build Nix Flake'
+  compile-nix-flake:
+    name: 'Nix flake'
     strategy:
       matrix:
         os: [ubuntu-latest, macos-11]
@@ -203,8 +204,7 @@ jobs:
         run: GC_DONT_GC=1 nix build .
 
   test-nix:
-    needs: nix-flake-submodules
-    name: 'Test With Nix'
+    name: 'Nix'
     strategy:
       matrix:
         os: [ubuntu-latest, macos-11]
@@ -241,4 +241,3 @@ jobs:
 
       - name: 'Run selected integration tests'
         run: nix-build test.nix --argstr test help
-
