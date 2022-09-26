@@ -1,11 +1,35 @@
-name: 'Update'
+name: 'Test PR'
 on:
   pull_request:
+    branches:
+      - 'master'
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+
+  version-bump:
+    name: 'Version Bump'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
+          # fetch-depth 0 means deep clone the repo
+          fetch-depth: 0
+      - name: 'Update Version'
+        run: |
+          set -x
+          git config user.name devops
+          git config user.email devops@runtimeverification.com
+          ./package/version.sh bump $(git show origin/${GITHUB_BASE_REF}:package/version)
+          ./package/version.sh sub
+          if git add --update && git commit --message "Set Version: $(cat package/version)"; then
+            git push origin HEAD:${GITHUB_HEAD_REF}
+          fi
+
   # Update the pinned Maven dependencies for Nix.
   # This job only runs on push events because we cannot push changes back to a
   # pull request branch from a fork.
@@ -116,3 +140,72 @@ jobs:
               fi
             fi
           fi
+
+  compile-nix-flake:
+    name: 'Nix flake'
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-11]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v2.3.4
+        with:
+          # Check out pull request HEAD instead of merge commit.
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: 'Install Nix'
+        uses: cachix/install-nix-action@v15
+        with:
+          extra_nix_config: |
+            substituters = http://cache.nixos.org https://cache.iog.io
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
+
+      - name: 'Install Cachix'
+        uses: cachix/cachix-action@v10
+        with:
+          name: runtimeverification
+          extraPullNames: kore
+          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+
+      - name: 'Build K Framework'
+        run: GC_DONT_GC=1 nix build .
+
+  test-nix:
+    name: 'Nix'
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-11]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v2.3.4
+        with:
+          # Check out pull request HEAD instead of merge commit.
+          ref: ${{ github.event.pull_request.head.sha }}
+          submodules: recursive
+
+      - name: 'Install Nix'
+        uses: cachix/install-nix-action@v14.1
+        with:
+          install_url: "https://releases.nixos.org/nix/nix-2.3.16/install"
+
+      - name: 'Install Cachix'
+        uses: cachix/cachix-action@v10
+        with:
+          name: runtimeverification
+          extraPullNames: kore
+          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+
+      - name: 'Build K Framework'
+        run: nix-build -A k -A llvm-backend -A haskell-backend
+
+      - name: 'Build K Framework with LTO'
+        run: nix-build -A k -A llvm-backend -A haskell-backend --arg release true
+        if: ${{ !startsWith(matrix.os, 'macos') }}
+
+      - name: 'Check development environment'
+        run: nix-shell --run "echo OK"
+
+      - name: 'Run selected integration tests'
+        run: nix-build test.nix --argstr test help
