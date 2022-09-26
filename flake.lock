@@ -192,6 +192,7 @@
       "locked": {
         "lastModified": 1663929854,
         "narHash": "sha256-nVIKvkanhiP7n/vC4cgRM/fYWnqzMge8FgXxVnAs0TA=",
+        "owner": "runtimeverification",
         "repo": "haskell-backend",
         "rev": "a5653fa8dbc35443e37c70047d56e96a4a5b82de",
         "type": "github"
