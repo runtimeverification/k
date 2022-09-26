@@ -245,7 +245,7 @@ jobs:
           docker stop k-jammy-package-build || true
           docker stop k-jammy-package-test || true
 
-  build-nix-flake:
+  compile-nix-flake:
     name: 'Nix flake'
     strategy:
       matrix:
