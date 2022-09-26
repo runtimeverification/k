@@ -1,9 +1,10 @@
 name: 'Update'
 on:
   pull_request:
-  push:
-    branches-ignore:
-      - 'master'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # Update the pinned Maven dependencies for Nix.
   # This job only runs on push events because we cannot push changes back to a
@@ -36,8 +37,8 @@ jobs:
         env:
           file_pattern: 'nix/'
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git config user.name rv-devops
+          git config user.email devops@runtimeverification.com
           if [ -n "$(git status --porcelain $file_pattern)" ]; then
             if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
               echo "::error :: The Maven dependencies changed, so the Nix lock files need to be updated. Please run ./nix/update-maven.sh to update the lock files, or move this branch to the runtimeverification/k repository."
@@ -50,5 +51,68 @@ jobs:
             else
               echo "::error :: Event type not supported: $GITHUB_EVENT_NAME"
               exit 1
+            fi
+          fi
+
+  nix-flake-submodules:
+    name: 'Nix flake sumbodule sync'
+    runs-on: ubuntu-latest
+    steps:
+      - id: config
+        run: |
+          ref=${{ github.ref }}
+          if [ "${{ github.event_name }}" == 'pull_request' ]; then
+            ref="${{ github.event.pull_request.head.sha }}"
+          fi
+          ref="${ref#refs/heads/}"
+          echo "::set-output name=ref::$ref"
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
+      - name: Check out code
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ steps.config.outputs.ref }}
+          submodules: recursive
+
+      - name: 'Install Nix'
+        uses: cachix/install-nix-action@v15
+        with:
+          extra_nix_config: |
+            substituters = http://cache.nixos.org https://cache.iog.io
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
+
+      - name: 'Install Cachix'
+        uses: cachix/cachix-action@v10
+        with:
+          name: runtimeverification
+          extraPullNames: kore
+          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+
+
+      - name: Update Nix flake inputs from submodules
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if ! GC_DONT_GC=1 nix run .#check-submodules ; then
+            if [[ $GITHUB_EVENT_NAME == 'push' ]]; then
+              if git status -s -b | grep -q '^##.*(no branch)$'; then
+                echo 2>&1 "Error: Git is in detached HEAD state"
+                exit 1
+              fi
+            fi
+            GC_DONT_GC=1 nix run .#update-from-submodules
+            if [ -n "$(git status --porcelain 'flake.lock')" ]; then
+              if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
+                echo 2>&1 "Error: submodules do not match the flake inputs"
+                git diff
+                exit 1
+              elif [[ $GITHUB_EVENT_NAME == 'push' ]]; then
+                git add 'flake.lock'
+                git commit -m 'Sync flake inputs to submodules'
+                git push
+              else
+                echo 2>&1 "Error: event not supported: $GITHUB_EVENT_NAME"
+                exit 1
+              fi
             fi
           fi

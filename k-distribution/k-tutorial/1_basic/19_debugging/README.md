@@ -3,6 +3,13 @@
 The purpose of this lesson is to teach how to debug your K interpreter using
 the K-language support provided in [GDB](https://www.gnu.org/software/gdb/).
 
+## Caveats
+
+Debugging K definitions using GDB is currently only supported on Linux; the
+instructions in this section will not work properly on macOS. Support for
+debugging K using LLDB is a work in progress, and this chapter will be updated
+when doing so is possible.
+
 ## Getting started
 
 You will need GDB in order to complete this lesson. If you do not already

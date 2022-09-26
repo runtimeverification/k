@@ -97,7 +97,7 @@ public class ToJson {
         return out.toByteArray();
     }
 
-    public static byte[] apply(Module mod) {
+    public static byte[] apply(java.util.Set<Module> mods, String mainSpecModule) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             DataOutputStream data = new DataOutputStream(out);
@@ -106,7 +106,17 @@ public class ToJson {
             JsonObjectBuilder term = Json.createObjectBuilder();
             term.add("format", "KAST");
             term.add("version", version);
-            term.add("term", toJson(mod));
+            JsonObjectBuilder jmodlist = Json.createObjectBuilder();
+
+            jmodlist.add("node", JsonParser.KFLATMODULELIST);
+            jmodlist.add("mainModule", mainSpecModule);
+
+            JsonArrayBuilder jmods = Json.createArrayBuilder();
+            for (Module m : mods) {
+                jmods.add(toJson(m));
+            }
+            jmodlist.add("term", jmods);
+            term.add("term", jmodlist);
 
             jsonWriter.write(term.build());
             jsonWriter.close();

@@ -8,6 +8,7 @@ RUN    apt-get update                   \
     && apt-get install --yes            \
                         build-essential \
                         git             \
+                        python3         \
                         python3-pip
 
 RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.15 \
@@ -25,7 +26,3 @@ RUN    apt-get update                                     \
     && apt-get install --yes --no-install-recommends /kframework_amd64_jammy.deb
 
 RUN rm -rf /kframework_amd64_jammy.deb
-
-COPY pyk/ /pyk
-RUN    pip3 install /pyk \
-    && rm -rf /pyk

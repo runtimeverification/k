@@ -17,15 +17,24 @@ export DEB_BUILD_MAINT_OPTIONS=hardening=-stackprotector optimize=-lto
 # package maintainers to append LDFLAGS
 #export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
 
+DESTDIR=$(shell pwd)/debian/kframework
+PREFIX=/usr
+PYTHON_VERSION=python3.10
+PYTHON_DEB_VERSION=python3
+export DESTDIR
+export PREFIX
 
 %:
 	dh $@ 
 
 override_dh_auto_build:
-	mvn --batch-mode package -DskipTests -Dllvm.backend.prefix=/usr -Dllvm.backend.destdir=$(shell pwd)/debian/kframework
+	mvn --batch-mode package -DskipTests -Dllvm.backend.prefix=$(PREFIX) -Dllvm.backend.destdir=$(DESTDIR)
 
 override_dh_auto_install:
-	DESTDIR=$(shell pwd)/debian/kframework PREFIX=/usr package/package
+	package/package
+	mv $(DESTDIR)$(PREFIX)/local/lib/$(PYTHON_VERSION) $(DESTDIR)$(PREFIX)/lib/$(PYTHON_VERSION)
+	@mkdir -p $(DESTDIR)$(PREFIX)/lib/$(PYTHON_DEB_VERSION)/dist-packages
+	ln --symbolic --relative $(DESTDIR)$(PREFIX)/lib/$(PYTHON_VERSION)/site-packages/kllvm $(DESTDIR)$(PREFIX)/lib/$(PYTHON_DEB_VERSION)/dist-packages/kllvm
 
 override_dh_strip:
 	dh_strip -Xliballoc.a -Xlibarithmetic.a -XlibAST.a -Xlibutil.a -XlibParser.a -Xlibcollect.a -Xlibcollections.a -Xlibjson.a -Xlibstrings.a -Xlibmeta.a -Xlibio.a

@@ -7,3 +7,4 @@
   <k>
     doneLemma ( keccak ( _Gen0 ) ) ~> _DotVar1 ~> .
   </k>
+[Error] Prover: backend terminated because the configuration cannot be rewritten further. See output for more details.

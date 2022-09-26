@@ -45,6 +45,8 @@ import org.kframework.kore.VisitK;
 import org.kframework.unparser.Formatter;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
@@ -72,17 +74,19 @@ class RuleInfo {
     boolean isEquation;
     boolean isOwise;
     boolean isKore;
+    boolean isCeil;
     Production production;
     String productionSortStr;
     List<Sort> prodChildrenSorts;
     KLabel productionLabel;
     List<K> leftChildren;
 
-    public RuleInfo(boolean equation, boolean owise, boolean kore, Production production,
+    public RuleInfo(boolean equation, boolean owise, boolean kore, boolean ceil, Production production,
                     String prodSortStr, List<Sort> prodChildrenSorts, KLabel prodLabel, List<K> leftChildren) {
         this.isEquation = equation;
         this.isOwise = owise;
         this.isKore = kore;
+        this.isCeil = ceil;
         this.production = production;
         this.productionSortStr = prodSortStr;
         this.prodChildrenSorts = prodChildrenSorts;
@@ -107,7 +111,14 @@ public class ModuleToKORE {
     private final Set<String> mlBinders = new HashSet<>();
     private final KompileOptions options;
 
+    private final KExceptionManager kem;
+
     public ModuleToKORE(Module module, KLabel topCellInitializer, KompileOptions options) {
+        this(module, topCellInitializer, options, null);
+    }
+
+    public ModuleToKORE(Module module, KLabel topCellInitializer, KompileOptions options, KExceptionManager kem) {
+        this.kem = kem;
         this.module = module;
         this.addSortInjections = new AddSortInjections(module);
         this.topCellInitializer = topCellInitializer;
@@ -179,7 +190,9 @@ public class ModuleToKORE {
         if (options.backend.equals("haskell")) {
             module.sortedProductions().toStream().filter(this::isGeneratedInKeysOp).foreach(
                     prod -> {
-                        genMapCeilAxioms(prod, sortedRules);
+                        if (!options.disableCeilSimplificationRules) {
+                            genMapCeilAxioms(prod, sortedRules);
+                        }
                         return prod;
                     }
             );
@@ -559,7 +572,7 @@ public class ModuleToKORE {
         //  {(@K1 in_keys(@Rest)) #Equals false} #And #Ceil(@K2) #And ... #And #Ceil(@Kn)
         // Note: The {_ in_keys(_) #Equals false} condition implies
         // #Ceil(@K1) and #Ceil(@Rest).
-        // [anywhere, simplification]
+        // [simplification]
 
         K restMapSet = KVariable("@Rest", Att.empty().add(Sort.class, mapSort));
         KLabel ceilMapLabel = KLabel(KLabels.ML_CEIL.name(), mapSort, sortParam);
@@ -881,6 +894,7 @@ public class ModuleToKORE {
         boolean equation = false;
         boolean owise = false;
         boolean kore = rule.att().contains(Att.KORE());
+        boolean ceil = false;
         Production production = null;
         Sort productionSort = null;
         String productionSortStr = null;
@@ -902,6 +916,9 @@ public class ModuleToKORE {
                     .map(i -> (NonTerminal) i)
                     .map(NonTerminal::sort).collect(Collectors.toList());
             productionLabel = production.klabel().get();
+            if (productionLabel.name().equals("#Ceil") && rule.att().contains(Att.SIMPLIFICATION())) {
+                ceil = true;
+            }
             if (isFunction(production) || rule.att().contains(Att.SIMPLIFICATION()) || rule.att().contains(Att.ANYWHERE()) && !kore) {
                 leftChildren = ((KApply) leftPattern).items();
                 equation = true;
@@ -912,7 +929,7 @@ public class ModuleToKORE {
             owise = rule.att().contains(Att.OWISE());
         }
 
-        return new RuleInfo(equation, owise, kore, production,
+        return new RuleInfo(equation, owise, kore, ceil, production,
                 productionSortStr, productionSorts, productionLabel, leftChildren);
     }
 
@@ -936,12 +953,21 @@ public class ModuleToKORE {
         sb.append("// ");
         sb.append(rule.toString());
         sb.append("\n");
+        if (ruleInfo.isCeil && options.disableCeilSimplificationRules) {
+          return;
+        }
         Set<KVariable> freeVariables = collectLHSFreeVariables(requires, left);
         Map<String,KVariable> freeVarsMap = freeVariables
                 .stream().collect(Collectors.toMap(KVariable::name, Function.identity()));
         if (ruleInfo.isEquation) {
             assertNoExistentials(rule, existentials);
-            sb.append("  axiom{R");
+            if (rule instanceof Claim) {
+                sb.append("  claim{R");
+                if (kem != null) // TODO: remove once https://github.com/runtimeverification/haskell-backend/issues/3010 is implemented
+                    kem.registerCompilerWarning(KException.ExceptionType.FUTURE_ERROR, "Functional claims not yet supported. https://github.com/runtimeverification/haskell-backend/issues/3010", rule);
+            } else {
+                sb.append("  axiom{R");
+            }
             Option<Sort> sortParamsWrapper = rule.att().getOption("sortParams", Sort.class);
             Option<Set<String>> sortParams = sortParamsWrapper.map(s -> stream(s.params()).map(sort -> sort.name()).collect(Collectors.toSet()));
             if (sortParams.nonEmpty()) {
@@ -1054,7 +1080,7 @@ public class ModuleToKORE {
                 sb.append(")))\n  ");
                 convert(consideredAttributes, rule.att(), sb, freeVarsMap, rule);
                 sb.append("\n\n");
-            } else if (rule.att().contains(Att.SIMPLIFICATION())) {
+            } else if (rule.att().contains(Att.SIMPLIFICATION()) || rule instanceof Claim) {
                 sb.append("\\implies{R} (\n    ");
                 convertSideCondition(requires, sb);
                 sb.append(",\n    \\equals{");

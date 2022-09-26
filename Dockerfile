@@ -30,23 +30,21 @@ RUN    apt-get update        \
         openjdk-11-jdk       \
         parallel             \
         pkg-config           \
-        python               \
         python3              \
-        python3-graphviz     \
         texlive-xetex        \
         wget                 \
         zlib1g-dev
 
 RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.15 \
     && cd z3                                                         \
-    && python scripts/mk_make.py                                     \
+    && python3 scripts/mk_make.py                                    \
     && cd build                                                      \
     && make -j8                                                      \
     && make install                                                  \
     && cd ../..                                                      \
     && rm -rf z3
 
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
 RUN    apt-get update               \
     && apt-get upgrade --yes        \
     && apt-get install --yes nodejs

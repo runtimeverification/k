@@ -22,6 +22,7 @@ import org.kframework.compile.checks.CheckRHSVariables;
 import org.kframework.compile.checks.CheckRewrite;
 import org.kframework.compile.checks.CheckSortTopUniqueness;
 import org.kframework.compile.checks.CheckStreams;
+import org.kframework.compile.checks.CheckSyntaxGroups;
 import org.kframework.compile.checks.CheckTokens;
 import org.kframework.definition.*;
 import org.kframework.definition.Module;
@@ -446,16 +447,17 @@ public class Kompile {
                 errors.add(KEMException.compilerError("Found syntax declaration in proof module. Only tokens for existing sorts are allowed.", s));
 
         ModuleTransformer mt = ModuleTransformer.fromSentenceTransformer((m, s) -> {
+            if (s instanceof Rule && (s.att().contains(Att.SIMPLIFICATION()))) {
+                KLabel kl = m.matchKLabel((Rule) s);
+                Att atts = m.attributesFor().get(kl).getOrElse(Att::empty);
+                if (!(atts.contains(Att.FUNCTION()) || atts.contains(Att.FUNCTIONAL()) || atts.contains("mlOp")))
+                    errors.add(KEMException.compilerError("Simplification rules expect function/functional/mlOp symbols at the top of the left hand side term.", s));
+            }
             if (m.name().equals(mainDefModule.name()) || mainDefModule.importedModuleNames().contains(m.name()))
                 return s;
             if (!(s instanceof Claim || s.isSyntax())) {
                 if (s instanceof Rule && !s.att().contains(Att.SIMPLIFICATION()))
                     errors.add(KEMException.compilerError("Only claims and simplification rules are allowed in proof modules.", s));
-            }
-            if (s instanceof Rule && (s.att().contains(Att.SIMPLIFICATION()) && !s.att().contains(Att.ANYWHERE()))) {
-                KLabel kl = m.matchKLabel((Rule) s);
-                if (!m.functions().contains(kl))
-                    errors.add(KEMException.compilerError("Simplification rules need to be function/functional like.", s));
             }
             return s;
         }, "rules in spec module");
@@ -490,6 +492,8 @@ public class Kompile {
               new CheckFunctions(errors, m)::check));
 
         stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckAnonymous(errors, m, kem)::check));
+
+        stream(modules).forEach(m -> stream(m.localSentences()).forEach(new CheckSyntaxGroups(errors, m, kem)::check));
 
         Set<String> moduleNames = new HashSet<>();
         stream(modules).forEach(m -> {

@@ -14,3 +14,4 @@
     X:MyId in_keys ( ( X:MyId |-> 3 ) [ x <- 5 ]
     ( y |-> 4 ) )
   }
+[Error] Prover: backend terminated because the configuration cannot be rewritten further. See output for more details.

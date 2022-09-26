@@ -68,7 +68,7 @@ trait RegexTerminalToString {
     "r" + StringUtil.enquoteKString(
       (if ("#" == precedeRegex) "" else "(?<!" + precedeRegex + ")" ) +
       regex +
-      (if ("#" == followRegex) "" else "(?!" + precedeRegex + ")" )
+      (if ("#" == followRegex) "" else "(?!" + followRegex + ")" )
     )
   }
 }

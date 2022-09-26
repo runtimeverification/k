@@ -33,6 +33,7 @@ public class KException implements Serializable, HasLocation {
         labels.put(KExceptionGroup.INTERNAL, "Internal");
         labels.put(KExceptionGroup.CRITICAL, "Critical");
         labels.put(KExceptionGroup.DEBUGGER, "Debugger");
+        labels.put(KExceptionGroup.PROVER, "Prover");
     }
 
     public static KException criticalError(String message) {
@@ -104,7 +105,7 @@ public class KException implements Serializable, HasLocation {
     }
 
     public enum KExceptionGroup {
-        OUTER_PARSER, INNER_PARSER, COMPILER, LISTS, INTERNAL, CRITICAL, DEBUGGER
+        OUTER_PARSER, INNER_PARSER, COMPILER, LISTS, INTERNAL, CRITICAL, DEBUGGER, PROVER
     }
 
     public enum ExceptionType {
@@ -115,6 +116,7 @@ public class KException implements Serializable, HasLocation {
         MISSING_SYNTAX_MODULE,
         INVALID_EXIT_CODE,
         INVALID_CONFIG_VAR,
+        INVALID_ASSOCIATIVITY,
         FUTURE_ERROR,
         UNUSED_VAR,
         PROOF_LINT,
