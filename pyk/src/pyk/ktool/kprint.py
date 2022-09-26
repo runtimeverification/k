@@ -176,7 +176,10 @@ def pretty_print_kast(kast: KAst, symbol_table: SymbolTable, debug: bool = False
         sys.stderr.write('\n')
         sys.stderr.flush()
     if type(kast) is KVariable:
-        return kast.name
+        sort = kast.sort
+        if not sort:
+            return kast.name
+        return kast.name + ':' + pretty_print_kast(sort, symbol_table, debug)
     if type(kast) is KSort:
         return kast.name
     if type(kast) is KToken:
