@@ -23,11 +23,8 @@ jobs:
           set -x
           git config user.name devops
           git config user.email devops@runtimeverification.com
-          if git diff --exit-code origin/${GITHUB_BASE_REF} origin/${GITHUB_HEAD_REF} -- package/version; then
-            ./package/version.sh bump $(git show origin/${GITHUB_BASE_REF}:package/version)
-          fi
+          ./package/version.sh bump $(git show origin/${GITHUB_BASE_REF}:package/version)
           ./package/version.sh sub
-          git add --update
-          if git commit --message "Set Version: $(cat package/version)"; then
+          if git add --update && git commit --message "Set Version: $(cat package/version)"; then
             git push origin HEAD:${GITHUB_HEAD_REF}
           fi
