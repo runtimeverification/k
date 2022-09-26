@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+{ # Prevent execution if this script was only partially downloaded
+  set -e
+
+  GREEN='\033[0;32m'
+  RED='\033[0;31m'
+  NC='\033[0m'
+
+  NIX_POST_INSTALL_MESSAGE="To ensure that the necessary environment variables are set, either log in again, or type
+
+  . $HOME/.nix-profile/etc/profile.d/nix.sh
+
+in your shell."
+
+  oops() {
+    >&2 echo -e "${RED}error:${NC} $1"
+    exit 1
+  }
+
+  [[ "$(id -u)" -eq 0 ]] && oops "Please run this script as a regular user"
+
+  # Check if nix is already installed and is at least version 2.4
+  if command -v nix > /dev/null; then
+    NIX_VERSION=$(nix --version | sed -ne 's/[^0-9]*\(\([0-9]\.\)\)/\1/p')
+    NIX_VERSION_MINOR=`echo $NIX_VERSION | cut -d. -f2`
+    if [ "$NIX_VERSION_MINOR" -gt "3" ]; then
+      echo -e "Detected nix version $NIX_VERSION. Proceeding with K framework install."
+    else
+      oops "It appears that you have a version of nix on your system that's too old. The K framework installer requires nix >=2.4. Please update nix and try again."
+    fi
+  else
+    read -p "It appears that you don't have nix installed. Since the K framework needs nix for distribution, this script will attempt to install nix first. Would you like to proceed? [y/N]" -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+      echo "Downloading nix and running the installer..."
+      bash <(curl -L https://nixos.org/nix/install)
+      . $HOME/.nix-profile/etc/profile.d/nix.sh
+      NIX_FRESH_INSTALL=true
+    else
+      oops "Cannot proceed with the installation without nix."
+    fi 
+  fi
+
+  GC_DONT_GC=1 nix profile install github:runtimeverification/k/8889dea9288f29e74ec23c4e9362a8668dcbe61a#kup \
+  --option extra-substituters 'https://k-framework.cachix.org https://cache.iog.io' \
+  --option extra-trusted-public-keys 'k-framework.cachix.org-1:jeyMXB2h28gpNRjuVkehg+zLj62ma1RnyyopA/20yFE= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=' \
+  --experimental-features 'nix-command flakes'
+
+  echo -e "${GREEN}All set!${NC}"
+  if [ -n "$NIX_FRESH_INSTALL" ]; then
+    echo -e "$NIX_POST_INSTALL_MESSAGE"
+  fi
+
+}
