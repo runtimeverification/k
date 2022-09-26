@@ -144,21 +144,6 @@
         "type": "github"
       }
     },
-    "flake-utils_4": {
-      "locked": {
-        "lastModified": 1659877975,
-        "narHash": "sha256-zllb8aq3YO3h8B/U0/J1WBgAL8EX5yWf5pMj3G0NAmc=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "c0e246b9b83f637f4681389ecabcb2681b4f3af0",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
     "ghc-8.6.5-iohk": {
       "flake": false,
       "locked": {
@@ -201,14 +186,15 @@
           "haskell-nix",
           "nixpkgs-unstable"
         ],
+        "nixpkgs22_05": "nixpkgs22_05",
         "z3-src": "z3-src"
       },
       "locked": {
-        "lastModified": 1662470488,
-        "narHash": "sha256-fOgOwrPoRlxGb1A97sJs3SErL1EA5bNJQf4wnZKAoXs=",
+        "lastModified": 1663319771,
+        "narHash": "sha256-ZldQAKQ0I2YxzxHhOrIUEpIFlar8RLltpCw5iHkvmeU=",
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "a1959233e210f960d49a91ebe7fcec76da14ebe3",
+        "rev": "efeb976108a0baa202844386193695564a257540",
         "type": "github"
       },
       "original": {
@@ -326,11 +312,11 @@
         "utils": "utils_2"
       },
       "locked": {
-        "lastModified": 1662725846,
-        "narHash": "sha256-uMSe4IhRGkBHiU61qM2lByJ2zhuX3VzgvDMPDJ4QM1o=",
+        "lastModified": 1663886771,
+        "narHash": "sha256-XsBBQ7V4q7lGxY8A6sxIpmKUuNbh5L7NG1MSIlMc5GM=",
         "owner": "runtimeverification",
         "repo": "llvm-backend",
-        "rev": "3214609a9d975f9703a583e68ccb849f89dfa421",
+        "rev": "badaedda62e4b3c62c039b56ed2d248226cd2c60",
         "type": "github"
       },
       "original": {
@@ -544,6 +530,21 @@
         "type": "github"
       }
     },
+    "nixpkgs22_05": {
+      "locked": {
+        "lastModified": 1662099760,
+        "narHash": "sha256-MdZLCTJPeHi/9fg6R9fiunyDwP3XHJqDd51zWWz9px0=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "67e45078141102f45eff1589a831aeaa3182b41e",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "ref": "nixos-22.05",
+        "type": "indirect"
+      }
+    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1643805626,
@@ -589,32 +590,17 @@
     },
     "nixpkgs_5": {
       "locked": {
-        "lastModified": 1662099760,
-        "narHash": "sha256-MdZLCTJPeHi/9fg6R9fiunyDwP3XHJqDd51zWWz9px0=",
+        "lastModified": 1663760840,
+        "narHash": "sha256-ym5Iycs5H4cOaLfE2/vC0tsLp8XuBJQIHGV8/uXSy8M=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "67e45078141102f45eff1589a831aeaa3182b41e",
+        "rev": "9bdbbaa634aa666eb6a27096bdcb991c59181244",
         "type": "github"
       },
       "original": {
         "id": "nixpkgs",
         "ref": "nixos-22.05",
         "type": "indirect"
-      }
-    },
-    "nixpkgs_6": {
-      "locked": {
-        "lastModified": 1662726965,
-        "narHash": "sha256-gVYhcdxAwMZuCRKcZRgJGH6iEsgRVaEwPraKXC8RRQU=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "b81147f59e9b210bef47334856cbf4064e306b9e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "type": "github"
       }
     },
     "old-ghc-nix": {
@@ -631,25 +617,6 @@
         "owner": "angerman",
         "ref": "master",
         "repo": "old-ghc-nix",
-        "type": "github"
-      }
-    },
-    "poetry2nix": {
-      "inputs": {
-        "flake-utils": "flake-utils_4",
-        "nixpkgs": "nixpkgs_6"
-      },
-      "locked": {
-        "lastModified": 1662501725,
-        "narHash": "sha256-MJGqNpbDikOYZODfa4CyqAyH8IYz/4fvUjU0EV1oMIQ=",
-        "owner": "nix-community",
-        "repo": "poetry2nix",
-        "rev": "539423bbf90465049112a3d7c340cc68911acb51",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "poetry2nix",
         "type": "github"
       }
     },
@@ -711,7 +678,6 @@
         "llvm-backend": "llvm-backend",
         "mavenix": "mavenix_2",
         "nixpkgs": "nixpkgs_5",
-        "poetry2nix": "poetry2nix",
         "rv-utils": "rv-utils"
       }
     },

@@ -8,18 +8,18 @@ module TEST
  // ---------------------------------------------------------------------
 
     syntax Wad = FInt
-    syntax Wad ::= wad ( Int )
- // --------------------------
+    syntax Wad ::= wad ( Int ) [macro]
+ // ----------------------------------
 
     // Note that if we just switch the order of these rules in the file, it works.
     // But we should not care about order of rules in the file, is better for user to be explicit.
-    rule wad(I) => FInt(I *Int WAD, WAD) [macro, priority(26)]
-    rule wad(1) => FInt(WAD       , WAD) [macro, priority(25)]
-    rule wad(0) => FInt(0         , WAD) [macro, priority(25)]
+    rule wad(I) => FInt(I *Int WAD, WAD) [priority(26)]
+    rule wad(1) => FInt(WAD       , WAD) [priority(25)]
+    rule wad(0) => FInt(0         , WAD) [priority(25)]
 
-    syntax Int ::= "WAD"
- // --------------------
-    rule WAD => 1000000000000000000 [macro]
+    syntax Int ::= "WAD" [macro]
+ // ----------------------------
+    rule WAD => 1000000000000000000
 
     syntax Pgm ::= "go" FInt | Pgm ";" Pgm [left]
  // ---------------------------------------------

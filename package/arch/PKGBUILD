@@ -1,6 +1,6 @@
 # Maintainer: Dwight Guth <dwight.guth@runtimeverification.com>
 pkgname=kframework-git
-pkgver=5.3.0
+pkgver=5.4.3
 pkgrel=1
 epoch=
 pkgdesc="K framework toolchain. Includes K Framework compiler for K language definitions, and K interpreter and prover for programs written in languages defined in K."
@@ -8,8 +8,8 @@ arch=('x86_64')
 url="https://github.com/runtimeverification/k"
 license=('custom')
 groups=()
-depends=( 'bison' 'clang' 'diffutils' 'flex' 'gawk' 'gcc' 'gettext' 'gmp' 'grep' 'java-runtime' 'jemalloc' 'libyaml' 'lld' 'llvm' 'make' 'mpfr' 'patch' 'tar' 'z3' )
-makedepends=( 'boost' 'cmake' 'jdk-openjdk' 'maven' 'zlib' )
+depends=( 'bison' 'clang' 'diffutils' 'flex' 'gawk' 'gcc' 'gettext' 'gmp' 'grep' 'java-runtime' 'jemalloc' 'libyaml' 'lld' 'llvm' 'make' 'mpfr' 'patch' 'python' 'tar' 'z3' )
+makedepends=( 'boost' 'cmake' 'jdk-openjdk' 'maven' 'python' 'zlib' )
 checkdepends=()
 optdepends=()
 provides=()

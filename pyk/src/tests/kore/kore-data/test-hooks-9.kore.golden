@@ -1,4 +1,0 @@
-Error:
-  module 'TEST-HOOKS-9':
-  symbol 'f' declaration (test-hooks-9.kore 7:10):
-    Unexpected 'hook' attribute

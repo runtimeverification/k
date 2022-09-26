@@ -1,9 +1,10 @@
 name: 'Update'
 on:
   pull_request:
-  push:
-    branches-ignore:
-      - 'master'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # Update the pinned Maven dependencies for Nix.
   # This job only runs on push events because we cannot push changes back to a

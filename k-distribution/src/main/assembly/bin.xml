@@ -93,6 +93,10 @@
       <outputDirectory>/lib/cmake/kframework</outputDirectory>
     </fileSet>
     <fileSet>
+      <directory>${project.basedir}/../llvm-backend/target/build/install/bindings</directory>
+      <outputDirectory>/bindings</outputDirectory>
+    </fileSet>
+    <fileSet>
       <directory>${project.basedir}/../haskell-backend/src/main/native/haskell-backend/src/main/kore</directory>
       <outputDirectory>/include/kframework/kore</outputDirectory>
     </fileSet>

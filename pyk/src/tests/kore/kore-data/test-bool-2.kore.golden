@@ -1,4 +1,0 @@
-Error:
-  module 'BOOL':
-  hooked-sort 'Bool' declaration (test-bool-2.kore 3:17):
-    Expected 0 sort parameters, found 1
