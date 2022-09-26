@@ -44,6 +44,8 @@ in your shell."
   fi
 
   GC_DONT_GC=1 nix profile install github:runtimeverification/k/29c7dc291addcde0ff2ed69f22cd37a0936ad72c#kup \
+  --option extra-substituters 'https://k-framework.cachix.org' \
+  --option extra-trusted-public-keys 'k-framework.cachix.org-1:jeyMXB2h28gpNRjuVkehg+zLj62ma1RnyyopA/20yFE=' \
   --experimental-features 'nix-command flakes'
 
   echo -e "${GREEN}All set!${NC}"
