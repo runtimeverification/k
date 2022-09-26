@@ -43,9 +43,7 @@ in your shell."
     fi 
   fi
 
-  GC_DONT_GC=1 nix profile install github:runtimeverification/k/8889dea9288f29e74ec23c4e9362a8668dcbe61a#kup \
-  --option extra-substituters 'https://k-framework.cachix.org https://cache.iog.io' \
-  --option extra-trusted-public-keys 'k-framework.cachix.org-1:jeyMXB2h28gpNRjuVkehg+zLj62ma1RnyyopA/20yFE= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=' \
+  GC_DONT_GC=1 nix profile install github:runtimeverification/k/29c7dc291addcde0ff2ed69f22cd37a0936ad72c#kup \
   --experimental-features 'nix-command flakes'
 
   echo -e "${GREEN}All set!${NC}"
