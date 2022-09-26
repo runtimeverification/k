@@ -190,11 +190,11 @@
         "z3-src": "z3-src"
       },
       "locked": {
-        "lastModified": 1663319771,
-        "narHash": "sha256-ZldQAKQ0I2YxzxHhOrIUEpIFlar8RLltpCw5iHkvmeU=",
+        "lastModified": 1663929854,
+        "narHash": "sha256-nVIKvkanhiP7n/vC4cgRM/fYWnqzMge8FgXxVnAs0TA=",
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "efeb976108a0baa202844386193695564a257540",
+        "rev": "a5653fa8dbc35443e37c70047d56e96a4a5b82de",
         "type": "github"
       },
       "original": {
