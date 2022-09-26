@@ -1,11 +1,10 @@
 from typing import Iterable, Tuple
 
-from pyk.kast import KApply, KAtt, KInner, KToken, KVariable
+from pyk.kast import KApply, KInner, KSort, KToken, KVariable
 from pyk.ktool import KompileBackend
 from pyk.ktool.kit import parse_token_rule_syntax
 from pyk.ktool.kprint import SymbolTable
 from pyk.prelude.kint import intToken
-from pyk.utils import FrozenDict
 
 from .kprove_test import KProveTest
 
@@ -23,15 +22,16 @@ class ParseTokenTest(KProveTest):
         pass
 
     def test_parse_token(self) -> None:
-        def vattr(sort: str) -> KAtt:
-            return KAtt(FrozenDict({'org.kframework.kore.Sort': FrozenDict({'node': 'KSort', 'name': sort})}))
-
         tests: Iterable[Tuple[str, KToken, KInner]] = (
-            ('variable', KToken('N', 'Int'), KVariable('N', vattr('K'))),  # TODO: This should parse as an int.
+            (
+                'variable',
+                KToken('N', 'Int'),
+                KVariable('N', sort=KSort('K')),
+            ),  # TODO: This should parse as an Int, not a K.
             (
                 '==Int',
                 KToken('N ==Int 1', 'Bool'),
-                KApply('_==Int_', KVariable('N', vattr('Int')), intToken(1)),
+                KApply('_==Int_', KVariable('N', sort=KSort('Int')), intToken(1)),
             ),
         )
 
