@@ -2,25 +2,25 @@
   <T>
     <k>
       3
-      ~> _DotVar2
+      ~> _DotVar2:K
     </k>
     ...
   </T>
   <generatedCounter>
-    _DotVar3
+    _DotVar3:Int
   </generatedCounter>
 </generatedTop>
-#And #Not ( #Exists _DotVar3 . #Exists K0 . { _DotVar2 #Equals #freezer_+_1_ ( K0 )
-~> _DotVar3 } )
-#And #Not ( #Exists _DotVar3 . #Exists K0 . { _DotVar2 #Equals #freezer_/_1_ ( K0 )
-~> _DotVar3 } )
-#And #Not ( #Exists _DotVar3 . #Exists K0 . { _DotVar2 #Equals #freezer_<=_1_ ( K0 )
-~> _DotVar3 } )
-#And #Not ( #Exists _DotVar3 . #Exists K0 . { _DotVar2 #Equals #freezer_=_;1_ ( K0 )
-~> _DotVar3 } )
-#And #Not ( #Exists _DotVar3 . #Exists K1 . { _DotVar2 #Equals #freezer_+_0_ ( K1 )
-~> _DotVar3 } )
-#And #Not ( #Exists _DotVar3 . #Exists K1 . { _DotVar2 #Equals #freezer_/_0_ ( K1 )
-~> _DotVar3 } )
-#And #Not ( #Exists _DotVar3 . #Exists K1 . { _DotVar2 #Equals #freezer_<=_0_ ( K1 )
-~> _DotVar3 } )
+#And #Not ( #Exists _DotVar3:K . #Exists K0:AExp . { _DotVar2:K #Equals #freezer_+_1_ ( K0:AExp )
+~> _DotVar3:K } )
+#And #Not ( #Exists _DotVar3:K . #Exists K0:AExp . { _DotVar2:K #Equals #freezer_/_1_ ( K0:AExp )
+~> _DotVar3:K } )
+#And #Not ( #Exists _DotVar3:K . #Exists K0:AExp . { _DotVar2:K #Equals #freezer_<=_1_ ( K0:AExp )
+~> _DotVar3:K } )
+#And #Not ( #Exists _DotVar3:K . #Exists K0:Id . { _DotVar2:K #Equals #freezer_=_;1_ ( K0:Id )
+~> _DotVar3:K } )
+#And #Not ( #Exists _DotVar3:K . #Exists K1:AExp . { _DotVar2:K #Equals #freezer_+_0_ ( K1:AExp )
+~> _DotVar3:K } )
+#And #Not ( #Exists _DotVar3:K . #Exists K1:AExp . { _DotVar2:K #Equals #freezer_/_0_ ( K1:AExp )
+~> _DotVar3:K } )
+#And #Not ( #Exists _DotVar3:K . #Exists K1:AExp . { _DotVar2:K #Equals #freezer_<=_0_ ( K1:AExp )
+~> _DotVar3:K } )

@@ -1,13 +1,65 @@
 from typing import Final, List, Tuple
 from unittest import TestCase
 
-from pyk.kast import KApply, KDefinition, KFlatModule, KInner, KLabel, KSequence, KSort, build_assoc
+from pyk.kast import KApply, KAtt, KDefinition, KFlatModule, KInner, KLabel, KSequence, KSort, KVariable, build_assoc
 from pyk.prelude.kbool import BOOL
 from pyk.prelude.kint import INT
 from pyk.prelude.string import STRING
 from pyk.prelude.utils import token
+from pyk.utils import FrozenDict
 
 from .utils import f, x, y, z
+
+
+class KVariableTest(TestCase):
+    TEST_DATA: Final[Tuple[Tuple[str, KInner, KInner], ...]] = (
+        ('no-sort', KVariable('Foo'), KVariable('Foo', att=KAtt({}))),
+        (
+            'sort',
+            KVariable('Foo', att=KAtt({'org.kframework.kore.Sort': FrozenDict(INT.to_dict())})),
+            KVariable('Foo', sort=INT),
+        ),
+    )
+
+    def test_construct(self) -> None:
+        for i, (name, input, expected) in enumerate(self.TEST_DATA):
+            with self.subTest(i=i, name=name):
+                self.assertEqual(input, expected)
+
+        with self.assertRaises(ValueError):
+            KVariable('Foo', sort=INT, att=KAtt({'org.kframework.kore.Sort': FrozenDict(BOOL.to_dict())}))
+
+    def test_to_dict(self) -> None:
+        for i, (name, input, expected) in enumerate(self.TEST_DATA):
+            with self.subTest(i=i, name=name):
+                self.assertEqual(KVariable.from_dict(input.to_dict()), expected)
+
+    def test_let(self) -> None:
+        test_data = (
+            ('let-changes-sort', KVariable('Foo', sort=STRING).let(sort=INT), KVariable('Foo', sort=INT)),
+            (
+                'sort-overrides-att-if-unset',
+                KVariable('Foo', att=KAtt({'bar': 'buzz'})).let(sort=INT, att=KAtt({'widget': 'gadget'})),
+                KVariable('Foo', sort=INT, att=(KAtt({'widget': 'gadget'}))),
+            ),
+            (
+                'let-can-set-sort-and-other-attribute',
+                KVariable('Foo').let(sort=STRING, att=KAtt({'bar': 'buzz'})),
+                KVariable('Foo', sort=STRING, att=KAtt({'bar': 'buzz'})),
+            ),
+            (
+                'let-preserves-atts',
+                KVariable('Foo', att=KAtt({'bar': 'buzz'})).let(sort=STRING),
+                KVariable('Foo', sort=STRING, att=KAtt({'bar': 'buzz'})),
+            ),
+        )
+
+        for i, (name, input, expected) in enumerate(test_data):
+            with self.subTest(i=i, name=name):
+                self.assertEqual(KVariable.from_dict(input.to_dict()), expected)
+
+        with self.assertRaises(ValueError):
+            KVariable('Foo').let(sort=STRING, att=KAtt({KAtt.SORT: INT})),
 
 
 class KLabelTest(TestCase):
