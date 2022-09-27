@@ -1,4 +1,4 @@
-import os
+import os, sys
 import json
 import subprocess
 from argparse import ArgumentParser
@@ -7,29 +7,8 @@ from terminaltables import SingleTable
 INSTALLED = "🟢 \033[92minstalled\033[0m"
 AVAILABLE = "🔵 \033[94mavailable\033[0m"
 UPDATE = "🟠 \033[93mnewer version available\033[0m"
-LOCAL = "(not managed by kup)"
+LOCAL = "\033[3mnot managed by kup\033[0m"
 
-kup_packages = {
-  "kup": {
-    "repo": "k",
-    "package": "kup"
-  },
-  "k": {
-    "repo": "k",
-    "package": "k"
-  },
-  "evm-semantics": {
-    "repo": "evm-semantics",
-    "package": "kevm"
-  },
-  "ksummarize": {
-    "repo": "ksummarize",
-    "package": "ksummarize"
-  }
-}
-
-packages = []
-installed_packages = []
 
 def nix(args):
   extraFlags = [
@@ -39,9 +18,36 @@ def nix(args):
   ]
   return subprocess.run(['nix'] + args + extraFlags, stdout=subprocess.PIPE)
 
+SYSTEM = nix(['eval', '--impure', '--expr', 'builtins.currentSystem']).stdout.decode('utf8').strip().replace('"', '')
 
-def check_package_version(package: str, currentUrl: str ) -> str:
-  result = nix(['flake', 'metadata', 'github:runtimeverification/' + package, '--json'])
+class AvailablePackage:
+  def __init__(self, repo:str, package:str):
+    self.repo = repo
+    self.package = package
+
+available_packages:dict[str,AvailablePackage] = {
+  'kup': AvailablePackage('k', f'packages.{SYSTEM}.kup'),
+  'k': AvailablePackage('k', f'packages.{SYSTEM}.k'),
+  'kevm': AvailablePackage('evm-semantics', f'packages.{SYSTEM}.kevm'),
+  'ksummarize': AvailablePackage('ksummarize', f'packages.{SYSTEM}.ksummarize'),
+}
+
+
+class ConcretePackage:
+  def __init__(self, repo: str, package: str, status: str, version: str = '-', immutable: bool = True, index: int = -1):
+    self.repo = repo
+    self.package = package
+    self.version = version
+    self.status = status
+    self.immutable = immutable
+    self.index = index
+
+packages: dict[str, ConcretePackage] = {}
+installed_packages: list[str] = []
+
+
+def check_package_version(p: AvailablePackage, currentUrl: str ) -> str:
+  result = nix(['flake', 'metadata', f'github:runtimeverification/{p.repo}', '--json'])
   meta = json.loads(result.stdout)
 
   if meta["url"] == currentUrl:
@@ -52,55 +58,30 @@ def check_package_version(package: str, currentUrl: str ) -> str:
 
 def reload_packages():
   global packages, installed_packages
-  with open(os.getenv("HOME")+"/.nix-profile/manifest.json") as manifest_file:
-    manifest = json.loads(manifest_file.read())["elements"]
-    # print(json.dumps(manifest, indent=4))
+  packages = {}
+  installed_packages = []
+  with open(f'{os.getenv("HOME")}/.nix-profile/manifest.json') as manifest_file:
+    manifest = json.loads(manifest_file.read())['elements']
+    available_packages_lookup = { p.package: (key, p) for key, p in available_packages.items() }
 
-    kup = next(({
-      "name": "kup",
-      "version": m["url"].removeprefix("github:runtimeverification/k/"),
-      "status": INSTALLED,
-      "immutable": len(m["originalUrl"].removeprefix("github:runtimeverification/k").split("/")) > 1,
-      "storePaths": m["storePaths"]
-    } for m in manifest if 
-      "url" in m and 
-      "github:runtimeverification/k/" in m["url"] and 
-      "attrPath" in m and 
-      "kup" in m["attrPath"]), 
-    {
-      "name": "kup",
-      "version": "-",
-      "status": LOCAL
-    })
+    for idx, m in enumerate(manifest):
+      if 'attrPath' in m and m['attrPath'] in available_packages_lookup:
+        (name, available_package) = available_packages_lookup[m['attrPath']]
+        if 'originalUrl' in m and m['originalUrl'].startswith(f'github:runtimeverification/{available_package.repo}'):
+          version = m['url'].removeprefix(f'github:runtimeverification/{available_package.repo}/')
+          status = check_package_version(available_package,m['url'])
+          immutable = len(m['originalUrl'].removeprefix(f'github:runtimeverification/{available_package.repo}')) > 1,
+          packages[name] = ConcretePackage(available_package.repo, available_package.package, status, version, immutable, idx)
+        else:
+          packages[name] = ConcretePackage(available_package.repo, available_package.package, LOCAL, index = idx)
 
-    packages = [kup]
 
-    for m in manifest:
-      if "originalUrl" in m and m["originalUrl"].startswith("github:runtimeverification/"):
-        name = m["originalUrl"].removeprefix("github:runtimeverification/").split("/")[0]
-        # print(json.dumps(check_package_version(name), indent=4))
-        packages.append({
-          "name": name,
-          "version": m["url"].removeprefix("github:runtimeverification/" + name + "/"),
-          "status": check_package_version(name, m["url"]),
-          "immutable": len(m["originalUrl"].removeprefix("github:runtimeverification/").split("/")) > 1,
-          "storePaths": m["storePaths"]
-        })
-    installed_packages = [ p["name"] for p in packages ]
-    for p in kup_packages.keys():
+    installed_packages = [ p for p in packages ]
+    for p in available_packages:
       if p not in installed_packages:
-        packages.append({
-          "name": p,
-          "version": "",
-          "immutable": False,
-          "status": AVAILABLE
-        })
-
-def find_package_index(storePaths):
-  global packages, installed_packages
-  with open(os.getenv("HOME")+"/.nix-profile/manifest.json") as manifest_file:
-    manifest = json.loads(manifest_file.read())["elements"]
-    return next((idx for idx, m in enumerate(manifest) if m["storePaths"] == storePaths), -1)
+        package = available_packages[p]
+        packages[p] = ConcretePackage(package.repo, package.package, AVAILABLE, '')
+        
 
 def main() -> None:
   parser = ArgumentParser(description='The K Framework installer')
@@ -109,8 +90,9 @@ def main() -> None:
 
   install = subparser.add_parser('install', help='Download and install the stated package')
   install.add_argument('package', type=str)
+  install.add_argument('--version', type=str)
 
-  uninstall = subparser.add_parser('uninstall', help='Uninstall the given package')
+  uninstall = subparser.add_parser('remove', help='Remove the given package from the user\'s PATH')
   uninstall.add_argument('package', type=str)
 
   update = subparser.add_parser('update', help='Update the package to the latest version')
@@ -128,65 +110,76 @@ def main() -> None:
     reload_packages()
     table_data = [
         ['Package', "Installed version", "Status"],
-    ] + [ [ p["name"], p["version"], p["status"] ] for p in packages ]
+    ] + [ [ name, p.version, p.status ] for name, p in packages.items() ]
     table = SingleTable(table_data)
     print(table.table)
   
   elif args.command == "update":
     reload_packages()
-    if args.package not in kup_packages.keys():
+    if args.package not in available_packages.keys():
       print(f'❗ The package \'\033[94m{args.package}\033[0m\' does not exist. Use \'\033[92mkup list\033[0m\' to see all the available packages.')
       return
     if args.package not in installed_packages:
       print(f'❗ The package \'\033[94m{args.package}\033[0m\' is not currently installed. Use \'\033[92mkup install {args.package}\033[0m\' to install the latest version.')
       return
-    package = next(p for p in packages if p["name"] == args.package)
-    if package["status"] == LOCAL:
-      print(f'❗ The package \'\033[94m{args.package}\033[0m\' is not managed by kup.')
-      return
-    if package["status"] == INSTALLED:
+    package = packages[args.package]
+    if package.status == INSTALLED and not args.version:
       print(f'The package \'\033[94m{args.package}\033[0m\' is already up to date.')
       return
-    # print(package)
-    nix_profile_index = find_package_index(package["storePaths"])
 
-    if package["immutable"]:
-      nix(['profile', 'remove', str(nix_profile_index)])
-      nix(['profile', 'install', f'github:runtimeverification/{kup_packages[args.package]["repo"]}#{kup_packages[args.package]["package"]}'])
-  
+    if package.immutable or args.version:
+      nix(['profile', 'remove', str(package.index)])
+      version = '/' + args.version if args.version else ''
+      nix(['profile', 'install', f'github:runtimeverification/{package.repo}{version}#{package.package}'])
     else:
-      nix(['profile', 'upgrade', str(nix_profile_index)])
+      nix(['profile', 'upgrade', str(package.index)])
 
-  elif args.command == "uninstall":
+  elif args.command == "remove":
     reload_packages()
-    if args.package not in kup_packages.keys():
+    if args.package not in available_packages.keys():
       print(f'❗ The package \'\033[94m{args.package}\033[0m\' does not exist. Use \'\033[92mkup list\033[0m\' to see all the available packages.')
       return
     if args.package not in installed_packages:
       print(f'❗ The package \'\033[94m{args.package}\033[0m\' is not currently installed.')
       return
-    package = next(p for p in packages if p["name"] == args.package)
-    if package["status"] == LOCAL:
-      print(f'❗ The package \'\033[94m{args.package}\033[0m\' is not managed by kup.')
-      return
-    nix_profile_index = find_package_index(package["storePaths"])
 
-    nix(['profile', 'remove', str(nix_profile_index)])
+    if args.package == "kup" and len(installed_packages) > 1:
+      print(f'⚠️ You are about to remove \'\033[94mkup\033[0m\' with other K framework packages still installed. Are you sure you want to continue? [y/N]')
+
+      yes = {'yes','y', 'ye', ''}
+      no = {'no','n'}
+
+      choice = input().lower()
+      if choice in no:
+        return
+      if choice in yes:
+        pass
+      else:
+        sys.stdout.write("Please respond with '[y]es' or '[n]o'")
+        return
+    package = packages[args.package]
+    nix(['profile', 'remove', str(package.index)])
 
   elif args.command == "install":
     reload_packages()
-    if args.package not in kup_packages.keys():
+    if args.package not in available_packages.keys():
       print(f'❗ The package \'\033[94m{args.package}\033[0m\' does not exist. Use \'\033[92mkup list\033[0m\' to see all the available packages.')
       return
     if args.package in installed_packages:
-      print(f'❗ The package \'\033[94m{args.package}\033[0m\' is already installed.')
+      print(f'❗ The package \'\033[94m{args.package}\033[0m\' is already installed. Use \'\033[92mkup update {args.package}\033[0m\' to update to the latest version.')
       return
-
-    nix(['profile', 'install', f'github:runtimeverification/{kup_packages[args.package]["repo"]}#{kup_packages[args.package]["package"]}'])
+    package = available_packages[args.package]
+    version = '/' + args.version if args.version else ''
+    nix(['profile', 'install', f'github:runtimeverification/{package.repo}{version}#{package.package}'])
   
-  else:
-    print(args)
-
-
+  elif args.command == "shell":
+    reload_packages()
+    if args.package not in available_packages.keys():
+      print(f'❗ The package \'\033[94m{args.package}\033[0m\' does not exist. Use \'\033[92mkup list\033[0m\' to see all the available packages.')
+      return
+    package = available_packages[args.package]
+    version = '/' + args.version if args.version else ''
+    nix(['profile', 'install', f'github:runtimeverification/{package.repo}{version}#{package.package}'])
+  
 if __name__ == '__main__':
     main()
