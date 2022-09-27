@@ -670,8 +670,8 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
     
   //simplified #Ceil. Matching for above version not implemented yet: https://github.com/runtimeverification/haskell-backend/issues/3107
   rule #Ceil(@S:Set SetItem(@E:KItem)) => {(@E in @S) #Equals false} #And #Ceil(@S) #And #Ceil(@E)
-    [anywhere, simplification]
-endmodule                      
+    [simplification]
+endmodule
 
 module SET-SYMBOLIC
   imports SET-KORE-SYMBOLIC
