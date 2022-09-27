@@ -141,7 +141,6 @@ jobs:
           fi
 
   test-k:
-    needs: nix-maven
     name: 'K Tests'
     runs-on: [self-hosted, linux]
     needs: [nix-maven, nix-flake-submodules]
