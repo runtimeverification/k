@@ -69,7 +69,7 @@
 
             kup = prev.poetry2nix.mkPoetryApplication {
               python = prev.python39;
-              projectDir = ./package/kup;
+              projectDir = ./kup;
             };
           })
       ];
