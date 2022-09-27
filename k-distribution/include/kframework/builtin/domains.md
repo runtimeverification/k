@@ -606,23 +606,37 @@ that two different sets will return the same element, even if they are similar.
 
 ```k
   syntax KItem ::= choice(Set)                [function, hook(SET.choice), klabel(Set:choice)]
+
+endmodule
 ```
 
-```k
-endmodule
+### Simplifications on (symbolic) Sets
 
+```k
 module SET-KORE-SYMBOLIC [kore,symbolic]
   imports SET
   imports private K-EQUAL
   imports private BOOL
+  imports private COLLECTIONS
 
-  // Symbolic in
-  //Unsupported: "Set1 Set2" matching. Using "Set SetItem(E) instead."
-  //rule E  in ( S1 S2)                  => E in S2 requires notBool E in S1       [simplification]
-  //rule E  in (S1 _S2)                  => true    requires         E in S1       [simplification]
+  // Symbolic in ()
+
+  // original
   rule E1 in (S SetItem(E2))           => true requires E1 ==K E2 orBool E1 in S     [simplification]
-  rule E1 in (S SetItem(E2))           => E1 in S           requires E1 =/=K E2      [simplification]                  
+  rule E1 in (S SetItem(E2))           => E1 in S           requires E1 =/=K E2      [simplification]
   rule E1 in (S SetItem(E2))           => E1 in SetItem(E2) requires notBool E1 in S [simplification]
+
+  // rule E in S  => E in Set2List(S) [simplification]
+  // FIXME this should be elsewhere, not in this module! Needs a COLLECTION-SYMBOLIC module
+  // rule Set2List( S:Set SetItem(E) ) => Set2List( S ) ListItem( E ) [simplification]
+  // rule Set2List( SetItem(E) )       => ListItem( E )               [simplification]
+  // rule Set2List( .Set )             => .List                       [simplification]
+  // rule E1 in ListItem(E2)           => false requires E1 =/=K E2   [simplification]
+
+  // rule E in (S SetItem(E))  => true ensures notBool (E in S) [simplification]
+  // rule E1 in (S SetItem(E2)) => E1 in S requires E1 =/=K E2 ensures notBool (E2 in S) [simplification]
+
+ 
 
   // Symbolic intersectSet
   rule intersectSet(_S, .Set) => .Set                                                                                      [simplification]                                                                                         
