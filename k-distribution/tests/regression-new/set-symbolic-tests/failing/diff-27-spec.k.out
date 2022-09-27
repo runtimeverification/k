@@ -1,0 +1,21 @@
+  #Not ( {
+    X
+  #Equals
+    Y
+  } )
+#And
+  #Not ( {
+    Y
+  #Equals
+    Z
+  } )
+#And
+  <k>
+    diffResult ( Z:MyId in S SetItem ( X:MyId ) ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in S
+  }

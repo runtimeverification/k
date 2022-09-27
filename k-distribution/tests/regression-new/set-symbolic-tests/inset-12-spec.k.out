@@ -1,0 +1,23 @@
+  <k>
+    inSetResult ( true ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in SET
+    SetItem ( Z:MyId )
+  }
+#And
+  {
+    false
+  #Equals
+    Z:MyId in SET
+  }
+#And
+  {
+    true
+  #Equals
+    Y:MyId in SET
+  }
+[Error] Prover: backend terminated because the configuration cannot be rewritten further. See output for more details.

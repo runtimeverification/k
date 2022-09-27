@@ -1,0 +1,10 @@
+  <k>
+    intersectResult ( Z:MyId in SetItem ( Y:MyId ) ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    Z:MyId in S
+  }
+[Error] Prover: backend terminated because the configuration cannot be rewritten further. See output for more details.

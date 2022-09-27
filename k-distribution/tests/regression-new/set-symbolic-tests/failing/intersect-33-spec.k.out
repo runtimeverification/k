@@ -1,0 +1,16 @@
+  #Not ( {
+    X
+  #Equals
+    Z
+  } )
+#And
+  <k>
+    intersectResult ( Z:MyId in intersectSet ( S ,
+    SetItem ( Y:MyId ) ) ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in S
+  }

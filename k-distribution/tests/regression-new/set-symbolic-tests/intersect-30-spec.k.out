@@ -1,0 +1,16 @@
+  #Not ( {
+    X
+  #Equals
+    Z
+  } )
+#And
+  <k>
+    intersectResult ( Z:MyId in S ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in S
+  }
+[Error] Prover: backend terminated because the configuration cannot be rewritten further. See output for more details.

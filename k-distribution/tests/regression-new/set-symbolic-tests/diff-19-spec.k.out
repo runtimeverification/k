@@ -1,0 +1,11 @@
+  <k>
+    diffResult ( S1 -Set ( S2
+    SetItem ( X:MyId ) ) ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in S2
+  }
+[Error] Prover: backend terminated because the configuration cannot be rewritten further. See output for more details.

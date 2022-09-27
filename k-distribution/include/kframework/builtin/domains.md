@@ -522,7 +522,7 @@ number of unbound keys being mached. In other words, one unbound variable is
 linear, two is quadratic, three is cubic, etc.
 
 ```k
-  syntax Set ::= Set Set                  [left, function, functional, hook(SET.concat), klabel(_Set_), symbol, assoc, comm, unit(.Set), idem, element(SetItem), format(%1%n%2)]
+  syntax Set ::= Set Set                  [left, function, hook(SET.concat), klabel(_Set_), symbol, assoc, comm, unit(.Set), idem, element(SetItem), format(%1%n%2)]
 ```
 
 ### Set unit
@@ -550,7 +550,7 @@ elements present in either set.
 
 ```k
   syntax Set ::= Set "|Set" Set            [left, function, functional, hook(SET.union)]
-  rule S1:Set |Set S2:Set => S1 (S2 -Set S1)
+  rule S1:Set |Set S2:Set => S1 (S2 -Set S1) [concrete]
 ```
 
 ### Set intersection
@@ -606,9 +606,89 @@ that two different sets will return the same element, even if they are similar.
 
 ```k
   syntax KItem ::= choice(Set)                [function, hook(SET.choice), klabel(Set:choice)]
+
+endmodule
 ```
 
+### Simplifications on (symbolic) Sets
+
 ```k
+module SET-KORE-SYMBOLIC [kore,symbolic]
+  imports SET
+  imports private K-EQUAL
+  imports private BOOL
+  imports private COLLECTIONS
+
+  // Symbolic in ()
+
+  // original
+  rule E1 in (S SetItem(E2))           => true requires E1 ==K E2 orBool E1 in S     [simplification]
+  rule E1 in (S SetItem(E2))           => E1 in S           requires E1 =/=K E2      [simplification]
+  rule E1 in (S SetItem(E2))           => E1 in SetItem(E2) requires notBool E1 in S [simplification]
+
+  // rule E in S  => E in Set2List(S) [simplification]
+  // FIXME this should be elsewhere, not in this module! Needs a COLLECTION-SYMBOLIC module
+  // rule Set2List( S:Set SetItem(E) ) => Set2List( S ) ListItem( E ) [simplification]
+  // rule Set2List( SetItem(E) )       => ListItem( E )               [simplification]
+  // rule Set2List( .Set )             => .List                       [simplification]
+  // rule E1 in ListItem(E2)           => false requires E1 =/=K E2   [simplification]
+
+  // rule E in (S SetItem(E))  => true ensures notBool (E in S) [simplification]
+  // rule E1 in (S SetItem(E2)) => E1 in S requires E1 =/=K E2 ensures notBool (E2 in S) [simplification]
+
+ 
+
+  // Symbolic intersectSet
+  rule intersectSet(_S, .Set) => .Set                                                                                      [simplification]                                                                                         
+  rule intersectSet(.Set, _S) => .Set                                                                                      [simplification]
+  rule intersectSet(S, S) => S                                                                                             [simplification]
+  rule intersectSet(S1 SetItem(E), S2) => intersectSet(S1, S2) SetItem(E) requires         E in S2                         [simplification]
+  rule intersectSet(S1 SetItem(E), S2) => intersectSet(S1, S2)            requires notBool E in S2 ensures notBool E in S1 [simplification]     
+  rule intersectSet(S1, S2 SetItem(E)) => intersectSet(S1, S2) SetItem(E) requires         E in S1                         [simplification]
+  rule intersectSet(S1, S2 SetItem(E)) => intersectSet(S1, S2)            requires notBool E in S1 ensures notBool E in S2 [simplification]
+  
+  rule E in intersectSet(S1, S2) => E in S1 requires E in S2                                       [simplification]
+  rule E in intersectSet(S1, S2) => E in S2 requires E in S1                                       [simplification]
+  rule E in intersectSet(S1, S2) => false   requires notBool E in S1  orBool notBool E in S2       [simplification]
+
+  // Symbolic -Set
+  rule S -Set .Set  => S                                                           [simplification]
+  rule .Set -Set _S => .Set                                                        [simplification]
+  rule S -Set S     => .Set                                                        [simplification]
+  //Last side conditions are workarounds for: https://github.com/runtimeverification/haskell-backend/issues/3124
+  rule (S1 SetItem(E)) -Set S2 =>  S1 -Set S2             requires         E in S2 andBool notBool E in S1 [simplification]
+  rule (S1 SetItem(E)) -Set S2 => (S1 -Set S2) SetItem(E) requires notBool E in S2 andBool notBool E in S1 [simplification]     
+  rule S1 -Set (S2 SetItem(E)) =>  S1 -Set S2             requires notBool E in S1 andBool notBool E in S2 [simplification]
+                                                             
+  rule E in ( S1 -Set  S2) => notBool E in S2 requires         E in S1             [simplification]
+  rule E in ( S1 -Set _S2) => false           requires notBool E in S1             [simplification]
+  rule E in (_S1 -Set  S2) => false           requires         E in S2             [simplification]
+  rule E in ( S1 -Set  S2) => E in S1         requires notBool E in S2             [simplification]
+
+  // Symbolic |Set
+  rule S    |Set .Set => S                                                        [simplification]                                                                                         
+  rule .Set |Set S    => S                                                        [simplification]
+  rule S    |Set S    => S                                                        [simplification]
+  //Last side conditions are workarounds for: https://github.com/runtimeverification/haskell-backend/issues/3124
+  rule (S1 SetItem(E)) |Set S2 =>  S1 |Set S2             requires         E in S2 andBool notBool E in S1 [simplification]
+  rule (S1 SetItem(E)) |Set S2 => (S1 |Set S2) SetItem(E) requires notBool E in S2 andBool notBool E in S1 [simplification]     
+  rule S1 |Set (S2 SetItem(E)) => (S1 |Set S2) SetItem(E) requires notBool E in S1 andBool notBool E in S2 [simplification]
+                                                             
+  rule E in (S1 |Set S2) => true    requires E in S1 orBool E in S2      [simplification]
+  rule E in (S1 |Set S2) => E in S2 requires notBool E in S1             [simplification]
+  rule E in (S1 |Set S2) => E in S1 requires notBool E in S2             [simplification]
+
+  //Temp rule, should be generated in front-end
+  /*rule #Ceil(@S1:Set @S2:Set) => {intersectSet(@S1, @S2) #Equals .Set} #And #Ceil(@S1) #And #Ceil(@S2)
+    [anywhere, simplification]*/ 
+    
+  //simplified #Ceil. Matching for above version not implemented yet: https://github.com/runtimeverification/haskell-backend/issues/3107
+  rule #Ceil(@S:Set SetItem(@E:KItem)) => {(@E in @S) #Equals false} #And #Ceil(@S) #And #Ceil(@E)
+    [simplification]
+endmodule
+
+module SET-SYMBOLIC
+  imports SET-KORE-SYMBOLIC
 endmodule
 ```
 
