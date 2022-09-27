@@ -181,7 +181,6 @@ jobs:
           docker exec -t k-ci /bin/bash -c 'k-distribution/target/release/k/bin/spawn-kserver kserver.log'
           docker exec -t k-ci /bin/bash -c 'cd k-exercises/tutorial && make -j`nproc` --output-sync'
           docker exec -t k-ci /bin/bash -c 'cd k-distribution/k-tutorial/1_basic && ./test_kompile.sh'
-          docker exec -t k-ci /bin/bash -c 'cd k-distribution/k-tutorial/1_basic && ./test_kompile.sh'
           docker exec -t k-ci /bin/bash -c 'k-distribution/target/release/k/bin/stop-kserver'
       - name: 'Tear down Docker'
         if: always()
