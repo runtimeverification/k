@@ -1,10 +1,9 @@
 .PHONY: default all clean build install          \
         poetry-install                           \
-        test test-unit                           \
         format isort autoflake black             \
         check check-isort check-autoflake check-black check-flake8 check-mypy
 
-default: check test-unit
+default: check
 
 clean:
 	rm -rf dist .mypy_cache
@@ -17,14 +16,6 @@ poetry-install:
 	poetry install
 
 POETRY_RUN := poetry run
-
-
-# Tests
-
-test: test-unit
-
-test-unit: poetry-install
-	$(POETRY_RUN) python -m unittest discover tests --failfast --verbose
 
 
 # Checks and formatting

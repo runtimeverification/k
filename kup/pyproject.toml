@@ -3,9 +3,9 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "kup"
+name = "K Framework installer"
 version = "0.1.0"
-description = "kup is a tool for managing installations of the K framework along with the different available semantics"
+description = ""
 authors = [
     "Runtime Verification, Inc. <contact@runtimeverification.com>",
 ]
