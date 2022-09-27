@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 <<<<<<< HEAD
-K_VERSION=5.4.8
+K_VERSION=5.4.9
 =======
 K_VERSION=5.4.9
 >>>>>>> 0bb2ade641007570b16f772f01e5570590d7ea7a
