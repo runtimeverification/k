@@ -9,16 +9,15 @@ AVAILABLE = "🔵 \033[94mavailable\033[0m"
 UPDATE = "🟠 \033[93mnewer version available\033[0m"
 LOCAL = "\033[3mnot managed by kup\033[0m"
 
+NIX_SUBSTITUTERS = [
+  '--option', 'extra-substituters', 'https://k-framework.cachix.org https://cache.iog.io',
+  '--option', 'extra-trusted-public-keys', 'k-framework.cachix.org-1:jeyMXB2h28gpNRjuVkehg+zLj62ma1RnyyopA/20yFE= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ='
+]
 
-def nix(args):
-  extraFlags = [
-    '--option', 'extra-substituters', 'https://k-framework.cachix.org https://cache.iog.io',
-    '--option', 'extra-trusted-public-keys', 'k-framework.cachix.org-1:jeyMXB2h28gpNRjuVkehg+zLj62ma1RnyyopA/20yFE= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=',
-    '--extra-experimental-features', 'nix-command flakes'
-  ]
-  return subprocess.run(['nix'] + args + extraFlags, stdout=subprocess.PIPE)
+def nix(args, extraFlags = NIX_SUBSTITUTERS):
+  return subprocess.run(['nix'] + args + ['--extra-experimental-features', 'nix-command flakes'] + extraFlags, stdout=subprocess.PIPE)
 
-SYSTEM = nix(['eval', '--impure', '--expr', 'builtins.currentSystem']).stdout.decode('utf8').strip().replace('"', '')
+SYSTEM = nix(['eval', '--impure', '--expr', 'builtins.currentSystem'], extraFlags = []).stdout.decode('utf8').strip().replace('"', '')
 
 class AvailablePackage:
   def __init__(self, repo:str, package:str):
@@ -29,7 +28,8 @@ available_packages:dict[str,AvailablePackage] = {
   'kup': AvailablePackage('k', f'packages.{SYSTEM}.kup'),
   'k': AvailablePackage('k', f'packages.{SYSTEM}.k'),
   'kevm': AvailablePackage('evm-semantics', f'packages.{SYSTEM}.kevm'),
-  'ksummarize': AvailablePackage('ksummarize', f'packages.{SYSTEM}.ksummarize'),
+  'kore-exec': AvailablePackage('haskell-backend', f'packages.{SYSTEM}.kore:exe:kore-exec'),
+  # 'ksummarize': AvailablePackage('ksummarize', f'packages.{SYSTEM}.ksummarize'),
 }
 
 
