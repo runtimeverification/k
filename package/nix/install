@@ -43,7 +43,7 @@ in your shell."
     fi 
   fi
 
-  GC_DONT_GC=1 nix profile install github:runtimeverification/k/29c7dc291addcde0ff2ed69f22cd37a0936ad72c#kup \
+  GC_DONT_GC=1 nix profile install github:runtimeverification/k#kup \
   --option extra-substituters 'https://k-framework.cachix.org' \
   --option extra-trusted-public-keys 'k-framework.cachix.org-1:jeyMXB2h28gpNRjuVkehg+zLj62ma1RnyyopA/20yFE=' \
   --experimental-features 'nix-command flakes'
