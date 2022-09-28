@@ -42,6 +42,7 @@ RUN    apt-get update            \
         libz3-dev                \
         lld-$LLVM_VERSION        \
         llvm-$LLVM_VERSION-tools \
+        locales                  \
         maven                    \
         openjdk-11-jdk           \
         parallel                 \
@@ -54,6 +55,11 @@ RUN    apt-get update            \
 
 COPY --from=Z3 /usr/bin/z3 /usr/bin/z3
 COPY --from=STACK /usr/local/bin/stack /usr/local/bin/stack
+
+RUN locale-gen en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000
