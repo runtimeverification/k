@@ -185,7 +185,7 @@ jobs:
           path: k-repo
           submodules: recursive
       - name: 'Set up Docker'
-        uses: ./.github/actions/with-docker
+        uses: ./k-repo/.github/actions/with-docker
         with:
           tag: k-jammy-package-build
       - name: 'Build Jammy Package'
