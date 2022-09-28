@@ -11,7 +11,6 @@ module INSET-100-ELEMENTS-SPEC
        Y:MyId in
         ( SetItem(X:MyId)
           (SetItem(_X00)  (SetItem(_X01) (SetItem(_X02) (SetItem(_X03) (SetItem(_X04) (SetItem(_X05) (SetItem(_X06) (SetItem(_X07) (SetItem(_X08) (SetItem(_X09)))))))))))
-/*
           (SetItem(_X10)  (SetItem(_X11) (SetItem(_X12) (SetItem(_X13) (SetItem(_X14) (SetItem(_X15) (SetItem(_X16) (SetItem(_X17) (SetItem(_X18) (SetItem(_X19)))))))))))
           (SetItem(_X20)  (SetItem(_X21) (SetItem(_X22) (SetItem(_X23) (SetItem(_X24) (SetItem(_X25) (SetItem(_X26) (SetItem(_X27) (SetItem(_X28) (SetItem(_X29)))))))))))
           (SetItem(_X30)  (SetItem(_X31) (SetItem(_X32) (SetItem(_X33) (SetItem(_X34) (SetItem(_X35) (SetItem(_X36) (SetItem(_X37) (SetItem(_X38) (SetItem(_X39)))))))))))
@@ -21,7 +20,6 @@ module INSET-100-ELEMENTS-SPEC
           (SetItem(_X70)  (SetItem(_X71) (SetItem(_X72) (SetItem(_X73) (SetItem(_X74) (SetItem(_X75) (SetItem(_X76) (SetItem(_X77) (SetItem(_X78) (SetItem(_X79)))))))))))
           (SetItem(_X80)  (SetItem(_X81) (SetItem(_X82) (SetItem(_X83) (SetItem(_X84) (SetItem(_X85) (SetItem(_X86) (SetItem(_X87) (SetItem(_X88) (SetItem(_X89)))))))))))
           (SetItem(_X90)  (SetItem(_X91) (SetItem(_X92) (SetItem(_X93) (SetItem(_X94) (SetItem(_X95) (SetItem(_X96) (SetItem(_X97) (SetItem(_X98) (SetItem(_X99)))))))))))
-*/
         )
      ) => inSetResult ( true ) </k>
       requires Y ==K X
