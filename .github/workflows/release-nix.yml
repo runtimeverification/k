@@ -19,7 +19,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
       - name: 'Check out code'
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3.0.2
 
       - name: 'Upgrade bash'
         if: ${{ contains(matrix.os, 'macos') }}
