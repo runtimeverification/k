@@ -33,14 +33,14 @@ runs:
           --build-arg LLVM_VERSION=14                    \
           --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)
 
-      docker run                            \
-          --name ${TAG_NAME}                \
-          --rm -it                          \
-          --detach                          \
-          --workdir /opt/workspace${SUBDIR} \
-          --user user:user                  \
-          -v ${HOME}:${HOME}                \
-          -v "$(pwd):/opt/workspace"        \
-          -v "/etc/passwd:/etc/passwd:ro"   \
-          -v "/etc/group:/etc/group:ro"     \
+      docker run                             \
+          --name ${TAG_NAME}                 \
+          --rm -it                           \
+          --detach                           \
+          --workdir /opt/workspace/${SUBDIR} \
+          --user user:user                   \
+          -v ${HOME}:${HOME}                 \
+          -v "$(pwd):/opt/workspace"         \
+          -v "/etc/passwd:/etc/passwd:ro"    \
+          -v "/etc/group:/etc/group:ro"      \
           runtimeverification/${TAG_NAME}
