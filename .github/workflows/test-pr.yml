@@ -151,24 +151,30 @@ jobs:
       - name: 'Set up Docker'
         run: |
           Z3_VERSION=4.8.15
-          docker build . --file .github/workflows/Dockerfile.z3 \
-            --tag z3:${Z3_VERSION}
-          docker build . --file .github/workflows/Dockerfile           \
-            --tag runtimeverification/k-ci                             \
-            --build-arg Z3_VERSION=${Z3_VERSION}                       \
-            --build-arg LLVM_VERSION=14                                \
-            --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)
-          docker run                        \
-            --name k-ci                     \
-            --rm -it                        \
-            --detach                        \
-            --workdir /opt/workspace        \
-            --user $(id -u):$(id -g)        \
-            -v ${HOME}:${HOME}              \
-            -v "$(pwd):/opt/workspace"      \
-            -v "/etc/passwd:/etc/passwd:ro" \
-            -v "/etc/group:/etc/group:ro"   \
-            runtimeverification/k-ci
+          K_VERSION=$(cat package/version)
+
+          docker build . --file .github/workflows/Dockerfile.z3          --tag z3:${Z3_VERSION}
+          docker build . --file .github/workflows/Dockerfile.stack-deps  --tag stack:${K_VERSION}
+          docker build . --file .github/workflows/Dockerfile.maven-cache --tag maven:${K_VERSION}
+
+          docker build . --file .github/workflows/Dockerfile \
+              --tag runtimeverification/k-ci                 \
+              --build-arg Z3_VERSION=${Z3_VERSION}           \
+              --build-arg K_VERSION=${K_VERSION}             \
+              --build-arg LLVM_VERSION=14                    \
+              --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)
+
+          docker run                          \
+              --name k-ci                     \
+              --rm -it                        \
+              --detach                        \
+              --workdir /opt/workspace        \
+              --user user:user                \
+              -v ${HOME}:${HOME}              \
+              -v "$(pwd):/opt/workspace"      \
+              -v "/etc/passwd:/etc/passwd:ro" \
+              -v "/etc/group:/etc/group:ro"   \
+              runtimeverification/k-ci
       - name: 'Build K'
         run: docker exec -t k-ci /bin/bash -c 'mvn package -DskipTests'
       - name: 'Unit Tests'
@@ -206,24 +212,30 @@ jobs:
           workspace=$(pwd)
           cd k-repo
           Z3_VERSION=4.8.15
-          docker build . --file .github/workflows/Dockerfile.z3 \
-            --tag z3:${Z3_VERSION}
-          docker build . --file .github/workflows/Dockerfile           \
-            --tag runtimeverification/k-jammy-package-build            \
-            --build-arg Z3_VERSION=${Z3_VERSION}                       \
-            --build-arg LLVM_VERSION=14                                \
-            --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)
-          docker run                         \
-            --name k-jammy-package-build     \
-            --rm -it                         \
-            --detach                         \
-            --workdir /opt/workspace/k-repo  \
-            --user $(id -u):$(id -g)         \
-            -v ${HOME}:${HOME}               \
-            -v "${workspace}:/opt/workspace" \
-            -v "/etc/passwd:/etc/passwd:ro"  \
-            -v "/etc/group:/etc/group:ro"    \
-            runtimeverification/k-jammy-package-build
+          K_VERSION=$(cat package/version)
+
+          docker build . --file .github/workflows/Dockerfile.z3          --tag z3:${Z3_VERSION}
+          docker build . --file .github/workflows/Dockerfile.stack-deps  --tag stack:${K_VERSION}
+          docker build . --file .github/workflows/Dockerfile.maven-cache --tag maven:${K_VERSION}
+
+          docker build . --file .github/workflows/Dockerfile  \
+              --tag runtimeverification/k-jammy-package-build \
+              --build-arg Z3_VERSION=${Z3_VERSION}            \
+              --build-arg K_VERSION=${K_VERSION}              \
+              --build-arg LLVM_VERSION=14                     \
+              --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)
+
+          docker run                          \
+              --name k-jammy-package-build    \
+              --rm -it                        \
+              --detach                        \
+              --workdir /opt/workspace        \
+              --user user:user                \
+              -v ${HOME}:${HOME}              \
+              -v "$(pwd):/opt/workspace"      \
+              -v "/etc/passwd:/etc/passwd:ro" \
+              -v "/etc/group:/etc/group:ro"   \
+              runtimeverification/k-jammy-package-build
       - name: 'Build Jammy Package'
         run: |
           docker exec -t k-jammy-package-build /bin/bash -c 'mv package/debian debian'
