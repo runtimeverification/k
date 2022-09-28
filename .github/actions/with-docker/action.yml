@@ -26,11 +26,11 @@ runs:
       docker build . --file ${SUBDIR}.github/workflows/Dockerfile.stack-deps  --tag stack:${K_VERSION}
       docker build . --file ${SUBDIR}.github/workflows/Dockerfile.maven-cache --tag maven:${K_VERSION}
 
-      docker build . --file ${SUBDIR}.github/workflows/Dockerfile \
-          --tag runtimeverification/${TAG_NAME}          \
-          --build-arg Z3_VERSION=${Z3_VERSION}           \
-          --build-arg K_VERSION=${K_VERSION}             \
-          --build-arg LLVM_VERSION=14                    \
+      docker build . --file ${SUBDIR}.github/workflows/Dockerfile    \
+          --tag runtimeverification/${TAG_NAME}                      \
+          --build-arg Z3_VERSION=${Z3_VERSION}                       \
+          --build-arg K_VERSION=${K_VERSION}                         \
+          --build-arg LLVM_VERSION=14                                \
           --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)
 
       docker run                             \
