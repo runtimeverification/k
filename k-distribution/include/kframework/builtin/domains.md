@@ -654,6 +654,10 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   rule intersectSet( _  , .Set) => .Set    [simplification]
   rule intersectSet( S  , S   ) =>  S      [simplification]
 
+  rule intersectSet( _ SetItem(X), SetItem(X))     => SetItem(X)                      [simplification]
+  rule intersectSet( S SetItem(X) , S)             => S ensures notBool (X in S)      [simplification]
+  rule intersectSet( S1 SetItem(X), S2 SetItem(X)) => intersectSet(S1, S2) SetItem(X) [simplification]
+
   // membership simplifications
   rule E in .Set           => false requires #Ceil(E)       [simplification]
   rule E in SetItem(E)     => true  requires #Ceil(E)       [simplification]
