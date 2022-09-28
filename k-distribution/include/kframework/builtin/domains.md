@@ -659,6 +659,12 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   rule E in SetItem(E)     => true  requires #Ceil(E)       [simplification]
   rule E in (S SetItem(E)) => true ensures notBool (E in S) [simplification]
 
+// These two rules would be sound but impose a giant overhead on `in` evaluation:
+  // rule E1 in (S SetItem(E2)) => true requires E1 in S
+  //                                 ensures notBool (E2 in S) [simplification]
+  // rule E1 in (S SetItem(E2)) => E1 in S requires E1 =/=K E2
+  //                                 ensures notBool (E2 in S) [simplification]
+
 endmodule
 
 module SET-SYMBOLIC
