@@ -1,0 +1,10 @@
+  <k>
+    diffResult ( S -Set ( S
+    SetItem ( X:MyId ) ) ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in S
+  }

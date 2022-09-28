@@ -636,8 +636,13 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
     [simplification]
 
   // -Set simplifications
-  rule S    -Set .Set => S    [simplification]
-  rule .Set -Set _    => .Set [simplification]
+  rule S              -Set .Set           => S          [simplification]
+  rule .Set           -Set  _             => .Set       [simplification]
+  rule SetItem(X)     -Set (_ SetItem(X)) => .Set       [simplification]
+  rule S              -Set (S SetItem(_)) => .Set       [simplification]
+  rule (S SetItem(X)) -Set S              => SetItem(X) [simplification]
+  rule SetItem(X)     -Set S              => SetItem(X)
+                             requires notBool (X in S)  [simplification]
 
   // |Set simplifications
   rule S    |Set .Set => S    [simplification]
@@ -646,12 +651,13 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
 
   // intersectSet simplifications
   rule intersectSet(.Set, _   ) => .Set    [simplification]
-  rule intersectSet( _  , .Set) => .Set    [simplification]  
+  rule intersectSet( _  , .Set) => .Set    [simplification]
   rule intersectSet( S  , S   ) =>  S      [simplification]
-  
+
   // membership simplifications
-  rule E in .Set       => false requires #Ceil(E)    [simplification]
-  rule E in SetItem(E) => true  requires #Ceil(E)    [simplification]
+  rule E in .Set           => false requires #Ceil(E)       [simplification]
+  rule E in SetItem(E)     => true  requires #Ceil(E)       [simplification]
+  rule E in (S SetItem(E)) => true ensures notBool (E in S) [simplification]
 
 endmodule
 

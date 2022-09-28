@@ -1,0 +1,9 @@
+  <k>
+    diffResult ( SetItem ( Y:MyId ) -Set SetItem ( X:MyId ) ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in S
+  }

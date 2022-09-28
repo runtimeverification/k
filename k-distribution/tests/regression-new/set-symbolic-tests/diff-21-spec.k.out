@@ -1,0 +1,9 @@
+  <k>
+    diffResult ( Z:MyId in S ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    Y:MyId in S
+  }

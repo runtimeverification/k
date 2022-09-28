@@ -1,0 +1,15 @@
+  <k>
+    diffResult ( .Set ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in S
+  }
+#And
+  {
+    true
+  #Equals
+    Y:MyId in S
+  }

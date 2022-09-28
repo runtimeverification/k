@@ -1,0 +1,15 @@
+  #Not ( {
+    X
+  #Equals
+    Z
+  } )
+#And
+  <k>
+    diffResult ( false ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in S
+  }

@@ -1,0 +1,9 @@
+  <k>
+    diffResult ( false ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    X:MyId in S
+  }
