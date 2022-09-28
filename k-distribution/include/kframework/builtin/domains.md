@@ -612,6 +612,55 @@ that two different sets will return the same element, even if they are similar.
 endmodule
 ```
 
+### Implementation of Sets
+
+The following lemmas are simplifications that the Haskell backend can
+apply to simplify expressions of sort `Set`.
+
+```k
+module SET-KORE-SYMBOLIC [kore,symbolic]
+  imports SET
+  imports private K-EQUAL
+  imports private BOOL
+
+  //Temporarly rule for #Ceil simplification, should be generated in front-end
+
+/* Matching for this version not implemented.
+  rule #Ceil(@S1:Set @S2:Set) =>
+         {intersectSet(@S1, @S2) #Equals .Set} #And #Ceil(@S1) #And #Ceil(@S2)
+    [simplification]
+*/
+  //simplified version
+  rule #Ceil(@S:Set SetItem(@E:KItem)) =>
+         {(@E in @S) #Equals false} #And #Ceil(@S) #And #Ceil(@E)
+    [simplification]
+
+  // -Set simplifications
+  rule S    -Set .Set => S    [simplification]
+  rule .Set -Set _    => .Set [simplification]
+
+  // |Set simplifications
+  rule S    |Set .Set => S    [simplification]
+  rule .Set |Set S    => S    [simplification]
+  rule S    |Set S    => S    [simplification]
+
+  // intersectSet simplifications
+  rule intersectSet(.Set, _   ) => .Set    [simplification]
+  rule intersectSet( _  , .Set) => .Set    [simplification]  
+  rule intersectSet( S  , S   ) =>  S      [simplification]
+  
+  // membership simplifications
+  rule E in .Set       => false requires #Ceil(E)    [simplification]
+  rule E in SetItem(E) => true  requires #Ceil(E)    [simplification]
+
+endmodule
+
+module SET-SYMBOLIC
+  imports SET-KORE-SYMBOLIC
+endmodule
+```
+
+
 Lists
 -----
 
