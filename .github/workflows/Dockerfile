@@ -1,6 +1,9 @@
-ARG BASE_IMAGE=ubuntu:jammy
-FROM ${BASE_IMAGE}
-ARG BASE_IMAGE
+ARG Z3_VERSION
+FROM z3:${Z3_VERSION} as Z3
+
+FROM ubuntu:jammy
+
+COPY --from=Z3 /usr/bin/z3 /usr/bin/z3
 
 ARG LLVM_VERSION=14
 
@@ -45,15 +48,6 @@ RUN    apt-get update            \
         zlib1g-dev
 
 RUN curl -sSL https://get.haskellstack.org/ | sh
-
-RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.15 \
-    && cd z3                                                         \
-    && python3 scripts/mk_make.py                                    \
-    && cd build                                                      \
-    && make -j8                                                      \
-    && make install                                                  \
-    && cd ../..                                                      \
-    && rm -rf z3
 
 ARG USER_ID=1000
 ARG GROUP_ID=1000

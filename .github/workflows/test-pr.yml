@@ -150,8 +150,13 @@ jobs:
           submodules: recursive
       - name: 'Set up Docker'
         run: |
-          docker build . --file .github/workflows/Dockerfile --tag runtimeverification/k-ci \
-            --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14                 \
+          Z3_VERSION=4.8.15
+          docker build . --file .github/workflows/Dockerfile.z3 \
+            --tag z3:${Z3_VERSION}
+          docker build . --file .github/workflows/Dockerfile           \
+            --tag runtimeverification/k-ci                             \
+            --build-arg Z3_VERSION=${Z3_VERSION}                       \
+            --build-arg LLVM_VERSION=14                                \
             --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)
           docker run                        \
             --name k-ci                     \
@@ -200,8 +205,13 @@ jobs:
         run: |
           workspace=$(pwd)
           cd k-repo
-          docker build . --file .github/workflows/Dockerfile --tag runtimeverification/k-jammy-package-build \
-            --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14                                  \
+          Z3_VERSION=4.8.15
+          docker build . --file .github/workflows/Dockerfile.z3 \
+            --tag z3:${Z3_VERSION}
+          docker build . --file .github/workflows/Dockerfile           \
+            --tag runtimeverification/k-jammy-package-build            \
+            --build-arg Z3_VERSION=${Z3_VERSION}                       \
+            --build-arg LLVM_VERSION=14                                \
             --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)
           docker run                         \
             --name k-jammy-package-build     \
