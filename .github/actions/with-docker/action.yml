@@ -4,6 +4,10 @@ inputs:
   tag:
     description: 'Docker image tag to use'
     required: true
+  subdir:
+    description: 'Subdirectory where code is cloned.'
+    required: false
+    default:
 runs:
   using: 'composite'
   steps:
@@ -11,29 +15,30 @@ runs:
     shell: bash {0}
     env:
       TAG_NAME: ${{ inputs.tag }}
+      SUBDIR: ${{ inputs.subdir }}
     run: |
       Z3_VERSION=4.8.15
-      K_VERSION=$(cat package/version)
+      K_VERSION=$(cat ${SUBDIR}package/version)
 
-      docker build . --file .github/workflows/Dockerfile.z3          --tag z3:${Z3_VERSION}
-      docker build . --file .github/workflows/Dockerfile.stack-deps  --tag stack:${K_VERSION}
-      docker build . --file .github/workflows/Dockerfile.maven-cache --tag maven:${K_VERSION}
+      docker build . --file ${SUBDIR}.github/workflows/Dockerfile.z3          --tag z3:${Z3_VERSION}
+      docker build . --file ${SUBDIR}.github/workflows/Dockerfile.stack-deps  --tag stack:${K_VERSION}
+      docker build . --file ${SUBDIR}.github/workflows/Dockerfile.maven-cache --tag maven:${K_VERSION}
 
-      docker build . --file .github/workflows/Dockerfile \
+      docker build . --file ${SUBDIR}.github/workflows/Dockerfile \
           --tag runtimeverification/${TAG_NAME}          \
           --build-arg Z3_VERSION=${Z3_VERSION}           \
           --build-arg K_VERSION=${K_VERSION}             \
           --build-arg LLVM_VERSION=14                    \
           --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)
 
-      docker run                          \
-          --name ${TAG_NAME}              \
-          --rm -it                        \
-          --detach                        \
-          --workdir /opt/workspace        \
-          --user user:user                \
-          -v ${HOME}:${HOME}              \
-          -v "$(pwd):/opt/workspace"      \
-          -v "/etc/passwd:/etc/passwd:ro" \
-          -v "/etc/group:/etc/group:ro"   \
+      docker run                            \
+          --name ${TAG_NAME}                \
+          --rm -it                          \
+          --detach                          \
+          --workdir /opt/workspace${SUBDIR} \
+          --user user:user                  \
+          -v ${HOME}:${HOME}                \
+          -v "$(pwd):/opt/workspace"        \
+          -v "/etc/passwd:/etc/passwd:ro"   \
+          -v "/etc/group:/etc/group:ro"     \
           runtimeverification/${TAG_NAME}
