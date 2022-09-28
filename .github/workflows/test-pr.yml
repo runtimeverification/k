@@ -152,10 +152,8 @@ jobs:
         uses: ./.github/actions/with-docker
         with:
           tag: k-ci
-      - name: 'Build K'
-        run: docker exec -t k-ci /bin/bash -c 'mvn package -DskipTests'
-      - name: 'Unit Tests'
-        run: docker exec -t k-ci /bin/bash -c 'mvn --batch-mode verify -U'
+      - name: 'Build and Test K'
+        run: docker exec -t k-ci /bin/bash -c 'mvn verify --batch-mode -U'
       - name: 'Check out k-exercises'
         uses: actions/checkout@v3
         with:
