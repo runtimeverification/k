@@ -141,7 +141,7 @@ jobs:
 
   test-k:
     name: 'K Tests'
-    runs-on: [self-hosted, linux]
+    runs-on: [self-hosted, linux, normal]
     needs: [nix-maven, nix-flake-submodules]
     steps:
       - name: 'Check out code'
@@ -188,7 +188,7 @@ jobs:
 
   test-ubuntu-package:
     name: 'K Ubuntu Jammy Package'
-    runs-on: [self-hosted, linux]
+    runs-on: [self-hosted, linux, normal]
     needs: [nix-maven, nix-flake-submodules]
     steps:
       - name: 'Check out code'
