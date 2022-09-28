@@ -8,6 +8,7 @@ runs:
   using: 'composite'
   steps:
   - name: 'Set up Docker'
+    shell: bash {0}
     env:
       TAG_NAME: ${{ inputs.tag }}
     run: |
