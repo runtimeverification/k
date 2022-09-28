@@ -148,7 +148,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
-      - name: 'Build Docker Images'
+      - name: 'Set up Docker'
         uses: ./.github/actions/with-docker
         with:
           tag: k-ci
@@ -184,7 +184,7 @@ jobs:
         with:
           path: k-repo
           submodules: recursive
-      - name: 'Build Docker Images'
+      - name: 'Set up Docker'
         uses: ./k-repo/.github/actions/with-docker
         with:
           tag: k-jammy-package-build
