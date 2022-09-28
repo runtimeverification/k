@@ -7,7 +7,6 @@ ARG LLVM_VERSION=14
 ENV TZ America/Chicago
 ENV DEBIAN_FRONTEND=noninteractive
 
-# RUN if [ "$BASE_IMAGE" = "debian:bullseye" ]; then echo "Enabling backports..."; echo "deb http://deb.debian.org/debian bullseye-backports main" > /etc/apt/sources.list.d/bullseye-backports.list; fi
 RUN    apt-get update            \
     && apt-get install --yes     \
         bison                    \
