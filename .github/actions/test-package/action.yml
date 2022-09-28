@@ -1,0 +1,50 @@
+name: 'Build and Test Package'
+description: 'Build the package for a given distribution and test it.'
+inputs:
+  distro:
+    description: 'Distribution to build and test package for.'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+  - name: 'Check out code'
+    uses: actions/checkout@v3
+    with:
+      path: k-${{ inputs.distro }}
+      submodules: recursive
+  - name: 'Set up Docker'
+    uses: ./k-${{ inputs.distro }}/.github/actions/with-docker
+    with:
+      tag: k-package-build-${{ inputs.distro }}
+      subdir: k-${{ inputs.distro }}/
+  - name: 'Build Package: ${{ inputs.distro }}'
+    run: |
+      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'mv package/debian debian'
+      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'mv debian/compat.jammy debian/compat'
+      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'mv debian/control.jammy debian/control'
+      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'mv debian/rules.jammy debian/rules'
+      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'dpkg-buildpackage'
+      docker stop k-package-build-${{ inputs.disto }}
+  - name: 'Set up Docker Test Image: ${{inputs.distro }}'
+    run: |
+      workspace=$(pwd)
+      cd k-${{ inputs.distro }}
+      docker run                                  \
+        --name k-package-test-${{ inptus.disto }} \
+        --rm -it                                  \
+        --detach                                  \
+        --workdir /opt/workspace                  \
+        -v ${HOME}:${HOME}                        \
+        -v "${workspace}:/opt/workspace"          \
+        -v "/etc/passwd:/etc/passwd:ro"           \
+        -v "/etc/group:/etc/group:ro"             \
+        ubuntu:${{ inputs.distro }}
+  - name: 'Test Package: ${{ inputs.distro }}'
+    run: |
+      docker exec -t k-package-test-${{ inptus.disto }} /bin/bash -c 'k-${{ inputs.distro }}/src/main/scripts/test-in-container-debian'
+      docker stop k-package-test-${{ inptus.disto }}
+  - name: 'Tear down Docker'
+    if: always()
+    run: |
+      docker stop k-package-build-${{ inputs.disto }} || true
+      docker stop k-package-test-${{ inptus.disto }} || true
