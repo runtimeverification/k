@@ -40,6 +40,7 @@ output:
     - [Lesson 1.19: Debugging with GDB](/k-distribution/k-tutorial/1_basic/19_debugging/README.md)
     - [Lesson 1.20: K Backends and the Haskell Backend](/k-distribution/k-tutorial/1_basic/20_backends/README.md)
     - [Lesson 1.21: Unification and Symbolic Execution](/k-distribution/k-tutorial/1_basic/21_symbolic_execution/README.md)
+    - [Lesson 1.22: K Deductive Verification](/k-distribution/k-tutorial/1_basic/22_proofs/README.md)
 - [K PL Tutorial](/k-distribution/pl-tutorial/README.md)
   - [K Overview](/web/pages/overview.md)
   - [Learning K](/k-distribution/pl-tutorial/1_k/README.md)
@@ -100,7 +101,9 @@ output:
       - Lesson 3, FUN polymorphic type inferencer
     - [Part 10: LOGIK: Designing Logic Programming Languages](/k-distribution/pl-tutorial/2_languages/4_logik/basic/logik.md)
       - [Lesson 1, LOGIK](/k-distribution/pl-tutorial/2_languages/4_logik/basic/logik.md)
-- [K User Manual](/USER_MANUAL.md)
+- [K User Manual](/docs/user_manual.md)
+- [K Cheat Sheet](/docs/cheat_sheet.md)
+- [K Tool Reference](/docs/ktools.md)
 - [K Builtins](/k-distribution/include/kframework/builtin/README.md)
   - [domains](/k-distribution/include/kframework/builtin/domains.md)
   - [kast](/k-distribution/include/kframework/builtin/kast.md)
