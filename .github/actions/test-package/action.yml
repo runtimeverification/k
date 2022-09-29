@@ -40,6 +40,7 @@ runs:
     if: always()
     run: |
       docker stop k-package-build-${DISTRO} || true
+      docker container rm k-package-build-${DISTRO} || true
   - name: 'Set up Docker Test Image: ${{ inputs.distro }}'
     shell: bash {0}
     env:
@@ -65,7 +66,6 @@ runs:
     run: |
       set -euxo pipefail
       docker exec -t k-package-test-${DISTRO} /bin/bash -c "k-${DISTRO}/src/main/scripts/test-in-container-debian"
-      docker stop k-package-test-${DISTRO}
   - name: 'Tear down Docker Test'
     shell: bash {0}
     env:
@@ -73,3 +73,4 @@ runs:
     if: always()
     run: |
       docker stop k-package-test-${DISTRO} || true
+      docker container rm k-package-test-${DISTRO} || true

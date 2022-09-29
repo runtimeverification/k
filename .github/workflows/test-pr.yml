@@ -173,54 +173,16 @@ jobs:
           docker stop k-ci || true
           docker container rm k-ci || true
 
-  test-ubuntu-package:
+  test-ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
     runs-on: [self-hosted, linux, normal]
-    needs: version-sync
     steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+      - name: 'Build and Test'
+        uses: ./.github/actions/test-package
         with:
-          path: k-repo
-          submodules: recursive
-      - name: 'Set up Docker'
-        uses: ./k-repo/.github/actions/with-docker
-        with:
-          tag: k-jammy-package-build
-          subdir: k-repo/
-      - name: 'Build Jammy Package'
-        run: |
-          docker exec -t k-jammy-package-build /bin/bash -c 'mv package/debian debian'
-          docker exec -t k-jammy-package-build /bin/bash -c 'mv debian/compat.jammy debian/compat'
-          docker exec -t k-jammy-package-build /bin/bash -c 'mv debian/control.jammy debian/control'
-          docker exec -t k-jammy-package-build /bin/bash -c 'mv debian/rules.jammy debian/rules'
-          docker exec -t k-jammy-package-build /bin/bash -c 'dpkg-buildpackage'
-          docker stop k-jammy-package-build
-      - name: 'Set up Docker Test Image'
-        run: |
-          workspace=$(pwd)
-          cd k-repo
-          docker run                         \
-            --name k-jammy-package-test      \
-            --rm -it                         \
-            --detach                         \
-            --workdir /opt/workspace         \
-            -v ${HOME}:${HOME}               \
-            -v "${workspace}:/opt/workspace" \
-            -v "/etc/passwd:/etc/passwd:ro"  \
-            -v "/etc/group:/etc/group:ro"    \
-            ubuntu:jammy
-      - name: 'Test Jammy Package'
-        run: |
-          docker exec -t k-jammy-package-test /bin/bash -c 'k-repo/src/main/scripts/test-in-container-debian'
-          docker stop k-jammy-package-test
-      - name: 'Tear down Docker'
-        if: always()
-        run: |
-          docker stop k-jammy-package-build || true
-          docker stop k-jammy-package-test || true
-          docker container rm k-jammy-package-build || true
-          docker container rm k-jammy-package-test || true
+          distro: jammy
+          llvm: 14
 
   compile-nix-flake:
     name: 'Nix flake'
