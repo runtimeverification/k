@@ -40,7 +40,7 @@ runs:
     if: always()
     run: |
       docker stop k-package-build-${DISTRO} || true
-  - name: 'Set up Docker Test Image: ${{inputs.distro }}'
+  - name: 'Set up Docker Test Image: ${{ inputs.distro }}'
     shell: bash {0}
     env:
       DISTRO: ${{ inputs.distro }}
