@@ -18,6 +18,7 @@ runs:
       tag: k-package-build-${{ inputs.distro }}
       subdir: k-${{ inputs.distro }}/
   - name: 'Build Package: ${{ inputs.distro }}'
+    shell: bash {0}
     run: |
       docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'mv package/debian debian'
       docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'mv debian/compat.jammy debian/compat'
@@ -26,6 +27,7 @@ runs:
       docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'dpkg-buildpackage'
       docker stop k-package-build-${{ inputs.disto }}
   - name: 'Set up Docker Test Image: ${{inputs.distro }}'
+    shell: bash {0}
     run: |
       workspace=$(pwd)
       cd k-${{ inputs.distro }}
@@ -40,10 +42,12 @@ runs:
         -v "/etc/group:/etc/group:ro"             \
         ubuntu:${{ inputs.distro }}
   - name: 'Test Package: ${{ inputs.distro }}'
+    shell: bash {0}
     run: |
       docker exec -t k-package-test-${{ inptus.disto }} /bin/bash -c 'k-${{ inputs.distro }}/src/main/scripts/test-in-container-debian'
       docker stop k-package-test-${{ inptus.disto }}
   - name: 'Tear down Docker'
+    shell: bash {0}
     if: always()
     run: |
       docker stop k-package-build-${{ inputs.disto }} || true
