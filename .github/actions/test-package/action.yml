@@ -18,23 +18,29 @@ runs:
       tag: k-package-build-${{ inputs.distro }}
       subdir: k-${{ inputs.distro }}/
   - name: 'Build Package: ${{ inputs.distro }}'
-    shell: bash {0}
+    env:
+      DISTRO: ${{ inputs.disto }}
+    shell: docker exec -t k-package-build-${DISTRO} /bin/bash -c {0}
     run: |
-      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'mv package/debian debian'
-      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'mv debian/compat.jammy debian/compat'
-      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'mv debian/control.jammy debian/control'
-      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'mv debian/rules.jammy debian/rules'
-      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'dpkg-buildpackage'
+      mv package/debian debian
+      mv debian/compat.jammy debian/compat
+      mv debian/control.jammy debian/control
+      mv debian/rules.jammy debian/rules
+      dpkg-buildpackage
   - name: 'Tear down Docker'
     shell: bash {0}
+    env:
+      DISTRO: ${{ inputs.distro }}
     if: always()
     run: |
-      docker stop k-package-build-${{ inputs.disto }} || true
+      docker stop k-package-build-${DISTRO} || true
   - name: 'Set up Docker Test Image: ${{inputs.distro }}'
     shell: bash {0}
+    env:
+      DISTRO: ${{ inputs.distro }}
     run: |
       workspace=$(pwd)
-      cd k-${{ inputs.distro }}
+      cd k-${DISTRO}
       docker run                                  \
         --name k-package-test-${{ inputs.disto }} \
         --rm -it                                  \
@@ -44,14 +50,18 @@ runs:
         -v "${workspace}:/opt/workspace"          \
         -v "/etc/passwd:/etc/passwd:ro"           \
         -v "/etc/group:/etc/group:ro"             \
-        ubuntu:${{ inputs.distro }}
+        ubuntu:${DISTRO}
   - name: 'Test Package: ${{ inputs.distro }}'
     shell: bash {0}
+    env:
+      DISTRO: ${{ inputs.distro }}
     run: |
-      docker exec -t k-package-test-${{ inputs.disto }} /bin/bash -c 'k-${{ inputs.distro }}/src/main/scripts/test-in-container-debian'
-      docker stop k-package-test-${{ inputs.disto }}
+      docker exec -t k-package-test-${{ inputs.disto }} /bin/bash -c "k-${DISTRO}/src/main/scripts/test-in-container-debian"
+      docker stop k-package-test-${DISTRO}
   - name: 'Tear down Docker Test'
     shell: bash {0}
+    env:
+      DISTRO: ${{ inputs.distro }}
     if: always()
     run: |
-      docker stop k-package-test-${{ inputs.disto }} || true
+      docker stop k-package-test-${DISTRO} || true
