@@ -3,6 +3,9 @@ on:
   release:
     types:
       - prereleased
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
 
 jobs:
   nix-release:
