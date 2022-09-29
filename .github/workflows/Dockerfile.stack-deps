@@ -1,0 +1,19 @@
+FROM ubuntu:jammy
+
+RUN    apt-get update        \
+    && apt-get upgrade --yes \
+    && apt-get install --yes \
+            curl
+
+RUN curl -sSL https://get.haskellstack.org/ | sh
+
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+RUN groupadd -g $GROUP_ID user && useradd -m -u $USER_ID -s /bin/sh -g user user
+
+USER user:user
+
+ENV LC_ALL=C.UTF-8
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml      /home/user/.tmp-haskell/
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/kore.cabal /home/user/.tmp-haskell/kore/
+RUN cd /home/user/.tmp-haskell && stack build --only-snapshot
