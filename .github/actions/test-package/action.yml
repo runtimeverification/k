@@ -36,7 +36,7 @@ runs:
       workspace=$(pwd)
       cd k-${{ inputs.distro }}
       docker run                                  \
-        --name k-package-test-${{ inptus.disto }} \
+        --name k-package-test-${{ inputs.disto }} \
         --rm -it                                  \
         --detach                                  \
         --workdir /opt/workspace                  \
@@ -48,10 +48,10 @@ runs:
   - name: 'Test Package: ${{ inputs.distro }}'
     shell: bash {0}
     run: |
-      docker exec -t k-package-test-${{ inptus.disto }} /bin/bash -c 'k-${{ inputs.distro }}/src/main/scripts/test-in-container-debian'
-      docker stop k-package-test-${{ inptus.disto }}
+      docker exec -t k-package-test-${{ inputs.disto }} /bin/bash -c 'k-${{ inputs.distro }}/src/main/scripts/test-in-container-debian'
+      docker stop k-package-test-${{ inputs.disto }}
   - name: 'Tear down Docker Test'
     shell: bash {0}
     if: always()
     run: |
-      docker stop k-package-test-${{ inptus.disto }} || true
+      docker stop k-package-test-${{ inputs.disto }} || true
