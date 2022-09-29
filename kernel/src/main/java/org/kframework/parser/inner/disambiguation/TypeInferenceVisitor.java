@@ -196,11 +196,9 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
 
     private Sort expectedSort;
     private boolean hasCastAlready = false, hasCheckAlready = false;
-    private TreeNodesToKORE converter;
     private AddSortInjections inj;
     public TypeCheckVisitor(Sort topSort) {
       this.expectedSort = topSort;
-      this.converter = new TreeNodesToKORE(Outer::parseSort, true);
       this.inj = new AddSortInjections(inferencer.module());
     }
 
@@ -212,6 +210,21 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
         msg = "Unexpected sort " + actualSort + " for term parsed as production " + pr.production() + ". Expected " + expectedSort + ".";
       }
       return Left.apply(Collections.singleton(KEMException.innerParserError(msg, pr)));
+    }
+
+    private Sort getSort(ProductionReference child, Sort expectedSort) {
+        if (inferencer.module().syntacticSubsorts().greaterThan(expectedSort, Sorts.K())) {
+            expectedSort = Sorts.K();
+        }
+        Sort res = inj.substituteProd(child.production(), expectedSort, (i, fresh) -> getSort((ProductionReference)((TermCons)child).get(i), fresh.nonterminals().apply(i).sort()), child).sort();
+        if (res.equals(Sorts.KVariable())) {
+            if (expectedSort.params().isEmpty()) {
+              return expectedSort;
+            } else {
+              return Sorts.K();
+            }
+        }
+        return res;
     }
 
     @Override
@@ -235,25 +248,21 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
       // compute the instantiated production with its sort parameters
       Production substituted = pr.production();
       if (pr.production().params().nonEmpty()) {
-          List<Term> args = new ArrayList<>();
-          if (pr instanceof TermCons) {
-              TermCons tc = (TermCons)pr;
-              for (int i = 0; i < tc.items().size(); i++) {
-                  if (tc.get(i) instanceof Ambiguity) {
-                      // If one of the children is an ambiguity,
-                      // push it up and reapply over the new ast
-                      Ambiguity old = (Ambiguity)tc.get(i);
-                      Set<Term> newTerms = new HashSet<>();
-                      for (Term child : old.items()) {
-                          Term newTerm = tc.with(i, child);
-                          newTerms.add(newTerm);
-                      }
-                      return super.apply(Ambiguity.apply(newTerms));
+          TermCons tc = (TermCons)pr;
+          for (int i = 0; i < tc.items().size(); i++) {
+              if (tc.get(i) instanceof Ambiguity) {
+                  // If one of the children is an ambiguity,
+                  // push it up and reapply over the new ast
+                  Ambiguity old = (Ambiguity)tc.get(i);
+                  Set<Term> newTerms = new HashSet<>();
+                  for (Term child : old.items()) {
+                      Term newTerm = tc.with(i, child);
+                      newTerms.add(newTerm);
                   }
-                  args.add(tc.get(i));
+                  return super.apply(Ambiguity.apply(newTerms));
               }
           }
-          substituted = inj.substituteProd(substituted, expectedSort, (i, fresh2) -> inj.sort(converter.apply(args.get(i)), fresh2.nonterminals().apply(i).sort()), pr);
+          substituted = inj.substituteProd(substituted, expectedSort, (i, fresh2) -> getSort((ProductionReference)tc.get(i), fresh2.nonterminals().apply(i).sort()), pr);
       }
 
       Sort actualSort = substituted.sort();
