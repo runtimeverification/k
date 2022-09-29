@@ -23,6 +23,7 @@ runs:
       K_VERSION=$(cat ${SUBDIR}package/version)
 
       docker stop ${TAG_NAME} || true
+      docker stop /${TAG_NAME} || true
 
       docker build . --file ${SUBDIR}.github/workflows/Dockerfile.z3          --tag z3:${Z3_VERSION}
       docker build . --file ${SUBDIR}.github/workflows/Dockerfile.stack-deps  --tag stack:${K_VERSION}
