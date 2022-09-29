@@ -10,6 +10,8 @@ from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import split_config_and_constraints
 from .kast import KInner, read_kast_definition
 from .kastManip import flatten_label, minimize_rule, minimize_term, propagate_up_constraints, remove_source_map
+from .kore.parser import KoreParser
+from .kore.syntax import Pattern
 from .ktool import KPrint, KProve
 from .ktool.kprint import build_symbol_table, pretty_print_kast
 from .prelude.k import GENERATED_TOP_CELL
@@ -28,8 +30,6 @@ def main() -> None:
     cli_parser = create_argument_parser()
     args = vars(cli_parser.parse_args())
 
-    kompiled_dir = Path(args['definition'])
-
     if not args['verbose']:
         logging.basicConfig(level=logging.WARNING, format=_LOG_FORMAT)
     elif args['verbose'] == 1:
@@ -38,6 +38,7 @@ def main() -> None:
         logging.basicConfig(level=logging.DEBUG, format=_LOG_FORMAT)
 
     if args['command'] == 'print':
+        kompiled_dir = Path(args['definition'])
         printer = KPrint(kompiled_dir, profile=args['profile'])
         _LOGGER.info(f'Reading Kast from file: {args["term"].name}')
         term = KInner.from_json(args['term'].read())
@@ -60,12 +61,14 @@ def main() -> None:
             _LOGGER.info(f'Wrote file: {args["output_file"].name}')
 
     elif args['command'] == 'prove':
+        kompiled_dir = Path(args['definition'])
         kprover = KProve(kompiled_dir, args['main-file'], profile=args['profile'])
         final_state = kprover.prove(Path(args['spec-file']), spec_module_name=args['spec-module'], args=args['kArgs'])
         args['output_file'].write(final_state.to_json())
         _LOGGER.info(f'Wrote file: {args["output_file"].name}')
 
     elif args['command'] == 'graph-imports':
+        kompiled_dir = Path(args['definition'])
         kprinter = KPrint(kompiled_dir, profile=args['profile'])
         definition = kprinter.definition
         import_graph = Digraph()
@@ -79,6 +82,7 @@ def main() -> None:
         _LOGGER.info(f'Wrote file: {graph_file}')
 
     elif args['command'] == 'coverage':
+        kompiled_dir = Path(args['definition'])
         json_definition = remove_source_map(read_kast_definition(kompiled_dir / 'compiled.json'))
         symbol_table = build_symbol_table(json_definition)
         for rid in args['coverage-file']:
@@ -89,8 +93,26 @@ def main() -> None:
             args['output'].write(pretty_print_kast(rule, symbol_table))
         _LOGGER.info(f'Wrote file: {args["output"].name}')
 
+    elif args['command'] == 'kore-to-json':
+        kore_to_json()
+
+    elif args['command'] == 'json-to-kore':
+        json_to_kore()
+
     else:
         raise ValueError(f'Unknown command: {args["command"]}')
+
+
+def kore_to_json() -> None:
+    text = sys.stdin.read()
+    kore = KoreParser(text).pattern()
+    print(kore.json)
+
+
+def json_to_kore() -> None:
+    text = sys.stdin.read()
+    kore = Pattern.from_json(text)
+    print(kore.text)
 
 
 def create_argument_parser() -> ArgumentParser:
@@ -147,6 +169,10 @@ def create_argument_parser() -> ArgumentParser:
     )
     coverage_args.add_argument('coverage-file', type=FileType('r'), help='Coverage file to build log for.')
     coverage_args.add_argument('-o', '--output', type=FileType('w'), default='-')
+
+    pyk_args_command.add_parser('kore-to-json', help='Convert textual KORE to JSON', parents=[logging_args])
+
+    pyk_args_command.add_parser('json-to-kore', help='Convert JSON to textual KORE', parents=[logging_args])
 
     return pyk_args
 
