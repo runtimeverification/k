@@ -18,7 +18,7 @@ call/cc.
 
 - Install from the latest [K GitHub Release](https://github.com/runtimeverification/k/releases/latest).
 - Try our [Editor Support](./editor_support.md) page for links to K syntax highlighting definitions for various popular editors/IDEs. Please feel free to contribute.
-- Build or browse the code [on GitHub](https://github.com/kframework), where you can also [report bugs](http://github.com/runtimeverification/k/issues).
+- Build or browse the code [on GitHub](https://github.com/runtimeverification/k), where you can also [report bugs](http://github.com/runtimeverification/k/issues).
 
 ## Learn K
 
