@@ -13,7 +13,7 @@ runs:
       path: k-${{ inputs.distro }}
       submodules: recursive
   - name: 'Set up Docker'
-    uses: ./k-${{ inputs.distro }}/.github/actions/with-docker
+    uses: ./.github/actions/with-docker
     with:
       tag: k-package-build-${{ inputs.distro }}
       subdir: k-${{ inputs.distro }}/
