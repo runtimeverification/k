@@ -51,7 +51,7 @@ generatePagesFromMarkdownFiles({
   },
 });
 generatePagesFromMarkdownFiles({
-  globPattern: path.resolve(__dirname, "../") + "/USER_MANUAL.md",
+  globPattern: path.resolve(__dirname, "../docs") + "*.md",
   globOptions: {},
   origin: "https://github.com/runtimeverification/k/tree/master/",
   sourceDirectory: path.resolve(__dirname, "../"),
