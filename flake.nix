@@ -82,6 +82,10 @@
       let
         pkgs = import nixpkgs {
           inherit system;
+
+          # Temporarily required until a bug on pyOpenSSL is resolved for aarch64-darwin
+          # https://github.com/NixOS/nixpkgs/pull/172397
+          config.allowBroken = system == "aarch64-darwin";
           overlays = [ (final: prev: { llvm-backend-release = false; }) ]
             ++ allOverlays;
         };
