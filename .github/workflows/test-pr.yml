@@ -171,6 +171,7 @@ jobs:
         run: |
           docker exec -t k-ci /bin/bash -c 'k-distribution/target/release/k/bin/stop-kserver' || true
           docker stop k-ci || true
+          docker container rm k-ci || true
 
   test-ubuntu-package:
     name: 'K Ubuntu Jammy Package'
@@ -218,6 +219,8 @@ jobs:
         run: |
           docker stop k-jammy-package-build || true
           docker stop k-jammy-package-test || true
+          docker container rm k-jammy-package-build || true
+          docker container rm k-jammy-package-test || true
 
   compile-nix-flake:
     name: 'Nix flake'
