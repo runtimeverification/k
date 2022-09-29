@@ -1,4 +1,4 @@
-name: "Release nix"
+name: "Master Push"
 on:
   push:
     branches:
@@ -45,14 +45,13 @@ jobs:
           export GC_DONT_GC=1
           export CACHIX_AUTH_TOKEN=$RV_DEVOPS_CACHIX_TOKEN
           nix shell nixpkgs#jq
-          nix-store --query --requisites --include-outputs \
-            $(nix-store --query --deriver \
-              $(nix build .#k --json | jq -r '.[].outputs | to_entries[].value')) \
-            | cachix push k-framework
+          k=$(nix build .#k --json | jq -r '.[].outputs | to_entries[].value')
+          drv=$(nix-store --query --deriver ${k})
+          nix-store --query --requisites --include-outputs ${drv} | cachix push k-framework
             
       - name: 'Build and cache kup'
         run: |
-          nix-store --query --requisites --include-outputs \
-            $(nix-store --query --deriver \
-              $(nix build .#kup --json | jq -r '.[].outputs | to_entries[].value')) \
-            | cachix push k-framework
+          kup=$(nix build .#kup --json | jq -r '.[].outputs | to_entries[].value')
+          drv=$(nix-store --query --deriver ${kup})
+          nix-store --query --requisites --include-outputs ${drv} | cachix push k-framework
+            
