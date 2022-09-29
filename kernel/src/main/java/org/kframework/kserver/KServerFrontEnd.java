@@ -9,7 +9,6 @@ import com.martiansoftware.nailgun.NGContext;
 import com.martiansoftware.nailgun.NGListeningAddress;
 import com.martiansoftware.nailgun.NGServer;
 import com.martiansoftware.nailgun.ThreadLocalPrintStream;
-import org.fusesource.jansi.io.AnsiOutputStream;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.Main;
 import org.kframework.utils.OS;
@@ -19,7 +18,6 @@ import org.kframework.utils.file.JarInfo;
 import org.kframework.utils.file.TTYInfo;
 import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.JCommanderModule;
-import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
 import org.kframework.utils.inject.SimpleScope;
 
@@ -58,7 +56,7 @@ public class KServerFrontEnd extends FrontEnd {
     private static KServerFrontEnd instance;
     private static Thread threadInstance;
     private static final ImmutableList<String> tools = ImmutableList.of("-kompile", "-krun", "-kast",
-            "-kdep", "-keq", "-kprove", "-kprovex", "-kbmc", "-kserver", "-k-compile-search-pattern");
+            "-kdep", "-keq", "-kprove-legacy", "-kprove", "-kbmc", "-kserver", "-k-compile-search-pattern");
 
     private final KServerOptions options;
     private final Map<String, Injector> injectors = new HashMap<>();

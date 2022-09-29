@@ -3,10 +3,10 @@ Installing the K Framework Package
 
 We currently strive to provide packages for the following platforms:
 
--   Ubuntu Bionic Beaver (18.04) and Focal Fossa (20.04)
+-   Ubuntu Focal Fossa (20.04) and Jammy Jellyfish (22.04)
 -   Debian Bullseye
 -   Arch Linux
--   MacOS X Mojave/Homewbrew
+-   macOS Catalina (10.15), Big Sur (11) and Monterey (12) via Homebrew
 -   Docker Images
 
 Pre-installation Notes
@@ -15,7 +15,7 @@ Pre-installation Notes
 -   We **do not** currently support running K natively on Windows. To use K on
     Windows 10, you are encouraged to install the
     [Windows Subsystem for Linux (version 2)](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
-    and follow the instructions for installing Ubuntu Bionic.
+    and follow the instructions for installing Ubuntu Focal.
 
     If you have already installed WSL, before proceeding, you will need to
     enter the WSL environment. You can do this by:
@@ -28,7 +28,7 @@ Pre-installation Notes
     you will need to use a virtual machine (VM) software. We assume you have:
 
     1.  Created a virtual machine
-    2.  Installed a Linux distribution (e.g. Ubuntu Bionic Beaver) on your
+    2.  Installed a Linux distribution (e.g. Ubuntu Focal Fossa) on your
         virtual machine
 
     Consult your virtual machine software if you need help with the above
@@ -49,12 +49,7 @@ Pre-installation Notes
 
     where `<package-download-url>` is replaced by the URL you just copied.
 
--   The packages we distribute do **not** include the OCaml backend dependency
-    setup. However, we include
-    [instructions below](#installing-the-ocaml-backend-optional) on using the
-    OCaml backend with the package-installed K.
-
--   K depends on version 4.8.11 of Z3, which may not be supplied by package
+-   K depends on version 4.8.15 of Z3, which may not be supplied by package
     managers. If this is the case, it should be built and installed from source
     following the
     [instructions](https://github.com/Z3Prover/z3#building-z3-using-cmake) in
@@ -71,23 +66,23 @@ Releases are generated as often as possible from `master` build.
 Installing Packages
 -------------------
 
-For version `X.Y.Z`, disto `DISTRO`, and package ID `ID`, the following
+For version `X.Y.Z`, distribution `DISTRO`, and package ID `ID`, the following
 instructions tell you how to install on each system. Note that this typically
 requires about ~1.4GB of dependencies and will take some time.
 
 -   On Linux systems, K will typically be installed under `/usr`.
 -   On macOS/brew, K will typically be installed under `/usr/local`.
 
-### Ubuntu Bionic (18.04)
-
-```sh
-sudo apt install ./kframework_X.Y.Z_amd64_bionic.deb
-```
-
 ### Ubuntu Focal (20.04)
 
 ```sh
 sudo apt install ./kframework_X.Y.Z_amd64_focal.deb
+```
+
+### Ubuntu Jammy (22.04)
+
+```sh
+sudo apt install ./kframework_X.Y.Z_amd64_jammy.deb
 ```
 
 ### Debian Bullseye
@@ -145,8 +140,6 @@ Docker images with K pre-installed are available at the
 
 Each release at `COMMIT_ID` has an image associated with it at
 `runtimeverificationinc/kframework-k:ubuntu-focal-COMMIT_ID`.
-The latest `master` build Docker image can be accessed with `COMMIT_ID` set to
-`master`.
 
 To run the image directly:
 
@@ -161,32 +154,7 @@ and to make a Docker Image based on it, use the following line in your
 FROM runtimeverificationinc/kframework-k:ubuntu-focal-COMMIT_ID
 ```
 
-We also create Ubuntu 18.04 images with the `ubuntu-bionic-COMMIT_ID` tags.
-
-Installing the OCaml Backend (Optional)
----------------------------------------
-
-**NOTE**: It is *strongly* recommended that you use the LLVM backend instead of
-the OCaml backend. The OCaml backend is being sunsetted.
-
-To use the OCaml backend requires an installation of the OCaml package manager
-`opam`. Instructions on installing `opam` are available here:
-<https://opam.ocaml.org/doc/Install.html>.
-You should install on Windows by following the instructions for the Linux
-distribution you installed for Windows Subsystem for Linux.
-
-Once `opam` is installed, you can prepare the installation to run the OCaml
-backend by running (for a user-local install):
-
-```sh
-k-configure-opam
-eval $(opam config env)
-```
-
-`k-configure-opam` is in the `k/bin` directory, and the `eval` command sets up
-your OCaml environment. You can optionally control where the OCaml dependencies
-are installed by setting the `OPAMROOT` environment variable before running the
-above commands with `export OPAMROOT=/path/to/opam/root`.
+We also create Ubuntu 22.04 images with the `ubuntu-jammy-COMMIT_ID` tags.
 
 Testing Packages
 ----------------

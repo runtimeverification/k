@@ -9,6 +9,8 @@ import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
+import org.kframework.definition.Production;
+import org.kframework.definition.ProductionItem;
 import org.kframework.definition.RegexTerminal;
 import org.kframework.definition.SyntaxLexical;
 import org.kframework.definition.Terminal;
@@ -28,10 +30,13 @@ import java.nio.ByteOrder;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.Semaphore;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -49,24 +54,74 @@ public class Scanner implements AutoCloseable {
     private final Module module;
     private GlobalOptions go = new GlobalOptions();
 
-    private static final String EXE_EXTENSION = OS.current().equals(OS.WINDOWS) ? ".exe" : "";
+    public static final String COMPILER = OS.current().equals(OS.OSX) ? "clang" : "gcc";
+
+    public static Map<TerminalLike, Tuple2<Integer, Integer>> getTokens(Module module) {
+        Map<TerminalLike, Integer> tokens = new TreeMap<>();
+        Set<String> terminals = new HashSet<>();
+        for (Production p : iterable(module.productions())) {
+            for (ProductionItem pi : iterable(p.items())) {
+                if (pi instanceof TerminalLike) {
+                    TerminalLike lx = (TerminalLike) pi;
+                    if (tokens.containsKey(lx)) {
+                        int prec;
+                        if (p.att().contains("prec")) {
+                            prec = Integer.valueOf(p.att().<String>getOptional("prec").get());
+                        } else if (lx instanceof Terminal) {
+                            prec = Integer.MAX_VALUE;
+                        } else {
+                            prec = 0;
+                        }
+                        if (prec != tokens.get(lx)) {
+                            throw KEMException.compilerError("Inconsistent token precedence detected.", p);
+                        }
+                    } else if (lx instanceof Terminal && terminals.contains(((Terminal) lx).value())) {
+                        tokens.put(lx, Integer.MAX_VALUE);
+                    } else {
+                        if (lx instanceof Terminal) {
+                            terminals.add(((Terminal) lx).value());
+                            tokens.put(lx, Integer.MAX_VALUE);
+                        } else {
+                            int prec;
+                            if (p.att().contains("prec")) {
+                                prec = Integer.valueOf(p.att().<String>getOptional("prec").get());
+                            } else {
+                                prec = 0;
+                            }
+                            tokens.put(lx, prec);
+                        }
+                    }
+                }
+            }
+        }
+
+        Map<TerminalLike, Tuple2<Integer, Integer>> finalTokens = new HashMap<>();
+        // token 0 is EOF, so start at index 1
+        int idx = 1;
+        for (TerminalLike t : tokens.keySet()) {
+            finalTokens.put(t, Tuple2.apply(idx++, tokens.get(t)));
+        }
+
+        return finalTokens;
+    }
+
 
     public Scanner(ParseInModule module, GlobalOptions go) {
         this.go = go;
-        this.tokens  = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
+        this.tokens  = getTokens(module.getParsingModule());
         this.module  = module.seedModule();
         this.scanner = getScanner();
     }
 
     public Scanner(ParseInModule module) {
-        this.tokens  = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
+        this.tokens  = getTokens(module.getParsingModule());
         this.module  = module.seedModule();
         this.scanner = getScanner();
     }
 
     public Scanner(ParseInModule module, GlobalOptions go, File scanner) {
         this.go = go;
-        this.tokens  = KSyntax2GrammarStatesFilter.getTokens(module.getParsingModule());
+        this.tokens  = getTokens(module.getParsingModule());
         this.module  = module.seedModule();
         this.scanner = scanner;
     }
@@ -234,16 +289,16 @@ public class Scanner implements AutoCloseable {
                 throw KEMException.internalError(
                         "Flex returned nonzero exit code. See output for details. flex command: " + pb.command());
             }
-            scanner = File.createTempFile("tmp-kompile-", EXE_EXTENSION);
+            scanner = File.createTempFile("tmp-kompile-", "");
             scanner.deleteOnExit();
             //Option -lfl unnecessary. Same effect achieved by --noyywrap above.
-            pb = new ProcessBuilder("gcc", scannerCSource.getAbsolutePath(), "-o", scanner.getAbsolutePath(), "-Wno-unused-result");
+            pb = new ProcessBuilder(COMPILER, scannerCSource.getAbsolutePath(), "-o", scanner.getAbsolutePath(), "-Wno-unused-result");
             pb.inheritIO();
             exit = pb.start().waitFor();
             scanner.setExecutable(true);
             if (exit != 0) {
                 throw KEMException.internalError(
-                        "gcc returned nonzero exit code. See output for details. gcc command: " + pb.command());
+                        COMPILER + " returned nonzero exit code. See output for details. " + COMPILER + " command: " + pb.command());
             }
         } catch (IOException | InterruptedException e) {
             throw KEMException.internalError("Failed to write file for scanner", e);
@@ -369,7 +424,7 @@ public class Scanner implements AutoCloseable {
             process.getOutputStream().write(size.array());
             process.getOutputStream().write(buf);
             process.getOutputStream().flush();
-            return readTokenizedOutput(process, source, lines, columns);
+            return readTokenizedOutput(process, source, lines, columns, input.length());
         } catch (IOException | InterruptedException e) {
             throw KEMException.internalError("Failed to invoke scanner", e);
         } finally {
@@ -377,7 +432,7 @@ public class Scanner implements AutoCloseable {
         }
     }
 
-    private Token[] readTokenizedOutput(Process process, Source source, int[] lines, int[] columns) throws IOException {
+    private Token[] readTokenizedOutput(Process process, Source source, int[] lines, int[] columns, int length) throws IOException {
         List<Token> result = new ArrayList<>();
         boolean success = false;
         try {
@@ -406,6 +461,8 @@ public class Scanner implements AutoCloseable {
                 result.add(t);
             }
             success = true;
+            // add EOF token at end of token sequence
+            result.add(new Token(0, "", length, length));
             return result.toArray(new Token[result.size()]);
         } finally {
             if (success) {

@@ -1,7 +1,0 @@
-/kast-tests/*.out
-/kast-tests/*.gen
-/llvm
-/haskell
-/kpyk-tests/*.coverage
-/kpyk-tests/minimize/*.out
-/kpyk-tests/minimize/*.json

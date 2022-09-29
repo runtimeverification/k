@@ -6,6 +6,10 @@
 
 <br>
 
+- **[Dedukti (Mar 2021 - Present)](https://gitlab.com/semantiko/K-semantics)**
+
+  This project aims to translate real K semantics into Dedukti.
+
 - **[KWasm (Aug 2015 - Present)](https://github.com/kframework/wasm-semantics)**
 
   KWasm is the K semantics of [WebAssembly](https://webassembly.github.io/spec/).
@@ -28,21 +32,10 @@
   K-Michelson is the K semantics of [Michelson blockchain programming language](https://www.michelson.org/), which powers the [Tezos blockchain](https://tezos.com/).
   KMichelson provides additional testing tools for developers, including a unit-testing framework which is extendable to symbolic property testing.
 
-- **[Elrond (July 2020 - Present)](https://github.com/runtimeverification/elrond-semantics)**
-
-  The semantics of [Elrond](https://elrond.com/) is a wrapper around KWasm which extends it with the Elrond blockchain primitives.
-  This extension enables developers targeting the Elrond blockchain to measure coverage of their test-suite directly at the Wasm level.
-
 - **[C (Jul 2010 - Present)](https://github.com/kframework/c-semantics)**
 
   The K semantics of the [C programming language](<https://en.wikipedia.org/wiki/C_(programming_language)>) specifies the translation, linking, and execution semantics of the C language according to the official C standard.
   It has been used to build tools like RV-Match, which detects undefined behaviors in users programs by running their test-suites through the C semantics.
-
-- **[P4 (Nov 2016 - Present)](https://github.com/kframework/p4-semantics)**
-
-  A complete formal semantics of the [P4 language](https://p4.org/), version 1.0.4.
-  P4 is a software-defined-networking language, targeted at providing a hardware agnostic way to specify network behavior.
-  The K P4 semantics provides a way to model-check these P4 specifications, looking for bad networking states.
 
 ## Archived
 
@@ -71,3 +64,5 @@
 - [KEwasm (2019-2020)](https://github.com/kframework/ewasm-semantics)
 - [hybrid programs (2020-2020)](https://github.com/Formal-Systems-Laboratory/hybrid-programs-semantics)
 - [Boogie (2020)](https://github.com/kframework/boogie-semantics)
+- [Elrond (2020-2021)](https://github.com/runtimeverification/elrond-semantics)
+- [P4 (2016-2021)](https://github.com/kframework/p4-semantics)

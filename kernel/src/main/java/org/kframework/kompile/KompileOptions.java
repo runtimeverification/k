@@ -47,10 +47,8 @@ public class KompileOptions implements Serializable {
     public OutputDirectoryOptions outputDirectory = new OutputDirectoryOptions();
 
     // Common options
-    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [llvm|haskell|kore|java|ocaml]. Each creates the kompiled K definition.")
+    @Parameter(names="--backend", description="Choose a backend. <backend> is one of [llvm|haskell|kore|java]. Each creates the kompiled K definition.")
     public String backend = Backends.LLVM;
-
-    private boolean kore;
 
     @Parameter(names="--main-module", description="Specify main module in which a program starts to execute. This information is used by 'krun'. The default is the name of the given K definition file without the extension (.k).")
     private String mainModule;
@@ -70,16 +68,6 @@ public class KompileOptions implements Serializable {
             return mainModule(files) + "-SYNTAX";
         }
         return syntaxModule;
-    }
-
-    @Parameter(names="--non-strict", description="Do not add runtime sort checks for every variable's inferred sort. Only has an effect with `--backend ocaml`.")
-    private boolean nonStrict;
-
-    public boolean strict() {
-        if (nonStrict && ! backend.equals("ocaml")) {
-            throw KEMException.criticalError("Option `--non-strict` only makes sense for `--backend ocaml`.");
-        }
-        return !nonStrict;
     }
 
     @Parameter(names="--coverage", description="Generate coverage data when executing semantics.")
@@ -142,4 +130,14 @@ public class KompileOptions implements Serializable {
 
     @Parameter(names="--top-cell", description="Choose the top configuration cell when more than one is provided. Does nothing if only one top cell exists.")
     public String topCell;
+
+    @Parameter(names="--debug-type-inference", description="Filename and source line of rule to debug type inference for. This is generally an option used only by maintaners.")
+    public String debugTypeInference;
+
+    @Parameter(names={"--post-process"}, description="JSON KAST => JSON KAST converter to run on definition after kompile pipeline.")
+    public String postProcess;
+
+    // TODO(dwightguth): remove this when it is no longer needed
+    @Parameter(names={"--disable-ceil-simplification-rules"}, description="Disable all rules with the simplification attribute whose left-hand side has a #Ceil at the top.")
+    public boolean disableCeilSimplificationRules;
 }

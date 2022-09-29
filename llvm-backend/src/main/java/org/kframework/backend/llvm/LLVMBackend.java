@@ -16,6 +16,7 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.file.FileUtil;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -107,10 +108,14 @@ public class LLVMBackend extends KoreBackend {
     private void llvmKompile(String type, String executable) {
         ProcessBuilder pb = files.getProcessBuilder();
         List<String> args = new ArrayList<>();
-        args.add("llvm-kompile");
+        args.add("llvm-kompilex");
         args.add("definition.kore");
         args.add("dt");
         args.add(type);
+
+        // Arguments after this point are passed on to Clang.
+        args.add("--");
+
         args.add("-o");
         args.add(executable);
         if (kompileOptions.optimize1) args.add("-O1");
@@ -118,13 +123,19 @@ public class LLVMBackend extends KoreBackend {
         if (kompileOptions.optimize3) args.add("-O2"); // clang -O3 does not make the llvm backend any faster
         args.addAll(options.ccopts);
         try {
-            Process p = pb.command(args).directory(files.resolveKompiled(".")).inheritIO().start();
+            File kompiledDir = files.resolveKompiled(".");
+
+            if (globalOptions.verbose) {
+                System.out.println("Executing in " + kompiledDir.getCanonicalPath() + ": " + String.join(" ", args));
+            }
+
+            Process p = pb.command(args).directory(kompiledDir).inheritIO().start();
             int exit = p.waitFor();
             if (exit != 0) {
-                throw KEMException.criticalError("llvm-kompile returned nonzero exit code: " + exit + "\nExamine output to see errors.");
+                throw KEMException.criticalError("llvm-kompilex returned nonzero exit code: " + exit + "\nExamine output to see errors.");
             }
         } catch (IOException | InterruptedException e) {
-            throw KEMException.criticalError("Error with I/O while executing llvm-kompile", e);
+            throw KEMException.criticalError("Error with I/O while executing llvm-kompilex", e);
         }
     }
 

@@ -58,6 +58,10 @@ programming language and then compile and execute it. Instead, it is an
 interpreter which reads the generated IR from `kompile` and implements in
 Haskell an interpreter that is capable of interpreting any K definition.
 
+Note that on arm64 macOS (Apple Silicon), there is a known issue with the `Compact`
+library that causes crashes in the Haskell backend. Pass the additional flag
+`--no-haskell-binary` to `kompile` to resolve this.
+
 ### Exercise
 
 Try running the program `0` in this K definition on the Haskell Backend and
@@ -66,13 +70,11 @@ definition with the LLVM Backend.
 
 ## Legacy backends
 
-As a quick note, K does provide two other backends, which exist primarily
-as legacy code which should be considered deprecated. These are the
-**Java Backend** and the **OCAML Backend**. The Java Backend is essentially
-a precursor to the Haskell Backend, and the OCAML Backend is essentially a
-precursor to the LLVM Backend. We will not cover these backends in any detail
-since they are deprecated, but we still mention them here for the purposes
-of understanding.
+As a quick note, K does provide one other backend, which exists primarily as
+legacy code which should be considered deprecated. This is the
+**Java Backend**. The Java Backend is essentially a precursor to the Haskell
+Backend. We will not cover this backend in any detail since it is deprecated, 
+but we still mention it here for the purposes of understanding.
 
 ## Exercises
 

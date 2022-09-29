@@ -29,14 +29,16 @@ import org.kframework.definition.SyntaxSort;
 import org.kframework.kore.AddAttRec;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KToken;
 import org.kframework.kore.Sort;
+import org.kframework.kore.VisitK;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ParserUtils;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.ParseCache;
 import org.kframework.parser.inner.ParseCache.ParsedSentence;
 import org.kframework.parser.inner.ParseInModule;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.BinaryLoader;
@@ -98,7 +100,6 @@ public class DefinitionParsing {
 
     public final AtomicInteger parsedBubbles = new AtomicInteger(0);
     public final AtomicInteger cachedBubbles = new AtomicInteger(0);
-    private final boolean isStrict;
     private final boolean profileRules;
     private final List<File> lookupDirectories;
     private final InnerParsingOptions innerParsingOptions;
@@ -128,12 +129,11 @@ public class DefinitionParsing {
         this.autoImportDomains = !outerParsingOptions.noPrelude;
         this.kore = options.isKore();
         this.loader = new BinaryLoader(this.kem);
-        this.isStrict = options.strict();
         this.profileRules = innerParsingOptions.profileRules != null;
         this.sw = sw;
     }
 
-    public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, java.util.Set<String> excludeModules, boolean readOnlyCache) {
+    public java.util.Set<Module> parseModules(CompiledDefinition definition, String mainModule, String entryPointModule, File definitionFile, java.util.Set<String> excludeModules, boolean readOnlyCache, boolean useCachedScanner) {
         Definition def = parser.loadDefinition(
                 mainModule,
                 mutable(definition.getParsedDefinition().modules()),
@@ -176,7 +176,7 @@ public class DefinitionParsing {
             throw new AssertionError("should not reach this statement");
         }
 
-        def = resolveNonConfigBubbles(def, false);
+        def = resolveNonConfigBubbles(def, false, useCachedScanner);
         saveTimings();
         if (! readOnlyCache) {
             saveCaches();
@@ -231,7 +231,7 @@ public class DefinitionParsing {
         sw.printIntermediate("Parse configurations [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " declarations]");
         parsedBubbles.set(0);
         cachedBubbles.set(0);
-        Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles, true);
+        Definition afterResolvingAllOtherBubbles = resolveNonConfigBubbles(afterResolvingConfigBubbles, true, false);
         sw.printIntermediate("Parse rules [" + parsedBubbles.get() + "/" + (parsedBubbles.get() + cachedBubbles.get()) + " rules]");
         saveTimings();
         saveCachesAndReportParsingErrors();
@@ -306,6 +306,32 @@ public class DefinitionParsing {
         return errors;
     }
 
+    private void checkDuplicateKCells(Definition defWithParsedConfigs) {
+        // check for duplicate <k> cell declarations
+        List<K> kcells = new ArrayList<>();
+        stream(defWithParsedConfigs.mainModule().sentences())
+                .filter(s -> s instanceof Configuration)
+                .forEach(s -> new VisitK() {
+                    @Override
+                    public void apply(KApply k) {
+                        if (k.klabel().equals(KLabel("#configCell"))) {
+                            KToken kt = (KToken) k.klist().items().get(0);
+                            assert kt.sort().equals(Sorts.CellName());
+                            if (kt.s().equals("k"))
+                                kcells.add(k);
+                        }
+                        super.apply(k);
+                    }
+                }.apply(((Configuration) s).body()));
+        if (kcells.size() <= 1) {
+            return;
+        }
+        for (K kCellDecl: kcells) {
+            this.errors.add(KEMException.compilerError("Multiple K cell declarations detected. Only one <k> cell declaration is allowed.", kCellDecl));
+        }
+        throwExceptionIfThereAreErrors();
+    }
+
     private Definition resolveConfigBubbles(Definition def) {
         Definition defWithCaches = resolveCachedBubbles(def, false);
         RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
@@ -320,7 +346,7 @@ public class DefinitionParsing {
                 return m;
             Module configParserModule = gen.getConfigGrammar(m);
             ParseCache cache = loadCache(configParserModule);
-            try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files)) {
+            try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, files, options.debugTypeInference)) {
                 // each parser gets its own scanner because config labels can conflict with user tokens
                 parser.getScanner(globalOptions);
                 parser.initialize();
@@ -341,6 +367,8 @@ public class DefinitionParsing {
                 Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()),
                 "replace configs").apply(defWithCaches);
 
+        checkDuplicateKCells(defWithParsedConfigs);
+
         // replace config bubbles with the generated syntax and rules
         return DefinitionTransformer.from(m -> {
             if (stream(m.localSentences()).noneMatch(s -> s instanceof Configuration
@@ -355,7 +383,7 @@ public class DefinitionParsing {
                   (Set<Sentence>) m.localSentences().$bar(importedConfigurationSortsSubsortedToCell),
                   m.att());
 
-            Module extMod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(module), isStrict, profileRules, files).getExtensionModule();
+            Module extMod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(module), true, profileRules, files, options.debugTypeInference).getExtensionModule();
             Set<Sentence> configDeclProductions = stream(module.localSentences())
                       .filter(s -> s instanceof Configuration)
                       .map(b -> (Configuration) b)
@@ -372,17 +400,24 @@ public class DefinitionParsing {
         }, "expand configs").apply(defWithParsedConfigs);
     }
 
-    private Definition resolveNonConfigBubbles(Definition defWithConfig, boolean serializeScanner) {
+    private Definition resolveNonConfigBubbles(Definition defWithConfig, boolean serializeScanner, boolean deserializeScanner) {
         Definition defWithCaches = resolveCachedBubbles(defWithConfig, true);
         RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithCaches);
         Module ruleParserModule = gen.getRuleGrammar(defWithCaches.mainModule());
         ParseCache cache = loadCache(ruleParserModule);
-        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files, true)) {
-            Scanner scanner = parser.getScanner(globalOptions);
-            if (serializeScanner) {
-                scanner.serialize(files.resolveKompiled("scanner"));
+        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, false, true, files, options.debugTypeInference)) {
+            Scanner scanner;
+            if (deserializeScanner) {
+                scanner = new Scanner(parser, globalOptions, files.resolveKompiled("scanner"));
+                parser.setScanner(scanner);
+            } else {
+                scanner = parser.getScanner(globalOptions);
+                if (serializeScanner) {
+                    scanner.serialize(files.resolveKompiled("scanner"));
+                }
             }
-            Map<String, Module> parsed = defWithCaches.parMap(m -> this.resolveNonConfigBubbles(m, parser.getScanner(globalOptions), gen));
+            final Scanner realScanner = scanner;
+            Map<String, Module> parsed = defWithCaches.parMap(m -> this.resolveNonConfigBubbles(m, realScanner, gen));
             return DefinitionTransformer.from(m -> Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()), "parsing rules").apply(defWithConfig);
         }
     }
@@ -397,8 +432,8 @@ public class DefinitionParsing {
 
         ParseCache cache = loadCache(ruleParserModule);
         try (ParseInModule parser = needNewScanner ?
-                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), isStrict, profileRules, files) :
-                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), scanner, isStrict, profileRules, false, files)) {
+                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, files, options.debugTypeInference) :
+                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), scanner, true, profileRules, false, files, options.debugTypeInference)) {
             if (needNewScanner)
                 parser.getScanner(globalOptions);
             parser.initialize();
@@ -508,7 +543,7 @@ public class DefinitionParsing {
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         RuleGrammarGenerator gen = new RuleGrammarGenerator(compiledDef.kompiledDefinition);
         try (ParseInModule parser = RuleGrammarGenerator
-                .getCombinedGrammar(gen.getRuleGrammar(compiledDef.getParsedDefinition().mainModule()), isStrict, profileRules, false, true, files)) {
+                .getCombinedGrammar(gen.getRuleGrammar(compiledDef.getParsedDefinition().mainModule()), true, profileRules, false, true, files, options.debugTypeInference)) {
             parser.setScanner(new Scanner(parser, globalOptions, files.resolveKompiled("scanner")));
             java.util.Set<K> res = parseBubble(parser, new HashMap<>(),
                     new Bubble(rule, contents, Att().add("contentStartLine", 1)
@@ -607,8 +642,8 @@ public class DefinitionParsing {
 
     private ParseCache loadCache(Module parser) {
         ParseCache cachedParser = caches.get(parser.name());
-        if (cachedParser == null || !equalsSyntax(cachedParser.getModule().signature(), parser.signature()) || cachedParser.isStrict() != isStrict) {
-            cachedParser = new ParseCache(parser, isStrict, java.util.Collections.synchronizedMap(new HashMap<>()));
+        if (cachedParser == null || !equalsSyntax(cachedParser.getModule().signature(), parser.signature())) {
+            cachedParser = new ParseCache(parser, true, java.util.Collections.synchronizedMap(new HashMap<>()));
             caches.put(parser.name(), cachedParser);
         }
         return cachedParser;
@@ -632,7 +667,7 @@ public class DefinitionParsing {
         parsedBubbles.getAndIncrement();
         registerWarnings(result._2());
         if (result._1().isRight()) {
-            KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, isStrict).down(result._1().right().get());
+            KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, true).down(result._1().right().get());
             k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine", Integer.class)
                     .remove("contentStartColumn", Integer.class).remove(Source.class).remove(Location.class)));
             cache.put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));

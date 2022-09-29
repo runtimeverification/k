@@ -1,4 +1,12 @@
-FROM ubuntu:bionic
+FROM ubuntu:focal
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+ENV TZ=American/Chicago
+
+RUN ln -fs /usr/share/zoneinfo/America/Chicago /etc/localtime
+RUN    apt-get update          \
+    && apt-get upgrade --yes   \
+    && DEBIAN_FRONTEND=noninteractive apt-get install --yes tzdata
 
 RUN    apt-get update        \
     && apt-get install --yes \
@@ -19,27 +27,30 @@ RUN    apt-get update        \
         lld-10               \
         llvm-10-tools        \
         maven                \
-        opam                 \
         openjdk-11-jdk       \
         parallel             \
         pkg-config           \
         python3              \
-        python3-graphviz     \
+        texlive-xetex        \
+        wget                 \
         zlib1g-dev
 
-RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.11 \
+RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.15 \
     && cd z3                                                         \
-    && python scripts/mk_make.py                                     \
+    && python3 scripts/mk_make.py                                    \
     && cd build                                                      \
     && make -j8                                                      \
     && make install                                                  \
     && cd ../..                                                      \
     && rm -rf z3
 
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
 RUN    apt-get update               \
     && apt-get upgrade --yes        \
     && apt-get install --yes nodejs
+
+RUN wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=5.42.0
+RUN wget https://github.com/jgm/pandoc/releases/download/2.18/pandoc-2.18-1-amd64.deb -O /tmp/pandoc.deb && dpkg -i /tmp/pandoc.deb
 
 RUN curl -sSL https://get.haskellstack.org/ | sh
 
@@ -49,35 +60,29 @@ RUN    groupadd -g $GROUP_ID user                     \
     && useradd -m -u $USER_ID -s /bin/sh -g user user
 
 USER user:user
+WORKDIR /home/user
 
-RUN curl -L https://github.com/github/hub/releases/download/v2.14.0/hub-linux-amd64-2.14.0.tgz -o /home/user/hub.tgz
-RUN cd /home/user && tar xzf hub.tgz
+RUN    curl -L https://github.com/github/hub/releases/download/v2.14.0/hub-linux-amd64-2.14.0.tgz -o hub.tgz \
+    && tar xzf hub.tgz
 
 ENV LD_LIBRARY_PATH=/usr/local/lib
 ENV PATH=/home/user/hub-linux-amd64-2.14.0/bin:$PATH
 
-ADD k-distribution/src/main/scripts/bin/k-configure-opam-dev k-distribution/src/main/scripts/bin/k-configure-opam-common /home/user/.tmp-opam/bin/
-ADD k-distribution/src/main/scripts/lib/opam                                                                             /home/user/.tmp-opam/lib/kframework/opam/
-RUN    cd /home/user                        \
-    && ./.tmp-opam/bin/k-configure-opam-dev
-
 ENV LC_ALL=C.UTF-8
-ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml        /home/user/.tmp-haskell/
-ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/kore.cabal /home/user/.tmp-haskell/kore/
-RUN    cd /home/user/.tmp-haskell  \
-    && stack build --only-snapshot
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml      .tmp-haskell/
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/kore.cabal .tmp-haskell/kore/
+RUN cd .tmp-haskell && stack build --only-snapshot
 
-ADD pom.xml                                                    /home/user/.tmp-maven/
-ADD ktree/pom.xml                                              /home/user/.tmp-maven/ktree/
-ADD llvm-backend/pom.xml                                       /home/user/.tmp-maven/llvm-backend/
-ADD llvm-backend/src/main/native/llvm-backend/matching/pom.xml /home/user/.tmp-maven/llvm-backend/src/main/native/llvm-backend/matching/
-ADD haskell-backend/pom.xml                                    /home/user/.tmp-maven/haskell-backend/
-ADD ocaml-backend/pom.xml                                      /home/user/.tmp-maven/ocaml-backend/
-ADD kernel/pom.xml                                             /home/user/.tmp-maven/kernel/
-ADD java-backend/pom.xml                                       /home/user/.tmp-maven/java-backend/
-ADD k-distribution/pom.xml                                     /home/user/.tmp-maven/k-distribution/
-ADD kore/pom.xml                                               /home/user/.tmp-maven/kore/
-RUN    cd /home/user/.tmp-maven               \
+ADD pom.xml                                                    .tmp-maven/
+ADD ktree/pom.xml                                              .tmp-maven/ktree/
+ADD llvm-backend/pom.xml                                       .tmp-maven/llvm-backend/
+ADD llvm-backend/src/main/native/llvm-backend/matching/pom.xml .tmp-maven/llvm-backend/src/main/native/llvm-backend/matching/
+ADD haskell-backend/pom.xml                                    .tmp-maven/haskell-backend/
+ADD kernel/pom.xml                                             .tmp-maven/kernel/
+ADD java-backend/pom.xml                                       .tmp-maven/java-backend/
+ADD k-distribution/pom.xml                                     .tmp-maven/k-distribution/
+ADD kore/pom.xml                                               .tmp-maven/kore/
+RUN    cd .tmp-maven                          \
     && mvn --batch-mode dependency:go-offline
 
 RUN    git config --global user.email 'admin@runtimeverification.com' \

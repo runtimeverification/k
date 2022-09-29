@@ -157,7 +157,7 @@ first case, we see that `?X` is greater than or equal to 10, so the second rule
 applied, rewriting the symbolic integer to the concrete integer 5. In the
 second case, we see that the second rule did not apply because `?X` is less
 than 10. Moreover, because of the `ensures` clause on the first rule, we know
-that `?X` is not zero, therefore the second rule will not apply a second time.
+that `?X` is not zero, therefore the first rule will not apply a second time.
 If we had omitted this constraint, we would have ended up infinitely applying
 the first rule, leading to `krun` not terminating.
 
@@ -172,3 +172,6 @@ ten to a symbolic even integer less than 10 and greater than 0. This rule will
 now apply nondeterministically along with the existing rules. Predict what the
 resulting output configuration will be from rewriting `0` after adding this
 rule. Then run the program and see whether your prediction is correct.
+
+Once you have completed the above exercises, you can continue to
+[Lesson 1.22: Basics of Deductive Program Verification using K](../22_proofs/README.md).

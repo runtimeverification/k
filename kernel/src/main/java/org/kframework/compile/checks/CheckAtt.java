@@ -51,7 +51,7 @@ public class CheckAtt {
             Att sortAtt =  m.sortAttributesFor().getOrElse(prod.sort().head(), () -> Att.empty());
             if (sortAtt.contains(Att.HOOK()) && !sortAtt.get(Att.HOOK()).equals("ARRAY.Array") && !(sortAtt.get(Att.HOOK()).equals("KVAR.KVar") && isSymbolicKast)) {
                 if (!prod.att().contains(Att.FUNCTION()) && !prod.att().contains(Att.BRACKET()) &&
-                    !prod.att().contains("token") && !(prod.klabel().isDefined() && macros.contains(prod.klabel().get()))) {
+                    !prod.att().contains("token") && !prod.att().contains("macro") && !(prod.klabel().isDefined() && macros.contains(prod.klabel().get()))) {
                     if (!(prod.sort().equals(Sorts.K()) && ((prod.klabel().isDefined() && (prod.klabel().get().name().equals("#EmptyK") || prod.klabel().get().name().equals("#KSequence"))) || prod.isSubsort()))) {
                         if (!(sortAtt.contains("cellCollection") && prod.isSubsort())) {
                             errors.add(KEMException.compilerError("Cannot add new constructors to hooked sort " + prod.sort(), prod));
@@ -173,6 +173,9 @@ public class CheckAtt {
         }
         if (att.contains(Att.PRIORITY()) && att.contains(Att.SIMPLIFICATION())) {
           errors.add(KEMException.compilerError("priority attribute is not supported on simplification rules.", loc));
+        }
+        if(att.contains(Att.ANYWHERE()) && att.contains(Att.SIMPLIFICATION())) {
+          errors.add(KEMException.compilerError("anywhere attribute is not supported on simplification rules.", loc));
         }
     }
 }

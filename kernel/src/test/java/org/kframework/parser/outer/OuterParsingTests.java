@@ -7,9 +7,12 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.kframework.attributes.Source;
+import org.kframework.builtin.Sorts;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Module;
 import org.kframework.kil.StringSentence;
+
+import static org.kframework.kore.KORE.*;
 
 public class OuterParsingTests {
 
@@ -34,5 +37,13 @@ public class OuterParsingTests {
         StringSentence sen = (StringSentence) mod.getItems().get(0);
         Assert.assertEquals(sen.getContent(), "X => Y");
         Assert.assertEquals(sen.getType(), "claim");
+    }
+
+    @Test
+    public void testSortParsing() {
+        Assert.assertEquals(Sorts.K().toString(), Outer.parseSort(Sorts.K().toString()).toString());
+        Assert.assertEquals(Sorts.MInt().toString(), Outer.parseSort(Sorts.MInt().toString()).toString());
+        Assert.assertEquals(Sort("X", Sort("6"), Sort("Z")).toString(),
+            Outer.parseSort(Sort("X", Sort("6"), Sort("Z")).toString()).toString());
     }
 }

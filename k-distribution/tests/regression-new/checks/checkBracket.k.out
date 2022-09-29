@@ -1,3 +1,5 @@
 [Error] Outer Parser: bracket productions should have exactly one non-terminal of the same sort as the production.
 	Source(checkBracket.k)
-	Location(2,18,2,42)
+	Location(2,18,2,43)
+	2 |	  syntax Exp ::= "(" Exp Exp ")" [bracket]
+	  .	                 ^~~~~~~~~~~~~~~~~~~~~~~~~

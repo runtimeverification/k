@@ -148,7 +148,7 @@ public class ExpandMacros {
     KVariable newDotVariable(Att att) {
         KVariable newLabel;
         do {
-            newLabel = KVariable("_" + (counter++), att.add("anonymous"));
+            newLabel = KVariable("_Gen" + (counter++), att.add("anonymous"));
         } while (vars.contains(newLabel));
         vars.add(newLabel);
         return newLabel;
@@ -398,11 +398,11 @@ public class ExpandMacros {
 
     public Sentence expand(Sentence s) {
         if (s instanceof Rule && !isMacro(s)) {
-            return transformer.resolve(mod, expand((Rule) s));
+            return transformer.resolve(expand((Rule) s), mod);
         } else if (s instanceof Claim) {
-            return transformer.resolve(mod, expand((Claim) s));
+            return transformer.resolve(expand((Claim) s), mod);
         } else if (s instanceof Context) {
-            return transformer.resolve(mod, expand((Context) s));
+            return transformer.resolve(expand((Context) s), mod);
         } else {
             return s;
         }

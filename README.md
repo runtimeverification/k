@@ -49,7 +49,8 @@ for details about supported configurations and system setup.
 5.  [Changing the KORE Data Structures](#changing-the-kore-data-structures)
 6.  [Building the Final Release Directory/Archives](#building-the-final-release-directoryarchives)
 7.  [Compiling Definitions and Running Programs](#compiling-definitions-and-running-programs)
-8.  [Troubleshooting](#troubleshooting)
+8.  [Installing Python Support](#installing-python-support)
+9.  [Troubleshooting](#troubleshooting)
 
 # Prerequisite Install Guide
 
@@ -58,15 +59,15 @@ must first be installed.
 
 ## The Short Version
 
-On Ubuntu Linux:
+On Ubuntu Linux 20.04 (Focal) or 22.04 (Jammy):
 
 ```shell
 git submodule update --init --recursive
-sudo apt-get install build-essential m4 openjdk-11-jdk libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 cmake gcc clang-10 lld-10 llvm-10-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
+sudo apt-get install build-essential m4 openjdk-11-jdk libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 python3-dev cmake gcc clang-12 lld-12 llvm-12-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
 curl -sSL https://get.haskellstack.org/ | sh
 ```
 
-Note: we require version 10 or greater for clang, lld, and llvm-tools.
+Note: we require a version between 10 and 14 for clang, lld, and llvm-tools.
 
 On Arch Linux:
 
@@ -107,15 +108,10 @@ The following dependencies are needed either at build time or runtime:
 *   [stack](https://docs.haskellstack.org/en/stable/README/)
 *   [zlib](https://www.zlib.net/)
 *   [z3](https://github.com/Z3Prover/z3) (on some distributions libz3 is also
-    needed and packaged separately) Note that you need version 4.8.11 of Z3,
+    needed and packaged separately) Note that you need version 4.8.15 of Z3,
     which may require you to build and install from source if your package
     manager does not supply it. Other versions are known to have bugs and
     performance regressions likely to cause issues in the K test suite.
-
-The following dependencies are optional and are only needed when building
-the OCaml backend (**not recommended**):
-
-*   [opam](https://opam.ocaml.org/doc/Install.html)
 
 Typically, these can all be installed from your package manager.
 On some system configurations, special installation steps or post-installation
@@ -209,27 +205,78 @@ addition to the usual Maven build setup:
     and [associated PR](https://github.com/kframework/kore/pull/2893) for more
     details.
 
-### Optional OCaml Backend Setup
+## Building with Nix flakes (Recommended)
 
-**If** you want to use the OCaml backend (not recommended), then after running
-`mvn package` for the first time, setup the OCaml dependencies by running
-the following command:
+We now support building K using [nix flakes](https://nixos.wiki/wiki/Flakes).
+To set up nix flakes you will need to be on `nix` 2.4 or higher and follow the instructions [here](https://nixos.wiki/wiki/Flakes).
 
-```sh
-k-distribution/target/release/k/bin/k-configure-opam
-eval $(opam config env)
+For example, if you are on a standard Linux distribution, such as Ubuntu, first [install nix](https://nixos.org/download.html#download-nix)
+and then enable flakes by editing either `~/.config/nix/nix.conf` or `/etc/nix/nix.conf` and adding:
+
+```
+experimental-features = nix-command flakes
 ```
 
-This performs first-time setup of the OCaml backend. You may optionally set
-`OPAMROOT` before running this command to specify where any OCaml dependencies
-should be installed.
+This is needed to expose the Nix 2.0 CLI and flakes support that are hidden behind feature-flags.
 
-## Building with Nix
 
 By default, Nix will build the project and its transitive dependencies from
 source, which can take up to an hour. We recommend setting up
 [the binary cache](https://app.cachix.org/cache/kore) to speed up the build
-process significantly.
+process significantly. You will also need to add the following sections to `/etc/nix/nix.conf` or, if you are a trusted user, `~/.config/nix/nix.conf` (if you don't know what a "trusted user" is, you probably want to do the former):
+
+```
+trusted-public-keys = ... hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
+substituters = ... https://cache.iog.io
+```
+
+i.e. if the file was originally
+
+```
+substituters = https://cache.nixos.org
+trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
+```
+
+it will now read
+
+```
+substituters = https://cache.nixos.org https://cache.iog.io
+trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
+```
+
+To build the K Framework itself, run:
+
+```bash
+nix build .
+```
+
+This will build all of K and put a link to the resulting binaries in the `result/` folder.
+
+
+_Note: Mac users, especially those running M1/M2 Macs may find nix segfaulting on occasion. If this happens, try running the nix command like this: `GC_DONT_GC=1 nix build .`_ 
+
+
+If you want to temporarily add the K binaries (such as `kompile` or `kast`) to the current shell, run
+
+```bash
+nix shell .
+```
+
+To run the integration tests:
+
+```
+nix build .#test
+```
+
+If you change any `pom.xml`, you must run 
+
+```
+nix run .#update-maven
+```
+
+and commit the updated `nix/mavenix.lock` file.
+
+## Building with Nix (not recommended, use Nix flakes)
 
 To build the K Framework itself, run:
 
@@ -319,6 +366,10 @@ Assuming k-distribution/target/release/k/bin is in your path, you can compile de
 the `kompile` command.  To execute a program you can use `krun`.
 
 For running either program in the debugger, use the main class `org.kframework.main.Main` with an additional argument `-kompile` or `-krun` added before other command line arguments, and use the classpath from the `k-distribution` module.
+
+# Installing Python Support
+
+Python tools for K can be found under [runtimeverification/pyk](https://github.com/runtimeverification/pyk).
 
 # Troubleshooting
 Common build-time error messages:

@@ -756,6 +756,13 @@ syntax left mult
 syntax right add
 ```
 
+Note that `syntax [left|right|non-assoc]` should not be used to group together
+productions with different priorities. For example, this code would be invalid:
+```k
+syntax priorities mult > add
+syntax left mult add
+```
+
 Note that there is one other way to describe associativity, but it is
 prone to a very common mistake. You can apply the attribute `left`, `right`,
 or `non-assoc` directly to a production to indicate that it is, by itself,
@@ -1377,8 +1384,8 @@ the LHS of a rule to mean the pattern above:
 The `memo` attribute is a hint from the user to the backend to memoize a
 function. Not all backends support memoization, but when the attribute is used
 and the definition is compiled for a `memo`-supporting backend, then calls to
-the function may be cached. At the time of writing, the Haskell and OCaml
-backends support memoization.
+the function may be cached. At the time of writing, only the Haskell
+backend supports memoization.
 
 #### Limitations of memoization with the Haskell backend
 
@@ -1509,10 +1516,9 @@ K also introduces the strict cast:
     syntax S ::= S "::S"
 ```
 
-The meaning at runtime is exactly the same as the semantic cast (except in the
-ocaml backend, where it will match a term of any sort at runtime); however,
-it restricts the sort of the term inside the cast to **exactly** `Sort`. That
-is to say, if you use it on something that is a strictly smaller sort, it will
+The meaning at runtime is exactly the same as the semantic cast; however, it
+restricts the sort of the term inside the cast to **exactly** `Sort`. That is
+to say, if you use it on something that is a strictly smaller sort, it will
 generate a type error. This is useful in certain circumstances to help
 disambiguate terms, when a semantic cast would not have resolved the ambiguity.
 As such, it is primarily used to solve ambiguities rather than to guide
@@ -2826,6 +2832,14 @@ on a particular program by passing the `--debugger` flag to krun, or by
 invoking the llvm backend interpreter directly. Below we provide a simple
 tutorial to explain some of the basic commands supported by the LLVM backend.
 
+### LLDB Support
+
+GDB is not well-supported on macOS, particularly on newer OS versions and Apple
+Silicon ARM hardware. Consequently, if the `--debugger` option is passed to krun
+on macOS, LLDB[^1] is launched instead of GDB. However, the K-specific debugger
+scripts that GDB uses have not been ported to LLDB yet, and so the instructions
+in the rest of this section will not work.
+
 ### The K Definition
 
 Here is a sample K definition we will use to demonstrate debugging
@@ -2853,7 +2867,10 @@ You should compile this definition with `--backend llvm -ccopt -g` and without
 instruct you on how to modify ~/.gdbinit to enable printing abstract syntax
 of K terms in the debugger. If you do not perform this step, you can still
 use all the other features, but K terms will be printed as their raw address
-in memory.
+in memory. GDB will need the kompiled interpreter in its safe path in order
+to access the pretty printing python script within it. A good way to do this
+would be to pick a minimum top-level path that covers all of your kompiled
+semantics (ie. `set auto-load safe-path ~/k-semantics`)
 
 You can break before every step of execution is taken by setting a breakpoint
 on the `step` function:
@@ -3025,6 +3042,91 @@ Using `rbreak <regex>` you can set breakpoints on multiple functions.
 -   `(gdb) break definition.kore:break -> No source file named definition.kore.`
 send `-ccopt -g` to kompile in order to generate debug info symbols.
 
+Profiling your K semantics
+--------------------------
+
+The first thing to be aware of is in order to get meaningful data,
+you need to build the semantics and all of its dependencies with
+optimizations enabled but _without the frame pointer elimination
+optimization_. For example, for EVM, this means rebuilding GMP, MPFR,
+JEMalloc, Crypto++, SECP256K1, etc with the following `exports`. 
+
+```sh
+export CFLAGS="-DNDEBUG -O2 -fno-omit-frame-pointer"
+export CXXFLAGS="-DNDEBUG -O2 -fno-omit-frame-pointer"
+```
+
+You can skip this step, but if you do, any samples within these
+libraries will not have correct stack trace information, which means
+you will likely not get a meaningful set of data that will tell you
+where the majority of time is really being spent. Don't worry about
+rebuilding literally every single dependency though. Just focus on the
+ones that you expect to take a non-negligible amount of runtime. You
+will be able to tell if you haven't done enough later, and you can go
+back and rebuild more.  Once this is done, you then build K with 
+optimizations and debug info enabled, like so:
+
+```sh
+mvn package -Dproject.build.type="FastBuild"
+```
+
+Next, you build the semantics with optimizations and debug info
+enabled (i.e., `kompile -ccopt -O2 --iterated -ccopt -fno-omit-frame-pointer`). 
+
+Once all this is done, you should be ready to profile your
+application. Essentially, you should run whatever test suite you
+usually run, but with `perf record -g -- ` prefixed to the front. For
+example, for KEVM it's the following command. (For best data, don't 
+run this step in parallel.)
+
+```sh
+perf record -g -- make test-conformance
+```
+
+Finally, you want to filter out just the samples that landed within
+the llvm backend and view the report. For this, you need to know the
+name of the binary that was generated by your build system. Normally
+it is `interpreter`, but e.g. if you are building the web3 client for
+kevm, it would be `kevm-client`. You will want to run the following
+command.
+
+```sh
+perf report -g -c $binary_name
+```
+
+If all goes well, you should see a breakdown of where CPU time has
+been spent executing the application. You will know that sufficient
+time was spent rebuilding dependencies with the correct flags when the
+total time reported by the main method is close to 100%. If it's not
+close to 100%, this is probably because a decent amount of self time
+was reported in stack traces that were not built with frame pointers
+enabled, meaning that perf was unable to walk the stack. You will have
+to go back, rebuild the appropriate libraries, and then record your
+trace again.
+
+Your ultimate goal is to identify the hotspots that take the most
+time, and make them execute faster. Entries like `step` and
+`step_1234` like functions refer to the cost of matching. An entry
+like `side_condition_1234` is a side condition and `apply_rule_1234`
+is constructing the rhs of a rule. You can convert from this rule
+ordinal to a location using the `llvm-kompile-compute-loc` script in
+the bin folder of the llvm backend repo. For example,
+
+```sh
+llvm-kompile-compute-loc 5868 evm-semantics/.build/defn/llvm/driver-kompiled
+```
+
+spits out the following text.
+
+```
+Line: 18529
+/home/dwightguth/evm-semantics/./.build/defn/llvm/driver.k:493:10
+```
+
+This is the line of `definition.kore` that the axiom appears on as
+well as the original location of the rule in the K semantics. You can
+use this information to figure out which rules and functions are
+causing the most time and optimize them to be more efficient.
 
 Attributes Reference
 --------------------
@@ -3144,13 +3246,17 @@ unusual or complex examples. Such attributes are typically generated by the
 compiler and used internally. We list these attributes below as a reference for
 interested readers:
 
-| Name       | Type | Backend | Reference                                                                             |
-| ---------- | ---- | ------- | ------------------------------------------------------------------------------------- |
-| `assoc`    | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
-| `comm`     | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
-| `idem`     | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
-| `unit`     | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
-| `userList` | prod | all     | No reference yet                                                                      |
+| Name           | Type | Backend | Reference                                                                             |
+|----------------| ---- | ------- |---------------------------------------------------------------------------------------|
+| `assoc`        | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
+| `comm`         | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
+| `idem`         | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
+| `unit`         | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
+| `userList`     | prod | all     | Identifies the desugared form of `Lst ::= List{Elm,"delim"}`                          |
+| `predicate`    | prod | all     | Specifies the sort of a predicate label                                               |
+| `element`      | prod | all     | Specifies the label of the elements in a list                                         |
+| `bracketLabel` | prod | all     | Keep track of the label of a bracket production since it can't have a klabel          |
+
 
 ### Index Legend
 
@@ -3225,3 +3331,6 @@ sed 's/hook(//' | sed 's/)//' | sort | uniq | grep -v org.kframework
 ```
 
 All of these hooks will also eventually need documentation.
+
+[^1]: More precisely, a lightly-customized debugger built using the LLDB Python
+  API.

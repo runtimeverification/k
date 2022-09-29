@@ -1,0 +1,47 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "kup"
+version = "0.1.0"
+description = "kup is a tool for managing installations of the K framework along with the different available semantics"
+authors = [
+    "Runtime Verification, Inc. <contact@runtimeverification.com>",
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+terminaltables = "^3.1.10"
+
+[tool.poetry.scripts]
+kup = "kup.__main__:main"
+
+[tool.poetry.dev-dependencies]
+autoflake = "*"
+black = "*"
+flake8 = "*"
+flake8-bugbear = "*"
+flake8-comprehensions = "*"
+isort = "*"
+mypy = "*"
+pep8-naming = "*"
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.autoflake]
+recursive = true
+expand-star-imports = true
+remove-all-unused-imports = true
+ignore-init-module-imports = true
+remove-duplicate-keys = true
+remove-unused-variables = true
+
+[tool.black]
+line-length = 120
+skip-string-normalization = true
+
+[tool.mypy]
+disallow_untyped_defs = true

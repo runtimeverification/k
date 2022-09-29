@@ -2,6 +2,8 @@
 package org.kframework.unparser;
 
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.definition.Associativity;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.Claim;
@@ -69,10 +71,7 @@ import static org.kframework.Collections.*;
  */
 public class ToJson {
 
-    private DataOutputStream data;
-    private ToJson(DataOutputStream data) {
-        this.data = data;
-    }
+    public static final int version = 2;
 
 ///////////////////////////////
 // ToJson Definition Objects //
@@ -86,7 +85,7 @@ public class ToJson {
 
             JsonObjectBuilder term = Json.createObjectBuilder();
             term.add("format", "KAST");
-            term.add("version", 1);
+            term.add("version", version);
             term.add("term", toJson(def));
 
             jsonWriter.write(term.build());
@@ -94,6 +93,36 @@ public class ToJson {
             data.close();
         } catch (IOException e) {
             throw KEMException.criticalError("Could not write Definition to Json", e);
+        }
+        return out.toByteArray();
+    }
+
+    public static byte[] apply(java.util.Set<Module> mods, String mainSpecModule) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            DataOutputStream data = new DataOutputStream(out);
+            JsonWriter jsonWriter = Json.createWriter(data);
+
+            JsonObjectBuilder term = Json.createObjectBuilder();
+            term.add("format", "KAST");
+            term.add("version", version);
+            JsonObjectBuilder jmodlist = Json.createObjectBuilder();
+
+            jmodlist.add("node", JsonParser.KFLATMODULELIST);
+            jmodlist.add("mainModule", mainSpecModule);
+
+            JsonArrayBuilder jmods = Json.createArrayBuilder();
+            for (Module m : mods) {
+                jmods.add(toJson(m));
+            }
+            jmodlist.add("term", jmods);
+            term.add("term", jmodlist);
+
+            jsonWriter.write(term.build());
+            jsonWriter.close();
+            data.close();
+        } catch (IOException e) {
+            throw KEMException.criticalError("Could not write Module to Json", e);
         }
         return out.toByteArray();
     }
@@ -120,7 +149,32 @@ public class ToJson {
 
         JsonObjectBuilder jattKeys = Json.createObjectBuilder();
         for (Tuple2<String,String> key: JavaConverters.seqAsJavaList(att.att().keys().toSeq())) {
-            jattKeys.add(key._1(), att.att().get(key).get().toString());
+            if (key._1().equals(Location.class.getName())) {
+                JsonArrayBuilder locarr = Json.createArrayBuilder();
+                Location loc = att.get(Location.class);
+                locarr.add(loc.startLine());
+                locarr.add(loc.startColumn());
+                locarr.add(loc.endLine());
+                locarr.add(loc.endColumn());
+                jattKeys.add(key._1(), locarr.build());
+            } else if (key._1().equals(Source.class.getName())){
+                jattKeys.add(key._1(), att.get(Source.class).source());
+            } else if (key._1().equals(Production.class.getName())){
+                jattKeys.add(key._1(), toJson(att.get(Production.class)));
+            } else if (key._1().equals(Sort.class.getName())){
+                jattKeys.add(key._1(), toJson(att.get(Sort.class)));
+            } else if (key._1().equals("bracketLabel")) {
+                jattKeys.add(key._1(), toJson(att.get("bracketLabel", KLabel.class)));
+            } else if (key._1().equals(Att.PREDICATE())) {
+                jattKeys.add(key._1(), toJson(att.get(Att.PREDICATE(), Sort.class)));
+            } else if (key._1().equals("cellOptAbsent")) {
+                jattKeys.add(key._1(), toJson(att.get("cellOptAbsent", Sort.class)));
+            } else if (key._1().equals("cellFragment")) {
+                jattKeys.add(key._1(), toJson(att.get("cellFragment", Sort.class)));
+            } else if (key._1().equals("sortParams")) {
+                jattKeys.add(key._1(), toJson(att.get("sortParams", Sort.class)));
+            } else
+                jattKeys.add(key._1(), att.att().get(key).get().toString());
         }
         jatt.add("att", jattKeys.build());
 
@@ -143,6 +197,7 @@ public class ToJson {
         JsonArrayBuilder imports = Json.createArrayBuilder();
         stream(mod.imports()).forEach(i -> {
           JsonObjectBuilder jimp = Json.createObjectBuilder();
+          jimp.add("node", JsonParser.KIMPORT);
           jimp.add("name", i.name());
           jimp.add("isPublic", i.isPublic());
           imports.add(jimp.build());
@@ -302,7 +357,7 @@ public class ToJson {
 
         Option<KLabel> klabel = pro.klabel();
         if (! klabel.isEmpty()) {
-            jpro.add("klabel", klabel.get().name());
+            jpro.add("klabel", toJson(klabel.get()));
         }
 
         JsonArrayBuilder productionItems = Json.createArrayBuilder();
@@ -348,7 +403,8 @@ public class ToJson {
         JsonObjectBuilder jsort = Json.createObjectBuilder();
 
         jsort.add("node", JsonParser.KSORT);
-        jsort.add("name", sort.name());
+        // store sort and its parameters as a flat string
+        jsort.add("name", sort.toString());
 
         return jsort.build();
     }
@@ -364,7 +420,7 @@ public class ToJson {
 
             JsonObjectBuilder kterm = Json.createObjectBuilder();
             kterm.add("format", "KAST");
-            kterm.add("version", 1);
+            kterm.add("version", version);
             kterm.add("term", toJson(k));
 
             jsonWriter.write(kterm.build());
@@ -381,21 +437,21 @@ public class ToJson {
         return out.toByteArray();
     }
 
-    private static JsonStructure toJson(K k) {
+    public static JsonStructure toJson(K k) {
         JsonObjectBuilder knode = Json.createObjectBuilder();
         if (k instanceof KToken) {
             KToken tok = (KToken) k;
 
             knode.add("node", JsonParser.KTOKEN);
-            knode.add("sort", tok.sort().toString());
+            knode.add("sort", toJson(tok.sort()));
             knode.add("token", tok.s());
+            knode.add("att", toJson(k.att()));
 
         } else if (k instanceof KApply) {
             KApply app = (KApply) k;
 
             knode.add("node", JsonParser.KAPPLY);
-            knode.add("label", app.klabel().name());
-            knode.add("variable", app.klabel() instanceof KVariable);
+            knode.add("label", toJson(((KApply) k).klabel()));
 
             JsonArrayBuilder args = Json.createArrayBuilder();
             for (K item : app.klist().asIterable()) {
@@ -404,6 +460,7 @@ public class ToJson {
 
             knode.add("arity", app.klist().size());
             knode.add("args", args.build());
+            knode.add("att", toJson(k.att()));
 
         } else if (k instanceof KSequence) {
             KSequence seq = (KSequence) k;
@@ -423,12 +480,7 @@ public class ToJson {
 
             knode.add("node", JsonParser.KVARIABLE);
             knode.add("name", var.name());
-            Optional<String> origName = var.att().getOptional("originalName");
-            if (origName.isPresent()) {
-                knode.add("originalName", origName.get());
-            } else {
-                knode.add("originalName", var.name());
-            }
+            knode.add("att", toJson(k.att()));
 
         } else if (k instanceof KRewrite) {
             KRewrite rew = (KRewrite) k;
@@ -436,7 +488,7 @@ public class ToJson {
             knode.add("node", JsonParser.KREWRITE);
             knode.add("lhs", toJson(rew.left()));
             knode.add("rhs", toJson(rew.right()));
-            knode.add("att", rew.att().toString());
+            knode.add("att", toJson(k.att()));
 
         } else if (k instanceof KAs) {
             KAs alias = (KAs) k;
@@ -444,18 +496,29 @@ public class ToJson {
             knode.add("node", JsonParser.KAS);
             knode.add("pattern", toJson(alias.pattern()));
             knode.add("alias",   toJson(alias.alias()));
-            knode.add("att", alias.att().toString());
+            knode.add("att", toJson(k.att()));
 
         } else if (k instanceof InjectedKLabel) {
             InjectedKLabel inj = (InjectedKLabel) k;
 
             knode.add("node", JsonParser.INJECTEDKLABEL);
-            knode.add("name", inj.klabel().name());
-            knode.add("variable", inj.klabel() instanceof KVariable);
+            knode.add("label", toJson(inj.klabel()));
+            knode.add("att", toJson(k.att()));
 
         } else {
             throw KEMException.criticalError("Unimplemented for JSON serialization: ", k);
         }
         return knode.build();
+    }
+
+    public static JsonStructure toJson(KLabel kl) {
+        JsonObjectBuilder jkl = Json.createObjectBuilder();
+        jkl.add("node", "KLabel");
+        jkl.add("name", kl.name());
+        JsonArrayBuilder params = Json.createArrayBuilder();
+        for (Sort s : mutable(kl.params()))
+            params.add(toJson(s));
+        jkl.add("params", params.build());
+        return jkl.build();
     }
 }

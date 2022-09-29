@@ -8,13 +8,11 @@ export PATH="$(cd "$(dirname "$0")"; pwd):$PATH"
 # initialize flags
 ARGV=()
 dir=.
+kompiledDir=
 filterSubst=true
-fold_lines="fold -s"
 literal=false
 outputFile=-
 outputMode=pretty
-result=1
-verbose=false
 
 # setup temp files
 now=`date +"%Y-%m-%d-%H-%M-%S"`
@@ -22,15 +20,11 @@ tempDir="$(mktemp -d .kore-print-${now}-XXXXXXXXXX)"
 tempFiles=("$tempDir")
 trap 'rm -rf ${tempFiles[*]}' INT TERM EXIT
 
-source "$(dirname "$0")/../lib/kframework/k-util.sh"
-
 KORE_PRINT=$(basename "$0")
 KAST_UTIL="$(dirname "$0")/kast"
 
-error () {
-  printf "[Error] Unparser: $@\n" | $fold_lines 1>&2
-  exit $result
-}
+ktool="${KORE_PRINT}"
+source "$(dirname "$0")/../lib/kframework/k-util.sh"
 
 print_usage () {
 cat <<HERE
@@ -43,14 +37,19 @@ $KORE_PRINT expects exactly 1 positional argument. It must be a file and the
 contents of that file must contain a KORE pattern. By default, $KORE_PRINT will
 pretty print that term, but some customization is possible; see below.
 
+General arguments:
+
+$(k_util_usage)
+
+$KORE_PRINT arguments:
+
       --color [on|off]     Enable/disable ANSI color codes. Overrides default,
                            which is determined based on whether stdout is a
                            terminal
   -d, --directory DIR      Look for a kompiled directory ending in "-kompiled"
                            under the directory DIR
+      --definition DIR     Exact path to the kompiled directory.
   -h, --help               Display this help and exit
-      --no-exc-wrap        Do not wrap exception messages to 80 chars. Keep
-                           long lines
       --no-substitution-filtering  Don't filter conjuncts with anonymous
                                    variables from substitution output
   -o, --output MODE        Select output mode to use when unparsing. Valid
@@ -59,7 +58,6 @@ pretty print that term, but some customization is possible; see below.
       --output-file FILE   Print converted term to FILE
       --save-temps         Do not delete temporary files when $KORE_PRINT
                            terminates
-  -v, --verbose            Print significant commands executed by $KORE_PRINT
       --version            Print version of K
       --                   Interpret all arguments following as positional
                            arguments
@@ -87,7 +85,7 @@ do
         ;;
 
         *)
-        error 'Invalid value for --color. Should be "on" or "off".'
+        error 1 'Invalid value for --color. Should be "on" or "off".'
         ;;
       esac
       shift
@@ -98,13 +96,14 @@ do
       shift
       ;;
 
+      --definition)
+      kompiledDir="$2"
+      shift
+      ;;
+
       -h|--help)
       print_usage
       exit 0
-      ;;
-
-      --no-exc-wrap)
-      fold_lines="cat -"
       ;;
 
       --no-substitution-filtering)
@@ -123,7 +122,7 @@ do
         none) ;;
 
         *)
-        error 'Invalid value for --output. Should be one of "pretty", "program", "kast", "binary", "json", "latex", "kore", or "none".'
+        error 1 'Invalid value for --output. Should be one of "pretty", "program", "kast", "binary", "json", "latex", "kore", or "none".'
         ;;
       esac
       outputMode="$2"
@@ -133,10 +132,6 @@ do
       --output-file)
       outputFile="$2"
       shift
-      ;;
-
-      -v|--verbose)
-      verbose=true
       ;;
 
       --save-temps)
@@ -179,24 +174,27 @@ fi
 
 if [[ "${#ARGV[@]}" -ne 1 ]]; then
   print_usage
-  error 'Must pass exactly one KORE file as a positional argument.'
+  error 1 'Must pass exactly one KORE file as a positional argument.'
 fi
 input_file="${ARGV[0]}"
 
 # Compute kompiled directory
-kompiledDir=
 hasKompiledDir=false
-for file in "$dir"/*-kompiled; do
-  [ ! -d "$file" ] && continue
-  kompiledDir=$file
-  if $hasKompiledDir; then
-    error 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
-  fi
+if [[ -d $kompiledDir ]]; then
   hasKompiledDir=true
-done
+else
+  for file in "$dir"/*-kompiled; do
+    [ ! -d "$file" ] && continue
+    kompiledDir=$file
+    if $hasKompiledDir; then
+      error 1 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
+    fi
+    hasKompiledDir=true
+  done
+fi
 
 if ! $hasKompiledDir; then
-  error 'Could not find a compiled definition. Use --directory to specify one.'
+  error 1 'Could not find a compiled definition. Use --directory to specify one.'
 fi
 
 if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then
@@ -207,7 +205,7 @@ fi
 if [[ "$input_file" == "-" ]]; then
   input_file=/dev/stdin
 elif [ ! -r "$input_file" ]; then
-  error "Could not open file: $input_file"
+  error 1 "Could not open file: $input_file"
 fi
 
 if [ "$outputFile" = "-" ]; then

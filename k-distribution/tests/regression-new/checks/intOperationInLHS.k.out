@@ -1,10 +1,16 @@
 [Error] Compiler: Illegal function symbol _+Int_ on LHS of rule. Consider adding `simplification` attribute to the rule if this is intended.
 	Source(intOperationInLHS.k)
 	Location(7,10,7,18)
+	7 |	rule foo(_ +Int 1) => 0
+	  .	         ^~~~~~~~
 [Error] Compiler: Illegal function symbol foo(_)_INTOPERATIONINLHS_Int_Int on LHS of rule. Consider adding `simplification` attribute to the rule if this is intended.
 	Source(intOperationInLHS.k)
 	Location(17,10,17,16)
+	17 |	     <k> foo(0) </k>
+	   .	         ^~~~~~
 [Error] Compiler: Illegal function symbol foo(_)_INTOPERATIONINLHS_Int_Int on LHS of rule. Consider adding `simplification` attribute to the rule if this is intended.
 	Source(intOperationInLHS.k)
 	Location(19,19,19,25)
+	19 |	rule [[ bar(0 |-> foo(0)) => foo(0) ]]
+	   .	                  ^~~~~~
 [Error] Compiler: Had 3 structural errors.

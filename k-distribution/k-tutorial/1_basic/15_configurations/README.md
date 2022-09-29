@@ -26,8 +26,14 @@ initialized with the value of the `$PGM` **configuration variable**.
 Configuration variables function as inputs to `krun`. These terms are supplied
 to `krun` in the form of ASTs parsed using a particular module. By default, the
 `$PGM` configuration variable uses the main syntax module of the definition.
+
 The cast on the configuration variable also specifies the sort that is used as
-the entry point to the parser, in this case the `K` sort.
+the entry point to the parser, in this case the `K` sort. It is often
+useful to cast to other sorts there as well for better control over the accepted
+language. The sort used for the `$PGM` variable is referred to as the start
+symbol. During parsing, the default start symbol `K` subsumes all user-defined
+sorts except for syntactic lists. These are excluded because they will always
+produce an ambiguity error when parsing a single element.
 
 Note that we did not explicitly specify the `$PGM` configuration variable when
 we invoked `krun` on a file. This is because `krun` handles the `$PGM` variable

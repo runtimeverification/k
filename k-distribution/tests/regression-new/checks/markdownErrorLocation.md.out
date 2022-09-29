@@ -1,4 +1,6 @@
 [Error] Compiler: Rules must have at least one rewrite.
 	Source(markdownErrorLocation.md)
 	Location(22,8,22,10)
+	22 |	  rule 21 // pandoc would think this is line 20, column 7
+	   .	       ^~
 [Error] Compiler: Had 1 structural errors.

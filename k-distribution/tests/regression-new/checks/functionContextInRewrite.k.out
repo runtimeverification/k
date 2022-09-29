@@ -1,4 +1,6 @@
 [Error] Inner Parser: Parse error: unexpected token '[' following token '('.
 	Source(functionContextInRewrite.k)
 	Location(8,12,8,13)
+	8 |	rule 0 => ([[ 1 ]] <bar> 0 </bar>)
+	  .	           ^
 [Error] Compiler: Had 1 parsing errors.

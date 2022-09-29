@@ -1,6 +1,4 @@
 #!/bin/sh -ex
-OPAMROOT=/usr/lib/kframework/opamroot k-configure-opam
-eval $(opam config env)
 cp -R /usr/share/kframework/pl-tutorial ~
 WD=`pwd`
 cd
@@ -9,7 +7,15 @@ spawn-kserver $WD/kserver.log
 cd pl-tutorial
 echo 'Testing tutorial in user environment...'
 make -j`nproc`
+make clean
 cd ~
 echo "module TEST imports BOOL endmodule" > test.k
-kompile test.k --backend ocaml
 kompile test.k --backend haskell
+rm -rf test-kompiled
+
+# Make sure that the KLLVM bindings have been installed properly.
+python3 <<HERE
+import kllvm
+sort_int = kllvm.ast.CompositeSort("SortInt")
+assert str(sort_int) == "SortInt{}"
+HERE

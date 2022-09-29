@@ -1,18 +1,27 @@
 // Copyright (c) 2012-2019 K Team. All Rights Reserved.
 package org.kframework.kast;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.kframework.attributes.Att;
 import org.kframework.attributes.Source;
+import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.Sorts;
-import org.kframework.compile.ExpandMacros;
+import org.kframework.compile.*;
 import org.kframework.definition.Module;
+import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kore.K;
 import org.kframework.main.FrontEnd;
+import org.kframework.parser.InputModes;
 import org.kframework.parser.KRead;
+import org.kframework.parser.TreeNodesToKORE;
+import org.kframework.parser.inner.ParseInModule;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.parser.outer.Outer;
 import org.kframework.unparser.KPrint;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.Environment;
@@ -22,20 +31,23 @@ import org.kframework.utils.file.KompiledDir;
 import org.kframework.utils.inject.CommonModule;
 import org.kframework.utils.inject.DefinitionScope;
 import org.kframework.utils.inject.JCommanderModule;
-import org.kframework.utils.inject.JCommanderModule.ExperimentalUsage;
 import org.kframework.utils.inject.JCommanderModule.Usage;
-import org.kframework.utils.Stopwatch;
 import scala.Option;
+import scala.Tuple2;
+import scala.util.Either;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.kframework.kore.KORE.*;
 
 public class KastFrontEnd extends FrontEnd {
 
@@ -82,26 +94,85 @@ public class KastFrontEnd extends FrontEnd {
         this.scope = scope;
     }
 
+    public enum KompileSteps {
+        help, concretizeCells, anonVars
+    }
+
     /**
      *
      * @return true if the application terminated normally; false otherwise
      */
     @Override
     public int run() {
+        if (options.steps.contains(KompileSteps.help)) {
+            System.out.println(
+                    "For --input rule, apply these steps, in this order, separated by comma:\n" +
+                            "   concretizeCells - configuration concretization\n" +
+                            "   anonVars - rename anonymous variables to be unique\n" +
+                            "   , - empty list of steps");
+            return 0;
+        }
         scope.enter(kompiledDir.get());
         try {
             CompiledDefinition def = compiledDef.get();
 
             org.kframework.kore.Sort sort = options.sort;
             if (sort == null) {
-                if (env.get("KRUN_SORT") != null) {
+                if (env.get("KRUN_SORT") != null)
                     sort = Outer.parseSort(env.get("KRUN_SORT"));
-                } else {
-                    sort = def.programStartSymbol;
+            }
+
+            if (options.input.equals(InputModes.RULE)) {
+                options.module = def.executionModule().name();
+                if (sort == null)
+                    sort = Sorts.K();
+                Module mod = def.ruleParsingModuleFor(options.module)
+                        .getOrElse(() -> {throw KEMException.innerParserError("Module " + options.module + " not found. Specify a module with -m.");});
+                String stringToParse = FileUtil.read(options.stringToParse());
+                Source source = options.source();
+
+                try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, true, null)) {
+                    Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> res = parseInModule.parseString(stringToParse, sort, source);
+                    kem.addAllKException(res._2().stream().map(KEMException::getKException).collect(Collectors.toSet()));
+                    if (res._1().isLeft()) {
+                        throw res._1().left().get().iterator().next();
+                    }
+                    // important to get the extension module for unparsing because it contains generated syntax
+                    // like casts, projections and others
+                    Module unparsingMod = parseInModule.getExtensionModule();
+                    K parsed = new TreeNodesToKORE(Outer::parseSort, true).down(res._1().right().get());
+
+                    if (options.expandMacros) {
+                        parsed = ExpandMacros.forNonSentences(unparsingMod, files.get(), def.kompileOptions, false).expand(parsed);
+                    }
+                    ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
+                    LabelInfo labelInfo = new LabelInfoFromModule(mod);
+                    SortInfo sortInfo = SortInfo.fromModule(mod);
+
+                    Rule r = Rule.apply(parsed, BooleanUtils.TRUE, BooleanUtils.TRUE, Att.empty());
+                    if (options.steps.contains(KompileSteps.anonVars))
+                        r = (Rule) new ResolveAnonVar().resolve(r);
+                    r = (Rule) new ResolveSemanticCasts(false).resolve(r); // move casts to side condition predicates
+                    r = (Rule) new ConstantFolding().fold(unparsingMod, r);
+                    r = (Rule) new CloseCells(configInfo, sortInfo, labelInfo).close(r);
+                    if (options.steps.contains(KompileSteps.concretizeCells)) {
+                        r = (Rule) new AddImplicitComputationCell(configInfo, labelInfo).apply(mod, r);
+                        r = (Rule) new ConcretizeCells(configInfo, labelInfo, sortInfo, mod, true).concretize(mod, r);
+                    }
+                    K result = r.body();
+                    kprint.get().prettyPrint(def.kompiledDefinition, unparsingMod, s -> kprint.get().outputFile(s), result, sort);
                 }
+
+                sw.printTotal("Total");
+                return 0;
+            } else if (!options.steps.equals(Lists.newArrayList(KompileSteps.anonVars))) {
+                throw KEMException.innerParserError("Option --steps is available only with --input rule.");
             }
 
             Module unparsingMod;
+            if (sort == null)
+                sort = def.programStartSymbol;
+
             if (options.module == null) {
                 options.module = def.mainSyntaxModuleName();
                 switch (options.input) {
