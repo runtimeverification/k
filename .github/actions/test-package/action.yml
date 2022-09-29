@@ -18,13 +18,13 @@ runs:
       tag: k-package-build-${{ inputs.distro }}
       subdir: k-${{ inputs.distro }}/
   - name: 'Build Package: ${{ inputs.distro }}'
-    shell: docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c {0}
+    shell: bash {0}
     run: |
-      mv package/debian debian
-      mv debian/compat.jammy debian/compat
-      mv debian/control.jammy debian/control
-      mv debian/rules.jammy debian/rules
-      dpkg-buildpackage
+      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'mv package/debian debian'
+      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'mv debian/compat.jammy debian/compat'
+      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'mv debian/control.jammy debian/control'
+      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'mv debian/rules.jammy debian/rules'
+      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'dpkg-buildpackage'
   - name: 'Tear down Docker'
     shell: bash {0}
     if: always()
