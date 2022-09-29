@@ -4,6 +4,9 @@ inputs:
   distro:
     description: 'Distribution to build and test package for.'
     required: true
+  llvm:
+    description: 'LLVM version to use.'
+    required: true
 runs:
   using: 'composite'
   steps:
@@ -17,6 +20,8 @@ runs:
     with:
       tag: k-package-build-${{ inputs.distro }}
       subdir: k-${{ inputs.distro }}/
+      distro: ${{ inputs.distro }}
+      llvm: ${{ inputs.llvm }}
   - name: 'Build Package: ${{ inputs.distro }}'
     shell: bash {0}
     env:

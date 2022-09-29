@@ -8,6 +8,12 @@ inputs:
     description: 'Subdirectory where code is cloned.'
     required: false
     default:
+  distro:
+    description: 'Distribution to setup Docker for.'
+    required: true
+  llvm:
+    description: 'LLVM version to use.'
+    required: true
 runs:
   using: 'composite'
   steps:
@@ -16,6 +22,8 @@ runs:
     env:
       TAG_NAME: ${{ inputs.tag }}
       SUBDIR: ${{ inputs.subdir }}
+      BASE_IMAGE: ${{ inputs.distro }}
+      LLVM_VERSION: ${{ inputs.llvm }}
     run: |
       set -euxo pipefail
 
@@ -25,15 +33,16 @@ runs:
       docker stop ${TAG_NAME} || true
       docker stop /${TAG_NAME} || true
 
-      docker build . --file ${SUBDIR}.github/workflows/Dockerfile.z3          --tag z3:${Z3_VERSION}
-      docker build . --file ${SUBDIR}.github/workflows/Dockerfile.stack-deps  --tag stack:${K_VERSION}
-      docker build . --file ${SUBDIR}.github/workflows/Dockerfile.maven-cache --tag maven:${K_VERSION}
+      docker build . --build-arg BASE_IMAGE=${BASE_IMAGE} --tag z3:${Z3_VERSION}   --file ${SUBDIR}.github/workflows/Dockerfile.z3
+      docker build . --build-arg BASE_IMAGE=${BASE_IMAGE} --tag stack:${K_VERSION} --file ${SUBDIR}.github/workflows/Dockerfile.stack-deps
+      docker build . --build-arg BASE_IMAGE=${BASE_IMAGE} --tag maven:${K_VERSION} --file ${SUBDIR}.github/workflows/Dockerfile.maven-cache
 
       docker build . --file ${SUBDIR}.github/workflows/Dockerfile    \
           --tag runtimeverification/${TAG_NAME}                      \
+          --build-arg BASE_IMAGE=${BASE_IMAGE}                       \
           --build-arg Z3_VERSION=${Z3_VERSION}                       \
           --build-arg K_VERSION=${K_VERSION}                         \
-          --build-arg LLVM_VERSION=14                                \
+          --build-arg LLVM_VERSION=${LLVM_VERSION}                   \
           --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)
 
       docker run                             \
