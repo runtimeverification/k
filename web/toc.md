@@ -16,7 +16,7 @@ output:
 # Table of Contents
 
 - [Homepage](/web/pages/index.md)
-- [K Tool Binaries](/web/pages/downloads.md)
+- [Install K](https://github.com/runtimeverification/k/releases/latest)
 - [K Tutorial](/k-distribution/k-tutorial/README.md)
   - [Section 1: Basic K Concepts](/k-distribution/k-tutorial/1_basic/README.md)
     - [Lesson 1.1: Setting up a K Environment](/k-distribution/k-tutorial/1_basic/01_installing/README.md)

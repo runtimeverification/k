@@ -16,13 +16,13 @@ call/cc.
 
 ## K Tool Download
 
-- The provided [K Tool Binaries](./downloads.md) are supported on Linux, OS X, and Windows. Other platforms may or may not work correctly. We welcome information about usability of unsupported platforms or bugs in the supported platforms.
+- Install from the latest [K GitHub Release](https://github.com/runtimeverification/k/releases/latest).
 - Try our [Editor Support](./editor_support.md) page for links to K syntax highlighting definitions for various popular editors/IDEs. Please feel free to contribute.
-- The source code (Java) is available on [GitHub](https://github.com/kframework), where you can also [report bugs](http://github.com/runtimeverification/k/issues)</a> (please do so).
+- Build or browse the code [on GitHub](https://github.com/kframework), where you can also [report bugs](http://github.com/runtimeverification/k/issues).
 
 ## Learn K
 
-- <a style="font-size:24px" href="/k-distribution/k-tutorial/README.md">Do the K Tutorial!</a>
+- <a href="/k-distribution/k-tutorial/README.md">Do the K Tutorial!</a>
 - <a href="/k-distribution/pl-tutorial/README.md">Build programming languages in K!</a>
 - <a href="/docs/user_manual.md">Reference Documentation</a>
 - <a href="/docs/cheat_sheet.md">K Cheat Sheet</a>
