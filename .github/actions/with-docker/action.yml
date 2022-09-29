@@ -17,7 +17,7 @@ runs:
       TAG_NAME: ${{ inputs.tag }}
       SUBDIR: ${{ inputs.subdir }}
     run: |
-      set -x
+      set -euxo pipefail
 
       Z3_VERSION=4.8.15
       K_VERSION=$(cat ${SUBDIR}package/version)

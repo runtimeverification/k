@@ -22,6 +22,7 @@ runs:
     env:
       DISTRO: ${{ inputs.distro }}
     run: |
+      set -euxo pipefail
       docker exec -t k-package-build-${DISTRO} /bin/bash -c 'mv package/debian debian'
       docker exec -t k-package-build-${DISTRO} /bin/bash -c 'mv debian/compat.jammy debian/compat'
       docker exec -t k-package-build-${DISTRO} /bin/bash -c 'mv debian/control.jammy debian/control'
@@ -39,6 +40,7 @@ runs:
     env:
       DISTRO: ${{ inputs.distro }}
     run: |
+      set -euxo pipefail
       workspace=$(pwd)
       cd k-${DISTRO}
       docker run                         \
@@ -56,6 +58,7 @@ runs:
     env:
       DISTRO: ${{ inputs.distro }}
     run: |
+      set -euxo pipefail
       docker exec -t k-package-test-${DISTRO} /bin/bash -c "k-${DISTRO}/src/main/scripts/test-in-container-debian"
       docker stop k-package-test-${DISTRO}
   - name: 'Tear down Docker Test'
