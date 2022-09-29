@@ -18,14 +18,18 @@ runs:
       tag: k-package-build-${{ inputs.distro }}
       subdir: k-${{ inputs.distro }}/
   - name: 'Build Package: ${{ inputs.distro }}'
-    shell: bash {0}
+    shell: docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c {0}
     run: |
-      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'mv package/debian debian'
-      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'mv debian/compat.jammy debian/compat'
-      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'mv debian/control.jammy debian/control'
-      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'mv debian/rules.jammy debian/rules'
-      docker exec -t k-package-build-${{ inputs.disto }} /bin/bash -c 'dpkg-buildpackage'
-      docker stop k-package-build-${{ inputs.disto }}
+      mv package/debian debian
+      mv debian/compat.jammy debian/compat
+      mv debian/control.jammy debian/control
+      mv debian/rules.jammy debian/rules
+      dpkg-buildpackage
+  - name: 'Tear down Docker'
+    shell: bash {0}
+    if: always()
+    run: |
+      docker stop k-package-build-${{ inputs.disto }} || true
   - name: 'Set up Docker Test Image: ${{inputs.distro }}'
     shell: bash {0}
     run: |
@@ -46,9 +50,8 @@ runs:
     run: |
       docker exec -t k-package-test-${{ inptus.disto }} /bin/bash -c 'k-${{ inputs.distro }}/src/main/scripts/test-in-container-debian'
       docker stop k-package-test-${{ inptus.disto }}
-  - name: 'Tear down Docker'
+  - name: 'Tear down Docker Test'
     shell: bash {0}
     if: always()
     run: |
-      docker stop k-package-build-${{ inputs.disto }} || true
       docker stop k-package-test-${{ inptus.disto }} || true
