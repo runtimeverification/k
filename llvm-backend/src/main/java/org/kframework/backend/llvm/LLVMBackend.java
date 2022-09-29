@@ -131,7 +131,7 @@ public class LLVMBackend extends KoreBackend {
             File kompiledDir = files.resolveKompiled(".");
 
             if (globalOptions.verbose) {
-                System.out.println("  Executing in " + kompiledDir.getCanonicalPath() + ": " + String.join(" ", args));
+                System.out.println("  \u250cExecuting in " + kompiledDir.getCanonicalPath() + ": " + String.join(" ", args));
             }
 
             Process p = pb.command(args).directory(kompiledDir).inheritIO().start();
@@ -142,7 +142,7 @@ public class LLVMBackend extends KoreBackend {
         } catch (IOException | InterruptedException e) {
             throw KEMException.criticalError("Error with I/O while executing llvm-kompilex", e);
         }
-        sw.printIntermediate("  " + executable + ": " + type);
+        sw.printIntermediate("  \u2514" + executable + ": " + type);
     }
 
     private String getThreshold() {
