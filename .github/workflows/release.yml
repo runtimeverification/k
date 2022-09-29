@@ -6,6 +6,7 @@ on:
 
 jobs:
   nix-release:
+    name: 'Nix Release'
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -24,6 +25,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
   macos-build:
+    name: 'Build MacOS Package'
     runs-on: macos-11
     environment: production
     steps:
@@ -105,6 +107,7 @@ jobs:
       version: ${{ steps.build.outputs.version }}
 
   macos-test:
+    name: 'Test MacOS Package'
     runs-on: macos-11
     environment: production
     needs: macos-build
@@ -191,7 +194,8 @@ jobs:
             const { owner, repo } = context.repo
             await github.repos.deleteRelease({ owner, repo, release_id: ${{ needs.macos-build.outputs.release_id }} })
 
-  macos-release:
+  release:
+    name: 'Publish Release'
     runs-on: ubuntu-latest
     environment: production
     needs: [nix-release, macos-build, macos-test]
