@@ -30,9 +30,6 @@ runs:
       Z3_VERSION=4.8.15
       K_VERSION=$(cat ${SUBDIR}package/version)
 
-      docker stop ${TAG_NAME} || true
-      docker container rm ${TAG_NAME} || true
-
       docker build . --build-arg BASE_IMAGE=${BASE_IMAGE} --tag z3:${Z3_VERSION}   --file ${SUBDIR}.github/workflows/Dockerfile.z3
       docker build . --build-arg BASE_IMAGE=${BASE_IMAGE} --tag stack:${K_VERSION} --file ${SUBDIR}.github/workflows/Dockerfile.stack-deps
       docker build . --build-arg BASE_IMAGE=${BASE_IMAGE} --tag maven:${K_VERSION} --file ${SUBDIR}.github/workflows/Dockerfile.maven-cache
