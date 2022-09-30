@@ -266,6 +266,9 @@ jobs:
       - name: 'Build K Framework'
         run: GC_DONT_GC=1 nix build .
 
+      - name: 'Test K'
+        run: GC_DONT_GC=1 nix build .#test
+
   test-nix:
     name: 'Nix'
     strategy:
