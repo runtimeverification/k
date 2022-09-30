@@ -152,6 +152,8 @@ jobs:
         uses: ./.github/actions/with-docker
         with:
           tag: k-ci
+          distro: jammy
+          llvm: 14
       - name: 'Build and Test K'
         run: docker exec -t k-ci /bin/bash -c 'mvn verify --batch-mode -U'
       - name: 'Check out k-exercises'
