@@ -1,11 +1,6 @@
-  #Not ( {
-    X
-  #Equals
-    Y
-  } )
-#And
   <k>
-    diffResult ( SetItem ( Y:MyId ) ) ~> .
+    unionResult ( S ( SetItem ( Y:MyId ) |Set
+    SetItem ( X:MyId ) ) ) ~> .
   </k>
 #And
   {

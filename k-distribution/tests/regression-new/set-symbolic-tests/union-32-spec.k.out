@@ -1,0 +1,20 @@
+  #Ceil ( S
+  ( SetItem ( Y:MyId ) -Set SetItem ( Z:MyId ) ) )
+#And
+  <k>
+    unionResult ( true ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    Z:MyId in S
+    ( SetItem ( Y:MyId ) -Set SetItem ( Z:MyId ) )
+  }
+#And
+  {
+    false
+  #Equals
+    Z:MyId in S
+  }
+[Error] Prover: backend terminated because the configuration cannot be rewritten further. See output for more details.

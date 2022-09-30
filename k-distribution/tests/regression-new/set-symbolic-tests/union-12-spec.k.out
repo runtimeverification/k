@@ -1,5 +1,12 @@
+  #Not ( {
+    X
+  #Equals
+    Y
+  } )
+#And
   <k>
-    intersectResult ( SetItem ( X:MyId ) ) ~> .
+    unionResult ( SetItem ( X:MyId )
+    ( SetItem ( Y:MyId ) |Set S ) ) ~> .
   </k>
 #And
   {

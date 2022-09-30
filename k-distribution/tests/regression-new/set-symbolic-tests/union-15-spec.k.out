@@ -1,10 +1,24 @@
+  #Not ( {
+    X
+  #Equals
+    Y
+  } )
+#And
   <k>
-    diffResult ( SetItem ( X:MyId ) ) ~> .
+    unionResult ( S
+    SetItem ( X:MyId )
+    SetItem ( Y:MyId ) ) ~> .
   </k>
 #And
   {
     false
   #Equals
     X:MyId in S
+  }
+#And
+  {
+    false
+  #Equals
+    Y:MyId in S
   }
 [Error] Prover: backend terminated because the configuration cannot be rewritten further. See output for more details.

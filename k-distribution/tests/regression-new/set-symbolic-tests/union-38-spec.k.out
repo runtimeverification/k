@@ -1,0 +1,17 @@
+  #Not ( {
+    X
+  #Equals
+    x
+  } )
+#And
+  <k>
+    unionResult ( X:MyId in ( SetItem ( X:MyId )
+    SetItem ( y ) ) |Set SetItem ( x ) ) ~> .
+  </k>
+#And
+  {
+    false
+  #Equals
+    y in SetItem ( X:MyId )
+  }
+[Error] Prover: backend terminated because the configuration cannot be rewritten further. See output for more details.

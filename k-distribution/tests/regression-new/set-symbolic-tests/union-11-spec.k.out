@@ -1,5 +1,6 @@
   <k>
-    intersectResult ( SetItem ( X:MyId ) ) ~> .
+    unionResult ( SetItem ( Y:MyId ) |Set ( S
+    SetItem ( X:MyId ) ) ) ~> .
   </k>
 #And
   {
