@@ -1,7 +1,6 @@
 const {
   generatePagesFromMarkdownFiles,
   convertSidebarToCToHTML,
-  md,
 } = require("k-web-theme");
 const path = require("path");
 const fs = require("fs");
@@ -64,3 +63,8 @@ generatePagesFromMarkdownFiles({
     TOC: tocHTML,
   },
 });
+
+fs.copyFileSync(
+  path.join(__dirname, "../package/nix/install"),
+  path.join(__dirname, "./public_content/install")
+);
