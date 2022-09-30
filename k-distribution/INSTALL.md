@@ -19,6 +19,18 @@ bash <(curl https://kframework.org/install)
 kup install k
 ```
 
+You can update K with:
+
+```
+kup update k
+```
+
+And list available versions with:
+
+```
+kup list
+```
+
 
 Pre-installation Notes
 ----------------------
