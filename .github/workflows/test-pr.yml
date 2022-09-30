@@ -173,9 +173,10 @@ jobs:
           docker stop k-ci || true
           docker container rm k-ci || true
 
-  test-ubuntu-jammy:
+  test-package-ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
     runs-on: [self-hosted, linux, normal]
+    needs: version-sync
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test'
