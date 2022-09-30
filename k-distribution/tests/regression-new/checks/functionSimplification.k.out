@@ -1,0 +1,5 @@
+[Error] Compiler: Simplification rules expect function/functional/mlOp symbols at the top of the left hand side term.
+	Source(functionSimplification.k)
+	Location(9,8,9,18)
+	9 |	  rule a() => b() [simplification]
+	  .	       ^~~~~~~~~~
