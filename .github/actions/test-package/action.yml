@@ -74,3 +74,7 @@ runs:
     run: |
       docker stop k-package-test-${DISTRO} || true
       docker container rm k-package-test-${DISTRO} || true
+  - name: 'Rename Package'
+    env:
+      DISTRO: ${{ inputs.distro }}
+    run: mv kframework_$(cat package/version)_amd64.deb kframework_amd64_${DISTRO}.deb
