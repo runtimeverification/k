@@ -625,12 +625,12 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
 
   //Temporarly rule for #Ceil simplification, should be generated in front-end
 
-/* Matching for this version not implemented.
-  rule #Ceil(@S1:Set @S2:Set) =>
-         {intersectSet(@S1, @S2) #Equals .Set} #And #Ceil(@S1) #And #Ceil(@S2)
-    [simplification]
-*/
-  //simplified version
+// Matching for this version not implemented.
+  // rule #Ceil(@S1:Set @S2:Set) =>
+  //        {intersectSet(@S1, @S2) #Equals .Set} #And #Ceil(@S1) #And #Ceil(@S2)
+  //   [simplification]
+
+//simpler version
   rule #Ceil(@S:Set SetItem(@E:KItem)) =>
          {(@E in @S) #Equals false} #And #Ceil(@S) #And #Ceil(@E)
     [simplification]
@@ -654,9 +654,12 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   rule intersectSet( _  , .Set) => .Set    [simplification]
   rule intersectSet( S  , S   ) =>  S      [simplification]
 
-  rule intersectSet( _ SetItem(X), SetItem(X))     => SetItem(X)                      [simplification]
+  rule intersectSet( S SetItem(X), SetItem(X))     => SetItem(X)
+                                                        ensures notBool (X in S)      [simplification]
   rule intersectSet( S SetItem(X) , S)             => S ensures notBool (X in S)      [simplification]
-  rule intersectSet( S1 SetItem(X), S2 SetItem(X)) => intersectSet(S1, S2) SetItem(X) [simplification]
+  rule intersectSet( S1 SetItem(X), S2 SetItem(X)) => intersectSet(S1, S2) SetItem(X)
+                                                        ensures notBool (X in S1)
+                                                        andBool notBool (X in S2)     [simplification]
 
   // membership simplifications
   rule E in .Set           => false requires #Ceil(E)       [simplification]
