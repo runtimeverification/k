@@ -276,8 +276,6 @@ jobs:
             os: ubuntu-latest
           - runner: macos-12
             os: macos-12
-          - runner: MacM1
-            os: self-macos-12
     runs-on: ${{ matrix.runner }}
     needs: [nix-maven, nix-flake-submodules]
     steps:
