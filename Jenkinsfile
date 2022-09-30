@@ -439,44 +439,5 @@ pipeline {
         }
       }
     }
-    stage('GitHub Pages') {
-      when {
-        branch 'master'
-        beforeAgent true
-      }
-      agent {
-        dockerfile {
-          additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
-          reuseNode true
-        }
-      }
-      post { failure { slackSend color: '#cb2431' , channel: '#k' , message: "GitHub Pages Deploy Failed: ${env.BUILD_URL}" } }
-      steps {
-        dir('gh-pages') {
-          sshagent(['rv-jenkins-github']) {
-            sh '''
-              git clone 'ssh://github.com/runtimeverification/k.git' --depth 1 --no-single-branch --branch master --branch gh-pages
-              cd k
-              git checkout -B gh-pages origin/master
-              git submodule update --init --recursive -- ./web
-              cd web
-              npm install
-              npm run build
-              npm run build-book
-              npm run build-sitemap
-              cd -
-              mv web/public_content ./
-              rm -rf $(find . -maxdepth 1 -not -name public_content -a -not -name .git -a -not -path . -a -not -path .. -a -not -name CNAME)
-              mv public_content/* ./
-              rm -rf public_content
-              git add ./
-              git commit -m 'gh-pages: Updated the website'
-              git merge --strategy ours origin/gh-pages --allow-unrelated-histories
-              git push origin gh-pages
-            '''
-          }
-        }
-      }
-    }
   }
 }
