@@ -1,9 +1,0 @@
-  <k>
-    diffResult ( notBool ( Z:MyId in SetItem ( Y:MyId ) ) ) ~> .
-  </k>
-#And
-  {
-    false
-  #Equals
-    Z:MyId in S
-  }
