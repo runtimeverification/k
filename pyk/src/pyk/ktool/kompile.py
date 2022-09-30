@@ -55,7 +55,7 @@ def kompile(
     )
 
     try:
-        _kompile(str(main_file), check=check, profile=profile, *args)
+        _kompile(str(main_file), *args, check=check, profile=profile)
     except CalledProcessError as err:
         raise RuntimeError(
             f'Command kompile exited with code {err.returncode} for: {main_file}', err.stdout, err.stderr
