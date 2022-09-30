@@ -292,3 +292,34 @@ jobs:
 
       - name: 'Run selected integration tests'
         run: nix-build test.nix --argstr test help
+
+  gh-pages:
+    name: 'GitHub Pages deployment'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          path: gh-pages
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
+      - name: 'Build webpage'
+        working-directory: gh-pages
+        run: |
+          cd web
+          npm install
+          npm run build
+          npm run build-book
+          npm run build-sitemap
+          cd -
+          mv web/public_content ./
+          rm -rf $(find . -maxdepth 1 -not -name public_content -a -not -name .git -a -not -path . -a -not -path .. -a -not -name CNAME)
+          mv public_content/* ./
+          rm -rf public_content
+      - name: 'Push gh-pages branch'
+        working-directory: gh-pages
+        run: |
+          git checkout -B gh-pages
+          git add ./
+          git commit -m 'gh-pages: Updated the website'
+          git merge --strategy ours origin/gh-pages --allow-unrelated-histories
+          git push origin gh-pages
