@@ -11,7 +11,14 @@
       overlay = final: prev: {
         pyk = prev.poetry2nix.mkPoetryApplication { 
           python = prev.python39;
-          projectDir = ./.; 
+          projectDir = ./.;
+          overrides = prev.poetry2nix.overrides.withDefaults (
+            final: prev: {
+              mypy = prev.mypy.overridePythonAttrs (_old: {
+                MYPY_USE_MYPYC = false;
+              });
+            }
+          );
         };
       };
     } // (flake-utils.lib.eachDefaultSystem (system:

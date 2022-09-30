@@ -1,7 +1,7 @@
 import json
 import logging
 import socket
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
@@ -10,6 +10,7 @@ from subprocess import Popen
 from time import sleep
 from typing import (
     Any,
+    ClassVar,
     ContextManager,
     Dict,
     Final,
@@ -165,7 +166,7 @@ class State:
         )
 
 
-class ExecuteResult(ABC):
+class ExecuteResult(ABC):  # noqa: B024
     _TYPES: Mapping[StopReason, str] = {
         StopReason.STUCK: 'StuckResult',
         StopReason.DEPTH_BOUND: 'DepthBoundResult',
@@ -174,16 +175,12 @@ class ExecuteResult(ABC):
         StopReason.TERMINAL_RULE: 'TerminalResult',
     }
 
+    reason: ClassVar[StopReason]
+
     state: State
     depth: int
     next_states: Optional[Tuple[State, ...]]
     rule: Optional[str]
-
-    @classmethod
-    @property
-    @abstractmethod
-    def reason(cls) -> StopReason:
-        ...
 
     @classmethod
     def from_dict(cls: Type[ER], dct: Mapping[str, Any]) -> ER:
