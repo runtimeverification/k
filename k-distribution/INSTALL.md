@@ -9,6 +9,17 @@ We currently strive to provide packages for the following platforms:
 -   macOS Catalina (10.15), Big Sur (11) and Monterey (12) via Homebrew
 -   Docker Images
 
+Fast Installation
+-----------------
+
+If you're on a system that supports [Nix](https://nixos.org/download.html), use this command to install via Nix:
+
+```
+bash <(curl https://kframework.org/install)
+kup install k
+```
+
+
 Pre-installation Notes
 ----------------------
 
