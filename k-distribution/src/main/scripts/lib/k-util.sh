@@ -73,14 +73,27 @@ fi
 
 execute () {
   (
+  set +e
+
+  declare -a cmd
+  if ${profile}; then
+    TIMEFORMAT="%lR %lU %lS $*"
+    cmd=(time "$@")
+  else
+    cmd=("$@")
+  fi
+
   if ${verbose}; then
     set -x
   fi
-  if ${profile}; then
-    TIMEFORMAT="%lR %lU %lS $*"
-    time "$@"
-  else
-    "$@"
+
+  "${cmd[@]}"
+
+  { set +x; } 2>/dev/null
+
+  ret="$?"
+  if [ "$ret" -ne 0 ]; then
+    error "$ret" "$@"
   fi
   )
 }
