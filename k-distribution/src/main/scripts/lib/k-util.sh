@@ -88,10 +88,10 @@ execute () {
   fi
 
   "${cmd[@]}"
+  ret="$?"
 
   { set +x; } 2>/dev/null
 
-  ret="$?"
   if [ "$ret" -ne 0 ]; then
     error "$ret" "$@"
   fi
