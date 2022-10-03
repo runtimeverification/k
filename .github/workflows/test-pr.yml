@@ -310,6 +310,7 @@ jobs:
           submodules: recursive
           path: gh-pages
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
+          fetch-depth: 0
       - working-directory: gh-pages
         run: |
           git config --global user.name rv-jenkins
