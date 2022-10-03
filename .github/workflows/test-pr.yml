@@ -330,6 +330,8 @@ jobs:
       - name: 'Push gh-pages branch'
         working-directory: gh-pages
         run: |
+          git config --global user.name rv-jenkins
+          git config --global user.email devops@runtimeverification.com
           git checkout -B gh-pages
           git add ./
           git commit -m 'gh-pages: Updated the website'
