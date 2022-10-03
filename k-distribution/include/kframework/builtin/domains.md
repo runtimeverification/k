@@ -2460,6 +2460,15 @@ finishes.
   syntax K ::= #logToFile(name: String, value: String) [function, functional, hook(IO.log), impure, returnsUnit, symbol]
 ```
 
+Strings can also be logged via the logging mechanisms available to the backend.
+On the LLVM backend, this just means logging the text to standard error. On the
+Haskell backend, a log message of type InfoUserLog is created with the
+specified text.
+
+```k
+  syntax K ::= #log(value: String) [function, funtional, hook(IO.logString), impure, returnsUnit, symbol]
+```
+
 Terms can also be logged to standard error in _surface syntax_, rather than as
 KORE using `#trace`. This operator has similar semantics to `#logToFile` (i.e.
 it returns `.K`, but prints as an impure side effect). Note that calling
