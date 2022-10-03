@@ -11,18 +11,9 @@ pipeline {
     MAKE_EXTRA_ARGS = '' // Example: 'DEBUG=--debug' to see stack traces
   }
   stages {
-    stage('Init title') {
-      when { changeRequest() }
-      steps {
-        script { currentBuild.displayName = "PR ${env.CHANGE_ID}: ${env.CHANGE_TITLE}" }
-      }
-    }
     stage('Create source tarball') {
       when {
-        anyOf {
-          branch 'master'
-          changeRequest()
-        }
+        branch 'master'
         beforeAgent true
       }
       agent {
@@ -46,10 +37,7 @@ pipeline {
     }
     stage('Build and Package on Ubuntu Focal') {
       when {
-        anyOf {
-          branch 'master'
-          changeRequest()
-        }
+        branch 'master'
         beforeAgent true
       }
       stages {

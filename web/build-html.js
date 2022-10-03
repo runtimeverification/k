@@ -1,7 +1,6 @@
 const {
   generatePagesFromMarkdownFiles,
   convertSidebarToCToHTML,
-  md,
 } = require("k-web-theme");
 const path = require("path");
 const fs = require("fs");
@@ -51,7 +50,7 @@ generatePagesFromMarkdownFiles({
   },
 });
 generatePagesFromMarkdownFiles({
-  globPattern: path.resolve(__dirname, "../") + "/USER_MANUAL.md",
+  globPattern: path.resolve(__dirname, "../docs/") + "/*.md",
   globOptions: {},
   origin: "https://github.com/runtimeverification/k/tree/master/",
   sourceDirectory: path.resolve(__dirname, "../"),
@@ -64,3 +63,8 @@ generatePagesFromMarkdownFiles({
     TOC: tocHTML,
   },
 });
+
+fs.copyFileSync(
+  path.join(__dirname, "../package/nix/install"),
+  path.join(__dirname, "./public_content/install")
+);
