@@ -316,6 +316,7 @@ jobs:
       - name: 'Build webpage'
         working-directory: gh-pages
         run: |
+          export PATH="$PATH":/opt/calibre
           cd web
           npm install
           npm run build
