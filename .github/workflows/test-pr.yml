@@ -332,6 +332,7 @@ jobs:
       - name: 'Push gh-pages branch'
         working-directory: gh-pages
         run: |
+          set -x
           git add ./
           git commit -m 'gh-pages: Updated the website'
           git merge --strategy ours origin/gh-pages --allow-unrelated-histories
