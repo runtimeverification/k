@@ -550,7 +550,7 @@ elements present in either set.
 
 ```k
   syntax Set ::= Set "|Set" Set            [left, function, functional, hook(SET.union)]
-  rule S1:Set |Set S2:Set => S1 (S2 -Set S1)
+// FIXME  rule S1:Set |Set S2:Set => S1 (S2 -Set S1)
 ```
 
 ### Set intersection
@@ -645,9 +645,13 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
                              requires notBool (X in S)  [simplification]
 
   // |Set simplifications
-  rule S    |Set .Set => S    [simplification]
-  rule .Set |Set S    => S    [simplification]
-  rule S    |Set S    => S    [simplification]
+  rule S              |Set .Set       => S            [simplification]
+  rule .Set           |Set S          => S            [simplification]
+  rule S              |Set S          => S            [simplification]
+  rule (S SetItem(X)) |Set SetItem(X) => S SetItem(X) [simplification]
+  rule (S SetItem(X)) |Set S          => S SetItem(X) [simplification]
+  rule SetItem(X) |Set (S SetItem(X)) => S SetItem(X) [simplification]
+  rule S          |Set (S SetItem(X)) => S SetItem(X) [simplification]
 
   // intersectSet simplifications
   rule intersectSet(.Set, _   ) => .Set    [simplification]
