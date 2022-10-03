@@ -302,6 +302,7 @@ jobs:
           submodules: recursive
           path: gh-pages
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
+      - run: git checkout -B gh-pages
       - name: 'Install nodejs 16'
         uses: actions/setup-node@v3
         with:
@@ -332,7 +333,6 @@ jobs:
         run: |
           git config --global user.name rv-jenkins
           git config --global user.email devops@runtimeverification.com
-          git checkout -B gh-pages
           git add ./
           git commit -m 'gh-pages: Updated the website'
           git merge --strategy ours origin/gh-pages --allow-unrelated-histories
