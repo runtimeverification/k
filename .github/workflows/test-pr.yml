@@ -303,10 +303,6 @@ jobs:
           path: gh-pages
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
       - run: git checkout -B gh-pages
-      - name: 'Install nodejs 16'
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
       - name: 'Install pandoc/texlive/calibre'
         run: |
           sudo apt update --yes
