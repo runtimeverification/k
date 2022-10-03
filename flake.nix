@@ -101,6 +101,7 @@
             p."kore:exe:kore-exec"
             p."kore:exe:kore-rpc"
             p."kore:exe:kore-repl"
+            p."kore:exe:kore-parser"
             p."kore:exe:kore-prof"
             p."kore:exe:kore-match-disjunction"
           ];
