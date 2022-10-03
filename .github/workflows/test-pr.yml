@@ -297,13 +297,6 @@ jobs:
     name: 'GitHub Pages deployment'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-          path: gh-pages
-          token: ${{ secrets.JENKINS_GITHUB_PAT }}
-      - working-directory: gh-pages
-        run: git checkout -B gh-pages
       - name: 'Install pandoc/texlive/calibre'
         run: |
           sudo apt update --yes
@@ -311,6 +304,17 @@ jobs:
           sudo wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=5.42.0
           sudo wget https://github.com/jgm/pandoc/releases/download/2.18/pandoc-2.18-1-amd64.deb -O /tmp/pandoc.deb
           sudo dpkg -i /tmp/pandoc.deb
+      - name: 'Checkout code and set up web build'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          path: gh-pages
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
+      - working-directory: gh-pages
+        run: |
+          git config --global user.name rv-jenkins
+          git config --global user.email devops@runtimeverification.com
+          git checkout -B gh-pages
       - name: 'Build webpage'
         working-directory: gh-pages
         run: |
@@ -328,8 +332,6 @@ jobs:
       - name: 'Push gh-pages branch'
         working-directory: gh-pages
         run: |
-          git config --global user.name rv-jenkins
-          git config --global user.email devops@runtimeverification.com
           git add ./
           git commit -m 'gh-pages: Updated the website'
           git merge --strategy ours origin/gh-pages --allow-unrelated-histories
