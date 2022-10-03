@@ -302,6 +302,13 @@ jobs:
           submodules: recursive
           path: gh-pages
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
+      - name: 'Install pandoc/texlive/calibre'
+        run: |
+          sudo apt update --yes
+          sudo apt install --yes wget texlive-xetex
+          sudo wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=5.42.0
+          sudo wget https://github.com/jgm/pandoc/releases/download/2.18/pandoc-2.18-1-amd64.deb -O /tmp/pandoc.deb
+          sudo dpkg -i /tmp/pandoc.deb
       - name: 'Build webpage'
         working-directory: gh-pages
         run: |
