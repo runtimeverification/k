@@ -1,18 +1,6 @@
-  #Ceil ( S
-  ( SetItem ( Y:MyId ) -Set ( S
-  SetItem ( Z:MyId ) ) ) )
-#And
   <k>
     unionResult ( true ) ~> .
   </k>
-#And
-  {
-    false
-  #Equals
-    Z:MyId in S
-    ( SetItem ( Y:MyId ) -Set ( S
-    SetItem ( Z:MyId ) ) )
-  }
 #And
   {
     false
