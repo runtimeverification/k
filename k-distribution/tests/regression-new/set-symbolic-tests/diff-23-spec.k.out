@@ -1,16 +1,15 @@
+  #Not ( {
+    Y
+  #Equals
+    Z
+  } )
+#And
   <k>
-    unionResult ( S
-    SetItem ( X:MyId ) ) ~> .
+    diffResult ( Z:MyId in S ) ~> .
   </k>
 #And
   {
     false
-  #Equals
-    X:MyId in S
-  }
-#And
-  {
-    true
   #Equals
     Y:MyId in S
   }
