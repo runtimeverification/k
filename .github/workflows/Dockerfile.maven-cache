@@ -1,4 +1,5 @@
-FROM ubuntu:jammy
+ARG BASE_IMAGE
+FROM ubuntu:${BASE_IMAGE}
 
 RUN    apt-get update        \
     && apt-get upgrade --yes \
