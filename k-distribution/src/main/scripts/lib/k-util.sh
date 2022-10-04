@@ -75,15 +75,19 @@ execute () {
   (
   set +e
 
-  if ${verbose}; then
-    set -x
-  fi
-
   if ${profile}; then
+    if ${verbose}; then
+      set -x
+    fi
+
     TIMEFORMAT="%lR %lU %lS $*"
-    command time "$@"
+    time "$@"
     ret="$?"
   else
+    if ${verbose}; then
+      set -x
+    fi
+
     "$@"
     ret="$?"
   fi
