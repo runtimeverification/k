@@ -75,20 +75,18 @@ execute () {
   (
   set +e
 
-  declare -a cmd
-  if ${profile}; then
-    TIMEFORMAT="%lR %lU %lS $*"
-    cmd=(time "$@")
-  else
-    cmd=("$@")
-  fi
-
   if ${verbose}; then
     set -x
   fi
 
-  "${cmd[@]}"
-  ret="$?"
+  if ${profile}; then
+    TIMEFORMAT="%lR %lU %lS $*"
+    command time "$@"
+    ret="$?"
+  else
+    "$@"
+    ret="$?"
+  fi
 
   { set +x; } 2>/dev/null
 

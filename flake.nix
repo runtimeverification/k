@@ -152,7 +152,7 @@
                 (nix-gitignore.gitignoreSourcePure [ ./.gitignore ]
                   ./k-distribution);
               preferLocalBuild = true;
-              buildInputs = [ time gmp mpfr k ];
+              buildInputs = [ gmp mpfr k ];
               postPatch = ''
                 patchShebangs tests/regression-new/*
                 substituteInPlace tests/regression-new/append/kparse-twice \
