@@ -435,9 +435,9 @@ module MAP-KORE-SYMBOLIC [kore,symbolic]
   rule ( MAP:Map [ K1 <- _V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2 [simplification]
 
   rule (K  |->  V M:Map) [  K ] orDefault _ => V ensures notBool (K in_keys(M)) [simplification]
-  rule (K1 |-> _V M:Map) [ K2 ] orDefault _ => M [K2] requires K1 =/=K K2 ensures notBool (K1 in_keys(M)) [simplification]
+  rule (K1 |-> _V M:Map) [ K2 ] orDefault D => M [K2] orDefault D requires K1 =/=K K2 ensures notBool (K1 in_keys(M)) [simplification]
   rule (_MAP:Map [ K  <-  V1 ]) [ K ] orDefault _ => V1 [simplification]
-  rule ( MAP:Map [ K1 <- _V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2 [simplification]
+  rule ( MAP:Map [ K1 <- _V1 ]) [ K2 ] orDefault D => MAP [ K2 ] orDefault D requires K1 =/=K K2 [simplification]
   rule .Map [ _ ] orDefault D => D [simplification]
 
   // Symbolic in_keys
