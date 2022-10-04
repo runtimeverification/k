@@ -1,4 +1,4 @@
-name: "Release"
+name: 'Release'
 on:
   release:
     types:
@@ -21,7 +21,7 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v14.1
         with:
-          install_url: "https://releases.nixos.org/nix/nix-2.3.16/install"
+          install_url: 'https://releases.nixos.org/nix/nix-2.3.16/install'
 
       - name: Upload release.nix
         uses: ttuegel/upload-release.nix@v1.0
@@ -169,7 +169,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          asset_content_type: "application/gzip"
+          asset_content_type: 'application/gzip'
           asset_name: ${{ needs.macos-build.outputs.bottle_path_remote }}
           asset_path: homebrew-k-old/${{ needs.macos-build.outputs.bottle_path }}
           upload_url: ${{ needs.macos-build.outputs.upload_url }}
