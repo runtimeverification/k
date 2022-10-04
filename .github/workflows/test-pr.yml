@@ -171,7 +171,7 @@ jobs:
           - runner: MacM1
             os: self-macos-12
     runs-on: ${{ matrix.runner }}
-    needs: [nix-maven, nix-flake-submodules]
+    needs: [nix-maven]
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v2.3.4
@@ -219,7 +219,7 @@ jobs:
           - runner: macos-12
             os: macos-12
     runs-on: ${{ matrix.runner }}
-    needs: [nix-maven, nix-flake-submodules]
+    needs: [nix-maven]
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v2.3.4
