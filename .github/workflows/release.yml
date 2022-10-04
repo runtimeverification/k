@@ -8,6 +8,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+
   nix-release:
     name: 'Nix Release'
     runs-on: ubuntu-latest
@@ -27,6 +28,7 @@ jobs:
         uses: ttuegel/upload-release.nix@v1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
   macos-build:
     name: 'Build MacOS Package'
     runs-on: macos-11
