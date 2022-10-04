@@ -14,10 +14,8 @@ jobs:
             os: ubuntu-latest
           - runner: macos-12
             os: macos-12
-          # Disabled as a hotfix until this PR is merged:
-          # https://github.com/runtimeverification/k/pull/2924
-          # - runner: MacM1
-          #   os: self-macos-12
+          - runner: MacM1
+            os: self-macos-12
     runs-on: ${{ matrix.runner }}
     steps:
       - name: 'Check out code'
