@@ -638,11 +638,21 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   // -Set simplifications
   rule S              -Set .Set           => S          [simplification]
   rule .Set           -Set  _             => .Set       [simplification]
-  rule SetItem(X)     -Set (_ SetItem(X)) => .Set       [simplification]
-  rule S              -Set (S SetItem(_)) => .Set       [simplification]
-  rule (S SetItem(X)) -Set S              => SetItem(X) [simplification]
-  rule SetItem(X)     -Set S              => SetItem(X)
-                             requires notBool (X in S)  [simplification]
+  rule SetItem(X)     -Set (S SetItem(X)) => .Set
+                               ensures notBool (X in S) [simplification]
+  rule S              -Set (S SetItem(X)) => .Set
+                               ensures notBool (X in S) [simplification]
+  rule (S SetItem(X)) -Set S              => SetItem(X)
+                               ensures notBool (X in S) [simplification]
+  rule (S SetItem(X)) -Set SetItem(X)     => S
+                               ensures notBool (X in S) [simplification]
+  // rule SetItem(X)     -Set S              => SetItem(X)
+  //                            requires notBool (X in S)  [simplification]
+  // rule (S1 SetItem(X)) -Set (S2 SetItem(X))  => S1 -Set S2
+  //                             ensures notBool (X in S1)
+  //                             andBool notBool (X in S2) [simplification]
+
+
 
   // |Set simplifications
   rule S    |Set .Set => S    [simplification]
@@ -656,7 +666,7 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
 
   rule intersectSet( S SetItem(X), SetItem(X))     => SetItem(X)
                                                         ensures notBool (X in S)      [simplification]
-  rule intersectSet( S SetItem(X) , S)             => S ensures notBool (X in S)      [simplification]
+  // rule intersectSet( S SetItem(X) , S)             => S ensures notBool (X in S)      [simplification]
   rule intersectSet( S1 SetItem(X), S2 SetItem(X)) => intersectSet(S1, S2) SetItem(X)
                                                         ensures notBool (X in S1)
                                                         andBool notBool (X in S2)     [simplification]
