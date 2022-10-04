@@ -5,8 +5,8 @@
   } )
 #And
   <k>
-    lookupResult ( ( MAP
-    X:MyId |-> 1 ) [ Y:MyId <- 2 ] [ Z:MyId ] orDefault 0 ~> . ) ~> .
+    lookupResult ( MAP
+    ( X:MyId |-> 1 ) [ Z:MyId ] orDefault 0 ~> . ) ~> .
   </k>
 #And
   {

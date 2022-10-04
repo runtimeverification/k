@@ -11,18 +11,12 @@
   } )
 #And
   <k>
-    lookupResult ( MAP [ Y:MyId <- 2 ] [ Z:MyId ] ~> . ) ~> .
+    lookupResult ( MAP [ Y:MyId <- 2 ] [ Z:MyId ] orDefault 0 ~> . ) ~> .
   </k>
 #And
   {
     false
   #Equals
     X:MyId in_keys ( MAP )
-  }
-#And
-  {
-    true
-  #Equals
-    Z:MyId in_keys ( MAP [ Y:MyId <- 2 ] )
   }
 [Error] Prover: backend terminated because the configuration cannot be rewritten further. See output for more details.
