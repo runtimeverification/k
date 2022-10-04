@@ -1,0 +1,5 @@
+[Error] Compiler: Simplification rules expect function/functional/mlOp symbols at the top of the left hand side term.
+	Source(a6-spec.k)
+	Location(7,8,7,25)
+	7 |	  rule notAFunction => 1 [simplification]
+	  .	       ^~~~~~~~~~~~~~~~~

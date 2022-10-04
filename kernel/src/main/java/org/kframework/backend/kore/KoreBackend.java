@@ -3,21 +3,19 @@ package org.kframework.backend.kore;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
+import org.kframework.Strategy;
 import org.kframework.attributes.Att;
 import org.kframework.compile.*;
-import org.kframework.definition.Definition;
-import org.kframework.definition.DefinitionTransformer;
 import org.kframework.definition.Module;
-import org.kframework.definition.ModuleTransformer;
-import org.kframework.definition.Rule;
+import org.kframework.definition.*;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.kore.KLabel;
 import org.kframework.main.Tool;
-import org.kframework.Strategy;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-
 import scala.Function1;
 
 import java.io.File;
@@ -119,6 +117,7 @@ public class KoreBackend extends AbstractBackend {
           ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d, true);
           return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kem, kompileOptions, false).expand(s), "expand macros").apply(d);
         };
+        Function1<Definition, Definition> checkSimplificationRules = d -> DefinitionTransformer.from(m -> { m.localRules().foreach(r -> checkSimpIsFunc(m, r)); return m;}, "Check simplification rules").apply(d);
         DefinitionTransformer constantFolding = DefinitionTransformer.fromSentenceTransformer(new ConstantFolding()::fold, "constant expression folding");
         Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(d, true, kompileOptions.topCell, files).resolve(m)), "resolving !Var variables").apply(d);
         GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
@@ -146,6 +145,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(constantFolding)
                 .andThen(propagateMacroToRules)
                 .andThen(expandMacros)
+                .andThen(checkSimplificationRules)
                 .andThen(guardOrs)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(resolveFreshConstants)
@@ -182,6 +182,7 @@ public class KoreBackend extends AbstractBackend {
           ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(m, true);
           return ModuleTransformer.fromSentenceTransformer((m2, s) -> new ExpandMacros(transformer, m2, files, kem, kompileOptions, false).expand(s), "expand macros").apply(m);
         };
+        Function1<Module, Module> checkSimplificationRules = ModuleTransformer.from(m -> { m.localRules().foreach(r -> checkSimpIsFunc(m, r)); return m;}, "Check simplification rules");
         ModuleTransformer subsortKItem = ModuleTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         ModuleTransformer addImplicitComputationCell = ModuleTransformer.fromSentenceTransformer(
                 new AddImplicitComputationCell(configInfo, labelInfo)::apply,
@@ -198,12 +199,25 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(generateSortProjections)
                 .andThen(propagateMacroToRules)
                 .andThen(expandMacros)
+                .andThen(checkSimplificationRules)
                 .andThen(addImplicitComputationCell)
                 .andThen(resolveFreshConstants)
                 .andThen(concretizeCells)
                 .andThen(subsortKItem)
                 .andThen(restoreDefinitionModulesTransformer(def))
                 .apply(m);
+    }
+
+    // check that simplification rules have a functional symbol on the LHS
+    public Sentence checkSimpIsFunc(Module m, Sentence s) {
+        // need to check after macro expansion
+        if (s instanceof Rule && (s.att().contains(Att.SIMPLIFICATION()))) {
+            KLabel kl = m.matchKLabel((Rule) s);
+            Att atts = m.attributesFor().get(kl).getOrElse(Att::empty);
+            if (!(atts.contains(Att.FUNCTION()) || atts.contains(Att.FUNCTIONAL()) || atts.contains("mlOp")))
+                throw  KEMException.compilerError("Simplification rules expect function/functional/mlOp symbols at the top of the left hand side term.", s);
+        }
+        return s;
     }
 
     @Override
