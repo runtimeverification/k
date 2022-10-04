@@ -1,56 +1,59 @@
+ARG BASE_IMAGE
 ARG K_VERSION
 ARG Z3_VERSION
 FROM z3:${Z3_VERSION} as Z3
 
+ARG BASE_IMAGE
 ARG K_VERSION
 FROM stack:${K_VERSION} as STACK
 
+ARG BASE_IMAGE
 ARG K_VERSION
 FROM maven:${K_VERSION} as MAVEN
 
-FROM ubuntu:jammy
+FROM ubuntu:${BASE_IMAGE}
 
 ENV TZ America/Chicago
 ENV DEBIAN_FRONTEND=noninteractive
 
-ARG LLVM_VERSION=14
+ARG LLVM_VERSION
 
-RUN    apt-get update            \
-    && apt-get install --yes     \
-        bison                    \
-        build-essential          \
-        clang-$LLVM_VERSION      \
-        cmake                    \
-        curl                     \
-        debhelper                \
-        flex                     \
-        gcc                      \
-        git                      \
-        libboost-test-dev        \
-        libbz2-dev               \
-        libffi-dev               \
-        libgdbm-dev              \
-        libgmp-dev               \
-        libjemalloc-dev          \
-        libmpfr-dev              \
-        libncurses5-dev          \
-        libnss3-dev              \
-        libreadline-dev          \
-        libsqlite3-dev           \
-        libssl-dev               \
-        libyaml-dev              \
-        libz3-dev                \
-        lld-$LLVM_VERSION        \
-        llvm-$LLVM_VERSION-tools \
-        locales                  \
-        maven                    \
-        openjdk-11-jdk           \
-        parallel                 \
-        pkg-config               \
-        python3                  \
-        python3-dev              \
-        python3-distutils        \
-        python3-pip              \
+RUN    apt-get update              \
+    && apt-get install --yes       \
+        bison                      \
+        build-essential            \
+        clang-${LLVM_VERSION}      \
+        cmake                      \
+        curl                       \
+        debhelper                  \
+        flex                       \
+        gcc                        \
+        git                        \
+        libboost-test-dev          \
+        libbz2-dev                 \
+        libffi-dev                 \
+        libgdbm-dev                \
+        libgmp-dev                 \
+        libjemalloc-dev            \
+        libmpfr-dev                \
+        libncurses5-dev            \
+        libnss3-dev                \
+        libreadline-dev            \
+        libsqlite3-dev             \
+        libssl-dev                 \
+        libyaml-dev                \
+        libz3-dev                  \
+        lld-${LLVM_VERSION}        \
+        llvm-${LLVM_VERSION}-tools \
+        locales                    \
+        maven                      \
+        openjdk-11-jdk             \
+        parallel                   \
+        pkg-config                 \
+        python3                    \
+        python3-dev                \
+        python3-distutils          \
+        python3-pip                \
         zlib1g-dev
 
 COPY --from=Z3 /usr/bin/z3 /usr/bin/z3
