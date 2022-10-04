@@ -45,7 +45,7 @@ jobs:
       - name: 'Build and cache K Framework'
         run: |
           export GC_DONT_GC=1
-          export CACHIX_AUTH_TOKEN=$RV_DEVOPS_CACHIX_TOKEN
+          export CACHIX_AUTH_TOKEN=${{ secrets.RV_DEVOPS_CACHIX_TOKEN }}
           nix shell nixpkgs#jq
           k=$(nix build .#k --json | jq -r '.[].outputs | to_entries[].value')
           drv=$(nix-store --query --deriver ${k})
