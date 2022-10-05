@@ -124,8 +124,8 @@ really necessary, but it makes the definition of letrec easier to understand
 and faster to execute.
 
 ```k
-  syntax Exp ::= "letrec" KVar KVar "=" Exp "in" Exp
-               | "mu" KVar "." Exp                  [macro, binder, latex(\mu{#1}.{#2})]
+  syntax Exp ::= "letrec" KVar KVar "=" Exp "in" Exp [macro]
+               | "mu" KVar "." Exp                   [binder, latex(\mu{#1}.{#2})]
   rule letrec F:KVar X:KVar = E in E' => let F = mu F . lambda X . E in E'
 endmodule
 ```
