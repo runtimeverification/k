@@ -137,9 +137,6 @@ jobs:
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
-        with:
-          # Check out pull request HEAD instead of merge commit.
-          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: 'Upgrade bash'
         if: ${{ contains(matrix.os, 'macos') }}
@@ -186,8 +183,6 @@ jobs:
       - name: 'Check out code'
         uses: actions/checkout@v3
         with:
-          # Check out pull request HEAD instead of merge commit.
-          ref: ${{ github.event.pull_request.head.sha }}
           submodules: recursive
 
       - name: 'Upgrade bash'
@@ -198,7 +193,7 @@ jobs:
         if: ${{ !startsWith(matrix.os, 'self') }}
         uses: cachix/install-nix-action@v14.1
         with:
-          install_url: "https://releases.nixos.org/nix/nix-2.3.16/install"
+          install_url: 'https://releases.nixos.org/nix/nix-2.3.16/install'
 
       - name: 'Install Cachix'
         if: ${{ !startsWith(matrix.os, 'self') }}
