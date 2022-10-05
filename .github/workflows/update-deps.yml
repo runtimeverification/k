@@ -11,6 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+
   nix-flake-submodule-sync:
     name: 'Nix flake submodule sync'
     runs-on: ubuntu-latest
@@ -37,7 +38,7 @@ jobs:
           extraPullNames: kore
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
 
-      - name: Update Nix flake inputs from submodules
+      - name: 'Update Nix flake inputs from submodules'
         run: |
           GC_DONT_GC=1 nix run .#update-from-submodules
           if git add 'flake.lock' && git commit -m 'Sync flake inputs to submodules'; then
