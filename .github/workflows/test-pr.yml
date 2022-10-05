@@ -42,6 +42,7 @@ jobs:
       - run: |
           git config user.name devops
           git config user.email devops@runtimeverification.com
+          git fetch --all
       - name: 'Set up Nix/Cachix'
         if: ${{ !startsWith(matrix.os, 'self') }}
         uses: ./.github/actions/install-nix-cachix
