@@ -73,14 +73,29 @@ fi
 
 execute () {
   (
-  if ${verbose}; then
-    set -x
-  fi
+  set +e
+
   if ${profile}; then
+    if ${verbose}; then
+      set -x
+    fi
+
     TIMEFORMAT="%lR %lU %lS $*"
     time "$@"
+    ret="$?"
   else
+    if ${verbose}; then
+      set -x
+    fi
+
     "$@"
+    ret="$?"
+  fi
+
+  { set +x; } 2>/dev/null
+
+  if [ "$ret" -ne 0 ]; then
+    error "$ret" "$@"
   fi
   )
 }
