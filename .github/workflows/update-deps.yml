@@ -15,21 +15,13 @@ jobs:
     name: 'Nix flake submodule sync'
     runs-on: ubuntu-latest
     steps:
-      - id: config
-        run: |
-          ref=${{ github.ref }}
-          if [ "${{ github.event_name }}" == 'pull_request' ]; then
-            ref="${{ github.event.pull_request.head.sha }}"
-          fi
-          ref="${ref#refs/heads/}"
-          echo "::set-output name=ref::$ref"
-          git config --global user.name github-actions
-          git config --global user.email github-actions@github.com
-      - name: Check out code
-        uses: actions/checkout@v2.3.4
+      - name: 'Check out code, setup Git'
+        uses: actions/checkout@v3
         with:
-          ref: ${{ steps.config.outputs.ref }}
           submodules: recursive
+        run: |
+          git config user.name devops
+          git config user.email devops@runtimeverification.com
 
       - name: 'Install Nix'
         uses: cachix/install-nix-action@v15
@@ -44,7 +36,6 @@ jobs:
           name: runtimeverification
           extraPullNames: kore
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
-
 
       - name: Update Nix flake inputs from submodules
         run: |
