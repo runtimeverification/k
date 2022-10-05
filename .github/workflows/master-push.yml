@@ -25,22 +25,12 @@ jobs:
         if: ${{ contains(matrix.os, 'macos') }}
         run: brew install bash
 
-      - name: 'Install Nix'
+      - name: 'Set up Nix/Cachix'
         if: ${{ !startsWith(matrix.os, 'self') }}
-        uses: cachix/install-nix-action@v15
+        uses: ./.github/actions/install-nix-cachix
         with:
-          extra_nix_config: |
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-            substituters = http://cache.nixos.org https://cache.iog.io
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
-
-      - name: 'Install Cachix'
-        if: ${{ !startsWith(matrix.os, 'self') }}
-        uses: cachix/cachix-action@v10
-        with:
-          name: k-framework
-          signingKey: '${{ secrets.RV_DEVOPS_CACHIX_TOKEN }}'
-          skipPush: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          cachix-key: ${{ secrets.CACHIX_SIGNING_KEY }}
 
       - name: 'Build and cache K Framework'
         uses: workflow/nix-shell-action@v3

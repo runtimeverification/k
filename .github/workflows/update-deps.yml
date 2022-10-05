@@ -25,20 +25,12 @@ jobs:
           git config --global user.name rv-jenkins
           git config --global user.email devops@runtimeverification.com
 
-      - name: 'Install Nix'
-        uses: cachix/install-nix-action@v15
+      - name: 'Set up Nix/Cachix'
+        if: ${{ !startsWith(matrix.os, 'self') }}
+        uses: ./.github/actions/install-nix-cachix
         with:
-          extra_nix_config: |
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-            substituters = http://cache.nixos.org https://cache.iog.io
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
-
-      - name: 'Install Cachix'
-        uses: cachix/cachix-action@v10
-        with:
-          name: runtimeverification
-          extraPullNames: kore
-          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          cachix-key: ${{ secrets.CACHIX_SIGNING_KEY }}
 
       - name: 'Update Nix flake inputs from submodules'
         run: |
