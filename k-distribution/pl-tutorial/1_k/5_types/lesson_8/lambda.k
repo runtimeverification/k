@@ -15,8 +15,8 @@ module LAMBDA
                > Exp "<=" Exp                     [strict]
                > "lambda" KVar "." Exp              [binder]
                | "if" Exp "then" Exp "else" Exp   [strict]
-               | "let" KVar "=" Exp "in" Exp
-               | "letrec" KVar KVar "=" Exp "in" Exp
+               | "let" KVar "=" Exp "in" Exp          [macro]
+               | "letrec" KVar KVar "=" Exp "in" Exp  [macro]
                | "mu" KVar "." Exp                  [binder]
 
   syntax Type ::= "int" | "bool"
@@ -43,8 +43,8 @@ module LAMBDA
 
   rule T1:Type T2:Type => T1 = (T2 -> ?T:Type) ~> ?T
   rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1
-  rule let X = E in E' => E'[E/X]                                       [macro]
-  rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
+  rule let X = E in E' => E'[E/X]
+  rule letrec F X = E in E' => let F = mu F . lambda X . E in E'
   rule <k> mu X:KVar . E:Exp => (?T:Type -> ?T) E ~> setTenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
 

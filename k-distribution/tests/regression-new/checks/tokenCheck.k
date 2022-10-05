@@ -13,7 +13,7 @@ module TOKENCHECK
   syntax Y ::= Z
   syntax Z ::= "b" [token]
 
-  syntax Int ::= "foo"
-  rule foo => 3 [macro]
+  syntax Int ::= "foo" [macro]
+  rule foo => 3
 
 endmodule
