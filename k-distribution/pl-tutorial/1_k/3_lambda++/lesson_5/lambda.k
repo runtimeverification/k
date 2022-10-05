@@ -44,12 +44,12 @@ module LAMBDA
   rule if true  then E else _ => E
   rule if false then _ else E => E
 
-  syntax Exp ::= "let" Id "=" Exp "in" Exp
-  rule let X = E in E':Exp => (lambda X . E') E                        [macro]
+  syntax Exp ::= "let" Id "=" Exp "in" Exp [macro]
+  rule let X = E in E':Exp => (lambda X . E') E
 
-  syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
-               | "mu" Id "." Exp      [latex(\mu{#1}.{#2})]
-  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'    [macro]
+  syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp  [macro]
+               | "mu" Id "." Exp                  [latex(\mu{#1}.{#2})]
+  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'
 
   syntax Exp ::= muclosure(Map,Exp)
   rule <k> mu X . E => muclosure(Rho[X <- !N], E) ...</k>
