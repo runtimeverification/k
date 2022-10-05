@@ -549,8 +549,8 @@ number and thus the time is effectively linear. The union consists of all the
 elements present in either set.
 
 ```k
-  syntax Set ::= Set "|Set" Set            [left, function, functional, hook(SET.union)]
-  // FIXME rule S1:Set |Set S2:Set => S1 (S2 -Set S1)
+  syntax Set ::= Set "|Set" Set              [left, function, functional, hook(SET.union)]
+  rule S1:Set |Set S2:Set => S1 (S2 -Set S1) [concrete]
 ```
 
 ### Set intersection
@@ -681,9 +681,10 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
                                                         andBool notBool (X in S2)     [simplification]
 
   // membership simplifications
-  rule E in .Set           => false requires #Ceil(E)       [simplification]
-  rule E in SetItem(E)     => true  requires #Ceil(E)       [simplification]
-  rule E in (S SetItem(E)) => true ensures notBool (E in S) [simplification]
+  rule _E in .Set           => false   [simplification]
+  rule E  in SetItem(E)     => true    [simplification]
+  rule E  in (S SetItem(E)) => true
+              ensures notBool (E in S) [simplification]
 
 // These two rules would be sound but impose a giant overhead on `in` evaluation:
   // rule E1 in (S SetItem(E2)) => true requires E1 in S
