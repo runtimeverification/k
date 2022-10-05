@@ -154,7 +154,7 @@ def list_package(package_name: str) -> None:
                 tagged_releases[c['sha']]['name'] if c['sha'] in tagged_releases else None,
                 c['commit']['committer']['date'],
             )
-            for c in commits.json() 
+            for c in commits.json()
             if not c['commit']['message'].startswith("Merge remote-tracking branch 'origin/develop'")
         ]
 
