@@ -3,6 +3,8 @@ on:
   release:
     types:
       - prereleased
+concurrency:
+  group: ${{ github.workflow }}
 
 jobs:
 
