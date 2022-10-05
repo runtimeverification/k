@@ -267,7 +267,7 @@ jobs:
         if: ${{ !contains(matrix.os, 'macos') }}
 
       - name: 'Check development environment'
-        run: nix-shell --run "echo OK"
+        run: nix-shell --run 'echo OK'
 
       - name: 'Run selected integration tests'
         run: nix-build test.nix --argstr test help
