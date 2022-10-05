@@ -30,6 +30,7 @@ jobs:
         uses: cachix/install-nix-action@v15
         with:
           extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
             substituters = http://cache.nixos.org https://cache.iog.io
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
 
@@ -39,6 +40,7 @@ jobs:
         with:
           name: k-framework
           signingKey: '${{ secrets.RV_DEVOPS_CACHIX_TOKEN }}'
+          skipPush: true
 
       - name: 'Build and cache K Framework'
         uses: workflow/nix-shell-action@v3
@@ -50,20 +52,8 @@ jobs:
           script: |
             k=$(nix build .#k --json | jq -r '.[].outputs | to_entries[].value')
             drv=$(nix-store --query --deriver ${k})
-            nix-store --query --requisites --include-outputs ${drv} # | cachix push k-framework
-
-      - name: 'Build and cache kup'
-        uses: workflow/nix-shell-action@v3
-        env:
-          GC_DONT_GC: 1
-          CACHIX_AUTH_TOKEN: '${{ secrets.RV_DEVOPS_CACHIX_TOKEN }}'
-        with:
-          packages: jq
-          script: |
-            k=$(nix build .#k --json | jq -r '.[].outputs | to_entries[].value')
-            drv=$(nix-store --query --deriver ${k})
             nix-store --query --requisites --include-outputs ${drv} | cachix push k-framework
-            
+
       - name: 'Build and cache kup'
         uses: workflow/nix-shell-action@v3
         env:
