@@ -50,8 +50,8 @@ We move all the LAMBDA++ syntax here.
                > Exp "<=" Exp         [strict]
 // Other functional constructs
   syntax Exp ::= "if" Exp "then" Exp "else" Exp  [strict(1)] // Conditional
-               | "let" Id "=" Exp "in" Exp                   // Let binder
-               | "letrec" Id Id "=" Exp "in" Exp             // Letrec
+               | "let" Id "=" Exp "in" Exp [macro]           // Let binder
+               | "letrec" Id Id "=" Exp "in" Exp [macro]     // Letrec
                | "mu" Id "." Exp      [latex(\mu{#1}.{#2})]  // Mu
                | "callcc" Exp  [strict]                      // Callcc
 ```
@@ -160,14 +160,14 @@ division rule.
 ### Let Binder
 
 ```k
-  rule let X = E in E':Exp => (lambda X . E') E                         [macro]
+  rule let X = E in E':Exp => (lambda X . E') E
 ```
 
 ### Letrec Binder
 We define `letrec` in term of `mu`, whose semantics is below.
 
 ```k
-  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'     [macro]
+  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'
 ```
 
 ### Mu

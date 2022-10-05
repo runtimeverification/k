@@ -43,16 +43,16 @@ module LAMBDA
   rule if true  then E else _ => E
   rule if false then _ else E => E
 
-  syntax Exp ::= "let" Id "=" Exp "in" Exp
-  rule let X = E in E':Exp => (lambda X . E') E                        [macro]
+  syntax Exp ::= "let" Id "=" Exp "in" Exp [macro]
+  rule let X = E in E':Exp => (lambda X . E') E
 
-  syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp
+  syntax Exp ::= "letrec" Id Id "=" Exp "in" Exp [macro]
   syntax Id ::= "$x" [token] | "$y" [token]
   rule letrec F:Id X:Id = E in E'
     => let F =
          (lambda $x . ((lambda F . lambda X . E) (lambda $y . ($x $x $y))))
          (lambda $x . ((lambda F . lambda X . E) (lambda $y . ($x $x $y))))
-       in E'                                                           [macro]
+       in E'
 
   syntax Exp ::= "callcc" Exp  [strict]
   syntax Val ::= cc(K)
