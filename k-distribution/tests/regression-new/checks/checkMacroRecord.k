@@ -5,8 +5,8 @@ module CHECKMACRORECORD
 
     configuration <k> $PGM:Int </k>
 
-    syntax Int ::= f ( a: Int, b: Int )
+    syntax Int ::= f ( a: Int, b: Int ) [macro]
  // -----------------------------------
-    rule f(X, Y) => X +Int Y [macro]
+    rule f(X, Y) => X +Int Y
 
 endmodule

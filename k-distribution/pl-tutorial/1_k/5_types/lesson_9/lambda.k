@@ -16,7 +16,7 @@ module LAMBDA
                > "lambda" Id "." Exp
                | "if" Exp "then" Exp "else" Exp   [strict]
                | "let" Id "=" Exp "in" Exp        [strict(2)]
-               | "letrec" Id Id "=" Exp "in" Exp
+               | "letrec" Id Id "=" Exp "in" Exp  [macro]
                | "mu" Id "." Exp
 
   syntax Type ::= "int" | "bool"
@@ -53,7 +53,7 @@ module LAMBDA
   rule <k> X:Id => #renameMetaKVariables(T, Tvs) ...</k>
        <tenv>... X |-> (forall Tvs) T ...</tenv>
 
-  rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
+  rule letrec F X = E in E' => let F = mu F . lambda X . E in E'
   rule <k> mu X:Id . E:Exp => (?T:Type -> ?T) E ~> setTenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
 
