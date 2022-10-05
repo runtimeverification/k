@@ -43,6 +43,8 @@ jobs:
         uses: cachix/install-nix-action@v14.1
         with:
           install_url: "https://releases.nixos.org/nix/nix-2.3.16/install"
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Install Cachix'
         uses: cachix/cachix-action@v10
@@ -75,70 +77,6 @@ jobs:
             fi
           fi
 
-  nix-flake-submodules:
-    name: 'Nix flake sumbodule sync'
-    runs-on: ubuntu-latest
-    needs: version-sync
-    steps:
-      - id: config
-        run: |
-          ref=${{ github.ref }}
-          if [ "${{ github.event_name }}" == 'pull_request' ]; then
-            ref="${{ github.event.pull_request.head.sha }}"
-          fi
-          ref="${ref#refs/heads/}"
-          echo "::set-output name=ref::$ref"
-          git config --global user.name github-actions
-          git config --global user.email github-actions@github.com
-      - name: Check out code
-        uses: actions/checkout@v2.3.4
-        with:
-          ref: ${{ steps.config.outputs.ref }}
-          submodules: recursive
-
-      - name: 'Install Nix'
-        uses: cachix/install-nix-action@v15
-        with:
-          extra_nix_config: |
-            substituters = http://cache.nixos.org https://cache.iog.io
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
-
-      - name: 'Install Cachix'
-        uses: cachix/cachix-action@v10
-        with:
-          name: runtimeverification
-          extraPullNames: kore
-          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
-
-
-      - name: Update Nix flake inputs from submodules
-        env:
-          GITHUB_EVENT_NAME: ${{ github.event_name }}
-        run: |
-          if ! GC_DONT_GC=1 nix run .#check-submodules ; then
-            if [[ $GITHUB_EVENT_NAME == 'push' ]]; then
-              if git status -s -b | grep -q '^##.*(no branch)$'; then
-                echo 2>&1 "Error: Git is in detached HEAD state"
-                exit 1
-              fi
-            fi
-            GC_DONT_GC=1 nix run .#update-from-submodules
-            if [ -n "$(git status --porcelain 'flake.lock')" ]; then
-              if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
-                echo 2>&1 "Error: submodules do not match the flake inputs"
-                git diff
-                exit 1
-              elif [[ $GITHUB_EVENT_NAME == 'push' ]]; then
-                git add 'flake.lock'
-                git commit -m 'Sync flake inputs to submodules'
-                git push
-              else
-                echo 2>&1 "Error: event not supported: $GITHUB_EVENT_NAME"
-                exit 1
-              fi
-            fi
-          fi
-
   test-k:
     name: 'K Tests'
     runs-on: [self-hosted, linux, normal]
@@ -152,6 +90,8 @@ jobs:
         uses: ./.github/actions/with-docker
         with:
           tag: k-ci
+          distro: jammy
+          llvm: 14
       - name: 'Build and Test K'
         run: docker exec -t k-ci /bin/bash -c 'mvn verify --batch-mode -U'
       - name: 'Check out k-exercises'
@@ -173,54 +113,17 @@ jobs:
           docker stop k-ci || true
           docker container rm k-ci || true
 
-  test-ubuntu-package:
+  test-package-ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
     runs-on: [self-hosted, linux, normal]
     needs: version-sync
     steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+      - name: 'Build and Test'
+        uses: ./.github/actions/test-package
         with:
-          path: k-repo
-          submodules: recursive
-      - name: 'Set up Docker'
-        uses: ./k-repo/.github/actions/with-docker
-        with:
-          tag: k-jammy-package-build
-          subdir: k-repo/
-      - name: 'Build Jammy Package'
-        run: |
-          docker exec -t k-jammy-package-build /bin/bash -c 'mv package/debian debian'
-          docker exec -t k-jammy-package-build /bin/bash -c 'mv debian/compat.jammy debian/compat'
-          docker exec -t k-jammy-package-build /bin/bash -c 'mv debian/control.jammy debian/control'
-          docker exec -t k-jammy-package-build /bin/bash -c 'mv debian/rules.jammy debian/rules'
-          docker exec -t k-jammy-package-build /bin/bash -c 'dpkg-buildpackage'
-          docker stop k-jammy-package-build
-      - name: 'Set up Docker Test Image'
-        run: |
-          workspace=$(pwd)
-          cd k-repo
-          docker run                         \
-            --name k-jammy-package-test      \
-            --rm -it                         \
-            --detach                         \
-            --workdir /opt/workspace         \
-            -v ${HOME}:${HOME}               \
-            -v "${workspace}:/opt/workspace" \
-            -v "/etc/passwd:/etc/passwd:ro"  \
-            -v "/etc/group:/etc/group:ro"    \
-            ubuntu:jammy
-      - name: 'Test Jammy Package'
-        run: |
-          docker exec -t k-jammy-package-test /bin/bash -c 'k-repo/src/main/scripts/test-in-container-debian'
-          docker stop k-jammy-package-test
-      - name: 'Tear down Docker'
-        if: always()
-        run: |
-          docker stop k-jammy-package-build || true
-          docker stop k-jammy-package-test || true
-          docker container rm k-jammy-package-build || true
-          docker container rm k-jammy-package-test || true
+          distro: jammy
+          llvm: 14
 
   compile-nix-flake:
     name: 'Nix flake'
@@ -235,7 +138,7 @@ jobs:
           - runner: MacM1
             os: self-macos-12
     runs-on: ${{ matrix.runner }}
-    needs: [nix-maven, nix-flake-submodules]
+    needs: [nix-maven]
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v2.3.4
@@ -283,7 +186,7 @@ jobs:
           - runner: macos-12
             os: macos-12
     runs-on: ${{ matrix.runner }}
-    needs: [nix-maven, nix-flake-submodules]
+    needs: [nix-maven]
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v2.3.4
