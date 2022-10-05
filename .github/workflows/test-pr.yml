@@ -60,10 +60,11 @@ jobs:
 
       - name: 'Update Maven dependencies, push changes'
         run: |
-          if git diff --exit-code ${GITHUB_BASE_REF} ${GITHUB_HEAD_REF} \
-                -- $(find . -name pom.xml)                              \
-                   $(find nix -name '*.nix')                            \
-                   llvm-backend/src/main/native/llvm-backend            \
+          set -x
+          if ! git diff --exit-code origin/${GITHUB_BASE_REF} origin/${GITHUB_HEAD_REF} \
+                -- $(find . -name pom.xml)                                              \
+                   $(find nix -name '*.nix')                                            \
+                   llvm-backend/src/main/native/llvm-backend                            \
                    haskell-backend/src/main/native/haskell-backend; then
             ./nix/update-maven.sh
           fi
