@@ -103,7 +103,6 @@ jobs:
     outputs:
       bottle_path: ${{ steps.build.outputs.path }}
       bottle_path_remote: ${{ steps.build.outputs.path_remote }}
-      upload_url: ${{ github.event.release.upload_url }}
       version: ${{ steps.build.outputs.version }}
 
   macos-test:
