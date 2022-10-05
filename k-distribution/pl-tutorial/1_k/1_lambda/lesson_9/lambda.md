@@ -114,8 +114,8 @@ Note that the `if` construct is strict only in its first argument.
 The let binder is a derived construct, because it can be defined using λ.
 
 ```k
-  syntax Exp ::= "let" KVar "=" Exp "in" Exp
-  rule let X = E in E':Exp => (lambda X . E') E                         [macro]
+  syntax Exp ::= "let" KVar "=" Exp "in" Exp [macro]
+  rule let X = E in E':Exp => (lambda X . E') E
 ```
 
 ### Letrec Binder
@@ -124,9 +124,9 @@ really necessary, but it makes the definition of letrec easier to understand
 and faster to execute.
 
 ```k
-  syntax Exp ::= "letrec" KVar KVar "=" Exp "in" Exp
-               | "mu" KVar "." Exp                  [binder, latex(\mu{#1}.{#2})]
-  rule letrec F:KVar X:KVar = E in E' => let F = mu F . lambda X . E in E' [macro]
+  syntax Exp ::= "letrec" KVar KVar "=" Exp "in" Exp [macro]
+               | "mu" KVar "." Exp                   [binder, latex(\mu{#1}.{#2})]
+  rule letrec F:KVar X:KVar = E in E' => let F = mu F . lambda X . E in E'
 endmodule
 ```
 
