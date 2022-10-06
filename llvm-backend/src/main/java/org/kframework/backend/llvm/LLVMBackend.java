@@ -11,6 +11,7 @@ import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
+import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -52,9 +53,11 @@ public class LLVMBackend extends KoreBackend {
 
     @Override
     public void accept(Backend.Holder h) {
+        Stopwatch sw = new Stopwatch(globalOptions);
         String kore = getKompiledString(h.def);
         h.def = null;
         files.saveToKompiled("definition.kore", kore);
+        sw.printIntermediate("  Print definition.kore");
         FileUtils.deleteQuietly(files.resolveKompiled("dt"));
         MutableInt warnings = new MutableInt();
         boolean optimize = kompileOptions.optimize1 || kompileOptions.optimize2 || kompileOptions.optimize3;
@@ -73,6 +76,7 @@ public class LLVMBackend extends KoreBackend {
           }
           return null;
         });
+        sw.printIntermediate("  Write decision tree");
         if (warnings.intValue() > 0 && kem.options.warnings2errors) {
           throw KEMException.compilerError("Had " + warnings.intValue() + " pattern matching errors.");
         }
@@ -106,6 +110,7 @@ public class LLVMBackend extends KoreBackend {
     }
 
     private void llvmKompile(String type, String executable) {
+        Stopwatch sw = new Stopwatch(globalOptions);
         ProcessBuilder pb = files.getProcessBuilder();
         List<String> args = new ArrayList<>();
         args.add("llvm-kompilex");
@@ -126,7 +131,7 @@ public class LLVMBackend extends KoreBackend {
             File kompiledDir = files.resolveKompiled(".");
 
             if (globalOptions.verbose) {
-                System.out.println("Executing in " + kompiledDir.getCanonicalPath() + ": " + String.join(" ", args));
+                System.out.println("  \u250cExecuting in " + kompiledDir.getCanonicalPath() + ": " + String.join(" ", args));
             }
 
             Process p = pb.command(args).directory(kompiledDir).inheritIO().start();
@@ -137,6 +142,7 @@ public class LLVMBackend extends KoreBackend {
         } catch (IOException | InterruptedException e) {
             throw KEMException.criticalError("Error with I/O while executing llvm-kompilex", e);
         }
+        sw.printIntermediate("  \u2514" + executable + ": " + type);
     }
 
     private String getThreshold() {
