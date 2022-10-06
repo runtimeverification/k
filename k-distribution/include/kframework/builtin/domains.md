@@ -693,6 +693,11 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
   // rule E1 in (S SetItem(E2)) => E1 in S requires E1 =/=K E2
   //                                 ensures notBool (E2 in S) [simplification]
 
+  rule X in ((SetItem(X) S) |Set  _            ) => true
+                                    ensures notBool (X in S) [simplification]
+  rule X in ( _             |Set (SetItem(X) S)) => true
+                                    ensures notBool (X in S) [simplification]
+
 endmodule
 
 module SET-SYMBOLIC

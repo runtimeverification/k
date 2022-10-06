@@ -36,3 +36,4 @@ claim <k> union ( Z:MyId in ( (S SetItem(X:MyId)) |Set SetItem(Y:MyId) ) )     =
 claim <k> union ( Z:MyId in ( (S SetItem(X:MyId)) |Set SetItem(Y:MyId) ) )     => . </k> requires Z =/=K Y andBool Z =/=K X
 claim <k> union ( X      in ( (SetItem(X:MyId) SetItem(y)) |Set SetItem(x) ) ) => . </k>
 claim <k> union ( X      in ( (SetItem(X:MyId) SetItem(y)) |Set SetItem(x) ) ) => . </k> requires X =/=K x
+claim <k> union ( X      in ( SetItem(x) |Set (SetItem(X:MyId) SetItem(y))) ) => . </k>
