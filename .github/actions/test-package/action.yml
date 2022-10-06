@@ -66,7 +66,7 @@ runs:
     run: |
       set -euxo pipefail
       docker exec -t k-package-test-${DISTRO} /bin/bash -c "k-${DISTRO}/package/debian/install-package.sh"
-      docker exec -t k-package-test-${DISTRO} /bin/bash -c "cd k-${DISTRO}/k-distribution/tests/smoke && bash run-tests.sh"
+      docker exec -t k-package-test-${DISTRO} /bin/bash -c "cd k-${DISTRO}/k-distribution/tests/smoke && ./run-tests.sh"
   - name: 'Tear down Docker Test'
     shell: bash {0}
     env:
