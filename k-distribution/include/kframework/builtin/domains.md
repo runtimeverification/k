@@ -434,6 +434,12 @@ module MAP-KORE-SYMBOLIC [kore,symbolic]
   rule (_MAP:Map [ K  <-  V1 ]) [ K ]  => V1 [simplification]
   rule ( MAP:Map [ K1 <- _V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2 [simplification]
 
+  rule (K  |->  V M:Map) [  K ] orDefault _ => V ensures notBool (K in_keys(M)) [simplification]
+  rule (K1 |-> _V M:Map) [ K2 ] orDefault D => M [K2] orDefault D requires K1 =/=K K2 ensures notBool (K1 in_keys(M)) [simplification]
+  rule (_MAP:Map [ K  <-  V1 ]) [ K ] orDefault _ => V1 [simplification]
+  rule ( MAP:Map [ K1 <- _V1 ]) [ K2 ] orDefault D => MAP [ K2 ] orDefault D requires K1 =/=K K2 [simplification]
+  rule .Map [ _ ] orDefault D => D [simplification]
+
   // Symbolic in_keys
   rule K in_keys(_M [ K <- undef ]) => false [simplification]
   rule K in_keys(_M [ K <- _ ]) => true [simplification]
@@ -549,8 +555,8 @@ number and thus the time is effectively linear. The union consists of all the
 elements present in either set.
 
 ```k
-  syntax Set ::= Set "|Set" Set            [left, function, functional, hook(SET.union)]
-  rule S1:Set |Set S2:Set => S1 (S2 -Set S1)
+  syntax Set ::= Set "|Set" Set              [left, function, functional, hook(SET.union), comm]
+  rule S1:Set |Set S2:Set => S1 (S2 -Set S1) [concrete]
 ```
 
 ### Set intersection
@@ -560,7 +566,7 @@ is the size of the smaller set), or effectively linear. The intersection
 consists of all the elements present in both sets.
 
 ```k
-  syntax Set ::= intersectSet(Set, Set)   [function, functional, hook(SET.intersection)]
+  syntax Set ::= intersectSet(Set, Set)   [function, functional, hook(SET.intersection), comm]
 ```
 
 ### Set complement
@@ -611,6 +617,94 @@ that two different sets will return the same element, even if they are similar.
 ```k
 endmodule
 ```
+
+### Implementation of Sets
+
+The following lemmas are simplifications that the Haskell backend can
+apply to simplify expressions of sort `Set`.
+
+```k
+module SET-KORE-SYMBOLIC [kore,symbolic]
+  imports SET
+  imports private K-EQUAL
+  imports private BOOL
+
+  //Temporarly rule for #Ceil simplification, should be generated in front-end
+
+// Matching for this version not implemented.
+  // rule #Ceil(@S1:Set @S2:Set) =>
+  //        {intersectSet(@S1, @S2) #Equals .Set} #And #Ceil(@S1) #And #Ceil(@S2)
+  //   [simplification]
+
+//simpler version
+  rule #Ceil(@S:Set SetItem(@E:KItem)) =>
+         {(@E in @S) #Equals false} #And #Ceil(@S) #And #Ceil(@E)
+    [simplification]
+
+  // -Set simplifications
+  rule S              -Set .Set           => S          [simplification]
+  rule .Set           -Set  _             => .Set       [simplification]
+  rule SetItem(X)     -Set (S SetItem(X)) => .Set
+                               ensures notBool (X in S) [simplification]
+  rule S              -Set (S SetItem(X)) => .Set
+                               ensures notBool (X in S) [simplification]
+  rule (S SetItem(X)) -Set S              => SetItem(X)
+                               ensures notBool (X in S) [simplification]
+  rule (S SetItem(X)) -Set SetItem(X)     => S
+                               ensures notBool (X in S) [simplification]
+  // rule SetItem(X)     -Set S              => SetItem(X)
+  //                            requires notBool (X in S)  [simplification]
+  // rule (S1 SetItem(X)) -Set (S2 SetItem(X))  => S1 -Set S2
+  //                             ensures notBool (X in S1)
+  //                             andBool notBool (X in S2) [simplification]
+
+
+
+  // |Set simplifications
+  rule S    |Set .Set => S    [simplification, comm]
+  rule S    |Set S    => S    [simplification]
+
+  rule (S SetItem(X)) |Set SetItem(X) => S SetItem(X)
+                             ensures notBool (X in S) [simplification, comm]
+  // Currently disabled, see runtimeverification/haskell-backend#3301
+  // rule (S SetItem(X)) |Set S          => S SetItem(X)
+  //                            ensures notBool (X in S) [simplification, comm]
+
+  // intersectSet simplifications
+  rule intersectSet(.Set, _   ) => .Set    [simplification, comm]
+  rule intersectSet( S  , S   ) =>  S      [simplification]
+
+  rule intersectSet( S SetItem(X), SetItem(X))     => SetItem(X)
+                                                        ensures notBool (X in S)      [simplification, comm]
+  // Currently disabled, see runtimeverification/haskell-backend#3294
+  // rule intersectSet( S SetItem(X) , S)             => S ensures notBool (X in S)      [simplification, comm]
+  rule intersectSet( S1 SetItem(X), S2 SetItem(X)) => intersectSet(S1, S2) SetItem(X)
+                                                        ensures notBool (X in S1)
+                                                        andBool notBool (X in S2)     [simplification]
+
+  // membership simplifications
+  rule _E in .Set           => false   [simplification]
+  rule E  in (S SetItem(E)) => true
+              ensures notBool (E in S) [simplification]
+
+// These two rules would be sound but impose a giant overhead on `in` evaluation:
+  // rule E1 in (S SetItem(E2)) => true requires E1 in S
+  //                                 ensures notBool (E2 in S) [simplification]
+  // rule E1 in (S SetItem(E2)) => E1 in S requires E1 =/=K E2
+  //                                 ensures notBool (E2 in S) [simplification]
+
+  rule X in ((SetItem(X) S) |Set  _            ) => true
+                                    ensures notBool (X in S) [simplification]
+  rule X in ( _             |Set (SetItem(X) S)) => true
+                                    ensures notBool (X in S) [simplification]
+
+endmodule
+
+module SET-SYMBOLIC
+  imports SET-KORE-SYMBOLIC
+endmodule
+```
+
 
 Lists
 -----

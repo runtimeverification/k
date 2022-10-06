@@ -34,15 +34,20 @@ jobs:
     runs-on: ubuntu-latest
     needs: version-sync
     steps:
-      - name: 'Check out code'
-        uses: actions/checkout@v2.3.4
+
+      - name: 'Check out code, set up Git'
+        uses: actions/checkout@v3
         with:
           submodules: recursive
+          fetch-depth: 0
+      - run: |
+          git config user.name devops
+          git config user.email devops@runtimeverification.com
 
       - name: 'Install Nix'
         uses: cachix/install-nix-action@v14.1
         with:
-          install_url: "https://releases.nixos.org/nix/nix-2.3.16/install"
+          install_url: 'https://releases.nixos.org/nix/nix-2.3.16/install'
           extra_nix_config: |
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
@@ -53,28 +58,18 @@ jobs:
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
           skipPush: true
 
-      - name: 'Update Maven dependencies'
-        run: ./nix/update-maven.sh
-
-      - name: 'Commit changes'
-        env:
-          file_pattern: 'nix/'
+      - name: 'Update Maven dependencies, push changes'
         run: |
-          git config user.name rv-devops
-          git config user.email devops@runtimeverification.com
-          if [ -n "$(git status --porcelain $file_pattern)" ]; then
-            if [[ $GITHUB_EVENT_NAME == 'pull_request' ]]; then
-              echo "::error :: The Maven dependencies changed, so the Nix lock files need to be updated. Please run ./nix/update-maven.sh to update the lock files, or move this branch to the runtimeverification/k repository."
-              git diff
-              exit 1
-            elif [[ $GITHUB_EVENT_NAME == 'push' ]]; then
-              git add $file_pattern
-              git commit -m 'Update Nix lock files'
-              git push
-            else
-              echo "::error :: Event type not supported: $GITHUB_EVENT_NAME"
-              exit 1
-            fi
+          set -x
+          if ! git diff --exit-code origin/${GITHUB_BASE_REF} origin/${GITHUB_HEAD_REF} \
+                -- $(find . -name pom.xml)                                              \
+                   $(find nix -name '*.nix')                                            \
+                   llvm-backend/src/main/native/llvm-backend                            \
+                   haskell-backend/src/main/native/haskell-backend; then
+            ./nix/update-maven.sh
+          fi
+          if git add nix/ && git commit -m 'Update Nix lock files'; then
+            git push
           fi
 
   test-k:
@@ -221,7 +216,7 @@ jobs:
         if: ${{ !contains(matrix.os, 'macos') }}
 
       - name: 'Check development environment'
-        run: nix-shell --run "echo OK"
+        run: nix-shell --run 'echo OK'
 
       - name: 'Run selected integration tests'
         run: nix-build test.nix --argstr test help
