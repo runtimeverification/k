@@ -118,6 +118,14 @@ jobs:
         with:
           distro: jammy
           llvm: 14
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
+        with:
+          asset_content_type: 'application/gzip'
+          asset_name: 'K Framework Ubuntu Jammy (22.04) Deb'
+          asset_path: kframework_ubuntu_jammy.deb
+          upload_url: ${{ github.event.release.upload_url }}
       - name: 'Test and Push up Docker Image'
         shell: bash {0}
         env:
