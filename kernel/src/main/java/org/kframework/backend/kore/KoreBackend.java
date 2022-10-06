@@ -5,13 +5,17 @@ import com.google.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.Strategy;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Location;
+import org.kframework.attributes.Source;
 import org.kframework.compile.*;
 import org.kframework.definition.Module;
 import org.kframework.definition.*;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.kore.KApply;
 import org.kframework.kore.KLabel;
+import org.kframework.kore.KVariable;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -128,6 +132,7 @@ public class KoreBackend extends AbstractBackend {
         Function1<Definition, Definition> markExtraConcreteRules = d -> DefinitionTransformer.fromSentenceTransformer((m, s) ->
                 s instanceof Rule && kompileOptions.extraConcreteRuleLabels.contains(s.att().getOption(Att.LABEL()).getOrElse(() -> null)) ?
                         Rule.apply(((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att().add(Att.CONCRETE())) : s, "mark extra concrete rules").apply(d);
+        DefinitionTransformer markPreservesDefinednessDT = DefinitionTransformer.fromSentenceTransformer(KoreBackend::markPreservesDefinedness, "markPreservesDefinednessDT");
 
         return def -> resolveComm
                 .andThen(resolveIO)
@@ -160,6 +165,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(resolveConfigVar)
                 .andThen(addCoolLikeAtt)
                 .andThen(markExtraConcreteRules)
+                .andThen(markPreservesDefinednessDT)
                 .apply(def);
     }
 
@@ -216,6 +222,47 @@ public class KoreBackend extends AbstractBackend {
             Att atts = m.attributesFor().get(kl).getOrElse(Att::empty);
             if (!(atts.contains(Att.FUNCTION()) || atts.contains(Att.FUNCTIONAL()) || atts.contains("mlOp")))
                 throw  KEMException.compilerError("Simplification rules expect function/functional/mlOp symbols at the top of the left hand side term.", s);
+        }
+        return s;
+    }
+
+    public static Sentence markPreservesDefinedness(Module m, Sentence s) {
+        // temporary code to test out the efficacy of selective application of @Ceil checks
+        // https://github.com/runtimeverification/k/issues/2943#issuecomment-1265519499
+        if (!(s instanceof Rule)) return s;
+        Rule r = (Rule) s;
+        if (s.att().contains(Att.SIMPLIFICATION()) || s.att().contains(Att.ANYWHERE())) return s;
+        KLabel kl = m.matchKLabel((Rule) s);
+        Att atts = m.attributesFor().get(kl).getOrElse(Att::empty);
+        if (atts.contains(Att.FUNCTION()) || atts.contains(Att.FUNCTIONAL()) || atts.contains("mlOp"))
+            return s;
+        
+        Set<KEMException> errors = new HashSet<>();
+        new RewriteAwareVisitor(true, errors) {
+            @Override
+            public void apply(KApply k) {
+                if (!errors.isEmpty())
+                    return;
+                Att attributes = m.attributesFor().apply(k.klabel());
+                if (isRHS()) {
+                    if (attributes.contains(Att.FUNCTION()) && !attributes.contains(Att.FUNCTIONAL())) // only total functions
+                        errors.add(KEMException.compilerError("Not an actual error. Used as a marker for markPreservesDefinedness.", r));
+                    else if (attributes.contains(Att.ASSOC()) || attributes.contains(Att.IDEM())) // only constructors
+                        errors.add(KEMException.compilerError("Not an actual error. Used as a marker for markPreservesDefinedness.", r));
+                }
+                super.apply(k);
+            }
+
+            @Override
+            public void apply(KVariable k) {
+                if (k.name().startsWith("@")) // no set variables
+                    errors.add(KEMException.compilerError("Not an actual error. Used as a marker for markPreservesDefinedness.", r));
+            }
+        }.apply(r.body());
+
+        if (errors.isEmpty()) {
+            //System.out.println("preserves-definedness: " + r.source().orElse(Source.apply("gen")).source() + ":" + r.location().orElse(Location.apply(0,0,0,0)).startLine());
+            return Rule.apply(r.body(), r.requires(), r.ensures(), r.att().add("preserves-definedness"));
         }
         return s;
     }

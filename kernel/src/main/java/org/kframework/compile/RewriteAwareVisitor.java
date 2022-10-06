@@ -18,7 +18,7 @@ import java.util.Set;
  */
 public class RewriteAwareVisitor extends VisitK {
 
-    private final Set<KEMException> errors;
+    protected final Set<KEMException> errors;
     public RewriteAwareVisitor(boolean isBody, Set<KEMException> errors) {
         this.errors = errors;
         if (isBody) {
