@@ -79,7 +79,8 @@ pipeline {
             unstash 'bullseye'
             sh '''
               # echo "deb http://deb.debian.org/debian bullseye-backports main" > /etc/apt/sources.list.d/bullseye-backports.list
-              src/main/scripts/test-in-container-debian
+              package/debian/install-package.sh
+              cd k-distribution/tests/smoke && ./run-tests.sh
             '''
           }
           post {
@@ -141,7 +142,7 @@ pipeline {
             sh '''
               pacman -Syyu --noconfirm
               pacman -U --noconfirm kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
-              src/main/scripts/test-in-container
+              cd k-distribution/tests/smoke && ./run-tests.sh
             '''
           }
           post {
