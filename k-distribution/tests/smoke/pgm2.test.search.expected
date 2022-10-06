@@ -1,0 +1,15 @@
+  {
+    Result:GeneratedTopCell
+  #Equals
+    <k>
+      b ~> .
+    </k>
+  }
+#Or
+  {
+    Result:GeneratedTopCell
+  #Equals
+    <k>
+      c ~> .
+    </k>
+  }
