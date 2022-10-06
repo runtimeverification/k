@@ -11,8 +11,8 @@ echo "module TEST1 imports BOOL endmodule" > test1.k
 kompile test1.k --backend haskell
 rm -rf test1-kompiled
 
-kompile test.k --main-module TEST --syntax-module TEST --backend llvm    --output-definition llvm-kompiled    --enable-search
-kompile test.k --main-module TEST --syntax-module TEST --backend haskell --output-definition haskell-kompiled 
+kompile test.k --main-module TEST --syntax-module TEST --backend llvm --output-definition llvm-kompiled --enable-search
+kompile test.k --main-module TEST --syntax-module TEST --backend haskell --output-definition haskell-kompiled
 
 krun pgm1.test --definition llvm-kompiled > pgm1.test.out
 "${CHECK[@]}" pgm1.test.out pgm1.test.expected
