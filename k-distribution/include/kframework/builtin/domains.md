@@ -667,12 +667,13 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
 
   rule (S SetItem(X)) |Set SetItem(X) => S SetItem(X)
                              ensures notBool (X in S) [simplification]
-//  rule (S SetItem(X)) |Set S          => S SetItem(X)
-//                             ensures notBool (X in S) [simplification]
   rule SetItem(X) |Set (S SetItem(X)) => S SetItem(X)
                              ensures notBool (X in S) [simplification]
-  rule S          |Set (S SetItem(X)) => S SetItem(X)
-                             ensures notBool (X in S) [simplification]
+  // Currently disabled, see runtimeverification/haskell-backend#3301
+  // rule (S SetItem(X)) |Set S          => S SetItem(X)
+  //                            ensures notBool (X in S) [simplification]
+  // rule S          |Set (S SetItem(X)) => S SetItem(X)
+  //                            ensures notBool (X in S) [simplification]
 
   // intersectSet simplifications
   rule intersectSet(.Set, _   ) => .Set    [simplification]
@@ -681,6 +682,7 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
 
   rule intersectSet( S SetItem(X), SetItem(X))     => SetItem(X)
                                                         ensures notBool (X in S)      [simplification]
+  // Currently disabled, see runtimeverification/haskell-backend#3294
   // rule intersectSet( S SetItem(X) , S)             => S ensures notBool (X in S)      [simplification]
   rule intersectSet( S1 SetItem(X), S2 SetItem(X)) => intersectSet(S1, S2) SetItem(X)
                                                         ensures notBool (X in S1)
