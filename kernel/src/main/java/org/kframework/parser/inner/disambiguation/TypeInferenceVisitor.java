@@ -262,7 +262,14 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
                   return super.apply(Ambiguity.apply(newTerms));
               }
           }
-          substituted = inj.substituteProd(substituted, expectedSort, (i, fresh2) -> getSort((ProductionReference)tc.get(i), fresh2.nonterminals().apply(i).sort()), pr);
+          try {
+              substituted = inj.substituteProd(substituted, expectedSort, (i, fresh2) -> getSort((ProductionReference)tc.get(i), fresh2.nonterminals().apply(i).sort()), pr);
+          } catch (KEMException e) {
+              Set<KEMException> exceptions = new HashSet<>();
+              exceptions.add(e);
+              exceptions.addAll(typeError(pr, expectedSort, Sorts.KBott()).left().get());
+              return Left.apply(exceptions);
+          }
       }
 
       Sort actualSort = substituted.sort();
