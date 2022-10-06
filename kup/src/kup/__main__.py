@@ -2,8 +2,11 @@ import json
 import os
 import subprocess
 import sys
+import textwrap
 from argparse import ArgumentParser
+from typing import Optional, Union
 
+import requests
 from terminaltables import SingleTable  # type: ignore
 
 INSTALLED = "🟢 \033[92minstalled\033[0m"
@@ -114,10 +117,154 @@ def reload_packages() -> None:
                 packages[p] = ConcretePackage(package.repo, package.package, AVAILABLE, '')
 
 
+class PackageVersion:
+    __slots__ = ["sha", "message", "tag", "merged_at"]
+
+    def __init__(self, sha: str, message: str, tag: Optional[str], merged_at: str):
+        self.sha = sha
+        self.message = message
+        self.tag = tag
+        self.merged_at = merged_at
+
+
+def highlight_row(condition: bool, xs: list[str]) -> list[str]:
+    if condition:
+        return [f'\033[92m{x}\033[0m' for x in xs]
+    else:
+        return xs
+
+
+def list_package(package_name: str) -> None:
+    reload_packages()
+    if package_name != 'all':
+        if package_name not in available_packages.keys():
+            print(
+                f'❗ The package \'\033[94m{package_name}\033[0m\' does not exist. Use \'\033[92mkup list\033[0m\' to see all the available packages.'
+            )
+            return
+        listed_package = available_packages[package_name]
+
+        tags = requests.get(f'https://api.github.com/repos/runtimeverification/{listed_package.repo}/tags')
+        commits = requests.get(f'https://api.github.com/repos/runtimeverification/{listed_package.repo}/commits')
+        tagged_releases = {t['commit']['sha']: t for t in tags.json()}
+        all_releases = [
+            PackageVersion(
+                c['sha'],
+                c['commit']['message'],
+                tagged_releases[c['sha']]['name'] if c['sha'] in tagged_releases else None,
+                c['commit']['committer']['date'],
+            )
+            for c in commits.json()
+            if not c['commit']['message'].startswith("Merge remote-tracking branch 'origin/develop'")
+        ]
+
+        installed_packages_sha = {p.version for p in packages.values()}
+
+        table_data = [['Version \033[92m(installed)\033[0m', "Commit", "Message"],] + [
+            highlight_row(
+                p.sha in installed_packages_sha,
+                [p.tag if p.tag else "", p.sha[:7], textwrap.shorten(p.message, width=50, placeholder="...")],
+            )
+            for p in all_releases
+        ]
+        table = SingleTable(table_data)
+        print(table.table)
+    else:
+        table_data = [
+            ['Package', "Installed version", "Status"],
+        ] + [[name, p.version, p.status] for name, p in packages.items()]
+        table = SingleTable(table_data)
+        print(table.table)
+
+
+def update_or_install_package(package: Union[AvailablePackage, ConcretePackage], version: Optional[str]) -> None:
+    version = '/' + version if version else ''
+    if type(package) is ConcretePackage:
+        if package.immutable or version:
+            nix(['profile', 'remove', str(package.index)])
+            nix(['profile', 'install', f'github:runtimeverification/{package.repo}{version}#{package.package}'])
+        else:
+            nix(['profile', 'upgrade', str(package.index)])
+    else:
+        nix(['profile', 'install', f'github:runtimeverification/{package.repo}{version}#{package.package}'])
+
+
+def install_package(package_name: str, package_version: Optional[str]) -> None:
+    reload_packages()
+    if package_name not in available_packages.keys():
+        print(
+            f'❗ The package \'\033[94m{package_name}\033[0m\' does not exist. Use \'\033[92mkup list\033[0m\' to see all the available packages.'
+        )
+        return
+    if package_name in installed_packages and not package_version:
+        print(
+            f'❗ The package \'\033[94m{package_name}\033[0m\' is already installed. Use \'\033[92mkup update {package_name}\033[0m\' to update to the latest version.'
+        )
+        return
+    if package_name in installed_packages:
+        package = packages[package_name]
+        update_or_install_package(package, package_version)
+    else:
+        new_package = available_packages[package_name]
+        update_or_install_package(new_package, package_version)
+
+
+def update_package(package_name: str, package_version: Optional[str]) -> None:
+    reload_packages()
+    if package_name not in available_packages.keys():
+        print(
+            f'❗ The package \'\033[94m{package_name}\033[0m\' does not exist. Use \'\033[92mkup list\033[0m\' to see all the available packages.'
+        )
+        return
+    if package_name not in installed_packages:
+        print(
+            f'❗ The package \'\033[94m{package_name}\033[0m\' is not currently installed. Use \'\033[92mkup install {package_name}\033[0m\' to install the latest version.'
+        )
+        return
+    package = packages[package_name]
+    if package.status == INSTALLED and not package_version:
+        print(f'The package \'\033[94m{package_name}\033[0m\' is already up to date.')
+        return
+
+    update_or_install_package(package, package_version)
+
+
+def remove_package(package_name: str) -> None:
+    reload_packages()
+    if package_name not in available_packages.keys():
+        print(
+            f'❗ The package \'\033[94m{package_name}\033[0m\' does not exist. Use \'\033[92mkup list\033[0m\' to see all the available packages.'
+        )
+        return
+    if package_name not in installed_packages:
+        print(f'❗ The package \'\033[94m{package_name}\033[0m\' is not currently installed.')
+        return
+
+    if package_name == "kup" and len(installed_packages) > 1:
+        print(
+            '⚠️ You are about to remove \'\033[94mkup\033[0m\' with other K framework packages still installed. Are you sure you want to continue? [y/N]'
+        )
+
+        yes = {'yes', 'y', 'ye', ''}
+        no = {'no', 'n'}
+
+        choice = input().lower()
+        if choice in no:
+            return
+        if choice in yes:
+            pass
+        else:
+            sys.stdout.write("Please respond with '[y]es' or '[n]o'")
+            remove_package(package_name)
+    package = packages[package_name]
+    nix(['profile', 'remove', str(package.index)])
+
+
 def main() -> None:
     parser = ArgumentParser(description='The K Framework installer')
     subparser = parser.add_subparsers(dest='command')
-    subparser.add_parser('list', help='Show the active and installed K semantics')
+    list = subparser.add_parser('list', help='Show the active and installed K semantics')
+    list.add_argument('package', nargs='?', default='all', type=str)
 
     install = subparser.add_parser('install', help='Download and install the stated package')
     install.add_argument('package', type=str)
@@ -137,83 +284,13 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.command == "list":
-        reload_packages()
-        table_data = [
-            ['Package', "Installed version", "Status"],
-        ] + [[name, p.version, p.status] for name, p in packages.items()]
-        table = SingleTable(table_data)
-        print(table.table)
-
-    elif args.command == "update":
-        reload_packages()
-        if args.package not in available_packages.keys():
-            print(
-                f'❗ The package \'\033[94m{args.package}\033[0m\' does not exist. Use \'\033[92mkup list\033[0m\' to see all the available packages.'
-            )
-            return
-        if args.package not in installed_packages:
-            print(
-                f'❗ The package \'\033[94m{args.package}\033[0m\' is not currently installed. Use \'\033[92mkup install {args.package}\033[0m\' to install the latest version.'
-            )
-            return
-        package = packages[args.package]
-        if package.status == INSTALLED and not args.version:
-            print(f'The package \'\033[94m{args.package}\033[0m\' is already up to date.')
-            return
-
-        if package.immutable or args.version:
-            nix(['profile', 'remove', str(package.index)])
-            version = '/' + args.version if args.version else ''
-            nix(['profile', 'install', f'github:runtimeverification/{package.repo}{version}#{package.package}'])
-        else:
-            nix(['profile', 'upgrade', str(package.index)])
-
-    elif args.command == "remove":
-        reload_packages()
-        if args.package not in available_packages.keys():
-            print(
-                f'❗ The package \'\033[94m{args.package}\033[0m\' does not exist. Use \'\033[92mkup list\033[0m\' to see all the available packages.'
-            )
-            return
-        if args.package not in installed_packages:
-            print(f'❗ The package \'\033[94m{args.package}\033[0m\' is not currently installed.')
-            return
-
-        if args.package == "kup" and len(installed_packages) > 1:
-            print(
-                '⚠️ You are about to remove \'\033[94mkup\033[0m\' with other K framework packages still installed. Are you sure you want to continue? [y/N]'
-            )
-
-            yes = {'yes', 'y', 'ye', ''}
-            no = {'no', 'n'}
-
-            choice = input().lower()
-            if choice in no:
-                return
-            if choice in yes:
-                pass
-            else:
-                sys.stdout.write("Please respond with '[y]es' or '[n]o'")
-                return
-        package = packages[args.package]
-        nix(['profile', 'remove', str(package.index)])
-
+        list_package(args.package)
     elif args.command == "install":
-        reload_packages()
-        if args.package not in available_packages.keys():
-            print(
-                f'❗ The package \'\033[94m{args.package}\033[0m\' does not exist. Use \'\033[92mkup list\033[0m\' to see all the available packages.'
-            )
-            return
-        if args.package in installed_packages:
-            print(
-                f'❗ The package \'\033[94m{args.package}\033[0m\' is already installed. Use \'\033[92mkup update {args.package}\033[0m\' to update to the latest version.'
-            )
-            return
-        new_package = available_packages[args.package]
-        version = '/' + args.version if args.version else ''
-        nix(['profile', 'install', f'github:runtimeverification/{new_package.repo}{version}#{new_package.package}'])
-
+        install_package(args.package, args.version)
+    elif args.command == "update":
+        update_package(args.package, args.version)
+    elif args.command == "remove":
+        remove_package(args.package)
     elif args.command == "shell":
         reload_packages()
         if args.package not in available_packages.keys():
@@ -221,9 +298,9 @@ def main() -> None:
                 f'❗ The package \'\033[94m{args.package}\033[0m\' does not exist. Use \'\033[92mkup list\033[0m\' to see all the available packages.'
             )
             return
-        new_package = available_packages[args.package]
+        temporary_package = available_packages[args.package]
         version = '/' + args.version if args.version else ''
-        nix(['profile', 'install', f'github:runtimeverification/{new_package.repo}{version}#{new_package.package}'])
+        nix(['shell', f'github:runtimeverification/{temporary_package.repo}{version}#{temporary_package.package}'])
 
 
 if __name__ == '__main__':

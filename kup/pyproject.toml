@@ -13,6 +13,8 @@ authors = [
 [tool.poetry.dependencies]
 python = "^3.8"
 terminaltables = "^3.1.10"
+requests = "^2.28.1"
+types-requests = "^2.28.11"
 
 [tool.poetry.scripts]
 kup = "kup.__main__:main"
