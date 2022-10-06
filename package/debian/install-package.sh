@@ -5,4 +5,3 @@ apt-get update
 apt-get upgrade --yes
 apt-get install --yes make
 apt-get install --yes ./kframework_${K_VERSION}_amd64.deb
-"$(dirname "$0")/test-in-container"
