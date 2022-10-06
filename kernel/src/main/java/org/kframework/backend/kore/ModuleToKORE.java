@@ -636,10 +636,9 @@ public class ModuleToKORE {
 
     /** Constructs a #Ceil simplification rule for sets constructed by juxtaposition.
      *
-     * @param prod the production hooked to membership (`Set.in`) (used in RHS)
-     * @return resulting simplification rule
-     *   #Ceil(@S:Set SetItem(@E:KItem)) => {(@E in @S) #Equals false}
-     * NB the RHS implies #Ceil(@S) #And #Ceil(@E).
+     * @param prod the production hooked to membership (`Set.in`)
+     * @return simplification rule
+     *   #Ceil(@S:Set SetItem(@E:KItem)) => {(@E in @S) #Equals false} #And #Ceil(@S) #And #Ceil(#E)
      */
     private Rule genSetCeilAxioms(Production prod) {
         Sort setSort = prod.nonterminal(1).sort();
@@ -651,10 +650,13 @@ public class ModuleToKORE {
 
         Sort sortParam = Sort(AddSortInjections.SORTPARAM_NAME, Sort("Q"));
         KLabel ceilSetLabel = KLabel(KLabels.ML_CEIL.name(), setSort, sortParam);
+        KLabel andLabel = KLabel(KLabels.ML_AND.name(), sortParam);
+        KLabel ceilLabel = KLabel(KLabels.ML_CEIL.name(), itemE.sort(), sortParam);
         KLabel equalsLabel = KLabel(KLabels.ML_EQUALS.name(), Sorts.Bool(), sortParam);
 
-        K restSetVar = KVariable("@S", Att.empty().add(Sort.class, setSort));
         K itemVar = KVariable("@E", Att.empty().add(Sort.class, itemE.sort()));
+        K restSetVar = KVariable("@S", Att.empty().add(Sort.class, setSort));
+
         Seq<K> argsSeq = JavaConverters.iterableAsScalaIterable(singletonList(itemVar)).toSeq();
         return
                 Rule(
@@ -669,12 +671,22 @@ public class ModuleToKORE {
                                         )
                                 )
                                 ,
-                                KApply(equalsLabel,
-                                        KApply(prod.klabel().get(),
-                                                itemVar,
-                                                restSetVar
+                                KApply(andLabel,
+                                        KApply(equalsLabel,
+                                                KApply(prod.klabel().get(),
+                                                        itemVar,
+                                                        restSetVar
+                                                ),
+                                                BooleanUtils.FALSE
                                         ),
-                                        BooleanUtils.FALSE
+                                        KApply(andLabel,
+                                                KApply(ceilSetLabel,
+                                                        restSetVar
+                                                ),
+                                                KApply(ceilLabel,
+                                                        itemVar
+                                                )
+                                        )
                                 )
                         )
                         , BooleanUtils.TRUE
