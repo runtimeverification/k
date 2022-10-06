@@ -555,7 +555,7 @@ number and thus the time is effectively linear. The union consists of all the
 elements present in either set.
 
 ```k
-  syntax Set ::= Set "|Set" Set              [left, function, functional, hook(SET.union)]
+  syntax Set ::= Set "|Set" Set              [left, function, functional, hook(SET.union), comm]
   rule S1:Set |Set S2:Set => S1 (S2 -Set S1) [concrete]
 ```
 
@@ -566,7 +566,7 @@ is the size of the smaller set), or effectively linear. The intersection
 consists of all the elements present in both sets.
 
 ```k
-  syntax Set ::= intersectSet(Set, Set)   [function, functional, hook(SET.intersection)]
+  syntax Set ::= intersectSet(Set, Set)   [function, functional, hook(SET.intersection), comm]
 ```
 
 ### Set complement
@@ -661,36 +661,29 @@ module SET-KORE-SYMBOLIC [kore,symbolic]
 
 
   // |Set simplifications
-  rule S    |Set .Set => S    [simplification]
-  rule .Set |Set S    => S    [simplification]
+  rule S    |Set .Set => S    [simplification, comm]
   rule S    |Set S    => S    [simplification]
 
   rule (S SetItem(X)) |Set SetItem(X) => S SetItem(X)
-                             ensures notBool (X in S) [simplification]
-  rule SetItem(X) |Set (S SetItem(X)) => S SetItem(X)
-                             ensures notBool (X in S) [simplification]
+                             ensures notBool (X in S) [simplification, comm]
   // Currently disabled, see runtimeverification/haskell-backend#3301
   // rule (S SetItem(X)) |Set S          => S SetItem(X)
-  //                            ensures notBool (X in S) [simplification]
-  // rule S          |Set (S SetItem(X)) => S SetItem(X)
-  //                            ensures notBool (X in S) [simplification]
+  //                            ensures notBool (X in S) [simplification, comm]
 
   // intersectSet simplifications
-  rule intersectSet(.Set, _   ) => .Set    [simplification]
-  rule intersectSet( _  , .Set) => .Set    [simplification]
+  rule intersectSet(.Set, _   ) => .Set    [simplification, comm]
   rule intersectSet( S  , S   ) =>  S      [simplification]
 
   rule intersectSet( S SetItem(X), SetItem(X))     => SetItem(X)
-                                                        ensures notBool (X in S)      [simplification]
+                                                        ensures notBool (X in S)      [simplification, comm]
   // Currently disabled, see runtimeverification/haskell-backend#3294
-  // rule intersectSet( S SetItem(X) , S)             => S ensures notBool (X in S)      [simplification]
+  // rule intersectSet( S SetItem(X) , S)             => S ensures notBool (X in S)      [simplification, comm]
   rule intersectSet( S1 SetItem(X), S2 SetItem(X)) => intersectSet(S1, S2) SetItem(X)
                                                         ensures notBool (X in S1)
                                                         andBool notBool (X in S2)     [simplification]
 
   // membership simplifications
   rule _E in .Set           => false   [simplification]
-  rule E  in SetItem(E)     => true    [simplification]
   rule E  in (S SetItem(E)) => true
               ensures notBool (E in S) [simplification]
 
