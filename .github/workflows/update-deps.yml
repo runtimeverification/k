@@ -15,12 +15,11 @@ jobs:
     name: 'Nix flake submodule sync'
     runs-on: ubuntu-latest
     steps:
-      - id: config
+      - name: 'Check out code, set up Git'
         run: |
           git config --global user.name github-actions
           git config --global user.email github-actions@github.com
-      - name: Check out code
-        uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 
