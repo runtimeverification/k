@@ -49,7 +49,6 @@ jobs:
 
 
       - name: Update Nix flake inputs from submodules
-        uses: actions/checkout@v3
         env:
           token: ${{ secrets.GITHUB_TOKEN }}
         run: |
