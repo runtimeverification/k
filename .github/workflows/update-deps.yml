@@ -49,6 +49,9 @@ jobs:
 
 
       - name: Update Nix flake inputs from submodules
+        uses: actions/checkout@v3
+        env:
+          token: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if ! GC_DONT_GC=1 nix run .#check-submodules ; then
             GC_DONT_GC=1 nix run .#update-from-submodules
