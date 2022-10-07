@@ -25,10 +25,11 @@ jobs:
           echo "::set-output name=ref::$ref"
           git config --global user.name github-actions
           git config --global user.email github-actions@github.com
+          
       - name: Check out code
         uses: actions/checkout@v3
         env:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
         with:
           ref: ${{ steps.config.outputs.ref }}
           submodules: recursive
@@ -49,8 +50,6 @@ jobs:
 
 
       - name: Update Nix flake inputs from submodules
-        env:
-          token: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if ! GC_DONT_GC=1 nix run .#check-submodules ; then
             GC_DONT_GC=1 nix run .#update-from-submodules
