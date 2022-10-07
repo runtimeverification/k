@@ -16,14 +16,14 @@ jobs:
     name: 'Nix flake submodule sync'
     runs-on: ubuntu-latest
     steps:
-      - name: 'Check out code, setup Git'
+      - name: 'Check out code, set up Git'
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           submodules: recursive
-        run: |
-          git config user.name devops
-          git config user.email devops@runtimeverification.com
+      - run: |
+          git config --global user.name rv-jenkins
+          git config --global user.email devops@runtimeverification.com
 
       - name: 'Install Nix'
         uses: cachix/install-nix-action@v15
