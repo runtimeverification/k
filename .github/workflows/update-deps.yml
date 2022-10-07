@@ -40,9 +40,7 @@ jobs:
 
       - name: Update Nix flake inputs from submodules
         run: |
-          if ! GC_DONT_GC=1 nix run .#check-submodules ; then
-            GC_DONT_GC=1 nix run .#update-from-submodules
-            git add 'flake.lock'
-            git commit -m 'Sync flake inputs to submodules'
+          GC_DONT_GC=1 nix run .#update-from-submodules
+          if git add 'flake.lock' && git commit -m 'Sync flake inputs to submodules'; then
             git push
           fi
