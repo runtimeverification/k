@@ -17,8 +17,8 @@ jobs:
     steps:
       - name: 'Check out code, set up Git'
         run: |
-          git config --global user.name github-actions
-          git config --global user.email github-actions@github.com
+          git config --global user.name rv-jenkins
+          git config --global user.email devops@runtimeverification.com
       - uses: actions/checkout@v3
         with:
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
