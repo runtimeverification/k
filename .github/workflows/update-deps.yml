@@ -19,6 +19,7 @@ jobs:
       - name: 'Check out code, setup Git'
         uses: actions/checkout@v3
         with:
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
           submodules: recursive
         run: |
           git config user.name devops
