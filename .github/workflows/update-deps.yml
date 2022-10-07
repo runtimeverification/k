@@ -21,6 +21,7 @@ jobs:
           git config --global user.email github-actions@github.com
       - uses: actions/checkout@v3
         with:
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
           submodules: recursive
 
       - name: 'Install Nix'
