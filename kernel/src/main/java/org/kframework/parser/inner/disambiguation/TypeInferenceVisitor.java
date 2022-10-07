@@ -13,7 +13,6 @@ import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.SetsTransformerWithErrors;
-import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.compile.AddSortInjections;
 
