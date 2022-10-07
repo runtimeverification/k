@@ -437,6 +437,20 @@ def labels_to_dots(kast: KInner, labels: Collection[str]) -> KInner:
     return bottom_up(_labels_to_dots, kast)
 
 
+def extract_cells(kast: KInner, keep_cells: Collection[str]) -> KInner:
+    def _extract_cells(k: KInner) -> KInner:
+        if (
+            type(k) is KApply
+            and k.is_cell
+            and not k.label.name in keep_cells
+            and all(type(arg) != KApply or not arg.is_cell or arg == DOTS for arg in k.args)
+        ):
+            return DOTS
+        return k
+
+    return bottom_up(_extract_cells, kast)
+
+
 def on_attributes(kast: W, f: Callable[[KAtt], KAtt]) -> W:
     kast = kast.map_att(f)
 
@@ -453,7 +467,9 @@ def on_attributes(kast: W, f: Callable[[KAtt], KAtt]) -> W:
     return kast
 
 
-def minimize_term(term: KInner, keep_vars: Iterable[str] = (), abstract_labels: Collection[str] = ()) -> KInner:
+def minimize_term(
+    term: KInner, keep_vars: Iterable[str] = (), abstract_labels: Collection[str] = (), keep_cells: Collection[str] = ()
+) -> KInner:
     """Minimize a K term for pretty-printing.
 
     -   Input: kast term, and optionally requires and ensures clauses with constraints.
@@ -462,11 +478,18 @@ def minimize_term(term: KInner, keep_vars: Iterable[str] = (), abstract_labels: 
         -   Unused cells will be abstracted.
         -   Attempt to remove useless conditions.
     """
+
     term = inline_cell_maps(term)
     term = remove_semantic_casts(term)
     term = useless_vars_to_dots(term, keep_vars=keep_vars)
-    term = labels_to_dots(term, abstract_labels)
+
+    if keep_cells:
+        term = extract_cells(term, keep_cells)
+    else:
+        term = labels_to_dots(term, abstract_labels)
+
     term = collapse_dots(term)
+
     return term
 
 
