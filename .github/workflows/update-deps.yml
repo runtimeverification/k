@@ -16,6 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: config
+        uses: actions/checkout@v3.1.0
+        env:
+          token: ${{ secrets.GITHUB_TOKEN}}
         run: |
           ref=${{ github.ref }}
           if [ "${{ github.event_name }}" == 'pull_request' ]; then
@@ -24,7 +27,8 @@ jobs:
           ref="${ref#refs/heads/}"
           echo "::set-output name=ref::$ref"
           git config --global user.name github-actions
-          git config --global user.email github-actions@github.com
+          git config --global user.email devops@runtimeverification.com
+          
       - name: Check out code
         uses: actions/checkout@v3.1.0
         env:
