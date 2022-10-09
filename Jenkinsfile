@@ -35,157 +35,6 @@ pipeline {
         stash name: 'src', includes: "kframework-${env.VERSION}-src.tar.gz"
       }
     }
-    stage('Build and Package on Ubuntu Focal') {
-      when {
-        branch 'master'
-        beforeAgent true
-      }
-      stages {
-        stage('Build on Ubuntu Focal') {
-          agent {
-            dockerfile {
-              filename 'package/debian/Dockerfile'
-              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg LLVM_VERSION=12'
-              reuseNode true
-            }
-          }
-          stages {
-            stage('Checkout code') { steps { dir('k-exercises') { git url: 'git@github.com:kframework/k-exercises.git', credentialsId: 'rv-jenkins-access-token' } } }
-            stage('Build and Test K') {
-              options { timeout(time: 45, unit: 'MINUTES') }
-              steps {
-                sh '''
-                  echo 'Setting up environment...'
-                  export K_OPTS='-Xmx12G'
-                  echo 'Building K...'
-                  mvn --batch-mode verify -U
-                  echo 'Starting kserver...'
-                  k-distribution/target/release/k/bin/spawn-kserver kserver.log
-                  cd k-exercises/tutorial
-                  make -j`nproc` --output-sync ${MAKE_EXTRA_ARGS}
-                  cd ../../k-distribution/k-tutorial/1_basic
-                  ./test_kompile.sh
-                '''
-              }
-              post {
-                always {
-                  sh 'k-distribution/target/release/k/bin/stop-kserver || true'
-                  archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-                }
-              }
-            }
-            stage('Build Debian Package') {
-              steps {
-                dir("kframework-${env.VERSION}") {
-                  checkout scm
-                  sh '''
-                    mv package/debian ./debian
-                    mv debian/control.focal debian/control
-                    dpkg-buildpackage
-                  '''
-                }
-                stash name: 'focal', includes: "kframework_${env.VERSION}_amd64.deb"
-              }
-            }
-          }
-          post {
-            always {
-              sh '''
-                rm -rf k-distribution/k-tutorial/1_basic/build
-                make --directory=k-distribution clean
-                make --directory=k-exercises clean
-                make --directory=haskell-backend/src/main/native/haskell-backend clean
-              '''
-            }
-          }
-        }
-        stage('Test Debian Package') {
-          agent {
-            docker {
-              image 'ubuntu:focal'
-              args '-u 0'
-              reuseNode true
-            }
-          }
-          options { skipDefaultCheckout() }
-          steps {
-            unstash 'focal'
-            sh '''
-              src/main/scripts/test-in-container-debian
-            '''
-          }
-          post {
-            always {
-              sh 'stop-kserver || true'
-              archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-            }
-          }
-        }
-      }
-    }
-    stage('Build and Package on Ubuntu Jammy') {
-      when {
-        branch 'master'
-        beforeAgent true
-      }
-      stages {
-        stage('Build on Ubuntu Jammy') {
-          agent {
-            dockerfile {
-              filename 'package/debian/Dockerfile'
-              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=ubuntu:jammy --build-arg LLVM_VERSION=14'
-              reuseNode true
-            }
-          }
-          stages {
-            stage('Build Debian Package') {
-              steps {
-                dir("kframework-${env.VERSION}") {
-                  checkout scm
-                  sh '''
-                    mv package/debian ./debian
-                    mv debian/control.jammy debian/control
-                    mv debian/compat.jammy debian/compat
-                    mv debian/rules.jammy debian/rules
-                    dpkg-buildpackage
-                  '''
-                }
-                stash name: 'jammy', includes: "kframework_${env.VERSION}_amd64.deb"
-              }
-            }
-          }
-        }
-        stage('Test Debian Package') {
-          agent {
-            docker {
-              image 'ubuntu:jammy'
-              args '-u 0'
-              reuseNode true
-            }
-          }
-          options { skipDefaultCheckout() }
-          steps {
-            unstash 'jammy'
-            sh '''
-              src/main/scripts/test-in-container-debian
-            '''
-          }
-          post {
-            always {
-              sh 'stop-kserver || true'
-              archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-            }
-          }
-        }
-      }
-      post {
-        failure {
-          slackSend color: '#cb2431'                                             \
-                  , channel: '#k'                                                \
-                  , message: "Ubuntu Jammy Packaging Failed: ${env.BUILD_URL}"
-        }
-      }
-    }
     stage('Build and Package on Debian Bullseye') {
       when {
         branch 'master'
@@ -311,79 +160,6 @@ pipeline {
         }
       }
     }
-    stage('DockerHub') {
-      when {
-        branch 'master'
-        beforeAgent true
-      }
-      environment {
-        DOCKERHUB_TOKEN    = credentials('rvdockerhub')
-        FOCAL_VERSION_TAG  = "ubuntu-focal-${env.VERSION}"
-        FOCAL_BRANCH_TAG   = "ubuntu-focal-${env.BRANCH_NAME}"
-        JAMMY_VERSION_TAG  = "ubuntu-jammy-${env.VERSION}"
-        JAMMY_BRANCH_TAG   = "ubuntu-jammy-${env.BRANCH_NAME}"
-        DOCKERHUB_REPO     = "runtimeverificationinc/kframework-k"
-      }
-      stages {
-        stage('Build Image') {
-          steps {
-            milestone(1)
-            dir('focal') { unstash 'focal' }
-            sh '''
-                mv focal/kframework_${VERSION}_amd64.deb kframework_amd64_focal.deb
-                docker login --username "${DOCKERHUB_TOKEN_USR}" --password "${DOCKERHUB_TOKEN_PSW}"
-                docker image build . --file package/docker/Dockerfile.ubuntu-focal --tag "${DOCKERHUB_REPO}:${FOCAL_VERSION_TAG}"
-                docker image push "${DOCKERHUB_REPO}:${FOCAL_VERSION_TAG}"
-                docker tag "${DOCKERHUB_REPO}:${FOCAL_VERSION_TAG}" "${DOCKERHUB_REPO}:${FOCAL_BRANCH_TAG}"
-                docker push "${DOCKERHUB_REPO}:${FOCAL_BRANCH_TAG}"
-            '''
-            dir('jammy') { unstash 'jammy' }
-            sh '''
-                mv jammy/kframework_${VERSION}_amd64.deb kframework_amd64_jammy.deb
-                docker login --username "${DOCKERHUB_TOKEN_USR}" --password "${DOCKERHUB_TOKEN_PSW}"
-                docker image build . --file package/docker/Dockerfile.ubuntu-jammy --tag "${DOCKERHUB_REPO}:${JAMMY_VERSION_TAG}"
-                docker image push "${DOCKERHUB_REPO}:${JAMMY_VERSION_TAG}"
-                docker tag "${DOCKERHUB_REPO}:${JAMMY_VERSION_TAG}" "${DOCKERHUB_REPO}:${JAMMY_BRANCH_TAG}"
-                docker push "${DOCKERHUB_REPO}:${JAMMY_BRANCH_TAG}"
-            '''
-          }
-        }
-        stage('Test Focal Image') {
-          agent {
-            docker {
-              image "${DOCKERHUB_REPO}:${FOCAL_VERSION_TAG}"
-              args '-u 0'
-              reuseNode true
-            }
-          }
-          steps {
-            sh '''
-              cd ~
-              echo 'module TEST imports BOOL endmodule' > test.k
-              kompile test.k --backend llvm
-              kompile test.k --backend haskell
-            '''
-          }
-        }
-        stage('Test Jammy Image') {
-          agent {
-            docker {
-              image "${DOCKERHUB_REPO}:${JAMMY_VERSION_TAG}"
-              args '-u 0'
-              reuseNode true
-            }
-          }
-          steps {
-            sh '''
-              cd ~
-              echo 'module TEST imports BOOL endmodule' > test.k
-              kompile test.k --backend llvm
-              kompile test.k --backend haskell
-            '''
-          }
-        }
-      }
-    }
     stage('Deploy') {
       when {
         branch 'master'
@@ -399,10 +175,8 @@ pipeline {
       environment { GITHUB_TOKEN = credentials('rv-jenkins-access-token') }
       steps {
         unstash 'src'
-        dir('focal')  { unstash 'focal' }
-        dir('jammy')  { unstash 'jammy' }
         dir('bullseye') { unstash 'bullseye' }
-        dir('arch')   { unstash 'arch'   }
+        dir('arch')     { unstash 'arch'     }
         sshagent(['rv-jenkins-github']) {
           sh '''
             git clone 'ssh://github.com/runtimeverification/k.git' k-release
@@ -419,19 +193,15 @@ pipeline {
             git tag "${K_RELEASE_TAG}" "${release_commit}"
             git push origin "${K_RELEASE_TAG}"
 
-            mv ../kframework-${VERSION}-src.tar.gz                      kframework-${VERSION}-src.tar.gz
-            mv ../focal/kframework_${VERSION}_amd64.deb                 kframework_${VERSION}_amd64_focal.deb
-            mv ../jammy/kframework_${VERSION}_amd64.deb                 kframework_${VERSION}_amd64_jammy.deb
-            mv ../bullseye/kframework_${VERSION}_amd64.deb              kframework_${VERSION}_amd64_bullseye.deb
-            mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst   kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
+            mv ../kframework-${VERSION}-src.tar.gz                     kframework-${VERSION}-src.tar.gz
+            mv ../bullseye/kframework_${VERSION}_amd64.deb             kframework_${VERSION}_amd64_bullseye.deb
+            mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst  kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
 
             echo "K Framework Release ${VERSION}"  > release.md
             echo ''                               >> release.md
             cat k-distribution/INSTALL.md         >> release.md
             hub release create --prerelease                                                      \
                 --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                        \
-                --attach kframework_${VERSION}_amd64_focal.deb'#Ubuntu Focal (20.04) Package'    \
-                --attach kframework_${VERSION}_amd64_jammy.deb'#Ubuntu Jammy (22.04) Package'    \
                 --attach kframework_${VERSION}_amd64_bullseye.deb'#Debian Bullseye (11) Package' \
                 --attach kframework-git-${VERSION}-1-x86_64.pkg.tar.zst'#Arch Package'           \
                 --file release.md "${K_RELEASE_TAG}"
