@@ -81,7 +81,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                 .collect(Collectors.toSet());
 
         Att att = convertAttributes(m);
-        att = att.add("digest", String.valueOf(m.digest()));
+        att = att.add(Att.DIGEST(), String.valueOf(m.digest()));
 
         return new FlatModule(moduleName, immutable(importedModuleNames), immutable(items), att);
     }

@@ -206,7 +206,7 @@ public class ParserUtils {
         Map<String, List<Tuple4<String, Source, Location, Long>>> groupedModules =
                 Streams.concat(
                         previousModules.stream().map(m -> Tuple4.apply(m.name(), m.att().get(Att.SOURCE(), Source.class),
-                                m.att().get(Att.LOCATION(), Location.class), Long.valueOf(m.att().get("digest")))),
+                                m.att().get(Att.LOCATION(), Location.class), Long.valueOf(m.att().get(Att.DIGEST())))),
                         kilModules.stream().map(m -> Tuple4.apply(m.getName(), m.getSource(), m.getLocation(), m.digest())))
                 // make sure we have unique modules (double requires), and preserve order
                 .collect(Collectors.toCollection(LinkedHashSet::new)).stream()
