@@ -222,7 +222,7 @@ public class ParserUtils {
         for (String moduleName : duplicateModules) {
           Tuple4<String, Source, Location, Long> firstMod = groupedModules.get(moduleName).get(0);
           Tuple4<String, Source, Location, Long> secondMod = groupedModules.get(moduleName).get(1);
-          KEMException ex = KEMException.outerParserError("Module " + moduleName + " previously declared at "
+          KEMException ex = KEMException.outerParserError("Module " + moduleName + " differs from previous declaration at "
                   + firstMod._2() + " and " + firstMod._3(), secondMod._2(), secondMod._3());
           // give an error message only if we have
           // the same module name found in different filenames (path doesn't matter)
