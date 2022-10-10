@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pyk.kast import KApply, KSequence, KToken
 from pyk.kastManip import flatten_label, get_cell
 from pyk.ktool import KompileBackend
@@ -13,7 +15,7 @@ class ImpRunTest(KRunTest):
     KOMPILE_OUTPUT_DIR = 'definitions/imp'
     KOMPILE_EMIT_JSON = True
 
-    KRUN_USE_DIR = '.imp'
+    KRUN_USE_DIR: Optional[str] = '.imp'
 
     @staticmethod
     def _update_symbol_table(symbol_table: SymbolTable) -> None:
@@ -36,3 +38,7 @@ class ImpRunTest(KRunTest):
         self.maxDiff = None
         self.assertEqual(k_actual, k_expected)
         self.assertCountEqual(state_actual_map_items, state_expected_map_items)
+
+
+class TmpRunTest(ImpRunTest):
+    KRUN_USE_DIR = None
