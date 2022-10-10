@@ -57,5 +57,19 @@ public class Module extends DefinitionItem {
         sb.append("endmodule");
     }
 
-
+    /**
+     * Used to determine if a module was modified.
+     * <a href="https://github.com/runtimeverification/k/issues/2910"> GH #2910</a>
+     * This allows for scripts to move files around after compilation but still give error messages
+     * if the contents of modules differ.
+     */
+    public long digest() {
+        StringBuilder mod = new StringBuilder();
+        toString(mod);
+        long hash = 7;
+        for (int i = 0; i < mod.length(); i++) {
+            hash = hash * 31 + mod.charAt(i);
+        }
+        return hash;
+    }
 }
