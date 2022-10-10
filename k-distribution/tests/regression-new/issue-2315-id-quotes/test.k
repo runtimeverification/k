@@ -1,4 +1,4 @@
-module TEST 
+module TEST
   imports ID
   imports BOOL
   imports K-EQUAL
