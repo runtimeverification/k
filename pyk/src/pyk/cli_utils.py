@@ -11,6 +11,18 @@ from typing import Final, Iterable, Mapping, Optional, Union
 _LOGGER: Final = logging.getLogger(__name__)
 
 
+def loglevel(level: str) -> int:
+    res = getattr(logging, level.upper(), None)
+
+    if isinstance(res, int):
+        return res
+
+    try:
+        return int(level)
+    except ValueError:
+        raise ValueError('Invalid log level: {level}') from None
+
+
 def check_dir_path(path: Path) -> None:
     if not path.exists():
         raise ValueError(f'Directory does not exist: {path}')
