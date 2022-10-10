@@ -1,5 +1,6 @@
   <k>
-    diffResult ( SetItem ( Y:MyId ) -Set SetItem ( X:MyId ) ) ~> .
+    diffResult ( SetItem ( Y:MyId ) -Set ( S
+    SetItem ( X:MyId ) ) ) ~> .
   </k>
 #And
   {
