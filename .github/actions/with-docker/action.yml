@@ -44,7 +44,7 @@ runs:
 
       docker run                             \
           --name ${TAG_NAME}                 \
-          --rm -it                           \
+          -it                                \
           --detach                           \
           --workdir /opt/workspace/${SUBDIR} \
           --user user:user                   \
