@@ -1,0 +1,52 @@
+  #Ceil ( <cellElem>
+    <cellA>
+      partialInt ( _I1 )
+    </cellA>
+    <cellB>
+      partialInt ( _I2 )
+    </cellB>
+  </cellElem> _CELLSET )
+#And
+  #Ceil ( <cellElem>
+    <cellA>
+      partialInt ( _I3 )
+    </cellA>
+    <cellB>
+      partialInt ( _I4 )
+    </cellB>
+  </cellElem> _CELLSET )
+#And
+  #Not ( {
+      partialInt ( _I1 )
+    #Equals
+      partialInt ( _I3 )
+    }
+  #And
+    {
+      partialInt ( _I2 )
+    #Equals
+      partialInt ( _I4 )
+    } )
+#And
+  <generatedTop>
+    <k>
+      done ( . ) ~> .
+    </k>
+    <cellSet>
+      <cellElem>
+        <cellA>
+          partialInt ( _I1 )
+        </cellA>
+        <cellB>
+          partialInt ( _I2 )
+        </cellB>
+      </cellElem> <cellElem>
+        <cellA>
+          partialInt ( _I3 )
+        </cellA>
+        <cellB>
+          partialInt ( _I4 )
+        </cellB>
+      </cellElem> _CELLSET
+    </cellSet>
+  </generatedTop>
