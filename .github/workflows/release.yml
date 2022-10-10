@@ -290,7 +290,7 @@ jobs:
   gh-pages:
     name: 'GitHub Pages deployment'
     runs-on: ubuntu-latest
-    needs: [macos-release]
+    needs: [release]
     steps:
       - name: 'Install pandoc/texlive/calibre'
         run: |
