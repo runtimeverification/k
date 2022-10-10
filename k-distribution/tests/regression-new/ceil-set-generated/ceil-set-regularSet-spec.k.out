@@ -1,0 +1,29 @@
+  #Ceil ( partialInt ( _I1 ) )
+#And
+  #Ceil ( partialInt ( _I2 ) )
+#And
+  #Ceil ( partialSet ( _S ) )
+#And
+  <generatedTop>
+    <k>
+      done ( SetItem ( partialInt ( _I1 ) )
+      SetItem ( partialInt ( _I2 ) )
+      partialSet ( _S ) ~> . ) ~> .
+    </k>
+    <cellSet>
+      _CELLSET
+    </cellSet>
+  </generatedTop>
+#And
+  {
+    false
+  #Equals
+    partialInt ( _I1 ) in SetItem ( partialInt ( _I2 ) )
+    partialSet ( _S )
+  }
+#And
+  {
+    false
+  #Equals
+    partialInt ( _I2 ) in partialSet ( _S )
+  }
