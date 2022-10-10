@@ -24,6 +24,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
@@ -120,7 +121,7 @@ public class ConstantFolding {
       return KToken(((FloatBuiltin)result).value(), sort);
     } else if (result instanceof BigInteger) {
       return KToken(result.toString(), sort);
-    } else if (result instanceof String) {
+    } else if (result instanceof String && !Objects.equals(sort.name(), "Id")) {
       return KToken(StringUtil.enquoteKString((String)result), sort);
     } else {
       return KToken(result.toString(), sort);
