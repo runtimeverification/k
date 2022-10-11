@@ -9,6 +9,29 @@ We currently strive to provide packages for the following platforms:
 -   macOS Catalina (10.15), Big Sur (11) and Monterey (12) via Homebrew
 -   Docker Images
 
+Fast Installation
+-----------------
+
+If you're on a system that supports [Nix](https://nixos.org/download.html), use this command to install via Nix:
+
+```
+bash <(curl https://kframework.org/install)
+kup install k
+```
+
+You can update K with:
+
+```
+kup update k
+```
+
+And list available versions with:
+
+```
+kup list
+```
+
+
 Pre-installation Notes
 ----------------------
 
@@ -140,8 +163,6 @@ Docker images with K pre-installed are available at the
 
 Each release at `COMMIT_ID` has an image associated with it at
 `runtimeverificationinc/kframework-k:ubuntu-focal-COMMIT_ID`.
-The latest `master` build Docker image can be accessed with `COMMIT_ID` set to
-`master`.
 
 To run the image directly:
 

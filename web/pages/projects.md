@@ -6,6 +6,10 @@
 
 <br>
 
+- **[Dedukti (Mar 2021 - Present)](https://gitlab.com/semantiko/K-semantics)**
+
+  This project aims to translate real K semantics into Dedukti.
+
 - **[KWasm (Aug 2015 - Present)](https://github.com/kframework/wasm-semantics)**
 
   KWasm is the K semantics of [WebAssembly](https://webassembly.github.io/spec/).

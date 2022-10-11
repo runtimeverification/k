@@ -49,7 +49,8 @@ for details about supported configurations and system setup.
 5.  [Changing the KORE Data Structures](#changing-the-kore-data-structures)
 6.  [Building the Final Release Directory/Archives](#building-the-final-release-directoryarchives)
 7.  [Compiling Definitions and Running Programs](#compiling-definitions-and-running-programs)
-8.  [Troubleshooting](#troubleshooting)
+8.  [Installing Python Support](#installing-python-support)
+9.  [Troubleshooting](#troubleshooting)
 
 # Prerequisite Install Guide
 
@@ -58,15 +59,15 @@ must first be installed.
 
 ## The Short Version
 
-On Ubuntu Linux:
+On Ubuntu Linux 20.04 (Focal) or 22.04 (Jammy):
 
 ```shell
 git submodule update --init --recursive
-sudo apt-get install build-essential m4 openjdk-11-jdk libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 cmake gcc clang-10 lld-10 llvm-10-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
+sudo apt-get install build-essential m4 openjdk-11-jdk libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 python3-dev cmake gcc clang-12 lld-12 llvm-12-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
 curl -sSL https://get.haskellstack.org/ | sh
 ```
 
-Note: we require version 10 or greater for clang, lld, and llvm-tools.
+Note: we require a version between 10 and 14 for clang, lld, and llvm-tools.
 
 On Arch Linux:
 
@@ -365,6 +366,10 @@ Assuming k-distribution/target/release/k/bin is in your path, you can compile de
 the `kompile` command.  To execute a program you can use `krun`.
 
 For running either program in the debugger, use the main class `org.kframework.main.Main` with an additional argument `-kompile` or `-krun` added before other command line arguments, and use the classpath from the `k-distribution` module.
+
+# Installing Python Support
+
+Python tools for K can be found under [runtimeverification/pyk](https://github.com/runtimeverification/pyk).
 
 # Troubleshooting
 Common build-time error messages:

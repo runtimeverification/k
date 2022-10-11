@@ -6,6 +6,7 @@
     llvm-backend.url = "github:runtimeverification/llvm-backend";
     llvm-backend.inputs.nixpkgs.follows = "haskell-backend/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
+    rv-utils.url = "github:runtimeverification/rv-nix-tools";
     mavenix.url = "github:goodlyrottenapple/mavenix";
     # needed by nix/flake-compat-k-unwrapped.nix
     flake-compat = {
@@ -15,8 +16,8 @@
     poetry2nix.url = "github:nix-community/poetry2nix";
   };
 
-  outputs = { self, nixpkgs, flake-utils, haskell-backend, llvm-backend, mavenix
-    , flake-compat, poetry2nix }:
+  outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend
+    , llvm-backend, mavenix, flake-compat, poetry2nix }:
     let
       allOverlays = [
         poetry2nix.overlay
@@ -66,9 +67,16 @@
                 version = "${k-version}-${self.rev or "dirty"}";
               };
 
-            pyk = prev.poetry2nix.mkPoetryApplication {
+            kup = prev.poetry2nix.mkPoetryApplication {
               python = prev.python39;
-              projectDir = ./pyk;
+              projectDir = ./kup;
+              overrides = prev.poetry2nix.overrides.withDefaults (
+                final: prev: {
+                  mypy = prev.mypy.overridePythonAttrs (_old: {
+                    MYPY_USE_MYPYC = false;
+                  });
+                }
+          );
             };
           })
       ];
@@ -81,6 +89,10 @@
       let
         pkgs = import nixpkgs {
           inherit system;
+
+          # Temporarily required until a bug on pyOpenSSL is resolved for aarch64-darwin
+          # https://github.com/NixOS/nixpkgs/pull/172397
+          config.allowBroken = system == "aarch64-darwin";
           overlays = [ (final: prev: { llvm-backend-release = false; }) ]
             ++ allOverlays;
         };
@@ -96,6 +108,7 @@
             p."kore:exe:kore-exec"
             p."kore:exe:kore-rpc"
             p."kore:exe:kore-repl"
+            p."kore:exe:kore-parser"
             p."kore:exe:kore-prof"
             p."kore:exe:kore-match-disjunction"
           ];
@@ -104,12 +117,13 @@
       in rec {
 
         packages = rec {
-          inherit (pkgs) pyk;
           k = pkgs.k-framework haskell-backend-bins;
+
+          inherit (pkgs) kup;
 
           # This is a copy of the `nix/update-maven.sh` script, which should be
           # eventually removed. Having this inside the flake provides a uniform
-          # interface, i.e. we have `update-maven`/`update-python` in k and 
+          # interface, i.e. we have `update-maven` in k and 
           # `update-cabal` in the haskell-backend.
           # The first `nix-build` command below ensures k source is loaded into the Nix store. 
           # This command will fail, but only after loading the source. 
@@ -123,33 +137,17 @@
             ${pkgs.mavenix-cli}/bin/mvnix-update -l ./nix/mavenix.lock -E 'import ./nix/flake-compat-k-unwrapped.nix'
           '';
 
-          check-versions = let
-            hashes = [
-              {
-                name = "llvm-mackend";
-                rev = llvm-backend.rev;
-              }
-              {
-                name = "haskell-mackend";
-                rev = haskell-backend.rev;
-              }
-            ];
-          in pkgs.writeShellScriptBin "check-versions" ''
-            STATUS=$(git submodule status);
-            for elem in ${
-              pkgs.lib.concatMapStringsSep " " ({ name, rev }: "${name},${rev}")
-              hashes
-            }; do
-              IFS=","; set -- $elem;
-              if ! grep -q "$2" <<< "$STATUS";
-              then
-                  echo "$1 with hash '$2' does not match any current submodules:"
-                  git submodule status
-                  exit 1
-              fi
-            done
-            echo "All dependencies match"
-          '';
+          check-submodules = rv-utils.lib.check-submodules pkgs {
+            inherit llvm-backend haskell-backend;
+          };
+
+          update-from-submodules =
+            rv-utils.lib.update-from-submodules pkgs ./flake.lock {
+              haskell-backend.submodule =
+                "haskell-backend/src/main/native/haskell-backend";
+              llvm-backend.submodule =
+                "llvm-backend/src/main/native/llvm-backend";
+            };
 
           test = with pkgs;
             let
@@ -194,7 +192,6 @@
                 runHook postInstall
               '';
             };
-
         };
         defaultPackage = packages.k;
       }) // {

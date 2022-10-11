@@ -16,7 +16,7 @@ module LAMBDA-SYNTAX
                > "lambda" KVar "." Exp
                | "if" Exp "then" Exp "else" Exp   [strict]
                | "let" KVar "=" Exp "in" Exp        [strict(2)]
-               | "letrec" KVar KVar "=" Exp "in" Exp
+               | "letrec" KVar KVar "=" Exp "in" Exp [macro]
                | "mu" KVar "." Exp
 endmodule
 
@@ -60,7 +60,7 @@ module LAMBDA
   rule <k> X:KVar => #renameMetaKVariables(T, Tvs) ...</k>
        <tenv>... X |-> (forall Tvs) T ...</tenv>
 
-  rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
+  rule letrec F X = E in E' => let F = mu F . lambda X . E in E'
   rule <k> mu X:KVar . E:Exp => (?T:Type -> ?T) E ~> setTenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
 

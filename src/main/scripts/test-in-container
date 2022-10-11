@@ -12,3 +12,10 @@ cd ~
 echo "module TEST imports BOOL endmodule" > test.k
 kompile test.k --backend haskell
 rm -rf test-kompiled
+
+# Make sure that the KLLVM bindings have been installed properly.
+python3 <<HERE
+import kllvm
+sort_int = kllvm.ast.CompositeSort("SortInt")
+assert str(sort_int) == "SortInt{}"
+HERE

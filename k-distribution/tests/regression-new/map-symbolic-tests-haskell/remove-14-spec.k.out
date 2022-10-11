@@ -27,3 +27,4 @@
     Z:MyId in_keys ( ( MAP
     X:MyId |-> 1 ) [ Y:MyId <- undef ] )
   }
+[Error] Prover: backend terminated because the configuration cannot be rewritten further. See output for more details.

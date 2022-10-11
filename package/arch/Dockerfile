@@ -22,7 +22,6 @@ RUN    pacman -Sy   --noconfirm archlinux-keyring \
                        openssh                    \
                        python                     \
                        python-pip                 \
-                       python-poetry              \
                        stack                      \
                        z3                         \
                        zlib
@@ -52,5 +51,3 @@ ADD k-distribution/pom.xml                                     /home/user/.tmp-m
 ADD kore/pom.xml                                               /home/user/.tmp-maven/kore/
 RUN    cd /home/user/.tmp-maven               \
     && mvn --batch-mode dependency:go-offline
-
-RUN pip3 install --user graphviz

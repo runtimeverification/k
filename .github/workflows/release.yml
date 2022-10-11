@@ -1,11 +1,15 @@
-name: "Release"
+name: 'Release'
 on:
   release:
     types:
       - prereleased
+concurrency:
+  group: ${{ github.workflow }}
 
 jobs:
+
   nix-release:
+    name: 'Nix Release'
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -17,13 +21,87 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v14.1
         with:
-          install_url: "https://releases.nixos.org/nix/nix-2.3.16/install"
+          install_url: 'https://releases.nixos.org/nix/nix-2.3.16/install'
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload release.nix
         uses: ttuegel/upload-release.nix@v1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  ubuntu-jammy:
+    name: 'K Ubuntu Jammy Package'
+    runs-on: [self-hosted, linux, normal]
+    steps:
+      - uses: actions/checkout@v3
+      - name: 'Build and Test'
+        uses: ./.github/actions/test-package
+        with:
+          distro: jammy
+          llvm: 14
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
+        with:
+          asset_content_type: 'application/gzip'
+          asset_name: 'K Framework Ubuntu Jammy (22.04) Deb'
+          asset_path: kframework_ubuntu_jammy.deb
+          upload_url: ${{ github.event.release.upload_url }}
+      - name: 'Test and Push up Docker Image'
+        shell: bash {0}
+        env:
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+          DOCKERHUB_REPO: runtimeverificationinc/kframework-k
+        run: |
+          set -euxo pipefail
+          version=$(cat package/version)
+          version_tag=ubuntu-jammy-${version}
+          docker login --username rvdockerhub --password ${DOCKERHUB_PASSWORD}
+          docker image build . --file package/docker/Dockerfile.ubuntu-jammy --tag ${DOCKERHUB_REPO}:${version_tag}
+          docker run --name k-package-docker-test-jammy --rm -it --detach ${DOCKERHUB_REPO}:${version_tag}
+          docker exec -t k-package-docker-test-jammy bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
+          docker exec -t k-package-docker-test-jammy bash -c 'cd ~ && kompile test.k --backend llvm'
+          docker exec -t k-package-docker-test-jammy bash -c 'cd ~ && kompile test.k --backend haskell'
+          docker image push ${DOCKERHUB_REPO}:${version_tag}
+
+  ubuntu-focal:
+    name: 'K Ubuntu Focal Package'
+    runs-on: [self-hosted, linux, normal]
+    steps:
+      - uses: actions/checkout@v3
+      - name: 'Build and Test'
+        uses: ./.github/actions/test-package
+        with:
+          distro: focal
+          llvm: 14
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
+        with:
+          asset_content_type: 'application/gzip'
+          asset_name: 'K Framework Ubuntu Focal (20.04) Deb'
+          asset_path: kframework_ubuntu_focal.deb
+          upload_url: ${{ github.event.release.upload_url }}
+      - name: 'Test and Push up Docker Image'
+        shell: bash {0}
+        env:
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+          DOCKERHUB_REPO: runtimeverificationinc/kframework-k
+        run: |
+          set -euxo pipefail
+          version=$(cat package/version)
+          version_tag=ubuntu-focal-${version}
+          docker login --username rvdockerhub --password ${DOCKERHUB_PASSWORD}
+          docker image build . --file package/docker/Dockerfile.ubuntu-focal --tag ${DOCKERHUB_REPO}:${version_tag}
+          docker run --name k-package-docker-test-focal --rm -it --detach ${DOCKERHUB_REPO}:${version_tag}
+          docker exec -t k-package-docker-test-focal bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
+          docker exec -t k-package-docker-test-focal bash -c 'cd ~ && kompile test.k --backend llvm'
+          docker exec -t k-package-docker-test-focal bash -c 'cd ~ && kompile test.k --backend haskell'
+          docker image push ${DOCKERHUB_REPO}:${version_tag}
+
   macos-build:
+    name: 'Build MacOS Package'
     runs-on: macos-11
     environment: production
     steps:
@@ -57,12 +135,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Get upload_url
-        run: |
-          echo "::set-output name=release_id::$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)"
-          echo "::set-output name=upload_url::https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)/assets{?name,label}"
-        id: release
-
       - name: Build brew bottle
         id: build
         run: |
@@ -95,16 +167,15 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const { owner, repo } = context.repo
-            await github.repos.deleteRelease({ owner, repo, release_id: ${{ steps.release.outputs.release_id }} })
+            await github.repos.deleteRelease({ owner, repo, release_id: ${{ github.event.release.release_id }} })
 
     outputs:
       bottle_path: ${{ steps.build.outputs.path }}
       bottle_path_remote: ${{ steps.build.outputs.path_remote }}
-      release_id: ${{ steps.release.outputs.release_id }}
-      upload_url: ${{ steps.release.outputs.upload_url }}
       version: ${{ steps.build.outputs.version }}
 
   macos-test:
+    name: 'Test MacOS Package'
     runs-on: macos-11
     environment: production
     needs: macos-build
@@ -163,10 +234,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          asset_content_type: "application/gzip"
+          asset_content_type: 'application/gzip'
           asset_name: ${{ needs.macos-build.outputs.bottle_path_remote }}
           asset_path: homebrew-k-old/${{ needs.macos-build.outputs.bottle_path }}
-          upload_url: ${{ needs.macos-build.outputs.upload_url }}
+          upload_url: ${{ github.event.release.upload_url }}
 
       - name: Add ssh key
         uses: shimataro/ssh-key-action@v2
@@ -189,12 +260,13 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const { owner, repo } = context.repo
-            await github.repos.deleteRelease({ owner, repo, release_id: ${{ needs.macos-build.outputs.release_id }} })
+            await github.repos.deleteRelease({ owner, repo, release_id: ${{ github.event.release.release_id }} })
 
-  macos-release:
+  release:
+    name: 'Publish Release'
     runs-on: ubuntu-latest
     environment: production
-    needs: [nix-release, macos-build, macos-test]
+    needs: [nix-release, macos-build, macos-test, ubuntu-jammy, ubuntu-focal]
     steps:
       - name: Publish release
         uses: actions/github-script@v4
@@ -202,7 +274,7 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const { owner, repo } = context.repo
-            await github.repos.updateRelease({ owner, repo, release_id: ${{ needs.macos-build.outputs.release_id }}, prerelease: false })
+            await github.repos.updateRelease({ owner, repo, release_id: ${{ github.event.release.release_id }}, prerelease: false })
       - name: Update dependents
         env:
           JENKINS_DEVOPS_TOKEN: ${{ secrets.JENKINS_DEVOPS_TOKEN }}
@@ -214,3 +286,50 @@ jobs:
               --data UPDATE_DEPS=true \
               --data UPDATE_DEPS_REPO=runtimeverification/k \
               --data UPDATE_DEPS_VERSION=v$VERSION
+
+  gh-pages:
+    name: 'GitHub Pages deployment'
+    runs-on: ubuntu-latest
+    needs: [macos-release]
+    steps:
+      - name: 'Install pandoc/texlive/calibre'
+        run: |
+          sudo apt update --yes
+          sudo apt install --yes wget texlive-xetex
+          sudo wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=5.42.0
+          sudo wget https://github.com/jgm/pandoc/releases/download/2.18/pandoc-2.18-1-amd64.deb -O /tmp/pandoc.deb
+          sudo dpkg -i /tmp/pandoc.deb
+      - name: 'Checkout code and set up web build'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          path: gh-pages
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
+          fetch-depth: 0
+      - working-directory: gh-pages
+        run: |
+          git config --global user.name rv-jenkins
+          git config --global user.email devops@runtimeverification.com
+          git checkout -B gh-pages origin/master
+      - name: 'Build webpage'
+        working-directory: gh-pages
+        run: |
+          export PATH="$PATH":/opt/calibre
+          cd web
+          npm install
+          npm run build
+          npm run build-book
+          npm run build-sitemap
+          cd -
+          mv web/public_content ./
+          rm -rf $(find . -maxdepth 1 -not -name public_content -a -not -name .git -a -not -path . -a -not -path .. -a -not -name CNAME)
+          mv public_content/* ./
+          rm -rf public_content
+      - name: 'Push gh-pages branch'
+        working-directory: gh-pages
+        run: |
+          set -x
+          git add ./
+          git commit -m 'gh-pages: Updated the website'
+          git merge --strategy ours origin/gh-pages --allow-unrelated-histories
+          git push origin gh-pages

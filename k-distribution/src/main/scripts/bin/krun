@@ -554,6 +554,9 @@ if [ "$backendName" = "llvm" ]; then
     tempFiles+=("$disjunctFile")
     if $search; then
       llvmCommand="$kompiledDir/search"
+      if [ -n "$bound" ]; then
+        interpreter_flags="$interpreter_flags --bound $bound"
+      fi
     else
       llvmCommand="$kompiledDir/interpreter"
     fi

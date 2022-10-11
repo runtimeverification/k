@@ -69,7 +69,7 @@ possible?  The problem is now the non-deterministic evaluation strategy of
 the function application construct.  Indeed, recall that the semantics of
 the let-in construct is defined by desugaring to lambda application:
 
-    rule let X = E in E' => (lambda X . E') E     [macro]
+    rule let X = E in E' => (lambda X . E') E
 
 With this, the program above eventually reduces to
 

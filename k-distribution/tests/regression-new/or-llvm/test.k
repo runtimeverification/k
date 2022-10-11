@@ -14,8 +14,8 @@ module TEST
   rule test(test2(baz,_) #Or test(test2(baz,_))) => 1
   rule stuff(test(test3(baz,V:Int) #Or test(test3(baz,V:Int)))) => V
 
-  syntax KItem ::= "macro"
-  rule macro => a #Or b [macro]
+  syntax KItem ::= "macro" [macro]
+  rule macro => a #Or b
   syntax Foo ::= "a"
   syntax Bar ::= "b"
   rule <k> macro ... </k>  <c> 0 => 1 </c>
