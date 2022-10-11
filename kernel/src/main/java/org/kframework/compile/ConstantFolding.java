@@ -24,6 +24,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static org.kframework.Collections.*;
 import static org.kframework.kore.KORE.*;
@@ -113,14 +114,17 @@ public class ConstantFolding {
     }
   }
 
-  private K wrap(Object result, Sort sort) {
+  private K wrap(Object result, Sort sort, Module module) {
+    String resultHookName = module.sortAttributesFor().apply(sort.head()).getOptional(Att.HOOK()).orElse("");
+    boolean hasStringHook = resultHookName.equals("STRING.String") || resultHookName.equals("BYTES.Bytes");
+
     if (result instanceof Boolean) {
       return KToken(result.toString(), sort);
     } else if (result instanceof FloatBuiltin) {
       return KToken(((FloatBuiltin)result).value(), sort);
     } else if (result instanceof BigInteger) {
       return KToken(result.toString(), sort);
-    } else if (result instanceof String) {
+    } else if (result instanceof String && hasStringHook) {
       return KToken(StringUtil.enquoteKString((String)result), sort);
     } else {
       return KToken(result.toString(), sort);
@@ -141,7 +145,7 @@ public class ConstantFolding {
     try {
       Method m = ConstantFolding.class.getDeclaredMethod(renamedHook, paramTypes.toArray(new Class<?>[args.size()]));
       Object result = m.invoke(this, unwrappedArgs.toArray(new Object[args.size()]));
-      return wrap(result, resultSort);
+      return wrap(result, resultSort, module);
     } catch (IllegalAccessException e) {
       throw KEMException.internalError("Error invoking constant folding function", e);
     } catch (InvocationTargetException e) {
