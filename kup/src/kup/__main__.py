@@ -24,18 +24,34 @@ NIX_SUBSTITUTERS = [
 ]
 
 
-def nix(args: list[str], extra_flags: list[str] = NIX_SUBSTITUTERS) -> subprocess.CompletedProcess[bytes]:
-    return subprocess.run(
-        ['nix'] + args + ['--extra-experimental-features', 'nix-command flakes'] + extra_flags, stdout=subprocess.PIPE
-    )
+def nix_raw(args: list[str], extra_flags: list[str] = NIX_SUBSTITUTERS, gc_dont_gc: bool = True) -> bytes:
+    my_env = os.environ.copy()
+    if gc_dont_gc:
+        my_env["GC_DONT_GC"] = "1"
+    try:
+        output = subprocess.check_output(
+            ['nix'] + args + ['--extra-experimental-features', 'nix-command flakes'] + extra_flags, env=my_env
+        )
+    except subprocess.CalledProcessError as exc:
+        print('❗ \033[91mThe operation could not be completed. See above for the error output ...\033[0m')
+        sys.exit(exc.returncode)
+    else:
+        return output
 
 
 SYSTEM = (
-    nix(['eval', '--impure', '--expr', 'builtins.currentSystem'], extra_flags=[])
-    .stdout.decode('utf8')
+    nix_raw(['eval', '--impure', '--expr', 'builtins.currentSystem'], extra_flags=[])
+    .decode('utf8')
     .strip()
     .replace('"', '')
 )
+
+# nix tends to fail on macs with a segfault so we add `GC_DONT_GC=1` if on macOS (i.e. darwin)
+# The `GC_DONT_GC` simply disables the garbage collector used during evaluation of a nix
+# expression. This may cause the process to run out of memory, but hasn't been observed for our
+# derivations in practice, so should be ok to do.
+def nix(args: list[str], extra_flags: list[str] = NIX_SUBSTITUTERS) -> bytes:
+    return nix_raw(args, extra_flags, True if "darwin" in SYSTEM else False)
 
 
 class AvailablePackage:
@@ -51,7 +67,6 @@ available_packages: dict[str, AvailablePackage] = {
     'k': AvailablePackage('k', f'packages.{SYSTEM}.k'),
     'kevm': AvailablePackage('evm-semantics', f'packages.{SYSTEM}.kevm'),
     'kore-exec': AvailablePackage('haskell-backend', f'packages.{SYSTEM}.kore:exe:kore-exec'),
-    # 'ksummarize': AvailablePackage('ksummarize', f'packages.{SYSTEM}.ksummarize'),
 }
 
 
@@ -75,7 +90,7 @@ installed_packages: list[str] = []
 
 def check_package_version(p: AvailablePackage, current_url: str) -> str:
     result = nix(['flake', 'metadata', f'github:runtimeverification/{p.repo}', '--json'])
-    meta = json.loads(result.stdout)
+    meta = json.loads(result)
 
     if meta["url"] == current_url:
         return INSTALLED
@@ -193,12 +208,12 @@ def install_package(package_name: str, package_version: Optional[str]) -> None:
     reload_packages()
     if package_name not in available_packages.keys():
         print(
-            f'❗ The package \'\033[94m{package_name}\033[0m\' does not exist. Use \'\033[92mkup list\033[0m\' to see all the available packages.'
+            f'❗ \033[91mThe package \'\033[94m{package_name}\033[91m\' does not exist.\033[0m\nUse \'\033[92mkup list\033[0m\' to see all the available packages.'
         )
         return
     if package_name in installed_packages and not package_version:
         print(
-            f'❗ The package \'\033[94m{package_name}\033[0m\' is already installed. Use \'\033[92mkup update {package_name}\033[0m\' to update to the latest version.'
+            f'❗ The package \'\033[94m{package_name}\033[0m\' is already installed.\nUse \'\033[92mkup update {package_name}\033[0m\' to update to the latest version.'
         )
         return
     if package_name in installed_packages:
@@ -213,17 +228,17 @@ def update_package(package_name: str, package_version: Optional[str]) -> None:
     reload_packages()
     if package_name not in available_packages.keys():
         print(
-            f'❗ The package \'\033[94m{package_name}\033[0m\' does not exist. Use \'\033[92mkup list\033[0m\' to see all the available packages.'
+            f'❗ \033[91mThe package \'\033[94m{package_name}\033[91m\' does not exist.\033[0m\nUse \'\033[92mkup list\033[0m\' to see all the available packages.'
         )
         return
     if package_name not in installed_packages:
         print(
-            f'❗ The package \'\033[94m{package_name}\033[0m\' is not currently installed. Use \'\033[92mkup install {package_name}\033[0m\' to install the latest version.'
+            f'❗ The package \'\033[94m{package_name}\033[0m\' is not currently installed.\nUse \'\033[92mkup install {package_name}\033[0m\' to install the latest version.'
         )
         return
     package = packages[package_name]
     if package.status == INSTALLED and not package_version:
-        print(f'The package \'\033[94m{package_name}\033[0m\' is already up to date.')
+        print(f'The package \'\033[94m{package_name}\033[0m\' is up to date.')
         return
 
     update_or_install_package(package, package_version)
@@ -233,7 +248,7 @@ def remove_package(package_name: str) -> None:
     reload_packages()
     if package_name not in available_packages.keys():
         print(
-            f'❗ The package \'\033[94m{package_name}\033[0m\' does not exist. Use \'\033[92mkup list\033[0m\' to see all the available packages.'
+            f'❗ \033[91mThe package \'\033[94m{package_name}\033[91m\' does not exist.\033[0m\nUse \'\033[92mkup list\033[0m\' to see all the available packages.'
         )
         return
     if package_name not in installed_packages:
@@ -242,7 +257,7 @@ def remove_package(package_name: str) -> None:
 
     if package_name == "kup" and len(installed_packages) > 1:
         print(
-            '⚠️ You are about to remove \'\033[94mkup\033[0m\' with other K framework packages still installed. Are you sure you want to continue? [y/N]'
+            '⚠️ \033[93mYou are about to remove \'\033[94mkup\033[93m\' with other K framework packages still installed.\033[0m\nAre you sure you want to continue? [y/N]'
         )
 
         yes = {'yes', 'y', 'ye', ''}
@@ -251,11 +266,13 @@ def remove_package(package_name: str) -> None:
         choice = input().lower()
         if choice in no:
             return
-        if choice in yes:
+        elif choice in yes:
             pass
         else:
-            sys.stdout.write("Please respond with '[y]es' or '[n]o'")
-            remove_package(package_name)
+            sys.stdout.write("Please respond with '[y]es' or '[n]o'\n")
+            # in case the user selected a wrong opion we want to short-circuit and
+            # not try to remove kup twice
+            return remove_package(package_name)
     package = packages[package_name]
     nix(['profile', 'remove', str(package.index)])
 
@@ -295,7 +312,7 @@ def main() -> None:
         reload_packages()
         if args.package not in available_packages.keys():
             print(
-                f'❗ The package \'\033[94m{args.package}\033[0m\' does not exist. Use \'\033[92mkup list\033[0m\' to see all the available packages.'
+                f'❗ \033[91mThe package \'\033[94m{args.package}\033[91m\' does not exist.\033[0m\nUse \'\033[92mkup list\033[0m\' to see all the available packages.'
             )
             return
         temporary_package = available_packages[args.package]
