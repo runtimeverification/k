@@ -1,6 +1,10 @@
+import time
+from socket import AF_INET, SOCK_STREAM, socket
 from subprocess import Popen
-from typing import Any, ContextManager, Iterable
+from typing import Any, ContextManager, List
 from unittest import TestCase
+
+from pyk.krepl.server import DEFAULT_PORT
 
 
 class KReplProc(ContextManager['KReplProc']):
@@ -25,12 +29,33 @@ class KReplProc(ContextManager['KReplProc']):
 
 
 class KReplTest(TestCase):
-    KREPL_ARGS: Iterable[str] = ()
+    KREPL_PORT: int = DEFAULT_PORT
+    KREPL_LOGLEVEL: str = 'error'
 
     _server: KReplProc
 
     def setUp(self) -> None:
-        self._server = KReplProc(*self.KREPL_ARGS)
+        args: List[str] = []
+        args += ['--port', str(self.KREPL_PORT)]
+        args += ['--loglevel', self.KREPL_LOGLEVEL]
+
+        self._server = KReplProc(*args)
+        self._wait_for_port()
 
     def tearDown(self) -> None:
         self._server.close()
+
+    def _wait_for_port(self) -> None:
+        while not self._port_is_open():
+            time.sleep(0.1)
+
+    def _port_is_open(self) -> bool:
+        sock = socket(AF_INET, SOCK_STREAM)
+        try:
+            sock.connect(('localhost', self.KREPL_PORT))
+        except BaseException:
+            return False
+        else:
+            return True
+        finally:
+            sock.close()
