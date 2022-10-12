@@ -131,21 +131,21 @@ class CFGManager:
         return {
             # Used by KIT
             # -----------
-            "specificationFile": str(self.spec_file),
+            'specificationFile': str(self.spec_file),
             # Used by KSummarize
             # ------------------
-            "verificationFile": str(self.main_file) if self.main_file else None,
-            "strategy_name": self.strategy_name,
+            'verificationFile': str(self.main_file) if self.main_file else None,
+            'strategy_name': self.strategy_name,
             # Used by the web interface
             # -------------------------
             # TODO: These should be managed by the web interface, though we
             # should allow reading/writing this file without modifying these fields.
-            "summaryName": self.summary_name,
-            "id": self.summary_name.replace('/', '-'),
-            "summaryDirectory": str(self.summary_dir),  # TODO: Is this really needed?
-            "states": [],
-            "runningProcesses": 0,
-            "totalProcesses": 0,
+            'summaryName': self.summary_name,
+            'id': self.summary_name.replace('/', '-'),
+            'summaryDirectory': str(self.summary_dir),  # TODO: Is this really needed?
+            'states': [],
+            'runningProcesses': 0,
+            'totalProcesses': 0,
         }
 
     def empty_cfg(self) -> KCFG:
