@@ -192,7 +192,7 @@ def is_hash(x: Any) -> bool:
 def shorten_hash(h: str, left_chars: int = 6, right_chars: int = 6) -> str:
     left = h[0:left_chars] if left_chars > 0 else ''
     right = h[-right_chars:] if right_chars > 0 else ''
-    return left + ".." + right
+    return left + '..' + right
 
 
 def shorten_hashes(value: Any, left_chars: int = 6, right_chars: int = 6) -> Any:
