@@ -39,7 +39,7 @@ runs:
       DISTRO: ${{ inputs.distro }}
     if: always()
     run: |
-      docker stop k-package-build-${DISTRO} || true
+      docker stop -t 0 k-package-build-${DISTRO} || true
       docker container rm -f k-package-build-${DISTRO} || true
   - name: 'Set up Docker Test Image: ${{ inputs.distro }}'
     shell: bash {0}
@@ -72,7 +72,7 @@ runs:
       DISTRO: ${{ inputs.distro }}
     if: always()
     run: |
-      docker stop k-package-test-${DISTRO} || true
+      docker stop -t 0 k-package-test-${DISTRO} || true
       docker container rm -f k-package-test-${DISTRO} || true
   - name: 'Rename Package'
     shell: bash {0}
