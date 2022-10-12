@@ -104,7 +104,7 @@ jobs:
       - name: 'Tear down Docker'
         if: always()
         run: |
-          docker stop k-ci || true
+          docker stop -t 0 k-ci || true
           docker container rm -f k-ci || true
 
   test-package-ubuntu-jammy:
