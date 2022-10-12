@@ -3,6 +3,8 @@ package org.kframework.kil;
 
 import org.kframework.kore.Sort;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -63,13 +65,15 @@ public class Module extends DefinitionItem {
      * This allows for scripts to move files around after compilation but still give error messages
      * if the contents of modules differ.
      */
-    public long digest() {
-        StringBuilder mod = new StringBuilder();
-        toString(mod);
-        long hash = 7;
-        for (int i = 0; i < mod.length(); i++) {
-            hash = hash * 31 + mod.charAt(i);
+    public String digest() {
+        try {
+            StringBuilder mod = new StringBuilder();
+            toString(mod);
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+            messageDigest.update(mod.toString().getBytes());
+            return new String(messageDigest.digest());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
-        return hash;
     }
 }

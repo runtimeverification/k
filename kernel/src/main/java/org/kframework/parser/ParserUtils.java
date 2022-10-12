@@ -202,11 +202,11 @@ public class ParserUtils {
 
         new CollectProductionsVisitor(kore, context).visit(def);
 
-        // Tuple3 of moduleName, Source, Location, digest
-        Map<String, List<Tuple4<String, Source, Location, Long>>> groupedModules =
+        // Tuple4 of moduleName, Source, Location, digest
+        Map<String, List<Tuple4<String, Source, Location, String>>> groupedModules =
                 Streams.concat(
                         previousModules.stream().map(m -> Tuple4.apply(m.name(), m.att().get(Att.SOURCE(), Source.class),
-                                m.att().get(Att.LOCATION(), Location.class), Long.valueOf(m.att().get(Att.DIGEST())))),
+                                m.att().get(Att.LOCATION(), Location.class), m.att().get(Att.DIGEST()))),
                         kilModules.stream().map(m -> Tuple4.apply(m.getName(), m.getSource(), m.getLocation(), m.digest())))
                 // make sure we have unique modules (double requires), and preserve order
                 .collect(Collectors.toCollection(LinkedHashSet::new)).stream()
@@ -220,8 +220,8 @@ public class ParserUtils {
 
         int errors = 0;
         for (String moduleName : duplicateModules) {
-          Tuple4<String, Source, Location, Long> firstMod = groupedModules.get(moduleName).get(0);
-          Tuple4<String, Source, Location, Long> secondMod = groupedModules.get(moduleName).get(1);
+          Tuple4<String, Source, Location, String> firstMod = groupedModules.get(moduleName).get(0);
+          Tuple4<String, Source, Location, String> secondMod = groupedModules.get(moduleName).get(1);
           KEMException ex = KEMException.outerParserError("Module " + moduleName + " differs from previous declaration at "
                   + firstMod._2() + " and " + firstMod._3(), secondMod._2(), secondMod._3());
           // give an error message only if we have
