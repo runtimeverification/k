@@ -219,7 +219,7 @@
         <executions>
           <execution>
             <id>get-git-revision</id>
-            <phase>compile</phase>
+            <phase>package</phase>
             <configuration>
               <exportAntProperties>true</exportAntProperties>
               <target>
