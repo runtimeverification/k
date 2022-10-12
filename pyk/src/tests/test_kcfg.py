@@ -337,39 +337,39 @@ class KCFGTestCase(TestCase):
         actual = '\n'.join(cfg.pretty(MockKPrint())) + '\n'
         self.assertMultiLineEqual(
             actual,
-            f"{_short_hash(0)} (init, expanded)\n"
-            f"│  (1 step)\n"
-            f"├  {_short_hash(1)} (expanded)\n"
-            f"│  \033[1m\33[32m(verified)\033[0m\033[0m\n"
-            f"│  (5 steps)\n"
-            f"├  {_short_hash(2)} (expanded)\n"
-            f"│  (1 step)\n"
-            f"├  {_short_hash(3)} (expanded, @bar, @foo)\n"
-            f"┣━ {_short_hash(4)} (expanded)    _==K_ ( x , 4 )\n"
-            f"┃   │  (1 step)\n"
-            f"┃   ├  {_short_hash(5)} (expanded)\n"
-            f"┃   │  (1 step)\n"
-            f"┃   ├  {_short_hash(2)} (expanded)\n"
-            f"┃   ┊ (looped back)\n"
-            f"┃\n"
-            f"┣━ {_short_hash(5)} (expanded)    _==K_ ( x , 5 )\n"
-            f"┃   ┊ (continues as previously)\n"
-            f"┃\n"
-            f"┣━ {_short_hash(6)} (target, leaf)    _==K_ ( x , 6 )\n"
-            f"┃\n"
-            f"┣━ {_short_hash(7)} (expanded)    _==K_ ( x , 7 )\n"
-            f"┃   │  (1 step)\n"
-            f"┃   └  {_short_hash(6)} (target, leaf)\n"
-            f"┃\n"
-            f"┗━ {_short_hash(11)} (expanded)    _==K_ ( x , 11 )\n"
-            f"    │  (1 step)\n"
-            f"    ├  {_short_hash(8)} (leaf)\n"
-            f"    ┊  constraint: true\n"
-            f"    ┊  subst:\n"
-            f"    ┊    V11 |-> 8\n"
-            f"    └╌ {_short_hash(11)} (expanded)\n"
-            f"        ┊ (looped back)\n"
-            f"\n"
-            f"\033[1m{_short_hash(10)} (frontier, leaf)\033[0m\n"
-            f"\033[1m{_short_hash(9)} (frontier, leaf)\033[0m\n",
+            f'{_short_hash(0)} (init, expanded)\n'
+            f'│  (1 step)\n'
+            f'├  {_short_hash(1)} (expanded)\n'
+            f'│  \033[1m\33[32m(verified)\033[0m\033[0m\n'
+            f'│  (5 steps)\n'
+            f'├  {_short_hash(2)} (expanded)\n'
+            f'│  (1 step)\n'
+            f'├  {_short_hash(3)} (expanded, @bar, @foo)\n'
+            f'┣━ {_short_hash(4)} (expanded)    _==K_ ( x , 4 )\n'
+            f'┃   │  (1 step)\n'
+            f'┃   ├  {_short_hash(5)} (expanded)\n'
+            f'┃   │  (1 step)\n'
+            f'┃   ├  {_short_hash(2)} (expanded)\n'
+            f'┃   ┊ (looped back)\n'
+            f'┃\n'
+            f'┣━ {_short_hash(5)} (expanded)    _==K_ ( x , 5 )\n'
+            f'┃   ┊ (continues as previously)\n'
+            f'┃\n'
+            f'┣━ {_short_hash(6)} (target, leaf)    _==K_ ( x , 6 )\n'
+            f'┃\n'
+            f'┣━ {_short_hash(7)} (expanded)    _==K_ ( x , 7 )\n'
+            f'┃   │  (1 step)\n'
+            f'┃   └  {_short_hash(6)} (target, leaf)\n'
+            f'┃\n'
+            f'┗━ {_short_hash(11)} (expanded)    _==K_ ( x , 11 )\n'
+            f'    │  (1 step)\n'
+            f'    ├  {_short_hash(8)} (leaf)\n'
+            f'    ┊  constraint: true\n'
+            f'    ┊  subst:\n'
+            f'    ┊    V11 |-> 8\n'
+            f'    └╌ {_short_hash(11)} (expanded)\n'
+            f'        ┊ (looped back)\n'
+            f'\n'
+            f'\033[1m{_short_hash(10)} (frontier, leaf)\033[0m\n'
+            f'\033[1m{_short_hash(9)} (frontier, leaf)\033[0m\n',
         )

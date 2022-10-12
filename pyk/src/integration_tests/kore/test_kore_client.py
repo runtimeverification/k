@@ -18,7 +18,7 @@ from .kore_client_test import KoreClientTest
 
 def term(n: int) -> Pattern:
     template = Template(
-        r'''
+        r"""
         Lbl'-LT-'generatedTop'-GT-'{}(
             Lbl'-LT-'k'-GT-'{}(
                 kseq{}(
@@ -30,7 +30,7 @@ def term(n: int) -> Pattern:
             ),
             GCC:SortGeneratedCounterCell{}
         )
-        '''
+        """
     )
     parser = KoreParser(template.substitute(n=n))
     pattern = parser.pattern()
