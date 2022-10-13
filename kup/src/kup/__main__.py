@@ -54,6 +54,14 @@ def nix(args: list[str], extra_flags: list[str] = NIX_SUBSTITUTERS) -> bytes:
     return nix_raw(args, extra_flags, True if "darwin" in SYSTEM else False)
 
 
+def nix_detach(args: list[str], extra_flags: list[str] = NIX_SUBSTITUTERS) -> None:
+    my_env = os.environ.copy()
+    if "darwin" in SYSTEM:
+        my_env["GC_DONT_GC"] = "1"
+    nix = subprocess.check_output(['which', 'nix']).decode('utf8').strip()
+    os.execve(nix, [nix] + args + ['--extra-experimental-features', 'nix-command flakes'] + extra_flags, my_env)
+
+
 class AvailablePackage:
     __slots__ = ["repo", "package"]
 
@@ -320,7 +328,9 @@ def main() -> None:
             return
         temporary_package = available_packages[args.package]
         version = '/' + args.version if args.version else ''
-        nix(['shell', f'github:runtimeverification/{temporary_package.repo}{version}#{temporary_package.package}'])
+        nix_detach(
+            ['shell', f'github:runtimeverification/{temporary_package.repo}{version}#{temporary_package.package}']
+        )
 
 
 if __name__ == '__main__':
