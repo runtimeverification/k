@@ -4,6 +4,7 @@ from subprocess import Popen
 from typing import Any, ContextManager, List
 from unittest import TestCase
 
+from pyk.krepl.client import KReplClient
 from pyk.krepl.server import DEFAULT_PORT
 
 
@@ -33,6 +34,7 @@ class KReplTest(TestCase):
     KREPL_LOGLEVEL: str = 'error'
 
     _server: KReplProc
+    client: KReplClient
 
     def setUp(self) -> None:
         args: List[str] = []
@@ -41,6 +43,7 @@ class KReplTest(TestCase):
 
         self._server = KReplProc(*args)
         self._wait_for_port()
+        self.client = KReplClient(self.KREPL_PORT)
 
     def tearDown(self) -> None:
         self._server.close()

@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyk"
-version = "0.1.20"
+version = "0.1.21"
 description = ""
 authors = [
     "Runtime Verification, Inc. <contact@runtimeverification.com>",
@@ -28,6 +28,7 @@ pep8-naming = "*"
 
 [tool.poetry.scripts]
 pyk = "pyk.__main__:main"
+krepl-client = "pyk.krepl.client.__main__:main"
 krepl-server = "pyk.krepl.server.__main__:main"
 "kit.py" = "pyk.ktool.kit:main"
 

@@ -1,7 +1,5 @@
 import os
 
-from pyk.krepl.rpc.client import JsonRpcClient
-
 from .utils import KReplTest
 
 
@@ -16,14 +14,10 @@ class KReplPidTest(KReplTest):
             raise AssertionError(f'Process with PID {pid} does not exist') from None
 
 
-class KReplRpcTest(KReplTest):
-    def test_request(self) -> None:
-        # Given
-        client = JsonRpcClient(self.KREPL_PORT)
-        msg = 'Hello, World!'
-
+class KReplRequestTest(KReplTest):
+    def test_step_to_branch(self) -> None:
         # When
-        response = client.echo(msg)
+        response = self.client.step_to_branch()
 
         # Then
-        self.assertEqual(response, msg)
+        self.assertEqual(response, '')
