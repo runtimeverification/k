@@ -23,10 +23,12 @@ VERSION_TAG=$(git describe --contains --always "$MERGE_BASE" | sed 's/~.*//')
 VERSION_STRING=$VERSION_TAG
 
 DISTANCE=$(git rev-list --count "$MERGE_BASE"..HEAD)
-VERSION_STRING+="-$DISTANCE"
+if [[ $DISTANCE -ne 0 ]]; then
+  VERSION_STRING+="-$DISTANCE"
 
-SHA=$(git rev-parse --short HEAD)
-VERSION_STRING+="-g$SHA"
+  SHA=$(git rev-parse --short HEAD)
+  VERSION_STRING+="-g$SHA"
+fi
 
 DIRTY=$(git diff HEAD)
 if [ -n "$DIRTY" ]; then

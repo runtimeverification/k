@@ -7,5 +7,5 @@ if [ -z "$GIT_REVISION" ]; then
   exit 0
 fi
 
-VERSION_REGEX='v\d+\.\d+\.\d+-\d+-g[0-9a-z]+(-dirty)?$'
+VERSION_REGEX='v\d+\.\d+\.\d+(-0-shouldFail|-[1-9]+-g[0-9a-z]+)?(-dirty)?$'
 echo "$GIT_REVISION" | grep -Pq "$VERSION_REGEX"
