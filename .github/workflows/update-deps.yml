@@ -11,33 +11,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+
   nix-flake-submodule-sync:
     name: 'Nix flake submodule sync'
     runs-on: ubuntu-latest
     steps:
-      - id: config
-        run: |
-          ref=${{ github.ref }}
-          if [ "${{ github.event_name }}" == 'pull_request' ]; then
-            ref="${{ github.event.pull_request.head.sha }}"
-          fi
-          ref="${ref#refs/heads/}"
-          echo "::set-output name=ref::$ref"
-          git config --global user.name github-actions
-          git config --global user.email github-actions@github.com
-          
-      - name: Check out code
+      - name: 'Check out code, set up Git'
         uses: actions/checkout@v3
-        env:
-          token: ${{ secrets.JENKINS_GITHUB_PAT }}
         with:
-          ref: ${{ steps.config.outputs.ref }}
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
           submodules: recursive
+      - run: |
+          git config --global user.name rv-jenkins
+          git config --global user.email devops@runtimeverification.com
 
       - name: 'Install Nix'
         uses: cachix/install-nix-action@v15
         with:
           extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
             substituters = http://cache.nixos.org https://cache.iog.io
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
 
@@ -48,12 +40,9 @@ jobs:
           extraPullNames: kore
           signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
 
-
-      - name: Update Nix flake inputs from submodules
+      - name: 'Update Nix flake inputs from submodules'
         run: |
-          if ! GC_DONT_GC=1 nix run .#check-submodules ; then
-            GC_DONT_GC=1 nix run .#update-from-submodules
-            git add 'flake.lock'
-            git commit -m 'Sync flake inputs to submodules'
+          GC_DONT_GC=1 nix run .#update-from-submodules
+          if git add 'flake.lock' && git commit -m 'Sync flake inputs to submodules'; then
             git push
           fi
