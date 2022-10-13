@@ -81,7 +81,7 @@ If you install this list of dependencies, continue directly to the [Build and In
 On macOS using [Homebrew](https://brew.sh/):
 ```shell
 git submodule update --init --recursive
-brew install bison boost cmake flex gcc gmp openjdk jemalloc libyaml llvm make maven mpfr pkg-config python stack zlib z3
+brew install bison boost cmake flex gcc gmp openjdk jemalloc libyaml llvm@14 make maven mpfr pkg-config python stack zlib z3
 ```
 
 ## The Long Version
@@ -136,6 +136,9 @@ See the notes below.
     *   macOS/brew: Since LLVM is distributed as a keg-only package, we must
         explicitly make it available for command line usage. See the results
         of the `brew info llvm` command for more information on how to do this.
+        Additionally, the default version of LLVM supplied by Homebrew is newer
+        than the version supported by K. The formula `llvm@14` should be used
+        instead of `llvm`.
 
 3.  Flex / Bison
 
