@@ -64,7 +64,11 @@ jobs:
           docker exec -t k-package-docker-test-jammy bash -c 'cd ~ && kompile test.k --backend llvm'
           docker exec -t k-package-docker-test-jammy bash -c 'cd ~ && kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
-          dockert stop -t 0 k-package-docker-test-jammy
+      - name: 'Clean up Docker Container'
+        if: always()
+        run: |
+          docker stop -t 0 k-package-docker-test-jammy || true
+          docker rm -f k-package-docker-test-jammy || true 
 
   ubuntu-focal:
     name: 'K Ubuntu Focal Package'
@@ -100,7 +104,11 @@ jobs:
           docker exec -t k-package-docker-test-focal bash -c 'cd ~ && kompile test.k --backend llvm'
           docker exec -t k-package-docker-test-focal bash -c 'cd ~ && kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
-          dockert stop -t 0 k-package-docker-test-focal
+      - name: 'Clean up Docker Container'
+        if: always()
+        run: |
+          docker stop -t 0 k-package-docker-test-focal || true
+          docker rm -f k-package-docker-test-focal || true 
 
   macos-build:
     name: 'Build MacOS Package'
