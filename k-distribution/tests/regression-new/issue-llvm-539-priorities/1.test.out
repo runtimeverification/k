@@ -1,0 +1,22 @@
+<generatedTop>
+  <cells>
+    <cell>
+      <id>
+        0
+      </id>
+      <k>
+        buzz ~> .
+      </k>
+    </cell> <cell>
+      <id>
+        1
+      </id>
+      <k>
+        buzz ~> .
+      </k>
+    </cell>
+  </cells>
+  <order>
+    ListItem ( bar ) ~> ListItem ( foo ) ~> .
+  </order>
+</generatedTop>
