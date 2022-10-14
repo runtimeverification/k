@@ -99,6 +99,10 @@ jobs:
           docker exec -t k-package-docker-test-focal bash -c 'cd ~ && kompile test.k --backend llvm'
           docker exec -t k-package-docker-test-focal bash -c 'cd ~ && kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
+      - name: Clean up Docker Container
+        if: always()
+        run: |
+          docker stop -t 0 k-package-docker-test-jammy 
 
   macos-build:
     name: 'Build MacOS Package'
