@@ -222,8 +222,6 @@ public class ParserUtils {
         for (String moduleName : duplicateModules) {
           Tuple4<String, Source, Location, String> firstMod = groupedModules.get(moduleName).get(0);
           Tuple4<String, Source, Location, String> secondMod = groupedModules.get(moduleName).get(1);
-          KEMException ex = KEMException.outerParserError("Module " + moduleName + " differs from previous declaration at "
-                  + firstMod._2() + " and " + firstMod._3(), secondMod._2(), secondMod._3());
           // give an error message only if we have
           // the same module name found in different filenames (path doesn't matter)
           // the location is different or
@@ -231,6 +229,8 @@ public class ParserUtils {
           if (!Paths.get(firstMod._2().source()).getFileName().equals(Paths.get(secondMod._2().source()).getFileName())
             || !firstMod._3().equals(secondMod._3())
             || !firstMod._4().equals(secondMod._4())) {
+              KEMException ex = KEMException.outerParserError("Module " + moduleName + " differs from previous declaration at "
+                      + firstMod._2() + " and " + firstMod._3(), secondMod._2(), secondMod._3());
               errors++;
               kem.addKException(ex.getKException());
           }
