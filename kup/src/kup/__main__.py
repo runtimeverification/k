@@ -54,6 +54,14 @@ def nix(args: list[str], extra_flags: list[str] = NIX_SUBSTITUTERS) -> bytes:
     return nix_raw(args, extra_flags, True if "darwin" in SYSTEM else False)
 
 
+def nix_detach(args: list[str], extra_flags: list[str] = NIX_SUBSTITUTERS) -> None:
+    my_env = os.environ.copy()
+    if "darwin" in SYSTEM:
+        my_env["GC_DONT_GC"] = "1"
+    nix = subprocess.check_output(['which', 'nix']).decode('utf8').strip()
+    os.execve(nix, [nix] + args + ['--extra-experimental-features', 'nix-command flakes'] + extra_flags, my_env)
+
+
 class AvailablePackage:
     __slots__ = ["repo", "package"]
 
@@ -100,36 +108,39 @@ def check_package_version(p: AvailablePackage, current_url: str) -> str:
 
 def reload_packages() -> None:
     global packages, installed_packages
-    packages = {}
-    installed_packages = []
-    with open(f'{os.getenv("HOME")}/.nix-profile/manifest.json') as manifest_file:
+
+    if os.path.exists(f'{os.getenv("HOME")}/.nix-profile/manifest.json'):
+        manifest_file = open(f'{os.getenv("HOME")}/.nix-profile/manifest.json')
         manifest = json.loads(manifest_file.read())['elements']
-        available_packages_lookup = {p.package: (key, p) for key, p in available_packages.items()}
+        manifest_file.close()
+    else:
+        manifest = []
 
-        for idx, m in enumerate(manifest):
-            if 'attrPath' in m and m['attrPath'] in available_packages_lookup:
-                (name, available_package) = available_packages_lookup[m['attrPath']]
-                if 'originalUrl' in m and m['originalUrl'].startswith(
-                    f'github:runtimeverification/{available_package.repo}'
-                ):
-                    version = m['url'].removeprefix(f'github:runtimeverification/{available_package.repo}/')
-                    status = check_package_version(available_package, m['url'])
-                    immutable = (
-                        len(m['originalUrl'].removeprefix(f'github:runtimeverification/{available_package.repo}')) > 1
-                    )
-                    packages[name] = ConcretePackage(
-                        available_package.repo, available_package.package, status, version, immutable, idx
-                    )
-                else:
-                    packages[name] = ConcretePackage(
-                        available_package.repo, available_package.package, LOCAL, index=idx
-                    )
+    packages = {}
+    available_packages_lookup = {p.package: (key, p) for key, p in available_packages.items()}
 
-        installed_packages = list(packages.keys())
-        for p in available_packages:
-            if p not in installed_packages:
-                package = available_packages[p]
-                packages[p] = ConcretePackage(package.repo, package.package, AVAILABLE, '')
+    for idx, m in enumerate(manifest):
+        if 'attrPath' in m and m['attrPath'] in available_packages_lookup:
+            (name, available_package) = available_packages_lookup[m['attrPath']]
+            if 'originalUrl' in m and m['originalUrl'].startswith(
+                f'github:runtimeverification/{available_package.repo}'
+            ):
+                version = m['url'].removeprefix(f'github:runtimeverification/{available_package.repo}/')
+                status = check_package_version(available_package, m['url'])
+                immutable = (
+                    len(m['originalUrl'].removeprefix(f'github:runtimeverification/{available_package.repo}')) > 1
+                )
+                packages[name] = ConcretePackage(
+                    available_package.repo, available_package.package, status, version, immutable, idx
+                )
+            else:
+                packages[name] = ConcretePackage(available_package.repo, available_package.package, LOCAL, index=idx)
+
+    installed_packages = list(packages.keys())
+    for pkg_name in available_packages:
+        if pkg_name not in installed_packages:
+            available_package = available_packages[pkg_name]
+            packages[pkg_name] = ConcretePackage(available_package.repo, available_package.package, AVAILABLE, '')
 
 
 class PackageVersion:
@@ -317,7 +328,9 @@ def main() -> None:
             return
         temporary_package = available_packages[args.package]
         version = '/' + args.version if args.version else ''
-        nix(['shell', f'github:runtimeverification/{temporary_package.repo}{version}#{temporary_package.package}'])
+        nix_detach(
+            ['shell', f'github:runtimeverification/{temporary_package.repo}{version}#{temporary_package.package}']
+        )
 
 
 if __name__ == '__main__':
