@@ -113,7 +113,7 @@ public class LLVMBackend extends KoreBackend {
         Stopwatch sw = new Stopwatch(globalOptions);
         ProcessBuilder pb = files.getProcessBuilder();
         List<String> args = new ArrayList<>();
-        args.add("llvm-kompilex");
+        args.add("llvm-kompile");
         args.add("definition.kore");
         args.add("dt");
         args.add(type);
@@ -137,10 +137,10 @@ public class LLVMBackend extends KoreBackend {
             Process p = pb.command(args).directory(kompiledDir).inheritIO().start();
             int exit = p.waitFor();
             if (exit != 0) {
-                throw KEMException.criticalError("llvm-kompilex returned nonzero exit code: " + exit + "\nExamine output to see errors.");
+                throw KEMException.criticalError("llvm-kompile returned nonzero exit code: " + exit + "\nExamine output to see errors.");
             }
         } catch (IOException | InterruptedException e) {
-            throw KEMException.criticalError("Error with I/O while executing llvm-kompilex", e);
+            throw KEMException.criticalError("Error with I/O while executing llvm-kompile", e);
         }
         sw.printIntermediate("  \u2514" + executable + ": " + type);
     }

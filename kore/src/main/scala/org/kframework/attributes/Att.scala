@@ -138,6 +138,7 @@ object Att {
   val REFERS_RESTORE_CONFIGURATION = "refers_RESTORE_CONFIGURATION"
   val TOP_RULE = "topRule"
   val ORIGINAL_PRD = "originalPrd"
+  val DIGEST = "digest"
   val RECORD_PRD = "recordPrd"
   val SOURCE = "org.kframework.attributes.Source"
   val LOCATION = "org.kframework.attributes.Location"
