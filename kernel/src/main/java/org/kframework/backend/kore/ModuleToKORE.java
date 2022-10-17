@@ -305,7 +305,7 @@ public class ModuleToKORE {
         semantics.append("\n// priority groups\n");
         genPriorityGroups(priorityList, priorityToPreviousGroup, priorityToAlias, topCellSortStr, semantics);
         semantics.append("endmodule ");
-        convert(attributes, module.att(), semantics, null, null);
+        convert(attributes, module.att().remove(Att.DIGEST()), semantics, null, null);
         semantics.append("\n");
     }
 
@@ -876,7 +876,7 @@ public class ModuleToKORE {
             }
         }
         sb.append("endmodule ");
-        convert(consideredAttributes, spec.att(), sb, null, null);
+        convert(consideredAttributes, spec.att().remove(Att.DIGEST()), sb, null, null);
         sb.append("\n");
         return sb.toString();
     }
