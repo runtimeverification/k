@@ -78,7 +78,7 @@ jobs:
         uses: ./.github/actions/test-package
         with:
           distro: focal
-          llvm: 14
+          llvm: 12
       - uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
