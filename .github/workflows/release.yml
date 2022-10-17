@@ -67,7 +67,7 @@ jobs:
       - name: 'Clean up Docker Container'
         if: always()
         run: |
-          docker stop -t 0 k-package-docker-test-jammy
+          docker stop --time=0 k-package-docker-test-jammy
 
   ubuntu-focal:
     name: 'K Ubuntu Focal Package'
