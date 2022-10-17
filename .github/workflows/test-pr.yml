@@ -104,9 +104,8 @@ jobs:
       - name: 'Tear down Docker'
         if: always()
         run: |
-          docker exec -t k-ci /bin/bash -c 'k-distribution/target/release/k/bin/stop-kserver' || true
-          docker stop k-ci || true
-          docker container rm k-ci || true
+          docker stop --time=0 k-ci
+          docker container rm --force k-ci || true
 
   test-package-ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
