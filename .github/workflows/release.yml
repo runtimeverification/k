@@ -35,7 +35,7 @@ jobs:
     runs-on: [self-hosted, linux, normal]
     steps:
       - uses: actions/checkout@v3
-      - name: 'Build and Test'
+      - name: 'Build and Test Package'
         uses: ./.github/actions/test-package
         with:
           distro: jammy
@@ -48,7 +48,7 @@ jobs:
           asset_name: 'K Framework Ubuntu Jammy (22.04) Deb'
           asset_path: kframework_amd64_jammy.deb
           upload_url: ${{ github.event.release.upload_url }}
-      - name: 'Test and Push up Docker Image'
+      - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
         env:
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -74,7 +74,7 @@ jobs:
     runs-on: [self-hosted, linux, normal]
     steps:
       - uses: actions/checkout@v3
-      - name: 'Build and Test'
+      - name: 'Build and Test Package'
         uses: ./.github/actions/test-package
         with:
           distro: focal
@@ -87,7 +87,7 @@ jobs:
           asset_name: 'K Framework Ubuntu Focal (20.04) Deb'
           asset_path: kframework_amd64_focal.deb
           upload_url: ${{ github.event.release.upload_url }}
-      - name: 'Test and Push up Docker Image'
+      - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
         env:
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
