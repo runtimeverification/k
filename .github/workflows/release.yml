@@ -106,7 +106,7 @@ jobs:
       - name: Clean up Docker Container
         if: always()
         run: |
-          docker stop -t 0 k-package-docker-test-focal
+          docker stop --time=0 k-package-docker-test-focal
 
   macos-build:
     name: 'Build MacOS Package'
