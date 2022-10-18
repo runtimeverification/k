@@ -2946,6 +2946,7 @@ interested readers:
 |----------------| ---- | ------- |---------------------------------------------------------------------------------------|
 | `assoc`        | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
 | `comm`         | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
+| `digest`       | mod  | all     | Contains the hash of the textual contents of the module.                              |
 | `idem`         | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
 | `unit`         | prod | all     | [`assoc`, `comm`, `idem` and `unit` attributes](#assoc-comm-idem-and-unit-attributes) |
 | `userList`     | prod | all     | Identifies the desugared form of `Lst ::= List{Elm,"delim"}`                          |

@@ -12,7 +12,7 @@ from terminaltables import SingleTable  # type: ignore
 INSTALLED = "🟢 \033[92minstalled\033[0m"
 AVAILABLE = "🔵 \033[94mavailable\033[0m"
 UPDATE = "🟠 \033[93mnewer version available\033[0m"
-LOCAL = "\033[3mnot managed by kup\033[0m"
+LOCAL = "\033[3mlocal checkout\033[0m"
 
 NIX_SUBSTITUTERS = [
     '--option',
@@ -52,6 +52,14 @@ SYSTEM = (
 # derivations in practice, so should be ok to do.
 def nix(args: list[str], extra_flags: list[str] = NIX_SUBSTITUTERS) -> bytes:
     return nix_raw(args, extra_flags, True if "darwin" in SYSTEM else False)
+
+
+def nix_detach(args: list[str], extra_flags: list[str] = NIX_SUBSTITUTERS) -> None:
+    my_env = os.environ.copy()
+    if "darwin" in SYSTEM:
+        my_env["GC_DONT_GC"] = "1"
+    nix = subprocess.check_output(['which', 'nix']).decode('utf8').strip()
+    os.execve(nix, [nix] + args + ['--extra-experimental-features', 'nix-command flakes'] + extra_flags, my_env)
 
 
 class AvailablePackage:
@@ -100,36 +108,39 @@ def check_package_version(p: AvailablePackage, current_url: str) -> str:
 
 def reload_packages() -> None:
     global packages, installed_packages
-    packages = {}
-    installed_packages = []
-    with open(f'{os.getenv("HOME")}/.nix-profile/manifest.json') as manifest_file:
+
+    if os.path.exists(f'{os.getenv("HOME")}/.nix-profile/manifest.json'):
+        manifest_file = open(f'{os.getenv("HOME")}/.nix-profile/manifest.json')
         manifest = json.loads(manifest_file.read())['elements']
-        available_packages_lookup = {p.package: (key, p) for key, p in available_packages.items()}
+        manifest_file.close()
+    else:
+        manifest = []
 
-        for idx, m in enumerate(manifest):
-            if 'attrPath' in m and m['attrPath'] in available_packages_lookup:
-                (name, available_package) = available_packages_lookup[m['attrPath']]
-                if 'originalUrl' in m and m['originalUrl'].startswith(
-                    f'github:runtimeverification/{available_package.repo}'
-                ):
-                    version = m['url'].removeprefix(f'github:runtimeverification/{available_package.repo}/')
-                    status = check_package_version(available_package, m['url'])
-                    immutable = (
-                        len(m['originalUrl'].removeprefix(f'github:runtimeverification/{available_package.repo}')) > 1
-                    )
-                    packages[name] = ConcretePackage(
-                        available_package.repo, available_package.package, status, version, immutable, idx
-                    )
-                else:
-                    packages[name] = ConcretePackage(
-                        available_package.repo, available_package.package, LOCAL, index=idx
-                    )
+    packages = {}
+    available_packages_lookup = {p.package: (key, p) for key, p in available_packages.items()}
 
-        installed_packages = list(packages.keys())
-        for p in available_packages:
-            if p not in installed_packages:
-                package = available_packages[p]
-                packages[p] = ConcretePackage(package.repo, package.package, AVAILABLE, '')
+    for idx, m in enumerate(manifest):
+        if 'attrPath' in m and m['attrPath'] in available_packages_lookup:
+            (name, available_package) = available_packages_lookup[m['attrPath']]
+            if 'originalUrl' in m and m['originalUrl'].startswith(
+                f'github:runtimeverification/{available_package.repo}'
+            ):
+                version = m['url'].removeprefix(f'github:runtimeverification/{available_package.repo}/')
+                status = check_package_version(available_package, m['url'])
+                immutable = (
+                    len(m['originalUrl'].removeprefix(f'github:runtimeverification/{available_package.repo}')) > 1
+                )
+                packages[name] = ConcretePackage(
+                    available_package.repo, available_package.package, status, version, immutable, idx
+                )
+            else:
+                packages[name] = ConcretePackage(available_package.repo, available_package.package, LOCAL, index=idx)
+
+    installed_packages = list(packages.keys())
+    for pkg_name in available_packages:
+        if pkg_name not in installed_packages:
+            available_package = available_packages[pkg_name]
+            packages[pkg_name] = ConcretePackage(available_package.repo, available_package.package, AVAILABLE, '')
 
 
 class PackageVersion:
@@ -192,39 +203,42 @@ def list_package(package_name: str) -> None:
         print(table.table)
 
 
-def update_or_install_package(package: Union[AvailablePackage, ConcretePackage], version: Optional[str]) -> None:
+def update_or_install_package(
+    package: Union[AvailablePackage, ConcretePackage], version: Optional[str], local_path: Optional[str]
+) -> None:
     version = '/' + version if version else ''
+    path = f'github:runtimeverification/{package.repo}{version}' if not local_path else local_path
     if type(package) is ConcretePackage:
-        if package.immutable or version:
+        if package.immutable or version or local_path:
             nix(['profile', 'remove', str(package.index)])
-            nix(['profile', 'install', f'github:runtimeverification/{package.repo}{version}#{package.package}'])
+            nix(['profile', 'install', f'{path}#{package.package}'])
         else:
             nix(['profile', 'upgrade', str(package.index)])
     else:
-        nix(['profile', 'install', f'github:runtimeverification/{package.repo}{version}#{package.package}'])
+        nix(['profile', 'install', f'{path}#{package.package}'])
 
 
-def install_package(package_name: str, package_version: Optional[str]) -> None:
+def install_package(package_name: str, package_version: Optional[str], local_path: Optional[str]) -> None:
     reload_packages()
     if package_name not in available_packages.keys():
         print(
             f'❗ \033[91mThe package \'\033[94m{package_name}\033[91m\' does not exist.\033[0m\nUse \'\033[92mkup list\033[0m\' to see all the available packages.'
         )
         return
-    if package_name in installed_packages and not package_version:
+    if package_name in installed_packages and not (package_version or local_path):
         print(
             f'❗ The package \'\033[94m{package_name}\033[0m\' is already installed.\nUse \'\033[92mkup update {package_name}\033[0m\' to update to the latest version.'
         )
         return
     if package_name in installed_packages:
         package = packages[package_name]
-        update_or_install_package(package, package_version)
+        update_or_install_package(package, package_version, local_path)
     else:
         new_package = available_packages[package_name]
-        update_or_install_package(new_package, package_version)
+        update_or_install_package(new_package, package_version, local_path)
 
 
-def update_package(package_name: str, package_version: Optional[str]) -> None:
+def update_package(package_name: str, package_version: Optional[str], local_path: Optional[str]) -> None:
     reload_packages()
     if package_name not in available_packages.keys():
         print(
@@ -237,11 +251,11 @@ def update_package(package_name: str, package_version: Optional[str]) -> None:
         )
         return
     package = packages[package_name]
-    if package.status == INSTALLED and not package_version:
+    if package.status == INSTALLED and not (package_version or local_path):
         print(f'The package \'\033[94m{package_name}\033[0m\' is up to date.')
         return
 
-    update_or_install_package(package, package_version)
+    update_or_install_package(package, package_version, local_path)
 
 
 def remove_package(package_name: str) -> None:
@@ -286,6 +300,7 @@ def main() -> None:
     install = subparser.add_parser('install', help='Download and install the stated package')
     install.add_argument('package', type=str)
     install.add_argument('--version', type=str)
+    install.add_argument('--local', type=str)
 
     uninstall = subparser.add_parser('remove', help='Remove the given package from the user\'s PATH')
     uninstall.add_argument('package', type=str)
@@ -293,19 +308,21 @@ def main() -> None:
     update = subparser.add_parser('update', help='Update the package to the latest version')
     update.add_argument('package', type=str)
     update.add_argument('--version', type=str)
+    update.add_argument('--local', type=str)
 
     shell = subparser.add_parser('shell', help='Add the selected package to the current shell (temporary)')
     shell.add_argument('package', type=str)
     shell.add_argument('--version', type=str)
+    shell.add_argument('--local', type=str)
 
     args = parser.parse_args()
 
     if args.command == "list":
         list_package(args.package)
     elif args.command == "install":
-        install_package(args.package, args.version)
+        install_package(args.package, args.version, args.local)
     elif args.command == "update":
-        update_package(args.package, args.version)
+        update_package(args.package, args.version, args.local)
     elif args.command == "remove":
         remove_package(args.package)
     elif args.command == "shell":
@@ -317,7 +334,8 @@ def main() -> None:
             return
         temporary_package = available_packages[args.package]
         version = '/' + args.version if args.version else ''
-        nix(['shell', f'github:runtimeverification/{temporary_package.repo}{version}#{temporary_package.package}'])
+        path = f'github:runtimeverification/{temporary_package.repo}{version}' if not args.local else args.local
+        nix_detach(['shell', f'{path}#{temporary_package.package}'])
 
 
 if __name__ == '__main__':

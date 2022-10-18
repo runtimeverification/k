@@ -66,7 +66,6 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.*;
 import static org.kframework.Collections.*;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
@@ -197,15 +196,6 @@ public class ModuleToKORE {
                         return prod;
                     }
             );
-
-            module.sortedProductions().toStream().filter(this::isGeneratedInSetOp).foreach(
-                    prod -> {
-                        if (!options.disableCeilSimplificationRules) {
-                            sortedRules.add(genSetCeilAxioms(prod));
-                        }
-                        return prod;
-                    }
-            );
         }
         SetMultimap<KLabel, Rule> functionRules = HashMultimap.create();
         for (Rule rule : sortedRules) {
@@ -315,7 +305,7 @@ public class ModuleToKORE {
         semantics.append("\n// priority groups\n");
         genPriorityGroups(priorityList, priorityToPreviousGroup, priorityToAlias, topCellSortStr, semantics);
         semantics.append("endmodule ");
-        convert(attributes, module.att(), semantics, null, null);
+        convert(attributes, module.att().remove(Att.DIGEST()), semantics, null, null);
         semantics.append("\n");
     }
 
@@ -634,67 +624,6 @@ public class ModuleToKORE {
         rules.add(ceilMapRule);
     }
 
-    /** Constructs a #Ceil simplification rule for sets constructed by juxtaposition.
-     *
-     * @param prod the production hooked to membership (`Set.in`)
-     * @return simplification rule
-     *   #Ceil(@S:Set SetItem(@E:KItem)) => {(@E in @S) #Equals false} #And #Ceil(@S) #And #Ceil(#E)
-     */
-    private Rule genSetCeilAxioms(Production prod) {
-        Sort setSort = prod.nonterminal(1).sort();
-        scala.collection.Set<Production> setProds = module.productionsForSort().apply(setSort.head());
-        Production concatProd = setProds.find(p -> hasHookValue(p.att(), "SET.concat")).get();
-        Production elementProd = setProds.find(p -> hasHookValue(p.att(), "SET.element")).get();
-        assert(elementProd.nonterminals().length() == 1);
-        NonTerminal itemE = elementProd.nonterminals().head();
-
-        Sort sortParam = Sort(AddSortInjections.SORTPARAM_NAME, Sort("Q"));
-        KLabel ceilSetLabel = KLabel(KLabels.ML_CEIL.name(), setSort, sortParam);
-        KLabel andLabel = KLabel(KLabels.ML_AND.name(), sortParam);
-        KLabel ceilLabel = KLabel(KLabels.ML_CEIL.name(), itemE.sort(), sortParam);
-        KLabel equalsLabel = KLabel(KLabels.ML_EQUALS.name(), Sorts.Bool(), sortParam);
-
-        K itemVar = KVariable("@E", Att.empty().add(Sort.class, itemE.sort()));
-        K restSetVar = KVariable("@S", Att.empty().add(Sort.class, setSort));
-
-        Seq<K> argsSeq = JavaConverters.iterableAsScalaIterable(singletonList(itemVar)).toSeq();
-        return
-                Rule(
-                        KRewrite(
-                                KApply(ceilSetLabel,
-                                        KApply(concatProd.klabel().get(),
-                                                KApply(elementProd.klabel().get(),
-                                                        argsSeq,
-                                                        Att.empty()
-                                                ),
-                                                restSetVar
-                                        )
-                                )
-                                ,
-                                KApply(andLabel,
-                                        KApply(equalsLabel,
-                                                KApply(prod.klabel().get(),
-                                                        itemVar,
-                                                        restSetVar
-                                                ),
-                                                BooleanUtils.FALSE
-                                        ),
-                                        KApply(andLabel,
-                                                KApply(ceilSetLabel,
-                                                        restSetVar
-                                                ),
-                                                KApply(ceilLabel,
-                                                        itemVar
-                                                )
-                                        )
-                                )
-                        )
-                        , BooleanUtils.TRUE
-                        , BooleanUtils.TRUE
-                        , Att.empty().add(Att.SIMPLIFICATION())
-                );
-    }
-
     static boolean hasHookValue(Att atts, String value) {
         return atts.contains(Att.HOOK()) &&
                 atts.get(Att.HOOK()).equals(value);
@@ -947,7 +876,7 @@ public class ModuleToKORE {
             }
         }
         sb.append("endmodule ");
-        convert(consideredAttributes, spec.att(), sb, null, null);
+        convert(consideredAttributes, spec.att().remove(Att.DIGEST()), sb, null, null);
         sb.append("\n");
         return sb.toString();
     }
@@ -1519,11 +1448,6 @@ public class ModuleToKORE {
         if (hook.isEmpty()) return false;
         if (!hook.get().equals("MAP.in_keys")) return false;
         return (!prod.klabel().isEmpty());
-    }
-
-    private boolean isGeneratedInSetOp(Production prod) {
-        Option<String> hook = prod.att().getOption(Att.HOOK());
-        return !hook.isEmpty() && hook.get().equals("SET.in") && !prod.klabel().isEmpty();
     }
 
     private Att addKoreAttributes(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads) {
