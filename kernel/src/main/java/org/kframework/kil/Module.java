@@ -3,6 +3,8 @@ package org.kframework.kil;
 
 import org.kframework.kore.Sort;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -57,5 +59,21 @@ public class Module extends DefinitionItem {
         sb.append("endmodule");
     }
 
-
+    /**
+     * Used to determine if a module was modified.
+     * <a href="https://github.com/runtimeverification/k/issues/2910"> GH #2910</a>
+     * This allows for scripts to move files around after compilation but still give error messages
+     * if the contents of modules differ.
+     */
+    public String digest() {
+        try {
+            StringBuilder mod = new StringBuilder();
+            toString(mod);
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+            messageDigest.update(mod.toString().getBytes());
+            return new String(messageDigest.digest());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

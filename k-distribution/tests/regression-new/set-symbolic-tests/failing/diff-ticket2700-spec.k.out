@@ -1,11 +1,10 @@
   <k>
-    diffResult ( SetItem ( Y:MyId ) -Set ( S
-    SetItem ( X:MyId ) ) ) ~> .
+    diffResult ( SetItem ( 1 ) ) ~> .
   </k>
 #And
   {
-    false
+    true
   #Equals
-    X:MyId in S
+    X <Int 1
   }
 [Error] Prover: backend terminated because the configuration cannot be rewritten further. See output for more details.
