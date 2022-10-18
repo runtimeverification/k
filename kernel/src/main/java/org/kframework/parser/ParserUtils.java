@@ -25,7 +25,7 @@ import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import org.kframework.utils.options.OuterParsingOptions;
-import scala.Tuple3;
+import scala.Tuple4;
 
 import java.io.File;
 import java.io.IOException;
@@ -202,15 +202,15 @@ public class ParserUtils {
 
         new CollectProductionsVisitor(kore, context).visit(def);
 
-        // Tuple3 of moduleName, Source, Location
-        Map<String, List<Tuple3<String, Source, Location>>> groupedModules =
+        // Tuple4 of moduleName, Source, Location, digest
+        Map<String, List<Tuple4<String, Source, Location, String>>> groupedModules =
                 Streams.concat(
-                        previousModules.stream().map(m -> Tuple3.apply(m.name(), m.att().get(Att.SOURCE(), Source.class),
-                                m.att().get(Att.LOCATION(), Location.class))),
-                        kilModules.stream().map(m -> Tuple3.apply(m.getName(), m.getSource(), m.getLocation())))
+                        previousModules.stream().map(m -> Tuple4.apply(m.name(), m.att().get(Att.SOURCE(), Source.class),
+                                m.att().get(Att.LOCATION(), Location.class), m.att().get(Att.DIGEST()))),
+                        kilModules.stream().map(m -> Tuple4.apply(m.getName(), m.getSource(), m.getLocation(), m.digest())))
                 // make sure we have unique modules (double requires), and preserve order
                 .collect(Collectors.toCollection(LinkedHashSet::new)).stream()
-                .collect(Collectors.groupingBy(Tuple3::_1));
+                .collect(Collectors.groupingBy(Tuple4::_1));
 
         List<String> duplicateModules = groupedModules
           .entrySet().stream()
@@ -220,12 +220,20 @@ public class ParserUtils {
 
         int errors = 0;
         for (String moduleName : duplicateModules) {
-          Tuple3<String, Source, Location> firstMod = groupedModules.get(moduleName).get(0);
-          Tuple3<String, Source, Location> secondMod = groupedModules.get(moduleName).get(1);
-          KEMException ex = KEMException.outerParserError("Module " + moduleName + " previously declared at "
-                  + firstMod._2() + " and " + firstMod._3(), secondMod._2(), secondMod._3());
-          errors++;
-          kem.addKException(ex.getKException());
+          Tuple4<String, Source, Location, String> firstMod = groupedModules.get(moduleName).get(0);
+          Tuple4<String, Source, Location, String> secondMod = groupedModules.get(moduleName).get(1);
+          // give an error message only if we have
+          // the same module name found in different filenames (path doesn't matter)
+          // the location is different or
+          // the hashes of the pretty printed contents are different.
+          if (!Paths.get(firstMod._2().source()).getFileName().equals(Paths.get(secondMod._2().source()).getFileName())
+            || !firstMod._3().equals(secondMod._3())
+            || !firstMod._4().equals(secondMod._4())) {
+              KEMException ex = KEMException.outerParserError("Module " + moduleName + " differs from previous declaration at "
+                      + firstMod._2() + " and " + firstMod._3(), secondMod._2(), secondMod._3());
+              errors++;
+              kem.addKException(ex.getKException());
+          }
         }
 
         if (errors > 0) {
