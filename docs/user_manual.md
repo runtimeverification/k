@@ -2954,6 +2954,7 @@ interested readers:
 | `predicate`    | prod | all     | Specifies the sort of a predicate label                                               |
 | `element`      | prod | all     | Specifies the label of the elements in a list                                         |
 | `bracketLabel` | prod | all     | Keep track of the label of a bracket production since it can't have a klabel          |
+| `injective`    | prod | all     | Label a given production as injective (unique output for each input)                  |
 
 
 ### Index Legend
