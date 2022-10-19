@@ -63,7 +63,7 @@ jobs:
   integration-tests:
     needs: unit-tests
     name: 'Integration Tests'
-    runs-on: [self-hosted, linux]
+    runs-on: [self-hosted, linux, normal]
     strategy:
       matrix:
         distro: ['focal', 'jammy']
@@ -89,12 +89,13 @@ jobs:
             runtimeverificationinc/pyk-ci:${COMMIT}
 
           docker cp . pyk-ci:/home/user
+          docker exec pyk-ci chown -R user:user /home/user
       - name: 'Build and run all tests'
-        run: docker exec pyk-ci make all
+        run: docker exec --user user --workdir /home/user pyk-ci make all
       - name: 'Tear down Docker container'
         if: always()
         run: |
-          docker stop pyk-ci
+          docker stop --time=0 pyk-ci
 
   build-on-nix:
     needs: unit-tests
