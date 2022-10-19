@@ -403,11 +403,11 @@ syntax {Sort1, Sort2} Sort1 ::= "#fun" "(" Sort2 "=>" Sort1 ")" "(" Sort2 ")"
 Here we have:
 
 1. Brackets, which can enclose any sort but should be of the same sort that was
-   enclosed
+   enclosed.
 2. Every sort is a KItem.
-3. A KBott term can appear inside any sort
-4. Rewrites, which can rewrite a value of any sort to a value of the same sort,
-   or to a different sort which is allowed in that context
+3. A KBott term can appear inside any sort.
+4. Rewrites, which can rewrite a value of any sort to a value of the same sort.
+   Note that this allows the lhs or rhs to be a subsort of the other.
 5. If then else, which can return any sort but which must contain that sort on
    both the true and false branches.
 6. lambda applications, in which the argument and parameter must be the same
