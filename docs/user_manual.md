@@ -437,7 +437,8 @@ a *partial function*).
 
 The `functional` attribute indicates to the symbolic reasoning engine that a
 given symbol is a *total function*, that is it has *exactly* one return value
-for every possible input.
+for every possible input. Note that it does not make sense to have only the
+`functional` attribute without the `function` attribute.
 
 For example, here we define the `_+Word_` total function and the `_/Word_`
 partial function, which can be used to do addition/division modulo
@@ -2888,8 +2889,8 @@ arguments. A legend describing how to interpret the index follows.
 | `exit = ""`           | cell  | all     | [`exit` attribute](#exit-attribute)                                                                                                             |
 | `format`              | prod  | all     | [`format` attribute](#format-attribute)                                                                                                         |
 | `freshGenerator`      | prod  | all     | [`freshGenerator` attribute](#freshgenerator-attribute)                                                                                         |
-| `functional`          | rule  | all     | [`function` and `functional` attributes](#function-and-functional-attributes)                                                                   |
-| `function`            | rule  | all     | [`function` and `functional` attributes](#function-and-functional-attributes)                                                                   |
+| `functional`          | prod  | all     | [`function` and `functional` attributes](#function-and-functional-attributes)                                                                   |
+| `function`            | prod  | all     | [`function` and `functional` attributes](#function-and-functional-attributes)                                                                   |
 | `hook(_)`             | prod  | all     | No reference yet                                                                                                                                |
 | `hybrid(_)`           | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
 | `hybrid`              | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
