@@ -1135,18 +1135,18 @@ duplicate expressions on the LHS and RHS of the rewriting.
 ### Macros and Aliases
 
 A rule can be tagged with the `macro`, `alias`, `macro-rec`, or `alias-rec`
-attributes. In all cases, what this signifies is that this is a macro rule.
-Macro rules are applied statically during compilation on all terms that they
-match, and statically before program execution on the initial configuration.
-Currently, macros are required to not have side conditions, although they can
-contain sort checks.
+attributes. In all cases, what this signifies is that this is a macro production.
+Macro rules are rules where the top symbol of the left-hand-side are macro
+labels. Macro rules are applied statically during compilation on all terms that
+they match, and statically before program execution on the initial configuration.
+Currently, macro rules are required to not have side conditions, although they
+can contain sort checks.
 
-When a rule is tagged with the `alias` attribute, it is also applied statically
-in reverse prior to unparsing on the final configuration. Note that a macro can
-have unbound variables in the right hand side. When such a macro exists, it
-should be used only on the left hand side of rules, unless the user is
-performing symbolic execution and expects to introduce symbolic terms into the
-subject being rewritten.
+`alias` rules are also applied statically in reverse prior to unparsing on the
+final configuration. Note that a macro rule can have unbound variables in the
+right hand side. When such a macro exists, it should be used only on the left
+hand side of rules, unless the user is performing symbolic execution and expects
+to introduce symbolic terms into the subject being rewritten.
 
 However, when used on the left hand side of a rule, it functions similarly to a
 pattern alias, and allows the user to concisely express a reusable pattern that
@@ -1155,10 +1155,10 @@ they wish to match on in multiple places.
 For example, consider the following semantics:
 
 ```k
-syntax KItem ::= "foo" | "foobar"
-syntax KItem ::= bar(KItem) | baz(Int, KItem)
-rule foo => foobar [alias]
-rule bar(I) => baz(?_, I) [macro]
+syntax KItem ::= "foo" [alias] | "foobar"
+syntax KItem ::= bar(KItem) [macro] | baz(Int, KItem)
+rule foo => foobar
+rule bar(I) => baz(?_, I)
 rule bar(I) => I
 ```
 
@@ -1176,10 +1176,10 @@ can be used to provide this behavior.
 For example, consider the following semantics:
 
 ```k
-syntax Exp ::= "int" Exps ";" | Exp Exp | Id
+syntax Exp ::= "int" Exp ";" | "int" Exps ";" [macro] | Exp Exp | Id
 syntax Exps ::= List{Exp,","}
 
-rule int X:Id, X':Id, Xs:Exps ; => int X ; int X', Xs ; [macro]
+rule int X:Id, X':Id, Xs:Exps ; => int X ; int X', Xs ;
 ```
 
 This will expand `int x, y, z;` to `int x; int y, z;` because the macro does
@@ -1366,7 +1366,7 @@ a comma-separated list of names of variables which can be unbound in the rule.
 
 For example, in the macro declaration
 ```k
-  rule cppEnumType => bar(_, scopedEnum() #Or unscopedEnum() ) [macro, unboundVariables(_)]
+  rule cppEnumType => bar(_, scopedEnum() #Or unscopedEnum() ) [unboundVariables(_)]
 ```
 the declaration `unboundVariables(_)` allows the rule to pass the unbound
 variable checks, and this in turn allows for `cppEnumType` to be used in
@@ -2871,8 +2871,8 @@ arguments. A legend describing how to interpret the index follows.
 
 | Name                  | Type  | Backend | Reference                                                                                                                                       |
 | --------------------- | ----- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `alias-rec`           | rule  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
-| `alias`               | rule  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `alias-rec`           | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `alias`               | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
 | `all-path`            | claim | haskell | [`all-path` and `one-path` attributes to distinguish reachability claims](#all-path-and-one-path-attributes-to-distinguish-reachability-claims) |
 | `anywhere`            | rule  | all     | [`anywhere` rules](#anywhere-rules)                                                                                                             |
 | `applyPriority(_)`    | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
@@ -2897,8 +2897,8 @@ arguments. A legend describing how to interpret the index follows.
 | `latex(_)`            | prod  | all     | No reference yet                                                                                                                                |
 | `left`                | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
 | `locations`           | sort  | all     | [Location Information](#location-information)                                                                                                   |
-| `macro-rec`           | rule  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
-| `macro`               | rule  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `macro-rec`           | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `macro`               | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
 | `memo`                | rule  | haskell | [The `memo` attribute](#the-memo-attribute)                                                                                                     |
 | `multiplicity = "_"`  | cell  | all     | [Collection Cells: `multiplicity` and `type` attributes](#collection-cells-multiplicity-and-type-attributes)                                    |
 | `non-assoc`           | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
