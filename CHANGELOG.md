@@ -1,3 +1,24 @@
+K Framework 5.5.0
+=================
+
+Features
+--------
+- Improve error messages for erroneous simplification rules.
+
+- Added the `kup` tool to help with keeping the various dependencies up to date.
+
+- Documentation updates
+
+
+Misc/Bug Fixes
+--------------
+- Relax module duplication check to allow for duplicate files. Useful when moving
+  the original definition to a new location.
+
+A more detailed list of changes can be found here:
+https://github.com/runtimeverification/k/issues/3005
+
+
 K Framework 5.4.0
 =================
 
