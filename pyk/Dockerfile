@@ -9,8 +9,7 @@ RUN    apt-get update     \
 RUN    curl -sSL https://install.python-poetry.org | POETRY_HOME=/usr python3 - \
     && poetry --version
 
-ARG USER_ID=1000
-ARG GROUP_ID=1000
+ARG USER_ID=9876
+ARG GROUP_ID=9876
 RUN    groupadd -g $GROUP_ID user                     \
     && useradd -m -u $USER_ID -s /bin/sh -g user user
-WORKDIR /home/user
