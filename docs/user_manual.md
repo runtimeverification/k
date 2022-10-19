@@ -2885,13 +2885,11 @@ arguments. A legend describing how to interpret the index follows.
 | `concrete(_)`         | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
 | `concrete`            | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
 | `context(_)`          | alias | all     | [Context aliases](#context-aliases)                                                                                                             |
-| `cool`                | rule  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
 | `exit = ""`           | cell  | all     | [`exit` attribute](#exit-attribute)                                                                                                             |
 | `format`              | prod  | all     | [`format` attribute](#format-attribute)                                                                                                         |
 | `freshGenerator`      | prod  | all     | [`freshGenerator` attribute](#freshgenerator-attribute)                                                                                         |
 | `functional`          | rule  | all     | [`function` and `functional` attributes](#function-and-functional-attributes)                                                                   |
 | `function`            | rule  | all     | [`function` and `functional` attributes](#function-and-functional-attributes)                                                                   |
-| `heat`                | rule  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
 | `hook(_)`             | prod  | all     | No reference yet                                                                                                                                |
 | `hybrid(_)`           | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
 | `hybrid`              | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
@@ -2955,7 +2953,8 @@ interested readers:
 | `element`      | prod | all     | Specifies the label of the elements in a list                                         |
 | `bracketLabel` | prod | all     | Keep track of the label of a bracket production since it can't have a klabel          |
 | `injective`    | prod | all     | Label a given production as injective (unique output for each input)                  |
-
+| `cool`         | rule | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)               |
+| `heat`         | rule | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)               |
 
 ### Index Legend
 
