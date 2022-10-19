@@ -1207,21 +1207,15 @@ syntax Stmt ::= Stmt ";" Stmt
 rule (S1 ; S2) ; S3 => S1 ; (S2 ; S3) [anywhere]
 ```
 
-Then after every step, all occurances of `_;_` will be re-associated. Note that
+Then after every step, all occurrences of `_;_` will be re-associated. Note that
 this allows the symbol `_;_` to still be a constructor, even though it is
 simplified similarly to a `function`.
 
-### `smt-lemma`, `lemma`, and `trusted` attributes
+### `trusted` claims
 
-These attributes guide the prover when it tries to apply rules to discharge a
-proof obligation.
-
--   `smt-lemma` can be applied to a rule to encode it as an equality when
-    sending queries to Z3.
--   `lemma` distinguishes normal rules from lemma rules in the semantics, but
-    has no affect.
--   `trusted` instructs the prover that it should not attempt proving a given
-    proof obligation, instead trusting that it is true.
+You may add the `trusted` attribute to a given claim for the K prover to
+automatically add it to the list of proven circularities, instead of trying to
+discharge it separately.
 
 ### Projection and Predicate functions
 
@@ -2226,13 +2220,19 @@ more details.
 
 K makes queries to an SMT solver (Z3) to discharge proof obligations when doing
 symbolic execution. You can control how these queries are made using the
-attributes `smtlib` and `smt-hook` on declared productions.
+attributes `smtlib`, `smt-hook`, and `smt-lemma` on declared productions.
+These attributes guide the prover when it tries to apply rules to discharge a
+proof obligation.
 
 - `smt-hook(...)` allows you to specify a term in SMTLIB2 format which should
   be used to encode that production, and assumes that all symbols appearing in
   the term are already declared by the SMT solver.
 - `smtlib(...)` allows you to declare a new SMT symbol to be used when that
   production is sent to Z3, and gives it _uninterpreted function_ semantics.
+- `smt-lemma` can be applied to a rule to encode it as a conditional equality
+  when sending queries to Z3. A rule `rule LHS => RHS requires REQ` will be
+  encoded as the conditional equality `(=> REQ (= (LHS RHS))`. Every symbol
+  present in the rule must have an `smt-hook(...)` or `smtlib(...)` attribute.
 
 ```k
 syntax Int ::= "~Int" Int          [function, klabel(~Int_), symbol,
@@ -2898,7 +2898,6 @@ arguments. A legend describing how to interpret the index follows.
 | `klabel(_)`           | all   | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
 | `latex(_)`            | prod  | all     | No reference yet                                                                                                                                |
 | `left`                | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
-| `lemma`               | rule  | all     | [`smt-lemma`, `lemma`, and `trusted` attributes](#smt-lemma-lemma-and-trusted-attributes)                                                       |
 | `locations`           | sort  | all     | [Location Information](#location-information)                                                                                                   |
 | `macro-rec`           | rule  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
 | `macro`               | rule  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
@@ -2922,8 +2921,8 @@ arguments. A legend describing how to interpret the index follows.
 | `simplification`      | rule  | haskell | [`simplification` attribute (Haskell backend)](#simplification-attribute-haskell-backend)                                                       |
 | `simplification(_)`   | rule  | haskell | [`simplification` attribute (Haskell backend)](#simplification-attribute-haskell-backend)                                                       |
 | `smt-hook(_)`         | prod  | haskell | [SMT Translation](#smt-translation)                                                                                                             |
-| `smt-lemma`           | rule  | all     | [`smt-lemma`, `lemma`, and `trusted` attributes](#smt-lemma-lemma-and-trusted-attributes)                                                       |
 | `smtlib(_)`           | prod  | haskell | [SMT Translation](#smt-translation)                                                                                                             |
+| `smt-lemma`           | rule  | haskell | [SMT Translation](#smt-translation)                                                                                                             |
 | `strict`              | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
 | `strict(_)`           | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
 | `symbolic`            | mod   | haskell | [`symbolic` and `concrete` attribute](#symbolic-and-concrete-attribute)                                                                         |
@@ -2932,7 +2931,7 @@ arguments. A legend describing how to interpret the index follows.
 | `symbol`              | prod  | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
 | `token`               | prod  | all     | [`token` attribute](#token-attribute)                                                                                                           |
 | `token`               | sort  | all     | [`token` attribute](#token-attribute)                                                                                                           |
-| `trusted`             | claim | haskell | [`smt-lemma`, `lemma`, and `trusted` attributes](#smt-lemma-lemma-and-trusted-attributes)                                                       |
+| `trusted`             | claim | haskell | [`trusted` attribute](#trusted-claims)                                                                                                          |
 | `type = "_"`          | cell  | all     | [Collection Cells: `multiplicity` and `type` attributes](#collection-cells-multiplicity-and-type-attributes)                                    |
 | `unboundVariables(_)` | rule  | all     | [The `unboundVariables` attribute](#the-unboundvariables-attribute)                                                                             |
 | `unused`              | prod  | all     | [`unused` attribute](#unused-attribute)                                                                                                         |
