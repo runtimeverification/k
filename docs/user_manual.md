@@ -1007,6 +1007,43 @@ value given in the `configuration ...` declaration.
 Rule Declaration
 ----------------
 
+### Rule Structure
+
+Each K rule follows the same basic structure (given as an example here):
+
+```k
+rule LHS => RHS requires REQ ensures ENS [ATTRS]
+```
+
+The portion between `rule` and `requires` is referred to as the *rule body*,
+and may contain one or more rewrites (though not nested). Here, the rule body is
+`LHS => RHS`, where `LHS` and `RHS` are used as placeholders for the pre- and
+post- states. Note that we lose no generality referring to _the_ `LHS` or _the_
+`RHS`, even in the presence of multiple rewrites, as the rewrites are pulled to
+the top-level anyway.
+
+Next is the *requires clause*, represented here as `REQ`. The requires clause is
+an additional predicate (function-like term of sort `Bool`), which is to be
+evaluated before applying the rule. For functional rules, if the requires clause
+does not evaluate to `true`, then the rule does not apply. For semantic rules,
+the requires clause may cause the state to branch into two states, one where
+`REQ` holds and one where it does not.
+
+Finally is the *ensures clause*, represented here as `ENS`. The ensures clause
+is to be interpreted as a post-condition, and will be automatically added to the
+path condition if the rule applies. It *may* cause the entire term to become
+undefined, but the backend will not stop itself from applying the rule in this
+case.
+
+Overall, the transition represented by such a rule is from a state
+`LHS #And REQ` ending in a state `RHS #And ENS`. When backends are applying this
+rule as a transition/rewrite, they should:
+
+- Check if pattern `LHS` matches (or unifies) with the current term, giving
+  substitution `alpha`.
+- Check if the instantiation `alpha(REQ)` is valid (or satisfiable).
+- Build the new term `alpha(RHS #And ENS)`, and check if it's satisfiable.
+
 ### Pattern Matching operator
 
 Sometimes when you want to express a side condition, you want to say that a
