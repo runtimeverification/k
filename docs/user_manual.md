@@ -1134,7 +1134,7 @@ duplicate expressions on the LHS and RHS of the rewriting.
 
 ### Macros and Aliases
 
-A rule can be tagged with the `macro`, `alias`, `macro-rec`, or `alias-rec`
+A production can be tagged with the `macro`, `alias`, `macro-rec`, or `alias-rec`
 attributes. In all cases, what this signifies is that this is a macro production.
 Macro rules are rules where the top symbol of the left-hand-side are macro
 labels. Macro rules are applied statically during compilation on all terms that
