@@ -22,25 +22,12 @@ runs:
       subdir: k-${{ inputs.distro }}/
       distro: ${{ inputs.distro }}
       llvm: ${{ inputs.llvm }}
-  - name: 'Build Package: ${{ inputs.distro }}'
-    shell: bash {0}
-    env:
-      DISTRO: ${{ inputs.distro }}
-    run: |
-      set -euxo pipefail
-      docker exec -t k-package-build-${DISTRO} /bin/bash -c 'mv package/debian debian'
-      docker exec -t k-package-build-${DISTRO} /bin/bash -c 'mv debian/compat.jammy debian/compat'
-      docker exec -t k-package-build-${DISTRO} /bin/bash -c 'mv debian/control.jammy debian/control'
-      docker exec -t k-package-build-${DISTRO} /bin/bash -c 'mv debian/rules.jammy debian/rules'
-      docker exec -t k-package-build-${DISTRO} /bin/bash -c 'dpkg-buildpackage'
-  - name: 'Tear down Docker'
-    shell: bash {0}
-    env:
-      DISTRO: ${{ inputs.distro }}
-    if: always()
-    run: |
-      docker stop --time=0 k-package-build-${DISTRO}
-      docker container rm --force k-package-build-${DISTRO} || true
+      script: |
+        mv package/debian debian
+        mv debian/compat.jammy debian/compat
+        mv debian/control.jammy debian/control
+        mv debian/rules.jammy debian/rules
+        dpkg-buildpackage
   - name: 'Set up Docker Test Image: ${{ inputs.distro }}'
     shell: bash {0}
     env:
