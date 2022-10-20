@@ -84,7 +84,7 @@ jobs:
       - name: 'Set up Docker'
         uses: ./.github/actions/with-docker
         with:
-          tag: k-ci-${GITHUB_SHA}
+          tag: k-ci-${{ github.sha }}
           distro: jammy
           llvm: 14
       - name: 'Build and Test K'
