@@ -131,21 +131,6 @@
     },
     "flake-utils_3": {
       "locked": {
-        "lastModified": 1642700792,
-        "narHash": "sha256-XqHrk7hFb+zBvRg6Ghl+AZDq03ov6OshJLiSWOoX5es=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "846b2ae0fc4cc943637d3d1def4454213e203cba",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
-    "flake-utils_4": {
-      "locked": {
         "lastModified": 1659877975,
         "narHash": "sha256-zllb8aq3YO3h8B/U0/J1WBgAL8EX5yWf5pMj3G0NAmc=",
         "owner": "numtide",
@@ -195,7 +180,6 @@
     "haskell-backend": {
       "inputs": {
         "haskell-nix": "haskell-nix",
-        "mach-nix": "mach-nix",
         "nixpkgs": [
           "haskell-backend",
           "haskell-nix",
@@ -205,11 +189,11 @@
         "z3-src": "z3-src"
       },
       "locked": {
-        "lastModified": 1665662600,
-        "narHash": "sha256-GVEVfo59JnVGGITjEvmzTnE7k0XLhL8/+ryWpocEbBY=",
+        "lastModified": 1666306991,
+        "narHash": "sha256-ot8JCZi58LYfMC1ih2ix+/iXGR0TwSD6uXFvauoYE+I=",
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "22922c13b8b412afd2583aef04321d0c3d7a39d8",
+        "rev": "7922cf79a16b66356f1874407798beb7f7f26793",
         "type": "github"
       },
       "original": {
@@ -356,29 +340,9 @@
         "type": "github"
       }
     },
-    "mach-nix": {
-      "inputs": {
-        "flake-utils": "flake-utils_3",
-        "nixpkgs": "nixpkgs_2",
-        "pypi-deps-db": "pypi-deps-db"
-      },
-      "locked": {
-        "lastModified": 1657089034,
-        "narHash": "sha256-qSjk1iOi14ijAOP6QuGfE3fvy08aVxsgus+ArwgiyuU=",
-        "owner": "DavHau",
-        "repo": "mach-nix",
-        "rev": "51caf584f26acdfaa51bbf7ee1ffa365aea7bc64",
-        "type": "github"
-      },
-      "original": {
-        "owner": "DavHau",
-        "repo": "mach-nix",
-        "type": "github"
-      }
-    },
     "mavenix": {
       "inputs": {
-        "nixpkgs": "nixpkgs_3",
+        "nixpkgs": "nixpkgs_2",
         "utils": "utils"
       },
       "locked": {
@@ -397,7 +361,7 @@
     },
     "mavenix_2": {
       "inputs": {
-        "nixpkgs": "nixpkgs_4",
+        "nixpkgs": "nixpkgs_3",
         "utils": "utils_3"
       },
       "locked": {
@@ -562,16 +526,15 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1643805626,
-        "narHash": "sha256-AXLDVMG+UaAGsGSpOtQHPIKB+IZ0KSd9WS77aanGzgc=",
+        "lastModified": 1621552131,
+        "narHash": "sha256-AD/AEXv+QOYAg0PIqMYv2nbGOGTIwfOGKtz3rE+y+Tc=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "554d2d8aa25b6e583575459c297ec23750adb6cb",
+        "rev": "d42cd445dde587e9a993cd9434cb43da07c4c5de",
         "type": "github"
       },
       "original": {
         "id": "nixpkgs",
-        "ref": "nixos-unstable",
         "type": "indirect"
       }
     },
@@ -591,25 +554,11 @@
     },
     "nixpkgs_4": {
       "locked": {
-        "lastModified": 1621552131,
-        "narHash": "sha256-AD/AEXv+QOYAg0PIqMYv2nbGOGTIwfOGKtz3rE+y+Tc=",
+        "lastModified": 1666249138,
+        "narHash": "sha256-CzK8NA8xEMKAhvHXB8UMODckcH97sZXm6lziKNWLv0M=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "d42cd445dde587e9a993cd9434cb43da07c4c5de",
-        "type": "github"
-      },
-      "original": {
-        "id": "nixpkgs",
-        "type": "indirect"
-      }
-    },
-    "nixpkgs_5": {
-      "locked": {
-        "lastModified": 1666164185,
-        "narHash": "sha256-5v+YB4ijeUfg5LCz9ck4gIpCPhIS+qn02OyPJO48bCE=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "c5203abb1329f7ea084c04acda330ca75d5b9fb5",
+        "rev": "44fc3cb097324c9f9f93313dd3f103e78d722968",
         "type": "github"
       },
       "original": {
@@ -618,13 +567,13 @@
         "type": "indirect"
       }
     },
-    "nixpkgs_6": {
+    "nixpkgs_5": {
       "locked": {
-        "lastModified": 1666271429,
-        "narHash": "sha256-xF+tYzzkVZaoIO5q5t5u8aQ3DoQt04DToimnPPGyZvI=",
+        "lastModified": 1666305607,
+        "narHash": "sha256-2OeImHE/Jr/+Q8M5MctrYvtvMv7QK0fOrqpN06MycTk=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "d473597e332a0bf83f826192684dad128ced147f",
+        "rev": "dd2351ee2f2671d2f2216dd843e4997060eb9576",
         "type": "github"
       },
       "original": {
@@ -652,15 +601,15 @@
     },
     "poetry2nix": {
       "inputs": {
-        "flake-utils": "flake-utils_4",
-        "nixpkgs": "nixpkgs_6"
+        "flake-utils": "flake-utils_3",
+        "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1666223385,
-        "narHash": "sha256-RpP3FJDEeXRdJYwROXB04dbWEHfWotaEemlw7HCl5J4=",
+        "lastModified": 1666275627,
+        "narHash": "sha256-FgsXXBbQX8dsNAv8+82AkMxCQQ6g+SH2k/c8q7MD3XI=",
         "owner": "nix-community",
         "repo": "poetry2nix",
-        "rev": "185bcb30d47d97b8b1c02d68f26f9524e91c34d8",
+        "rev": "a982fc6574b0eaec19d02834e2c988df7e0948a3",
         "type": "github"
       },
       "original": {
@@ -683,22 +632,6 @@
         "owner": "pybind",
         "repo": "pybind11",
         "rev": "0ba639d6177659c5dc2955ac06ad7b5b0d22e05c",
-        "type": "github"
-      }
-    },
-    "pypi-deps-db": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1643877077,
-        "narHash": "sha256-jv8pIvRFTP919GybOxXE5TfOkrjTbdo9QiCO1TD3ZaY=",
-        "owner": "DavHau",
-        "repo": "pypi-deps-db",
-        "rev": "da53397f0b782b0b18deb72ef8e0fb5aa7c98aa3",
-        "type": "github"
-      },
-      "original": {
-        "owner": "DavHau",
-        "repo": "pypi-deps-db",
         "type": "github"
       }
     },
@@ -726,7 +659,7 @@
         "haskell-backend": "haskell-backend",
         "llvm-backend": "llvm-backend",
         "mavenix": "mavenix_2",
-        "nixpkgs": "nixpkgs_5",
+        "nixpkgs": "nixpkgs_4",
         "poetry2nix": "poetry2nix",
         "rv-utils": "rv-utils"
       }
