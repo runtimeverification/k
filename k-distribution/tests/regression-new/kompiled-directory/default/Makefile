@@ -1,6 +1,7 @@
 DEF=test
 EXT=test
 TESTDIR=.
+KOMPILE_FLAGS+=--syntax-module TEST
 KOMPILE_BACKEND=llvm
 
 include ../../../../include/kframework/ktest.mak
