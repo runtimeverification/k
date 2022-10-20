@@ -60,6 +60,6 @@ runs:
 
       while read line; do
           docker exec --tag ${TAG_NAME} /bin/bash -c "${line}"
-      done
+      done <(cat ${SCRIPT})
 
       docker stop --time=0 ${TAG_NAME}
