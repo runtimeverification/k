@@ -403,11 +403,11 @@ syntax {Sort1, Sort2} Sort1 ::= "#fun" "(" Sort2 "=>" Sort1 ")" "(" Sort2 ")"
 Here we have:
 
 1. Brackets, which can enclose any sort but should be of the same sort that was
-   enclosed
+   enclosed.
 2. Every sort is a KItem.
-3. A KBott term can appear inside any sort
-4. Rewrites, which can rewrite a value of any sort to a value of the same sort,
-   or to a different sort which is allowed in that context
+3. A KBott term can appear inside any sort.
+4. Rewrites, which can rewrite a value of any sort to a value of the same sort.
+   Note that this allows the lhs or rhs to be a subsort of the other.
 5. If then else, which can return any sort but which must contain that sort on
    both the true and false branches.
 6. lambda applications, in which the argument and parameter must be the same
@@ -437,7 +437,8 @@ a *partial function*).
 
 The `functional` attribute indicates to the symbolic reasoning engine that a
 given symbol is a *total function*, that is it has *exactly* one return value
-for every possible input.
+for every possible input. Note that it does not make sense to have only the
+`functional` attribute without the `function` attribute.
 
 For example, here we define the `_+Word_` total function and the `_/Word_`
 partial function, which can be used to do addition/division modulo
@@ -1007,6 +1008,42 @@ value given in the `configuration ...` declaration.
 Rule Declaration
 ----------------
 
+### Rule Structure
+
+Each K rule follows the same basic structure (given as an example here):
+
+```k
+rule LHS => RHS requires REQ ensures ENS [ATTRS]
+```
+
+The portion between `rule` and `requires` is referred to as the *rule body*,
+and may contain one or more rewrites (though not nested). Here, the rule body is
+`LHS => RHS`, where `LHS` and `RHS` are used as placeholders for the pre- and
+post- states. Note that we lose no generality referring to _the_ `LHS` or _the_
+`RHS`, even in the presence of multiple rewrites, as the rewrites are pulled to
+the top-level anyway.
+
+Next is the *requires clause*, represented here as `REQ`. The requires clause is
+an additional predicate (function-like term of sort `Bool`), which is to be
+evaluated before applying the rule. If the requires clause does not evaluate to
+`true`, then the rule does not apply.
+
+Finally is the *ensures clause*, represented here as `ENS`. The ensures clause
+is to be interpreted as a post-condition, and will be automatically added to the
+path condition if the rule applies. It *may* cause the entire term to become
+undefined, but the backend will not stop itself from applying the rule in this
+case. Note that concrete backends (eg. the LLVM backend) are free to ignore the
+ensures clause.
+
+Overall, the transition represented by such a rule is from a state
+`LHS #And REQ` ending in a state `RHS #And ENS`. When backends apply this rule
+as a transition/rewrite, they should:
+
+- Check if pattern `LHS` matches (or unifies) with the current term, giving
+  substitution `alpha`.
+- Check if the instantiation `alpha(REQ)` is valid (or satisfiable).
+- Build the new term `alpha(RHS #And ENS)`, and check if it's satisfiable.
+
 ### Pattern Matching operator
 
 Sometimes when you want to express a side condition, you want to say that a
@@ -1097,19 +1134,19 @@ duplicate expressions on the LHS and RHS of the rewriting.
 
 ### Macros and Aliases
 
-A rule can be tagged with the `macro`, `alias`, `macro-rec`, or `alias-rec`
-attributes. In all cases, what this signifies is that this is a macro rule.
-Macro rules are applied statically during compilation on all terms that they
-match, and statically before program execution on the initial configuration.
-Currently, macros are required to not have side conditions, although they can
-contain sort checks.
+A production can be tagged with the `macro`, `alias`, `macro-rec`, or `alias-rec`
+attributes. In all cases, what this signifies is that this is a macro production.
+Macro rules are rules where the top symbol of the left-hand-side are macro
+labels. Macro rules are applied statically during compilation on all terms that
+they match, and statically before program execution on the initial configuration.
+Currently, macro rules are required to not have side conditions, although they
+can contain sort checks.
 
-When a rule is tagged with the `alias` attribute, it is also applied statically
-in reverse prior to unparsing on the final configuration. Note that a macro can
-have unbound variables in the right hand side. When such a macro exists, it
-should be used only on the left hand side of rules, unless the user is
-performing symbolic execution and expects to introduce symbolic terms into the
-subject being rewritten.
+`alias` rules are also applied statically in reverse prior to unparsing on the
+final configuration. Note that a macro rule can have unbound variables in the
+right hand side. When such a macro exists, it should be used only on the left
+hand side of rules, unless the user is performing symbolic execution and expects
+to introduce symbolic terms into the subject being rewritten.
 
 However, when used on the left hand side of a rule, it functions similarly to a
 pattern alias, and allows the user to concisely express a reusable pattern that
@@ -1118,10 +1155,10 @@ they wish to match on in multiple places.
 For example, consider the following semantics:
 
 ```k
-syntax KItem ::= "foo" | "foobar"
-syntax KItem ::= bar(KItem) | baz(Int, KItem)
-rule foo => foobar [alias]
-rule bar(I) => baz(?_, I) [macro]
+syntax KItem ::= "foo" [alias] | "foobar"
+syntax KItem ::= bar(KItem) [macro] | baz(Int, KItem)
+rule foo => foobar
+rule bar(I) => baz(?_, I)
 rule bar(I) => I
 ```
 
@@ -1139,10 +1176,10 @@ can be used to provide this behavior.
 For example, consider the following semantics:
 
 ```k
-syntax Exp ::= "int" Exps ";" | Exp Exp | Id
+syntax Exp ::= "int" Exp ";" | "int" Exps ";" [macro] | Exp Exp | Id
 syntax Exps ::= List{Exp,","}
 
-rule int X:Id, X':Id, Xs:Exps ; => int X ; int X', Xs ; [macro]
+rule int X:Id, X':Id, Xs:Exps ; => int X ; int X', Xs ;
 ```
 
 This will expand `int x, y, z;` to `int x; int y, z;` because the macro does
@@ -1170,21 +1207,15 @@ syntax Stmt ::= Stmt ";" Stmt
 rule (S1 ; S2) ; S3 => S1 ; (S2 ; S3) [anywhere]
 ```
 
-Then after every step, all occurances of `_;_` will be re-associated. Note that
+Then after every step, all occurrences of `_;_` will be re-associated. Note that
 this allows the symbol `_;_` to still be a constructor, even though it is
 simplified similarly to a `function`.
 
-### `smt-lemma`, `lemma`, and `trusted` attributes
+### `trusted` claims
 
-These attributes guide the prover when it tries to apply rules to discharge a
-proof obligation.
-
--   `smt-lemma` can be applied to a rule to encode it as an equality when
-    sending queries to Z3.
--   `lemma` distinguishes normal rules from lemma rules in the semantics, but
-    has no affect.
--   `trusted` instructs the prover that it should not attempt proving a given
-    proof obligation, instead trusting that it is true.
+You may add the `trusted` attribute to a given claim for the K prover to
+automatically add it to the list of proven circularities, instead of trying to
+discharge it separately.
 
 ### Projection and Predicate functions
 
@@ -1296,41 +1327,6 @@ side is `#Bottom`. The reason for this is that the general case is undecidable,
 and the backend might enter an infinite loop. Therefore, the backend emits a
 warning if it encounters such a claim.
 
-### `concrete` attribute, `#isConcrete` and `#isVariable` function (Java backend)
-
-**NOTE**: The Haskell backend _does not_ and _will not_ support the
-meta-functions `#isConcrete` and `#isVariable`. See below for information about
-the `concrete` and `symbolic` attributes in the Haskell backend.
-
-Sometimes you only want a given function to simplify if all (or some) of the
-arguments are concrete (non-symbolic). To do so, you can use either the
-`concrete` attribute (if you want it to only apply when all arguments are
-concrete), or the `#isConcrete(_)` side-condition (when you only want it to
-apply if some arguments are concrete). Conversly, the function `#isVariable(_)`
-will only return true when the argument is a variable.
-
-For example, the following will only re-associate terms when all arguments
-are concrete:
-
-```k
-rule X +Int (Y +Int Z) => (X +Int Y) +Int Z [concrete]
-```
-
-And the following rules will only re-associate terms when it will end up
-grouping concrete sub-terms:
-
-```k
-rule X +Int (Y +Int Z) => (X +Int Y) +Int Z
-  requires #isConcrete(X)
-   andBool #isConcrete(Y)
-   andBool #isVariable(Z)
-
-rule X +Int (Y +Int Z) => (X +Int Z) +Int Y
-  requires #isConcrete(X)
-   andBool #isConcrete(Z)
-   andBool #isVariable(Y)
-```
-
 ### `concrete` and `symbolic` attributes (Haskell backend)
 
 Sometimes you only want a rule to apply if some or all arguments are concrete
@@ -1370,7 +1366,7 @@ a comma-separated list of names of variables which can be unbound in the rule.
 
 For example, in the macro declaration
 ```k
-  rule cppEnumType => bar(_, scopedEnum() #Or unscopedEnum() ) [macro, unboundVariables(_)]
+  rule cppEnumType => bar(_, scopedEnum() #Or unscopedEnum() ) [unboundVariables(_)]
 ```
 the declaration `unboundVariables(_)` allows the rule to pass the unbound
 variable checks, and this in turn allows for `cppEnumType` to be used in
@@ -2224,13 +2220,19 @@ more details.
 
 K makes queries to an SMT solver (Z3) to discharge proof obligations when doing
 symbolic execution. You can control how these queries are made using the
-attributes `smtlib` and `smt-hook` on declared productions.
+attributes `smtlib`, `smt-hook`, and `smt-lemma` on declared productions.
+These attributes guide the prover when it tries to apply rules to discharge a
+proof obligation.
 
 - `smt-hook(...)` allows you to specify a term in SMTLIB2 format which should
   be used to encode that production, and assumes that all symbols appearing in
   the term are already declared by the SMT solver.
 - `smtlib(...)` allows you to declare a new SMT symbol to be used when that
   production is sent to Z3, and gives it _uninterpreted function_ semantics.
+- `smt-lemma` can be applied to a rule to encode it as a conditional equality
+  when sending queries to Z3. A rule `rule LHS => RHS requires REQ` will be
+  encoded as the conditional equality `(=> REQ (= (LHS RHS))`. Every symbol
+  present in the rule must have an `smt-hook(...)` or `smtlib(...)` attribute.
 
 ```k
 syntax Int ::= "~Int" Int          [function, klabel(~Int_), symbol,
@@ -2869,8 +2871,8 @@ arguments. A legend describing how to interpret the index follows.
 
 | Name                  | Type  | Backend | Reference                                                                                                                                       |
 | --------------------- | ----- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `alias-rec`           | rule  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
-| `alias`               | rule  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `alias-rec`           | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `alias`               | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
 | `all-path`            | claim | haskell | [`all-path` and `one-path` attributes to distinguish reachability claims](#all-path-and-one-path-attributes-to-distinguish-reachability-claims) |
 | `anywhere`            | rule  | all     | [`anywhere` rules](#anywhere-rules)                                                                                                             |
 | `applyPriority(_)`    | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
@@ -2883,27 +2885,24 @@ arguments. A legend describing how to interpret the index follows.
 | `concrete(_)`         | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
 | `concrete`            | rule  | haskell | [`concrete` and `symbolic` attributes (Haskell backend)](#concrete-and-symbolic-attributes-haskell-backend)                                     |
 | `context(_)`          | alias | all     | [Context aliases](#context-aliases)                                                                                                             |
-| `cool`                | rule  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
 | `exit = ""`           | cell  | all     | [`exit` attribute](#exit-attribute)                                                                                                             |
 | `format`              | prod  | all     | [`format` attribute](#format-attribute)                                                                                                         |
 | `freshGenerator`      | prod  | all     | [`freshGenerator` attribute](#freshgenerator-attribute)                                                                                         |
-| `functional`          | rule  | all     | [`function` and `functional` attributes](#function-and-functional-attributes)                                                                   |
-| `function`            | rule  | all     | [`function` and `functional` attributes](#function-and-functional-attributes)                                                                   |
-| `heat`                | rule  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
+| `functional`          | prod  | all     | [`function` and `functional` attributes](#function-and-functional-attributes)                                                                   |
+| `function`            | prod  | all     | [`function` and `functional` attributes](#function-and-functional-attributes)                                                                   |
 | `hook(_)`             | prod  | all     | No reference yet                                                                                                                                |
 | `hybrid(_)`           | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
 | `hybrid`              | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
-| `klabel(_)`           | all   | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
+| `klabel(_)`           | prod  | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
 | `latex(_)`            | prod  | all     | No reference yet                                                                                                                                |
 | `left`                | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
-| `lemma`               | rule  | all     | [`smt-lemma`, `lemma`, and `trusted` attributes](#smt-lemma-lemma-and-trusted-attributes)                                                       |
 | `locations`           | sort  | all     | [Location Information](#location-information)                                                                                                   |
-| `macro-rec`           | rule  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
-| `macro`               | rule  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `macro-rec`           | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
+| `macro`               | prod  | all     | [Macros and Aliases](#macros-and-aliases)                                                                                                       |
 | `memo`                | rule  | haskell | [The `memo` attribute](#the-memo-attribute)                                                                                                     |
 | `multiplicity = "_"`  | cell  | all     | [Collection Cells: `multiplicity` and `type` attributes](#collection-cells-multiplicity-and-type-attributes)                                    |
 | `non-assoc`           | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
-| `one-path`            | claim | all     | [`all-path` and `one-path` attributes to distinguish reachability claims](#all-path-and-one-path-attributes-to-distinguish-reachability-claims) |
+| `one-path`            | claim | haskell | [`all-path` and `one-path` attributes to distinguish reachability claims](#all-path-and-one-path-attributes-to-distinguish-reachability-claims) |
 | `owise`               | rule  | all     | [`owise` and `priority` attributes](#owise-and-priority-attributes)                                                                             |
 | `prec(_)`             | token | all     | [`prec` attribute](#prec-attribute)                                                                                                             |
 | `prefer`              | prod  | all     | [Symbol priority and associativity](#symbol-priority-and-associativity)                                                                         |
@@ -2920,8 +2919,8 @@ arguments. A legend describing how to interpret the index follows.
 | `simplification`      | rule  | haskell | [`simplification` attribute (Haskell backend)](#simplification-attribute-haskell-backend)                                                       |
 | `simplification(_)`   | rule  | haskell | [`simplification` attribute (Haskell backend)](#simplification-attribute-haskell-backend)                                                       |
 | `smt-hook(_)`         | prod  | haskell | [SMT Translation](#smt-translation)                                                                                                             |
-| `smt-lemma`           | rule  | all     | [`smt-lemma`, `lemma`, and `trusted` attributes](#smt-lemma-lemma-and-trusted-attributes)                                                       |
 | `smtlib(_)`           | prod  | haskell | [SMT Translation](#smt-translation)                                                                                                             |
+| `smt-lemma`           | rule  | haskell | [SMT Translation](#smt-translation)                                                                                                             |
 | `strict`              | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
 | `strict(_)`           | prod  | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)                                                                         |
 | `symbolic`            | mod   | haskell | [`symbolic` and `concrete` attribute](#symbolic-and-concrete-attribute)                                                                         |
@@ -2930,10 +2929,15 @@ arguments. A legend describing how to interpret the index follows.
 | `symbol`              | prod  | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
 | `token`               | prod  | all     | [`token` attribute](#token-attribute)                                                                                                           |
 | `token`               | sort  | all     | [`token` attribute](#token-attribute)                                                                                                           |
-| `trusted`             | claim | haskell | [`smt-lemma`, `lemma`, and `trusted` attributes](#smt-lemma-lemma-and-trusted-attributes)                                                       |
+| `trusted`             | claim | haskell | [`trusted` attribute](#trusted-claims)                                                                                                          |
 | `type = "_"`          | cell  | all     | [Collection Cells: `multiplicity` and `type` attributes](#collection-cells-multiplicity-and-type-attributes)                                    |
 | `unboundVariables(_)` | rule  | all     | [The `unboundVariables` attribute](#the-unboundvariables-attribute)                                                                             |
 | `unused`              | prod  | all     | [`unused` attribute](#unused-attribute)                                                                                                         |
+| `kast`                | mod   | all     | Specify that this module should only be included in KAST backends (Java backend).                                                               |
+| `kore`                | mod   | all     | Specify that this module should only be included in Kore backends (Haskell/LLVM backend).                                                       |
+| `concrete`            | mod   | all     | Specify that this module should only be included in concrete backends (LLVM backend).                                                           |
+| `symbolic`            | mod   | all     | Specify that this module should only be included in symbolic backends (Haskell/Java backend).                                                   |
+| `stream = "_"`        | cell  | all     | Specify that this cell should be hooked up to a stream, either `stdin`, `stdout`, or `stderr`.                                                  |
 
 ### Internal Attribute Index
 
@@ -2953,7 +2957,9 @@ interested readers:
 | `predicate`    | prod | all     | Specifies the sort of a predicate label                                               |
 | `element`      | prod | all     | Specifies the label of the elements in a list                                         |
 | `bracketLabel` | prod | all     | Keep track of the label of a bracket production since it can't have a klabel          |
-
+| `injective`    | prod | all     | Label a given production as injective (unique output for each input)                  |
+| `cool`         | rule | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)               |
+| `heat`         | rule | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)               |
 
 ### Index Legend
 
