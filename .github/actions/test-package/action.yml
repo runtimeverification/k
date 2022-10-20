@@ -23,6 +23,7 @@ runs:
       distro: ${{ inputs.distro }}
       llvm: ${{ inputs.llvm }}
       script: |
+        |
         mv package/debian debian
         mv debian/compat.jammy debian/compat
         mv debian/control.jammy debian/control

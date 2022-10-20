@@ -58,8 +58,8 @@ runs:
           -v "/etc/group:/etc/group:ro"      \
           runtimeverification/${TAG_NAME}
 
-      while read line; do
+      echo ${SCRIPT} | while read line; do
           docker exec --tag ${TAG_NAME} /bin/bash -c "${line}"
-      done <(cat ${SCRIPT})
+      done
 
       docker stop --time=0 ${TAG_NAME}

@@ -95,6 +95,7 @@ jobs:
           distro: jammy
           llvm: 14
           script: |
+            |
             mvn verify --batch-mode -U
             k-distribution/target/release/k/bin/spawn-kserver kserver.log
             cd k-exercises/tutorial && make -j`nproc` --output-sync && cd -
