@@ -46,7 +46,7 @@ jobs:
         with:
           asset_content_type: 'application/gzip'
           asset_name: 'K Framework Ubuntu Jammy (22.04) Deb'
-          asset_path: kframework_ubuntu_jammy.deb
+          asset_path: kframework_amd64_jammy.deb
           upload_url: ${{ github.event.release.upload_url }}
       - name: 'Test and Push up Docker Image'
         shell: bash {0}
@@ -64,6 +64,10 @@ jobs:
           docker exec -t k-package-docker-test-jammy bash -c 'cd ~ && kompile test.k --backend llvm'
           docker exec -t k-package-docker-test-jammy bash -c 'cd ~ && kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
+      - name: 'Clean up Docker Container'
+        if: always()
+        run: |
+          docker stop --time=0 k-package-docker-test-jammy
 
   ubuntu-focal:
     name: 'K Ubuntu Focal Package'
@@ -81,7 +85,7 @@ jobs:
         with:
           asset_content_type: 'application/gzip'
           asset_name: 'K Framework Ubuntu Focal (20.04) Deb'
-          asset_path: kframework_ubuntu_focal.deb
+          asset_path: kframework_amd64_focal.deb
           upload_url: ${{ github.event.release.upload_url }}
       - name: 'Test and Push up Docker Image'
         shell: bash {0}
@@ -99,6 +103,10 @@ jobs:
           docker exec -t k-package-docker-test-focal bash -c 'cd ~ && kompile test.k --backend llvm'
           docker exec -t k-package-docker-test-focal bash -c 'cd ~ && kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
+      - name: Clean up Docker Container
+        if: always()
+        run: |
+          docker stop --time=0 k-package-docker-test-focal
 
   macos-build:
     name: 'Build MacOS Package'
