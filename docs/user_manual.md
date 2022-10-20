@@ -1025,10 +1025,8 @@ the top-level anyway.
 
 Next is the *requires clause*, represented here as `REQ`. The requires clause is
 an additional predicate (function-like term of sort `Bool`), which is to be
-evaluated before applying the rule. For functional rules, if the requires clause
-does not evaluate to `true`, then the rule does not apply. For semantic rules,
-the requires clause may cause the state to branch into two states, one where
-`REQ` holds and one where it does not.
+evaluated before applying the rule. If the requires clause does not evaluate to
+`true`, then the rule does not apply.
 
 Finally is the *ensures clause*, represented here as `ENS`. The ensures clause
 is to be interpreted as a post-condition, and will be automatically added to the
