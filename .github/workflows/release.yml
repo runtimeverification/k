@@ -59,15 +59,15 @@ jobs:
           version_tag=ubuntu-jammy-${version}
           docker login --username rvdockerhub --password ${DOCKERHUB_PASSWORD}
           docker image build . --file package/docker/Dockerfile.ubuntu-jammy --tag ${DOCKERHUB_REPO}:${version_tag}
-          docker run --name k-package-docker-test-jammy --rm -it --detach ${DOCKERHUB_REPO}:${version_tag}
-          docker exec -t k-package-docker-test-jammy bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
-          docker exec -t k-package-docker-test-jammy bash -c 'cd ~ && kompile test.k --backend llvm'
-          docker exec -t k-package-docker-test-jammy bash -c 'cd ~ && kompile test.k --backend haskell'
+          docker run --name k-package-docker-test-jammy-${GITHUB_SHA} --rm -it --detach ${DOCKERHUB_REPO}:${version_tag}
+          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
+          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend llvm'
+          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
       - name: 'Clean up Docker Container'
         if: always()
         run: |
-          docker stop --time=0 k-package-docker-test-jammy
+          docker stop --time=0 k-package-docker-test-jammy-${GITHUB_SHA}
 
   ubuntu-focal:
     name: 'K Ubuntu Focal Package'
@@ -98,15 +98,15 @@ jobs:
           version_tag=ubuntu-focal-${version}
           docker login --username rvdockerhub --password ${DOCKERHUB_PASSWORD}
           docker image build . --file package/docker/Dockerfile.ubuntu-focal --tag ${DOCKERHUB_REPO}:${version_tag}
-          docker run --name k-package-docker-test-focal --rm -it --detach ${DOCKERHUB_REPO}:${version_tag}
-          docker exec -t k-package-docker-test-focal bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
-          docker exec -t k-package-docker-test-focal bash -c 'cd ~ && kompile test.k --backend llvm'
-          docker exec -t k-package-docker-test-focal bash -c 'cd ~ && kompile test.k --backend haskell'
+          docker run --name k-package-docker-test-focal-${GITHUB_SHA} --rm -it --detach ${DOCKERHUB_REPO}:${version_tag}
+          docker exec -t k-package-docker-test-focal-${GITHUB_SHA} bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
+          docker exec -t k-package-docker-test-focal-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend llvm'
+          docker exec -t k-package-docker-test-focal-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
       - name: Clean up Docker Container
         if: always()
         run: |
-          docker stop --time=0 k-package-docker-test-focal
+          docker stop --time=0 k-package-docker-test-focal-${GITHUB_SHA}
 
   macos-build:
     name: 'Build MacOS Package'
