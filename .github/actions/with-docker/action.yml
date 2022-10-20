@@ -14,6 +14,9 @@ inputs:
   llvm:
     description: 'LLVM version to use.'
     required: true
+  script:
+    description: 'Commands to run in Docker container.'
+    required: true
 runs:
   using: 'composite'
   steps:
@@ -24,6 +27,7 @@ runs:
       SUBDIR: ${{ inputs.subdir }}
       BASE_IMAGE: ${{ inputs.distro }}
       LLVM_VERSION: ${{ inputs.llvm }}
+      SCRIPT: ${{ inputs.script }}
     run: |
       set -euxo pipefail
 
@@ -53,3 +57,9 @@ runs:
           -v "/etc/passwd:/etc/passwd:ro"    \
           -v "/etc/group:/etc/group:ro"      \
           runtimeverification/${TAG_NAME}
+
+      while read line; do
+          docker exec --tag ${TAG_NAME} /bin/bash -c "${line}"
+      done
+
+      docker stop --time=0 ${TAG_NAME}
