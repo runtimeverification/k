@@ -1036,8 +1036,8 @@ case. Note that concrete backends (eg. the LLVM backend) are free to ignore the
 ensures clause.
 
 Overall, the transition represented by such a rule is from a state
-`LHS #And REQ` ending in a state `RHS #And ENS`. When backends are applying this
-rule as a transition/rewrite, they should:
+`LHS #And REQ` ending in a state `RHS #And ENS`. When backends apply this rule
+as a transition/rewrite, they should:
 
 - Check if pattern `LHS` matches (or unifies) with the current term, giving
   substitution `alpha`.
