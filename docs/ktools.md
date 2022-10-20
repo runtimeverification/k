@@ -3,6 +3,55 @@ K Tools
 
 Here we document how to use some of the most commonly used K tools.
 
+Minimizing Output
+-----------------
+
+When one is working with `kore-repl` or the prover in general and looking at
+specific configurations using config, sometimes the configurations can be huge.
+
+One tool to help print configuration compactly is the `pyk print` utility:
+
+```sh
+pyk print
+```
+
+We are going to use `--minimize` option (which is actually used automatically
+when printing with pyk). This will filter out many uninteresting cells for the
+current config and make the result more compact.
+
+Then, when invoking the prover, you can minimize your output by piping it into
+the `pyk print ...` facility with arguments for controlling the output:
+
+```sh
+kprove --output json --definition DEFN ... \
+    | jq .term                             \
+    | pyk print DEFN /dev/stdin --omit-labels ... --keep-labels ...
+```
+
+You can also use this in the `kore-repl` more easily, by making a help script.
+In your current directory, save a new script `pykprint.sh`:
+
+```sh
+#!/bin/bash
+
+kast --input kore --output json --definition $1 /dev/stdin \
+    | jq .term                                             \
+    | pyk print $1 /dev/stdin --omit-labels $2
+```
+
+Now call `config | bash pykprint.sh DEFN` in Kore REPL to make the output
+smaller.
+
+The options you have to control the output are as follows:
+
+- `--no-minimize`: do not remove uninteresting cells.
+- `--omit-cells`: remove the selected cells from the output.
+- `--keep-cells`: keep only the selected cells in the output.
+
+Note: Make sure that there is no whitespace around , in the omit list,
+otherwise you'll get an error (, is a list separator, so this
+requirement is strict).
+
 Debugging
 ---------
 
