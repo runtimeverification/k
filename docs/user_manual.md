@@ -1034,7 +1034,8 @@ Finally is the *ensures clause*, represented here as `ENS`. The ensures clause
 is to be interpreted as a post-condition, and will be automatically added to the
 path condition if the rule applies. It *may* cause the entire term to become
 undefined, but the backend will not stop itself from applying the rule in this
-case.
+case. Note that concrete backends (eg. the LLVM backend) are free to ignore the
+ensures clause.
 
 Overall, the transition represented by such a rule is from a state
 `LHS #And REQ` ending in a state `RHS #And ENS`. When backends are applying this
