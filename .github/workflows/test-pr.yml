@@ -88,7 +88,7 @@ jobs:
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           submodules: recursive
           path: k-exercises
-      - name: 'Set up Docker'
+      - name: 'Run K Tests'
         uses: ./.github/actions/with-docker
         with:
           tag: k-ci
