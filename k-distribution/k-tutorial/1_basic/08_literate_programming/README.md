@@ -33,10 +33,12 @@ and ends when it encounters another ` ``` ` keyword.
 For example, if you view the markdown source of this document, this is a K
 code block:
 
+````
 ```k
 module LESSON-08
   imports INT
 ```
+````
 
 Only the code inside K code blocks will actually be sent to the compiler. The
 rest, while it may appear in the document when rendered by a markdown viewer,
@@ -48,10 +50,12 @@ together into a single file before passing it off to the outer parser.
 For example, the following code block contains sentences that are part of the
 `LESSON-08` module that we declared the beginning of above:
 
+````
 ```k
   syntax Int ::= Int "+" Int [function]
   rule I1 + I2 => I1 +Int I2
 ```
+````
 
 ### Exercise
 
@@ -80,19 +84,23 @@ the selector immediately following the backticks that open the code block.
 
 For example, here is a code block with the `foo` selector:
 
+````
 ```foo
 foo bar
 ```
+````
 
 Note that this is not K code. By convention, K code should have the `k`
 selector on it. You can express multiple selectors on a code block by putting
 them between curly braces and prepending each with the `.` character. For
 example, here is a code block with the `foo` and `k` selectors:
 
+````
 ```{.k .foo}
   syntax Int ::= foo(Int) [function]
   rule foo(0) => 0
 ```
+````
 
 Because this code block contains the `k` Markdown selector, by default it is
 included as part of the K definition being compiled.
@@ -115,6 +123,7 @@ Each selector becomes an atom, and you can combine these atoms via the `&`,
 Here is a grammar, written in K, of the language of Markdown selector
 expressions:
 
+````
 ```{.k .selector}
   syntax Selector ::= r"[0-9a-zA-Z_]+" [token]
   syntax SelectorExp ::= Selector
@@ -126,22 +135,27 @@ expressions:
                        > right:
                          SelectorExp "|" SelectorExp
 ```
+````
 
 Here is a selector expression that selects all the K code blocks in this
 definition except the one immediately above:
 
+````
 ```
 k & (! selector)
 ```
+````
 
 ## Addendum
 
 This code block exists in order to make the above lesson a syntactically valid
 K definition. Consider why it is necessary.
 
+````
 ```k
 endmodule
 ```
+````
 
 ### Exercises
 
