@@ -1,0 +1,40 @@
+name: 'Run Tests'
+on:
+  push:
+    branches:
+      - 'master'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+
+  tag-release:
+    name: 'Tag Release and Bump Dependents'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.JENKINS_GITHUB_PAT }}
+          # fetch-depth 0 means deep clone the repo
+          fetch-depth: 0
+      - name: 'Update Version'
+        run: |
+          git config user.name devops
+          git config user.email devops@runtimeverification.com
+          version=v"$(cat package/version)"
+          git tag --delete "${version}" || true
+          git push --delete origin "${version}" || true
+          git tag "${version}" HEAD
+          git push origin "${version}:${version}"
+      - name: 'Update dependents'
+        env:
+          JENKINS_DEVOPS_TOKEN: ${{ secrets.JENKINS_DEVOPS_TOKEN }}
+        run: |
+          version="v$(cat package/version)"
+          curl --fail 'https://ci.runtimeverification.com/jenkins/buildByToken/buildWithParameters' \
+              --data job=Devops/master                                                              \
+              --data token=${JENKINS_DEVOPS_TOKEN}                                                  \
+              --data UPDATE_DEPS=true                                                               \
+              --data UPDATE_DEPS_REPO=runtimeverification/pyk                                       \
+              --data UPDATE_DEPS_VERSION=${version}
