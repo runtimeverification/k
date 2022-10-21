@@ -29,9 +29,9 @@ runs:
     run: |
       set -euxo pipefail
       docker exec -t k-package-build-${DISTRO}-${GITHUB_SHA} /bin/bash -c 'mv package/debian debian'
-      docker exec -t k-package-build-${DISTRO}-${GITHUB_SHA} /bin/bash -c 'mv debian/compat.jammy debian/compat'
-      docker exec -t k-package-build-${DISTRO}-${GITHUB_SHA} /bin/bash -c 'mv debian/control.jammy debian/control'
-      docker exec -t k-package-build-${DISTRO}-${GITHUB_SHA} /bin/bash -c 'mv debian/rules.jammy debian/rules'
+      docker exec -t k-package-build-${DISTRO}-${GITHUB_SHA} /bin/bash -c "mv debian/compat.${DISTRO} debian/compat"
+      docker exec -t k-package-build-${DISTRO}-${GITHUB_SHA} /bin/bash -c "mv debian/control.${DISTRO} debian/control"
+      docker exec -t k-package-build-${DISTRO}-${GITHUB_SHA} /bin/bash -c "mv debian/rules.${DISTRO} debian/rules"
       docker exec -t k-package-build-${DISTRO}-${GITHUB_SHA} /bin/bash -c 'dpkg-buildpackage'
   - name: 'Tear down Docker'
     shell: bash {0}
