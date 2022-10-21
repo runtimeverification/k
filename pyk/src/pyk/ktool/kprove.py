@@ -256,7 +256,7 @@ class KProve(KPrint):
             haskell_args=(['--execute-to-branch'] + list(haskell_args)),
             log_axioms_file=log_axioms_file,
         )
-        if len(flatten_label('#And', next_state)) != 1:
+        if len(flatten_label('#Or', next_state)) != 1:
             raise AssertionError(f'get_basic_block execeted 1 state from Haskell backend, got: {next_state}')
         with open(log_axioms_file) as lf:
             log_file = lf.readlines()
