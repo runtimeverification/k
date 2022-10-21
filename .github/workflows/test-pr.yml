@@ -84,11 +84,11 @@ jobs:
       - name: 'Set up Docker'
         uses: ./.github/actions/with-docker
         with:
-          tag: k-ci
+          tag: k-ci-${{ github.sha }}
           distro: jammy
           llvm: 14
       - name: 'Build and Test K'
-        run: docker exec -t k-ci /bin/bash -c 'mvn verify --batch-mode -U'
+        run: docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'mvn verify --batch-mode -U'
       - name: 'Check out k-exercises'
         uses: actions/checkout@v3
         with:
@@ -98,14 +98,14 @@ jobs:
           path: k-exercises
       - name: 'Tutorial Integration Tests'
         run: |
-          docker exec -t k-ci /bin/bash -c 'k-distribution/target/release/k/bin/spawn-kserver kserver.log'
-          docker exec -t k-ci /bin/bash -c 'cd k-exercises/tutorial && make -j`nproc` --output-sync'
-          docker exec -t k-ci /bin/bash -c 'cd k-distribution/k-tutorial/1_basic && ./test_kompile.sh'
+          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'k-distribution/target/release/k/bin/spawn-kserver kserver.log'
+          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-exercises/tutorial && make -j`nproc` --output-sync'
+          docker exec -t k-ci-${GITHUB_SHA} /bin/bash -c 'cd k-distribution/k-tutorial/1_basic && ./test_kompile.sh'
       - name: 'Tear down Docker'
         if: always()
         run: |
-          docker stop --time=0 k-ci
-          docker container rm --force k-ci || true
+          docker stop --time=0 k-ci-${GITHUB_SHA}
+          docker container rm --force k-ci-${GITHUB_SHA} || true
 
   test-package-ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
