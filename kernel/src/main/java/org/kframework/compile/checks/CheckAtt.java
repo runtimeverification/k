@@ -3,6 +3,7 @@ package org.kframework.compile.checks;
 
 import org.kframework.attributes.Att;
 import org.kframework.attributes.HasLocation;
+import org.kframework.backend.Backends;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.definition.Production;
@@ -28,13 +29,15 @@ public class CheckAtt {
     private final KExceptionManager kem;
     private final Module m;
     private final boolean isSymbolicKast;
+    private final String backend;
 
-    public CheckAtt(Set<KEMException> errors, KExceptionManager kem, Module m, boolean isSymbolicKast) {
+    public CheckAtt(Set<KEMException> errors, KExceptionManager kem, Module m, boolean isSymbolicKast, String backend) {
         this.errors = errors;
         this.kem = kem;
         this.m = m;
         this.isSymbolicKast = isSymbolicKast;
         this.macros = m.macroKLabels();
+        this.backend = backend;
     }
 
     public void check(Sentence sentence) {
@@ -145,7 +148,7 @@ public class CheckAtt {
     }
 
     private void check(Rule rule) {
-        if (rule.isMacro()) {
+        if (rule.isMacro() && !backend.equals(Backends.JAVA)) {
             kem.registerCompilerWarning(ExceptionType.RULE_HAS_MACRO_ATT, errors,
                     "The attribute [" + rule.att().getMacro().get() + "] has been deprecated on rules. Use this label on syntax declarations instead.", rule);
         }
