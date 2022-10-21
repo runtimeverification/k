@@ -91,7 +91,7 @@ jobs:
       - name: 'Run K Tests'
         uses: ./.github/actions/with-docker
         with:
-          tag: k-ci
+          tag: k-ci-${{ github.sha }}
           distro: jammy
           llvm: 14
           script: |
