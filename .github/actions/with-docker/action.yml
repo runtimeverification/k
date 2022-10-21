@@ -27,7 +27,7 @@ runs:
       SUBDIR: ${{ inputs.subdir }}
       BASE_IMAGE: ${{ inputs.distro }}
       LLVM_VERSION: ${{ inputs.llvm }}
-      SCRIPT: ${{ inputs.script }}
+      SCRIPT: "${{ inputs.script }}"
     run: |
       set -euxo pipefail
 
