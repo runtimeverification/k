@@ -1,6 +1,7 @@
 import json
 import shutil
 from pathlib import Path
+from tempfile import mkdtemp
 from typing import Iterable, Optional
 from unittest import TestCase
 
@@ -12,7 +13,6 @@ from pyk.prelude.ml import is_top
 class KompiledTest(TestCase):
     KOMPILE_MAIN_FILE: str
     KOMPILE_BACKEND: Optional[KompileBackend] = None
-    KOMPILE_OUTPUT_DIR: Optional[str] = None
     KOMPILE_INCLUDE_DIRS: Iterable[str] = []
     KOMPILE_EMIT_JSON = False
     KOMPILE_POST_PROCESS: Optional[str] = None
@@ -25,8 +25,7 @@ class KompiledTest(TestCase):
         self.assertTrue(main_file.is_file())
         self.assertEqual(main_file.suffix, '.k')
 
-        output_dir = Path(self.KOMPILE_OUTPUT_DIR) if self.KOMPILE_OUTPUT_DIR else None
-
+        output_dir = Path(mkdtemp())
         include_dirs = [Path(include_dir) for include_dir in self.KOMPILE_INCLUDE_DIRS]
         self.assertTrue(all(include_dir.is_dir() for include_dir in include_dirs))
 
@@ -45,7 +44,7 @@ class KompiledTest(TestCase):
                 self.definition = KDefinition.from_dict(json_dct['term'])
 
     def tearDown(self) -> None:
-        shutil.rmtree(self.kompiled_dir)
+        shutil.rmtree(self.kompiled_dir, ignore_errors=True)
 
     def assertTop(self, term: KInner) -> None:  # noqa: N802
         self.assertTrue(is_top(term), f'{term} is not #Top')

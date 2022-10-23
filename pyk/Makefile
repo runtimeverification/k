@@ -15,7 +15,7 @@ default: check test-unit
 all: check test
 
 clean:
-	rm -rf definitions dist .mypy_cache
+	rm -rf dist .mypy_cache
 	find -type d -name __pycache__ -prune -exec rm -rf {} \;
 	$(MAKE) -C pyk-tests clean
 
