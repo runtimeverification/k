@@ -10,10 +10,7 @@ from .kprove_test import KProveTest
 class DefnTest(KProveTest):
     KOMPILE_MAIN_FILE = 'k-files/imp-verification.k'
     KOMPILE_BACKEND = KompileBackend.HASKELL
-    KOMPILE_OUTPUT_DIR = 'definitions/imp-verification'
     KOMPILE_EMIT_JSON = True
-
-    KPROVE_USE_DIR = '.defn-test'
 
     @staticmethod
     def _update_symbol_table(symbol_table: SymbolTable) -> None:
