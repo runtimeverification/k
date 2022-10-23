@@ -12,7 +12,6 @@ from .krun_test import KRunTest
 class ImpRunTest(KRunTest):
     KOMPILE_MAIN_FILE = 'k-files/imp.k'
     KOMPILE_BACKEND = KompileBackend.HASKELL
-    KOMPILE_OUTPUT_DIR = 'definitions/imp'
     KOMPILE_EMIT_JSON = True
 
     KRUN_USE_DIR: Optional[str] = '.imp'

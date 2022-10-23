@@ -7,7 +7,6 @@ from .kompiled_test import KompiledTest
 class RegexTerminalTest(KompiledTest):
     KOMPILE_MAIN_FILE = 'k-files/regex-terminal.k'
     KOMPILE_BACKEND = KompileBackend.HASKELL
-    KOMPILE_OUTPUT_DIR = 'definitions/regex-terminal'
     KOMPILE_EMIT_JSON = True
     KOMPILE_POST_PROCESS = 'cat'  # This ensures that the compiled JSON is read back by K
 
