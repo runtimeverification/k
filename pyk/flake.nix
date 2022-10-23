@@ -3,7 +3,7 @@
 
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs";
-  inputs.poetry2nix.url = "github:nix-community/poetry2nix";
+  inputs.poetry2nix.url = "github:nix-community/poetry2nix/1.33.0";
 
   outputs = { self, nixpkgs, flake-utils, poetry2nix }:
     {
