@@ -472,8 +472,8 @@ module K
       change in the future).*/
 
   syntax Bool ::= left:
-                  K ":=K" K           [function, functional, klabel(_:=K_), symbol, equalEqualK]
-                | K ":/=K" K          [function, functional, klabel(_:/=K_), symbol, notEqualEqualK]
+                  K ":=K" K           [function, total, klabel(_:=K_), symbol, equalEqualK]
+                | K ":/=K" K          [function, total, klabel(_:/=K_), symbol, notEqualEqualK]
 endmodule
 
 // To be used to parse terms in full K
