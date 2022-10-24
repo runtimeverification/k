@@ -306,17 +306,6 @@ def collapse_dots(kast: KInner) -> KInner:
 
 
 def push_down_rewrites(kast: KInner) -> KInner:
-    def _flatten_ksequence(_kast: KInner) -> KInner:
-        if type(_kast) is KSequence:
-            new_items: List[KInner] = []
-            for item in _kast.items:
-                if type(item) is KSequence:
-                    new_items.extend(item.items)
-                else:
-                    new_items.append(item)
-            return KSequence(new_items)
-        return _kast
-
     def _push_down_rewrites(_kast: KInner) -> KInner:
         if type(_kast) is KRewrite:
             lhs = _kast.lhs
@@ -333,12 +322,12 @@ def push_down_rewrites(kast: KInner) -> KInner:
                     return KRewrite(lhs.items[0], rhs.items[0])
                 if lhs.items[0] == rhs.items[0]:
                     lower_rewrite = _push_down_rewrites(KRewrite(KSequence(lhs.items[1:]), KSequence(rhs.items[1:])))
-                    return _flatten_ksequence(KSequence([lhs.items[0], lower_rewrite]))
+                    return KSequence([lhs.items[0], lower_rewrite])
                 if lhs.items[-1] == rhs.items[-1]:
                     lower_rewrite = _push_down_rewrites(
                         KRewrite(KSequence(lhs.items[0:-1]), KSequence(rhs.items[0:-1]))
                     )
-                    return _flatten_ksequence(KSequence([lower_rewrite, lhs.items[-1]]))
+                    return KSequence([lower_rewrite, lhs.items[-1]])
             if (
                 type(lhs) is KSequence
                 and lhs.arity > 0
