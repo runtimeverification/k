@@ -426,7 +426,7 @@ argument and parameter are K, and it has no effect on the resulting sort of
 the term. However, it will nevertheless affect the kore generated from the term
 by introducing an additional parameter to the symbol generated for the term.
 
-### `function` and `functional` attributes
+### `function` and `total` attributes
 
 Many times it becomes easier to write a semantics if you have "helper"
 functions written which can be used in the RHS of rules. The `function`
@@ -435,10 +435,11 @@ appears anywhere in the configuration. Semantically, it means that evaluation
 of that symbol will result in at most one return value (that is, the symbol is
 a *partial function*).
 
-The `functional` attribute indicates to the symbolic reasoning engine that a
-given symbol is a *total function*, that is it has *exactly* one return value
-for every possible input. Note that it does not make sense to have only the
-`functional` attribute without the `function` attribute.
+The `total` attribute can be added to a production with the `function`
+attribute to indicate to the symbolic reasoning engine that a given symbol is a
+*total function*, that is it has *exactly* one return value for every possible
+input. While the `total` attribute can in theory be added to something which
+is not a function, this behavior is not currently implemented.
 
 For example, here we define the `_+Word_` total function and the `_/Word_`
 partial function, which can be used to do addition/division modulo
@@ -447,7 +448,7 @@ integers should not grow larger than `2 ^Int 256`. Notice how `_/Word_` is
 *not* defined when the denominator is `0`.
 
 ```k
-syntax Int ::= Int "+Word" Int [function, functional]
+syntax Int ::= Int "+Word" Int [function, total]
              | Int "/Word" Int [function]
 
 rule I1 +Word I2 => (I1 +Int I2) modInt (2 ^Int 256)
@@ -480,7 +481,7 @@ generate fresh `Foo`s using the `freshFoo(_)` function annotated with
 ```k
 syntax Foo ::= "a" | "b" | "c" | d ( Int )
 
-syntax Foo ::= freshFoo ( Int ) [freshGenerator, function, functional]
+syntax Foo ::= freshFoo ( Int ) [freshGenerator, function, total]
 
 rule freshFoo(0) => a
 rule freshFoo(1) => b
@@ -511,13 +512,13 @@ implemented by builtin hooks.
 The hook `STRING.token2string` allows conversion of any token to a string:
 
 ```k
-syntax String ::= FooToString(Foo)  [function, functional, hook(STRING.token2string)]
+syntax String ::= FooToString(Foo)  [function, total, hook(STRING.token2string)]
 ```
 
 Similarly, the hook `STRING.string2Token` allows the inverse:
 
 ```k
-syntax Bar ::= StringToBar(String) [function, functional, hook(STRING.string2token)]
+syntax Bar ::= StringToBar(String) [function, total, hook(STRING.string2token)]
 ```
 
 WARNING: This sort of conversion does *NOT* do any sort of parsing or validation.
@@ -2502,7 +2503,7 @@ any one implementation.
 We do not need special frontend syntax to define `arb()`.
 We only need to define it in the usual way as a function
 (instead of a language construct), and provide no axioms for it.
-The `functional` attribute ensures that the function is total, i.e.,
+The `total` attribute ensures that the function is total, i.e.,
 that it evaluates to precisely one value for each input.
 
 ##### Variants
@@ -2541,7 +2542,7 @@ The intended semantics of `interval(M,N)` is that it equals the _set_ of
 integers that are larger than or equal to `M` and smaller than or equal to `N`.
 
 Since expressing the axiom for `interval` requires an an existential
-quantification on the right-hand-side, thus making it a non-functional symbol
+quantification on the right-hand-side, thus making it a non-total symbol
 defined through an equation, using `?` variables might be confusing since their
 usage would be different from that presented in the previous sections.
 
@@ -2888,8 +2889,7 @@ arguments. A legend describing how to interpret the index follows.
 | `exit = ""`           | cell  | all     | [`exit` attribute](#exit-attribute)                                                                                                             |
 | `format`              | prod  | all     | [`format` attribute](#format-attribute)                                                                                                         |
 | `freshGenerator`      | prod  | all     | [`freshGenerator` attribute](#freshgenerator-attribute)                                                                                         |
-| `functional`          | prod  | all     | [`function` and `functional` attributes](#function-and-functional-attributes)                                                                   |
-| `function`            | prod  | all     | [`function` and `functional` attributes](#function-and-functional-attributes)                                                                   |
+| `function`            | prod  | all     | [`function` and `total` attributes](#function-and-total-attributes)                                                                             |
 | `hook(_)`             | prod  | all     | No reference yet                                                                                                                                |
 | `hybrid(_)`           | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
 | `hybrid`              | prod  | all     | [`hybrid` attribute](#hybrid-attribute)                                                                                                         |
@@ -2929,6 +2929,7 @@ arguments. A legend describing how to interpret the index follows.
 | `symbol`              | prod  | all     | [`klabel(_)` and `symbol` attributes](#klabel_-and-symbol-attributes)                                                                           |
 | `token`               | prod  | all     | [`token` attribute](#token-attribute)                                                                                                           |
 | `token`               | sort  | all     | [`token` attribute](#token-attribute)                                                                                                           |
+| `total`               | prod  | all     | [`function` and `total` attributes](#function-and-total-attributes)                                                                             |
 | `trusted`             | claim | haskell | [`trusted` attribute](#trusted-claims)                                                                                                          |
 | `type = "_"`          | cell  | all     | [Collection Cells: `multiplicity` and `type` attributes](#collection-cells-multiplicity-and-type-attributes)                                    |
 | `unboundVariables(_)` | rule  | all     | [The `unboundVariables` attribute](#the-unboundvariables-attribute)                                                                             |
