@@ -110,7 +110,6 @@ public class KException implements Serializable, HasLocation {
 
     public enum ExceptionType {
         ERROR,
-        RULE_HAS_MACRO_ATT,
         NON_EXHAUSTIVE_MATCH,
         UNDELETED_TEMP_DIR,
         MISSING_SYNTAX_MODULE,

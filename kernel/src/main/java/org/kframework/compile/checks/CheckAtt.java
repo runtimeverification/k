@@ -150,7 +150,7 @@ public class CheckAtt {
 
     private void check(Rule rule) {
         if (rule.isMacro()) {
-            kem.registerCompilerWarning(ExceptionType.RULE_HAS_MACRO_ATT, errors,
+            kem.registerCompilerWarning(ExceptionType.FUTURE_ERROR, errors,
                     "The attribute [" + rule.att().getMacro().get() + "] has been deprecated on rules. Use this label on syntax declarations instead.", rule);
         }
 
