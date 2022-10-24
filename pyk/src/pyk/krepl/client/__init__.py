@@ -1,31 +1,39 @@
 from cmd import Cmd
 from pathlib import Path
-from typing import Any, Final, List
+from typing import Any, Dict, Final, List, Literal, Mapping, Optional
+
+import requests
+from requests import Response
 
 from pyk.cli_utils import check_file_path, dir_path, file_path
-
-from ..rpc.client import JsonRpcClient
 
 DEFAULT_PORT: Final = 42412
 
 
 class KReplClient:
-    _client: JsonRpcClient
+    _HOST: Final = 'localhost'
+
+    _port: int
 
     def __init__(self, port: int):
-        self._client = JsonRpcClient(port)
+        self._port = port
 
-    def load_raw(self, path: Path) -> str:
+    def _request(self, method: Literal['GET', 'POST'], path: str, *, json: Optional[Any] = None) -> Response:
+        url = f'http://{self._HOST}:{self._port}/{path}'
+        response = requests.request(method, url, json=json)
+        response.raise_for_status()
+        return response
+
+    def load_raw(self, path: Path) -> Dict[str, Mapping]:
         check_file_path(path)
         with open(path, 'r') as f:
             text = f.read()
-
-        response = self._client.load_raw(text)
-        return response
+        response = self._request('POST', 'load-raw', json={'term': text})
+        return response.json()
 
     def step_to_branch(self) -> str:
-        response = self._client.step_to_branch()
-        return response
+        response = self._request('POST', 'step-to-branch')
+        return response.json()['configId']
 
 
 class Repl(Cmd):
@@ -58,7 +66,12 @@ class Repl(Cmd):
             print(err.args[0])
             return
 
-        response = self._client.load_raw(path)
+        try:
+            response = self._client.load_raw(path)
+        except Exception as err:
+            print(err.args[0])
+            return
+
         print(response)
 
     def do_step_to_branch(self, arg: str) -> None:
@@ -69,7 +82,12 @@ class Repl(Cmd):
             print(err.args[0])
             return
 
-        response = self._client.step_to_branch()
+        try:
+            response = self._client.step_to_branch()
+        except Exception as err:
+            print(err.args[0])
+            return
+
         print(response)
 
     def do_exit(self, arg: str) -> bool:
