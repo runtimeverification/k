@@ -52,14 +52,14 @@ test-kit: poetry-install
 
 # Checks and formatting
 
-format: isort autoflake black
-check: check-isort check-autoflake check-black check-flake8 check-mypy
+format: autoflake isort black
+check: check-flake8 check-mypy check-autoflake check-isort check-black
 
-isort: poetry-install
-	$(POETRY_RUN) isort src
+check-flake8: poetry-install
+	$(POETRY_RUN) flake8 src
 
-check-isort: poetry-install
-	$(POETRY_RUN) isort --check src
+check-mypy: poetry-install
+	$(POETRY_RUN) mypy src
 
 autoflake: poetry-install
 	$(POETRY_RUN) autoflake --quiet --in-place src
@@ -67,14 +67,14 @@ autoflake: poetry-install
 check-autoflake: poetry-install
 	$(POETRY_RUN) autoflake --quiet --check src
 
-check-flake8: poetry-install
-	$(POETRY_RUN) flake8 src
+isort: poetry-install
+	$(POETRY_RUN) isort src
+
+check-isort: poetry-install
+	$(POETRY_RUN) isort --check src
 
 black: poetry-install
 	$(POETRY_RUN) black src
 
 check-black: poetry-install
 	$(POETRY_RUN) black --check src
-
-check-mypy: poetry-install
-	$(POETRY_RUN) mypy src
