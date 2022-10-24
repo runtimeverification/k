@@ -142,6 +142,10 @@ public class CheckAtt {
         if (hasColors && nescapes + nterminals != ncolors) {
             errors.add(KEMException.compilerError("Invalid colors attribute: expected " + (nescapes + nterminals) + " colors, found " + ncolors + " colors instead.", prod));
         }
+        if (prod.att().contains(Att.FUNCTIONAL())) {
+            kem.registerCompilerWarning(ExceptionType.FUTURE_ERROR, errors,
+                "The attribute 'functional' has been deprecated on symbols. Use the combination of attributes 'function' and 'total' instead.", prod);
+        }
     }
 
     private void check(Rule rule) {
