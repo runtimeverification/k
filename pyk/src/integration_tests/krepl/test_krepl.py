@@ -20,4 +20,4 @@ class KReplRequestTest(KReplTest):
         response = self.client.step_to_branch()
 
         # Then
-        self.assertEqual(response, '')
+        self.assertEqual(response, '1')

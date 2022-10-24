@@ -17,10 +17,7 @@ def main() -> None:
     server = KReplServer(args.port)
 
     _LOGGER.info(f'Server started at port {args.port}')
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        ...
+    server.run()
     _LOGGER.info('Server stopped')
 
 

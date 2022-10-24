@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyk"
-version = "0.1.28"
+version = "0.1.29"
 description = ""
 authors = [
     "Runtime Verification, Inc. <contact@runtimeverification.com>",
@@ -12,8 +12,9 @@ authors = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
+flask = "^2.2.2"
 graphviz = "^0.20.1"
-tinyrpc = { version = "^1.1.5", extras = [ "gevent", "httpclient", "wsgi" ] }
+requests = "^2.28.1"
 
 [tool.poetry.group.dev.dependencies]
 autoflake = "*"
@@ -25,6 +26,7 @@ flake8-quotes = "*"
 isort = "*"
 mypy = "*"
 pep8-naming = "*"
+types-requests = "^2.28.1"
 
 [tool.poetry.scripts]
 pyk = "pyk.__main__:main"
@@ -52,13 +54,5 @@ skip-string-normalization = true
 disallow_untyped_defs = true
 
 [[tool.mypy.overrides]]
-module = "gevent.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
 module = "graphviz"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "tinyrpc.*"
 ignore_missing_imports = true
