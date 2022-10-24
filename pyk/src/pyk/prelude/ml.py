@@ -9,6 +9,10 @@ def is_top(term: KInner) -> bool:
     return isinstance(term, KApply) and term.label.name == '#Top'
 
 
+def is_bottom(term: KInner) -> bool:
+    return isinstance(term, KApply) and term.label.name == '#Bottom'
+
+
 # TODO default sort K can be tightened using basic type inference
 def mlEquals(  # noqa: N802
     term1: KInner,
@@ -28,7 +32,7 @@ def mlTop(sort: Union[str, KSort] = K) -> KApply:  # noqa: N802
 
 
 def mlBottom(sort: Union[str, KSort] = K) -> KApply:  # noqa: N802
-    return KLabel('#Top', sort)()
+    return KLabel('#Bottom', sort)()
 
 
 def mlNot(term: KInner, sort: Union[str, KSort] = K) -> KApply:  # noqa: N802

@@ -681,6 +681,14 @@ class KSequence(KInner, Sequence[KInner]):
         else:
             items = args
 
+        _items = []
+        for i in items:
+            if type(i) is KSequence:
+                _items.extend(list(i.items))
+            else:
+                _items.append(i)
+        items = tuple(_items)
+
         object.__setattr__(self, 'items', tuple(items))
 
     @overload
@@ -717,8 +725,16 @@ class KSequence(KInner, Sequence[KInner]):
         return self.let(items=(f(item) for item in self.items))
 
     def match(self, term: KInner) -> Optional[Subst]:
-        if type(term) is KSequence and term.arity == self.arity:
-            return KInner._combine_matches(item.match(term_item) for item, term_item in zip(self.items, term.items))
+        if type(term) is KSequence:
+            if term.arity == self.arity:
+                return KInner._combine_matches(item.match(term_item) for item, term_item in zip(self.items, term.items))
+            if 0 < self.arity and self.arity < term.arity and type(self.items[-1]) is KVariable:
+                common_length = len(self.items) - 1
+                _subst: Optional[Subst] = Subst({self.items[-1].name: KSequence(term.items[common_length:])})
+                for si, ti in zip(self.items[:common_length], term.items[:common_length]):
+                    _subst = KInner._combine_matches([_subst, si.match(ti)])
+                return _subst
+
         return None
 
 

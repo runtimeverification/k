@@ -55,7 +55,11 @@ class KRun(KPrint):
             ntf.write(self.pretty_print(init_PGM))
             ntf.flush()
             result = _krun(
-                self.definition_dir, Path(ntf.name), depth=depth, args=['--output', 'json'], profile=self._profile
+                self.definition_dir,
+                Path(ntf.name),
+                depth=depth,
+                args=(list(args) + ['--output', 'json']),
+                profile=self._profile,
             )
             if result.returncode != 0:
                 raise RuntimeError('Non-zero exit-code from krun.')
