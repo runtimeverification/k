@@ -139,6 +139,7 @@ object Att {
   val TAG = "tag"
   val TOKEN = "token"
   val TOP_RULE = "topRule"
+  val TOTAL = "total"
   val TRANSITION = "transition"
   val TRUSTED = "trusted"
   val UNBOUND_VARIABLES = "unboundVariables"
