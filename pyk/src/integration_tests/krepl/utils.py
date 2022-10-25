@@ -38,12 +38,13 @@ class KReplTest(TestCase):
         port = free_port_on_host()
 
         args: List[str] = []
+        args += ['--host', 'localhost']
         args += ['--port', str(port)]
         args += ['--loglevel', self.KREPL_LOGLEVEL]
 
         self._server = KReplProc(*args)
         wait_for_port(port)
-        self.client = KReplClient(port)
+        self.client = KReplClient('localhost', port)
 
     def tearDown(self) -> None:
         self._server.close()

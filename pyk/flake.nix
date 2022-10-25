@@ -15,6 +15,13 @@
           groups = [];
           # We remove `"dev"` from `checkGroups`, so that poetry2nix does not try to resolve dev dependencies.
           checkGroups = [];
+          overrides = prev.poetry2nix.overrides.withDefaults (finalPython: prevPython: {
+            graphql-server = prevPython.graphql-server.overridePythonAttrs(oldAttrs: {
+              buildInputs = (oldAttrs.buildInputs or []) ++ [
+                prevPython.setuptools
+              ];
+            });
+          });
         };
       };
     } // (flake-utils.lib.eachDefaultSystem (system:

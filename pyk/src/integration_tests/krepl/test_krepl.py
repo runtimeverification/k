@@ -17,7 +17,7 @@ class KReplPidTest(KReplTest):
 class KReplRequestTest(KReplTest):
     def test_step_to_branch(self) -> None:
         # When
-        response = self.client.step_to_branch()
+        response = self.client.hello('Joe')
 
         # Then
-        self.assertEqual(response, '1')
+        self.assertDictEqual(response, {'hello': 'Hello Joe!'})
