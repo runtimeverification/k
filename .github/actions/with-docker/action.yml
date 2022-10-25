@@ -47,7 +47,7 @@ runs:
           --rm -it                           \
           --detach                           \
           --workdir /opt/workspace/${SUBDIR} \
-          --user user:user                   \
+          --user github-user:user            \
           -v "$(pwd):/opt/workspace"         \
           -v "/etc/passwd:/etc/passwd:ro"    \
           -v "/etc/group:/etc/group:ro"      \
