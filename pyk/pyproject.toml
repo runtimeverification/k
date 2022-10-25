@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyk"
-version = "0.1.30"
+version = "0.1.31"
 description = ""
 authors = [
     "Runtime Verification, Inc. <contact@runtimeverification.com>",
@@ -13,8 +13,11 @@ authors = [
 [tool.poetry.dependencies]
 python = "^3.8"
 flask = "^2.2.2"
+graphene = "^3.1.1"
 graphviz = "^0.20.1"
-requests = "^2.28.1"
+graphql-server = "^3.0.0b5"
+gql = { version = "^3.4.0", extras = [ "requests" ] }
+
 
 [tool.poetry.group.dev.dependencies]
 autoflake = "*"
@@ -52,6 +55,14 @@ skip-string-normalization = true
 
 [tool.mypy]
 disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "graphene.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "graphql_server.*"
+ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "graphviz"
