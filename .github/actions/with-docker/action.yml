@@ -50,7 +50,6 @@ runs:
           --detach                           \
           --workdir /opt/workspace/${SUBDIR} \
           --user user:user                   \
-          -v ${HOME}:${HOME}                 \
           -v "$(pwd):/opt/workspace"         \
           -v "/etc/passwd:/etc/passwd:ro"    \
           -v "/etc/group:/etc/group:ro"      \
