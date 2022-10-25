@@ -1,7 +1,6 @@
 name: 'Test PR'
 on:
   pull_request:
-    types: [opened, edited, reopened]
     branches:
       - 'develop'
 concurrency:
