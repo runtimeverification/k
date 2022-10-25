@@ -70,5 +70,5 @@ RUN groupadd -g $GROUP_ID user && useradd -m -u $USER_ID -s /bin/sh -g user gith
 
 USER github-user:user
 
-COPY --from=STACK --chown=user:user /home/user/.stack /home/github-user/.stack
-COPY --from=MAVEN --chown=user:user /home/user/.m2 /home/github-user/.m2
+COPY --from=STACK --chown=github-user:user /home/user/.stack /home/github-user/.stack
+COPY --from=MAVEN --chown=github-user:user /home/user/.m2 /home/github-user/.m2
