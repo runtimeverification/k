@@ -64,11 +64,15 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
+# The image is built specifically for an environment with this user/group
+ARG USER
+RUN echo "User: ${USER?'USER argument must be provided during docker build'}"
+ARG GROUP=$USER
 ARG USER_ID=1000
-ARG GROUP_ID=1000
-RUN groupadd -g $GROUP_ID user && useradd -m -u $USER_ID -s /bin/sh -g user github-user
+ARG GROUP_ID=$USER_ID
+RUN groupadd -g $GROUP_ID $GROUP && useradd -m -u $USER_ID -s /bin/sh -g $GROUP $USER
 
-USER github-user:user
+USER $USER:$GROUP
 
-COPY --from=STACK --chown=github-user:user /home/user/.stack /home/github-user/.stack
-COPY --from=MAVEN --chown=github-user:user /home/user/.m2 /home/github-user/.m2
+COPY --from=STACK --chown=$USER:$GROUP /home/$USER/.stack /home/$USER/.stack
+COPY --from=MAVEN --chown=$USER:$GROUP /home/$USER/.m2 /home/$USER/.m2

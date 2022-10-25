@@ -11,13 +11,17 @@ RUN    apt-get update        \
 
 RUN curl -sSL https://get.haskellstack.org/ | sh
 
+# The image is built specifically for an environment with this user/group
+ARG USER
+RUN echo "User: ${USER?'USER argument must be provided during docker build'}"
+ARG GROUP=$USER
 ARG USER_ID=1000
-ARG GROUP_ID=1000
-RUN groupadd -g $GROUP_ID user && useradd -m -u $USER_ID -s /bin/sh -g user github-user
+ARG GROUP_ID=$USER_ID
+RUN groupadd -g $GROUP_ID $GROUP && useradd -m -u $USER_ID -s /bin/sh -g $GROUP $USER
 
-USER github-user:user
+USER $USER:$GROUP
 
 ENV LC_ALL=C.UTF-8
-ADD --chown=github-user:user haskell-backend/src/main/native/haskell-backend/stack.yaml      /home/github-user/.tmp-haskell/
-ADD --chown=github-user:user haskell-backend/src/main/native/haskell-backend/kore/kore.cabal /home/github-user/.tmp-haskell/kore/
-RUN cd /home/github-user/.tmp-haskell && stack build --only-snapshot
+ADD --chown=$USER:$GROUP haskell-backend/src/main/native/haskell-backend/stack.yaml      /home/$USER/.tmp-haskell/
+ADD --chown=$USER:$GROUP haskell-backend/src/main/native/haskell-backend/kore/kore.cabal /home/$USER/.tmp-haskell/kore/
+RUN cd /home/$USER/.tmp-haskell && stack build --only-snapshot
