@@ -65,8 +65,7 @@ ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
 # The image is built specifically for an environment with this user/group
-ARG USER
-RUN echo "User: ${USER?'USER argument must be provided during docker build'}"
+ARG USER=github-user
 ARG GROUP=$USER
 ARG USER_ID=1000
 ARG GROUP_ID=$USER_ID
