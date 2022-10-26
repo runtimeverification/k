@@ -24,7 +24,7 @@ test: test-kpyk
 
 ## kpyk runner tests
 
-test-kpyk: test-kpyk-graphviz test-kpyk-minimize-term test-post-process
+test-kpyk: test-kpyk-graphviz test-kpyk-minimize-term # test-post-process
 
 test-kpyk-graphviz: d.kompiled
 	$(PYK) graph-imports $(PYK_OPTIONS) definitions/d
