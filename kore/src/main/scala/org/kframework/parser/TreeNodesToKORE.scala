@@ -73,7 +73,7 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
     case t@KApply(KLabel("#KToken"), items) =>
       def removeQuotes(s: String) = s.drop(1).dropRight(1).replace("\\\"", "\"")
 
-      KToken(removeQuotes(items.head.asInstanceOf[KToken].s), parseSort(removeQuotes(items.tail.head.asInstanceOf[KToken].s)))
+      KToken(removeQuotes(items.head.asInstanceOf[KToken].s), parseSort(removeQuotes(items.tail.head.asInstanceOf[KToken].s)), t.att)
 
     case t@KApply(l, items) =>
       KApply(l, KList((items map down _).asJava), t.att)
