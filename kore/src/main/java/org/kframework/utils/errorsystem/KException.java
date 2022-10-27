@@ -255,7 +255,8 @@ public class KException implements Serializable, HasLocation {
             sourceText.append(StringUtils.repeat('~', firstLine.length() - location.startColumn()));
         }
         sourceText.append("\n\t");
-        sourceText.append(String.valueOf(location.startLine()) + " |\t");
+        int padding = String.valueOf(location.endLine()).length() - String.valueOf(location.startLine()).length();
+        sourceText.append(StringUtils.repeat(' ', padding) + String.valueOf(location.startLine()) + " |\t");
         sourceText.append(firstLine);
 
         if (errorLineCount == 3) {
