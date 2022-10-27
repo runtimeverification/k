@@ -261,7 +261,8 @@ public class KException implements Serializable, HasLocation {
 
         if (errorLineCount == 3) {
             sourceText.append("\n\t");
-            sourceText.append(String.valueOf(location.startLine() + 1) + " |\t");
+            int padding2 = String.valueOf(location.endLine()).length() - String.valueOf(location.startLine() + 1).length();
+            sourceText.append(StringUtils.repeat(' ', padding2) + String.valueOf(location.startLine() + 1) + " |\t");
             Stream secondline = Files.lines(Paths.get(getSource().source()));
             sourceText.append((String) secondline.skip(location.startLine()).findFirst().get());
         } else if (errorLineCount > 3) {
