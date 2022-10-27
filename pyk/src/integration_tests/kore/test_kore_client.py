@@ -4,12 +4,14 @@ from typing import Any, Final, Mapping, Tuple
 from pyk.kore.parser import KoreParser
 from pyk.kore.rpc import (
     BranchingResult,
+    CutPointResult,
     DepthBoundResult,
     ExecuteResult,
     ImpliesResult,
     KoreClientError,
     State,
     StuckResult,
+    TerminalResult,
 )
 from pyk.kore.syntax import DV, Equals, EVar, Implies, Pattern, SortApp, SortVar, String, Top
 
@@ -52,6 +54,18 @@ class SimpleKoreClientTest(KoreClientTest):
             ('branching', 0, {}, BranchingResult(state=state(2), depth=2, next_states=(state(4), state(3)))),
             ('depth-bound', 0, {'max_depth': 2}, DepthBoundResult(state=state(2), depth=2)),
             ('stuck', 4, {}, StuckResult(state=state(6), depth=2)),
+            (
+                'cut-point',
+                4,
+                {'cut_point_rules': ['KORE-RPC-TEST.r56']},
+                CutPointResult(state=state(5), depth=1, next_states=(state(6),), rule='KORE-RPC-TEST.r56'),
+            ),
+            (
+                'terminal',
+                4,
+                {'terminal_rules': ['KORE-RPC-TEST.r56']},
+                TerminalResult(state=state(6), depth=2, rule='KORE-RPC-TEST.r56'),
+            ),
         )
 
         for test_name, n, params, expected in test_data:

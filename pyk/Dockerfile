@@ -4,7 +4,8 @@ FROM runtimeverificationinc/kframework-k:ubuntu-${K_DISTRO}-${K_VERSION}
 
 RUN    apt-get update     \
     && apt-get install -y \
-         curl
+         curl             \
+         graphviz
 
 RUN    curl -sSL https://install.python-poetry.org | POETRY_HOME=/usr python3 - \
     && poetry --version
