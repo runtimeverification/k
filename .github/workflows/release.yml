@@ -8,6 +8,16 @@ concurrency:
 
 jobs:
 
+  set-release-id:
+    name: 'Set Release ID'
+    runs-on: ubuntu-latest
+    steps:
+        - name: 'Get release_id'
+          run: echo "::set-output name=release_id::$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)"
+          id: release
+    outputs:
+      release_id: ${{ steps.release.outputs.release_id }}
+
   nix-release:
     name: 'Nix Release'
     runs-on: ubuntu-latest
@@ -112,6 +122,7 @@ jobs:
     name: 'Build MacOS Package'
     runs-on: macos-11
     environment: production
+    needs: set-release-id
     steps:
       - name: Check out code
         uses: actions/checkout@v2.3.4
@@ -175,7 +186,7 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const { owner, repo } = context.repo
-            await github.repos.deleteRelease({ owner, repo, release_id: ${{ github.event.release.release_id }} })
+            await github.repos.deleteRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }} })
 
     outputs:
       bottle_path: ${{ steps.build.outputs.path }}
@@ -186,7 +197,7 @@ jobs:
     name: 'Test MacOS Package'
     runs-on: macos-11
     environment: production
-    needs: macos-build
+    needs: [macos-build, set-release-id]
     steps:
       - name: Check out matching homebrew repo branch
         uses: actions/checkout@v3
@@ -268,13 +279,13 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const { owner, repo } = context.repo
-            await github.repos.deleteRelease({ owner, repo, release_id: ${{ github.event.release.release_id }} })
+            await github.repos.deleteRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }} })
 
   release:
     name: 'Publish Release'
     runs-on: ubuntu-latest
     environment: production
-    needs: [nix-release, macos-build, macos-test, ubuntu-jammy, ubuntu-focal]
+    needs: [nix-release, macos-build, macos-test, ubuntu-jammy, ubuntu-focal, set-release-id]
     steps:
       - name: Publish release
         uses: actions/github-script@v4
@@ -282,7 +293,7 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const { owner, repo } = context.repo
-            await github.repos.updateRelease({ owner, repo, release_id: ${{ github.event.release.release_id }}, prerelease: false })
+            await github.repos.updateRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }}, prerelease: false })
       - name: Update dependents
         env:
           JENKINS_DEVOPS_TOKEN: ${{ secrets.JENKINS_DEVOPS_TOKEN }}
