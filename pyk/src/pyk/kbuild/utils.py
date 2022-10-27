@@ -21,17 +21,13 @@ class KVersion:
     git: Optional[Git]
 
     _PATTERN: ClassVar = re.compile(
-        r'(?P<major>[1-9]+)\.'
-        r'(?P<minor>[0-9]+)\.'
-        r'(?P<patch>[0-9]+)'
-        r'|'
-        r'(?P<git>v)'
-        r'(?P<gmajor>[1-9]+)\.'
-        r'(?P<gminor>[0-9]+)\.'
-        r'(?P<gpatch>[0-9]+)-'
-        r'(?P<ahead>[0-9]+)-g'
-        r'(?P<rev>[0-9a-f]{10})'
-        r'(?P<dirty>-dirty)?'
+        r'v(?P<major>[1-9]+)'
+        r'\.(?P<minor>[0-9]+)'
+        r'\.(?P<patch>[0-9]+)'
+        r'(?P<git>'
+        r'-(?P<ahead>[0-9]+)'
+        r'-g(?P<rev>[0-9a-f]{10})'
+        r'(?P<dirty>-dirty)?)?'
     )
 
     @staticmethod
@@ -40,9 +36,9 @@ class KVersion:
         if not match:
             raise ValueError(f'Invalid K version string: {text}')
 
-        major = int(match['major'] or match['gmajor'])
-        minor = int(match['minor'] or match['gminor'])
-        patch = int(match['patch'] or match['gpatch'])
+        major = int(match['major'])
+        minor = int(match['minor'])
+        patch = int(match['patch'])
         git = (
             KVersion.Git(
                 ahead=int(match['ahead']),
@@ -57,11 +53,10 @@ class KVersion:
 
     @property
     def text(self) -> str:
-        v = 'v' if self.git else ''
-        version = f'{self.major}.{self.minor}.{self.patch}'
+        version = f'v{self.major}.{self.minor}.{self.patch}'
         dirty = '-dirty' if self.git and self.git.dirty else ''
         git = f'-{self.git.ahead}-g{self.git.rev}{dirty}' if self.git else ''
-        return f'{v}{version}{git}'
+        return f'{version}{git}'
 
 
 def k_version() -> KVersion:
