@@ -10,6 +10,49 @@ concurrency:
 
 jobs:
 
+  prerelease:
+    name: 'Set up Github Prerelease'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - env:
+          GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
+        run: |
+          set -x
+          version=$(cat package/version)
+          tag_name=v${version}_$(git rev-parse --short=7 HEAD)
+          name=v${version}_$(git rev-parse --short=7 HEAD)
+          curl -X POST                                                  \
+            -H "Accept: application/vnd.github+json"                    \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}"                  \
+            https://api.github.com/repos/runtimeverification/k/releases \
+            -d '{"tag_name":"'${tag_name}'","target_commitish":"'${GITHUB_HEAD_REF}'","name":"'${name}'","body":"PRERELEASE: '${name}'","draft":false,"prerelease":true,"generate_release_notes":false}'
+
+  release:
+    name: 'Publish Release'
+    runs-on: ubuntu-latest
+    environment: production
+    needs: [prerelease]
+    steps:
+      - name: Publish release
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const { owner, repo } = context.repo
+            await github.repos.updateRelease({ owner, repo, release_id: ${{ github.event.release.release_id }}, prerelease: false })
+      - name: Update dependents
+        env:
+          JENKINS_DEVOPS_TOKEN: ${{ secrets.JENKINS_DEVOPS_TOKEN }}
+          VERSION: ${{ needs.macos-build.outputs.version }}
+        run: |
+          curl --fail 'https://ci.runtimeverification.com/jenkins/buildByToken/buildWithParameters' \
+              --data job=Devops/master \
+              --data token=$JENKINS_DEVOPS_TOKEN \
+              --data UPDATE_DEPS=true \
+              --data UPDATE_DEPS_REPO=runtimeverification/k \
+              --data UPDATE_DEPS_VERSION=v$VERSION
+
   version-sync:
     name: 'Version Sync'
     runs-on: ubuntu-latest
