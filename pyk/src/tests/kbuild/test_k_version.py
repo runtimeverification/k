@@ -7,7 +7,7 @@ class KVersionTest(TestCase):
     def test_parse_valid(self) -> None:
         # Given
         test_data = (
-            ('5.4.7', KVersion(5, 4, 7, None)),
+            ('v5.4.7', KVersion(5, 4, 7, None)),
             ('v5.4.7-0-g0b0189cc60', KVersion(5, 4, 7, KVersion.Git(0, '0b0189cc60', False))),
             ('v5.4.7-0-g0b0189cc60-dirty', KVersion(5, 4, 7, KVersion.Git(0, '0b0189cc60', True))),
         )
@@ -29,13 +29,13 @@ class KVersionTest(TestCase):
             '1',
             '1.2',
             '1.2',
-            'v1.2.3',
-            '1.2.3-dirty',
+            '1.2.3',
+            'v1.2.3-dirty',
             'v1.2.3-10',
             'v1.2.3-10-dirty',
             'v1.2.3-10-0123',
             'v1.2.3-a-0123456789',
-            '1.2.3-10-0123456789',
+            'v1.2.3-10-0123456789',
         )
 
         for version in test_data:
