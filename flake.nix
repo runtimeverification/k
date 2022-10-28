@@ -13,14 +13,12 @@
       url = "github:edolstra/flake-compat";
       flake = false;
     };
-    poetry2nix.url = "github:nix-community/poetry2nix";
   };
 
   outputs = { self, nixpkgs, flake-utils, rv-utils, haskell-backend
-    , llvm-backend, mavenix, flake-compat, poetry2nix }:
+    , llvm-backend, mavenix, flake-compat }:
     let
       allOverlays = [
-        poetry2nix.overlay
         mavenix.overlay
         llvm-backend.overlays.default
         haskell-backend.overlay # used only to override the z3 version to the same one as used by the haskell backend.
@@ -66,18 +64,6 @@
                   prev.gdb;
                 version = "${k-version}-${self.rev or "dirty"}";
               };
-
-            kup = prev.poetry2nix.mkPoetryApplication {
-              python = prev.python39;
-              projectDir = ./kup;
-              overrides = prev.poetry2nix.overrides.withDefaults (
-                final: prev: {
-                  mypy = prev.mypy.overridePythonAttrs (_old: {
-                    MYPY_USE_MYPYC = false;
-                  });
-                }
-          );
-            };
           })
       ];
     in flake-utils.lib.eachSystem [
@@ -118,8 +104,6 @@
 
         packages = rec {
           k = pkgs.k-framework haskell-backend-bins;
-
-          inherit (pkgs) kup;
 
           # This is a copy of the `nix/update-maven.sh` script, which should be
           # eventually removed. Having this inside the flake provides a uniform
