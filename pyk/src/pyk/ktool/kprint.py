@@ -19,6 +19,7 @@ from ..kast import (
     KFlatModule,
     KImport,
     KInner,
+    KLabel,
     KNonTerminal,
     KProduction,
     KRegexTerminal,
@@ -39,13 +40,93 @@ from ..kast import (
 )
 from ..kastManip import flatten_label
 from ..kore.parser import KoreParser
-from ..kore.syntax import Kore
+from ..kore.syntax import DV, App, Kore, Pattern, SortApp, String
 from ..prelude.k import DOTS, EMPTY_K
 from ..prelude.kbool import TRUE
 
 _LOGGER: Final = logging.getLogger(__name__)
 
 SymbolTable = Dict[str, Callable[..., str]]
+
+_unmunge_codes: Dict[str, str] = {
+    'Spce': ' ',
+    'Bang': '!',
+    'Quot': '"',
+    'Hash': '#',
+    'Dolr': '$',
+    'Perc': '%',
+    'And-': '&',
+    'Apos': "'",
+    'LPar': '(',
+    'RPar': ')',
+    'Star': '*',
+    'Plus': '+',
+    'Comm': ',',
+    'Stop': '.',
+    'Slsh': '/',
+    'Coln': ':',
+    'SCln': ';',
+    '-LT-': '<',
+    'Eqls': '=',
+    '-GT-': '>',
+    'Ques': '?',
+    '-AT-': '@',
+    'LSqB': '[',
+    'RSqB': ']',
+    'Bash': '\\',
+    'Xor-': '^',
+    'Unds': '_',
+    'BQuo': '`',
+    'LBra': '{',
+    'Pipe': '|',
+    'RBra': '}',
+    'Tild': '~',
+}
+_munge_codes: Dict[str, str] = {v: k for k, v in _unmunge_codes.items()}
+
+
+def _munge(label: str) -> str:
+    global _munge_codes
+    _symbol = 'Lbl'
+    literal_mode = True
+    while len(label) > 0:
+        if label[0] in _munge_codes:
+            if not literal_mode:
+                _symbol += _munge_codes[label[0]]
+                label = label[1:]
+            else:
+                _symbol += "'"
+                literal_mode = False
+        else:
+            if literal_mode:
+                _symbol += label[0]
+                label = label[1:]
+            else:
+                _symbol += "'"
+                literal_mode = True
+    if not literal_mode:
+        _symbol += "'"
+    return _symbol
+
+
+def _unmunge(symbol: str) -> str:
+    global _unmunge_codes
+    if symbol.startswith('Lbl'):
+        symbol = symbol[3:]
+    _label = ''
+    literal_mode = True
+    while len(symbol) > 0:
+        if symbol[0] == "'":
+            literal_mode = not literal_mode
+            symbol = symbol[1:]
+        else:
+            if literal_mode:
+                _label += symbol[0]
+                symbol = symbol[1:]
+            else:
+                _label += _unmunge_codes[symbol[0:4]]
+                symbol = symbol[4:]
+    return _label
 
 
 def _kast(
@@ -79,6 +160,9 @@ class KPrint:
     _definition: Optional[KDefinition]
     _symbol_table: Optional[SymbolTable]
     _temp_dir: Optional[TemporaryDirectory] = None
+
+    _unmunge_codes: Dict[str, str]
+    _munge_codes: Dict[str, str]
 
     def __init__(self, definition_dir: Path, use_directory: Optional[Path] = None, profile: bool = False) -> None:
         self.definition_dir = Path(definition_dir)
@@ -120,15 +204,101 @@ class KPrint:
         return kast_token
 
     def kore_to_kast(self, kore: Kore) -> KAst:
+        if isinstance(kore, Pattern):
+            _kast_out = self._kore_to_kast(kore)
+            if _kast_out is not None:
+                return _kast_out
+        _LOGGER.warning(f'Falling back to using `kast` for Kore -> Kast: {kore.text}')
         output = _kast(self.definition_dir, kore.text, input='kore', output='json', profile=self._profile)
         return KAst.from_dict(json.loads(output)['term'])
 
+    def _kore_to_kast(self, kore: Pattern) -> Optional[KInner]:
+
+        if type(kore) is DV and kore.sort.name.startswith('Sort'):
+            return KToken(kore.value.value, KSort(kore.sort.name[4:]))
+
+        if type(kore) is App:
+
+            if kore.symbol == 'inj' and len(kore.sorts) == 2 and len(kore.patterns) == 1:
+                return self._kore_to_kast(kore.patterns[0])
+
+            # TODO: Support sort parameters
+            if len(kore.sorts) == 0:
+
+                if kore.symbol == 'dotk' and len(kore.patterns) == 0:
+                    return KSequence([])
+
+                elif kore.symbol == 'kseq' and len(kore.patterns) == 2:
+                    p0 = self._kore_to_kast(kore.patterns[0])
+                    p1 = self._kore_to_kast(kore.patterns[1])
+                    if p0 is not None and p1 is not None:
+                        return KSequence([p0, p1])
+
+                else:
+                    klabel = KLabel(_unmunge(kore.symbol), [KSort(k.name) for k in kore.sorts])
+                    args = [self._kore_to_kast(_a) for _a in kore.patterns]
+                    # TODO: Written like this to appease the type-checker.
+                    new_args = [a for a in args if a is not None]
+                    if len(new_args) == len(args):
+                        return KApply(klabel, new_args)
+
+        return None
+
     def kast_to_kore(self, kast: KAst, sort: Optional[KSort] = None) -> Kore:
+        if isinstance(kast, KInner):
+            _kore_out = self._kast_to_kore(kast, sort=sort)
+            if _kore_out is not None:
+                return _kore_out
+        _LOGGER.warning(f'Falling back to using `kast` for KAst -> Kore: {kast}')
         kast_json = {'format': 'KAST', 'version': 2, 'term': kast.to_dict()}
         output = _kast(
             self.definition_dir, json.dumps(kast_json), input='json', output='kore', sort=sort, profile=self._profile
         )
         return KoreParser(output).pattern()
+
+    def _kast_to_kore(self, kast: KInner, sort: Optional[KSort] = None) -> Optional[Pattern]:
+        def _get_sort(_ki: KInner) -> Optional[KSort]:
+            if type(_ki) is KApply:
+                return self.definition.return_sort(_ki.label)
+            return None
+
+        if type(kast) is KToken:
+            dv: Pattern = DV(SortApp('Sort' + kast.sort.name), String(kast.token))
+            if sort is not None and kast.sort != sort:
+                dv = self._add_sort_injection(dv, kast.sort, sort)
+            return dv
+
+        if type(kast) is KApply:
+            # TODO: Support sort parameters
+            if len(kast.label.params) == 0:
+                args = [
+                    self._kast_to_kore(arg, sort=arg_sort)
+                    for arg, arg_sort in zip(kast.args, self.definition.argument_sorts(kast.label))
+                ]
+                # TODO: Written like this to appease the type-checker.
+                new_args = [a for a in args if a is not None]
+                if len(new_args) == len(args):
+                    app: Pattern = App(_munge(kast.label.name), (), new_args)
+                    isort = _get_sort(kast)
+                    if sort is not None and isort is not None and isort != sort:
+                        app = self._add_sort_injection(app, isort, sort)
+                    return app
+
+        if type(kast) is KSequence:
+            seq = App('dotk', (), ())
+            for i in reversed(kast.items):
+                kore_i = self._kast_to_kore(i, sort=KSort('KItem'))
+                if kore_i is None:
+                    return None
+                seq = App('kseq', (), [kore_i, seq])
+            return seq
+
+        return None
+
+    def _add_sort_injection(self, pat: Pattern, isort: KSort, osort: KSort) -> Pattern:
+        if isort not in self.definition.subsorts(osort):
+            raise ValueError(f'Could not find injection from subsort to supersort: {isort} -> {osort}')
+        return App('inj', [SortApp('Sort' + isort.name), SortApp('Sort' + osort.name)], [pat])
 
     def pretty_print(self, kast: KAst, debug: bool = False) -> str:
         return pretty_print_kast(kast, self.symbol_table, debug=debug)
