@@ -112,12 +112,13 @@ class KProve(KPrint):
         main_file: Optional[Path] = None,
         use_directory: Optional[Path] = None,
         profile: bool = False,
+        command: str = 'kprove',
     ):
         super(KProve, self).__init__(definition_dir, use_directory=use_directory, profile=profile)
         # TODO: we should not have to supply main_file, it should be read
         # TODO: setting use_directory manually should set temp files to not be deleted and a log message
         self.main_file = main_file
-        self.prover = ['kprove']
+        self.prover = [command]
         self.prover_args = []
         with open(self.definition_dir / 'backend.txt', 'r') as ba:
             self.backend = ba.read()
