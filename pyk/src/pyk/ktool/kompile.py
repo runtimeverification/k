@@ -20,6 +20,7 @@ class KompileBackend(Enum):
 def kompile(
     main_file: Path,
     *,
+    command: str = 'kompile',
     check: bool = True,
     profile: bool = False,
     main_module: Optional[str] = None,
@@ -55,7 +56,7 @@ def kompile(
     )
 
     try:
-        _kompile(str(main_file), *args, check=check, profile=profile)
+        _kompile(str(main_file), *args, command=command, check=check, profile=profile)
     except CalledProcessError as err:
         raise RuntimeError(
             f'Command kompile exited with code {err.returncode} for: {main_file}', err.stdout, err.stderr
@@ -117,8 +118,10 @@ def _build_arg_list(
     return _args
 
 
-def _kompile(main_file: str, *args: str, check: bool = True, profile: bool = False) -> CompletedProcess:
-    run_args = ['kompile', main_file] + list(args)
+def _kompile(
+    main_file: str, *args: str, check: bool = True, profile: bool = False, command: str = 'kompile'
+) -> CompletedProcess:
+    run_args = [command, main_file] + list(args)
     return run_process(run_args, logger=_LOGGER, check=check, profile=profile)
 
 
