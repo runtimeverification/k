@@ -435,11 +435,13 @@ appears anywhere in the configuration. Semantically, it means that evaluation
 of that symbol will result in at most one return value (that is, the symbol is
 a *partial function*).
 
-The `total` attribute can be added to a production with the `function`
-attribute to indicate to the symbolic reasoning engine that a given symbol is a
+The `total` attribute indicates that a symbol cannot be equal to matching logic
+bottom; in other words, it has *at least* one value for every possible set of
+arguments. It can be added to a production with the `function` attribute to
+indicate to the symbolic reasoning engine that a given symbol is a
 *total function*, that is it has *exactly* one return value for every possible
-input. While the `total` attribute can in theory be added to something which
-is not a function, this behavior is not currently implemented.
+input. Other uses of the `total` attribute (i.e., on multi-valued symbols to
+indicate they always have at least one value) are not yet implemented.
 
 For example, here we define the `_+Word_` total function and the `_/Word_`
 partial function, which can be used to do addition/division modulo
