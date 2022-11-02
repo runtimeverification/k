@@ -43,6 +43,20 @@ jobs:
       - name: 'Build and run code quality checks'
         run: make check
 
+  schema-check:
+    needs: code-quality-checks
+    name: 'GraphQL Schema Check'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+      - name: 'Install dependencies'
+        run: |
+          curl -sSL https://install.python-poetry.org | sudo bash -c 'POETRY_HOME=/usr python3 -'
+          poetry --version
+      - name: 'Check GraphQL schema'
+        run: make check-schema
+
   unit-tests:
     needs: code-quality-checks
     name: 'Unit Tests'

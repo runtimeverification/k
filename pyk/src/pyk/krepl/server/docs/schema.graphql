@@ -1,0 +1,164 @@
+type Query {
+  hello(name: String = "stranger"): String
+  graph: Graph!
+  processes: [Process!]!
+  wait(id: ProcessID!): Process!
+  diff(from: NodeID!, to: NodeID!): String!
+}
+
+type Graph {
+  init: Node!
+  node(id: NodeID!): Node
+  nodes(tagged: String): [Node!]!
+  edge(id: EdgeID!): Edge
+  edges(tagged: String): [Edge!]!
+  tags: [String!]!
+  dot: String!
+  tree: String!
+}
+
+type Node {
+  id: NodeID!
+  term: Term!
+  inEdge: Edge
+  outEdges: [Edge!]!
+  tags: [String!]!
+}
+
+scalar NodeID
+
+type Term {
+  pretty(cells: [String!]): String!
+  kast: String!
+  kastJson: JSONString!
+  kore: String!
+  koreJson: JSONString!
+}
+
+"""
+Allows use of a JSON String for input / output from the GraphQL schema.
+
+Use of this type is *not recommended* as you lose the benefits of having a defined, static
+schema (one of the key benefits of GraphQL).
+"""
+scalar JSONString
+
+type Edge {
+  id: EdgeID!
+  source: Node!
+  target: Node!
+  condition: Term!
+  substitution: Subst!
+  tags: [String!]!
+}
+
+scalar EdgeID
+
+type Subst {
+  items: [SubstItem!]!
+}
+
+type SubstItem {
+  var: String!
+  term: Term!
+}
+
+interface Process {
+  id: ProcessID!
+  status: ProcessStatus!
+}
+
+scalar ProcessID
+
+enum ProcessStatus {
+  PENDING
+  RUNNING
+  DONE
+}
+
+type Mutation {
+  load(input: LoadInput!): Graph!
+  loadRaw(input: LoadRawInput!): Graph!
+  step(input: StepInput!, wait: Boolean = false): StepProcess!
+  rewind(input: RewindInput!, wait: Boolean = false): RewindProcess!
+  caseSplit(input: CaseSplitInput!): CaseSplitResult!
+  updateCell(input: UpdateCellInput!): Node!
+}
+
+input LoadInput {
+  program: TermString!
+  params: [LoadParam!]
+}
+
+input TermString {
+  term: String!
+  module: String
+  sort: String
+}
+
+input LoadParam {
+  name: String!
+  program: TermString!
+}
+
+input LoadRawInput {
+  kore: String!
+}
+
+type StepProcess implements Process {
+  id: ProcessID!
+  status: ProcessStatus!
+  result: StepResult
+}
+
+type StepResult {
+  graph: Graph!
+  newNodes: [Node!]!
+  newEdges: [Edge!]!
+}
+
+input StepInput {
+  id: NodeID!
+  branch: Boolean!
+  depth: Int
+}
+
+type RewindProcess implements Process {
+  id: ProcessID!
+  status: ProcessStatus!
+  result: RewindResult
+}
+
+type RewindResult {
+  graph: Graph!
+  newNode: Node!
+  newEdges: [Edge!]!
+  removedEdges: [Edge!]!
+}
+
+input RewindInput {
+  id: NodeID!
+  depth: Int
+}
+
+type CaseSplitResult {
+  graph: Graph!
+  positiveNode: Node!
+  negativeNode: Node!
+}
+
+input CaseSplitInput {
+  id: NodeID!
+  condition: BoolTermString!
+}
+
+input BoolTermString {
+  term: String!
+  module: String
+}
+
+input UpdateCellInput {
+  id: NodeID!
+  cell: String!
+  value: TermString!
+}
