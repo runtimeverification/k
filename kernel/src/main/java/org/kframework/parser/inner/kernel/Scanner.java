@@ -398,7 +398,7 @@ public class Scanner implements AutoCloseable {
         }
     };
 
-    public Token[] tokenize(String input, Source source, int[] lines, int[] columns) {
+    public Token[] tokenize(String moduleName, String input, Source source, int[] lines, int[] columns) {
         try {
             runningScanners.acquire();
 

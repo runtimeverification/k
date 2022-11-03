@@ -529,7 +529,7 @@ public class EarleyParser {
      * @param startLine The line the sentence started on.
      * @param startColumn The column the sentence started on.
      */
-    public ParserMetadata(String input, Scanner scanner, Source source, int startLine, int startColumn) {
+    public ParserMetadata(String input, Scanner scanner, String moduleName, Source source, int startLine, int startColumn) {
       // compute location info
       byte[] utf8 = StringUtils.getBytesUtf8(input);
       int[] lines = new int[utf8.length+1];
@@ -571,7 +571,7 @@ public class EarleyParser {
       columns[utf8.length] = c;
 
       //initialize
-      this.words = scanner.tokenize(input, source, lines, columns);
+      this.words = scanner.tokenize(moduleName, input, source, lines, columns);
       this.lines = lines;
       this.columns = columns;
       this.source = source;
@@ -794,9 +794,9 @@ production:
    * @return A {@link Term} representing the parse forest
    * @throws KEMException if parsing fails
    */
-  public Term parse(String input, Source source, int startLine, int startColumn) {
+  public Term parse(String input, String moduleName, Source source, int startLine, int startColumn) {
     // compute metadata about sentence
-    ParserMetadata data = new ParserMetadata(input, scanner, source, startLine, startColumn);
+    ParserMetadata data = new ParserMetadata(input, scanner, moduleName, source, startLine, startColumn);
 
     // initialize Earley sets
     List<EarleySet> S = new ArrayList<>(data.words.length + 1);

@@ -234,7 +234,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
             Set<KEMException> warn = Sets.newHashSet();
             Term parsed;
             try {
-                parsed = parser.parse(input, source, startLine, startColumn);
+                parsed = parser.parse(input, seedModule.name(), source, startLine, startColumn);
             } catch (KEMException e) {
                 return Tuple2.apply(Left.apply(Collections.singleton(e)), Collections.emptySet());
             }
