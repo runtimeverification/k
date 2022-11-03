@@ -208,9 +208,9 @@ public class CompiledDefinition implements Serializable {
      * @return the parsed term.
      */
 
-    public K parseSingleTerm(Module module, Sort programStartSymbol, KExceptionManager kem, FileUtil files, String s, Source source) {
+    public K parseSingleTerm(Module module, Sort programStartSymbol, String startSymbolLocation, KExceptionManager kem, FileUtil files, String s, Source source) {
         try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, true, files)) {
-            Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> res = parseInModule.parseString(s, programStartSymbol, source);
+            Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> res = parseInModule.parseString(s, programStartSymbol, startSymbolLocation, source);
             kem.addAllKException(res._2().stream().map(e -> e.getKException()).collect(Collectors.toSet()));
             if (res._1().isLeft()) {
                 throw res._1().left().get().iterator().next();

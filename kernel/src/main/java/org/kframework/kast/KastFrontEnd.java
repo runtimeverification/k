@@ -117,22 +117,27 @@ public class KastFrontEnd extends FrontEnd {
             CompiledDefinition def = compiledDef.get();
 
             org.kframework.kore.Sort sort = options.sort;
+            String startSymbolLocation =  "kast CLI --sort";
             if (sort == null) {
-                if (env.get("KRUN_SORT") != null)
+                if (env.get("KRUN_SORT") != null) {
                     sort = Outer.parseSort(env.get("KRUN_SORT"));
+                    startSymbolLocation =  "kast env KRUN_SORT";
+                }
             }
 
             if (options.input.equals(InputModes.RULE)) {
                 options.module = def.executionModule().name();
-                if (sort == null)
+                if (sort == null) {
                     sort = Sorts.K();
+                    startSymbolLocation =  "kast default K";
+                }
                 Module mod = def.ruleParsingModuleFor(options.module)
                         .getOrElse(() -> {throw KEMException.innerParserError("Module " + options.module + " not found. Specify a module with -m.");});
                 String stringToParse = FileUtil.read(options.stringToParse());
                 Source source = options.source();
 
                 try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, true, null)) {
-                    Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> res = parseInModule.parseString(stringToParse, sort, source);
+                    Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> res = parseInModule.parseString(stringToParse, sort, startSymbolLocation, source);
                     kem.addAllKException(res._2().stream().map(KEMException::getKException).collect(Collectors.toSet()));
                     if (res._1().isLeft()) {
                         throw res._1().left().get().iterator().next();
@@ -170,8 +175,10 @@ public class KastFrontEnd extends FrontEnd {
             }
 
             Module unparsingMod;
-            if (sort == null)
+            if (sort == null) {
                 sort = def.programStartSymbol;
+                startSymbolLocation = " program default";
+            }
 
             if (options.module == null) {
                 options.module = def.mainSyntaxModuleName();
@@ -205,7 +212,7 @@ public class KastFrontEnd extends FrontEnd {
             } else {
                 Reader stringToParse = options.stringToParse();
                 Source source = options.source();
-                K parsed = kread.prettyRead(parsingMod, sort, def, source, FileUtil.read(stringToParse));
+                K parsed = kread.prettyRead(parsingMod, sort, startSymbolLocation, def, source, FileUtil.read(stringToParse));
 
                 if (options.expandMacros) {
                     parsed = ExpandMacros.forNonSentences(unparsingMod, files.get(), def.kompileOptions, false).expand(parsed);
