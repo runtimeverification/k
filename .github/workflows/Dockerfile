@@ -1,15 +1,15 @@
 ARG BASE_IMAGE
 ARG K_VERSION
 ARG Z3_VERSION
-FROM z3:${Z3_VERSION} as Z3
+FROM z3:${BASE_IMAGE}-${Z3_VERSION} as Z3
 
 ARG BASE_IMAGE
 ARG K_VERSION
-FROM stack:${K_VERSION} as STACK
+FROM stack:${BASE_IMAGE}-${K_VERSION} as STACK
 
 ARG BASE_IMAGE
 ARG K_VERSION
-FROM maven:${K_VERSION} as MAVEN
+FROM maven:${BASE_IMAGE}-${K_VERSION} as MAVEN
 
 FROM ubuntu:${BASE_IMAGE}
 
@@ -64,11 +64,14 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
+# The image is built specifically for an environment with this user/group
+ARG USER=github-user
+ARG GROUP=$USER
 ARG USER_ID=1000
-ARG GROUP_ID=1000
-RUN groupadd -g $GROUP_ID user && useradd -m -u $USER_ID -s /bin/sh -g user user
+ARG GROUP_ID=$USER_ID
+RUN groupadd -g $GROUP_ID $GROUP && useradd -m -u $USER_ID -s /bin/sh -g $GROUP $USER
 
-USER user:user
+USER $USER:$GROUP
 
-COPY --from=STACK --chown=user:user /home/user/.stack /home/user/.stack
-COPY --from=MAVEN --chown=user:user /home/user/.m2 /home/user/.m2
+COPY --from=STACK --chown=$USER:$GROUP /home/$USER/.stack /home/$USER/.stack
+COPY --from=MAVEN --chown=$USER:$GROUP /home/$USER/.m2 /home/$USER/.m2

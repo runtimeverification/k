@@ -8,6 +8,16 @@ concurrency:
 
 jobs:
 
+  set-release-id:
+    name: 'Set Release ID'
+    runs-on: ubuntu-latest
+    steps:
+        - name: 'Get release_id'
+          run: echo "::set-output name=release_id::$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)"
+          id: release
+    outputs:
+      release_id: ${{ steps.release.outputs.release_id }}
+
   nix-release:
     name: 'Nix Release'
     runs-on: ubuntu-latest
@@ -35,7 +45,7 @@ jobs:
     runs-on: [self-hosted, linux, normal]
     steps:
       - uses: actions/checkout@v3
-      - name: 'Build and Test'
+      - name: 'Build and Test Package'
         uses: ./.github/actions/test-package
         with:
           distro: jammy
@@ -48,7 +58,7 @@ jobs:
           asset_name: 'K Framework Ubuntu Jammy (22.04) Deb'
           asset_path: kframework_amd64_jammy.deb
           upload_url: ${{ github.event.release.upload_url }}
-      - name: 'Test and Push up Docker Image'
+      - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
         env:
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -59,26 +69,26 @@ jobs:
           version_tag=ubuntu-jammy-${version}
           docker login --username rvdockerhub --password ${DOCKERHUB_PASSWORD}
           docker image build . --file package/docker/Dockerfile.ubuntu-jammy --tag ${DOCKERHUB_REPO}:${version_tag}
-          docker run --name k-package-docker-test-jammy --rm -it --detach ${DOCKERHUB_REPO}:${version_tag}
-          docker exec -t k-package-docker-test-jammy bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
-          docker exec -t k-package-docker-test-jammy bash -c 'cd ~ && kompile test.k --backend llvm'
-          docker exec -t k-package-docker-test-jammy bash -c 'cd ~ && kompile test.k --backend haskell'
+          docker run --name k-package-docker-test-jammy-${GITHUB_SHA} --rm -it --detach ${DOCKERHUB_REPO}:${version_tag}
+          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
+          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend llvm'
+          docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
       - name: 'Clean up Docker Container'
         if: always()
         run: |
-          docker stop --time=0 k-package-docker-test-jammy
+          docker stop --time=0 k-package-docker-test-jammy-${GITHUB_SHA}
 
   ubuntu-focal:
     name: 'K Ubuntu Focal Package'
     runs-on: [self-hosted, linux, normal]
     steps:
       - uses: actions/checkout@v3
-      - name: 'Build and Test'
+      - name: 'Build and Test Package'
         uses: ./.github/actions/test-package
         with:
           distro: focal
-          llvm: 14
+          llvm: 12
       - uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
@@ -87,7 +97,7 @@ jobs:
           asset_name: 'K Framework Ubuntu Focal (20.04) Deb'
           asset_path: kframework_amd64_focal.deb
           upload_url: ${{ github.event.release.upload_url }}
-      - name: 'Test and Push up Docker Image'
+      - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
         env:
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -98,20 +108,21 @@ jobs:
           version_tag=ubuntu-focal-${version}
           docker login --username rvdockerhub --password ${DOCKERHUB_PASSWORD}
           docker image build . --file package/docker/Dockerfile.ubuntu-focal --tag ${DOCKERHUB_REPO}:${version_tag}
-          docker run --name k-package-docker-test-focal --rm -it --detach ${DOCKERHUB_REPO}:${version_tag}
-          docker exec -t k-package-docker-test-focal bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
-          docker exec -t k-package-docker-test-focal bash -c 'cd ~ && kompile test.k --backend llvm'
-          docker exec -t k-package-docker-test-focal bash -c 'cd ~ && kompile test.k --backend haskell'
+          docker run --name k-package-docker-test-focal-${GITHUB_SHA} --rm -it --detach ${DOCKERHUB_REPO}:${version_tag}
+          docker exec -t k-package-docker-test-focal-${GITHUB_SHA} bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
+          docker exec -t k-package-docker-test-focal-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend llvm'
+          docker exec -t k-package-docker-test-focal-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
       - name: Clean up Docker Container
         if: always()
         run: |
-          docker stop --time=0 k-package-docker-test-focal
+          docker stop --time=0 k-package-docker-test-focal-${GITHUB_SHA}
 
   macos-build:
     name: 'Build MacOS Package'
     runs-on: macos-11
     environment: production
+    needs: set-release-id
     steps:
       - name: Check out code
         uses: actions/checkout@v2.3.4
@@ -175,7 +186,7 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const { owner, repo } = context.repo
-            await github.repos.deleteRelease({ owner, repo, release_id: ${{ github.event.release.release_id }} })
+            await github.repos.deleteRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }} })
 
     outputs:
       bottle_path: ${{ steps.build.outputs.path }}
@@ -186,7 +197,7 @@ jobs:
     name: 'Test MacOS Package'
     runs-on: macos-11
     environment: production
-    needs: macos-build
+    needs: [macos-build, set-release-id]
     steps:
       - name: Check out matching homebrew repo branch
         uses: actions/checkout@v3
@@ -268,13 +279,13 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const { owner, repo } = context.repo
-            await github.repos.deleteRelease({ owner, repo, release_id: ${{ github.event.release.release_id }} })
+            await github.repos.deleteRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }} })
 
   release:
     name: 'Publish Release'
     runs-on: ubuntu-latest
     environment: production
-    needs: [nix-release, macos-build, macos-test, ubuntu-jammy, ubuntu-focal]
+    needs: [nix-release, macos-build, macos-test, ubuntu-jammy, ubuntu-focal, set-release-id]
     steps:
       - name: Publish release
         uses: actions/github-script@v4
@@ -282,7 +293,7 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const { owner, repo } = context.repo
-            await github.repos.updateRelease({ owner, repo, release_id: ${{ github.event.release.release_id }}, prerelease: false })
+            await github.repos.updateRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }}, prerelease: false })
       - name: Update dependents
         env:
           JENKINS_DEVOPS_TOKEN: ${{ secrets.JENKINS_DEVOPS_TOKEN }}

@@ -1,6 +1,9 @@
 ARG BASE_IMAGE
 FROM ubuntu:${BASE_IMAGE}
 
+ENV TZ=America/Chicago
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 RUN    apt-get update        \
     && apt-get upgrade --yes \
     && apt-get install --yes \
@@ -8,13 +11,16 @@ RUN    apt-get update        \
 
 RUN curl -sSL https://get.haskellstack.org/ | sh
 
+# The image is built specifically for an environment with this user/group
+ARG USER=github-user
+ARG GROUP=$USER
 ARG USER_ID=1000
-ARG GROUP_ID=1000
-RUN groupadd -g $GROUP_ID user && useradd -m -u $USER_ID -s /bin/sh -g user user
+ARG GROUP_ID=$USER_ID
+RUN groupadd -g $GROUP_ID $GROUP && useradd -m -u $USER_ID -s /bin/sh -g $GROUP $USER
 
-USER user:user
+USER $USER:$GROUP
 
 ENV LC_ALL=C.UTF-8
-ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml      /home/user/.tmp-haskell/
-ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/kore.cabal /home/user/.tmp-haskell/kore/
-RUN cd /home/user/.tmp-haskell && stack build --only-snapshot
+ADD --chown=$USER:$GROUP haskell-backend/src/main/native/haskell-backend/stack.yaml      /home/$USER/.tmp-haskell/
+ADD --chown=$USER:$GROUP haskell-backend/src/main/native/haskell-backend/kore/kore.cabal /home/$USER/.tmp-haskell/kore/
+RUN cd /home/$USER/.tmp-haskell && stack build --only-snapshot
