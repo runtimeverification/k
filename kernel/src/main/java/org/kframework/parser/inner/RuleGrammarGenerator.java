@@ -121,7 +121,7 @@ public class RuleGrammarGenerator {
 
     private Module getGrammar(Module mod, String name) {
         // import RULE-CELLS in order to parse cells specific to rules
-        Module newM = new Module( mod.name() + "-" + name
+        Module newM = new Module( mod.name()
                                 , (scala.collection.Set<Import>) mod.imports().$bar(Set(Import(baseK.getModule(K).get(), true), Import(baseK.getModule(name).get(), true), Import(baseK.getModule(DEFAULT_LAYOUT).get(), true)))
                                 , mod.localSentences()
                                 , mod.att()
