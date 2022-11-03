@@ -101,11 +101,11 @@
     },
     "flake-utils": {
       "locked": {
-        "lastModified": 1667077288,
-        "narHash": "sha256-bdC8sFNDpT0HK74u9fUkpbf1MEzVYJ+ka7NXCdgBoaA=",
+        "lastModified": 1667395993,
+        "narHash": "sha256-nuEHfE/LcWyuSWnS8t12N1wc105Qtau+/OdUAjtQ0rA=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "6ee9ebb6b1ee695d2cacc4faa053a7b9baa76817",
+        "rev": "5aed5285a952e0b949eb3ba02c12fa4fcfef535f",
         "type": "github"
       },
       "original": {
@@ -174,11 +174,11 @@
         "z3-src": "z3-src"
       },
       "locked": {
-        "lastModified": 1667277115,
-        "narHash": "sha256-rSn1yQsZSHODmsoPwuoXDH8Dulv0sRPLRvbEDWYnc7w=",
+        "lastModified": 1667477113,
+        "narHash": "sha256-CdtpoCgg1ZE7gkoq3MMvhe9FdW1tW+gfOBo0YF2M0MM=",
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "0cc2eb046101cba0080b63e04a5b5a0f1374a99f",
+        "rev": "f083470cebc22853cc9650b300cb86f87c17f270",
         "type": "github"
       },
       "original": {
