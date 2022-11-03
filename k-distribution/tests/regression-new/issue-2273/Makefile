@@ -1,6 +1,6 @@
 DEF=a
 EXT=a
-KAST_FLAGS+=--sort Foo
+KAST_FLAGS+=--sort Foo --no-exc-wrap
 
 include ../../../include/kframework/ktest.mak
 

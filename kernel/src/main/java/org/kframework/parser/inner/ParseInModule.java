@@ -155,10 +155,16 @@ public class ParseInModule implements Serializable, AutoCloseable {
     public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
             parseString(String input, Sort startSymbol, Source source) {
         try (Scanner scanner = getScanner()) {
-            return parseString(input, startSymbol, scanner, source, 1, 1, true, false);
+            return parseString(input, startSymbol, "unit test", scanner, source, 1, 1, true, false);
         }
     }
 
+    public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
+            parseString(String input, Sort startSymbol, String startSymbolLocation, Source source) {
+        try (Scanner scanner = getScanner()) {
+            return parseString(input, startSymbol, startSymbolLocation, scanner, source, 1, 1, true, false);
+        }
+    }
     private void getParser(Scanner scanner, Sort startSymbol) {
         EarleyParser p = parser;
         if (p == null) {
@@ -189,9 +195,9 @@ public class ParseInModule implements Serializable, AutoCloseable {
     }
 
     public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
-        parseString(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
+        parseString(String input, Sort startSymbol, String startSymbolLocation, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
         final Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> result
-                = parseStringTerm(input, startSymbol, scanner, source, startLine, startColumn, inferSortChecks, isAnywhere);
+                = parseStringTerm(input, startSymbol, startSymbolLocation, scanner, source, startLine, startColumn, inferSortChecks, isAnywhere);
         Either<Set<KEMException>, K> parseInfo;
         if (result._1().isLeft()) {
             parseInfo = Left.apply(result._1().left().get());
@@ -216,9 +222,9 @@ public class ParseInModule implements Serializable, AutoCloseable {
      * @return
      */
     private Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>>
-            parseStringTerm(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
+            parseStringTerm(String input, Sort startSymbol, String startSymbolLocation, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
         if (!parsingModule.definedSorts().contains(startSymbol.head()))
-            throw KEMException.innerParserError("Could not find start symbol: " + startSymbol, source, Location.apply(startLine, startColumn, startLine, startColumn + 1));
+            throw KEMException.innerParserError("Could not find start symbol: " + startSymbol + " provided to " + startSymbolLocation, source, Location.apply(startLine, startColumn, startLine, startColumn + 1));
         getParser(scanner, startSymbol);
 
         long start, endParse = 0, startTypeInf = 0, endTypeInf = 0;

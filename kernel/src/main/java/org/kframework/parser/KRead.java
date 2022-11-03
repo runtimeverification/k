@@ -50,11 +50,11 @@ public class KRead {
         this.globalOptions = globalOptions;
     }
 
-    public K prettyRead(Module mod, Sort sort, CompiledDefinition def, Source source, String stringToParse) {
-        return prettyRead(mod, sort, def, source, stringToParse, this.input);
+    public K prettyRead(Module mod, Sort sort, String startSymbolLocation, CompiledDefinition def, Source source, String stringToParse) {
+        return prettyRead(mod, sort, startSymbolLocation, def, source, stringToParse, this.input);
     }
 
-    public K prettyRead(Module mod, Sort sort, CompiledDefinition def, Source source, String stringToParse, InputModes inputMode) {
+    public K prettyRead(Module mod, Sort sort, String startSymbolLocation, CompiledDefinition def, Source source, String stringToParse, InputModes inputMode) {
         switch (inputMode) {
             case BINARY:
             case JSON:
@@ -63,7 +63,7 @@ public class KRead {
             case KORE:
                 return new KoreParser(mod.sortAttributesFor()).parseString(stringToParse);
             case PROGRAM:
-                return def.parseSingleTerm(mod, sort, kem, files, stringToParse, source);
+                return def.parseSingleTerm(mod, sort, startSymbolLocation, kem, files, stringToParse, source);
             case RULE:
                 throw KEMException.internalError("Should have been handled directly by the kast front end: " + inputMode);
             default:
