@@ -391,6 +391,9 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
 
   def flattened()   : FlatModule                = new FlatModule(name, imports.map(i => FlatImport(i.module.name, i.isPublic, Att.empty)), localSentences, att)
   def flatModules() : (String, Set[FlatModule]) = (name, Set(flattened) ++ fullImports.map(m => m.flatModules._2).flatten)
+
+  lazy val localTerminals: Set[TerminalLike] = localProductions.flatMap(_.items.filter(_.isInstanceOf[TerminalLike]).map(_.asInstanceOf[TerminalLike]))
+  lazy val terminals: Set[TerminalLike] = imports.flatMap(_.module.terminals) ++ localTerminals
 }
 
 trait HasAtt {
