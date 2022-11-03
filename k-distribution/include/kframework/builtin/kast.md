@@ -271,7 +271,7 @@ tail of the cell, and cells whose contents are sort `List` can only have `...`
 appear on at most one side in a single rule.
 
 ```k
-module RULE-CELLS
+module RULE-CELLS [implicit-module]
   imports KCELLS
   imports RULE-LISTS
   // if this module is imported, the parser automatically
@@ -296,7 +296,7 @@ other configuration declarations must appear composed within another
 configuration declaration.
 
 ```k
-module CONFIG-CELLS
+module CONFIG-CELLS [implicit-module]
   imports KCELLS
   imports RULE-LISTS
   syntax #CellName ::= r"[a-zA-Z][a-zA-Z0-9\\-]*"  [token, prec(1)]
@@ -444,7 +444,7 @@ module KREWRITE
 endmodule
 
 // To be used to parse semantic rules
-module K
+module K [implicit-module]
   imports KSEQ-SYMBOLIC
   imports REQUIRES-ENSURES
   imports RECORD-PRODUCTIONS
