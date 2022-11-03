@@ -219,11 +219,11 @@ syntax includes:
   syntax Stmt ::= Block
                 | Exp ";"                               [strict]
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
-                | "if" "(" Exp ")" Block
+                | "if" "(" Exp ")" Block                [macro]
                 | "while" "(" Exp ")" Block
-            | "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmt Exp ";" Exp ")" Block  [macro]
                 | "return" Exp ";"                      [strict]
-                | "return" ";"
+                | "return" ";"                          [macro]
                 | "print" "(" Exps ")" ";"              [strict]
                 | "try" Block "catch" "(" Id ")" Block
                 | "throw" Exp ";"                       [strict]
@@ -238,8 +238,8 @@ syntax includes:
 
 Old desugaring rules, from SIMPLE
 ```k
-  rule if (E) S => if (E) S else {}                                 [macro]
-  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}  [macro]
+  rule if (E) S => if (E) S else {}
+  rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}
   rule var E1::Exp, E2::Exp, Es::Exps; => var E1; var E2, Es;       [macro-rec]
   rule var X::Id = E; => var X; X = E;                              [macro]
 ```
@@ -466,7 +466,7 @@ interestingly, the semantics of return stays unchanged.
        <env> _ => Env </env>
 
   syntax Val ::= "nothing"
-  rule return; => return nothing;   [macro]
+  rule return; => return nothing;
 
 
   rule <k> read() => I ...</k> <input> ListItem(I:Int) => .List ...</input>  [read]
