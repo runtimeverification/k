@@ -55,6 +55,7 @@ public class Scanner implements AutoCloseable {
     private final File scanner;
     private final Module module;
     private GlobalOptions go = new GlobalOptions();
+    private Map<String, Integer> startConditions = null;
 
     public static final String COMPILER = OS.current().equals(OS.OSX) ? "clang" : "gcc";
 
@@ -162,12 +163,41 @@ public class Scanner implements AutoCloseable {
         return tokens.entrySet().stream().filter(e -> e.getValue()._1() == kind).findAny().get().getKey();
     }
 
-    public void appendScanner(StringBuilder flex, BiConsumer<StringBuilder, TerminalLike> writeAction) {
+    public void appendScanner(StringBuilder flex, BiConsumer<StringBuilder, TerminalLike> writeAction, Map<String, Integer> startConditions) {
         if (this.module.allSorts().contains(Sorts.Layout())) {
-            flex.append(this.module.layout() + " ;\n");
+            flex.append("<*>").append(this.module.layout()).append(" ;\n");
         }
         List<TerminalLike> ordered = tokens.keySet().stream().sorted((t1, t2) -> tokens.get(t2)._2() - tokens.get(t1)._2()).collect(Collectors.toList());
         for (TerminalLike key : ordered) {
+            if (startConditions != null) {
+                flex.append("<");
+                String conn = "";
+                if (implicitTokens.contains(key)) {
+                  flex.append("*");
+                } else {
+                    boolean any = false;
+                    if (module.terminals().contains(key)) {
+                        flex.append(conn);
+                        flex.append("module");
+                        flex.append(startConditions.get(module.name()));
+                        conn = ",";
+                        any = true;
+                    }
+                    for (Module mod : iterable(module.importedModules())) {
+                        if (mod.terminals().contains(key)) {
+                            flex.append(conn);
+                            flex.append("module");
+                            flex.append(startConditions.get(mod.name()));
+                            conn = ",";
+                            any = true;
+                        }
+                    }
+                    if (!any) {
+                        flex.append("*");
+                    }
+                }
+                flex.append(">");
+            }
             if (key instanceof Terminal) {
                 Terminal t = (Terminal) key;
                 flex.append(StringUtil.enquoteCString(t.value()));
@@ -216,7 +246,7 @@ public class Scanner implements AutoCloseable {
             flex.append(regex).append(" line_marker(yytext, yyscanner);\n");
           });
         }
-        appendScanner(flex, this::writeStandaloneAction);
+        appendScanner(flex, this::writeStandaloneAction, null);
         try {
             FileUtils.write(path, flex);
         } catch (IOException e) {
@@ -249,6 +279,7 @@ public class Scanner implements AutoCloseable {
                     "   fwrite(yytext, 1, len, stdout);" +
                     " } while (0) \n" +
                     "char *buffer;\n" +
+                    "int startCondition;\n" +
                     "%}\n\n");
             for (SyntaxLexical ident : iterable(module.lexicalIdentifiers())) {
               flex.append(ident.name());
@@ -256,8 +287,20 @@ public class Scanner implements AutoCloseable {
               flex.append(ident.regex());
               flex.append("\n");
             }
+            flex.append("%x ");
+            startConditions = new HashMap<>();
+            int i = 2;
+            startConditions.put(module.name(), 1);
+            flex.append("module1").append(" ");
+            for (Module mod : iterable(module.importedModules())) {
+              int id = i++;
+              startConditions.put(mod.name(), id);
+              flex.append("module").append(id).append(" ");
+            }
+            flex.append("\n");
             flex.append("%%\n\n");
-            appendScanner(flex, this::writeAction);
+            flex.append("    BEGIN(startCondition);\n");
+            appendScanner(flex, this::writeAction, startConditions);
             //WIN32 fix for line terminator issue: https://sourceforge.net/p/mingw/mailman/message/11374534/
             flex.append("\n\n%%\n\n" +
                     "int main(int argc, char **argv) {\n" +
@@ -277,6 +320,8 @@ public class Scanner implements AutoCloseable {
                     "  while(1) {\n" +
                     "    int length;\n" +
                     "    size_t nread = fread(&length, sizeof(length), 1, stdin);\n" +
+                    "    if (nread < 1) exit(0);\n" +
+                    "    nread = fread(&startCondition, sizeof(startCondition), 1, stdin);\n" +
                     "    if (nread < 1) exit(0);\n" +
                     "    buffer = malloc(length + 2);\n" +
                     "    buffer[length] = 0;\n" +
@@ -436,6 +481,15 @@ public class Scanner implements AutoCloseable {
             ByteBuffer size = ByteBuffer.allocate(4);
             size.order(ByteOrder.nativeOrder());
             size.putInt(buf.length);
+            process.getOutputStream().write(size.array());
+            if (startConditions != null) {
+                size.position(0);
+                Integer sc = startConditions.get(moduleName);
+                if (sc == null) {
+                    throw KEMException.internalError("Could not find start condition code for module '" + moduleName + "' in scanner for module '" + module.name() + "'.");
+                }
+                size.putInt(sc);
+            }
             process.getOutputStream().write(size.array());
             process.getOutputStream().write(buf);
             process.getOutputStream().flush();
