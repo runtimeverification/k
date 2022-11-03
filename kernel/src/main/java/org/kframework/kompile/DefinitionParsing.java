@@ -663,7 +663,7 @@ public class DefinitionParsing {
         Source source = b.att().get(Source.class);
         boolean isAnywhere = b.att().contains(Att.ANYWHERE()) || b.att().contains(Att.SIMPLIFICATION()) || ExpandMacros.isMacro(b);
         Tuple2<Either<java.util.Set<KEMException>, K>, java.util.Set<KEMException>> result =
-                pim.parseString(b.contents(), START_SYMBOL, pim.getScanner(), source, startLine, startColumn, true, isAnywhere);
+                pim.parseString(b.contents(), START_SYMBOL, "bubble parsing", pim.getScanner(), source, startLine, startColumn, true, isAnywhere);
         parsedBubbles.getAndIncrement();
         registerWarnings(result._2());
         if (result._1().isRight()) {
