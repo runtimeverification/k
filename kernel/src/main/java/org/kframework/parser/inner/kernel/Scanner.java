@@ -126,6 +126,7 @@ public class Scanner implements AutoCloseable {
         this.tokens  = getTokens(module.getParsingModule());
         this.module  = module.seedModule();
         this.scanner = scanner;
+        initStartConditions(new StringBuilder());
     }
 
     public void serialize(File output) {
@@ -251,6 +252,18 @@ public class Scanner implements AutoCloseable {
         }
     }
 
+    public void initStartConditions(StringBuilder flex) {
+        startConditions = new HashMap<>();
+        int i = 2;
+        startConditions.put(module.name(), 1);
+        flex.append("module1").append(" ");
+        for (Module mod : iterable(module.importedModules())) {
+            int id = i++;
+            startConditions.put(mod.name(), id);
+            flex.append("module").append(id).append(" ");
+        }
+    }
+
     public File getScanner() {
         Stopwatch sw = new Stopwatch(go);
         File scanner;
@@ -285,15 +298,7 @@ public class Scanner implements AutoCloseable {
               flex.append("\n");
             }
             flex.append("%x ");
-            startConditions = new HashMap<>();
-            int i = 2;
-            startConditions.put(module.name(), 1);
-            flex.append("module1").append(" ");
-            for (Module mod : iterable(module.importedModules())) {
-              int id = i++;
-              startConditions.put(mod.name(), id);
-              flex.append("module").append(id).append(" ");
-            }
+            initStartConditions(flex);
             flex.append("\n");
             flex.append("%%\n\n");
             flex.append("    BEGIN(startCondition);\n");
