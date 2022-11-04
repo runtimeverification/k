@@ -51,23 +51,12 @@ import static org.kframework.Collections.*;
 public class Scanner implements AutoCloseable {
 
     private final Map<TerminalLike, Tuple2<Integer, Integer>> tokens;
-    private final Set<TerminalLike> implicitTokens;
     private final File scanner;
     private final Module module;
     private GlobalOptions go = new GlobalOptions();
     private Map<String, Integer> startConditions = null;
 
     public static final String COMPILER = OS.current().equals(OS.OSX) ? "clang" : "gcc";
-
-    private static Set<TerminalLike> getImplicitTokens(Map<TerminalLike, Tuple2<Integer, Integer>> tokens, Module module) {
-      Set<TerminalLike> implicitTokens = new HashSet<>();
-      for (Import _import : iterable(module.imports())) {
-        if (_import.module().att().contains("implicit-module")) {
-          implicitTokens.addAll(mutable(_import.module().terminals()));
-        }
-      }
-      return implicitTokens;
-    }
 
     public static Map<TerminalLike, Tuple2<Integer, Integer>> getTokens(Module module) {
         Map<TerminalLike, Integer> tokens = new TreeMap<>();
@@ -122,14 +111,12 @@ public class Scanner implements AutoCloseable {
     public Scanner(ParseInModule module, GlobalOptions go) {
         this.go = go;
         this.tokens  = getTokens(module.getParsingModule());
-        this.implicitTokens = getImplicitTokens(tokens, module.seedModule());
         this.module  = module.seedModule();
         this.scanner = getScanner();
     }
 
     public Scanner(ParseInModule module) {
         this.tokens  = getTokens(module.getParsingModule());
-        this.implicitTokens = getImplicitTokens(tokens, module.seedModule());
         this.module  = module.seedModule();
         this.scanner = getScanner();
     }
@@ -137,7 +124,6 @@ public class Scanner implements AutoCloseable {
     public Scanner(ParseInModule module, GlobalOptions go, File scanner) {
         this.go = go;
         this.tokens  = getTokens(module.getParsingModule());
-        this.implicitTokens = getImplicitTokens(tokens, module.seedModule());
         this.module  = module.seedModule();
         this.scanner = scanner;
     }
@@ -163,11 +149,22 @@ public class Scanner implements AutoCloseable {
         return tokens.entrySet().stream().filter(e -> e.getValue()._1() == kind).findAny().get().getKey();
     }
 
+    private Set<TerminalLike> getImplicitTokens() {
+      Set<TerminalLike> implicitTokens = new HashSet<>();
+      for (Import _import : iterable(module.imports())) {
+        if (_import.module().att().contains("implicit-module")) {
+          implicitTokens.addAll(mutable(_import.module().terminals()));
+        }
+      }
+      return implicitTokens;
+    }
+
     public void appendScanner(StringBuilder flex, BiConsumer<StringBuilder, TerminalLike> writeAction, Map<String, Integer> startConditions) {
         if (this.module.allSorts().contains(Sorts.Layout())) {
             flex.append("<*>").append(this.module.layout()).append(" ;\n");
         }
         List<TerminalLike> ordered = tokens.keySet().stream().sorted((t1, t2) -> tokens.get(t2)._2() - tokens.get(t1)._2()).collect(Collectors.toList());
+        Set<TerminalLike> implicitTokens = getImplicitTokens();
         for (TerminalLike key : ordered) {
             if (startConditions != null) {
                 flex.append("<");
