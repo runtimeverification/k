@@ -11,6 +11,9 @@ from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp, run
 from ..cterm import CTerm, build_claim
 from ..kast import KClaim, KDefinition, KFlatModule, KImport, KInner, KRequire, KRule, KSentence
 from ..kastManip import extract_subst, flatten_label, free_vars
+from ..kore.rpc import KoreClient, KoreServer
+from ..kore.syntax import Pattern
+from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.ml import is_top, mlAnd, mlBottom, mlTop
 from ..utils import unique
 from .kprint import KPrint
@@ -43,11 +46,15 @@ def _kprove(
     env: Optional[Mapping[str, str]] = None,
     check: bool = True,
     profile: bool = False,
+    depth: Optional[int] = None,
 ) -> CompletedProcess:
     check_file_path(spec_file)
 
     for include_dir in include_dirs:
         check_dir_path(include_dir)
+
+    if depth is not None and depth < 0:
+        raise ValueError(f'Argument "depth" must be non-negative, got: {depth}')
 
     typed_args = _build_arg_list(
         kompiled_dir=kompiled_dir,
@@ -56,6 +63,7 @@ def _kprove(
         emit_json_spec=emit_json_spec,
         output=output,
         dry_run=dry_run,
+        depth=depth,
     )
 
     try:
@@ -75,6 +83,7 @@ def _build_arg_list(
     emit_json_spec: Optional[Path],
     output: Optional[KProveOutput],
     dry_run: bool,
+    depth: Optional[int],
 ) -> List[str]:
     args = []
 
@@ -96,6 +105,9 @@ def _build_arg_list(
     if dry_run:
         args.append('--dry-run')
 
+    if depth:
+        args += ['--depth', str(depth)]
+
     return args
 
 
@@ -105,6 +117,8 @@ class KProve(KPrint):
     prover_args: List[str]
     backend: str
     main_module: str
+    port: int
+    _kore_rpc: Optional[Tuple[KoreServer, KoreClient]]
 
     def __init__(
         self,
@@ -113,6 +127,7 @@ class KProve(KPrint):
         use_directory: Optional[Path] = None,
         profile: bool = False,
         command: str = 'kprove',
+        port: Optional[int] = None,
     ):
         super(KProve, self).__init__(definition_dir, use_directory=use_directory, profile=profile)
         # TODO: we should not have to supply main_file, it should be read
@@ -120,10 +135,25 @@ class KProve(KPrint):
         self.main_file = main_file
         self.prover = [command]
         self.prover_args = []
+        self.port = 3000 if port is None else port
         with open(self.definition_dir / 'backend.txt', 'r') as ba:
             self.backend = ba.read()
         with open(self.definition_dir / 'mainModule.txt', 'r') as mm:
             self.main_module = mm.read()
+        self._kore_rpc = None
+
+    def kore_rpc(self) -> Tuple[KoreServer, KoreClient]:
+        if not self._kore_rpc:
+            _kore_server = KoreServer(self.definition_dir, self.main_module, self.port)
+            _kore_client = KoreClient('localhost', self.port)
+            self._kore_rpc = (_kore_server, _kore_client)
+        return self._kore_rpc
+
+    def close_kore_rpc(self) -> None:
+        if self._kore_rpc is not None:
+            _kore_server, _kore_client = self._kore_rpc
+            _kore_client.close()
+            _kore_server.close()
 
     def prove(
         self,
@@ -135,6 +165,7 @@ class KProve(KPrint):
         log_axioms_file: Optional[Path] = None,
         allow_zero_step: bool = False,
         dry_run: bool = False,
+        depth: Optional[int] = None,
     ) -> KInner:
         log_file = spec_file.with_suffix('.debug-log') if log_axioms_file is None else log_axioms_file
         if log_file.exists():
@@ -165,6 +196,7 @@ class KProve(KPrint):
             env=env,
             check=False,
             profile=self._profile,
+            depth=depth,
         )
 
         if proc_result.returncode not in (0, 1):
@@ -190,6 +222,7 @@ class KProve(KPrint):
         log_axioms_file: Optional[Path] = None,
         allow_zero_step: bool = False,
         dry_run: bool = False,
+        depth: Optional[int] = None,
     ) -> KInner:
         claim_path, claim_module_name = self._write_claim_definition(claim, claim_id, lemmas=lemmas)
         return self.prove(
@@ -201,6 +234,7 @@ class KProve(KPrint):
             log_axioms_file=log_axioms_file,
             allow_zero_step=allow_zero_step,
             dry_run=dry_run,
+            depth=depth,
         )
 
     # TODO: This should return the empty disjunction `[]` instead of `#Top`.
@@ -216,6 +250,7 @@ class KProve(KPrint):
         haskell_args: Iterable[str] = (),
         log_axioms_file: Path = None,
         allow_zero_step: bool = False,
+        depth: Optional[int] = None,
     ) -> List[KInner]:
         claim, var_map = build_claim(claim_id, init_cterm, target_cterm, keep_vars=free_vars(init_cterm.kast))
         next_state = self.prove_claim(
@@ -226,6 +261,7 @@ class KProve(KPrint):
             haskell_args=haskell_args,
             log_axioms_file=log_axioms_file,
             allow_zero_step=allow_zero_step,
+            depth=depth,
         )
         next_states = [var_map(ns) for ns in flatten_label('#Or', next_state)]
         constraint_subst, _ = extract_subst(init_cterm.kast)
@@ -253,9 +289,10 @@ class KProve(KPrint):
         next_state = self.prove(
             claim_path,
             spec_module_name=claim_module,
-            args=list(args) + ['--depth', str(max_depth)],
+            args=args,
             haskell_args=(['--execute-to-branch'] + list(haskell_args)),
             log_axioms_file=log_axioms_file,
+            depth=max_depth,
         )
         if len(flatten_label('#Or', next_state)) != 1:
             raise AssertionError(f'get_basic_block execeted 1 state from Haskell backend, got: {next_state}')
@@ -282,6 +319,25 @@ class KProve(KPrint):
                 could_be_branching = True
             else:
                 could_be_branching = False
+        return depth, branching, next_state
+
+    def execute(
+        self,
+        cterm: CTerm,
+        depth: Optional[int] = None,
+        cut_point_rules: Optional[Iterable[str]] = None,
+        terminal_rules: Optional[Iterable[str]] = None,
+    ) -> Tuple[int, bool, KInner]:
+        kore = self.kast_to_kore(cterm.kast, GENERATED_TOP_CELL)
+        assert isinstance(kore, Pattern)
+        _, kore_client = self.kore_rpc()
+        er = kore_client.execute(kore, max_depth=depth, cut_point_rules=cut_point_rules, terminal_rules=terminal_rules)
+        depth = er.depth
+        branching = er.next_states is not None and len(er.next_states) > 1
+        next_state = self.kore_to_kast(er.state.term)
+        assert isinstance(next_state, KInner)
+        assert er.state.substitution is None
+        assert er.state.predicate is None
         return depth, branching, next_state
 
     def _write_claim_definition(self, claim: KClaim, claim_id: str, lemmas: Iterable[KRule] = ()) -> Tuple[Path, str]:

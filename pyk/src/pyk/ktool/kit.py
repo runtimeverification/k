@@ -314,7 +314,7 @@ def parse_token_rule_syntax(kprove: KProve, ktoken: KToken, kast_args: Iterable[
     claim, var_map = build_claim(
         claim_id, cterm, CTerm(mlAnd([cterm.kast, mlEqualsTrue(FALSE)])), keep_vars=free_vars(cterm.kast)
     )
-    kprove_result = kprove.prove_claim(claim, claim_id, args=['--depth', '0'], allow_zero_step=True)
+    kprove_result = kprove.prove_claim(claim, claim_id, depth=0, allow_zero_step=True)
     kprove_result = Subst(var_map).apply(kprove_result)
     simp_cterm = CTerm(kprove_result)
     result = get_cell(simp_cterm.kast, 'K_CELL')
