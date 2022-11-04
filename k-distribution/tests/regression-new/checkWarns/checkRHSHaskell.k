@@ -14,7 +14,7 @@ module CHECKRHSHASKELL
 
     syntax Pgm ::= "a" | "b"
     rule <k> a => b </k>
-    syntax Int ::= f ( Int ) [function, functional, no-evaluators]
+    syntax Int ::= f ( Int ) [function, total, no-evaluators]
 
     configuration <k> $PGM:Pgm </k>
 

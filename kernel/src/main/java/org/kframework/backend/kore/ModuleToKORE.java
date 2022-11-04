@@ -1451,7 +1451,7 @@ public class ModuleToKORE {
     }
 
     private Att addKoreAttributes(Production prod, SetMultimap<KLabel, Rule> functionRules, Set<Production> overloads) {
-        boolean isFunctional = !isFunction(prod);
+        boolean isFunctional = !isFunction(prod) || prod.att().contains(Att.TOTAL());
         boolean isConstructor = !isFunction(prod);
         isConstructor &= !prod.att().contains(Att.ASSOC());
         isConstructor &= !prod.att().contains(Att.COMM());
