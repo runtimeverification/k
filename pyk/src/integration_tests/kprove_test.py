@@ -9,6 +9,7 @@ from pyk.ktool import KProve
 from pyk.ktool.kprint import SymbolTable
 
 from .kompiled_test import KompiledTest
+from .utils import free_port_on_host
 
 
 class KProveTest(KompiledTest, ABC):
@@ -27,11 +28,12 @@ class KProveTest(KompiledTest, ABC):
         kprove_main_file = Path(kompiled_main_file.name)
         kprove_include_dirs = [str(kompiled_main_file.parent)] + list(self.KPROVE_INCLUDE_DIRS)
 
-        self.kprove = KProve(self.kompiled_dir, kprove_main_file, self.use_dir)
+        self.kprove = KProve(self.kompiled_dir, kprove_main_file, self.use_dir, port=free_port_on_host())
         self.kprove.prover_args += list(chain.from_iterable(['-I', include_dir] for include_dir in kprove_include_dirs))
         self._update_symbol_table(self.kprove.symbol_table)
 
     def tearDown(self) -> None:
+        self.kprove.close_kore_rpc()
         shutil.rmtree(self.use_dir, ignore_errors=True)
         super().tearDown()
 

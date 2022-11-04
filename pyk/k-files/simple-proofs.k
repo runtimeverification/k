@@ -21,4 +21,13 @@ module SIMPLE-PROOFS
          <state> ... 3 |-> N ... </state>
       requires pred1(N)
 
+    syntax KItem ::= Step
+    syntax Step ::= "a" | "b" | "c" | "d" | "e"
+
+    rule [a.b]: <k> a => b ... </k>
+    rule [b.c]: <k> b => c ... </k>
+    rule [b.d]: <k> b => d ... </k>
+    rule [c.e]: <k> c => e ... </k>
+    rule [d.e]: <k> d => e ... </k>
+
 endmodule
