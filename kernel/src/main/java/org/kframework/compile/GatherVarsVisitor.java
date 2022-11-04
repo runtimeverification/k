@@ -15,7 +15,7 @@ public class GatherVarsVisitor extends RewriteAwareVisitor {
     private final Set<KVariable> vars;
     private final Set<KEMException> errors;
     private final boolean errorExistential;
-    private boolean isInExistsLhs = false;
+    private boolean isInMLBinderLhs = false;
 
     public GatherVarsVisitor(boolean isBody, Set<KEMException> errors, Set<KVariable> vars, boolean errorExistential) {
         super(isBody, errors);
@@ -28,7 +28,7 @@ public class GatherVarsVisitor extends RewriteAwareVisitor {
     public void apply(KVariable v) {
         if (isLHS() && !ResolveAnonVar.isAnonVar(v))
             vars.add(v);
-        if (isRHS() && isInExistsLhs)
+        if (isRHS() && isInMLBinderLhs)
             vars.add(v);
         if (errorExistential && v.name().startsWith("?")) {
             errors.add(KEMException.compilerError("Found existential variable not supported by concrete backend.", v));
@@ -42,10 +42,10 @@ public class GatherVarsVisitor extends RewriteAwareVisitor {
             apply((KVariable) k.klabel());
         }
         if (k.klabel().equals(KLabels.ML_EXISTS) || k.klabel().equals(KLabels.ML_FORALL)) {
-            boolean tmp = isInExistsLhs;
-            isInExistsLhs = true;
+            boolean tmp = isInMLBinderLhs;
+            isInMLBinderLhs = true;
             apply(k.items().get(0));
-            isInExistsLhs = tmp;
+            isInMLBinderLhs = tmp;
             apply(k.items().get(1));
             return;
         }
