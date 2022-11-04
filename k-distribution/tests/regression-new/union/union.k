@@ -11,8 +11,8 @@ module UNION
   imports UNION-SYNTAX
   imports DOMAINS
 
-  syntax Set ::= #IntsToSet(Ints) [function, functional]
-  syntax Set ::= #IntsToSetAux(Ints, Set) [function, functional]
+  syntax Set ::= #IntsToSet(Ints) [function, total]
+  syntax Set ::= #IntsToSetAux(Ints, Set) [function, total]
 
   rule #IntsToSet(Is) => #IntsToSetAux(Is, .Set)
   rule #IntsToSetAux(.Ints, S) => S

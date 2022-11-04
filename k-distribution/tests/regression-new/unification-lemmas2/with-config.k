@@ -23,7 +23,7 @@ module WITH-CONFIG
     syntax AccountId ::= ".AccountId" | Int
     // ---------------------------------------
 
-    syntax Int ::= "total_balance" "(" AccountId ")" [function, functional]
+    syntax Int ::= "total_balance" "(" AccountId ")" [function, total]
     // -----------------------------------------------------------------------
     rule total_balance(_WHO) => 0 [owise]
     rule [[ total_balance(WHO) => FREE_BALANCE ]]
