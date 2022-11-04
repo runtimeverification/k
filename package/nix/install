@@ -23,7 +23,7 @@ in your shell."
   # Check if nix is already installed and is at least version 2.4
   if command -v nix > /dev/null; then
     NIX_VERSION=$(nix --version | sed -ne 's/[^0-9]*\(\([0-9]\.\)\)/\1/p')
-    NIX_VERSION_MINOR=`echo $NIX_VERSION | cut -d. -f2`
+    NIX_VERSION_MINOR=$(echo "$NIX_VERSION" | cut -d. -f2)
     if [ "$NIX_VERSION_MINOR" -gt "3" ]; then
       echo -e "Detected nix version $NIX_VERSION. Proceeding with K framework install."
     else
@@ -36,14 +36,14 @@ in your shell."
     then
       echo "Downloading nix and running the installer..."
       bash <(curl -L https://nixos.org/nix/install)
-      . $HOME/.nix-profile/etc/profile.d/nix.sh
+      . "$HOME"/.nix-profile/etc/profile.d/nix.sh
       NIX_FRESH_INSTALL=true
     else
       oops "Cannot proceed with the installation without nix."
     fi 
   fi
 
-  GC_DONT_GC=1 nix profile install github:runtimeverification/k#kup \
+  GC_DONT_GC=1 nix profile install github:runtimeverification/kup#kup \
   --option extra-substituters 'https://k-framework.cachix.org' \
   --option extra-trusted-public-keys 'k-framework.cachix.org-1:jeyMXB2h28gpNRjuVkehg+zLj62ma1RnyyopA/20yFE=' \
   --experimental-features 'nix-command flakes'

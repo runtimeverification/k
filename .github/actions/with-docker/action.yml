@@ -30,9 +30,24 @@ runs:
       Z3_VERSION=4.8.15
       K_VERSION=$(cat ${SUBDIR}package/version)
 
-      docker build . --build-arg BASE_IMAGE=${BASE_IMAGE} --tag z3:${Z3_VERSION}   --file ${SUBDIR}.github/workflows/Dockerfile.z3
-      docker build . --build-arg BASE_IMAGE=${BASE_IMAGE} --tag stack:${K_VERSION} --file ${SUBDIR}.github/workflows/Dockerfile.stack-deps
-      docker build . --build-arg BASE_IMAGE=${BASE_IMAGE} --tag maven:${K_VERSION} --file ${SUBDIR}.github/workflows/Dockerfile.maven-cache
+      docker build . \
+          --build-arg USER=$(id -un) --build-arg USER_ID=$(id -u)   \
+          --build-arg GROUP=$(id -gn) --build-arg GROUP_ID=$(id -g) \
+          --build-arg BASE_IMAGE=${BASE_IMAGE}                      \
+          --tag z3:${BASE_IMAGE}-${Z3_VERSION}                      \
+          --file ${SUBDIR}.github/workflows/Dockerfile.z3
+      docker build . \
+          --build-arg USER=$(id -un) --build-arg USER_ID=$(id -u)   \
+          --build-arg GROUP=$(id -gn) --build-arg GROUP_ID=$(id -g) \
+          --build-arg BASE_IMAGE=${BASE_IMAGE}                      \
+          --tag stack:${BASE_IMAGE}-${K_VERSION}                    \
+          --file ${SUBDIR}.github/workflows/Dockerfile.stack-deps
+      docker build . \
+          --build-arg USER=$(id -un) --build-arg USER_ID=$(id -u)   \
+          --build-arg GROUP=$(id -gn) --build-arg GROUP_ID=$(id -g) \
+          --build-arg BASE_IMAGE=${BASE_IMAGE}                      \
+          --tag maven:${BASE_IMAGE}-${K_VERSION}                    \
+          --file ${SUBDIR}.github/workflows/Dockerfile.maven-cache
 
       docker build . --file ${SUBDIR}.github/workflows/Dockerfile    \
           --tag runtimeverification/${TAG_NAME}                      \
@@ -40,15 +55,15 @@ runs:
           --build-arg Z3_VERSION=${Z3_VERSION}                       \
           --build-arg K_VERSION=${K_VERSION}                         \
           --build-arg LLVM_VERSION=${LLVM_VERSION}                   \
-          --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)
+          --build-arg USER=$(id -un) --build-arg USER_ID=$(id -u)    \
+          --build-arg GROUP=$(id -gn) --build-arg GROUP_ID=$(id -g)
 
       docker run                             \
           --name ${TAG_NAME}                 \
           --rm -it                           \
           --detach                           \
           --workdir /opt/workspace/${SUBDIR} \
-          --user user:user                   \
-          -v ${HOME}:${HOME}                 \
+          --user $(id -un):$(id -gn)         \
           -v "$(pwd):/opt/workspace"         \
           -v "/etc/passwd:/etc/passwd:ro"    \
           -v "/etc/group:/etc/group:ro"      \
