@@ -1,5 +1,5 @@
-from pyk.kast import KApply, KSequence, KSort
-from pyk.kore.syntax import DV, App, SortApp, String
+from pyk.kast import KApply, KSequence, KSort, KVariable
+from pyk.kore.syntax import DV, App, EVar, SortApp, String
 from pyk.ktool import KompileBackend
 from pyk.ktool.kprint import SymbolTable
 from pyk.prelude.kint import intToken
@@ -16,13 +16,31 @@ class KoreToKastTest(KProveTest):
     def _update_symbol_table(symbol_table: SymbolTable) -> None:
         pass
 
-    def test_kast_to_kore(self) -> None:
+    def test_bidirectional(self) -> None:
         kore_kast_pairs = (
             (
                 'domain-value',
                 KSort('Int'),
                 DV(SortApp('SortInt'), String('3')),
                 intToken(3),
+            ),
+            (
+                'variable-with-sort',
+                KSort('Int'),
+                EVar('VarX', SortApp('SortInt')),
+                KVariable('X', sort=KSort('Int')),
+            ),
+            (
+                'variable-with-super-sort',
+                KSort('Bar'),
+                App('inj', [SortApp('SortBaz'), SortApp('SortBar')], [EVar('VarX', SortApp('SortBaz'))]),
+                KVariable('X', sort=KSort('Baz')),
+            ),
+            (
+                'variable-with-underscore',
+                KSort('Int'),
+                EVar("VarX'Unds'Y", SortApp('SortInt')),
+                KVariable('X_Y', sort=KSort('Int')),
             ),
             (
                 'issue:k/2762',
@@ -112,3 +130,17 @@ class KoreToKastTest(KProveTest):
                 kast_actual = self.kprove.kore_to_kast(kore)
                 self.assertEqual(kore_actual, kore)
                 self.assertEqual(kast_actual, kast)
+
+    def test_kast_to_kore(self) -> None:
+        kore_kast_pairs = (
+            (
+                'variable-without-sort',
+                KSort('Bar'),
+                EVar('VarX', SortApp('SortBar')),
+                KVariable('X'),
+            ),
+        )
+        for name, sort, kore, kast in kore_kast_pairs:
+            with self.subTest(name):
+                kore_actual = self.kprove.kast_to_kore(kast, sort=sort)
+                self.assertEqual(kore_actual, kore)
