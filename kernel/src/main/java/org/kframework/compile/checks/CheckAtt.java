@@ -142,11 +142,19 @@ public class CheckAtt {
         if (hasColors && nescapes + nterminals != ncolors) {
             errors.add(KEMException.compilerError("Invalid colors attribute: expected " + (nescapes + nterminals) + " colors, found " + ncolors + " colors instead.", prod));
         }
+        if (prod.att().contains(Att.FUNCTIONAL())) {
+            kem.registerCompilerWarning(ExceptionType.FUTURE_ERROR, errors,
+                "The attribute 'functional' has been deprecated on symbols. Use the combination of attributes 'function' and 'total' instead.", prod);
+        }
+        if (prod.att().contains(Att.TOTAL()) && !prod.att().contains(Att.FUNCTION())) {
+            kem.registerCompilerWarning(ExceptionType.IGNORED_ATTRIBUTE, errors,
+                "The attribute 'total' was applied to a production which does not have the 'function' attribute; the attribute was ignored.", prod);
+        }
     }
 
     private void check(Rule rule) {
         if (rule.isMacro()) {
-            kem.registerCompilerWarning(ExceptionType.RULE_HAS_MACRO_ATT, errors,
+            kem.registerCompilerWarning(ExceptionType.FUTURE_ERROR, errors,
                     "The attribute [" + rule.att().getMacro().get() + "] has been deprecated on rules. Use this label on syntax declarations instead.", rule);
         }
 

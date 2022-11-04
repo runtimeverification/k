@@ -494,13 +494,13 @@ public class GenerateSentencesFromConfigDecl {
             sentences.add(bagUnit);
             sentences.add(bag);
             if (type.equals("Map")) {
-                // syntax Bool ::= KeyCell "in_keys" "(" CellMap ")" [function, functional, hook(MAP.in_keys)]
-                sentences.add(Production(KLabel(bagSort.name() + ":in_keys"), Sorts.Bool(), Seq(NonTerminal(childSorts.get(0)), Terminal("in_keys"), Terminal("("), NonTerminal(bagSort), Terminal(")")), Att().add(Att.HOOK(), "MAP.in_keys").add(Att.FUNCTION()).add(Att.FUNCTIONAL())));
+                // syntax Bool ::= KeyCell "in_keys" "(" CellMap ")" [function, total, hook(MAP.in_keys)]
+                sentences.add(Production(KLabel(bagSort.name() + ":in_keys"), Sorts.Bool(), Seq(NonTerminal(childSorts.get(0)), Terminal("in_keys"), Terminal("("), NonTerminal(bagSort), Terminal(")")), Att().add(Att.HOOK(), "MAP.in_keys").add(Att.FUNCTION()).add(Att.TOTAL())));
 
-                // syntax KeyCell ::= CellMapKey(Cell) [function, functional]
+                // syntax KeyCell ::= CellMapKey(Cell) [function, total]
                 // rule CellMapKey(<cell> K ...<\cell>) => K
                 KLabel cellMapKeyLabel = KLabel(bagSort.name() + "Key");
-                Production cellMapKeyProduction = Production(cellMapKeyLabel, childSorts.get(0), Seq(Terminal(bagSort.name() + "Key"), Terminal("("), NonTerminal(sort), Terminal(")")), Att().add(Att.FUNCTION()).add(Att.FUNCTIONAL()));
+                Production cellMapKeyProduction = Production(cellMapKeyLabel, childSorts.get(0), Seq(Terminal(bagSort.name() + "Key"), Terminal("("), NonTerminal(sort), Terminal(")")), Att().add(Att.FUNCTION()).add(Att.TOTAL()));
                 KVariable key = KVariable("Key", Att.empty().add(Sort.class, childSorts.get(0)));
                 Rule cellMapKeyRule = Rule(KRewrite(KApply(cellMapKeyLabel, IncompleteCellUtils.make(KLabel(klabel), false, key, true)), key),  BooleanUtils.TRUE, BooleanUtils.TRUE);
                 sentences.add(cellMapKeyProduction);
