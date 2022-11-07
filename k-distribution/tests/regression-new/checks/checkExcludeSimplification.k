@@ -5,8 +5,8 @@ module CHECKEXCLUDESIMPLIFICATION
   imports CHECKEXCLUDESIMPLIFICATION-SYNTAX
   imports INT
 
-syntax Int ::= f(Int)  [function, functional]
-syntax Int ::= g(Int)  [function, functional]
+syntax Int ::= f(Int)  [function, total]
+syntax Int ::= g(Int)  [function, total]
 
 rule g(f(X)) => X [simplification]
 

@@ -4,7 +4,7 @@ module TEST-SYNTAX
           |"ONE" [token]
 
   syntax Kat ::= TokKat [hook(KAT.Kat)]
-  syntax Kat ::= ".Kat" [function, functional, hook(KAT.empty), impure]
+  syntax Kat ::= ".Kat" [function, total, hook(KAT.empty), impure]
 
 endmodule
 
@@ -17,13 +17,13 @@ module TEST
 // Boolean Algebra Part of KAT
 
   syntax Kat ::= Bool
-                | "notKat" Kat          [function, functional, klabel(notKat_), symbol, smt-hook(not), boolOperation, latex(\neg_{\scriptstyle\it Kat}{#1}), hook(KAT.not)]
-                > Kat "andKat" Kat     [function, functional, klabel(_andKat_), symbol, left, smt-hook(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Kat}{#2}), hook(KAT.and)]
-                | Kat "orKat" Kat      [function, functional, klabel(_orKat_), left, smt-hook(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Kat}{#2}), hook(KAT.or)]
-                | Kat "=/=Kat" Kat     [function, functional, klabel(_=/=Kat_), symbol, left, smt-hook(distinct), hook(KAT.ne)]
-                //| Kat "impliesKat" Kat [function, functional, klabel(_impliesKat_), symbol, left, smt-hook(=>), boolOperation, hook(KAT.implies)]
+                | "notKat" Kat          [function, total, klabel(notKat_), symbol, smt-hook(not), boolOperation, latex(\neg_{\scriptstyle\it Kat}{#1}), hook(KAT.not)]
+                > Kat "andKat" Kat     [function, total, klabel(_andKat_), symbol, left, smt-hook(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Kat}{#2}), hook(KAT.and)]
+                | Kat "orKat" Kat      [function, total, klabel(_orKat_), left, smt-hook(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Kat}{#2}), hook(KAT.or)]
+                | Kat "=/=Kat" Kat     [function, total, klabel(_=/=Kat_), symbol, left, smt-hook(distinct), hook(KAT.ne)]
+                //| Kat "impliesKat" Kat [function, total, klabel(_impliesKat_), symbol, left, smt-hook(=>), boolOperation, hook(KAT.implies)]
 
-  syntax Bool ::= Kat "==Kat" Kat      [function, functional, klabel(_==Kat_), symbol, left, smt-hook(=), hook(KAT.eq)]
+  syntax Bool ::= Kat "==Kat" Kat      [function, total, klabel(_==Kat_), symbol, left, smt-hook(=), hook(KAT.eq)]
 
 
   syntax Kat ::= freshKat(Kat)    [freshGenerator, function]
