@@ -1,4 +1,4 @@
-name: 'Test PR'
+name: 'Switch master PRs to develop'
 on:
   pull_request:
     branches:
