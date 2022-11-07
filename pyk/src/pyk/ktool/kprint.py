@@ -40,7 +40,7 @@ from ..kast import (
 )
 from ..kastManip import flatten_label
 from ..kore.parser import KoreParser
-from ..kore.syntax import DV, App, EVar, Kore, Pattern, SortApp, String
+from ..kore.syntax import DV, And, App, Equals, EVar, Kore, Pattern, SortApp, String
 from ..prelude.k import DOTS, EMPTY_K
 from ..prelude.kbool import TRUE
 
@@ -224,7 +224,6 @@ class KPrint:
             if kore.symbol == 'inj' and len(kore.sorts) == 2 and len(kore.patterns) == 1:
                 return self._kore_to_kast(kore.patterns[0])
 
-            # TODO: Support sort parameters
             if len(kore.sorts) == 0:
 
                 if kore.symbol == 'dotk' and len(kore.patterns) == 0:
@@ -238,12 +237,27 @@ class KPrint:
 
                 else:
                     _label_name = _unmunge(kore.symbol[3:])
-                    klabel = KLabel(_label_name, [KSort(k.name) for k in kore.sorts])
+                    klabel = KLabel(_label_name, [KSort(k.name[4:]) for k in kore.sorts])
                     args = [self._kore_to_kast(_a) for _a in kore.patterns]
                     # TODO: Written like this to appease the type-checker.
                     new_args = [a for a in args if a is not None]
                     if len(new_args) == len(args):
                         return KApply(klabel, new_args)
+
+        if type(kore) is And:
+            psort = KSort(kore.sort.name[4:])
+            larg = self._kore_to_kast(kore.left)
+            rarg = self._kore_to_kast(kore.right)
+            if larg is not None and rarg is not None:
+                return KApply(KLabel('#And', [psort]), [larg, rarg])
+
+        if type(kore) is Equals:
+            osort = KSort(kore.op_sort.name[4:])
+            psort = KSort(kore.sort.name[4:])
+            larg = self._kore_to_kast(kore.left)
+            rarg = self._kore_to_kast(kore.right)
+            if larg is not None and rarg is not None:
+                return KApply(KLabel('#Equals', [osort, psort]), [larg, rarg])
 
         _LOGGER.warning(f'KPrint._kore_to_kast failed on input: {kore}')
         return None
@@ -282,7 +296,7 @@ class KPrint:
                 return EVar(vname, SortApp('Sort' + kast.sort.name))
 
         if type(kast) is KApply:
-            # TODO: Support sort parameters
+
             if len(kast.label.params) == 0:
                 # TODO: KAST validation should be a separate pass
                 argument_sorts = self.definition.argument_sorts(kast.label)
@@ -302,6 +316,31 @@ class KPrint:
                     if sort is not None and isort is not None:
                         app = self._add_sort_injection(app, isort, sort)
                     return app
+
+            if len(kast.label.params) == 1:
+                psort = kast.label.params[0]
+                if kast.label.name == '#And' and kast.arity == 2:
+                    larg = self._kast_to_kore(kast.args[0], sort=psort)
+                    rarg = self._kast_to_kore(kast.args[1], sort=psort)
+                    if larg is not None and rarg is not None:
+                        _and: Pattern = And(SortApp('Sort' + psort.name), larg, rarg)
+                        if sort is not None:
+                            _and = self._add_sort_injection(_and, psort, sort)
+                        return _and
+
+            if len(kast.label.params) == 2:
+                osort = kast.label.params[0]
+                psort = kast.label.params[1]
+                if kast.label.name == '#Equals' and kast.arity == 2:
+                    larg = self._kast_to_kore(kast.args[0], sort=osort)
+                    rarg = self._kast_to_kore(kast.args[1], sort=osort)
+                    if larg is not None and rarg is not None:
+                        _equals: Pattern = Equals(
+                            SortApp('Sort' + osort.name), SortApp('Sort' + psort.name), larg, rarg
+                        )
+                        if sort is not None:
+                            _equals = self._add_sort_injection(_equals, psort, sort)
+                        return _equals
 
         if type(kast) is KSequence:
             args = [self._kast_to_kore(i, sort=KSort('KItem')) for i in reversed(kast.items)]

@@ -5,9 +5,9 @@ SUM-TO-N-SPEC.main
 + split-node @init-not-1 N ==Int 2 --alias-true init-2 --alias-false init-not-1-2
 + split-node @init-not-1-2 N ==Int 10 --alias-true init-10
 + show-edge @init-not-1-2,@init-10
-1a257b..1bd4cd (expanded, @init-not-1-2)
+3dde9b..707641 (expanded, @init-not-1-2)
 │ N:Int ==Int 10
-a425e5..4b490f (frontier, leaf, @init-10)
+b9624a..9c790c (frontier, leaf, @init-10)
 
 + show-node @init-10
 <T>
@@ -27,7 +27,7 @@ a425e5..4b490f (frontier, leaf, @init-10)
 + build-edges @init-10,#target
 + verify-edges --edges @init-10,#target
 + build-edges @init-2,@init-10
-CRITICAL - Could not verify claim: BASIC-BLOCK-cdb3dba1208f967019d9a737b5ae9c3f99e01ec8d4add5721d99e070388863e3-TO-a425e5e2ed1348d1503e07d50814643227f6db35ff58ba78b384a78ade4b490f
+CRITICAL - Could not verify claim: BASIC-BLOCK-ed71d73dca946691e513847d6349ab6b43b00ed47e299630ead69fbc5bbed2d3-TO-b9624a5a330a93ac89ccef4ab422be4281a0c3bc77681b2e2ac11472419c790c
 
 Prover output:
 
@@ -44,25 +44,25 @@ Prover output:
 </generatedTop>
 #And #Top.
 + show-cfg
-508444..3623d3 (init, expanded)
-┣━ 16058b..29d5c1 (expanded, @init-1)    N:Int ==Int 1
+ad5d55..d0813a (init, expanded)
+┣━ 38aba0..ea28c3 (expanded, @init-1)    N:Int ==Int 1
 ┃   │  [1m[32m(verified)[0m[0m
 ┃   │  (-1 steps)
 ┃   └  6a6e72..499ac5 (target, leaf)
 ┃
-┗━ 73e36d..9633b6 (expanded, @init-not-1)    notBool ( N:Int ==Int 1 )
-    ┣━ cdb3db..8863e3 (expanded, @init-2)    N:Int ==Int 2
+┗━ 8c6816..882c59 (expanded, @init-not-1)    notBool ( N:Int ==Int 1 )
+    ┣━ ed71d7..bed2d3 (expanded, @init-2)    N:Int ==Int 2
     ┃   │  (-1 steps)
-    ┃   ├  a425e5..4b490f (expanded, @init-10)
+    ┃   ├  b9624a..9c790c (expanded, @init-10)
     ┃   │  [1m[32m(verified)[0m[0m
     ┃   │  (-1 steps)
     ┃   └  6a6e72..499ac5 (target, leaf)
     ┃
-    ┗━ 1a257b..1bd4cd (expanded, @init-not-1-2)    notBool ( N:Int ==Int 2 )
-        ┣━ a425e5..4b490f (expanded, @init-10)    N:Int ==Int 10
+    ┗━ 3dde9b..707641 (expanded, @init-not-1-2)    notBool ( N:Int ==Int 2 )
+        ┣━ b9624a..9c790c (expanded, @init-10)    N:Int ==Int 10
         ┃   ┊ (continues as previously)
         ┃
-        ┗━ [1md4bf3e..e01c82 (frontier, leaf)[0m    notBool ( N:Int ==Int 10 )
+        ┗━ [1mee58a0..387d42 (frontier, leaf)[0m    notBool ( N:Int ==Int 10 )
 
 
 
