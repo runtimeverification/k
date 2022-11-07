@@ -1,9 +1,11 @@
 from typing import Optional
 
-from pyk.kast import KApply, KSequence, KToken
+from pyk.kast import KApply, KSequence, KSort, KToken
 from pyk.kastManip import flatten_label, get_cell
+from pyk.kore.parser import KoreParser
+from pyk.kore.syntax import Pattern
 from pyk.ktool import KompileBackend
-from pyk.ktool.kprint import SymbolTable
+from pyk.ktool.kprint import SymbolTable, _kast
 from pyk.prelude.kint import intToken
 
 from .krun_test import KRunTest
@@ -37,6 +39,39 @@ class ImpRunTest(KRunTest):
         self.maxDiff = None
         self.assertEqual(k_actual, k_expected)
         self.assertCountEqual(state_actual_map_items, state_expected_map_items)
+
+    def test_run_kore_term(self) -> None:
+        # Given
+        x = '#token("x", "Id")'
+        pattern = self._state(k=f'int {x} ; {x} = 1 ;', state='.Map')
+        expected = self._state(k='.', state=f'{x} |-> 1')
+
+        # When
+        actual = self.krun.run_kore_term(pattern)
+
+        # Then
+        self.assertEqual(actual, expected)
+
+    def _state(self, k: str, state: str) -> Pattern:
+        pretty_text = f"""
+            <generatedTop>
+                <T>
+                    <k> {k} </k>
+                    <state> {state} </state>
+                </T>
+                <generatedCounter>
+                    0
+                </generatedCounter>
+            </generatedTop>
+        """
+        kore_text = _kast(
+            definition=self.krun.definition_dir,
+            expression=pretty_text,
+            input='rule',
+            output='kore',
+            sort=KSort('GeneratedTopCell'),
+        )
+        return KoreParser(kore_text).pattern()
 
 
 class TmpRunTest(ImpRunTest):
