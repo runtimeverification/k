@@ -1,7 +1,8 @@
-from pyk.kast import KApply, KSequence, KSort, KVariable
-from pyk.kore.syntax import DV, App, EVar, SortApp, String
+from pyk.kast import KApply, KLabel, KSequence, KSort, KVariable
+from pyk.kore.syntax import DV, And, App, Equals, EVar, SortApp, String
 from pyk.ktool import KompileBackend
 from pyk.ktool.kprint import SymbolTable
+from pyk.prelude.kbool import TRUE
 from pyk.prelude.kint import intToken
 
 from .kprove_test import KProveTest
@@ -53,6 +54,33 @@ class KoreToKastTest(KProveTest):
                 KSort('KCell'),
                 App("Lbl'-LT-'k'-GT-'", [], [App('dotk', [], [])]),
                 KApply('<k>', [KSequence()]),
+            ),
+            (
+                'constrained-term',
+                KSort('KCell'),
+                And(
+                    SortApp('SortKCell'),
+                    App("Lbl'-LT-'k'-GT-'", [], [App('dotk', [], [])]),
+                    EVar('VarX', SortApp('SortKCell')),
+                ),
+                KApply(
+                    KLabel('#And', params=[KSort('KCell')]),
+                    [KApply('<k>', [KSequence()]), KVariable('X', sort=KSort('KCell'))],
+                ),
+            ),
+            (
+                'ml-equals',
+                KSort('GeneratedTopCell'),
+                Equals(
+                    SortApp('SortBool'),
+                    SortApp('SortGeneratedTopCell'),
+                    EVar('VarX', SortApp('SortBool')),
+                    DV(SortApp('SortBool'), String('true')),
+                ),
+                KApply(
+                    KLabel('#Equals', [KSort('Bool'), KSort('GeneratedTopCell')]),
+                    [KVariable('X', sort=KSort('Bool')), TRUE],
+                ),
             ),
             (
                 'simple-injection',
