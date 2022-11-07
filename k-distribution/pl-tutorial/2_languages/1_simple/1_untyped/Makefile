@@ -2,7 +2,7 @@ MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 DEF=simple-untyped
 EXT=simple
 TESTDIR=tests/*
-KOMPILE_FLAGS=--transition strict --enable-search
+KOMPILE_FLAGS=--enable-search
 KOMPILE_BACKEND?=llvm
 KRUN_FLAGS=--output none --smt none
 
