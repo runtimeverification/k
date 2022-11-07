@@ -13,7 +13,7 @@ from pyk.kastManip import (
     split_config_from,
     substitute,
 )
-from pyk.prelude.k import DOTS, GENERATED_TOP_CELL, K
+from pyk.prelude.k import DOTS, GENERATED_TOP_CELL
 from pyk.prelude.kbool import BOOL, FALSE, TRUE, andBool, notBool
 from pyk.prelude.kint import INT, intToken
 from pyk.prelude.ml import mlEqualsTrue, mlTop
@@ -132,7 +132,9 @@ class BoolMlPredConversionsTest(TestCase):
                 bool_actual = ml_pred_to_bool(ml_pred, unsafe=unsafe)
                 self.assertEqual(bool_actual, bool_expected)
 
-    test_data_bool_to_ml_pred = (('equals-true', KApply(KLabel('#Equals', [BOOL, K]), [TRUE, f(a)]), f(a)),)
+    test_data_bool_to_ml_pred = (
+        ('equals-true', KApply(KLabel('#Equals', [BOOL, GENERATED_TOP_CELL]), [TRUE, f(a)]), f(a)),
+    )
 
     def test_bool_to_ml_pred(self) -> None:
         for name, ml_pred_expected, bool_in in self.test_data_bool_to_ml_pred:

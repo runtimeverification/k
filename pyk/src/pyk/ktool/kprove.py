@@ -263,13 +263,10 @@ class KProve(KPrint):
             allow_zero_step=allow_zero_step,
             depth=depth,
         )
-        next_states = [var_map(ns) for ns in flatten_label('#Or', next_state)]
+        next_states = list(unique(var_map(ns) for ns in flatten_label('#Or', next_state) if not is_top(ns)))
         constraint_subst, _ = extract_subst(init_cterm.kast)
-        next_states = [
-            mlAnd([constraint_subst.unapply(ns), constraint_subst.ml_pred]) if ns not in [mlTop(), mlBottom()] else ns
-            for ns in next_states
-        ]
-        return next_states
+        next_states = [mlAnd([constraint_subst.unapply(ns), constraint_subst.ml_pred]) for ns in next_states]
+        return next_states if len(next_states) > 0 else [mlTop()]
 
     def get_claim_basic_block(
         self,

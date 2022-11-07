@@ -1657,7 +1657,7 @@ class KDefinition(KOuter, WithKAtt):
         if klabel not in self._production_for_klabel:
             try:
                 self._production_for_klabel[klabel] = single(
-                    prod for prod in self.productions if prod.klabel and prod.klabel == klabel
+                    prod for prod in self.productions if prod.klabel and prod.klabel.name == klabel.name
                 )
             except ValueError as err:
                 raise ValueError(f'Expected a single production for label {klabel}') from err
