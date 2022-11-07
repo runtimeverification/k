@@ -8,8 +8,8 @@ module TEST
   imports TEST-SYNTAX
   configuration <k> $PGM:Pgm </k> <counter> 0 </counter> <mem> .Map </mem>
 
-  syntax Int ::= final(Int) [function, functional]
-               | "n" [function, functional, no-evaluators]
+  syntax Int ::= final(Int) [function, total]
+               | "n" [function, total, no-evaluators]
   syntax S ::= "notAFunction" | Int
              | "a" | "b" | "c"
 

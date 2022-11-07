@@ -48,8 +48,8 @@ module KVAR-COMMON
   imports KVAR-SYNTAX
   imports private STRING
 
-  syntax KVar ::= String2KVar (String) [function, functional, hook(STRING.string2token)]
-  syntax KVar ::= freshKVar(Int)    [freshGenerator, function, functional, private]
+  syntax KVar ::= String2KVar (String) [function, total, hook(STRING.string2token)]
+  syntax KVar ::= freshKVar(Int)    [freshGenerator, function, total, private]
 
   rule freshKVar(I:Int) => String2KVar("_" +String Int2String(I))
 endmodule

@@ -418,7 +418,7 @@ public class Kompile {
         // check rogue syntax in spec module
         Set<Sentence> toCheck = mutable(specModule.sentences().$minus$minus(mainDefModule.sentences()));
         for (Sentence s : toCheck)
-            if (s.isSyntax())
+            if (s.isSyntax() && !s.att().contains(Att.TOKEN()))
                 kem.registerCompilerWarning(ExceptionType.FUTURE_ERROR, errors,
                         "Found syntax declaration in proof module. This will not be visible from the main module.", s);
 
