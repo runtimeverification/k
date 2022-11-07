@@ -94,7 +94,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: kframework/k-exercises
-          ref: updateSimpleUntyped
           token: ${{ secrets.JENKINS_GITHUB_PAT }}
           submodules: recursive
           path: k-exercises
