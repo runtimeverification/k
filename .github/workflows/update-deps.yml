@@ -36,9 +36,9 @@ jobs:
       - name: 'Install Cachix'
         uses: cachix/cachix-action@v10
         with:
-          name: runtimeverification
+          name: k-framework
           extraPullNames: kore
-          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+          signingKey: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
 
       - name: 'Update Nix flake inputs from submodules'
         run: |

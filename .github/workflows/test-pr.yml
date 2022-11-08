@@ -55,8 +55,8 @@ jobs:
       - name: 'Install Cachix'
         uses: cachix/cachix-action@v10
         with:
-          name: runtimeverification
-          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+          name: k-framework
+          signingKey: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
           skipPush: true
 
       - name: 'Update Maven dependencies, push changes'
@@ -155,9 +155,8 @@ jobs:
         if: ${{ !startsWith(matrix.os, 'self') }}
         uses: cachix/cachix-action@v10
         with:
-          name: runtimeverification
-          extraPullNames: kore
-          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+          name: k-framework
+          signingKey: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
 
       - name: 'Build K Framework'
         run: GC_DONT_GC=1 nix build .
@@ -202,9 +201,9 @@ jobs:
         if: ${{ !startsWith(matrix.os, 'self') }}
         uses: cachix/cachix-action@v10
         with:
-          name: runtimeverification
+          name: k-framework
           extraPullNames: kore
-          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+          signingKey: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
 
       - name: 'Build K Framework'
         run: nix-build -A k -A llvm-backend -A haskell-backend
