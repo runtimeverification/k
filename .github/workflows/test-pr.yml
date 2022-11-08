@@ -56,7 +56,7 @@ jobs:
         uses: cachix/cachix-action@v10
         with:
           name: k-framework
-          signingKey: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
+          authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
           skipPush: true
 
       - name: 'Update Maven dependencies, push changes'
@@ -156,7 +156,7 @@ jobs:
         uses: cachix/cachix-action@v10
         with:
           name: k-framework
-          signingKey: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
+          authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
 
       - name: 'Build K Framework'
         run: GC_DONT_GC=1 nix build .
@@ -202,8 +202,7 @@ jobs:
         uses: cachix/cachix-action@v10
         with:
           name: k-framework
-          extraPullNames: kore
-          signingKey: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
+          authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
 
       - name: 'Build K Framework'
         run: nix-build -A k -A llvm-backend -A haskell-backend
