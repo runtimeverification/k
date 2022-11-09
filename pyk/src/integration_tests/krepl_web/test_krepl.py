@@ -1,9 +1,9 @@
 import os
 
-from .utils import KReplTest
+from .utils import KReplServerTest
 
 
-class KReplPidTest(KReplTest):
+class PidTest(KReplServerTest):
     def test_krepl_running(self) -> None:
         self.assertPid(self._server.pid)
 
@@ -14,7 +14,7 @@ class KReplPidTest(KReplTest):
             raise AssertionError(f'Process with PID {pid} does not exist') from None
 
 
-class KReplRequestTest(KReplTest):
+class RequestTest(KReplServerTest):
     def test_step_to_branch(self) -> None:
         # When
         response = self.client.hello('Joe')

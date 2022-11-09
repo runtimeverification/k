@@ -82,8 +82,8 @@ check-black: poetry-install
 
 # GraphQL schema
 
-SCHEMA_FILE := src/pyk/krepl/server/docs/schema.graphql
-GEN_SCHEMA := $(POETRY_RUN) python3 -c 'from pyk.krepl.server.schema import SCHEMA ; print(SCHEMA)'
+SCHEMA_FILE := src/pyk/krepl_web/docs/schema.graphql
+GEN_SCHEMA := $(POETRY_RUN) python3 -c 'from pyk.krepl_web.server.schema import SCHEMA ; print(SCHEMA)'
 
 schema: poetry-install
 	$(GEN_SCHEMA) > $(SCHEMA_FILE)
