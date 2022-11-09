@@ -248,7 +248,7 @@ class KProve(KPrint):
         lemmas: Iterable[KRule] = (),
         args: Iterable[str] = (),
         haskell_args: Iterable[str] = (),
-        log_axioms_file: Path = None,
+        log_axioms_file: Optional[Path] = None,
         allow_zero_step: bool = False,
         depth: Optional[int] = None,
     ) -> List[KInner]:
