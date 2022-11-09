@@ -1,11 +1,12 @@
 import json
 import logging
-import os
+from enum import Enum
 from pathlib import Path
+from subprocess import CalledProcessError, CompletedProcess
 from tempfile import TemporaryDirectory
-from typing import Any, Callable, Dict, Final, Iterable, Optional
+from typing import Any, Callable, Dict, Final, List, Optional
 
-from ..cli_utils import check_dir_path, run_process
+from ..cli_utils import check_dir_path, check_file_path, run_process
 from ..kast import (
     KApply,
     KAs,
@@ -126,30 +127,90 @@ def _unmunge(symbol: str) -> str:
     return _label
 
 
+class KAstInput(Enum):
+    PROGRAM = 'program'
+    BINARY = 'binary'
+    JSON = 'json'
+    KAST = 'kast'
+    KORE = 'kore'
+    RULE = 'rule'
+
+
+class KAstOutput(Enum):
+    PRETTY = 'pretty'
+    PROGRAM = 'program'
+    KAST = 'kast'
+    BINARY = 'binary'
+    JSON = 'json'
+    LATEX = 'latex'
+    KORE = 'kore'
+    NONE = 'none'
+
+
 def _kast(
-    definition: Path,
-    expression: str,
+    command: str = 'kast',
+    *,
+    input_file: Optional[Path] = None,
+    definition_dir: Optional[Path] = None,
+    input: Optional[KAstInput] = None,
+    output: Optional[KAstOutput] = None,
+    expression: Optional[str] = None,
+    sort: Optional[str] = None,
+    # ---
     check: bool = True,
-    profile: bool = False,
-    input: str = 'program',
-    output: str = 'json',
-    sort: Optional[KSort] = None,
-    args: Iterable[str] = (),
-) -> str:
-    kast_command = ['kast', '--definition', str(definition)]
-    kast_command += ['--input', input, '--output', output]
+    profile: bool = True,
+) -> CompletedProcess:
+    if input_file:
+        check_file_path(input_file)
+
+    if definition_dir:
+        check_dir_path(definition_dir)
+
+    args = _build_arg_list(
+        command=command,
+        input_file=input_file,
+        definition_dir=definition_dir,
+        input=input,
+        output=output,
+        expression=expression,
+        sort=sort,
+    )
+
+    try:
+        return run_process(args, logger=_LOGGER, check=check, profile=profile)
+    except CalledProcessError as err:
+        raise RuntimeError(
+            f'Command kast exited with code {err.returncode} for: {input_file}', err.stdout, err.stderr
+        ) from err
+
+
+def _build_arg_list(
+    *,
+    command: str,
+    input_file: Optional[Path],
+    definition_dir: Optional[Path],
+    input: Optional[KAstInput],
+    output: Optional[KAstOutput],
+    expression: Optional[str],
+    sort: Optional[str],
+) -> List[str]:
+    args = [command]
+    if input_file:
+        args += [str(input_file)]
+    if definition_dir:
+        args += ['--definition', str(definition_dir)]
+    if input:
+        args += ['--input', input.value]
+    if output:
+        args += ['--output', output.value]
+    if expression:
+        args += ['--expression', expression]
     if sort:
-        kast_command += ['--sort', sort.name]
-    kast_command += ['--expression', expression]
-    command_env = os.environ.copy()
-    proc_result = run_process(kast_command, env=command_env, logger=_LOGGER, check=check, profile=profile)
-    if proc_result.returncode != 0:
-        raise RuntimeError(f'Calling kast failed: {kast_command}')
-    return proc_result.stdout
+        args += ['--sort', sort]
+    return args
 
 
 class KPrint:
-
     definition_dir: Path
     use_directory: Path
     _profile: bool
@@ -194,11 +255,18 @@ class KPrint:
         return self._symbol_table
 
     def parse_token(self, ktoken: KToken, *, as_rule: bool = False) -> KInner:
-        input = 'rule' if as_rule else 'program'
-        output = _kast(self.definition_dir, ktoken.token, sort=ktoken.sort, input=input, profile=self._profile)
-        kast_token = KAst.from_dict(json.loads(output)['term'])
-        assert isinstance(kast_token, KInner)
-        return kast_token
+        input = KAstInput('rule' if as_rule else 'program')
+        proc_res = _kast(
+            definition_dir=self.definition_dir,
+            input=input,
+            output=KAstOutput.JSON,
+            expression=ktoken.token,
+            sort=ktoken.sort.name,
+            profile=self._profile,
+        )
+        kast = KAst.from_dict(json.loads(proc_res.stdout)['term'])
+        assert isinstance(kast, KInner)
+        return kast
 
     def kore_to_kast(self, kore: Kore) -> KAst:
         if isinstance(kore, Pattern):
@@ -206,8 +274,14 @@ class KPrint:
             if _kast_out is not None:
                 return _kast_out
         _LOGGER.warning(f'Falling back to using `kast` for Kore -> Kast: {kore.text}')
-        output = _kast(self.definition_dir, kore.text, input='kore', output='json', profile=self._profile)
-        return KAst.from_dict(json.loads(output)['term'])
+        proc_res = _kast(
+            definition_dir=self.definition_dir,
+            input=KAstInput.KORE,
+            output=KAstOutput.JSON,
+            expression=kore.text,
+            profile=self._profile,
+        )
+        return KAst.from_dict(json.loads(proc_res.stdout)['term'])
 
     def _kore_to_kast(self, kore: Pattern) -> Optional[KInner]:
         _LOGGER.debug(f'_kore_to_kast: {kore}')
@@ -269,10 +343,15 @@ class KPrint:
                 return _kore_out
         _LOGGER.warning(f'Falling back to using `kast` for KAst -> Kore: {kast}')
         kast_json = {'format': 'KAST', 'version': 2, 'term': kast.to_dict()}
-        output = _kast(
-            self.definition_dir, json.dumps(kast_json), input='json', output='kore', sort=sort, profile=self._profile
+        proc_res = _kast(
+            definition_dir=self.definition_dir,
+            input=KAstInput.JSON,
+            output=KAstOutput.KORE,
+            expression=json.dumps(kast_json),
+            sort=sort.name if sort is not None else None,
+            profile=self._profile,
         )
-        return KoreParser(output).pattern()
+        return KoreParser(proc_res.stdout).pattern()
 
     def _kast_to_kore(self, kast: KInner, sort: Optional[KSort] = None) -> Optional[Pattern]:
         _LOGGER.debug(f'_kast_to_kore: {kast}')
