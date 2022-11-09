@@ -195,7 +195,7 @@ def _build_arg_list(
         args += ['--output', output.value]
     if parser:
         args += ['--parser', parser]
-    if depth:
+    if depth is not None:
         args += ['--depth', str(depth)]
     for name, value in (pmap or {}).items():
         args += [f'--p{name}={value}']
