@@ -156,7 +156,6 @@ jobs:
         uses: cachix/cachix-action@v10
         with:
           name: k-framework
-          extraPullNames: kore
           authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
 
       - name: 'Build K Framework'
