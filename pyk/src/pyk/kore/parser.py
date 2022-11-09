@@ -8,6 +8,7 @@ from .syntax import (
     AliasDecl,
     And,
     App,
+    Assoc,
     Attr,
     Axiom,
     BinaryConn,
@@ -25,6 +26,7 @@ from .syntax import (
     Implies,
     Import,
     In,
+    LeftAssoc,
     MLFixpoint,
     MLPattern,
     MLQuant,
@@ -37,6 +39,7 @@ from .syntax import (
     Or,
     Pattern,
     Rewrites,
+    RightAssoc,
     RoundPred,
     Sentence,
     Sort,
@@ -61,6 +64,7 @@ QF = TypeVar('QF', bound=MLQuant)
 FP = TypeVar('FP', bound=MLFixpoint)
 RP = TypeVar('RP', bound=RoundPred)
 BP = TypeVar('BP', bound=BinaryPred)
+AS = TypeVar('AS', bound=Assoc)
 
 
 class _LookaheadBuffer(Generic[T]):
@@ -124,8 +128,8 @@ class KoreParser:
             '\\next': self.next,
             '\\rewrites': self.rewrites,
             '\\dv': self.dv,
-            '\\left-assoc': self._unsupported_ml_symbol('\\left-assoc'),
-            '\\right-assoc': self._unsupported_ml_symbol('\\right-assoc'),
+            '\\left-assoc': self.left_assoc,
+            '\\right-assoc': self.right_assoc,
         }
 
         self._sentence_kws = {
@@ -271,12 +275,6 @@ class KoreParser:
         parse = self._ml_symbols[symbol]
         return parse()
 
-    def _unsupported_ml_symbol(self, symbol: str) -> Callable[[], MLPattern]:
-        def parse() -> MLPattern:
-            raise ValueError(f'Unsupported matching logic symbol: {symbol}')
-
-        return parse
-
     def _nullary(self, symbol: str, cls: Type[NC]) -> NC:
         self._match_symbol_id(symbol)
         self._match(KoreToken.Type.LBRACE)
@@ -419,6 +417,21 @@ class KoreParser:
         value = self.string()
         self._match(KoreToken.Type.RPAREN)
         return DV(sort, value)
+
+    def _assoc(self, symbol: str, cls: Type[AS]) -> AS:
+        self._match_symbol_id(symbol)
+        self._match(KoreToken.Type.LBRACE)
+        self._match(KoreToken.Type.RBRACE)
+        self._match(KoreToken.Type.LPAREN)
+        app = self.app()
+        self._match(KoreToken.Type.RPAREN)
+        return cls(app)  # type: ignore
+
+    def left_assoc(self) -> LeftAssoc:
+        return self._assoc('\\left-assoc', LeftAssoc)
+
+    def right_assoc(self) -> RightAssoc:
+        return self._assoc('\\right-assoc', RightAssoc)
 
     def attr(self) -> Attr:
         symbol = self._custom_symbol_id()
