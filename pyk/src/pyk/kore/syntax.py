@@ -129,6 +129,8 @@ class Kore(ABC):
         'Next',
         'Rewrites',
         'DV',
+        'LeftAssoc',
+        'RightAssoc',
     }
 
     @classmethod
@@ -1314,9 +1316,73 @@ class DV(MLPattern, WithSort):
         return self._symbol() + ' { ' + self.sort.text + ' } ( ' + self.value.text + ' )'
 
 
-# TODO
 class MLSyntaxSugar(MLPattern):
     ...
+
+
+# TODO AppAssoc, OrAssoc
+class Assoc(MLSyntaxSugar):
+    app: App
+
+    @property
+    def dict(self) -> Dict[str, Any]:
+        return {'tag': self._tag(), 'app': self.app.dict}
+
+    @property
+    def text(self) -> str:
+        return self._symbol() + ' { } ( ' + self.app.text + ' )'
+
+
+@final
+@dataclass(frozen=True)
+class LeftAssoc(Assoc):
+    app: App
+
+    def let(self, *, app: Optional[App] = None) -> 'LeftAssoc':
+        app = app if app is not None else self.app
+        return LeftAssoc(app=app)
+
+    def map_pattern(self: 'LeftAssoc', f: Callable[[Pattern], Pattern]) -> 'LeftAssoc':
+        return self
+
+    @classmethod
+    def _tag(cls) -> str:
+        return 'LeftAssoc'
+
+    @classmethod
+    def _symbol(cls) -> str:
+        return '\\left-assoc'
+
+    @classmethod
+    def from_dict(cls: Type['LeftAssoc'], dct: Mapping[str, Any]) -> 'LeftAssoc':
+        cls._check_tag(dct)
+        return LeftAssoc(app=App.from_dict(dct['app']))
+
+
+@final
+@dataclass(frozen=True)
+class RightAssoc(Assoc):
+    app: App
+
+    def let(self, *, app: Optional[App] = None) -> 'RightAssoc':
+        app = app if app is not None else self.app
+        return RightAssoc(app=app)
+
+    def map_pattern(self: 'RightAssoc', f: Callable[[Pattern], Pattern]) -> 'RightAssoc':
+        return self
+
+    @classmethod
+    def _tag(cls) -> str:
+        return 'RightAssoc'
+
+    @classmethod
+    def _symbol(cls) -> str:
+        return '\\right-assoc'
+
+    @classmethod
+    def from_dict(cls: Type['RightAssoc'], dct: Mapping[str, Any]) -> 'RightAssoc':
+        cls._check_tag(dct)
+        return RightAssoc(app=App.from_dict(dct['app']))
 
 
 @final
