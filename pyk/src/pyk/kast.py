@@ -1,4 +1,5 @@
 import json
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import InitVar, dataclass, fields
 from enum import Enum
@@ -32,6 +33,8 @@ T = TypeVar('T', bound='KAst')
 W = TypeVar('W', bound='WithKAtt')
 KI = TypeVar('KI', bound='KInner')
 RL = TypeVar('RL', bound='KRuleLike')
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 
 class KAst(ABC):
@@ -318,6 +321,7 @@ class KToken(KInner):
     def match(self, term: KInner) -> Optional[Subst]:
         if type(term) is KToken:
             return Subst() if term.token == self.token else None
+        _LOGGER.debug(f'Matching failed: ({self}.match({term}))')
         return None
 
 
@@ -524,6 +528,7 @@ class KApply(KInner):
     def match(self, term: KInner) -> Optional[Subst]:
         if type(term) is KApply and term.label.name == self.label.name and term.arity == self.arity:
             return KInner._combine_matches(arg.match(term_arg) for arg, term_arg in zip(self.args, term.args))
+        _LOGGER.debug(f'Matching failed: ({self}.match({term}))')
         return None
 
 
@@ -621,6 +626,7 @@ class KRewrite(KInner, WithKAtt):
             if lhs_subst is None or rhs_subst is None:
                 return None
             return lhs_subst.union(rhs_subst)
+        _LOGGER.debug(f'Matching failed: ({self}.match({term}))')
         return None
 
     def apply_top(self, term: KInner) -> KInner:
@@ -734,7 +740,7 @@ class KSequence(KInner, Sequence[KInner]):
                 for si, ti in zip(self.items[:common_length], term.items[:common_length]):
                     _subst = KInner._combine_matches([_subst, si.match(ti)])
                 return _subst
-
+        _LOGGER.debug(f'Matching failed: ({self}.match({term}))')
         return None
 
 
@@ -1655,12 +1661,11 @@ class KDefinition(KOuter, WithKAtt):
 
     def production_for_klabel(self, klabel: KLabel) -> KProduction:
         if klabel not in self._production_for_klabel:
+            prods = [prod for prod in self.productions if prod.klabel and prod.klabel.name == klabel.name]
             try:
-                self._production_for_klabel[klabel] = single(
-                    prod for prod in self.productions if prod.klabel and prod.klabel.name == klabel.name
-                )
+                self._production_for_klabel[klabel] = single(prods)
             except ValueError as err:
-                raise ValueError(f'Expected a single production for label {klabel}') from err
+                raise ValueError(f'Expected a single production for label {klabel}, not: {prods}') from err
         return self._production_for_klabel[klabel]
 
     def production_for_cell_sort(self, sort: KSort) -> KProduction:
