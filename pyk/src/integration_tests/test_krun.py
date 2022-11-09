@@ -1,11 +1,11 @@
 from typing import Optional
 
-from pyk.kast import KApply, KSequence, KSort, KToken
+from pyk.kast import KApply, KSequence, KToken
 from pyk.kastManip import flatten_label, get_cell
 from pyk.kore.parser import KoreParser
 from pyk.kore.syntax import Pattern
 from pyk.ktool import KompileBackend
-from pyk.ktool.kprint import SymbolTable, _kast
+from pyk.ktool.kprint import KAstInput, KAstOutput, SymbolTable, _kast
 from pyk.prelude.kint import intToken
 
 from .krun_test import KRunTest
@@ -64,13 +64,14 @@ class ImpRunTest(KRunTest):
                 </generatedCounter>
             </generatedTop>
         """
-        kore_text = _kast(
-            definition=self.krun.definition_dir,
+        proc_res = _kast(
+            definition_dir=self.krun.definition_dir,
+            input=KAstInput.RULE,
+            output=KAstOutput.KORE,
             expression=pretty_text,
-            input='rule',
-            output='kore',
-            sort=KSort('GeneratedTopCell'),
+            sort='GeneratedTopCell',
         )
+        kore_text = proc_res.stdout
         return KoreParser(kore_text).pattern()
 
 
