@@ -111,7 +111,9 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                 Module mod = getExecutionModule(module);
                 ModuleToKORE converter = new ModuleToKORE(mod, def.topCellInitializer, kompileOptions);
                 String koreOutput = getKoreString(k, mod, converter);
-                String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();
+                String defPath = files.resolveKompiled("haskellDefinition.bin").exists() ?
+                        files.resolveKompiled("haskellDefinition.bin").getAbsolutePath() :
+                        files.resolveKompiled("definition.kore").getAbsolutePath();
                 String moduleName = mod.name();
 
                 files.saveToTemp("execute-initial.kore", koreOutput);
@@ -191,7 +193,9 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
                         + patternTermKore
                         + ", " + patternConditionKore
                         + ")";
-                String defPath = files.resolveKompiled("definition.kore").getAbsolutePath();
+                String defPath = files.resolveKompiled("haskellDefinition.bin").exists() ?
+                        files.resolveKompiled("haskellDefinition.bin").getAbsolutePath() :
+                        files.resolveKompiled("definition.kore").getAbsolutePath();
                 String moduleName = mod.name();
 
                 files.saveToTemp("search-initial.kore", koreOutput);
@@ -352,7 +356,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             @Override
             public RewriterResult prove(Module rules, Rule boundaryPattern, Boolean reuseDef) {
                 Module kompiledModule = KoreBackend.getKompiledModule(module);
-                ModuleToKORE converter = new ModuleToKORE(kompiledModule, def.topCellInitializer, kompileOptions);
+                ModuleToKORE converter = new ModuleToKORE(kompiledModule, def.topCellInitializer, kompileOptions, kem);
                 String defPath = reuseDef ? files.resolveKompiled("definition.kore").getAbsolutePath() : saveKoreDefinitionToTemp(converter);
                 String specPath = saveKoreSpecToTemp(converter, rules);
                 File koreOutputFile = files.resolveTemp("result.kore");

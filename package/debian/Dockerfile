@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ubuntu:bionic
+ARG BASE_IMAGE=ubuntu:focal
 FROM ${BASE_IMAGE}
 ARG BASE_IMAGE
 
@@ -11,6 +11,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN    apt-get update            \
     && apt-get install --yes     \
         bison                    \
+        build-essential          \
         clang-$LLVM_VERSION      \
         cmake                    \
         curl                     \
@@ -19,10 +20,18 @@ RUN    apt-get update            \
         gcc                      \
         git                      \
         libboost-test-dev        \
+        libgdbm-dev              \
         libgmp-dev               \
         libjemalloc-dev          \
+        libffi-dev               \
         libmpfr-dev              \
+        libncurses5-dev          \
+        libnss3-dev              \
+        libreadline-dev          \
+        libsqlite3-dev           \
+        libssl-dev               \
         libyaml-dev              \
+        libbz2-dev               \
         libz3-dev                \
         lld-$LLVM_VERSION        \
         llvm-$LLVM_VERSION-tools \
@@ -30,16 +39,17 @@ RUN    apt-get update            \
         openjdk-11-jdk           \
         parallel                 \
         pkg-config               \
-        python                   \
         python3                  \
-        python3-graphviz         \
+        python3-dev              \
+        python3-distutils        \
+        python3-pip              \
         zlib1g-dev
 
 RUN curl -sSL https://get.haskellstack.org/ | sh
 
-RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.11 \
+RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.15 \
     && cd z3                                                         \
-    && python scripts/mk_make.py                                     \
+    && python3 scripts/mk_make.py                                     \
     && cd build                                                      \
     && make -j8                                                      \
     && make install                                                  \

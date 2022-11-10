@@ -14,7 +14,7 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.ParseInModule;
 import org.kframework.parser.ParserUtils;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -30,6 +30,7 @@ import static org.junit.Assert.*;
 public class AddBracketsTest {
 
     private RuleGrammarGenerator gen;
+    private FileUtil files;
 
     @Before
     public void setUp() throws  Exception{
@@ -38,7 +39,7 @@ public class AddBracketsTest {
 
     public RuleGrammarGenerator makeRuleGrammarGenerator() {
         String definitionText;
-        FileUtil files = FileUtil.testFileUtil();
+        files = FileUtil.testFileUtil();
         ParserUtils parser = new ParserUtils(files, new KExceptionManager(new GlobalOptions()));
         File definitionFile = new File(Kompile.BUILTIN_DIRECTORY.toString() + "/prelude.md");
         definitionText = files.loadFromWorkingDirectory(definitionFile.getPath());
@@ -89,7 +90,7 @@ public class AddBracketsTest {
 
     private void unparserTest(String def, String pgm) {
         Module test = parseModule(def);
-        ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(test), true);
+        ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(test), true, files);
         K parsed = parseTerm(pgm, parser);
         KPrint kprint = new KPrint();
         String unparsed = kprint.unparseTerm(parsed, test);

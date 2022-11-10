@@ -129,7 +129,7 @@ are replaced with `value`, in O(length*log(N)) time, or effectively linear.
 You can test whether an integer is within the bounds of an array in O(1) time.
 
 ```k
-  syntax Bool ::= Int "in_keys" "(" Array ")" [function, functional, hook(ARRAY.in_keys)]
+  syntax Bool ::= Int "in_keys" "(" Array ")" [function, total, hook(ARRAY.in_keys)]
 ```
 
 ```k
@@ -245,7 +245,7 @@ etc.
 The map with zero elements is represented by `.Map`.
 
 ```k
-  syntax Map ::= ".Map"                         [function, functional, hook(MAP.unit), klabel(.Map), symbol, latex(\dotCt{Map})]
+  syntax Map ::= ".Map"                         [function, total, hook(MAP.unit), klabel(.Map), symbol, latex(\dotCt{Map})]
 ```
 
 ### Map elements
@@ -254,7 +254,7 @@ An element of a `Map` is constructed via the `|->` operator. The key is on the
 left and the value is on the right.
 
 ```k
-  syntax Map ::= KItem "|->" KItem                      [function, functional, hook(MAP.element), klabel(_|->_), symbol, latex({#1}\mapsto{#2})]
+  syntax Map ::= KItem "|->" KItem                      [function, total, hook(MAP.element), klabel(_|->_), symbol, latex({#1}\mapsto{#2}), injective]
 
   syntax priorities _|->_ > _Map_ .Map
   syntax non-assoc _|->_
@@ -278,7 +278,7 @@ total function that assigns a specific default value if the key is not present
 in the map. This operation is also O(log(N)), or effectively constant.
 
 ```k
-  syntax KItem ::= Map "[" KItem "]" "orDefault" KItem      [function, functional, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault)]
+  syntax KItem ::= Map "[" KItem "]" "orDefault" KItem      [function, total, hook(MAP.lookupOrDefault), klabel(Map:lookupOrDefault)]
 ```
 
 ### Map update
@@ -287,7 +287,7 @@ You can insert a key/value pair into a map in O(log(N)) time, or effectively
 constant.
 
 ```k
-  syntax Map ::= Map "[" key: KItem "<-" value: KItem "]"           [function, functional, klabel(Map:update), symbol, hook(MAP.update), prefer]
+  syntax Map ::= Map "[" key: KItem "<-" value: KItem "]"           [function, total, klabel(Map:update), symbol, hook(MAP.update), prefer]
 ```
 
 ### Map delete
@@ -296,7 +296,7 @@ You can remove a key/value pair from a map via its key in O(log(N)) time, or
 effectively constant.
 
 ```k
-  syntax Map ::= Map "[" KItem "<-" "undef" "]"     [function, functional, hook(MAP.remove), klabel(_[_<-undef]), symbol]
+  syntax Map ::= Map "[" KItem "<-" "undef" "]"     [function, total, hook(MAP.remove), klabel(_[_<-undef]), symbol]
 ```
 
 ### Map difference
@@ -308,7 +308,7 @@ in both maps are removed. To remove all the keys in one map from another map,
 you can say `removeAll(M1, keys(M2))`.
 
 ```k
-  syntax Map ::= Map "-Map" Map                 [function, functional, hook(MAP.difference), latex({#1}-_{\it Map}{#2})]
+  syntax Map ::= Map "-Map" Map                 [function, total, hook(MAP.difference), latex({#1}-_{\it Map}{#2})]
 ```
 
 ### Multiple map update
@@ -321,7 +321,7 @@ total, which is distinct from map concatenation, a partial function only
 defined on maps with disjoint keys.
 
 ```k
-  syntax Map ::= updateMap(Map, Map)            [function, functional, hook(MAP.updateAll)]
+  syntax Map ::= updateMap(Map, Map)            [function, total, hook(MAP.updateAll)]
 ```
 
 ### Multiple map removal
@@ -330,7 +330,7 @@ You can remove a `Set` of keys from a map in O(N*log(M)) time (where M is the
 size of the `Map` and `N` is the size of the `Set`), or effectively linear.
 
 ```k
-  syntax Map ::= removeAll(Map, Set)            [function, functional, hook(MAP.removeAll)]
+  syntax Map ::= removeAll(Map, Set)            [function, total, hook(MAP.removeAll)]
 ```
 
 ### Map keys (as `Set`)
@@ -338,7 +338,7 @@ size of the `Map` and `N` is the size of the `Set`), or effectively linear.
 You can get a `Set` of all the keys in a Map in O(N) time.
 
 ```k
-  syntax Set ::= keys(Map)                      [function, functional, hook(MAP.keys)]
+  syntax Set ::= keys(Map)                      [function, total, hook(MAP.keys)]
 ```
 
 ### Map keys (as `List`)
@@ -354,7 +354,7 @@ You can get a `List` of all the keys in a Map in O(N) time.
 You can check whether a key is present in a map in O(1) time.
 
 ```k
-  syntax Bool ::= KItem "in_keys" "(" Map ")"       [function, functional, hook(MAP.in_keys)]
+  syntax Bool ::= KItem "in_keys" "(" Map ")"       [function, total, hook(MAP.in_keys)]
 ```
 
 ### Map values (as `List`)
@@ -370,7 +370,7 @@ You can get a `List` of all the values in a map in O(N) time.
 You can get the number of key/value pairs in a map in O(1) time.
 
 ```k
-  syntax Int ::= size(Map)                      [function, functional, hook(MAP.size), klabel(sizeMap)]
+  syntax Int ::= size(Map)                      [function, total, hook(MAP.size), klabel(sizeMap)]
 ```
 
 ### Map inclusion
@@ -380,7 +380,7 @@ time (where N is the size of the first map). Only keys that are bound to the
 same value are considered equal.
 
 ```k
-  syntax Bool ::= Map "<=Map" Map               [function, functional, hook(MAP.inclusion)]
+  syntax Bool ::= Map "<=Map" Map               [function, total, hook(MAP.inclusion)]
 ```
 
 ### Map choice
@@ -408,7 +408,7 @@ module MAP-KORE-SYMBOLIC [kore,symbolic]
   imports private K-EQUAL
   imports private BOOL
 
-  rule #Ceil(@M:Map [@K:KItem]) => {(@K in_keys(@M)) #Equals true} #And #Ceil(@M) #And #Ceil(@K) [anywhere, simplification]
+  rule #Ceil(@M:Map [@K:KItem]) => {(@K in_keys(@M)) #Equals true} #And #Ceil(@M) #And #Ceil(@K) [simplification]
 
   // Symbolic update
 
@@ -434,18 +434,29 @@ module MAP-KORE-SYMBOLIC [kore,symbolic]
   rule (_MAP:Map [ K  <-  V1 ]) [ K ]  => V1 [simplification]
   rule ( MAP:Map [ K1 <- _V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2 [simplification]
 
+  rule (K  |->  V M:Map) [  K ] orDefault _ => V ensures notBool (K in_keys(M)) [simplification]
+  rule (K1 |-> _V M:Map) [ K2 ] orDefault D => M [K2] orDefault D requires K1 =/=K K2 ensures notBool (K1 in_keys(M)) [simplification]
+  rule (_MAP:Map [ K  <-  V1 ]) [ K ] orDefault _ => V1 [simplification]
+  rule ( MAP:Map [ K1 <- _V1 ]) [ K2 ] orDefault D => MAP [ K2 ] orDefault D requires K1 =/=K K2 [simplification]
+  rule .Map [ _ ] orDefault D => D [simplification]
+
   // Symbolic in_keys
   rule K in_keys(_M [ K <- undef ]) => false [simplification]
   rule K in_keys(_M [ K <- _ ]) => true [simplification]
   rule K1 in_keys(M [ K2 <- _ ]) => true requires K1 ==K K2 orBool K1 in_keys(M) [simplification]
   rule K1 in_keys(M [ K2 <- _ ]) => K1 in_keys(M) requires K1 =/=K K2 [simplification]
 
+  rule {false #Equals @Key in_keys(.Map)} => #Ceil(@Key) [simplification]
+  rule {@Key in_keys(.Map) #Equals false} => #Ceil(@Key) [simplification]
+  rule {false #Equals @Key in_keys(Key' |-> Val @M)} => #Ceil(@Key) #And #Ceil(Key' |-> Val @M) #And #Not({@Key #Equals Key'}) #And {false #Equals @Key in_keys(@M)} [simplification]
+  rule {@Key in_keys(Key' |-> Val @M) #Equals false} => #Ceil(@Key) #And #Ceil(Key' |-> Val @M) #And #Not({@Key #Equals Key'}) #And {@Key in_keys(@M) #Equals false} [simplification]
+
 /*
 // The rule below is automatically generated by the frontend for every sort
 // hooked to MAP.Map. It is left here to serve as documentation.
 
   rule #Ceil(@M:Map (@K:KItem |-> @V:KItem)) => {(@K in_keys(@M)) #Equals false} #And #Ceil(@M) #And #Ceil(@K) #And #Ceil(@V)
-    [anywhere, simplification]
+    [simplification]
 */
 endmodule
 
@@ -517,7 +528,7 @@ number of unbound keys being mached. In other words, one unbound variable is
 linear, two is quadratic, three is cubic, etc.
 
 ```k
-  syntax Set ::= Set Set                  [left, function, functional, hook(SET.concat), klabel(_Set_), symbol, assoc, comm, unit(.Set), idem, element(SetItem), format(%1%n%2)]
+  syntax Set ::= Set Set                  [left, function, total, hook(SET.concat), klabel(_Set_), symbol, assoc, comm, unit(.Set), idem, element(SetItem), format(%1%n%2)]
 ```
 
 ### Set unit
@@ -525,7 +536,7 @@ linear, two is quadratic, three is cubic, etc.
 The set with zero elements is represented by `.Set`.
 
 ```k
-  syntax Set ::= ".Set"                   [function, functional, hook(SET.unit), klabel(.Set), symbol, latex(\dotCt{Set})]
+  syntax Set ::= ".Set"                   [function, total, hook(SET.unit), klabel(.Set), symbol, latex(\dotCt{Set})]
 ```
 
 ### Set elements
@@ -533,7 +544,7 @@ The set with zero elements is represented by `.Set`.
 An element of a `Set` is constructed via the `SetItem` operator.
 
 ```k
-  syntax Set ::= SetItem(KItem)               [function, functional, hook(SET.element), klabel(SetItem), symbol]
+  syntax Set ::= SetItem(KItem)               [function, total, hook(SET.element), klabel(SetItem), symbol, injective]
 ```
 
 ### Set union
@@ -544,8 +555,8 @@ number and thus the time is effectively linear. The union consists of all the
 elements present in either set.
 
 ```k
-  syntax Set ::= Set "|Set" Set            [left, function, functional, hook(SET.union)]
-  rule S1:Set |Set S2:Set => S1 (S2 -Set S1)
+  syntax Set ::= Set "|Set" Set              [left, function, total, hook(SET.union), comm]
+  rule S1:Set |Set S2:Set => S1 (S2 -Set S1) [concrete]
 ```
 
 ### Set intersection
@@ -555,7 +566,7 @@ is the size of the smaller set), or effectively linear. The intersection
 consists of all the elements present in both sets.
 
 ```k
-  syntax Set ::= intersectSet(Set, Set)   [function, functional, hook(SET.intersection)]
+  syntax Set ::= intersectSet(Set, Set)   [function, total, hook(SET.intersection), comm]
 ```
 
 ### Set complement
@@ -565,7 +576,7 @@ N is the size of the second set), or effectively linear. This is the set of
 elements in the first set that are not present in the second set.
 
 ```k
-  syntax Set ::= Set "-Set" Set           [function, functional, hook(SET.difference), latex({#1}-_{\it Set}{#2}), klabel(Set:difference), symbol]
+  syntax Set ::= Set "-Set" Set           [function, total, hook(SET.difference), latex({#1}-_{\it Set}{#2}), klabel(Set:difference), symbol]
 ```
 
 ### Set membership
@@ -573,7 +584,7 @@ elements in the first set that are not present in the second set.
 You can compute whether an element is a member of a set in O(1) time.
 
 ```k
-  syntax Bool ::= KItem "in" Set              [function, functional, hook(SET.in), klabel(Set:in), symbol]
+  syntax Bool ::= KItem "in" Set              [function, total, hook(SET.in), klabel(Set:in), symbol]
 ```
 
 ### Set inclusion
@@ -582,7 +593,7 @@ You can determine whether a `Set` is a strict subset of another `Set` in O(N)
 time (where N is the size of the first set).
 
 ```k
-  syntax Bool ::= Set "<=Set" Set         [function, functional, hook(SET.inclusion)]
+  syntax Bool ::= Set "<=Set" Set         [function, total, hook(SET.inclusion)]
 ```
 
 ### Set size
@@ -590,7 +601,7 @@ time (where N is the size of the first set).
 You can get the number of elements (the cardinality) of a set in O(1) time.
 
 ```k
-  syntax Int ::= size(Set)                [function, functional, hook(SET.size)]
+  syntax Int ::= size(Set)                [function, total, hook(SET.size)]
 ```
 
 ### Set choice
@@ -606,6 +617,94 @@ that two different sets will return the same element, even if they are similar.
 ```k
 endmodule
 ```
+
+### Implementation of Sets
+
+The following lemmas are simplifications that the Haskell backend can
+apply to simplify expressions of sort `Set`.
+
+```k
+module SET-KORE-SYMBOLIC [kore,symbolic]
+  imports SET
+  imports private K-EQUAL
+  imports private BOOL
+
+  //Temporarly rule for #Ceil simplification, should be generated in front-end
+
+// Matching for this version not implemented.
+  // rule #Ceil(@S1:Set @S2:Set) =>
+  //        {intersectSet(@S1, @S2) #Equals .Set} #And #Ceil(@S1) #And #Ceil(@S2)
+  //   [simplification]
+
+//simpler version
+  rule #Ceil(@S:Set SetItem(@E:KItem)) =>
+         {(@E in @S) #Equals false} #And #Ceil(@S) #And #Ceil(@E)
+    [simplification]
+
+  // -Set simplifications
+  rule S              -Set .Set           => S          [simplification]
+  rule .Set           -Set  _             => .Set       [simplification]
+  rule SetItem(X)     -Set (S SetItem(X)) => .Set
+                               ensures notBool (X in S) [simplification]
+  rule S              -Set (S SetItem(X)) => .Set
+                               ensures notBool (X in S) [simplification]
+  rule (S SetItem(X)) -Set S              => SetItem(X)
+                               ensures notBool (X in S) [simplification]
+  rule (S SetItem(X)) -Set SetItem(X)     => S
+                               ensures notBool (X in S) [simplification]
+  // rule SetItem(X)     -Set S              => SetItem(X)
+  //                            requires notBool (X in S)  [simplification]
+  // rule (S1 SetItem(X)) -Set (S2 SetItem(X))  => S1 -Set S2
+  //                             ensures notBool (X in S1)
+  //                             andBool notBool (X in S2) [simplification]
+
+
+
+  // |Set simplifications
+  rule S    |Set .Set => S    [simplification, comm]
+  rule S    |Set S    => S    [simplification]
+
+  rule (S SetItem(X)) |Set SetItem(X) => S SetItem(X)
+                             ensures notBool (X in S) [simplification, comm]
+  // Currently disabled, see runtimeverification/haskell-backend#3301
+  // rule (S SetItem(X)) |Set S          => S SetItem(X)
+  //                            ensures notBool (X in S) [simplification, comm]
+
+  // intersectSet simplifications
+  rule intersectSet(.Set, _   ) => .Set    [simplification, comm]
+  rule intersectSet( S  , S   ) =>  S      [simplification]
+
+  rule intersectSet( S SetItem(X), SetItem(X))     => SetItem(X)
+                                                        ensures notBool (X in S)      [simplification, comm]
+  // Currently disabled, see runtimeverification/haskell-backend#3294
+  // rule intersectSet( S SetItem(X) , S)             => S ensures notBool (X in S)      [simplification, comm]
+  rule intersectSet( S1 SetItem(X), S2 SetItem(X)) => intersectSet(S1, S2) SetItem(X)
+                                                        ensures notBool (X in S1)
+                                                        andBool notBool (X in S2)     [simplification]
+
+  // membership simplifications
+  rule _E in .Set           => false   [simplification]
+  rule E  in (S SetItem(E)) => true
+              ensures notBool (E in S) [simplification]
+
+// These two rules would be sound but impose a giant overhead on `in` evaluation:
+  // rule E1 in (S SetItem(E2)) => true requires E1 in S
+  //                                 ensures notBool (E2 in S) [simplification]
+  // rule E1 in (S SetItem(E2)) => E1 in S requires E1 =/=K E2
+  //                                 ensures notBool (E2 in S) [simplification]
+
+  rule X in ((SetItem(X) S) |Set  _            ) => true
+                                    ensures notBool (X in S) [simplification]
+  rule X in ( _             |Set (SetItem(X) S)) => true
+                                    ensures notBool (X in S) [simplification]
+
+endmodule
+
+module SET-SYMBOLIC
+  imports SET-KORE-SYMBOLIC
+endmodule
+```
+
 
 Lists
 -----
@@ -637,7 +736,7 @@ side, it is O(N), where N is the number of elements matched on the front and
 back of the list.
 
 ```k
-  syntax List ::= List List               [left, function, functional, hook(LIST.concat), klabel(_List_), symbol, smtlib(smt_seq_concat), assoc, unit(.List), element(ListItem), format(%1%n%2)]
+  syntax List ::= List List               [left, function, total, hook(LIST.concat), klabel(_List_), symbol, smtlib(smt_seq_concat), assoc, unit(.List), element(ListItem), format(%1%n%2)]
 ```
 
 ### List unit
@@ -645,7 +744,7 @@ back of the list.
 The list with zero elements is represented by `.List`.
 
 ```k
-  syntax List ::= ".List"                 [function, functional, hook(LIST.unit), klabel(.List), symbol, smtlib(smt_seq_nil), latex(\dotCt{List})]
+  syntax List ::= ".List"                 [function, total, hook(LIST.unit), klabel(.List), symbol, smtlib(smt_seq_nil), latex(\dotCt{List})]
 ```
 
 ### List elements
@@ -653,7 +752,7 @@ The list with zero elements is represented by `.List`.
 An element of a `List` is constucted via the `ListItem` operator.
 
 ```k
-  syntax List ::= ListItem(KItem)             [function, functional, hook(LIST.element), klabel(ListItem), symbol, smtlib(smt_seq_elem)]
+  syntax List ::= ListItem(KItem)             [function, total, hook(LIST.element), klabel(ListItem), symbol, smtlib(smt_seq_elem)]
 ```
 
 ### List indexing
@@ -720,7 +819,7 @@ You can compute whether an element is in a list in O(N) time. For repeated
 comparisons, it is much better to first convert to a set using `List2Set`.
 
 ```k
-  syntax Bool ::= KItem "in" List             [function, functional, hook(LIST.in), klabel(_inList_)]
+  syntax Bool ::= KItem "in" List             [function, total, hook(LIST.in), klabel(_inList_)]
 ```
 
 ### List size
@@ -728,7 +827,7 @@ comparisons, it is much better to first convert to a set using `List2Set`.
 You can get the number of elements of a list in O(1) time.
 
 ```k
-  syntax Int ::= size(List)               [function, functional, hook(LIST.size), klabel (sizeList), smtlib(smt_seq_len)]
+  syntax Int ::= size(List)               [function, total, hook(LIST.size), klabel (sizeList), smtlib(smt_seq_len)]
 ```
 
 ```k
@@ -757,8 +856,8 @@ module COLLECTIONS
   imports SET
   imports MAP
 
-  syntax List ::= Set2List(Set) [function, functional, hook(SET.set2list)]
-  syntax Set ::= List2Set(List) [function, functional, hook(SET.list2set)]
+  syntax List ::= Set2List(Set) [function, total, hook(SET.set2list)]
+  syntax Set ::= List2Set(List) [function, total, hook(SET.list2set)]
 
 endmodule
 ```
@@ -785,7 +884,7 @@ module BOOL-SYNTAX
   syntax Bool ::= "false" [token]
 endmodule
 
-module BOOL
+module BOOL-COMMON
   imports private BASIC-K
   imports BOOL-SYNTAX
 ```
@@ -808,16 +907,16 @@ and `orBool` may be short-circuited in concrete backends, but in symbolic
 ackends, both arguments will be evaluated.
 
 ```k
-  syntax Bool ::= "notBool" Bool          [function, functional, klabel(notBool_), symbol, smt-hook(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
-                > Bool "andBool" Bool     [function, functional, klabel(_andBool_), symbol, left, smt-hook(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
-                | Bool "andThenBool" Bool [function, functional, klabel(_andThenBool_), symbol, left, smt-hook(and), boolOperation, hook(BOOL.andThen)]
-                | Bool "xorBool" Bool     [function, functional, klabel(_xorBool_), symbol, left, smt-hook(xor), boolOperation, hook(BOOL.xor)]
-                | Bool "orBool" Bool      [function, functional, klabel(_orBool_), symbol, left, smt-hook(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
-                | Bool "orElseBool" Bool  [function, functional, klabel(_orElseBool_), symbol, left, smt-hook(or), boolOperation, hook(BOOL.orElse)]
-                | Bool "impliesBool" Bool [function, functional, klabel(_impliesBool_), symbol, left, smt-hook(=>), boolOperation, hook(BOOL.implies)]
+  syntax Bool ::= "notBool" Bool          [function, total, klabel(notBool_), symbol, smt-hook(not), boolOperation, latex(\neg_{\scriptstyle\it Bool}{#1}), hook(BOOL.not)]
+                > Bool "andBool" Bool     [function, total, klabel(_andBool_), symbol, left, smt-hook(and), boolOperation, latex({#1}\wedge_{\scriptstyle\it Bool}{#2}), hook(BOOL.and)]
+                | Bool "andThenBool" Bool [function, total, klabel(_andThenBool_), symbol, left, smt-hook(and), boolOperation, hook(BOOL.andThen)]
+                | Bool "xorBool" Bool     [function, total, klabel(_xorBool_), symbol, left, smt-hook(xor), boolOperation, hook(BOOL.xor)]
+                | Bool "orBool" Bool      [function, total, klabel(_orBool_), symbol, left, smt-hook(or), boolOperation, latex({#1}\vee_{\scriptstyle\it Bool}{#2}), hook(BOOL.or)]
+                | Bool "orElseBool" Bool  [function, total, klabel(_orElseBool_), symbol, left, smt-hook(or), boolOperation, hook(BOOL.orElse)]
+                | Bool "impliesBool" Bool [function, total, klabel(_impliesBool_), symbol, left, smt-hook(=>), boolOperation, hook(BOOL.implies)]
                 > left:
-                  Bool "==Bool" Bool      [function, functional, klabel(_==Bool_), symbol, left, smt-hook(=), hook(BOOL.eq)]
-                | Bool "=/=Bool" Bool     [function, functional, klabel(_=/=Bool_), symbol, left, smt-hook(distinct), hook(BOOL.ne)]
+                  Bool "==Bool" Bool      [function, total, klabel(_==Bool_), symbol, left, smt-hook(=), hook(BOOL.eq)]
+                | Bool "=/=Bool" Bool     [function, total, klabel(_=/=Bool_), symbol, left, smt-hook(distinct), hook(BOOL.ne)]
 ```
 
 ### Implementation of Booleans
@@ -859,6 +958,25 @@ operations listed above.
   rule B:Bool impliesBool false => notBool B
 
   rule B1:Bool =/=Bool B2:Bool => notBool (B1 ==Bool B2)
+endmodule
+
+module BOOL-KORE [kore, symbolic]
+  imports BOOL-COMMON
+
+  rule {true #Equals notBool @B} => {false #Equals @B} [simplification]
+  rule {notBool @B #Equals true} => {@B #Equals false} [simplification]
+  rule {false #Equals notBool @B} => {true #Equals @B} [simplification]
+  rule {notBool @B #Equals false} => {@B #Equals true} [simplification]
+
+  rule {true #Equals @B1 andBool @B2} => {true #Equals @B1} #And {true #Equals @B2} [simplification]
+  rule {@B1 andBool @B2 #Equals true} => {@B1 #Equals true} #And {@B2 #Equals true} [simplification]
+  rule {false #Equals @B1 orBool @B2} => {false #Equals @B1} #And {false #Equals @B2} [simplification]
+  rule {@B1 orBool @B2 #Equals false} => {@B1 #Equals false} #And {@B2 #Equals false} [simplification]
+endmodule
+
+module BOOL
+  imports BOOL-COMMON
+  imports BOOL-KORE
 endmodule
 ```
 
@@ -917,12 +1035,12 @@ You can:
 * Compute the bitwise inclusive-or of two integers in twos-complement.
 
 ```k
-  syntax Int ::= "~Int" Int                     [function, klabel(~Int_), symbol, functional, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(INT.not), smtlib(notInt)]
+  syntax Int ::= "~Int" Int                     [function, klabel(~Int_), symbol, total, latex(\mathop{\sim_{\scriptstyle\it Int}}{#1}), hook(INT.not), smtlib(notInt)]
                > left:
                  Int "^Int" Int                 [function, klabel(_^Int_), symbol, left, smt-hook(^), latex({#1}\mathrel{{\char`\^}_{\!\scriptstyle\it Int}}{#2}), hook(INT.pow)]
                | Int "^%Int" Int Int            [function, klabel(_^%Int__), symbol, left, smt-hook((mod (^ #1 #2) #3)), hook(INT.powmod)]
                > left:
-                 Int "*Int" Int                 [function, functional, klabel(_*Int_), symbol, left, smt-hook(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
+                 Int "*Int" Int                 [function, total, klabel(_*Int_), symbol, left, comm, smt-hook(*), latex({#1}\mathrel{\ast_{\scriptstyle\it Int}}{#2}), hook(INT.mul)]
                /* FIXME: translate /Int and %Int into smtlib */
                /* /Int and %Int implement t-division, which rounds towards 0 */
                | Int "/Int" Int                 [function, klabel(_/Int_), symbol, left, smt-hook(div), latex({#1}\mathrel{\div_{\scriptstyle\it Int}}{#2}), hook(INT.tdiv)]
@@ -931,17 +1049,17 @@ You can:
                | Int "divInt" Int               [function, klabel(_divInt_), symbol, left, smt-hook(div), hook(INT.ediv)]
                | Int "modInt" Int               [function, klabel(_modInt_), symbol, left, smt-hook(mod), hook(INT.emod)]
                > left:
-                 Int "+Int" Int                 [function, functional, klabel(_+Int_), symbol, left, smt-hook(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(INT.add)]
-               | Int "-Int" Int                 [function, functional, klabel(_-Int_), symbol, left, smt-hook(-), latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(INT.sub)]
+                 Int "+Int" Int                 [function, total, klabel(_+Int_), symbol, left, comm, smt-hook(+), latex({#1}\mathrel{+_{\scriptstyle\it Int}}{#2}), hook(INT.add)]
+               | Int "-Int" Int                 [function, total, klabel(_-Int_), symbol, left, smt-hook(-), latex({#1}\mathrel{-_{\scriptstyle\it Int}}{#2}), hook(INT.sub)]
                > left:
                  Int ">>Int" Int                [function, klabel(_>>Int_), symbol, left, latex({#1}\mathrel{\gg_{\scriptstyle\it Int}}{#2}), hook(INT.shr), smtlib(shrInt)]
                | Int "<<Int" Int                [function, klabel(_<<Int_), symbol, left, latex({#1}\mathrel{\ll_{\scriptstyle\it Int}}{#2}), hook(INT.shl), smtlib(shlInt)]
                > left:
-                 Int "&Int" Int                 [function, functional, klabel(_&Int_), symbol, left, latex({#1}\mathrel{\&_{\scriptstyle\it Int}}{#2}), hook(INT.and), smtlib(andInt)]
+                 Int "&Int" Int                 [function, total, klabel(_&Int_), symbol, left, comm, latex({#1}\mathrel{\&_{\scriptstyle\it Int}}{#2}), hook(INT.and), smtlib(andInt)]
                > left:
-                 Int "xorInt" Int               [function, functional, klabel(_xorInt_), symbol, left, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(INT.xor), smtlib(xorInt)]
+                 Int "xorInt" Int               [function, total, klabel(_xorInt_), symbol, left, comm, latex({#1}\mathrel{\oplus_{\scriptstyle\it Int}}{#2}), hook(INT.xor), smtlib(xorInt)]
                > left:
-                 Int "|Int" Int                 [function, functional, klabel(_|Int_), symbol, left, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(INT.or), smtlib(orInt)]
+                 Int "|Int" Int                 [function, total, klabel(_|Int_), symbol, left, comm, latex({#1}\mathrel{|_{\scriptstyle\it Int}}{#2}), hook(INT.or), smtlib(orInt)]
 ```
 
 ### Integer minimum and maximum
@@ -949,8 +1067,8 @@ You can:
 You can compute the minimum and maximum `minInt` and `maxInt` of two integers.
 
 ```k
-  syntax Int ::= "minInt" "(" Int "," Int ")"   [function, functional, smt-hook((ite (< #1 #2) #1 #2)), hook(INT.min)]
-               | "maxInt" "(" Int "," Int ")"   [function, functional, smt-hook((ite (< #1 #2) #2 #1)), hook(INT.max)]
+  syntax Int ::= "minInt" "(" Int "," Int ")"   [function, total, smt-hook((ite (< #1 #2) #1 #2)), hook(INT.min)]
+               | "maxInt" "(" Int "," Int ")"   [function, total, smt-hook((ite (< #1 #2) #2 #1)), hook(INT.max)]
 ```
 
 ### Absolute value
@@ -958,7 +1076,7 @@ You can compute the minimum and maximum `minInt` and `maxInt` of two integers.
 You can compute the absolute value `absInt` of an integer.
 
 ```k
-  syntax Int ::= absInt ( Int )                 [function, functional, smt-hook((ite (< #1 0) (- 0 #1) #1)), hook(INT.abs)]
+  syntax Int ::= absInt ( Int )                 [function, total, smt-hook((ite (< #1 0) (- 0 #1) #1)), hook(INT.abs)]
 ```
 
 ### Log base 2
@@ -993,12 +1111,12 @@ You can compute whether two integers are less than or equal to, less than,
 greater than or equal to, greater than, equal, or unequal to another integer.
 
 ```k
-  syntax Bool ::= Int "<=Int" Int         [function, functional, klabel(_<=Int_), symbol, left, smt-hook(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
-                | Int "<Int" Int          [function, functional, klabel(_<Int_), symbol, left, smt-hook(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
-                | Int ">=Int" Int         [function, functional, klabel(_>=Int_), symbol, left, smt-hook(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
-                | Int ">Int" Int          [function, functional, klabel(_>Int_), symbol, left, smt-hook(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(INT.gt)]
-                | Int "==Int" Int         [function, functional, klabel(_==Int_), symbol, left, smt-hook(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.eq)]
-                | Int "=/=Int" Int        [function, functional, klabel(_=/=Int_), symbol, left, smt-hook(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.ne)]
+  syntax Bool ::= Int "<=Int" Int         [function, total, klabel(_<=Int_), symbol, left, smt-hook(<=), latex({#1}\mathrel{\leq_{\scriptstyle\it Int}}{#2}), hook(INT.le)]
+                | Int "<Int" Int          [function, total, klabel(_<Int_), symbol, left, smt-hook(<), latex({#1}\mathrel{<_{\scriptstyle\it Int}}{#2}), hook(INT.lt)]
+                | Int ">=Int" Int         [function, total, klabel(_>=Int_), symbol, left, smt-hook(>=), latex({#1}\mathrel{\geq_{\scriptstyle\it Int}}{#2}), hook(INT.ge)]
+                | Int ">Int" Int          [function, total, klabel(_>Int_), symbol, left, smt-hook(>), latex({#1}\mathrel{>_{\scriptstyle\it Int}}{#2}), hook(INT.gt)]
+                | Int "==Int" Int         [function, total, klabel(_==Int_), symbol, left, smt-hook(=), latex({#1}\mathrel{{=}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.eq)]
+                | Int "=/=Int" Int        [function, total, klabel(_=/=Int_), symbol, left, smt-hook(distinct), latex({#1}\mathrel{{=}{/}{=}_{\scriptstyle\it Int}}{#2}), hook(INT.ne)]
 ```
 
 ### Divides
@@ -1089,11 +1207,20 @@ module INT-KAST [kast]
 
 endmodule
 
-module INT-KORE [kore]
+module INT-KORE [kore, symbolic]
   imports private K-EQUAL
+  imports private BOOL
   imports INT-COMMON
 
-  rule I1:Int ==K I2:Int => I1 ==Int I2
+  rule I1:Int ==K I2:Int => I1 ==Int I2 [simplification]
+  rule {K1 ==Int K2 #Equals true} => {K1 #Equals K2} [simplification]
+  rule {true #Equals K1 ==Int K2} => {K1 #Equals K2} [simplification]
+  rule {K1 ==Int K2 #Equals false} => #Not({K1 #Equals K2}) [simplification]
+  rule {false #Equals K1 ==Int K2} => #Not({K1 #Equals K2}) [simplification]
+  rule {K1 =/=Int K2 #Equals true} => #Not({K1 #Equals K2}) [simplification]
+  rule {true #Equals K1 =/=Int K2} => #Not({K1 #Equals K2}) [simplification]
+  rule {K1 =/=Int K2 #Equals false} => {K1 #Equals K2} [simplification]
+  rule {false #Equals K1 =/=Int K2} => {K1 #Equals K2} [simplification]
 
 endmodule
 
@@ -1123,7 +1250,7 @@ module INT
   rule I1:Int =/=Int I2:Int => notBool (I1 ==Int I2)
   rule (I1:Int dividesInt I2:Int) => (I2 %Int I1) ==Int 0
 
-  syntax Int ::= freshInt(Int)    [freshGenerator, function, functional, private]
+  syntax Int ::= freshInt(Int)    [freshGenerator, function, total, private]
   rule freshInt(I:Int) => I
 endmodule
 ```
@@ -1178,7 +1305,7 @@ module FLOAT
 You can retrieve the number of bits of precision in a `Float`.
 
 ```k
-  syntax Int ::= precisionFloat(Float) [function, functional, hook(FLOAT.precision)]
+  syntax Int ::= precisionFloat(Float) [function, total, hook(FLOAT.precision)]
 ```
 
 ### Float exponent bits
@@ -1186,7 +1313,7 @@ You can retrieve the number of bits of precision in a `Float`.
 You can retrieve the number of bits of exponent range in a `Float`.
 
 ```k
-  syntax Int ::= exponentBitsFloat(Float) [function, functional, hook(FLOAT.exponentBits)]
+  syntax Int ::= exponentBitsFloat(Float) [function, total, hook(FLOAT.exponentBits)]
 ```
 
 ### Float exponent
@@ -1194,7 +1321,7 @@ You can retrieve the number of bits of exponent range in a `Float`.
 You can retrieve the value of the exponent bits of a `Float` as an integer.
 
 ```k
-  syntax Int ::= exponentFloat(Float) [function, functional, hook(FLOAT.exponent)]
+  syntax Int ::= exponentFloat(Float) [function, total, hook(FLOAT.exponent)]
 ```
 
 ### Float sign
@@ -1203,7 +1330,7 @@ You can retrieve the value of the sign bit of a `Float` as a boolean. True
 means the sign bit is set.
 
 ```k
-  syntax Bool ::= signFloat(Float)      [function, functional, hook(FLOAT.sign)]
+  syntax Bool ::= signFloat(Float)      [function, total, hook(FLOAT.sign)]
 ```
 
 ### Float special values
@@ -1211,8 +1338,8 @@ means the sign bit is set.
 You can check whether a `Float` value is infinite or Not-a-Number.
 
 ```k
-  syntax Bool ::= isNaN(Float)          [function, functional, smt-hook(fp.isNaN), hook(FLOAT.isNaN)]
-                | isInfinite(Float)     [function, functional]
+  syntax Bool ::= isNaN(Float)          [function, total, smt-hook(fp.isNaN), hook(FLOAT.isNaN)]
+                | isInfinite(Float)     [function, total]
 ```
 
 ### Float arithmetic
@@ -1229,7 +1356,7 @@ You can:
 * Compute the sum `+Float` or difference `-Float` of two floats.
 
 ```k
-  syntax Float ::= "--Float" Float             [function, functional, smt-hook(fp.neg), hook(FLOAT.neg)]
+  syntax Float ::= "--Float" Float             [function, total, smt-hook(fp.neg), hook(FLOAT.neg)]
                  > Float "^Float" Float        [function, left, latex({#1}^{#2}), hook(FLOAT.pow)]
                  > left:
                    Float "*Float" Float        [function, left, smt-hook((fp.mul roundNearestTiesToEven #1 #2)), latex({#1}\mathrel{\ast_{\scriptstyle\it Float}}{#2}), hook(FLOAT.mul)]
@@ -1275,19 +1402,19 @@ You can:
 
 ```k
   syntax Float ::= rootFloat(Float, Int)        [function, hook(FLOAT.root)]
-                 | absFloat(Float)              [function, functional, smt-hook(fp.abs), hook(FLOAT.abs)]
+                 | absFloat(Float)              [function, total, smt-hook(fp.abs), hook(FLOAT.abs)]
                  | roundFloat(Float, precision: Int, exponentBits: Int)  [function, hook(FLOAT.round)]
-                 | floorFloat(Float)            [function, functional, hook(FLOAT.floor)]
-                 | ceilFloat(Float)             [function, functional, hook(FLOAT.ceil)]
-                 | truncFloat(Float)            [function, functional, hook(FLOAT.trunc)]
-                 | expFloat(Float)              [function, functional, hook(FLOAT.exp)]
+                 | floorFloat(Float)            [function, total, hook(FLOAT.floor)]
+                 | ceilFloat(Float)             [function, total, hook(FLOAT.ceil)]
+                 | truncFloat(Float)            [function, total, hook(FLOAT.trunc)]
+                 | expFloat(Float)              [function, total, hook(FLOAT.exp)]
                  | logFloat(Float)              [function, hook(FLOAT.log)]
-                 | sinFloat(Float)              [function, functional, hook(FLOAT.sin)]
-                 | cosFloat(Float)              [function, functional, hook(FLOAT.cos)]
+                 | sinFloat(Float)              [function, total, hook(FLOAT.sin)]
+                 | cosFloat(Float)              [function, total, hook(FLOAT.cos)]
                  | tanFloat(Float)              [function, hook(FLOAT.tan)]
                  | asinFloat(Float)             [function, hook(FLOAT.asin)]
                  | acosFloat(Float)             [function, hook(FLOAT.acos)]
-                 | atanFloat(Float)             [function, functional, hook(FLOAT.atan)]
+                 | atanFloat(Float)             [function, total, hook(FLOAT.atan)]
                  | atan2Float(Float, Float)     [function, hook(FLOAT.atan2)]
                  | maxFloat(Float, Float)       [function, smt-hook(fp.max), hook(FLOAT.max)]
                  | minFloat(Float, Float)       [function, smt-hook(fp.min), hook(FLOAT.min)]
@@ -1329,7 +1456,7 @@ type.
 
 ```k
   syntax Float ::= Int2Float(Int, precision: Int, exponentBits: Int)    [function, latex({\\it{}Int2Float}), hook(FLOAT.int2float)]
-  syntax Int ::= Float2Int(Float)    [function, functional, latex({\\it{}Float2Int}), hook(FLOAT.float2int)]
+  syntax Int ::= Float2Int(Float)    [function, total, latex({\\it{}Float2Int}), hook(FLOAT.float2int)]
 ```
 
 ### Implementation of Floats
@@ -1392,7 +1519,7 @@ You can concatenate two strings in O(N) time. For successive concatenation
 operations, it may be better to use the `STRING-BUFFER` module.
 
 ```k
-  syntax String ::= String "+String" String    [function, functional, left, latex({#1}+_{\scriptstyle\it String}{#2}), hook(STRING.concat)]
+  syntax String ::= String "+String" String    [function, total, left, latex({#1}+_{\scriptstyle\it String}{#2}), hook(STRING.concat)]
 ```
 
 ### String length
@@ -1400,7 +1527,7 @@ operations, it may be better to use the `STRING-BUFFER` module.
 You can get the length of a string in O(1) time.
 
 ```k
-  syntax Int ::= lengthString ( String ) [function, functional, hook(STRING.length)]
+  syntax Int ::= lengthString ( String ) [function, total, hook(STRING.length)]
 ```
 
 ### Character and integer conversion
@@ -1425,7 +1552,7 @@ length of the substring). There are two important facts to note:
     length).
 
 ```k
-  syntax String ::= substrString ( String , startIndex: Int , endIndex: Int ) [function, functional, hook(STRING.substr)]
+  syntax String ::= substrString ( String , startIndex: Int , endIndex: Int ) [function, total, hook(STRING.substr)]
 ```
 
 ### String search
@@ -1453,7 +1580,7 @@ O(N*M) time.
 ### String and Bool conversion
 
 ```k
-  syntax String ::= Bool2String(Bool) [function, functional]
+  syntax String ::= Bool2String(Bool) [function, total]
   rule Bool2String(true)  => "true"
   rule Bool2String(false) => "false"
 ```
@@ -1480,7 +1607,7 @@ functionality may not be supported on backends that do not use Gnu MPFR to
 implement floating-point numbers.
 
 ```k
-  syntax String ::= Float2String ( Float )              [function, functional, hook(STRING.float2string)]
+  syntax String ::= Float2String ( Float )              [function, total, hook(STRING.float2string)]
   syntax String ::= Float2String ( Float , format: String )     [function, klabel(FloatFormat), hook(STRING.floatFormat)]
   syntax Float  ::= String2Float ( String )             [function, hook(STRING.string2float)]
 ```
@@ -1502,7 +1629,7 @@ but the backend will consistently choose one or the other.
 
 ```k
   syntax Int    ::= String2Int   ( String )             [function, hook(STRING.string2int)]
-  syntax String ::= Int2String   ( Int )                [function, functional, hook(STRING.int2string)]
+  syntax String ::= Int2String   ( Int )                [function, total, hook(STRING.int2string)]
   syntax String ::= Base2String  ( Int , base: Int )          [function, hook(STRING.base2string)]
   syntax Int    ::= String2Base  ( String , base: Int )       [function, hook(STRING.string2base)]
 ```
@@ -1519,10 +1646,10 @@ You can also count the number of times a string occurs within another string
 using `countAllOccurrences`.
 
 ```k
-  syntax String ::= "replaceAll" "(" haystack: String "," needle: String "," replacement: String ")"      [function, functional, hook(STRING.replaceAll)]
+  syntax String ::= "replaceAll" "(" haystack: String "," needle: String "," replacement: String ")"      [function, total, hook(STRING.replaceAll)]
   syntax String ::= "replace" "(" haystack: String "," needle: String "," replacement: String "," times: Int ")" [function, hook(STRING.replace)]
-  syntax String ::= "replaceFirst" "(" haystack: String "," needle: String "," replacement: String ")"    [function, functional, hook(STRING.replaceFirst)]
-  syntax Int ::= "countAllOccurrences" "(" haystack: String "," needle: String ")"            [function, functional, hook(STRING.countAllOccurrences)]
+  syntax String ::= "replaceFirst" "(" haystack: String "," needle: String "," replacement: String ")"    [function, total, hook(STRING.replaceFirst)]
+  syntax Int ::= "countAllOccurrences" "(" haystack: String "," needle: String ")"            [function, total, hook(STRING.countAllOccurrences)]
 ```
 
 ### String equality and lexicographic comparison
@@ -1532,14 +1659,14 @@ is less than, less than or equal to, greater than, or greater than or equal to
 another according to the natural lexicographic ordering of strings.
 
 ```k
-  syntax Bool ::= String "==String" String [function, functional, left, hook(STRING.eq)]
-                | String "=/=String" String      [function, functional, left, hook(STRING.ne)]
+  syntax Bool ::= String "==String" String [function, total, left, hook(STRING.eq)]
+                | String "=/=String" String      [function, total, left, hook(STRING.ne)]
   rule S1:String =/=String S2:String => notBool (S1 ==String S2)
 
-  syntax Bool ::= String  "<String" String [function, functional, hook(STRING.lt)]
-                | String "<=String" String [function, functional, hook(STRING.le)]
-                | String  ">String" String [function, functional, hook(STRING.gt)]
-                | String ">=String" String [function, functional, hook(STRING.ge)]
+  syntax Bool ::= String  "<String" String [function, total, hook(STRING.lt)]
+                | String "<=String" String [function, total, hook(STRING.le)]
+                | String  ">String" String [function, total, hook(STRING.gt)]
+                | String ">=String" String [function, total, hook(STRING.ge)]
 ```
 
 ### Implementation of Strings
@@ -1592,11 +1719,11 @@ module STRING-KAST [kast]
 
 endmodule
 
-module STRING-KORE [kore]
+module STRING-KORE [kore, symbolic]
   imports private K-EQUAL
   imports STRING-COMMON
 
-  rule S1:String ==K S2:String => S1 ==String S2
+  rule S1:String ==K S2:String => S1 ==String S2 [simplification]
 
 endmodule
 
@@ -1630,10 +1757,10 @@ module STRING-BUFFER-IN-K [symbolic]
   imports private BASIC-K
   imports STRING
 
-  syntax StringBuffer ::= ".StringBuffer" [function, functional]
-  syntax StringBuffer ::= StringBuffer "+String" String [function, functional, left, avoid]
+  syntax StringBuffer ::= ".StringBuffer" [function, total]
+  syntax StringBuffer ::= StringBuffer "+String" String [function, total, left, avoid]
   syntax StringBuffer ::= String
-  syntax String ::= StringBuffer2String ( StringBuffer ) [function, functional]
+  syntax String ::= StringBuffer2String ( StringBuffer ) [function, total]
 
   rule {SB:String +String S:String}<:StringBuffer => (SB +String S)::String
   rule .StringBuffer => ""
@@ -1645,9 +1772,9 @@ module STRING-BUFFER-HOOKED [concrete]
   imports STRING
 
   syntax StringBuffer [hook(BUFFER.StringBuffer)]
-  syntax StringBuffer ::= ".StringBuffer" [function, functional, hook(BUFFER.empty), impure]
-  syntax StringBuffer ::= StringBuffer "+String" String [function, functional, left, hook(BUFFER.concat), avoid]
-  syntax String ::= StringBuffer2String ( StringBuffer ) [function, functional, hook(BUFFER.toString)]
+  syntax StringBuffer ::= ".StringBuffer" [function, total, hook(BUFFER.empty), impure]
+  syntax StringBuffer ::= StringBuffer "+String" String [function, total, left, hook(BUFFER.concat), avoid]
+  syntax String ::= StringBuffer2String ( StringBuffer ) [function, total, hook(BUFFER.toString)]
 endmodule
 
 module STRING-BUFFER
@@ -1703,7 +1830,7 @@ module BYTES-HOOKED
 The byte array of length zero is represented by `.Bytes`.
 
 ```k
-  syntax Bytes ::= ".Bytes" [function, functional, hook(BYTES.empty)]
+  syntax Bytes ::= ".Bytes" [function, total, hook(BYTES.empty)]
 ```
 
 ### Endianness
@@ -1752,9 +1879,9 @@ integer is N, then the byte array will be at least N+1 bits long, rounded up
 to the nearest byte.
 
 ```k
-  syntax Int ::= Bytes2Int(Bytes, Endianness, Signedness) [function, functional, hook(BYTES.bytes2int)]
-  syntax Bytes ::= Int2Bytes(length: Int, Int, Endianness) [function, functional, hook(BYTES.int2bytes)]
-                 | Int2Bytes(Int, Endianness, Signedness) [function, functional, klabel(Int2BytesNoLen)]
+  syntax Int ::= Bytes2Int(Bytes, Endianness, Signedness) [function, total, hook(BYTES.bytes2int)]
+  syntax Bytes ::= Int2Bytes(length: Int, Int, Endianness) [function, total, hook(BYTES.int2bytes)]
+                 | Int2Bytes(Int, Endianness, Signedness) [function, total, klabel(Int2BytesNoLen)]
 ```
 
 ### String and Bytes conversion
@@ -1764,8 +1891,8 @@ value is a copy of the original and will not be affected by subsequent
 mutations of the input or output value.
 
 ```k
-  syntax String ::= Bytes2String(Bytes) [function, functional, hook(BYTES.bytes2string)]
-  syntax Bytes ::= String2Bytes(String) [function, functional, hook(BYTES.string2bytes)]
+  syntax String ::= Bytes2String(Bytes) [function, total, hook(BYTES.bytes2string)]
+  syntax Bytes ::= String2Bytes(String) [function, total, hook(BYTES.string2bytes)]
 ```
 
 ### Bytes update
@@ -1832,7 +1959,7 @@ You can reverse a `Bytes` object in O(N) time. This does not create a new
 `Bytes` object and will instead modify the original on concrete backends.
 
 ```k
-  syntax Bytes ::= reverseBytes(Bytes) [function, functional, hook(BYTES.reverse)]
+  syntax Bytes ::= reverseBytes(Bytes) [function, total, hook(BYTES.reverse)]
 ```
 
 ### Bytes length
@@ -1840,7 +1967,7 @@ You can reverse a `Bytes` object in O(N) time. This does not create a new
 You can get the length of a `Bytes` term in O(1) time.
 
 ```k
-  syntax Int ::= lengthBytes(Bytes) [function, functional, hook(BYTES.length), smtlib(lengthBytes)]
+  syntax Int ::= lengthBytes(Bytes) [function, total, hook(BYTES.length), smtlib(lengthBytes)]
 ```
 
 
@@ -1850,7 +1977,7 @@ You can create a new `Bytes` object by concatenating two `Bytes` objects
 together in O(N) time.
 
 ```k
-  syntax Bytes ::= Bytes "+Bytes" Bytes [function, functional, hook(BYTES.concat), right]
+  syntax Bytes ::= Bytes "+Bytes" Bytes [function, total, hook(BYTES.concat), right]
 
 endmodule
 ```
@@ -1877,10 +2004,10 @@ module BYTES-IN-K [symbolic, kast]
   syntax Signedness ::= "Signed" [klabel(signedBytes), symbol]
                       | "Unsigned" [klabel(unsignedBytes), symbol]
 
-  syntax Bytes ::= ".Bytes" [function, functional]
+  syntax Bytes ::= ".Bytes" [function, total]
   rule .Bytes => nilBytes
 
-  syntax Int ::= Bytes2Int(Bytes, Endianness, Signedness) [function, functional]
+  syntax Int ::= Bytes2Int(Bytes, Endianness, Signedness) [function, total]
   rule Bytes2Int(nilBytes, _, _) => 0
   rule Bytes2Int(B : nilBytes, BE, Unsigned) => B
   rule Bytes2Int(B0 : B1 : BS, BE, Unsigned) => Bytes2Int(((B0 <<Int 8) |Int B1) : BS, BE, Unsigned)
@@ -1888,20 +2015,20 @@ module BYTES-IN-K [symbolic, kast]
   rule Bytes2Int(B0 : BS, LE, S) => Bytes2Int(reverseBytes(B0 : BS), BE, S)
 
   syntax Bytes ::= Int2Bytes(Int, Bytes) [function, klabel(Int2BytesAux)]
-  syntax Bytes ::= Int2Bytes(Int, Int, Endianness) [function, functional]
-                 | Int2Bytes(Int, Endianness, Signedness) [function, functional, klabel(Int2BytesNoLen)]
+  syntax Bytes ::= Int2Bytes(Int, Int, Endianness) [function, total]
+                 | Int2Bytes(Int, Endianness, Signedness) [function, total, klabel(Int2BytesNoLen)]
   rule Int2Bytes(LEN, I, BE) => padLeftBytes(Int2Bytes(bitRangeInt(I, 0, LEN <<Int 3), nilBytes), LEN, #if I <Int 0 #then 255 #else 0 #fi)
   rule Int2Bytes(LEN, I, LE) => reverseBytes(Int2Bytes(LEN, I, BE))
   rule Int2Bytes(0, BS) => BS
   rule Int2Bytes(I, BS) => Int2Bytes(I >>Int 8, I &Int 255 : BS) requires I =/=Int 0
 
   syntax String ::= Bytes2String(Bytes, StringBuffer) [function, klabel(Bytes2StringAux)]
-  syntax String ::= Bytes2String(Bytes) [function, functional]
+  syntax String ::= Bytes2String(Bytes) [function, total]
   rule Bytes2String(BS) => Bytes2String(BS, .StringBuffer)
   rule Bytes2String(nilBytes, BUFFER) => StringBuffer2String(BUFFER)
   rule Bytes2String(B : BS, BUFFER) => Bytes2String(BS, BUFFER +String chrChar(B))
 
-  syntax Bytes ::= String2Bytes(String) [function, functional]
+  syntax Bytes ::= String2Bytes(String) [function, total]
   rule String2Bytes(S) => ordChar(substrString(S, 0, 1)) : String2Bytes(substrString(S, 1, lengthString(S))) requires lengthString(S) >=Int 1
   rule String2Bytes("") => nilBytes
 
@@ -1928,19 +2055,19 @@ module BYTES-IN-K [symbolic, kast]
   rule padLeftBytes(BS, LEN, _) => BS requires lengthBytes(BS) >=Int LEN andBool 0 <=Int LEN
   rule padLeftBytes(BS, LEN, VAL) => padLeftBytes(VAL : BS, LEN, VAL) requires lengthBytes(BS) <Int LEN andBool 0 <=Int LEN
 
-  syntax Bytes ::= reverseBytes(Bytes) [function, functional]
+  syntax Bytes ::= reverseBytes(Bytes) [function, total]
   syntax Bytes ::= reverseBytes(Bytes, Bytes) [function, klabel(reverseBytesAux)]
   rule reverseBytes(BS) => reverseBytes(BS, nilBytes)
   rule reverseBytes(nilBytes, BS) => BS
   rule reverseBytes(B : BS, BS') => reverseBytes(BS, B : BS')
 
-  syntax Int ::= lengthBytes(Bytes) [function, functional, smtlib(lengthBytes)]
+  syntax Int ::= lengthBytes(Bytes) [function, total, smtlib(lengthBytes)]
   syntax Int ::= lengthBytes(Bytes, Int) [function, klabel(lengthBytesAux), smtlib(lengthBytesAux)]
   rule lengthBytes(BS) => lengthBytes(BS, 0)
   rule lengthBytes(nilBytes, SIZE) => SIZE
   rule lengthBytes(_ : BS, SIZE) => lengthBytes(BS, SIZE +Int 1)
 
-  syntax Bytes ::= Bytes "+Bytes" Bytes [function, functional, right]
+  syntax Bytes ::= Bytes "+Bytes" Bytes [function, total, right]
   rule nilBytes +Bytes B2 => B2
   rule (B : BS) +Bytes B2 => B : (BS +Bytes B2)
 endmodule
@@ -2012,9 +2139,9 @@ module ID-COMMON
   imports ID-SYNTAX
   imports private STRING
 
-  syntax String ::= Id2String ( Id )    [function, functional, hook(STRING.token2string)]
-  syntax Id ::= String2Id (String) [function, functional, hook(STRING.string2token)]
-  syntax Id ::= freshId(Int)    [freshGenerator, function, functional, private]
+  syntax String ::= Id2String ( Id )    [function, total, hook(STRING.token2string)]
+  syntax Id ::= String2Id (String) [function, total, hook(STRING.string2token)]
+  syntax Id ::= freshId(Int)    [freshGenerator, function, total, private]
 
   rule freshId(I:Int) => String2Id("_" +String Int2String(I))
 endmodule
@@ -2051,20 +2178,28 @@ module K-EQUAL-SYNTAX
   imports private BASIC-K
 
   syntax Bool ::= left:
-                  K "==K" K           [function, functional, smt-hook(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), equalEqualK]
-                | K "=/=K" K          [function, functional, smt-hook(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
+                  K "==K" K           [function, total, smt-hook(=), hook(KEQUAL.eq), klabel(_==K_), symbol, latex({#1}\mathrel{=_K}{#2}), equalEqualK]
+                | K "=/=K" K          [function, total, smt-hook(distinct), hook(KEQUAL.ne), klabel(_=/=K_), symbol, latex({#1}\mathrel{\neq_K}{#2}), notEqualEqualK]
 
   syntax priorities equalEqualK notEqualEqualK > boolOperation mlOp
 
-  syntax {Sort} Sort ::= "#if" Bool "#then" Sort "#else" Sort "#fi"   [function, functional, smt-hook(ite), hook(KEQUAL.ite)]
+  syntax {Sort} Sort ::= "#if" Bool "#then" Sort "#else" Sort "#fi"   [function, total, smt-hook(ite), hook(KEQUAL.ite)]
 
 endmodule
 
-module K-EQUAL-KORE [kore]
+module K-EQUAL-KORE [kore, symbolic]
   import private BOOL
   import K-EQUAL-SYNTAX
 
-  rule K1:Bool ==K K2:Bool => K1 ==Bool K2
+  rule K1:Bool ==K K2:Bool => K1 ==Bool K2 [simplification]
+  rule {K1 ==K K2 #Equals true} => {K1 #Equals K2} [simplification]
+  rule {true #Equals K1 ==K K2} => {K1 #Equals K2} [simplification]
+  rule {K1 ==K K2 #Equals false} => #Not({K1 #Equals K2}) [simplification]
+  rule {false #Equals K1 ==K K2} => #Not({K1 #Equals K2}) [simplification]
+  rule {K1 =/=K K2 #Equals true} => #Not({K1 #Equals K2}) [simplification]
+  rule {true #Equals K1 =/=K K2} => #Not({K1 #Equals K2}) [simplification]
+  rule {K1 =/=K K2 #Equals false} => {K1 #Equals K2} [simplification]
+  rule {false #Equals K1 =/=K K2} => {K1 #Equals K2} [simplification]
 
 endmodule
 
@@ -2364,9 +2499,9 @@ Provided here are functions that return the file descriptor for standard input,
 standard output, and standard error.
 
 ```k
-  syntax Int ::= "#stdin"   [function, functional]
-                | "#stdout" [function, functional]
-                | "#stderr" [function, functional]
+  syntax Int ::= "#stdin"   [function, total]
+                | "#stdout" [function, total]
+                | "#stderr" [function, total]
 
   rule #stdin => 0
   rule #stdout => 1
@@ -2404,7 +2539,7 @@ You can delete a file using its absolute or relative path using the `#remove`
 operator. It returns `.K` on success or an `IOError` on failure.
 
 ```k
-  syntax K ::= #remove(path: String) [function, functional, hook(IO.remove), impure]
+  syntax K ::= #remove(path: String) [function, total, hook(IO.remove), impure]
 ```
 
 ### Logging
@@ -2416,7 +2551,28 @@ containing `name` in its name. The file is only flushed to disk when rewriting
 finishes.
 
 ```k
-  syntax K ::= #logToFile(name: String, value: String) [function, functional, hook(IO.log), impure, returnsUnit, symbol]
+  syntax K ::= #logToFile(name: String, value: String) [function, total, hook(IO.log), impure, returnsUnit, symbol]
+```
+
+Strings can also be logged via the logging mechanisms available to the backend.
+On the LLVM backend, this just means logging the text to standard error. On the
+Haskell backend, a log message of type InfoUserLog is created with the
+specified text.
+
+```k
+  syntax K ::= #log(value: String) [function, funtional, hook(IO.logString), impure, returnsUnit, symbol]
+```
+
+Terms can also be logged to standard error in _surface syntax_, rather than as
+KORE using `#trace`. This operator has similar semantics to `#logToFile` (i.e.
+it returns `.K`, but prints as an impure side effect). Note that calling
+`#trace` is equivalent to invoking the `kprint` tool for the first term that is
+logged, which requires re-parsing the underlying K definition. Subsequent calls
+do not incur this overhead again; the definition is cached.
+
+```k
+  syntax K ::= #trace(value: KItem) [function, total, hook(IO.traceTerm), impure, returnsUnit, symbol]
+             | #traceK(value: K)    [function, total, hook(IO.traceTerm), impure, returnsUnit, symbol]
 ```
 
 ### Implementation of high-level I/O streams in K
@@ -2644,7 +2800,7 @@ module MINT
 You can get the number of bits of width in an MInt using `bitwidthMInt`.
 
 ```k
-  syntax {Width} Int ::= bitwidthMInt(MInt{Width})   [function, functional, hook(MINT.bitwidth)]
+  syntax {Width} Int ::= bitwidthMInt(MInt{Width})   [function, total, hook(MINT.bitwidth)]
 ```
 
 ### Int and MInt conversions
@@ -2661,10 +2817,10 @@ has the correct bitwidth, as this will influence the width of the resulting
 `MInt`.
 
 ```k
-  syntax {Width} Int ::= MInt2Signed(MInt{Width})     [function, functional, hook(MINT.svalue)]
-                       | MInt2Unsigned(MInt{Width})     [function, functional, hook(MINT.uvalue), smt-hook(bv2int)]
+  syntax {Width} Int ::= MInt2Signed(MInt{Width})     [function, total, hook(MINT.svalue)]
+                       | MInt2Unsigned(MInt{Width})     [function, total, hook(MINT.uvalue), smt-hook(bv2int)]
 
-  syntax {Width} MInt{Width} ::= Int2MInt(Int) [function, functional, hook(MINT.integer), smt-hook(int2bv)]
+  syntax {Width} MInt{Width} ::= Int2MInt(Int) [function, total, hook(MINT.integer), smt-hook(int2bv)]
 ```
 
 ### MInt min and max values
@@ -2728,27 +2884,27 @@ You can:
 * Compute the bitwise inclusive or `|MInt` of two `MInt`s.
 
 ```k
-  syntax {Width} MInt{Width} ::= "~MInt" MInt{Width} [function, functional, hook(MINT.not), smt-hook(bvnot)]
-                               | "--MInt" MInt{Width} [function, functional, hook(MINT.neg), smt-hook(bvuminus)]
+  syntax {Width} MInt{Width} ::= "~MInt" MInt{Width} [function, total, hook(MINT.not), smt-hook(bvnot)]
+                               | "--MInt" MInt{Width} [function, total, hook(MINT.neg), smt-hook(bvuminus)]
                                > left:
-                                 MInt{Width} "*MInt" MInt{Width} [function, functional, hook(MINT.mul), smt-hook(bvmul)]
+                                 MInt{Width} "*MInt" MInt{Width} [function, total, hook(MINT.mul), smt-hook(bvmul)]
                                | MInt{Width} "/sMInt" MInt{Width} [function, hook(MINT.sdiv), smt-hook(bvsdiv)]
                                | MInt{Width} "%sMInt" MInt{Width} [function, hook(MINT.srem), smt-hook(bvsrem)]
                                | MInt{Width} "/uMInt" MInt{Width} [function, hook(MINT.udiv), smt-hook(bvudiv)]
                                | MInt{Width} "%uMInt" MInt{Width} [function, hook(MINT.urem), smt-hook(bvurem)]
                                > left:
-                                 MInt{Width} "+MInt" MInt{Width} [function, functional, hook(MINT.add), smt-hook(bvadd)]
-                               | MInt{Width} "-MInt" MInt{Width} [function, functional, hook(MINT.sub), smt-hook(bvsub)]
+                                 MInt{Width} "+MInt" MInt{Width} [function, total, hook(MINT.add), smt-hook(bvadd)]
+                               | MInt{Width} "-MInt" MInt{Width} [function, total, hook(MINT.sub), smt-hook(bvsub)]
                                > left:
                                  MInt{Width} "<<MInt" MInt{Width} [function, hook(MINT.shl), smt-hook(bvshl)]
                                | MInt{Width} ">>aMInt" MInt{Width} [function, hook(MINT.ashr), smt-hook(bvashr)]
                                | MInt{Width} ">>lMInt" MInt{Width} [function, hook(MINT.lshr), smt-hook(bvlshr)]
                                > left:
-                                 MInt{Width} "&MInt" MInt{Width} [function, functional, hook(MINT.and), smt-hook(bvand)]
+                                 MInt{Width} "&MInt" MInt{Width} [function, total, hook(MINT.and), smt-hook(bvand)]
                                > left:
-                                 MInt{Width} "xorMInt" MInt{Width} [function, functional, hook(MINT.xor), smt-hook(bvxor)]
+                                 MInt{Width} "xorMInt" MInt{Width} [function, total, hook(MINT.xor), smt-hook(bvxor)]
                                > left:
-                                 MInt{Width} "|MInt" MInt{Width} [function, functional, hook(MINT.or), smt-hook(bvor)]
+                                 MInt{Width} "|MInt" MInt{Width} [function, total, hook(MINT.or), smt-hook(bvor)]
 ```
 
 ### MInt comparison
@@ -2759,16 +2915,16 @@ or unsigned integers. You can also compute whether one `MInt` is equal to or
 unequal to another `MInt`.
 
 ```k
-  syntax {Width} Bool ::= MInt{Width} "<sMInt" MInt{Width} [function, functional, hook(MINT.slt), smt-hook(bvslt)]
-                        | MInt{Width} "<uMInt" MInt{Width} [function, functional, hook(MINT.ult), smt-hook(bvult)]
-                        | MInt{Width} "<=sMInt" MInt{Width} [function, functional, hook(MINT.sle), smt-hook(bvsle)]
-                        | MInt{Width} "<=uMInt" MInt{Width} [function, functional, hook(MINT.ule), smt-hook(bvule)]
-                        | MInt{Width} ">sMInt" MInt{Width} [function, functional, hook(MINT.sgt), smt-hook(bvsgt)]
-                        | MInt{Width} ">uMInt" MInt{Width} [function, functional, hook(MINT.ugt), smt-hook(bvugt)]
-                        | MInt{Width} ">=sMInt" MInt{Width} [function, functional, hook(MINT.sge), smt-hook(bvsge)]
-                        | MInt{Width} ">=uMInt" MInt{Width} [function, functional, hook(MINT.uge), smt-hook(bvuge)]
-                        | MInt{Width} "==MInt" MInt{Width} [function, functional, hook(MINT.eq), smt-hook(=)]
-                        | MInt{Width} "=/=MInt" MInt{Width} [function, functional, hook(MINT.ne), smt-hook(distinct)]
+  syntax {Width} Bool ::= MInt{Width} "<sMInt" MInt{Width} [function, total, hook(MINT.slt), smt-hook(bvslt)]
+                        | MInt{Width} "<uMInt" MInt{Width} [function, total, hook(MINT.ult), smt-hook(bvult)]
+                        | MInt{Width} "<=sMInt" MInt{Width} [function, total, hook(MINT.sle), smt-hook(bvsle)]
+                        | MInt{Width} "<=uMInt" MInt{Width} [function, total, hook(MINT.ule), smt-hook(bvule)]
+                        | MInt{Width} ">sMInt" MInt{Width} [function, total, hook(MINT.sgt), smt-hook(bvsgt)]
+                        | MInt{Width} ">uMInt" MInt{Width} [function, total, hook(MINT.ugt), smt-hook(bvugt)]
+                        | MInt{Width} ">=sMInt" MInt{Width} [function, total, hook(MINT.sge), smt-hook(bvsge)]
+                        | MInt{Width} ">=uMInt" MInt{Width} [function, total, hook(MINT.uge), smt-hook(bvuge)]
+                        | MInt{Width} "==MInt" MInt{Width} [function, total, hook(MINT.eq), smt-hook(=)]
+                        | MInt{Width} "=/=MInt" MInt{Width} [function, total, hook(MINT.ne), smt-hook(distinct)]
 ```
 
 ### MInt min/max
@@ -2778,10 +2934,10 @@ the unsigned minimum `uMinMInt`, and the unsigned maximum `uMaxMInt` of two
 `MInt`s.
 
 ```k
-  syntax {Width} MInt{Width} ::= sMaxMInt(MInt{Width}, MInt{Width}) [function, functional, hook(MINT.smax), smt-hook((ite (bvslt #1 #2) #2 #1))]
-                               | sMinMInt(MInt{Width}, MInt{Width}) [function, functional, hook(MINT.smin), smt-hook((ite (bvslt #1 #2) #1 #2))]
-                               | uMaxMInt(MInt{Width}, MInt{Width}) [function, functional, hook(MINT.umax), smt-hook((ite (bvult #1 #2) #2 #1))]
-                               | uMinMInt(MInt{Width}, MInt{Width}) [function, functional, hook(MINT.umin), smt-hook((ite (bvult #1 #2) #1 #2))]
+  syntax {Width} MInt{Width} ::= sMaxMInt(MInt{Width}, MInt{Width}) [function, total, hook(MINT.smax), smt-hook((ite (bvslt #1 #2) #2 #1))]
+                               | sMinMInt(MInt{Width}, MInt{Width}) [function, total, hook(MINT.smin), smt-hook((ite (bvslt #1 #2) #1 #2))]
+                               | uMaxMInt(MInt{Width}, MInt{Width}) [function, total, hook(MINT.umax), smt-hook((ite (bvult #1 #2) #2 #1))]
+                               | uMinMInt(MInt{Width}, MInt{Width}) [function, total, hook(MINT.umin), smt-hook((ite (bvult #1 #2) #1 #2))]
 ```
 
 ### MInt to MInt conversion
@@ -2793,7 +2949,7 @@ zero-extended with the same low-order bits if the resulting width is larger
 than the input.
 
 ```k
-  syntax {Width1, Width2} MInt{Width1} ::= roundMInt(MInt{Width2}) [function, functional, hook(MINT.round)]
+  syntax {Width1, Width2} MInt{Width1} ::= roundMInt(MInt{Width2}) [function, total, hook(MINT.round)]
 ```
 
 ```k

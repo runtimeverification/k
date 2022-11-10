@@ -1,0 +1,6 @@
+[Error] Compiler: anywhere attribute is not supported on simplification rules.
+	Source(anywhereSimplification.k)
+	Location(5,8,5,18)
+	5 |	  rule a() => b() [anywhere, simplification]
+	  .	       ^~~~~~~~~~
+[Error] Compiler: Had 1 structural errors.

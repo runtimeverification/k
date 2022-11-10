@@ -128,7 +128,7 @@ public class ResolveAnonVar {
             att = att.add("fresh");
         }
         do {
-            newLabel = KVariable(prefix + "_" + (counter++), att);
+            newLabel = KVariable(prefix + "_Gen" + (counter++), att);
         } while (vars.contains(newLabel));
         vars.add(newLabel);
         return newLabel;

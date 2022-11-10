@@ -1,7 +1,11 @@
 [Error] Inner Parser: Parse error: unexpected token '[' following token '('.
 	Source(nestedFunctionContextInFun.k)
 	Location(8,16,8,17)
+	8 |	rule 0 => #fun([[0 => 1]] <bar> 0 </bar>)(0)
+	  .	               ^
 [Error] Inner Parser: Parse error: unexpected token '[' following token '('.
 	Source(nestedFunctionContextInFun.k)
 	Location(10,16,10,17)
+	10 |	rule 0 => #fun([[[[0 => 1]] <bar> 0 </bar>]] <bar> 0 </bar>)(0)
+	   .	               ^
 [Error] Compiler: Had 2 parsing errors.

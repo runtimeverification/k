@@ -12,7 +12,7 @@ languages is asymptotically faster than parsing ambiguous languages.
 Programming language designers instead usually use the notions of operator
 precedence and associativity to make expression grammars unambiguous. These
 mechanisms work by instructing the parser to reject certain ASTs in favor of
-others in case of ambiguities; often it is possible to remove *all* ambiguities
+others in case of ambiguities; it is often possible to remove *all* ambiguities
 in a grammar with these techniques.
 
 While it is sometimes possible to explicitly rewrite the grammar to remove
@@ -225,6 +225,17 @@ the productions with at least one of the attributes in that group, and each
 `syntax left`, `syntax right`, or `syntax non-assoc` sentence defines an
 associativity relation connecting all the productions with one of the target
 attributes together into a left-, right-, or non-associative grouping.
+Specifically, this means that:
+```
+syntax left a b
+```
+is _different_ to:
+```
+syntax left a
+syntax left b
+```
+As a consequence of this, `syntax [left|right|non-assoc]` should not be used to
+group together labels with different priority.
 
 ## Prefer/avoid
 

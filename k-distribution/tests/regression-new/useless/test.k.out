@@ -1,64 +1,106 @@
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(20,6,20,17)
+	20 |	rule foo(A) => A
+	   .	     ^~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(21,6,21,17)
+	21 |	rule foo(B) => B
+	   .	     ^~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(26,6,26,22)
+	26 |	rule foo2(bar()) => 0
+	   .	     ^~~~~~~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(30,6,30,19)
+	30 |	rule foo3("") => 0
+	   .	     ^~~~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(34,6,34,35)
+	34 |	rule foo4(BAR) => lengthBytes(BAR)
+	   .	     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(35,6,35,35)
+	35 |	rule foo4(BAZ) => lengthBytes(BAZ)
+	   .	     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(38,6,38,28)
+	38 |	rule foo5(ListItem(_)) => 0
+	   .	     ^~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(46,6,46,24)
+	46 |	rule foo7(_ |-> _) => 0
+	   .	     ^~~~~~~~~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(50,6,50,27)
+	50 |	rule foo8(X |-> _, X) => 0
+	   .	     ^~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(51,6,51,27)
+	51 |	rule foo8(_ |-> _, _) => 0
+	   .	     ^~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(59,6,59,27)
+	59 |	rule foo7(SetItem(_)) => 0
+	   .	     ^~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(63,6,63,30)
+	63 |	rule foo8(SetItem(X), X) => 0
+	   .	     ^~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(64,6,64,30)
+	64 |	rule foo8(SetItem(_), _) => 0
+	   .	     ^~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(69,6,69,22)
+	69 |	rule foo10(0.0F) => 0
+	   .	     ^~~~~~~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(70,6,70,22)
+	70 |	rule foo10(0.0f) => 0
+	   .	     ^~~~~~~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(73,6,73,22)
+	73 |	rule foo10a(0.0) => 0
+	   .	     ^~~~~~~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(75,6,75,28)
+	75 |	rule foo10a(0.0p53x11) => 0
+	   .	     ^~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(78,6,78,22)
+	78 |	rule foo11(true) => 0
+	   .	     ^~~~~~~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(83,6,83,19)
+	83 |	rule foo12(x) => 0
+	   .	     ^~~~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(87,6,87,58)
+	87 |	rule foo13(BAR) => lengthString(StringBuffer2String(BAR))
+	   .	     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Potentially useless rule detected.
 	Source(test.k)
 	Location(88,6,88,58)
+	88 |	rule foo13(BAZ) => lengthString(StringBuffer2String(BAZ))
+	   .	     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 21 pattern matching errors.

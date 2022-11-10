@@ -21,7 +21,7 @@ import org.kframework.kore.VisitK;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.ParseInModule;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -191,6 +191,15 @@ public class CompiledDefinition implements Serializable {
         }
     }
 
+    public Option<Module> ruleParsingModuleFor(String moduleName) {
+        RuleGrammarGenerator gen = new RuleGrammarGenerator(kompiledDefinition);
+
+        Option<Module> moduleOption = kompiledDefinition.getModule(moduleName);
+        if (!moduleOption.isDefined())
+            return Option.empty();
+        return Option.apply(gen.getRuleGrammar(moduleOption.get()));
+    }
+
     public Module languageParsingModule() { return languageParsingModule; }
 
     /**
@@ -199,9 +208,9 @@ public class CompiledDefinition implements Serializable {
      * @return the parsed term.
      */
 
-    public K parseSingleTerm(Module module, Sort programStartSymbol, KExceptionManager kem, String s, Source source) {
-        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, true)) {
-            Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> res = parseInModule.parseString(s, programStartSymbol, source);
+    public K parseSingleTerm(Module module, Sort programStartSymbol, String startSymbolLocation, KExceptionManager kem, FileUtil files, String s, Source source) {
+        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(module, true, files)) {
+            Tuple2<Either<Set<KEMException>, K>, Set<KEMException>> res = parseInModule.parseString(s, programStartSymbol, startSymbolLocation, source);
             kem.addAllKException(res._2().stream().map(e -> e.getKException()).collect(Collectors.toSet()));
             if (res._1().isLeft()) {
                 throw res._1().left().get().iterator().next();
@@ -210,8 +219,8 @@ public class CompiledDefinition implements Serializable {
         }
     }
 
-    public Module getExtensionModule(Module module) {
-        return RuleGrammarGenerator.getCombinedGrammar(module, true).getExtensionModule();
+    public Module getExtensionModule(Module module, FileUtil files) {
+        return RuleGrammarGenerator.getCombinedGrammar(module, true, files).getExtensionModule();
     }
 
     public Rule compilePatternIfAbsent(FileUtil files, KExceptionManager kem, String pattern, Source source) {

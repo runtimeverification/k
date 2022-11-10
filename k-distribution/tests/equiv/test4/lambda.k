@@ -17,8 +17,8 @@ module LAMBDA-SYNTAX
                > Exp "+" Exp          [seqstrict, left, klabel(addl)]
                > Exp "<=" Exp         [strict, klabel(lel)]
   syntax Exp ::= "if" Exp "then" Exp "else" Exp  [strict(1)] // Conditional
-               | "let" Id "=" Exp "in" Exp                   // Let binder
-               | "letrec" Id Id "=" Exp "in" Exp             // Letrec
+               | "let" Id "=" Exp "in" Exp       [macro]     // Let binder
+               | "letrec" Id Id "=" Exp "in" Exp [macro]     // Letrec
                | "mu" Id "." Exp      [latex(\mu{#1}.{#2})]  // Mu
 
 endmodule
@@ -60,9 +60,9 @@ module LAMBDA
   rule if true  then E else _ => E
   rule if false then _ else E => E
 
-  rule let X = E in E':Exp => (lambda X . E') E                         [macro]
+  rule let X = E in E':Exp => (lambda X . E') E
 
-  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'     [macro]
+  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'
 
   syntax Exp ::= muclosure(Map,Exp)
     [latex(\textsf{closure}_\mu({#1},{#2}))]

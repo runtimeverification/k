@@ -7,6 +7,8 @@
 *.pdf
 *.swp
 *.kore
+*.mobi
+*.epub
 .metadata
 .recommenders
 .cache
@@ -25,3 +27,5 @@ kore/doc
 __pycache__
 result*
 .envrc
+flake.lock
+.DS_Store

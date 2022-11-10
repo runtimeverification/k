@@ -87,7 +87,7 @@ public class ResolveFunctionWithConfig {
         return false;
     }
 
-    private RuleOrClaim resolve(RuleOrClaim rule, Module m) {
+    public RuleOrClaim resolve(RuleOrClaim rule, Module m) {
         return rule.newInstance(
                 transform(resolve(rule.body(), m), m),
                 transform(rule.requires(), m),
@@ -95,14 +95,14 @@ public class ResolveFunctionWithConfig {
                 rule.att());
     }
 
-    private Context resolve(Context context, Module m) {
+    public Context resolve(Context context, Module m) {
         return new Context(
                 transform(context.body(), m),
                 transform(context.requires(), m),
                 context.att());
     }
 
-    private ContextAlias resolve(ContextAlias context, Module m) {
+    public ContextAlias resolve(ContextAlias context, Module m) {
         return new ContextAlias(
                 transform(context.body(), m),
                 transform(context.requires(), m),
@@ -225,17 +225,27 @@ public class ResolveFunctionWithConfig {
       return s;
     }
 
-    public Sentence resolve(Module m, Sentence s) {
-        if (s instanceof RuleOrClaim) {
-            return resolve((RuleOrClaim) s, m);
-        } else if (s instanceof Context) {
-            return resolve((Context) s, m);
-        } else if (s instanceof ContextAlias) {
-            return resolve((ContextAlias) s, m);
-        } else if (s instanceof Production) {
-            return resolve((Production) s);
-        } else {
-            return s;
+    public Module moduleResolve(Module m) {
+        Set<Sentence> newSentences = new HashSet<>();
+        for (Sentence s : mutable(m.localSentences())) {
+            if (s instanceof RuleOrClaim) {
+                newSentences.add(resolve((RuleOrClaim) s, m));
+            } else if (s instanceof Context) {
+                newSentences.add(resolve((Context) s, m));
+            } else if (s instanceof ContextAlias) {
+                newSentences.add(resolve((ContextAlias) s, m));
+            } else if (s instanceof Production) {
+                Production prd = resolve((Production) s);
+                newSentences.add(prd);
+                // topCell introduces a new sort. Make sure it's declared
+                if (!prd.equals(s) && !m.definedSorts().contains(topCell.head()))
+                    newSentences.add(SyntaxSort(Seq(), topCell));
+            } else {
+                newSentences.add(s);
+            }
         }
+        if (newSentences.equals(mutable(m.localSentences())))
+            return m;
+        return Module.apply(m.name(), m.imports(), immutable(newSentences), m.att());
     }
 }

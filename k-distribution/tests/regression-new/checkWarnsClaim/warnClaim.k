@@ -5,8 +5,8 @@
 module WARNCLAIM-SYNTAX
     imports INT
 
-    syntax Int ::= "foo"
-    rule foo => 3 [macro]
+    syntax Int ::= "foo" [macro]
+    rule foo => 3
 
     syntax Pgm ::= doIt ( Int )
     syntax Pgm ::= addCounter ( Int )

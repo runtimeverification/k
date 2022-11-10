@@ -1,6 +1,8 @@
 [Error] Compiler: Invalid term in smt-lemma detected. All terms in smt-lemma rules require smt-hook or smtlib labels
 	Source(smtLemmaCheck.k)
 	Location(12,8,12,12)
+	12 |	  rule f(_) >Int -1 andBool false => true  [simplification, smt-lemma]
+	   .	       ^~~~
 [Error] Compiler: Had 1 structural errors after macro expansion.
   while executing phase "expand macros" on sentence at
 	Source(smtLemmaCheck.k)

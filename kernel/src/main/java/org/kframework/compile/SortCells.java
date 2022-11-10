@@ -214,7 +214,7 @@ public class SortCells {
     KVariable newDotVariable(Att att) {
         KVariable newLabel;
         do {
-            newLabel = KVariable("_" + (counter++), att);
+            newLabel = KVariable("_Gen" + (counter++), att);
         } while (variables.containsKey(newLabel) || previousVars.contains(newLabel));
         variables.put(newLabel, null);
         return newLabel;

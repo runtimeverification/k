@@ -27,8 +27,6 @@ public class JCommanderModule extends AbstractModule  {
 
     @BindingAnnotation @Target({FIELD, PARAMETER, METHOD}) @Retention(RUNTIME)
     public @interface Usage {}
-    @BindingAnnotation @Target({FIELD, PARAMETER, METHOD}) @Retention(RUNTIME)
-    public @interface ExperimentalUsage {}
 
     @Override
     protected void configure() {
@@ -44,7 +42,7 @@ public class JCommanderModule extends AbstractModule  {
             sw.printIntermediate("Parse command line options");
             return jc;
         } catch (ParameterException e) {
-            throw KEMException.criticalError(e.getMessage(), e);
+            throw KEMException.criticalError(e.getMessage());
         }
     }
 

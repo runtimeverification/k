@@ -1,0 +1,92 @@
+---
+name: "[K-Bug] Report"
+description: Create a bug report to help us improve
+title: "[K-Bug] <TITLE>"
+labels: ["k-bug", "k"]
+  
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Please Fill out the Form to the best of your ability.
+        ## Briefly what we're looking for:
+        ### Input Guidelines: 
+        1. *Minimized* files need to produce the bug.
+        2. When providing K definitions, a _single_ file should be provided (if possible), and as few modules and sentences as possible.
+        3. When providing programs or proofs, a _single_ program should be provided with a minimized definition which _quickly_ reproduces the issue.
+
+        ### Reproduction Steps
+        Steps to reproduce the behavior (including _code blocks_ with what to run, and _code blocks_ with resulting output).
+
+        ### Expected Behavior
+        A clear and concise description of what you expected to happen.
+        ---------------------------------------------------------------
+
+  - type: dropdown
+    attributes:
+      label: What component is the issue in?
+      options:
+        - Front-End 
+        - haskell-backend
+        - llvm-backend
+
+  - type: checkboxes
+    attributes:
+      label: Which command
+      description: You may select more than one
+      options:
+        - label: kompile
+        - label: kast
+        - label: krun
+        - label: kprove
+        - label: kprovex
+        - label: ksearch
+
+  - type: input
+    attributes:
+      label: What K Version?
+      placeholder: |
+        Run kompile --version and paste here
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: "Operating System"
+      options:
+        - Linux
+        - MacOS (Intel)
+        - MacOS (Apple Silicon/AMD)
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: K Definitions (If Possible)
+      description: A _single_ program file with a minimized definition which _quickly_ reproduces the issue
+      placeholder: |
+        Files can be Drag & Dropped HERE 
+  - type: textarea
+    attributes:
+      label: Steps to Reproduce
+      description: Any information you think is relevant for us to understand the issue. Code blocks are acceptable.
+      placeholder: |
+        < ATTACH LOG HERE (IF POSSIBLE) > 
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: "Expected Results"
+      description: Please provide a brief description of what you expected to happen 
+      placeholder: < Drag & Drop files can be used to support expected result >
+    validations:
+      required: true
+
+
+  - type: markdown
+    attributes:
+      value: "## Thank you for contributing to our project!"
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report.

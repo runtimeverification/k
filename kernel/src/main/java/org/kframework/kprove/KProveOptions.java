@@ -86,6 +86,15 @@ public class KProveOptions {
             "rules marked with `[concrete]` attribute")
     public List<String> extraConcreteRuleLabels = Collections.emptyList();
 
+    @Parameter(names="--trusted", description="Mark this comma separated list of claims as [trusted]")
+    public List<String> trusted = null;
+
+    @Parameter(names="--exclude", description="Exclude this comma separated list of claims")
+    public List<String> exclude = null;
+
+    @Parameter(names="--claims", description="Only keep this comma separated list of claims")
+    public List<String> claims = null;
+
     @Parameter(names="--debugger", description="Launch proof in an interactive debugger. Currently only supported by the Haskell backend.")
     public boolean debugger;
 

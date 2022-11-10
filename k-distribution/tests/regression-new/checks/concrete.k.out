@@ -1,19 +1,31 @@
 [Error] Compiler: Found symbolic attribute without simplification attribute on function with one or more non-symbolic rules.
 	Source(concrete.k)
 	Location(6,8,6,21)
+	6 |	  rule 0 *Int X => 0 [symbolic]
+	  .	       ^~~~~~~~~~~~~
 [Error] Compiler: Found concrete attribute without simplification attribute on function with one or more non-concrete rules.
 	Source(concrete.k)
 	Location(7,8,7,21)
+	7 |	  rule 1 *Int X => X [concrete]
+	  .	       ^~~~~~~~~~~~~
 [Error] Compiler: Rule cannot be both concrete and symbolic in the same variable.
 	Source(concrete.k)
 	Location(10,8,10,19)
+	10 |	  rule foo(0) => 0 [symbolic, concrete]
+	   .	       ^~~~~~~~~~~
 [Error] Compiler: Found symbolic attribute without simplification attribute on function with one or more non-symbolic rules.
 	Source(concrete.k)
 	Location(16,8,16,20)
+	16 |	  rule bar2(0) => 0 [symbolic]
+	   .	       ^~~~~~~~~~~~
 [Error] Compiler: Found concrete attribute without simplification attribute on function with one or more non-concrete rules.
 	Source(concrete.k)
 	Location(25,8,25,20)
+	25 |	  rule baz2(0) => 0 [concrete]
+	   .	       ^~~~~~~~~~~~
 [Error] Compiler: Found concrete attribute without simplification attribute on function with one or more non-concrete rules.
 	Source(concrete.k)
 	Location(29,8,29,20)
+	29 |	  rule baz3(X) => 0 [concrete(X)]
+	   .	       ^~~~~~~~~~~~
 [Error] Compiler: Had 6 structural errors.

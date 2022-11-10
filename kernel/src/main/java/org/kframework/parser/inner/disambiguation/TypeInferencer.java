@@ -18,7 +18,7 @@ import org.kframework.parser.Constant;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.Term;
 import org.kframework.parser.TermCons;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.utils.OS;
 import org.kframework.utils.errorsystem.KEMException;
 
@@ -64,6 +64,7 @@ public class TypeInferencer implements AutoCloseable {
   private Process process;
   private PrintStream z3;
   private BufferedReader output;
+  private final boolean debug;
   private final Module mod;
   private final java.util.Set<SortHead> sorts;
 
@@ -89,7 +90,7 @@ public class TypeInferencer implements AutoCloseable {
    * Create a new z3 process and write the sorts and subsort relation to it.
    * @param mod the module to create an inferencer for.
    */
-  public TypeInferencer(Module mod) {
+  public TypeInferencer(Module mod, boolean debug) {
     initProcess();
     println("(get-info :version)");
     try {
@@ -111,6 +112,7 @@ public class TypeInferencer implements AutoCloseable {
       throw KEMException.internalError("Could not read from z3 process", e);
     }
     println(PRELUDE1);
+    this.debug = debug;
     this.mod = mod;
     this.sorts = stream(mod.definedSorts()).filter(this::isRealSort).collect(Collectors.toSet());
     push(mod);
@@ -147,7 +149,7 @@ public class TypeInferencer implements AutoCloseable {
     makeSubsorts(mod, "<=Sort", mod.subsorts());
     makeSubsorts(mod, "<=SortSyntax", mod.syntacticSubsorts());
 
-    if (DEBUG) {
+    if (debug) {
       debugPrelude = sb.toString();
     }
   }
@@ -668,7 +670,7 @@ public class TypeInferencer implements AutoCloseable {
       if (isBadNatSort(actualSort)) {
         sb.append("false ");
       } else {
-        if (isStrictEquality) {
+        if (isStrictEquality || actualParams.get().production().params().contains(actualSort)) {
           sb.append("(= ");
         } else {
           sb.append("(<=Sort ");
@@ -839,6 +841,30 @@ public class TypeInferencer implements AutoCloseable {
     return new HashMap<>(model);
   }
 
+  void pushGreater() {
+    level++;
+    println("(push)");
+    java.util.Set<String> realVariables = new HashSet<>(variables);
+    realVariables.removeAll(parameters);
+    for (String var : realVariables) {
+      print("(assert (<=SortSyntax ");
+      printSort(model.get(var));
+      print(" |");
+      print(var);
+      println("|))");
+    }
+    print("(assert (or false ");
+    for (String var : realVariables) {
+      print("(distinct ");
+      printSort(model.get(var));
+      print(" |");
+      print(var);
+      print("|) ");
+    }
+    println("))");
+    status = null;
+  }
+
   void pushNotModel() {
     print("(assert (not (and true");
     java.util.Set<String> realVariables = new HashSet<>(variables);
@@ -848,7 +874,7 @@ public class TypeInferencer implements AutoCloseable {
       printSort(model.get(var));
       print(") ");
     }
-    print(")))");
+    println(")))");
     status = null;
   }
 
@@ -890,7 +916,7 @@ public class TypeInferencer implements AutoCloseable {
         result = result.substring(startIdx, endIdx);
       }
       Sort r = new SmtSortParser(new StringReader(result)).Sort();
-      if (DEBUG)
+      if (debug)
         sb.append("; ").append(r).append("\n");
       return r;
     } catch (IOException e) {
@@ -913,7 +939,7 @@ public class TypeInferencer implements AutoCloseable {
   private void reset() {
     if (level > 0)
       return;
-    if (DEBUG) {
+    if (debug) {
       System.err.print(sb.toString());
       sb = new StringBuilder();
     }
@@ -945,12 +971,10 @@ public class TypeInferencer implements AutoCloseable {
     return pr.id().get() + suffix;
   }
 
-  private static final boolean DEBUG = false;
-
   private StringBuilder sb = new StringBuilder();
 
   private void println(String s) {
-    if (DEBUG) {
+    if (debug) {
       sb.append(s).append('\n');
     }
     z3.println(s);
@@ -958,7 +982,7 @@ public class TypeInferencer implements AutoCloseable {
   }
 
   private void print(String s) {
-    if (DEBUG) {
+    if (debug) {
       sb.append(s);
     }
     z3.print(s);

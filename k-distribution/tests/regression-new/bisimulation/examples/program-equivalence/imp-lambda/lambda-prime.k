@@ -14,10 +14,10 @@ module LAMBDA-SYNTAX
                | Exp "/" Exp          [klabel(divl)]
                > Exp "+" Exp          [left, klabel(addl)]
                > Exp "<=" Exp         [klabel(lel)]
-  syntax Exp ::= "if" Exp "then" Exp "else" Exp   // Conditional
-               | "let" Id "=" Exp "in" Exp        // Let binder
-               | "letrec" Id Id "=" Exp "in" Exp  // Letrec
-               | "mu" Id "." Exp                  // Mu
+  syntax Exp ::= "if" Exp "then" Exp "else" Exp          // Conditional
+               | "let" Id "=" Exp "in" Exp       [macro] // Let binder
+               | "letrec" Id Id "=" Exp "in" Exp [macro] // Letrec
+               | "mu" Id "." Exp                         // Mu
 endmodule
 
 module LAMBDA-CONFIG
@@ -103,9 +103,9 @@ module LAMBDA
   rule <lambdak> if true  then E else _ => E ... </lambdak> [tag(b)]
   rule <lambdak> if false then _ else E => E ... </lambdak> [tag(b)]
 
-  rule let X = E in E':Exp => (lambda X . E') E                         [macro, tag(b)]
+  rule let X = E in E':Exp => (lambda X . E') E                         [tag(b)]
 
-  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'     [macro, tag(b)]
+  rule letrec F:Id X = E in E' => let F = mu F . lambda X . E in E'     [tag(b)]
 
   syntax Exp ::= muclosure(Map,Exp)
   rule <lambdak> mu X . E => muclosure(Rho[X <- N], E) ...</lambdak>

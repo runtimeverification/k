@@ -1,25 +1,41 @@
 [Error] Compiler: Claims are not allowed in the definition.
 	Source(existentialCheck.k)
 	Location(14,9,14,29)
+	14 |	  claim <k> ?X:Int => . </k>
+	   .	        ^~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Existential variable ?X found in LHS. Existential variables are only allowed in the RHS.
 	Source(existentialCheck.k)
 	Location(14,13,14,15)
+	14 |	  claim <k> ?X:Int => . </k>
+	   .	            ^~
 [Error] Compiler: Found existential variable not supported by concrete backend.
 	Source(existentialCheck.k)
 	Location(14,13,14,15)
+	14 |	  claim <k> ?X:Int => . </k>
+	   .	            ^~
 [Error] Compiler: Existential variable ?X found in LHS. Existential variables are only allowed in the RHS.
 	Source(existentialCheck.k)
 	Location(16,12,16,14)
+	16 |	  rule <k> ?X:Int => . </k>
+	   .	           ^~
 [Error] Compiler: Found existential variable not supported by concrete backend.
 	Source(existentialCheck.k)
 	Location(16,12,16,14)
+	16 |	  rule <k> ?X:Int => . </k>
+	   .	           ^~
 [Error] Compiler: Found existential variable not supported by concrete backend.
 	Source(existentialCheck.k)
 	Location(18,22,18,28)
+	18 |	  rule <k> stateA => ?STATE </k>
+	   .	                     ^~~~~~
 [Error] Compiler: Existential variable ?STATE found in LHS. Existential variables are only allowed in the RHS.
 	Source(existentialCheck.k)
 	Location(19,21,19,27)
+	19 |	    requires isDone(?STATE)
+	   .	                    ^~~~~~
 [Error] Compiler: Found existential variable not supported by concrete backend.
 	Source(existentialCheck.k)
 	Location(19,21,19,27)
+	19 |	    requires isDone(?STATE)
+	   .	                    ^~~~~~
 [Error] Compiler: Had 8 structural errors.

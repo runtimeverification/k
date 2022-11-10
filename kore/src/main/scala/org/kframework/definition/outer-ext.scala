@@ -64,6 +64,7 @@ object FlatModule {
         val newImports = m.imports.map(f)
         val newM = new Module(m.name, newImports, m.localSentences, m.att)
         newM.checkSorts()
+        newM.checkUserLists()
         newM
       })
     }

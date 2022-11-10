@@ -119,6 +119,25 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
           inferencer.computeModel();
         }
         once = false;
+        boolean isMaximal = false;
+        do {
+          inferencer.pushGreater();
+          switch(inferencer.status()) {
+            case SATISFIABLE:
+              // is not maximal, keep going
+              isMaximal = false;
+              inferencer.computeModel();
+              inferencer.pop();
+              break;
+            case UNKNOWN:
+              // constraints coiuld not be solved, so error
+              throw KEMException.internalError("Could not solve sortconstraints.", t);
+            case UNSATISFIABLE:
+              isMaximal = true;
+              inferencer.pop();
+              break;
+          }
+        } while (!isMaximal);
         models.add(inferencer.getModel());
         // assert that we don't want any solutions less than this one
         inferencer.pushNotModel();
@@ -137,10 +156,9 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
         }
       } while (hasAnotherSolution);
       // remove all models that are not maximal
-      List<Map<String, Sort>> maximalModels = removeNonMaximal(models);
       Set<Term> candidates = new HashSet<>();
       Set<KEMException> exceptions = new HashSet<>();
-      for (Map<String, Sort> model : maximalModels) {
+      for (Map<String, Sort> model : models) {
         // for each model, apply it to the term
         inferencer.selectModel(model);
         Either<Set<KEMException>, Term> result = new TypeCheckVisitor(topSort).apply(t);
@@ -161,47 +179,6 @@ public class TypeInferenceVisitor extends SetsTransformerWithErrors<KEMException
     } finally {
       inferencer.pop();
     }
-  }
-
-  /**
-   * Check whether one model is less than or equal to another
-   * @param model1
-   * @param model2
-   * @return
-   */
-  public boolean lessThanEq(Map<String, Sort> model1, Map<String, Sort> model2) {
-    for (Map.Entry<String, Sort> model1Entry : model1.entrySet()) {
-      if (model1Entry.getKey().startsWith("Var")) {
-        Sort model1Sort = model1Entry.getValue();
-        Sort model2Sort = model2.get(model1Entry.getKey());
-        if (!inferencer.module().syntacticSubsorts().lessThanEq(model1Sort, model2Sort)) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  /**
-   * Compute the list of maximal models from a set of models
-   * @param models All the models
-   * @return The models in the input which are not strictly less than some other model.
-   */
-  public List<Map<String, Sort>> removeNonMaximal(Set<Map<String, Sort>> models) {
-    List<Map<String, Sort>> maximals = new ArrayList<>();
-    outer:
-    for (Map<String, Sort> candidate : models) {
-      for (Iterator<Map<String, Sort>> it = maximals.iterator(); it.hasNext();) {
-        Map<String, Sort> maximal = it.next();
-        if (lessThanEq(candidate, maximal)) {
-          continue outer;
-        } else if (lessThanEq(maximal, candidate)) {
-          it.remove();
-        }
-      }
-      maximals.add(new HashMap<>(candidate));
-    }
-    return maximals;
   }
 
   /**

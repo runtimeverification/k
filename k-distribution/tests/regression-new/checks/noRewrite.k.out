@@ -1,4 +1,6 @@
 [Error] Compiler: Rules must have at least one rewrite.
 	Source(noRewrite.k)
 	Location(4,6,4,7)
+	4 |	rule 0
+	  .	     ^
 [Error] Compiler: Had 1 structural errors.

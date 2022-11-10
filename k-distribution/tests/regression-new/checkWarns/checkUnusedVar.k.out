@@ -1,10 +1,16 @@
 [Error] Compiler: Variable 'X' defined but not used. Prefix variable name with underscore if this is intentional.
 	Source(checkUnusedVar.k)
 	Location(16,12,16,13)
+	16 |	  rule foo(X) => 0
+	   .	           ^
 [Error] Compiler: Variable 'X' defined but not used. Prefix variable name with underscore if this is intentional.
 	Source(checkUnusedVar.k)
 	Location(21,12,21,13)
+	21 |	  rule foo(X) => 1
+	   .	           ^
 [Error] Compiler: Variable '?X' defined but not used. Prefix variable name with underscore if this is intentional.
 	Source(checkUnusedVar.k)
 	Location(24,18,24,20)
+	24 |	  rule foo(X) => ?X:Int
+	   .	                 ^~
 [Error] Compiler: Had 3 structural errors.

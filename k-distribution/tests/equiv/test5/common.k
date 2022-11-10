@@ -2,7 +2,11 @@
 
 require "domains.md"
 
+module COMMON-SYNTAX
+endmodule
+
 module COMMON
+imports COMMON-SYNTAX
 imports DOMAINS
 imports ID
 

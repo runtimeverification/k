@@ -1,0 +1,1 @@
+[Error] Critical: Only one main parameter allowed but found several: "--badflag" and "--extra"

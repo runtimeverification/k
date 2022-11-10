@@ -1,4 +1,6 @@
 [Error] Compiler: Only claims and simplification rules are allowed in proof modules.
 	Source(rule-spec.k)
 	Location(6,10,6,43)
+	6 |	    rule <k> doIt(foo) => doIt(0) ... </k>
+	  .	         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 1 structural errors.

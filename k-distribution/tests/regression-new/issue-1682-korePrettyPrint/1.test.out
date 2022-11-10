@@ -6,7 +6,7 @@ Lbl'-LT-'generatedTop'-GT-'{}(
         kseq{}(
             /* Fl Fn D Sfa */
             /* Inj: */ inj{SortInt{}, SortKItem{}}(
-                /* Fl Fn D Sfa */ Var'QuesUnds'0:SortInt{}
+                /* Fl Fn D Sfa */ Var'QuesUnds'Gen0:SortInt{}
             ),
             /* Fl Fn D Sfa Cl */ dotk{}()
         )

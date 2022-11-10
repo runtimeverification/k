@@ -12,8 +12,8 @@ module LAMBDA
                > Exp "<=" Exp
                > "lambda" Id "." Exp
                | "if" Exp "then" Exp "else" Exp
-               | "let" Id "=" Exp "in" Exp
-               | "letrec" Id Id "=" Exp "in" Exp
+               | "let" Id "=" Exp "in" Exp        [macro]
+               | "letrec" Id Id "=" Exp "in" Exp  [macro]
                | "mu" Id "." Exp
 
   syntax Type ::= "int" | "bool"
@@ -59,8 +59,8 @@ module LAMBDA
              <task> <k> E1 = ?T </k> <tenv> Rho </tenv> </task>
              <task> <k> E2 = ?T </k> <tenv> Rho </tenv> </task>)
 
-  rule let X = E in E' => (lambda X . E') E                             [macro]
-  rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
+  rule let X = E in E' => (lambda X . E') E
+  rule letrec F X = E in E' => let F = mu F . lambda X . E in E'
   rule <k> mu X . E => ?T:Type ...</k>  <tenv> TEnv </tenv>
        (.Bag => <task> <k> E = ?T </k> <tenv> TEnv[X <- ?T] </tenv> </task>)
 

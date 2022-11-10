@@ -1,3 +1,5 @@
 [Error] Outer Parser: bracket productions should have exactly one non-terminal of the same sort as the production.
 	Source(checkBracketUnrelatedsort.k)
-	Location(3,18,3,36)
+	Location(3,18,3,37)
+	3 |	  syntax Exp ::= "(" A ")" [bracket]
+	  .	                 ^~~~~~~~~~~~~~~~~~~

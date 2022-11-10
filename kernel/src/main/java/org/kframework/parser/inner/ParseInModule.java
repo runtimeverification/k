@@ -3,6 +3,7 @@ package org.kframework.parser.inner;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
+import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
@@ -12,10 +13,7 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.disambiguation.*;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
-import org.kframework.parser.inner.kernel.Grammar;
-import org.kframework.parser.inner.kernel.KSyntax2GrammarStatesFilter;
-import org.kframework.parser.inner.kernel.Parser;
+import org.kframework.parser.inner.kernel.EarleyParser;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
@@ -26,12 +24,9 @@ import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Queue;
@@ -59,25 +54,23 @@ public class ParseInModule implements Serializable, AutoCloseable {
      * original production, so disambiguation can be done safely.
      */
     private volatile Module parsingModule;
-    private volatile Grammar grammar = null;
+    private volatile EarleyParser parser = null;
     private final boolean strict;
     private final boolean profileRules;
     private final boolean isBison;
     private final boolean forGlobalScanner;
     private final FileUtil files;
-    public ParseInModule(Module seedModule) {
-        this(seedModule, seedModule, seedModule, seedModule, null, true, false, false, false, null);
+    private final String typeInferenceDebug;
+
+    ParseInModule(Module seedModule, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files, String typeInferenceDebug) {
+        this(seedModule, null, null, null, null, strict, profileRules, isBison, forGlobalScanner, files, typeInferenceDebug);
     }
 
-    public ParseInModule(Module seedModule, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files) {
-        this(seedModule, null, null, null, null, strict, profileRules, isBison, forGlobalScanner, files);
+    ParseInModule(Module seedModule, Scanner scanner, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files, String typeInferenceDebug) {
+        this(seedModule, null, null, null, scanner, strict, profileRules, isBison, forGlobalScanner, files, typeInferenceDebug);
     }
 
-    public ParseInModule(Module seedModule, Scanner scanner, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files) {
-        this(seedModule, null, null, null, scanner, strict, profileRules, isBison, forGlobalScanner, files);
-    }
-
-    public ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule, Scanner scanner, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files) {
+    private ParseInModule(Module seedModule, Module extensionModule, Module disambModule, Module parsingModule, Scanner scanner, boolean strict, boolean profileRules, boolean isBison, boolean forGlobalScanner, FileUtil files, String typeInferenceDebug) {
         this.seedModule = seedModule;
         this.extensionModule = extensionModule;
         this.disambModule = disambModule;
@@ -88,6 +81,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         this.isBison = isBison;
         this.forGlobalScanner = forGlobalScanner;
         this.files = files;
+        this.typeInferenceDebug = typeInferenceDebug;
     }
 
     /**
@@ -161,22 +155,28 @@ public class ParseInModule implements Serializable, AutoCloseable {
     public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
             parseString(String input, Sort startSymbol, Source source) {
         try (Scanner scanner = getScanner()) {
-            return parseString(input, startSymbol, scanner, source, 1, 1, true, false);
+            return parseString(input, startSymbol, "unit test", scanner, source, 1, 1, true, false);
         }
     }
 
-    private Scanner getGrammar(Scanner scanner) {
-        Grammar g = grammar;
-        if (g == null) {
-            g = KSyntax2GrammarStatesFilter.getGrammar(getParsingModule(), scanner);
-            grammar = g;
+    public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
+            parseString(String input, Sort startSymbol, String startSymbolLocation, Source source) {
+        try (Scanner scanner = getScanner()) {
+            return parseString(input, startSymbol, startSymbolLocation, scanner, source, 1, 1, true, false);
         }
-        return scanner;
+    }
+    private void getParser(Scanner scanner, Sort startSymbol) {
+        EarleyParser p = parser;
+        if (p == null) {
+            Module m = getParsingModule();
+            p = new EarleyParser(m, scanner, startSymbol);
+            parser = p;
+        }
     }
 
     private Scanner scanner;
-    private ThreadLocal<TypeInferencer> inferencer = new ThreadLocal<>();
-    private Queue<TypeInferencer> inferencers = new ConcurrentLinkedQueue<>();
+    private final ThreadLocal<TypeInferencer> inferencer = new ThreadLocal<>();
+    private final Queue<TypeInferencer> inferencers = new ConcurrentLinkedQueue<>();
 
     public Scanner getScanner(GlobalOptions go) {
         if (scanner == null) {
@@ -195,9 +195,9 @@ public class ParseInModule implements Serializable, AutoCloseable {
     }
 
     public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
-        parseString(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
+        parseString(String input, Sort startSymbol, String startSymbolLocation, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
         final Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> result
-                = parseStringTerm(input, startSymbol, scanner, source, startLine, startColumn, inferSortChecks, isAnywhere);
+                = parseStringTerm(input, startSymbol, startSymbolLocation, scanner, source, startLine, startColumn, inferSortChecks, isAnywhere);
         Either<Set<KEMException>, K> parseInfo;
         if (result._1().isLeft()) {
             parseInfo = Left.apply(result._1().left().get());
@@ -222,45 +222,26 @@ public class ParseInModule implements Serializable, AutoCloseable {
      * @return
      */
     private Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>>
-            parseStringTerm(String input, Sort startSymbol, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
-        scanner = getGrammar(scanner);
+            parseStringTerm(String input, Sort startSymbol, String startSymbolLocation, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
+        if (!parsingModule.definedSorts().contains(startSymbol.head()))
+            throw KEMException.innerParserError("Could not find start symbol: " + startSymbol + " provided to " + startSymbolLocation, source, Location.apply(startLine, startColumn, startLine, startColumn + 1));
+        getParser(scanner, startSymbol);
 
         long start, endParse = 0, startTypeInf = 0, endTypeInf = 0;
         start = profileRules ? System.currentTimeMillis() : 0;
 
         try {
-            Grammar.NonTerminal startSymbolNT = grammar.get(startSymbol.toString());
             Set<KEMException> warn = Sets.newHashSet();
-            if (startSymbolNT == null) {
-                String msg = "Could not find start symbol: " + startSymbol;
-                return new Tuple2<>(Left.apply(Sets.newHashSet(KEMException.criticalError(msg))), warn);
-            }
-
             Term parsed;
             try {
-                Parser parser = new Parser(input, scanner, source, startLine, startColumn);
-                parsed = parser.parse(startSymbolNT, 0);
+                parsed = parser.parse(input, source, startLine, startColumn);
             } catch (KEMException e) {
                 return Tuple2.apply(Left.apply(Collections.singleton(e)), Collections.emptySet());
             }
             endParse = profileRules ? System.currentTimeMillis() : 0;
 
-            Either<Set<KEMException>, Term> rez = new TreeCleanerVisitor().apply(parsed);
-            if (rez.isLeft())
-                return new Tuple2<>(rez, warn);
-            rez = new CollapseRecordProdsVisitor(rez.right().get()).apply(rez.right().get());
-            if (rez.isLeft())
-                return new Tuple2<>(rez, warn);
-            rez = new CorrectRewritePriorityVisitor().apply(rez.right().get());
-            if (rez.isLeft())
-                return new Tuple2<>(rez, warn);
-            rez = new CorrectKSeqPriorityVisitor().apply(rez.right().get());
-            if (rez.isLeft())
-                return new Tuple2<>(rez, warn);
-            rez = new CorrectLetPriorityVisitor().apply(rez.right().get());
-            if (rez.isLeft())
-                return new Tuple2<>(rez, warn);
-            rez = new CorrectCastPriorityVisitor().apply(rez.right().get());
+            Term rez3 = new TreeCleanerVisitor().apply(parsed);
+            Either<Set<KEMException>, Term> rez = new CollapseRecordProdsVisitor(rez3).apply(rez3);
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
             rez = new PriorityVisitor(disambModule.priorities(), disambModule.leftAssoc(), disambModule.rightAssoc()).apply(rez.right().get());
@@ -269,15 +250,21 @@ public class ParseInModule implements Serializable, AutoCloseable {
             rez = new KAppToTermConsVisitor(disambModule).apply(rez.right().get());
             if (rez.isLeft())
                 return new Tuple2<>(rez, warn);
-            Term rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez.right().get());
+            rez3 = new PushAmbiguitiesDownAndPreferAvoid().apply(rez.right().get());
             rez3 = new PushTopAmbiguityUp().apply(rez3);
             startTypeInf = profileRules ? System.currentTimeMillis() : 0;
 
-            TypeInferencer currentInferencer = inferencer.get();
-            if (currentInferencer == null) {
-                currentInferencer = new TypeInferencer(disambModule);
-                inferencer.set(currentInferencer);
+            TypeInferencer currentInferencer;
+            if (isDebug(source, startLine)) {
+                currentInferencer = new TypeInferencer(disambModule, true);
                 inferencers.add(currentInferencer);
+            } else {
+                currentInferencer = inferencer.get();
+                if (currentInferencer == null) {
+                    currentInferencer = new TypeInferencer(disambModule, isDebug(source, startLine));
+                    inferencer.set(currentInferencer);
+                    inferencers.add(currentInferencer);
+                }
             }
 
             rez = new TypeInferenceVisitor(currentInferencer, startSymbol, strict && inferSortChecks, true, isAnywhere).apply(rez3);
@@ -316,6 +303,13 @@ public class ParseInModule implements Serializable, AutoCloseable {
         }
     }
 
+    private boolean isDebug(Source source, int startLine) {
+        if (typeInferenceDebug == null) {
+            return false;
+        }
+        return (source.source() + ":" + startLine).endsWith(typeInferenceDebug);
+    }
+
     public void close() {
         if (scanner != null) {
             scanner.close();
@@ -330,7 +324,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
         Term rez3 = new PushTopAmbiguityUp().apply(ambiguity);
         Either<Set<KEMException>, Term> rez;
         Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> rez2;
-        try (TypeInferencer inferencer = new TypeInferencer(mod)) {
+        try (TypeInferencer inferencer = new TypeInferencer(mod, false)) {
             rez = new TypeInferenceVisitor(inferencer, Sorts.K(), false, false, false).apply(rez3);
         }
         if (rez.isLeft()) {

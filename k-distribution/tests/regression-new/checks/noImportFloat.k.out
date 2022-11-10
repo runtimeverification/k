@@ -1,3 +1,5 @@
 [Error] Compiler: Could not find sorts: [Float]
 	Source(noImportFloat.k)
-	Location(3,19,3,28)
+	Location(3,19,3,29)
+	3 |	   syntax Pgm ::= foo(Float) | bar()
+	  .	                  ^~~~~~~~~~

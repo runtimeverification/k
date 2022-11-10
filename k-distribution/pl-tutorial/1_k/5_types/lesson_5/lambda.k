@@ -12,8 +12,8 @@ module LAMBDA
                > Exp "<=" Exp                     [strict]
                > "lambda" Id "." Exp
                | "if" Exp "then" Exp "else" Exp   [strict]
-               | "let" Id "=" Exp "in" Exp
-               | "letrec" Id Id "=" Exp "in" Exp
+               | "let" Id "=" Exp "in" Exp        [macro]
+               | "letrec" Id Id "=" Exp "in" Exp  [macro]
                | "mu" Id "." Exp
 
   syntax Type ::= "int" | "bool"
@@ -39,8 +39,8 @@ module LAMBDA
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
   rule T1:Type T2:Type => T1 = (T2 -> ?T:Type) ~> ?T
   rule if T:Type then T1:Type else T2:Type => T = bool ~> T1 = T2 ~> T1
-  rule let X = E in E' => (lambda X . E') E                             [macro]
-  rule letrec F X = E in E' => let F = mu F . lambda X . E in E'        [macro]
+  rule let X = E in E' => (lambda X . E') E
+  rule letrec F X = E in E' => let F = mu F . lambda X . E in E'
   rule <k> mu X:Id . E:Exp => (?T:Type -> ?T) E ~> setTenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
 

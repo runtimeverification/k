@@ -1,4 +1,6 @@
 [Error] Inner Parser: Scanner error: unexpected character sequence '<'.
 	Source(test-broken-spec.k)
 	Location(3,10,3,11)
+	3 |	    rule <k> inc X => X +Int 1 ... </k>
+	  .	         ^
 [Error] Compiler: Had 1 parsing errors.

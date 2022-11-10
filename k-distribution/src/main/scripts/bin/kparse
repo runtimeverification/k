@@ -8,6 +8,7 @@ export PATH="$(cd "$(dirname "$0")"; pwd):$PATH"
 # initialize flags
 ARGV=()
 dir=.
+kompiledDir=
 inputMode=program
 literal=false
 outputFile=-
@@ -48,6 +49,7 @@ $KPARSE options:
   -d, --directory DIR      Look for a kompiled directory ending in "-kompiled"
                            under the directory DIR
   -h, --help               Display this help and exit
+      --definition DIR     Exact path to the kompiled directory.
   -i, --input MODE         Select input mode to use when parsing. Valid values
                            are program, kast, binary, json, and kore.
   -m, --module MODULE      Module to use to generate grammar
@@ -79,6 +81,11 @@ do
       -h|--help)
       print_usage
       exit 0
+      ;;
+
+      --definition)
+      kompiledDir="$2"
+      shift
       ;;
 
       -i|--input)
@@ -149,19 +156,22 @@ fi
 input_file="${ARGV[0]}"
 
 # Compute kompiled directory
-kompiledDir=
 hasKompiledDir=false
-for file in "$dir"/*-kompiled; do
-  [ ! -d "$file" ] && continue
-  kompiledDir=$file
-  if $hasKompiledDir; then
-    error 1 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
-  fi
+if [[ -d $kompiledDir ]]; then
   hasKompiledDir=true
-done
+else
+  for file in "$dir"/*-kompiled; do
+    [ ! -d "$file" ] && continue
+    kompiledDir=$file
+    if $hasKompiledDir; then
+      error 1 'Multiple compiled definitions found in the current working directory: ' "$dir"/*-kompiled
+    fi
+    hasKompiledDir=true
+  done
+fi
 
 if ! $hasKompiledDir; then
-  error 1 'Could not find a compiled definition. Use --directory to specify one.'
+  error 1 'Could not find a compiled definition. Use --directory or --definition to specify one.'
 fi
 
 if [ ! -f "$kompiledDir/syntaxDefinition.kore" ]; then

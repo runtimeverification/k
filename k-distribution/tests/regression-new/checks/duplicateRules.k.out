@@ -1,10 +1,16 @@
 [Error] Compiler: Claims are not allowed in the definition.
 	Source(duplicateRules.k)
 	Location(6,9,6,15)
+	6 |	  claim A => 0
+	  .	        ^~~~~~
 [Error] Compiler: Claims are not allowed in the definition.
 	Source(duplicateRules.k)
 	Location(7,9,7,15)
+	7 |	  claim A => 0
+	  .	        ^~~~~~
 [Error] Compiler: Claims are not allowed in the definition.
 	Source(duplicateRules.k)
 	Location(8,9,8,15)
+	8 |	  claim A => 0
+	  .	        ^~~~~~
 [Error] Compiler: Had 3 structural errors.

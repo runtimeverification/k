@@ -26,6 +26,7 @@ public class HaskellBackendKModule extends AbstractKModule {
         mods.add(new AbstractModule() {
             @Override
             protected void configure() {
+                bindOptions(HaskellBackendKModule.this::kompileOptions, binder());
                 installHaskellBackend(binder());
             }
         });
@@ -41,6 +42,11 @@ public class HaskellBackendKModule extends AbstractKModule {
     @Override
     public List<Pair<Class<?>, Boolean>> krunOptions() {
         return Collections.singletonList(Pair.of(HaskellKRunOptions.class, true));
+    }
+
+    @Override
+    public List<Pair<Class<?>, Boolean>> kompileOptions() {
+        return Collections.singletonList(Pair.of(HaskellKompileOptions.class, true));
     }
 
     @Override

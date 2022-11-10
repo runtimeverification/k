@@ -57,9 +57,6 @@ public class RewriteAwareVisitor extends VisitK {
         if (!(k.klabel() instanceof KVariable) && k.klabel().name().equals("#fun2") || k.klabel().name().equals("#fun3") || k.klabel().name().equals("#let")) {
             boolean wasRHS = isRHS;
             boolean wasLHS = isLHS;
-            if (!isRHS || isLHS) {
-                errors.add(KEMException.compilerError("Found #fun expression not on right-hand side of rule.", k));
-            }
             if (k.klabel().name().equals("#fun2")) {
                 isRHS = true;
                 isLHS = true;

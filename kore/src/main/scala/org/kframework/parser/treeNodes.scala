@@ -55,26 +55,6 @@ case class Ambiguity(items: Set[Term])
   override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(Ambiguity.this);
 }
 
-case class KList(items: PStack[Term])
-  extends Term with HasChildren {
-  def add(t: Term) = {
-    if (items.size() == 0 && t.isInstanceOf[KList])
-      t
-    else
-      KList(items.plus(t), location, source)
-  }
-  def remove(n: Int) = {
-    var newItems = items;
-    for (_ <- 1 to n) {
-      newItems = items.minus(0)
-    }
-    KList(newItems, location, source)
-  }
-  def replaceChildren(newChildren: Collection[Term]) = KList(ConsPStack.from(newChildren), location, source)
-  override def toString() = "[" + (new ArrayList(items).asScala.reverse mkString ",") + "]"
-  override lazy val hashCode: Int = scala.runtime.ScalaRunTime._hashCode(KList.this);
-}
-
 object Constant {
   def apply(value: String, production: Production, location: Optional[Location], source: Optional[Source]):Constant = {
     val res = Constant(value, production)
@@ -98,16 +78,6 @@ object TermCons {
   }
 
   def apply(items: PStack[Term], production: Production, location: Location, source: Source):TermCons = TermCons(items, production, Optional.of(location), Optional.of(source), Optional.empty())
-}
-
-object KList {
-  def apply(toCopy: KList): KList = KList(toCopy.items, toCopy.location, toCopy.source) // change when making the classes mutable
-  def apply(items: PStack[Term], location: Optional[Location], source: Optional[Source]):KList = {
-    val res = KList(items)
-    res.location = location
-    res.source = source
-    res
-  }
 }
 
 object Ambiguity {

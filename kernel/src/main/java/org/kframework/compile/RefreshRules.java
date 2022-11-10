@@ -76,7 +76,7 @@ public class RefreshRules {
                 if (!vars.containsKey(var)) {
                     String newVarName;
                     do {
-                        newVarName = "_" + counter++;
+                        newVarName = "_Gen" + counter++;
                     } while (avoidVars.contains(newVarName));
                     vars.put(var, newVarName);
                 }

@@ -42,7 +42,7 @@ public class CommonModule extends AbstractModule {
 
     @Provides
     ProcessBuilder pb(@WorkingDir File workingDir, @Environment Map<String, String> env) {
-        return new FileUtil(null, null, workingDir, null, null, env).getProcessBuilder();
+        return new FileUtil(null, workingDir, null, null, env).getProcessBuilder();
     }
 
     @Provides @RequestScoped

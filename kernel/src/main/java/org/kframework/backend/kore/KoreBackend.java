@@ -3,49 +3,19 @@ package org.kframework.backend.kore;
 
 import com.google.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
+import org.kframework.Strategy;
 import org.kframework.attributes.Att;
-import org.kframework.compile.AbstractBackend;
-import org.kframework.compile.AddCoolLikeAtt;
-import org.kframework.compile.AddImplicitComputationCell;
-import org.kframework.compile.AddSortInjections;
-import org.kframework.compile.Backend;
-import org.kframework.compile.ConcretizeCells;
-import org.kframework.compile.ConfigurationInfoFromModule;
-import org.kframework.compile.ConstantFolding;
-import org.kframework.compile.ExpandMacros;
-import org.kframework.compile.GenerateCoverage;
-import org.kframework.compile.GeneratedTopFormat;
-import org.kframework.compile.GenerateSortPredicateRules;
-import org.kframework.compile.GenerateSortPredicateSyntax;
-import org.kframework.compile.GenerateSortProjections;
-import org.kframework.compile.GuardOrPatterns;
-import org.kframework.compile.LabelInfo;
-import org.kframework.compile.LabelInfoFromModule;
-import org.kframework.compile.MinimizeTermConstruction;
-import org.kframework.compile.NumberSentences;
-import org.kframework.compile.PropagateMacro;
-import org.kframework.compile.ResolveAnonVar;
-import org.kframework.compile.ResolveContexts;
-import org.kframework.compile.ResolveFreshConstants;
-import org.kframework.compile.ResolveFun;
-import org.kframework.compile.ResolveFunctionWithConfig;
-import org.kframework.compile.ResolveHeatCoolAttribute;
-import org.kframework.compile.ResolveSemanticCasts;
-import org.kframework.compile.ResolveStrict;
-import org.kframework.compile.SortInfo;
-import org.kframework.definition.Definition;
-import org.kframework.definition.DefinitionTransformer;
+import org.kframework.compile.*;
 import org.kframework.definition.Module;
-import org.kframework.definition.ModuleTransformer;
-import org.kframework.definition.Rule;
+import org.kframework.definition.*;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
 import org.kframework.kompile.KompileOptions;
+import org.kframework.kore.KLabel;
 import org.kframework.main.Tool;
-import org.kframework.Strategy;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-
 import scala.Function1;
 
 import java.io.File;
@@ -128,6 +98,7 @@ public class KoreBackend extends AbstractBackend {
 
     @Override
     public Function<Definition, Definition> steps() {
+        DefinitionTransformer resolveComm = DefinitionTransformer.from(new ResolveComm(kem)::resolve, "resolve comm simplification rules");
         Function1<Definition, Definition> resolveStrict = d -> DefinitionTransformer.from(new ResolveStrict(kompileOptions, d)::resolve, "resolving strict and seqstrict attributes").apply(d);
         DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.transition), heatCoolConditions)::resolve, "resolving heat and cool attributes");
         DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
@@ -135,7 +106,7 @@ public class KoreBackend extends AbstractBackend {
         DefinitionTransformer resolveSemanticCasts =
                 DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(true)::resolve, "resolving semantic casts");
         DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun(true)::resolve, "resolving #fun");
-        Function1<Definition, Definition> resolveFunctionWithConfig = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, true)::resolve, "resolving functions with config context").apply(d);
+        Function1<Definition, Definition> resolveFunctionWithConfig = d -> DefinitionTransformer.from(new ResolveFunctionWithConfig(d, true)::moduleResolve, "resolving functions with config context").apply(d);
         DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
         DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections(kompileOptions.coverage)::gen, "adding sort projections");
         DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
@@ -146,8 +117,9 @@ public class KoreBackend extends AbstractBackend {
           ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d, true);
           return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kem, kompileOptions, false).expand(s), "expand macros").apply(d);
         };
+        Function1<Definition, Definition> checkSimplificationRules = d -> DefinitionTransformer.from(m -> { m.localRules().foreach(r -> checkSimpIsFunc(m, r)); return m;}, "Check simplification rules").apply(d);
         DefinitionTransformer constantFolding = DefinitionTransformer.fromSentenceTransformer(new ConstantFolding()::fold, "constant expression folding");
-        Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(d, true, kompileOptions.topCell).resolve(m)), "resolving !Var variables").apply(d);
+        Function1<Definition, Definition> resolveFreshConstants = d -> DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(d, true, kompileOptions.topCell, files).resolve(m)), "resolving !Var variables").apply(d);
         GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
         Function1<Definition, Definition> genCoverage = d -> DefinitionTransformer.fromRuleBodyTransformerWithRule((r, body) -> cov.gen(r, body, d.mainModule()), "generate coverage instrumentation").apply(d);
         DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
@@ -157,7 +129,8 @@ public class KoreBackend extends AbstractBackend {
                 s instanceof Rule && kompileOptions.extraConcreteRuleLabels.contains(s.att().getOption(Att.LABEL()).getOrElse(() -> null)) ?
                         Rule.apply(((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att().add(Att.CONCRETE())) : s, "mark extra concrete rules").apply(d);
 
-        return def -> resolveIO
+        return def -> resolveComm
+                .andThen(resolveIO)
                 .andThen(resolveFun)
                 .andThen(resolveFunctionWithConfig)
                 .andThen(resolveStrict)
@@ -172,6 +145,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(constantFolding)
                 .andThen(propagateMacroToRules)
                 .andThen(expandMacros)
+                .andThen(checkSimplificationRules)
                 .andThen(guardOrs)
                 .andThen(AddImplicitComputationCell::transformDefinition)
                 .andThen(resolveFreshConstants)
@@ -191,6 +165,7 @@ public class KoreBackend extends AbstractBackend {
 
     @Override
     public Function<Module, Module> specificationSteps(Definition def) {
+        ModuleTransformer resolveComm = ModuleTransformer.from(new ResolveComm(kem)::resolve, "resolve comm simplification rules");
         Module mod = def.mainModule();
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(mod);
         LabelInfo labelInfo = new LabelInfoFromModule(mod);
@@ -207,27 +182,42 @@ public class KoreBackend extends AbstractBackend {
           ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(m, true);
           return ModuleTransformer.fromSentenceTransformer((m2, s) -> new ExpandMacros(transformer, m2, files, kem, kompileOptions, false).expand(s), "expand macros").apply(m);
         };
+        Function1<Module, Module> checkSimplificationRules = ModuleTransformer.from(m -> { m.localRules().foreach(r -> checkSimpIsFunc(m, r)); return m;}, "Check simplification rules");
         ModuleTransformer subsortKItem = ModuleTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
         ModuleTransformer addImplicitComputationCell = ModuleTransformer.fromSentenceTransformer(
                 new AddImplicitComputationCell(configInfo, labelInfo)::apply,
                 "concretizing configuration");
-        Function1<Module, Module> resolveFreshConstants = d -> ModuleTransformer.from(new ResolveFreshConstants(def, true, kompileOptions.topCell)::resolve, "resolving !Var variables").apply(d);
+        Function1<Module, Module> resolveFreshConstants = d -> ModuleTransformer.from(new ResolveFreshConstants(def, true, kompileOptions.topCell, files)::resolve, "resolving !Var variables").apply(d);
         ModuleTransformer concretizeCells = ModuleTransformer.fromSentenceTransformer(
                 new ConcretizeCells(configInfo, labelInfo, sortInfo, mod, true)::concretize,
                 "concretizing configuration");
         ModuleTransformer generateSortProjections = ModuleTransformer.from(new GenerateSortProjections(false)::gen, "adding sort projections");
 
-        return m -> resolveAnonVars
+        return m -> resolveComm
+                .andThen(resolveAnonVars)
                 .andThen(resolveSemanticCasts)
                 .andThen(generateSortProjections)
                 .andThen(propagateMacroToRules)
                 .andThen(expandMacros)
+                .andThen(checkSimplificationRules)
                 .andThen(addImplicitComputationCell)
                 .andThen(resolveFreshConstants)
                 .andThen(concretizeCells)
                 .andThen(subsortKItem)
                 .andThen(restoreDefinitionModulesTransformer(def))
                 .apply(m);
+    }
+
+    // check that simplification rules have a functional symbol on the LHS
+    public Sentence checkSimpIsFunc(Module m, Sentence s) {
+        // need to check after macro expansion
+        if (s instanceof Rule && (s.att().contains(Att.SIMPLIFICATION()))) {
+            KLabel kl = m.matchKLabel((Rule) s);
+            Att atts = m.attributesFor().get(kl).getOrElse(Att::empty);
+            if (!(atts.contains(Att.FUNCTION()) || atts.contains(Att.FUNCTIONAL()) || atts.contains("mlOp")))
+                throw  KEMException.compilerError("Simplification rules expect function/functional/mlOp symbols at the top of the left hand side term.", s);
+        }
+        return s;
     }
 
     @Override

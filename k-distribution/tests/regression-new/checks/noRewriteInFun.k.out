@@ -1,4 +1,6 @@
 [Error] Compiler: #fun expressions must have at least one rewrite.
 	Source(noRewriteInFun.k)
 	Location(4,11,4,21)
+	4 |	rule 0 => #fun(0)(0)
+	  .	          ^~~~~~~~~~
 [Error] Compiler: Had 1 structural errors.

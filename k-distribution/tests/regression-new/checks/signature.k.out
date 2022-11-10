@@ -1,31 +1,51 @@
 [Error] Inner Parser: Parse error: unexpected token 'foo'.
 	Source(signature.k)
 	Location(24,8,24,11)
+	24 |	  rule foo() => .K
+	   .	       ^~~
 [Error] Inner Parser: Parse error: unexpected token 'fu'.
 	Source(signature.k)
 	Location(26,8,26,10)
+	26 |	  rule fu() => .K
+	   .	       ^~
 [Error] Inner Parser: Parse error: unexpected token 'baz'.
 	Source(signature.k)
 	Location(28,8,28,11)
+	28 |	  rule baz => .K
+	   .	       ^~~
 [Error] Inner Parser: Parse error: unexpected token 'foo'.
 	Source(signature.k)
 	Location(36,8,36,11)
+	36 |	  rule foo() => .K
+	   .	       ^~~
 [Error] Inner Parser: Parse error: unexpected token 'bam'.
 	Source(signature.k)
 	Location(37,8,37,11)
+	37 |	  rule bam() => .K
+	   .	       ^~~
 [Error] Inner Parser: Parse error: unexpected token 'fu'.
 	Source(signature.k)
 	Location(38,8,38,10)
+	38 |	  rule fu() => .K
+	   .	       ^~
 [Error] Inner Parser: Parse error: unexpected token 'bar'.
 	Source(signature.k)
 	Location(39,8,39,11)
+	39 |	  rule bar => .K
+	   .	       ^~~
 [Error] Inner Parser: Parse error: unexpected token 'baz'.
 	Source(signature.k)
 	Location(40,8,40,11)
+	40 |	  rule baz => .K
+	   .	       ^~~
 [Error] Inner Parser: Parse error: unexpected token 'b'.
 	Source(signature.k)
 	Location(42,8,42,9)
+	42 |	  rule b() => .K
+	   .	       ^
 [Error] Inner Parser: Parse error: unexpected token 'a'.
 	Source(signature.k)
 	Location(54,8,54,9)
+	54 |	  rule a() => .K
+	   .	       ^
 [Error] Compiler: Had 10 parsing errors.

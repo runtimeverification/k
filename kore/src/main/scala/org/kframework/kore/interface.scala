@@ -117,6 +117,8 @@ trait Sort extends Ordered[Sort] with AttValue {
     this == sort || params.exists(_.contains(sort))
   }
 
+  override def toString: String = name + (if (params.nonEmpty) "{" + params.mkString(",") + "}")
+
   lazy val isNat: Boolean = {
     try {
       name.toInt

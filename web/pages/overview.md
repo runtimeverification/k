@@ -11,4 +11,4 @@
 
 Go to [Youtube mirror](https://youtu.be/eSaIKHQOo4c), if the above does not work.
 
-Go back to https://kframework.org for further links, the K tool and contact information.
+Go back to [https://kframework.org](https://kframework.org) for further links, the K tool and contact information.

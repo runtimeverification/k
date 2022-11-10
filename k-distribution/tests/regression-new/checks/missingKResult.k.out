@@ -1,4 +1,4 @@
 [Error] Compiler: Definition is missing function isKResult required for strictness. Please either declare sort KResult or declare 'syntax Bool ::= isKResult(K) [symbol, function]'
   while executing phase "resolving heat and cool attributes" on sentence at
 	Source(missingKResult.k)
-	Location(13,18,13,46)
+	Location(13,18,13,47)

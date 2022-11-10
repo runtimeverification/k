@@ -1,3 +1,3 @@
 <k>
-  foo ( < "blah" > )
+  foo ( < "blah" > ) ~> .
 </k>

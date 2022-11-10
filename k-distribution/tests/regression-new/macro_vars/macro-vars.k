@@ -10,6 +10,10 @@ module MACRO-VARS
   syntax K ::= inverseConvertType(CPPType, Foo) [function]
   rule inverseConvertType(cppEnumType, foo((cppEnumType #as T::CPPType => underlyingType(T))))
   syntax CPPType ::= underlyingType(CPPType) [function]
-  syntax CPPType ::= "cppEnumType"
-  rule cppEnumType => bar(_, scopedEnum() #Or unscopedEnum() ) [macro, unboundVariables(_)]
+  syntax CPPType ::= "cppEnumType" [macro]
+  rule cppEnumType => bar(_, scopedEnum() #Or unscopedEnum() ) [unboundVariables(_)]
+
+  syntax Int ::= "hookedMacro" [macro]
+  rule hookedMacro => 5
+
 endmodule

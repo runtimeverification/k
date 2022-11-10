@@ -1,5 +1,0 @@
-#!/usr/bin/env sh
-set -e
-set -u
-export PYTHONPATH="$(dirname "$0")/../lib/kframework:$PYTHONPATH"
-python3 -m pyk "$@"

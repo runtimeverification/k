@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+GIT_REVISION="$1"
+shift
+
+if [ -z "$GIT_REVISION" ]; then
+  exit 0
+fi
+
+VERSION_REGEX='v\d+\.\d+\.\d+-\d+-g[0-9a-z]+(-dirty)?$'
+echo "$GIT_REVISION" | grep -Pq "$VERSION_REGEX"

@@ -1,4 +1,6 @@
 [Error] Compiler: Invalid colors attribute: expected 5 colors, found 4 colors instead.
 	Source(formatatt.k)
-	Location(4,19,4,119)
+	Location(4,19,4,120)
+	4 |	  syntax Stmt ::= "if" "(" Bool ")" Stmt "else" Stmt [avoid, colors(blue,red,red,blue), format(%1 %2%c%3%r%4 %5 %6 %7)]
+	  .	                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 1 structural errors.

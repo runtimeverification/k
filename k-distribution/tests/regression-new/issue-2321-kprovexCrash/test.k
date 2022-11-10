@@ -15,5 +15,5 @@ module TEST
     rule #assert false => #fail
 
 // Uninterpreted functions
-    syntax Int ::= i(Int, Int)   [function, functional, no-evaluators, smtlib(fi), klabel(i)]
+    syntax Int ::= i(Int, Int)   [function, total, no-evaluators, smtlib(fi), klabel(i)]
 endmodule

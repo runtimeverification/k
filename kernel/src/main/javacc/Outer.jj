@@ -276,7 +276,7 @@ public class Outer {
   uses of this function).
   */
   private <T extends ASTNode> T markLoc(Location locPrefix, T node) {
-    return markLocExplicit(Location.apply(locPrefix.startLine(), locPrefix.startColumn(), token.endLine, token.endColumn), node);
+    return markLocExplicit(Location.apply(locPrefix.startLine(), locPrefix.startColumn(), token.endLine, token.endColumn + 1), node);
   }
 
   /** Marks 'node' with the location in 'loc'.Returns 'node' (which

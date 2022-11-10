@@ -28,7 +28,7 @@ class KoreTest {
     tempDir.mkdirs()
     val kompiledDir = new File(tempRoot, "kompiled")
     kompiledDir.mkdirs()
-    new FileUtil(tempDir, tempRoot, tempRoot, kompiledDir, global, System.getenv)
+    new FileUtil(tempDir, tempRoot, kompiledDir, global, System.getenv)
   }
 
   val kem: KExceptionManager = new KExceptionManager(global)

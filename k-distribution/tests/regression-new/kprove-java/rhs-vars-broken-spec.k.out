@@ -1,10 +1,16 @@
 [Error] Compiler: Found variable _ on right hand side of rule, not bound on left hand side. Did you mean "?_"?
 	Source(rhs-vars-broken-spec.k)
 	Location(12,20,12,21)
+	12 |	   claim <k> .K => _ </k>
+	   .	                   ^
 [Error] Compiler: Found variable A on right hand side of rule, not bound on left hand side. Did you mean "?A"?
 	Source(rhs-vars-broken-spec.k)
 	Location(14,20,14,21)
+	14 |	   claim <k> .K => A </k>
+	   .	                   ^
 [Warning] Compiler: Variable 'A' defined but not used. Prefix variable name with underscore if this is intentional.
 	Source(rhs-vars-broken-spec.k)
 	Location(14,20,14,21)
+	14 |	   claim <k> .K => A </k>
+	   .	                   ^
 [Error] Compiler: Had 2 structural errors.

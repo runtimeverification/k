@@ -51,7 +51,7 @@ public class CheckAtt {
             Att sortAtt =  m.sortAttributesFor().getOrElse(prod.sort().head(), () -> Att.empty());
             if (sortAtt.contains(Att.HOOK()) && !sortAtt.get(Att.HOOK()).equals("ARRAY.Array") && !(sortAtt.get(Att.HOOK()).equals("KVAR.KVar") && isSymbolicKast)) {
                 if (!prod.att().contains(Att.FUNCTION()) && !prod.att().contains(Att.BRACKET()) &&
-                    !prod.att().contains("token") && !(prod.klabel().isDefined() && macros.contains(prod.klabel().get()))) {
+                    !prod.att().contains("token") && !prod.att().contains("macro") && !(prod.klabel().isDefined() && macros.contains(prod.klabel().get()))) {
                     if (!(prod.sort().equals(Sorts.K()) && ((prod.klabel().isDefined() && (prod.klabel().get().name().equals("#EmptyK") || prod.klabel().get().name().equals("#KSequence"))) || prod.isSubsort()))) {
                         if (!(sortAtt.contains("cellCollection") && prod.isSubsort())) {
                             errors.add(KEMException.compilerError("Cannot add new constructors to hooked sort " + prod.sort(), prod));
@@ -142,11 +142,19 @@ public class CheckAtt {
         if (hasColors && nescapes + nterminals != ncolors) {
             errors.add(KEMException.compilerError("Invalid colors attribute: expected " + (nescapes + nterminals) + " colors, found " + ncolors + " colors instead.", prod));
         }
+        if (prod.att().contains(Att.FUNCTIONAL())) {
+            kem.registerCompilerWarning(ExceptionType.FUTURE_ERROR, errors,
+                "The attribute 'functional' has been deprecated on symbols. Use the combination of attributes 'function' and 'total' instead.", prod);
+        }
+        if (prod.att().contains(Att.TOTAL()) && !prod.att().contains(Att.FUNCTION())) {
+            kem.registerCompilerWarning(ExceptionType.IGNORED_ATTRIBUTE, errors,
+                "The attribute 'total' was applied to a production which does not have the 'function' attribute; the attribute was ignored.", prod);
+        }
     }
 
     private void check(Rule rule) {
         if (rule.isMacro()) {
-            kem.registerCompilerWarning(ExceptionType.RULE_HAS_MACRO_ATT, errors,
+            kem.registerCompilerWarning(ExceptionType.FUTURE_ERROR, errors,
                     "The attribute [" + rule.att().getMacro().get() + "] has been deprecated on rules. Use this label on syntax declarations instead.", rule);
         }
 
@@ -173,6 +181,9 @@ public class CheckAtt {
         }
         if (att.contains(Att.PRIORITY()) && att.contains(Att.SIMPLIFICATION())) {
           errors.add(KEMException.compilerError("priority attribute is not supported on simplification rules.", loc));
+        }
+        if(att.contains(Att.ANYWHERE()) && att.contains(Att.SIMPLIFICATION())) {
+          errors.add(KEMException.compilerError("anywhere attribute is not supported on simplification rules.", loc));
         }
     }
 }

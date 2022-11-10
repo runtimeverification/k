@@ -22,7 +22,7 @@ public class BinaryToText {
 
 
     public static void nailMain(NGContext context) throws IOException {
-        FileUtil files = new FileUtil(null,null,new File(context.getWorkingDirectory()),null,null,null);
+        FileUtil files = new FileUtil(null, new File(context.getWorkingDirectory()),null,null,null);
         File f = files.resolveWorkingDirectory(context.getArgs()[0]);
         FileChannel channel = FileChannel.open(f.toPath());
         ByteBuffer buf = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());

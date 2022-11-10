@@ -18,7 +18,7 @@ import org.kframework.definition.Terminal;
 import org.kframework.definition.TerminalLike;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
@@ -360,11 +360,15 @@ public class KSyntax2Bison {
           "  node *n = malloc(sizeof(node));\n" +
           "  n->symbol = ");
       boolean isString = module.sortAttributesFor().get(prod.sort().head()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("").equals("STRING.String");
-      if (!isString) {
+      boolean isBytes  = module.sortAttributesFor().get(prod.sort().head()).getOrElse(() -> Att.empty()).getOptional("hook").orElse("").equals("BYTES.Bytes");
+      if (!isString && !isBytes) {
         bison.append("enquote(");
       }
       bison.append("$1.token");
-      if (!isString) {
+      if (isBytes) {
+        bison.append("+1"); // skip the first 'b' char
+      }
+      if (!isString && !isBytes) {
         bison.append(")");
       }
       bison.append(";\n" +

@@ -1,4 +1,9 @@
 [Error] Compiler: Cell bags are only supported on the Java backend. If you want this feature, comment on https://github.com/runtimeverification/k/issues/1419 . As a workaround, you can add the attribute type="Set" and add a unique identifier to each element in the set.
 	Source(test.k)
 	Location(18,17,32,21)
+	   .	                v~~~~~~~~~~~~~~~~~
+	18 |	  configuration <T color="yellow">
+	   |		...
+	32 |	                </T>
+	   .	                ~~~^
 [Error] Compiler: Had 1 structural errors.

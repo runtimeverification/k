@@ -64,6 +64,7 @@ public class ResolveFun {
     private final Set<Production> funProds = new HashSet<>();
     private final Set<Rule> funRules = new HashSet<>();
     private Module module;
+    private AddSortInjections inj;
     private final Set<KLabel> klabels = new HashSet<>();
 
     private KLabel getUniqueLambdaLabel(String nameHint1, String nameHint2) {
@@ -215,7 +216,6 @@ public class ResolveFun {
             return ((KToken) k).sort();
         if (k instanceof KApply) {
             if (kore) {
-                AddSortInjections inj = new AddSortInjections(module);
                 return inj.sort(k, Sorts.K());
             } else {
                 return k.att().get(Production.class).sort();
@@ -254,6 +254,7 @@ public class ResolveFun {
 
     public Module resolve(Module m) {
         module = Kompile.subsortKItem(m);
+        inj = new AddSortInjections(module);
         funProds.clear();
         funRules.clear();
         Set<Sentence> newSentences = stream(m.localSentences()).map(this::resolve).collect(Collectors.toSet());

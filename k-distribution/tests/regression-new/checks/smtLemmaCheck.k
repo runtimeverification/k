@@ -4,7 +4,7 @@ module SMTLEMMACHECK
   imports K-EQUAL
 
   syntax KItem ::= a(Int)
-  syntax Int ::= f(Int)  [function, functional]
+  syntax Int ::= f(Int)  [function, total]
 
   rule f(0) => 0
   rule f(_) => 1  [owise]

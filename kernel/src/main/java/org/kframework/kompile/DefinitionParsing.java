@@ -29,14 +29,16 @@ import org.kframework.definition.SyntaxSort;
 import org.kframework.kore.AddAttRec;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
+import org.kframework.kore.KToken;
 import org.kframework.kore.Sort;
+import org.kframework.kore.VisitK;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ParserUtils;
 import org.kframework.parser.TreeNodesToKORE;
 import org.kframework.parser.inner.ParseCache;
 import org.kframework.parser.inner.ParseCache.ParsedSentence;
 import org.kframework.parser.inner.ParseInModule;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.BinaryLoader;
@@ -304,6 +306,32 @@ public class DefinitionParsing {
         return errors;
     }
 
+    private void checkDuplicateKCells(Definition defWithParsedConfigs) {
+        // check for duplicate <k> cell declarations
+        List<K> kcells = new ArrayList<>();
+        stream(defWithParsedConfigs.mainModule().sentences())
+                .filter(s -> s instanceof Configuration)
+                .forEach(s -> new VisitK() {
+                    @Override
+                    public void apply(KApply k) {
+                        if (k.klabel().equals(KLabel("#configCell"))) {
+                            KToken kt = (KToken) k.klist().items().get(0);
+                            assert kt.sort().equals(Sorts.CellName());
+                            if (kt.s().equals("k"))
+                                kcells.add(k);
+                        }
+                        super.apply(k);
+                    }
+                }.apply(((Configuration) s).body()));
+        if (kcells.size() <= 1) {
+            return;
+        }
+        for (K kCellDecl: kcells) {
+            this.errors.add(KEMException.compilerError("Multiple K cell declarations detected. Only one <k> cell declaration is allowed.", kCellDecl));
+        }
+        throwExceptionIfThereAreErrors();
+    }
+
     private Definition resolveConfigBubbles(Definition def) {
         Definition defWithCaches = resolveCachedBubbles(def, false);
         RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
@@ -318,7 +346,7 @@ public class DefinitionParsing {
                 return m;
             Module configParserModule = gen.getConfigGrammar(m);
             ParseCache cache = loadCache(configParserModule);
-            try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, files)) {
+            try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, files, options.debugTypeInference)) {
                 // each parser gets its own scanner because config labels can conflict with user tokens
                 parser.getScanner(globalOptions);
                 parser.initialize();
@@ -339,6 +367,8 @@ public class DefinitionParsing {
                 Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()),
                 "replace configs").apply(defWithCaches);
 
+        checkDuplicateKCells(defWithParsedConfigs);
+
         // replace config bubbles with the generated syntax and rules
         return DefinitionTransformer.from(m -> {
             if (stream(m.localSentences()).noneMatch(s -> s instanceof Configuration
@@ -353,7 +383,7 @@ public class DefinitionParsing {
                   (Set<Sentence>) m.localSentences().$bar(importedConfigurationSortsSubsortedToCell),
                   m.att());
 
-            Module extMod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(module), true, profileRules, files).getExtensionModule();
+            Module extMod = RuleGrammarGenerator.getCombinedGrammar(gen.getConfigGrammar(module), true, profileRules, files, options.debugTypeInference).getExtensionModule();
             Set<Sentence> configDeclProductions = stream(module.localSentences())
                       .filter(s -> s instanceof Configuration)
                       .map(b -> (Configuration) b)
@@ -375,7 +405,7 @@ public class DefinitionParsing {
         RuleGrammarGenerator gen = new RuleGrammarGenerator(defWithCaches);
         Module ruleParserModule = gen.getRuleGrammar(defWithCaches.mainModule());
         ParseCache cache = loadCache(ruleParserModule);
-        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, files, true)) {
+        try (ParseInModule parser = RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, false, true, files, options.debugTypeInference)) {
             Scanner scanner;
             if (deserializeScanner) {
                 scanner = new Scanner(parser, globalOptions, files.resolveKompiled("scanner"));
@@ -402,8 +432,8 @@ public class DefinitionParsing {
 
         ParseCache cache = loadCache(ruleParserModule);
         try (ParseInModule parser = needNewScanner ?
-                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, files) :
-                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), scanner, true, profileRules, false, files)) {
+                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), true, profileRules, files, options.debugTypeInference) :
+                RuleGrammarGenerator.getCombinedGrammar(cache.getModule(), scanner, true, profileRules, false, files, options.debugTypeInference)) {
             if (needNewScanner)
                 parser.getScanner(globalOptions);
             parser.initialize();
@@ -513,7 +543,7 @@ public class DefinitionParsing {
         errors = java.util.Collections.synchronizedSet(Sets.newHashSet());
         RuleGrammarGenerator gen = new RuleGrammarGenerator(compiledDef.kompiledDefinition);
         try (ParseInModule parser = RuleGrammarGenerator
-                .getCombinedGrammar(gen.getRuleGrammar(compiledDef.getParsedDefinition().mainModule()), true, profileRules, false, true, files)) {
+                .getCombinedGrammar(gen.getRuleGrammar(compiledDef.getParsedDefinition().mainModule()), true, profileRules, false, true, files, options.debugTypeInference)) {
             parser.setScanner(new Scanner(parser, globalOptions, files.resolveKompiled("scanner")));
             java.util.Set<K> res = parseBubble(parser, new HashMap<>(),
                     new Bubble(rule, contents, Att().add("contentStartLine", 1)
@@ -633,7 +663,7 @@ public class DefinitionParsing {
         Source source = b.att().get(Source.class);
         boolean isAnywhere = b.att().contains(Att.ANYWHERE()) || b.att().contains(Att.SIMPLIFICATION()) || ExpandMacros.isMacro(b);
         Tuple2<Either<java.util.Set<KEMException>, K>, java.util.Set<KEMException>> result =
-                pim.parseString(b.contents(), START_SYMBOL, pim.getScanner(), source, startLine, startColumn, true, isAnywhere);
+                pim.parseString(b.contents(), START_SYMBOL, "bubble parsing", pim.getScanner(), source, startLine, startColumn, true, isAnywhere);
         parsedBubbles.getAndIncrement();
         registerWarnings(result._2());
         if (result._1().isRight()) {

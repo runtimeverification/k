@@ -3,7 +3,18 @@
 The purpose of this lesson is to teach how to debug your K interpreter using
 the K-language support provided in [GDB](https://www.gnu.org/software/gdb/).
 
+## Caveats
+
+Debugging K definitions using GDB is currently only supported on Linux; the
+instructions in this section will not work properly on macOS. Support for
+debugging K using LLDB is a work in progress, and this chapter will be updated
+when doing so is possible.
+
 ## Getting started
+
+You will need GDB in order to complete this lesson. If you do not already
+have GDB installed, then do so. Steps to install GDB are outlined in
+this [GDB Tutorial](http://www.gdbtutorial.com/tutorial/how-install-gdb).
 
 The first thing neccessary in order to debug a K interpreter in GDB is to
 build the interpreter with full debugging support enabled. This can be done
@@ -11,6 +22,8 @@ relatively simply. First, make sure you have not passed `-O1`, `-O2`, or `-O3`
 to `kompile`. Second, simply add the command line flags `-ccopt -g -ccopt -O1`
 to `kompile`. The resulting compiled K definition will be ready to support
 debugging.
+
+Note: the 'O' in `-O1` is the letter 'O' not the number 0!
 
 Once you have a compiled K definition and a program you wish to debug, you
 can start the debugger by passing the `--debugger` flag to `krun`. This will
@@ -50,9 +63,9 @@ Find the GDB manual and other documentation resources online at:
 For help, type "help".
 Type "apropos word" to search for commands related to "word"...
 Reading symbols from ./lesson-19-a-kompiled/interpreter...
-warning: File "/home/dwightguth/kframework-5.0.0/llvm-backend/target/build/install/lib/kllvm/gdb/interpreter-gdb.py" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+warning: File "/home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-a-kompiled/interpreter" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
 To enable execution of this file add
-        add-auto-load-safe-path /home/dwightguth/kframework-5.0.0/llvm-backend/target/build/install/lib/kllvm/gdb/interpreter-gdb.py
+        add-auto-load-safe-path /home/dwightguth/kframework-5.0.0/k-distribution/k-tutorial/1_basic/19_debugging/lesson-19-a-kompiled/interpreter
 line to your configuration file "/home/dwightguth/.gdbinit".
 To completely disable this security protection add
         set auto-load safe-path /
@@ -67,7 +80,12 @@ To make full advantage of the GDB features of K, you should follow the first
 command listed in this output message and add the corresponding
 `add-auto-load-safe-path` command to your `~/.gdbinit` file as prompted.
 Please note that the path will be different on your machine than the one
-listed above. 
+listed above. Adding directories to the "load safe path" effectively tells GDB
+to trust those directories. All content under a given directory will be recursively
+trusted, so if you want to avoid having to add paths to the "load safe path" every
+time you kompile a different `K` definition, then you can just trust a minimal
+directory containing all your kompiled files; however, do not choose a top-level directory containing arbitrary files as this amounts to trusting arbitrary files and is a security risk. More info on the load safe path
+can be found [here](https://sourceware.org/gdb/onlinedocs/gdb/Auto_002dloading-safe-path.html).
 
 ## Basic commands
 

@@ -22,7 +22,7 @@ import org.kframework.compile.ExpandMacros;
 import org.kframework.definition.Claim;
 import org.kframework.definition.Module;
 import org.kframework.kil.loader.Context;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import scala.collection.JavaConversions;
@@ -115,7 +115,11 @@ public class Definition extends JavaSymbolicObject {
     public Definition(org.kframework.definition.Module module, KExceptionManager kem) {
         this.kem = kem;
 
-        Module moduleWithPolyProds = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
+        // I passed null here for the FileUtil because it would be a decent amount of work to
+        // refactor to get this constructor access to a FileUtil object. This is fine here
+        // because the Java backend is basically dead, but in general it's much better practice in
+        // live code to actually pass the correct FileUtil instance.
+        Module moduleWithPolyProds = RuleGrammarGenerator.getCombinedGrammar(module, false, null).getExtensionModule();
 
         ImmutableSetMultimap.Builder<String, SortSignature> signaturesBuilder = ImmutableSetMultimap.builder();
         JavaConversions.mapAsJavaMap(moduleWithPolyProds.signatureFor()).entrySet().stream().forEach(e -> {

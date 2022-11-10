@@ -9,7 +9,7 @@ import org.kframework.kore.Sort;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.binary.BinaryParser;
 import org.kframework.parser.inner.ParseInModule;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.parser.inner.kernel.KSyntax2Bison;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.json.JsonParser;
@@ -50,11 +50,11 @@ public class KRead {
         this.globalOptions = globalOptions;
     }
 
-    public K prettyRead(Module mod, Sort sort, CompiledDefinition def, Source source, String stringToParse) {
-        return prettyRead(mod, sort, def, source, stringToParse, this.input);
+    public K prettyRead(Module mod, Sort sort, String startSymbolLocation, CompiledDefinition def, Source source, String stringToParse) {
+        return prettyRead(mod, sort, startSymbolLocation, def, source, stringToParse, this.input);
     }
 
-    public K prettyRead(Module mod, Sort sort, CompiledDefinition def, Source source, String stringToParse, InputModes inputMode) {
+    public K prettyRead(Module mod, Sort sort, String startSymbolLocation, CompiledDefinition def, Source source, String stringToParse, InputModes inputMode) {
         switch (inputMode) {
             case BINARY:
             case JSON:
@@ -63,7 +63,9 @@ public class KRead {
             case KORE:
                 return new KoreParser(mod.sortAttributesFor()).parseString(stringToParse);
             case PROGRAM:
-                return def.parseSingleTerm(mod, sort, kem, stringToParse, source);
+                return def.parseSingleTerm(mod, sort, startSymbolLocation, kem, files, stringToParse, source);
+            case RULE:
+                throw KEMException.internalError("Should have been handled directly by the kast front end: " + inputMode);
             default:
                 throw KEMException.criticalError("Unsupported input mode: " + inputMode);
         }
@@ -71,7 +73,7 @@ public class KRead {
 
     public void createBisonParser(Module mod, Sort sort, File outputFile, boolean glr, String bisonFile, long stackDepth) {
         Stopwatch sw = new Stopwatch(globalOptions);
-        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, true, false, true)) {
+        try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, true, false, true, false, files)) {
             try (Scanner scanner = parseInModule.getScanner(kem.options)) {
                 File scannerFile = files.resolveTemp("scanner.l");
                 File scanHdr = files.resolveTemp("scanner.h");
@@ -98,7 +100,7 @@ public class KRead {
                 }
                 List<String> command = new ArrayList<>();
                 command.addAll(Arrays.asList(
-                      "gcc",
+                      Scanner.COMPILER,
                       files.resolveKInclude("cparser/main.c").getAbsolutePath(),
                       files.resolveTemp("lex.yy.c").getAbsolutePath(),
                       files.resolveTemp("parser.tab.c").getAbsolutePath(),
@@ -114,7 +116,7 @@ public class KRead {
                   .start()
                   .waitFor();
                 if (exit != 0) {
-                    throw KEMException.internalError("gcc returned nonzero exit code: " + exit + "\n");
+                    throw KEMException.internalError(Scanner.COMPILER + " returned nonzero exit code: " + exit + "\n");
                 }
             } catch(IOException | InterruptedException e) {
               throw KEMException.internalError("Failed to execute process.", e);

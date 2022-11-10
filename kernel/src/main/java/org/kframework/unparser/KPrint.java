@@ -28,7 +28,7 @@ import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ProductionReference;
 import org.kframework.parser.Term;
 import org.kframework.parser.inner.ParseInModule;
-import org.kframework.parser.inner.generator.RuleGrammarGenerator;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -67,6 +67,8 @@ public class KPrint {
 
     @Nullable
     private final CompiledDefinition compiledDefinition;
+    private final Module executionModule;
+    private final AddSortInjections addSortInjections;
 
     public KPrint() {
         this(new KExceptionManager(new GlobalOptions()), FileUtil.testFileUtil(), new TTYInfo(false, false, false),
@@ -81,6 +83,14 @@ public class KPrint {
         this.tty = tty;
         this.options = options;
         this.compiledDefinition = compiledDefinition;
+        if (compiledDefinition != null) {
+            this.executionModule = compiledDefinition.executionModule();
+            this.addSortInjections = new AddSortInjections(executionModule);
+        } else {
+            this.executionModule = null;
+            this.addSortInjections = null;
+        }
+
         this.kompileOptions = kompileOptions;
     }
 
@@ -128,11 +138,11 @@ public class KPrint {
             case LATEX:
                 return serialize(result, outputMode);
             case PRETTY:
-                Module prettyUnparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false).getExtensionModule();
+                Module prettyUnparsingModule = RuleGrammarGenerator.getCombinedGrammar(module, false, files).getExtensionModule();
                 return (unparseTerm(result, prettyUnparsingModule, colorize) + "\n").getBytes();
             case PROGRAM: {
                 RuleGrammarGenerator gen = new RuleGrammarGenerator(def);
-                Module programUnparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false).getParsingModule();
+                Module programUnparsingModule = RuleGrammarGenerator.getCombinedGrammar(gen.getProgramsGrammar(module), false, files).getParsingModule();
                 return (unparseTerm(result, programUnparsingModule, colorize) + "\n").getBytes();
             }
             case KORE:
@@ -140,8 +150,8 @@ public class KPrint {
                     throw KEMException.criticalError("KORE output requires a compiled definition.");
                 }
                 ModuleToKORE converter = new ModuleToKORE(module, compiledDefinition.topCellInitializer, kompileOptions);
-                result = ExpandMacros.forNonSentences(compiledDefinition.executionModule(), files, kompileOptions, false).expand(result);
-                result = new AddSortInjections(compiledDefinition.executionModule()).addSortInjections(result, s);
+                result = ExpandMacros.forNonSentences(executionModule, files, kompileOptions, false).expand(result);
+                result = addSortInjections.addSortInjections(result, s);
                 StringBuilder sb = new StringBuilder();
                 converter.convert(result, sb);
                 return sb.toString().getBytes();
@@ -292,7 +302,7 @@ public class KPrint {
     }
 
     private K sortCollections(Module mod, K input) {
-        Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(mod, false).getExtensionModule();
+        Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(mod, false, files).getExtensionModule();
         return new TransformK() {
             @Override
             public K apply(KApply k) {
@@ -366,7 +376,7 @@ public class KPrint {
     }
 
     private K tokenizeTerm(Module mod, KApply kapp) {
-        Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(mod, false).getExtensionModule();
+        Module unparsingModule = RuleGrammarGenerator.getCombinedGrammar(mod, false, files).getExtensionModule();
         String tokenizedTerm   = unparseTerm(kapp, unparsingModule, ColorSetting.OFF);
         Sort   finalSort       = Sorts.K();
         Option<Sort> termSort  = mod.sortFor().get(kapp.klabel());
