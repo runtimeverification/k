@@ -1623,7 +1623,7 @@ Evaluation Strategy
 ### `strict` and `seqstrict` attributes
 
 The strictness attributes allow defining evaluation strategies without having
-to explicitely make rules which implement them. This is done by injecting
+to explicitly make rules which implement them. This is done by injecting
 *heating* and *cooling* rules for the subterms. For this to work, you need to
 define what a *result* is for K, by extending the  `KResult` sort.
 
@@ -1663,7 +1663,9 @@ variable, but it has special meaning in the context of sentences with the
 `heat` or `cool` attribute. In heating or cooling rules, the variable named
 `HOLE` is considered to be the term being heated or cooled and the compiler
 will generate `isKResult(HOLE)` and `notBool isKResult(HOLE)` side conditions
-appropriately to ensure that the backend does not loop infinitely.
+appropriately to ensure that the backend does not loop infinitely. The module
+`BOOL` will also be automatically and privately included for semantic
+purposes. The syntax for parsing programs will not be affected.
 
 In order for this functionality to work, you need to define the `KResult` sort.
 For instance, we tell K that a term is fully evaluated once it becomes an `Int`
