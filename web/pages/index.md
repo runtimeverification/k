@@ -31,7 +31,7 @@ call/cc.
 
 ## Support
 
-- [Discord Server](https://discord.gg/HygNq4QY): Most direct way to get support.
+- [Discord Server](https://discord.com/invite/CurfmXNtbN): Most direct way to get support.
 - [Matrix Room](https://riot.im/app/#/room/#k:matrix.org): Another way to get support.
 - [Stackoverflow](https://stackoverflow.com/questions/tagged/kframework): for general questions to the K user community.
 
