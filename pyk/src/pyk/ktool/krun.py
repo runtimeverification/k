@@ -115,6 +115,31 @@ class KRun(KPrint):
         assert parser.eof
         return res
 
+    def run_kore_config(
+        self,
+        config: Mapping[str, Pattern],
+        *,
+        depth: Optional[int] = None,
+        expand_macros: bool = False,
+    ) -> Pattern:
+        proc_res = _krun(
+            definition_dir=self.definition_dir,
+            output=KRunOutput.KORE,
+            pmap={var: 'cat' for var in config},
+            cmap={var: pattern.text for var, pattern in config.items()},
+            depth=depth,
+            no_expand_macros=not expand_macros,
+            profile=self._profile,
+        )
+
+        if proc_res.returncode != 0:
+            raise RuntimeError('Non-zero exit-code from krun')
+
+        parser = KoreParser(proc_res.stdout)
+        res = parser.pattern()
+        assert parser.eof
+        return res
+
 
 class KRunOutput(Enum):
     PRETTY = 'pretty'
@@ -198,9 +223,9 @@ def _build_arg_list(
     if depth is not None:
         args += ['--depth', str(depth)]
     for name, value in (pmap or {}).items():
-        args += [f'--p{name}={value}']
+        args += [f'-p{name}={value}']
     for name, value in (cmap or {}).items():
-        args += [f'--c{name}={value}']
+        args += [f'-c{name}={value}']
     if term:
         args += ['--term']
     if no_expand_macros:
