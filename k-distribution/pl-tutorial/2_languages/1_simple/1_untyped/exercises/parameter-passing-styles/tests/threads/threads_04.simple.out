@@ -1,3 +1,23 @@
-  S ==K "2 3 "
+  {
+    S:String
+  #Equals
+    "2 3 "
+  }
 #Or
-  S ==K "3 2 "
+  {
+    S:String
+  #Equals
+    "3 2 "
+  }
+#Or
+  {
+    S:String
+  #Equals
+    "23  "
+  }
+#Or
+  {
+    S:String
+  #Equals
+    "32  "
+  }
