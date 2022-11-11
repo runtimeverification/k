@@ -296,11 +296,11 @@
         "utils": "utils_2"
       },
       "locked": {
-        "lastModified": 1666110648,
-        "narHash": "sha256-CLbUT6XJ2WXCoZ/281OOrjyKvjATJTU4Atd9LM2VCpA=",
+        "lastModified": 1668106029,
+        "narHash": "sha256-q+OPGphcNOxQkT0FoeQmFV4j2IdOE+9b+tZu6dznyjg=",
         "owner": "runtimeverification",
         "repo": "llvm-backend",
-        "rev": "8aef0826d9e6cd3301d4596a72f796804f3debc0",
+        "rev": "611eec66270ce531b2547baff8e249fa0e9dd63e",
         "type": "github"
       },
       "original": {
