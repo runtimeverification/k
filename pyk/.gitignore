@@ -6,3 +6,6 @@ __pycache__/
 /kit-tests/**/*.json
 /kit-tests/**/*.run.out
 /kit-tests/**/*_summary/
+
+.kprove*
+*.debug-log

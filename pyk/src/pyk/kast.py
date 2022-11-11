@@ -27,7 +27,7 @@ from typing import (
     overload,
 )
 
-from .utils import EMPTY_FROZEN_DICT, FrozenDict, filter_none, hash_str, single
+from .utils import EMPTY_FROZEN_DICT, FrozenDict, filter_none, hash_str, single, unique
 
 T = TypeVar('T', bound='KAst')
 W = TypeVar('W', bound='WithKAtt')
@@ -1704,6 +1704,29 @@ class KDefinition(KOuter, WithKAtt):
                 _subsorts.extend([_subsort] + self.subsorts(prod.items[0].sort))
         return _subsorts
 
+    def sort_vars_subst(self, kast: KInner) -> Subst:
+        # TODO: Should also take sort inferences from KApply children.
+        # TODO: Should also take into account subsorts.
+        subst = {}
+        for vname, _voccurrences in var_occurrences(kast).items():
+            voccurrences = list(unique(_voccurrences))
+            if len(voccurrences) > 0:
+                vsort = voccurrences[0].sort
+                if len(voccurrences) > 1:
+                    for v in voccurrences[1:]:
+                        if vsort is None and v.sort is not None:
+                            vsort = v.sort
+                        elif vsort is not None and v.sort is not None and vsort != v.sort:
+                            raise ValueError(
+                                f'Could not find common subsort among variable occurrences: {voccurrences}'
+                            )
+                subst[vname] = KVariable(vname, sort=vsort)
+        return Subst(subst)
+
+    def sort_vars(self, kast: KInner) -> KInner:
+        subst = self.sort_vars_subst(kast)
+        return subst(kast)
+
     def empty_config(self, sort: KSort) -> KInner:
         def _kdefinition_empty_config(_sort: KSort) -> KApply:
             cell_prod = self.production_for_cell_sort(_sort)
@@ -1778,6 +1801,21 @@ def bottom_up(f: Callable[[KInner], KInner], kinner: KInner) -> KInner:
 # TODO make method of KInner
 def top_down(f: Callable[[KInner], KInner], kinner: KInner) -> KInner:
     return f(kinner).map_inner(lambda _kinner: top_down(f, _kinner))
+
+
+# TODO: make method of KInner
+def var_occurrences(term: KInner) -> Dict[str, List[KVariable]]:
+    _var_occurrences: Dict[str, List[KVariable]] = {}
+
+    # TODO: should treat #Exists and #Forall specially.
+    def _var_occurence(_term: KInner) -> None:
+        if type(_term) is KVariable:
+            if _term.name not in _var_occurrences:
+                _var_occurrences[_term.name] = []
+            _var_occurrences[_term.name].append(_term)
+
+    collect(_var_occurence, term)
+    return _var_occurrences
 
 
 # TODO replace by method that does not reconstruct the AST

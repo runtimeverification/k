@@ -5,19 +5,22 @@ SUM-TO-N-SPEC.main
 + split-node @init-not-1 N ==Int 2 --alias-true init-2 --alias-false init-not-1-2
 + split-node @init-not-1-2 N ==Int 10 --alias-true init-10
 + show-edge @init-not-1-2,@init-10
-3dde9b..707641 (expanded, @init-not-1-2)
+91c88c..f061ad (expanded, @init-not-1-2)
 │ N:Int ==Int 10
-b9624a..9c790c (frontier, leaf, @init-10)
+c4ad22..79ff4a (frontier, leaf, @init-10)
 
 + show-node @init-10
-<T>
-  <k>
-    int $n , $s , .Ids ; $n = N:Int ; $s = 0 ; while ( ! $n <= 0 ) { $s = $s + $n ; $n = $n + -1 ; }
-  </k>
-  <state>
-    .Map
-  </state>
-</T>
+<generatedTop>
+  <T>
+    <k>
+      int $n , $s , .Ids ; $n = N:Int ; $s = 0 ; while ( ! $n <= 0 ) { $s = $s + $n ; $n = $n + -1 ; }
+    </k>
+    <state>
+      .Map
+    </state>
+  </T>
+  ...
+</generatedTop>
 #And { true #Equals N:Int >=Int 0 }
 #And { true #Equals N:Int ==Int 10 }
 #And { true #Equals notBool ( N:Int ==Int 1 ) }
@@ -27,7 +30,7 @@ b9624a..9c790c (frontier, leaf, @init-10)
 + build-edges @init-10,#target
 + verify-edges --edges @init-10,#target
 + build-edges @init-2,@init-10
-CRITICAL - Could not verify claim: BASIC-BLOCK-ed71d73dca946691e513847d6349ab6b43b00ed47e299630ead69fbc5bbed2d3-TO-b9624a5a330a93ac89ccef4ab422be4281a0c3bc77681b2e2ac11472419c790c
+CRITICAL - Could not verify claim: BASIC-BLOCK-58f58f9aff5bf55a969e444a0df1f67fecc6e2b124bc40cb6acd16b17c25986d-TO-c4ad220dbd093f445dc7733196c226307f0391dd2dd7a783e330667e7a79ff4a
 
 Prover output:
 
@@ -44,25 +47,25 @@ Prover output:
 </generatedTop>
 #And #Top.
 + show-cfg
-ad5d55..d0813a (init, expanded)
-┣━ 38aba0..ea28c3 (expanded, @init-1)    N:Int ==Int 1
+4f03b9..e100c3 (init, expanded)
+┣━ 0566ac..c60853 (expanded, @init-1)    N:Int ==Int 1
 ┃   │  [1m[32m(verified)[0m[0m
 ┃   │  (-1 steps)
-┃   └  6a6e72..499ac5 (target, leaf)
+┃   └  76b287..c61318 (target, leaf)
 ┃
-┗━ 8c6816..882c59 (expanded, @init-not-1)    notBool ( N:Int ==Int 1 )
-    ┣━ ed71d7..bed2d3 (expanded, @init-2)    N:Int ==Int 2
+┗━ d9ed37..e32051 (expanded, @init-not-1)    notBool ( N:Int ==Int 1 )
+    ┣━ 58f58f..25986d (expanded, @init-2)    N:Int ==Int 2
     ┃   │  (-1 steps)
-    ┃   ├  b9624a..9c790c (expanded, @init-10)
+    ┃   ├  c4ad22..79ff4a (expanded, @init-10)
     ┃   │  [1m[32m(verified)[0m[0m
     ┃   │  (-1 steps)
-    ┃   └  6a6e72..499ac5 (target, leaf)
+    ┃   └  76b287..c61318 (target, leaf)
     ┃
-    ┗━ 3dde9b..707641 (expanded, @init-not-1-2)    notBool ( N:Int ==Int 2 )
-        ┣━ b9624a..9c790c (expanded, @init-10)    N:Int ==Int 10
+    ┗━ 91c88c..f061ad (expanded, @init-not-1-2)    notBool ( N:Int ==Int 2 )
+        ┣━ c4ad22..79ff4a (expanded, @init-10)    N:Int ==Int 10
         ┃   ┊ (continues as previously)
         ┃
-        ┗━ [1mee58a0..387d42 (frontier, leaf)[0m    notBool ( N:Int ==Int 10 )
+        ┗━ [1m3cf5c5..2a0dcb (frontier, leaf)[0m    notBool ( N:Int ==Int 10 )
 
 
 

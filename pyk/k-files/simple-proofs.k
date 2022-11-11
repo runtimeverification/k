@@ -17,6 +17,8 @@ module SIMPLE-PROOFS
 
     syntax Baz ::= "foo-bar" | "baz" [klabel(baz), symbol]
 
+    syntax BarHolder ::= hold ( Foo , Bar ) [klabel(barholder), symbol]
+
     rule <k> foo => bar ... </k>
          <state> ... 3 |-> N ... </state>
       requires pred1(N)

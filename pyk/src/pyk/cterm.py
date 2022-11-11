@@ -12,6 +12,7 @@ from .kastManip import (
     minimize_rule,
     ml_pred_to_bool,
     push_down_rewrites,
+    remove_generated_cells,
     simplify_bool,
     split_config_and_constraints,
     substitute,
@@ -136,7 +137,7 @@ def build_rule(
 
     lhs_vars = free_vars(init_term)
     rhs_vars = free_vars(final_term)
-    var_occurances = count_vars(
+    var_occurrences = count_vars(
         mlAnd(
             [push_down_rewrites(KRewrite(init_config, final_config))] + init_constraints + final_constraints,
             GENERATED_TOP_CELL,
@@ -144,21 +145,22 @@ def build_rule(
     )
     v_subst: Dict[str, KVariable] = {}
     vremap_subst: Dict[str, KVariable] = {}
-    for v in var_occurances:
+    for v in var_occurrences:
         new_v = v
-        if var_occurances[v] == 1:
+        if var_occurrences[v] == 1:
             new_v = '_' + new_v
         if v in rhs_vars and v not in lhs_vars:
             new_v = '?' + new_v
-        v_subst[v] = KVariable(new_v)
-        vremap_subst[new_v] = KVariable(v)
+        if new_v != v:
+            v_subst[v] = KVariable(new_v)
+            vremap_subst[new_v] = KVariable(v)
 
     init_term = substitute(init_term, v_subst)
     final_term = apply_existential_substitutions(substitute(final_term, v_subst))
     (init_config, init_constraint) = split_config_and_constraints(init_term)
     (final_config, final_constraint) = split_config_and_constraints(final_term)
 
-    rule_body = push_down_rewrites(KRewrite(init_config, final_config))
+    rule_body = remove_generated_cells(push_down_rewrites(KRewrite(init_config, final_config)))
     rule_requires = simplify_bool(ml_pred_to_bool(init_constraint))
     rule_ensures = simplify_bool(ml_pred_to_bool(final_constraint))
     att_dict = {} if priority is None else {'priority': str(priority)}
@@ -166,5 +168,5 @@ def build_rule(
 
     rule = KRule(rule_body, requires=rule_requires, ensures=rule_ensures, att=rule_att)
     rule = rule.update_atts({'label': rule_id})
-    new_keep_vars = [v_subst[v].name for v in keep_vars]
+    new_keep_vars = [v_subst[v].name if v in v_subst else v for v in keep_vars]
     return (minimize_rule(rule, keep_vars=new_keep_vars), Subst(vremap_subst))

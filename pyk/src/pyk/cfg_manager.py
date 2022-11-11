@@ -49,7 +49,7 @@ def rename_generated_vars(cterm: CTerm) -> CTerm:
         if v.startswith('_Gen') or v.startswith('?_Gen') or v.startswith('_DotVar') or v.startswith('?_DotVar'):
             cvars = [cv for cv in config_var_count if v in config_var_count[cv]]
             if len(cvars) > 1:
-                raise ValueError(f'Found "Gen*" or "DotVar*" variable with multiple occurances: {v}')
+                raise ValueError(f'Found "Gen*" or "DotVar*" variable with multiple occurrences: {v}')
             cvar = cvars[0]
             new_v = abstract_term_safely(KVariable(v), base_name=cvar)
             while new_v.name in vs:

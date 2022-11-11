@@ -1,5 +1,5 @@
 from pyk.kast import KApply, KLabel, KSequence, KSort, KVariable
-from pyk.kore.syntax import DV, And, App, Equals, EVar, SortApp, String
+from pyk.kore.syntax import DV, And, App, Ceil, Equals, EVar, SortApp, String
 from pyk.ktool import KompileBackend
 from pyk.ktool.kprint import SymbolTable
 from pyk.prelude.kbool import TRUE
@@ -80,6 +80,19 @@ class KoreToKastTest(KProveTest):
                 KApply(
                     KLabel('#Equals', [KSort('Bool'), KSort('GeneratedTopCell')]),
                     [KVariable('X', sort=KSort('Bool')), TRUE],
+                ),
+            ),
+            (
+                'ml-ceil',
+                KSort('GeneratedTopCell'),
+                Ceil(
+                    SortApp('SortBool'),
+                    SortApp('SortGeneratedTopCell'),
+                    EVar('VarX', SortApp('SortBool')),
+                ),
+                KApply(
+                    KLabel('#Ceil', [KSort('Bool'), KSort('GeneratedTopCell')]),
+                    [KVariable('X', sort=KSort('Bool'))],
                 ),
             ),
             (
@@ -166,6 +179,23 @@ class KoreToKastTest(KProveTest):
                 KSort('Bar'),
                 EVar('VarX', SortApp('SortBar')),
                 KVariable('X'),
+            ),
+            (
+                'variable-different-sorts',
+                KSort('BarHolder'),
+                App(
+                    'Lblbarholder',
+                    [],
+                    [
+                        App(
+                            'Lblfoo',
+                            [],
+                            [App('inj', [SortApp('SortBaz'), SortApp('SortBar')], [EVar('VarB', SortApp('SortBaz'))])],
+                        ),
+                        App('inj', [SortApp('SortBaz'), SortApp('SortBar')], [EVar('VarB', SortApp('SortBaz'))]),
+                    ],
+                ),
+                KApply('barholder', [KApply('foo', [KVariable('B', sort=KSort('Baz'))]), KVariable('B')]),
             ),
         )
         for name, sort, kore, kast in kore_kast_pairs:
