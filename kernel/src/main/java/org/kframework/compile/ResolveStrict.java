@@ -3,14 +3,10 @@ package org.kframework.compile;
 
 import org.kframework.attributes.Att;
 import org.kframework.builtin.BooleanUtils;
+import org.kframework.builtin.Hooks;
 import org.kframework.builtin.Sorts;
-import org.kframework.definition.Context;
-import org.kframework.definition.ContextAlias;
-import org.kframework.definition.Definition;
+import org.kframework.definition.*;
 import org.kframework.definition.Module;
-import org.kframework.definition.Production;
-import org.kframework.definition.Rule;
-import org.kframework.definition.Sentence;
 import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.K;
 import org.kframework.kore.KApply;
@@ -240,6 +236,10 @@ public class ResolveStrict {
                 .filter(s -> s instanceof Production)
                 .map(s -> (Production) s)
                 .filter(p -> p.att().contains("strict") || p.att().contains("seqstrict")).collect(Collectors.toSet()));
-        return Module(input.name(), input.imports(), (scala.collection.Set<Sentence>) stream(input.localSentences()).filter(s -> !(s instanceof ContextAlias)).collect(Collections.toSet()).$bar(immutable(contextsToAdd)), input.att());
+        scala.collection.Set<Import> imports = input.imports();
+        // strictness makes use _andBool_ found in the BOOL module. Make sure it's imported
+        if (!contextsToAdd.isEmpty() && !input.importedModuleNames().contains(Hooks.BOOL))
+            imports = (scala.collection.Set<Import>) Set(Import.apply(d.getModule(Hooks.BOOL).get(), false)).$bar(imports);
+        return Module(input.name(), imports, (scala.collection.Set<Sentence>) stream(input.localSentences()).filter(s -> !(s instanceof ContextAlias)).collect(Collections.toSet()).$bar(immutable(contextsToAdd)), input.att());
     }
 }
