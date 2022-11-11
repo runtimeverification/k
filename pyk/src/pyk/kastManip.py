@@ -32,8 +32,8 @@ from .kast import (
     Subst,
     WithKAtt,
     bottom_up,
-    collect,
     top_down,
+    var_occurrences,
 )
 from .prelude.k import DOTS, EMPTY_K, GENERATED_TOP_CELL
 from .prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
@@ -205,12 +205,9 @@ def extract_subst(term: KInner) -> Tuple[Subst, KInner]:
 
 def count_vars(term: KInner) -> typing.Counter[str]:
     counter: typing.Counter[str] = Counter()
-
-    def count(term: KInner) -> None:
-        if type(term) is KVariable:
-            counter[term.name] += 1
-
-    collect(count, term)
+    occurrences = var_occurrences(term)
+    for vname in occurrences:
+        counter[vname] = len(occurrences[vname])
     return counter
 
 
@@ -371,22 +368,6 @@ def remove_semantic_casts(kast: KInner) -> KInner:
         return _kast
 
     return bottom_up(_remove_semtnaic_casts, kast)
-
-
-def mark_useless_vars(kast: KInner) -> KInner:
-    """Given a kast term as input with variables, return one where the useless vars are appropriately marked.
-
-    -   Input: A Kast term.
-    -   Output: Kast term with variables appropriately named.
-    """
-    occurances = count_vars(kast)
-    subst = {}
-    for v in occurances:
-        if v.startswith('_') and occurances[v] > 1:
-            subst[v] = KVariable(v[1:])
-        elif (not v.startswith('_')) and occurances[v] == 1:
-            subst[v] = KVariable('_' + v)
-    return substitute(kast, subst)
 
 
 def useless_vars_to_dots(kast: KInner, keep_vars: Iterable[str] = ()) -> KInner:
