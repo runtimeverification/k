@@ -11,7 +11,7 @@ from graphviz import Digraph
 
 from .cterm import CTerm, build_claim, build_rule
 from .kast import KClaim, KInner, KRule, Subst
-from .kastManip import ml_pred_to_bool, mlAnd, remove_generated_cells, remove_source_attributes, simplify_bool
+from .kastManip import ml_pred_to_bool, mlAnd, remove_source_attributes, simplify_bool
 from .ktool import KPrint
 from .utils import add_indent, compare_short_hashes, shorten_hash
 
@@ -469,7 +469,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
     def create_node(self, cterm: CTerm) -> Node:
         term = cterm.kast
-        term = remove_generated_cells(term)
         term = remove_source_attributes(term)
         cterm = CTerm(term)
         node = KCFG.Node(cterm)
