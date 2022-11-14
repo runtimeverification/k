@@ -1,7 +1,8 @@
 from typing import Final, Tuple
 from unittest import TestCase
 
-from pyk.kast import KApply, KAst, KAtt, KLabel, KNonTerminal, KProduction, KRule, KSort, KTerminal, KVariable
+from pyk.kast.inner import KApply, KAst, KAtt, KLabel, KSort, KVariable
+from pyk.kast.outer import KNonTerminal, KProduction, KRule, KTerminal
 from pyk.ktool.kprint import SymbolTable, pretty_print_kast, unparser_for_production
 from pyk.prelude.kbool import TRUE
 

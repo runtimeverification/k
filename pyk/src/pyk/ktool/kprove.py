@@ -9,8 +9,9 @@ from typing import Final, Iterable, List, Mapping, Optional, Tuple
 
 from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp, run_process
 from ..cterm import CTerm, build_claim
-from ..kast import KClaim, KDefinition, KFlatModule, KImport, KInner, KRequire, KRule, KSentence
-from ..kastManip import extract_subst, flatten_label, free_vars
+from ..kast.inner import KInner
+from ..kast.manip import extract_subst, flatten_label, free_vars
+from ..kast.outer import KClaim, KDefinition, KFlatModule, KImport, KRequire, KRule, KSentence
 from ..kore.rpc import KoreClient, KoreServer
 from ..kore.syntax import Pattern
 from ..prelude.k import GENERATED_TOP_CELL

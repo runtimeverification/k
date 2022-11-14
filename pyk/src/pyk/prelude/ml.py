@@ -1,6 +1,6 @@
 from typing import Iterable, Union
 
-from ..kast import KApply, KInner, KLabel, KSort, build_assoc
+from ..kast.inner import KApply, KInner, KLabel, KSort, build_assoc
 from .k import GENERATED_TOP_CELL
 from .kbool import BOOL, TRUE
 

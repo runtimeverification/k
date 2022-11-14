@@ -1,8 +1,8 @@
 from typing import Final, Mapping, Tuple
 from unittest import TestCase
 
-from pyk.kast import KInner
-from pyk.kastManip import count_vars
+from pyk.kast.inner import KInner
+from pyk.kast.manip import count_vars
 
 from .utils import a, b, c, f, g, h, x, y, z
 

@@ -6,8 +6,8 @@ from typing import Any, Dict, Final, Iterable, Optional
 
 from .cli_utils import check_dir_path, check_file_path
 from .cterm import CTerm
-from .kast import KApply, KClaim, KDefinition, KInner, KNonTerminal, KVariable, Subst
-from .kastManip import (
+from .kast.inner import KApply, KInner, KVariable, Subst
+from .kast.manip import (
     abstract_term_safely,
     bool_to_ml_pred,
     bottom_up,
@@ -17,6 +17,7 @@ from .kastManip import (
     free_vars,
     split_config_from,
 )
+from .kast.outer import KClaim, KDefinition, KNonTerminal
 from .kcfg import KCFG
 
 _LOGGER: Final = logging.getLogger(__name__)

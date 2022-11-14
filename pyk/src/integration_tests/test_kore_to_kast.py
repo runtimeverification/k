@@ -1,4 +1,4 @@
-from pyk.kast import KApply, KLabel, KSequence, KSort, KVariable
+from pyk.kast.inner import KApply, KLabel, KSequence, KSort, KVariable
 from pyk.kore.syntax import DV, And, App, Ceil, Equals, EVar, SortApp, String
 from pyk.ktool import KompileBackend
 from pyk.ktool.kprint import SymbolTable

@@ -7,40 +7,30 @@ from tempfile import TemporaryDirectory
 from typing import Any, Callable, Dict, Final, List, Optional
 
 from ..cli_utils import check_dir_path, check_file_path, run_process
-from ..kast import (
-    KApply,
-    KAs,
-    KAst,
-    KAtt,
+from ..kast.inner import KApply, KAs, KAst, KAtt, KInner, KLabel, KRewrite, KSequence, KSort, KToken, KVariable
+from ..kast.manip import flatten_label
+from ..kast.outer import (
     KBubble,
     KClaim,
     KContext,
     KDefinition,
     KFlatModule,
     KImport,
-    KInner,
-    KLabel,
     KNonTerminal,
     KProduction,
     KRegexTerminal,
     KRequire,
-    KRewrite,
     KRule,
-    KSequence,
-    KSort,
     KSortSynonym,
     KSyntaxAssociativity,
     KSyntaxLexical,
     KSyntaxPriority,
     KSyntaxSort,
     KTerminal,
-    KToken,
-    KVariable,
     read_kast_definition,
 )
-from ..kastManip import flatten_label
 from ..kore.parser import KoreParser
-from ..kore.syntax import DV, And, App, Ceil, Equals, EVar, Kore, Pattern, SortApp, String
+from ..kore.syntax import DV, And, App, Ceil, Equals, EVar, Pattern, SortApp, String
 from ..prelude.k import DOTS, EMPTY_K
 from ..prelude.kbool import TRUE
 
@@ -264,15 +254,12 @@ class KPrint:
             sort=ktoken.sort.name,
             profile=self._profile,
         )
-        kast = KAst.from_dict(json.loads(proc_res.stdout)['term'])
-        assert isinstance(kast, KInner)
-        return kast
+        return KInner.from_dict(json.loads(proc_res.stdout)['term'])
 
-    def kore_to_kast(self, kore: Kore) -> KAst:
-        if isinstance(kore, Pattern):
-            _kast_out = self._kore_to_kast(kore)
-            if _kast_out is not None:
-                return _kast_out
+    def kore_to_kast(self, kore: Pattern) -> KInner:
+        _kast_out = self._kore_to_kast(kore)
+        if _kast_out is not None:
+            return _kast_out
         _LOGGER.warning(f'Falling back to using `kast` for Kore -> Kast: {kore.text}')
         proc_res = _kast(
             definition_dir=self.definition_dir,
@@ -281,7 +268,7 @@ class KPrint:
             expression=kore.text,
             profile=self._profile,
         )
-        return KAst.from_dict(json.loads(proc_res.stdout)['term'])
+        return KInner.from_dict(json.loads(proc_res.stdout)['term'])
 
     def _kore_to_kast(self, kore: Pattern) -> Optional[KInner]:
         _LOGGER.debug(f'_kore_to_kast: {kore}')
@@ -343,12 +330,11 @@ class KPrint:
         _LOGGER.warning(f'KPrint._kore_to_kast failed on input: {kore}')
         return None
 
-    def kast_to_kore(self, kast: KAst, sort: Optional[KSort] = None) -> Kore:
-        if isinstance(kast, KInner):
-            kast = self.definition.sort_vars(kast)
-            _kore_out = self._kast_to_kore(kast, sort=sort)
-            if _kore_out is not None:
-                return _kore_out
+    def kast_to_kore(self, kast: KInner, sort: Optional[KSort] = None) -> Pattern:
+        kast = self.definition.sort_vars(kast)
+        _kore_out = self._kast_to_kore(kast, sort=sort)
+        if _kore_out is not None:
+            return _kore_out
         _LOGGER.warning(f'Falling back to using `kast` for KAst -> Kore: {kast}')
         kast_json = {'format': 'KAST', 'version': 2, 'term': kast.to_dict()}
         proc_res = _kast(

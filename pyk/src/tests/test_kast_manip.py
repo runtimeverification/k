@@ -1,8 +1,8 @@
 from typing import List, Tuple
 from unittest import TestCase
 
-from pyk.kast import KApply, KInner, KLabel, KRewrite, KSequence, KSort, KVariable
-from pyk.kastManip import (
+from pyk.kast.inner import KApply, KInner, KLabel, KRewrite, KSequence, KSort, KVariable
+from pyk.kast.manip import (
     bool_to_ml_pred,
     collapse_dots,
     minimize_term,

@@ -1,4 +1,4 @@
-from pyk.kast import KDefinition, KFlatModule
+from pyk.kast.outer import KDefinition, KFlatModule
 from pyk.ktool.kprint import KPrint
 
 

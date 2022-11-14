@@ -1,5 +1,5 @@
-from pyk.kast import KApply, KSequence, KToken, KVariable
-from pyk.kastManip import remove_attrs
+from pyk.kast.inner import KApply, KSequence, KToken, KVariable
+from pyk.kast.manip import remove_attrs
 from pyk.ktool import KompileBackend
 from pyk.ktool.kprint import SymbolTable
 from pyk.prelude.kint import intToken

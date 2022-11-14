@@ -1,8 +1,9 @@
 import json
 from pathlib import Path
 
-from pyk.kast import EMPTY_ATT, KAst, KDefinition, KFlatModuleList, KRequire
-from pyk.kastManip import remove_generated_cells
+from pyk.kast.inner import EMPTY_ATT
+from pyk.kast.manip import remove_generated_cells
+from pyk.kast.outer import KDefinition, KFlatModuleList, KRequire
 from pyk.ktool import KompileBackend
 from pyk.ktool.kprint import SymbolTable, paren
 from pyk.ktool.kprove import _kprove
@@ -27,8 +28,7 @@ class EmitJsonSpecTest(KProveTest):
         _kprove(spec_file, kompiled_dir=self.kompiled_dir, emit_json_spec=self.spec_json_file, dry_run=True)
 
         with open(self.spec_json_file, 'r') as f:
-            kfml = KAst.from_dict(json.load(f)['term'])
-            assert type(kfml) is KFlatModuleList
+            kfml = KFlatModuleList.from_dict(json.load(f)['term'])
 
         module = list(kfml.modules)[0]
         claim = module.claims[0]

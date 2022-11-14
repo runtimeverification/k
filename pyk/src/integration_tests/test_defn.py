@@ -1,5 +1,6 @@
-from pyk.kast import KApply, KClaim, KRewrite, KSort, KToken, KVariable
-from pyk.kastManip import push_down_rewrites
+from pyk.kast.inner import KApply, KRewrite, KSort, KToken, KVariable
+from pyk.kast.manip import push_down_rewrites
+from pyk.kast.outer import KClaim
 from pyk.ktool import KompileBackend
 from pyk.ktool.kprint import SymbolTable, assoc_with_unit
 from pyk.prelude.k import GENERATED_TOP_CELL

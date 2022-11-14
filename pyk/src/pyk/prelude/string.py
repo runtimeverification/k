@@ -1,6 +1,6 @@
 from typing import Final
 
-from ..kast import KSort, KToken
+from ..kast.inner import KSort, KToken
 
 STRING: Final = KSort('String')
 
