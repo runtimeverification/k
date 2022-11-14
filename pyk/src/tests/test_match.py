@@ -1,7 +1,7 @@
 from typing import Final, Tuple
 from unittest import TestCase
 
-from pyk.kast import KInner, KSequence
+from pyk.kast.inner import KInner, KSequence
 from pyk.prelude.ml import mlBottom, mlTop
 
 from .utils import a, b, c, f, g, h, x, y, z

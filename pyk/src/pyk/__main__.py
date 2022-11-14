@@ -8,8 +8,9 @@ from graphviz import Digraph
 
 from .coverage import get_rule_by_id, strip_coverage_logger
 from .cterm import split_config_and_constraints
-from .kast import KInner, read_kast_definition
-from .kastManip import flatten_label, minimize_rule, minimize_term, propagate_up_constraints, remove_source_map
+from .kast.inner import KInner
+from .kast.manip import flatten_label, minimize_rule, minimize_term, propagate_up_constraints, remove_source_map
+from .kast.outer import read_kast_definition
 from .kore.parser import KoreParser
 from .kore.syntax import Pattern
 from .ktool import KPrint, KProve

@@ -1,7 +1,8 @@
 from typing import Final, List, Tuple
 from unittest import TestCase
 
-from pyk.kast import KApply, KAtt, KDefinition, KFlatModule, KInner, KLabel, KSequence, KSort, KVariable, build_assoc
+from pyk.kast.inner import KApply, KAtt, KInner, KLabel, KSequence, KSort, KVariable, build_assoc
+from pyk.kast.outer import KDefinition, KFlatModule
 from pyk.prelude.kbool import BOOL
 from pyk.prelude.kint import INT
 from pyk.prelude.string import STRING

@@ -8,7 +8,7 @@ module SIMPLE-PROOFS
     configuration <k> $PGM:KItem </k>
                   <state> .Map </state>
 
-    syntax Bool ::= pred1 ( Int ) [function, functional, klabel(pred1), symbol, no-evaluators]
+    syntax Bool ::= pred1 ( Int ) [function, total, klabel(pred1), symbol, no-evaluators]
     syntax KItem ::= "foo" | "bar"
 
     syntax Foo ::= foo ( Bar ) [klabel(foo), symbol]

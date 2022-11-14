@@ -3,8 +3,8 @@ from functools import cached_property
 from itertools import chain
 from typing import Dict, Iterable, Iterator, Optional, Tuple
 
-from .kast import KApply, KAtt, KClaim, KInner, KRewrite, KRule, KVariable, Subst
-from .kastManip import (
+from .kast.inner import KApply, KAtt, KInner, KRewrite, KVariable, Subst
+from .kast.manip import (
     apply_existential_substitutions,
     count_vars,
     flatten_label,
@@ -17,6 +17,7 @@ from .kastManip import (
     split_config_and_constraints,
     substitute,
 )
+from .kast.outer import KClaim, KRule
 from .prelude.k import GENERATED_TOP_CELL
 from .prelude.ml import mlAnd, mlImplies, mlTop
 from .utils import unique

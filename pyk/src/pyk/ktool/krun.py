@@ -8,7 +8,7 @@ from typing import Final, List, Mapping, Optional
 
 from ..cli_utils import check_dir_path, check_file_path, run_process
 from ..cterm import CTerm
-from ..kast import KAst, KInner, KSort
+from ..kast.inner import KInner, KSort
 from ..kore.parser import KoreParser
 from ..kore.syntax import Pattern
 from .kprint import KPrint
@@ -50,8 +50,7 @@ class KRun(KPrint):
         if result.returncode != 0:
             raise RuntimeError('Non-zero exit-code from krun.')
 
-        result_kast = KAst.from_dict(json.loads(result.stdout)['term'])
-        assert isinstance(result_kast, KInner)
+        result_kast = KInner.from_dict(json.loads(result.stdout)['term'])
         return CTerm(result_kast)
 
     def run_kore(

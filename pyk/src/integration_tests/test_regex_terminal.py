@@ -1,4 +1,4 @@
-from pyk.kast import KRegexTerminal
+from pyk.kast.outer import KRegexTerminal
 from pyk.ktool import KompileBackend
 
 from .kompiled_test import KompiledTest

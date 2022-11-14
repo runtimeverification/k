@@ -1,8 +1,8 @@
 from typing import Dict, Final, Optional, Tuple
 from unittest import TestCase
 
-from pyk.kast import KApply, KInner, KLabel, KVariable, Subst
-from pyk.kastManip import extract_subst
+from pyk.kast.inner import KApply, KInner, KLabel, KVariable, Subst
+from pyk.kast.manip import extract_subst
 from pyk.prelude.kbool import TRUE
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlTop

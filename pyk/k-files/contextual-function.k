@@ -1,7 +1,7 @@
 module CONTEXTUAL-FUNCTION-SYNTAX
     imports INT-SYNTAX
 
-    syntax Int ::= getCtx() [function, functional]
+    syntax Int ::= getCtx() [function, total]
 endmodule
 
 
