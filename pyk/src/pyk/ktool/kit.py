@@ -7,8 +7,9 @@ from typing import Any, Callable, Dict, Final, Iterable, List, Mapping, Optional
 
 from ..cfg_manager import CFGManager
 from ..cterm import CTerm, build_claim
-from ..kast import KApply, KDefinition, KFlatModuleList, KInner, KSequence, KToken, Subst
-from ..kastManip import free_vars, get_cell, minimize_term
+from ..kast.inner import KApply, KInner, KSequence, KToken, Subst
+from ..kast.manip import free_vars, get_cell, minimize_term
+from ..kast.outer import KDefinition, KFlatModuleList
 from ..kcfg import KCFG
 from ..ktool import KProve
 from ..prelude.kbool import FALSE

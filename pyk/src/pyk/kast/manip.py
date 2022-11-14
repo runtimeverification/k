@@ -17,28 +17,13 @@ from typing import (
     TypeVar,
 )
 
-from .kast import (
-    EMPTY_ATT,
-    KApply,
-    KAtt,
-    KDefinition,
-    KFlatModule,
-    KInner,
-    KRewrite,
-    KRuleLike,
-    KSequence,
-    KToken,
-    KVariable,
-    Subst,
-    WithKAtt,
-    bottom_up,
-    top_down,
-    var_occurrences,
-)
-from .prelude.k import DOTS, EMPTY_K, GENERATED_TOP_CELL
-from .prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
-from .prelude.ml import is_top, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlOr
-from .utils import find_common_items, hash_str
+from ..prelude.k import DOTS, EMPTY_K, GENERATED_TOP_CELL
+from ..prelude.kbool import FALSE, TRUE, andBool, impliesBool, notBool, orBool
+from ..prelude.ml import is_top, mlAnd, mlBottom, mlEqualsTrue, mlImplies, mlOr
+from ..utils import find_common_items, hash_str
+from .inner import KApply, KInner, KRewrite, KSequence, KToken, KVariable, Subst, bottom_up, top_down, var_occurrences
+from .kast import EMPTY_ATT, KAtt, WithKAtt
+from .outer import KDefinition, KFlatModule, KRuleLike
 
 _LOGGER: Final = logging.getLogger(__name__)
 

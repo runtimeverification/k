@@ -2,7 +2,7 @@ from typing import Any, Dict, Iterable, List, Tuple
 from unittest import TestCase
 
 from pyk.cterm import CTerm
-from pyk.kast import KApply, KInner, KVariable
+from pyk.kast.inner import KApply, KInner, KVariable
 from pyk.kcfg import KCFG
 from pyk.prelude.kbool import TRUE
 from pyk.prelude.ml import mlEquals

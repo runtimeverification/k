@@ -1,6 +1,6 @@
 from typing import Final
 
-from ..kast import KApply, KSort, KToken
+from ..kast.inner import KApply, KSort, KToken
 
 K: Final = KSort('K')
 GENERATED_TOP_CELL: Final = KSort('GeneratedTopCell')
