@@ -459,7 +459,6 @@ public class Kompile {
     }
 
     public void structuralChecks(scala.collection.Set<Module> modules, Module mainModule, Option<Module> kModule, Set<String> excludedModuleTags) {
-        checkAnywhereRules(modules);
         boolean isSymbolic = excludedModuleTags.contains(Att.CONCRETE());
         boolean isKast = excludedModuleTags.contains(Att.KORE());
         CheckRHSVariables checkRHSVariables = new CheckRHSVariables(errors, !isSymbolic, kompileOptions.backend);
@@ -522,15 +521,6 @@ public class Kompile {
             kem.addAllKException(errors.stream().map(e -> e.exception).collect(Collectors.toList()));
             throw KEMException.compilerError("Had " + errors.size() + " structural errors.");
         }
-    }
-
-    private void checkAnywhereRules(scala.collection.Set<Module> modules) {
-        if (kompileOptions.backend.equals(Backends.HASKELL))
-            errors.addAll(stream(modules).flatMap(m -> stream(m.localSentences()).flatMap(s -> {
-                if (s instanceof Rule && s.att().contains(Att.ANYWHERE()))
-                    return Stream.of(KEMException.compilerError(Att.ANYWHERE() + " is not supported by the " + Backends.HASKELL + " backend.", s));
-                return Stream.empty();
-            })).collect(Collectors.toSet()));
     }
 
     public static Definition addSemanticsModule(Definition d) {
