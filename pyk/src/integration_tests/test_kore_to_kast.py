@@ -1,9 +1,10 @@
-from pyk.kast.inner import KApply, KLabel, KSequence, KSort, KVariable
-from pyk.kore.syntax import DV, And, App, Ceil, Equals, EVar, SortApp, String
+from pyk.kast.inner import KApply, KLabel, KSequence, KSort, KToken, KVariable
+from pyk.kore.syntax import DV, And, App, Ceil, Equals, EVar, Not, SortApp, String
 from pyk.ktool import KompileBackend
 from pyk.ktool.kprint import SymbolTable
 from pyk.prelude.kbool import TRUE
-from pyk.prelude.kint import intToken
+from pyk.prelude.kint import INT, intToken
+from pyk.prelude.string import STRING, stringToken
 
 from .kprove_test import KProveTest
 
@@ -20,16 +21,28 @@ class KoreToKastTest(KProveTest):
     def test_bidirectional(self) -> None:
         kore_kast_pairs = (
             (
-                'domain-value',
-                KSort('Int'),
+                'domain-value-int',
+                INT,
                 DV(SortApp('SortInt'), String('3')),
                 intToken(3),
             ),
             (
+                'domain-value-string',
+                STRING,
+                DV(SortApp('SortString'), String('foobar')),
+                stringToken('foobar'),
+            ),
+            (
+                'domain-value-bytes',
+                KSort('Bytes'),
+                DV(SortApp('SortBytes'), String('0000')),
+                KToken('b"0000"', KSort('Bytes')),
+            ),
+            (
                 'variable-with-sort',
-                KSort('Int'),
+                INT,
                 EVar('VarX', SortApp('SortInt')),
-                KVariable('X', sort=KSort('Int')),
+                KVariable('X', sort=INT),
             ),
             (
                 'variable-with-super-sort',
@@ -39,9 +52,9 @@ class KoreToKastTest(KProveTest):
             ),
             (
                 'variable-with-underscore',
-                KSort('Int'),
+                INT,
                 EVar("VarX'Unds'Y", SortApp('SortInt')),
-                KVariable('X_Y', sort=KSort('Int')),
+                KVariable('X_Y', sort=INT),
             ),
             (
                 'issue:k/2762',
@@ -92,6 +105,18 @@ class KoreToKastTest(KProveTest):
                 ),
                 KApply(
                     KLabel('#Ceil', [KSort('Bool'), KSort('GeneratedTopCell')]),
+                    [KVariable('X', sort=KSort('Bool'))],
+                ),
+            ),
+            (
+                'ml-not',
+                KSort('Bool'),
+                Not(
+                    SortApp('SortBool'),
+                    EVar('VarX', SortApp('SortBool')),
+                ),
+                KApply(
+                    KLabel('#Not', [KSort('Bool')]),
                     [KVariable('X', sort=KSort('Bool'))],
                 ),
             ),

@@ -30,9 +30,11 @@ from ..kast.outer import (
     read_kast_definition,
 )
 from ..kore.parser import KoreParser
-from ..kore.syntax import DV, And, App, Ceil, Equals, EVar, Pattern, SortApp, String
+from ..kore.syntax import DV, And, App, Ceil, Equals, EVar, Not, Pattern, SortApp, String
+from ..prelude.bytes import BYTES, bytesToken
 from ..prelude.k import DOTS, EMPTY_K
 from ..prelude.kbool import TRUE
+from ..prelude.string import STRING, stringToken
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -148,7 +150,7 @@ def _kast(
     sort: Optional[str] = None,
     # ---
     check: bool = True,
-    profile: bool = True,
+    profile: bool = False,
 ) -> CompletedProcess:
     if input_file:
         check_file_path(input_file)
@@ -274,6 +276,10 @@ class KPrint:
         _LOGGER.debug(f'_kore_to_kast: {kore}')
 
         if type(kore) is DV and kore.sort.name.startswith('Sort'):
+            if kore.sort == SortApp('SortString'):
+                return stringToken(kore.value.value)
+            if kore.sort == SortApp('SortBytes'):
+                return bytesToken(kore.value.value)
             return KToken(kore.value.value, KSort(kore.sort.name[4:]))
 
         elif type(kore) is EVar:
@@ -311,6 +317,12 @@ class KPrint:
             rarg = self._kore_to_kast(kore.right)
             if larg is not None and rarg is not None:
                 return KApply(KLabel('#And', [psort]), [larg, rarg])
+
+        elif type(kore) is Not:
+            psort = KSort(kore.sort.name[4:])
+            arg = self._kore_to_kast(kore.pattern)
+            if arg is not None:
+                return KApply(KLabel('#Not', [psort]), [arg])
 
         elif type(kore) is Equals:
             osort = KSort(kore.op_sort.name[4:])
@@ -356,7 +368,16 @@ class KPrint:
             return None
 
         if type(kast) is KToken:
-            dv: Pattern = DV(SortApp('Sort' + kast.sort.name), String(kast.token))
+            value = kast.token
+            if kast.sort == STRING:
+                assert value.startswith('"')
+                assert value.endswith('"')
+                value = value[1:-1]
+            if kast.sort == BYTES:
+                assert value.startswith('b"')
+                assert value.endswith('"')
+                value = value[2:-1]
+            dv: Pattern = DV(SortApp('Sort' + kast.sort.name), String(value))
             if sort is not None:
                 dv = self._add_sort_injection(dv, kast.sort, sort)
             return dv
@@ -402,6 +423,13 @@ class KPrint:
                         if sort is not None:
                             _and = self._add_sort_injection(_and, psort, sort)
                         return _and
+                elif kast.label.name == '#Not' and kast.arity == 1:
+                    arg = self._kast_to_kore(kast.args[0], sort=psort)
+                    if arg is not None:
+                        _not: Pattern = Not(SortApp('Sort' + psort.name), arg)
+                        if sort is not None:
+                            _not = self._add_sort_injection(_not, psort, sort)
+                        return _not
 
             elif len(kast.label.params) == 2:
                 osort = kast.label.params[0]
