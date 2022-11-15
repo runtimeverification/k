@@ -81,7 +81,6 @@ class KRun(KPrint):
 
         result_kore = KoreParser(result.stdout).pattern()
         result_kast = self.kore_to_kast(result_kore)
-        assert isinstance(result_kast, KInner)
         return CTerm(result_kast)
 
     def run_kore_term(

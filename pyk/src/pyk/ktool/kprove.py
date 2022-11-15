@@ -9,11 +9,10 @@ from typing import Final, Iterable, List, Mapping, Optional, Tuple
 
 from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp, run_process
 from ..cterm import CTerm, build_claim
-from ..kast.inner import KInner
+from ..kast.inner import KApply, KInner, KLabel
 from ..kast.manip import extract_subst, flatten_label, free_vars
 from ..kast.outer import KClaim, KDefinition, KFlatModule, KImport, KRequire, KRule, KSentence
 from ..kore.rpc import KoreClient, KoreServer
-from ..kore.syntax import Pattern
 from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.ml import is_top, mlAnd, mlBottom, mlTop
 from ..utils import unique
@@ -325,18 +324,29 @@ class KProve(KPrint):
         depth: Optional[int] = None,
         cut_point_rules: Optional[Iterable[str]] = None,
         terminal_rules: Optional[Iterable[str]] = None,
+        assume_defined: bool = True,
     ) -> Tuple[int, bool, KInner]:
+        if assume_defined:
+            cterm = cterm.add_constraint(
+                KApply(KLabel('#Ceil', [GENERATED_TOP_CELL, GENERATED_TOP_CELL]), [cterm.kast])
+            )
         kore = self.kast_to_kore(cterm.kast, GENERATED_TOP_CELL)
-        assert isinstance(kore, Pattern)
         _, kore_client = self.kore_rpc()
         er = kore_client.execute(kore, max_depth=depth, cut_point_rules=cut_point_rules, terminal_rules=terminal_rules)
         depth = er.depth
         branching = er.next_states is not None and len(er.next_states) > 1
         next_state = self.kore_to_kast(er.state.term)
-        assert isinstance(next_state, KInner)
+        next_predicate: KInner = mlTop()
+        next_predicate = mlTop() if er.state.predicate is None else self.kore_to_kast(er.state.predicate)
         assert er.state.substitution is None
-        assert er.state.predicate is None
-        return depth, branching, next_state
+        return depth, branching, mlAnd([next_state] + flatten_label('#And', next_predicate))
+
+    def simplify(self, cterm: CTerm) -> KInner:
+        kore = self.kast_to_kore(cterm.kast, GENERATED_TOP_CELL)
+        _, kore_client = self.kore_rpc()
+        kore_simplified = kore_client.simplify(kore)
+        kast_simplified = self.kore_to_kast(kore_simplified)
+        return kast_simplified
 
     def _write_claim_definition(self, claim: KClaim, claim_id: str, lemmas: Iterable[KRule] = ()) -> Tuple[Path, str]:
         tmp_claim = self.use_directory / (claim_id.lower() + '-spec')
