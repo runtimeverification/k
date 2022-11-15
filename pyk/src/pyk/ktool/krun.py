@@ -31,9 +31,14 @@ class KRun(KPrint):
         self,
         pgm: KInner,
         *,
+        config: Optional[Mapping[str, KInner]] = None,
         depth: Optional[int] = None,
         expand_macros: bool = False,
     ) -> CTerm:
+        if config is not None and 'PGM' in config:
+            raise ValueError('Cannot supply both pgm and config with PGM variable.')
+        pmap = {k: 'cat' for k in config} if config is not None else None
+        cmap = {k: self.kast_to_kore(v).text for k, v in config.items()} if config is not None else None
         with NamedTemporaryFile('w', dir=self.use_directory, delete=False) as ntf:
             ntf.write(self.pretty_print(pgm))
             ntf.flush()
@@ -45,6 +50,8 @@ class KRun(KPrint):
                 depth=depth,
                 no_expand_macros=not expand_macros,
                 profile=self._profile,
+                cmap=cmap,
+                pmap=pmap,
             )
 
         if result.returncode != 0:
@@ -164,7 +171,7 @@ def _krun(
     no_expand_macros: bool = False,
     # ---
     check: bool = True,
-    profile: bool = True,
+    profile: bool = False,
 ) -> CompletedProcess:
     if input_file:
         check_file_path(input_file)
