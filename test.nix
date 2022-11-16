@@ -40,7 +40,7 @@ in stdenv.mkDerivation {
     llvm-backend
   ];
   postPatch = ''
-    patchShebangs tests/regression-new
+    patchShebangs tests/smoke
   '';
   buildFlags = [
     # Find executables on PATH
@@ -63,7 +63,7 @@ in stdenv.mkDerivation {
   ] ++ lib.optional (test != null) "-C ${test}";
   enableParallelBuilding = true;
   preBuild = ''
-    cd tests/regression-new
+    cd tests/smoke
   '';
   installPhase = ''
     runHook preInstall

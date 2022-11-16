@@ -11,7 +11,7 @@ test.kore: 1.test kompile
 include ../../../include/kframework/ktest.mak
 
 clean:
-	rm -rf test.kore test-kompiled
+	rm -rf test.kore test-kompiled.depend-tmp .depend .kompile-* .krun-* .kprove-* .kbmc-* kore-exec.tar.gz
 
 
 KRUN_OR_LEGACY=./parse
