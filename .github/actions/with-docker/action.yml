@@ -32,7 +32,7 @@ runs:
       set -euxo pipefail
 
       Z3_VERSION=4.8.15
-      K_VERSION=$(cat ${SUBDIR}/package/version)
+      K_VERSION=$(cat ${SUBDIR}package/version)
 
       docker build . \
           --build-arg USER=$(id -un) --build-arg USER_ID=$(id -u)   \
