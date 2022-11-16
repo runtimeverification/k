@@ -8,6 +8,9 @@ inputs:
     description: 'Subdirectory where code is cloned.'
     required: false
     default:
+  os: 
+    description: 'OS to setup Docker for.'
+    required: true
   distro:
     description: 'Distribution to setup Docker for.'
     required: true
@@ -22,7 +25,8 @@ runs:
     env:
       TAG_NAME: ${{ inputs.tag }}
       SUBDIR: ${{ inputs.subdir }}
-      BASE_IMAGE: ${{ inputs.distro }}
+      BASE_OS: ${{ inputs.os }}
+      BASE_DISTRO: ${{ inputs.distro }}
       LLVM_VERSION: ${{ inputs.llvm }}
     run: |
       set -euxo pipefail
@@ -33,25 +37,25 @@ runs:
       docker build . \
           --build-arg USER=$(id -un) --build-arg USER_ID=$(id -u)   \
           --build-arg GROUP=$(id -gn) --build-arg GROUP_ID=$(id -g) \
-          --build-arg BASE_IMAGE=${BASE_IMAGE}                      \
-          --tag z3:${BASE_IMAGE}-${Z3_VERSION}                      \
+          --build-arg BASE_IMAGE=${BASE_OS}                      \
+          --tag z3:${BASE_OS}-${Z3_VERSION}                      \
           --file ${SUBDIR}.github/workflows/Dockerfile.z3
       docker build . \
           --build-arg USER=$(id -un) --build-arg USER_ID=$(id -u)   \
           --build-arg GROUP=$(id -gn) --build-arg GROUP_ID=$(id -g) \
-          --build-arg BASE_IMAGE=${BASE_IMAGE}                      \
-          --tag stack:${BASE_IMAGE}-${K_VERSION}                    \
+          --build-arg BASE_IMAGE=${BASE_OS}                      \
+          --tag stack:${BASE_OS}-${K_VERSION}                    \
           --file ${SUBDIR}.github/workflows/Dockerfile.stack-deps
       docker build . \
           --build-arg USER=$(id -un) --build-arg USER_ID=$(id -u)   \
           --build-arg GROUP=$(id -gn) --build-arg GROUP_ID=$(id -g) \
-          --build-arg BASE_IMAGE=${BASE_IMAGE}                      \
-          --tag maven:${BASE_IMAGE}-${K_VERSION}                    \
+          --build-arg BASE_IMAGE=${BASE_OS}                      \
+          --tag maven:${BASE_OS}-${K_VERSION}                    \
           --file ${SUBDIR}.github/workflows/Dockerfile.maven-cache
 
       docker build . --file ${SUBDIR}.github/workflows/Dockerfile    \
           --tag runtimeverification/${TAG_NAME}                      \
-          --build-arg BASE_IMAGE=${BASE_IMAGE}                       \
+          --build-arg BASE_IMAGE=${BASE_OS}                       \
           --build-arg Z3_VERSION=${Z3_VERSION}                       \
           --build-arg K_VERSION=${K_VERSION}                         \
           --build-arg LLVM_VERSION=${LLVM_VERSION}                   \

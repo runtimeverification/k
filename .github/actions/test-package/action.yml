@@ -1,6 +1,9 @@
 name: 'Build and Test Package'
 description: 'Build the package for a given distribution and test it.'
 inputs:
+  os: 
+    description: 'Release OS to build and test package for.'
+    required: true
   distro:
     description: 'Distribution to build and test package for.'
     required: true
@@ -19,19 +22,22 @@ runs:
     uses: ./.github/actions/with-docker
     with:
       tag: k-package-build-${{ inputs.distro }}-${{ github.sha }}
-      subdir: k-${{ inputs.distro }}/
+      subdir: k-${{ inputs.distro }}
+      os: ${{ inputs.os }}
       distro: ${{ inputs.distro }}
       llvm: ${{ inputs.llvm }}
+
   - name: 'Build Package: ${{ inputs.distro }}'
     shell: bash {0}
     env:
       DISTRO: ${{ inputs.distro }}
+      OS: ${{ inputs.os }}
     run: |
       set -euxo pipefail
       docker exec -t k-package-build-${DISTRO}-${GITHUB_SHA} /bin/bash -c 'mv package/debian debian'
-      docker exec -t k-package-build-${DISTRO}-${GITHUB_SHA} /bin/bash -c "mv debian/compat.${DISTRO} debian/compat"
-      docker exec -t k-package-build-${DISTRO}-${GITHUB_SHA} /bin/bash -c "mv debian/control.${DISTRO} debian/control"
-      docker exec -t k-package-build-${DISTRO}-${GITHUB_SHA} /bin/bash -c "mv debian/rules.${DISTRO} debian/rules"
+      docker exec -t k-package-build-${DISTRO}-${GITHUB_SHA} /bin/bash -c "mv debian/compat.${OS} debian/compat"
+      docker exec -t k-package-build-${DISTRO}-${GITHUB_SHA} /bin/bash -c "mv debian/control.${OS} debian/control"
+      docker exec -t k-package-build-${DISTRO}-${GITHUB_SHA} /bin/bash -c "mv debian/rules.${OS} debian/rules"
       docker exec -t k-package-build-${DISTRO}-${GITHUB_SHA} /bin/bash -c 'dpkg-buildpackage'
   - name: 'Tear down Docker'
     shell: bash {0}
