@@ -6,7 +6,7 @@ echo 'Starting kserver...'
 spawn-kserver $WD/kserver.log
 cd imp
 echo 'Testing tutorial in user environment...'
-time make -j `nproc` --output-sync
+make -j `nproc` --output-sync
 make clean
 cd ~
 echo "module TEST imports BOOL endmodule" > test.k
