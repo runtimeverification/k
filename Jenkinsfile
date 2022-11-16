@@ -35,69 +35,6 @@ pipeline {
         stash name: 'src', includes: "kframework-${env.VERSION}-src.tar.gz"
       }
     }
-    stage('Build and Package on Debian Bullseye') {
-      when {
-        branch 'master'
-        beforeAgent true
-      }
-      stages {
-        stage('Build on Debian Bullseye') {
-          agent {
-            dockerfile {
-              filename 'package/debian/Dockerfile'
-              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:bullseye --build-arg LLVM_VERSION=11'
-              reuseNode true
-            }
-          }
-          stages {
-            stage('Build Debian Package') {
-              steps {
-                dir("kframework-${env.VERSION}") {
-                  checkout scm
-                  sh '''
-                    mv package/debian ./debian
-                    mv debian/control.debian debian/control
-                    mv debian/rules.debian debian/rules
-                    dpkg-buildpackage
-                  '''
-                }
-                stash name: 'bullseye', includes: "kframework_${env.VERSION}_amd64.deb"
-              }
-            }
-          }
-        }
-        stage('Test Debian Package') {
-          agent {
-            docker {
-              image 'debian:bullseye'
-              args '-u 0'
-              reuseNode true
-            }
-          }
-          options { skipDefaultCheckout() }
-          steps {
-            unstash 'bullseye'
-            sh '''
-              # echo "deb http://deb.debian.org/debian bullseye-backports main" > /etc/apt/sources.list.d/bullseye-backports.list
-              src/main/scripts/test-in-container-debian
-            '''
-          }
-          post {
-            always {
-              sh 'stop-kserver || true'
-              archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-            }
-          }
-        }
-      }
-      post {
-        failure {
-          slackSend color: '#cb2431'                                             \
-                  , channel: '#k'                                                \
-                  , message: "Debian Bullseye Packaging Failed: ${env.BUILD_URL}"
-        }
-      }
-    }
     stage('Build and Package on Arch Linux') {
       when {
         branch 'master'

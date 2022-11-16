@@ -136,7 +136,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
         with:
           asset_content_type: 'application/gzip'
-          asset_name: 'K Framework Debian Bullseye (22.04) Deb'
+          asset_name: 'K Framework Debian Bullseye (11) Deb'
           asset_path: kframework_amd64_bullseye.deb
           upload_url: ${{ github.event.release.upload_url }}
       - name: 'Build, Test, and Push Dockerhub Image'
