@@ -51,6 +51,8 @@ jobs:
           os: ubuntu
           distro: jammy
           llvm: 14
+          build-package: package/debian/build-package jammy
+          test-package: package/debian/test-package jammy
       - uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
@@ -91,6 +93,8 @@ jobs:
           os: ubuntu
           distro: focal
           llvm: 12
+          build-package: package/debian/build-package focal
+          test-package: package/debian/test-package focal
       - uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
@@ -131,6 +135,8 @@ jobs:
           os: debian
           distro: bullseye
           llvm: 11
+          build-package: package/debian/build-package bullseye
+          test-package: package/debian/test-package bullseye
       - uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
