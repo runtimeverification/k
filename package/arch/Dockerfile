@@ -1,4 +1,6 @@
-FROM archlinux:base
+ARG BASE_OS
+ARG BASE_DISTRO
+FROM ${BASE_OS}:${BASE_DISTRO}
 
 RUN    pacman -Sy   --noconfirm archlinux-keyring \
     && pacman -Syyu --noconfirm                   \
@@ -26,12 +28,14 @@ RUN    pacman -Sy   --noconfirm archlinux-keyring \
                        z3                         \
                        zlib
 
+# The image is built specifically for an environment with this user/group
+ARG USER=github-user
+ARG GROUP=${USER}
 ARG USER_ID=1000
-ARG GROUP_ID=1000
-RUN    groupadd -g $GROUP_ID user                     \
-    && useradd -m -u $USER_ID -s /bin/sh -g user user
+ARG GROUP_ID=${USER_ID}
+RUN groupadd -g $GROUP_ID ${GROUP} && useradd -m -u ${USER_ID} -s /bin/sh -g ${GROUP} ${USER}
 
-USER $USER_ID:$GROUP_ID
+USER ${USER_ID}:${GROUP_ID}
 
 ENV PATH="${PATH}:/usr/bin/core_perl"
 
