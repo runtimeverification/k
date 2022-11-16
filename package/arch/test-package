@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euxo pipefail
+
+version="$1" ; shift
+
+pacman -Syyu --noconfirm
+pacman -U --noconfirm kframework-git-${version}-1-x86_64.pkg.tar.zst
+src/main/scripts/test-in-container

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -euxo pipefail
+
+base_distro="$1" ; shift
+
+k-${base_distro}/src/main/scripts/test-in-container-debian
