@@ -325,7 +325,7 @@ class KProve(KPrint):
         cut_point_rules: Optional[Iterable[str]] = None,
         terminal_rules: Optional[Iterable[str]] = None,
         assume_defined: bool = True,
-    ) -> Tuple[int, bool, KInner]:
+    ) -> Tuple[int, KInner, List[KInner]]:
         if assume_defined:
             cterm = cterm.add_constraint(
                 KApply(KLabel('#Ceil', [GENERATED_TOP_CELL, GENERATED_TOP_CELL]), [cterm.kast])
@@ -334,11 +334,10 @@ class KProve(KPrint):
         _, kore_client = self.kore_rpc()
         er = kore_client.execute(kore, max_depth=depth, cut_point_rules=cut_point_rules, terminal_rules=terminal_rules)
         depth = er.depth
-        branching = er.next_states is not None and len(er.next_states) > 1
-        next_state = self.kore_to_kast(er.state.term)
-        next_predicate = mlTop() if er.state.predicate is None else self.kore_to_kast(er.state.predicate)
-        assert er.state.substitution is None
-        return depth, branching, mlAnd([next_state] + flatten_label('#And', next_predicate))
+        next_state = self.kore_to_kast(er.state.kore)
+        _next_states = er.next_states if er.next_states is not None and len(er.next_states) > 1 else []
+        next_states = [self.kore_to_kast(ns.kore) for ns in _next_states]
+        return depth, next_state, next_states
 
     def simplify(self, cterm: CTerm) -> KInner:
         kore = self.kast_to_kore(cterm.kast, GENERATED_TOP_CELL)
