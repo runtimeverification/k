@@ -112,7 +112,6 @@ pipeline {
       environment { GITHUB_TOKEN = credentials('rv-jenkins-access-token') }
       steps {
         unstash 'src'
-        dir('bullseye') { unstash 'bullseye' }
         dir('arch')     { unstash 'arch'     }
         sshagent(['rv-jenkins-github']) {
           sh '''
@@ -131,7 +130,6 @@ pipeline {
             git push origin "${K_RELEASE_TAG}"
 
             mv ../kframework-${VERSION}-src.tar.gz                     kframework-${VERSION}-src.tar.gz
-            mv ../bullseye/kframework_${VERSION}_amd64.deb             kframework_${VERSION}_amd64_bullseye.deb
             mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst  kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
 
             echo "K Framework Release ${VERSION}"  > release.md
@@ -139,7 +137,6 @@ pipeline {
             cat k-distribution/INSTALL.md         >> release.md
             hub release create --prerelease                                                      \
                 --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                        \
-                --attach kframework_${VERSION}_amd64_bullseye.deb'#Debian Bullseye (11) Package' \
                 --attach kframework-git-${VERSION}-1-x86_64.pkg.tar.zst'#Arch Package'           \
                 --file release.md "${K_RELEASE_TAG}"
           '''
