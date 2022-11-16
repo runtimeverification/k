@@ -27,7 +27,7 @@ from typing import (
 
 from ..cli_utils import check_dir_path, check_file_path
 from ..utils import filter_none
-from .syntax import Pattern
+from .syntax import And, Pattern, SortApp
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -164,6 +164,15 @@ class State:
             substitution=Pattern.from_dict(dct['substitution']['term']) if 'substitution' in dct else None,
             predicate=Pattern.from_dict(dct['predicate']['term']) if 'predicate' in dct else None,
         )
+
+    @property
+    def kore(self) -> Pattern:
+        _kore = self.term
+        if self.substitution is not None:
+            _kore = And(SortApp('SortGeneratedTopCell'), _kore, self.substitution)
+        if self.predicate is not None:
+            _kore = And(SortApp('SortGeneratedTopCell'), _kore, self.predicate)
+        return _kore
 
 
 class ExecuteResult(ABC):  # noqa: B024

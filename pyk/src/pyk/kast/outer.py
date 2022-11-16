@@ -853,6 +853,8 @@ class KDefinition(KOuter, WithKAtt):
 
     _production_for_klabel: Dict[KLabel, KProduction]
     _subsorts: Dict[KSort, List[KSort]]
+    _init_config: Dict[KSort, KInner]
+    _empty_config: Dict[KSort, KInner]
 
     def __init__(
         self,
@@ -878,6 +880,8 @@ class KDefinition(KOuter, WithKAtt):
         object.__setattr__(self, 'main_module', main_module)
         object.__setattr__(self, '_production_for_klabel', {})
         object.__setattr__(self, '_subsorts', {})
+        object.__setattr__(self, '_init_config', {})
+        object.__setattr__(self, '_empty_config', {})
 
     def __iter__(self) -> Iterator[KFlatModule]:
         return iter(self.modules)
@@ -941,6 +945,24 @@ class KDefinition(KOuter, WithKAtt):
     @property
     def rules(self) -> List[KRule]:
         return [rule for module in self.modules for rule in module.rules]
+
+    @property
+    def alias_rules(self) -> List[KRule]:
+        return [rule for rule in self.rules if 'alias' in rule.att]
+
+    @property
+    def macro_rules(self) -> List[KRule]:
+        return [rule for rule in self.rules if 'macro' in rule.att] + self.alias_rules
+
+    @property
+    def semantic_rules(self) -> List[KRule]:
+        _semantic_rules = []
+        for r in self.rules:
+            if type(r.body) is KApply and r.body.label.name == '<generatedTop>':
+                _semantic_rules.append(r)
+            if type(r.body) is KRewrite and type(r.body.lhs) is KApply and r.body.lhs.label.name == '<generatedTop>':
+                _semantic_rules.append(r)
+        return _semantic_rules
 
     def production_for_klabel(self, klabel: KLabel) -> KProduction:
         if klabel not in self._production_for_klabel:
@@ -1011,6 +1033,11 @@ class KDefinition(KOuter, WithKAtt):
         return subst(kast)
 
     def empty_config(self, sort: KSort) -> KInner:
+        if sort not in self._empty_config:
+            self._empty_config[sort] = self._compute_empty_config(sort)
+        return self._empty_config[sort]
+
+    def _compute_empty_config(self, sort: KSort) -> KInner:
         def _kdefinition_empty_config(_sort: KSort) -> KApply:
             cell_prod = self.production_for_cell_sort(_sort)
             cell_klabel = cell_prod.klabel
@@ -1034,6 +1061,11 @@ class KDefinition(KOuter, WithKAtt):
         return _kdefinition_empty_config(sort)
 
     def init_config(self, sort: KSort) -> KInner:
+        if sort not in self._init_config:
+            self._init_config[sort] = self._compute_init_config(sort)
+        return self._init_config[sort]
+
+    def _compute_init_config(self, sort: KSort) -> KInner:
 
         config_var_map = KVariable('__###CONFIG_VAR_MAP###__')
 

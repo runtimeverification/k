@@ -1,3 +1,5 @@
+from typing import List, Tuple
+
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KAtt, KSequence, KToken, KVariable
 from pyk.kast.manip import get_cell
@@ -55,24 +57,37 @@ class SimpleProofTest(KProveTest):
             )
 
         # Given
-        pre_state = '.Map'
+        test_data = (('simple-branch', 3, ('a', '.Map'), 1, ('b', '.Map'), [('c', '.Map'), ('d', '.Map')]),)
 
-        test_data = (('simple-branch', 3, 'a', (1, True, ('b', '.Map'))),)
-
-        for name, depth, pre_k, (expected_depth, expected_branching, (expected_k, expected_mem)) in test_data:
+        for (
+            name,
+            depth,
+            (pre_k, pre_state),
+            expected_depth,
+            (expected_k, expected_state),
+            expected_next_states,
+        ) in test_data:
             with self.subTest(name):
                 # When
-                actual_depth, actual_branching, _actual_state = self.kprove.execute(
+                actual_depth, _actual_state, _actual_next_states = self.kprove.execute(
                     _config(pre_k, pre_state), depth=depth
                 )
                 actual_k = self.kprove.pretty_print(get_cell(_actual_state, 'K_CELL'))
-                actual_mem = self.kprove.pretty_print(get_cell(_actual_state, 'STATE_CELL'))
+                actual_state = self.kprove.pretty_print(get_cell(_actual_state, 'STATE_CELL'))
+
+                actual_next_states = [
+                    (
+                        self.kprove.pretty_print(get_cell(s, 'K_CELL')),
+                        self.kprove.pretty_print(get_cell(s, 'STATE_CELL')),
+                    )
+                    for s in _actual_next_states
+                ]
 
                 # Then
                 self.assertEqual(actual_k, expected_k)
-                self.assertEqual(actual_mem, expected_mem)
-                self.assertEqual(actual_branching, expected_branching)
+                self.assertEqual(actual_state, expected_state)
                 self.assertEqual(actual_depth, expected_depth)
+                self.assertCountEqual(actual_next_states, expected_next_states)
 
 
 class ImpProofTest(KProveTest):
@@ -177,30 +192,60 @@ class ImpProofTest(KProveTest):
             )
 
         # Given
-        pre_state = '.Map'
-
+        empty_states: List[Tuple[str, str]] = []
         test_data = (
-            ('step-1', 1, 'int $n , $s ; $n = 3 ;', (1, False, ('int $s , .Ids ; $n = 3 ;', '$n |-> 0'))),
-            ('step-2', 2, 'int $n , $s ; $n = 3 ;', (2, False, ('int .Ids ; $n = 3 ;', '$s |-> 0 $n |-> 0'))),
+            (
+                'step-1',
+                1,
+                ('int $n , $s ; $n = 3 ;', '.Map'),
+                1,
+                ('int $s , .Ids ; $n = 3 ;', '$n |-> 0'),
+                empty_states,
+            ),
+            (
+                'step-2',
+                2,
+                ('int $n , $s ; $n = 3 ;', '.Map'),
+                2,
+                ('int .Ids ; $n = 3 ;', '$s |-> 0 $n |-> 0'),
+                empty_states,
+            ),
             (
                 'branch',
                 4,
-                'int $n ; if (_B:Bool) { $n = 1; } else { $n = 2; }',
-                (2, True, ('if ( _B:Bool ) { $n = 1 ; } else { $n = 2 ; }', '$n |-> 0')),
+                ('int $n ; if (_B:Bool) { $n = 1; } else { $n = 2; }', '.Map'),
+                2,
+                ('if ( _B:Bool ) { $n = 1 ; } else { $n = 2 ; }', '$n |-> 0'),
+                [('{ $n = 1 ; }', '$n |-> 0'), ('{ $n = 2 ; }', '$n |-> 0')],
             ),
         )
 
-        for name, depth, pre_k, (expected_depth, expected_branching, (expected_k, expected_mem)) in test_data:
+        for (
+            name,
+            depth,
+            (pre_k, pre_state),
+            expected_depth,
+            (expected_k, expected_state),
+            expected_next_states,
+        ) in test_data:
             with self.subTest(name):
                 # When
-                actual_depth, actual_branching, _actual_state = self.kprove.execute(
+                actual_depth, _actual_state, _actual_next_states = self.kprove.execute(
                     _config(pre_k, pre_state), depth=depth
                 )
                 actual_k = self.kprove.pretty_print(get_cell(_actual_state, 'K_CELL'))
-                actual_mem = self.kprove.pretty_print(get_cell(_actual_state, 'STATE_CELL'))
+                actual_state = self.kprove.pretty_print(get_cell(_actual_state, 'STATE_CELL'))
+
+                actual_next_states = [
+                    (
+                        self.kprove.pretty_print(get_cell(s, 'K_CELL')),
+                        self.kprove.pretty_print(get_cell(s, 'STATE_CELL')),
+                    )
+                    for s in _actual_next_states
+                ]
 
                 # Then
                 self.assertEqual(actual_k, expected_k)
-                self.assertEqual(actual_mem, expected_mem)
-                self.assertEqual(actual_branching, expected_branching)
+                self.assertEqual(actual_state, expected_state)
                 self.assertEqual(actual_depth, expected_depth)
+                self.assertCountEqual(actual_next_states, expected_next_states)
