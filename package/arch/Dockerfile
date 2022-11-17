@@ -40,10 +40,10 @@ RUN    pacman -Sy   --noconfirm archlinux-keyring \
                        openssh                    \
                        python                     \
                        python-pip                 \
+                       stack                      \
                        zlib
 
 COPY --from=Z3 /usr/bin/z3 /usr/bin/z3
-COPY --from=STACK /usr/local/bin/stack /usr/local/bin/stack
 
 # The image is built specifically for an environment with this user/group
 ARG USER=github-user
