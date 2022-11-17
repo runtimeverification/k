@@ -96,7 +96,7 @@ runs:
       PKG_NAME: ${{ inputs.pkg-name }}
     run: |
       set -euxo pipefail
-      docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "${TEST_PACKAGE} ${PKG_NAME}"
+      docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "${TEST_PACKAGE} ./${PKG_NAME}"
 
   - name: 'Tear down Docker Test'
     shell: bash {0}
