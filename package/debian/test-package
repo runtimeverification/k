@@ -3,5 +3,6 @@
 set -euxo pipefail
 
 base_distro="$1" ; shift
+pkg="$1" ; shift
 
-k-${base_distro}/src/main/scripts/test-in-container-debian
+k-${base_distro}/src/main/scripts/test-in-container-debian ${pkg}

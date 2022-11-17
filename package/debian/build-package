@@ -3,6 +3,7 @@
 set -euxo pipefail
 
 base_distro="$1" ; shift
+pkg_name="$1" ; shift
 
 mkdir debian
 
@@ -16,3 +17,5 @@ mv package/debian/control.${base_distro} debian/control
 mv package/debian/rules.${base_distro} debian/rules
 
 dpkg-buildpackage
+
+mv ../kframework_$(cat package/version)_amd64.deb ${pkg_name}
