@@ -31,7 +31,7 @@ runs:
   - name: 'Set up Docker'
     uses: ./.github/actions/with-docker
     with:
-      tag: k-package-build-${{ inputs.distro }}-${{ github.sha }}
+      tag: k-package-build-${{ inputs.os }}-${{ inputs.distro }}-${{ github.sha }}
       subdir: k-${{ inputs.distro }}/
       os: ${{ inputs.os }}
       distro: ${{ inputs.distro }}
