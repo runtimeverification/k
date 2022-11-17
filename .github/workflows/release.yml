@@ -48,6 +48,7 @@ jobs:
       - name: 'Build and Test Package'
         uses: ./.github/actions/test-package
         with:
+          os: ubuntu
           distro: jammy
           llvm: 14
       - uses: actions/upload-release-asset@v1
@@ -87,6 +88,7 @@ jobs:
       - name: 'Build and Test Package'
         uses: ./.github/actions/test-package
         with:
+          os: ubuntu
           distro: focal
           llvm: 12
       - uses: actions/upload-release-asset@v1
@@ -117,6 +119,26 @@ jobs:
         if: always()
         run: |
           docker stop --time=0 k-package-docker-test-focal-${GITHUB_SHA}
+
+  debian-bullseye:
+    name: 'K Debian Bullseye Package'
+    runs-on: [self-hosted, linux, normal]
+    steps:
+      - uses: actions/checkout@v3
+      - name: 'Build and Test Package'
+        uses: ./.github/actions/test-package
+        with:
+          os: debian
+          distro: bullseye
+          llvm: 11
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
+        with:
+          asset_content_type: 'application/gzip'
+          asset_name: 'K Framework Debian Bullseye (11) Deb'
+          asset_path: kframework_amd64_bullseye.deb
+          upload_url: ${{ github.event.release.upload_url }}
 
   macos-build:
     name: 'Build MacOS Package'
@@ -285,7 +307,7 @@ jobs:
     name: 'Publish Release'
     runs-on: ubuntu-latest
     environment: production
-    needs: [nix-release, macos-build, macos-test, ubuntu-jammy, ubuntu-focal, set-release-id]
+    needs: [nix-release, macos-build, macos-test, ubuntu-jammy, ubuntu-focal, debian-bullseye, set-release-id]
     steps:
       - name: Publish release
         uses: actions/github-script@v4

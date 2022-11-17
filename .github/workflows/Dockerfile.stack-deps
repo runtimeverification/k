@@ -1,5 +1,6 @@
-ARG BASE_IMAGE
-FROM ubuntu:${BASE_IMAGE}
+ARG BASE_OS
+ARG BASE_DISTRO
+FROM ${BASE_OS}:${BASE_DISTRO}
 
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
