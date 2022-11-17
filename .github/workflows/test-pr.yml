@@ -86,6 +86,7 @@ jobs:
         uses: ./.github/actions/with-docker
         with:
           tag: k-ci-${{ github.sha }}
+          os: ubuntu
           distro: jammy
           llvm: 14
       - name: 'Build and Test K'
@@ -117,6 +118,7 @@ jobs:
       - name: 'Build and Test'
         uses: ./.github/actions/test-package
         with:
+          os: ubuntu
           distro: jammy
           llvm: 14
 
