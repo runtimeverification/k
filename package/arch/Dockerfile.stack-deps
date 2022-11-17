@@ -2,14 +2,10 @@ ARG BASE_OS
 ARG BASE_DISTRO
 FROM ${BASE_OS}:${BASE_DISTRO}
 
-ENV TZ=America/Chicago
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-RUN    apt-get update        \
-    && apt-get upgrade --yes \
-    && apt-get install --yes \
-            curl             \
-            stack
+RUN    pacman -Sy   --noconfirm archlinux-keyring \
+    && pacman -Syyu --noconfirm                   \
+    && pacman -S    --noconfirm                   \
+                        stack
 
 # The image is built specifically for an environment with this user/group
 ARG USER=github-user
