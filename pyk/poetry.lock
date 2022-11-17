@@ -495,7 +495,7 @@ requests = ">=2.0.1,<3.0.0"
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 
@@ -588,7 +588,7 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "f7ca888b15805f3cac3925243da32e7be18eb6bff218aec72f9a1ae5e25f0483"
+content-hash = "5022817e1c2d0683327701dbd67f3f2683eda19c59cba6be7ac020105ead0bef"
 
 [metadata.files]
 aniso8601 = [

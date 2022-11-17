@@ -43,10 +43,26 @@ def check_file_path(path: Path) -> None:
         raise ValueError(f'Path is not a file: {path}')
 
 
+def check_absolute_path(path: Path) -> None:
+    if not path.is_absolute():
+        raise ValueError(f'Path is not absolute: {path}')
+
+
+def check_relative_path(path: Path) -> None:
+    if path.is_absolute():
+        raise ValueError(f'Path is not relative: {path}')
+
+
 def file_path(s: str) -> Path:
     path = Path(s)
     check_file_path(path)
     return path
+
+
+def abs_or_rel_to(path: Path, base: Path) -> Path:
+    if path.is_absolute():
+        return path
+    return base / path
 
 
 def run_process(
@@ -56,10 +72,14 @@ def run_process(
     input: Optional[str] = None,
     pipe_stdout: bool = True,
     pipe_stderr: bool = False,
+    cwd: Optional[Union[str, Path]] = None,
     env: Optional[Mapping[str, str]] = None,
     logger: Optional[Logger] = None,
     profile: bool = False,
 ) -> CompletedProcess:
+    if cwd is not None:
+        cwd = Path(cwd)
+        check_dir_path(cwd)
 
     if type(args) is str:
         command = args
@@ -77,7 +97,7 @@ def run_process(
     try:
         if profile:
             start_time = time.time()
-        res = subprocess.run(args, input=input, env=env, stdout=stdout, stderr=stderr, check=check, text=True)
+        res = subprocess.run(args, input=input, cwd=cwd, env=env, stdout=stdout, stderr=stderr, check=check, text=True)
     except CalledProcessError as err:
         logger.info(f'Completed with status {err.returncode}: {command}')
         raise
