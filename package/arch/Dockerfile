@@ -1,8 +1,6 @@
 ARG BASE_OS
 ARG BASE_DISTRO
 ARG K_VERSION
-ARG Z3_VERSION
-FROM z3:${BASE_DISTRO}-${Z3_VERSION} as Z3
 
 ARG BASE_OS
 ARG BASE_DISTRO
@@ -41,9 +39,8 @@ RUN    pacman -Sy   --noconfirm archlinux-keyring \
                        python                     \
                        python-pip                 \
                        stack                      \
+                       z3                         \
                        zlib
-
-COPY --from=Z3 /usr/bin/z3 /usr/bin/z3
 
 # The image is built specifically for an environment with this user/group
 ARG USER=github-user
