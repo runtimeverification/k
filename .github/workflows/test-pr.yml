@@ -122,6 +122,19 @@ jobs:
           distro: jammy
           llvm: 14
 
+  debian-bullseye:
+    name: 'K Debian Bullseye Package'
+    runs-on: [self-hosted, linux, normal]
+    steps:
+      - uses: actions/checkout@v3
+      - name: 'Build and Test Package'
+        uses: ./.github/actions/test-package
+        with:
+          os: debian
+          distro: bullseye
+          llvm: 11
+
+
   compile-nix-flake:
     name: 'Nix flake'
     strategy:
