@@ -79,6 +79,7 @@ runs:
     env:
       BASE_OS: ${{ inputs.os }}
       BASE_DISTRO: ${{ inputs.distro }}
+      TEST_PACKAGE: ${{ inputs.test-package }}
     run: |
       set -euxo pipefail
       docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "${TEST_PACKAGE}"
