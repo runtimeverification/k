@@ -21,8 +21,9 @@ inputs:
     description: 'Script which tests the given package.'
     required: true
   pkg-name:
-    description: 'Script which tests the given package.'
-    required: true
+    description: 'Where to move the package.'
+    required: false
+    default: package.pkg
 runs:
   using: 'composite'
   steps:
