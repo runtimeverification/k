@@ -129,7 +129,7 @@ jobs:
         uses: ./.github/actions/test-package
         with:
           os: debian
-          distro: bullseye 
+          distro: bullseye
           llvm: 11
       - uses: actions/upload-release-asset@v1
         env:
