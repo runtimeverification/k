@@ -20,6 +20,9 @@ inputs:
   test-package:
     description: 'Script which tests the given package.'
     required: true
+  pkg-name:
+    description: 'Script which tests the given package.'
+    required: true
 runs:
   using: 'composite'
   steps:
@@ -44,9 +47,10 @@ runs:
       BASE_DISTRO: ${{ inputs.distro }}
       BASE_OS: ${{ inputs.os }}
       BUILD_PACKAGE: ${{ inputs.build-package }}
+      PKG_NAME: ${{ inputs.pkg-name }}
     run: |
       set -euxo pipefail
-      docker exec -t k-package-build-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "${BUILD_PACKAGE}"
+      docker exec -t k-package-build-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "${BUILD_PACKAGE} ${PKG_NAME}"
   - name: 'Tear down Docker'
     shell: bash {0}
     env:
@@ -80,9 +84,10 @@ runs:
       BASE_OS: ${{ inputs.os }}
       BASE_DISTRO: ${{ inputs.distro }}
       TEST_PACKAGE: ${{ inputs.test-package }}
+      PKG_NAME: ${{ inputs.pkg-name }}
     run: |
       set -euxo pipefail
-      docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "${TEST_PACKAGE}"
+      docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "${TEST_PACKAGE} ${PKG_NAME}"
   - name: 'Tear down Docker Test'
     shell: bash {0}
     env:
@@ -92,9 +97,3 @@ runs:
     run: |
       docker stop --time=0 k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA}
       docker container rm --force k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} || true
-  - name: 'Rename Package'
-    shell: bash {0}
-    env:
-      BASE_OS: ${{ inputs.os }}
-      BASE_DISTRO: ${{ inputs.distro }}
-    run: mv kframework_$(cat package/version)_amd64.deb kframework_amd64_${BASE_OS}_${BASE_DISTRO}.deb
