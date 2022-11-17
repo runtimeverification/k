@@ -1,9 +1,9 @@
 #!/bin/sh -ex
 #cp -R /usr/share/kframework/pl-tutorial ~
-pwd
-ll
+ls
 WD=`pwd`
 cd
+ls
 echo 'Starting kserver...'
 spawn-kserver $WD/kserver.log
 cd test/smoke
