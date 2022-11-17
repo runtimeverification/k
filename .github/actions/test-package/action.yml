@@ -70,6 +70,7 @@ runs:
       BASE_DISTRO: ${{ inputs.distro }}
     run: |
       set -euxo pipefail
+      docker exec -t k-package-test-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "cp -R k-${BASE_DISTRO}/k-distribution/tests/smoke tests/smoke"
       docker exec -t k-package-test-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "k-${BASE_DISTRO}/src/main/scripts/test-in-container-debian"
   - name: 'Tear down Docker Test'
     shell: bash {0}

@@ -1,10 +1,12 @@
 #!/bin/sh -ex
-cp -R /usr/share/kframework/pl-tutorial ~
+#cp -R /usr/share/kframework/pl-tutorial ~
+pwd
+ll
 WD=`pwd`
 cd
 echo 'Starting kserver...'
 spawn-kserver $WD/kserver.log
-cd pl-tutorial
+cd test/smoke
 echo 'Testing tutorial in user environment...'
 make -j`nproc`
 make clean
