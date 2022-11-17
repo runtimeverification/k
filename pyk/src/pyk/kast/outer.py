@@ -3,25 +3,10 @@ from abc import abstractmethod
 from dataclasses import InitVar, dataclass
 from enum import Enum
 from os import PathLike
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Final,
-    FrozenSet,
-    Iterable,
-    Iterator,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-    final,
-)
+from typing import Any, Dict, Final, FrozenSet, Iterable, Iterator, List, Optional, Tuple, Type, TypeVar, Union, final
 
 from ..utils import filter_none, single, unique
-from .inner import TRUE, KApply, KInner, KLabel, KRewrite, KSort, KToken, KVariable, Subst
+from .inner import TRUE, KApply, KInner, KLabel, KRewrite, KSort, KToken, KVariable, Subst, top_down, var_occurrences
 from .kast import EMPTY_ATT, KAst, KAtt, WithKAtt
 
 RL = TypeVar('RL', bound='KRuleLike')
@@ -1106,62 +1091,6 @@ class KDefinition(KOuter, WithKAtt):
         init_config = top_down(_remove_config_var_lookups, init_config)
 
         return init_config
-
-
-# TODO make method of KInner
-def bottom_up(f: Callable[[KInner], KInner], kinner: KInner) -> KInner:
-    return f(kinner.map_inner(lambda _kinner: bottom_up(f, _kinner)))
-
-
-# TODO make method of KInner
-def top_down(f: Callable[[KInner], KInner], kinner: KInner) -> KInner:
-    return f(kinner).map_inner(lambda _kinner: top_down(f, _kinner))
-
-
-# TODO: make method of KInner
-def var_occurrences(term: KInner) -> Dict[str, List[KVariable]]:
-    _var_occurrences: Dict[str, List[KVariable]] = {}
-
-    # TODO: should treat #Exists and #Forall specially.
-    def _var_occurence(_term: KInner) -> None:
-        if type(_term) is KVariable:
-            if _term.name not in _var_occurrences:
-                _var_occurrences[_term.name] = []
-            _var_occurrences[_term.name].append(_term)
-
-    collect(_var_occurence, term)
-    return _var_occurrences
-
-
-# TODO replace by method that does not reconstruct the AST
-def collect(callback: Callable[[KInner], None], kinner: KInner) -> None:
-    def f(kinner: KInner) -> KInner:
-        callback(kinner)
-        return kinner
-
-    bottom_up(f, kinner)
-
-
-def build_assoc(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner]) -> KInner:
-    _label = label if type(label) is KLabel else KLabel(label)
-    res: Optional[KInner] = None
-    for term in reversed(list(terms)):
-        if term == unit:
-            continue
-        if not res:
-            res = term
-        else:
-            res = _label(term, res)
-    return res or unit
-
-
-def build_cons(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner]) -> KInner:
-    it = iter(terms)
-    try:
-        fst = next(it)
-        return KApply(label, (fst, build_cons(unit, label, it)))
-    except StopIteration:
-        return unit
 
 
 def read_kast_definition(path: Union[str, PathLike]) -> KDefinition:
