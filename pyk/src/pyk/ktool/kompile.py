@@ -5,7 +5,7 @@ from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
 from typing import Final, Iterable, List, Optional
 
-from ..cli_utils import check_dir_path, check_file_path, run_process
+from ..cli_utils import abs_or_rel_to, check_dir_path, check_file_path, run_process
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -21,8 +21,6 @@ def kompile(
     main_file: Path,
     *,
     command: str = 'kompile',
-    check: bool = True,
-    profile: bool = False,
     main_module: Optional[str] = None,
     syntax_module: Optional[str] = None,
     backend: Optional[KompileBackend],
@@ -34,12 +32,16 @@ def kompile(
     post_process: Optional[str] = None,
     concrete_rules: Iterable[str] = (),
     args: Iterable[str] = (),
+    # ---
+    cwd: Optional[Path] = None,
+    check: bool = True,
+    profile: bool = False,
 ) -> Path:
-    check_file_path(main_file)
+    check_file_path(abs_or_rel_to(main_file, cwd or Path()))
 
     include_dirs = list(include_dirs)
     for include_dir in include_dirs:
-        check_dir_path(include_dir)
+        check_dir_path(abs_or_rel_to(include_dir, cwd or Path()))
 
     args = _build_arg_list(
         main_module=main_module,
@@ -56,7 +58,7 @@ def kompile(
     )
 
     try:
-        _kompile(str(main_file), *args, command=command, check=check, profile=profile)
+        _kompile(str(main_file), *args, command=command, cwd=cwd, check=check, profile=profile)
     except CalledProcessError as err:
         raise RuntimeError(
             f'Command kompile exited with code {err.returncode} for: {main_file}', err.stdout, err.stderr
@@ -119,10 +121,15 @@ def _build_arg_list(
 
 
 def _kompile(
-    main_file: str, *args: str, check: bool = True, profile: bool = False, command: str = 'kompile'
+    main_file: str,
+    *args: str,
+    check: bool = True,
+    profile: bool = False,
+    command: str = 'kompile',
+    cwd: Optional[Path] = None,
 ) -> CompletedProcess:
     run_args = [command, main_file] + list(args)
-    return run_process(run_args, logger=_LOGGER, check=check, profile=profile)
+    return run_process(run_args, logger=_LOGGER, cwd=cwd, check=check, profile=profile)
 
 
 def _kompiled_dir(main_file: Path, output_dir: Optional[Path] = None) -> Path:

@@ -1,8 +1,10 @@
 import re
+import shutil
 from dataclasses import dataclass
-from typing import ClassVar, Optional, final
+from pathlib import Path
+from typing import ClassVar, Iterable, List, Optional, final
 
-from pyk.cli_utils import run_process
+from pyk.cli_utils import check_dir_path, check_file_path, run_process
 
 
 @final
@@ -20,7 +22,7 @@ class KVersion:
     patch: int
     git: Optional[Git]
 
-    _PATTERN: ClassVar = re.compile(
+    _PATTERN_STR: ClassVar = (
         r'v(?P<major>[1-9]+)'
         r'\.(?P<minor>[0-9]+)'
         r'\.(?P<patch>[0-9]+)'
@@ -29,10 +31,11 @@ class KVersion:
         r'-g(?P<rev>[0-9a-f]{10})'
         r'(?P<dirty>-dirty)?)?'
     )
+    PATTERN: ClassVar = re.compile(_PATTERN_STR)
 
     @staticmethod
     def parse(text: str) -> 'KVersion':
-        match = KVersion._PATTERN.fullmatch(text)
+        match = KVersion.PATTERN.fullmatch(text)
         if not match:
             raise ValueError(f'Invalid K version string: {text}')
 
@@ -67,3 +70,32 @@ def k_version() -> KVersion:
 
     version = proc_res.stdout.splitlines()[0][14:]  # 'K version:    ...'
     return KVersion.parse(version)
+
+
+def sync_files(source_dir: Path, target_dir: Path, file_names: Iterable[str]) -> List[Path]:
+    check_dir_path(source_dir)
+    shutil.rmtree(target_dir, ignore_errors=True)
+    target_dir.mkdir(parents=True)
+
+    res = []
+    for file_name in file_names:
+        source_file = source_dir / file_name
+        check_file_path(source_file)
+        target_file = target_dir / file_name
+        target_file.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_file, target_file)
+        res.append(target_file)
+
+    return res
+
+
+def find_file_upwards(file_name: str, start_dir: Path) -> Path:
+    check_dir_path(start_dir)
+    curr_dir = start_dir.resolve()
+    while True:
+        path = curr_dir / file_name
+        if path.is_file():
+            return path
+        if curr_dir == curr_dir.parent:
+            raise FileNotFoundError(f'{file_name} not found')
+        curr_dir = curr_dir.parent
