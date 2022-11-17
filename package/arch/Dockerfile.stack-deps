@@ -5,6 +5,8 @@ FROM ${BASE_OS}:${BASE_DISTRO}
 RUN    pacman -Sy   --noconfirm archlinux-keyring \
     && pacman -Syyu --noconfirm                   \
     && pacman -S    --noconfirm                   \
+                        clang                     \
+                        make                      \
                         stack
 
 # The image is built specifically for an environment with this user/group
