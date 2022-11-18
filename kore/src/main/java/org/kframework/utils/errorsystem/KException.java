@@ -121,13 +121,14 @@ public class KException implements Serializable, HasLocation {
         PROOF_LINT,
         NON_LR_GRAMMAR,
         IGNORED_ATTRIBUTE,
+        REMOVED_ANYWHERE,
         FIRST_HIDDEN, // warnings below here are hidden by default
         MISSING_HOOK_JAVA,
         USELESS_RULE,
         UNRESOLVED_FUNCTION_SYMBOL,
         MALFORMED_MARKDOWN,
         INVALIDATED_CACHE,
-        UNUSED_SYMBOL
+        UNUSED_SYMBOL,
     }
 
     @Override
