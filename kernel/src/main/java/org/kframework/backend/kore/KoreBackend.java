@@ -241,7 +241,7 @@ public class KoreBackend extends AbstractBackend {
             for(var s : sentences) {
                 if(s instanceof Rule && s.att().contains(Att.ANYWHERE())) {
                     kem.registerCompilerWarning(KException.ExceptionType.REMOVED_ANYWHERE,
-                            "Removed anywhere rule for Haskell backend execution; this may change the behavior of your code.");
+                            "Removed anywhere rule for Haskell backend execution; this may change the behavior of your code.", s);
                 } else {
                     filtered.add(s);
                 }
