@@ -1,0 +1,11 @@
+[Error] Compiler: Cell name <generatedCounter> is reserved by K.
+	Source(checkReservedCellNames.k)
+	Location(12,6,12,22)
+	12 |	    <generatedCounter> 0 </generatedCounter>
+	   .	     ^~~~~~~~~~~~~~~~
+[Error] Compiler: Cell name <generatedTop> is reserved by K.
+	Source(checkReservedCellNames.k)
+	Location(13,6,13,18)
+	13 |	    <generatedTop> 1 </generatedTop>
+	   .	     ^~~~~~~~~~~~
+[Error] Compiler: Had 2 parsing errors.
