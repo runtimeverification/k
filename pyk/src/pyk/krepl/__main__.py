@@ -1,13 +1,12 @@
 from argparse import ArgumentParser
 
 from ..cli_utils import dir_path
-from .repl import KDebugger, KRepl
+from .repl import KRepl
 
 
 def main() -> None:
     args = argument_parser().parse_args()
-    debugger = KDebugger(args.definition_dir)
-    repl = KRepl(debugger)
+    repl = KRepl(args.definition_dir)
     repl.cmdloop()
 
 
