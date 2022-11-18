@@ -1,6 +1,7 @@
+from abc import ABC, abstractmethod
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
-from typing import Final, Optional
+from typing import Any, Final, Generic, Iterator, Optional, Tuple, TypeVar
 
 from cmd2 import Cmd, with_argparser, with_category
 
@@ -10,70 +11,69 @@ from ..kore.syntax import Pattern
 from ..ktool.kprint import KAstInput, KAstOutput, _kast
 from ..ktool.krun import KRun, KRunOutput, _krun
 
-
-class DebuggerError(Exception):
-    ...
+T = TypeVar('T')
 
 
-class KDebugger:
+class Interpreter(Generic[T], ABC):
+    def __iter__(self) -> Iterator[T]:
+        state = self.init_state()
+        while True:
+            yield state
+            state = self.next_state(state)
+
+    @abstractmethod
+    def init_state(self) -> T:
+        ...
+
+    @abstractmethod
+    def next_state(self, state: T, steps: Optional[int] = None) -> T:
+        ...
+
+    def show_state(self, state: T) -> str:
+        return str(state)
+
+
+class KInterpreter(Interpreter[Pattern]):
     definition_dir: Path
-    program_file: Optional[Path]
-    pattern: Optional[Pattern]
+    program_file: Path
 
-    krun: KRun
-
-    def __init__(self, definition_dir: Path) -> None:
+    def __init__(self, definition_dir: Path, program_file: Path) -> None:
         check_dir_path(definition_dir)
-
-        self.definition_dir = definition_dir
-        self.program_file = None
-        self.pattern = None
-
-        self.krun = KRun(definition_dir)
-
-    def load(self, program_file: Path) -> None:
         check_file_path(program_file)
+        self.definition_dir = definition_dir
+        self.program_file = program_file
 
+    def init_state(self) -> Pattern:
         try:
             proc_res = _krun(
-                input_file=program_file,
+                input_file=self.program_file,
                 definition_dir=self.definition_dir,
                 output=KRunOutput.KORE,
                 depth=0,
             )
         except RuntimeError as err:
-            raise DebuggerError('Failed to load program') from err
+            raise ReplError('Failed to load program') from err
 
-        self.pattern = KoreParser(proc_res.stdout).pattern()
-        self.program_file = program_file
+        state = KoreParser(proc_res.stdout).pattern()
+        return state
 
-    def step(self, depth: int = 1) -> None:
-        if self.pattern is None:
-            raise DebuggerError('No loaded program')
-        self.pattern = self.krun.run_kore_term(self.pattern, depth=depth)
+    def next_state(self, state: Pattern, steps: Optional[int] = None) -> Pattern:
+        state = KRun(self.definition_dir).run_kore_term(state, depth=steps)
+        return state
 
-    def show(self) -> str:
-        if self.pattern is None:
-            raise DebuggerError('No loded program')
-
+    def show_state(self, state: Pattern) -> str:
         proc_res = _kast(
             definition_dir=self.definition_dir,
             input=KAstInput.KORE,
             output=KAstOutput.PRETTY,
-            expression=self.pattern.text,
+            expression=state.text,
         )
         return proc_res.stdout
 
 
-def _load_parser() -> ArgumentParser:
-    parser = ArgumentParser(description='Load a program')
-    parser.add_argument('program', type=file_path, metavar='PROGRAM')
-    return parser
-
-
 def _step_parser() -> ArgumentParser:
-    parser = ArgumentParser(description='Execute a step in the program')
-    parser.add_argument('depth', type=int, nargs='?', default=1, metavar='DEPTH')
+    parser = ArgumentParser(description='Execute steps in the program')
+    parser.add_argument('steps', type=int, nargs='?', default=1, metavar='STEPS', help='number of steps to take')
     return parser
 
 
@@ -81,45 +81,83 @@ def _show_parser() -> ArgumentParser:
     return ArgumentParser(description='Show the current configuration')
 
 
-class KRepl(Cmd):
+class ReplError(Exception):
+    ...
+
+
+class BaseRepl(Cmd, Generic[T], ABC):
     CAT_DEBUG: Final = 'Debugger Commands'
     CAT_BUILTIN: Final = 'Built-in Commands'
 
-    intro = 'K-REPL Shell\nType "help" or "?" for more information.'
     prompt = '> '
 
-    debugger: KDebugger
+    interpreter: Optional[Interpreter[T]]
+    state: Optional[T]
 
-    def __init__(self, debugger: KDebugger) -> None:
+    def __init__(self) -> None:
         super().__init__(allow_cli_args=False)
         self.default_category = self.CAT_BUILTIN
 
-        self.debugger = debugger
+        self.interpreter = None
+        self.state = None
 
-    @with_argparser(_load_parser())
-    @with_category(CAT_DEBUG)
-    def do_load(self, args: Namespace) -> None:
-        try:
-            self.debugger.load(args.program)
-        except DebuggerError as err:
-            self.poutput(err)
+    @abstractmethod
+    def do_load(self, args: Any) -> Optional[bool]:  # Leaky abstraction - make extension mechanism more robust
+        """
+        Abstract method to set up the interpreter.
+        Subclasses are expected to
+        * decorate the method with `with_argparser` to ensure the right set of arguments is parsed;
+        * instantiate an `Interpreter[T]` based on `args`, then set `self.interpreter`;
+        * set `self.state` to `self.interpreter.init_state()`.
+        """
+        ...
 
     @with_argparser(_step_parser())
     @with_category(CAT_DEBUG)
     def do_step(self, args: Namespace) -> None:
-        if args.depth < 0:
-            self.poutput('Depth should be non-negative')
-            return
-
         try:
-            self.debugger.step(args.depth)
-        except DebuggerError as err:
+            interpreter, state = self._check_state()
+            self._check_steps(args.steps)
+            self.state = interpreter.next_state(state, args.steps)
+        except ReplError as err:
             self.poutput(err)
 
     @with_argparser(_show_parser())
     @with_category(CAT_DEBUG)
     def do_show(self, args: Namespace) -> None:
         try:
-            self.poutput(self.debugger.show())
-        except DebuggerError as err:
+            interpreter, state = self._check_state()
+            self.poutput(interpreter.show_state(state))
+        except ReplError as err:
             self.poutput(err)
+
+    def _check_state(self) -> Tuple[Interpreter, T]:
+        if self.interpreter is None:
+            raise ReplError('No program is loaded')
+        assert self.state is not None
+        return self.interpreter, self.state
+
+    def _check_steps(self, steps: Optional[int] = None) -> None:
+        if steps and steps < 0:
+            raise ReplError('Depth should be non-negative')
+
+
+def _load_parser() -> ArgumentParser:
+    parser = ArgumentParser(description='Load a program')
+    parser.add_argument('program', type=file_path, metavar='PROGRAM', help='program to load')
+    return parser
+
+
+class KRepl(BaseRepl[Pattern]):
+    intro = 'K-REPL Shell\nType "help" or "?" for more information.'
+
+    def __init__(self, definition_dir: Path):
+        check_dir_path(definition_dir)
+        super().__init__()
+        self.definition_dir = definition_dir
+
+    @with_argparser(_load_parser())
+    @with_category(BaseRepl.CAT_DEBUG)
+    def do_load(self, args: Namespace) -> None:
+        self.interpreter = KInterpreter(self.definition_dir, args.program)
+        self.state = self.interpreter.init_state()
