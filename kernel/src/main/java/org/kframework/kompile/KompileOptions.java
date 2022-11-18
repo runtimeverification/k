@@ -140,4 +140,7 @@ public class KompileOptions implements Serializable {
     // TODO(dwightguth): remove this when it is no longer needed
     @Parameter(names={"--disable-ceil-simplification-rules"}, description="Disable all rules with the simplification attribute whose left-hand side has a #Ceil at the top.")
     public boolean disableCeilSimplificationRules;
+
+    @Parameter(names={"--allow-anywhere-haskell"}, description="Disable error message for anywhere rules on the Haskell backend.")
+    public boolean allowAnywhereRulesHaskell;
 }
