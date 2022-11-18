@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
 import org.kframework.Strategy;
 import org.kframework.attributes.Att;
+import org.kframework.backend.Backends;
 import org.kframework.compile.*;
 import org.kframework.definition.Module;
 import org.kframework.definition.*;
@@ -14,6 +15,7 @@ import org.kframework.kompile.KompileOptions;
 import org.kframework.kore.KLabel;
 import org.kframework.main.Tool;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Function1;
@@ -25,6 +27,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 
+import static org.kframework.Collections.*;
 import static org.kframework.compile.ResolveHeatCoolAttribute.Mode.*;
 
 public class KoreBackend extends AbstractBackend {
@@ -128,6 +131,9 @@ public class KoreBackend extends AbstractBackend {
         Function1<Definition, Definition> markExtraConcreteRules = d -> DefinitionTransformer.fromSentenceTransformer((m, s) ->
                 s instanceof Rule && kompileOptions.extraConcreteRuleLabels.contains(s.att().getOption(Att.LABEL()).getOrElse(() -> null)) ?
                         Rule.apply(((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att().add(Att.CONCRETE())) : s, "mark extra concrete rules").apply(d);
+        Function1<Definition, Definition> removeAnywhereRules =
+                d -> DefinitionTransformer.from(this::removeAnywhereRules,
+                        "removing anywhere rules for the Haskell backend").apply(d);
 
         return def -> resolveComm
                 .andThen(resolveIO)
@@ -160,6 +166,7 @@ public class KoreBackend extends AbstractBackend {
                 .andThen(resolveConfigVar)
                 .andThen(addCoolLikeAtt)
                 .andThen(markExtraConcreteRules)
+                .andThen(removeAnywhereRules)
                 .apply(def);
     }
 
@@ -218,6 +225,31 @@ public class KoreBackend extends AbstractBackend {
                 throw  KEMException.compilerError("Simplification rules expect function/functional/mlOp symbols at the top of the left hand side term.", s);
         }
         return s;
+    }
+
+    // If a user guarantees that their semantics will never _dynamically_ try to rewrite an anywhere rule on the
+    // Haskell backend (with the --allow-anywhere-haskell flag), but cannot prove this statically, we allow them to
+    // strip out all those rules before sending the definition to the backend. If this transformation is applied
+    // unsoundly (i.e. an anywhere rule would have been attempted if it had not been stripped), the behaviour of the
+    // Haskell backend on that program is essentially undefined.
+    private Module removeAnywhereRules(Module m) {
+        java.util.Set<Sentence> sentences = mutable(m.localSentences());
+
+        if(kompileOptions.backend.equals(Backends.HASKELL) && kompileOptions.allowAnywhereRulesHaskell) {
+            java.util.Set<Sentence> filtered = new HashSet<Sentence>();
+
+            for(var s : sentences) {
+                if(s instanceof Rule && s.att().contains(Att.ANYWHERE())) {
+                    kem.registerCompilerWarning(KException.ExceptionType.REMOVED_ANYWHERE,
+                            "Removed anywhere rule for Haskell backend execution; this may change the behavior of your code.", s);
+                } else {
+                    filtered.add(s);
+                }
+            }
+
+            sentences = filtered;
+        }
+        return new Module(m.name(), m.imports(), immutable(sentences), m.att());
     }
 
     @Override
