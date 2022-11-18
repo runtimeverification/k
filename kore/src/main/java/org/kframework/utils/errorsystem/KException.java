@@ -127,7 +127,8 @@ public class KException implements Serializable, HasLocation {
         UNRESOLVED_FUNCTION_SYMBOL,
         MALFORMED_MARKDOWN,
         INVALIDATED_CACHE,
-        UNUSED_SYMBOL
+        UNUSED_SYMBOL,
+        REMOVED_ANYWHERE,
     }
 
     @Override

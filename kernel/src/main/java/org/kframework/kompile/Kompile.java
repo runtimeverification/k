@@ -525,12 +525,13 @@ public class Kompile {
     }
 
     private void checkAnywhereRules(scala.collection.Set<Module> modules) {
-        if (kompileOptions.backend.equals(Backends.HASKELL))
+        if (kompileOptions.backend.equals(Backends.HASKELL) && !kompileOptions.allowAnywhereRulesHaskell) {
             errors.addAll(stream(modules).flatMap(m -> stream(m.localSentences()).flatMap(s -> {
                 if (s instanceof Rule && s.att().contains(Att.ANYWHERE()))
                     return Stream.of(KEMException.compilerError(Att.ANYWHERE() + " is not supported by the " + Backends.HASKELL + " backend.", s));
                 return Stream.empty();
             })).collect(Collectors.toSet()));
+        }
     }
 
     public static Definition addSemanticsModule(Definition d) {
