@@ -1,6 +1,7 @@
 import json
 import logging
 from enum import Enum
+from logging import Logger
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
 from tempfile import NamedTemporaryFile
@@ -171,6 +172,8 @@ def _krun(
     no_expand_macros: bool = False,
     # ---
     check: bool = True,
+    pipe_stderr: bool = False,
+    logger: Optional[Logger] = None,
     profile: bool = False,
 ) -> CompletedProcess:
     if input_file:
@@ -196,7 +199,7 @@ def _krun(
     )
 
     try:
-        return run_process(args, logger=_LOGGER, check=check, profile=profile)
+        return run_process(args, check=check, pipe_stderr=pipe_stderr, logger=logger or _LOGGER, profile=profile)
     except CalledProcessError as err:
         raise RuntimeError(
             f'Command krun exited with code {err.returncode} for: {input_file}', err.stdout, err.stderr
