@@ -9,10 +9,10 @@ from typing import Final, List, Mapping, Optional
 
 from ..cli_utils import check_dir_path, check_file_path, run_process
 from ..cterm import CTerm
-from ..kast.inner import KInner, KSort
+from ..kast.inner import KInner, KLabel, KSort
 from ..kore.parser import KoreParser
-from ..kore.syntax import Pattern
-from .kprint import KPrint
+from ..kore.syntax import DV, App, Pattern, SortApp, String
+from .kprint import KPrint, _unmunge
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -128,23 +128,33 @@ class KRun(KPrint):
         depth: Optional[int] = None,
         expand_macros: bool = False,
     ) -> Pattern:
-        proc_res = _krun(
-            definition_dir=self.definition_dir,
-            output=KRunOutput.KORE,
-            pmap={var: 'cat' for var in config},
-            cmap={var: pattern.text for var, pattern in config.items()},
-            depth=depth,
-            no_expand_macros=not expand_macros,
-            profile=self._profile,
-        )
+        def _config_var_token(s: str) -> DV:
+            return DV(SortApp('SortKConfigVar'), String(f'${s}'))
 
-        if proc_res.returncode != 0:
-            raise RuntimeError('Non-zero exit-code from krun')
+        def _map_item(s: str, p: Pattern, sort: KSort) -> Pattern:
+            _map_key = self._add_sort_injection(_config_var_token(s), KSort('KConfigVar'), KSort('KItem'))
+            _map_value = self._add_sort_injection(p, sort, KSort('KItem'))
+            return App("Lbl'UndsPipe'-'-GT-Unds'", [], [_map_key, _map_value])
 
-        parser = KoreParser(proc_res.stdout)
-        res = parser.pattern()
-        assert parser.eof
-        return res
+        def _map(ps: List[Pattern]) -> Pattern:
+            if len(ps) == 0:
+                return App("Lbl'Stop'Map{}()", [], [])
+            if len(ps) == 1:
+                return ps[0]
+            return App("Lbl'Unds'Map'Unds'", [], [ps[0], _map(ps[1:])])
+
+        def _sort(p: Pattern) -> KSort:
+            if type(p) is DV:
+                return KSort(p.sort.name[4:])
+            if type(p) is App:
+                label = KLabel(_unmunge(p.symbol[3:]))
+                return self.definition.return_sort(label)
+            raise ValueError(f'Cannot fast-compute sort for pattern: {p}')
+
+        config_var_map = _map([_map_item(k, v, _sort(v)) for k, v in config.items()])
+        term = App('LblinitGeneratedTopCell', [], [config_var_map])
+
+        return self.run_kore_term(term, depth=depth, expand_macros=expand_macros)
 
 
 class KRunOutput(Enum):
