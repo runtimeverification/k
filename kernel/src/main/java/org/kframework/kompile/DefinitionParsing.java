@@ -68,6 +68,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.kframework.Collections.*;
+import static org.kframework.builtin.KLabels.*;
 import static org.kframework.definition.Constructors.Module;
 import static org.kframework.definition.Constructors.*;
 import static org.kframework.kore.KORE.*;
@@ -306,7 +307,7 @@ public class DefinitionParsing {
         return errors;
     }
 
-    private void checkDuplicateKCells(Definition defWithParsedConfigs) {
+    private void checkConfigCells(Definition defWithParsedConfigs) {
         // check for duplicate <k> cell declarations
         List<K> kcells = new ArrayList<>();
         stream(defWithParsedConfigs.mainModule().sentences())
@@ -319,6 +320,10 @@ public class DefinitionParsing {
                             assert kt.sort().equals(Sorts.CellName());
                             if (kt.s().equals("k"))
                                 kcells.add(k);
+                            else if (kt.s().equals(GENERATED_TOP_CELL_NAME) || kt.s().equals(GENERATED_COUNTER_CELL_NAME)) {
+                                // check for definitions of generated cell names
+                                errors.add(KEMException.compilerError("Cell name <" + kt.s() + "> is reserved by K.", kt));
+                            }
                         }
                         super.apply(k);
                     }
@@ -367,7 +372,7 @@ public class DefinitionParsing {
                 Module(m.name(), m.imports(), parsed.get(m.name()).localSentences(), m.att()),
                 "replace configs").apply(defWithCaches);
 
-        checkDuplicateKCells(defWithParsedConfigs);
+        checkConfigCells(defWithParsedConfigs);
 
         // replace config bubbles with the generated syntax and rules
         return DefinitionTransformer.from(m -> {
