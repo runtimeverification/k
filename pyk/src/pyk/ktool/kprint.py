@@ -30,7 +30,7 @@ from ..kast.outer import (
     read_kast_definition,
 )
 from ..kore.parser import KoreParser
-from ..kore.syntax import DV, And, App, Ceil, Equals, EVar, Not, Pattern, SortApp, String
+from ..kore.syntax import DV, And, App, Assoc, Ceil, Equals, EVar, Not, Pattern, SortApp, String
 from ..prelude.bytes import BYTES, bytesToken
 from ..prelude.k import DOTS, EMPTY_K
 from ..prelude.kbool import TRUE
@@ -338,6 +338,9 @@ class KPrint:
             arg = self._kore_to_kast(kore.pattern)
             if arg is not None:
                 return KApply(KLabel('#Ceil', [osort, psort]), [arg])
+
+        elif isinstance(kore, Assoc):
+            return self._kore_to_kast(kore.pattern)
 
         _LOGGER.warning(f'KPrint._kore_to_kast failed on input: {kore}')
         return None

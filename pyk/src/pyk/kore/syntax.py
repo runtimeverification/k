@@ -1325,6 +1325,11 @@ class Assoc(MLSyntaxSugar):
     app: App
 
     @property
+    @abstractmethod
+    def pattern(self) -> Pattern:
+        ...
+
+    @property
     def dict(self) -> Dict[str, Any]:
         return {'tag': self._tag(), 'app': self.app.dict}
 
@@ -1344,6 +1349,17 @@ class LeftAssoc(Assoc):
 
     def map_pattern(self: 'LeftAssoc', f: Callable[[Pattern], Pattern]) -> 'LeftAssoc':
         return self
+
+    @property
+    def pattern(self) -> Pattern:
+        if len(self.app.sorts) > 0:
+            raise ValueError(f'Cannot associate a pattern with sort parameters: {self}')
+        if len(self.app.patterns) == 0:
+            raise ValueError(f'Cannot associate a pattern with no arguments: {self}')
+        ret = self.app.patterns[0]
+        for a in self.app.patterns[1:]:
+            ret = App(self.app.symbol, [], [ret, a])
+        return ret
 
     @classmethod
     def _tag(cls) -> str:
@@ -1370,6 +1386,17 @@ class RightAssoc(Assoc):
 
     def map_pattern(self: 'RightAssoc', f: Callable[[Pattern], Pattern]) -> 'RightAssoc':
         return self
+
+    @property
+    def pattern(self) -> Pattern:
+        if len(self.app.sorts) > 0:
+            raise ValueError(f'Cannot associate a pattern with sort parameters: {self}')
+        if len(self.app.patterns) == 0:
+            raise ValueError(f'Cannot associate a pattern with no arguments: {self}')
+        ret = self.app.patterns[-1]
+        for a in reversed(self.app.patterns[:-1]):
+            ret = App(self.app.symbol, [], [a, ret])
+        return ret
 
     @classmethod
     def _tag(cls) -> str:
