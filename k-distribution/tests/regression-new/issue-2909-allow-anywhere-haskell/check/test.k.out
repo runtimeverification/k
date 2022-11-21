@@ -1,0 +1,5 @@
+[Error] Compiler: Removed anywhere rule for Haskell backend execution; this may change the behavior of your code.
+	Source(test.k)
+	Location(4,8,4,14)
+	4 |	  rule 1 => 2 [anywhere]
+	  .	       ^~~~~~
