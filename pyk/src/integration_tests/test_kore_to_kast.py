@@ -1,5 +1,5 @@
 from pyk.kast.inner import KApply, KLabel, KSequence, KSort, KToken, KVariable
-from pyk.kore.syntax import DV, And, App, Ceil, Equals, EVar, Not, SortApp, String
+from pyk.kore.syntax import DV, And, App, Ceil, Equals, EVar, LeftAssoc, Not, RightAssoc, SortApp, String
 from pyk.ktool import KompileBackend
 from pyk.ktool.kprint import SymbolTable
 from pyk.prelude.kbool import TRUE
@@ -227,3 +227,55 @@ class KoreToKastTest(KProveTest):
             with self.subTest(name):
                 kore_actual = self.kprove.kast_to_kore(kast, sort=sort)
                 self.assertEqual(kore_actual, kore)
+
+    def test_kore_to_kast(self) -> None:
+        kore_kast_pairs = (
+            (
+                'left-assoc',
+                KSort('Map'),
+                LeftAssoc(
+                    App(
+                        "Lbl'Unds'Map'Unds'",
+                        [],
+                        [
+                            EVar('VarX', SortApp('SortMap')),
+                            EVar('VarY', SortApp('SortMap')),
+                            EVar('VarZ', SortApp('SortMap')),
+                        ],
+                    )
+                ),
+                KApply(
+                    '_Map_',
+                    [
+                        KApply('_Map_', [KVariable('X', sort=KSort('Map')), KVariable('Y', sort=KSort('Map'))]),
+                        KVariable('Z', sort=KSort('Map')),
+                    ],
+                ),
+            ),
+            (
+                'right-assoc',
+                KSort('Map'),
+                RightAssoc(
+                    App(
+                        "Lbl'Unds'Map'Unds'",
+                        [],
+                        [
+                            EVar('VarX', SortApp('SortMap')),
+                            EVar('VarY', SortApp('SortMap')),
+                            EVar('VarZ', SortApp('SortMap')),
+                        ],
+                    )
+                ),
+                KApply(
+                    '_Map_',
+                    [
+                        KVariable('X', sort=KSort('Map')),
+                        KApply('_Map_', [KVariable('Y', sort=KSort('Map')), KVariable('Z', sort=KSort('Map'))]),
+                    ],
+                ),
+            ),
+        )
+        for name, _sort, kore, kast in kore_kast_pairs:
+            with self.subTest(name):
+                kast_actual = self.kprove.kore_to_kast(kore)
+                self.assertEqual(kast_actual, kast)
