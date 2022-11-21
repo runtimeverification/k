@@ -15,7 +15,6 @@ class KompiledTest(TestCase):
     KOMPILE_MAIN_FILE: str
     KOMPILE_BACKEND: Optional[KompileBackend] = None
     KOMPILE_INCLUDE_DIRS: Iterable[str] = []
-    KOMPILE_EMIT_JSON = False
     KOMPILE_POST_PROCESS: Optional[str] = None
 
     kompiled_dir: Path
@@ -35,14 +34,12 @@ class KompiledTest(TestCase):
             backend=self.KOMPILE_BACKEND,
             output_dir=output_dir,
             include_dirs=include_dirs,
-            emit_json=self.KOMPILE_EMIT_JSON,
             post_process=self.KOMPILE_POST_PROCESS,
         )
 
-        if self.KOMPILE_EMIT_JSON:
-            with open(self.kompiled_dir / 'compiled.json', 'r') as f:
-                json_dct = json.load(f)
-                self.definition = KDefinition.from_dict(json_dct['term'])
+        with open(self.kompiled_dir / 'compiled.json', 'r') as f:
+            json_dct = json.load(f)
+            self.definition = KDefinition.from_dict(json_dct['term'])
 
     def tearDown(self) -> None:
         shutil.rmtree(self.kompiled_dir, ignore_errors=True)
