@@ -24,6 +24,7 @@ def loglevel(level: str) -> int:
 
 
 def check_dir_path(path: Path) -> None:
+    path = path.resolve()
     if not path.exists():
         raise ValueError(f'Directory does not exist: {path}')
     if not path.is_dir():
@@ -37,10 +38,17 @@ def dir_path(s: str) -> Path:
 
 
 def check_file_path(path: Path) -> None:
+    path = path.resolve()
     if not path.exists():
         raise ValueError(f'File does not exist: {path}')
     if not path.is_file():
         raise ValueError(f'Path is not a file: {path}')
+
+
+def file_path(s: str) -> Path:
+    path = Path(s)
+    check_file_path(path)
+    return path
 
 
 def check_absolute_path(path: Path) -> None:
@@ -51,12 +59,6 @@ def check_absolute_path(path: Path) -> None:
 def check_relative_path(path: Path) -> None:
     if path.is_absolute():
         raise ValueError(f'Path is not relative: {path}')
-
-
-def file_path(s: str) -> Path:
-    path = Path(s)
-    check_file_path(path)
-    return path
 
 
 def abs_or_rel_to(path: Path, base: Path) -> Path:
