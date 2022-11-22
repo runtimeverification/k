@@ -38,10 +38,10 @@ TEST_ARGS :=
 test: test-unit test-integration test-pyk test-kit
 
 test-unit: poetry-install
-	$(POETRY_RUN) python -m unittest discover tests --failfast --verbose $(TEST_ARGS)
+	$(POETRY_RUN) pytest src/tests --maxfail=1 --verbose $(TEST_ARGS)
 
 test-integration: poetry-install
-	$(POETRY_RUN) python -m unittest discover integration_tests --failfast --verbose $(TEST_ARGS)
+	$(POETRY_RUN) pytest src/integration_tests --durations=0 --maxfail=1 --verbose $(TEST_ARGS)
 
 test-pyk: poetry-install
 	$(POETRY_RUN) $(MAKE) -C pyk-tests
