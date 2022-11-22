@@ -5,8 +5,9 @@ from enum import Enum
 from os import PathLike
 from typing import Any, Dict, Final, FrozenSet, Iterable, Iterator, List, Optional, Tuple, Type, TypeVar, Union, final
 
+from ..prelude.kbool import TRUE
 from ..utils import filter_none, single, unique
-from .inner import TRUE, KApply, KInner, KLabel, KRewrite, KSort, KToken, KVariable, Subst, top_down, var_occurrences
+from .inner import KApply, KInner, KLabel, KRewrite, KSort, KToken, KVariable, Subst, top_down, var_occurrences
 from .kast import EMPTY_ATT, KAst, KAtt, WithKAtt
 
 RL = TypeVar('RL', bound='KRuleLike')
