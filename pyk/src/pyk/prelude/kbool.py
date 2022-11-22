@@ -1,14 +1,11 @@
 from typing import Final, Iterable
 
-from ..kast.inner import BOOL as KAST_BOOL
-from ..kast.inner import FALSE as KAST_FALSE
-from ..kast.inner import TRUE as KAST_TRUE
-from ..kast.inner import KApply, KInner, KLabel, KToken, build_assoc
+from ..kast.inner import KApply, KInner, KLabel, KSort, KToken, build_assoc
 from ..utils import unique
 
-BOOL: Final = KAST_BOOL
-TRUE: Final = KAST_TRUE
-FALSE: Final = KAST_FALSE
+BOOL: Final = KSort('Bool')
+TRUE: Final = KToken('true', BOOL)
+FALSE: Final = KToken('false', BOOL)
 
 
 def boolToken(b: bool) -> KToken:  # noqa: N802
