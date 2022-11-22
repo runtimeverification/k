@@ -256,11 +256,6 @@ class KVariable(KInner, WithKAtt):
         return Subst({self.name: term})
 
 
-BOOL: Final = KSort('Bool')
-TRUE: Final = KToken('true', BOOL)
-FALSE: Final = KToken('false', BOOL)
-
-
 @final
 @dataclass(frozen=True)
 class KLabel(KInner):
