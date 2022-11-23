@@ -110,7 +110,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         _LOGGER.info(f'Sending request to {server_addr}: {req}')
         self._sock.sendall(req.encode())
         _LOGGER.info(f'Waiting for response from {server_addr}...')
-        resp = self._file.readline()
+        resp = self._file.readline().rstrip()
         _LOGGER.info(f'Received response from {server_addr}: {resp}')
 
         data = json.loads(resp)

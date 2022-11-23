@@ -5,16 +5,16 @@ from enum import Enum
 from itertools import chain
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
-from typing import Final, Iterable, List, Mapping, Optional, Tuple
+from typing import Dict, Final, Iterable, List, Mapping, Optional, Tuple
 
 from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp, run_process
 from ..cterm import CTerm, build_claim
-from ..kast.inner import KApply, KInner, KLabel
+from ..kast.inner import KApply, KInner, KLabel, Subst
 from ..kast.manip import extract_subst, flatten_label, free_vars
-from ..kast.outer import KClaim, KDefinition, KFlatModule, KImport, KRequire, KRule, KSentence
+from ..kast.outer import KClaim, KDefinition, KFlatModule, KImport, KRequire, KRule, KSentence, KVariable
 from ..kore.rpc import KoreClient, KoreServer
 from ..prelude.k import GENERATED_TOP_CELL
-from ..prelude.ml import is_top, mlAnd, mlBottom, mlTop
+from ..prelude.ml import is_top, mlAnd, mlBottom, mlEquals, mlTop
 from ..utils import unique
 from .kprint import KPrint
 
@@ -325,7 +325,7 @@ class KProve(KPrint):
         cut_point_rules: Optional[Iterable[str]] = None,
         terminal_rules: Optional[Iterable[str]] = None,
         assume_defined: bool = True,
-    ) -> Tuple[int, KInner, List[KInner]]:
+    ) -> Tuple[int, CTerm, List[CTerm]]:
         if assume_defined:
             cterm = cterm.add_constraint(
                 KApply(KLabel('#Ceil', [GENERATED_TOP_CELL, GENERATED_TOP_CELL]), [cterm.kast])
@@ -334,9 +334,9 @@ class KProve(KPrint):
         _, kore_client = self.kore_rpc()
         er = kore_client.execute(kore, max_depth=depth, cut_point_rules=cut_point_rules, terminal_rules=terminal_rules)
         depth = er.depth
-        next_state = self.kore_to_kast(er.state.kore)
+        next_state = CTerm(self.kore_to_kast(er.state.kore))
         _next_states = er.next_states if er.next_states is not None and len(er.next_states) > 1 else []
-        next_states = [self.kore_to_kast(ns.kore) for ns in _next_states]
+        next_states = [CTerm(self.kore_to_kast(ns.kore)) for ns in _next_states]
         return depth, next_state, next_states
 
     def simplify(self, cterm: CTerm) -> KInner:
@@ -345,6 +345,33 @@ class KProve(KPrint):
         kore_simplified = kore_client.simplify(kore)
         kast_simplified = self.kore_to_kast(kore_simplified)
         return kast_simplified
+
+    def implies(self, antecedent: CTerm, consequent: CTerm, bind_consequent_variables: bool = True) -> Optional[Subst]:
+        _consequent = consequent.kast
+        if bind_consequent_variables:
+            _consequent = consequent.kast
+            fv_antecedent = free_vars(antecedent.kast)
+            unbound_consequent = [v for v in free_vars(_consequent) if v not in fv_antecedent]
+            if len(unbound_consequent) > 0:
+                _LOGGER.info(f'Binding variables in consequent: {unbound_consequent}')
+                for uc in unbound_consequent:
+                    _consequent = KApply(KLabel('#Exists', [GENERATED_TOP_CELL]), [KVariable(uc), _consequent])
+        antecedent_kore = self.kast_to_kore(antecedent.kast, GENERATED_TOP_CELL)
+        consequent_kore = self.kast_to_kore(_consequent, GENERATED_TOP_CELL)
+        _, kore_client = self.kore_rpc()
+        result = kore_client.implies(antecedent_kore, consequent_kore)
+        if result.substitution is None:
+            return None
+        ml_subst = self.kore_to_kast(result.substitution)
+        subst_pattern = mlEquals(KVariable('###VAR'), KVariable('###TERM'))
+        _subst: Dict[str, KInner] = {}
+        for ml_pred in flatten_label('#And', ml_subst):
+            m = subst_pattern.match(ml_pred)
+            if m is not None and type(m['###VAR']) is KVariable:
+                _subst[m['###VAR'].name] = m['###TERM']
+            else:
+                raise ValueError(f'Recieved back a non-substitution from implies endpoint: {ml_pred}')
+        return Subst(_subst)
 
     def _write_claim_definition(self, claim: KClaim, claim_id: str, lemmas: Iterable[KRule] = ()) -> Tuple[Path, str]:
         tmp_claim = self.use_directory / (claim_id.lower() + '-spec')

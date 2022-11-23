@@ -1007,10 +1007,14 @@ class KDefinition(KOuter, WithKAtt):
                     for v in voccurrences[1:]:
                         if vsort is None and v.sort is not None:
                             vsort = v.sort
-                        elif vsort is not None and v.sort is not None and vsort != v.sort:
-                            raise ValueError(
-                                f'Could not find common subsort among variable occurrences: {voccurrences}'
-                            )
+                        elif vsort is not None and v.sort is not None:
+                            if vsort != v.sort:
+                                if v.sort in self.subsorts(vsort):
+                                    vsort = v.sort
+                                elif vsort not in self.subsorts(v.sort):
+                                    raise ValueError(
+                                        f'Could not find common subsort among variable occurrences: {voccurrences}'
+                                    )
                 subst[vname] = KVariable(vname, sort=vsort)
         return Subst(subst)
 
