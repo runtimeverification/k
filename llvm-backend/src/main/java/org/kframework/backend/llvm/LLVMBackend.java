@@ -94,11 +94,12 @@ public class LLVMBackend extends KoreBackend {
             case "main":
             case "search":
             case "static":
+            case "library":
             case "python":
                 llvmType = options.llvmKompileType;
                 break;
             default:
-                throw KEMException.criticalError("Non-valid argument for --llvm-kompile-type: " + options.llvmKompileType + ". Expected [main|search|static|python]");
+                throw KEMException.criticalError("Non-valid argument for --llvm-kompile-type: " + options.llvmKompileType + ". Expected [main|search|library|static|python]");
         }
 
         String llvmOutput = "interpreter";
