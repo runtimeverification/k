@@ -14,6 +14,7 @@ from .kast.inner import KInner, Subst
 from .kast.manip import ml_pred_to_bool, mlAnd, remove_source_attributes, simplify_bool
 from .kast.outer import KClaim, KRule
 from .ktool import KPrint
+from .prelude.ml import mlTop
 from .utils import add_indent, compare_short_hashes, shorten_hash
 
 
@@ -95,20 +96,35 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         subst: Subst
         constraint: KInner
 
-        def __init__(self, source: 'KCFG.Node', target: 'KCFG.Node'):
+        def __init__(
+            self,
+            source: 'KCFG.Node',
+            target: 'KCFG.Node',
+            subst: Optional[Subst] = None,
+            constraint: Optional[KInner] = None,
+        ):
             object.__setattr__(self, 'source', source)
             object.__setattr__(self, 'target', target)
 
-            match_res = target.cterm.match_with_constraint(source.cterm)
-            if not match_res:
-                raise ValueError(f'No matching between: {source.id} and {target.id}')
+            if subst is None and constraint is not None:
+                subst = Subst({})
+            elif subst is not None and constraint is None:
+                constraint = mlTop()
+            elif subst is None and constraint is None:
+                match_res = target.cterm.match_with_constraint(source.cterm)
+                if not match_res:
+                    raise ValueError(f'No matching between: {source.id} and {target.id}')
+                subst, constraint = match_res
 
-            subst, constraint = match_res
             object.__setattr__(self, 'subst', subst)
             object.__setattr__(self, 'constraint', constraint)
 
         def to_dict(self) -> Dict[str, Any]:
-            return {'source': self.source.id, 'target': self.target.id}
+            return {
+                'source': self.source.id,
+                'target': self.target.id,
+                'witness': {'subst': self.subst.to_dict(), 'constraint': self.constraint.to_dict()},
+            }
 
         def pretty(self, kprint: KPrint) -> Iterable[str]:
             return [
@@ -255,7 +271,13 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         for cover_dict in dct.get('covers') or []:
             source_id = resolve(cover_dict['source'])
             target_id = resolve(cover_dict['target'])
-            cfg.create_cover(source_id, target_id)
+            subst = None
+            constraint = None
+            if 'subst' in cover_dict:
+                subst = Subst.from_dict(cover_dict['subst'])
+            if 'constraint' in cover_dict:
+                constraint = KInner.from_dict(cover_dict['constraint'])
+            cfg.create_cover(source_id, target_id, subst=subst, constraint=constraint)
 
         for init_id in dct.get('init') or []:
             cfg.add_init(resolve(init_id))
@@ -600,7 +622,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             return cover == other
         return False
 
-    def create_cover(self, source_id: str, target_id: str) -> Cover:
+    def create_cover(
+        self, source_id: str, target_id: str, subst: Optional[Subst] = None, constraint: Optional[KInner] = None
+    ) -> Cover:
         source = self.node(source_id)
         target = self.node(target_id)
 
@@ -610,7 +634,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         if source.id not in self._covers:
             self._covers[source.id] = {}
 
-        cover = KCFG.Cover(source, target)
+        cover = KCFG.Cover(source, target, subst=subst, constraint=constraint)
         self._covers[source.id][target.id] = cover
         return cover
 

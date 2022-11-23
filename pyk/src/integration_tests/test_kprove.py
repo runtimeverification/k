@@ -1,12 +1,13 @@
 from typing import List, Tuple
 
 from pyk.cterm import CTerm
-from pyk.kast.inner import KApply, KAtt, KSequence, KToken, KVariable
+from pyk.kast.inner import KApply, KAtt, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kast.manip import get_cell
 from pyk.kast.outer import KClaim, KRule
 from pyk.ktool import KompileBackend
 from pyk.ktool.kprint import SymbolTable
 from pyk.prelude.kbool import BOOL
+from pyk.prelude.kint import intToken
 
 from .kprove_test import KProveTest
 
@@ -72,13 +73,13 @@ class SimpleProofTest(KProveTest):
                 actual_depth, _actual_state, _actual_next_states = self.kprove.execute(
                     _config(pre_k, pre_state), depth=depth
                 )
-                actual_k = self.kprove.pretty_print(get_cell(_actual_state, 'K_CELL'))
-                actual_state = self.kprove.pretty_print(get_cell(_actual_state, 'STATE_CELL'))
+                actual_k = self.kprove.pretty_print(get_cell(_actual_state.kast, 'K_CELL'))
+                actual_state = self.kprove.pretty_print(get_cell(_actual_state.kast, 'STATE_CELL'))
 
                 actual_next_states = [
                     (
-                        self.kprove.pretty_print(get_cell(s, 'K_CELL')),
-                        self.kprove.pretty_print(get_cell(s, 'STATE_CELL')),
+                        self.kprove.pretty_print(get_cell(s.kast, 'K_CELL')),
+                        self.kprove.pretty_print(get_cell(s.kast, 'STATE_CELL')),
                     )
                     for s in _actual_next_states
                 ]
@@ -233,13 +234,13 @@ class ImpProofTest(KProveTest):
                 actual_depth, _actual_state, _actual_next_states = self.kprove.execute(
                     _config(pre_k, pre_state), depth=depth
                 )
-                actual_k = self.kprove.pretty_print(get_cell(_actual_state, 'K_CELL'))
-                actual_state = self.kprove.pretty_print(get_cell(_actual_state, 'STATE_CELL'))
+                actual_k = self.kprove.pretty_print(get_cell(_actual_state.kast, 'K_CELL'))
+                actual_state = self.kprove.pretty_print(get_cell(_actual_state.kast, 'STATE_CELL'))
 
                 actual_next_states = [
                     (
-                        self.kprove.pretty_print(get_cell(s, 'K_CELL')),
-                        self.kprove.pretty_print(get_cell(s, 'STATE_CELL')),
+                        self.kprove.pretty_print(get_cell(s.kast, 'K_CELL')),
+                        self.kprove.pretty_print(get_cell(s.kast, 'STATE_CELL')),
                     )
                     for s in _actual_next_states
                 ]
@@ -249,3 +250,54 @@ class ImpProofTest(KProveTest):
                 self.assertEqual(actual_state, expected_state)
                 self.assertEqual(actual_depth, expected_depth)
                 self.assertCountEqual(actual_next_states, expected_next_states)
+
+    def test_implies(self) -> None:
+        def _config(k: str, state: str) -> CTerm:
+            _k_parsed = self.kprove.parse_token(KToken(k, 'Pgm'), as_rule=True)
+            _state_parsed = self.kprove.parse_token(KToken(state, 'Map'), as_rule=True)
+            return CTerm(
+                KApply(
+                    '<generatedTop>',
+                    [
+                        KApply(
+                            '<T>',
+                            (
+                                KApply('<k>', [KSequence([_k_parsed])]),
+                                KApply('<state>', [_state_parsed]),
+                            ),
+                        ),
+                        KVariable('GENERATED_COUNTER_CELL'),
+                    ],
+                )
+            )
+
+        # Given
+        test_data = (
+            (
+                'constant-subst',
+                ('int $n , $s ; $n = X ;', '.Map'),
+                ('int $n , $s ; $n = 3 ;', '.Map'),
+                Subst({'X': intToken(3)}),
+            ),
+            (
+                'variable-subst',
+                ('int $n , $s ; $n = X ;', '.Map'),
+                ('int $n , $s ; $n = Y ;', '.Map'),
+                Subst({'X': KVariable('Y', sort=KSort('AExp'))}),
+            ),
+        )
+
+        for (
+            name,
+            (antecedent_k, antecedent_map),
+            (consequent_k, consequent_map),
+            expected_subst,
+        ) in test_data:
+            with self.subTest(name):
+                antecedent = _config(antecedent_k, antecedent_map)
+                consequent = _config(consequent_k, consequent_map)
+                # When
+                actual_subst = self.kprove.implies(antecedent, consequent)
+
+                # Then
+                self.assertEqual(actual_subst, expected_subst)
