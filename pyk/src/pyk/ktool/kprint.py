@@ -30,7 +30,7 @@ from ..kast.outer import (
     read_kast_definition,
 )
 from ..kore.parser import KoreParser
-from ..kore.syntax import DV, And, App, Assoc, Ceil, Equals, EVar, Not, Pattern, SortApp, String
+from ..kore.syntax import DV, And, App, Assoc, Ceil, Equals, EVar, Exists, Not, Pattern, SortApp, String
 from ..prelude.bytes import BYTES, bytesToken
 from ..prelude.k import DOTS, EMPTY_K
 from ..prelude.kbool import TRUE
@@ -324,6 +324,13 @@ class KPrint:
             if arg is not None:
                 return KApply(KLabel('#Not', [psort]), [arg])
 
+        elif type(kore) is Exists:
+            psort = KSort(kore.sort.name[4:])
+            var = self._kore_to_kast(kore.var)
+            body = self._kore_to_kast(kore.pattern)
+            if var is not None and type(var) is KVariable and body is not None:
+                return KApply(KLabel('#Exists', [psort]), [var, body])
+
         elif type(kore) is Equals:
             osort = KSort(kore.op_sort.name[4:])
             psort = KSort(kore.sort.name[4:])
@@ -418,6 +425,7 @@ class KPrint:
 
             elif len(kast.label.params) == 1:
                 psort = kast.label.params[0]
+
                 if kast.label.name == '#And' and kast.arity == 2:
                     larg = self._kast_to_kore(kast.args[0], sort=psort)
                     rarg = self._kast_to_kore(kast.args[1], sort=psort)
@@ -426,6 +434,7 @@ class KPrint:
                         if sort is not None:
                             _and = self._add_sort_injection(_and, psort, sort)
                         return _and
+
                 elif kast.label.name == '#Not' and kast.arity == 1:
                     arg = self._kast_to_kore(kast.args[0], sort=psort)
                     if arg is not None:
@@ -433,6 +442,15 @@ class KPrint:
                         if sort is not None:
                             _not = self._add_sort_injection(_not, psort, sort)
                         return _not
+
+                elif kast.label.name == '#Exists' and kast.arity == 2 and type(kast.args[0]) is KVariable:
+                    var = self._kast_to_kore(kast.args[0])
+                    body = self._kast_to_kore(kast.args[1], sort=psort)
+                    if var is not None and type(var) is EVar and body is not None:
+                        _exists: Pattern = Exists(SortApp('Sort' + psort.name), var, body)
+                        if sort is not None:
+                            _exists = self._add_sort_injection(_exists, psort, sort)
+                        return _exists
 
             elif len(kast.label.params) == 2:
                 osort = kast.label.params[0]
@@ -474,7 +492,9 @@ class KPrint:
         if isort == osort:
             return pat
         if isort not in self.definition.subsorts(osort):
-            raise ValueError(f'Could not find injection from subsort to supersort: {isort} -> {osort}')
+            raise ValueError(
+                f'Could not find injection from subsort to supersort {isort} -> {osort} for pattern: {pat}'
+            )
         return App('inj', [SortApp('Sort' + isort.name), SortApp('Sort' + osort.name)], [pat])
 
     def pretty_print(self, kast: KAst) -> str:
