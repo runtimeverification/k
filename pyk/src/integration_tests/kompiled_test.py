@@ -14,6 +14,7 @@ from pyk.prelude.ml import is_top
 class KompiledTest(TestCase):
     KOMPILE_MAIN_FILE: str
     KOMPILE_BACKEND: Optional[KompileBackend] = None
+    KOMPILE_SYNTAX_MODULE: Optional[str] = None
     KOMPILE_INCLUDE_DIRS: Iterable[str] = []
     KOMPILE_POST_PROCESS: Optional[str] = None
 
@@ -32,6 +33,7 @@ class KompiledTest(TestCase):
         self.kompiled_dir = kompile(
             main_file,
             backend=self.KOMPILE_BACKEND,
+            syntax_module=self.KOMPILE_SYNTAX_MODULE,
             output_dir=output_dir,
             include_dirs=include_dirs,
             post_process=self.KOMPILE_POST_PROCESS,
