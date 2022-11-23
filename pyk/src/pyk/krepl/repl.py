@@ -175,5 +175,8 @@ class KRepl(BaseRepl[KState]):
     @with_argparser(_load_parser())
     @with_category(BaseRepl.CAT_DEBUG)
     def do_load(self, args: Namespace) -> None:
-        self.interpreter = KInterpreter(self.definition_dir, args.program)
-        self.state = self.interpreter.init_state()
+        try:
+            self.interpreter = KInterpreter(self.definition_dir, args.program)
+            self.state = self.interpreter.init_state()
+        except ReplError as err:
+            self.poutput(err)
