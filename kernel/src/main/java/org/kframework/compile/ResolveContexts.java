@@ -76,6 +76,13 @@ public class ResolveContexts {
         return freezer;
     }
 
+    private Att addSuffixToLabel(Att a, String suffix) {
+        if (!a.contains(Att.LABEL())) {
+            return a;
+        }
+        return a.add(Att.LABEL(), a.get(Att.LABEL()) + suffix);
+    }
+
     private Stream<? extends Sentence> resolve(Context context, Module input) {
         checkContextValidity(context);
         final SortedMap<KVariable, K> vars = new TreeMap<>((v1, v2) -> v1.name().compareTo(v2.name()));
@@ -201,8 +208,8 @@ public class ResolveContexts {
         Production freezer = Production(freezerLabel, Sorts.KItem(), immutable(items), Att());
         K frozen = KApply(freezerLabel, vars.values().stream().collect(Collections.toList()));
         return Stream.of(freezer,
-                Rule(insert(body, KRewrite(cooled, KSequence(heated, frozen)), input), requiresHeat, BooleanUtils.TRUE, context.att().add("heat")),
-                Rule(insert(body, KRewrite(KSequence(heated, frozen), cooled), input), requiresCool, BooleanUtils.TRUE, context.att().add("cool")));
+                Rule(insert(body, KRewrite(cooled, KSequence(heated, frozen)), input), requiresHeat, BooleanUtils.TRUE, addSuffixToLabel(context.att().add("heat"), "-heat")),
+                Rule(insert(body, KRewrite(KSequence(heated, frozen), cooled), input), requiresCool, BooleanUtils.TRUE, addSuffixToLabel(context.att().add("cool"), "-cool")));
     }
 
     private K insert(K body, K rewrite, Module mod) {
