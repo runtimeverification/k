@@ -7,7 +7,6 @@ from pyk.prelude.kbool import TRUE
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlTop
 
-from .mock_kprint import MockKPrint
 from .utils import a, b, c, f, g, h, x, y, z
 
 
@@ -100,12 +99,6 @@ class SubstTest(TestCase):
 
                 # Then
                 self.assertEqual(actual, expected)
-
-    def test_pretty(self) -> None:
-        self.assertListEqual(
-            list(Subst({'X': TRUE, 'Y': KApply('_andBool_', [TRUE, TRUE])}).pretty(MockKPrint())),
-            ['X |-> true', 'Y |-> _andBool_ ( true , true )'],
-        )
 
     def test_ml_pred(self) -> None:
         subst_pred_pairs = (

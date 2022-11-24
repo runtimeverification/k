@@ -123,14 +123,24 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             return {
                 'source': self.source.id,
                 'target': self.target.id,
-                'witness': {'subst': self.subst.to_dict(), 'constraint': self.constraint.to_dict()},
+                'subst': self.subst.to_dict(),
+                'constraint': self.constraint.to_dict(),
             }
 
-        def pretty(self, kprint: KPrint) -> Iterable[str]:
+        def pretty(self, kprint: KPrint, omit_large_subst: bool = False) -> Iterable[str]:
+            subst_strs = [f'{k} <- {kprint.pretty_print(v)}' for k, v in self.subst.items()]
+            subst_str = ''
+            if len(subst_strs) == 0:
+                subst_str = '.Subst'
+            if len(subst_strs) == 1:
+                subst_str = subst_strs[0]
+            if len(subst_strs) > 1 and omit_large_subst:
+                subst_str = 'OMITTED SUBST'
+            if len(subst_strs) > 1 and not omit_large_subst:
+                subst_str = '{\n    ' + '\n    '.join(subst_strs) + '\n}'
             return [
-                'constraint: ' + kprint.pretty_print(ml_pred_to_bool(self.constraint)),
-                'subst:',
-                *add_indent('  ', self.subst.minimize().pretty(kprint)),
+                f'constraint: {kprint.pretty_print(ml_pred_to_bool(self.constraint))}',
+                f'subst: {subst_str}',
             ]
 
     _nodes: Dict[str, Node]

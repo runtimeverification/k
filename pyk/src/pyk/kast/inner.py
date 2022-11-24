@@ -131,10 +131,6 @@ class Subst(Mapping[str, KInner]):
             new_term = KRewrite(lhs, rhs).replace(new_term)
         return new_term
 
-    # TODO `kprint: KPrint` introcudes a circular dependency
-    def pretty(self, kprint: Any) -> Iterable[str]:
-        return (key + ' |-> ' + kprint.pretty_print(value) for key, value in self.items())
-
     @property
     def ml_pred(self) -> KInner:
         items = []
