@@ -1,48 +1,45 @@
-from unittest import TestCase
+import pytest
 
 from pyk.kbuild.utils import KVersion
 
+VALID_TEST_DATA = (
+    ('v5.4.7', KVersion(5, 4, 7, None)),
+    ('v5.4.7-0-g0b0189cc60', KVersion(5, 4, 7, KVersion.Git(0, '0b0189cc60', False))),
+    ('v5.4.7-0-g0b0189cc60-dirty', KVersion(5, 4, 7, KVersion.Git(0, '0b0189cc60', True))),
+)
 
-class KVersionTest(TestCase):
-    def test_parse_valid(self) -> None:
-        # Given
-        test_data = (
-            ('v5.4.7', KVersion(5, 4, 7, None)),
-            ('v5.4.7-0-g0b0189cc60', KVersion(5, 4, 7, KVersion.Git(0, '0b0189cc60', False))),
-            ('v5.4.7-0-g0b0189cc60-dirty', KVersion(5, 4, 7, KVersion.Git(0, '0b0189cc60', True))),
-        )
 
-        for version, expected in test_data:
-            with self.subTest(version):
-                # When
-                actual = KVersion.parse(version)
+@pytest.mark.parametrize('version,expected', VALID_TEST_DATA)
+def test_parse_valid(version: str, expected: KVersion) -> None:
+    # When
+    actual = KVersion.parse(version)
 
-                # Then
-                self.assertEqual(actual, expected)
-                self.assertEqual(actual.text, version)
+    # Then
+    assert actual == expected
+    assert actual.text == version
 
-    def test_parse_invalid(self) -> None:
-        # Given
-        test_data = (
-            '',
-            'a',
-            '1',
-            '1.2',
-            '1.2',
-            '1.2.3',
-            'v1.2.3-dirty',
-            'v1.2.3-10',
-            'v1.2.3-10-dirty',
-            'v1.2.3-10-0123',
-            'v1.2.3-a-0123456789',
-            'v1.2.3-10-0123456789',
-        )
 
-        for version in test_data:
-            with self.subTest(version):
-                with self.assertRaises(ValueError) as cm:
-                    # When
-                    KVersion.parse(version)
+INVALID_TEST_DATA = (
+    '',
+    'a',
+    '1',
+    '1.2',
+    '1.2',
+    '1.2.3',
+    'v1.2.3-dirty',
+    'v1.2.3-10',
+    'v1.2.3-10-dirty',
+    'v1.2.3-10-0123',
+    'v1.2.3-a-0123456789',
+    'v1.2.3-10-0123456789',
+)
 
-                # Then
-                self.assertEqual(cm.exception.args[0], f'Invalid K version string: {version}')
+
+@pytest.mark.parametrize('version', INVALID_TEST_DATA)
+def test_parse_invalid(version: str) -> None:
+    with pytest.raises(ValueError) as excinfo:
+        # When
+        KVersion.parse(version)
+
+    # Then
+    assert str(excinfo.value) == f'Invalid K version string: {version}'

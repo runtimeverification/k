@@ -1,36 +1,34 @@
 from typing import Final, Mapping, Tuple
-from unittest import TestCase
+
+import pytest
 
 from pyk.kast.inner import KInner
 from pyk.kast.manip import count_vars
 
 from .utils import a, b, c, f, g, h, x, y, z
 
+TEST_DATA: Final[Tuple[Tuple[KInner, Mapping[str, int]], ...]] = (
+    (a, {}),
+    (x, {'x': 1}),
+    (f(a), {}),
+    (f(a, b, c), {}),
+    (f(x), {'x': 1}),
+    (f(f(f(x))), {'x': 1}),
+    (f(x, a), {'x': 1}),
+    (f(x, x), {'x': 2}),
+    (f(x, y), {'x': 1, 'y': 1}),
+    (f(x, y, z), {'x': 1, 'y': 1, 'z': 1}),
+    (f(x, g(y), h(z)), {'x': 1, 'y': 1, 'z': 1}),
+    (f(x, a, g(y, b), h(z, c)), {'x': 1, 'y': 1, 'z': 1}),
+    (f(x, g(x, y), h(x, z)), {'x': 3, 'y': 1, 'z': 1}),
+    (f(x, g(x, h(x, y, z))), {'x': 3, 'y': 1, 'z': 1}),
+)
 
-class CountVarTest(TestCase):
-    TEST_DATA: Final[Tuple[Tuple[KInner, Mapping[str, int]], ...]] = (
-        (a, {}),
-        (x, {'x': 1}),
-        (f(a), {}),
-        (f(a, b, c), {}),
-        (f(x), {'x': 1}),
-        (f(f(f(x))), {'x': 1}),
-        (f(x, a), {'x': 1}),
-        (f(x, x), {'x': 2}),
-        (f(x, y), {'x': 1, 'y': 1}),
-        (f(x, y, z), {'x': 1, 'y': 1, 'z': 1}),
-        (f(x, g(y), h(z)), {'x': 1, 'y': 1, 'z': 1}),
-        (f(x, a, g(y, b), h(z, c)), {'x': 1, 'y': 1, 'z': 1}),
-        (f(x, g(x, y), h(x, z)), {'x': 3, 'y': 1, 'z': 1}),
-        (f(x, g(x, h(x, y, z))), {'x': 3, 'y': 1, 'z': 1}),
-    )
 
-    def test(self) -> None:
-        # Given
-        for i, [term, expected] in enumerate(self.TEST_DATA):
-            with self.subTest(i=i):
-                # When
-                actual = count_vars(term)
+@pytest.mark.parametrize('term,expected', TEST_DATA, ids=[i for i, _ in enumerate(TEST_DATA)])
+def test(term: KInner, expected: Mapping) -> None:
+    # When
+    actual = count_vars(term)
 
-                # Then
-                self.assertDictEqual(actual, expected)
+    # Then
+    assert actual == expected

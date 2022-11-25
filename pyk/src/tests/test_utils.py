@@ -1,26 +1,32 @@
-from unittest import TestCase
+from typing import Final, Tuple
+
+import pytest
 
 from pyk.utils import deconstruct_short_hash
 
+FULL_HASH: Final = '0001000200030004000500060007000800010002000300040005000600070008'
+TEST_DATA_PASS: Final = (
+    ('..abcdef', ('', 'abcdef')),
+    ('abcdef..', ('abcdef', '')),
+    ('abcdef..12345', ('abcdef', '12345')),
+    (FULL_HASH, (FULL_HASH, FULL_HASH)),
+)
 
-class ShortHashTest(TestCase):
-    def test_parse_short_id(self) -> None:
-        # prefix with / without the dots, suffix, both prefix and suffix, full hash, etc).
-        self.assertEqual(deconstruct_short_hash('..abcdef'), ('', 'abcdef'))
-        self.assertEqual(deconstruct_short_hash('abcdef..'), ('abcdef', ''))
-        self.assertEqual(deconstruct_short_hash('abcdef..12345'), ('abcdef', '12345'))
 
-        full_hash = '0001000200030004000500060007000800010002000300040005000600070008'
-        self.assertEqual(deconstruct_short_hash(full_hash), (full_hash, full_hash))
+@pytest.mark.parametrize('short_hash,expected', TEST_DATA_PASS, ids=[short_hash for short_hash, _ in TEST_DATA_PASS])
+def test_deconstruct_short_hash_pass(short_hash: str, expected: Tuple[str, str]) -> None:
+    # When
+    actual = deconstruct_short_hash(short_hash)
 
-        # Bad short hash: Has digits between dots
-        with self.assertRaises(ValueError, msg='Bad short hash: 3.c62e73544...'):
-            deconstruct_short_hash('3.c62e73544...')
+    # Then
+    assert actual == expected
 
-        # Bad short hash: Has non hex digits
-        with self.assertRaises(ValueError, msg='Bad short hash: 3...XXX'):
-            deconstruct_short_hash('3...XXX')
 
-        # Bad short hash: Has more than two dots
-        with self.assertRaises(ValueError, msg='Bad short hash: 3.....adf'):
-            deconstruct_short_hash('3...adf')
+@pytest.mark.parametrize('short_hash', ('3.c62e73544.', '3..XXX', '3...adf'))
+def test_deconstruct_short_hash_fail(short_hash: str) -> None:
+    with pytest.raises(ValueError) as excinfo:
+        # When
+        deconstruct_short_hash(short_hash)
+
+    # Then
+    assert str(excinfo.value) == f'Bad short hash: {short_hash}'
