@@ -1,12 +1,11 @@
 from pyk.kore.rpc import KoreClient, KoreServer
-from pyk.ktool import KompileBackend
 
 from ..kompiled_test import KompiledTest
 from ..utils import free_port_on_host
 
 
 class KoreClientTest(KompiledTest):
-    KOMPILE_BACKEND = KompileBackend.HASKELL
+    KOMPILE_BACKEND = 'haskell'
 
     KORE_MODULE_NAME: str
     KORE_CLIENT_TIMEOUT = 1000

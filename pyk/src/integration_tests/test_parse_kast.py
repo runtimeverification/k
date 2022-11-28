@@ -1,14 +1,14 @@
+from typing import ClassVar
+
 from pyk.kast.inner import KApply, KAs, KRewrite, KSort
 from pyk.kast.outer import KSortSynonym
-from pyk.ktool import KompileBackend
 from pyk.utils import single
 
 from .kompiled_test import KompiledTest
 
 
 class ParseKAstTest(KompiledTest):
-    KOMPILE_EMIT_JSON = True
-    MODULE_NAME: str
+    MODULE_NAME: ClassVar[str]
 
     def setUp(self) -> None:
         super().setUp()
@@ -17,7 +17,6 @@ class ParseKAstTest(KompiledTest):
 
 class KSortSynonymTest(ParseKAstTest):
     KOMPILE_MAIN_FILE = 'k-files/sort-synonym.k'
-    KOMPILE_BACKEND = KompileBackend.HASKELL
 
     MODULE_NAME = 'SORT-SYNONYM-SYNTAX'
 
@@ -29,7 +28,6 @@ class KSortSynonymTest(ParseKAstTest):
 
 class KAsTest(ParseKAstTest):
     KOMPILE_MAIN_FILE = 'k-files/contextual-function.k'
-    KOMPILE_BACKEND = KompileBackend.HASKELL
 
     MODULE_NAME = 'CONTEXTUAL-FUNCTION'
 

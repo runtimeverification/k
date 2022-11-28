@@ -1,5 +1,4 @@
 from pyk.kllvm.ast import CompositePattern
-from pyk.kllvm.runtime import compile_runtime, import_runtime
 
 from .utils import RuntimeTest
 
@@ -7,11 +6,6 @@ from .utils import RuntimeTest
 class TermTest(RuntimeTest):
     KOMPILE_MAIN_FILE = 'k-files/ctor.k'
     KOMPILE_SYNTAX_MODULE = 'CTOR'
-
-    def setUp(self) -> None:
-        super().setUp()
-        compile_runtime(self.kompiled_dir)
-        self.runtime = import_runtime(self.kompiled_dir)
 
     def test_construct(self) -> None:
         test_data = ('one', 'two', 'three')
