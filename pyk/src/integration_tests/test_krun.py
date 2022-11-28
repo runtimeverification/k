@@ -4,7 +4,6 @@ from pyk.kast.inner import KApply, KSequence, KToken
 from pyk.kast.manip import flatten_label, get_cell
 from pyk.kore.parser import KoreParser
 from pyk.kore.syntax import DV, App, Pattern, SortApp, String
-from pyk.ktool import KompileBackend
 from pyk.ktool.kprint import KAstInput, KAstOutput, SymbolTable, _kast
 from pyk.prelude.kint import intToken
 
@@ -13,8 +12,7 @@ from .krun_test import KRunTest
 
 class ImpRunTest(KRunTest):
     KOMPILE_MAIN_FILE = 'k-files/imp.k'
-    KOMPILE_BACKEND = KompileBackend.HASKELL
-    KOMPILE_EMIT_JSON = True
+    KOMPILE_BACKEND = 'haskell'
 
     KRUN_USE_DIR: Optional[str] = '.imp'
 
@@ -81,7 +79,7 @@ class TmpRunTest(ImpRunTest):
 
 class ConfigTest(KRunTest):
     KOMPILE_MAIN_FILE = 'k-files/config.k'
-    KOMPILE_BACKEND = KompileBackend.LLVM
+    KOMPILE_BACKEND = 'llvm'
 
     # TODO Should be unnecessary
     @staticmethod

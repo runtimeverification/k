@@ -1,14 +1,10 @@
 from pyk.kast.outer import KRegexTerminal
-from pyk.ktool import KompileBackend
 
 from .kompiled_test import KompiledTest
 
 
 class RegexTerminalTest(KompiledTest):
     KOMPILE_MAIN_FILE = 'k-files/regex-terminal.k'
-    KOMPILE_BACKEND = KompileBackend.HASKELL
-    KOMPILE_EMIT_JSON = True
-    KOMPILE_POST_PROCESS = 'cat'  # This ensures that the compiled JSON is read back by K
 
     def test(self) -> None:
         # Given

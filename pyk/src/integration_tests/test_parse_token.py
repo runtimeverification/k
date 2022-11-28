@@ -1,7 +1,6 @@
 from typing import Iterable, Tuple
 
 from pyk.kast.inner import KApply, KInner, KSort, KToken, KVariable
-from pyk.ktool import KompileBackend
 from pyk.ktool.kit import parse_token_rule_syntax
 from pyk.ktool.kprint import SymbolTable
 from pyk.prelude.kint import intToken
@@ -11,8 +10,6 @@ from .kprove_test import KProveTest
 
 class ParseTokenTest(KProveTest):
     KOMPILE_MAIN_FILE = 'k-files/simple-proofs.k'
-    KOMPILE_BACKEND = KompileBackend.HASKELL
-    KOMPILE_EMIT_JSON = True
 
     @staticmethod
     def _update_symbol_table(symbol_table: SymbolTable) -> None:

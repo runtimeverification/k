@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from itertools import chain
 from pathlib import Path
 from tempfile import mkdtemp
-from typing import Iterable
+from typing import ClassVar, Iterable
 
 from pyk.ktool import KProve
 from pyk.ktool.kprint import SymbolTable
@@ -13,7 +13,9 @@ from .utils import free_port_on_host
 
 
 class KProveTest(KompiledTest, ABC):
-    KPROVE_INCLUDE_DIRS: Iterable[str] = []
+    KOMPILE_BACKEND = 'haskell'
+
+    KPROVE_INCLUDE_DIRS: ClassVar[Iterable[str]] = []
 
     use_dir: Path
     kprove: KProve

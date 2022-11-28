@@ -1,7 +1,6 @@
 from pyk.kast.inner import KApply, KRewrite, KSort, KToken, KVariable
 from pyk.kast.manip import push_down_rewrites
 from pyk.kast.outer import KClaim
-from pyk.ktool import KompileBackend
 from pyk.ktool.kprint import SymbolTable, assoc_with_unit
 from pyk.prelude.k import GENERATED_TOP_CELL
 
@@ -10,8 +9,6 @@ from .kprove_test import KProveTest
 
 class DefnTest(KProveTest):
     KOMPILE_MAIN_FILE = 'k-files/imp-verification.k'
-    KOMPILE_BACKEND = KompileBackend.HASKELL
-    KOMPILE_EMIT_JSON = True
 
     @staticmethod
     def _update_symbol_table(symbol_table: SymbolTable) -> None:
