@@ -1,6 +1,5 @@
 from pyk.kast.inner import KApply, KSequence, KToken, KVariable
 from pyk.kast.manip import remove_attrs
-from pyk.ktool import KompileBackend
 from pyk.ktool.kprint import SymbolTable
 from pyk.prelude.kint import intToken
 
@@ -9,8 +8,6 @@ from .kprove_test import KProveTest
 
 class ImpParseTest(KProveTest):
     KOMPILE_MAIN_FILE = 'k-files/imp.k'
-    KOMPILE_BACKEND = KompileBackend.HASKELL
-    KOMPILE_EMIT_JSON = True
 
     @staticmethod
     def _update_symbol_table(symbol_table: SymbolTable) -> None:

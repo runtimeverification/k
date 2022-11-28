@@ -4,7 +4,6 @@ from pathlib import Path
 from pyk.kast.inner import EMPTY_ATT
 from pyk.kast.manip import remove_generated_cells
 from pyk.kast.outer import KDefinition, KFlatModuleList, KRequire
-from pyk.ktool import KompileBackend
 from pyk.ktool.kprint import SymbolTable, paren
 from pyk.ktool.kprove import _kprove
 
@@ -15,8 +14,6 @@ class EmitJsonSpecTest(KProveTest):
     MAIN_FILE_NAME = 'imp-verification.k'
 
     KOMPILE_MAIN_FILE = f'k-files/{MAIN_FILE_NAME}'
-    KOMPILE_BACKEND = KompileBackend.HASKELL
-    KOMPILE_EMIT_JSON = True
 
     SPEC_FILE = 'k-files/looping-spec.k'
 
