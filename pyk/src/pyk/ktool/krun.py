@@ -48,7 +48,7 @@ class KRun(KPrint):
             raise ValueError('Cannot supply both pgm and config with PGM variable.')
         pmap = {k: 'cat' for k in config} if config is not None else None
         cmap = {k: self.kast_to_kore(v).text for k, v in config.items()} if config is not None else None
-        with NamedTemporaryFile('w', dir=self.use_directory, delete=False) as ntf:
+        with NamedTemporaryFile('w', dir=self.use_directory) as ntf:
             ntf.write(self.pretty_print(pgm))
             ntf.flush()
 

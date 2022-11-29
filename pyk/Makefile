@@ -41,7 +41,7 @@ test-unit: poetry-install
 	$(POETRY_RUN) pytest src/tests --maxfail=1 --verbose $(TEST_ARGS)
 
 test-integration: poetry-install
-	$(POETRY_RUN) pytest src/integration_tests --durations=0 --maxfail=1 --verbose $(TEST_ARGS)
+	$(POETRY_RUN) pytest src/integration_tests --numprocesses=4 --durations=0 --maxfail=1 --verbose $(TEST_ARGS)
 
 test-pyk: poetry-install
 	$(POETRY_RUN) $(MAKE) -C pyk-tests

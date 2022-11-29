@@ -1,41 +1,64 @@
-from typing import ClassVar
-
 from pyk.kast.inner import KApply, KAs, KRewrite, KSort
-from pyk.kast.outer import KSortSynonym
+from pyk.kast.outer import KRegexTerminal, KSortSynonym, read_kast_definition
 from pyk.utils import single
 
-from .kompiled_test import KompiledTest
+from .utils import Kompiler
 
 
-class ParseKAstTest(KompiledTest):
-    MODULE_NAME: ClassVar[str]
+def test_sort_synonym(kompile: Kompiler) -> None:
+    # Given
+    definition_dir = kompile('k-files/sort-synonym.k')
+    definition = read_kast_definition(definition_dir / 'compiled.json')
+    module = definition.module('SORT-SYNONYM-SYNTAX')
 
-    def setUp(self) -> None:
-        super().setUp()
-        self.module = single(module for module in self.definition if module.name == self.MODULE_NAME)
+    # When
+    sort_synonym = single(sentence for sentence in module if type(sentence) is KSortSynonym)
 
-
-class KSortSynonymTest(ParseKAstTest):
-    KOMPILE_MAIN_FILE = 'k-files/sort-synonym.k'
-
-    MODULE_NAME = 'SORT-SYNONYM-SYNTAX'
-
-    def test(self) -> None:
-        sort_synonym = [sentence for sentence in self.module if type(sentence) is KSortSynonym][0]
-        self.assertEqual(sort_synonym.new_sort, KSort('NewInt'))
-        self.assertEqual(sort_synonym.old_sort, KSort('Int'))
+    # Then
+    assert sort_synonym.new_sort == KSort('NewInt')
+    assert sort_synonym.old_sort == KSort('Int')
 
 
-class KAsTest(ParseKAstTest):
-    KOMPILE_MAIN_FILE = 'k-files/contextual-function.k'
+def test_kas(kompile: Kompiler) -> None:
+    # Given
+    definition_dir = kompile('k-files/contextual-function.k')
+    definition = read_kast_definition(definition_dir / 'compiled.json')
+    module = definition.module('CONTEXTUAL-FUNCTION')
 
-    MODULE_NAME = 'CONTEXTUAL-FUNCTION'
+    # When
+    rule = single(rule for rule in module.rules if rule.att.get('label') == 'def-get-ctx')
 
-    def test(self) -> None:
-        rule = [rule for rule in self.module.rules if rule.att.get('label') == 'def-get-ctx'][0]
-        rewrite = rule.body
-        assert type(rewrite) is KRewrite
-        lhs = rewrite.lhs
-        assert type(lhs) is KApply
-        kas = lhs.args[0]
-        self.assertIsInstance(kas, KAs)
+    # Then
+    rewrite = rule.body
+    assert type(rewrite) is KRewrite
+    lhs = rewrite.lhs
+    assert type(lhs) is KApply
+    kas = lhs.args[0]
+    assert isinstance(kas, KAs)
+
+
+def test_regex_terminal(kompile: Kompiler) -> None:
+    # Given
+    definition_dir = kompile('k-files/regex-terminal.k')
+    definition = read_kast_definition(definition_dir / 'compiled.json')
+    module = definition.module('REGEX-TERMINAL-SYNTAX')
+    expected = [
+        KRegexTerminal('b', '#', '#'),
+        KRegexTerminal('b', 'a', '#'),
+        KRegexTerminal('b', '#', 'c'),
+        KRegexTerminal('b', 'a', 'c'),
+    ]
+
+    # When
+    productions = sorted(
+        (
+            prod
+            for prod in module.productions
+            if prod.sort.name in {'T0', 'T1', 'T2', 'T3'} and type(prod.items[0]) is KRegexTerminal
+        ),
+        key=lambda prod: prod.sort.name,
+    )
+    actual = [prod.items[0] for prod in productions]
+
+    # Then
+    assert actual == expected
