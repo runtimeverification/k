@@ -1,42 +1,44 @@
-from unittest import TestCase
+from typing import Final
+
+import pytest
 
 from pyk.kllvm.ast import CompositeSort, Symbol, Variable
 
+s1 = Symbol("Lbl'Plus")
+s2 = Symbol("Lbl'Plus")
+s2.add_formal_argument(CompositeSort('A'))
 
-class SymbolTest(TestCase):
-    def test_str(self) -> None:
-        # Given
-        s1 = Symbol("Lbl'Plus")
-        s2 = Symbol("Lbl'Plus")
-        s2.add_formal_argument(CompositeSort('A'))
-
-        test_data = (
-            (s1, "Lbl'Plus{}"),
-            (s2, "Lbl'Plus{A{}}"),
-        )
-
-        for i, (symbol, expected) in enumerate(test_data):
-            with self.subTest(i=i):
-                # When
-                actual = str(symbol)
-
-                # Then
-                self.assertEqual(actual, expected)
-
-    def test_equal(self) -> None:
-        a1 = Symbol('A')
-        a2 = Symbol('A')
-        b1 = Symbol('B')
-        self.assertIsNot(a1, a2)
-        self.assertEqual(a1, a2)
-        self.assertNotEqual(a1, b1)
+STR_TEST_DATA: Final = (
+    (s1, "Lbl'Plus{}"),
+    (s2, "Lbl'Plus{A{}}"),
+)
 
 
-class VariableTest(TestCase):
-    def test_variable(self) -> None:
-        # When
-        a = Variable('A')
+@pytest.mark.parametrize('symbol,expected', STR_TEST_DATA, ids=[expected for _, expected in STR_TEST_DATA])
+def test_str(symbol: Symbol, expected: str) -> None:
+    # When
+    actual = str(symbol)
 
-        # Then
-        self.assertEqual(a.name, 'A')
-        self.assertEqual(str(a), 'A')
+    # Then
+    assert actual == expected
+
+
+def test_equal() -> None:
+    # Given
+    a1 = Symbol('A')
+    a2 = Symbol('A')
+    b = Symbol('B')
+
+    # Then
+    assert a1 is not a2
+    assert a1 == a2
+    assert a1 != b
+
+
+def test_variable() -> None:
+    # When
+    a = Variable('A')
+
+    # Then
+    assert a.name == 'A'
+    assert str(a) == 'A'

@@ -1,56 +1,51 @@
-from typing import Optional
+from pathlib import Path
 
 from pyk.kast.inner import KApply, KSequence, KToken
 from pyk.kast.manip import flatten_label, get_cell
 from pyk.kore.parser import KoreParser
 from pyk.kore.syntax import DV, App, Pattern, SortApp, String
-from pyk.ktool.kprint import KAstInput, KAstOutput, SymbolTable, _kast
+from pyk.ktool import KRun
+from pyk.ktool.kprint import KAstInput, KAstOutput, _kast
 from pyk.prelude.kint import intToken
 
-from .krun_test import KRunTest
+from .utils import KRunTest
 
 
-class ImpRunTest(KRunTest):
+class TestImpRun(KRunTest):
     KOMPILE_MAIN_FILE = 'k-files/imp.k'
     KOMPILE_BACKEND = 'haskell'
 
-    KRUN_USE_DIR: Optional[str] = '.imp'
-
-    @staticmethod
-    def _update_symbol_table(symbol_table: SymbolTable) -> None:
-        pass
-
-    def test_run(self) -> None:
+    def test_run(self, krun: KRun) -> None:
         # Given
         init_pgm_token = KToken('int n , s ; n = 2 ; s = 0 ; while ( 0 <= n ) { s = s + n ; n = n + -1 ; }', 'Pgm')
-        final_cterm = self.krun.run(init_pgm_token)
+        final_cterm = krun.run(init_pgm_token)
 
-        k_expected = KSequence([])
-        state_expected_map_items = [
+        expected_k = KSequence([])
+        expected_map_items = [
             KApply('_|->_', [KToken('s', 'Id'), intToken(3)]),
             KApply('_|->_', [KToken('n', 'Id'), intToken(-1)]),
         ]
 
-        k_actual = get_cell(final_cterm.config, 'K_CELL')
-        state_actual_map_items = flatten_label('_Map_', get_cell(final_cterm.config, 'STATE_CELL'))
+        # When
+        actual_k = get_cell(final_cterm.config, 'K_CELL')
+        actual_map_items = flatten_label('_Map_', get_cell(final_cterm.config, 'STATE_CELL'))
 
-        self.maxDiff = None
-        self.assertEqual(k_actual, k_expected)
-        self.assertCountEqual(state_actual_map_items, state_expected_map_items)
+        assert actual_k == expected_k
+        assert set(actual_map_items) == set(expected_map_items)
 
-    def test_run_kore_term(self) -> None:
+    def test_run_kore_term(self, krun: KRun) -> None:
         # Given
         x = '#token("x", "Id")'
-        pattern = self._state(k=f'int {x} ; {x} = 1 ;', state='.Map')
-        expected = self._state(k='.', state=f'{x} |-> 1')
+        pattern = self._state(krun.definition_dir, k=f'int {x} ; {x} = 1 ;', state='.Map')
+        expected = self._state(krun.definition_dir, k='.', state=f'{x} |-> 1')
 
         # When
-        actual = self.krun.run_kore_term(pattern)
+        actual = krun.run_kore_term(pattern)
 
         # Then
-        self.assertEqual(actual, expected)
+        assert actual == expected
 
-    def _state(self, k: str, state: str) -> Pattern:
+    def _state(self, definition_dir: Path, k: str, state: str) -> Pattern:
         pretty_text = f"""
             <generatedTop>
                 <T>
@@ -63,7 +58,7 @@ class ImpRunTest(KRunTest):
             </generatedTop>
         """
         proc_res = _kast(
-            definition_dir=self.krun.definition_dir,
+            definition_dir=definition_dir,
             input=KAstInput.RULE,
             output=KAstOutput.KORE,
             expression=pretty_text,
@@ -73,20 +68,10 @@ class ImpRunTest(KRunTest):
         return KoreParser(kore_text).pattern()
 
 
-class TmpRunTest(ImpRunTest):
-    KRUN_USE_DIR = None
-
-
-class ConfigTest(KRunTest):
+class TestCofigRun(KRunTest):
     KOMPILE_MAIN_FILE = 'k-files/config.k'
-    KOMPILE_BACKEND = 'llvm'
 
-    # TODO Should be unnecessary
-    @staticmethod
-    def _update_symbol_table(symbol_table: SymbolTable) -> None:
-        pass
-
-    def test_run_kore_config(self) -> None:
+    def test_run_kore_config(self, krun: KRun) -> None:
         # Given
         fst = DV(SortApp('SortInt'), String('0'))
         snd = DV(SortApp('SortInt'), String('1'))
@@ -111,7 +96,7 @@ class ConfigTest(KRunTest):
         )
 
         # When
-        actual = self.krun.run_kore_config({'FST': fst, 'SND': snd}, depth=0)
+        actual = krun.run_kore_config({'FST': fst, 'SND': snd}, depth=0)
 
         # Then
-        self.assertEqual(actual, expected)
+        assert actual == expected

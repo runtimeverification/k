@@ -1,18 +1,17 @@
+from pathlib import Path
 from types import ModuleType
-from typing import ClassVar
+
+import pytest
 
 from pyk.kllvm.runtime import compile_runtime, import_runtime
 
-from ..kompiled_test import KompiledTest
+from ..utils import KompiledTest
 
 
 class RuntimeTest(KompiledTest):
     KOMPILE_BACKEND = 'llvm'
 
-    runtime: ClassVar[ModuleType]
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
-        compile_runtime(cls.kompiled_dir)
-        cls.runtime = import_runtime(cls.kompiled_dir)
+    @pytest.fixture(scope='class')
+    def runtime(self, definition_dir: Path) -> ModuleType:
+        compile_runtime(definition_dir)
+        return import_runtime(definition_dir)

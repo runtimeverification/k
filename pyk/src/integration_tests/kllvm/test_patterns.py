@@ -1,56 +1,58 @@
-from tempfile import NamedTemporaryFile
-from unittest import TestCase
+from pathlib import Path
+
+import pytest
 
 from pyk.kllvm.ast import CompositePattern, CompositeSort, Pattern, StringPattern, VariablePattern
 
 
-class PatternTest(TestCase):
-    def test_file_load(self) -> None:
-        # Given
-        test_data = (
-            'A{}(B{}(),C{}())',
-            '"string pattern"',
-            'XYZ : ABC',
-        )
+@pytest.mark.parametrize(
+    'kore_text',
+    (
+        'A{}(B{}(),C{}())',
+        '"string pattern"',
+        'XYZ : ABC',
+    ),
+)
+def test_file_load(tmp_path: Path, kore_text: str) -> None:
+    # Given
+    kore_file = tmp_path / 'test.kore'
+    kore_file.write_text(kore_text)
 
-        for text in test_data:
-            with self.subTest(text):
-                with NamedTemporaryFile(mode='w') as f:
-                    f.write(text)
-                    f.flush()
+    # When
+    actual = Pattern(str(kore_file))
 
-                    # When
-                    actual = Pattern(f.name)
+    # Then
+    assert str(actual) == kore_text
 
-                # Then
-                self.assertEqual(str(actual), text)
 
-    def test_composite(self) -> None:
-        # Given
-        pattern = CompositePattern('F')
-        pattern.add_argument(CompositePattern('A'))
-        pattern.add_argument(VariablePattern('X', CompositeSort('S')))
+def test_composite() -> None:
+    # Given
+    pattern = CompositePattern('F')
+    pattern.add_argument(CompositePattern('A'))
+    pattern.add_argument(VariablePattern('X', CompositeSort('S')))
 
-        # When
-        actual = pattern.substitute({'X': CompositePattern('B')})
+    # When
+    actual = pattern.substitute({'X': CompositePattern('B')})
 
-        # Then
-        self.assertEqual(str(actual), 'F{}(A{}(),B{}())')
+    # Then
+    assert str(actual) == 'F{}(A{}(),B{}())'
 
-    def test_string(self) -> None:
-        # Given
-        pattern = StringPattern('abc')
 
-        # Then
-        self.assertEqual(str(pattern), '"abc"')
-        self.assertEqual(pattern.contents, 'abc')
+def test_string() -> None:
+    # Given
+    pattern = StringPattern('abc')
 
-    def test_variable(self) -> None:
-        # Given
-        pattern = VariablePattern('X', CompositeSort('S'))
+    # Then
+    assert str(pattern) == '"abc"'
+    assert pattern.contents == 'abc'
 
-        # When
-        actual = pattern.substitute({'X': CompositePattern('A')})
 
-        # Then
-        self.assertEqual(str(actual), 'A{}()')
+def test_variable() -> None:
+    # Given
+    pattern = VariablePattern('X', CompositeSort('S'))
+
+    # When
+    actual = pattern.substitute({'X': CompositePattern('A')})
+
+    # Then
+    assert str(actual) == 'A{}()'

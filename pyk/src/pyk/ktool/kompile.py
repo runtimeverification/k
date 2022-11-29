@@ -3,7 +3,7 @@ import shlex
 from enum import Enum
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Final, Iterable, List, Optional
+from typing import Final, Iterable, List, Optional, Union
 
 from ..cli_utils import abs_or_rel_to, check_dir_path, check_file_path, run_process
 
@@ -18,14 +18,14 @@ class KompileBackend(Enum):
 
 
 def kompile(
-    main_file: Path,
+    main_file: Union[str, Path],
     *,
     command: Iterable[str] = ('kompile',),
-    output_dir: Optional[Path] = None,
+    output_dir: Optional[Union[str, Path]] = None,
     backend: Optional[KompileBackend] = None,
     main_module: Optional[str] = None,
     syntax_module: Optional[str] = None,
-    include_dirs: Iterable[Path] = (),
+    include_dirs: Iterable[Union[str, Path]] = (),
     md_selector: Optional[str] = None,
     hook_namespaces: Iterable[str] = (),
     emit_json: bool = True,
@@ -36,11 +36,14 @@ def kompile(
     check: bool = True,
     profile: bool = False,
 ) -> Path:
+    main_file = Path(main_file)
     check_file_path(abs_or_rel_to(main_file, cwd or Path()))
 
-    include_dirs = list(include_dirs)
-    for include_dir in include_dirs:
+    _include_dirs = [Path(include_dir) for include_dir in include_dirs]
+    for include_dir in _include_dirs:
         check_dir_path(abs_or_rel_to(include_dir, cwd or Path()))
+
+    output_dir = Path(output_dir) if output_dir is not None else None
 
     args = _build_arg_list(
         command=command,
@@ -49,7 +52,7 @@ def kompile(
         backend=backend,
         main_module=main_module,
         syntax_module=syntax_module,
-        include_dirs=include_dirs,
+        include_dirs=_include_dirs,
         md_selector=md_selector,
         hook_namespaces=hook_namespaces,
         emit_json=emit_json,
