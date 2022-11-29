@@ -1,34 +1,36 @@
+from types import ModuleType
+
 from pyk.kllvm.ast import Pattern
 from pyk.kllvm.parser import Parser
 
 from .utils import RuntimeTest
 
 
-class StepTest(RuntimeTest):
+class TestStep(RuntimeTest):
     KOMPILE_MAIN_FILE = 'k-files/steps.k'
 
-    def test_steps_1(self) -> None:
-        term = self.runtime.Term(start_pattern())
+    def test_steps_1(self, runtime: ModuleType) -> None:
+        term = runtime.Term(start_pattern())
         term.step(0)
-        self.assertEqual(str(term), foo_output(0))
+        assert str(term) == foo_output(0)
         term.step()
         term.step()
-        self.assertEqual(str(term), foo_output(2))
+        assert str(term) == foo_output(2)
         term.step(200)
-        self.assertEqual(str(term), bar_output())
+        assert str(term) == bar_output()
 
-    def test_steps_2(self) -> None:
-        term = self.runtime.Term(start_pattern())
-        self.assertEqual(str(term), foo_output(0))
+    def test_steps_2(self, runtime: ModuleType) -> None:
+        term = runtime.Term(start_pattern())
+        assert str(term) == foo_output(0)
         term.step(50)
-        self.assertEqual(str(term), foo_output(50))
+        assert str(term) == foo_output(50)
         term.step(-1)
-        self.assertEqual(str(term), bar_output())
+        assert str(term) == bar_output()
 
-    def test_steps_3(self) -> None:
-        term = self.runtime.Term(start_pattern())
+    def test_steps_3(self, runtime: ModuleType) -> None:
+        term = runtime.Term(start_pattern())
         term.run()
-        self.assertEqual(str(term), bar_output())
+        assert str(term) == bar_output()
 
 
 def start_pattern() -> Pattern:

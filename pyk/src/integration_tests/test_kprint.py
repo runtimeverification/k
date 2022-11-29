@@ -1,28 +1,39 @@
-from pyk.kast.inner import KApply, KSequence, KToken, KVariable
+from typing import Final
+
+import pytest
+
+from pyk.kast.inner import KApply, KInner, KSequence, KToken, KVariable
 from pyk.kast.manip import remove_attrs
-from pyk.ktool.kprint import SymbolTable
+from pyk.ktool import KPrint
 from pyk.prelude.kint import intToken
 
-from .kprove_test import KProveTest
+from .utils import KPrintTest
+
+TEST_DATA: Final = (
+    ('int-token', False, KToken('3', 'Int'), intToken(3)),
+    ('id-token', False, KToken('abc', 'Id'), KToken('abc', 'Id')),
+    ('add-aexp', False, KToken('3 + 4', 'AExp'), KApply('_+_', [intToken(3), intToken(4)])),
+    ('add-int', True, KToken('3 +Int V', 'Int'), KApply('_+Int_', [intToken(3), KVariable('V')])),
+    ('k-cell', True, KToken('<k> . </k>', 'KCell'), KApply('<k>', KSequence())),
+)
 
 
-class ImpParseTest(KProveTest):
+class TestParseToken(KPrintTest):
     KOMPILE_MAIN_FILE = 'k-files/imp.k'
 
-    @staticmethod
-    def _update_symbol_table(symbol_table: SymbolTable) -> None:
-        pass
+    @pytest.mark.parametrize(
+        'test_id,as_rule,token,expected', TEST_DATA, ids=[test_id for test_id, _, _, _ in TEST_DATA]
+    )
+    def test_parse_token(
+        self,
+        kprint: KPrint,
+        test_id: str,
+        as_rule: bool,
+        token: KToken,
+        expected: KInner,
+    ) -> None:
+        # When
+        actual = kprint.parse_token(token, as_rule=as_rule)
 
-    def test_parse_token(self) -> None:
-        test_parses = (
-            ('int-token', False, KToken('3', 'Int'), intToken(3)),
-            ('id-token', False, KToken('abc', 'Id'), KToken('abc', 'Id')),
-            ('add-aexp', False, KToken('3 + 4', 'AExp'), KApply('_+_', [intToken(3), intToken(4)])),
-            ('add-int', True, KToken('3 +Int V', 'Int'), KApply('_+Int_', [intToken(3), KVariable('V')])),
-            ('k-cell', True, KToken('<k> . </k>', 'KCell'), KApply('<k>', KSequence())),
-        )
-
-        for name, as_rule, token, kast in test_parses:
-            with self.subTest(name):
-                actual_kast = self.kprove.parse_token(token, as_rule=as_rule)
-                self.assertEqual(remove_attrs(actual_kast), kast)
+        # Then
+        assert remove_attrs(actual) == expected

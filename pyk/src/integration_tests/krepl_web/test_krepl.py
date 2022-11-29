@@ -1,23 +1,9 @@
-import os
-
-from .utils import KReplServerTest
+from pyk.krepl_web.client import KReplClient
 
 
-class PidTest(KReplServerTest):
-    def test_krepl_running(self) -> None:
-        self.assertPid(self._server.pid)
+def test_hello(krepl_client: KReplClient) -> None:
+    # When
+    response = krepl_client.hello('Joe')
 
-    def assertPid(self, pid: int) -> None:  # noqa: N802
-        try:
-            os.kill(pid, 0)
-        except OSError:
-            raise AssertionError(f'Process with PID {pid} does not exist') from None
-
-
-class RequestTest(KReplServerTest):
-    def test_step_to_branch(self) -> None:
-        # When
-        response = self.client.hello('Joe')
-
-        # Then
-        self.assertDictEqual(response, {'hello': 'Hello Joe!'})
+    # Then
+    assert response == {'hello': 'Hello Joe!'}
