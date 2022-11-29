@@ -7,20 +7,24 @@ from pyk.kore.syntax import (
     DV,
     And,
     App,
+    Bottom,
     Ceil,
     Equals,
     EVar,
     Exists,
+    Implies,
     LeftAssoc,
     Not,
     Pattern,
     RightAssoc,
     SortApp,
     String,
+    Top,
 )
 from pyk.ktool import KPrint
 from pyk.prelude.kbool import TRUE
 from pyk.prelude.kint import INT, intToken
+from pyk.prelude.ml import mlBottom, mlImplies, mlTop
 from pyk.prelude.string import STRING, stringToken
 
 from .utils import KPrintTest
@@ -43,6 +47,32 @@ BIDIRECTIONAL_TEST_DATA: Final = (
         KSort('Bytes'),
         DV(SortApp('SortBytes'), String('0000')),
         KToken('b"0000"', KSort('Bytes')),
+    ),
+    (
+        'ml-top',
+        KSort('GeneratedTopCell'),
+        Top(SortApp('SortGeneratedTopCell')),
+        mlTop(),
+    ),
+    (
+        'ml-bottom',
+        KSort('GeneratedTopCell'),
+        Bottom(SortApp('SortGeneratedTopCell')),
+        mlBottom(),
+    ),
+    (
+        'ml-implies',
+        KSort('GeneratedTopCell'),
+        Implies(
+            SortApp('SortGeneratedTopCell'),
+            EVar('VarX', SortApp('SortGeneratedTopCell')),
+            EVar('VarY', SortApp('SortGeneratedTopCell')),
+        ),
+        mlImplies(
+            KVariable('X', sort=KSort('GeneratedTopCell')),
+            KVariable('Y', sort=KSort('GeneratedTopCell')),
+            sort=KSort('GeneratedTopCell'),
+        ),
     ),
     (
         'variable-with-sort',
@@ -249,6 +279,16 @@ KAST_TO_KORE_TEST_DATA: Final = (
             ],
         ),
         KApply('barholder2', [KVariable('X', sort=KSort('Baz')), KVariable('X', sort=KSort('Bar'))]),
+    ),
+    (
+        'ml-exists-var-inference',
+        KSort('Foo'),
+        Exists(
+            SortApp('SortFoo'),
+            EVar('VarX', SortApp('SortBar')),
+            App('Lblfoo', [], [EVar('VarX', SortApp('SortBar'))]),
+        ),
+        KApply(KLabel('#Exists', [KSort('Foo')]), [KVariable('X'), KApply('foo', [KVariable('X')])]),
     ),
 )
 
