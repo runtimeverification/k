@@ -252,6 +252,9 @@ class KVariable(KInner, WithKAtt):
     def let_att(self, att: KAtt) -> 'KVariable':
         return self.let(att=att)
 
+    def let_sort(self, sort: KSort) -> 'KVariable':
+        return self.let_att(self.att.update({KAtt.SORT: sort.to_dict()}))
+
     def map_inner(self: 'KVariable', f: Callable[[KInner], KInner]) -> 'KVariable':
         return self
 
