@@ -19,6 +19,9 @@
     , llvm-backend, mavenix, flake-compat }:
     let
       allOverlays = [
+        (_: _: {
+          llvm-version = 14;
+          llvm-backend-build-type = "Release"; })
         mavenix.overlay
         llvm-backend.overlays.default
         haskell-backend.overlay # used only to override the z3 version to the same one as used by the haskell backend.
@@ -79,7 +82,7 @@
           # Temporarily required until a bug on pyOpenSSL is resolved for aarch64-darwin
           # https://github.com/NixOS/nixpkgs/pull/172397
           config.allowBroken = system == "aarch64-darwin";
-          overlays = [ (final: prev: { llvm-backend-release = false; }) ]
+          overlays = [ (final: prev: { llvm-backend-build-type = "FastBuild"; }) ]
             ++ allOverlays;
         };
 

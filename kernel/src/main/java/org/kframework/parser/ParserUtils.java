@@ -229,8 +229,11 @@ public class ParserUtils {
           if (!Paths.get(firstMod._2().source()).getFileName().equals(Paths.get(secondMod._2().source()).getFileName())
             || !firstMod._3().equals(secondMod._3())
             || !firstMod._4().equals(secondMod._4())) {
+              String extraMDWarning = "";
+              if (Paths.get(secondMod._2().source()).getFileName().toString().endsWith(".md"))
+                  extraMDWarning = ". This can happen if --md-selector differs for kompile and kprove";
               KEMException ex = KEMException.outerParserError("Module " + moduleName + " differs from previous declaration at "
-                      + firstMod._2() + " and " + firstMod._3(), secondMod._2(), secondMod._3());
+                      + firstMod._2() + " and " + firstMod._3() + extraMDWarning, secondMod._2(), secondMod._3());
               errors++;
               kem.addKException(ex.getKException());
           }
