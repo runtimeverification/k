@@ -348,7 +348,7 @@ Here, we have that:
 
 -   In frontend K, you can refer to "symbol1" as `#Foo` (from `klabel(#Foo)`),
     and the backend will see `'Hash'Foo` as the symbol name.
--   In frontend K, you can refer to "symbol2" as `Bar` (from `klabel(#Bar)`),
+-   In frontend K, you can refer to "symbol2" as `#Bar` (from `klabel(#Bar)`),
     and the backend will see
     `'Hash'Bar'LParUndsCommUndsRParUnds'MYMODULE'Unds'FooBarBaz'Unds'Int'Unds'Int`
     as the symbol name.
