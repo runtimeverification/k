@@ -21,7 +21,7 @@
       allOverlays = [
         (_: _: {
           llvm-version = 14;
-          llvm-backend-build-type = "Release"; })
+          llvm-backend-build-type = "FastBuild"; })
         mavenix.overlay
         llvm-backend.overlays.default
         haskell-backend.overlay # used only to override the z3 version to the same one as used by the haskell backend.
