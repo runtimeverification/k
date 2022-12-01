@@ -1,8 +1,13 @@
-#!/usr/bin/env bash
+#!/bin/sh -ex
 
-set -euxo pipefail
-
-base_distro="$1" ; shift
 pkg="$1" ; shift
 
-k-${base_distro}/src/main/scripts/test-in-container-debian ${pkg}
+K_VERSION=5.5.0
+
+export DEBIAN_FRONTEND=noninteractive
+apt-get update
+apt-get upgrade --yes
+apt-get install --yes make
+apt-get install --yes "${pkg}"
+
+"$(dirname "$0")/test-in-container"
