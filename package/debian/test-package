@@ -4,6 +4,10 @@ set -euxo pipefail
 
 pkg="$1" ; shift
 
+ls
+ls *
+ls ../
+
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get upgrade --yes
