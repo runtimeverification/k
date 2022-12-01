@@ -41,7 +41,7 @@ class TestSimpleProof(KProveTest):
     @pytest.mark.parametrize(
         'test_id,depth,pre,expected_depth,expected_post,expected_next_states',
         EXECUTE_TEST_DATA,
-        ids=[test_data[0] for test_data in EXECUTE_TEST_DATA],
+        ids=[test_id for test_id, *_ in EXECUTE_TEST_DATA],
     )
     def test_execute(
         self,

@@ -1,3 +1,4 @@
+from itertools import count
 from typing import Final, Tuple
 
 import pytest
@@ -25,7 +26,7 @@ MATCH_TEST_DATA: Final[Tuple[Tuple[KInner, KInner], ...]] = (
 )
 
 
-@pytest.mark.parametrize('term,pattern', MATCH_TEST_DATA, ids=[i for i, _ in enumerate(MATCH_TEST_DATA)])
+@pytest.mark.parametrize('term,pattern', MATCH_TEST_DATA, ids=count())
 def test_match_and_subst(term: KInner, pattern: KInner) -> None:
     # When
     subst = pattern.match(term)
@@ -42,7 +43,7 @@ NO_MATCH_TEST_DATA: Final[Tuple[Tuple[KInner, KInner], ...]] = (
 )
 
 
-@pytest.mark.parametrize('term,pattern', NO_MATCH_TEST_DATA, ids=[i for i, _ in enumerate(NO_MATCH_TEST_DATA)])
+@pytest.mark.parametrize('term,pattern', NO_MATCH_TEST_DATA, ids=count())
 def test_no_match(term: KInner, pattern: KInner) -> None:
     # When
     subst = pattern.match(term)

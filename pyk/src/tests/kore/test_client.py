@@ -1,113 +1,53 @@
-from typing import Any, Dict
-from unittest import TestCase
+from itertools import count
+from typing import Any, Dict, Final, Iterator
 from unittest.mock import Mock, patch
 
-from pyk.kore.rpc import ImpliesResult, JsonRpcClient, KoreClient, State, StuckResult
+import pytest
+
+from pyk.kore.rpc import ExecuteResult, ImpliesResult, JsonRpcClient, KoreClient, State, StuckResult
 from pyk.kore.syntax import DV, And, App, Bottom, Pattern, SortApp, String, Top
 
 
-class KoreClientTest(TestCase):
+class MockClient:
     mock: Mock
-    client: KoreClient
 
-    def setUp(self) -> None:
-        # Given
-        patcher = patch('pyk.kore.rpc.JsonRpcClient', spec=True)
-        MockClient = patcher.start()  # noqa: N806
-        self.addCleanup(patcher.stop)
-        self.mock = MockClient.return_value
+    def __init__(self, mock: Mock):
+        self.mock = mock
 
-        # When
-        self.client = KoreClient('localhost', 3000)
-
-        # Then
-        self.assertIsInstance(self.mock, JsonRpcClient)
-        MockClient.assert_called_with('localhost', 3000, timeout=None)
-        self.assertEqual(self.client._client, self.mock)
-
-    def tearDown(self) -> None:
-        # When
-        self.client.close()
-
-        # Then
-        self.mock.close.assert_called()
-
-    def assumeResponse(self, response: Dict[str, Any]) -> None:  # noqa: N802
+    def assume_response(self, response: Dict[str, Any]) -> None:
         self.mock.request.return_value = response
 
-    def assertRequest(self, method: str, **params: Any) -> None:  # noqa: N802
+    def assert_request(self, method: str, **params: Any) -> None:
         self.mock.request.assert_called_with(method, **params)
 
-    def test_execute(self) -> None:
-        test_data = (
-            (
-                App('IntAdd', (), (int_dv(1), int_dv(1))),
-                {'state': kore(App('IntAdd', [], [int_dv(1), int_dv(1)]))},
-                {
-                    'state': {'term': kore(int_dv(2)), 'substitution': kore(int_top), 'predicate': kore(int_top)},
-                    'depth': 1,
-                    'reason': 'stuck',
-                },
-                StuckResult(State(int_dv(2), int_top, int_top), 1),
-            ),
-        )
 
-        for i, (pattern, params, response, expected) in enumerate(test_data):
-            with self.subTest(i=i):
-                # Given
-                self.assumeResponse(response)
+@pytest.fixture
+def mock_class() -> Iterator[Mock]:
+    patcher = patch('pyk.kore.rpc.JsonRpcClient', spec=True)
+    yield patcher.start()
+    patcher.stop()
 
-                # When
-                actual = self.client.execute(pattern)
 
-                # Then
-                self.assertRequest('execute', **params)
-                self.assertEqual(expected, actual)
+@pytest.fixture
+def mock(mock_class: Mock) -> Mock:
+    mock = mock_class.return_value
+    assert isinstance(mock, JsonRpcClient)
+    return mock  # type: ignore
 
-    def test_implies(self) -> None:
-        test_data = (
-            (
-                int_bottom,
-                int_top,
-                {'antecedent': kore(int_bottom), 'consequent': kore(int_top)},
-                {'satisfiable': True, 'implication': kore(int_top)},
-                ImpliesResult(True, int_top, None, None),
-            ),
-        )
 
-        for i, (antecedent, consequent, params, response, expected) in enumerate(test_data):
-            with self.subTest(i=i):
-                # Given
-                self.assumeResponse(response)
+@pytest.fixture
+def rpc_client(mock: Mock) -> MockClient:
+    return MockClient(mock)
 
-                # When
-                actual = self.client.implies(antecedent, consequent)
 
-                # Then
-                self.assertRequest('implies', **params)
-                self.assertEqual(expected, actual)
-
-    def test_simplify(self) -> None:
-        test_data = (
-            (
-                And(int_sort, int_top, int_top),
-                {'state': kore(And(int_sort, int_top, int_top))},
-                {'state': kore(int_top)},
-                int_top,
-            ),
-        )
-
-        for i, (pattern, params, response, expected) in enumerate(test_data):
-            with self.subTest(i=i):
-                # Given
-                self.assumeResponse(response)
-
-                # When
-                actual = self.client.simplify(pattern)
-
-                # Then
-                self.assertRequest('simplify', **params)
-                self.assertEqual(expected, actual)
+@pytest.fixture
+def kore_client(mock: Mock, mock_class: Mock) -> Iterator[KoreClient]:  # noqa: N803
+    client = KoreClient('localhost', 3000)
+    mock_class.assert_called_with('localhost', 3000, timeout=None)
+    assert client._client == mock
+    yield client
+    client.close()
+    mock.close.assert_called()
 
 
 int_sort = SortApp('IntSort')
@@ -125,3 +65,97 @@ def kore(pattern: Pattern) -> Dict[str, Any]:
         'version': 1,
         'term': pattern.dict,
     }
+
+
+EXECUTE_TEST_DATA: Final = (
+    (
+        App('IntAdd', (), (int_dv(1), int_dv(1))),
+        {'state': kore(App('IntAdd', [], [int_dv(1), int_dv(1)]))},
+        {
+            'state': {'term': kore(int_dv(2)), 'substitution': kore(int_top), 'predicate': kore(int_top)},
+            'depth': 1,
+            'reason': 'stuck',
+        },
+        StuckResult(State(int_dv(2), int_top, int_top), 1),
+    ),
+)
+
+IMPLIES_TEST_DATA: Final = (
+    (
+        int_bottom,
+        int_top,
+        {'antecedent': kore(int_bottom), 'consequent': kore(int_top)},
+        {'satisfiable': True, 'implication': kore(int_top)},
+        ImpliesResult(True, int_top, None, None),
+    ),
+)
+
+SIMPLIFY_TEST_DATA: Final = (
+    (
+        And(int_sort, int_top, int_top),
+        {'state': kore(And(int_sort, int_top, int_top))},
+        {'state': kore(int_top)},
+        int_top,
+    ),
+)
+
+
+@pytest.mark.parametrize('pattern,params,response,expected', EXECUTE_TEST_DATA, ids=count())
+def test_execute(
+    kore_client: KoreClient,
+    rpc_client: MockClient,
+    pattern: Pattern,
+    params: Dict[str, Any],
+    response: Dict[str, Any],
+    expected: ExecuteResult,
+) -> None:
+    # Given
+    rpc_client.assume_response(response)
+
+    # When
+    actual = kore_client.execute(pattern)
+
+    # Then
+    rpc_client.assert_request('execute', **params)
+    assert actual == expected
+
+
+@pytest.mark.parametrize('antecedent,consequent,params,response,expected', IMPLIES_TEST_DATA, ids=count())
+def test_implies(
+    kore_client: KoreClient,
+    rpc_client: MockClient,
+    antecedent: Pattern,
+    consequent: Pattern,
+    params: Dict[str, Any],
+    response: Dict[str, Any],
+    expected: ImpliesResult,
+) -> None:
+    # Given
+    rpc_client.assume_response(response)
+
+    # When
+    actual = kore_client.implies(antecedent, consequent)
+
+    # Then
+    rpc_client.assert_request('implies', **params)
+    assert actual == expected
+
+
+@pytest.mark.parametrize('pattern,params,response,expected', SIMPLIFY_TEST_DATA, ids=count())
+def test_simplify(
+    kore_client: KoreClient,
+    rpc_client: MockClient,
+    pattern: Pattern,
+    params: Dict[str, Any],
+    response: Dict[str, Any],
+    expected: Pattern,
+) -> None:
+    # Given
+    rpc_client.assume_response(response)
+
+    # When
+    actual = kore_client.simplify(pattern)
+
+    # Then
+    rpc_client.assert_request('simplify', **params)
+    assert actual == expected
