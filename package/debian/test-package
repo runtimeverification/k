@@ -1,4 +1,6 @@
-#!/bin/sh -ex
+#!/usr/bin/env bash
+
+set -euxo pipefail
 
 pkg="$1" ; shift
 
