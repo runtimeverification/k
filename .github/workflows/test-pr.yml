@@ -44,15 +44,6 @@ jobs:
           build-package: package/arch/build-package
           test-package: package/arch/test-package
           pkg-name: kframework_arch_x86_64.pkg.tar.zst
-      - name: 'Upload Package to Release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
-        with:
-          asset_content_type: 'application/gzip'
-          asset_name: 'K Framework Arch Package'
-          asset_path: kframework_arch_x86_64.pkg.tar.zst
-          upload_url: ${{ github.event.release.upload_url }}
 
   nix-maven:
     name: 'Nix: Maven'
