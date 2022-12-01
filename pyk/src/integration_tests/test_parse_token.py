@@ -23,7 +23,7 @@ TEST_DATA: Final = (
 )
 
 
-@pytest.mark.parametrize('test_id,token,expected', TEST_DATA, ids=[test_id for test_id, _, _ in TEST_DATA])
+@pytest.mark.parametrize('test_id,token,expected', TEST_DATA, ids=[test_id for test_id, *_ in TEST_DATA])
 class TestParseToken(KProveTest):
     KOMPILE_MAIN_FILE = 'k-files/simple-proofs.k'
 

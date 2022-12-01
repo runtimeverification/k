@@ -9,7 +9,7 @@ VALID_TEST_DATA = (
 )
 
 
-@pytest.mark.parametrize('version,expected', VALID_TEST_DATA)
+@pytest.mark.parametrize('version,expected', VALID_TEST_DATA, ids=[version for version, _ in VALID_TEST_DATA])
 def test_parse_valid(version: str, expected: KVersion) -> None:
     # When
     actual = KVersion.parse(version)

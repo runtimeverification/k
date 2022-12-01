@@ -110,7 +110,7 @@ class TestDefn(KPrintTest):
         assert actual == expected
 
     @pytest.mark.parametrize(
-        'test_id,sort,expected', EMPTY_CONFIG_TEST_DATA, ids=[test_id for test_id, _, _ in EMPTY_CONFIG_TEST_DATA]
+        'test_id,sort,expected', EMPTY_CONFIG_TEST_DATA, ids=[test_id for test_id, *_ in EMPTY_CONFIG_TEST_DATA]
     )
     def test_empty_config(self, kprint: KPrint, test_id: str, sort: KSort, expected: str) -> None:
         # When
@@ -121,7 +121,7 @@ class TestDefn(KPrintTest):
         assert actual == expected
 
     @pytest.mark.parametrize(
-        'test_id,sort,expected', INIT_CONFIG_TEST_DATA, ids=[test_id for test_id, _, _ in INIT_CONFIG_TEST_DATA]
+        'test_id,sort,expected', INIT_CONFIG_TEST_DATA, ids=[test_id for test_id, *_ in INIT_CONFIG_TEST_DATA]
     )
     def test_init_config(self, kprint: KPrint, test_id: str, sort: KSort, expected: str) -> None:
         # When

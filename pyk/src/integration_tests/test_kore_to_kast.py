@@ -344,7 +344,7 @@ class TestKoreToKast(KPrintTest):
     KOMPILE_MAIN_FILE = 'k-files/simple-proofs.k'
 
     @pytest.mark.parametrize(
-        'test_id,sort,kore,kast', BIDIRECTIONAL_TEST_DATA, ids=[test_id for test_id, _, _, _ in BIDIRECTIONAL_TEST_DATA]
+        'test_id,sort,kore,kast', BIDIRECTIONAL_TEST_DATA, ids=[test_id for test_id, *_ in BIDIRECTIONAL_TEST_DATA]
     )
     def test_bidirectional(self, kprint: KPrint, test_id: str, sort: KSort, kore: Pattern, kast: KInner) -> None:
         # When
@@ -356,7 +356,7 @@ class TestKoreToKast(KPrintTest):
         assert actual_kast == kast
 
     @pytest.mark.parametrize(
-        'test_id,sort,kore,kast', KAST_TO_KORE_TEST_DATA, ids=[test_id for test_id, _, _, _ in KAST_TO_KORE_TEST_DATA]
+        'test_id,sort,kore,kast', KAST_TO_KORE_TEST_DATA, ids=[test_id for test_id, *_ in KAST_TO_KORE_TEST_DATA]
     )
     def test_kast_to_kore(self, kprint: KPrint, test_id: str, sort: KSort, kore: Pattern, kast: KInner) -> None:
         # When
@@ -366,7 +366,7 @@ class TestKoreToKast(KPrintTest):
         assert actual_kore == kore
 
     @pytest.mark.parametrize(
-        'test_id,_sort,kore,kast', KORE_TO_KAST_TEST_DATA, ids=[test_id for test_id, _, _, _ in KORE_TO_KAST_TEST_DATA]
+        'test_id,_sort,kore,kast', KORE_TO_KAST_TEST_DATA, ids=[test_id for test_id, *_ in KORE_TO_KAST_TEST_DATA]
     )
     def test_kore_to_kast(self, kprint: KPrint, test_id: str, _sort: KSort, kore: Pattern, kast: KInner) -> None:
         # When

@@ -21,9 +21,7 @@ TEST_DATA: Final = (
 class TestParseToken(KPrintTest):
     KOMPILE_MAIN_FILE = 'k-files/imp.k'
 
-    @pytest.mark.parametrize(
-        'test_id,as_rule,token,expected', TEST_DATA, ids=[test_id for test_id, _, _, _ in TEST_DATA]
-    )
+    @pytest.mark.parametrize('test_id,as_rule,token,expected', TEST_DATA, ids=[test_id for test_id, *_ in TEST_DATA])
     def test_parse_token(
         self,
         kprint: KPrint,

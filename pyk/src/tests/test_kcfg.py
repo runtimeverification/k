@@ -1,5 +1,6 @@
 from typing import Any, Dict, Iterable, List, Tuple
-from unittest import TestCase
+
+import pytest
 
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KInner, KVariable
@@ -47,328 +48,343 @@ def cover_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
     return [{'source': nid(i), 'target': nid(j), 'condition': TRUE.to_dict(), 'depth': 1} for i, j in edges]
 
 
-class KCFGTestCase(TestCase):
-    def test_from_dict_single_node(self) -> None:
-        # Given
-        d = {'nodes': node_dicts(1)}
+def test_from_dict_single_node() -> None:
+    # Given
+    d = {'nodes': node_dicts(1)}
 
+    # When
+    cfg = KCFG.from_dict(d)
+
+    # Then
+    assert set(cfg.nodes) == {node(0)}
+    assert cfg.to_dict() == d
+
+
+def test_from_dict_two_nodes() -> None:
+    # Given
+    d = {'nodes': node_dicts(2)}
+
+    # When
+    cfg = KCFG.from_dict(d)
+
+    # Then
+    assert set(cfg.nodes) == {node(0), node(1)}
+
+
+def test_from_dict_loop_edge() -> None:
+    # Given
+    d = {'nodes': node_dicts(1), 'edges': edge_dicts((0, 0))}
+
+    # When
+    cfg = KCFG.from_dict(d)
+
+    # Then
+    assert set(cfg.nodes) == {node(0)}
+    assert set(cfg.edges()) == {edge(0, 0)}
+    assert cfg.edge(nid(0), nid(0)) == edge(0, 0)
+    assert cfg.to_dict() == d
+
+
+def test_from_dict_simple_edge() -> None:
+    # Given
+    d = {'nodes': node_dicts(2), 'edges': edge_dicts((0, 1))}
+
+    # When
+    cfg = KCFG.from_dict(d)
+
+    # Then
+    assert set(cfg.nodes) == {node(0), node(1)}
+    assert set(cfg.edges()) == {edge(0, 1)}
+    assert cfg.edge(nid(0), nid(1)) == edge(0, 1)
+
+
+def test_create_node() -> None:
+    # Given
+    cfg = KCFG()
+
+    # When
+    new_node = cfg.create_node(term(0))
+
+    # Then
+    assert new_node == node(0)
+    assert set(cfg.nodes) == {node(0)}
+    assert not cfg.is_expanded(new_node.id)
+
+
+def test_remove_unknown_node() -> None:
+    # Given
+    cfg = KCFG()
+
+    # Then
+    with pytest.raises(ValueError):
         # When
-        cfg = KCFG.from_dict(d)
+        cfg.remove_node(nid(0))
 
-        # Then
-        self.assertSetEqual(set(cfg.nodes), {node(0)})
-        self.assertDictEqual(cfg.to_dict(), d)
 
-    def test_from_dict_two_nodes(self) -> None:
-        # Given
-        d = {'nodes': node_dicts(2)}
+def test_remove_node() -> None:
+    # Given
+    d = {'nodes': node_dicts(3), 'edges': edge_dicts((0, 1), (1, 2))}
+    cfg = KCFG.from_dict(d)
+    cfg.add_expanded(node(0).id)
+    cfg.add_expanded(node(1).id)
 
-        # When
-        cfg = KCFG.from_dict(d)
+    # When
+    cfg.remove_node(nid(1))
 
-        # Then
-        self.assertSetEqual(set(cfg.nodes), {node(0), node(1)})
+    # Then
+    assert set(cfg.nodes) == {node(0), node(2)}
+    assert set(cfg.edges()) == set()
+    assert not cfg.is_expanded(nid(0))
+    with pytest.raises(ValueError):
+        cfg.node(nid(1))
+    with pytest.raises(ValueError):
+        cfg.edge(nid(0), nid(1))
+    with pytest.raises(ValueError):
+        cfg.edge(nid(1), nid(2))
 
-    def test_from_dict_loop_edge(self) -> None:
-        # Given
-        d = {'nodes': node_dicts(1), 'edges': edge_dicts((0, 0))}
 
-        # When
-        cfg = KCFG.from_dict(d)
+def test_cover_then_remove() -> None:
+    # Given
+    cfg = KCFG()
 
-        # Then
-        self.assertSetEqual(set(cfg.nodes), {node(0)})
-        self.assertSetEqual(set(cfg.edges()), {edge(0, 0)})
-        self.assertEqual(cfg.edge(nid(0), nid(0)), edge(0, 0))
-        self.assertDictEqual(cfg.to_dict(), d)
+    # When
+    node1 = cfg.create_node(CTerm(KApply('<top>', [token(1)])))
+    node2 = cfg.create_node(CTerm(KApply('<top>', [KVariable('X')])))
+    cover = cfg.create_cover(node1.id, node2.id)
 
-    def test_from_dict_simple_edge(self) -> None:
-        # Given
-        d = {'nodes': node_dicts(2), 'edges': edge_dicts((0, 1))}
+    # Then
+    assert cfg.is_covered(node1.id)
+    assert not cfg.is_covered(node2.id)
+    assert not cfg.is_expanded(node1.id)
+    assert not cfg.is_expanded(node2.id)
+    assert dict(cover.subst) == {'X': token(1)}
+    assert cfg.covers() == [cover]
 
-        # When
-        cfg = KCFG.from_dict(d)
+    # When
+    cfg.remove_cover(node1.id, node2.id)
 
-        # Then
-        self.assertSetEqual(set(cfg.nodes), {node(0), node(1)})
-        self.assertSetEqual(set(cfg.edges()), {edge(0, 1)})
-        self.assertEqual(cfg.edge(nid(0), nid(1)), edge(0, 1))
+    # Then
+    assert not cfg.is_covered(node1.id)
+    assert not cfg.is_covered(node2.id)
+    assert not cfg.is_expanded(node1.id)
+    assert not cfg.is_expanded(node2.id)
+    assert cfg.covers() == []
 
-    def test_create_node(self) -> None:
-        # Given
-        cfg = KCFG()
 
-        # When
-        new_node = cfg.create_node(term(0))
+def test_insert_loop_edge() -> None:
+    # Given
+    d = {'nodes': node_dicts(1)}
+    cfg = KCFG.from_dict(d)
 
-        # Then
-        self.assertEqual(new_node, node(0))
-        self.assertSetEqual(set(cfg.nodes), {node(0)})
-        self.assertFalse(cfg.is_expanded(new_node.id))
+    # When
+    new_edge = cfg.create_edge(nid(0), nid(0), TRUE, 1)
 
-    def test_remove_unknown_node(self) -> None:
-        # Given
-        cfg = KCFG()
+    # Then
+    assert new_edge == edge(0, 0)
+    assert set(cfg.nodes) == {node(0)}
+    assert set(cfg.edges()) == {edge(0, 0)}
+    assert cfg.edge(nid(0), nid(0)) == edge(0, 0)
 
-        # Then
-        with self.assertRaises(ValueError):
-            # When
-            cfg.remove_node(nid(0))
 
-    def test_remove_node(self) -> None:
-        # Given
-        d = {'nodes': node_dicts(3), 'edges': edge_dicts((0, 1), (1, 2))}
-        cfg = KCFG.from_dict(d)
-        cfg.add_expanded(node(0).id)
-        cfg.add_expanded(node(1).id)
+def test_insert_simple_edge() -> None:
+    # Given
+    d = {'nodes': node_dicts(2)}
+    cfg = KCFG.from_dict(d)
 
-        # When
-        cfg.remove_node(nid(1))
+    # When
+    new_edge = cfg.create_edge(nid(0), nid(1), TRUE, 1)
 
-        # Then
-        self.assertSetEqual(set(cfg.nodes), {node(0), node(2)})
-        self.assertSetEqual(set(cfg.edges()), set())
-        self.assertFalse(cfg.is_expanded(nid(0)))
-        with self.assertRaises(ValueError):
-            cfg.node(nid(1))
-        with self.assertRaises(ValueError):
-            cfg.edge(nid(0), nid(1))
-        with self.assertRaises(ValueError):
-            cfg.edge(nid(1), nid(2))
+    # Then
+    assert new_edge == edge(0, 1)
+    assert set(cfg.nodes) == {node(0), node(1)}
+    assert set(cfg.edges()) == {edge(0, 1)}
 
-    def test_cover_then_remove(self) -> None:
-        # Given
-        cfg = KCFG()
 
-        # When
-        node1 = cfg.create_node(CTerm(KApply('<top>', [token(1)])))
-        node2 = cfg.create_node(CTerm(KApply('<top>', [KVariable('X')])))
-        cover = cfg.create_cover(node1.id, node2.id)
+def test_get_successors() -> None:
+    d = {'nodes': node_dicts(3), 'edges': edge_dicts((0, 1), (0, 2))}
+    cfg = KCFG.from_dict(d)
 
-        # Then
-        self.assertTrue(cfg.is_covered(node1.id))
-        self.assertFalse(cfg.is_covered(node2.id))
-        self.assertFalse(cfg.is_expanded(node1.id))
-        self.assertFalse(cfg.is_expanded(node2.id))
-        self.assertDictEqual(dict(cover.subst), {'X': token(1)})
-        self.assertEqual(cfg.covers(), [cover])
+    # When
+    succs = set(cfg.edges(source_id=nid(0)))
 
-        # When
-        cfg.remove_cover(node1.id, node2.id)
+    # Then
+    assert succs == {edge(0, 1), edge(0, 2)}
 
-        # Then
-        self.assertFalse(cfg.is_covered(node1.id))
-        self.assertFalse(cfg.is_covered(node2.id))
-        self.assertFalse(cfg.is_expanded(node1.id))
-        self.assertFalse(cfg.is_expanded(node2.id))
-        self.assertEqual(cfg.covers(), [])
 
-    def test_insert_loop_edge(self) -> None:
-        # Given
-        d = {'nodes': node_dicts(1)}
-        cfg = KCFG.from_dict(d)
+def test_get_predecessors() -> None:
+    d = {'nodes': node_dicts(3), 'edges': edge_dicts((0, 2), (1, 2))}
+    cfg = KCFG.from_dict(d)
 
-        # When
-        new_edge = cfg.create_edge(nid(0), nid(0), TRUE, 1)
+    # When
+    preds = set(cfg.edges(target_id=nid(2)))
 
-        # Then
-        self.assertEqual(new_edge, edge(0, 0))
-        self.assertSetEqual(set(cfg.nodes), {node(0)})
-        self.assertSetEqual(set(cfg.edges()), {edge(0, 0)})
-        self.assertEqual(cfg.edge(nid(0), nid(0)), edge(0, 0))
+    # Then
+    assert preds == {edge(0, 2), edge(1, 2)}
 
-    def test_insert_simple_edge(self) -> None:
-        # Given
-        d = {'nodes': node_dicts(2)}
-        cfg = KCFG.from_dict(d)
 
-        # When
-        new_edge = cfg.create_edge(nid(0), nid(1), TRUE, 1)
+def test_reachable_nodes() -> None:
+    # Given
+    d = {
+        'nodes': node_dicts(12),
+        'edges': edge_dicts((0, 1), (0, 5), (0, 11), (1, 2), (1, 3), (2, 4), (3, 4), (4, 1)),
+        'covers': cover_dicts((4, 11)),
+    }
+    cfg = KCFG.from_dict(d)
 
-        # Then
-        self.assertEqual(new_edge, edge(0, 1))
-        self.assertSetEqual(set(cfg.nodes), {node(0), node(1)})
-        self.assertSetEqual(set(cfg.edges()), {edge(0, 1)})
+    # When
+    nodes_1 = cfg.reachable_nodes(nid(1))
+    nodes_2 = cfg.reachable_nodes(nid(1), traverse_covers=True)
 
-    def test_get_successors(self) -> None:
-        d = {'nodes': node_dicts(3), 'edges': edge_dicts((0, 1), (0, 2))}
-        cfg = KCFG.from_dict(d)
+    # Then
+    assert nodes_1 == {node(1), node(2), node(3), node(4)}
+    assert nodes_2 == {node(1), node(2), node(3), node(4), node(11)}
 
-        # When
-        succs = set(cfg.edges(source_id=nid(0)))
 
-        # Then
-        self.assertSetEqual(succs, {edge(0, 1), edge(0, 2)})
+def test_paths_between() -> None:
+    # Given
+    d = {
+        'nodes': node_dicts(4),
+        'edges': edge_dicts((0, 1), (0, 2), (1, 2), (1, 3), (2, 3), (3, 0)),
+    }
+    cfg = KCFG.from_dict(d)
 
-    def test_get_predecessors(self) -> None:
-        d = {'nodes': node_dicts(3), 'edges': edge_dicts((0, 2), (1, 2))}
-        cfg = KCFG.from_dict(d)
+    # When
+    paths = set(cfg.paths_between(nid(0), nid(3)))
 
-        # When
-        preds = set(cfg.edges(target_id=nid(2)))
+    # Then
+    assert paths == {
+        (edge(0, 1), edge(1, 3)),
+        (edge(0, 2), edge(2, 3)),
+        (edge(0, 1), edge(1, 2), edge(2, 3)),
+    }
 
-        # Then
-        self.assertSetEqual(preds, {edge(0, 2), edge(1, 2)})
 
-    def test_reachable_nodes(self) -> None:
-        # Given
-        d = {
-            'nodes': node_dicts(12),
-            'edges': edge_dicts((0, 1), (0, 5), (0, 11), (1, 2), (1, 3), (2, 4), (3, 4), (4, 1)),
-            'covers': cover_dicts((4, 11)),
-        }
-        cfg = KCFG.from_dict(d)
+def test_resolve() -> None:
+    # Given
+    d = {
+        'nodes': node_dicts(4),
+        'edges': edge_dicts((0, 1), (0, 2), (1, 2), (1, 3), (2, 3), (3, 0)),
+    }
+    cfg = KCFG.from_dict(d)
 
-        # When
-        nodes_1 = cfg.reachable_nodes(nid(1))
-        nodes_2 = cfg.reachable_nodes(nid(1), traverse_covers=True)
+    assert node(1) == cfg.node('d33..d8')
+    assert node(1) == cfg.node(node(1).id)
 
-        # Then
-        self.assertSetEqual(nodes_1, {node(1), node(2), node(3), node(4)})
-        self.assertSetEqual(nodes_2, {node(1), node(2), node(3), node(4), node(11)})
+    # Matches no nodes
+    with pytest.raises(ValueError, match='Unknown node: deadbeef..d8'):
+        cfg.node('deadbeef..d8')
 
-    def test_paths_between(self) -> None:
-        # Given
-        d = {
-            'nodes': node_dicts(4),
-            'edges': edge_dicts((0, 1), (0, 2), (1, 2), (1, 3), (2, 3), (3, 0)),
-        }
-        cfg = KCFG.from_dict(d)
+    # Matches all nodes
+    with pytest.raises(ValueError, match='Multiple nodes for pattern: ...'):
+        cfg.node('..')
 
-        # When
-        paths = set(cfg.paths_between(nid(0), nid(3)))
+    # Matches node(0) and node(2)
+    with pytest.raises(ValueError, match='Multiple nodes for pattern: ...'):
+        cfg.node('3..')
 
-        # Then
-        self.assertSetEqual(
-            paths,
-            {
-                (edge(0, 1), edge(1, 3)),
-                (edge(0, 2), edge(2, 3)),
-                (edge(0, 1), edge(1, 2), edge(2, 3)),
-            },
-        )
 
-    def test_resolve(self) -> None:
-        # Given
-        d = {
-            'nodes': node_dicts(4),
-            'edges': edge_dicts((0, 1), (0, 2), (1, 2), (1, 3), (2, 3), (3, 0)),
-        }
-        cfg = KCFG.from_dict(d)
+def test_aliases() -> None:
+    # Given
+    d = {
+        'init': [nid(0)],
+        'target': [nid(3)],
+        'nodes': node_dicts(4),
+        'edges': edge_dicts((0, 1), (1, 2)),
+        'aliases': {'foo': nid(1)},
+    }
 
-        self.assertEqual(node(1), cfg.node('d33..d8'))
-        self.assertEqual(node(1), cfg.node(node(1).id))
+    cfg = KCFG.from_dict(d)
+    assert cfg.node('@foo'), node(1)
 
-        # Matches no nodes
-        with self.assertRaises(ValueError, msg='Unknown node: deadbeef..d8'):
-            self.assertEqual(node(1), cfg.node('deadbeef..d8'))
+    assert cfg.node('#init'), node(0)
+    assert cfg.node('#target'), node(3)
+    cfg.add_expanded(nid(0))
+    cfg.add_expanded(nid(1))
+    assert cfg.node('#frontier'), node(2)
 
-        # Matches all nodes
-        with self.assertRaisesRegex(ValueError, 'Multiple nodes for pattern: ...'):
-            cfg.node('..')
+    cfg.add_alias('bar', node(0).id)
+    cfg.add_alias('bar2', node(0).id)
+    assert cfg.node('@bar'), node(0)
+    assert cfg.node('@bar2'), node(0)
+    cfg.remove_alias('bar')
+    with pytest.raises(ValueError, match='Unknown alias: @bar'):
+        cfg.node('@bar')
 
-        # Matches node(0) and node(2)
-        with self.assertRaisesRegex(ValueError, 'Multiple nodes for pattern: ...'):
-            cfg.node('3..')
+    with pytest.raises(ValueError, match='Duplicate alias "bar2"'):
+        cfg.add_alias('bar2', node(1).id)
+    with pytest.raises(ValueError, match='Alias may not contain "@"'):
+        cfg.add_alias('@buzz', node(1).id)
+    with pytest.raises(ValueError, match=f'Unknown node: {nid(9)}'):
+        cfg.add_alias('buzz', node(9).id)
 
-    def test_aliases(self) -> None:
-        # Given
-        d = {
-            'init': [nid(0)],
-            'target': [nid(3)],
-            'nodes': node_dicts(4),
-            'edges': edge_dicts((0, 1), (1, 2)),
-            'aliases': {'foo': nid(1)},
-        }
+    cfg.remove_node(nid(1))
+    cfg.create_node(term(1))
 
-        cfg = KCFG.from_dict(d)
-        self.assertEqual(cfg.node('@foo'), node(1))
 
-        self.assertEqual(cfg.node('#init'), node(0))
-        self.assertEqual(cfg.node('#target'), node(3))
-        cfg.add_expanded(nid(0))
-        cfg.add_expanded(nid(1))
-        self.assertEqual(cfg.node('#frontier'), node(2))
+def test_pretty_print() -> None:
+    d = {
+        'init': [nid(0)],
+        'target': [nid(6)],
+        'nodes': node_dicts(12),
+        'aliases': {'foo': nid(3), 'bar': nid(3)},
+        # Each of the branching edges have given depth=0
+        # fmt: off
+        'edges': edge_dicts((0, 1), (1, 2, 5), (2, 3),   # Initial Linear segment
+                            (3, 4, 0, mlEquals(KVariable('x'), token(4))), (4, 5), (5, 2),   # Loops back
+                            (3, 5, 0, mlEquals(KVariable('x'), token(5))),                   # Go to previous non-terminal node not as loop
+                            (3, 6, 0, mlEquals(KVariable('x'), token(6))),                   # Terminates
+                            (3, 7, 0, mlEquals(KVariable('x'), token(7))), (7, 6),           # Go to previous terminal node not as loop
+                            (3, 11, 0, mlEquals(KVariable('x'), token(11))), (11, 8)         # Covered
+                            ),
+        # fmt: on
+        'covers': cover_dicts((8, 11)),  # Loops back
+        'expanded': [nid(i) for i in [0, 1, 2, 3, 4, 5, 7, 11]],
+        'verified': edge_dicts((1, 2)),
+    }
+    cfg = KCFG.from_dict(d)
 
-        cfg.add_alias('bar', node(0).id)
-        cfg.add_alias('bar2', node(0).id)
-        self.assertEqual(cfg.node('@bar'), node(0))
-        self.assertEqual(cfg.node('@bar2'), node(0))
-        cfg.remove_alias('bar')
-        with self.assertRaises(ValueError, msg='Unknown alias: @bar'):
-            cfg.node('@bar')
+    def _short_hash(i: int) -> str:
+        return shorten_hash(nid(i))
 
-        with self.assertRaises(ValueError, msg='Duplicate alias "bar2"'):
-            cfg.add_alias('bar2', node(1).id)
-        with self.assertRaises(ValueError, msg='Alias may not contain "@"'):
-            cfg.add_alias('@buzz', node(1).id)
-        with self.assertRaises(ValueError, msg=f'Unknown node: {nid(3)}'):
-            cfg.add_alias('buzz', node(9).id)
+    expected = (
+        f'{_short_hash(0)} (init, expanded)\n'
+        f'│  (1 step)\n'
+        f'├  {_short_hash(1)} (expanded)\n'
+        f'│  \033[1m\33[32m(verified)\033[0m\033[0m\n'
+        f'│  (5 steps)\n'
+        f'├  {_short_hash(2)} (expanded)\n'
+        f'│  (1 step)\n'
+        f'├  {_short_hash(3)} (expanded, @bar, @foo)\n'
+        f'┣━ {_short_hash(4)} (expanded)    _==K_ ( x , 4 )\n'
+        f'┃   │  (1 step)\n'
+        f'┃   ├  {_short_hash(5)} (expanded)\n'
+        f'┃   │  (1 step)\n'
+        f'┃   ├  {_short_hash(2)} (expanded)\n'
+        f'┃   ┊ (looped back)\n'
+        f'┃\n'
+        f'┣━ {_short_hash(5)} (expanded)    _==K_ ( x , 5 )\n'
+        f'┃   ┊ (continues as previously)\n'
+        f'┃\n'
+        f'┣━ {_short_hash(6)} (target, leaf)    _==K_ ( x , 6 )\n'
+        f'┃\n'
+        f'┣━ {_short_hash(7)} (expanded)    _==K_ ( x , 7 )\n'
+        f'┃   │  (1 step)\n'
+        f'┃   └  {_short_hash(6)} (target, leaf)\n'
+        f'┃\n'
+        f'┗━ {_short_hash(11)} (expanded)    _==K_ ( x , 11 )\n'
+        f'    │  (1 step)\n'
+        f'    ├  {_short_hash(8)} (leaf)\n'
+        f'    ┊  constraint: true\n'
+        f'    ┊  subst: V11 <- 8\n'
+        f'    └╌ {_short_hash(11)} (expanded)\n'
+        f'        ┊ (looped back)\n'
+        f'\n'
+        f'\033[1m{_short_hash(10)} (frontier, leaf)\033[0m\n'
+        f'\033[1m{_short_hash(9)} (frontier, leaf)\033[0m\n'
+    )
 
-        cfg.remove_node(nid(1))
-        cfg.create_node(term(1))
+    # When
+    actual = '\n'.join(cfg.pretty(MockKPrint())) + '\n'
 
-    def test_pretty_print(self) -> None:
-        d = {
-            'init': [nid(0)],
-            'target': [nid(6)],
-            'nodes': node_dicts(12),
-            'aliases': {'foo': nid(3), 'bar': nid(3)},
-            # Each of the branching edges have given depth=0
-            # fmt: off
-            'edges': edge_dicts((0, 1), (1, 2, 5), (2, 3),   # Initial Linear segment
-                                (3, 4, 0, mlEquals(KVariable('x'), token(4))), (4, 5), (5, 2),   # Loops back
-                                (3, 5, 0, mlEquals(KVariable('x'), token(5))),                   # Go to previous non-terminal node not as loop
-                                (3, 6, 0, mlEquals(KVariable('x'), token(6))),                   # Terminates
-                                (3, 7, 0, mlEquals(KVariable('x'), token(7))), (7, 6),           # Go to previous terminal node not as loop
-                                (3, 11, 0, mlEquals(KVariable('x'), token(11))), (11, 8)         # Covered
-                                ),
-            # fmt: on
-            'covers': cover_dicts((8, 11)),  # Loops back
-            'expanded': [nid(i) for i in [0, 1, 2, 3, 4, 5, 7, 11]],
-            'verified': edge_dicts((1, 2)),
-        }
-        cfg = KCFG.from_dict(d)
-
-        def _short_hash(i: int) -> str:
-            return shorten_hash(nid(i))
-
-        self.maxDiff = None
-        actual = '\n'.join(cfg.pretty(MockKPrint())) + '\n'
-        self.assertMultiLineEqual(
-            actual,
-            f'{_short_hash(0)} (init, expanded)\n'
-            f'│  (1 step)\n'
-            f'├  {_short_hash(1)} (expanded)\n'
-            f'│  \033[1m\33[32m(verified)\033[0m\033[0m\n'
-            f'│  (5 steps)\n'
-            f'├  {_short_hash(2)} (expanded)\n'
-            f'│  (1 step)\n'
-            f'├  {_short_hash(3)} (expanded, @bar, @foo)\n'
-            f'┣━ {_short_hash(4)} (expanded)    _==K_ ( x , 4 )\n'
-            f'┃   │  (1 step)\n'
-            f'┃   ├  {_short_hash(5)} (expanded)\n'
-            f'┃   │  (1 step)\n'
-            f'┃   ├  {_short_hash(2)} (expanded)\n'
-            f'┃   ┊ (looped back)\n'
-            f'┃\n'
-            f'┣━ {_short_hash(5)} (expanded)    _==K_ ( x , 5 )\n'
-            f'┃   ┊ (continues as previously)\n'
-            f'┃\n'
-            f'┣━ {_short_hash(6)} (target, leaf)    _==K_ ( x , 6 )\n'
-            f'┃\n'
-            f'┣━ {_short_hash(7)} (expanded)    _==K_ ( x , 7 )\n'
-            f'┃   │  (1 step)\n'
-            f'┃   └  {_short_hash(6)} (target, leaf)\n'
-            f'┃\n'
-            f'┗━ {_short_hash(11)} (expanded)    _==K_ ( x , 11 )\n'
-            f'    │  (1 step)\n'
-            f'    ├  {_short_hash(8)} (leaf)\n'
-            f'    ┊  constraint: true\n'
-            f'    ┊  subst: V11 <- 8\n'
-            f'    └╌ {_short_hash(11)} (expanded)\n'
-            f'        ┊ (looped back)\n'
-            f'\n'
-            f'\033[1m{_short_hash(10)} (frontier, leaf)\033[0m\n'
-            f'\033[1m{_short_hash(9)} (frontier, leaf)\033[0m\n',
-        )
+    # Then
+    assert actual == expected

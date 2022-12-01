@@ -1,5 +1,7 @@
-from typing import Final, Tuple
-from unittest import TestCase
+from itertools import count
+from typing import Final, List, Tuple
+
+import pytest
 
 from pyk.cterm import CTerm, build_claim, build_rule
 from pyk.kast.inner import KApply, KAtt, KInner, KLabel, KRewrite, KSequence, KVariable
@@ -24,121 +26,124 @@ v1_sorted = KVariable('V1', sort=INT)
 
 
 def _as_cterm(term: KInner) -> CTerm:
-    return CTerm(KApply(KLabel('<generatedTop>', (GENERATED_TOP_CELL,)), (term,)))
+    return CTerm(KApply(KLabel('<generatedTop>', GENERATED_TOP_CELL), term))
 
 
-class CTermTest(TestCase):
-    def test_cterm_match_and_subst(self) -> None:
-        # Given
-        test_data: Final[Tuple[Tuple[KInner, KInner], ...]] = (
-            (a, a),
-            (a, x),
-            (f(a), x),
-            (f(a), f(a)),
-            (f(a), f(x)),
-            (f(a, b), f(x, y)),
-            (f(a, b, c), f(x, y, z)),
-            (f(g(h(a))), f(x)),
-            (f(g(h(x))), f(x)),
-            (f(a, g(b, h(c))), f(x, y)),
-        )
-
-        for i, [term, pattern] in enumerate(test_data):
-            with self.subTest(i=i):
-                # When
-                subst_cterm = _as_cterm(pattern).match(_as_cterm(term))
-
-                # Then
-                self.assertIsNotNone(subst_cterm)
-                assert subst_cterm is not None  # https://github.com/python/mypy/issues/4063
-                self.assertEqual(subst_cterm(pattern), term)
-
-    def test_no_cterm_match(self) -> None:
-        # Given
-        test_data: Final[Tuple[Tuple[KInner, KInner], ...]] = ((f(x, x), f(x, a)),)
-
-        for i, [term, pattern] in enumerate(test_data):
-            with self.subTest(i=i):
-                # When
-                subst_cterm = _as_cterm(pattern).match(_as_cterm(term))
-
-                # Then
-                self.assertIsNone(subst_cterm)
+MATCH_TEST_DATA: Final[Tuple[Tuple[KInner, KInner], ...]] = (
+    (a, a),
+    (a, x),
+    (f(a), x),
+    (f(a), f(a)),
+    (f(a), f(x)),
+    (f(a, b), f(x, y)),
+    (f(a, b, c), f(x, y, z)),
+    (f(g(h(a))), f(x)),
+    (f(g(h(x))), f(x)),
+    (f(a, g(b, h(c))), f(x, y)),
+)
 
 
-class BuildRuleTest(TestCase):
-    def test_build_rule(self) -> None:
-        # Given
-        test_data = [
-            (
-                T(k(KVariable('K_CELL')), mem(KVariable('MEM_CELL'))),
-                T(
-                    k(KVariable('K_CELL')),
-                    mem(KApply('_[_<-_]', [KVariable('MEM_CELL'), KVariable('KEY'), KVariable('VALUE')])),
-                ),
-                ['K_CELL'],
-                T(
-                    k(KVariable('_K_CELL')),
-                    mem(
-                        KRewrite(
-                            KVariable('MEM_CELL'),
-                            KApply('_[_<-_]', [KVariable('MEM_CELL'), KVariable('?_KEY'), KVariable('?_VALUE')]),
-                        )
-                    ),
-                ),
-            )
-        ]
+@pytest.mark.parametrize('term,pattern', MATCH_TEST_DATA, ids=count())
+def test_cterm_match_and_subst(term: KInner, pattern: KInner) -> None:
+    # When
+    subst = _as_cterm(pattern).match(_as_cterm(term))
 
-        for i, (lhs, rhs, keep_vars, expected) in enumerate(test_data):
-            with self.subTest(i=i):
-                # When
-                rule, _ = build_rule(f'test-{i}', CTerm(lhs), CTerm(rhs), keep_vars=keep_vars)
-                actual = rule.body
-
-                # Then
-                self.assertEqual(actual, expected)
+    # Then
+    assert subst is not None
+    assert subst(pattern) == term
 
 
-class BuildClaimtest(TestCase):
-    def test_build_claim(self) -> None:
-        # (<k> V1 </k> #And { true #Equals 0 <=Int V2}) => <k> V2 </k>      expected: <k> _V1 => V2 </k> requires 0 <=Int V2
-        # <k> V1 </k> => <k> V2 </k>                                        expected: <k> _V1 => ?_V2 </k>
-        # <k> V1 </k> => <k> V2 </k> #And { true #Equals 0 <=Int V2 }       expected: <k> _V1 => ?V2 </k> ensures 0 <=Int ?V2
+NO_MATCH_TEST_DATA: Final = ((f(x, x), f(x, a)),)
 
-        def constraint(v: KVariable) -> KInner:
-            return KApply('_<=Int_', [intToken(0), v])
 
-        test_data = (
-            (
-                'sorted-var-1',
-                mlAnd([k(v1_sorted), mlEqualsTrue(constraint(v1))]),
-                k(v2),
-                KClaim(k(KRewrite(v1_sorted, ques_unds_v2)), requires=constraint(v1), att=KAtt({'label': 'claim'})),
+@pytest.mark.parametrize('term,pattern', NO_MATCH_TEST_DATA, ids=count())
+def test_no_cterm_match(term: KInner, pattern: KInner) -> None:
+    # When
+    subst = _as_cterm(pattern).match(_as_cterm(term))
+
+    # Then
+    assert subst is None
+
+
+BUILD_RULE_TEST_DATA: Final = (
+    (
+        T(k(KVariable('K_CELL')), mem(KVariable('MEM_CELL'))),
+        T(
+            k(KVariable('K_CELL')),
+            mem(KApply('_[_<-_]', [KVariable('MEM_CELL'), KVariable('KEY'), KVariable('VALUE')])),
+        ),
+        ['K_CELL'],
+        T(
+            k(KVariable('_K_CELL')),
+            mem(
+                KRewrite(
+                    KVariable('MEM_CELL'),
+                    KApply('_[_<-_]', [KVariable('MEM_CELL'), KVariable('?_KEY'), KVariable('?_VALUE')]),
+                )
             ),
-            (
-                'sorted-var-2',
-                mlAnd([k(v1), mlEqualsTrue(constraint(v1_sorted))]),
-                k(v2),
-                KClaim(k(KRewrite(v1, ques_unds_v2)), requires=constraint(v1_sorted), att=KAtt({'label': 'claim'})),
-            ),
-            (
-                'req-rhs',
-                mlAnd([k(v1), mlEqualsTrue(constraint(v2))]),
-                k(v2),
-                KClaim(k(KRewrite(unds_v1, v2)), requires=constraint(v2), att=KAtt({'label': 'claim'})),
-            ),
-            ('free-rhs', k(v1), k(v2), KClaim(k(KRewrite(unds_v1, ques_unds_v2)), att=KAtt({'label': 'claim'}))),
-            (
-                'bound-rhs',
-                k(v1),
-                mlAnd([k(v2), mlEqualsTrue(constraint(v2))]),
-                KClaim(k(KRewrite(unds_v1, ques_v2)), ensures=constraint(ques_v2), att=KAtt({'label': 'claim'})),
-            ),
-        )
+        ),
+    ),
+)
 
-        for name, init, target, claim_expected in test_data:
-            with self.subTest(name):
-                init_cterm = CTerm(init)
-                target_cterm = CTerm(target)
-                claim_actual, _ = build_claim('claim', init_cterm, target_cterm)
-                self.assertEqual(claim_actual, claim_expected)
+
+@pytest.mark.parametrize('lhs,rhs,keep_vars,expected', BUILD_RULE_TEST_DATA, ids=count())
+def test_build_rule(lhs: KInner, rhs: KInner, keep_vars: List[str], expected: KInner) -> None:
+    # When
+    rule, _ = build_rule('test-rule', CTerm(lhs), CTerm(rhs), keep_vars=keep_vars)
+    actual = rule.body
+
+    # Then
+    assert actual == expected
+
+
+def constraint(v: KVariable) -> KInner:
+    return KApply('_<=Int_', intToken(0), v)
+
+
+# (<k> V1 </k> #And { true #Equals 0 <=Int V2}) => <k> V2 </k>      expected: <k> _V1 => V2 </k> requires 0 <=Int V2
+# <k> V1 </k> => <k> V2 </k>                                        expected: <k> _V1 => ?_V2 </k>
+# <k> V1 </k> => <k> V2 </k> #And { true #Equals 0 <=Int V2 }       expected: <k> _V1 => ?V2 </k> ensures 0 <=Int ?V2
+BUILD_CLAIM_TEST_DATA: Final = (
+    (
+        'sorted-var-1',
+        mlAnd([k(v1_sorted), mlEqualsTrue(constraint(v1))]),
+        k(v2),
+        KClaim(k(KRewrite(v1_sorted, ques_unds_v2)), requires=constraint(v1), att=KAtt({'label': 'claim'})),
+    ),
+    (
+        'sorted-var-2',
+        mlAnd([k(v1), mlEqualsTrue(constraint(v1_sorted))]),
+        k(v2),
+        KClaim(k(KRewrite(v1, ques_unds_v2)), requires=constraint(v1_sorted), att=KAtt({'label': 'claim'})),
+    ),
+    (
+        'req-rhs',
+        mlAnd([k(v1), mlEqualsTrue(constraint(v2))]),
+        k(v2),
+        KClaim(k(KRewrite(unds_v1, v2)), requires=constraint(v2), att=KAtt({'label': 'claim'})),
+    ),
+    ('free-rhs', k(v1), k(v2), KClaim(k(KRewrite(unds_v1, ques_unds_v2)), att=KAtt({'label': 'claim'}))),
+    (
+        'bound-rhs',
+        k(v1),
+        mlAnd([k(v2), mlEqualsTrue(constraint(v2))]),
+        KClaim(k(KRewrite(unds_v1, ques_v2)), ensures=constraint(ques_v2), att=KAtt({'label': 'claim'})),
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    'test_id,init,target,expected',
+    BUILD_CLAIM_TEST_DATA,
+    ids=[test_id for test_id, *_ in BUILD_CLAIM_TEST_DATA],
+)
+def test_build_claim(test_id: str, init: KInner, target: KInner, expected: KClaim) -> None:
+    # Given
+    init_cterm = CTerm(init)
+    target_cterm = CTerm(target)
+
+    # When
+    actual, _ = build_claim('claim', init_cterm, target_cterm)
+
+    # Then
+    assert actual == expected

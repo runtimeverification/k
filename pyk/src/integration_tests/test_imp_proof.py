@@ -142,7 +142,7 @@ class TestImpProof(KProveTest):
     @pytest.mark.parametrize(
         'test_id,haskell_args,k,expected_next_states',
         PROVE_CTERM_TEST_DATA,
-        ids=[test_data[0] for test_data in PROVE_CTERM_TEST_DATA],
+        ids=[test_id for test_id, *_ in PROVE_CTERM_TEST_DATA],
     )
     def test_prove_cterm(
         self,
@@ -173,7 +173,7 @@ class TestImpProof(KProveTest):
     @pytest.mark.parametrize(
         'test_id,depth,pre,expected_depth,expected_post,expected_next_states',
         EXECUTE_TEST_DATA,
-        ids=[test_data[0] for test_data in EXECUTE_TEST_DATA],
+        ids=[test_id for test_id, *_ in EXECUTE_TEST_DATA],
     )
     def test_execute(
         self,
@@ -211,7 +211,7 @@ class TestImpProof(KProveTest):
     @pytest.mark.parametrize(
         'test_id,antecedent,consequent,expected',
         IMPLIES_TEST_DATA,
-        ids=[test_data[0] for test_data in IMPLIES_TEST_DATA],
+        ids=[test_id for test_id, *_ in IMPLIES_TEST_DATA],
     )
     def test_implies(
         self,
