@@ -1,6 +1,9 @@
 #!/bin/sh -ex
+
 pkg="$1" ; shift
+
 K_VERSION=5.5.0
+
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get upgrade --yes
