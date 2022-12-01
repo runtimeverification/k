@@ -54,9 +54,11 @@ runs:
       BASE_OS: ${{ inputs.os }}
       BUILD_PACKAGE: ${{ inputs.build-package }}
       PKG_NAME: ${{ inputs.pkg-name }}
+      SUBDIR: k-${{ inputs.distro }}/
     run: |
       set -euxo pipefail
       docker exec -t k-package-build-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "${BUILD_PACKAGE} ${PKG_NAME}"
+      mv ${SUBDIR}${PKG_NAME} ${PKG_NAME}
 
   - name: 'Tear down Docker'
     shell: bash {0}
@@ -99,7 +101,7 @@ runs:
       ls
       ls *
       ls ../
-      docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "${TEST_PACKAGE} ./${PKG_NAME}"
+      docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "${TEST_PACKAGE} ${PKG_NAME}"
 
   - name: 'Tear down Docker Test'
     shell: bash {0}
