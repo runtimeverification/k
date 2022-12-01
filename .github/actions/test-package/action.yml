@@ -97,7 +97,8 @@ runs:
       SUBDIR: k-${{ inputs.distro }}/
     run: |
       set -euxo pipefail
-      docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "${TEST_PACKAGE} ${SUBDIR}${PKG_NAME}"
+      mv ${SUBDIR}${PKG_NAME} ${PKG_NAME}
+      docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "${TEST_PACKAGE} ${PKG_NAME}"
 
   - name: 'Tear down Docker Test'
     shell: bash {0}
