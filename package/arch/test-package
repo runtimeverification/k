@@ -7,4 +7,4 @@ pkg="$1" ; shift
 pacman -Syyu --noconfirm
 pacman -U --noconfirm ${pkg}
 
-src/main/scripts/test-in-container
+package/test-package
