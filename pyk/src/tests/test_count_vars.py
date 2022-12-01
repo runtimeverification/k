@@ -1,3 +1,4 @@
+from itertools import count
 from typing import Final, Mapping, Tuple
 
 import pytest
@@ -25,7 +26,7 @@ TEST_DATA: Final[Tuple[Tuple[KInner, Mapping[str, int]], ...]] = (
 )
 
 
-@pytest.mark.parametrize('term,expected', TEST_DATA, ids=[i for i, _ in enumerate(TEST_DATA)])
+@pytest.mark.parametrize('term,expected', TEST_DATA, ids=count())
 def test(term: KInner, expected: Mapping) -> None:
     # When
     actual = count_vars(term)

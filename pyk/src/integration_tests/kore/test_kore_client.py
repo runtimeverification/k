@@ -112,7 +112,7 @@ class TestKoreClient(KoreClientTest):
     KORE_MODULE_NAME = 'KORE-RPC-TEST'
 
     @pytest.mark.parametrize(
-        'test_id,n,params,expected', EXECUTE_TEST_DATA, ids=[test_data[0] for test_data in EXECUTE_TEST_DATA]
+        'test_id,n,params,expected', EXECUTE_TEST_DATA, ids=[test_id for test_id, *_ in EXECUTE_TEST_DATA]
     )
     def test_execute(
         self, kore_client: KoreClient, test_id: str, n: int, params: Mapping[str, Any], expected: ExecuteResult
@@ -126,7 +126,7 @@ class TestKoreClient(KoreClientTest):
     @pytest.mark.parametrize(
         'test_id,antecedent,consequent,expected',
         IMPLIES_TEST_DATA,
-        ids=[test_data[0] for test_data in IMPLIES_TEST_DATA],
+        ids=[test_id for test_id, *_ in IMPLIES_TEST_DATA],
     )
     def test_implies(
         self, kore_client: KoreClient, test_id: str, antecedent: Pattern, consequent: Pattern, expected: ImpliesResult
@@ -140,7 +140,7 @@ class TestKoreClient(KoreClientTest):
     @pytest.mark.parametrize(
         'test_id,antecedent,consequent',
         IMPLIES_ERROR_TEST_DATA,
-        ids=[test_id for test_id, _, _ in IMPLIES_ERROR_TEST_DATA],
+        ids=[test_id for test_id, *_ in IMPLIES_ERROR_TEST_DATA],
     )
     def test_implies_error(
         self, kore_client: KoreClient, test_id: str, antecedent: Pattern, consequent: Pattern

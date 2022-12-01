@@ -1,5 +1,7 @@
-from typing import List, Tuple
-from unittest import TestCase
+from itertools import count
+from typing import Dict, Final, List, Tuple
+
+import pytest
 
 from pyk.kast.inner import KApply, KInner, KLabel, KRewrite, KSequence, KSort, KVariable
 from pyk.kast.manip import (
@@ -26,184 +28,200 @@ GENERATED_COUNTER_CELL = KApply('<generatedCounter>', [KVariable('X')])
 GENERATED_TOP_CELL_1 = KApply('<generatedTop>', [T_CELL, KVariable('_GENERATED_COUNTER_PLACEHOLDER')])
 GENERATED_TOP_CELL_2 = KApply('<generatedTop>', [T_CELL, GENERATED_COUNTER_CELL])
 
-
-class PushDownRewritesTest(TestCase):
-    def test_push_down_rewrites(self) -> None:
-        # Given
-        test_data = ((KRewrite(KSequence([f(a), b]), KSequence([f(c), b])), KSequence([f(KRewrite(a, c)), b])),)
-
-        for i, (before, expected) in enumerate(test_data):
-            with self.subTest(i=i):
-                # When
-                actual = push_down_rewrites(before)
-
-                # Then
-                self.assertEqual(actual, expected)
+PUSH_REWRITES_TEST_DATA: Final = (
+    (KRewrite(KSequence([f(a), b]), KSequence([f(c), b])), KSequence([f(KRewrite(a, c)), b])),
+)
 
 
-class MinimizeTermTest(TestCase):
-    def test_minimize_term(self) -> None:
-        state = KLabel('<state>')
-        pc = KLabel('<pc>')
+@pytest.mark.parametrize('term,expected', PUSH_REWRITES_TEST_DATA, ids=count())
+def test_push_down_rewrites(term: KInner, expected: KInner) -> None:
+    # When
+    actual = push_down_rewrites(term)
 
-        # Given
-        test_data: Tuple[Tuple[KInner, List[str], List[str], KInner], ...] = (
-            (f(k(a), state(a), pc(a)), [], [], f(k(a), state(a), pc(a))),
-            (f(k(a), state(a), pc(a)), ['<k>'], [], f(state(a), pc(a), DOTS)),
-            (f(k(a), state(a), pc(a)), [], ['<state>'], f(state(a), DOTS)),
-        )
-
-        for i, (before, abstract_labels, keep_cells, expected) in enumerate(test_data):
-            with self.subTest(i=i):
-                # When
-                actual = minimize_term(before, abstract_labels=abstract_labels, keep_cells=keep_cells)
-
-                # Then
-                self.assertEqual(actual, expected)
+    # Then
+    assert actual == expected
 
 
-class BoolMlPredConversionsTest(TestCase):
+STATE: Final = KLabel('<state>')
+PC: Final = KLabel('<pc>')
+MINIMIZE_TERM_TEST_DATA: Final[Tuple[Tuple[KInner, List[str], List[str], KInner], ...]] = (
+    (f(k(a), STATE(a), PC(a)), [], [], f(k(a), STATE(a), PC(a))),
+    (f(k(a), STATE(a), PC(a)), ['<k>'], [], f(STATE(a), PC(a), DOTS)),
+    (f(k(a), STATE(a), PC(a)), [], ['<state>'], f(STATE(a), DOTS)),
+)
 
-    # TODO: We'd like for bool_to_ml_pred and ml_pred_to_bool to be somewhat invertible.
 
-    test_data_ml_pred_to_bool = (
-        (
-            'equals-true',
-            False,
-            KApply(KLabel('#Equals', [BOOL, GENERATED_TOP_CELL]), [TRUE, f(a)]),
-            f(a),
+@pytest.mark.parametrize('term,abstract_labels,keep_cells,expected', MINIMIZE_TERM_TEST_DATA, ids=count())
+def test_minimize_term(term: KInner, abstract_labels: List[str], keep_cells: List[str], expected: KInner) -> None:
+    # When
+    actual = minimize_term(term, abstract_labels=abstract_labels, keep_cells=keep_cells)
+
+    # Then
+    assert actual == expected
+
+
+# TODO: We'd like for bool_to_ml_pred and ml_pred_to_bool to be somewhat invertible.
+ML_TO_BOOL_TEST_DATA: Final = (
+    (
+        'equals-true',
+        False,
+        KApply(KLabel('#Equals', [BOOL, GENERATED_TOP_CELL]), [TRUE, f(a)]),
+        f(a),
+    ),
+    ('top-sort-bool', False, KApply(KLabel('#Top', [BOOL])), TRUE),
+    ('top-no-sort', False, KApply('#Top'), TRUE),
+    ('top-no-sort', False, mlTop(), TRUE),
+    ('equals-variabl', False, KApply(KLabel('#Equals'), [x, f(a)]), KApply('_==K_', [x, f(a)])),
+    ('equals-true-no-sort', False, KApply(KLabel('#Equals'), [TRUE, f(a)]), f(a)),
+    (
+        'equals-token',
+        False,
+        KApply(KLabel('#Equals', [KSort('Int'), GENERATED_TOP_CELL]), [intToken(3), f(a)]),
+        KApply('_==K_', [intToken(3), f(a)]),
+    ),
+    ('not-top', False, KApply(KLabel('#Not', [GENERATED_TOP_CELL]), [mlTop()]), notBool(TRUE)),
+    ('equals-term', True, KApply(KLabel('#Equals'), [f(a), f(x)]), KApply('_==K_', [f(a), f(x)])),
+    (
+        'simplify-and-true',
+        False,
+        KApply(KLabel('#And', [GENERATED_TOP_CELL]), [mlEqualsTrue(TRUE), mlEqualsTrue(TRUE)]),
+        TRUE,
+    ),
+    (
+        'ceil-set-concat-no-sort',
+        True,
+        KApply(
+            KLabel('#Ceil', [KSort('Set'), GENERATED_TOP_CELL]),
+            [KApply(KLabel('_Set_'), [KVariable('_'), KVariable('_')])],
         ),
-        ('top-sort-bool', False, KApply(KLabel('#Top', [BOOL])), TRUE),
-        ('top-no-sort', False, KApply('#Top'), TRUE),
-        ('top-no-sort', False, mlTop(), TRUE),
-        ('equals-variabl', False, KApply(KLabel('#Equals'), [x, f(a)]), KApply('_==K_', [x, f(a)])),
-        ('equals-true-no-sort', False, KApply(KLabel('#Equals'), [TRUE, f(a)]), f(a)),
-        (
-            'equals-token',
-            False,
-            KApply(KLabel('#Equals', [KSort('Int'), GENERATED_TOP_CELL]), [intToken(3), f(a)]),
-            KApply('_==K_', [intToken(3), f(a)]),
+        KVariable('Ceil_0f9c9997'),
+    ),
+    (
+        'ceil-set-concat-sort',
+        True,
+        KApply(
+            KLabel('#Not', [GENERATED_TOP_CELL]),
+            [
+                KApply(
+                    KLabel('#Ceil', [KSort('Set'), GENERATED_TOP_CELL]),
+                    [KApply(KLabel('_Set_'), [KVariable('_'), KVariable('_')])],
+                )
+            ],
         ),
-        ('not-top', False, KApply(KLabel('#Not', [GENERATED_TOP_CELL]), [mlTop()]), notBool(TRUE)),
-        ('equals-term', True, KApply(KLabel('#Equals'), [f(a), f(x)]), KApply('_==K_', [f(a), f(x)])),
-        (
-            'simplify-and-true',
-            False,
-            KApply(KLabel('#And', [GENERATED_TOP_CELL]), [mlEqualsTrue(TRUE), mlEqualsTrue(TRUE)]),
-            TRUE,
+        notBool(KVariable('Ceil_0f9c9997')),
+    ),
+    (
+        'exists-equal-int',
+        True,
+        KApply(
+            KLabel('#Exists', [INT, BOOL]),
+            [KVariable('X'), KApply('_==Int_', [KVariable('X'), KVariable('Y')])],
         ),
-        (
-            'ceil-set-concat-no-sort',
-            True,
-            KApply(
-                KLabel('#Ceil', [KSort('Set'), GENERATED_TOP_CELL]),
-                [KApply(KLabel('_Set_'), [KVariable('_'), KVariable('_')])],
-            ),
-            KVariable('Ceil_0f9c9997'),
-        ),
-        (
-            'ceil-set-concat-sort',
-            True,
-            KApply(
-                KLabel('#Not', [GENERATED_TOP_CELL]),
-                [
-                    KApply(
-                        KLabel('#Ceil', [KSort('Set'), GENERATED_TOP_CELL]),
-                        [KApply(KLabel('_Set_'), [KVariable('_'), KVariable('_')])],
-                    )
-                ],
-            ),
-            notBool(KVariable('Ceil_0f9c9997')),
-        ),
-        (
-            'exists-equal-int',
-            True,
-            KApply(
-                KLabel('#Exists', [INT, BOOL]),
-                [KVariable('X'), KApply('_==Int_', [KVariable('X'), KVariable('Y')])],
-            ),
-            KVariable('Exists_6acf2557'),
-        ),
-    )
-
-    def test_ml_pred_to_bool(self) -> None:
-        for name, unsafe, ml_pred, bool_expected in self.test_data_ml_pred_to_bool:
-            with self.subTest(name):
-                bool_actual = ml_pred_to_bool(ml_pred, unsafe=unsafe)
-                self.assertEqual(bool_actual, bool_expected)
-
-    test_data_bool_to_ml_pred = (
-        ('equals-true', KApply(KLabel('#Equals', [BOOL, GENERATED_TOP_CELL]), [TRUE, f(a)]), f(a)),
-    )
-
-    def test_bool_to_ml_pred(self) -> None:
-        for name, ml_pred_expected, bool_in in self.test_data_bool_to_ml_pred:
-            with self.subTest(name):
-                ml_pred_actual = bool_to_ml_pred(bool_in)
-                self.assertEqual(ml_pred_actual, ml_pred_expected)
+        KVariable('Exists_6acf2557'),
+    ),
+)
 
 
-class RemoveGeneratedCellsTest(TestCase):
-    def test_first(self) -> None:
-        # When
-        config_actual = remove_generated_cells(GENERATED_TOP_CELL_1)
+@pytest.mark.parametrize(
+    'test_id,unsafe,ml_pred,expected',
+    ML_TO_BOOL_TEST_DATA,
+    ids=[test_id for test_id, *_ in ML_TO_BOOL_TEST_DATA],
+)
+def test_ml_pred_to_bool(test_id: str, unsafe: bool, ml_pred: KInner, expected: KInner) -> None:
+    # When
+    actual = ml_pred_to_bool(ml_pred, unsafe=unsafe)
 
-        # Then
-        self.assertEqual(config_actual, T_CELL)
-
-    def test_second(self) -> None:
-        # When
-        config_actual = remove_generated_cells(GENERATED_TOP_CELL_2)
-
-        # Then
-        self.assertEqual(config_actual, T_CELL)
+    # Then
+    assert actual == expected
 
 
-class CollapseDotsTest(TestCase):
-    def test(self) -> None:
-        # Given
-        config_before = substitute(GENERATED_TOP_CELL_1, {'MAP': DOTS, '_GENERATED_COUNTER_PLACEHOLDER': DOTS})
-        config_expected = KApply('<generatedTop>', [KApply('<T>', [K_CELL, DOTS]), DOTS])
-
-        # When
-        config_actual = collapse_dots(config_before)
-
-        # Then
-        self.assertEqual(config_actual, config_expected)
+BOOL_TO_ML_TEST_DATA = (('equals-true', KApply(KLabel('#Equals', BOOL, GENERATED_TOP_CELL), TRUE, f(a)), f(a)),)
 
 
-class SimplifyBoolTest(TestCase):
-    def test_simplify_bool(self) -> None:
-        # Given
-        bool_tests = (
-            ('trivial-false', andBool([FALSE, TRUE]), FALSE),
-            (
-                'and-true',
-                andBool([KApply('_==Int_', [intToken(3), intToken(4)]), TRUE]),
-                KApply('_==Int_', [intToken(3), intToken(4)]),
-            ),
-            ('not-false', notBool(FALSE), TRUE),
-        )
+@pytest.mark.parametrize(
+    'test_id,expected,term',
+    BOOL_TO_ML_TEST_DATA,
+    ids=[test_id for test_id, *_ in BOOL_TO_ML_TEST_DATA],
+)
+def test_bool_to_ml_pred(test_id: str, expected: KInner, term: KInner) -> None:
+    # When
+    actual = bool_to_ml_pred(term)
 
-        for test_name, bool_in, bool_out in bool_tests:
-            with self.subTest(test_name):
-                # When
-                bool_out_actual = simplify_bool(bool_in)
-
-                # Then
-                self.assertEqual(bool_out_actual, bool_out)
+    # Then
+    assert actual == expected
 
 
-class SplitConfigTest(TestCase):
-    def test_split_config_from(self) -> None:
-        k_cell = KSequence([KApply('foo'), KApply('bar')])
-        term = KApply('<k>', [k_cell])
-        config, subst = split_config_from(term)
-        self.assertEqual(config, KApply('<k>', [KVariable('K_CELL')]))
-        self.assertEqual(subst, {'K_CELL': k_cell})
+REMOVE_GENERATED_TEST_DATA = (
+    (GENERATED_TOP_CELL_1, T_CELL),
+    (GENERATED_TOP_CELL_2, T_CELL),
+)
 
-        map_item_cell = KApply('<mapItem>', [KApply('foo')])
-        map_cell = KApply('<mapCell>', [KApply('map_join', [map_item_cell, map_item_cell])])
-        config, subst = split_config_from(map_cell)
-        self.assertEqual(config, KApply('<mapCell>', [KVariable('MAPCELL_CELL')]))
-        self.assertEqual(subst, {'MAPCELL_CELL': KApply('map_join', [map_item_cell, map_item_cell])})
+
+@pytest.mark.parametrize('term,expected', REMOVE_GENERATED_TEST_DATA, ids=count())
+def test_remove_generated_cells(term: KInner, expected: KInner) -> None:
+    # When
+    actual = remove_generated_cells(term)
+
+    # Then
+    assert actual == expected
+
+
+def test_collapse_dots() -> None:
+    # Given
+    term = substitute(GENERATED_TOP_CELL_1, {'MAP': DOTS, '_GENERATED_COUNTER_PLACEHOLDER': DOTS})
+    expected = KApply('<generatedTop>', KApply('<T>', K_CELL, DOTS), DOTS)
+
+    # When
+    actual = collapse_dots(term)
+
+    # Then
+    assert actual == expected
+
+
+SIMPLIFY_BOOL_TEST_DATA = (
+    ('trivial-false', andBool([FALSE, TRUE]), FALSE),
+    (
+        'and-true',
+        andBool([KApply('_==Int_', [intToken(3), intToken(4)]), TRUE]),
+        KApply('_==Int_', [intToken(3), intToken(4)]),
+    ),
+    ('not-false', notBool(FALSE), TRUE),
+)
+
+
+@pytest.mark.parametrize(
+    'test_id,term,expected',
+    SIMPLIFY_BOOL_TEST_DATA,
+    ids=[test_id for test_id, *_ in SIMPLIFY_BOOL_TEST_DATA],
+)
+def test_simplify_bool(test_id: str, term: KInner, expected: KInner) -> None:
+    # When
+    actual = simplify_bool(term)
+
+    # Then
+    assert actual == expected
+
+
+MAP_ITEM_CELL = KApply('<mapItem>', KApply('foo'))
+SPLIT_CONFIG_TEST_DATA = (
+    (
+        KApply('<k>', KSequence(KApply('foo'), KApply('bar'))),
+        KApply('<k>', KVariable('K_CELL')),
+        {'K_CELL': KSequence(KApply('foo'), KApply('bar'))},
+    ),
+    (
+        KApply('<mapCell>', KApply('map_join', MAP_ITEM_CELL, MAP_ITEM_CELL)),
+        KApply('<mapCell>', KVariable('MAPCELL_CELL')),
+        {'MAPCELL_CELL': KApply('map_join', MAP_ITEM_CELL, MAP_ITEM_CELL)},
+    ),
+)
+
+
+@pytest.mark.parametrize('term,expected_config,expected_subst', SPLIT_CONFIG_TEST_DATA, ids=count())
+def test_split_config_from(term: KInner, expected_config: KInner, expected_subst: Dict[str, KInner]) -> None:
+    # When
+    actual_config, actual_subst = split_config_from(term)
+
+    # Then
+    assert actual_config == expected_config
+    assert actual_subst == expected_subst
