@@ -1,43 +1,31 @@
-from pathlib import Path
+from pyk.kompile import _subsort_dict
+from pyk.kore.syntax import Attr, Axiom, Definition, Module, Sort, SortApp, SortVar, Top
 
-from pyk.ktool.kompile import KompileBackend, _build_arg_list
 
+def test_subsort_dict() -> None:
+    def sort_axiom(subsort: Sort, supersort: Sort) -> Axiom:
+        r = SortVar('R')
+        return Axiom((r,), Top(r), attrs=(Attr('subsort', (subsort, supersort)),))
 
-def test_all_args() -> None:
-    # Given
-    # fmt: off
-    expected = [
-        'kevm', 'kompile',
-        'imp.k',
-        '--output-definition', 'path/to/kompiled',
-        '--backend', 'haskell',
-        '--main-module', 'MAIN-MODULE',
-        '--syntax-module', 'SYNTAX-MODULE',
-        '-I', '/',
-        '-I', '/include/lib',
-        '--md-selector', 'k & ! nobytes & ! node',
-        '--hook-namespaces', 'JSON KRYPTO BLOCKCHAIN',
-        '--emit-json',
-        '--post-process', "'echo \"hello\"'",
-        '--concrete-rules', 'foo,bar',
-    ]
-    # fmt: on
+    a, b, c, d = (SortApp(name) for name in ['a', 'b', 'c', 'd'])
 
     # When
-    actual = _build_arg_list(
-        command=('kevm', 'kompile'),
-        main_file=Path('imp.k'),
-        output_dir=Path('path/to/kompiled'),
-        backend=KompileBackend.HASKELL,
-        main_module='MAIN-MODULE',
-        syntax_module='SYNTAX-MODULE',
-        include_dirs=(Path(path) for path in ['/', '/include/lib']),
-        md_selector='k & ! nobytes & ! node',
-        hook_namespaces=['JSON', 'KRYPTO', 'BLOCKCHAIN'],
-        emit_json=True,
-        post_process='echo "hello"',
-        concrete_rules=['foo', 'bar'],
+    definition = Definition(
+        (
+            Module(
+                'MODULE-1',
+                (sort_axiom(a, d), sort_axiom(b, d)),
+            ),
+            Module('MODULE-2', (sort_axiom(b, c),)),
+        )
     )
+    expected = {
+        c: {b},
+        d: {a, b},
+    }
+
+    # When
+    actual = _subsort_dict(definition)
 
     # Then
     assert actual == expected
