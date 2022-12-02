@@ -3,12 +3,13 @@ from typing import Final, Iterable, List, Tuple
 import pytest
 
 from pyk.cterm import CTerm
-from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
+from pyk.kast.inner import KApply, KInner, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kast.manip import get_cell
 from pyk.kast.outer import KClaim
 from pyk.ktool import KPrint, KProve
 from pyk.ktool.kprint import SymbolTable
 from pyk.prelude.kint import intToken
+from pyk.prelude.ml import mlTop
 
 from .utils import KProveTest
 
@@ -57,19 +58,19 @@ IMPLIES_TEST_DATA: Final = (
         'constant-subst',
         ('int $n , $s ; $n = X ;', '.Map'),
         ('int $n , $s ; $n = 3 ;', '.Map'),
-        Subst({'X': intToken(3)}),
+        (Subst({'X': intToken(3)}), mlTop()),
     ),
     (
         'variable-subst',
         ('int $n , $s ; $n = X ;', '.Map'),
         ('int $n , $s ; $n = Y ;', '.Map'),
-        Subst({'X': KVariable('Y', sort=KSort('AExp'))}),
+        (Subst({'X': KVariable('Y', sort=KSort('AExp'))}), mlTop()),
     ),
     (
         'trivial',
         ('int $n , $s ; $n = 3 ;', '.Map'),
         ('int $n , $s ; $n = 3 ;', '.Map'),
-        Subst({}),
+        (Subst({}), mlTop()),
     ),
 )
 
@@ -219,7 +220,7 @@ class TestImpProof(KProveTest):
         test_id: str,
         antecedent: Tuple[str, str],
         consequent: Tuple[str, str],
-        expected: Subst,
+        expected: Tuple[Subst, KInner],
     ) -> None:
         # Given
         antecedent_term = self.config(kprove, *antecedent)
