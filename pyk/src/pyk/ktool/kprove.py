@@ -33,6 +33,11 @@ class KProveOutput(Enum):
     NONE = 'none'
 
 
+class KoreExecLogFormat(Enum):
+    STANDARD = 'standard'
+    ONELINE = 'oneline'
+
+
 def _kprove(
     spec_file: Path,
     *,
@@ -185,16 +190,20 @@ class KProve(KPrint, ContextManager['KProve']):
         allow_zero_step: bool = False,
         dry_run: bool = False,
         depth: Optional[int] = None,
+        haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
+        haskell_log_debug_transition: bool = True,
     ) -> KInner:
         log_file = spec_file.with_suffix('.debug-log') if log_axioms_file is None else log_axioms_file
         if log_file.exists():
             log_file.unlink()
-        haskell_log_entries = unique(list(haskell_log_entries) + ['DebugTransition'])
+        haskell_log_entries = unique(
+            list(haskell_log_entries) + (['DebugTransition'] if haskell_log_debug_transition else [])
+        )
         haskell_log_args = [
             '--log',
             str(log_file),
             '--log-format',
-            'oneline',
+            haskell_log_format.value,
             '--log-entries',
             ','.join(haskell_log_entries),
         ]
