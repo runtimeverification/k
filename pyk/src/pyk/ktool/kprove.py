@@ -367,7 +367,9 @@ class KProve(KPrint, ContextManager['KProve']):
         kast_simplified = self.kore_to_kast(kore_simplified)
         return kast_simplified
 
-    def implies(self, antecedent: CTerm, consequent: CTerm, bind_consequent_variables: bool = True) -> Optional[Subst]:
+    def implies(
+        self, antecedent: CTerm, consequent: CTerm, bind_consequent_variables: bool = True
+    ) -> Optional[Tuple[Subst, KInner]]:
         _LOGGER.debug(f'Checking implication: {antecedent} #Implies {consequent}')
         _consequent = consequent.kast
         if bind_consequent_variables:
@@ -386,24 +388,21 @@ class KProve(KPrint, ContextManager['KProve']):
             _LOGGER.warning(
                 f'Received a non-trivial implication back from check implication endpoint: {result.implication}'
             )
-        if result.predicate is not None and type(result.predicate) is not Top:
-            raise ValueError(
-                f'Received a non-trivial predicate back from check implication endpoint: {result.predicate}'
-            )
         if result.substitution is None:
             return None
         ml_subst = self.kore_to_kast(result.substitution)
+        ml_pred = self.kore_to_kast(result.predicate) if result.predicate is not None else mlTop()
         if is_top(ml_subst):
-            return Subst({})
+            return (Subst({}), ml_pred)
         subst_pattern = mlEquals(KVariable('###VAR'), KVariable('###TERM'))
         _subst: Dict[str, KInner] = {}
-        for ml_pred in flatten_label('#And', ml_subst):
-            m = subst_pattern.match(ml_pred)
+        for subst_pred in flatten_label('#And', ml_subst):
+            m = subst_pattern.match(subst_pred)
             if m is not None and type(m['###VAR']) is KVariable:
                 _subst[m['###VAR'].name] = m['###TERM']
             else:
-                raise AssertionError(f'Received a non-substitution from implies endpoint: {ml_pred}')
-        return Subst(_subst)
+                raise AssertionError(f'Received a non-substitution from implies endpoint: {subst_pred}')
+        return (Subst(_subst), ml_pred)
 
     def _write_claim_definition(self, claim: KClaim, claim_id: str, lemmas: Iterable[KRule] = ()) -> Tuple[Path, str]:
         tmp_claim = self.use_directory / (claim_id.lower() + '-spec')

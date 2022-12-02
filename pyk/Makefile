@@ -34,6 +34,7 @@ POETRY_RUN := poetry run
 # Tests
 
 TEST_ARGS :=
+CHECK = git --no-pager diff --no-index -R
 
 test: test-unit test-integration test-pyk test-kit
 
@@ -47,7 +48,7 @@ test-pyk: poetry-install
 	$(POETRY_RUN) $(MAKE) -C pyk-tests
 
 test-kit: poetry-install
-	$(POETRY_RUN) $(MAKE) -C kit-tests
+	$(POETRY_RUN) $(MAKE) -C kit-tests CHECK="$(CHECK)"
 
 
 # Checks and formatting
