@@ -435,10 +435,9 @@ class KoreParser:
 
     def attr(self) -> Attr:
         symbol = self._custom_symbol_id()
-        self._match(KoreToken.Type.LBRACE)
-        self._match(KoreToken.Type.RBRACE)
+        sorts = self._sort_list()
         params = self._attr_param_list()
-        return Attr(symbol, params)
+        return Attr(symbol, sorts, params)
 
     def _attr_param(self) -> Union[String, Attr]:
         if self._la().type == KoreToken.Type.STRING:
