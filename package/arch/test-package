@@ -2,10 +2,6 @@
 
 set -euxo pipefail
 
-ls
-ls *
-ls ../
-
 pkg="$1" ; shift
 
 pacman -Syyu --noconfirm

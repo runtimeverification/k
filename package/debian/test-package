@@ -6,10 +6,6 @@ pkg="$1" ; shift
 
 mv "${pkg}" kframework.deb
 
-ls
-ls *
-ls ../
-
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get upgrade --yes
