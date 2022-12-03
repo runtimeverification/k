@@ -121,6 +121,8 @@ jobs:
           os: ubuntu
           distro: jammy
           llvm: 14
+          build-package: package/debian/build-package jammy
+          test-package: package/debian/test-package
 
   compile-nix-flake:
     name: 'Nix flake'
