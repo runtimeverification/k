@@ -8,7 +8,20 @@ from typing import Any, Dict, Final, FrozenSet, Iterable, Iterator, List, Option
 
 from ..prelude.kbool import TRUE
 from ..utils import filter_none, single, unique
-from .inner import KApply, KInner, KLabel, KRewrite, KSort, KToken, KVariable, Subst, collect, top_down, var_occurrences
+from .inner import (
+    KApply,
+    KInner,
+    KLabel,
+    KRewrite,
+    KSequence,
+    KSort,
+    KToken,
+    KVariable,
+    Subst,
+    collect,
+    top_down,
+    var_occurrences,
+)
 from .kast import EMPTY_ATT, KAst, KAtt, WithKAtt
 
 RL = TypeVar('RL', bound='KRuleLike')
@@ -1000,7 +1013,7 @@ class KDefinition(KOuter, WithKAtt):
 
     def subsorts(self, sort: KSort) -> List[KSort]:
         if sort not in self._subsorts:
-            self._subsorts[sort] = list(set(self._compute_subsorts(sort)))
+            self._subsorts[sort] = self._compute_subsorts(sort)
         return self._subsorts[sort]
 
     def _compute_subsorts(self, sort: KSort) -> List[KSort]:
@@ -1009,7 +1022,7 @@ class KDefinition(KOuter, WithKAtt):
             if prod.sort == sort and len(prod.items) == 1 and type(prod.items[0]) is KNonTerminal:
                 _subsort = prod.items[0].sort
                 _subsorts.extend([_subsort] + self.subsorts(prod.items[0].sort))
-        return _subsorts
+        return list(set(_subsorts))
 
     def sort_vars_subst(self, kast: KInner) -> Subst:
         _var_sort_occurrences = var_occurrences(kast)
@@ -1022,6 +1035,13 @@ class KDefinition(KOuter, WithKAtt):
                     for t, a in zip(prod.argument_sorts, _kast.args):
                         if type(a) is KVariable:
                             _var_sort_occurrences[a.name].append(a.let_sort(t))
+            if type(_kast) is KSequence and _kast.arity > 0:
+                for a in _kast.items[0:-1]:
+                    if type(a) is KVariable:
+                        _var_sort_occurrences[a.name].append(a.let_sort(KSort('KItem')))
+                last_a = _kast.items[-1]
+                if type(last_a) is KVariable:
+                    _var_sort_occurrences[last_a.name].append(last_a.let_sort(KSort('K')))
 
         collect(_sort_contexts, kast)
 
