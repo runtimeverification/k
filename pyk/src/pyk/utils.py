@@ -230,3 +230,32 @@ def compare_short_hashes(lhs: str, rhs: str) -> bool:
     (l0, l1) = deconstruct_short_hash(lhs)
     (r0, r1) = deconstruct_short_hash(rhs)
     return (l0.startswith(r0) or r0.startswith(l0)) and (l1.endswith(r1) or r1.endswith(l1))
+
+
+# From enquoteKString: https://github.com/runtimeverification/k/blob/8b2e215fb46901b68532f9f3cb9656bfed7ed504/kore/src/main/java/org/kframework/utils/StringUtil.java#L224
+def enquote_str(orig_s: str) -> str:
+    def enquote_char(orig_c: str) -> str:
+        if orig_c == '"':
+            return r'\"'
+        elif orig_c == '\\':
+            return r'\\'
+        elif orig_c == '\n':
+            return r'\n'
+        elif orig_c == '\t':
+            return r'\t'
+        elif orig_c == '\r':
+            return r'\r'
+        elif orig_c == '\f':
+            return r'\f'
+        else:
+            ord_c = ord(orig_c)
+            if 32 <= ord_c and ord_c < 127:
+                return orig_c
+            elif ord_c < 16:
+                return '\\x0' + hex(ord(orig_c))[2:]
+            elif ord_c <= 255:
+                return '\\x' + hex(ord(orig_c))[2:]
+            else:
+                raise ValueError(f'Unsupported character for enquoting: {orig_c}')
+
+    return ''.join(enquote_char(c) for c in orig_s)

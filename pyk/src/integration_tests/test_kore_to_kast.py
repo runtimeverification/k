@@ -2,7 +2,7 @@ from typing import Final
 
 import pytest
 
-from pyk.kast.inner import KApply, KInner, KLabel, KSequence, KSort, KToken, KVariable
+from pyk.kast.inner import KApply, KInner, KLabel, KSequence, KSort, KVariable
 from pyk.kore.syntax import (
     DV,
     And,
@@ -22,6 +22,7 @@ from pyk.kore.syntax import (
     Top,
 )
 from pyk.ktool import KPrint
+from pyk.prelude.bytes import bytesToken
 from pyk.prelude.kbool import TRUE
 from pyk.prelude.kint import INT, intToken
 from pyk.prelude.ml import mlBottom, mlImplies, mlTop
@@ -45,8 +46,8 @@ BIDIRECTIONAL_TEST_DATA: Final = (
     (
         'domain-value-bytes',
         KSort('Bytes'),
-        DV(SortApp('SortBytes'), String('0000')),
-        KToken('b"0000"', KSort('Bytes')),
+        DV(SortApp('SortBytes'), String(chr(0) + chr(60) + chr(96) + chr(245))),
+        bytesToken(chr(0) + chr(60) + chr(96) + chr(245)),
     ),
     (
         'ml-top',
@@ -289,6 +290,44 @@ KAST_TO_KORE_TEST_DATA: Final = (
             App('Lblfoo', [], [EVar('VarX', SortApp('SortBar'))]),
         ),
         KApply(KLabel('#Exists', [KSort('Foo')]), [KVariable('X'), KApply('foo', [KVariable('X')])]),
+    ),
+    (
+        'ksequence-empty',
+        KSort('K'),
+        App('dotk', [], []),
+        KSequence([]),
+    ),
+    (
+        'ksequence-singleton-var',
+        KSort('K'),
+        EVar('VarCONT', SortApp('SortK')),
+        KSequence([KVariable('CONT')]),
+    ),
+    (
+        'ksequence-duo-var-1',
+        KSort('K'),
+        App(
+            'kseq',
+            (),
+            [
+                EVar('VarELEM', SortApp('SortKItem')),
+                EVar('VarCONT', SortApp('SortK')),
+            ],
+        ),
+        KSequence([KVariable('ELEM'), KVariable('CONT')]),
+    ),
+    (
+        'ksequence-duo-var-2',
+        KSort('K'),
+        App(
+            'kseq',
+            (),
+            [
+                EVar('VarELEM1', SortApp('SortKItem')),
+                App('kseq', (), [EVar('VarELEM2', SortApp('SortKItem')), App('dotk', (), ())]),
+            ],
+        ),
+        KSequence([KVariable('ELEM1', sort=KSort('KItem')), KVariable('ELEM2', sort=KSort('KItem'))]),
     ),
 )
 

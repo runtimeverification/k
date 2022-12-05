@@ -127,19 +127,22 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 'constraint': self.constraint.to_dict(),
             }
 
-        def pretty(self, kprint: KPrint, omit_large_subst: bool = False) -> Iterable[str]:
+        def pretty(self, kprint: KPrint, minimize: bool = True) -> Iterable[str]:
             subst_strs = [f'{k} <- {kprint.pretty_print(v)}' for k, v in self.subst.items()]
             subst_str = ''
             if len(subst_strs) == 0:
                 subst_str = '.Subst'
             if len(subst_strs) == 1:
                 subst_str = subst_strs[0]
-            if len(subst_strs) > 1 and omit_large_subst:
+            if len(subst_strs) > 1 and minimize:
                 subst_str = 'OMITTED SUBST'
-            if len(subst_strs) > 1 and not omit_large_subst:
+            if len(subst_strs) > 1 and not minimize:
                 subst_str = '{\n    ' + '\n    '.join(subst_strs) + '\n}'
+            constraint_str = kprint.pretty_print(ml_pred_to_bool(self.constraint, unsafe=True))
+            if len(constraint_str) > 78:
+                constraint_str = 'OMITTED CONSTRAINT'
             return [
-                f'constraint: {kprint.pretty_print(ml_pred_to_bool(self.constraint))}',
+                f'constraint: {constraint_str}',
                 f'subst: {subst_str}',
             ]
 
@@ -322,7 +325,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         attr_string = ' (' + ', '.join(attrs) + ')' if attrs else ''
         return shorten_hash(node.id) + attr_string
 
-    def pretty(self, kprint: KPrint, omit_large_subst: bool = False) -> Iterable[str]:
+    def pretty(self, kprint: KPrint, minimize: bool = True) -> Iterable[str]:
 
         processed_nodes: List[KCFG.Node] = []
 
@@ -373,7 +376,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                         ret.append(indent + '│  ' + _bold(_green('(verified)')))
                     ret.extend(add_indent(indent + '│  ', edge_like.pretty(kprint)))
                 elif isinstance(edge_like, KCFG.Cover):
-                    ret.extend(add_indent(indent + '┊  ', edge_like.pretty(kprint, omit_large_subst=omit_large_subst)))
+                    ret.extend(add_indent(indent + '┊  ', edge_like.pretty(kprint, minimize=minimize)))
                 ret.append(indent + elbow + ' ' + _print_node(edge_like.target))
                 if isinstance(edge_like, KCFG.Edge) and edge_like.depth == 0:
                     first, *rest = edge_like.pretty(kprint)
