@@ -52,6 +52,7 @@ from ..prelude.k import DOTS, EMPTY_K
 from ..prelude.kbool import TRUE
 from ..prelude.ml import mlAnd, mlBottom, mlCeil, mlEquals, mlExists, mlImplies, mlNot, mlTop
 from ..prelude.string import STRING, stringToken
+from ..utils import enquote_str
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -537,14 +538,21 @@ class KPrint:
                         return _ceil
 
         elif type(kast) is KSequence:
-            args = [self._kast_to_kore(i, sort=KSort('KItem')) for i in reversed(kast.items)]
-            # TODO: Written like this to appease the type-checker.
-            new_args = [a for a in args if a is not None]
-            if len(new_args) == len(args):
-                seq = App('dotk', (), ())
-                for a in new_args:
-                    seq = App('kseq', (), [a, seq])
-                return seq
+            if kast.arity == 0:
+                return App('dotk', (), ())
+            item0 = kast.items[0]
+            if kast.arity == 1:
+                if type(item0) is KVariable and item0.sort == KSort('K'):
+                    return self._kast_to_kore(item0, sort=KSort('K'))
+                else:
+                    item0_kore = self._kast_to_kore(item0, sort=KSort('KItem'))
+                    if item0_kore is not None:
+                        return App('kseq', (), [item0_kore, App('dotk', (), ())])
+            else:
+                item0_kore = self._kast_to_kore(item0, sort=KSort('KItem'))
+                items_kore = self._kast_to_kore(KSequence(kast.items[1:]), sort=KSort('K'))
+                if item0_kore is not None and items_kore is not None:
+                    return App('kseq', (), [item0_kore, items_kore])
 
         _LOGGER.warning(f'KPrint._kast_to_kore failed on input: {kast}')
         return None
@@ -616,6 +624,16 @@ def pretty_print_kast(kast: KAst, symbol_table: SymbolTable) -> str:
     if type(kast) is KSort:
         return kast.name
     if type(kast) is KToken:
+        if kast.sort == BYTES:
+            assert len(kast.token) >= 3
+            assert kast.token[0:2] == 'b"'
+            assert kast.token[-1] == '"'
+            return 'b"' + enquote_str(kast.token[2:-1]) + '"'
+        if kast.sort == STRING:
+            assert len(kast.token) >= 2
+            assert kast.token[0] == '"'
+            assert kast.token[-1] == '"'
+            return '"' + enquote_str(kast.token[1:-1]) + '"'
         return kast.token
     if type(kast) is KApply:
         label = kast.label.name
