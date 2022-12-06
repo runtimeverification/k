@@ -124,11 +124,7 @@ jobs:
           build-package: package/debian/build-package jammy
           test-package: package/debian/test-package
       - name: 'Upload Package to Release'
-        run: |
-          ls
-          ls *
-          ls ..
-          ls kframework_amd64_ubuntu_jammy.deb
+        run: ls kframework_amd64_ubuntu_jammy.deb
         # uses: actions/upload-release-asset@v1
         # env:
         #   GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
