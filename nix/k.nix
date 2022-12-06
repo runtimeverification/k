@@ -1,12 +1,33 @@
-{ src, clang, stdenv, lib, mavenix, runCommand, makeWrapper, bison, flex, gcc
-, git, gmp, jdk, mpfr, ncurses, pkgconfig, python3, z3, haskell-backend
+{ src, coreutils, darwin, clang, stdenv, lib, mavenix, runCommand, makeWrapper, bison, flex, gawk, gcc
+, git, gmp, gnugrep, gnused, jdk, mpfr, ncurses, pkgconfig, python3, z3, haskell-backend
 , prelude-kore, llvm-backend, debugger, version }:
 
 let
-  unwrapped = mavenix.buildMaven {
-    name = "k-${version}-maven";
+  hostInputs = [
+    coreutils
+    gawk
+    gnused
+    bison
+    flex
+    (if stdenv.isDarwin then clang else gcc)
+    gmp
+    jdk
+    mpfr
+    ncurses
+    pkgconfig
+    python3
+    z3
+    haskell-backend
+    llvm-backend
+  ] ++ lib.optional (debugger != null) debugger
+  # PATH used at runtime
+  hostPATH = lib.makeBinPath hostInputs;
+
+in mavenix.buildMaven {
+    name = "k-${version}";
     infoFile = ./mavenix.lock;
     inherit src;
+    nativeBuildInputs = [ makeWrapper ];
 
     # By default, mavenix copies the jars defined in `submodules` of mavenix.lock to `$out/share/java`.
     # The following flag disables this, since we copy the jars ourselves.
@@ -22,6 +43,7 @@ let
       "-Dllvm.backend.skip=true"
       "-Dhaskell.backend.skip=true"
     ];
+
     # Attributes are passed to the underlying `stdenv.mkDerivation`, so build
     # hooks can also be set here.
     postPatch = ''
@@ -33,6 +55,7 @@ let
     # in $out/share/mavenix/repo with a symlink to reduce the derivation size. This is done to reduce the cachix upload sizes
     # We also have to make sure to link the cmake/ and include/ folders from the llvm-backend source repo and the llvm-backend derivation, 
     # as these will be expected/required when compiling other projects, e.g. the evm-semantics repo
+    # Finally we wrap all binaries with the required runtime deps
     postInstall = ''
       cp -r k-distribution/target/release/k/{bin,include,lib} $out/
 
@@ -53,6 +76,11 @@ let
       prelude_kore="$out/include/kframework/kore/prelude.kore"
       mkdir -p "$(dirname "$prelude_kore")"
       ln -sf "${prelude-kore}" "$prelude_kore"
+
+      for prog in $out/bin/*
+      do
+        wrapProgram $prog --prefix PATH : ${hostPATH}
+      done
     '';
 
     preFixup = lib.optionalString (!stdenv.isDarwin) ''
@@ -63,42 +91,4 @@ let
     installCheckPhase = ''
       $out/bin/ng --help
     '';
-  };
-
-in let
-  hostInputs = [
-    bison
-    flex
-    (if stdenv.isDarwin then clang else gcc)
-    gmp
-    jdk
-    mpfr
-    ncurses
-    pkgconfig
-    python3
-    z3
-    haskell-backend
-    llvm-backend
-  ] ++ lib.optional (debugger != null) debugger;
-  # PATH used at runtime
-  hostPATH = lib.makeBinPath hostInputs;
-
-in runCommand (lib.removeSuffix "-maven" unwrapped.name) {
-  nativeBuildInputs = [ makeWrapper ];
-  passthru = { inherit unwrapped; };
-  inherit unwrapped;
-} ''
-  mkdir -p $out/bin
-
-  # Wrap bin/ to augment PATH.
-  for prog in $unwrapped/bin/*
-  do
-    makeWrapper $prog $out/bin/$(basename $prog) --prefix PATH : ${hostPATH}
-  done
-
-  # Link each top-level package directory, for dependents that need that.
-  for each in include lib share
-  do
-    ln -sf $unwrapped/$each $out/$each
-  done
-''
+  }
