@@ -47,25 +47,30 @@ Prover output:
 </generatedTop>
 #And #Top.
 + show-cfg
-4f03b9..e100c3 (init, expanded)
+
+┌  4f03b9..e100c3 (init, expanded)
+│
 ┣━ 0566ac..c60853 (expanded, @init-1)    N:Int ==Int 1
+┃   │
 ┃   │  [1m[32m(verified)[0m[0m
 ┃   │  (-1 steps)
 ┃   └  76b287..c61318 (target, leaf)
 ┃
 ┗━ d9ed37..e32051 (expanded, @init-not-1)    notBool ( N:Int ==Int 1 )
+    │
     ┣━ 58f58f..25986d (expanded, @init-2)    N:Int ==Int 2
+    ┃   │
     ┃   │  (-1 steps)
     ┃   ├  c4ad22..79ff4a (expanded, @init-10)
+    ┃   │
     ┃   │  [1m[32m(verified)[0m[0m
     ┃   │  (-1 steps)
     ┃   └  76b287..c61318 (target, leaf)
     ┃
     ┗━ 91c88c..f061ad (expanded, @init-not-1-2)    notBool ( N:Int ==Int 2 )
+        │
         ┣━ c4ad22..79ff4a (expanded, @init-10)    N:Int ==Int 10
-        ┃   ┊ (continues as previously)
+        ┃   ┊
+        ┃   └╌ (continues as previously)
         ┃
         ┗━ [1m3cf5c5..2a0dcb (frontier, leaf)[0m    notBool ( N:Int ==Int 10 )
-
-
-

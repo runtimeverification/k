@@ -5,7 +5,22 @@ from functools import reduce
 from itertools import chain
 from threading import RLock
 from types import TracebackType
-from typing import Any, Container, Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple, Type, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Container,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 from graphviz import Digraph
 
@@ -320,12 +335,18 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def from_json(s: str) -> 'KCFG':
         return KCFG.from_dict(json.loads(s))
 
-    def node_short_info(self, node: Node) -> str:
+    def node_short_info(self, node: Node, node_printer: Optional[Callable[[CTerm], Iterable[str]]] = None) -> List[str]:
         attrs = self.node_attrs(node.id) + ['@' + alias for alias in sorted(self.aliases(node.id))]
         attr_string = ' (' + ', '.join(attrs) + ')' if attrs else ''
-        return shorten_hash(node.id) + attr_string
+        node_header = shorten_hash(node.id) + attr_string
+        node_strs = [node_header]
+        if node_printer:
+            node_strs.extend(f' {nl}' for nl in node_printer(node.cterm))
+        return node_strs
 
-    def pretty(self, kprint: KPrint, minimize: bool = True) -> Iterable[str]:
+    def pretty(
+        self, kprint: KPrint, minimize: bool = True, node_printer: Optional[Callable[[CTerm], Iterable[str]]] = None
+    ) -> Iterable[str]:
 
         processed_nodes: List[KCFG.Node] = []
 
@@ -335,10 +356,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         def _green(text: str) -> str:
             return '\033[32m' + text + '\033[0m'
 
-        def _print_node(node: KCFG.Node) -> str:
-            short_info = self.node_short_info(node)
+        def _print_node(node: KCFG.Node) -> List[str]:
+            short_info = self.node_short_info(node, node_printer=node_printer)
             if self.is_frontier(node.id):
-                short_info = _bold(short_info)
+                short_info[0] = _bold(short_info[0])
             return short_info
 
         def _print_subgraph(indent: str, curr_node: KCFG.Node, prior_on_trace: List[KCFG.Node]) -> List[str]:
@@ -348,53 +369,69 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             if curr_node in processed_nodes:
                 if not edges_from:
                     return ret
+                ret.append(indent + '┊')
                 if curr_node in prior_on_trace:
-                    ret.append(indent + '┊ (looped back)')
+                    ret.append(indent + '└╌ (looped back)')
                 else:
-                    ret.append(indent + '┊ (continues as previously)')
+                    ret.append(indent + '└╌ (continues as previously)')
                 return ret
             processed_nodes.append(curr_node)
 
             num_children = len(edges_from)
             is_cover = num_children == 1 and isinstance(edges_from[0], KCFG.Cover)
             is_branch = num_children > 1
+            if is_branch:
+                ret.append(indent + '│')
             for i, edge_like in enumerate(edges_from):
                 is_last_child = i == num_children - 1
 
                 if not (is_branch or is_cover):
                     elbow = '├ ' if len(self.edge_likes(source_id=edge_like.target.id)) else '└ '
-                    new_indent = indent
+                    new_indent = ''
+                    node_indent = '│  '
                 elif is_last_child:
                     elbow = '└╌' if is_cover else '┗━'
-                    new_indent = indent + '    '
+                    new_indent = '    '
+                    node_indent = '    │'
                 else:
                     elbow = '┣━'
-                    new_indent = indent + '┃   '
+                    new_indent = '┃   '
+                    node_indent = '┃   │'
 
                 if isinstance(edge_like, KCFG.Edge) and edge_like.depth:
+                    ret.append(indent + '│')
                     if self.is_verified(edge_like.source.id, edge_like.target.id):
                         ret.append(indent + '│  ' + _bold(_green('(verified)')))
                     ret.extend(add_indent(indent + '│  ', edge_like.pretty(kprint)))
                 elif isinstance(edge_like, KCFG.Cover):
+                    ret.append(indent + '┊')
                     ret.extend(add_indent(indent + '┊  ', edge_like.pretty(kprint, minimize=minimize)))
-                ret.append(indent + elbow + ' ' + _print_node(edge_like.target))
+                target_strs = _print_node(edge_like.target)
+                ret.append(indent + elbow + ' ' + target_strs[0])
+
                 if isinstance(edge_like, KCFG.Edge) and edge_like.depth == 0:
                     first, *rest = edge_like.pretty(kprint)
                     ret[-1] += '    ' + first
-                    ret.extend(add_indent(new_indent + (7 + len(_print_node(edge_like.target))) * ' ', rest))
+                    ret.extend(add_indent(indent + new_indent + (7 + len(target_strs[0])) * ' ', rest))
 
-                ret.extend(_print_subgraph(new_indent, edge_like.target, prior_on_trace + [edge_like.source]))
-                if is_branch:
-                    ret.append(new_indent.rstrip())
+                ret.extend(add_indent(indent + node_indent, target_strs[1:]))
+                ret.extend(_print_subgraph(indent + new_indent, edge_like.target, prior_on_trace + [edge_like.source]))
+
+                if is_branch and not is_last_child:
+                    ret.append(indent + new_indent)
+
             return ret
 
         ret = []
         init = sorted(self.init)
         while init:
-            ret.append(_print_node(init[0]))
+            init_strs = _print_node(init[0])
+            ret.append('')
+            ret.append('┌  ' + init_strs[0])
+            ret.extend(add_indent('│  ', init_strs[1:]))
             ret.extend(_print_subgraph('', init[0], [init[0]]))
             init = sorted(node for node in self.nodes if node not in processed_nodes)
-        return ret
+        return (r.rstrip() for r in ret)
 
     def to_dot(self, kprint: KPrint) -> str:
         def _short_label(label: str) -> str:
@@ -408,7 +445,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         graph = Digraph()
 
         for node in self.nodes:
-            label = self.node_short_info(node)
+            label = '\n'.join(self.node_short_info(node))
             class_attrs = ' '.join(self.node_attrs(node.id))
             attrs = {'class': class_attrs} if class_attrs else {}
             graph.node(name=node.id, label=label, **attrs)
