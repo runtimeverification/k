@@ -290,9 +290,9 @@ def show_edge(manager: CFGManager, kprove: KProve, args: Mapping[str, Any], cfg_
 
     if edges:
         edge = edges[0]
-        print(cfg.node_short_info(edge.source))
+        print('\n'.join(cfg.node_short_info(edge.source)))
         list(map(print, add_indent('│ ', edge.pretty(kprove))))
-        print(cfg.node_short_info(edge.target))
+        print('\n'.join(cfg.node_short_info(edge.target)))
         print()
     else:
         raise ValueError(f'Could not find edge: {source},{target}')
