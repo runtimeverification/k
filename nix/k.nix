@@ -19,7 +19,7 @@ let
     z3
     haskell-backend
     llvm-backend
-  ] ++ lib.optional (debugger != null) debugger
+  ] ++ lib.optional (debugger != null) debugger;
   # PATH used at runtime
   hostPATH = lib.makeBinPath hostInputs;
 
