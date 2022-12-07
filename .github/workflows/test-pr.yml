@@ -46,7 +46,7 @@ jobs:
           git config user.email devops@runtimeverification.com
 
       - name: 'Install Nix'
-        uses: cachix/install-nix-action@v14.1
+        uses: cachix/install-nix-action@v15
         with:
           install_url: 'https://releases.nixos.org/nix/nix-2.3.16/install'
           extra_nix_config: |
@@ -194,7 +194,7 @@ jobs:
         run: brew install bash
 
       - name: 'Install Nix'
-        uses: cachix/install-nix-action@v14.1
+        uses: cachix/install-nix-action@v15
         with:
           extra_nix_config: |
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
