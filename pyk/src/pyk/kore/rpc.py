@@ -22,6 +22,7 @@ from typing import (
     Tuple,
     Type,
     TypeVar,
+    Union,
     final,
 )
 
@@ -398,15 +399,28 @@ class KoreServer(ContextManager['KoreServer']):
     _port: int
     _pid: int
 
-    def __init__(self, kompiled_dir: Path, module_name: str, port: int):
+    def __init__(
+        self,
+        kompiled_dir: Union[str, Path],
+        module_name: str,
+        port: int,
+        *,
+        command: Union[str, Iterable[str]] = 'kore-rpc',
+    ):
+        kompiled_dir = Path(kompiled_dir)
         check_dir_path(kompiled_dir)
 
         definition_file = kompiled_dir / 'definition.kore'
         check_file_path(definition_file)
 
+        if type(command) is str:
+            command = (command,)
+
+        args = tuple(command) + (str(definition_file), '--module', module_name, '--server-port', str(port))
+
         self._port = port
         _LOGGER.info(f'Starting KoreServer: port={self._port}')
-        self._proc = Popen(['kore-rpc', str(definition_file), '--module', module_name, '--server-port', str(port)])
+        self._proc = Popen(args)
         self._pid = self._proc.pid
         _LOGGER.info(f'KoreServer started: port={self._port}, pid={self._pid}')
 
