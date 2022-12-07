@@ -12,6 +12,7 @@ from typing import (
     Mapping,
     Optional,
     Tuple,
+    Type,
     TypeVar,
     cast,
 )
@@ -59,6 +60,12 @@ class FrozenDict(Mapping[K, V]):
 
 
 EMPTY_FROZEN_DICT: Final[FrozenDict] = FrozenDict()
+
+
+def check_type(x: Any, typ: Type[T]) -> T:
+    if not isinstance(x, typ):
+        raise ValueError(f'Expected object of type {typ.__name__}, got: {x}')
+    return x
 
 
 def raised(f: Callable, *args: Any, **kwargs: Any) -> Optional[BaseException]:
