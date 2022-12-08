@@ -12,7 +12,7 @@ jobs:
 
   version-sync:
     name: 'Version Sync'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
@@ -32,7 +32,7 @@ jobs:
 
   nix-maven:
     name: 'Nix: Maven'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: version-sync
     steps:
 
@@ -130,8 +130,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: ubuntu-latest
-            os: ubuntu-latest
+          - runner: ubuntu-20.04
+            os: ubuntu-20.04
           - runner: macos-12
             os: macos-12
           - runner: MacM1
@@ -177,8 +177,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: ubuntu-latest
-            os: ubuntu-latest
+          - runner: ubuntu-20.04
+            os: ubuntu-20.04
           - runner: macos-12
             os: macos-12
     runs-on: ${{ matrix.runner }}

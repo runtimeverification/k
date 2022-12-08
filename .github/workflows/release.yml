@@ -10,7 +10,7 @@ jobs:
 
   set-release-id:
     name: 'Set Release ID'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
         - name: 'Get release_id'
           run: echo "::set-output name=release_id::$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)"
@@ -20,7 +20,7 @@ jobs:
 
   nix-release:
     name: 'Nix Release'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     environment: production
     steps:
       - name: Check out code
@@ -341,7 +341,7 @@ jobs:
 
   release:
     name: 'Publish Release'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     environment: production
     needs: [nix-release, macos-build, macos-test, ubuntu-jammy, ubuntu-focal, debian-bullseye, set-release-id]
     steps:
@@ -366,7 +366,7 @@ jobs:
 
   gh-pages:
     name: 'GitHub Pages deployment'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: [release]
     steps:
       - name: 'Install pandoc/texlive/calibre'
