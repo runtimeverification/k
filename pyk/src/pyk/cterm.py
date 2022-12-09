@@ -15,7 +15,6 @@ from .kast.manip import (
     remove_generated_cells,
     simplify_bool,
     split_config_and_constraints,
-    substitute,
 )
 from .kast.outer import KClaim, KRule
 from .prelude.k import GENERATED_TOP_CELL
@@ -156,8 +155,8 @@ def build_rule(
             v_subst[v] = KVariable(new_v)
             vremap_subst[new_v] = KVariable(v)
 
-    init_term = substitute(init_term, v_subst)
-    final_term = apply_existential_substitutions(substitute(final_term, v_subst))
+    init_term = Subst(v_subst)(init_term)
+    final_term = apply_existential_substitutions(Subst(v_subst)(final_term))
     (init_config, init_constraint) = split_config_and_constraints(init_term)
     (final_config, final_constraint) = split_config_and_constraints(final_term)
 
