@@ -107,26 +107,6 @@ jobs:
           asset_name: 'K Framework Ubuntu Focal (20.04) Deb'
           asset_path: kframework_amd64_ubuntu_focal.deb
           upload_url: ${{ github.event.release.upload_url }}
-      - name: 'Build, Test, and Push Dockerhub Image'
-        shell: bash {0}
-        env:
-          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
-          DOCKERHUB_REPO: runtimeverificationinc/kframework-k
-        run: |
-          set -euxo pipefail
-          version=$(cat package/version)
-          version_tag=ubuntu-focal-${version}
-          docker login --username rvdockerhub --password ${DOCKERHUB_PASSWORD}
-          docker image build . --file package/docker/Dockerfile.ubuntu-focal --tag ${DOCKERHUB_REPO}:${version_tag}
-          docker run --name k-package-docker-test-focal-${GITHUB_SHA} --rm -it --detach ${DOCKERHUB_REPO}:${version_tag}
-          docker exec -t k-package-docker-test-focal-${GITHUB_SHA} bash -c 'cd ~ && echo "module TEST imports BOOL endmodule" > test.k'
-          docker exec -t k-package-docker-test-focal-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend llvm'
-          docker exec -t k-package-docker-test-focal-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend haskell'
-          docker image push ${DOCKERHUB_REPO}:${version_tag}
-      - name: Clean up Docker Container
-        if: always()
-        run: |
-          docker stop --time=0 k-package-docker-test-focal-${GITHUB_SHA}
 
   debian-bullseye:
     name: 'K Debian Bullseye Package'
@@ -183,13 +163,13 @@ jobs:
     needs: set-release-id
     steps:
       - name: Check out code
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
         with:
           submodules: recursive
           path: kframework
 
       - name: Check out matching homebrew repo branch
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
         id: checkout
         with:
           repository: kframework/homebrew-k
@@ -198,7 +178,7 @@ jobs:
         continue-on-error: true
 
       - name: Check out homebrew repo master branch
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
         if: ${{ steps.checkout.outcome == 'failure' }}
         with:
           repository: kframework/homebrew-k

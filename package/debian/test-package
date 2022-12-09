@@ -4,7 +4,7 @@ set -euxo pipefail
 
 pkg="$1" ; shift
 
-mv "${pkg}" kframework.deb
+cp "${pkg}" kframework.deb
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update

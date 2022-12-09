@@ -46,14 +46,14 @@ jobs:
           git config user.email devops@runtimeverification.com
 
       - name: 'Install Nix'
-        uses: cachix/install-nix-action@v14.1
+        uses: cachix/install-nix-action@v15
         with:
-          install_url: 'https://releases.nixos.org/nix/nix-2.3.16/install'
+          install_url: https://releases.nixos.org/nix/nix-2.7.0/install
           extra_nix_config: |
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Install Cachix'
-        uses: cachix/cachix-action@v10
+        uses: cachix/cachix-action@v11
         with:
           name: k-framework
           authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
@@ -150,14 +150,15 @@ jobs:
         if: ${{ !startsWith(matrix.os, 'self') }}
         uses: cachix/install-nix-action@v15
         with:
+          install_url: https://releases.nixos.org/nix/nix-2.7.0/install
           extra_nix_config: |
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
             substituters = http://cache.nixos.org https://cache.iog.io
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
-
+      
       - name: 'Install Cachix'
         if: ${{ !startsWith(matrix.os, 'self') }}
-        uses: cachix/cachix-action@v10
+        uses: cachix/cachix-action@v11
         with:
           name: k-framework
           authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
@@ -194,15 +195,16 @@ jobs:
         run: brew install bash
 
       - name: 'Install Nix'
-        uses: cachix/install-nix-action@v14.1
+        uses: cachix/install-nix-action@v15
         with:
+          install_url: https://releases.nixos.org/nix/nix-2.7.0/install
           extra_nix_config: |
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
             substituters = http://cache.nixos.org https://cache.iog.io
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
 
       - name: 'Install Cachix'
-        uses: cachix/cachix-action@v10
+        uses: cachix/cachix-action@v11
         with:
           name: k-framework
           authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
