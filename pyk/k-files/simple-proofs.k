@@ -4,6 +4,7 @@ module SIMPLE-PROOFS
     imports INT
     imports MAP
     imports BOOL
+    imports BYTES
 
     configuration <k> $PGM:KItem </k>
                   <state> .Map </state>
@@ -32,5 +33,8 @@ module SIMPLE-PROOFS
     rule [b.d]: <k> b => d ... </k>
     rule [c.e]: <k> c => e ... </k>
     rule [d.e]: <k> d => e ... </k>
+
+    syntax KItem ::= "mybytes" [symbol, klabel(mybytes), function, total]
+    rule mybytes => b"\x00\x90\xa0\n\xa1\xf1\x61"
 
 endmodule
