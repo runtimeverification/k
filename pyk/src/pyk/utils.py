@@ -258,11 +258,44 @@ def enquote_str(orig_s: str) -> str:
             ord_c = ord(orig_c)
             if 32 <= ord_c and ord_c < 127:
                 return orig_c
-            elif ord_c < 16:
-                return '\\x0' + hex(ord(orig_c))[2:]
-            elif ord_c <= 255:
-                return '\\x' + hex(ord(orig_c))[2:]
+            ret = hex(ord(orig_c))[2:]
+            if ord_c <= 0xFF:
+                return r'\x' + ret.zfill(2)
+            if ord_c <= 0xFFFF:
+                return r'\u' + ret.zfill(4)
+            if ord_c <= 0xFFFFFFFF:
+                return r'\U' + ret.zfill(8)
             else:
                 raise ValueError(f'Unsupported character for enquoting: {orig_c}')
 
     return ''.join(enquote_char(c) for c in orig_s)
+
+
+def dequote_str(orig_str: str) -> str:
+    def dequote_str(s: str) -> Tuple[str, str]:
+        if len(s) >= 2:
+            if s[:2] == r'\"':
+                return ('"', s[2:])
+            if s[:2] == r'\\':
+                return ('\\', s[2:])
+            if s[:2] == r'\n':
+                return ('\n', s[2:])
+            if s[:2] == r'\t':
+                return ('\t', s[2:])
+            if s[:2] == r'\r':
+                return ('\r', s[2:])
+            if s[:2] == r'\f':
+                return ('\f', s[2:])
+            if len(s) >= 4 and s[:2] == r'\x':
+                return (chr(int(s[2:4], 16)), s[4:])
+            if len(s) >= 6 and s[:2] == r'\u':
+                return (chr(int(s[2:6], 16)), s[6:])
+            if len(s) >= 10 and s[:2] == r'\U':
+                return (chr(int(s[2:10], 16)), s[10:])
+        return (s[0], s[1:])
+
+    new_strs = []
+    while len(orig_str) > 0:
+        next_c, orig_str = dequote_str(orig_str)
+        new_strs.append(next_c)
+    return ''.join(new_strs)

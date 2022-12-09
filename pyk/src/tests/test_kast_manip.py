@@ -3,7 +3,7 @@ from typing import Dict, Final, List, Tuple
 
 import pytest
 
-from pyk.kast.inner import KApply, KInner, KLabel, KRewrite, KSequence, KSort, KVariable
+from pyk.kast.inner import KApply, KInner, KLabel, KRewrite, KSequence, KSort, KVariable, Subst
 from pyk.kast.manip import (
     bool_to_ml_pred,
     collapse_dots,
@@ -13,7 +13,6 @@ from pyk.kast.manip import (
     remove_generated_cells,
     simplify_bool,
     split_config_from,
-    substitute,
 )
 from pyk.prelude.k import DOTS, GENERATED_TOP_CELL
 from pyk.prelude.kbool import BOOL, FALSE, TRUE, andBool, notBool
@@ -168,7 +167,7 @@ def test_remove_generated_cells(term: KInner, expected: KInner) -> None:
 
 def test_collapse_dots() -> None:
     # Given
-    term = substitute(GENERATED_TOP_CELL_1, {'MAP': DOTS, '_GENERATED_COUNTER_PLACEHOLDER': DOTS})
+    term = Subst({'MAP': DOTS, '_GENERATED_COUNTER_PLACEHOLDER': DOTS})(GENERATED_TOP_CELL_1)
     expected = KApply('<generatedTop>', KApply('<T>', K_CELL, DOTS), DOTS)
 
     # When

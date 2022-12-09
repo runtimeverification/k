@@ -14,6 +14,8 @@ from .utils import KProveTest
 
 EXECUTE_TEST_DATA: Final = (('simple-branch', 3, ('a', '.Map'), 1, ('b', '.Map'), [('c', '.Map'), ('d', '.Map')]),)
 
+SIMPLIFY_TEST_DATA: Final = (('bytes-return', ('mybytes', '.Map'), (r'b"\x00\x90\xa0\n\xa1\xf1a"', '.Map')),)
+
 
 class TestSimpleProof(KProveTest):
     KOMPILE_MAIN_FILE = 'k-files/simple-proofs.k'
@@ -89,3 +91,43 @@ class TestSimpleProof(KProveTest):
         assert actual_state == expected_state
         assert actual_depth == expected_depth
         assert set(actual_next_states) == set(expected_next_states)
+
+    @pytest.mark.parametrize(
+        'test_id,pre,expected_post',
+        SIMPLIFY_TEST_DATA,
+        ids=[test_id for test_id, *_ in SIMPLIFY_TEST_DATA],
+    )
+    def test_simplify(
+        self,
+        kprove: KProve,
+        test_id: str,
+        pre: Tuple[str, str],
+        expected_post: Tuple[str, str],
+    ) -> None:
+        def _config(k: str, state: str) -> CTerm:
+            _k_parsed = kprove.parse_token(KToken(k, 'KItem'), as_rule=True)
+            _state_parsed = kprove.parse_token(KToken(state, 'Map'), as_rule=True)
+            # TODO: Why does kompile put <generatedCounter> before <state>?
+            return CTerm(
+                KApply(
+                    '<generatedTop>',
+                    [
+                        KApply('<k>', [KSequence([_k_parsed])]),
+                        KVariable('GENERATED_COUNTER_CELL'),
+                        KApply('<state>', [_state_parsed]),
+                    ],
+                )
+            )
+
+        # Given
+        k, state = pre
+        expected_k, expected_state = expected_post
+
+        # When
+        actual_post = kprove.simplify(_config(k, state))
+        actual_k = kprove.pretty_print(get_cell(actual_post, 'K_CELL'))
+        actual_state = kprove.pretty_print(get_cell(actual_post, 'STATE_CELL'))
+
+        # Then
+        assert actual_k == expected_k
+        assert actual_state == expected_state
