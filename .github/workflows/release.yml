@@ -323,7 +323,7 @@ jobs:
     name: 'Publish Release'
     runs-on: ubuntu-20.04
     environment: production
-    needs: [nix-release, macos-build, macos-test, ubuntu-jammy, ubuntu-focal, debian-bullseye, set-release-id]
+    needs: [nix-release, macos-build, macos-test, ubuntu-jammy, ubuntu-focal, debian-bullseye, set-release-id, arch]
     steps:
       - name: Publish release
         uses: actions/github-script@v4
