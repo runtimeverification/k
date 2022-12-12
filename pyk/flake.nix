@@ -24,6 +24,16 @@
                       buildInputs = (oldAttrs.buildInputs or [ ])
                         ++ [ prevPython.setuptools ];
                     });
+                  nanoid = prevPython.nanoid.overridePythonAttrs
+                    (oldAttrs: {
+                      buildInputs = (oldAttrs.buildInputs or [ ])
+                        ++ [ prevPython.setuptools ];
+                    });
+                  packaging = prevPython.packaging.overridePythonAttrs
+                    (oldAttrs: {
+                      buildInputs = (oldAttrs.buildInputs or [ ])
+                        ++ [ prevPython.flit-core ];
+                    });
                 });
             };
         in {
@@ -39,6 +49,7 @@
       in {
         packages = {
           inherit (pkgs) pyk;
+          pyk-python310 = pkgs.python310Packages.pyk;
           default = pkgs.pyk;
         };
       }));
