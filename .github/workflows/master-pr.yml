@@ -11,7 +11,7 @@ jobs:
 
   change-base:
     name: 'Change base to develop branch'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
