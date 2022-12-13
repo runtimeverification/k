@@ -419,8 +419,6 @@ class KPrint:
                 assert value.startswith('b"')
                 assert value.endswith('"')
                 value = value[2:-1]
-            else:
-                value = enquote_str(value)
             dv: Pattern = DV(SortApp('Sort' + kast.sort.name), String(value))
             if sort is not None:
                 dv = self._add_sort_injection(dv, kast.sort, sort)
