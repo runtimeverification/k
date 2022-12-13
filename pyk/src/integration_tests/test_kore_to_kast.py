@@ -2,7 +2,7 @@ from typing import Final
 
 import pytest
 
-from pyk.kast.inner import KApply, KInner, KLabel, KSequence, KSort, KVariable
+from pyk.kast.inner import KApply, KInner, KLabel, KSequence, KSort, KToken, KVariable
 from pyk.kore.syntax import (
     DV,
     And,
@@ -40,14 +40,20 @@ BIDIRECTIONAL_TEST_DATA: Final = (
     (
         'domain-value-string',
         STRING,
-        DV(SortApp('SortString'), String('foobar')),
-        stringToken('foobar'),
+        DV(SortApp('SortString'), String('foobar\n')),
+        stringToken('foobar\n'),
     ),
     (
         'domain-value-bytes',
         KSort('Bytes'),
         DV(SortApp('SortBytes'), String(chr(0) + chr(60) + chr(96) + chr(245))),
         bytesToken(chr(0) + chr(60) + chr(96) + chr(245)),
+    ),
+    (
+        'domain-value-other',
+        KSort('Foo'),
+        DV(SortApp('SortFoo'), String('hello\\n')),
+        KToken('hello\\n', 'Foo'),
     ),
     (
         'ml-top',
