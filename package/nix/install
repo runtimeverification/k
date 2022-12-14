@@ -43,6 +43,15 @@ in your shell."
     fi 
   fi
 
+  PREV_KUP_INSTALL=$(nix profile list --experimental-features 'nix-command flakes' | awk '/packages\..*\.kup/ {print $1}')
+  if ! [[ -z "$PREV_KUP_INSTALL" ]]; then
+    echo "Removing previous K framework installer versions ..."
+    GC_DONT_GC=1 nix profile remove $PREV_KUP_INSTALL \
+    --experimental-features 'nix-command flakes'
+  fi
+
+  echo "Installing the K framework installer utility (kup) ..."
+
   GC_DONT_GC=1 nix profile install github:runtimeverification/kup#kup \
   --option extra-substituters 'https://k-framework.cachix.org' \
   --option extra-trusted-public-keys 'k-framework.cachix.org-1:jeyMXB2h28gpNRjuVkehg+zLj62ma1RnyyopA/20yFE=' \
