@@ -25,7 +25,7 @@ kup install k
 ```
 
 For more information on the `kup` tool and other packaged releases of K, please
-refer to our [installation notes](INSTALL.md).
+refer to our [installation notes](k-distribution/INSTALL.md).
 
 ## Preface
 
