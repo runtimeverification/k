@@ -276,6 +276,15 @@ class KPrint:
         )
         return KInner.from_dict(json.loads(proc_res.stdout)['term'])
 
+    def kore_to_pretty(self, pattern: Pattern) -> str:
+        proc_res = _kast(
+            definition_dir=self.definition_dir,
+            input=KAstInput.KORE,
+            output=KAstOutput.PRETTY,
+            expression=pattern.text,
+        )
+        return proc_res.stdout
+
     def kore_to_kast(self, kore: Pattern) -> KInner:
         _kast_out = self._kore_to_kast(kore)
         if _kast_out is not None:
@@ -306,24 +315,24 @@ class KPrint:
 
         elif type(kore) is App:
 
-            if kore.symbol == 'inj' and len(kore.sorts) == 2 and len(kore.patterns) == 1:
-                return self._kore_to_kast(kore.patterns[0])
+            if kore.symbol == 'inj' and len(kore.sorts) == 2 and len(kore.args) == 1:
+                return self._kore_to_kast(kore.args[0])
 
             elif len(kore.sorts) == 0:
 
-                if kore.symbol == 'dotk' and len(kore.patterns) == 0:
+                if kore.symbol == 'dotk' and len(kore.args) == 0:
                     return KSequence([])
 
-                elif kore.symbol == 'kseq' and len(kore.patterns) == 2:
-                    p0 = self._kore_to_kast(kore.patterns[0])
-                    p1 = self._kore_to_kast(kore.patterns[1])
+                elif kore.symbol == 'kseq' and len(kore.args) == 2:
+                    p0 = self._kore_to_kast(kore.args[0])
+                    p1 = self._kore_to_kast(kore.args[1])
                     if p0 is not None and p1 is not None:
                         return KSequence([p0, p1])
 
                 else:
                     _label_name = _unmunge(kore.symbol[3:])
                     klabel = KLabel(_label_name, [KSort(k.name[4:]) for k in kore.sorts])
-                    args = [self._kore_to_kast(_a) for _a in kore.patterns]
+                    args = [self._kore_to_kast(_a) for _a in kore.args]
                     # TODO: Written like this to appease the type-checker.
                     new_args = [a for a in args if a is not None]
                     if len(new_args) == len(args):

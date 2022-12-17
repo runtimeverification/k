@@ -267,14 +267,32 @@ class SortApp(Sort):
 
 
 class Pattern(Kore):
+    @property
     @abstractmethod
-    def map_pattern(self: P, f: Callable[['Pattern'], 'Pattern']) -> P:
+    def patterns(self) -> Tuple['Pattern', ...]:
         ...
+
+    @abstractmethod
+    def let_patterns(self: P, patterns: Iterable['Pattern']) -> P:
+        ...
+
+    def map_patterns(self: P, f: Callable[['Pattern'], 'Pattern']) -> P:
+        return self.let_patterns(patterns=(f(pattern) for pattern in self.patterns))
+
+    def bottom_up(self, f: Callable[['Pattern'], 'Pattern']) -> 'Pattern':
+        return f(self.map_patterns(lambda pattern: pattern.bottom_up(f)))
+
+    def top_down(self, f: Callable[['Pattern'], 'Pattern']) -> 'Pattern':
+        return f(self).map_patterns(lambda pattern: pattern.top_down(f))
 
 
 class VarPattern(Pattern, WithSort):
     name: str
     sort: Sort
+
+    @property
+    def patterns(self) -> Tuple[()]:
+        return ()
 
     @property
     def dict(self) -> Dict[str, Any]:
@@ -304,7 +322,8 @@ class EVar(VarPattern):
     def let_sort(self, sort: Sort) -> 'EVar':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'EVar', f: Callable[[Pattern], Pattern]) -> 'EVar':
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'EVar':
+        () = patterns
         return self
 
     @classmethod
@@ -336,7 +355,8 @@ class SVar(VarPattern):
     def let_sort(self, sort: Sort) -> 'SVar':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'SVar', f: Callable[[Pattern], Pattern]) -> 'SVar':
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'SVar':
+        () = patterns
         return self
 
     @classmethod
@@ -358,7 +378,8 @@ class String(Pattern):
         value = value if value is not None else self.value
         return String(value=value)
 
-    def map_pattern(self: 'String', f: Callable[[Pattern], Pattern]) -> 'String':
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'String':
+        () = patterns
         return self
 
     @classmethod
@@ -369,6 +390,10 @@ class String(Pattern):
     def from_dict(cls: Type['String'], dct: Mapping[str, Any]) -> 'String':
         cls._check_tag(dct)
         return String(value=dct['value'])
+
+    @property
+    def patterns(self) -> Tuple[()]:
+        return ()
 
     @property
     def dict(self) -> Dict[str, Any]:
@@ -384,28 +409,28 @@ class String(Pattern):
 class App(Pattern):
     symbol: str
     sorts: Tuple[Sort, ...]
-    patterns: Tuple[Pattern, ...]
+    args: Tuple[Pattern, ...]
 
-    def __init__(self, symbol: str, sorts: Iterable[Sort] = (), patterns: Iterable[Pattern] = ()):
+    def __init__(self, symbol: str, sorts: Iterable[Sort] = (), args: Iterable[Pattern] = ()):
         check_symbol_id(symbol)
         object.__setattr__(self, 'symbol', symbol)
         object.__setattr__(self, 'sorts', tuple(sorts))
-        object.__setattr__(self, 'patterns', tuple(patterns))
+        object.__setattr__(self, 'args', tuple(args))
 
     def let(
         self,
         *,
         symbol: Optional[str] = None,
         sorts: Optional[Iterable] = None,
-        patterns: Optional[Iterable] = None,
+        args: Optional[Iterable] = None,
     ) -> 'App':
         symbol = symbol if symbol is not None else self.symbol
         sorts = sorts if sorts is not None else self.sorts
-        patterns = patterns if patterns is not None else self.patterns
-        return App(symbol=symbol, sorts=sorts, patterns=patterns)
+        args = args if args is not None else self.args
+        return App(symbol=symbol, sorts=sorts, args=args)
 
-    def map_pattern(self: 'App', f: Callable[[Pattern], Pattern]) -> 'App':
-        return self.let(patterns=(f(pattern) for pattern in self.patterns))
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'App':
+        return self.let(args=patterns)
 
     @classmethod
     def _tag(cls) -> str:
@@ -417,8 +442,12 @@ class App(Pattern):
         return App(
             symbol=dct['name'],
             sorts=(Sort.from_dict(sort) for sort in dct['sorts']),
-            patterns=(Pattern.from_dict(arg) for arg in dct['args']),
+            args=(Pattern.from_dict(arg) for arg in dct['args']),
         )
+
+    @property
+    def patterns(self) -> Tuple[Pattern, ...]:
+        return self.args
 
     @property
     def dict(self) -> Dict[str, Any]:
@@ -426,7 +455,7 @@ class App(Pattern):
             'tag': self._tag(),
             'name': self.symbol,
             'sorts': [sort.dict for sort in self.sorts],
-            'args': [pattern.dict for pattern in self.patterns],
+            'args': [pattern.dict for pattern in self.args],
         }
 
     @property
@@ -436,7 +465,7 @@ class App(Pattern):
             + ' '
             + _braced(sort.text for sort in self.sorts)
             + ' '
-            + _parend(pattern.text for pattern in self.patterns)
+            + _parend(args.text for args in self.args)
         )
 
 
@@ -469,9 +498,12 @@ class MLPattern(Pattern):
         ...
 
     @property
-    @abstractmethod
-    def patterns(self) -> Tuple[Pattern, ...]:
-        ...
+    def ctor_patterns(self) -> Tuple[Pattern, ...]:
+        """
+        Patterns used to construct the term with `of`.
+        Except for `Assoc`, `DV`, `MLFixpoint` and `MLQuant` it coincides with `patterns`.
+        """
+        return self.patterns
 
     @property
     def text(self) -> str:
@@ -480,7 +512,7 @@ class MLPattern(Pattern):
             + ' '
             + _braced(sort.text for sort in self.sorts)
             + ' '
-            + _parend(pattern.text for pattern in self.patterns)
+            + _parend(pattern.text for pattern in self.ctor_patterns)
         )
 
 
@@ -512,7 +544,8 @@ class Top(NullaryConn):
     def let_sort(self: 'Top', sort: Sort) -> 'Top':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'Top', f: Callable[[Pattern], Pattern]) -> 'Top':
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'Top':
+        () = patterns
         return self
 
     @classmethod
@@ -548,7 +581,8 @@ class Bottom(NullaryConn):
     def let_sort(self: 'Bottom', sort: Sort) -> 'Bottom':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'Bottom', f: Callable[[Pattern], Pattern]) -> 'Bottom':
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'Bottom':
+        () = patterns
         return self
 
     @classmethod
@@ -598,8 +632,9 @@ class Not(UnaryConn):
     def let_sort(self: 'Not', sort: Sort) -> 'Not':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'Not', f: Callable[[Pattern], Pattern]) -> 'Not':
-        return self.let(pattern=f(self.pattern))
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'Not':
+        (pattern,) = patterns
+        return self.let(pattern=pattern)
 
     @classmethod
     def _tag(cls) -> str:
@@ -666,8 +701,9 @@ class And(BinaryConn):
     def let_sort(self: 'And', sort: Sort) -> 'And':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'And', f: Callable[[Pattern], Pattern]) -> 'And':
-        return self.let(left=f(self.left), right=f(self.right))
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'And':
+        left, right = patterns
+        return self.let(left=left, right=right)
 
     @classmethod
     def _tag(cls) -> str:
@@ -716,8 +752,9 @@ class Or(BinaryConn):
     def let_sort(self: 'Or', sort: Sort) -> 'Or':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'Or', f: Callable[[Pattern], Pattern]) -> 'Or':
-        return self.let(left=f(self.left), right=f(self.right))
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'Or':
+        left, right = patterns
+        return self.let(left=left, right=right)
 
     @classmethod
     def _tag(cls) -> str:
@@ -766,8 +803,9 @@ class Implies(BinaryConn):
     def let_sort(self: 'Implies', sort: Sort) -> 'Implies':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'Implies', f: Callable[[Pattern], Pattern]) -> 'Implies':
-        return self.let(left=f(self.left), right=f(self.right))
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'Implies':
+        left, right = patterns
+        return self.let(left=left, right=right)
 
     @classmethod
     def _tag(cls) -> str:
@@ -818,8 +856,9 @@ class Iff(BinaryConn):
     def let_sort(self: 'Iff', sort: Sort) -> 'Iff':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'Iff', f: Callable[[Pattern], Pattern]) -> 'Iff':
-        return self.let(left=f(self.left), right=f(self.right))
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'Iff':
+        left, right = patterns
+        return self.let(left=left, right=right)
 
     @classmethod
     def _tag(cls) -> str:
@@ -856,7 +895,11 @@ class MLQuant(MLPattern, WithSort):
         return (self.sort,)
 
     @property
-    def patterns(self) -> Tuple[EVar, Pattern]:
+    def patterns(self) -> Tuple[Pattern]:
+        return (self.pattern,)
+
+    @property
+    def ctor_patterns(self) -> Tuple[EVar, Pattern]:
         return (self.var, self.pattern)
 
     @property
@@ -892,8 +935,9 @@ class Exists(MLQuant):
     def let_sort(self, sort: Sort) -> 'Exists':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'Exists', f: Callable[[Pattern], Pattern]) -> 'Exists':
-        return self.let(pattern=f(self.pattern))
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'Exists':
+        (pattern,) = patterns
+        return self.let(pattern=pattern)
 
     @classmethod
     def _tag(cls) -> str:
@@ -943,8 +987,9 @@ class Forall(MLQuant):
     def let_sort(self, sort: Sort) -> 'Forall':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'Forall', f: Callable[[Pattern], Pattern]) -> 'Forall':
-        return self.let(pattern=f(self.pattern))
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'Forall':
+        (pattern,) = patterns
+        return self.let(pattern=pattern)
 
     @classmethod
     def _tag(cls) -> str:
@@ -981,7 +1026,11 @@ class MLFixpoint(MLPattern):
         return ()
 
     @property
-    def patterns(self) -> Tuple[SVar, Pattern]:
+    def patterns(self) -> Tuple[Pattern]:
+        return (self.pattern,)
+
+    @property
+    def ctor_patterns(self) -> Tuple[SVar, Pattern]:
         return (self.var, self.pattern)
 
     @property
@@ -1005,8 +1054,9 @@ class Mu(MLFixpoint):
         pattern = pattern if pattern is not None else self.pattern
         return Mu(var=var, pattern=pattern)
 
-    def map_pattern(self: 'Mu', f: Callable[[Pattern], Pattern]) -> 'Mu':
-        return self.let(pattern=f(self.pattern))
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'Mu':
+        (pattern,) = patterns
+        return self.let(pattern=pattern)
 
     @classmethod
     def _tag(cls) -> str:
@@ -1044,8 +1094,9 @@ class Nu(MLFixpoint):
         pattern = pattern if pattern is not None else self.pattern
         return Nu(var=var, pattern=pattern)
 
-    def map_pattern(self: 'Nu', f: Callable[[Pattern], Pattern]) -> 'Nu':
-        return self.let(pattern=f(self.pattern))
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'Nu':
+        (pattern,) = patterns
+        return self.let(pattern=pattern)
 
     @classmethod
     def _tag(cls) -> str:
@@ -1119,8 +1170,9 @@ class Ceil(RoundPred):
     def let_sort(self, sort: Sort) -> 'Ceil':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'Ceil', f: Callable[[Pattern], Pattern]) -> 'Ceil':
-        return self.let(pattern=f(self.pattern))
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'Ceil':
+        (pattern,) = patterns
+        return self.let(pattern=pattern)
 
     @classmethod
     def _tag(cls) -> str:
@@ -1169,8 +1221,9 @@ class Floor(RoundPred):
     def let_sort(self, sort: Sort) -> 'Floor':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'Floor', f: Callable[[Pattern], Pattern]) -> 'Floor':
-        return self.let(pattern=f(self.pattern))
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'Floor':
+        (pattern,) = patterns
+        return self.let(pattern=pattern)
 
     @classmethod
     def _tag(cls) -> str:
@@ -1245,8 +1298,9 @@ class Equals(BinaryPred):
     def let_sort(self, sort: Sort) -> 'Equals':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'Equals', f: Callable[[Pattern], Pattern]) -> 'Equals':
-        return self.let(left=f(self.left), right=f(self.right))
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'Equals':
+        left, right = patterns
+        return self.let(left=left, right=right)
 
     @classmethod
     def _tag(cls) -> str:
@@ -1299,8 +1353,9 @@ class In(BinaryPred):
     def let_sort(self, sort: Sort) -> 'In':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'In', f: Callable[[Pattern], Pattern]) -> 'In':
-        return self.let(left=f(self.left), right=f(self.right))
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'In':
+        left, right = patterns
+        return self.let(left=left, right=right)
 
     @classmethod
     def _tag(cls) -> str:
@@ -1348,8 +1403,9 @@ class Next(MLRewrite):
     def let_sort(self, sort: Sort) -> 'Next':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'Next', f: Callable[[Pattern], Pattern]) -> 'Next':
-        return self.let(pattern=f(self.pattern))
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'Next':
+        (pattern,) = patterns
+        return self.let(pattern=pattern)
 
     @classmethod
     def _tag(cls) -> str:
@@ -1405,8 +1461,9 @@ class Rewrites(MLRewrite):
     def let_sort(self, sort: Sort) -> 'Rewrites':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'Rewrites', f: Callable[[Pattern], Pattern]) -> 'Rewrites':
-        return self.let(left=f(self.left), right=f(self.right))
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'Rewrites':
+        left, right = patterns
+        return self.let(left=left, right=right)
 
     @classmethod
     def _tag(cls) -> str:
@@ -1462,7 +1519,8 @@ class DV(MLPattern, WithSort):
     def let_sort(self, sort: Sort) -> 'DV':
         return self.let(sort=sort)
 
-    def map_pattern(self: 'DV', f: Callable[[Pattern], Pattern]) -> 'DV':
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'DV':
+        () = patterns
         return self
 
     @classmethod
@@ -1494,7 +1552,11 @@ class DV(MLPattern, WithSort):
         return (self.sort,)
 
     @property
-    def patterns(self) -> Tuple[String]:
+    def patterns(self) -> Tuple[()]:
+        return ()
+
+    @property
+    def ctor_patterns(self) -> Tuple[String]:
         return (self.value,)
 
     @property
@@ -1520,7 +1582,11 @@ class Assoc(MLSyntaxSugar):
         return ()
 
     @property
-    def patterns(self) -> Tuple[App]:
+    def patterns(self) -> Tuple[()]:
+        return ()
+
+    @property
+    def ctor_patterns(self) -> Tuple[App]:
         return (self.app,)
 
     @property
@@ -1537,17 +1603,18 @@ class LeftAssoc(Assoc):
         app = app if app is not None else self.app
         return LeftAssoc(app=app)
 
-    def map_pattern(self: 'LeftAssoc', f: Callable[[Pattern], Pattern]) -> 'LeftAssoc':
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'LeftAssoc':
+        () = patterns
         return self
 
     @property
     def pattern(self) -> Pattern:
         if len(self.app.sorts) > 0:
             raise ValueError(f'Cannot associate a pattern with sort parameters: {self}')
-        if len(self.app.patterns) == 0:
+        if len(self.app.args) == 0:
             raise ValueError(f'Cannot associate a pattern with no arguments: {self}')
-        ret = self.app.patterns[0]
-        for a in self.app.patterns[1:]:
+        ret = self.app.args[0]
+        for a in self.app.args[1:]:
             ret = App(self.app.symbol, [], [ret, a])
         return ret
 
@@ -1587,17 +1654,18 @@ class RightAssoc(Assoc):
         app = app if app is not None else self.app
         return RightAssoc(app=app)
 
-    def map_pattern(self: 'RightAssoc', f: Callable[[Pattern], Pattern]) -> 'RightAssoc':
+    def let_patterns(self, patterns: Iterable[Pattern]) -> 'RightAssoc':
+        () = patterns
         return self
 
     @property
     def pattern(self) -> Pattern:
         if len(self.app.sorts) > 0:
             raise ValueError(f'Cannot associate a pattern with sort parameters: {self}')
-        if len(self.app.patterns) == 0:
+        if len(self.app.args) == 0:
             raise ValueError(f'Cannot associate a pattern with no arguments: {self}')
-        ret = self.app.patterns[-1]
-        for a in reversed(self.app.patterns[:-1]):
+        ret = self.app.args[-1]
+        for a in reversed(self.app.args[:-1]):
             ret = App(self.app.symbol, [], [a, ret])
         return ret
 
