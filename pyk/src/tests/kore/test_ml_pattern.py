@@ -76,4 +76,4 @@ def test_ml_pattern_of(symbol: str, sorts: Iterable[Sort], patterns: Iterable[Pa
     assert actual == expected
     assert actual.symbol() == symbol
     assert actual.sorts == sorts
-    assert actual.patterns == patterns
+    assert actual.ctor_patterns == patterns
