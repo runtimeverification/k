@@ -10,7 +10,7 @@ from cmd2 import Cmd, with_argparser, with_category
 from ..cli_utils import check_dir_path, check_file_path, file_path
 from ..kore.parser import KoreParser
 from ..kore.syntax import Pattern
-from ..ktool.kprint import KAstInput, KAstOutput, _kast
+from ..ktool.kprint import KPrint
 from ..ktool.krun import KRun, KRunOutput, _krun
 
 T = TypeVar('T')
@@ -46,13 +46,7 @@ class KState:
 
     @cached_property
     def pretty(self) -> str:
-        proc_res = _kast(
-            definition_dir=self.definition_dir,
-            input=KAstInput.KORE,
-            output=KAstOutput.PRETTY,
-            expression=self.pattern.text,
-        )
-        return proc_res.stdout
+        return KPrint(self.definition_dir).kore_to_pretty(self.pattern)
 
     def __str__(self) -> str:
         return self.pretty
