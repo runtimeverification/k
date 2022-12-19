@@ -338,6 +338,20 @@ class KPrint:
                     if len(new_args) == len(args):
                         return KApply(klabel, new_args)
 
+            # hardcoded polymorphic operators
+            elif (
+                len(kore.sorts) == 1
+                and kore.symbol
+                == "Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort"
+            ):
+                _label_name = _unmunge(kore.symbol[3:])
+                klabel = KLabel(_label_name, [KSort(kore.sorts[0].name[4:])])
+                # TODO: Written like this to appease the type-checker.
+                args = [self._kore_to_kast(_a) for _a in kore.args]
+                new_args = [a for a in args if a is not None]
+                if len(new_args) == len(args):
+                    return KApply(klabel, new_args)
+
         elif type(kore) is Top:
             return mlTop(sort=KSort(kore.sort.name[4:]))
 
@@ -464,6 +478,24 @@ class KPrint:
                         app = self._add_sort_injection(app, isort, sort)
                     return app
 
+            # hardcoded polymorphic operators
+            elif (
+                len(kast.label.params) == 1
+                and kast.label.name == '#if_#then_#else_#fi_K-EQUAL-SYNTAX_Sort_Bool_Sort_Sort'
+            ):
+                assert kast.arity == 3
+                arg_sort = kast.label.params[0]
+                cond = self._kast_to_kore(kast.args[0], sort=KSort('Bool'))
+                b1 = self._kast_to_kore(kast.args[1], sort=arg_sort)
+                b2 = self._kast_to_kore(kast.args[2], sort=arg_sort)
+                if cond is not None and b1 is not None and b2 is not None:
+                    label_name = 'Lbl' + _munge(kast.label.name)
+                    _ite: Pattern = App(label_name, [SortApp('Sort' + arg_sort.name)], [cond, b1, b2])
+                    if sort is not None:
+                        _ite = self._add_sort_injection(_ite, arg_sort, sort)
+                    return _ite
+
+            # ML symbols
             elif len(kast.label.params) == 1:
                 psort = kast.label.params[0]
 
