@@ -248,6 +248,23 @@ BIDIRECTIONAL_TEST_DATA: Final = (
         ),
         KSequence([KApply('foo_SIMPLE-PROOFS_KItem'), KApply('foo-bar_SIMPLE-PROOFS_Baz')]),
     ),
+    (
+        'if-then-else',
+        KSort('K'),
+        App(
+            "Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort",
+            [SortApp('SortK')],
+            [EVar('VarC', SortApp('SortBool')), EVar('VarB1', SortApp('SortK')), EVar('VarB2', SortApp('SortK'))],
+        ),
+        KApply(
+            KLabel('#if_#then_#else_#fi_K-EQUAL-SYNTAX_Sort_Bool_Sort_Sort', [KSort('K')]),
+            [
+                KVariable('C', sort=KSort('Bool')),
+                KVariable('B1', sort=KSort('K')),
+                KVariable('B2', sort=KSort('K')),
+            ],
+        ),
+    ),
 )
 
 KAST_TO_KORE_TEST_DATA: Final = (
