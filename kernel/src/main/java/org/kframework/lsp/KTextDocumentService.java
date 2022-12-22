@@ -5,18 +5,28 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.kframework.attributes.Source;
 import org.kframework.kil.DefinitionItem;
+import org.kframework.kil.Module;
+import org.kframework.kil.Syntax;
+import org.kframework.kil.Terminal;
+import org.kframework.kompile.Kompile;
+import org.kframework.kore.Sort;
+import org.kframework.parser.outer.ExtractFencedKCodeFromMarkdown;
 import org.kframework.parser.outer.Outer;
-import org.kframework.utils.StringUtil;
 import org.kframework.utils.file.FileUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
+import java.nio.file.LinkOption;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * TextDocumentService implementation for K.
@@ -24,11 +34,24 @@ import java.util.concurrent.CompletableFuture;
 public class KTextDocumentService implements TextDocumentService {
 
     private KLanguageServer languageServer;
-    private LSClientLogger clientLogger;
+    private final LSClientLogger clientLogger;
 
-    private Map<String, List<DefinitionItem>> elems = new HashMap<>();
+    private final Map<String, List<DefinitionItem>> elems = new HashMap<>();
+    private final ExtractFencedKCodeFromMarkdown mdExtractor = new ExtractFencedKCodeFromMarkdown(null, "k");
+    private static final URI domains;
+    private static final URI kast;
 
-    public KTextDocumentService(KLanguageServer languageServer) {
+    static {
+        try {
+            domains = new File(Kompile.BUILTIN_DIRECTORY.toString() + File.separatorChar + "domains.md").toPath().toRealPath(LinkOption.NOFOLLOW_LINKS).toUri();
+            kast = new File(Kompile.BUILTIN_DIRECTORY.toString() + File.separatorChar + "kast.md").toPath().toRealPath(LinkOption.NOFOLLOW_LINKS).toUri();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public KTextDocumentService(KLanguageServer languageServer) throws URISyntaxException {
         this.languageServer = languageServer;
         this.clientLogger = LSClientLogger.getInstance();
     }
@@ -38,6 +61,14 @@ public class KTextDocumentService implements TextDocumentService {
         this.clientLogger.logMessage("Operation '" + "text/didOpen" +
                 "' {fileUri: '" + didOpenTextDocumentParams.getTextDocument().getUri() + "'} opened");
         outerParse(didOpenTextDocumentParams.getTextDocument().getUri());
+        if (!elems.containsKey(domains.toString())) {
+            this.clientLogger.logMessage("Builtin: " + domains);
+            outerParse(domains.toString());
+        }
+        if (!elems.containsKey(kast.toString())) {
+            this.clientLogger.logMessage("Builtin: " + domains);
+            outerParse(kast.toString());
+        }
     }
 
     @Override
@@ -62,33 +93,69 @@ public class KTextDocumentService implements TextDocumentService {
     @Override
     public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(CompletionParams position) {
         return CompletableFuture.supplyAsync(() -> {
-            this.clientLogger.logMessage("Operation '" + "text/completion");
-            CompletionItem completionItem = new CompletionItem();
-            completionItem.setLabel("Test completion item");
-            completionItem.setInsertText("Test");
-            completionItem.setDetail("Snippet");
-            completionItem.setKind(CompletionItemKind.Snippet);
-            return Either.forLeft(Arrays.asList(completionItem));
+            List<DefinitionItem> fileDi = new ArrayList<>(elems.getOrDefault(position.getTextDocument().getUri(), List.of()));
+            fileDi.addAll(elems.get(domains.toString()));
+            fileDi.addAll(elems.get(kast.toString()));
+            this.clientLogger.logMessage("Operation '" + "text/completion: " + position.getTextDocument() + " #di: " + fileDi.size());
+            return Either.forLeft(getCompletionItems(fileDi));
         });
-        /*return CompletableFuture.supplyAsync(() -> {
-            this.clientLogger.logMessage("Operation '" + "text/completion");
-            CompletionItem completionItem = new CompletionItem();
-            completionItem.setLabel("Test completion item");
-            completionItem.setInsertText("Test");
-            completionItem.setDetail("Snippet");
-            completionItem.setKind(CompletionItemKind.Snippet);
-            return Either.forLeft(Arrays.asList(completionItem));
-        });*/
+    }
+
+    static Pattern ptrn = Pattern.compile("[a-zA-Z0-9#]+");
+
+    private static List<CompletionItem> getCompletionItems(List<DefinitionItem> dis) {
+        List<CompletionItem> lci = new ArrayList<>();
+        dis.stream().filter(i -> i instanceof Module)
+                .map(m -> ((Module)m))
+                .forEach(m -> m.getItems().stream()
+                        .filter(mi -> mi instanceof Syntax)
+                        .map(s -> ((Syntax)s))
+                        .forEach(s -> s.getPriorityBlocks()
+                                .forEach((pb -> pb.getProductions()
+                                        .forEach(p -> p.getItems().stream()
+                                                .filter(pi -> pi instanceof Terminal)
+                                                .map(t -> (Terminal) t)
+                                                .forEach(t -> {
+                                                    if (ptrn.matcher(t.getTerminal()).matches()) {
+                                                        CompletionItem completionItem = new CompletionItem();
+                                                        completionItem.setLabel(t.getTerminal());
+                                                        completionItem.setInsertText(t.getTerminal());
+                                                        completionItem.setDetail("module " + m.getName());
+                                                        String doc = "syntax ";
+                                                        doc += !s.getParams().isEmpty() ?
+                                                                "{" + s.getParams().stream().map(Sort::toString).collect(Collectors.joining(", ")) + "} " : "";
+                                                        doc += s.getDeclaredSort() + " ::= ";
+                                                        doc += p.toString();
+                                                        completionItem.setDocumentation(doc);
+                                                        completionItem.setKind(CompletionItemKind.Snippet);
+                                                        lci.add(completionItem);
+                                                    }
+                                                }))))));
+
+        return lci;
     }
 
     private void outerParse(String uri) {
         List<DefinitionItem> di = null;
         try {
-            di = Outer.parse(Source.apply(uri),FileUtil.load(new File(new URI(uri))),null);
+            String contents = FileUtil.load(new File(new URI(uri)));
+            if (uri.endsWith(".md"))
+                contents = mdExtractor.extract(contents, Source.apply(uri));
+            di = Outer.parse(Source.apply(uri), contents,null);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
         elems.put(uri, di);
         this.clientLogger.logMessage("Operation '" + "outerParse" + " #di: " + di.size());
+    }
+
+    // for quick testing
+    public static void main(String[] args) throws InterruptedException, ExecutionException, URISyntaxException {
+        String uri = "file:///home/radu/work/test/test.k";
+        List<DefinitionItem> dis = Outer.parse(Source.apply(uri), FileUtil.load(new File(new URI(uri))), null);
+        List<DefinitionItem> doma = Outer.parse(Source.apply(domains.toString()), FileUtil.load(new File(domains)), null);
+        List<DefinitionItem> kst = Outer.parse(Source.apply(kast.toString()), FileUtil.load(new File(kast)), null);
+        List<CompletionItem> x = getCompletionItems(dis);
+        System.out.println(x.size());
     }
 }

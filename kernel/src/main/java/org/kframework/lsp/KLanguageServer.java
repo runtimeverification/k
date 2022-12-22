@@ -18,6 +18,7 @@ import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -27,14 +28,18 @@ import java.util.concurrent.CompletableFuture;
  */
 public class KLanguageServer implements LanguageServer, LanguageClientAware {
 
-    private TextDocumentService textDocumentService;
-    private WorkspaceService workspaceService;
+    private final TextDocumentService textDocumentService;
+    private final WorkspaceService workspaceService;
     private ClientCapabilities clientCapabilities;
     LanguageClient languageClient;
     private int shutdown = 1;
 
     public KLanguageServer() {
-        this.textDocumentService = new KTextDocumentService(this);
+        try {
+            this.textDocumentService = new KTextDocumentService(this);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
         this.workspaceService = new KWorkspaceService(this);
     }
 
