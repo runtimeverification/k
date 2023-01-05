@@ -24,13 +24,13 @@ from typing import (
 
 from graphviz import Digraph
 
-from .cterm import CTerm, build_claim, build_rule
-from .kast.inner import KInner, Subst
-from .kast.manip import ml_pred_to_bool, mlAnd, remove_source_attributes, simplify_bool
-from .kast.outer import KClaim, KRule
-from .ktool import KPrint
-from .prelude.ml import mlTop
-from .utils import add_indent, compare_short_hashes, shorten_hash
+from pyk.cterm import CTerm, build_claim, build_rule
+from pyk.kast.inner import KInner, Subst
+from pyk.kast.manip import ml_pred_to_bool, mlAnd, remove_source_attributes, simplify_bool
+from pyk.kast.outer import KClaim, KRule
+from pyk.ktool import KPrint
+from pyk.prelude.ml import mlTop
+from pyk.utils import add_indent, compare_short_hashes, shorten_hash
 
 
 class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
@@ -344,11 +344,18 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             node_strs.extend(f' {nl}' for nl in node_printer(node.cterm))
         return node_strs
 
-    def pretty(
+    def pretty_segments(
         self, kprint: KPrint, minimize: bool = True, node_printer: Optional[Callable[[CTerm], Iterable[str]]] = None
-    ) -> Iterable[str]:
+    ) -> Iterable[Tuple[str, Iterable[str]]]:
+        """Return a pretty version of the KCFG in segments.
+
+        Each segment is a tuple of an identifier and a list of lines to be printed for that segment (Tuple[str, Iterable[str]).
+        The identifier tells you whether that segment is for a given node, edge, or just pretty spacing ('unknown').
+        This is useful for applications which want to pretty print in chunks, so that they can know which printed region corresponds to each node/edge.
+        """
 
         processed_nodes: List[KCFG.Node] = []
+        ret_lines: List[Tuple[str, List[str]]] = []
 
         def _bold(text: str) -> str:
             return '\033[1m' + text + '\033[0m'
@@ -362,76 +369,100 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 short_info[0] = _bold(short_info[0])
             return short_info
 
-        def _print_subgraph(indent: str, curr_node: KCFG.Node, prior_on_trace: List[KCFG.Node]) -> List[str]:
-            ret: List[str] = []
+        def _print_subgraph(indent: str, curr_node: KCFG.Node, prior_on_trace: List[KCFG.Node]) -> None:
 
             edges_from = sorted(self.edge_likes(source_id=curr_node.id))
             if curr_node in processed_nodes:
                 if not edges_from:
-                    return ret
-                ret.append(indent + '┊')
+                    return
+                ret_edge_lines = [(indent + '┊')]
                 if curr_node in prior_on_trace:
-                    ret.append(indent + '└╌ (looped back)')
+                    ret_edge_lines.append(indent + '└╌ (looped back)')
                 else:
-                    ret.append(indent + '└╌ (continues as previously)')
-                return ret
+                    ret_edge_lines.append(indent + '└╌ (continues as previously)')
+                ret_lines.append(('unknown', ret_edge_lines))
+                return
             processed_nodes.append(curr_node)
 
             num_children = len(edges_from)
             is_cover = num_children == 1 and isinstance(edges_from[0], KCFG.Cover)
             is_branch = num_children > 1
             if is_branch:
-                ret.append(indent + '│')
+                ret_lines.append(('unknown', [indent + '│']))
             for i, edge_like in enumerate(edges_from):
                 is_last_child = i == num_children - 1
 
                 if not (is_branch or is_cover):
                     elbow = '├ ' if len(self.edge_likes(source_id=edge_like.target.id)) else '└ '
                     new_indent = ''
-                    node_indent = '│  '
+                    node_indent = '│ '
                 elif is_last_child:
                     elbow = '└╌' if is_cover else '┗━'
-                    new_indent = '    '
-                    node_indent = '    │'
+                    new_indent = '   '
+                    node_indent = '   │'
                 else:
                     elbow = '┣━'
-                    new_indent = '┃   '
-                    node_indent = '┃   │'
+                    new_indent = '┃  '
+                    node_indent = '┃  │'
 
                 if isinstance(edge_like, KCFG.Edge) and edge_like.depth:
-                    ret.append(indent + '│')
+                    ret_edge_lines = [(indent + '│')]
                     if self.is_verified(edge_like.source.id, edge_like.target.id):
-                        ret.append(indent + '│  ' + _bold(_green('(verified)')))
-                    ret.extend(add_indent(indent + '│  ', edge_like.pretty(kprint)))
+                        ret_edge_lines.append(indent + '│  ' + _bold(_green('(verified)')))
+                    ret_edge_lines.extend(add_indent(indent + '│  ', edge_like.pretty(kprint)))
+                    ret_lines.append((f'edge({edge_like.source.id},{edge_like.target.id})', ret_edge_lines))
                 elif isinstance(edge_like, KCFG.Cover):
-                    ret.append(indent + '┊')
-                    ret.extend(add_indent(indent + '┊  ', edge_like.pretty(kprint, minimize=minimize)))
+                    ret_edge_lines = [(indent + '┊')]
+                    ret_edge_lines.extend(add_indent(indent + '┊  ', edge_like.pretty(kprint, minimize=minimize)))
+                    ret_lines.append((f'cover({edge_like.source.id},{edge_like.target.id})', ret_edge_lines))
+
                 target_strs = _print_node(edge_like.target)
-                ret.append(indent + elbow + ' ' + target_strs[0])
+                ret_node_lines = [(indent + elbow + ' ' + target_strs[0])]
 
                 if isinstance(edge_like, KCFG.Edge) and edge_like.depth == 0:
                     first, *rest = edge_like.pretty(kprint)
-                    ret[-1] += '    ' + first
-                    ret.extend(add_indent(indent + new_indent + (7 + len(target_strs[0])) * ' ', rest))
+                    ret_node_lines[-1] += '    ' + first
+                    ret_node_lines.extend(add_indent(indent + new_indent + '       ' + len(target_strs[0]) * ' ', rest))
 
-                ret.extend(add_indent(indent + node_indent, target_strs[1:]))
-                ret.extend(_print_subgraph(indent + new_indent, edge_like.target, prior_on_trace + [edge_like.source]))
+                ret_node_lines.extend(add_indent(indent + node_indent, target_strs[1:]))
+                ret_lines.append((f'node({edge_like.target.id})', ret_node_lines))
+
+                _print_subgraph(indent + new_indent, edge_like.target, prior_on_trace + [edge_like.source])
 
                 if is_branch and not is_last_child:
-                    ret.append(indent + new_indent)
+                    ret_lines.append(('unknown', [indent + new_indent]))
 
-            return ret
-
-        ret = []
         init = sorted(self.init)
         while init:
             init_strs = _print_node(init[0])
-            ret.append('')
-            ret.append('┌  ' + init_strs[0])
-            ret.extend(add_indent('│  ', init_strs[1:]))
-            ret.extend(_print_subgraph('', init[0], [init[0]]))
+            ret_lines.append(('unknown', ['']))
+            ret_init = [('┌  ' + init_strs[0])]
+            ret_init.extend(add_indent('│  ', init_strs[1:]))
+            ret_lines.append((f'node({init[0].id})', ret_init))
+            _print_subgraph('', init[0], [init[0]])
             init = sorted(node for node in self.nodes if node not in processed_nodes)
-        return (r.rstrip() for r in ret)
+
+        _ret_lines = []
+        used_ids = []
+        for id, seg_lines in ret_lines:
+            suffix = ''
+            counter = 0
+            while f'{id}{suffix}' in used_ids:
+                suffix = f'_{counter}'
+                counter += 1
+            new_id = f'{id}{suffix}'
+            used_ids.append(new_id)
+            _ret_lines.append((f'{new_id}', [l.rstrip() for l in seg_lines]))
+        return _ret_lines
+
+    def pretty(
+        self, kprint: KPrint, minimize: bool = True, node_printer: Optional[Callable[[CTerm], Iterable[str]]] = None
+    ) -> Iterable[str]:
+        return (
+            line
+            for _, seg_lines in self.pretty_segments(kprint, minimize=minimize, node_printer=node_printer)
+            for line in seg_lines
+        )
 
     def to_dot(self, kprint: KPrint) -> str:
         def _short_label(label: str) -> str:

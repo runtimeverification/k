@@ -1,0 +1,48 @@
+#navigation {
+    dock: left;
+    width: 35%;
+    height: 100%;
+    layout: vertical;
+}
+#behavior {
+    height: 1fr;
+    border: solid;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.cfg-node {
+    height: auto;
+    width: auto;
+}
+
+#display {
+    layout: vertical;
+}
+#info-view {
+    height: 2fr;
+    border: solid;
+    overflow: auto scroll;
+}
+#term-view {
+    height: 15fr;
+    border: solid;
+    overflow: auto scroll;
+}
+#constraint-view {
+    height: 5fr;
+    border: solid;
+    overflow: auto scroll;
+}
+#info {
+    width: auto;
+    height: auto;
+}
+#term {
+    width: auto;
+    height: auto;
+}
+#constraint {
+    width: auto;
+    height: auto;
+}
