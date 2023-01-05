@@ -16,7 +16,7 @@ from pyk.kore.rpc import (
     StuckResult,
     TerminalResult,
 )
-from pyk.kore.syntax import DV, Equals, EVar, Implies, Pattern, SortApp, SortVar, String, Top
+from pyk.kore.syntax import DV, Equals, EVar, Implies, Pattern, SortApp, String, Top
 
 from .utils import KoreClientTest
 
@@ -91,7 +91,7 @@ IMPLIES_TEST_DATA: Final = (
             Implies(int_sort, x, int_dv(0)),
             Equals(
                 op_sort=int_sort,
-                sort=SortVar(name='JSONSortVariable'),
+                sort=SortApp(name='SortInt'),
                 left=x,
                 right=int_dv(0),
             ),
