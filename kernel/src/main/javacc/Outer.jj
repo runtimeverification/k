@@ -230,8 +230,18 @@ public class Outer {
               }).collect(Collectors.toList()).toString(), e, source,
             new Location(e.currentToken.next.beginLine, e.currentToken.next.beginColumn, e.currentToken.next.endLine, e.currentToken.next.endColumn + 1), false);
     } catch (TokenMgrException e) {
-      // TODO: report location
-      throw KEMException.outerParserError(e.getMessage(), e, source, null);
+      // extract the location info from the error message
+      Pattern p = Pattern.compile("\\d+");
+      Matcher m = p.matcher(e.getMessage());
+      Location loc = null;
+      if (m.find()) {
+        int line = Integer.parseInt(m.group());
+        if (m.find()) {
+            int col = Integer.parseInt(m.group());
+            loc = new Location(line, col, line, col + 1);
+        }
+      }
+      throw KEMException.outerParserError(e.getMessage(), e, source, loc);
     }
   }
 

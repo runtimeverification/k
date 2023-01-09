@@ -152,6 +152,7 @@ public class KTextDocumentService implements TextDocumentService {
             throw new RuntimeException(e);
         } catch (KEMException e) {
             Location loc = e.exception.getLocation();
+            if (loc == null) loc = new Location(1, 1, 1, 2);
             Range range = new Range(new Position(loc.startLine() - 1, loc.startColumn() - 1),
                     new Position(loc.endLine() - 1, loc.endColumn() - 1));
             Diagnostic d = new Diagnostic(range, e.exception.getMessage(), DiagnosticSeverity.Error, "Outer Parser");
