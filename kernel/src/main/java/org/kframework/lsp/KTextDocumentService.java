@@ -3,6 +3,7 @@ package org.kframework.lsp;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
+import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.kil.Module;
@@ -12,6 +13,7 @@ import org.kframework.kompile.Kompile;
 import org.kframework.kore.Sort;
 import org.kframework.parser.outer.ExtractFencedKCodeFromMarkdown;
 import org.kframework.parser.outer.Outer;
+import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 
 import java.io.File;
@@ -25,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -33,7 +37,7 @@ import java.util.stream.Collectors;
  */
 public class KTextDocumentService implements TextDocumentService {
 
-    private KLanguageServer languageServer;
+    private final KLanguageServer languageServer;
     private final LSClientLogger clientLogger;
 
     private final Map<String, List<DefinitionItem>> elems = new HashMap<>();
@@ -106,10 +110,10 @@ public class KTextDocumentService implements TextDocumentService {
     private static List<CompletionItem> getCompletionItems(List<DefinitionItem> dis) {
         List<CompletionItem> lci = new ArrayList<>();
         dis.stream().filter(i -> i instanceof Module)
-                .map(m -> ((Module)m))
+                .map(m -> ((Module) m))
                 .forEach(m -> m.getItems().stream()
                         .filter(mi -> mi instanceof Syntax)
-                        .map(s -> ((Syntax)s))
+                        .map(s -> ((Syntax) s))
                         .forEach(s -> s.getPriorityBlocks()
                                 .forEach((pb -> pb.getProductions()
                                         .forEach(p -> p.getItems().stream()
@@ -135,18 +139,29 @@ public class KTextDocumentService implements TextDocumentService {
         return lci;
     }
 
-    private void outerParse(String uri) {
+    private List<Diagnostic> outerParse(String uri) {
         List<DefinitionItem> di = null;
+        List<Diagnostic> problems = new ArrayList<>();
         try {
             String contents = FileUtil.load(new File(new URI(uri)));
             if (uri.endsWith(".md"))
                 contents = mdExtractor.extract(contents, Source.apply(uri));
-            di = Outer.parse(Source.apply(uri), contents,null);
+            di = Outer.parse(Source.apply(uri), contents, null);
+            elems.put(uri, di);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
+        } catch (KEMException e) {
+            Location loc = e.exception.getLocation();
+            Range range = new Range(new Position(loc.startLine() - 1, loc.startColumn() - 1),
+                    new Position(loc.endLine() - 1, loc.endColumn() - 1));
+            Diagnostic d = new Diagnostic(range, e.exception.getMessage(), DiagnosticSeverity.Error, "Outer Parser");
+            problems.add(d);
         }
-        elems.put(uri, di);
-        this.clientLogger.logMessage("Operation '" + "outerParse" + " #di: " + di.size());
+        if (problems.isEmpty())
+            this.clientLogger.logMessage("Operation 'outerParse' #di: " + di.size());
+        else
+            this.clientLogger.logMessage("Operation 'outerParse' #problems: " + problems.size());
+        return problems;
     }
 
     // for quick testing
@@ -157,5 +172,22 @@ public class KTextDocumentService implements TextDocumentService {
         List<DefinitionItem> kst = Outer.parse(Source.apply(kast.toString()), FileUtil.load(new File(kast)), null);
         List<CompletionItem> x = getCompletionItems(dis);
         System.out.println(x.size());
+    }
+
+    // previous diagnostics task. If it's still active, cancel it and run a newer, updated one
+    private CompletableFuture<DocumentDiagnosticReport> latestScheduled;
+    public CompletableFuture<DocumentDiagnosticReport> diagnostic(DocumentDiagnosticParams params) {
+        if (latestScheduled != null && !latestScheduled.isDone())
+            latestScheduled.completeExceptionally(new Throwable("Cancelled diagnostic publisher"));
+
+        Executor delayedExecutor = CompletableFuture.delayedExecutor(1, TimeUnit.SECONDS);
+        CompletableFuture<DocumentDiagnosticReport> scheduledFuture = CompletableFuture.supplyAsync(() -> {
+            List<Diagnostic> problems = outerParse(params.getTextDocument().getUri());
+            DocumentDiagnosticReport report = new DocumentDiagnosticReport(new RelatedFullDocumentDiagnosticReport(problems));
+            this.clientLogger.logMessage("Operation '" + "text/diagnostics: " + params.getTextDocument() + " #problems: " + problems.size());
+            return report;
+        }, delayedExecutor);
+        latestScheduled = scheduledFuture;
+        return scheduledFuture;
     }
 }

@@ -1,17 +1,7 @@
 package org.kframework.lsp;
 
 
-import org.eclipse.lsp4j.ClientCapabilities;
-import org.eclipse.lsp4j.CompletionOptions;
-import org.eclipse.lsp4j.CompletionRegistrationOptions;
-import org.eclipse.lsp4j.InitializeParams;
-import org.eclipse.lsp4j.InitializeResult;
-import org.eclipse.lsp4j.InitializedParams;
-import org.eclipse.lsp4j.Registration;
-import org.eclipse.lsp4j.RegistrationParams;
-import org.eclipse.lsp4j.ServerCapabilities;
-import org.eclipse.lsp4j.TextDocumentClientCapabilities;
-import org.eclipse.lsp4j.TextDocumentSyncKind;
+import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -56,6 +46,10 @@ public class KLanguageServer implements LanguageServer, LanguageClientAware {
         if (!isDynamicCompletionRegistration()) {
             response.getCapabilities().setCompletionProvider(new CompletionOptions());
         }
+        // TODO: check if client supports this capability
+        //if (!lsClientCapabilities.getInitializationOptions().isEnableLightWeightMode()) {
+            response.getCapabilities().setDiagnosticProvider(new DiagnosticRegistrationOptions(false, false));
+        //}
         return CompletableFuture.supplyAsync(() -> response);
     }
 
