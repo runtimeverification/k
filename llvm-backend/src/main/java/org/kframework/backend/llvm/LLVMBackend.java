@@ -86,22 +86,32 @@ public class LLVMBackend extends KoreBackend {
         if (options.enableSearch && options.llvmKompileOutput != null) {
             throw KEMException.criticalError("Can't use --llvm-kompile-output with --enable-search.");
         }
+        if (options.llvmKompileType.equals("python") && options.llvmKompileOutput != null) {
+            throw KEMException.criticalError("Can't use --llvm-kompile-output with --llvm-kompile-type python");
+        }
         String llvmType;
         switch (options.llvmKompileType) {
             case "main":
             case "search":
-            case "library":
             case "static":
+            case "library":
+            case "python":
+            case "c":
                 llvmType = options.llvmKompileType;
                 break;
             default:
-                throw KEMException.criticalError("Non-valid argument for --llvm-kompile-type: " + options.llvmKompileType + ". Expected [main|search|library|static]");
+                throw KEMException.criticalError("Non-valid argument for --llvm-kompile-type: " + options.llvmKompileType + ". Expected [main|search|library|static|python|c]");
         }
 
         String llvmOutput = "interpreter";
         if (options.llvmKompileOutput != null) {
             llvmOutput = options.llvmKompileOutput;
         }
+
+        if (options.llvmKompileType.equals("python")) {
+            llvmOutput = null;
+        }
+
         llvmKompile(llvmType, llvmOutput);
 
         if (options.enableSearch) {
@@ -121,8 +131,13 @@ public class LLVMBackend extends KoreBackend {
         // Arguments after this point are passed on to Clang.
         args.add("--");
 
-        args.add("-o");
-        args.add(executable);
+        // For Python bindings, we explicitly leave this unset so that python3-config
+        // can decide the proper filename.
+        if (executable != null) {
+            args.add("-o");
+            args.add(executable);
+        }
+
         if (kompileOptions.optimize1) args.add("-O1");
         if (kompileOptions.optimize2) args.add("-O2");
         if (kompileOptions.optimize3) args.add("-O2"); // clang -O3 does not make the llvm backend any faster

@@ -348,7 +348,7 @@ Here, we have that:
 
 -   In frontend K, you can refer to "symbol1" as `#Foo` (from `klabel(#Foo)`),
     and the backend will see `'Hash'Foo` as the symbol name.
--   In frontend K, you can refer to "symbol2" as `Bar` (from `klabel(#Bar)`),
+-   In frontend K, you can refer to "symbol2" as `#Bar` (from `klabel(#Bar)`),
     and the backend will see
     `'Hash'Bar'LParUndsCommUndsRParUnds'MYMODULE'Unds'FooBarBaz'Unds'Int'Unds'Int`
     as the symbol name.
@@ -577,14 +577,18 @@ However, when it has to choose between two different tokens of equal length,
 token productions with higher precedence are tried first. Note that the default
 precedence value is zero when the `prec` attribute is not specified.
 
-We also need to make sorts with more specific tokens subsorts of ones with more
-general tokens. We add the token attribute to this production so that all
-tokens of a particular sort are marked with the sort it is parsed as, and not a
-subsort thereof. e.g. we get `underbar(#token("foo", "NameWithUnderbar"))`
-instead of `underbar(#token("foo", "#LowerId"))`
+For example, the `BUILTIN-ID-TOKENS` module defines `#UpperId` and `#LowerId` with
+the `prec(2)` attribute.
+```k
+  syntax #LowerId ::= r"[a-z][a-zA-Z0-9]*"                    [prec(2), token]
+  syntax #UpperId ::= r"[A-Z][a-zA-Z0-9]*"                    [prec(2), token]
+```
 
-The `BUILTIN-ID-TOKENS` module defines `#UpperId` and `#LowerId` with
-attributes `prec(2)`.
+Furthermore, we also need to make sorts with more specific tokens subsorts of ones with more
+general tokens. We add the token attribute to this production so that all
+tokens of a particular sort are marked with the sort they are parsed as and not a
+subsort thereof. e.g. we get `underbar(#token("foo", "NameWithUnderbar"))`
+instead of `underbar(#token("foo", "#LowerId"))`
 
 ```k
 imports BUILTIN-ID-TOKENS
@@ -1623,7 +1627,7 @@ Evaluation Strategy
 ### `strict` and `seqstrict` attributes
 
 The strictness attributes allow defining evaluation strategies without having
-to explicitely make rules which implement them. This is done by injecting
+to explicitly make rules which implement them. This is done by injecting
 *heating* and *cooling* rules for the subterms. For this to work, you need to
 define what a *result* is for K, by extending the  `KResult` sort.
 
@@ -1663,7 +1667,9 @@ variable, but it has special meaning in the context of sentences with the
 `heat` or `cool` attribute. In heating or cooling rules, the variable named
 `HOLE` is considered to be the term being heated or cooled and the compiler
 will generate `isKResult(HOLE)` and `notBool isKResult(HOLE)` side conditions
-appropriately to ensure that the backend does not loop infinitely.
+appropriately to ensure that the backend does not loop infinitely. The module
+`BOOL` will also be automatically and privately included for semantic
+purposes. The syntax for parsing programs will not be affected.
 
 In order for this functionality to work, you need to define the `KResult` sort.
 For instance, we tell K that a term is fully evaluated once it becomes an `Int`
