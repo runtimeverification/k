@@ -1,7 +1,0 @@
-#!/bin/bash
-# Copyright (c) 2014-2018 K Team. All Rights Reserved.
-# Usage: ./fix_whitespace <files>
-
-sed -i $'s/\r$//' "$@"
-sed -i 's/ *$//' "$@"
-sed -i 's/	/    /g' "$@"

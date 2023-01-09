@@ -25,6 +25,7 @@ public class KLabels {
 
     public static final String GENERATED_TOP_CELL_NAME = "generatedTop";
     public static final KLabel GENERATED_TOP_CELL = KLabel("<generatedTop>");
+    public static final String GENERATED_COUNTER_CELL_NAME = "generatedCounter";
     public static final KLabel GENERATED_COUNTER_CELL = KLabel("<generatedCounter>");
     public static final KLabel INIT_GENERATED_TOP_CELL = KLabel("initGeneratedTopCell");
     public static final KLabel INIT_GENERATED_COUNTER_CELL = KLabel("initGeneratedCounterCell");

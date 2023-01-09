@@ -35,131 +35,6 @@ pipeline {
         stash name: 'src', includes: "kframework-${env.VERSION}-src.tar.gz"
       }
     }
-    stage('Build and Package on Debian Bullseye') {
-      when {
-        branch 'master'
-        beforeAgent true
-      }
-      stages {
-        stage('Build on Debian Bullseye') {
-          agent {
-            dockerfile {
-              filename 'package/debian/Dockerfile'
-              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg BASE_IMAGE=debian:bullseye --build-arg LLVM_VERSION=11'
-              reuseNode true
-            }
-          }
-          stages {
-            stage('Build Debian Package') {
-              steps {
-                dir("kframework-${env.VERSION}") {
-                  checkout scm
-                  sh '''
-                    mv package/debian ./debian
-                    mv debian/control.debian debian/control
-                    mv debian/rules.debian debian/rules
-                    dpkg-buildpackage
-                  '''
-                }
-                stash name: 'bullseye', includes: "kframework_${env.VERSION}_amd64.deb"
-              }
-            }
-          }
-        }
-        stage('Test Debian Package') {
-          agent {
-            docker {
-              image 'debian:bullseye'
-              args '-u 0'
-              reuseNode true
-            }
-          }
-          options { skipDefaultCheckout() }
-          steps {
-            unstash 'bullseye'
-            sh '''
-              # echo "deb http://deb.debian.org/debian bullseye-backports main" > /etc/apt/sources.list.d/bullseye-backports.list
-              src/main/scripts/test-in-container-debian
-            '''
-          }
-          post {
-            always {
-              sh 'stop-kserver || true'
-              archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-            }
-          }
-        }
-      }
-      post {
-        failure {
-          slackSend color: '#cb2431'                                             \
-                  , channel: '#k'                                                \
-                  , message: "Debian Bullseye Packaging Failed: ${env.BUILD_URL}"
-        }
-      }
-    }
-    stage('Build and Package on Arch Linux') {
-      when {
-        branch 'master'
-        beforeAgent true
-      }
-      stages {
-        stage('Build on Arch Linux') {
-          agent {
-            dockerfile {
-              filename 'package/arch/Dockerfile'
-              additionalBuildArgs '--build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g)'
-              reuseNode true
-            }
-          }
-          stages {
-            stage('Build Pacman Package') {
-              steps {
-                dir("kframework-arch-${env.VERSION}") {
-                  checkout scm
-                  sh '''
-                    mv package/arch/* ./
-                    makepkg
-                  '''
-                  stash name: 'arch', includes: "kframework-git-${env.VERSION}-1-x86_64.pkg.tar.zst"
-                }
-              }
-            }
-          }
-        }
-        stage('Test Arch Package') {
-          agent {
-            docker {
-              image 'archlinux:base'
-              args '-u 0'
-              reuseNode true
-            }
-          }
-          options { skipDefaultCheckout() }
-          steps {
-            unstash 'arch'
-            sh '''
-              pacman -Syyu --noconfirm
-              pacman -U --noconfirm kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
-              src/main/scripts/test-in-container
-            '''
-          }
-          post {
-            always {
-              sh 'stop-kserver || true'
-              archiveArtifacts 'kserver.log,k-distribution/target/kserver.log'
-            }
-          }
-        }
-      }
-      post {
-        failure {
-          slackSend color: '#cb2431'                                         \
-                  , channel: '#k'                                            \
-                  , message: "Arch Linux Packaging Failed: ${env.BUILD_URL}"
-        }
-      }
-    }
     stage('Deploy') {
       when {
         branch 'master'
@@ -175,8 +50,6 @@ pipeline {
       environment { GITHUB_TOKEN = credentials('rv-jenkins-access-token') }
       steps {
         unstash 'src'
-        dir('bullseye') { unstash 'bullseye' }
-        dir('arch')     { unstash 'arch'     }
         sshagent(['rv-jenkins-github']) {
           sh '''
             git clone 'ssh://github.com/runtimeverification/k.git' k-release
@@ -194,16 +67,12 @@ pipeline {
             git push origin "${K_RELEASE_TAG}"
 
             mv ../kframework-${VERSION}-src.tar.gz                     kframework-${VERSION}-src.tar.gz
-            mv ../bullseye/kframework_${VERSION}_amd64.deb             kframework_${VERSION}_amd64_bullseye.deb
-            mv ../arch/kframework-git-${VERSION}-1-x86_64.pkg.tar.zst  kframework-git-${VERSION}-1-x86_64.pkg.tar.zst
 
             echo "K Framework Release ${VERSION}"  > release.md
             echo ''                               >> release.md
             cat k-distribution/INSTALL.md         >> release.md
             hub release create --prerelease                                                      \
                 --attach kframework-${VERSION}-src.tar.gz'#Source tar.gz'                        \
-                --attach kframework_${VERSION}_amd64_bullseye.deb'#Debian Bullseye (11) Package' \
-                --attach kframework-git-${VERSION}-1-x86_64.pkg.tar.zst'#Arch Package'           \
                 --file release.md "${K_RELEASE_TAG}"
           '''
         }

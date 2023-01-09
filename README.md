@@ -14,6 +14,19 @@ language called K.
 The K Framework includes tools for compiling K specifications to build
 interpreters, model checkers, verifiers, associated documentation, and more.
 
+## Quick Start
+
+If you are not a K developer, but just want to get started using K, we provide a
+streamlined installation process for any system that supports
+[Nix](https://nixos.org/download.html):
+```shell
+bash <(curl https://kframework.org/install)
+kup install k
+```
+
+For more information on the `kup` tool and other packaged releases of K, please
+refer to our [installation notes](k-distribution/INSTALL.md).
+
 ## Preface
 
 This is a readme file for _K developers_. Users should feel comfortable using

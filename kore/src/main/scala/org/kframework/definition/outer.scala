@@ -292,7 +292,7 @@ case class Module(val name: String, val imports: Set[Import], localSentences: Se
   lazy val sortSynonymMap: Map[Sort, Sort] = sortSynonyms.map(s => (s.newSort, s.oldSort)).toMap
 
   lazy val sortDeclarationsFor: Map[SortHead, Set[SyntaxSort]] =
-    sortDeclarations
+    (sortDeclarations ++ allSorts.map(s => SyntaxSort(Seq(), s, Att.empty)))
       .groupBy(_.sort.head)
 
   @transient lazy val sortAttributesFor: Map[SortHead, Att] = sortDeclarationsFor mapValues {mergeAttributes(_)}

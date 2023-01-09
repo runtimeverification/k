@@ -185,5 +185,8 @@ public class CheckAtt {
         if(att.contains(Att.ANYWHERE()) && att.contains(Att.SIMPLIFICATION())) {
           errors.add(KEMException.compilerError("anywhere attribute is not supported on simplification rules.", loc));
         }
+        if(att.contains(Att.ANYWHERE()) && att.contains(Att.SYMBOLIC())) {
+            errors.add(KEMException.compilerError("anywhere attribute is not supported on symbolic rules.", loc));
+        }
     }
 }

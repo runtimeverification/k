@@ -19,7 +19,7 @@ let
 
   llvm-backend-project = import ./llvm-backend/src/main/native/llvm-backend {
     inherit pkgs;
-    inherit release;
+    cmakeBuildType = if release then "Release" else "FastBuild";
     src = ttuegel.cleanGitSubtree {
       name = "llvm-backend";
       src = ./.;
