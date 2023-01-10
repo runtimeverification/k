@@ -12,7 +12,7 @@
   KAVM leverages the K Framework to empower Algorand smart contracts' developers
   with property-based testing and formal verification.
 
-- **[KPlutus (Feb 2018 - Present)](https://github.com/runtimeverification/plutus-core-semantics)**
+- **[KPlutus (2016 - Present)](https://github.com/runtimeverification/plutus-core-semantics)**
 
   The K Semantics of Plutus-Core
 
@@ -30,7 +30,7 @@
 - **[KEVM (Sep 2017 - Present)](https://jellopaper.org/)**
 
   KEVM is the K semantics of the [Ethereum Virtual Machine](https://ethereum.org/en/developers/docs/evm/).
-  It passes all of the Ethereum Test Suite, and is used for verifying EVM programs.
+  It passes all the Ethereum Test Suite, and is used for verifying EVM programs.
 
 - **[IELE (Oct 2016 - Present)](https://ielelang.org/)**
 
@@ -62,7 +62,6 @@
 - [javacard (2014-2014)](https://github.com/kframework/javacard-semantics)
 - [orc (2016-2017)](https://github.com/kframework/orc-semantics)
 - [haskell core (2016-2017)](https://github.com/kframework/haskell-core-semantics)
-- [plutus core (2016-2019)](https://github.com/kframework/plutus-core-semantics)
 - [X86-64 (2017-2020)](https://github.com/kframework/X86-64-semantics)
 - [vyper (2017-2018)](https://github.com/kframework/vyper-semantics)
 - [erc20 (2017-2018)](https://github.com/runtimeverification/erc20-semantics)
