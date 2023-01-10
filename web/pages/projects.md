@@ -6,6 +6,16 @@
 
 <br>
 
+- **[KAVM (Feb 2022 - Present)](https://github.com/runtimeverification/avm-semantics)**
+
+  The Algorand Virtual Machine and TEAL Semantics in K\
+  KAVM leverages the K Framework to empower Algorand smart contracts' developers
+  with property-based testing and formal verification.
+
+- **[KPlutus (Feb 2018 - Present)](https://github.com/runtimeverification/plutus-core-semantics)**
+
+  The K Semantics of Plutus-Core
+
 - **[Dedukti (Mar 2021 - Present)](https://gitlab.com/semantiko/K-semantics)**
 
   This project aims to translate real K semantics into Dedukti.
