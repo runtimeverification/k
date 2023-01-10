@@ -14,7 +14,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Language Server implementation for Ballerina.
+ * Language Server implementation for the K framework.
  */
 public class KLanguageServer implements LanguageServer, LanguageClientAware {
 
@@ -43,13 +43,10 @@ public class KLanguageServer implements LanguageServer, LanguageClientAware {
         /* Check if dynamic registration of completion capability is allowed by the client. If so we don't register the capability.
            Else, we register the completion capability.
          */
-        if (!isDynamicCompletionRegistration()) {
+        if (!isDynamicCompletionRegistration())
             response.getCapabilities().setCompletionProvider(new CompletionOptions());
-        }
-        // TODO: check if client supports this capability
-        //if (!lsClientCapabilities.getInitializationOptions().isEnableLightWeightMode()) {
+        if (!isDiagnosticRegistration())
             response.getCapabilities().setDiagnosticProvider(new DiagnosticRegistrationOptions(false, false));
-        //}
         return CompletableFuture.supplyAsync(() -> response);
     }
 
@@ -61,6 +58,12 @@ public class KLanguageServer implements LanguageServer, LanguageClientAware {
             Registration completionRegistration = new Registration(UUID.randomUUID().toString(),
                     "textDocument/completion", completionRegistrationOptions);
             languageClient.registerCapability(new RegistrationParams(List.of(completionRegistration)));
+        }
+        if (isDiagnosticRegistration()) {
+            DiagnosticRegistrationOptions diagnosticRegistrationOptions = new DiagnosticRegistrationOptions(false, false);
+            Registration diagnosticRegistration = new Registration(UUID.randomUUID().toString(),
+                    "textDocument/diagnostic", diagnosticRegistrationOptions);
+            languageClient.registerCapability(new RegistrationParams(List.of(diagnosticRegistration)));
         }
     }
 
@@ -92,9 +95,13 @@ public class KLanguageServer implements LanguageServer, LanguageClientAware {
     }
 
     private boolean isDynamicCompletionRegistration() {
-        TextDocumentClientCapabilities textDocumentCapabilities =
-                clientCapabilities.getTextDocument();
+        TextDocumentClientCapabilities textDocumentCapabilities = clientCapabilities.getTextDocument();
         return textDocumentCapabilities != null && textDocumentCapabilities.getCompletion() != null
                 && Boolean.FALSE.equals(textDocumentCapabilities.getCompletion().getDynamicRegistration());
+    }
+
+    private boolean isDiagnosticRegistration() {
+        TextDocumentClientCapabilities textDocumentCapabilities = clientCapabilities.getTextDocument();
+        return textDocumentCapabilities != null && textDocumentCapabilities.getDiagnostic() != null;
     }
 }
