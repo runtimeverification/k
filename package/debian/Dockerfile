@@ -24,6 +24,7 @@ RUN    apt-get update            \
         libgmp-dev               \
         libjemalloc-dev          \
         libffi-dev               \
+        libfmt-dev               \
         libmpfr-dev              \
         libncurses5-dev          \
         libnss3-dev              \

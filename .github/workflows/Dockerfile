@@ -37,6 +37,7 @@ RUN    apt-get update              \
         libboost-test-dev          \
         libbz2-dev                 \
         libffi-dev                 \
+        libfmt-dev                 \
         libgdbm-dev                \
         libgmp-dev                 \
         libjemalloc-dev            \
