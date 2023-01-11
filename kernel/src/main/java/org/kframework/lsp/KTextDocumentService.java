@@ -3,12 +3,11 @@ package org.kframework.lsp;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
+import org.jetbrains.annotations.NotNull;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
-import org.kframework.kil.DefinitionItem;
+import org.kframework.kil.*;
 import org.kframework.kil.Module;
-import org.kframework.kil.Syntax;
-import org.kframework.kil.Terminal;
 import org.kframework.kompile.Kompile;
 import org.kframework.kore.Sort;
 import org.kframework.parser.outer.ExtractFencedKCodeFromMarkdown;
@@ -124,22 +123,28 @@ public class KTextDocumentService implements TextDocumentService {
                                                 .map(t -> (Terminal) t)
                                                 .forEach(t -> {
                                                     if (ptrn.matcher(t.getTerminal()).matches()) {
-                                                        CompletionItem completionItem = new CompletionItem();
-                                                        completionItem.setLabel(t.getTerminal());
-                                                        completionItem.setInsertText(t.getTerminal());
-                                                        completionItem.setDetail("module " + m.getName());
-                                                        String doc = "syntax ";
-                                                        doc += !s.getParams().isEmpty() ?
-                                                                "{" + s.getParams().stream().map(Sort::toString).collect(Collectors.joining(", ")) + "} " : "";
-                                                        doc += s.getDeclaredSort() + " ::= ";
-                                                        doc += p.toString();
-                                                        completionItem.setDocumentation(doc);
-                                                        completionItem.setKind(CompletionItemKind.Snippet);
+                                                        CompletionItem completionItem = buildCompletionItem(m, s, p, t);
                                                         lci.add(completionItem);
                                                     }
                                                 }))))));
 
         return lci;
+    }
+
+    @NotNull
+    private static CompletionItem buildCompletionItem(Module m, Syntax s, Production p, Terminal t) {
+        CompletionItem completionItem = new CompletionItem();
+        completionItem.setLabel(t.getTerminal());
+        completionItem.setInsertText(t.getTerminal());
+        completionItem.setDetail("module " + m.getName());
+        String doc = "syntax ";
+        doc += !s.getParams().isEmpty() ?
+                "{" + s.getParams().stream().map(Sort::toString).collect(Collectors.joining(", ")) + "} " : "";
+        doc += s.getDeclaredSort() + " ::= ";
+        doc += p.toString();
+        completionItem.setDocumentation(doc);
+        completionItem.setKind(CompletionItemKind.Snippet);
+        return completionItem;
     }
 
     private List<Diagnostic> outerParse(String uri) {
