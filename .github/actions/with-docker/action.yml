@@ -7,7 +7,7 @@ inputs:
   subdir:
     description: 'Subdirectory where code is cloned.'
     required: false
-    default: ""
+    default: "./"
   os: 
     description: 'OS to setup Docker for.'
     required: true
@@ -44,21 +44,21 @@ runs:
       GROUP=$(id -gn)
       GROUP_ID=$(id -g)
 
-      docker build .                                                  \
+      docker build ${SUBDIR}                                          \
           --build-arg USER=${USER} --build-arg USER_ID=${USER_ID}     \
           --build-arg GROUP=${GROUP} --build-arg GROUP_ID=${GROUP_ID} \
           --build-arg BASE_OS=${BASE_OS}                              \
           --build-arg BASE_DISTRO=${BASE_DISTRO}                      \
           --tag z3:${BASE_DISTRO}-${Z3_VERSION}                       \
           --file ${SUBDIR}${DOCKERFILE}.z3
-      docker build .                                                  \
+      docker build ${SUBDIR}                                          \
           --build-arg USER=${USER} --build-arg USER_ID=${USER_ID}     \
           --build-arg GROUP=${GROUP} --build-arg GROUP_ID=${GROUP_ID} \
           --build-arg BASE_OS=${BASE_OS}                              \
           --build-arg BASE_DISTRO=${BASE_DISTRO}                      \
           --tag stack:${BASE_DISTRO}-${K_VERSION}                     \
           --file ${SUBDIR}${DOCKERFILE}.stack-deps
-      docker build .                                                  \
+      docker build ${SUBDIR}                                          \
           --build-arg USER=${USER} --build-arg USER_ID=${USER_ID}     \
           --build-arg GROUP=${GROUP} --build-arg GROUP_ID=${GROUP_ID} \
           --build-arg BASE_OS=${BASE_OS}                              \
@@ -66,7 +66,7 @@ runs:
           --tag maven:${BASE_DISTRO}-${K_VERSION}                     \
           --file ${SUBDIR}${DOCKERFILE}.maven-cache
 
-      docker build . --file ${SUBDIR}${DOCKERFILE}                    \
+      docker build ${SUBDIR} --file ${SUBDIR}${DOCKERFILE}            \
           --tag runtimeverification/${TAG_NAME}                       \
           --build-arg BASE_OS=${BASE_OS}                              \
           --build-arg BASE_DISTRO=${BASE_DISTRO}                      \
