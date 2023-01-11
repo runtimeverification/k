@@ -656,3 +656,23 @@ def undo_aliases(definition: KDefinition, kast: KInner) -> KInner:
             raise ValueError(f'Expected KRewrite as alias body, found: {rewrite}')
         kast = rewrite(kast)
     return kast
+
+
+def rename_generated_vars(term: KInner) -> KInner:
+    state, _ = split_config_and_constraints(term)
+    _, config_subst = split_config_from(state)
+    config_var_count = {cvar: count_vars(ccontents) for cvar, ccontents in config_subst.items()}
+    vs = free_vars(term)
+    var_subst: Dict[str, KInner] = {}
+    for v in vs:
+        if v.startswith('_Gen') or v.startswith('?_Gen') or v.startswith('_DotVar') or v.startswith('?_DotVar'):
+            cvars = [cv for cv in config_var_count if v in config_var_count[cv]]
+            if len(cvars) > 1:
+                raise ValueError(f'Found "Gen*" or "DotVar*" variable with multiple occurrences: {v}')
+            cvar = cvars[0]
+            new_v = abstract_term_safely(KVariable(v), base_name=cvar)
+            while new_v.name in vs:
+                new_v = abstract_term_safely(KVariable(new_v.name), base_name=cvar)
+            var_subst[v] = new_v
+            vs.append(new_v.name)
+    return Subst(var_subst).apply(term)

@@ -18,6 +18,7 @@ from .inner import (
     KToken,
     KVariable,
     Subst,
+    bottom_up,
     collect,
     top_down,
     var_occurrences,
@@ -1096,6 +1097,22 @@ class KDefinition(KOuter, WithKAtt):
             return KApply(cell_klabel, args)
 
         return _kdefinition_empty_config(sort)
+
+    def instantiate_cell_vars(self, term: KInner) -> KInner:
+        def _cell_vars_to_labels(_kast: KInner) -> KInner:
+            if type(_kast) is KApply and _kast.is_cell:
+                production = self.production_for_klabel(_kast.label)
+                production_arity = [prod_item.sort for prod_item in production.items if type(prod_item) is KNonTerminal]
+                new_args = []
+                for sort, arg in zip(production_arity, _kast.args):
+                    if sort.name.endswith('Cell') and type(arg) is KVariable:
+                        new_args.append(self.empty_config(sort))
+                    else:
+                        new_args.append(arg)
+                return KApply(_kast.label, new_args)
+            return _kast
+
+        return bottom_up(_cell_vars_to_labels, term)
 
     def init_config(self, sort: KSort) -> KInner:
         if sort not in self._init_config:
