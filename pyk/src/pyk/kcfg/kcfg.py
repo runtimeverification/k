@@ -26,8 +26,17 @@ from graphviz import Digraph
 
 from pyk.cterm import CTerm, build_claim, build_rule
 from pyk.kast.inner import KInner, Subst
-from pyk.kast.manip import ml_pred_to_bool, mlAnd, remove_source_attributes, simplify_bool
-from pyk.kast.outer import KClaim, KRule
+from pyk.kast.manip import (
+    bool_to_ml_pred,
+    extract_lhs,
+    extract_rhs,
+    ml_pred_to_bool,
+    mlAnd,
+    remove_source_attributes,
+    rename_generated_vars,
+    simplify_bool,
+)
+from pyk.kast.outer import KClaim, KDefinition, KRule
 from pyk.ktool import KPrint
 from pyk.prelude.ml import mlTop
 from pyk.utils import add_indent, compare_short_hashes, shorten_hash
@@ -245,6 +254,23 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     @property
     def stuck(self) -> List[Node]:
         return [node for node in self.nodes if self.is_stuck(node.id)]
+
+    @staticmethod
+    def from_claim(defn: KDefinition, claim: KClaim) -> 'KCFG':
+        cfg = KCFG()
+        claim_body = claim.body
+        claim_body = defn.instantiate_cell_vars(claim_body)
+        claim_body = rename_generated_vars(claim_body)
+
+        claim_lhs = CTerm(extract_lhs(claim_body)).add_constraint(bool_to_ml_pred(claim.requires))
+        init_state = cfg.create_node(claim_lhs)
+        cfg.add_init(init_state.id)
+
+        claim_rhs = CTerm(extract_rhs(claim_body)).add_constraint(bool_to_ml_pred(claim.ensures))
+        target_state = cfg.create_node(claim_rhs)
+        cfg.add_target(target_state.id)
+
+        return cfg
 
     def to_dict(self) -> Dict[str, Any]:
         nodes = [node.to_dict() for node in self.nodes]
