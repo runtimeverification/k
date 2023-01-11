@@ -111,6 +111,7 @@ public class KTextDocumentService implements TextDocumentService {
         List<CompletionItem> lci = new ArrayList<>();
         // Traverse all the modules and all the syntax declarations to find the Terminals in productions
         // For each Terminal that follows the <ptrn> above, create a CompletionItem with some documentation
+        // Tree structure: Definition -> Module -> Syntax -> PriorityBlock -> Production -> Terminal
         dis.stream().filter(i -> i instanceof Module)
                 .map(m -> ((Module) m))
                 .forEach(m -> m.getItems().stream()
