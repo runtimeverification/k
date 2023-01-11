@@ -5,59 +5,10 @@ from pathlib import Path
 from typing import Any, Dict, Final, Iterable, Optional
 
 from .cli_utils import check_dir_path, check_file_path
-from .cterm import CTerm
-from .kast.inner import KApply, KInner, KVariable, Subst
-from .kast.manip import (
-    abstract_term_safely,
-    bool_to_ml_pred,
-    bottom_up,
-    count_vars,
-    extract_lhs,
-    extract_rhs,
-    free_vars,
-    split_config_from,
-)
-from .kast.outer import KClaim, KDefinition, KNonTerminal
+from .kast.outer import KClaim, KDefinition
 from .kcfg import KCFG
 
 _LOGGER: Final = logging.getLogger(__name__)
-
-
-def instantiate_cell_vars(definition: KDefinition, term: KInner) -> KInner:
-    def _cell_vars_to_labels(_kast: KInner) -> KInner:
-        if type(_kast) is KApply and _kast.is_cell:
-            production = definition.production_for_klabel(_kast.label)
-            production_arity = [prod_item.sort for prod_item in production.items if type(prod_item) is KNonTerminal]
-            new_args = []
-            for sort, arg in zip(production_arity, _kast.args):
-                if sort.name.endswith('Cell') and type(arg) is KVariable:
-                    new_args.append(definition.empty_config(sort))
-                else:
-                    new_args.append(arg)
-            return KApply(_kast.label, new_args)
-        return _kast
-
-    return bottom_up(_cell_vars_to_labels, term)
-
-
-def rename_generated_vars(cterm: CTerm) -> CTerm:
-    state, *constraints = cterm
-    _, config_subst = split_config_from(state)
-    config_var_count = {cvar: count_vars(ccontents) for cvar, ccontents in config_subst.items()}
-    vs = free_vars(cterm.kast)
-    var_subst: Dict[str, KInner] = {}
-    for v in vs:
-        if v.startswith('_Gen') or v.startswith('?_Gen') or v.startswith('_DotVar') or v.startswith('?_DotVar'):
-            cvars = [cv for cv in config_var_count if v in config_var_count[cv]]
-            if len(cvars) > 1:
-                raise ValueError(f'Found "Gen*" or "DotVar*" variable with multiple occurrences: {v}')
-            cvar = cvars[0]
-            new_v = abstract_term_safely(KVariable(v), base_name=cvar)
-            while new_v.name in vs:
-                new_v = abstract_term_safely(KVariable(new_v.name), base_name=cvar)
-            var_subst[v] = new_v
-            vs.append(new_v.name)
-    return CTerm(Subst(var_subst).apply(cterm.kast))
 
 
 class CFGManager:
@@ -153,20 +104,7 @@ class CFGManager:
         return KCFG()
 
     def cfg_from_claim(self, defn: KDefinition, claim: KClaim) -> KCFG:
-        cfg = KCFG()
-        claim_body = claim.body
-        claim_body = instantiate_cell_vars(defn, claim_body)
-        claim_body = rename_generated_vars(CTerm(claim_body)).kast
-
-        claim_lhs = CTerm(extract_lhs(claim_body)).add_constraint(bool_to_ml_pred(claim.requires))
-        init_state = cfg.create_node(claim_lhs)
-        cfg.add_init(init_state.id)
-
-        claim_rhs = CTerm(extract_rhs(claim_body)).add_constraint(bool_to_ml_pred(claim.ensures))
-        target_state = cfg.create_node(claim_rhs)
-        cfg.add_target(target_state.id)
-
-        return cfg
+        return KCFG.from_claim(defn, claim)
 
     def list_cfgs(self) -> Iterable[str]:
         return self._read_cfgs().keys()
