@@ -175,10 +175,11 @@ public class KTextDocumentService implements TextDocumentService {
 
     // for quick testing
     public static void main(String[] args) throws InterruptedException, ExecutionException, URISyntaxException {
-        String uri = "file:///home/radu/work/test/test.k";
+        String uri = args[0];
+        ExtractFencedKCodeFromMarkdown mdExtractor = new ExtractFencedKCodeFromMarkdown(null, "k");
         List<DefinitionItem> dis = Outer.parse(Source.apply(uri), FileUtil.load(new File(new URI(uri))), null);
-        List<DefinitionItem> doma = Outer.parse(Source.apply(domains.toString()), FileUtil.load(new File(domains)), null);
-        List<DefinitionItem> kst = Outer.parse(Source.apply(kast.toString()), FileUtil.load(new File(kast)), null);
+        List<DefinitionItem> doma = Outer.parse(Source.apply(domains.toString()), mdExtractor.extract(FileUtil.load(new File(domains)), Source.apply(uri)), null);
+        List<DefinitionItem> kst = Outer.parse(Source.apply(kast.toString()), mdExtractor.extract(FileUtil.load(new File(kast)), Source.apply(uri)), null);
         List<CompletionItem> x = getCompletionItems(dis);
         System.out.println(x.size());
     }
