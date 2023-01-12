@@ -1274,6 +1274,18 @@
       "sha1": "8d93cdf4d84d7e1de736df607945c6df0730a10f"
     },
     {
+      "path": "com/google/code/gson/gson-parent/2.9.1/gson-parent-2.9.1.pom",
+      "sha1": "066fdfacdd5cac19a21e4cd2fc94ac8587f3a2a5"
+    },
+    {
+      "path": "com/google/code/gson/gson/2.9.1/gson-2.9.1.jar",
+      "sha1": "02cc2131b98ebfb04e2b2c7dfb84431f4045096b"
+    },
+    {
+      "path": "com/google/code/gson/gson/2.9.1/gson-2.9.1.pom",
+      "sha1": "f0cf3edcef8dcb74d27cb427544a309eb718d772"
+    },
+    {
       "path": "com/google/code/maven-scm-provider-svnjava/maven-scm-provider-svnjava/1.13/maven-scm-provider-svnjava-1.13.jar",
       "sha1": "f87ba6a4da7ba58626cb521652d7834a0fc4fdcc"
     },
@@ -1342,6 +1354,10 @@
       "sha1": "967743c6cda3e5267084455bca3c7ab08df3f453"
     },
     {
+      "path": "com/google/guava/guava-parent/30.1-jre/guava-parent-30.1-jre.pom",
+      "sha1": "b732bbf7c4ceb14dfd6af514a8b8b71dd952e53b"
+    },
+    {
       "path": "com/google/guava/guava/16.0.1/guava-16.0.1.pom",
       "sha1": "52f16cd93f1ee1f0d1e1e55f46fa21c35f829f85"
     },
@@ -1360,6 +1376,10 @@
     {
       "path": "com/google/guava/guava/30.0-jre/guava-30.0-jre.pom",
       "sha1": "d7239fe628e6e3fbb6734acbc07195435fdac305"
+    },
+    {
+      "path": "com/google/guava/guava/30.1-jre/guava-30.1-jre.pom",
+      "sha1": "4056c9385578a442117d1a68118def38087164da"
     },
     {
       "path": "com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar",
@@ -6846,6 +6866,58 @@
       "sha1": "17d9344459471ef3d2792e7452ead549809eccc5"
     },
     {
+      "path": "org/eclipse/lsp4j/org.eclipse.lsp4j.generator/0.19.0/org.eclipse.lsp4j.generator-0.19.0.jar",
+      "sha1": "7d3d3deea4e8062a3ea76f08e4eacbad0b0813cf"
+    },
+    {
+      "path": "org/eclipse/lsp4j/org.eclipse.lsp4j.generator/0.19.0/org.eclipse.lsp4j.generator-0.19.0.pom",
+      "sha1": "b91d9579771da9ab24d85d405d0820ab4e92608d"
+    },
+    {
+      "path": "org/eclipse/lsp4j/org.eclipse.lsp4j.jsonrpc/0.19.0/org.eclipse.lsp4j.jsonrpc-0.19.0.jar",
+      "sha1": "4096302e8fc7c55e85bb2825261320bdfc015f30"
+    },
+    {
+      "path": "org/eclipse/lsp4j/org.eclipse.lsp4j.jsonrpc/0.19.0/org.eclipse.lsp4j.jsonrpc-0.19.0.pom",
+      "sha1": "94f89861c682040a6cfde9a5de7f35f554ec7b04"
+    },
+    {
+      "path": "org/eclipse/lsp4j/org.eclipse.lsp4j/0.19.0/org.eclipse.lsp4j-0.19.0.jar",
+      "sha1": "aa73e1c6873c85369cd72d89a94e1493ce5e610a"
+    },
+    {
+      "path": "org/eclipse/lsp4j/org.eclipse.lsp4j/0.19.0/org.eclipse.lsp4j-0.19.0.pom",
+      "sha1": "4794e5b2ff8e4a168130d1528ceab28b01ee99ba"
+    },
+    {
+      "path": "org/eclipse/xtend/org.eclipse.xtend.lib.macro/2.28.0/org.eclipse.xtend.lib.macro-2.28.0.jar",
+      "sha1": "b7201908e9108ed1babd784b53208c7c22d2fe11"
+    },
+    {
+      "path": "org/eclipse/xtend/org.eclipse.xtend.lib.macro/2.28.0/org.eclipse.xtend.lib.macro-2.28.0.pom",
+      "sha1": "f196181d0c97b5d81723baaf90d4b6a391369200"
+    },
+    {
+      "path": "org/eclipse/xtend/org.eclipse.xtend.lib/2.28.0/org.eclipse.xtend.lib-2.28.0.jar",
+      "sha1": "b2119c6c7f87783cdf3b422c1901db03fe5fe2d3"
+    },
+    {
+      "path": "org/eclipse/xtend/org.eclipse.xtend.lib/2.28.0/org.eclipse.xtend.lib-2.28.0.pom",
+      "sha1": "50acae6035fd5112a089ee894f14b13357b5d6f7"
+    },
+    {
+      "path": "org/eclipse/xtext/org.eclipse.xtext.xbase.lib/2.28.0/org.eclipse.xtext.xbase.lib-2.28.0.jar",
+      "sha1": "44245e49dc576cf0b912e423af52bd52f104061a"
+    },
+    {
+      "path": "org/eclipse/xtext/org.eclipse.xtext.xbase.lib/2.28.0/org.eclipse.xtext.xbase.lib-2.28.0.pom",
+      "sha1": "bed15d716d0f6aef9b93434f0ad31ef2199bce91"
+    },
+    {
+      "path": "org/eclipse/xtext/xtext-dev-bom/2.28.0/xtext-dev-bom-2.28.0.pom",
+      "sha1": "4e468148c830041ebe9389f3b183febf6508b0d7"
+    },
+    {
       "path": "org/fusesource/fusesource-pom/1.11/fusesource-pom-1.11.pom",
       "sha1": "f5547b0657be718d1ec0d2816cbcd5c398d6fccb"
     },
@@ -7702,12 +7774,12 @@
       "sha1": "83c041bde1965b281cf4e6b31ab11bcf4b68a649"
     },
     {
-      "path": "org/yaml/snakeyaml/1.31/snakeyaml-1.31.jar",
-      "sha1": "cf26b7b05fef01e7bec00cb88ab4feeeba743e12"
+      "path": "org/yaml/snakeyaml/1.32/snakeyaml-1.32.jar",
+      "sha1": "e80612549feb5c9191c498de628c1aa80693cf0b"
     },
     {
-      "path": "org/yaml/snakeyaml/1.31/snakeyaml-1.31.pom",
-      "sha1": "d930834f6b4d9d226021db6c1d7908165c6dd6cd"
+      "path": "org/yaml/snakeyaml/1.32/snakeyaml-1.32.pom",
+      "sha1": "d51efbe04924b1b5c38ae59f4003acd040d5f436"
     },
     {
       "path": "oro/oro/2.0.8/oro-2.0.8.jar",
@@ -7808,6 +7880,10 @@
   ],
   "groupId": "com.runtimeverification.k",
   "metas": [
+    {
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>com.google.code.gson</groupId>\n  <artifactId>gson</artifactId>\n  <versioning>\n    <latest>2.10.1</latest>\n    <release>2.10.1</release>\n    <versions>\n      <version>1.1</version>\n      <version>1.4</version>\n      <version>1.5</version>\n      <version>1.6</version>\n      <version>1.7</version>\n      <version>1.7.1</version>\n      <version>1.7.2</version>\n      <version>2.0</version>\n      <version>2.1</version>\n      <version>2.2</version>\n      <version>2.2.1</version>\n      <version>2.2.2</version>\n      <version>2.2.3</version>\n      <version>2.2.4</version>\n      <version>2.3</version>\n      <version>2.3.1</version>\n      <version>2.4</version>\n      <version>2.5</version>\n      <version>2.6</version>\n      <version>2.6.1</version>\n      <version>2.6.2</version>\n      <version>2.7</version>\n      <version>2.8.0</version>\n      <version>2.8.1</version>\n      <version>2.8.2</version>\n      <version>2.8.3</version>\n      <version>2.8.4</version>\n      <version>2.8.5</version>\n      <version>2.8.6</version>\n      <version>2.8.7</version>\n      <version>2.8.8</version>\n      <version>2.8.9</version>\n      <version>2.9.0</version>\n      <version>2.9.1</version>\n      <version>2.10</version>\n      <version>2.10.1</version>\n    </versions>\n    <lastUpdated>20230106154835</lastUpdated>\n  </versioning>\n</metadata>",
+      "path": "com/google/code/gson/gson"
+    },
     {
       "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<metadata modelVersion=\"1.1.0\">\n  <groupId>org.kframework.dependencies</groupId>\n  <artifactId>nailgun-all</artifactId>\n  <version>0.9.2-SNAPSHOT</version>\n  <versioning>\n    <snapshot>\n      <timestamp>20180116.225224</timestamp>\n      <buildNumber>2</buildNumber>\n    </snapshot>\n    <lastUpdated>20180116225224</lastUpdated>\n    <snapshotVersions>\n      <snapshotVersion>\n        <extension>pom</extension>\n        <value>0.9.2-20180116.225224-2</value>\n        <updated>20180116225224</updated>\n      </snapshotVersion>\n    </snapshotVersions>\n  </versioning>\n</metadata>",
       "path": "org/kframework/dependencies/nailgun-all/0.9.2-SNAPSHOT"
