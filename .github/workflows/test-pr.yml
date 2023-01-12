@@ -62,6 +62,7 @@ jobs:
       - name: 'Update Maven dependencies, push changes'
         run: |
           set -x
+          git checkout ${GITHUB_HEAD_REF}
           if ! git diff --exit-code origin/${GITHUB_BASE_REF} origin/${GITHUB_HEAD_REF} \
                 -- $(find . -name pom.xml)                                              \
                    $(find nix -name '*.nix')                                            \
