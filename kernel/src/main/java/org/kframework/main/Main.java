@@ -37,6 +37,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.concurrent.ExecutionException;
 
 public class Main {
 
@@ -149,6 +150,13 @@ public class Main {
         List<Module> modules = new ArrayList<>();
 
             switch (tool) {
+                case "-klsp":
+                    try {
+                        org.kframework.lsp.KLanguageServerLauncher.startServer(System.in, System.out);
+                    } catch (InterruptedException | ExecutionException e) {
+                        throw new RuntimeException(e);
+                    }
+                    break;
                 case "-kserver":
                     modules.addAll(KServerFrontEnd.getModules());
                     break;
