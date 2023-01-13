@@ -234,7 +234,6 @@ public class ModuleToKORE {
                 continue;
             }
         }
-        genSubsortAxiom(Production(Seq(), Sorts.KItem(), Seq(NonTerminal(Sorts.KConfigVar()))), syntax);
 
         for (Production lesser : iterable(module.overloads().elements())) {
             for (Production greater : iterable(module.overloads().relations().get(lesser).getOrElse(() -> Collections.<Production>Set()))) {
@@ -276,7 +275,6 @@ public class ModuleToKORE {
                 genNoConfusionAxioms(prod, noConfusion, functionRules, semantics);
             }
         }
-        genSubsortAxiom(Production(Seq(), Sorts.KItem(), Seq(NonTerminal(Sorts.KConfigVar()))), semantics);
 
         for (Sort sort : iterable(module.sortedAllSorts())) {
             genNoJunkAxiom(sort, semantics);
