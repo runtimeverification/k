@@ -215,6 +215,11 @@ addition to the usual Maven build setup:
     # then restart your shell.
     cp macos-envrc .envrc
     direnv allow
+    # You should see a message like:
+    #   direnv: loading .../k/.envrc
+    #   direnv: export ~PATH
+    # The llvm-config binary should also be on your PATH; check with:
+    which llvm-config
     ```
 * Pass `-Dstack.extra-opts='--compiler ghc-8.10.7 --system-ghc'` as an
   additional argument to `mvn package` when building the toolchain.
