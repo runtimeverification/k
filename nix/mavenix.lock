@@ -7926,13 +7926,6 @@
       "version": "1.0-SNAPSHOT"
     },
     {
-      "artifactId": "ktree",
-      "groupId": "com.runtimeverification.k",
-      "name": "ktree-1.0-SNAPSHOT",
-      "path": "./ktree",
-      "version": "1.0-SNAPSHOT"
-    },
-    {
       "artifactId": "java-backend",
       "groupId": "com.runtimeverification.k",
       "name": "java-backend-1.0-SNAPSHOT",
