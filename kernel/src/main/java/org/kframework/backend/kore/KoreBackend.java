@@ -67,6 +67,10 @@ public class KoreBackend extends AbstractBackend {
         files.saveToDefinitionDirectory(basename + ".kore", kore);
     }
 
+    /**
+     * Convert a CompiledDefinition to a String of a KORE definition.
+     * @param hasAnd whether the backend in question supports and-patterns during pattern matching.
+     */
     protected String getKompiledString(CompiledDefinition def, boolean hasAnd) {
         Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule(), hasAnd);
         ModuleToKORE converter = new ModuleToKORE(mainModule, def.topCellInitializer, def.kompileOptions);
