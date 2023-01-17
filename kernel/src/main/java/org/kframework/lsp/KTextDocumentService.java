@@ -99,7 +99,7 @@ public class KTextDocumentService implements TextDocumentService {
             List<DefinitionItem> fileDi = new ArrayList<>(elems.getOrDefault(position.getTextDocument().getUri(), List.of()));
             fileDi.addAll(elems.get(domains.toString()));
             fileDi.addAll(elems.get(kast.toString()));
-            this.clientLogger.logMessage("Operation '" + "text/completion: " + position.getTextDocument() + " #di: " + fileDi.size());
+            this.clientLogger.logMessage("Operation '" + "text/completion: " + position.getTextDocument().getUri() + " #di: " + fileDi.size());
             return Either.forLeft(getCompletionItems(fileDi));
         });
     }
@@ -161,8 +161,7 @@ public class KTextDocumentService implements TextDocumentService {
         } catch (KEMException e) {
             Location loc = e.exception.getLocation();
             if (loc == null) loc = new Location(1, 1, 1, 2);
-            Range range = new Range(new Position(loc.startLine() - 1, loc.startColumn() - 1),
-                    new Position(loc.endLine() - 1, loc.endColumn() - 1));
+            Range range = loc2range(loc);
             Diagnostic d = new Diagnostic(range, e.exception.getMessage(), DiagnosticSeverity.Error, "Outer Parser");
             problems.add(d);
         }
@@ -186,6 +185,7 @@ public class KTextDocumentService implements TextDocumentService {
 
     // previous diagnostics task. If it's still active, cancel it and run a newer, updated one
     private CompletableFuture<DocumentDiagnosticReport> latestScheduled;
+
     public CompletableFuture<DocumentDiagnosticReport> diagnostic(DocumentDiagnosticParams params) {
         if (latestScheduled != null && !latestScheduled.isDone())
             latestScheduled.completeExceptionally(new Throwable("Cancelled diagnostic publisher"));
@@ -194,10 +194,71 @@ public class KTextDocumentService implements TextDocumentService {
         CompletableFuture<DocumentDiagnosticReport> scheduledFuture = CompletableFuture.supplyAsync(() -> {
             List<Diagnostic> problems = outerParse(params.getTextDocument().getUri());
             DocumentDiagnosticReport report = new DocumentDiagnosticReport(new RelatedFullDocumentDiagnosticReport(problems));
-            this.clientLogger.logMessage("Operation '" + "text/diagnostics: " + params.getTextDocument() + " #problems: " + problems.size());
+            this.clientLogger.logMessage("Operation '" + "text/diagnostics: " + params.getTextDocument().getUri() + " #problems: " + problems.size());
             return report;
         }, delayedExecutor);
         latestScheduled = scheduledFuture;
         return scheduledFuture;
+    }
+
+    public CompletableFuture<Either<List<? extends org.eclipse.lsp4j.Location>, List<? extends LocationLink>>> definition(DefinitionParams params) {
+        Position pos = new Position(params.getPosition().getLine() + 1, params.getPosition().getCharacter() + 1);
+        this.clientLogger.logMessage("Operation '" + "text/definition: " + params.getTextDocument().getUri() + " #pos: " + pos.getLine() + " " + pos.getCharacter());
+        return CompletableFuture.supplyAsync(() -> {
+            List<LocationLink> lls = new ArrayList<>();
+            try {
+                List<DefinitionItem> dis = elems.getOrDefault(params.getTextDocument().getUri(), List.of());
+                for (DefinitionItem di : dis) {
+                    if (di instanceof Require) {
+                        Location loc = getSafeLoc(di);
+                        if (isPositionOverLocation(pos, loc)) {
+                            Require req = (Require) di;
+                            File f = new File(new URI(params.getTextDocument().getUri()));
+                            URI targetURI = new File(f.getParent() + File.separatorChar + req.getValue()).toURI();
+
+                            lls.add(new LocationLink(targetURI.toString(),
+                                    new Range(new Position(0, 0), new Position(0, 0)),
+                                    new Range(new Position(0, 0), new Position(0, 0)),
+                                    loc2range(loc)));
+                        }
+                    } else if (di instanceof Module) {
+                        Module m = (Module) di;
+                        for (ModuleItem mi : m.getItems()) {
+                            if (mi instanceof Import) {
+                                Location loc = getSafeLoc(mi);
+                                if (isPositionOverLocation(pos, loc)) {
+                                    Import imp = (Import) mi;
+                                    elems.forEach((uri, ddis) -> ddis.forEach((ddi) -> {
+                                        if (ddi instanceof Module && ((Module) ddi).getName().equals(imp.getName()))
+                                            lls.add(new LocationLink(uri,
+                                                    loc2range(getSafeLoc(ddi)),
+                                                    loc2range(getSafeLoc(ddi)),
+                                                    loc2range(getSafeLoc(imp))));
+                                        })
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (URISyntaxException e) {
+                throw new RuntimeException();
+            }
+
+            return Either.forRight(lls);
+        });
+    }
+
+    public static Location getSafeLoc(ASTNode node) {
+        return node.location().orElse(new Location(0,0,0,0));
+    }
+    public static boolean isPositionOverLocation(Position pos, Location loc) {
+        return loc.startLine() <= pos.getLine() &&
+                pos.getLine() <= loc.endLine() &&
+                loc.startColumn() <= pos.getCharacter() &&
+                pos.getCharacter() <= loc.endColumn();
+    }
+    public static Range loc2range(Location loc) {
+        return new Range(new Position(loc.startLine() -1 , loc.startColumn() - 1), new Position(loc.endLine() - 1, loc.endColumn() - 1));
     }
 }

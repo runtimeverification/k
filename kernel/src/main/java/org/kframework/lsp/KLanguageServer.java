@@ -43,6 +43,7 @@ public class KLanguageServer implements LanguageServer, LanguageClientAware {
         /* Check if dynamic registration of completion capability is allowed by the client. If so we don't register the capability.
            Else, we register the completion capability.
          */
+        response.getCapabilities().setDefinitionProvider(true);
         if (!isDynamicCompletionRegistration())
             response.getCapabilities().setCompletionProvider(new CompletionOptions());
         if (!isDiagnosticRegistration())
