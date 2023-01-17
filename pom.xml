@@ -11,7 +11,6 @@
   <modules>
     <module>kore</module>
     <module>kernel</module>
-    <module>ktree</module>
     <module>k-distribution</module>
     <module>java-backend</module>
     <module>haskell-backend</module>
