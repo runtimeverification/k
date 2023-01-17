@@ -60,15 +60,19 @@ public class KoreBackend extends AbstractBackend {
     @Override
     public void accept(Backend.Holder h) {
         CompiledDefinition def = h.def;
-        String kore = getKompiledString(def);
+        String kore = getKompiledString(def, true);
         File defFile = kompileOptions.outerParsing.mainDefinitionFile(files);
         String name = defFile.getName();
         String basename = FilenameUtils.removeExtension(name);
         files.saveToDefinitionDirectory(basename + ".kore", kore);
     }
 
-    protected String getKompiledString(CompiledDefinition def) {
-        Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule());
+    /**
+     * Convert a CompiledDefinition to a String of a KORE definition.
+     * @param hasAnd whether the backend in question supports and-patterns during pattern matching.
+     */
+    protected String getKompiledString(CompiledDefinition def, boolean hasAnd) {
+        Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule(), hasAnd);
         ModuleToKORE converter = new ModuleToKORE(mainModule, def.topCellInitializer, def.kompileOptions);
         return getKompiledString(converter, files, heatCoolEquations, tool);
     }
@@ -92,10 +96,12 @@ public class KoreBackend extends AbstractBackend {
         return semantics.toString();
     }
 
-    public static Module getKompiledModule(Module mainModule) {
+    public static Module getKompiledModule(Module mainModule, boolean hasAnd) {
         mainModule = new GenerateSortPredicateRules(true).gen(mainModule);
         mainModule = ModuleTransformer.fromSentenceTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
-        mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction").apply(mainModule);
+        if (hasAnd) {
+          mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction").apply(mainModule);
+        }
         return mainModule;
     }
 
