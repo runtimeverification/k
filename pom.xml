@@ -197,40 +197,8 @@
         </configuration>
       </plugin>
       <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.7</version>
-        <executions>
-          <!-- The following execution is used to get the list of changed files to
-               run the copyright check on. -->
-          <execution>
-            <id>init-changed-files</id>
-            <phase>pre-integration-test</phase>
-            <configuration>
-              <target>
-                <exec executable="git" outputproperty="git.diff.out" failifexecutionfails="false">
-                  <arg value="diff" />
-                  <arg value="${base}" />
-                  <arg value="--name-only" />
-                </exec>
-                <condition property="git.diff.out" value="">
-                  <isset property="git.diff.out" />
-                </condition>
-                <filelist id="git.diff.filelist" dir="." files="${git.diff.out}" />
-                <pathconvert property="git.modified.files" pathsep="," refid="git.diff.filelist" dirsep="/">
-                  <map from="${basedir}/" to="" />
-                </pathconvert>
-              </target>
-              <exportAntProperties>true</exportAntProperties>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>3.2.1</version>
         <executions>
           <execution>
             <id>checkstyle-copyright</id>
@@ -242,11 +210,11 @@
               <sourceDirectories>
                 <sourceDirectory>${project.basedir}</sourceDirectory>
               </sourceDirectories>
-              <includes>${git.modified.files}</includes>
+              <includes>**/*.xml,**/*.xsd,**/*.md,**/*.k,**/*.kore,**/*.java,**/*.scala,**/*.jj,**/*.str,**/*.css,**/*.sty,**/*.tex,**/*.cls</includes>
               <configLocation>src/main/config/checkstyle-copyright.xml</configLocation>
               <failsOnError>true</failsOnError>
               <consoleOutput>true</consoleOutput>
-              <excludes>haskell-backend/src/main/native/**,llvm-backend/src/main/native/**,k-distribution/include/kore/prelude.kore,.idea/**,**/com/davekoelle/**,**/src/main/sdf/syntax/Integration.sdf</excludes>
+              <excludes>haskell-backend/src/main/native/**,llvm-backend/src/main/native/**,.idea/**,**/com/davekoelle/**,java-backend/src/main/java/org/kframework/backend/java/builtins/crypto/**,**/target/**,LICENSE.md,web/toc.md,web/k-web-theme/**,**/*-kompiled/*.kore,k-distribution/include/kframework/kore/*,**/.kompile-*/**,**/.git/**</excludes>
             </configuration>
           </execution>
           <execution>
@@ -258,11 +226,11 @@
             <configuration>
               <sourceDirectories>
                 <sourceDirectory>${project.basedir}</sourceDirectory>
-	      </sourceDirectories>
-	      <includeResources>false</includeResources>
-	      <includeTestResources>false</includeTestResources>
+              </sourceDirectories>
+              <includeResources>false</includeResources>
+              <includeTestResources>false</includeTestResources>
               <includes>**/*.k</includes>
-              <excludes>haskell-backend/src/main/native/**,llvm-backend/src/main/native/**</excludes>
+              <excludes>haskell-backend/src/main/native/**,llvm-backend/src/main/native/**,**/.kompile-*/**</excludes>
               <configLocation>src/main/config/checkstyle-k.xml</configLocation>
               <failsOnError>true</failsOnError>
               <consoleOutput>true</consoleOutput>
