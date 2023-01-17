@@ -7,7 +7,7 @@ from subprocess import CalledProcessError, CompletedProcess
 from tempfile import NamedTemporaryFile
 from typing import Final, List, Mapping, Optional
 
-from ..cli_utils import check_dir_path, check_file_path, run_process
+from ..cli_utils import BugReport, check_dir_path, check_file_path, run_process
 from ..cterm import CTerm
 from ..kast.inner import KInner, KLabel, KSort
 from ..kore.parser import KoreParser
@@ -28,8 +28,9 @@ class KRun(KPrint):
         use_directory: Optional[Path] = None,
         profile: bool = False,
         command: str = 'krun',
+        bug_report: Optional[BugReport] = None,
     ) -> None:
-        super(KRun, self).__init__(definition_dir, use_directory=use_directory, profile=profile)
+        super(KRun, self).__init__(definition_dir, use_directory=use_directory, profile=profile, bug_report=bug_report)
         self.command = command
         with open(self.definition_dir / 'backend.txt', 'r') as ba:
             self.backend = ba.read()
@@ -59,9 +60,10 @@ class KRun(KPrint):
                 output=KRunOutput.JSON,
                 depth=depth,
                 no_expand_macros=not expand_macros,
-                profile=self._profile,
                 cmap=cmap,
                 pmap=pmap,
+                profile=self._profile,
+                bug_report=self._bug_report,
             )
 
         if result.returncode != 0:
@@ -92,6 +94,7 @@ class KRun(KPrint):
                 depth=depth,
                 no_expand_macros=not expand_macros,
                 profile=self._profile,
+                bug_report=self._bug_report,
             )
 
         if result.returncode != 0:
@@ -107,6 +110,7 @@ class KRun(KPrint):
         *,
         depth: Optional[int] = None,
         expand_macros: bool = False,
+        bug_report: Optional[BugReport] = None,
     ) -> Pattern:
         with NamedTemporaryFile('w', dir=self.use_directory) as f:
             f.write(pattern.text)
@@ -122,6 +126,7 @@ class KRun(KPrint):
                 depth=depth,
                 no_expand_macros=not expand_macros,
                 profile=self._profile,
+                bug_report=self._bug_report,
             )
 
         if proc_res.returncode != 0:
@@ -138,6 +143,7 @@ class KRun(KPrint):
         *,
         depth: Optional[int] = None,
         expand_macros: bool = False,
+        bug_report: Optional[BugReport] = None,
     ) -> Pattern:
         def _config_var_token(s: str) -> DV:
             return DV(SortApp('SortKConfigVar'), String(f'${s}'))
@@ -165,7 +171,7 @@ class KRun(KPrint):
         config_var_map = _map([_map_item(k, v, _sort(v)) for k, v in config.items()])
         term = App('LblinitGeneratedTopCell', [], [config_var_map])
 
-        return self.run_kore_term(term, depth=depth, expand_macros=expand_macros)
+        return self.run_kore_term(term, depth=depth, expand_macros=expand_macros, bug_report=bug_report)
 
 
 class KRunOutput(Enum):
@@ -196,6 +202,7 @@ def _krun(
     pipe_stderr: bool = False,
     logger: Optional[Logger] = None,
     profile: bool = False,
+    bug_report: Optional[BugReport] = None,
 ) -> CompletedProcess:
     if input_file:
         check_file_path(input_file)
@@ -218,6 +225,14 @@ def _krun(
         term=term,
         no_expand_macros=no_expand_macros,
     )
+
+    if bug_report is not None:
+        if input_file is not None:
+            new_input_file = Path(f'krun_inputs/{input_file}')
+            bug_report.add_file(input_file, new_input_file)
+            bug_report.add_command([a if a != str(input_file) else str(new_input_file) for a in args])
+        else:
+            bug_report.add_command(args)
 
     try:
         return run_process(args, check=check, pipe_stderr=pipe_stderr, logger=logger or _LOGGER, profile=profile)
