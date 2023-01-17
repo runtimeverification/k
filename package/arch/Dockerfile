@@ -21,6 +21,7 @@ RUN    pacman -Sy   --noconfirm archlinux-keyring \
                        clang                      \
                        cmake                      \
                        curl                       \
+                       fmt                        \
                        git                        \
                        gmp                        \
                        hub                        \
