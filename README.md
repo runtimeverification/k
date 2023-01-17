@@ -211,7 +211,8 @@ addition to the usual Maven build setup:
     brew install direnv
     # Follow the instructions at https://direnv.net/docs/hook.html
     # ...for example, if your shell is bash, run:
-    # echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
+    #   echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
+    # then restart your shell.
     cp macos-envrc .envrc
     direnv allow
     ```
