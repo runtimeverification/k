@@ -86,11 +86,11 @@
     "flake-compat": {
       "flake": false,
       "locked": {
-        "lastModified": 1668681692,
-        "narHash": "sha256-Ht91NGdewz8IQLtWZ9LCeNXMSXHUss+9COoqu6JLmXU=",
+        "lastModified": 1673956053,
+        "narHash": "sha256-4gtG9iQuiKITOjNQQeQIpoIB6b16fm+504Ch3sNKLd8=",
         "owner": "edolstra",
         "repo": "flake-compat",
-        "rev": "009399224d5e398d03b22badca40a37ac85412a1",
+        "rev": "35bb57c0c8d8b62bbfd284272c928ceb64ddbde9",
         "type": "github"
       },
       "original": {
@@ -191,11 +191,11 @@
         "z3-src": "z3-src"
       },
       "locked": {
-        "lastModified": 1673534356,
-        "narHash": "sha256-29RP/ZEToPdbprzJ2o9HA1GJDxkh4pLsnCXEjfZ1K2w=",
+        "lastModified": 1673959667,
+        "narHash": "sha256-TijpfLXay+t9TqVyBKkbUcAqzj1GLWPGaFXAaSfZTVE=",
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "adbf9d05c645872960e073c731bd80b0c7e73955",
+        "rev": "2550e47d97c87f9b2354164b885a57af64fee3ee",
         "type": "github"
       },
       "original": {
