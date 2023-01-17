@@ -43,7 +43,7 @@ def rpc_client(mock: Mock) -> MockClient:
 @pytest.fixture
 def kore_client(mock: Mock, mock_class: Mock) -> Iterator[KoreClient]:  # noqa: N803
     client = KoreClient('localhost', 3000)
-    mock_class.assert_called_with('localhost', 3000, timeout=None)
+    mock_class.assert_called_with('localhost', 3000, timeout=None, bug_report=None)
     assert client._client == mock
     yield client
     client.close()

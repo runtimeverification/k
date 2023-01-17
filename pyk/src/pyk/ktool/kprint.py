@@ -6,7 +6,7 @@ from subprocess import CalledProcessError, CompletedProcess
 from tempfile import TemporaryDirectory
 from typing import Any, Callable, Dict, Final, List, Optional
 
-from ..cli_utils import check_dir_path, check_file_path, run_process
+from ..cli_utils import BugReport, check_dir_path, check_file_path, run_process
 from ..kast.inner import KApply, KAs, KAst, KAtt, KInner, KLabel, KRewrite, KSequence, KSort, KToken, KVariable
 from ..kast.manip import flatten_label
 from ..kast.outer import (
@@ -232,7 +232,15 @@ class KPrint:
     _unmunge_codes: Dict[str, str]
     _munge_codes: Dict[str, str]
 
-    def __init__(self, definition_dir: Path, use_directory: Optional[Path] = None, profile: bool = False) -> None:
+    _bug_report: Optional[BugReport]
+
+    def __init__(
+        self,
+        definition_dir: Path,
+        use_directory: Optional[Path] = None,
+        profile: bool = False,
+        bug_report: Optional[BugReport] = None,
+    ) -> None:
         self.definition_dir = Path(definition_dir)
         if use_directory:
             self.use_directory = use_directory
@@ -243,6 +251,9 @@ class KPrint:
         self._definition = None
         self._symbol_table = None
         self._profile = profile
+        self._bug_report = bug_report
+        if self._bug_report:
+            self._bug_report.add_definition(self.definition_dir)
 
     def __del__(self) -> None:
         if self._temp_dir is not None:

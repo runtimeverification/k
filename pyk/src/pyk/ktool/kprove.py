@@ -7,7 +7,7 @@ from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
 from typing import Any, ContextManager, Dict, Final, Iterable, List, Mapping, Optional, Tuple
 
-from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp, run_process
+from ..cli_utils import BugReport, check_dir_path, check_file_path, gen_file_timestamp, run_process
 from ..cterm import CTerm, build_claim
 from ..kast.inner import KApply, KInner, KLabel, Subst
 from ..kast.manip import extract_subst, flatten_label, free_vars
@@ -124,6 +124,7 @@ class KProve(KPrint, ContextManager['KProve']):
     backend: str
     main_module: str
     port: int
+
     _kore_rpc: Optional[Tuple[KoreServer, KoreClient]]
 
     def __init__(
@@ -134,8 +135,11 @@ class KProve(KPrint, ContextManager['KProve']):
         profile: bool = False,
         command: str = 'kprove',
         port: Optional[int] = None,
+        bug_report: Optional[BugReport] = None,
     ):
-        super(KProve, self).__init__(definition_dir, use_directory=use_directory, profile=profile)
+        super(KProve, self).__init__(
+            definition_dir, use_directory=use_directory, profile=profile, bug_report=bug_report
+        )
         # TODO: we should not have to supply main_file, it should be read
         # TODO: setting use_directory manually should set temp files to not be deleted and a log message
         self.main_file = main_file
@@ -156,8 +160,8 @@ class KProve(KPrint, ContextManager['KProve']):
 
     def kore_rpc(self) -> Tuple[KoreServer, KoreClient]:
         if not self._kore_rpc:
-            _kore_server = KoreServer(self.definition_dir, self.main_module, self.port)
-            _kore_client = KoreClient('localhost', self.port)
+            _kore_server = KoreServer(self.definition_dir, self.main_module, self.port, bug_report=self._bug_report)
+            _kore_client = KoreClient('localhost', self.port, bug_report=self._bug_report)
             self._kore_rpc = (_kore_server, _kore_client)
         return self._kore_rpc
 
