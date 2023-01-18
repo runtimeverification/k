@@ -96,11 +96,47 @@ public class KTextDocumentService implements TextDocumentService {
     @Override
     public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(CompletionParams position) {
         return CompletableFuture.supplyAsync(() -> {
+            Position pos = position.getPosition();
+            List<CompletionItem> lci = new ArrayList<>();
             List<DefinitionItem> fileDi = new ArrayList<>(elems.getOrDefault(position.getTextDocument().getUri(), List.of()));
             fileDi.addAll(elems.get(domains.toString()));
             fileDi.addAll(elems.get(kast.toString()));
-            this.clientLogger.logMessage("Operation '" + "text/completion: " + position.getTextDocument().getUri() + " #di: " + fileDi.size());
-            return Either.forLeft(getCompletionItems(fileDi));
+            fileDi.stream().filter(i -> i instanceof Module)
+                    .map(m -> ((Module) m))
+                    .forEach(m -> m.getItems().forEach((mi -> {
+                        if (isPositionOverLocation(pos, mi.getLocation())) {
+                            if (mi instanceof Import) {
+                                elems.forEach((uri, ddis) -> ddis.stream()
+                                        .filter(mi2 -> mi2 instanceof Module)
+                                        .map(m2 -> ((Module) m2))
+                                        .forEach(m2 -> {
+                                            CompletionItem ci = new CompletionItem();
+                                            ci.setLabel(m2.getName());
+                                            ci.setInsertText(m2.getName());
+                                            ci.setKind(CompletionItemKind.Snippet);
+                                            lci.add(new CompletionItem());
+                                        }));
+                            } else if (mi instanceof Syntax) {
+                                fileDi.stream().filter(i -> i instanceof Module)
+                                        .map(m3 -> ((Module) m3))
+                                        .forEach(m3 -> m3.getItems().stream()
+                                                .filter(mi3 -> mi3 instanceof Syntax)
+                                                .map(s -> ((Syntax) s))
+                                                .forEach(s -> {
+                                                    CompletionItem ci = new CompletionItem();
+                                                    ci.setLabel(s.getDeclaredSort().getSort().name());
+                                                    ci.setInsertText(s.getDeclaredSort().getSort().name());
+                                                    ci.setKind(CompletionItemKind.Snippet);
+                                                    lci.add(new CompletionItem());
+                                                }));
+                            } else if (mi instanceof StringSentence) {
+                                lci.addAll(getCompletionItems(fileDi));
+                            }
+                        }
+                    })));
+// TODO: add completion for attributes
+            this.clientLogger.logMessage("Operation '" + "text/completion: " + position.getTextDocument().getUri() + " #pos: " + pos.getLine() + " " + pos.getCharacter());
+            return Either.forLeft(lci);
         });
     }
 
