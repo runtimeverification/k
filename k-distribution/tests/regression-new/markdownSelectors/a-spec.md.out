@@ -1,9 +1,9 @@
-[Error] Outer Parser: Module TEST differs from previous declaration at Source(test.md) and Location(7,1,32,10). This can happen if --md-selector differs for kompile and kprove
+[Error] Outer Parser: Module TEST differs from previous declaration at Source(test.md) and Location(11,1,36,10). This can happen if --md-selector differs for kompile and kprove
 	Source(test.md)
-	Location(7,1,32,10)
+	Location(11,1,36,10)
 	   .	v~~~~~~~~~~
-	 7 |	module TEST
+	11 |	module TEST
 	   |		...
-	32 |	endmodule
+	36 |	endmodule
 	   .	~~~~~~~~^
 [Error] Outer Parser: Had 1 outer parsing errors.
