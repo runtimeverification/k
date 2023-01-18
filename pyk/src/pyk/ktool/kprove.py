@@ -5,17 +5,14 @@ from enum import Enum
 from itertools import chain
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
-from typing import Any, ContextManager, Dict, Final, Iterable, List, Mapping, Optional, Tuple
+from typing import Final, Iterable, List, Mapping, Optional, Tuple
 
 from ..cli_utils import BugReport, check_dir_path, check_file_path, gen_file_timestamp, run_process
 from ..cterm import CTerm, build_claim
-from ..kast.inner import KApply, KInner, KLabel, Subst
+from ..kast.inner import KInner
 from ..kast.manip import extract_subst, flatten_label, free_vars
-from ..kast.outer import KClaim, KDefinition, KFlatModule, KImport, KRequire, KRule, KSentence, KVariable
-from ..kore.rpc import KoreClient, KoreServer
-from ..kore.syntax import Top
-from ..prelude.k import GENERATED_TOP_CELL
-from ..prelude.ml import is_top, mlAnd, mlBottom, mlEquals, mlTop
+from ..kast.outer import KClaim, KDefinition, KFlatModule, KImport, KRequire, KRule, KSentence
+from ..prelude.ml import is_top, mlAnd, mlBottom, mlTop
 from ..utils import unique
 from .kprint import KPrint
 
@@ -117,15 +114,10 @@ def _build_arg_list(
     return args
 
 
-class KProve(KPrint, ContextManager['KProve']):
+class KProve(KPrint):
     main_file: Optional[Path]
     prover: List[str]
     prover_args: List[str]
-    backend: str
-    main_module: str
-    port: int
-
-    _kore_rpc: Optional[Tuple[KoreServer, KoreClient]]
 
     def __init__(
         self,
@@ -134,7 +126,6 @@ class KProve(KPrint, ContextManager['KProve']):
         use_directory: Optional[Path] = None,
         profile: bool = False,
         command: str = 'kprove',
-        port: Optional[int] = None,
         bug_report: Optional[BugReport] = None,
     ):
         super(KProve, self).__init__(
@@ -145,43 +136,6 @@ class KProve(KPrint, ContextManager['KProve']):
         self.main_file = main_file
         self.prover = [command]
         self.prover_args = []
-        self.port = 3000 if port is None else port
-        with open(self.definition_dir / 'backend.txt', 'r') as ba:
-            self.backend = ba.read()
-        with open(self.definition_dir / 'mainModule.txt', 'r') as mm:
-            self.main_module = mm.read()
-        self._kore_rpc = None
-
-    def __enter__(self) -> 'KProve':
-        return self
-
-    def __exit__(self, *args: Any) -> None:
-        self.close()
-
-    def kore_rpc(self) -> Tuple[KoreServer, KoreClient]:
-        if not self._kore_rpc:
-            _kore_server = KoreServer(self.definition_dir, self.main_module, self.port, bug_report=self._bug_report)
-            _kore_client = KoreClient('localhost', self.port, bug_report=self._bug_report)
-            self._kore_rpc = (_kore_server, _kore_client)
-        return self._kore_rpc
-
-    def close_kore_rpc(self) -> None:
-        if self._kore_rpc is not None:
-            _kore_server, _kore_client = self._kore_rpc
-            _kore_client.close()
-            _kore_server.close()
-            self._kore_rpc = None
-
-    def set_kore_rpc_port(self, p: int) -> None:
-        was_open = self._kore_rpc is not None
-        if was_open:
-            self.close_kore_rpc()
-        self.port = p
-        if was_open:
-            self.kore_rpc()
-
-    def close(self) -> None:
-        self.close_kore_rpc()
 
     def prove(
         self,
@@ -349,73 +303,6 @@ class KProve(KPrint, ContextManager['KProve']):
             else:
                 could_be_branching = False
         return depth, branching, next_state
-
-    def execute(
-        self,
-        cterm: CTerm,
-        depth: Optional[int] = None,
-        cut_point_rules: Optional[Iterable[str]] = None,
-        terminal_rules: Optional[Iterable[str]] = None,
-        assume_defined: bool = True,
-    ) -> Tuple[int, CTerm, List[CTerm]]:
-        if assume_defined:
-            cterm = cterm.add_constraint(
-                KApply(KLabel('#Ceil', [GENERATED_TOP_CELL, GENERATED_TOP_CELL]), [cterm.kast])
-            )
-        _LOGGER.debug(f'Executing: {cterm}')
-        kore = self.kast_to_kore(cterm.kast, GENERATED_TOP_CELL)
-        _, kore_client = self.kore_rpc()
-        er = kore_client.execute(kore, max_depth=depth, cut_point_rules=cut_point_rules, terminal_rules=terminal_rules)
-        depth = er.depth
-        next_state = CTerm(self.kore_to_kast(er.state.kore))
-        _next_states = er.next_states if er.next_states is not None and len(er.next_states) > 1 else []
-        next_states = [CTerm(self.kore_to_kast(ns.kore)) for ns in _next_states]
-        return depth, next_state, next_states
-
-    def simplify(self, cterm: CTerm) -> KInner:
-        _LOGGER.debug(f'Simplifying: {cterm}')
-        kore = self.kast_to_kore(cterm.kast, GENERATED_TOP_CELL)
-        _, kore_client = self.kore_rpc()
-        kore_simplified = kore_client.simplify(kore)
-        kast_simplified = self.kore_to_kast(kore_simplified)
-        return kast_simplified
-
-    def implies(
-        self, antecedent: CTerm, consequent: CTerm, bind_consequent_variables: bool = True
-    ) -> Optional[Tuple[Subst, KInner]]:
-        _LOGGER.debug(f'Checking implication: {antecedent} #Implies {consequent}')
-        _consequent = consequent.kast
-        if bind_consequent_variables:
-            _consequent = consequent.kast
-            fv_antecedent = free_vars(antecedent.kast)
-            unbound_consequent = [v for v in free_vars(_consequent) if v not in fv_antecedent]
-            if len(unbound_consequent) > 0:
-                _LOGGER.info(f'Binding variables in consequent: {unbound_consequent}')
-                for uc in unbound_consequent:
-                    _consequent = KApply(KLabel('#Exists', [GENERATED_TOP_CELL]), [KVariable(uc), _consequent])
-        antecedent_kore = self.kast_to_kore(antecedent.kast, GENERATED_TOP_CELL)
-        consequent_kore = self.kast_to_kore(_consequent, GENERATED_TOP_CELL)
-        _, kore_client = self.kore_rpc()
-        result = kore_client.implies(antecedent_kore, consequent_kore)
-        if type(result.implication) is not Top:
-            _LOGGER.warning(
-                f'Received a non-trivial implication back from check implication endpoint: {result.implication}'
-            )
-        if result.substitution is None:
-            return None
-        ml_subst = self.kore_to_kast(result.substitution)
-        ml_pred = self.kore_to_kast(result.predicate) if result.predicate is not None else mlTop()
-        if is_top(ml_subst):
-            return (Subst({}), ml_pred)
-        subst_pattern = mlEquals(KVariable('###VAR'), KVariable('###TERM'))
-        _subst: Dict[str, KInner] = {}
-        for subst_pred in flatten_label('#And', ml_subst):
-            m = subst_pattern.match(subst_pred)
-            if m is not None and type(m['###VAR']) is KVariable:
-                _subst[m['###VAR'].name] = m['###TERM']
-            else:
-                raise AssertionError(f'Received a non-substitution from implies endpoint: {subst_pred}')
-        return (Subst(_subst), ml_pred)
 
     def _write_claim_definition(self, claim: KClaim, claim_id: str, lemmas: Iterable[KRule] = ()) -> Tuple[Path, str]:
         tmp_claim = self.use_directory / (claim_id.lower() + '-spec')

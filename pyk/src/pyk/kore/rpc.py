@@ -129,11 +129,11 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
                 ]
             )
 
-        _LOGGER.info(f'Sending request to {server_addr}: {req}')
+        _LOGGER.debug(f'Sending request to {server_addr}: {req}')
         self._sock.sendall(req.encode())
-        _LOGGER.info(f'Waiting for response from {server_addr}...')
+        _LOGGER.debug(f'Waiting for response from {server_addr}...')
         resp = self._file.readline().rstrip()
-        _LOGGER.info(f'Received response from {server_addr}: {resp}')
+        _LOGGER.debug(f'Received response from {server_addr}: {resp}')
 
         if self._bug_report:
             bug_report_response = f'rpc/{old_id:03}_response.json'
