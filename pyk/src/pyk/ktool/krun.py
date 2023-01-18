@@ -18,8 +18,6 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 
 class KRun(KPrint):
-    backend: str
-    main_module: str
     command: str
 
     def __init__(
@@ -32,10 +30,6 @@ class KRun(KPrint):
     ) -> None:
         super(KRun, self).__init__(definition_dir, use_directory=use_directory, profile=profile, bug_report=bug_report)
         self.command = command
-        with open(self.definition_dir / 'backend.txt', 'r') as ba:
-            self.backend = ba.read()
-        with open(self.definition_dir / 'mainModule.txt', 'r') as mm:
-            self.main_module = mm.read()
 
     def run(
         self,

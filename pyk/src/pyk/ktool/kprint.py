@@ -223,6 +223,8 @@ def _build_arg_list(
 class KPrint:
     definition_dir: Path
     use_directory: Path
+    main_module: str
+    backend: str
     _profile: bool
 
     _definition: Optional[KDefinition]
@@ -251,6 +253,10 @@ class KPrint:
         self._definition = None
         self._symbol_table = None
         self._profile = profile
+        with open(self.definition_dir / 'mainModule.txt', 'r') as mm:
+            self.main_module = mm.read()
+        with open(self.definition_dir / 'backend.txt', 'r') as ba:
+            self.backend = ba.read()
         self._bug_report = bug_report
         if self._bug_report:
             self._bug_report.add_definition(self.definition_dir)
