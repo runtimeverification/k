@@ -38,6 +38,7 @@ module BASIC-K
   syntax KItem [hook(K.KItem)]
   syntax K     ::= KItem
   syntax KConfigVar [token]
+  syntax KItem ::= KConfigVar
 endmodule
 ```
 
