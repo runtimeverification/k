@@ -1,5 +1,5 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.keq;
-
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;

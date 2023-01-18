@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
+
 `set_balance` spec
 ==================
 

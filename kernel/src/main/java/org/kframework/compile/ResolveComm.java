@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2022 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import com.google.common.collect.Lists;

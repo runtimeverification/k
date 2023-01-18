@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.14: Defining Evaluation Order
 
 The purpose of this lesson is to explain how to use the `heat` and `cool`

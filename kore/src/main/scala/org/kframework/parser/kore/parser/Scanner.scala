@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.kore.parser
 
 /** A scanner of an input stream.

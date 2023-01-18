@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 require "domains.md"
 
 module Y-SYNTAX

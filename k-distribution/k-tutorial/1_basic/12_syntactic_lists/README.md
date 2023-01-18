@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.12: Syntactic Lists
 
 The purpose of this lesson is to explain how K provides support for syntactic

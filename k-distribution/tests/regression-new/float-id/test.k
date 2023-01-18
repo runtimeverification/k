@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module TEST-SYNTAX
   imports FLOAT-SYNTAX
   imports ID

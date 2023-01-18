@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 require "def.k"
 
 // X = Y,   `mid Y => end incPos(Y)` - Function in pattern RHS.

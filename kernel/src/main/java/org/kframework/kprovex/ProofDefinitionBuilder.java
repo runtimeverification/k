@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.kprovex;
 
 import com.google.common.collect.Sets;

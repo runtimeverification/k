@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.8: Literate Programming with Markdown
 
 The purpose of this lesson is to teach a paradigm for performing literate

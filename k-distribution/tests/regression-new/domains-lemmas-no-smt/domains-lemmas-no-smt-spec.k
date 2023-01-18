@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 requires "domains-lemmas-no-smt.k"
 
 module DOMAINS-LEMMAS-NO-SMT-SPEC

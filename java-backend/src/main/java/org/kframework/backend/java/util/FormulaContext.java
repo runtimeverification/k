@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2018 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
 import com.google.common.collect.ImmutableMap;

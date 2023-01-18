@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 module IMP-SYNTAX
   imports DOMAINS-SYNTAX
   syntax AExp  ::= Int | String | Id

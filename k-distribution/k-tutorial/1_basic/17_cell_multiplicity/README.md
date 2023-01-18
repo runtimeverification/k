@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.17: Cell Multiplicity and Cell Collections
 
 The purpose of this lesson is to explain how you can create optional cells

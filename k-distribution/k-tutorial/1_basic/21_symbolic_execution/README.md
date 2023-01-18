@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.21: Unification and Symbolic Execution
 
 The purpose of this lesson is to teach the basic concepts of symbolic execution
