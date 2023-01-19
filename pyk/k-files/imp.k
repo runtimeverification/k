@@ -6,9 +6,8 @@ module IMP-SYNTAX
   imports ID
 
   syntax AExp  ::= Int | Id
-                 | "-" Int                    [klabae(-_), symbol, format(%1%2)]
-                 | AExp "/" AExp              [klabel(_/_), symbol, left, strict, color(pink)]
-                 > AExp "+" AExp              [klabel(_+_), symbol, left, strict, color(pink)]
+                 | AExp "/" AExp              [klabel(_/_), symbol, left, seqstrict, color(pink)]
+                 > AExp "+" AExp              [klabel(_+_), symbol, left, seqstrict, color(pink)]
                  | "(" AExp ")"               [bracket]
   syntax BExp  ::= Bool
                  | AExp "<=" AExp             [klabel(_<=_), symbol, seqstrict, latex({#1}\leq{#2}), color(pink)]
@@ -44,30 +43,30 @@ module IMP
                   <state color="red"> .Map </state>
                 </T>
 
-  rule <k> X:Id => I ...</k> <state>... X |-> I ...</state>
+  rule <k> X:Id => STATE[X] ... </k> <state> STATE </state> requires X in_keys(STATE)
 
-  rule I1 / I2 => I1 /Int I2  requires I2 =/=Int 0
-  rule I1 + I2 => I1 +Int I2
-  rule - I1 => 0 -Int I1
+  rule <k> I1 / I2 => I1 /Int I2 ... </k>  requires I2 =/=Int 0
+  rule <k> I1 + I2 => I1 +Int I2 ... </k>
 
-  rule I1 <= I2 => I1 <=Int I2
-  rule ! T => notBool T
-  rule true && B => B
-  rule false && _ => false
+  rule <k> I1 <= I2   => I1 <=Int I2 ... </k>
+  rule <k> ! T        => notBool T   ... </k>
+  rule <k> true && B  => B           ... </k>
+  rule <k> false && _ => false       ... </k>
 
-  rule {} => .   [structural]
-  rule {S} => S  [structural]
+  rule <k> {}  => . ... </k>
+  rule <k> {S} => S ... </k>
 
-  rule <k> X = I:Int; => . ...</k> <state>... X |-> (_ => I) ...</state>
+  rule <k> X = I:Int; => . ... </k> <state> STATE => STATE [ X <- I ] </state>
 
-  rule S1:Stmt S2:Stmt => S1 ~> S2  [structural]
+  rule <k> S1:Stmt S2:Stmt => S1 ~> S2 ... </k>
 
-  rule if (true)  S else _ => S
-  rule if (false) _ else S => S
+  rule <k> if (true)  S else _ => S ... </k>
+  rule <k> if (false) _ else S => S ... </k>
 
-  rule while (B) S => if (B) {S while (B) S} else {}  [structural]
+  rule <k> while (B) S => if (B) {S while (B) S} else {} ... </k>
 
-  rule <k> int (X,Xs => Xs);_ </k> <state> Rho:Map (.Map => X|->0) </state>
-    requires notBool (X in keys(Rho))
-  rule int .Ids; S => S  [structural]
+  rule <k> int (X , Xs => Xs) ; _ ... </k> <state> STATE => STATE [ X <- 0 ] </state>
+    requires notBool (X in keys(STATE))
+
+  rule <k> int .Ids ; S => S ... </k>
 endmodule

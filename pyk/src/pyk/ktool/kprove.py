@@ -5,13 +5,14 @@ from enum import Enum
 from itertools import chain
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
+from tempfile import NamedTemporaryFile
 from typing import Final, Iterable, List, Mapping, Optional, Tuple
 
 from ..cli_utils import BugReport, check_dir_path, check_file_path, gen_file_timestamp, run_process
 from ..cterm import CTerm, build_claim
 from ..kast.inner import KInner
 from ..kast.manip import extract_subst, flatten_label, free_vars
-from ..kast.outer import KClaim, KDefinition, KFlatModule, KImport, KRequire, KRule, KSentence
+from ..kast.outer import KClaim, KDefinition, KFlatModule, KFlatModuleList, KImport, KRequire, KRule, KSentence
 from ..prelude.ml import is_top, mlAnd, mlBottom, mlTop
 from ..utils import unique
 from .kprint import KPrint
@@ -41,6 +42,7 @@ def _kprove(
     command: Iterable[str] = ('kprove',),
     kompiled_dir: Optional[Path] = None,
     spec_module_name: Optional[str] = None,
+    md_selector: Optional[str] = None,
     include_dirs: Iterable[Path] = (),
     emit_json_spec: Optional[Path] = None,
     output: Optional[KProveOutput] = None,
@@ -62,6 +64,7 @@ def _kprove(
     typed_args = _build_arg_list(
         kompiled_dir=kompiled_dir,
         spec_module_name=spec_module_name,
+        md_selector=md_selector,
         include_dirs=include_dirs,
         emit_json_spec=emit_json_spec,
         output=output,
@@ -82,6 +85,7 @@ def _build_arg_list(
     *,
     kompiled_dir: Optional[Path],
     spec_module_name: Optional[str],
+    md_selector: Optional[str],
     include_dirs: Iterable[Path],
     emit_json_spec: Optional[Path],
     output: Optional[KProveOutput],
@@ -95,6 +99,9 @@ def _build_arg_list(
 
     if spec_module_name:
         args += ['--spec-module', spec_module_name]
+
+    if md_selector:
+        args += ['--md-selector', md_selector]
 
     for include_dir in include_dirs:
         args += ['-I', str(include_dir)]
@@ -142,6 +149,8 @@ class KProve(KPrint):
         spec_file: Path,
         spec_module_name: Optional[str] = None,
         args: Iterable[str] = (),
+        include_dirs: Iterable[Path] = (),
+        md_selector: Optional[str] = None,
         haskell_args: Iterable[str] = (),
         haskell_log_entries: Iterable[str] = (),
         log_axioms_file: Optional[Path] = None,
@@ -176,6 +185,8 @@ class KProve(KPrint):
             command=self.prover,
             kompiled_dir=self.definition_dir,
             spec_module_name=spec_module_name,
+            include_dirs=include_dirs,
+            md_selector=md_selector,
             output=KProveOutput.JSON,
             dry_run=dry_run,
             args=self.prover_args + list(args),
@@ -253,6 +264,38 @@ class KProve(KPrint):
         constraint_subst, _ = extract_subst(init_cterm.kast)
         next_states = [mlAnd([constraint_subst.unapply(ns), constraint_subst.ml_pred]) for ns in next_states]
         return next_states if len(next_states) > 0 else [mlTop()]
+
+    def get_claims(
+        self,
+        spec_file: Path,
+        spec_module_name: Optional[str] = None,
+        include_dirs: Iterable[Path] = (),
+        md_selector: Optional[str] = None,
+        claim_labels: Optional[Iterable[str]] = (),
+        exclude_claim_labels: Optional[Iterable[str]] = (),
+    ) -> List[KClaim]:
+        with NamedTemporaryFile('w', dir=self.use_directory) as ntf:
+            self.prove(
+                spec_file,
+                spec_module_name=spec_module_name,
+                include_dirs=include_dirs,
+                md_selector=md_selector,
+                dry_run=True,
+                args=['--emit-json-spec', ntf.name],
+            )
+            flat_module_list = KFlatModuleList.from_dict(json.loads(Path(ntf.name).read_text())['term'])
+
+        all_claims = {c.label: c for m in flat_module_list.modules for c in m.claims}
+
+        unfound_labels = []
+        claim_labels = list(all_claims.keys()) if claim_labels is None else claim_labels
+        exclude_claim_labels = [] if exclude_claim_labels is None else exclude_claim_labels
+        unfound_labels.extend([cl for cl in claim_labels if cl not in all_claims])
+        unfound_labels.extend([cl for cl in exclude_claim_labels if cl not in all_claims])
+        if len(unfound_labels) > 0:
+            raise ValueError(f'Claim labels not found: {unfound_labels}')
+
+        return [all_claims[cl] for cl in all_claims if cl in claim_labels and cl not in exclude_claim_labels]
 
     def get_claim_basic_block(
         self,

@@ -1,12 +1,13 @@
-from typing import Final, Iterable, List, Tuple
+from pathlib import Path
+from typing import Final, Iterable, List, Optional, Tuple
 
 import pytest
 
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KInner, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kast.manip import get_cell
-from pyk.kcfg import KCFGExplore
-from pyk.ktool import KPrint
+from pyk.kcfg import KCFG, KCFGExplore
+from pyk.ktool import KPrint, KProve
 from pyk.ktool.kprint import SymbolTable
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlTop
@@ -71,6 +72,38 @@ IMPLIES_TEST_DATA: Final = (
         ('int $n , $s ; $n = 3 ;', '.Map'),
         ('int $n , $s ; $n = 3 ;', '.Map'),
         (Subst({}), mlTop()),
+    ),
+)
+
+APR_PROVE_TEST_DATA: Iterable[Tuple[str, str, str, str, Optional[int], Optional[int], Iterable[str]]] = (
+    ('imp-simple-addition-1', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'addition-1', 2, 1, []),
+    ('imp-simple-addition-2', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'addition-2', 2, 7, []),
+    (
+        'imp-simple-sum-10',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'sum-10',
+        None,
+        None,
+        ['IMP-VERIFICATION.halt'],
+    ),
+    (
+        'imp-simple-sum-100',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'sum-100',
+        None,
+        None,
+        ['IMP-VERIFICATION.halt'],
+    ),
+    (
+        'imp-simple-sum-1000',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'sum-1000',
+        None,
+        None,
+        ['IMP-VERIFICATION.halt'],
     ),
 )
 
@@ -164,3 +197,38 @@ class TestImpProof(KCFGExploreTest):
 
         # Then
         assert actual == expected
+
+    @pytest.mark.parametrize(
+        'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,terminal_rules',
+        APR_PROVE_TEST_DATA,
+        ids=[test_id for test_id, *_ in APR_PROVE_TEST_DATA],
+    )
+    def test_all_path_reachability_prove(
+        self,
+        kprove: KProve,
+        kcfg_explore: KCFGExplore,
+        test_id: str,
+        spec_file: str,
+        spec_module: str,
+        claim_id: str,
+        max_iterations: int,
+        max_depth: int,
+        terminal_rules: Iterable[str],
+    ) -> None:
+
+        claims = kprove.get_claims(
+            Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}']
+        )
+        assert len(claims) == 1
+
+        kcfg = KCFG.from_claim(kprove.definition, claims[0])
+        kcfg = kcfg_explore.all_path_reachability_prove(
+            f'{spec_module}.{claim_id}',
+            kcfg,
+            max_iterations=max_iterations,
+            execute_depth=max_depth,
+            terminal_rules=terminal_rules,
+        )
+
+        failed_nodes = len(kcfg.frontier) + len(kcfg.stuck)
+        assert failed_nodes == 0

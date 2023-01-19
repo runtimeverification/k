@@ -8,5 +8,9 @@ endmodule
 module IMP-VERIFICATION
     imports IMP-VERIFICATION-SYNTAX
     imports IMP
+
+    syntax KItem ::= "#FINISH"
+
+    rule [halt]: <k> #FINISH => . ... </k>
 endmodule
 

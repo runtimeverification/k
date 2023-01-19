@@ -75,6 +75,8 @@ class KAtt(KAst, Mapping[str, Any]):
     atts: FrozenDict[str, Any]
 
     SORT: ClassVar[str] = 'org.kframework.kore.Sort'
+    LOCATION: ClassVar[str] = 'org.kframework.attributes.Location'
+    SOURCE: ClassVar[str] = 'org.kframework.attributes.Source'
 
     def __init__(self, atts: Mapping[str, Any] = EMPTY_FROZEN_DICT):
         def _freeze(m: Any) -> Any:
