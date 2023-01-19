@@ -7,6 +7,7 @@ from typing import ClassVar, Iterable, Iterator, Optional, Union
 import pytest
 from pytest import TempPathFactory
 
+from pyk.cli_utils import BugReport
 from pyk.kast.outer import KDefinition, read_kast_definition
 from pyk.kcfg import KCFGExplore
 from pyk.ktool import KompileBackend, KPrint, KProve, KRun, kompile
@@ -44,6 +45,12 @@ class KompiledTest:
     KOMPILE_MAIN_MODULE: ClassVar[Optional[str]] = None
     KOMPILE_SYNTAX_MODULE: ClassVar[Optional[str]] = None
     KOMPILE_INCLUDE_DIRS: ClassVar[Iterable[str]] = []
+
+    @pytest.fixture(scope='class')
+    def bug_report(self) -> Optional[BugReport]:
+        return None
+        # Use the following line instead to generate bug reports for tests
+        # return BugReport(Path('bug_report'))
 
     @pytest.fixture(scope='class')
     def definition_dir(self, kompile: Kompiler) -> Path:
@@ -88,8 +95,10 @@ class KProveTest(KompiledTest):
     KOMPILE_BACKEND = 'haskell'
 
     @pytest.fixture
-    def kprove(self, definition_dir: Path, tmp_path_factory: TempPathFactory) -> Iterator[KProve]:
-        kprove = KProve(definition_dir, use_directory=tmp_path_factory.mktemp('kprove'))
+    def kprove(
+        self, definition_dir: Path, tmp_path_factory: TempPathFactory, bug_report: Optional[BugReport]
+    ) -> Iterator[KProve]:
+        kprove = KProve(definition_dir, use_directory=tmp_path_factory.mktemp('kprove'), bug_report=bug_report)
         self._update_symbol_table(kprove.symbol_table)
         yield kprove
 
@@ -101,7 +110,7 @@ class KProveTest(KompiledTest):
 class KCFGExploreTest(KProveTest):
     @pytest.fixture
     def kcfg_explore(self, kprove: KProve) -> Iterator[KCFGExplore]:
-        kcfg_explore = KCFGExplore(kprove, free_port_on_host())
+        kcfg_explore = KCFGExplore(kprove, free_port_on_host(), bug_report=kprove._bug_report)
         yield kcfg_explore
 
 

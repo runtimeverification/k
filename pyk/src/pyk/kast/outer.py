@@ -98,6 +98,19 @@ class KSentence(KOuter, WithKAtt):
 
         raise ValueError(f"Expected KSentence label as 'node' value, found: '{node}'")
 
+    @property
+    def label(self) -> str:
+        if 'label' in self.att:
+            return self.att['label']
+        elif 'UNIQUE_ID' in self.att:
+            return self.att['UNIQUE_ID']
+        else:
+            _LOGGER.warning(f'Found a sentence without label or UNIQUE_ID: {self}')
+            if KAtt.SOURCE in self.att and KAtt.LOCATION in self.att:
+                return f'{self.att[KAtt.SOURCE]}:{self.att[KAtt.LOCATION]}'
+            else:
+                raise ValueError(f'Found sentence without label, UNIQUE_ID, or SOURCE:LOCATION: {self}')
+
 
 @final
 @dataclass(frozen=True)
