@@ -3,6 +3,10 @@ from typing import Final
 import pytest
 
 from pyk.kast.inner import KApply, KInner, KLabel, KSequence, KSort, KToken, KVariable
+from pyk.kore.prelude import BOOL as KORE_BOOL
+from pyk.kore.prelude import BYTES as KORE_BYTES
+from pyk.kore.prelude import INT as KORE_INT
+from pyk.kore.prelude import bool_dv, int_dv, string_dv
 from pyk.kore.syntax import (
     DV,
     And,
@@ -34,19 +38,19 @@ BIDIRECTIONAL_TEST_DATA: Final = (
     (
         'domain-value-int',
         INT,
-        DV(SortApp('SortInt'), String('3')),
+        int_dv(3),
         intToken(3),
     ),
     (
         'domain-value-string',
         STRING,
-        DV(SortApp('SortString'), String('foobar\n')),
+        string_dv('foobar\n'),
         stringToken('foobar\n'),
     ),
     (
         'domain-value-bytes',
         KSort('Bytes'),
-        DV(SortApp('SortBytes'), String(chr(0) + chr(60) + chr(96) + chr(245))),
+        DV(KORE_BYTES, String(chr(0) + chr(60) + chr(96) + chr(245))),
         bytesToken(chr(0) + chr(60) + chr(96) + chr(245)),
     ),
     (
@@ -84,7 +88,7 @@ BIDIRECTIONAL_TEST_DATA: Final = (
     (
         'variable-with-sort',
         INT,
-        EVar('VarX', SortApp('SortInt')),
+        EVar('VarX', KORE_INT),
         KVariable('X', sort=INT),
     ),
     (
@@ -96,13 +100,13 @@ BIDIRECTIONAL_TEST_DATA: Final = (
     (
         'variable-with-underscore',
         INT,
-        EVar("VarX'Unds'Y", SortApp('SortInt')),
+        EVar("VarX'Unds'Y", KORE_INT),
         KVariable('X_Y', sort=INT),
     ),
     (
         'issue:k/2762',
         KSort('Bool'),
-        App('Lblpred1', [], [DV(SortApp('SortInt'), String('3'))]),
+        App('Lblpred1', [], [int_dv(3)]),
         KApply('pred1', [intToken(3)]),
     ),
     (
@@ -128,10 +132,10 @@ BIDIRECTIONAL_TEST_DATA: Final = (
         'ml-equals',
         KSort('GeneratedTopCell'),
         Equals(
-            SortApp('SortBool'),
+            KORE_BOOL,
             SortApp('SortGeneratedTopCell'),
-            EVar('VarX', SortApp('SortBool')),
-            DV(SortApp('SortBool'), String('true')),
+            EVar('VarX', KORE_BOOL),
+            bool_dv(True),
         ),
         KApply(
             KLabel('#Equals', [KSort('Bool'), KSort('GeneratedTopCell')]),
@@ -142,9 +146,9 @@ BIDIRECTIONAL_TEST_DATA: Final = (
         'ml-ceil',
         KSort('GeneratedTopCell'),
         Ceil(
-            SortApp('SortBool'),
+            KORE_BOOL,
             SortApp('SortGeneratedTopCell'),
-            EVar('VarX', SortApp('SortBool')),
+            EVar('VarX', KORE_BOOL),
         ),
         KApply(
             KLabel('#Ceil', [KSort('Bool'), KSort('GeneratedTopCell')]),
@@ -155,9 +159,9 @@ BIDIRECTIONAL_TEST_DATA: Final = (
         'ml-exists',
         KSort('Bool'),
         Exists(
-            SortApp('SortBool'),
-            EVar('VarX', SortApp('SortBool')),
-            EVar('VarX', SortApp('SortBool')),
+            KORE_BOOL,
+            EVar('VarX', KORE_BOOL),
+            EVar('VarX', KORE_BOOL),
         ),
         KApply(
             KLabel('#Exists', [KSort('Bool')]),
@@ -171,8 +175,8 @@ BIDIRECTIONAL_TEST_DATA: Final = (
         'ml-not',
         KSort('Bool'),
         Not(
-            SortApp('SortBool'),
-            EVar('VarX', SortApp('SortBool')),
+            KORE_BOOL,
+            EVar('VarX', KORE_BOOL),
         ),
         KApply(
             KLabel('#Not', [KSort('Bool')]),
@@ -254,7 +258,7 @@ BIDIRECTIONAL_TEST_DATA: Final = (
         App(
             "Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort",
             [SortApp('SortK')],
-            [EVar('VarC', SortApp('SortBool')), EVar('VarB1', SortApp('SortK')), EVar('VarB2', SortApp('SortK'))],
+            [EVar('VarC', KORE_BOOL), EVar('VarB1', SortApp('SortK')), EVar('VarB2', SortApp('SortK'))],
         ),
         KApply(
             KLabel('#if_#then_#else_#fi_K-EQUAL-SYNTAX_Sort_Bool_Sort_Sort', [KSort('K')]),
