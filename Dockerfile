@@ -74,7 +74,6 @@ ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/kore.
 RUN cd .tmp-haskell && stack build --only-snapshot
 
 ADD pom.xml                                                    .tmp-maven/
-ADD ktree/pom.xml                                              .tmp-maven/ktree/
 ADD llvm-backend/pom.xml                                       .tmp-maven/llvm-backend/
 ADD llvm-backend/src/main/native/llvm-backend/matching/pom.xml .tmp-maven/llvm-backend/src/main/native/llvm-backend/matching/
 ADD haskell-backend/pom.xml                                    .tmp-maven/haskell-backend/

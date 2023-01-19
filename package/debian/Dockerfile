@@ -24,6 +24,7 @@ RUN    apt-get update            \
         libgmp-dev               \
         libjemalloc-dev          \
         libffi-dev               \
+        libfmt-dev               \
         libmpfr-dev              \
         libncurses5-dev          \
         libnss3-dev              \
@@ -70,7 +71,6 @@ RUN    cd /home/user/.tmp-haskell  \
     && stack build --only-snapshot
 
 ADD pom.xml                                                    /home/user/.tmp-maven/
-ADD ktree/pom.xml                                              /home/user/.tmp-maven/ktree/
 ADD llvm-backend/pom.xml                                       /home/user/.tmp-maven/llvm-backend/
 ADD llvm-backend/src/main/native/llvm-backend/matching/pom.xml /home/user/.tmp-maven/llvm-backend/src/main/native/llvm-backend/matching/
 ADD haskell-backend/pom.xml                                    /home/user/.tmp-maven/haskell-backend/

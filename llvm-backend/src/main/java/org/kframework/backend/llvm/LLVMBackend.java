@@ -54,7 +54,7 @@ public class LLVMBackend extends KoreBackend {
     @Override
     public void accept(Backend.Holder h) {
         Stopwatch sw = new Stopwatch(globalOptions);
-        String kore = getKompiledString(h.def);
+        String kore = getKompiledString(h.def, true);
         h.def = null;
         files.saveToKompiled("definition.kore", kore);
         sw.printIntermediate("  Print definition.kore");
@@ -96,10 +96,11 @@ public class LLVMBackend extends KoreBackend {
             case "static":
             case "library":
             case "python":
+            case "c":
                 llvmType = options.llvmKompileType;
                 break;
             default:
-                throw KEMException.criticalError("Non-valid argument for --llvm-kompile-type: " + options.llvmKompileType + ". Expected [main|search|library|static|python]");
+                throw KEMException.criticalError("Non-valid argument for --llvm-kompile-type: " + options.llvmKompileType + ". Expected [main|search|library|static|python|c]");
         }
 
         String llvmOutput = "interpreter";
