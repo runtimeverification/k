@@ -30,6 +30,8 @@ from ..kast.outer import (
     read_kast_definition,
 )
 from ..kore.parser import KoreParser
+from ..kore.prelude import BYTES as KORE_BYTES
+from ..kore.prelude import STRING as KORE_STRING
 from ..kore.syntax import (
     DV,
     And,
@@ -320,9 +322,9 @@ class KPrint:
         _LOGGER.debug(f'_kore_to_kast: {kore}')
 
         if type(kore) is DV and kore.sort.name.startswith('Sort'):
-            if kore.sort == SortApp('SortString'):
+            if kore.sort == KORE_STRING:
                 return stringToken(kore.value.value)
-            if kore.sort == SortApp('SortBytes'):
+            if kore.sort == KORE_BYTES:
                 return bytesToken(kore.value.value)
             return KToken(kore.value.value, KSort(kore.sort.name[4:]))
 
