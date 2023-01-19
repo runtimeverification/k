@@ -4,6 +4,7 @@ from typing import Any, Final, Mapping, Tuple
 import pytest
 
 from pyk.kore.parser import KoreParser
+from pyk.kore.prelude import INT, int_dv
 from pyk.kore.rpc import (
     BranchingResult,
     CutPointResult,
@@ -16,17 +17,12 @@ from pyk.kore.rpc import (
     StuckResult,
     TerminalResult,
 )
-from pyk.kore.syntax import DV, Equals, EVar, Implies, Pattern, SortApp, String, Top
+from pyk.kore.syntax import Equals, EVar, Implies, Pattern, Top
 
 from .utils import KoreClientTest
 
-int_sort = SortApp('SortInt')
-int_top = Top(int_sort)
-x, y = (EVar(v, int_sort) for v in ['x', 'y'])
-
-
-def int_dv(n: int) -> DV:
-    return DV(int_sort, String(str(n)))
+int_top = Top(INT)
+x, y = (EVar(v, INT) for v in ['x', 'y'])
 
 
 def term(n: int) -> Pattern:
@@ -79,26 +75,26 @@ IMPLIES_TEST_DATA: Final = (
         '0 -> T',
         int_dv(0),
         int_top,
-        ImpliesResult(True, Implies(int_sort, int_dv(0), int_top), int_top, int_top),
+        ImpliesResult(True, Implies(INT, int_dv(0), int_top), int_top, int_top),
     ),
-    ('0 -> 1', int_dv(0), int_dv(1), ImpliesResult(False, Implies(int_sort, int_dv(0), int_dv(1)), None, None)),
+    ('0 -> 1', int_dv(0), int_dv(1), ImpliesResult(False, Implies(INT, int_dv(0), int_dv(1)), None, None)),
     (
         'X -> 0',
         x,
         int_dv(0),
         ImpliesResult(
             False,
-            Implies(int_sort, x, int_dv(0)),
+            Implies(INT, x, int_dv(0)),
             Equals(
-                op_sort=int_sort,
-                sort=SortApp(name='SortInt'),
+                op_sort=INT,
+                sort=INT,
                 left=x,
                 right=int_dv(0),
             ),
             int_top,
         ),
     ),
-    ('X -> X', x, x, ImpliesResult(True, Implies(int_sort, x, x), int_top, int_top)),
+    ('X -> X', x, x, ImpliesResult(True, Implies(INT, x, x), int_top, int_top)),
 )
 
 IMPLIES_ERROR_TEST_DATA: Final = (

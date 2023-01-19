@@ -3,7 +3,8 @@ from pathlib import Path
 from pyk.kast.inner import KApply, KSequence, KToken
 from pyk.kast.manip import flatten_label, get_cell
 from pyk.kore.parser import KoreParser
-from pyk.kore.syntax import DV, App, Pattern, SortApp, String
+from pyk.kore.prelude import int_dv
+from pyk.kore.syntax import App, Pattern
 from pyk.ktool import KRun
 from pyk.ktool.kprint import KAstInput, KAstOutput, _kast
 from pyk.prelude.kint import intToken
@@ -73,8 +74,8 @@ class TestCofigRun(KRunTest):
 
     def test_run_kore_config(self, krun: KRun) -> None:
         # Given
-        fst = DV(SortApp('SortInt'), String('0'))
-        snd = DV(SortApp('SortInt'), String('1'))
+        fst = int_dv(0)
+        snd = int_dv(1)
         expected = App(
             "Lbl'-LT-'generatedTop'-GT-'",
             (),
@@ -90,7 +91,7 @@ class TestCofigRun(KRunTest):
                 App(
                     "Lbl'-LT-'generatedCounter'-GT-'",
                     (),
-                    (DV(SortApp('SortInt'), String('0')),),
+                    (int_dv(0),),
                 ),
             ),
         )
