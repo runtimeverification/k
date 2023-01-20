@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -40,13 +41,15 @@ public class KTextDocumentService implements TextDocumentService {
     private final LSClientLogger clientLogger;
 
     public final TextDocumentSyncHandler files = new TextDocumentSyncHandler();
-    private static final URI domains;
-    private static final URI kast;
+    public static final URI domains;
+    public static final URI kast;
+    // time delay after which to start doing completion calculation
+    public static long DELAY_EXECUTION_MS = 1000;
 
     static {
         try {
-            domains = new File(Kompile.BUILTIN_DIRECTORY.toString() + File.separatorChar + "domains.md").toPath().toRealPath(LinkOption.NOFOLLOW_LINKS).toUri();
-            kast = new File(Kompile.BUILTIN_DIRECTORY.toString() + File.separatorChar + "kast.md").toPath().toRealPath(LinkOption.NOFOLLOW_LINKS).toUri();
+            domains = Path.of(Kompile.BUILTIN_DIRECTORY.toString(), "domains.md").toRealPath(LinkOption.NOFOLLOW_LINKS).toUri();
+            kast = Path.of(Kompile.BUILTIN_DIRECTORY.toString(), "kast.md").toRealPath(LinkOption.NOFOLLOW_LINKS).toUri();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -94,10 +97,10 @@ public class KTextDocumentService implements TextDocumentService {
     @Override
     public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(CompletionParams position) {
         return CompletableFuture.supplyAsync(() -> {
-            Position pos = position.getPosition();
+            Position pos = new Position(position.getPosition().getLine() + 1, position.getPosition().getCharacter() + 1);
             List<CompletionItem> lci = new ArrayList<>();
             KTextDocument doc = files.files.get(position.getTextDocument().getUri());
-            String context = doc.getContextAt(position.getPosition());
+            String context = doc.getContextAt(pos);
             List<DefinitionItem> allDi = files.files.entrySet().stream().flatMap((u) -> u.getValue().dis.stream()).collect(Collectors.toList());
             switch (context) {
                 case "import":
@@ -143,7 +146,7 @@ public class KTextDocumentService implements TextDocumentService {
                     lci.addAll(getCompletionItems(allDi)); break;
             }
             this.clientLogger.logMessage("Operation '" + "text/completion: " + position.getTextDocument().getUri() + " #pos: " + pos.getLine() + " " + pos.getCharacter()
-            + " context: " + context + " #: " + lci.size());
+                + " context: " + context + " #: " + lci.size());
 
             // TODO: add completion for attributes
             return Either.forLeft(lci);
@@ -193,26 +196,6 @@ public class KTextDocumentService implements TextDocumentService {
         return completionItem;
     }
 
-    // for quick testing
-    public static void main(String[] args) throws InterruptedException, ExecutionException, URISyntaxException {
-        String uri = args[0];
-        System.out.println(isPositionOverLocation(new Position(10, 16), new Location(9, 3, 12, 17)));
-        KLanguageServer kls = new KLanguageServer();
-        kls.getTextDocumentService().didOpen(new DidOpenTextDocumentParams(new TextDocumentItem(uri, "kframework", 1, FileUtil.load(new File(new URI(uri))))));
-
-        CompletableFuture<DocumentDiagnosticReport> diags = kls.getTextDocumentService().diagnostic(new DocumentDiagnosticParams(new TextDocumentIdentifier(uri)));
-        RelatedFullDocumentDiagnosticReport z = diags.get().getLeft();
-        //System.out.println("Diags: " + z);
-
-        CompletableFuture<Either<List<CompletionItem>, CompletionList>> x = kls.getTextDocumentService().completion(new CompletionParams(new TextDocumentIdentifier(uri), new Position(10, 17)));
-        List<CompletionItem> y = x.get().getLeft();
-        System.out.println("Completion: " + y.size());
-
-        CompletableFuture<Either<List<? extends org.eclipse.lsp4j.Location>, List<? extends LocationLink>>> defin = kls.getTextDocumentService().definition(new DefinitionParams(new TextDocumentIdentifier(uri), new Position(21, 6)));
-        List<? extends LocationLink> defRez = defin.get().getRight();
-        //System.out.println("GoToDef: " + defRez);
-    }
-
     // previous diagnostics task. If it's still active, cancel it and run a newer, updated one
     private CompletableFuture<DocumentDiagnosticReport> latestScheduled;
 
@@ -220,7 +203,7 @@ public class KTextDocumentService implements TextDocumentService {
         if (latestScheduled != null && !latestScheduled.isDone())
             latestScheduled.completeExceptionally(new Throwable("Cancelled diagnostic publisher"));
 
-        Executor delayedExecutor = CompletableFuture.delayedExecutor(1, TimeUnit.SECONDS);
+        Executor delayedExecutor = CompletableFuture.delayedExecutor(DELAY_EXECUTION_MS, TimeUnit.MILLISECONDS);
         CompletableFuture<DocumentDiagnosticReport> scheduledFuture = CompletableFuture.supplyAsync(() -> {
             files.files.get(params.getTextDocument().getUri()).outerParse();
             List<Diagnostic> problems = files.files.get(params.getTextDocument().getUri()).problems;

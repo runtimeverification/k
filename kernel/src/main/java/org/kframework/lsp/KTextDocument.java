@@ -1,18 +1,17 @@
 package org.kframework.lsp;
 
 
-import org.eclipse.lsp4j.*;
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
 import org.kframework.kil.DefinitionItem;
 import org.kframework.parser.outer.ExtractFencedKCodeFromMarkdown;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
-import org.kframework.utils.file.FileUtil;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -57,14 +56,12 @@ public class KTextDocument {
                 c++;
             }
         }
-        pos = new Position(pos.getLine() + 1, pos.getCharacter() + 1);
         Matcher m = p.matcher(content);
         String context = "requires";
         while (m.find()) {
-            context = m.group();
-            System.out.println(context + " idx: " + m.start() + "-" + m.end() + " l: " + lines[m.start()] + " c: " + columns[m.start()]);
-            if (lines[m.end()] > pos.getLine() || lines[m.end()] == pos.getLine() && columns[m.end()] < pos.getCharacter())
+            if (lines[m.end()] > pos.getLine() || lines[m.end()] == pos.getLine() && columns[m.end()] > pos.getCharacter())
                 break;
+            context = m.group();
         }
         return context;
     }
