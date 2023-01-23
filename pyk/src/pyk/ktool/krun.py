@@ -5,7 +5,7 @@ from logging import Logger
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
 from tempfile import NamedTemporaryFile
-from typing import Final, List, Mapping, Optional
+from typing import Final, Iterable, List, Mapping, Optional, Union
 
 from ..cli_utils import BugReport, check_dir_path, check_file_path, run_process
 from ..cterm import CTerm
@@ -38,6 +38,7 @@ class KRun(KPrint):
         config: Optional[Mapping[str, KInner]] = None,
         depth: Optional[int] = None,
         expand_macros: bool = False,
+        expect_rc: Union[int, Iterable[int]] = 0,
     ) -> CTerm:
         if config is not None and 'PGM' in config:
             raise ValueError('Cannot supply both pgm and config with PGM variable.')
@@ -58,10 +59,10 @@ class KRun(KPrint):
                 pmap=pmap,
                 profile=self._profile,
                 bug_report=self._bug_report,
+                check=(expect_rc == 0),
             )
 
-        if result.returncode != 0:
-            raise RuntimeError('Non-zero exit-code from krun.')
+        self._check_return_code(result.returncode, expect_rc)
 
         result_kast = KInner.from_dict(json.loads(result.stdout)['term'])
         return CTerm(result_kast)
@@ -73,6 +74,7 @@ class KRun(KPrint):
         sort: Optional[KSort] = None,
         depth: Optional[int] = None,
         expand_macros: bool = False,
+        expect_rc: Union[int, Iterable[int]] = 0,
     ) -> CTerm:
         kore_pgm = self.kast_to_kore(pgm, sort=sort)
         with NamedTemporaryFile('w', dir=self.use_directory) as ntf:
@@ -89,10 +91,10 @@ class KRun(KPrint):
                 no_expand_macros=not expand_macros,
                 profile=self._profile,
                 bug_report=self._bug_report,
+                check=(expect_rc == 0),
             )
 
-        if result.returncode != 0:
-            raise RuntimeError('Non-zero exit-code from krun.')
+        self._check_return_code(result.returncode, expect_rc)
 
         result_kore = KoreParser(result.stdout).pattern()
         result_kast = self.kore_to_kast(result_kore)
@@ -105,6 +107,7 @@ class KRun(KPrint):
         depth: Optional[int] = None,
         expand_macros: bool = False,
         bug_report: Optional[BugReport] = None,
+        expect_rc: Union[int, Iterable[int]] = 0,
     ) -> Pattern:
         with NamedTemporaryFile('w', dir=self.use_directory) as f:
             f.write(pattern.text)
@@ -121,10 +124,10 @@ class KRun(KPrint):
                 no_expand_macros=not expand_macros,
                 profile=self._profile,
                 bug_report=self._bug_report,
+                check=(expect_rc == 0),
             )
 
-        if proc_res.returncode != 0:
-            raise RuntimeError('Non-zero exit-code from krun')
+        self._check_return_code(proc_res.returncode, expect_rc)
 
         parser = KoreParser(proc_res.stdout)
         res = parser.pattern()
@@ -138,6 +141,7 @@ class KRun(KPrint):
         depth: Optional[int] = None,
         expand_macros: bool = False,
         bug_report: Optional[BugReport] = None,
+        expect_rc: int = 0,
     ) -> Pattern:
         def _config_var_token(s: str) -> DV:
             return DV(SortApp('SortKConfigVar'), String(f'${s}'))
@@ -165,7 +169,17 @@ class KRun(KPrint):
         config_var_map = _map([_map_item(k, v, _sort(v)) for k, v in config.items()])
         term = App('LblinitGeneratedTopCell', [], [config_var_map])
 
-        return self.run_kore_term(term, depth=depth, expand_macros=expand_macros, bug_report=bug_report)
+        return self.run_kore_term(
+            term, depth=depth, expand_macros=expand_macros, bug_report=bug_report, expect_rc=expect_rc
+        )
+
+    @staticmethod
+    def _check_return_code(actual: int, expected: Union[int, Iterable[int]]) -> None:
+        if isinstance(expected, int):
+            expected = [expected]
+
+        if actual not in expected:
+            raise RuntimeError(f'Expected {expected} as exit code from krun, but got {actual}')
 
 
 class KRunOutput(Enum):
