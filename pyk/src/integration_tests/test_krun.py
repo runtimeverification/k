@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from pyk.kast.inner import KApply, KSequence, KToken
 from pyk.kast.manip import flatten_label, get_cell
 from pyk.kore.parser import KoreParser
@@ -69,7 +71,7 @@ class TestImpRun(KRunTest):
         return KoreParser(kore_text).pattern()
 
 
-class TestCofigRun(KRunTest):
+class TestConfigRun(KRunTest):
     KOMPILE_MAIN_FILE = 'k-files/config.k'
 
     def test_run_kore_config(self, krun: KRun) -> None:
@@ -101,3 +103,28 @@ class TestCofigRun(KRunTest):
 
         # Then
         assert actual == expected
+
+
+class TestReturnCodeRun(KRunTest):
+    KOMPILE_MAIN_FILE = 'k-files/return-code.k'
+
+    @staticmethod
+    def _input(value: int) -> KToken:
+        return KToken(f'foo({value})', 'Foo')
+
+    def test_run_expect_rc(self, krun: KRun) -> None:
+        krun.run(self._input(0))
+        krun.run(self._input(67), expect_rc=67)
+        krun.run(self._input(3), expect_rc=[1, 2, 3, 4])
+
+        with pytest.raises(RuntimeError):
+            krun.run(self._input(7))
+
+        with pytest.raises(RuntimeError):
+            krun.run(self._input(7), expect_rc=8)
+
+        with pytest.raises(RuntimeError):
+            krun.run(self._input(2), expect_rc=[])
+
+        with pytest.raises(RuntimeError):
+            krun.run(self._input(2), expect_rc=(1, 4, 5))
