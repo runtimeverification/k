@@ -40,7 +40,7 @@ public class KTextDocumentService implements TextDocumentService {
     private final KLanguageServer languageServer;
     private final LSClientLogger clientLogger;
 
-    public final TextDocumentSyncHandler files = new TextDocumentSyncHandler();
+    public final TextDocumentSyncHandler files;
     public static final URI domains;
     public static final URI kast;
     // time delay after which to start doing completion calculation
@@ -59,7 +59,7 @@ public class KTextDocumentService implements TextDocumentService {
     public KTextDocumentService(KLanguageServer languageServer) throws URISyntaxException {
         this.languageServer = languageServer;
         this.clientLogger = LSClientLogger.getInstance();
-        TextDocumentSyncHandler d = new TextDocumentSyncHandler();
+        files = new TextDocumentSyncHandler(clientLogger);
         files.add(domains.toString());
         files.add(kast.toString());
     }
@@ -101,11 +101,11 @@ public class KTextDocumentService implements TextDocumentService {
             List<CompletionItem> lci = new ArrayList<>();
             KTextDocument doc = files.files.get(position.getTextDocument().getUri());
             String context = doc.getContextAt(pos);
-            List<DefinitionItem> allDi = files.files.entrySet().stream().flatMap((u) -> u.getValue().dis.stream()).collect(Collectors.toList());
+            List<DefinitionItem> allDi = files.slurp(position.getTextDocument().getUri());
             switch (context) {
                 case "import":
                 case "imports":
-                    files.files.forEach((uri, ddis) -> ddis.dis.stream()
+                    allDi.stream()
                             .filter(mi2 -> mi2 instanceof Module)
                             .map(m2 -> ((Module) m2))
                             .forEach(m2 -> {
@@ -114,7 +114,7 @@ public class KTextDocumentService implements TextDocumentService {
                                 ci.setInsertText(m2.getName());
                                 ci.setKind(CompletionItemKind.Snippet);
                                 lci.add(ci);
-                            })); break;
+                            }); break;
                 case "syntax":
                     Map<String, Set<Att>> allSorts = allDi.stream().filter(i -> i instanceof Module)
                             .map(m3 -> ((Module) m3))
@@ -228,8 +228,7 @@ public class KTextDocumentService implements TextDocumentService {
                         if (isPositionOverLocation(pos, loc)) {
                             Require req = (Require) di;
                             File f = new File(new URI(params.getTextDocument().getUri()));
-                            URI targetURI = new File(f.getParent() + File.separatorChar + req.getValue()).toURI();
-
+                            URI targetURI = Path.of(f.getParent(), req.getValue()).toRealPath(LinkOption.NOFOLLOW_LINKS).toUri();
                             lls.add(new LocationLink(targetURI.toString(),
                                     new Range(new Position(0, 0), new Position(10, 0)),
                                     new Range(new Position(0, 0), new Position(0, 0)),
@@ -242,21 +241,21 @@ public class KTextDocumentService implements TextDocumentService {
                                 Location loc = getSafeLoc(mi);
                                 if (isPositionOverLocation(pos, loc)) {
                                     Import imp = (Import) mi;
-                                    files.files.forEach((uri, ddis) -> ddis.dis.forEach((ddi) -> {
-                                        if (ddi instanceof Module && ((Module) ddi).getName().equals(imp.getName()))
-                                            lls.add(new LocationLink(uri,
-                                                    loc2range(getSafeLoc(ddi)),
-                                                    loc2range(getSafeLoc(ddi)),
-                                                    loc2range(getSafeLoc(imp))));
-                                        })
-                                    );
+                                    List<DefinitionItem> allDi = files.slurp(params.getTextDocument().getUri());
+                                    allDi.stream().filter(ddi -> ddi instanceof Module)
+                                                .map(ddi -> ((Module) ddi))
+                                                .filter(m2 -> m2.getName().equals(imp.getName()))
+                                                .forEach(m3 -> lls.add(new LocationLink(URI.create(m3.getSource().source()).toString(),
+                                                            loc2range(getSafeLoc(m3)),
+                                                            loc2range(getSafeLoc(m3)),
+                                                            loc2range(getSafeLoc(imp)))));
                                 }
                             }
                         }
                     }
                 }
-            } catch (URISyntaxException e) {
-                throw new RuntimeException();
+            } catch (URISyntaxException | RuntimeException | IOException e) {
+                clientLogger.logMessage("definition failed: " + params.getTextDocument().getUri());
             }
 
             return Either.forRight(lls);

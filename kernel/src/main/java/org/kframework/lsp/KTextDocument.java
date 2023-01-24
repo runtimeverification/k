@@ -24,14 +24,14 @@ public class KTextDocument {
     public int[] lines;
     public int[] columns;
     public boolean linesOutdated = true;
-    public boolean disOutdated = true;
+    public boolean parsingOutdated = true;
     public List<Diagnostic> problems = new ArrayList<>();
     // definition items provided by outer parsing
     public List<DefinitionItem> dis = new ArrayList<>();
     public static final ExtractFencedKCodeFromMarkdown mdExtractor = new ExtractFencedKCodeFromMarkdown(null, "k");
 
     public void updateText(String input) {
-        disOutdated = true;
+        parsingOutdated = true;
         linesOutdated = true;
         content = input;
     }
@@ -67,8 +67,8 @@ public class KTextDocument {
     }
 
     public void outerParse() {
-        if (disOutdated) {
-            disOutdated = false;
+        if (parsingOutdated) {
+            parsingOutdated = false;
             problems.clear();
             try {
                 String contents = this.content;
