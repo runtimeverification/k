@@ -5,6 +5,7 @@ from typing import (
     Callable,
     Dict,
     Final,
+    Generic,
     Hashable,
     Iterable,
     Iterator,
@@ -15,8 +16,20 @@ from typing import (
     Type,
     TypeVar,
     cast,
+    overload,
 )
 
+P = TypeVar('P')
+P1 = TypeVar('P1')
+P2 = TypeVar('P2')
+P3 = TypeVar('P3')
+P4 = TypeVar('P4')
+Q = TypeVar('Q')
+R = TypeVar('R')
+R1 = TypeVar('R1')
+R2 = TypeVar('R2')
+R3 = TypeVar('R3')
+R4 = TypeVar('R4')
 T = TypeVar('T')
 K = TypeVar('K')
 V = TypeVar('V')
@@ -90,6 +103,106 @@ def merge_with(f: Callable[[V, V], V], d1: Mapping[K, V], d2: Mapping[K, V]) -> 
 
 def filter_none(mapping: Mapping[K, V]) -> Dict[K, V]:
     return {k: v for k, v in mapping.items() if v is not None}
+
+
+# Higher-order functions
+
+
+class Chainable(Generic[P, R]):
+    _f: Callable[[P], R]
+
+    def __init__(self, f: Callable[[P], R]):
+        self._f = f
+
+    def __call__(self, p: P) -> R:
+        return self._f(p)
+
+    def __rshift__(self, other: Callable[[R], Q]) -> 'Chainable[P, Q]':
+        return Chainable(lambda p: other(self(p)))
+
+
+chain: Final[Chainable[Any, Any]] = Chainable(lambda x: x)
+
+
+def none(x: Any) -> None:
+    pass
+
+
+def maybe(f: Callable[[P], R]) -> Callable[[Optional[P]], Optional[R]]:
+    def res(p: Optional[P]) -> Optional[R]:
+        return f(p) if p is not None else None
+
+    return res
+
+
+@overload
+def tuple_of() -> Callable[[Tuple[()]], Tuple[()]]:
+    ...
+
+
+@overload
+def tuple_of(
+    f1: Callable[[P1], R1],
+    /,
+) -> Callable[[Tuple[P1]], Tuple[R1]]:
+    ...
+
+
+@overload
+def tuple_of(
+    f1: Callable[[P1], R1],
+    f2: Callable[[P2], R2],
+    /,
+) -> Callable[[Tuple[P1, P2]], Tuple[R1, R2]]:
+    ...
+
+
+@overload
+def tuple_of(
+    f1: Callable[[P1], R1],
+    f2: Callable[[P2], R2],
+    f3: Callable[[P3], R3],
+    /,
+) -> Callable[[Tuple[P1, P2, P3]], Tuple[R1, R2, R3]]:
+    ...
+
+
+@overload
+def tuple_of(
+    f1: Callable[[P1], R1],
+    f2: Callable[[P2], R2],
+    f3: Callable[[P3], R3],
+    f4: Callable[[P4], R4],
+    /,
+) -> Callable[[Tuple[P1, P2, P3, P4]], Tuple[R1, R2, R3, R4]]:
+    ...
+
+
+def tuple_of(*args: Callable) -> Callable:
+    def res(t: Tuple) -> Tuple:
+        return tuple(f(x) for f, x in zip(args, t))
+
+    return res
+
+
+def case(
+    cases: Iterable[Tuple[Callable[[P], bool], Callable[[P], R]]],
+    default: Optional[Callable[[P], R]] = None,
+) -> Callable[[P], R]:
+    def res(p: P) -> R:
+        for cond, then in cases:  # noqa: B905
+            if cond(p):
+                return then(p)
+
+        if default is not None:
+            return default(p)
+
+        raise ValueError(f'No match found for: {p}')
+
+    return res
+
+
+# Iterables
 
 
 def find_common_items(l1: Iterable[T], l2: Iterable[T]) -> Tuple[List[T], List[T], List[T]]:
