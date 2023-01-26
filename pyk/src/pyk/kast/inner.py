@@ -233,50 +233,52 @@ class KToken(KInner):
 
 @final
 @dataclass(frozen=True)
-class KVariable(KInner, WithKAtt):
+class KVariable(KInner):
     name: str
-    att: KAtt
+    sort: Optional[KSort]
 
-    def __init__(self, name: str, *, sort: Optional[KSort] = None, att: KAtt = EMPTY_ATT):
+    def __init__(self, name: str, *, sort: Optional[KSort] = None):
         object.__setattr__(self, 'name', name)
-        if sort is not None:
-            if KAtt.SORT in att:
-                raise ValueError('Both sort and sort attribute provided.')
-            att = att.update({KAtt.SORT: sort.to_dict()})
-        object.__setattr__(self, 'att', att)
-
-    @property
-    def sort(self) -> Optional[KSort]:
-        if KAtt.SORT in self.att:
-            return KSort.from_dict(self.att[KAtt.SORT])
-        return None
+        object.__setattr__(self, 'sort', sort)
 
     @classmethod
     def from_dict(cls: Type['KVariable'], d: Dict[str, Any]) -> 'KVariable':
         cls._check_node(d)
-        return KVariable(
-            name=d['name'],
-            att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
-        )
+        sort = None
+        att = KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT
+        for a in [
+            KAtt.LOCATION,
+            KAtt.SOURCE,
+            'anonymous',
+            'cellSort',
+            'withConfig',
+            'prettyPrintWithSortAnnotation',
+            'fresh',
+        ]:
+            if a in att:
+                _LOGGER.debug(f'Removing attribute from KVariable: {a}: {att[a]}, from KVariable {d}')
+                att = att.remove([a])
+        if KAtt.SORT in att:
+            sort = KSort.from_dict(att[KAtt.SORT])
+            if len(att) > 1:
+                raise ValueError(f'Attributes other than {KAtt.SORT} attached to KVariable: {d}')
+        elif len(att) > 0:
+            raise ValueError(f'Attributes other than {KAtt.SORT} attached to KVariable: {d}')
+        return KVariable(name=d['name'], sort=sort)
 
     def to_dict(self) -> Dict[str, Any]:
-        return {'node': 'KVariable', 'name': self.name, 'att': self.att.to_dict()}
+        _att = KAtt({})
+        if self.sort is not None:
+            _att = _att.update({KAtt.SORT: self.sort.to_dict()})
+        return {'node': 'KVariable', 'name': self.name, 'att': _att.to_dict()}
 
-    def let(
-        self, *, name: Optional[str] = None, sort: Optional[KSort] = None, att: Optional[KAtt] = None
-    ) -> 'KVariable':
-        # TODO: We actually want `sort: Optional[Optional['KSort']]`
+    def let(self, *, name: Optional[str] = None, sort: Optional[KSort] = None) -> 'KVariable':
         name = name if name is not None else self.name
-        att = att if att is not None else self.att
-        if sort is not None:
-            att = att.update({KAtt.SORT: None})
-        return KVariable(name=name, sort=sort, att=att)
+        sort = sort if sort is not None else self.sort
+        return KVariable(name=name, sort=sort)
 
-    def let_att(self, att: KAtt) -> 'KVariable':
-        return self.let(att=att)
-
-    def let_sort(self, sort: KSort) -> 'KVariable':
-        return self.let_att(self.att.update({KAtt.SORT: sort.to_dict()}))
+    def let_sort(self, sort: Optional[KSort]) -> 'KVariable':
+        return KVariable(self.name, sort=sort)
 
     def map_inner(self: 'KVariable', f: Callable[[KInner], KInner]) -> 'KVariable':
         return self
