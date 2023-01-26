@@ -5,7 +5,7 @@ import pytest
 from pyk.kast.inner import KApply, KInner, KSequence, KToken, KVariable
 from pyk.kast.manip import remove_attrs
 from pyk.ktool import KPrint
-from pyk.prelude.kint import intToken
+from pyk.prelude.kint import INT, intToken
 
 from .utils import KPrintTest
 
@@ -13,7 +13,7 @@ TEST_DATA: Final = (
     ('int-token', False, KToken('3', 'Int'), intToken(3)),
     ('id-token', False, KToken('abc', 'Id'), KToken('abc', 'Id')),
     ('add-aexp', False, KToken('3 + 4', 'AExp'), KApply('_+_', [intToken(3), intToken(4)])),
-    ('add-int', True, KToken('3 +Int V', 'Int'), KApply('_+Int_', [intToken(3), KVariable('V')])),
+    ('add-int', True, KToken('3 +Int V', 'Int'), KApply('_+Int_', [intToken(3), KVariable('V', sort=INT)])),
     ('k-cell', True, KToken('<k> . </k>', 'KCell'), KApply('<k>', KSequence())),
 )
 
