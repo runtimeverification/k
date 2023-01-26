@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Store information about each file.
+ */
 public class KTextDocument {
 
     public String content = "";
@@ -33,9 +36,10 @@ public class KTextDocument {
         parsingOutdated = true;
         linesOutdated = true;
         content = input;
+        problems.clear();
     }
 
-    Pattern p = Pattern.compile("(module|endmodule|syntax|context|configuration|rule|claim|require[s]?|import[s]?)");
+    private static final Pattern p = Pattern.compile("(module|endmodule|syntax|context|configuration|rule|claim|require[s]?|import[s]?)");
 
     // get the last keyword at Position in order to provide contextual completion
     public String getContextAt(KPos pos) {
