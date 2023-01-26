@@ -310,7 +310,7 @@ def test_aliases() -> None:
     with pytest.raises(ValueError, match='Unknown alias: @bar'):
         cfg.node('@bar')
 
-    with pytest.raises(ValueError, match='Duplicate alias "bar2"'):
+    with pytest.raises(ValueError, match='Duplicate alias: bar2'):
         cfg.add_alias('bar2', node(1).id)
     with pytest.raises(ValueError, match='Alias may not contain "@"'):
         cfg.add_alias('@buzz', node(1).id)

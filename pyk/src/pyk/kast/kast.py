@@ -56,7 +56,7 @@ class KAst(ABC):
         expected = expected if expected is not None else cls.__name__
         actual = d['node']
         if actual != expected:
-            raise ValueError(f"Expected '{expected}' as 'node' value, found: '{actual}'")
+            raise ValueError(f'Expected "node" value: {expected}, got: {actual}')
 
     def _as_shallow_tuple(self) -> Tuple[Any, ...]:
         # shallow copy version of dataclass.astuple.

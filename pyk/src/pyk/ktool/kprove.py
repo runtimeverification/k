@@ -176,7 +176,7 @@ class KProve(KPrint):
         ]
 
         kore_exec_opts = ' '.join(list(haskell_args) + haskell_log_args)
-        _LOGGER.debug(f'export KORE_EXEC_OPTS="{kore_exec_opts}"')
+        _LOGGER.debug(f'export KORE_EXEC_OPTS={kore_exec_opts!r}')
         env = os.environ.copy()
         env['KORE_EXEC_OPTS'] = kore_exec_opts
 
