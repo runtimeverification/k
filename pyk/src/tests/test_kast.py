@@ -1,73 +1,52 @@
 from itertools import count
-from typing import Final, List, Tuple
+from typing import Any, Dict, Final, List, Tuple
 
 import pytest
 
-from pyk.kast.inner import KApply, KAtt, KInner, KLabel, KSequence, KSort, KVariable, build_assoc
+from pyk.kast.inner import KApply, KInner, KLabel, KSequence, KSort, KVariable, build_assoc
 from pyk.kast.outer import KDefinition, KFlatModule
 from pyk.prelude.kbool import BOOL
 from pyk.prelude.kint import INT
 from pyk.prelude.string import STRING
 from pyk.prelude.utils import token
-from pyk.utils import FrozenDict
 
 from .utils import f, x, y, z
 
 KVARIABLE_TEST_DATA: Final = (
-    ('no-sort', KVariable('Foo'), KVariable('Foo', att=KAtt({}))),
+    ('no-sort', KVariable('Foo'), {'node': 'KVariable', 'name': 'Foo', 'att': {'node': 'KAtt', 'att': {}}}),
     (
         'sort',
-        KVariable('Foo', att=KAtt({'org.kframework.kore.Sort': FrozenDict(INT.to_dict())})),
-        KVariable('Foo', sort=INT),
+        KVariable('Foo', sort=KSort('Int')),
+        {
+            'node': 'KVariable',
+            'name': 'Foo',
+            'att': {'node': 'KAtt', 'att': {'org.kframework.kore.Sort': {'node': 'KSort', 'name': 'Int'}}},
+        },
     ),
 )
 
 
 @pytest.mark.parametrize(
-    'test_id,actual,expected',
+    'test_id,var,dct',
     KVARIABLE_TEST_DATA,
     ids=[test_id for test_id, *_ in KVARIABLE_TEST_DATA],
 )
-def test_kvariable_construct(test_id: str, actual: KVariable, expected: KVariable) -> None:
-    assert actual == expected
-
-
-@pytest.mark.parametrize(
-    'test_id,var,expected',
-    KVARIABLE_TEST_DATA,
-    ids=[test_id for test_id, *_ in KVARIABLE_TEST_DATA],
-)
-def test_kvariable_to_dict(test_id: str, var: KVariable, expected: KVariable) -> None:
+def test_kvariable_to_dict(test_id: str, var: KVariable, dct: Dict[str, Any]) -> None:
     # When
-    actual = KVariable.from_dict(var.to_dict())
+    actual_var = KVariable.from_dict(dct)
+    actual_dct = var.to_dict()
 
     # Then
-    assert actual == expected
-
-
-def test_kvariable_construct_error() -> None:
-    # Then
-    with pytest.raises(ValueError):
-        # When
-        KVariable('Foo', sort=INT, att=KAtt({'org.kframework.kore.Sort': FrozenDict(BOOL.to_dict())}))
+    assert actual_var == var
+    assert actual_dct == dct
 
 
 KVARIABLE_LET_TEST_DATA: Final = (
     ('let-changes-sort', KVariable('Foo', sort=STRING).let(sort=INT), KVariable('Foo', sort=INT)),
     (
-        'sort-overrides-att-if-unset',
-        KVariable('Foo', att=KAtt({'bar': 'buzz'})).let(sort=INT, att=KAtt({'widget': 'gadget'})),
-        KVariable('Foo', sort=INT, att=(KAtt({'widget': 'gadget'}))),
-    ),
-    (
-        'let-can-set-sort-and-other-attribute',
-        KVariable('Foo').let(sort=STRING, att=KAtt({'bar': 'buzz'})),
-        KVariable('Foo', sort=STRING, att=KAtt({'bar': 'buzz'})),
-    ),
-    (
-        'let-preserves-atts',
-        KVariable('Foo', att=KAtt({'bar': 'buzz'})).let(sort=STRING),
-        KVariable('Foo', sort=STRING, att=KAtt({'bar': 'buzz'})),
+        'let-can-set-sort',
+        KVariable('Foo').let(sort=STRING),
+        KVariable('Foo', sort=STRING),
     ),
 )
 
@@ -83,13 +62,6 @@ def test_kvariable_let(test_id: str, var: KVariable, expected: KVariable) -> Non
 
     # Then
     assert actual == expected
-
-
-def test_kvariable_let_error() -> None:
-    # Then
-    with pytest.raises(ValueError):
-        # When
-        KVariable('Foo').let(sort=STRING, att=KAtt({KAtt.SORT: INT})),
 
 
 KLABEL_TEST_DATA: Final[Tuple[List[KSort], ...]] = (

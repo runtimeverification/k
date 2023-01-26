@@ -54,7 +54,7 @@ Prover output:
 ┃  │
 ┃  │  [1m[32m(verified)[0m[0m
 ┃  │  (-1 steps)
-┃  └  76b287..c61318 (target, leaf)
+┃  └  163c23..f5fb94 (target, leaf)
 ┃
 ┗━ d9ed37..e32051 (expanded, @init-not-1)    notBool ( N:Int ==Int 1 )
    │
@@ -65,7 +65,7 @@ Prover output:
    ┃  │
    ┃  │  [1m[32m(verified)[0m[0m
    ┃  │  (-1 steps)
-   ┃  └  76b287..c61318 (target, leaf)
+   ┃  └  163c23..f5fb94 (target, leaf)
    ┃
    ┗━ 91c88c..f061ad (expanded, @init-not-1-2)    notBool ( N:Int ==Int 2 )
       │

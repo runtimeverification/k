@@ -93,7 +93,7 @@ ML_TO_BOOL_TEST_DATA: Final = (
             KLabel('#Ceil', [KSort('Set'), GENERATED_TOP_CELL]),
             [KApply(KLabel('_Set_'), [KVariable('_'), KVariable('_')])],
         ),
-        KVariable('Ceil_0f9c9997'),
+        KVariable('Ceil_fa9c0b54'),
     ),
     (
         'ceil-set-concat-sort',
@@ -107,7 +107,7 @@ ML_TO_BOOL_TEST_DATA: Final = (
                 )
             ],
         ),
-        notBool(KVariable('Ceil_0f9c9997')),
+        notBool(KVariable('Ceil_fa9c0b54')),
     ),
     (
         'exists-equal-int',
@@ -116,7 +116,7 @@ ML_TO_BOOL_TEST_DATA: Final = (
             KLabel('#Exists', [INT, BOOL]),
             [KVariable('X'), KApply('_==Int_', [KVariable('X'), KVariable('Y')])],
         ),
-        KVariable('Exists_6acf2557'),
+        KVariable('Exists_9a5d09ae'),
     ),
 )
 
