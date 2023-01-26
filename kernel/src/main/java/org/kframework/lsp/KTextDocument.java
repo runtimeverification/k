@@ -41,7 +41,7 @@ public class KTextDocument {
 
     private static final Pattern p = Pattern.compile("(module|endmodule|syntax|context|configuration|rule|claim|require[s]?|import[s]?)");
 
-    // get the last keyword at Position in order to provide contextual completion
+    // get the last keyword at KPos in order to provide contextual completion
     public String getContextAt(KPos pos) {
         if (linesOutdated) {
             linesOutdated = false;
