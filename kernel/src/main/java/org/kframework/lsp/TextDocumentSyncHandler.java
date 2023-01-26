@@ -278,7 +278,7 @@ public class TextDocumentSyncHandler {
                         }
                     }
                 }
-            } catch (URISyntaxException | RuntimeException | IOException e) {
+            } catch (URISyntaxException | IOException e) {
                 clientLogger.logMessage("definition failed: " + params.getTextDocument().getUri() + e);
             }
 
