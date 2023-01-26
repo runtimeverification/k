@@ -5,10 +5,13 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kframework.attributes.Location;
+import org.kframework.kil.DefinitionItem;
 
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public class LSPTests {
 
@@ -44,27 +47,27 @@ public class LSPTests {
     public void testGetContext() {
         KTextDocument doc = new KTextDocument();
         doc.updateText(def);
-        Assert.assertEquals("require", doc.getContextAt(new Position(2, 2)));
-        Assert.assertEquals("module", doc.getContextAt(new Position(4, 8)));
-        Assert.assertEquals("imports", doc.getContextAt(new Position(9, 21)));
-        Assert.assertEquals("syntax", doc.getContextAt(new Position(11, 18)));
-        Assert.assertEquals("endmodule", doc.getContextAt(new Position(19, 1)));
-        Assert.assertEquals("rule", doc.getContextAt(new Position(24, 30)));
+        Assert.assertEquals("require", doc.getContextAt(new KPos(2, 2)));
+        Assert.assertEquals("module", doc.getContextAt(new KPos(4, 8)));
+        Assert.assertEquals("imports", doc.getContextAt(new KPos(9, 21)));
+        Assert.assertEquals("syntax", doc.getContextAt(new KPos(11, 18)));
+        Assert.assertEquals("endmodule", doc.getContextAt(new KPos(19, 1)));
+        Assert.assertEquals("rule", doc.getContextAt(new KPos(24, 30)));
     }
 
     @Test
     public void isPositionOverLocation() {
-        Assert.assertTrue(KTextDocumentService.isPositionOverLocation(
-                new Position(9, 3),
+        Assert.assertTrue(TextDocumentSyncHandler.isPositionOverLocation(
+                new KPos(9, 3),
                 new Location(9, 3, 12, 17)));
-        Assert.assertTrue(KTextDocumentService.isPositionOverLocation(
-                new Position(10, 16),
+        Assert.assertTrue(TextDocumentSyncHandler.isPositionOverLocation(
+                new KPos(10, 16),
                 new Location(9, 3, 12, 17)));
-        Assert.assertFalse(KTextDocumentService.isPositionOverLocation(
-                new Position(9, 2),
+        Assert.assertFalse(TextDocumentSyncHandler.isPositionOverLocation(
+                new KPos(9, 2),
                 new Location(9, 3, 12, 17)));
-        Assert.assertFalse(KTextDocumentService.isPositionOverLocation(
-                new Position(12, 18),
+        Assert.assertFalse(TextDocumentSyncHandler.isPositionOverLocation(
+                new KPos(12, 18),
                 new Location(9, 3, 12, 17)));
     }
 

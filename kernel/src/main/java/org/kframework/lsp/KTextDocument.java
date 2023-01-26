@@ -3,7 +3,6 @@ package org.kframework.lsp;
 
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
-import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.kframework.attributes.Location;
 import org.kframework.attributes.Source;
@@ -39,7 +38,7 @@ public class KTextDocument {
     Pattern p = Pattern.compile("(module|endmodule|syntax|context|configuration|rule|claim|require[s]?|import[s]?)");
 
     // get the last keyword at Position in order to provide contextual completion
-    public String getContextAt(Position pos) {
+    public String getContextAt(KPos pos) {
         if (linesOutdated) {
             linesOutdated = false;
             lines = new int[content.length() + 1];
@@ -78,7 +77,7 @@ public class KTextDocument {
             } catch (KEMException e) {
                 Location loc = e.exception.getLocation();
                 if (loc == null) loc = new Location(1, 1, 1, 2);
-                Range range = KTextDocumentService.loc2range(loc);
+                Range range = TextDocumentSyncHandler.loc2range(loc);
                 Diagnostic d = new Diagnostic(range, e.exception.getMessage(), DiagnosticSeverity.Error, "Outer Parser");
                 problems.add(d);
             }
