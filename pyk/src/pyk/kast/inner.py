@@ -42,7 +42,7 @@ class KInner(KAst):
         if node in KInner._INNER_NODES:
             return globals()[node].from_dict(d)
 
-        raise ValueError(f"Expected KInner label as 'node' value, found: '{node}'")
+        raise ValueError(f'Expected KInner label as "node" value, found: {node}')
 
     @abstractmethod
     def map_inner(self: KI, f: Callable[['KInner'], 'KInner']) -> KI:
@@ -306,9 +306,9 @@ class KLabel(KInner):
         if kwargs:
             bad_arg = next((arg for arg in kwargs if arg != 'params'), None)
             if bad_arg:
-                raise TypeError(f"KLabel() got an unexpected keyword argument '{bad_arg}'")
+                raise TypeError(f'KLabel() got an unexpected keyword argument: {bad_arg}')
             if args:
-                raise TypeError("KLabel() got multiple values for argument 'params'")
+                raise TypeError('KLabel() got multiple values for argument: params')
             params = kwargs['params']
 
         elif len(args) == 1 and isinstance(args[0], Iterable) and not isinstance(args[0], KInner):
@@ -387,9 +387,9 @@ class KApply(KInner):
         if kwargs:
             bad_arg = next((arg for arg in kwargs if arg != 'args'), None)
             if bad_arg:
-                raise TypeError(f"KApply() got an unexpected keyword argument '{bad_arg}'")
+                raise TypeError(f'KApply() got an unexpected keyword argument: {bad_arg}')
             if args:
-                raise TypeError("KApply() got multiple values for argument 'args'")
+                raise TypeError('KApply() got multiple values for argument: args')
             _args = kwargs['args']
 
         elif len(args) == 1 and isinstance(args[0], Iterable) and not isinstance(args[0], KInner):
@@ -582,9 +582,9 @@ class KSequence(KInner, Sequence[KInner]):
         if kwargs:
             bad_arg = next((arg for arg in kwargs if arg != 'items'), None)
             if bad_arg:
-                raise TypeError(f"KSequence() got an unexpected keyword argument '{bad_arg}'")
+                raise TypeError(f'KSequence() got an unexpected keyword argument: {bad_arg}')
             if args:
-                raise TypeError("KSequence() got multiple values for argument 'items'")
+                raise TypeError('KSequence() got multiple values for argument: items')
             items = kwargs['items']
 
         elif len(args) == 1 and isinstance(args[0], Iterable) and not isinstance(args[0], KInner):

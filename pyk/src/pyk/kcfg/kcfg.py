@@ -813,7 +813,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         if '@' in alias:
             raise ValueError('Alias may not contain "@"')
         if alias in self._aliases:
-            raise ValueError(f'Duplicate alias "{alias}"')
+            raise ValueError(f'Duplicate alias: {alias}')
         node_id = self._resolve(node_id)
         self._aliases[alias] = node_id
 

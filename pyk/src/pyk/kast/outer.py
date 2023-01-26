@@ -59,7 +59,7 @@ class KOuter(KAst):
         if node in KOuter._OUTER_NODES:
             return globals()[node].from_dict(d)
 
-        raise ValueError(f"Expected KOuter label as 'node' value, found: '{node}'")
+        raise ValueError(f'Expected "node" value in: {KOuter._OUTER_NODES}, got: {node}')
 
 
 class KProductionItem(KOuter):
@@ -72,7 +72,7 @@ class KProductionItem(KOuter):
         if node in KProductionItem._PRODUCTION_ITEM_NODES:
             return globals()[node].from_dict(d)
 
-        raise ValueError(f"Expected KProductionItem label as 'node' value, found: '{node}'")
+        raise ValueError(f'Expected "node" value in: {KProductionItem._PRODUCTION_ITEM_NODES}, got: {node}')
 
 
 class KSentence(KOuter, WithKAtt):
@@ -96,7 +96,7 @@ class KSentence(KOuter, WithKAtt):
         if node in KSentence._SENTENCE_NODES:
             return globals()[node].from_dict(d)
 
-        raise ValueError(f"Expected KSentence label as 'node' value, found: '{node}'")
+        raise ValueError(f'Expected "node" value in: {KSentence._SENTENCE_NODES}, got: {node}')
 
     @property
     def label(self) -> str:
@@ -540,7 +540,7 @@ class KRuleLike(KSentence):
         if node in KRuleLike._RULE_LIKE_NODES:
             return globals()[node].from_dict(d)
 
-        raise ValueError(f"Expected KRuleLike label as 'node' value, found: '{node}'")
+        raise ValueError(f'Expected "node" value in: {KRuleLike._RULE_LIKE_NODES}, got: {node}')
 
     @abstractmethod
     def let(
@@ -887,9 +887,9 @@ class KDefinition(KOuter, WithKAtt):
         main_modules = [module for module in modules if module.name == main_module_name]
 
         if not main_modules:
-            raise ValueError(f"Module '{main_module_name}' not found")
+            raise ValueError(f'Module not found: {main_module_name}')
         if len(main_modules) > 1:
-            raise ValueError(f"Module '{main_module_name}' is not unique")
+            raise ValueError(f'Module is not unique: {main_module_name}')
 
         main_module = main_modules[0]
 

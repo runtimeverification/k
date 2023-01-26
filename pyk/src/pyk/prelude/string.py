@@ -6,4 +6,4 @@ STRING: Final = KSort('String')
 
 
 def stringToken(s: str) -> KToken:  # noqa: N802
-    return KToken(f'"{s}"', STRING)
+    return KToken('"' + s + '"', STRING)

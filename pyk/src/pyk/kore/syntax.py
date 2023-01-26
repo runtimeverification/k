@@ -169,7 +169,7 @@ class Kore(ABC):
     def _check_tag(cls: Type[T], dct: Mapping[str, Any]) -> None:
         tag = cls._get_tag(dct)
         if tag != cls._tag():
-            raise ValueError(f"Expected '{cls._tag()}' as 'tag' value, found: '{tag}'")
+            raise ValueError(f'Expected "tag" value: {cls._tag()}, got: {tag}')
 
     @property
     def json(self) -> str:
@@ -401,7 +401,7 @@ class String(Pattern):
 
     @property
     def text(self) -> str:
-        return f'"{encode_kore_str(self.value)}"'
+        return '"' + encode_kore_str(self.value) + '"'
 
 
 @final
@@ -490,7 +490,7 @@ class MLPattern(Pattern):
     @classmethod
     def _check_symbol(cls: Type[ML], symbol: str) -> None:
         if symbol != cls.symbol():
-            raise ValueError(f"Expected '{cls.symbol()}' as symbol, found: '{symbol}'")
+            raise ValueError(f'Expected "symbol" value: {cls.symbol()}, got: {symbol}')
 
     @property
     @abstractmethod
