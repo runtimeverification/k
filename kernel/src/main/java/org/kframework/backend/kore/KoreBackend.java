@@ -186,6 +186,7 @@ public class KoreBackend extends AbstractBackend {
         ModuleTransformer resolveAnonVars = ModuleTransformer.fromSentenceTransformer(
                 new ResolveAnonVar()::resolve,
                 "resolving \"_\" vars");
+        ModuleTransformer numberSentences = ModuleTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
         ModuleTransformer resolveSemanticCasts = ModuleTransformer.fromSentenceTransformer(
                 new ResolveSemanticCasts(true)::resolve,
                 "resolving semantic casts");
@@ -208,6 +209,7 @@ public class KoreBackend extends AbstractBackend {
 
         return m -> resolveComm
                 .andThen(resolveAnonVars)
+                .andThen(numberSentences)
                 .andThen(resolveSemanticCasts)
                 .andThen(generateSortProjections)
                 .andThen(propagateMacroToRules)
