@@ -1,18 +1,11 @@
-Installing the K Framework Package
-==================================
+Installing the K Framework
+==========================
 
-We currently strive to provide packages for the following platforms:
+Fast Installation (preferred)
+-----------------------------
 
--   Ubuntu Focal Fossa (20.04) and Jammy Jellyfish (22.04)
--   Debian Bullseye
--   Arch Linux
--   macOS Catalina (10.15), Big Sur (11) and Monterey (12) via Homebrew
--   Docker Images
-
-Fast Installation
------------------
-
-If you're on a system that supports [Nix](https://nixos.org/download.html), use this command to install via Nix:
+If you're on a system that supports [Nix](https://nixos.org/download.html),
+use this command to install via Nix:
 
 ```
 bash <(curl https://kframework.org/install)
@@ -31,6 +24,24 @@ And list available versions with:
 kup list
 ```
 
+This will take care of all the dependencies and specific versions used by K.
+Note that the first run will take longer to fetch all the libraries and compile
+sources. (30m to 1h)
+
+If you are on Apple Silicon, `kup` is currently the only way to install K
+because of upstream issues in the general Haskell ecosystem.
+
+
+Through packages
+----------------
+
+We currently strive to provide packages for the following platforms:
+
+-   Ubuntu Focal Fossa (20.04) and Jammy Jellyfish (22.04)
+-   Debian Bullseye
+-   Arch Linux
+-   macOS Catalina (10.15), Big Sur (11) and Monterey (12) via Homebrew
+-   Docker Images
 
 Pre-installation Notes
 ----------------------
