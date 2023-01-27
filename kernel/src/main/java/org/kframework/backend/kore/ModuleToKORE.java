@@ -867,6 +867,7 @@ public class ModuleToKORE {
         consideredAttributes.put(Att.LABEL(), true);
         consideredAttributes.put(Att.SOURCE(), true);
         consideredAttributes.put(Att.LOCATION(), true);
+        consideredAttributes.put(Att.UNIQUE_ID(), true);
 
         for (Sentence sentence : iterable(spec.sentencesExcept(definition))) {
             if (sentence instanceof Claim || (sentence instanceof Rule && sentence.att().contains(Att.SIMPLIFICATION()))) {
