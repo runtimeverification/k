@@ -1,10 +1,11 @@
 from itertools import count
-from typing import Any, Dict, Final, List, Tuple
+from typing import Any, Dict, Final, List, Mapping, Optional, Tuple
 
 import pytest
 
+from pyk.kast import KAst, KAtt
 from pyk.kast.inner import KApply, KInner, KLabel, KSequence, KSort, KVariable, build_assoc
-from pyk.kast.outer import KDefinition, KFlatModule
+from pyk.kast.outer import KDefinition, KFlatModule, KTerminal
 from pyk.prelude.kbool import BOOL
 from pyk.prelude.kint import INT
 from pyk.prelude.string import STRING
@@ -257,3 +258,22 @@ def test_build_assoc(terms: Tuple[KInner, ...], expected: KInner) -> None:
 
     # Then
     assert actual == expected
+
+
+KAST_FROM_DICT_TEST_DATA: Final = (
+    ({'node': 'KAtt', 'att': {'foo': 0}}, KAtt({'foo': 0})),
+    ({'node': 'KVariable', 'name': 'X'}, KVariable('X')),
+    ({'node': 'KTerminal', 'value': 'foo'}, KTerminal('foo')),
+    ({'node': 'Foo'}, None),
+)
+
+
+@pytest.mark.parametrize('dct,expected', KAST_FROM_DICT_TEST_DATA, ids=count())
+def test_kast_from_dict(dct: Mapping['str', Any], expected: Optional[KAst]) -> None:
+    if expected is None:
+        with pytest.raises(ValueError):
+            KAst.from_dict(dct)
+
+    else:
+        actual = KAst.from_dict(dct)
+        assert actual == expected
