@@ -661,7 +661,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         for in_cover in in_covers:
             self.create_cover(in_cover.source.id, new_node.id, subst=in_cover.subst, constraint=in_cover.constraint)
         for out_cover in out_covers:
-            self.create_cover(new_node.id, out_cover.target.id, subst=in_cover.subst, constraint=in_cover.constraint)
+            self.create_cover(new_node.id, out_cover.target.id, subst=out_cover.subst, constraint=out_cover.constraint)
         if init:
             self.add_init(new_node.id)
         if target:
