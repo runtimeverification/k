@@ -37,7 +37,7 @@ class KInner(KAst):
 
     @classmethod
     @abstractmethod
-    def from_dict(cls: Type['KInner'], d: Dict[str, Any]) -> 'KInner':
+    def from_dict(cls: Type['KInner'], d: Mapping[str, Any]) -> 'KInner':
         node = d['node']
         if node in KInner._INNER_NODES:
             return globals()[node].from_dict(d)
@@ -93,7 +93,7 @@ class Subst(Mapping[str, KInner]):
         return self.apply(term)
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> 'Subst':
+    def from_dict(d: Mapping[str, Any]) -> 'Subst':
         return Subst({k: KInner.from_dict(v) for k, v in d.items()})
 
     def to_dict(self) -> Dict[str, Any]:
@@ -154,7 +154,7 @@ class KSort(KInner):
         object.__setattr__(self, 'name', name)
 
     @classmethod
-    def from_dict(cls: Type['KSort'], d: Dict[str, Any]) -> 'KSort':
+    def from_dict(cls: Type['KSort'], d: Mapping[str, Any]) -> 'KSort':
         cls._check_node(d)
         return KSort(name=d['name'])
 
@@ -186,7 +186,7 @@ class KToken(KInner):
         object.__setattr__(self, 'sort', sort)
 
     @classmethod
-    def from_dict(cls: Type['KToken'], d: Dict[str, Any]) -> 'KToken':
+    def from_dict(cls: Type['KToken'], d: Mapping[str, Any]) -> 'KToken':
         cls._check_node(d)
         token = d['token']
         sort = KSort.from_dict(d['sort'])
@@ -242,7 +242,7 @@ class KVariable(KInner):
         object.__setattr__(self, 'sort', sort)
 
     @classmethod
-    def from_dict(cls: Type['KVariable'], d: Dict[str, Any]) -> 'KVariable':
+    def from_dict(cls: Type['KVariable'], d: Mapping[str, Any]) -> 'KVariable':
         cls._check_node(d)
         sort = None
         att = KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT
@@ -336,7 +336,7 @@ class KLabel(KInner):
         return self.apply(*args, **kwargs)
 
     @classmethod
-    def from_dict(cls: Type['KLabel'], d: Dict[str, Any]) -> 'KLabel':
+    def from_dict(cls: Type['KLabel'], d: Mapping[str, Any]) -> 'KLabel':
         cls._check_node(d)
         return KLabel(name=d['name'], params=(KSort.from_dict(param) for param in d['params']))
 
@@ -410,7 +410,7 @@ class KApply(KInner):
         return len(self.label.name) > 1 and self.label.name[0] == '<' and self.label.name[-1] == '>'
 
     @classmethod
-    def from_dict(cls: Type['KApply'], d: Dict[str, Any]) -> 'KApply':
+    def from_dict(cls: Type['KApply'], d: Mapping[str, Any]) -> 'KApply':
         cls._check_node(d)
         return KApply(label=KLabel.from_dict(d['label']), args=(KInner.from_dict(arg) for arg in d['args']))
 
@@ -449,7 +449,7 @@ class KAs(KInner):
         object.__setattr__(self, 'alias', alias)
 
     @classmethod
-    def from_dict(cls: Type['KAs'], d: Dict[str, Any]) -> 'KAs':
+    def from_dict(cls: Type['KAs'], d: Mapping[str, Any]) -> 'KAs':
         cls._check_node(d)
         return KAs(pattern=KInner.from_dict(d['pattern']), alias=KInner.from_dict(d['alias']))
 
@@ -491,7 +491,7 @@ class KRewrite(KInner, WithKAtt):
         return self.apply(term)
 
     @classmethod
-    def from_dict(cls: Type['KRewrite'], d: Dict[str, Any]) -> 'KRewrite':
+    def from_dict(cls: Type['KRewrite'], d: Mapping[str, Any]) -> 'KRewrite':
         cls._check_node(d)
         return KRewrite(
             lhs=KInner.from_dict(d['lhs']),
@@ -622,7 +622,7 @@ class KSequence(KInner, Sequence[KInner]):
         return len(self.items)
 
     @classmethod
-    def from_dict(cls: Type['KSequence'], d: Dict[str, Any]) -> 'KSequence':
+    def from_dict(cls: Type['KSequence'], d: Mapping[str, Any]) -> 'KSequence':
         cls._check_node(d)
         return KSequence(items=(KInner.from_dict(item) for item in d['items']))
 

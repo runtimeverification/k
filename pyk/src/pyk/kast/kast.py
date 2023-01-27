@@ -30,9 +30,21 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 class KAst(ABC):
     @classmethod
-    @abstractmethod
-    def from_dict(cls: Type[T], d: Dict[str, Any]) -> T:
-        ...
+    def from_dict(cls: Type[T], d: Mapping[str, Any]) -> T:
+        from . import inner, outer
+
+        node = d['node']
+
+        if node == 'KAtt':
+            return KAtt.from_dict(d)  # type: ignore
+
+        if node in inner.KInner._INNER_NODES:
+            return getattr(inner, node).from_dict(d)
+
+        if node in outer.KOuter._OUTER_NODES:
+            return getattr(outer, node).from_dict(d)
+
+        raise ValueError(f'Expected KAst label as "node" value, found: {node}')
 
     @abstractmethod
     def to_dict(self) -> Dict[str, Any]:
@@ -52,7 +64,7 @@ class KAst(ABC):
         return hash_str(self.to_json())
 
     @classmethod
-    def _check_node(cls: Type[T], d: Dict[str, Any], expected: Optional[str] = None) -> None:
+    def _check_node(cls: Type[T], d: Mapping[str, Any], expected: Optional[str] = None) -> None:
         expected = expected if expected is not None else cls.__name__
         actual = d['node']
         if actual != expected:
@@ -107,7 +119,7 @@ class KAtt(KAst, Mapping[str, Any]):
         return KAtt(atts=atts)
 
     @classmethod
-    def from_dict(cls: Type['KAtt'], d: Dict[str, Any]) -> 'KAtt':
+    def from_dict(cls: Type['KAtt'], d: Mapping[str, Any]) -> 'KAtt':
         cls._check_node(d)
         return KAtt(atts=d['att'])
 
