@@ -39,7 +39,7 @@ public class KTextDocument {
         problems.clear();
     }
 
-    private static final Pattern p = Pattern.compile("(module|endmodule|syntax|context|configuration|rule|claim|require[s]?|import[s]?)");
+    private static final Pattern p = Pattern.compile("(module|endmodule|syntax|context|configuration|rule|claim|import[s]?)");
 
     // get the last keyword at KPos in order to provide contextual completion
     public String getContextAt(KPos pos) {
@@ -60,7 +60,7 @@ public class KTextDocument {
             }
         }
         Matcher m = p.matcher(content);
-        String context = "requires";
+        String context = "";
         while (m.find()) {
             if (lines[m.end()] > pos.getLine() || lines[m.end()] == pos.getLine() && columns[m.end()] > pos.getCharacter())
                 break;
