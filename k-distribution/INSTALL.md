@@ -7,20 +7,20 @@ Fast Installation (preferred)
 If you're on a system that supports [Nix](https://nixos.org/download.html),
 use this command to install via Nix:
 
-```
+```shell
 bash <(curl https://kframework.org/install)
 kup install k
 ```
 
 You can update K with:
 
-```
+```shell
 kup update k
 ```
 
 And list available versions with:
 
-```
+```shell
 kup list
 ```
 
@@ -32,7 +32,7 @@ If you are on Apple Silicon, `kup` is currently the only way to install K
 because of upstream issues in the general Haskell ecosystem.
 
 
-Through packages
+Install through packages
 ----------------
 
 We currently strive to provide packages for the following platforms:
@@ -110,25 +110,25 @@ requires about ~1.4GB of dependencies and will take some time.
 ### Ubuntu Focal (20.04)
 
 ```sh
-sudo apt install ./kframework_X.Y.Z_amd64_focal.deb
+sudo apt install ./kframework_amd64_ubuntu_focal.deb
 ```
 
 ### Ubuntu Jammy (22.04)
 
 ```sh
-sudo apt install ./kframework_X.Y.Z_amd64_jammy.deb
+sudo apt install ./kframework_amd64_ubuntu_jammy.deb
 ```
 
 ### Debian Bullseye
 
 ```sh
-sudo apt install ./kframework_X.Y.Z_amd64_bullseye.deb
+sudo apt install ./kframework_amd64_debian_bullseye.deb
 ```
 
 ### Arch Linux
 
 ```sh
-pacman -U ./kframework-git-X.Y.Z-1-x86_64.pkg.tar.zst
+pacman -U ./kframework_arch_x86_64.pkg.tar.zst
 ```
 
 ### MacOS X Mojave/Homebrew
