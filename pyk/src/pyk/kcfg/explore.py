@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Any, Callable, ContextManager, Dict, Final, Iterable, List, Optional, Tuple
+from typing import Any, Callable, ContextManager, Dict, Final, Iterable, List, Optional, Tuple, Union
 
 from pyk.cli_utils import BugReport
 from pyk.cterm import CTerm
@@ -21,15 +21,23 @@ _LOGGER: Final = logging.getLogger(__name__)
 class KCFGExplore(ContextManager['KCFGExplore']):
     kprint: KPrint
     _port: int
+    _kore_rpc_command: Union[str, Iterable[str]] = 'kore-rpc'
     _kore_server: Optional[KoreServer]
     _kore_client: Optional[KoreClient]
     _rpc_closed: bool
     _bug_report: Optional[BugReport]
 
-    def __init__(self, kprint: KPrint, port: int, bug_report: Optional[BugReport] = None):
+    def __init__(
+        self,
+        kprint: KPrint,
+        port: int,
+        bug_report: Optional[BugReport] = None,
+        kore_rpc_command: Union[str, Iterable[str]] = 'kore-rpc',
+    ):
         self.kprint = kprint
         self._port = port
         self._bug_report = bug_report
+        self._kore_rpc_command = kore_rpc_command
         self._kore_server = None
         self._kore_client = None
         self._rpc_closed = False
@@ -46,7 +54,11 @@ class KCFGExplore(ContextManager['KCFGExplore']):
             raise ValueError('RPC server already closed!')
         if not self._kore_server:
             self._kore_server = KoreServer(
-                self.kprint.definition_dir, self.kprint.main_module, self._port, bug_report=self._bug_report
+                self.kprint.definition_dir,
+                self.kprint.main_module,
+                self._port,
+                bug_report=self._bug_report,
+                command=self._kore_rpc_command,
             )
         if not self._kore_client:
             self._kore_client = KoreClient('localhost', self._port, bug_report=self._bug_report)
