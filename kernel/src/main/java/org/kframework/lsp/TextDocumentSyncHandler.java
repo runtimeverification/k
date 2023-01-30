@@ -3,13 +3,9 @@ package org.kframework.lsp;
 
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import org.jetbrains.annotations.NotNull;
-import org.kframework.attributes.Att;
 import org.kframework.kil.*;
 import org.kframework.kil.Module;
-import org.kframework.kore.Sort;
 import org.kframework.utils.file.FileUtil;
-import scala.Tuple2;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,10 +17,10 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.kframework.Collections.immutable;
+import static org.kframework.lsp.CompletionHelper.*;
 
 /**
  * Handle the caches of all the files of interest.
@@ -128,15 +124,27 @@ public class TextDocumentSyncHandler {
             String context = doc.getContextAt(pos);
             List<DefinitionItem> allDi = slurp(position.getTextDocument().getUri());
             switch (context) {
+                case "":
+                    lci.add(getNewRequiresCompletion());
+                    lci.add(getNewModuleCompletion()); break;
+                case "endmodule":
+                    lci.add(getNewModuleCompletion()); break;
+                case "module":
+                    lci.add(getNewImportCompletion());
+                    lci.addAll(getNewSentenceCompletion()); break;
                 case "import":
                 case "imports":
+                    lci.add(getNewImportCompletion());
+                    lci.addAll(getNewSentenceCompletion());
                     lci.addAll(getImportCompletion(allDi)); break;
                 case "syntax":
+                    lci.addAll(getNewSentenceCompletion());
                     lci.addAll(getSyntaxCompletion(allDi)); break;
                 case "context":
                 case "rule":
                 case "configuration":
                 case "claim":
+                    lci.addAll(getNewSentenceCompletion());
                     lci.addAll(getRuleCompletion(allDi)); break;
             }
             this.clientLogger.logMessage("Operation '" + "text/completion: " + position.getTextDocument().getUri() + " #pos: "
@@ -145,94 +153,6 @@ public class TextDocumentSyncHandler {
             // TODO: add completion for attributes
             return Either.forLeft(lci);
         });
-    }
-
-    private static List<CompletionItem> getImportCompletion(List<DefinitionItem> allDi) {
-        return allDi.stream()
-                .filter(mi2 -> mi2 instanceof Module)
-                .map(m2 -> ((Module) m2))
-                .map(m2 -> {
-                    CompletionItem ci = new CompletionItem();
-                    ci.setLabel(m2.getName());
-                    ci.setInsertText(m2.getName());
-                    ci.setDetail(Path.of(m2.getSource().source()).getFileName().toString());
-                    ci.setKind(CompletionItemKind.Snippet);
-                    return ci;
-                }).collect(Collectors.toList());
-    }
-
-    // create a list of all the visible declared sorts
-    private static List<CompletionItem> getSyntaxCompletion(List<DefinitionItem> allDi) {
-        Map<String, Set<Att>> allSorts = allDi.stream().filter(i -> i instanceof Module)
-                .map(m3 -> ((Module) m3))
-                .flatMap(m3 -> m3.getItems().stream()
-                        .filter(mi3 -> mi3 instanceof Syntax)
-                        .map(s -> ((Syntax) s))
-                        .filter(s -> !s.getParams().contains(s.getDeclaredSort().getRealSort()))
-                        .map(s -> Tuple2.apply(s.getDeclaredSort().getRealSort().name(), s.getAttributes())))
-                .collect(Collectors.groupingBy(Tuple2::_1, Collectors.mapping(Tuple2::_2, Collectors.toSet())));
-        Map<String, Att> allSorts2 = allSorts.entrySet().stream()
-                .map(e -> Tuple2.apply(e.getKey(), Att.mergeAttributes(immutable(e.getValue()))))
-                .collect(Collectors.toMap(Tuple2::_1, Tuple2::_2));
-        return allSorts2.entrySet().stream().map(e -> {
-            CompletionItem ci = new CompletionItem();
-            ci.setLabel(e.getKey());
-            ci.setInsertText(e.getKey());
-            // TODO: to calculate properly we need to recurse through the inclusion tree
-            // and find the first module to declare the sort. This should be easy to get
-            // when we connect to the kompile pipeline.
-            //ci.setDetail("module " + m.getName());
-            String documentation = "syntax " + e.getKey() + " ";
-            documentation += e.getValue().toString();
-            ci.setDocumentation(documentation);
-            ci.setKind(CompletionItemKind.Snippet);
-            return ci;
-        }).collect(Collectors.toList());
-    }
-
-    static Pattern ptrn = Pattern.compile("[a-zA-Z0-9#]+");
-
-    // create the list of CompletionItems for every piece of syntax
-    // for now we filter by alphanumeric but can be improved greatly.
-    private static List<CompletionItem> getRuleCompletion(List<DefinitionItem> dis) {
-        List<CompletionItem> lci = new ArrayList<>();
-        // Traverse all the modules and all the syntax declarations to find the Terminals in productions
-        // For each Terminal that follows the <ptrn> above, create a CompletionItem with some documentation
-        // Tree structure: Definition -> Module -> Syntax -> PriorityBlock -> Production -> Terminal
-        dis.stream().filter(i -> i instanceof Module)
-                .map(m -> ((Module) m))
-                .forEach(m -> m.getItems().stream()
-                        .filter(mi -> mi instanceof Syntax)
-                        .map(s -> ((Syntax) s))
-                        .forEach(s -> s.getPriorityBlocks()
-                                .forEach((pb -> pb.getProductions()
-                                        .forEach(p -> p.getItems().stream()
-                                                .filter(pi -> pi instanceof Terminal)
-                                                .map(t -> (Terminal) t)
-                                                .forEach(t -> {
-                                                    if (ptrn.matcher(t.getTerminal()).matches()) {
-                                                        CompletionItem completionItem = buildRuleCompletionItem(m, s, p, t);
-                                                        lci.add(completionItem);
-                                                    }
-                                                }))))));
-
-        return lci;
-    }
-
-    @NotNull
-    private static CompletionItem buildRuleCompletionItem(Module m, Syntax s, Production p, Terminal t) {
-        CompletionItem completionItem = new CompletionItem();
-        completionItem.setLabel(t.getTerminal());
-        completionItem.setInsertText(t.getTerminal());
-        completionItem.setDetail("module " + m.getName());
-        String doc = "syntax ";
-        doc += !s.getParams().isEmpty() ?
-                "{" + s.getParams().stream().map(Sort::toString).collect(Collectors.joining(", ")) + "} " : "";
-        doc += s.getDeclaredSort() + " ::= ";
-        doc += p.toString();
-        completionItem.setDocumentation(doc);
-        completionItem.setKind(CompletionItemKind.Snippet);
-        return completionItem;
     }
 
     // At the moment we only have access to outer parsing information, so we can find the definition for
