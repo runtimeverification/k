@@ -3,6 +3,7 @@ import logging
 from abc import abstractmethod
 from dataclasses import InitVar, dataclass
 from enum import Enum
+from functools import cached_property
 from os import PathLike
 from typing import (
     Any,
@@ -738,7 +739,7 @@ class KImport(KOuter):
 
 @final
 @dataclass(frozen=True)
-class KFlatModule(KOuter, WithKAtt):
+class KFlatModule(KOuter, WithKAtt, Iterable[KSentence]):
     name: str
     sentences: Tuple[KSentence, ...]
     imports: Tuple[KImport, ...]
@@ -755,38 +756,40 @@ class KFlatModule(KOuter, WithKAtt):
     def __iter__(self) -> Iterator[KSentence]:
         return iter(self.sentences)
 
-    @property
-    def productions(self) -> List[KProduction]:
-        return [sentence for sentence in self.sentences if type(sentence) is KProduction]
+    @cached_property
+    def productions(self) -> Tuple[KProduction, ...]:
+        return tuple(sentence for sentence in self if type(sentence) is KProduction)
 
-    @property
-    def syntax_productions(self) -> List[KProduction]:
-        return [prod for prod in self.productions if prod.klabel]
+    @cached_property
+    def syntax_productions(self) -> Tuple[KProduction, ...]:
+        return tuple(prod for prod in self.productions if prod.klabel)
 
-    @property
-    def functions(self) -> List[KProduction]:
-        def _is_non_free_constructor(label: str) -> bool:
+    @cached_property
+    def functions(self) -> Tuple[KProduction, ...]:
+        return tuple(prod for prod in self.syntax_productions if self._is_function(prod))
+
+    @cached_property
+    def constructors(self) -> Tuple[KProduction, ...]:
+        return tuple(prod for prod in self.syntax_productions if not self._is_function(prod))
+
+    @staticmethod
+    def _is_function(prod: KProduction) -> bool:
+        def is_not_actually_function(label: str) -> bool:
             is_cell_map_constructor = label.endswith('CellMapItem') or label.endswith('CellMap_')
             is_builtin_data_constructor = label in {'_Set_', '_List_', '_Map_', 'SetItem', 'ListItem', '_|->_'}
             return is_cell_map_constructor or is_builtin_data_constructor
 
-        _functions = [
-            prod for prod in self.syntax_productions if 'function' in prod.att.atts or 'functional' in prod.att.atts
-        ]
-        _functions = [f for f in _functions if not (f.klabel and _is_non_free_constructor(f.klabel.name))]
-        return _functions
+        return ('function' in prod.att.atts or 'functional' in prod.att.atts) and not (
+            prod.klabel and is_not_actually_function(prod.klabel.name)
+        )
 
-    @property
-    def constructors(self) -> List[KProduction]:
-        return [prod for prod in self.syntax_productions if prod not in self.functions]
+    @cached_property
+    def rules(self) -> Tuple[KRule, ...]:
+        return tuple(sentence for sentence in self if type(sentence) is KRule)
 
-    @property
-    def rules(self) -> List[KRule]:
-        return [sentence for sentence in self.sentences if type(sentence) is KRule]
-
-    @property
-    def claims(self) -> List[KClaim]:
-        return [sentence for sentence in self.sentences if type(sentence) is KClaim]
+    @cached_property
+    def claims(self) -> Tuple[KClaim, ...]:
+        return tuple(sentence for sentence in self if type(sentence) is KClaim)
 
     @classmethod
     def from_dict(cls: Type['KFlatModule'], d: Mapping[str, Any]) -> 'KFlatModule':
@@ -878,7 +881,7 @@ class KRequire(KOuter):
 
 @final
 @dataclass(frozen=True)
-class KDefinition(KOuter, WithKAtt):
+class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
     main_module_name: str
     modules: Tuple[KFlatModule, ...]
     requires: Tuple[KRequire, ...]
@@ -957,47 +960,48 @@ class KDefinition(KOuter, WithKAtt):
     def let_att(self, att: KAtt) -> 'KDefinition':
         return self.let(att=att)
 
-    @property
-    def module_names(self) -> List[str]:
-        return [_m.name for _m in self.modules]
+    @cached_property
+    def module_names(self) -> Tuple[str, ...]:
+        return tuple(module.name for module in self)
 
-    @property
-    def productions(self) -> List[KProduction]:
-        return [prod for module in self.modules for prod in module.productions]
+    @cached_property
+    def productions(self) -> Tuple[KProduction, ...]:
+        return tuple(prod for module in self for prod in module.productions)
 
-    @property
-    def syntax_productions(self) -> List[KProduction]:
-        return [prod for module in self.modules for prod in module.syntax_productions]
+    @cached_property
+    def syntax_productions(self) -> Tuple[KProduction, ...]:
+        return tuple(prod for module in self for prod in module.syntax_productions)
 
-    @property
-    def functions(self) -> List[KProduction]:
-        return [prod for module in self.modules for prod in module.functions]
+    @cached_property
+    def functions(self) -> Tuple[KProduction, ...]:
+        return tuple(func for module in self for func in module.functions)
 
-    @property
-    def constructors(self) -> List[KProduction]:
-        return [prod for module in self.modules for prod in module.constructors]
+    @cached_property
+    def constructors(self) -> Tuple[KProduction, ...]:
+        return tuple(ctor for module in self for ctor in module.constructors)
 
-    @property
-    def rules(self) -> List[KRule]:
-        return [rule for module in self.modules for rule in module.rules]
+    @cached_property
+    def rules(self) -> Tuple[KRule, ...]:
+        return tuple(rule for module in self for rule in module.rules)
 
-    @property
-    def alias_rules(self) -> List[KRule]:
-        return [rule for rule in self.rules if 'alias' in rule.att]
+    @cached_property
+    def alias_rules(self) -> Tuple[KRule, ...]:
+        return tuple(rule for rule in self.rules if 'alias' in rule.att)
 
-    @property
-    def macro_rules(self) -> List[KRule]:
-        return [rule for rule in self.rules if 'macro' in rule.att] + self.alias_rules
+    @cached_property
+    def macro_rules(self) -> Tuple[KRule, ...]:
+        return tuple(rule for rule in self.rules if 'macro' in rule.att) + self.alias_rules
 
-    @property
-    def semantic_rules(self) -> List[KRule]:
-        _semantic_rules = []
-        for r in self.rules:
-            if type(r.body) is KApply and r.body.label.name == '<generatedTop>':
-                _semantic_rules.append(r)
-            if type(r.body) is KRewrite and type(r.body.lhs) is KApply and r.body.lhs.label.name == '<generatedTop>':
-                _semantic_rules.append(r)
-        return _semantic_rules
+    @cached_property
+    def semantic_rules(self) -> Tuple[KRule, ...]:
+        def is_semantic(rule: KRule) -> bool:
+            return (type(rule.body) is KApply and rule.body.label.name == '<generatedTop>') or (
+                type(rule.body) is KRewrite
+                and type(rule.body.lhs) is KApply
+                and rule.body.lhs.label.name == '<generatedTop>'
+            )
+
+        return tuple(rule for rule in self.rules if is_semantic(rule))
 
     def production_for_klabel(self, klabel: KLabel) -> KProduction:
         if klabel not in self._production_for_klabel:
