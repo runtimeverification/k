@@ -99,7 +99,7 @@ public class KompileOptions implements Serializable {
     public List<String> extraConcreteRuleLabels = Collections.emptyList();
 
     public boolean isKore() {
-        return backend.equals("kore") || backend.equals("haskell") || backend.equals("llvm");
+        return backend.equals("kore") || backend.equals("haskell") || backend.equals("llvm") || backend.equals("maude");
     }
 
     @ParametersDelegate
