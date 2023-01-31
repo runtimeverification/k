@@ -436,11 +436,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                     if self.is_verified(edge_like.source.id, edge_like.target.id):
                         ret_edge_lines.append(indent + '│  ' + _bold(_green('(verified)')))
                     ret_edge_lines.extend(add_indent(indent + '│  ', edge_like.pretty(kprint)))
-                    ret_lines.append((f'edge({edge_like.source.id},{edge_like.target.id})', ret_edge_lines))
+                    ret_lines.append((f'edge_{edge_like.source.id}_{edge_like.target.id}', ret_edge_lines))
                 elif isinstance(edge_like, KCFG.Cover):
                     ret_edge_lines = [(indent + '┊')]
                     ret_edge_lines.extend(add_indent(indent + '┊  ', edge_like.pretty(kprint, minimize=minimize)))
-                    ret_lines.append((f'cover({edge_like.source.id},{edge_like.target.id})', ret_edge_lines))
+                    ret_lines.append((f'cover_{edge_like.source.id}_{edge_like.target.id}', ret_edge_lines))
 
                 target_strs = _print_node(edge_like.target)
                 ret_node_lines = [(indent + elbow + ' ' + target_strs[0])]
@@ -451,7 +451,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                     ret_node_lines.extend(add_indent(indent + new_indent + '       ' + len(target_strs[0]) * ' ', rest))
 
                 ret_node_lines.extend(add_indent(indent + node_indent, target_strs[1:]))
-                ret_lines.append((f'node({edge_like.target.id})', ret_node_lines))
+                ret_lines.append((f'node_{edge_like.target.id}', ret_node_lines))
 
                 _print_subgraph(indent + new_indent, edge_like.target, prior_on_trace + [edge_like.source])
 
@@ -464,7 +464,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             ret_lines.append(('unknown', ['']))
             ret_init = [('┌  ' + init_strs[0])]
             ret_init.extend(add_indent('│  ', init_strs[1:]))
-            ret_lines.append((f'node({init[0].id})', ret_init))
+            ret_lines.append((f'node_{init[0].id}', ret_init))
             _print_subgraph('', init[0], [init[0]])
             init = sorted(node for node in self.nodes if node not in processed_nodes)
 
