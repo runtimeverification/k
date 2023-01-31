@@ -60,8 +60,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
         with:
           asset_content_type: 'application/gzip'
-          asset_name: 'K Framework Ubuntu Jammy (22.04) Deb'
-          asset_path: kframework_amd64_ubuntu_jammy.deb
+          asset_name: kframework_amd64_ubuntu_jammy.deb
+          asset_path: ./kframework_amd64_ubuntu_jammy.deb
           upload_url: ${{ github.event.release.upload_url }}
       - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
@@ -104,8 +104,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
         with:
           asset_content_type: 'application/gzip'
-          asset_name: 'K Framework Ubuntu Focal (20.04) Deb'
-          asset_path: kframework_amd64_ubuntu_focal.deb
+          asset_name: kframework_amd64_ubuntu_focal.deb
+          asset_path: ./kframework_amd64_ubuntu_focal.deb
           upload_url: ${{ github.event.release.upload_url }}
       - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
@@ -148,8 +148,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
         with:
           asset_content_type: 'application/gzip'
-          asset_name: 'K Framework Debian Bullseye (11) Deb'
-          asset_path: kframework_amd64_debian_bullseye.deb
+          asset_name: kframework_amd64_debian_bullseye.deb
+          asset_path: ./kframework_amd64_debian_bullseye.deb
           upload_url: ${{ github.event.release.upload_url }}
 
   arch:
@@ -172,8 +172,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
         with:
           asset_content_type: 'application/gzip'
-          asset_name: 'K Framework Arch Package'
-          asset_path: kframework_arch_x86_64.pkg.tar.zst
+          asset_name: kframework_arch_x86_64.pkg.tar.zst
+          asset_path: ./kframework_arch_x86_64.pkg.tar.zst
           upload_url: ${{ github.event.release.upload_url }}
 
   macos-build:
