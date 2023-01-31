@@ -1,3 +1,4 @@
+import json
 import logging
 from pathlib import Path
 from typing import Any, Callable, ContextManager, Dict, Final, Iterable, List, Optional, Tuple, Union
@@ -11,7 +12,7 @@ from pyk.kore.syntax import Top
 from pyk.ktool import KPrint
 from pyk.prelude.k import GENERATED_TOP_CELL
 from pyk.prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlTop
-from pyk.utils import shorten_hashes
+from pyk.utils import hash_str, shorten_hashes, single
 
 from .kcfg import KCFG
 
@@ -47,6 +48,23 @@ class KCFGExplore(ContextManager['KCFGExplore']):
 
     def __exit__(self, *args: Any) -> None:
         self.close()
+
+    @staticmethod
+    def read_cfg(cfgid: str, kcfgs_dir: Path) -> Optional[KCFG]:
+        cfg_path = kcfgs_dir / f'{hash_str(cfgid)}.json'
+        if cfg_path.exists():
+            cfg_dict = json.loads(cfg_path.read_text())
+            _LOGGER.info(f'Reading KCFG from file {cfgid}: {cfg_path}')
+            return KCFG.from_dict(cfg_dict)
+        return None
+
+    @staticmethod
+    def write_cfg(cfgid: str, kcfgs_dir: Path, cfg: KCFG) -> None:
+        cfg_dict = cfg.to_dict()
+        cfg_dict['cfgid'] = cfgid
+        cfg_path = kcfgs_dir / f'{hash_str(cfgid)}.json'
+        cfg_path.write_text(json.dumps(cfg_dict))
+        _LOGGER.info(f'Updated CFG file {cfgid}: {cfg_path}')
 
     @property
     def _kore_rpc(self) -> Tuple[KoreServer, KoreClient]:
@@ -121,7 +139,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         _, kore_client = self._kore_rpc
         result = kore_client.implies(antecedent_kore, consequent_kore)
         if type(result.implication) is not Top:
-            _LOGGER.warning(
+            _LOGGER.info(
                 f'Received a non-trivial implication back from check implication endpoint: {result.implication}'
             )
         if result.substitution is None:
@@ -138,13 +156,14 @@ class KCFGExplore(ContextManager['KCFGExplore']):
                 _subst[m['###VAR'].name] = m['###TERM']
             else:
                 raise AssertionError(f'Received a non-substitution from implies endpoint: {subst_pred}')
+        # TODO: remove this extra consequent checking logic or this comment after resolution: https://github.com/runtimeverification/haskell-backend/issues/3469
+        new_consequent = self.cterm_simplify(CTerm(Subst(_subst)(consequent.add_constraint(ml_pred).kast)))
+        if is_bottom(new_consequent):
+            _LOGGER.warning(f'Simplifying instantiated consquent resulted in #Bottom: {antecedent} -> {consequent}')
+            return None
         return (Subst(_subst), ml_pred)
 
-    def simplify(
-        self,
-        cfgid: str,
-        cfg: KCFG,
-    ) -> KCFG:
+    def simplify(self, cfgid: str, cfg: KCFG) -> KCFG:
         for node in cfg.nodes:
             _LOGGER.info(f'Simplifying node {cfgid}: {shorten_hashes(node.id)}')
             new_term = self.cterm_simplify(node.cterm)
@@ -156,11 +175,73 @@ class KCFGExplore(ContextManager['KCFGExplore']):
                 cfg.replace_node(node.id, CTerm(new_term))
         return cfg
 
+    def step(self, cfgid: str, cfg: KCFG, node_id: str) -> Tuple[KCFG, str]:
+        node = cfg.node(node_id)
+        out_edges = cfg.edges(source_id=node.id)
+        if len(out_edges) > 1:
+            raise ValueError(
+                f'Only support stepping from nodes with 0 or 1 out edges {cfgid}: {(node.id, [e.target.id for e in out_edges])}'
+            )
+        _LOGGER.info(f'Taking 1 step from node {cfgid}: {shorten_hashes(node.id)}')
+        depth, cterm, next_cterms = self.cterm_execute(node.cterm, depth=1)
+        if depth != 1:
+            raise ValueError(f'Unable to take single step from node {cfgid}: {node.id}')
+        if len(next_cterms) > 0:
+            raise ValueError(f'Found branch with single step {cfgid}: {node.id}')
+        new_node = cfg.get_or_create_node(cterm)
+        _LOGGER.info(f'Found new node at depth 1 {cfgid}: {shorten_hashes((node.id, new_node.id))}')
+        if len(out_edges) == 0:
+            cfg.create_edge(node.id, new_node.id, condition=mlTop(), depth=1)
+        else:
+            edge = out_edges[0]
+            cfg.remove_edge(edge.source.id, edge.target.id)
+            cfg.create_edge(edge.source.id, new_node.id, condition=mlTop(), depth=1)
+            cfg.create_edge(new_node.id, edge.target.id, condition=edge.condition, depth=(edge.depth - 1))
+        return (cfg, new_node.id)
+
+    def section_edge(
+        self, cfgid: str, cfg: KCFG, source_id: str, target_id: str, sections: int = 2
+    ) -> Tuple[KCFG, Tuple[str, ...]]:
+        if sections <= 1:
+            raise ValueError(f'Cannot section an edge less than twice: {sections}')
+        edge = single(cfg.edges(source_id=source_id, target_id=target_id))
+        if not is_top(edge.condition):
+            raise ValueError(f'Cannot section edge with non-#Top condition: {edge.condition}')
+        section_depth = int(edge.depth / sections)
+        if section_depth == 0:
+            raise ValueError(f'Too many sections, results in 0-length section: {sections}')
+        cfg.remove_edge(source_id=source_id, target_id=target_id)
+        remainder_depth = edge.depth - (section_depth * sections)
+        if remainder_depth > 0:
+            sections += 1
+        else:
+            remainder_depth = section_depth
+        curr_node = edge.source
+        new_nodes = []
+        for _i in range(sections - 1):
+            _LOGGER.info(f'Taking {section_depth} steps from node {cfgid}: {shorten_hashes(curr_node.id)}')
+            new_depth, cterm, next_cterms = self.cterm_execute(curr_node.cterm, depth=section_depth)
+            if new_depth != section_depth:
+                raise ValueError(
+                    f'Found section with differing depth than section depth: {new_depth} vs {section_depth}'
+                )
+            if len(next_cterms) != 0:
+                raise ValueError('Found branch when sectioning edge.')
+            new_node = cfg.get_or_create_node(cterm)
+            new_nodes.append(new_node.id)
+            _LOGGER.info(
+                f'Found new node at {section_depth} steps from node {cfgid}: {shorten_hashes((curr_node.id, new_node.id))}'
+            )
+            cfg.create_edge(curr_node.id, new_node.id, condition=mlTop(), depth=section_depth)
+            curr_node = new_node
+        cfg.create_edge(source_id=curr_node.id, target_id=edge.target.id, condition=mlTop(), depth=remainder_depth)
+        return (cfg, tuple(new_nodes))
+
     def all_path_reachability_prove(
         self,
         cfgid: str,
         cfg: KCFG,
-        cfg_path: Optional[Path] = None,
+        cfg_dir: Optional[Path] = None,
         is_terminal: Optional[Callable[[CTerm], bool]] = None,
         extract_branches: Optional[Callable[[CTerm], Iterable[KInner]]] = None,
         max_iterations: Optional[int] = None,
@@ -171,9 +252,8 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         implication_every_block: bool = True,
     ) -> KCFG:
         def _write_cfg(_cfg: KCFG) -> None:
-            if cfg_path is not None:
-                cfg_path.write_text(_cfg.to_json())
-                _LOGGER.info(f'Updated CFG file {cfgid}: {cfg_path}')
+            if cfg_dir is not None:
+                KCFGExplore.write_cfg(cfgid, cfg_dir, _cfg)
 
         target_node = cfg.get_unique_target()
         iterations = 0

@@ -16,6 +16,10 @@
     width: auto;
 }
 
+.hidden {
+    display: none;
+}
+
 #display {
     layout: vertical;
 }
