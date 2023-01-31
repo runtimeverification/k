@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Final, Iterable, List, Optional, Tuple
+from typing import Final, Iterable, List, Optional, Tuple, Union
 
 import pytest
 
@@ -10,7 +10,7 @@ from pyk.kcfg import KCFG, KCFGExplore
 from pyk.ktool import KPrint, KProve
 from pyk.ktool.kprint import SymbolTable
 from pyk.prelude.kint import intToken
-from pyk.prelude.ml import mlTop
+from pyk.prelude.ml import mlEqualsTrue, mlTop
 
 from ..utils import KCFGExploreTest
 
@@ -73,6 +73,12 @@ IMPLIES_TEST_DATA: Final = (
         ('int $n , $s ; $n = 3 ;', '.Map'),
         (Subst({}), mlTop()),
     ),
+    (
+        'consequent-constraint',
+        ('int $n , $s ; $n = 3 ;', '.Map'),
+        ('int $n , $s ; $n = X ;', '.Map', mlEqualsTrue(KApply('_<Int_', [KVariable('X'), intToken(3)]))),
+        None,
+    ),
 )
 
 APR_PROVE_TEST_DATA: Iterable[Tuple[str, str, str, str, Optional[int], Optional[int], Iterable[str]]] = (
@@ -116,10 +122,10 @@ class TestImpProof(KCFGExploreTest):
         symbol_table['.List{"_,_"}_Ids'] = lambda: '.Ids'
 
     @staticmethod
-    def config(kprint: KPrint, k: str, state: str) -> CTerm:
+    def config(kprint: KPrint, k: str, state: str, constraint: Optional[KInner] = None) -> CTerm:
         k_parsed = kprint.parse_token(KToken(k, 'Pgm'), as_rule=True)
         state_parsed = kprint.parse_token(KToken(state, 'Map'), as_rule=True)
-        return CTerm(
+        _config = CTerm(
             KApply(
                 '<generatedTop>',
                 [
@@ -134,6 +140,9 @@ class TestImpProof(KCFGExploreTest):
                 ],
             )
         )
+        if constraint is not None:
+            _config = _config.add_constraint(constraint)
+        return _config
 
     @pytest.mark.parametrize(
         'test_id,depth,pre,expected_depth,expected_post,expected_next_states',
@@ -184,8 +193,8 @@ class TestImpProof(KCFGExploreTest):
         self,
         kcfg_explore: KCFGExplore,
         test_id: str,
-        antecedent: Tuple[str, str],
-        consequent: Tuple[str, str],
+        antecedent: Union[Tuple[str, str], Tuple[str, str, KInner]],
+        consequent: Union[Tuple[str, str], Tuple[str, str, KInner]],
         expected: Tuple[Subst, KInner],
     ) -> None:
         # Given
