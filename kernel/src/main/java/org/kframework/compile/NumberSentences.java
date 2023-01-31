@@ -10,7 +10,7 @@ import org.kframework.definition.RuleOrClaim;
 public class NumberSentences {
 
     public static Sentence number(Sentence s) {
-        if (!(s instanceof RuleOrClaim)) {
+        if (!(s instanceof RuleOrClaim) || s.att().contains(Att.UNIQUE_ID())) {
             return s;
         }
         String id = ruleHash(s.withAtt(Att.empty()));
