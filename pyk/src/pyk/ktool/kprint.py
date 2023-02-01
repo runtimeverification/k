@@ -29,6 +29,7 @@ from ..kast.outer import (
     KTerminal,
     read_kast_definition,
 )
+from ..konvert import munge, unmunge
 from ..kore.parser import KoreParser
 from ..kore.prelude import BYTES as KORE_BYTES
 from ..kore.prelude import STRING as KORE_STRING
@@ -59,84 +60,6 @@ from ..utils import enquote_str
 _LOGGER: Final = logging.getLogger(__name__)
 
 SymbolTable = Dict[str, Callable[..., str]]
-
-_unmunge_codes: Dict[str, str] = {
-    'Spce': ' ',
-    'Bang': '!',
-    'Quot': '"',
-    'Hash': '#',
-    'Dolr': '$',
-    'Perc': '%',
-    'And-': '&',
-    'Apos': "'",
-    'LPar': '(',
-    'RPar': ')',
-    'Star': '*',
-    'Plus': '+',
-    'Comm': ',',
-    'Stop': '.',
-    'Slsh': '/',
-    'Coln': ':',
-    'SCln': ';',
-    '-LT-': '<',
-    'Eqls': '=',
-    '-GT-': '>',
-    'Ques': '?',
-    '-AT-': '@',
-    'LSqB': '[',
-    'RSqB': ']',
-    'Bash': '\\',
-    'Xor-': '^',
-    'Unds': '_',
-    'BQuo': '`',
-    'LBra': '{',
-    'Pipe': '|',
-    'RBra': '}',
-    'Tild': '~',
-}
-_munge_codes: Dict[str, str] = {v: k for k, v in _unmunge_codes.items()}
-
-
-def _munge(label: str) -> str:
-    global _munge_codes
-    _symbol = ''
-    literal_mode = True
-    while len(label) > 0:
-        if label[0] in _munge_codes:
-            if not literal_mode:
-                _symbol += _munge_codes[label[0]]
-                label = label[1:]
-            else:
-                _symbol += "'"
-                literal_mode = False
-        else:
-            if literal_mode:
-                _symbol += label[0]
-                label = label[1:]
-            else:
-                _symbol += "'"
-                literal_mode = True
-    if not literal_mode:
-        _symbol += "'"
-    return _symbol
-
-
-def _unmunge(symbol: str) -> str:
-    global _unmunge_codes
-    _label = ''
-    literal_mode = True
-    while len(symbol) > 0:
-        if symbol[0] == "'":
-            literal_mode = not literal_mode
-            symbol = symbol[1:]
-        else:
-            if literal_mode:
-                _label += symbol[0]
-                symbol = symbol[1:]
-            else:
-                _label += _unmunge_codes[symbol[0:4]]
-                symbol = symbol[4:]
-    return _label
 
 
 class KAstInput(Enum):
@@ -233,9 +156,6 @@ class KPrint:
     _symbol_table: Optional[SymbolTable]
     _temp_dir: Optional[TemporaryDirectory] = None
 
-    _unmunge_codes: Dict[str, str]
-    _munge_codes: Dict[str, str]
-
     _bug_report: Optional[BugReport]
 
     def __init__(
@@ -329,7 +249,7 @@ class KPrint:
             return KToken(kore.value.value, KSort(kore.sort.name[4:]))
 
         elif type(kore) is EVar:
-            vname = _unmunge(kore.name[3:])
+            vname = unmunge(kore.name[3:])
             return KVariable(vname, sort=KSort(kore.sort.name[4:]))
 
         elif type(kore) is App:
@@ -349,7 +269,7 @@ class KPrint:
                         return KSequence([p0, p1])
 
                 else:
-                    _label_name = _unmunge(kore.symbol[3:])
+                    _label_name = unmunge(kore.symbol[3:])
                     klabel = KLabel(_label_name, [KSort(k.name[4:]) for k in kore.sorts])
                     args = [self._kore_to_kast(_a) for _a in kore.args]
                     # TODO: Written like this to appease the type-checker.
@@ -363,7 +283,7 @@ class KPrint:
                 and kore.symbol
                 == "Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort"
             ):
-                _label_name = _unmunge(kore.symbol[3:])
+                _label_name = unmunge(kore.symbol[3:])
                 klabel = KLabel(_label_name, [KSort(kore.sorts[0].name[4:])])
                 # TODO: Written like this to appease the type-checker.
                 args = [self._kore_to_kast(_a) for _a in kore.args]
@@ -467,7 +387,7 @@ class KPrint:
             return dv
 
         elif type(kast) is KVariable:
-            vname = _munge('Var' + kast.name)
+            vname = munge('Var' + kast.name)
             if sort is not None and kast.sort is not None:
                 return self._add_sort_injection(EVar(vname, SortApp('Sort' + kast.sort.name)), kast.sort, sort)
             if sort is not None and kast.sort is None:
@@ -490,7 +410,7 @@ class KPrint:
                 # TODO: Written like this to appease the type-checker.
                 new_args = [a for a in args if a is not None]
                 if len(new_args) == len(args):
-                    label_name = 'Lbl' + _munge(kast.label.name)
+                    label_name = 'Lbl' + munge(kast.label.name)
                     app: Pattern = App(label_name, (), new_args)
                     isort = _get_sort(kast)
                     if sort is not None and isort is not None:
@@ -508,7 +428,7 @@ class KPrint:
                 b1 = self._kast_to_kore(kast.args[1], sort=arg_sort)
                 b2 = self._kast_to_kore(kast.args[2], sort=arg_sort)
                 if cond is not None and b1 is not None and b2 is not None:
-                    label_name = 'Lbl' + _munge(kast.label.name)
+                    label_name = 'Lbl' + munge(kast.label.name)
                     _ite: Pattern = App(label_name, [SortApp('Sort' + arg_sort.name)], [cond, b1, b2])
                     if sort is not None:
                         _ite = self._add_sort_injection(_ite, arg_sort, sort)

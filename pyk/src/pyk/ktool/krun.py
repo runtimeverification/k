@@ -10,9 +10,10 @@ from typing import Final, Iterable, List, Mapping, Optional, Union
 from ..cli_utils import BugReport, check_dir_path, check_file_path, run_process
 from ..cterm import CTerm
 from ..kast.inner import KInner, KLabel, KSort
+from ..konvert import unmunge
 from ..kore.parser import KoreParser
 from ..kore.syntax import DV, App, Pattern, SortApp, String
-from .kprint import KPrint, _unmunge
+from .kprint import KPrint
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -162,7 +163,7 @@ class KRun(KPrint):
             if type(p) is DV:
                 return KSort(p.sort.name[4:])
             if type(p) is App:
-                label = KLabel(_unmunge(p.symbol[3:]))
+                label = KLabel(unmunge(p.symbol[3:]))
                 return self.definition.return_sort(label)
             raise ValueError(f'Cannot fast-compute sort for pattern: {p}')
 
