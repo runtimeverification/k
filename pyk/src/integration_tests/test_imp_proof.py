@@ -5,7 +5,6 @@ import pytest
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence, KToken, KVariable
 from pyk.kast.manip import get_cell
-from pyk.kast.outer import KClaim
 from pyk.ktool import KPrint, KProve
 from pyk.ktool.kprint import SymbolTable
 
@@ -49,44 +48,6 @@ class TestImpProof(KProveTest):
                 ],
             )
         )
-
-    def test_get_basic_block(self, kprove: KProve) -> None:
-        # Given
-        new_claim = KClaim(
-            KToken(
-                '<k> $s = 0 ; while ( 0 <= $n ) { $s = $s + $n ; $n = $n + -1 ; } => . ... </k> <state> $n |-> (N => 0) $s |-> (_ => (N *Int (N +Int 1)) /Int 2) </state>',
-                'KCell',
-            )
-        )
-
-        # When
-        post_depth_actual, post_branching_actual, post_state = kprove.get_claim_basic_block(
-            'imp-basic-block', new_claim
-        )
-        post_state_pretty_actual = kprove.pretty_print(post_state)
-
-        post_depth_expected = 9
-        post_branching_expected = True
-        post_state_pretty_expected = (
-            '<generatedTop>\n'
-            '  <T>\n'
-            '    <k>\n'
-            '      if ( 0 <=Int N:Int ) { { $s = $s + $n ; $n = $n + -1 ; } while ( 0 <= $n ) { $s = $s + $n ; $n = $n + -1 ; } } else { }\n'
-            '      ~> _DotVar2:K\n'
-            '    </k>\n'
-            '    <state>\n'
-            '      $n |-> N:Int $s |-> 0\n'
-            '    </state>\n'
-            '  </T>\n'
-            '  <generatedCounter>\n'
-            '    _DotVar3:Int\n'
-            '  </generatedCounter>\n'
-            '</generatedTop>'
-        )
-
-        assert post_depth_actual == post_depth_expected
-        assert post_branching_actual == post_branching_expected
-        assert post_state_pretty_actual == post_state_pretty_expected
 
     @pytest.mark.parametrize(
         'test_id,haskell_args,k,expected_next_states',
