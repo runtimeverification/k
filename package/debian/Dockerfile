@@ -19,6 +19,7 @@ RUN    apt-get update            \
         flex                     \
         gcc                      \
         git                      \
+        libboost-dev             \
         libboost-test-dev        \
         libgdbm-dev              \
         libgmp-dev               \
