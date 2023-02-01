@@ -32,7 +32,7 @@ public class KPos {
 
     public KPos(Position pos) {
         this.line = pos.getLine() + 1;
-        this.character = pos.getCharacter();
+        this.character = pos.getCharacter() + 1;
     }
 
     public Position toPosition() {
