@@ -3,28 +3,15 @@ package org.kframework.lsp;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
-import org.jetbrains.annotations.NotNull;
-import org.kframework.attributes.Att;
-import org.kframework.attributes.Location;
-import org.kframework.kil.*;
-import org.kframework.kil.Module;
 import org.kframework.kompile.Kompile;
-import org.kframework.kore.Sort;
-import scala.Tuple2;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import static org.kframework.Collections.*;
 
 /**
  * TextDocumentService implementation for K.
@@ -101,5 +88,10 @@ public class KTextDocumentService implements TextDocumentService {
     @Override
     public CompletableFuture<Either<List<? extends org.eclipse.lsp4j.Location>, List<? extends LocationLink>>> definition(DefinitionParams params) {
         return memo.definition(params);
+    }
+
+    @Override
+    public CompletableFuture<List<? extends Location>> references(ReferenceParams params) {
+        return memo.references(params);
     }
 }
