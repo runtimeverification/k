@@ -8,7 +8,6 @@ from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KInner, KLabel, KVariable, Subst
 from pyk.kast.manip import flatten_label, free_vars
 from pyk.kore.rpc import KoreClient, KoreServer
-from pyk.kore.syntax import Top
 from pyk.ktool import KPrint
 from pyk.prelude.k import GENERATED_TOP_CELL
 from pyk.prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlTop
@@ -138,10 +137,6 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         consequent_kore = self.kprint.kast_to_kore(_consequent, GENERATED_TOP_CELL)
         _, kore_client = self._kore_rpc
         result = kore_client.implies(antecedent_kore, consequent_kore)
-        if type(result.implication) is not Top:
-            _LOGGER.info(
-                f'Received a non-trivial implication back from check implication endpoint: {result.implication}'
-            )
         if result.substitution is None:
             return None
         ml_subst = self.kprint.kore_to_kast(result.substitution)
@@ -203,13 +198,13 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         self, cfgid: str, cfg: KCFG, source_id: str, target_id: str, sections: int = 2
     ) -> Tuple[KCFG, Tuple[str, ...]]:
         if sections <= 1:
-            raise ValueError(f'Cannot section an edge less than twice: {sections}')
+            raise ValueError(f'Cannot section an edge less than twice {cfgid}: {sections}')
         edge = single(cfg.edges(source_id=source_id, target_id=target_id))
         if not is_top(edge.condition):
-            raise ValueError(f'Cannot section edge with non-#Top condition: {edge.condition}')
+            raise ValueError(f'Cannot section edge with non-#Top condition {cfgid}: {edge.condition}')
         section_depth = int(edge.depth / sections)
         if section_depth == 0:
-            raise ValueError(f'Too many sections, results in 0-length section: {sections}')
+            raise ValueError(f'Too many sections, results in 0-length section {cfgid}: {sections}')
         cfg.remove_edge(source_id=source_id, target_id=target_id)
         remainder_depth = edge.depth - (section_depth * sections)
         if remainder_depth > 0:
@@ -223,10 +218,12 @@ class KCFGExplore(ContextManager['KCFGExplore']):
             new_depth, cterm, next_cterms = self.cterm_execute(curr_node.cterm, depth=section_depth)
             if new_depth != section_depth:
                 raise ValueError(
-                    f'Found section with differing depth than section depth: {new_depth} vs {section_depth}'
+                    f'Found section with differing depth than section depth {cfgid}: {new_depth} vs {section_depth}'
                 )
             if len(next_cterms) != 0:
-                raise ValueError('Found branch when sectioning edge.')
+                raise ValueError(
+                    'Found branch when sectioning edge {cfgid}: {(shorten_hashes(curr_node.id), target_id)}'
+                )
             new_node = cfg.get_or_create_node(cterm)
             new_nodes.append(new_node.id)
             _LOGGER.info(
@@ -262,7 +259,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
             _write_cfg(cfg)
 
             if max_iterations is not None and max_iterations <= iterations:
-                _LOGGER.warning(f'Reached iteration bound: {max_iterations}')
+                _LOGGER.warning(f'Reached iteration bound {cfgid}: {max_iterations}')
                 break
             iterations += 1
             curr_node = cfg.frontier[0]
@@ -275,7 +272,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
                 if impl is not None:
                     subst, pred = impl
                     cfg.create_cover(curr_node.id, target_node.id, subst=subst, constraint=pred)
-                    _LOGGER.info(f'Subsumed into target node: {shorten_hashes((curr_node.id, target_node.id))}')
+                    _LOGGER.info(f'Subsumed into target node {cfgid}: {shorten_hashes((curr_node.id, target_node.id))}')
                     continue
 
             if is_terminal is not None:
@@ -294,7 +291,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
 
             # Nonsense case.
             if len(next_cterms) == 1:
-                raise ValueError(f'Found a single successor cterm: {(depth, cterm, next_cterms)}')
+                raise ValueError(f'Found a single successor cterm {cfgid}: {(depth, cterm, next_cterms)}')
 
             if len(next_cterms) == 0 and depth == 0:
                 _LOGGER.info(f'Found stuck node {cfgid}: {shorten_hashes(curr_node.id)}')

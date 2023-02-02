@@ -271,8 +271,8 @@ class KProve(KPrint):
         spec_module_name: Optional[str] = None,
         include_dirs: Iterable[Path] = (),
         md_selector: Optional[str] = None,
-        claim_labels: Optional[Iterable[str]] = (),
-        exclude_claim_labels: Optional[Iterable[str]] = (),
+        claim_labels: Optional[Iterable[str]] = None,
+        exclude_claim_labels: Optional[Iterable[str]] = None,
     ) -> List[KClaim]:
         with NamedTemporaryFile('w', dir=self.use_directory) as ntf:
             self.prove(
