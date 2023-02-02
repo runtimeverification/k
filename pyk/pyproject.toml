@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyk"
-version = "0.1.114"
+version = "0.1.115"
 description = ""
 authors = [
     "Runtime Verification, Inc. <contact@runtimeverification.com>",
@@ -18,6 +18,7 @@ graphene = "^3.1.1"
 graphviz = "^0.20.1"
 graphql-server = "^3.0.0b5"
 gql = { version = "^3.4.0", extras = [ "requests" ] }
+pybind11 = "^2.10.3"
 textual = "^0.10.1"
 tomli = "^2.0.1"
 

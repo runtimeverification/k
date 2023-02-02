@@ -1,4 +1,5 @@
 import logging
+import sys
 from pathlib import Path
 from types import ModuleType
 from typing import Final, Type, Union
@@ -25,7 +26,17 @@ def compile_runtime(kompiled_dir: Union[str, Path], *, verbose: bool = False) ->
 
     module_file = kompiled_dir / RUNTIME_MODULE_FILE_NAME
 
-    args = ['llvm-kompile', str(defn_file), str(dt_dir), 'python', '--', '-o', str(module_file)]
+    args = [
+        'llvm-kompile',
+        str(defn_file),
+        str(dt_dir),
+        'python',
+        '--python',
+        sys.executable,
+        '--',
+        '-o',
+        str(module_file),
+    ]
     if verbose:
         args.append('-v')
 
