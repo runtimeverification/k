@@ -1920,7 +1920,7 @@ class Symbol(Kore):
 @dataclass(frozen=True)
 class SymbolDecl(Sentence):
     symbol: Symbol
-    sort_params: Tuple[Sort, ...]
+    param_sorts: Tuple[Sort, ...]
     sort: Sort
     attrs: Tuple[Attr, ...]
     hooked: bool
@@ -1928,14 +1928,14 @@ class SymbolDecl(Sentence):
     def __init__(
         self,
         symbol: Symbol,
-        sort_params: Iterable[Sort],
+        param_sorts: Iterable[Sort],
         sort: Sort,
         attrs: Iterable[Attr] = (),
         *,
         hooked: bool = False,
     ):
         object.__setattr__(self, 'symbol', symbol)
-        object.__setattr__(self, 'sort_params', tuple(sort_params))
+        object.__setattr__(self, 'param_sorts', tuple(param_sorts))
         object.__setattr__(self, 'sort', sort)
         object.__setattr__(self, 'attrs', tuple(attrs))
         object.__setattr__(self, 'hooked', hooked)
@@ -1944,17 +1944,17 @@ class SymbolDecl(Sentence):
         self,
         *,
         symbol: Optional[Symbol] = None,
-        sort_params: Optional[Iterable[Sort]] = None,
+        param_sorts: Optional[Iterable[Sort]] = None,
         sort: Optional[Sort] = None,
         attrs: Optional[Iterable[Attr]] = None,
         hooked: Optional[bool] = None,
     ) -> 'SymbolDecl':
         symbol = symbol if symbol is not None else self.symbol
-        sort_params = sort_params if sort_params is not None else self.sort_params
+        param_sorts = param_sorts if param_sorts is not None else self.param_sorts
         sort = sort if sort is not None else self.sort
         attrs = attrs if attrs is not None else self.attrs
         hooked = hooked if hooked is not None else self.hooked
-        return SymbolDecl(symbol=symbol, sort_params=sort_params, sort=sort, attrs=attrs, hooked=hooked)
+        return SymbolDecl(symbol=symbol, param_sorts=param_sorts, sort=sort, attrs=attrs, hooked=hooked)
 
     def let_attrs(self: 'SymbolDecl', attrs: Iterable[Attr]) -> 'SymbolDecl':
         return self.let(attrs=attrs)
@@ -1977,7 +1977,7 @@ class SymbolDecl(Sentence):
             [
                 'hooked-symbol' if self.hooked else 'symbol',
                 self.symbol.text,
-                _parend(sort.text for sort in self.sort_params),
+                _parend(sort.text for sort in self.param_sorts),
                 ':',
                 self.sort.text,
                 _brackd(attr.text for attr in self.attrs),
@@ -1989,7 +1989,7 @@ class SymbolDecl(Sentence):
 @dataclass(frozen=True)
 class AliasDecl(Sentence):
     alias: Symbol
-    sort_params: Tuple[Sort, ...]
+    param_sorts: Tuple[Sort, ...]
     sort: Sort
     left: App
     right: Pattern
@@ -1998,14 +1998,14 @@ class AliasDecl(Sentence):
     def __init__(
         self,
         alias: Symbol,
-        sort_params: Iterable[Sort],
+        param_sorts: Iterable[Sort],
         sort: Sort,
         left: App,
         right: Pattern,
         attrs: Iterable[Attr] = (),
     ):
         object.__setattr__(self, 'alias', alias)
-        object.__setattr__(self, 'sort_params', tuple(sort_params))
+        object.__setattr__(self, 'param_sorts', tuple(param_sorts))
         object.__setattr__(self, 'sort', sort)
         object.__setattr__(self, 'left', left)
         object.__setattr__(self, 'right', right)
@@ -2015,19 +2015,19 @@ class AliasDecl(Sentence):
         self,
         *,
         alias: Optional[Symbol] = None,
-        sort_params: Optional[Iterable[Sort]] = None,
+        param_sorts: Optional[Iterable[Sort]] = None,
         sort: Optional[Sort] = None,
         left: Optional[App] = None,
         right: Optional[Pattern] = None,
         attrs: Optional[Iterable[Attr]] = None,
     ) -> 'AliasDecl':
         alias = alias if alias is not None else self.alias
-        sort_params = sort_params if sort_params is not None else self.sort_params
+        param_sorts = param_sorts if param_sorts is not None else self.param_sorts
         sort = sort if sort is not None else self.sort
         left = left if left is not None else self.left
         right = right if right is not None else self.right
         attrs = attrs if attrs is not None else self.attrs
-        return AliasDecl(alias=alias, sort_params=sort_params, sort=sort, left=left, right=right, attrs=attrs)
+        return AliasDecl(alias=alias, param_sorts=param_sorts, sort=sort, left=left, right=right, attrs=attrs)
 
     def let_attrs(self: 'AliasDecl', attrs: Iterable[Attr]) -> 'AliasDecl':
         return self.let(attrs=attrs)
@@ -2050,7 +2050,7 @@ class AliasDecl(Sentence):
             [
                 'alias',
                 self.alias.text,
-                _parend(sort.text for sort in self.sort_params),
+                _parend(sort.text for sort in self.param_sorts),
                 ':',
                 self.sort.text,
                 'where',
