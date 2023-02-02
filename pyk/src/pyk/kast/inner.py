@@ -311,7 +311,12 @@ class KLabel(KInner):
                 raise TypeError('KLabel() got multiple values for argument: params')
             params = kwargs['params']
 
-        elif len(args) == 1 and isinstance(args[0], Iterable) and not isinstance(args[0], KInner):
+        elif (
+            len(args) == 1
+            and isinstance(args[0], Iterable)
+            and not isinstance(args[0], str)
+            and not isinstance(args[0], KInner)
+        ):
             params = args[0]
 
         else:
