@@ -2220,6 +2220,10 @@ class Module(Kore, WithAttrs, Iterable[Sentence]):
         )
 
     @cached_property
+    def symbol_decls(self) -> Tuple[SymbolDecl, ...]:
+        return tuple(sentence for sentence in self if type(sentence) is SymbolDecl)
+
+    @cached_property
     def axioms(self) -> Tuple[Axiom, ...]:
         return tuple(sentence for sentence in self if type(sentence) is Axiom)
 
