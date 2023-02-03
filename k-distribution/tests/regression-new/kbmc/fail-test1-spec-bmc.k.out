@@ -1,8 +1,0 @@
-<T>
-  <k>
-    #execute ~> .
-  </k>
-  <state>
-    "x" |-> 10
-  </state>
-</T>
