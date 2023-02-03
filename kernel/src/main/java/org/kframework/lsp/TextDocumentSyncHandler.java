@@ -3,8 +3,8 @@ package org.kframework.lsp;
 
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import org.kframework.kil.*;
 import org.kframework.kil.Module;
+import org.kframework.kil.*;
 import org.kframework.utils.file.FileUtil;
 
 import java.io.File;
@@ -19,7 +19,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.kframework.Collections.immutable;
 import static org.kframework.lsp.CompletionHelper.*;
 
 /**
@@ -223,11 +222,12 @@ public class TextDocumentSyncHandler {
     }
 
     // previous diagnostics task. If it's still active, cancel it and run a newer, updated one
-    private CompletableFuture<DocumentDiagnosticReport> latestDiagnosticScheduled;
+    private final Map<String, CompletableFuture<DocumentDiagnosticReport>> latestDiagnosticScheduled = new HashMap<>();
 
     public CompletableFuture<DocumentDiagnosticReport> diagnostic(DocumentDiagnosticParams params) {
-        if (latestDiagnosticScheduled != null && !latestDiagnosticScheduled.isDone())
-            latestDiagnosticScheduled.completeExceptionally(new Throwable("Cancelled diagnostic publisher"));
+        String uri = params.getTextDocument().getUri();
+        if (latestDiagnosticScheduled.containsKey(uri) && !latestDiagnosticScheduled.get(uri).isDone())
+            latestDiagnosticScheduled.get(uri).completeExceptionally(new Throwable("Cancelled diagnostic publisher"));
 
         Executor delayedExecutor = CompletableFuture.delayedExecutor(KTextDocumentService.DELAY_EXECUTION_MS, TimeUnit.MILLISECONDS);
         CompletableFuture<DocumentDiagnosticReport> scheduledFuture = CompletableFuture.supplyAsync(() -> {
@@ -237,7 +237,47 @@ public class TextDocumentSyncHandler {
             this.clientLogger.logMessage("Operation '" + "text/diagnostics: " + params.getTextDocument().getUri() + " #problems: " + problems.size());
             return report;
         }, delayedExecutor);
-        latestDiagnosticScheduled = scheduledFuture;
+        latestDiagnosticScheduled.put(uri, scheduledFuture);
         return scheduledFuture;
+    }
+
+    // find references of modules being used in imports
+    public CompletableFuture<List<? extends Location>> references(ReferenceParams params) {
+        return CompletableFuture.supplyAsync(() -> {
+            KPos pos = new KPos(params.getPosition());
+            List<Location> lloc = new ArrayList<>();
+
+            // look in the current file and check if we are positioned anywhere on `module NAME`
+            // then find all the imports with this name
+            List<DefinitionItem> dis = files.get(params.getTextDocument().getUri()).dis;
+            for (DefinitionItem di : dis) {
+                org.kframework.attributes.Location loc = getSafeLoc(di);
+                if (di instanceof Module && isPositionOverLocation(pos, loc)) {
+                    Module m = (Module) di;
+                    // we don't store the exact position for the module name so try to calculate it
+                    String name = m.getName();
+                    org.kframework.attributes.Location nameLoc = new org.kframework.attributes.Location(
+                            loc.startLine(), loc.startColumn(), loc.startLine(), loc.startColumn() + "module ".length() + name.length());
+
+                    if (isPositionOverLocation(pos, nameLoc)) {
+                        List<DefinitionItem> allDi = files.values().stream()
+                                .flatMap(doc -> doc.dis.stream()).collect(Collectors.toList());
+                        allDi.stream().filter(ddi -> ddi instanceof Module)
+                            .map(ddi -> ((Module) ddi))
+                            .forEach(m3 -> m3.getItems().stream()
+                                .filter(mi -> mi instanceof Import)
+                                .map(mmi -> (Import) mmi)
+                                .filter(i -> i.getName().equals(name))
+                                .forEach(imp ->
+                                    lloc.add(new Location(URI.create(m3.getSource().source()).toString(),
+                                        loc2range(getSafeLoc(imp))))));
+                    }
+                }
+            }
+            this.clientLogger.logMessage("Operation '" + "text/references: " + params.getTextDocument().getUri() + " #pos: "
+                    + pos.getLine() + " " + pos.getCharacter() + " found: " + lloc.size());
+
+            return lloc;
+        });
     }
 }
