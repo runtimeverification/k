@@ -22,6 +22,7 @@ public class KLanguageServer implements LanguageServer, LanguageClientAware {
     private final WorkspaceService workspaceService;
     private ClientCapabilities clientCapabilities;
     LanguageClient languageClient;
+    List<WorkspaceFolder> workspaceFolders;
     private int shutdown = 1;
 
     public KLanguageServer() {
@@ -35,6 +36,8 @@ public class KLanguageServer implements LanguageServer, LanguageClientAware {
 
     @Override
     public CompletableFuture<InitializeResult> initialize(InitializeParams initializeParams) {
+        workspaceFolders = initializeParams.getWorkspaceFolders();
+
         final InitializeResult response = new InitializeResult(new ServerCapabilities());
         //Set the document synchronization capabilities to full.
         response.getCapabilities().setTextDocumentSync(TextDocumentSyncKind.Full);

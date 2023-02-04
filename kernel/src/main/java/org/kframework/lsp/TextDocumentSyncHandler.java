@@ -5,12 +5,17 @@ import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.kframework.kil.Module;
 import org.kframework.kil.*;
+import org.kframework.main.GlobalOptions;
+import org.kframework.parser.inner.ParseCache;
+import org.kframework.utils.BinaryLoader;
+import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.*;
@@ -27,10 +32,27 @@ import static org.kframework.lsp.CompletionHelper.*;
 public class TextDocumentSyncHandler {
 
     public Map<String, KTextDocument> files = new HashMap<>();
+    public Map<String, ParseCache> caches;
     private final LSClientLogger clientLogger;
+    private final WorkspaceFolder workspaceFolder;
 
-    public TextDocumentSyncHandler(LSClientLogger clientLogger) {
+    private static final BinaryLoader loader = new BinaryLoader(new KExceptionManager(new GlobalOptions()));
+
+
+    public TextDocumentSyncHandler(LSClientLogger clientLogger, WorkspaceFolder workspaceFolder) {
         this.clientLogger = clientLogger;
+        this.workspaceFolder = workspaceFolder;
+    }
+
+    public void findCacheFile() {
+        if (workspaceFolder == null)
+            return;
+        try {
+            Optional<Path> cacheFile = Files.walk(Path.of(workspaceFolder.getName())).filter(p -> p.endsWith("cache.bin")).findFirst();
+            cacheFile.ifPresent(path -> caches = loader.loadCache(Map.class, path.toFile()));
+        } catch (IOException e) {
+            clientLogger.logMessage("findCachesException: " + e);
+        }
     }
 
     public void add(String uri) {

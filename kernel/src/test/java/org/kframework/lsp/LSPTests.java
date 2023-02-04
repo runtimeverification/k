@@ -6,9 +6,18 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.kframework.attributes.Location;
 import org.kframework.kil.DefinitionItem;
+import org.kframework.main.GlobalOptions;
+import org.kframework.parser.inner.ParseCache;
+import org.kframework.utils.BinaryLoader;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -91,5 +100,18 @@ public class LSPTests {
         List<? extends LocationLink> defRez = defin.get().getRight();
         Assert.assertNotEquals(defRez.size(), 0);
         //System.out.println("GoToDef: " + defRez);
+    }
+
+    @Test
+    public void testKLSPath() throws IOException {
+        Path workspaceFolder = Path.of("/home/radu/work/test");
+        BinaryLoader loader = new BinaryLoader(new KExceptionManager(new GlobalOptions()));
+        Map<String, ParseCache> caches = null;
+
+        Optional<Path> cacheFile = Files.walk(workspaceFolder).filter(p -> p.endsWith("cache.bin")).findFirst();
+        if (cacheFile.isPresent())
+            caches = loader.loadCache(Map.class, cacheFile.get().toFile());
+
+        System.out.println(caches);
     }
 }

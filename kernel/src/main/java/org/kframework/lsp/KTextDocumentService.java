@@ -40,9 +40,10 @@ public class KTextDocumentService implements TextDocumentService {
     public KTextDocumentService(KLanguageServer languageServer) throws URISyntaxException {
         this.languageServer = languageServer;
         this.clientLogger = LSClientLogger.getInstance();
-        memo = new TextDocumentSyncHandler(clientLogger);
+        memo = new TextDocumentSyncHandler(clientLogger, languageServer.workspaceFolders != null ? languageServer.workspaceFolders.get(0) : null);
         memo.add(domains.toString());
         memo.add(kast.toString());
+        this.clientLogger.logMessage("Operation '" + "text/workspaceFolders " + languageServer.workspaceFolders);
     }
 
     @Override
