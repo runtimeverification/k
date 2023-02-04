@@ -303,7 +303,7 @@ public class DefinitionParsing {
     }
 
     Map<String, ParseCache> caches;
-    java.util.Set<IDECache> ideCacheSet = new HashSet<>();
+    java.util.List<IDECache> ideCacheSet = new ArrayList<>();
 
     private java.util.Set<KEMException> errors;
 

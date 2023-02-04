@@ -30,10 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -158,14 +155,14 @@ public class ParseInModule implements Serializable, AutoCloseable {
     public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
             parseString(String input, Sort startSymbol, Source source) {
         try (Scanner scanner = getScanner()) {
-            return parseString(input, startSymbol, "unit test", scanner, source, 1, 1, true, false, new HashSet<>());
+            return parseString(input, startSymbol, "unit test", scanner, source, 1, 1, true, false, new ArrayList<>());
         }
     }
 
     public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
             parseString(String input, Sort startSymbol, String startSymbolLocation, Source source) {
         try (Scanner scanner = getScanner()) {
-            return parseString(input, startSymbol, startSymbolLocation, scanner, source, 1, 1, true, false, new HashSet<>());
+            return parseString(input, startSymbol, startSymbolLocation, scanner, source, 1, 1, true, false, new ArrayList<>());
         }
     }
     private void getParser(Scanner scanner, Sort startSymbol) {
@@ -199,7 +196,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
 
     public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
         parseString(String input, Sort startSymbol, String startSymbolLocation, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere,
-                    java.util.Set<IDECache> ideCache) {
+                    java.util.List<IDECache> ideCache) {
         final Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> result
                 = parseStringTerm(input, startSymbol, startSymbolLocation, scanner, source, startLine, startColumn, inferSortChecks, isAnywhere);
         //TODO: save the exact parse tree as Tuple(input, source, startLine, startColumn, AST/Err)

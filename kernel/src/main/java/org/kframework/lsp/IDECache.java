@@ -1,7 +1,9 @@
 package org.kframework.lsp;
 
 import org.kframework.attributes.Source;
+import org.kframework.parser.STerm;
 import org.kframework.parser.Term;
+import org.kframework.parser.ToSerializable;
 import org.kframework.utils.errorsystem.KEMException;
 import scala.Serializable;
 import scala.Tuple2;
@@ -18,7 +20,7 @@ public class IDECache implements Serializable {
 
     Set<KEMException> errors = new HashSet<>();
     Set<KEMException> warnings;
-    Term ast = null;
+    STerm ast = null;
 
     public IDECache(String input, Source source, int startLine, int startColumn, Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> result) {
         this.input = input;
@@ -29,6 +31,6 @@ public class IDECache implements Serializable {
         if (result._1().isLeft())
             errors = result._1().left().get();
         else
-            ast = result._1().right().get();
+            ast = ToSerializable.apply(result._1().right().get());
     }
 }
