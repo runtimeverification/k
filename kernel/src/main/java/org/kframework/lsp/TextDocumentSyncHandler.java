@@ -6,7 +6,6 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.kframework.kil.Module;
 import org.kframework.kil.*;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.inner.ParseCache;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -32,24 +31,28 @@ import static org.kframework.lsp.CompletionHelper.*;
 public class TextDocumentSyncHandler {
 
     public Map<String, KTextDocument> files = new HashMap<>();
-    public java.util.List<IDECache> caches;
+    public java.util.List<IDECache> caches = new LinkedList<>();
     private final LSClientLogger clientLogger;
-    private final WorkspaceFolder workspaceFolder;
+    private final KLanguageServer kls;
+    private WorkspaceFolder workspaceFolder;
 
     private static final BinaryLoader loader = new BinaryLoader(new KExceptionManager(new GlobalOptions()));
 
 
-    public TextDocumentSyncHandler(LSClientLogger clientLogger, WorkspaceFolder workspaceFolder) {
+    public TextDocumentSyncHandler(LSClientLogger clientLogger, KLanguageServer kls) {
         this.clientLogger = clientLogger;
-        this.workspaceFolder = workspaceFolder;
+        this.kls = kls;
     }
 
     public void findCacheFile() {
-        if (workspaceFolder == null)
+        if (workspaceFolder != null || kls.workspaceFolders == null)
             return;
         try {
-            Optional<Path> cacheFile = Files.walk(Path.of(workspaceFolder.getName())).filter(p -> p.endsWith("cache.bin.ide")).findFirst();
+            workspaceFolder = kls.workspaceFolders.get(0);
+            Optional<Path> cacheFile = Files.walk(Path.of(URI.create(workspaceFolder.getUri())))
+                    .filter(p -> p.endsWith("cache.bin.ide")).findFirst();
             cacheFile.ifPresent(path -> caches = loader.loadCache(java.util.List.class, path.toFile()));
+            clientLogger.logMessage("loaded caches: " + (caches != null? caches.size():null));
         } catch (IOException e) {
             clientLogger.logMessage("findCachesException: " + e);
         }
@@ -179,6 +182,7 @@ public class TextDocumentSyncHandler {
     // At the moment we only have access to outer parsing information, so we can find the definition for
     // imported module names and required files
     public CompletableFuture<Either<List<? extends org.eclipse.lsp4j.Location>, List<? extends LocationLink>>> definition(DefinitionParams params) {
+        findCacheFile();
         KPos pos = new KPos(params.getPosition());
         return CompletableFuture.supplyAsync(() -> {
             this.clientLogger.logMessage("Operation '" + "text/definition: " + params.getTextDocument().getUri() + " #pos: " + pos.getLine() + " " + pos.getCharacter());
@@ -201,9 +205,9 @@ public class TextDocumentSyncHandler {
                     } else if (di instanceof Module) {
                         Module m = (Module) di;
                         for (ModuleItem mi : m.getItems()) {
-                            if (mi instanceof Import) {
-                                org.kframework.attributes.Location loc = getSafeLoc(mi);
-                                if (isPositionOverLocation(pos, loc)) {
+                            org.kframework.attributes.Location loc = getSafeLoc(mi);
+                            if (isPositionOverLocation(pos, loc)) {
+                                if (mi instanceof Import) {
                                     Import imp = (Import) mi;
                                     List<DefinitionItem> allDi = slurp(params.getTextDocument().getUri());
                                     allDi.stream().filter(ddi -> ddi instanceof Module)
@@ -213,8 +217,15 @@ public class TextDocumentSyncHandler {
                                                     loc2range(getSafeLoc(m3)),
                                                     loc2range(getSafeLoc(m3)),
                                                     loc2range(getSafeLoc(imp)))));
-                                    break;
+                                } else if (mi instanceof StringSentence) {
+                                    // TODO: check filename as well
+                                    Optional<IDECache> rl = caches.stream().filter(ch -> ch.input.equals(((StringSentence) mi).getContent())).findFirst();
+                                    if (rl.isPresent() && rl.get().ast != null) {
+
+                                    } else
+                                        clientLogger.logMessage("definition failed rule not found in caches: " + params.getTextDocument().getUri() + " #cachedRules: " + caches.size());
                                 }
+                                break;
                             }
                         }
                     }
@@ -247,6 +258,7 @@ public class TextDocumentSyncHandler {
     private final Map<String, CompletableFuture<DocumentDiagnosticReport>> latestDiagnosticScheduled = new HashMap<>();
 
     public CompletableFuture<DocumentDiagnosticReport> diagnostic(DocumentDiagnosticParams params) {
+        findCacheFile();
         String uri = params.getTextDocument().getUri();
         if (latestDiagnosticScheduled.containsKey(uri) && !latestDiagnosticScheduled.get(uri).isDone())
             latestDiagnosticScheduled.get(uri).completeExceptionally(new Throwable("Cancelled diagnostic publisher"));
@@ -255,6 +267,12 @@ public class TextDocumentSyncHandler {
         CompletableFuture<DocumentDiagnosticReport> scheduledFuture = CompletableFuture.supplyAsync(() -> {
             files.get(params.getTextDocument().getUri()).outerParse();
             List<Diagnostic> problems = files.get(params.getTextDocument().getUri()).problems;
+            Optional<IDECache> rl = caches.stream().filter(ch -> URI.create(ch.source.source()).toString().equals(uri)).findFirst();
+            rl.ifPresent(r -> r.errors.forEach(err -> {
+                Diagnostic d = new Diagnostic(loc2range(err.exception.getLocation()), err.exception.getMessage(), DiagnosticSeverity.Error, "Inner Parser");
+                problems.add(d);
+            }));
+
             DocumentDiagnosticReport report = new DocumentDiagnosticReport(new RelatedFullDocumentDiagnosticReport(problems));
             this.clientLogger.logMessage("Operation '" + "text/diagnostics: " + params.getTextDocument().getUri() + " #problems: " + problems.size());
             return report;

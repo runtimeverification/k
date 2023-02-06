@@ -12,6 +12,7 @@ import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -104,14 +105,14 @@ public class LSPTests {
 
     @Test
     public void testKLSPath() throws IOException {
-        Path workspaceFolder = Path.of("/home/radu/work/test");
+        WorkspaceFolder workspaceFolder = new WorkspaceFolder("file:///home/radu/work/test", "test");
         BinaryLoader loader = new BinaryLoader(new KExceptionManager(new GlobalOptions()));
-        Map<String, ParseCache> caches = null;
+        List<IDECache> caches = null;
 
-        Optional<Path> cacheFile = Files.walk(workspaceFolder).filter(p -> p.endsWith("cache.bin")).findFirst();
+        Optional<Path> cacheFile = Files.walk(Path.of(URI.create(workspaceFolder.getUri()))).filter(p -> p.endsWith("cache.bin.ide")).findFirst();
         if (cacheFile.isPresent())
-            caches = loader.loadCache(Map.class, cacheFile.get().toFile());
+            caches = loader.loadCache(java.util.List.class, cacheFile.get().toFile());
 
-        System.out.println(caches);
+        System.out.println(caches.size());
     }
 }

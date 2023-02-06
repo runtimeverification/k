@@ -37,6 +37,7 @@ public class KLanguageServer implements LanguageServer, LanguageClientAware {
     @Override
     public CompletableFuture<InitializeResult> initialize(InitializeParams initializeParams) {
         workspaceFolders = initializeParams.getWorkspaceFolders();
+        LSClientLogger.getInstance().logMessage("initWorkspaceFolders" + initializeParams.getWorkspaceFolders() + " get0: " + initializeParams.getWorkspaceFolders().get(0));
 
         final InitializeResult response = new InitializeResult(new ServerCapabilities());
         //Set the document synchronization capabilities to full.
