@@ -41,7 +41,9 @@ abstract class SSafeTransformer {
 object ToSerializable {
   def apply(t: Term): STerm =
     t match {
-      case tc@TermCons(items, prod) => STermCons.apply(new util.ArrayList(items).asScala.reverse map apply asJava, prod, tc.location.get(), tc.source.get())
+      case tc@TermCons(items, prod) => STermCons.apply(
+        new util.ArrayList(items).asScala.reverse map apply asJava
+        , prod, tc.location.get(), tc.source.get())
       case c@Constant(str, prod) => SConstant(str, prod, c.location.get(), c.source.get())
     }
 }

@@ -199,7 +199,7 @@ public class ParseInModule implements Serializable, AutoCloseable {
                     java.util.List<IDECache> ideCache) {
         final Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> result
                 = parseStringTerm(input, startSymbol, startSymbolLocation, scanner, source, startLine, startColumn, inferSortChecks, isAnywhere);
-        //TODO: save the exact parse tree as Tuple(input, source, startLine, startColumn, AST/Err)
+        //save the exact parse tree as IDECache(input, source, startLine, startColumn, AST/Err)
         ideCache.add(new IDECache(input, source, startLine, startColumn, result));
         Either<Set<KEMException>, K> parseInfo;
         if (result._1().isLeft()) {

@@ -27,9 +27,9 @@ public class IDECache implements Serializable {
         this.source = source;
         this.startLine = startLine;
         this.startColumn = startColumn;
-        warnings = result._2();
+        warnings = new HashSet<>(result._2());
         if (result._1().isLeft())
-            errors = result._1().left().get();
+            errors = new HashSet<>(result._1().left().get());
         else
             ast = ToSerializable.apply(result._1().right().get());
     }

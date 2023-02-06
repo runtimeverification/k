@@ -32,7 +32,7 @@ import static org.kframework.lsp.CompletionHelper.*;
 public class TextDocumentSyncHandler {
 
     public Map<String, KTextDocument> files = new HashMap<>();
-    public Map<String, ParseCache> caches;
+    public java.util.List<IDECache> caches;
     private final LSClientLogger clientLogger;
     private final WorkspaceFolder workspaceFolder;
 
@@ -48,8 +48,8 @@ public class TextDocumentSyncHandler {
         if (workspaceFolder == null)
             return;
         try {
-            Optional<Path> cacheFile = Files.walk(Path.of(workspaceFolder.getName())).filter(p -> p.endsWith("cache.bin")).findFirst();
-            cacheFile.ifPresent(path -> caches = loader.loadCache(Map.class, path.toFile()));
+            Optional<Path> cacheFile = Files.walk(Path.of(workspaceFolder.getName())).filter(p -> p.endsWith("cache.bin.ide")).findFirst();
+            cacheFile.ifPresent(path -> caches = loader.loadCache(java.util.List.class, path.toFile()));
         } catch (IOException e) {
             clientLogger.logMessage("findCachesException: " + e);
         }
