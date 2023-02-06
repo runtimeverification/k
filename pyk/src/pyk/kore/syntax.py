@@ -1722,7 +1722,7 @@ ML_SYMBOLS: Final = {
 
 @final
 @dataclass(frozen=True)
-class Attr(Kore):
+class Attr(Kore):  # https://github.com/runtimeverification/k/issues/3137
     symbol: str
     sorts: Tuple[Sort, ...]
     params: Tuple[Union[String, 'Attr'], ...]
@@ -1769,13 +1769,13 @@ class Attr(Kore):
 
 
 class WithAttrs(ABC):
-    attrs: Tuple[Attr, ...]
+    attrs: Tuple[App, ...]
 
     @abstractmethod
-    def let_attrs(self: WA, attrs: Iterable[Attr]) -> WA:
+    def let_attrs(self: WA, attrs: Iterable[App]) -> WA:
         ...
 
-    def map_attrs(self: WA, f: Callable[[Tuple[Attr, ...]], Iterable[Attr]]) -> WA:
+    def map_attrs(self: WA, f: Callable[[Tuple[App, ...]], Iterable[App]]) -> WA:
         return self.let_attrs(f(self.attrs))
 
 
@@ -1789,19 +1789,19 @@ class Sentence(Kore, WithAttrs):
 @dataclass(frozen=True)
 class Import(Sentence):
     module_name: str
-    attrs: Tuple[Attr, ...]
+    attrs: Tuple[App, ...]
 
-    def __init__(self, module_name: str, attrs: Iterable[Attr] = ()):
+    def __init__(self, module_name: str, attrs: Iterable[App] = ()):
         check_id(module_name)
         object.__setattr__(self, 'module_name', module_name)
         object.__setattr__(self, 'attrs', tuple(attrs))
 
-    def let(self, *, module_name: Optional[str] = None, attrs: Optional[Iterable[Attr]] = None) -> 'Import':
+    def let(self, *, module_name: Optional[str] = None, attrs: Optional[Iterable[App]] = None) -> 'Import':
         module_name = module_name if module_name is not None else self.module_name
         attrs = attrs if attrs is not None else self.attrs
         return Import(module_name=module_name, attrs=attrs)
 
-    def let_attrs(self: 'Import', attrs: Iterable[Attr]) -> 'Import':
+    def let_attrs(self: 'Import', attrs: Iterable[App]) -> 'Import':
         return self.let(attrs=attrs)
 
     @classmethod
@@ -1832,10 +1832,10 @@ class Import(Sentence):
 class SortDecl(Sentence):
     name: str
     vars: Tuple[SortVar, ...]
-    attrs: Tuple[Attr, ...]
+    attrs: Tuple[App, ...]
     hooked: bool
 
-    def __init__(self, name: str, vars: Iterable[SortVar], attrs: Iterable[Attr] = (), *, hooked: bool = False):
+    def __init__(self, name: str, vars: Iterable[SortVar], attrs: Iterable[App] = (), *, hooked: bool = False):
         check_id(name)
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'vars', tuple(vars))
@@ -1847,7 +1847,7 @@ class SortDecl(Sentence):
         *,
         name: Optional[str] = None,
         vars: Optional[Iterable[SortVar]] = None,
-        attrs: Optional[Iterable[Attr]] = None,
+        attrs: Optional[Iterable[App]] = None,
         hooked: Optional[bool] = None,
     ) -> 'SortDecl':
         name = name if name is not None else self.name
@@ -1856,7 +1856,7 @@ class SortDecl(Sentence):
         hooked = hooked if hooked is not None else self.hooked
         return SortDecl(name=name, vars=vars, attrs=attrs, hooked=hooked)
 
-    def let_attrs(self: 'SortDecl', attrs: Iterable[Attr]) -> 'SortDecl':
+    def let_attrs(self: 'SortDecl', attrs: Iterable[App]) -> 'SortDecl':
         return self.let(attrs=attrs)
 
     @classmethod
@@ -1922,7 +1922,7 @@ class SymbolDecl(Sentence):
     symbol: Symbol
     param_sorts: Tuple[Sort, ...]
     sort: Sort
-    attrs: Tuple[Attr, ...]
+    attrs: Tuple[App, ...]
     hooked: bool
 
     def __init__(
@@ -1930,7 +1930,7 @@ class SymbolDecl(Sentence):
         symbol: Symbol,
         param_sorts: Iterable[Sort],
         sort: Sort,
-        attrs: Iterable[Attr] = (),
+        attrs: Iterable[App] = (),
         *,
         hooked: bool = False,
     ):
@@ -1946,7 +1946,7 @@ class SymbolDecl(Sentence):
         symbol: Optional[Symbol] = None,
         param_sorts: Optional[Iterable[Sort]] = None,
         sort: Optional[Sort] = None,
-        attrs: Optional[Iterable[Attr]] = None,
+        attrs: Optional[Iterable[App]] = None,
         hooked: Optional[bool] = None,
     ) -> 'SymbolDecl':
         symbol = symbol if symbol is not None else self.symbol
@@ -1956,7 +1956,7 @@ class SymbolDecl(Sentence):
         hooked = hooked if hooked is not None else self.hooked
         return SymbolDecl(symbol=symbol, param_sorts=param_sorts, sort=sort, attrs=attrs, hooked=hooked)
 
-    def let_attrs(self: 'SymbolDecl', attrs: Iterable[Attr]) -> 'SymbolDecl':
+    def let_attrs(self: 'SymbolDecl', attrs: Iterable[App]) -> 'SymbolDecl':
         return self.let(attrs=attrs)
 
     @classmethod
@@ -1993,7 +1993,7 @@ class AliasDecl(Sentence):
     sort: Sort
     left: App
     right: Pattern
-    attrs: Tuple[Attr, ...]
+    attrs: Tuple[App, ...]
 
     def __init__(
         self,
@@ -2002,7 +2002,7 @@ class AliasDecl(Sentence):
         sort: Sort,
         left: App,
         right: Pattern,
-        attrs: Iterable[Attr] = (),
+        attrs: Iterable[App] = (),
     ):
         object.__setattr__(self, 'alias', alias)
         object.__setattr__(self, 'param_sorts', tuple(param_sorts))
@@ -2019,7 +2019,7 @@ class AliasDecl(Sentence):
         sort: Optional[Sort] = None,
         left: Optional[App] = None,
         right: Optional[Pattern] = None,
-        attrs: Optional[Iterable[Attr]] = None,
+        attrs: Optional[Iterable[App]] = None,
     ) -> 'AliasDecl':
         alias = alias if alias is not None else self.alias
         param_sorts = param_sorts if param_sorts is not None else self.param_sorts
@@ -2029,7 +2029,7 @@ class AliasDecl(Sentence):
         attrs = attrs if attrs is not None else self.attrs
         return AliasDecl(alias=alias, param_sorts=param_sorts, sort=sort, left=left, right=right, attrs=attrs)
 
-    def let_attrs(self: 'AliasDecl', attrs: Iterable[Attr]) -> 'AliasDecl':
+    def let_attrs(self: 'AliasDecl', attrs: Iterable[App]) -> 'AliasDecl':
         return self.let(attrs=attrs)
 
     @classmethod
@@ -2091,9 +2091,9 @@ class Axiom(AxiomLike):
 
     vars: Tuple[SortVar, ...]
     pattern: Pattern
-    attrs: Tuple[Attr, ...]
+    attrs: Tuple[App, ...]
 
-    def __init__(self, vars: Iterable[SortVar], pattern: Pattern, attrs: Iterable[Attr] = ()):
+    def __init__(self, vars: Iterable[SortVar], pattern: Pattern, attrs: Iterable[App] = ()):
         object.__setattr__(self, 'vars', tuple(vars))
         object.__setattr__(self, 'pattern', pattern)
         object.__setattr__(self, 'attrs', tuple(attrs))
@@ -2103,14 +2103,14 @@ class Axiom(AxiomLike):
         *,
         vars: Optional[Iterable[SortVar]] = None,
         pattern: Optional[Pattern] = None,
-        attrs: Optional[Iterable[Attr]] = None,
+        attrs: Optional[Iterable[App]] = None,
     ) -> 'Axiom':
         vars = vars if vars is not None else self.vars
         pattern = pattern if pattern is not None else self.pattern
         attrs = attrs if attrs is not None else self.attrs
         return Axiom(vars=vars, pattern=pattern, attrs=attrs)
 
-    def let_attrs(self: 'Axiom', attrs: Iterable[Attr]) -> 'Axiom':
+    def let_attrs(self: 'Axiom', attrs: Iterable[App]) -> 'Axiom':
         return self.let(attrs=attrs)
 
     @classmethod
@@ -2133,9 +2133,9 @@ class Claim(AxiomLike):
 
     vars: Tuple[SortVar, ...]
     pattern: Pattern
-    attrs: Tuple[Attr, ...]
+    attrs: Tuple[App, ...]
 
-    def __init__(self, vars: Iterable[SortVar], pattern: Pattern, attrs: Iterable[Attr] = ()):
+    def __init__(self, vars: Iterable[SortVar], pattern: Pattern, attrs: Iterable[App] = ()):
         object.__setattr__(self, 'vars', tuple(vars))
         object.__setattr__(self, 'pattern', pattern)
         object.__setattr__(self, 'attrs', tuple(attrs))
@@ -2145,14 +2145,14 @@ class Claim(AxiomLike):
         *,
         vars: Optional[Iterable[SortVar]] = None,
         pattern: Optional[Pattern] = None,
-        attrs: Optional[Iterable[Attr]] = None,
+        attrs: Optional[Iterable[App]] = None,
     ) -> 'Claim':
         vars = vars if vars is not None else self.vars
         pattern = pattern if pattern is not None else self.pattern
         attrs = attrs if attrs is not None else self.attrs
         return Claim(vars=vars, pattern=pattern, attrs=attrs)
 
-    def let_attrs(self: 'Claim', attrs: Iterable[Attr]) -> 'Claim':
+    def let_attrs(self: 'Claim', attrs: Iterable[App]) -> 'Claim':
         return self.let(attrs=attrs)
 
     @classmethod
@@ -2173,9 +2173,9 @@ class Claim(AxiomLike):
 class Module(Kore, WithAttrs, Iterable[Sentence]):
     name: str
     sentences: Tuple[Sentence, ...]
-    attrs: Tuple[Attr, ...]
+    attrs: Tuple[App, ...]
 
-    def __init__(self, name: str, sentences: Iterable[Sentence] = (), attrs: Iterable[Attr] = ()):
+    def __init__(self, name: str, sentences: Iterable[Sentence] = (), attrs: Iterable[App] = ()):
         check_id(name)
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sentences', tuple(sentences))
@@ -2189,14 +2189,14 @@ class Module(Kore, WithAttrs, Iterable[Sentence]):
         *,
         name: Optional[str] = None,
         sentences: Optional[Iterable[Sentence]] = None,
-        attrs: Optional[Iterable[Attr]] = None,
+        attrs: Optional[Iterable[App]] = None,
     ) -> 'Module':
         name = name if name is not None else self.name
         sentences = sentences if sentences is not None else self.sentences
         attrs = attrs if attrs is not None else self.attrs
         return Module(name=name, sentences=sentences, attrs=attrs)
 
-    def let_attrs(self: 'Module', attrs: Iterable[Attr]) -> 'Module':
+    def let_attrs(self: 'Module', attrs: Iterable[App]) -> 'Module':
         return self.let(attrs=attrs)
 
     @classmethod
@@ -2232,23 +2232,21 @@ class Module(Kore, WithAttrs, Iterable[Sentence]):
 @dataclass(frozen=True)
 class Definition(Kore, WithAttrs, Iterable[Module]):
     modules: Tuple[Module, ...]
-    attrs: Tuple[Attr, ...]
+    attrs: Tuple[App, ...]
 
-    def __init__(self, modules: Iterable[Module] = (), attrs: Iterable[Attr] = ()):
+    def __init__(self, modules: Iterable[Module] = (), attrs: Iterable[App] = ()):
         object.__setattr__(self, 'modules', tuple(modules))
         object.__setattr__(self, 'attrs', tuple(attrs))
 
     def __iter__(self) -> Iterator[Module]:
         return iter(self.modules)
 
-    def let(
-        self, *, modules: Optional[Iterable[Module]] = None, attrs: Optional[Iterable[Attr]] = None
-    ) -> 'Definition':
+    def let(self, *, modules: Optional[Iterable[Module]] = None, attrs: Optional[Iterable[App]] = None) -> 'Definition':
         modules = modules if modules is not None else self.modules
         attrs = attrs if attrs is not None else self.attrs
         return Definition(modules=modules, attrs=attrs)
 
-    def let_attrs(self: 'Definition', attrs: Iterable[Attr]) -> 'Definition':
+    def let_attrs(self: 'Definition', attrs: Iterable[App]) -> 'Definition':
         return self.let(attrs=attrs)
 
     @classmethod

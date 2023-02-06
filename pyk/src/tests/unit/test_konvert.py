@@ -4,13 +4,13 @@ from typing import Final, Iterator, Tuple
 import pytest
 
 from pyk.konvert import _subsort_dict, munge, unmunge
-from pyk.kore.syntax import Attr, Axiom, Definition, Module, Sort, SortApp, SortVar, Top
+from pyk.kore.syntax import App, Axiom, Definition, Module, Sort, SortApp, SortVar, Top
 
 
 def test_subsort_dict() -> None:
     def sort_axiom(subsort: Sort, supersort: Sort) -> Axiom:
         r = SortVar('R')
-        return Axiom((r,), Top(r), attrs=(Attr('subsort', (subsort, supersort)),))
+        return Axiom((r,), Top(r), attrs=(App('subsort', (subsort, supersort)),))
 
     a, b, c, d = (SortApp(name) for name in ['a', 'b', 'c', 'd'])
 
