@@ -5,21 +5,10 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.junit.Assert;
 import org.junit.Test;
 import org.kframework.attributes.Location;
-import org.kframework.main.GlobalOptions;
-import org.kframework.parser.STerm;
-import org.kframework.parser.STermViz;
-import org.kframework.utils.BinaryLoader;
-import org.kframework.utils.errorsystem.KExceptionManager;
 
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class LSPTests {
 
@@ -99,37 +88,5 @@ public class LSPTests {
         List<? extends LocationLink> defRez = defin.get().getRight();
         Assert.assertNotEquals(defRez.size(), 0);
         //System.out.println("GoToDef: " + defRez);
-    }
-
-    @Test
-    public void testKLSPath() throws IOException {
-        WorkspaceFolder workspaceFolder = new WorkspaceFolder("file:///home/radu/work/test", "test");
-        BinaryLoader loader = new BinaryLoader(new KExceptionManager(new GlobalOptions()));
-        List<IDECache> caches = null;
-
-        Optional<Path> cacheFile = Files.walk(Path.of(URI.create(workspaceFolder.getUri()))).filter(p -> p.endsWith("cache.bin.ide")).findFirst();
-        if (cacheFile.isPresent())
-            caches = loader.loadCache(java.util.List.class, cacheFile.get().toFile());
-
-        System.out.println(caches.size());
-
-        KPos pos = new KPos(10, 14);
-        Optional<IDECache> rl = caches.stream().filter(ch -> ch.input.equals("1 => 2")).findFirst();
-        if (rl.isPresent() && rl.get().ast != null) {
-            if (rl.get().ast != null) {
-                STerm ast = rl.get().ast;
-                AtomicReference<STerm> x = new AtomicReference<>();
-                STermViz.from(t -> {
-                    if (TextDocumentSyncHandler.isPositionOverLocation(pos, t.location())) {
-                        x.set(t);
-                        System.out.println("Pos over loc: " + pos + " loc: " + t.location() + " trm: " + t.production());
-                    } else
-                        System.out.println("Pos out loc: " + pos + " loc: " + t.location() + " trm: " + t.production());
-                    return t;
-                }, "test find").apply(ast);
-                System.out.println(x.get().production());
-            }
-        } else
-            System.out.println("definition failed rule not found in caches: #cachedRules: " + caches.size());
     }
 }
