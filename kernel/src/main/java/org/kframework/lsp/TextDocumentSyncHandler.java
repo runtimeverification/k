@@ -210,7 +210,7 @@ public class TextDocumentSyncHandler {
                         for (ModuleItem mi : m.getItems()) {
                             org.kframework.attributes.Location loc = getSafeLoc(mi);
                             if (isPositionOverLocation(pos, loc)) {
-                                if (mi instanceof Import) {
+                                if (mi instanceof Import) { // goto module definition
                                     Import imp = (Import) mi;
                                     List<DefinitionItem> allDi = slurp(params.getTextDocument().getUri());
                                     allDi.stream().filter(ddi -> ddi instanceof Module)
@@ -220,7 +220,7 @@ public class TextDocumentSyncHandler {
                                                     loc2range(getSafeLoc(m3)),
                                                     loc2range(getSafeLoc(m3)),
                                                     loc2range(getSafeLoc(imp)))));
-                                } else if (mi instanceof StringSentence) {
+                                } else if (mi instanceof StringSentence) { // goto syntax of term inside rule
                                     Optional<IDECache> rl = caches.stream().filter(ch -> ch.input.equals(((StringSentence) mi).getContent())).findFirst();
                                     if (rl.isPresent() && rl.get().ast != null &&
                                             rl.get().source.source().equals(Path.of(URI.create(mi.getSource().source())).toString()) && // same path
@@ -228,7 +228,7 @@ public class TextDocumentSyncHandler {
                                             rl.get().startColumn == ((StringSentence) mi).getContentStartColumn()) { // same start col
                                         AtomicReference<STerm> x = new AtomicReference<>();
                                         STermViz.from(t -> {
-                                            if (TextDocumentSyncHandler.isPositionOverLocation(pos, t.location()))
+                                            if (isPositionOverLocation(pos, t.location()))
                                                 x.set(t);
                                             return t;
                                         }, "Find def in rule").apply(rl.get().ast);
@@ -310,7 +310,7 @@ public class TextDocumentSyncHandler {
             List<DefinitionItem> dis = files.get(params.getTextDocument().getUri()).dis;
             for (DefinitionItem di : dis) {
                 org.kframework.attributes.Location loc = getSafeLoc(di);
-                if (di instanceof Module && isPositionOverLocation(pos, loc)) {
+                if (isPositionOverLocation(pos, loc)) {
                     Module m = (Module) di;
                     // we don't store the exact position for the module name so try to calculate it
                     String name = m.getName();
@@ -329,10 +329,38 @@ public class TextDocumentSyncHandler {
                                 .forEach(imp ->
                                     lloc.add(new Location(URI.create(m3.getSource().source()).toString(),
                                         loc2range(getSafeLoc(imp))))));
+                    } else {
+                        // look for syntax references
+                        AtomicReference<Production> xprd = new AtomicReference<>();
+                        m.getItems().stream().filter(a -> a instanceof Syntax)
+                                .map(a -> ((Syntax)a))
+                                .forEach(b -> b.getPriorityBlocks().forEach(c -> c.getProductions().forEach(
+                                        d -> {
+                                            if (isPositionOverLocation(pos, d.getLocation()))
+                                                xprd.set(d);
+                                        }
+                                )));
+                        if (xprd.get() != null) {
+                            Production prd = xprd.get();
+                            String psource = Path.of(URI.create(prd.source().get().source())).toString();
+                            org.kframework.attributes.Location ploc = prd.location().get();
+                            caches.stream().filter(id -> id.ast != null).forEach(idec ->
+                                    // visitor that recurses through the rule AST
+                                    STermViz.from(t -> {
+                                        // the two production elements are not compatible so compare location information which should match
+                                        if (t.production().location().isPresent() && t.production().location().get().equals(ploc) &&
+                                            t.production().source().isPresent() && t.production().source().get().source().equals(psource)) {
+                                            lloc.add(new Location(URI.create(t.source().source()).toString(),
+                                                    loc2range(t.location())));
+                                        }
+                                        return t;
+                                    }, "Find ref in rule").apply(idec.ast)
+                                );
+                        }
                     }
                 }
             }
-            this.clientLogger.logMessage("Operation '" + "text/references: " + params.getTextDocument().getUri() + " #pos: "
+            clientLogger.logMessage("Operation '" + "text/references: " + params.getTextDocument().getUri() + " #pos: "
                     + pos.getLine() + " " + pos.getCharacter() + " found: " + lloc.size());
 
             return lloc;
