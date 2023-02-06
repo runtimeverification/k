@@ -448,8 +448,8 @@ class KoreParser:
     def _attr_param_list(self) -> List[Union[String, Attr]]:
         return self._delimited_list_of(self._attr_param, KoreToken.Type.LPAREN, KoreToken.Type.RPAREN)
 
-    def _attr_list(self) -> List[Attr]:
-        return self._delimited_list_of(self.attr, KoreToken.Type.LBRACK, KoreToken.Type.RBRACK)
+    def _attr_list(self) -> List[App]:
+        return self._delimited_list_of(self.app, KoreToken.Type.LBRACK, KoreToken.Type.RBRACK)
 
     def sentence(self) -> Sentence:
         token_type = self._la().type
