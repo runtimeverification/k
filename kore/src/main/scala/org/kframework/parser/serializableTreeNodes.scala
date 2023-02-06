@@ -26,16 +26,25 @@ case class SConstant private(value: String, production: Production, location: Lo
 case class STermCons private(items: java.util.List[STerm], production: Production, location: Location, source: Source) extends STerm with Serializable {
 }
 
-abstract class SSafeTransformer {
+object STermViz {
+  def from(f: java.util.function.UnaryOperator[STerm], name:String):STermViz = STermViz(f(_), name)
 
-  def applyTerm(t: STerm): STerm
-
-  def apply(tc: STermCons): STerm = {
-    tc.items.asScala.map(applyTerm)
-    tc
+  def apply(f: STerm => STerm, name: String): STermViz = f match {
+    case f: STermViz => f
+    case _ => new STermViz(f, name)
   }
+}
 
-  def apply(c: SConstant): STerm = c
+class STermViz(f: STerm => STerm, name: String) extends (STerm => STerm) {
+  override def apply(input: STerm): STerm = {
+    input match {
+      case c: SConstant => f(c)
+      case tc: STermCons =>
+        f(tc)
+        tc.items.forEach(apply)
+        tc
+    }
+  }
 }
 
 object ToSerializable {

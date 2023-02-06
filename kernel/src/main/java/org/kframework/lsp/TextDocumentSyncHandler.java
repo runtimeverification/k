@@ -6,6 +6,8 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.kframework.kil.Module;
 import org.kframework.kil.*;
 import org.kframework.main.GlobalOptions;
+import org.kframework.parser.STerm;
+import org.kframework.parser.STermViz;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -21,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.kframework.lsp.CompletionHelper.*;
@@ -221,7 +224,17 @@ public class TextDocumentSyncHandler {
                                     // TODO: check filename as well
                                     Optional<IDECache> rl = caches.stream().filter(ch -> ch.input.equals(((StringSentence) mi).getContent())).findFirst();
                                     if (rl.isPresent() && rl.get().ast != null) {
+                                        AtomicReference<STerm> x = new AtomicReference<>();
+                                        STermViz.from(t -> {
+                                            if (TextDocumentSyncHandler.isPositionOverLocation(pos, t.location()))
+                                                x.set(t);
+                                            return t;
+                                        }, "Find def in rule").apply(rl.get().ast);
 
+                                        lls.add(new LocationLink(URI.create(x.get().production().source().get().source()).toString(),
+                                                loc2range(x.get().production().location().get()),
+                                                loc2range(x.get().production().location().get()),
+                                                loc2range(x.get().location())));
                                     } else
                                         clientLogger.logMessage("definition failed rule not found in caches: " + params.getTextDocument().getUri() + " #cachedRules: " + caches.size());
                                 }
