@@ -2,6 +2,7 @@ package org.kframework.lsp;
 
 
 import org.eclipse.lsp4j.*;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -9,6 +10,8 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -24,6 +27,8 @@ public class KLanguageServer implements LanguageServer, LanguageClientAware {
     LanguageClient languageClient;
     List<WorkspaceFolder> workspaceFolders;
     private int shutdown = 1;
+
+    public static final String CACHE_FILE_NAME = "cache.bin.ide";
 
     public KLanguageServer() {
         try {
@@ -72,6 +77,14 @@ public class KLanguageServer implements LanguageServer, LanguageClientAware {
                     "textDocument/diagnostic", diagnosticRegistrationOptions);
             languageClient.registerCapability(new RegistrationParams(List.of(diagnosticRegistration)));
         }
+        // Register file watchers
+        List<FileSystemWatcher> watchers = new ArrayList<>();
+        watchers.add(new FileSystemWatcher(Either.forLeft("/**/" + CACHE_FILE_NAME),
+                WatchKind.Create + WatchKind.Delete + WatchKind.Change));
+        DidChangeWatchedFilesRegistrationOptions opts = new DidChangeWatchedFilesRegistrationOptions(watchers);
+        Registration registration = new Registration(UUID.randomUUID().toString(),
+                "workspace/didChangeWatchedFiles", opts);
+        languageClient.registerCapability(new RegistrationParams(Collections.singletonList(registration)));
     }
 
     @Override

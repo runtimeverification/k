@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.kframework.lsp.CompletionHelper.*;
+import static org.kframework.lsp.KLanguageServer.CACHE_FILE_NAME;
 
 /**
  * Handle the caches of all the files of interest.
@@ -38,6 +39,7 @@ public class TextDocumentSyncHandler {
     private final LSClientLogger clientLogger;
     private final KLanguageServer kls;
     private WorkspaceFolder workspaceFolder;
+    private Optional<Path> cacheFile = Optional.empty();
 
     private static final BinaryLoader loader = new BinaryLoader(new KExceptionManager(new GlobalOptions()));
 
@@ -52,13 +54,18 @@ public class TextDocumentSyncHandler {
             return;
         try {
             workspaceFolder = kls.workspaceFolders.get(0);
-            Optional<Path> cacheFile = Files.walk(Path.of(URI.create(workspaceFolder.getUri())))
-                    .filter(p -> p.endsWith("cache.bin.ide")).findFirst();
-            cacheFile.ifPresent(path -> caches = loader.loadCache(java.util.List.class, path.toFile()));
-            clientLogger.logMessage("loaded caches: " + (caches != null? caches.size():null));
+            // TODO: find a better way to get the kompiled directory - maybe with the toml file from KBuild
+            cacheFile = Files.walk(Path.of(URI.create(workspaceFolder.getUri())))
+                    .filter(p -> p.endsWith(CACHE_FILE_NAME)).findFirst();
+            loadCaches();
         } catch (IOException e) {
             clientLogger.logMessage("findCachesException: " + e);
         }
+    }
+
+    public void loadCaches() {
+        cacheFile.ifPresent(path -> caches = loader.loadCache(java.util.List.class, path.toFile()));
+        clientLogger.logMessage("loaded caches: " + (caches != null? caches.size():null));
     }
 
     public void add(String uri) {
@@ -285,11 +292,18 @@ public class TextDocumentSyncHandler {
         CompletableFuture<DocumentDiagnosticReport> scheduledFuture = CompletableFuture.supplyAsync(() -> {
             files.get(params.getTextDocument().getUri()).outerParse();
             List<Diagnostic> problems = files.get(params.getTextDocument().getUri()).problems;
-            Optional<IDECache> rl = caches.stream().filter(ch -> ch.source.source().equals(Path.of(URI.create(uri)).toString())).findFirst();
-            rl.ifPresent(r -> r.errors.forEach(err -> {
-                Diagnostic d = new Diagnostic(loc2range(err.exception.getLocation()), err.exception.getMessage(), DiagnosticSeverity.Error, "Inner Parser");
-                problems.add(d);
-            }));
+            caches.stream().filter(ch -> !ch.errors.isEmpty() && ch.source.source().equals(Path.of(URI.create(uri)).toString()))
+                    .forEach(r -> {
+                        // TODO: check to see why errors linger for the first diagnostic, but clear after the second
+                        r.errors.forEach(err -> {
+                            Diagnostic d = new Diagnostic(loc2range(err.exception.getLocation()), err.exception.getMessage(), DiagnosticSeverity.Error, "Inner Parser");
+                            problems.add(d);
+                        });
+                        r.warnings.forEach(err -> {
+                            Diagnostic d = new Diagnostic(loc2range(err.exception.getLocation()), err.exception.getMessage(), DiagnosticSeverity.Warning, "Inner Parser");
+                            problems.add(d);
+                        });
+                    });
 
             DocumentDiagnosticReport report = new DocumentDiagnosticReport(new RelatedFullDocumentDiagnosticReport(problems));
             this.clientLogger.logMessage("Operation '" + "text/diagnostics: " + params.getTextDocument().getUri() + " #problems: " + problems.size());
@@ -360,6 +374,7 @@ public class TextDocumentSyncHandler {
                     }
                 }
             }
+            // TODO: check why sometimes this message is duplicated
             clientLogger.logMessage("Operation '" + "text/references: " + params.getTextDocument().getUri() + " #pos: "
                     + pos.getLine() + " " + pos.getCharacter() + " found: " + lloc.size());
 
