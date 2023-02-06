@@ -221,9 +221,11 @@ public class TextDocumentSyncHandler {
                                                     loc2range(getSafeLoc(m3)),
                                                     loc2range(getSafeLoc(imp)))));
                                 } else if (mi instanceof StringSentence) {
-                                    // TODO: check filename as well
                                     Optional<IDECache> rl = caches.stream().filter(ch -> ch.input.equals(((StringSentence) mi).getContent())).findFirst();
-                                    if (rl.isPresent() && rl.get().ast != null) {
+                                    if (rl.isPresent() && rl.get().ast != null &&
+                                            rl.get().source.source().equals(Path.of(URI.create(mi.getSource().source())).toString()) && // same path
+                                            rl.get().startLine == ((StringSentence) mi).getContentStartLine() && // same start line
+                                            rl.get().startColumn == ((StringSentence) mi).getContentStartColumn()) { // same start col
                                         AtomicReference<STerm> x = new AtomicReference<>();
                                         STermViz.from(t -> {
                                             if (TextDocumentSyncHandler.isPositionOverLocation(pos, t.location()))
@@ -231,10 +233,13 @@ public class TextDocumentSyncHandler {
                                             return t;
                                         }, "Find def in rule").apply(rl.get().ast);
 
-                                        lls.add(new LocationLink(URI.create(x.get().production().source().get().source()).toString(),
+                                        if (x.get() != null && x.get().production().source().isPresent() && x.get().production().location().isPresent())
+                                            lls.add(new LocationLink(URI.create(x.get().production().source().get().source()).toString(),
                                                 loc2range(x.get().production().location().get()),
                                                 loc2range(x.get().production().location().get()),
                                                 loc2range(x.get().location())));
+                                        else
+                                            clientLogger.logMessage("definition failed no origin for prod: " + (x.get() != null ? x.get().production() : null));
                                     } else
                                         clientLogger.logMessage("definition failed rule not found in caches: " + params.getTextDocument().getUri() + " #cachedRules: " + caches.size());
                                 }
@@ -280,7 +285,7 @@ public class TextDocumentSyncHandler {
         CompletableFuture<DocumentDiagnosticReport> scheduledFuture = CompletableFuture.supplyAsync(() -> {
             files.get(params.getTextDocument().getUri()).outerParse();
             List<Diagnostic> problems = files.get(params.getTextDocument().getUri()).problems;
-            Optional<IDECache> rl = caches.stream().filter(ch -> URI.create(ch.source.source()).toString().equals(uri)).findFirst();
+            Optional<IDECache> rl = caches.stream().filter(ch -> ch.source.source().equals(Path.of(URI.create(uri)).toString())).findFirst();
             rl.ifPresent(r -> r.errors.forEach(err -> {
                 Diagnostic d = new Diagnostic(loc2range(err.exception.getLocation()), err.exception.getMessage(), DiagnosticSeverity.Error, "Inner Parser");
                 problems.add(d);
