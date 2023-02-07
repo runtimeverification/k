@@ -84,7 +84,7 @@ jobs:
       - name: 'Build Docker image'
         run: |
           COMMIT=$(git rev-parse --short=7 HEAD)
-          K_VERSION=$(cat deps/K_VERSION)
+          K_VERSION=$(cut --delim=v --field=2 deps/k_release)
 
           docker build .                              \
             --build-arg K_DISTRO=${{ matrix.distro }} \
