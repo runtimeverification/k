@@ -134,9 +134,14 @@ class KProve(KPrint):
         profile: bool = False,
         command: str = 'kprove',
         bug_report: Optional[BugReport] = None,
+        extra_unparsing_modules: Iterable[KFlatModule] = (),
     ):
         super(KProve, self).__init__(
-            definition_dir, use_directory=use_directory, profile=profile, bug_report=bug_report
+            definition_dir,
+            use_directory=use_directory,
+            profile=profile,
+            bug_report=bug_report,
+            extra_unparsing_modules=extra_unparsing_modules,
         )
         # TODO: we should not have to supply main_file, it should be read
         # TODO: setting use_directory manually should set temp files to not be deleted and a log message
