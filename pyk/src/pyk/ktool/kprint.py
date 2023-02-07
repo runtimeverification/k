@@ -5,7 +5,7 @@ from functools import cached_property
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
 from tempfile import TemporaryDirectory
-from typing import Any, Callable, Dict, Final, List, Optional
+from typing import Any, Callable, Dict, Final, Iterable, List, Optional
 
 from ..cli_utils import BugReport, check_dir_path, check_file_path, run_process
 from ..kast.inner import KApply, KAs, KAst, KAtt, KInner, KLabel, KRewrite, KSequence, KSort, KToken, KVariable
@@ -152,6 +152,7 @@ class KPrint:
     main_module: str
     backend: str
     _profile: bool
+    _extra_unparsing_modules: Iterable[KFlatModule]
 
     _temp_dir: Optional[TemporaryDirectory] = None
 
@@ -163,6 +164,7 @@ class KPrint:
         use_directory: Optional[Path] = None,
         profile: bool = False,
         bug_report: Optional[BugReport] = None,
+        extra_unparsing_modules: Iterable[KFlatModule] = (),
     ) -> None:
         self.definition_dir = Path(definition_dir)
         if use_directory:
@@ -178,6 +180,7 @@ class KPrint:
             self.main_module = mm.read()
         with open(self.definition_dir / 'backend.txt', 'r') as ba:
             self.backend = ba.read()
+        self._extra_unparsing_modules = extra_unparsing_modules
         self._bug_report = bug_report
         if self._bug_report:
             self._bug_report.add_definition(self.definition_dir)
@@ -196,7 +199,13 @@ class KPrint:
 
     @cached_property
     def symbol_table(self) -> SymbolTable:
-        return build_symbol_table(self.definition, opinionated=True)
+        symb_table = build_symbol_table(self.definition, extra_modules=self._extra_unparsing_modules, opinionated=True)
+        self._patch_symbol_table(symb_table)
+        return symb_table
+
+    @classmethod
+    def _patch_symbol_table(cls, symbol_table: SymbolTable) -> None:
+        pass
 
     def parse_token(self, ktoken: KToken, *, as_rule: bool = False) -> KInner:
         input = KAstInput('rule' if as_rule else 'program')
@@ -560,14 +569,17 @@ def unparser_for_production(prod: KProduction) -> Callable[..., str]:
     return _unparser
 
 
-def build_symbol_table(definition: KDefinition, opinionated: bool = False) -> SymbolTable:
+def build_symbol_table(
+    definition: KDefinition, extra_modules: Iterable[KFlatModule] = (), opinionated: bool = False
+) -> SymbolTable:
     """Build the unparsing symbol table given a JSON encoded definition.
 
     -   Input: JSON encoded K definition.
     -   Return: Python dictionary mapping klabels to automatically generated unparsers.
     """
     symbol_table = {}
-    for module in definition.modules:
+    all_modules = list(definition.modules) + ([] if extra_modules is None else list(extra_modules))
+    for module in all_modules:
         for prod in module.syntax_productions:
             assert prod.klabel
             label = prod.klabel.name
