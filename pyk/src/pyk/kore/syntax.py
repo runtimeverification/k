@@ -20,7 +20,7 @@ from typing import (
     final,
 )
 
-from ..utils import check_type
+from ..utils import FrozenDict, check_type
 from .lexer import KoreLexer, KoreStringLexer
 
 
@@ -2269,6 +2269,85 @@ class Definition(Kore, WithAttrs, Iterable[Module]):
             ]
             + [module.text for module in self.modules]
         )
+
+    @cached_property
+    def symbol_table(self) -> FrozenDict[str, SymbolDecl]:
+        return FrozenDict(
+            (symbol_decl.symbol.name, symbol_decl) for module in self for symbol_decl in module.symbol_decls
+        )
+
+    @cached_property
+    def weak_symbol_table(self) -> FrozenDict[str, SymbolDecl]:
+        S, T = (SortVar(name) for name in ('S', 'T'))  # noqa: N806
+        ml_symbol_table = {
+            r'\top': SymbolDecl(Symbol(r'\top', (S,)), (), S),
+            r'\bottom': SymbolDecl(Symbol(r'\bottom', (S,)), (), S),
+            r'\not': SymbolDecl(Symbol(r'\not', (S,)), (S,), S),
+            r'\and': SymbolDecl(Symbol(r'\and', (S,)), (S, S), S),
+            r'\or': SymbolDecl(Symbol(r'\or', (S,)), (S, S), S),
+            r'\implies': SymbolDecl(Symbol(r'\implies', (S,)), (S, S), S),
+            r'\iff': SymbolDecl(Symbol(r'\iff', (S,)), (S, S), S),
+            r'\ceil': SymbolDecl(Symbol(r'\ceil', (S, T)), (S,), T),
+            r'\floor': SymbolDecl(Symbol(r'\floor', (S, T)), (S,), T),
+            r'\equals': SymbolDecl(Symbol(r'\equals', (S, T)), (S, S), T),
+            r'\in': SymbolDecl(Symbol(r'\in', (S, T)), (S, S), T),
+        }
+        return FrozenDict({**ml_symbol_table, **self.symbol_table})
+
+    def resolve(self, symbol_id: str, sorts: Iterable[Sort] = ()) -> Tuple[Sort, Tuple[Sort, ...]]:
+        symbol_decl = self.weak_symbol_table.get(symbol_id)
+        if not symbol_decl:
+            raise ValueError(f'Undeclared symbol: {symbol_id}')
+
+        symbol = symbol_decl.symbol
+        sorts = tuple(sorts)
+
+        nr_sort_vars = len(symbol.vars)
+        nr_sorts = len(sorts)
+        if nr_sort_vars != nr_sorts:
+            raise ValueError(f'Expected {nr_sort_vars} sort parameters, got {nr_sorts} for: {symbol_id}')
+
+        sort_table: Dict[Sort, Sort] = dict(zip(symbol.vars, sorts))
+
+        def resolve_sort(sort: Sort) -> Sort:
+            if type(sort) is SortVar:
+                return sort_table.get(sort, sort)
+            return sort
+
+        sort = resolve_sort(symbol_decl.sort)
+        param_sorts = tuple(resolve_sort(sort) for sort in symbol_decl.param_sorts)
+
+        return sort, param_sorts
+
+    def infer_sort(self, pattern: Pattern) -> Sort:
+        if isinstance(pattern, WithSort):
+            return pattern.sort
+
+        if type(pattern) is App:
+            sort, _ = self.resolve(pattern.symbol, pattern.sorts)
+            return sort
+
+        raise ValueError(f'Cannot infer sort: {pattern}')
+
+    def pattern_sorts(self, pattern: Pattern) -> Tuple[Sort, ...]:
+        sorts: Tuple[Sort, ...]
+        if isinstance(pattern, DV):
+            sorts = ()
+
+        elif isinstance(pattern, MLQuant):
+            sorts = (pattern.sort,)
+
+        elif isinstance(pattern, MLPattern):
+            _, sorts = self.resolve(pattern.symbol(), pattern.sorts)
+
+        elif isinstance(pattern, App):
+            _, sorts = self.resolve(pattern.symbol, pattern.sorts)
+
+        else:
+            sorts = ()
+
+        assert len(sorts) == len(pattern.patterns)
+        return sorts
 
 
 def kore_term(dct: Mapping[str, Any], cls: Type[T] = Kore) -> T:  # type: ignore
