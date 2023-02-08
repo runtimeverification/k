@@ -1098,7 +1098,10 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
 
         return Subst(subst)
 
-    def sort_vars(self, kast: KInner) -> KInner:
+    def sort_vars(self, kast: KInner, sort: Optional[KSort] = None) -> KInner:
+        if type(kast) is KVariable and kast.sort is None and sort is not None:
+            return kast.let(sort=sort)
+
         subst = self.sort_vars_subst(kast)
         return subst(kast)
 

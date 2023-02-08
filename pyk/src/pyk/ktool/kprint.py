@@ -1,5 +1,6 @@
 import json
 import logging
+from contextlib import suppress
 from enum import Enum
 from functools import cached_property
 from pathlib import Path
@@ -30,27 +31,11 @@ from ..kast.outer import (
     KTerminal,
     read_kast_definition,
 )
-from ..konvert import munge, unmunge
+from ..konvert import KompiledKore, kast_to_kore, unmunge
 from ..kore.parser import KoreParser
 from ..kore.prelude import BYTES as KORE_BYTES
 from ..kore.prelude import STRING as KORE_STRING
-from ..kore.syntax import (
-    DV,
-    And,
-    App,
-    Assoc,
-    Bottom,
-    Ceil,
-    Equals,
-    EVar,
-    Exists,
-    Implies,
-    Not,
-    Pattern,
-    SortApp,
-    String,
-    Top,
-)
+from ..kore.syntax import DV, And, App, Assoc, Bottom, Ceil, Equals, EVar, Exists, Implies, Not, Pattern, SortApp, Top
 from ..prelude.bytes import BYTES, bytesToken
 from ..prelude.k import DOTS, EMPTY_K
 from ..prelude.kbool import TRUE
@@ -192,6 +177,10 @@ class KPrint:
     @cached_property
     def definition(self) -> KDefinition:
         return read_kast_definition(self.definition_dir / 'compiled.json')
+
+    @cached_property
+    def kompiled_kore(self) -> KompiledKore:
+        return KompiledKore(self.definition_dir)
 
     @property
     def definition_hash(self) -> str:
@@ -351,10 +340,9 @@ class KPrint:
         return None
 
     def kast_to_kore(self, kast: KInner, sort: Optional[KSort] = None) -> Pattern:
-        kast = self.definition.sort_vars(kast)
-        _kore_out = self._kast_to_kore(kast, sort=sort)
-        if _kore_out is not None:
-            return _kore_out
+        with suppress(ValueError):
+            return kast_to_kore(self.definition, self.kompiled_kore, kast, sort)
+
         _LOGGER.warning(f'Falling back to using `kast` for KAst -> Kore: {kast}')
         kast_json = {'format': 'KAST', 'version': 2, 'term': kast.to_dict()}
         proc_res = _kast(
@@ -366,180 +354,6 @@ class KPrint:
             profile=self._profile,
         )
         return KoreParser(proc_res.stdout).pattern()
-
-    def _kast_to_kore(self, kast: KInner, sort: Optional[KSort] = None) -> Optional[Pattern]:
-        _LOGGER.debug(f'_kast_to_kore: {kast}')
-
-        def _get_sort(_ki: KInner) -> Optional[KSort]:
-            if type(_ki) is KApply:
-                return self.definition.return_sort(_ki.label)
-            return None
-
-        if type(kast) is KToken:
-            value = kast.token
-            if kast.sort == STRING:
-                assert value.startswith('"')
-                assert value.endswith('"')
-                value = value[1:-1]
-            elif kast.sort == BYTES:
-                assert value.startswith('b"')
-                assert value.endswith('"')
-                value = value[2:-1]
-            dv: Pattern = DV(SortApp('Sort' + kast.sort.name), String(value))
-            if sort is not None:
-                dv = self._add_sort_injection(dv, kast.sort, sort)
-            return dv
-
-        elif type(kast) is KVariable:
-            vname = munge('Var' + kast.name)
-            if sort is not None and kast.sort is not None:
-                return self._add_sort_injection(EVar(vname, SortApp('Sort' + kast.sort.name)), kast.sort, sort)
-            if sort is not None and kast.sort is None:
-                return EVar(vname, SortApp('Sort' + sort.name))
-            if sort is None and kast.sort is not None:
-                return EVar(vname, SortApp('Sort' + kast.sort.name))
-
-        elif type(kast) is KApply:
-
-            if len(kast.label.params) == 0:
-                # TODO: KAST validation should be a separate pass
-                argument_sorts = self.definition.argument_sorts(kast.label)
-                if kast.arity != len(argument_sorts):
-                    raise ValueError(
-                        f'Incorrect argument count for label {kast.label}:\n'
-                        f'    Actual: {kast.args}\n'
-                        f'    Expected: {argument_sorts}\n'
-                    )
-                args = [self._kast_to_kore(arg, sort=arg_sort) for arg, arg_sort in zip(kast.args, argument_sorts)]
-                # TODO: Written like this to appease the type-checker.
-                new_args = [a for a in args if a is not None]
-                if len(new_args) == len(args):
-                    label_name = 'Lbl' + munge(kast.label.name)
-                    app: Pattern = App(label_name, (), new_args)
-                    isort = _get_sort(kast)
-                    if sort is not None and isort is not None:
-                        app = self._add_sort_injection(app, isort, sort)
-                    return app
-
-            # hardcoded polymorphic operators
-            elif (
-                len(kast.label.params) == 1
-                and kast.label.name == '#if_#then_#else_#fi_K-EQUAL-SYNTAX_Sort_Bool_Sort_Sort'
-            ):
-                assert kast.arity == 3
-                arg_sort = kast.label.params[0]
-                cond = self._kast_to_kore(kast.args[0], sort=KSort('Bool'))
-                b1 = self._kast_to_kore(kast.args[1], sort=arg_sort)
-                b2 = self._kast_to_kore(kast.args[2], sort=arg_sort)
-                if cond is not None and b1 is not None and b2 is not None:
-                    label_name = 'Lbl' + munge(kast.label.name)
-                    _ite: Pattern = App(label_name, [SortApp('Sort' + arg_sort.name)], [cond, b1, b2])
-                    if sort is not None:
-                        _ite = self._add_sort_injection(_ite, arg_sort, sort)
-                    return _ite
-
-            # ML symbols
-            elif len(kast.label.params) == 1:
-                psort = kast.label.params[0]
-
-                if kast.label.name == '#And':
-                    assert kast.arity == 2
-                    larg = self._kast_to_kore(kast.args[0], sort=psort)
-                    rarg = self._kast_to_kore(kast.args[1], sort=psort)
-                    if larg is not None and rarg is not None:
-                        _and: Pattern = And(SortApp('Sort' + psort.name), larg, rarg)
-                        if sort is not None:
-                            _and = self._add_sort_injection(_and, psort, sort)
-                        return _and
-
-                elif kast.label.name == '#Implies':
-                    assert kast.arity == 2
-                    larg = self._kast_to_kore(kast.args[0], sort=psort)
-                    rarg = self._kast_to_kore(kast.args[1], sort=psort)
-                    if larg is not None and rarg is not None:
-                        _implies: Pattern = Implies(SortApp('Sort' + psort.name), larg, rarg)
-                        if sort is not None:
-                            _implies = self._add_sort_injection(_implies, psort, sort)
-                        return _implies
-
-                elif kast.label.name == '#Not':
-                    assert kast.arity == 1
-                    arg = self._kast_to_kore(kast.args[0], sort=psort)
-                    if arg is not None:
-                        _not: Pattern = Not(SortApp('Sort' + psort.name), arg)
-                        if sort is not None:
-                            _not = self._add_sort_injection(_not, psort, sort)
-                        return _not
-
-                elif kast.label.name == '#Top':
-                    assert kast.arity == 0
-                    _top: Pattern = Top(SortApp('Sort' + psort.name))
-                    if sort is not None:
-                        _top = self._add_sort_injection(_top, psort, sort)
-                        return _top
-
-                elif kast.label.name == '#Bottom':
-                    assert kast.arity == 0
-                    _bottom: Pattern = Bottom(SortApp('Sort' + psort.name))
-                    if sort is not None:
-                        _bottom = self._add_sort_injection(_bottom, psort, sort)
-                        return _bottom
-
-                elif kast.label.name == '#Exists':
-                    assert kast.arity == 2
-                    assert type(kast.args[0]) is KVariable
-                    var = self._kast_to_kore(kast.args[0])
-                    body = self._kast_to_kore(kast.args[1], sort=psort)
-                    if var is not None and type(var) is EVar and body is not None:
-                        _exists: Pattern = Exists(SortApp('Sort' + psort.name), var, body)
-                        if sort is not None:
-                            _exists = self._add_sort_injection(_exists, psort, sort)
-                        return _exists
-
-            elif len(kast.label.params) == 2:
-                osort = kast.label.params[0]
-                psort = kast.label.params[1]
-
-                if kast.label.name == '#Equals':
-                    assert kast.arity == 2
-                    larg = self._kast_to_kore(kast.args[0], sort=osort)
-                    rarg = self._kast_to_kore(kast.args[1], sort=osort)
-                    if larg is not None and rarg is not None:
-                        _equals: Pattern = Equals(
-                            SortApp('Sort' + osort.name), SortApp('Sort' + psort.name), larg, rarg
-                        )
-                        if sort is not None:
-                            _equals = self._add_sort_injection(_equals, psort, sort)
-                        return _equals
-
-                if kast.label.name == '#Ceil':
-                    assert kast.arity == 1
-                    arg = self._kast_to_kore(kast.args[0], sort=osort)
-                    if arg is not None:
-                        _ceil: Pattern = Ceil(SortApp('Sort' + osort.name), SortApp('Sort' + psort.name), arg)
-                        if sort is not None:
-                            _ceil = self._add_sort_injection(_ceil, psort, sort)
-                        return _ceil
-
-        elif type(kast) is KSequence:
-            if kast.arity == 0:
-                return App('dotk', (), ())
-            item0 = kast.items[0]
-            if kast.arity == 1:
-                if type(item0) is KVariable and item0.sort == KSort('K'):
-                    return self._kast_to_kore(item0, sort=KSort('K'))
-                else:
-                    item0_kore = self._kast_to_kore(item0, sort=KSort('KItem'))
-                    if item0_kore is not None:
-                        return App('kseq', (), [item0_kore, App('dotk', (), ())])
-            else:
-                item0_kore = self._kast_to_kore(item0, sort=KSort('KItem'))
-                items_kore = self._kast_to_kore(KSequence(kast.items[1:]), sort=KSort('K'))
-                if item0_kore is not None and items_kore is not None:
-                    return App('kseq', (), [item0_kore, items_kore])
-
-        _LOGGER.warning(f'KPrint._kast_to_kore failed on input: {kast}')
-        return None
 
     def _add_sort_injection(self, pat: Pattern, isort: KSort, osort: KSort) -> Pattern:
         if isort == osort:

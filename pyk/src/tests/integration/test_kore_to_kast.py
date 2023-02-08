@@ -1,8 +1,11 @@
+from pathlib import Path
 from typing import Final
 
 import pytest
 
 from pyk.kast.inner import KApply, KInner, KLabel, KSequence, KSort, KToken, KVariable
+from pyk.konvert import kast_to_kore
+from pyk.kore.kompiled import KompiledKore
 from pyk.kore.prelude import BOOL as KORE_BOOL
 from pyk.kore.prelude import BYTES as KORE_BYTES
 from pyk.kore.prelude import INT as KORE_INT
@@ -409,12 +412,24 @@ KORE_TO_KAST_TEST_DATA: Final = (
 class TestKoreToKast(KPrintTest):
     KOMPILE_MAIN_FILE = 'k-files/simple-proofs.k'
 
+    @pytest.fixture(scope='class')
+    def kompiled_kore(self, definition_dir: Path) -> KompiledKore:
+        return KompiledKore(definition_dir)
+
     @pytest.mark.parametrize(
         'test_id,sort,kore,kast', BIDIRECTIONAL_TEST_DATA, ids=[test_id for test_id, *_ in BIDIRECTIONAL_TEST_DATA]
     )
-    def test_bidirectional(self, kprint: KPrint, test_id: str, sort: KSort, kore: Pattern, kast: KInner) -> None:
+    def test_bidirectional(
+        self,
+        kprint: KPrint,
+        kompiled_kore: KompiledKore,
+        test_id: str,
+        sort: KSort,
+        kore: Pattern,
+        kast: KInner,
+    ) -> None:
         # When
-        actual_kore = kprint.kast_to_kore(kast, sort=sort)
+        actual_kore = kast_to_kore(kprint.definition, kompiled_kore, kast, sort=sort)
         actual_kast = kprint.kore_to_kast(kore)
 
         # Then
@@ -424,9 +439,17 @@ class TestKoreToKast(KPrintTest):
     @pytest.mark.parametrize(
         'test_id,sort,kore,kast', KAST_TO_KORE_TEST_DATA, ids=[test_id for test_id, *_ in KAST_TO_KORE_TEST_DATA]
     )
-    def test_kast_to_kore(self, kprint: KPrint, test_id: str, sort: KSort, kore: Pattern, kast: KInner) -> None:
+    def test_kast_to_kore(
+        self,
+        kprint: KPrint,
+        kompiled_kore: KompiledKore,
+        test_id: str,
+        sort: KSort,
+        kore: Pattern,
+        kast: KInner,
+    ) -> None:
         # When
-        actual_kore = kprint.kast_to_kore(kast, sort=sort)
+        actual_kore = kast_to_kore(kprint.definition, kompiled_kore, kast, sort=sort)
 
         # Then
         assert actual_kore == kore
