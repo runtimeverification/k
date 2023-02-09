@@ -37,8 +37,7 @@ jobs:
       - name: 'PATH?'
         run: |
           echo $PATH
-          brew list
-          ld64.lld
+          ls $(brew --prefix llvm)/bin
 
   nix-maven:
     name: 'Nix: Maven'
