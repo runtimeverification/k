@@ -1,13 +1,7 @@
-K_ROOT := $(abspath ..)
-K_BIN  := $(K_ROOT)/k-distribution/target/release/k/bin
-
-export PATH := $(K_BIN):$(PATH)
-
-
-.PHONY: default all clean build install          \
-        poetry-install                           \
-        test test-unit test-integration test-pyk \
-        format isort autoflake black             \
+.PHONY: default all clean build install \
+        poetry-install                  \
+        test test-unit test-integration \
+        format isort autoflake black    \
         check check-isort check-autoflake check-black check-flake8 check-mypy
 
 default: check test-unit
@@ -17,7 +11,6 @@ all: check test
 clean:
 	rm -rf dist .mypy_cache
 	find -type d -name __pycache__ -prune -exec rm -rf {} \;
-	$(MAKE) -C pyk-tests clean
 
 build:
 	poetry build
@@ -34,21 +27,14 @@ POETRY_RUN := poetry run
 # Tests
 
 TEST_ARGS :=
-CHECK = git --no-pager diff --no-index -R
 
-test: test-unit test-integration test-pyk test-kit
+test: test-unit test-integration
 
 test-unit: poetry-install
 	$(POETRY_RUN) pytest src/tests/unit --maxfail=1 --verbose $(TEST_ARGS)
 
 test-integration: poetry-install
 	$(POETRY_RUN) pytest src/tests/integration --numprocesses=4 --durations=0 --maxfail=1 --verbose $(TEST_ARGS)
-
-test-pyk: poetry-install
-	$(POETRY_RUN) $(MAKE) -C pyk-tests
-
-test-kit: poetry-install
-	$(POETRY_RUN) $(MAKE) -C kit-tests CHECK="$(CHECK)"
 
 
 # Checks and formatting
@@ -79,16 +65,3 @@ black: poetry-install
 
 check-black: poetry-install
 	$(POETRY_RUN) black --check src
-
-
-# GraphQL schema
-
-SCHEMA_FILE := src/pyk/krepl_web/docs/schema.graphql
-GEN_SCHEMA := $(POETRY_RUN) python3 -c 'from pyk.krepl_web.server.schema import SCHEMA ; print(SCHEMA)'
-
-schema: poetry-install
-	$(GEN_SCHEMA) > $(SCHEMA_FILE)
-.PHONY: schema
-
-check-schema: poetry-install
-	echo "$$($(GEN_SCHEMA))" | diff $(SCHEMA_FILE) -
