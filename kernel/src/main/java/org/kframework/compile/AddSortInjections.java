@@ -24,6 +24,7 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.parser.outer.Outer;
 import org.kframework.utils.errorsystem.KEMException;
+import scala.Option;
 import scala.Tuple2;
 
 import java.util.ArrayList;
@@ -437,11 +438,12 @@ public class AddSortInjections {
         if (term.klabel() instanceof KVariable) {
           throw KEMException.internalError("KORE does not yet support KLabel variables.", term);
         }
-        scala.collection.Set<Production> prods = mod.productionsFor().apply(((KApply) term).klabel().head());
-        if (prods.size() == 0) {
-          throw KEMException.compilerError("Could not find production for KApply with label " + term.klabel(), term);
+        Option<scala.collection.Set<Production>> prods = mod.productionsFor().get(term.klabel().head());
+        if (prods.isEmpty()) {
+          throw KEMException.compilerError("Could not find productions for KApply with label "
+                  + term.klabel() + " in module " + mod.name(), term);
         }
-        return prods.head();
+        return prods.get().head();
     }
 
     private static Sort lub(Collection<Sort> entries, Sort expectedSort, HasLocation loc, Module mod) {
