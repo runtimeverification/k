@@ -40,7 +40,7 @@ EXECUTE_TEST_DATA: Final = (
         2,
         ('int $n , $s ; $n = 3 ;', '.Map'),
         2,
-        ('int .Ids ; $n = 3 ;', '$s |-> 0 $n |-> 0'),
+        ('int .Ids ; $n = 3 ;', '$n |-> 0 $s |-> 0'),
         EMPTY_STATES,
     ),
     (
