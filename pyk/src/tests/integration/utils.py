@@ -97,10 +97,10 @@ class KProveTest(KompiledTest):
     @pytest.fixture
     def kprove(
         self, definition_dir: Path, tmp_path_factory: TempPathFactory, bug_report: Optional[BugReport]
-    ) -> Iterator[KProve]:
+    ) -> KProve:
         kprove = KProve(definition_dir, use_directory=tmp_path_factory.mktemp('kprove'), bug_report=bug_report)
         self._update_symbol_table(kprove.symbol_table)
-        yield kprove
+        return kprove
 
     @staticmethod
     def _update_symbol_table(symbol_table: SymbolTable) -> None:
@@ -110,8 +110,8 @@ class KProveTest(KompiledTest):
 class KCFGExploreTest(KProveTest):
     @pytest.fixture
     def kcfg_explore(self, kprove: KProve) -> Iterator[KCFGExplore]:
-        kcfg_explore = KCFGExplore(kprove, free_port_on_host(), bug_report=kprove._bug_report)
-        yield kcfg_explore
+        with KCFGExplore(kprove, free_port_on_host(), bug_report=kprove._bug_report) as kcfg_explore:
+            yield kcfg_explore
 
 
 # Based on: https://stackoverflow.com/a/45690594
