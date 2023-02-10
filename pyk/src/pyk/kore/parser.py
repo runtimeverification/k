@@ -9,7 +9,6 @@ from .syntax import (
     And,
     App,
     Assoc,
-    Attr,
     Axiom,
     BinaryConn,
     BinaryPred,
@@ -432,21 +431,6 @@ class KoreParser:
 
     def right_assoc(self) -> RightAssoc:
         return self._assoc('\\right-assoc', RightAssoc)
-
-    def attr(self) -> Attr:
-        symbol = self._custom_symbol_id()
-        sorts = self._sort_list()
-        params = self._attr_param_list()
-        return Attr(symbol, sorts, params)
-
-    def _attr_param(self) -> Union[String, Attr]:
-        if self._la().type == KoreToken.Type.STRING:
-            return self.string()
-
-        return self.attr()
-
-    def _attr_param_list(self) -> List[Union[String, Attr]]:
-        return self._delimited_list_of(self._attr_param, KoreToken.Type.LPAREN, KoreToken.Type.RPAREN)
 
     def _attr_list(self) -> List[App]:
         return self._delimited_list_of(self.app, KoreToken.Type.LBRACK, KoreToken.Type.RBRACK)
