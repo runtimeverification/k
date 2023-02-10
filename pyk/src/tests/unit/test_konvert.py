@@ -70,18 +70,19 @@ def test_subsort_table(kore_factory: KoreFactory) -> None:
     definition_text = r"""
         []
         module MODULE-1
-            axiom{R} \top{R}() [subsort{A{}, D{}}()]
-            axiom{R} \top{R}() [subsort{B{}, D{}}()]
+            axiom{R} \top{R}() [subsort{A{}, B{}}()]
+            axiom{R} \top{R}() [subsort{B{}, C{}}()]
         endmodule []
         module MODULE-2
-            axiom{R} \top{R}() [subsort{B{}, C{}}()]
+            axiom{R} \top{R}() [subsort{B{}, D{}}()]
         endmodule []
     """
     kompiled_kore = kore_factory(definition_text)
 
     a, b, c, d = (SortApp(name) for name in ['A', 'B', 'C', 'D'])
     expected = {
-        c: {b},
+        b: {a},
+        c: {a, b},
         d: {a, b},
     }
 
