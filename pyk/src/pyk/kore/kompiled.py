@@ -42,11 +42,22 @@ class KompiledKore:
         subsort_attrs = (attr for attr in attrs if attr.symbol == 'subsort')
         subsort_attr_sorts = (attr.sorts for attr in subsort_attrs)
 
-        subsort_table: Dict[Sort, Set[Sort]] = defaultdict(set)
+        direct_subsorts: Dict[Sort, Set[Sort]] = defaultdict(set)
         for subsort, supersort in subsort_attr_sorts:
-            subsort_table[supersort].add(subsort)
+            direct_subsorts[supersort].add(subsort)
 
-        return FrozenDict({supersort: frozenset(subsorts) for supersort, subsorts in subsort_table.items()})
+        supersorts = direct_subsorts.keys()
+
+        subsort_table = dict(direct_subsorts)
+        for sort_k in supersorts:
+            for sort_j in supersorts:
+                if sort_k not in subsort_table[sort_j]:
+                    continue
+
+                for sort_i in subsort_table[sort_k]:
+                    subsort_table[sort_j].add(sort_i)
+
+        return FrozenDict((supersort, frozenset(subsorts)) for supersort, subsorts in subsort_table.items())
 
     def is_subsort(self, sort1: Sort, sort2: Sort) -> bool:
         if sort1 == sort2:
