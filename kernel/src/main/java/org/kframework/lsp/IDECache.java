@@ -13,6 +13,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class IDECache implements Serializable {
+    // TODO: it might be possible to completely remove this class
+    // The K classes that we store in existing caches already have the original production as an attribute
     String input;
     Source source;
     int startLine;

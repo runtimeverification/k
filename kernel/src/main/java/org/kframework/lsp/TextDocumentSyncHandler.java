@@ -3,11 +3,19 @@ package org.kframework.lsp;
 
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.kframework.attributes.Source;
+import org.kframework.definition.Bubble;
+import org.kframework.definition.KViz;
+import org.kframework.definition.KViz$;
 import org.kframework.kil.Module;
 import org.kframework.kil.*;
+import org.kframework.kompile.DefinitionParsing;
+import org.kframework.kore.K;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.STerm;
 import org.kframework.parser.STermViz;
+import org.kframework.parser.inner.ParseCache;
+import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -35,7 +43,8 @@ import static org.kframework.lsp.KLanguageServer.CACHE_FILE_NAME;
 public class TextDocumentSyncHandler {
 
     public Map<String, KTextDocument> files = new HashMap<>();
-    public java.util.List<IDECache> caches = new LinkedList<>();
+    //public java.util.List<IDECache> caches = new LinkedList<>();
+    public Map<String, ParseCache> caches;
     private final LSClientLogger clientLogger;
     private final KLanguageServer kls;
     private WorkspaceFolder workspaceFolder;
@@ -64,7 +73,7 @@ public class TextDocumentSyncHandler {
     }
 
     public void loadCaches() {
-        cacheFile.ifPresent(path -> caches = loader.loadCache(java.util.List.class, path.toFile()));
+        cacheFile.ifPresent(path -> caches = loader.loadCache(java.util.Map.class, path.toFile()));
         clientLogger.logMessage("loaded caches: " + (caches != null? caches.size():null));
     }
 
@@ -228,27 +237,35 @@ public class TextDocumentSyncHandler {
                                                     loc2range(getSafeLoc(m3)),
                                                     loc2range(getSafeLoc(imp)))));
                                 } else if (mi instanceof StringSentence) { // goto syntax of term inside rule
-                                    Optional<IDECache> rl = caches.stream().filter(ch -> ch.input.equals(((StringSentence) mi).getContent())).findFirst();
-                                    if (rl.isPresent() && rl.get().ast != null &&
-                                            rl.get().source.source().equals(Path.of(URI.create(mi.getSource().source())).toString()) && // same path
-                                            rl.get().startLine == ((StringSentence) mi).getContentStartLine() && // same start line
-                                            rl.get().startColumn == ((StringSentence) mi).getContentStartColumn()) { // same start col
-                                        AtomicReference<STerm> x = new AtomicReference<>();
-                                        STermViz.from(t -> {
-                                            if (isPositionOverLocation(pos, t.location()))
-                                                x.set(t);
-                                            return t;
-                                        }, "Find def in rule").apply(rl.get().ast);
+                                    String suffix = ((StringSentence) mi).getType().equals(DefinitionParsing.configuration) ? "-" + RuleGrammarGenerator.CONFIG_CELLS : "-" + RuleGrammarGenerator.RULE_CELLS;
+                                    Optional<Map.Entry<String, ParseCache>> ch = caches.entrySet().stream().filter(elm -> elm.getKey().startsWith(m.getName() + suffix)).findFirst();
+                                    if (ch.isPresent()) {
+                                        ParseCache parseCache = ch.get().getValue();
+                                        Map<String, ParseCache.ParsedSentence> parsedSent = parseCache.getCache();
+                                        StringSentence ss = (StringSentence) mi;
+                                        if (parsedSent.containsKey(((StringSentence) mi).getContent())) {
+                                            Bubble b = new Bubble(ss.getType(), ss.getContent(), ss.getAttributes()
+                                                    .add(org.kframework.attributes.Location.class, ss.getLocation()).add(Source.class, ss.getSource())
+                                                    .add("contentStartLine", ss.getContentStartLine()).add("contentStartColumn", ss.getContentStartColumn()));
+                                            ParseCache.ParsedSentence parse = DefinitionParsing.updateLocation(parsedSent.get(b.contents()), b);
+                                            AtomicReference<K> x = new AtomicReference<>();
+                                            KViz.from(t -> {
+                                                if (isPositionOverLocation(pos, t.location().get()))
+                                                    x.set(t);
+                                                return t;
+                                            }, "Find def in rule").apply(parse.getParse());
+                                            if (x.get() != null && x.get().att().contains(org.kframework.definition.Production.class)) {
+                                                org.kframework.definition.Production prd = x.get().att().get(org.kframework.definition.Production.class);
 
-                                        if (x.get() != null && x.get().production().source().isPresent() && x.get().production().location().isPresent())
-                                            lls.add(new LocationLink(URI.create(x.get().production().source().get().source()).toString(),
-                                                loc2range(x.get().production().location().get()),
-                                                loc2range(x.get().production().location().get()),
-                                                loc2range(x.get().location())));
-                                        else
-                                            clientLogger.logMessage("definition failed no origin for prod: " + (x.get() != null ? x.get().production() : null));
-                                    } else
-                                        clientLogger.logMessage("definition failed rule not found in caches: " + params.getTextDocument().getUri() + " #cachedRules: " + caches.size());
+                                                lls.add(new LocationLink(URI.create(prd.source().get().source()).toString(),
+                                                        loc2range(prd.location().get()),
+                                                        loc2range(prd.location().get()),
+                                                        loc2range(x.get().att().get(org.kframework.attributes.Location.class))));
+                                            } else
+                                                clientLogger.logMessage("definition failed no origin for prod: " + (x.get() != null ? x.get().att().get(org.kframework.definition.Production.class) : null));
+
+                                        }
+                                    }
                                 }
                                 break;
                             }
@@ -292,7 +309,7 @@ public class TextDocumentSyncHandler {
         CompletableFuture<DocumentDiagnosticReport> scheduledFuture = CompletableFuture.supplyAsync(() -> {
             files.get(params.getTextDocument().getUri()).outerParse();
             List<Diagnostic> problems = files.get(params.getTextDocument().getUri()).problems;
-            caches.stream().filter(ch -> !ch.errors.isEmpty() && ch.source.source().equals(Path.of(URI.create(uri)).toString()))
+            /*caches.stream().filter(ch -> !ch.errors.isEmpty() && ch.source.source().equals(Path.of(URI.create(uri)).toString()))
                     .forEach(r -> {
                         // TODO: check to see why errors linger for the first diagnostic, but clear after the second
                         r.errors.forEach(err -> {
@@ -303,7 +320,7 @@ public class TextDocumentSyncHandler {
                             Diagnostic d = new Diagnostic(loc2range(err.exception.getLocation()), err.exception.getMessage(), DiagnosticSeverity.Warning, "Inner Parser");
                             problems.add(d);
                         });
-                    });
+                    });*/
 
             DocumentDiagnosticReport report = new DocumentDiagnosticReport(new RelatedFullDocumentDiagnosticReport(problems));
             this.clientLogger.logMessage("Operation '" + "text/diagnostics: " + params.getTextDocument().getUri() + " #problems: " + problems.size());
@@ -358,7 +375,7 @@ public class TextDocumentSyncHandler {
                             Production prd = xprd.get();
                             String psource = Path.of(URI.create(prd.source().get().source())).toString();
                             org.kframework.attributes.Location ploc = prd.location().get();
-                            caches.stream().filter(id -> id.ast != null).forEach(idec ->
+                            /*caches.stream().filter(id -> id.ast != null).forEach(idec ->
                                     // visitor that recurses through the rule AST
                                     STermViz.from(t -> {
                                         // the two production elements are not compatible so compare location information which should match
@@ -369,7 +386,7 @@ public class TextDocumentSyncHandler {
                                         }
                                         return t;
                                     }, "Find ref in rule").apply(idec.ast)
-                                );
+                                );*/
                         }
                     }
                 }
