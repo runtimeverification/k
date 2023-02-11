@@ -306,18 +306,32 @@ public class TextDocumentSyncHandler {
         CompletableFuture<DocumentDiagnosticReport> scheduledFuture = CompletableFuture.supplyAsync(() -> {
             files.get(params.getTextDocument().getUri()).outerParse();
             List<Diagnostic> problems = files.get(params.getTextDocument().getUri()).problems;
-            /*caches.stream().filter(ch -> !ch.errors.isEmpty() && ch.source.source().equals(Path.of(URI.create(uri)).toString()))
-                    .forEach(r -> {
-                        // TODO: check to see why errors linger for the first diagnostic, but clear after the second
-                        r.errors.forEach(err -> {
-                            Diagnostic d = new Diagnostic(loc2range(err.exception.getLocation()), err.exception.getMessage(), DiagnosticSeverity.Error, "Inner Parser");
-                            problems.add(d);
-                        });
-                        r.warnings.forEach(err -> {
-                            Diagnostic d = new Diagnostic(loc2range(err.exception.getLocation()), err.exception.getMessage(), DiagnosticSeverity.Warning, "Inner Parser");
-                            problems.add(d);
-                        });
-                    });*/
+            files.get(params.getTextDocument().getUri()).dis.stream().filter(di -> di instanceof Module).map(di -> (Module) di)
+                    .forEach(m -> m.getItems().stream().filter(mi -> mi instanceof StringSentence).map(mi -> (StringSentence) mi)
+                            .forEach(ss -> {
+                                String suffix = ss.getType().equals(DefinitionParsing.configuration) ? "-" + RuleGrammarGenerator.CONFIG_CELLS : "-" + RuleGrammarGenerator.RULE_CELLS;
+                                Optional<Map.Entry<String, ParseCache>> ch = caches.entrySet().stream().filter(elm -> elm.getKey().startsWith(m.getName() + suffix)).findFirst();
+                                if (ch.isPresent()) {
+                                    ParseCache parseCache = ch.get().getValue();
+                                    Map<String, ParseCache.ParsedSentence> parsedSent = parseCache.getCache();
+                                    if (parsedSent.containsKey(ss.getContent())) {
+                                        Bubble b = new Bubble(ss.getType(), ss.getContent(), ss.getAttributes()
+                                                .add(org.kframework.attributes.Location.class, ss.getLocation()).add(Source.class, ss.getSource())
+                                                .add("contentStartLine", ss.getContentStartLine()).add("contentStartColumn", ss.getContentStartColumn()));
+                                        ParseCache.ParsedSentence parse = DefinitionParsing.updateLocation(parsedSent.get(b.contents()), b);
+                                        // TODO: check to see why errors linger for the first diagnostic, but clear after the second
+                                        parse.getErrors().forEach(err -> {
+                                            Diagnostic d = new Diagnostic(loc2range(err.exception.getLocation()), err.exception.getMessage(), DiagnosticSeverity.Error, "Inner Parser");
+                                            problems.add(d);
+                                        });
+                                        parse.getWarnings().forEach(err -> {
+                                            Diagnostic d = new Diagnostic(loc2range(err.exception.getLocation()), err.exception.getMessage(), DiagnosticSeverity.Warning, "Inner Parser");
+                                            problems.add(d);
+                                        });
+                                    }
+                                }
+
+                            }));
 
             DocumentDiagnosticReport report = new DocumentDiagnosticReport(new RelatedFullDocumentDiagnosticReport(problems));
             this.clientLogger.logMessage("Operation '" + "text/diagnostics: " + params.getTextDocument().getUri() + " #problems: " + problems.size());
@@ -370,16 +384,20 @@ public class TextDocumentSyncHandler {
                             org.kframework.attributes.Location ploc = prd.location().get();
                             // TODO: validate that all cached rules are still in the definition
                             // caches remember previous versions for quick access
-                            caches.forEach((key, value) -> value.getCache().forEach((key1, value1) -> KViz.from(t -> {
-                                // the two production elements are not compatible so compare location information which should match
-                                org.kframework.definition.Production dprd = t.att().get(org.kframework.definition.Production.class);
-                                if (dprd.location().isPresent() && dprd.location().get().equals(ploc) &&
-                                        dprd.source().isPresent() && dprd.source().get().source().equals(psource)) {
-                                    lloc.add(new Location(URI.create(t.source().get().source()).toString(),
-                                            loc2range(t.location().get())));
-                                }
-                                return t;
-                            }, "Find ref in rule").apply(value1.getParse())));
+
+                            caches.forEach((key, value) -> value.getCache().forEach((key1, value1) -> {
+                                if (value1.getParse() != null)
+                                    KViz.from(t -> {
+                                        // the two production elements are not compatible so compare location information which should match
+                                        org.kframework.definition.Production dprd = t.att().get(org.kframework.definition.Production.class);
+                                        if (dprd.location().isPresent() && dprd.location().get().equals(ploc) &&
+                                                dprd.source().isPresent() && dprd.source().get().source().equals(psource)) {
+                                            lloc.add(new Location(URI.create(t.source().get().source()).toString(),
+                                                    loc2range(t.location().get())));
+                                        }
+                                        return t;
+                                    }, "Find ref in rule").apply(value1.getParse());
+                            }));
                         }
                     }
                 }
