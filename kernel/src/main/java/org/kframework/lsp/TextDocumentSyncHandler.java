@@ -6,14 +6,11 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.kframework.attributes.Source;
 import org.kframework.definition.Bubble;
 import org.kframework.definition.KViz;
-import org.kframework.definition.KViz$;
 import org.kframework.kil.Module;
 import org.kframework.kil.*;
 import org.kframework.kompile.DefinitionParsing;
 import org.kframework.kore.K;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.STerm;
-import org.kframework.parser.STermViz;
 import org.kframework.parser.inner.ParseCache;
 import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.utils.BinaryLoader;
@@ -254,13 +251,13 @@ public class TextDocumentSyncHandler {
                                                     x.set(t);
                                                 return t;
                                             }, "Find def in rule").apply(parse.getParse());
-                                            if (x.get() != null && x.get().att().contains(org.kframework.definition.Production.class)) {
+                                            if (x.get() != null && x.get().att().get(org.kframework.definition.Production.class).source().isPresent()) {
                                                 org.kframework.definition.Production prd = x.get().att().get(org.kframework.definition.Production.class);
-
-                                                lls.add(new LocationLink(URI.create(prd.source().get().source()).toString(),
-                                                        loc2range(prd.location().get()),
-                                                        loc2range(prd.location().get()),
-                                                        loc2range(x.get().att().get(org.kframework.attributes.Location.class))));
+                                                if (prd.source().isPresent())
+                                                    lls.add(new LocationLink(URI.create(prd.source().get().source()).toString(),
+                                                            loc2range(prd.location().get()),
+                                                            loc2range(prd.location().get()),
+                                                            loc2range(x.get().att().get(org.kframework.attributes.Location.class))));
                                             } else
                                                 clientLogger.logMessage("definition failed no origin for prod: " + (x.get() != null ? x.get().att().get(org.kframework.definition.Production.class) : null));
 
@@ -365,28 +362,24 @@ public class TextDocumentSyncHandler {
                         AtomicReference<Production> xprd = new AtomicReference<>();
                         m.getItems().stream().filter(a -> a instanceof Syntax)
                                 .map(a -> ((Syntax)a))
-                                .forEach(b -> b.getPriorityBlocks().forEach(c -> c.getProductions().forEach(
-                                        d -> {
-                                            if (isPositionOverLocation(pos, d.getLocation()))
-                                                xprd.set(d);
-                                        }
-                                )));
+                                .forEach(b -> b.getPriorityBlocks().forEach(c -> c.getProductions().stream()
+                                        .filter(d -> isPositionOverLocation(pos, d.getLocation())).forEach(xprd::set)));
                         if (xprd.get() != null) {
                             Production prd = xprd.get();
                             String psource = Path.of(URI.create(prd.source().get().source())).toString();
                             org.kframework.attributes.Location ploc = prd.location().get();
-                            /*caches.stream().filter(id -> id.ast != null).forEach(idec ->
-                                    // visitor that recurses through the rule AST
-                                    STermViz.from(t -> {
-                                        // the two production elements are not compatible so compare location information which should match
-                                        if (t.production().location().isPresent() && t.production().location().get().equals(ploc) &&
-                                            t.production().source().isPresent() && t.production().source().get().source().equals(psource)) {
-                                            lloc.add(new Location(URI.create(t.source().source()).toString(),
-                                                    loc2range(t.location())));
-                                        }
-                                        return t;
-                                    }, "Find ref in rule").apply(idec.ast)
-                                );*/
+                            // TODO: validate that all cached rules are still in the definition
+                            // caches remember previous versions for quick access
+                            caches.forEach((key, value) -> value.getCache().forEach((key1, value1) -> KViz.from(t -> {
+                                // the two production elements are not compatible so compare location information which should match
+                                org.kframework.definition.Production dprd = t.att().get(org.kframework.definition.Production.class);
+                                if (dprd.location().isPresent() && dprd.location().get().equals(ploc) &&
+                                        dprd.source().isPresent() && dprd.source().get().source().equals(psource)) {
+                                    lloc.add(new Location(URI.create(t.source().get().source()).toString(),
+                                            loc2range(t.location().get())));
+                                }
+                                return t;
+                            }, "Find ref in rule").apply(value1.getParse())));
                         }
                     }
                 }
