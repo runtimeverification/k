@@ -109,7 +109,8 @@ public class TextDocumentSyncHandler {
     }
 
     public void didClose(DidCloseTextDocumentParams params) {
-        files.remove(params.getTextDocument().getUri());
+        // do not remove files from memory
+        //files.remove(params.getTextDocument().getUri());
     }
 
     // recurse through all the required files and return the list of DefinitionItems

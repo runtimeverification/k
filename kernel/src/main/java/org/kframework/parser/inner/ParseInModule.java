@@ -20,7 +20,6 @@ import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
 import scala.Tuple3;
-import scala.Tuple5;
 import scala.util.Either;
 import scala.util.Left;
 import scala.util.Right;
@@ -29,7 +28,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collections;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -197,7 +198,6 @@ public class ParseInModule implements Serializable, AutoCloseable {
         parseString(String input, Sort startSymbol, String startSymbolLocation, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
         final Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> result
                 = parseStringTerm(input, startSymbol, startSymbolLocation, scanner, source, startLine, startColumn, inferSortChecks, isAnywhere);
-        //save the exact parse tree as IDECache(input, source, startLine, startColumn, AST/Err)
         Either<Set<KEMException>, K> parseInfo;
         if (result._1().isLeft()) {
             parseInfo = Left.apply(result._1().left().get());

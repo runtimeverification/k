@@ -10,8 +10,6 @@ import org.kframework.definition.KViz;
 import org.kframework.definition.Production;
 import org.kframework.kore.K;
 import org.kframework.main.GlobalOptions;
-import org.kframework.parser.STerm;
-import org.kframework.parser.STermViz;
 import org.kframework.parser.inner.ParseCache;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.errorsystem.KExceptionManager;
