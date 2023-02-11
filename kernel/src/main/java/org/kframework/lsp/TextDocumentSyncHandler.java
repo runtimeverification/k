@@ -40,8 +40,7 @@ import static org.kframework.lsp.KLanguageServer.CACHE_FILE_NAME;
 public class TextDocumentSyncHandler {
 
     public Map<String, KTextDocument> files = new HashMap<>();
-    //public java.util.List<IDECache> caches = new LinkedList<>();
-    public Map<String, ParseCache> caches;
+    public Map<String, ParseCache> caches = new HashMap<>();
     private final LSClientLogger clientLogger;
     private final KLanguageServer kls;
     private WorkspaceFolder workspaceFolder;
@@ -71,7 +70,16 @@ public class TextDocumentSyncHandler {
 
     public void loadCaches() {
         cacheFile.ifPresent(path -> caches = loader.loadCache(java.util.Map.class, path.toFile()));
-        clientLogger.logMessage("loaded caches: " + (caches != null? caches.size():null));
+        if (caches == null)
+            caches = new HashMap<>();
+        caches.forEach((key, val) -> {
+            String uri = Path.of(val.getModule().att().get(org.kframework.attributes.Source.class).source()).toUri().toString();
+            // load into LSP all the files found in the caches, even if they are not open in the IDE.
+            // this way we can find all the updated locations when finding references
+            if (!files.containsKey(uri))
+                add(uri);
+        });
+        clientLogger.logMessage("loaded cached modules: " + caches.size());
     }
 
     public void add(String uri) {
@@ -383,22 +391,40 @@ public class TextDocumentSyncHandler {
                             Production prd = xprd.get();
                             String psource = Path.of(URI.create(prd.source().get().source())).toString();
                             org.kframework.attributes.Location ploc = prd.location().get();
-                            // TODO: validate that all cached rules are still in the definition
-                            // caches remember previous versions for quick access
 
-                            caches.forEach((key, value) -> value.getCache().forEach((key1, value1) -> {
-                                if (value1.getParse() != null)
-                                    KViz.from(t -> {
-                                        // the two production elements are not compatible so compare location information which should match
-                                        org.kframework.definition.Production dprd = t.att().get(org.kframework.definition.Production.class);
-                                        if (dprd.location().isPresent() && dprd.location().get().equals(ploc) &&
-                                                dprd.source().isPresent() && dprd.source().get().source().equals(psource)) {
-                                            lloc.add(new Location(URI.create(t.source().get().source()).toString(),
-                                                    loc2range(t.location().get())));
-                                        }
-                                        return t;
-                                    }, "Find ref in rule").apply(value1.getParse());
-                            }));
+                            // caches remember previous versions for quick access, so we may find more instances than there actually exist in the source file
+                            // 1. for each cached sentence
+                            // 2. find if it still exists in the source file and get its updated location
+                            caches.forEach((mname, parseCache) -> {
+                                String uri = Path.of(parseCache.getModule().att().get(org.kframework.attributes.Source.class).source()).toUri().toString();
+                                files.get(uri).dis.stream().filter(di2 -> di2 instanceof Module)
+                                        .map(di2 -> (Module) di2)
+                                        .filter(mm -> mname.startsWith((mm.getName())))
+                                        .forEach(mm -> mm.getItems().stream().filter(mi -> mi instanceof StringSentence)
+                                                .map(mi -> (StringSentence) mi)
+                                                .forEach(ss -> {
+                                                    if (parseCache.getCache().containsKey(ss.getContent())) {
+                                                        ParseCache.ParsedSentence ps = parseCache.getCache().get(ss.getContent());
+                                                        if (ps.getParse() != null) {
+                                                            Bubble b = new Bubble(ss.getType(), ss.getContent(), ss.getAttributes()
+                                                                    .add(org.kframework.attributes.Location.class, ss.getLocation()).add(Source.class, ss.getSource())
+                                                                    .add("contentStartLine", ss.getContentStartLine()).add("contentStartColumn", ss.getContentStartColumn()));
+                                                            ps = DefinitionParsing.updateLocation(ps, b);
+                                                            KViz.from(t -> {
+                                                                // the two production elements are not compatible so compare location information which should match
+                                                                org.kframework.definition.Production dprd = t.att().get(org.kframework.definition.Production.class);
+                                                                if (dprd.location().isPresent() && dprd.location().get().equals(ploc) &&
+                                                                        dprd.source().isPresent() && dprd.source().get().source().equals(psource)) {
+                                                                    lloc.add(new Location(URI.create(t.source().get().source()).toString(),
+                                                                            loc2range(t.location().get())));
+                                                                }
+                                                                return t;
+                                                            }, "Find ref in rule").apply(ps.getParse());
+                                                        }
+                                                    }
+                                                })
+                                        );
+                            });
                         }
                     }
                 }
