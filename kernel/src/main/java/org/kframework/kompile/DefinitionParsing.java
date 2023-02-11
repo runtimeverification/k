@@ -32,7 +32,6 @@ import org.kframework.kore.KApply;
 import org.kframework.kore.KToken;
 import org.kframework.kore.Sort;
 import org.kframework.kore.VisitK;
-import org.kframework.lsp.IDECache;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.ParserUtils;
 import org.kframework.parser.TreeNodesToKORE;
@@ -199,7 +198,6 @@ public class DefinitionParsing {
 
     private void saveCachesAndReportParsingErrors() {
         saveCaches();
-        loader.saveOrDie(new File(cacheFile.getPath() + ".ide"), ideCache);
         throwExceptionIfThereAreErrors();
     }
 
@@ -303,7 +301,6 @@ public class DefinitionParsing {
     }
 
     Map<String, ParseCache> caches;
-    java.util.List<IDECache> ideCache = new ArrayList<>();
 
     private java.util.Set<KEMException> errors;
 
@@ -676,7 +673,7 @@ public class DefinitionParsing {
         Source source = b.att().get(Source.class);
         boolean isAnywhere = b.att().contains(Att.ANYWHERE()) || b.att().contains(Att.SIMPLIFICATION()) || ExpandMacros.isMacro(b);
         Tuple2<Either<java.util.Set<KEMException>, K>, java.util.Set<KEMException>> result =
-                pim.parseString(b.contents(), START_SYMBOL, "bubble parsing", pim.getScanner(), source, startLine, startColumn, true, isAnywhere, ideCache);
+                pim.parseString(b.contents(), START_SYMBOL, "bubble parsing", pim.getScanner(), source, startLine, startColumn, true, isAnywhere);
         parsedBubbles.getAndIncrement();
         registerWarnings(result._2());
         if (result._1().isRight()) {

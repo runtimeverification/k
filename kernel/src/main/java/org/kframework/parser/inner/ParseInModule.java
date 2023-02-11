@@ -9,7 +9,6 @@ import org.kframework.builtin.Sorts;
 import org.kframework.definition.Module;
 import org.kframework.kore.K;
 import org.kframework.kore.Sort;
-import org.kframework.lsp.IDECache;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.Term;
 import org.kframework.parser.TreeNodesToKORE;
@@ -155,14 +154,14 @@ public class ParseInModule implements Serializable, AutoCloseable {
     public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
             parseString(String input, Sort startSymbol, Source source) {
         try (Scanner scanner = getScanner()) {
-            return parseString(input, startSymbol, "unit test", scanner, source, 1, 1, true, false, new ArrayList<>());
+            return parseString(input, startSymbol, "unit test", scanner, source, 1, 1, true, false);
         }
     }
 
     public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
             parseString(String input, Sort startSymbol, String startSymbolLocation, Source source) {
         try (Scanner scanner = getScanner()) {
-            return parseString(input, startSymbol, startSymbolLocation, scanner, source, 1, 1, true, false, new ArrayList<>());
+            return parseString(input, startSymbol, startSymbolLocation, scanner, source, 1, 1, true, false);
         }
     }
     private void getParser(Scanner scanner, Sort startSymbol) {
@@ -195,12 +194,10 @@ public class ParseInModule implements Serializable, AutoCloseable {
     }
 
     public Tuple2<Either<Set<KEMException>, K>, Set<KEMException>>
-        parseString(String input, Sort startSymbol, String startSymbolLocation, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere,
-                    java.util.List<IDECache> ideCache) {
+        parseString(String input, Sort startSymbol, String startSymbolLocation, Scanner scanner, Source source, int startLine, int startColumn, boolean inferSortChecks, boolean isAnywhere) {
         final Tuple2<Either<Set<KEMException>, Term>, Set<KEMException>> result
                 = parseStringTerm(input, startSymbol, startSymbolLocation, scanner, source, startLine, startColumn, inferSortChecks, isAnywhere);
         //save the exact parse tree as IDECache(input, source, startLine, startColumn, AST/Err)
-        ideCache.add(new IDECache(input, source, startLine, startColumn, result));
         Either<Set<KEMException>, K> parseInfo;
         if (result._1().isLeft()) {
             parseInfo = Left.apply(result._1().left().get());
