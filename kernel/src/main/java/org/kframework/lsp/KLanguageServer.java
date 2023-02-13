@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import static org.kframework.kompile.Kompile.CACHE_FILE_NAME;
+
 /**
  * Language Server implementation for the K framework.
  */

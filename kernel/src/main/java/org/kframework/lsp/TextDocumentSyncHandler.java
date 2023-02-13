@@ -31,8 +31,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import static org.kframework.kompile.Kompile.CACHE_FILE_NAME;
 import static org.kframework.lsp.CompletionHelper.*;
-import static org.kframework.lsp.KLanguageServer.CACHE_FILE_NAME;
 
 /**
  * Handle the caches of all the files of interest.
