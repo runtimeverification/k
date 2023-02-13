@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.kframework.attributes.Location;
 import org.kframework.definition.KViz;
 import org.kframework.definition.Production;
+import org.kframework.kompile.Kompile;
 import org.kframework.kore.K;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.inner.ParseCache;
@@ -112,7 +113,7 @@ public class LSPTests {
         BinaryLoader loader = new BinaryLoader(new KExceptionManager(new GlobalOptions()));
         Map<String, ParseCache> caches = null;
 
-        Optional<Path> cacheFile = Files.walk(Path.of(URI.create(workspaceFolder.getUri()))).filter(p -> p.endsWith("cache.bin")).findFirst();
+        Optional<Path> cacheFile = Files.walk(Path.of(URI.create(workspaceFolder.getUri()))).filter(p -> p.endsWith(Kompile.CACHE_FILE_NAME)).findFirst();
         if (cacheFile.isPresent())
             caches = loader.loadCache(java.util.Map.class, cacheFile.get().toFile());
 

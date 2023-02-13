@@ -28,8 +28,6 @@ public class KLanguageServer implements LanguageServer, LanguageClientAware {
     List<WorkspaceFolder> workspaceFolders;
     private int shutdown = 1;
 
-    public static final String CACHE_FILE_NAME = "cache.bin";
-
     public KLanguageServer() {
         try {
             this.textDocumentService = new KTextDocumentService(this);
