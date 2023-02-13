@@ -1,12 +1,13 @@
-from typing import Final, Iterable, NamedTuple, Tuple
+from pathlib import Path
+from typing import Final, Iterable, NamedTuple, Optional, Tuple
 
 import pytest
 
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KInner, KSequence, KToken, KVariable, build_assoc
 from pyk.kast.manip import get_cell
-from pyk.kcfg import KCFGExplore
-from pyk.ktool import KPrint
+from pyk.kcfg import KCFG, KCFGExplore
+from pyk.ktool import KPrint, KProve
 
 from ..utils import KCFGExploreTest
 
@@ -26,6 +27,11 @@ EXECUTE_TEST_DATA: Final[Iterable[Tuple[str, int, State, int, State, Iterable[St
         State('false', 'SetItem(1)', [('1', '2')]),
         [],
     ),
+)
+
+
+APR_PROVE_TEST_DATA: Iterable[Tuple[str, str, str, str, Optional[int], Optional[int], Iterable[str]]] = (
+    ('cell-map-no-branch', 'k-files/cell-map-spec.k', 'CELL-MAP-SPEC', 'cell-map-no-branch', 2, 1, []),
 )
 
 
@@ -96,3 +102,38 @@ class TestCellMapProof(KCFGExploreTest):
         # Then
         assert actual_depth == expected_depth
         assert actual_k == expected_k
+
+    @pytest.mark.parametrize(
+        'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,terminal_rules',
+        APR_PROVE_TEST_DATA,
+        ids=[test_id for test_id, *_ in APR_PROVE_TEST_DATA],
+    )
+    def test_all_path_reachability_prove(
+        self,
+        kprove: KProve,
+        kcfg_explore: KCFGExplore,
+        test_id: str,
+        spec_file: str,
+        spec_module: str,
+        claim_id: str,
+        max_iterations: int,
+        max_depth: int,
+        terminal_rules: Iterable[str],
+    ) -> None:
+
+        claims = kprove.get_claims(
+            Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}']
+        )
+        assert len(claims) == 1
+
+        kcfg = KCFG.from_claim(kprove.definition, claims[0])
+        kcfg = kcfg_explore.all_path_reachability_prove(
+            f'{spec_module}.{claim_id}',
+            kcfg,
+            max_iterations=max_iterations,
+            execute_depth=max_depth,
+            terminal_rules=terminal_rules,
+        )
+
+        failed_nodes = len(kcfg.frontier) + len(kcfg.stuck)
+        assert failed_nodes == 0

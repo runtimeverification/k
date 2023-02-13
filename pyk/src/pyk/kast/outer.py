@@ -772,6 +772,10 @@ class KFlatModule(KOuter, WithKAtt, Iterable[KSentence]):
     def constructors(self) -> Tuple[KProduction, ...]:
         return tuple(prod for prod in self.syntax_productions if not self._is_function(prod))
 
+    @cached_property
+    def cell_collection_productions(self) -> Tuple[KProduction, ...]:
+        return tuple(prod for prod in self.syntax_productions if 'cellCollection' in prod.att)
+
     @staticmethod
     def _is_function(prod: KProduction) -> bool:
         def is_not_actually_function(label: str) -> bool:
@@ -981,6 +985,10 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return tuple(ctor for module in self for ctor in module.constructors)
 
     @cached_property
+    def cell_collection_productions(self) -> Tuple[KProduction, ...]:
+        return tuple(prod for module in self for prod in module.cell_collection_productions)
+
+    @cached_property
     def rules(self) -> Tuple[KRule, ...]:
         return tuple(rule for module in self for rule in module.rules)
 
@@ -1104,6 +1112,50 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
 
         subst = self.sort_vars_subst(kast)
         return subst(kast)
+
+    def add_cell_map_items(self, kast: KInner) -> KInner:
+
+        # example:
+        # syntax AccountCellMap [cellCollection, hook(MAP.Map)]
+        # syntax AccountCellMap ::= AccountCellMap AccountCellMap [assoc, avoid, cellCollection, comm, element(AccountCellMapItem), function, hook(MAP.concat), unit(.AccountCellMap), wrapElement(<account>)]
+
+        cell_wrappers = {}
+        for ccp in self.cell_collection_productions:
+            if 'element' in ccp.att and 'wrapElement' in ccp.att:
+                cell_wrappers[ccp.att['wrapElement']] = ccp.att['element']
+
+        def _wrap_elements(_k: KInner) -> KInner:
+            if type(_k) is KApply and _k.label.name in cell_wrappers:
+                return KApply(cell_wrappers[_k.label.name], [_k.args[0], _k])
+            return _k
+
+        # To ensure we don't get duplicate wrappers.
+        _kast = self.remove_cell_map_items(kast)
+        return bottom_up(_wrap_elements, _kast)
+
+    def remove_cell_map_items(self, kast: KInner) -> KInner:
+
+        # example:
+        # syntax AccountCellMap [cellCollection, hook(MAP.Map)]
+        # syntax AccountCellMap ::= AccountCellMap AccountCellMap [assoc, avoid, cellCollection, comm, element(AccountCellMapItem), function, hook(MAP.concat), unit(.AccountCellMap), wrapElement(<account>)]
+
+        cell_wrappers = {}
+        for ccp in self.cell_collection_productions:
+            if 'element' in ccp.att and 'wrapElement' in ccp.att:
+                cell_wrappers[ccp.att['element']] = ccp.att['wrapElement']
+
+        def _wrap_elements(_k: KInner) -> KInner:
+            if (
+                type(_k) is KApply
+                and _k.label.name in cell_wrappers
+                and len(_k.args) == 2
+                and type(_k.args[1]) is KApply
+                and _k.args[1].label.name == cell_wrappers[_k.label.name]
+            ):
+                return _k.args[1]
+            return _k
+
+        return bottom_up(_wrap_elements, kast)
 
     def empty_config(self, sort: KSort) -> KInner:
         if sort not in self._empty_config:

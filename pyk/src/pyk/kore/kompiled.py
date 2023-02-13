@@ -110,4 +110,4 @@ class KompiledKore:
         if self.is_subsort(actual_sort, sort):
             return App('inj', (actual_sort, sort), (pattern,))
 
-        raise ValueError(f'Sort {actual_sort.name} is not a subsort of {sort.name}')
+        raise ValueError(f'Sort {actual_sort.name} is not a subsort of {sort.name}: {pattern}')
