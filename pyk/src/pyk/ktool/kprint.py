@@ -1,6 +1,5 @@
 import json
 import logging
-from contextlib import suppress
 from enum import Enum
 from functools import cached_property
 from pathlib import Path
@@ -220,7 +219,7 @@ class KPrint:
     def kore_to_kast(self, kore: Pattern) -> KInner:
         _kast_out = self._kore_to_kast(kore)
         if _kast_out is not None:
-            return _kast_out
+            return self.definition.remove_cell_map_items(_kast_out)
         _LOGGER.warning(f'Falling back to using `kast` for Kore -> Kast: {kore.text}')
         proc_res = _kast(
             definition_dir=self.definition_dir,
@@ -340,8 +339,10 @@ class KPrint:
         return None
 
     def kast_to_kore(self, kast: KInner, sort: Optional[KSort] = None) -> Pattern:
-        with suppress(ValueError):
+        try:
             return kast_to_kore(self.definition, self.kompiled_kore, kast, sort)
+        except ValueError as ve:
+            _LOGGER.warning(ve)
 
         _LOGGER.warning(f'Falling back to using `kast` for KAst -> Kore: {kast}')
         kast_json = {'format': 'KAST', 'version': 2, 'term': kast.to_dict()}

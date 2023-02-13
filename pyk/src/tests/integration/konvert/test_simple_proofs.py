@@ -35,7 +35,7 @@ from pyk.prelude.kint import INT, intToken
 from pyk.prelude.ml import mlBottom, mlImplies, mlTop
 from pyk.prelude.string import STRING, stringToken
 
-from .utils import KPrintTest
+from ..utils import KPrintTest
 
 BIDIRECTIONAL_TEST_DATA: Final = (
     (
@@ -409,7 +409,7 @@ KORE_TO_KAST_TEST_DATA: Final = (
 )
 
 
-class TestKoreToKast(KPrintTest):
+class TestKonvertSimpleProofs(KPrintTest):
     KOMPILE_MAIN_FILE = 'k-files/simple-proofs.k'
 
     @pytest.fixture(scope='class')
