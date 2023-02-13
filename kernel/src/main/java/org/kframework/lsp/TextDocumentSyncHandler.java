@@ -204,8 +204,7 @@ public class TextDocumentSyncHandler {
         });
     }
 
-    // At the moment we only have access to outer parsing information, so we can find the definition for
-    // imported module names and required files
+    // ctrl+click - goto definition for requires, imports terms inside rules
     public CompletableFuture<Either<List<? extends org.eclipse.lsp4j.Location>, List<? extends LocationLink>>> definition(DefinitionParams params) {
         findCacheFile();
         KPos pos = new KPos(params.getPosition());
@@ -215,7 +214,7 @@ public class TextDocumentSyncHandler {
             try {
                 List<DefinitionItem> dis = files.get(params.getTextDocument().getUri()).dis;
                 for (DefinitionItem di : dis) {
-                    if (di instanceof Require) {
+                    if (di instanceof Require) { // goto required file
                         org.kframework.attributes.Location loc = getSafeLoc(di);
                         if (isPositionOverLocation(pos, loc)) {
                             Require req = (Require) di;
@@ -243,26 +242,25 @@ public class TextDocumentSyncHandler {
                                                     loc2range(getSafeLoc(m3)),
                                                     loc2range(getSafeLoc(imp)))));
                                 } else if (mi instanceof StringSentence) { // goto syntax of term inside rule
-                                    String suffix = ((StringSentence) mi).getType().equals(DefinitionParsing.configuration) ? "-" + RuleGrammarGenerator.CONFIG_CELLS : "-" + RuleGrammarGenerator.RULE_CELLS;
+                                    StringSentence ss = (StringSentence) mi;
+                                    String suffix = ss.getType().equals(DefinitionParsing.configuration) ? "-" + RuleGrammarGenerator.CONFIG_CELLS : "-" + RuleGrammarGenerator.RULE_CELLS;
                                     Optional<Map.Entry<String, ParseCache>> ch = caches.entrySet().stream().filter(elm -> elm.getKey().startsWith(m.getName() + suffix)).findFirst();
                                     if (ch.isPresent()) {
-                                        ParseCache parseCache = ch.get().getValue();
-                                        Map<String, ParseCache.ParsedSentence> parsedSent = parseCache.getCache();
-                                        StringSentence ss = (StringSentence) mi;
-                                        if (parsedSent.containsKey(((StringSentence) mi).getContent())) {
+                                        Map<String, ParseCache.ParsedSentence> parsedSent = ch.get().getValue().getCache();
+                                        if (parsedSent.containsKey(ss.getContent())) {
                                             Bubble b = new Bubble(ss.getType(), ss.getContent(), ss.getAttributes()
                                                     .add(org.kframework.attributes.Location.class, ss.getLocation()).add(Source.class, ss.getSource())
                                                     .add("contentStartLine", ss.getContentStartLine()).add("contentStartColumn", ss.getContentStartColumn()));
-                                            ParseCache.ParsedSentence parse = DefinitionParsing.updateLocation(parsedSent.get(b.contents()), b);
+                                            ParseCache.ParsedSentence parse = DefinitionParsing.updateLocation(parsedSent.get(ss.getContent()), b);
                                             AtomicReference<K> x = new AtomicReference<>();
                                             KViz.from(t -> {
                                                 if (isPositionOverLocation(pos, t.location().get()))
-                                                    x.set(t);
+                                                    x.set(t); // find the deepest term that contains this position
                                                 return t;
                                             }, "Find def in rule").apply(parse.getParse());
                                             if (x.get() != null && x.get().att().get(org.kframework.definition.Production.class).source().isPresent()) {
                                                 org.kframework.definition.Production prd = x.get().att().get(org.kframework.definition.Production.class);
-                                                if (prd.source().isPresent())
+                                                if (prd.source().isPresent()) // exclude generated productions like casts
                                                     lls.add(new LocationLink(URI.create(prd.source().get().source()).toString(),
                                                             loc2range(prd.location().get()),
                                                             loc2range(prd.location().get()),
@@ -313,8 +311,11 @@ public class TextDocumentSyncHandler {
 
         Executor delayedExecutor = CompletableFuture.delayedExecutor(KTextDocumentService.DELAY_EXECUTION_MS, TimeUnit.MILLISECONDS);
         CompletableFuture<DocumentDiagnosticReport> scheduledFuture = CompletableFuture.supplyAsync(() -> {
+            // make sure the out syntax is up to date
             files.get(params.getTextDocument().getUri()).outerParse();
             List<Diagnostic> problems = files.get(params.getTextDocument().getUri()).problems;
+            // for each bubble in the current file
+            // search for a cached parsed version and collect reported errors
             files.get(params.getTextDocument().getUri()).dis.stream().filter(di -> di instanceof Module).map(di -> (Module) di)
                     .forEach(m -> m.getItems().stream().filter(mi -> mi instanceof StringSentence).map(mi -> (StringSentence) mi)
                             .forEach(ss -> {
@@ -328,7 +329,6 @@ public class TextDocumentSyncHandler {
                                                 .add(org.kframework.attributes.Location.class, ss.getLocation()).add(Source.class, ss.getSource())
                                                 .add("contentStartLine", ss.getContentStartLine()).add("contentStartColumn", ss.getContentStartColumn()));
                                         ParseCache.ParsedSentence parse = DefinitionParsing.updateLocation(parsedSent.get(b.contents()), b);
-                                        // TODO: check to see why errors linger for the first diagnostic, but clear after the second
                                         parse.getErrors().forEach(err -> {
                                             Diagnostic d = new Diagnostic(loc2range(err.exception.getLocation()), err.exception.getMessage(), DiagnosticSeverity.Error, "Inner Parser");
                                             problems.add(d);
@@ -339,7 +339,6 @@ public class TextDocumentSyncHandler {
                                         });
                                     }
                                 }
-
                             }));
 
             DocumentDiagnosticReport report = new DocumentDiagnosticReport(new RelatedFullDocumentDiagnosticReport(problems));
@@ -350,19 +349,19 @@ public class TextDocumentSyncHandler {
         return scheduledFuture;
     }
 
-    // find references of modules being used in imports
+    // find references of modules being used in imports and syntax used in rules
     public CompletableFuture<List<? extends Location>> references(ReferenceParams params) {
         return CompletableFuture.supplyAsync(() -> {
             KPos pos = new KPos(params.getPosition());
             List<Location> lloc = new ArrayList<>();
 
-            // look in the current file and check if we are positioned anywhere on `module NAME`
-            // then find all the imports with this name
+            // look in the current file and find the term under KPos
             List<DefinitionItem> dis = files.get(params.getTextDocument().getUri()).dis;
             for (DefinitionItem di : dis) {
                 org.kframework.attributes.Location loc = getSafeLoc(di);
                 if (isPositionOverLocation(pos, loc)) {
                     Module m = (Module) di;
+                    // want to activate when over `module NAME` and nothing else but,
                     // we don't store the exact position for the module name so try to calculate it
                     String name = m.getName();
                     org.kframework.attributes.Location nameLoc = new org.kframework.attributes.Location(
@@ -412,6 +411,7 @@ public class TextDocumentSyncHandler {
                                                             ps = DefinitionParsing.updateLocation(ps, b);
                                                             KViz.from(t -> {
                                                                 // the two production elements are not compatible so compare location information which should match
+                                                                // if the definition wasn't modified
                                                                 org.kframework.definition.Production dprd = t.att().get(org.kframework.definition.Production.class);
                                                                 if (dprd.location().isPresent() && dprd.location().get().equals(ploc) &&
                                                                         dprd.source().isPresent() && dprd.source().get().source().equals(psource)) {
@@ -427,6 +427,7 @@ public class TextDocumentSyncHandler {
                             });
                         }
                     }
+                    break;
                 }
             }
             // TODO: check why sometimes this message is duplicated

@@ -301,7 +301,6 @@ public class DefinitionParsing {
     }
 
     Map<String, ParseCache> caches;
-
     private java.util.Set<KEMException> errors;
 
     public java.util.Set<KEMException> errors() {
