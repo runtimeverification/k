@@ -36,22 +36,10 @@ public abstract class AbstractKModule implements KModule {
         return Collections.emptyList();
     }
 
-    public Map<String, String> javaBackendHooks() {
-        return Collections.emptyMap();
-    }
-
     protected void bindOptions(Supplier<List<Pair<Class<?>, Boolean>>> action, Binder binder) {
         Multibinder<Object> optionsBinder = Multibinder.newSetBinder(binder, Object.class, Options.class);
         for (Pair<Class<?>, Boolean> option : action.get()) {
             optionsBinder.addBinding().to(option.getKey());
-        }
-    }
-
-    private void bindJavaBackendHooks(Binder binder) {
-        MapBinder<String, String> builtinMethods = MapBinder.newMapBinder(binder,
-                String.class, String.class, Builtins.class);
-        for (Map.Entry<String, String> entry : javaBackendHooks().entrySet()) {
-            builtinMethods.addBinding(entry.getKey()).toInstance(entry.getValue());
         }
     }
 
@@ -62,8 +50,6 @@ public abstract class AbstractKModule implements KModule {
             @Override
             protected void configure() {
                 bindOptions(AbstractKModule.this::kompileOptions, binder());
-
-                bindJavaBackendHooks(binder());
             }
         });
     }
@@ -80,7 +66,6 @@ public abstract class AbstractKModule implements KModule {
             @Override
             protected void configure() {
                 bindOptions(AbstractKModule.this::krunOptions, binder());
-                bindJavaBackendHooks(binder());
             }
         });
     }
@@ -97,7 +82,6 @@ public abstract class AbstractKModule implements KModule {
             @Override
             protected void configure() {
                 //bind backend implementations of tools to their interfaces
-                bindJavaBackendHooks(binder());
             }
         });
     }
@@ -109,7 +93,6 @@ public abstract class AbstractKModule implements KModule {
             @Override
             protected void configure() {
                 bindOptions(AbstractKModule.this::kproveOptions, binder());
-                bindJavaBackendHooks(binder());
             }
         });
     }

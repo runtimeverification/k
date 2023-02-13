@@ -305,61 +305,6 @@ public class Kompile {
         return dt.andThen(d -> Definition(d.mainModule(), immutable(stream(d.entryModules()).filter(mod -> excludedModuleTags.stream().noneMatch(tag -> mod.att().contains(tag))).collect(Collectors.toSet())), d.att()));
     }
 
-    public static Function<Definition, Definition> defaultSteps(KompileOptions kompileOptions, KExceptionManager kem, FileUtil files) {
-        Function1<Definition, Definition> resolveStrict = d -> DefinitionTransformer.from(new ResolveStrict(kompileOptions, d)::resolve, "resolving strict and seqstrict attributes").apply(d);
-        DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.transition), EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION, COOL_RESULT_INJECTION))::resolve, "resolving heat and cool attributes");
-        DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
-        DefinitionTransformer guardOrs = DefinitionTransformer.fromSentenceTransformer(new GuardOrPatterns(false)::resolve, "resolving or patterns");
-        DefinitionTransformer resolveSemanticCasts =
-                DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve, "resolving semantic casts");
-        DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun(false)::resolve, "resolving #fun");
-        Function1<Definition, Definition> resolveFunctionWithConfig = d -> DefinitionTransformer.from(new ResolveFunctionWithConfig(d, false)::moduleResolve, "resolving functions with config context").apply(d);
-        DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
-        DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections(kompileOptions.coverage)::gen, "adding sort projections");
-        DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
-        Function1<Definition, Definition> propagateMacroToRules =
-                d -> DefinitionTransformer.fromSentenceTransformer((m, s) -> new PropagateMacro(m).propagate(s), "propagate macro labels from production to rules").apply(d);
-        Function1<Definition, Definition> expandMacros = d -> {
-          ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d, false);
-          return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kem, kompileOptions, false).expand(s), "expand macros").apply(d);
-        };
-        GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
-        Function1<Definition, Definition> genCoverage = d -> DefinitionTransformer.fromRuleBodyTransformerWithRule((r, body) -> cov.gen(r, body, d.mainModule()), "generate coverage instrumentation").apply(d);
-        DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
-        Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, false)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
-        Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
-        Function1<Definition, Definition> markExtraConcreteRules = d -> DefinitionTransformer.fromSentenceTransformer((m, s) ->
-                    s instanceof Rule && kompileOptions.extraConcreteRuleLabels.contains(s.att().getOption(Att.LABEL()).getOrElse(() -> null)) ?
-                            Rule.apply(((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att().add(Att.CONCRETE())) : s, "mark extra concrete rules").apply(d);
-
-        return def -> resolveIO
-                .andThen(resolveFun)
-                .andThen(resolveFunctionWithConfig)
-                .andThen(resolveStrict)
-                .andThen(resolveAnonVars)
-                .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
-                .andThen(numberSentences)
-                .andThen(resolveHeatCoolAttribute)
-                .andThen(resolveSemanticCasts)
-                .andThen(subsortKItem)
-                .andThen(generateSortPredicateSyntax)
-                .andThen(generateSortProjections)
-                .andThen(propagateMacroToRules)
-                .andThen(expandMacros)
-                .andThen(guardOrs)
-                .andThen(d -> Kompile.resolveFreshConstants(d, files))
-                .andThen(generateSortPredicateSyntax)
-                .andThen(generateSortProjections)
-                .andThen(AddImplicitComputationCell::transformDefinition)
-                .andThen(d -> new Strategy().addStrategyCellToRulesTransformer(d).apply(d))
-                .andThen(d -> ConcretizeCells.transformDefinition(d, false))
-                .andThen(genCoverage)
-                .andThen(Kompile::addSemanticsModule)
-                .andThen(resolveConfigVar)
-                .andThen(markExtraConcreteRules)
-                .apply(def);
-    }
-
     public static Sentence removePolyKLabels(Sentence s) {
       if (s instanceof Production) {
         Production p = (Production)s;
@@ -549,15 +494,10 @@ public class Kompile {
         return Constructors.Definition(d.mainModule(), immutable(allModules), d.att());
     }
 
-    public static Definition resolveFreshConstants(Definition input, FileUtil files) {
-        return DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(input, false, null, files).resolve(m)), "resolving !Var variables")
-                .apply(input);
-    }
-
     public Rule compileRule(Definition compiledDef, Rule parsedRule) {
         return (Rule) UnaryOperator.<Sentence>identity()
                 .andThen(new ResolveAnonVar()::resolve)
-                .andThen(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve)
+                .andThen(new ResolveSemanticCasts(false)::resolve)
                 .andThen(s -> concretizeSentence(s, compiledDef))
                 .apply(parsedRule);
     }
