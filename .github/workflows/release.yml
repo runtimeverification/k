@@ -12,9 +12,9 @@ jobs:
     name: 'Set Release ID'
     runs-on: ubuntu-20.04
     steps:
-        - name: 'Get release_id'
-          run: echo "::set-output name=release_id::$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)"
-          id: release
+      - name: 'Get release_id'
+        run: echo "release_id=$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)" >> ${GITHUB_OUTPUT}
+        id: release
     outputs:
       release_id: ${{ steps.release.outputs.release_id }}
 
@@ -229,9 +229,9 @@ jobs:
           LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.big_sur.bottle*.tar.gz"))
           BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#./} | sed 's!kframework--!kframework-!')
           ../kframework/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL}
-          echo "::set-output name=path::$LOCAL_BOTTLE_NAME"
-          echo "::set-output name=path_remote::$BOTTLE_NAME"
-          echo "::set-output name=version::$VERSION"
+          echo "path=${LOCAL_BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
+          echo "path_remote=${BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
+          echo "version=${VERSION}" >> ${GITHUB_OUTPUT}
 
       - name: Upload bottle
         uses: actions/upload-artifact@v2
