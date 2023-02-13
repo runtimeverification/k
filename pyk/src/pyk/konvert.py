@@ -52,6 +52,7 @@ def kast_to_kore(
     if sort is None:
         sort = K
     kast = kast_defn.sort_vars(kast, sort)
+    kast = kast_defn.add_cell_map_items(kast)
     kore = _kast_to_kore(kast)
     return kompiled_kore.add_injections(kore, _ksort_to_kore(sort))
 
