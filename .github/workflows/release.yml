@@ -390,7 +390,7 @@ jobs:
         run: |
           git config --global user.name rv-jenkins
           git config --global user.email devops@runtimeverification.com
-          git checkout -B gh-pages origin/master
+          git checkout --orphan gh-pages origin/master
       - name: 'Build webpage'
         working-directory: gh-pages
         run: |
@@ -411,5 +411,4 @@ jobs:
           set -x
           git add ./
           git commit -m 'gh-pages: Updated the website'
-          git merge --strategy ours origin/gh-pages --allow-unrelated-histories
-          git push origin gh-pages
+          git push --force origin gh-pages
