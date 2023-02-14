@@ -1,6 +1,6 @@
 DEF=errorClaim
 TESTDIR=.
-KOMPILE_BACKEND=java
+KOMPILE_BACKEND=haskell
 
 include ../../../include/kframework/ktest.mak
 

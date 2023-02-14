@@ -4,7 +4,7 @@ TESTDIR=..
 RESULTDIR=.
 
 KOMPILE_FLAGS=--syntax-module BOUNDARY-CELLS-TEST
-KOMPILE_BACKEND?=java
+KOMPILE_BACKEND?=haskell
 
 KPROVE_FLAGS=--boundary-cells c1
 

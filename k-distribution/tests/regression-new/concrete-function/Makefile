@@ -1,6 +1,6 @@
 DEF=a
 EXT=a
-KOMPILE_BACKEND=java
+KOMPILE_BACKEND=haskell
 TESTDIR=.
 KOMPILE_FLAGS=--concrete-rules "A.f1"
 
