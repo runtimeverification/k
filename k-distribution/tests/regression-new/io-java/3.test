@@ -1,1 +1,0 @@
-mkstemp("test-foo-XXXXXX")
