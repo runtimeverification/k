@@ -1,47 +1,143 @@
-    Out ==K "x = 11\n"
+    {
+      Out:String
+    #Equals
+      "x = 16\n"
+    }
   #And
-    Store ==K ( 1 |-> 11 )
+    {
+      Store:Map
+    #Equals
+      0 |-> 16
+    }
 #Or
-    Out ==K "x = 11\n"
+    {
+      Out:String
+    #Equals
+      "x = 11\n"
+    }
   #And
-    Store ==K ( 1 |-> 21 )
+    {
+      Store:Map
+    #Equals
+      0 |-> 11
+    }
 #Or
-    Out ==K "x = 11\n"
+    {
+      Out:String
+    #Equals
+      "x = 11\n"
+    }
   #And
-    Store ==K ( 1 |-> 33 )
+    {
+      Store:Map
+    #Equals
+      0 |-> 21
+    }
 #Or
-    Out ==K "x = 16\n"
+    {
+      Out:String
+    #Equals
+      "x = 11\n"
+    }
   #And
-    Store ==K ( 1 |-> 16 )
+    {
+      Store:Map
+    #Equals
+      0 |-> 33
+    }
 #Or
-    Out ==K "x = 21\n"
+    {
+      Out:String
+    #Equals
+      "x = 21\n"
+    }
   #And
-    Store ==K ( 1 |-> 21 )
+    {
+      Store:Map
+    #Equals
+      0 |-> 21
+    }
 #Or
-    Out ==K "x = 23\n"
+    {
+      Out:String
+    #Equals
+      "x = 23\n"
+    }
   #And
-    Store ==K ( 1 |-> 11 )
+    {
+      Store:Map
+    #Equals
+      0 |-> 11
+    }
 #Or
-    Out ==K "x = 23\n"
+    {
+      Out:String
+    #Equals
+      "x = 23\n"
+    }
   #And
-    Store ==K ( 1 |-> 16 )
+    {
+      Store:Map
+    #Equals
+      0 |-> 16
+    }
 #Or
-    Out ==K "x = 23\n"
+    {
+      Out:String
+    #Equals
+      "x = 23\n"
+    }
   #And
-    Store ==K ( 1 |-> 21 )
+    {
+      Store:Map
+    #Equals
+      0 |-> 21
+    }
 #Or
-    Out ==K "x = 23\n"
+    {
+      Out:String
+    #Equals
+      "x = 23\n"
+    }
   #And
-    Store ==K ( 1 |-> 33 )
+    {
+      Store:Map
+    #Equals
+      0 |-> 33
+    }
 #Or
-    Out ==K "x = 33\n"
+    {
+      Out:String
+    #Equals
+      "x = 33\n"
+    }
   #And
-    Store ==K ( 1 |-> 11 )
+    {
+      Store:Map
+    #Equals
+      0 |-> 11
+    }
 #Or
-    Out ==K "x = 33\n"
+    {
+      Out:String
+    #Equals
+      "x = 33\n"
+    }
   #And
-    Store ==K ( 1 |-> 16 )
+    {
+      Store:Map
+    #Equals
+      0 |-> 16
+    }
 #Or
-    Out ==K "x = 33\n"
+    {
+      Out:String
+    #Equals
+      "x = 33\n"
+    }
   #And
-    Store ==K ( 1 |-> 33 )
+    {
+      Store:Map
+    #Equals
+      0 |-> 33
+    }
