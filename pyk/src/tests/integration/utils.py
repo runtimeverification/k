@@ -10,8 +10,10 @@ from pytest import TempPathFactory
 from pyk.cli_utils import BugReport
 from pyk.kast.outer import KDefinition, read_kast_definition
 from pyk.kcfg import KCFGExplore
-from pyk.ktool import KompileBackend, KPrint, KProve, KRun, kompile
-from pyk.ktool.kprint import SymbolTable
+from pyk.ktool.kompile import KompileBackend, kompile
+from pyk.ktool.kprint import KPrint, SymbolTable
+from pyk.ktool.kprove import KProve
+from pyk.ktool.krun import KRun
 
 
 class Kompiler:
@@ -32,7 +34,7 @@ class Kompiler:
         return kompile(
             main_file=main_file,
             output_dir=self._tmp_path_factory.mktemp('kompiled'),
-            backend=KompileBackend(backend) if backend is not None else None,
+            backend=backend,
             main_module=main_module,
             syntax_module=syntax_module,
             include_dirs=include_dirs,

@@ -7,7 +7,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union, f
 import tomli
 
 from ..cli_utils import abs_or_rel_to, check_absolute_path, check_dir_path, check_file_path, check_relative_path
-from ..ktool import KompileBackend
+from ..ktool.kompile import KompileBackend
 from ..utils import single
 from .config import PROJECT_FILE_NAME
 
@@ -154,7 +154,8 @@ class Project:
         object.__setattr__(self, 'targets', tuple(targets))
 
     @staticmethod
-    def load(project_file: Path) -> 'Project':
+    def load(project_file: Union[str, Path]) -> 'Project':
+        project_file = Path(project_file)
         check_file_path(project_file)
 
         with open(project_file, 'rb') as f:
@@ -175,7 +176,9 @@ class Project:
         )
 
     @staticmethod
-    def load_from_dir(project_dir: Path) -> 'Project':
+    def load_from_dir(project_dir: Union[str, Path]) -> 'Project':
+        project_dir = Path(project_dir)
+        check_dir_path(project_dir)
         return Project.load(project_dir / PROJECT_FILE_NAME)
 
     @property

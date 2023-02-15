@@ -4,7 +4,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import List, Union, final
 
-from ..ktool import kompile
+from ..ktool.kompile import kompile
 from .package import Package
 from .utils import k_version, sync_files
 

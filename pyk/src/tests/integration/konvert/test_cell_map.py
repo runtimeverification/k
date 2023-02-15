@@ -8,7 +8,7 @@ from pyk.konvert import kast_to_kore
 from pyk.kore.kompiled import KompiledKore
 from pyk.kore.prelude import int_dv
 from pyk.kore.syntax import DV, App, EVar, LeftAssoc, Pattern, SortApp, String
-from pyk.ktool import KPrint
+from pyk.ktool.kprint import KPrint
 from pyk.prelude.kint import INT, intToken
 
 from ..utils import KPrintTest

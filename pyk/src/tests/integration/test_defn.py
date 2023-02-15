@@ -5,8 +5,8 @@ import pytest
 from pyk.kast.inner import KApply, KRewrite, KSort, KToken, KVariable
 from pyk.kast.manip import push_down_rewrites
 from pyk.kast.outer import KClaim
-from pyk.ktool import KPrint, KProve
-from pyk.ktool.kprint import SymbolTable, assoc_with_unit
+from pyk.ktool.kprint import KPrint, SymbolTable, assoc_with_unit
+from pyk.ktool.kprove import KProve
 from pyk.prelude.k import GENERATED_TOP_CELL
 from pyk.prelude.ml import is_top
 

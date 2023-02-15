@@ -37,7 +37,7 @@ from pyk.kast.manip import (
     simplify_bool,
 )
 from pyk.kast.outer import KClaim, KDefinition, KRule
-from pyk.ktool import KPrint
+from pyk.ktool.kprint import KPrint
 from pyk.prelude.ml import mlTop
 from pyk.utils import add_indent, compare_short_hashes, shorten_hash
 

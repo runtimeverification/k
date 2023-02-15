@@ -13,8 +13,8 @@ from .kast.manip import flatten_label, minimize_rule, minimize_term, propagate_u
 from .kast.outer import read_kast_definition
 from .kore.parser import KoreParser
 from .kore.syntax import Pattern
-from .ktool import KPrint, KProve
-from .ktool.kprint import build_symbol_table, pretty_print_kast
+from .ktool.kprint import KPrint, build_symbol_table, pretty_print_kast
+from .ktool.kprove import KProve
 from .prelude.k import GENERATED_TOP_CELL
 from .prelude.ml import is_top, mlAnd, mlOr
 

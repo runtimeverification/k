@@ -10,7 +10,7 @@ from textual.widgets import Static
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KInner, KRewrite
 from pyk.kast.manip import flatten_label, minimize_term, push_down_rewrites
-from pyk.ktool import KPrint
+from pyk.ktool.kprint import KPrint
 from pyk.prelude.kbool import TRUE
 
 from ..kcfg import KCFG
