@@ -1,13 +1,13 @@
     {
       Out:String
     #Equals
-      "x = 16\n"
+      "x = 21\n"
     }
   #And
     {
       Store:Map
     #Equals
-      0 |-> 16
+      0 |-> 21
     }
 #Or
     {
@@ -49,13 +49,13 @@
     {
       Out:String
     #Equals
-      "x = 21\n"
+      "x = 16\n"
     }
   #And
     {
       Store:Map
     #Equals
-      0 |-> 21
+      0 |-> 16
     }
 #Or
     {
