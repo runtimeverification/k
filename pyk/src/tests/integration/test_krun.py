@@ -7,8 +7,8 @@ from pyk.kast.manip import flatten_label, get_cell
 from pyk.kore.parser import KoreParser
 from pyk.kore.prelude import int_dv
 from pyk.kore.syntax import App, Pattern
-from pyk.ktool import KRun
 from pyk.ktool.kprint import KAstInput, KAstOutput, _kast
+from pyk.ktool.krun import KRun
 from pyk.prelude.kint import intToken
 
 from .utils import KRunTest
