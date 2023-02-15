@@ -41,10 +41,10 @@ module IMP
 
   configuration <T color="yellow">
                   <threads color="orange">
-                    <thread multiplicity="*" color="blue">
+                    <thread multiplicity="*" color="blue" type="Map">
+                      <id color="black"> 0 </id>
                       <k color="green"> $PGM:Stmts </k>
                       <env color="LightSkyBlue"> .Map </env>
-                      <id color="black"> 0 </id>
                     </thread>
                   </threads>
                   <store color="red"> .Map </store>
