@@ -2,6 +2,10 @@
 
 module SUM-SPEC
   imports IMP
+
+rule {I #Equals I +Int 1} => #Bottom [simplification]
+rule {I #Equals I +Int 2} => #Bottom [simplification]
+
 claim
   <threads><thread>...
     <k>
@@ -17,6 +21,16 @@ claim
       sum |-> LSUM:Int
     ...</env>
   ...</thread></threads>
+  <input>
+    ListItem ( #buffer ( "\n" ~> . ) )
+    ListItem ( "off" )
+    ListItem ( #istream ( 0 ) )
+  </input>
+  <output>
+    ListItem ( #ostream ( 1 ) )
+    ListItem ( "off" )
+    ListItem ( #buffer ( "" ~> . ) )
+  </output>
   <store>...
     LN   |-> (N:Int => 0)
     LSUM |-> (S:Int => S +Int ((N +Int 1) *Int N /Int 2))
@@ -43,11 +57,22 @@ claim
       sum |-> ?LSUM:Int
     </env>
   ...</thread></threads>
-  <store>...
+  <input>
+    ListItem ( #buffer ( "\n" ~> . ) )
+    ListItem ( "off" )
+    ListItem ( #istream ( 0 ) )
+  </input>
+  <output>
+    ListItem ( #ostream ( 1 ) )
+    ListItem ( "off" )
+    ListItem ( #buffer ( "" ~> . ) )
+  </output>
+  <store>
     .Map
   =>
     ?LN   |-> 0
     ?LSUM |-> ((N +Int 1) *Int N /Int 2)
-  ...</store>
+  </store>
+  <generatedCounter> C:Int => C +Int 2 </generatedCounter>
 requires N >=Int 0
 endmodule
