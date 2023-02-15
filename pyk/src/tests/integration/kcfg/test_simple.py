@@ -6,7 +6,7 @@ from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence, KToken, KVariable
 from pyk.kast.manip import get_cell
 from pyk.kcfg import KCFGExplore
-from pyk.ktool import KPrint
+from pyk.ktool.kprint import KPrint
 
 from ..utils import KCFGExploreTest
 

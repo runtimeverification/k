@@ -28,7 +28,7 @@ from pyk.kore.syntax import (
     String,
     Top,
 )
-from pyk.ktool import KPrint
+from pyk.ktool.kprint import KPrint
 from pyk.prelude.bytes import bytesToken
 from pyk.prelude.kbool import TRUE
 from pyk.prelude.kint import INT, intToken

@@ -4,7 +4,7 @@ import pytest
 
 from pyk.kast.inner import KApply, KInner, KSequence, KToken, KVariable
 from pyk.kast.manip import remove_attrs
-from pyk.ktool import KPrint
+from pyk.ktool.kprint import KPrint
 from pyk.prelude.kint import INT, intToken
 
 from .utils import KPrintTest

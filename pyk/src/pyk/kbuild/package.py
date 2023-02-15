@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
-from typing import List, Tuple, final
+from typing import List, Tuple, Union, final
 
 from ..utils import hash_str
 from .project import Dependency, GitSource, PathSource, Project, Source
@@ -10,7 +10,7 @@ from .project import Dependency, GitSource, PathSource, Project, Source
 
 class Package(ABC):
     @staticmethod
-    def create(project_file: Path) -> 'Package':
+    def create(project_file: Union[str, Path]) -> 'Package':
         project = Project.load(project_file)
         return _RootPackage(project)
 

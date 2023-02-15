@@ -6,9 +6,8 @@ import pytest
 from pyk.kast.inner import EMPTY_ATT
 from pyk.kast.manip import remove_generated_cells
 from pyk.kast.outer import KDefinition, KFlatModule, KFlatModuleList, KRequire
-from pyk.ktool import KProve
 from pyk.ktool.kprint import SymbolTable, paren
-from pyk.ktool.kprove import _kprove
+from pyk.ktool.kprove import KProve, _kprove
 from pyk.prelude.ml import is_top
 
 from .utils import KProveTest

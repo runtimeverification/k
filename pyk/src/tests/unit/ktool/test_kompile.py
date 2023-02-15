@@ -36,6 +36,9 @@ def test_all_args() -> None:
         hook_namespaces=['JSON', 'KRYPTO', 'BLOCKCHAIN'],
         emit_json=True,
         post_process='echo "hello"',
+        opt_level=None,
+        ccopts=(),
+        no_llvm_kompile=False,
         concrete_rules=['foo', 'bar'],
     )
 
