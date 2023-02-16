@@ -2967,6 +2967,7 @@ interested readers:
 | `element`      | prod | all     | Specifies the label of the elements in a list                                         |
 | `bracketLabel` | prod | all     | Keep track of the label of a bracket production since it can't have a klabel          |
 | `injective`    | prod | all     | Label a given production as injective (unique output for each input)                  |
+| `internal`     | prod | all     | Production is reserved for internal use by the compiler                               |
 | `cool`         | rule | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)               |
 | `heat`         | rule | all     | [`strict` and `seqstrict` attributes](#strict-and-seqstrict-attributes)               |
 
