@@ -1,4 +1,4 @@
-from typing import Final, Iterable, Tuple
+from typing import Final, Iterable, List, Optional, Tuple, Union
 
 import pytest
 
@@ -7,10 +7,23 @@ from pyk.kast.inner import KApply, KSequence, KToken, KVariable
 from pyk.kast.manip import get_cell
 from pyk.kcfg import KCFGExplore
 from pyk.ktool.kprint import KPrint
+from pyk.prelude.ml import mlAnd, mlEqualsTrue, mlTop
 
 from ..utils import KCFGExploreTest
 
-EXECUTE_TEST_DATA: Final = (('simple-branch', 3, ('a', '.Map'), 1, ('b', '.Map'), [('c', '.Map'), ('d', '.Map')]),)
+STATE = Union[Tuple[str, str], Tuple[str, str, str]]
+
+EXECUTE_TEST_DATA: Iterable[Tuple[str, int, STATE, int, STATE, List[STATE]]] = (
+    ('branch', 3, ('a', '.Map'), 1, ('b', '.Map'), [('c', '.Map'), ('d', '.Map')]),
+    (
+        'no-branch',
+        1,
+        ('foo', '3 |-> M:Int', 'notBool pred1(M:Int)'),
+        0,
+        ('foo', '3 |-> M:Int'),
+        [],
+    ),
+)
 
 SIMPLIFY_TEST_DATA: Final = (('bytes-return', ('mybytes', '.Map'), (r'b"\x00\x90\xa0\n\xa1\xf1a"', '.Map')),)
 
@@ -19,18 +32,28 @@ class TestSimpleProof(KCFGExploreTest):
     KOMPILE_MAIN_FILE = 'k-files/simple-proofs.k'
 
     @staticmethod
-    def config(kprint: KPrint, k: str, state: str) -> CTerm:
+    def config(kprint: KPrint, k: str, state: str, constraint: Optional[str] = None) -> CTerm:
         _k_parsed = kprint.parse_token(KToken(k, 'KItem'), as_rule=True)
         _state_parsed = kprint.parse_token(KToken(state, 'Map'), as_rule=True)
+        _constraint = (
+            mlTop()
+            if constraint is None
+            else mlEqualsTrue(kprint.parse_token(KToken(constraint, 'Bool'), as_rule=True))
+        )
         # TODO: Why does kompile put <generatedCounter> before <state>?
         return CTerm(
-            KApply(
-                '<generatedTop>',
+            mlAnd(
                 [
-                    KApply('<k>', [KSequence([_k_parsed])]),
-                    KVariable('GENERATED_COUNTER_CELL'),
-                    KApply('<state>', [_state_parsed]),
-                ],
+                    KApply(
+                        '<generatedTop>',
+                        [
+                            KApply('<k>', [KSequence([_k_parsed])]),
+                            KVariable('GENERATED_COUNTER_CELL'),
+                            KApply('<state>', [_state_parsed]),
+                        ],
+                    ),
+                    _constraint,
+                ]
             )
         )
 
@@ -50,12 +73,11 @@ class TestSimpleProof(KCFGExploreTest):
         expected_next_states: Iterable[Tuple[str, str]],
     ) -> None:
         # Given
-        k, state = pre
-        expected_k, expected_state = expected_post
+        expected_k, expected_state, *_ = expected_post
 
         # When
         actual_depth, actual_post_term, actual_next_terms = kcfg_explore.cterm_execute(
-            self.config(kcfg_explore.kprint, k, state), depth=depth
+            self.config(kcfg_explore.kprint, *pre), depth=depth
         )
         actual_k = kcfg_explore.kprint.pretty_print(get_cell(actual_post_term.kast, 'K_CELL'))
         actual_state = kcfg_explore.kprint.pretty_print(get_cell(actual_post_term.kast, 'STATE_CELL'))
@@ -87,10 +109,10 @@ class TestSimpleProof(KCFGExploreTest):
     ) -> None:
         # Given
         k, state = pre
-        expected_k, expected_state = expected_post
+        expected_k, expected_state, *_ = expected_post
 
         # When
-        actual_post = kcfg_explore.cterm_simplify(self.config(kcfg_explore.kprint, k, state))
+        actual_post = kcfg_explore.cterm_simplify(self.config(kcfg_explore.kprint, *pre))
         actual_k = kcfg_explore.kprint.pretty_print(get_cell(actual_post, 'K_CELL'))
         actual_state = kcfg_explore.kprint.pretty_print(get_cell(actual_post, 'STATE_CELL'))
 

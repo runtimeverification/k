@@ -109,7 +109,17 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         depth = er.depth
         next_state = CTerm(self.kprint.kore_to_kast(er.state.kore))
         _next_states = er.next_states if er.next_states is not None and len(er.next_states) > 1 else []
-        next_states = [CTerm(self.kprint.kore_to_kast(ns.kore)) for ns in _next_states]
+        # TODO: should not have to prune bottom branches, the backend should do this for us.
+        next_states = []
+        for ns in _next_states:
+            _LOGGER.info(f'Checking for bottom branch: {ns}')
+            _ns = self.cterm_simplify(CTerm(self.kprint.kore_to_kast(ns.kore)))
+            if is_bottom(_ns):
+                _LOGGER.warning(f'Found bottom branch: {ns}')
+            else:
+                next_states.append(CTerm(_ns))
+        if len(next_states) == 1 and len(next_states) < len(_next_states):
+            return depth + 1, next_states[0], []
         return depth, next_state, next_states
 
     def cterm_simplify(self, cterm: CTerm) -> KInner:
@@ -170,28 +180,38 @@ class KCFGExplore(ContextManager['KCFGExplore']):
                 cfg.replace_node(node.id, CTerm(new_term))
         return cfg
 
-    def step(self, cfgid: str, cfg: KCFG, node_id: str) -> Tuple[KCFG, str]:
+    def step(self, cfgid: str, cfg: KCFG, node_id: str, depth: int = 1) -> Tuple[KCFG, str]:
+        if depth <= 0:
+            raise ValueError(f'Expected positive depth, got: {depth}')
         node = cfg.node(node_id)
         out_edges = cfg.edges(source_id=node.id)
         if len(out_edges) > 1:
             raise ValueError(
                 f'Only support stepping from nodes with 0 or 1 out edges {cfgid}: {(node.id, [e.target.id for e in out_edges])}'
             )
-        _LOGGER.info(f'Taking 1 step from node {cfgid}: {shorten_hashes(node.id)}')
-        depth, cterm, next_cterms = self.cterm_execute(node.cterm, depth=1)
-        if depth != 1:
-            raise ValueError(f'Unable to take single step from node {cfgid}: {node.id}')
+        elif len(out_edges) == 1 and not is_top(out_edges[0].condition):
+            raise ValueError(
+                f'Only allow stepping on out edges with #Top condition {cfgid}: {(node.id, shorten_hashes(out_edges[0].target.id))}'
+            )
+        _LOGGER.info(f'Taking {depth} steps from node {cfgid}: {shorten_hashes(node.id)}')
+        actual_depth, cterm, next_cterms = self.cterm_execute(node.cterm, depth=depth)
+        if actual_depth != depth:
+            raise ValueError(f'Unable to take {depth} steps from node, got {actual_depth} steps {cfgid}: {node.id}')
         if len(next_cterms) > 0:
-            raise ValueError(f'Found branch with single step {cfgid}: {node.id}')
+            raise ValueError(f'Found branch within {depth} steps {cfgid}: {node.id}')
         new_node = cfg.get_or_create_node(cterm)
-        _LOGGER.info(f'Found new node at depth 1 {cfgid}: {shorten_hashes((node.id, new_node.id))}')
+        _LOGGER.info(f'Found new node at depth {depth} {cfgid}: {shorten_hashes((node.id, new_node.id))}')
         if len(out_edges) == 0:
-            cfg.create_edge(node.id, new_node.id, condition=mlTop(), depth=1)
+            cfg.create_edge(node.id, new_node.id, condition=mlTop(), depth=depth)
         else:
             edge = out_edges[0]
+            if depth > edge.depth:
+                raise ValueError(
+                    f'Step depth {depth} greater than original edge depth {edge.depth} {cfgid}: {shorten_hashes((edge.source.id, edge.target.id))}'
+                )
             cfg.remove_edge(edge.source.id, edge.target.id)
-            cfg.create_edge(edge.source.id, new_node.id, condition=mlTop(), depth=1)
-            cfg.create_edge(new_node.id, edge.target.id, condition=edge.condition, depth=(edge.depth - 1))
+            cfg.create_edge(edge.source.id, new_node.id, condition=mlTop(), depth=depth)
+            cfg.create_edge(new_node.id, edge.target.id, condition=mlTop(), depth=(edge.depth - depth))
         return (cfg, new_node.id)
 
     def section_edge(
@@ -200,38 +220,18 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         if sections <= 1:
             raise ValueError(f'Cannot section an edge less than twice {cfgid}: {sections}')
         edge = single(cfg.edges(source_id=source_id, target_id=target_id))
-        if not is_top(edge.condition):
-            raise ValueError(f'Cannot section edge with non-#Top condition {cfgid}: {edge.condition}')
         section_depth = int(edge.depth / sections)
         if section_depth == 0:
             raise ValueError(f'Too many sections, results in 0-length section {cfgid}: {sections}')
-        cfg.remove_edge(source_id=source_id, target_id=target_id)
-        remainder_depth = edge.depth - (section_depth * sections)
-        if remainder_depth > 0:
-            sections += 1
-        else:
-            remainder_depth = section_depth
-        curr_node = edge.source
+        orig_depth = edge.depth
+        new_depth = section_depth
         new_nodes = []
-        for _i in range(sections - 1):
-            _LOGGER.info(f'Taking {section_depth} steps from node {cfgid}: {shorten_hashes(curr_node.id)}')
-            new_depth, cterm, next_cterms = self.cterm_execute(curr_node.cterm, depth=section_depth)
-            if new_depth != section_depth:
-                raise ValueError(
-                    f'Found section with differing depth than section depth {cfgid}: {new_depth} vs {section_depth}'
-                )
-            if len(next_cterms) != 0:
-                raise ValueError(
-                    'Found branch when sectioning edge {cfgid}: {(shorten_hashes(curr_node.id), target_id)}'
-                )
-            new_node = cfg.get_or_create_node(cterm)
-            new_nodes.append(new_node.id)
-            _LOGGER.info(
-                f'Found new node at {section_depth} steps from node {cfgid}: {shorten_hashes((curr_node.id, new_node.id))}'
-            )
-            cfg.create_edge(curr_node.id, new_node.id, condition=mlTop(), depth=section_depth)
-            curr_node = new_node
-        cfg.create_edge(source_id=curr_node.id, target_id=edge.target.id, condition=mlTop(), depth=remainder_depth)
+        curr_node_id = edge.source.id
+        while new_depth < orig_depth:
+            _LOGGER.info(f'Taking {section_depth} steps from node {cfgid}: {shorten_hashes(curr_node_id)}')
+            cfg, curr_node_id = self.step(cfgid, cfg, curr_node_id, depth=section_depth)
+            new_nodes.append(curr_node_id)
+            new_depth += section_depth
         return (cfg, tuple(new_nodes))
 
     def all_path_reachability_prove(
