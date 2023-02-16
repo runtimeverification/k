@@ -10,7 +10,7 @@ from pyk.kcfg import KCFG, KCFGExplore
 from pyk.ktool.kprint import KPrint, SymbolTable
 from pyk.ktool.kprove import KProve
 from pyk.prelude.kint import intToken
-from pyk.prelude.ml import mlEqualsTrue, mlTop
+from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsTrue, mlTop
 
 from ..utils import KCFGExploreTest
 
@@ -78,6 +78,21 @@ IMPLIES_TEST_DATA: Final = (
         ('int $n , $s ; $n = 3 ;', '.Map'),
         ('int $n , $s ; $n = X ;', '.Map', mlEqualsTrue(KApply('_<Int_', [KVariable('X'), intToken(3)]))),
         None,
+    ),
+    (
+        'antecedent-bottom',
+        (
+            'int $n , $s ; $n = X ;',
+            '.Map',
+            mlAnd(
+                [
+                    mlEqualsTrue(KApply('_<Int_', [KVariable('X'), intToken(3)])),
+                    mlEqualsTrue(KApply('_<Int_', [intToken(3), KVariable('X')])),
+                ]
+            ),
+        ),
+        ('int $n , $s ; $n = Y ;', '.Map'),
+        (Subst({}), mlBottom()),
     ),
 )
 
