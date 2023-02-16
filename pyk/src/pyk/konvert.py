@@ -1,3 +1,4 @@
+import logging
 from functools import reduce
 from typing import Final, Optional, Tuple
 
@@ -9,6 +10,8 @@ from .prelude.bytes import BYTES
 from .prelude.k import K
 from .prelude.string import STRING
 from .utils import FrozenDict
+
+_LOGGER: Final = logging.getLogger(__name__)
 
 # ------------
 # KAST-to-KORE
@@ -58,6 +61,7 @@ def kast_to_kore(
 
 
 def _kast_to_kore(kast: KInner) -> Pattern:
+    _LOGGER.debug(f'_kast_to_kore: {kast}')
     if type(kast) is KToken:
         return _ktoken_to_kore(kast)
     elif type(kast) is KVariable:
