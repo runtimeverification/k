@@ -493,8 +493,8 @@ with the declared configuration cell multiplicity. The unique identifier
 of the new thread is generated using the `fresh` side condition.
 
 ```k
-  rule <k> spawn S => !T:Int ...</k> <env> Rho </env>
-       (.Bag => <thread>... <k> S </k> <env> Rho </env> <id> !T </id> ...</thread>)
+  rule <k> spawn S => !T:Int +Int 1 ...</k> <env> Rho </env>
+       (.Bag => <thread>... <k> S </k> <env> Rho </env> <id> !T +Int 1 </id> ...</thread>)
 ```
 ### Join thread
 A thread who wants to join another thread `T` has to wait until

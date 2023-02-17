@@ -99,7 +99,7 @@ module IMP
   rule <k> halt; ~> _ => . </k>
 
   rule <k> spawn S => . ...</k> <env> Rho </env>
-       (.Bag => <thread>... <k> S </k> <env> Rho </env> <id> !T </id> ...</thread>)
+       (.Bag => <thread>... <k> S </k> <env> Rho </env> <id> !T +Int 1 </id> ...</thread>)
 
   rule <thread>... <k> . </k> ...</thread> => .Bag  [structural]
 endmodule

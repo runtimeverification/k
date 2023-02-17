@@ -98,8 +98,8 @@ module IMP
 
   rule <k> halt; ~> _ => . </k>
 
-  rule <k> spawn S => !T:Int ...</k> <env> Rho </env>
-       (.Bag => <thread>... <k> S </k> <env> Rho </env> <id> !T </id> ...</thread>)
+  rule <k> spawn S => !T:Int +Int 1 ...</k> <env> Rho </env>
+       (.Bag => <thread>... <k> S </k> <env> Rho </env> <id> !T +Int 1 </id> ...</thread>)
   rule <k> join(T:Int); => . ...</k>
        <thread>... <k> . </k> <id> T </id> ...</thread>
 
