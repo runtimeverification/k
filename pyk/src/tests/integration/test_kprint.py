@@ -15,6 +15,40 @@ TEST_DATA: Final = (
     ('add-aexp', False, KToken('3 + 4', 'AExp'), KApply('_+_', [intToken(3), intToken(4)])),
     ('add-int', True, KToken('3 +Int V', 'Int'), KApply('_+Int_', [intToken(3), KVariable('V', sort=INT)])),
     ('k-cell', True, KToken('<k> . </k>', 'KCell'), KApply('<k>', KSequence())),
+    (
+        'imp-config',
+        True,
+        KToken(
+            """
+            <generatedTop>
+                <T>
+                    <k> int #token("x", "Id") ; #token("x", "Id") = 0 ; </k>
+                    <state> .Map </state>
+                </T>
+                <generatedCounter>
+                    0
+                </generatedCounter>
+            </generatedTop>
+            """,
+            'GeneratedTopCell',
+        ),
+        KApply(
+            '<generatedTop>',
+            KApply(
+                '<T>',
+                KApply(
+                    '<k>',
+                    KApply(
+                        'int_;_',
+                        KApply('_,_', KToken('x', 'Id'), KApply('.List{"_,_"}_Ids')),
+                        KApply('_=_;', KToken('x', 'Id'), KToken('0', 'Int')),
+                    ),
+                ),
+                KApply('<state>', KApply('.Map')),
+            ),
+            KApply('<generatedCounter>', KToken('0', 'Int')),
+        ),
+    ),
 )
 
 
