@@ -1,13 +1,9 @@
-from pathlib import Path
-
 import pytest
 
-from pyk.kast.inner import KApply, KSequence, KToken
+from pyk.kast.inner import KApply, KInner, KSequence, KSort, KToken, Subst
 from pyk.kast.manip import flatten_label, get_cell
-from pyk.kore.parser import KoreParser
 from pyk.kore.prelude import int_dv
 from pyk.kore.syntax import App, Pattern
-from pyk.ktool.kprint import KAstInput, KAstOutput, _kast
 from pyk.ktool.krun import KRun
 from pyk.prelude.kint import intToken
 
@@ -37,38 +33,39 @@ class TestImpRun(KRunTest):
         assert set(actual_map_items) == set(expected_map_items)
 
     def test_run_kore_term(self, krun: KRun) -> None:
+        def state(k: KInner, state: KInner) -> Pattern:
+            kast = krun.definition.empty_config(KSort('GeneratedTopCell'))
+            kast = Subst(
+                {
+                    'K_CELL': k,
+                    'STATE_CELL': state,
+                    'GENERATEDCOUNTER_CELL': intToken(0),
+                }
+            )(kast)
+            return krun.kast_to_kore(kast, KSort('GeneratedTopCell'))
+
         # Given
-        x = '#token("x", "Id")'
-        pattern = self._state(krun.definition_dir, k=f'int {x} ; {x} = 1 ;', state='.Map')
-        expected = self._state(krun.definition_dir, k='.', state=f'{x} |-> 1')
+        x = KToken('x', 'Id')
+        pattern = state(
+            k=KSequence(
+                KApply(
+                    'int_;_',
+                    KApply('_,_', x, KApply('.List{"_,_"}_Ids')),
+                    KApply('_=_;', x, intToken(1)),
+                ),
+            ),
+            state=KApply('.Map'),
+        )
+        expected = state(
+            k=KSequence(),
+            state=KApply('_|->_', x, intToken(1)),
+        )
 
         # When
         actual = krun.run_kore_term(pattern)
 
         # Then
         assert actual == expected
-
-    def _state(self, definition_dir: Path, k: str, state: str) -> Pattern:
-        pretty_text = f"""
-            <generatedTop>
-                <T>
-                    <k> {k} </k>
-                    <state> {state} </state>
-                </T>
-                <generatedCounter>
-                    0
-                </generatedCounter>
-            </generatedTop>
-        """
-        proc_res = _kast(
-            definition_dir=definition_dir,
-            input=KAstInput.RULE,
-            output=KAstOutput.KORE,
-            expression=pretty_text,
-            sort='GeneratedTopCell',
-        )
-        kore_text = proc_res.stdout
-        return KoreParser(kore_text).pattern()
 
 
 class TestConfigRun(KRunTest):
