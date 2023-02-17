@@ -67,4 +67,12 @@ public class KPos {
     public int hashCode() {
         return Objects.hash(line, character);
     }
+
+    @Override
+    public String toString() {
+        return "KPos{" +
+                "l:" + line +
+                ", c:" + character +
+                '}';
+    }
 }
