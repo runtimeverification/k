@@ -56,7 +56,7 @@ The meaning of these priority groups becomes apparent when parsing programs:
 A symbol with a **lesser priority**, (i.e., one that **binds looser**), cannot
 appear as the **direct child** of a symbol with a **greater priority** (i.e.,
 one that **binds tighter**. In this case, the `>` operator can be seen as a
-**greater-than** operator describing a transitive partial ordering on the 
+**greater-than** operator describing a transitive partial ordering on the
 productions in the production block, expressing their relative priority.
 
 To see this more concretely, let's look again at the program
@@ -70,7 +70,7 @@ cannot appear as the direct child of a symbol with greater priority
 unambiguously as `true || (false && false)`. Conversely, if the user explicitly
 wants the other parse, they can express this using brackets by explicitly
 writing `true && (false || false)`. This still parses successfully because the
-`||` operator is no longer the **direct** child of the `&&` operator, but is 
+`||` operator is no longer the **direct** child of the `&&` operator, but is
 instead the direct child of the `()` operator, and the `&&` operator is an
 **indirect** parent, which is not subject to the priority restriction.
 
@@ -89,7 +89,7 @@ cases where the child is either the first or last production item in the
 parent's production. For example, in the production `Bool "&&" Bool`, the
 first `Bool` non-terminal is not preceded by any terminals, and the last `Bool`
 non-terminal is not followed by any terminals. As a result of this, we apply
-the priority rule to both children of `&&`. However, in the `()` operator, 
+the priority rule to both children of `&&`. However, in the `()` operator,
 the sole non-terminal is both preceded by and followed by terminals. As a
 result, the priority rule is not applied when `()` is the parent. Because of
 this, the program we mentioned above successfully parses.
@@ -124,7 +124,7 @@ symbol with equal priority; and
 * a non-associative symbol cannot appear as a direct leftmost **or** rightmost
 child of a symbol with equal priority.
 
-In C, binary operators are all left-associative, meaning that the expression 
+In C, binary operators are all left-associative, meaning that the expression
 `true && false && false` parses unambiguously as `(true && false) && false`,
 because `&&` cannot appear as the rightmost child of itself.
 
@@ -159,7 +159,7 @@ module LESSON-04-C
   syntax Boolean ::= "true" | "false"
                    | "(" Boolean ")" [bracket]
                    > "!" Boolean [function]
-                   > left: 
+                   > left:
                      Boolean "&&" Boolean [function]
                    | Boolean "^" Boolean [function]
                    | Boolean "||" Boolean [function]
@@ -177,7 +177,7 @@ to think about what the differences are in practice.
 ### Exercise
 
 Parse the program `true && false && false` yourself, and confirm that the AST
-places the rightmost `&&` at the top of the expression. Then modify the 
+places the rightmost `&&` at the top of the expression. Then modify the
 definition to generate the alternative parse.
 
 ## Explicit priority and associativity declarations
@@ -202,7 +202,7 @@ module LESSON-04-D
                    | "!" Boolean [not, function]
                    | Boolean "&&" Boolean [and, function]
                    | Boolean "^" Boolean [xor, function]
-                   | Boolean "|" Boolean [or, function]
+                   | Boolean "||" Boolean [or, function]
 
   syntax priorities literal atom > not > and > xor > or
   syntax left and
@@ -313,7 +313,7 @@ In both cases, no action is taken if the parse is not ambiguous.
 and confirm that else clause is part of the innermost `if` statement. Then
 modify the definition so that you will get the alternative parse.
 
-2. Modify your solution from lesson 1.3, problem 2 so that unary negation should
+2. Modify your solution from Lesson 1.3, Exercise 2 so that unary negation should
 bind tighter than multiplication and division, which should bind tighter than
 addition and subtraction, and each binary operator should be left associative.
 Write these priority and associativity declarations both inline and explicitly.

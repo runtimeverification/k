@@ -61,6 +61,7 @@ Haskell an interpreter that is capable of interpreting any K definition.
 Note that on arm64 macOS (Apple Silicon), there is a known issue with the `Compact`
 library that causes crashes in the Haskell backend. Pass the additional flag
 `--no-haskell-binary` to `kompile` to resolve this.
+This flag is also needed when using `krun`.
 
 ### Exercise
 
@@ -73,12 +74,12 @@ definition with the LLVM Backend.
 As a quick note, K does provide one other backend, which exists primarily as
 legacy code which should be considered deprecated. This is the
 **Java Backend**. The Java Backend is essentially a precursor to the Haskell
-Backend. We will not cover this backend in any detail since it is deprecated, 
+Backend. We will not cover this backend in any detail since it is deprecated,
 but we still mention it here for the purposes of understanding.
 
 ## Exercises
 
-1. Compile your solution to Lesson 1.18, Problem 2 with the Haskell Backend
+1. Compile your solution to Lesson 1.18, Exercise 2 with the Haskell Backend
 and execute some programs. Compare the resulting configurations with the
 output of the same program on the LLVM Backend. Note that if you are getting
 different behaviors on the Haskell backend, you might have some luck debugging
