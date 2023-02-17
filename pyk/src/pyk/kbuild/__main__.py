@@ -1,9 +1,10 @@
 import shutil
+import sys
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import Any
 
-from ..cli_utils import dir_path
+from ..cli_utils import check_dir_path, dir_path
 from .config import KBUILD_DIR, PROJECT_FILE_NAME
 from .kbuild import KBuild
 from .package import Package
@@ -19,6 +20,9 @@ def main() -> None:
 
     if command == 'kompile':
         return do_kompile(**args)
+
+    if command == 'which':
+        return do_which(**args)
 
     raise AssertionError()
 
@@ -36,7 +40,15 @@ def _argument_parser() -> ArgumentParser:
     kompile_parser = command_parser.add_parser('kompile', help='kompile target')
     kompile_parser.add_argument('target_name', metavar='TARGET', help='target to build')
 
+    which_parser = command_parser.add_parser('which', help='print definition directory for target')
+    which_parser.add_argument('target_name', metavar='TARGET', help='target to print definition directory for')
+
     return parser
+
+
+def _package(start_dir: Path) -> Package:
+    project_file = find_file_upwards(PROJECT_FILE_NAME, start_dir)
+    return Package.create(project_file)
 
 
 def do_clean(**kwargs: Any) -> None:
@@ -44,10 +56,23 @@ def do_clean(**kwargs: Any) -> None:
 
 
 def do_kompile(start_dir: Path, target_name: str, **kwargs: Any) -> None:
-    project_file = find_file_upwards(PROJECT_FILE_NAME, start_dir)
-    package = Package.create(project_file)
+    package = _package(start_dir)
     kbuild = KBuild(KBUILD_DIR)
     definition_dir = kbuild.kompile(package, target_name)
+    print(definition_dir)
+
+
+def do_which(start_dir: Path, target_name: str, **kwargs: Any) -> None:
+    package = _package(start_dir)
+    kbuild = KBuild(KBUILD_DIR)
+    definition_dir = kbuild.definition_dir(package, target_name)
+
+    try:
+        check_dir_path(definition_dir)
+    except ValueError as e:
+        print(e, file=sys.stderr)
+        sys.exit(1)
+
     print(definition_dir)
 
 
