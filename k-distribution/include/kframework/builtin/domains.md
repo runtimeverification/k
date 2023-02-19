@@ -2560,7 +2560,7 @@ Haskell backend, a log message of type InfoUserLog is created with the
 specified text.
 
 ```k
-  syntax K ::= #log(value: String) [function, funtional, hook(IO.logString), impure, returnsUnit, symbol]
+  syntax K ::= #log(value: String) [function, total, hook(IO.logString), impure, returnsUnit, symbol]
 ```
 
 Terms can also be logged to standard error in _surface syntax_, rather than as
