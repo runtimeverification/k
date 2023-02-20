@@ -19,6 +19,8 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
+import static org.kframework.kompile.Kompile.CACHE_FILE_NAME;
+
 @RequestScoped
 public class KompileOptions implements Serializable {
 
@@ -105,7 +107,7 @@ public class KompileOptions implements Serializable {
     @ParametersDelegate
     public SMTOptions smt = new SMTOptions();
 
-    @Parameter(names="--cache-file", description="Location of parse cache file. Default is $KOMPILED_DIR/cache.bin.")
+    @Parameter(names="--cache-file", description="Location of parse cache file. Default is $KOMPILED_DIR/" + CACHE_FILE_NAME + ".")
     public String cacheFile;
 
     @Parameter(names="--emit-json", description="Emit JSON serialized version of parsed and kompiled definitions.")
