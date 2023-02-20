@@ -26,6 +26,9 @@ public class KWorkspaceService implements WorkspaceService {
     @Override
     public void didChangeWatchedFiles(DidChangeWatchedFilesParams didChangeWatchedFilesParams) {
         this.clientLogger.logMessage("Operation 'workspace/didChangeWatchedFiles' Ack");
+        KTextDocumentService ktxt = (KTextDocumentService) languageServer.getTextDocumentService();
+        ktxt.memo.loadCaches();
+        languageServer.languageClient.refreshDiagnostics();
     }
 
     @Override

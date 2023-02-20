@@ -18,9 +18,8 @@ this [GDB Tutorial](http://www.gdbtutorial.com/tutorial/how-install-gdb).
 
 The first thing neccessary in order to debug a K interpreter in GDB is to
 build the interpreter with full debugging support enabled. This can be done
-relatively simply. First, make sure you have not passed `-O1`, `-O2`, or `-O3`
-to `kompile`. Second, simply add the command line flags `-ccopt -g -ccopt -O1`
-to `kompile`. The resulting compiled K definition will be ready to support
+relatively simply. First, run `kompile` with the command line flags `-ccopt -g -ccopt -O1`.
+The resulting compiled K definition will be ready to support
 debugging.
 
 Note: the 'O' in `-O1` is the letter 'O' not the number 0!
@@ -368,7 +367,7 @@ want to try to do something and are unsure as to how.
 
 ## Exercises
 
-1. Compile your solution to Lesson 1.18, Problem 2 with debugging support
+1. Compile your solution to Lesson 1.18, Exercise 2 with debugging support
 enabled and step through several programs you have previously used to test.
 Then set a breakpoint on the `isKResult` function and observe the state of the
 interpreter when stopped at that breakpoint. Set a breakpoint on the rule for
