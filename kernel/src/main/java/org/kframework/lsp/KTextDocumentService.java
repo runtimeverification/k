@@ -95,4 +95,9 @@ public class KTextDocumentService implements TextDocumentService {
     public CompletableFuture<List<? extends Location>> references(ReferenceParams params) {
         return memo.references(params);
     }
+
+    @Override
+    public CompletableFuture<List<SelectionRange>> selectionRange(SelectionRangeParams params) {
+        return memo.selectionRange(params);
+    }
 }
