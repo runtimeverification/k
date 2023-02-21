@@ -99,5 +99,6 @@ public class MDsourceTest {
         Assert.assertEquals(1, TagSelector.parseTags("k", new Source(MDsourceTest.class.toString()), kem).size());
         Assert.assertEquals(0, TagSelector.parseTags("", new Source(MDsourceTest.class.toString()), kem).size());
         Assert.assertEquals(0, TagSelector.parseTags(" ", new Source(MDsourceTest.class.toString()), kem).size());
+        Assert.assertEquals(3, TagSelector.parseTags("{.k .numberLines startFrom=\"0\"}", new Source(MDsourceTest.class.toString()), kem).size());
     }
 }
