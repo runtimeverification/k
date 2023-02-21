@@ -22,7 +22,7 @@ from typing import (
     overload,
 )
 
-from ..utils import EMPTY_FROZEN_DICT, FrozenDict, dequote_str, enquote_str
+from ..utils import EMPTY_FROZEN_DICT, FrozenDict, dequote_str, enquote_str, some
 from .kast import EMPTY_ATT, KAst, KAtt, WithKAtt
 
 T = TypeVar('T', bound='KAst')
@@ -244,26 +244,33 @@ class KVariable(KInner):
     @classmethod
     def from_dict(cls: Type['KVariable'], d: Mapping[str, Any]) -> 'KVariable':
         cls._check_node(d)
-        sort = None
         att = KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT
-        for a in [
+
+        sort: Optional[KSort]
+        if KAtt.SORT in att:
+            sort = KSort.from_dict(att[KAtt.SORT])
+        else:
+            sort = None
+
+        ignored_atts = {
+            KAtt.SORT,
             KAtt.LOCATION,
             KAtt.SOURCE,
+            'org.kframework.definition.Production',
             'anonymous',
             'cellSort',
             'withConfig',
             'prettyPrintWithSortAnnotation',
             'fresh',
-        ]:
-            if a in att:
-                _LOGGER.debug(f'Removing attribute from KVariable: {a}: {att[a]}, from KVariable {d}')
-                att = att.remove([a])
-        if KAtt.SORT in att:
-            sort = KSort.from_dict(att[KAtt.SORT])
-            if len(att) > 1:
-                raise ValueError(f'Attributes other than {KAtt.SORT} attached to KVariable: {d}')
-        elif len(att) > 0:
-            raise ValueError(f'Attributes other than {KAtt.SORT} attached to KVariable: {d}')
+        }
+
+        problem_att = some(a for a in att if a not in ignored_atts)
+        if problem_att:
+            raise ValueError(f'Attribute other than {KAtt.SORT} attached to KVariable: {problem_att}')
+
+        if att:
+            _LOGGER.debug(f'Removing attributes: {list(att)} from KVariable: {d}')
+
         return KVariable(name=d['name'], sort=sort)
 
     def to_dict(self) -> Dict[str, Any]:

@@ -261,6 +261,10 @@ def single(iterable: Iterable[T]) -> T:
     return fst
 
 
+def some(iterable: Iterable[T]) -> Optional[T]:
+    return next(iter(iterable), None)
+
+
 def repeat_last(iterable: Iterable[T]) -> Iterator[T]:
     it = iter(iterable)
     last: Optional[T] = None
