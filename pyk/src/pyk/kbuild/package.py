@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
-from typing import List, Tuple, Union, final
+from typing import Tuple, Union, final
 
 from ..utils import hash_str
 from .project import Dependency, GitSource, PathSource, Project, Source
@@ -38,16 +38,12 @@ class Package(ABC):
         return self.path / 'target'
 
     @property
+    def resource_dir(self) -> Path:
+        return self.path / 'resource'
+
+    @property
     def include_dir(self) -> Path:
         return self.path / 'include'
-
-    @property
-    def include_dirs(self) -> List[Path]:
-        return [package.include_dir for package in self.sub_packages]
-
-    @property
-    def include_files(self) -> List[Path]:
-        return [self.include_dir / self.name / file_name for file_name in self.project.include_file_names]
 
     @cached_property
     def deps_packages(self) -> Tuple['Package', ...]:

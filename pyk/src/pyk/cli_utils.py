@@ -63,6 +63,12 @@ def check_relative_path(path: Path) -> None:
         raise ValueError(f'Path is not relative: {path}')
 
 
+def relative_path(path: Union[str, Path]) -> Path:
+    path = Path(path)
+    check_relative_path(path)
+    return path
+
+
 def abs_or_rel_to(path: Path, base: Path) -> Path:
     if path.is_absolute():
         return path
