@@ -21,12 +21,14 @@ def compile_kllvm(target_dir: Union[str, Path], *, verbose: bool = False) -> Pat
 
     module_file = target_dir / KLLVM_MODULE_FILE_NAME
 
-    args = ['llvm-kompile', 'pythonast', '--python', sys.executable, '--', '-o', str(module_file)]
+    args = ['llvm-kompile', 'pythonast', '--python', sys.executable, '--python-output-dir', str(target_dir)]
     if verbose:
-        args.append('-v')
+        args.append('--verbose')
 
     _LOGGER.info(f'Compiling pythonast extension: {module_file.name}')
     run_process(args, logger=_LOGGER)
+
+    assert module_file.exists()
     return module_file
 
 
