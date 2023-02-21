@@ -2,7 +2,7 @@ DEF=test
 EXT=test
 TESTDIR=.
 KOMPILE_BACKEND=haskell
-KOMPILE_FLAGS=--md-selector '(k&!discard)|(keep&!discard)'
+KOMPILE_FLAGS=--md-selector '(k|keep) & !discard'
 KPROVE_FLAGS+=--md-selector k
 
 include ../../../include/kframework/ktest.mak
