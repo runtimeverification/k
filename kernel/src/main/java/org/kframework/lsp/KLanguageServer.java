@@ -55,6 +55,8 @@ public class KLanguageServer implements LanguageServer, LanguageClientAware {
         // TODO: check if this needs to be guarded
         response.getCapabilities().setReferencesProvider(true);
         response.getCapabilities().setDefinitionProvider(true);
+        response.getCapabilities().setSelectionRangeProvider(true);
+
         if (!isDynamicCompletionRegistration())
             response.getCapabilities().setCompletionProvider(new CompletionOptions());
         if (!isDiagnosticRegistration())

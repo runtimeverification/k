@@ -58,6 +58,8 @@ public class KTextDocument {
                 }
                 c++;
             }
+            lines[content.length()] = l;
+            columns[content.length()] = c;
         }
         Matcher m = p.matcher(content);
         String context = "";
