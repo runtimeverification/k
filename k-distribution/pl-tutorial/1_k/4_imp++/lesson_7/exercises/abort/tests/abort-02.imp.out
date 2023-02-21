@@ -1,1 +1,5 @@
-S ==K "7\n"
+{
+  S:String
+#Equals
+  "7\n"
+}
