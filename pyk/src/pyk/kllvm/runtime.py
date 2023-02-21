@@ -26,22 +26,14 @@ def compile_runtime(kompiled_dir: Union[str, Path], *, verbose: bool = False) ->
 
     module_file = kompiled_dir / RUNTIME_MODULE_FILE_NAME
 
-    args = [
-        'llvm-kompile',
-        str(defn_file),
-        str(dt_dir),
-        'python',
-        '--python',
-        sys.executable,
-        '--',
-        '-o',
-        str(module_file),
-    ]
+    args = ['llvm-kompile', str(defn_file), str(dt_dir), 'python', '--python', sys.executable]
     if verbose:
-        args.append('-v')
+        args.append('--verbose')
 
     _LOGGER.info(f'Compiling python extension: {module_file.name}')
     run_process(args, logger=_LOGGER)
+
+    assert module_file.exists()
     return module_file
 
 
