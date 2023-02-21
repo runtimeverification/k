@@ -6,9 +6,16 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union, f
 
 import tomli
 
-from ..cli_utils import abs_or_rel_to, check_absolute_path, check_dir_path, check_file_path, check_relative_path
+from ..cli_utils import (
+    abs_or_rel_to,
+    check_absolute_path,
+    check_dir_path,
+    check_file_path,
+    check_relative_path,
+    relative_path,
+)
 from ..ktool.kompile import KompileBackend
-from ..utils import single
+from ..utils import FrozenDict, single
 from .config import PROJECT_FILE_NAME
 
 
@@ -68,6 +75,12 @@ class Target:
     md_selector: Optional[str]
     hook_namespaces: Optional[Tuple[str, ...]]
     emit_json: Optional[bool]
+    # LLVM backend
+    opt_level: Optional[int]
+    ccopts: Optional[Tuple[str, ...]]
+    no_llvm_kompile: Optional[bool]
+    # Haskell backend
+    concrete_rules: Optional[Tuple[str, ...]]
 
     def __init__(
         self,
@@ -80,6 +93,10 @@ class Target:
         md_selector: Optional[str] = None,
         hook_namespaces: Optional[Iterable[str]] = None,
         emit_json: Optional[bool] = None,
+        opt_level: Optional[int] = None,
+        ccopts: Optional[Iterable[str]] = None,
+        no_llvm_kompile: Optional[bool] = None,
+        concrete_rules: Optional[Iterable[str]],
     ):
         main_file = Path(main_file)
         check_relative_path(main_file)
@@ -91,6 +108,10 @@ class Target:
         object.__setattr__(self, 'md_selector', md_selector)
         object.__setattr__(self, 'hook_namespaces', tuple(hook_namespaces) if hook_namespaces is not None else None)
         object.__setattr__(self, 'emit_json', emit_json)
+        object.__setattr__(self, 'opt_level', opt_level)
+        object.__setattr__(self, 'ccopts', tuple(ccopts) if ccopts is not None else None)
+        object.__setattr__(self, 'no_llvm_kompile', no_llvm_kompile)
+        object.__setattr__(self, 'concrete_rules', tuple(concrete_rules) if concrete_rules is not None else None)
 
     @staticmethod
     def from_dict(name: str, dct: Mapping[str, Any]) -> 'Target':
@@ -103,12 +124,16 @@ class Target:
             md_selector=dct.get('md-selector'),
             hook_namespaces=dct.get('hook-namespaces'),
             emit_json=dct.get('emit-json'),
+            opt_level=dct.get('opt-level'),
+            ccopts=dct.get('ccopts'),
+            no_llvm_kompile=dct.get('no-llvm-kompile'),
+            concrete_rules=dct.get('concrete-rules'),
         )
 
-    def kompile_args(self) -> Dict[str, Any]:
-        args = dataclasses.asdict(self)
-        args.pop('name')
-        return args
+    @property
+    def dict(self) -> Dict[str, Any]:
+        dct = dataclasses.asdict(self)
+        return {key: value for key, value in dct.items() if value is not None}
 
 
 @final
@@ -118,6 +143,7 @@ class Project:
     name: str
     version: str
     source_dir: Path
+    resources: FrozenDict[str, Path]
     dependencies: Tuple[Dependency, ...]
     targets: Tuple[Target, ...]
 
@@ -128,28 +154,27 @@ class Project:
         name: str,
         version: str,
         source_dir: Union[str, Path],
+        resources: Optional[Mapping[str, Union[str, Path]]] = None,
         dependencies: Iterable[Dependency] = (),
         targets: Iterable[Target] = (),
     ):
         path = Path(path).resolve()
         check_dir_path(path)
-        check_absolute_path(path)
 
-        source_dir = Path(source_dir)
-        # TODO extract
-        if source_dir.is_absolute():
-            source_dir = source_dir.resolve()
-            # TODO Lift this restriction: check source_dir.is_relative_to(path)
-            raise ValueError(f'Expected relative path for source_dir, got: {source_dir}')
-        else:
-            source_dir = (path / source_dir).resolve()
-
+        source_dir = (path / relative_path(source_dir)).resolve()
         check_dir_path(source_dir)
+
+        resources = resources or {}
+        resources = {
+            resource_name: (path / relative_path(resource_dir)).resolve()
+            for resource_name, resource_dir in resources.items()
+        }
 
         object.__setattr__(self, 'path', path)
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'version', version)
         object.__setattr__(self, 'source_dir', source_dir)
+        object.__setattr__(self, 'resources', FrozenDict(resources))
         object.__setattr__(self, 'dependencies', tuple(dependencies))
         object.__setattr__(self, 'targets', tuple(targets))
 
@@ -168,6 +193,7 @@ class Project:
             name=dct['project']['name'],
             version=dct['project']['version'],
             source_dir=dct['project']['source'],
+            resources=dct['project'].get('resources'),
             dependencies=tuple(
                 Dependency(name=name, source=Source.from_dict(project_dir, source))
                 for name, source in dct.get('dependencies', {}).items()
@@ -182,18 +208,36 @@ class Project:
         return Project.load(project_dir / PROJECT_FILE_NAME)
 
     @property
-    def include_file_names(self) -> List[str]:
-        source_files = list(self.source_dir.rglob('*.k'))
-        source_files.extend(self.source_dir.rglob('*.md'))
-        return [str(source_file.relative_to(self.source_dir)) for source_file in source_files]
-
-    @property
-    def include_files(self) -> List[Path]:
-        return [self.source_dir / file_name for file_name in self.include_file_names]
-
-    @property
     def project_file(self) -> Path:
         return self.path / PROJECT_FILE_NAME
+
+    @property
+    def source_files(self) -> List[Path]:
+        res: List[Path] = []
+        res.extend(self.source_dir.rglob('*.k'))
+        res.extend(self.source_dir.rglob('*.md'))
+        return res
+
+    @property
+    def source_file_names(self) -> List[str]:
+        return [str(source_file.relative_to(self.source_dir)) for source_file in self.source_files]
+
+    @property
+    def resource_files(self) -> Dict[str, List[Path]]:
+        res: Dict[str, List[Path]] = {}
+        for resource_name, resource_dir in self.resources.items():
+            check_dir_path(resource_dir)
+            res[resource_name] = [resource_file for resource_file in resource_dir.rglob('*') if resource_file.is_file()]
+        return res
+
+    @property
+    def resource_file_names(self) -> Dict[str, List[str]]:
+        return {
+            resource_name: [
+                str(resource_file.relative_to(self.resources[resource_name])) for resource_file in resource_files
+            ]
+            for resource_name, resource_files in self.resource_files.items()
+        }
 
     def get_target(self, target_name: str) -> Target:
         # TODO Should be enforced as a validation rule
