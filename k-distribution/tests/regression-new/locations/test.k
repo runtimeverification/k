@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module TEST-SYNTAX
   imports UNSIGNED-INT-SYNTAX
   syntax Exp [locations]

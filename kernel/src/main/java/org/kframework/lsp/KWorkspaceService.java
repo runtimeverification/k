@@ -1,3 +1,4 @@
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.lsp;
 
 import org.eclipse.lsp4j.DidChangeConfigurationParams;

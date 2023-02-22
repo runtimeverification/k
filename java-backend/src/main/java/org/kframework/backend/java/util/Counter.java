@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.backend.java.util;
 
 import org.apache.commons.lang3.mutable.MutableInt;

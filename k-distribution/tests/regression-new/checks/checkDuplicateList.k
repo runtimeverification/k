@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module CHECKDUPLICATELIST-SYNTAX
   imports INT-SYNTAX
   syntax MyList ::= List{Int,""}

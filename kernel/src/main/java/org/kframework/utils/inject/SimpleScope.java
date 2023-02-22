@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 // from https://github.com/google/guice/wiki/CustomScopes, used with permission
 package org.kframework.utils.inject;
 

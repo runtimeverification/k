@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 /*
 This defines a core subset of K and KAST, called KORE, with the property

@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.3: BNF Syntax and Parser Generation
 
 The purpose of this lesson is to explain the full syntax and semantics of

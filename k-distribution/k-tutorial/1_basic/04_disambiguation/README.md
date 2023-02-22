@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.4: Disambiguating Parses
 
 The purpose of this lesson is to teach how to use K's builtin features for

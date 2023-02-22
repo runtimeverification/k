@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.5: Modules, Imports, and Requires
 
 The purpose of this lesson is to explain how K definitions can be broken into

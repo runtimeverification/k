@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Section 1: Basic K Concepts
 
 The goal of this first section of the K tutorial is to teach the basic

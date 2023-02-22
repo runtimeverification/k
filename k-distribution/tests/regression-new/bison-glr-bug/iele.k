@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module IELE-SYNTAX
   imports IELE-COMMON
   syntax IeleNameToken  ::=

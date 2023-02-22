@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module SYNTAXGROUPS-SYNTAX
   syntax Exp  ::= Exp "*" Exp [times, unused]
                 > Exp "+" Exp [plus,  unused]
