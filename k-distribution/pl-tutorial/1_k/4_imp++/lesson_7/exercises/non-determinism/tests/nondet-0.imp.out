@@ -1,1 +1,5 @@
-S ==K "60"
+{
+  S:String
+#Equals
+  "60"
+}

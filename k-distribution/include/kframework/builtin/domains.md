@@ -2264,7 +2264,6 @@ module K-REFLECTION
   // Takes as input a string and returns a K term
   syntax {Sort} Sort ::= #parseKORE(String) [function, hook(KREFLECTION.parseKORE)]
   syntax {Sort} String ::= #unparseKORE(Sort) [function, hook(KREFLECTION.printKORE)]
-  syntax {Sort} Sort ::= #parseKAST(String) [function, hook(KREFLECTION.parseKAST)]
   syntax IOError ::= "#noParse" "(" String ")" [klabel(#noParse), symbol]
 
 endmodule
@@ -2636,18 +2635,6 @@ module STDIN-STREAM
        _:List
        </stdin>
     requires findChar(S, Delimiters, 0) =/=Int -1
-       andBool lengthString(S) >Int 1 // [stdin]
-       [stream]
-
-  rule [stdinParseArbitrarySort]:
-       <stdin>
-       (ListItem(#parseInput(Sort:String, Delimiters:String))
-       => ListItem(#parseKAST(substrString(S, 0, findChar(S, Delimiters, 0)))))
-       ListItem(#buffer(S:String => substrString(S,findChar(S, Delimiters, 0) +Int 1, lengthString(S))))
-       _:List
-       </stdin>
-    requires findChar(S, Delimiters, 0) =/=Int -1
-       andBool Sort ==String "K"
        andBool lengthString(S) >Int 1 // [stdin]
        [stream]
 

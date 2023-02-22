@@ -1,12 +1,12 @@
 // Copyright (c) K Team. All Rights Reserved.
 
-module MIN-SPEC
+module MAX-SPEC
   imports IMP
 
 claim
   <threads><thread>...
     <k>
-      if (a <= b) {
+      if (b <= a) {
         c = a;
       } else {
         c = b;
@@ -20,10 +20,20 @@ claim
       c |-> LC:Int
     ...</env>
   ...</thread></threads>
+  <input>
+    ListItem ( #buffer ( "\n" ~> . ) )
+    ListItem ( "off" )
+    ListItem ( #istream ( 0 ) )
+  </input>
+  <output>
+    ListItem ( #ostream ( 1 ) )
+    ListItem ( "off" )
+    ListItem ( #buffer ( "" ~> . ) )
+  </output>
   <store>...
     LA |-> A:Int
     LB |-> B:Int
-    LC |-> (_ => minInt(A, B))
+    LC |-> (_ => maxInt(A, B))
   ...</store>
 
 endmodule

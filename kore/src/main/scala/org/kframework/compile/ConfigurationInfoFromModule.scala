@@ -32,6 +32,8 @@ class ConfigurationInfoFromModule(val m: Module) extends ConfigurationInfo {
       if (_cells.size == 0)
         return _cellMap
       val (s, p) = _cells.head
+      if (p.att.contains("internal"))
+        return buildCellProductionMap(_cells.tail, _cellMap)
       if (_cellMap.contains(s))
         throw KEMException.compilerError("Too many productions for cell sort: " + s)
       buildCellProductionMap(_cells.tail, _cellMap + (s -> p))
