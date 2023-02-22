@@ -20,7 +20,7 @@
   </module>
   <module name="RegexpHeader">
     <property name="header" value="^// Copyright \(c\) (Runtime Verification, Inc|K Team). All Rights Reserved.$" />
-    <property name="fileExtensions" value="k,kore,java,scala,jj,str" />
+    <property name="fileExtensions" value="k,kore,java,scala,jj,jjt,str" />
   </module>
   <module name="RegexpHeader">
     <property name="header" value="^/\* Copyright \(c\) (Runtime Verification, Inc|K Team). All Rights Reserved. \*/$" />
