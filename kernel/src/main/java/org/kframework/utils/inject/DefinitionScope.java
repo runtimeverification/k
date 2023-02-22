@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.utils.inject;
 
 import static com.google.common.base.Preconditions.checkState;

@@ -1,4 +1,4 @@
-// Copyright (c) 2022 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 module SET-TESTS-SYNTAX
     imports SET

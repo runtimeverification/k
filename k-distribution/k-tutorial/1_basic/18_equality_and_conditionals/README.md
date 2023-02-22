@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.18: Term Equality and the Ternary Operator
 
 The purpose of this lesson is to introduce how to compare equality of terms in

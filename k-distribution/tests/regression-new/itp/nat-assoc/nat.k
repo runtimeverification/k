@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 // CafeOBJ-style proof of addition associativity
 // https://pdfs.semanticscholar.org/16b0/a31be7de330027dfffc3c9521d5d4424e4cd.pdf
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.backend.java.kil;
 
 import org.kframework.kore.KLabel;

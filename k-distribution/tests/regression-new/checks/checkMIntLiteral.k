@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module CHECKMINTLITERAL-SYNTAX
   imports MINT-SYNTAX
 endmodule

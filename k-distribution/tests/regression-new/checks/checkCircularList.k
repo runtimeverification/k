@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module CHECKCIRCULARLIST-SYNTAX
   imports INT-SYNTAX
   imports LIST

@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.13: Basics of K Rewriting
 
 The purpose of this lesson is to explain how rewrite rules that are not the

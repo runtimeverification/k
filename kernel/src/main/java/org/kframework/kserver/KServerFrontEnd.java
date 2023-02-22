@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.kserver;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;

@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 require "unification.k"
 
 module LOGIK-COMMON
