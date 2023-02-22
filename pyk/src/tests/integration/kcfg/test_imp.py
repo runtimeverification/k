@@ -57,14 +57,14 @@ EXECUTE_TEST_DATA: Final = (
 IMPLIES_TEST_DATA: Final = (
     (
         'constant-subst',
-        ('int $n , $s ; $n = X ;', '.Map'),
         ('int $n , $s ; $n = 3 ;', '.Map'),
+        ('int $n , $s ; $n = X ;', '.Map'),
         (Subst({'X': intToken(3)}), mlTop()),
     ),
     (
         'variable-subst',
-        ('int $n , $s ; $n = X ;', '.Map'),
         ('int $n , $s ; $n = Y ;', '.Map'),
+        ('int $n , $s ; $n = X ;', '.Map'),
         (Subst({'X': KVariable('Y', sort=KSort('AExp'))}), mlTop()),
     ),
     (
