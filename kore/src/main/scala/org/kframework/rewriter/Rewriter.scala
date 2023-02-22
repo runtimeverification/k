@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.rewriter
 
 import java.util.Optional

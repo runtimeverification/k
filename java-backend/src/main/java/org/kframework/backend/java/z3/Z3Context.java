@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.backend.java.z3;
 
 import com.sun.jna.Pointer;

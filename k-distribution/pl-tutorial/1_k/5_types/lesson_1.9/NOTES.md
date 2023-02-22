@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2013-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 This currently does NOT work, because of the rules
 

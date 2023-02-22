@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2014-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 With the current version of the tool (as of Sept 12, 2013), the
 callcc-env1.lambda program actually evaluates to 4, as expected.

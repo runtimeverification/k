@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.16: Maps, Semantic Lists, and Sets
 
 The purpose of this lesson is to explain how to use the data structure sorts

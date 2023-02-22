@@ -1,3 +1,5 @@
+// Copyright (c) K Team. All Rights Reserved.
+//
 // Issue #1593
 // priority between left guarded and right guarded
 // operators are not properly disambiguated

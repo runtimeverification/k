@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 requires "substitution.md"
 
 module TEST-SYNTAX

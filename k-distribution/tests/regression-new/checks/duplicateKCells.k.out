@@ -1,25 +1,25 @@
 [Error] Compiler: Multiple K cell declarations detected. Only one <k> cell declaration is allowed.
 	Source(duplicateKCells.k)
-	Location(3,19,3,34)
-	3 |	    configuration <k> $PGM:K </k>
+	Location(4,19,4,34)
+	4 |	    configuration <k> $PGM:K </k>
 	  .	                  ^~~~~~~~~~~~~~~
 [Error] Compiler: Multiple K cell declarations detected. Only one <k> cell declaration is allowed.
 	Source(duplicateKCells.k)
-	Location(10,19,10,36)
-	10 |	    configuration <k> $PGM:Int </k>
+	Location(11,19,11,36)
+	11 |	    configuration <k> $PGM:Int </k>
 	   .	                  ^~~~~~~~~~~~~~~~~
 [Error] Compiler: Multiple K cell declarations detected. Only one <k> cell declaration is allowed.
 	Source(duplicateKCells.k)
-	Location(12,19,15,23)
+	Location(13,19,16,23)
 	   .	                  v~~
-	12 |	    configuration <k>
+	13 |	    configuration <k>
 	   |		...
-	15 |	                  </k>
+	16 |	                  </k>
 	   .	                  ~~~^
 [Error] Compiler: Multiple K cell declarations detected. Only one <k> cell declaration is allowed.
 	Source(duplicateKCells.k)
-	Location(13,23,13,40)
-	13 |	                      <k> $PGM:Int </k>
+	Location(14,23,14,40)
+	14 |	                      <k> $PGM:Int </k>
 	   .	                      ^~~~~~~~~~~~~~~~~
 [Error] Compiler: Had 4 parsing errors.
 [Error] Compiler: Had 5 parsing errors.

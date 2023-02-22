@@ -1,8 +1,8 @@
 [Error] Compiler: Division by zero.
   while executing phase "constant expression folding" on sentence at
 	Source(invalidConstantExp.k)
-	Location(4,8,4,21)
+	Location(5,8,5,21)
 	Source(invalidConstantExp.k)
-	Location(4,13,4,21)
-	4 |	  rule 0 => 1 /Int 0
+	Location(5,13,5,21)
+	5 |	  rule 0 => 1 /Int 0
 	  .	            ^~~~~~~~

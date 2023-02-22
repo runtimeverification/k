@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module A
   import INT
   syntax Int ::= abs(Int) [function, total]

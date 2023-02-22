@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 2.11: Uncommon Evaluation Order Concepts
 
 ## Return to Top

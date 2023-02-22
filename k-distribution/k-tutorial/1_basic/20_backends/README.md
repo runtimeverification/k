@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.20: K Backends and the Haskell Backend
 
 The purpose of this lesson is to teach about the multiple backends of K,

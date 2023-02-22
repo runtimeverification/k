@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module X_SPEC
 imports X
 

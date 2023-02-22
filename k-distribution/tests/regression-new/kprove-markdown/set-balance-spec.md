@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
+
 Balances Module Specifications
 ==============================
 

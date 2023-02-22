@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module INVALIDSYMBOL
 
 syntax Foo ::= foo() [klabel(#KToken), symbol]

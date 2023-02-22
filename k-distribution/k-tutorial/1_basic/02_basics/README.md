@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.2: Basics of Functional K
 
 The purpose of this lesson is to explain the basics of **productions** and

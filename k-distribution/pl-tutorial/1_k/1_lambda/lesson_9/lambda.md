@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
+copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
 **K** code can be nested inside Markdown using annotated code blocks.

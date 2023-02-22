@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module MACROWITHFUNCTION
     imports INT
     imports BOOL

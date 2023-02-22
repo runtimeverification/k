@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.22: Basics of Deductive Program Verification using K
 
 In this lesson, you will familiarize yourself with the basics of using K for
