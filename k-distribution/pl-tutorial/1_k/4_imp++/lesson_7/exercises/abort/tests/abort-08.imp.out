@@ -1,1 +1,5 @@
-S ==K "child spawned\nchild halted\n"
+{
+  S:String
+#Equals
+  "child spawned\nchild halted\n"
+}
