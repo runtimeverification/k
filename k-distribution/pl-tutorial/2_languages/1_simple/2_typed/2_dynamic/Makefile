@@ -3,9 +3,8 @@ DEF=simple-typed-dynamic
 EXT=simple
 TESTDIR?=../programs/*
 RESULTDIR=tests
-KOMPILE_FLAGS=--transition strict
-KOMPILE_BACKEND?=java
-KRUN_FLAGS=--output none --smt none
+KOMPILE_FLAGS=--enable-search
+KRUN_FLAGS=--output none
 
 %/threads/threads_05.simple: kompile
 	cat tests/threads_05.simple.in 2>/dev/null | $(KRUN_OR_LEGACY) $@ -d $(DEFDIR) --search --bound 5 $(CHECK) tests/threads_05.simple.out
