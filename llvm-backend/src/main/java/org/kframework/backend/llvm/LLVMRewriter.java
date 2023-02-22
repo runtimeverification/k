@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.backend.llvm;
 
 import com.google.inject.Inject;

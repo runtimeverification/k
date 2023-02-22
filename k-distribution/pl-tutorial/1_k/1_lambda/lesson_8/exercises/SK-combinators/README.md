@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2014-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 Define LAMBDA using the S/K combinators instead of substitution.
 You new definition will not require the `substitution.k` module anymore,

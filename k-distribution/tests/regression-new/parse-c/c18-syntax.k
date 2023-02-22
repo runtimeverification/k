@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module C-LEXICAL-SORTS
   syntax Identifier
   syntax Constant ::= Char

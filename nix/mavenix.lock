@@ -1294,16 +1294,12 @@
       "sha1": "868d204d15b6faac64578ebd9f322975fbbcfe99"
     },
     {
+      "path": "com/google/collections/google-collections/1.0/google-collections-1.0.jar",
+      "sha1": "9ffe71ac6dcab6bc03ea13f5c2e7b2804e69b357"
+    },
+    {
       "path": "com/google/collections/google-collections/1.0/google-collections-1.0.pom",
       "sha1": "292197f3cb1ebc0dd03e20897e4250b265177286"
-    },
-    {
-      "path": "com/google/errorprone/error_prone_annotations/2.2.0/error_prone_annotations-2.2.0.jar",
-      "sha1": "88e3c593e9b3586e1c6177f89267da6fc6986f0c"
-    },
-    {
-      "path": "com/google/errorprone/error_prone_annotations/2.2.0/error_prone_annotations-2.2.0.pom",
-      "sha1": "e28b5b546020f18ea29e2b4756023f53ee91492b"
     },
     {
       "path": "com/google/errorprone/error_prone_annotations/2.3.4/error_prone_annotations-2.3.4.jar",
@@ -1314,12 +1310,20 @@
       "sha1": "9a23fcb83bc8ed502506a8e6c648bf763dc5bcf9"
     },
     {
-      "path": "com/google/errorprone/error_prone_parent/2.2.0/error_prone_parent-2.2.0.pom",
-      "sha1": "72e2f31cb1952eada003d2ba7e82874cfe4b738c"
+      "path": "com/google/errorprone/error_prone_annotations/2.7.1/error_prone_annotations-2.7.1.jar",
+      "sha1": "458d9042f7aa6fa9a634df902b37f544e15aacac"
+    },
+    {
+      "path": "com/google/errorprone/error_prone_annotations/2.7.1/error_prone_annotations-2.7.1.pom",
+      "sha1": "0b0fa22131b64b3985fba347927252af21898984"
     },
     {
       "path": "com/google/errorprone/error_prone_parent/2.3.4/error_prone_parent-2.3.4.pom",
       "sha1": "a9b9dd42d174a5f96d6c195525877fc6d0b2028a"
+    },
+    {
+      "path": "com/google/errorprone/error_prone_parent/2.7.1/error_prone_parent-2.7.1.pom",
+      "sha1": "cca3ba79de44febe5a196510393e1011bd554e0b"
     },
     {
       "path": "com/google/google/1/google-1.pom",
@@ -1346,10 +1350,6 @@
       "sha1": "a2c0df489614352b7e8e503e274bd1dee5c42a64"
     },
     {
-      "path": "com/google/guava/guava-parent/27.1-jre/guava-parent-27.1-jre.pom",
-      "sha1": "a4686474dcba0d75d89e3d4f9665634832e49b6f"
-    },
-    {
       "path": "com/google/guava/guava-parent/30.0-jre/guava-parent-30.0-jre.pom",
       "sha1": "967743c6cda3e5267084455bca3c7ab08df3f453"
     },
@@ -1358,16 +1358,12 @@
       "sha1": "b732bbf7c4ceb14dfd6af514a8b8b71dd952e53b"
     },
     {
+      "path": "com/google/guava/guava-parent/31.0.1-jre/guava-parent-31.0.1-jre.pom",
+      "sha1": "eb78b5264bd92cca5655396c44420eef3ad3ec0f"
+    },
+    {
       "path": "com/google/guava/guava/16.0.1/guava-16.0.1.pom",
       "sha1": "52f16cd93f1ee1f0d1e1e55f46fa21c35f829f85"
-    },
-    {
-      "path": "com/google/guava/guava/27.1-jre/guava-27.1-jre.jar",
-      "sha1": "e47b59c893079b87743cdcfb6f17ca95c08c592c"
-    },
-    {
-      "path": "com/google/guava/guava/27.1-jre/guava-27.1-jre.pom",
-      "sha1": "db536f4a1c26739eb6ee1cfb707ec3fbe8325c86"
     },
     {
       "path": "com/google/guava/guava/30.0-jre/guava-30.0-jre.jar",
@@ -1380,6 +1376,14 @@
     {
       "path": "com/google/guava/guava/30.1-jre/guava-30.1-jre.pom",
       "sha1": "4056c9385578a442117d1a68118def38087164da"
+    },
+    {
+      "path": "com/google/guava/guava/31.0.1-jre/guava-31.0.1-jre.jar",
+      "sha1": "119ea2b2bc205b138974d351777b20f02b92704b"
+    },
+    {
+      "path": "com/google/guava/guava/31.0.1-jre/guava-31.0.1-jre.pom",
+      "sha1": "d0ec1628dcc04e4835721416103672384ea3136f"
     },
     {
       "path": "com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar",
@@ -1436,14 +1440,6 @@
     {
       "path": "com/google/inject/guice/4.0-beta5/guice-4.0-beta5.pom",
       "sha1": "1e968b8c1da8cb48b7c0b77ffc565f92f313c392"
-    },
-    {
-      "path": "com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1.jar",
-      "sha1": "ed28ded51a8b1c6b112568def5f4b455e6809019"
-    },
-    {
-      "path": "com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1.pom",
-      "sha1": "b964a9414771661bdf35a3f10692a2fb0dd2c866"
     },
     {
       "path": "com/google/j2objc/j2objc-annotations/1.3/j2objc-annotations-1.3.jar",
@@ -1518,14 +1514,6 @@
       "sha1": "577f1f4e1d5c8603f45a5fa34ba42128ea6e5b84"
     },
     {
-      "path": "com/ibm/icu/icu4j/63.1/icu4j-63.1.jar",
-      "sha1": "385682b7fff53cd5ac2cad0fdb4658a7b97e9475"
-    },
-    {
-      "path": "com/ibm/icu/icu4j/63.1/icu4j-63.1.pom",
-      "sha1": "ac9bbff56a4a94b546468cdee50d17ee0fc4c24f"
-    },
-    {
       "path": "com/jcraft/jsch/0.1.23/jsch-0.1.23.pom",
       "sha1": "1d4266015cc4deba8bf4b56441ebc02cd170503d"
     },
@@ -1590,12 +1578,16 @@
       "sha1": "74d18a5a5cffbfa318c2d7d648e81483af9629fb"
     },
     {
-      "path": "com/puppycrawl/tools/checkstyle/8.19/checkstyle-8.19.jar",
-      "sha1": "b89d91993480a473c416f83677ad92dbede809fa"
+      "path": "com/puppycrawl/tools/checkstyle/9.3/checkstyle-9.3.jar",
+      "sha1": "f8c4b25a65d8e4b9b5f60e3fb3efb9c9ad2c7d7b"
     },
     {
-      "path": "com/puppycrawl/tools/checkstyle/8.19/checkstyle-8.19.pom",
-      "sha1": "db7bb76bc0aefa23d21d36949cec9ab8e0d14e1d"
+      "path": "com/puppycrawl/tools/checkstyle/9.3/checkstyle-9.3.pom",
+      "sha1": "fdec6f2d2514787039928bcb781f9e67f4738899"
+    },
+    {
+      "path": "com/sun/activation/all/1.2.0/all-1.2.0.pom",
+      "sha1": "9b1023e38195ea19d1a0ac79192d486da1904f97"
     },
     {
       "path": "com/thoughtworks/qdox/qdox/1.12/qdox-1.12.jar",
@@ -2046,12 +2038,12 @@
       "sha1": "19eca029edacc1be30030faf43ea6acb30556d1a"
     },
     {
-      "path": "commons-beanutils/commons-beanutils/1.9.3/commons-beanutils-1.9.3.jar",
-      "sha1": "c845703de334ddc6b4b3cd26835458cb1cba1f3d"
+      "path": "commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar",
+      "sha1": "d52b9abcd97f38c81342bb7e7ae1eee9b73cba51"
     },
     {
-      "path": "commons-beanutils/commons-beanutils/1.9.3/commons-beanutils-1.9.3.pom",
-      "sha1": "a0db273e77035b0443974984e92d48896c12ee9c"
+      "path": "commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.pom",
+      "sha1": "42e7c39331e1735250b294ce2984d0e434ebc955"
     },
     {
       "path": "commons-chain/commons-chain/1.1/commons-chain-1.1.jar",
@@ -2084,6 +2076,14 @@
     {
       "path": "commons-codec/commons-codec/1.10/commons-codec-1.10.pom",
       "sha1": "44b9477418d2942d45550f7e7c66c16262062d0e"
+    },
+    {
+      "path": "commons-codec/commons-codec/1.11/commons-codec-1.11.jar",
+      "sha1": "3acb4705652e16236558f0f4f2192cc33c3bd189"
+    },
+    {
+      "path": "commons-codec/commons-codec/1.11/commons-codec-1.11.pom",
+      "sha1": "093ee1760aba62d6896d578bd7d247d0fa52f0e7"
     },
     {
       "path": "commons-codec/commons-codec/1.2/commons-codec-1.2.jar",
@@ -2124,6 +2124,10 @@
     {
       "path": "commons-collections/commons-collections/2.1/commons-collections-2.1.pom",
       "sha1": "03ac124c9f50b403afc9819e1f430d6883e77213"
+    },
+    {
+      "path": "commons-collections/commons-collections/3.1/commons-collections-3.1.jar",
+      "sha1": "40fb048097caeacdb11dbb33b5755854d89efdeb"
     },
     {
       "path": "commons-collections/commons-collections/3.1/commons-collections-3.1.pom",
@@ -2212,6 +2216,10 @@
     {
       "path": "commons-io/commons-io/2.5/commons-io-2.5.pom",
       "sha1": "7e39112810f6096061c43504188d18edc7d7eece"
+    },
+    {
+      "path": "commons-io/commons-io/2.6/commons-io-2.6.jar",
+      "sha1": "815893df5f31da2ece4040fe0a12fd44b577afaf"
     },
     {
       "path": "commons-io/commons-io/2.6/commons-io-2.6.pom",
@@ -2358,12 +2366,12 @@
       "sha1": "58c8ff0503f987cf9c4b4d48e9aecaf753cfa96b"
     },
     {
-      "path": "info/picocli/picocli/3.9.5/picocli-3.9.5.jar",
-      "sha1": "f659a2feef0e8f7f8458aaf7d36c4d92f65320c8"
+      "path": "info/picocli/picocli/4.6.2/picocli-4.6.2.jar",
+      "sha1": "2c4196c67c0bc65f7a86cba64787b10d61c3cc63"
     },
     {
-      "path": "info/picocli/picocli/3.9.5/picocli-3.9.5.pom",
-      "sha1": "b13a5c3a0441370820a2d7bf36cbc4b7be6dd32b"
+      "path": "info/picocli/picocli/4.6.2/picocli-4.6.2.pom",
+      "sha1": "8df91b46d389066807c634e85ddb8b10222c7586"
     },
     {
       "path": "io/netty/netty-buffer/4.1.17.Final/netty-buffer-4.1.17.Final.jar",
@@ -2426,6 +2434,30 @@
       "sha1": "dba27c519135ee04fdecfb5b37696f5d1b9b4b6a"
     },
     {
+      "path": "javax/activation/javax.activation-api/1.2.0/javax.activation-api-1.2.0.jar",
+      "sha1": "85262acf3ca9816f9537ca47d5adeabaead7cb16"
+    },
+    {
+      "path": "javax/activation/javax.activation-api/1.2.0/javax.activation-api-1.2.0.pom",
+      "sha1": "1aa9ef58e50ba6868b2e955d61fcd73be5b4cea5"
+    },
+    {
+      "path": "javax/annotation/javax.annotation-api/1.2/javax.annotation-api-1.2.jar",
+      "sha1": "479c1e06db31c432330183f5cae684163f186146"
+    },
+    {
+      "path": "javax/annotation/javax.annotation-api/1.2/javax.annotation-api-1.2.pom",
+      "sha1": "d90e6c7f83898fe30f83aeaf4d411285f970a433"
+    },
+    {
+      "path": "javax/enterprise/cdi-api/1.2/cdi-api-1.2.jar",
+      "sha1": "53bba91dc3968adf411e076df020cf207283d7dc"
+    },
+    {
+      "path": "javax/enterprise/cdi-api/1.2/cdi-api-1.2.pom",
+      "sha1": "b0239d3cc2f5a47533bb0be184830a9f90db984a"
+    },
+    {
       "path": "javax/inject/javax.inject/1/javax.inject-1.jar",
       "sha1": "6975da39a7040257bd51d21a231b76c915872d38"
     },
@@ -2446,16 +2478,16 @@
       "sha1": "a159fa05cce714c83deff647655dd53db064b21c"
     },
     {
-      "path": "javax/xml/bind/jaxb-api-parent/2.3.0/jaxb-api-parent-2.3.0.pom",
-      "sha1": "813cc0def6b156ec1808f4695a74cf6777030012"
+      "path": "javax/xml/bind/jaxb-api-parent/2.3.1/jaxb-api-parent-2.3.1.pom",
+      "sha1": "26101e8a1a09e16cdf277a4591f6d29917b2e06e"
     },
     {
-      "path": "javax/xml/bind/jaxb-api/2.3.0/jaxb-api-2.3.0.jar",
-      "sha1": "99f802e0cb3e953ba3d6e698795c4aeb98d37c48"
+      "path": "javax/xml/bind/jaxb-api/2.3.1/jaxb-api-2.3.1.jar",
+      "sha1": "8531ad5ac454cc2deb9d4d32c40c4d7451939b5d"
     },
     {
-      "path": "javax/xml/bind/jaxb-api/2.3.0/jaxb-api-2.3.0.pom",
-      "sha1": "61dab99f547e2110e42e35f659d9ba27bd00108c"
+      "path": "javax/xml/bind/jaxb-api/2.3.1/jaxb-api-2.3.1.pom",
+      "sha1": "c42c51ae84892b73ef7de5351188908e673f5c69"
     },
     {
       "path": "jaxen/jaxen/1.1-beta-8/jaxen-1.1-beta-8.jar",
@@ -2646,6 +2678,10 @@
       "sha1": "30f4caff4cda589a081bedc5c7c72d2ffbee6273"
     },
     {
+      "path": "net/java/jvnet-parent/1/jvnet-parent-1.pom",
+      "sha1": "b55a1b046dbe82acdee8edde7476eebcba1e57d8"
+    },
+    {
       "path": "net/java/jvnet-parent/3/jvnet-parent-3.pom",
       "sha1": "f8f3be3e980551a39b5679411e171aeb6931aaec"
     },
@@ -2674,12 +2710,12 @@
       "sha1": "7c04b0fc9048e65c1bb8109fda805ea4cfee2bb1"
     },
     {
-      "path": "net/sf/saxon/Saxon-HE/9.9.1-2/Saxon-HE-9.9.1-2.jar",
-      "sha1": "2f7b0257a1b60990d1909f7fcd33739732dd2843"
+      "path": "net/sf/saxon/Saxon-HE/10.6/Saxon-HE-10.6.jar",
+      "sha1": "6c961655bd2e6ec11054bf7142c502406359f635"
     },
     {
-      "path": "net/sf/saxon/Saxon-HE/9.9.1-2/Saxon-HE-9.9.1-2.pom",
-      "sha1": "8ed41101df308d914e8572f991eb7a37f4072a86"
+      "path": "net/sf/saxon/Saxon-HE/10.6/Saxon-HE-10.6.pom",
+      "sha1": "ba8bb059ca776ff5e0b2cc6aaa25949f74fc1e97"
     },
     {
       "path": "net/sourceforge/collections/collections-generic/4.01/collections-generic-4.01.jar",
@@ -2702,16 +2738,16 @@
       "sha1": "d72704aaf6a6fd2cd6bc142b959f9206e8f71a90"
     },
     {
-      "path": "org/antlr/antlr4-master/4.7.2/antlr4-master-4.7.2.pom",
-      "sha1": "be60f81cb61996f57281497067d890caf8eeece8"
+      "path": "org/antlr/antlr4-master/4.9.3/antlr4-master-4.9.3.pom",
+      "sha1": "036b2162383e22b5a6c8c254e485921b5d77ad0c"
     },
     {
-      "path": "org/antlr/antlr4-runtime/4.7.2/antlr4-runtime-4.7.2.jar",
-      "sha1": "e27d8ab4f984f9d186f54da984a6ab1cccac755e"
+      "path": "org/antlr/antlr4-runtime/4.9.3/antlr4-runtime-4.9.3.jar",
+      "sha1": "81befc16ebedb8b8aea3e4c0835dd5ca7e8523a8"
     },
     {
-      "path": "org/antlr/antlr4-runtime/4.7.2/antlr4-runtime-4.7.2.pom",
-      "sha1": "0ef31048e832523e34634045589c56c5e63d4866"
+      "path": "org/antlr/antlr4-runtime/4.9.3/antlr4-runtime-4.9.3.pom",
+      "sha1": "7ed961275fcdee7e2b69a66bf1ae6c4f9f5a1ab8"
     },
     {
       "path": "org/antlr/stringtemplate/3.2/stringtemplate-3.2.jar",
@@ -2810,6 +2846,14 @@
       "sha1": "649b700a1b2b4a1d87e7ae8e3f47bfe101b2a4a5"
     },
     {
+      "path": "org/apache/apache/23/apache-23.pom",
+      "sha1": "0404949e96725e63a10a6d8f9d9b521948d170d5"
+    },
+    {
+      "path": "org/apache/apache/27/apache-27.pom",
+      "sha1": "ea179482b464bfc8cac939c6d6e632b6a8e3316b"
+    },
+    {
       "path": "org/apache/apache/3/apache-3.pom",
       "sha1": "1bc0010136a890e2fd38d901a0b7ecdf0e3f9871"
     },
@@ -2906,6 +2950,14 @@
       "sha1": "c445be3b6442b41cbea539d4218be3aea9428a55"
     },
     {
+      "path": "org/apache/commons/commons-lang3/3.8.1/commons-lang3-3.8.1.jar",
+      "sha1": "6505a72a097d9270f7a9e7bf42c4238283247755"
+    },
+    {
+      "path": "org/apache/commons/commons-lang3/3.8.1/commons-lang3-3.8.1.pom",
+      "sha1": "59092f9d06947b986318dfbe297312e08379b0ae"
+    },
+    {
       "path": "org/apache/commons/commons-parent/11/commons-parent-11.pom",
       "sha1": "3f29657e1e3d6856344728ddbcf696477e943d59"
     },
@@ -2970,6 +3022,14 @@
       "sha1": "a24c1d164086ee8f10c11879da2f86f52cbea7fb"
     },
     {
+      "path": "org/apache/commons/commons-parent/45/commons-parent-45.pom",
+      "sha1": "71201c6eea226cd986f03adb1b6ec326dd860786"
+    },
+    {
+      "path": "org/apache/commons/commons-parent/47/commons-parent-47.pom",
+      "sha1": "391715f2f4f1b32604a201a2f4ea74a174e1f21c"
+    },
+    {
       "path": "org/apache/commons/commons-parent/5/commons-parent-5.pom",
       "sha1": "a0a168281558e7ae972f113fa128bc46b4973edd"
     },
@@ -2986,12 +3046,40 @@
       "sha1": "217cc375e25b647a61956e1d6a88163f9e3a387c"
     },
     {
+      "path": "org/apache/commons/commons-text/1.3/commons-text-1.3.jar",
+      "sha1": "9abf61708a66ab5e55f6169a200dbfc584b546d9"
+    },
+    {
+      "path": "org/apache/commons/commons-text/1.3/commons-text-1.3.pom",
+      "sha1": "319d278bae93adc3f5b5e8408a90fd2d98ce75f7"
+    },
+    {
+      "path": "org/apache/geronimo/genesis/genesis-default-flava/2.0/genesis-default-flava-2.0.pom",
+      "sha1": "3ad9b678150869f27aa7f92fb5359da79c74cda5"
+    },
+    {
+      "path": "org/apache/geronimo/genesis/genesis-java5-flava/2.0/genesis-java5-flava-2.0.pom",
+      "sha1": "045137568f17802240e75e9776c9d7d948f9673a"
+    },
+    {
+      "path": "org/apache/geronimo/genesis/genesis/2.0/genesis-2.0.pom",
+      "sha1": "8d7ac66279bb3dce6f19e43a68d9e761c40b7aa3"
+    },
+    {
       "path": "org/apache/httpcomponents/httpclient/4.0.2/httpclient-4.0.2.jar",
       "sha1": "781b68c2fd5335de914166241b8d4bfe8c2f91b7"
     },
     {
       "path": "org/apache/httpcomponents/httpclient/4.0.2/httpclient-4.0.2.pom",
       "sha1": "f218515f169bb93b7fd6c67fab0dedbaf832a8ae"
+    },
+    {
+      "path": "org/apache/httpcomponents/httpclient/4.5.13/httpclient-4.5.13.jar",
+      "sha1": "e5f6cae5ca7ecaac1ec2827a9e2d65ae2869cada"
+    },
+    {
+      "path": "org/apache/httpcomponents/httpclient/4.5.13/httpclient-4.5.13.pom",
+      "sha1": "e5b134e5cd3e28dc431ca5397e9b53d28d1cfa74"
     },
     {
       "path": "org/apache/httpcomponents/httpclient/4.5.2/httpclient-4.5.2.jar",
@@ -3006,6 +3094,10 @@
       "sha1": "f068349e19ba323665d0bc49141333747b174f3f"
     },
     {
+      "path": "org/apache/httpcomponents/httpcomponents-client/4.5.13/httpcomponents-client-4.5.13.pom",
+      "sha1": "61045e5bac5f6b0a7e3301053de0d78fc92f09db"
+    },
+    {
       "path": "org/apache/httpcomponents/httpcomponents-client/4.5.2/httpcomponents-client-4.5.2.pom",
       "sha1": "55d500e6c1e98ffbb00c35bee72fabc255c22108"
     },
@@ -3014,8 +3106,20 @@
       "sha1": "2766fab80fcc4f8bfdfe4f4a7cf151140ec8e0ed"
     },
     {
+      "path": "org/apache/httpcomponents/httpcomponents-core/4.4.13/httpcomponents-core-4.4.13.pom",
+      "sha1": "221f9ef52d6147e7c193f540c495db26f25d64b6"
+    },
+    {
+      "path": "org/apache/httpcomponents/httpcomponents-core/4.4.14/httpcomponents-core-4.4.14.pom",
+      "sha1": "6dede7e95d51c365a10c346b010797c2656edc65"
+    },
+    {
       "path": "org/apache/httpcomponents/httpcomponents-core/4.4.4/httpcomponents-core-4.4.4.pom",
       "sha1": "84c5600018f58510ef3d2c3b5d218bea5d51bbbe"
+    },
+    {
+      "path": "org/apache/httpcomponents/httpcomponents-parent/11/httpcomponents-parent-11.pom",
+      "sha1": "3ee7a841cc49326e8681089ea7ad6a3b81b88581"
     },
     {
       "path": "org/apache/httpcomponents/httpcore/4.0.1/httpcore-4.0.1.jar",
@@ -3024,6 +3128,18 @@
     {
       "path": "org/apache/httpcomponents/httpcore/4.0.1/httpcore-4.0.1.pom",
       "sha1": "d965db94102b75a50bd29938ef67105da1535554"
+    },
+    {
+      "path": "org/apache/httpcomponents/httpcore/4.4.13/httpcore-4.4.13.pom",
+      "sha1": "7d4610db34bf2175d0d3813d7faac9cf7ca7c0e5"
+    },
+    {
+      "path": "org/apache/httpcomponents/httpcore/4.4.14/httpcore-4.4.14.jar",
+      "sha1": "9dd1a631c082d92ecd4bd8fd4cf55026c720a8c1"
+    },
+    {
+      "path": "org/apache/httpcomponents/httpcore/4.4.14/httpcore-4.4.14.pom",
+      "sha1": "16db7143a7586192ac1d863c7ecfaf25541bbc47"
     },
     {
       "path": "org/apache/httpcomponents/httpcore/4.4.4/httpcore-4.4.4.jar",
@@ -3090,6 +3206,14 @@
       "sha1": "6746463f79c8f1bcd049222d500d4c9bdd3fa38f"
     },
     {
+      "path": "org/apache/maven/doxia/doxia-core/1.11.1/doxia-core-1.11.1.jar",
+      "sha1": "0b0438a61c2c1208b4d2e2b38241478383dd758b"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-core/1.11.1/doxia-core-1.11.1.pom",
+      "sha1": "aa9c5245d88b7ee6950904d37a743ca01fde6499"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia-core/1.2/doxia-core-1.2.jar",
       "sha1": "58675d96dbee38691c7085d12907a9fd04ff27d3"
     },
@@ -3138,6 +3262,14 @@
       "sha1": "3c5a873ca8a24cd8f32e1e8ea019a4f52b0d3226"
     },
     {
+      "path": "org/apache/maven/doxia/doxia-decoration-model/1.11.1/doxia-decoration-model-1.11.1.jar",
+      "sha1": "1e10f4e9268b49edf40bca721eef07271bc91de5"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-decoration-model/1.11.1/doxia-decoration-model-1.11.1.pom",
+      "sha1": "fdbb72f0d54a43e13a8329e74096a96dae5abe17"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia-decoration-model/1.2/doxia-decoration-model-1.2.pom",
       "sha1": "b21179344a7a25ae86298e1a051508ecb54ff118"
     },
@@ -3154,10 +3286,6 @@
       "sha1": "deaf255b7f237392dde3f76100300a41c8409532"
     },
     {
-      "path": "org/apache/maven/doxia/doxia-decoration-model/1.6/doxia-decoration-model-1.6.pom",
-      "sha1": "4009e46e902f2ebaac97670fc4d0b973206ce78c"
-    },
-    {
       "path": "org/apache/maven/doxia/doxia-decoration-model/1.7.4/doxia-decoration-model-1.7.4.jar",
       "sha1": "e0b3ed5b1fdd4df92e0981a57796eedd055654c2"
     },
@@ -3166,20 +3294,20 @@
       "sha1": "93ac3cc4743537aa38c0c56f93a6d21bea836993"
     },
     {
+      "path": "org/apache/maven/doxia/doxia-integration-tools/1.11.1/doxia-integration-tools-1.11.1.jar",
+      "sha1": "fdc4c4f29d10b0e2b5b9d7f9eea16812d496e478"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-integration-tools/1.11.1/doxia-integration-tools-1.11.1.pom",
+      "sha1": "9ebdded413aade54a0363d8fc7137ead4c31e4c8"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia-integration-tools/1.5/doxia-integration-tools-1.5.jar",
       "sha1": "ee43d4ccb9e5cc4067ac4f4de9b50e89de2f1191"
     },
     {
       "path": "org/apache/maven/doxia/doxia-integration-tools/1.5/doxia-integration-tools-1.5.pom",
       "sha1": "b2384c4865857d55209a95ac4a21f2d358984f57"
-    },
-    {
-      "path": "org/apache/maven/doxia/doxia-integration-tools/1.6/doxia-integration-tools-1.6.jar",
-      "sha1": "aa12128117facfa64c1ac8b8f70c6cf1dbf8b5ca"
-    },
-    {
-      "path": "org/apache/maven/doxia/doxia-integration-tools/1.6/doxia-integration-tools-1.6.pom",
-      "sha1": "9793d30249abc7b4d66cc4a45f25dae88c893c7d"
     },
     {
       "path": "org/apache/maven/doxia/doxia-logging-api/1.1.2/doxia-logging-api-1.1.2.jar",
@@ -3206,6 +3334,14 @@
       "sha1": "511c87192bc6c0883d077ba7ae7ddbe8a2d06fa9"
     },
     {
+      "path": "org/apache/maven/doxia/doxia-logging-api/1.11.1/doxia-logging-api-1.11.1.jar",
+      "sha1": "ee28757cce6ee0215bac550dead25074c97c532d"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-logging-api/1.11.1/doxia-logging-api-1.11.1.pom",
+      "sha1": "af26cdf5a6904c4fa2b20f36cdee7e705807b120"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia-logging-api/1.2/doxia-logging-api-1.2.pom",
       "sha1": "369a028bcaa2b7aa935cbd0fd1483d2f4a4d64f4"
     },
@@ -3220,10 +3356,6 @@
     {
       "path": "org/apache/maven/doxia/doxia-logging-api/1.4/doxia-logging-api-1.4.pom",
       "sha1": "042598efe5bf93859b9366c333c2398af28a2bb5"
-    },
-    {
-      "path": "org/apache/maven/doxia/doxia-logging-api/1.6/doxia-logging-api-1.6.pom",
-      "sha1": "483135610509c3ccd9137b3dbdaaed18c338f2d8"
     },
     {
       "path": "org/apache/maven/doxia/doxia-logging-api/1.7/doxia-logging-api-1.7.jar",
@@ -3342,6 +3474,14 @@
       "sha1": "7127a073d9e36527071d6cf11b174c55f4be6d26"
     },
     {
+      "path": "org/apache/maven/doxia/doxia-module-xhtml/1.11.1/doxia-module-xhtml-1.11.1.jar",
+      "sha1": "f1b755a09934cd9c51d87b606c8e8ddf07719ebf"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-module-xhtml/1.11.1/doxia-module-xhtml-1.11.1.pom",
+      "sha1": "9e3bb8e5e94e8bef653c39706682750ad6139967"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia-module-xhtml/1.2/doxia-module-xhtml-1.2.pom",
       "sha1": "da521780a03c3ef10917fd918e33ee19f2756510"
     },
@@ -3362,6 +3502,14 @@
       "sha1": "d1f0d5a3a7f54e44185eedfd244c4f7a3fb95b56"
     },
     {
+      "path": "org/apache/maven/doxia/doxia-module-xhtml5/1.11.1/doxia-module-xhtml5-1.11.1.jar",
+      "sha1": "e4ee721555ff063d7ef9042d6b9237386c6b33e0"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-module-xhtml5/1.11.1/doxia-module-xhtml5-1.11.1.pom",
+      "sha1": "0d8e33c7b4edded1ade1e13d56d78beb4b510bc9"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia-modules/1.0-alpha-10/doxia-modules-1.0-alpha-10.pom",
       "sha1": "ae077e474fa8206f400ebc197eb78577f280a653"
     },
@@ -3376,6 +3524,10 @@
     {
       "path": "org/apache/maven/doxia/doxia-modules/1.1.3/doxia-modules-1.1.3.pom",
       "sha1": "b1a87a4973f1da44a484e74c2ac47a2436eb9424"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-modules/1.11.1/doxia-modules-1.11.1.pom",
+      "sha1": "8d840d311dff1c26fdabb11cdcccb6dcfdea20f7"
     },
     {
       "path": "org/apache/maven/doxia/doxia-modules/1.2/doxia-modules-1.2.pom",
@@ -3434,6 +3586,14 @@
       "sha1": "0a73bb471bb8fe69ed25d59c348139e6afb834bc"
     },
     {
+      "path": "org/apache/maven/doxia/doxia-sink-api/1.11.1/doxia-sink-api-1.11.1.jar",
+      "sha1": "59c2255f58c78fbbcb7e638e82bd2914e78aec8b"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-sink-api/1.11.1/doxia-sink-api-1.11.1.pom",
+      "sha1": "d5edaf41ae531082a30c7cf2dac699645f0af643"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia-sink-api/1.2/doxia-sink-api-1.2.pom",
       "sha1": "d50511019c3eae662d803f6722d353fd0af2e37d"
     },
@@ -3478,6 +3638,14 @@
       "sha1": "0d48d19dfd34ff16b0d71befdbaca53427592ac1"
     },
     {
+      "path": "org/apache/maven/doxia/doxia-site-renderer/1.11.1/doxia-site-renderer-1.11.1.jar",
+      "sha1": "414e3b2049aa6f6710ecca4fa905d9d2ce318773"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-site-renderer/1.11.1/doxia-site-renderer-1.11.1.pom",
+      "sha1": "86029ecfaf40c43c94eebddca9173cc3cdb4934c"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia-site-renderer/1.2/doxia-site-renderer-1.2.pom",
       "sha1": "02d945960abfc9ff27d0b0ad76a5e806c7c776a1"
     },
@@ -3514,6 +3682,10 @@
       "sha1": "a507679b334f14def6a81b3fca8adde67868181d"
     },
     {
+      "path": "org/apache/maven/doxia/doxia-sitetools/1.11.1/doxia-sitetools-1.11.1.pom",
+      "sha1": "4ccd0bdfe05e890d6d4354284fc1cd709ee68a5d"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia-sitetools/1.2/doxia-sitetools-1.2.pom",
       "sha1": "78990d3ce17fbf65b8e4290b043bac7868a3e51d"
     },
@@ -3526,12 +3698,16 @@
       "sha1": "09cf8365031618c2d39ea0118e1a75be6ba18b66"
     },
     {
-      "path": "org/apache/maven/doxia/doxia-sitetools/1.6/doxia-sitetools-1.6.pom",
-      "sha1": "561855c84f27d4c5dd00dda557c3bf9efc1dbad9"
-    },
-    {
       "path": "org/apache/maven/doxia/doxia-sitetools/1.7.4/doxia-sitetools-1.7.4.pom",
       "sha1": "08771214df4ba46109dcb2a57842b24e88183317"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-skin-model/1.11.1/doxia-skin-model-1.11.1.jar",
+      "sha1": "b6994a60da09eb429c01362e9a6a510e0f83d24e"
+    },
+    {
+      "path": "org/apache/maven/doxia/doxia-skin-model/1.11.1/doxia-skin-model-1.11.1.pom",
+      "sha1": "0c19bbbb51b5ccd70b299b28c77cd79cd916d453"
     },
     {
       "path": "org/apache/maven/doxia/doxia-skin-model/1.7.4/doxia-skin-model-1.7.4.jar",
@@ -3544,10 +3720,6 @@
     {
       "path": "org/apache/maven/doxia/doxia-tools/2/doxia-tools-2.pom",
       "sha1": "c13f811b01d98631ebe9131b63aeb6bded234aff"
-    },
-    {
-      "path": "org/apache/maven/doxia/doxia-tools/3/doxia-tools-3.pom",
-      "sha1": "aadd84e5a564ed471990a24e56c5c9b484fb1438"
     },
     {
       "path": "org/apache/maven/doxia/doxia/1.0-alpha-10/doxia-1.0-alpha-10.pom",
@@ -3574,6 +3746,10 @@
       "sha1": "b2306ce11082ee839fa2deee1fe4f1122c15227c"
     },
     {
+      "path": "org/apache/maven/doxia/doxia/1.11.1/doxia-1.11.1.pom",
+      "sha1": "73c5c8642a1a66260e448866657f9231399fb938"
+    },
+    {
       "path": "org/apache/maven/doxia/doxia/1.2/doxia-1.2.pom",
       "sha1": "1cd5c098f618eec281c1b8716f90fa2680c5d26a"
     },
@@ -3584,10 +3760,6 @@
     {
       "path": "org/apache/maven/doxia/doxia/1.4/doxia-1.4.pom",
       "sha1": "121c5566d364de8190fcab422b41870acb86f2de"
-    },
-    {
-      "path": "org/apache/maven/doxia/doxia/1.6/doxia-1.6.pom",
-      "sha1": "08acdcf813dddb754acb38173b4d764403583bb5"
     },
     {
       "path": "org/apache/maven/doxia/doxia/1.7/doxia-1.7.pom",
@@ -3628,6 +3800,14 @@
     {
       "path": "org/apache/maven/maven-aether-provider/3.0/maven-aether-provider-3.0.pom",
       "sha1": "a3e7fa0d4d0d26f901c919173681bab824c5588c"
+    },
+    {
+      "path": "org/apache/maven/maven-aether-provider/3.1.0/maven-aether-provider-3.1.0.jar",
+      "sha1": "dda2231a2be2768109d474805c702b76a8e794e6"
+    },
+    {
+      "path": "org/apache/maven/maven-aether-provider/3.1.0/maven-aether-provider-3.1.0.pom",
+      "sha1": "7110ccc3760777302afd19972b8609d5ea167607"
     },
     {
       "path": "org/apache/maven/maven-archiver/2.4.2/maven-archiver-2.4.2.jar",
@@ -3806,6 +3986,14 @@
       "sha1": "6823c7ad1a5557c2f96bd2fd312948513af8e524"
     },
     {
+      "path": "org/apache/maven/maven-artifact/3.1.0/maven-artifact-3.1.0.jar",
+      "sha1": "446e6a69fee5b7f2b0f498c0e4dfbd38f740a8f9"
+    },
+    {
+      "path": "org/apache/maven/maven-artifact/3.1.0/maven-artifact-3.1.0.pom",
+      "sha1": "29d03c0c9e8e47bcc1ab504e574fc235f6e6df83"
+    },
+    {
       "path": "org/apache/maven/maven-compat/3.0.4/maven-compat-3.0.4.jar",
       "sha1": "14d626e1e29a36f5f4629b689e964f8665707839"
     },
@@ -3866,6 +4054,14 @@
       "sha1": "3727542038487060064a4a14b74c7590d364c45b"
     },
     {
+      "path": "org/apache/maven/maven-core/3.1.0/maven-core-3.1.0.jar",
+      "sha1": "3aca07a1e496f1fb9c0d2d950b6aac7779c67b98"
+    },
+    {
+      "path": "org/apache/maven/maven-core/3.1.0/maven-core-3.1.0.pom",
+      "sha1": "95634e1849f1d9acd0d2709935417195ddd610c1"
+    },
+    {
       "path": "org/apache/maven/maven-error-diagnostics/2.0.6/maven-error-diagnostics-2.0.6.jar",
       "sha1": "49f5380c07a79cd91ee09e0cb9063764f1f6525c"
     },
@@ -3908,6 +4104,14 @@
     {
       "path": "org/apache/maven/maven-model-builder/3.0/maven-model-builder-3.0.pom",
       "sha1": "e4b3e5ffec18728f099d8000e400ac763af2cc20"
+    },
+    {
+      "path": "org/apache/maven/maven-model-builder/3.1.0/maven-model-builder-3.1.0.jar",
+      "sha1": "13ba294cedb659c3851f0c2980af7f44bcc6a8e0"
+    },
+    {
+      "path": "org/apache/maven/maven-model-builder/3.1.0/maven-model-builder-3.1.0.pom",
+      "sha1": "c8acc6f639a2ee4206f53a29ceee12c873c5f67f"
     },
     {
       "path": "org/apache/maven/maven-model/2.0.10/maven-model-2.0.10.pom",
@@ -3984,6 +4188,10 @@
     {
       "path": "org/apache/maven/maven-model/3.0/maven-model-3.0.pom",
       "sha1": "3aa89da7792286192b860c58841b3907364d33a8"
+    },
+    {
+      "path": "org/apache/maven/maven-model/3.1.0/maven-model-3.1.0.pom",
+      "sha1": "3e7b6ecee46f39f4ba482d5ad47669cd4f239a26"
     },
     {
       "path": "org/apache/maven/maven-monitor/2.0.6/maven-monitor-2.0.6.jar",
@@ -4082,8 +4290,12 @@
       "sha1": "e773af8e851de63461222f3a26d37e4619431e03"
     },
     {
-      "path": "org/apache/maven/maven-parent/33/maven-parent-33.pom",
-      "sha1": "9dd736089b07fa56da1259c87a825a097ba0278c"
+      "path": "org/apache/maven/maven-parent/34/maven-parent-34.pom",
+      "sha1": "d03d96b2f4ee06300faa9731b0fa71feeec5a8ef"
+    },
+    {
+      "path": "org/apache/maven/maven-parent/37/maven-parent-37.pom",
+      "sha1": "4dea31650e71386d7c41da8806ef4c87ef8de0b1"
     },
     {
       "path": "org/apache/maven/maven-parent/4/maven-parent-4.pom",
@@ -4180,6 +4392,14 @@
     {
       "path": "org/apache/maven/maven-plugin-api/3.0/maven-plugin-api-3.0.pom",
       "sha1": "9627e130b4f516945f0db03119dbafb86f168026"
+    },
+    {
+      "path": "org/apache/maven/maven-plugin-api/3.1.0/maven-plugin-api-3.1.0.jar",
+      "sha1": "8821fd1b81c6b960f7ce39f5dde612c665146fd8"
+    },
+    {
+      "path": "org/apache/maven/maven-plugin-api/3.1.0/maven-plugin-api-3.1.0.pom",
+      "sha1": "b5099f8ebbd34e79be313854f554a2de0994166b"
     },
     {
       "path": "org/apache/maven/maven-plugin-descriptor/2.0.10/maven-plugin-descriptor-2.0.10.jar",
@@ -4518,6 +4738,14 @@
       "sha1": "5126010cefcb80ed5dc6eb066541b546dbdbc971"
     },
     {
+      "path": "org/apache/maven/maven-repository-metadata/3.1.0/maven-repository-metadata-3.1.0.jar",
+      "sha1": "77bb2c383b1654b158cf9f905f4105d9d522fc7e"
+    },
+    {
+      "path": "org/apache/maven/maven-repository-metadata/3.1.0/maven-repository-metadata-3.1.0.pom",
+      "sha1": "9f0ec3ca8467110d8fcc9957e6ccdf9e51ef0374"
+    },
+    {
       "path": "org/apache/maven/maven-settings-builder/3.0.4/maven-settings-builder-3.0.4.jar",
       "sha1": "1c47e99b3cef4aed391f6c76aa073f3f7f25044b"
     },
@@ -4532,6 +4760,14 @@
     {
       "path": "org/apache/maven/maven-settings-builder/3.0/maven-settings-builder-3.0.pom",
       "sha1": "69a41566b573bda12bd2bb7dcb64d30da834cb9c"
+    },
+    {
+      "path": "org/apache/maven/maven-settings-builder/3.1.0/maven-settings-builder-3.1.0.jar",
+      "sha1": "ab0e825308fb8862d6d2b6fecea80c0d06c48407"
+    },
+    {
+      "path": "org/apache/maven/maven-settings-builder/3.1.0/maven-settings-builder-3.1.0.pom",
+      "sha1": "1731542d386485f51ffdb9126cb73432ce2f838b"
     },
     {
       "path": "org/apache/maven/maven-settings/2.0.10/maven-settings-2.0.10.jar",
@@ -4610,6 +4846,14 @@
       "sha1": "efc9c618ca5b82f76d1894977482069fe0e4565a"
     },
     {
+      "path": "org/apache/maven/maven-settings/3.1.0/maven-settings-3.1.0.jar",
+      "sha1": "032c65d957271cb15ae3c93c883ab7e6aca39138"
+    },
+    {
+      "path": "org/apache/maven/maven-settings/3.1.0/maven-settings-3.1.0.pom",
+      "sha1": "5ad20b57975d041847a01814cc9f362c3e6901f8"
+    },
+    {
       "path": "org/apache/maven/maven-toolchain/2.0.9/maven-toolchain-2.0.9.jar",
       "sha1": "db9f7eb8b6708b7ee46db0f0357fed43ef555793"
     },
@@ -4682,6 +4926,10 @@
       "sha1": "30c961aaf964aadcc028102ebe03d1afff324ec0"
     },
     {
+      "path": "org/apache/maven/maven/3.1.0/maven-3.1.0.pom",
+      "sha1": "d529c90764cc6292f9581e33ce828cc3fd4e34c5"
+    },
+    {
       "path": "org/apache/maven/plugin-tools/maven-plugin-annotations/3.2/maven-plugin-annotations-3.2.jar",
       "sha1": "06959f227cb1d36470877ce56c7425fe6626dac2"
     },
@@ -4718,12 +4966,12 @@
       "sha1": "5ed2aafa283fb1219934f67b7b7319ec93d8a49f"
     },
     {
-      "path": "org/apache/maven/plugins/maven-checkstyle-plugin/3.1.0/maven-checkstyle-plugin-3.1.0.jar",
-      "sha1": "4cbc5be82d92e87f8db396f8e1f8c218f6dcce0e"
+      "path": "org/apache/maven/plugins/maven-checkstyle-plugin/3.2.1/maven-checkstyle-plugin-3.2.1.jar",
+      "sha1": "ccb6c40aec280db3e1eb4ddbb1d60b306c3c682b"
     },
     {
-      "path": "org/apache/maven/plugins/maven-checkstyle-plugin/3.1.0/maven-checkstyle-plugin-3.1.0.pom",
-      "sha1": "81d9a6e0b315ba84839c42eff734fd9502d81437"
+      "path": "org/apache/maven/plugins/maven-checkstyle-plugin/3.2.1/maven-checkstyle-plugin-3.2.1.pom",
+      "sha1": "1efbbc80bb1ecdd7eff846fc3aecbc60d535c553"
     },
     {
       "path": "org/apache/maven/plugins/maven-clean-plugin/2.5/maven-clean-plugin-2.5.jar",
@@ -4834,8 +5082,8 @@
       "sha1": "0b5efc4b76da252b79b683e47d3df82752f44093"
     },
     {
-      "path": "org/apache/maven/plugins/maven-plugins/33/maven-plugins-33.pom",
-      "sha1": "1492c1ec367964ea0a088d128d13b1df4529c8ae"
+      "path": "org/apache/maven/plugins/maven-plugins/37/maven-plugins-37.pom",
+      "sha1": "d3614b72d15b15c9e3bbd8a08abe648083389b1b"
     },
     {
       "path": "org/apache/maven/plugins/maven-release-plugin/2.5/maven-release-plugin-2.5.jar",
@@ -4922,6 +5170,14 @@
       "sha1": "eca7bd81ad86e6d8a978f37e1d077fee5c59d41e"
     },
     {
+      "path": "org/apache/maven/reporting/maven-reporting-api/3.1.1/maven-reporting-api-3.1.1.jar",
+      "sha1": "74ca00a13e46d065071cdf6376d7d231e0208916"
+    },
+    {
+      "path": "org/apache/maven/reporting/maven-reporting-api/3.1.1/maven-reporting-api-3.1.1.pom",
+      "sha1": "c0dc187be8c0ecdc11eb876abaf22307f20a1d0a"
+    },
+    {
       "path": "org/apache/maven/reporting/maven-reporting-exec/1.1/maven-reporting-exec-1.1.jar",
       "sha1": "6e584f7a77d08716e703aae223809e22cbba3af7"
     },
@@ -4964,6 +5220,14 @@
     {
       "path": "org/apache/maven/reporting/maven-reporting-impl/3.0.0/maven-reporting-impl-3.0.0.pom",
       "sha1": "8da809795a05e4e01d343e4aecff5c409ab6fe67"
+    },
+    {
+      "path": "org/apache/maven/reporting/maven-reporting-impl/3.2.0/maven-reporting-impl-3.2.0.jar",
+      "sha1": "97ffee6a6c3f81e341f42f641651a37f077759c6"
+    },
+    {
+      "path": "org/apache/maven/reporting/maven-reporting-impl/3.2.0/maven-reporting-impl-3.2.0.pom",
+      "sha1": "7f3f289d6b84ee0b17f18f11dfabd1a2a9e917b4"
     },
     {
       "path": "org/apache/maven/reporting/maven-reporting/2.0.4/maven-reporting-2.0.4.pom",
@@ -5438,6 +5702,10 @@
       "sha1": "1e54affbd5add6742dadba9ffff35d57512b015e"
     },
     {
+      "path": "org/apache/maven/shared/maven-shared-components/34/maven-shared-components-34.pom",
+      "sha1": "633600d0ac8d18b70b559a90fa62ad4e90e8dc15"
+    },
+    {
       "path": "org/apache/maven/shared/maven-shared-components/4/maven-shared-components-4.pom",
       "sha1": "9d53a40e21554c2ea70743cdcb13cf33b11b24e0"
     },
@@ -5506,10 +5774,6 @@
       "sha1": "20a5f96a873ad02124be3dafded7acba5fdcb70b"
     },
     {
-      "path": "org/apache/maven/shared/maven-shared-utils/0.6/maven-shared-utils-0.6.jar",
-      "sha1": "6310f3d6d252fa4da46a05d0c08d2a6a1019299c"
-    },
-    {
       "path": "org/apache/maven/shared/maven-shared-utils/0.6/maven-shared-utils-0.6.pom",
       "sha1": "8b703e3862a8c071daeb80934a4e24568897e35e"
     },
@@ -5532,6 +5796,14 @@
     {
       "path": "org/apache/maven/shared/maven-shared-utils/3.2.0/maven-shared-utils-3.2.0.pom",
       "sha1": "562babea575ea1aabdea1911ea9d9226bb2c7c78"
+    },
+    {
+      "path": "org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.jar",
+      "sha1": "f87a61adb1e12a00dcc6cc6005a51e693aa7c4ac"
+    },
+    {
+      "path": "org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.pom",
+      "sha1": "9e3c134dc5c3f2a588203ce1cd137b7c3c51c642"
     },
     {
       "path": "org/apache/maven/surefire/maven-surefire-common/2.17/maven-surefire-common-2.17.jar",
@@ -5862,8 +6134,20 @@
       "sha1": "5027123eb872a166f5205a5eb00d3ed186b63277"
     },
     {
+      "path": "org/apache/xbean/xbean-reflect/3.7/xbean-reflect-3.7.jar",
+      "sha1": "6072a967ec936b3bb25b421d8eca07dd750219fd"
+    },
+    {
+      "path": "org/apache/xbean/xbean-reflect/3.7/xbean-reflect-3.7.pom",
+      "sha1": "c0ade23ea098a70947671b7f612112f133b1dc98"
+    },
+    {
       "path": "org/apache/xbean/xbean/3.4/xbean-3.4.pom",
       "sha1": "6b6d0d977f3fb41cfd097a350472baefd82713f5"
+    },
+    {
+      "path": "org/apache/xbean/xbean/3.7/xbean-3.7.pom",
+      "sha1": "7535d6499940c84ce0af8124ea57d3cfd4b2989b"
     },
     {
       "path": "org/beanshell/beanshell/2.0b4/beanshell-2.0b4.pom",
@@ -5886,12 +6170,12 @@
       "sha1": "c622f23fc3d1acf7c0cf66755ad7455781c4d489"
     },
     {
-      "path": "org/checkerframework/checker-qual/2.5.2/checker-qual-2.5.2.jar",
-      "sha1": "cea74543d5904a30861a61b4643a5f2bb372efc4"
+      "path": "org/checkerframework/checker-qual/3.12.0/checker-qual-3.12.0.jar",
+      "sha1": "d5692f0526415fcc6de94bb5bfbd3afd9dd3b3e5"
     },
     {
-      "path": "org/checkerframework/checker-qual/2.5.2/checker-qual-2.5.2.pom",
-      "sha1": "7cee753353b0fc94e0300ad3dbf155069260c4d7"
+      "path": "org/checkerframework/checker-qual/3.12.0/checker-qual-3.12.0.pom",
+      "sha1": "fb8dca6f40fcb30f7b89de269940bf3316fb9845"
     },
     {
       "path": "org/checkerframework/checker-qual/3.5.0/checker-qual-3.5.0.jar",
@@ -6004,18 +6288,6 @@
     {
       "path": "org/codehaus/groovy/groovy-all/1.7.6/groovy-all-1.7.6.pom",
       "sha1": "f9f2e45942b25bfded764cce615156228e7b8a3a"
-    },
-    {
-      "path": "org/codehaus/mojo/animal-sniffer-annotations/1.17/animal-sniffer-annotations-1.17.jar",
-      "sha1": "f97ce6decaea32b36101e37979f8b647f00681fb"
-    },
-    {
-      "path": "org/codehaus/mojo/animal-sniffer-annotations/1.17/animal-sniffer-annotations-1.17.pom",
-      "sha1": "80948bd07c5db60753d8d5a9164b8b2272e0842a"
-    },
-    {
-      "path": "org/codehaus/mojo/animal-sniffer-parent/1.17/animal-sniffer-parent-1.17.pom",
-      "sha1": "eea4b805793494ebb025e5a9926ea3cf1ee8b34d"
     },
     {
       "path": "org/codehaus/mojo/buildnumber-maven-plugin/1.3/buildnumber-maven-plugin-1.3.jar",
@@ -6154,12 +6426,28 @@
       "sha1": "068f7ac6a425f5e82bbbb5faef91e4b5d3d84f76"
     },
     {
+      "path": "org/codehaus/plexus/plexus-classworlds/2.4.2/plexus-classworlds-2.4.2.jar",
+      "sha1": "e006f28662eba33d91d1c5e342e0bd66f8e9da18"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-classworlds/2.4.2/plexus-classworlds-2.4.2.pom",
+      "sha1": "55f9b6f069b025381e0e0975ce946575a4c49d8d"
+    },
+    {
       "path": "org/codehaus/plexus/plexus-classworlds/2.4/plexus-classworlds-2.4.jar",
       "sha1": "ef38ff5c25f83a4a02fcd9843d85f3e47012873e"
     },
     {
       "path": "org/codehaus/plexus/plexus-classworlds/2.4/plexus-classworlds-2.4.pom",
       "sha1": "e93052514961d9aebb23ef1090b85292a19af650"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-classworlds/2.5.2/plexus-classworlds-2.5.2.pom",
+      "sha1": "a39bedbc3fa3652d3606821d7c21d80e900f57a0"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.pom",
+      "sha1": "e05bc927ead7a1e7dc36c7daed209611d94fbb6d"
     },
     {
       "path": "org/codehaus/plexus/plexus-compiler-api/2.8.2/plexus-compiler-api-2.8.2.jar",
@@ -6224,6 +6512,14 @@
     {
       "path": "org/codehaus/plexus/plexus-component-annotations/1.7.1/plexus-component-annotations-1.7.1.pom",
       "sha1": "e265daf1fcf56a67dd9bae3db80531a9717ccee4"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-component-annotations/2.1.1/plexus-component-annotations-2.1.1.jar",
+      "sha1": "856d33577e7e404f2438b2f14dbdf4ff5d6078b9"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-component-annotations/2.1.1/plexus-component-annotations-2.1.1.pom",
+      "sha1": "88a80a2203f423c4796327f7645e22d4b6ea51ad"
     },
     {
       "path": "org/codehaus/plexus/plexus-component-api/1.0-alpha-15/plexus-component-api-1.0-alpha-15.pom",
@@ -6330,6 +6626,14 @@
       "sha1": "f68a6d3761cfdfdf1e13ce2c18327c514acad611"
     },
     {
+      "path": "org/codehaus/plexus/plexus-container-default/2.1.0/plexus-container-default-2.1.0.jar",
+      "sha1": "c189df3d30aa7707c36aa2746fae55ebe11d711e"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-container-default/2.1.0/plexus-container-default-2.1.0.pom",
+      "sha1": "422fa1b8961ec766735cc1bea268e8206402667a"
+    },
+    {
       "path": "org/codehaus/plexus/plexus-containers/1.0-alpha-15/plexus-containers-1.0-alpha-15.pom",
       "sha1": "34357afac973e85e2eb35a1296c8b8bb55d00ffe"
     },
@@ -6368,6 +6672,22 @@
     {
       "path": "org/codehaus/plexus/plexus-containers/1.7.1/plexus-containers-1.7.1.pom",
       "sha1": "7ff4e431b5af8100be6e9fcd946ba7c532d890e2"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-containers/2.1.0/plexus-containers-2.1.0.pom",
+      "sha1": "133ad2d4fca8f498be182d776e85f359f7ac6e36"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-containers/2.1.1/plexus-containers-2.1.1.pom",
+      "sha1": "b159bc1c2557f85a60cc38e7703be49c7ec95cc0"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-i18n/1.0-beta-10/plexus-i18n-1.0-beta-10.jar",
+      "sha1": "27506f59e54cc80b8c28b977c2bcd0478094e0cc"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-i18n/1.0-beta-10/plexus-i18n-1.0-beta-10.pom",
+      "sha1": "d7865049eee42a4c87888fd1e762e9b8d864a78d"
     },
     {
       "path": "org/codehaus/plexus/plexus-i18n/1.0-beta-7/plexus-i18n-1.0-beta-7.jar",
@@ -6442,12 +6762,16 @@
       "sha1": "3dda3be2ada841f5ca3976a48281349a99f27e89"
     },
     {
-      "path": "org/codehaus/plexus/plexus-interpolation/1.24/plexus-interpolation-1.24.jar",
-      "sha1": "ff3f217127fbd6846bba831ab156e227db2cf347"
+      "path": "org/codehaus/plexus/plexus-interpolation/1.16/plexus-interpolation-1.16.pom",
+      "sha1": "c70b5eaf02d61618e86d8d78e4faf75404046366"
     },
     {
-      "path": "org/codehaus/plexus/plexus-interpolation/1.24/plexus-interpolation-1.24.pom",
-      "sha1": "1909f6cd42a5ead655435ebc7ecb609e3d6536ac"
+      "path": "org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.jar",
+      "sha1": "25b919c664b79795ccde0ede5cee0fd68b544197"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.pom",
+      "sha1": "af412be9edee5aad63bbb304752ac0deda35ff08"
     },
     {
       "path": "org/codehaus/plexus/plexus-interpolation/1.6/plexus-interpolation-1.6.pom",
@@ -6746,6 +7070,18 @@
       "sha1": "8113ec9ba85eb589648929ae5bbd68b1023996c7"
     },
     {
+      "path": "org/codehaus/plexus/plexus-utils/3.3.0/plexus-utils-3.3.0.pom",
+      "sha1": "de5faec837d872a1712aa89242845216118a9405"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-utils/3.4.2/plexus-utils-3.4.2.jar",
+      "sha1": "82445e007f9009ac5ba6ae5d6b6898c4ce54dcf6"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus-utils/3.4.2/plexus-utils-3.4.2.pom",
+      "sha1": "2e7d0c48e7888250f5ecf22634fc7be5a9743e69"
+    },
+    {
       "path": "org/codehaus/plexus/plexus-velocity/1.1.7/plexus-velocity-1.1.7.jar",
       "sha1": "1440fc2552d1405b1c2d380ef3b96c4d9c6dbd0b"
     },
@@ -6850,6 +7186,42 @@
       "sha1": "7733f81581a7b549cef034c9117d4d8c29ea07d6"
     },
     {
+      "path": "org/codehaus/plexus/plexus/5.1/plexus-5.1.pom",
+      "sha1": "2fca82e2eb5172f6a2909bea7accc733581a8c71"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus/6.5/plexus-6.5.pom",
+      "sha1": "bf76519b122eea2e701e28d16ca101d467dfa5c6"
+    },
+    {
+      "path": "org/codehaus/plexus/plexus/8/plexus-8.pom",
+      "sha1": "b3982e53f063775a9ab1d8522a5928ffadfcf54a"
+    },
+    {
+      "path": "org/eclipse/aether/aether-api/0.9.0.M2/aether-api-0.9.0.M2.jar",
+      "sha1": "97662c999c6b2fbf2ee50e814a34639c1c1d22de"
+    },
+    {
+      "path": "org/eclipse/aether/aether-api/0.9.0.M2/aether-api-0.9.0.M2.pom",
+      "sha1": "3b0bb3ce9bc61aabe2b1a699e2fc92127218f72b"
+    },
+    {
+      "path": "org/eclipse/aether/aether-impl/0.9.0.M2/aether-impl-0.9.0.M2.jar",
+      "sha1": "eab9a4baae8de96a24c04219236363d0ca73e8a9"
+    },
+    {
+      "path": "org/eclipse/aether/aether-impl/0.9.0.M2/aether-impl-0.9.0.M2.pom",
+      "sha1": "62fb6f92ddea8b994756c6cba4198f63effc04c7"
+    },
+    {
+      "path": "org/eclipse/aether/aether-spi/0.9.0.M2/aether-spi-0.9.0.M2.jar",
+      "sha1": "3647d00620a91360990c9680f29fbcc22d69c2ee"
+    },
+    {
+      "path": "org/eclipse/aether/aether-spi/0.9.0.M2/aether-spi-0.9.0.M2.pom",
+      "sha1": "b2279ec2d571105a2db40191ba78b2fc8202bb7d"
+    },
+    {
       "path": "org/eclipse/aether/aether-util/0.9.0.M2/aether-util-0.9.0.M2.jar",
       "sha1": "b957089deb654647da320ad7507b0a4b5ce23813"
     },
@@ -6888,6 +7260,30 @@
     {
       "path": "org/eclipse/lsp4j/org.eclipse.lsp4j/0.19.0/org.eclipse.lsp4j-0.19.0.pom",
       "sha1": "4794e5b2ff8e4a168130d1528ceab28b01ee99ba"
+    },
+    {
+      "path": "org/eclipse/sisu/org.eclipse.sisu.inject/0.3.5/org.eclipse.sisu.inject-0.3.5.jar",
+      "sha1": "d4265dd4f0f1d7a06d80df5a5f475d5ff9c17140"
+    },
+    {
+      "path": "org/eclipse/sisu/org.eclipse.sisu.inject/0.3.5/org.eclipse.sisu.inject-0.3.5.pom",
+      "sha1": "3722f112fe5752bbb677eeae0ff379848902df2c"
+    },
+    {
+      "path": "org/eclipse/sisu/org.eclipse.sisu.plexus/0.3.5/org.eclipse.sisu.plexus-0.3.5.jar",
+      "sha1": "d71996bb2e536f966b3b70e647067fff3b73d32f"
+    },
+    {
+      "path": "org/eclipse/sisu/org.eclipse.sisu.plexus/0.3.5/org.eclipse.sisu.plexus-0.3.5.pom",
+      "sha1": "e462a9a33f45e2f44460eb67611708791a8e9640"
+    },
+    {
+      "path": "org/eclipse/sisu/sisu-inject/0.3.5/sisu-inject-0.3.5.pom",
+      "sha1": "37191778332db19b604649f562b3aa4aaa84063b"
+    },
+    {
+      "path": "org/eclipse/sisu/sisu-plexus/0.3.5/sisu-plexus-0.3.5.pom",
+      "sha1": "2bfdf50eb1fcf53bf56114cf988f5ad5ddb34e4d"
     },
     {
       "path": "org/eclipse/xtend/org.eclipse.xtend.lib.macro/2.28.0/org.eclipse.xtend.lib.macro-2.28.0.jar",
@@ -6996,6 +7392,18 @@
     {
       "path": "org/iq80/snappy/snappy/0.4/snappy-0.4.pom",
       "sha1": "a2a52b5dc6183010d4e3d12a520ced355607ce32"
+    },
+    {
+      "path": "org/javassist/javassist/3.28.0-GA/javassist-3.28.0-GA.jar",
+      "sha1": "9a958811a88381bb159cc2f5ed79c34a45c4af7a"
+    },
+    {
+      "path": "org/javassist/javassist/3.28.0-GA/javassist-3.28.0-GA.pom",
+      "sha1": "12ec4905545213432afa703f4caf0b7409fbc3d9"
+    },
+    {
+      "path": "org/jboss/weld/weld-parent/26/weld-parent-26.pom",
+      "sha1": "54a75d96c0c3f6bb4b32293d2ababb8fae665e91"
     },
     {
       "path": "org/jdom/jdom/1.1/jdom-1.1.jar",
@@ -7290,6 +7698,14 @@
       "sha1": "5ada4f90b1651ae7b89766df379740215570fec7"
     },
     {
+      "path": "org/reflections/reflections/0.10.2/reflections-0.10.2.jar",
+      "sha1": "b638d7ca0e0fe0146b60a0e7ba232ad852a73b31"
+    },
+    {
+      "path": "org/reflections/reflections/0.10.2/reflections-0.10.2.pom",
+      "sha1": "79c2b5f8150ae55c4f46c77a5f8f5ea9ad2850a2"
+    },
+    {
       "path": "org/scala-lang/modules/scala-xml_2.12/1.0.6/scala-xml_2.12-1.0.6.jar",
       "sha1": "e22de3366a698a9f744106fb6dda4335838cf6a7"
     },
@@ -7406,6 +7822,14 @@
       "sha1": "02013960e5ee7f712d8fa6f2e618a6ff2e8d98a9"
     },
     {
+      "path": "org/slf4j/slf4j-api/1.7.32/slf4j-api-1.7.32.jar",
+      "sha1": "cdcff33940d9f2de763bc41ea05a0be5941176c3"
+    },
+    {
+      "path": "org/slf4j/slf4j-api/1.7.32/slf4j-api-1.7.32.pom",
+      "sha1": "dd71cee8b1ef6f54fa6e60f3814fa748f03642e2"
+    },
+    {
       "path": "org/slf4j/slf4j-api/1.7.5/slf4j-api-1.7.5.jar",
       "sha1": "6b262da268f8ad9eff941b25503a9198f0a0ac93"
     },
@@ -7448,6 +7872,10 @@
     {
       "path": "org/slf4j/slf4j-parent/1.7.30/slf4j-parent-1.7.30.pom",
       "sha1": "d3cf0e0cdb58d3c6f8a08c21e55894422fd725b9"
+    },
+    {
+      "path": "org/slf4j/slf4j-parent/1.7.32/slf4j-parent-1.7.32.pom",
+      "sha1": "a3cb6b2b36f7d228af85043d7b31393c6c16a4d6"
     },
     {
       "path": "org/slf4j/slf4j-parent/1.7.5/slf4j-parent-1.7.5.pom",

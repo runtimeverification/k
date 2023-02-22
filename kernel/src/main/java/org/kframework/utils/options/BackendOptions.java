@@ -1,4 +1,4 @@
-// Copyright (c) 2020 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.utils.options;
 
 import com.beust.jcommander.Parameter;

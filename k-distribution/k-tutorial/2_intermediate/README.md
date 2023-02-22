@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Section 2: Intermediate K Concepts
 
 The goal of this second section is to supplement a beginning developer's

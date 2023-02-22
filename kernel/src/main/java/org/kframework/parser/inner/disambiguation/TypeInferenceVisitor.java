@@ -1,4 +1,4 @@
-// Copyright (c) 2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.inner.disambiguation;
 
 import org.kframework.builtin.Sorts;

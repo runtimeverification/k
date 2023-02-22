@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module LLVM-INT
     imports INT
 

@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.kprove;
 
 import com.google.inject.Inject;

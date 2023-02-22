@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Editor Support
 
 This page lists (alphabetically) known Editor/IDE plugins for K.

@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 require "c18-syntax.k"
 
 module C18-TRANSLATION-SYNTAX

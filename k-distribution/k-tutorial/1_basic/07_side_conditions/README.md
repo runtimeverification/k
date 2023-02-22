@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.7: Side Conditions and Rule Priority
 
 The purpose of this lesson is to explain how to write conditional rules in K,

@@ -1,3 +1,6 @@
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 Installing the K Framework
 ==========================
 

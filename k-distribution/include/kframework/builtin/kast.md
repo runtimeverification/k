@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) 2015-2020 K Team. All Rights Reserved.
+copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
 K Language Features

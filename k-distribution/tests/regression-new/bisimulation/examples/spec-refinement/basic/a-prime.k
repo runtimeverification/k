@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 requires "imap.k"
 
 module A-SYNTAX

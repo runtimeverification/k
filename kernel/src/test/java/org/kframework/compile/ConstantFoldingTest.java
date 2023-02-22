@@ -1,4 +1,4 @@
-// Copyright (c) 21 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import org.junit.Before;

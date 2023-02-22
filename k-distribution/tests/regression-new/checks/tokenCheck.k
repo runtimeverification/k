@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module TOKENCHECK-SYNTAX
   syntax X ::= "abc" [token]
 
