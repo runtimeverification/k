@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 module PLUS-IMP-SPEC
 imports IMP

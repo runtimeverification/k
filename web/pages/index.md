@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 <b style="font-size: 36px; line-height: 1;">K</b> is a rewrite-based
 executable semantic framework in which programming languages, type
 systems and formal analysis tools can be defined using configurations

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 module ABS-SPEC
   imports IMP
@@ -19,6 +19,16 @@ claim
       b |-> LB:Int
     ...</env>
   ...</thread></threads>
+  <input>
+    ListItem ( #buffer ( "\n" ~> . ) )
+    ListItem ( "off" )
+    ListItem ( #istream ( 0 ) )
+  </input>
+  <output>
+    ListItem ( #ostream ( 1 ) )
+    ListItem ( "off" )
+    ListItem ( #buffer ( "" ~> . ) )
+  </output>
   <store>...
     LA |-> A:Int
     LB |-> (_ => absInt(A))

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 module RAND-SYNTAX
   imports DOMAINS-SYNTAX

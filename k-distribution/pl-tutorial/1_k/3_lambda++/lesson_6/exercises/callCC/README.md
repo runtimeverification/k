@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2013-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 (see similar exercise in Lesson 1, with substitution instead of environments)
 

@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # K Tutorial
 
 The purpose of this series of lessons is to teach developers how to program in

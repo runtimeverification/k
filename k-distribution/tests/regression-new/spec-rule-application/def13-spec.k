@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 require "def.k"
 
 // X (in term) = Y (in pattern) matching.

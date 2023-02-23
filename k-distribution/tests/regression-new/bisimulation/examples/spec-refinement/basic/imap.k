@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module IMAP-SYNTAX
     imports INT
     syntax IMap [smt-prelude] // (define-sort IMap () (Array Int Int))

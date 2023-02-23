@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.7: Side Conditions and Rule Priority
 
 The purpose of this lesson is to explain how to write conditional rules in K,
@@ -200,6 +204,11 @@ integer operations.
 by zero will no longer make `krun` crash with a "Divison by zero" exception.
 Instead, the `/` function should not match any of its rules if the denominator
 is zero.
+
+3. Write your own implementation of `==`, `<`, `<=`, `>`, `>=` for integers and modify your solution from Exercise 2 to use it.
+You can use any arithmetic operations in the `INT` module, but do not use any built-in boolean functions for comparing integers.
+
+    Hint: Use pattern matching and recursive definitions with rule priorities.
 
 ## Next lesson
 

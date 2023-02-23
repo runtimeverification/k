@@ -1,3 +1,4 @@
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.lsp;
 
 
@@ -58,6 +59,8 @@ public class KTextDocument {
                 }
                 c++;
             }
+            lines[content.length()] = l;
+            columns[content.length()] = c;
         }
         Matcher m = p.matcher(content);
         String context = "";

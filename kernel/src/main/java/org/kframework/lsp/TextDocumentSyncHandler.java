@@ -1,3 +1,4 @@
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.lsp;
 
 
@@ -436,5 +437,83 @@ public class TextDocumentSyncHandler {
 
             return lloc;
         });
+    }
+
+    // Return the selection tree for a given position. This follows the AST as much as we have location information.
+    // The SelectionRange object is a recursive structure where the head is the smallest AST node next to the cursor
+    // and the deepest element is the entire file, the root of the document.
+    public CompletableFuture<List<SelectionRange>> selectionRange(SelectionRangeParams params) {
+        return CompletableFuture.supplyAsync(() -> {
+            List<SelectionRange> lloc = new ArrayList<>();
+
+            KTextDocument txtDoc = files.get(params.getTextDocument().getUri());
+            List<DefinitionItem> dis = txtDoc.dis;
+            txtDoc.getContextAt(new KPos(1, 1)); // warmup to avoid NPE
+            SelectionRange topsr = new SelectionRange(new Range(new Position(0,0),
+                    new Position(txtDoc.lines[txtDoc.content.length()], txtDoc.columns[txtDoc.content.length()])), null);
+            for (Position ppos : params.getPositions()) {
+                KPos pos = new KPos(ppos);
+                for (DefinitionItem di : dis) {
+                    if (isPositionOverLocation(pos, getSafeLoc(di))) {
+                        if (di instanceof Module) {
+                            Module m = (Module) di;
+                            SelectionRange msr = new SelectionRange(loc2range(m.getLocation()), topsr);
+                            for (ModuleItem mi : m.getItems()) {
+                                if (isPositionOverLocation(pos, getSafeLoc(mi))) {
+                                    SelectionRange sentsr = new SelectionRange(loc2range(getSafeLoc(mi)), msr);
+                                    if (mi instanceof org.kframework.kil.Syntax) {
+                                        Syntax stx = (org.kframework.kil.Syntax) mi;
+                                        for (PriorityBlock pb : stx.getPriorityBlocks()) {
+                                            SelectionRange pbsr = new SelectionRange(loc2range(getSafeLoc(pb)), sentsr);
+                                            for (Production prd : pb.getProductions())
+                                                if (isPositionOverLocation(pos, getSafeLoc(prd)))
+                                                    lloc.add(new SelectionRange(loc2range(getSafeLoc(prd)), pbsr));
+                                        }
+                                    } else if (mi instanceof StringSentence) { // if we have caches, find the deepest term
+                                        StringSentence ss = (StringSentence) mi;
+                                        String suffix = ss.getType().equals(DefinitionParsing.configuration) ? "-" + RuleGrammarGenerator.CONFIG_CELLS : "-" + RuleGrammarGenerator.RULE_CELLS;
+                                        Optional<Map.Entry<String, ParseCache>> ch = caches.entrySet().stream().filter(elm -> elm.getKey().startsWith(m.getName() + suffix)).findFirst();
+                                        AtomicReference<SelectionRange> x = new AtomicReference<>(sentsr);
+                                        if (ch.isPresent()) {
+                                            Map<String, ParseCache.ParsedSentence> parsedSent = ch.get().getValue().getCache();
+                                            if (parsedSent.containsKey(ss.getContent())) {
+                                                Bubble b = new Bubble(ss.getType(), ss.getContent(), ss.getAttributes()
+                                                        .add(org.kframework.attributes.Location.class, ss.getLocation()).add(Source.class, ss.getSource())
+                                                        .add("contentStartLine", ss.getContentStartLine()).add("contentStartColumn", ss.getContentStartColumn()));
+                                                ParseCache.ParsedSentence parse = DefinitionParsing.updateLocation(parsedSent.get(ss.getContent()), b);
+                                                KViz.from(t -> {
+                                                    if (isPositionOverLocation(pos, t.location().get())) {
+                                                        SelectionRange tsr = new SelectionRange(loc2range(t.location().get()), x.get());
+                                                        x.set(tsr); // find the deepest term that contains this position
+                                                    }
+                                                    return t;
+                                                }, "Find selectionRange in rule").apply(parse.getParse());
+                                            }
+                                        }
+                                        lloc.add(x.get());
+                                    } else { // anything else that doesn't have a complex structure: Import, SyntaxPriorities...
+                                        lloc.add(new SelectionRange(loc2range(getSafeLoc(mi)),  msr));
+                                    }
+                                }
+                            }
+                        } else {
+                            lloc.add(new SelectionRange(loc2range(di.getLocation()), topsr));
+                        }
+                    }
+                }
+            }
+
+            String poss = params.getPositions().stream().map(pos -> new KPos(pos).toString()).collect(Collectors.joining(" "));
+            clientLogger.logMessage("Operation '" + "text/selectionRange: " + params.getTextDocument().getUri() + " #poss: "
+                    + poss + " rezDepth: " + lloc.stream().map(TextDocumentSyncHandler::getSelectionRangeDepth).collect(Collectors.toList()));
+
+            return lloc;
+        });
+    }
+
+    // for debug purposes, return the depth of the selection range
+    private static int getSelectionRangeDepth(SelectionRange sr) {
+        if (sr == null) return 0;
+        return 1 + getSelectionRangeDepth(sr.getParent());
     }
 }

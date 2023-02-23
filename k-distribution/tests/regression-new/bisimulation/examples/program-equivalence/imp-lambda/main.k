@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 requires "imp-prime.k"
 requires "lambda-prime.k"
 

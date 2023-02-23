@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module CHECKBRACKETFINE-SYNTAX
   syntax Exp ::= "(" Exp [bracket]
   syntax Exp ::= Exp ")" [bracket]

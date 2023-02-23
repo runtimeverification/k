@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module DATA
     imports INT
     imports BOOL

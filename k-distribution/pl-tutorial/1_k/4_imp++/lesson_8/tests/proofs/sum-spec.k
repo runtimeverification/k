@@ -1,7 +1,8 @@
-// Copyright (c) 2016-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
-module SUM-SPEC
+module SUM-INVARIANT
   imports IMP
+
 claim
   <threads><thread>...
     <k>
@@ -17,11 +18,26 @@ claim
       sum |-> LSUM:Int
     ...</env>
   ...</thread></threads>
+  <input>
+    ListItem ( #buffer ( "\n" ~> . ) )
+    ListItem ( "off" )
+    ListItem ( #istream ( 0 ) )
+  </input>
+  <output>
+    ListItem ( #ostream ( 1 ) )
+    ListItem ( "off" )
+    ListItem ( #buffer ( "" ~> . ) )
+  </output>
   <store>...
     LN   |-> (N:Int => 0)
     LSUM |-> (S:Int => S +Int ((N +Int 1) *Int N /Int 2))
   ...</store>
 requires N >=Int 0
+
+endmodule
+
+module SUM-SPEC
+  imports SUM-INVARIANT
 
 claim
   <threads><thread>...
@@ -43,11 +59,22 @@ claim
       sum |-> ?LSUM:Int
     </env>
   ...</thread></threads>
+  <input>
+    ListItem ( #buffer ( "\n" ~> . ) )
+    ListItem ( "off" )
+    ListItem ( #istream ( 0 ) )
+  </input>
+  <output>
+    ListItem ( #ostream ( 1 ) )
+    ListItem ( "off" )
+    ListItem ( #buffer ( "" ~> . ) )
+  </output>
   <store>...
     .Map
   =>
     ?LN   |-> 0
     ?LSUM |-> ((N +Int 1) *Int N /Int 2)
   ...</store>
+  <generatedCounter> C => C +Int 2 </generatedCounter>
 requires N >=Int 0
 endmodule

@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 requires "a-prime.k"
 requires "b-prime.k"
 

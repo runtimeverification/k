@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.4: Disambiguating Parses
 
 The purpose of this lesson is to teach how to use K's builtin features for
@@ -44,8 +48,7 @@ endmodule
 In this example, some of the `|` symbols separating productions in a single
 block have been replaced with `>`. This serves to describe the
 **priority groups** associated with this block of productions.
-
-In this example, the first priority group consists of the atoms of the
+The first priority group consists of the atoms of the
 language: `true`, `false`, and the bracket operator. In general, a priority
 group starts either at the `::=` or `>` operator and extends until either the
 next `>` operator or the end of the production block. Thus, we can see that the
@@ -316,11 +319,23 @@ modify the definition so that you will get the alternative parse.
 2. Modify your solution from Lesson 1.3, Exercise 2 so that unary negation should
 bind tighter than multiplication and division, which should bind tighter than
 addition and subtraction, and each binary operator should be left associative.
-Write these priority and associativity declarations both inline and explicitly.
+Write these priority and associativity declarations explicitly, and then
+try to write them inline.
 
 3. Write a simple grammar containing at least one ambiguity that cannot be
 resolved via priority or associativity, and then use the `prefer` attribute to
 resolve that ambiguity.
+
+4. Explain why the following grammar is not labeled ambiguous by the K parser when parsing `abb`, then make the parser realize the ambiguity.
+```k
+module EXERCISE4
+
+syntax Expr ::= "a" Expr "b"
+              | "abb"
+              | "b"
+
+endmodule
+```
 
 ## Next lesson
 
