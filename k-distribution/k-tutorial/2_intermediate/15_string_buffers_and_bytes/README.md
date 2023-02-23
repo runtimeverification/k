@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 2.15: String Buffers and Byte Sequences
 
 ## Return to Top

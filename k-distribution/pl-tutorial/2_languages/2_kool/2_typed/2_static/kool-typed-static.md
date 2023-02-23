@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
+copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
 # KOOL — Typed — Static

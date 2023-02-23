@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 requires "main.k"
 
 module VERIFICATION

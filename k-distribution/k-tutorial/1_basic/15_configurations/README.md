@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.15: Configuration Declarations and Cell Nesting
 
 The purpose of this lesson is to explain how to store additional information

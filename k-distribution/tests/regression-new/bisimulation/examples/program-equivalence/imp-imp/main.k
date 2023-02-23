@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 requires "imp-syntax.k"
 requires "imp-a.k"
 requires "imp-b.k"

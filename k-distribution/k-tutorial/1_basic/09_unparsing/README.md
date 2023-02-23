@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.9: Unparsing and the format and color attributes
 
 The purpose of this lesson is to teach the user about how terms are

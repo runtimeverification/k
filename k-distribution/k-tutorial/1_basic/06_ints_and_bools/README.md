@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.6: Integers and Booleans
 
 The purpose of this lesson is to explain the two most basic types of builtin

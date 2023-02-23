@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2016-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 This folder has been added after the original tutorial was made
 and after the videos were recorded.  Eventually we will renumber

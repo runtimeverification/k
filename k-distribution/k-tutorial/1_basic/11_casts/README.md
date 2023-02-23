@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.11: Casting Terms
 
 The purpose of this lesson is to explain how to use **cast** expressions in

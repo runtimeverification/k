@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
+
 K Framework 5.5.0
 =================
 

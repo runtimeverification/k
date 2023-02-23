@@ -1,4 +1,4 @@
-// Copyright (c) 2020 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 // This is temporary to test if kprove gives a warning when it finds rules in a specification
 // once the transition to claim is done, it should be removed
 
