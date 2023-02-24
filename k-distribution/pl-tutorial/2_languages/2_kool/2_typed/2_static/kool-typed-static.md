@@ -125,13 +125,12 @@ the wrapper in the generated documentation, we associate it an
 
 ```k
   syntax Type ::= "void" | "int" | "bool" | "string"
-                | Id                     [klabel("class"), avoid]  // see next
-                | class(Id)         // explicit KOOL class type
+                | Id                     [klabel("class"), symbol, avoid]  // see next
                 | Type "[" "]"
                 | "(" Type ")"           [bracket]
                 > Types "->" Type
 
-  syntax Types ::= List{Type,","}
+  syntax Types ::= List{Type,","}        [klabel(exps)]
 ```
 
 ## Declarations
@@ -188,7 +187,7 @@ the wrapper in the generated documentation, we associate it an
   syntax Exp ::= FieldReference | ArrayReference
   syntax priority _.__KOOL-TYPED-STATIC-SYNTAX > _[_]_KOOL-TYPED-STATIC-SYNTAX > _(_)_KOOL-TYPED-STATIC-SYNTAX
 
-  syntax Exps ::= List{Exp,","}          [strict]
+  syntax Exps ::= List{Exp,","}          [strict, klabel(exps)]
 ```
 
 ## Statements
@@ -200,9 +199,9 @@ the wrapper in the generated documentation, we associate it an
   syntax Stmt ::= Block
                 | Exp ";"                                 [strict]
                 | "if" "(" Exp ")" Block "else" Block     [avoid, strict]
-                | "if" "(" Exp ")" Block
+                | "if" "(" Exp ")" Block                  [macro]
                 | "while" "(" Exp ")" Block               [strict]
-                | "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmt Exp ";" Exp ")" Block    [macro]
                 | "return" Exp ";"                        [strict]
                 | "return" ";"
                 | "print" "(" Exps ")" ";"                [strict]
@@ -219,10 +218,10 @@ the wrapper in the generated documentation, we associate it an
 ## Desugaring macros
 
 ```k
-  rule if (E) S => if (E) S else {}                                     [macro]
-  rule for(Start Cond; Step) {S:Stmt} => {Start while(Cond){S Step;}}  [macro]
-  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro-rec]
-  rule T:Type X:Id = E; => T X; X = E;                                  [macro]
+  rule if (E) S => if (E) S else {}
+  rule for(Start Cond; Step) {S:Stmt} => {Start while(Cond){S Step;}}
+  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [anywhere]
+  rule T:Type X:Id = E; => T X; X = E;                                  [anywhere]
 
   rule class C:Id S => class C extends Object S
 
@@ -284,7 +283,7 @@ in the class extends relation.
 ```k
   configuration <T multiplicity="?" color="yellow">
                   <tasks color="orange" multiplicity="?">
-                    <task multiplicity="*" color="yellow">
+                    <task multiplicity="*" color="yellow" type="Set">
                       <k color="green"> $PGM:Stmt </k>
                       <tenv multiplicity="?" color="cyan"> .Map </tenv>
                       <ctenvT multiplicity="?" color="blue"> .Map </ctenvT>
@@ -294,7 +293,7 @@ in the class extends relation.
                   </tasks>
 //                  <br/>
                   <classes color="Fuchsia">
-                    <classData multiplicity="*">
+                    <classData multiplicity="*" type="Map">
                       <className color="Fuchsia"> Object </className>
                       <baseClass color="Fuchsia"> .K </baseClass>
                       <baseClasses color="Fuchsia"> .Set </baseClasses>
@@ -584,7 +583,7 @@ instance of this rule).
              ...</classData>)
 //       <br/>
        (.Bag => <task>
-                <k> checkType(class(C')) ~> S </k>
+                <k> checkType(`class`(C')) ~> S </k>
                 <inClass> C </inClass>
                 <ctenvT> .Map </ctenvT>
              </task>)
@@ -597,7 +596,7 @@ syntax Type ::= "stmtStop"
   rule <tasks>...
        <task> <k> class C:Id extends C':Id { S:Stmt } => stmtStop ...</k> </task>
        (.Bag => <task>
-                <k> checkType(class(C')) ~> S </k>
+                <k> checkType(`class`(C')) ~> S </k>
                 <inClass> C </inClass>
                 <ctenvT> .Map </ctenvT>
              </task>)
@@ -660,7 +659,7 @@ succeeds, meaning that it types to `stmt`, then we discard the
 the new object.  The auxiliary `discard` operation is defined
 also at the end of this module.
 ```k
-  rule new C:Id(Ts:Types) => class(C) . C (Ts) ~> discard ~> class(C)
+  rule new C:Id(Ts:Types) => `class`(C) . C (Ts) ~> discard ~> `class`(C)
 ```
 
 ## Self reference
@@ -668,7 +667,7 @@ also at the end of this module.
 The typing rule for `this` is straightforward: reduce to the
 current class type.
 ```k
-  rule <k> this => class(C) ...</k>
+  rule <k> this => `class`(C) ...</k>
        <inClass> C:Id </inClass>
 ```
 
@@ -678,7 +677,7 @@ Similarly, `super` types to the parent class type.
 Note that for typing concerns, super can be considered as an object
 (recall that this was not the case in the dynamic semantics).
 ```k
-   rule <k> super => class(C') ...</k>
+   rule <k> super => `class`(C') ...</k>
         <inClass> C:Id </inClass>
         <className> C </className>
         <baseClass> C':Id </baseClass>
@@ -724,17 +723,17 @@ wait.  Finally, the sixth rule below reports an error when the
 // OLD approach:
 //  rule ltype(E:Exp . X:Id) => E . X  [structural]
 
-  rule <k> class(C:Id) . X:Id => T ...</k>
+  rule <k> `class`(C:Id) . X:Id => T ...</k>
        <className> C </className>
        <ctenv>... X |-> T:Type ...</ctenv>
 
-  rule <k> class(C1:Id => C2) . X:Id ...</k>
+  rule <k> `class`(C1:Id => C2) . X:Id ...</k>
        <className> C1 </className>
        <baseClass> C2:Id </baseClass>
        <ctenv> Rho </ctenv>
     when notBool(X in keys(Rho))  [structural]
 
-  rule <k> class(Object) . X:Id => stuck(class(Object) . X) ...</k>
+  rule <k> `class`(Object) . X:Id => stuck(`class`(Object) . X) ...</k>
        <inClass> C:Id </inClass>
 //      <br/>
        <output>... .List => ListItem("Member \"" +String Id2String(X)
@@ -751,15 +750,15 @@ do some basic upcasting and downcasting checks, to reject casts which
 will absolutely fail.  However, dynamic semantics or implementations
 of the language need to insert runtime checks for downcasting to be safe.
 ```k
-  rule class(_C1:Id) instanceOf _C2:Id => bool
-  rule (C:Id) class(C) => class(C)
-  rule <k> (C2:Id) class(C1:Id) => class(C2) ...</k>
+  rule `class`(_C1:Id) instanceOf _C2:Id => bool
+  rule (C:Id) `class`(C) => `class`(C)
+  rule <k> (C2:Id) `class`(C1:Id) => `class`(C2) ...</k>
        <className> C1 </className>
        <baseClasses>...SetItem(C2)...</baseClasses>    // upcast
-  rule <k> (C2:Id) class(C1:Id) => class(C2) ...</k>
+  rule <k> (C2:Id) `class`(C1:Id) => `class`(C2) ...</k>
        <className> C2 </className>
        <baseClasses>...SetItem(C1)...</baseClasses>    // downcast
-  rule <k> (C2) class(C1:Id) => stuck((C2) class(C1)) ...</k>
+  rule <k> (C2) `class`(C1:Id) => stuck((C2) `class`(C1)) ...</k>
        <classData>...
          <className> C1 </className>
          <baseClasses> S1 </baseClasses>
@@ -839,7 +838,7 @@ The subclass relation introduces a subtyping relation.
 
   rule checkSubtype(T:Type, T) => .  [structural]
 
-  rule <k> checkSubtype(class(C:Id), class(C':Id)) => . ...</k>
+  rule <k> checkSubtype(`class`(C:Id), `class`(C':Id)) => . ...</k>
        <className> C </className>
        <baseClasses>... SetItem(C') ...</baseClasses>  [structural]
 
@@ -871,9 +870,9 @@ check that the types used in the program actually exists
   rule checkType(bool) => .  [structural]
   rule checkType(string) => .  [structural]
   rule checkType(void) => .  [structural]
-  rule <k> checkType(class(C:Id)) => . ...</k> <className> C </className>
+  rule <k> checkType(`class`(C:Id)) => . ...</k> <className> C </className>
     [structural]
-  rule checkType(class(Object)) => .  [structural]
+  rule checkType(`class`(Object)) => .  [structural]
   rule checkType(Ts:Types -> T:Type) => checkType(T,Ts)  [structural]
   rule checkType(T:Type[]) => checkType(T)  [structural]
 ```
