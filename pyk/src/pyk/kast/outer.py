@@ -887,7 +887,7 @@ class KRequire(KOuter):
 @dataclass(frozen=True)
 class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
     main_module_name: str
-    modules: Tuple[KFlatModule, ...]
+    all_modules: Tuple[KFlatModule, ...]
     requires: Tuple[KRequire, ...]
     att: KAtt
 
@@ -901,12 +901,12 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
     def __init__(
         self,
         main_module_name: str,
-        modules: Iterable[KFlatModule],
+        all_modules: Iterable[KFlatModule],
         requires: Iterable[KRequire] = (),
         att: KAtt = EMPTY_ATT,
     ):
-        modules = tuple(modules)
-        main_modules = [module for module in modules if module.name == main_module_name]
+        all_modules = tuple(all_modules)
+        main_modules = [module for module in all_modules if module.name == main_module_name]
 
         if not main_modules:
             raise ValueError(f'Module not found: {main_module_name}')
@@ -916,7 +916,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         main_module = main_modules[0]
 
         object.__setattr__(self, 'main_module_name', main_module_name)
-        object.__setattr__(self, 'modules', tuple(modules))
+        object.__setattr__(self, 'all_modules', tuple(all_modules))
         object.__setattr__(self, 'requires', tuple(requires))
         object.__setattr__(self, 'att', att)
         object.__setattr__(self, 'main_module', main_module)
@@ -926,14 +926,14 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         object.__setattr__(self, '_empty_config', {})
 
     def __iter__(self) -> Iterator[KFlatModule]:
-        return iter(self.modules)
+        return iter(self.all_modules)
 
     @classmethod
     def from_dict(cls: Type['KDefinition'], d: Mapping[str, Any]) -> 'KDefinition':
         cls._check_node(d)
         return KDefinition(
             main_module_name=d['mainModule'],
-            modules=(KFlatModule.from_dict(module) for module in d['modules']),
+            all_modules=(KFlatModule.from_dict(module) for module in d['modules']),
             requires=(KRequire.from_dict(require) for require in d['requires']) if d.get('requires') else (),
             att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
         )
@@ -942,7 +942,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return {
             'node': 'KDefinition',
             'mainModule': self.main_module_name,
-            'modules': [module.to_dict() for module in self.modules],
+            'modules': [module.to_dict() for module in self.all_modules],
             'requires': [require.to_dict() for require in self.requires],
             'att': self.att.to_dict(),
         }
@@ -951,46 +951,65 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         self,
         *,
         main_module_name: Optional[str] = None,
-        modules: Optional[Iterable[KFlatModule]] = None,
+        all_modules: Optional[Iterable[KFlatModule]] = None,
         requires: Optional[Iterable[KRequire]] = None,
         att: Optional[KAtt] = None,
     ) -> 'KDefinition':
         main_module_name = main_module_name if main_module_name is not None else self.main_module_name
-        modules = modules if modules is not None else self.modules
+        all_modules = all_modules if all_modules is not None else self.all_modules
         requires = requires if requires is not None else self.requires
         att = att if att is not None else self.att
-        return KDefinition(main_module_name=main_module_name, modules=modules, requires=requires, att=att)
+        return KDefinition(main_module_name=main_module_name, all_modules=all_modules, requires=requires, att=att)
 
     def let_att(self, att: KAtt) -> 'KDefinition':
         return self.let(att=att)
 
     @cached_property
+    def all_module_names(self) -> Tuple[str, ...]:
+        return tuple(module.name for module in self.all_modules)
+
+    @cached_property
     def module_names(self) -> Tuple[str, ...]:
-        return tuple(module.name for module in self)
+        module_names = [self.main_module_name]
+        seen_modules = []
+        while len(module_names) > 0:
+            mname = module_names.pop(0)
+            if mname not in seen_modules:
+                seen_modules.append(mname)
+                module_names.extend([i.name for i in self.all_modules_dict[mname].imports])
+        return tuple(seen_modules)
+
+    @cached_property
+    def all_modules_dict(self) -> Dict[str, KFlatModule]:
+        return {m.name: m for m in self.all_modules}
+
+    @cached_property
+    def modules(self) -> Tuple[KFlatModule, ...]:
+        return tuple(self.all_modules_dict[mname] for mname in self.module_names)
 
     @cached_property
     def productions(self) -> Tuple[KProduction, ...]:
-        return tuple(prod for module in self for prod in module.productions)
+        return tuple(prod for module in self.modules for prod in module.productions)
 
     @cached_property
     def syntax_productions(self) -> Tuple[KProduction, ...]:
-        return tuple(prod for module in self for prod in module.syntax_productions)
+        return tuple(prod for module in self.modules for prod in module.syntax_productions)
 
     @cached_property
     def functions(self) -> Tuple[KProduction, ...]:
-        return tuple(func for module in self for func in module.functions)
+        return tuple(func for module in self.modules for func in module.functions)
 
     @cached_property
     def constructors(self) -> Tuple[KProduction, ...]:
-        return tuple(ctor for module in self for ctor in module.constructors)
+        return tuple(ctor for module in self.modules for ctor in module.constructors)
 
     @cached_property
     def cell_collection_productions(self) -> Tuple[KProduction, ...]:
-        return tuple(prod for module in self for prod in module.cell_collection_productions)
+        return tuple(prod for module in self.modules for prod in module.cell_collection_productions)
 
     @cached_property
     def rules(self) -> Tuple[KRule, ...]:
-        return tuple(rule for module in self for rule in module.rules)
+        return tuple(rule for module in self.modules for rule in module.rules)
 
     @cached_property
     def alias_rules(self) -> Tuple[KRule, ...]:
@@ -1044,7 +1063,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
             raise ValueError(f'Expected a single cell production for sort {sort}') from err
 
     def module(self, name: str) -> KFlatModule:
-        return single(module for module in self if module.name == name)
+        return self.all_modules_dict[name]
 
     def return_sort(self, label: KLabel) -> KSort:
         return self.production_for_klabel(label).sort

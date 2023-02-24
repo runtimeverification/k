@@ -393,7 +393,7 @@ def build_symbol_table(
     -   Return: Python dictionary mapping klabels to automatically generated unparsers.
     """
     symbol_table = {}
-    all_modules = list(definition.modules) + ([] if extra_modules is None else list(extra_modules))
+    all_modules = list(definition.all_modules) + ([] if extra_modules is None else list(extra_modules))
     for module in all_modules:
         for prod in module.syntax_productions:
             assert prod.klabel
@@ -550,7 +550,7 @@ def pretty_print_kast(kast: KAst, symbol_table: SymbolTable) -> str:
         return 'requires "' + kast.require + '"'
     if type(kast) is KDefinition:
         requires = '\n'.join([pretty_print_kast(require, symbol_table) for require in kast.requires])
-        modules = '\n\n'.join([pretty_print_kast(module, symbol_table) for module in kast.modules])
+        modules = '\n\n'.join([pretty_print_kast(module, symbol_table) for module in kast.all_modules])
         return requires + '\n\n' + modules
 
     raise ValueError(f'Error unparsing: {kast}')
