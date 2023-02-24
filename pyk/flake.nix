@@ -31,10 +31,10 @@
                     });
                 });
             };
-        in rec {
-          pyk = pyk-python39;
-          pyk-python39 = mkPyk prev.python39;
-          pyk-python310 = mkPyk prev.python310;
+        in {
+          pyk = mkPyk prev.python39;
+          python39Packages.pyk = mkPyk prev.python39;
+          python310Packages.pyk = mkPyk prev.python310;
         };
     } // (flake-utils.lib.eachDefaultSystem (system:
       let
@@ -44,7 +44,9 @@
         };
       in {
         packages = {
-          inherit (pkgs) pyk pyk-python39 pyk-python310;
+          inherit (pkgs) pyk;
+          pyk-python39 = pkgs.python39Packages.pyk;
+          pyk-python310 = pkgs.python310Packages.pyk;
           default = pkgs.pyk;
         };
       }));
