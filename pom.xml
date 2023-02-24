@@ -214,7 +214,7 @@
               <configLocation>src/main/config/checkstyle-copyright.xml</configLocation>
               <failsOnError>true</failsOnError>
               <consoleOutput>true</consoleOutput>
-              <excludes>haskell-backend/src/main/native/**,llvm-backend/src/main/native/**,.idea/**,**/com/davekoelle/**,java-backend/src/main/java/org/kframework/backend/java/builtins/crypto/**,**/target/**,LICENSE.md,web/toc.md,web/k-web-theme/**,**/*-kompiled/*.kore,k-distribution/include/kframework/kore/*,**/.kompile-*/**,**/.git/**</excludes>
+              <excludes>haskell-backend/src/main/native/**,llvm-backend/src/main/native/**,.idea/**,**/com/davekoelle/**,java-backend/src/main/java/org/kframework/backend/java/builtins/crypto/**,**/target/**,LICENSE.md,web/toc.md,web/k-web-theme/**,**/*-kompiled/*.kore,k-distribution/include/kframework/kore/*,**/.kompile-*/**,**/.git/**,result/**</excludes>
             </configuration>
           </execution>
           <execution>
