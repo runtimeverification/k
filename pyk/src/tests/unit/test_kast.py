@@ -5,7 +5,7 @@ import pytest
 
 from pyk.kast import KAst, KAtt
 from pyk.kast.inner import KApply, KInner, KLabel, KSequence, KSort, KVariable, build_assoc
-from pyk.kast.outer import KDefinition, KFlatModule, KTerminal
+from pyk.kast.outer import KDefinition, KFlatModule, KImport, KTerminal
 from pyk.prelude.kbool import BOOL
 from pyk.prelude.kint import INT
 from pyk.prelude.string import STRING
@@ -226,10 +226,22 @@ def test_ksequence_init_unkown_keyword(items: List[KInner]) -> None:
 
 def test_defn_module_names() -> None:
     # Given
-    defn = KDefinition('FOO', [KFlatModule('BAR', [], []), KFlatModule('FOO', [], [])])
+    defn = KDefinition(
+        'FOO',
+        [
+            KFlatModule('BAR', [], []),
+            KFlatModule('FOO', [], [KImport('FOO-A'), KImport('FOO-B')]),
+            KFlatModule('FOO-A', [], [KImport('FOO-C')]),
+            KFlatModule('FOO-B', [], [KImport('FOO-C')]),
+            KFlatModule('FOO-C', [], []),
+        ],
+    )
 
     # Then
-    assert set(defn.module_names) == {'FOO', 'BAR'}
+    assert len(defn.all_module_names) == 5
+    assert len(defn.module_names) == 4
+    assert set(defn.all_module_names) == {'FOO', 'BAR', 'FOO-A', 'FOO-B', 'FOO-C'}
+    assert set(defn.module_names) == {'FOO', 'FOO-A', 'FOO-B', 'FOO-C'}
 
 
 _0: Final = token('0')
