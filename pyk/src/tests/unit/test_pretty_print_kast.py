@@ -22,6 +22,21 @@ PRETTY_PRINT_TEST_DATA = (
         KProduction(KSort('Test'), [KTerminal('foo'), KNonTerminal(KSort('Int'))], att=KAtt({'function': ''})),
         'syntax Test ::= "foo" Int [function()]',
     ),
+    (
+        'simple-attributes',
+        KAtt({'function': '', 'total': '', 'klabel': 'foo-bar'}),
+        '[function(), total(), klabel(foo-bar)]',
+    ),
+    (
+        'location-source-attributes',
+        KAtt(
+            {
+                'org.kframework.attributes.Location': [2135, 3, 2135, 20],
+                'org.kframework.attributes.Source': r'/some/path\ with \ spaces/domains.md',
+            }
+        ),
+        r'[org.kframework.attributes.Location(2135,3,2135,20), org.kframework.attributes.Source("/some/path\ with \ spaces/domains.md")]',
+    ),
 )
 
 

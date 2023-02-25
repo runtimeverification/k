@@ -69,3 +69,7 @@ class TestParseToken(KPrintTest):
 
         # Then
         assert remove_attrs(actual) == expected
+
+    # Test that printing a definition is possible without error.
+    def test_print_definition(self, kprint: KPrint) -> None:
+        kprint.pretty_print(kprint.definition)
