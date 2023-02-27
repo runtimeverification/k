@@ -38,6 +38,11 @@
     border: solid;
     overflow: auto scroll;
 }
+#custom-view {
+    height: 15fr;
+    border: solid;
+    overflow: auto scroll;
+}
 #info {
     width: auto;
     height: auto;
@@ -47,6 +52,10 @@
     height: auto;
 }
 #constraint {
+    width: auto;
+    height: auto;
+}
+#custom {
     width: auto;
     height: auto;
 }

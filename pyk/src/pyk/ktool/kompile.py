@@ -185,7 +185,7 @@ def haskell_kompile(
 
 def _check_backend_param(check: bool, param_name: str, backend: Optional[KompileBackend]) -> None:
     if not check:
-        raise ValueError('Parameter {param_name} is not supported by backend: {backend.value}')
+        raise ValueError(f'Parameter not supported by backend {backend}: {param_name}')
 
 
 def _build_arg_list(
