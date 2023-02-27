@@ -100,7 +100,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
     ) -> Tuple[int, CTerm, List[CTerm]]:
         if assume_defined:
             cterm = cterm.add_constraint(
-                KApply(KLabel('#Ceil', [GENERATED_TOP_CELL, GENERATED_TOP_CELL]), [cterm.kast])
+                KApply(KLabel('#Ceil', [GENERATED_TOP_CELL, GENERATED_TOP_CELL]), [cterm.config])
             )
         _LOGGER.debug(f'Executing: {cterm}')
         kore = self.kprint.kast_to_kore(cterm.kast, GENERATED_TOP_CELL)
