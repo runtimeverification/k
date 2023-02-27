@@ -7,6 +7,8 @@ module IMP-SIMPLE-SPEC
 
     claim [addition-2]: <k> $s + $n => 7 ... </k> <state> $s |-> 3 $n |-> 4 </state>
 
+    claim [addition-var]: <k> 3 + N => 7 ... </k> requires N ==Int 4
+
     claim [sum-10]: <k> int $s, $n, .Ids ; $n = 10 ; while (0 <= $n) { $s = $s + $n ; $n = $n + -1 ; } ~> #FINISH => . ... </k>
                      <state> .Map => $s |-> 55 $n |-> -1 </state>
 
