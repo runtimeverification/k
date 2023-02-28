@@ -361,7 +361,7 @@ jobs:
           VERSION: ${{ needs.macos-build.outputs.version }}
         run: |
           set -x
-          version=v"${GITHUB_SHA}"
+          version=v"${VERSION}"
           curl --fail                                                          \
             -X POST                                                            \
             -H "Accept: application/vnd.github+json"                           \
