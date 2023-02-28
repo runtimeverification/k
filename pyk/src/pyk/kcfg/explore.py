@@ -147,12 +147,8 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         consequent_kore = self.kprint.kast_to_kore(_consequent, GENERATED_TOP_CELL)
         _, kore_client = self._kore_rpc
         result = kore_client.implies(antecedent_kore, consequent_kore)
-        if not result.satisfiable:
-            return None
         if result.substitution is None:
-            raise ValueError('Received empty substutition for satisfiable implication.')
-        if result.predicate is None:
-            raise ValueError('Received empty predicate for satisfiable implication.')
+            return None
         ml_subst = self.kprint.kore_to_kast(result.substitution)
         ml_pred = self.kprint.kore_to_kast(result.predicate) if result.predicate is not None else mlTop()
         if is_top(ml_subst):
@@ -165,6 +161,11 @@ class KCFGExplore(ContextManager['KCFGExplore']):
                 _subst[m['###VAR'].name] = m['###TERM']
             else:
                 raise AssertionError(f'Received a non-substitution from implies endpoint: {subst_pred}')
+        # TODO: remove this extra consequent checking logic or this comment after resolution: https://github.com/runtimeverification/haskell-backend/issues/3469
+        new_consequent = self.cterm_simplify(CTerm(Subst(_subst)(consequent.add_constraint(ml_pred).kast)))
+        if is_bottom(new_consequent):
+            _LOGGER.warning(f'Simplifying instantiated consquent resulted in #Bottom: {antecedent} -> {consequent}')
+            return None
         return (Subst(_subst), ml_pred)
 
     def simplify(self, cfgid: str, cfg: KCFG) -> KCFG:
