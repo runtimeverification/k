@@ -6,7 +6,7 @@ import time
 from datetime import datetime
 from logging import Logger
 from pathlib import Path
-from subprocess import CalledProcessError, CompletedProcess
+from subprocess import CompletedProcess
 from tempfile import NamedTemporaryFile
 from typing import Dict, Final, Iterable, Mapping, Optional, Union
 
@@ -100,7 +100,6 @@ def run_process(
     cwd: Optional[Union[str, Path]] = None,
     env: Optional[Mapping[str, str]] = None,
     logger: Optional[Logger] = None,
-    profile: bool = False,
 ) -> CompletedProcess:
     if cwd is not None:
         cwd = Path(cwd)
@@ -119,20 +118,16 @@ def run_process(
     stderr = subprocess.PIPE if pipe_stderr else None
 
     logger.info(f'Running: {command}')
-    try:
-        if profile:
-            start_time = time.time()
-        res = subprocess.run(args, input=input, cwd=cwd, env=env, stdout=stdout, stderr=stderr, check=check, text=True)
-    except CalledProcessError as err:
-        logger.info(f'Completed with status {err.returncode}: {command}')
-        raise
+    start_time = time.time()
 
-    if profile:
-        stop_time = time.time()
-        delta_time = stop_time - start_time
-        logger.info(f'Timing [{delta_time:.3f}]: {command}')
+    res = subprocess.run(args, input=input, cwd=cwd, env=env, stdout=stdout, stderr=stderr, text=True)
 
-    logger.info(f'Completed: {command}')
+    delta_time = time.time() - start_time
+    logger.info(f'Completed in {delta_time:.3f}s with status {res.returncode}: {command}')
+
+    if check:
+        res.check_returncode()
+
     return res
 
 

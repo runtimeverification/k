@@ -40,7 +40,7 @@ def main() -> None:
 
     if args['command'] == 'print':
         kompiled_dir = Path(args['definition'])
-        printer = KPrint(kompiled_dir, profile=args['profile'])
+        printer = KPrint(kompiled_dir)
         _LOGGER.info(f'Reading Kast from file: {args["term"].name}')
         term = KInner.from_json(args['term'].read())
         if is_top(term):
@@ -73,14 +73,14 @@ def main() -> None:
 
     elif args['command'] == 'prove':
         kompiled_dir = Path(args['definition'])
-        kprover = KProve(kompiled_dir, args['main-file'], profile=args['profile'])
+        kprover = KProve(kompiled_dir, args['main-file'])
         final_state = kprover.prove(Path(args['spec-file']), spec_module_name=args['spec-module'], args=args['kArgs'])
         args['output_file'].write(final_state.to_json())
         _LOGGER.info(f'Wrote file: {args["output_file"].name}')
 
     elif args['command'] == 'graph-imports':
         kompiled_dir = Path(args['definition'])
-        kprinter = KPrint(kompiled_dir, profile=args['profile'])
+        kprinter = KPrint(kompiled_dir)
         definition = kprinter.definition
         import_graph = Digraph()
         graph_file = kompiled_dir / 'import-graph'
@@ -131,9 +131,6 @@ def create_argument_parser() -> ArgumentParser:
     logging_args = ArgumentParser(add_help=False)
     logging_args.add_argument(
         '-v', '--verbose', action='count', help='Verbosity level, repeat for more verbosity (up to two times).'
-    )
-    logging_args.add_argument(
-        '--profile', dest='profile', default=False, action='store_true', help='Enable coarse-grained process profiling.'
     )
 
     definition_args = ArgumentParser(add_help=False)
