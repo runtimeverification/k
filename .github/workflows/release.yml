@@ -368,7 +368,7 @@ jobs:
             -H "Authorization: Bearer ${GITHUB_TOKEN}"                         \
             -H "X-GitHub-Api-Version: 2022-11-28"                              \
             https://api.github.com/repos/runtimeverification/devops/dispatches \
-            -d '{"event_type":"on-demand-test","client_payload":{"repo":"runtimeverification/k","version":"'${VERSION}'"}}'
+            -d '{"event_type":"on-demand-test","client_payload":{"repo":"runtimeverification/k","version":"'v${VERSION}'"}}'
 
   gh-pages:
     name: 'GitHub Pages deployment'
