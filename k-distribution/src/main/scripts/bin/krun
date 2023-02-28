@@ -134,9 +134,8 @@ $KRUN options:
                            if the user says "$KRUN --parser cat foo.kore", then
                            \`cat foo.kore\` is invoked and the result on stdout
                            is used as the value of \$PGM as a KORE term.
-      --no-pattern         Skip kore-match-disjunction invokation when --search
-                           or --search-final is used. Can't be used with
-                           --pattern PAT.
+      --no-pattern         Skip pattern matching the result of searches on the
+                           llvm backend against the default search pattern.
       --pattern PAT        Use PAT as the search pattern with --search. Can
                            also be used without --search to match the output
                            configuration against a pattern and print the
@@ -583,7 +582,7 @@ if [ "$backendName" = "llvm" ]; then
     if [ -z "$noPattern" ]; then
     execute kore-match-disjunction "$kompiledDir/definition.kore" --module "$mainModuleName" --disjunction "$disjunctFile" --match "$patternFile" --output "$kore_output"
     else
-    execute $cmdprefix "$kompiledDir/interpreter" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags
+     execute cp "$disjunctFile" "$kore_output"
     fi
   else
     set +e
