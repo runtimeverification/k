@@ -26,7 +26,6 @@ class KRun(KPrint):
         self,
         definition_dir: Path,
         use_directory: Optional[Path] = None,
-        profile: bool = False,
         command: str = 'krun',
         bug_report: Optional[BugReport] = None,
         extra_unparsing_modules: Iterable[KFlatModule] = (),
@@ -34,7 +33,6 @@ class KRun(KPrint):
         super(KRun, self).__init__(
             definition_dir,
             use_directory=use_directory,
-            profile=profile,
             bug_report=bug_report,
             extra_unparsing_modules=extra_unparsing_modules,
         )
@@ -66,7 +64,6 @@ class KRun(KPrint):
                 no_expand_macros=not expand_macros,
                 cmap=cmap,
                 pmap=pmap,
-                profile=self._profile,
                 bug_report=self._bug_report,
                 check=(expect_rc == 0),
             )
@@ -98,7 +95,6 @@ class KRun(KPrint):
                 parser='cat',
                 depth=depth,
                 no_expand_macros=not expand_macros,
-                profile=self._profile,
                 bug_report=self._bug_report,
                 check=(expect_rc == 0),
             )
@@ -131,7 +127,6 @@ class KRun(KPrint):
                 term=True,
                 depth=depth,
                 no_expand_macros=not expand_macros,
-                profile=self._profile,
                 bug_report=self._bug_report,
                 check=(expect_rc == 0),
             )
@@ -218,7 +213,6 @@ def _krun(
     check: bool = True,
     pipe_stderr: bool = False,
     logger: Optional[Logger] = None,
-    profile: bool = False,
     bug_report: Optional[BugReport] = None,
 ) -> CompletedProcess:
     if input_file:
@@ -252,7 +246,7 @@ def _krun(
             bug_report.add_command(args)
 
     try:
-        return run_process(args, check=check, pipe_stderr=pipe_stderr, logger=logger or _LOGGER, profile=profile)
+        return run_process(args, check=check, pipe_stderr=pipe_stderr, logger=logger or _LOGGER)
     except CalledProcessError as err:
         raise RuntimeError(
             f'Command krun exited with code {err.returncode} for: {input_file}', err.stdout, err.stderr
