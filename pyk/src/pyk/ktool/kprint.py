@@ -78,7 +78,6 @@ def _kast(
     sort: Optional[str] = None,
     # ---
     check: bool = True,
-    profile: bool = False,
 ) -> CompletedProcess:
     if input_file:
         check_file_path(input_file)
@@ -97,7 +96,7 @@ def _kast(
     )
 
     try:
-        return run_process(args, logger=_LOGGER, check=check, profile=profile)
+        return run_process(args, logger=_LOGGER, check=check)
     except CalledProcessError as err:
         raise RuntimeError(
             f'Command kast exited with code {err.returncode} for: {input_file}', err.stdout, err.stderr
@@ -135,7 +134,6 @@ class KPrint:
     use_directory: Path
     main_module: str
     backend: str
-    _profile: bool
     _extra_unparsing_modules: Iterable[KFlatModule]
 
     _temp_dir: Optional[TemporaryDirectory] = None
@@ -146,7 +144,6 @@ class KPrint:
         self,
         definition_dir: Path,
         use_directory: Optional[Path] = None,
-        profile: bool = False,
         bug_report: Optional[BugReport] = None,
         extra_unparsing_modules: Iterable[KFlatModule] = (),
     ) -> None:
@@ -159,7 +156,6 @@ class KPrint:
         check_dir_path(self.use_directory)
         self._definition = None
         self._symbol_table = None
-        self._profile = profile
         with open(self.definition_dir / 'mainModule.txt', 'r') as mm:
             self.main_module = mm.read()
         with open(self.definition_dir / 'backend.txt', 'r') as ba:
@@ -203,7 +199,6 @@ class KPrint:
             output=KAstOutput.JSON,
             expression=ktoken.token,
             sort=ktoken.sort.name,
-            profile=self._profile,
         )
         return KInner.from_dict(json.loads(proc_res.stdout)['term'])
 
@@ -226,7 +221,6 @@ class KPrint:
             input=KAstInput.KORE,
             output=KAstOutput.JSON,
             expression=kore.text,
-            profile=self._profile,
         )
         return KInner.from_dict(json.loads(proc_res.stdout)['term'])
 
@@ -352,7 +346,6 @@ class KPrint:
             output=KAstOutput.KORE,
             expression=json.dumps(kast_json),
             sort=sort.name if sort is not None else None,
-            profile=self._profile,
         )
         return KoreParser(proc_res.stdout).pattern()
 

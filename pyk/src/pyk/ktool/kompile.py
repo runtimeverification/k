@@ -42,7 +42,6 @@ def kompile(
     # ---
     cwd: Optional[Path] = None,
     check: bool = True,
-    profile: bool = False,
 ) -> Path:
     main_file = Path(main_file)
     check_file_path(abs_or_rel_to(main_file, cwd or Path()))
@@ -86,7 +85,7 @@ def kompile(
     )
 
     try:
-        run_process(args, logger=_LOGGER, cwd=cwd, check=check, profile=profile)
+        run_process(args, logger=_LOGGER, cwd=cwd, check=check)
     except CalledProcessError as err:
         raise RuntimeError(
             f'Command kompile exited with code {err.returncode} for: {main_file}',
@@ -119,7 +118,6 @@ def llvm_kompile(
     # ---
     cwd: Optional[Path] = None,
     check: bool = True,
-    profile: bool = False,
 ) -> Path:
     return kompile(
         main_file=main_file,
@@ -139,7 +137,6 @@ def llvm_kompile(
         no_llvm_kompile=no_llvm_kompile,
         cwd=cwd,
         check=check,
-        profile=profile,
     )
 
 
@@ -161,7 +158,6 @@ def haskell_kompile(
     # ---
     cwd: Optional[Path] = None,
     check: bool = True,
-    profile: bool = False,
 ) -> Path:
     return kompile(
         main_file=main_file,
@@ -179,7 +175,6 @@ def haskell_kompile(
         concrete_rules=concrete_rules,
         cwd=cwd,
         check=check,
-        profile=profile,
     )
 
 

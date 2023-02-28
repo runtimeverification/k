@@ -50,7 +50,6 @@ def _kprove(
     args: Iterable[str] = (),
     env: Optional[Mapping[str, str]] = None,
     check: bool = True,
-    profile: bool = False,
     depth: Optional[int] = None,
 ) -> CompletedProcess:
     check_file_path(spec_file)
@@ -74,7 +73,7 @@ def _kprove(
 
     try:
         run_args = tuple(chain(command, [str(spec_file)], typed_args, args))
-        return run_process(run_args, logger=_LOGGER, env=env, check=check, profile=profile)
+        return run_process(run_args, logger=_LOGGER, env=env, check=check)
     except CalledProcessError as err:
         raise RuntimeError(
             f'Command kprove exited with code {err.returncode} for: {spec_file}', err.stdout, err.stderr
@@ -131,7 +130,6 @@ class KProve(KPrint):
         definition_dir: Path,
         main_file: Optional[Path] = None,
         use_directory: Optional[Path] = None,
-        profile: bool = False,
         command: str = 'kprove',
         bug_report: Optional[BugReport] = None,
         extra_unparsing_modules: Iterable[KFlatModule] = (),
@@ -139,7 +137,6 @@ class KProve(KPrint):
         super(KProve, self).__init__(
             definition_dir,
             use_directory=use_directory,
-            profile=profile,
             bug_report=bug_report,
             extra_unparsing_modules=extra_unparsing_modules,
         )
@@ -197,7 +194,6 @@ class KProve(KPrint):
             args=self.prover_args + list(args),
             env=env,
             check=False,
-            profile=self._profile,
             depth=depth,
         )
 
