@@ -355,17 +355,20 @@ jobs:
           script: |
             const { owner, repo } = context.repo
             await github.repos.updateRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }}, prerelease: false })
-      - name: Update dependents
+      - name: 'Update dependents'
         env:
-          JENKINS_DEVOPS_TOKEN: ${{ secrets.JENKINS_DEVOPS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
           VERSION: ${{ needs.macos-build.outputs.version }}
         run: |
-          curl --fail 'https://ci.runtimeverification.com/jenkins/buildByToken/buildWithParameters' \
-              --data job=Devops/master \
-              --data token=$JENKINS_DEVOPS_TOKEN \
-              --data UPDATE_DEPS=true \
-              --data UPDATE_DEPS_REPO=runtimeverification/k \
-              --data UPDATE_DEPS_VERSION=v$VERSION
+          set -x
+          version="${GITHUB_SHA}"
+          curl --fail                                                          \
+            -X POST                                                            \
+            -H "Accept: application/vnd.github+json"                           \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}"                         \
+            -H "X-GitHub-Api-Version: 2022-11-28"                              \
+            https://api.github.com/repos/runtimeverification/devops/dispatches \
+            -d '{"event_type":"on-demand-test","client_payload":{"repo":"runtimeverification/k","version":"'${VERSION}'"}}'
 
   gh-pages:
     name: 'GitHub Pages deployment'
