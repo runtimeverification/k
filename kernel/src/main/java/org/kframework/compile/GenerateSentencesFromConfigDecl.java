@@ -4,6 +4,7 @@ package org.kframework.compile;
 import com.google.common.collect.Lists;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Location;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
@@ -96,11 +97,14 @@ public class GenerateSentencesFromConfigDecl {
                                 boolean isStream = cellProperties.getOption("stream").isDefined();
 
                                 K cellContents = kapp.klist().items().get(2);
+                                Att att = cfgAtt;
+                                if (kapp.att().contains(Location.class))
+                                    att = cfgAtt.add(Location.class, kapp.att().get(Location.class));
                                 Tuple4<Set<Sentence>, List<Sort>, K, Boolean> childResult = genInternal(
-                                        cellContents, null, cfgAtt, m, kore);
+                                        cellContents, null, att, m, kore);
 
                                 boolean isLeafCell = childResult._4();
-                                Tuple4<Set<Sentence>, Sort, K, Boolean> myResult = computeSentencesOfWellFormedCell(isLeafCell, isStream, kore, multiplicity, cfgAtt, m, cellName, cellProperties,
+                                Tuple4<Set<Sentence>, Sort, K, Boolean> myResult = computeSentencesOfWellFormedCell(isLeafCell, isStream, kore, multiplicity, att, m, cellName, cellProperties,
                                         childResult._2(), childResult._3(), ensures, hasConfigOrRegularVariable(cellContents, m));
                                 return Tuple4.apply((Set<Sentence>)childResult._1().$bar(myResult._1()), Lists.newArrayList(myResult._2()), myResult._3(), false);
                             }
