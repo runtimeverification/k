@@ -29,6 +29,8 @@ jobs:
         if: ${{ !startsWith(matrix.os, 'self') }}
         uses: cachix/install-nix-action@v19
         with:
+          # Pin due to error https://github.com/cachix/cachix-action/issues/138#issuecomment-1448893176
+          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
           extra_nix_config: |
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
             substituters = http://cache.nixos.org https://cache.iog.io
