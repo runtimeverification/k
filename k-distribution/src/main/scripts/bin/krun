@@ -304,18 +304,18 @@ do
 
       --pattern)
       if [ -z "$noPattern" ]; then
-      pattern="$2"
+        pattern="$2"
       else
-      error 1 "The option --pattern cannot be used with the option --no-pattern"
+        error 1 "The option --pattern cannot be used with the option --no-pattern"
       fi
       shift
       ;;
 
       --no-pattern)
       if [ -z "$pattern" ]; then
-      noPattern=true
+        noPattern=true
       else
-      error 1 "The option --no-pattern cannot be used with the option --pattern"
+        error 1 "The option --no-pattern cannot be used with the option --pattern"
       fi
       ;;
 
@@ -580,9 +580,9 @@ if [ "$backendName" = "llvm" ]; then
     result=$?
     set -e
     if [ -z "$noPattern" ]; then
-    execute kore-match-disjunction "$kompiledDir/definition.kore" --module "$mainModuleName" --disjunction "$disjunctFile" --match "$patternFile" --output "$kore_output"
+      execute kore-match-disjunction "$kompiledDir/definition.kore" --module "$mainModuleName" --disjunction "$disjunctFile" --match "$patternFile" --output "$kore_output"
     else
-     execute cp "$disjunctFile" "$kore_output"
+      execute cp "$disjunctFile" "$kore_output"
     fi
   else
     set +e
