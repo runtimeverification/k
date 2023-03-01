@@ -5,7 +5,7 @@ from functools import cached_property
 from pathlib import Path
 from subprocess import CalledProcessError, CompletedProcess
 from tempfile import TemporaryDirectory
-from typing import Any, Callable, Dict, Final, Iterable, List, Optional
+from typing import Any, Callable, Dict, Final, Iterable, List, Optional, Union
 
 from ..cli_utils import BugReport, check_dir_path, check_file_path, run_process
 from ..kast.inner import KApply, KAs, KAst, KAtt, KInner, KLabel, KRewrite, KSequence, KSort, KToken, KVariable
@@ -68,54 +68,95 @@ class KAstOutput(Enum):
 
 
 def _kast(
-    command: str = 'kast',
+    file: Optional[Union[str, Path]] = None,
     *,
-    input_file: Optional[Path] = None,
-    definition_dir: Optional[Path] = None,
-    input: Optional[KAstInput] = None,
-    output: Optional[KAstOutput] = None,
+    command: Optional[str] = None,
+    definition_dir: Optional[Union[str, Path]] = None,
+    input: Optional[Union[str, KAstInput]] = None,
+    output: Optional[Union[str, KAstOutput]] = None,
     expression: Optional[str] = None,
+    module: Optional[str] = None,
     sort: Optional[str] = None,
+    gen_glr_parser: bool = False,
     # ---
     check: bool = True,
 ) -> CompletedProcess:
-    if input_file:
-        check_file_path(input_file)
+    if file is not None:
+        file = Path(file)
 
-    if definition_dir:
+    if file and not gen_glr_parser:
+        check_file_path(file)
+
+    if not file and gen_glr_parser:
+        raise ValueError('No output file specified for --gen-glr-parser')
+
+    if definition_dir is not None:
+        definition_dir = Path(definition_dir)
         check_dir_path(definition_dir)
 
+    if input is not None:
+        input = KAstInput(input)
+
+    if output is not None:
+        output = KAstOutput(output)
+
     args = _build_arg_list(
+        file=file,
         command=command,
-        input_file=input_file,
         definition_dir=definition_dir,
         input=input,
         output=output,
         expression=expression,
+        module=module,
         sort=sort,
+        gen_glr_parser=gen_glr_parser,
     )
 
     try:
         return run_process(args, logger=_LOGGER, check=check)
     except CalledProcessError as err:
         raise RuntimeError(
-            f'Command kast exited with code {err.returncode} for: {input_file}', err.stdout, err.stderr
+            f'Command kast exited with code {err.returncode} for: {file}', err.stdout, err.stderr
         ) from err
+
+
+def gen_glr_parser(
+    parser_file: Union[str, Path],
+    *,
+    command: Optional[str] = None,
+    definition_dir: Optional[Union[str, Path]] = None,
+    module: Optional[str] = None,
+    sort: Optional[str] = None,
+) -> Path:
+    parser_file = Path(parser_file)
+    _kast(
+        file=parser_file,
+        command=command,
+        definition_dir=definition_dir,
+        module=module,
+        sort=sort,
+        gen_glr_parser=True,
+        check=True,
+    )
+    assert parser_file.is_file()
+    return parser_file
 
 
 def _build_arg_list(
     *,
-    command: str,
-    input_file: Optional[Path],
+    file: Optional[Path],
+    command: Optional[str],
     definition_dir: Optional[Path],
     input: Optional[KAstInput],
     output: Optional[KAstOutput],
     expression: Optional[str],
+    module: Optional[str],
     sort: Optional[str],
+    gen_glr_parser: bool,
 ) -> List[str]:
-    args = [command]
-    if input_file:
-        args += [str(input_file)]
+    args = [command if command is not None else 'kast']
+    if file:
+        args += [str(file)]
     if definition_dir:
         args += ['--definition', str(definition_dir)]
     if input:
@@ -124,8 +165,12 @@ def _build_arg_list(
         args += ['--output', output.value]
     if expression:
         args += ['--expression', expression]
+    if module:
+        args += ['--module', module]
     if sort:
         args += ['--sort', sort]
+    if gen_glr_parser:
+        args += ['--gen-glr-parser']
     return args
 
 
