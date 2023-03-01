@@ -98,7 +98,7 @@ public class KLanguageServer implements LanguageServer, LanguageClientAware {
 
     @Override
     public void exit() {
-        System.exit(shutdown);
+        Main.exit(shutdown);
     }
 
     @Override

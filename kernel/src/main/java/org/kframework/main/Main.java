@@ -64,6 +64,16 @@ public class Main {
         return isNailgun;
     }
 
+    private static NGContext context = null;
+
+    public static void exit(int exitCode) {
+      if (context != null) {
+          context.exit(exitCode);
+      } else {
+          System.exit(exitCode);
+      }
+    }
+
     public static void nailMain(NGContext context) {
         long startTime = System.nanoTime();
         KServerFrontEnd kserver = KServerFrontEnd.instance();
@@ -71,10 +81,11 @@ public class Main {
             context.assertLoopbackClient();
         }
         isNailgun = true;
+        Main.context = context;
         if (context.getArgs().length >= 1) {
             String[] args2 = Arrays.copyOfRange(context.getArgs(), 1, context.getArgs().length);
             int result = kserver.run(context.getArgs()[0], args2, new File(context.getWorkingDirectory()), (Map) context.getEnv(), startTime);
-            System.exit(result);
+            context.exit(result);
             return;
         }
         invalidJarArguments();
@@ -195,7 +206,7 @@ public class Main {
         }
         if (modules.size() == 0) {
             //boot error, we should have printed it already
-            System.exit(1);
+            Main.exit(1);
         }
         Injector injector = Guice.createInjector(modules);
         return injector;
@@ -203,6 +214,6 @@ public class Main {
 
     private static void invalidJarArguments() {
         System.err.println("The first argument of the K java compiler not recognized. Try -kompile, -kast, -kdep, -kserver, or -klsp.");
-        System.exit(1);
+        Main.exit(1);
     }
 }
