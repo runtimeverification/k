@@ -17,7 +17,7 @@ krun (--search-all)? {file}                         : interpret file, evaluating
 foo-kompiled/parser_PGM {file}                      : ahead of time parse
 kompile (--main-module)? (--syntax-module)? {file}  : generate parser for {file}.k {file}-syntax.k, explicitly state main modules
 kparse <file> | kore-print -                        : parse and unparse a file
-kompile {file} -ccopt -g -ccopt -O1                 : generate debuggable output for {file}.k
+kompile {file} --enable-llvm-debug                  : generate debuggable output for {file}.k
 krun {file} --debugger                              : debug K code
 kprove {file}                                       : Verify specs in {file}
 ```
