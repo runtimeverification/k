@@ -133,6 +133,11 @@ public class LLVMBackend extends KoreBackend {
             // Arguments after this point are passed on to Clang.
             args.add("--");
 
+            if (options.debug) {
+                args.add("-g");
+                args.add("-O1");
+            }
+
             // For Python bindings, we explicitly leave this unset so that python3-config
             // can decide the proper filename.
             if (executable != null) {
@@ -146,9 +151,12 @@ public class LLVMBackend extends KoreBackend {
                 args.add(outputFile.getCanonicalPath());
             }
 
-            if (kompileOptions.optimize1) args.add("-O1");
-            if (kompileOptions.optimize2) args.add("-O2");
-            if (kompileOptions.optimize3) args.add("-O2"); // clang -O3 does not make the llvm backend any faster
+            if (!options.debug) {
+                if (kompileOptions.optimize1) args.add("-O1");
+                if (kompileOptions.optimize2) args.add("-O2");
+                if (kompileOptions.optimize3) args.add("-O2"); // clang -O3 does not make the llvm backend any faster
+            }
+
             args.addAll(options.ccopts);
 
             if (globalOptions.verbose) {
