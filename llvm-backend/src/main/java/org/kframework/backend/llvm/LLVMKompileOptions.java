@@ -12,6 +12,9 @@ import java.util.List;
 @RequestScoped
 public class LLVMKompileOptions {
 
+    @Parameter(names="--enable-llvm-debug", description="Enable debugging support for the LLVM backend.")
+    public boolean debug = false;
+
     @Parameter(names="-ccopt", description="Add a command line option to the compiler invocation for the llvm backend.", listConverter=SingletonListConverter.class)
     public List<String> ccopts = new ArrayList<>();
 
