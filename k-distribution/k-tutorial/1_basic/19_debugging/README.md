@@ -20,13 +20,10 @@ You will need GDB in order to complete this lesson. If you do not already
 have GDB installed, then do so. Steps to install GDB are outlined in
 this [GDB Tutorial](http://www.gdbtutorial.com/tutorial/how-install-gdb).
 
-The first thing neccessary in order to debug a K interpreter in GDB is to
-build the interpreter with full debugging support enabled. This can be done
-relatively simply. First, run `kompile` with the command line flags `-ccopt -g -ccopt -O1`.
-The resulting compiled K definition will be ready to support
-debugging.
-
-Note: the 'O' in `-O1` is the letter 'O' not the number 0!
+The first thing neccessary in order to debug a K interpreter in GDB is to build
+the interpreter with full debugging support enabled. This can be done relatively
+simply. First, run `kompile` with the command line flag `--enable-llvm-debug`.
+The resulting compiled K definition will be ready to support debugging.
 
 Once you have a compiled K definition and a program you wish to debug, you
 can start the debugger by passing the `--debugger` flag to `krun`. This will
@@ -44,10 +41,9 @@ module LESSON-19-A
 endmodule
 ```
 
-If we compile this definition with
-`kompile lesson-19-a.k -ccopt -g -ccopt -O1`, and run the program `0` in the
-debugger with `krun -cPGM=0 --debugger`, we will see the following output
-(roughly):
+If we compile this definition with `kompile lesson-19-a.k --enable-llvm-debug`,
+and run the program `0` in the debugger with `krun -cPGM=0 --debugger`, we will
+see the following output (roughly):
 
 ```
 GNU gdb (Ubuntu 9.2-0ubuntu1~20.04) 9.2
