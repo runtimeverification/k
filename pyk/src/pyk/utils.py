@@ -330,7 +330,7 @@ def shorten_hashes(value: Any, left_chars: int = 6, right_chars: int = 6) -> Any
         result = [shorten_hashes(v) for v in value]
     elif type(value) is dict:
         result = {}
-        for (k, v) in value.items():
+        for k, v in value.items():
             result[shorten_hashes(k)] = shorten_hashes(v)
     elif type(value) is set:
         result = set()

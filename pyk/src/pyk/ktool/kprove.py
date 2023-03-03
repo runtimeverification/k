@@ -319,7 +319,6 @@ class KProve(KPrint):
 
 
 def _get_rule_log(debug_log_file: Path) -> List[List[Tuple[str, bool, int]]]:
-
     # rule_loc, is_success, ellapsed_time_since_start
     def _get_rule_line(_line: str) -> Optional[Tuple[str, bool, int]]:
         if _line.startswith('kore-exec: ['):

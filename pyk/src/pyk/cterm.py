@@ -128,7 +128,6 @@ def build_rule(
     priority: Optional[int] = None,
     keep_vars: Iterable[str] = (),
 ) -> Tuple[KRule, Subst]:
-
     init_config, *init_constraints = init_cterm
     final_config, *final_constraints = final_cterm
     final_constraints = [c for c in final_constraints if c not in init_constraints]
