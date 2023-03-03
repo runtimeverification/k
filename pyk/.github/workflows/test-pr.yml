@@ -36,10 +36,8 @@ jobs:
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
-      - name: 'Install dependencies'
-        run: |
-          curl -sSL https://install.python-poetry.org | sudo bash -c 'POETRY_HOME=/usr python3 -'
-          poetry --version
+      - name: 'Install Poetry'
+        uses: Gr1N/setup-poetry@v8
       - name: 'Build and run code quality checks'
         run: make check
 
@@ -50,10 +48,8 @@ jobs:
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
-      - name: 'Install dependencies'
-        run: |
-          curl -sSL https://install.python-poetry.org | sudo bash -c 'POETRY_HOME=/usr python3 -'
-          poetry --version
+      - name: 'Install Poetry'
+        uses: Gr1N/setup-poetry@v8
       - name: 'Build and run unit tests'
         run: make cov-unit
 
