@@ -432,6 +432,9 @@ class KoreServer(ContextManager['KoreServer']):
         module_name: str,
         port: int,
         *,
+        smt_timeout: Optional[int] = None,
+        smt_retry_limit: Optional[int] = None,
+        smt_reset_interval: Optional[int] = None,
         command: Union[str, Iterable[str]] = 'kore-rpc',
         bug_report: Optional[BugReport] = None,
     ):
@@ -441,13 +444,26 @@ class KoreServer(ContextManager['KoreServer']):
         definition_file = kompiled_dir / 'definition.kore'
         check_file_path(definition_file)
 
+        self._check_none_or_positive(smt_timeout, 'smt_timeout')
+        self._check_none_or_positive(smt_retry_limit, 'smt_retry_limit')
+        self._check_none_or_positive(smt_reset_interval, 'smt_reset_interval')
+
         if type(command) is str:
             command = (command,)
 
-        args = tuple(command) + (str(definition_file), '--module', module_name, '--server-port', str(port))
+        args = list(command)
+        args += [str(definition_file)]
+        args += ['--module', module_name]
+        args += ['--server-port', str(port)]
+        if smt_timeout:
+            args += ['--smt-timeout', str(smt_timeout)]
+        if smt_retry_limit:
+            args += ['--smt-retry-limit', str(smt_retry_limit)]
+        if smt_reset_interval:
+            args += ['--smt-reset-interval', str(smt_reset_interval)]
 
         self._port = port
-        _LOGGER.info(f'Starting KoreServer: port={self._port}')
+        _LOGGER.info(f'Starting KoreServer: {" ".join(args)}')
         if bug_report is not None:
             bug_report.add_command(args)
         self._proc = Popen(args)
@@ -464,3 +480,8 @@ class KoreServer(ContextManager['KoreServer']):
         self._proc.terminate()
         self._proc.wait()
         _LOGGER.info(f'KoreServer stopped: port={self._port}, pid={self._pid}')
+
+    @staticmethod
+    def _check_none_or_positive(n: Optional[int], param_name: str) -> None:
+        if n is not None and n <= 0:
+            raise ValueError(f'Expected positive integer for: {param_name}, got: {n}')
