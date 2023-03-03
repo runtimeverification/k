@@ -60,8 +60,9 @@ ENV LD_LIBRARY_PATH=/usr/local/lib
 ENV PATH=/home/user/hub-linux-amd64-2.14.0/bin:$PATH
 
 ENV LC_ALL=C.UTF-8
-ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml      .tmp-haskell/
-ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/kore.cabal .tmp-haskell/kore/
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml                          .tmp-haskell/
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/kore.cabal                     .tmp-haskell/kore/
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore-rpc-types/kore-rpc-types.cabal .tmp-haskell/kore-rpc-types/
 RUN cd .tmp-haskell && stack build --only-snapshot
 
 ADD pom.xml                                                    .tmp-maven/
