@@ -55,7 +55,7 @@ jobs:
           curl -sSL https://install.python-poetry.org | sudo bash -c 'POETRY_HOME=/usr python3 -'
           poetry --version
       - name: 'Build and run unit tests'
-        run: make test-unit
+        run: make cov-unit
 
   integration-tests:
     needs: unit-tests
@@ -88,7 +88,7 @@ jobs:
           docker cp . pyk-ci:/home/user
           docker exec pyk-ci chown -R user:user /home/user
       - name: 'Build and run integration tests'
-        run: docker exec --user user --workdir /home/user pyk-ci make test-integration
+        run: docker exec --user user --workdir /home/user pyk-ci make cov-integration
       - name: 'Tear down Docker container'
         if: always()
         run: |
