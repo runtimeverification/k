@@ -1133,7 +1133,6 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return subst(kast)
 
     def add_cell_map_items(self, kast: KInner) -> KInner:
-
         # example:
         # syntax AccountCellMap [cellCollection, hook(MAP.Map)]
         # syntax AccountCellMap ::= AccountCellMap AccountCellMap [assoc, avoid, cellCollection, comm, element(AccountCellMapItem), function, hook(MAP.concat), unit(.AccountCellMap), wrapElement(<account>)]
@@ -1153,7 +1152,6 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return bottom_up(_wrap_elements, _kast)
 
     def remove_cell_map_items(self, kast: KInner) -> KInner:
-
         # example:
         # syntax AccountCellMap [cellCollection, hook(MAP.Map)]
         # syntax AccountCellMap ::= AccountCellMap AccountCellMap [assoc, avoid, cellCollection, comm, element(AccountCellMapItem), function, hook(MAP.concat), unit(.AccountCellMap), wrapElement(<account>)]
@@ -1226,7 +1224,6 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return self._init_config[sort]
 
     def _compute_init_config(self, sort: KSort) -> KInner:
-
         config_var_map = KVariable('__###CONFIG_VAR_MAP###__')
 
         def _remove_config_var_lookups(_kast: KInner) -> KInner:

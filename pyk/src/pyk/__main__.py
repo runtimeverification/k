@@ -127,7 +127,6 @@ def json_to_kore() -> None:
 
 
 def create_argument_parser() -> ArgumentParser:
-
     logging_args = ArgumentParser(add_help=False)
     logging_args.add_argument(
         '-v', '--verbose', action='count', help='Verbosity level, repeat for more verbosity (up to two times).'
