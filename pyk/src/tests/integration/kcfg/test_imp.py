@@ -240,7 +240,6 @@ class TestImpProof(KCFGExploreTest):
         max_depth: int,
         terminal_rules: Iterable[str],
     ) -> None:
-
         claims = kprove.get_claims(
             Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}']
         )

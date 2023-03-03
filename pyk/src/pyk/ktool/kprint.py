@@ -284,12 +284,10 @@ class KPrint:
             return KVariable(vname, sort=KSort(kore.sort.name[4:]))
 
         elif type(kore) is App:
-
             if kore.symbol == 'inj' and len(kore.sorts) == 2 and len(kore.args) == 1:
                 return self._kore_to_kast(kore.args[0])
 
             elif len(kore.sorts) == 0:
-
                 if kore.symbol == 'dotk' and len(kore.args) == 0:
                     return KSequence([])
 

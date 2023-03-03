@@ -396,7 +396,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             return short_info
 
         def _print_subgraph(indent: str, curr_node: KCFG.Node, prior_on_trace: List[KCFG.Node]) -> None:
-
             edges_from = sorted(self.edge_likes(source_id=curr_node.id))
             if curr_node in processed_nodes:
                 if not edges_from:
@@ -639,7 +638,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             self.remove_alias(alias)
 
     def replace_node(self, node_id: str, new_cterm: CTerm) -> str:
-
         # Remove old node, record data
         node = self.node(node_id)
         in_edges = self.edges(target_id=node.id)
@@ -711,7 +709,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         return edge
 
     def split_node(self, source_id: str, constraints: Iterable[KInner]) -> List[str]:
-
         source = self.node(source_id)
 
         def _add_case_edge(_constraint: KInner) -> str:
@@ -976,7 +973,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         return paths
 
     def reachable_nodes(self, source_id: str, *, reverse: bool = False, traverse_covers: bool = False) -> Set[Node]:
-
         visited: Set[KCFG.Node] = set()
         worklist: List[KCFG.Node] = [self.node(source_id)]
 

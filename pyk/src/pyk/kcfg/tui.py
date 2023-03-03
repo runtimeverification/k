@@ -172,7 +172,6 @@ class NodeView(Widget):
         custom_str = 'Custom'
 
         if self._element is not None:
-
             if type(self._element) is KCFG.Node:
                 term_str, constraint_str = _cterm_text(self._element.cterm)
 
@@ -241,7 +240,6 @@ class KCFGViewer(App):
         yield Footer()
 
     def on_graph_chunk_selected(self, message: GraphChunk.Selected) -> None:
-
         if message.chunk_id.startswith('node_'):
             self._selected_chunk = message.chunk_id
             node = message.chunk_id[5:]
