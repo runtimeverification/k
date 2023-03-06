@@ -159,7 +159,7 @@ As we can see, ten rewrite steps were taken.
 
 The next important step in debugging an application in GDB is to be able to
 set breakpoints. Generally speaking, there are three types of breakpoints we
-are interested in in a K semantics: Setting a breakpoint when a particular
+are interested in a K semantics: Setting a breakpoint when a particular
 function is called, setting a breakpoint when a particular rule is applied,
 and setting a breakpoint when a side condition of a rule is evaluated.
 
