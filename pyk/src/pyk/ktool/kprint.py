@@ -8,6 +8,7 @@ from tempfile import TemporaryDirectory
 from typing import Any, Callable, Dict, Final, Iterable, List, Optional, Union
 
 from ..cli_utils import BugReport, check_dir_path, check_file_path, run_process
+from ..kast import kast_term
 from ..kast.inner import KApply, KAs, KAst, KAtt, KInner, KLabel, KRewrite, KSequence, KSort, KToken, KVariable
 from ..kast.manip import flatten_label
 from ..kast.outer import (
@@ -245,7 +246,7 @@ class KPrint:
             expression=ktoken.token,
             sort=ktoken.sort.name,
         )
-        return KInner.from_dict(json.loads(proc_res.stdout)['term'])
+        return kast_term(json.loads(proc_res.stdout), KInner)  # type: ignore # https://github.com/python/mypy/issues/4717
 
     def kore_to_pretty(self, pattern: Pattern) -> str:
         proc_res = _kast(
@@ -267,7 +268,7 @@ class KPrint:
             output=KAstOutput.JSON,
             expression=kore.text,
         )
-        return KInner.from_dict(json.loads(proc_res.stdout)['term'])
+        return kast_term(json.loads(proc_res.stdout), KInner)  # type: ignore # https://github.com/python/mypy/issues/4717
 
     def _kore_to_kast(self, kore: Pattern) -> Optional[KInner]:
         _LOGGER.debug(f'_kore_to_kast: {kore}')

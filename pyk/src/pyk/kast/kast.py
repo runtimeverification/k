@@ -172,3 +172,13 @@ class WithKAtt(ABC):
 
     def update_atts(self: W, atts: Mapping[str, Any]) -> W:
         return self.let_att(att=self.att.update(atts))
+
+
+def kast_term(dct: Mapping[str, Any], cls: Type[T] = KAst) -> T:  # type: ignore
+    if dct['format'] != 'KAST':
+        raise ValueError(f"Invalid format: {dct['format']}")
+
+    if dct['version'] != 2:
+        raise ValueError(f"Invalid version: {dct['version']}")
+
+    return cls.from_dict(dct['term'])

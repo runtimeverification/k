@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from pyk.kast import kast_term
 from pyk.kast.inner import EMPTY_ATT
 from pyk.kast.manip import remove_generated_cells
 from pyk.kast.outer import KDefinition, KFlatModule, KFlatModuleList, KRequire
@@ -26,7 +27,7 @@ class TestEmitJsonSpec(KProveTest):
         spec_file = Path('k-files/looping-spec.k')
         spec_json_file = definition_dir / 'looping-spec.json'
         _kprove(spec_file, kompiled_dir=definition_dir, emit_json_spec=spec_json_file, dry_run=True)
-        kfml = KFlatModuleList.from_dict(json.loads(spec_json_file.read_text())['term'])
+        kfml = kast_term(json.loads(spec_json_file.read_text()), KFlatModuleList)
         module = kfml.modules[0]
         claim = module.claims[0]
         claim = claim.let(body=remove_generated_cells(claim.body), att=EMPTY_ATT)

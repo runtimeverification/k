@@ -28,7 +28,7 @@ from typing import (
 
 from ..cli_utils import BugReport, check_dir_path, check_file_path
 from ..utils import filter_none
-from .syntax import And, Pattern, SortApp
+from .syntax import And, Pattern, SortApp, kore_term
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -188,9 +188,10 @@ class State:
     @staticmethod
     def from_dict(dct: Mapping[str, Any]) -> 'State':
         return State(
-            term=Pattern.from_dict(dct['term']['term']),
-            substitution=Pattern.from_dict(dct['substitution']['term']) if 'substitution' in dct else None,
-            predicate=Pattern.from_dict(dct['predicate']['term']) if 'predicate' in dct else None,
+            # https://github.com/python/mypy/issues/4717
+            term=kore_term(dct['term'], Pattern),  # type: ignore
+            substitution=kore_term(dct['substitution'], Pattern) if 'substitution' in dct else None,  # type: ignore
+            predicate=kore_term(dct['predicate'], Pattern) if 'predicate' in dct else None,  # type: ignore
         )
 
     @property
@@ -341,13 +342,14 @@ class ImpliesResult:
 
     @staticmethod
     def from_dict(dct: Mapping[str, Any]) -> 'ImpliesResult':
-        substitution = dct.get('condition', {}).get('substitution', {}).get('term')
-        predicate = dct.get('condition', {}).get('predicate', {}).get('term')
+        substitution = dct.get('condition', {}).get('substitution')
+        predicate = dct.get('condition', {}).get('predicate')
         return ImpliesResult(
             satisfiable=dct['satisfiable'],
-            implication=Pattern.from_dict(dct['implication']['term']),
-            substitution=Pattern.from_dict(substitution) if substitution is not None else None,
-            predicate=Pattern.from_dict(predicate) if predicate is not None else None,
+            # https://github.com/python/mypy/issues/4717
+            implication=kore_term(dct['implication'], Pattern),  # type: ignore
+            substitution=kore_term(substitution, Pattern) if substitution is not None else None,  # type: ignore
+            predicate=kore_term(predicate, Pattern) if predicate is not None else None,  # type: ignore
         )
 
 
@@ -418,7 +420,7 @@ class KoreClient(ContextManager['KoreClient']):
         }
 
         result = self._request('simplify', **params)
-        return Pattern.from_dict(result['state']['term'])
+        return kore_term(result['state'], Pattern)  # type: ignore # https://github.com/python/mypy/issues/4717
 
 
 class KoreServer(ContextManager['KoreServer']):

@@ -10,6 +10,7 @@ from typing import Final, Iterable, List, Mapping, Optional, Tuple
 
 from ..cli_utils import BugReport, check_dir_path, check_file_path, gen_file_timestamp, run_process
 from ..cterm import CTerm, build_claim
+from ..kast import kast_term
 from ..kast.inner import KInner
 from ..kast.manip import extract_subst, flatten_label, free_vars
 from ..kast.outer import KClaim, KDefinition, KFlatModule, KFlatModuleList, KImport, KRequire, KRule, KSentence
@@ -204,7 +205,7 @@ class KProve(KPrint):
             return mlBottom()
 
         debug_log = _get_rule_log(log_file)
-        final_state = KInner.from_dict(json.loads(proc_result.stdout)['term'])
+        final_state = kast_term(json.loads(proc_result.stdout), KInner)  # type: ignore # https://github.com/python/mypy/issues/4717
         if is_top(final_state) and len(debug_log) == 0 and not allow_zero_step:
             raise ValueError(f'Proof took zero steps, likely the LHS is invalid: {spec_file}')
         return final_state
@@ -284,7 +285,7 @@ class KProve(KPrint):
                 dry_run=True,
                 args=['--emit-json-spec', ntf.name],
             )
-            flat_module_list = KFlatModuleList.from_dict(json.loads(Path(ntf.name).read_text())['term'])
+            flat_module_list = kast_term(json.loads(Path(ntf.name).read_text()), KFlatModuleList)
 
         all_claims = {c.label: c for m in flat_module_list.modules for c in m.claims}
 

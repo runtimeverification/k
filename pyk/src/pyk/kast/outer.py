@@ -39,7 +39,7 @@ from .inner import (
     top_down,
     var_occurrences,
 )
-from .kast import EMPTY_ATT, KAst, KAtt, WithKAtt
+from .kast import EMPTY_ATT, KAst, KAtt, WithKAtt, kast_term
 
 RL = TypeVar('RL', bound='KRuleLike')
 
@@ -1266,5 +1266,5 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
 
 
 def read_kast_definition(path: Union[str, PathLike]) -> KDefinition:
-    with open(path, 'r') as _f:
-        return KDefinition.from_dict(json.loads(_f.read())['term'])
+    with open(path, 'r') as f:
+        return kast_term(json.loads(f.read()), KDefinition)
