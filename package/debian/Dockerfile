@@ -66,8 +66,9 @@ RUN    groupadd -g $GROUP_ID user                     \
 USER $USER_ID:$GROUP_ID
 
 ENV LC_ALL=C.UTF-8
-ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml        /home/user/.tmp-haskell/
-ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/kore.cabal /home/user/.tmp-haskell/kore/
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml                          /home/user/.tmp-haskell/
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/kore.cabal                     /home/user/.tmp-haskell/kore/
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore-rpc-types/kore-rpc-types.cabal /home/user/.tmp-haskell/kore-rpc-types/
 RUN    cd /home/user/.tmp-haskell  \
     && stack build --only-snapshot
 

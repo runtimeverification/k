@@ -90,8 +90,8 @@ module TEST
 endmodule
 ```
 
-You should compile this definition with `--backend llvm -ccopt -g` and without
-`-ccopt -O2` in order to use the debugger most effectively.
+You should compile this definition with `--backend llvm --enable-llvm-debug` to
+use the debugger most effectively.
 
 ### Stepping
 
@@ -272,7 +272,7 @@ Using `rbreak <regex>` you can set breakpoints on multiple functions.
 
 -   `<optimized out>` try kompiling without `-O1`, `-O2`, or `-O3`.
 -   `(gdb) break definition.kore:break -> No source file named definition.kore.`
-send `-ccopt -g` to kompile in order to generate debug info symbols.
+send `--enable-llvm-debug` to kompile in order to generate debug info symbols.
 
 Profiling your K semantics
 --------------------------
