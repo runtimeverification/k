@@ -76,7 +76,7 @@ On Ubuntu Linux 20.04 (Focal) or 22.04 (Jammy):
 
 ```shell
 git submodule update --init --recursive
-sudo apt-get install build-essential m4 openjdk-11-jdk libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 python3-dev cmake gcc clang-12 lld-12 llvm-12-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
+sudo apt-get install build-essential m4 openjdk-11-jdk libfmt-dev libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 python3-dev cmake gcc clang-12 lld-12 llvm-12-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
 curl -sSL https://get.haskellstack.org/ | sh
 ```
 
@@ -86,7 +86,7 @@ On Arch Linux:
 
 ```shell
 git submodule update --init --recursive
-sudo pacman -S git maven jdk-openjdk cmake boost libyaml jemalloc clang llvm lld zlib gmp mpfr z3 curl stack base-devel base python
+sudo pacman -S git maven jdk-openjdk cmake boost fmt libyaml jemalloc clang llvm lld zlib gmp mpfr z3 curl stack base-devel base python
 ```
 
 If you install this list of dependencies, continue directly to the [Build and Install Guide](#build-and-install-guide).
@@ -94,7 +94,7 @@ If you install this list of dependencies, continue directly to the [Build and In
 On macOS using [Homebrew](https://brew.sh/):
 ```shell
 git submodule update --init --recursive
-brew install bison boost cmake flex gcc gmp openjdk jemalloc libyaml llvm@14 make maven mpfr pkg-config python stack zlib z3
+brew install bison boost cmake flex fmt gcc gmp openjdk jemalloc libyaml llvm@14 make maven mpfr pkg-config python stack zlib z3
 ```
 
 ## The Long Version
@@ -105,6 +105,7 @@ The following dependencies are needed either at build time or runtime:
 *   [boost](https://www.boost.org/)
 *   [cmake](https://cmake.org/)
 *   [flex](https://github.com/westes/flex)
+*   [fmt](https://fmt.dev/)
 *   [gcc](https://gcc.gnu.org/)
 *   [gmp](https://gmplib.org/)
 *   [jdk](https://openjdk.java.net/) (version 11 or greater)
