@@ -9,6 +9,7 @@ from typing import Final, Iterable, List, Mapping, Optional, Union
 
 from ..cli_utils import BugReport, check_dir_path, check_file_path, run_process
 from ..cterm import CTerm
+from ..kast import kast_term
 from ..kast.inner import KInner, KLabel, KSort
 from ..kast.outer import KFlatModule
 from ..konvert import unmunge
@@ -70,7 +71,7 @@ class KRun(KPrint):
 
         self._check_return_code(result.returncode, expect_rc)
 
-        result_kast = KInner.from_dict(json.loads(result.stdout)['term'])
+        result_kast = kast_term(json.loads(result.stdout), KInner)  # type: ignore # https://github.com/python/mypy/issues/4717
         return CTerm(result_kast)
 
     def run_kore(
