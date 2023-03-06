@@ -17,7 +17,6 @@ from typing import (
     Iterable,
     Mapping,
     Optional,
-    Sequence,
     TextIO,
     Tuple,
     Type,
@@ -158,15 +157,15 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
 
 @final
 @dataclass(frozen=True)
-class KoreClientError(Exception):
+class KoreClientError(Exception):  # TODO refine
     message: str
     code: int
-    context: Tuple[str, ...]
+    data: Any
 
-    def __init__(self, message: str, code: int, context: Sequence[str] = ()):
-        object.__setattr__(self, 'message', message)
+    def __init__(self, message: str, code: int, data: Any):
         object.__setattr__(self, 'code', code)
-        object.__setattr__(self, 'context', tuple(context))
+        object.__setattr__(self, 'message', message)
+        object.__setattr__(self, 'data', data)
         super().__init__(message)
 
 
@@ -375,7 +374,7 @@ class KoreClient(ContextManager['KoreClient']):
             return self._client.request(method, **params)
         except JsonRpcError as err:
             assert err.code not in {-32601, -32602}, 'Malformed Kore-RPC request'
-            raise KoreClientError(message=err.data['error'], code=err.code, context=err.data['context']) from err
+            raise KoreClientError(message=err.message, code=err.code, data=err.data) from err
 
     @staticmethod
     def _state(pattern: Pattern) -> Dict[str, Any]:
