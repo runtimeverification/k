@@ -16,7 +16,6 @@ import org.kframework.kil.loader.Context;
 import org.kframework.kompile.Kompile;
 import org.kframework.kore.convertors.KILtoKORE;
 import org.kframework.main.GlobalOptions;
-import org.kframework.main.Main;
 import org.kframework.parser.inner.ApplySynonyms;
 import org.kframework.parser.inner.CollectProductionsVisitor;
 import org.kframework.parser.outer.ExtractFencedKCodeFromMarkdown;
@@ -318,7 +317,7 @@ public class ParserUtils {
             previousModules.addAll(loadModules(new HashSet<>(), context, Kompile.REQUIRE_PRELUDE_K, Source.apply("Auto imported prelude"), currentDirectory, lookupDirectories, requiredFiles, kore, preprocess, leftAssoc));
         Set<Module> modules = loadModules(previousModules, context, definitionText, source, currentDirectory, lookupDirectories, requiredFiles, kore, preprocess, leftAssoc);
         if (preprocess) {
-          Main.exit(0);
+          System.exit(0);
         }
         modules.addAll(previousModules); // add the previous modules, since load modules is not additive
         Module mainModule = getMainModule(mainModuleName, modules);
