@@ -6,6 +6,8 @@ from pathlib import Path
 from re import Match
 from typing import Any, Dict, List, Union, final
 
+from filelock import FileLock
+
 from ..ktool.kompile import kompile
 from ..utils import single
 from .package import Package
@@ -71,24 +73,25 @@ class KBuild:
         return res
 
     def kompile(self, package: Package, target_name: str) -> Path:
-        for sub_package in package.sub_packages:
-            self.sync(sub_package)
+        with FileLock(self.kbuild_dir / '.lock'):
+            for sub_package in package.sub_packages:
+                self.sync(sub_package)
 
-        output_dir = self.definition_dir(package, target_name)
+            output_dir = self.definition_dir(package, target_name)
 
-        if self.up_to_date(package, target_name):
+            if self.up_to_date(package, target_name):
+                return output_dir
+
+            target = package.project.get_target(target_name)
+            args = self.kompile_args(package, target)
+            kompile(
+                output_dir=output_dir,
+                include_dirs=[self.include_dir(sub_package) for sub_package in package.sub_packages],
+                cwd=self.kbuild_dir,
+                **args,
+            )
+
             return output_dir
-
-        target = package.project.get_target(target_name)
-        args = self.kompile_args(package, target)
-        kompile(
-            output_dir=output_dir,
-            include_dirs=[self.include_dir(sub_package) for sub_package in package.sub_packages],
-            cwd=self.kbuild_dir,
-            **args,
-        )
-
-        return output_dir
 
     def up_to_date(self, package: Package, target_name: str) -> bool:
         definition_dir = self.definition_dir(package, target_name)

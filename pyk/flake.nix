@@ -19,10 +19,20 @@
               checkGroups = [ ];
               overrides = prev.poetry2nix.overrides.withDefaults
                 (finalPython: prevPython: {
+                  filelock = prevPython.filelock.overridePythonAttrs
+                    (oldAttrs: {
+                      buildInputs = (oldAttrs.buildInputs or [ ])
+                        ++ [ prevPython.hatchling prevPython.hatch-vcs ];
+                    });
                   nanoid = prevPython.nanoid.overridePythonAttrs
                     (oldAttrs: {
                       buildInputs = (oldAttrs.buildInputs or [ ])
                         ++ [ prevPython.setuptools ];
+                    });
+                  pathspec = prevPython.pathspec.overridePythonAttrs
+                    (oldAttrs: {
+                      buildInputs = (oldAttrs.buildInputs or [ ])
+                        ++ [ prevPython.flit-core ];
                     });
                   packaging = prevPython.packaging.overridePythonAttrs
                     (oldAttrs: {
