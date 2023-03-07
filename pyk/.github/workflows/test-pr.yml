@@ -112,4 +112,4 @@ jobs:
           name: k-framework
           authToken: '${{ secrets.CACHIX_PUBLIC_KEY }}'
       - name: 'Build pyk'
-        run: GC_DONT_GC=1 nix build .#${{ matrix.target }}
+        run: GC_DONT_GC=1 nix build --print-build-logs .#${{ matrix.target }}
