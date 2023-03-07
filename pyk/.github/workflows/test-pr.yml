@@ -54,44 +54,33 @@ jobs:
         run: make cov-unit
 
   integration-tests:
-    needs: unit-tests
+    needs: code-quality-checks
     name: 'Integration Tests'
-    runs-on: [self-hosted, linux, normal]
+    runs-on: [self-hosted, linux, normal-ephemeral]
     strategy:
       matrix:
-        distro: ['focal', 'jammy']
+        python-version: ['3.8', '3.10']
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
-      - name: 'Build Docker image'
+      - name: 'Install Python'
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: 'Install Poetry'
+        uses: Gr1N/setup-poetry@v8
+      - name: 'Install K'
         run: |
-          COMMIT=$(git rev-parse --short=7 HEAD)
-          K_VERSION=$(cut --delim=v --field=2 deps/k_release)
-
-          docker build .                              \
-            --build-arg K_DISTRO=${{ matrix.distro }} \
-            --build-arg K_VERSION=${K_VERSION}        \
-            --tag runtimeverificationinc/pyk-ci:${COMMIT}
-
-          docker run                 \
-            --name pyk-ci            \
-            --rm                     \
-            --interactive            \
-            --tty                    \
-            --detach                 \
-            runtimeverificationinc/pyk-ci:${COMMIT}
-
-          docker cp . pyk-ci:/home/user
-          docker exec pyk-ci chown -R user:user /home/user
+          K_VERSION=$(cat deps/k_release)
+          wget https://github.com/runtimeverification/k/releases/download/v${K_VERSION}/kframework_amd64_ubuntu_jammy.deb
+          sudo apt-get update
+          sudo apt-get -y install graphviz ./kframework_amd64_ubuntu_jammy.deb
+          kompile --version
       - name: 'Build and run integration tests'
-        run: docker exec --user user --workdir /home/user pyk-ci make cov-integration
-      - name: 'Tear down Docker container'
-        if: always()
-        run: |
-          docker stop --time=0 pyk-ci
+        run: make cov-integration
 
   build-on-nix:
-    needs: unit-tests
+    needs: code-quality-checks
     name: 'Build on Nix'
     strategy:
       matrix:
