@@ -9,7 +9,7 @@
 
   NIX_POST_INSTALL_MESSAGE="To ensure that the necessary environment variables are set, either log in again, or type
 
-  . $HOME/.nix-profile/etc/profile.d/nix.sh
+  . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 
 in your shell."
 
@@ -35,8 +35,12 @@ in your shell."
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
       echo "Downloading nix and running the installer..."
-      bash <(curl -L https://nixos.org/nix/install)
-      . "$HOME"/.nix-profile/etc/profile.d/nix.sh
+      curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm
+      if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+          . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+      else
+        oops "Could not source nix."
+      fi
       NIX_FRESH_INSTALL=true
     else
       oops "Cannot proceed with the installation without nix."
