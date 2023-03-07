@@ -6,8 +6,7 @@ import pytest
 from pyk.kast.inner import KApply, KInner, KSort, KVariable
 from pyk.konvert import kast_to_kore
 from pyk.kore.kompiled import KompiledKore
-from pyk.kore.prelude import int_dv
-from pyk.kore.syntax import DV, App, EVar, LeftAssoc, Pattern, SortApp, String
+from pyk.kore.parser import KoreParser
 from pyk.ktool.kprint import KPrint
 from pyk.prelude.kint import INT, intToken
 
@@ -17,52 +16,26 @@ BIDIRECTIONAL_TEST_DATA: Final = (
     (
         'domain-value-int',
         INT,
-        int_dv(3),
+        r'\dv{SortInt{}}("3")',
         intToken(3),
     ),
     (
         'account-cell-map',
         KSort('AccountsCell'),
-        App(
-            "Lbl'-LT-'accounts'-GT-'",
-            [],
-            [
-                App(
-                    "Lbl'Unds'AccountCellMap'Unds'",
-                    [],
-                    [
-                        App(
-                            'LblAccountCellMapItem',
-                            [],
-                            [
-                                App(
-                                    "Lbl'-LT-'id'-GT-'",
-                                    [],
-                                    [DV(SortApp('SortInt'), String('3'))],
-                                ),
-                                App(
-                                    "Lbl'-LT-'account'-GT-'",
-                                    [],
-                                    [
-                                        App(
-                                            "Lbl'-LT-'id'-GT-'",
-                                            [],
-                                            [DV(SortApp('SortInt'), String('3'))],
-                                        ),
-                                        App(
-                                            "Lbl'-LT-'balance'-GT-'",
-                                            [],
-                                            [DV(SortApp('SortInt'), String('0'))],
-                                        ),
-                                    ],
-                                ),
-                            ],
-                        ),
-                        EVar("Var'Unds'DotVar2", SortApp('SortAccountCellMap')),
-                    ],
+        r"""
+        Lbl'-LT-'accounts'-GT-'{}(
+            Lbl'Unds'AccountCellMap'Unds'{}(
+                LblAccountCellMapItem{}(
+                    Lbl'-LT-'id'-GT-'{}(\dv{SortInt{}}("3")),
+                    Lbl'-LT-'account'-GT-'{}(
+                        Lbl'-LT-'id'-GT-'{}(\dv{SortInt{}}("3")),
+                        Lbl'-LT-'balance'-GT-'{}(\dv{SortInt{}}("0"))
+                    )
                 ),
-            ],
-        ),
+                Var'Unds'DotVar2 : SortAccountCellMap{}
+            )
+        )
+        """,
         KApply(
             '<accounts>',
             [
@@ -78,30 +51,28 @@ BIDIRECTIONAL_TEST_DATA: Final = (
     ),
 )
 
-KAST_TO_KORE_TEST_DATA: Final = (
+KAST_TO_KORE_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (
     (
         'variable-without-sort',
         KSort('Bar'),
-        EVar('VarX', SortApp('SortBar')),
+        'VarX : SortBar{}',
         KVariable('X'),
     ),
 )
 
-KORE_TO_KAST_TEST_DATA: Final = (
+KORE_TO_KAST_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (
     (
         'left-assoc',
         KSort('Map'),
-        LeftAssoc(
-            App(
-                "Lbl'Unds'Map'Unds'",
-                [],
-                [
-                    EVar('VarX', SortApp('SortMap')),
-                    EVar('VarY', SortApp('SortMap')),
-                    EVar('VarZ', SortApp('SortMap')),
-                ],
+        r"""
+        \left-assoc{}(
+            Lbl'Unds'Map'Unds'{}(
+                VarX : SortMap{},
+                VarY : SortMap{},
+                VarZ : SortMap{},
             )
-        ),
+        )
+        """,
         KApply(
             '_Map_',
             [
@@ -121,27 +92,9 @@ class TestKonvertCellMap(KPrintTest):
         return KompiledKore(definition_dir)
 
     @pytest.mark.parametrize(
-        'test_id,sort,kore,kast', BIDIRECTIONAL_TEST_DATA, ids=[test_id for test_id, *_ in BIDIRECTIONAL_TEST_DATA]
-    )
-    def test_bidirectional(
-        self,
-        kprint: KPrint,
-        kompiled_kore: KompiledKore,
-        test_id: str,
-        sort: KSort,
-        kore: Pattern,
-        kast: KInner,
-    ) -> None:
-        # When
-        actual_kore = kast_to_kore(kprint.definition, kompiled_kore, kast, sort=sort)
-        actual_kast = kprint.kore_to_kast(kore)
-
-        # Then
-        assert actual_kore == kore
-        assert actual_kast == kast
-
-    @pytest.mark.parametrize(
-        'test_id,sort,kore,kast', KAST_TO_KORE_TEST_DATA, ids=[test_id for test_id, *_ in KAST_TO_KORE_TEST_DATA]
+        'test_id,sort,kore_text,kast',
+        KAST_TO_KORE_TEST_DATA,
+        ids=[test_id for test_id, *_ in KAST_TO_KORE_TEST_DATA],
     )
     def test_kast_to_kore(
         self,
@@ -149,9 +102,12 @@ class TestKonvertCellMap(KPrintTest):
         kompiled_kore: KompiledKore,
         test_id: str,
         sort: KSort,
-        kore: Pattern,
+        kore_text: str,
         kast: KInner,
     ) -> None:
+        # Given
+        kore = KoreParser(kore_text).pattern()
+
         # When
         actual_kore = kast_to_kore(kprint.definition, kompiled_kore, kast, sort=sort)
 
@@ -159,9 +115,14 @@ class TestKonvertCellMap(KPrintTest):
         assert actual_kore == kore
 
     @pytest.mark.parametrize(
-        'test_id,_sort,kore,kast', KORE_TO_KAST_TEST_DATA, ids=[test_id for test_id, *_ in KORE_TO_KAST_TEST_DATA]
+        'test_id,_sort,kore_text,kast',
+        KORE_TO_KAST_TEST_DATA,
+        ids=[test_id for test_id, *_ in KORE_TO_KAST_TEST_DATA],
     )
-    def test_kore_to_kast(self, kprint: KPrint, test_id: str, _sort: KSort, kore: Pattern, kast: KInner) -> None:
+    def test_kore_to_kast(self, kprint: KPrint, test_id: str, _sort: KSort, kore_text: str, kast: KInner) -> None:
+        # Given
+        kore = KoreParser(kore_text).pattern()
+
         # When
         actual_kast = kprint.kore_to_kast(kore)
 
