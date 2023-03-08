@@ -39,13 +39,15 @@ def kompile(
     md_selector: Optional[str] = None,
     hook_namespaces: Iterable[str] = (),
     emit_json: bool = True,
+    gen_bison_parser: bool = False,
     debug: bool = False,
     post_process: Optional[str] = None,
     # LLVM backend
+    llvm_kompile_type: Optional[LLVMKompileType] = None,
     opt_level: Optional[int] = None,
     ccopts: Iterable[str] = (),
     no_llvm_kompile: bool = False,
-    llvm_kompile_type: Optional[LLVMKompileType] = None,
+    enable_search: bool = False,
     # Haskell backend
     concrete_rules: Iterable[str] = (),
     # ---
@@ -62,10 +64,11 @@ def kompile(
     backend = KompileBackend(backend) if backend is not None else None
 
     if backend and backend != KompileBackend.LLVM:
+        _check_backend_param(llvm_kompile_type is None, 'llvm_kompile_type', backend)
         _check_backend_param(opt_level is None, 'opt_level', backend)
         _check_backend_param(not list(ccopts), 'ccopts', backend)
         _check_backend_param(not no_llvm_kompile, 'no_llvm_kompile', backend)
-        _check_backend_param(llvm_kompile_type is None, 'llvm_kompile_type', backend)
+        _check_backend_param(not enable_search, 'enable_search', backend)
 
     if backend != KompileBackend.HASKELL:
         _check_backend_param(not list(concrete_rules), 'concrete_rules', backend)
@@ -86,12 +89,14 @@ def kompile(
         md_selector=md_selector,
         hook_namespaces=hook_namespaces,
         emit_json=emit_json,
+        gen_bison_parser=gen_bison_parser,
         debug=debug,
         post_process=post_process,
+        llvm_kompile_type=llvm_kompile_type,
+        enable_search=enable_search,
         opt_level=opt_level,
         ccopts=ccopts,
         no_llvm_kompile=no_llvm_kompile,
-        llvm_kompile_type=llvm_kompile_type,
         concrete_rules=concrete_rules,
     )
 
@@ -121,12 +126,14 @@ def llvm_kompile(
     md_selector: Optional[str] = None,
     hook_namespaces: Iterable[str] = (),
     emit_json: bool = True,
+    gen_bison_parser: bool = False,
     debug: bool = False,
     post_process: Optional[str] = None,
+    llvm_kompile_type: Optional[LLVMKompileType] = None,
     opt_level: Optional[int] = None,
     ccopts: Iterable[str] = (),
     no_llvm_kompile: bool = False,
-    llvm_kompile_type: Optional[LLVMKompileType] = None,
+    enable_search: bool = False,
     # ---
     cwd: Optional[Path] = None,
     check: bool = True,
@@ -142,11 +149,13 @@ def llvm_kompile(
         md_selector=md_selector,
         hook_namespaces=hook_namespaces,
         emit_json=emit_json,
+        gen_bison_parser=gen_bison_parser,
         debug=debug,
         post_process=post_process,
         opt_level=opt_level,
         ccopts=ccopts,
         no_llvm_kompile=no_llvm_kompile,
+        enable_search=enable_search,
         llvm_kompile_type=llvm_kompile_type,
         cwd=cwd,
         check=check,
@@ -165,6 +174,7 @@ def haskell_kompile(
     md_selector: Optional[str] = None,
     hook_namespaces: Iterable[str] = (),
     emit_json: bool = True,
+    gen_bison_parser: bool = False,
     debug: bool = False,
     post_process: Optional[str] = None,
     concrete_rules: Iterable[str] = (),
@@ -183,6 +193,7 @@ def haskell_kompile(
         md_selector=md_selector,
         hook_namespaces=hook_namespaces,
         emit_json=emit_json,
+        gen_bison_parser=gen_bison_parser,
         debug=debug,
         post_process=post_process,
         concrete_rules=concrete_rules,
@@ -208,12 +219,14 @@ def _build_arg_list(
     md_selector: Optional[str],
     hook_namespaces: Iterable[str],
     emit_json: bool,
+    gen_bison_parser: bool,
     debug: bool = False,
     post_process: Optional[str],
+    llvm_kompile_type: Optional[LLVMKompileType] = None,
     opt_level: Optional[int],
     ccopts: Iterable[str],
     no_llvm_kompile: bool,
-    llvm_kompile_type: Optional[LLVMKompileType] = None,
+    enable_search: bool,
     concrete_rules: Iterable[str],
 ) -> List[str]:
     args = list(command) + [str(main_file)]
@@ -242,11 +255,17 @@ def _build_arg_list(
     if emit_json:
         args.append('--emit-json')
 
+    if gen_bison_parser:
+        args.append('--gen-bison-parser')
+
     if debug:
         args.append('--debug')
 
     if post_process:
         args.extend(['--post-process', shlex.quote(post_process)])
+
+    if llvm_kompile_type is not None:
+        args.extend(['--llvm-kompile-type', llvm_kompile_type.value])
 
     if opt_level:
         args.append(f'-O{opt_level}')
@@ -257,8 +276,8 @@ def _build_arg_list(
     if no_llvm_kompile:
         args.append('--no-llvm-kompile')
 
-    if llvm_kompile_type is not None:
-        args.extend(['--llvm-kompile-type', llvm_kompile_type.value])
+    if enable_search:
+        args.append('--enable-search')
 
     if concrete_rules:
         args.extend(['--concrete-rules', ','.join(concrete_rules)])
