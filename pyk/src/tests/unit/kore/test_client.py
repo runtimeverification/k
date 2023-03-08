@@ -4,8 +4,20 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from pyk.kore.prelude import INT, int_dv
 from pyk.kore.rpc import ExecuteResult, ImpliesResult, JsonRpcClient, KoreClient, State, StuckResult
-from pyk.kore.syntax import DV, And, App, Bottom, Pattern, SortApp, String, Top
+from pyk.kore.syntax import And, App, Bottom, Definition, Module, Pattern, Top
+
+int_top = Top(INT)
+int_bottom = Bottom(INT)
+
+
+def kore(pattern: Pattern) -> Dict[str, Any]:
+    return {
+        'format': 'KORE',
+        'version': 1,
+        'term': pattern.dict,
+    }
 
 
 class MockClient:
@@ -14,7 +26,7 @@ class MockClient:
     def __init__(self, mock: Mock):
         self.mock = mock
 
-    def assume_response(self, response: Dict[str, Any]) -> None:
+    def assume_response(self, response: Any) -> None:
         self.mock.request.return_value = response
 
     def assert_request(self, method: str, **params: Any) -> None:
@@ -50,23 +62,6 @@ def kore_client(mock: Mock, mock_class: Mock) -> Iterator[KoreClient]:  # noqa: 
     mock.close.assert_called()
 
 
-int_sort = SortApp('IntSort')
-int_top = Top(int_sort)
-int_bottom = Bottom(int_sort)
-
-
-def int_dv(n: int) -> DV:
-    return DV(int_sort, String(str(n)))
-
-
-def kore(pattern: Pattern) -> Dict[str, Any]:
-    return {
-        'format': 'KORE',
-        'version': 1,
-        'term': pattern.dict,
-    }
-
-
 EXECUTE_TEST_DATA: Final = (
     (
         App('IntAdd', (), (int_dv(1), int_dv(1))),
@@ -77,25 +72,6 @@ EXECUTE_TEST_DATA: Final = (
             'reason': 'stuck',
         },
         StuckResult(State(int_dv(2), int_top, int_top), 1),
-    ),
-)
-
-IMPLIES_TEST_DATA: Final = (
-    (
-        int_bottom,
-        int_top,
-        {'antecedent': kore(int_bottom), 'consequent': kore(int_top)},
-        {'satisfiable': True, 'implication': kore(int_top)},
-        ImpliesResult(True, int_top, None, None),
-    ),
-)
-
-SIMPLIFY_TEST_DATA: Final = (
-    (
-        And(int_sort, int_top, int_top),
-        {'state': kore(And(int_sort, int_top, int_top))},
-        {'state': kore(int_top)},
-        int_top,
     ),
 )
 
@@ -120,6 +96,17 @@ def test_execute(
     assert actual == expected
 
 
+IMPLIES_TEST_DATA: Final = (
+    (
+        int_bottom,
+        int_top,
+        {'antecedent': kore(int_bottom), 'consequent': kore(int_top)},
+        {'satisfiable': True, 'implication': kore(int_top)},
+        ImpliesResult(True, int_top, None, None),
+    ),
+)
+
+
 @pytest.mark.parametrize('antecedent,consequent,params,response,expected', IMPLIES_TEST_DATA, ids=count())
 def test_implies(
     kore_client: KoreClient,
@@ -141,6 +128,16 @@ def test_implies(
     assert actual == expected
 
 
+SIMPLIFY_TEST_DATA: Final = (
+    (
+        And(INT, int_top, int_top),
+        {'state': kore(And(INT, int_top, int_top))},
+        {'state': kore(int_top)},
+        int_top,
+    ),
+)
+
+
 @pytest.mark.parametrize('pattern,params,response,expected', SIMPLIFY_TEST_DATA, ids=count())
 def test_simplify(
     kore_client: KoreClient,
@@ -159,3 +156,28 @@ def test_simplify(
     # Then
     rpc_client.assert_request('simplify', **params)
     assert actual == expected
+
+
+ADD_MODULE_TEST_DATA: Final = (
+    (
+        Module('HELLO'),
+        {'name': 'HELLO', 'module': Definition((Module('HELLO'),)).text},
+    ),
+)
+
+
+@pytest.mark.parametrize('module,params', ADD_MODULE_TEST_DATA, ids=count())
+def test_add_module(
+    kore_client: KoreClient,
+    rpc_client: MockClient,
+    module: Module,
+    params: Dict[str, Any],
+) -> None:
+    # Given
+    rpc_client.assume_response([])
+
+    # When
+    kore_client.add_module(module)
+
+    # Then
+    rpc_client.assert_request('add-module', **params)
