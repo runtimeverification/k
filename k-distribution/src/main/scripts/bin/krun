@@ -33,7 +33,7 @@ expandMacros=true
 filterSubst=
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  DBG_CMD="python3 $(dirname "$0")/../lib/lldb/klldb.py"
+  DBG_CMD="lldb -- "
 else
   DBG_CMD="gdb --args "
 fi
