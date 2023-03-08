@@ -4,12 +4,13 @@ from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
 from re import Match
-from typing import Any, Dict, List, Union, final
+from typing import Any, Dict, List, Optional, Union, final
 
 from filelock import FileLock
 
 from ..ktool.kompile import kompile
 from ..utils import single
+from .config import KBUILD_DIR
 from .package import Package
 from .project import Target
 from .utils import k_version, sync_files
@@ -20,7 +21,8 @@ from .utils import k_version, sync_files
 class KBuild:
     kbuild_dir: Path
 
-    def __init__(self, kbuild_dir: Union[str, Path]):
+    def __init__(self, kbuild_dir: Optional[Union[str, Path]] = None):
+        kbuild_dir = kbuild_dir if kbuild_dir is not None else KBUILD_DIR
         kbuild_dir = Path(kbuild_dir).resolve()
         object.__setattr__(self, 'kbuild_dir', kbuild_dir)
 
@@ -73,6 +75,7 @@ class KBuild:
         return res
 
     def kompile(self, package: Package, target_name: str) -> Path:
+        self.kbuild_dir.mkdir(parents=True, exist_ok=True)
         with FileLock(self.kbuild_dir / '.lock'):
             for sub_package in package.sub_packages:
                 self.sync(sub_package)
