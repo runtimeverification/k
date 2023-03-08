@@ -57,14 +57,14 @@ def do_clean(**kwargs: Any) -> None:
 
 def do_kompile(start_dir: Path, target_name: str, **kwargs: Any) -> None:
     package = _package(start_dir)
-    kbuild = KBuild(KBUILD_DIR)
+    kbuild = KBuild()
     definition_dir = kbuild.kompile(package, target_name)
     print(definition_dir)
 
 
 def do_which(start_dir: Path, target_name: str, **kwargs: Any) -> None:
     package = _package(start_dir)
-    kbuild = KBuild(KBUILD_DIR)
+    kbuild = KBuild()
     definition_dir = kbuild.definition_dir(package, target_name)
 
     try:
