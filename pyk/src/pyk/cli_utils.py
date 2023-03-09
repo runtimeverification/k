@@ -1,4 +1,5 @@
 import logging
+import shlex
 import subprocess
 import sys
 import tarfile
@@ -109,7 +110,7 @@ def run_process(
         command = args
     else:
         args = tuple(args)
-        command = ' '.join(args)
+        command = shlex.join(args)
 
     if not logger:
         logger = _LOGGER
