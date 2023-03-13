@@ -5,7 +5,7 @@ import pytest
 
 from pyk.kore.rpc import KoreClient, KoreServer
 
-from ..utils import KompiledTest, free_port_on_host
+from ..utils import KompiledTest
 
 
 class KoreClientTest(KompiledTest):
@@ -16,9 +16,8 @@ class KoreClientTest(KompiledTest):
 
     @pytest.fixture
     def kore_client(self, definition_dir: Path) -> Iterator[KoreClient]:
-        port = free_port_on_host()
-        server = KoreServer(definition_dir, self.KORE_MODULE_NAME, port)
-        client = KoreClient('localhost', port, timeout=self.KORE_CLIENT_TIMEOUT)
+        server = KoreServer(definition_dir, self.KORE_MODULE_NAME)
+        client = KoreClient('localhost', server.port, timeout=self.KORE_CLIENT_TIMEOUT)
         yield client
         client.close()
         server.close()
