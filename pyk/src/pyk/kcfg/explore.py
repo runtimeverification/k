@@ -140,15 +140,23 @@ class KCFGExplore(ContextManager['KCFGExplore']):
             fv_antecedent = free_vars(antecedent.kast)
             unbound_consequent = [v for v in free_vars(_consequent) if v not in fv_antecedent]
             if len(unbound_consequent) > 0:
-                _LOGGER.info(f'Binding variables in consequent: {unbound_consequent}')
+                _LOGGER.debug(f'Binding variables in consequent: {unbound_consequent}')
                 for uc in unbound_consequent:
                     _consequent = KApply(KLabel('#Exists', [GENERATED_TOP_CELL]), [KVariable(uc), _consequent])
         antecedent_kore = self.kprint.kast_to_kore(antecedent.kast, GENERATED_TOP_CELL)
         consequent_kore = self.kprint.kast_to_kore(_consequent, GENERATED_TOP_CELL)
         _, kore_client = self._kore_rpc
         result = kore_client.implies(antecedent_kore, consequent_kore)
-        if result.substitution is None:
+        if not result.satisfiable:
+            if result.substitution is not None:
+                _LOGGER.debug(f'Received a non-empty substitution for unsatisfiable implication: {result.substitution}')
+            if result.predicate is not None:
+                _LOGGER.debug(f'Received a non-empty predicate for unsatisfiable implication: {result.predicate}')
             return None
+        if result.substitution is None:
+            raise ValueError('Received empty substutition for satisfiable implication.')
+        if result.predicate is None:
+            raise ValueError('Received empty predicate for satisfiable implication.')
         ml_subst = self.kprint.kore_to_kast(result.substitution)
         ml_pred = self.kprint.kore_to_kast(result.predicate) if result.predicate is not None else mlTop()
         if is_top(ml_subst):
@@ -161,11 +169,6 @@ class KCFGExplore(ContextManager['KCFGExplore']):
                 _subst[m['###VAR'].name] = m['###TERM']
             else:
                 raise AssertionError(f'Received a non-substitution from implies endpoint: {subst_pred}')
-        # TODO: remove this extra consequent checking logic or this comment after resolution: https://github.com/runtimeverification/haskell-backend/issues/3469
-        new_consequent = self.cterm_simplify(CTerm(Subst(_subst)(consequent.add_constraint(ml_pred).kast)))
-        if is_bottom(new_consequent):
-            _LOGGER.warning(f'Simplifying instantiated consquent resulted in #Bottom: {antecedent} -> {consequent}')
-            return None
         return (Subst(_subst), ml_pred)
 
     def remove_subgraph_from(self, cfgid: str, cfg: KCFG, node: str) -> KCFG:
