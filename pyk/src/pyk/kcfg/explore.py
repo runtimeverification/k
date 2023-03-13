@@ -168,6 +168,13 @@ class KCFGExplore(ContextManager['KCFGExplore']):
             return None
         return (Subst(_subst), ml_pred)
 
+    def remove_subgraph_from(self, cfgid: str, cfg: KCFG, node: str) -> KCFG:
+        for _node in cfg.reachable_nodes(node, traverse_covers=True):
+            if not cfg.is_target(_node.id):
+                _LOGGER.info(f'Removing node: {shorten_hashes(_node.id)}')
+                cfg.remove_node(_node.id)
+        return cfg
+
     def simplify(self, cfgid: str, cfg: KCFG) -> KCFG:
         for node in cfg.nodes:
             _LOGGER.info(f'Simplifying node {cfgid}: {shorten_hashes(node.id)}')
