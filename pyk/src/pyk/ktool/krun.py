@@ -112,6 +112,8 @@ class KRun(KPrint):
         *,
         depth: Optional[int] = None,
         expand_macros: bool = False,
+        search_final: bool = False,
+        no_pattern: bool = False,
         bug_report: Optional[BugReport] = None,
         expect_rc: Union[int, Iterable[int]] = 0,
     ) -> Pattern:
@@ -128,6 +130,8 @@ class KRun(KPrint):
                 term=True,
                 depth=depth,
                 no_expand_macros=not expand_macros,
+                search_final=search_final,
+                no_pattern=no_pattern,
                 bug_report=self._bug_report,
                 check=(expect_rc == 0),
             )
@@ -145,6 +149,9 @@ class KRun(KPrint):
         *,
         depth: Optional[int] = None,
         expand_macros: bool = False,
+        search_final: bool = False,
+        no_pattern: bool = False,
+        # ---
         bug_report: Optional[BugReport] = None,
         expect_rc: int = 0,
     ) -> Pattern:
@@ -175,7 +182,13 @@ class KRun(KPrint):
         term = App('LblinitGeneratedTopCell', [], [config_var_map])
 
         return self.run_kore_term(
-            term, depth=depth, expand_macros=expand_macros, bug_report=bug_report, expect_rc=expect_rc
+            term,
+            depth=depth,
+            expand_macros=expand_macros,
+            search_final=search_final,
+            no_pattern=no_pattern,
+            bug_report=bug_report,
+            expect_rc=expect_rc,
         )
 
     @staticmethod
@@ -210,6 +223,8 @@ def _krun(
     cmap: Optional[Mapping[str, str]] = None,
     term: bool = False,
     no_expand_macros: bool = False,
+    search_final: bool = False,
+    no_pattern: bool = False,
     # ---
     check: bool = True,
     pipe_stderr: bool = False,
@@ -236,6 +251,8 @@ def _krun(
         cmap=cmap,
         term=term,
         no_expand_macros=no_expand_macros,
+        search_final=search_final,
+        no_pattern=no_pattern,
     )
 
     if bug_report is not None:
@@ -266,6 +283,8 @@ def _build_arg_list(
     cmap: Optional[Mapping[str, str]],
     term: bool,
     no_expand_macros: bool,
+    search_final: bool,
+    no_pattern: bool,
 ) -> List[str]:
     args = [command]
     if input_file:
@@ -286,4 +305,8 @@ def _build_arg_list(
         args += ['--term']
     if no_expand_macros:
         args += ['--no-expand-macros']
+    if search_final:
+        args += ['--search-final']
+    if no_pattern:
+        args += ['--no-pattern']
     return args
