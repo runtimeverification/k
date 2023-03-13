@@ -25,6 +25,8 @@ from typing import (
     final,
 )
 
+from psutil import Process
+
 from ..cli_utils import BugReport, check_dir_path, check_file_path
 from ..utils import filter_none
 from .syntax import And, Definition, Module, Pattern, SortApp, kore_term
@@ -428,15 +430,16 @@ class KoreClient(ContextManager['KoreClient']):
 
 class KoreServer(ContextManager['KoreServer']):
     _proc: Popen
-    _port: int
     _pid: int
+    _host: str
+    _port: int
 
     def __init__(
         self,
         kompiled_dir: Union[str, Path],
         module_name: str,
-        port: int,
         *,
+        port: Optional[int] = None,
         smt_timeout: Optional[int] = None,
         smt_retry_limit: Optional[int] = None,
         smt_reset_interval: Optional[int] = None,
@@ -459,7 +462,7 @@ class KoreServer(ContextManager['KoreServer']):
         args = list(command)
         args += [str(definition_file)]
         args += ['--module', module_name]
-        args += ['--server-port', str(port)]
+        args += ['--server-port', str(port or 0)]
         if smt_timeout:
             args += ['--smt-timeout', str(smt_timeout)]
         if smt_retry_limit:
@@ -467,13 +470,42 @@ class KoreServer(ContextManager['KoreServer']):
         if smt_reset_interval:
             args += ['--smt-reset-interval', str(smt_reset_interval)]
 
-        self._port = port
         _LOGGER.info(f'Starting KoreServer: {" ".join(args)}')
         if bug_report is not None:
             bug_report.add_command(args)
         self._proc = Popen(args)
         self._pid = self._proc.pid
-        _LOGGER.info(f'KoreServer started: port={self._port}, pid={self._pid}')
+        self._host, self._port = self._get_host_and_port(self._pid)
+        if port:
+            assert self.port == port
+        _LOGGER.info(f'KoreServer started: {self.host}:{self.port}, pid={self.pid}')
+
+    @staticmethod
+    def _check_none_or_positive(n: Optional[int], param_name: str) -> None:
+        if n is not None and n <= 0:
+            raise ValueError(f'Expected positive integer for: {param_name}, got: {n}')
+
+    @staticmethod
+    def _get_host_and_port(pid: int) -> Tuple[str, int]:
+        proc = Process(pid)
+        while not proc.connections():
+            sleep(0.01)
+        conns = proc.connections()
+        assert len(conns) == 1
+        conn = conns[0]
+        return conn.laddr
+
+    @property
+    def pid(self) -> int:
+        return self._pid
+
+    @property
+    def host(self) -> str:
+        return self._host
+
+    @property
+    def port(self) -> int:
+        return self._port
 
     def __enter__(self) -> 'KoreServer':
         return self
@@ -484,9 +516,4 @@ class KoreServer(ContextManager['KoreServer']):
     def close(self) -> None:
         self._proc.terminate()
         self._proc.wait()
-        _LOGGER.info(f'KoreServer stopped: port={self._port}, pid={self._pid}')
-
-    @staticmethod
-    def _check_none_or_positive(n: Optional[int], param_name: str) -> None:
-        if n is not None and n <= 0:
-            raise ValueError(f'Expected positive integer for: {param_name}, got: {n}')
+        _LOGGER.info(f'KoreServer stopped: {self.host}:{self.port}, pid={self.pid}')
