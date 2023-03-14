@@ -239,21 +239,19 @@ class KPrint:
 
     def parse_token(self, ktoken: KToken, *, as_rule: bool = False) -> KInner:
         input = KAstInput('rule' if as_rule else 'program')
-        proc_res = _kast(
-            definition_dir=self.definition_dir,
+        proc_res = self._expression_kast(
+            ktoken.token,
             input=input,
             output=KAstOutput.JSON,
-            expression=ktoken.token,
             sort=ktoken.sort.name,
         )
         return kast_term(json.loads(proc_res.stdout), KInner)  # type: ignore # https://github.com/python/mypy/issues/4717
 
     def kore_to_pretty(self, pattern: Pattern) -> str:
-        proc_res = _kast(
-            definition_dir=self.definition_dir,
+        proc_res = self._expression_kast(
+            pattern.text,
             input=KAstInput.KORE,
             output=KAstOutput.PRETTY,
-            expression=pattern.text,
         )
         return proc_res.stdout
 
@@ -262,11 +260,10 @@ class KPrint:
         if _kast_out is not None:
             return self.definition.remove_cell_map_items(_kast_out)
         _LOGGER.warning(f'Falling back to using `kast` for Kore -> Kast: {kore.text}')
-        proc_res = _kast(
-            definition_dir=self.definition_dir,
+        proc_res = self._expression_kast(
+            kore.text,
             input=KAstInput.KORE,
             output=KAstOutput.JSON,
-            expression=kore.text,
         )
         return kast_term(json.loads(proc_res.stdout), KInner)  # type: ignore # https://github.com/python/mypy/issues/4717
 
@@ -384,11 +381,10 @@ class KPrint:
 
         _LOGGER.warning(f'Falling back to using `kast` for KAst -> Kore: {kast}')
         kast_json = {'format': 'KAST', 'version': 2, 'term': kast.to_dict()}
-        proc_res = _kast(
-            definition_dir=self.definition_dir,
+        proc_res = self._expression_kast(
+            json.dumps(kast_json),
             input=KAstInput.JSON,
             output=KAstOutput.KORE,
-            expression=json.dumps(kast_json),
             sort=sort.name if sort is not None else None,
         )
         return KoreParser(proc_res.stdout).pattern()
@@ -404,6 +400,42 @@ class KPrint:
 
     def pretty_print(self, kast: KAst) -> str:
         return pretty_print_kast(kast, self.symbol_table)
+
+    def _expression_kast(
+        self,
+        expression: str,
+        *,
+        command: Optional[str] = None,
+        input: Optional[Union[str, KAstInput]] = None,
+        output: Optional[Union[str, KAstOutput]] = None,
+        module: Optional[str] = None,
+        sort: Optional[str] = None,
+        # ---
+        check: bool = True,
+    ) -> CompletedProcess:
+        if len(expression) < 128 * 1024:
+            return _kast(
+                expression=expression,
+                command=command,
+                definition_dir=self.definition_dir,
+                input=input,
+                output=output,
+                module=module,
+                sort=sort,
+                check=check,
+            )
+        file_path = self.use_directory / 'kast.input'
+        file_path.write_text(expression)
+        return _kast(
+            file_path,
+            command=command,
+            definition_dir=self.definition_dir,
+            input=input,
+            output=output,
+            module=module,
+            sort=sort,
+            check=check,
+        )
 
 
 def unparser_for_production(prod: KProduction) -> Callable[..., str]:
