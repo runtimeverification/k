@@ -632,13 +632,13 @@ superclass relation, the second transitively closes it, and the third
 checks for cycles.
 ```k
   rule <baseClass> C </baseClass>
-       <baseClasses> .Set => SetItem(C) </baseClasses>  [structural]
+       <baseClasses> .Set => SetItem(C) </baseClasses>  [structural, priority(25)]
 
   rule <classData>...
          <baseClasses> SetItem(C) Cs:Set (.Set => SetItem(C')) </baseClasses>
        ...</classData>
        <classData>... <className>C</className> <baseClass>C'</baseClass> ...</classData>
-    when notBool(C' in (SetItem(C) Cs))  [structural]
+    when notBool(C' in (SetItem(C) Cs))  [structural, priority(25)]
 
   rule (<T>...
           <className> C </className>
@@ -646,7 +646,7 @@ checks for cycles.
         ...</T> => .Bag)
        <output>... .List => ListItem("Class \"" +String Id2String(C)
                                   +String "\" is in a cycle!\n") </output>
-    [inheritance-cycle]
+    [inheritance-cycle, priority(25)]
 ```
 
 ## New
