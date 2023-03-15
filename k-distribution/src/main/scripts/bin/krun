@@ -442,11 +442,6 @@ if ! $hasKompiledDir; then
   error 1 'Could not find a compiled definition. Use --directory to specify one.'
 fi
 
-if [ ! -f "$kompiledDir/definition.kore" ]; then
-  "$(dirname "$0")/krun-legacy" ${ORIG_ARGV[@]+"${ORIG_ARGV[@]}"}
-  exit $?
-fi
-
 # Process configuration variables
 hasArgv=false
 if [[ "${#ARGV[@]}" -gt 0 ]]; then
@@ -645,7 +640,7 @@ elif [ "$backendName" = "haskell" ] ; then
     set -e
   fi
 else
-  error 1 "Backend $backendName not supported. Use krun-legacy."
+  error 1 "Backend $backendName not supported."
 fi
 
 # Unparsing

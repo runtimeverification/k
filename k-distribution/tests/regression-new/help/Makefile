@@ -14,7 +14,6 @@ KORE_PRINT=${K_BIN}/kore-print
 	./check-git-revision-format "$(GIT_REVISION)"
 	${KAST}          --help    | grep -q -- "--version"
 	${KDEP}          --help    | grep -q -- "--version"
-	${KEQ}           --help    | grep -q -- "--version"
 	${KOMPILE}       --help    | grep -q -- "--version"
 	${KPROVE_LEGACY} --help    | grep -q -- "--version"
 	${KPROVE}	 --help    | grep -q -- "--version"
@@ -25,7 +24,6 @@ KORE_PRINT=${K_BIN}/kore-print
 	${KORE_PRINT}    --help    | grep -q -- "--version"
 	${KAST}          --version | grep -q $(VERSION_REGEX)
 	${KDEP}          --version | grep -q $(VERSION_REGEX)
-	${KEQ}           --version | grep -q $(VERSION_REGEX)
 	${KOMPILE}       --version | grep -q $(VERSION_REGEX)
 	${KPROVE_LEGACY} --version | grep -q $(VERSION_REGEX)
 	${KPROVE}	 --version | grep -q $(VERSION_REGEX)

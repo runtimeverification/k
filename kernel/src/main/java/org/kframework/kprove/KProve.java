@@ -8,7 +8,6 @@ import org.kframework.definition.Module;
 import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.krun.KRun;
 import org.kframework.RewriterResult;
 import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.Rewriter;
@@ -133,7 +132,7 @@ public class KProve {
             patternStr.append(String.format("<%2$s> %1$s%2$s </%2$s> ", BOUNDARY_CELL_PREFIX, cell));
         }
 
-        return KRun.compilePattern(files, kem, patternStr.toString(), compiledDefinition,
+        return compiledDefinition.compilePatternIfAbsent(files, kem, patternStr.toString(),
                 Source.apply("<option --boundary-cells>"));
     }
 }

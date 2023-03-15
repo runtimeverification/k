@@ -7,7 +7,6 @@ import com.google.inject.Inject;
 import org.kframework.attributes.Att;
 import org.kframework.kil.Production;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.krun.KRunOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.utils.inject.RequestScoped;
 import scala.Tuple2;
@@ -29,7 +28,6 @@ public class Context implements Serializable {
     // TODO(dwightguth): remove these fields and replace with injected dependencies
     @Deprecated @Inject public transient GlobalOptions globalOptions;
     public KompileOptions kompileOptions;
-    @Deprecated @Inject(optional=true) public transient KRunOptions krunOptions;
 
     public void addProduction(Production p, boolean kore) {
         if (p.getKLabel(false) != null) {
