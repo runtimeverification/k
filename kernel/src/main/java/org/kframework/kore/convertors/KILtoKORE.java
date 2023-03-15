@@ -37,22 +37,13 @@ public class KILtoKORE extends KILTransformation<Object> {
 
     private org.kframework.kil.loader.Context context;
     private final boolean syntactic;
-    private final boolean kore;
     private String moduleName;
     private final boolean bisonLists;
 
-    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean kore, boolean bisonLists) {
+    public KILtoKORE(org.kframework.kil.loader.Context context, boolean syntactic, boolean bisonLists) {
         this.context = context;
         this.syntactic = syntactic;
-        this.kore = kore;
         this.bisonLists = bisonLists;
-    }
-
-    public KILtoKORE(org.kframework.kil.loader.Context context) {
-        this.context = context;
-        this.syntactic = false;
-        kore = false;
-        bisonLists = false;
     }
 
     public FlatModule toFlatModule(Module m) {
@@ -170,9 +161,9 @@ public class KILtoKORE extends KILTransformation<Object> {
             if (productions.isEmpty())
                 throw KEMException.outerParserError("Could not find any productions for tag: " + l.name(), loc.getSource(), loc.getLocation());
             return productions.stream().map(p -> {
-              String label = p.getKLabel(kore);
+              String label = p.getKLabel(true);
               if (label == null && p.getAttributes().contains(Att.BRACKET())) {
-                label = p.getBracketLabel(kore);
+                label = p.getBracketLabel(true);
               }
               return Tag(label);
             });
@@ -191,8 +182,8 @@ public class KILtoKORE extends KILTransformation<Object> {
         }
 
         Function<PriorityBlock, scala.collection.Set<Tag>> applyToTags = (PriorityBlock b) -> immutable(Stream.concat(b
-                .getProductions().stream().filter(p -> p.getKLabel(kore) != null).map(p -> Tag(p.getKLabel(kore))),
-                b.getProductions().stream().filter(p -> p.containsAttribute(Att.BRACKET())).map(p -> Tag(p.getBracketLabel(kore))))
+                .getProductions().stream().filter(p -> p.getKLabel(true) != null).map(p -> Tag(p.getKLabel(true))),
+                b.getProductions().stream().filter(p -> p.containsAttribute(Att.BRACKET())).map(p -> Tag(p.getBracketLabel(true))))
                 .collect(Collectors.toSet()));
 
         if (s.getPriorityBlocks().size() > 1) {
@@ -239,22 +230,12 @@ public class KILtoKORE extends KILTransformation<Object> {
                     }
 
                     org.kframework.attributes.Att attrs = convertAttributes(p);
-                    if (!kore) {
-                        // https://github.com/runtimeverification/k/pull/2754#issuecomment-1198279737
-                        // Adding a new behavior to the 'comm' attribute, but it conflicts with the Java backend
-                        // so, we remove it in certain conditions
-                        Optional<?> assoc = attrs.getOptional(Att.ASSOC());
-                        Optional<?> comm = attrs.getOptional(Att.COMM());
-                        Optional<?> idem = attrs.getOptional(Att.IDEM());
-                        if (comm.isPresent() && assoc.isEmpty() && idem.isEmpty())
-                            attrs = attrs.remove(Att.COMM());
-                    }
                     if (attrs.contains(Att.BRACKET())) {
-                      attrs = attrs.add("bracketLabel", KLabel.class, KLabel(p.getBracketLabel(kore), immutable(p.getParams())));
+                      attrs = attrs.add("bracketLabel", KLabel.class, KLabel(p.getBracketLabel(true), immutable(p.getParams())));
                     }
 
                     org.kframework.definition.Production prod;
-                    if (p.getKLabel(kore) == null)
+                    if (p.getKLabel(true) == null)
                         prod = Production(
                                 immutable(p.getParams()),
                                 sort,
@@ -262,7 +243,7 @@ public class KILtoKORE extends KILTransformation<Object> {
                                 attrs);
                     else
                         prod = Production(
-                                KLabel(p.getKLabel(kore), immutable(p.getParams())),
+                                KLabel(p.getKLabel(true), immutable(p.getParams())),
                                 sort,
                                 immutable(items),
                                 attrs);
@@ -270,11 +251,11 @@ public class KILtoKORE extends KILTransformation<Object> {
                     res.add(prod);
                     // handle associativity for the production
                     if (p.containsAttribute("left"))
-                        res.add(SyntaxAssociativity(applyAssoc("left"), Set(Tag(p.getKLabel(kore)))));
+                        res.add(SyntaxAssociativity(applyAssoc("left"), Set(Tag(p.getKLabel(true)))));
                     else if (p.containsAttribute("right"))
-                        res.add(SyntaxAssociativity(applyAssoc("right"), Set(Tag(p.getKLabel(kore)))));
+                        res.add(SyntaxAssociativity(applyAssoc("right"), Set(Tag(p.getKLabel(true)))));
                     else if (p.containsAttribute("non-assoc"))
-                        res.add(SyntaxAssociativity(applyAssoc("non-assoc"), Set(Tag(p.getKLabel(kore)))));
+                        res.add(SyntaxAssociativity(applyAssoc("non-assoc"), Set(Tag(p.getKLabel(true)))));
                 }
             }
         }
@@ -322,18 +303,18 @@ public class KILtoKORE extends KILTransformation<Object> {
 
         // Es ::= E "," Es
         if (bisonLists) {
-          prod1 = Production(KLabel(p.getKLabel(kore), immutable(p.getParams())), sort,
+          prod1 = Production(KLabel(p.getKLabel(true), immutable(p.getParams())), sort,
                   Seq(NonTerminal(sort), Terminal(userList.getSeparator()), NonTerminal(elementSort)),
                   attrs.add("left"));
         } else {
-          prod1 = Production(KLabel(p.getKLabel(kore), immutable(p.getParams())), sort,
+          prod1 = Production(KLabel(p.getKLabel(true), immutable(p.getParams())), sort,
                   Seq(NonTerminal(elementSort), Terminal(userList.getSeparator()), NonTerminal(sort)),
                   attrs.add("right"));
         }
 
 
         // Es ::= ".Es"
-        prod3 = Production(KLabel(p.getTerminatorKLabel(kore), immutable(p.getParams())), sort, Seq(Terminal("." + sort.toString())),
+        prod3 = Production(KLabel(p.getTerminatorKLabel(true), immutable(p.getParams())), sort, Seq(Terminal("." + sort.toString())),
                 attrs.remove("format").remove("strict").add("klabel", p.getTerminatorKLabel(false)));
 
         res.add(prod1);

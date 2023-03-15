@@ -446,7 +446,7 @@ public class Kompile {
             moduleNames.add(m.name());
         });
 
-        CheckKLabels checkKLabels = new CheckKLabels(errors, kem, kompileOptions.isKore(), files);
+        CheckKLabels checkKLabels = new CheckKLabels(errors, kem, files);
         Set<String> checkedModules = new HashSet<>();
         // only check imported modules because otherwise we might have false positives
         Consumer<Module> checkModuleKLabels = m -> {
@@ -513,6 +513,6 @@ public class Kompile {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
-        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule(), kompileOptions.isKore()).concretize(input.mainModule(), s);
+        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule()).concretize(input.mainModule(), s);
     }
 }

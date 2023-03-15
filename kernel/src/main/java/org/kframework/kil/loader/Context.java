@@ -29,7 +29,7 @@ public class Context implements Serializable {
     @Deprecated @Inject public transient GlobalOptions globalOptions;
     public KompileOptions kompileOptions;
 
-    public void addProduction(Production p, boolean kore) {
+    public void addProduction(Production p) {
         if (p.getKLabel(false) != null) {
             tags.put(p.getKLabel(false), p);
         } else if (p.getAttributes().contains(Att.BRACKET())) {

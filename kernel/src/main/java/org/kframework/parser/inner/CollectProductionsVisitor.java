@@ -12,10 +12,9 @@ import java.util.List;
 
 public class CollectProductionsVisitor {
     private final Context context;
-    private final boolean kore;
 
-    public CollectProductionsVisitor(boolean kore, Context context) {
-        this.kore = kore; this.context = context;
+    public CollectProductionsVisitor(Context context) {
+        this.context = context;
     }
 
     private String moduleName;
@@ -37,7 +36,7 @@ public class CollectProductionsVisitor {
         node.setSort(sort);
         node.setOwnerModuleName(moduleName);
         node.setParams(params);
-        context.addProduction(node, kore);
+        context.addProduction(node);
     }
 
     public void visit(Definition def) {

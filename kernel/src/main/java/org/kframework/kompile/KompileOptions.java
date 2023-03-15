@@ -100,10 +100,6 @@ public class KompileOptions implements Serializable {
             "rules marked with `[concrete]` attribute")
     public List<String> extraConcreteRuleLabels = Collections.emptyList();
 
-    public boolean isKore() {
-        return backend.equals("kore") || backend.equals("haskell") || backend.equals("llvm") || backend.equals("maude");
-    }
-
     @ParametersDelegate
     public SMTOptions smt = new SMTOptions();
 
