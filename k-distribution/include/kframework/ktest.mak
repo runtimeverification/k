@@ -1,5 +1,7 @@
 SHELL=/bin/bash
 
+UNAME := $(shell uname)
+
 # path to the current makefile
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # path to binary directory of this distribution
@@ -53,6 +55,11 @@ KOMPILE_BACKEND?=llvm
 # check if .k file exists, if not, check if .md file exists
 # if not, default to .k to give error message
 SOURCE_EXT?=$(or $(and $(wildcard $(DEF).k), k), $(or $(and $(wildcard $(DEF).md), md), k))
+
+ifeq ($(UNAME), Darwin)
+	KOMPILE_FLAGS+=--no-haskell-binary
+endif
+
 KOMPILE_FLAGS+=--no-exc-wrap
 KPROVE_FLAGS+=--no-exc-wrap
 KRUN_FLAGS+=--no-exc-wrap
