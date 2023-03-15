@@ -354,7 +354,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             }
 
             @Override
-            public RewriterResult prove(Module rules, Rule boundaryPattern, Boolean reuseDef) {
+            public RewriterResult prove(Module rules, Boolean reuseDef) {
                 Module kompiledModule = KoreBackend.getKompiledModule(module, true);
                 ModuleToKORE converter = new ModuleToKORE(kompiledModule, def.topCellInitializer, kompileOptions, kem);
                 String defPath = reuseDef ? files.resolveKompiled("definition.kore").getAbsolutePath() : saveKoreDefinitionToTemp(converter);

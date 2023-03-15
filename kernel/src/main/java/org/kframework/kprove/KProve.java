@@ -80,7 +80,6 @@ public class KProve {
 
         Rewriter rewriter = rewriterGenerator.apply(compiled._1());
         Module specModule = compiled._2();
-        Rule boundaryPattern = buildBoundaryPattern(compiledDefinition);
 
         if (kproveOptions.emitJson) {
             try {
@@ -90,7 +89,7 @@ public class KProve {
             }
         }
 
-        RewriterResult results = rewriter.prove(specModule, boundaryPattern, false);
+        RewriterResult results = rewriter.prove(specModule, false);
         sw.printIntermediate("Backend");
         kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), kprint::outputFile,
                 results.k());
@@ -113,26 +112,5 @@ public class KProve {
             throw KEMException.criticalError(
                     "Could not create proof output directory " + proveKompiledDir.toAbsolutePath(), e);
         }
-    }
-
-    /**
-     * A pattern that implements --boundary-cells functionality. When this pattern matches, in the resulting
-     * substitution, for each boundary cell there will be a variable starting with {@code "BOUND_"}. Other variables
-     * must be ignored.
-     *
-     * @return the rule corresponding to boundary pattern, or null if no boundary cells were set.
-     */
-    public Rule buildBoundaryPattern(CompiledDefinition compiledDefinition) {
-        if (kproveOptions.boundaryCells.isEmpty()) {
-            return null;
-        }
-        StringBuilder patternStr = new StringBuilder();
-        for (String cell : kproveOptions.boundaryCells) {
-            //for each boundary cell add a sequence of the form `<cell> VAR </cell>`
-            patternStr.append(String.format("<%2$s> %1$s%2$s </%2$s> ", BOUNDARY_CELL_PREFIX, cell));
-        }
-
-        return compiledDefinition.compilePatternIfAbsent(files, kem, patternStr.toString(),
-                Source.apply("<option --boundary-cells>"));
     }
 }
