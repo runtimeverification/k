@@ -8,4 +8,4 @@ if [ -z "$GIT_REVISION" ]; then
 fi
 
 VERSION_REGEX='v\d+\.\d+\.\d+-\d+-g[0-9a-z]+(-dirty)?$'
-echo "$GIT_REVISION" | grep -Pq "$VERSION_REGEX"
+echo "$GIT_REVISION" | egrep -q "$VERSION_REGEX"
