@@ -40,8 +40,8 @@ syntax Pgm ::= begin(Int) | end(Int)
 rule begin(X) => end(X)
 
 syntax Int ::= bar1(Int) [function, smtlib(bar1)]
-             | bar2(Int) [function, smtlib(bar2)]
-             | bar3(Int) [function, smtlib(bar3)]
+             | bar2(Int) [function, smtlib(bar2), no-evaluators]
+             | bar3(Int) [function, smtlib(bar3), no-evaluators]
 
 rule [f1]: bar1(X) => bar2(X) requires X >Int 0
 
