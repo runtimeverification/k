@@ -6,7 +6,7 @@ module DEPOSIT-SYNTAX
 imports INT-SYNTAX
 
 // libraries
-syntax Int ::= hash(Int, Int) [function, smtlib(hash)]
+syntax Int ::= hash(Int, Int) [function, total, no-evaluators, smtlib(hash)]
 
 // functions
 syntax Cmd ::= "initConfig"     | initConfigLoop(Int, Int)
