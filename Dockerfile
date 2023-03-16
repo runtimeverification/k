@@ -17,6 +17,7 @@ RUN    apt-get update        \
         debhelper            \
         flex                 \
         gcc                  \
+        g++                  \
         git                  \
         libboost-test-dev    \
         libgmp-dev           \
