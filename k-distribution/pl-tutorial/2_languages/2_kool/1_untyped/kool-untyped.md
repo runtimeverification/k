@@ -240,8 +240,8 @@ Old desugaring rules, from SIMPLE
 ```k
   rule if (E) S => if (E) S else {}
   rule for(Start Cond; Step) {S} => {Start while (Cond) {S Step;}}
-  rule var E1::Exp, E2::Exp, Es::Exps; => var E1; var E2, Es;       [macro-rec]
-  rule var X::Id = E; => var X; X = E;                              [macro]
+  rule var E1::Exp, E2::Exp, Es::Exps; => var E1; var E2, Es;       [anywhere]
+  rule var X::Id = E; => var X; X = E;                              [anywhere]
 ```
 New desugaring rule
 ```k
