@@ -37,7 +37,7 @@ rule "abc" ~> Fd:Int ~> remove(Path) => #close(Fd) ~> remove(Path)
 
 // 4
 syntax KItem ::= "orr"
-rule orr => #open("../io-java/1.test", "r") ~> orr
+rule orr => #open("1.test", "r") ~> orr
 rule Fd:Int ~> orr => #read(Fd, 4) ~> Fd:Int ~> orr
 rule S1:String              ~> Fd:Int ~> orr => S1       ~> #read(Fd, 100) ~> Fd:Int ~> orr
 rule S1:String ~> S2:String ~> Fd:Int ~> orr => S1 ~> S2 ~> #read(Fd, 100)

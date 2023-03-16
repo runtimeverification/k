@@ -1,0 +1,1 @@
+system("echo sout ; >&2 echo serr")
