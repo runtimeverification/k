@@ -29,7 +29,7 @@ from psutil import Process
 
 from ..cli_utils import BugReport, check_dir_path, check_file_path
 from ..utils import filter_none
-from .syntax import And, Definition, Module, Pattern, SortApp, kore_term
+from .syntax import And, Module, Pattern, SortApp, kore_term
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -424,7 +424,7 @@ class KoreClient(ContextManager['KoreClient']):
         return kore_term(result['state'], Pattern)  # type: ignore # https://github.com/python/mypy/issues/4717
 
     def add_module(self, module: Module) -> None:
-        result = self._request('add-module', name=module.name, module=Definition((module,)).text)
+        result = self._request('add-module', module=module.text)
         assert result == []
 
 

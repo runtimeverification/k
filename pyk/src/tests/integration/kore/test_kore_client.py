@@ -166,7 +166,7 @@ class TestKoreClient(KoreClientTest):
             kore_client.implies(antecedent, consequent)
 
         # Then
-        assert excinfo.value.code == -32003
+        assert excinfo.value.code == 4
 
     @pytest.mark.parametrize(
         'test_id,pattern,expected',

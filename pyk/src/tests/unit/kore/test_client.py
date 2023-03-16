@@ -6,7 +6,7 @@ import pytest
 
 from pyk.kore.prelude import INT, int_dv
 from pyk.kore.rpc import ExecuteResult, ImpliesResult, JsonRpcClient, KoreClient, State, StuckResult
-from pyk.kore.syntax import And, App, Bottom, Definition, Module, Pattern, Top
+from pyk.kore.syntax import And, App, Bottom, Module, Pattern, Top
 
 int_top = Top(INT)
 int_bottom = Bottom(INT)
@@ -161,7 +161,7 @@ def test_simplify(
 ADD_MODULE_TEST_DATA: Final = (
     (
         Module('HELLO'),
-        {'name': 'HELLO', 'module': Definition((Module('HELLO'),)).text},
+        {'module': 'module HELLO\nendmodule [ ]'},
     ),
 )
 
