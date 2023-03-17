@@ -1,7 +1,7 @@
 DEF=def
 EXT=a
 KOMPILE_FLAGS=--syntax-module DEF
-KOMPILE_BACKEND?=java
+KOMPILE_BACKEND?=haskell
 
 TESTDIR=.
 

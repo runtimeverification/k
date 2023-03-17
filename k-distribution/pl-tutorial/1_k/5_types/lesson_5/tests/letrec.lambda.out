@@ -1,1 +1,5 @@
-T ==K V0 -> int
+{
+  T:Type
+#Equals
+  ?T1:Type -> int
+}
