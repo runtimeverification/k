@@ -1,9 +1,10 @@
 name: 'Test PR'
 on:
   pull_request_target:
-    types: [opened, edited, reopened, synchronize]
+    types: [opened, edited, reopened, synchronize, ready_for_review, converted_to_draft, assigned]
     branches:
       - 'develop'
+      - 'master'
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
