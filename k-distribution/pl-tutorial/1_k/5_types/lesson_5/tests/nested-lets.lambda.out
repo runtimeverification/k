@@ -1,1 +1,5 @@
-T ==K bool -> bool
+{
+  T:Type
+#Equals
+  bool -> bool
+}

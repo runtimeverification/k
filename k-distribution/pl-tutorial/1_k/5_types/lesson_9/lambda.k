@@ -8,19 +8,19 @@ module LAMBDA
 
   syntax Exp ::= Int | Bool | Id
                | "(" Exp ")"                      [bracket]
-               | Exp Exp                          [strict, left]
-               > Exp "*" Exp                      [strict, left]
-               | Exp "/" Exp                      [strict]
-               > Exp "+" Exp                      [strict, left]
-               > Exp "<=" Exp                     [strict]
+               | Exp Exp                          [seqstrict, left]
+               > Exp "*" Exp                      [seqstrict, left]
+               | Exp "/" Exp                      [seqstrict]
+               > Exp "+" Exp                      [seqstrict, left]
+               > Exp "<=" Exp                     [seqstrict]
                > "lambda" Id "." Exp
-               | "if" Exp "then" Exp "else" Exp   [strict]
+               | "if" Exp "then" Exp "else" Exp   [seqstrict]
                | "let" Id "=" Exp "in" Exp        [strict(2)]
                | "letrec" Id Id "=" Exp "in" Exp  [macro]
                | "mu" Id "." Exp
 
   syntax Type ::= "int" | "bool"
-                | Type "->" Type
+                | Type "->" Type                  [klabel(functionType)]
                 | "(" Type ")"                    [bracket]
 
   syntax Exp ::= Type
@@ -37,7 +37,7 @@ module LAMBDA
   rule T1:Type  + T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type <= T2:Type => T1 = int ~> T2 = int ~> bool
 
-  syntax Exp ::= Exp "->" Exp                  [strict]
+  syntax Exp ::= Exp "->" Exp                  [seqstrict, klabel(functionType)]
   rule <k> lambda X:Id . E => ?T:Type -> E ~> setTenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
 
