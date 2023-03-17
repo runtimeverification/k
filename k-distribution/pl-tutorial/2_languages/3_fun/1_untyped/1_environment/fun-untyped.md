@@ -145,8 +145,8 @@ with the former category.  We prefer the names of variables and functions
 to start with lower case letters.  We take the freedom to tacitly introduce
 syntactic lists/sequences for each nonterminal for which we need them:
 ```k
-  syntax Name
-  syntax Names ::= List{Name,","}
+  syntax Name                                      [token]
+  syntax Names ::= List{Name,","}                  [klabel(exps)]
 ```
 Expression constructs will be defined throughtout the syntax module.
 Below are the very basic ones, namely the builtins, the names, and the
@@ -156,11 +156,13 @@ the list is on a position which can be evaluated:
 ```k
   syntax Exp ::= Int | Bool | String | Name
                | "(" Exp ")"                       [bracket]
-  syntax Exps  ::= List{Exp,","}                   [strict]
+  syntax Exps  ::= List{Exp,","}                   [strict, klabel(exps)]
   syntax Val
-  syntax Vals ::= List{Val,","}
+  syntax Exp ::= Val
+  syntax Exps ::= Vals
+  syntax Vals ::= List{Val,","}                    [klabel(exps)]
   syntax Bottom
-  syntax Bottoms ::= List{Bottom,","}
+  syntax Bottoms ::= List{Bottom,","}              [klabel(exps)]
 ```
 We next define the syntax of arithmetic constructs, together with
 their relative priorities and left-/non-associativities.  We also
@@ -210,10 +212,13 @@ patterns as ordinary expression constructs, although we will make sure that
 we do not give them semantics if they appear in any other place then in a
 function case pattern.
 ```k
-  syntax Exp ::= "[" Exps "]"                             [strict]
-               | "cons" |  "head" | "tail" | "null?"
+  syntax Exp ::= "[" Exps "]"                             [strict, klabel(list)]
+               | "head" [macro] | "tail" [macro] | "null?" [macro]
                | "[" Exps "|" Exp "]"
-  syntax Val ::= "[" Vals "]"
+  syntax Val ::= "[" Vals "]"                             [klabel(list)]
+  syntax Cons ::= "cons"
+  syntax Val ::= Cons
+  syntax Val ::= Cons Val                                 [klabel(apply)]
 ```
 Data constructors start with capital letters and they may or may
 not have arguments.  We need to use the attribute "prefer" to make
@@ -224,10 +229,10 @@ to the expression `a`.  Also, note that the constructor is strict
 in its second argument, because we want to evaluate its arguments but
 not the constuctor name itsef.
 ```k
-  syntax ConstructorName
+  syntax ConstructorName                         [token]
   syntax Exp ::= ConstructorName
-               | ConstructorName "(" Exps ")"    [prefer, strict(2)]
-  syntax Val ::= ConstructorName "(" Vals ")"
+               | ConstructorName "(" Exps ")"    [prefer, strict(2), klabel(constructor)]
+  syntax Val ::= ConstructorName "(" Vals ")"    [klabel(constructor)]
 ```
 A function is essentially a `|`-separated ordered
 sequence of cases, each case of the form `pattern -> expression`,
@@ -248,7 +253,7 @@ expressions, without worrying about type correctness.  Again, the type
 system will reject type-incorrect programs.
 ```k
   syntax Exp ::= "fun" Cases
-               | Exp Exp                              [strict, left]
+               | Exp Exp                              [strict, left, klabel(apply)]
 // NOTE: We would like eventually to also have Exp "(" Exps ")
   syntax Case  ::= Exp "->" Exp
   syntax Cases ::= List{Case, "|"}
@@ -284,7 +289,7 @@ construct, which is sequentially strict.  This evaluates to the value of
 its second argument; the value of the first argument is lost (which has
 therefore been evaluated only for its side effects.
 ```k
-  syntax Exp ::= "ref"
+  syntax Exp ::= "ref"                             [macro]
                | "&" Name
                | "@" Exp                                     [strict]
                | Exp ":=" Exp                                [strict]
@@ -309,14 +314,14 @@ introduce the special expression contant `throw`, but we need to
 use it as a function argument name in the desugaring macro, so we define
 it as a name instead of as an expression constant:
 ```k
-  syntax Exp ::= "callcc"
-               | "try" Exp "catch" "(" Name ")" Exp
+  syntax Exp ::= "try" Exp "catch" "(" Name ")" Exp [macro]
+  syntax Val ::= "callcc"
   syntax Name ::= "throw" [token]
 ```
 Finally, FUN also allows polymorphic datatype declarations.  These
 will be useful when we define the type system later on.
 ```k
-  syntax Exp ::= "datatype" Type "=" TypeCases Exp
+  syntax Exp ::= "datatype" Type "=" TypeCases Exp [macro]
 // NOTE: In a future version of K, we want the datatype declaration
 // to be a construct by itself, but that is not possible currently
 // because K's parser wronly identifies the __ operation allowing
@@ -329,8 +334,8 @@ in datatype declarations.
 Like in many functional languages, type parameters/variables in
 user-defined types are quoted identifiers.
 ```k
-  syntax TypeVar
-  syntax TypeVars ::= List{TypeVar,","}
+  syntax TypeVar                        [token]
+  syntax TypeVars ::= List{TypeVar,","} [klabel(types)]
 ```
 Types can be basic types, function types, or user-defined
 parametric types.  In the dynamic semantics we are going to simply ignore
@@ -339,15 +344,15 @@ for generating the desired parser.  To avoid syntactic ambiguities with
 the arrow construct for function cases, we use the symbol `-->` as
 a constructor for function types:
 ```k
-  syntax TypeName
+  syntax TypeName [token]
   syntax Type ::= "int" | "bool" | "string"
                 | Type "-->" Type                            [right]
                 | "(" Type ")"                             [bracket]
                 | TypeVar
                 | TypeName             [klabel(TypeName), avoid]
-                | Type TypeName   [klabel(Type-TypeName)]
+                | Type TypeName   [klabel(Type-TypeName), symbol, macro]
                 | "(" Types ")" TypeName                    [prefer]
-  syntax Types ::= List{Type,","}
+  syntax Types ::= List{Type,","} [klabel(types)]
   syntax Types ::= TypeVars
 
   syntax TypeCase ::= ConstructorName
@@ -359,7 +364,7 @@ a constructor for function types:
 
 ```k
   syntax priorities @__FUN-UNTYPED-COMMON
-                  > ___FUN-UNTYPED-COMMON
+                  > apply
                   > arith
                   > _:=__FUN-UNTYPED-COMMON
                   > let_in__FUN-UNTYPED-COMMON
@@ -382,34 +387,33 @@ those, we follow the same convention like in the **K** tutorial, where we
 added them as new identifier constructs starting with the character `$`,
 so we can easily recognize them when we debug or trace the semantics.
 ```k
-  syntax Name ::= "$h" | "$t"
-  rule head => fun [$h|$t] -> $h                             [macro]
-  rule tail => fun [$h|$t] -> $t                             [macro]
-  rule null? => fun [.Exps] -> true | [$h|$t] -> false       [macro]
+  syntax Name ::= "$h" [token] | "$t" [token]
+  rule head => fun [$h|$t] -> $h
+  rule tail => fun [$h|$t] -> $t
+  rule null? => fun [.Exps] -> true | [$h|$t] -> false
 ```
 Multiple-head list patterns desugar into successive one-head patterns:
 ```k
-  rule [E1,E2,Es:Exps|T] => [E1|[E2,Es|T]]                   [macro-rec]
+  rule [E1,E2,Es:Exps|T] => [E1|[E2,Es|T]]                   [anywhere]
 ```
 Uncurrying of multiple arguments in functions and binders:
 ```k
-  rule P1 P2 -> E => P1 -> fun P2 -> E                       [macro-rec]
-  rule F P = E => F = fun P -> E                             [macro-rec]
+  rule P1 P2 -> E => P1 -> fun P2 -> E                       [anywhere]
+  rule F P = E => F = fun P -> E                             [anywhere]
 ```
 We desugar the `try-catch` construct into callcc:
 ```k
-  syntax Name ::= "$k" | "$v"
+  syntax Name ::= "$k" [token] | "$v" [token]
   rule try E catch(X) E'
-    => callcc (fun $k -> (fun throw -> E)(fun X -> $k E'))   [macro]
+    => callcc (fun $k -> (fun throw -> E)(fun X -> $k E'))
 ```
 For uniformity, we reduce all types to their general form:
 ```k
-//  rule TypeName(Tn:TypeName) => (.TypeVars) Tn               [macro]
-  rule `Type-TypeName`(T:Type, Tn:TypeName) => (T) Tn          [macro]
+  rule `Type-TypeName`(T:Type, Tn:TypeName) => (T) Tn
 ```
 The dynamic semantics ignores all the type declarations:
 ```k
-  rule datatype _T = _TCs E => E                               [macro]
+  rule datatype _T = _TCs E => E
 
 endmodule
 
@@ -458,8 +462,6 @@ We only define integers, Booleans and strings as values here, but will
 add more values later.
 ```k
   syntax Val ::= Int | Bool | String
-  syntax Exp ::= Val
-  syntax Exps ::= Vals
   syntax Vals ::= Bottoms
   syntax KResult ::= Val
 ```
@@ -516,8 +518,6 @@ value, but we do not need that level of detail here), and also that
 `cons` applied to a value is a value (specifically, it would be
 a function/closure value that expects the second, list argument):
 ```k
-  rule isVal(cons) => true
-  rule isVal(cons _V:Val) => true
   rule cons V:Val [Vs:Vals] => [V,Vs]
 ```
 
@@ -641,8 +641,8 @@ Sequential composition, which is needed only to accumulate the
 side effects due to assignments, was strict in the first argument.
 Once evaluated, its first argument is simply discarded:
 ```k
-  syntax Name ::= "$x"
-  rule ref => fun $x -> & $x                                 [macro]
+  syntax Name ::= "$x" [token]
+  rule ref => fun $x -> & $x
   rule <k> & X => L ...</k>  <env>... X |-> L ...</env>
   rule <k> @ L:Int => V:Val ...</k>  <store>... L |-> V ...</store>
   rule <k> L:Int := V:Val => V ...</k>  <store>... L |-> (_=>V) ...</store>
@@ -679,7 +679,6 @@ the current execution context with its own and continues the execution
 normally.
 ```k
   syntax Val ::= cc(Map,K)
-  rule isVal(callcc) => true
   rule <k> (callcc V:Val => V cc(Rho,K)) ~> K </k>  <env> Rho </env>
   rule <k> cc(Rho,K) V:Val ~> _ => V ~> K </k>  <env> _ => Rho </env>
 ```
