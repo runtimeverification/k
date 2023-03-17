@@ -7,7 +7,7 @@ module LAMBDA
   imports SUBSTITUTION
 
   syntax Type ::= "int" | "bool"
-                | Type "->" Type
+                | Type "->" Type               [klabel(functionType)]
                 | "(" Type ")"                 [bracket]
 
   syntax Exp ::= KVar
@@ -19,7 +19,7 @@ module LAMBDA
 
   syntax KResult ::= Type
 
-  syntax Exp ::= Exp "->" Exp                  [strict]
+  syntax Exp ::= Exp "->" Exp                  [strict, klabel(functionType)]
 
   rule lambda X : T . E => T -> (E[T/X])
   rule (T1 -> T2) T1 => T2

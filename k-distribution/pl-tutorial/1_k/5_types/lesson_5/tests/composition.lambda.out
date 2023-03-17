@@ -1,1 +1,5 @@
-T ==K ( V0 -> V1 ) -> ( ( V1 -> V2 ) -> ( V0 -> V2 ) )
+{
+  T:Type
+#Equals
+  ( ?T1:Type -> ?T2:Type ) -> ( ( ?T2:Type -> ?T3:Type ) -> ( ?T1:Type -> ?T3:Type ) )
+}

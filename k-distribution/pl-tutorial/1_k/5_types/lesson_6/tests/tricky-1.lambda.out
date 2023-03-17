@@ -1,1 +1,5 @@
-T ==K ( int -> ( int -> int ) ) -> ( int -> ( int -> int ) )
+{
+  T:Type
+#Equals
+  ( int -> ( int -> int ) ) -> ( int -> ( int -> int ) )
+}
