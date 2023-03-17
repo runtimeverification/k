@@ -8,13 +8,13 @@ module LAMBDA-SYNTAX
   imports KVAR
   syntax Exp ::= Int | Bool | KVar
                | "(" Exp ")"                      [bracket]
-               | Exp Exp                          [strict, left]
-               > Exp "*" Exp                      [strict, left]
-               | Exp "/" Exp                      [strict]
-               > Exp "+" Exp                      [strict, left]
-               > Exp "<=" Exp                     [strict]
+               | Exp Exp                          [seqstrict, left]
+               > Exp "*" Exp                      [seqstrict, left]
+               | Exp "/" Exp                      [seqstrict]
+               > Exp "+" Exp                      [seqstrict, left]
+               > Exp "<=" Exp                     [seqstrict]
                > "lambda" KVar "." Exp
-               | "if" Exp "then" Exp "else" Exp   [strict]
+               | "if" Exp "then" Exp "else" Exp   [seqstrict]
                | "let" KVar "=" Exp "in" Exp        [strict(2)]
                | "letrec" KVar KVar "=" Exp "in" Exp [macro]
                | "mu" KVar "." Exp
@@ -27,7 +27,7 @@ module LAMBDA
   imports SUBSTITUTION
 
   syntax Type ::= "int" | "bool"
-                | Type "->" Type
+                | Type "->" Type                  [klabel(functionType)]
                 | "(" Type ")"                    [bracket]
 
   syntax Exp ::= Type
@@ -45,7 +45,7 @@ module LAMBDA
   rule int + int => int
   rule int <= int => bool
 
-  syntax Exp ::= Exp "->" Exp                  [strict]
+  syntax Exp ::= Exp "->" Exp                  [seqstrict, klabel(functionType)]
   rule <k> lambda X:KVar . E => ?T:Type -> E ~> setTenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
 
