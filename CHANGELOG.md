@@ -2,6 +2,14 @@
 copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
+K Framework 6.0.0
+=================
+
+Removals
+--------
+
+- Deleted the 'java' backend of K.
+
 K Framework 5.5.0
 =================
 
