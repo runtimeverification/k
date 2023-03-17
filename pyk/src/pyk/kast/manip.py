@@ -59,12 +59,16 @@ def ml_pred_to_bool(kast: KInner, unsafe: bool = False) -> KInner:
             if _kast.label.name == '#Implies' and len(_kast.args) == 2:
                 return impliesBool(_ml_constraint_to_bool(_kast.args[0]), _ml_constraint_to_bool(_kast.args[1]))
             if _kast.label.name == '#Equals':
-                if _kast.args[0] == TRUE:
-                    return _kast.args[1]
-                if _kast.args[0] == FALSE:
-                    return notBool(_kast.args[1])
-                if type(_kast.args[0]) in [KVariable, KToken]:
+                first, second = _kast.args
+                if first == TRUE:
+                    return second
+                if first == FALSE:
+                    return notBool(second)
+                if type(first) in [KVariable, KToken]:
                     return KApply('_==K_', _kast.args)
+                if type(first) is KSequence and type(second) is KSequence:
+                    if first.arity == 1 and second.arity == 1:
+                        return KApply('_==K_', (first.items[0], second.items[0]))
             if unsafe:
                 if _kast.label.name == '#Equals':
                     return KApply('_==K_', _kast.args)
