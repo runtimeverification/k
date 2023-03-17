@@ -18,6 +18,7 @@ RUN    apt-get update            \
         debhelper                \
         flex                     \
         gcc                      \
+        g++                      \
         git                      \
         libboost-dev             \
         libboost-test-dev        \
