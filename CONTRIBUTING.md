@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
+
 # K Framework Contributor Guide
 
 Thank you for making a contribution to the K Framework. This document explains
