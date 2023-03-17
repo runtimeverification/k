@@ -6,7 +6,7 @@ module IH
     imports NAT
 
     // declaring constants as arbitrary values
-    syntax Nat ::= "k" [function]
+    syntax Nat ::= "k" [function, no-evaluators]
 
     // induction hypothesis:
     rule (I:Nat + J:Nat) + k => I:Nat + (J:Nat + k) [simplification]
