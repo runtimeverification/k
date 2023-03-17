@@ -111,7 +111,7 @@ The following dependencies are needed either at build time or runtime:
 *   [jdk](https://openjdk.java.net/) (version 11 or greater)
 *   [libjemalloc](https://github.com/jemalloc/jemalloc)
 *   [libyaml](https://pyyaml.org/wiki/LibYAML)
-*   [llvm](https://llvm.org/) (We require version 10 or greater for clang, lld, and llvm-tools. On some distributions, the utilities below are also needed and packaged separately.)
+*   [llvm](https://llvm.org/) (We require a version between 10 and 14 for clang, lld, and llvm-tools. On some distributions, the utilities below are also needed and packaged separately.)
     * [clang](http://clang.llvm.org/)
     * [lld](https://lld.llvm.org/)
 *   [make](https://www.gnu.org/software/make/)
