@@ -237,7 +237,10 @@ class KVariable(KInner):
     name: str
     sort: Optional[KSort]
 
-    def __init__(self, name: str, *, sort: Optional[KSort] = None):
+    def __init__(self, name: str, sort: Optional[Union[str, KSort]] = None):
+        if type(sort) is str:
+            sort = KSort(sort)
+
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sort', sort)
 
@@ -279,7 +282,7 @@ class KVariable(KInner):
             _att = _att.update({KAtt.SORT: self.sort.to_dict()})
         return {'node': 'KVariable', 'name': self.name, 'att': _att.to_dict()}
 
-    def let(self, *, name: Optional[str] = None, sort: Optional[KSort] = None) -> 'KVariable':
+    def let(self, *, name: Optional[str] = None, sort: Optional[Union[str, KSort]] = None) -> 'KVariable':
         name = name if name is not None else self.name
         sort = sort if sort is not None else self.sort
         return KVariable(name=name, sort=sort)
