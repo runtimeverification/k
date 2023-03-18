@@ -10,7 +10,7 @@ from pyk.kcfg import KCFG, KCFGExplore
 from pyk.ktool.kprint import KPrint, SymbolTable
 from pyk.ktool.kprove import KProve
 from pyk.prelude.kint import intToken
-from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsTrue, mlTop
+from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue, mlTop
 
 from ..utils import KCFGExploreTest
 
@@ -219,6 +219,25 @@ class TestImpProof(KCFGExploreTest):
 
         # When
         actual = kcfg_explore.cterm_implies(antecedent_term, consequent_term)
+
+        # Then
+        assert actual == expected
+
+    def test_assume_defined(
+        self,
+        kcfg_explore: KCFGExplore,
+    ) -> None:
+        # Given
+        k, state = ('PGM', '( $n |-> 0 ) MAP')
+        config = self.config(kcfg_explore.kprint, k, state)
+
+        constraint = mlEqualsFalse(
+            KApply('_in_keys(_)_MAP_Bool_KItem_Map', KToken('$n', 'Id'), KVariable('MAP', 'Map'))
+        )
+        expected = config.add_constraint(constraint)
+
+        # When
+        actual = kcfg_explore.cterm_assume_defined(config)
 
         # Then
         assert actual == expected

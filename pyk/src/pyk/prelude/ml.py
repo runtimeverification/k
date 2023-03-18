@@ -2,7 +2,7 @@ from typing import Iterable, Union
 
 from ..kast.inner import KApply, KInner, KLabel, KSort, KVariable, build_assoc
 from .k import GENERATED_TOP_CELL
-from .kbool import BOOL, TRUE
+from .kbool import BOOL, FALSE, TRUE
 
 
 def is_top(term: KInner) -> bool:
@@ -24,6 +24,10 @@ def mlEquals(  # noqa: N802
 
 def mlEqualsTrue(term: KInner) -> KApply:  # noqa: N802
     return mlEquals(TRUE, term, BOOL)
+
+
+def mlEqualsFalse(term: KInner) -> KApply:  # noqa: N802
+    return mlEquals(FALSE, term, BOOL)
 
 
 def mlTop(sort: Union[str, KSort] = GENERATED_TOP_CELL) -> KApply:  # noqa: N802
