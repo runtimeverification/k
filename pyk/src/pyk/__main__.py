@@ -123,7 +123,8 @@ def kore_to_json() -> None:
 def json_to_kore() -> None:
     text = sys.stdin.read()
     kore = Pattern.from_json(text)
-    print(kore.text)
+    kore.write(sys.stdout)
+    sys.stdout.write('\n')
 
 
 def create_argument_parser() -> ArgumentParser:
