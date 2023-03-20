@@ -85,7 +85,8 @@ class KRun(KPrint):
     ) -> CTerm:
         kore_pgm = self.kast_to_kore(pgm, sort=sort)
         with NamedTemporaryFile('w', dir=self.use_directory) as ntf:
-            ntf.write(kore_pgm.text)
+            kore_pgm.write(ntf)
+            ntf.write('\n')
             ntf.flush()
 
             result = _krun(
@@ -118,7 +119,8 @@ class KRun(KPrint):
         expect_rc: Union[int, Iterable[int]] = 0,
     ) -> Pattern:
         with NamedTemporaryFile('w', dir=self.use_directory) as f:
-            f.write(pattern.text)
+            pattern.write(f)
+            f.write('\n')
             f.flush()
 
             proc_res = _krun(
