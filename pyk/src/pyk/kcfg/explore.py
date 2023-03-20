@@ -20,24 +20,32 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 class KCFGExplore(ContextManager['KCFGExplore']):
     kprint: KPrint
-    _kore_rpc_command: Union[str, Iterable[str]] = 'kore-rpc'
     _port: Optional[int]
+    _kore_rpc_command: Union[str, Iterable[str]]
+    _smt_timeout: Optional[int]
+    _smt_retry_limit: Optional[int]
+    _bug_report: Optional[BugReport]
+
     _kore_server: Optional[KoreServer]
     _kore_client: Optional[KoreClient]
     _rpc_closed: bool
-    _bug_report: Optional[BugReport]
 
     def __init__(
         self,
         kprint: KPrint,
+        *,
         port: Optional[int] = None,
-        bug_report: Optional[BugReport] = None,
         kore_rpc_command: Union[str, Iterable[str]] = 'kore-rpc',
+        smt_timeout: Optional[int] = None,
+        smt_retry_limit: Optional[int] = None,
+        bug_report: Optional[BugReport] = None,
     ):
         self.kprint = kprint
         self._port = port
-        self._bug_report = bug_report
         self._kore_rpc_command = kore_rpc_command
+        self._smt_timeout = smt_timeout
+        self._smt_retry_limit = smt_retry_limit
+        self._bug_report = bug_report
         self._kore_server = None
         self._kore_client = None
         self._rpc_closed = False
@@ -76,6 +84,8 @@ class KCFGExplore(ContextManager['KCFGExplore']):
                 port=self._port,
                 bug_report=self._bug_report,
                 command=self._kore_rpc_command,
+                smt_timeout=self._smt_timeout,
+                smt_retry_limit=self._smt_retry_limit,
             )
         if not self._kore_client:
             self._kore_client = KoreClient('localhost', self._kore_server._port, bug_report=self._bug_report)
