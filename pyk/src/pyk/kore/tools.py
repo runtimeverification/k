@@ -25,7 +25,8 @@ def kore_print(pattern: Pattern, definition_dir: Union[str, Path], output: Union
     output = PrintOutput(output)
 
     with NamedTemporaryFile(mode='w') as f:
-        f.write(pattern.text)
+        pattern.write(f)
+        f.write('\n')
         f.flush()
 
         run_res = run_process(['kore-print', f.name, '--definition', str(definition_dir), '--output', output.value])
