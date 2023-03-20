@@ -134,32 +134,54 @@ void print(node *current) {
 extern node *result;
 extern char *filename;
 
-int main(int argc, char **argv) {
+#define CONCAT(X, Y) X##Y
+#define NAME(sort) CONCAT(parse_, sort)
+#define PARSER_FUNCTION NAME(K_BISON_PARSER_SORT)
+
+void PARSER_FUNCTION(
+    char *program_name, char *input_file, char *location_file) {
   yyscan_t scanner;
   yylex_init(&scanner);
-  if (argc < 2 || argc > 3) {
-    fprintf(stderr, "usage: %s <file> [<filename>]\n", argv[0]);
-    exit(1);
-  }
-  if (argc == 3) {
-    filename = argv[2];
-  } else {
-    filename = argv[1];
-  }
-  FILE *f = fopen(argv[1], "r");
+
+  filename = location_file;
+
+  FILE *f = fopen(input_file, "r");
   if (!f) {
-    int len = strlen(argv[0]) + strlen(argv[1]) + 19;
+    int len = strlen(program_name) + strlen(input_file) + 19;
     char *buf = malloc(len);
-    snprintf(buf, len, "%s: cannot access '%s'", argv[0], argv[1]);
+    snprintf(buf, len, "%s: cannot access '%s'", program_name, input_file);
     perror(buf);
     exit(1);
   }
+
   yyset_in(f, scanner);
+
   int status = yyparse(scanner);
   if (status) {
     exit(status);
   }
+
   print(result);
   printf("\n");
   yylex_destroy(scanner);
 }
+
+#ifdef K_BISON_PARSER_MAIN
+
+int main(int argc, char **argv) {
+  if (argc < 2 || argc > 3) {
+    fprintf(stderr, "usage: %s <file> [<filename>]\n", argv[0]);
+    exit(1);
+  }
+
+  char *location_file;
+  if (argc == 3) {
+    location_file = argv[2];
+  } else {
+    location_file = argv[1];
+  }
+
+  PARSER_FUNCTION(argv[0], argv[1], location_file);
+}
+
+#endif

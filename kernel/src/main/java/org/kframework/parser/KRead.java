@@ -101,6 +101,8 @@ public class KRead {
                 List<String> command = new ArrayList<>();
                 command.addAll(Arrays.asList(
                       Scanner.COMPILER,
+                      "-DK_BISON_PARSER_SORT=" + sort.name(),
+                      "-DK_BISON_PARSER_MAIN",
                       files.resolveKInclude("cparser/main.c").getAbsolutePath(),
                       files.resolveTemp("lex.yy.c").getAbsolutePath(),
                       files.resolveTemp("parser.tab.c").getAbsolutePath(),
