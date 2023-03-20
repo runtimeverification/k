@@ -161,7 +161,7 @@ def test_simplify(
 ADD_MODULE_TEST_DATA: Final = (
     (
         Module('HELLO'),
-        {'module': 'module HELLO\nendmodule [ ]'},
+        {'module': 'module HELLO\nendmodule []'},
     ),
 )
 
