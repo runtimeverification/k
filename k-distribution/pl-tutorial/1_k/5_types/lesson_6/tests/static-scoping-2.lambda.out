@@ -1,1 +1,5 @@
-T ==K int
+{
+  T:Type
+#Equals
+  int
+}
