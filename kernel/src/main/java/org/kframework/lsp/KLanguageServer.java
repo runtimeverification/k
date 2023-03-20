@@ -57,6 +57,8 @@ public class KLanguageServer implements LanguageServer, LanguageClientAware {
         response.getCapabilities().setReferencesProvider(true);
         response.getCapabilities().setDefinitionProvider(true);
         response.getCapabilities().setSelectionRangeProvider(true);
+        response.getCapabilities().setExecuteCommandProvider(new ExecuteCommandOptions(List.of("kframework.showKAST")));
+        response.getCapabilities().setCodeActionProvider(true);
 
         if (!isDynamicCompletionRegistration())
             response.getCapabilities().setCompletionProvider(new CompletionOptions());

@@ -101,4 +101,9 @@ public class KTextDocumentService implements TextDocumentService {
     public CompletableFuture<List<SelectionRange>> selectionRange(SelectionRangeParams params) {
         return memo.selectionRange(params);
     }
+
+    @Override
+    public CompletableFuture<List<Either<Command, CodeAction>>> codeAction(CodeActionParams params) {
+        return memo.codeAction(params);
+    }
 }

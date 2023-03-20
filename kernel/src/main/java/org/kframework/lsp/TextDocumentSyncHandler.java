@@ -80,7 +80,7 @@ public class TextDocumentSyncHandler {
             if (!files.containsKey(uri))
                 add(uri);
         });
-        clientLogger.logMessage("loaded cached modules: " + caches.size());
+        clientLogger.logMessage("loaded cached modules: " + caches.size() + " from: " + cacheFile.orElse(Path.of("")));
     }
 
     public void add(String uri) {
@@ -515,5 +515,102 @@ public class TextDocumentSyncHandler {
     private static int getSelectionRangeDepth(SelectionRange sr) {
         if (sr == null) return 0;
         return 1 + getSelectionRangeDepth(sr.getParent());
+    }
+
+    // update current file and user selection range
+    public CompletableFuture<List<Either<Command, CodeAction>>> codeAction(CodeActionParams params) {
+        return CompletableFuture.supplyAsync(() -> {
+            spos = new KPos(params.getRange().getStart());
+            epos = new KPos(params.getRange().getEnd());
+            currFile = params.getTextDocument().getUri();
+
+            clientLogger.logMessage("Operation '" + "text/codeAction: " + params.getTextDocument().getUri() + " #range: "
+                    + params.getRange().getStart().getLine() + "," + params.getRange().getStart().getCharacter() + " -> "
+                    + params.getRange().getEnd().getLine() + "," + params.getRange().getEnd().getCharacter());
+
+            return List.of();
+        });
+    }
+
+    // start of selection range
+    public KPos spos = new KPos(1,1);
+    // end of selection range
+    public KPos epos = new KPos(1,1);
+    // currently selected file
+    public String currFile = "";
+
+    // TODO: display parsed caches from scala.Module
+    public String showKast(String cmd) {
+        StringBuilder result = new StringBuilder();
+
+        KTextDocument txtDoc = files.get(currFile);
+        List<DefinitionItem> dis = txtDoc.dis;
+        txtDoc.getContextAt(new KPos(1, 1)); // warmup to avoid NPE
+
+        for (DefinitionItem di : dis) {
+            if (isTermInSelection(getSafeLoc(di))) {
+                result.append(di);
+            } else if (isPositionOverLocation(spos, getSafeLoc(di)) || isPositionOverLocation(epos, getSafeLoc(di))) {
+                if (di instanceof Module) {
+                    Module m = (Module) di;
+                    for (ModuleItem mi : m.getItems()) {
+                        if (isTermInSelection(getSafeLoc(di))) {
+                            result.append(mi);
+                        } else if (isPositionOverLocation(spos, getSafeLoc(mi)) || isPositionOverLocation(epos, getSafeLoc(mi))) {
+                            if (mi instanceof org.kframework.kil.Syntax) {
+                                Syntax stx = (org.kframework.kil.Syntax) mi;
+                                for (PriorityBlock pb : stx.getPriorityBlocks()) {
+                                    for (Production prd : pb.getProductions())
+                                        if (isPositionOverLocation(spos, getSafeLoc(prd)) || isPositionOverLocation(epos, getSafeLoc(prd)))
+                                            result.append(prd);
+                                }
+                            } else if (mi instanceof StringSentence) { // if we have caches, find the deepest term
+                                StringSentence ss = (StringSentence) mi;
+                                String suffix = ss.getType().equals(DefinitionParsing.configuration) ? "-" + RuleGrammarGenerator.CONFIG_CELLS : "-" + RuleGrammarGenerator.RULE_CELLS;
+                                Optional<Map.Entry<String, ParseCache>> ch = caches.entrySet().stream().filter(elm -> elm.getKey().startsWith(m.getName() + suffix)).findFirst();
+                                AtomicReference<K> x = new AtomicReference<>();
+                                if (ch.isPresent()) {
+                                    Map<String, ParseCache.ParsedSentence> parsedSent = ch.get().getValue().getCache();
+                                    if (parsedSent.containsKey(ss.getContent())) {
+                                        Bubble b = new Bubble(ss.getType(), ss.getContent(), ss.getAttributes()
+                                                .add(org.kframework.attributes.Location.class, ss.getLocation()).add(Source.class, ss.getSource())
+                                                .add("contentStartLine", ss.getContentStartLine()).add("contentStartColumn", ss.getContentStartColumn()));
+                                        ParseCache.ParsedSentence parse = DefinitionParsing.updateLocation(parsedSent.get(ss.getContent()), b);
+                                        KViz.from(t -> {
+                                            if (isPositionOverLocation(spos, t.location().get()) && isPositionOverLocation(epos, t.location().get()))
+                                                x.set(t); // find the deepest term that contains this position
+                                            return t;
+                                        }, "Find selected terms").apply(parse.getParse());
+                                    }
+                                }
+                                result.append(x.get());
+                            } else { // anything else that doesn't have a complex structure: Import, SyntaxPriorities...
+                                result.append(mi);
+                            }
+                        }
+                    }
+                } else {
+                    result.append(di);
+                }
+            }
+        }
+
+        try {
+            File tmp = File.createTempFile("kast", ".txt");
+            FileUtil.save(tmp, result.toString());
+            kls.languageClient.showDocument(new ShowDocumentParams(tmp.toURI().toString()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return result.toString();
+    }
+
+    // true if either start or end of the selection touches the term
+    public boolean isTermInSelection(org.kframework.attributes.Location loc) {
+        org.kframework.attributes.Location selection = new org.kframework.attributes.Location(spos.getLine(), spos.getCharacter(), epos.getLine(), epos.getCharacter());
+        KPos begin = new KPos(loc.startLine(), loc.startColumn());
+        KPos end = new KPos(loc.endLine(), loc.endColumn());
+        return isPositionOverLocation(begin, selection) || isPositionOverLocation(end, selection);
     }
 }
