@@ -153,25 +153,26 @@ YYSTYPE mergeAmb(YYSTYPE x0, YYSTYPE x1) {
   return result;
 }
 
-void print(node *current) {
+char *print(struct string_buffer *sb, node *current) {
   if (current->hasLocation) {
-    printf("Lbl'Hash'location{");
-    printf("%s", current->sort);
-    printf("}(");
+    buf_printf(sb, "Lbl'Hash'location{");
+    buf_printf(sb, "%s", current->sort);
+    buf_printf(sb, "}(");
   }
-  printf("%s", current->symbol);
+  buf_printf(sb, "%s", current->symbol);
   if (!current->str) {
-    printf("(");
+    buf_printf(sb, "(");
     for (int i = 0; i < current->nchildren; i++) {
       node *child = current->children[i];
-      print(child);
+      print(sb, child);
       if (i != current->nchildren - 1)
-        printf(",");
+        buf_printf(sb, ",");
     }
-    printf(")");
+    buf_printf(sb, ")");
   }
   if (current->hasLocation) {
-    printf(
+    buf_printf(
+        sb,
         ", \\dv{SortString{}}(%s), \\dv{SortInt{}}(\"%d\"), "
         "\\dv{SortInt{}}(\"%d\"), \\dv{SortInt{}}(\"%d\"), "
         "\\dv{SortInt{}}(\"%d\"))",
@@ -188,8 +189,8 @@ extern char *filename;
 #define NAME(sort) CONCAT(parse_, sort)
 #define PARSER_FUNCTION NAME(K_BISON_PARSER_SORT)
 
-void PARSER_FUNCTION(
-    char *program_name, char *input_file, char *location_file) {
+char *
+PARSER_FUNCTION(char *program_name, char *input_file, char *location_file) {
   yyscan_t scanner;
   yylex_init(&scanner);
 
@@ -211,9 +212,12 @@ void PARSER_FUNCTION(
     exit(status);
   }
 
-  print(result);
-  printf("\n");
+  struct string_buffer sb = string_buffer_new(8192);
+
+  print(&sb, result);
   yylex_destroy(scanner);
+
+  return sb.buf;
 }
 
 #ifdef K_BISON_PARSER_MAIN
@@ -231,7 +235,10 @@ int main(int argc, char **argv) {
     location_file = argv[1];
   }
 
-  PARSER_FUNCTION(argv[0], argv[1], location_file);
+  char *out = PARSER_FUNCTION(argv[0], argv[1], location_file);
+  printf("%s\n", out);
+
+  free(out);
 }
 
 #endif
