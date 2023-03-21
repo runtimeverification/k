@@ -2,10 +2,60 @@
 #include "parser.tab.h"
 #include "scanner.h"
 
+#include <assert.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+struct string_buffer {
+  char *buf;
+  size_t capacity;
+  size_t idx;
+};
+
+struct string_buffer string_buffer_new(size_t initial) {
+  assert(initial > 0 && "Invalid initial capacity");
+
+  char *buf = malloc(sizeof(*buf) * initial);
+  buf[0] = '\0';
+
+  struct string_buffer ret = {.buf = buf, .capacity = initial, .idx = 0};
+  return ret;
+}
+
+void string_buffer_free(struct string_buffer sb) {
+  free(sb.buf);
+}
+
+void string_buffer_grow(struct string_buffer *sb) {
+  size_t old_cap = sb->capacity;
+  size_t new_cap = old_cap * 2;
+
+  sb->buf = realloc(sb->buf, new_cap);
+  sb->buf[old_cap] = 0;
+  sb->capacity = new_cap;
+}
+
+int buf_printf(struct string_buffer *sb, char const *format, ...) {
+  va_list args;
+
+  va_start(args, format);
+  int required = vsnprintf(NULL, 0, format, args) + 1;
+  va_end(args);
+
+  while ((sb->capacity - sb->idx) < required) {
+    string_buffer_grow(sb);
+  }
+
+  va_start(args, format);
+  vsnprintf(sb->buf + sb->idx, required, format, args);
+  va_end(args);
+
+  sb->idx += required - 1;
+  return required;
+}
 
 static void append(char *buf, size_t *bufidx, char *str, size_t len) {
   memcpy(buf + *bufidx, str, len);
