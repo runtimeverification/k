@@ -10,7 +10,7 @@ else
 endif
 
 check: test.kore
-	diff test.kore test.ref.kore
+	diff test.kore test.out
 
 test: kompile
 	$(CC) test.c -Ltest-kompiled -lfoo -lparser_KItem_TEST -o test
