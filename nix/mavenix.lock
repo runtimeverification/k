@@ -8098,12 +8098,12 @@
       "sha1": "67a95cd14d42aa16c6cc1e7a40fba28e3ddb7521"
     },
     {
-      "path": "org/yaml/snakeyaml/1.32/snakeyaml-1.32.jar",
-      "sha1": "e80612549feb5c9191c498de628c1aa80693cf0b"
+      "path": "org/yaml/snakeyaml/2.0/snakeyaml-2.0.jar",
+      "sha1": "3aab2116756442bf0d4cd1c089b24d34c3baa253"
     },
     {
-      "path": "org/yaml/snakeyaml/1.32/snakeyaml-1.32.pom",
-      "sha1": "d51efbe04924b1b5c38ae59f4003acd040d5f436"
+      "path": "org/yaml/snakeyaml/2.0/snakeyaml-2.0.pom",
+      "sha1": "1e17fe847aaf24faa9ab83a365afcdc6ff880111"
     },
     {
       "path": "oro/oro/2.0.8/oro-2.0.8.jar",
