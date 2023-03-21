@@ -10,26 +10,33 @@
 #include <string.h>
 
 struct string_buffer {
+  FILE *fp;
   char *buf;
   size_t capacity;
   size_t idx;
 };
 
-struct string_buffer string_buffer_new(size_t initial) {
+struct string_buffer string_buffer_new_memory(size_t initial) {
   assert(initial > 0 && "Invalid initial capacity");
 
   char *buf = malloc(sizeof(*buf) * initial);
   buf[0] = '\0';
 
-  struct string_buffer ret = {.buf = buf, .capacity = initial, .idx = 0};
+  struct string_buffer ret
+      = {.fp = NULL, .buf = buf, .capacity = initial, .idx = 0};
   return ret;
 }
 
-void string_buffer_free(struct string_buffer sb) {
-  free(sb.buf);
+struct string_buffer string_buffer_new_file(FILE *fp) {
+  struct string_buffer ret = {.fp = fp, .buf = NULL, .capacity = 0, .idx = 0};
+  return ret;
 }
 
 void string_buffer_grow(struct string_buffer *sb) {
+  if (sb->fp) {
+    return;
+  }
+
   size_t old_cap = sb->capacity;
   size_t new_cap = old_cap * 2;
 
@@ -41,20 +48,27 @@ void string_buffer_grow(struct string_buffer *sb) {
 int buf_printf(struct string_buffer *sb, char const *format, ...) {
   va_list args;
 
-  va_start(args, format);
-  int required = vsnprintf(NULL, 0, format, args) + 1;
-  va_end(args);
+  if (sb->fp) {
+    va_start(args, format);
+    int result = vfprintf(sb->fp, format, args);
+    va_end(args);
+    return result;
+  } else {
+    va_start(args, format);
+    int required = vsnprintf(NULL, 0, format, args) + 1;
+    va_end(args);
 
-  while ((sb->capacity - sb->idx) < required) {
-    string_buffer_grow(sb);
+    while ((sb->capacity - sb->idx) < required) {
+      string_buffer_grow(sb);
+    }
+
+    va_start(args, format);
+    vsnprintf(sb->buf + sb->idx, required, format, args);
+    va_end(args);
+
+    sb->idx += required - 1;
+    return required;
   }
-
-  va_start(args, format);
-  vsnprintf(sb->buf + sb->idx, required, format, args);
-  va_end(args);
-
-  sb->idx += required - 1;
-  return required;
 }
 
 static void append(char *buf, size_t *bufidx, char *str, size_t len) {
@@ -153,7 +167,7 @@ YYSTYPE mergeAmb(YYSTYPE x0, YYSTYPE x1) {
   return result;
 }
 
-char *print(struct string_buffer *sb, node *current) {
+void print(struct string_buffer *sb, node *current) {
   if (current->hasLocation) {
     buf_printf(sb, "Lbl'Hash'location{");
     buf_printf(sb, "%s", current->sort);
@@ -185,12 +199,9 @@ char *print(struct string_buffer *sb, node *current) {
 extern node *result;
 extern char *filename;
 
-#define CONCAT(X, Y) X##Y
-#define NAME(sort) CONCAT(parse_, sort)
-#define PARSER_FUNCTION NAME(K_BISON_PARSER_SORT)
-
-char *
-PARSER_FUNCTION(char *program_name, char *input_file, char *location_file) {
+static void parse_internal(
+    struct string_buffer *sb, char *program_name, char *input_file,
+    char *location_file) {
   yyscan_t scanner;
   yylex_init(&scanner);
 
@@ -212,11 +223,18 @@ PARSER_FUNCTION(char *program_name, char *input_file, char *location_file) {
     exit(status);
   }
 
-  struct string_buffer sb = string_buffer_new(8192);
-
-  print(&sb, result);
+  print(sb, result);
   yylex_destroy(scanner);
+}
 
+#define CONCAT(X, Y) X##Y
+#define NAME(sort) CONCAT(parse_, sort)
+#define PARSER_FUNCTION NAME(K_BISON_PARSER_SORT)
+
+char *
+PARSER_FUNCTION(char *program_name, char *input_file, char *location_file) {
+  struct string_buffer sb = string_buffer_new_memory(1024);
+  parse_internal(&sb, program_name, input_file, location_file);
   return sb.buf;
 }
 
@@ -235,10 +253,9 @@ int main(int argc, char **argv) {
     location_file = argv[1];
   }
 
-  char *out = PARSER_FUNCTION(argv[0], argv[1], location_file);
-  printf("%s\n", out);
-
-  free(out);
+  struct string_buffer sb = string_buffer_new_file(stdout);
+  parse_internal(&sb, argv[0], argv[1], location_file);
+  printf("\n");
 }
 
 #endif
