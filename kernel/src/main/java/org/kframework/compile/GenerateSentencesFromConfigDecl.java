@@ -475,6 +475,10 @@ public class GenerateSentencesFromConfigDecl {
             Sentence bagSubsort = Production(Seq(), bagSort, Seq(NonTerminal(sort)));
             Sentence bagElement;
             if (type.equals("Map")) {
+                if (childSorts.isEmpty()) {
+                    throw KEMException.compilerError("Cells of type Map expect at least one child cell as their key",
+                            KApply(KLabel("#EmptyK"), Seq(), configAtt));
+                }
                 bagElement = Production(KLabel(bagSort.name() + "Item"), bagSort, Seq(
                         Terminal(bagSort.name() + "Item"),
                         Terminal("("),
