@@ -111,6 +111,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         }
 
         server_addr = f'{self._host}:{self._port}'
+        _LOGGER.info(f'Sending request to {server_addr}: {old_id} - {method}')
         req = json.dumps(payload)
         if self._bug_report:
             bug_report_request = f'rpc/{old_id:03}_request.json'
@@ -146,6 +147,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         self._check(data)
         assert data['id'] == old_id
 
+        _LOGGER.info(f'Received response from {server_addr}: {old_id} - {method}')
         return data['result']
 
     @staticmethod
