@@ -103,7 +103,6 @@ public class KRead {
                 command.addAll(Arrays.asList(
                       Scanner.COMPILER,
                       "-DK_BISON_PARSER_SORT=" + sort.name(),
-                      "-DK_BISON_PARSER_MAIN",
                       files.resolveKInclude("cparser/main.c").getAbsolutePath(),
                       files.resolveTemp("lex.yy.c").getAbsolutePath(),
                       files.resolveTemp("parser.tab.c").getAbsolutePath(),
@@ -113,6 +112,8 @@ public class KRead {
 
                 if (library) {
                     command.addAll(OS.current().getSharedLibraryCompilerFlags());
+                } else {
+                    command.add("-DK_BISON_PARSER_MAIN");
                 }
 
                 if (bisonFile != null) {
