@@ -3,7 +3,8 @@ EXT=test
 TESTDIR=.
 KOMPILE_FLAGS=--syntax-module TEST --gen-glr-bison-parser --bison-parser-library --llvm-kompile-type c --llvm-kompile-output libfoo
 
-ifeq ($(UNAME), Darwin)
+UNAME := $(shell uname)
+ifeq ($(UNAME),Darwin)
 	CC=clang
 else
 	CC=gcc
