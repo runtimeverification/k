@@ -47,8 +47,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.kframework.kore.KORE.*;
-
 public class KastFrontEnd extends FrontEnd {
 
     public static List<com.google.inject.Module> getModules() {
@@ -205,7 +203,7 @@ public class KastFrontEnd extends FrontEnd {
 
             KRead kread = new KRead(kem, files.get(), options.input, options.global);
             if (options.genParser || options.genGlrParser) {
-                kread.createBisonParser(parsingMod, sort, options.bisonOutputFile(), options.genGlrParser, options.bisonFile, options.bisonStackMaxDepth);
+                kread.createBisonParser(parsingMod, sort, options.bisonOutputFile(), options.genGlrParser, options.bisonFile, options.bisonStackMaxDepth, false);
                 try {
                   Files.copy(options.bisonOutputFile().toPath(), files.get().resolveKompiled("parser_" + sort.name() + "_" + options.module).toPath(), StandardCopyOption.REPLACE_EXISTING);
                 } catch (IOException e) {}

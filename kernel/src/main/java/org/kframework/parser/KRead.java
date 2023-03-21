@@ -14,6 +14,7 @@ import org.kframework.parser.inner.kernel.KSyntax2Bison;
 import org.kframework.parser.inner.kernel.Scanner;
 import org.kframework.parser.json.JsonParser;
 import org.kframework.parser.kast.KastParser;
+import org.kframework.utils.OS;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KExceptionManager;
@@ -71,7 +72,7 @@ public class KRead {
         }
     }
 
-    public void createBisonParser(Module mod, Sort sort, File outputFile, boolean glr, String bisonFile, long stackDepth) {
+    public void createBisonParser(Module mod, Sort sort, File outputFile, boolean glr, String bisonFile, long stackDepth, boolean library) {
         Stopwatch sw = new Stopwatch(globalOptions);
         try (ParseInModule parseInModule = RuleGrammarGenerator.getCombinedGrammar(mod, true, false, true, false, files)) {
             try (Scanner scanner = parseInModule.getScanner(kem.options)) {
@@ -109,6 +110,11 @@ public class KRead {
                       "-iquote", files.resolveTemp(".").getAbsolutePath(),
                       "-iquote", files.resolveKInclude("cparser").getAbsolutePath(),
                       "-o", outputFile.getAbsolutePath()));
+
+                if (library) {
+                    command.addAll(OS.current().getSharedLibraryCompilerFlags());
+                }
+
                 if (bisonFile != null) {
                     command.add(files.resolveWorkingDirectory(bisonFile).getAbsolutePath());
                 }

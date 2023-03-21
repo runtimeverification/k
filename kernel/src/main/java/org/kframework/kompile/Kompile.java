@@ -39,6 +39,7 @@ import org.kframework.parser.KRead;
 import org.kframework.parser.ParserUtils;
 import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.unparser.ToJson;
+import org.kframework.utils.OS;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
@@ -189,10 +190,10 @@ public class Kompile {
 
         if (kompileOptions.genBisonParser || kompileOptions.genGlrBisonParser) {
             if (def.configurationVariableDefaultSorts.containsKey("$PGM")) {
-                String filename = "parser_" + def.programStartSymbol.name() + "_" + def.mainSyntaxModuleName();
+                String filename = getBisonParserFilename(def.programStartSymbol.name(), def.mainSyntaxModuleName());
                 File outputFile = files.resolveKompiled(filename);
                 File linkFile = files.resolveKompiled("parser_PGM");
-                new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, outputFile, kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth);
+                new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(def.programParsingModuleFor(def.mainSyntaxModuleName(), kem).get(), def.programStartSymbol, outputFile, kompileOptions.genGlrBisonParser, kompileOptions.bisonFile, kompileOptions.bisonStackMaxDepth, kompileOptions.genBisonParserLibrary);
                 try {
                     linkFile.delete();
                     Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
@@ -215,10 +216,10 @@ public class Kompile {
                             throw KEMException.compilerError("Could not find module referenced by parser attribute: " + module, prod);
                         }
                         Sort sort = def.configurationVariableDefaultSorts.getOrDefault("$" + name, Sorts.K());
-                        String filename = "parser_" + sort.name() + "_" + module;
+                        String filename = getBisonParserFilename(sort.name(), module);
                         File outputFile = files.resolveKompiled(filename);
                         File linkFile = files.resolveKompiled("parser_" + name);
-                        new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(mod.get(), sort, outputFile, kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth);
+                        new KRead(kem, files, InputModes.PROGRAM, globalOptions).createBisonParser(mod.get(), sort, outputFile, kompileOptions.genGlrBisonParser, null, kompileOptions.bisonStackMaxDepth, kompileOptions.genBisonParserLibrary);
                         try {
                             linkFile.delete();
                             Files.createSymbolicLink(linkFile.toPath(), files.resolveKompiled(".").toPath().relativize(outputFile.toPath()));
@@ -231,6 +232,16 @@ public class Kompile {
         }
 
         return def;
+    }
+
+    private String getBisonParserFilename(String sort, String module) {
+        String baseName = "parser_" + sort + "_" + module;
+
+        if (kompileOptions.genBisonParserLibrary) {
+            return "lib" + baseName + OS.current().getSharedLibraryExtension();
+        } else {
+            return baseName;
+        }
     }
 
     private Definition postProcessJSON(Definition defn, String postProcess) {
