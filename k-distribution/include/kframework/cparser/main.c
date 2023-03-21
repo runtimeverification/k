@@ -231,10 +231,17 @@ static void parse_internal(
 #define NAME(sort) CONCAT(parse_, sort)
 #define PARSER_FUNCTION NAME(K_BISON_PARSER_SORT)
 
-char *
-PARSER_FUNCTION(char *program_name, char *input_file, char *location_file) {
+#define XSTR(S) #S
+#define STR(S) XSTR(S)
+
+char *PARSER_FUNCTION(char *input_file, char *location_file) {
   struct string_buffer sb = string_buffer_new_memory(1024);
-  parse_internal(&sb, program_name, input_file, location_file);
+
+  if (!location_file) {
+    location_file = input_file;
+  }
+
+  parse_internal(&sb, STR(PARSER_FUNCTION), input_file, location_file);
   return sb.buf;
 }
 
