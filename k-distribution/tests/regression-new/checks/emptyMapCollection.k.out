@@ -1,9 +1,9 @@
 [Error] Compiler: Cells of type Map expect at least one child cell as their key
 	Source(emptyMapCollection.k)
-	Location(4,7,6,14)
+	Location(5,7,7,14)
 	  .	      v~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	4 |	      <cell multiplicity="*" type="Map">
-	5 |	        .Bag
-	6 |	      </cell>
+	5 |	      <cell multiplicity="*" type="Map">
+	6 |	        .Bag
+	7 |	      </cell>
 	  .	      ~~~~~~^
 [Error] Compiler: Had 1 parsing errors.
