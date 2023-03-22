@@ -403,7 +403,7 @@ class SVar(VarPattern):
 class String(Pattern):
     value: str
 
-    _ENCODE_TABLE: Final[Mapping[int, str]] = FrozenDict(
+    _ENCODE_TABLE: ClassVar[FrozenDict[int, str]] = FrozenDict(
         {
             9: r'\t',
             10: r'\n',
