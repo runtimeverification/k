@@ -469,12 +469,16 @@ public class GenerateSentencesFromConfigDecl {
                 break;
             default:
                 throw KEMException.compilerError("Unexpected type for multiplicity * cell: " + cellName
-                        + ". Should be one of: Set, Bag, List, Map");
+                        + ". Should be one of: Set, Bag, List, Map", KApply(KLabel("#EmptyK"), Seq(), configAtt));
             }
             SyntaxSort sortDecl = SyntaxSort(Seq(), bagSort, Att().add("hook", type.toUpperCase() + '.' + type).add("cellCollection"));
             Sentence bagSubsort = Production(Seq(), bagSort, Seq(NonTerminal(sort)));
             Sentence bagElement;
             if (type.equals("Map")) {
+                if (childSorts.isEmpty()) {
+                    throw KEMException.compilerError("Cells of type Map expect at least one child cell as their key",
+                            KApply(KLabel("#EmptyK"), Seq(), configAtt));
+                }
                 bagElement = Production(KLabel(bagSort.name() + "Item"), bagSort, Seq(
                         Terminal(bagSort.name() + "Item"),
                         Terminal("("),
