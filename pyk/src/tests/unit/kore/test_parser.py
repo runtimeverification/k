@@ -1,11 +1,11 @@
 import json
 from pathlib import Path
-from typing import Any, Final, Mapping
+from typing import Any, Final, List, Mapping, Tuple
 
 import pytest
 
 from pyk.kore.parser import KoreParser
-from pyk.kore.syntax import Kore, Pattern, kore_term
+from pyk.kore.syntax import App, Kore, Pattern, kore_term
 
 TEST_DATA_DIR: Final = Path(__file__).parent / 'test-data'
 
@@ -86,3 +86,29 @@ def test_parse_json(json_file: Path, i: int, dct: Mapping[str, Any]) -> None:
     assert parser.eof
     assert kore1 == kore2
     assert kore1 == kore3
+
+
+x, y, z = (App(name) for name in ['x', 'y', 'z'])
+MULTI_OR_TEST_DATA: Final[Tuple[Tuple[str, str, List[Pattern]], ...]] = (
+    ('nullary', r'\left-assoc{}(\or{S}())', []),
+    ('unary', r'\left-assoc{}(\or{S}(x{}()))', [x]),
+    ('binary', r'\left-assoc{}(\or{S}(x{}(), y{}()))', [x, y]),
+    ('multiary', r'\left-assoc{}(\or{S}(x{}(), y{}(), z{}()))', [x, y, z]),
+)
+
+
+@pytest.mark.parametrize(
+    'test_id,text,expected',
+    MULTI_OR_TEST_DATA,
+    ids=[test_id for test_id, *_ in MULTI_OR_TEST_DATA],
+)
+def test_multi_or(test_id: str, text: str, expected: List[Pattern]) -> None:
+    # Given
+    parser = KoreParser(text)
+
+    # When
+    actual = parser.multi_or()
+
+    # Then
+    assert parser.eof
+    assert actual == expected
