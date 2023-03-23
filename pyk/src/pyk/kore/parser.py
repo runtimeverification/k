@@ -497,6 +497,20 @@ class KoreParser:
     def _sort_param_list(self) -> List[Sort]:
         return self._delimited_list_of(self.sort, KoreToken.Type.LPAREN, KoreToken.Type.RPAREN)
 
+    # TODO remove once \left-assoc{}(\or{...}(...)) is no longer supported
+    def multi_or(self) -> List[Pattern]:
+        self._match(KoreToken.Type.ML_LEFT_ASSOC)
+        self._match(KoreToken.Type.LBRACE)
+        self._match(KoreToken.Type.RBRACE)
+        self._match(KoreToken.Type.LPAREN)
+        self._match(KoreToken.Type.ML_OR)
+        self._match(KoreToken.Type.LBRACE)
+        self.sort()
+        self._match(KoreToken.Type.RBRACE)
+        patterns = self._pattern_list()
+        self._match(KoreToken.Type.RPAREN)
+        return patterns
+
     def symbol(self) -> Symbol:
         name = self.symbol_id()
         vars = self._sort_var_list()
