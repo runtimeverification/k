@@ -76,11 +76,11 @@ On Ubuntu Linux 20.04 (Focal) or 22.04 (Jammy):
 
 ```shell
 git submodule update --init --recursive
-sudo apt-get install build-essential m4 openjdk-11-jdk libfmt-dev libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 python3-dev cmake gcc clang-12 lld-12 llvm-12-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
+sudo apt-get install build-essential m4 openjdk-11-jdk libfmt-dev libgmp-dev libmpfr-dev pkg-config flex bison z3 libz3-dev maven python3 python3-dev cmake gcc g++ clang-12 lld-12 llvm-12-tools zlib1g-dev libboost-test-dev libyaml-dev libjemalloc-dev
 curl -sSL https://get.haskellstack.org/ | sh
 ```
 
-Note: we require a version between 10 and 14 for clang, lld, and llvm-tools.
+Note: we require a version between 10 and 15 for clang, lld, and llvm-tools.
 
 On Arch Linux:
 
@@ -94,7 +94,7 @@ If you install this list of dependencies, continue directly to the [Build and In
 On macOS using [Homebrew](https://brew.sh/):
 ```shell
 git submodule update --init --recursive
-brew install bison boost cmake flex fmt gcc gmp openjdk jemalloc libyaml llvm@14 make maven mpfr pkg-config python stack zlib z3
+brew install bison boost cmake flex fmt gcc gmp openjdk jemalloc libyaml llvm@15 make maven mpfr pkg-config python stack zlib z3
 ```
 
 ## The Long Version
@@ -151,7 +151,7 @@ See the notes below.
         explicitly make it available for command line usage. See the results
         of the `brew info llvm` command for more information on how to do this.
         Additionally, the default version of LLVM supplied by Homebrew is newer
-        than the version supported by K. The formula `llvm@14` should be used
+        than the version supported by K. The formula `llvm@15` should be used
         instead of `llvm`.
 
 3.  Flex / Bison

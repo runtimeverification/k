@@ -20,7 +20,7 @@ module LAMBDA
                | "mu" KVar "." Exp                  [binder]
 
   syntax Type ::= "int" | "bool"
-                | Type "->" Type
+                | Type "->" Type                  [klabel(functionType)]
                 | "(" Type ")"                    [bracket]
 
   syntax Exp ::= Type
@@ -35,7 +35,7 @@ module LAMBDA
   rule T1:Type  + T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type <= T2:Type => T1 = int ~> T2 = int ~> bool
 
-  syntax Exp ::= Exp "->" Exp                  [strict]
+  syntax Exp ::= Exp "->" Exp                  [strict, klabel(functionType)]
   rule lambda X . E => ?T:Type -> (E[?T/X])
 
   rule T1:Type T2:Type => T1 = (T2 -> ?T:Type) ~> ?T

@@ -1,7 +1,7 @@
 DEF=demo
 EXT=demo
 TESTDIR=.
-KOMPILE_BACKEND=java
+KOMPILE_BACKEND=haskell
 KOMPILE_FLAGS=--syntax-module DEMO
 KPROVE_FLAGS=--def-module VERIFICATION
 
