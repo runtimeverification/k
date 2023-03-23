@@ -102,4 +102,6 @@ in runCommand (lib.removeSuffix "-maven" unwrapped.name) {
   do
     ln -sf $unwrapped/$each $out/$each
   done
+
+  ln -sf ${haskell-backend}/bin/kore-rpc $out/bin/kore-rpc
 ''
