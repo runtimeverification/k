@@ -1266,7 +1266,7 @@ ambiguity during parsing, so care should be taken to ensure that named
 nonterminals are sufficiently unique from one another to prevent such
 ambiguities. Of course, the compiler will generate a warning in this case.
 
-### `simplification` attribute (Haskell backend)
+### `simplification` attribute
 
 The simplification attribute identifies rules outside the main semantics that
 are used to simplify function patterns.
@@ -1285,12 +1285,12 @@ rule (X +Int Y) +Int Z => X +Int (Y +Int Z) [simplification]
 A simplification rule is only applied when the current side condition _implies_
 the `requires` clause of the rule, like function definition rules.
 
-**Order**: Simplification rules are applied after definition rules, if no
-definition rule did apply. The `simplification` attribute accepts an optional
-integer argument which is the rule's _priority_; if the optional argument is not
-specified, it is equivalent to a priority of 50. Simplification rules are
-applied in order of their priority. `simplification` rules may not have the
-`priority` attribute.
+**Order**: The `simplification` attribute accepts an optional integer argument
+which is the rule's _priority_; if the optional argument is not specified, it
+is equivalent to a priority of 50. Simplification rules are applied in order of
+their priority. `simplification` rules may not have the `priority` attribute.
+Unlike the `priority` attribute, this `simplification` index is a _suggestion_
+to the backend, not a semantic requirement.
 
 For example, for the following definition:
 
