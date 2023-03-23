@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyk"
-version = "0.1.191"
+version = "0.1.192"
 description = ""
 authors = [
     "Runtime Verification, Inc. <contact@runtimeverification.com>",
@@ -13,6 +13,7 @@ authors = [
 [tool.poetry.dependencies]
 python = "^3.8"
 cmd2 = "^2.4.2"
+coloredlogs = "^15.0.1"
 filelock = "^3.9.0"
 graphviz = "^0.20.1"
 psutil = "^5.9.4"
@@ -40,6 +41,7 @@ types-psutil = "^5.9.5.10"
 pyk = "pyk.__main__:main"
 kbuild = "pyk.kbuild.__main__:main"
 krepl = "pyk.krepl.__main__:main"
+kore-exec-covr = "pyk.kore_exec_covr.__main__:main"
 
 [tool.isort]
 profile = "black"
@@ -62,4 +64,8 @@ disallow_untyped_defs = true
 
 [[tool.mypy.overrides]]
 module = "graphviz"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "coloredlogs"
 ignore_missing_imports = true
