@@ -361,17 +361,27 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def from_json(s: str) -> 'KCFG':
         return KCFG.from_dict(json.loads(s))
 
-    def node_short_info(self, node: Node, node_printer: Optional[Callable[[CTerm], Iterable[str]]] = None) -> List[str]:
+    def node_short_info(
+        self, node: Node, node_printer: Optional[Callable[[CTerm], Iterable[str]]] = None, omit_node_hash: bool = False
+    ) -> List[str]:
         attrs = self.node_attrs(node.id) + ['@' + alias for alias in sorted(self.aliases(node.id))]
         attr_string = ' (' + ', '.join(attrs) + ')' if attrs else ''
-        node_header = shorten_hash(node.id) + attr_string
+        if omit_node_hash:
+            node_hash = 'OMITTED HASH'
+        else:
+            node_hash = shorten_hash(node.id)
+        node_header = node_hash + attr_string
         node_strs = [node_header]
         if node_printer:
             node_strs.extend(f' {nl}' for nl in node_printer(node.cterm))
         return node_strs
 
     def pretty_segments(
-        self, kprint: KPrint, minimize: bool = True, node_printer: Optional[Callable[[CTerm], Iterable[str]]] = None
+        self,
+        kprint: KPrint,
+        minimize: bool = True,
+        node_printer: Optional[Callable[[CTerm], Iterable[str]]] = None,
+        omit_node_hash: bool = False,
     ) -> Iterable[Tuple[str, Iterable[str]]]:
         """Return a pretty version of the KCFG in segments.
 
@@ -390,7 +400,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             return '\033[32m' + text + '\033[0m'
 
         def _print_node(node: KCFG.Node) -> List[str]:
-            short_info = self.node_short_info(node, node_printer=node_printer)
+            short_info = self.node_short_info(node, node_printer=node_printer, omit_node_hash=omit_node_hash)
             if self.is_frontier(node.id):
                 short_info[0] = _bold(short_info[0])
             return short_info
@@ -481,11 +491,17 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         return _ret_lines
 
     def pretty(
-        self, kprint: KPrint, minimize: bool = True, node_printer: Optional[Callable[[CTerm], Iterable[str]]] = None
+        self,
+        kprint: KPrint,
+        minimize: bool = True,
+        node_printer: Optional[Callable[[CTerm], Iterable[str]]] = None,
+        omit_node_hash: bool = False,
     ) -> Iterable[str]:
         return (
             line
-            for _, seg_lines in self.pretty_segments(kprint, minimize=minimize, node_printer=node_printer)
+            for _, seg_lines in self.pretty_segments(
+                kprint, minimize=minimize, node_printer=node_printer, omit_node_hash=omit_node_hash
+            )
             for line in seg_lines
         )
 
