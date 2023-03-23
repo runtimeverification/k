@@ -14,9 +14,10 @@ This lesson has been written with GDB support on Linux in mind. Unfortunately,
 on macOS, GDB has limited support. To address this, we have introduced early
 experimental support for debugging with LLDB on macOS. In some cases, the
 features supported by LLDB are slightly different to those supported by GDB; the
-tutorial text will make this clear where necessary. If you encounter an issue on
-either operating system, please open an issue against the
-[K repository](https://github.com/runtimeverification/k).
+tutorial text will make this clear where necessary. If you use a macOS with an
+LLVM version older than 15, you may need to upgrade it to use the LLDB
+correctly. If you encounter an issue on either operating system, please open an
+issue against the [K repository](https://github.com/runtimeverification/k).
 
 ## Getting started
 
