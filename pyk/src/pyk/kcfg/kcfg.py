@@ -1,44 +1,26 @@
 import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from functools import reduce
 from itertools import chain
 from threading import RLock
 from types import TracebackType
-from typing import (
-    Any,
-    Callable,
-    Container,
-    Dict,
-    Iterable,
-    List,
-    Mapping,
-    Optional,
-    Sequence,
-    Set,
-    Tuple,
-    Type,
-    Union,
-    cast,
-)
+from typing import Any, Callable, Container, Dict, Iterable, List, Mapping, Optional, Set, Tuple, Type, Union, cast
 
 from graphviz import Digraph
 
-from pyk.cterm import CTerm, build_claim, build_rule
-from pyk.kast.inner import KInner, Subst
+from pyk.cterm import CSubst, CTerm, build_claim, build_rule
+from pyk.kast.inner import KInner
 from pyk.kast.manip import (
     bool_to_ml_pred,
     extract_lhs,
     extract_rhs,
     ml_pred_to_bool,
-    mlAnd,
     remove_source_attributes,
     rename_generated_vars,
     simplify_bool,
 )
 from pyk.kast.outer import KClaim, KDefinition, KRule
 from pyk.ktool.kprint import KPrint
-from pyk.prelude.ml import mlTop
 from pyk.utils import add_indent, compare_short_hashes, shorten_hash
 
 
@@ -55,7 +37,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             return self.cterm.hash
 
         def to_dict(self) -> Dict[str, Any]:
-            return {'id': self.id, 'term': self.cterm.kast.to_dict()}
+            return {'id': self.id, 'cterm': self.cterm.to_dict()}
 
     class EdgeLike(ABC):
         source: 'KCFG.Node'
@@ -117,42 +99,31 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     class Cover(EdgeLike):
         source: 'KCFG.Node'
         target: 'KCFG.Node'
-        subst: Subst
-        constraint: KInner
+        csubst: CSubst
 
         def __init__(
             self,
             source: 'KCFG.Node',
             target: 'KCFG.Node',
-            subst: Optional[Subst] = None,
-            constraint: Optional[KInner] = None,
+            csubst: Optional[CSubst] = None,
         ):
             object.__setattr__(self, 'source', source)
             object.__setattr__(self, 'target', target)
-
-            if subst is None and constraint is not None:
-                subst = Subst({})
-            elif subst is not None and constraint is None:
-                constraint = mlTop()
-            elif subst is None and constraint is None:
-                match_res = target.cterm.match_with_constraint(source.cterm)
-                if not match_res:
+            if csubst is None:
+                csubst = target.cterm.match_with_constraint(source.cterm)
+                if csubst is None:
                     raise ValueError(f'No matching between: {source.id} and {target.id}')
-                subst, constraint = match_res
-
-            object.__setattr__(self, 'subst', subst)
-            object.__setattr__(self, 'constraint', constraint)
+            object.__setattr__(self, 'csubst', csubst)
 
         def to_dict(self) -> Dict[str, Any]:
             return {
                 'source': self.source.id,
                 'target': self.target.id,
-                'subst': self.subst.to_dict(),
-                'constraint': self.constraint.to_dict(),
+                'csubst': self.csubst.to_dict(),
             }
 
         def pretty(self, kprint: KPrint, minimize: bool = True) -> Iterable[str]:
-            subst_strs = [f'{k} <- {kprint.pretty_print(v)}' for k, v in self.subst.items()]
+            subst_strs = [f'{k} <- {kprint.pretty_print(v)}' for k, v in self.csubst.subst.items()]
             subst_str = ''
             if len(subst_strs) == 0:
                 subst_str = '.Subst'
@@ -162,7 +133,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 subst_str = 'OMITTED SUBST'
             if len(subst_strs) > 1 and not minimize:
                 subst_str = '{\n    ' + '\n    '.join(subst_strs) + '\n}'
-            constraint_str = kprint.pretty_print(ml_pred_to_bool(self.constraint, unsafe=True))
+            constraint_str = kprint.pretty_print(ml_pred_to_bool(self.csubst.constraint, unsafe=True))
             if len(constraint_str) > 78:
                 constraint_str = 'OMITTED CONSTRAINT'
             return [
@@ -307,7 +278,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             return nodes[node_id]
 
         for node_dict in dct.get('nodes') or []:
-            cterm = CTerm(KInner.from_dict(node_dict['term']))
+            cterm = CTerm.from_dict(node_dict['cterm'])
             node = cfg.create_node(cterm)
 
             node_key = node_dict['id']
@@ -325,13 +296,8 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         for cover_dict in dct.get('covers') or []:
             source_id = resolve(cover_dict['source'])
             target_id = resolve(cover_dict['target'])
-            subst = None
-            constraint = None
-            if 'subst' in cover_dict:
-                subst = Subst.from_dict(cover_dict['subst'])
-            if 'constraint' in cover_dict:
-                constraint = KInner.from_dict(cover_dict['constraint'])
-            cfg.create_cover(source_id, target_id, subst=subst, constraint=constraint)
+            csubst = CSubst.from_dict(cover_dict['csubst'])
+            cfg.create_cover(source_id, target_id, csubst=csubst)
 
         for init_id in dct.get('init') or []:
             cfg.add_init(resolve(init_id))
@@ -534,7 +500,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             graph.edge(tail_name=edge.source.id, head_name=edge.target.id, label=f'  {label}        ', **attrs)
 
         for cover in self.covers():
-            label = ', '.join(f'{k} |-> {kprint.pretty_print(v)}' for k, v in cover.subst.minimize().items())
+            label = ', '.join(f'{k} |-> {kprint.pretty_print(v)}' for k, v in cover.csubst.subst.minimize().items())
             label = _short_label(label)
             attrs = {'class': 'abstraction', 'style': 'dashed'}
             graph.edge(tail_name=cover.source.id, head_name=cover.target.id, label=f'  {label}        ', **attrs)
@@ -673,9 +639,9 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         for out_edge in out_edges:
             self.create_edge(new_node.id, out_edge.target.id, out_edge.condition, out_edge.depth)
         for in_cover in in_covers:
-            self.create_cover(in_cover.source.id, new_node.id, subst=in_cover.subst, constraint=in_cover.constraint)
+            self.create_cover(in_cover.source.id, new_node.id, csubst=in_cover.csubst)
         for out_cover in out_covers:
-            self.create_cover(new_node.id, out_cover.target.id, subst=out_cover.subst, constraint=out_cover.constraint)
+            self.create_cover(new_node.id, out_cover.target.id, csubst=out_cover.csubst)
         if init:
             self.add_init(new_node.id)
         if target:
@@ -772,9 +738,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             return cover == other
         return False
 
-    def create_cover(
-        self, source_id: str, target_id: str, subst: Optional[Subst] = None, constraint: Optional[KInner] = None
-    ) -> Cover:
+    def create_cover(self, source_id: str, target_id: str, csubst: Optional[CSubst] = None) -> Cover:
         source = self.node(source_id)
         target = self.node(target_id)
 
@@ -784,7 +748,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         if source.id not in self._covers:
             self._covers[source.id] = {}
 
-        cover = KCFG.Cover(source, target, subst=subst, constraint=constraint)
+        cover = KCFG.Cover(source, target, csubst=csubst)
         self._covers[source.id][target.id] = cover
         return cover
 
@@ -1009,21 +973,3 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 worklist.extend(edge.source for edge in edges)
 
         return visited
-
-
-def path_condition(path: Sequence[KCFG.EdgeLike]) -> Tuple[KInner, Subst, int]:
-    constraints: List[KInner] = []
-    substitutions: List[Subst] = []
-    depth = 0
-
-    for edge in path:
-        if type(edge) == KCFG.Edge:
-            constraints.append(edge.condition)
-            depth += edge.depth
-        elif type(edge) == KCFG.Cover:
-            substitutions.append(edge.subst)
-        else:
-            raise AssertionError
-
-    substitution = reduce(Subst.compose, reversed(substitutions), Subst())
-    return mlAnd(constraints), substitution, depth

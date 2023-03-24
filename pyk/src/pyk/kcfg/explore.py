@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any, Callable, ContextManager, Dict, Final, Iterable, List, Optional, Tuple, Union
 
 from pyk.cli_utils import BugReport
-from pyk.cterm import CTerm
+from pyk.cterm import CSubst, CTerm
 from pyk.kast.inner import KApply, KInner, KLabel, KVariable, Subst
 from pyk.kast.manip import flatten_label, free_vars
 from pyk.kore.rpc import KoreClient, KoreServer
@@ -137,7 +137,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
 
     def cterm_implies(
         self, antecedent: CTerm, consequent: CTerm, bind_consequent_variables: bool = True
-    ) -> Optional[Tuple[Subst, KInner]]:
+    ) -> Optional[CSubst]:
         _LOGGER.debug(f'Checking implication: {antecedent} #Implies {consequent}')
         _consequent = consequent.kast
         if bind_consequent_variables:
@@ -164,8 +164,9 @@ class KCFGExplore(ContextManager['KCFGExplore']):
             raise ValueError('Received empty predicate for satisfiable implication.')
         ml_subst = self.kprint.kore_to_kast(result.substitution)
         ml_pred = self.kprint.kore_to_kast(result.predicate) if result.predicate is not None else mlTop()
+        ml_preds = flatten_label('#And', ml_pred)
         if is_top(ml_subst):
-            return (Subst({}), ml_pred)
+            return CSubst(subst=Subst({}), constraints=ml_preds)
         subst_pattern = mlEquals(KVariable('###VAR'), KVariable('###TERM'))
         _subst: Dict[str, KInner] = {}
         for subst_pred in flatten_label('#And', ml_subst):
@@ -174,7 +175,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
                 _subst[m['###VAR'].name] = m['###TERM']
             else:
                 raise AssertionError(f'Received a non-substitution from implies endpoint: {subst_pred}')
-        return (Subst(_subst), ml_pred)
+        return CSubst(subst=Subst(_subst), constraints=ml_preds)
 
     def cterm_assume_defined(self, cterm: CTerm) -> CTerm:
         _LOGGER.debug(f'Computing definedness condition for: {cterm}')
@@ -293,10 +294,9 @@ class KCFGExplore(ContextManager['KCFGExplore']):
                 _LOGGER.info(
                     f'Checking subsumption into target state {cfgid}: {shorten_hashes((curr_node.id, target_node.id))}'
                 )
-                impl = self.cterm_implies(curr_node.cterm, target_node.cterm)
-                if impl is not None:
-                    subst, pred = impl
-                    cfg.create_cover(curr_node.id, target_node.id, subst=subst, constraint=pred)
+                csubst = self.cterm_implies(curr_node.cterm, target_node.cterm)
+                if csubst is not None:
+                    cfg.create_cover(curr_node.id, target_node.id, csubst=csubst)
                     _LOGGER.info(f'Subsumed into target node {cfgid}: {shorten_hashes((curr_node.id, target_node.id))}')
                     continue
 
