@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from functools import cached_property
 from itertools import chain
-from typing import Dict, Iterable, Iterator, Optional, Tuple
+from typing import Any, Dict, Iterable, Iterator, Optional, Tuple, Union
 
 from .kast.inner import KApply, KAtt, KInner, KRewrite, KVariable, Subst
 from .kast.manip import (
@@ -18,7 +18,7 @@ from .kast.manip import (
 )
 from .kast.outer import KClaim, KRule
 from .prelude.k import GENERATED_TOP_CELL
-from .prelude.ml import mlAnd, mlImplies, mlTop
+from .prelude.ml import is_top, mlAnd, mlImplies, mlTop
 from .utils import unique
 
 
@@ -42,7 +42,11 @@ class CTerm:
 
     @staticmethod
     def _is_spurious_constraint(term: KInner) -> bool:
-        return type(term) is KApply and term.label.name == '#Equals' and term.args[0] == term.args[1]
+        if type(term) is KApply and term.label.name == '#Equals' and term.args[0] == term.args[1]:
+            return True
+        if is_top(term):
+            return True
+        return False
 
     @staticmethod
     def _constraint_sort_key(term: KInner) -> Tuple[int, str]:
@@ -51,6 +55,18 @@ class CTerm:
 
     def __iter__(self) -> Iterator[KInner]:
         return chain([self.config], self.constraints)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            'config': self.config.to_dict(),
+            'constraints': [c.to_dict() for c in self.constraints],
+        }
+
+    @staticmethod
+    def from_dict(dct: Dict[str, Any]) -> 'CTerm':
+        config = KInner.from_dict(dct['config'])
+        constraints = [KInner.from_dict(c) for c in dct['constraints']]
+        return CTerm(mlAnd([config] + constraints))
 
     @cached_property
     def kast(self) -> KInner:
@@ -61,19 +77,17 @@ class CTerm:
         return self.kast.hash
 
     def match(self, cterm: 'CTerm') -> Optional[Subst]:
-        match_res = self.match_with_constraint(cterm)
+        csubst = self.match_with_constraint(cterm)
 
-        if not match_res:
+        if not csubst:
             return None
 
-        subst, condition = match_res
-
-        if condition != mlTop(GENERATED_TOP_CELL):
+        if csubst.constraint != mlTop(GENERATED_TOP_CELL):
             return None
 
-        return subst
+        return csubst.subst
 
-    def match_with_constraint(self, cterm: 'CTerm') -> Optional[Tuple[Subst, KInner]]:
+    def match_with_constraint(self, cterm: 'CTerm') -> Optional['CSubst']:
         subst = self.config.match(cterm.config)
 
         if subst is None:
@@ -81,7 +95,7 @@ class CTerm:
 
         constraint = self._ml_impl(cterm.constraints, map(subst, self.constraints))
 
-        return subst, constraint
+        return CSubst(subst=subst, constraints=[constraint])
 
     @staticmethod
     def _ml_impl(antecedents: Iterable[KInner], consequents: Iterable[KInner]) -> KInner:
@@ -95,6 +109,42 @@ class CTerm:
 
     def add_constraint(self, new_constraint: KInner) -> 'CTerm':
         return CTerm(mlAnd([self.config, new_constraint] + list(self.constraints), GENERATED_TOP_CELL))
+
+
+@dataclass(frozen=True, order=True)
+class CSubst:
+    subst: Subst
+    constraints: Tuple[KInner, ...]
+
+    def __init__(self, subst: Optional[Subst] = None, constraints: Iterable[KInner] = ()) -> None:
+        object.__setattr__(self, 'subst', subst if subst is not None else Subst({}))
+        object.__setattr__(self, 'constraints', CTerm._normalize_constraints(constraints))
+
+    def __iter__(self) -> Iterator[Union[Subst, KInner]]:
+        return chain([self.subst], self.constraints)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            'subst': self.subst.to_dict(),
+            'constraints': [c.to_dict() for c in self.constraints],
+        }
+
+    @staticmethod
+    def from_dict(dct: Dict[str, Any]) -> 'CSubst':
+        subst = Subst.from_dict(dct['subst'])
+        constraints = (KInner.from_dict(c) for c in dct['constraints'])
+        return CSubst(subst=subst, constraints=constraints)
+
+    @property
+    def constraint(self) -> KInner:
+        return mlAnd(self.constraints)
+
+    def add_constraint(self, constraint: KInner) -> 'CSubst':
+        return CSubst(self.subst, list(self.constraints) + [constraint])
+
+    def apply(self, cterm: CTerm) -> CTerm:
+        _kast = self.subst(cterm.kast)
+        return CTerm(_kast).add_constraint(self.constraint)
 
 
 def remove_useless_constraints(cterm: CTerm, keep_vars: Iterable[str] = ()) -> CTerm:
