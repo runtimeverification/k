@@ -184,8 +184,8 @@ class NodeView(Widget):
                 term_str, constraint_str = _cterm_text(crewrite)
 
             elif type(self._element) is KCFG.Cover:
-                subst_equalities = map(_boolify, flatten_label('#And', self._element.subst.ml_pred))
-                constraints = map(_boolify, flatten_label('#And', self._element.constraint))
+                subst_equalities = map(_boolify, flatten_label('#And', self._element.csubst.subst.ml_pred))
+                constraints = map(_boolify, flatten_label('#And', self._element.csubst.constraint))
                 term_str = '\n'.join(self._kprint.pretty_print(se) for se in subst_equalities)
                 constraint_str = '\n'.join(self._kprint.pretty_print(c) for c in constraints)
 
