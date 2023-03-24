@@ -1,3 +1,5 @@
+// Copyright (c) K Team. All Rights Reserved.
+
 requires "set-balance.md"
 
 module VERIFICATION

@@ -1,3 +1,5 @@
+// Copyright (c) K Team. All Rights Reserved.
+
 require "chain.k"
 
 module VERIFICATION-SYNTAX
