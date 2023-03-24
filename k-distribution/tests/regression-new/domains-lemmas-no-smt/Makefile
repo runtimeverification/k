@@ -7,5 +7,3 @@ KOMPILE_FLAGS=--syntax-module DOMAINS-LEMMAS-NO-SMT
 export KORE_EXEC_OPTS=--log-level error
 
 include ../../../include/kframework/ktest.mak
-
-KPROVE_OR_LEGACY=$(KPROVE)

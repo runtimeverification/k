@@ -5,5 +5,3 @@ TESTDIR=.
 KOMPILE_FLAGS=--syntax-module TEST
 
 include ../../../include/kframework/ktest.mak
-
-KPROVE_OR_LEGACY=$(KPROVE)

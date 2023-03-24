@@ -6,5 +6,3 @@ TESTDIR=.
 KPROVE_FLAGS=--md-selector 'keep&!(discard|k)'
 
 include ../../../include/kframework/ktest.mak
-
-KPROVE_OR_LEGACY=$(KPROVE)

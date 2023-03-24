@@ -6,5 +6,3 @@ KOMPILE_BACKEND?=haskell
 TESTDIR=.
 
 include ../../../include/kframework/ktest.mak
-
-KPROVE_OR_LEGACY=$(KPROVE)
