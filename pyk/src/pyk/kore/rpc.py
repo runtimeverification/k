@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
+from signal import SIGINT
 from subprocess import Popen
 from time import sleep
 from typing import (
@@ -516,6 +517,6 @@ class KoreServer(ContextManager['KoreServer']):
         self.close()
 
     def close(self) -> None:
-        self._proc.terminate()
+        self._proc.send_signal(SIGINT)
         self._proc.wait()
         _LOGGER.info(f'KoreServer stopped: {self.host}:{self.port}, pid={self.pid}')
