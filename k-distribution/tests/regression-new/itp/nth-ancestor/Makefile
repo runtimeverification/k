@@ -1,4 +1,10 @@
-SUBDIRS=haskell
-export KORE_EXEC_OPTS=--log-level error
+DEF=verification
+EXT=chain
+TESTDIR=.
+KOMPILE_BACKEND=haskell
+KOMPILE_FLAGS=
+KPROVE_FLAGS=
 
-include ../../../../include/kframework/ktest-group.mak
+include ../../../../include/kframework/ktest.mak
+
+KPROVE_OR_LEGACY=$(KPROVE)
