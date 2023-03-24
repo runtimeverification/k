@@ -5,3 +5,5 @@ KOMPILE_FLAGS=--syntax-module TEST
 export KORE_EXEC_OPTS=--log-level error
 
 include ../../../include/kframework/ktest.mak
+
+KPROVE_OR_LEGACY=$(KPROVE)
