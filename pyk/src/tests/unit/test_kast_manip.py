@@ -11,6 +11,7 @@ from pyk.kast.manip import (
     ml_pred_to_bool,
     push_down_rewrites,
     remove_generated_cells,
+    rename_generated_vars,
     simplify_bool,
     split_config_from,
 )
@@ -160,6 +161,110 @@ REMOVE_GENERATED_TEST_DATA = (
 def test_remove_generated_cells(term: KInner, expected: KInner) -> None:
     # When
     actual = remove_generated_cells(term)
+
+    # Then
+    assert actual == expected
+
+
+RENAME_GENERATED_VARS_TEST_DATA = (
+    (
+        'non-generated',
+        KApply(
+            '<k>',
+            KSequence(
+                KVariable('Gen'),
+                KVariable('DotVar'),
+                KVariable('?Gen'),
+                KVariable('?DotVar'),
+                KVariable('_notGen'),
+                KVariable('_notDotVar'),
+                KVariable('?_notGen'),
+                KVariable('?_ntDotVar'),
+            ),
+        ),
+        KApply(
+            '<k>',
+            KSequence(
+                KVariable('Gen'),
+                KVariable('DotVar'),
+                KVariable('?Gen'),
+                KVariable('?DotVar'),
+                KVariable('_notGen'),
+                KVariable('_notDotVar'),
+                KVariable('?_notGen'),
+                KVariable('?_ntDotVar'),
+            ),
+        ),
+    ),
+    (
+        'name-conflicts',
+        KApply('<k>', KSequence(KVariable('_Gen'), KVariable('_DotVar'), KVariable('?_Gen'), KVariable('?_DotVar'))),
+        KApply(
+            '<k>',
+            KSequence(
+                KVariable('K_CELL_8b13e996'),
+                KVariable('K_CELL_3ee7a189'),
+                KVariable('K_CELL_40796e18'),
+                KVariable('K_CELL_20fb46a2'),
+            ),
+        ),
+    ),
+    (
+        'nested-cells',
+        KApply(
+            '<k>', [KApply('<cell1>', KVariable('_Gen1')), KApply('<cell2>', KApply('<cell3>', KVariable('_Gen2')))]
+        ),
+        KApply(
+            '<k>',
+            [
+                KApply('<cell1>', KVariable('CELL1_CELL_dbe3b121')),
+                KApply('<cell2>', KApply('<cell3>', KVariable('CELL3_CELL_125dfae6'))),
+            ],
+        ),
+    ),
+    (
+        'multiple-args',
+        KApply(
+            '<generatedTop>',
+            [
+                KApply('<k>', (KRewrite(lhs=KVariable('_Gen0'), rhs=KVariable('?_Gen1')))),
+                KApply('<generatedCounter>', KVariable('GENERATEDCOUNTER_CELL')),
+                KApply(
+                    '<outerCell>',
+                    KRewrite(lhs=KVariable('_Gen1'), rhs=KVariable('_Gen4')),
+                    KRewrite(lhs=KVariable('_Gen3'), rhs=KVariable('_Gen5')),
+                ),
+            ],
+        ),
+        KApply(
+            '<generatedTop>',
+            [
+                KApply('<k>', (KRewrite(lhs=KVariable('K_CELL_7d91010a'), rhs=KVariable('K_CELL_3efbf5b5')))),
+                KApply('<generatedCounter>', KVariable('GENERATEDCOUNTER_CELL')),
+                KApply(
+                    '<outerCell>',
+                    KRewrite(lhs=KVariable('OUTERCELL_CELL_dbe3b121'), rhs=KVariable('OUTERCELL_CELL_3efb5235')),
+                    KRewrite(lhs=KVariable('OUTERCELL_CELL_82e8f7a8'), rhs=KVariable('OUTERCELL_CELL_f301f679')),
+                ),
+            ],
+        ),
+    ),
+    (
+        'no-outer-cell',
+        KApply('#And', [KApply('<k>', KVariable('_Gen1')), KVariable('_Gen2')]),
+        KApply('#And', [KApply('<k>', KVariable('K_CELL_dbe3b121')), KVariable('_Gen2')]),
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    'test_id,term,expected',
+    RENAME_GENERATED_VARS_TEST_DATA,
+    ids=[test_id for test_id, *_ in RENAME_GENERATED_VARS_TEST_DATA],
+)
+def test_rename_generated_vars(test_id: str, term: KInner, expected: KInner) -> None:
+    # When
+    actual = rename_generated_vars(term)
 
     # Then
     assert actual == expected
