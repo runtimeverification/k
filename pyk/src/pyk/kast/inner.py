@@ -244,6 +244,14 @@ class KVariable(KInner):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'sort', sort)
 
+    def __lt__(self, other: Any) -> bool:
+        if not isinstance(other, KAst):
+            return NotImplemented
+        if type(other) is KVariable:
+            if (self.sort is None or other.sort is None) and self.name == other.name:
+                return self.sort is None
+        return super().__lt__(other)
+
     @classmethod
     def from_dict(cls: Type['KVariable'], d: Mapping[str, Any]) -> 'KVariable':
         cls._check_node(d)
