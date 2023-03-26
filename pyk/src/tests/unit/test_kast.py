@@ -289,3 +289,19 @@ def test_kast_from_dict(dct: Mapping['str', Any], expected: Optional[KAst]) -> N
     else:
         actual = KAst.from_dict(dct)
         assert actual == expected
+
+
+KAST_COMPARE_TEST_DATA: Final = (
+    (KVariable('X', sort=KSort('Int')), KVariable('X', sort=KSort('Int')), False),
+    (KVariable('X', sort=KSort('Int')), KVariable('X'), False),
+    (KVariable('X'), KVariable('X', sort=KSort('Int')), True),
+    (KVariable('X', sort=KSort('Int')), KVariable('Y', sort=KSort('Int')), True),
+    (KVariable('X', sort=KSort('Int')), KVariable('Y'), True),
+    (KVariable('X'), KVariable('Y', sort=KSort('Int')), True),
+)
+
+
+@pytest.mark.parametrize('lkast,rkast,expected', KAST_COMPARE_TEST_DATA, ids=count())
+def test_kast_compare(lkast: KInner, rkast: KInner, expected: bool) -> None:
+    actual = lkast < rkast
+    assert actual == expected
