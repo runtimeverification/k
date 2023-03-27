@@ -1,12 +1,11 @@
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import pytest
 
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KInner, KVariable
 from pyk.kcfg import KCFG
-from pyk.prelude.kbool import TRUE
-from pyk.prelude.ml import mlEquals
+from pyk.prelude.ml import mlEquals, mlTop
 from pyk.prelude.utils import token
 from pyk.utils import shorten_hash
 
@@ -30,7 +29,7 @@ def node(i: int) -> KCFG.Node:
 
 
 def edge(i: int, j: int) -> KCFG.Edge:
-    return KCFG.Edge(node(i), node(j), TRUE, 1)
+    return KCFG.Edge(node(i), node(j), mlTop(), 0)
 
 
 def node_dicts(n: int) -> List[Dict[str, Any]]:
@@ -38,7 +37,9 @@ def node_dicts(n: int) -> List[Dict[str, Any]]:
 
 
 def edge_dicts(*edges: Iterable) -> List[Dict[str, Any]]:
-    def _make_edge_dict(i: int, j: int, depth: int = 1, condition: KInner = TRUE) -> Dict[str, Any]:
+    def _make_edge_dict(i: int, j: int, depth: int = 0, condition: Optional[KInner] = None) -> Dict[str, Any]:
+        if condition is None:
+            condition = mlTop()
         return {'source': nid(i), 'target': nid(j), 'condition': condition.to_dict(), 'depth': depth}
 
     return [_make_edge_dict(*edge) for edge in edges]
@@ -182,7 +183,7 @@ def test_insert_loop_edge() -> None:
     cfg = KCFG.from_dict(d)
 
     # When
-    new_edge = cfg.create_edge(nid(0), nid(0), TRUE, 1)
+    new_edge = cfg.create_edge(nid(0), nid(0), mlTop(), 0)
 
     # Then
     assert new_edge == edge(0, 0)
@@ -197,7 +198,7 @@ def test_insert_simple_edge() -> None:
     cfg = KCFG.from_dict(d)
 
     # When
-    new_edge = cfg.create_edge(nid(0), nid(1), TRUE, 1)
+    new_edge = cfg.create_edge(nid(0), nid(1), mlTop(), 0)
 
     # Then
     assert new_edge == edge(0, 1)
@@ -334,12 +335,12 @@ def test_pretty_print() -> None:
         'aliases': {'foo': nid(3), 'bar': nid(3)},
         # Each of the branching edges have given depth=0
         # fmt: off
-        'edges': edge_dicts((0, 1), (1, 2, 5), (2, 3),   # Initial Linear segment
-                            (3, 4, 0, mlEquals(KVariable('x'), token(4))), (4, 5), (5, 2),   # Loops back
-                            (3, 5, 0, mlEquals(KVariable('x'), token(5))),                   # Go to previous non-terminal node not as loop
-                            (3, 6, 0, mlEquals(KVariable('x'), token(6))),                   # Terminates
-                            (3, 7, 0, mlEquals(KVariable('x'), token(7))), (7, 6),           # Go to previous terminal node not as loop
-                            (3, 11, 0, mlEquals(KVariable('x'), token(11))), (11, 8)         # Covered
+        'edges': edge_dicts((0, 1, 1), (1, 2, 5), (2, 3, 1),                                        # Initial Linear segment
+                            (3, 4, 0, mlEquals(KVariable('x'), token(4))), (4, 5, 1), (5, 2, 1),    # Loops back
+                            (3, 5, 0, mlEquals(KVariable('x'), token(5))),                          # Go to previous non-terminal node not as loop
+                            (3, 6, 0, mlEquals(KVariable('x'), token(6))),                          # Terminates
+                            (3, 7, 0, mlEquals(KVariable('x'), token(7))), (7, 6, 1),               # Go to previous terminal node not as loop
+                            (3, 11, 0, mlEquals(KVariable('x'), token(11))), (11, 8, 1)             # Covered
                             ),
         # fmt: on
         'covers': cover_dicts((8, 11)),  # Loops back

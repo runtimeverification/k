@@ -8,7 +8,7 @@ from typing import Any, Callable, Container, Dict, Iterable, List, Mapping, Opti
 
 from graphviz import Digraph
 
-from pyk.cterm import CSubst, CTerm, build_claim, build_rule
+from pyk.cterm import CSubst, CTerm
 from pyk.kast.inner import KInner
 from pyk.kast.manip import (
     bool_to_ml_pred,
@@ -19,8 +19,9 @@ from pyk.kast.manip import (
     rename_generated_vars,
     simplify_bool,
 )
-from pyk.kast.outer import KClaim, KDefinition, KRule
+from pyk.kast.outer import KClaim, KDefinition
 from pyk.ktool.kprint import KPrint
+from pyk.prelude.ml import is_top
 from pyk.utils import add_indent, compare_short_hashes, shorten_hash
 
 
@@ -28,9 +29,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     @dataclass(frozen=True, order=True)
     class Node:
         cterm: CTerm
-
-        def __init__(self, cterm: CTerm):
-            object.__setattr__(self, 'cterm', cterm)
 
         @property
         def id(self) -> str:
@@ -67,53 +65,21 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 'depth': self.depth,
             }
 
-        def to_rule(self, priority: int = 50) -> KRule:
-            sentence_id = f'BASIC-BLOCK-{self.source.id}-TO-{self.target.id}'
-            rule, _ = build_rule(
-                sentence_id, self.source.cterm.add_constraint(self.condition), self.target.cterm, priority=priority
-            )
-            return rule
-
-        def to_claim(self) -> KClaim:
-            sentence_id = f'BASIC-BLOCK-{self.source.id}-TO-{self.target.id}'
-            claim, _ = build_claim(sentence_id, self.source.cterm.add_constraint(self.condition), self.target.cterm)
-            return claim
-
         def pretty(self, kprint: KPrint) -> Iterable[str]:
             if self.depth == 0:
+                if is_top(self.condition):
+                    return ['']
                 return ['\nandBool'.join(kprint.pretty_print(ml_pred_to_bool(self.condition)).split(' andBool'))]
             elif self.depth == 1:
                 return ['(' + str(self.depth) + ' step)']
             else:
                 return ['(' + str(self.depth) + ' steps)']
 
-        # TODO: These should only be available for split case nodes and return a Node rather than a CTerm,
-        # when we extract a class for them.
-        def pre(self) -> CTerm:
-            return self.source.cterm.add_constraint(self.condition)
-
-        def post(self) -> CTerm:
-            return self.target.cterm
-
     @dataclass(frozen=True)
     class Cover(EdgeLike):
         source: 'KCFG.Node'
         target: 'KCFG.Node'
         csubst: CSubst
-
-        def __init__(
-            self,
-            source: 'KCFG.Node',
-            target: 'KCFG.Node',
-            csubst: Optional[CSubst] = None,
-        ):
-            object.__setattr__(self, 'source', source)
-            object.__setattr__(self, 'target', target)
-            if csubst is None:
-                csubst = target.cterm.match_with_constraint(source.cterm)
-                if csubst is None:
-                    raise ValueError(f'No matching between: {source.id} and {target.id}')
-            object.__setattr__(self, 'csubst', csubst)
 
         def to_dict(self) -> Dict[str, Any]:
             return {
@@ -654,6 +620,18 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         return new_node.id
 
+    def _check_no_successors(self, source_id: str) -> None:
+        for edge in self.edges(source_id=source_id):
+            if edge.depth > 0:
+                raise ValueError(
+                    f'Node already has a successor: {shorten_hash(source_id)} -> {shorten_hash(edge.target.id)}'
+                )
+        covers = self.covers(source_id=source_id)
+        if len(covers) > 0:
+            raise ValueError(
+                f'Node already has successors: {shorten_hash(source_id)} -> {shorten_hash(covers[0].target.id)}'
+            )
+
     def edge(self, source_id: str, target_id: str) -> Optional[Edge]:
         source_id = self._resolve(source_id)
         target_id = self._resolve(target_id)
@@ -677,11 +655,10 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         return False
 
     def create_edge(self, source_id: str, target_id: str, condition: KInner, depth: int) -> Edge:
+        self._check_no_successors(source_id)
+
         source = self.node(source_id)
         target = self.node(target_id)
-
-        if target.id in self._edges.get(source.id, {}):
-            raise ValueError(f'Edge already exists: {source.id} -> {target.id}')
 
         if source.id not in self._edges:
             self._edges[source.id] = {}
@@ -739,11 +716,15 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         return False
 
     def create_cover(self, source_id: str, target_id: str, csubst: Optional[CSubst] = None) -> Cover:
+        self._check_no_successors(source_id)
+
         source = self.node(source_id)
         target = self.node(target_id)
 
-        if target.id in self._covers.get(source.id, {}):
-            raise ValueError(f'Cover already exists: {source.id} -> {target.id}')
+        if csubst is None:
+            csubst = target.cterm.match_with_constraint(source.cterm)
+            if csubst is None:
+                raise ValueError(f'No matching between: {source.id} and {target.id}')
 
         if source.id not in self._covers:
             self._covers[source.id] = {}
