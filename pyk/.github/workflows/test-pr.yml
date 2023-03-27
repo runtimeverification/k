@@ -53,6 +53,18 @@ jobs:
       - name: 'Build and run unit tests'
         run: make cov-unit
 
+  profile:
+    needs: code-quality-checks
+    name: 'Profiling'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+      - name: 'Install Poetry'
+        uses: Gr1N/setup-poetry@v8
+      - name: 'Build and run profiling'
+        run: make profile
+
   integration-tests:
     needs: code-quality-checks
     name: 'Integration Tests'
