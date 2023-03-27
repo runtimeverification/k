@@ -14,6 +14,7 @@ from pyk.kast.manip import (
     bool_to_ml_pred,
     extract_lhs,
     extract_rhs,
+    flatten_label,
     ml_pred_to_bool,
     remove_source_attributes,
     rename_generated_vars,
@@ -113,7 +114,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     _init: Set[str]
     _target: Set[str]
     _expanded: Set[str]
-    _verified: Set[Tuple[str, str]]
     _aliases: Dict[str, str]
     _lock: RLock
 
@@ -124,7 +124,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         self._init = set()
         self._target = set()
         self._expanded = set()
-        self._verified = set()
         self._aliases = {}
         self._lock = RLock()
 
@@ -167,10 +166,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     @property
     def expanded(self) -> List[Node]:
         return [node for node in self.nodes if self.is_expanded(node.id)]
-
-    @property
-    def verified(self) -> List[Edge]:
-        return [edge for edge in self.edges() if self.is_verified(edge.source.id, edge.target.id)]
 
     @property
     def leaves(self) -> List[Node]:
@@ -217,7 +212,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         init = sorted(self._init)
         target = sorted(self._target)
         expanded = sorted(self._expanded)
-        verified = [{'source': source_id, 'target': target_id} for source_id, target_id in sorted(self._verified)]
         aliases = dict(sorted(self._aliases.items()))
 
         res = {
@@ -227,7 +221,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             'init': init,
             'target': target,
             'expanded': expanded,
-            'verified': verified,
             'aliases': aliases,
         }
         return {k: v for k, v in res.items() if v}
@@ -273,9 +266,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
 
         for expanded_id in dct.get('expanded') or []:
             cfg.add_expanded(resolve(expanded_id))
-
-        for verified_ids in dct.get('verified') or []:
-            cfg.add_verified(resolve(verified_ids['source']), resolve(verified_ids['target']))
 
         for alias, id in dct.get('aliases', {}).items():
             cfg.add_alias(alias=alias, node_id=resolve(id))
@@ -337,77 +327,124 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                 short_info[0] = _bold(short_info[0])
             return short_info
 
+        def _print_split_edge(constraint: KInner) -> List[str]:
+            ret_split_lines: List[str] = []
+            constraints = flatten_label('#And', constraint)
+            if len(constraints) == 1:
+                ret_split_lines.append(f'constraint: {kprint.pretty_print(constraints[0])}')
+
+            elif len(constraints) > 1:
+                ret_split_lines.append('constraints:')
+                ret_split_lines.extend(f'    {kprint.pretty_print(c)}' for c in constraints)
+            return ret_split_lines
+
         def _print_subgraph(indent: str, curr_node: KCFG.Node, prior_on_trace: List[KCFG.Node]) -> None:
-            edges_from = sorted(self.edge_likes(source_id=curr_node.id))
-            if curr_node in processed_nodes:
-                if not edges_from:
-                    return
-                ret_edge_lines = [(indent + '┊')]
-                if curr_node in prior_on_trace:
-                    ret_edge_lines.append(indent + '└╌ (looped back)')
-                else:
-                    ret_edge_lines.append(indent + '└╌ (continues as previously)')
-                ret_lines.append(('unknown', ret_edge_lines))
-                return
+            processed = curr_node in processed_nodes
             processed_nodes.append(curr_node)
+            successors = list(self.edge_likes(source_id=curr_node.id))
 
-            num_children = len(edges_from)
-            is_cover = num_children == 1 and isinstance(edges_from[0], KCFG.Cover)
-            is_branch = num_children > 1
-            if is_branch:
-                ret_lines.append(('unknown', [indent + '│']))
-            for i, edge_like in enumerate(edges_from):
-                is_last_child = i == num_children - 1
+            curr_node_strs = _print_node(curr_node)
 
-                if not (is_branch or is_cover):
-                    elbow = '├ ' if len(self.edge_likes(source_id=edge_like.target.id)) else '└ '
-                    new_indent = ''
-                    node_indent = '│ '
-                elif is_last_child:
-                    elbow = '└╌' if is_cover else '┗━'
-                    new_indent = '   '
-                    node_indent = '   │'
+            ret_node_lines = []
+            suffix = []
+            elbow = '├─'
+            node_indent = '│   '
+            if self.is_init(curr_node.id):
+                elbow = '┌─'
+            elif processed or self.is_target(curr_node.id) or not successors:
+                elbow = '└─'
+                node_indent = '    '
+                if curr_node in prior_on_trace:
+                    suffix = ['(looped back)', '']
+                elif processed and not self.is_target(curr_node.id):
+                    suffix = ['(continues as previously)', '']
+                elif self.is_stuck(curr_node.id):
+                    suffix = ['(stuck)', '']
                 else:
-                    elbow = '┣━'
-                    new_indent = '┃  '
-                    node_indent = '┃  │'
+                    suffix = ['']
+            ret_node_lines.append(indent + elbow + ' ' + curr_node_strs[0])
+            ret_node_lines.extend(add_indent(indent + node_indent, curr_node_strs[1:]))
+            ret_node_lines.extend(add_indent(indent + '   ', suffix))
+            ret_lines.append((f'node_{curr_node.id}', ret_node_lines))
 
-                if isinstance(edge_like, KCFG.Edge) and edge_like.depth:
-                    ret_edge_lines = [(indent + '│')]
-                    if self.is_verified(edge_like.source.id, edge_like.target.id):
-                        ret_edge_lines.append(indent + '│  ' + _bold(_green('(verified)')))
-                    ret_edge_lines.extend(add_indent(indent + '│  ', edge_like.pretty(kprint)))
-                    ret_lines.append((f'edge_{edge_like.source.id}_{edge_like.target.id}', ret_edge_lines))
-                elif isinstance(edge_like, KCFG.Cover):
-                    ret_edge_lines = [(indent + '┊')]
-                    ret_edge_lines.extend(add_indent(indent + '┊  ', edge_like.pretty(kprint, minimize=minimize)))
-                    ret_lines.append((f'cover_{edge_like.source.id}_{edge_like.target.id}', ret_edge_lines))
+            if processed or self.is_target(curr_node.id):
+                return
 
-                target_strs = _print_node(edge_like.target)
-                ret_node_lines = [(indent + elbow + ' ' + target_strs[0])]
+            if not successors:
+                return
 
-                if isinstance(edge_like, KCFG.Edge) and edge_like.depth == 0:
-                    first, *rest = edge_like.pretty(kprint)
-                    ret_node_lines[-1] += '    ' + first
-                    ret_node_lines.extend(add_indent(indent + new_indent + '       ' + len(target_strs[0]) * ' ', rest))
+            if len(successors) > 1:
+                ret_lines.append(('unknown', [f'{indent}┃']))
 
-                ret_node_lines.extend(add_indent(indent + node_indent, target_strs[1:]))
-                ret_lines.append((f'node_{edge_like.target.id}', ret_node_lines))
+                for edge in successors[:-1]:
+                    assert type(edge) is KCFG.Edge
+                    ret_edge_lines = _print_split_edge(edge.condition)
+                    ret_edge_lines = [indent + '┣━━┓ ' + ret_edge_lines[0]] + add_indent(
+                        indent + '┃  ┃ ', ret_edge_lines[1:]
+                    )
+                    ret_edge_lines.append(indent + '┃  │')
+                    ret_lines.append(('edge_{curr_node.id}_{edge.target.id}', ret_edge_lines))
+                    _print_subgraph(indent + '┃  ', edge.target, prior_on_trace + [curr_node])
+                edge = successors[-1]
+                assert type(edge) is KCFG.Edge
+                ret_edge_lines = _print_split_edge(edge.condition)
+                ret_edge_lines = [indent + '┗━━┓ ' + ret_edge_lines[0]] + add_indent(
+                    indent + '   ┃ ', ret_edge_lines[1:]
+                )
+                ret_edge_lines.append(indent + '   │')
+                ret_lines.append(('edge_{curr_node.id}_{edge.target.id}', ret_edge_lines))
+                _print_subgraph(indent + '   ', edge.target, prior_on_trace + [curr_node])
 
-                _print_subgraph(indent + new_indent, edge_like.target, prior_on_trace + [edge_like.source])
+            else:
+                successor = successors[0]
+                ret_lines.append(('unknown', [f'{indent}│']))
 
-                if is_branch and not is_last_child:
-                    ret_lines.append(('unknown', [indent + new_indent]))
+                if type(successor) is KCFG.Edge:
+                    ret_edge_lines = []
+                    ret_edge_lines.extend(add_indent(indent + '│  ', successor.pretty(kprint)))
+                    ret_lines.append((f'edge_{successor.source.id}_{successor.target.id}', ret_edge_lines))
 
-        init = sorted(self.init)
+                elif type(successor) is KCFG.Cover:
+                    ret_edge_lines = []
+                    ret_edge_lines.extend(add_indent(indent + '┊  ', successor.pretty(kprint, minimize=minimize)))
+                    ret_lines.append((f'cover_{successor.source.id}_{successor.target.id}', ret_edge_lines))
+
+                _print_subgraph(indent, successor.target, prior_on_trace + [curr_node])
+
+        def _sorted_init_nodes() -> Tuple[List[KCFG.Node], List[KCFG.Node]]:
+            sorted_init_nodes = sorted(node for node in self.nodes if node not in processed_nodes)
+            init_expanded_nodes = []
+            init_unexpanded_nodes = []
+            target_nodes = []
+            remaining_nodes = []
+            for node in sorted_init_nodes:
+                if self.is_init(node.id):
+                    if self.is_expanded(node.id):
+                        init_expanded_nodes.append(node)
+                    else:
+                        init_unexpanded_nodes.append(node)
+                elif self.is_target(node.id):
+                    target_nodes.append(node)
+                else:
+                    remaining_nodes.append(node)
+            return (init_expanded_nodes + init_unexpanded_nodes + target_nodes, remaining_nodes)
+
+        init, _ = _sorted_init_nodes()
         while init:
-            init_strs = _print_node(init[0])
             ret_lines.append(('unknown', ['']))
-            ret_init = [('┌  ' + init_strs[0])]
-            ret_init.extend(add_indent('│  ', init_strs[1:]))
-            ret_lines.append((f'node_{init[0].id}', ret_init))
             _print_subgraph('', init[0], [init[0]])
-            init = sorted(node for node in self.nodes if node not in processed_nodes)
+            init, _ = _sorted_init_nodes()
+        if self.frontier or self.stuck:
+            ret_lines.append(('unknown', ['', 'Target Nodes:']))
+            for target in self.target:
+                ret_node_lines = [''] + _print_node(target)
+                ret_lines.append((f'node_{target.id}', ret_node_lines))
+        _, remaining = _sorted_init_nodes()
+        if remaining:
+            ret_lines.append(('unknown', ['', 'Remaining Nodes:']))
+            for node in remaining:
+                ret_node_lines = [''] + _print_node(node)
+                ret_lines.append((f'node_{node.id}', ret_node_lines))
 
         _ret_lines = []
         used_ids = []
@@ -460,10 +497,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             label = '\nandBool'.join(kprint.pretty_print(display_condition).split(' andBool'))
             label = f'{label}\n{depth} steps'
             label = _short_label(label)
-            attrs = (
-                {'class': 'verified'} if self.is_verified(edge.source.id, edge.target.id) else {'class': 'unverified'}
-            )
-            graph.edge(tail_name=edge.source.id, head_name=edge.target.id, label=f'  {label}        ', **attrs)
+            graph.edge(tail_name=edge.source.id, head_name=edge.target.id, label=f'  {label}        ')
 
         for cover in self.covers():
             label = ', '.join(f'{k} |-> {kprint.pretty_print(v)}' for k, v in cover.csubst.subst.minimize().items())
@@ -576,11 +610,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         self._init.discard(node_id)
         self._target.discard(node_id)
         self._expanded.discard(node_id)
-        self._verified = {
-            (source_id, target_id)
-            for source_id, target_id in self._verified
-            if source_id != node_id and target_id != node_id
-        }
 
         for alias in [alias for alias, id in self._aliases.items() if id == node_id]:
             self.remove_alias(alias)
@@ -674,7 +703,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             _cterm = source.cterm.add_constraint(_constraint)
             _node = self.get_or_create_node(_cterm)
             self.create_edge(source.id, _node.id, _constraint, 0)
-            self.add_verified(source.id, _node.id)
             return _node.id
 
         branch_node_ids = [_add_case_edge(constraint) for constraint in constraints]
@@ -762,11 +790,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         node_id = self._resolve(node_id)
         self._expanded.add(node_id)
 
-    def add_verified(self, source_id: str, target_id: str) -> None:
-        source_id = self._resolve(source_id)
-        target_id = self._resolve(target_id)
-        self._verified.add((source_id, target_id))
-
     def add_alias(self, alias: str, node_id: str) -> None:
         if '@' in alias:
             raise ValueError('Alias may not contain "@"')
@@ -793,13 +816,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             raise ValueError(f'Node is not expanded: {node_id}')
         self._expanded.remove(node_id)
 
-    def remove_verified(self, source_id: str, target_id: str) -> None:
-        source_id = self._resolve(source_id)
-        target_id = self._resolve(target_id)
-        if (source_id, target_id) not in self._verified:
-            raise ValueError(f'Edge is not verified: {(source_id, target_id)}')
-        self._verified.remove((source_id, target_id))
-
     def remove_alias(self, alias: str) -> None:
         if alias not in self._aliases:
             raise ValueError(f'Alias does not exist: {alias}')
@@ -816,11 +832,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def discard_expanded(self, node_id: str) -> None:
         node_id = self._resolve(node_id)
         self._expanded.discard(node_id)
-
-    def discard_verified(self, source_id: str, target_id: str) -> None:
-        source_id = self._resolve(source_id)
-        target_id = self._resolve(target_id)
-        self._verified.discard((source_id, target_id))
 
     def is_init(self, node_id: str) -> bool:
         node_id = self._resolve(node_id)
@@ -849,11 +860,6 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def is_stuck(self, node_id: str) -> bool:
         node_id = self._resolve(node_id)
         return self.is_expanded(node_id) and self.is_leaf(node_id)
-
-    def is_verified(self, source_id: str, target_id: str) -> bool:
-        source_id = self._resolve(source_id)
-        target_id = self._resolve(target_id)
-        return (source_id, target_id) in self._verified
 
     def node_attrs(self, node_id: str) -> List[str]:
         attrs = []
