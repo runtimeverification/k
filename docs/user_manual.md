@@ -1286,11 +1286,15 @@ A simplification rule is only applied when the current side condition _implies_
 the `requires` clause of the rule, like function definition rules.
 
 **Order**: The `simplification` attribute accepts an optional integer argument
-which is the rule's _priority_; if the optional argument is not specified, it
-is equivalent to a priority of 50. Simplification rules are applied in order of
-their priority. `simplification` rules may not have the `priority` attribute.
-Unlike the `priority` attribute, this `simplification` index is a _suggestion_
-to the backend, not a semantic requirement.
+which is the rule's _simplification priority_; if the optional argument is not
+specified, it is equivalent to a simplification priority of 50. Backends
+_should_ attempt simplification rules in order of their _simlpification
+priority_, but are not required to do so; in fact, the backend is free to apply
+`simplification` rules at _any time_. Because of this, users must ensure that
+simplification rules are sound regardless of their order of application. This
+differs from the `priority` attribute in that rules with the `priority`
+attribute _must_ be applied in their priority order by the backend. It is an
+error to have the `priority` attribute on a `simplification` rule.
 
 For example, for the following definition:
 
