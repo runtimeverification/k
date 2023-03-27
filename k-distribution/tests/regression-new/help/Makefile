@@ -16,7 +16,6 @@ KORE_PRINT=${K_BIN}/kore-print
 	${KDEP}          --help    | grep -q -- "--version"
 	${KEQ}           --help    | grep -q -- "--version"
 	${KOMPILE}       --help    | grep -q -- "--version"
-	${KPROVE_LEGACY} --help    | grep -q -- "--version"
 	${KPROVE}	 --help    | grep -q -- "--version"
 	${KRUN}          --help    | grep -q -- "--version"
 	${KSERVER}       --help    | grep -q -- "--version"
@@ -27,7 +26,6 @@ KORE_PRINT=${K_BIN}/kore-print
 	${KDEP}          --version | grep -q $(VERSION_REGEX)
 	${KEQ}           --version | grep -q $(VERSION_REGEX)
 	${KOMPILE}       --version | grep -q $(VERSION_REGEX)
-	${KPROVE_LEGACY} --version | grep -q $(VERSION_REGEX)
 	${KPROVE}	 --version | grep -q $(VERSION_REGEX)
 	${KRUN}          --version | grep -q $(VERSION_REGEX)
 	${KSERVER}       --version | grep -q $(VERSION_REGEX)
