@@ -45,6 +45,7 @@ jobs:
   ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
     runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
@@ -89,6 +90,7 @@ jobs:
   ubuntu-focal:
     name: 'K Ubuntu Focal Package'
     runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
@@ -133,6 +135,7 @@ jobs:
   debian-bullseye:
     name: 'K Debian Bullseye Package'
     runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
@@ -157,6 +160,7 @@ jobs:
   arch:
     name: 'Arch Linux Package'
     runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
@@ -181,6 +185,7 @@ jobs:
   macos-build:
     name: 'Build MacOS Package'
     runs-on: macos-11
+    timeout-minutes: 90
     environment: production
     needs: set-release-id
     steps:
@@ -258,6 +263,7 @@ jobs:
   macos-test:
     name: 'Test MacOS Package'
     runs-on: macos-11
+    timeout-minutes: 30
     environment: production
     needs: [macos-build, set-release-id]
     steps:
@@ -375,6 +381,7 @@ jobs:
   gh-pages:
     name: 'GitHub Pages deployment'
     runs-on: ubuntu-20.04
+    timeout-minutes: 15
     needs: [release]
     steps:
       - name: 'Install pandoc/texlive/calibre'
