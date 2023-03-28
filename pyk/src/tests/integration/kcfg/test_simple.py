@@ -1,17 +1,24 @@
-from typing import Final, Iterable, List, Optional, Tuple, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pytest
 
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence, KToken, KVariable
 from pyk.kast.manip import get_cell
-from pyk.kcfg import KCFGExplore
-from pyk.ktool.kprint import KPrint
 from pyk.prelude.ml import mlAnd, mlEqualsTrue, mlTop
 
 from ..utils import KCFGExploreTest
 
-STATE = Union[Tuple[str, str], Tuple[str, str, str]]
+if TYPE_CHECKING:
+    from typing import Final, Iterable, List, Optional, Tuple, Union
+
+    from pyk.kcfg import KCFGExplore
+    from pyk.ktool.kprint import KPrint
+
+    STATE = Union[Tuple[str, str], Tuple[str, str, str]]
+
 
 EXECUTE_TEST_DATA: Iterable[Tuple[str, int, STATE, int, STATE, List[STATE]]] = (
     ('branch', 3, ('a', '.Map'), 1, ('b', '.Map'), [('c', '.Map'), ('d', '.Map')]),

@@ -1,9 +1,16 @@
-from typing import Dict, Tuple
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pytest
-from pytest import TempPathFactory
 
 from pyk.kore_exec_covr.kore_exec_covr import HaskellLogEntry, _parse_haskell_oneline_log, parse_rule_applications
+
+if TYPE_CHECKING:
+    from typing import Dict, Tuple
+
+    from pytest import TempPathFactory
+
 
 PARSE_HASKELL_ONELINE_LOG_TEST_DATA = [
     (

@@ -1,14 +1,20 @@
+from __future__ import annotations
+
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import cached_property, reduce
 from pathlib import Path
-from typing import Dict, FrozenSet, Iterable, Optional, Set, Union, final
+from typing import TYPE_CHECKING, final
 
 from ..cli_utils import check_dir_path, check_file_path
-from ..kore.parser import KoreParser
-from ..kore.syntax import Definition, Sort
 from ..utils import FrozenDict
-from .syntax import App, Pattern, SortApp
+from .parser import KoreParser
+from .syntax import App, SortApp
+
+if TYPE_CHECKING:
+    from typing import Dict, FrozenSet, Iterable, Optional, Set, Union
+
+    from .syntax import Definition, Pattern, Sort
 
 
 @final

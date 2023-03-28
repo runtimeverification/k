@@ -1,9 +1,15 @@
-from types import ModuleType
+from __future__ import annotations
 
-from pyk.kllvm.ast import Pattern
+from typing import TYPE_CHECKING
+
 from pyk.kllvm.parser import Parser
 
 from .utils import RuntimeTest
+
+if TYPE_CHECKING:
+    from types import ModuleType
+
+    from pyk.kllvm.ast import Pattern
 
 
 class TestStep(RuntimeTest):

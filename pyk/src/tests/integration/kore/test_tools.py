@@ -1,11 +1,16 @@
-from pathlib import Path
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pytest
 
 from pyk.kore.parser import KoreParser
 from pyk.kore.tools import PrintOutput, kore_print
 
-from ..utils import Kompiler
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from ..utils import Kompiler
 
 
 @pytest.fixture(scope='module')

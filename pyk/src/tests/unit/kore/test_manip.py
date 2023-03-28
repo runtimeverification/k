@@ -1,10 +1,17 @@
+from __future__ import annotations
+
 from itertools import count
-from typing import Collection, Dict, Iterable, List
+from typing import TYPE_CHECKING
 
 import pytest
 
 from pyk.kore.manip import free_occs
-from pyk.kore.syntax import And, EVar, Exists, Pattern, SortApp, Top
+from pyk.kore.syntax import And, EVar, Exists, SortApp, Top
+
+if TYPE_CHECKING:
+    from typing import Collection, Dict, Iterable, List
+
+    from pyk.kore.syntax import Pattern
 
 S = SortApp('S')
 x, y = (EVar(name, S) for name in ('x', 'y'))

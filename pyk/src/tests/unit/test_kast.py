@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 from itertools import count
-from typing import Any, Dict, Final, List, Mapping, Optional, Tuple
+from typing import TYPE_CHECKING
 
 import pytest
 
 from pyk.kast import KAst, KAtt
-from pyk.kast.inner import KApply, KInner, KLabel, KSequence, KSort, KVariable, build_assoc
+from pyk.kast.inner import KApply, KLabel, KSequence, KSort, KVariable, build_assoc
 from pyk.kast.outer import KDefinition, KFlatModule, KImport, KTerminal
 from pyk.prelude.kbool import BOOL
 from pyk.prelude.kint import INT
@@ -12,6 +14,12 @@ from pyk.prelude.string import STRING
 from pyk.prelude.utils import token
 
 from .utils import f, x, y, z
+
+if TYPE_CHECKING:
+    from typing import Any, Dict, Final, List, Mapping, Optional, Tuple
+
+    from pyk.kast import KInner
+
 
 KVARIABLE_TEST_DATA: Final = (
     ('no-sort', KVariable('Foo'), {'node': 'KVariable', 'name': 'Foo', 'att': {'node': 'KAtt', 'att': {}}}),
@@ -281,7 +289,7 @@ KAST_FROM_DICT_TEST_DATA: Final = (
 
 
 @pytest.mark.parametrize('dct,expected', KAST_FROM_DICT_TEST_DATA, ids=count())
-def test_kast_from_dict(dct: Mapping['str', Any], expected: Optional[KAst]) -> None:
+def test_kast_from_dict(dct: Mapping[str, Any], expected: Optional[KAst]) -> None:
     if expected is None:
         with pytest.raises(ValueError):
             KAst.from_dict(dct)

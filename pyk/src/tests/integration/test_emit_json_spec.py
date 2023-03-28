@@ -1,17 +1,25 @@
+from __future__ import annotations
+
 import json
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
 from pyk.kast import kast_term
 from pyk.kast.inner import EMPTY_ATT
 from pyk.kast.manip import remove_generated_cells
-from pyk.kast.outer import KDefinition, KFlatModule, KFlatModuleList, KRequire
-from pyk.ktool.kprint import SymbolTable, paren
-from pyk.ktool.kprove import KProve, _kprove
+from pyk.kast.outer import KDefinition, KFlatModuleList, KRequire
+from pyk.ktool.kprint import paren
+from pyk.ktool.kprove import _kprove
 from pyk.prelude.ml import is_top
 
 from .utils import KProveTest
+
+if TYPE_CHECKING:
+    from pyk.kast.outer import KFlatModule
+    from pyk.ktool.kprint import SymbolTable
+    from pyk.ktool.kprove import KProve
 
 
 class TestEmitJsonSpec(KProveTest):

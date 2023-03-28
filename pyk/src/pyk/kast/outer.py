@@ -1,26 +1,12 @@
+from __future__ import annotations
+
 import json
 import logging
 from abc import abstractmethod
-from dataclasses import InitVar, dataclass
+from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
-from os import PathLike
-from typing import (
-    Any,
-    Dict,
-    Final,
-    FrozenSet,
-    Iterable,
-    Iterator,
-    List,
-    Mapping,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-    final,
-)
+from typing import TYPE_CHECKING, Iterable, final
 
 from ..prelude.kbool import TRUE
 from ..utils import filter_none, single, unique
@@ -41,7 +27,12 @@ from .inner import (
 )
 from .kast import EMPTY_ATT, KAst, KAtt, WithKAtt, kast_term
 
-RL = TypeVar('RL', bound='KRuleLike')
+if TYPE_CHECKING:
+    from dataclasses import InitVar
+    from os import PathLike
+    from typing import Any, Dict, Final, FrozenSet, Iterator, List, Mapping, Optional, Tuple, Type, TypeVar, Union
+
+    RL = TypeVar('RL', bound='KRuleLike')
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -70,7 +61,7 @@ class KOuter(KAst):
 
     @classmethod
     @abstractmethod
-    def from_dict(cls: Type['KOuter'], d: Mapping[str, Any]) -> 'KOuter':
+    def from_dict(cls: Type[KOuter], d: Mapping[str, Any]) -> KOuter:
         node = d['node']
         if node in KOuter._OUTER_NODES:
             return globals()[node].from_dict(d)
@@ -83,7 +74,7 @@ class KProductionItem(KOuter):
 
     @classmethod
     @abstractmethod
-    def from_dict(cls: Type['KProductionItem'], d: Mapping[str, Any]) -> 'KProductionItem':
+    def from_dict(cls: Type[KProductionItem], d: Mapping[str, Any]) -> KProductionItem:
         node = d['node']
         if node in KProductionItem._PRODUCTION_ITEM_NODES:
             return globals()[node].from_dict(d)
@@ -107,7 +98,7 @@ class KSentence(KOuter, WithKAtt):
 
     @classmethod
     @abstractmethod
-    def from_dict(cls: Type['KSentence'], d: Mapping[str, Any]) -> 'KSentence':
+    def from_dict(cls: Type[KSentence], d: Mapping[str, Any]) -> KSentence:
         node = d['node']
         if node in KSentence._SENTENCE_NODES:
             return globals()[node].from_dict(d)
@@ -137,14 +128,14 @@ class KTerminal(KProductionItem):
         object.__setattr__(self, 'value', value)
 
     @classmethod
-    def from_dict(cls: Type['KTerminal'], d: Mapping[str, Any]) -> 'KTerminal':
+    def from_dict(cls: Type[KTerminal], d: Mapping[str, Any]) -> KTerminal:
         cls._check_node(d)
         return KTerminal(value=d['value'])
 
     def to_dict(self) -> Dict[str, Any]:
         return {'node': 'KTerminal', 'value': self.value}
 
-    def let(self, *, value: Optional[str] = None) -> 'KTerminal':
+    def let(self, *, value: Optional[str] = None) -> KTerminal:
         value = value if value is not None else self.value
         return KTerminal(value=value)
 
@@ -162,7 +153,7 @@ class KRegexTerminal(KProductionItem):
         object.__setattr__(self, 'follow_regex', follow_regex)
 
     @classmethod
-    def from_dict(cls: Type['KRegexTerminal'], d: Mapping[str, Any]) -> 'KRegexTerminal':
+    def from_dict(cls: Type[KRegexTerminal], d: Mapping[str, Any]) -> KRegexTerminal:
         cls._check_node(d)
         return KRegexTerminal(
             regex=d['regex'],
@@ -180,7 +171,7 @@ class KRegexTerminal(KProductionItem):
 
     def let(
         self, *, regex: Optional[str] = None, precede_regex: Optional[str] = None, follow_regex: Optional[str] = None
-    ) -> 'KRegexTerminal':
+    ) -> KRegexTerminal:
         regex = regex if regex is not None else self.regex
         precede_regex = precede_regex if precede_regex is not None else self.precede_regex
         follow_regex = follow_regex if follow_regex is not None else self.follow_regex
@@ -196,14 +187,14 @@ class KNonTerminal(KProductionItem):
         object.__setattr__(self, 'sort', sort)
 
     @classmethod
-    def from_dict(cls: Type['KNonTerminal'], d: Mapping[str, Any]) -> 'KNonTerminal':
+    def from_dict(cls: Type[KNonTerminal], d: Mapping[str, Any]) -> KNonTerminal:
         cls._check_node(d)
         return KNonTerminal(sort=KSort.from_dict(d['sort']))
 
     def to_dict(self) -> Dict[str, Any]:
         return {'node': 'KNonTerminal', 'sort': self.sort.to_dict()}
 
-    def let(self, *, sort: Optional[KSort] = None) -> 'KNonTerminal':
+    def let(self, *, sort: Optional[KSort] = None) -> KNonTerminal:
         sort = sort or self.sort
         return KNonTerminal(sort=sort)
 
@@ -248,7 +239,7 @@ class KProduction(KSentence):
         return [knt.sort for knt in self.items if type(knt) is KNonTerminal]
 
     @classmethod
-    def from_dict(cls: Type['KProduction'], d: Mapping[str, Any]) -> 'KProduction':
+    def from_dict(cls: Type[KProduction], d: Mapping[str, Any]) -> KProduction:
         cls._check_node(d)
         return KProduction(
             sort=KSort.from_dict(d['sort']),
@@ -278,7 +269,7 @@ class KProduction(KSentence):
         params: Optional[Iterable[Union[str, KSort]]] = None,
         klabel: Optional[Union[str, KLabel]] = None,
         att: Optional[KAtt] = None,
-    ) -> 'KProduction':
+    ) -> KProduction:
         sort = sort if sort is not None else self.sort
         items = items if items is not None else self.items
         params = params if params is not None else self.params
@@ -286,7 +277,7 @@ class KProduction(KSentence):
         att = att if att is not None else self.att
         return KProduction(sort=sort, items=items, params=params, klabel=klabel, att=att)
 
-    def let_att(self, att: KAtt) -> 'KProduction':
+    def let_att(self, att: KAtt) -> KProduction:
         return self.let(att=att)
 
 
@@ -304,7 +295,7 @@ class KSyntaxSort(KSentence):
         object.__setattr__(self, 'att', att)
 
     @classmethod
-    def from_dict(cls: Type['KSyntaxSort'], d: Mapping[str, Any]) -> 'KSyntaxSort':
+    def from_dict(cls: Type[KSyntaxSort], d: Mapping[str, Any]) -> KSyntaxSort:
         cls._check_node(d)
         return KSyntaxSort(
             sort=KSort.from_dict(d['sort']),
@@ -326,13 +317,13 @@ class KSyntaxSort(KSentence):
         sort: Optional[KSort] = None,
         params: Optional[Iterable[Union[str, KSort]]] = None,
         att: Optional[KAtt] = None,
-    ) -> 'KSyntaxSort':
+    ) -> KSyntaxSort:
         sort = sort or self.sort
         params = params if params is not None else self.params
         att = att if att is not None else self.att
         return KSyntaxSort(sort=sort, params=params, att=att)
 
-    def let_att(self, att: KAtt) -> 'KSyntaxSort':
+    def let_att(self, att: KAtt) -> KSyntaxSort:
         return self.let(att=att)
 
 
@@ -349,7 +340,7 @@ class KSortSynonym(KSentence):
         object.__setattr__(self, 'att', att)
 
     @classmethod
-    def from_dict(cls: Type['KSortSynonym'], d: Mapping[str, Any]) -> 'KSortSynonym':
+    def from_dict(cls: Type[KSortSynonym], d: Mapping[str, Any]) -> KSortSynonym:
         cls._check_node(d)
         return KSortSynonym(
             new_sort=KSort.from_dict(d['newSort']),
@@ -367,13 +358,13 @@ class KSortSynonym(KSentence):
 
     def let(
         self, *, old_sort: Optional[KSort] = None, new_sort: Optional[KSort] = None, att: Optional[KAtt] = None
-    ) -> 'KSortSynonym':
+    ) -> KSortSynonym:
         new_sort = new_sort or self.new_sort
         old_sort = old_sort or self.old_sort
         att = att if att is not None else self.att
         return KSortSynonym(new_sort=new_sort, old_sort=old_sort, att=att)
 
-    def let_att(self, att: KAtt) -> 'KSortSynonym':
+    def let_att(self, att: KAtt) -> KSortSynonym:
         return self.let(att=att)
 
 
@@ -390,7 +381,7 @@ class KSyntaxLexical(KSentence):
         object.__setattr__(self, 'att', att)
 
     @classmethod
-    def from_dict(cls: Type['KSyntaxLexical'], d: Mapping[str, Any]) -> 'KSyntaxLexical':
+    def from_dict(cls: Type[KSyntaxLexical], d: Mapping[str, Any]) -> KSyntaxLexical:
         cls._check_node(d)
         return KSyntaxLexical(
             name=d['name'],
@@ -408,13 +399,13 @@ class KSyntaxLexical(KSentence):
 
     def let(
         self, *, name: Optional[str] = None, regex: Optional[str] = None, att: Optional[KAtt] = None
-    ) -> 'KSyntaxLexical':
+    ) -> KSyntaxLexical:
         name = name if name is not None else self.name
         regex = regex if regex is not None else self.regex
         att = att if att is not None else self.att
         return KSyntaxLexical(name=name, regex=regex, att=att)
 
-    def let_att(self, att: KAtt) -> 'KSyntaxLexical':
+    def let_att(self, att: KAtt) -> KSyntaxLexical:
         return self.let(att=att)
 
 
@@ -437,7 +428,7 @@ class KSyntaxAssociativity(KSentence):
         object.__setattr__(self, 'att', att)
 
     @classmethod
-    def from_dict(cls: Type['KSyntaxAssociativity'], d: Mapping[str, Any]) -> 'KSyntaxAssociativity':
+    def from_dict(cls: Type[KSyntaxAssociativity], d: Mapping[str, Any]) -> KSyntaxAssociativity:
         cls._check_node(d)
         return KSyntaxAssociativity(
             assoc=KAssoc(d['assoc']),
@@ -455,13 +446,13 @@ class KSyntaxAssociativity(KSentence):
 
     def let(
         self, *, assoc: Optional[KAssoc] = None, tags: Optional[Iterable[str]] = None, att: Optional[KAtt] = None
-    ) -> 'KSyntaxAssociativity':
+    ) -> KSyntaxAssociativity:
         assoc = assoc or self.assoc
         tags = tags if tags is not None else self.tags
         att = att if att is not None else self.att
         return KSyntaxAssociativity(assoc=assoc, tags=tags, att=att)
 
-    def let_att(self, att: KAtt) -> 'KSyntaxAssociativity':
+    def let_att(self, att: KAtt) -> KSyntaxAssociativity:
         return self.let(att=att)
 
 
@@ -476,7 +467,7 @@ class KSyntaxPriority(KSentence):
         object.__setattr__(self, 'att', att)
 
     @classmethod
-    def from_dict(cls: Type['KSyntaxPriority'], d: Mapping[str, Any]) -> 'KSyntaxPriority':
+    def from_dict(cls: Type[KSyntaxPriority], d: Mapping[str, Any]) -> KSyntaxPriority:
         cls._check_node(d)
         return KSyntaxPriority(
             priorities=d['priorities'],
@@ -492,12 +483,12 @@ class KSyntaxPriority(KSentence):
 
     def let(
         self, *, priorities: Optional[Iterable[Iterable[str]]] = None, att: Optional[KAtt] = None
-    ) -> 'KSyntaxPriority':
+    ) -> KSyntaxPriority:
         priorities = priorities if priorities is not None else self.priorities
         att = att if att is not None else self.att
         return KSyntaxPriority(priorities=priorities, att=att)
 
-    def let_att(self, att: KAtt) -> 'KSyntaxPriority':
+    def let_att(self, att: KAtt) -> KSyntaxPriority:
         return self.let(att=att)
 
 
@@ -514,7 +505,7 @@ class KBubble(KSentence):
         object.__setattr__(self, 'att', att)
 
     @classmethod
-    def from_dict(cls: Type['KBubble'], d: Mapping[str, Any]) -> 'KBubble':
+    def from_dict(cls: Type[KBubble], d: Mapping[str, Any]) -> KBubble:
         cls._check_node(d)
         return KBubble(
             sentence_type=d['sentenceType'],
@@ -532,13 +523,13 @@ class KBubble(KSentence):
 
     def let(
         self, *, sentence_type: Optional[str] = None, content: Optional[str] = None, att: Optional[KAtt] = None
-    ) -> 'KBubble':
+    ) -> KBubble:
         sentence_type = sentence_type if sentence_type is not None else self.sentence_type
         content = content if content is not None else self.content
         att = att if att is not None else self.att
         return KBubble(sentence_type=sentence_type, content=content, att=att)
 
-    def let_att(self, att: KAtt) -> 'KBubble':
+    def let_att(self, att: KAtt) -> KBubble:
         return self.let(att=att)
 
 
@@ -551,7 +542,7 @@ class KRuleLike(KSentence):
 
     @classmethod
     @abstractmethod
-    def from_dict(cls: Type['KRuleLike'], d: Mapping[str, Any]) -> 'KRuleLike':
+    def from_dict(cls: Type[KRuleLike], d: Mapping[str, Any]) -> KRuleLike:
         node = d['node']
         if node in KRuleLike._RULE_LIKE_NODES:
             return globals()[node].from_dict(d)
@@ -585,7 +576,7 @@ class KRule(KRuleLike):
         object.__setattr__(self, 'att', att)
 
     @classmethod
-    def from_dict(cls: Type['KRule'], d: Mapping[str, Any]) -> 'KRule':
+    def from_dict(cls: Type[KRule], d: Mapping[str, Any]) -> KRule:
         cls._check_node(d)
         return KRule(
             body=KInner.from_dict(d['body']),
@@ -610,14 +601,14 @@ class KRule(KRuleLike):
         requires: Optional[KInner] = None,
         ensures: Optional[KInner] = None,
         att: Optional[KAtt] = None,
-    ) -> 'KRule':
+    ) -> KRule:
         body = body if body is not None else self.body
         requires = requires if requires is not None else self.requires
         ensures = ensures if ensures is not None else self.ensures
         att = att if att is not None else self.att
         return KRule(body=body, requires=requires, ensures=ensures, att=att)
 
-    def let_att(self, att: KAtt) -> 'KRule':
+    def let_att(self, att: KAtt) -> KRule:
         return self.let(att=att)
 
 
@@ -636,7 +627,7 @@ class KClaim(KRuleLike):
         object.__setattr__(self, 'att', att)
 
     @classmethod
-    def from_dict(cls: Type['KClaim'], d: Mapping[str, Any]) -> 'KClaim':
+    def from_dict(cls: Type[KClaim], d: Mapping[str, Any]) -> KClaim:
         cls._check_node(d)
         return KClaim(
             body=KInner.from_dict(d['body']),
@@ -661,14 +652,14 @@ class KClaim(KRuleLike):
         requires: Optional[KInner] = None,
         ensures: Optional[KInner] = None,
         att: Optional[KAtt] = None,
-    ) -> 'KClaim':
+    ) -> KClaim:
         body = body if body is not None else self.body
         requires = requires if requires is not None else self.requires
         ensures = ensures if ensures is not None else self.ensures
         att = att if att is not None else self.att
         return KClaim(body=body, requires=requires, ensures=ensures, att=att)
 
-    def let_att(self, att: KAtt) -> 'KClaim':
+    def let_att(self, att: KAtt) -> KClaim:
         return self.let(att=att)
 
 
@@ -685,7 +676,7 @@ class KContext(KSentence):
         object.__setattr__(self, 'att', att)
 
     @classmethod
-    def from_dict(cls: Type['KContext'], d: Mapping[str, Any]) -> 'KContext':
+    def from_dict(cls: Type[KContext], d: Mapping[str, Any]) -> KContext:
         cls._check_node(d)
         return KContext(
             body=KInner.from_dict(d['body']),
@@ -703,13 +694,13 @@ class KContext(KSentence):
 
     def let(
         self, *, body: Optional[KInner] = None, requires: Optional[KInner] = None, att: Optional[KAtt] = None
-    ) -> 'KContext':
+    ) -> KContext:
         body = body if body is not None else self.body
         requires = requires if requires is not None else self.requires
         att = att if att is not None else self.att
         return KContext(body=body, requires=requires, att=att)
 
-    def let_att(self, att: KAtt) -> 'KContext':
+    def let_att(self, att: KAtt) -> KContext:
         return self.let(att=att)
 
 
@@ -724,14 +715,14 @@ class KImport(KOuter):
         object.__setattr__(self, 'public', public)
 
     @classmethod
-    def from_dict(cls: Type['KImport'], d: Mapping[str, Any]) -> 'KImport':
+    def from_dict(cls: Type[KImport], d: Mapping[str, Any]) -> KImport:
         cls._check_node(d)
         return KImport(name=d['name'], public=d['isPublic'])
 
     def to_dict(self) -> Dict[str, Any]:
         return {'node': 'KImport', 'name': self.name, 'isPublic': self.public}
 
-    def let(self, *, name: Optional[str] = None, public: Optional[bool] = None) -> 'KImport':
+    def let(self, *, name: Optional[str] = None, public: Optional[bool] = None) -> KImport:
         name = name if name is not None else self.name
         public = public if public is not None else self.public
         return KImport(name=name, public=public)
@@ -796,7 +787,7 @@ class KFlatModule(KOuter, WithKAtt, Iterable[KSentence]):
         return tuple(sentence for sentence in self if type(sentence) is KClaim)
 
     @classmethod
-    def from_dict(cls: Type['KFlatModule'], d: Mapping[str, Any]) -> 'KFlatModule':
+    def from_dict(cls: Type[KFlatModule], d: Mapping[str, Any]) -> KFlatModule:
         cls._check_node(d)
         return KFlatModule(
             name=d['name'],
@@ -821,14 +812,14 @@ class KFlatModule(KOuter, WithKAtt, Iterable[KSentence]):
         sentences: Optional[Iterable[KSentence]] = None,
         imports: Optional[Iterable[KImport]] = None,
         att: Optional[KAtt] = None,
-    ) -> 'KFlatModule':
+    ) -> KFlatModule:
         name = name if name is not None else self.name
         sentences = sentences if sentences is not None else self.sentences
         imports = imports if imports is not None else self.imports
         att = att if att is not None else self.att
         return KFlatModule(name=name, imports=imports, sentences=sentences, att=att)
 
-    def let_att(self, att: KAtt) -> 'KFlatModule':
+    def let_att(self, att: KAtt) -> KFlatModule:
         return self.let(att=att)
 
 
@@ -843,7 +834,7 @@ class KFlatModuleList(KOuter):
         object.__setattr__(self, 'modules', tuple(modules))
 
     @classmethod
-    def from_dict(cls: Type['KFlatModuleList'], d: Mapping[str, Any]) -> 'KFlatModuleList':
+    def from_dict(cls: Type[KFlatModuleList], d: Mapping[str, Any]) -> KFlatModuleList:
         cls._check_node(d)
         return KFlatModuleList(main_module=d['mainModule'], modules=(KFlatModule.from_dict(kfm) for kfm in d['term']))
 
@@ -856,7 +847,7 @@ class KFlatModuleList(KOuter):
 
     def let(
         self, *, main_module: Optional[str] = None, modules: Optional[Iterable[KFlatModule]] = None
-    ) -> 'KFlatModuleList':
+    ) -> KFlatModuleList:
         main_module = main_module if main_module is not None else self.main_module
         modules = modules if modules is not None else self.modules
         return KFlatModuleList(main_module=main_module, modules=modules)
@@ -871,14 +862,14 @@ class KRequire(KOuter):
         object.__setattr__(self, 'require', require)
 
     @classmethod
-    def from_dict(cls: Type['KRequire'], d: Mapping[str, Any]) -> 'KRequire':
+    def from_dict(cls: Type[KRequire], d: Mapping[str, Any]) -> KRequire:
         cls._check_node(d)
         return KRequire(require=d['require'])
 
     def to_dict(self) -> Dict[str, Any]:
         return {'node': 'KRequire', 'require': self.require}
 
-    def let(self, *, require: Optional[str] = None) -> 'KRequire':
+    def let(self, *, require: Optional[str] = None) -> KRequire:
         require = require if require is not None else self.require
         return KRequire(require=require)
 
@@ -929,7 +920,7 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         return iter(self.all_modules)
 
     @classmethod
-    def from_dict(cls: Type['KDefinition'], d: Mapping[str, Any]) -> 'KDefinition':
+    def from_dict(cls: Type[KDefinition], d: Mapping[str, Any]) -> KDefinition:
         cls._check_node(d)
         return KDefinition(
             main_module_name=d['mainModule'],
@@ -954,14 +945,14 @@ class KDefinition(KOuter, WithKAtt, Iterable[KFlatModule]):
         all_modules: Optional[Iterable[KFlatModule]] = None,
         requires: Optional[Iterable[KRequire]] = None,
         att: Optional[KAtt] = None,
-    ) -> 'KDefinition':
+    ) -> KDefinition:
         main_module_name = main_module_name if main_module_name is not None else self.main_module_name
         all_modules = all_modules if all_modules is not None else self.all_modules
         requires = requires if requires is not None else self.requires
         att = att if att is not None else self.att
         return KDefinition(main_module_name=main_module_name, all_modules=all_modules, requires=requires, att=att)
 
-    def let_att(self, att: KAtt) -> 'KDefinition':
+    def let_att(self, att: KAtt) -> KDefinition:
         return self.let(att=att)
 
     @cached_property

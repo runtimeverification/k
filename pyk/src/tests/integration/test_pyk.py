@@ -1,13 +1,19 @@
+from __future__ import annotations
+
 import sys
 from pathlib import Path
-from typing import Iterable
+from typing import TYPE_CHECKING
 
 import pytest
-from pytest import MonkeyPatch
 
 from pyk.__main__ import main
 
 from .utils import KompiledTest
+
+if TYPE_CHECKING:
+    from typing import Iterable
+
+    from pytest import MonkeyPatch
 
 
 class AssumeArgv:

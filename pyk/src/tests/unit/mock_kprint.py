@@ -1,7 +1,13 @@
+from __future__ import annotations
+
 from functools import cached_property
+from typing import TYPE_CHECKING
 
 from pyk.kast.outer import KDefinition, KFlatModule
-from pyk.ktool.kprint import KPrint, SymbolTable
+from pyk.ktool.kprint import KPrint
+
+if TYPE_CHECKING:
+    from pyk.ktool.kprint import SymbolTable
 
 
 class MockKPrint(KPrint):

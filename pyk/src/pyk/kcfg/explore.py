@@ -1,19 +1,26 @@
+from __future__ import annotations
+
 import json
 import logging
-from pathlib import Path
-from typing import Any, Callable, ContextManager, Dict, Final, Iterable, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, ContextManager
 
-from pyk.cli_utils import BugReport
-from pyk.cterm import CSubst, CTerm
-from pyk.kast.inner import KApply, KInner, KLabel, KVariable, Subst
-from pyk.kast.manip import flatten_label, free_vars
-from pyk.kore.rpc import KoreClient, KoreServer
-from pyk.ktool.kprint import KPrint
-from pyk.prelude.k import GENERATED_TOP_CELL
-from pyk.prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlTop
-from pyk.utils import hash_str, shorten_hashes, single
-
+from ..cterm import CSubst, CTerm
+from ..kast.inner import KApply, KLabel, KVariable, Subst
+from ..kast.manip import flatten_label, free_vars
+from ..kore.rpc import KoreClient, KoreServer
+from ..prelude.k import GENERATED_TOP_CELL
+from ..prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlTop
+from ..utils import hash_str, shorten_hashes, single
 from .kcfg import KCFG
+
+if TYPE_CHECKING:
+    from pathlib import Path
+    from typing import Any, Callable, Dict, Final, Iterable, List, Optional, Tuple, Union
+
+    from ..cli_utils import BugReport
+    from ..kast import KInner
+    from ..ktool.kprint import KPrint
+
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -50,7 +57,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         self._kore_client = None
         self._rpc_closed = False
 
-    def __enter__(self) -> 'KCFGExplore':
+    def __enter__(self) -> KCFGExplore:
         return self
 
     def __exit__(self, *args: Any) -> None:

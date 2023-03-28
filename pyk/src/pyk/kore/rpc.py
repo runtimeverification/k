@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 import socket
@@ -9,32 +11,23 @@ from pathlib import Path
 from signal import SIGINT
 from subprocess import Popen
 from time import sleep
-from typing import (
-    Any,
-    ClassVar,
-    ContextManager,
-    Dict,
-    Final,
-    Iterable,
-    Mapping,
-    Optional,
-    TextIO,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-    final,
-)
+from typing import TYPE_CHECKING, ContextManager, final
 
 from psutil import Process
 
-from ..cli_utils import BugReport, check_dir_path, check_file_path
+from ..cli_utils import check_dir_path, check_file_path
 from ..utils import filter_none
-from .syntax import And, Module, Pattern, SortApp, kore_term
+from .syntax import And, Pattern, SortApp, kore_term
+
+if TYPE_CHECKING:
+    from typing import Any, ClassVar, Dict, Final, Iterable, Mapping, Optional, TextIO, Tuple, Type, TypeVar, Union
+
+    from ..cli_utils import BugReport
+    from .syntax import Module
+
+    ER = TypeVar('ER', bound='ExecuteResult')
 
 _LOGGER: Final = logging.getLogger(__name__)
-
-ER = TypeVar('ER', bound='ExecuteResult')
 
 
 @final
@@ -89,7 +82,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
 
         raise RuntimeError(f'Connection timed out: {host}:{port}')
 
-    def __enter__(self) -> 'JsonRpcClient':
+    def __enter__(self) -> JsonRpcClient:
         return self
 
     def __exit__(self, *args: Any) -> None:
@@ -190,7 +183,7 @@ class State:
     predicate: Optional[Pattern]
 
     @staticmethod
-    def from_dict(dct: Mapping[str, Any]) -> 'State':
+    def from_dict(dct: Mapping[str, Any]) -> State:
         return State(
             # https://github.com/python/mypy/issues/4717
             term=kore_term(dct['term'], Pattern),  # type: ignore
@@ -248,7 +241,7 @@ class StuckResult(ExecuteResult):
     depth: int
 
     @classmethod
-    def from_dict(cls: Type['StuckResult'], dct: Mapping[str, Any]) -> 'StuckResult':
+    def from_dict(cls: Type[StuckResult], dct: Mapping[str, Any]) -> StuckResult:
         cls._check_reason(dct)
         return StuckResult(
             state=State.from_dict(dct['state']),
@@ -267,7 +260,7 @@ class DepthBoundResult(ExecuteResult):
     depth: int
 
     @classmethod
-    def from_dict(cls: Type['DepthBoundResult'], dct: Mapping[str, Any]) -> 'DepthBoundResult':
+    def from_dict(cls: Type[DepthBoundResult], dct: Mapping[str, Any]) -> DepthBoundResult:
         cls._check_reason(dct)
         return DepthBoundResult(
             state=State.from_dict(dct['state']),
@@ -286,7 +279,7 @@ class BranchingResult(ExecuteResult):
     next_states: Tuple[State, ...]
 
     @classmethod
-    def from_dict(cls: Type['BranchingResult'], dct: Mapping[str, Any]) -> 'BranchingResult':
+    def from_dict(cls: Type[BranchingResult], dct: Mapping[str, Any]) -> BranchingResult:
         cls._check_reason(dct)
         return BranchingResult(
             state=State.from_dict(dct['state']),
@@ -306,7 +299,7 @@ class CutPointResult(ExecuteResult):
     rule: str
 
     @classmethod
-    def from_dict(cls: Type['CutPointResult'], dct: Mapping[str, Any]) -> 'CutPointResult':
+    def from_dict(cls: Type[CutPointResult], dct: Mapping[str, Any]) -> CutPointResult:
         cls._check_reason(dct)
         return CutPointResult(
             state=State.from_dict(dct['state']),
@@ -327,7 +320,7 @@ class TerminalResult(ExecuteResult):
     rule: str
 
     @classmethod
-    def from_dict(cls: Type['TerminalResult'], dct: Mapping[str, Any]) -> 'TerminalResult':
+    def from_dict(cls: Type[TerminalResult], dct: Mapping[str, Any]) -> TerminalResult:
         cls._check_reason(dct)
         return TerminalResult(
             state=State.from_dict(dct['state']),
@@ -345,7 +338,7 @@ class ImpliesResult:
     predicate: Optional[Pattern]
 
     @staticmethod
-    def from_dict(dct: Mapping[str, Any]) -> 'ImpliesResult':
+    def from_dict(dct: Mapping[str, Any]) -> ImpliesResult:
         substitution = dct.get('condition', {}).get('substitution')
         predicate = dct.get('condition', {}).get('predicate')
         return ImpliesResult(
@@ -365,7 +358,7 @@ class KoreClient(ContextManager['KoreClient']):
     def __init__(self, host: str, port: int, *, timeout: Optional[int] = None, bug_report: Optional[BugReport] = None):
         self._client = JsonRpcClient(host, port, timeout=timeout, bug_report=bug_report)
 
-    def __enter__(self) -> 'KoreClient':
+    def __enter__(self) -> KoreClient:
         return self
 
     def __exit__(self, *args: Any) -> None:
@@ -510,7 +503,7 @@ class KoreServer(ContextManager['KoreServer']):
     def port(self) -> int:
         return self._port
 
-    def __enter__(self) -> 'KoreServer':
+    def __enter__(self) -> KoreServer:
         return self
 
     def __exit__(self, *args: Any) -> None:

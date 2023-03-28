@@ -1,16 +1,23 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
-from typing import Tuple, Union, final
+from typing import TYPE_CHECKING, final
 
 from ..utils import hash_str
-from .project import Dependency, GitSource, PathSource, Project, Source
+from .project import GitSource, PathSource, Project
+
+if TYPE_CHECKING:
+    from typing import Tuple, Union
+
+    from .project import Dependency, Source
 
 
 class Package(ABC):
     @staticmethod
-    def create(project_file: Union[str, Path]) -> 'Package':
+    def create(project_file: Union[str, Path]) -> Package:
         project = Project.load(project_file)
         return _RootPackage(project)
 
@@ -46,11 +53,11 @@ class Package(ABC):
         return self.path / 'include'
 
     @cached_property
-    def deps_packages(self) -> Tuple['Package', ...]:
+    def deps_packages(self) -> Tuple[Package, ...]:
         return tuple(_DepsPackage(dependency) for dependency in self.project.dependencies)
 
     @cached_property
-    def sub_packages(self) -> Tuple['Package', ...]:
+    def sub_packages(self) -> Tuple[Package, ...]:
         res: Tuple[Package, ...] = (self,)
         for package in self.deps_packages:
             res += package.sub_packages

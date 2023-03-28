@@ -1,12 +1,21 @@
+from __future__ import annotations
+
 from itertools import count
-from typing import Any, Dict, Final, Iterator
-from unittest.mock import Mock, patch
+from typing import TYPE_CHECKING
+from unittest.mock import patch
 
 import pytest
 
 from pyk.kore.prelude import INT, int_dv
-from pyk.kore.rpc import ExecuteResult, ImpliesResult, JsonRpcClient, KoreClient, State, StuckResult
-from pyk.kore.syntax import And, App, Bottom, Module, Pattern, Top
+from pyk.kore.rpc import ImpliesResult, JsonRpcClient, KoreClient, State, StuckResult
+from pyk.kore.syntax import And, App, Bottom, Module, Top
+
+if TYPE_CHECKING:
+    from typing import Any, Dict, Final, Iterator
+    from unittest.mock import Mock
+
+    from pyk.kore.rpc import ExecuteResult
+    from pyk.kore.syntax import Pattern
 
 int_top = Top(INT)
 int_bottom = Bottom(INT)

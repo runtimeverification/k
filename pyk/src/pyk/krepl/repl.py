@@ -1,17 +1,24 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser
 from dataclasses import dataclass
 from functools import cached_property
-from pathlib import Path
-from typing import Any, Final, Generic, Iterator, Optional, Tuple, TypeVar, final
+from typing import TYPE_CHECKING, Generic, TypeVar, final
 
 from cmd2 import Cmd, with_argparser, with_category
 
 from ..cli_utils import check_dir_path, check_file_path, file_path
 from ..kore.parser import KoreParser
-from ..kore.syntax import Pattern
 from ..ktool.kprint import KPrint
 from ..ktool.krun import KRun, KRunOutput, _krun
+
+if TYPE_CHECKING:
+    from argparse import Namespace
+    from pathlib import Path
+    from typing import Any, Final, Iterator, Optional, Tuple
+
+    from ..kore.syntax import Pattern
 
 T = TypeVar('T')
 

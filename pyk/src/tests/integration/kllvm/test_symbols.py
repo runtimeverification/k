@@ -1,8 +1,13 @@
-from typing import Final
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pytest
 
 from pyk.kllvm.ast import CompositeSort, Symbol, Variable
+
+if TYPE_CHECKING:
+    from typing import Final
 
 s1 = Symbol("Lbl'Plus")
 s2 = Symbol("Lbl'Plus")

@@ -1,21 +1,30 @@
+from __future__ import annotations
+
 import json
 import logging
 from enum import Enum
-from logging import Logger
 from pathlib import Path
-from subprocess import CalledProcessError, CompletedProcess
+from subprocess import CalledProcessError
 from tempfile import NamedTemporaryFile
-from typing import Final, Iterable, List, Mapping, Optional, Union
+from typing import TYPE_CHECKING
 
-from ..cli_utils import BugReport, check_dir_path, check_file_path, run_process
+from ..cli_utils import check_dir_path, check_file_path, run_process
 from ..cterm import CTerm
 from ..kast import kast_term
 from ..kast.inner import KInner, KLabel, KSort
-from ..kast.outer import KFlatModule
 from ..konvert import unmunge
 from ..kore.parser import KoreParser
-from ..kore.syntax import DV, App, Pattern, SortApp, String
+from ..kore.syntax import DV, App, SortApp, String
 from .kprint import KPrint
+
+if TYPE_CHECKING:
+    from logging import Logger
+    from subprocess import CompletedProcess
+    from typing import Final, Iterable, List, Mapping, Optional, Union
+
+    from ..cli_utils import BugReport
+    from ..kast.outer import KFlatModule
+    from ..kore.syntax import Pattern
 
 _LOGGER: Final = logging.getLogger(__name__)
 

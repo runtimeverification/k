@@ -1,16 +1,24 @@
-from pathlib import Path
-from typing import Final
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kast.inner import KApply, KInner, KSort, KVariable
+from pyk.kast.inner import KApply, KSort, KVariable
 from pyk.konvert import kast_to_kore
 from pyk.kore.kompiled import KompiledKore
 from pyk.kore.parser import KoreParser
-from pyk.ktool.kprint import KPrint
 from pyk.prelude.kint import INT, intToken
 
 from ..utils import KPrintTest
+
+if TYPE_CHECKING:
+    from pathlib import Path
+    from typing import Final
+
+    from pyk.kast import KInner
+    from pyk.ktool.kprint import KPrint
+
 
 BIDIRECTIONAL_TEST_DATA: Final = (
     (

@@ -1,13 +1,21 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pytest
 
-from pyk.kast.inner import KApply, KInner, KSequence, KSort, KToken, Subst
+from pyk.kast.inner import KApply, KSequence, KSort, KToken, Subst
 from pyk.kast.manip import flatten_label, get_cell
 from pyk.kore.prelude import int_dv
-from pyk.kore.syntax import App, Pattern
-from pyk.ktool.krun import KRun
+from pyk.kore.syntax import App
 from pyk.prelude.kint import intToken
 
 from .utils import KRunTest
+
+if TYPE_CHECKING:
+    from pyk.kast import KInner
+    from pyk.kore.syntax import Pattern
+    from pyk.ktool.krun import KRun
 
 
 class TestImpRun(KRunTest):

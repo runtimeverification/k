@@ -1,6 +1,11 @@
-from pathlib import Path
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from pyk.kllvm.parser import Parser, read_pattern
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def test_read_pattern(tmp_path: Path) -> None:

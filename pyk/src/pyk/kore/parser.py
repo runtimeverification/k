@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from itertools import islice
-from typing import Callable, Generic, Iterator, List, Mapping, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 from ..utils import repeat_last
 from .lexer import KoreLexer, KoreToken
@@ -8,10 +10,7 @@ from .syntax import (
     AliasDecl,
     And,
     App,
-    Assoc,
     Axiom,
-    BinaryConn,
-    BinaryPred,
     Bottom,
     Ceil,
     Claim,
@@ -26,22 +25,14 @@ from .syntax import (
     Import,
     In,
     LeftAssoc,
-    MLFixpoint,
-    MLPattern,
-    MLQuant,
     Module,
     Mu,
     Next,
     Not,
     Nu,
-    NullaryConn,
     Or,
-    Pattern,
     Rewrites,
     RightAssoc,
-    RoundPred,
-    Sentence,
-    Sort,
     SortApp,
     SortDecl,
     SortVar,
@@ -50,20 +41,38 @@ from .syntax import (
     Symbol,
     SymbolDecl,
     Top,
-    UnaryConn,
-    VarPattern,
     decode_kore_str,
 )
 
+if TYPE_CHECKING:
+    from typing import Callable, Iterator, List, Mapping, Type, Union
+
+    from .syntax import (
+        Assoc,
+        BinaryConn,
+        BinaryPred,
+        MLFixpoint,
+        MLPattern,
+        MLQuant,
+        NullaryConn,
+        Pattern,
+        RoundPred,
+        Sentence,
+        Sort,
+        UnaryConn,
+        VarPattern,
+    )
+
+    NC = TypeVar('NC', bound=NullaryConn)
+    UC = TypeVar('UC', bound=Union[UnaryConn, Next])
+    BC = TypeVar('BC', bound=Union[BinaryConn, Rewrites])
+    QF = TypeVar('QF', bound=MLQuant)
+    FP = TypeVar('FP', bound=MLFixpoint)
+    RP = TypeVar('RP', bound=RoundPred)
+    BP = TypeVar('BP', bound=BinaryPred)
+    AS = TypeVar('AS', bound=Assoc)
+
 T = TypeVar('T')
-NC = TypeVar('NC', bound=NullaryConn)
-UC = TypeVar('UC', bound=Union[UnaryConn, Next])
-BC = TypeVar('BC', bound=Union[BinaryConn, Rewrites])
-QF = TypeVar('QF', bound=MLQuant)
-FP = TypeVar('FP', bound=MLFixpoint)
-RP = TypeVar('RP', bound=RoundPred)
-BP = TypeVar('BP', bound=BinaryPred)
-AS = TypeVar('AS', bound=Assoc)
 
 
 class _LookaheadBuffer(Generic[T]):
