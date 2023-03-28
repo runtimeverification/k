@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 from textual.app import App
 from textual.containers import Horizontal, Vertical
@@ -17,7 +17,7 @@ from ..prelude.ml import mlAnd
 from ..utils import shorten_hashes, single
 
 if TYPE_CHECKING:
-    from typing import Callable, Iterable, List, Optional, Tuple, Union
+    from typing import Callable, Iterable, List, Optional, Tuple
 
     from textual.app import ComposeResult
     from textual.events import Click
@@ -26,7 +26,8 @@ if TYPE_CHECKING:
     from ..kast import KInner
     from ..ktool.kprint import KPrint
 
-    KCFGElem = Union[KCFG.Node, KCFG.EdgeLike]
+
+KCFGElem = Union[KCFG.Node, KCFG.EdgeLike]
 
 
 class GraphChunk(Static):
