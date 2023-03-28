@@ -1,6 +1,13 @@
-from typing import Final, Optional, Tuple, Union
+from __future__ import annotations
 
-from .syntax import DV, App, LeftAssoc, Pattern, SortApp, String, SymbolId
+from typing import TYPE_CHECKING
+
+from .syntax import DV, App, LeftAssoc, SortApp, String, SymbolId
+
+if TYPE_CHECKING:
+    from typing import Final, Optional, Tuple, Union
+
+    from .syntax import Pattern
 
 BOOL: Final = SortApp('SortBool')
 INT: Final = SortApp('SortInt')

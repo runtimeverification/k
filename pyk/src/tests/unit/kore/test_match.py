@@ -1,11 +1,18 @@
+from __future__ import annotations
+
 from itertools import count
-from typing import Any, Callable
+from typing import TYPE_CHECKING
 
 import pytest
 
 from pyk.kore.match import app, arg, args, case_symbol, inj, kore_int, kore_list_of, kore_map_of, kore_set_of, kore_str
 from pyk.kore.prelude import dv, kore_list, kore_map, kore_set
-from pyk.kore.syntax import App, Pattern
+from pyk.kore.syntax import App
+
+if TYPE_CHECKING:
+    from typing import Any, Callable
+
+    from pyk.kore.syntax import Pattern
 
 
 def mk_app(symbol: str) -> Callable[..., App]:

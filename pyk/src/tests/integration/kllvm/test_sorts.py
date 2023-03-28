@@ -1,6 +1,13 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pytest
 
-from pyk.kllvm.ast import CompositeSort, Sort, SortVariable
+from pyk.kllvm.ast import CompositeSort, SortVariable
+
+if TYPE_CHECKING:
+    from pyk.kllvm.ast import Sort
 
 
 @pytest.mark.parametrize(

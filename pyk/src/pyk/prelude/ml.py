@@ -1,8 +1,16 @@
-from typing import Iterable, Union
+from __future__ import annotations
 
-from ..kast.inner import KApply, KInner, KLabel, KSort, KVariable, build_assoc
+from typing import TYPE_CHECKING
+
+from ..kast.inner import KApply, KLabel, build_assoc
 from .k import GENERATED_TOP_CELL
 from .kbool import BOOL, FALSE, TRUE
+
+if TYPE_CHECKING:
+    from typing import Iterable, Union
+
+    from ..kast import KInner
+    from ..kast.inner import KSort, KVariable
 
 
 def is_top(term: KInner) -> bool:

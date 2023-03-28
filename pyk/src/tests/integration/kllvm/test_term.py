@@ -1,10 +1,15 @@
-from types import ModuleType
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pytest
 
 from pyk.kllvm.ast import CompositePattern
 
 from .utils import RuntimeTest
+
+if TYPE_CHECKING:
+    from types import ModuleType
 
 
 class TestTerm(RuntimeTest):

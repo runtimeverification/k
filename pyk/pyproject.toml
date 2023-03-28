@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyk"
-version = "0.1.201"
+version = "0.1.202"
 description = ""
 authors = [
     "Runtime Verification, Inc. <contact@runtimeverification.com>",
@@ -28,6 +28,7 @@ flake8 = "*"
 flake8-bugbear = "*"
 flake8-comprehensions = "*"
 flake8-quotes = "*"
+flake8-type-checking = "*"
 isort = "*"
 mypy = "*"
 pep8-naming = "*"

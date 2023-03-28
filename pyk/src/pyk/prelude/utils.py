@@ -1,9 +1,15 @@
-from typing import Union
+from __future__ import annotations
 
-from ..kast.inner import KToken
+from typing import TYPE_CHECKING
+
 from .kbool import boolToken
 from .kint import intToken
 from .string import stringToken
+
+if TYPE_CHECKING:
+    from typing import Union
+
+    from ..kast.inner import KToken
 
 
 def token(x: Union[bool, int, str]) -> KToken:

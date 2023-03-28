@@ -1,16 +1,25 @@
-from pathlib import Path
-from typing import ClassVar, Iterable, Iterator, Optional, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pytest
-from pytest import TempPathFactory
 
-from pyk.cli_utils import BugReport
-from pyk.kast.outer import KDefinition, read_kast_definition
+from pyk.kast.outer import read_kast_definition
 from pyk.kcfg import KCFGExplore
 from pyk.ktool.kompile import KompileBackend, kompile
-from pyk.ktool.kprint import KPrint, SymbolTable
+from pyk.ktool.kprint import KPrint
 from pyk.ktool.kprove import KProve
 from pyk.ktool.krun import KRun
+
+if TYPE_CHECKING:
+    from pathlib import Path
+    from typing import ClassVar, Iterable, Iterator, Optional, Union
+
+    from pytest import TempPathFactory
+
+    from pyk.cli_utils import BugReport
+    from pyk.kast.outer import KDefinition
+    from pyk.ktool.kprint import SymbolTable
 
 
 class Kompiler:

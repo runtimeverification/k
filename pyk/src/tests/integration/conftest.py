@@ -1,7 +1,13 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pytest
-from pytest import TempPathFactory
 
 from .utils import Kompiler
+
+if TYPE_CHECKING:
+    from pytest import TempPathFactory
 
 
 @pytest.fixture(scope='session')

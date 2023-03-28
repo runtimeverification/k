@@ -1,16 +1,24 @@
-from typing import Final
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pytest
 
 from pyk.kast.inner import KApply, KRewrite, KSort, KToken, KVariable
 from pyk.kast.manip import push_down_rewrites
 from pyk.kast.outer import KClaim
-from pyk.ktool.kprint import KPrint, SymbolTable, assoc_with_unit
-from pyk.ktool.kprove import KProve
+from pyk.ktool.kprint import assoc_with_unit
 from pyk.prelude.k import GENERATED_TOP_CELL
 from pyk.prelude.ml import is_top
 
 from .utils import KPrintTest, KProveTest
+
+if TYPE_CHECKING:
+    from typing import Final
+
+    from pyk.ktool.kprint import KPrint, SymbolTable
+    from pyk.ktool.kprove import KProve
+
 
 EMPTY_CONFIG_TEST_DATA: Final = (
     (
@@ -90,7 +98,7 @@ class TestDefn(KPrintTest):
         # Given
         # fmt: off
         config = KApply('<T>', [KApply('<k>', [KApply('int_;_', [KApply('_,_', [KToken('x', 'Id'), KApply('_,_', [KToken('y', 'Id'), KApply('.List{"_,_"}')])])])]), KApply('<state>', [KApply('.Map')])])
-    
+
         expected = (
             '<T>\n'
             '  <k>\n'

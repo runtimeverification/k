@@ -1,13 +1,21 @@
-from typing import Final
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kast.inner import KApply, KInner, KSequence, KToken, KVariable
+from pyk.kast.inner import KApply, KSequence, KToken, KVariable
 from pyk.kast.manip import remove_attrs
-from pyk.ktool.kprint import KPrint
 from pyk.prelude.kint import INT, intToken
 
 from .utils import KPrintTest
+
+if TYPE_CHECKING:
+    from typing import Final
+
+    from pyk.kast import KInner
+    from pyk.ktool.kprint import KPrint
+
 
 TEST_DATA: Final = (
     ('int-token', False, KToken('3', 'Int'), intToken(3)),

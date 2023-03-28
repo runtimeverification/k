@@ -1,18 +1,27 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Final, Iterable, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING
 
 import pytest
 
 from pyk.cterm import CSubst, CTerm
-from pyk.kast.inner import KApply, KInner, KSequence, KSort, KToken, KVariable, Subst
+from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kast.manip import get_cell
-from pyk.kcfg import KCFG, KCFGExplore
-from pyk.ktool.kprint import KPrint, SymbolTable
-from pyk.ktool.kprove import KProve
+from pyk.kcfg import KCFG
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue
 
 from ..utils import KCFGExploreTest
+
+if TYPE_CHECKING:
+    from typing import Final, Iterable, List, Optional, Tuple, Union
+
+    from pyk.kast import KInner
+    from pyk.kcfg import KCFGExplore
+    from pyk.ktool.kprint import KPrint, SymbolTable
+    from pyk.ktool.kprove import KProve
+
 
 PROVE_CTERM_TEST_DATA: Final = (
     ('step-1', ['--depth', '1'], 'int $n , $s ; $n = 3 ;', [('int $s , .Ids ; $n = 3 ;', '$n |-> 0')]),

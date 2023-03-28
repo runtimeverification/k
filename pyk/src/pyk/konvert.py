@@ -1,15 +1,23 @@
+from __future__ import annotations
+
 import logging
 from functools import reduce
-from typing import Final, Optional, Tuple
+from typing import TYPE_CHECKING
 
-from .kast.inner import KApply, KInner, KSequence, KSort, KToken, KVariable
-from .kast.outer import KDefinition
-from .kore.kompiled import KompiledKore
-from .kore.syntax import DV, App, EVar, MLPattern, MLQuant, Pattern, Sort, SortApp, String
+from .kast.inner import KApply, KSequence, KSort, KToken, KVariable
+from .kore.syntax import DV, App, EVar, MLPattern, MLQuant, SortApp, String
 from .prelude.bytes import BYTES
 from .prelude.k import K
 from .prelude.string import STRING
 from .utils import FrozenDict
+
+if TYPE_CHECKING:
+    from typing import Final, Optional, Tuple
+
+    from .kast import KInner
+    from .kast.outer import KDefinition
+    from .kore.kompiled import KompiledKore
+    from .kore.syntax import Pattern, Sort
 
 _LOGGER: Final = logging.getLogger(__name__)
 

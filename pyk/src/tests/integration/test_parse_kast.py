@@ -1,8 +1,13 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from pyk.kast.inner import KApply, KAs, KRewrite, KSort
 from pyk.kast.outer import KRegexTerminal, KSortSynonym, read_kast_definition
 from pyk.utils import single
 
-from .utils import Kompiler
+if TYPE_CHECKING:
+    from .utils import Kompiler
 
 
 def test_sort_synonym(kompile: Kompiler) -> None:

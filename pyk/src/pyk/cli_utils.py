@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import shlex
 import subprocess
@@ -5,11 +7,14 @@ import sys
 import tarfile
 import time
 from datetime import datetime
-from logging import Logger
 from pathlib import Path
-from subprocess import CompletedProcess
 from tempfile import NamedTemporaryFile
-from typing import Dict, Final, Iterable, Mapping, Optional, Union
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from logging import Logger
+    from subprocess import CompletedProcess
+    from typing import Dict, Final, Iterable, Mapping, Optional, Union
 
 _LOGGER: Final = logging.getLogger(__name__)
 

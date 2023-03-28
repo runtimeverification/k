@@ -1,10 +1,15 @@
+from __future__ import annotations
+
 import sysconfig
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
-from types import ModuleType
-from typing import Final, Union
+from typing import TYPE_CHECKING
 
 from ..cli_utils import check_file_path
+
+if TYPE_CHECKING:
+    from types import ModuleType
+    from typing import Final, Union
 
 PYTHON_EXTENSION_SUFFIX: Final = sysconfig.get_config_var('EXT_SUFFIX')
 

@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from string import Template
-from typing import Any, Final, Mapping, Tuple
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -9,17 +11,21 @@ from pyk.kore.rpc import (
     BranchingResult,
     CutPointResult,
     DepthBoundResult,
-    ExecuteResult,
     ImpliesResult,
-    KoreClient,
     KoreClientError,
     State,
     StuckResult,
     TerminalResult,
 )
-from pyk.kore.syntax import And, Equals, EVar, Implies, Module, Pattern, Top
+from pyk.kore.syntax import And, Equals, EVar, Implies, Module, Top
 
 from .utils import KoreClientTest
+
+if TYPE_CHECKING:
+    from typing import Any, Final, Mapping, Tuple
+
+    from pyk.kore.rpc import ExecuteResult, KoreClient
+    from pyk.kore.syntax import Pattern
 
 int_top = Top(INT)
 x, y = (EVar(v, INT) for v in ['x', 'y'])

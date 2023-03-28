@@ -1,16 +1,25 @@
+from __future__ import annotations
+
 from itertools import count
-from typing import Final, List, Tuple
+from typing import TYPE_CHECKING
 
 import pytest
 
 from pyk.cterm import CTerm, build_claim, build_rule
-from pyk.kast.inner import KApply, KAtt, KInner, KLabel, KRewrite, KSequence, KVariable
+from pyk.kast import KAtt
+from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KVariable
 from pyk.kast.outer import KClaim
 from pyk.prelude.k import GENERATED_TOP_CELL
 from pyk.prelude.kint import INT, intToken
 from pyk.prelude.ml import mlAnd, mlEqualsTrue
 
 from .utils import a, b, c, f, g, h, k, x, y, z
+
+if TYPE_CHECKING:
+    from typing import Final, List, Tuple
+
+    from pyk.kast import KInner
+
 
 mem = KLabel('<mem>')
 

@@ -1,14 +1,21 @@
-from typing import Final, Iterable, Tuple
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pytest
 
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence, KToken, KVariable
 from pyk.kast.manip import get_cell
-from pyk.ktool.kprint import KPrint, SymbolTable
-from pyk.ktool.kprove import KProve
 
 from .utils import KProveTest
+
+if TYPE_CHECKING:
+    from typing import Final, Iterable, Tuple
+
+    from pyk.ktool.kprint import KPrint, SymbolTable
+    from pyk.ktool.kprove import KProve
+
 
 PROVE_CTERM_TEST_DATA: Final = (
     ('step-1', ['--depth', '1'], 'int $n , $s ; $n = 3 ;', [('int $s , .Ids ; $n = 3 ;', '$n |-> 0')]),

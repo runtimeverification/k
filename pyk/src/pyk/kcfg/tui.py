@@ -1,23 +1,32 @@
-from typing import Callable, Iterable, List, Optional, Tuple, Union
+from __future__ import annotations
 
-from textual.app import App, ComposeResult
+from typing import TYPE_CHECKING
+
+from textual.app import App
 from textual.containers import Horizontal, Vertical
-from textual.events import Click
-from textual.message import Message, MessageTarget
+from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Footer, Static
 
-from pyk.cterm import CTerm
-from pyk.kast.inner import KApply, KInner, KRewrite
-from pyk.kast.manip import flatten_label, minimize_term, push_down_rewrites
-from pyk.ktool.kprint import KPrint
-from pyk.prelude.kbool import TRUE
-from pyk.prelude.ml import mlAnd
-
+from ..cterm import CTerm
+from ..kast.inner import KApply, KRewrite
+from ..kast.manip import flatten_label, minimize_term, push_down_rewrites
 from ..kcfg import KCFG
+from ..prelude.kbool import TRUE
+from ..prelude.ml import mlAnd
 from ..utils import shorten_hashes, single
 
-KCFGElem = Union[KCFG.Node, KCFG.EdgeLike]
+if TYPE_CHECKING:
+    from typing import Callable, Iterable, List, Optional, Tuple, Union
+
+    from textual.app import ComposeResult
+    from textual.events import Click
+    from textual.message import MessageTarget
+
+    from ..kast import KInner
+    from ..ktool.kprint import KPrint
+
+    KCFGElem = Union[KCFG.Node, KCFG.EdgeLike]
 
 
 class GraphChunk(Static):

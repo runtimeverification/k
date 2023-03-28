@@ -1,14 +1,19 @@
+from __future__ import annotations
+
 import logging
 from argparse import ArgumentParser
-from pathlib import Path
-from typing import Dict, Final
+from typing import TYPE_CHECKING
 
 import coloredlogs
 
-from pyk.kast.outer import read_kast_definition
-from pyk.kore_exec_covr.kore_exec_covr import HaskellLogEntry, build_rule_dict, parse_rule_applications
-
 from ..cli_utils import dir_path, file_path
+from ..kast.outer import read_kast_definition
+from .kore_exec_covr import HaskellLogEntry, build_rule_dict, parse_rule_applications
+
+if TYPE_CHECKING:
+    from pathlib import Path
+    from typing import Dict, Final
+
 
 _LOG_FORMAT: Final = '%(levelname)s %(name)s - %(message)s'
 

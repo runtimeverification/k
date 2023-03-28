@@ -1,12 +1,19 @@
+from __future__ import annotations
+
 import logging
 import sys
 from pathlib import Path
-from types import ModuleType
-from typing import Final, Type, Union
+from typing import TYPE_CHECKING
 
 from ..cli_utils import check_dir_path, check_file_path, run_process
-from .ast import Pattern
 from .utils import PYTHON_EXTENSION_SUFFIX, import_from_file
+
+if TYPE_CHECKING:
+    from types import ModuleType
+    from typing import Final, Type, Union
+
+    from .ast import Pattern
+
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -60,7 +67,7 @@ def _make_term_class(mod: ModuleType) -> Type:
         def run(self) -> None:
             self.step(-1)
 
-        def copy(self) -> 'Term':
+        def copy(self) -> Term:
             other = self
             other._block = self._block.step(0)
             return other

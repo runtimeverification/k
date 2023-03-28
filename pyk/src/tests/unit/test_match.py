@@ -1,12 +1,20 @@
+from __future__ import annotations
+
 from itertools import count
-from typing import Final, Tuple
+from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kast.inner import KInner, KSequence
+from pyk.kast.inner import KSequence
 from pyk.prelude.ml import mlBottom, mlTop
 
 from .utils import a, b, c, f, g, h, x, y, z
+
+if TYPE_CHECKING:
+    from typing import Final, Tuple
+
+    from pyk.kast import KInner
+
 
 MATCH_TEST_DATA: Final[Tuple[Tuple[KInner, KInner], ...]] = (
     (a, a),

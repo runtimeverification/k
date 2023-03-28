@@ -1,12 +1,19 @@
+from __future__ import annotations
+
 import logging
 import re
 from collections import defaultdict
 from enum import Enum
-from pathlib import Path
-from typing import Dict, Final, Optional, Tuple
+from typing import TYPE_CHECKING
 
-from pyk.kast.kast import KAtt
-from pyk.kast.outer import KDefinition, KRule
+from ..kast import KAtt
+
+if TYPE_CHECKING:
+    from pathlib import Path
+    from typing import Dict, Final, Optional, Tuple
+
+    from ..kast.outer import KDefinition, KRule
+
 
 _LOG_FORMAT: Final = '%(levelname)s %(name)s - %(message)s'
 _LOGGER: Final = logging.getLogger(__name__)
