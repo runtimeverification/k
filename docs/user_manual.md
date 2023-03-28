@@ -1288,7 +1288,7 @@ the `requires` clause of the rule, like function definition rules.
 **Order**: The `simplification` attribute accepts an optional integer argument
 which is the rule's _simplification priority_; if the optional argument is not
 specified, it is equivalent to a simplification priority of 50. Backends
-_should_ attempt simplification rules in order of their _simlpification
+_should_ attempt simplification rules in order of their _simplification
 priority_, but are not required to do so; in fact, the backend is free to apply
 `simplification` rules at _any time_. Because of this, users must ensure that
 simplification rules are sound regardless of their order of application. This
