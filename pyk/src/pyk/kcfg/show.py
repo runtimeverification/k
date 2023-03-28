@@ -1,17 +1,24 @@
+from __future__ import annotations
+
 import logging
-from pathlib import Path
-from typing import Callable, Final, Iterable, List, Optional, Tuple
+from typing import TYPE_CHECKING
 
-from pyk.cli_utils import ensure_dir_path
-from pyk.cterm import CTerm, build_claim, build_rule
-from pyk.kast.inner import KApply, KInner, KRewrite, top_down
-from pyk.kast.manip import flatten_label, minimize_term, push_down_rewrites
-from pyk.kast.outer import KFlatModule, KRuleLike
-from pyk.ktool.kprint import KPrint
-from pyk.prelude.k import DOTS
-from pyk.prelude.ml import mlAnd, mlTop
-
+from ..cli_utils import ensure_dir_path
+from ..cterm import CTerm, build_claim, build_rule
+from ..kast.inner import KApply, KRewrite, top_down
+from ..kast.manip import flatten_label, minimize_term, push_down_rewrites
+from ..kast.outer import KFlatModule
+from ..prelude.k import DOTS
+from ..prelude.ml import mlAnd, mlTop
 from .kcfg import KCFG
+
+if TYPE_CHECKING:
+    from pathlib import Path
+    from typing import Callable, Final, Iterable, List, Optional, Tuple
+
+    from ..kast import KInner
+    from ..kast.outer import KRuleLike
+    from ..ktool.kprint import KPrint
 
 _LOGGER: Final = logging.getLogger(__name__)
 

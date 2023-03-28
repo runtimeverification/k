@@ -1,12 +1,19 @@
-from typing import Any, Callable, Dict, Optional, Tuple, TypeVar, Union, overload
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, overload
 
 from ..utils import case, check_type
 from .prelude import BOOL, INT, STRING
-from .syntax import DV, App, LeftAssoc, Pattern, Sort
+from .syntax import DV, App, LeftAssoc
 
-T = TypeVar('T')
-K = TypeVar('K')
-V = TypeVar('V')
+if TYPE_CHECKING:
+    from typing import Any, Callable, Dict, Optional, Tuple, TypeVar, Union
+
+    from .syntax import Pattern, Sort
+
+    T = TypeVar('T')
+    K = TypeVar('K')
+    V = TypeVar('V')
 
 
 def match_dv(pattern: Pattern, sort: Optional[Sort] = None) -> DV:

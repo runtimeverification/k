@@ -1,22 +1,32 @@
+from __future__ import annotations
+
 import json
 import logging
 import os
 from enum import Enum
 from itertools import chain
 from pathlib import Path
-from subprocess import CalledProcessError, CompletedProcess
+from subprocess import CalledProcessError
 from tempfile import NamedTemporaryFile
-from typing import Final, Iterable, List, Mapping, Optional, Tuple
+from typing import TYPE_CHECKING
 
-from ..cli_utils import BugReport, check_dir_path, check_file_path, gen_file_timestamp, run_process
-from ..cterm import CTerm, build_claim
+from ..cli_utils import check_dir_path, check_file_path, gen_file_timestamp, run_process
+from ..cterm import build_claim
 from ..kast import kast_term
 from ..kast.inner import KInner
 from ..kast.manip import extract_subst, flatten_label, free_vars
-from ..kast.outer import KClaim, KDefinition, KFlatModule, KFlatModuleList, KImport, KRequire, KRule, KSentence
+from ..kast.outer import KDefinition, KFlatModule, KFlatModuleList, KImport, KRequire
 from ..prelude.ml import is_top, mlAnd, mlBottom, mlTop
 from ..utils import unique
 from .kprint import KPrint
+
+if TYPE_CHECKING:
+    from subprocess import CompletedProcess
+    from typing import Final, Iterable, List, Mapping, Optional, Tuple
+
+    from ..cli_utils import BugReport
+    from ..cterm import CTerm
+    from ..kast.outer import KClaim, KRule, KSentence
 
 _LOGGER: Final = logging.getLogger(__name__)
 

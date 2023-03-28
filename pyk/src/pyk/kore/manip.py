@@ -1,6 +1,13 @@
-from typing import Collection, Dict, List, Set
+from __future__ import annotations
 
-from .syntax import Assoc, EVar, MLQuant, Pattern
+from typing import TYPE_CHECKING
+
+from .syntax import Assoc, EVar, MLQuant
+
+if TYPE_CHECKING:
+    from typing import Collection, Dict, List, Set
+
+    from .syntax import Pattern
 
 
 def free_occs(pattern: Pattern, *, bound_vars: Collection[str] = ()) -> Dict[str, List[EVar]]:

@@ -1,6 +1,13 @@
-from typing import Final
+from __future__ import annotations
 
-from ..kast.inner import KApply, KInner, KSort, KToken
+from typing import TYPE_CHECKING
+
+from ..kast.inner import KApply, KSort, KToken
+
+if TYPE_CHECKING:
+    from typing import Final
+
+    from ..kast import KInner
 
 INT: Final = KSort('Int')
 

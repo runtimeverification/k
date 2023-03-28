@@ -1,40 +1,29 @@
+from __future__ import annotations
+
 import hashlib
 import string
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Final,
-    Generic,
-    Hashable,
-    Iterable,
-    Iterator,
-    List,
-    Mapping,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    cast,
-    overload,
-)
+from typing import TYPE_CHECKING, Generic, Mapping, TypeVar, cast, overload
+
+if TYPE_CHECKING:
+    from typing import Any, Callable, Dict, Final, Hashable, Iterable, Iterator, List, Optional, Tuple, Type
+
+    P1 = TypeVar('P1')
+    P2 = TypeVar('P2')
+    P3 = TypeVar('P3')
+    P4 = TypeVar('P4')
+    Q = TypeVar('Q')
+    R1 = TypeVar('R1')
+    R2 = TypeVar('R2')
+    R3 = TypeVar('R3')
+    R4 = TypeVar('R4')
+    T = TypeVar('T')
+    S = TypeVar('S')
+    H = TypeVar('H', bound=Hashable)
 
 P = TypeVar('P')
-P1 = TypeVar('P1')
-P2 = TypeVar('P2')
-P3 = TypeVar('P3')
-P4 = TypeVar('P4')
-Q = TypeVar('Q')
 R = TypeVar('R')
-R1 = TypeVar('R1')
-R2 = TypeVar('R2')
-R3 = TypeVar('R3')
-R4 = TypeVar('R4')
-T = TypeVar('T')
-S = TypeVar('S')
 K = TypeVar('K')
 V = TypeVar('V')
-H = TypeVar('H', bound=Hashable)
 
 
 # Based on: https://stackoverflow.com/a/2704866
@@ -118,7 +107,7 @@ class Chainable(Generic[P, R]):
     def __call__(self, p: P) -> R:
         return self._f(p)
 
-    def __rshift__(self, other: Callable[[R], Q]) -> 'Chainable[P, Q]':
+    def __rshift__(self, other: Callable[[R], Q]) -> Chainable[P, Q]:
         return Chainable(lambda p: other(self(p)))
 
 
@@ -252,7 +241,7 @@ def single(iterable: Iterable[T]) -> T:
     fst = next(it, sentinel)
     if fst is sentinel:
         raise ValueError('Expected a single element, found none')
-    fst = cast(T, fst)
+    fst = cast('T', fst)
 
     snd = next(it, sentinel)
     if snd is not sentinel:

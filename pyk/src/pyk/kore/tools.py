@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 from enum import Enum
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Union
+from typing import TYPE_CHECKING
 
 from ..cli_utils import check_dir_path, run_process
-from .syntax import Pattern
+
+if TYPE_CHECKING:
+    from typing import Union
+
+    from .syntax import Pattern
 
 
 class PrintOutput(Enum):

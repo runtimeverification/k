@@ -1,11 +1,16 @@
-from pathlib import Path
-from typing import ClassVar, Iterator
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pytest
 
 from pyk.kore.rpc import KoreClient, KoreServer
 
 from ..utils import KompiledTest
+
+if TYPE_CHECKING:
+    from pathlib import Path
+    from typing import ClassVar, Iterator
 
 
 class KoreClientTest(KompiledTest):

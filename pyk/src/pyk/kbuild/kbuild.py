@@ -1,19 +1,25 @@
+from __future__ import annotations
+
 import re
 import shutil
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
-from re import Match
-from typing import Any, Dict, List, Optional, Union, final
+from typing import TYPE_CHECKING, final
 
 from filelock import FileLock
 
 from ..ktool.kompile import kompile
 from ..utils import single
 from .config import KBUILD_DIR
-from .package import Package
-from .project import Target
 from .utils import k_version, sync_files
+
+if TYPE_CHECKING:
+    from re import Match
+    from typing import Any, Dict, List, Optional, Union
+
+    from .package import Package
+    from .project import Target
 
 
 @final

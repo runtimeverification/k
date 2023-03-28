@@ -1,9 +1,18 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pytest
 
-from pyk.kast.inner import KApply, KAst, KAtt, KLabel, KSort, KVariable
+from pyk.kast import KAtt
+from pyk.kast.inner import KApply, KLabel, KSort, KVariable
 from pyk.kast.outer import KNonTerminal, KProduction, KRule, KTerminal
 from pyk.ktool.kprint import pretty_print_kast, unparser_for_production
 from pyk.prelude.kbool import TRUE
+
+if TYPE_CHECKING:
+    from pyk.kast import KAst
+
 
 PRETTY_PRINT_TEST_DATA = (
     ('var', KVariable('V'), 'V'),

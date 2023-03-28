@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 from itertools import count
-from typing import Dict, Final, List, Tuple
+from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kast.inner import KApply, KInner, KLabel, KRewrite, KSequence, KSort, KVariable, Subst
+from pyk.kast.inner import KApply, KLabel, KRewrite, KSequence, KSort, KVariable, Subst
 from pyk.kast.manip import (
     bool_to_ml_pred,
     collapse_dots,
@@ -21,6 +23,12 @@ from pyk.prelude.kint import INT, intToken
 from pyk.prelude.ml import mlEqualsTrue, mlTop
 
 from .utils import a, b, c, f, k, x
+
+if TYPE_CHECKING:
+    from typing import Dict, Final, List, Tuple
+
+    from pyk.kast import KInner
+
 
 K_CELL = KApply('<k>', [KSequence([KVariable('S1'), KVariable('_DotVar0')])])
 T_CELL = KApply('<T>', [K_CELL, KApply('<state>', [KVariable('MAP')])])

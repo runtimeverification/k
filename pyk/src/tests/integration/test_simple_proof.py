@@ -1,10 +1,16 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from pyk.kast.inner import KAtt, KToken
 from pyk.kast.outer import KClaim, KRule
-from pyk.ktool.kprove import KProve
 from pyk.prelude.kbool import BOOL
 from pyk.prelude.ml import is_top
 
 from .utils import KProveTest
+
+if TYPE_CHECKING:
+    from pyk.ktool.kprove import KProve
 
 
 class TestSimpleProof(KProveTest):

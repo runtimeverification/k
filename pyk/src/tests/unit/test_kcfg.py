@@ -1,15 +1,22 @@
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import pytest
 
 from pyk.cterm import CTerm
-from pyk.kast.inner import KApply, KInner, KVariable
+from pyk.kast.inner import KApply, KVariable
 from pyk.kcfg import KCFG
 from pyk.prelude.ml import mlEquals, mlTop
 from pyk.prelude.utils import token
 from pyk.utils import shorten_hash
 
 from .mock_kprint import MockKPrint
+
+if TYPE_CHECKING:
+    from typing import Any, Dict, Iterable, List, Optional, Tuple
+
+    from pyk.kast import KInner
 
 
 def nid(i: int) -> str:

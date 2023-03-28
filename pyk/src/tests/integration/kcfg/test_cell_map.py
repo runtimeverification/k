@@ -1,16 +1,24 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Final, Iterable, NamedTuple, Optional, Tuple
+from typing import TYPE_CHECKING, NamedTuple
 
 import pytest
 
 from pyk.cterm import CTerm
-from pyk.kast.inner import KApply, KInner, KSequence, KToken, KVariable, build_assoc
+from pyk.kast.inner import KApply, KSequence, KToken, KVariable, build_assoc
 from pyk.kast.manip import get_cell
-from pyk.kcfg import KCFG, KCFGExplore
-from pyk.ktool.kprint import KPrint
-from pyk.ktool.kprove import KProve
+from pyk.kcfg import KCFG
 
 from ..utils import KCFGExploreTest
+
+if TYPE_CHECKING:
+    from typing import Final, Iterable, Optional, Tuple
+
+    from pyk.kast import KInner
+    from pyk.kcfg import KCFGExplore
+    from pyk.ktool.kprint import KPrint
+    from pyk.ktool.kprove import KProve
 
 
 class State(NamedTuple):

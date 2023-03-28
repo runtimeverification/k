@@ -1,15 +1,17 @@
+from __future__ import annotations
+
 import json
 import logging
 from enum import Enum
 from functools import cached_property
 from pathlib import Path
-from subprocess import CalledProcessError, CompletedProcess
+from subprocess import CalledProcessError
 from tempfile import TemporaryDirectory
-from typing import Any, Callable, Dict, Final, Iterable, List, Optional, Union
+from typing import TYPE_CHECKING, Callable, Dict
 
-from ..cli_utils import BugReport, check_dir_path, check_file_path, run_process
+from ..cli_utils import check_dir_path, check_file_path, run_process
 from ..kast import kast_term
-from ..kast.inner import KApply, KAs, KAst, KAtt, KInner, KLabel, KRewrite, KSequence, KSort, KToken, KVariable
+from ..kast.inner import KApply, KAs, KAtt, KInner, KLabel, KRewrite, KSequence, KSort, KToken, KVariable
 from ..kast.manip import flatten_label
 from ..kast.outer import (
     KBubble,
@@ -31,17 +33,26 @@ from ..kast.outer import (
     KTerminal,
     read_kast_definition,
 )
-from ..konvert import KompiledKore, kast_to_kore, unmunge
+from ..konvert import kast_to_kore, unmunge
+from ..kore.kompiled import KompiledKore
 from ..kore.parser import KoreParser
 from ..kore.prelude import BYTES as KORE_BYTES
 from ..kore.prelude import STRING as KORE_STRING
-from ..kore.syntax import DV, And, App, Assoc, Bottom, Ceil, Equals, EVar, Exists, Implies, Not, Pattern, SortApp, Top
+from ..kore.syntax import DV, And, App, Assoc, Bottom, Ceil, Equals, EVar, Exists, Implies, Not, SortApp, Top
 from ..prelude.bytes import BYTES, bytesToken
 from ..prelude.k import DOTS, EMPTY_K
 from ..prelude.kbool import TRUE
 from ..prelude.ml import mlAnd, mlBottom, mlCeil, mlEquals, mlExists, mlImplies, mlNot, mlTop
 from ..prelude.string import STRING, stringToken
 from ..utils import enquote_str
+
+if TYPE_CHECKING:
+    from subprocess import CompletedProcess
+    from typing import Any, Final, Iterable, List, Optional, Union
+
+    from ..cli_utils import BugReport
+    from ..kast import KAst
+    from ..kore.syntax import Pattern
 
 _LOGGER: Final = logging.getLogger(__name__)
 

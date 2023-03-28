@@ -1,10 +1,15 @@
+from __future__ import annotations
+
 import re
 import shutil
 from dataclasses import dataclass
-from pathlib import Path
-from typing import ClassVar, Iterable, List, Optional, final
+from typing import TYPE_CHECKING, final
 
 from pyk.cli_utils import check_dir_path, check_file_path, run_process
+
+if TYPE_CHECKING:
+    from pathlib import Path
+    from typing import ClassVar, Iterable, List, Optional
 
 
 @final
@@ -34,7 +39,7 @@ class KVersion:
     PATTERN: ClassVar = re.compile(_PATTERN_STR)
 
     @staticmethod
-    def parse(text: str) -> 'KVersion':
+    def parse(text: str) -> KVersion:
         match = KVersion.PATTERN.fullmatch(text)
         if not match:
             raise ValueError(f'Invalid K version string: {text}')
