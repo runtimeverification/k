@@ -15,7 +15,7 @@ clean:
 build:
 	$(POETRY) build
 
-.PHONY: install
+.PHONY: poetry-install
 poetry-install:
 	$(POETRY) install
 
