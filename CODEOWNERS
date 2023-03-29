@@ -1,4 +1,4 @@
 /k-distribution/include/kframework/builtin/* @dwightguth @ehildenb
 /Jenkinsfile @runtimeverification/admin
 /.github/workflows/* @runtimeverification/admin
-/package/version @dwightguth @ehildenb @radumereuta
+/package/version @dwightguth @ehildenb @radumereuta @runtimeverification/jenkins @F-WRunTime @Baltoli
