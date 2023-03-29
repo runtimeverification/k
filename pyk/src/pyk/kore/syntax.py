@@ -443,10 +443,10 @@ class String(Pattern):
         output.write('"')
         for char in self.value:
             code = ord(char)
-            if 32 <= code < 127:
-                output.write(char)
-            elif code in self._ENCODE_TABLE:
+            if code in self._ENCODE_TABLE:
                 output.write(self._ENCODE_TABLE[code])
+            elif 32 <= code < 127:
+                output.write(char)
             elif code <= 0xFF:
                 output.write(fr'\x{code:02x}')
             elif code <= 0xFFFF:
