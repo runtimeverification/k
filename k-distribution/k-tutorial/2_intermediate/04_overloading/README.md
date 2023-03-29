@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 2.4: Overloaded Symbols
 
 ## Return to Top

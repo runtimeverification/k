@@ -1,3 +1,4 @@
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.lsp;
 
 import org.eclipse.lsp4j.*;
@@ -40,9 +41,10 @@ public class KTextDocumentService implements TextDocumentService {
     public KTextDocumentService(KLanguageServer languageServer) throws URISyntaxException {
         this.languageServer = languageServer;
         this.clientLogger = LSClientLogger.getInstance();
-        memo = new TextDocumentSyncHandler(clientLogger);
+        memo = new TextDocumentSyncHandler(clientLogger, languageServer);
         memo.add(domains.toString());
         memo.add(kast.toString());
+        this.clientLogger.logMessage("Operation '" + "text/workspaceFolders " + languageServer.workspaceFolders);
     }
 
     @Override
@@ -93,5 +95,10 @@ public class KTextDocumentService implements TextDocumentService {
     @Override
     public CompletableFuture<List<? extends Location>> references(ReferenceParams params) {
         return memo.references(params);
+    }
+
+    @Override
+    public CompletableFuture<List<SelectionRange>> selectionRange(SelectionRangeParams params) {
+        return memo.selectionRange(params);
     }
 }

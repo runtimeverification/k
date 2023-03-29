@@ -17,6 +17,7 @@ haskellCmd=kore-exec
 cmdprefix=
 outputFile=-
 pattern=
+noPattern=
 search=false
 searchType=FINAL
 term=false
@@ -32,7 +33,12 @@ expandMacros=true
 filterSubst=
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  DBG_CMD="python3 $(dirname "$0")/../lib/lldb/klldb.py"
+  LLDB_FILE="$(dirname "$0")/../lib/kllvm/lldb/k_lldb_path"
+  if [ -f "$LLDB_FILE" ]; then
+    DBG_CMD="$(cat "$LLDB_FILE") -- "
+  else
+    DBG_CMD="lldb --"
+  fi
 else
   DBG_CMD="gdb --args "
 fi
@@ -133,6 +139,8 @@ $KRUN options:
                            if the user says "$KRUN --parser cat foo.kore", then
                            \`cat foo.kore\` is invoked and the result on stdout
                            is used as the value of \$PGM as a KORE term.
+      --no-pattern         Skip pattern matching the result of searches on the
+                           llvm backend against the default search pattern.
       --pattern PAT        Use PAT as the search pattern with --search. Can
                            also be used without --search to match the output
                            configuration against a pattern and print the
@@ -300,8 +308,20 @@ do
       ;;
 
       --pattern)
-      pattern="$2"
+      if [ -z "$noPattern" ]; then
+        pattern="$2"
+      else
+        error 1 "The option --pattern cannot be used with the option --no-pattern"
+      fi
       shift
+      ;;
+
+      --no-pattern)
+      if [ -z "$pattern" ]; then
+        noPattern=true
+      else
+        error 1 "The option --no-pattern cannot be used with the option --pattern"
+      fi
       ;;
 
       --search)
@@ -564,7 +584,11 @@ if [ "$backendName" = "llvm" ]; then
     execute $cmdprefix "$llvmCommand" "$expanded_input_file" "${depth:--1}" "$disjunctFile" $interpreter_flags
     result=$?
     set -e
-    execute kore-match-disjunction "$kompiledDir/definition.kore" --module "$mainModuleName" --disjunction "$disjunctFile" --match "$patternFile" --output "$kore_output"
+    if [ -z "$noPattern" ]; then
+      execute kore-match-disjunction "$kompiledDir/definition.kore" --module "$mainModuleName" --disjunction "$disjunctFile" --match "$patternFile" --output "$kore_output"
+    else
+      execute cp "$disjunctFile" "$kore_output"
+    fi
   else
     set +e
     execute $cmdprefix "$kompiledDir/interpreter" "$expanded_input_file" "${depth:--1}" "$kore_output" $interpreter_flags

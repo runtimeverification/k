@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 require "substitution.md"
 
@@ -7,7 +7,7 @@ module LAMBDA
   imports SUBSTITUTION
 
   syntax Type ::= "int" | "bool"
-                | Type "->" Type
+                | Type "->" Type               [klabel(functionType)]
                 | "(" Type ")"                 [bracket]
 
   syntax Exp ::= KVar
@@ -19,7 +19,7 @@ module LAMBDA
 
   syntax KResult ::= Type
 
-  syntax Exp ::= Exp "->" Exp
+  syntax Exp ::= Exp "->" Exp                  [klabel(functionType)]
   rule lambda X : T . E => T -> (E[T/X])       [anywhere]
   rule (T1 -> T2) T1 => T2                     [anywhere]
 

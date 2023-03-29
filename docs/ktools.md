@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 K Tools
 =======
 
@@ -86,25 +90,32 @@ module TEST
 endmodule
 ```
 
-You should compile this definition with `--backend llvm -ccopt -g` and without
-`-ccopt -O2` in order to use the debugger most effectively.
+You should compile this definition with `--backend llvm --enable-llvm-debug` to
+use the debugger most effectively.
 
 ### Stepping
 
-**Important:** When you first run `krun` with option `--debugger`, GDB will
-instruct you on how to modify ~/.gdbinit to enable printing abstract syntax
-of K terms in the debugger. If you do not perform this step, you can still
-use all the other features, but K terms will be printed as their raw address
-in memory. GDB will need the kompiled interpreter in its safe path in order
-to access the pretty printing python script within it. A good way to do this
-would be to pick a minimum top-level path that covers all of your kompiled
-semantics (ie. `set auto-load safe-path ~/k-semantics`)
+**Important:** When you first run `krun` with option `--debugger`, GDB / LLDB
+will instruct you on how to modify `~/.gdbinit` or `~/.lldbinit` to enable
+printing abstract syntax of K terms in the debugger. If you do not perform this
+step, you can still use all the other features, but K terms will be printed as
+their raw address in memory.
+
+GDB will need the kompiled interpreter in its safe path in order to access the
+pretty printing python script within it. A good way to do this would be to pick
+a minimum top-level path that covers all of your kompiled semantics (ie. `set
+auto-load safe-path ~/k-semantics`). LLDB has slightly different security
+policies that do not require fully-arbitrary code execution.
+
+This section uses GDB syntax to demonstrate the debugging features. Please
+refer to the [GDB to LLDB command map](https://lldb.llvm.org/use/map.html) on
+macOS.
 
 You can break before every step of execution is taken by setting a breakpoint
-on the `step` function:
+on the `k_step` function.
 
 ```
-(gdb) break definition.kore:step
+(gdb) break definition.kore:k_step
 Breakpoint 1 at 0x25e340
 (gdb) run
 Breakpoint 1, 0x000000000025e340 in step (subject=`<generatedTop>{}`(`<k>{}`(`kseq{}`(`inj{Int{}, KItem{}}`(#token("0", "Int")),dotk{}(.KList))),`<generatedCounter>{}`(#token("0", "Int"))))
@@ -268,7 +279,7 @@ Using `rbreak <regex>` you can set breakpoints on multiple functions.
 
 -   `<optimized out>` try kompiling without `-O1`, `-O2`, or `-O3`.
 -   `(gdb) break definition.kore:break -> No source file named definition.kore.`
-send `-ccopt -g` to kompile in order to generate debug info symbols.
+send `--enable-llvm-debug` to kompile in order to generate debug info symbols.
 
 Profiling your K semantics
 --------------------------

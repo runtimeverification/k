@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module CHECKSORTDECLISSUE3038-SYNTAX
   imports STRING
 

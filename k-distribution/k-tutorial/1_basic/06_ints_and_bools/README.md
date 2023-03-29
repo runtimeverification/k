@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.6: Integers and Booleans
 
 The purpose of this lesson is to explain the two most basic types of builtin
@@ -11,7 +15,7 @@ K provides definitions of some useful sorts in
 `include/kframework/builtin` directory of the K installation. This file is
 defined via a
 [Literate programming](https://en.wikipedia.org/wiki/Literate_programming)
-style that we will discuss in a future lesson. We will not cover all of the 
+style that we will discuss in a future lesson. We will not cover all of the
 sorts found there immediately, however, this lesson discusses some of the
 details surrounding integers and Booleans, as well as providing information
 about how to look up more detailed knowledge about builtin functions in K's
@@ -89,7 +93,7 @@ module that has previously already been discussed, but also provides the
 values `true` and `false`, but not any of the functions that operate over the
 `Bool` sort. The rationale is that you may want to import this module into the
 main syntax module of your definition in some cases, whereas you generally do
-not want to do this with the version of the module that includes all the 
+not want to do this with the version of the module that includes all the
 functions over the `Bool` sort. For example, if you were defining the semantics
 of C++, you might import `BOOL-SYNTAX` into the syntax module of your
 definition, because `true` and `false` are part of the grammar of C++, but
@@ -162,20 +166,20 @@ programming languages.
 
 ## Exercises
 
-1. Extend your solution from lesson 1.4, problem 2 to implement the rules
+1. Extend your solution from Lesson 1.4, Exercise 2 to implement the rules
 that define the behavior of addition, subtraction, multiplication, and
 division. Do not worry about the case when the user tries to divide by zero
 at this time. Use `/Int` to implement division. Test your new calculator
 implementation by executing the arithmetic expressions you wrote as part of
-lesson 1.3, problem 2. Check to make sure each computes the value you expected.
+Lesson 1.3, Exercise 2. Check to make sure each computes the value you expected.
 
 2. Combine the Boolean expression calculator from this lesson with your
-solution to problem 1, and then extend the combined calculator with the `<`,
+solution to Exercise 1, and then extend the combined calculator with the `<`,
 `<=`, `>`, `>=`, `==`, and `!=` expressions. Write some Boolean expressions
 that combine integer and Boolean operations, and test to ensure that these
 expressions return the expected truth value.
 
-3. Compute the following expressions using your solution from problem 2:
+3. Compute the following expressions using your solution from Exercise 2:
 `7 / 3`, `7 / -3`, `-7 / 3`, `-7 / -3`. Then replace the `/Int` function in
 your definition with `divInt` instead, and observe how the value of the above
 expressions changes. Why does this occur?

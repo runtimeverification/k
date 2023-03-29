@@ -1,9 +1,9 @@
-// Copyright (c) 2012-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 module LAMBDA
   imports DOMAINS
   syntax Type ::= "int" | "bool"
-                | Type "->" Type
+                | Type "->" Type               [klabel(functionType)]
                 | "(" Type ")"                 [bracket]
 
   syntax Exp ::= Id
@@ -20,7 +20,7 @@ module LAMBDA
                   <tenv color="blue"> .Map </tenv>
                 </T>
 
-  syntax Exp ::= Exp "->" Exp                  [strict]
+  syntax Exp ::= Exp "->" Exp                  [strict, klabel(functionType)]
   rule <k> lambda X : T . E => (T -> E) ~> Rho ...</k>
        <tenv> Rho => Rho[X <- T] </tenv>
 

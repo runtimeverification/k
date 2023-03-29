@@ -1,3 +1,4 @@
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.lsp;
 
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
@@ -26,6 +27,9 @@ public class KWorkspaceService implements WorkspaceService {
     @Override
     public void didChangeWatchedFiles(DidChangeWatchedFilesParams didChangeWatchedFilesParams) {
         this.clientLogger.logMessage("Operation 'workspace/didChangeWatchedFiles' Ack");
+        KTextDocumentService ktxt = (KTextDocumentService) languageServer.getTextDocumentService();
+        ktxt.memo.loadCaches();
+        languageServer.languageClient.refreshDiagnostics();
     }
 
     @Override

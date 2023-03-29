@@ -1,4 +1,8 @@
-V ==K closure ( f00 |-> 1
-f01 |-> 2
-f02 |-> 3
-f03 |-> 4 , x -> f03 ( f03 x ) | .Cases )
+{
+  V:K
+#Equals
+  closure ( f00 |-> 0
+  f01 |-> 1
+  f02 |-> 2
+  f03 |-> 3 , x -> f03 ( f03 x ) | .Cases ) ~> .
+}

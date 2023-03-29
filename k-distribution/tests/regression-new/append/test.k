@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module TEAL-SYNTAX
   import INT-SYNTAX
 endmodule

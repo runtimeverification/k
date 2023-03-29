@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module DUPLICATEKCELLS-SYNTAX
 
     configuration <k> $PGM:K </k>

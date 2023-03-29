@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2020 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 options {
   MULTI=true;
   STATIC = false;
@@ -141,7 +141,7 @@ SKIP :
 
 TOKEN : /* TAG */
 {
-  <TAG: (["_","a"-"z","A"-"Z","0"-"9","#","$","%","^","*","+",".","-"])+>
+  <TAG: (["a"-"z", "A"-"Z", "0"-"9", "#", "$", "%", "^", "*", "+", ".", "-", "\"", "=", "_"])+>
 }
 
 /** Main tag list production. */

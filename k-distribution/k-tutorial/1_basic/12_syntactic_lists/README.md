@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.12: Syntactic Lists
 
 The purpose of this lesson is to explain how K provides support for syntactic
@@ -51,11 +55,11 @@ endmodule
 ```
 
 As you can see, the `List{}` construct represents a cons-list with an element
-at the head and another list at the tail. The empty list is represented by 
+at the head and another list at the tail. The empty list is represented by
 a `.` followed by the sort of the list.
 
 However, the `List{}` construct provides several key syntactic conveniences
-over the above definition. First of all, when writing a list in a rule, 
+over the above definition. First of all, when writing a list in a rule,
 explicitly writing the terminator is not always required. For example, consider
 the following additional module (`lesson-12-c.k`):
 
@@ -88,11 +92,6 @@ instead. This works even with lists of more than one element:
 
 This rule is redundant, but here we explicitly match a list of exactly two
 elements, because the `.Ints` is implicitly added after `I2`.
-
-### Exercise
-
-Write a function `concat` which takes a list of `String` and concatenates them
-all together. Do not worry if the function is O(n^2).
 
 ## Parsing Syntactic Lists in Programs
 
@@ -127,7 +126,11 @@ endmodule
 
 ### Exercise
 
-Write some function call expressions using identifiers in C and verify with 
+Write a function `concat` which takes a list of `String` and concatenates them
+all together. Do not worry if the function is O(n^2).
+Test your implementation using the syntactic sugar for lists added by the parser.
+
+Then write some function call expressions using identifiers in C and verify with
 `kast` that the above grammar captures the intended syntax. Make sure to test
 with function calls with zero, one, and two or more arguments.
 

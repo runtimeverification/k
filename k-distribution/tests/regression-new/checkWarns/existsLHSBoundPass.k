@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module EXISTSLHSBOUNDPASS-SYNTAX
   imports INT-SYNTAX
 endmodule

@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module DEF-SYNTAX
     imports MAP
     imports BOOL

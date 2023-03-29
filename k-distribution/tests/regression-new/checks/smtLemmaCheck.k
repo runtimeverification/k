@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module SMTLEMMACHECK
   imports BOOL
   imports INT

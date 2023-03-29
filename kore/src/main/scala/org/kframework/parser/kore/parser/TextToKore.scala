@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.kore.parser
 
 import org.kframework.parser.kore._

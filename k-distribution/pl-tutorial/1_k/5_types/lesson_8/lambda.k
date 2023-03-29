@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 require "substitution.md"
 
@@ -8,19 +8,19 @@ module LAMBDA
 
   syntax Exp ::= Int | Bool | KVar
                | "(" Exp ")"                      [bracket]
-               | Exp Exp                          [strict, left]
-               > Exp "*" Exp                      [strict, left]
-               | Exp "/" Exp                      [strict]
-               > Exp "+" Exp                      [strict, left]
-               > Exp "<=" Exp                     [strict]
+               | Exp Exp                          [seqstrict, left]
+               > Exp "*" Exp                      [seqstrict, left]
+               | Exp "/" Exp                      [seqstrict]
+               > Exp "+" Exp                      [seqstrict, left]
+               > Exp "<=" Exp                     [seqstrict]
                > "lambda" KVar "." Exp              [binder]
-               | "if" Exp "then" Exp "else" Exp   [strict]
+               | "if" Exp "then" Exp "else" Exp   [seqstrict]
                | "let" KVar "=" Exp "in" Exp          [macro]
                | "letrec" KVar KVar "=" Exp "in" Exp  [macro]
                | "mu" KVar "." Exp                  [binder]
 
   syntax Type ::= "int" | "bool"
-                | Type "->" Type
+                | Type "->" Type                  [klabel(functionType)]
                 | "(" Type ")"                    [bracket]
 
   syntax Exp ::= Type
@@ -37,7 +37,7 @@ module LAMBDA
   rule T1:Type  + T2:Type => T1 = int ~> T2 = int ~> int
   rule T1:Type <= T2:Type => T1 = int ~> T2 = int ~> bool
 
-  syntax Exp ::= Exp "->" Exp                  [strict]
+  syntax Exp ::= Exp "->" Exp                  [seqstrict, klabel(functionType)]
   rule <k> lambda X:KVar . E => ?T:Type -> E ~> setTenv(TEnv) ...</k>
        <tenv> TEnv => TEnv[X <- ?T] </tenv>
 

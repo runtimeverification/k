@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 module LAMBDA
   imports DOMAINS
@@ -24,7 +24,7 @@ module LAMBDA
   syntax KResult ::= Type
 
   configuration <tasks color="yellow">
-                  <task color="orange" multiplicity="*">
+                  <task color="orange" multiplicity="*" type="List">
                     <k color="green"> $PGM:Exp </k>
                     <tenv color="red"> .Map </tenv>
                   </task>
@@ -64,7 +64,7 @@ module LAMBDA
   rule <k> mu X . E => ?T:Type ...</k>  <tenv> TEnv </tenv>
        (.Bag => <task> <k> E = ?T </k> <tenv> TEnv[X <- ?T] </tenv> </task>)
 
-  syntax KItem ::= Exp "=" Exp  [strict]
+  syntax KItem ::= Exp "=" Exp  [seqstrict]
   rule <k> T:Type = T:Type => . ...</k>
 
   rule <task>... <k> . </k> ...</task> => .Bag

@@ -1,17 +1,31 @@
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.lsp;
 
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kframework.attributes.Location;
-import org.kframework.kil.DefinitionItem;
+import org.kframework.definition.KViz;
+import org.kframework.definition.Production;
+import org.kframework.kompile.Kompile;
+import org.kframework.kore.K;
+import org.kframework.main.GlobalOptions;
+import org.kframework.parser.inner.ParseCache;
+import org.kframework.utils.BinaryLoader;
+import org.kframework.utils.errorsystem.KExceptionManager;
 
-import java.net.URISyntaxException;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class LSPTests {
 
@@ -91,5 +105,35 @@ public class LSPTests {
         List<? extends LocationLink> defRez = defin.get().getRight();
         Assert.assertNotEquals(defRez.size(), 0);
         //System.out.println("GoToDef: " + defRez);
+    }
+
+    // useful for local testing
+    @Test @Ignore
+    public void testKLSPathK() throws IOException {
+        WorkspaceFolder workspaceFolder = new WorkspaceFolder("file:///home/radu/work/test", "test");
+        BinaryLoader loader = new BinaryLoader(new KExceptionManager(new GlobalOptions()));
+        Map<String, ParseCache> caches = null;
+
+        Optional<Path> cacheFile = Files.walk(Path.of(URI.create(workspaceFolder.getUri()))).filter(p -> p.endsWith(Kompile.CACHE_FILE_NAME)).findFirst();
+        if (cacheFile.isPresent())
+            caches = loader.loadCache(java.util.Map.class, cacheFile.get().toFile());
+
+        System.out.println(caches.size());
+
+        KPos pos = new KPos(10, 11);
+        Map<String, ParseCache.ParsedSentence> ch = caches.entrySet().stream().filter(elm -> elm.getKey().startsWith("TEST-RULE-CELLS")).findFirst().get().getValue().getCache();
+
+        ParseCache.ParsedSentence rl = ch.entrySet().stream().filter(r -> r.getKey().equals("1 => 2")).findFirst().get().getValue();
+        K ast = rl.getParse();
+        AtomicReference<K> x = new AtomicReference<>();
+        KViz.from(t -> {
+            if (TextDocumentSyncHandler.isPositionOverLocation(pos, t.location().get())) {
+                x.set(t);
+                System.out.println("Pos over loc: " + pos + " loc: " + t.location() + " trm: " + t.att().get(Production.class));
+            } else
+                System.out.println("Pos out loc: " + pos + " loc: " + t.location() + " trm: " + t.att().get(Production.class));
+            return t;
+        }, "test find").apply(ast);
+        System.out.println(x.get());
     }
 }

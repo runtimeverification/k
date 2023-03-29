@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Projects using K
 
 <br>
@@ -75,3 +79,4 @@
 - [Boogie (2020)](https://github.com/kframework/boogie-semantics)
 - [Elrond (2020-2021)](https://github.com/runtimeverification/elrond-semantics)
 - [P4 (2016-2021)](https://github.com/kframework/p4-semantics)
+- [K-Javalette (2022)](https://github.com/bbyalcinkaya/k-javalette)

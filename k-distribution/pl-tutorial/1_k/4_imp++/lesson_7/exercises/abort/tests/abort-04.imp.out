@@ -1,9 +1,41 @@
-  S ==K "3"
+  {
+    S:String
+  #Equals
+    "3"
+  }
 #Or
-  S ==K "30"
+  {
+    S:String
+  #Equals
+    "30"
+  }
 #Or
-  S ==K "31"
+  {
+    S:String
+  #Equals
+    "31"
+  }
 #Or
-  S ==K "301"
+  {
+    S:String
+  #Equals
+    "301"
+  }
 #Or
-  S ==K ""
+  {
+    S:String
+  #Equals
+    "310"
+  }
+#Or
+  {
+    S:String
+  #Equals
+    "3010"
+  }
+#Or
+  {
+    S:String
+  #Equals
+    ""
+  }

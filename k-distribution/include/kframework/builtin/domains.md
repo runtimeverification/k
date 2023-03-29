@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) 2015-2020 K Team. All Rights Reserved.
+copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
 Basic Builtin Types in K
@@ -403,7 +403,7 @@ simplify terms.
 ```k
 endmodule
 
-module MAP-KORE-SYMBOLIC [kore,symbolic]
+module MAP-KORE-SYMBOLIC [kore,symbolic,haskell]
   imports MAP
   imports private K-EQUAL
   imports private BOOL
@@ -1169,7 +1169,7 @@ module INT-SYMBOLIC [symbolic]
   rule 0 >>Int _ => 0 [simplification]
 endmodule
 
-module INT-SYMBOLIC-KORE [symbolic, kore]
+module INT-SYMBOLIC-KORE [symbolic, kore, haskell]
   imports INT-COMMON
   imports ML-SYNTAX
   imports private BOOL
@@ -2264,7 +2264,6 @@ module K-REFLECTION
   // Takes as input a string and returns a K term
   syntax {Sort} Sort ::= #parseKORE(String) [function, hook(KREFLECTION.parseKORE)]
   syntax {Sort} String ::= #unparseKORE(Sort) [function, hook(KREFLECTION.printKORE)]
-  syntax {Sort} Sort ::= #parseKAST(String) [function, hook(KREFLECTION.parseKAST)]
   syntax IOError ::= "#noParse" "(" String ")" [klabel(#noParse), symbol]
 
 endmodule
@@ -2560,7 +2559,7 @@ Haskell backend, a log message of type InfoUserLog is created with the
 specified text.
 
 ```k
-  syntax K ::= #log(value: String) [function, funtional, hook(IO.logString), impure, returnsUnit, symbol]
+  syntax K ::= #log(value: String) [function, total, hook(IO.logString), impure, returnsUnit, symbol]
 ```
 
 Terms can also be logged to standard error in _surface syntax_, rather than as
@@ -2636,18 +2635,6 @@ module STDIN-STREAM
        _:List
        </stdin>
     requires findChar(S, Delimiters, 0) =/=Int -1
-       andBool lengthString(S) >Int 1 // [stdin]
-       [stream]
-
-  rule [stdinParseArbitrarySort]:
-       <stdin>
-       (ListItem(#parseInput(Sort:String, Delimiters:String))
-       => ListItem(#parseKAST(substrString(S, 0, findChar(S, Delimiters, 0)))))
-       ListItem(#buffer(S:String => substrString(S,findChar(S, Delimiters, 0) +Int 1, lengthString(S))))
-       _:List
-       </stdin>
-    requires findChar(S, Delimiters, 0) =/=Int -1
-       andBool Sort ==String "K"
        andBool lengthString(S) >Int 1 // [stdin]
        [stream]
 

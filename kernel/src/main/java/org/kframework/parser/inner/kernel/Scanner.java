@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.inner.kernel;
 
 import com.google.common.collect.ArrayListMultimap;

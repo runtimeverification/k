@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
+
 Test
 ====
 ```k
@@ -22,6 +26,10 @@ module TEST
 
 ```{.k .keep}
   rule <k> 1 => 2 </k>
+```
+
+```{.k .discard .numberLines startFrom="0"}
+  rule <k> 2 => 3 </k>
 ```
 
 ```{.keep .discard}

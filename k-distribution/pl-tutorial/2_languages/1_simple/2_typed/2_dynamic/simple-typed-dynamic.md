@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
+copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
 # SIMPLE — Typed — Dynamic
@@ -47,7 +47,7 @@ constructs.
                 | Type "[" "]"
                 | "(" Type ")"           [bracket]
                 > Types "->" Type
-  syntax Types ::= List{Type,","}
+  syntax Types ::= List{Type,","}        [klabel(exps)]
 ```
 
 ## Declarations
@@ -95,9 +95,9 @@ constructs.
 Like in the static semantics, there is no need for lists of identifiers
 (because we now have lists of parameters).
 ```k
-  syntax Exps ::= List{Exp,","}          [strict]
+  syntax Exps ::= List{Exp,","}          [strict, klabel(exps)]
   syntax Val
-  syntax Vals ::= List{Val,","}
+  syntax Vals ::= List{Val,","}          [klabel(exps)]
 ```
 
 ## Statements
@@ -109,9 +109,9 @@ Like in the static semantics, there is no need for lists of identifiers
   syntax Stmt ::= Block
                 | Exp ";"                               [strict]
                 | "if" "(" Exp ")" Block "else" Block   [avoid, strict(1)]
-                | "if" "(" Exp ")" Block
+                | "if" "(" Exp ")" Block                [macro]
                 | "while" "(" Exp ")" Block
-            | "for" "(" Stmt Exp ";" Exp ")" Block
+                | "for" "(" Stmt Exp ";" Exp ")" Block  [macro]
                 | "print" "(" Exps ")" ";"              [strict]
                 | "return" Exp ";"                      [strict]
                 | "return" ";"
@@ -126,11 +126,11 @@ Like in the static semantics, there is no need for lists of identifiers
 ```
 The same desugaring macros like in the statically typed SIMPLE.
 ```k
-  rule if (E) S => if (E) S else {}                                     [macro]
-  rule for(Start Cond; Step) {S:Stmt} => {Start while(Cond){S Step;}}  [macro]
-  rule for(Start Cond; Step) {} => {Start while(Cond){Step;}}           [macro]
-  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [macro-rec]
-  rule T:Type X:Id = E; => T X; X = E;                                  [macro]
+  rule if (E) S => if (E) S else {}
+  rule for(Start Cond; Step) {S:Stmt} => {Start while(Cond){S Step;}}
+  rule for(Start Cond; Step) {} => {Start while(Cond){Step;}}
+  rule T:Type E1:Exp, E2:Exp, Es:Exps; => T E1; T E2, Es;               [anywhere]
+  rule T:Type X:Id = E; => T X; X = E;                                  [anywhere]
 
 endmodule
 
@@ -180,7 +180,8 @@ function body encounters an explicit `return` statement.
 
   configuration <T color="red">
                   <threads color="orange">
-                    <thread multiplicity="*" color="yellow">
+                    <thread multiplicity="*" color="yellow" type="Map">
+                      <id color="pink"> 0 </id>
                       <k color="green"> ($PGM:Stmt ~> execute) </k>
 //                      <br/>
                       <control color="cyan">
@@ -191,7 +192,6 @@ function body encounters an explicit `return` statement.
 //                      <br/>
                       <env color="violet"> .Map </env>
                       <holds color="black"> .Map </holds>
-                      <id color="pink"> 0 </id>
                     </thread>
                   </threads>
 //                  <br/>
@@ -253,7 +253,7 @@ adds the length of `Vs` dimensions to the type `T`.
 ```k
 // TODO: Check the desugaring below to be consistent with the one for untyped simple
 
-  syntax Id ::= "$1" | "$2"
+  syntax Id ::= "$1" [token] | "$2" [token]
   rule T:Type X:Id[N1:Int, N2:Int, Vs:Vals];
     => T[]<Vs> X[N1];
        {
@@ -480,13 +480,13 @@ values, in which case our semantics below works fine:
 
 ```k
    rule <thread>...
-          <k> spawn S => !T:Int ...</k>
+          <k> spawn S => !T:Int +Int 1 ...</k>
           <env> Env </env>
         ...</thread>
         (.Bag => <thread>...
                 <k> S </k>
                 <env> Env </env>
-                <id> !T </id>
+                <id> !T +Int 1 </id>
               ...</thread>)
 ```
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 module IMP-SYNTAX
   imports DOMAINS-SYNTAX
@@ -28,10 +28,8 @@ module IMP-SYNTAX
                  > "spawn" Stmt
                  > Stmt Stmt                  [left]
 
-  syntax Ids   ::= List{Id,","}
-  syntax AExps ::= List{AExp,","}
-  // K does not yet handle automatically subsorting one user defined list to
-  // another when the elements are subsorted, so we must do it manually.
+  syntax Ids   ::= List{Id,","}               [klabel(exps)]
+  syntax AExps ::= List{AExp,","}             [klabel(exps)]
   syntax AExps ::= Ids
 endmodule
 

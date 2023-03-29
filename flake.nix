@@ -98,7 +98,6 @@
             p."kore:exe:kore-rpc"
             p."kore:exe:kore-repl"
             p."kore:exe:kore-parser"
-            p."kore:exe:kore-prof"
             p."kore:exe:kore-match-disjunction"
           ];
         };
@@ -151,17 +150,6 @@
                 patchShebangs tests/regression-new/*
                 substituteInPlace tests/regression-new/append/kparse-twice \
                   --replace '"$(dirname "$0")/../../../bin/kparse"' '"${k}/bin/kparse"'
-                ${
-                # we add the `--no-haskell-binary` flag due to the compact library
-                # (used to create the binary haskell files) being broken on Mac
-                # https://github.com/runtimeverification/haskell-backend/issues/3137
-                lib.optionalString stdenv.isDarwin ''
-                  for mak in include/kframework/*.mak
-                  do
-                    substituteInPlace $mak \
-                      --replace 'KOMPILE_FLAGS+=--no-exc-wrap' 'KOMPILE_FLAGS+=--no-exc-wrap --no-haskell-binary'
-                  done
-                ''}
               '';
               buildFlags = [
                 "K_BIN=${k}/bin"

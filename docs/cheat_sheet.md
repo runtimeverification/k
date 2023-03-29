@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 K Cheat Sheet
 =============
 
@@ -13,12 +17,13 @@ krun (--search-all)? {file}                         : interpret file, evaluating
 foo-kompiled/parser_PGM {file}                      : ahead of time parse
 kompile (--main-module)? (--syntax-module)? {file}  : generate parser for {file}.k {file}-syntax.k, explicitly state main modules
 kparse <file> | kore-print -                        : parse and unparse a file
-kompile {file} -ccopt -g -ccopt -O1                 : generate debuggable output for {file}.k
+kompile {file} --enable-llvm-debug                  : generate debuggable output for {file}.k
 krun {file} --debugger                              : debug K code
 kprove {file}                                       : Verify specs in {file}
 ```
 
-Durring GDB debugging session:
+During GDB debugging session (see [here](https://lldb.llvm.org/use/map.html) for
+LLDB breakpoint syntax):
 
 ```
 break {file}:{linenum}                              : add a breakpoint to {file}'s {linenum} numbered line

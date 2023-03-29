@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # K: A Rewriting-Based Language Definitional Framework
 
 Tutorial at the 33rd ACM SIGPLAN International Conference on Programming Language Design and Implementation (PLDI)

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 module IMP-SYNTAX
   imports DOMAINS-SYNTAX
@@ -27,8 +27,8 @@ module IMP-SYNTAX
                  | "halt" ";"
                  > "join" AExp ";"            [strict]
 
-  syntax Ids   ::= List{Id,","}
-  syntax AExps ::= List{AExp,","}
+  syntax Ids   ::= List{Id,","}               [klabel(exps)]
+  syntax AExps ::= List{AExp,","}             [klabel(exps)]
   syntax Stmts ::= List{Stmt,""}
   syntax AExps ::= Ids
 endmodule
@@ -41,10 +41,10 @@ module IMP
 
   configuration <T color="yellow">
                   <threads color="orange">
-                    <thread multiplicity="*" color="blue">
+                    <thread multiplicity="*" color="blue" type="Map">
+                      <id color="black"> 0 </id>
                       <k color="green"> $PGM:Stmts </k>
                       <env color="LightSkyBlue"> .Map </env>
-                      <id color="black"> 0 </id>
                     </thread>
                   </threads>
                   <store color="red"> .Map </store>
@@ -98,8 +98,8 @@ module IMP
 
   rule <k> halt; ~> _ => . </k>
 
-  rule <k> spawn S => !T:Int ...</k> <env> Rho </env>
-       (.Bag => <thread>... <k> S </k> <env> Rho </env> <id> !T </id> ...</thread>)
+  rule <k> spawn S => !T:Int +Int 1 ...</k> <env> Rho </env>
+       (.Bag => <thread>... <k> S </k> <env> Rho </env> <id> !T +Int 1 </id> ...</thread>)
   rule <k> join(T:Int); => . ...</k>
        <thread>... <k> . </k> <id> T </id> ...</thread>
 

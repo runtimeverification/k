@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.main;
 
 import com.google.inject.Guice;
@@ -188,15 +188,6 @@ public class Main {
                     modules.addAll(KRunFrontEnd.getModules());
                     for (KModule kModule : kModules) {
                         List<Module> ms = kModule.getKRunModules();
-                        if (ms != null) {
-                            modules.addAll(ms);
-                        }
-                    }
-                    break;
-                case "-kprove-legacy":
-                    modules.addAll(KProveFrontEnd.getModules());
-                    for (KModule kModule : kModules) {
-                        List<Module> ms = kModule.getKProveModules();
                         if (ms != null) {
                             modules.addAll(ms);
                         }

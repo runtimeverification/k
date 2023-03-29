@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 // K ITP proof script language
 
 module PROOF-SCRIPT

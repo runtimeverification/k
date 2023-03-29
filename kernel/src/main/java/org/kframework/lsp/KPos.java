@@ -1,3 +1,4 @@
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.lsp;
 
 import org.eclipse.lsp4j.Position;
@@ -66,5 +67,13 @@ public class KPos {
     @Override
     public int hashCode() {
         return Objects.hash(line, character);
+    }
+
+    @Override
+    public String toString() {
+        return "KPos{" +
+                "l:" + line +
+                ", c:" + character +
+                '}';
     }
 }

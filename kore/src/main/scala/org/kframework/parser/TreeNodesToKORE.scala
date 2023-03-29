@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser
 
 import java.util
@@ -19,14 +20,10 @@ class TreeNodesToKORE(parseSort: java.util.function.Function[String, Sort], stri
   import org.kframework.kore.KORE.{KApply,KLabel,KList,KToken,KVariable,KSequence,KAs,KRewrite,InjectedKLabel}
 
   def apply(t: Term): K = t match {
-    case c@Constant(s, p) => KToken(s, p.sort, locationToAtt(c.location, c.source))
+    case c@Constant(s, p) => KToken(s, p.sort, locationToAtt(c.location, c.source)
+      .add(classOf[Production], c.production.att.getOption("originalPrd", classOf[Production]).getOrElse(c.production)))
     case t@TermCons(_, _) => termConsToKApply(t)
     case Ambiguity(items) => KApply(KLabel("amb"), KList(items.asScala.toList map apply asJava), Att.empty)
-  }
-
-  def anonVar(sort: Sort, t: HasLocation): K = {
-    val lbl = KLabel("#SemanticCastTo" + sort.toString())
-    if (strict) KApply(lbl, KList(KToken("_", Sorts.KVariable, locationToAtt(t.location, t.source))), locationToAtt(t.location, t.source).add(classOf[Production], Production(lbl, Seq(), sort, Seq(NonTerminal(sort, None))))) else KToken("_", Sorts.KVariable, locationToAtt(t.location, t.source))
   }
 
   def termConsToKApply(t: TermCons): K = {
