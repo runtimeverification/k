@@ -774,6 +774,10 @@ public class ModuleToKORE {
             sb.append(", ");
             hasToken = true;
         }
+        if (numTerms == 0) {
+            sb.delete(sb.length() - 10, sb.length());
+            return;
+        }
         sb.append("\\bottom{");
         convert(sort, sb);
         sb.append("}()");
