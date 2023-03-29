@@ -59,7 +59,10 @@ class KCFGShow:
                 return top_down(_hide_cells, term)
             return term
 
+        nodes_printed = False
+
         for node_id in nodes:
+            nodes_printed = True
             kast = cfg.node(node_id).cterm.kast
             kast = hide_cells(kast)
             if minimize:
@@ -75,6 +78,7 @@ class KCFGShow:
             res_lines.append('')
 
         for node_id_1, node_id_2 in node_deltas:
+            nodes_printed = True
             config_1 = cfg.node(node_id_1).cterm.config
             config_2 = cfg.node(node_id_2).cterm.config
             config_1 = hide_cells(config_1)
@@ -88,6 +92,11 @@ class KCFGShow:
             res_lines.append('')
             res_lines.append(self.kprint.pretty_print(config_delta))
             res_lines.append('')
+
+        if not (nodes_printed):
+            res_lines.append('')
+        res_lines.append('')
+        res_lines.append('')
 
         if to_module:
 
