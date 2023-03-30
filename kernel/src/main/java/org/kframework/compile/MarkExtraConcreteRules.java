@@ -25,7 +25,8 @@ public class MarkExtraConcreteRules {
             if (s instanceof Rule) {
                 Rule r = (Rule) s;
                 String label = r.att().getOption(Att.LABEL()).getOrElse(() -> null);
-                if (label != null && extraConcreteRuleLabels.contains(label)) {
+                if (label != null && concreteLabelsSet.contains(label)) {
+                    // rule labels must be unique, so it's safe to remove from the set as we iterate
                     concreteLabelsSet.remove(label);
                     return Rule.apply(r.body(), r.requires(), r.ensures(), r.att().add(Att.CONCRETE()));
                 }
