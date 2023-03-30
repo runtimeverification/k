@@ -395,7 +395,7 @@ public class TextDocumentSyncHandler {
                             org.kframework.attributes.Location ploc = prd.location().get();
 
                             if (caches.isEmpty())
-                                kls.languageClient.showMessage(new MessageParams(MessageType.Error, "No caches found. Find references for productions is only available in workspace mode and it requires a kompiled definition."));
+                                kls.languageClient.showMessage(new MessageParams(MessageType.Error, "No caches found. 'Find references' for productions is only available in workspace mode and requires a kompiled definition."));
 
                             // caches remember previous versions for quick access, so we may find more instances than there actually exist in the source file
                             // 1. for each cached sentence
