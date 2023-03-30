@@ -6,6 +6,6 @@ RESULTDIR=.
 KOMPILE_FLAGS=--syntax-module MAIN
 KOMPILE_BACKEND?=haskell
 
-KPROVE_FLAGS=--def-module VERIFICATION
+KPROVE_FLAGS=
 
 include ../../../include/kframework/ktest.mak
