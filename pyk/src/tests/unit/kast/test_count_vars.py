@@ -7,7 +7,7 @@ import pytest
 
 from pyk.kast.manip import count_vars
 
-from .utils import a, b, c, f, g, h, x, y, z
+from ..utils import a, b, c, f, g, h, x, y, z
 
 if TYPE_CHECKING:
     from typing import Final, Mapping, Tuple

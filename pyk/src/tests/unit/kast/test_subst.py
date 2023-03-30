@@ -11,7 +11,7 @@ from pyk.prelude.kbool import TRUE
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlTop
 
-from .utils import a, b, c, f, g, h, x, y, z
+from ..utils import a, b, c, f, g, h, x, y, z
 
 if TYPE_CHECKING:
     from typing import Dict, Final, Optional, Tuple

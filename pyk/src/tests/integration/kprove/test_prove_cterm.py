@@ -5,15 +5,15 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.cterm import CTerm
-from pyk.kast.inner import KApply, KSequence, KToken, KVariable
+from pyk.kast.inner import KApply, KToken
 from pyk.kast.manip import get_cell
 
-from .utils import KProveTest
+from ..utils import KProveTest
 
 if TYPE_CHECKING:
     from typing import Final, Iterable, Tuple
 
-    from pyk.ktool.kprint import KPrint, SymbolTable
+    from pyk.ktool.kprint import SymbolTable
     from pyk.ktool.kprove import KProve
 
 
@@ -35,26 +35,6 @@ class TestImpProof(KProveTest):
     @staticmethod
     def _update_symbol_table(symbol_table: SymbolTable) -> None:
         symbol_table['.List{"_,_"}_Ids'] = lambda: '.Ids'
-
-    @staticmethod
-    def config(kprint: KPrint, k: str, state: str) -> CTerm:
-        k_parsed = kprint.parse_token(KToken(k, 'Pgm'), as_rule=True)
-        state_parsed = kprint.parse_token(KToken(state, 'Map'), as_rule=True)
-        return CTerm(
-            KApply(
-                '<generatedTop>',
-                [
-                    KApply(
-                        '<T>',
-                        (
-                            KApply('<k>', [KSequence([k_parsed])]),
-                            KApply('<state>', [state_parsed]),
-                        ),
-                    ),
-                    KVariable('GENERATED_COUNTER_CELL'),
-                ],
-            )
-        )
 
     @pytest.mark.parametrize(
         'test_id,haskell_args,k,expected_next_states',

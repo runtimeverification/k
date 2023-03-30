@@ -22,7 +22,7 @@ from pyk.prelude.kbool import BOOL, FALSE, TRUE, andBool, notBool
 from pyk.prelude.kint import INT, intToken
 from pyk.prelude.ml import mlEqualsTrue, mlTop
 
-from .utils import a, b, c, f, k, x
+from ..utils import a, b, c, f, k, x
 
 if TYPE_CHECKING:
     from typing import Dict, Final, List, Tuple

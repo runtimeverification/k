@@ -14,7 +14,7 @@ from pyk.ktool.kprint import paren
 from pyk.ktool.kprove import _kprove
 from pyk.prelude.ml import is_top
 
-from .utils import KProveTest
+from ..utils import KProveTest
 
 if TYPE_CHECKING:
     from pyk.kast.outer import KFlatModule

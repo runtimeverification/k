@@ -13,7 +13,7 @@ from pyk.prelude.kint import INT
 from pyk.prelude.string import STRING
 from pyk.prelude.utils import token
 
-from .utils import f, x, y, z
+from ..utils import f, x, y, z
 
 if TYPE_CHECKING:
     from typing import Any, Dict, Final, List, Mapping, Optional, Tuple
