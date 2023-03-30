@@ -328,9 +328,7 @@ public class Kompile {
         DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
         Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, false)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
-        Function1<Definition, Definition> markExtraConcreteRules = d -> DefinitionTransformer.fromSentenceTransformer((m, s) ->
-                    s instanceof Rule && kompileOptions.extraConcreteRuleLabels.contains(s.att().getOption(Att.LABEL()).getOrElse(() -> null)) ?
-                            Rule.apply(((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att().add(Att.CONCRETE())) : s, "mark extra concrete rules").apply(d);
+        Function1<Definition, Definition> markExtraConcreteRules = d -> MarkExtraConcreteRules.mark(d, kompileOptions.extraConcreteRuleLabels);
 
         return def -> resolveIO
                 .andThen(resolveFun)
