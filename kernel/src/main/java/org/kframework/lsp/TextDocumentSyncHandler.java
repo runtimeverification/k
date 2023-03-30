@@ -271,7 +271,7 @@ public class TextDocumentSyncHandler {
 
                                         }
                                     } else {
-                                        kls.languageClient.showMessage(new MessageParams(MessageType.Error, "No caches found for this sentence. Definition inside rules is only available in workspace mode and it requires a kompiled definition."));
+                                        kls.languageClient.showMessage(new MessageParams(MessageType.Error, "No caches found for this sentence. 'Go to definition' inside rules is only available in workspace mode and requires a kompiled definition."));
                                     }
                                 }
                                 break;
