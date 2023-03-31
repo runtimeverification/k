@@ -174,6 +174,7 @@ class WithKAtt(ABC):
         return self.let_att(att=self.att.update(atts))
 
 
+# TODO fix typing (maybe just return Mapping)
 def kast_term(dct: Mapping[str, Any], cls: Type[T] = KAst) -> T:  # type: ignore
     if dct['format'] != 'KAST':
         raise ValueError(f"Invalid format: {dct['format']}")
