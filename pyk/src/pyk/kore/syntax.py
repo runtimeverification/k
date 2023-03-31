@@ -22,6 +22,7 @@ from typing import (
     final,
 )
 
+from ..dequote import enquoted
 from ..utils import FrozenDict, check_type
 from .lexer import KoreLexer, KoreStringLexer
 
@@ -441,20 +442,8 @@ class String(Pattern):
 
     def write(self, output: IO[str]) -> None:
         output.write('"')
-        for char in self.value:
-            code = ord(char)
-            if code in self._ENCODE_TABLE:
-                output.write(self._ENCODE_TABLE[code])
-            elif 32 <= code < 127:
-                output.write(char)
-            elif code <= 0xFF:
-                output.write(fr'\x{code:02x}')
-            elif code <= 0xFFFF:
-                output.write(fr'\u{code:04x}')
-            elif code <= 0xFFFFFFFF:
-                output.write(fr'\U{code:08x}')
-            else:
-                raise ValueError(f"Unsupported character '{char}' in KORE string: {self.value}")
+        for char in enquoted(self.value):
+            output.write(char)
         output.write('"')
 
 
