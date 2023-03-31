@@ -270,6 +270,8 @@ public class TextDocumentSyncHandler {
                                                 clientLogger.logMessage("definition failed no origin for prod: " + (x.get() != null ? x.get().att().get(org.kframework.definition.Production.class) : null));
 
                                         }
+                                    } else {
+                                        kls.languageClient.showMessage(new MessageParams(MessageType.Error, "No caches found for this sentence. 'Go to definition' inside rules is only available in workspace mode and requires a kompiled definition."));
                                     }
                                 }
                                 break;
@@ -391,6 +393,9 @@ public class TextDocumentSyncHandler {
                             Production prd = xprd.get();
                             String psource = Path.of(URI.create(prd.source().get().source())).toString();
                             org.kframework.attributes.Location ploc = prd.location().get();
+
+                            if (caches.isEmpty())
+                                kls.languageClient.showMessage(new MessageParams(MessageType.Error, "No caches found. 'Find references' for productions is only available in workspace mode and requires a kompiled definition."));
 
                             // caches remember previous versions for quick access, so we may find more instances than there actually exist in the source file
                             // 1. for each cached sentence
