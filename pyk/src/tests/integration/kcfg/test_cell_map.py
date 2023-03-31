@@ -9,6 +9,7 @@ from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence, KToken, KVariable, build_assoc
 from pyk.kast.manip import get_cell
 from pyk.kcfg import KCFG
+from pyk.proof import AGProof, AGProver
 
 from ..utils import KCFGExploreTest
 
@@ -138,9 +139,10 @@ class TestCellMapProof(KCFGExploreTest):
         init = kcfg.get_unique_init()
         new_init_term = kcfg_explore.cterm_assume_defined(init.cterm)
         kcfg.replace_node(init.id, new_init_term)
-        kcfg = kcfg_explore.all_path_reachability_prove(
+        prover = AGProver(AGProof(kcfg))
+        kcfg = prover.advance_proof(
             f'{spec_module}.{claim_id}',
-            kcfg,
+            kcfg_explore,
             max_iterations=max_iterations,
             execute_depth=max_depth,
             terminal_rules=terminal_rules,
