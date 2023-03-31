@@ -465,6 +465,147 @@ module MAP-SYMBOLIC
 endmodule
 ```
 
+Range maps
+----
+
+Provided here is the syntax of an implementation of immutable, associative,
+commutative range maps from `KItem` to `KItem`. This type is hooked to an
+implementation of range maps provided by the backend.
+The current implementation fully supports only SortInt keys due to limitations
+of the defined ordering. To support an additional key sort, implement the
+corresponding ordering between elements of that sort.
+
+```k
+module RANGEMAP
+  imports private BOOL-SYNTAX
+  imports private INT-SYNTAX
+  imports private LIST
+  imports private SET
+
+  syntax Range ::= range(rangeStart: KItem, rangeEnd: KItem)
+  
+  syntax RangeMap [hook(RANGEMAP.RangeMap)]
+```
+
+### Range map concatenation
+
+```k
+  syntax RangeMap ::= RangeMap RangeMap                        [left, function, hook(RANGEMAP.concat), klabel(_RangeMap_), symbol, assoc, comm, unit(.RangeMap), element(_r|->_), index(0), format(%1%n%2)]
+```
+
+### Range map unit
+
+```k
+  syntax RangeMap ::= ".RangeMap"                         [function, total, hook(RANGEMAP.unit), klabel(.RangeMap), symbol, latex(\dotCt{RangeMap})]
+```
+
+### Range map elements
+
+```k
+  syntax RangeMap ::= Range "|->" KItem                      [function, hook(RANGEMAP.elementRng), klabel(_r|->_), symbol, latex({#1}\mapsto{#2}), injective]
+
+  syntax priorities _r|->_ > _RangeMap_ .RangeMap
+  syntax non-assoc _r|->_
+```
+
+### Range map lookup
+
+```k
+  syntax KItem ::= RangeMap "[" KItem "]"                    [function, hook(RANGEMAP.lookup), klabel(RangeMap:lookup), symbol]
+```
+
+### Range map lookup with default
+
+```k
+  syntax KItem ::= RangeMap "[" KItem "]" "orDefault" KItem      [function, total, hook(RANGEMAP.lookupOrDefault), klabel(RangeMap:lookupOrDefault)]
+```
+
+### Range map lookup for range of key
+
+```k
+  syntax Range ::= "find_range" "(" RangeMap "," KItem ")"                    [function, hook(RANGEMAP.find_range), klabel(RangeMap:find_range)]
+```
+
+### Range map update
+
+```k
+  syntax RangeMap ::= RangeMap "[" keyRange: Range "<-" value: KItem "]"           [function, klabel(RangeMap:update), symbol, hook(RANGEMAP.updateRng), prefer]
+```
+
+### Range map delete
+
+```k
+  syntax RangeMap ::= RangeMap "[" Range "<-" "undef" "]"     [function, hook(RANGEMAP.removeRng), klabel(_r[_<-undef]), symbol]
+```
+
+### Range map difference
+
+```k
+  syntax RangeMap ::= RangeMap "-RangeMap" RangeMap                 [function, total, hook(RANGEMAP.difference), latex({#1}-_{\it RangeMap}{#2})]
+```
+
+### Multiple range map update
+
+```k
+  syntax RangeMap ::= updateRangeMap(RangeMap, RangeMap)            [function, total, hook(RANGEMAP.updateAll)]
+```
+
+### Multiple range map removal
+
+```k
+  syntax RangeMap ::= removeAll(RangeMap, Set)            [function, total, hook(RANGEMAP.removeAll)]
+```
+
+### Range map keys (as `Set`)
+
+```k
+  syntax Set ::= keys(RangeMap)                      [function, total, hook(RANGEMAP.keys)]
+```
+
+### Range map keys (as `List`)
+
+```k
+  syntax List ::= "keys_list" "(" RangeMap ")"       [function, hook(RANGEMAP.keys_list)]
+```
+
+### Range map key membership
+
+```k
+  syntax Bool ::= KItem "in_keys" "(" RangeMap ")"       [function, total, hook(RANGEMAP.in_keys)]
+```
+
+### Range map values (as `List`)
+
+```k
+  syntax List ::= values(RangeMap)                   [function, hook(RANGEMAP.values)]
+```
+
+### Range map size
+
+```k
+  syntax Int ::= size(RangeMap)                      [function, total, hook(RANGEMAP.size), klabel(sizeRangeMap)]
+```
+
+### Range map inclusion
+
+```k
+  syntax Bool ::= RangeMap "<=RangeMap" RangeMap               [function, total, hook(RANGEMAP.inclusion)]
+```
+
+### Range map choice
+
+```k
+  syntax KItem ::= choice(RangeMap)                      [function, hook(RANGEMAP.choice), klabel(RangeMap:choice)]
+```
+
+### Implementation of range maps
+
+TBD
+
+```k
+endmodule
+```
+
 Sets
 ----
 
