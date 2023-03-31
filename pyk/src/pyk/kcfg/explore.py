@@ -9,13 +9,13 @@ from ..kast.inner import KApply, KLabel, KVariable, Subst
 from ..kast.manip import flatten_label, free_vars
 from ..kore.rpc import KoreClient, KoreServer
 from ..prelude.k import GENERATED_TOP_CELL
-from ..prelude.ml import is_bottom, is_top, mlAnd, mlEquals, mlTop
+from ..prelude.ml import is_bottom, is_top, mlEquals, mlTop
 from ..utils import hash_str, shorten_hashes, single
 from .kcfg import KCFG
 
 if TYPE_CHECKING:
     from pathlib import Path
-    from typing import Any, Callable, Dict, Final, Iterable, List, Optional, Tuple, Union
+    from typing import Any, Dict, Final, Iterable, List, Optional, Tuple, Union
 
     from ..cli_utils import BugReport
     from ..kast import KInner
@@ -261,85 +261,3 @@ class KCFGExplore(ContextManager['KCFGExplore']):
             new_nodes.append(curr_node_id)
             new_depth += section_depth
         return (cfg, tuple(new_nodes))
-
-    def all_path_reachability_prove(
-        self,
-        cfgid: str,
-        cfg: KCFG,
-        cfg_dir: Optional[Path] = None,
-        is_terminal: Optional[Callable[[CTerm], bool]] = None,
-        extract_branches: Optional[Callable[[CTerm], Iterable[KInner]]] = None,
-        max_iterations: Optional[int] = None,
-        execute_depth: Optional[int] = None,
-        cut_point_rules: Iterable[str] = (),
-        terminal_rules: Iterable[str] = (),
-        simplify_init: bool = True,
-        implication_every_block: bool = True,
-    ) -> KCFG:
-        def _write_cfg(_cfg: KCFG) -> None:
-            if cfg_dir is not None:
-                KCFGExplore.write_cfg(cfgid, cfg_dir, _cfg)
-
-        target_node = cfg.get_unique_target()
-        iterations = 0
-
-        while cfg.frontier:
-            _write_cfg(cfg)
-
-            if max_iterations is not None and max_iterations <= iterations:
-                _LOGGER.warning(f'Reached iteration bound {cfgid}: {max_iterations}')
-                break
-            iterations += 1
-            curr_node = cfg.frontier[0]
-
-            if implication_every_block or (is_terminal is not None and is_terminal(curr_node.cterm)):
-                _LOGGER.info(
-                    f'Checking subsumption into target state {cfgid}: {shorten_hashes((curr_node.id, target_node.id))}'
-                )
-                csubst = self.cterm_implies(curr_node.cterm, target_node.cterm)
-                if csubst is not None:
-                    cfg.create_cover(curr_node.id, target_node.id, csubst=csubst)
-                    _LOGGER.info(f'Subsumed into target node {cfgid}: {shorten_hashes((curr_node.id, target_node.id))}')
-                    continue
-
-            if is_terminal is not None:
-                _LOGGER.info(f'Checking terminal {cfgid}: {shorten_hashes(curr_node.id)}')
-                if is_terminal(curr_node.cterm):
-                    _LOGGER.info(f'Terminal node {cfgid}: {shorten_hashes(curr_node.id)}.')
-                    cfg.add_expanded(curr_node.id)
-                    continue
-
-            cfg.add_expanded(curr_node.id)
-
-            _LOGGER.info(f'Advancing proof from node {cfgid}: {shorten_hashes(curr_node.id)}')
-            depth, cterm, next_cterms = self.cterm_execute(
-                curr_node.cterm, depth=execute_depth, cut_point_rules=cut_point_rules, terminal_rules=terminal_rules
-            )
-
-            # Nonsense case.
-            if len(next_cterms) == 1:
-                raise ValueError(f'Found a single successor cterm {cfgid}: {(depth, cterm, next_cterms)}')
-
-            if depth > 0:
-                next_node = cfg.get_or_create_node(cterm)
-                cfg.create_edge(curr_node.id, next_node.id, depth)
-                _LOGGER.info(
-                    f'Found basic block at depth {depth} for {cfgid}: {shorten_hashes((curr_node.id, next_node.id))}.'
-                )
-                curr_node = next_node
-
-            if len(next_cterms) == 0:
-                _LOGGER.info(f'Found stuck node {cfgid}: {shorten_hashes(curr_node.id)}')
-
-            else:
-                branches = list(extract_branches(cterm)) if extract_branches is not None else []
-                if len(branches) != len(next_cterms):
-                    _LOGGER.warning(f'Falling back to manual branch extraction {cfgid}: {shorten_hashes(curr_node.id)}')
-                    branches = [mlAnd(c for c in s.constraints if c not in cterm.constraints) for s in next_cterms]
-                _LOGGER.info(
-                    f'Found {len(branches)} branches for node {cfgid}: {shorten_hashes(curr_node.id)}: {[self.kprint.pretty_print(bc) for bc in branches]}'
-                )
-                cfg.split_on_constraints(curr_node.id, branches)
-
-        _write_cfg(cfg)
-        return cfg
