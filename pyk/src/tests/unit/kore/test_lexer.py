@@ -2,13 +2,13 @@ from typing import Final, List, Tuple
 
 import pytest
 
-from pyk.kore.lexer import KoreLexer, KoreToken
+from pyk.kore.lexer import KoreLexer, TokenType
 
 # Abbreviate for convenience
-TT = KoreToken.Type
+TT = TokenType
 
 
-PASS_TEST_DATA: Final[Tuple[Tuple[str, List[KoreToken.Type]], ...]] = (
+PASS_TEST_DATA: Final[Tuple[Tuple[str, List[TokenType]], ...]] = (
     ('', []),
     (' ', []),
     ('//', []),
@@ -30,7 +30,7 @@ PASS_TEST_DATA: Final[Tuple[Tuple[str, List[KoreToken.Type]], ...]] = (
 
 
 @pytest.mark.parametrize('text,expected', PASS_TEST_DATA, ids=[text for text, _ in PASS_TEST_DATA])
-def test_lexer_success(text: str, expected: List[KoreToken.Type]) -> None:
+def test_lexer_success(text: str, expected: List[TokenType]) -> None:
     # When
     actual = [token.type for token in KoreLexer(text)]
 
