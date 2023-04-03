@@ -12,7 +12,6 @@ from typing import (
     Final,
     Iterable,
     Iterator,
-    List,
     Mapping,
     Optional,
     Tuple,
@@ -24,7 +23,7 @@ from typing import (
 
 from ..dequote import enquoted
 from ..utils import FrozenDict, check_type
-from .lexer import KoreLexer, KoreStringLexer
+from .lexer import KoreLexer
 
 
 @final
@@ -82,18 +81,6 @@ class SetVarId:
             lexer.eof()
         except ValueError as err:
             raise ValueError(f'Expected set variable identifier, found: {value}') from err
-
-
-def decode_kore_str(s: str) -> str:
-    res: List[str] = []
-    for token, _ in KoreStringLexer(s):
-        if token == '\\f':
-            res += '\f'
-        elif token == '\\"':
-            res += '"'
-        else:
-            res += token.encode('ascii').decode('unicode-escape')
-    return ''.join(res)
 
 
 # TODO Constructor @overloads
