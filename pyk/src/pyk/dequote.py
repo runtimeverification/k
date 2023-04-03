@@ -25,6 +25,8 @@ CPOINT_TABLE: Final = {
     'U': 8,
 }
 
+HEX_TABLE = {c: int(c, 16) for c in '0123456789abcdefABCDEF'}
+
 
 def dequoted(it: Iterable[str]) -> Iterator[str]:
     acc = 0
@@ -32,13 +34,17 @@ def dequoted(it: Iterable[str]) -> Iterator[str]:
     state = NORMAL
     for c in it:
         if state == CPOINT:
+            if c not in HEX_TABLE:
+                raise ValueError(f'Expected hex digit, got: {c}')
+
             acc *= 16
-            acc += int(c, 16)
+            acc += HEX_TABLE[c]
             cnt -= 1
             if cnt == 0:
                 yield chr(acc)
                 acc = 0
                 state = NORMAL
+
         elif state == ESCAPE:
             if c in CPOINT_TABLE:
                 cnt = CPOINT_TABLE[c]
@@ -48,14 +54,17 @@ def dequoted(it: Iterable[str]) -> Iterator[str]:
                 state = NORMAL
             else:
                 raise ValueError(fr'Unexpected escape sequence: \{c}')
+
         elif c == '\\':
             state = ESCAPE
+
         else:
             yield c
 
-    if state != NORMAL:
-        assert state == CPOINT
-        raise ValueError('Invalid Unicode code point')
+    if state == CPOINT:
+        raise ValueError('Incomplete Unicode code point')
+    elif state == ESCAPE:
+        raise ValueError('Incomplete escape sequence')
 
 
 ENQUOTE_TABLE: Final = {
