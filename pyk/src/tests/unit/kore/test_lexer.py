@@ -2,7 +2,7 @@ from typing import Final, List, Tuple
 
 import pytest
 
-from pyk.kore.lexer import KoreLexer, TokenType
+from pyk.kore.lexer import TokenType, kore_lexer
 
 # Abbreviate for convenience
 TT = TokenType
@@ -32,7 +32,7 @@ PASS_TEST_DATA: Final[Tuple[Tuple[str, List[TokenType]], ...]] = (
 @pytest.mark.parametrize('text,expected', PASS_TEST_DATA, ids=[text for text, _ in PASS_TEST_DATA])
 def test_lexer_success(text: str, expected: List[TokenType]) -> None:
     # When
-    actual = [token.type for token in KoreLexer(text)]
+    actual = [token.type for token in kore_lexer(text)]
 
     # Then
     assert actual == expected + [TT.EOF]
@@ -42,4 +42,4 @@ def test_lexer_success(text: str, expected: List[TokenType]) -> None:
 def test_lexer_failure(text: str) -> None:
     # Then
     with pytest.raises(ValueError):
-        list(KoreLexer(text))
+        list(kore_lexer(text))
