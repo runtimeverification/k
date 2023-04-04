@@ -58,14 +58,12 @@ jobs:
           build-package: package/debian/build-package jammy
           test-package: package/debian/test-package
       - name: 'Upload Package to Release'
-        uses: actions/upload-release-asset@v1
+        uses: xresloader/upload-to-github-release@v1.3.12
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
         with:
-          asset_content_type: 'application/gzip'
-          asset_name: kframework_amd64_ubuntu_jammy.deb
-          asset_path: ./kframework_amd64_ubuntu_jammy.deb
-          upload_url: ${{ github.event.release.upload_url }}
+          file: ./kframework_amd64_ubuntu_jammy.deb
+
       - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
         env:
@@ -103,14 +101,12 @@ jobs:
           build-package: package/debian/build-package focal
           test-package: package/debian/test-package
       - name: 'Upload Package to Release'
-        uses: actions/upload-release-asset@v1
+        uses: xresloader/upload-to-github-release@v1.3.12
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
         with:
-          asset_content_type: 'application/gzip'
-          asset_name: kframework_amd64_ubuntu_focal.deb
-          asset_path: ./kframework_amd64_ubuntu_focal.deb
-          upload_url: ${{ github.event.release.upload_url }}
+          file: ./kframework_amd64_ubuntu_focal.deb
+
       - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
         env:
@@ -148,14 +144,11 @@ jobs:
           build-package: package/debian/build-package bullseye
           test-package: package/debian/test-package
       - name: 'Upload Package to Release'
-        uses: actions/upload-release-asset@v1
+        uses: xresloader/upload-to-github-release@v1.3.12
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
         with:
-          asset_content_type: 'application/gzip'
-          asset_name: kframework_amd64_debian_bullseye.deb
-          asset_path: ./kframework_amd64_debian_bullseye.deb
-          upload_url: ${{ github.event.release.upload_url }}
+          file: ./kframework_amd64_debian_bullseye.deb
 
   arch:
     name: 'Arch Linux Package'
@@ -173,14 +166,11 @@ jobs:
           test-package: package/arch/test-package
           pkg-name: kframework_arch_x86_64.pkg.tar.zst
       - name: 'Upload Package to Release'
-        uses: actions/upload-release-asset@v1
+        uses: xresloader/upload-to-github-release@v1.3.12
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
         with:
-          asset_content_type: 'application/gzip'
-          asset_name: kframework_arch_x86_64.pkg.tar.zst
-          asset_path: ./kframework_arch_x86_64.pkg.tar.zst
-          upload_url: ${{ github.event.release.upload_url }}
+          file: ./kframework_arch_x86_64.pkg.tar.zst
 
   macos-build:
     name: 'Build MacOS Package'
@@ -318,14 +308,11 @@ jobs:
           kompile test.k --backend haskell
 
       - name: Upload bottle to release
-        uses: actions/upload-release-asset@v1
+        uses: xresloader/upload-to-github-release@v1.3.12
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          asset_content_type: 'application/gzip'
-          asset_name: ${{ needs.macos-build.outputs.bottle_path_remote }}
-          asset_path: homebrew-k-old/${{ needs.macos-build.outputs.bottle_path }}
-          upload_url: ${{ github.event.release.upload_url }}
+          file: homebrew-k-old/${{ needs.macos-build.outputs.bottle_path }}
 
       - name: Add ssh key
         uses: shimataro/ssh-key-action@v2
