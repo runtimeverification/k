@@ -23,7 +23,7 @@ from typing import (
 
 from ..dequote import enquoted
 from ..utils import FrozenDict, check_type
-from .lexer import KoreLexer
+from .lexer import check_id, check_set_var_id, check_symbol_id
 
 
 @final
@@ -32,17 +32,8 @@ class Id:
     value: str
 
     def __init__(self, value: str):
-        self.check(value)
+        check_id(value)
         object.__setattr__(self, 'value', value)
-
-    @staticmethod
-    def check(value: str) -> None:
-        lexer = KoreLexer(value)
-        try:
-            lexer.id()
-            lexer.eof()
-        except ValueError as err:
-            raise ValueError(f'Expected identifier, found: {value}') from err
 
 
 @final
@@ -51,17 +42,8 @@ class SymbolId:
     value: str
 
     def __init__(self, value: str):
-        self.check(value)
+        check_symbol_id(value)
         object.__setattr__(self, 'value', value)
-
-    @staticmethod
-    def check(value: str) -> None:
-        lexer = KoreLexer(value)
-        try:
-            lexer.symbol_id()
-            lexer.eof()
-        except ValueError as err:
-            raise ValueError(f'Expected symbol identifier, found: {value}') from err
 
 
 @final
@@ -70,17 +52,8 @@ class SetVarId:
     value: str
 
     def __init__(self, value: str):
-        self.check(value)
+        check_set_var_id(value)
         object.__setattr__(self, 'value', value)
-
-    @staticmethod
-    def check(value: str) -> None:
-        lexer = KoreLexer(value)
-        try:
-            lexer.set_var_id()
-            lexer.eof()
-        except ValueError as err:
-            raise ValueError(f'Expected set variable identifier, found: {value}') from err
 
 
 # TODO Constructor @overloads

@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from enum import Enum, auto
-from itertools import chain
 from typing import TYPE_CHECKING, Iterator, NamedTuple
 
 if TYPE_CHECKING:
-    from typing import Final, Iterable, List, Optional
+    from typing import Callable, Final, Iterable, Mapping, Optional, Tuple
 
 
 class TokenType(Enum):
@@ -61,229 +60,232 @@ class KoreToken(NamedTuple):
     type: TokenType
 
 
-class KoreLexer(Iterator[KoreToken]):
-    _EOF_TOKEN: Final = KoreToken('', TokenType.EOF)
+_EOF_TOKEN: Final = KoreToken('', TokenType.EOF)
+_COLON_TOKEN: Final = KoreToken(':', TokenType.COLON)
+_WALRUS_TOKEN: Final = KoreToken(':=', TokenType.WALRUS)
 
-    _ML_SYMBOLS: Final = {
-        r'\top': KoreToken(r'\top', TokenType.ML_TOP),
-        r'\bottom': KoreToken(r'\bottom', TokenType.ML_BOTTOM),
-        r'\not': KoreToken(r'\not', TokenType.ML_NOT),
-        r'\and': KoreToken(r'\and', TokenType.ML_AND),
-        r'\or': KoreToken(r'\or', TokenType.ML_OR),
-        r'\implies': KoreToken(r'\implies', TokenType.ML_IMPLIES),
-        r'\iff': KoreToken(r'\iff', TokenType.ML_IFF),
-        r'\exists': KoreToken(r'\exists', TokenType.ML_EXISTS),
-        r'\forall': KoreToken(r'\forall', TokenType.ML_FORALL),
-        r'\mu': KoreToken(r'\mu', TokenType.ML_MU),
-        r'\nu': KoreToken(r'\nu', TokenType.ML_NU),
-        r'\ceil': KoreToken(r'\ceil', TokenType.ML_CEIL),
-        r'\floor': KoreToken(r'\floor', TokenType.ML_FLOOR),
-        r'\equals': KoreToken(r'\equals', TokenType.ML_EQUALS),
-        r'\in': KoreToken(r'\in', TokenType.ML_IN),
-        r'\next': KoreToken(r'\next', TokenType.ML_NEXT),
-        r'\rewrites': KoreToken(r'\rewrites', TokenType.ML_REWRITES),
-        r'\dv': KoreToken(r'\dv', TokenType.ML_DV),
-        r'\left-assoc': KoreToken(r'\left-assoc', TokenType.ML_LEFT_ASSOC),
-        r'\right-assoc': KoreToken(r'\right-assoc', TokenType.ML_RIGHT_ASSOC),
-    }
+_ML_SYMBOLS: Final = {
+    r'\top': KoreToken(r'\top', TokenType.ML_TOP),
+    r'\bottom': KoreToken(r'\bottom', TokenType.ML_BOTTOM),
+    r'\not': KoreToken(r'\not', TokenType.ML_NOT),
+    r'\and': KoreToken(r'\and', TokenType.ML_AND),
+    r'\or': KoreToken(r'\or', TokenType.ML_OR),
+    r'\implies': KoreToken(r'\implies', TokenType.ML_IMPLIES),
+    r'\iff': KoreToken(r'\iff', TokenType.ML_IFF),
+    r'\exists': KoreToken(r'\exists', TokenType.ML_EXISTS),
+    r'\forall': KoreToken(r'\forall', TokenType.ML_FORALL),
+    r'\mu': KoreToken(r'\mu', TokenType.ML_MU),
+    r'\nu': KoreToken(r'\nu', TokenType.ML_NU),
+    r'\ceil': KoreToken(r'\ceil', TokenType.ML_CEIL),
+    r'\floor': KoreToken(r'\floor', TokenType.ML_FLOOR),
+    r'\equals': KoreToken(r'\equals', TokenType.ML_EQUALS),
+    r'\in': KoreToken(r'\in', TokenType.ML_IN),
+    r'\next': KoreToken(r'\next', TokenType.ML_NEXT),
+    r'\rewrites': KoreToken(r'\rewrites', TokenType.ML_REWRITES),
+    r'\dv': KoreToken(r'\dv', TokenType.ML_DV),
+    r'\left-assoc': KoreToken(r'\left-assoc', TokenType.ML_LEFT_ASSOC),
+    r'\right-assoc': KoreToken(r'\right-assoc', TokenType.ML_RIGHT_ASSOC),
+}
 
-    _KEYWORDS: Final = {
-        'module': KoreToken('module', TokenType.KW_MODULE),
-        'endmodule': KoreToken('endmodule', TokenType.KW_ENDMODULE),
-        'import': KoreToken('import', TokenType.KW_IMPORT),
-        'sort': KoreToken('sort', TokenType.KW_SORT),
-        'hooked-sort': KoreToken('hooked-sort', TokenType.KW_HOOKED_SORT),
-        'symbol': KoreToken('symbol', TokenType.KW_SYMBOL),
-        'hooked-symbol': KoreToken('hooked-symbol', TokenType.KW_HOOKED_SYMBOL),
-        'axiom': KoreToken('axiom', TokenType.KW_AXIOM),
-        'claim': KoreToken('claim', TokenType.KW_CLAIM),
-        'alias': KoreToken('alias', TokenType.KW_ALIAS),
-        'where': KoreToken('where', TokenType.KW_WHERE),
-    }
+_KEYWORDS: Final = {
+    'module': KoreToken('module', TokenType.KW_MODULE),
+    'endmodule': KoreToken('endmodule', TokenType.KW_ENDMODULE),
+    'import': KoreToken('import', TokenType.KW_IMPORT),
+    'sort': KoreToken('sort', TokenType.KW_SORT),
+    'hooked-sort': KoreToken('hooked-sort', TokenType.KW_HOOKED_SORT),
+    'symbol': KoreToken('symbol', TokenType.KW_SYMBOL),
+    'hooked-symbol': KoreToken('hooked-symbol', TokenType.KW_HOOKED_SYMBOL),
+    'axiom': KoreToken('axiom', TokenType.KW_AXIOM),
+    'claim': KoreToken('claim', TokenType.KW_CLAIM),
+    'alias': KoreToken('alias', TokenType.KW_ALIAS),
+    'where': KoreToken('where', TokenType.KW_WHERE),
+}
 
-    _SIMPLE_CHARS: Final = {
-        ',': KoreToken(',', TokenType.COMMA),
-        '(': KoreToken('(', TokenType.LPAREN),
-        ')': KoreToken(')', TokenType.RPAREN),
-        '{': KoreToken('{', TokenType.LBRACE),
-        '}': KoreToken('}', TokenType.RBRACE),
-        '[': KoreToken('[', TokenType.LBRACK),
-        ']': KoreToken(']', TokenType.RBRACK),
-    }
+_SIMPLE_CHARS: Final = {
+    ',': KoreToken(',', TokenType.COMMA),
+    '(': KoreToken('(', TokenType.LPAREN),
+    ')': KoreToken(')', TokenType.RPAREN),
+    '{': KoreToken('{', TokenType.LBRACE),
+    '}': KoreToken('}', TokenType.RBRACE),
+    '[': KoreToken('[', TokenType.LBRACK),
+    ']': KoreToken(']', TokenType.RBRACK),
+}
 
-    _ID_FIRST_CHARS: Final = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
-    _ID_CHARS: Final = set("01234567890'-").union(_ID_FIRST_CHARS)
+_WHITESPACE_CHARS: Final = {' ', '\t', '\n', '\r'}
+_ID_FIRST_CHARS: Final = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+_ID_CHARS: Final = set("01234567890'-").union(_ID_FIRST_CHARS)
 
-    _iter: Iterator[Optional[str]]  # TODO maybe '' can be the sentinel
-    _la: Optional[str]
-    _done: bool
 
-    def __init__(self, s: str):
-        self._iter = iter(chain(s, [None]))
-        self._la = next(self._iter)
-        self._done = False
+def _whitespace(la: str, it: Iterator[str]) -> Tuple[str, None]:
+    la = next(it, '')
+    while la in _WHITESPACE_CHARS:
+        la = next(it, '')
+    return la, None
 
-    def __next__(self) -> KoreToken:
+
+def _comment(la: str, it: Iterator[str]) -> Tuple[str, None]:
+    # line comment
+    la = next(it, '')
+    if la == '/':
+        while la and la != '\n':
+            la = next(it, '')
+        if la:
+            la = next(it, '')
+
+    # block comment
+    elif la == '*':
+        la = next(it)
         while True:
-            if self._la is None:
-                if self._done:
-                    raise StopIteration
-
-                self._done = True
-                return self._eof_token()
-
-            if self._la.isspace():
-                self._consume()
-                continue
-
-            if self._la == '/':
-                self._comment()
-                continue
-
-            if self._la in self._SIMPLE_CHARS:
-                return self._simple_char_token()
-
-            if self._la in self._ID_FIRST_CHARS:
-                return self._id_or_keyword_token()
-
-            if self._la == '\\':
-                return self._symbol_id_or_ml_symbol_token()
-
-            if self._la == '@':
-                return self._set_var_id_token()
-
-            if self._la == ':':
-                return self._colon_or_walrus_token()
-
-            if self._la == '"':
-                return self._string_token()
-
-            raise ValueError(f'Unexpected character: {self._la}')
-
-    def eof(self) -> None:
-        self._eof_token()
-
-    def id(self) -> str:
-        name = self._id_text()
-        if name in self._KEYWORDS:
-            raise ValueError(f'Expected identifier, found keyword: {name}')
-        return name
-
-    def symbol_id(self) -> str:
-        if self._la == '\\':
-            return self._match('\\') + self._id_text()
-        return self.id()
-
-    def set_var_id(self) -> str:
-        return self._match('@') + self._id_text()
-
-    def _consume(self) -> str:
-        if not self._la:
-            raise ValueError('Unexpected <EOF>')
-
-        consumed = self._la
-        self._la = next(self._iter)
-        return consumed
-
-    def _match(self, c: str) -> str:
-        if self._la != c:
-            actual = '<EOF>' if self._la is None else self._la
-            raise ValueError(f'Expected {c}, found: {actual}')
-
-        return self._consume()
-
-    def _match_any(self, cs: Iterable[str]) -> str:
-        if self._la is None or self._la not in cs:
-            expected = sorted(cs)
-            actual = '<EOF>' if self._la is None else self._la
-            raise ValueError(f'Expected {expected}, found: {actual}')
-
-        return self._consume()
-
-    def _comment(self) -> None:
-        self._match('/')
-        char = self._match_any({'/', '*'})
-
-        if char == '/':
-            self._line_comment_rest()
-        elif char == '*':
-            self._block_comment_rest()
-        else:
-            raise AssertionError()
-
-    def _line_comment_rest(self) -> None:
-        while self._la is not None and self._la != '\n':
-            self._consume()
-
-        if self._la:
-            assert self._la == '\n'
-            self._consume()
-
-    def _block_comment_rest(self) -> None:
-        while True:
-            while self._la != '*':
-                self._consume()
-
-            self._consume()
-            if self._la == '/':
-                self._consume()
+            while la != '*':
+                la = next(it)
+            la = next(it)
+            if la == '/':
+                la = next(it, '')
                 break
 
-    def _eof_token(self) -> KoreToken:
-        if self._la is not None:
-            raise ValueError(f'Expected <EOF>, found: {self._la}')
-        return self._EOF_TOKEN
+    # mismatch
+    else:
+        raise ValueError(f'Expected / or *, got: {la}')
 
-    def _simple_char_token(self) -> KoreToken:
-        char = self._match_any(self._SIMPLE_CHARS)
-        return self._SIMPLE_CHARS[char]
+    return la, None
 
-    def _colon_or_walrus_token(self) -> KoreToken:
-        self._match(':')
 
-        if self._la == '=':
-            self._consume()
-            return KoreToken(':=', TokenType.WALRUS)
+def _simple_char(la: str, it: Iterator[str]) -> Tuple[str, KoreToken]:
+    return next(it, ''), _SIMPLE_CHARS[la]
 
-        return KoreToken(':', TokenType.COLON)
 
-    def _string_token(self) -> KoreToken:
-        buf: List[str] = []
-        buf += self._match('"')
-        while self._la != '"':
-            if self._la == '\\':
-                buf += self._consume()
-            buf += self._consume()
-        buf += self._consume()
+def _colon_or_walrus(la: str, it: Iterator[str]) -> Tuple[str, KoreToken]:
+    la = next(it, '')
+    if la == '=':
+        token = _WALRUS_TOKEN
+        la = next(it, '')
+    else:
+        token = _COLON_TOKEN
+    return la, token
 
-        return KoreToken(''.join(buf), TokenType.STRING)
 
-    def _symbol_id_or_ml_symbol_token(self) -> KoreToken:
-        self._match('\\')
-        name = self._id_text()
-        symbol_id = f'\\{name}'
+def _id_or_keyword(la: str, it: Iterator[str]) -> Tuple[str, KoreToken]:
+    buf = [la]
+    la = next(it, '')
+    while la in _ID_CHARS:
+        buf.append(la)
+        la = next(it, '')
+    name = ''.join(buf)
+    if name in _KEYWORDS:
+        token = _KEYWORDS[name]
+    else:
+        token = KoreToken(name, TokenType.ID)
+    return la, token
 
-        if symbol_id in self._ML_SYMBOLS:
-            return self._ML_SYMBOLS[symbol_id]
 
-        return KoreToken(symbol_id, TokenType.SYMBOL_ID)
+def _symbol_or_ml_conn(la: str, it: Iterator[str]) -> Tuple[str, KoreToken]:
+    buf = [la]
+    la = next(it)
+    if la not in _ID_FIRST_CHARS:
+        raise ValueError(f'Expected letter, got: {la}')
+    buf.append(la)
+    la = next(it, '')
+    while la in _ID_CHARS:
+        buf.append(la)
+        la = next(it, '')
+    symbol = ''.join(buf)
+    if symbol in _ML_SYMBOLS:
+        token = _ML_SYMBOLS[symbol]
+    else:
+        token = KoreToken(symbol, TokenType.SYMBOL_ID)
+    return la, token
 
-    def _set_var_id_token(self) -> KoreToken:
-        self._match('@')
-        name = self._id_text()
-        return KoreToken(f'@{name}', TokenType.SET_VAR_ID)
 
-    def _id_or_keyword_token(self) -> KoreToken:
-        name = self._id_text()
+def _set_var_id(la: str, it: Iterator[str]) -> Tuple[str, KoreToken]:
+    buf = [la]
+    la = next(it)
+    if la not in _ID_FIRST_CHARS:
+        raise ValueError(f'Expected letter, got: {la}')
+    buf.append(la)
+    la = next(it, '')
+    while la in _ID_CHARS:
+        buf.append(la)
+        la = next(it, '')
+    return la, KoreToken(''.join(buf), TokenType.SET_VAR_ID)
 
-        if name in self._KEYWORDS:
-            return self._KEYWORDS[name]
 
-        return KoreToken(name, TokenType.ID)
+def _string(la: str, it: Iterator[str]) -> Tuple[str, KoreToken]:
+    buf = [la]
+    la = next(it)
+    while la != '"':
+        if la == '\\':
+            buf.append(la)
+            la = next(it)
+        buf.append(la)
+        la = next(it)
+    buf.append(la)
+    return next(it, ''), KoreToken(''.join(buf), TokenType.STRING)
 
-    def _id_text(self) -> str:
-        buf: List[str] = []
-        buf += self._match_any(self._ID_FIRST_CHARS)
-        while self._la in self._ID_CHARS:
-            buf += self._consume()
-        return ''.join(buf)
+
+_DISPATCH_TABLE: Final[Mapping[str, Callable[[str, Iterator[str]], Tuple[str, Optional[KoreToken]]]]] = {
+    '/': _comment,
+    ':': _colon_or_walrus,
+    '"': _string,
+    '@': _set_var_id,
+    '\\': _symbol_or_ml_conn,
+    **{c: _whitespace for c in _WHITESPACE_CHARS},
+    **{c: _id_or_keyword for c in _ID_FIRST_CHARS},
+    **{c: _simple_char for c in _SIMPLE_CHARS},
+}
+
+
+def kore_lexer(it: Iterable[str]) -> Iterator[KoreToken]:
+    it = iter(it)
+    la = next(it, '')
+    while True:
+        if not la:
+            yield _EOF_TOKEN
+            return
+
+        try:
+            next_state = _DISPATCH_TABLE[la]
+        except KeyError as err:
+            raise ValueError(f'Unexpected character: {la}') from err
+
+        try:
+            la, token = next_state(la, it)
+            if token:
+                yield token
+        except StopIteration as err:
+            raise ValueError('Unexpected end of file') from err
+
+
+def check_id(value: str) -> None:
+    lexer = kore_lexer(value)
+    token = next(lexer)
+    if token.type == TokenType.ID:
+        token = next(lexer)
+        if token.type == TokenType.EOF:
+            return
+
+    raise ValueError(f'Expected identifier, found: {value}')
+
+
+def check_symbol_id(value: str) -> None:
+    if value in _ML_SYMBOLS:  # enables uniform handling of app and ml connectives
+        return
+
+    lexer = kore_lexer(value)
+    token = next(lexer)
+    if token.type == TokenType.ID or token.type == TokenType.SYMBOL_ID:
+        token = next(lexer)
+        if token.type == TokenType.EOF:
+            return
+
+    raise ValueError(f'Expected symbol identifier, found: {value}')
+
+
+def check_set_var_id(value: str) -> None:
+    lexer = kore_lexer(value)
+    token = next(lexer)
+    if token.type == TokenType.SET_VAR_ID:
+        token = next(lexer)
+        if token.type == TokenType.EOF:
+            return
+
+    raise ValueError(f'Expected set variable identifier, found: {value}')

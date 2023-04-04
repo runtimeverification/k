@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, TypeVar
 
 from ..utils import dequote_str
-from .lexer import KoreLexer, TokenType
+from .lexer import TokenType, kore_lexer
 from .syntax import (
     DV,
     AliasDecl,
@@ -113,7 +113,7 @@ class KoreParser:
     _la: KoreToken
 
     def __init__(self, text: str):
-        self._iter = KoreLexer(text)
+        self._iter = kore_lexer(text)
         self._la = next(self._iter)
 
     @property
