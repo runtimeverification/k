@@ -118,5 +118,8 @@ class KProveTest(KompiledTest):
 class KCFGExploreTest(KProveTest):
     @pytest.fixture
     def kcfg_explore(self, kprove: KProve) -> Iterator[KCFGExplore]:
-        with KCFGExplore(kprove, bug_report=kprove._bug_report) as kcfg_explore:
+        with KCFGExplore(
+            kprove,
+            bug_report=kprove._bug_report,
+        ) as kcfg_explore:
             yield kcfg_explore

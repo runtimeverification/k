@@ -8,6 +8,7 @@ from ..cterm import CSubst, CTerm
 from ..kast.inner import KApply, KLabel, KVariable, Subst
 from ..kast.manip import flatten_label, free_vars
 from ..kore.rpc import KoreClient, KoreServer
+from ..ktool.kprove import KoreExecLogFormat
 from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.ml import is_bottom, is_top, mlEquals, mlTop
 from ..utils import hash_str, shorten_hashes, single
@@ -46,6 +47,9 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         smt_timeout: Optional[int] = None,
         smt_retry_limit: Optional[int] = None,
         bug_report: Optional[BugReport] = None,
+        haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
+        haskell_log_entries: Iterable[str] = (),
+        log_axioms_file: Optional[Path] = None,
     ):
         self.kprint = kprint
         self._port = port
@@ -53,6 +57,9 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         self._smt_timeout = smt_timeout
         self._smt_retry_limit = smt_retry_limit
         self._bug_report = bug_report
+        self._haskell_log_format = haskell_log_format
+        self._haskell_log_entries = haskell_log_entries
+        self._log_axioms_file = log_axioms_file
         self._kore_server = None
         self._kore_client = None
         self._rpc_closed = False
@@ -93,6 +100,9 @@ class KCFGExplore(ContextManager['KCFGExplore']):
                 command=self._kore_rpc_command,
                 smt_timeout=self._smt_timeout,
                 smt_retry_limit=self._smt_retry_limit,
+                haskell_log_format=self._haskell_log_format,
+                haskell_log_entries=self._haskell_log_entries,
+                log_axioms_file=self._log_axioms_file,
             )
         if not self._kore_client:
             self._kore_client = KoreClient('localhost', self._kore_server._port, bug_report=self._bug_report)

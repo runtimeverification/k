@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 _LOG_FORMAT: Final = '%(levelname)s %(name)s - %(message)s'
 _LOGGER: Final = logging.getLogger(__name__)
 
-_HASKELL_LOG_ENTRY_REGEXP: Final = re.compile(r'kore-exec: \[\d*\] Debug \(([a-zA-Z]*)\):(.*)')
+_HASKELL_LOG_ENTRY_REGEXP: Final = re.compile(r'(kore-exec|kore-rpc): \[\d*\] Debug \(([a-zA-Z]*)\):(.*)')
 
 
 class HaskellLogEntry(Enum):
@@ -65,8 +65,8 @@ def _parse_haskell_oneline_log(log_entry: str) -> Optional[Tuple[HaskellLogEntry
     matches = _HASKELL_LOG_ENTRY_REGEXP.match(log_entry)
     try:
         assert matches
-        entry = matches.groups()[0]
-        location_str = matches.groups()[1].strip()
+        entry = matches.groups()[1]
+        location_str = matches.groups()[2].strip()
         return HaskellLogEntry(entry), location_str
     except (AssertionError, KeyError, ValueError):
         return None
