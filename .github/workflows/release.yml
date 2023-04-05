@@ -18,6 +18,36 @@ jobs:
     outputs:
       release_id: ${{ steps.release.outputs.release_id }}
 
+  source-tarball:
+    name: 'Create source tarball'
+    runs-on: ubuntu-latest
+    environment: production
+    needs: set-release-id
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: 'Create source tarball'
+        env:
+          RELEASE_ID: ${{ needs.set-release-id.outputs.release_id }}
+        run: |
+          set -x
+          find . -name .git | xargs rm -r
+          CURDIR=$(pwd)
+          cd ..
+          tar czvf kframework-${RELEASE_ID}-src.tar.gz
+          mv kframework-${RELEASE_ID}-src.tar.gz ${CURDIR}/
+      - name: 'Upload Source Tarball to Release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
+        with:
+          asset_content_type: 'application/gzip'
+          asset_name: kframework-${{ needs.set-release-id.outputs.release_id }}-src.tar.gz
+          asset_path: kframework-${{ needs.set-release-id.outputs.release_id }}-src.tar.gz
+          upload_url: ${{ github.event.release.upload_url }}
+
   nix-release:
     name: 'Nix Release'
     runs-on: ubuntu-20.04
@@ -354,7 +384,7 @@ jobs:
     name: 'Publish Release'
     runs-on: ubuntu-20.04
     environment: production
-    needs: [nix-release, macos-build, macos-test, ubuntu-jammy, ubuntu-focal, debian-bullseye, set-release-id, arch]
+    needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, ubuntu-focal, debian-bullseye, set-release-id, arch]
     steps:
       - name: Publish release
         uses: actions/github-script@v4
