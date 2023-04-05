@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, ContextManager, final
 from psutil import Process
 
 from ..cli_utils import check_dir_path, check_file_path
+from ..ktool.kprove import KoreExecLogFormat
 from ..utils import filter_none
 from .syntax import And, Pattern, SortApp, kore_term
 
@@ -441,6 +442,9 @@ class KoreServer(ContextManager['KoreServer']):
         smt_reset_interval: Optional[int] = None,
         command: Union[str, Iterable[str]] = 'kore-rpc',
         bug_report: Optional[BugReport] = None,
+        haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
+        haskell_log_entries: Iterable[str] = (),
+        log_axioms_file: Optional[Path] = None,
     ):
         kompiled_dir = Path(kompiled_dir)
         check_dir_path(kompiled_dir)
@@ -465,6 +469,20 @@ class KoreServer(ContextManager['KoreServer']):
             args += ['--smt-retry-limit', str(smt_retry_limit)]
         if smt_reset_interval:
             args += ['--smt-reset-interval', str(smt_reset_interval)]
+
+        haskell_log_args = (
+            [
+                '--log',
+                str(log_axioms_file),
+                '--log-format',
+                haskell_log_format.value,
+                '--log-entries',
+                ','.join(haskell_log_entries),
+            ]
+            if log_axioms_file
+            else []
+        )
+        args += haskell_log_args
 
         _LOGGER.info(f'Starting KoreServer: {" ".join(args)}')
         if bug_report is not None:
