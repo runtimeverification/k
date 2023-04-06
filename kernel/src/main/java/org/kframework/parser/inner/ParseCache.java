@@ -1,6 +1,7 @@
-// Copyright (c) 2015-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.inner;
 
+import org.kframework.attributes.Source;
 import org.kframework.definition.Module;
 import org.kframework.kore.K;
 import org.kframework.utils.errorsystem.KEMException;
@@ -39,9 +40,20 @@ public class ParseCache implements Serializable {
         private K parse;
         private final Set<KEMException> warnings;
 
-        public ParsedSentence(K parse, Set<KEMException> warnings) {
+        private final Set<KEMException> errors;
+
+        private final int startLine;
+        private final int startColumn;
+
+        private final Source source;
+
+        public ParsedSentence(K parse, Set<KEMException> warnings, Set<KEMException> errors, int startLine, int startColumn, Source source) {
             this.parse = parse;
             this.warnings = warnings;
+            this.errors = errors;
+            this.startLine = startLine;
+            this.startColumn = startColumn;
+            this.source = source;
         }
 
         public K getParse() {
@@ -50,6 +62,22 @@ public class ParseCache implements Serializable {
 
         public Set<KEMException> getWarnings() {
             return warnings;
+        }
+
+        public Set<KEMException> getErrors() {
+            return errors;
+        }
+
+        public int getStartLine() {
+            return startLine;
+        }
+
+        public int getStartColumn() {
+            return startColumn;
+        }
+
+        public Source getSource() {
+            return source;
         }
     }
 }

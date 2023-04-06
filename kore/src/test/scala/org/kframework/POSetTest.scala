@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework
 
 import org.kframework.utils.errorsystem.KEMException

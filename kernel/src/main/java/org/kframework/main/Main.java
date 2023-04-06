@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.main;
 
 import com.google.inject.Guice;
@@ -37,6 +37,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.concurrent.ExecutionException;
 
 public class Main {
 
@@ -149,6 +150,13 @@ public class Main {
         List<Module> modules = new ArrayList<>();
 
             switch (tool) {
+                case "-klsp":
+                    try {
+                        org.kframework.lsp.KLanguageServerLauncher.startServer(System.in, System.out);
+                    } catch (InterruptedException | ExecutionException e) {
+                        throw new RuntimeException(e);
+                    }
+                    break;
                 case "-kserver":
                     modules.addAll(KServerFrontEnd.getModules());
                     break;
@@ -180,15 +188,6 @@ public class Main {
                     modules.addAll(KRunFrontEnd.getModules());
                     for (KModule kModule : kModules) {
                         List<Module> ms = kModule.getKRunModules();
-                        if (ms != null) {
-                            modules.addAll(ms);
-                        }
-                    }
-                    break;
-                case "-kprove-legacy":
-                    modules.addAll(KProveFrontEnd.getModules());
-                    for (KModule kModule : kModules) {
-                        List<Module> ms = kModule.getKProveModules();
                         if (ms != null) {
                             modules.addAll(ms);
                         }

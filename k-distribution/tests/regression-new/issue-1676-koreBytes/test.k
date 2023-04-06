@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 // testing that krun pretty prints corectly Bytes
 // kx should replace krun though, so if this test
 // prevents a future upgrade, it should be removed

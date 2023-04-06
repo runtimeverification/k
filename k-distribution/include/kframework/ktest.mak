@@ -1,5 +1,7 @@
 SHELL=/bin/bash
 
+UNAME := $(shell uname)
+
 # path to the current makefile
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # path to binary directory of this distribution
@@ -11,7 +13,6 @@ KRUN=${K_BIN}/krun
 # and kdep
 KDEP=${K_BIN}/kdep
 # and kprove
-KPROVE_LEGACY=${K_BIN}/kprove-legacy
 KPROVE=${K_BIN}/kprove
 # and kbmc
 KBMC=${K_BIN}/kbmc
@@ -53,12 +54,16 @@ KOMPILE_BACKEND?=llvm
 # check if .k file exists, if not, check if .md file exists
 # if not, default to .k to give error message
 SOURCE_EXT?=$(or $(and $(wildcard $(DEF).k), k), $(or $(and $(wildcard $(DEF).md), md), k))
+
+ifeq ($(UNAME), Darwin)
+	KOMPILE_FLAGS+=--no-haskell-binary
+endif
+
 KOMPILE_FLAGS+=--no-exc-wrap
 KPROVE_FLAGS+=--no-exc-wrap
 KRUN_FLAGS+=--no-exc-wrap
 
 KRUN_OR_LEGACY=$(KRUN)
-KPROVE_OR_LEGACY=$(KPROVE_LEGACY)
 
 CHECK?=| diff -
 REMOVE_PATHS=| sed 's!'`pwd`'/\(\./\)\{0,2\}!!g'
@@ -118,16 +123,16 @@ endif
 
 %-spec.k %-spec.md: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
-	$(KPROVE_OR_LEGACY) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_PROVER_ERRORS) $(REMOVE_PATHS) $(CHECK) $@.out
+	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_PROVER_ERRORS) $(REMOVE_PATHS) $(CHECK) $@.out
 else
-	$(KPROVE_OR_LEGACY) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_PROVER_ERRORS) $(REMOVE_PATHS) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_PROVER_ERRORS) $(REMOVE_PATHS) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %-broken-spec.k %-broken-spec.md: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
-	$(KPROVE_OR_LEGACY) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_ERRORS) $(REMOVE_PATHS) $(CHECK) $@.out
+	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_ERRORS) $(REMOVE_PATHS) $(CHECK) $@.out
 else
-	$(KPROVE_OR_LEGACY) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_ERRORS) $(REMOVE_PATHS) $(CHECK) $(RESULTDIR)/$(notdir $@).out
+	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_ERRORS) $(REMOVE_PATHS) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
 %-spec-bmc.k %-spec-bmc.md: kompile

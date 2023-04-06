@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.backend.haskell;
 
 import com.google.inject.Inject;
@@ -355,7 +355,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
 
             @Override
             public RewriterResult prove(Module rules, Rule boundaryPattern, Boolean reuseDef) {
-                Module kompiledModule = KoreBackend.getKompiledModule(module);
+                Module kompiledModule = KoreBackend.getKompiledModule(module, true);
                 ModuleToKORE converter = new ModuleToKORE(kompiledModule, def.topCellInitializer, kompileOptions, kem);
                 String defPath = reuseDef ? files.resolveKompiled("definition.kore").getAbsolutePath() : saveKoreDefinitionToTemp(converter);
                 String specPath = saveKoreSpecToTemp(converter, rules);
@@ -394,7 +394,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             }
 
             public RewriterResult bmc (Module rules) {
-                Module kompiledModule = KoreBackend.getKompiledModule(module);
+                Module kompiledModule = KoreBackend.getKompiledModule(module, true);
                 ModuleToKORE converter = new ModuleToKORE(kompiledModule, def.topCellInitializer, kompileOptions);
                 String defPath = saveKoreDefinitionToTemp(converter);
                 String specPath = saveKoreSpecToTemp(converter, rules);

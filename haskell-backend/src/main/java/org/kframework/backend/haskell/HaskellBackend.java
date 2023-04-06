@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.backend.haskell;
 
 import com.google.inject.Inject;
@@ -49,7 +49,7 @@ public class HaskellBackend extends KoreBackend {
     @Override
     public void accept(Backend.Holder h) {
         Stopwatch sw = new Stopwatch(globalOptions);
-        String kore = getKompiledString(h.def);
+        String kore = getKompiledString(h.def, true);
         h.def = null;
         files.saveToKompiled("definition.kore", kore);
         sw.printIntermediate("  Print definition.kore");

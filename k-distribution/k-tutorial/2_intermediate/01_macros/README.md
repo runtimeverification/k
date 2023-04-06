@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 2.1: Macros, Aliases, and Anywhere Rules
 
 ## Return to Top

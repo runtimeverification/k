@@ -1,5 +1,42 @@
-Installing the K Framework Package
-==================================
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
+Installing the K Framework
+==========================
+
+Fast Installation (preferred)
+-----------------------------
+
+If you're on a system that supports [Nix](https://nixos.org/download.html),
+use this command to install via Nix:
+
+```shell
+bash <(curl https://kframework.org/install)
+kup install k
+```
+
+You can update K with:
+
+```shell
+kup update k
+```
+
+And list available versions with:
+
+```shell
+kup list
+```
+
+This will take care of all the dependencies and specific versions used by K.
+Note that the first run will take longer to fetch all the libraries and compile
+sources. (30m to 1h)
+
+If you are on Apple Silicon, `kup` is currently the only way to install K
+because of upstream issues in the general Haskell ecosystem.
+
+
+Install through packages
+----------------
 
 We currently strive to provide packages for the following platforms:
 
@@ -8,29 +45,6 @@ We currently strive to provide packages for the following platforms:
 -   Arch Linux
 -   macOS Catalina (10.15), Big Sur (11) and Monterey (12) via Homebrew
 -   Docker Images
-
-Fast Installation
------------------
-
-If you're on a system that supports [Nix](https://nixos.org/download.html), use this command to install via Nix:
-
-```
-bash <(curl https://kframework.org/install)
-kup install k
-```
-
-You can update K with:
-
-```
-kup update k
-```
-
-And list available versions with:
-
-```
-kup list
-```
-
 
 Pre-installation Notes
 ----------------------
@@ -99,25 +113,25 @@ requires about ~1.4GB of dependencies and will take some time.
 ### Ubuntu Focal (20.04)
 
 ```sh
-sudo apt install ./kframework_X.Y.Z_amd64_focal.deb
+sudo apt install ./kframework_amd64_ubuntu_focal.deb
 ```
 
 ### Ubuntu Jammy (22.04)
 
 ```sh
-sudo apt install ./kframework_X.Y.Z_amd64_jammy.deb
+sudo apt install ./kframework_amd64_ubuntu_jammy.deb
 ```
 
 ### Debian Bullseye
 
 ```sh
-sudo apt install ./kframework_X.Y.Z_amd64_bullseye.deb
+sudo apt install ./kframework_amd64_debian_bullseye.deb
 ```
 
 ### Arch Linux
 
 ```sh
-pacman -U ./kframework-git-X.Y.Z-1-x86_64.pkg.tar.zst
+pacman -U ./kframework_arch_x86_64.pkg.tar.zst
 ```
 
 ### MacOS X Mojave/Homebrew

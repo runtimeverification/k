@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2014-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 # Substitution-Based Higher-Order Type Systems
 

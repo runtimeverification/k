@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 DEF: null -> null
 module TEST
   rule #token("#Bool", "true")() => INJECTED-KLIST(#token("#Bool", "true")()) requires _andBool_(#token("#Bool", "true")(),, #token("#Bool", "true")())

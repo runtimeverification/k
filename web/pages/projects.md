@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Projects using K
 
 <br>
@@ -5,6 +9,16 @@
 ## Featured
 
 <br>
+
+- **[KAVM (Feb 2022 - Present)](https://github.com/runtimeverification/avm-semantics)**
+
+  The Algorand Virtual Machine and TEAL Semantics in K\
+  KAVM leverages the K Framework to empower Algorand smart contracts' developers
+  with property-based testing and formal verification.
+
+- **[KPlutus (2016 - Present)](https://github.com/runtimeverification/plutus-core-semantics)**
+
+  The K Semantics of Plutus-Core
 
 - **[Dedukti (Mar 2021 - Present)](https://gitlab.com/semantiko/K-semantics)**
 
@@ -20,7 +34,7 @@
 - **[KEVM (Sep 2017 - Present)](https://jellopaper.org/)**
 
   KEVM is the K semantics of the [Ethereum Virtual Machine](https://ethereum.org/en/developers/docs/evm/).
-  It passes all of the Ethereum Test Suite, and is used for verifying EVM programs.
+  It passes all the Ethereum Test Suite, and is used for verifying EVM programs.
 
 - **[IELE (Oct 2016 - Present)](https://ielelang.org/)**
 
@@ -52,7 +66,6 @@
 - [javacard (2014-2014)](https://github.com/kframework/javacard-semantics)
 - [orc (2016-2017)](https://github.com/kframework/orc-semantics)
 - [haskell core (2016-2017)](https://github.com/kframework/haskell-core-semantics)
-- [plutus core (2016-2019)](https://github.com/kframework/plutus-core-semantics)
 - [X86-64 (2017-2020)](https://github.com/kframework/X86-64-semantics)
 - [vyper (2017-2018)](https://github.com/kframework/vyper-semantics)
 - [erc20 (2017-2018)](https://github.com/runtimeverification/erc20-semantics)
@@ -66,3 +79,4 @@
 - [Boogie (2020)](https://github.com/kframework/boogie-semantics)
 - [Elrond (2020-2021)](https://github.com/runtimeverification/elrond-semantics)
 - [P4 (2016-2021)](https://github.com/kframework/p4-semantics)
+- [K-Javalette (2022)](https://github.com/bbyalcinkaya/k-javalette)

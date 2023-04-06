@@ -47,7 +47,6 @@ in stdenv.mkDerivation {
     "KOMPILE=kompile"
     "KRUN=krun"
     "KDEP=kdep"
-    "KPROVE_LEGACY=kprove-legacy"
     "KPROVE=kprove"
     "KBMC=kbmc"
     "KAST=kast"

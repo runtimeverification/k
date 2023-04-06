@@ -1,7 +1,11 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 1.14: Defining Evaluation Order
 
 The purpose of this lesson is to explain how to use the `heat` and `cool`
-attributes, `context` and `context alias` sentences, and the `strict` and 
+attributes, `context` and `context alias` sentences, and the `strict` and
 `seqstrict` attributes to more compactly express heating and cooling in K,
 and to express more advanced evaluation strategies in K.
 
@@ -292,9 +296,7 @@ side condition that the denominator is non-zero. Run `krun --search` on the
 program `1 / 0 + 2 / 1` and observe all possible outputs of the program. How
 many are there total, and why?
 
-2. Modify your solution from lesson 1.11 problem 2 to remove the `eval`
-function and instead evaluate expressions from left to right using the
-`seqstrict` attribute.
+2. Rework your solution from Lesson 1.9, Exercise 2 to evaluate expressions from left to right using the `seqstrict` attribute.
 
 ## Next lesson
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2020 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.outer;
 
 import org.junit.Assert;
@@ -99,5 +99,6 @@ public class MDsourceTest {
         Assert.assertEquals(1, TagSelector.parseTags("k", new Source(MDsourceTest.class.toString()), kem).size());
         Assert.assertEquals(0, TagSelector.parseTags("", new Source(MDsourceTest.class.toString()), kem).size());
         Assert.assertEquals(0, TagSelector.parseTags(" ", new Source(MDsourceTest.class.toString()), kem).size());
+        Assert.assertEquals(3, TagSelector.parseTags("{.k .numberLines startFrom=\"0\"}", new Source(MDsourceTest.class.toString()), kem).size());
     }
 }

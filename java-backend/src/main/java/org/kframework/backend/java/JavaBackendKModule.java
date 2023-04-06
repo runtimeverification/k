@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2019 Runtime Verification, Inc. (RV-Match team). All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.backend.java;
 
 import com.google.inject.AbstractModule;

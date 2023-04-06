@@ -1,9 +1,10 @@
-// Copyright (c) 2015-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import com.google.common.collect.Lists;
 import org.kframework.Collections;
 import org.kframework.attributes.Att;
+import org.kframework.attributes.Location;
 import org.kframework.builtin.BooleanUtils;
 import org.kframework.builtin.KLabels;
 import org.kframework.builtin.Sorts;
@@ -96,11 +97,14 @@ public class GenerateSentencesFromConfigDecl {
                                 boolean isStream = cellProperties.getOption("stream").isDefined();
 
                                 K cellContents = kapp.klist().items().get(2);
+                                Att att = cfgAtt;
+                                if (kapp.att().contains(Location.class))
+                                    att = cfgAtt.add(Location.class, kapp.att().get(Location.class));
                                 Tuple4<Set<Sentence>, List<Sort>, K, Boolean> childResult = genInternal(
-                                        cellContents, null, cfgAtt, m, kore);
+                                        cellContents, null, att, m, kore);
 
                                 boolean isLeafCell = childResult._4();
-                                Tuple4<Set<Sentence>, Sort, K, Boolean> myResult = computeSentencesOfWellFormedCell(isLeafCell, isStream, kore, multiplicity, cfgAtt, m, cellName, cellProperties,
+                                Tuple4<Set<Sentence>, Sort, K, Boolean> myResult = computeSentencesOfWellFormedCell(isLeafCell, isStream, kore, multiplicity, att, m, cellName, cellProperties,
                                         childResult._2(), childResult._3(), ensures, hasConfigOrRegularVariable(cellContents, m));
                                 return Tuple4.apply((Set<Sentence>)childResult._1().$bar(myResult._1()), Lists.newArrayList(myResult._2()), myResult._3(), false);
                             }
@@ -465,12 +469,16 @@ public class GenerateSentencesFromConfigDecl {
                 break;
             default:
                 throw KEMException.compilerError("Unexpected type for multiplicity * cell: " + cellName
-                        + ". Should be one of: Set, Bag, List, Map");
+                        + ". Should be one of: Set, Bag, List, Map", KApply(KLabel("#EmptyK"), Seq(), configAtt));
             }
             SyntaxSort sortDecl = SyntaxSort(Seq(), bagSort, Att().add("hook", type.toUpperCase() + '.' + type).add("cellCollection"));
             Sentence bagSubsort = Production(Seq(), bagSort, Seq(NonTerminal(sort)));
             Sentence bagElement;
             if (type.equals("Map")) {
+                if (childSorts.isEmpty()) {
+                    throw KEMException.compilerError("Cells of type Map expect at least one child cell as their key",
+                            KApply(KLabel("#EmptyK"), Seq(), configAtt));
+                }
                 bagElement = Production(KLabel(bagSort.name() + "Item"), bagSort, Seq(
                         Terminal(bagSort.name() + "Item"),
                         Terminal("("),

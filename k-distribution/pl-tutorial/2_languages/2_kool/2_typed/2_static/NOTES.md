@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2016-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 Why is the following happening at line 347?  It should infer the sort Stmts for S:
 

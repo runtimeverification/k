@@ -1,5 +1,5 @@
 ---
-copyright: Copyright (c) 2014-2020 K Team. All Rights Reserved.
+copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
 IMP++
@@ -146,8 +146,8 @@ of statements surrounded by curly brackets.
                  | "halt" ";"
                  > "join" AExp ";"            [strict]
 
-  syntax Ids   ::= List{Id,","}
-  syntax AExps ::= List{AExp,","}
+  syntax Ids   ::= List{Id,","}               [klabel(exps)]
+  syntax AExps ::= List{AExp,","}             [klabel(exps)]
   syntax Stmts ::= List{Stmt,""}
   syntax AExps ::= Ids
 endmodule
@@ -190,10 +190,10 @@ buffers as lists of items.
 ```k
   configuration <T color="yellow">
                   <threads color="orange">
-                    <thread multiplicity="*" color="blue">
+                    <thread multiplicity="*" color="blue" type="Map">
+                      <id color="black"> 0 </id>
                       <k color="green"> $PGM:Stmts </k>
                       <env color="LightSkyBlue"> .Map </env>
-                      <id color="black"> 0 </id>
                     </thread>
                   </threads>
 //                <br/>
@@ -493,8 +493,8 @@ with the declared configuration cell multiplicity. The unique identifier
 of the new thread is generated using the `fresh` side condition.
 
 ```k
-  rule <k> spawn S => !T:Int ...</k> <env> Rho </env>
-       (.Bag => <thread>... <k> S </k> <env> Rho </env> <id> !T </id> ...</thread>)
+  rule <k> spawn S => !T:Int +Int 1 ...</k> <env> Rho </env>
+       (.Bag => <thread>... <k> S </k> <env> Rho </env> <id> !T +Int 1 </id> ...</thread>)
 ```
 ### Join thread
 A thread who wants to join another thread `T` has to wait until

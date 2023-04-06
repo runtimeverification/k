@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.kompile;
 
 import com.google.common.collect.Lists;
@@ -80,11 +80,11 @@ import static org.kframework.kore.KORE.*;
  */
 public class DefinitionParsing {
     public static final Sort START_SYMBOL = Sorts.RuleContent();
-    private static final String rule = "rule";
-    private static final String claim = "claim";
-    private static final String configuration = "config";
-    private static final String alias = "alias";
-    private static final String context = "context";
+    public static final String rule = "rule";
+    public static final String claim = "claim";
+    public static final String configuration = "config";
+    public static final String alias = "alias";
+    public static final String context = "context";
     private final File cacheFile;
     private final boolean autoImportDomains;
     private final boolean kore;
@@ -477,7 +477,7 @@ public class DefinitionParsing {
                     .filter(s -> s instanceof Bubble && (isRule || ((Bubble) s).sentenceType().equals(configuration)))
                     .map(b -> (Bubble) b)
                     .flatMap(b -> {
-                        if (cache.getCache().containsKey(b.contents())) {
+                        if (cache.getCache().containsKey(b.contents()) && cache.getCache().get(b.contents()).getParse() != null) {
                             ParsedSentence parse = updateLocation(cache.getCache().get(b.contents()), b);
                             Att termAtt = parse.getParse().att().remove(Source.class).remove(Location.class).remove(Production.class);
                             Att bubbleAtt = b.att().remove(Source.class).remove(Location.class).remove("contentStartLine", Integer.class).remove("contentStartColumn", Integer.class);
@@ -485,7 +485,8 @@ public class DefinitionParsing {
                                 return Stream.of();
                             cachedBubbles.getAndIncrement();
                             registerWarnings(parse.getWarnings());
-                            return Stream.of(Pair.of(b, upSentence(parse.getParse(), b.sentenceType())));
+                            KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, true).down(parse.getParse());
+                            return Stream.of(Pair.of(b, upSentence(k, b.sentenceType())));
                         }
                         return Stream.of();
                     }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
@@ -500,24 +501,27 @@ public class DefinitionParsing {
         }, "load cached bubbles").apply(def);
     }
 
-    private ParsedSentence updateLocation(ParsedSentence parse, Bubble b) {
+    public static ParsedSentence updateLocation(ParsedSentence parse, Bubble b) {
         int newStartLine = b.att().get("contentStartLine", Integer.class);
         int newStartColumn = b.att().get("contentStartColumn", Integer.class);
-        int oldStartLine = parse.getParse().att().get(Location.class).startLine();
-        int oldStartColumn = parse.getParse().att().get(Location.class).startColumn();
-        if (oldStartLine != newStartLine || oldStartColumn != newStartColumn || !parse.getParse().source().equals(b.source())) {
+        int oldStartLine = parse.getStartLine();
+        int oldStartColumn = parse.getStartColumn();
+        if (oldStartLine != newStartLine || oldStartColumn != newStartColumn || !parse.getSource().equals(b.source().get())) {
             int lineOffset = newStartLine - oldStartLine;
             int columnOffset = newStartColumn - oldStartColumn;
-            K k = new AddAttRec(a -> {
+            K k = parse.getParse() != null ? new AddAttRec(a -> {
                 Location loc = a.get(Location.class);
                 Location newLoc = updateLocation(oldStartLine, lineOffset, columnOffset, loc);
                 return a.remove(Source.class).remove(Location.class).add(Location.class, newLoc)
                         .add(Source.class, b.source().orElseThrow(() -> new AssertionError("Expecting bubble to have source location!")));
-            }).apply(parse.getParse());
-            java.util.Set<KEMException> warnings = parse.getWarnings().stream().map(ex -> ex.withLocation(ex.exception.getLocation(),
+            }).apply(parse.getParse()) : null;
+            java.util.Set<KEMException> warnings = parse.getWarnings().stream().map(ex -> ex.withLocation(updateLocation(oldStartLine, lineOffset, columnOffset, ex.exception.getLocation()),
                             b.source().orElseThrow(() -> new AssertionError("Expecting bubble to have source location!"))))
                     .collect(Collectors.toSet());
-            return new ParsedSentence(k, warnings);
+            java.util.Set<KEMException> errors = parse.getErrors().stream().map(ex -> ex.withLocation(updateLocation(oldStartLine, lineOffset, columnOffset, ex.exception.getLocation()),
+                            b.source().orElseThrow(() -> new AssertionError("Expecting bubble to have source location!"))))
+                    .collect(Collectors.toSet());
+            return new ParsedSentence(k, warnings, errors, newStartLine, newStartColumn, parse.getSource());
         }
         return parse;
     }
@@ -672,12 +676,14 @@ public class DefinitionParsing {
         parsedBubbles.getAndIncrement();
         registerWarnings(result._2());
         if (result._1().isRight()) {
-            KApply k = (KApply) new TreeNodesToKORE(Outer::parseSort, true).down(result._1().right().get());
+            KApply k = (KApply) result._1().right().get();
             k = KApply(k.klabel(), k.klist(), k.att().addAll(b.att().remove("contentStartLine", Integer.class)
                     .remove("contentStartColumn", Integer.class).remove(Source.class).remove(Location.class)));
-            cache.put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2())));
+            cache.put(b.contents(), new ParsedSentence(k, new HashSet<>(result._2()), new HashSet<>(), startLine, startColumn, source));
+            k = (KApply) new TreeNodesToKORE(Outer::parseSort, true).down(k);
             return Stream.of(k);
         } else {
+            cache.put(b.contents(), new ParsedSentence(null, new HashSet<>(result._2()), result._1().left().get(), startLine, startColumn, source));
             errors.addAll(result._1().left().get());
             return Stream.empty();
         }

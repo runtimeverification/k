@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.kompile;
 
 import com.google.inject.Inject;
@@ -88,6 +88,9 @@ public class Kompile {
     public static final File BUILTIN_DIRECTORY = JarInfo.getKIncludeDir().resolve("builtin").toFile();
     public static final String REQUIRE_PRELUDE_K = "requires \"prelude.md\"\n";
 
+    public static final String CACHE_FILE_NAME = "cache.bin";
+
+
     private final KompileOptions kompileOptions;
     private final GlobalOptions globalOptions;
     private final FileUtil files;
@@ -125,7 +128,7 @@ public class Kompile {
         // these directories should be relative to the current working directory if we refer to them later after the WD has changed.
         this.outerParsingOptions.includes = lookupDirectories.stream().map(File::getAbsolutePath).collect(Collectors.toList());
         File cacheFile = kompileOptions.cacheFile != null
-                ? files.resolveWorkingDirectory(kompileOptions.cacheFile) : files.resolveKompiled("cache.bin");
+                ? files.resolveWorkingDirectory(kompileOptions.cacheFile) : files.resolveKompiled(CACHE_FILE_NAME);
         this.definitionParsing = new DefinitionParsing(
                 lookupDirectories, kompileOptions, outerParsingOptions, innerParsingOptions, globalOptions, kem, files,
                 parser, cacheParses, cacheFile, sw);
@@ -325,9 +328,7 @@ public class Kompile {
         DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
         Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, false)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
-        Function1<Definition, Definition> markExtraConcreteRules = d -> DefinitionTransformer.fromSentenceTransformer((m, s) ->
-                    s instanceof Rule && kompileOptions.extraConcreteRuleLabels.contains(s.att().getOption(Att.LABEL()).getOrElse(() -> null)) ?
-                            Rule.apply(((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att().add(Att.CONCRETE())) : s, "mark extra concrete rules").apply(d);
+        Function1<Definition, Definition> markExtraConcreteRules = d -> MarkExtraConcreteRules.mark(d, kompileOptions.extraConcreteRuleLabels);
 
         return def -> resolveIO
                 .andThen(resolveFun)

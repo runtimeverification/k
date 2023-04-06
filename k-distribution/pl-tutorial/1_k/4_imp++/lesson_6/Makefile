@@ -1,8 +1,7 @@
 DEF=imp
 EXT=imp
-KOMPILE_FLAGS=--transition "division lookup increment assignment read print"
-KOMPILE_BACKEND?=java
 KRUN_FLAGS=--output none
+KOMPILE_FLAGS=--gen-glr-bison-parser --enable-search
 
 include ../../../find-k.mak
 include ${K_HOME}/include/kframework/ktest.mak

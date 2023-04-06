@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.backend.llvm;
 
 import com.google.inject.Inject;
@@ -54,7 +54,7 @@ public class LLVMBackend extends KoreBackend {
     @Override
     public void accept(Backend.Holder h) {
         Stopwatch sw = new Stopwatch(globalOptions);
-        String kore = getKompiledString(h.def);
+        String kore = getKompiledString(h.def, true);
         h.def = null;
         files.saveToKompiled("definition.kore", kore);
         sw.printIntermediate("  Print definition.kore");
@@ -123,33 +123,47 @@ public class LLVMBackend extends KoreBackend {
         Stopwatch sw = new Stopwatch(globalOptions);
         ProcessBuilder pb = files.getProcessBuilder();
         List<String> args = new ArrayList<>();
-        args.add("llvm-kompile");
-        args.add("definition.kore");
-        args.add("dt");
-        args.add(type);
 
-        // Arguments after this point are passed on to Clang.
-        args.add("--");
-
-        // For Python bindings, we explicitly leave this unset so that python3-config
-        // can decide the proper filename.
-        if (executable != null) {
-            args.add("-o");
-            args.add(executable);
-        }
-
-        if (kompileOptions.optimize1) args.add("-O1");
-        if (kompileOptions.optimize2) args.add("-O2");
-        if (kompileOptions.optimize3) args.add("-O2"); // clang -O3 does not make the llvm backend any faster
-        args.addAll(options.ccopts);
         try {
-            File kompiledDir = files.resolveKompiled(".");
+            args.add("llvm-kompile");
+            args.add(files.resolveKompiled("definition.kore").getCanonicalPath());
+            args.add(files.resolveKompiled("dt").getCanonicalPath());
+            args.add(type);
 
-            if (globalOptions.verbose) {
-                System.out.println("  \u250cExecuting in " + kompiledDir.getCanonicalPath() + ": " + String.join(" ", args));
+            // Arguments after this point are passed on to Clang.
+            args.add("--");
+
+            if (options.debug) {
+                args.add("-g");
+                args.add("-O1");
             }
 
-            Process p = pb.command(args).directory(kompiledDir).inheritIO().start();
+            // For Python bindings, we explicitly leave this unset so that python3-config
+            // can decide the proper filename.
+            if (executable != null) {
+                args.add("-o");
+
+                File outputFile = new File(executable);
+                if(!new File(executable).isAbsolute()) {
+                    outputFile = files.resolveKompiled(executable);
+                }
+
+                args.add(outputFile.getCanonicalPath());
+            }
+
+            if (!options.debug) {
+                if (kompileOptions.optimize1) args.add("-O1");
+                if (kompileOptions.optimize2) args.add("-O2");
+                if (kompileOptions.optimize3) args.add("-O2"); // clang -O3 does not make the llvm backend any faster
+            }
+
+            args.addAll(options.ccopts);
+
+            if (globalOptions.verbose) {
+                System.out.println("  \u250cExecuting: " + String.join(" ", args));
+            }
+
+            Process p = pb.command(args).inheritIO().start();
             int exit = p.waitFor();
             if (exit != 0) {
                 throw KEMException.criticalError("llvm-kompile returned nonzero exit code: " + exit + "\nExamine output to see errors.");

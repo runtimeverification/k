@@ -18,12 +18,15 @@ RUN    apt-get update            \
         debhelper                \
         flex                     \
         gcc                      \
+        g++                      \
         git                      \
+        libboost-dev             \
         libboost-test-dev        \
         libgdbm-dev              \
         libgmp-dev               \
         libjemalloc-dev          \
         libffi-dev               \
+        libfmt-dev               \
         libmpfr-dev              \
         libncurses5-dev          \
         libnss3-dev              \
@@ -64,13 +67,13 @@ RUN    groupadd -g $GROUP_ID user                     \
 USER $USER_ID:$GROUP_ID
 
 ENV LC_ALL=C.UTF-8
-ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml        /home/user/.tmp-haskell/
-ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/kore.cabal /home/user/.tmp-haskell/kore/
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml                          /home/user/.tmp-haskell/
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/kore.cabal                     /home/user/.tmp-haskell/kore/
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore-rpc-types/kore-rpc-types.cabal /home/user/.tmp-haskell/kore-rpc-types/
 RUN    cd /home/user/.tmp-haskell  \
     && stack build --only-snapshot
 
 ADD pom.xml                                                    /home/user/.tmp-maven/
-ADD ktree/pom.xml                                              /home/user/.tmp-maven/ktree/
 ADD llvm-backend/pom.xml                                       /home/user/.tmp-maven/llvm-backend/
 ADD llvm-backend/src/main/native/llvm-backend/matching/pom.xml /home/user/.tmp-maven/llvm-backend/src/main/native/llvm-backend/matching/
 ADD haskell-backend/pom.xml                                    /home/user/.tmp-maven/haskell-backend/

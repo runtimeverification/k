@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.compile;
 
 import org.bouncycastle.jcajce.provider.digest.SHA3;
@@ -10,7 +10,7 @@ import org.kframework.definition.RuleOrClaim;
 public class NumberSentences {
 
     public static Sentence number(Sentence s) {
-        if (!(s instanceof RuleOrClaim)) {
+        if (!(s instanceof RuleOrClaim) || s.att().contains(Att.UNIQUE_ID())) {
             return s;
         }
         String id = ruleHash(s.withAtt(Att.empty()));

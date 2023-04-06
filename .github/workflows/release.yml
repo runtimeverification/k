@@ -12,9 +12,9 @@ jobs:
     name: 'Set Release ID'
     runs-on: ubuntu-20.04
     steps:
-        - name: 'Get release_id'
-          run: echo "::set-output name=release_id::$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)"
-          id: release
+      - name: 'Get release_id'
+        run: echo "release_id=$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)" >> ${GITHUB_OUTPUT}
+        id: release
     outputs:
       release_id: ${{ steps.release.outputs.release_id }}
 
@@ -29,11 +29,13 @@ jobs:
           submodules: recursive
 
       - name: Install Nix
-        uses: cachix/install-nix-action@v14.1
+        uses: cachix/install-nix-action@v19
         with:
-          install_url: 'https://releases.nixos.org/nix/nix-2.3.16/install'
+          install_url: https://releases.nixos.org/nix/nix-2.13.3/install
           extra_nix_config: |
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+            substituters = http://cache.nixos.org https://hydra.iohk.io
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
 
       - name: Upload release.nix
         uses: ttuegel/upload-release.nix@v1.0
@@ -43,6 +45,7 @@ jobs:
   ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
     runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
@@ -60,8 +63,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
         with:
           asset_content_type: 'application/gzip'
-          asset_name: 'K Framework Ubuntu Jammy (22.04) Deb'
-          asset_path: kframework_amd64_ubuntu_jammy.deb
+          asset_name: kframework_amd64_ubuntu_jammy.deb
+          asset_path: ./kframework_amd64_ubuntu_jammy.deb
           upload_url: ${{ github.event.release.upload_url }}
       - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
@@ -87,6 +90,7 @@ jobs:
   ubuntu-focal:
     name: 'K Ubuntu Focal Package'
     runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
@@ -104,8 +108,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
         with:
           asset_content_type: 'application/gzip'
-          asset_name: 'K Framework Ubuntu Focal (20.04) Deb'
-          asset_path: kframework_amd64_ubuntu_focal.deb
+          asset_name: kframework_amd64_ubuntu_focal.deb
+          asset_path: ./kframework_amd64_ubuntu_focal.deb
           upload_url: ${{ github.event.release.upload_url }}
       - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
@@ -131,6 +135,7 @@ jobs:
   debian-bullseye:
     name: 'K Debian Bullseye Package'
     runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
@@ -148,13 +153,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
         with:
           asset_content_type: 'application/gzip'
-          asset_name: 'K Framework Debian Bullseye (11) Deb'
-          asset_path: kframework_amd64_debian_bullseye.deb
+          asset_name: kframework_amd64_debian_bullseye.deb
+          asset_path: ./kframework_amd64_debian_bullseye.deb
           upload_url: ${{ github.event.release.upload_url }}
 
   arch:
     name: 'Arch Linux Package'
     runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
@@ -172,13 +178,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
         with:
           asset_content_type: 'application/gzip'
-          asset_name: 'K Framework Arch Package'
-          asset_path: kframework_arch_x86_64.pkg.tar.zst
+          asset_name: kframework_arch_x86_64.pkg.tar.zst
+          asset_path: ./kframework_arch_x86_64.pkg.tar.zst
           upload_url: ${{ github.event.release.upload_url }}
 
   macos-build:
     name: 'Build MacOS Package'
     runs-on: macos-11
+    timeout-minutes: 120
     environment: production
     needs: set-release-id
     steps:
@@ -214,6 +221,12 @@ jobs:
 
       - name: Build brew bottle
         id: build
+        env:
+          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+          MAVEN_OPTS: >-
+              -Dhttp.keepAlive=false
+              -Dmaven.wagon.http.pool=false
+              -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
         run: |
           PACKAGE=kframework
           VERSION=$(cat kframework/package/version)
@@ -227,9 +240,9 @@ jobs:
           LOCAL_BOTTLE_NAME=$(basename $(find . -name "kframework--${VERSION}.big_sur.bottle*.tar.gz"))
           BOTTLE_NAME=$(echo ${LOCAL_BOTTLE_NAME#./} | sed 's!kframework--!kframework-!')
           ../kframework/package/macos/brew-update-to-final ${PACKAGE} ${VERSION} ${ROOT_URL}
-          echo "::set-output name=path::$LOCAL_BOTTLE_NAME"
-          echo "::set-output name=path_remote::$BOTTLE_NAME"
-          echo "::set-output name=version::$VERSION"
+          echo "path=${LOCAL_BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
+          echo "path_remote=${BOTTLE_NAME}" >> ${GITHUB_OUTPUT}
+          echo "version=${VERSION}" >> ${GITHUB_OUTPUT}
 
       - name: Upload bottle
         uses: actions/upload-artifact@v2
@@ -254,6 +267,7 @@ jobs:
   macos-test:
     name: 'Test MacOS Package'
     runs-on: macos-11
+    timeout-minutes: 60
     environment: production
     needs: [macos-build, set-release-id]
     steps:
@@ -289,6 +303,7 @@ jobs:
           # variable, so instead we just have to tell it to use Java 11
           # explicitly intead.
           JAVA_HOME: ${{ env.JAVA_HOME_11_X64 }}
+          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
         run: |
           cd homebrew-k-old
           brew tap kframework/k "file:///$(pwd)"
@@ -352,21 +367,25 @@ jobs:
           script: |
             const { owner, repo } = context.repo
             await github.repos.updateRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }}, prerelease: false })
-      - name: Update dependents
+      - name: 'Update dependents'
         env:
-          JENKINS_DEVOPS_TOKEN: ${{ secrets.JENKINS_DEVOPS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
           VERSION: ${{ needs.macos-build.outputs.version }}
         run: |
-          curl --fail 'https://ci.runtimeverification.com/jenkins/buildByToken/buildWithParameters' \
-              --data job=Devops/master \
-              --data token=$JENKINS_DEVOPS_TOKEN \
-              --data UPDATE_DEPS=true \
-              --data UPDATE_DEPS_REPO=runtimeverification/k \
-              --data UPDATE_DEPS_VERSION=v$VERSION
+          set -x
+          version=v"${VERSION}"
+          curl --fail                                                          \
+            -X POST                                                            \
+            -H "Accept: application/vnd.github+json"                           \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}"                         \
+            -H "X-GitHub-Api-Version: 2022-11-28"                              \
+            https://api.github.com/repos/runtimeverification/devops/dispatches \
+            -d '{"event_type":"on-demand-test","client_payload":{"repo":"runtimeverification/k","version":"'${VERSION}'"}}'
 
   gh-pages:
     name: 'GitHub Pages deployment'
     runs-on: ubuntu-20.04
+    timeout-minutes: 30
     needs: [release]
     steps:
       - name: 'Install pandoc/texlive/calibre'
@@ -387,7 +406,7 @@ jobs:
         run: |
           git config --global user.name rv-jenkins
           git config --global user.email devops@runtimeverification.com
-          git checkout -B gh-pages origin/master
+          git checkout --orphan gh-pages origin/master
       - name: 'Build webpage'
         working-directory: gh-pages
         run: |
@@ -408,5 +427,4 @@ jobs:
           set -x
           git add ./
           git commit -m 'gh-pages: Updated the website'
-          git merge --strategy ours origin/gh-pages --allow-unrelated-histories
-          git push origin gh-pages
+          git push --force origin gh-pages

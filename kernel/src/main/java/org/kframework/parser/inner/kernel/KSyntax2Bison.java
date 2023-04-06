@@ -1,4 +1,4 @@
-// Copyright (c) 2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.parser.inner.kernel;
 
 import org.apache.commons.io.FileUtils;
@@ -102,7 +102,7 @@ public class KSyntax2Bison {
     worklist.addAll(nts);
     while (!worklist.isEmpty()) {
       Tuple2<Sort, Set<Tag>> item = worklist.poll();
-      for (Production prod : iterable(module.productionsForSort().apply(item._1().head()))) {
+      for (Production prod : iterable(module.productionsForSort().get(item._1().head()).getOrElse(() -> Collections.<Production>Seq()))) {
         int ordinal = ordinals.get(item._2());
         Sort newNT = Sort(item._1().name() + "#" + ordinal, item._1().params());
         if (prod.isSubsort()) {

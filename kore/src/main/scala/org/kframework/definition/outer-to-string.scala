@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 package org.kframework.definition
 
 import org.kframework.attributes.{Location,Source}

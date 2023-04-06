@@ -1,3 +1,7 @@
+---
+copyright: Copyright (c) Runtime Verification, Inc. All Rights Reserved.
+---
+
 # Lesson 2.5: Matching Logic Connectives and `#Or` Patterns
 
 ## Return to Top

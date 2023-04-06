@@ -1,3 +1,4 @@
+// Copyright (c) K Team. All Rights Reserved.
 module A1-SPEC
 
 imports A

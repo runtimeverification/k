@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 module IMP-SYNTAX
   imports DOMAINS-SYNTAX
@@ -27,8 +27,8 @@ module IMP-SYNTAX
                  > "spawn" Stmt
                  > Stmt Stmt                  [left]
 
-  syntax Ids   ::= List{Id,","}
-  syntax AExps ::= List{AExp,","}
+  syntax Ids   ::= List{Id,","}               [klabel(exps)]
+  syntax AExps ::= List{AExp,","}             [klabel(exps)]
   syntax AExps ::= Ids
 endmodule
 
@@ -40,7 +40,8 @@ module IMP
 
   configuration <T color="yellow">
                   <threads color="orange">
-                    <thread multiplicity="*" color="blue">
+                    <thread multiplicity="*" color="blue" type="Map">
+                      <id color="black"> 0 </id>
                       <k color="green"> $PGM:Stmt </k>
                       <env color="LightSkyBlue"> .Map </env>
                     </thread>
@@ -98,7 +99,7 @@ module IMP
   rule <k> halt; ~> _ => . </k>
 
   rule <k> spawn S => . ...</k> <env> Rho </env>
-       (.Bag => <thread>... <k> S </k> <env> Rho </env> ...</thread>)
+       (.Bag => <thread>... <k> S </k> <env> Rho </env> <id> !_T:Int +Int 1 </id> ...</thread>)
 
   rule <thread>... <k> . </k> ...</thread> => .Bag  [structural]
 endmodule

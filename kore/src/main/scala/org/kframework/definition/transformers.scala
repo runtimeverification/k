@@ -1,12 +1,11 @@
-// Copyright (c) 2014-2019 K Team. All Rights Reserved.
+// Copyright (c) K Team. All Rights Reserved.
 
 package org.kframework.definition
 
 import java.util.function.BiFunction
-
-import org.kframework.attributes.{Source, Location}
+import org.kframework.attributes.{Location, Source}
 import org.kframework.definition
-import org.kframework.kore.{AttCompare, K}
+import org.kframework.kore.{AttCompare, K, KApply, KToken}
 import org.kframework.utils.errorsystem.KEMException
 
 object ModuleTransformer {
@@ -116,4 +115,24 @@ class DefinitionTransformer(moduleTransformer: Module => Module) extends (Defini
   }
 }
 
+object KViz {
+  def from(f: java.util.function.UnaryOperator[K], name:String):KViz = KViz(f(_), name)
 
+  def apply(f: K => K, name: String): KViz = f match {
+    case f: KViz => f
+    case _ => new KViz(f, name)
+  }
+}
+
+class KViz(f: K => K, name: String) extends (K => K) {
+  override def apply(input: K): K = {
+    input match {
+      case c: KToken  => f(c)
+      case tc: KApply =>
+        f(tc)
+        tc.items.forEach(apply)
+        tc
+      case _ => throw new AssertionError("Not expected downed term in visitor " + name + " term: " + input)
+    }
+  }
+}

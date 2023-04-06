@@ -37,7 +37,7 @@ output:
     - [Lesson 1.16: Maps, Semantic Lists, and Sets](/k-distribution/k-tutorial/1_basic/16_collections/README.md)
     - [Lesson 1.17: Cell Multiplicity and Cell Collections](/k-distribution/k-tutorial/1_basic/17_cell_multiplicity/README.md)
     - [Lesson 1.18: Term Equality and the Ternary Operator](/k-distribution/k-tutorial/1_basic/18_equality_and_conditionals/README.md)
-    - [Lesson 1.19: Debugging with GDB](/k-distribution/k-tutorial/1_basic/19_debugging/README.md)
+    - [Lesson 1.19: Debugging with GDB or LLDB](/k-distribution/k-tutorial/1_basic/19_debugging/README.md)
     - [Lesson 1.20: K Backends and the Haskell Backend](/k-distribution/k-tutorial/1_basic/20_backends/README.md)
     - [Lesson 1.21: Unification and Symbolic Execution](/k-distribution/k-tutorial/1_basic/21_symbolic_execution/README.md)
     - [Lesson 1.22: K Deductive Verification](/k-distribution/k-tutorial/1_basic/22_proofs/README.md)

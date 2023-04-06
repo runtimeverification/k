@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2010-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 # Adding/Deleting Cells Dynamically; Configuration Abstraction, Part 2
 

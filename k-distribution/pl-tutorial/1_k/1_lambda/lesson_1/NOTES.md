@@ -1,4 +1,6 @@
-<!-- Copyright (c) 2015-2019 K Team. All Rights Reserved. -->
+---
+copyright: Copyright (c) K Team. All Rights Reserved.
+---
 
 We now support the following line to the syntax module:
 

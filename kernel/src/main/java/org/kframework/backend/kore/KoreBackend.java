@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 K Team. All Rights Reserved.
+// Copyright (c) Runtime Verification, Inc. All Rights Reserved.
 package org.kframework.backend.kore;
 
 import com.google.inject.Inject;
@@ -60,15 +60,19 @@ public class KoreBackend extends AbstractBackend {
     @Override
     public void accept(Backend.Holder h) {
         CompiledDefinition def = h.def;
-        String kore = getKompiledString(def);
+        String kore = getKompiledString(def, true);
         File defFile = kompileOptions.outerParsing.mainDefinitionFile(files);
         String name = defFile.getName();
         String basename = FilenameUtils.removeExtension(name);
         files.saveToDefinitionDirectory(basename + ".kore", kore);
     }
 
-    protected String getKompiledString(CompiledDefinition def) {
-        Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule());
+    /**
+     * Convert a CompiledDefinition to a String of a KORE definition.
+     * @param hasAnd whether the backend in question supports and-patterns during pattern matching.
+     */
+    protected String getKompiledString(CompiledDefinition def, boolean hasAnd) {
+        Module mainModule = getKompiledModule(def.kompiledDefinition.mainModule(), hasAnd);
         ModuleToKORE converter = new ModuleToKORE(mainModule, def.topCellInitializer, def.kompileOptions);
         return getKompiledString(converter, files, heatCoolEquations, tool);
     }
@@ -92,10 +96,12 @@ public class KoreBackend extends AbstractBackend {
         return semantics.toString();
     }
 
-    public static Module getKompiledModule(Module mainModule) {
+    public static Module getKompiledModule(Module mainModule, boolean hasAnd) {
         mainModule = new GenerateSortPredicateRules(true).gen(mainModule);
         mainModule = ModuleTransformer.fromSentenceTransformer(new AddSortInjections(mainModule)::addInjections, "Add sort injections").apply(mainModule);
-        mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction").apply(mainModule);
+        if (hasAnd) {
+          mainModule = ModuleTransformer.fromSentenceTransformer(new MinimizeTermConstruction(mainModule)::resolve, "Minimize term construction").apply(mainModule);
+        }
         return mainModule;
     }
 
@@ -128,9 +134,7 @@ public class KoreBackend extends AbstractBackend {
         DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
         Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, true)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
         Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
-        Function1<Definition, Definition> markExtraConcreteRules = d -> DefinitionTransformer.fromSentenceTransformer((m, s) ->
-                s instanceof Rule && kompileOptions.extraConcreteRuleLabels.contains(s.att().getOption(Att.LABEL()).getOrElse(() -> null)) ?
-                        Rule.apply(((Rule) s).body(), ((Rule) s).requires(), ((Rule) s).ensures(), s.att().add(Att.CONCRETE())) : s, "mark extra concrete rules").apply(d);
+        Function1<Definition, Definition> markExtraConcreteRules = d -> MarkExtraConcreteRules.mark(d, kompileOptions.extraConcreteRuleLabels);
         Function1<Definition, Definition> removeAnywhereRules =
                 d -> DefinitionTransformer.from(this::removeAnywhereRules,
                         "removing anywhere rules for the Haskell backend").apply(d);
@@ -180,6 +184,7 @@ public class KoreBackend extends AbstractBackend {
         ModuleTransformer resolveAnonVars = ModuleTransformer.fromSentenceTransformer(
                 new ResolveAnonVar()::resolve,
                 "resolving \"_\" vars");
+        ModuleTransformer numberSentences = ModuleTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
         ModuleTransformer resolveSemanticCasts = ModuleTransformer.fromSentenceTransformer(
                 new ResolveSemanticCasts(true)::resolve,
                 "resolving semantic casts");
@@ -202,6 +207,7 @@ public class KoreBackend extends AbstractBackend {
 
         return m -> resolveComm
                 .andThen(resolveAnonVars)
+                .andThen(numberSentences)
                 .andThen(resolveSemanticCasts)
                 .andThen(generateSortProjections)
                 .andThen(propagateMacroToRules)

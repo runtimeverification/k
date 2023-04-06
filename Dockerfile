@@ -17,6 +17,7 @@ RUN    apt-get update        \
         debhelper            \
         flex                 \
         gcc                  \
+        g++                  \
         git                  \
         libboost-test-dev    \
         libgmp-dev           \
@@ -31,7 +32,6 @@ RUN    apt-get update        \
         parallel             \
         pkg-config           \
         python3              \
-        texlive-xetex        \
         wget                 \
         zlib1g-dev
 
@@ -43,14 +43,6 @@ RUN    git clone 'https://github.com/z3prover/z3' --branch=z3-4.8.15 \
     && make install                                                  \
     && cd ../..                                                      \
     && rm -rf z3
-
-RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
-RUN    apt-get update               \
-    && apt-get upgrade --yes        \
-    && apt-get install --yes nodejs
-
-RUN wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin version=5.42.0
-RUN wget https://github.com/jgm/pandoc/releases/download/2.18/pandoc-2.18-1-amd64.deb -O /tmp/pandoc.deb && dpkg -i /tmp/pandoc.deb
 
 RUN curl -sSL https://get.haskellstack.org/ | sh
 
@@ -69,12 +61,12 @@ ENV LD_LIBRARY_PATH=/usr/local/lib
 ENV PATH=/home/user/hub-linux-amd64-2.14.0/bin:$PATH
 
 ENV LC_ALL=C.UTF-8
-ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml      .tmp-haskell/
-ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/kore.cabal .tmp-haskell/kore/
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/stack.yaml                          .tmp-haskell/
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore/kore.cabal                     .tmp-haskell/kore/
+ADD --chown=user:user haskell-backend/src/main/native/haskell-backend/kore-rpc-types/kore-rpc-types.cabal .tmp-haskell/kore-rpc-types/
 RUN cd .tmp-haskell && stack build --only-snapshot
 
 ADD pom.xml                                                    .tmp-maven/
-ADD ktree/pom.xml                                              .tmp-maven/ktree/
 ADD llvm-backend/pom.xml                                       .tmp-maven/llvm-backend/
 ADD llvm-backend/src/main/native/llvm-backend/matching/pom.xml .tmp-maven/llvm-backend/src/main/native/llvm-backend/matching/
 ADD haskell-backend/pom.xml                                    .tmp-maven/haskell-backend/
