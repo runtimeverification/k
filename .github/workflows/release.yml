@@ -223,7 +223,7 @@ jobs:
         id: build
         env:
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
-          MAVEN_OPTS: >-
+          HOMEBREW_MAVEN_OPTS: >-
               -Dhttp.keepAlive=false
               -Dmaven.wagon.http.pool=false
               -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
