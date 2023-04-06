@@ -53,7 +53,7 @@ public class RuleGrammarTest {
                         definitionFile,
                         definitionFile.getParentFile(),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
-                        false, false, false, false);
+                        false, false, false);
 
         return new RuleGrammarGenerator(baseK);
     }
@@ -348,8 +348,8 @@ public class RuleGrammarTest {
         String def = "" +
                 "module TEST \n" +
                 "  syntax K \n" +
-                "  syntax KItem ::= foo(K) [klabel(foo)]\n" +
-                "  syntax Bar ::= bar() [klabel(bar)]\n" +
+                "  syntax KItem ::= foo(K) [klabel(foo), symbol]\n" +
+                "  syntax Bar ::= bar() [klabel(bar), symbol]\n" +
                 "endmodule";
         parseRule("`foo`(`bar`(.KList) ~> .K , .KList)", def, 0, false);
         parseRule("`foo`(`bar`(.KList) => .K , .KList)", def, 0, false);
@@ -423,7 +423,7 @@ public class RuleGrammarTest {
         String def = "" +
                 "module TEST\n" +
                 "syntax A\n" +
-                "syntax A ::= f(A) [klabel(l)]\n" +
+                "syntax A ::= f(A) [klabel(l), symbol]\n" +
                 "endmodule";
         parseRule("l(_) => .K", def, 0,
                 KApply(KLabel("#ruleNoConditions"),KApply(KLabel("#KRewrite"),

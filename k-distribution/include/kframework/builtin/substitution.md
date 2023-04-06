@@ -54,17 +54,8 @@ module KVAR-COMMON
   rule freshKVar(I:Int) => String2KVar("_" +String Int2String(I))
 endmodule
 
-module KVAR-SYMBOLIC [symbolic, kast]
-  imports KVAR-COMMON
-  imports private STRING
-
-  syntax KItem  ::= "#parseToken"  "(" String "," String ")"  [function, klabel(#parseKVar), hook(STRING.parseToken)]
-  rule String2KVar(S:String) => {#parseToken("KVar", S)}:>KVar
-endmodule
-
 module KVAR
   imports KVAR-COMMON
-  imports KVAR-SYMBOLIC
 endmodule
 ```
 

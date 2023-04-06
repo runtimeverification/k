@@ -12,8 +12,6 @@ import org.kframework.kast.KastOptions;
 import org.kframework.kil.Definition;
 import org.kframework.kil.loader.Context;
 import org.kframework.kompile.KompileOptions;
-import org.kframework.krun.KRunOptions;
-import org.kframework.krun.RunProcess;
 import org.kframework.main.Main;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
@@ -91,7 +89,6 @@ public abstract class BaseTestCase {
         @Override
         protected void configure() {
             bind(RunProcess.class).toInstance(rp);
-            bind(KRunOptions.class).toInstance(new KRunOptions());
             bind(KastOptions.class).toInstance(new KastOptions());
         }
 

@@ -82,7 +82,7 @@ public class ExpandMacros {
     }
 
     private ExpandMacros(Module mod, FileUtil files, KExceptionManager kem, KompileOptions kompileOptions, boolean reverse, boolean sentences) {
-        this(sentences ? new ResolveFunctionWithConfig(mod, kompileOptions.isKore()) : null, mod, files, kem, kompileOptions, reverse);
+        this(sentences ? new ResolveFunctionWithConfig(mod) : null, mod, files, kem, kompileOptions, reverse);
     }
 
     public ExpandMacros(ResolveFunctionWithConfig transformer, Module mod, FileUtil files, KExceptionManager kem, KompileOptions kompileOptions, boolean reverse) {
@@ -367,7 +367,7 @@ public class ExpandMacros {
                throw KEMException.compilerError("Cannot compute macros with klabel variables.", r);
            }
            if (!p.klabel().name().equals(s.klabel().name())) {
-             if (!kompileOptions.isKore() || !mod.overloads().greaterThan(mod.productionsFor().apply(p.klabel()).head(), mod.productionsFor().apply(s.klabel()).head())) {
+             if (!mod.overloads().greaterThan(mod.productionsFor().apply(p.klabel()).head(), mod.productionsFor().apply(s.klabel()).head())) {
                return false;
              }
            }

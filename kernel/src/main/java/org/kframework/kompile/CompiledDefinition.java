@@ -60,7 +60,6 @@ public class CompiledDefinition implements Serializable {
     public final HashMap<String, Sort> configurationVariableDefaultSorts = new HashMap<>();
     public final KLabel topCellInitializer;
     private final Module languageParsingModule;
-    public final Rule exitCodePattern;
     private Map<String, Rule> cachedcompiledPatterns = new ConcurrentHashMap<>();
     private Map<String, Rule> cachedParsedPatterns = new ConcurrentHashMap<>();
 
@@ -76,17 +75,6 @@ public class CompiledDefinition implements Serializable {
         this.programStartSymbol = configurationVariableDefaultSorts.getOrDefault("$PGM", Sorts.K());
         this.topCellInitializer = topCellInitializer;
         this.languageParsingModule = kompiledDefinition.getModule("LANGUAGE-PARSING").get();
-        Rule exitCodeRule;
-        if (kompileOptions.isKore()) {
-            exitCodeRule = null;
-        } else {
-            exitCodeRule = getExitCodeRule(parsedDefinition);
-        }
-        if (exitCodeRule == null) {
-            this.exitCodePattern = null;
-        } else {
-            this.exitCodePattern = new Kompile(kompileOptions, outerParsingOptions, innerParsingOptions, globalOptions, files, kem).compileRule(kompiledDefinition, exitCodeRule);
-        }
     }
 
     private Rule getExitCodeRule(Definition parsedDefinition) {

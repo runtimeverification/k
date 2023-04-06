@@ -51,8 +51,6 @@ in stdenv.mkDerivation {
     "KBMC=kbmc"
     "KAST=kast"
     "KPRINT=kprint"
-    "KRUN_LEGACY=krun-legacy"
-    "KEQ=keq"
     "KSERVER=kserver"
     "KPARSE=kparse"
     "KPARSE_GEN=kparse-gen"
