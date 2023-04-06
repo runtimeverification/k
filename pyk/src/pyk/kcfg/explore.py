@@ -129,17 +129,17 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         _, kore_client = self._kore_rpc
         er = kore_client.execute(kore, max_depth=depth, cut_point_rules=cut_point_rules, terminal_rules=terminal_rules)
         depth = er.depth
-        next_state = CTerm(self.kprint.kore_to_kast(er.state.kore))
+        next_state = CTerm.from_kast(self.kprint.kore_to_kast(er.state.kore))
         _next_states = er.next_states if er.next_states is not None and len(er.next_states) > 1 else []
         # TODO: should not have to prune bottom branches, the backend should do this for us.
         next_states = []
         for ns in _next_states:
             _LOGGER.info(f'Checking for bottom branch: {ns}')
-            _ns = self.cterm_simplify(CTerm(self.kprint.kore_to_kast(ns.kore)))
+            _ns = self.cterm_simplify(CTerm.from_kast(self.kprint.kore_to_kast(ns.kore)))
             if is_bottom(_ns):
                 _LOGGER.warning(f'Found bottom branch: {ns}')
             else:
-                next_states.append(CTerm(_ns))
+                next_states.append(CTerm.from_kast(_ns))
         if len(next_states) == 1 and len(next_states) < len(_next_states):
             return depth + 1, next_states[0], []
         return depth, next_state, next_states
@@ -220,7 +220,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
             if is_bottom(new_term):
                 raise ValueError(f'Node simplified to #Bottom {cfgid}: {shorten_hashes(node.id)}')
             if new_term != node.cterm.kast:
-                cfg.replace_node(node.id, CTerm(new_term))
+                cfg.replace_node(node.id, CTerm.from_kast(new_term))
         return cfg
 
     def step(self, cfgid: str, cfg: KCFG, node_id: str, depth: int = 1) -> Tuple[KCFG, str]:

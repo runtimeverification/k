@@ -154,17 +154,16 @@ class TestImpProof(KCFGExploreTest):
         _config = CTerm(
             KApply(
                 '<generatedTop>',
-                [
-                    KApply(
-                        '<T>',
-                        (
-                            KApply('<k>', [KSequence([k_parsed])]),
-                            KApply('<state>', [state_parsed]),
-                        ),
+                KApply(
+                    '<T>',
+                    (
+                        KApply('<k>', KSequence(k_parsed)),
+                        KApply('<state>', state_parsed),
                     ),
-                    KVariable('GENERATED_COUNTER_CELL'),
-                ],
-            )
+                ),
+                KVariable('GENERATED_COUNTER_CELL'),
+            ),
+            (),
         )
         if constraint is not None:
             _config = _config.add_constraint(constraint)

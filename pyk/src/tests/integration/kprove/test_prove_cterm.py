@@ -50,7 +50,9 @@ class TestImpProof(KProveTest):
         expected_next_states: Iterable[Tuple[str, str]],
     ) -> None:
         def config(k: str, state: str) -> CTerm:
-            return CTerm(KApply('<T>', (KApply('<k>', (KToken(k, 'K'),)), KApply('<state>', (KToken(state, 'Map'),)))))
+            return CTerm(
+                KApply('<T>', (KApply('<k>', (KToken(k, 'K'),)), KApply('<state>', (KToken(state, 'Map'),)))), ()
+            )
 
         # Given
         state = '.Map'

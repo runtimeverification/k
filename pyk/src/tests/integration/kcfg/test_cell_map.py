@@ -58,16 +58,12 @@ class TestCellMapProof(KCFGExploreTest):
         _accounts_parsed = (
             KApply(
                 'AccountCellMapItem',
-                [
-                    KApply('<id>', [_parse(KToken(act_id, 'Int'))]),
-                    KApply(
-                        '<account>',
-                        [
-                            KApply('<id>', [_parse(KToken(act_id, 'Int'))]),
-                            KApply('<balance>', [_parse(KToken(act_state, 'Int'))]),
-                        ],
-                    ),
-                ],
+                KApply('<id>', _parse(KToken(act_id, 'Int'))),
+                KApply(
+                    '<account>',
+                    KApply('<id>', _parse(KToken(act_id, 'Int'))),
+                    KApply('<balance>', _parse(KToken(act_state, 'Int'))),
+                ),
             )
             for act_id, act_state in accounts
         )
@@ -75,13 +71,12 @@ class TestCellMapProof(KCFGExploreTest):
         return CTerm(
             KApply(
                 '<generatedTop>',
-                [
-                    KApply('<k>', [KSequence([_k_parsed])]),
-                    KApply('<activeAccounts>', [_active_accounts]),
-                    KVariable('GENERATED_COUNTER_CELL'),
-                    KApply('<accounts>', [_accounts]),
-                ],
-            )
+                KApply('<k>', KSequence(_k_parsed)),
+                KApply('<activeAccounts>', _active_accounts),
+                KVariable('GENERATED_COUNTER_CELL'),
+                KApply('<accounts>', _accounts),
+            ),
+            (),
         )
 
     @pytest.mark.parametrize(

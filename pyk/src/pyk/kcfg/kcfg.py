@@ -228,11 +228,11 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         claim_body = defn.instantiate_cell_vars(claim_body)
         claim_body = rename_generated_vars(claim_body)
 
-        claim_lhs = CTerm(extract_lhs(claim_body)).add_constraint(bool_to_ml_pred(claim.requires))
+        claim_lhs = CTerm.from_kast(extract_lhs(claim_body)).add_constraint(bool_to_ml_pred(claim.requires))
         init_state = cfg.create_node(claim_lhs)
         cfg.add_init(init_state.id)
 
-        claim_rhs = CTerm(extract_rhs(claim_body)).add_constraint(bool_to_ml_pred(claim.ensures))
+        claim_rhs = CTerm.from_kast(extract_rhs(claim_body)).add_constraint(bool_to_ml_pred(claim.ensures))
         target_state = cfg.create_node(claim_rhs)
         cfg.add_target(target_state.id)
 
@@ -618,7 +618,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
     def create_node(self, cterm: CTerm) -> Node:
         term = cterm.kast
         term = remove_source_attributes(term)
-        cterm = CTerm(term)
+        cterm = CTerm.from_kast(term)
         node = KCFG.Node(cterm)
 
         if node.id in self._nodes:

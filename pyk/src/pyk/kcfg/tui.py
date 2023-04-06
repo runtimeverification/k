@@ -13,7 +13,6 @@ from ..kast.inner import KApply, KRewrite
 from ..kast.manip import flatten_label, minimize_term, push_down_rewrites
 from ..kcfg import KCFG
 from ..prelude.kbool import TRUE
-from ..prelude.ml import mlAnd
 from ..utils import shorten_hashes, single
 
 if TYPE_CHECKING:
@@ -190,7 +189,7 @@ class NodeView(Widget):
                 config_target, *constraints_target = self._element.target.cterm
                 constraints_new = [c for c in constraints_target if c not in constraints_source]
                 config = push_down_rewrites(KRewrite(config_source, config_target))
-                crewrite = CTerm(mlAnd([config] + constraints_new))
+                crewrite = CTerm(config, constraints_new)
                 term_str, constraint_str = _cterm_text(crewrite)
 
             elif type(self._element) is KCFG.Cover:
