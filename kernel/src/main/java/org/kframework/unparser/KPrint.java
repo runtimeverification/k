@@ -190,21 +190,17 @@ public class KPrint {
     }
 
     private Term disambiguateForUnparse(Module mod, Term t) {
-        if (kompileOptions.isKore()) {
-            return t;
-        } else {
-            return ParseInModule.disambiguateForUnparse(mod, t);
-        }
+        return t;
     }
 
     private String unparseInternal(Module mod, K input, ColorSetting colorize) {
         ExpandMacros expandMacros = ExpandMacros.forNonSentences(mod, files, kompileOptions, true);
         return Formatter.format(
-                new AddBrackets(mod).addBrackets((ProductionReference) disambiguateForUnparse(mod, KOREToTreeNodes.apply(KOREToTreeNodes.up(mod, expandMacros.expand(input)), mod, kompileOptions.isKore()))), options.color(tty.stdout, files.getEnv()));
+                new AddBrackets(mod).addBrackets((ProductionReference) disambiguateForUnparse(mod, KOREToTreeNodes.apply(KOREToTreeNodes.up(mod, expandMacros.expand(input)), mod))), options.color(tty.stdout, files.getEnv()));
     }
 
     public K abstractTerm(Module mod, K term) {
-        K filteredSubst     = options.noFilterSubstitution || !kompileOptions.isKore() ? term : filterSubst(term, mod);
+        K filteredSubst     = options.noFilterSubstitution ? term : filterSubst(term, mod);
         K origNames         = options.restoreOriginalNames ? restoreOriginalNameIfPresent(filteredSubst) : filteredSubst;
         K collectionsSorted = options.noSortCollections    ? origNames : sortCollections(mod, origNames);
         //non-determinism is still possible if associative/commutative collection terms start with anonymous vars

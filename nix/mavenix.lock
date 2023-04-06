@@ -2678,14 +2678,6 @@
       "sha1": "05e315ccb7e487e68bf19124d736afbc9136c631"
     },
     {
-      "path": "net/java/dev/jna/jna/4.5.1/jna-4.5.1.jar",
-      "sha1": "65bd0cacc9c79a21c6ed8e9f588577cd3c2f85b9"
-    },
-    {
-      "path": "net/java/dev/jna/jna/4.5.1/jna-4.5.1.pom",
-      "sha1": "30f4caff4cda589a081bedc5c7c72d2ffbee6273"
-    },
-    {
       "path": "net/java/jvnet-parent/1/jvnet-parent-1.pom",
       "sha1": "b55a1b046dbe82acdee8edde7476eebcba1e57d8"
     },
@@ -7434,10 +7426,6 @@
       "sha1": "1e734bc044c421baf57f3f224aed74e1a6ccee20"
     },
     {
-      "path": "org/objenesis/objenesis-parent/2.1/objenesis-parent-2.1.pom",
-      "sha1": "156a12a0fcf8ed856bdc60ce10550ea46fba8eaa"
-    },
-    {
       "path": "org/objenesis/objenesis-parent/2.6/objenesis-parent-2.6.pom",
       "sha1": "cfc0966402e8174fbacd5c5dd355b5815364a4fe"
     },
@@ -7448,14 +7436,6 @@
     {
       "path": "org/objenesis/objenesis/1.0/objenesis-1.0.pom",
       "sha1": "e7b3dff753f6935f2d287691ab3e8fd165290e4a"
-    },
-    {
-      "path": "org/objenesis/objenesis/2.1/objenesis-2.1.jar",
-      "sha1": "87c0ea803b69252868d09308b4618f766f135a96"
-    },
-    {
-      "path": "org/objenesis/objenesis/2.1/objenesis-2.1.pom",
-      "sha1": "362dfc522ff5a1401838f136cb7a7ec99033fc33"
     },
     {
       "path": "org/objenesis/objenesis/2.6/objenesis-2.6.jar",
@@ -8150,14 +8130,6 @@
       "sha1": "69e2c447f2c424d95c4a818463d58da1723fce2c"
     },
     {
-      "path": "uk/com/robust-it/cloning/1.9.2/cloning-1.9.2.jar",
-      "sha1": "cd49306bc364d5c5e2edcd244d38ead53616b02d"
-    },
-    {
-      "path": "uk/com/robust-it/cloning/1.9.2/cloning-1.9.2.pom",
-      "sha1": "7baabb3c61d772fe073db8005b2ad7f1e2cf4b77"
-    },
-    {
       "path": "xerces/xercesImpl/2.8.1/xercesImpl-2.8.1.pom",
       "sha1": "abda46c0359b0e2dcf7a31359128a0c6cecd4dca"
     },
@@ -8247,13 +8219,6 @@
       "groupId": "com.runtimeverification.k",
       "name": "kernel-1.0-SNAPSHOT",
       "path": "./kernel",
-      "version": "1.0-SNAPSHOT"
-    },
-    {
-      "artifactId": "java-backend",
-      "groupId": "com.runtimeverification.k",
-      "name": "java-backend-1.0-SNAPSHOT",
-      "path": "./java-backend",
       "version": "1.0-SNAPSHOT"
     },
     {

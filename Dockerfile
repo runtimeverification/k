@@ -71,7 +71,6 @@ ADD llvm-backend/pom.xml                                       .tmp-maven/llvm-b
 ADD llvm-backend/src/main/native/llvm-backend/matching/pom.xml .tmp-maven/llvm-backend/src/main/native/llvm-backend/matching/
 ADD haskell-backend/pom.xml                                    .tmp-maven/haskell-backend/
 ADD kernel/pom.xml                                             .tmp-maven/kernel/
-ADD java-backend/pom.xml                                       .tmp-maven/java-backend/
 ADD k-distribution/pom.xml                                     .tmp-maven/k-distribution/
 ADD kore/pom.xml                                               .tmp-maven/kore/
 RUN    cd .tmp-maven                          \
