@@ -7,7 +7,7 @@ import pytest
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence, KToken, KVariable
 from pyk.kast.manip import get_cell
-from pyk.prelude.ml import mlAnd, mlEqualsTrue, mlTop
+from pyk.prelude.ml import mlEqualsTrue, mlTop
 
 from ..utils import KCFGExploreTest
 
@@ -49,19 +49,13 @@ class TestSimpleProof(KCFGExploreTest):
         )
         # TODO: Why does kompile put <generatedCounter> before <state>?
         return CTerm(
-            mlAnd(
-                [
-                    KApply(
-                        '<generatedTop>',
-                        [
-                            KApply('<k>', [KSequence([_k_parsed])]),
-                            KVariable('GENERATED_COUNTER_CELL'),
-                            KApply('<state>', [_state_parsed]),
-                        ],
-                    ),
-                    _constraint,
-                ]
-            )
+            KApply(
+                '<generatedTop>',
+                KApply('<k>', KSequence(_k_parsed)),
+                KVariable('GENERATED_COUNTER_CELL'),
+                KApply('<state>', _state_parsed),
+            ),
+            (_constraint,),
         )
 
     @pytest.mark.parametrize(

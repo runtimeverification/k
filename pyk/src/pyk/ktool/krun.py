@@ -81,7 +81,7 @@ class KRun(KPrint):
         self._check_return_code(result.returncode, expect_rc)
 
         result_kast = kast_term(json.loads(result.stdout), KInner)  # type: ignore # https://github.com/python/mypy/issues/4717
-        return CTerm(result_kast)
+        return CTerm.from_kast(result_kast)
 
     def run_kore(
         self,
@@ -114,7 +114,7 @@ class KRun(KPrint):
 
         result_kore = KoreParser(result.stdout).pattern()
         result_kast = self.kore_to_kast(result_kore)
-        return CTerm(result_kast)
+        return CTerm.from_kast(result_kast)
 
     def run_kore_term(
         self,

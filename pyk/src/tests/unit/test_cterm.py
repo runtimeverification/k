@@ -35,7 +35,7 @@ v1_sorted = KVariable('V1', sort=INT)
 
 
 def _as_cterm(term: KInner) -> CTerm:
-    return CTerm(KApply(KLabel('<generatedTop>', GENERATED_TOP_CELL), term))
+    return CTerm(KApply(KLabel('<generatedTop>', GENERATED_TOP_CELL), term), ())
 
 
 MATCH_TEST_DATA: Final[Tuple[Tuple[KInner, KInner], ...]] = (
@@ -98,7 +98,7 @@ BUILD_RULE_TEST_DATA: Final = (
 @pytest.mark.parametrize('lhs,rhs,keep_vars,expected', BUILD_RULE_TEST_DATA, ids=count())
 def test_build_rule(lhs: KInner, rhs: KInner, keep_vars: List[str], expected: KInner) -> None:
     # When
-    rule, _ = build_rule('test-rule', CTerm(lhs), CTerm(rhs), keep_vars=keep_vars)
+    rule, _ = build_rule('test-rule', CTerm.from_kast(lhs), CTerm.from_kast(rhs), keep_vars=keep_vars)
     actual = rule.body
 
     # Then
@@ -148,8 +148,8 @@ BUILD_CLAIM_TEST_DATA: Final = (
 )
 def test_build_claim(test_id: str, init: KInner, target: KInner, expected: KClaim) -> None:
     # Given
-    init_cterm = CTerm(init)
-    target_cterm = CTerm(target)
+    init_cterm = CTerm.from_kast(init)
+    target_cterm = CTerm.from_kast(target)
 
     # When
     actual, _ = build_claim('claim', init_cterm, target_cterm)
