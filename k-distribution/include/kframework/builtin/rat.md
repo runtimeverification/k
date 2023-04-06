@@ -127,28 +127,10 @@ module RAT-KORE [kore]
   rule R =/=Rat S => R =/=K S
 endmodule
 
-module RAT-KAST [kast]
-  imports private RAT-COMMON
-  imports private INT
-  imports private BOOL
-
-  /*
-   * equalities for non-kore backends such as the java backend
-   */
-
-  rule < I , I' >Rat ==Rat < J , J' >Rat => I ==Int J andBool I' ==Int J'
-  rule _:Int         ==Rat < _ , _  >Rat => false
-  rule < _ , _  >Rat ==Rat _:Int         => false
-  rule I:Int         ==Rat J:Int         => I ==Int J
-
-  rule R =/=Rat S => notBool (R ==Rat S)
-endmodule
-
 module RAT [private]
   imports private RAT-COMMON
   imports public RAT-SYMBOLIC
   imports public RAT-KORE
-  imports public RAT-KAST
   imports public RAT-SYNTAX
   imports private INT
   imports private BOOL

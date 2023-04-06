@@ -61,7 +61,7 @@ public class AddEmptyListsTest {
                         definitionFile,
                         definitionFile.getParentFile(),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
-                        false, false, false, false);
+                        false, false, false);
 
         return new RuleGrammarGenerator(baseK);
     }
@@ -86,17 +86,19 @@ public class AddEmptyListsTest {
 
     private static final String DEF =
             "module TEST\n" +
-                    "syntax A ::= \"a\" [klabel(\"alabel\")]\n" +
-                    "syntax B ::= \"b\" [klabel(\"blabel\")]\n" +
+                    "syntax A ::= \"a\" [klabel(\"alabel\"), symbol]\n" +
+                    "syntax B ::= \"b\" [klabel(\"blabel\"), symbol]\n" +
                     "syntax A ::= B\n" +
-                    "syntax As ::= List{A,\",\"}\n" +
-                    "syntax Bs ::= List{B,\",\"}\n" +
+                    "syntax As ::= List{A,\",\"} [klabel(as)]\n" +
+                    "syntax Bs ::= List{B,\",\"} [klabel(as)]\n" +
                     "syntax As ::= Bs\n" +
-                    "syntax K ::= f(As) | g(A) | h(Bs)" +
+                    "syntax K ::= f(As) [symbol] | g(A) [symbol] | h(Bs) [symbol]" +
                     "endmodule\n";
 
-    public static final KApply NIL = KApply(KLabel(".List{\"_,__TEST\"}"));
-    public static final KLabel CONS = KLabel("_,__TEST");
+    public static final KApply NIL = KApply(KLabel(".List{\"_,__TEST_Bs_B_Bs\"}_Bs"));
+    public static final KLabel BS = KLabel("_,__TEST_Bs_B_Bs");
+    public static final KLabel AS = KLabel("_,__TEST_As_A_As");
+    public static final KLabel CONS = BS;
     public static final KApply A = KApply(KLabel("alabel"));
     public static final KApply B = KApply(KLabel("blabel"));
     public static final KLabel F = KLabel("f");
@@ -115,15 +117,15 @@ public class AddEmptyListsTest {
     @Ignore("The API of AddEmptyLists needs to change for this to be possible")
     @Test
     public void testItem() {
-        parseTerm("a", "As", KApply(CONS, A, NIL));
+        parseTerm("a", "As", KApply(BS, A, NIL));
     }
 
     @Test
     public void testConcreteTop() {
         parseTerm(".As", "As", NIL);
-        parseTerm("a,a", "As", KApply(CONS, A, KApply(CONS, A, NIL)));
-        parseTerm("a,.As", "As", KApply(CONS, A, NIL));
-        parseTerm("a,b", "As", KApply(CONS, A, KApply(CONS, B, NIL)));
+        parseTerm("a,a", "As", KApply(AS, A, KApply(AS, A, NIL)));
+        parseTerm("a,.As", "As", KApply(AS, A, NIL));
+        parseTerm("a,b", "As", KApply(AS, A, KApply(CONS, B, NIL)));
         parseTerm("b,.Bs", "As", KApply(CONS, B, NIL));
         parseTerm("b,b", "As", KApply(CONS, B, KApply(CONS, B, NIL)));
     }
@@ -131,10 +133,10 @@ public class AddEmptyListsTest {
     @Test
     public void testConcreteArgument() {
         parseTerm("f(.As)", "K", KApply(F, NIL));
-        parseTerm("f(a)", "K", KApply(F, KApply(CONS, A, NIL)));
-        parseTerm("f(a,a)", "K", KApply(F, KApply(CONS, A, KApply(CONS, A, NIL))));
-        parseTerm("f(a,.As)", "K", KApply(F, KApply(CONS, A, NIL)));
-        parseTerm("f(a,b)", "K", KApply(F, KApply(CONS, A, KApply(CONS, B, NIL))));
+        parseTerm("f(a)", "K", KApply(F, KApply(AS, A, NIL)));
+        parseTerm("f(a,a)", "K", KApply(F, KApply(AS, A, KApply(AS, A, NIL))));
+        parseTerm("f(a,.As)", "K", KApply(F, KApply(AS, A, NIL)));
+        parseTerm("f(a,b)", "K", KApply(F, KApply(AS, A, KApply(CONS, B, NIL))));
         parseTerm("f(b,.Bs)", "K", KApply(F, KApply(CONS, B, NIL)));
         parseTerm("f(b,b)", "K", KApply(F, KApply(CONS, B, KApply(CONS, B, NIL))));
     }
@@ -148,9 +150,9 @@ public class AddEmptyListsTest {
     @Test
     public void testLabedFunConcreteArgument() {
         parseTerm("`f`(.As)", "K", KApply(F, NIL));
-        parseTerm("`f`((a,a))", "K", KApply(F, KApply(CONS, A, KApply(CONS, A, NIL))));
-        parseTerm("`f`((a,.As))", "K", KApply(F, KApply(CONS, A, NIL)));
-        parseTerm("`f`((a,b))", "K", KApply(F, KApply(CONS, A, KApply(CONS, B, NIL))));
+        parseTerm("`f`((a,a))", "K", KApply(F, KApply(AS, A, KApply(AS, A, NIL))));
+        parseTerm("`f`((a,.As))", "K", KApply(F, KApply(AS, A, NIL)));
+        parseTerm("`f`((a,b))", "K", KApply(F, KApply(AS, A, KApply(CONS, B, NIL))));
         parseTerm("`f`((b,.Bs))", "K", KApply(F, KApply(CONS, B, NIL)));
         parseTerm("`f`((b,b))", "K", KApply(F, KApply(CONS, B, KApply(CONS, B, NIL))));
     }
@@ -162,7 +164,7 @@ public class AddEmptyListsTest {
 
     @Test
     public void testArgumentLabeledCons() {
-        parseTerm("f(a,.As)", "K", KApply(F, KApply(CONS, A, NIL)));
+        parseTerm("f(a,.As)", "K", KApply(F, KApply(AS, A, NIL)));
     }
 
     @Test
@@ -200,14 +202,14 @@ public class AddEmptyListsTest {
     public void testArgumentInferredItemVar() {
         // 1 warning from inference
         parseTerm("f(V)~>g(V)", "K",
-                KSequence(KApply(F, KApply(CONS, KApply(CAST_A, KVariable("V")), NIL)),
+                KSequence(KApply(F, KApply(AS, KApply(CAST_A, KVariable("V")), NIL)),
                         KApply(G, KApply(CAST_A, KVariable("V")))));
     }
 
     @Test
     public void testArgumentAnnItemVar() {
         parseTerm("f(V:A)", "K",
-                KApply(F, KApply(CONS, KApply(CAST_A, KVariable("V")), NIL)));
+                KApply(F, KApply(AS, KApply(CAST_A, KVariable("V")), NIL)));
     }
 
     @Test

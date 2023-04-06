@@ -56,11 +56,6 @@ import static org.kframework.kore.KORE.*;
  */
 public class ResolveFun {
 
-    public ResolveFun(boolean kore) {
-      this.kore = kore;
-    }
-
-    private final boolean kore;
     private final Set<Production> funProds = new HashSet<>();
     private final Set<Rule> funRules = new HashSet<>();
     private Module module;
@@ -215,11 +210,7 @@ public class ResolveFun {
         if (k instanceof KToken)
             return ((KToken) k).sort();
         if (k instanceof KApply) {
-            if (kore) {
-                return inj.sort(k, Sorts.K());
-            } else {
-                return k.att().get(Production.class).sort();
-            }
+            return inj.sort(k, Sorts.K());
         }
         if (k instanceof KVariable)
             return Sorts.K();
