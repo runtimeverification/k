@@ -76,4 +76,4 @@ jobs:
           gh release create "${release_tag}" \
             --target "${GITHUB_SHA}"         \
             --prerelease                     \
-            --notes-file 'INSTALL.md'
+            --notes-file 'release.md'
