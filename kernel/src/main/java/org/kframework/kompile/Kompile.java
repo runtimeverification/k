@@ -31,7 +31,6 @@ import org.kframework.definition.Rule;
 import org.kframework.definition.Sentence;
 import org.kframework.kore.KLabel;
 import org.kframework.kore.Sort;
-import org.kframework.krun.RunProcess;
 import org.kframework.main.GlobalOptions;
 import org.kframework.parser.InputModes;
 import org.kframework.parser.json.JsonParser;
@@ -39,6 +38,7 @@ import org.kframework.parser.KRead;
 import org.kframework.parser.ParserUtils;
 import org.kframework.parser.inner.RuleGrammarGenerator;
 import org.kframework.unparser.ToJson;
+import org.kframework.utils.RunProcess;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.StringUtil;
 import org.kframework.utils.errorsystem.KEMException;
@@ -305,59 +305,6 @@ public class Kompile {
         return dt.andThen(d -> Definition(d.mainModule(), immutable(stream(d.entryModules()).filter(mod -> excludedModuleTags.stream().noneMatch(tag -> mod.att().contains(tag))).collect(Collectors.toSet())), d.att()));
     }
 
-    public static Function<Definition, Definition> defaultSteps(KompileOptions kompileOptions, KExceptionManager kem, FileUtil files) {
-        Function1<Definition, Definition> resolveStrict = d -> DefinitionTransformer.from(new ResolveStrict(kompileOptions, d)::resolve, "resolving strict and seqstrict attributes").apply(d);
-        DefinitionTransformer resolveHeatCoolAttribute = DefinitionTransformer.fromSentenceTransformer(new ResolveHeatCoolAttribute(new HashSet<>(kompileOptions.transition), EnumSet.of(HEAT_RESULT, COOL_RESULT_CONDITION, COOL_RESULT_INJECTION))::resolve, "resolving heat and cool attributes");
-        DefinitionTransformer resolveAnonVars = DefinitionTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolving \"_\" vars");
-        DefinitionTransformer guardOrs = DefinitionTransformer.fromSentenceTransformer(new GuardOrPatterns(false)::resolve, "resolving or patterns");
-        DefinitionTransformer resolveSemanticCasts =
-                DefinitionTransformer.fromSentenceTransformer(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve, "resolving semantic casts");
-        DefinitionTransformer resolveFun = DefinitionTransformer.from(new ResolveFun(false)::resolve, "resolving #fun");
-        Function1<Definition, Definition> resolveFunctionWithConfig = d -> DefinitionTransformer.from(new ResolveFunctionWithConfig(d, false)::moduleResolve, "resolving functions with config context").apply(d);
-        DefinitionTransformer generateSortPredicateSyntax = DefinitionTransformer.from(new GenerateSortPredicateSyntax()::gen, "adding sort predicate productions");
-        DefinitionTransformer generateSortProjections = DefinitionTransformer.from(new GenerateSortProjections(kompileOptions.coverage)::gen, "adding sort projections");
-        DefinitionTransformer subsortKItem = DefinitionTransformer.from(Kompile::subsortKItem, "subsort all sorts to KItem");
-        Function1<Definition, Definition> propagateMacroToRules =
-                d -> DefinitionTransformer.fromSentenceTransformer((m, s) -> new PropagateMacro(m).propagate(s), "propagate macro labels from production to rules").apply(d);
-        Function1<Definition, Definition> expandMacros = d -> {
-          ResolveFunctionWithConfig transformer = new ResolveFunctionWithConfig(d, false);
-          return DefinitionTransformer.fromSentenceTransformer((m, s) -> new ExpandMacros(transformer, m, files, kem, kompileOptions, false).expand(s), "expand macros").apply(d);
-        };
-        GenerateCoverage cov = new GenerateCoverage(kompileOptions.coverage, files);
-        Function1<Definition, Definition> genCoverage = d -> DefinitionTransformer.fromRuleBodyTransformerWithRule((r, body) -> cov.gen(r, body, d.mainModule()), "generate coverage instrumentation").apply(d);
-        DefinitionTransformer numberSentences = DefinitionTransformer.fromSentenceTransformer(NumberSentences::number, "number sentences uniquely");
-        Function1<Definition, Definition> resolveConfigVar = d -> DefinitionTransformer.fromSentenceTransformer(new ResolveFunctionWithConfig(d, false)::resolveConfigVar, "Adding configuration variable to lhs").apply(d);
-        Function1<Definition, Definition> resolveIO = (d -> Kompile.resolveIOStreams(kem, d));
-        Function1<Definition, Definition> markExtraConcreteRules = d -> MarkExtraConcreteRules.mark(d, kompileOptions.extraConcreteRuleLabels);
-
-        return def -> resolveIO
-                .andThen(resolveFun)
-                .andThen(resolveFunctionWithConfig)
-                .andThen(resolveStrict)
-                .andThen(resolveAnonVars)
-                .andThen(d -> new ResolveContexts(kompileOptions).resolve(d))
-                .andThen(numberSentences)
-                .andThen(resolveHeatCoolAttribute)
-                .andThen(resolveSemanticCasts)
-                .andThen(subsortKItem)
-                .andThen(generateSortPredicateSyntax)
-                .andThen(generateSortProjections)
-                .andThen(propagateMacroToRules)
-                .andThen(expandMacros)
-                .andThen(guardOrs)
-                .andThen(d -> Kompile.resolveFreshConstants(d, files))
-                .andThen(generateSortPredicateSyntax)
-                .andThen(generateSortProjections)
-                .andThen(AddImplicitComputationCell::transformDefinition)
-                .andThen(d -> new Strategy().addStrategyCellToRulesTransformer(d).apply(d))
-                .andThen(d -> ConcretizeCells.transformDefinition(d, false))
-                .andThen(genCoverage)
-                .andThen(Kompile::addSemanticsModule)
-                .andThen(resolveConfigVar)
-                .andThen(markExtraConcreteRules)
-                .apply(def);
-    }
-
     public static Sentence removePolyKLabels(Sentence s) {
       if (s instanceof Production) {
         Production p = (Production)s;
@@ -499,7 +446,7 @@ public class Kompile {
             moduleNames.add(m.name());
         });
 
-        CheckKLabels checkKLabels = new CheckKLabels(errors, kem, kompileOptions.isKore(), files);
+        CheckKLabels checkKLabels = new CheckKLabels(errors, kem, files);
         Set<String> checkedModules = new HashSet<>();
         // only check imported modules because otherwise we might have false positives
         Consumer<Module> checkModuleKLabels = m -> {
@@ -547,15 +494,10 @@ public class Kompile {
         return Constructors.Definition(d.mainModule(), immutable(allModules), d.att());
     }
 
-    public static Definition resolveFreshConstants(Definition input, FileUtil files) {
-        return DefinitionTransformer.from(m -> GeneratedTopFormat.resolve(new ResolveFreshConstants(input, false, null, files).resolve(m)), "resolving !Var variables")
-                .apply(input);
-    }
-
     public Rule compileRule(Definition compiledDef, Rule parsedRule) {
         return (Rule) UnaryOperator.<Sentence>identity()
                 .andThen(new ResolveAnonVar()::resolve)
-                .andThen(new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA))::resolve)
+                .andThen(new ResolveSemanticCasts(false)::resolve)
                 .andThen(s -> concretizeSentence(s, compiledDef))
                 .apply(parsedRule);
     }
@@ -571,6 +513,6 @@ public class Kompile {
         ConfigurationInfoFromModule configInfo = new ConfigurationInfoFromModule(input.mainModule());
         LabelInfo labelInfo = new LabelInfoFromModule(input.mainModule());
         SortInfo sortInfo = SortInfo.fromModule(input.mainModule());
-        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule(), kompileOptions.isKore()).concretize(input.mainModule(), s);
+        return new ConcretizeCells(configInfo, labelInfo, sortInfo, input.mainModule()).concretize(input.mainModule(), s);
     }
 }

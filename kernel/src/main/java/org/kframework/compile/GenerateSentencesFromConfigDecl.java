@@ -61,8 +61,8 @@ public class GenerateSentencesFromConfigDecl {
      * @param m The module the configuration declaration exists in.
      * @return A set of sentences representing the configuration declaration.
      */
-    public static Set<Sentence> gen(K body, K ensures, Att att, Module m, boolean kore) {
-        return genInternal(body, ensures, att, m, kore)._1();
+    public static Set<Sentence> gen(K body, K ensures, Att att, Module m) {
+        return genInternal(body, ensures, att, m)._1();
     }
 
     /**
@@ -78,7 +78,7 @@ public class GenerateSentencesFromConfigDecl {
      * @param m The module the configuration declaration is in. Used to get the sort of leaf cells.
      * @return A tuple of the sentences generated, a list of the sorts of the children of the cell, and the body of the initializer.
      */
-    private static Tuple4<Set<Sentence>, List<Sort>, K, Boolean> genInternal(K term, K ensures, Att cfgAtt, Module m, boolean kore) {
+    private static Tuple4<Set<Sentence>, List<Sort>, K, Boolean> genInternal(K term, K ensures, Att cfgAtt, Module m) {
         if (term instanceof KApply) {
             KApply kapp = (KApply) term;
             if (kapp.klabel().name().equals("#configCell")) {
@@ -101,10 +101,10 @@ public class GenerateSentencesFromConfigDecl {
                                 if (kapp.att().contains(Location.class))
                                     att = cfgAtt.add(Location.class, kapp.att().get(Location.class));
                                 Tuple4<Set<Sentence>, List<Sort>, K, Boolean> childResult = genInternal(
-                                        cellContents, null, att, m, kore);
+                                        cellContents, null, att, m);
 
                                 boolean isLeafCell = childResult._4();
-                                Tuple4<Set<Sentence>, Sort, K, Boolean> myResult = computeSentencesOfWellFormedCell(isLeafCell, isStream, kore, multiplicity, att, m, cellName, cellProperties,
+                                Tuple4<Set<Sentence>, Sort, K, Boolean> myResult = computeSentencesOfWellFormedCell(isLeafCell, isStream, multiplicity, att, m, cellName, cellProperties,
                                         childResult._2(), childResult._3(), ensures, hasConfigOrRegularVariable(cellContents, m));
                                 return Tuple4.apply((Set<Sentence>)childResult._1().$bar(myResult._1()), Lists.newArrayList(myResult._2()), myResult._3(), false);
                             }
@@ -145,7 +145,7 @@ public class GenerateSentencesFromConfigDecl {
                     //top level cell, therefore, should be the children of the generatedTop cell
                     KToken cellLabel = KToken(KLabels.GENERATED_TOP_CELL_NAME, Sort("#CellName"));
                     K generatedTop = KApply(KLabel("#configCell"), cellLabel, KApply(KLabel("#cellPropertyListTerminator")), term, cellLabel);
-                    return genInternal(generatedTop, ensures, cfgAtt, m, kore);
+                    return genInternal(generatedTop, ensures, cfgAtt, m);
                 }
                 List<K> cells = Assoc.flatten(kapp.klabel(), kapp.klist().items(), m);
                 Set<Sentence> accumSentences = Set();
@@ -153,7 +153,7 @@ public class GenerateSentencesFromConfigDecl {
                 List<K> initializers = Lists.newArrayList();
                 for (K cell : cells) {
                     //for each cell, generate the child and inform the parent of the children it contains
-                    Tuple4<Set<Sentence>, List<Sort>, K, Boolean> childResult = genInternal(cell, null, cfgAtt, m, kore);
+                    Tuple4<Set<Sentence>, List<Sort>, K, Boolean> childResult = genInternal(cell, null, cfgAtt, m);
                     accumSentences = (Set<Sentence>)accumSentences.$bar(childResult._1());
                     sorts.addAll(childResult._2());
                     initializers.add(childResult._3());
@@ -310,7 +310,6 @@ public class GenerateSentencesFromConfigDecl {
     private static Tuple4<Set<Sentence>, Sort, K, Boolean> computeSentencesOfWellFormedCell(
             boolean isLeaf,
             boolean isStream,
-            boolean kore,
             Multiplicity multiplicity,
             Att configAtt,
             Module m,
@@ -545,7 +544,7 @@ public class GenerateSentencesFromConfigDecl {
             }
         }
 
-        if (cellProperties.contains("exit") && kore) {
+        if (cellProperties.contains("exit")) {
             KLabel getExitCodeLabel = KLabel("getExitCode");
             Production getExitCode = Production(getExitCodeLabel, Sorts.Int(), Seq(Terminal("getExitCode"), Terminal("("), NonTerminal(Sorts.GeneratedTopCell()), Terminal(")")), Att.empty().add("function"));
             sentences.add(getExitCode);

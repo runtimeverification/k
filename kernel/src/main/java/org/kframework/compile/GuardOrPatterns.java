@@ -18,11 +18,6 @@ import static org.kframework.kore.KORE.*;
 public class GuardOrPatterns {
 
     private Set<KVariable> vars = new HashSet<>();
-    private final boolean kore;
-
-    public GuardOrPatterns(boolean kore) {
-      this.kore = kore;
-    }
 
     void resetVars() {
         vars.clear();
@@ -81,12 +76,8 @@ public class GuardOrPatterns {
             @Override
             public K apply(KApply k) {
               if (k.klabel().head().equals(KLabels.ML_OR)) {
-                if (kore) {
-                  AddSortInjections inj = new AddSortInjections(m);
-                  return KAs(k, newDotVariable(inj.sort(k, null)));
-                } else {
-                  return KAs(k, newDotVariable(k.items().get(1).att().get(Production.class).sort()));
-                }
+                AddSortInjections inj = new AddSortInjections(m);
+                return KAs(k, newDotVariable(inj.sort(k, null)));
               }
               return super.apply(k);
             }

@@ -2,8 +2,8 @@ name: 'Update Nix Flake Inputs'
 on:
   push:
     branches:
-      - '_update-deps_runtimeverification_haskell-backend'
-      - '_update-deps_runtimeverification_llvm-backend'
+      - '_update-deps/runtimeverification/haskell-backend'
+      - '_update-deps/runtimeverification/llvm-backend'
   workflow_dispatch:
 # Stop in progress workflows on the same branch and same workflow to use latest committed code
 concurrency:

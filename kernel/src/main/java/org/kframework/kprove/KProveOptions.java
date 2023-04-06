@@ -74,14 +74,6 @@ public class KProveOptions {
     @Parameter(names="--depth", description="The maximum number of computational steps to prove")
     public Integer depth;
 
-    @Parameter(names = "--boundary-cells", description = "The comma-separated list of cells used to mark the boundary " +
-            "of evaluation. If option is specified, execution ends when these cells in the current term match same " +
-            "cells in the target term. (Except for step 1, for which boundary checking is disabled.)" +
-            "If the whole current term matches target, execution is successful. " +
-            "Otherwise it fails on the present path. If option is not specified, full target term implication is checked " +
-            "on every step. In most specifications boundary is marked by \"k\".")
-    public List<String> boundaryCells = Collections.emptyList();
-
     @Parameter(names="--concrete-rules", description="List of rule labels to be considered concrete, in addition to " +
             "rules marked with `[concrete]` attribute")
     public List<String> extraConcreteRuleLabels = Collections.emptyList();
