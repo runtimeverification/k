@@ -1,10 +1,11 @@
-name: "Master Push"
+name: 'Master Push'
 on:
   push:
     branches:
       - master
 
 jobs:
+
   nix-flake-release:
     name: 'Nix flake release'
     strategy:
@@ -55,3 +56,24 @@ jobs:
             k=$(nix build .#k --json | jq -r '.[].outputs | to_entries[].value')
             drv=$(nix-store --query --deriver ${k})
             nix-store --query --requisites --include-outputs ${drv} | cachix push k-framework
+
+  gh-release:
+    name: 'Publish GitHub Prerelease'
+    runs-on: ubuntu-latest
+    needs: nix-flake-release
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+      - name: 'Publish prerelease'
+        env:
+          GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
+        run: |
+          set -x
+          release_tag=v$(cat package/version)
+          echo "K Framework Release ${release_tag}"  > release.md
+          echo ''                                   >> release.md
+          cat k-distribution/INSTALL.md             >> release.md
+          gh release create "${release_tag}" \
+            --target "${GITHUB_SHA}"         \
+            --prerelease                     \
+            --notes-file 'INSTALL.md'
