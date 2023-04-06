@@ -6,6 +6,9 @@ module NAT-SYNTAX
     syntax Nat ::= "z"
                  | s(Nat)
                  | Nat "+" Nat [function]
+
+    // declaring constants as arbitrary values
+    syntax Nat ::= "k" [function, no-evaluators]
 endmodule
 
 module NAT

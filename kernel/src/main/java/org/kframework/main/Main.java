@@ -182,15 +182,6 @@ public class Main {
                 case "-k-compile-search-pattern":
                     modules = KSearchPatternFrontEnd.getModules();
                     break;
-                case "-kprove-legacy":
-                    modules.addAll(KProveFrontEnd.getModules());
-                    for (KModule kModule : kModules) {
-                        List<Module> ms = kModule.getKProveModules();
-                        if (ms != null) {
-                            modules.addAll(ms);
-                        }
-                    }
-                    break;
                 case "-kprove":
                     modules.addAll(org.kframework.kprovex.KProveFrontEnd.getModules());
                     for (KModule kModule : kModules) {

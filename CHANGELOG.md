@@ -2,6 +2,40 @@
 copyright: Copyright (c) K Team. All Rights Reserved.
 ---
 
+K Framework 5.6.0
+=================
+
+Features
+--------
+- Rename the attribute `functional` to `total` to better reflect its semantics.
+
+- Updated `pl-tutorial` examples to work with the more modern backends: simple-untyped, kool, fun and logik.
+
+- Pass through C build type option to llvm-kompile.
+
+- Extended the syntax for code block annotations to allow for more decorators for web extensions.
+
+- Added option `kompile --enable-llvm-debug` as a more easy to remember alternative to `-g -O1`.
+
+- Improved LLDB debugging support for macOS.
+
+- Added the `klsp` tool. It adds [Language Server](https://microsoft.github.io/language-server-protocol/) support for K.
+  For now it supports: contextual code completion, go-to definition, find references, syntax error reporting
+  and selection range. Has been tested with VSCode. You can find the
+  [K Framework](https://marketplace.visualstudio.com/items?itemName=RuntimeVerification.k-vscode) extension on the marketplace.
+
+Misc/Bug Fixes
+--------------
+- Fix an issue where #Exists would not bind variables in the LHS.
+
+- Automatically import BOOL when strictness is applied.
+
+- Update the check for duplicated modules. It now allows for file copy.
+  It calculates a digest and looks for content changes.
+
+A more detailed list of changes can be found here:
+https://github.com/runtimeverification/k/issues/3260
+
 K Framework 5.5.0
 =================
 
@@ -298,7 +332,7 @@ K Framework 5.0.0
 Major changes since version 3.6, not all are documented here.
 In particular:
 
-- No longer user Maude backend for K.
+- No longer uses Maude backend for K.
 
 - OCaml backend was developed, but now is being deprecated in favor of LLVM
   backend for concrete execution.

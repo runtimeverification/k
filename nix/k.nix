@@ -47,6 +47,7 @@ let
 
       mkdir -p $out/lib/cmake/kframework && ln -sf ${llvm-backend.src}/cmake/* $out/lib/cmake/kframework/
       ln -sf ${llvm-backend}/include/kllvm $out/include/
+      ln -sf ${llvm-backend}/include/kllvm-c $out/include/
       ln -sf ${llvm-backend}/lib/kllvm $out/lib/
       ln -sf ${llvm-backend}/bin/* $out/bin/
 
@@ -101,4 +102,6 @@ in runCommand (lib.removeSuffix "-maven" unwrapped.name) {
   do
     ln -sf $unwrapped/$each $out/$each
   done
+
+  ln -sf ${haskell-backend}/bin/kore-rpc $out/bin/kore-rpc
 ''

@@ -22,7 +22,8 @@ krun {file} --debugger                              : debug K code
 kprove {file}                                       : Verify specs in {file}
 ```
 
-Durring GDB debugging session:
+During GDB debugging session (see [here](https://lldb.llvm.org/use/map.html) for
+LLDB breakpoint syntax):
 
 ```
 break {file}:{linenum}                              : add a breakpoint to {file}'s {linenum} numbered line

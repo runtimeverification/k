@@ -1,1 +1,0 @@
-Bytes2String(reverseBytes(String2Bytes("1234")))
