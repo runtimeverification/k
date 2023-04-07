@@ -43,10 +43,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
         with:
-          asset_content_type: 'application/gzip'
-          asset_name: kframework-${{ needs.set-release-id.outputs.release_id }}-src.tar.gz
-          asset_path: kframework-${{ needs.set-release-id.outputs.release_id }}-src.tar.gz
-          upload_url: ${{ github.event.release.upload_url }}
+          files: kframework-${{ needs.set-release-id.outputs.release_id }}-src.tar.gz
 
   nix-release:
     name: 'Nix Release'
