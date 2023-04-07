@@ -23,4 +23,4 @@ include ../../../include/kframework/ktest.mak
 
 clean:
 	rm -rf ./test-kompiled .depend-tmp .depend .kompile-* .krun-* .kprove-* .kbmc-* kore-exec.tar.gz
-	rm -rf test.kore
+	rm -rf test.kore test
