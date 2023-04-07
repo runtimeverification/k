@@ -45,13 +45,11 @@ import static org.kframework.Collections.*;
  */
 public class CheckKLabels {
     private final Set<KEMException> errors;
-    private final boolean kore;
     private final KExceptionManager kem;
     private final FileUtil files;
 
-    public CheckKLabels(Set<KEMException> errors, KExceptionManager kem, boolean kore, FileUtil files) {
+    public CheckKLabels(Set<KEMException> errors, KExceptionManager kem, FileUtil files) {
         this.errors = errors;
-        this.kore = kore;
         this.kem = kem;
         this.files = files;
     }
@@ -111,10 +109,7 @@ public class CheckKLabels {
             Production prod = (Production) sentence;
             if (prod.klabel().isDefined()) {
                 KLabel klabel = prod.klabel().get();
-                if (klabels.containsKey(klabel.name()) && !m.equals(klabels.get(klabel.name())) && !kore) {
-                    errors.add(KEMException.compilerError("KLabel " + klabel.name() + " defined in multiple modules: " + klabels.get(klabel.name()).name() + " and " + m.name() + ".", prod));
-                }
-                if (klabelProds.containsKey(klabel.name()) && kore && !internalDuplicates.contains(klabel.name())) {
+                if (klabelProds.containsKey(klabel.name()) && !internalDuplicates.contains(klabel.name())) {
                     errors.add(KEMException.compilerError("Symbol " + klabel.name() + " is not unique. Previously defined as: " + klabelProds.get(klabel.name()), prod));
                 }
                 klabels.put(klabel.name(), m);

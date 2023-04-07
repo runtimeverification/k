@@ -65,12 +65,4 @@ public class KompileOptionsTest {
         parse("--main-module", "BAR", "foo.k");
         assertEquals("BAR-SYNTAX", options.syntaxModule(files));
     }
-
-    @Test
-    public void testTransitionSpaceSeparator() {
-        parse("--transition", "foo bar", "foo.k");
-        assertEquals(2, options.transition.size());
-        assertTrue(options.transition.contains("foo"));
-        assertTrue(options.transition.contains("bar"));
-    }
 }

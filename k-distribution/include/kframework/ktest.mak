@@ -20,16 +20,12 @@ KBMC=${K_BIN}/kbmc
 KAST=${K_BIN}/kast
 # and kparse
 KPARSE=${K_BIN}/kparse
-# and keq
-KEQ=${K_BIN}/keq
 # and kserver
 KSERVER=${K_BIN}/kserver
 # and ksearch
 KSEARCH:=$(KRUN) --search-all
 # and kprint
 KPRINT=${K_BIN}/kprint
-# and krun-legacy
-KRUN_LEGACY=${K_BIN}/krun-legacy
 # and llvm-krun
 LLVM_KRUN=${K_BIN}/llvm-krun
 # path relative to current definition of test programs

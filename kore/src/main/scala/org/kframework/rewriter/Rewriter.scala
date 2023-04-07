@@ -39,7 +39,7 @@ trait Rewriter {
 
   def executeAndMatch(k: kore.K, depth: Optional[Integer], rule: Rule): Tuple2[RewriterResult, kore.K]
 
-  def prove(rules: Module, boundaryPattern: Rule, reuseDef:java.lang.Boolean): RewriterResult
+  def prove(rules: Module, reuseDef:java.lang.Boolean): RewriterResult
 
   def bmc(rules: Module): RewriterResult
 
