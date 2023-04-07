@@ -3,12 +3,9 @@ package org.kframework.kprovex;
 
 import com.google.inject.Inject;
 import org.kframework.RewriterResult;
-import org.kframework.attributes.Source;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
-import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
-import org.kframework.kprove.KProveOptions;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
 import org.kframework.unparser.ToJson;

@@ -2,13 +2,11 @@
 package org.kframework.kprove;
 
 import com.google.inject.Inject;
-import org.kframework.attributes.Source;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
-import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
-import org.kframework.kompile.KompileOptions;
 import org.kframework.RewriterResult;
+import org.kframework.kprovex.KProveOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;

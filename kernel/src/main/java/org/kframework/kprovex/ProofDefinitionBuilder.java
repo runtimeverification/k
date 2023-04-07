@@ -10,7 +10,6 @@ import org.kframework.definition.Module;
 import org.kframework.definition.*;
 import org.kframework.kompile.CompiledDefinition;
 import org.kframework.kompile.Kompile;
-import org.kframework.kprove.KProveOptions;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.file.FileUtil;
