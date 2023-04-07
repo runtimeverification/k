@@ -23,7 +23,6 @@ jobs:
     name: 'Create source tarball'
     runs-on: ubuntu-latest
     environment: production
-    needs: set-release-id
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
