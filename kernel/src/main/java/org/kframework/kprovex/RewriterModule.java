@@ -1,5 +1,5 @@
 // Copyright (c) K Team. All Rights Reserved.
-package org.kframework.kprove;
+package org.kframework.kprovex;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
