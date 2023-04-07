@@ -89,7 +89,8 @@ jobs:
         run: |
           set -x
           version=$(cat package/version)
-          gh release upload v${version} kframework_amd64_ubuntu_jammy.deb
+          cp kframework_amd64_ubuntu_jammy.deb kframework_${version}_amd64_ubuntu_jammy
+          gh release upload v${version} kframework_${version}_amd64_ubuntu_jammy.deb
       - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
         env:
@@ -132,7 +133,8 @@ jobs:
         run: |
           set -x
           version=$(cat package/version)
-          gh release upload v${version} kframework_amd64_ubuntu_focal.deb
+          cp kframework_amd64_ubuntu_focal.deb kframework_${version}_amd64_ubuntu_focal
+          gh release upload v${version} kframework_${version}_amd64_ubuntu_focal.deb
       - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
         env:
@@ -175,7 +177,8 @@ jobs:
         run: |
           set -x
           version=$(cat package/version)
-          gh release upload v${version} kframework_amd64_debian_bullseye.deb
+          cp kframework_amd64_debian_bullseye.deb kframework_${version}_amd64_debian_bullseye
+          gh release upload v${version} kframework_${version}_amd64_debian_bullseye.deb
 
   arch:
     name: 'Arch Linux Package'
@@ -198,7 +201,8 @@ jobs:
         run: |
           set -x
           version=$(cat package/version)
-          gh release upload v${version} kframework_arch_x86_64.pkg.tar.zst
+          cp kframework_arch_x86_64.pkg.tar.zst kframework_${version}_arch_x86_64.pkg.tar.zst
+          gh release upload v${version} kframework_${version}_arch_x86_64.pkg.tar.zst
 
   macos-build:
     name: 'Build MacOS Package'
