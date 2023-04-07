@@ -7,7 +7,7 @@ import pytest
 from pyk.kore_exec_covr.kore_exec_covr import HaskellLogEntry, _parse_haskell_oneline_log, parse_rule_applications
 
 if TYPE_CHECKING:
-    from typing import Dict, Tuple
+    pass
 
     from pytest import TempPathFactory
 
@@ -49,7 +49,7 @@ PARSE_HASKELL_ONELINE_LOG_TEST_DATA = [
     PARSE_HASKELL_ONELINE_LOG_TEST_DATA,
     ids=[test_id for test_id, *_ in PARSE_HASKELL_ONELINE_LOG_TEST_DATA],
 )
-def test_parse_haskell_oneline_log(test_id: str, log_line: str, expected: Tuple[HaskellLogEntry, str]) -> None:
+def test_parse_haskell_oneline_log(test_id: str, log_line: str, expected: tuple[HaskellLogEntry, str]) -> None:
     # When
     actual = _parse_haskell_oneline_log(log_line)
 
@@ -88,7 +88,7 @@ PARSE_RULE_APPLICATIONS_TEST_DATA = [
 def test_parse_rule_applications(
     test_id: str,
     haskell_rule_log: str,
-    expected: Dict[HaskellLogEntry, Dict[str, int]],
+    expected: dict[HaskellLogEntry, dict[str, int]],
     tmp_path_factory: TempPathFactory,
 ) -> None:
     # Given

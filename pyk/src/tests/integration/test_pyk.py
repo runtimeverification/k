@@ -11,7 +11,7 @@ from pyk.__main__ import main
 from .utils import KompiledTest
 
 if TYPE_CHECKING:
-    from typing import Iterable
+    from collections.abc import Iterable
 
     from pytest import MonkeyPatch
 

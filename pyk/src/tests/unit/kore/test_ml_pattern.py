@@ -34,7 +34,8 @@ from pyk.kore.syntax import (
 )
 
 if TYPE_CHECKING:
-    from typing import Final, Iterable
+    from collections.abc import Iterable
+    from typing import Final
 
     from pyk.kore.syntax import Pattern, Sort
 

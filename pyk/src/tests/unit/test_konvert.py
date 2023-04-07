@@ -10,14 +10,15 @@ from pyk.kore.kompiled import KompiledKore
 from pyk.kore.syntax import SortApp
 
 if TYPE_CHECKING:
-    from typing import Final, Iterator, Tuple
+    from collections.abc import Iterator
+    from typing import Final
 
     from pytest import TempPathFactory
 
 
-def munge_test_data_reader() -> Iterator[Tuple[str, str]]:
+def munge_test_data_reader() -> Iterator[tuple[str, str]]:
     test_data_file = Path(__file__).parent / 'test-data/munge-tests'
-    with open(test_data_file, 'r') as f:
+    with open(test_data_file) as f:
         while True:
             try:
                 label = next(f)

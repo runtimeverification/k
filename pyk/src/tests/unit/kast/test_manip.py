@@ -25,7 +25,7 @@ from pyk.prelude.ml import mlEqualsTrue, mlTop
 from ..utils import a, b, c, f, k, x
 
 if TYPE_CHECKING:
-    from typing import Dict, Final, List, Tuple
+    from typing import Final
 
     from pyk.kast import KInner
 
@@ -52,7 +52,7 @@ def test_push_down_rewrites(term: KInner, expected: KInner) -> None:
 
 STATE: Final = KLabel('<state>')
 PC: Final = KLabel('<pc>')
-MINIMIZE_TERM_TEST_DATA: Final[Tuple[Tuple[KInner, List[str], List[str], KInner], ...]] = (
+MINIMIZE_TERM_TEST_DATA: Final[tuple[tuple[KInner, list[str], list[str], KInner], ...]] = (
     (f(k(a), STATE(a), PC(a)), [], [], f(k(a), STATE(a), PC(a))),
     (f(k(a), STATE(a), PC(a)), ['<k>'], [], f(STATE(a), PC(a), DOTS)),
     (f(k(a), STATE(a), PC(a)), [], ['<state>'], f(STATE(a), DOTS)),
@@ -60,7 +60,7 @@ MINIMIZE_TERM_TEST_DATA: Final[Tuple[Tuple[KInner, List[str], List[str], KInner]
 
 
 @pytest.mark.parametrize('term,abstract_labels,keep_cells,expected', MINIMIZE_TERM_TEST_DATA, ids=count())
-def test_minimize_term(term: KInner, abstract_labels: List[str], keep_cells: List[str], expected: KInner) -> None:
+def test_minimize_term(term: KInner, abstract_labels: list[str], keep_cells: list[str], expected: KInner) -> None:
     # When
     actual = minimize_term(term, abstract_labels=abstract_labels, keep_cells=keep_cells)
 
@@ -330,7 +330,7 @@ SPLIT_CONFIG_TEST_DATA = (
 
 
 @pytest.mark.parametrize('term,expected_config,expected_subst', SPLIT_CONFIG_TEST_DATA, ids=count())
-def test_split_config_from(term: KInner, expected_config: KInner, expected_subst: Dict[str, KInner]) -> None:
+def test_split_config_from(term: KInner, expected_config: KInner, expected_subst: dict[str, KInner]) -> None:
     # When
     actual_config, actual_subst = split_config_from(term)
 

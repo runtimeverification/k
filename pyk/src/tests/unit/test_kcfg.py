@@ -14,7 +14,8 @@ from pyk.utils import shorten_hash
 from .mock_kprint import MockKPrint
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Iterable, List, Tuple
+    from collections.abc import Iterable
+    from typing import Any
 
     from pyk.kast import KInner
 
@@ -55,21 +56,21 @@ def split(i: int, js: Iterable[int]) -> KCFG.Split:
         csubst = term(i).match_with_constraint(term(j))
         assert csubst is not None
         split_substs.append(csubst)
-    return KCFG.Split(node(i), zip(map(node, js), split_substs))
+    return KCFG.Split(node(i), zip(map(node, js), split_substs, strict=True))
 
 
-def node_dicts(n: int, start: int = 0) -> List[Dict[str, Any]]:
+def node_dicts(n: int, start: int = 0) -> list[dict[str, Any]]:
     return [node(i).to_dict() for i in range(start, n)]
 
 
-def edge_dicts(*edges: Iterable) -> List[Dict[str, Any]]:
-    def _make_edge_dict(i: int, j: int, depth: int = 1) -> Dict[str, Any]:
+def edge_dicts(*edges: Iterable) -> list[dict[str, Any]]:
+    def _make_edge_dict(i: int, j: int, depth: int = 1) -> dict[str, Any]:
         return {'source': nid(i), 'target': nid(j), 'depth': depth}
 
     return [_make_edge_dict(*edge) for edge in edges]
 
 
-def cover_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
+def cover_dicts(*edges: tuple[int, int]) -> list[dict[str, Any]]:
     covers = []
     for i, j in edges:
         csubst = term(j).match_with_constraint(term(i))
@@ -78,7 +79,7 @@ def cover_dicts(*edges: Tuple[int, int]) -> List[Dict[str, Any]]:
     return covers
 
 
-def split_dicts(*edges: Tuple[int, Iterable[Tuple[int, KInner]]]) -> Dict[str, Any]:
+def split_dicts(*edges: tuple[int, Iterable[tuple[int, KInner]]]) -> dict[str, Any]:
     splits = {}
     for s, ts in edges:
         targets = {}

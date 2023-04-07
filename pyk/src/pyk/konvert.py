@@ -12,7 +12,7 @@ from .prelude.string import STRING
 from .utils import FrozenDict
 
 if TYPE_CHECKING:
-    from typing import Final, Optional, Tuple
+    from typing import Final
 
     from .kast import KInner
     from .kast.outer import KDefinition
@@ -58,7 +58,7 @@ def kast_to_kore(
     kast_defn: KDefinition,
     kompiled_kore: KompiledKore,
     kast: KInner,
-    sort: Optional[KSort] = None,
+    sort: KSort | None = None,
 ) -> Pattern:
     if sort is None:
         sort = K
@@ -117,7 +117,7 @@ def _ksequence_to_kore(kseq: KSequence) -> Pattern:
         return App('dotk')
 
     unit: Pattern
-    items: Tuple[KInner, ...]
+    items: tuple[KInner, ...]
 
     last = kseq[-1]
     if type(last) is KVariable and (not last.sort or last.sort == KSort('K')):
@@ -250,7 +250,7 @@ class Unmunger:
                 res += self._consume()
         return res
 
-    def _la(self) -> Optional[str]:
+    def _la(self) -> str | None:
         if self._rest:
             return self._rest[0]
         return None

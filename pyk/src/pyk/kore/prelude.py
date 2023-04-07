@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from .syntax import DV, App, LeftAssoc, SortApp, String, SymbolId
 
 if TYPE_CHECKING:
-    from typing import Final, Optional, Tuple, Union
+    from typing import Final
 
     from .syntax import Pattern
 
@@ -15,7 +15,7 @@ BYTES: Final = SortApp('SortBytes')
 STRING: Final = SortApp('SortString')
 
 
-def dv(val: Union[bool, int, str]) -> DV:
+def dv(val: bool | int | str) -> DV:
     if type(val) is bool:
         return bool_dv(val)
     if type(val) is int:
@@ -68,7 +68,7 @@ LBL_MAP = SymbolId("Lbl'Unds'Map'Unds'")
 LBL_MAP_ITEM = SymbolId("Lbl'UndsPipe'-'-GT-Unds'")
 
 
-def kore_map(*args: Tuple[Pattern, Pattern], cell: Optional[str] = None) -> Pattern:
+def kore_map(*args: tuple[Pattern, Pattern], cell: str | None = None) -> Pattern:
     if not args:
         return App(f"Lbl'Stop'{cell}Map") if cell else STOP_MAP
 

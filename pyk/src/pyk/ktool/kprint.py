@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Callable
 from enum import Enum
 from functools import cached_property
 from pathlib import Path
 from subprocess import CalledProcessError
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Callable, Dict
+from typing import TYPE_CHECKING
 
 from ..cli_utils import check_dir_path, check_file_path, run_process
 from ..kast import kast_term
@@ -47,8 +48,9 @@ from ..prelude.string import STRING, stringToken
 from ..utils import enquote_str
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from subprocess import CompletedProcess
-    from typing import Any, Final, Iterable, List, Optional, Union
+    from typing import Any, Final
 
     from ..cli_utils import BugReport
     from ..kast import KAst
@@ -56,7 +58,7 @@ if TYPE_CHECKING:
 
 _LOGGER: Final = logging.getLogger(__name__)
 
-SymbolTable = Dict[str, Callable[..., str]]
+SymbolTable = dict[str, Callable[..., str]]
 
 
 class KAstInput(Enum):
@@ -80,15 +82,15 @@ class KAstOutput(Enum):
 
 
 def _kast(
-    file: Optional[Union[str, Path]] = None,
+    file: str | Path | None = None,
     *,
-    command: Optional[str] = None,
-    definition_dir: Optional[Union[str, Path]] = None,
-    input: Optional[Union[str, KAstInput]] = None,
-    output: Optional[Union[str, KAstOutput]] = None,
-    expression: Optional[str] = None,
-    module: Optional[str] = None,
-    sort: Optional[str] = None,
+    command: str | None = None,
+    definition_dir: str | Path | None = None,
+    input: str | KAstInput | None = None,
+    output: str | KAstOutput | None = None,
+    expression: str | None = None,
+    module: str | None = None,
+    sort: str | None = None,
     gen_glr_parser: bool = False,
     # ---
     check: bool = True,
@@ -133,12 +135,12 @@ def _kast(
 
 
 def gen_glr_parser(
-    parser_file: Union[str, Path],
+    parser_file: str | Path,
     *,
-    command: Optional[str] = None,
-    definition_dir: Optional[Union[str, Path]] = None,
-    module: Optional[str] = None,
-    sort: Optional[str] = None,
+    command: str | None = None,
+    definition_dir: str | Path | None = None,
+    module: str | None = None,
+    sort: str | None = None,
 ) -> Path:
     parser_file = Path(parser_file)
     _kast(
@@ -156,16 +158,16 @@ def gen_glr_parser(
 
 def _build_arg_list(
     *,
-    file: Optional[Path],
-    command: Optional[str],
-    definition_dir: Optional[Path],
-    input: Optional[KAstInput],
-    output: Optional[KAstOutput],
-    expression: Optional[str],
-    module: Optional[str],
-    sort: Optional[str],
+    file: Path | None,
+    command: str | None,
+    definition_dir: Path | None,
+    input: KAstInput | None,
+    output: KAstOutput | None,
+    expression: str | None,
+    module: str | None,
+    sort: str | None,
     gen_glr_parser: bool,
-) -> List[str]:
+) -> list[str]:
     args = [command if command is not None else 'kast']
     if file:
         args += [str(file)]
@@ -193,15 +195,15 @@ class KPrint:
     backend: str
     _extra_unparsing_modules: Iterable[KFlatModule]
 
-    _temp_dir: Optional[TemporaryDirectory] = None
+    _temp_dir: TemporaryDirectory | None = None
 
-    _bug_report: Optional[BugReport]
+    _bug_report: BugReport | None
 
     def __init__(
         self,
         definition_dir: Path,
-        use_directory: Optional[Path] = None,
-        bug_report: Optional[BugReport] = None,
+        use_directory: Path | None = None,
+        bug_report: BugReport | None = None,
         extra_unparsing_modules: Iterable[KFlatModule] = (),
     ) -> None:
         self.definition_dir = Path(definition_dir)
@@ -213,9 +215,9 @@ class KPrint:
         check_dir_path(self.use_directory)
         self._definition = None
         self._symbol_table = None
-        with open(self.definition_dir / 'mainModule.txt', 'r') as mm:
+        with open(self.definition_dir / 'mainModule.txt') as mm:
             self.main_module = mm.read()
-        with open(self.definition_dir / 'backend.txt', 'r') as ba:
+        with open(self.definition_dir / 'backend.txt') as ba:
             self.backend = ba.read()
         self._extra_unparsing_modules = extra_unparsing_modules
         self._bug_report = bug_report
@@ -278,7 +280,7 @@ class KPrint:
         )
         return kast_term(json.loads(proc_res.stdout), KInner)  # type: ignore # https://github.com/python/mypy/issues/4717
 
-    def _kore_to_kast(self, kore: Pattern) -> Optional[KInner]:
+    def _kore_to_kast(self, kore: Pattern) -> KInner | None:
         _LOGGER.debug(f'_kore_to_kast: {kore}')
 
         if type(kore) is DV and kore.sort.name.startswith('Sort'):
@@ -384,7 +386,7 @@ class KPrint:
         _LOGGER.warning(f'KPrint._kore_to_kast failed on input: {kore}')
         return None
 
-    def kast_to_kore(self, kast: KInner, sort: Optional[KSort] = None) -> Pattern:
+    def kast_to_kore(self, kast: KInner, sort: KSort | None = None) -> Pattern:
         try:
             return kast_to_kore(self.definition, self.kompiled_kore, kast, sort)
         except ValueError as ve:
@@ -416,11 +418,11 @@ class KPrint:
         self,
         expression: str,
         *,
-        command: Optional[str] = None,
-        input: Optional[Union[str, KAstInput]] = None,
-        output: Optional[Union[str, KAstOutput]] = None,
-        module: Optional[str] = None,
-        sort: Optional[str] = None,
+        command: str | None = None,
+        input: str | KAstInput | None = None,
+        output: str | KAstOutput | None = None,
+        module: str | None = None,
+        sort: str | None = None,
         # ---
         check: bool = True,
     ) -> CompletedProcess:

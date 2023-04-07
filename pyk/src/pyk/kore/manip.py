@@ -5,15 +5,15 @@ from typing import TYPE_CHECKING
 from .syntax import Assoc, EVar, MLQuant
 
 if TYPE_CHECKING:
-    from typing import Collection, Dict, List, Set
+    from collections.abc import Collection
 
     from .syntax import Pattern
 
 
-def free_occs(pattern: Pattern, *, bound_vars: Collection[str] = ()) -> Dict[str, List[EVar]]:
-    occurrences: Dict[str, List[EVar]] = {}
+def free_occs(pattern: Pattern, *, bound_vars: Collection[str] = ()) -> dict[str, list[EVar]]:
+    occurrences: dict[str, list[EVar]] = {}
 
-    def collect(pattern: Pattern, bound_vars: Set[str]) -> None:
+    def collect(pattern: Pattern, bound_vars: set[str]) -> None:
         if type(pattern) is EVar and pattern.name not in bound_vars:
             if pattern.name in occurrences:
                 occurrences[pattern.name].append(pattern)

@@ -24,13 +24,14 @@ from .prelude.ml import is_top, mlAnd, mlImplies, mlTop
 from .utils import unique
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Iterable, Iterator, Optional, Tuple, Union
+    from collections.abc import Iterable, Iterator
+    from typing import Any
 
 
 @dataclass(frozen=True, order=True)
 class CTerm:
     config: KInner  # TODO Optional?
-    constraints: Tuple[KInner, ...]
+    constraints: tuple[KInner, ...]
 
     def __init__(self, config: KInner, constraints: Iterable[KInner]) -> None:
         self._check_config(config)
@@ -45,7 +46,7 @@ class CTerm:
         return CTerm(config, constraints)
 
     @staticmethod
-    def from_dict(dct: Dict[str, Any]) -> CTerm:
+    def from_dict(dct: dict[str, Any]) -> CTerm:
         config = KInner.from_dict(dct['config'])
         constraints = [KInner.from_dict(c) for c in dct['constraints']]
         return CTerm(config, constraints)
@@ -56,7 +57,7 @@ class CTerm:
             raise ValueError('Expected cell label, found: {config.label.name}')
 
     @staticmethod
-    def _normalize_constraints(constraints: Iterable[KInner]) -> Tuple[KInner, ...]:
+    def _normalize_constraints(constraints: Iterable[KInner]) -> tuple[KInner, ...]:
         constraints = (constraint for _constraint in constraints for constraint in flatten_label('#And', _constraint))
         constraints = unique(constraints)
         constraints = (constraint for constraint in constraints if not CTerm._is_spurious_constraint(constraint))
@@ -72,14 +73,14 @@ class CTerm:
         return False
 
     @staticmethod
-    def _constraint_sort_key(term: KInner) -> Tuple[int, str]:
+    def _constraint_sort_key(term: KInner) -> tuple[int, str]:
         term_str = str(term)
         return (len(term_str), term_str)
 
     def __iter__(self) -> Iterator[KInner]:
         return chain([self.config], self.constraints)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             'config': self.config.to_dict(),
             'constraints': [c.to_dict() for c in self.constraints],
@@ -93,7 +94,7 @@ class CTerm:
     def hash(self) -> str:
         return self.kast.hash
 
-    def match(self, cterm: CTerm) -> Optional[Subst]:
+    def match(self, cterm: CTerm) -> Subst | None:
         csubst = self.match_with_constraint(cterm)
 
         if not csubst:
@@ -104,7 +105,7 @@ class CTerm:
 
         return csubst.subst
 
-    def match_with_constraint(self, cterm: CTerm) -> Optional[CSubst]:
+    def match_with_constraint(self, cterm: CTerm) -> CSubst | None:
         subst = self.config.match(cterm.config)
 
         if subst is None:
@@ -131,23 +132,23 @@ class CTerm:
 @dataclass(frozen=True, order=True)
 class CSubst:
     subst: Subst
-    constraints: Tuple[KInner, ...]
+    constraints: tuple[KInner, ...]
 
-    def __init__(self, subst: Optional[Subst] = None, constraints: Iterable[KInner] = ()) -> None:
+    def __init__(self, subst: Subst | None = None, constraints: Iterable[KInner] = ()) -> None:
         object.__setattr__(self, 'subst', subst if subst is not None else Subst({}))
         object.__setattr__(self, 'constraints', CTerm._normalize_constraints(constraints))
 
-    def __iter__(self) -> Iterator[Union[Subst, KInner]]:
+    def __iter__(self) -> Iterator[Subst | KInner]:
         return chain([self.subst], self.constraints)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             'subst': self.subst.to_dict(),
             'constraints': [c.to_dict() for c in self.constraints],
         }
 
     @staticmethod
-    def from_dict(dct: Dict[str, Any]) -> CSubst:
+    def from_dict(dct: dict[str, Any]) -> CSubst:
         subst = Subst.from_dict(dct['subst'])
         constraints = (KInner.from_dict(c) for c in dct['constraints'])
         return CSubst(subst=subst, constraints=constraints)
@@ -182,7 +183,7 @@ def remove_useless_constraints(cterm: CTerm, keep_vars: Iterable[str] = ()) -> C
 
 def build_claim(
     claim_id: str, init_cterm: CTerm, final_cterm: CTerm, keep_vars: Iterable[str] = ()
-) -> Tuple[KClaim, Subst]:
+) -> tuple[KClaim, Subst]:
     rule, var_map = build_rule(claim_id, init_cterm, final_cterm, keep_vars=keep_vars)
     claim = KClaim(rule.body, requires=rule.requires, ensures=rule.ensures, att=rule.att)
     return claim, var_map
@@ -192,9 +193,9 @@ def build_rule(
     rule_id: str,
     init_cterm: CTerm,
     final_cterm: CTerm,
-    priority: Optional[int] = None,
+    priority: int | None = None,
     keep_vars: Iterable[str] = (),
-) -> Tuple[KRule, Subst]:
+) -> tuple[KRule, Subst]:
     init_config, *init_constraints = init_cterm
     final_config, *final_constraints = final_cterm
     final_constraints = [c for c in final_constraints if c not in init_constraints]
@@ -209,8 +210,8 @@ def build_rule(
             GENERATED_TOP_CELL,
         )
     )
-    v_subst: Dict[str, KVariable] = {}
-    vremap_subst: Dict[str, KVariable] = {}
+    v_subst: dict[str, KVariable] = {}
+    vremap_subst: dict[str, KVariable] = {}
     for v in var_occurrences:
         new_v = v
         if var_occurrences[v] == 1:

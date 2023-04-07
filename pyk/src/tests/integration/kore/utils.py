@@ -9,8 +9,9 @@ from pyk.kore.rpc import KoreClient, KoreServer
 from ..utils import KompiledTest
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from pathlib import Path
-    from typing import ClassVar, Iterator
+    from typing import ClassVar
 
 
 class KoreClientTest(KompiledTest):

@@ -7,12 +7,12 @@ from .kint import intToken
 from .string import stringToken
 
 if TYPE_CHECKING:
-    from typing import Union
+    pass
 
     from ..kast.inner import KToken
 
 
-def token(x: Union[bool, int, str]) -> KToken:
+def token(x: bool | int | str) -> KToken:
     if type(x) is bool:
         return boolToken(x)
     if type(x) is int:

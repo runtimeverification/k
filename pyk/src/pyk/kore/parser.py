@@ -43,7 +43,8 @@ from .syntax import (
 )
 
 if TYPE_CHECKING:
-    from typing import Callable, Final, Iterator, List, Type, Union
+    from collections.abc import Callable, Iterator
+    from typing import Final, Union
 
     from .lexer import KoreToken
     from .syntax import (
@@ -137,8 +138,8 @@ class KoreParser:
         ldelim: TokenType,
         rdelim: TokenType,
         sep: TokenType = TokenType.COMMA,
-    ) -> List[T]:
-        res: List[T] = []
+    ) -> list[T]:
+        res: list[T] = []
 
         self._match(ldelim)
         while self._la.type != rdelim:
@@ -171,7 +172,7 @@ class KoreParser:
 
         return SortVar(name)
 
-    def _sort_list(self) -> List[Sort]:
+    def _sort_list(self) -> list[Sort]:
         return self._delimited_list_of(self.sort, TokenType.LBRACE, TokenType.RBRACE)
 
     def sort_var(self) -> SortVar:
@@ -206,7 +207,7 @@ class KoreParser:
         patterns = self._pattern_list()
         return App(name, sorts, patterns)
 
-    def _pattern_list(self) -> List[Pattern]:
+    def _pattern_list(self) -> list[Pattern]:
         return self._delimited_list_of(self.pattern, TokenType.LPAREN, TokenType.RPAREN)
 
     def string(self) -> String:
@@ -244,7 +245,7 @@ class KoreParser:
         parse = getattr(self, self._ML_SYMBOLS[token_type])
         return parse()
 
-    def _nullary(self, token_type: TokenType, cls: Type[NC]) -> NC:
+    def _nullary(self, token_type: TokenType, cls: type[NC]) -> NC:
         self._match(token_type)
         self._match(TokenType.LBRACE)
         sort = self.sort()
@@ -261,7 +262,7 @@ class KoreParser:
     def bottom(self) -> Bottom:
         return self._nullary(TokenType.ML_BOTTOM, Bottom)
 
-    def _unary(self, token_type: TokenType, cls: Type[UC]) -> UC:
+    def _unary(self, token_type: TokenType, cls: type[UC]) -> UC:
         self._match(token_type)
         self._match(TokenType.LBRACE)
         sort = self.sort()
@@ -274,7 +275,7 @@ class KoreParser:
     def nott(self) -> Not:
         return self._unary(TokenType.ML_NOT, Not)
 
-    def _binary(self, token_type: TokenType, cls: Type[BC]) -> BC:
+    def _binary(self, token_type: TokenType, cls: type[BC]) -> BC:
         self._match(token_type)
         self._match(TokenType.LBRACE)
         sort = self.sort()
@@ -298,7 +299,7 @@ class KoreParser:
     def iff(self) -> Iff:
         return self._binary(TokenType.ML_IFF, Iff)
 
-    def _quantifier(self, token_type: TokenType, cls: Type[QF]) -> QF:
+    def _quantifier(self, token_type: TokenType, cls: type[QF]) -> QF:
         self._match(token_type)
         self._match(TokenType.LBRACE)
         sort = self.sort()
@@ -316,7 +317,7 @@ class KoreParser:
     def forall(self) -> Forall:
         return self._quantifier(TokenType.ML_FORALL, Forall)
 
-    def _fixpoint(self, token_type: TokenType, cls: Type[FP]) -> FP:
+    def _fixpoint(self, token_type: TokenType, cls: type[FP]) -> FP:
         self._match(token_type)
         self._match(TokenType.LBRACE)
         self._match(TokenType.RBRACE)
@@ -333,7 +334,7 @@ class KoreParser:
     def nu(self) -> Nu:
         return self._fixpoint(TokenType.ML_NU, Nu)
 
-    def _round_pred(self, token_type: TokenType, cls: Type[RP]) -> RP:
+    def _round_pred(self, token_type: TokenType, cls: type[RP]) -> RP:
         self._match(token_type)
         self._match(TokenType.LBRACE)
         op_sort = self.sort()
@@ -351,7 +352,7 @@ class KoreParser:
     def floor(self) -> Floor:
         return self._round_pred(TokenType.ML_FLOOR, Floor)
 
-    def _binary_pred(self, token_type: TokenType, cls: Type[BP]) -> BP:
+    def _binary_pred(self, token_type: TokenType, cls: type[BP]) -> BP:
         self._match(token_type)
         self._match(TokenType.LBRACE)
         left_sort = self.sort()
@@ -387,7 +388,7 @@ class KoreParser:
         self._match(TokenType.RPAREN)
         return DV(sort, value)
 
-    def _assoc(self, token_type: TokenType, cls: Type[AS]) -> AS:
+    def _assoc(self, token_type: TokenType, cls: type[AS]) -> AS:
         self._match(token_type)
         self._match(TokenType.LBRACE)
         self._match(TokenType.RBRACE)
@@ -402,7 +403,7 @@ class KoreParser:
     def right_assoc(self) -> RightAssoc:
         return self._assoc(TokenType.ML_RIGHT_ASSOC, RightAssoc)
 
-    def _attr_list(self) -> List[App]:
+    def _attr_list(self) -> list[App]:
         return self._delimited_list_of(self.app, TokenType.LBRACK, TokenType.RBRACK)
 
     def sentence(self) -> Sentence:
@@ -434,7 +435,7 @@ class KoreParser:
         attrs = self._attr_list()
         return SortDecl(name, vars, attrs, hooked=True)
 
-    def _sort_var_list(self) -> List[SortVar]:
+    def _sort_var_list(self) -> list[SortVar]:
         return self._delimited_list_of(self.sort_var, TokenType.LBRACE, TokenType.RBRACE)
 
     def symbol_decl(self) -> SymbolDecl:
@@ -468,11 +469,11 @@ class KoreParser:
         attrs = self._attr_list()
         return AliasDecl(symbol, sort_params, sort, left, right, attrs)
 
-    def _sort_param_list(self) -> List[Sort]:
+    def _sort_param_list(self) -> list[Sort]:
         return self._delimited_list_of(self.sort, TokenType.LPAREN, TokenType.RPAREN)
 
     # TODO remove once \left-assoc{}(\or{...}(...)) is no longer supported
-    def multi_or(self) -> List[Pattern]:
+    def multi_or(self) -> list[Pattern]:
         self._match(TokenType.ML_LEFT_ASSOC)
         self._match(TokenType.LBRACE)
         self._match(TokenType.RBRACE)
@@ -508,7 +509,7 @@ class KoreParser:
         self._match(TokenType.KW_MODULE)
         name = self.id()
 
-        sentences: List[Sentence] = []
+        sentences: list[Sentence] = []
         while self._la.type != TokenType.KW_ENDMODULE:
             sentences.append(self.sentence())
         self._consume()
@@ -520,7 +521,7 @@ class KoreParser:
     def definition(self) -> Definition:
         attrs = self._attr_list()
 
-        modules: List[Module] = []
+        modules: list[Module] = []
         while self._la.type != TokenType.EOF:
             modules.append(self.module())
 

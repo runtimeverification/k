@@ -14,7 +14,8 @@ from pyk.proof import AGProof, AGProver
 from ..utils import KCFGExploreTest
 
 if TYPE_CHECKING:
-    from typing import Final, Iterable, Optional, Tuple
+    from collections.abc import Iterable
+    from typing import Final
 
     from pyk.kast import KInner
     from pyk.kcfg import KCFGExplore
@@ -25,10 +26,10 @@ if TYPE_CHECKING:
 class State(NamedTuple):
     pgm: str
     active_accounts: str
-    accounts: Iterable[Tuple[str, str]]
+    accounts: Iterable[tuple[str, str]]
 
 
-EXECUTE_TEST_DATA: Final[Iterable[Tuple[str, int, State, int, State, Iterable[State]]]] = (
+EXECUTE_TEST_DATA: Final[Iterable[tuple[str, int, State, int, State, Iterable[State]]]] = (
     (
         'account-nonexistent',
         1,
@@ -40,7 +41,7 @@ EXECUTE_TEST_DATA: Final[Iterable[Tuple[str, int, State, int, State, Iterable[St
 )
 
 
-APR_PROVE_TEST_DATA: Iterable[Tuple[str, str, str, str, Optional[int], Optional[int], Iterable[str]]] = (
+APR_PROVE_TEST_DATA: Iterable[tuple[str, str, str, str, int | None, int | None, Iterable[str]]] = (
     ('cell-map-no-branch', 'k-files/cell-map-spec.k', 'CELL-MAP-SPEC', 'cell-map-no-branch', 2, 1, []),
 )
 
@@ -49,7 +50,7 @@ class TestCellMapProof(KCFGExploreTest):
     KOMPILE_MAIN_FILE = 'k-files/cell-map.k'
 
     @staticmethod
-    def config(kprint: KPrint, k: str, active_accounts: str, accounts: Iterable[Tuple[str, str]]) -> CTerm:
+    def config(kprint: KPrint, k: str, active_accounts: str, accounts: Iterable[tuple[str, str]]) -> CTerm:
         def _parse(kt: KToken) -> KInner:
             return kprint.parse_token(kt, as_rule=True)
 
