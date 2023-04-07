@@ -73,7 +73,8 @@ jobs:
           echo "K Framework Release ${release_tag}"  > release.md
           echo ''                                   >> release.md
           cat k-distribution/INSTALL.md             >> release.md
-          gh release create "${release_tag}" \
-            --target "${GITHUB_SHA}"         \
-            --prerelease                     \
+          gh release create "${release_tag}"             \
+            --target "${GITHUB_SHA}"                     \
+            --title "K Framework Release ${release_tag}" \
+            --prerelease                                 \
             --notes-file 'release.md'

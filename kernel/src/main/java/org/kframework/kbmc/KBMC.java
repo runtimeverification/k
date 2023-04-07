@@ -38,7 +38,7 @@ public class KBMC {
         }
 
         Tuple2<Definition, Module> compiled = proofDefinitionBuilder
-                .build(options.specFile(files), options.defModule, options.specModule);
+                .build(options.specFile(files), options.specModule, true);
         Rewriter rewriter = rewriterGenerator.apply(compiled._1());
         Module specModule = compiled._2();
 
