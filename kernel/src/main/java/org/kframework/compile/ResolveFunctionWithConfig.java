@@ -41,23 +41,18 @@ public class ResolveFunctionWithConfig {
     private final Sort topCell;
     private final KLabel topCellLabel;
 
-    public ResolveFunctionWithConfig(Definition d, boolean kore) {
-      this(d.mainModule(), kore);
+    public ResolveFunctionWithConfig(Definition d) {
+      this(d.mainModule());
     }
 
-    public ResolveFunctionWithConfig(Module mod, boolean kore) {
+    public ResolveFunctionWithConfig(Module mod) {
       ComputeTransitiveFunctionDependencies deps = new ComputeTransitiveFunctionDependencies(mod);
       Set<KLabel> functions = stream(mod.productions()).filter(p -> p.att().contains(Att.FUNCTION())).map(p -> p.klabel().get()).collect(Collectors.toSet());
       withConfigFunctions.addAll(functions.stream().filter(f -> stream(mod.rulesFor().getOrElse(f, () -> Collections.<Rule>Set())).anyMatch(r -> ruleNeedsConfig(r))).collect(Collectors.toSet()));
       withConfigFunctions.addAll(deps.ancestors(withConfigFunctions));
       ConfigurationInfoFromModule info = new ConfigurationInfoFromModule(mod);
-      if (kore) {
-        topCell = Sorts.GeneratedTopCell();
-        topCellLabel = KLabels.GENERATED_TOP_CELL;
-      } else {
-        topCell = info.getRootCell();
-        topCellLabel = info.getCellLabel(topCell);
-      }
+      topCell = Sorts.GeneratedTopCell();
+      topCellLabel = KLabels.GENERATED_TOP_CELL;
       CONFIG_VAR = KVariable("#Configuration", Att().add(Sort.class, topCell).add("withConfig"));
     }
 

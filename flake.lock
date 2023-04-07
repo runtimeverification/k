@@ -211,11 +211,11 @@
     },
     "flake-utils": {
       "locked": {
-        "lastModified": 1678901627,
-        "narHash": "sha256-U02riOqrKKzwjsxc/400XnElV+UtPUQWpANPlyazjH0=",
+        "lastModified": 1680776469,
+        "narHash": "sha256-3CXUDK/3q/kieWtdsYpDOBJw3Gw4Af6x+2EiSnIkNQw=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "93a2b84fc4b70d9e089d029deacc3583435c2ed6",
+        "rev": "411e8764155aa9354dbcd6d5faaeb97e9e3dce24",
         "type": "github"
       },
       "original": {
@@ -365,11 +365,11 @@
         "z3-src": "z3-src"
       },
       "locked": {
-        "lastModified": 1679358752,
-        "narHash": "sha256-puBqy+VOlW9KN82VFRGBs02f89zlGUN5gLbmbZGWlN8=",
+        "lastModified": 1680784150,
+        "narHash": "sha256-/rK339Yvl+0ReRhc6TAr2uzVfWe2c14ID9KGeRnuSrY=",
         "owner": "runtimeverification",
         "repo": "haskell-backend",
-        "rev": "858a31999af3db1a8c7c86e30da2917ab561c253",
+        "rev": "736e5d7ed5dfdc516670ff2b46b62083a2cef4cf",
         "type": "github"
       },
       "original": {
@@ -509,11 +509,11 @@
         "utils": "utils_3"
       },
       "locked": {
-        "lastModified": 1679569354,
-        "narHash": "sha256-7czcdj7+TQqZjBuFfzq+ahzrDQSqZhBa0yPNdnysS4w=",
+        "lastModified": 1680757355,
+        "narHash": "sha256-n6p5C6cUBJ8btlZGR4ehDOFmjD/XmmCLuzOY4DVeZhw=",
         "owner": "runtimeverification",
         "repo": "llvm-backend",
-        "rev": "66982fd9311c0832302c2a5be62e96c14e325013",
+        "rev": "6145f2ac6b4a9cf7dc6a5d00c47be9e99eca36a3",
         "type": "github"
       },
       "original": {

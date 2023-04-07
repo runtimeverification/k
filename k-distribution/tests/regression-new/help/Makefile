@@ -5,7 +5,7 @@ KRUN_FLAGS=--help
 KOMPILE_FLAGS=--syntax-module TEST
 PACKAGE_VERSION ?= $(shell cat ../../../../package/version)
 GIT_REVISION=$(shell ../../../../scripts/get-version-string.sh)
-VERSION_REGEX="$(PACKAGE_VERSION)\|$(GIT_REVISION)"
+VERSION_REGEX="$(PACKAGE_VERSION)\|$(shell echo $(GIT_REVISION) | sed 's/-dirty/\\(-dirty\\)\\?/')"
 KPARSE=${K_BIN}/kparse
 KPARSE_GEN=${K_BIN}/kparse-gen
 KORE_PRINT=${K_BIN}/kore-print
@@ -14,9 +14,7 @@ KORE_PRINT=${K_BIN}/kore-print
 	./check-git-revision-format "$(GIT_REVISION)"
 	${KAST}          --help    | grep -q -- "--version"
 	${KDEP}          --help    | grep -q -- "--version"
-	${KEQ}           --help    | grep -q -- "--version"
 	${KOMPILE}       --help    | grep -q -- "--version"
-	${KPROVE_LEGACY} --help    | grep -q -- "--version"
 	${KPROVE}	 --help    | grep -q -- "--version"
 	${KRUN}          --help    | grep -q -- "--version"
 	${KSERVER}       --help    | grep -q -- "--version"
@@ -25,9 +23,7 @@ KORE_PRINT=${K_BIN}/kore-print
 	${KORE_PRINT}    --help    | grep -q -- "--version"
 	${KAST}          --version | grep -q $(VERSION_REGEX)
 	${KDEP}          --version | grep -q $(VERSION_REGEX)
-	${KEQ}           --version | grep -q $(VERSION_REGEX)
 	${KOMPILE}       --version | grep -q $(VERSION_REGEX)
-	${KPROVE_LEGACY} --version | grep -q $(VERSION_REGEX)
 	${KPROVE}	 --version | grep -q $(VERSION_REGEX)
 	${KRUN}          --version | grep -q $(VERSION_REGEX)
 	${KSERVER}       --version | grep -q $(VERSION_REGEX)

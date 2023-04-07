@@ -18,6 +18,36 @@ jobs:
     outputs:
       release_id: ${{ steps.release.outputs.release_id }}
 
+  source-tarball:
+    name: 'Create source tarball'
+    runs-on: ubuntu-latest
+    environment: production
+    needs: set-release-id
+    steps:
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: 'Create source tarball'
+        env:
+          RELEASE_ID: ${{ needs.set-release-id.outputs.release_id }}
+        run: |
+          set -x
+          find . -name .git | xargs rm -r
+          CURDIR=$(pwd)
+          cd ..
+          tar czvf kframework-${RELEASE_ID}-src.tar.gz $(basename ${CURDIR})
+          mv kframework-${RELEASE_ID}-src.tar.gz ${CURDIR}/
+      - name: 'Upload Source Tarball to Release'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
+        with:
+          asset_content_type: 'application/gzip'
+          asset_name: kframework-${{ needs.set-release-id.outputs.release_id }}-src.tar.gz
+          asset_path: kframework-${{ needs.set-release-id.outputs.release_id }}-src.tar.gz
+          upload_url: ${{ github.event.release.upload_url }}
+
   nix-release:
     name: 'Nix Release'
     runs-on: ubuntu-20.04
@@ -45,6 +75,7 @@ jobs:
   ubuntu-jammy:
     name: 'K Ubuntu Jammy Package'
     runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
@@ -89,6 +120,7 @@ jobs:
   ubuntu-focal:
     name: 'K Ubuntu Focal Package'
     runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
@@ -133,6 +165,7 @@ jobs:
   debian-bullseye:
     name: 'K Debian Bullseye Package'
     runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
@@ -157,6 +190,7 @@ jobs:
   arch:
     name: 'Arch Linux Package'
     runs-on: [self-hosted, linux, normal]
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v3
       - name: 'Build and Test Package'
@@ -181,6 +215,7 @@ jobs:
   macos-build:
     name: 'Build MacOS Package'
     runs-on: macos-11
+    timeout-minutes: 120
     environment: production
     needs: set-release-id
     steps:
@@ -218,6 +253,10 @@ jobs:
         id: build
         env:
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+          MAVEN_OPTS: >-
+              -Dhttp.keepAlive=false
+              -Dmaven.wagon.http.pool=false
+              -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
         run: |
           PACKAGE=kframework
           VERSION=$(cat kframework/package/version)
@@ -258,6 +297,7 @@ jobs:
   macos-test:
     name: 'Test MacOS Package'
     runs-on: macos-11
+    timeout-minutes: 60
     environment: production
     needs: [macos-build, set-release-id]
     steps:
@@ -348,7 +388,7 @@ jobs:
     name: 'Publish Release'
     runs-on: ubuntu-20.04
     environment: production
-    needs: [nix-release, macos-build, macos-test, ubuntu-jammy, ubuntu-focal, debian-bullseye, set-release-id, arch]
+    needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, ubuntu-focal, debian-bullseye, set-release-id, arch]
     steps:
       - name: Publish release
         uses: actions/github-script@v4
@@ -375,6 +415,7 @@ jobs:
   gh-pages:
     name: 'GitHub Pages deployment'
     runs-on: ubuntu-20.04
+    timeout-minutes: 30
     needs: [release]
     steps:
       - name: 'Install pandoc/texlive/calibre'

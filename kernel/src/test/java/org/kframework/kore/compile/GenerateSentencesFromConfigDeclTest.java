@@ -52,7 +52,7 @@ public class GenerateSentencesFromConfigDeclTest {
                         definitionFile,
                         definitionFile.getParentFile(),
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
-                        false, false, false, false);
+                        false, false, false);
     }
 
     @Test
@@ -67,7 +67,7 @@ public class GenerateSentencesFromConfigDeclTest {
         Module m1 = Module("CONFIG", Set(Import(def.getModule("KSEQ").get(), true)), Set(prod), Att());
         RuleGrammarGenerator parserGen = new RuleGrammarGenerator(def);
         Module m = RuleGrammarGenerator.getCombinedGrammar(parserGen.getConfigGrammar(m1), true, files).getExtensionModule();
-        Set<Sentence> gen = GenerateSentencesFromConfigDecl.gen(configuration, BooleanUtils.FALSE, Att(), m, false);
+        Set<Sentence> gen = GenerateSentencesFromConfigDecl.gen(configuration, BooleanUtils.FALSE, Att(), m);
         Att initializerAtts = Att().add("initializer");
         Att productionAtts = initializerAtts.add("function").add("noThread");
         Set<Sentence> reference = Set(Production(KLabel("<threads>"), Sort("ThreadsCell"),

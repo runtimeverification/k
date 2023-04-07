@@ -704,7 +704,8 @@ public class ModuleToKORE {
     }
 
     private void genNoJunkAxiom(Sort sort, StringBuilder sb) {
-        sb.append("  axiom{} ");
+        StringBuilder sbTemp = new StringBuilder();
+        sbTemp.append("  axiom{} ");
         boolean hasToken = false;
         int numTerms = 0;
         for (Production prod : iterable(mutable(module.productionsForSort()).getOrDefault(sort.head(), Set()).toSeq().sorted(Production.ord()))) {
@@ -715,76 +716,81 @@ public class ModuleToKORE {
                 continue;
             }
             numTerms++;
-            sb.append("\\or{");
-            convert(sort, sb);
-            sb.append("} (");
+            sbTemp.append("\\or{");
+            convert(sort, sbTemp);
+            sbTemp.append("} (");
             if (prod.att().contains("token") && !hasToken) {
-                convertTokenProd(sort, sb);
+                convertTokenProd(sort, sbTemp);
                 hasToken = true;
             } else if (prod.klabel().isDefined()) {
                 for (int i = 0; i < prod.arity(); i++) {
-                    sb.append("\\exists{");
-                    convert(sort, sb);
-                    sb.append("} (X").append(i).append(":");
-                    convert(prod.nonterminal(i).sort(), prod, sb);
-                    sb.append(", ");
+                    sbTemp.append("\\exists{");
+                    convert(sort, sbTemp);
+                    sbTemp.append("} (X").append(i).append(":");
+                    convert(prod.nonterminal(i).sort(), prod, sbTemp);
+                    sbTemp.append(", ");
                 }
-                convert(prod.klabel().get(), prod, sb);
-                sb.append("(");
+                convert(prod.klabel().get(), prod, sbTemp);
+                sbTemp.append("(");
                 String conn = "";
                 for (int i = 0; i < prod.arity(); i++) {
-                    sb.append(conn).append("X").append(i).append(":");
-                    convert(prod.nonterminal(i).sort(), prod, sb);
+                    sbTemp.append(conn).append("X").append(i).append(":");
+                    convert(prod.nonterminal(i).sort(), prod, sbTemp);
                     conn = ", ";
                 }
-                sb.append(")");
+                sbTemp.append(")");
                 for (int i = 0; i < prod.arity(); i++) {
-                    sb.append(")");
+                    sbTemp.append(")");
                 }
             }
-            sb.append(", ");
+            sbTemp.append(", ");
         }
         for (Sort s : iterable(module.sortedAllSorts())) {
             if (module.subsorts().lessThan(s, sort) && !sort.equals(Sorts.K())) {
                 numTerms++;
-                sb.append("\\or{");
-                convert(sort, sb);
-                sb.append("} (");
-                sb.append("\\exists{");
-                convert(sort, sb);
-                sb.append("} (Val:");
-                convert(s, sb);
-                sb.append(", inj{");
-                convert(s, sb);
-                sb.append(", ");
-                convert(sort, sb);
-                sb.append("} (Val:");
-                convert(s, sb);
-                sb.append("))");
-                sb.append(", ");
+                sbTemp.append("\\or{");
+                convert(sort, sbTemp);
+                sbTemp.append("} (");
+                sbTemp.append("\\exists{");
+                convert(sort, sbTemp);
+                sbTemp.append("} (Val:");
+                convert(s, sbTemp);
+                sbTemp.append(", inj{");
+                convert(s, sbTemp);
+                sbTemp.append(", ");
+                convert(sort, sbTemp);
+                sbTemp.append("} (Val:");
+                convert(s, sbTemp);
+                sbTemp.append("))");
+                sbTemp.append(", ");
             }
         }
         Att sortAtt = module.sortAttributesFor().get(sort.head()).getOrElse(() -> KORE.Att());
         if (!hasToken && sortAtt.contains("token")) {
             numTerms++;
-            sb.append("\\or{");
-            convert(sort, sb);
-            sb.append("} (");
-            convertTokenProd(sort, sb);
-            sb.append(", ");
+            sbTemp.append("\\or{");
+            convert(sort, sbTemp);
+            sbTemp.append("} (");
+            convertTokenProd(sort, sbTemp);
+            sbTemp.append(", ");
             hasToken = true;
         }
-        sb.append("\\bottom{");
-        convert(sort, sb);
-        sb.append("}()");
+        sbTemp.append("\\bottom{");
+        convert(sort, sbTemp);
+        sbTemp.append("}()");
         for (int i = 0; i < numTerms; i++) {
-            sb.append(")");
+            sbTemp.append(")");
         }
-        sb.append(" [constructor{}()] // no junk");
+        sbTemp.append(" [constructor{}()] // no junk");
         if (hasToken && !METAVAR) {
-            sb.append(" (TODO: fix bug with \\dv)");
+            sbTemp.append(" (TODO: fix bug with \\dv)");
         }
-        sb.append("\n");
+        sbTemp.append("\n");
+
+        // If there are no terms, then we don't need to generate the axiom.
+        if (numTerms != 0) {
+            sb.append(sbTemp);
+        }
     }
 
     private void genOverloadedAxiom(Production lesser, Production greater, StringBuilder sb) {

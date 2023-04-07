@@ -2,7 +2,6 @@
 package org.kframework.kast;
 
 import org.kframework.kil.loader.Context;
-import org.kframework.krun.KRunOptions;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;

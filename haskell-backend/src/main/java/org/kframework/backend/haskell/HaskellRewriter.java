@@ -22,7 +22,6 @@ import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
 import org.kframework.kore.VisitK;
 import org.kframework.kprove.KProveOptions;
-import org.kframework.krun.RunProcess;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
 import org.kframework.main.Tool;
@@ -33,11 +32,11 @@ import org.kframework.rewriter.Rewriter;
 import org.kframework.rewriter.SearchType;
 import org.kframework.unparser.KPrint;
 import org.kframework.unparser.OutputModes;
+import org.kframework.utils.RunProcess;
 import org.kframework.utils.errorsystem.KEMException;
 import org.kframework.utils.errorsystem.KException.ExceptionType;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
-import org.kframework.utils.inject.DefinitionScoped;
 import org.kframework.utils.inject.RequestScoped;
 import org.kframework.utils.options.BackendOptions;
 import org.kframework.utils.options.SMTOptions;
@@ -45,7 +44,6 @@ import org.kframework.utils.options.SMTOptions;
 import scala.Tuple2;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,7 +51,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.function.Function;
 
 import static org.kframework.builtin.BooleanUtils.*;
@@ -354,7 +351,7 @@ public class HaskellRewriter implements Function<Definition, Rewriter> {
             }
 
             @Override
-            public RewriterResult prove(Module rules, Rule boundaryPattern, Boolean reuseDef) {
+            public RewriterResult prove(Module rules, Boolean reuseDef) {
                 Module kompiledModule = KoreBackend.getKompiledModule(module, true);
                 ModuleToKORE converter = new ModuleToKORE(kompiledModule, def.topCellInitializer, kompileOptions, kem);
                 String defPath = reuseDef ? files.resolveKompiled("definition.kore").getAbsolutePath() : saveKoreDefinitionToTemp(converter);

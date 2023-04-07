@@ -39,18 +39,4 @@ public class LLVMBackendKModule extends AbstractKModule {
     public List<Pair<Class<?>, Boolean>> kompileOptions() {
         return Collections.singletonList(Pair.of(LLVMKompileOptions.class, true));
     }
-
-    @Override
-    public List<Module> getKRunModules() {
-        return Collections.singletonList(new AbstractModule() {
-            @Override
-            protected void configure() {
-                MapBinder<String, Function<Definition, Rewriter>> rewriterBinder = MapBinder.newMapBinder(
-                        binder(), TypeLiteral.get(String.class), new TypeLiteral<Function<Definition, Rewriter>>() {
-                        });
-                rewriterBinder.addBinding("llvm").to(LLVMRewriter.class);
-
-            }
-        });
-    }
 }

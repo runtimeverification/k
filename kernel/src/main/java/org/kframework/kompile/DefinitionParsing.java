@@ -87,7 +87,6 @@ public class DefinitionParsing {
     public static final String context = "context";
     private final File cacheFile;
     private final boolean autoImportDomains;
-    private final boolean kore;
     private final KompileOptions options;
     private final GlobalOptions globalOptions;
     private final OuterParsingOptions outerParsingOptions;
@@ -128,7 +127,6 @@ public class DefinitionParsing {
         this.cacheParses = cacheParses;
         this.cacheFile = cacheFile;
         this.autoImportDomains = !outerParsingOptions.noPrelude;
-        this.kore = options.isKore();
         this.loader = new BinaryLoader(this.kem);
         this.profileRules = innerParsingOptions.profileRules != null;
         this.sw = sw;
@@ -143,7 +141,6 @@ public class DefinitionParsing {
                 definitionFile.getParentFile(),
                 ListUtils.union(Lists.newArrayList(Kompile.BUILTIN_DIRECTORY),
                   lookupDirectories),
-                kore,
                 options.preprocess,
                 options.bisonLists);
 
@@ -255,7 +252,6 @@ public class DefinitionParsing {
                 ListUtils.union(lookupDirectories,
                         Lists.newArrayList(Kompile.BUILTIN_DIRECTORY)),
                 autoImportDomains,
-                kore,
                 options.preprocess,
                 options.bisonLists);
         Module m = definition.mainModule();
@@ -392,7 +388,7 @@ public class DefinitionParsing {
             Set<Sentence> configDeclProductions = stream(module.localSentences())
                       .filter(s -> s instanceof Configuration)
                       .map(b -> (Configuration) b)
-                      .flatMap(configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), extMod, kore)))
+                      .flatMap(configDecl -> stream(GenerateSentencesFromConfigDecl.gen(configDecl.body(), configDecl.ensures(), configDecl.att(), extMod)))
                       .collect(toSet());
 
             Set<Sentence> stc = m.localSentences()

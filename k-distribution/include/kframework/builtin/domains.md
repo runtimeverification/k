@@ -460,35 +460,7 @@ module MAP-KORE-SYMBOLIC [kore,symbolic,haskell]
 */
 endmodule
 
-module MAP-JAVA-SYMBOLIC [kast, symbolic]
-  imports MAP
-  imports private K-EQUAL
-  imports private BOOL
-  rule .Map [ K1 <- V1 ] => K1 |-> V1 [simplification]
-
-  rule ((K1 |->  V1) _MAP) [ K2 ] => V1         requires K1  ==K K2 [simplification]
-  rule ((K1 |-> _V1)  MAP) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2 [simplification]
-
-  rule (_MAP:Map [ K1 <-  V1 ]) [ K2 ] => V1         requires K1  ==K K2 [simplification]
-  rule ( MAP:Map [ K1 <- _V1 ]) [ K2 ] => MAP [ K2 ] requires K1 =/=K K2 [simplification]
-
-  rule ((K1 |-> _V1) MAP) [ K2 <- V2 ] => (K1 |-> V2) MAP                requires K1  ==K K2 [simplification]
-  rule ((K1 |->  V1) MAP) [ K2 <- V2 ] => (K1 |-> V1) (MAP [ K2 <- V2 ]) requires K1 =/=K K2 [simplification]
-
-  rule (MAP:Map [ K1 <- _V1 ]) [ K2 <- V2 ] => MAP              [ K1 <- V2 ] requires K1  ==K K2 [simplification]
-
-  // potential infinite loop
-  // rule (MAP:Map [ K1 <- V1 ]) [ K2 <- V2 ] => MAP [ K2 <- V2 ] [ K1 <- V1 ] requires K1 =/=K K2
-
-  rule K1 in_keys(M K2 |-> _) => true          requires K1  ==K K2 orBool K1 in_keys(M) [simplification]
-  rule K1 in_keys(M K2 |-> _) => K1 in_keys(M) requires K1 =/=K K2 [simplification]
-
-  rule K1 in_keys(M [ K2 <- _ ]) => true          requires K1  ==K K2 orBool K1 in_keys(M) [simplification]
-  rule K1 in_keys(M [ K2 <- _ ]) => K1 in_keys(M) requires K1 =/=K K2 [simplification]
-endmodule
-
 module MAP-SYMBOLIC
-  imports MAP-JAVA-SYMBOLIC
   imports MAP-KORE-SYMBOLIC
 endmodule
 ```
@@ -1199,14 +1171,6 @@ module INT-SYMBOLIC-KORE [symbolic, kore, haskell]
 
 endmodule
 
-module INT-KAST [kast]
-  imports private K-EQUAL
-  imports INT-COMMON
-
-  rule I1:Int ==Int I2:Int => I1 ==K I2
-
-endmodule
-
 module INT-KORE [kore, symbolic]
   imports private K-EQUAL
   imports private BOOL
@@ -1227,7 +1191,6 @@ endmodule
 module INT
   imports INT-COMMON
   imports INT-SYMBOLIC
-  imports INT-KAST
   imports INT-KORE
   imports private K-EQUAL
   imports private BOOL
@@ -1711,14 +1674,6 @@ of the above operations in K.
 
 endmodule
 
-module STRING-KAST [kast]
-  imports private K-EQUAL
-  imports STRING-COMMON
-
-  rule S1:String ==String S2:String => S1 ==K S2
-
-endmodule
-
 module STRING-KORE [kore, symbolic]
   imports private K-EQUAL
   imports STRING-COMMON
@@ -1729,7 +1684,6 @@ endmodule
 
 module STRING
   imports STRING-COMMON
-  imports STRING-KAST
   imports STRING-KORE
 endmodule
 ```
@@ -1985,93 +1939,9 @@ endmodule
 ### Implementation of Bytes
 
 The remainder of this module consists of an implementation of some of the
-operators listed above in K. This implementation is primarily used by outdated
-backends and should not be viewed as authoritative, nor should the user
-use the `nilBytes` or `:` operators in their definition.
+operators listed above in K.
 
 ```k
-module BYTES-IN-K [symbolic, kast]
-  imports INT
-  imports K-EQUAL
-  imports STRING
-  imports STRING-BUFFER
-  imports BOOL
-
-  syntax Bytes ::= "nilBytes"
-                 | Int ":" Bytes
-  syntax Endianness ::= "LE" [klabel(littleEndianBytes), symbol]
-                      | "BE" [klabel(bigEndianBytes), symbol]
-  syntax Signedness ::= "Signed" [klabel(signedBytes), symbol]
-                      | "Unsigned" [klabel(unsignedBytes), symbol]
-
-  syntax Bytes ::= ".Bytes" [function, total]
-  rule .Bytes => nilBytes
-
-  syntax Int ::= Bytes2Int(Bytes, Endianness, Signedness) [function, total]
-  rule Bytes2Int(nilBytes, _, _) => 0
-  rule Bytes2Int(B : nilBytes, BE, Unsigned) => B
-  rule Bytes2Int(B0 : B1 : BS, BE, Unsigned) => Bytes2Int(((B0 <<Int 8) |Int B1) : BS, BE, Unsigned)
-  rule Bytes2Int(B0 : BS, BE, Signed) => signExtendBitRangeInt(Bytes2Int(B0 : BS, BE, Unsigned), 0, lengthBytes(B0 : BS) <<Int 3)
-  rule Bytes2Int(B0 : BS, LE, S) => Bytes2Int(reverseBytes(B0 : BS), BE, S)
-
-  syntax Bytes ::= Int2Bytes(Int, Bytes) [function, klabel(Int2BytesAux)]
-  syntax Bytes ::= Int2Bytes(Int, Int, Endianness) [function, total]
-                 | Int2Bytes(Int, Endianness, Signedness) [function, total, klabel(Int2BytesNoLen)]
-  rule Int2Bytes(LEN, I, BE) => padLeftBytes(Int2Bytes(bitRangeInt(I, 0, LEN <<Int 3), nilBytes), LEN, #if I <Int 0 #then 255 #else 0 #fi)
-  rule Int2Bytes(LEN, I, LE) => reverseBytes(Int2Bytes(LEN, I, BE))
-  rule Int2Bytes(0, BS) => BS
-  rule Int2Bytes(I, BS) => Int2Bytes(I >>Int 8, I &Int 255 : BS) requires I =/=Int 0
-
-  syntax String ::= Bytes2String(Bytes, StringBuffer) [function, klabel(Bytes2StringAux)]
-  syntax String ::= Bytes2String(Bytes) [function, total]
-  rule Bytes2String(BS) => Bytes2String(BS, .StringBuffer)
-  rule Bytes2String(nilBytes, BUFFER) => StringBuffer2String(BUFFER)
-  rule Bytes2String(B : BS, BUFFER) => Bytes2String(BS, BUFFER +String chrChar(B))
-
-  syntax Bytes ::= String2Bytes(String) [function, total]
-  rule String2Bytes(S) => ordChar(substrString(S, 0, 1)) : String2Bytes(substrString(S, 1, lengthString(S))) requires lengthString(S) >=Int 1
-  rule String2Bytes("") => nilBytes
-
-  syntax Bytes ::= Bytes "[" Int "<-" Int "]" [function]
-  rule BS [ N <- M ] => substrBytes(BS, 0, N) +Bytes M : substrBytes(BS, N +Int 1, lengthBytes(BS))
-
-  syntax Int ::= Bytes "[" Int "]" [function]
-  rule (B : _) [ 0 ] => B
-  rule (_ : BS) [ I ] => BS [ I -Int 1] requires I >Int 0
-
-  syntax Bytes ::= substrBytes(Bytes, Int, Int) [function]
-  rule substrBytes(_, 0, 0) => nilBytes
-  rule substrBytes(_ : BS, N, M) => substrBytes(BS, N -Int 1, M -Int 1) requires N >Int 0
-  rule substrBytes(B : BS, 0, M) => B : substrBytes(BS, 0, M -Int 1) requires M >Int 0
-
-  syntax Bytes ::= replaceAtBytes(Bytes, Int, Bytes) [function]
-  rule replaceAtBytes(BS, _, nilBytes) => BS
-  rule replaceAtBytes(B : BS, N, BS') => B : replaceAtBytes(BS, N -Int 1, BS') requires N >Int 0
-  rule replaceAtBytes(_ : BS, 0, B : BS') => B : replaceAtBytes(BS, 0, BS')
-
-  syntax Bytes ::= padRightBytes(Bytes, Int, Int) [function]
-                 | padLeftBytes(Bytes, Int, Int) [function]
-  rule padRightBytes(BS, LEN, VAL) => reverseBytes(padLeftBytes(reverseBytes(BS), LEN, VAL))
-  rule padLeftBytes(BS, LEN, _) => BS requires lengthBytes(BS) >=Int LEN andBool 0 <=Int LEN
-  rule padLeftBytes(BS, LEN, VAL) => padLeftBytes(VAL : BS, LEN, VAL) requires lengthBytes(BS) <Int LEN andBool 0 <=Int LEN
-
-  syntax Bytes ::= reverseBytes(Bytes) [function, total]
-  syntax Bytes ::= reverseBytes(Bytes, Bytes) [function, klabel(reverseBytesAux)]
-  rule reverseBytes(BS) => reverseBytes(BS, nilBytes)
-  rule reverseBytes(nilBytes, BS) => BS
-  rule reverseBytes(B : BS, BS') => reverseBytes(BS, B : BS')
-
-  syntax Int ::= lengthBytes(Bytes) [function, total, smtlib(lengthBytes)]
-  syntax Int ::= lengthBytes(Bytes, Int) [function, klabel(lengthBytesAux), smtlib(lengthBytesAux)]
-  rule lengthBytes(BS) => lengthBytes(BS, 0)
-  rule lengthBytes(nilBytes, SIZE) => SIZE
-  rule lengthBytes(_ : BS, SIZE) => lengthBytes(BS, SIZE +Int 1)
-
-  syntax Bytes ::= Bytes "+Bytes" Bytes [function, total, right]
-  rule nilBytes +Bytes B2 => B2
-  rule (B : BS) +Bytes B2 => B : (BS +Bytes B2)
-endmodule
-
 module BYTES-CONCRETE [concrete]
   imports BYTES-HOOKED
 endmodule
@@ -2093,7 +1963,6 @@ endmodule
 module BYTES
   imports BYTES-CONCRETE
   imports BYTES-KORE
-  imports BYTES-IN-K
   imports private INT
 
   rule Int2Bytes(I::Int, E::Endianness, Unsigned) => Int2Bytes((log2Int(I) +Int 8) /Int 8, I, E)
@@ -2148,15 +2017,6 @@ endmodule
 
 module ID
   imports ID-COMMON
-  imports ID-SYMBOLIC
-endmodule
-
-module ID-SYMBOLIC [symbolic, kast, private]
-  imports public ID-COMMON
-  imports private STRING
-
-  syntax KItem  ::= "#parseIdToken"  "(" String "," String ")"  [function, hook(STRING.parseToken)]
-  rule String2Id(S:String) => {#parseIdToken("Id", S)}:>Id
 endmodule
 ```
 
@@ -2203,18 +2063,9 @@ module K-EQUAL-KORE [kore, symbolic]
 
 endmodule
 
-module K-EQUAL-KAST [kast]
-  import private BOOL
-  import K-EQUAL-SYNTAX
-
-  rule K1:Bool ==Bool K2:Bool => K1 ==K K2
-
-endmodule
-
 module K-EQUAL
   import private BOOL
   import K-EQUAL-SYNTAX
-  import K-EQUAL-KAST
   import K-EQUAL-KORE
 
   rule K1:K =/=K K2:K => notBool (K1 ==K K2)
@@ -2246,7 +2097,6 @@ unsupported in modern K. There are a few exceptions:
 module K-REFLECTION
   imports BASIC-K
   imports STRING
-  imports K-REFLECTION-SYMBOLIC
 
   syntax K ::= "#configuration" [function, impure, hook(KREFLECTION.configuration)]
   syntax String ::= #sort(K) [function, hook(KREFLECTION.sort)]
@@ -2266,18 +2116,6 @@ module K-REFLECTION
   syntax {Sort} String ::= #unparseKORE(Sort) [function, hook(KREFLECTION.printKORE)]
   syntax IOError ::= "#noParse" "(" String ")" [klabel(#noParse), symbol]
 
-endmodule
-
-module K-REFLECTION-SYMBOLIC [symbolic, kast]
-  imports BASIC-K
-  imports STRING
-
-  // return empty string if the term has no klabel
-  syntax String ::= #getKLabelString(K) [function, hook(KREFLECTION.getKLabelString)]
-
-  // return true if no variable nor unresolved function appears in any subterm
-  syntax Bool ::= #isConcrete(K) [function, hook(KREFLECTION.isConcrete)]
-  syntax Bool ::= #isVariable(K) [function, hook(KREFLECTION.isVariable)]
 endmodule
 ```
 

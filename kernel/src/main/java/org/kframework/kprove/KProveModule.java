@@ -3,11 +3,8 @@ package org.kframework.kprove;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
-import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
-import com.google.inject.name.Named;
 import org.kframework.kompile.BackendModule;
-import org.kframework.krun.RewriterModule;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
@@ -19,8 +16,6 @@ import org.kframework.utils.options.DefinitionLoadingOptions;
 import org.kframework.utils.options.InnerParsingOptions;
 import org.kframework.utils.options.OuterParsingOptions;
 import org.kframework.utils.options.SMTOptions;
-
-import java.util.List;
 
 public class KProveModule extends AbstractModule {
     @Override
@@ -44,7 +39,7 @@ public class KProveModule extends AbstractModule {
     OuterParsingOptions outerParsingOptions(KProveOptions options) { return options.outerParsing; }
 
     @Provides @RequestScoped
-    InnerParsingOptions innerParsingOptions(KProveOptions options) { return options.innerParsing; }
+    InnerParsingOptions InnerParsingOptions(KProveOptions options) { return options.innerParsing; }
 
     @Provides @RequestScoped
     PrintOptions printOptions(KProveOptions options) {
@@ -64,11 +59,5 @@ public class KProveModule extends AbstractModule {
     @Provides
     SMTOptions smtOptions(KProveOptions options) {
         return options.smt;
-    }
-
-    @Provides
-    @Named("extraConcreteRuleLabels")
-    List<String> extraConcreteRuleLabels(KProveOptions options) {
-        return options.extraConcreteRuleLabels;
     }
 }

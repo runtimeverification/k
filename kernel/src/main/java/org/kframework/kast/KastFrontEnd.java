@@ -160,7 +160,7 @@ public class KastFrontEnd extends FrontEnd {
                     r = (Rule) new CloseCells(configInfo, sortInfo, labelInfo).close(r);
                     if (options.steps.contains(KompileSteps.concretizeCells)) {
                         r = (Rule) new AddImplicitComputationCell(configInfo, labelInfo).apply(mod, r);
-                        r = (Rule) new ConcretizeCells(configInfo, labelInfo, sortInfo, mod, true).concretize(mod, r);
+                        r = (Rule) new ConcretizeCells(configInfo, labelInfo, sortInfo, mod).concretize(mod, r);
                     }
                     K result = r.body();
                     kprint.get().prettyPrint(def.kompiledDefinition, unparsingMod, s -> kprint.get().outputFile(s), result, sort);
