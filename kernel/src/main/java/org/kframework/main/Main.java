@@ -202,7 +202,7 @@ public class Main {
     }
 
     private static void invalidJarArguments() {
-        System.err.println("The first argument of K3 not recognized. Try -kompile, -kast, -kdep, -kserver, or -kpp.");
+        System.err.println("The first argument of the K java compiler not recognized. Try -kompile, -kast, -kdep, -kserver, or -klsp.");
         System.exit(1);
     }
 }
