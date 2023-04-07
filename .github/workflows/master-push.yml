@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - master
-      - release-title
 
 jobs:
 
@@ -61,6 +60,7 @@ jobs:
   gh-release:
     name: 'Publish GitHub Prerelease'
     runs-on: ubuntu-latest
+    needs: nix-flake-release
     steps:
       - name: 'Check out code'
         uses: actions/checkout@v3
@@ -69,7 +69,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
         run: |
           set -x
-          release_tag=v$(cat package/version)-test
+          release_tag=v$(cat package/version)
           echo "K Framework Release ${release_tag}"  > release.md
           echo ''                                   >> release.md
           cat k-distribution/INSTALL.md             >> release.md
