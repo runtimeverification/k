@@ -17,6 +17,7 @@ import org.kframework.kast.KastFrontEnd;
 import org.kframework.kbmc.KBMCFrontEnd;
 import org.kframework.kdep.KDepFrontEnd;
 import org.kframework.kompile.KompileFrontEnd;
+import org.kframework.kprove.KProveFrontEnd;
 import org.kframework.ksearchpattern.KSearchPatternFrontEnd;
 import org.kframework.kserver.KServerFrontEnd;
 import org.kframework.utils.errorsystem.KEMException;
