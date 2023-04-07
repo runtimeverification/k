@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import logging
 from typing import TYPE_CHECKING, ContextManager
 
@@ -11,7 +10,7 @@ from ..kore.rpc import KoreClient, KoreServer
 from ..ktool.kprove import KoreExecLogFormat
 from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.ml import is_bottom, is_top, mlEquals, mlTop
-from ..utils import hash_str, shorten_hashes, single
+from ..utils import shorten_hashes, single
 from .kcfg import KCFG
 
 if TYPE_CHECKING:
@@ -69,23 +68,6 @@ class KCFGExplore(ContextManager['KCFGExplore']):
 
     def __exit__(self, *args: Any) -> None:
         self.close()
-
-    @staticmethod
-    def read_cfg(cfgid: str, kcfgs_dir: Path) -> Optional[KCFG]:
-        cfg_path = kcfgs_dir / f'{hash_str(cfgid)}.json'
-        if cfg_path.exists():
-            cfg_dict = json.loads(cfg_path.read_text())
-            _LOGGER.info(f'Reading KCFG from file {cfgid}: {cfg_path}')
-            return KCFG.from_dict(cfg_dict)
-        return None
-
-    @staticmethod
-    def write_cfg(cfgid: str, kcfgs_dir: Path, cfg: KCFG) -> None:
-        cfg_dict = cfg.to_dict()
-        cfg_dict['cfgid'] = cfgid
-        cfg_path = kcfgs_dir / f'{hash_str(cfgid)}.json'
-        cfg_path.write_text(json.dumps(cfg_dict))
-        _LOGGER.info(f'Updated CFG file {cfgid}: {cfg_path}')
 
     @property
     def _kore_rpc(self) -> Tuple[KoreServer, KoreClient]:
