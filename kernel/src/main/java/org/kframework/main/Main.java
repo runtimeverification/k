@@ -17,7 +17,6 @@ import org.kframework.kast.KastFrontEnd;
 import org.kframework.kbmc.KBMCFrontEnd;
 import org.kframework.kdep.KDepFrontEnd;
 import org.kframework.kompile.KompileFrontEnd;
-import org.kframework.kprove.KProveFrontEnd;
 import org.kframework.ksearchpattern.KSearchPatternFrontEnd;
 import org.kframework.kserver.KServerFrontEnd;
 import org.kframework.utils.errorsystem.KEMException;
@@ -183,7 +182,7 @@ public class Main {
                     modules = KSearchPatternFrontEnd.getModules();
                     break;
                 case "-kprove":
-                    modules.addAll(org.kframework.kprovex.KProveFrontEnd.getModules());
+                    modules.addAll(org.kframework.kprove.KProveFrontEnd.getModules());
                     for (KModule kModule : kModules) {
                         List<Module> ms = kModule.getKProveModules();
                         if (ms != null) {
