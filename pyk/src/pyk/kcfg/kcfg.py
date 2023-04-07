@@ -374,10 +374,15 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
             substs = csubst.subst.items()
             constraints = csubst.constraints
             if len(constraints) == 1:
-                ret_split_lines.append(f'constraint: {kprint.pretty_print(constraints[0])}')
+                first_line, *rest_lines = kprint.pretty_print(constraints[0]).split('\n')
+                ret_split_lines.append(f'constraint: {first_line}')
+                ret_split_lines.extend(f'              {line}' for line in rest_lines)
             elif len(constraints) > 1:
                 ret_split_lines.append('constraints:')
-                ret_split_lines.extend(f'    {kprint.pretty_print(c)}' for c in constraints)
+                for constraint in constraints:
+                    first_line, *rest_lines = kprint.pretty_print(constraint).split('\n')
+                    ret_split_lines.append(f'    {first_line}')
+                    ret_split_lines.extend(f'      {line}' for line in rest_lines)
             if len(substs) == 1:
                 vname, term = list(substs)[0]
                 ret_split_lines.append(f'subst: {vname} <- {kprint.pretty_print(term)}')
