@@ -10,7 +10,7 @@ from ..kast import KAtt
 
 if TYPE_CHECKING:
     from pathlib import Path
-    from typing import Dict, Final, Optional, Tuple
+    from typing import Final
 
     from ..kast.outer import KDefinition, KRule
 
@@ -26,7 +26,7 @@ class HaskellLogEntry(Enum):
     DEBUG_APPLIED_REWRITE_RULES = 'DebugAppliedRewriteRules'
 
 
-def parse_rule_applications(haskell_backend_oneline_log_file: Path) -> Dict[HaskellLogEntry, Dict[str, int]]:
+def parse_rule_applications(haskell_backend_oneline_log_file: Path) -> dict[HaskellLogEntry, dict[str, int]]:
     """
     Traverse a one-line log file produced by K's Haskell backend and extract information about:
     * applied rewrites (DebugAppliedRewriteRules)
@@ -36,8 +36,8 @@ def parse_rule_applications(haskell_backend_oneline_log_file: Path) -> Dict[Hask
           It seems likely that those are generated projection rules.
           We report their applications in bulk with UNKNOWN location.
     """
-    rewrites: Dict[str, int] = defaultdict(int)
-    simplifications: Dict[str, int] = defaultdict(int)
+    rewrites: dict[str, int] = defaultdict(int)
+    simplifications: dict[str, int] = defaultdict(int)
 
     log_entries = haskell_backend_oneline_log_file.read_text().splitlines()
     for log_entry in log_entries:
@@ -60,7 +60,7 @@ def parse_rule_applications(haskell_backend_oneline_log_file: Path) -> Dict[Hask
     }
 
 
-def _parse_haskell_oneline_log(log_entry: str) -> Optional[Tuple[HaskellLogEntry, str]]:
+def _parse_haskell_oneline_log(log_entry: str) -> tuple[HaskellLogEntry, str] | None:
     """Attempt to parse a one-line log string emmitted by K's Haskell backend"""
     matches = _HASKELL_LOG_ENTRY_REGEXP.match(log_entry)
     try:
@@ -74,11 +74,11 @@ def _parse_haskell_oneline_log(log_entry: str) -> Optional[Tuple[HaskellLogEntry
 
 def build_rule_dict(
     definition: KDefinition, *, skip_projections: bool = True, skip_initializers: bool = True
-) -> Dict[str, KRule]:
+) -> dict[str, KRule]:
     """
     Traverse the kompiled definition and build a dictionary mapping str(file:location) to KRule
     """
-    rule_dict: Dict[str, KRule] = {}
+    rule_dict: dict[str, KRule] = {}
 
     for rule in definition.rules:
         if skip_projections and 'projection' in rule.att.atts:
@@ -89,9 +89,7 @@ def build_rule_dict(
             rule_source = rule.att.atts[KAtt.SOURCE]
             rule_location = rule.att.atts[KAtt.LOCATION]
         except KeyError:
-            _LOGGER.warning(
-                'Skipping rule with no location information {msg:.100}...<truncated>'.format(msg=str(rule.body))
-            )
+            _LOGGER.warning(f'Skipping rule with no location information {str(rule.body):.100}...<truncated>')
             rule_source = None
             rule_location = None
             continue
@@ -103,6 +101,6 @@ def build_rule_dict(
     return rule_dict
 
 
-def _location_tuple_to_str(location: Tuple[int, int, int, int]) -> str:
+def _location_tuple_to_str(location: tuple[int, int, int, int]) -> str:
     start_line, start_col, end_line, end_col = location
     return f'{start_line}:{start_col}-{end_line}:{end_col}'

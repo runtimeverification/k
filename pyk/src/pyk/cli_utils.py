@@ -12,9 +12,10 @@ from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Mapping
     from logging import Logger
     from subprocess import CompletedProcess
-    from typing import Dict, Final, Iterable, Mapping, Optional, Union
+    from typing import Final
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -39,13 +40,13 @@ def check_dir_path(path: Path) -> None:
         raise ValueError(f'Path is not a directory: {path}')
 
 
-def dir_path(s: Union[str, Path]) -> Path:
+def dir_path(s: str | Path) -> Path:
     path = Path(s)
     check_dir_path(path)
     return path
 
 
-def ensure_dir_path(path: Union[str, Path]) -> Path:
+def ensure_dir_path(path: str | Path) -> Path:
     path = Path(path)
     if not path.exists():
         _LOGGER.info(f'Making directory: {path}')
@@ -79,7 +80,7 @@ def check_relative_path(path: Path) -> None:
         raise ValueError(f'Path is not relative: {path}')
 
 
-def relative_path(path: Union[str, Path]) -> Path:
+def relative_path(path: str | Path) -> Path:
     path = Path(path)
     check_relative_path(path)
     return path
@@ -97,15 +98,15 @@ def is_relative_to(_self: Path, other: Path) -> bool:
 
 
 def run_process(
-    args: Union[str, Iterable[str]],
+    args: str | Iterable[str],
     *,
     check: bool = True,
-    input: Optional[str] = None,
+    input: str | None = None,
     pipe_stdout: bool = True,
     pipe_stderr: bool = False,
-    cwd: Optional[Union[str, Path]] = None,
-    env: Optional[Mapping[str, str]] = None,
-    logger: Optional[Logger] = None,
+    cwd: str | Path | None = None,
+    env: Mapping[str, str] | None = None,
+    logger: Logger | None = None,
 ) -> CompletedProcess:
     if cwd is not None:
         cwd = Path(cwd)
@@ -145,7 +146,7 @@ class BugReport:
     _bug_report: Path
     _command_id: int
     _defn_id: int
-    _file_remap: Dict[str, str]
+    _file_remap: dict[str, str]
 
     def __init__(self, bug_report: Path) -> None:
         self._bug_report = bug_report.with_suffix('.tar')

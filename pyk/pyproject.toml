@@ -4,14 +4,14 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pyk"
-version = "0.1.221"
+version = "0.1.222"
 description = ""
 authors = [
     "Runtime Verification, Inc. <contact@runtimeverification.com>",
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 cmd2 = "^2.4.2"
 coloredlogs = "^15.0.1"
 filelock = "^3.9.0"
@@ -36,6 +36,7 @@ pytest = "*"
 pytest-cov = "*"
 pytest-mock = "*"
 pytest-xdist = "*"
+pyupgrade = "*"
 types-psutil = "^5.9.5.10"
 
 [tool.poetry.scripts]

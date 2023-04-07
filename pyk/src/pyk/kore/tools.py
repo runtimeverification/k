@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from ..cli_utils import check_dir_path, run_process
 
 if TYPE_CHECKING:
-    from typing import Union
+    pass
 
     from .syntax import Pattern
 
@@ -24,7 +24,7 @@ class PrintOutput(Enum):
     NONE = 'none'
 
 
-def kore_print(pattern: Pattern, definition_dir: Union[str, Path], output: Union[str, PrintOutput]) -> str:
+def kore_print(pattern: Pattern, definition_dir: str | Path, output: str | PrintOutput) -> str:
     definition_dir = Path(definition_dir)
     check_dir_path(definition_dir)
 

@@ -4,15 +4,16 @@ import json
 import logging
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, Final, Type, TypeVar
+from typing import TYPE_CHECKING
 
 from ..utils import hash_str
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
     from pathlib import Path
-    from typing import Optional
+    from typing import Any, Final, TypeVar
 
-T = TypeVar('T', bound='Proof')
+    T = TypeVar('T', bound='Proof')
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -25,9 +26,9 @@ class ProofStatus(Enum):
 
 class Proof(ABC):
     id: str
-    proof_dir: Optional[Path]
+    proof_dir: Path | None
 
-    def __init__(self, id: str, proof_dir: Optional[Path] = None) -> None:
+    def __init__(self, id: str, proof_dir: Path | None = None) -> None:
         self.id = id
         self.proof_dir = proof_dir
 
@@ -45,10 +46,10 @@ class Proof(ABC):
 
     @property
     @abstractmethod
-    def dict(self) -> Dict[str, Any]:
+    def dict(self) -> dict[str, Any]:
         ...
 
     @classmethod
     @abstractmethod
-    def from_dict(cls: Type[Proof], dct: Dict[str, Any]) -> Proof:
+    def from_dict(cls: type[Proof], dct: Mapping[str, Any]) -> Proof:
         ...

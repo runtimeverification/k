@@ -18,9 +18,10 @@ from ..kore.syntax import DV, App, SortApp, String
 from .kprint import KPrint
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Mapping
     from logging import Logger
     from subprocess import CompletedProcess
-    from typing import Final, Iterable, List, Mapping, Optional, Union
+    from typing import Final
 
     from ..cli_utils import BugReport
     from ..kast.outer import KFlatModule
@@ -35,12 +36,12 @@ class KRun(KPrint):
     def __init__(
         self,
         definition_dir: Path,
-        use_directory: Optional[Path] = None,
+        use_directory: Path | None = None,
         command: str = 'krun',
-        bug_report: Optional[BugReport] = None,
+        bug_report: BugReport | None = None,
         extra_unparsing_modules: Iterable[KFlatModule] = (),
     ) -> None:
-        super(KRun, self).__init__(
+        super().__init__(
             definition_dir,
             use_directory=use_directory,
             bug_report=bug_report,
@@ -52,10 +53,10 @@ class KRun(KPrint):
         self,
         pgm: KInner,
         *,
-        config: Optional[Mapping[str, KInner]] = None,
-        depth: Optional[int] = None,
+        config: Mapping[str, KInner] | None = None,
+        depth: int | None = None,
         expand_macros: bool = False,
-        expect_rc: Union[int, Iterable[int]] = 0,
+        expect_rc: int | Iterable[int] = 0,
     ) -> CTerm:
         if config is not None and 'PGM' in config:
             raise ValueError('Cannot supply both pgm and config with PGM variable.')
@@ -87,10 +88,10 @@ class KRun(KPrint):
         self,
         pgm: KInner,
         *,
-        sort: Optional[KSort] = None,
-        depth: Optional[int] = None,
+        sort: KSort | None = None,
+        depth: int | None = None,
         expand_macros: bool = False,
-        expect_rc: Union[int, Iterable[int]] = 0,
+        expect_rc: int | Iterable[int] = 0,
     ) -> CTerm:
         kore_pgm = self.kast_to_kore(pgm, sort=sort)
         with NamedTemporaryFile('w', dir=self.use_directory) as ntf:
@@ -120,12 +121,12 @@ class KRun(KPrint):
         self,
         pattern: Pattern,
         *,
-        depth: Optional[int] = None,
+        depth: int | None = None,
         expand_macros: bool = False,
         search_final: bool = False,
         no_pattern: bool = False,
-        bug_report: Optional[BugReport] = None,
-        expect_rc: Union[int, Iterable[int]] = 0,
+        bug_report: BugReport | None = None,
+        expect_rc: int | Iterable[int] = 0,
     ) -> Pattern:
         with NamedTemporaryFile('w', dir=self.use_directory) as f:
             pattern.write(f)
@@ -158,12 +159,12 @@ class KRun(KPrint):
         self,
         config: Mapping[str, Pattern],
         *,
-        depth: Optional[int] = None,
+        depth: int | None = None,
         expand_macros: bool = False,
         search_final: bool = False,
         no_pattern: bool = False,
         # ---
-        bug_report: Optional[BugReport] = None,
+        bug_report: BugReport | None = None,
         expect_rc: int = 0,
     ) -> Pattern:
         def _config_var_token(s: str) -> DV:
@@ -174,7 +175,7 @@ class KRun(KPrint):
             _map_value = self._add_sort_injection(p, sort, KSort('KItem'))
             return App("Lbl'UndsPipe'-'-GT-Unds'", [], [_map_key, _map_value])
 
-        def _map(ps: List[Pattern]) -> Pattern:
+        def _map(ps: list[Pattern]) -> Pattern:
             if len(ps) == 0:
                 return App("Lbl'Stop'Map{}()", [], [])
             if len(ps) == 1:
@@ -203,7 +204,7 @@ class KRun(KPrint):
         )
 
     @staticmethod
-    def _check_return_code(actual: int, expected: Union[int, Iterable[int]]) -> None:
+    def _check_return_code(actual: int, expected: int | Iterable[int]) -> None:
         if isinstance(expected, int):
             expected = [expected]
 
@@ -225,13 +226,13 @@ class KRunOutput(Enum):
 def _krun(
     command: str = 'krun',
     *,
-    input_file: Optional[Path] = None,
-    definition_dir: Optional[Path] = None,
-    output: Optional[KRunOutput] = None,
-    parser: Optional[str] = None,
-    depth: Optional[int] = None,
-    pmap: Optional[Mapping[str, str]] = None,
-    cmap: Optional[Mapping[str, str]] = None,
+    input_file: Path | None = None,
+    definition_dir: Path | None = None,
+    output: KRunOutput | None = None,
+    parser: str | None = None,
+    depth: int | None = None,
+    pmap: Mapping[str, str] | None = None,
+    cmap: Mapping[str, str] | None = None,
     term: bool = False,
     no_expand_macros: bool = False,
     search_final: bool = False,
@@ -239,8 +240,8 @@ def _krun(
     # ---
     check: bool = True,
     pipe_stderr: bool = False,
-    logger: Optional[Logger] = None,
-    bug_report: Optional[BugReport] = None,
+    logger: Logger | None = None,
+    bug_report: BugReport | None = None,
 ) -> CompletedProcess:
     if input_file:
         check_file_path(input_file)
@@ -285,18 +286,18 @@ def _krun(
 def _build_arg_list(
     *,
     command: str,
-    input_file: Optional[Path],
-    definition_dir: Optional[Path],
-    output: Optional[KRunOutput],
-    parser: Optional[str],
-    depth: Optional[int],
-    pmap: Optional[Mapping[str, str]],
-    cmap: Optional[Mapping[str, str]],
+    input_file: Path | None,
+    definition_dir: Path | None,
+    output: KRunOutput | None,
+    parser: str | None,
+    depth: int | None,
+    pmap: Mapping[str, str] | None,
+    cmap: Mapping[str, str] | None,
     term: bool,
     no_expand_macros: bool,
     search_final: bool,
     no_pattern: bool,
-) -> List[str]:
+) -> list[str]:
     args = [command]
     if input_file:
         args += [str(input_file)]

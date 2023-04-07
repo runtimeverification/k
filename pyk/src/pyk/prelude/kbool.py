@@ -6,7 +6,8 @@ from ..kast.inner import KApply, KLabel, KSort, KToken, build_assoc
 from ..utils import unique
 
 if TYPE_CHECKING:
-    from typing import Final, Iterable
+    from collections.abc import Iterable
+    from typing import Final
 
     from ..kast import KInner
 

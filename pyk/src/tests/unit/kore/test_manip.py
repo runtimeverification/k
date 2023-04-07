@@ -9,7 +9,7 @@ from pyk.kore.manip import free_occs
 from pyk.kore.syntax import And, EVar, Exists, SortApp, Top
 
 if TYPE_CHECKING:
-    from typing import Collection, Dict, Iterable, List
+    from collections.abc import Collection, Iterable
 
     from pyk.kore.syntax import Pattern
 
@@ -31,7 +31,7 @@ FREE_OCCS_TEST_DATA: Iterable = (
 
 
 @pytest.mark.parametrize('pattern,bound_vars,expected', FREE_OCCS_TEST_DATA, ids=count())
-def test_free_occs(pattern: Pattern, bound_vars: Collection[str], expected: Dict[str, List[EVar]]) -> None:
+def test_free_occs(pattern: Pattern, bound_vars: Collection[str], expected: dict[str, list[EVar]]) -> None:
     # When
     actual = free_occs(pattern, bound_vars=bound_vars)
 

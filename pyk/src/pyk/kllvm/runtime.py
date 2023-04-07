@@ -10,7 +10,7 @@ from .utils import PYTHON_EXTENSION_SUFFIX, import_from_file
 
 if TYPE_CHECKING:
     from types import ModuleType
-    from typing import Final, Type, Union
+    from typing import Final
 
     from .ast import Pattern
 
@@ -21,7 +21,7 @@ RUNTIME_MODULE_NAME: Final = '_kllvm_runtime'
 RUNTIME_MODULE_FILE_NAME: Final = f'{RUNTIME_MODULE_NAME}{PYTHON_EXTENSION_SUFFIX}'
 
 
-def compile_runtime(kompiled_dir: Union[str, Path], *, verbose: bool = False) -> Path:
+def compile_runtime(kompiled_dir: str | Path, *, verbose: bool = False) -> Path:
     kompiled_dir = Path(kompiled_dir).resolve()
     check_dir_path(kompiled_dir)
 
@@ -44,7 +44,7 @@ def compile_runtime(kompiled_dir: Union[str, Path], *, verbose: bool = False) ->
     return module_file
 
 
-def import_runtime(kompiled_dir: Union[str, Path]) -> ModuleType:
+def import_runtime(kompiled_dir: str | Path) -> ModuleType:
     kompiled_dir = Path(kompiled_dir)
     check_dir_path(kompiled_dir)
     module_file = kompiled_dir / RUNTIME_MODULE_FILE_NAME
@@ -53,7 +53,7 @@ def import_runtime(kompiled_dir: Union[str, Path]) -> ModuleType:
     return runtime
 
 
-def _make_term_class(mod: ModuleType) -> Type:
+def _make_term_class(mod: ModuleType) -> type:
     class Term:
         def __init__(self, pattern: Pattern):
             self._block = mod.InternalTerm(pattern)

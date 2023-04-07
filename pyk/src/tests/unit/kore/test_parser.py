@@ -1,11 +1,17 @@
+from __future__ import annotations
+
 import json
 from pathlib import Path
-from typing import Any, Final, List, Mapping, Tuple
+from typing import TYPE_CHECKING
 
 import pytest
 
 from pyk.kore.parser import KoreParser
 from pyk.kore.syntax import App, Kore, Pattern, kore_term
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+    from typing import Any, Final
 
 TEST_DATA_DIR: Final = Path(__file__).parent / 'test-data'
 
@@ -89,7 +95,7 @@ def test_parse_json(json_file: Path, i: int, dct: Mapping[str, Any]) -> None:
 
 
 x, y, z = (App(name) for name in ['x', 'y', 'z'])
-MULTI_OR_TEST_DATA: Final[Tuple[Tuple[str, str, List[Pattern]], ...]] = (
+MULTI_OR_TEST_DATA: Final[tuple[tuple[str, str, list[Pattern]], ...]] = (
     ('nullary', r'\left-assoc{}(\or{S}())', []),
     ('unary', r'\left-assoc{}(\or{S}(x{}()))', [x]),
     ('binary', r'\left-assoc{}(\or{S}(x{}(), y{}()))', [x, y]),
@@ -102,7 +108,7 @@ MULTI_OR_TEST_DATA: Final[Tuple[Tuple[str, str, List[Pattern]], ...]] = (
     MULTI_OR_TEST_DATA,
     ids=[test_id for test_id, *_ in MULTI_OR_TEST_DATA],
 )
-def test_multi_or(test_id: str, text: str, expected: List[Pattern]) -> None:
+def test_multi_or(test_id: str, text: str, expected: list[Pattern]) -> None:
     # Given
     parser = KoreParser(text)
 

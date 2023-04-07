@@ -9,12 +9,12 @@ from ..cli_utils import check_file_path
 
 if TYPE_CHECKING:
     from types import ModuleType
-    from typing import Final, Union
+    from typing import Final
 
 PYTHON_EXTENSION_SUFFIX: Final = sysconfig.get_config_var('EXT_SUFFIX')
 
 
-def import_from_file(module_name: str, module_file: Union[str, Path]) -> ModuleType:
+def import_from_file(module_name: str, module_file: str | Path) -> ModuleType:
     module_file = Path(module_file).resolve()
     check_file_path(module_file)
 

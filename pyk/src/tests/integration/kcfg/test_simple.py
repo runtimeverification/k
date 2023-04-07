@@ -12,15 +12,16 @@ from pyk.prelude.ml import mlEqualsTrue, mlTop
 from ..utils import KCFGExploreTest
 
 if TYPE_CHECKING:
-    from typing import Final, Iterable, List, Optional, Tuple, Union
+    from collections.abc import Iterable
+    from typing import Final, Union
 
     from pyk.kcfg import KCFGExplore
     from pyk.ktool.kprint import KPrint
 
-    STATE = Union[Tuple[str, str], Tuple[str, str, str]]
+    STATE = Union[tuple[str, str], tuple[str, str, str]]
 
 
-EXECUTE_TEST_DATA: Iterable[Tuple[str, int, STATE, int, STATE, List[STATE]]] = (
+EXECUTE_TEST_DATA: Iterable[tuple[str, int, STATE, int, STATE, list[STATE]]] = (
     ('branch', 3, ('a', '.Map'), 1, ('b', '.Map'), [('c', '.Map'), ('d', '.Map')]),
     (
         'no-branch',
@@ -39,7 +40,7 @@ class TestSimpleProof(KCFGExploreTest):
     KOMPILE_MAIN_FILE = 'k-files/simple-proofs.k'
 
     @staticmethod
-    def config(kprint: KPrint, k: str, state: str, constraint: Optional[str] = None) -> CTerm:
+    def config(kprint: KPrint, k: str, state: str, constraint: str | None = None) -> CTerm:
         _k_parsed = kprint.parse_token(KToken(k, 'KItem'), as_rule=True)
         _state_parsed = kprint.parse_token(KToken(state, 'Map'), as_rule=True)
         _constraint = (
@@ -68,10 +69,10 @@ class TestSimpleProof(KCFGExploreTest):
         kcfg_explore: KCFGExplore,
         test_id: str,
         depth: int,
-        pre: Tuple[str, str],
+        pre: tuple[str, str],
         expected_depth: int,
-        expected_post: Tuple[str, str],
-        expected_next_states: Iterable[Tuple[str, str]],
+        expected_post: tuple[str, str],
+        expected_next_states: Iterable[tuple[str, str]],
     ) -> None:
         # Given
         expected_k, expected_state, *_ = expected_post
@@ -105,8 +106,8 @@ class TestSimpleProof(KCFGExploreTest):
         self,
         kcfg_explore: KCFGExplore,
         test_id: str,
-        pre: Tuple[str, str],
-        expected_post: Tuple[str, str],
+        pre: tuple[str, str],
+        expected_post: tuple[str, str],
     ) -> None:
         # Given
         k, state = pre

@@ -4,7 +4,7 @@ import shutil
 import sys
 from pathlib import Path
 from tempfile import mkdtemp
-from typing import Final, Union
+from typing import Final
 
 from ..cli_utils import check_dir_path, run_process
 from .utils import PYTHON_EXTENSION_SUFFIX, import_from_file
@@ -15,7 +15,7 @@ KLLVM_MODULE_NAME: Final = '_kllvm'
 KLLVM_MODULE_FILE_NAME: Final = f'{KLLVM_MODULE_NAME}{PYTHON_EXTENSION_SUFFIX}'
 
 
-def compile_kllvm(target_dir: Union[str, Path], *, verbose: bool = False) -> Path:
+def compile_kllvm(target_dir: str | Path, *, verbose: bool = False) -> Path:
     target_dir = Path(target_dir).resolve()
     check_dir_path(target_dir)
 

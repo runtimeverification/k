@@ -10,7 +10,8 @@ from pyk.kore.prelude import dv, kore_list, kore_map, kore_set
 from pyk.kore.syntax import App
 
 if TYPE_CHECKING:
-    from typing import Any, Callable
+    from collections.abc import Callable
+    from typing import Any
 
     from pyk.kore.syntax import Pattern
 

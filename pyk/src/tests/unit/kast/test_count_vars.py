@@ -10,12 +10,13 @@ from pyk.kast.manip import count_vars
 from ..utils import a, b, c, f, g, h, x, y, z
 
 if TYPE_CHECKING:
-    from typing import Final, Mapping, Tuple
+    from collections.abc import Mapping
+    from typing import Final
 
     from pyk.kast import KInner
 
 
-TEST_DATA: Final[Tuple[Tuple[KInner, Mapping[str, int]], ...]] = (
+TEST_DATA: Final[tuple[tuple[KInner, Mapping[str, int]], ...]] = (
     (a, {}),
     (x, {'x': 1}),
     (f(a), {}),

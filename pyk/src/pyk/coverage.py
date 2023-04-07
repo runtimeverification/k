@@ -6,8 +6,8 @@ from .kast.inner import KApply, KRewrite, KSequence
 from .kast.outer import KRule, read_kast_definition
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from os import PathLike
-    from typing import Iterable, List
 
     from .kast.outer import KDefinition
 
@@ -48,7 +48,7 @@ def translate_coverage(
     dst_all_rules: Iterable[str],
     dst_definition: KDefinition,
     src_rules_list: Iterable[str],
-) -> List[str]:
+) -> list[str]:
     """Translate the coverage data from one kompiled definition to another.
 
     Input:
@@ -106,7 +106,7 @@ def translate_coverage(
     return dst_rule_list
 
 
-def translate_coverage_from_paths(src_kompiled_dir: str, dst_kompiled_dir: str, src_rules_file: PathLike) -> List[str]:
+def translate_coverage_from_paths(src_kompiled_dir: str, dst_kompiled_dir: str, src_rules_file: PathLike) -> list[str]:
     """Translate coverage information given paths to needed files.
 
     Input:
@@ -118,17 +118,17 @@ def translate_coverage_from_paths(src_kompiled_dir: str, dst_kompiled_dir: str, 
     Output: Translated list of rules with non-semantic rules stripped out.
     """
     src_all_rules = []
-    with open(src_kompiled_dir + '/allRules.txt', 'r') as src_all_rules_file:
+    with open(src_kompiled_dir + '/allRules.txt') as src_all_rules_file:
         src_all_rules = [line.strip() for line in src_all_rules_file]
 
     dst_all_rules = []
-    with open(dst_kompiled_dir + '/allRules.txt', 'r') as dst_all_rules_file:
+    with open(dst_kompiled_dir + '/allRules.txt') as dst_all_rules_file:
         dst_all_rules = [line.strip() for line in dst_all_rules_file]
 
     dst_definition = read_kast_definition(dst_kompiled_dir + '/compiled.json')
 
     src_rules_list = []
-    with open(src_rules_file, 'r') as src_rules:
+    with open(src_rules_file) as src_rules:
         src_rules_list = [line.strip() for line in src_rules]
 
     return translate_coverage(src_all_rules, dst_all_rules, dst_definition, src_rules_list)

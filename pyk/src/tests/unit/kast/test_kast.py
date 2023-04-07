@@ -16,7 +16,8 @@ from pyk.prelude.utils import token
 from ..utils import f, x, y, z
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Final, List, Mapping, Optional, Tuple
+    from collections.abc import Mapping
+    from typing import Any, Final
 
     from pyk.kast import KInner
 
@@ -40,7 +41,7 @@ KVARIABLE_TEST_DATA: Final = (
     KVARIABLE_TEST_DATA,
     ids=[test_id for test_id, *_ in KVARIABLE_TEST_DATA],
 )
-def test_kvariable_to_dict(test_id: str, var: KVariable, dct: Dict[str, Any]) -> None:
+def test_kvariable_to_dict(test_id: str, var: KVariable, dct: dict[str, Any]) -> None:
     # When
     actual_var = KVariable.from_dict(dct)
     actual_dct = var.to_dict()
@@ -73,7 +74,7 @@ def test_kvariable_let(test_id: str, var: KVariable, expected: KVariable) -> Non
     assert actual == expected
 
 
-KLABEL_TEST_DATA: Final[Tuple[List[KSort], ...]] = (
+KLABEL_TEST_DATA: Final[tuple[list[KSort], ...]] = (
     [],
     [BOOL],
     [BOOL, INT],
@@ -82,7 +83,7 @@ KLABEL_TEST_DATA: Final[Tuple[List[KSort], ...]] = (
 
 
 @pytest.mark.parametrize('params', KLABEL_TEST_DATA, ids=count())
-def test_klabel_init(params: List[KSort]) -> None:
+def test_klabel_init(params: list[KSort]) -> None:
     # When
     terms = (
         KLabel('f', params),
@@ -98,7 +99,7 @@ def test_klabel_init(params: List[KSort]) -> None:
 
 
 @pytest.mark.parametrize('params', KLABEL_TEST_DATA[1:], ids=count())
-def test_klabel_init_multiple_values(params: List[KSort]) -> None:
+def test_klabel_init_multiple_values(params: list[KSort]) -> None:
     # Given
     expected_message = 'KLabel() got multiple values for argument: params'
 
@@ -113,7 +114,7 @@ def test_klabel_init_multiple_values(params: List[KSort]) -> None:
 
 
 @pytest.mark.parametrize('params', KLABEL_TEST_DATA, ids=count())
-def test_klabel_init_unkown_keyword(params: List[KSort]) -> None:
+def test_klabel_init_unkown_keyword(params: list[KSort]) -> None:
     # Given
     expected_message = 'KLabel() got an unexpected keyword argument: key'
 
@@ -127,7 +128,7 @@ def test_klabel_init_unkown_keyword(params: List[KSort]) -> None:
     assert actual_message == expected_message
 
 
-KAPPLY_TEST_DATA: Final[Tuple[List[KInner], ...]] = (
+KAPPLY_TEST_DATA: Final[tuple[list[KInner], ...]] = (
     [],
     [x],
     [x, y],
@@ -136,7 +137,7 @@ KAPPLY_TEST_DATA: Final[Tuple[List[KInner], ...]] = (
 
 
 @pytest.mark.parametrize('args', KAPPLY_TEST_DATA, ids=count())
-def test_kapply_init(args: List[KInner]) -> None:
+def test_kapply_init(args: list[KInner]) -> None:
     terms = (
         KApply('f', args),
         KApply('f', *args),
@@ -151,7 +152,7 @@ def test_kapply_init(args: List[KInner]) -> None:
 
 
 @pytest.mark.parametrize('args', KAPPLY_TEST_DATA[1:], ids=count())
-def test_kapply_init_multiple_values(args: List[KInner]) -> None:
+def test_kapply_init_multiple_values(args: list[KInner]) -> None:
     # Given
     expected_message = 'KApply() got multiple values for argument: args'
 
@@ -166,7 +167,7 @@ def test_kapply_init_multiple_values(args: List[KInner]) -> None:
 
 
 @pytest.mark.parametrize('args', KAPPLY_TEST_DATA, ids=count())
-def test_kapply_init_unkown_keyword(args: List[KInner]) -> None:
+def test_kapply_init_unkown_keyword(args: list[KInner]) -> None:
     # Given
     expected_message = 'KApply() got an unexpected keyword argument: key'
 
@@ -180,7 +181,7 @@ def test_kapply_init_unkown_keyword(args: List[KInner]) -> None:
     assert actual_message == expected_message
 
 
-KSEQUENCE_TEST_DATA: Final[Tuple[List[KInner], ...]] = (
+KSEQUENCE_TEST_DATA: Final[tuple[list[KInner], ...]] = (
     [],
     [x],
     [x, y],
@@ -189,7 +190,7 @@ KSEQUENCE_TEST_DATA: Final[Tuple[List[KInner], ...]] = (
 
 
 @pytest.mark.parametrize('items', KSEQUENCE_TEST_DATA, ids=count())
-def test_ksequence_init(items: List[KInner]) -> None:
+def test_ksequence_init(items: list[KInner]) -> None:
     # When
     terms = (
         KSequence(items),
@@ -203,7 +204,7 @@ def test_ksequence_init(items: List[KInner]) -> None:
 
 
 @pytest.mark.parametrize('items', KSEQUENCE_TEST_DATA[1:], ids=count())
-def test_ksequence_init_multiple_values(items: List[KInner]) -> None:
+def test_ksequence_init_multiple_values(items: list[KInner]) -> None:
     # Given
     expected_message = 'KSequence() got multiple values for argument: items'
 
@@ -218,7 +219,7 @@ def test_ksequence_init_multiple_values(items: List[KInner]) -> None:
 
 
 @pytest.mark.parametrize('items', KSEQUENCE_TEST_DATA, ids=count())
-def test_ksequence_init_unkown_keyword(items: List[KInner]) -> None:
+def test_ksequence_init_unkown_keyword(items: list[KInner]) -> None:
     # Given
     expected_message = 'KSequence() got an unexpected keyword argument: key'
 
@@ -272,7 +273,7 @@ BUILD_ASSOC_TEST_DATA: Final = (
 
 
 @pytest.mark.parametrize('terms,expected', BUILD_ASSOC_TEST_DATA, ids=count())
-def test_build_assoc(terms: Tuple[KInner, ...], expected: KInner) -> None:
+def test_build_assoc(terms: tuple[KInner, ...], expected: KInner) -> None:
     # When
     actual = build_assoc(_0, f, terms)
 
@@ -289,7 +290,7 @@ KAST_FROM_DICT_TEST_DATA: Final = (
 
 
 @pytest.mark.parametrize('dct,expected', KAST_FROM_DICT_TEST_DATA, ids=count())
-def test_kast_from_dict(dct: Mapping[str, Any], expected: Optional[KAst]) -> None:
+def test_kast_from_dict(dct: Mapping[str, Any], expected: KAst | None) -> None:
     if expected is None:
         with pytest.raises(ValueError):
             KAst.from_dict(dct)

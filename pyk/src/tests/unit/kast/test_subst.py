@@ -14,12 +14,12 @@ from pyk.prelude.ml import mlAnd, mlEquals, mlEqualsTrue, mlTop
 from ..utils import a, b, c, f, g, h, x, y, z
 
 if TYPE_CHECKING:
-    from typing import Dict, Final, Optional, Tuple
+    from typing import Final
 
     from pyk.kast import KInner
 
 
-COMPOSE_TEST_DATA: Tuple[Tuple[Dict[str, KInner], Dict[str, KInner], Dict[str, KInner]], ...] = (
+COMPOSE_TEST_DATA: tuple[tuple[dict[str, KInner], dict[str, KInner], dict[str, KInner]], ...] = (
     ({}, {}, {}),
     ({'x': x}, {}, {}),
     ({}, {'x': x}, {}),
@@ -35,7 +35,7 @@ COMPOSE_TEST_DATA: Tuple[Tuple[Dict[str, KInner], Dict[str, KInner], Dict[str, K
 
 
 @pytest.mark.parametrize('subst1,subst2,expected', COMPOSE_TEST_DATA, ids=count())
-def test_compose(subst1: Dict[str, KInner], subst2: Dict[str, KInner], expected: Dict[str, KInner]) -> None:
+def test_compose(subst1: dict[str, KInner], subst2: dict[str, KInner], expected: dict[str, KInner]) -> None:
     # When
     actual = dict((Subst(subst1) * Subst(subst2)).minimize())
 
@@ -43,7 +43,7 @@ def test_compose(subst1: Dict[str, KInner], subst2: Dict[str, KInner], expected:
     assert actual == expected
 
 
-UNION_TEST_DATA: Tuple[Tuple[Dict[str, KInner], Dict[str, KInner], Optional[Dict[str, KInner]]], ...] = (
+UNION_TEST_DATA: tuple[tuple[dict[str, KInner], dict[str, KInner], dict[str, KInner] | None], ...] = (
     ({}, {}, {}),
     ({'x': x}, {}, {'x': x}),
     ({}, {'x': x}, {'x': x}),
@@ -56,9 +56,9 @@ UNION_TEST_DATA: Tuple[Tuple[Dict[str, KInner], Dict[str, KInner], Optional[Dict
 
 @pytest.mark.parametrize('subst1,subst2,expected', UNION_TEST_DATA, ids=count())
 def test_union(
-    subst1: Dict[str, KInner],
-    subst2: Dict[str, KInner],
-    expected: Optional[Dict[str, KInner]],
+    subst1: dict[str, KInner],
+    subst2: dict[str, KInner],
+    expected: dict[str, KInner] | None,
 ) -> None:
     # When
     actual_subst = Subst(subst1).union(Subst(subst2))
@@ -68,7 +68,7 @@ def test_union(
     assert actual == expected
 
 
-APPLY_TEST_DATA: Tuple[Tuple[KInner, Dict[str, KInner], KInner], ...] = (
+APPLY_TEST_DATA: tuple[tuple[KInner, dict[str, KInner], KInner], ...] = (
     (a, {}, a),
     (x, {}, x),
     (a, {'x': b}, a),
@@ -80,7 +80,7 @@ APPLY_TEST_DATA: Tuple[Tuple[KInner, Dict[str, KInner], KInner], ...] = (
 
 
 @pytest.mark.parametrize('pattern,subst,expected', APPLY_TEST_DATA, ids=count())
-def test_apply(pattern: KInner, subst: Dict[str, KInner], expected: KInner) -> None:
+def test_apply(pattern: KInner, subst: dict[str, KInner], expected: KInner) -> None:
     # When
     actual = Subst(subst)(pattern)
 
@@ -88,7 +88,7 @@ def test_apply(pattern: KInner, subst: Dict[str, KInner], expected: KInner) -> N
     assert actual == expected
 
 
-UNAPPLY_TEST_DATA: Tuple[Tuple[KInner, Dict[str, KInner], KInner], ...] = (
+UNAPPLY_TEST_DATA: tuple[tuple[KInner, dict[str, KInner], KInner], ...] = (
     (a, {}, a),
     (a, {'x': a}, x),
     (y, {'x': y}, x),
@@ -100,7 +100,7 @@ UNAPPLY_TEST_DATA: Tuple[Tuple[KInner, Dict[str, KInner], KInner], ...] = (
 
 
 @pytest.mark.parametrize('term,subst,expected', UNAPPLY_TEST_DATA, ids=count())
-def test_unapply(term: KInner, subst: Dict[str, KInner], expected: KInner) -> None:
+def test_unapply(term: KInner, subst: dict[str, KInner], expected: KInner) -> None:
     # When
     actual = Subst(subst).unapply(term)
 
@@ -129,7 +129,7 @@ def test_ml_pred(test_id: str, subst: Subst, pred: KInner) -> None:
 
 _0 = intToken(0)
 _EQ = KLabel('_==Int_')
-EXTRACT_SUBST_TEST_DATA: Final[Tuple[Tuple[KInner, Dict[str, KInner], KInner], ...]] = (
+EXTRACT_SUBST_TEST_DATA: Final[tuple[tuple[KInner, dict[str, KInner], KInner], ...]] = (
     (a, {}, a),
     (mlEquals(a, b), {}, mlEquals(a, b)),
     (mlEquals(x, a), {'x': a}, mlTop()),
@@ -142,7 +142,7 @@ EXTRACT_SUBST_TEST_DATA: Final[Tuple[Tuple[KInner, Dict[str, KInner], KInner], .
 
 
 @pytest.mark.parametrize('term,expected_subst,expected_term', EXTRACT_SUBST_TEST_DATA, ids=count())
-def test_extract_subst(term: KInner, expected_subst: Dict[str, KInner], expected_term: KInner) -> None:
+def test_extract_subst(term: KInner, expected_subst: dict[str, KInner], expected_term: KInner) -> None:
     # When
     actual_subst, actual_term = extract_subst(term)
 

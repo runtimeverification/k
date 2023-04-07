@@ -1,33 +1,23 @@
+from __future__ import annotations
+
 import logging
 from abc import abstractmethod
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from functools import reduce
 from itertools import chain
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Final,
-    Iterable,
-    Iterator,
-    List,
-    Mapping,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-    final,
-    overload,
-)
+from typing import TYPE_CHECKING, final, overload
 
 from ..utils import EMPTY_FROZEN_DICT, FrozenDict, dequote_str, enquote_str, some
 from .kast import EMPTY_ATT, KAst, KAtt, WithKAtt
 
-T = TypeVar('T', bound='KAst')
-W = TypeVar('W', bound='WithKAtt')
-KI = TypeVar('KI', bound='KInner')
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterator
+    from typing import Any, Final, TypeVar
+
+    T = TypeVar('T', bound='KAst')
+    W = TypeVar('W', bound='WithKAtt')
+    KI = TypeVar('KI', bound='KInner')
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -37,7 +27,7 @@ class KInner(KAst):
 
     @classmethod
     @abstractmethod
-    def from_dict(cls: Type['KInner'], d: Mapping[str, Any]) -> 'KInner':
+    def from_dict(cls: type[KInner], d: Mapping[str, Any]) -> KInner:
         node = d['node']
         if node in KInner._INNER_NODES:
             return globals()[node].from_dict(d)
@@ -45,11 +35,11 @@ class KInner(KAst):
         raise ValueError(f'Expected KInner label as "node" value, found: {node}')
 
     @abstractmethod
-    def map_inner(self: KI, f: Callable[['KInner'], 'KInner']) -> KI:
+    def map_inner(self: KI, f: Callable[[KInner], KInner]) -> KI:
         ...
 
     @abstractmethod
-    def match(self, term: 'KInner') -> Optional['Subst']:
+    def match(self, term: KInner) -> Subst | None:
         """
         Perform syntactic pattern matching and return the substitution.
 
@@ -59,14 +49,14 @@ class KInner(KAst):
         ...
 
     @staticmethod
-    def _combine_matches(substs: Iterable[Optional['Subst']]) -> Optional['Subst']:
-        def combine(subst1: Optional['Subst'], subst2: Optional['Subst']) -> Optional['Subst']:
+    def _combine_matches(substs: Iterable[Subst | None]) -> Subst | None:
+        def combine(subst1: Subst | None, subst2: Subst | None) -> Subst | None:
             if subst1 is None or subst2 is None:
                 return None
 
             return subst1.union(subst2)
 
-        unit: Optional[Subst] = Subst()
+        unit: Subst | None = Subst()
         return reduce(combine, substs, unit)
 
 
@@ -86,28 +76,28 @@ class Subst(Mapping[str, KInner]):
     def __getitem__(self, key: str) -> KInner:
         return self._subst[key]
 
-    def __mul__(self, other: 'Subst') -> 'Subst':
+    def __mul__(self, other: Subst) -> Subst:
         return self.compose(other)
 
     def __call__(self, term: KInner) -> KInner:
         return self.apply(term)
 
     @staticmethod
-    def from_dict(d: Mapping[str, Any]) -> 'Subst':
+    def from_dict(d: Mapping[str, Any]) -> Subst:
         return Subst({k: KInner.from_dict(v) for k, v in d.items()})
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {k: v.to_dict() for k, v in self.items()}
 
-    def minimize(self) -> 'Subst':
+    def minimize(self) -> Subst:
         return Subst({k: v for k, v in self.items() if v != KVariable(k)})
 
-    def compose(self, other: 'Subst') -> 'Subst':
+    def compose(self, other: Subst) -> Subst:
         from_other = ((k, self(v)) for k, v in other.items())
         from_self = ((k, v) for k, v in self.items() if k not in other)
         return Subst(dict(chain(from_other, from_self)))
 
-    def union(self, other: 'Subst') -> Optional['Subst']:
+    def union(self, other: Subst) -> Subst | None:
         subst = dict(self)
         for v in other:
             if v in subst and subst[v] != other[v]:
@@ -154,21 +144,21 @@ class KSort(KInner):
         object.__setattr__(self, 'name', name)
 
     @classmethod
-    def from_dict(cls: Type['KSort'], d: Mapping[str, Any]) -> 'KSort':
+    def from_dict(cls: type[KSort], d: Mapping[str, Any]) -> KSort:
         cls._check_node(d)
         return KSort(name=d['name'])
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {'node': 'KSort', 'name': self.name}
 
-    def let(self, *, name: Optional[str] = None) -> 'KSort':
+    def let(self, *, name: str | None = None) -> KSort:
         name = name if name is not None else self.name
         return KSort(name=name)
 
-    def map_inner(self: 'KSort', f: Callable[[KInner], KInner]) -> 'KSort':
+    def map_inner(self: KSort, f: Callable[[KInner], KInner]) -> KSort:
         return self
 
-    def match(self, term: KInner) -> Optional[Subst]:
+    def match(self, term: KInner) -> Subst | None:
         raise TypeError('KSort does not support pattern matching')
 
 
@@ -178,7 +168,7 @@ class KToken(KInner):
     token: str
     sort: KSort
 
-    def __init__(self, token: str, sort: Union[str, KSort]):
+    def __init__(self, token: str, sort: str | KSort):
         if type(sort) is str:
             sort = KSort(sort)
 
@@ -186,7 +176,7 @@ class KToken(KInner):
         object.__setattr__(self, 'sort', sort)
 
     @classmethod
-    def from_dict(cls: Type['KToken'], d: Mapping[str, Any]) -> 'KToken':
+    def from_dict(cls: type[KToken], d: Mapping[str, Any]) -> KToken:
         cls._check_node(d)
         token = d['token']
         sort = KSort.from_dict(d['sort'])
@@ -202,7 +192,7 @@ class KToken(KInner):
             token = '"' + dequote_str(token[1:-1]) + '"'
         return KToken(token=token, sort=sort)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         token = self.token
         if self.sort == KSort('Bytes'):
             assert len(token) >= 3
@@ -216,15 +206,15 @@ class KToken(KInner):
             token = '"' + enquote_str(token[1:-1]) + '"'
         return {'node': 'KToken', 'token': token, 'sort': self.sort.to_dict()}
 
-    def let(self, *, token: Optional[str] = None, sort: Optional[Union[str, KSort]] = None) -> 'KToken':
+    def let(self, *, token: str | None = None, sort: str | KSort | None = None) -> KToken:
         token = token if token is not None else self.token
         sort = sort if sort is not None else self.sort
         return KToken(token=token, sort=sort)
 
-    def map_inner(self: 'KToken', f: Callable[[KInner], KInner]) -> 'KToken':
+    def map_inner(self: KToken, f: Callable[[KInner], KInner]) -> KToken:
         return self
 
-    def match(self, term: KInner) -> Optional[Subst]:
+    def match(self, term: KInner) -> Subst | None:
         if type(term) is KToken:
             return Subst() if term.token == self.token else None
         _LOGGER.debug(f'Matching failed: ({self}.match({term}))')
@@ -235,9 +225,9 @@ class KToken(KInner):
 @dataclass(frozen=True)
 class KVariable(KInner):
     name: str
-    sort: Optional[KSort]
+    sort: KSort | None
 
-    def __init__(self, name: str, sort: Optional[Union[str, KSort]] = None):
+    def __init__(self, name: str, sort: str | KSort | None = None):
         if type(sort) is str:
             sort = KSort(sort)
 
@@ -253,11 +243,11 @@ class KVariable(KInner):
         return super().__lt__(other)
 
     @classmethod
-    def from_dict(cls: Type['KVariable'], d: Mapping[str, Any]) -> 'KVariable':
+    def from_dict(cls: type[KVariable], d: Mapping[str, Any]) -> KVariable:
         cls._check_node(d)
         att = KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT
 
-        sort: Optional[KSort]
+        sort: KSort | None
         if KAtt.SORT in att:
             sort = KSort.from_dict(att[KAtt.SORT])
         else:
@@ -284,21 +274,21 @@ class KVariable(KInner):
 
         return KVariable(name=d['name'], sort=sort)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         _att = KAtt({})
         if self.sort is not None:
             _att = _att.update({KAtt.SORT: self.sort.to_dict()})
         return {'node': 'KVariable', 'name': self.name, 'att': _att.to_dict()}
 
-    def let(self, *, name: Optional[str] = None, sort: Optional[Union[str, KSort]] = None) -> 'KVariable':
+    def let(self, *, name: str | None = None, sort: str | KSort | None = None) -> KVariable:
         name = name if name is not None else self.name
         sort = sort if sort is not None else self.sort
         return KVariable(name=name, sort=sort)
 
-    def let_sort(self, sort: Optional[KSort]) -> 'KVariable':
+    def let_sort(self, sort: KSort | None) -> KVariable:
         return KVariable(self.name, sort=sort)
 
-    def map_inner(self: 'KVariable', f: Callable[[KInner], KInner]) -> 'KVariable':
+    def map_inner(self: KVariable, f: Callable[[KInner], KInner]) -> KVariable:
         return self
 
     def match(self, term: KInner) -> Subst:
@@ -309,14 +299,14 @@ class KVariable(KInner):
 @dataclass(frozen=True)
 class KLabel(KInner):
     name: str
-    params: Tuple[KSort, ...]
+    params: tuple[KSort, ...]
 
     @overload
-    def __init__(self, name: str, params: Iterable[Union[str, KSort]]):
+    def __init__(self, name: str, params: Iterable[str | KSort]):
         ...
 
     @overload
-    def __init__(self, name: str, *params: Union[str, KSort]):
+    def __init__(self, name: str, *params: str | KSort):
         ...
 
     # TODO Is it possible to extract a decorator?
@@ -344,48 +334,48 @@ class KLabel(KInner):
         object.__setattr__(self, 'name', name)
         object.__setattr__(self, 'params', params)
 
-    def __iter__(self) -> Iterator[Union[str, KSort]]:
+    def __iter__(self) -> Iterator[str | KSort]:
         return chain([self.name], self.params)
 
     @overload
-    def __call__(self, args: Iterable[KInner]) -> 'KApply':
+    def __call__(self, args: Iterable[KInner]) -> KApply:
         ...
 
     @overload
-    def __call__(self, *args: KInner) -> 'KApply':
+    def __call__(self, *args: KInner) -> KApply:
         ...
 
-    def __call__(self, *args: Any, **kwargs: Any) -> 'KApply':
+    def __call__(self, *args: Any, **kwargs: Any) -> KApply:
         return self.apply(*args, **kwargs)
 
     @classmethod
-    def from_dict(cls: Type['KLabel'], d: Mapping[str, Any]) -> 'KLabel':
+    def from_dict(cls: type[KLabel], d: Mapping[str, Any]) -> KLabel:
         cls._check_node(d)
         return KLabel(name=d['name'], params=(KSort.from_dict(param) for param in d['params']))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {'node': 'KLabel', 'name': self.name, 'params': [param.to_dict() for param in self.params]}
 
-    def let(self, *, name: Optional[str] = None, params: Optional[Iterable[Union[str, KSort]]] = None) -> 'KLabel':
+    def let(self, *, name: str | None = None, params: Iterable[str | KSort] | None = None) -> KLabel:
         name = name if name is not None else self.name
         params = params if params is not None else self.params
         return KLabel(name=name, params=params)
 
-    def map_inner(self: 'KLabel', f: Callable[[KInner], KInner]) -> 'KLabel':
+    def map_inner(self: KLabel, f: Callable[[KInner], KInner]) -> KLabel:
         return self
 
-    def match(self, term: KInner) -> Optional[Subst]:
+    def match(self, term: KInner) -> Subst | None:
         raise TypeError('KLabel does not support pattern matching')
 
     @overload
-    def apply(self, args: Iterable[KInner]) -> 'KApply':
+    def apply(self, args: Iterable[KInner]) -> KApply:
         ...
 
     @overload
-    def apply(self, *args: KInner) -> 'KApply':
+    def apply(self, *args: KInner) -> KApply:
         ...
 
-    def apply(self, *args: Any, **kwargs: Any) -> 'KApply':
+    def apply(self, *args: Any, **kwargs: Any) -> KApply:
         return KApply(self, *args, **kwargs)
 
 
@@ -393,17 +383,17 @@ class KLabel(KInner):
 @dataclass(frozen=True)
 class KApply(KInner):
     label: KLabel
-    args: Tuple[KInner, ...]
+    args: tuple[KInner, ...]
 
     @overload
-    def __init__(self, label: Union[str, KLabel], args: Iterable[KInner]):
+    def __init__(self, label: str | KLabel, args: Iterable[KInner]):
         ...
 
     @overload
-    def __init__(self, label: Union[str, KLabel], *args: KInner):
+    def __init__(self, label: str | KLabel, *args: KInner):
         ...
 
-    def __init__(self, label: Union[str, KLabel], *args: Any, **kwargs: Any):
+    def __init__(self, label: str | KLabel, *args: Any, **kwargs: Any):
         if type(label) is str:
             label = KLabel(label)
 
@@ -433,11 +423,11 @@ class KApply(KInner):
         return len(self.label.name) > 1 and self.label.name[0] == '<' and self.label.name[-1] == '>'
 
     @classmethod
-    def from_dict(cls: Type['KApply'], d: Mapping[str, Any]) -> 'KApply':
+    def from_dict(cls: type[KApply], d: Mapping[str, Any]) -> KApply:
         cls._check_node(d)
         return KApply(label=KLabel.from_dict(d['label']), args=(KInner.from_dict(arg) for arg in d['args']))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             'node': 'KApply',
             'label': self.label.to_dict(),
@@ -446,17 +436,19 @@ class KApply(KInner):
             'variable': False,
         }
 
-    def let(self, *, label: Optional[Union[str, KLabel]] = None, args: Optional[Iterable[KInner]] = None) -> 'KApply':
+    def let(self, *, label: str | KLabel | None = None, args: Iterable[KInner] | None = None) -> KApply:
         label = label if label is not None else self.label
         args = args if args is not None else self.args
         return KApply(label=label, args=args)
 
-    def map_inner(self: 'KApply', f: Callable[[KInner], KInner]) -> 'KApply':
+    def map_inner(self: KApply, f: Callable[[KInner], KInner]) -> KApply:
         return self.let(args=(f(arg) for arg in self.args))
 
-    def match(self, term: KInner) -> Optional[Subst]:
+    def match(self, term: KInner) -> Subst | None:
         if type(term) is KApply and term.label.name == self.label.name and term.arity == self.arity:
-            return KInner._combine_matches(arg.match(term_arg) for arg, term_arg in zip(self.args, term.args))
+            return KInner._combine_matches(
+                arg.match(term_arg) for arg, term_arg in zip(self.args, term.args, strict=True)
+            )
         _LOGGER.debug(f'Matching failed: ({self}.match({term}))')
         return None
 
@@ -472,24 +464,22 @@ class KAs(KInner):
         object.__setattr__(self, 'alias', alias)
 
     @classmethod
-    def from_dict(cls: Type['KAs'], d: Mapping[str, Any]) -> 'KAs':
+    def from_dict(cls: type[KAs], d: Mapping[str, Any]) -> KAs:
         cls._check_node(d)
         return KAs(pattern=KInner.from_dict(d['pattern']), alias=KInner.from_dict(d['alias']))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {'node': 'KAs', 'pattern': self.pattern.to_dict(), 'alias': self.alias.to_dict()}
 
-    def let(
-        self, *, pattern: Optional[KInner] = None, alias: Optional[KInner] = None, att: Optional[KAtt] = None
-    ) -> 'KAs':
+    def let(self, *, pattern: KInner | None = None, alias: KInner | None = None, att: KAtt | None = None) -> KAs:
         pattern = pattern if pattern is not None else self.pattern
         alias = alias if alias is not None else self.alias
         return KAs(pattern=pattern, alias=alias)
 
-    def map_inner(self: 'KAs', f: Callable[[KInner], KInner]) -> 'KAs':
+    def map_inner(self: KAs, f: Callable[[KInner], KInner]) -> KAs:
         return self.let(pattern=f(self.pattern), alias=f(self.alias))
 
-    def match(self, term: KInner) -> Optional[Subst]:
+    def match(self, term: KInner) -> Subst | None:
         raise TypeError('KAs does not support pattern matching')
 
 
@@ -514,7 +504,7 @@ class KRewrite(KInner, WithKAtt):
         return self.apply(term)
 
     @classmethod
-    def from_dict(cls: Type['KRewrite'], d: Mapping[str, Any]) -> 'KRewrite':
+    def from_dict(cls: type[KRewrite], d: Mapping[str, Any]) -> KRewrite:
         cls._check_node(d)
         return KRewrite(
             lhs=KInner.from_dict(d['lhs']),
@@ -522,7 +512,7 @@ class KRewrite(KInner, WithKAtt):
             att=KAtt.from_dict(d['att']) if d.get('att') else EMPTY_ATT,
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             'node': 'KRewrite',
             'lhs': self.lhs.to_dict(),
@@ -533,22 +523,22 @@ class KRewrite(KInner, WithKAtt):
     def let(
         self,
         *,
-        lhs: Optional[KInner] = None,
-        rhs: Optional[KInner] = None,
-        att: Optional[KAtt] = None,
-    ) -> 'KRewrite':
+        lhs: KInner | None = None,
+        rhs: KInner | None = None,
+        att: KAtt | None = None,
+    ) -> KRewrite:
         lhs = lhs if lhs is not None else self.lhs
         rhs = rhs if rhs is not None else self.rhs
         att = att if att is not None else self.att
         return KRewrite(lhs=lhs, rhs=rhs, att=att)
 
-    def let_att(self, att: KAtt) -> 'KRewrite':
+    def let_att(self, att: KAtt) -> KRewrite:
         return self.let(att=att)
 
-    def map_inner(self: 'KRewrite', f: Callable[[KInner], KInner]) -> 'KRewrite':
+    def map_inner(self: KRewrite, f: Callable[[KInner], KInner]) -> KRewrite:
         return self.let(lhs=f(self.lhs), rhs=f(self.rhs))
 
-    def match(self, term: KInner) -> Optional[Subst]:
+    def match(self, term: KInner) -> Subst | None:
         if type(term) is KRewrite:
             lhs_subst = self.lhs.match(term.lhs)
             rhs_subst = self.rhs.match(term.rhs)
@@ -591,7 +581,7 @@ class KRewrite(KInner, WithKAtt):
 @final
 @dataclass(frozen=True)
 class KSequence(KInner, Sequence[KInner]):
-    items: Tuple[KInner, ...]
+    items: tuple[KInner, ...]
 
     @overload
     def __init__(self, items: Iterable[KInner]):
@@ -631,10 +621,10 @@ class KSequence(KInner, Sequence[KInner]):
         ...
 
     @overload
-    def __getitem__(self, key: slice) -> Tuple[KInner, ...]:
+    def __getitem__(self, key: slice) -> tuple[KInner, ...]:
         ...
 
-    def __getitem__(self, key: Union[int, slice]) -> Union[KInner, Tuple[KInner, ...]]:
+    def __getitem__(self, key: int | slice) -> KInner | tuple[KInner, ...]:
         return self.items[key]
 
     def __len__(self) -> int:
@@ -645,28 +635,30 @@ class KSequence(KInner, Sequence[KInner]):
         return len(self.items)
 
     @classmethod
-    def from_dict(cls: Type['KSequence'], d: Mapping[str, Any]) -> 'KSequence':
+    def from_dict(cls: type[KSequence], d: Mapping[str, Any]) -> KSequence:
         cls._check_node(d)
         return KSequence(items=(KInner.from_dict(item) for item in d['items']))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {'node': 'KSequence', 'items': [item.to_dict() for item in self.items], 'arity': self.arity}
 
-    def let(self, *, items: Optional[Iterable[KInner]] = None) -> 'KSequence':
+    def let(self, *, items: Iterable[KInner] | None = None) -> KSequence:
         items = items if items is not None else self.items
         return KSequence(items=items)
 
-    def map_inner(self: 'KSequence', f: Callable[[KInner], KInner]) -> 'KSequence':
+    def map_inner(self: KSequence, f: Callable[[KInner], KInner]) -> KSequence:
         return self.let(items=(f(item) for item in self.items))
 
-    def match(self, term: KInner) -> Optional[Subst]:
+    def match(self, term: KInner) -> Subst | None:
         if type(term) is KSequence:
             if term.arity == self.arity:
-                return KInner._combine_matches(item.match(term_item) for item, term_item in zip(self.items, term.items))
+                return KInner._combine_matches(
+                    item.match(term_item) for item, term_item in zip(self.items, term.items, strict=True)
+                )
             if 0 < self.arity and self.arity < term.arity and type(self.items[-1]) is KVariable:
                 common_length = len(self.items) - 1
-                _subst: Optional[Subst] = Subst({self.items[-1].name: KSequence(term.items[common_length:])})
-                for si, ti in zip(self.items[:common_length], term.items[:common_length]):
+                _subst: Subst | None = Subst({self.items[-1].name: KSequence(term.items[common_length:])})
+                for si, ti in zip(self.items[:common_length], term.items[:common_length], strict=True):
                     _subst = KInner._combine_matches([_subst, si.match(ti)])
                 return _subst
         _LOGGER.debug(f'Matching failed: ({self}.match({term}))')
@@ -684,8 +676,8 @@ def top_down(f: Callable[[KInner], KInner], kinner: KInner) -> KInner:
 
 
 # TODO: make method of KInner
-def var_occurrences(term: KInner) -> Dict[str, List[KVariable]]:
-    _var_occurrences: Dict[str, List[KVariable]] = {}
+def var_occurrences(term: KInner) -> dict[str, list[KVariable]]:
+    _var_occurrences: dict[str, list[KVariable]] = {}
 
     # TODO: should treat #Exists and #Forall specially.
     def _var_occurence(_term: KInner) -> None:
@@ -707,9 +699,9 @@ def collect(callback: Callable[[KInner], None], kinner: KInner) -> None:
     bottom_up(f, kinner)
 
 
-def build_assoc(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner]) -> KInner:
+def build_assoc(unit: KInner, label: str | KLabel, terms: Iterable[KInner]) -> KInner:
     _label = label if type(label) is KLabel else KLabel(label)
-    res: Optional[KInner] = None
+    res: KInner | None = None
     for term in reversed(list(terms)):
         if term == unit:
             continue
@@ -720,7 +712,7 @@ def build_assoc(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner]
     return res or unit
 
 
-def build_cons(unit: KInner, label: Union[str, KLabel], terms: Iterable[KInner]) -> KInner:
+def build_cons(unit: KInner, label: str | KLabel, terms: Iterable[KInner]) -> KInner:
     it = iter(terms)
     try:
         fst = next(it)

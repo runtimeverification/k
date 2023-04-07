@@ -11,12 +11,12 @@ from pyk.prelude.ml import mlBottom, mlTop
 from ..utils import a, b, c, f, g, h, x, y, z
 
 if TYPE_CHECKING:
-    from typing import Final, Tuple
+    from typing import Final
 
     from pyk.kast import KInner
 
 
-MATCH_TEST_DATA: Final[Tuple[Tuple[KInner, KInner], ...]] = (
+MATCH_TEST_DATA: Final[tuple[tuple[KInner, KInner], ...]] = (
     (a, a),
     (a, x),
     (f(a), x),
@@ -44,7 +44,7 @@ def test_match_and_subst(term: KInner, pattern: KInner) -> None:
     assert subst(pattern) == term
 
 
-NO_MATCH_TEST_DATA: Final[Tuple[Tuple[KInner, KInner], ...]] = (
+NO_MATCH_TEST_DATA: Final[tuple[tuple[KInner, KInner], ...]] = (
     (f(x, x), f(x, a)),
     (mlTop(), mlBottom()),
     (KSequence([a, b, c]), KSequence([x, x])),

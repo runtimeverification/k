@@ -1,4 +1,4 @@
-from typing import Final, Tuple
+from typing import Final
 
 import pytest
 
@@ -14,7 +14,7 @@ TEST_DATA_PASS: Final = (
 
 
 @pytest.mark.parametrize('short_hash,expected', TEST_DATA_PASS, ids=[short_hash for short_hash, _ in TEST_DATA_PASS])
-def test_deconstruct_short_hash_pass(short_hash: str, expected: Tuple[str, str]) -> None:
+def test_deconstruct_short_hash_pass(short_hash: str, expected: tuple[str, str]) -> None:
     # When
     actual = deconstruct_short_hash(short_hash)
 

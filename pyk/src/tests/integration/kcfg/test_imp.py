@@ -16,7 +16,8 @@ from pyk.proof import AGProof, AGProver
 from ..utils import KCFGExploreTest
 
 if TYPE_CHECKING:
-    from typing import Final, Iterable, List, Optional, Tuple, Union
+    from collections.abc import Iterable
+    from typing import Final
 
     from pyk.kast import KInner
     from pyk.kcfg import KCFGExplore
@@ -35,7 +36,7 @@ PROVE_CTERM_TEST_DATA: Final = (
     ),
 )
 
-EMPTY_STATES: Final[List[Tuple[str, str]]] = []
+EMPTY_STATES: Final[list[tuple[str, str]]] = []
 EXECUTE_TEST_DATA: Final = (
     (
         'step-1',
@@ -106,7 +107,7 @@ IMPLIES_TEST_DATA: Final = (
     ),
 )
 
-APR_PROVE_TEST_DATA: Iterable[Tuple[str, str, str, str, Optional[int], Optional[int], Iterable[str]]] = (
+APR_PROVE_TEST_DATA: Iterable[tuple[str, str, str, str, int | None, int | None, Iterable[str]]] = (
     ('imp-simple-addition-1', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'addition-1', 2, 1, []),
     ('imp-simple-addition-2', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'addition-2', 2, 7, []),
     ('imp-simple-addition-var', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'addition-var', 2, 1, []),
@@ -148,7 +149,7 @@ class TestImpProof(KCFGExploreTest):
         symbol_table['.List{"_,_"}_Ids'] = lambda: '.Ids'
 
     @staticmethod
-    def config(kprint: KPrint, k: str, state: str, constraint: Optional[KInner] = None) -> CTerm:
+    def config(kprint: KPrint, k: str, state: str, constraint: KInner | None = None) -> CTerm:
         k_parsed = kprint.parse_token(KToken(k, 'Pgm'), as_rule=True)
         state_parsed = kprint.parse_token(KToken(state, 'Map'), as_rule=True)
         _config = CTerm(
@@ -179,10 +180,10 @@ class TestImpProof(KCFGExploreTest):
         kcfg_explore: KCFGExplore,
         test_id: str,
         depth: int,
-        pre: Tuple[str, str],
+        pre: tuple[str, str],
         expected_depth: int,
-        expected_post: Tuple[str, str],
-        expected_next_states: Iterable[Tuple[str, str]],
+        expected_post: tuple[str, str],
+        expected_next_states: Iterable[tuple[str, str]],
     ) -> None:
         # Given
         k, state = pre
@@ -218,9 +219,9 @@ class TestImpProof(KCFGExploreTest):
         self,
         kcfg_explore: KCFGExplore,
         test_id: str,
-        antecedent: Union[Tuple[str, str], Tuple[str, str, KInner]],
-        consequent: Union[Tuple[str, str], Tuple[str, str, KInner]],
-        expected: Optional[CSubst],
+        antecedent: tuple[str, str] | tuple[str, str, KInner],
+        consequent: tuple[str, str] | tuple[str, str, KInner],
+        expected: CSubst | None,
     ) -> None:
         # Given
         antecedent_term = self.config(kcfg_explore.kprint, *antecedent)

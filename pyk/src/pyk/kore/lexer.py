@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from enum import Enum, auto
-from typing import TYPE_CHECKING, Iterator, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 if TYPE_CHECKING:
-    from typing import Callable, Final, Iterable, Mapping, Optional, Tuple
+    from collections.abc import Callable, Iterable, Iterator, Mapping
+    from typing import Final
 
 
 class TokenType(Enum):
@@ -116,14 +117,14 @@ _ID_FIRST_CHARS: Final = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWX
 _ID_CHARS: Final = set("01234567890'-").union(_ID_FIRST_CHARS)
 
 
-def _whitespace(la: str, it: Iterator[str]) -> Tuple[str, None]:
+def _whitespace(la: str, it: Iterator[str]) -> tuple[str, None]:
     la = next(it, '')
     while la in _WHITESPACE_CHARS:
         la = next(it, '')
     return la, None
 
 
-def _comment(la: str, it: Iterator[str]) -> Tuple[str, None]:
+def _comment(la: str, it: Iterator[str]) -> tuple[str, None]:
     # line comment
     la = next(it, '')
     if la == '/':
@@ -150,11 +151,11 @@ def _comment(la: str, it: Iterator[str]) -> Tuple[str, None]:
     return la, None
 
 
-def _simple_char(la: str, it: Iterator[str]) -> Tuple[str, KoreToken]:
+def _simple_char(la: str, it: Iterator[str]) -> tuple[str, KoreToken]:
     return next(it, ''), _SIMPLE_CHARS[la]
 
 
-def _colon_or_walrus(la: str, it: Iterator[str]) -> Tuple[str, KoreToken]:
+def _colon_or_walrus(la: str, it: Iterator[str]) -> tuple[str, KoreToken]:
     la = next(it, '')
     if la == '=':
         token = _WALRUS_TOKEN
@@ -164,7 +165,7 @@ def _colon_or_walrus(la: str, it: Iterator[str]) -> Tuple[str, KoreToken]:
     return la, token
 
 
-def _id_or_keyword(la: str, it: Iterator[str]) -> Tuple[str, KoreToken]:
+def _id_or_keyword(la: str, it: Iterator[str]) -> tuple[str, KoreToken]:
     buf = [la]
     la = next(it, '')
     while la in _ID_CHARS:
@@ -178,7 +179,7 @@ def _id_or_keyword(la: str, it: Iterator[str]) -> Tuple[str, KoreToken]:
     return la, token
 
 
-def _symbol_or_ml_conn(la: str, it: Iterator[str]) -> Tuple[str, KoreToken]:
+def _symbol_or_ml_conn(la: str, it: Iterator[str]) -> tuple[str, KoreToken]:
     buf = [la]
     la = next(it)
     if la not in _ID_FIRST_CHARS:
@@ -196,7 +197,7 @@ def _symbol_or_ml_conn(la: str, it: Iterator[str]) -> Tuple[str, KoreToken]:
     return la, token
 
 
-def _set_var_id(la: str, it: Iterator[str]) -> Tuple[str, KoreToken]:
+def _set_var_id(la: str, it: Iterator[str]) -> tuple[str, KoreToken]:
     buf = [la]
     la = next(it)
     if la not in _ID_FIRST_CHARS:
@@ -209,7 +210,7 @@ def _set_var_id(la: str, it: Iterator[str]) -> Tuple[str, KoreToken]:
     return la, KoreToken(''.join(buf), TokenType.SET_VAR_ID)
 
 
-def _string(la: str, it: Iterator[str]) -> Tuple[str, KoreToken]:
+def _string(la: str, it: Iterator[str]) -> tuple[str, KoreToken]:
     buf = [la]
     la = next(it)
     while la != '"':
@@ -222,7 +223,7 @@ def _string(la: str, it: Iterator[str]) -> Tuple[str, KoreToken]:
     return next(it, ''), KoreToken(''.join(buf), TokenType.STRING)
 
 
-_DISPATCH_TABLE: Final[Mapping[str, Callable[[str, Iterator[str]], Tuple[str, Optional[KoreToken]]]]] = {
+_DISPATCH_TABLE: Final[Mapping[str, Callable[[str, Iterator[str]], tuple[str, KoreToken | None]]]] = {
     '/': _comment,
     ':': _colon_or_walrus,
     '"': _string,

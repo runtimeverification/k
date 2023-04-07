@@ -21,7 +21,8 @@ from ..utils import filter_none
 from .syntax import And, Pattern, SortApp, kore_term
 
 if TYPE_CHECKING:
-    from typing import Any, ClassVar, Dict, Final, Iterable, Mapping, Optional, TextIO, Tuple, Type, TypeVar, Union
+    from collections.abc import Iterable, Mapping
+    from typing import Any, ClassVar, Final, TextIO, TypeVar
 
     from ..cli_utils import BugReport
     from .syntax import Module
@@ -53,9 +54,9 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
     _sock: socket.socket
     _file: TextIO
     _req_id: int
-    _bug_report: Optional[BugReport]
+    _bug_report: BugReport | None
 
-    def __init__(self, host: str, port: int, *, timeout: Optional[int] = None, bug_report: Optional[BugReport] = None):
+    def __init__(self, host: str, port: int, *, timeout: int | None = None, bug_report: BugReport | None = None):
         self._host = host
         self._port = port
         self._sock = self._create_connection(host, port, timeout)
@@ -64,7 +65,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         self._bug_report = bug_report
 
     @staticmethod
-    def _create_connection(host: str, port: int, timeout: Optional[int]) -> socket.socket:
+    def _create_connection(host: str, port: int, timeout: int | None) -> socket.socket:
         if timeout is not None and timeout < 0:
             raise ValueError(f'Expected nonnegative timeout value, got: {timeout}')
 
@@ -94,7 +95,7 @@ class JsonRpcClient(ContextManager['JsonRpcClient']):
         self._file.close()
         self._sock.close()
 
-    def request(self, method: str, **params: Any) -> Dict[str, Any]:
+    def request(self, method: str, **params: Any) -> dict[str, Any]:
         old_id = self._req_id
         self._req_id += 1
 
@@ -180,8 +181,8 @@ class StopReason(str, Enum):
 @dataclass(frozen=True)
 class State:
     term: Pattern
-    substitution: Optional[Pattern]
-    predicate: Optional[Pattern]
+    substitution: Pattern | None
+    predicate: Pattern | None
 
     @staticmethod
     def from_dict(dct: Mapping[str, Any]) -> State:
@@ -215,15 +216,15 @@ class ExecuteResult(ABC):  # noqa: B024
 
     state: State
     depth: int
-    next_states: Optional[Tuple[State, ...]]
-    rule: Optional[str]
+    next_states: tuple[State, ...] | None
+    rule: str | None
 
     @classmethod
-    def from_dict(cls: Type[ER], dct: Mapping[str, Any]) -> ER:
+    def from_dict(cls: type[ER], dct: Mapping[str, Any]) -> ER:
         return globals()[ExecuteResult._TYPES[StopReason(dct['reason'])]].from_dict(dct)  # type: ignore
 
     @classmethod
-    def _check_reason(cls: Type[ER], dct: Mapping[str, Any]) -> None:
+    def _check_reason(cls: type[ER], dct: Mapping[str, Any]) -> None:
         reason = StopReason(dct['reason'])
         if reason is not cls.reason:
             raise ValueError(f"Expected {cls.reason} as 'reason', found: {reason}")
@@ -242,7 +243,7 @@ class StuckResult(ExecuteResult):
     depth: int
 
     @classmethod
-    def from_dict(cls: Type[StuckResult], dct: Mapping[str, Any]) -> StuckResult:
+    def from_dict(cls: type[StuckResult], dct: Mapping[str, Any]) -> StuckResult:
         cls._check_reason(dct)
         return StuckResult(
             state=State.from_dict(dct['state']),
@@ -261,7 +262,7 @@ class DepthBoundResult(ExecuteResult):
     depth: int
 
     @classmethod
-    def from_dict(cls: Type[DepthBoundResult], dct: Mapping[str, Any]) -> DepthBoundResult:
+    def from_dict(cls: type[DepthBoundResult], dct: Mapping[str, Any]) -> DepthBoundResult:
         cls._check_reason(dct)
         return DepthBoundResult(
             state=State.from_dict(dct['state']),
@@ -277,10 +278,10 @@ class BranchingResult(ExecuteResult):
 
     state: State
     depth: int
-    next_states: Tuple[State, ...]
+    next_states: tuple[State, ...]
 
     @classmethod
-    def from_dict(cls: Type[BranchingResult], dct: Mapping[str, Any]) -> BranchingResult:
+    def from_dict(cls: type[BranchingResult], dct: Mapping[str, Any]) -> BranchingResult:
         cls._check_reason(dct)
         return BranchingResult(
             state=State.from_dict(dct['state']),
@@ -296,11 +297,11 @@ class CutPointResult(ExecuteResult):
 
     state: State
     depth: int
-    next_states: Tuple[State, ...]
+    next_states: tuple[State, ...]
     rule: str
 
     @classmethod
-    def from_dict(cls: Type[CutPointResult], dct: Mapping[str, Any]) -> CutPointResult:
+    def from_dict(cls: type[CutPointResult], dct: Mapping[str, Any]) -> CutPointResult:
         cls._check_reason(dct)
         return CutPointResult(
             state=State.from_dict(dct['state']),
@@ -321,7 +322,7 @@ class TerminalResult(ExecuteResult):
     rule: str
 
     @classmethod
-    def from_dict(cls: Type[TerminalResult], dct: Mapping[str, Any]) -> TerminalResult:
+    def from_dict(cls: type[TerminalResult], dct: Mapping[str, Any]) -> TerminalResult:
         cls._check_reason(dct)
         return TerminalResult(
             state=State.from_dict(dct['state']),
@@ -335,8 +336,8 @@ class TerminalResult(ExecuteResult):
 class ImpliesResult:
     satisfiable: bool
     implication: Pattern
-    substitution: Optional[Pattern]
-    predicate: Optional[Pattern]
+    substitution: Pattern | None
+    predicate: Pattern | None
 
     @staticmethod
     def from_dict(dct: Mapping[str, Any]) -> ImpliesResult:
@@ -356,7 +357,7 @@ class KoreClient(ContextManager['KoreClient']):
 
     _client: JsonRpcClient
 
-    def __init__(self, host: str, port: int, *, timeout: Optional[int] = None, bug_report: Optional[BugReport] = None):
+    def __init__(self, host: str, port: int, *, timeout: int | None = None, bug_report: BugReport | None = None):
         self._client = JsonRpcClient(host, port, timeout=timeout, bug_report=bug_report)
 
     def __enter__(self) -> KoreClient:
@@ -368,7 +369,7 @@ class KoreClient(ContextManager['KoreClient']):
     def close(self) -> None:
         self._client.close()
 
-    def _request(self, method: str, **params: Any) -> Dict[str, Any]:
+    def _request(self, method: str, **params: Any) -> dict[str, Any]:
         try:
             return self._client.request(method, **params)
         except JsonRpcError as err:
@@ -376,7 +377,7 @@ class KoreClient(ContextManager['KoreClient']):
             raise KoreClientError(message=err.message, code=err.code, data=err.data) from err
 
     @staticmethod
-    def _state(pattern: Pattern) -> Dict[str, Any]:
+    def _state(pattern: Pattern) -> dict[str, Any]:
         return {
             'format': 'KORE',
             'version': KoreClient._KORE_JSON_VERSION,
@@ -387,9 +388,9 @@ class KoreClient(ContextManager['KoreClient']):
         self,
         pattern: Pattern,
         *,
-        max_depth: Optional[int] = None,
-        cut_point_rules: Optional[Iterable[str]] = None,
-        terminal_rules: Optional[Iterable[str]] = None,
+        max_depth: int | None = None,
+        cut_point_rules: Iterable[str] | None = None,
+        terminal_rules: Iterable[str] | None = None,
     ) -> ExecuteResult:
         params = filter_none(
             {
@@ -433,18 +434,18 @@ class KoreServer(ContextManager['KoreServer']):
 
     def __init__(
         self,
-        kompiled_dir: Union[str, Path],
+        kompiled_dir: str | Path,
         module_name: str,
         *,
-        port: Optional[int] = None,
-        smt_timeout: Optional[int] = None,
-        smt_retry_limit: Optional[int] = None,
-        smt_reset_interval: Optional[int] = None,
-        command: Union[str, Iterable[str]] = 'kore-rpc',
-        bug_report: Optional[BugReport] = None,
+        port: int | None = None,
+        smt_timeout: int | None = None,
+        smt_retry_limit: int | None = None,
+        smt_reset_interval: int | None = None,
+        command: str | Iterable[str] = 'kore-rpc',
+        bug_report: BugReport | None = None,
         haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
         haskell_log_entries: Iterable[str] = (),
-        log_axioms_file: Optional[Path] = None,
+        log_axioms_file: Path | None = None,
     ):
         kompiled_dir = Path(kompiled_dir)
         check_dir_path(kompiled_dir)
@@ -495,12 +496,12 @@ class KoreServer(ContextManager['KoreServer']):
         _LOGGER.info(f'KoreServer started: {self.host}:{self.port}, pid={self.pid}')
 
     @staticmethod
-    def _check_none_or_positive(n: Optional[int], param_name: str) -> None:
+    def _check_none_or_positive(n: int | None, param_name: str) -> None:
         if n is not None and n <= 0:
             raise ValueError(f'Expected positive integer for: {param_name}, got: {n}')
 
     @staticmethod
-    def _get_host_and_port(pid: int) -> Tuple[str, int]:
+    def _get_host_and_port(pid: int) -> tuple[str, int]:
         proc = Process(pid)
         while not proc.connections():
             sleep(0.01)

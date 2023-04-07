@@ -1,4 +1,4 @@
-from typing import Final, List, Tuple
+from typing import Final
 
 import pytest
 
@@ -8,7 +8,7 @@ from pyk.kore.lexer import TokenType, kore_lexer
 TT = TokenType
 
 
-PASS_TEST_DATA: Final[Tuple[Tuple[str, List[TokenType]], ...]] = (
+PASS_TEST_DATA: Final[tuple[tuple[str, list[TokenType]], ...]] = (
     ('', []),
     (' ', []),
     ('//', []),
@@ -30,7 +30,7 @@ PASS_TEST_DATA: Final[Tuple[Tuple[str, List[TokenType]], ...]] = (
 
 
 @pytest.mark.parametrize('text,expected', PASS_TEST_DATA, ids=[text for text, _ in PASS_TEST_DATA])
-def test_lexer_success(text: str, expected: List[TokenType]) -> None:
+def test_lexer_success(text: str, expected: list[TokenType]) -> None:
     # When
     actual = [token.type for token in kore_lexer(text)]
 

@@ -11,7 +11,8 @@ from pyk.kast.manip import get_cell
 from ..utils import KProveTest
 
 if TYPE_CHECKING:
-    from typing import Final, Iterable, Tuple
+    from collections.abc import Iterable
+    from typing import Final
 
     from pyk.ktool.kprint import SymbolTable
     from pyk.ktool.kprove import KProve
@@ -47,7 +48,7 @@ class TestImpProof(KProveTest):
         test_id: str,
         haskell_args: Iterable[str],
         k: str,
-        expected_next_states: Iterable[Tuple[str, str]],
+        expected_next_states: Iterable[tuple[str, str]],
     ) -> None:
         def config(k: str, state: str) -> CTerm:
             return CTerm(

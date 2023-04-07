@@ -1,36 +1,28 @@
+from __future__ import annotations
+
 import json
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from dataclasses import dataclass, fields
 from functools import cached_property
-from typing import (
-    Any,
-    Callable,
-    ClassVar,
-    Dict,
-    Final,
-    FrozenSet,
-    Iterable,
-    Iterator,
-    Mapping,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    final,
-)
+from typing import TYPE_CHECKING, Any, final
 
 from ..utils import EMPTY_FROZEN_DICT, FrozenDict, hash_str
 
-T = TypeVar('T', bound='KAst')
-W = TypeVar('W', bound='WithKAtt')
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable, Iterator
+    from typing import ClassVar, Final, TypeVar
+
+    T = TypeVar('T', bound='KAst')
+    W = TypeVar('W', bound='WithKAtt')
 
 _LOGGER: Final = logging.getLogger(__name__)
 
 
 class KAst(ABC):
     @classmethod
-    def from_dict(cls: Type[T], d: Mapping[str, Any]) -> T:
+    def from_dict(cls: type[T], d: Mapping[str, Any]) -> T:
         from . import inner, outer
 
         node = d['node']
@@ -47,11 +39,11 @@ class KAst(ABC):
         raise ValueError(f'Expected KAst label as "node" value, found: {node}')
 
     @abstractmethod
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         ...
 
     @classmethod
-    def from_json(cls: Type[T], s: str) -> T:
+    def from_json(cls: type[T], s: str) -> T:
         return cls.from_dict(json.loads(s))
 
     @final
@@ -64,15 +56,15 @@ class KAst(ABC):
         return hash_str(self.to_json())
 
     @classmethod
-    def _check_node(cls: Type[T], d: Mapping[str, Any], expected: Optional[str] = None) -> None:
+    def _check_node(cls: type[T], d: Mapping[str, Any], expected: str | None = None) -> None:
         expected = expected if expected is not None else cls.__name__
         actual = d['node']
         if actual != expected:
             raise ValueError(f'Expected "node" value: {expected}, got: {actual}')
 
-    def _as_shallow_tuple(self) -> Tuple[Any, ...]:
+    def _as_shallow_tuple(self) -> tuple[Any, ...]:
         # shallow copy version of dataclass.astuple.
-        return tuple(self.__dict__[field.name] for field in fields(type(self)))
+        return tuple(self.__dict__[field.name] for field in fields(type(self)))  # type: ignore
 
     def __lt__(self, other: Any) -> bool:
         if not isinstance(other, KAst):
@@ -93,12 +85,12 @@ class KAtt(KAst, Mapping[str, Any]):
 
     def __init__(self, atts: Mapping[str, Any] = EMPTY_FROZEN_DICT):
         def _freeze(m: Any) -> Any:
-            if isinstance(m, (int, str, tuple, FrozenDict, FrozenSet)):
+            if isinstance(m, (int, str, tuple, FrozenDict, frozenset)):
                 return m
             elif isinstance(m, list):
-                return tuple((v for v in m))
+                return tuple(v for v in m)
             elif isinstance(m, dict):
-                return FrozenDict(((k, _freeze(v)) for (k, v) in m.items()))
+                return FrozenDict((k, _freeze(v)) for (k, v) in m.items())
             raise ValueError(f"Don't know how to freeze attribute value {m} of type {type(m)}.")
 
         frozen = _freeze(atts)
@@ -115,15 +107,15 @@ class KAtt(KAst, Mapping[str, Any]):
         return self.atts[key]
 
     @staticmethod
-    def of(**atts: Any) -> 'KAtt':
+    def of(**atts: Any) -> KAtt:
         return KAtt(atts=atts)
 
     @classmethod
-    def from_dict(cls: Type['KAtt'], d: Mapping[str, Any]) -> 'KAtt':
+    def from_dict(cls: type[KAtt], d: Mapping[str, Any]) -> KAtt:
         cls._check_node(d)
         return KAtt(atts=d['att'])
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         def _to_dict(m: Any) -> Any:
             if isinstance(m, FrozenDict):
                 return {k: _to_dict(v) for (k, v) in m.items()}
@@ -131,14 +123,14 @@ class KAtt(KAst, Mapping[str, Any]):
 
         return {'node': 'KAtt', 'att': _to_dict(self.atts)}
 
-    def let(self, *, atts: Optional[Mapping[str, Any]] = None) -> 'KAtt':
+    def let(self, *, atts: Mapping[str, Any] | None = None) -> KAtt:
         atts = atts if atts is not None else self.atts
         return KAtt(atts=atts)
 
-    def update(self, atts: Mapping[str, Any]) -> 'KAtt':
+    def update(self, atts: Mapping[str, Any]) -> KAtt:
         return self.let(atts={k: v for k, v in {**self.atts, **atts}.items() if v is not None})
 
-    def remove(self, atts: Iterable[str]) -> 'KAtt':
+    def remove(self, atts: Iterable[str]) -> KAtt:
         return KAtt({k: v for k, v in self.atts.items() if k not in atts})
 
     @property
@@ -175,7 +167,7 @@ class WithKAtt(ABC):
 
 
 # TODO fix typing (maybe just return Mapping)
-def kast_term(dct: Mapping[str, Any], cls: Type[T] = KAst) -> T:  # type: ignore
+def kast_term(dct: Mapping[str, Any], cls: type[T] = KAst) -> T:  # type: ignore
     if dct['format'] != 'KAST':
         raise ValueError(f"Invalid format: {dct['format']}")
 

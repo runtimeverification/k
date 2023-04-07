@@ -11,7 +11,8 @@ from pyk.kore.rpc import ImpliesResult, JsonRpcClient, KoreClient, State, StuckR
 from pyk.kore.syntax import And, App, Bottom, Module, Top
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Final, Iterator
+    from collections.abc import Iterator
+    from typing import Any, Final
     from unittest.mock import Mock
 
     from pyk.kore.rpc import ExecuteResult
@@ -21,7 +22,7 @@ int_top = Top(INT)
 int_bottom = Bottom(INT)
 
 
-def kore(pattern: Pattern) -> Dict[str, Any]:
+def kore(pattern: Pattern) -> dict[str, Any]:
     return {
         'format': 'KORE',
         'version': 1,
@@ -90,8 +91,8 @@ def test_execute(
     kore_client: KoreClient,
     rpc_client: MockClient,
     pattern: Pattern,
-    params: Dict[str, Any],
-    response: Dict[str, Any],
+    params: dict[str, Any],
+    response: dict[str, Any],
     expected: ExecuteResult,
 ) -> None:
     # Given
@@ -122,8 +123,8 @@ def test_implies(
     rpc_client: MockClient,
     antecedent: Pattern,
     consequent: Pattern,
-    params: Dict[str, Any],
-    response: Dict[str, Any],
+    params: dict[str, Any],
+    response: dict[str, Any],
     expected: ImpliesResult,
 ) -> None:
     # Given
@@ -152,8 +153,8 @@ def test_simplify(
     kore_client: KoreClient,
     rpc_client: MockClient,
     pattern: Pattern,
-    params: Dict[str, Any],
-    response: Dict[str, Any],
+    params: dict[str, Any],
+    response: dict[str, Any],
     expected: Pattern,
 ) -> None:
     # Given
@@ -180,7 +181,7 @@ def test_add_module(
     kore_client: KoreClient,
     rpc_client: MockClient,
     module: Module,
-    params: Dict[str, Any],
+    params: dict[str, Any],
 ) -> None:
     # Given
     rpc_client.assume_response([])

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, Final, Iterable, Optional, Type, TypeVar
+from typing import TYPE_CHECKING
 
 from ..kcfg import KCFG
 from ..prelude.ml import mlAnd
@@ -10,13 +10,15 @@ from ..utils import hash_str, shorten_hashes
 from .proof import Proof, ProofStatus
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable, Mapping
     from pathlib import Path
+    from typing import Any, Final, TypeVar
 
     from ..cterm import CTerm
     from ..kast.inner import KInner
     from ..kcfg import KCFGExplore
 
-T = TypeVar('T', bound='Proof')
+    T = TypeVar('T', bound='Proof')
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -24,7 +26,7 @@ _LOGGER: Final = logging.getLogger(__name__)
 class AGProof(Proof):
     kcfg: KCFG
 
-    def __init__(self, id: str, kcfg: KCFG, proof_dir: Optional[Path] = None):
+    def __init__(self, id: str, kcfg: KCFG, proof_dir: Path | None = None):
         super().__init__(id, proof_dir=proof_dir)
         self.kcfg = kcfg
 
@@ -52,13 +54,13 @@ class AGProof(Proof):
             return ProofStatus.PASSED
 
     @classmethod
-    def from_dict(cls: Type[AGProof], dct: Dict[str, Any], proof_dir: Optional[Path] = None) -> AGProof:
+    def from_dict(cls: type[AGProof], dct: Mapping[str, Any], proof_dir: Path | None = None) -> AGProof:
         cfg = KCFG.from_dict(dct['cfg'])
         id = dct['id']
         return AGProof(id, cfg, proof_dir=proof_dir)
 
     @property
-    def dict(self) -> Dict[str, Any]:
+    def dict(self) -> dict[str, Any]:
         return {'type': 'AGProof', 'id': self.id, 'cfg': self.kcfg.to_dict()}
 
 
@@ -71,10 +73,10 @@ class AGProver:
     def advance_proof(
         self,
         kcfg_explore: KCFGExplore,
-        is_terminal: Optional[Callable[[CTerm], bool]] = None,
-        extract_branches: Optional[Callable[[CTerm], Iterable[KInner]]] = None,
-        max_iterations: Optional[int] = None,
-        execute_depth: Optional[int] = None,
+        is_terminal: Callable[[CTerm], bool] | None = None,
+        extract_branches: Callable[[CTerm], Iterable[KInner]] | None = None,
+        max_iterations: int | None = None,
+        execute_depth: int | None = None,
         cut_point_rules: Iterable[str] = (),
         terminal_rules: Iterable[str] = (),
         simplify_init: bool = True,

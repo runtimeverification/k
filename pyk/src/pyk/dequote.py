@@ -3,7 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Final, Iterable, Iterator
+    from collections.abc import Iterable, Iterator
+    from typing import Final
 
 
 NORMAL = 1

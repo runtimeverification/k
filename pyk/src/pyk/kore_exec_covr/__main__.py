@@ -12,7 +12,7 @@ from .kore_exec_covr import HaskellLogEntry, build_rule_dict, parse_rule_applica
 
 if TYPE_CHECKING:
     from pathlib import Path
-    from typing import Dict, Final
+    from typing import Final
 
 
 _LOG_FORMAT: Final = '%(levelname)s %(name)s - %(message)s'
@@ -33,10 +33,10 @@ def do_analyze(definition_dir: Path, input_file: Path) -> None:
     print(f'Discovering rewrite and simplification rules in {definition_dir}')
     rule_dict = build_rule_dict(definition)
 
-    defined_rewrites: Dict[str, int] = {
+    defined_rewrites: dict[str, int] = {
         key: 0 for key, rule in rule_dict.items() if not 'simplification' in rule.att.atts
     }
-    defined_simplifications: Dict[str, int] = {
+    defined_simplifications: dict[str, int] = {
         key: 0 for key, rule in rule_dict.items() if 'simplification' in rule.att.atts
     }
     print(f'    Found {len(defined_rewrites)} rewrite rules availible for {definition.main_module_name}')

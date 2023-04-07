@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __all__ = ['KompileBackend', 'kompile', 'llvm_kompile', 'haskell_kompile']
 
 import logging
@@ -5,9 +7,13 @@ import shlex
 from enum import Enum
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Final, Iterable, List, Optional, Union
+from typing import TYPE_CHECKING
 
 from ..cli_utils import abs_or_rel_to, check_dir_path, check_file_path, run_process
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+    from typing import Final
 
 _LOGGER: Final = logging.getLogger(__name__)
 
@@ -28,30 +34,30 @@ class LLVMKompileType(Enum):
 
 
 def kompile(
-    main_file: Union[str, Path],
+    main_file: str | Path,
     *,
     command: Iterable[str] = ('kompile',),
-    output_dir: Optional[Union[str, Path]] = None,
-    backend: Optional[Union[str, KompileBackend]] = None,
-    main_module: Optional[str] = None,
-    syntax_module: Optional[str] = None,
-    include_dirs: Iterable[Union[str, Path]] = (),
-    md_selector: Optional[str] = None,
+    output_dir: str | Path | None = None,
+    backend: str | KompileBackend | None = None,
+    main_module: str | None = None,
+    syntax_module: str | None = None,
+    include_dirs: Iterable[str | Path] = (),
+    md_selector: str | None = None,
     hook_namespaces: Iterable[str] = (),
     emit_json: bool = True,
     gen_bison_parser: bool = False,
     debug: bool = False,
-    post_process: Optional[str] = None,
+    post_process: str | None = None,
     # LLVM backend
-    llvm_kompile_type: Optional[LLVMKompileType] = None,
-    opt_level: Optional[int] = None,
+    llvm_kompile_type: LLVMKompileType | None = None,
+    opt_level: int | None = None,
     ccopts: Iterable[str] = (),
     no_llvm_kompile: bool = False,
     enable_search: bool = False,
     # Haskell backend
     concrete_rules: Iterable[str] = (),
     # ---
-    cwd: Optional[Path] = None,
+    cwd: Path | None = None,
     check: bool = True,
 ) -> Path:
     main_file = Path(main_file)
@@ -116,26 +122,26 @@ def kompile(
 
 
 def llvm_kompile(
-    main_file: Union[str, Path],
+    main_file: str | Path,
     *,
     command: Iterable[str] = ('kompile',),
-    output_dir: Optional[Union[str, Path]] = None,
-    main_module: Optional[str] = None,
-    syntax_module: Optional[str] = None,
-    include_dirs: Iterable[Union[str, Path]] = (),
-    md_selector: Optional[str] = None,
+    output_dir: str | Path | None = None,
+    main_module: str | None = None,
+    syntax_module: str | None = None,
+    include_dirs: Iterable[str | Path] = (),
+    md_selector: str | None = None,
     hook_namespaces: Iterable[str] = (),
     emit_json: bool = True,
     gen_bison_parser: bool = False,
     debug: bool = False,
-    post_process: Optional[str] = None,
-    llvm_kompile_type: Optional[LLVMKompileType] = None,
-    opt_level: Optional[int] = None,
+    post_process: str | None = None,
+    llvm_kompile_type: LLVMKompileType | None = None,
+    opt_level: int | None = None,
     ccopts: Iterable[str] = (),
     no_llvm_kompile: bool = False,
     enable_search: bool = False,
     # ---
-    cwd: Optional[Path] = None,
+    cwd: Path | None = None,
     check: bool = True,
 ) -> Path:
     return kompile(
@@ -163,23 +169,23 @@ def llvm_kompile(
 
 
 def haskell_kompile(
-    main_file: Union[str, Path],
+    main_file: str | Path,
     *,
     command: Iterable[str] = ('kompile',),
-    output_dir: Optional[Union[str, Path]] = None,
-    backend: Optional[KompileBackend] = None,
-    main_module: Optional[str] = None,
-    syntax_module: Optional[str] = None,
-    include_dirs: Iterable[Union[str, Path]] = (),
-    md_selector: Optional[str] = None,
+    output_dir: str | Path | None = None,
+    backend: KompileBackend | None = None,
+    main_module: str | None = None,
+    syntax_module: str | None = None,
+    include_dirs: Iterable[str | Path] = (),
+    md_selector: str | None = None,
     hook_namespaces: Iterable[str] = (),
     emit_json: bool = True,
     gen_bison_parser: bool = False,
     debug: bool = False,
-    post_process: Optional[str] = None,
+    post_process: str | None = None,
     concrete_rules: Iterable[str] = (),
     # ---
-    cwd: Optional[Path] = None,
+    cwd: Path | None = None,
     check: bool = True,
 ) -> Path:
     return kompile(
@@ -202,7 +208,7 @@ def haskell_kompile(
     )
 
 
-def _check_backend_param(check: bool, param_name: str, backend: Optional[KompileBackend]) -> None:
+def _check_backend_param(check: bool, param_name: str, backend: KompileBackend | None) -> None:
     if not check:
         raise ValueError(f'Parameter not supported by backend {backend}: {param_name}')
 
@@ -211,24 +217,24 @@ def _build_arg_list(
     *,
     command: Iterable[str],
     main_file: Path,
-    output_dir: Optional[Path],
-    backend: Optional[KompileBackend],
-    main_module: Optional[str],
-    syntax_module: Optional[str],
+    output_dir: Path | None,
+    backend: KompileBackend | None,
+    main_module: str | None,
+    syntax_module: str | None,
     include_dirs: Iterable[Path],
-    md_selector: Optional[str],
+    md_selector: str | None,
     hook_namespaces: Iterable[str],
     emit_json: bool,
     gen_bison_parser: bool,
     debug: bool = False,
-    post_process: Optional[str],
-    llvm_kompile_type: Optional[LLVMKompileType] = None,
-    opt_level: Optional[int],
+    post_process: str | None,
+    llvm_kompile_type: LLVMKompileType | None = None,
+    opt_level: int | None,
     ccopts: Iterable[str],
     no_llvm_kompile: bool,
     enable_search: bool,
     concrete_rules: Iterable[str],
-) -> List[str]:
+) -> list[str]:
     args = list(command) + [str(main_file)]
 
     if output_dir:
