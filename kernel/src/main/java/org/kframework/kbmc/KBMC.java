@@ -4,7 +4,7 @@ package org.kframework.kbmc;
 import org.kframework.RewriterResult;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
-import org.kframework.kprove.ProofDefinitionBuilder;
+import org.kframework.kprovex.ProofDefinitionBuilder;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
 import org.kframework.utils.errorsystem.KEMException;
@@ -38,7 +38,7 @@ public class KBMC {
         }
 
         Tuple2<Definition, Module> compiled = proofDefinitionBuilder
-                .build(options.specFile(files), options.defModule, options.specModule);
+                .build(options.specFile(files), options.specModule, true);
         Rewriter rewriter = rewriterGenerator.apply(compiled._1());
         Module specModule = compiled._2();
 
