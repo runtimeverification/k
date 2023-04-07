@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - set-release-name
 
 jobs:
 
@@ -18,13 +19,13 @@ jobs:
         run: |
           set -x
           release_tag=v$(cat package/version)
-          echo "K Framework Release ${release_tag}"  > release.md
+          echo "(!!! TEST) K Framework Release ${release_tag}"  > release.md
           echo ''                                   >> release.md
           cat k-distribution/INSTALL.md             >> release.md
           gh release create "${release_tag}" \
             --target "${GITHUB_SHA}"         \
-            --prerelease                     \
             --notes-file 'release.md'
+            # --prerelease                     \
 
   nix-flake-release:
     name: 'Nix flake release'
@@ -66,14 +67,14 @@ jobs:
           authToken: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
           skipPush: true
 
-      - name: 'Build and cache K Framework'
-        uses: workflow/nix-shell-action@v3
-        env:
-          GC_DONT_GC: 1
-          CACHIX_AUTH_TOKEN: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
-        with:
-          packages: jq
-          script: |
-            k=$(nix build .#k --json | jq -r '.[].outputs | to_entries[].value')
-            drv=$(nix-store --query --deriver ${k})
-            nix-store --query --requisites --include-outputs ${drv} | cachix push k-framework
+      # - name: 'Build and cache K Framework'
+      #   uses: workflow/nix-shell-action@v3
+      #   env:
+      #     GC_DONT_GC: 1
+      #     CACHIX_AUTH_TOKEN: '${{ secrets.CACHIX_PUBLIC_TOKEN }}'
+      #   with:
+      #     packages: jq
+      #     script: |
+      #       k=$(nix build .#k --json | jq -r '.[].outputs | to_entries[].value')
+      #       drv=$(nix-store --query --deriver ${k})
+      #       nix-store --query --requisites --include-outputs ${drv} | cachix push k-framework
