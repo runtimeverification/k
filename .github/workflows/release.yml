@@ -205,7 +205,7 @@ jobs:
     runs-on: macos-11
     timeout-minutes: 120
     environment: production
-    needs: set-release-id
+    needs: [set-release-id, source-tarball]
     steps:
       - name: Check out code
         uses: actions/checkout@v3
