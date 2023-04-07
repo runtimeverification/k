@@ -31,23 +31,18 @@ jobs:
           submodules: recursive
       - name: 'Create source tarball'
         env:
-          RELEASE_ID: ${{ needs.set-release-id.outputs.release_id }}
+         GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
         run: |
           set -x
+          version=$(cat package/version)
+          tarball=kframework-${version}-src.tar.gz
           find . -name .git | xargs rm -r
           CURDIR=$(pwd)
           cd ..
-          tar czvf kframework-${RELEASE_ID}-src.tar.gz $(basename ${CURDIR})
-          mv kframework-${RELEASE_ID}-src.tar.gz ${CURDIR}/
-      - name: 'Upload Source Tarball to Release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
-        with:
-          asset_content_type: 'application/gzip'
-          asset_name: kframework-${{ needs.set-release-id.outputs.release_id }}-src.tar.gz
-          asset_path: kframework-${{ needs.set-release-id.outputs.release_id }}-src.tar.gz
-          upload_url: ${{ github.event.release.upload_url }}
+          tar czvf ${tarball} $(basename ${CURDIR})
+          mv ${tarball} ${CURDIR}/
+          cd ${CURDIR}
+          gh release upload v${version} ${tarball}
 
   nix-release:
     name: 'Nix Release'
