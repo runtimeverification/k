@@ -31,23 +31,18 @@ jobs:
           submodules: recursive
       - name: 'Create source tarball'
         env:
-          RELEASE_ID: ${{ needs.set-release-id.outputs.release_id }}
+          GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
         run: |
           set -x
+          version=$(cat package/version)
+          tarball=kframework-${version}-src.tar.gz
           find . -name .git | xargs rm -r
           CURDIR=$(pwd)
           cd ..
-          tar czvf kframework-${RELEASE_ID}-src.tar.gz $(basename ${CURDIR})
-          mv kframework-${RELEASE_ID}-src.tar.gz ${CURDIR}/
-      - name: 'Upload Source Tarball to Release'
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
-        with:
-          asset_content_type: 'application/gzip'
-          asset_name: kframework-${{ needs.set-release-id.outputs.release_id }}-src.tar.gz
-          asset_path: kframework-${{ needs.set-release-id.outputs.release_id }}-src.tar.gz
-          upload_url: ${{ github.event.release.upload_url }}
+          tar czvf ${tarball} $(basename ${CURDIR})
+          mv ${tarball} ${CURDIR}/
+          cd ${CURDIR}
+          gh release upload --clobber v${version} ${tarball}
 
   nix-release:
     name: 'Nix Release'
@@ -89,14 +84,13 @@ jobs:
           build-package: package/debian/build-package jammy
           test-package: package/debian/test-package
       - name: 'Upload Package to Release'
-        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
-        with:
-          asset_content_type: 'application/gzip'
-          asset_name: kframework_amd64_ubuntu_jammy.deb
-          asset_path: ./kframework_amd64_ubuntu_jammy.deb
-          upload_url: ${{ github.event.release.upload_url }}
+        run: |
+          set -x
+          version=$(cat package/version)
+          cp kframework_amd64_ubuntu_jammy.deb kframework_${version}_amd64_ubuntu_jammy
+          gh release upload --clobber v${version} kframework_${version}_amd64_ubuntu_jammy.deb
       - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
         env:
@@ -134,14 +128,13 @@ jobs:
           build-package: package/debian/build-package focal
           test-package: package/debian/test-package
       - name: 'Upload Package to Release'
-        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
-        with:
-          asset_content_type: 'application/gzip'
-          asset_name: kframework_amd64_ubuntu_focal.deb
-          asset_path: ./kframework_amd64_ubuntu_focal.deb
-          upload_url: ${{ github.event.release.upload_url }}
+        run: |
+          set -x
+          version=$(cat package/version)
+          cp kframework_amd64_ubuntu_focal.deb kframework_${version}_amd64_ubuntu_focal
+          gh release upload --clobber v${version} kframework_${version}_amd64_ubuntu_focal.deb
       - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
         env:
@@ -179,14 +172,13 @@ jobs:
           build-package: package/debian/build-package bullseye
           test-package: package/debian/test-package
       - name: 'Upload Package to Release'
-        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
-        with:
-          asset_content_type: 'application/gzip'
-          asset_name: kframework_amd64_debian_bullseye.deb
-          asset_path: ./kframework_amd64_debian_bullseye.deb
-          upload_url: ${{ github.event.release.upload_url }}
+        run: |
+          set -x
+          version=$(cat package/version)
+          cp kframework_amd64_debian_bullseye.deb kframework_${version}_amd64_debian_bullseye
+          gh release upload --clobber v${version} kframework_${version}_amd64_debian_bullseye.deb
 
   arch:
     name: 'Arch Linux Package'
@@ -204,21 +196,20 @@ jobs:
           test-package: package/arch/test-package
           pkg-name: kframework_arch_x86_64.pkg.tar.zst
       - name: 'Upload Package to Release'
-        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
-        with:
-          asset_content_type: 'application/gzip'
-          asset_name: kframework_arch_x86_64.pkg.tar.zst
-          asset_path: ./kframework_arch_x86_64.pkg.tar.zst
-          upload_url: ${{ github.event.release.upload_url }}
+        run: |
+          set -x
+          version=$(cat package/version)
+          cp kframework_arch_x86_64.pkg.tar.zst kframework_${version}_arch_x86_64.pkg.tar.zst
+          gh release upload --clobber v${version} kframework_${version}_arch_x86_64.pkg.tar.zst
 
   macos-build:
     name: 'Build MacOS Package'
     runs-on: macos-11
     timeout-minutes: 120
     environment: production
-    needs: set-release-id
+    needs: [set-release-id, source-tarball]
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -352,15 +343,14 @@ jobs:
           kompile test.k --backend llvm
           kompile test.k --backend haskell
 
-      - name: Upload bottle to release
-        uses: actions/upload-release-asset@v1
+      - name: 'Upload Package to Release'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          asset_content_type: 'application/gzip'
-          asset_name: ${{ needs.macos-build.outputs.bottle_path_remote }}
-          asset_path: homebrew-k-old/${{ needs.macos-build.outputs.bottle_path }}
-          upload_url: ${{ github.event.release.upload_url }}
+          GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
+          BOTTLE_NAME: ${{ needs.macos-build.outputs.bottle_path }}
+        run: |
+          set -x
+          version=$(cat package/version)
+          gh release upload --clobber v${version} homebrew-k-old/${BOTTLE_NAME}
 
       - name: Add ssh key
         uses: shimataro/ssh-key-action@v2
