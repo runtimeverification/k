@@ -7,7 +7,8 @@ from .prelude import BOOL, INT, STRING
 from .syntax import DV, App, LeftAssoc
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, Optional, Tuple, TypeVar, Union
+    from collections.abc import Callable
+    from typing import Any, TypeVar
 
     from .syntax import Pattern, Sort
 
@@ -16,7 +17,7 @@ if TYPE_CHECKING:
     V = TypeVar('V')
 
 
-def match_dv(pattern: Pattern, sort: Optional[Sort] = None) -> DV:
+def match_dv(pattern: Pattern, sort: Sort | None = None) -> DV:
     dv = check_type(pattern, DV)
     if sort and dv.sort != sort:
         raise ValueError(f'Expected sort {sort.text}, found: {dv.sort.text}')
@@ -28,7 +29,7 @@ def match_symbol(app: App, symbol: str) -> None:
         raise ValueError(f'Expected symbol {symbol}, found: {app.symbol}')
 
 
-def match_app(pattern: Pattern, symbol: Optional[str] = None) -> App:
+def match_app(pattern: Pattern, symbol: str | None = None) -> App:
     app = check_type(pattern, App)
     if symbol is not None:
         match_symbol(app, symbol)
@@ -43,7 +44,7 @@ def match_left_assoc(pattern: Pattern) -> LeftAssoc:
     return check_type(pattern, LeftAssoc)
 
 
-def match_list(pattern: Pattern) -> Tuple[Pattern, ...]:
+def match_list(pattern: Pattern) -> tuple[Pattern, ...]:
     if type(pattern) is App:
         match_app(pattern, "Lbl'Stop'List")
         return ()
@@ -55,7 +56,7 @@ def match_list(pattern: Pattern) -> Tuple[Pattern, ...]:
     return tuple(elems)
 
 
-def match_set(pattern: Pattern) -> Tuple[Pattern, ...]:
+def match_set(pattern: Pattern) -> tuple[Pattern, ...]:
     if type(pattern) is App:
         match_app(pattern, "Lbl'Stop'Set")
         return ()
@@ -67,7 +68,7 @@ def match_set(pattern: Pattern) -> Tuple[Pattern, ...]:
     return tuple(elems)
 
 
-def match_map(pattern: Pattern, *, cell: Optional[str] = None) -> Tuple[Tuple[Pattern, Pattern], ...]:
+def match_map(pattern: Pattern, *, cell: str | None = None) -> tuple[tuple[Pattern, Pattern], ...]:
     cell = cell or ''
     stop_symbol = f"Lbl'Stop'{cell}Map"
     cons_symbol = f"Lbl'Unds'{cell}Map'Unds'"
@@ -102,7 +103,7 @@ def kore_str(pattern: Pattern) -> str:
 # Higher-order functions
 
 
-def app(symbol: Optional[str] = None) -> Callable[[Pattern], App]:
+def app(symbol: str | None = None) -> Callable[[Pattern], App]:
     def res(pattern: Pattern) -> App:
         return match_app(pattern, symbol)
 
@@ -119,8 +120,8 @@ def arg(symbol: str, /) -> Callable[[App], App]:
     ...
 
 
-def arg(id: Union[int, str]) -> Callable[[App], Union[Pattern, App]]:
-    def res(app: App) -> Union[Pattern, App]:
+def arg(id: int | str) -> Callable[[App], Pattern | App]:
+    def res(app: App) -> Pattern | App:
         if type(id) is int:
             if len(app.args) <= id:
                 raise ValueError('Argument index is out of range')
@@ -137,62 +138,62 @@ def arg(id: Union[int, str]) -> Callable[[App], Union[Pattern, App]]:
 
 
 @overload
-def args() -> Callable[[App], Tuple[()]]:
+def args() -> Callable[[App], tuple[()]]:
     ...
 
 
 @overload
-def args(n1: int, /) -> Callable[[App], Tuple[Pattern]]:
+def args(n1: int, /) -> Callable[[App], tuple[Pattern]]:
     ...
 
 
 @overload
-def args(n1: int, n2: int, /) -> Callable[[App], Tuple[Pattern, Pattern]]:
+def args(n1: int, n2: int, /) -> Callable[[App], tuple[Pattern, Pattern]]:
     ...
 
 
 @overload
-def args(n1: int, n2: int, n3: int, /) -> Callable[[App], Tuple[Pattern, Pattern, Pattern]]:
+def args(n1: int, n2: int, n3: int, /) -> Callable[[App], tuple[Pattern, Pattern, Pattern]]:
     ...
 
 
 @overload
-def args(n1: int, n2: int, n3: int, n4: int, /) -> Callable[[App], Tuple[Pattern, Pattern, Pattern, Pattern]]:
+def args(n1: int, n2: int, n3: int, n4: int, /) -> Callable[[App], tuple[Pattern, Pattern, Pattern, Pattern]]:
     ...
 
 
 @overload
-def args(*ns: int) -> Callable[[App], Tuple[Pattern, ...]]:
+def args(*ns: int) -> Callable[[App], tuple[Pattern, ...]]:
     ...
 
 
 @overload
-def args(s1: str, /) -> Callable[[App], Tuple[App]]:
+def args(s1: str, /) -> Callable[[App], tuple[App]]:
     ...
 
 
 @overload
-def args(s1: str, s2: str, /) -> Callable[[App], Tuple[App, App]]:
+def args(s1: str, s2: str, /) -> Callable[[App], tuple[App, App]]:
     ...
 
 
 @overload
-def args(s1: str, s2: str, s3: str, /) -> Callable[[App], Tuple[App, App, App]]:
+def args(s1: str, s2: str, s3: str, /) -> Callable[[App], tuple[App, App, App]]:
     ...
 
 
 @overload
-def args(s1: str, s2: str, s3: str, s4: str, /) -> Callable[[App], Tuple[App, App, App, App]]:
+def args(s1: str, s2: str, s3: str, s4: str, /) -> Callable[[App], tuple[App, App, App, App]]:
     ...
 
 
 @overload
-def args(*ss: str) -> Callable[[App], Tuple[App, ...]]:
+def args(*ss: str) -> Callable[[App], tuple[App, ...]]:
     ...
 
 
-def args(*ids: Any) -> Callable[[App], Tuple]:
-    def res(app: App) -> Tuple[Pattern, ...]:
+def args(*ids: Any) -> Callable[[App], tuple]:
+    def res(app: App) -> tuple[Pattern, ...]:
         if not ids:
             return ()
 
@@ -200,7 +201,7 @@ def args(*ids: Any) -> Callable[[App], Tuple]:
         if type(fst) is int:
             return tuple(arg(n)(app) for n in ids)
 
-        symbol_match: Dict[str, App] = {}
+        symbol_match: dict[str, App] = {}
         symbols = set(ids)
 
         for _arg in app.args:
@@ -222,15 +223,15 @@ def inj(pattern: Pattern) -> Pattern:
     return arg(0)(app('inj')(pattern))
 
 
-def kore_list_of(item: Callable[[Pattern], T]) -> Callable[[Pattern], Tuple[T, ...]]:
-    def res(pattern: Pattern) -> Tuple[T, ...]:
+def kore_list_of(item: Callable[[Pattern], T]) -> Callable[[Pattern], tuple[T, ...]]:
+    def res(pattern: Pattern) -> tuple[T, ...]:
         return tuple(item(e) for e in match_list(pattern))
 
     return res
 
 
-def kore_set_of(item: Callable[[Pattern], T]) -> Callable[[Pattern], Tuple[T, ...]]:
-    def res(pattern: Pattern) -> Tuple[T, ...]:
+def kore_set_of(item: Callable[[Pattern], T]) -> Callable[[Pattern], tuple[T, ...]]:
+    def res(pattern: Pattern) -> tuple[T, ...]:
         return tuple(item(e) for e in match_set(pattern))
 
     return res
@@ -240,17 +241,17 @@ def kore_map_of(
     key: Callable[[Pattern], K],
     value: Callable[[Pattern], V],
     *,
-    cell: Optional[str] = None,
-) -> Callable[[Pattern], Tuple[Tuple[K, V], ...]]:
-    def res(pattern: Pattern) -> Tuple[Tuple[K, V], ...]:
+    cell: str | None = None,
+) -> Callable[[Pattern], tuple[tuple[K, V], ...]]:
+    def res(pattern: Pattern) -> tuple[tuple[K, V], ...]:
         return tuple((key(k), value(v)) for k, v in match_map(pattern, cell=cell))
 
     return res
 
 
 def case_symbol(
-    *cases: Tuple[str, Callable[[App], T]],
-    default: Optional[Callable[[App], T]] = None,
+    *cases: tuple[str, Callable[[App], T]],
+    default: Callable[[App], T] | None = None,
 ) -> Callable[[Pattern], T]:
     def cond(symbol: str) -> Callable[[App], bool]:
         return lambda app: app.symbol == symbol

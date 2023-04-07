@@ -8,8 +8,9 @@ from typing import TYPE_CHECKING, final
 from pyk.cli_utils import check_dir_path, check_file_path, run_process
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from pathlib import Path
-    from typing import ClassVar, Iterable, List, Optional
+    from typing import ClassVar
 
 
 @final
@@ -25,7 +26,7 @@ class KVersion:
     major: int
     minor: int
     patch: int
-    git: Optional[Git]
+    git: Git | None
 
     _PATTERN_STR: ClassVar = (
         r'v(?P<major>[1-9]+)'
@@ -77,7 +78,7 @@ def k_version() -> KVersion:
     return KVersion.parse(version)
 
 
-def sync_files(source_dir: Path, target_dir: Path, file_names: Iterable[str]) -> List[Path]:
+def sync_files(source_dir: Path, target_dir: Path, file_names: Iterable[str]) -> list[Path]:
     check_dir_path(source_dir)
     shutil.rmtree(target_dir, ignore_errors=True)
     target_dir.mkdir(parents=True)

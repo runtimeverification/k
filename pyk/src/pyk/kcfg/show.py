@@ -13,8 +13,9 @@ from ..prelude.ml import mlAnd
 from .kcfg import KCFG
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
     from pathlib import Path
-    from typing import Callable, Final, Iterable, List, Optional, Tuple
+    from typing import Final
 
     from ..kast import KInner
     from ..kast.outer import KRuleLike
@@ -37,14 +38,14 @@ class KCFGShow:
         cfgid: str,
         cfg: KCFG,
         nodes: Iterable[str] = (),
-        node_deltas: Iterable[Tuple[str, str]] = (),
+        node_deltas: Iterable[tuple[str, str]] = (),
         to_module: bool = False,
         minimize: bool = True,
-        node_printer: Optional[Callable[[CTerm], Iterable[str]]] = None,
+        node_printer: Callable[[CTerm], Iterable[str]] | None = None,
         omit_node_hash: bool = False,
         omit_cells: Iterable[str] = (),
-    ) -> List[str]:
-        res_lines: List[str] = []
+    ) -> list[str]:
+        res_lines: list[str] = []
         res_lines += cfg.pretty(
             self.kprint, minimize=minimize, node_printer=node_printer, omit_node_hash=omit_node_hash
         )

@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import hashlib
 import string
-from typing import TYPE_CHECKING, Generic, Mapping, TypeVar, cast, overload
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Generic, TypeVar, cast, overload
 
 from .dequote import dequoted, enquoted
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, Final, Hashable, Iterable, Iterator, List, Optional, Tuple, Type
+    from collections.abc import Callable, Hashable, Iterable, Iterator
+    from typing import Any, Final
 
     P1 = TypeVar('P1')
     P2 = TypeVar('P2')
@@ -31,8 +33,8 @@ V = TypeVar('V')
 # Based on: https://stackoverflow.com/a/2704866
 # Perhaps one day: https://peps.python.org/pep-0603/
 class FrozenDict(Mapping[K, V]):
-    _dict: Dict[K, V]
-    _hash: Optional[int]
+    _dict: dict[K, V]
+    _hash: int | None
 
     # TODO overload
     # TODO try __init__(self: FrozenDict[str, V], **kwargs: V)
@@ -67,13 +69,13 @@ class FrozenDict(Mapping[K, V]):
 EMPTY_FROZEN_DICT: Final[FrozenDict] = FrozenDict()
 
 
-def check_type(x: Any, typ: Type[T]) -> T:
+def check_type(x: Any, typ: type[T]) -> T:
     if not isinstance(x, typ):
         raise ValueError(f'Expected object of type {typ.__name__}, got: {x}')
     return x
 
 
-def raised(f: Callable, *args: Any, **kwargs: Any) -> Optional[BaseException]:
+def raised(f: Callable, *args: Any, **kwargs: Any) -> BaseException | None:
     try:
         f(*args, **kwargs)
     except BaseException as e:
@@ -82,7 +84,7 @@ def raised(f: Callable, *args: Any, **kwargs: Any) -> Optional[BaseException]:
     return None
 
 
-def merge_with(f: Callable[[V, V], V], d1: Mapping[K, V], d2: Mapping[K, V]) -> Dict[K, V]:
+def merge_with(f: Callable[[V, V], V], d1: Mapping[K, V], d2: Mapping[K, V]) -> dict[K, V]:
     res = dict(d1)
     for k, v2 in d2.items():
         if k in d1:
@@ -93,7 +95,7 @@ def merge_with(f: Callable[[V, V], V], d1: Mapping[K, V], d2: Mapping[K, V]) -> 
     return res
 
 
-def filter_none(mapping: Mapping[K, V]) -> Dict[K, V]:
+def filter_none(mapping: Mapping[K, V]) -> dict[K, V]:
     return {k: v for k, v in mapping.items() if v is not None}
 
 
@@ -120,15 +122,15 @@ def none(x: Any) -> None:
     pass
 
 
-def maybe(f: Callable[[P], R]) -> Callable[[Optional[P]], Optional[R]]:
-    def res(p: Optional[P]) -> Optional[R]:
+def maybe(f: Callable[[P], R]) -> Callable[[P | None], R | None]:
+    def res(p: P | None) -> R | None:
         return f(p) if p is not None else None
 
     return res
 
 
 @overload
-def tuple_of() -> Callable[[Tuple[()]], Tuple[()]]:
+def tuple_of() -> Callable[[tuple[()]], tuple[()]]:
     ...
 
 
@@ -136,7 +138,7 @@ def tuple_of() -> Callable[[Tuple[()]], Tuple[()]]:
 def tuple_of(
     f1: Callable[[P1], R1],
     /,
-) -> Callable[[Tuple[P1]], Tuple[R1]]:
+) -> Callable[[tuple[P1]], tuple[R1]]:
     ...
 
 
@@ -145,7 +147,7 @@ def tuple_of(
     f1: Callable[[P1], R1],
     f2: Callable[[P2], R2],
     /,
-) -> Callable[[Tuple[P1, P2]], Tuple[R1, R2]]:
+) -> Callable[[tuple[P1, P2]], tuple[R1, R2]]:
     ...
 
 
@@ -155,7 +157,7 @@ def tuple_of(
     f2: Callable[[P2], R2],
     f3: Callable[[P3], R3],
     /,
-) -> Callable[[Tuple[P1, P2, P3]], Tuple[R1, R2, R3]]:
+) -> Callable[[tuple[P1, P2, P3]], tuple[R1, R2, R3]]:
     ...
 
 
@@ -166,20 +168,20 @@ def tuple_of(
     f3: Callable[[P3], R3],
     f4: Callable[[P4], R4],
     /,
-) -> Callable[[Tuple[P1, P2, P3, P4]], Tuple[R1, R2, R3, R4]]:
+) -> Callable[[tuple[P1, P2, P3, P4]], tuple[R1, R2, R3, R4]]:
     ...
 
 
 def tuple_of(*args: Callable) -> Callable:
-    def res(t: Tuple) -> Tuple:
-        return tuple(f(x) for f, x in zip(args, t))
+    def res(t: tuple) -> tuple:
+        return tuple(f(x) for f, x in zip(args, t, strict=True))
 
     return res
 
 
 def case(
-    cases: Iterable[Tuple[Callable[[P], bool], Callable[[P], R]]],
-    default: Optional[Callable[[P], R]] = None,
+    cases: Iterable[tuple[Callable[[P], bool], Callable[[P], R]]],
+    default: Callable[[P], R] | None = None,
 ) -> Callable[[P], R]:
     def res(p: P) -> R:
         for cond, then in cases:  # noqa: B905
@@ -197,7 +199,7 @@ def case(
 # Iterables
 
 
-def find_common_items(l1: Iterable[T], l2: Iterable[T]) -> Tuple[List[T], List[T], List[T]]:
+def find_common_items(l1: Iterable[T], l2: Iterable[T]) -> tuple[list[T], list[T], list[T]]:
     common = []
     for i in l1:
         if i in l2:
@@ -252,13 +254,13 @@ def single(iterable: Iterable[T]) -> T:
     return fst
 
 
-def some(iterable: Iterable[T]) -> Optional[T]:
+def some(iterable: Iterable[T]) -> T | None:
     return next(iter(iterable), None)
 
 
 def repeat_last(iterable: Iterable[T]) -> Iterator[T]:
     it = iter(iterable)
-    last: Optional[T] = None
+    last: T | None = None
     while True:
         try:
             last = next(it)
@@ -281,7 +283,7 @@ def nonempty_str(x: Any) -> str:
     return x
 
 
-def add_indent(indent: str, lines: Iterable[str]) -> List[str]:
+def add_indent(indent: str, lines: Iterable[str]) -> list[str]:
     return [indent + line for line in lines]
 
 
@@ -332,7 +334,7 @@ def shorten_hashes(value: Any, left_chars: int = 6, right_chars: int = 6) -> Any
     return result
 
 
-def deconstruct_short_hash(h: str) -> Tuple[str, str]:
+def deconstruct_short_hash(h: str) -> tuple[str, str]:
     x = h.lower()
     if is_hash(x):
         return (x, x)

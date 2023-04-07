@@ -10,14 +10,14 @@ from ..utils import hash_str
 from .project import GitSource, PathSource, Project
 
 if TYPE_CHECKING:
-    from typing import Tuple, Union
+    pass
 
     from .project import Dependency, Source
 
 
 class Package(ABC):
     @staticmethod
-    def create(project_file: Union[str, Path]) -> Package:
+    def create(project_file: str | Path) -> Package:
         project = Project.load(project_file)
         return _RootPackage(project)
 
@@ -53,12 +53,12 @@ class Package(ABC):
         return self.path / 'include'
 
     @cached_property
-    def deps_packages(self) -> Tuple[Package, ...]:
+    def deps_packages(self) -> tuple[Package, ...]:
         return tuple(_DepsPackage(dependency) for dependency in self.project.dependencies)
 
     @cached_property
-    def sub_packages(self) -> Tuple[Package, ...]:
-        res: Tuple[Package, ...] = (self,)
+    def sub_packages(self) -> tuple[Package, ...]:
+        res: tuple[Package, ...] = (self,)
         for package in self.deps_packages:
             res += package.sub_packages
         return res

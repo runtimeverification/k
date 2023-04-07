@@ -1,8 +1,14 @@
+from __future__ import annotations
+
 from contextlib import contextmanager
 from cProfile import Profile
 from pathlib import Path
 from pstats import SortKey, Stats
-from typing import Final, Iterable, Iterator, Optional, Union
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator
+    from typing import Final
 
 TEST_DATA_DIR: Final = (Path(__file__).parent / 'test-data').resolve(strict=True)
 
@@ -18,9 +24,9 @@ class Profiler:
         self,
         file_name: str = 'profile.txt',
         *,
-        sort_keys: Iterable[Union[str, SortKey]] = (),
+        sort_keys: Iterable[str | SortKey] = (),
         patterns: Iterable[str] = (),
-        limit: Optional[Union[int, float]] = None,
+        limit: int | float | None = None,
     ) -> Iterator[None]:
         profile_file = self._tmp_path / file_name
         _sort_keys = tuple(SortKey(key) for key in sort_keys)

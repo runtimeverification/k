@@ -16,7 +16,7 @@ from pyk.prelude.ml import mlAnd, mlEqualsTrue
 from .utils import a, b, c, f, g, h, k, x, y, z
 
 if TYPE_CHECKING:
-    from typing import Final, List, Tuple
+    from typing import Final
 
     from pyk.kast import KInner
 
@@ -38,7 +38,7 @@ def _as_cterm(term: KInner) -> CTerm:
     return CTerm(KApply(KLabel('<generatedTop>', GENERATED_TOP_CELL), term), ())
 
 
-MATCH_TEST_DATA: Final[Tuple[Tuple[KInner, KInner], ...]] = (
+MATCH_TEST_DATA: Final[tuple[tuple[KInner, KInner], ...]] = (
     (a, a),
     (a, x),
     (f(a), x),
@@ -96,7 +96,7 @@ BUILD_RULE_TEST_DATA: Final = (
 
 
 @pytest.mark.parametrize('lhs,rhs,keep_vars,expected', BUILD_RULE_TEST_DATA, ids=count())
-def test_build_rule(lhs: KInner, rhs: KInner, keep_vars: List[str], expected: KInner) -> None:
+def test_build_rule(lhs: KInner, rhs: KInner, keep_vars: list[str], expected: KInner) -> None:
     # When
     rule, _ = build_rule('test-rule', CTerm.from_kast(lhs), CTerm.from_kast(rhs), keep_vars=keep_vars)
     actual = rule.body

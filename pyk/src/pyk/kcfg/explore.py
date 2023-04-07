@@ -14,8 +14,9 @@ from ..utils import shorten_hashes, single
 from .kcfg import KCFG
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from pathlib import Path
-    from typing import Any, Dict, Final, Iterable, List, Optional, Tuple, Union
+    from typing import Any, Final
 
     from ..cli_utils import BugReport
     from ..kast import KInner
@@ -27,28 +28,28 @@ _LOGGER: Final = logging.getLogger(__name__)
 
 class KCFGExplore(ContextManager['KCFGExplore']):
     kprint: KPrint
-    _port: Optional[int]
-    _kore_rpc_command: Union[str, Iterable[str]]
-    _smt_timeout: Optional[int]
-    _smt_retry_limit: Optional[int]
-    _bug_report: Optional[BugReport]
+    _port: int | None
+    _kore_rpc_command: str | Iterable[str]
+    _smt_timeout: int | None
+    _smt_retry_limit: int | None
+    _bug_report: BugReport | None
 
-    _kore_server: Optional[KoreServer]
-    _kore_client: Optional[KoreClient]
+    _kore_server: KoreServer | None
+    _kore_client: KoreClient | None
     _rpc_closed: bool
 
     def __init__(
         self,
         kprint: KPrint,
         *,
-        port: Optional[int] = None,
-        kore_rpc_command: Union[str, Iterable[str]] = 'kore-rpc',
-        smt_timeout: Optional[int] = None,
-        smt_retry_limit: Optional[int] = None,
-        bug_report: Optional[BugReport] = None,
+        port: int | None = None,
+        kore_rpc_command: str | Iterable[str] = 'kore-rpc',
+        smt_timeout: int | None = None,
+        smt_retry_limit: int | None = None,
+        bug_report: BugReport | None = None,
         haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
         haskell_log_entries: Iterable[str] = (),
-        log_axioms_file: Optional[Path] = None,
+        log_axioms_file: Path | None = None,
     ):
         self.kprint = kprint
         self._port = port
@@ -70,7 +71,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         self.close()
 
     @property
-    def _kore_rpc(self) -> Tuple[KoreServer, KoreClient]:
+    def _kore_rpc(self) -> tuple[KoreServer, KoreClient]:
         if self._rpc_closed:
             raise ValueError('RPC server already closed!')
         if not self._kore_server:
@@ -102,10 +103,10 @@ class KCFGExplore(ContextManager['KCFGExplore']):
     def cterm_execute(
         self,
         cterm: CTerm,
-        depth: Optional[int] = None,
-        cut_point_rules: Optional[Iterable[str]] = None,
-        terminal_rules: Optional[Iterable[str]] = None,
-    ) -> Tuple[int, CTerm, List[CTerm]]:
+        depth: int | None = None,
+        cut_point_rules: Iterable[str] | None = None,
+        terminal_rules: Iterable[str] | None = None,
+    ) -> tuple[int, CTerm, list[CTerm]]:
         _LOGGER.debug(f'Executing: {cterm}')
         kore = self.kprint.kast_to_kore(cterm.kast, GENERATED_TOP_CELL)
         _, kore_client = self._kore_rpc
@@ -136,7 +137,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
 
     def cterm_implies(
         self, antecedent: CTerm, consequent: CTerm, bind_consequent_variables: bool = True
-    ) -> Optional[CSubst]:
+    ) -> CSubst | None:
         _LOGGER.debug(f'Checking implication: {antecedent} #Implies {consequent}')
         _consequent = consequent.kast
         if bind_consequent_variables:
@@ -167,7 +168,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         if is_top(ml_subst):
             return CSubst(subst=Subst({}), constraints=ml_preds)
         subst_pattern = mlEquals(KVariable('###VAR'), KVariable('###TERM'))
-        _subst: Dict[str, KInner] = {}
+        _subst: dict[str, KInner] = {}
         for subst_pred in flatten_label('#And', ml_subst):
             m = subst_pattern.match(subst_pred)
             if m is not None and type(m['###VAR']) is KVariable:
@@ -205,7 +206,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
                 cfg.replace_node(node.id, CTerm.from_kast(new_term))
         return cfg
 
-    def step(self, cfgid: str, cfg: KCFG, node_id: str, depth: int = 1) -> Tuple[KCFG, str]:
+    def step(self, cfgid: str, cfg: KCFG, node_id: str, depth: int = 1) -> tuple[KCFG, str]:
         if depth <= 0:
             raise ValueError(f'Expected positive depth, got: {depth}')
         node = cfg.node(node_id)
@@ -236,7 +237,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
 
     def section_edge(
         self, cfgid: str, cfg: KCFG, source_id: str, target_id: str, sections: int = 2
-    ) -> Tuple[KCFG, Tuple[str, ...]]:
+    ) -> tuple[KCFG, tuple[str, ...]]:
         if sections <= 1:
             raise ValueError(f'Cannot section an edge less than twice {cfgid}: {sections}')
         edge = single(cfg.edges(source_id=source_id, target_id=target_id))

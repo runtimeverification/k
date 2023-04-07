@@ -12,8 +12,9 @@ from pyk.ktool.kprove import KProve
 from pyk.ktool.krun import KRun
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator
     from pathlib import Path
-    from typing import ClassVar, Iterable, Iterator, Optional, Union
+    from typing import ClassVar
 
     from pytest import TempPathFactory
 
@@ -30,12 +31,12 @@ class Kompiler:
 
     def __call__(
         self,
-        main_file: Union[str, Path],
+        main_file: str | Path,
         *,
-        backend: Optional[Union[str, KompileBackend]] = None,
-        main_module: Optional[str] = None,
-        syntax_module: Optional[str] = None,
-        include_dirs: Iterable[Union[str, Path]] = (),
+        backend: str | KompileBackend | None = None,
+        main_module: str | None = None,
+        syntax_module: str | None = None,
+        include_dirs: Iterable[str | Path] = (),
     ) -> Path:
         return kompile(
             main_file=main_file,
@@ -49,13 +50,13 @@ class Kompiler:
 
 class KompiledTest:
     KOMPILE_MAIN_FILE: ClassVar[str]
-    KOMPILE_BACKEND: ClassVar[Optional[str]] = None
-    KOMPILE_MAIN_MODULE: ClassVar[Optional[str]] = None
-    KOMPILE_SYNTAX_MODULE: ClassVar[Optional[str]] = None
+    KOMPILE_BACKEND: ClassVar[str | None] = None
+    KOMPILE_MAIN_MODULE: ClassVar[str | None] = None
+    KOMPILE_SYNTAX_MODULE: ClassVar[str | None] = None
     KOMPILE_INCLUDE_DIRS: ClassVar[Iterable[str]] = []
 
     @pytest.fixture(scope='class')
-    def bug_report(self) -> Optional[BugReport]:
+    def bug_report(self) -> BugReport | None:
         return None
         # Use the following line instead to generate bug reports for tests
         # return BugReport(Path('bug_report'))
@@ -103,9 +104,7 @@ class KProveTest(KompiledTest):
     KOMPILE_BACKEND = 'haskell'
 
     @pytest.fixture
-    def kprove(
-        self, definition_dir: Path, tmp_path_factory: TempPathFactory, bug_report: Optional[BugReport]
-    ) -> KProve:
+    def kprove(self, definition_dir: Path, tmp_path_factory: TempPathFactory, bug_report: BugReport | None) -> KProve:
         kprove = KProve(definition_dir, use_directory=tmp_path_factory.mktemp('kprove'), bug_report=bug_report)
         self._update_symbol_table(kprove.symbol_table)
         return kprove

@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import dataclasses
 from abc import ABC
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union, final
+from typing import TYPE_CHECKING, final
 
 import tomli
 
@@ -18,10 +20,14 @@ from ..ktool.kompile import KompileBackend
 from ..utils import FrozenDict, single
 from .config import PROJECT_FILE_NAME
 
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Mapping
+    from typing import Any
+
 
 class Source(ABC):  # noqa: B024
     @staticmethod
-    def from_dict(project_dir: Path, dct: Mapping[str, Any]) -> 'Source':
+    def from_dict(project_dir: Path, dct: Mapping[str, Any]) -> Source:
         if 'path' in dct:
             return PathSource.from_dict(project_dir, dct)
 
@@ -44,7 +50,7 @@ class PathSource(Source):
         object.__setattr__(self, 'path', path)
 
     @staticmethod
-    def from_dict(project_dir: Path, dct: Mapping[str, Any]) -> 'PathSource':
+    def from_dict(project_dir: Path, dct: Mapping[str, Any]) -> PathSource:
         path = abs_or_rel_to(Path(dct['path']), project_dir).resolve()
         return PathSource(path=path)
 
@@ -70,37 +76,37 @@ class Target:
 
     main_file: Path  # relative to source folder
     backend: KompileBackend
-    main_module: Optional[str]
-    syntax_module: Optional[str]
-    md_selector: Optional[str]
-    hook_namespaces: Optional[Tuple[str, ...]]
-    emit_json: Optional[bool]
-    gen_bison_parser: Optional[bool]
+    main_module: str | None
+    syntax_module: str | None
+    md_selector: str | None
+    hook_namespaces: tuple[str, ...] | None
+    emit_json: bool | None
+    gen_bison_parser: bool | None
     # LLVM backend
-    opt_level: Optional[int]
-    ccopts: Optional[Tuple[str, ...]]
-    no_llvm_kompile: Optional[bool]
-    enable_search: Optional[bool]
+    opt_level: int | None
+    ccopts: tuple[str, ...] | None
+    no_llvm_kompile: bool | None
+    enable_search: bool | None
     # Haskell backend
-    concrete_rules: Optional[Tuple[str, ...]]
+    concrete_rules: tuple[str, ...] | None
 
     def __init__(
         self,
         *,
         name: str,
-        main_file: Union[str, Path],
+        main_file: str | Path,
         backend: KompileBackend,
-        main_module: Optional[str] = None,
-        syntax_module: Optional[str] = None,
-        md_selector: Optional[str] = None,
-        hook_namespaces: Optional[Iterable[str]] = None,
-        emit_json: Optional[bool] = None,
-        gen_bison_parser: Optional[bool] = None,
-        opt_level: Optional[int] = None,
-        ccopts: Optional[Iterable[str]] = None,
-        no_llvm_kompile: Optional[bool] = None,
-        enable_search: Optional[bool] = None,
-        concrete_rules: Optional[Iterable[str]],
+        main_module: str | None = None,
+        syntax_module: str | None = None,
+        md_selector: str | None = None,
+        hook_namespaces: Iterable[str] | None = None,
+        emit_json: bool | None = None,
+        gen_bison_parser: bool | None = None,
+        opt_level: int | None = None,
+        ccopts: Iterable[str] | None = None,
+        no_llvm_kompile: bool | None = None,
+        enable_search: bool | None = None,
+        concrete_rules: Iterable[str] | None = None,
     ):
         main_file = Path(main_file)
         check_relative_path(main_file)
@@ -120,7 +126,7 @@ class Target:
         object.__setattr__(self, 'concrete_rules', tuple(concrete_rules) if concrete_rules is not None else None)
 
     @staticmethod
-    def from_dict(name: str, dct: Mapping[str, Any]) -> 'Target':
+    def from_dict(name: str, dct: Mapping[str, Any]) -> Target:
         return Target(
             name=name,
             main_file=Path(dct['main-file']),
@@ -139,7 +145,7 @@ class Target:
         )
 
     @property
-    def dict(self) -> Dict[str, Any]:
+    def dict(self) -> dict[str, Any]:
         dct = dataclasses.asdict(self)
         return {key: value for key, value in dct.items() if value is not None}
 
@@ -152,17 +158,17 @@ class Project:
     version: str
     source_dir: Path
     resources: FrozenDict[str, Path]
-    dependencies: Tuple[Dependency, ...]
-    targets: Tuple[Target, ...]
+    dependencies: tuple[Dependency, ...]
+    targets: tuple[Target, ...]
 
     def __init__(
         self,
         *,
-        path: Union[str, Path],
+        path: str | Path,
         name: str,
         version: str,
-        source_dir: Union[str, Path],
-        resources: Optional[Mapping[str, Union[str, Path]]] = None,
+        source_dir: str | Path,
+        resources: Mapping[str, str | Path] | None = None,
         dependencies: Iterable[Dependency] = (),
         targets: Iterable[Target] = (),
     ):
@@ -187,7 +193,7 @@ class Project:
         object.__setattr__(self, 'targets', tuple(targets))
 
     @staticmethod
-    def load(project_file: Union[str, Path]) -> 'Project':
+    def load(project_file: str | Path) -> Project:
         project_file = Path(project_file)
         check_file_path(project_file)
 
@@ -210,7 +216,7 @@ class Project:
         )
 
     @staticmethod
-    def load_from_dir(project_dir: Union[str, Path]) -> 'Project':
+    def load_from_dir(project_dir: str | Path) -> Project:
         project_dir = Path(project_dir)
         check_dir_path(project_dir)
         return Project.load(project_dir / PROJECT_FILE_NAME)
@@ -220,26 +226,26 @@ class Project:
         return self.path / PROJECT_FILE_NAME
 
     @property
-    def source_files(self) -> List[Path]:
-        res: List[Path] = []
+    def source_files(self) -> list[Path]:
+        res: list[Path] = []
         res.extend(self.source_dir.rglob('*.k'))
         res.extend(self.source_dir.rglob('*.md'))
         return res
 
     @property
-    def source_file_names(self) -> List[str]:
+    def source_file_names(self) -> list[str]:
         return [str(source_file.relative_to(self.source_dir)) for source_file in self.source_files]
 
     @property
-    def resource_files(self) -> Dict[str, List[Path]]:
-        res: Dict[str, List[Path]] = {}
+    def resource_files(self) -> dict[str, list[Path]]:
+        res: dict[str, list[Path]] = {}
         for resource_name, resource_dir in self.resources.items():
             check_dir_path(resource_dir)
             res[resource_name] = [resource_file for resource_file in resource_dir.rglob('*') if resource_file.is_file()]
         return res
 
     @property
-    def resource_file_names(self) -> Dict[str, List[str]]:
+    def resource_file_names(self) -> dict[str, list[str]]:
         return {
             resource_name: [
                 str(resource_file.relative_to(self.resources[resource_name])) for resource_file in resource_files

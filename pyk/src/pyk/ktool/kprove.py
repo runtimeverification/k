@@ -21,8 +21,9 @@ from ..utils import unique
 from .kprint import KPrint
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Mapping
     from subprocess import CompletedProcess
-    from typing import Final, Iterable, List, Mapping, Optional, Tuple
+    from typing import Final
 
     from ..cli_utils import BugReport
     from ..cterm import CTerm
@@ -51,20 +52,20 @@ def _kprove(
     spec_file: Path,
     *,
     command: Iterable[str] = ('kprove',),
-    kompiled_dir: Optional[Path] = None,
-    spec_module_name: Optional[str] = None,
-    md_selector: Optional[str] = None,
+    kompiled_dir: Path | None = None,
+    spec_module_name: str | None = None,
+    md_selector: str | None = None,
     include_dirs: Iterable[Path] = (),
-    emit_json_spec: Optional[Path] = None,
-    output: Optional[KProveOutput] = None,
-    depth: Optional[int] = None,
+    emit_json_spec: Path | None = None,
+    output: KProveOutput | None = None,
+    depth: int | None = None,
     claims: Iterable[str] = (),
-    haskell_backend_command: Optional[str] = None,
+    haskell_backend_command: str | None = None,
     dry_run: bool = False,
     # --
     args: Iterable[str] = (),
     # --
-    env: Optional[Mapping[str, str]] = None,
+    env: Mapping[str, str] | None = None,
     check: bool = True,
 ) -> CompletedProcess:
     check_file_path(spec_file)
@@ -99,17 +100,17 @@ def _kprove(
 
 def _build_arg_list(
     *,
-    kompiled_dir: Optional[Path],
-    spec_module_name: Optional[str],
-    md_selector: Optional[str],
+    kompiled_dir: Path | None,
+    spec_module_name: str | None,
+    md_selector: str | None,
     include_dirs: Iterable[Path],
-    emit_json_spec: Optional[Path],
-    output: Optional[KProveOutput],
-    depth: Optional[int],
+    emit_json_spec: Path | None,
+    output: KProveOutput | None,
+    depth: int | None,
     claims: Iterable[str],
-    haskell_backend_command: Optional[str],
+    haskell_backend_command: str | None,
     dry_run: bool,
-) -> List[str]:
+) -> list[str]:
     args = []
 
     if kompiled_dir:
@@ -147,20 +148,20 @@ def _build_arg_list(
 
 
 class KProve(KPrint):
-    main_file: Optional[Path]
-    prover: List[str]
-    prover_args: List[str]
+    main_file: Path | None
+    prover: list[str]
+    prover_args: list[str]
 
     def __init__(
         self,
         definition_dir: Path,
-        main_file: Optional[Path] = None,
-        use_directory: Optional[Path] = None,
+        main_file: Path | None = None,
+        use_directory: Path | None = None,
         command: str = 'kprove',
-        bug_report: Optional[BugReport] = None,
+        bug_report: BugReport | None = None,
         extra_unparsing_modules: Iterable[KFlatModule] = (),
     ):
-        super(KProve, self).__init__(
+        super().__init__(
             definition_dir,
             use_directory=use_directory,
             bug_report=bug_report,
@@ -175,16 +176,16 @@ class KProve(KPrint):
     def prove(
         self,
         spec_file: Path,
-        spec_module_name: Optional[str] = None,
+        spec_module_name: str | None = None,
         args: Iterable[str] = (),
         include_dirs: Iterable[Path] = (),
-        md_selector: Optional[str] = None,
+        md_selector: str | None = None,
         haskell_args: Iterable[str] = (),
         haskell_log_entries: Iterable[str] = (),
-        log_axioms_file: Optional[Path] = None,
+        log_axioms_file: Path | None = None,
         allow_zero_step: bool = False,
         dry_run: bool = False,
-        depth: Optional[int] = None,
+        depth: int | None = None,
         haskell_log_format: KoreExecLogFormat = KoreExecLogFormat.ONELINE,
         haskell_log_debug_transition: bool = True,
     ) -> KInner:
@@ -243,10 +244,10 @@ class KProve(KPrint):
         args: Iterable[str] = (),
         haskell_args: Iterable[str] = (),
         haskell_log_entries: Iterable[str] = (),
-        log_axioms_file: Optional[Path] = None,
+        log_axioms_file: Path | None = None,
         allow_zero_step: bool = False,
         dry_run: bool = False,
-        depth: Optional[int] = None,
+        depth: int | None = None,
     ) -> KInner:
         claim_path, claim_module_name = self._write_claim_definition(claim, claim_id, lemmas=lemmas)
         return self.prove(
@@ -272,10 +273,10 @@ class KProve(KPrint):
         lemmas: Iterable[KRule] = (),
         args: Iterable[str] = (),
         haskell_args: Iterable[str] = (),
-        log_axioms_file: Optional[Path] = None,
+        log_axioms_file: Path | None = None,
         allow_zero_step: bool = False,
-        depth: Optional[int] = None,
-    ) -> List[KInner]:
+        depth: int | None = None,
+    ) -> list[KInner]:
         claim, var_map = build_claim(claim_id, init_cterm, target_cterm, keep_vars=free_vars(init_cterm.kast))
         next_state = self.prove_claim(
             claim,
@@ -295,12 +296,12 @@ class KProve(KPrint):
     def get_claims(
         self,
         spec_file: Path,
-        spec_module_name: Optional[str] = None,
+        spec_module_name: str | None = None,
         include_dirs: Iterable[Path] = (),
-        md_selector: Optional[str] = None,
-        claim_labels: Optional[Iterable[str]] = None,
-        exclude_claim_labels: Optional[Iterable[str]] = None,
-    ) -> List[KClaim]:
+        md_selector: str | None = None,
+        claim_labels: Iterable[str] | None = None,
+        exclude_claim_labels: Iterable[str] | None = None,
+    ) -> list[KClaim]:
         with NamedTemporaryFile('w', dir=self.use_directory) as ntf:
             self.prove(
                 spec_file,
@@ -324,11 +325,11 @@ class KProve(KPrint):
 
         return [all_claims[cl] for cl in all_claims if cl in claim_labels and cl not in exclude_claim_labels]
 
-    def _write_claim_definition(self, claim: KClaim, claim_id: str, lemmas: Iterable[KRule] = ()) -> Tuple[Path, str]:
+    def _write_claim_definition(self, claim: KClaim, claim_id: str, lemmas: Iterable[KRule] = ()) -> tuple[Path, str]:
         tmp_claim = self.use_directory / (claim_id.lower() + '-spec')
         tmp_module_name = claim_id.upper() + '-SPEC'
         tmp_claim = tmp_claim.with_suffix('.k')
-        sentences: List[KSentence] = []
+        sentences: list[KSentence] = []
         sentences.extend(lemmas)
         sentences.append(claim)
         with open(tmp_claim, 'w') as tc:
@@ -344,9 +345,9 @@ class KProve(KPrint):
         return tmp_claim, tmp_module_name
 
 
-def _get_rule_log(debug_log_file: Path) -> List[List[Tuple[str, bool, int]]]:
+def _get_rule_log(debug_log_file: Path) -> list[list[tuple[str, bool, int]]]:
     # rule_loc, is_success, ellapsed_time_since_start
-    def _get_rule_line(_line: str) -> Optional[Tuple[str, bool, int]]:
+    def _get_rule_line(_line: str) -> tuple[str, bool, int] | None:
         if _line.startswith('kore-exec: ['):
             time = int(_line.split('[')[1].split(']')[0])
             if _line.find('(DebugTransition): after  apply axioms: ') > 0:
@@ -357,14 +358,14 @@ def _get_rule_log(debug_log_file: Path) -> List[List[Tuple[str, bool, int]]]:
                 return (rule_name, False, time)
         return None
 
-    log_lines: List[Tuple[str, bool, int]] = []
-    with open(debug_log_file, 'r') as log_file:
+    log_lines: list[tuple[str, bool, int]] = []
+    with open(debug_log_file) as log_file:
         for line in log_file.read().split('\n'):
             if processed_line := _get_rule_line(line):
                 log_lines.append(processed_line)
 
     # rule_loc, is_success, time_delta
-    axioms: List[List[Tuple[str, bool, int]]] = [[]]
+    axioms: list[list[tuple[str, bool, int]]] = [[]]
     just_applied = True
     prev_time = 0
     for rule_name, is_application, rule_time in log_lines:

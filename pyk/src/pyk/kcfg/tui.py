@@ -16,7 +16,7 @@ from ..prelude.kbool import TRUE
 from ..utils import shorten_hashes, single
 
 if TYPE_CHECKING:
-    from typing import Callable, Iterable, List, Optional, Tuple
+    from collections.abc import Callable, Iterable
 
     from textual.app import ComposeResult
     from textual.events import Click
@@ -58,7 +58,7 @@ class BehaviorView(Widget):
     _kcfg: KCFG
     _kprint: KPrint
     _minimize: bool
-    _node_printer: Optional[Callable[[CTerm], Iterable[str]]]
+    _node_printer: Callable[[CTerm], Iterable[str]] | None
     _nodes: Iterable[GraphChunk]
 
     def __init__(
@@ -66,7 +66,7 @@ class BehaviorView(Widget):
         kcfg: KCFG,
         kprint: KPrint,
         minimize: bool = True,
-        node_printer: Optional[Callable[[CTerm], Iterable[str]]] = None,
+        node_printer: Callable[[CTerm], Iterable[str]] | None = None,
         id: str = '',
     ):
         super().__init__(id=id)
@@ -86,9 +86,9 @@ class BehaviorView(Widget):
 
 class NodeView(Widget):
     _kprint: KPrint
-    _custom_view: Optional[Callable[[KCFGElem], Iterable[str]]]
+    _custom_view: Callable[[KCFGElem], Iterable[str]] | None
 
-    _element: Optional[KCFGElem]
+    _element: KCFGElem | None
 
     _minimize: bool
     _term_on: bool
@@ -103,7 +103,7 @@ class NodeView(Widget):
         term_on: bool = True,
         constraint_on: bool = True,
         custom_on: bool = False,
-        custom_view: Optional[Callable[[KCFGElem], Iterable[str]]] = None,
+        custom_view: Callable[[KCFGElem], Iterable[str]] | None = None,
     ):
         super().__init__(id=id)
         self._kprint = kprint
@@ -169,7 +169,7 @@ class NodeView(Widget):
             else:
                 return c
 
-        def _cterm_text(cterm: CTerm) -> Tuple[str, str]:
+        def _cterm_text(cterm: CTerm) -> tuple[str, str]:
             config = cterm.config
             constraints = map(_boolify, cterm.constraints)
             if self._minimize:
@@ -213,20 +213,20 @@ class KCFGViewer(App):
     _kcfg: KCFG
     _kprint: KPrint
 
-    _node_printer: Optional[Callable[[CTerm], Iterable[str]]]
-    _custom_view: Optional[Callable[[KCFGElem], Iterable[str]]]
+    _node_printer: Callable[[CTerm], Iterable[str]] | None
+    _custom_view: Callable[[KCFGElem], Iterable[str]] | None
 
     _minimize: bool
 
-    _hidden_chunks: List[str]
-    _selected_chunk: Optional[str]
+    _hidden_chunks: list[str]
+    _selected_chunk: str | None
 
     def __init__(
         self,
         kcfg: KCFG,
         kprint: KPrint,
-        node_printer: Optional[Callable[[CTerm], Iterable[str]]] = None,
-        custom_view: Optional[Callable[[KCFGElem], Iterable[str]]] = None,
+        node_printer: Callable[[CTerm], Iterable[str]] | None = None,
+        custom_view: Callable[[KCFGElem], Iterable[str]] | None = None,
         minimize: bool = True,
     ) -> None:
         super().__init__()
