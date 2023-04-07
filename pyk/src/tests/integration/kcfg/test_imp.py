@@ -274,9 +274,8 @@ class TestImpProof(KCFGExploreTest):
         assert len(claims) == 1
 
         kcfg = KCFG.from_claim(kprove.definition, claims[0])
-        prover = AGProver(AGProof(kcfg))
+        prover = AGProver(AGProof(f'{spec_module}.{claim_id}', kcfg))
         kcfg = prover.advance_proof(
-            f'{spec_module}.{claim_id}',
             kcfg_explore,
             max_iterations=max_iterations,
             execute_depth=max_depth,
