@@ -4,7 +4,7 @@ package org.kframework.kbmc;
 import org.kframework.RewriterResult;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
-import org.kframework.kprovex.ProofDefinitionBuilder;
+import org.kframework.kprove.ProofDefinitionBuilder;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
 import org.kframework.utils.errorsystem.KEMException;

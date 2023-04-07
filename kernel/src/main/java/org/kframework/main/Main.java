@@ -182,7 +182,7 @@ public class Main {
                     modules = KSearchPatternFrontEnd.getModules();
                     break;
                 case "-kprove":
-                    modules.addAll(org.kframework.kprovex.KProveFrontEnd.getModules());
+                    modules.addAll(org.kframework.kprove.KProveFrontEnd.getModules());
                     for (KModule kModule : kModules) {
                         List<Module> ms = kModule.getKProveModules();
                         if (ms != null) {

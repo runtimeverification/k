@@ -1,5 +1,5 @@
 // Copyright (c) K Team. All Rights Reserved.
-package org.kframework.kprovex;
+package org.kframework.kprove;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;

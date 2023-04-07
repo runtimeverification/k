@@ -21,7 +21,7 @@ import org.kframework.kore.KVariable;
 import org.kframework.kore.Sort;
 import org.kframework.kore.TransformK;
 import org.kframework.kore.VisitK;
-import org.kframework.kprovex.KProveOptions;
+import org.kframework.kprove.KProveOptions;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Main;
 import org.kframework.main.Tool;

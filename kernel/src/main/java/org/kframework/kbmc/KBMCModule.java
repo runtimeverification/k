@@ -5,7 +5,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.multibindings.Multibinder;
 import org.kframework.kompile.BackendModule;
-import org.kframework.kprovex.RewriterModule;
+import org.kframework.kprove.RewriterModule;
 import org.kframework.main.FrontEnd;
 import org.kframework.main.GlobalOptions;
 import org.kframework.main.Tool;
