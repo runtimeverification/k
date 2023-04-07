@@ -61,21 +61,8 @@ public class KProveOptions {
     @Parameter(names={"--spec-module", "-sm"}, description="Name of module containing specification to prove")
     public String specModule;
 
-    @Parameter(names={"--def-module", "-m"}, description="Name of module containing definition to prove under")
-    public String defModule;
-
-    @Parameter(names={"--save-proof-definition-to"}, description="Save the binary version of full definition used " +
-            "for proving this spec. This can be used by other external tools, e.g., kast. The parameter should be " +
-            "the path to a directory not containing other -kompiled directories. A new directory named " +
-            "proof-spec-kompiled will be created in that directory, containing the compiled definition.")
-    public String saveProofDefinitionTo = null;
-
     @Parameter(names="--depth", description="The maximum number of computational steps to prove")
     public Integer depth;
-
-    @Parameter(names="--concrete-rules", description="List of rule labels to be considered concrete, in addition to " +
-            "rules marked with `[concrete]` attribute")
-    public List<String> extraConcreteRuleLabels = Collections.emptyList();
 
     @Parameter(names="--trusted", description="Mark this comma separated list of claims as [trusted]")
     public List<String> trusted = null;
