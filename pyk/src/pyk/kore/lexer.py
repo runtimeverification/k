@@ -254,39 +254,3 @@ def kore_lexer(it: Iterable[str]) -> Iterator[KoreToken]:
                 yield token
         except StopIteration as err:
             raise ValueError('Unexpected end of file') from err
-
-
-def check_id(value: str) -> None:
-    lexer = kore_lexer(value)
-    token = next(lexer)
-    if token.type == TokenType.ID:
-        token = next(lexer)
-        if token.type == TokenType.EOF:
-            return
-
-    raise ValueError(f'Expected identifier, found: {value}')
-
-
-def check_symbol_id(value: str) -> None:
-    if value in _ML_SYMBOLS:  # enables uniform handling of app and ml connectives
-        return
-
-    lexer = kore_lexer(value)
-    token = next(lexer)
-    if token.type == TokenType.ID or token.type == TokenType.SYMBOL_ID:
-        token = next(lexer)
-        if token.type == TokenType.EOF:
-            return
-
-    raise ValueError(f'Expected symbol identifier, found: {value}')
-
-
-def check_set_var_id(value: str) -> None:
-    lexer = kore_lexer(value)
-    token = next(lexer)
-    if token.type == TokenType.SET_VAR_ID:
-        token = next(lexer)
-        if token.type == TokenType.EOF:
-            return
-
-    raise ValueError(f'Expected set variable identifier, found: {value}')
