@@ -88,7 +88,7 @@ jobs:
         run: |
           set -x
           version=$(cat package/version)
-          cp kframework_amd64_ubuntu_jammy.deb kframework_${version}_amd64_ubuntu_jammy
+          cp kframework_amd64_ubuntu_jammy.deb kframework_${version}_amd64_ubuntu_jammy.deb
           gh release upload --repo runtimeverification/k --clobber v${version} kframework_${version}_amd64_ubuntu_jammy.deb
       - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
@@ -132,7 +132,7 @@ jobs:
         run: |
           set -x
           version=$(cat package/version)
-          cp kframework_amd64_ubuntu_focal.deb kframework_${version}_amd64_ubuntu_focal
+          cp kframework_amd64_ubuntu_focal.deb kframework_${version}_amd64_ubuntu_focal.deb
           gh release upload --repo runtimeverification/k --clobber v${version} kframework_${version}_amd64_ubuntu_focal.deb
       - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
@@ -176,7 +176,7 @@ jobs:
         run: |
           set -x
           version=$(cat package/version)
-          cp kframework_amd64_debian_bullseye.deb kframework_${version}_amd64_debian_bullseye
+          cp kframework_amd64_debian_bullseye.deb kframework_${version}_amd64_debian_bullseye.deb
           gh release upload --repo runtimeverification/k --clobber v${version} kframework_${version}_amd64_debian_bullseye.deb
 
   arch:
