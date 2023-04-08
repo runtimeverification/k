@@ -86,9 +86,10 @@ jobs:
       - name: 'Install K'
         run: |
           K_VERSION=$(cat deps/k_release)
-          wget https://github.com/runtimeverification/k/releases/download/v${K_VERSION}/kframework_amd64_ubuntu_jammy.deb
+          DEB_PACKAGE_NAME=kframework_${K_VERSION}_amd64_ubuntu_jammy.deb
+          wget https://github.com/runtimeverification/k/releases/download/v${K_VERSION}/${DEB_PACKAGE_NAME}
           sudo apt-get update
-          sudo apt-get -y install graphviz ./kframework_amd64_ubuntu_jammy.deb
+          sudo apt-get -y install graphviz ./${DEB_PACKAGE_NAME}
           kompile --version
       - name: 'Run integration tests'
         run: make cov-integration TEST_ARGS='-n8'
