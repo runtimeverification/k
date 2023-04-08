@@ -292,7 +292,7 @@ jobs:
     environment: production
     needs: [macos-build, set-release-id]
     steps:
-      - name: Check out matching homebrew repo branch
+      - name: 'Check out matching homebrew repo branch'
         uses: actions/checkout@v3
         id: checkout
         with:
@@ -302,7 +302,7 @@ jobs:
           persist-credentials: false
         continue-on-error: true
 
-      - name: Check out homebrew repo master branch
+      - name: 'Check out homebrew repo master branch'
         uses: actions/checkout@v3
         if: ${{ steps.checkout.outcome == 'failure' }}
         with:
@@ -310,13 +310,13 @@ jobs:
           path: homebrew-k
           persist-credentials: false
 
-      - name: Download bottle
+      - name: 'Download bottle'
         uses: actions/download-artifact@v2
         with:
           name: homebrew
           path: homebrew-k-old
 
-      - name: Test brew bottle
+      - name: 'Test brew bottle'
         id: test
         env:
           # github actions sets the JAVA_HOME variable to Java 8 explicitly for
@@ -342,22 +342,27 @@ jobs:
           kompile test.k --backend llvm
           kompile test.k --backend haskell
 
+      - name: 'Check out code'
+        uses: actions/checkout@v3
+        with:
+          path: k-homebrew-checkout
+
       - name: 'Upload Package to Release'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
           BOTTLE_NAME: ${{ needs.macos-build.outputs.bottle_path }}
         run: |
           set -x
-          version=$(cat package/version)
+          version=$(cat k-homebrew-checkout/package/version)
           gh release upload --repo runtimeverification/k --clobber v${version} homebrew-k-old/${BOTTLE_NAME}
 
-      - name: Add ssh key
+      - name: 'Add ssh key'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.HOMEBREW_SSH_KEY }}
           known_hosts: ${{ secrets.KNOWN_HOSTS_GITHUB_COM }}
 
-      - name: Commit changes
+      - name: 'Commit changes'
         run: |
           cp homebrew-k-old/Formula/kframework.rb homebrew-k/Formula/kframework.rb
           cd homebrew-k
@@ -365,7 +370,7 @@ jobs:
           git remote set-url origin git@github.com:kframework/homebrew-k.git
           git push origin master
 
-      - name: Delete Release
+      - name: 'Delete Release'
         if: failure()
         uses: actions/github-script@v4
         with:
