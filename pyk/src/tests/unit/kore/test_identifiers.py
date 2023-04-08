@@ -16,7 +16,7 @@ BASE_TEST_DATA = (
     ("a'", True),
 )
 
-ID_TEST_DATA = BASE_TEST_DATA + (('sort', False),)
+ID_TEST_DATA = BASE_TEST_DATA
 
 
 @pytest.mark.parametrize('s,expected', ID_TEST_DATA, ids=[s for s, _ in ID_TEST_DATA])

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from dataclasses import dataclass
@@ -10,7 +11,6 @@ from typing import TYPE_CHECKING, final
 
 from ..dequote import enquoted
 from ..utils import FrozenDict, check_type
-from .lexer import check_id, check_set_var_id, check_symbol_id
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Mapping
@@ -28,9 +28,17 @@ if TYPE_CHECKING:
 class Id:
     value: str
 
+    _PATTERN_STR: ClassVar = "[a-zA-Z][0-9a-zA-Z'-]*"
+    _PATTERN: ClassVar = re.compile(_PATTERN_STR)
+
     def __init__(self, value: str):
-        check_id(value)
+        self._check(value)
         object.__setattr__(self, 'value', value)
+
+    @staticmethod
+    def _check(value: str) -> None:
+        if not Id._PATTERN.fullmatch(value):
+            raise ValueError(f'Expected identifier, got: {value}')
 
 
 @final
@@ -38,9 +46,16 @@ class Id:
 class SymbolId:
     value: str
 
+    _PATTERN: ClassVar = re.compile(fr'\\?{Id._PATTERN_STR}')
+
     def __init__(self, value: str):
-        check_symbol_id(value)
+        self._check(value)
         object.__setattr__(self, 'value', value)
+
+    @staticmethod
+    def _check(value: str) -> None:
+        if not SymbolId._PATTERN.fullmatch(value):
+            raise ValueError(f'Expected symbol identifier, got: {value}')
 
 
 @final
@@ -48,9 +63,16 @@ class SymbolId:
 class SetVarId:
     value: str
 
+    _PATTERN: ClassVar = re.compile(f'@{Id._PATTERN_STR}')
+
     def __init__(self, value: str):
-        check_set_var_id(value)
+        self._check(value)
         object.__setattr__(self, 'value', value)
+
+    @staticmethod
+    def _check(value: str) -> None:
+        if not SetVarId._PATTERN.fullmatch(value):
+            raise ValueError(f'Expected set variable identifier, got: {value}')
 
 
 # TODO Constructor @overloads
