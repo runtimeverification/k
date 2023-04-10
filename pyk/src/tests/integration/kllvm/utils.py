@@ -4,7 +4,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pyk.kllvm.runtime import compile_runtime, import_runtime
+from pyk.kllvm.compiler import compile_runtime
+from pyk.kllvm.importer import import_runtime
 
 from ..utils import KompiledTest
 
