@@ -2,20 +2,48 @@ from __future__ import annotations
 
 import logging
 import sys
+import sysconfig
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ..cli_utils import check_dir_path, check_file_path, run_process
-from .utils import PYTHON_EXTENSION_SUFFIX, import_from_file
 
 if TYPE_CHECKING:
-    from types import ModuleType
     from typing import Final
-
-    from .ast import Pattern
 
 
 _LOGGER: Final = logging.getLogger(__name__)
+PYTHON_EXTENSION_SUFFIX: Final = sysconfig.get_config_var('EXT_SUFFIX')
+
+
+# ------
+# _kllvm
+# ------
+
+KLLVM_MODULE_NAME: Final = '_kllvm'
+KLLVM_MODULE_FILE_NAME: Final = f'{KLLVM_MODULE_NAME}{PYTHON_EXTENSION_SUFFIX}'
+
+
+def compile_kllvm(target_dir: str | Path, *, verbose: bool = False) -> Path:
+    target_dir = Path(target_dir).resolve()
+    check_dir_path(target_dir)
+
+    module_file = target_dir / KLLVM_MODULE_FILE_NAME
+
+    args = ['llvm-kompile', 'pythonast', '--python', sys.executable, '--python-output-dir', str(target_dir)]
+    if verbose:
+        args.append('--verbose')
+
+    _LOGGER.info(f'Compiling pythonast extension: {module_file.name}')
+    run_process(args, logger=_LOGGER)
+
+    assert module_file.exists()
+    return module_file
+
+
+# --------------
+# _kllvm_runtime
+# --------------
 
 RUNTIME_MODULE_NAME: Final = '_kllvm_runtime'
 RUNTIME_MODULE_FILE_NAME: Final = f'{RUNTIME_MODULE_NAME}{PYTHON_EXTENSION_SUFFIX}'
@@ -42,34 +70,3 @@ def compile_runtime(kompiled_dir: str | Path, *, verbose: bool = False) -> Path:
 
     assert module_file.exists()
     return module_file
-
-
-def import_runtime(kompiled_dir: str | Path) -> ModuleType:
-    kompiled_dir = Path(kompiled_dir)
-    check_dir_path(kompiled_dir)
-    module_file = kompiled_dir / RUNTIME_MODULE_FILE_NAME
-    runtime = import_from_file(RUNTIME_MODULE_NAME, module_file)
-    runtime.Term = _make_term_class(runtime)  # type: ignore
-    return runtime
-
-
-def _make_term_class(mod: ModuleType) -> type:
-    class Term:
-        def __init__(self, pattern: Pattern):
-            self._block = mod.InternalTerm(pattern)
-
-        def __str__(self) -> str:
-            return str(self._block)
-
-        def step(self, n: int = 1) -> None:
-            self._block = self._block.step(n)
-
-        def run(self) -> None:
-            self.step(-1)
-
-        def copy(self) -> Term:
-            other = self
-            other._block = self._block.step(0)
-            return other
-
-    return Term
