@@ -1344,20 +1344,39 @@ warning if it encounters such a claim.
 
 ### `concrete` and `symbolic` attributes (Haskell backend)
 
-Sometimes you only want a rule to apply if some or all arguments are concrete
-(not symbolic). This is done with the `concrete` attribute. Conversely, the
-`symbolic` attribute will allow a rule to apply only when some arguments are not
-concrete. These attributes should only be given with the `simplification`
-attribute.
+Users can control the application of `simplification` rules using the `concrete`
+and the `symbolic` attributes by specifying the type of patterns the rule's
+arguments are to match.
 
-For example, the following will only re-associate terms when all arguments
+A concrete pattern is a pattern which does not contain variables or unevaluated
+functions, otherwise the pattern is symbolic.
+
+The semantics of the two attributes is defined as follows:
+- If a simplification rule is marked `concrete`, then _all_ arguments must be
+concrete for the rule to match.
+- If a simplification rule is marked `symbolic`, then the rule will match only
+if _at least one_ argument is symbolic.
+- The following syntax `concrete(<variables>)` (resp. `symbolic(<variables>)`),
+where `<variables>` is a list of variable names separated by commas, can be used
+to specify the exact arguments the user expects to match concrete (resp. symbolic)
+patterns.
+
+For example, the following will only match when all arguments
 are concrete:
 
 ```k
 rule X +Int (Y +Int Z) => (X +Int Y) +Int Z [simplification, concrete]
 ```
 
-These rules will re-associate and commute terms to combine concrete arguments:
+Conversely, the following will only match when _some_ arguments
+are symbolic:
+
+```k
+rule X +Int (Y +Int Z) => (X +Int Y) +Int Z [simplification, symbolic]
+```
+
+In practice, the following rules will re-associate and commute terms to combine
+concrete arguments:
 
 ```k
 rule (A +Int Y) +Int Z => A +Int (Y +Int Z)
