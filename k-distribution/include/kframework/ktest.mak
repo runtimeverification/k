@@ -14,22 +14,16 @@ KRUN=${K_BIN}/krun
 KDEP=${K_BIN}/kdep
 # and kprove
 KPROVE=${K_BIN}/kprove
-# and kbmc
-KBMC=${K_BIN}/kbmc
 # and kast
 KAST=${K_BIN}/kast
 # and kparse
 KPARSE=${K_BIN}/kparse
-# and keq
-KEQ=${K_BIN}/keq
 # and kserver
 KSERVER=${K_BIN}/kserver
 # and ksearch
 KSEARCH:=$(KRUN) --search-all
 # and kprint
 KPRINT=${K_BIN}/kprint
-# and krun-legacy
-KRUN_LEGACY=${K_BIN}/krun-legacy
 # and llvm-krun
 LLVM_KRUN=${K_BIN}/llvm-krun
 # path relative to current definition of test programs
@@ -43,7 +37,6 @@ RESULTDIR?=$(TESTDIR)
 # all tests in test directory with matching file extension
 TESTS?=$(wildcard $(TESTDIR)/krun.nopgm) $(wildcard $(TESTDIR)/*.$(EXT))
 PROOF_TESTS?=$(wildcard $(TESTDIR)/*-spec.k) $(wildcard $(TESTDIR)/*-spec.md)
-BMC_TESTS?=$(wildcard $(TESTDIR)/*-spec-bmc.k) $(wildcard $(TESTDIR)/*-spec-bmc.md)
 SEARCH_TESTS?=$(wildcard $(TESTDIR)/*.$(EXT).search)
 STRAT_TESTS?=$(wildcard $(TESTDIR)/*.strat)
 KAST_TESTS?=$(wildcard $(TESTDIR)/*.kast)
@@ -73,10 +66,10 @@ PIPEFAIL?=set -o pipefail;
 # null by default, add CONSIDER_PROVER_ERRORS=2>&1 to the local Makefile to test kprove output
 #CONSIDER_PROVER_ERRORS=
 
-.PHONY: kompile krun all clean update-results proofs bmc
+.PHONY: kompile krun all clean update-results proofs
 
 # run all tests
-all: kompile krun proofs bmc searches strat kast kast-bison kparse
+all: kompile krun proofs searches strat kast kast-bison kparse
 
 # run only kompile
 kompile: $(KOMPILED_DIR)/timestamp
@@ -87,8 +80,6 @@ $(KOMPILED_DIR)/timestamp: $(DEF).$(SOURCE_EXT)
 krun: $(TESTS)
 
 proofs: $(PROOF_TESTS)
-
-bmc: $(BMC_TESTS)
 
 searches: $(SEARCH_TESTS)
 
@@ -135,13 +126,6 @@ else
 	$(KPROVE) $@ $(KPROVE_FLAGS) $(DEBUG) -d $(DEFDIR) $(CONSIDER_ERRORS) $(REMOVE_PATHS) $(CHECK) $(RESULTDIR)/$(notdir $@).out
 endif
 
-%-spec-bmc.k %-spec-bmc.md: kompile
-ifeq ($(TESTDIR),$(RESULTDIR))
-	$(KBMC) --raw-spec $@ $(KBMC_FLAGS) $(DEBUG) -d $(DEFDIR) --depth 20 $(CHECK) $@.out
-else
-	$(KBMC) --raw-spec $@ $(KBMC_FLAGS) $(DEBUG) -d $(DEFDIR) --depth 20 $(CHECK) $(RESULTDIR)/$(notdir $@).out
-endif
-
 %.search: kompile
 ifeq ($(TESTDIR),$(RESULTDIR))
 	$(PIPEFAIL) $(KSEARCH) $@ $(KSEARCH_FLAGS) $(DEBUG) -d $(DEFDIR) $(CHECK) $@.out
@@ -179,7 +163,7 @@ else
 endif
 
 clean:
-	rm -rf $(KOMPILED_DIR) .depend-tmp .depend .kompile-* .krun-* .kprove-* .kbmc-* kore-exec.tar.gz
+	rm -rf $(KOMPILED_DIR) .depend-tmp .depend .kompile-* .krun-* .kprove-* kore-exec.tar.gz
 
 .depend:
 	@$(KDEP) $(KDEP_FLAGS) $(DEF).$(SOURCE_EXT) > .depend-tmp

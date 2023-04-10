@@ -80,9 +80,9 @@ public class ParserUtils {
         def.setMainSyntaxModule(mainModule);
 
         Context context = new Context();
-        new CollectProductionsVisitor(false, context).visit(def);
+        new CollectProductionsVisitor(context).visit(def);
 
-        KILtoKORE kilToKore = new KILtoKORE(context);
+        KILtoKORE kilToKore = new KILtoKORE(context, false, false);
         return kilToKore.apply(def).getModule(mainModule).get();
     }
 
@@ -190,7 +190,6 @@ public class ParserUtils {
             File currentDirectory,
             List<File> lookupDirectories,
             Set<File> requiredFiles,
-            boolean kore,
             boolean preprocess,
             boolean leftAssoc) {
 
@@ -200,7 +199,7 @@ public class ParserUtils {
         Definition def = new Definition();
         def.setItems((List<DefinitionItem>) (Object) kilModules);
 
-        new CollectProductionsVisitor(kore, context).visit(def);
+        new CollectProductionsVisitor(context).visit(def);
 
         // Tuple4 of moduleName, Source, Location, digest
         Map<String, List<Tuple4<String, Source, Location, String>>> groupedModules =
@@ -247,7 +246,7 @@ public class ParserUtils {
           System.out.println(def.toString());
         }
 
-        KILtoKORE kilToKore = new KILtoKORE(context, false, kore, leftAssoc);
+        KILtoKORE kilToKore = new KILtoKORE(context, false, leftAssoc);
         // Order modules by name to stabilize the error message for circular imports
         java.util.List<FlatModule> flatModules = kilModules.stream().map(kilToKore::toFlatModule).sorted(Comparator.comparing(FlatModule::name)).collect(Collectors.toList());
         Set<Module> finalModules = mutable(FlatModule.toModules(immutable(flatModules), immutable(previousModules)));
@@ -267,10 +266,9 @@ public class ParserUtils {
             Source source,
             File currentDirectory,
             List<File> lookupDirectories,
-            boolean kore,
             boolean preprocess,
             boolean leftAssoc) {
-        Set<Module> modules = loadModules(previousModules, new Context(), definitionText, source, currentDirectory, lookupDirectories, new HashSet<>(), kore, preprocess, leftAssoc);
+        Set<Module> modules = loadModules(previousModules, new Context(), definitionText, source, currentDirectory, lookupDirectories, new HashSet<>(), preprocess, leftAssoc);
         Set<Module> allModules = new HashSet<>(modules);
         allModules.addAll(previousModules);
         Module mainModule = getMainModule(mainModuleName, allModules);
@@ -285,7 +283,6 @@ public class ParserUtils {
             File currentDirectory,
             List<File> lookupDirectories,
             boolean autoImportDomains,
-            boolean kore,
             boolean preprocess,
             boolean leftAssoc) {
         String strSource = source.getAbsolutePath();
@@ -296,7 +293,7 @@ public class ParserUtils {
         }
         return loadDefinition(mainModuleName, syntaxModuleName, definitionText,
                 Source.apply(strSource),
-                currentDirectory, lookupDirectories, autoImportDomains, kore, preprocess, leftAssoc);
+                currentDirectory, lookupDirectories, autoImportDomains, preprocess, leftAssoc);
     }
 
     public org.kframework.definition.Definition loadDefinition(
@@ -307,15 +304,14 @@ public class ParserUtils {
             File currentDirectory,
             List<File> lookupDirectories,
             boolean autoImportDomains,
-            boolean kore,
             boolean preprocess,
             boolean leftAssoc) {
         Set<Module> previousModules = new HashSet<>();
         Set<File> requiredFiles = new HashSet<>();
         Context context = new Context();
         if (autoImportDomains)
-            previousModules.addAll(loadModules(new HashSet<>(), context, Kompile.REQUIRE_PRELUDE_K, Source.apply("Auto imported prelude"), currentDirectory, lookupDirectories, requiredFiles, kore, preprocess, leftAssoc));
-        Set<Module> modules = loadModules(previousModules, context, definitionText, source, currentDirectory, lookupDirectories, requiredFiles, kore, preprocess, leftAssoc);
+            previousModules.addAll(loadModules(new HashSet<>(), context, Kompile.REQUIRE_PRELUDE_K, Source.apply("Auto imported prelude"), currentDirectory, lookupDirectories, requiredFiles, preprocess, leftAssoc));
+        Set<Module> modules = loadModules(previousModules, context, definitionText, source, currentDirectory, lookupDirectories, requiredFiles, preprocess, leftAssoc);
         if (preprocess) {
           System.exit(0);
         }
