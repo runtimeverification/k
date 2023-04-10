@@ -1218,9 +1218,17 @@ public class ModuleToKORE {
                 sb.append("\n      ");
             }
             sb.append(String.format("\\and{%s} (\n      ", topCellSortStr));
-            convertSideCondition(ensures, topCellSortStr, sb);
-            sb.append(", ");
-            convert(right, sb);
+
+            if (options.disableKoreAntileft) {
+                convert(right, sb);
+                sb.append(", ");
+                convertSideCondition(ensures, topCellSortStr, sb);
+            } else {
+                convertSideCondition(ensures, topCellSortStr, sb);
+                sb.append(", ");
+                convert(right, sb);
+            }
+
             sb.append(')');
             for (KVariable ignored : existentials) {
                 sb.append(')');
@@ -1360,9 +1368,9 @@ public class ModuleToKORE {
                                             String previousGroupName, StringBuilder sb)
     {
         sb.append(String.format("  \\and{%s} (\n        ", topCellSortStr));
-        convertSideCondition(requires, topCellSortStr, sb);
-        sb.append(",\n        ");
         convert(left, sb);
+        sb.append(",\n        ");
+        convertSideCondition(requires, topCellSortStr, sb);
         sb.append(")");
     }
 
