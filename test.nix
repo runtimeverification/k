@@ -48,7 +48,6 @@ in stdenv.mkDerivation {
     "KRUN=krun"
     "KDEP=kdep"
     "KPROVE=kprove"
-    "KBMC=kbmc"
     "KAST=kast"
     "KPRINT=kprint"
     "KSERVER=kserver"
