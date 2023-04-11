@@ -7,7 +7,6 @@ import pytest
 
 from pyk.cterm import CSubst, CTerm
 from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
-from pyk.kast.manip import get_cell
 from pyk.kcfg import KCFG
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue
@@ -111,6 +110,7 @@ APR_PROVE_TEST_DATA: Iterable[tuple[str, str, str, str, int | None, int | None, 
     ('imp-simple-addition-1', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'addition-1', 2, 1, []),
     ('imp-simple-addition-2', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'addition-2', 2, 7, []),
     ('imp-simple-addition-var', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'addition-var', 2, 1, []),
+    ('pre-branch-proved', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'pre-branch-proved', 1, 100, []),
     (
         'imp-simple-sum-10',
         'k-files/imp-simple-spec.k',
@@ -193,13 +193,13 @@ class TestImpProof(KCFGExploreTest):
         actual_depth, actual_post_term, actual_next_terms = kcfg_explore.cterm_execute(
             self.config(kcfg_explore.kprint, k, state), depth=depth
         )
-        actual_k = kcfg_explore.kprint.pretty_print(get_cell(actual_post_term.kast, 'K_CELL'))
-        actual_state = kcfg_explore.kprint.pretty_print(get_cell(actual_post_term.kast, 'STATE_CELL'))
+        actual_k = kcfg_explore.kprint.pretty_print(actual_post_term.cell('K_CELL'))
+        actual_state = kcfg_explore.kprint.pretty_print(actual_post_term.cell('STATE_CELL'))
 
         actual_next_states = [
             (
-                kcfg_explore.kprint.pretty_print(get_cell(s.kast, 'K_CELL')),
-                kcfg_explore.kprint.pretty_print(get_cell(s.kast, 'STATE_CELL')),
+                kcfg_explore.kprint.pretty_print(s.cell('K_CELL')),
+                kcfg_explore.kprint.pretty_print(s.cell('STATE_CELL')),
             )
             for s in actual_next_terms
         ]

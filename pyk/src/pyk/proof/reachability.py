@@ -70,6 +70,27 @@ class AGProver:
     def __init__(self, proof: AGProof) -> None:
         self.proof = proof
 
+    def _check_subsumption(
+        self,
+        kcfg_explore: KCFGExplore,
+        curr_node: KCFG.Node,
+        is_terminal: Callable[[CTerm], bool] | None = None,
+        implication_every_block: bool = True,
+    ) -> bool:
+        if implication_every_block or (is_terminal is not None and is_terminal(curr_node.cterm)):
+            target_node = self.proof.kcfg.get_unique_target()
+            _LOGGER.info(
+                f'Checking subsumption into target state {self.proof.id}: {shorten_hashes((curr_node.id, target_node.id))}'
+            )
+            csubst = kcfg_explore.cterm_implies(curr_node.cterm, target_node.cterm)
+            if csubst is not None:
+                self.proof.kcfg.create_cover(curr_node.id, target_node.id, csubst=csubst)
+                _LOGGER.info(
+                    f'Subsumed into target node {self.proof.id}: {shorten_hashes((curr_node.id, target_node.id))}'
+                )
+                return True
+        return False
+
     def advance_proof(
         self,
         kcfg_explore: KCFGExplore,
@@ -79,10 +100,8 @@ class AGProver:
         execute_depth: int | None = None,
         cut_point_rules: Iterable[str] = (),
         terminal_rules: Iterable[str] = (),
-        simplify_init: bool = True,
         implication_every_block: bool = True,
     ) -> KCFG:
-        target_node = self.proof.kcfg.get_unique_target()
         iterations = 0
 
         while self.proof.kcfg.frontier:
@@ -94,17 +113,10 @@ class AGProver:
             iterations += 1
             curr_node = self.proof.kcfg.frontier[0]
 
-            if implication_every_block or (is_terminal is not None and is_terminal(curr_node.cterm)):
-                _LOGGER.info(
-                    f'Checking subsumption into target state {self.proof.id}: {shorten_hashes((curr_node.id, target_node.id))}'
-                )
-                csubst = kcfg_explore.cterm_implies(curr_node.cterm, target_node.cterm)
-                if csubst is not None:
-                    self.proof.kcfg.create_cover(curr_node.id, target_node.id, csubst=csubst)
-                    _LOGGER.info(
-                        f'Subsumed into target node {self.proof.id}: {shorten_hashes((curr_node.id, target_node.id))}'
-                    )
-                    continue
+            if self._check_subsumption(
+                kcfg_explore, curr_node, is_terminal=is_terminal, implication_every_block=implication_every_block
+            ):
+                continue
 
             if is_terminal is not None:
                 _LOGGER.info(f'Checking terminal {self.proof.id}: {shorten_hashes(curr_node.id)}')
@@ -131,6 +143,11 @@ class AGProver:
                     f'Found basic block at depth {depth} for {self.proof.id}: {shorten_hashes((curr_node.id, next_node.id))}.'
                 )
                 curr_node = next_node
+
+                if self._check_subsumption(
+                    kcfg_explore, curr_node, is_terminal=is_terminal, implication_every_block=implication_every_block
+                ):
+                    continue
 
             if len(next_cterms) == 0:
                 _LOGGER.info(f'Found stuck node {self.proof.id}: {shorten_hashes(curr_node.id)}')

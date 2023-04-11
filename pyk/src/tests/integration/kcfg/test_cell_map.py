@@ -7,7 +7,6 @@ import pytest
 
 from pyk.cterm import CTerm
 from pyk.kast.inner import KApply, KSequence, KToken, KVariable, build_assoc
-from pyk.kast.manip import get_cell
 from pyk.kcfg import KCFG
 from pyk.proof import AGProof, AGProver
 
@@ -103,7 +102,7 @@ class TestCellMapProof(KCFGExploreTest):
         actual_depth, actual_post_term, _ = kcfg_explore.cterm_execute(
             self.config(kcfg_explore.kprint, k, aacounts, accounts), depth=depth
         )
-        actual_k = kcfg_explore.kprint.pretty_print(get_cell(actual_post_term.kast, 'K_CELL'))
+        actual_k = kcfg_explore.kprint.pretty_print(actual_post_term.cell('K_CELL'))
 
         # Then
         assert actual_depth == expected_depth
