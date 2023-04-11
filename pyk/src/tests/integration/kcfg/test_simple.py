@@ -81,12 +81,12 @@ class TestSimpleProof(KCFGExploreTest):
         actual_depth, actual_post_term, actual_next_terms = kcfg_explore.cterm_execute(
             self.config(kcfg_explore.kprint, *pre), depth=depth
         )
-        actual_k = kcfg_explore.kprint.pretty_print(get_cell(actual_post_term.kast, 'K_CELL'))
-        actual_state = kcfg_explore.kprint.pretty_print(get_cell(actual_post_term.kast, 'STATE_CELL'))
+        actual_k = kcfg_explore.kprint.pretty_print(actual_post_term.cell('K_CELL'))
+        actual_state = kcfg_explore.kprint.pretty_print(actual_post_term.cell('STATE_CELL'))
         actual_next_states = [
             (
-                kcfg_explore.kprint.pretty_print(get_cell(s.kast, 'K_CELL')),
-                kcfg_explore.kprint.pretty_print(get_cell(s.kast, 'STATE_CELL')),
+                kcfg_explore.kprint.pretty_print(s.cell('K_CELL')),
+                kcfg_explore.kprint.pretty_print(s.cell('STATE_CELL')),
             )
             for s in actual_next_terms
         ]
