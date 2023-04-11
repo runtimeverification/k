@@ -47,26 +47,33 @@ void string_buffer_grow(struct string_buffer *sb) {
 
 int buf_printf(struct string_buffer *sb, char const *format, ...) {
   va_list args;
+  va_start(args, format);
 
   if (sb->fp) {
-    va_start(args, format);
-    int result = vfprintf(sb->fp, format, args);
+    va_list copy;
+    va_copy(copy, args);
+    int result = vfprintf(sb->fp, format, copy);
+    va_end(copy);
+
     va_end(args);
     return result;
   } else {
-    va_start(args, format);
-    int required = vsnprintf(NULL, 0, format, args) + 1;
-    va_end(args);
+    va_list copy;
+    va_copy(copy, args);
+    int required = vsnprintf(NULL, 0, format, copy) + 1;
+    va_end(copy);
 
     while ((sb->capacity - sb->idx) < required) {
       string_buffer_grow(sb);
     }
 
-    va_start(args, format);
+    va_list copy_2;
+    va_copy(copy_2, args);
     vsnprintf(sb->buf + sb->idx, required, format, args);
-    va_end(args);
+    va_end(copy_2);
 
     sb->idx += required - 1;
+    va_end(args);
     return required;
   }
 }
