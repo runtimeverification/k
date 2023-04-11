@@ -273,7 +273,7 @@ jobs:
 
       - name: Delete Release
         if: failure()
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6.0.0
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
@@ -372,7 +372,7 @@ jobs:
 
       - name: 'Delete Release'
         if: failure()
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6.0.0
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
@@ -386,7 +386,7 @@ jobs:
     needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, ubuntu-focal, debian-bullseye, set-release-id, arch]
     steps:
       - name: Publish release
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6.0.0
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
