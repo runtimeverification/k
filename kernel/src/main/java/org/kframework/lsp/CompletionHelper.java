@@ -72,17 +72,20 @@ public class CompletionHelper {
         completionItem.setLabel(t.getTerminal());
         StringBuilder snip = new StringBuilder();
         int codeSnip = 1;
+        String prevToken = "(";
         for (int i = 0; i < p.getItems().size(); i++) {
             ProductionItem pi = p.getItems().get(i);
             if (pi instanceof Terminal) {
                 String trm = ((Terminal) pi).getTerminal();
-                if (i > 0 && !"(".equals(trm) && !")".equals(trm) && !",".equals(trm))
+                // don't insert whitespaces around ( ) parentheses
+                if (!(prevToken.equals("(") || prevToken.equals(")")) && !"(".equals(trm) && !")".equals(trm) && !",".equals(trm))
                     snip.append(" ");
-                snip.append(((Terminal) pi).getTerminal());
-                if (i < p.getItems().size() - 1 && !"(".equals(trm) && !")".equals(trm))
+                prevToken = trm;
+                snip.append(trm);
+            } else if (pi instanceof NonTerminal) {
+                if (!(prevToken.equals("(") || prevToken.equals(")")))
                     snip.append(" ");
-            }
-            if (pi instanceof NonTerminal) {
+                prevToken = "";
                 snip.append("${");
                 snip.append(codeSnip++);
                 snip.append(":_:");
