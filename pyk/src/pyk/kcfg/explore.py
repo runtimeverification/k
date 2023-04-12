@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, ContextManager
 from ..cterm import CSubst, CTerm
 from ..kast.inner import KApply, KLabel, KVariable, Subst
 from ..kast.manip import flatten_label, free_vars
-from ..kore.rpc import KoreClient, KoreServer
+from ..kore.rpc import KoreClient, KoreServer, StopReason
 from ..ktool.kprove import KoreExecLogFormat
 from ..prelude.k import GENERATED_TOP_CELL
 from ..prelude.ml import is_bottom, is_top, mlEquals, mlTop
@@ -113,7 +113,7 @@ class KCFGExplore(ContextManager['KCFGExplore']):
         er = kore_client.execute(kore, max_depth=depth, cut_point_rules=cut_point_rules, terminal_rules=terminal_rules)
         depth = er.depth
         next_state = CTerm.from_kast(self.kprint.kore_to_kast(er.state.kore))
-        _next_states = er.next_states if er.next_states is not None and len(er.next_states) > 1 else []
+        _next_states = er.next_states if er.next_states is not None else []
         # TODO: should not have to prune bottom branches, the backend should do this for us.
         next_states = []
         for ns in _next_states:
@@ -125,6 +125,11 @@ class KCFGExplore(ContextManager['KCFGExplore']):
                 next_states.append(CTerm.from_kast(_ns))
         if len(next_states) == 1 and len(next_states) < len(_next_states):
             return depth + 1, next_states[0], []
+        elif len(next_states) == 1:
+            if er.reason == StopReason.CUT_POINT_RULE:
+                return depth, next_state, next_states
+            else:
+                next_states = []
         return depth, next_state, next_states
 
     def cterm_simplify(self, cterm: CTerm) -> KInner:

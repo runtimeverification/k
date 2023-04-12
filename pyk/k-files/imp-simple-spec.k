@@ -12,6 +12,11 @@ module IMP-SIMPLE-SPEC
     claim [pre-branch-proved]: <k> $n = 7 ; if (B:Bool) { $n = 6 ; } else { $n = 5 ; } ~> #FINISH => if (B:Bool) { $n = 6 ; } else { $n = 5 ; } ~> #FINISH </k>
                                <state> $n |-> (0 => 7) </state>
 
+    claim [while-cut-rule]: <k> while (B:Bool) BB:Block => if (B) { BB while (B) BB } else {} ... </k>
+
+    claim [while-cut-rule-delayed]: <k> $n = 7 ; while (B:Bool) BB:Block => if (B) { BB while (B) BB } else {} ... </k>
+                                    <state> $n |-> (_ => ?_) </state>
+
     claim [sum-10]: <k> int $s, $n, .Ids ; $n = 10 ; while (0 <= $n) { $s = $s + $n ; $n = $n + -1 ; } ~> #FINISH => . ... </k>
                     <state> .Map => $s |-> 55 $n |-> -1 </state>
 
