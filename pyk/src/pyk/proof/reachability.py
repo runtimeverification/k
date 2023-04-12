@@ -132,9 +132,16 @@ class AGProver:
                 curr_node.cterm, depth=execute_depth, cut_point_rules=cut_point_rules, terminal_rules=terminal_rules
             )
 
-            # Nonsense case.
-            if len(next_cterms) == 1:
-                raise ValueError(f'Found a single successor cterm {self.proof.id}: {(depth, cterm, next_cterms)}')
+            # Cut Rule
+            if depth == 0 and len(next_cterms) == 1:
+                new_execute_depth = execute_depth - 1 if execute_depth is not None else None
+                depth, cterm, next_cterms = kcfg_explore.cterm_execute(
+                    next_cterms[0],
+                    depth=new_execute_depth,
+                    cut_point_rules=cut_point_rules,
+                    terminal_rules=terminal_rules,
+                )
+                depth = depth + 1
 
             if depth > 0:
                 next_node = self.proof.kcfg.get_or_create_node(cterm)
@@ -152,7 +159,7 @@ class AGProver:
             if len(next_cterms) == 0:
                 _LOGGER.info(f'Found stuck node {self.proof.id}: {shorten_hashes(curr_node.id)}')
 
-            else:
+            elif len(next_cterms) > 1:
                 branches = list(extract_branches(cterm)) if extract_branches is not None else []
                 if len(branches) != len(next_cterms):
                     _LOGGER.warning(
