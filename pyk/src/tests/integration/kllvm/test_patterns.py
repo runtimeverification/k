@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+import pyk.kllvm.load  # noqa: F401
 from pyk.kllvm.ast import CompositePattern, CompositeSort, Pattern, StringPattern, VariablePattern
 
 if TYPE_CHECKING:
