@@ -321,7 +321,7 @@ public class EarleyParser {
    * @param data The {@link ParserMetadata} about the current sentence being parsed.
    */
   private static void wrapState(Set<Term> parses, Set<PStack<Term>> parseTree, EarleyProduction eprod, int start, int end, ParserMetadata data) {
-    byte[] inputBytes = data.input.getBytes(StandardCharsets.UTF_8);
+    byte[] utf8Input = StringUtils.getBytesUtf8(data.input);
 
     for (PStack<Term> children : parseTree) {
       Production prod = eprod.prod;
@@ -343,8 +343,8 @@ public class EarleyParser {
 
       if (eprod.isToken()) {
         // it's a token, so create a Constant.
-        // Flex treats each byte as its own character, so startLoc and endLoc actually refer to indices into the byte array
-        String value = new String(Arrays.copyOfRange(inputBytes, startLoc, endLoc), StandardCharsets.UTF_8);
+        // Note that startLoc and endLoc refer to indices into the UTF-8 encoded byte array
+        String value = StringUtils.newStringUtf8(Arrays.copyOfRange(utf8Input, startLoc, endLoc));
         if (eprod.isMInt()) {
           // it's an MInt token, so make sure to add the correct bit-length to the production before creating the
           // Constant
