@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import pyk.kllvm.load  # noqa: F401
 from pyk.kllvm.parser import Parser
 
 from .utils import RuntimeTest
