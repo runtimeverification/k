@@ -63,7 +63,7 @@ module IMP
   rule <k> if (true)  S else _ => S ... </k>
   rule <k> if (false) _ else S => S ... </k>
 
-  rule <k> while (B) S => if (B) {S while (B) S} else {} ... </k>
+  rule [while]: <k> while (B) S => if (B) {S while (B) S} else {} ... </k>
 
   rule <k> int (X , Xs => Xs) ; _ ... </k> <state> STATE => STATE [ X <- 0 ] </state>
     requires notBool (X in keys(STATE))

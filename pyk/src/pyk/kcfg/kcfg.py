@@ -485,7 +485,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
         init, _ = _sorted_init_nodes()
         while init:
             ret_lines.append(('unknown', ['']))
-            _print_subgraph('', init[0], [init[0]])
+            _print_subgraph('', init[0], [])
             init, _ = _sorted_init_nodes()
         if self.frontier or self.stuck:
             ret_lines.append(('unknown', ['', 'Target Nodes:']))

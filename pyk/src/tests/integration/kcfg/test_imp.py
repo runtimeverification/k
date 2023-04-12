@@ -10,7 +10,7 @@ from pyk.kast.inner import KApply, KSequence, KSort, KToken, KVariable, Subst
 from pyk.kcfg import KCFG
 from pyk.prelude.kint import intToken
 from pyk.prelude.ml import mlAnd, mlBottom, mlEqualsFalse, mlEqualsTrue
-from pyk.proof import AGProof, AGProver
+from pyk.proof import AGProof, AGProver, ProofStatus
 
 from ..utils import KCFGExploreTest
 
@@ -106,11 +106,22 @@ IMPLIES_TEST_DATA: Final = (
     ),
 )
 
-APR_PROVE_TEST_DATA: Iterable[tuple[str, str, str, str, int | None, int | None, Iterable[str]]] = (
-    ('imp-simple-addition-1', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'addition-1', 2, 1, []),
-    ('imp-simple-addition-2', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'addition-2', 2, 7, []),
-    ('imp-simple-addition-var', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'addition-var', 2, 1, []),
-    ('pre-branch-proved', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'pre-branch-proved', 1, 100, []),
+APR_PROVE_TEST_DATA: Iterable[tuple[str, str, str, str, int | None, int | None, Iterable[str], Iterable[str]]] = (
+    ('imp-simple-addition-1', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'addition-1', 2, 1, [], []),
+    ('imp-simple-addition-2', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'addition-2', 2, 7, [], []),
+    ('imp-simple-addition-var', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'addition-var', 2, 1, [], []),
+    ('pre-branch-proved', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'pre-branch-proved', 1, 100, [], []),
+    ('while-cut-rule', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'while-cut-rule', 1, 1, [], ['IMP.while']),
+    (
+        'while-cut-rule-delayed',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'while-cut-rule-delayed',
+        4,
+        100,
+        [],
+        ['IMP.while'],
+    ),
     (
         'imp-simple-sum-10',
         'k-files/imp-simple-spec.k',
@@ -119,6 +130,7 @@ APR_PROVE_TEST_DATA: Iterable[tuple[str, str, str, str, int | None, int | None, 
         None,
         None,
         ['IMP-VERIFICATION.halt'],
+        [],
     ),
     (
         'imp-simple-sum-100',
@@ -128,6 +140,7 @@ APR_PROVE_TEST_DATA: Iterable[tuple[str, str, str, str, int | None, int | None, 
         None,
         None,
         ['IMP-VERIFICATION.halt'],
+        [],
     ),
     (
         'imp-simple-sum-1000',
@@ -137,6 +150,7 @@ APR_PROVE_TEST_DATA: Iterable[tuple[str, str, str, str, int | None, int | None, 
         None,
         None,
         ['IMP-VERIFICATION.halt'],
+        [],
     ),
 )
 
@@ -253,7 +267,7 @@ class TestImpProof(KCFGExploreTest):
         assert actual == expected
 
     @pytest.mark.parametrize(
-        'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,terminal_rules',
+        'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,terminal_rules,cut_rules',
         APR_PROVE_TEST_DATA,
         ids=[test_id for test_id, *_ in APR_PROVE_TEST_DATA],
     )
@@ -268,6 +282,7 @@ class TestImpProof(KCFGExploreTest):
         max_iterations: int,
         max_depth: int,
         terminal_rules: Iterable[str],
+        cut_rules: Iterable[str],
     ) -> None:
         claims = kprove.get_claims(
             Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}']
@@ -275,13 +290,14 @@ class TestImpProof(KCFGExploreTest):
         assert len(claims) == 1
 
         kcfg = KCFG.from_claim(kprove.definition, claims[0])
-        prover = AGProver(AGProof(f'{spec_module}.{claim_id}', kcfg))
+        proof = AGProof(f'{spec_module}.{claim_id}', kcfg)
+        prover = AGProver(proof)
         kcfg = prover.advance_proof(
             kcfg_explore,
             max_iterations=max_iterations,
             execute_depth=max_depth,
+            cut_point_rules=cut_rules,
             terminal_rules=terminal_rules,
         )
 
-        failed_nodes = len(kcfg.frontier) + len(kcfg.stuck)
-        assert failed_nodes == 0
+        assert proof.status == ProofStatus.PASSED
