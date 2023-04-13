@@ -273,12 +273,12 @@ jobs:
 
       - name: Delete Release
         if: failure()
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6.0.0
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const { owner, repo } = context.repo
-            await github.repos.deleteRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }} })
+            await github.rest.repos.deleteRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }} })
 
     outputs:
       bottle_path: ${{ steps.build.outputs.path }}
@@ -372,12 +372,12 @@ jobs:
 
       - name: 'Delete Release'
         if: failure()
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6.0.0
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const { owner, repo } = context.repo
-            await github.repos.deleteRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }} })
+            await github.rest.repos.deleteRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }} })
 
   release:
     name: 'Publish Release'
@@ -386,12 +386,12 @@ jobs:
     needs: [nix-release, macos-build, macos-test, source-tarball, ubuntu-jammy, ubuntu-focal, debian-bullseye, set-release-id, arch]
     steps:
       - name: Publish release
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6.0.0
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const { owner, repo } = context.repo
-            await github.repos.updateRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }}, prerelease: false })
+            await github.rest.repos.updateRelease({ owner, repo, release_id: ${{ needs.set-release-id.outputs.release_id }}, prerelease: false })
       - name: 'Update dependents'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
