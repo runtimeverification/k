@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 from ..cli_utils import check_dir_path, check_file_path, run_process
 from ..kast import kast_term
-from ..kast.inner import KApply, KAs, KAtt, KInner, KLabel, KRewrite, KSequence, KSort, KToken, KVariable
+from ..kast.inner import KApply, KAs, KAtt, KInner, KRewrite, KSequence, KSort, KToken, KVariable
 from ..kast.manip import flatten_label
 from ..kast.outer import (
     KBubble,
@@ -34,17 +34,12 @@ from ..kast.outer import (
     KTerminal,
     read_kast_definition,
 )
-from ..konvert import kast_to_kore, unmunge
+from ..konvert import kast_to_kore, kore_to_kast
 from ..kore.kompiled import KompiledKore
 from ..kore.parser import KoreParser
-from ..kore.prelude import BYTES as KORE_BYTES
-from ..kore.prelude import STRING as KORE_STRING
-from ..kore.syntax import DV, And, App, Assoc, Bottom, Ceil, Equals, EVar, Exists, Implies, Not, SortApp, Top
-from ..prelude.bytes import bytesToken
+from ..kore.syntax import App, SortApp
 from ..prelude.k import DOTS, EMPTY_K
 from ..prelude.kbool import TRUE
-from ..prelude.ml import mlAnd, mlBottom, mlCeil, mlEquals, mlExists, mlImplies, mlNot, mlTop
-from ..prelude.string import stringToken
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -268,9 +263,13 @@ class KPrint:
         return proc_res.stdout
 
     def kore_to_kast(self, kore: Pattern) -> KInner:
-        _kast_out = self._kore_to_kast(kore)
-        if _kast_out is not None:
-            return self.definition.remove_cell_map_items(_kast_out)
+        _LOGGER.debug(f'kore_to_kast: {kore.text}')
+
+        try:
+            return kore_to_kast(self.definition, kore)
+        except ValueError as err:
+            _LOGGER.warning(err)
+
         _LOGGER.warning(f'Falling back to using `kast` for Kore -> Kast: {kore.text}')
         proc_res = self._expression_kast(
             kore.text,
@@ -278,112 +277,6 @@ class KPrint:
             output=KAstOutput.JSON,
         )
         return kast_term(json.loads(proc_res.stdout), KInner)  # type: ignore # https://github.com/python/mypy/issues/4717
-
-    def _kore_to_kast(self, kore: Pattern) -> KInner | None:
-        _LOGGER.debug(f'_kore_to_kast: {kore}')
-
-        if type(kore) is DV and kore.sort.name.startswith('Sort'):
-            if kore.sort == KORE_STRING:
-                return stringToken(kore.value.value)
-            if kore.sort == KORE_BYTES:
-                return bytesToken(kore.value.value)
-            return KToken(kore.value.value, KSort(kore.sort.name[4:]))
-
-        elif type(kore) is EVar:
-            vname = unmunge(kore.name[3:])
-            return KVariable(vname, sort=KSort(kore.sort.name[4:]))
-
-        elif type(kore) is App:
-            if kore.symbol == 'inj' and len(kore.sorts) == 2 and len(kore.args) == 1:
-                return self._kore_to_kast(kore.args[0])
-
-            elif len(kore.sorts) == 0:
-                if kore.symbol == 'dotk' and len(kore.args) == 0:
-                    return KSequence([])
-
-                elif kore.symbol == 'kseq' and len(kore.args) == 2:
-                    p0 = self._kore_to_kast(kore.args[0])
-                    p1 = self._kore_to_kast(kore.args[1])
-                    if p0 is not None and p1 is not None:
-                        return KSequence([p0, p1])
-
-                else:
-                    _label_name = unmunge(kore.symbol[3:])
-                    klabel = KLabel(_label_name, [KSort(k.name[4:]) for k in kore.sorts])
-                    args = [self._kore_to_kast(_a) for _a in kore.args]
-                    # TODO: Written like this to appease the type-checker.
-                    new_args = [a for a in args if a is not None]
-                    if len(new_args) == len(args):
-                        return KApply(klabel, new_args)
-
-            # hardcoded polymorphic operators
-            elif (
-                len(kore.sorts) == 1
-                and kore.symbol
-                == "Lbl'Hash'if'UndsHash'then'UndsHash'else'UndsHash'fi'Unds'K-EQUAL-SYNTAX'Unds'Sort'Unds'Bool'Unds'Sort'Unds'Sort"
-            ):
-                _label_name = unmunge(kore.symbol[3:])
-                klabel = KLabel(_label_name, [KSort(kore.sorts[0].name[4:])])
-                # TODO: Written like this to appease the type-checker.
-                args = [self._kore_to_kast(_a) for _a in kore.args]
-                new_args = [a for a in args if a is not None]
-                if len(new_args) == len(args):
-                    return KApply(klabel, new_args)
-
-        elif type(kore) is Top:
-            return mlTop(sort=KSort(kore.sort.name[4:]))
-
-        elif type(kore) is Bottom:
-            return mlBottom(sort=KSort(kore.sort.name[4:]))
-
-        elif type(kore) is And:
-            psort = KSort(kore.sort.name[4:])
-            larg = self._kore_to_kast(kore.left)
-            rarg = self._kore_to_kast(kore.right)
-            if larg is not None and rarg is not None:
-                return mlAnd([larg, rarg], sort=psort)
-
-        elif type(kore) is Implies:
-            psort = KSort(kore.sort.name[4:])
-            larg = self._kore_to_kast(kore.left)
-            rarg = self._kore_to_kast(kore.right)
-            if larg is not None and rarg is not None:
-                return mlImplies(larg, rarg, sort=psort)
-
-        elif type(kore) is Not:
-            psort = KSort(kore.sort.name[4:])
-            arg = self._kore_to_kast(kore.pattern)
-            if arg is not None:
-                return mlNot(arg, sort=psort)
-
-        elif type(kore) is Exists:
-            psort = KSort(kore.sort.name[4:])
-            var = self._kore_to_kast(kore.var)
-            body = self._kore_to_kast(kore.pattern)
-            if var is not None and body is not None:
-                assert type(var) is KVariable
-                return mlExists(var, body, sort=psort)
-
-        elif type(kore) is Equals:
-            osort = KSort(kore.op_sort.name[4:])
-            psort = KSort(kore.sort.name[4:])
-            larg = self._kore_to_kast(kore.left)
-            rarg = self._kore_to_kast(kore.right)
-            if larg is not None and rarg is not None:
-                return mlEquals(larg, rarg, arg_sort=osort, sort=psort)
-
-        elif type(kore) is Ceil:
-            osort = KSort(kore.op_sort.name[4:])
-            psort = KSort(kore.sort.name[4:])
-            arg = self._kore_to_kast(kore.pattern)
-            if arg is not None:
-                return mlCeil(arg, arg_sort=osort, sort=psort)
-
-        elif isinstance(kore, Assoc):
-            return self._kore_to_kast(kore.pattern)
-
-        _LOGGER.warning(f'KPrint._kore_to_kast failed on input: {kore}')
-        return None
 
     def kast_to_kore(self, kast: KInner, sort: KSort | None = None) -> Pattern:
         try:
