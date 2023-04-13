@@ -7,6 +7,14 @@ if TYPE_CHECKING:
     from typing import Final
 
 
+def enquote_str(s: str) -> str:
+    return ''.join(enquoted(s))
+
+
+def dequote_str(s: str) -> str:
+    return ''.join(dequoted(s))
+
+
 NORMAL = 1
 ESCAPE = 2
 CPOINT = 3

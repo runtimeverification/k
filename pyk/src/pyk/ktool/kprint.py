@@ -40,12 +40,11 @@ from ..kore.parser import KoreParser
 from ..kore.prelude import BYTES as KORE_BYTES
 from ..kore.prelude import STRING as KORE_STRING
 from ..kore.syntax import DV, And, App, Assoc, Bottom, Ceil, Equals, EVar, Exists, Implies, Not, SortApp, Top
-from ..prelude.bytes import BYTES, bytesToken
+from ..prelude.bytes import bytesToken
 from ..prelude.k import DOTS, EMPTY_K
 from ..prelude.kbool import TRUE
 from ..prelude.ml import mlAnd, mlBottom, mlCeil, mlEquals, mlExists, mlImplies, mlNot, mlTop
-from ..prelude.string import STRING, stringToken
-from ..utils import enquote_str
+from ..prelude.string import stringToken
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -508,16 +507,6 @@ def pretty_print_kast(kast: KAst, symbol_table: SymbolTable) -> str:
     if type(kast) is KSort:
         return kast.name
     if type(kast) is KToken:
-        if kast.sort == BYTES:
-            assert len(kast.token) >= 3
-            assert kast.token[0:2] == 'b"'
-            assert kast.token[-1] == '"'
-            return 'b"' + enquote_str(kast.token[2:-1]) + '"'
-        if kast.sort == STRING:
-            assert len(kast.token) >= 2
-            assert kast.token[0] == '"'
-            assert kast.token[-1] == '"'
-            return '"' + enquote_str(kast.token[1:-1]) + '"'
         return kast.token
     if type(kast) is KApply:
         label = kast.label.name

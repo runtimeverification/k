@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypeVar
 
-from ..utils import dequote_str
+from ..dequote import dequote_str
 from .lexer import TokenType, kore_lexer
 from .syntax import (
     DV,

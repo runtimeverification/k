@@ -5,8 +5,6 @@ import string
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Generic, TypeVar, cast, overload
 
-from .dequote import dequoted, enquoted
-
 if TYPE_CHECKING:
     from collections.abc import Callable, Hashable, Iterable, Iterator
     from typing import Any, Final
@@ -348,11 +346,3 @@ def compare_short_hashes(lhs: str, rhs: str) -> bool:
     (l0, l1) = deconstruct_short_hash(lhs)
     (r0, r1) = deconstruct_short_hash(rhs)
     return (l0.startswith(r0) or r0.startswith(l0)) and (l1.endswith(r1) or r1.endswith(l1))
-
-
-def enquote_str(s: str) -> str:
-    return ''.join(enquoted(s))
-
-
-def dequote_str(s: str) -> str:
-    return ''.join(dequoted(s))

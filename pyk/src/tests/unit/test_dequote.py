@@ -7,7 +7,7 @@ import pytest
 if TYPE_CHECKING:
     from typing import Final
 
-from pyk.utils import dequote_str, enquote_str
+from pyk.dequote import dequote_str, enquote_str
 
 TEST_DATA: Final = (
     # enquoted, dequoted

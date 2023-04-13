@@ -8,7 +8,7 @@ from functools import reduce
 from itertools import chain
 from typing import TYPE_CHECKING, final, overload
 
-from ..utils import EMPTY_FROZEN_DICT, FrozenDict, dequote_str, enquote_str, some
+from ..utils import EMPTY_FROZEN_DICT, FrozenDict, some
 from .kast import EMPTY_ATT, KAst, KAtt, WithKAtt
 
 if TYPE_CHECKING:
@@ -178,33 +178,10 @@ class KToken(KInner):
     @classmethod
     def from_dict(cls: type[KToken], d: Mapping[str, Any]) -> KToken:
         cls._check_node(d)
-        token = d['token']
-        sort = KSort.from_dict(d['sort'])
-        if sort == KSort('Bytes'):
-            assert len(token) >= 3
-            assert token[0:2] == 'b"'
-            assert token[-1] == '"'
-            token = 'b"' + dequote_str(token[2:-1]) + '"'
-        if sort == KSort('String'):
-            assert len(token) >= 2
-            assert token[0] == '"'
-            assert token[-1] == '"'
-            token = '"' + dequote_str(token[1:-1]) + '"'
-        return KToken(token=token, sort=sort)
+        return KToken(token=d['token'], sort=KSort.from_dict(d['sort']))
 
     def to_dict(self) -> dict[str, Any]:
-        token = self.token
-        if self.sort == KSort('Bytes'):
-            assert len(token) >= 3
-            assert token[0:2] == 'b"'
-            assert token[-1] == '"'
-            token = 'b"' + enquote_str(token[2:-1]) + '"'
-        if self.sort == KSort('String'):
-            assert len(token) >= 2
-            assert token[0] == '"'
-            assert token[-1] == '"'
-            token = '"' + enquote_str(token[1:-1]) + '"'
-        return {'node': 'KToken', 'token': token, 'sort': self.sort.to_dict()}
+        return {'node': 'KToken', 'token': self.token, 'sort': self.sort.to_dict()}
 
     def let(self, *, token: str | None = None, sort: str | KSort | None = None) -> KToken:
         token = token if token is not None else self.token
