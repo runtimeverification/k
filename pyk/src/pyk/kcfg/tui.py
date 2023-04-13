@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from ..ktool.kprint import KPrint
 
 
-KCFGElem = Union[KCFG.Node, KCFG.EdgeLike]
+KCFGElem = Union[KCFG.Node, KCFG.Successor]
 
 
 class GraphChunk(Static):
@@ -198,6 +198,19 @@ class NodeView(Widget):
                 term_str = '\n'.join(self._kprint.pretty_print(se) for se in subst_equalities)
                 constraint_str = '\n'.join(self._kprint.pretty_print(c) for c in constraints)
 
+            elif type(self._element) is KCFG.Split:
+                term_strs = [f'split: {shorten_hashes(self._element.source.id)}']
+                for target, csubst in self._element.targets:
+                    term_strs.append('')
+                    term_strs.append(f'  - {shorten_hashes(target.id)}')
+                    if len(csubst.subst) > 0:
+                        subst_equalities = map(_boolify, flatten_label('#And', csubst.subst.ml_pred))
+                        term_strs.extend(f'    {self._kprint.pretty_print(cline)}' for cline in subst_equalities)
+                    if len(csubst.constraints) > 0:
+                        constraints = map(_boolify, flatten_label('#And', csubst.constraint))
+                        term_strs.extend(f'    {self._kprint.pretty_print(cline)}' for cline in constraints)
+                term_str = '\n'.join(term_strs)
+
             if self._custom_view is not None:
                 custom_str = '\n'.join(self._custom_view(self._element))
 
@@ -251,24 +264,26 @@ class KCFGViewer(App):
     def on_graph_chunk_selected(self, message: GraphChunk.Selected) -> None:
         if message.chunk_id.startswith('node_'):
             self._selected_chunk = message.chunk_id
-            node = message.chunk_id[5:]
+            node, *_ = message.chunk_id[5:].split('_')
             self.query_one('#node-view', NodeView).update(self._kcfg.node(node))
 
         elif message.chunk_id.startswith('edge_'):
             self._selected_chunk = None
-            node_source, node_target = message.chunk_id[5:].split('_')
+            node_source, node_target, *_ = message.chunk_id[5:].split('_')
             edge = single(self._kcfg.edges(source_id=node_source, target_id=node_target))
             self.query_one('#node-view', NodeView).update(edge)
 
         elif message.chunk_id.startswith('cover_'):
             self._selected_chunk = None
-            node_source, node_target = message.chunk_id[6:].split('_')
+            node_source, node_target, *_ = message.chunk_id[6:].split('_')
             cover = single(self._kcfg.covers(source_id=node_source, target_id=node_target))
             self.query_one('#node-view', NodeView).update(cover)
 
-        else:
-            # should be unreachable
-            raise AssertionError()
+        elif message.chunk_id.startswith('split_'):
+            self._selected_chunk = None
+            node_source, node_target, *_ = message.chunk_id[6:].split('_')
+            split = single(self._kcfg.splits(source_id=node_source, target_id=node_target))
+            self.query_one('#node-view', NodeView).update(split)
 
     BINDINGS = [
         ('h', 'keystroke("h")', 'Hide selected node.'),
