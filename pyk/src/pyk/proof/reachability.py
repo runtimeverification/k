@@ -39,11 +39,6 @@ class AGProof(Proof):
             return AGProof.from_dict(proof_dict, proof_dir=proof_dir)
         raise ValueError(f'Could not load AGProof from file {id}: {proof_path}')
 
-    @staticmethod
-    def proof_exists(id: str, proof_dir: Path) -> bool:
-        proof_path = proof_dir / f'{hash_str(id)}.json'
-        return proof_path.exists() and proof_path.is_file()
-
     @property
     def status(self) -> ProofStatus:
         if len(self.kcfg.stuck) > 0:
@@ -62,6 +57,15 @@ class AGProof(Proof):
     @property
     def dict(self) -> dict[str, Any]:
         return {'type': 'AGProof', 'id': self.id, 'cfg': self.kcfg.to_dict()}
+
+    @property
+    def summary(self) -> Iterable[str]:
+        return [
+            f'AGProof: {self.id}',
+            f'    nodes: {len(self.kcfg.nodes)}',
+            f'    frontier: {len(self.kcfg.frontier)}',
+            f'    stuck: {len(self.kcfg.stuck)}',
+        ]
 
 
 class AGProver:
@@ -88,6 +92,15 @@ class AGProver:
                 _LOGGER.info(
                     f'Subsumed into target node {self.proof.id}: {shorten_hashes((curr_node.id, target_node.id))}'
                 )
+                return True
+        return False
+
+    def _check_terminal(self, curr_node: KCFG.Node, is_terminal: Callable[[CTerm], bool] | None = None) -> bool:
+        if is_terminal is not None:
+            _LOGGER.info(f'Checking terminal {self.proof.id}: {shorten_hashes(curr_node.id)}')
+            if is_terminal(curr_node.cterm):
+                _LOGGER.info(f'Terminal node {self.proof.id}: {shorten_hashes(curr_node.id)}.')
+                self.proof.kcfg.add_expanded(curr_node.id)
                 return True
         return False
 
@@ -118,12 +131,8 @@ class AGProver:
             ):
                 continue
 
-            if is_terminal is not None:
-                _LOGGER.info(f'Checking terminal {self.proof.id}: {shorten_hashes(curr_node.id)}')
-                if is_terminal(curr_node.cterm):
-                    _LOGGER.info(f'Terminal node {self.proof.id}: {shorten_hashes(curr_node.id)}.')
-                    self.proof.kcfg.add_expanded(curr_node.id)
-                    continue
+            if self._check_terminal(curr_node, is_terminal=is_terminal):
+                continue
 
             self.proof.kcfg.add_expanded(curr_node.id)
 

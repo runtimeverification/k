@@ -106,12 +106,64 @@ IMPLIES_TEST_DATA: Final = (
     ),
 )
 
-APR_PROVE_TEST_DATA: Iterable[tuple[str, str, str, str, int | None, int | None, Iterable[str], Iterable[str]]] = (
-    ('imp-simple-addition-1', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'addition-1', 2, 1, [], []),
-    ('imp-simple-addition-2', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'addition-2', 2, 7, [], []),
-    ('imp-simple-addition-var', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'addition-var', 2, 1, [], []),
-    ('pre-branch-proved', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'pre-branch-proved', 1, 100, [], []),
-    ('while-cut-rule', 'k-files/imp-simple-spec.k', 'IMP-SIMPLE-SPEC', 'while-cut-rule', 1, 1, [], ['IMP.while']),
+APR_PROVE_TEST_DATA: Iterable[
+    tuple[str, str, str, str, int | None, int | None, Iterable[str], Iterable[str], ProofStatus]
+] = (
+    (
+        'imp-simple-addition-1',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'addition-1',
+        2,
+        1,
+        [],
+        [],
+        ProofStatus.PASSED,
+    ),
+    (
+        'imp-simple-addition-2',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'addition-2',
+        2,
+        7,
+        [],
+        [],
+        ProofStatus.PASSED,
+    ),
+    (
+        'imp-simple-addition-var',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'addition-var',
+        2,
+        1,
+        [],
+        [],
+        ProofStatus.PASSED,
+    ),
+    (
+        'pre-branch-proved',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'pre-branch-proved',
+        1,
+        100,
+        [],
+        [],
+        ProofStatus.PASSED,
+    ),
+    (
+        'while-cut-rule',
+        'k-files/imp-simple-spec.k',
+        'IMP-SIMPLE-SPEC',
+        'while-cut-rule',
+        1,
+        1,
+        [],
+        ['IMP.while'],
+        ProofStatus.PASSED,
+    ),
     (
         'while-cut-rule-delayed',
         'k-files/imp-simple-spec.k',
@@ -121,6 +173,7 @@ APR_PROVE_TEST_DATA: Iterable[tuple[str, str, str, str, int | None, int | None, 
         100,
         [],
         ['IMP.while'],
+        ProofStatus.PASSED,
     ),
     (
         'imp-simple-sum-10',
@@ -131,6 +184,7 @@ APR_PROVE_TEST_DATA: Iterable[tuple[str, str, str, str, int | None, int | None, 
         None,
         ['IMP-VERIFICATION.halt'],
         [],
+        ProofStatus.PASSED,
     ),
     (
         'imp-simple-sum-100',
@@ -141,6 +195,7 @@ APR_PROVE_TEST_DATA: Iterable[tuple[str, str, str, str, int | None, int | None, 
         None,
         ['IMP-VERIFICATION.halt'],
         [],
+        ProofStatus.PASSED,
     ),
     (
         'imp-simple-sum-1000',
@@ -151,6 +206,7 @@ APR_PROVE_TEST_DATA: Iterable[tuple[str, str, str, str, int | None, int | None, 
         None,
         ['IMP-VERIFICATION.halt'],
         [],
+        ProofStatus.PASSED,
     ),
 )
 
@@ -161,6 +217,16 @@ class TestImpProof(KCFGExploreTest):
     @staticmethod
     def _update_symbol_table(symbol_table: SymbolTable) -> None:
         symbol_table['.List{"_,_"}_Ids'] = lambda: '.Ids'
+
+    @staticmethod
+    def _is_terminal(cterm1: CTerm) -> bool:
+        k_cell = cterm1.cell('K_CELL')
+        if type(k_cell) is KSequence:
+            if len(k_cell) == 0:
+                return True
+            if len(k_cell) == 1 and type(k_cell[0]) is KVariable:
+                return True
+        return False
 
     @staticmethod
     def config(kprint: KPrint, k: str, state: str, constraint: KInner | None = None) -> CTerm:
@@ -267,7 +333,7 @@ class TestImpProof(KCFGExploreTest):
         assert actual == expected
 
     @pytest.mark.parametrize(
-        'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,terminal_rules,cut_rules',
+        'test_id,spec_file,spec_module,claim_id,max_iterations,max_depth,terminal_rules,cut_rules,proof_status',
         APR_PROVE_TEST_DATA,
         ids=[test_id for test_id, *_ in APR_PROVE_TEST_DATA],
     )
@@ -283,6 +349,7 @@ class TestImpProof(KCFGExploreTest):
         max_depth: int,
         terminal_rules: Iterable[str],
         cut_rules: Iterable[str],
+        proof_status: ProofStatus,
     ) -> None:
         claims = kprove.get_claims(
             Path(spec_file), spec_module_name=spec_module, claim_labels=[f'{spec_module}.{claim_id}']
@@ -298,6 +365,7 @@ class TestImpProof(KCFGExploreTest):
             execute_depth=max_depth,
             cut_point_rules=cut_rules,
             terminal_rules=terminal_rules,
+            is_terminal=TestImpProof._is_terminal,
         )
 
-        assert proof.status == ProofStatus.PASSED
+        assert proof.status == proof_status
