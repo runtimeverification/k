@@ -2,44 +2,39 @@
 package org.kframework.kprove;
 
 import com.google.inject.Inject;
-import org.kframework.attributes.Source;
+import org.kframework.RewriterResult;
 import org.kframework.definition.Definition;
 import org.kframework.definition.Module;
-import org.kframework.definition.Rule;
 import org.kframework.kompile.CompiledDefinition;
-import org.kframework.kompile.KompileOptions;
-import org.kframework.RewriterResult;
-import org.kframework.main.GlobalOptions;
 import org.kframework.rewriter.Rewriter;
 import org.kframework.unparser.KPrint;
 import org.kframework.unparser.ToJson;
 import org.kframework.utils.BinaryLoader;
 import org.kframework.utils.Stopwatch;
 import org.kframework.utils.errorsystem.KEMException;
+import org.kframework.utils.errorsystem.KException;
 import org.kframework.utils.errorsystem.KExceptionManager;
 import org.kframework.utils.file.FileUtil;
 import scala.Tuple2;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import static org.kframework.Collections.*;
 
-/**
- * Class that implements the "--prove" option.
- */
 public class KProve {
 
     public static final String BOUNDARY_CELL_PREFIX = "BOUND_";
+
+    private static final int KPROVE_SUCCESS_EXIT_CODE = 0;
+    private static final int KPROVE_MISMATCH_CONFIG_CODE = 1;
 
     private final KExceptionManager kem;
     private final FileUtil files;
     private final KPrint kprint;
     private final KProveOptions kproveOptions;
-    private final GlobalOptions globalOptions;
     private final CompiledDefinition compiledDefinition;
     private final BinaryLoader loader;
     private final ProofDefinitionBuilder proofDefinitionBuilder;
@@ -48,21 +43,17 @@ public class KProve {
 
     @Inject
     public KProve(KExceptionManager kem, FileUtil files, KPrint kprint, KProveOptions kproveOptions,
-                  GlobalOptions globalOptions, CompiledDefinition compiledDefinition, BinaryLoader loader,
+                  CompiledDefinition compiledDefinition, BinaryLoader loader,
                   ProofDefinitionBuilder proofDefinitionBuilder, Function<Definition, Rewriter> rewriterGenerator, Stopwatch sw) {
         this.kem = kem;
         this.files = files;
         this.kprint = kprint;
         this.kproveOptions = kproveOptions;
-        this.globalOptions = globalOptions;
         this.compiledDefinition = compiledDefinition;
         this.loader = loader;
         this.proofDefinitionBuilder = proofDefinitionBuilder;
         this.rewriterGenerator = rewriterGenerator;
         this.sw = sw;
-        if (kproveOptions.emitJsonSpec != null) {
-            throw KEMException.criticalError("Option `--emit-json-spec` only supported in kprovex tool!");
-        }
     }
 
     public int run() {
@@ -72,11 +63,7 @@ public class KProve {
         }
 
         Tuple2<Definition, Module> compiled = proofDefinitionBuilder
-                .build(kproveOptions.specFile(files), kproveOptions.defModule, kproveOptions.specModule, compiledDefinition.kompileOptions.readOnlyKompiledDirectory);
-
-        if (kproveOptions.saveProofDefinitionTo != null) {
-            saveFullDefinition(compiled._1());
-        }
+                .build(kproveOptions.specFile(files), kproveOptions.specModule, compiledDefinition.kompileOptions.readOnlyKompiledDirectory);
 
         Rewriter rewriter = rewriterGenerator.apply(compiled._1());
         Module specModule = compiled._2();
@@ -89,28 +76,33 @@ public class KProve {
             }
         }
 
-        RewriterResult results = rewriter.prove(specModule, false);
+        if (kproveOptions.emitJsonSpec != null) {
+            Set<String> names = stream(compiled._1().modules()).map(Module::name).collect(Collectors.toSet());
+            Set<Module> specMods = stream(specModule.importedModules()).filter(m -> !names.contains(m.name())).collect(Collectors.toSet());
+            specMods.add(specModule);
+            files.saveToWorkingDirectory(kproveOptions.emitJsonSpec, ToJson.apply(specMods, specModule.name()));
+        }
+
+        RewriterResult results = rewriter.prove(specModule, true);
         sw.printIntermediate("Backend");
         kprint.prettyPrint(compiled._1(), compiled._1().getModule("LANGUAGE-PARSING").get(), kprint::outputFile,
                 results.k());
         sw.printTotal("Total");
-        return results.exitCode().orElse(KEMException.TERMINATED_WITH_ERRORS_EXIT_CODE);
-    }
 
-    // Saving combined verification definition to disk to be usable by other tools (e.g., kast)
-    private void saveFullDefinition(Definition fullDefinition) {
-        CompiledDefinition fullCompiledDefinition = new CompiledDefinition(
-                compiledDefinition.kompileOptions, kproveOptions.outerParsing,
-                kproveOptions.innerParsing, globalOptions,
-                fullDefinition, fullDefinition,
-                files, kem, compiledDefinition.topCellInitializer);
-        Path proveKompiledDir = Paths.get(kproveOptions.saveProofDefinitionTo).resolve("prove-spec-kompiled");
-        try {
-            Files.createDirectories(proveKompiledDir);
-            loader.saveOrDie(proveKompiledDir.resolve("compiled.bin").toFile(), fullCompiledDefinition);
-        } catch (IOException e) {
-            throw KEMException.criticalError(
-                    "Could not create proof output directory " + proveKompiledDir.toAbsolutePath(), e);
+        int errCode = results.exitCode().orElse(0);
+        switch (errCode) {
+        case KPROVE_SUCCESS_EXIT_CODE:
+            break;
+        case KPROVE_MISMATCH_CONFIG_CODE:
+            kem.addKException( new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.PROVER,
+                    "backend terminated because the configuration cannot be rewritten further. See output for more details."));
+            break;
+        default:
+            kem.addKException( new KException(KException.ExceptionType.ERROR, KException.KExceptionGroup.PROVER,
+                    "backend crashed with exit code " + String.valueOf(errCode)));
+            break;
         }
+
+        return results.exitCode().orElse(KEMException.TERMINATED_WITH_ERRORS_EXIT_CODE);
     }
 }
