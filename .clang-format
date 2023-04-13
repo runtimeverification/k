@@ -1,0 +1,24 @@
+---
+BasedOnStyle: WebKit
+BreakBeforeBraces: Attach
+AccessModifierOffset: -2
+AlignAfterOpenBracket: AlwaysBreak
+AlignOperands: true
+Cpp11BracedListStyle: true
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+ColumnLimit: 80
+IndentWidth: 2
+Language: Cpp
+NamespaceIndentation: None
+AlwaysBreakTemplateDeclarations: true
+FixNamespaceComments: true
+SpaceBeforeCpp11BracedList: false
+DerivePointerAlignment: false
+PointerAlignment: Right
+AllowShortCaseLabelsOnASingleLine: true
+ReflowComments: false
+...

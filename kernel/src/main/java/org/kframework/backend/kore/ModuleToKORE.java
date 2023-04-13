@@ -259,9 +259,9 @@ public class ModuleToKORE {
             if (prod.att().contains(Att.ASSOC())) {
                 genAssocAxiom(prod, semantics);
             }
-            if (prod.att().contains(Att.COMM())) {
-                genCommAxiom(prod, semantics);
-            }
+            //if (prod.att().contains(Att.COMM())) {
+            //    genCommAxiom(prod, semantics);
+            //}
             if (prod.att().contains(Att.IDEM())) {
                 genIdemAxiom(prod, semantics);
             }
