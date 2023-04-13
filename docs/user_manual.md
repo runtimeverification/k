@@ -1368,7 +1368,7 @@ are concrete:
 rule X +Int (Y +Int Z) => (X +Int Y) +Int Z [simplification, concrete]
 ```
 
-Conversely, the following will only match when _all_ arguments
+Conversely, the following will only match when all arguments
 are symbolic:
 
 ```k
