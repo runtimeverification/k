@@ -5,19 +5,19 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.kast.inner import KApply, KSort, KVariable
-from pyk.konvert import kast_to_kore
+from pyk.konvert import kast_to_kore, kore_to_kast
 from pyk.kore.kompiled import KompiledKore
 from pyk.kore.parser import KoreParser
 from pyk.prelude.kint import INT, intToken
 
-from ..utils import KPrintTest
+from ..utils import KompiledTest
 
 if TYPE_CHECKING:
     from pathlib import Path
     from typing import Final
 
     from pyk.kast import KInner
-    from pyk.ktool.kprint import KPrint
+    from pyk.kast.outer import KDefinition
 
 
 BIDIRECTIONAL_TEST_DATA: Final = (
@@ -92,7 +92,7 @@ KORE_TO_KAST_TEST_DATA: Final = BIDIRECTIONAL_TEST_DATA + (
 )
 
 
-class TestKonvertCellMap(KPrintTest):
+class TestKonvertCellMap(KompiledTest):
     KOMPILE_MAIN_FILE = 'k-files/cell-map.k'
 
     @pytest.fixture(scope='class')
@@ -106,7 +106,7 @@ class TestKonvertCellMap(KPrintTest):
     )
     def test_kast_to_kore(
         self,
-        kprint: KPrint,
+        definition: KDefinition,
         kompiled_kore: KompiledKore,
         test_id: str,
         sort: KSort,
@@ -117,7 +117,7 @@ class TestKonvertCellMap(KPrintTest):
         kore = KoreParser(kore_text).pattern()
 
         # When
-        actual_kore = kast_to_kore(kprint.definition, kompiled_kore, kast, sort=sort)
+        actual_kore = kast_to_kore(definition, kompiled_kore, kast, sort=sort)
 
         # Then
         assert actual_kore == kore
@@ -127,12 +127,19 @@ class TestKonvertCellMap(KPrintTest):
         KORE_TO_KAST_TEST_DATA,
         ids=[test_id for test_id, *_ in KORE_TO_KAST_TEST_DATA],
     )
-    def test_kore_to_kast(self, kprint: KPrint, test_id: str, _sort: KSort, kore_text: str, kast: KInner) -> None:
+    def test_kore_to_kast(
+        self,
+        definition: KDefinition,
+        test_id: str,
+        _sort: KSort,
+        kore_text: str,
+        kast: KInner,
+    ) -> None:
         # Given
         kore = KoreParser(kore_text).pattern()
 
         # When
-        actual_kast = kprint.kore_to_kast(kore)
+        actual_kast = kore_to_kast(definition, kore)
 
         # Then
         assert actual_kast == kast

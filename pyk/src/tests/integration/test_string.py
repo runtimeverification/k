@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING
 import pytest
 
 from pyk.kast import KInner, kast_term
-from pyk.konvert import _kast_to_kore
+from pyk.konvert import _kast_to_kore, _kore_to_kast
 from pyk.kore.parser import KoreParser
 from pyk.kore.prelude import STRING, int_dv, string_dv
 from pyk.kore.rpc import KoreClient, KoreServer, StuckResult
 from pyk.kore.syntax import App, SortApp
-from pyk.ktool.kprint import KPrint, _kast, pretty_print_kast
+from pyk.ktool.kprint import _kast, pretty_print_kast
 from pyk.prelude.string import stringToken
 
 if TYPE_CHECKING:
@@ -58,10 +58,9 @@ def test_kast_to_kore(text: str) -> None:  # TODO turn into unit test
 def test_kore_to_kast(definition_dir: Path, text: str) -> None:  # TODO turn into unit test
     # Given
     kore = string_dv(text)
-    kprint = KPrint(definition_dir)
 
     # When
-    kast = kprint._kore_to_kast(kore)
+    kast = _kore_to_kast(kore)
 
     # Then
     assert kast == stringToken(text)
