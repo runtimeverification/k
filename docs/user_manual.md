@@ -1354,8 +1354,8 @@ functions, otherwise the pattern is symbolic.
 The semantics of the two attributes is defined as follows:
 - If a simplification rule is marked `concrete`, then _all_ arguments must be
 concrete for the rule to match.
-- If a simplification rule is marked `symbolic`, then the rule will match only
-if _at least one_ argument is symbolic.
+- If a simplification rule is marked `symbolic`, then _all_ arguments must be
+symbolic for the rule to match.
 - The following syntax `concrete(<variables>)` (resp. `symbolic(<variables>)`),
 where `<variables>` is a list of variable names separated by commas, can be used
 to specify the exact arguments the user expects to match concrete (resp. symbolic)
@@ -1368,7 +1368,7 @@ are concrete:
 rule X +Int (Y +Int Z) => (X +Int Y) +Int Z [simplification, concrete]
 ```
 
-Conversely, the following will only match when _some_ arguments
+Conversely, the following will only match when _all_ arguments
 are symbolic:
 
 ```k
