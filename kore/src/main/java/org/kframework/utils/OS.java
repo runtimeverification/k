@@ -3,6 +3,9 @@ package org.kframework.utils;
 
 import org.kframework.utils.errorsystem.KEMException;
 
+import java.util.Arrays;
+import java.util.List;
+
 public enum OS {
     OSX(true), LINUX(true), UNKNOWN(false), WINDOWS(false);
 
@@ -22,6 +25,20 @@ public enum OS {
             return OS.OSX;
         else
             return OS.UNKNOWN;
+    }
+
+    public String getSharedLibraryExtension() {
+        if (this == OSX) {
+            return ".dylib";
+        } else if (this == LINUX) {
+            return ".so";
+        } else {
+            throw KEMException.internalError("Shared libraries are not supported on: " + System.getProperty("os.name"));
+        }
+    }
+
+    public List<String> getSharedLibraryCompilerFlags() {
+        return Arrays.asList("-fPIC", "-shared");
     }
 
     public String getNativeExecutable(String executable) {
