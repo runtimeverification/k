@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING
 
 from .kast.inner import KApply, KSequence, KSort, KToken, KVariable
 from .kore.syntax import DV, App, EVar, MLPattern, MLQuant, SortApp, String
-from .prelude.bytes import BYTES
+from .prelude.bytes import BYTES, pretty_bytes
 from .prelude.k import K
-from .prelude.string import STRING
+from .prelude.string import STRING, pretty_string
 from .utils import FrozenDict
 
 if TYPE_CHECKING:
@@ -83,20 +83,17 @@ def _kast_to_kore(kast: KInner) -> Pattern:
 
 
 def _ktoken_to_kore(ktoken: KToken) -> DV:
-    token = ktoken.token
-    sort = ktoken.sort
+    value: String
+    if ktoken.sort == STRING:
+        value = String(pretty_string(ktoken))
+    elif ktoken.sort == BYTES:
+        value = String(pretty_bytes(ktoken))
+    else:
+        value = String(ktoken.token)
 
-    if sort == STRING:
-        assert token.startswith('"')
-        assert token.endswith('"')
-        return DV(_ksort_to_kore(sort), String(token[1:-1]))
+    sort = _ksort_to_kore(ktoken.sort)
 
-    if sort == BYTES:
-        assert token.startswith('b"')
-        assert token.endswith('"')
-        return DV(_ksort_to_kore(sort), String(token[2:-1]))
-
-    return DV(_ksort_to_kore(sort), String(token))
+    return DV(sort, value)
 
 
 def _ksort_to_kore(ksort: KSort) -> SortApp:

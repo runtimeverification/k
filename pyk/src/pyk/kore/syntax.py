@@ -376,17 +376,6 @@ class SVar(VarPattern):
 class String(Pattern):
     value: str
 
-    _ENCODE_TABLE: ClassVar[FrozenDict[int, str]] = FrozenDict(
-        {
-            9: r'\t',
-            10: r'\n',
-            12: r'\f',
-            13: r'\r',
-            34: r'\"',
-            92: r'\\',
-        }
-    )
-
     def let(self, *, value: str | None = None) -> String:
         value = value if value is not None else self.value
         return String(value=value)
