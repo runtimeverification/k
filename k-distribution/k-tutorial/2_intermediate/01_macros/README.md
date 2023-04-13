@@ -20,7 +20,7 @@ arbitrary input and output types; and
 3. Simplification rules, which describe ways in which the symbolic execution
 engine ought to simplify terms containing symbolic values.
 
-This lesson introduces three more types of rules, of which the first are
+This lesson introduces three more types of rules, the first of which are
 **macros**. A production is a macro if it has the `macro` attribute, and all
 rules whose top symbol on the left hand side is a macro are **macro rules**
 which define the behavior of the macro. Like function rules and simplification
@@ -33,7 +33,7 @@ configuration are rewritten.
 The rationale behind macros is they allow you to define one piece of syntax
 in terms of another piece of syntax without any runtime overhead associated
 with the cost of rewriting one to the other. For example, in a language with
-`if` statements and curly braces, I could write the following fragment
+`if` statements and curly braces, you could write the following fragment
 (`lesson-01.k`):
 
 ```k
@@ -53,10 +53,10 @@ need to give a single rule for how to rewrite `if` statements, rather than
 two separate rules for two types of `if` statements. This is a common pattern
 for dealing with program syntax that contains an optional component to it.
 
-It's worth noting, by default, macros are not applied recursively. To be more
-precise, by default a macro that arises as a result of the expansion of the
-same macro is not rewritten further. This is primarily to simplify the macro
-expansion process and reduce the risk that improperly defined macros will
+It is worth noting that by default, macros are not applied recursively. To be
+more precise, by default a macro that arises as a result of the expansion of
+the same macro is not rewritten further. This is primarily to simplify the 
+macro expansion process and reduce the risk that improperly defined macros will
 lead to non-terminating behavior.
 
 It is possible, however, to tell K to expand a macro recursively. To do this,
@@ -69,9 +69,9 @@ usually written are very easy to ensure this property on, however.
 ### Exercise
 
 Using a `Nat` sort containing the constructors `0` and `S` (i.e., a
-peano-style axiomatization of the natural numbers where `S(N) = N + 1`,
-`S(S(N)) = N + 2`, etc), write a macro that will compute the sum of two
-numbers.
+[Peano-style](https://en.wikipedia.org/wiki/Peano_axioms) axiomatization of the
+natural numbers where `S(N) = N + 1`, `S(S(N)) = N + 2`, etc), write a macro
+that will compute the sum of two numbers.
 
 ## Aliases
 
@@ -83,9 +83,9 @@ to keep these two concepts separate in your mind.
 
 Macros can be very useful in helping you define a programming language.
 However, they can be disruptive while pretty printing a configuration. For
-example, I might write a set of macros that transforms the code the user wrote
-into equivalent code that is slightly harder to read. This can make it more
-difficult to understand the code when it is pretty printed as part of the
+example, you might write a set of macros that transforms the code the user
+wrote into equivalent code that is slightly harder to read. This can make it
+more difficult to understand the code when it is pretty printed as part of the
 output of rewriting.
 
 K defines a relatively straightforward but novel solution to this problem,
@@ -95,13 +95,13 @@ during the pretty-printing process.
 
 It is very simple to make a production be an alias instead of a macro: simply
 use the `alias` or `alias-rec` attributes instead of the `macro` or `macro-rec`
-attributes. For example, if I were to declare the example involving `if`
-statements above using an alias instead of a macro, the `Stmt` term
-`if (E) {} else {}` would be pretty-printed as `if (E) {}`. This is because
-during pretty-printing, the term participates in another macro-expansion pass.
-However, this macro expansion step will only apply rules with the `alias`
-or `alias-rec` attribute, and, critically, it will treat the left-hand side
-of such rules as if they were the right-hand side, and vice versa.
+attributes. For example, if the example involving `if` statements above was
+declared using an alias instead of a macro, the `Stmt` term `if (E) {} else {}`
+would be pretty-printed as `if (E) {}`. This is because during pretty-printing,
+the term participates in another macro-expansion pass. However, this macro
+expansion step will only apply rules with the `alias` or `alias-rec` attribute,
+and, critically, it will reverse the rule by treating the left-hand side as if
+it were the right-hand side, and vice versa.
 
 This can be very useful to allow you to define one construct in terms of
 another while still being able to pretty-print the result as if it were
@@ -121,9 +121,9 @@ is called the **anywhere rule**. An anywhere rule is specified by adding the
 `anywhere` attribute to a rule. Such a rule is similar to a function rule
 in that it does not participate in cell completion, and will apply anywhere
 that the left-hand-side matches in the configuration, but distinct in that the
-symbol in question is still possible to be matched on in the left-hand side
-of other rules, even during concrete rewriting. The reasoning behind this is
-that instead of the symbol in question being a constructor, it is a constructor
+symbol in question can still be matched against in the left-hand side of other
+rules, even during concrete rewriting. The reasoning behind this is that
+instead of the symbol in question being a constructor, it is a constructor
 *modulo* the axioms defined with the `anywhere` attribute. Essentially, the
 rules with the `anywhere` attribute will apply as soon as they appear in the
 right-hand side of a rule being applied, but the symbol in question will still
