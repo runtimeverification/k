@@ -53,6 +53,16 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Setup Maven Deployment Settings.xml
+        uses: actions/setup-java@v3
+        with:
+          distribution: '?'
+          java-version: '11'
+          overwrite-settings: true
+          server-id: 'github'
+          server-username: ${{ env.GITHUB_ACTOR }}
+          server-password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Install Nix
         uses: cachix/install-nix-action@v19
         with:
