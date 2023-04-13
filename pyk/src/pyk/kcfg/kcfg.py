@@ -438,7 +438,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                         indent + '┃  ┃ ', ret_edge_lines[1:]
                     )
                     ret_edge_lines.append(indent + '┃  │')
-                    ret_lines.append(('edge_{curr_node.id}_{target.id}', ret_edge_lines))
+                    ret_lines.append((f'split_{curr_node.id}_{target.id}', ret_edge_lines))
                     _print_subgraph(indent + '┃  ', target, prior_on_trace + [curr_node])
                 target, csubst = successor.targets[-1]
                 ret_edge_lines = _print_split_edge(csubst)
@@ -446,7 +446,7 @@ class KCFG(Container[Union['KCFG.Node', 'KCFG.Edge', 'KCFG.Cover']]):
                     indent + '   ┃ ', ret_edge_lines[1:]
                 )
                 ret_edge_lines.append(indent + '   │')
-                ret_lines.append(('edge_{curr_node.id}_{target.id}', ret_edge_lines))
+                ret_lines.append((f'split_{curr_node.id}_{target.id}', ret_edge_lines))
                 _print_subgraph(indent + '   ', target, prior_on_trace + [curr_node])
 
             elif isinstance(successor, KCFG.EdgeLike):
