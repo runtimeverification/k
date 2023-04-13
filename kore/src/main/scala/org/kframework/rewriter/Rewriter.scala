@@ -41,7 +41,5 @@ trait Rewriter {
 
   def prove(rules: Module, reuseDef:java.lang.Boolean): RewriterResult
 
-  def bmc(rules: Module): RewriterResult
-
   def equivalence(firstDef: Rewriter, secondDef: Rewriter, firstSpec: Module, secondSpec: Module): Boolean
 }
