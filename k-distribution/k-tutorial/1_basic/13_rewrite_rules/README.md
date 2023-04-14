@@ -93,6 +93,13 @@ all possible final configurations reachable by each nondeterminstic choice that
 can be made. Note that the `--search` flag to krun only works if you pass
 `--enable-search` to kompile first.
 
+Unlike top-level rewrite rules, function rules are not associated with any
+particular set of cells in the configuration (although they can contain cells
+in their function arguments and return value). While top-level rewrite rules
+apply to the entire term being rewritten, function rules apply anywhere a
+function application for that function appears, and are immediately rewritten
+to their return value in that position.
+
 ### Exercise
 
 Pass a program containing no functions to `krun`. You can use a term of sort
