@@ -92,7 +92,7 @@ jobs:
           sudo apt-get -y install graphviz ./${DEB_PACKAGE_NAME}
           kompile --version
       - name: 'Run integration tests'
-        run: make cov-integration TEST_ARGS='-n8'
+        run: make cov-integration COV_ARGS='-n8'
 
   build-on-nix:
     needs: code-quality-checks

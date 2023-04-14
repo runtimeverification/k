@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from pyk.kast import KInner
 from pyk.kast.inner import KSort
 from pyk.kast.outer import read_kast_definition
-from pyk.konvert import kast_to_kore
+from pyk.konvert import kast_to_kore, kore_to_kast
 from pyk.kore.kompiled import KompiledKore
 
 from .utils import TEST_DATA_DIR
@@ -22,15 +22,18 @@ def test_kast_to_kore(profile: Profiler) -> None:
 
     sys.setrecursionlimit(10**8)
 
-    with profile('init-kast.txt', sort_keys=('cumtime',), limit=50):
+    with profile('init-kast-defn.txt', sort_keys=('cumtime',), limit=50):
         kast_defn = read_kast_definition(kast_defn_file)
 
-    kore_defn = KompiledKore(kast_to_kore_dir)
-    with profile('init-kore.txt', sort_keys=('cumtime',), limit=50):
+    with profile('init-kore-defn.txt', sort_keys=('cumtime',), limit=50):
+        kore_defn = KompiledKore(kast_to_kore_dir)
         kore_defn.definition
 
     kast = KInner.from_json(kinner_file.read_text())
 
-    for file_name in ['first.txt', 'second.txt']:
+    for file_name in ['kast-to-kore-1.txt', 'kast-to-kore-2.txt']:
         with profile(file_name, sort_keys=('cumtime',), limit=25):
-            kast_to_kore(kast_defn, kore_defn, kast, sort=KSort('GeneratedTopCell'))
+            kore = kast_to_kore(kast_defn, kore_defn, kast, sort=KSort('GeneratedTopCell'))
+
+    with profile('kore-to-kast.txt', sort_keys=('cumtime',), limit=25):
+        kore_to_kast(kast_defn, kore)
