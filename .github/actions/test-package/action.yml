@@ -33,6 +33,10 @@ inputs:
     description: 'Maven deploy id: runtime.verification or runtime.verification.snapshots'
     required: false
     default: 'runtime.verification.snapshots'
+  token:
+    description: 'GitHub token for publishing to GitHub Maven Packages.'
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
@@ -110,6 +114,7 @@ runs:
 
   - name: Set up Java for publishing to GitHub Maven Packages
     uses: actions/setup-java@v3
+    if : ${{ inputs.mvn-deploy == 'true' }}
     env:
       MAVEN_DEPLOY_ID: ${{ inputs.mvn-deploy-id }}
     with:
@@ -118,7 +123,7 @@ runs:
       overwrite-settings: true
       server-id: ${ MAVEN_DEPLOY_ID }
       server-username: ${{ env.GITHUB_ACTOR }}
-      server-password: ${{ secrets.GITHUB_TOKEN }}
+      server-password: ${{ inputs.token }}
 
   - name: 'Deploy Package: ${{ inputs.distro }}'
     shell: bash {0}

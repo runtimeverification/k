@@ -84,6 +84,7 @@ jobs:
           test-package: package/debian/test-package
           mvn-deploy: 'true'
           mvn-deploy-id: runtime.verification
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Upload Package to Release'
         env:
@@ -132,6 +133,7 @@ jobs:
           test-package: package/debian/test-package
           mvn-deploy: 'true'
           mvn-deploy-id: runtime.verification
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Upload Package to Release'
         env:
@@ -179,6 +181,7 @@ jobs:
           test-package: package/debian/test-package
           mvn-deploy: 'true'
           mvn-deploy-id: runtime.verification
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Upload Package to Release'
         env:
@@ -206,6 +209,7 @@ jobs:
           pkg-name: kframework_arch_x86_64.pkg.tar.zst
           mvn-deploy: 'true'
           mvn-deploy-id: runtime.verification
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Upload Package to Release'
         env:
