@@ -131,9 +131,6 @@ jobs:
           pkg-name: kframework_amd64_ubuntu_focal.deb
           build-package: package/debian/build-package focal
           test-package: package/debian/test-package
-          mvn-deploy: 'true'
-          mvn-deploy-id: runtime.verification
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Upload Package to Release'
         env:
@@ -179,9 +176,6 @@ jobs:
           pkg-name: kframework_amd64_debian_bullseye.deb
           build-package: package/debian/build-package bullseye
           test-package: package/debian/test-package
-          mvn-deploy: 'true'
-          mvn-deploy-id: runtime.verification
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Upload Package to Release'
         env:
@@ -207,9 +201,6 @@ jobs:
           build-package: package/arch/build-package
           test-package: package/arch/test-package
           pkg-name: kframework_arch_x86_64.pkg.tar.zst
-          mvn-deploy: 'true'
-          mvn-deploy-id: runtime.verification
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Upload Package to Release'
         env:
