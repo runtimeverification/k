@@ -32,6 +32,7 @@ from .prelude.string import STRING, pretty_string, stringToken
 from .utils import FrozenDict
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator
     from typing import Final
 
     from .kast import KInner
@@ -360,45 +361,53 @@ def munge(label: str) -> str:
     return symbol
 
 
-class Unmunger:
-    _rest: str
-
-    def __init__(self, symbol: str):
-        self._rest = symbol
-
-    def label(self) -> str:
-        res = ''
-        while self._la():
-            if self._la() == "'":
-                self._consume()
-                res += self._unmunged()
-                while self._la() != "'":
-                    res += self._unmunged()
-                self._consume()
-                if self._la() == "'":
-                    raise ValueError('Quoted sections next to each other')
-            else:
-                res += self._consume()
-        return res
-
-    def _la(self) -> str | None:
-        if self._rest:
-            return self._rest[0]
-        return None
-
-    def _consume(self, n: int = 1) -> str:
-        if len(self._rest) < n:
-            raise ValueError('Unexpected end of symbol')
-        consumed = self._rest[:n]
-        self._rest = self._rest[n:]
-        return consumed
-
-    def _unmunged(self) -> str:
-        munged = self._consume(4)
-        if munged not in UNMUNGE_TABLE:
-            raise ValueError(f'Unknown encoding "{munged}"')
-        return UNMUNGE_TABLE[munged]
-
-
 def unmunge(symbol: str) -> str:
-    return Unmunger(symbol).label()
+    return ''.join(unmunged(symbol))
+
+
+def unmunged(it: Iterable[str]) -> Iterator[str]:
+    it = iter(it)
+
+    startquote = False
+    quote = False
+    endquote = False
+    buff: list[str] = []
+    cnt = 0  # len(buff)
+
+    for c in it:
+        if c == "'":
+            if startquote:
+                raise ValueError('Empty quoted section')
+            elif quote:
+                if cnt == 0:
+                    quote = False
+                    endquote = True
+                else:
+                    fragment = ''.join(buff)
+                    raise ValueError(f'Unexpected end of symbol: {fragment}')
+            elif endquote:
+                raise ValueError('Quoted sections next to each other')
+            else:
+                quote = True
+                startquote = True
+
+        else:
+            startquote = False
+            endquote = False
+            if quote:
+                if cnt == 3:
+                    buff.append(c)
+                    munged = ''.join(buff)
+                    buff = []
+                    cnt = 0
+                    if not munged in UNMUNGE_TABLE:
+                        raise ValueError(f'Unknown encoding "{munged}"')
+                    yield UNMUNGE_TABLE[munged]
+                else:
+                    buff += [c]
+                    cnt += 1
+            else:
+                yield c
+
+    if quote:
+        raise ValueError('Unterminated quoted section')
