@@ -73,7 +73,7 @@ jobs:
     timeout-minutes: 75
     steps:
       - uses: actions/checkout@v3
-      - name: 'Build and Test Package'
+      - name: 'Build, Test Package, Upload Maven'
         uses: ./.github/actions/test-package
         with:
           os: ubuntu
@@ -82,6 +82,9 @@ jobs:
           pkg-name: kframework_amd64_ubuntu_jammy.deb
           build-package: package/debian/build-package jammy
           test-package: package/debian/test-package
+          mvn-deploy: 'true'
+          mvn-deploy-id: runtime.verification
+
       - name: 'Upload Package to Release'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
@@ -90,6 +93,7 @@ jobs:
           version=$(cat package/version)
           cp kframework_amd64_ubuntu_jammy.deb kframework_${version}_amd64_ubuntu_jammy.deb
           gh release upload --repo runtimeverification/k --clobber v${version} kframework_${version}_amd64_ubuntu_jammy.deb
+
       - name: 'Build, Test, and Push Dockerhub Image'
         shell: bash {0}
         env:
@@ -126,6 +130,9 @@ jobs:
           pkg-name: kframework_amd64_ubuntu_focal.deb
           build-package: package/debian/build-package focal
           test-package: package/debian/test-package
+          mvn-deploy: 'true'
+          mvn-deploy-id: runtime.verification
+
       - name: 'Upload Package to Release'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
@@ -170,6 +177,9 @@ jobs:
           pkg-name: kframework_amd64_debian_bullseye.deb
           build-package: package/debian/build-package bullseye
           test-package: package/debian/test-package
+          mvn-deploy: 'true'
+          mvn-deploy-id: runtime.verification
+
       - name: 'Upload Package to Release'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
@@ -194,6 +204,9 @@ jobs:
           build-package: package/arch/build-package
           test-package: package/arch/test-package
           pkg-name: kframework_arch_x86_64.pkg.tar.zst
+          mvn-deploy: 'true'
+          mvn-deploy-id: runtime.verification
+
       - name: 'Upload Package to Release'
         env:
           GITHUB_TOKEN: ${{ secrets.JENKINS_GITHUB_PAT }}
@@ -346,6 +359,21 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: k-homebrew-checkout
+
+      - name: Set up Java for publishing to GitHub Maven Packages
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+          overwrite-settings: true
+          server-id: runtime.verification
+          server-username: ${{ env.GITHUB_ACTOR }}
+          server-password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to GitHub Packages
+        run: mvn --batch-mode deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Upload Package to Release'
         env:
