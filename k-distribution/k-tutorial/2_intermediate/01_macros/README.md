@@ -32,7 +32,10 @@ configuration are rewritten.
 
 The rationale behind macros is they allow you to define one piece of syntax
 in terms of another piece of syntax without any runtime overhead associated
-with the cost of rewriting one to the other. For example, in a language with
+with the cost of rewriting one to the other. This process is a common one in
+programming language design and specification and is referred to as
+**desugaring**; The syntax that is transformed is typically also referred to as
+**syntactic sugar** for another type of syntax. For example, in a language with
 `if` statements and curly braces, you could write the following fragment
 (`lesson-01.k`):
 
@@ -66,8 +69,9 @@ It is possible, however, to tell K to expand a macro recursively. To do this,
 simply replace the `macro` attribute with the `macro-rec` attribute. Note that
 K does not do any kind of checking to ensure termination here, so it is
 important that rules be defined correctly to always terminate, otherwise the
-macro expansion phase will run forever. In practice, the types of macros
-usually written are very easy to ensure this property on, however.
+macro expansion phase will run forever. Fortunately, in practice it is very
+simple to ensure this property for most of the types of macros that are
+typically used in real-world semantics.
 
 ### Exercise
 
@@ -78,11 +82,9 @@ that will compute the sum of two numbers.
 
 ## Aliases
 
-**NOTE**: future lessons will discuss KORE, an intermediate language for K,
-which is based on Matching Logic. KORE defines a concept called an "alias"
-which is similar, but not exactly the same as the concept we are about to
-introduce, which is a particular variant of a macro. It's worth remembering
-to keep these two concepts separate in your mind.
+**NOTE**: This lesson introduces the concept of "aliases", which are a variant
+of macros. While similar, this is different from the concept of "aliases" in
+matching logic, which is introduced in Lesson 2.16.
 
 Macros can be very useful in helping you define a programming language.
 However, they can be disruptive while pretty printing a configuration. For
@@ -119,19 +121,18 @@ with how various terms are pretty-printed by invoking `krun` on them.
 
 ## `anywhere` rules
 
-There is one other type of rule that this lesson intends to introduce, which
-is called the **anywhere rule**. An anywhere rule is specified by adding the
-`anywhere` attribute to a rule. Such a rule is similar to a function rule
-in that it does not participate in cell completion, and will apply anywhere
-that the left-hand-side matches in the configuration, but distinct in that the
-symbol in question can still be matched against in the left-hand side of other
-rules, even during concrete rewriting. The reasoning behind this is that
-instead of the symbol in question being a constructor, it is a constructor
-*modulo* the axioms defined with the `anywhere` attribute. Essentially, the
-rules with the `anywhere` attribute will apply as soon as they appear in the
-right-hand side of a rule being applied, but the symbol in question will still
-be treated as a symbol that can be matched on if it is not completely removed
-by those rules.
+The last type of rule introduced in this lesson is the **anywhere rule**. An
+anywhere rule is specified by adding the `anywhere` attribute to a rule. Such a
+rule is similar to a function rule in that it does not participate in cell
+completion, and will apply anywhere that the left-hand-side matches in the
+configuration, but distinct in that the symbol in question can still be matched
+against in the left-hand side of other rules, even during concrete rewriting.
+The reasoning behind this is that instead of the symbol in question being a
+constructor, it is a constructor *modulo* the axioms defined with the
+`anywhere` attribute. Essentially, the rules with the `anywhere` attribute will
+apply as soon as they appear in the right-hand side of a rule being applied,
+but the symbol in question will still be treated as a symbol that can be
+matched on if it is not completely removed by those rules.
 
 This can be useful in certain cases to allow you to define transformations over
 particular pieces of syntax while still generally giving those pieces of syntax
