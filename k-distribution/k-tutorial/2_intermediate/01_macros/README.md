@@ -38,10 +38,13 @@ with the cost of rewriting one to the other. For example, in a language with
 
 ```k
 module LESSON-01
+  imports BOOL
+
   syntax Stmt ::= "if" "(" Exp ")" Stmt             [macro]
                 | "if" "(" Exp ")" Stmt "else" Stmt
                 | "{" Stmts "}"
   syntax Stmts ::= List{Stmt,""}
+  syntax Exp ::= Bool
 
   rule if ( E ) S => if ( E ) S else { }
 endmodule
