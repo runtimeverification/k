@@ -25,18 +25,6 @@ inputs:
     description: 'Where to move the package.'
     required: false
     default: package.pkg
-  mvn-deploy:
-    description: 'Run mvn deploy.'
-    required: false
-    default: 'false'
-  mv-deploy-id:
-    description: 'Maven deploy id: runtime.verification or runtime.verification.snapshots'
-    required: false
-    default: 'runtime.verification.snapshots'
-  token:
-    description: 'GitHub token for publishing to GitHub Maven Packages.'
-    required: false
-    default: ''
 
 runs:
   using: 'composite'
@@ -111,32 +99,6 @@ runs:
       set -euxo pipefail
       mv ${SUBDIR}${PKG_NAME} ${PKG_NAME}
       docker exec -t k-package-test-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "${TEST_PACKAGE} ${PKG_NAME}"
-
-  - name: Set up Java for publishing to GitHub Maven Packages
-    uses: actions/setup-java@v3
-    if : ${{ inputs.mvn-deploy == 'true' }}
-    env:
-      MAVEN_DEPLOY_ID: ${{ inputs.mvn-deploy-id }}
-    with:
-      java-version: '11'
-      distribution: 'adopt'
-      overwrite-settings: true
-      server-id: ${ MAVEN_DEPLOY_ID }
-      server-username: ${{ env.GITHUB_ACTOR }}
-      server-password: ${{ inputs.token }}
-
-  - name: 'Deploy Package: ${{ inputs.distro }}'
-    shell: bash {0}
-    if : ${{ inputs.mvn-deploy == 'true' }}
-    env:
-      BASE_DISTRO: ${{ inputs.distro }}
-      BASE_OS: ${{ inputs.os }}
-      MVN_DEPLOY: ${{ inputs.mvn-deploy }}
-      PKG_NAME: ${{ inputs.pkg-name }}
-    run: |
-      set -euxo pipefail
-      docker cp ~/.m2/settings.xml k-package-build-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA}:~/.m2/settings.xml
-      docker exec -t k-package-build-${BASE_OS}-${BASE_DISTRO}-${GITHUB_SHA} /bin/bash -c "mvn deploy"
 
   - name: 'Tear down Docker Test'
     shell: bash {0}

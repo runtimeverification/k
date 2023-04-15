@@ -82,9 +82,6 @@ jobs:
           pkg-name: kframework_amd64_ubuntu_jammy.deb
           build-package: package/debian/build-package jammy
           test-package: package/debian/test-package
-          mvn-deploy: 'true'
-          mvn-deploy-id: runtime.verification
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Upload Package to Release'
         env:
@@ -95,7 +92,17 @@ jobs:
           cp kframework_amd64_ubuntu_jammy.deb kframework_${version}_amd64_ubuntu_jammy.deb
           gh release upload --repo runtimeverification/k --clobber v${version} kframework_${version}_amd64_ubuntu_jammy.deb
 
-      - name: 'Build, Test, and Push Dockerhub Image'
+      - name: Set up Java for publishing to GitHub Maven Packages
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+          overwrite-settings: true
+          server-id: runtime.verification
+          server-username: ${{ env.GITHUB_ACTOR }}
+          server-password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 'Build, Test, Push Dockerhub Image, Push Mvn Packages'
         shell: bash {0}
         env:
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -111,6 +118,9 @@ jobs:
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend llvm'
           docker exec -t k-package-docker-test-jammy-${GITHUB_SHA} bash -c 'cd ~ && kompile test.k --backend haskell'
           docker image push ${DOCKERHUB_REPO}:${version_tag}
+          docker cp ~/.m2/settings.xml k-package-docker-test-jammy-${GITHUB_SHA}:~/.m2/settings.xml
+          docker exec k-package-docker-test-jammy-${GITHUB_SHA} /bin/bash -c "mvn deploy"
+
       - name: 'Clean up Docker Container'
         if: always()
         run: |
