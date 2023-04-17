@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import TYPE_CHECKING, NamedTuple
 
 import pytest
 
@@ -13,8 +14,7 @@ from pyk.ktool.krun import KRun
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
-    from pathlib import Path
-    from typing import ClassVar
+    from typing import Any, ClassVar
 
     from pytest import TempPathFactory
 
@@ -23,11 +23,24 @@ if TYPE_CHECKING:
     from pyk.ktool.kprint import SymbolTable
 
 
+class Target(NamedTuple):
+    main_file: Path
+    backend: KompileBackend
+    main_module: str | None
+    syntax_module: str | None
+    include_dirs: tuple[Path, ...]
+
+    def as_dict(self) -> dict[str, Any]:
+        return self._asdict()
+
+
 class Kompiler:
-    _tmp_path_factory: TempPathFactory
+    _path: Path
+    _cache: dict[Target, Path]
 
     def __init__(self, tmp_path_factory: TempPathFactory):
-        self._tmp_path_factory = tmp_path_factory
+        self._path = tmp_path_factory.mktemp('kompiled')
+        self._cache = {}
 
     def __call__(
         self,
@@ -38,14 +51,22 @@ class Kompiler:
         syntax_module: str | None = None,
         include_dirs: Iterable[str | Path] = (),
     ) -> Path:
-        return kompile(
-            main_file=main_file,
-            output_dir=self._tmp_path_factory.mktemp('kompiled'),
-            backend=backend,
+        target = Target(
+            main_file=Path(main_file).resolve(),
+            backend=KompileBackend(backend) if backend is not None else KompileBackend.LLVM,
             main_module=main_module,
             syntax_module=syntax_module,
-            include_dirs=include_dirs,
+            include_dirs=tuple(sorted(Path(include_dir).resolve() for include_dir in include_dirs)),
         )
+
+        if target not in self._cache:
+            output_dir = self._path / self._uid(target)
+            self._cache[target] = kompile(output_dir=output_dir, **target.as_dict())
+
+        return self._cache[target]
+
+    def _uid(self, target: Target) -> str:
+        return f'{target.main_file.stem}-{target.backend.value}-{len(self._cache)}'
 
 
 class KompiledTest:
