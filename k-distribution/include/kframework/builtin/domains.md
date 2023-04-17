@@ -1176,11 +1176,15 @@ module INT-KORE [kore, symbolic]
   imports private BOOL
   imports INT-COMMON
 
-  rule I1:Int ==K I2:Int => I1 ==Int I2 [simplification, comm]
+  rule I1:Int ==K I2:Int => I1 ==Int I2 [simplification]
   rule {K1 ==Int K2 #Equals true} => {K1 #Equals K2} [simplification]
+  rule {true #Equals K1 ==Int K2} => {K1 #Equals K2} [simplification]
   rule {K1 ==Int K2 #Equals false} => #Not({K1 #Equals K2}) [simplification]
+  rule {false #Equals K1 ==Int K2} => #Not({K1 #Equals K2}) [simplification]
   rule {K1 =/=Int K2 #Equals true} => #Not({K1 #Equals K2}) [simplification]
+  rule {true #Equals K1 =/=Int K2} => #Not({K1 #Equals K2}) [simplification]
   rule {K1 =/=Int K2 #Equals false} => {K1 #Equals K2} [simplification]
+  rule {false #Equals K1 =/=Int K2} => {K1 #Equals K2} [simplification]
 
 endmodule
 
@@ -2047,11 +2051,15 @@ module K-EQUAL-KORE [kore, symbolic]
   import private BOOL
   import K-EQUAL-SYNTAX
 
-  rule K1:Bool ==K K2:Bool => K1 ==Bool K2 [simplification, comm]
+  rule K1:Bool ==K K2:Bool => K1 ==Bool K2 [simplification]
   rule {K1 ==K K2 #Equals true} => {K1 #Equals K2} [simplification]
+  rule {true #Equals K1 ==K K2} => {K1 #Equals K2} [simplification]
   rule {K1 ==K K2 #Equals false} => #Not({K1 #Equals K2}) [simplification]
+  rule {false #Equals K1 ==K K2} => #Not({K1 #Equals K2}) [simplification]
   rule {K1 =/=K K2 #Equals true} => #Not({K1 #Equals K2}) [simplification]
+  rule {true #Equals K1 =/=K K2} => #Not({K1 #Equals K2}) [simplification]
   rule {K1 =/=K K2 #Equals false} => {K1 #Equals K2} [simplification]
+  rule {false #Equals K1 =/=K K2} => {K1 #Equals K2} [simplification]
 
 endmodule
 
